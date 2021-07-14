@@ -5,7 +5,7 @@ import path from "path";
 
 
 // eslint-disable-next-line no-console
-console.log(`the current DEPLOY_ENV environment variable is ${  process.env.DEPLOY_ENV}`);
+console.log(`the current CLOWDER_REMOTE_HOSTNAME environment variable is ${  process.env.CLOWDER_REMOTE_HOSTNAME}`);
 
 export default {
 	mode:"development",
@@ -32,7 +32,8 @@ export default {
 		new webpack.DefinePlugin({
 			"process.env": {
 				"NODE_ENV": JSON.stringify("development"),
-				"DEPLOY_ENV": JSON.stringify(process.env.DEPLOY_ENV)
+				"CLOWDER_REMOTE_HOSTNAME": JSON.stringify(process.env.CLOWDER_REMOTE_HOSTNAME),
+				"APIKEY": process.env.APIKEY
 			},
 			__DEV__: true
 		}),
