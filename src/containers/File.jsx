@@ -1,11 +1,12 @@
 import {connect} from "react-redux";
 import FileComponent from "../components/File";
-import {fetchFileMetadata} from "../actions/file";
+import {fetchFileExtractedMetadata, fetchFileMetadata} from "../actions/file";
 
 
 const mapStateToProps = (state) => {
 	return {
-		fileMetadata: state.file.file
+		fileMetadata: state.file.metadata,
+		fileExtractedMetadata: state.file.extractedMetadata
 	};
 };
 
@@ -13,6 +14,9 @@ const mapDispatchToProps = (dispatch) => {
 	return {
 		listFileMetadata: (id) => {
 			dispatch(fetchFileMetadata(id));
+		},
+		listFileExtractedMetadata: (id) => {
+			dispatch(fetchFileExtractedMetadata(id));
 		}
 	};
 };
