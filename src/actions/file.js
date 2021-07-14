@@ -1,8 +1,9 @@
 import config from "../app.config";
+import {getHeader} from "../utils/common";
 
-export const RECEIVE_FILE = "RECEIVE_FILE";
+export const RECEIVE_FILE_METADATA = "RECEIVE_FILE_METADATA";
 
-export function receiveFile(type, json){
+export function receiveFileMetadata(type, json){
 	return (dispatch) => {
 		dispatch({
 			type: type,
@@ -12,19 +13,18 @@ export function receiveFile(type, json){
 	};
 }
 
-export function fetchFile(id){
-	let url = `${config.geoServerWFS}?service=WFS&version=1.0.0&request=GetFeature&outputFormat=JSON`;
-	url = `${url}&typename=${id}&sortBy=${sortColumnName}+D`;
+export function fetchFileMetadata(id){
+	let url = `${config.hostname}api/files/576b0b1ce4b0e899329e8553/metadata`;
 	return (dispatch) => {
-		return fetch(url, {mode:"cors"})
+		return fetch(url, {mode:"cors", headers: getHeader()})
 		.then((response) => {
 			if (response.status === 200) {
 				response.json().then(json =>{
-					dispatch(receiveFile(RECEIVE_FILE, json["features"]));
+					dispatch(receiveFileMetadata(RECEIVE_FILE_METADATA, json));
 				});
 			}
 			else {
-				dispatch(receiveFile(RECEIVE_FILE, []));
+				dispatch(receiveFileMetadata(RECEIVE_FILE_METADATA, []));
 			}
 		});
 	};

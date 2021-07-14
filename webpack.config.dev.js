@@ -19,8 +19,8 @@ export default {
 		"./src/webpack-public-path",
 		"webpack-hot-middleware/client?reload=true",
 		path.resolve(__dirname, "src/index.js"),
-		"ol/ol.css",
-		"ol-layerswitcher/src/ol-layerswitcher.css",
+		// "ol/ol.css",
+		// "ol-layerswitcher/src/ol-layerswitcher.css",
 	],
 	target: "web",
 	output: {
@@ -33,7 +33,7 @@ export default {
 			"process.env": {
 				"NODE_ENV": JSON.stringify("development"),
 				"CLOWDER_REMOTE_HOSTNAME": JSON.stringify(process.env.CLOWDER_REMOTE_HOSTNAME),
-				"APIKEY": process.env.APIKEY
+				"APIKEY": JSON.stringify(process.env.APIKEY)
 			},
 			__DEV__: true
 		}),

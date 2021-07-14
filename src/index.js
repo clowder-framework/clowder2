@@ -7,14 +7,13 @@ import { Provider } from "react-redux";
 import { BrowserRouter } from "react-router-dom";
 import routes from "./routes";
 import configureStore from "./store/configureStore";
-import {createMuiTheme, MuiThemeProvider} from "@material-ui/core/styles";
+import {createTheme, MuiThemeProvider} from "@material-ui/core/styles";
 import config from "./app.config";
 
-require("./public/favicon.ico");
 
 const store = configureStore();
 
-const theme = createMuiTheme({
+const theme = createTheme({
 
 	typography: {
 		fontFamily: "Rubik"

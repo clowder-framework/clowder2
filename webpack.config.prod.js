@@ -21,8 +21,8 @@ export default {
 		"babel-polyfill",
 		"whatwg-fetch",
 		path.resolve(__dirname, "src/index.js"),
-		"ol/ol.css",
-		"ol-layerswitcher/src/ol-layerswitcher.css",
+		// "ol/ol.css",
+		// "ol-layerswitcher/src/ol-layerswitcher.css",
 	],
 	target: "web", // necessary per https://webpack.github.io/docs/testing.html#compile-and-test
 	output: {
@@ -41,7 +41,7 @@ export default {
 			"process.env": {
 				"NODE_ENV": JSON.stringify("production"),
 				"CLOWDER_REMOTE_HOSTNAME": JSON.stringify(process.env.CLOWDER_REMOTE_HOSTNAME),
-				"APIKEY":process.env.APIKEY
+				"APIKEY":JSON.stringify(process.env.APIKEY)
 			},
 			__DEV__: false
 		}),
