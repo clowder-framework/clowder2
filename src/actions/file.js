@@ -55,3 +55,29 @@ export function fetchFileExtractedMetadata(id){
 	};
 }
 
+export const RECEIVE_FILE_METADATA_JSONLD = "RECEIVE_FILE_METADATA_JSONLD";
+export function receiveFileMetadataJsonld(type, json){
+	return (dispatch) => {
+		dispatch({
+			type: type,
+			metadataJsonld: json,
+			receivedAt: Date.now(),
+		});
+	};
+}
+export function fetchFileMetadataJsonld(id){
+	let url = `${config.hostname}api/files/576b0b1ce4b0e899329e8553/metadata.jsonld`;
+	return (dispatch) => {
+		return fetch(url, {mode:"cors", headers: getHeader()})
+		.then((response) => {
+			if (response.status === 200) {
+				response.json().then(json =>{
+					dispatch(receiveFileMetadataJsonld(RECEIVE_FILE_METADATA_JSONLD, json));
+				});
+			}
+			else {
+				dispatch(receiveFileMetadataJsonld(RECEIVE_FILE_METADATA_JSONLD, []));
+			}
+		});
+	};
+}
