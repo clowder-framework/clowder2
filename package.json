@@ -31,6 +31,7 @@
 		"@material-ui/icons": "^4.9.1",
 		"babel-polyfill": "^6.26.0",
 		"classnames": "^2.2.6",
+		"jquery": "^3.6.0",
 		"jwt-decode": "^3.0.0",
 		"react": "~16.14.0",
 		"react-dom": "~16.14.0",

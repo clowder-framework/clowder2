@@ -12,6 +12,15 @@ export default function File(props){
 		listFileMetadata();
 		listFileExtractedMetadata();
 		listFileMetadataJsonld();
+
+		// attach previwer
+		const script = document.createElement('script');
+		script.src = "../public/thumbnail-previewer.js";
+		script.async = true;
+		document.body.appendChild(script);
+		return () => {
+			document.body.removeChild(script);
+		}
 	}, []);
 
 	return (
@@ -41,6 +50,7 @@ export default function File(props){
 					})
 				}
 			</div>
+			<h4>previewer</h4>
 		</div>
 	);
 }

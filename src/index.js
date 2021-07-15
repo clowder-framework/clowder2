@@ -8,8 +8,7 @@ import { BrowserRouter } from "react-router-dom";
 import routes from "./routes";
 import configureStore from "./store/configureStore";
 import {createTheme, MuiThemeProvider} from "@material-ui/core/styles";
-import config from "./app.config";
-
+import "./loader";
 
 const store = configureStore();
 
