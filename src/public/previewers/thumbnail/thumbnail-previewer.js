@@ -1,7 +1,23 @@
-(function ($, Configuration) {
-	console.log(Configuration);
-	console.log(Configuration.previewer);
+const Configuration = $("#previewer").data("configuration");
 
+// need to fetch img using APIKEY in the header
+function requestImg(imgDivId, Configuration){
+	$("#"+ imgDivId).ready(() => {
+		const src = Configuration.url;
+		const options = {
+			headers: {
+				"X-API-Key": Configuration.APIKEY
+			}
+		};
+		fetch(src, options)
+		.then(res => res.blob())
+		.then(blob => {
+			$("#"+ imgDivId).attr("src", URL.createObjectURL(blob));
+		});
+	});
+}
+
+(function ($, Configuration) {
 	var prNum = Configuration.tab.replace("#previewer","");
 	window["configs" + prNum] = Configuration;
 	window["configsFileId" + prNum] = Configuration.fileid;
@@ -13,16 +29,17 @@
 		|| Configuration.fileType === "image/bmp"){
 		$(Configuration.tab).append(
 			"<canvas class='fit-in-space rubberbandCanvas' id='rubberbandCanvas"+prNum+"'>" +
-			"<img src='" + Configuration.url + "' class='rubberbandimage' id='rubberbandimage"+prNum+"'></img>" +
+			"<img class='rubberbandimage' id='rubberbandimage"+prNum+"'></img>" +
 			"</canvas>" +
 			"<div class='rubberbandDiv' id='rubberbandDiv"+prNum+"'></div>"
 		);
+		requestImg("rubberbandimage", Configuration);
 
 		if (Configuration.authenticated) {
 			// load the rubberband library
 			var s = document.createElement("script");
 			s.type = "text/javascript";
-			s.src = Configuration.previewer + "/../sectionRubberband.js";
+			s.src = "/public/previewers/sectionRubberband.js";
 			$(Configuration.tab).append(s);
 
 			$(Configuration.tab).append(rubberbandCreate(prNum, showImage));
@@ -43,9 +60,9 @@
 		$(Configuration.tab).append(
 			"<embed alt='No plugin capable of displaying TIFF images was found.' width=750 height=550	"+
 				"src='" + Configuration.url + "' type='image/tiff'"+
-				" negative=no>"
+				" negative=no id='embedded'>"
 			);
-
+		requestImg("embedded", Configuration);
 	}
 
 	// --------------------------------------------------------

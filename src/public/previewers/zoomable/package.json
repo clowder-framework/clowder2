@@ -1,0 +1,4 @@
+{ "name" : "Zoomable",
+  "main" : "some-library.js",
+  "contentType" : ["application/dzi"]
+  }

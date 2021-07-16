@@ -1,4 +1,5 @@
 import React, {useEffect, useState} from "react";
+import config from "../app.config";
 
 export default function File(props){
 	const {
@@ -7,21 +8,32 @@ export default function File(props){
 		listFileMetadataJsonld, fileMetadataJsonld,
 		...other} = props;
 
+
 	// component did mount
 	useEffect(() => {
 		listFileMetadata();
 		listFileExtractedMetadata();
 		listFileMetadataJsonld();
 
+		//
 		// attach previwer
 		const script = document.createElement('script');
-		script.src = "../public/thumbnail-previewer.js";
+		script.src = "../public/previewers/thumbnail/thumbnail-previewer.js";
 		script.async = true;
 		document.body.appendChild(script);
 		return () => {
 			document.body.removeChild(script);
 		}
 	}, []);
+
+	const Configuration = {};
+	Configuration.tab = "#previewer";
+	Configuration.url = "https://clowder.ncsa.illinois.edu/clowder/api/previews/576b53afe4b0e899329e8b9c";
+	Configuration.fileid = "576b53afe4b0e899329e8b9c";
+	Configuration.previewer = ".";
+	Configuration.fileType = "image/png";
+	Configuration.APIKEY=config.apikey;
+	Configuration.authenticated = true;
 
 	return (
 		<div>
@@ -51,6 +63,7 @@ export default function File(props){
 				}
 			</div>
 			<h4>previewer</h4>
+			<div id="previewer" data-configuration={JSON.stringify(Configuration)}></div>
 		</div>
 	);
 }
