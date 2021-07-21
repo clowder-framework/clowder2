@@ -12,7 +12,7 @@ export function receiveFileMetadata(type, json){
 	};
 }
 export function fetchFileMetadata(id){
-	let url = `${config.hostname}api/files/576b0b1ce4b0e899329e8553/metadata`;
+	let url = `${config.hostname}/clowder/api/files/576b0b1ce4b0e899329e8553/metadata`;
 	return (dispatch) => {
 		return fetch(url, {mode:"cors", headers: getHeader()})
 		.then((response) => {
@@ -39,7 +39,7 @@ export function receiveFileExtractedMetadata(type, json){
 	};
 }
 export function fetchFileExtractedMetadata(id){
-	let url = `${config.hostname}api/files/576b0b1ce4b0e899329e8553/extracted_metadata`;
+	let url = `${config.hostname}/clowder/api/files/576b0b1ce4b0e899329e8553/extracted_metadata`;
 	return (dispatch) => {
 		return fetch(url, {mode:"cors", headers: getHeader()})
 		.then((response) => {
@@ -66,7 +66,7 @@ export function receiveFileMetadataJsonld(type, json){
 	};
 }
 export function fetchFileMetadataJsonld(id){
-	let url = `${config.hostname}api/files/576b0b1ce4b0e899329e8553/metadata.jsonld`;
+	let url = `${config.hostname}/clowder/api/files/576b0b1ce4b0e899329e8553/metadata.jsonld`;
 	return (dispatch) => {
 		return fetch(url, {mode:"cors", headers: getHeader()})
 		.then((response) => {
@@ -77,6 +77,33 @@ export function fetchFileMetadataJsonld(id){
 			}
 			else {
 				dispatch(receiveFileMetadataJsonld(RECEIVE_FILE_METADATA_JSONLD, []));
+			}
+		});
+	};
+}
+
+export const RECEIVE_PREVIEWS = "RECEIVE_PREVIEWS";
+export function receiveFilePreviews(type, json){
+	return (dispatch) => {
+		dispatch({
+			type: type,
+			previews: json,
+			receivedAt: Date.now(),
+		});
+	};
+}
+export function fetchFilePreviews(id){
+	let url = `${config.hostname}/clowder/api/files/576b0b1ce4b0e899329e8553/getPreviews`;
+	return (dispatch) => {
+		return fetch(url, {mode:"cors", headers: getHeader()})
+		.then((response) => {
+			if (response.status === 200) {
+				response.json().then(json =>{
+					dispatch(receiveFilePreviews(RECEIVE_PREVIEWS, json));
+				});
+			}
+			else {
+				dispatch(receiveFileMetadataJsonld(RECEIVE_PREVIEWS, []));
 			}
 		});
 	};

@@ -6,6 +6,7 @@ export default function File(props){
 		listFileMetadata, fileMetadata,
 		listFileExtractedMetadata, fileExtractedMetadata,
 		listFileMetadataJsonld, fileMetadataJsonld,
+		listFilePreviews, filePreviews,
 		...other} = props;
 
 
@@ -14,26 +15,21 @@ export default function File(props){
 		listFileMetadata();
 		listFileExtractedMetadata();
 		listFileMetadataJsonld();
-
-		//
-		// attach previwer
-		const script = document.createElement('script');
-		script.src = "../public/previewers/thumbnail/thumbnail-previewer.js";
-		script.async = true;
-		document.body.appendChild(script);
-		return () => {
-			document.body.removeChild(script);
-		}
+		listFilePreviews();
 	}, []);
 
-	const Configuration = {};
-	Configuration.tab = "#previewer";
-	Configuration.url = "https://clowder.ncsa.illinois.edu/clowder/api/previews/576b53afe4b0e899329e8b9c";
-	Configuration.fileid = "576b53afe4b0e899329e8b9c";
-	Configuration.previewer = ".";
-	Configuration.fileType = "image/png";
-	Configuration.APIKEY=config.apikey;
-	Configuration.authenticated = true;
+	useEffect(() => {
+		if (filePreviews.length > 0 && filePreviews[0].previews !== undefined){
+			// attach previwer jquery
+			const script = document.createElement('script');
+			script.src = "../public/previewers/thumbnail/thumbnail-previewer.js";
+			script.async = true;
+			document.body.appendChild(script);
+			return () => {
+				document.body.removeChild(script);
+			}
+		}
+	}, [filePreviews])
 
 	return (
 		<div>
@@ -62,8 +58,27 @@ export default function File(props){
 					})
 				}
 			</div>
-			<h4>previewer</h4>
-			<div id="previewer" data-configuration={JSON.stringify(Configuration)}></div>
+			<h4 id="preview">previewer</h4>
+			{
+				filePreviews.length > 0 && filePreviews[0].previews !== undefined
+					?
+					filePreviews[0].previews.map((filePreview, index)=> {
+						const Configuration = {};
+						Configuration.tab = `#previewer_${filePreviews[0]["file_id"]}_${index}`;
+						Configuration.url = `${config.hostname}${filePreview["pv_route"]}`;
+						Configuration.fileid = filePreview["pv_id"];
+						Configuration.previewer = ".";
+						Configuration.fileType = filePreview["pv_contenttype"];
+						Configuration.APIKEY=config.apikey;
+						Configuration.authenticated = true;
+						return (<div className="configuration" data-configuration={JSON.stringify(Configuration)}>
+							<div id={Configuration.tab.slice(1)}></div>
+						</div>);
+					})
+					:
+					<></>
+			}
+
 		</div>
 	);
 }
