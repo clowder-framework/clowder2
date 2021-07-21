@@ -22,12 +22,16 @@ export default function File(props){
 		if (filePreviews.length > 0 && filePreviews[0].previews !== undefined){
 			// attach previwer jquery
 			const script = document.createElement('script');
-			script.src = "../public/previewers/thumbnail/thumbnail-previewer.js";
-			script.async = true;
-			document.body.appendChild(script);
-			return () => {
-				document.body.removeChild(script);
-			}
+
+			// look at which previewer to load
+			filePreviews[0].previews.map((filePreview, index)=> {
+				script.src = `../public${filePreview["p_path"]}/${filePreview["p_main"]}`;;
+				script.async = true;
+				document.body.appendChild(script);
+				return () => {
+					document.body.removeChild(script);
+				}
+			});
 		}
 	}, [filePreviews])
 

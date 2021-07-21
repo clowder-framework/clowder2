@@ -2,7 +2,7 @@ $(".configuration").ready(function(){
 	// load helper to fetch image with apikey
 	var h = document.createElement("script");
 	h.type = "text/javascript";
-	h.src = "/public/previewers/helper.js";
+	h.src = "/public/clowder/assets/javascripts/previewers/helper.js";
 	$("#preview").append(h);
 
 	// loop through each configuration
@@ -31,7 +31,7 @@ $(".configuration").ready(function(){
 					// load the rubberband library
 					var s = document.createElement("script");
 					s.type = "text/javascript";
-					s.src = "/public/previewers/sectionRubberband.js";
+					s.src = "/public/clowder/assets/javascripts/previewers/sectionRubberband.js";
 					$(Configuration.tab).append(s);
 
 					$(Configuration.tab).append(rubberbandCreate(prNum, showImage));
