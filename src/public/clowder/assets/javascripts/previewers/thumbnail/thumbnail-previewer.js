@@ -6,7 +6,7 @@ $(".configuration").ready(function(){
 	$("#preview").append(h);
 
 	// loop through each configuration
-	$( ".configuration" ).each(function() {
+	$( ".configuration.thumbnail" ).each(function() {
 		var Configuration = $(this).data("configuration");
 
 		(function ($, Configuration) {

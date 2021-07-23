@@ -10,13 +10,13 @@ export default function File(props){
 		...other} = props;
 
 
-	// component did mount
-	useEffect(() => {
-		listFileMetadata();
-		listFileExtractedMetadata();
-		listFileMetadataJsonld();
-		listFilePreviews();
-	}, []);
+	// // component did mount
+	// useEffect(() => {
+	// 	// listFileMetadata();
+	// 	// listFileExtractedMetadata();
+	// 	// listFileMetadataJsonld();
+	// 	// listFilePreviews();
+	// }, []);
 
 	useEffect(() => {
 		if (filePreviews.length > 0 && filePreviews[0].previews !== undefined){
@@ -28,15 +28,28 @@ export default function File(props){
 				script.src = `../public${filePreview["p_path"]}/${filePreview["p_main"]}`;;
 				script.async = true;
 				document.body.appendChild(script);
-				return () => {
-					document.body.removeChild(script);
-				}
+				// return () => {
+				// 	document.body.removeChild(script);
+				// }
 			});
 		}
 	}, [filePreviews])
 
+	const selectFile = (fileId) =>{
+		listFileMetadata(fileId);
+		listFileExtractedMetadata(fileId);
+		listFileMetadataJsonld(fileId);
+		listFilePreviews(fileId);
+	}
+
 	return (
 		<div>
+			<select name="files" id="files" onChange={(e)=>{ selectFile(e.target.value);}} defaultValue="select">
+				<option value="select" disabled>Select A File</option>
+				<option value="60ee082d5e0e3ff9d746b5fc">Text File</option>
+				<option value="576b0b1ce4b0e899329e8553">Image</option>
+				<option value="mercedes">TBD</option>
+			</select>
 			<h4>metadata</h4>
 			<div>
 				<h1>
@@ -75,7 +88,9 @@ export default function File(props){
 						Configuration.fileType = filePreview["pv_contenttype"];
 						Configuration.APIKEY=config.apikey;
 						Configuration.authenticated = true;
-						return (<div className="configuration" data-configuration={JSON.stringify(Configuration)}>
+
+						let previewId = filePreview["p_id"].replace(" ","-").toLowerCase();
+						return (<div className={`configuration ${previewId}`} data-configuration={JSON.stringify(Configuration)}>
 							<div id={Configuration.tab.slice(1)}></div>
 						</div>);
 					})
