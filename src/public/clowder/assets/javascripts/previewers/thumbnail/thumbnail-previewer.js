@@ -31,7 +31,7 @@ $(".configuration").ready(function(){
 					// load the rubberband library
 					var s = document.createElement("script");
 					s.type = "text/javascript";
-					s.src = "/public/clowder/assets/javascripts/previewers/sectionRubberband.js";
+					s.src = Configuration.previewer + "../sectionRubberband.js";
 					$(Configuration.tab).append(s);
 
 					$(Configuration.tab).append(rubberbandCreate(prNum, showImage));

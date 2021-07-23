@@ -48,7 +48,7 @@ export default function File(props){
 				<option value="select" disabled>Select A File</option>
 				<option value="60ee082d5e0e3ff9d746b5fc">Text File</option>
 				<option value="576b0b1ce4b0e899329e8553">Image</option>
-				<option value="mercedes">TBD</option>
+				<option value="60ee08325e0e3ff9d746bc57">Three D</option>
 			</select>
 			<h4>metadata</h4>
 			<div>
@@ -84,7 +84,7 @@ export default function File(props){
 						Configuration.tab = `#previewer_${filePreviews[0]["file_id"]}_${index}`;
 						Configuration.url = `${config.hostname}${filePreview["pv_route"]}`;
 						Configuration.fileid = filePreview["pv_id"];
-						Configuration.previewer = ".";
+						Configuration.previewer = `/public${filePreview["p_path"]}/`;
 						Configuration.fileType = filePreview["pv_contenttype"];
 						Configuration.APIKEY=config.apikey;
 						Configuration.authenticated = true;

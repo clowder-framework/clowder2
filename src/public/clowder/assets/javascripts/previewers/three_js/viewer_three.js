@@ -17,42 +17,56 @@
 
 ****************************************************************/
 
+$(".configuration").ready(function() {
+	// load helper to fetch image with apikey
+	var h = document.createElement("script");
+	h.type = "text/javascript";
+	h.src = "/public/clowder/assets/javascripts/previewers/helper.js";
+	$("#preview").append(h);
 
-(function ($, Configuration) {
+	// loop through each configuration
+	$(".configuration.three-js").each(function () {
+		var Configuration = $(this).data("configuration");
 
-    let useTab = Configuration.tab;
-    let referenceUrl = Configuration.url;
-    let previewer = Configuration.previewer;
+		(function ($, Configuration) {
 
-    // The following variables are not needed for now
+			let useTab = Configuration.tab;
+			let referenceUrl = Configuration.url;
+			let previewer = Configuration.previewer;
 
-    //let fileName = $('#file-name-title').text().trim();
-    //let fileNameExtension = fileName.substr(fileName.length - 3);
-    //let fileType;
+			// The following variables are not needed for now
 
-    console.log = console.log || function (message) { alert(message); };
+			//let fileName = $('#file-name-title').text().trim();
+			//let fileNameExtension = fileName.substr(fileName.length - 3);
+			//let fileType;
 
-    console.warn = console.warn || function (message) { alert(message); };
+			console.log = console.log || function (message) { alert(message); };
 
-    console.error = console.error || function (message) { alert(message); };
+			console.warn = console.warn || function (message) { alert(message); };
 
-    let scripts = ["three.min.js", "stats.min.js", "OrbitControls.js", "FBXLoader.js", "fflate.min.js"];
+			console.error = console.error || function (message) { alert(message); };
 
-    // We use the for loop to load the files into our program
+			let scripts = ["three.min.js", "stats.min.js", "OrbitControls.js", "FBXLoader.js", "fflate.min.js"];
 
-    for (let index = 0; index < scripts.length; index++) {
-        let s = document.createElement("script");
-        s.type = "text/javascript";
-        s.src = previewer + "/js/" + scripts[index];
-        $(useTab).append(s);
-    }
+			// We use the for loop to load the files into our program
 
-    $(document).ready(function () {
-        init(referenceUrl);
-        animate();
-    });
+			for (let index = 0; index < scripts.length; index++) {
+				let s = document.createElement("script");
+				s.type = "text/javascript";
+				s.src = previewer + "/js/" + scripts[index];
+				$(useTab).append(s);
+			}
 
-}(jQuery, Configuration));
+			$(document).ready(function () {
+				init(referenceUrl);
+				animate();
+			});
+
+		}(jQuery, Configuration));
+
+	});
+});
+
 
 let camera, scene, renderer, stats;
 
