@@ -64,149 +64,149 @@ $(".configuration").ready(function() {
 
 		}(jQuery, Configuration));
 
-	});
-});
+		let camera, scene, renderer, stats;
+
+		const clock = new THREE.Clock();
+
+		let mixer;
+
+		let previewerWidth = 640;
+		let previewerHeight = 480;
+
+		function init(urlAddress) {
+
+			const container = document.getElementById(Configuration.tab.replace("#", ""));
+
+			camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 2000);
+			camera.position.set(100, 200, 300);
+
+			scene = new THREE.Scene();
+			scene.background = new THREE.Color(0xa0a0a0);
+			scene.fog = new THREE.Fog(0xa0a0a0, 200, 1000);
+
+			const hemiLight = new THREE.HemisphereLight(0xffffff, 0x444444);
+			hemiLight.position.set(0, 200, 0);
+			scene.add(hemiLight);
+
+			const dirLight = new THREE.DirectionalLight(0xffffff);
+			dirLight.position.set(0, 200, 100);
+			dirLight.castShadow = true;
+			dirLight.shadow.camera.top = 180;
+			dirLight.shadow.camera.bottom = - 100;
+			dirLight.shadow.camera.left = - 120;
+			dirLight.shadow.camera.right = 120;
+			scene.add(dirLight);
+
+			// scene.add( new THREE.CameraHelper( dirLight.shadow.camera ) );
+
+			// ground
+			const mesh = new THREE.Mesh(
+				new THREE.PlaneGeometry(2000, 2000),
+				new THREE.MeshPhongMaterial({ color: 0x999999, depthWrite: false })
+			);
+
+			mesh.rotation.x = - Math.PI / 2;
+			mesh.receiveShadow = true;
+			scene.add(mesh);
+
+			const grid = new THREE.GridHelper(2000, 20, 0x000000, 0x000000);
+			grid.material.opacity = 0.2;
+			grid.material.transparent = true;
+			scene.add(grid);
+
+			const loader = new THREE.FBXLoader();
+
+			let desiredScale = 320;
+			let scaleV3 = new THREE.Vector3().setScalar(desiredScale);
+
+			//
+
+			loader.setPath(urlAddress);
+
+			loader.load('', function (object) {
+
+				if (object.animations[0]) {
+					mixer = new THREE.AnimationMixer(object);
+
+					const action = mixer.clipAction(object.animations[0]);
+					action.play();
+				}
 
 
-let camera, scene, renderer, stats;
+				//
 
-const clock = new THREE.Clock();
+				let box = new THREE.Box3();
+				box.setFromObject(object);
 
-let mixer;
+				let size = new THREE.Vector3();
+				box.getSize(size);
 
-let previewerWidth = 640;
-let previewerHeight = 480;
+				let center = new THREE.Vector3();
+				box.getCenter(center);
 
-function init(urlAddress) {
+				let scaleTemp = new THREE.Vector3().copy(scaleV3).divide(size);
+				let scale = Math.min(scaleTemp.x, Math.min(scaleTemp.y, scaleTemp.z));
 
-    const container = document.getElementById(Configuration.tab.replace("#", ""));
+				object.scale.setScalar(scale);
+				object.position.sub(center.multiplyScalar(scale));
 
-    camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 2000);
-    camera.position.set(100, 200, 300);
+				//
 
-    scene = new THREE.Scene();
-    scene.background = new THREE.Color(0xa0a0a0);
-    scene.fog = new THREE.Fog(0xa0a0a0, 200, 1000);
+				object.traverse(function (child) {
 
-    const hemiLight = new THREE.HemisphereLight(0xffffff, 0x444444);
-    hemiLight.position.set(0, 200, 0);
-    scene.add(hemiLight);
+					if (child.isMesh) {
 
-    const dirLight = new THREE.DirectionalLight(0xffffff);
-    dirLight.position.set(0, 200, 100);
-    dirLight.castShadow = true;
-    dirLight.shadow.camera.top = 180;
-    dirLight.shadow.camera.bottom = - 100;
-    dirLight.shadow.camera.left = - 120;
-    dirLight.shadow.camera.right = 120;
-    scene.add(dirLight);
+						child.castShadow = true;
+						child.receiveShadow = true;
 
-    // scene.add( new THREE.CameraHelper( dirLight.shadow.camera ) );
+					}
 
-    // ground
-    const mesh = new THREE.Mesh(
-        new THREE.PlaneGeometry(2000, 2000),
-        new THREE.MeshPhongMaterial({ color: 0x999999, depthWrite: false })
-    );
+				});
 
-    mesh.rotation.x = - Math.PI / 2;
-    mesh.receiveShadow = true;
-    scene.add(mesh);
+				scene.add(object);
 
-    const grid = new THREE.GridHelper(2000, 20, 0x000000, 0x000000);
-    grid.material.opacity = 0.2;
-    grid.material.transparent = true;
-    scene.add(grid);
+			});
 
-    const loader = new THREE.FBXLoader();
+			renderer = new THREE.WebGLRenderer({ antialias: true });
+			renderer.setPixelRatio(window.devicePixelRatio);
+			renderer.setSize(previewerWidth, previewerHeight);
+			renderer.shadowMap.enabled = true;
 
-    let desiredScale = 320;
-    let scaleV3 = new THREE.Vector3().setScalar(desiredScale);
+			const controls = new THREE.OrbitControls(camera, renderer.domElement);
+			controls.target.set(0, 100, 0);
+			controls.update();
+			container.appendChild(renderer.domElement);
 
-    //
+			window.addEventListener('resize', onWindowResize);
 
-    loader.setPath(urlAddress);
+			// stats
+			stats = new Stats();
+			// container.appendChild( stats.dom );
+		}
 
-    loader.load('', function (object) {
+		function onWindowResize() {
 
-        if (object.animations[0]) {
-            mixer = new THREE.AnimationMixer(object);
+			camera.aspect = window.innerWidth / window.innerHeight;
+			camera.updateProjectionMatrix();
 
-            const action = mixer.clipAction(object.animations[0]);
-            action.play();
-        }
-
-
-        //
-
-        let box = new THREE.Box3();
-        box.setFromObject(object);
-
-        let size = new THREE.Vector3();
-        box.getSize(size);
-
-        let center = new THREE.Vector3();
-        box.getCenter(center);
-
-        let scaleTemp = new THREE.Vector3().copy(scaleV3).divide(size);
-        let scale = Math.min(scaleTemp.x, Math.min(scaleTemp.y, scaleTemp.z));
-
-        object.scale.setScalar(scale);
-        object.position.sub(center.multiplyScalar(scale));
-
-        //
-
-        object.traverse(function (child) {
-
-            if (child.isMesh) {
-
-                child.castShadow = true;
-                child.receiveShadow = true;
-
-            }
-
-        });
-
-        scene.add(object);
-
-    });
-
-    renderer = new THREE.WebGLRenderer({ antialias: true });
-    renderer.setPixelRatio(window.devicePixelRatio);
-    renderer.setSize(previewerWidth, previewerHeight);
-    renderer.shadowMap.enabled = true;
-
-    const controls = new THREE.OrbitControls(camera, renderer.domElement);
-    controls.target.set(0, 100, 0);
-    controls.update();
-    container.appendChild(renderer.domElement);
-
-    window.addEventListener('resize', onWindowResize);
-
-    // stats
-    stats = new Stats();
-    // container.appendChild( stats.dom );
-}
-
-function onWindowResize() {
-
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
-
-    renderer.setSize(window.innerWidth, window.innerHeight);
-}
+			renderer.setSize(window.innerWidth, window.innerHeight);
+		}
 
 //
 
-function animate() {
-    requestAnimationFrame(animate);
+		function animate() {
+			requestAnimationFrame(animate);
 
-    const delta = clock.getDelta();
+			const delta = clock.getDelta();
 
-    if (mixer) mixer.update(delta);
+			if (mixer) mixer.update(delta);
 
-    renderer.render(scene, camera);
+			renderer.render(scene, camera);
 
-    stats.update();
-}
+			stats.update();
+		}
 
+
+	});
+
+});

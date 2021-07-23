@@ -88,6 +88,7 @@ export default function File(props){
 						Configuration.fileType = filePreview["pv_contenttype"];
 						Configuration.APIKEY=config.apikey;
 						Configuration.authenticated = true;
+						// Configuration.metadataJsonld = fileMetadataJsonld;
 
 						let previewId = filePreview["p_id"].replace(" ","-").toLowerCase();
 						return (<div className={`configuration ${previewId}`} data-configuration={JSON.stringify(Configuration)}>
