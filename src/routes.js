@@ -6,7 +6,7 @@ import File from "./containers/File";
 
 export default (
 	<Switch>
-		<Route exact path="/file" render={() => {
+		<Route exact path="/" render={() => {
 			return (<File/>);
 		}}/>
 	</Switch>
