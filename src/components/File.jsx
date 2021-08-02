@@ -17,30 +17,33 @@ export default function File(props){
 		script.src = `../public/clowder/assets/javascripts/previewers/helper.js`;
 		script.async = true;
 		document.body.appendChild(script);
-		// return () => {
-		// 	document.body.removeChild(script);
-		// }
-
-		// attach previews
-		if (filePreviews.length > 0 && filePreviews[0].previews !== undefined){
-			// attach previwer jquery
-			const script = document.createElement('script');
-
-			// look at which previewer to load
-			filePreviews[0].previews.map((filePreview, index)=> {
-				script.src = `../public${filePreview["p_path"]}/${filePreview["p_main"]}`;;
-				script.async = true;
-				document.body.appendChild(script);
-				// return () => {
-				// 	document.body.removeChild(script);
-				// }
-			});
+		return () => {
+			document.body.removeChild(script);
 		}
 	}, []);
 
-	// useEffect(() => {
-	//
-	// }, [filePreviews])
+	useEffect(() => {
+		if (filePreviews.length > 0 && filePreviews[0].previews !== undefined){
+			let uniquePid = [];
+			// look at which previewer to load
+			filePreviews[0].previews.map((filePreview, index)=> {
+
+				// do not attach same previewer twice
+				if (uniquePid.indexOf(filePreview["p_id"]) === -1){
+					uniquePid.push(filePreview["p_id"]);
+
+					// attach previwer jquery
+					const script = document.createElement('script');
+					script.src = `../public${filePreview["p_path"]}/${filePreview["p_main"]}`;;
+					script.async = true;
+					document.body.appendChild(script);
+					return () => {
+						document.body.removeChild(script);
+					}
+				}
+			});
+		}
+	}, [filePreviews])
 
 	const selectFile = (fileId) =>{
 		listFileMetadata(fileId);
