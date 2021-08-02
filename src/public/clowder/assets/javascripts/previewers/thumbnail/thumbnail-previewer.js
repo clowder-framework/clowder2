@@ -25,7 +25,7 @@ $(".configuration").ready(function(){
 					"</canvas>" +
 					"<div class='rubberbandDiv' id='rubberbandDiv"+prNum+"'></div>"
 				);
-				requestImg("rubberbandimage"+prNum, Configuration);
+				requestSrc("rubberbandimage"+prNum, Configuration);
 
 				if (Configuration.authenticated) {
 					// load the rubberband library
@@ -54,7 +54,7 @@ $(".configuration").ready(function(){
 					"src='" + Configuration.url + "' type='image/tiff'"+
 					" negative=no id='embedded'>"
 				);
-				requestImg("embedded", Configuration);
+				requestSrc("embedded", Configuration);
 			}
 
 				// --------------------------------------------------------
