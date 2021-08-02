@@ -1,9 +1,9 @@
 $(".configuration").ready(function(){
-	// load helper to fetch image with apikey
-	var h = document.createElement("script");
-	h.type = "text/javascript";
-	h.src = "/public/clowder/assets/javascripts/previewers/helper.js";
-	$("#preview").append(h);
+	// // load helper to fetch image with apikey
+	// var h = document.createElement("script");
+	// h.type = "text/javascript";
+	// h.src = "/public/clowder/assets/javascripts/previewers/helper.js";
+	// $("#preview").append(h);
 
 	// loop through each configuration
 	$( ".configuration.thumbnail" ).each(function() {
@@ -25,7 +25,7 @@ $(".configuration").ready(function(){
 					"</canvas>" +
 					"<div class='rubberbandDiv' id='rubberbandDiv"+prNum+"'></div>"
 				);
-				requestImg("rubberbandimage"+prNum, Configuration);
+				requestSrc("rubberbandimage"+prNum, Configuration.url);
 
 				if (Configuration.authenticated) {
 					// load the rubberband library
@@ -54,7 +54,7 @@ $(".configuration").ready(function(){
 					"src='" + Configuration.url + "' type='image/tiff'"+
 					" negative=no id='embedded'>"
 				);
-				requestImg("embedded", Configuration);
+				requestSrc("embedded", Configuration.url);
 			}
 
 				// --------------------------------------------------------
@@ -85,3 +85,19 @@ $(".configuration").ready(function(){
 		}(jQuery, Configuration));
 	});
 });
+
+function requestSrc(divID, url){
+	$("#"+ divID).ready(() => {
+		const src = url;
+		const options = {
+			headers: {
+				"X-API-Key": Configuration.APIKEY
+			}
+		};
+		fetch(src, options)
+		.then(res => res.blob())
+		.then(blob => {
+			$("#"+ divID).attr("src", URL.createObjectURL(blob));
+		});
+	});
+}

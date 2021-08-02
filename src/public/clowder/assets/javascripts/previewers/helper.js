@@ -1,7 +1,7 @@
 // need to fetch img using APIKEY in the header
-function requestImg(imgDivId, Configuration){
-	$("#"+ imgDivId).ready(() => {
-		const src = Configuration.url;
+function requestSrc(divID, url){
+	$("#"+ divID).ready(() => {
+		const src = url;
 		const options = {
 			headers: {
 				"X-API-Key": Configuration.APIKEY
@@ -10,7 +10,7 @@ function requestImg(imgDivId, Configuration){
 		fetch(src, options)
 		.then(res => res.blob())
 		.then(blob => {
-			$("#"+ imgDivId).attr("src", URL.createObjectURL(blob));
+			$("#"+ divID).attr("src", URL.createObjectURL(blob));
 		});
 	});
 }
