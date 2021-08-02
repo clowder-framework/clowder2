@@ -47,9 +47,6 @@ export default function File(props){
 			<select name="files" id="files" onChange={(e)=>{ selectFile(e.target.value);}} defaultValue="select">
 				<option value="select" disabled>Select A File</option>
 				<option value="60ee082d5e0e3ff9d746b5fc">Text File</option>
-				<option value="59933ae8e4b04cf488f47aba">PDF</option>
-				<option value="59933ae9e4b04cf488f47b48">Video</option>
-				<option value="5d974f435e0eb9edf7b3cf00">Audio</option>
 				<option value="576b0b1ce4b0e899329e8553">Image</option>
 				<option value="60ee08325e0e3ff9d746bc57">Three D</option>
 			</select>
@@ -85,7 +82,7 @@ export default function File(props){
 					filePreviews[0].previews.map((filePreview, index)=> {
 						const Configuration = {};
 						Configuration.tab = `#previewer_${filePreviews[0]["file_id"]}_${index}`;
-						Configuration.url = `${config.hostname}${filePreview["pv_route"]}?superAdmin=true`;
+						Configuration.url = `${config.hostname}${filePreview["pv_route"]}`;
 						Configuration.fileid = filePreview["pv_id"];
 						Configuration.previewer = `/public${filePreview["p_path"]}/`;
 						Configuration.fileType = filePreview["pv_contenttype"];

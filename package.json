@@ -11,7 +11,7 @@
 		"preinstall": "node tools/nodeVersionCheck.js",
 		"start-message": "babel-node tools/startMessage.js",
 		"prestart": "npm-run-all --parallel start-message",
-		"start": "npm-run-all --parallel open:src",
+		"start": "npm-run-all --parallel open:src lint:watch",
 		"open:src": "babel-node tools/srcServer.js",
 		"open:dist": "babel-node tools/distServer.js",
 		"lint": "esw webpack.config.* src --color --ext .jsx,.js || exit 0",
