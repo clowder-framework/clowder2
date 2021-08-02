@@ -1,10 +1,4 @@
 $(".configuration").ready(function(){
-	// load helper to fetch image with apikey
-	var h = document.createElement("script");
-	h.type = "text/javascript";
-	h.src = "/public/clowder/assets/javascripts/previewers/helper.js";
-	$("#preview").append(h);
-
 	// loop through each configuration
 	$( ".configuration.thumbnail" ).each(function() {
 		var Configuration = $(this).data("configuration");

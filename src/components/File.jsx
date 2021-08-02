@@ -10,15 +10,18 @@ export default function File(props){
 		...other} = props;
 
 
-	// // component did mount
-	// useEffect(() => {
-	// 	// listFileMetadata();
-	// 	// listFileExtractedMetadata();
-	// 	// listFileMetadataJsonld();
-	// 	// listFilePreviews();
-	// }, []);
-
+	// component did mount
 	useEffect(() => {
+		// attach helper jquery
+		const script = document.createElement('script');
+		script.src = `../public/clowder/assets/javascripts/previewers/helper.js`;
+		script.async = true;
+		document.body.appendChild(script);
+		// return () => {
+		// 	document.body.removeChild(script);
+		// }
+
+		// attach previews
 		if (filePreviews.length > 0 && filePreviews[0].previews !== undefined){
 			// attach previwer jquery
 			const script = document.createElement('script');
@@ -33,7 +36,11 @@ export default function File(props){
 				// }
 			});
 		}
-	}, [filePreviews])
+	}, []);
+
+	// useEffect(() => {
+	//
+	// }, [filePreviews])
 
 	const selectFile = (fileId) =>{
 		listFileMetadata(fileId);
