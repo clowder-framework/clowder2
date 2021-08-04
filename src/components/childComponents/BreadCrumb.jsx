@@ -6,6 +6,9 @@ import Link from '@material-ui/core/Link';
 import {makeStyles} from "@material-ui/core/styles";
 
 const useStyles = makeStyles((theme) => ({
+	breadCrumb:{
+		padding:"28px"
+	},
 	breadCrumbText:{
 		fontStyle: "normal",
 		fontWeight: "600",
@@ -27,7 +30,7 @@ export default function Breadcrumbs(props) {
 		filename, ...other} = props;
 	return (
 		<div>
-			<MuiBreadcrumbs aria-label="breadcrumb">
+			<MuiBreadcrumbs className={classes.breadCrumb} aria-label="breadcrumb">
 				<Link color="inherit" href="/explore" className={classes.breadCrumbLink}>
 					Explore
 				</Link>

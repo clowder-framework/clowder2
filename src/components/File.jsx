@@ -2,8 +2,10 @@ import React, {useEffect, useState} from "react";
 import config from "../app.config";
 import TopBar from "./childComponents/TopBar";
 import Breadcrumbs from "./childComponents/BreadCrumb";
-import {AppBar, Box, Tab, Tabs, Typography, Grid,} from "@material-ui/core"
+import {AppBar, Box, Tab, Tabs, Typography, Grid, Divider} from "@material-ui/core"
 import {makeStyles} from "@material-ui/core/styles";
+import {ClowderInput} from "./styledComponents/ClowderInput";
+import {ClowderButton} from "./styledComponents/ClowderButton";
 
 const useStyles = makeStyles((theme) => ({
 	root: {
@@ -20,11 +22,19 @@ const useStyles = makeStyles((theme) => ({
 		color: "#495057",
 		textTransform:"capitalize",
 	},
+	infoCard:{
+		padding: "48px 0",
+	},
 	title:{
 		fontWeight: "600",
 		fontSize: "16px",
 		color: "#000000",
-	}
+		marginBottom:"8px"
+	},
+	content:{
+		fontSize: "14px",
+		color: "#000000",
+}
 }));
 
 export default function File(props) {
@@ -72,7 +82,6 @@ export default function File(props) {
 					const script = document.createElement("script");
 					script.className = "previewer-script";
 					script.src = `../public${filePreview["p_path"]}/${filePreview["p_main"]}`;
-					;
 					script.async = true;
 					document.body.appendChild(script);
 					return () => {
@@ -159,20 +168,38 @@ export default function File(props) {
 							</TabPanel>
 						</Grid>
 						<Grid item lg={4} sm={4} xl={4} xs={12}>
-							<Box>
+							<Box className={classes.infoCard}>
 								<Typography className={classes.title}>About</Typography>
-								<Typography>Type: {fileMetadata["content-type"]}</Typography>
-								<Typography>File size: {fileMetadata["size"]}</Typography>
-								<Typography>Uploaded on: {fileMetadata["data-created"]}</Typography>
-								<Typography>Uploaded as: {fileMetadata["filename"]}</Typography>
-								<Typography>Uploaded by: {fileMetadata["authorId"]}</Typography>
-								<Typography>Status: {fileMetadata["status"]}</Typography>
+								<Typography className={classes.content}>Type: {fileMetadata["content-type"]}</Typography>
+								<Typography className={classes.content}>File size: {fileMetadata["size"]}</Typography>
+								<Typography className={classes.content}>Uploaded on: {fileMetadata["date-created"]}</Typography>
+								<Typography className={classes.content}>Uploaded as: {fileMetadata["filename"]}</Typography>
+								<Typography className={classes.content}>Uploaded by: {fileMetadata["authorId"]}</Typography>
+								<Typography className={classes.content}>Status: {fileMetadata["status"]}</Typography>
 							</Box>
+							<Divider light />
+							<Box className={classes.infoCard}>
+								<Typography className={classes.title}>Statistics</Typography>
+								<Typography className={classes.content}>Views:10</Typography>
+								<Typography className={classes.content}>Last viewed:Jun 07, 2021 21:49:09</Typography>
+								<Typography className={classes.content}>Downloads:0</Typography>
+								<Typography className={classes.content}>Last downloaded:Never</Typography>
+							</Box>
+							<Divider light />
+							<Box className={classes.infoCard}>
+								<Typography className={classes.title}>Tags</Typography>
+								<Grid container spacing={}>
+									<Grid item lg={8} sm={8} xl={8} xs={12}>
+										<ClowderInput defaultValue="Tag"/>
+									</Grid>
+									<Grid item lg={4} sm={4} xl={4} xs={12}>
+										<ClowderButton>Search</ClowderButton>
+									</Grid>
+								</Grid>
+							</Box>
+							<Divider light />
 						</Grid>
 					</Grid>
-
-
-
 
 					<select name="files" id="files" onChange={(e) => { selectFile(e.target.value);}}
 							defaultValue="select">
