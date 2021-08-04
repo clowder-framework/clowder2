@@ -6,3 +6,7 @@ body {
 .outer-container{
 	padding: 45px;
 }
+
+.inner-container{
+	padding: 20px 0;
+}
