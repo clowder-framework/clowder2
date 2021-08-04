@@ -5,10 +5,7 @@ import {
 	Link,
 	Toolbar,
 	Typography,
-	Button,
-	IconButton,
 } from '@material-ui/core';
-import MenuIcon from '@material-ui/icons/Menu';
 
 const useStyles = makeStyles((theme) => ({
 	root: {
@@ -16,14 +13,17 @@ const useStyles = makeStyles((theme) => ({
 	},
 	appBar:{
 		background: "#FFFFFF",
-		boxShadow: "none"
+		boxShadow: "none",
+	},
+	toolBar:{
+		padding:"0 45px"
 	},
 	menuButton: {
 		marginRight: theme.spacing(2),
 	},
-	logo:{
-		marginRight:"50px"
-	},
+	// logo:{
+	// 	marginRight:"50px"
+	// },
 	toolBarItem:{
 		margin:"auto 12px auto 12px",
 	},
@@ -43,7 +43,7 @@ export default function TopBar() {
 	return (
 		<div className={classes.root}>
 			<AppBar position="static" className={classes.appBar}>
-				<Toolbar>
+				<Toolbar className={classes.toolBar}>
 					<img className={classes.logo} src="../../public/clowder-logo-sm.svg" alt="clowder-logo-sm"/>
 					<Typography className={classes.toolBarItem}>
 						<Link href="/" target="_blank" className={classes.toolBarlink}>
