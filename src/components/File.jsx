@@ -2,6 +2,13 @@ import React, {useEffect, useState} from "react";
 import config from "../app.config";
 import TopBar from "./childComponents/TopBar";
 import Breadcrumbs from "./childComponents/BreadCrumb";
+import {
+	Tabs,
+	Tab,
+	AppBar,
+	Box,
+	Typography
+} from "@material-ui/core"
 
 export default function File(props){
 	const {
@@ -11,10 +18,12 @@ export default function File(props){
 		listFilePreviews, filePreviews,
 		...other} = props;
 
+	const [selectedTabIndex, setSelectedTabIndex] = useState(0);
+
 	// component did mount
 	useEffect(() => {
 		// attach helper jquery
-		const script = document.createElement('script');
+		const script = document.createElement("script");
 		script.src = `../public/clowder/assets/javascripts/previewers/helper.js`;
 		script.async = true;
 		document.body.appendChild(script);
@@ -40,7 +49,7 @@ export default function File(props){
 					uniquePid.push(filePreview["p_id"]);
 
 					// attach previwer jquery
-					const script = document.createElement('script');
+					const script = document.createElement("script");
 					script.className = "previewer-script";
 					script.src = `../public${filePreview["p_path"]}/${filePreview["p_main"]}`;;
 					script.async = true;
@@ -60,11 +69,42 @@ export default function File(props){
 		listFilePreviews(fileId);
 	}
 
+	const handleTabChange = (event, newTabIndex) => {
+		setSelectedTabIndex(newTabIndex);
+	};
+
 	return (
 		<div>
 			<TopBar />
 			<div className="outer-container">
 				<Breadcrumbs filename={fileMetadata["filename"]}/>
+
+				{/*tabs*/}
+				<AppBar position="static">
+					<Tabs value={selectedTabIndex} onChange={handleTabChange} aria-label="file tabs">
+						<Tab label="Files" {...a11yProps(0)} />
+						<Tab label="Sections" {...a11yProps(1)} />
+						<Tab label="Metadata" {...a11yProps(2)} />
+						<Tab label="Extractions" {...a11yProps(3)} />
+						<Tab label="Comments" {...a11yProps(4)} />
+					</Tabs>
+				</AppBar>
+				<TabPanel value={selectedTabIndex} index={0}>
+					Previewer
+				</TabPanel>
+				<TabPanel value={selectedTabIndex} index={1}>
+					NA
+				</TabPanel>
+				<TabPanel value={selectedTabIndex} index={2}>
+					Metadata
+				</TabPanel>
+				<TabPanel value={selectedTabIndex} index={2}>
+					Extractions
+				</TabPanel>
+				<TabPanel value={selectedTabIndex} index={2}>
+					Comments
+				</TabPanel>
+
 				<select name="files" id="files" onChange={(e)=>{ selectFile(e.target.value);}} defaultValue="select">
 					<option value="select" disabled>Select A File</option>
 					<option value="60ee082d5e0e3ff9d746b5fc">Text File</option>
@@ -126,4 +166,31 @@ export default function File(props){
 
 		</div>
 	);
+}
+
+function TabPanel(props) {
+	const { children, selectedTabIndex, index, ...other } = props;
+
+	return (
+		<div
+			role="tabpanel"
+			hidden={selectedTabIndex !== index}
+			id={`file-tabpanel-${index}`}
+			aria-labelledby={`file-tab-${index}`}
+			{...other}
+		>
+			{selectedTabIndex === index && (
+				<Box p={3}>
+					<Typography>{children}</Typography>
+				</Box>
+			)}
+		</div>
+	);
+}
+
+function a11yProps(index) {
+	return {
+		id: `file-tab-${index}`,
+		"aria-controls": `file-tabpanel-${index}`,
+	};
 }
