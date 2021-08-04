@@ -2,7 +2,7 @@ import React, {useEffect, useState} from "react";
 import config from "../app.config";
 import TopBar from "./childComponents/TopBar";
 import Breadcrumbs from "./childComponents/BreadCrumb";
-import {AppBar, Box, Tab, Tabs, Typography} from "@material-ui/core"
+import {AppBar, Box, Tab, Tabs, Typography, Grid,} from "@material-ui/core"
 import {makeStyles} from "@material-ui/core/styles";
 
 const useStyles = makeStyles((theme) => ({
@@ -19,6 +19,11 @@ const useStyles = makeStyles((theme) => ({
 		fontSize: "16px",
 		color: "#495057",
 		textTransform:"capitalize",
+	},
+	title:{
+		fontWeight: "600",
+		fontSize: "16px",
+		color: "#000000",
 	}
 }));
 
@@ -97,77 +102,77 @@ export default function File(props) {
 
 				{/*tabs*/}
 				<div className="inner-container">
-					<AppBar className={classes.appBar} position="static">
-						<Tabs value={selectedTabIndex} onChange={handleTabChange} aria-label="file tabs">
-							<Tab className={classes.tab} label="Files" {...a11yProps(0)} />
-							<Tab className={classes.tab} label="Sections" {...a11yProps(1)} />
-							<Tab className={classes.tab} label="Metadata" {...a11yProps(2)} />
-							<Tab className={classes.tab} label="Extractions" {...a11yProps(3)} />
-							<Tab className={classes.tab} label="Comments" {...a11yProps(4)} />
-						</Tabs>
-					</AppBar>
-					<TabPanel value={selectedTabIndex} index={0}>
-						<h4 id="preview">previewer</h4>
-						{
-							filePreviews.length > 0 && filePreviews[0].previews !== undefined
-								?
-								filePreviews[0].previews.map((filePreview, index) => {
-									const Configuration = {};
-									Configuration.tab = `#previewer_${filePreviews[0]["file_id"]}_${index}`;
-									Configuration.url = `${config.hostname}${filePreview["pv_route"]}?superAdmin=true`;
-									Configuration.fileid = filePreview["pv_id"];
-									Configuration.previewer = `/public${filePreview["p_path"]}/`;
-									Configuration.fileType = filePreview["pv_contenttype"];
-									Configuration.APIKEY = config.apikey;
-									Configuration.authenticated = true;
-									// Configuration.metadataJsonld = fileMetadataJsonld;
+					<Grid container spacing={4}>
+						<Grid item lg={8} sm={8} xl={8} xs={12}>
+							<AppBar className={classes.appBar} position="static">
+								<Tabs value={selectedTabIndex} onChange={handleTabChange} aria-label="file tabs">
+									<Tab className={classes.tab} label="Previews" {...a11yProps(0)} />
+									<Tab className={classes.tab} label="Sections" {...a11yProps(1)} />
+									<Tab className={classes.tab} label="Metadata" {...a11yProps(2)} />
+									<Tab className={classes.tab} label="Extractions" {...a11yProps(3)} />
+									<Tab className={classes.tab} label="Comments" {...a11yProps(4)} />
+								</Tabs>
+							</AppBar>
+							<TabPanel value={selectedTabIndex} index={0}>
+								{
+									filePreviews.length > 0 && filePreviews[0].previews !== undefined
+										?
+										filePreviews[0].previews.map((filePreview, index) => {
+											const Configuration = {};
+											Configuration.tab = `#previewer_${filePreviews[0]["file_id"]}_${index}`;
+											Configuration.url = `${config.hostname}${filePreview["pv_route"]}?superAdmin=true`;
+											Configuration.fileid = filePreview["pv_id"];
+											Configuration.previewer = `/public${filePreview["p_path"]}/`;
+											Configuration.fileType = filePreview["pv_contenttype"];
+											Configuration.APIKEY = config.apikey;
+											Configuration.authenticated = true;
+											// Configuration.metadataJsonld = fileMetadataJsonld;
 
-									let previewId = filePreview["p_id"].replace(" ", "-").toLowerCase();
-									return (<div className={`configuration ${previewId}`}
-												 data-configuration={JSON.stringify(Configuration)}>
-										<div id={Configuration.tab.slice(1)}></div>
-									</div>);
-								})
-								:
-								<></>
-						}
-					</TabPanel>
-					<TabPanel value={selectedTabIndex} index={1}>
-						NA
-					</TabPanel>
-					<TabPanel value={selectedTabIndex} index={2}>
-						<h4>metadata</h4>
-						<div>
-							<h1>
-								{fileMetadata["filename"]}
-							</h1>
-							<p>{fileMetadata["content-type"]}</p>
-							<p>{fileMetadata["data-created"]}</p>
-							<p>{fileMetadata["authorId"]}</p>
-							<p>{fileMetadata["filedescription"]}</p>
-							<p>{fileMetadata["id"]}</p>
-							<p>{fileMetadata["size"]}</p>
-							<p>{fileMetadata["status"]}</p>
-							<p>{fileMetadata["thumbnail"]}</p>
-						</div>
-						<h4>metadata jsonld</h4>
-						<div>
-							{
-								fileMetadataJsonld.map((item) => {
-									return Object.keys(item["content"]).map((key) => {
-											return (<p>{key} - {JSON.stringify(item["content"][key])}</p>);
-										}
-									);
-								})
-							}
-						</div>
-					</TabPanel>
-					<TabPanel value={selectedTabIndex} index={3}>
-						Extractions
-					</TabPanel>
-					<TabPanel value={selectedTabIndex} index={4}>
-						Comments
-					</TabPanel>
+											let previewId = filePreview["p_id"].replace(" ", "-").toLowerCase();
+											return (<div className={`configuration ${previewId}`}
+														 data-configuration={JSON.stringify(Configuration)}>
+												<div id={Configuration.tab.slice(1)}></div>
+											</div>);
+										})
+										:
+										<></>
+								}
+							</TabPanel>
+							<TabPanel value={selectedTabIndex} index={1}>
+								NA
+							</TabPanel>
+							<TabPanel value={selectedTabIndex} index={2}>
+								{
+									fileMetadataJsonld.map((item) => {
+										return Object.keys(item["content"]).map((key) => {
+												return (<p>{key} - {JSON.stringify(item["content"][key])}</p>);
+											}
+										);
+									})
+								}
+							</TabPanel>
+							<TabPanel value={selectedTabIndex} index={3}>
+								Extractions
+							</TabPanel>
+							<TabPanel value={selectedTabIndex} index={4}>
+								Comments
+							</TabPanel>
+						</Grid>
+						<Grid item lg={4} sm={4} xl={4} xs={12}>
+							<Box>
+								<Typography className={classes.title}>About</Typography>
+								<Typography>Type: {fileMetadata["content-type"]}</Typography>
+								<Typography>File size: {fileMetadata["size"]}</Typography>
+								<Typography>Uploaded on: {fileMetadata["data-created"]}</Typography>
+								<Typography>Uploaded as: {fileMetadata["filename"]}</Typography>
+								<Typography>Uploaded by: {fileMetadata["authorId"]}</Typography>
+								<Typography>Status: {fileMetadata["status"]}</Typography>
+							</Box>
+						</Grid>
+					</Grid>
+
+
+
 
 					<select name="files" id="files" onChange={(e) => { selectFile(e.target.value);}}
 							defaultValue="select">
