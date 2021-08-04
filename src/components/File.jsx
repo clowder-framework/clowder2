@@ -1,6 +1,7 @@
 import React, {useEffect, useState} from "react";
 import config from "../app.config";
 import TopBar from "./childComponents/TopBar";
+import Breadcrumbs from "./childComponents/BreadCrumb";
 
 export default function File(props){
 	const {
@@ -62,6 +63,7 @@ export default function File(props){
 	return (
 		<div>
 			<TopBar />
+			<Breadcrumbs filename={fileMetadata["filename"]}/>
 			<select name="files" id="files" onChange={(e)=>{ selectFile(e.target.value);}} defaultValue="select">
 				<option value="select" disabled>Select A File</option>
 				<option value="60ee082d5e0e3ff9d746b5fc">Text File</option>

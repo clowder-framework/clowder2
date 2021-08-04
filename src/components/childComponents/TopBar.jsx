@@ -15,22 +15,20 @@ const useStyles = makeStyles((theme) => ({
 		flexGrow: 1,
 	},
 	appBar:{
-		position: "absolute",
-		left: "0%",
-		right: "0%",
-		top: "0%",
-		bottom: "0%",
 		background: "#FFFFFF",
+		boxShadow: "none"
 	},
 	menuButton: {
 		marginRight: theme.spacing(2),
+	},
+	logo:{
+		marginRight:"50px"
 	},
 	toolBarItem:{
 		margin:"auto 12px auto 12px",
 	},
 	toolBarlink:{
 		textDecoration: "none",
-		fontFamily: "Open Sans",
 		fontSize: "16px",
 		color: "#495057",
 	},
@@ -46,9 +44,7 @@ export default function TopBar() {
 		<div className={classes.root}>
 			<AppBar position="static" className={classes.appBar}>
 				<Toolbar>
-					<IconButton edge="start" className={classes.menuButton} color="inherit" aria-label="menu">
-						<MenuIcon />
-					</IconButton>
+					<img className={classes.logo} src="../../public/clowder-logo-sm.svg" alt="clowder-logo-sm"/>
 					<Typography className={classes.toolBarItem}>
 						<Link href="/" target="_blank" className={classes.toolBarlink}>
 							Home</Link>
@@ -65,7 +61,6 @@ export default function TopBar() {
 						<Link href="/" target="_blank" className={classes.toolBarlink}>
 							Create</Link>
 					</Typography>
-					<Button color="inherit">Login</Button>
 				</Toolbar>
 			</AppBar>
 		</div>
