@@ -1,5 +1,6 @@
 import React, {useEffect, useState} from "react";
 import config from "../app.config";
+import TopBar from "./childComponents/TopBar";
 
 export default function File(props){
 	const {
@@ -8,7 +9,6 @@ export default function File(props){
 		listFileMetadataJsonld, fileMetadataJsonld,
 		listFilePreviews, filePreviews,
 		...other} = props;
-
 
 	// component did mount
 	useEffect(() => {
@@ -23,6 +23,12 @@ export default function File(props){
 	}, []);
 
 	useEffect(() => {
+		// remove last previewer script attached
+		const previewerScripts = document.getElementsByClassName("previewer-script");
+		while (previewerScripts.length > 0) {
+			previewerScripts[0].parentNode.removeChild(previewerScripts[0]);
+		}
+
 		if (filePreviews.length > 0 && filePreviews[0].previews !== undefined){
 			let uniquePid = [];
 			// look at which previewer to load
@@ -34,6 +40,7 @@ export default function File(props){
 
 					// attach previwer jquery
 					const script = document.createElement('script');
+					script.className = "previewer-script";
 					script.src = `../public${filePreview["p_path"]}/${filePreview["p_main"]}`;;
 					script.async = true;
 					document.body.appendChild(script);
@@ -45,7 +52,7 @@ export default function File(props){
 		}
 	}, [filePreviews])
 
-	const selectFile = (fileId) =>{
+	const selectFile = (fileId) => {
 		listFileMetadata(fileId);
 		listFileExtractedMetadata(fileId);
 		listFileMetadataJsonld(fileId);
@@ -54,6 +61,7 @@ export default function File(props){
 
 	return (
 		<div>
+			<TopBar />
 			<select name="files" id="files" onChange={(e)=>{ selectFile(e.target.value);}} defaultValue="select">
 				<option value="select" disabled>Select A File</option>
 				<option value="60ee082d5e0e3ff9d746b5fc">Text File</option>
@@ -111,7 +119,6 @@ export default function File(props){
 					:
 					<></>
 			}
-
 		</div>
 	);
 }

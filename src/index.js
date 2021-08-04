@@ -15,10 +15,10 @@ const store = configureStore();
 const theme = createTheme({
 
 	typography: {
-		fontFamily: "Rubik"
+		fontFamily: "'Open Sans', sans-serif"
 	},
 	palette:{
-		fontFamily: "Rubik"
+		fontFamily: "'Open Sans', sans-serif"
 	}
 
 });

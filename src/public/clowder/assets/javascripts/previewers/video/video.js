@@ -47,8 +47,9 @@ $(".configuration").ready(function() {
 					});
 				} else {
 					$(useTab).append(
-						"<video width='100%' id='ourvideo' controls><source src='" + referenceUrl + "'></source></video>"
+						"<video width='100%' id='ourvideo' controls><source id='" + Configuration.fileid + "'></source></video>"
 					);
+					requestSrc(Configuration.fileid, Configuration);
 				}
 			}
 
