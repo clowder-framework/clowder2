@@ -39,7 +39,7 @@ export default function Dataset(props) {
 	const classes = useStyles();
 
 	const [fileId, setFileId] = useState("");
-	const [paths, setPaths] = useState(["explore","collection", "datasetID"]);
+	const [paths, setPaths] = useState(["explore","collection", "dataset", ""]);
 
 	const {
 		listFileMetadata, fileMetadata,
@@ -51,7 +51,7 @@ export default function Dataset(props) {
 
 	useEffect(() => {
 		// set breadcrumbs
-		setPaths(paths => [...paths.slice(0, paths.length), fileMetadata["filename"]]);
+		setPaths(paths => [...paths.slice(0, paths.length-1), fileMetadata["filename"]]);
 	}, [fileMetadata]);
 
 	const selectFile = (selectedFileId) => {
