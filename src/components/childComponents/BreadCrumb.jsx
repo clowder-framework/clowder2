@@ -19,28 +19,28 @@ const useStyles = makeStyles((theme) => ({
 		fontStyle: "normal",
 		fontWeight: "600",
 		fontSize: "24px",
-		color: "#6C757D"
+		color: "#6C757D",
+		textTransform: "capitalize"
 	}
 }));
 
 export default function Breadcrumbs(props) {
 	const classes = useStyles();
 
-	const {
-		filename, ...other} = props;
+	const { paths, ...other} = props;
 	return (
 		<div>
 			<MuiBreadcrumbs className={classes.breadCrumb} aria-label="breadcrumb">
-				<Link color="inherit" href="/explore" className={classes.breadCrumbLink}>
-					Explore
-				</Link>
-				<Link color="inherit" href="/collection" className={classes.breadCrumbLink}>
-					Collection
-				</Link>
-				<Link color="inherit" href="/dataset" className={classes.breadCrumbLink}>
-					Dataset
-				</Link>
-				<Typography className={classes.breadCrumbText}>{filename}</Typography>
+				{
+					paths.map((path, index) => {
+						if (index !== paths.length -1){
+							return (<Link color="inherit" href={path} className={classes.breadCrumbLink}>{path}</Link>);
+						}
+						else{
+							return (<Typography className={classes.breadCrumbText}>{path}</Typography>);
+						}
+					})
+				}
 			</MuiBreadcrumbs>
 			<Divider light />
 		</div>
