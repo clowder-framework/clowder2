@@ -6,9 +6,6 @@ import {ClowderInput} from "./styledComponents/ClowderInput";
 import {ClowderButton} from "./styledComponents/ClowderButton";
 
 const useStyles = makeStyles((theme) => ({
-	root: {
-		flexGrow: 1,
-	},
 	appBar: {
 		background: "#FFFFFF",
 		boxShadow: "none",
@@ -19,19 +16,6 @@ const useStyles = makeStyles((theme) => ({
 		fontSize: "16px",
 		color: "#495057",
 		textTransform: "capitalize",
-	},
-	infoCard: {
-		padding: "48px 0",
-	},
-	title: {
-		fontWeight: "600",
-		fontSize: "16px",
-		color: "#000000",
-		marginBottom: "8px"
-	},
-	content: {
-		fontSize: "14px",
-		color: "#000000",
 	}
 }));
 
@@ -89,9 +73,7 @@ export default function File(props) {
 	};
 
 	return (
-		<div>
-			{/*tabs*/}
-			<div className="inner-container">
+		<div className="inner-container">
 				<Grid container spacing={4}>
 					<Grid item lg={8} sm={8} xl={8} xs={12}>
 						<AppBar className={classes.appBar} position="static">
@@ -152,33 +134,33 @@ export default function File(props) {
 					<Grid item lg={4} sm={4} xl={4} xs={12}>
 						{
 							fileMetadata !== undefined ?
-								<Box className={classes.infoCard}>
-									<Typography className={classes.title}>About</Typography>
+								<Box className="infoCard">
+									<Typography className="title">About</Typography>
 									<Typography
-										className={classes.content}>Type: {fileMetadata["content-type"]}</Typography>
-									<Typography className={classes.content}>File
+										className="content">Type: {fileMetadata["content-type"]}</Typography>
+									<Typography className="content">File
 										size: {fileMetadata["size"]}</Typography>
-									<Typography className={classes.content}>Uploaded
+									<Typography className="content">Uploaded
 										on: {fileMetadata["date-created"]}</Typography>
-									<Typography className={classes.content}>Uploaded
+									<Typography className="content">Uploaded
 										as: {fileMetadata["filename"]}</Typography>
-									<Typography className={classes.content}>Uploaded
+									<Typography className="content">Uploaded
 										by: {fileMetadata["authorId"]}</Typography>
 									<Typography
-										className={classes.content}>Status: {fileMetadata["status"]}</Typography>
+										className="content">Status: {fileMetadata["status"]}</Typography>
 								</Box> : <></>
 						}
 						<Divider light/>
-						<Box className={classes.infoCard}>
-							<Typography className={classes.title}>Statistics</Typography>
-							<Typography className={classes.content}>Views:10</Typography>
-							<Typography className={classes.content}>Last viewed:Jun 07, 2021 21:49:09</Typography>
-							<Typography className={classes.content}>Downloads:0</Typography>
-							<Typography className={classes.content}>Last downloaded:Never</Typography>
+						<Box className="infoCard">
+							<Typography className="title">Statistics</Typography>
+							<Typography className="content">Views: 10</Typography>
+							<Typography className="content">Last viewed: Jun 07, 2021 21:49:09</Typography>
+							<Typography className="content">Downloads: 0</Typography>
+							<Typography className="content">Last downloaded: Never</Typography>
 						</Box>
 						<Divider light/>
-						<Box className={classes.infoCard}>
-							<Typography className={classes.title}>Tags</Typography>
+						<Box className="infoCard">
+							<Typography className="title">Tags</Typography>
 							<Grid container spacing={4}>
 								<Grid item lg={8} sm={8} xl={8} xs={12}>
 									<ClowderInput defaultValue="Tag"/>
@@ -192,7 +174,6 @@ export default function File(props) {
 					</Grid>
 				</Grid>
 			</div>
-		</div>
 	);
 }
 

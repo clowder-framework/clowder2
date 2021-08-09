@@ -1,33 +1,6 @@
 import config from "../app.config";
 import {getHeader} from "../utils/common";
 
-export const RECEIVE_FILE_METADATA = "RECEIVE_FILE_METADATA";
-export function receiveFileMetadata(type, json){
-	return (dispatch) => {
-		dispatch({
-			type: type,
-			metadata: json,
-			receivedAt: Date.now(),
-		});
-	};
-}
-export function fetchFileMetadata(id){
-	let url = `${config.hostname}/clowder/api/files/${id}/metadata?superAdmin=true`;
-	return (dispatch) => {
-		return fetch(url, {mode:"cors", headers: getHeader()})
-		.then((response) => {
-			if (response.status === 200) {
-				response.json().then(json =>{
-					dispatch(receiveFileMetadata(RECEIVE_FILE_METADATA, json));
-				});
-			}
-			else {
-				dispatch(receiveFileMetadata(RECEIVE_FILE_METADATA, []));
-			}
-		});
-	};
-}
-
 export const RECEIVE_FILE_EXTRACTED_METADATA = "RECEIVE_FILE_EXTRACTED_METADATA";
 export function receiveFileExtractedMetadata(type, json){
 	return (dispatch) => {
