@@ -2,14 +2,14 @@ import {connect} from "react-redux";
 import AppComponent from "../components/App";
 import {
 	fetchFileExtractedMetadata,
-	fetchFileMetadata,
 	fetchFileMetadataJsonld,
 	fetchFilePreviews
 } from "../actions/file";
 
 import {
 	fetchFilesInDataset,
-	fetchDatasetAbout
+	fetchDatasetAbout,
+	fetchDatasets
 } from "../actions/dataset";
 
 const mapStateToProps = (state) => {
@@ -18,7 +18,8 @@ const mapStateToProps = (state) => {
 		fileMetadataJsonld: state.file.metadataJsonld,
 		filePreviews: state.file.previews,
 		filesInDataset: state.dataset.files,
-		datasetAbout: state.dataset.about
+		datasetAbout: state.dataset.about,
+		datasets: state.dataset.datasets
 	};
 };
 
@@ -38,6 +39,9 @@ const mapDispatchToProps = (dispatch) => {
 		},
 		listDatasetAbout: (datasetId) => {
 			dispatch(fetchDatasetAbout(datasetId));
+		},
+		listDatasets: () =>{
+			dispatch(fetchDatasets());
 		}
 	};
 };

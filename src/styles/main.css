@@ -36,6 +36,32 @@ body {
 	margin-bottom:2px;
 }
 
+.actionCard {
+	padding: 20px;
+	margin: 20px 20px;
+	border: 1px solid #DFDFDF;
+	box-sizing: border-box;
+	border-radius: 4px;
+}
+
+.actionCard .title{
+	font-weight: 600;
+	font-size: 20px;
+	color: #212529;
+	margin-bottom: 12px;
+}
+
+.actionCard .content{
+	font-size: 16px;
+	color: #212529;
+	margin-bottom:12px;
+}
+
+.actionCard .link{
+	font-size: 16px;
+	color: #007BFF;
+}
+
 .appBar {
 	background: #FFFFFF;
 	box-shadow: none;

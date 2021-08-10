@@ -4,6 +4,7 @@ import MuiBreadcrumbs from '@material-ui/core/Breadcrumbs';
 import Divider from '@material-ui/core/Divider';
 import Link from '@material-ui/core/Link';
 import {makeStyles} from "@material-ui/core/styles";
+import {Button} from "@material-ui/core";
 
 const useStyles = makeStyles((theme) => ({
 	breadCrumb:{
@@ -27,23 +28,27 @@ const useStyles = makeStyles((theme) => ({
 export default function Breadcrumbs(props) {
 	const classes = useStyles();
 
-	const { paths, ...other} = props;
+	const { paths, goToPath, ...other} = props;
 	return (
 		<div>
 			<MuiBreadcrumbs className={classes.breadCrumb} aria-label="breadcrumb">
-				{
-					paths.map((path, index) => {
-						if (index !== paths.length -1){
-							return (<Link color="inherit" href={path} className={classes.breadCrumbLink}>{path}</Link>);
-						}
-						else{
-							return (<Typography className={classes.breadCrumbText}>{path}</Typography>);
-						}
-					})
-				}
+				<MuiBreadcrumbs className={classes.breadCrumb} aria-label="breadcrumb">
+					<Link color="inherit" className={classes.breadCrumbLink} href="">Explore</Link>
+					{
+						paths.map((path, index) => {
+							if (index !== paths.length -1){
+								return (<Link className={classes.breadCrumbLink}
+												onClick={() => goToPath(path["type"], path["id"])}>{path["name"]}
+								</Link>);
+							}
+							else{
+								return (<Typography className={classes.breadCrumbText}>{path["name"]}</Typography>);
+							}
+						})
+					}
+				</MuiBreadcrumbs>
 			</MuiBreadcrumbs>
 			<Divider light />
 		</div>
-
 	);
 }

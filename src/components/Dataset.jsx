@@ -1,6 +1,6 @@
-import React, {useEffect, useState} from "react";
+import React, {useState} from "react";
 import {makeStyles} from "@material-ui/core/styles";
-import {AppBar, Box, Button, Divider, Grid, ListItem, Tab, Tabs, Typography} from "@material-ui/core";
+import {AppBar, Box, Divider, Grid, ListItem, Tab, Tabs, Typography} from "@material-ui/core";
 import {ClowderInput} from "./styledComponents/ClowderInput";
 import {ClowderButton} from "./styledComponents/ClowderButton";
 import DescriptionIcon from '@material-ui/icons/Description';
@@ -17,34 +17,34 @@ const useStyles = makeStyles((theme) => ({
 		color: "#495057",
 		textTransform: "capitalize",
 	},
-	fileCard:{
+	fileCard: {
 		background: "#FFFFFF",
 		border: "1px solid #DFDFDF",
 		boxSizing: "border-box",
 		borderRadius: "4px",
-		margin:"20px auto",
-		"& > .MuiGrid-item":{
-			padding:0,
-			height:"150px",
+		margin: "20px auto",
+		"& > .MuiGrid-item": {
+			padding: 0,
+			height: "150px",
 		}
 	},
-	fileCardImg:{
+	fileCardImg: {
 		height: "50%",
-		margin:"40px auto",
-		display:"block"
+		margin: "40px auto",
+		display: "block"
 	},
-	fileCardText:{
+	fileCardText: {
 		padding: "40px 20px",
-		fontSize:"16px",
-		fontWeight:"normal",
-		color:"#212529"
+		fontSize: "16px",
+		fontWeight: "normal",
+		color: "#212529"
 	},
 }));
 
 export default function Dataset(props) {
 	const classes = useStyles();
 
-	const {files, thumbnails, about, selectFile,	...other} = props;
+	const {files, thumbnails, about, selectFile, ...other} = props;
 
 	const [selectedTabIndex, setSelectedTabIndex] = useState(0);
 
@@ -57,7 +57,7 @@ export default function Dataset(props) {
 			<Grid container spacing={4}>
 				<Grid item lg={8} xl={8} md={8} sm={8} xs={12}>
 					<AppBar className={classes.appBar} position="static">
-						<Tabs value={selectedTabIndex} onChange={handleTabChange} aria-label="file tabs">
+						<Tabs value={selectedTabIndex} onChange={handleTabChange} aria-label="dataset tabs">
 							<Tab className={classes.tab} label="Files" {...a11yProps(0)} />
 							<Tab className={classes.tab} label="Metadata" {...a11yProps(1)} />
 							<Tab className={classes.tab} label="Extractions" {...a11yProps(2)} />
@@ -68,10 +68,10 @@ export default function Dataset(props) {
 					<TabPanel value={selectedTabIndex} index={0}>
 
 						{
-							files !== undefined && files.length > 0 && thumbnails !== undefined && thumbnails.length > 0
-								?
+							files !== undefined && thumbnails !== undefined ?
 								files.map((file) => {
-									let thumbnailComp = <DescriptionIcon className={classes.fileCardImg} style={{fontSize:"5em"}}/>;
+									let thumbnailComp = <DescriptionIcon className={classes.fileCardImg}
+																		 style={{fontSize: "5em"}}/>;
 									thumbnails.map((thumbnail) => {
 										if (file["id"] !== undefined && thumbnail["id"] !== undefined &&
 											thumbnail["thumbnail"] !== null && thumbnail["thumbnail"] !== undefined &&
@@ -82,13 +82,14 @@ export default function Dataset(props) {
 									});
 									return (
 										<ListItem button className={classes.fileCard} key={file["id"]}
-												  onClick={() =>selectFile(file["id"])}>
+												  onClick={() => selectFile(file["id"])}>
 											<Grid item xl={2} lg={2} md={2} sm={2} xs={12}>
 												{thumbnailComp}
 											</Grid>
 											<Grid item xl={10} lg={10} md={10} sm={10} xs={12}>
 												<Box className={classes.fileCardText}>
-													<Typography>File Size: {file["size"]}</Typography>
+													<Typography>File name: {file["filename"]}</Typography>
+													<Typography>File size: {file["size"]}</Typography>
 													<Typography>Created on: {file["date-created"]}</Typography>
 													<Typography>Content type: {file["contentType"]}</Typography>
 												</Box>
