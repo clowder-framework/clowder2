@@ -40,8 +40,8 @@ const mapDispatchToProps = (dispatch) => {
 		listDatasetAbout: (datasetId) => {
 			dispatch(fetchDatasetAbout(datasetId));
 		},
-		listDatasets: () =>{
-			dispatch(fetchDatasets());
+		listDatasets: (when, date, limit) =>{
+			dispatch(fetchDatasets(when, date, limit));
 		}
 	};
 };

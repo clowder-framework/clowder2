@@ -21,7 +21,6 @@ const useStyles = makeStyles((theme) => ({
 		fontWeight: "600",
 		fontSize: "24px",
 		color: "#6C757D",
-		textTransform: "capitalize"
 	}
 }));
 

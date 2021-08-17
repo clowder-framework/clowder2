@@ -1,6 +1,6 @@
 import { RECEIVE_FILES_IN_DATASET, RECEIVE_DATASET_ABOUT, RECEIVE_DATASETS} from "../actions/dataset";
 
-const defaultState = {files: []};
+const defaultState = {files: [], about: {}, datasets: []};
 
 const dataset = (state=defaultState, action) => {
 	switch(action.type) {
