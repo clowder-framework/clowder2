@@ -1,6 +1,6 @@
 import React, {useState} from "react";
 import {makeStyles} from "@material-ui/core/styles";
-import {AppBar, Box, Link, Divider, Grid, ListItem, Tab, Tabs, Typography} from "@material-ui/core";
+import {AppBar, Box, Link, Divider, Grid, ListItem, Tab, Tabs, Typography, Button} from "@material-ui/core";
 import BusinessCenterIcon from '@material-ui/icons/BusinessCenter';
 
 const useStyles = makeStyles((theme) => ({
@@ -42,7 +42,7 @@ const useStyles = makeStyles((theme) => ({
 export default function Dashboard(props) {
 	const classes = useStyles();
 
-	const {datasets, selectDataset, thumbnails, ...other} = props;
+	const {datasets, selectDataset, thumbnails, previous, next, ...other} = props;
 
 	const [selectedTabIndex, setSelectedTabIndex] = useState(0);
 
@@ -97,6 +97,8 @@ export default function Dashboard(props) {
 								:
 								<></>
 						}
+						<Button onClick={previous}>Prev</Button>
+						<Button onClick={next}>Next</Button>
 					</TabPanel>
 					<TabPanel value={selectedTabIndex} index={1}></TabPanel>
 					<TabPanel value={selectedTabIndex} index={2}></TabPanel>

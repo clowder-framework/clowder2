@@ -19,6 +19,9 @@ export default function App(props) {
 	const [fileMetadataList, setFileMetadataList] = useState([]);
 	const [fileThumbnailList, setFileThumbnailList] = useState([]);
 	const [datasetThumbnailList, setDatasetThumbnailList] = useState([]);
+	const [lastDataset, setLastDataset] = useState([]);
+	const [firstDataset, setFirstDataset] = useState([]);
+	const [limit, setLimit] = useState(5);
 
 	const [paths, setPaths] = useState([]);
 
@@ -40,11 +43,10 @@ export default function App(props) {
 
 	// component did mount
 	useEffect(() => {
-		listDatasets();
+		listDatasets(null, null, limit);
 	}, []);
 
 	useEffect(() => {
-
 		(async () => {
 			if (datasets !== undefined && datasets.length > 0) {
 
@@ -57,6 +59,11 @@ export default function App(props) {
 					}
 				}));
 				setDatasetThumbnailList(datasetThumbnailListTemp);
+
+				// find last and first dataset for pagination
+				setFirstDataset(datasets[0])
+				setLastDataset(datasets[datasets.length - 1]);
+
 			}
 		})();
 	}, [datasets])
@@ -86,6 +93,16 @@ export default function App(props) {
 			}
 		})();
 	}, [filesInDataset])
+
+	const previous = () => {
+		let date = firstDataset["created"] !== undefined? new Date(firstDataset["created"]) : null;
+		if (date) listDatasets("b", date.toISOString(), limit);
+	}
+
+	const next = () => {
+		let date = lastDataset["created"] !== undefined? new Date(lastDataset["created"]) : null;
+		if (date) listDatasets("a", date.toISOString(), limit);
+	}
 
 	const selectDataset = (selectedDatasetId) => {
 		// pass that id to dataset component
@@ -173,7 +190,10 @@ export default function App(props) {
 					(() => {
 						if (selectedDatasetId === "") {
 							return <Dashboard datasets={datasets} selectDataset={selectDataset}
-											  thumbnails={datasetThumbnailList}/>
+											  thumbnails={datasetThumbnailList}
+											  previous={previous}
+											  next={next}
+							/>
 						} else if (selectedFileId === "") {
 							return <Dataset files={filesInDataset} selectFile={selectFile}
 											thumbnails={fileThumbnailList} about={datasetAbout}/>

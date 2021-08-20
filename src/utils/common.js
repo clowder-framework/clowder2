@@ -26,6 +26,28 @@ export function getHeader() {
 		// });
 }
 
+export async function downloadResource(url){
+		let authHeader = getHeader();
+		let response = await fetch(url, {
+			method: "GET",
+			mode: "cors",
+			headers: authHeader,
+		});
+
+		if (response.status  === 200){
+			let blob = await response.blob();
+			return window.URL.createObjectURL(blob);
+		}
+		else if  (response.status  === 401){
+			// TODO handle error
+			return null;
+		}
+		else {
+			// TODO handle error
+			return null;
+		}
+}
+
 // get current username
 // export function getCurrUsername(){
 // 	if (process.env.DEPLOY_ENV === "local"){
