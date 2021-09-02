@@ -7,7 +7,8 @@ import {downloadThumbnail} from "../utils/thumbnail";
 import Dashboard from "./Dashbard";
 import Dataset from "./Dataset";
 import File from "./File";
-
+import datasetSchema from "../schema/datasetSchema.json";
+import fileSchema from "../schema/fileSchema.json";
 
 const useStyles = makeStyles((theme) => ({}));
 
@@ -15,7 +16,9 @@ export default function App(props) {
 	const classes = useStyles();
 
 	const [selectedFileId, setSelectedFileId] = useState("");
+	const [selectedFilename, setSelectedFilename] = useState("");
 	const [selectedDatasetId, setSelectedDatasetId] = useState("");
+	const [selectedDatasetName, setSelectedDatasetName] = useState("");
 	const [fileMetadataList, setFileMetadataList] = useState([]);
 	const [fileThumbnailList, setFileThumbnailList] = useState([]);
 	const [datasetThumbnailList, setDatasetThumbnailList] = useState([]);
@@ -34,9 +37,10 @@ export default function App(props) {
 		//dataset
 		listFilesInDataset, filesInDataset,
 		listDatasetAbout, datasetAbout,
+		deleteFile,
 
 		//dashboard
-		listDatasets, datasets,
+		deleteDataset, listDatasets, datasets,
 
 		...other
 	} = props;
@@ -94,6 +98,42 @@ export default function App(props) {
 		})();
 	}, [filesInDataset])
 
+	// for breadcrumbs
+	useEffect(() => {
+		if (datasetAbout !== undefined && datasetAbout["name"] !== undefined){
+			setSelectedDatasetName(datasetAbout["name"]);
+			setPaths([
+				{
+					"name":datasetAbout["name"],
+					"id": selectedDatasetId,
+					"type":"dataset"
+				}
+			]);
+		}
+	}, [datasetAbout])
+
+	useEffect(() => {
+		fileMetadataList.map((fileMetadata) => {
+			if (selectedFileId === fileMetadata["id"]) {
+				if (fileMetadata !== undefined && fileMetadata["metadata"]["filename"] !== undefined) {
+					setSelectedFilename(fileMetadata["metadata"]["filename"]);
+					setPaths([
+						{
+							"name":selectedDatasetName,
+							"id": selectedDatasetId,
+							"type":"dataset"
+						},
+						{
+							"name":fileMetadata["metadata"]["filename"],
+							"id": selectedFileId,
+							"type":"file"
+						}
+					]);
+				}
+			}
+		});
+	}, [selectedFileId])
+
 	const previous = () => {
 		let date = firstDataset["created"] !== undefined? new Date(firstDataset["created"]) : null;
 		if (date) listDatasets("b", date.toISOString(), limit);
@@ -111,19 +151,6 @@ export default function App(props) {
 		// load dataset information
 		listFilesInDataset(selectedDatasetId);
 		listDatasetAbout(selectedDatasetId);
-
-		// for breadcrumb
-		let datasetName = selectedDatasetId;
-		datasets.map(dataset =>{
-			if (dataset["id"] === selectedDatasetId) datasetName = dataset["name"];
-		});
-		setPaths([
-			{
-				"name":datasetName,
-				"id": selectedDatasetId,
-				"type":"dataset"
-			}
-		]);
 	}
 
 	const selectFile = (selectedFileId) => {
@@ -134,45 +161,12 @@ export default function App(props) {
 		listFileExtractedMetadata(selectedFileId);
 		listFileMetadataJsonld(selectedFileId);
 		listFilePreviews(selectedFileId);
-
-		// for breadcrumb
-		let datasetName = selectedDatasetId;
-		datasets.map(dataset =>{
-			if (dataset["id"] === selectedDatasetId) datasetName = dataset["name"];
-		});
-		let fileName = selectedFileId;
-		filesInDataset.map(file =>{
-			if (file["id"] === selectedFileId) fileName = file["filename"];
-		});
-
-		setPaths([
-			{
-				"name":datasetName,
-				"id": selectedDatasetId,
-				"type":"dataset"
-			},
-			{
-				"name":fileName,
-				"id": selectedFileId,
-				"type":"file"
-			}
-		]);
 	}
 
 	const goToPath = (pathType, id) => {
 		if (pathType === "dataset"){
-			setSelectedDatasetId(id);
+			selectDataset(id);
 			setSelectedFileId("");
-
-			let datasetName = id;
-			datasets.map((dataset)=>{ if (dataset["id"] === id) datasetName = dataset["name"]});
-			setPaths([
-				{
-					"name": datasetName,
-					"id": id,
-					"type":"dataset"
-				},
-			]);
 		}
 		else{
 			setSelectedDatasetId("");
@@ -189,14 +183,25 @@ export default function App(props) {
 				{
 					(() => {
 						if (selectedDatasetId === "") {
-							return <Dashboard datasets={datasets} selectDataset={selectDataset}
+							return <Dashboard datasets={datasets}
+											  selectDataset={selectDataset}
 											  thumbnails={datasetThumbnailList}
 											  previous={previous}
 											  next={next}
+											  datasetSchema={datasetSchema}
+											  deleteDataset={deleteDataset}
 							/>
 						} else if (selectedFileId === "") {
-							return <Dataset files={filesInDataset} selectFile={selectFile}
-											thumbnails={fileThumbnailList} about={datasetAbout}/>
+							return <Dataset files={filesInDataset}
+											selectFile={selectFile}
+											thumbnails={fileThumbnailList}
+											about={datasetAbout}
+											fileSchema={fileSchema}
+											selectedDatasetId = {selectedDatasetId}
+											selectDataset={selectDataset}
+											deleteDataset={deleteDataset}
+											deleteFile={deleteFile}
+							/>
 						} else {
 							return fileMetadataList.map((fileMetadata) => {
 								if (selectedFileId === fileMetadata["id"]) {

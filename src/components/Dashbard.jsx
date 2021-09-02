@@ -1,7 +1,13 @@
 import React, {useState} from "react";
 import {makeStyles} from "@material-ui/core/styles";
-import {AppBar, Box, Link, Divider, Grid, ListItem, Tab, Tabs, Typography, Button} from "@material-ui/core";
-import BusinessCenterIcon from '@material-ui/icons/BusinessCenter';
+import {AppBar, Box, Link, Dialog, DialogTitle, Grid, ListItem, Tab, Tabs, Typography, Button} from "@material-ui/core";
+import BusinessCenterIcon from "@material-ui/icons/BusinessCenter";
+import DeleteOutlineIcon from "@material-ui/icons/DeleteOutline";
+import StarBorderIcon from "@material-ui/icons/StarBorder";
+import CloudDownloadOutlinedIcon from "@material-ui/icons/CloudDownloadOutlined";
+
+import CreateDataset from "./childComponents/CreateDataset";
+import {downloadDataset} from "../utils/dataset";
 
 const useStyles = makeStyles((theme) => ({
 	appBar: {
@@ -15,36 +21,48 @@ const useStyles = makeStyles((theme) => ({
 		color: "#495057",
 		textTransform: "capitalize",
 	},
-	fileCard:{
+	fileCardOuterBox: {
+		position: "relative"
+	},
+	fileCard: {
 		background: "#FFFFFF",
 		border: "1px solid #DFDFDF",
 		boxSizing: "border-box",
 		borderRadius: "4px",
-		margin:"20px auto",
-		"& > .MuiGrid-item":{
-			padding:0,
-			height:"150px",
-		}
+		margin: "20px auto",
+		"& > .MuiGrid-item": {
+			padding: 0,
+			height: "150px",
+		},
 	},
-	fileCardImg:{
+	fileCardImg: {
 		height: "50%",
-		margin:"40px auto",
-		display:"block"
+		margin: "40px auto",
+		display: "block"
 	},
-	fileCardText:{
+	fileCardText: {
 		padding: "40px 20px",
-		fontSize:"16px",
-		fontWeight:"normal",
-		color:"#212529"
+		fontSize: "16px",
+		fontWeight: "normal",
+		color: "#212529"
 	},
+	fileCardActionBox: {
+		position: "absolute",
+		right: "5%",
+		top: "40px",
+	},
+	fileCardActionItem: {
+		display: "block"
+	}
 }));
 
 export default function Dashboard(props) {
 	const classes = useStyles();
 
-	const {datasets, selectDataset, thumbnails, previous, next, ...other} = props;
+	const {datasets, selectDataset, deleteDataset, thumbnails, previous, next, datasetSchema, ...other} = props;
 
 	const [selectedTabIndex, setSelectedTabIndex] = useState(0);
+	const [open, setOpen] = React.useState(false);
 
 	const handleTabChange = (event, newTabIndex) => {
 		setSelectedTabIndex(newTabIndex);
@@ -69,7 +87,7 @@ export default function Dashboard(props) {
 							datasets !== undefined && thumbnails !== undefined ?
 								datasets.map((dataset) => {
 									let thumbnailComp = <BusinessCenterIcon className={classes.fileCardImg}
-																		 style={{fontSize: "5em"}}/>;
+																			style={{fontSize: "5em"}}/>;
 									thumbnails.map((thumbnail) => {
 										if (dataset["id"] !== undefined && thumbnail["id"] !== undefined &&
 											thumbnail["thumbnail"] !== null && thumbnail["thumbnail"] !== undefined &&
@@ -79,80 +97,102 @@ export default function Dashboard(props) {
 										}
 									});
 									return (
-										<ListItem button className={classes.fileCard} key={dataset["id"]}
-												  onClick={() =>selectDataset(dataset["id"])}>
-											<Grid item xl={2} lg={2} md={2} sm={2} xs={12}>
-												{thumbnailComp}
-											</Grid>
-											<Grid item xl={10} lg={10} md={10} sm={10} xs={12}>
-												<Box className={classes.fileCardText}>
-													<Typography>Dataset name: {dataset["name"]}</Typography>
-													<Typography>Description: {dataset["description"]}</Typography>
-													<Typography>Created on: {dataset["created"]}</Typography>
+										<Box className={classes.fileCardOuterBox}>
+											<ListItem button className={classes.fileCard} key={dataset["id"]}
+													  onClick={() => selectDataset(dataset["id"])}>
+												<Grid item xl={2} lg={2} md={2} sm={2} xs={12}>
+													{thumbnailComp}
+												</Grid>
+												<Grid item xl={8} lg={8} md={8} sm={8} xs={12}>
+													<Box className={classes.fileCardText}>
+														<Typography>Dataset name: {dataset["name"]}</Typography>
+														<Typography>Description: {dataset["description"]}</Typography>
+														<Typography>Created on: {dataset["created"]}</Typography>
+													</Box>
+												</Grid>
+											</ListItem>
+											<Box className={classes.fileCardActionBox}>
+												<Box className={classes.fileCardActionItem}>
+													<Button startIcon={<DeleteOutlineIcon/>}
+															onClick={() => {deleteDataset(dataset["id"]);}}>
+														Delete</Button>
 												</Box>
-											</Grid>
-										</ListItem>
+												<Box className={classes.fileCardActionItem}>
+													<Button startIcon={<StarBorderIcon/>}>Follow</Button>
+												</Box>
+												<Box className={classes.fileCardActionItem}>
+													<Button startIcon={<CloudDownloadOutlinedIcon/>}
+															onClick={() => {downloadDataset(dataset["id"], dataset["name"]);}}>
+														Download</Button>
+												</Box>
+											</Box>
+										</Box>
 									);
 								})
-								:
-								<></>
-						}
-						<Button onClick={previous}>Prev</Button>
-						<Button onClick={next}>Next</Button>
-					</TabPanel>
-					<TabPanel value={selectedTabIndex} index={1}></TabPanel>
-					<TabPanel value={selectedTabIndex} index={2}></TabPanel>
-					<TabPanel value={selectedTabIndex} index={3}></TabPanel>
-					<TabPanel value={selectedTabIndex} index={4}></TabPanel>
-				</Grid>
-				<Grid item lg={4} md={4} xl={4} sm={4} xs={12}>
-					<Box className="actionCard">
-						<Typography className="title">Create your dataset</Typography>
-						<Typography className="content">Some quick example text to tell users why they should upload
+							:
+							<></>
+							}
+							<Button onClick={previous}>Prev</Button>
+							<Button onClick={next}>Next</Button>
+							</TabPanel>
+							<TabPanel value={selectedTabIndex} index={1}></TabPanel>
+							<TabPanel value={selectedTabIndex} index={2}></TabPanel>
+							<TabPanel value={selectedTabIndex} index={3}></TabPanel>
+							<TabPanel value={selectedTabIndex} index={4}></TabPanel>
+							</Grid>
+							<Grid item lg={4} md={4} xl={4} sm={4} xs={12}>
+							<Box className="actionCard">
+							<Typography className="title">Create your dataset</Typography>
+							<Typography className="content">Some quick example text to tell users why they should upload
 							their own data</Typography>
-						<Link href="" className="link">Create Dataset</Link>
-					</Box>
-					<Box className="actionCard">
-						<Typography className="title">Explore more dataset</Typography>
-						<Typography className="content">Some quick example text to tell users why they should follow
+							<Link className="link" onClick={()=>{setOpen(true);}}>Create Dataset</Link>
+							</Box>
+							<Box className="actionCard">
+							<Typography className="title">Explore more dataset</Typography>
+							<Typography className="content">Some quick example text to tell users why they should follow
 							more people</Typography>
-						<Link href="" className="link">Go to Explore</Link>
-					</Box>
-					<Box className="actionCard">
-						<Typography className="title">Want to learn more about Clowder?</Typography>
-						<Typography className="content">Some quick example text to tell users why they should read
+							<Link href="" className="link">Go to Explore</Link>
+							</Box>
+							<Box className="actionCard">
+							<Typography className="title">Want to learn more about Clowder?</Typography>
+							<Typography className="content">Some quick example text to tell users why they should read
 							the tutorial</Typography>
-						<Link href="" className="link">Show me Tutorial</Link>
-					</Box>
-				</Grid>
-			</Grid>
-		</div>
-	);
-}
+							<Link href="" className="link">Show me Tutorial</Link>
+							</Box>
+							</Grid>
+							</Grid>
+							<Dialog open={open} onClose={()=>{setOpen(false);}} fullWidth={true} aria-labelledby="create-dataset">
+							<DialogTitle id="form-dialog-title">Create New Dataset</DialogTitle>
+						{/*pass select to uploader so once upload succeeded, can jump to that dataset/file page*/}
+							<CreateDataset selectDataset={selectDataset} setOpen={setOpen}/>
+							</Dialog>
+							</div>
+							);
+						}
 
-function TabPanel(props) {
-	const {children, value, index, ...other} = props;
+						function TabPanel(props) {
+						const {children, value, index, ...other} = props;
 
-	return (
-		<div
-			role="tabpanel"
-			hidden={value !== index}
-			id={`dashboard-tabpanel-${index}`}
-			aria-labelledby={`dashboard-tab-${index}`}
-			{...other}
-		>
-			{value === index && (
-				<Box p={3}>
-					<Typography>{children}</Typography>
-				</Box>
-			)}
-		</div>
-	);
-}
+						return (
+						<div
+						role="tabpanel"
+						hidden={value !== index}
+						id={`dashboard-tabpanel-${index}`}
+						aria-labelledby={`dashboard-tab-${index}`}
+					{...other}
+						>
+					{value === index && (
+						<Box p={3}>
+						<Typography>{children}</Typography>
+						</Box>
+						)}
+						</div>
+						);
+					}
 
-function a11yProps(index) {
-	return {
-		id: `dashboard-tab-${index}`,
-		"aria-controls": `dashboard-tabpanel-${index}`,
-	};
-}
+						function a11yProps(index) {
+						return {
+						id: `dashboard-tab-${index}`,
+						"aria-controls": `dashboard-tabpanel-${index}`,
+					};
+					}

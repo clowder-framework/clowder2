@@ -81,3 +81,31 @@ export function fetchFilePreviews(id){
 		});
 	};
 }
+
+export const DELETE_FILE = "DELETE_FILE";
+export function deleteFile(fileId){
+	let url = `${config.hostname}/clowder/api/files/${fileId}?superAdmin=true`;
+	return (dispatch) => {
+		return fetch(url, {mode:"cors", method:"DELETE", headers: getHeader()})
+		.then((response) => {
+			if (response.status === 200) {
+				response.json().then(json =>{
+					dispatch({
+						type: DELETE_FILE,
+						file: {"id": fileId, "status": json["status"]===undefined?json["status"]:"success"},
+						receivedAt: Date.now(),
+					});
+				});
+			}
+			else {
+				response.json().then(json => {
+					dispatch({
+						type: DELETE_FILE,
+						file: {"id": null, "status": json["status"] === undefined ? json["status"] : "fail"},
+						receivedAt: Date.now(),
+					});
+				});
+			}
+		});
+	};
+}

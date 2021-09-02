@@ -1,32 +1,14 @@
-import {getHeader, dataURItoFile} from "./common";
+import {getHeader} from "./common";
 import config from "../app.config";
 
+export async function createDataset(formData) {
+	let endpoint = `${config.hostname}/clowder/api/datasets/createempty?superAdmin=true`;
 
-export async function fetchFileMetadata(id){
-	let url = `${config.hostname}/clowder/api/files/${id}/metadata?superAdmin=true`;
-	let response = await fetch(url, {mode:"cors", headers: getHeader()});
-	if (response.status  === 200){
-		return await response.json();
-	}
-	else if  (response.status  === 401){
-		// TODO handle error
-		return {};
-	}
-	else {
-		// TODO handle error
-		return {};
-	}
-}
-
-export async function uploadFile(formData, selectedDatasetId) {
-	let endpoint = `${config.hostname}/clowder/api/datasets/${selectedDatasetId}/files?superAdmin=true`;
 	let authHeader = getHeader();
-	let body = new FormData();
-	formData.map((item) =>{
-		if (item["file"] !== undefined){
-			body.append("file", dataURItoFile(item["file"]));
-		}
-	});
+	authHeader.append('Accept', 'application/json');
+	authHeader.append('Content-Type', 'application/json');
+
+	let body = JSON.stringify(formData);
 
 	let response = await fetch(endpoint, {
 		method: "POST",
@@ -37,7 +19,6 @@ export async function uploadFile(formData, selectedDatasetId) {
 
 	if (response.status === 200) {
 		// {id:xxx}
-		// {ids:[{id:xxx}, {id:xxx}]}
 		return response.json();
 	} else if (response.status === 401) {
 		// TODO handle error
@@ -48,12 +29,16 @@ export async function uploadFile(formData, selectedDatasetId) {
 	}
 }
 
-export async function downloadFile(fileId, filename=null){
+export async function downloadDataset(datasetId, filename=null){
 
-	if (!filename){
-		filename = `${fileId}.zip`;
+	if (filename){
+		filename = filename.replace(/\s+/g, "_");
+		filename = `${filename}.zip`;
 	}
-	let endpoint = `${config.hostname}/clowder/api/files/${fileId}/blob?superAdmin=true`;
+	else{
+		filename = `${datasetId}.zip`;
+	}
+	let endpoint = `${config.hostname}/clowder/api/datasets/${datasetId}/download?superAdmin=true`;
 	let response = await fetch(endpoint, {method: "GET", mode: "cors", headers: await getHeader()});
 
 	if (response.status === 200) {
