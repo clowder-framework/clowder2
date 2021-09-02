@@ -83,3 +83,31 @@ export function fetchDatasets(when, date, limit="5"){
 		});
 	};
 }
+
+export const DELETE_DATASET = "DELETE_DATASET";
+export function deleteDataset(datasetId){
+	let url = `${config.hostname}/clowder/api/datasets/${datasetId}?superAdmin=true`;
+	return (dispatch) => {
+		return fetch(url, {mode:"cors", method:"DELETE", headers: getHeader()})
+		.then((response) => {
+			if (response.status === 200) {
+				response.json().then(json =>{
+					dispatch({
+						type: DELETE_DATASET,
+						dataset: {"id": datasetId, "status": json["status"]===undefined?json["status"]:"success"},
+						receivedAt: Date.now(),
+					});
+				});
+			}
+			else {
+				response.json().then(json => {
+					dispatch({
+						type: DELETE_DATASET,
+						dataset: {"id": null, "status": json["status"] === undefined ? json["status"] : "fail"},
+						receivedAt: Date.now(),
+					});
+				});
+			}
+		});
+	};
+}

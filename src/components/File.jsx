@@ -31,18 +31,6 @@ export default function File(props) {
 	const [selectedTabIndex, setSelectedTabIndex] = useState(0);
 	const [previews, setPreviews] = useState([]);
 
-	// // component did mount
-	// useEffect(() => {
-	// 	// attach helper jquery
-	// 	const script = document.createElement("script");
-	// 	script.src = `../public/clowder/assets/javascripts/previewers/helper.js`;
-	// 	script.async = true;
-	// 	document.body.appendChild(script);
-	// 	return () => {
-	// 		document.body.removeChild(script);
-	// 	}
-	// }, []);
-
 	useEffect(() => {
 		(async () => {
 			if (filePreviews !== undefined && filePreviews.length > 0 && filePreviews[0].previews !== undefined) {
@@ -126,6 +114,8 @@ export default function File(props) {
 							fileMetadata !== undefined ?
 								<Box className="infoCard">
 									<Typography className="title">About</Typography>
+									<Typography
+										className="content">File ID: {fileMetadata["id"]}</Typography>
 									<Typography
 										className="content">Type: {fileMetadata["content-type"]}</Typography>
 									<Typography className="content">File

@@ -74,3 +74,12 @@ body {
 	color: #495057;
 	text-transform: capitalize;
 }
+
+.form-button-block{
+	width: 100%;
+	font-weight: 600;
+}
+
+.inputGroup{
+	margin: 20px auto;
+}

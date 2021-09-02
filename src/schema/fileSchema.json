@@ -1,0 +1,23 @@
+{
+  "schema": {
+	"type": "array",
+	"items": {
+	  "type": "object",
+	  "required": [
+		"file"
+	  ],
+	  "properties": {
+		"file": {
+		  "type": "string",
+		  "format": "data-url",
+		  "title": "Add Single File"
+		}
+	  }
+	}
+  },
+  "uiSchema": {
+	"ui:options":{
+	  "orderable":false
+	}
+  }
+}

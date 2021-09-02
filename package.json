@@ -29,6 +29,8 @@
 	"dependencies": {
 		"@material-ui/core": "^4.11.0",
 		"@material-ui/icons": "^4.9.1",
+		"@rjsf/core": "^2.5.1",
+		"@rjsf/material-ui": "^2.5.1",
 		"babel-polyfill": "^6.26.0",
 		"classnames": "^2.2.6",
 		"jquery": "^3.6.0",
