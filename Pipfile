@@ -7,6 +7,8 @@ name = "pypi"
 fastapi = "*"
 uvicorn = "*"
 motor = "*"
+mongoengine = "*"
+beanie = "*"
 
 [dev-packages]
 

@@ -24,10 +24,10 @@ def update_item(item_id: int, item: Item):
 
 @router.post("/items", response_description="Add a new item", response_model=Item)
 async def update_item(request: Request, item: Item = Body(...)):
-    item = jsonable_encoder(item)
-    item_status = await request.app.db["items"].insert_one(item)
+    parsed_item = jsonable_encoder(item)
+    item_status = await request.app.db["items"].insert_one(parsed_item)
     created = await request.app.db["items"].find_one({"_id": item_status.inserted_id})
-    return JSONResponse(status_code=status.HTTP_201_CREATED, content=created)
+    return JSONResponse(status_code=status.HTTP_201_CREATED, content=Item.from_mongo(created))
 
 
 @router.get("/items", response_description="List items", response_model=List[Item])

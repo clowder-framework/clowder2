@@ -21,4 +21,12 @@ class Item(BaseModel):
     class Config:
         allow_population_by_field_name = True
         arbitrary_types_allowed = True
-        json_encoders = {ObjectId: str}
+        json_encoders = {ObjectId: str, PyObjectId: lambda x: ObjectId(x), ObjectId: lambda oid: str(oid)}
+
+    @classmethod
+    def from_mongo(cls, data: dict):
+        """We must convert _id into "id". """
+        if not data:
+            return data
+        id = data.pop('_id', None)
+        return cls(**dict(data, id=id))
