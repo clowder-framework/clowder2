@@ -11,6 +11,12 @@ export MONGODB_URL="mongodb://localhost:27017"
 uvicorn app.main:app --reload
 ```
 
+## NOTES ON ROUTES
+
+1. Create a user with the POST /users endpoint in routes.users. Supply name and password
+2. Get token using the POST /login endpoint in main. This will provide Bearer Access token good for 120 minutes.
+3. Currently only the create dataset endpoint and the test /protected endpoing in main check for the token
+
 ## Mongo
 
 There are currently a few different ways of connecting to Mongo shown in this project.

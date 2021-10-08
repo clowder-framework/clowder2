@@ -9,6 +9,10 @@ uvicorn = "*"
 motor = "*"
 mongoengine = "*"
 beanie = "*"
+passlib = "*"
+jwt = "*"
+bcrypt = "*"
+pyjwt = "*"
 
 [dev-packages]
 
