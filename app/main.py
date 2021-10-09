@@ -56,8 +56,8 @@ async def shutdown_db_client():
     pass
 
 
-@app.post('/login')
-async def login(auth_details: AuthDetails):
+@app.post('/token')
+async def get_token(auth_details: AuthDetails):
     try:
         name = auth_details.name
         password = auth_details.password
