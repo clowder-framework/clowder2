@@ -2,8 +2,8 @@ import datetime
 
 from bson import ObjectId
 from bson.errors import InvalidId
-from pydantic import BaseModel, BaseConfig
-
+from pydantic import BaseModel, BaseConfig, Field
+from app.models.pyobjectid import PyObjectId
 
 class OID(str):
     @classmethod
@@ -23,6 +23,12 @@ class OID(str):
 
 
 class MongoModel(BaseModel):
+    id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
+
+    def __init__(self, **pydict):
+        super().__init__(**pydict)
+        self.id = pydict.pop('_id')
+
     class Config(BaseConfig):
         allow_population_by_field_name = True
         json_encoders = {
@@ -53,3 +59,11 @@ class MongoModel(BaseModel):
             parsed['_id'] = parsed.pop('id')
 
         return parsed
+
+
+# class MongoOut(MongoModel):
+#     # id: Optional[PyObjectId]
+#
+#     def __init__(self, **pydict):
+#         super().__init__(**pydict)
+#         self.id = pydict.pop('_id')
