@@ -1,10 +1,10 @@
-import os
 from typing import List
 
 from bson import ObjectId
 from fastapi import APIRouter, Request, HTTPException, Depends
+
 from app.models.datasets import Dataset
-from auth import AuthHandler
+from app.auth import AuthHandler
 
 router = APIRouter()
 

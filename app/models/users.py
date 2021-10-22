@@ -23,3 +23,8 @@ class User(MongoModel):
 
     def verify_password(self, password):
         return pwd_context.verify(password, self.hashed_password)
+
+
+class AuthDetails(BaseModel):
+    name: str
+    password: str

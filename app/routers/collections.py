@@ -1,9 +1,7 @@
-import os
 from typing import List
 
 from bson import ObjectId
-from fastapi import APIRouter, Request, HTTPException, Depends
-from mongoengine import connect
+from fastapi import APIRouter, HTTPException, Depends
 
 from app import dependencies
 from app.db import MongoClient

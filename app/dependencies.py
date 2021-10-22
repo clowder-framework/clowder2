@@ -1,9 +1,8 @@
 import os
+from typing import Generator
 
 import motor
 from fastapi import Header, HTTPException
-from app.db import MongoClient
-from typing import Generator
 
 
 async def get_token_header(x_token: str = Header(...)):
