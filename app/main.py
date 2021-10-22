@@ -2,7 +2,7 @@ import uvicorn
 from fastapi import Depends, FastAPI
 
 from app.dependencies import get_query_token
-from app.routers import users, datasets, collections, authentication
+from app.routers import users, datasets, collections, authentication, items
 
 # app = FastAPI(dependencies=[Depends(get_query_token)])
 
@@ -12,6 +12,7 @@ app.include_router(users.router)
 app.include_router(datasets.router)
 app.include_router(collections.router)
 app.include_router(authentication.router)
+app.include_router(items.router)
 
 
 @app.on_event("startup")
