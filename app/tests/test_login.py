@@ -29,9 +29,6 @@ def test_token():
     assert response.status_code == 200
     token = response.json().get("token")
     assert token is not None
-    headers = {'Authorization': 'Bearer ' + token}
+    headers = {"Authorization": "Bearer " + token}
     response = client.get("/protected", headers=headers)
     assert response.status_code == 200
-
-
-

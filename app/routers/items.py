@@ -27,12 +27,20 @@ async def update_item(request: Request, item: Item = Body(...)):
     parsed_item = jsonable_encoder(item)
     item_status = await request.app.db["items"].insert_one(parsed_item)
     created = await request.app.db["items"].find_one({"_id": item_status.inserted_id})
-    return JSONResponse(status_code=status.HTTP_201_CREATED, content=Item.from_mongo(created))
+    return JSONResponse(
+        status_code=status.HTTP_201_CREATED, content=Item.from_mongo(created)
+    )
 
 
 @router.get("/items", response_description="List items", response_model=List[Item])
 async def read_items(request: Request, skip: int = 0, limit: int = 2):
     tasks = []
-    for doc in await request.app.db["items"].find().skip(skip).limit(limit).to_list(length=limit):
+    for doc in (
+        await request.app.db["items"]
+        .find()
+        .skip(skip)
+        .limit(limit)
+        .to_list(length=limit)
+    ):
         tasks.append(doc)
     return tasks

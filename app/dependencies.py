@@ -17,6 +17,8 @@ async def get_query_token(token: str):
 
 
 async def get_db() -> Generator:
-    mongo_client = motor.motor_asyncio.AsyncIOMotorClient(os.getenv("MONGODB_URL", "mongodb://localhost:27017"))
+    mongo_client = motor.motor_asyncio.AsyncIOMotorClient(
+        os.getenv("MONGODB_URL", "mongodb://localhost:27017")
+    )
     db = mongo_client.clowder
     yield db

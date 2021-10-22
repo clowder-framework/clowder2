@@ -59,7 +59,7 @@ async def shutdown_db_client():
     pass
 
 
-@app.post('/login')
+@app.post("/login")
 async def login(request: Request, db: MongoClient = Depends(dependencies.get_db)):
     request_json = await request.json()
     name = request_json["name"]
@@ -67,34 +67,44 @@ async def login(request: Request, db: MongoClient = Depends(dependencies.get_db)
     authenticated_user = await authenticate_user(name, password, db)
     if authenticated_user is not None:
         token = auth_handler.encode_token(str(authenticated_user.id))
-        return {'token': token}
-    return {'token': "none"}
+        return {"token": token}
+    return {"token": "none"}
 
 
 @app.post("/signin")
-async def sign_in(auth_details: AuthDetails, db: MongoClient = Depends(dependencies.get_db)):
+async def sign_in(
+    auth_details: AuthDetails, db: MongoClient = Depends(dependencies.get_db)
+):
     name = auth_details.name
     password = auth_details.password
-    current_user = await authenticate_user(name, password,db)
+    current_user = await authenticate_user(name, password, db)
     return current_user
 
 
-@app.get('/unprotected')
+@app.get("/unprotected")
 def unprotected():
-    return { 'hello': 'world' }
+    return {"hello": "world"}
 
-@app.get('/protected')
-async def protected(userid=Depends(auth_handler.auth_wrapper), db: MongoClient = Depends(dependencies.get_db)):
+
+@app.get("/protected")
+async def protected(
+    userid=Depends(auth_handler.auth_wrapper),
+    db: MongoClient = Depends(dependencies.get_db),
+):
     result = await db["users"].find_one({"_id": ObjectId(userid)})
     user = User.from_mongo(result)
     name = user.name
-    return { 'name': name, 'id':userid}
+    return {"name": name, "id": userid}
 
-@app.post('/protected')
-async def protected(userid=Depends(auth_handler.auth_wrapper), db: MongoClient = Depends(dependencies.get_db)):
+
+@app.post("/protected")
+async def protected(
+    userid=Depends(auth_handler.auth_wrapper),
+    db: MongoClient = Depends(dependencies.get_db),
+):
     result = await db["users"].find_one({"_id": ObjectId(userid)})
     user = User.from_mongo(result)
-    return { 'name': user.name, 'id':userid, 'type':'post'}
+    return {"name": user.name, "id": userid, "type": "post"}
 
 
 @app.get("/")
