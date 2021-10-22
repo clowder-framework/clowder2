@@ -1,9 +1,8 @@
 import uvicorn
-from fastapi import Depends, FastAPI
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
-from app.dependencies import get_query_token
 from app.routers import users, datasets, collections, authentication, items
-
 
 # app = FastAPI(dependencies=[Depends(get_query_token)])
 
