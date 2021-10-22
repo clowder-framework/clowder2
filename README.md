@@ -26,6 +26,9 @@ There are currently a few different ways of connecting to Mongo shown in this pr
 3. Users use Motor directly as well, but a `OID` and `MongoModel`. This means that the pydantic objects have less boilderplate.
 4. `beanie_test.py` shows it the basic example from their documentation and it is not used in the routers yet.
 
+## Dev Environment Setup
+1. To install Black python code formatter so it runs everytime you save in an IDE see https://black.readthedocs.io/en/stable/integrations/editors.html
+
 # Notes
 
 Mongo ObjectId

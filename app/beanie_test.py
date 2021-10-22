@@ -12,7 +12,9 @@ class Category(BaseModel):
 class Product(Document):
     name: str  # You can use normal types just like in pydantic
     description: Optional[str] = None
-    price: Indexed(float)  # You can also specify that a field should correspond to an index
+    price: Indexed(
+        float
+    )  # You can also specify that a field should correspond to an index
     category: Category  # You can include pydantic models as well
 
 
@@ -24,7 +26,9 @@ async def example():
     # Init beanie with the Product document class
     await init_beanie(database=client.db_name, document_models=[Product])
 
-    chocolate = Category(name="Chocolate", description="A preparation of roasted and ground cacao seeds.")
+    chocolate = Category(
+        name="Chocolate", description="A preparation of roasted and ground cacao seeds."
+    )
     # Beanie documents work just like pydantic models
     tonybar = Product(name="Tony's", price=5.95, category=chocolate)
     # And can be inserted into the database
