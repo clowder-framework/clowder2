@@ -12,6 +12,10 @@
     
     uvicorn app.main:app --reload
     ```
+   
+Linting is managed using (Black)((https://black.readthedocs.io/en/stable/)). You can set up pycharm to automatically
+run it when you save a file using these [instructions](https://black.readthedocs.io/en/stable/integrations/editors.html).
+The repository includes an action to run Black on push and pull_request.
 
 ## NOTES ON ROUTES
 
