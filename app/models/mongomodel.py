@@ -27,7 +27,8 @@ class MongoModel(BaseModel):
 
     def __init__(self, **pydict):
         super().__init__(**pydict)
-        self.id = pydict.pop('_id')
+        if "_id" in pydict.keys():
+            self.id = pydict.pop('_id', None)
 
     class Config(BaseConfig):
         allow_population_by_field_name = True
