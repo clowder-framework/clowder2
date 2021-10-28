@@ -33,6 +33,7 @@ class ObjectIdStr(str):
             raise ValueError("Not a valid ObjectId")
         return str(v)
 
+
 #
 # class PydanticObjectId(ObjectId):
 #     """

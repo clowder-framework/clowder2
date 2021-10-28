@@ -10,7 +10,7 @@ from passlib.context import CryptContext
 from mongoengine import connect
 
 DATABASE_URI = "mongodb://127.0.0.1:27017"
-db=DATABASE_URI+"/clowder"
+db = DATABASE_URI + "/clowder"
 connect(host=db)
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -23,3 +23,8 @@ class User(MongoModel):
 
     def verify_password(self, password):
         return pwd_context.verify(password, self.hashed_password)
+
+
+class AuthDetails(BaseModel):
+    name: str
+    password: str

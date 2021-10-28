@@ -1,15 +1,21 @@
 # Clowder FastAPI Example
 
 ## Try out
-Run mongo: `docker run --name clowder-mongo-fastapi -p 27017:27017 -d mongo`
+1. Run mongo: `docker run --name clowder-mongo-fastapi -p 27017:27017 -d mongo`
 
-Run app:
-```bash
-# Configure the location of your MongoDB database:
-export MONGODB_URL="mongodb://localhost:27017"
+2. Install dependencies using [pipenv](https://github.com/pypa/pipenv).
 
-uvicorn app.main:app --reload
-```
+3. Run app (or setup run configuration in pycharm):
+    ```bash
+    # Configure the location of your MongoDB database:
+    export MONGODB_URL="mongodb://localhost:27017"
+    
+    uvicorn app.main:app --reload
+    ```
+   
+Linting is managed using (Black)((https://black.readthedocs.io/en/stable/)). You can set up pycharm to automatically
+run it when you save a file using these [instructions](https://black.readthedocs.io/en/stable/integrations/editors.html).
+The repository includes an action to run Black on push and pull_request.
 
 ## NOTES ON ROUTES
 
@@ -25,6 +31,9 @@ There are currently a few different ways of connecting to Mongo shown in this pr
 2. Items use Motor directly and the custom `PyObjectId`
 3. Users use Motor directly as well, but a `OID` and `MongoModel`. This means that the pydantic objects have less boilderplate.
 4. `beanie_test.py` shows it the basic example from their documentation and it is not used in the routers yet.
+
+## Dev Environment Setup
+1. To install Black python code formatter so it runs everytime you save in an IDE see https://black.readthedocs.io/en/stable/integrations/editors.html
 
 # Notes
 
