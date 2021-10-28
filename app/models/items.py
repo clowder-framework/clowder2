@@ -13,7 +13,6 @@ class NestedValue(BaseModel):
 
 
 class Item(MongoModel):
-    id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
     name: str
     price: float
     is_offer: Optional[bool] = None

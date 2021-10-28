@@ -23,7 +23,7 @@ class OID(str):
 
 
 class MongoModel(BaseModel):
-    id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
+    id: PyObjectId = Field(default_factory=PyObjectId)
 
     def __init__(self, **pydict):
         super().__init__(**pydict)
@@ -59,11 +59,3 @@ class MongoModel(BaseModel):
             parsed["_id"] = parsed.pop("id")
 
         return parsed
-
-
-# class MongoOut(MongoModel):
-#     # id: Optional[PyObjectId]
-#
-#     def __init__(self, **pydict):
-#         super().__init__(**pydict)
-#         self.id = pydict.pop('_id')
