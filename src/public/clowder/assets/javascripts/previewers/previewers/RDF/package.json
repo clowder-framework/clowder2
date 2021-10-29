@@ -1,5 +1,0 @@
-{ "name": "RDF",
-  "main": "some-library.js",
-  "preview": true,
-  "contentType": ["application/rdf+xml"]
-  }

@@ -1,6 +1,0 @@
-{ "name" : "dataset-image",
-  "main" : "dataset-image.js",
-  "contentType" : [],
-  "dataset" : false,
-  "supported_previews" : []
-}

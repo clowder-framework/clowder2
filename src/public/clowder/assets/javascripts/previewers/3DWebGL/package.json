@@ -1,5 +1,0 @@
-{ "name" : "3DWebGL",
-  "main" : "some-library.js",
-  "file": true,
-  "contentType" : ["model/obj"]
-  }
