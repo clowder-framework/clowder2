@@ -17,7 +17,6 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
 class User(MongoModel):
-    id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
     name: str = Field()
     hashed_password: str = Field()
 
