@@ -93,10 +93,8 @@ export default function Dataset(props) {
 
 	const {files, deleteFile, thumbnails, about, selectFile, selectedDatasetId, deleteDataset, selectDataset,
 		fileSchema, ...other} = props;
-
 	const [selectedTabIndex, setSelectedTabIndex] = useState(0);
 	const [open, setOpen] = React.useState(false);
-
 
 	const [anchorEl, setAnchorEl] = React.useState(null);
 

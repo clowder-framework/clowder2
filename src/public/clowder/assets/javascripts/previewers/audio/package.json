@@ -1,5 +1,0 @@
-{ "name": "Audio",
-  "main": "audio.js",
-  "preview": true,
-  "contentType": ["audio/mp3", "audio/mpeg", "audio/mpeg3"]
-}
