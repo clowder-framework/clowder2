@@ -14,7 +14,8 @@ console.log(`the current CLOWDER_REMOTE_HOSTNAME environment variable is ${  pro
 export default {
 	mode:"production",
 	resolve: {
-		extensions: [".js", ".jsx", ".json"]
+		modules:["node_modules", "src"],
+		extensions: [".js", ".jsx", ".json", ".ts", "tsx"]
 	},
 	devtool: "source-map", // more info:https://webpack.github.io/docs/build-performance.html#sourcemaps and https://webpack.github.io/docs/configuration.html#devtool
 	entry: [
@@ -85,7 +86,7 @@ export default {
 	],
 	module: {
 		rules: [
-			{test: /\.jsx?$/, exclude: /node_modules/, loaders:["babel-loader"]},
+			{test: /\.[tj]sx?$/, exclude: /node_modules/, loaders: ["babel-loader"]},
 			{test: /\.eot(\?v=\d+.\d+.\d+)?$/, loader: "url-loader?name=[name].[ext]"},
 			{
 				test: /\.woff(2)?(\?v=[0-9]\.[0-9]\.[0-9])?$/,
