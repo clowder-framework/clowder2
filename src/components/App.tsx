@@ -1,7 +1,6 @@
 import React, {useEffect, useState} from "react";
 import TopBar from "./childComponents/TopBar";
 import Breadcrumbs from "./childComponents/BreadCrumb";
-import {makeStyles} from "@material-ui/core/styles";
 import {fetchFileMetadata} from "../utils/file";
 import {downloadThumbnail} from "../utils/thumbnail";
 import Dashboard from "./Dashbard";
@@ -10,13 +9,30 @@ import File from "./File";
 import datasetSchema from "../schema/datasetSchema.json";
 import fileSchema from "../schema/fileSchema.json";
 
-const useStyles = makeStyles((theme) => ({}));
+type Props = {
+	listFileExtractedMetadata:,
+	fileExtractedMetadata:,
+	listFileMetadataJsonld:,
+	fileMetadataJsonld:,
+	listFilePreviews:,
+	filePreviews:,
 
-export default function App(props) {
-	const classes = useStyles();
+	//dataset
+	listFilesInDataset:,
+	filesInDataset:,
+	listDatasetAbout:,
+	datasetAbout:,
+	deleteFile:,
 
+	//dashboard
+	deleteDataset:,
+	listDatasets:,
+	datasets:,
+}
+
+const App = (props:Props) : JSX.Element => {
 	const [selectedFileId, setSelectedFileId] = useState("");
-	const [selectedFilename, setSelectedFilename] = useState("");
+	const [,setSelectedFilename] = useState("");
 	const [selectedDatasetId, setSelectedDatasetId] = useState("");
 	const [selectedDatasetName, setSelectedDatasetName] = useState("");
 	const [fileMetadataList, setFileMetadataList] = useState([]);
@@ -24,7 +40,7 @@ export default function App(props) {
 	const [datasetThumbnailList, setDatasetThumbnailList] = useState([]);
 	const [lastDataset, setLastDataset] = useState([]);
 	const [firstDataset, setFirstDataset] = useState([]);
-	const [limit, setLimit] = useState(5);
+	const [limit,] = useState(5);
 
 	const [paths, setPaths] = useState([]);
 
@@ -42,7 +58,6 @@ export default function App(props) {
 		//dashboard
 		deleteDataset, listDatasets, datasets,
 
-		...other
 	} = props;
 
 	// component did mount
@@ -220,7 +235,9 @@ export default function App(props) {
 						}
 					})()
 				}
-				</div>
+			</div>
 		</div>
 	);
 }
+
+export default App;

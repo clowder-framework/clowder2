@@ -3,7 +3,7 @@ import {DELETE_FILE} from "../actions/file";
 
 const defaultState = {files: [], about: {}, datasets: [], status: ""};
 
-const dataset = (state=defaultState, action) => {
+const dataset = (state:DataState=defaultState, action: DataAction) => {
 	switch(action.type) {
 		case RECEIVE_FILES_IN_DATASET:
 			return Object.assign({}, state, {files: action.files});
@@ -11,7 +11,7 @@ const dataset = (state=defaultState, action) => {
 			return Object.assign({}, state, {
 				files: state.files.filter(file => file.id !== action.file.id),
 				status: action.file.status
-			})	
+			})
 		case RECEIVE_DATASET_ABOUT:
 			return Object.assign({}, state, {about: action.about});
 		case RECEIVE_DATASETS:
