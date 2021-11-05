@@ -3,9 +3,9 @@ import {Route, Switch} from "react-router-dom";
 
 import App from "./containers/App";
 
-
-export default (
+const Routes = (
 	<Switch>
 		<Route exact path="/" render={() => {return (<App/>);}}/>
-	</Switch>
-);
+	</Switch>);
+
+export default Routes;

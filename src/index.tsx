@@ -18,7 +18,7 @@ const theme = createTheme({
 		fontFamily: "'Open Sans', sans-serif"
 	},
 	palette:{
-		fontFamily: "'Open Sans', sans-serif"
+		// fontFamily: "'Open Sans', sans-serif"
 	}
 
 });
