@@ -8,10 +8,37 @@ import Dataset from "./Dataset";
 import File from "./File";
 import datasetSchema from "../schema/datasetSchema.json";
 import fileSchema from "../schema/fileSchema.json";
-import {PropsFromRedux} from "../containers/App";
 
+import {Dataset as DatasetType,
+	About as AboutType,
+	File as FileType,
+	ExtractedMetadata,
+	MetadataJsonld, Preview} from "../types/data";
+import {DataAction} from "../types/action";
 
-const App = (props: PropsFromRedux) : JSX.Element => {
+type Props = {
+	// files
+	listFileExtractedMetadata: DataAction,
+	fileExtractedMetadata: ExtractedMetadata,
+	listFileMetadataJsonld: DataAction,
+	fileMetadataJsonld: MetadataJsonld[],
+	listFilePreviews: DataAction,
+	filePreviews: Preview[],
+
+	//dataset
+	listFilesInDataset:DataAction,
+	filesInDataset: FileType[],
+	listDatasetAbout: DataAction,
+	datasetAbout: AboutType,
+	deleteFile: DataAction,
+
+	//dashboard
+	deleteDataset: DataAction,
+	listDatasets: DataAction,
+	datasets: DatasetType[],
+};
+
+export const App: React.FC<Props> = props  => {
 	const [selectedFileId, setSelectedFileId] = useState("");
 	const [,setSelectedFilename] = useState("");
 	const [selectedDatasetId, setSelectedDatasetId] = useState("");
@@ -220,5 +247,3 @@ const App = (props: PropsFromRedux) : JSX.Element => {
 		</div>
 	);
 }
-
-export default App;

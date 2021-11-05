@@ -1,4 +1,4 @@
-interface Dataset {
+export interface Dataset {
 	id:string;
 	name: string;
 	description: string;
@@ -6,7 +6,7 @@ interface Dataset {
 	status: string;
 }
 
-interface File {
+export interface File {
 	id: string;
 	filename: string;
 	size: number;
@@ -15,7 +15,7 @@ interface File {
 	status:string;
 }
 
-interface about {
+export interface About {
 	name: string;
 	id: string;
 	authorId: string;
@@ -24,7 +24,7 @@ interface about {
 	thumbnail: string;
 }
 
-interface MetadataJsonld {
+export interface MetadataJsonld {
 	id: string;
 	"content-type": string;
 	size:number;
@@ -34,11 +34,11 @@ interface MetadataJsonld {
 	status: string;
 }
 
-interface Preview{
+export interface Preview{
 	previews: filePreview[];
 }
 
-interface filePreview{
+export interface filePreview{
 	"p_id": string;
 	"pv_route": string;
 	"pv_id": string;
@@ -46,10 +46,14 @@ interface filePreview{
 	"pv_contenttype": string;
 }
 
-interface DataState {
+export interface ExtractedMetadata{
+
+}
+
+export interface DataState {
 	metadataJsonld: MetadataJsonld[];
 	previews: Preview[];
-	about: about;
+	about: About;
 	files: File[];
 	datasets: Dataset[];
 	status: string;

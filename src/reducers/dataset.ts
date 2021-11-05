@@ -1,6 +1,6 @@
 import {RECEIVE_FILES_IN_DATASET, RECEIVE_DATASET_ABOUT, RECEIVE_DATASETS, DELETE_DATASET} from "../actions/dataset";
 import {DELETE_FILE} from "../actions/file";
-import {DataAction} from "../types/action.d";
+import {DataAction} from "../types/action";
 
 const defaultState = {
 	files: [{id:""}],

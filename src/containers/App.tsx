@@ -1,5 +1,5 @@
-import {connect, ConnectedProps} from "react-redux";
-import AppComponent from "../components/App.tsx";
+import {connect} from "react-redux";
+import {App as AppComponent} from "../components/App";
 import {
 	deleteFile,
 	fetchFileExtractedMetadata,
@@ -58,6 +58,6 @@ const mapDispatchToProps = (dispatch: AppDispatch) => {
 
 const App = connect(mapStateToProps, mapDispatchToProps)(AppComponent);
 
-export type PropsFromRedux = ConnectedProps<typeof App>;
+// export type PropsFromRedux = ConnectedProps<typeof App>;
 
 export default App;
