@@ -21,7 +21,7 @@ async def save_dataset(
 ):
     res = await db["users"].find_one({"_id": ObjectId(user_id)})
     request_json = await request.json()
-    request_json["creator"] = res["_id"]
+    request_json["author"] = res["_id"]
     res = await db["datasets"].insert_one(request_json)
     found = await db["datasets"].find_one({"_id": res.inserted_id})
     return Dataset.from_mongo(found)
@@ -39,7 +39,7 @@ async def get_datasets(
     if mine:
         for doc in (
             await db["datasets"]
-            .find({"creator": ObjectId(user_id)})
+            .find({"author": ObjectId(user_id)})
             .skip(skip)
             .limit(limit)
             .to_list(length=limit)
