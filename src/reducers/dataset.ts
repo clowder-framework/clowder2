@@ -1,9 +1,13 @@
 import {RECEIVE_FILES_IN_DATASET, RECEIVE_DATASET_ABOUT, RECEIVE_DATASETS, DELETE_DATASET} from "../actions/dataset";
 import {DELETE_FILE} from "../actions/file";
+import {DataAction} from "../types/action";
 
-const defaultState = {files: [], about: {}, datasets: [], status: ""};
+const defaultState = {
+	files: [{id:""}],
+	datasets: [{id:""}]
+};
 
-const dataset = (state:DataState=defaultState, action: DataAction) => {
+const dataset = (state=defaultState, action: DataAction) => {
 	switch(action.type) {
 		case RECEIVE_FILES_IN_DATASET:
 			return Object.assign({}, state, {files: action.files});

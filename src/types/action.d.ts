@@ -1,3 +1,5 @@
+import {RECEIVE_FILE_METADATA_JSONLD, RECEIVE_PREVIEWS} from "../actions/file";
+
 interface RECEIVE_FILES_IN_DATASET {
 	type: "RECEIVE_FILES_IN_DATASET";
 	files: File[];
@@ -10,7 +12,7 @@ interface DELETE_FILE {
 
 interface RECEIVE_DATASET_ABOUT{
 	type: "RECEIVE_DATASET_ABOUT";
-	about: ;
+	about: about;
 }
 
 interface RECEIVE_DATASETS{
@@ -20,9 +22,23 @@ interface RECEIVE_DATASETS{
 
 interface DELETE_DATASET{
 	type: "DELETE_DATASET";
-	dataset:;
+	dataset: Dataset;
 }
 
+interface RECEIVE_FILE_EXTRACTED_METADATA{
+	type: "RECEIVE_FILE_EXTRACTED_METADATA";
+	extractedMetadata:ExtractedMetadata;
+}
+
+interface RECEIVE_FILE_METADATA_JSONLD{
+	type:"RECEIVE_FILE_METADATA_JSONLD";
+	metadataJsonld: MetadataJsonld[];
+}
+
+interface RECEIVE_PREVIEWS{
+	type:"RECEIVE_PREVIEWS";
+	previews: Preview[];
+}
 
 type DataAction =
 	| RECEIVE_FILES_IN_DATASET
@@ -30,4 +46,7 @@ type DataAction =
 	| RECEIVE_DATASET_ABOUT
 	| RECEIVE_DATASETS
 	| DELETE_DATASET
+	| RECEIVE_FILE_EXTRACTED_METADATA
+	| RECEIVE_FILE_METADATA_JSONLD
+	| RECEIVE_PREVIEWS
 	;
