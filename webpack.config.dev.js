@@ -11,7 +11,7 @@ export default {
 	mode:"development",
 	resolve: {
 		modules:["node_modules", "src"],
-		extensions: [".js", ".jsx", ".json", ".ts", "tsx"]
+		extensions: [".js", ".jsx", ".json", ".ts", ".tsx"]
 	},
 	devtool: "source-map",
 	entry: [
@@ -19,7 +19,7 @@ export default {
 		"whatwg-fetch",
 		"./src/webpack-public-path",
 		"webpack-hot-middleware/client?reload=true",
-		path.resolve(__dirname, "src/index.js"),
+		path.resolve(__dirname, "src/index.tsx"),
 		// "ol/ol.css",
 		// "ol-layerswitcher/src/ol-layerswitcher.css",
 	],

@@ -1,5 +1,5 @@
 import { RECEIVE_FILE_EXTRACTED_METADATA, RECEIVE_FILE_METADATA_JSONLD, RECEIVE_PREVIEWS } from "../actions/file";
-import {DataAction} from "../types/action";
+import {DataAction} from "../types/action.d";
 
 const defaultState = {metadata: {}, extractedMetadata: {}, metadataJsonld: [], previews: []};
 

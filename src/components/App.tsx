@@ -9,7 +9,7 @@ import File from "./File";
 import datasetSchema from "../schema/datasetSchema.json";
 import fileSchema from "../schema/fileSchema.json";
 
-type Props = {
+interface Props = {
 	listFileExtractedMetadata:,
 	fileExtractedMetadata:,
 	listFileMetadataJsonld:,
@@ -30,7 +30,7 @@ type Props = {
 	datasets:,
 }
 
-const App = (props:Props) : JSX.Element => {
+const App = () : JSX.Element => {
 	const [selectedFileId, setSelectedFileId] = useState("");
 	const [,setSelectedFilename] = useState("");
 	const [selectedDatasetId, setSelectedDatasetId] = useState("");

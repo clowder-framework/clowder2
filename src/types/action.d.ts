@@ -1,5 +1,3 @@
-import {RECEIVE_FILE_METADATA_JSONLD, RECEIVE_PREVIEWS} from "../actions/file";
-
 interface RECEIVE_FILES_IN_DATASET {
 	type: "RECEIVE_FILES_IN_DATASET";
 	files: File[];
