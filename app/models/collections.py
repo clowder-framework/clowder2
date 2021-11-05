@@ -8,7 +8,6 @@ from app.models.mongomodel import OID, MongoModel
 
 
 class Collection(MongoModel):
-    id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
     name: str
     description: str = ""
 
