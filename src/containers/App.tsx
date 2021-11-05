@@ -1,4 +1,4 @@
-import {connect} from "react-redux";
+import {connect, ConnectedProps} from "react-redux";
 import AppComponent from "../components/App.tsx";
 import {
 	deleteFile,
@@ -13,8 +13,9 @@ import {
 	fetchDatasets,
 	deleteDataset
 } from "../actions/dataset";
+import {AppDispatch, RootState} from "../index";
 
-const mapStateToProps = (state) => {
+const mapStateToProps = (state: RootState) => {
 	return {
 		fileExtractedMetadata: state.file.extractedMetadata,
 		fileMetadataJsonld: state.file.metadataJsonld,
@@ -26,35 +27,37 @@ const mapStateToProps = (state) => {
 	};
 };
 
-const mapDispatchToProps = (dispatch) => {
+const mapDispatchToProps = (dispatch: AppDispatch) => {
 	return {
-		listFileExtractedMetadata: (fileId) => {
+		listFileExtractedMetadata: (fileId:string) => {
 			dispatch(fetchFileExtractedMetadata(fileId));
 		},
-		listFileMetadataJsonld: (fileId) => {
+		listFileMetadataJsonld: (fileId:string) => {
 			dispatch(fetchFileMetadataJsonld(fileId));
 		},
-		listFilePreviews: (fileId) => {
+		listFilePreviews: (fileId:string) => {
 			dispatch(fetchFilePreviews(fileId));
 		},
-		listFilesInDataset: (datasetId) => {
+		listFilesInDataset: (datasetId:string) => {
 			dispatch(fetchFilesInDataset(datasetId));
 		},
-		deleteFile: (fileId) => {
+		deleteFile: (fileId:string) => {
 			dispatch(deleteFile(fileId));
 		},
-		listDatasetAbout: (datasetId) => {
+		listDatasetAbout: (datasetId:string) => {
 			dispatch(fetchDatasetAbout(datasetId));
 		},
-		listDatasets: (when, date, limit) =>{
+		listDatasets: (when:string, date:string, limit:string) =>{
 			dispatch(fetchDatasets(when, date, limit));
 		},
-		deleteDataset: (datasetId) => {
+		deleteDataset: (datasetId:string) => {
 			dispatch(deleteDataset(datasetId));
 		}
 	};
 };
 
 const App = connect(mapStateToProps, mapDispatchToProps)(AppComponent);
+
+export type PropsFromRedux = ConnectedProps<typeof App>;
 
 export default App;

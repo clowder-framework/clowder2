@@ -8,29 +8,10 @@ import Dataset from "./Dataset";
 import File from "./File";
 import datasetSchema from "../schema/datasetSchema.json";
 import fileSchema from "../schema/fileSchema.json";
+import {PropsFromRedux} from "../containers/App";
 
-interface Props = {
-	listFileExtractedMetadata:,
-	fileExtractedMetadata:,
-	listFileMetadataJsonld:,
-	fileMetadataJsonld:,
-	listFilePreviews:,
-	filePreviews:,
 
-	//dataset
-	listFilesInDataset:,
-	filesInDataset:,
-	listDatasetAbout:,
-	datasetAbout:,
-	deleteFile:,
-
-	//dashboard
-	deleteDataset:,
-	listDatasets:,
-	datasets:,
-}
-
-const App = () : JSX.Element => {
+const App = (props: PropsFromRedux) : JSX.Element => {
 	const [selectedFileId, setSelectedFileId] = useState("");
 	const [,setSelectedFilename] = useState("");
 	const [selectedDatasetId, setSelectedDatasetId] = useState("");
