@@ -1,7 +1,6 @@
 import os
 import io
-import tempfile
-from typing import List
+from typing import List, Optional
 
 from bson import ObjectId
 from fastapi import (
@@ -36,10 +35,10 @@ async def save_file(
     db: MongoClient = Depends(dependencies.get_db),
     fs: Minio = Depends(dependencies.get_fs),
     file: UploadFile = File(...),
-    file_info: Json[ClowderFile] = Form(...),
+    file_info: Optional[Json[ClowderFile]] = None,
 ):
     # First, add to database and get unique ID
-    f = dict(file_info)
+    f = dict(file_info) if file_info is not None else {}
     user = await db["users"].find_one({"_id": ObjectId(user_id)})
     f["name"] = file.filename
     f["creator"] = user["_id"]
