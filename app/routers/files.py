@@ -1,4 +1,5 @@
 import os
+import io
 from typing import List
 
 from bson import ObjectId
@@ -33,26 +34,32 @@ async def save_file(
     db: MongoClient = Depends(dependencies.get_db),
     fs: Minio = Depends(dependencies.get_fs),
     file: UploadFile = File(...),
-    fileinfo: Json[ClowderFile] = Form(...),
+    file_info: Json[ClowderFile] = Form(...),
 ):
-    # First, deal with database and get unique ID
-    res = await db["users"].find_one({"_id": ObjectId(user_id)})
-    f = dict(fileinfo)
-    f["creator"] = res["_id"]
-    f["name"] = (
-        f["name"] if (len(f["name"]) > 0 and f["name"] != "_NA_") else file.filename
-    )
-    res = await db["files"].insert_one(f)
-    found = await db["files"].find_one({"_id": res.inserted_id})
+    # First, add to database and get unique ID
+    f = dict(file_info)
+    user = await db["users"].find_one({"_id": ObjectId(user_id)})
+    f["name"] = file.filename
+    f["creator"] = user["_id"]
+    new_file = await db["files"].insert_one(f)
+    found = await db["files"].find_one({"_id": new_file.inserted_id})
 
     # Second, use unique ID as key for file storage
-    fs.put_object(
-        clowder_bucket,
-        str(res.inserted_id),
-        file.file,
-        length=-1,
-        part_size=upload_chunk_size,  # TODO: incorrect
-    )  # async write chunk to minio
+    # fs.put_object(
+    #     clowder_bucket,
+    #     str(new_file.inserted_id),
+    #     file.file,
+    #     length=-1,
+    #     part_size=upload_chunk_size,  # TODO: incorrect
+    # )
+    while content := file.file.read(upload_chunk_size):  # async read chunk
+        fs.put_object(
+            clowder_bucket,
+            str(new_file.inserted_id),
+            io.BytesIO(content),
+            length=-1,
+            part_size=upload_chunk_size,
+        )  # async write chunk to minio
 
     return ClowderFile.from_mongo(found)
 
