@@ -8,7 +8,6 @@ from app.models.mongomodel import OID, MongoModel
 
 
 class ClowderFile(MongoModel):
-    id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
     creator: PyObjectId = PyObjectId("000000000000000000000000")
     name: str = "_NA_"
     views: int = 0
