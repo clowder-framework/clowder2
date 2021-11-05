@@ -1,5 +1,6 @@
 import os
 import io
+import tempfile
 from typing import List
 
 from bson import ObjectId
@@ -12,6 +13,7 @@ from fastapi import (
     File,
     UploadFile,
 )
+from fastapi.responses import FileResponse
 from pydantic import Json
 from pymongo import MongoClient
 from minio import Minio
@@ -45,13 +47,6 @@ async def save_file(
     found = await db["files"].find_one({"_id": new_file.inserted_id})
 
     # Second, use unique ID as key for file storage
-    # fs.put_object(
-    #     clowder_bucket,
-    #     str(new_file.inserted_id),
-    #     file.file,
-    #     length=-1,
-    #     part_size=upload_chunk_size,  # TODO: incorrect
-    # )
     while content := file.file.read(upload_chunk_size):  # async read chunk
         fs.put_object(
             clowder_bucket,
@@ -65,7 +60,27 @@ async def save_file(
 
 
 @router.get("/files/{file_id}")
-async def get_file(file_id: str, db: MongoClient = Depends(dependencies.get_db)):
+async def download_file(
+    file_id: str,
+    user_id=Depends(auth_handler.auth_wrapper),
+    db: MongoClient = Depends(dependencies.get_db),
+    fs: Minio = Depends(dependencies.get_fs),
+):
+    # If file exists in MongoDB, download from Minio
     if (file := await db["files"].find_one({"_id": ObjectId(file_id)})) is not None:
-        return File.from_mongo(file)
+        temp_path = "/tmp/%s" % file["name"]
+        file_data = fs.fget_object(clowder_bucket, file_id, temp_path)
+        return FileResponse(
+            path=temp_path,
+            filename=file["name"],
+            media_type=file_data.content_type,
+        )
+
+
+@router.get("/files/{file_id}/summary")
+async def get_file_summary(
+    file_id: str, db: MongoClient = Depends(dependencies.get_db)
+):
+    if (file := await db["files"].find_one({"_id": ObjectId(file_id)})) is not None:
+        return ClowderFile.from_mongo(file)
     raise HTTPException(status_code=404, detail=f"File {file_id} not found")
