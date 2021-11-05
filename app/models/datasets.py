@@ -6,6 +6,7 @@ from bson import ObjectId
 from mongoengine import Document, StringField, IntField, DynamicDocument, ListField, connect
 from pydantic import BaseModel, Field
 from app.models.pyobjectid import PyObjectId
+from fastapi.encoders import jsonable_encoder
 from app.models.mongomodel import OID, MongoModel
 
 class AutoName(Enum):
