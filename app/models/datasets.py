@@ -1,11 +1,22 @@
 import datetime
 from typing import Optional, List
+from enum import Enum, auto
 import os
 from bson import ObjectId
 from mongoengine import Document, StringField, IntField, DynamicDocument, ListField, connect
 from pydantic import BaseModel, Field
 from app.models.pyobjectid import PyObjectId
 from app.models.mongomodel import OID, MongoModel
+
+class AutoName(Enum):
+    def _generate_next_value_(name, start, count, last_values):
+        return name
+
+class DatasetStatus(AutoName):
+    PRIVATE = auto()
+    PUBLIC = auto()
+    DEFALT = auto()
+    TRIAL = auto()
 
 
 class Dataset(MongoModel):
@@ -27,7 +38,7 @@ class Dataset(MongoModel):
     dateMovedToTrash: datetime.datetime = None
     followers: List[PyObjectId] = []
     stats: str = ""
-    status: str = "PRIVATE"
+    status: str = DatasetStatus.PRIVATE.name
     creators: List[PyObjectId] = []
     views: int = 0
     downloads: int = 0
