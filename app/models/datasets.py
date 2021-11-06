@@ -1,12 +1,9 @@
-from datetime import datetime, date
-from typing import Optional, List
+from datetime import datetime
+from typing import List
 from enum import Enum, auto
-import os
-from bson import ObjectId
-from mongoengine import Document, StringField, IntField, DynamicDocument, ListField, connect
-from pydantic import BaseModel, Field
+from mongoengine import DynamicDocument
+from pydantic import Field
 from app.models.pyobjectid import PyObjectId
-from fastapi.encoders import jsonable_encoder
 from app.models.mongomodel import OID, MongoModel
 
 class AutoName(Enum):
