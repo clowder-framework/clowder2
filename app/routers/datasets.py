@@ -81,10 +81,8 @@ async def edit_dataset( request: Request, dataset_id: str, db: MongoClient = Dep
     ) is not None:
         try:
             request_json["_id"] = dataset_id
-            new_lastModifiedDate = datetime.datetime.utcnow()
-            request_json["lastModifiedDate"] = new_lastModifiedDate
+            request_json["lastModifiedDate"] = datetime.datetime.utcnow()
             edited_dataset = Dataset.from_mongo(request_json)
-
             db["datasets"].replace_one({"_id": ObjectId(dataset_id)}, edited_dataset)
         except Exception as e:
             print(e)
