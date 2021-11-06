@@ -72,17 +72,24 @@ async def get_dataset(dataset_id: str, db: MongoClient = Depends(dependencies.ge
     raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
 
 @router.post("/datasets/edit/{dataset_id}")
-async def edit_dataset(dataset_id: str, db: MongoClient = Depends(dependencies.get_db)):
+async def edit_dataset( request: Request, dataset_id: str, db: MongoClient = Depends(dependencies.get_db)):
+    request_json = await request.json()
     if (
         dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
+
     ) is not None:
+        try:
+            edited_dataset = Dataset.from_mongo(request_json)
+            db["datasets"].replace_one({"_id": ObjectId(dataset_id)}, edited_dataset)
+        except Exception as e:
+            print(e)
         return Dataset.from_mongo(dataset)
     raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
 
 @router.delete("/datasets/delete/{dataset_id}")
 async def delete_dataset(dataset_id: str, db: MongoClient = Depends(dependencies.get_db)):
     if (
-        dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
+        dataset := await db["datasets"].delete_one({"_id": ObjectId(dataset_id)})
     ) is not None:
-        return Dataset.from_mongo(dataset)
+        return {"status":"deleted"}
     raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
