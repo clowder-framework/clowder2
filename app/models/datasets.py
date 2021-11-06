@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime, date
 from typing import Optional, List
 from enum import Enum, auto
 import os
@@ -24,7 +24,7 @@ class Dataset(MongoModel):
     name: str = "N/A"
     author: PyObjectId
     description: str = "N/A"
-    created: datetime.datetime = datetime.datetime.now()
+    created: datetime = Field(default_factory=datetime.utcnow)
     files: List[PyObjectId] = []
     folders: List[PyObjectId] = []
     stream_id: List[PyObjectId] = []
@@ -34,15 +34,17 @@ class Dataset(MongoModel):
     thumbnail_id: str = None
     licenseData: str = ""
     spaces: List[PyObjectId] = []
-    lastModifiedDate: datetime.date = datetime.date.today()
+    lastModifiedDate: datetime = Field(default_factory=datetime.utcnow)
     trash: bool = False
-    dateMovedToTrash: datetime.datetime = None
+    dateMovedToTrash: datetime = None
     followers: List[PyObjectId] = []
     stats: str = ""
     status: str = DatasetStatus.PRIVATE.name
     creators: List[PyObjectId] = []
     views: int = 0
     downloads: int = 0
+
+
 
 
 # class MongoDataset(Document):

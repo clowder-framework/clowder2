@@ -1,5 +1,4 @@
-import datetime
-
+from datetime import datetime
 from bson import ObjectId
 from bson.errors import InvalidId
 from pydantic import BaseModel, BaseConfig, Field
