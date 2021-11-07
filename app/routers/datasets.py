@@ -95,5 +95,5 @@ async def delete_dataset(dataset_id: str, db: MongoClient = Depends(dependencies
         dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
     ) is not None:
         res = await db["datasets"].delete_one({"_id": ObjectId(dataset_id)})
-        return {"status":"deleted"}
+        return {"status": "deleted"}
     raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
