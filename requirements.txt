@@ -1,0 +1,14 @@
+fastapi
+uvicorn
+motor
+mongoengine
+beanie
+passlib
+jwt
+bcrypt
+pyjwt
+black
+requests
+pytest
+minio
+python-multipart
