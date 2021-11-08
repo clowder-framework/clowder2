@@ -9,49 +9,31 @@ import File from "./File";
 import datasetSchema from "../schema/datasetSchema.json";
 import fileSchema from "../schema/fileSchema.json";
 
-import {Dataset as DatasetType,
-	About as AboutType,
-	File as FileType,
-	ExtractedMetadata,
-	MetadataJsonld, Preview} from "../types/data";
-import {DataAction} from "../types/action";
-import {useDispatch} from "react-redux";
-import {deleteFile, fetchFileExtractedMetadata, fetchFileMetadataJsonld, fetchFilePreviews} from "../actions/file";
-import {deleteDataset, fetchDatasetAbout, fetchDatasets, fetchFilesInDataset} from "../actions/dataset";
+import {useDispatch, useSelector} from "react-redux";
+import {fileDeleted, fetchFileExtractedMetadata, fetchFileMetadataJsonld, fetchFilePreviews} from "../actions/file";
+import {datasetDeleted, fetchDatasetAbout, fetchDatasets, fetchFilesInDataset} from "../actions/dataset";
 
-type Props = {
-	// files
-	listFileExtractedMetadata: DataAction,
-	fileExtractedMetadata: ExtractedMetadata,
-	listFileMetadataJsonld: DataAction,
-	fileMetadataJsonld: MetadataJsonld[],
-	listFilePreviews: DataAction,
-	filePreviews: Preview[],
-
-	//dataset
-	listFilesInDataset:DataAction,
-	filesInDataset: FileType[],
-	listDatasetAbout: DataAction,
-	datasetAbout: AboutType,
-	deleteFile: DataAction,
-
-	//dashboard
-	deleteDataset: DataAction,
-	listDatasets: DataAction,
-	datasets: DatasetType[],
-};
 
 export function App(): JSX.Element {
+
+	// props
 	const dispatch = useDispatch();
 
 	const listFileExtractedMetadata = (fileId:string) => dispatch(fetchFileExtractedMetadata(fileId));
 	const listFileMetadataJsonld = (fileId:string) => dispatch(fetchFileMetadataJsonld(fileId));
 	const listFilePreviews = (fileId:string) => dispatch(fetchFilePreviews(fileId));
-	const listFilesInDataset = datasetId:string) => dispatch(fetchFilesInDataset(datasetId));
-	const deleteFile = (fileId:string) => dispatch(deleteFile(fileId));
+	const listFilesInDataset = (datasetId:string) => dispatch(fetchFilesInDataset(datasetId));
+	const deleteFile = (fileId:string) => dispatch(fileDeleted(fileId));
 	const listDatasetAbout= (datasetId:string) => dispatch(fetchDatasetAbout(datasetId));
 	const listDatasets = (when:string, date:string, limit:string) => dispatch(fetchDatasets(when, date, limit));
-	const deleteDataset= (datasetId:string) => dispatch(deleteDataset(datasetId));
+	const deleteDataset= (datasetId:string) => dispatch(datasetDeleted(datasetId));
+
+	const fileExtractedMetadata = useSelector(state =>  state.file.extractedMetadata);
+	const fileMetadataJsonld = useSelector(state => state.file.metadataJsonld);
+	const filePreviews = useSelector(state => state.file.previews);
+	const filesInDataset = useSelector(state => state.dataset.files);
+	const datasetAbout = useSelector(state => state.dataset.about);
+	const datasets = useSelector(state => state.dataset.datasets);
 
 	const [selectedFileId, setSelectedFileId] = useState("");
 	const [,setSelectedFilename] = useState("");

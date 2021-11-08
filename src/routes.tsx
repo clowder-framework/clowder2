@@ -6,7 +6,7 @@ import {App} from "./components/App";
 
 const Routes = (
 	<Switch>
-		<Route exact path="/" render={() => {return (<App: JSX.Element/>);}}/>
+		<Route exact path="/" render={() => {return (<App/>);}}/>
 	</Switch>);
 
 export default Routes;
