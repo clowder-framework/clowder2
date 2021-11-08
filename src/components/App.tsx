@@ -3,7 +3,7 @@ import TopBar from "./childComponents/TopBar";
 import Breadcrumbs from "./childComponents/BreadCrumb";
 import {fetchFileMetadata} from "../utils/file";
 import {downloadThumbnail} from "../utils/thumbnail";
-import Dashboard from "./Dashbard";
+import {Dashboard} from "./Dashbard";
 import Dataset from "./Dataset";
 import File from "./File";
 import datasetSchema from "../schema/datasetSchema.json";
@@ -16,7 +16,7 @@ import {datasetDeleted, fetchDatasetAbout, fetchDatasets, fetchFilesInDataset} f
 import {RootState} from "../types/data";
 
 
-export function App(): JSX.Element {
+export const App = (): JSX.Element => {
 
 	// Props
 	const dispatch = useDispatch();
@@ -27,7 +27,7 @@ export function App(): JSX.Element {
 	const deleteFile = (fileId:string) => dispatch(fileDeleted(fileId));
 	const listDatasetAbout= (datasetId:string) => dispatch(fetchDatasetAbout(datasetId));
 	const listDatasets = (when:string, date:string, limit:number) => dispatch(fetchDatasets(when, date, limit));
-	const deleteDataset= (datasetId:string) => dispatch(datasetDeleted(datasetId));
+	const deleteDataset = (datasetId:string) => dispatch(datasetDeleted(datasetId));
 
 	const fileExtractedMetadata = useSelector((state:RootState) =>  state.file.extractedMetadata);
 	const fileMetadataJsonld = useSelector((state:RootState) => state.file.metadataJsonld);
@@ -41,13 +41,16 @@ export function App(): JSX.Element {
 	const [,setSelectedFilename] = useState<string>("");
 	const [selectedDatasetId, setSelectedDatasetId] = useState<string>("");
 	const [selectedDatasetName, setSelectedDatasetName] = useState<string>("");
-	const [fileMetadataList, setFileMetadataList] = useState([]);
-	const [fileThumbnailList, setFileThumbnailList] = useState([]);
-	const [datasetThumbnailList, setDatasetThumbnailList] = useState([]);
+	const [fileMetadataList, setFileMetadataList] = useState<any>([]);
+	const [fileThumbnailList, setFileThumbnailList] = useState<any>([]);
+	const [datasetThumbnailList, setDatasetThumbnailList] = useState<any>([]);
+
+	// TODO any type
 	const [lastDataset, setLastDataset] = useState<any>([]);
 	const [firstDataset, setFirstDataset] = useState<any>([]);
 	const [limit,] = useState<number>(5);
 
+	// TODO any type
 	const [paths, setPaths] = useState<any>([]);
 
 	// component did mount
