@@ -12,7 +12,7 @@ from fastapi import (
     File,
     UploadFile,
 )
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, StreamingResponse
 from pydantic import Json
 from pymongo import MongoClient
 from minio import Minio
@@ -67,13 +67,13 @@ async def download_file(
 ):
     # If file exists in MongoDB, download from Minio
     if (file := await db["files"].find_one({"_id": ObjectId(file_id)})) is not None:
-        temp_path = "/tmp/%s" % file["name"]
-        file_data = fs.fget_object(clowder_bucket, file_id, temp_path)
-        return FileResponse(
-            path=temp_path,
-            filename=file["name"],
-            media_type=file_data.content_type,
+        # Get content type & open file stream
+        content = fs.get_object(clowder_bucket, file_id)
+        response = StreamingResponse(content.stream(upload_chunk_size))
+        response.headers["Content-Disposition"] = (
+            "attachment; filename=%s" % file["name"]
         )
+        return response
 
 
 @router.get("/files/{file_id}/summary")
