@@ -85,7 +85,7 @@ export function fetchDatasets(when, date, limit="5"){
 }
 
 export const DELETE_DATASET = "DELETE_DATASET";
-export function deleteDataset(datasetId){
+export function datasetDeleted(datasetId){
 	let url = `${config.hostname}/clowder/api/datasets/${datasetId}?superAdmin=true`;
 	return (dispatch) => {
 		return fetch(url, {mode:"cors", method:"DELETE", headers: getHeader()})
