@@ -12,8 +12,7 @@ import fileSchema from "../schema/fileSchema.json";
 import {useDispatch, useSelector} from "react-redux";
 import {fileDeleted, fetchFileExtractedMetadata, fetchFileMetadataJsonld, fetchFilePreviews} from "../actions/file";
 import {datasetDeleted, fetchDatasetAbout, fetchDatasets, fetchFilesInDataset} from "../actions/dataset";
-// import {Dataset as DatasetType, Path as PathType, RootState} from "../types/data";
-import {RootState} from "../types/data";
+import {Dataset as DatasetType, Path as PathType, RootState, FileMetadata} from "../types/data";
 
 
 export const App = (): JSX.Element => {
@@ -41,21 +40,21 @@ export const App = (): JSX.Element => {
 	const [,setSelectedFilename] = useState<string>("");
 	const [selectedDatasetId, setSelectedDatasetId] = useState<string>("");
 	const [selectedDatasetName, setSelectedDatasetName] = useState<string>("");
-	const [fileMetadataList, setFileMetadataList] = useState<any>([]);
+	const [fileMetadataList, setFileMetadataList] = useState<FileMetadata[]>([]);
 	const [fileThumbnailList, setFileThumbnailList] = useState<any>([]);
 	const [datasetThumbnailList, setDatasetThumbnailList] = useState<any>([]);
 
 	// TODO any type
-	const [lastDataset, setLastDataset] = useState<any>([]);
-	const [firstDataset, setFirstDataset] = useState<any>([]);
+	const [lastDataset, setLastDataset] = useState<DatasetType>();
+	const [firstDataset, setFirstDataset] = useState<DatasetType>();
 	const [limit,] = useState<number>(5);
 
 	// TODO any type
-	const [paths, setPaths] = useState<any>([]);
+	const [paths, setPaths] = useState<PathType[]>([]);
 
 	// component did mount
 	useEffect(() => {
-		listDatasets("null", "null", limit);
+		listDatasets("", "", limit);
 	}, []);
 
 	useEffect(() => {
@@ -145,12 +144,12 @@ export const App = (): JSX.Element => {
 	}, [selectedFileId])
 
 	const previous = () => {
-		let date = firstDataset["created"] !== undefined? new Date(firstDataset["created"]) : null;
+		let date = firstDataset ? new Date(firstDataset["created"]) : null;
 		if (date) listDatasets("b", date.toISOString(), limit);
 	}
 
 	const next = () => {
-		let date = lastDataset["created"] !== undefined? new Date(lastDataset["created"]) : null;
+		let date = lastDataset ? new Date(lastDataset["created"]) : null;
 		if (date) listDatasets("a", date.toISOString(), limit);
 	}
 

@@ -1,4 +1,4 @@
-import {About, Dataset, ExtractedMetadata, File, MetadataJsonld, Preview} from "./data";
+import {About, Dataset, ExtractedMetadata, File, MetadataJsonld, FilePreview} from "./data";
 
 interface RECEIVE_FILES_IN_DATASET {
 	type: "RECEIVE_FILES_IN_DATASET";
@@ -37,7 +37,7 @@ interface RECEIVE_FILE_METADATA_JSONLD{
 
 interface RECEIVE_PREVIEWS{
 	type:"RECEIVE_PREVIEWS";
-	previews: Preview[];
+	previews: FilePreview[];
 }
 
 export type DataAction =

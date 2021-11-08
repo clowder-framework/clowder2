@@ -65,6 +65,7 @@ type DashboardProps = {
 	thumbnails: [],
 	previous: () => void,
 	next: () => void,
+	datasetSchema: any,
 };
 
 export const Dashboard: React.FC<DashboardProps> = (props: DashboardProps) => {
@@ -75,7 +76,7 @@ export const Dashboard: React.FC<DashboardProps> = (props: DashboardProps) => {
 	const [selectedTabIndex, setSelectedTabIndex] = useState(0);
 	const [open, setOpen] = React.useState(false);
 
-	const handleTabChange = (_event:Event, newTabIndex: number) => {
+	const handleTabChange = (_event: React.ChangeEvent<{}>, newTabIndex: number) => {
 		setSelectedTabIndex(newTabIndex);
 	};
 

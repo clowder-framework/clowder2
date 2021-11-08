@@ -34,10 +34,6 @@ export interface MetadataJsonld {
 	authorId: string;
 	status: string;
 }
-//
-// export interface Preview{
-// 	previews: filePreview[];
-// }
 
 export interface FilePreview{
 	"p_id": string;
@@ -48,13 +44,18 @@ export interface FilePreview{
 }
 
 export interface Path{
-	name: string,
-	id: string,
+	name: string;
+	id: string;
 	type:string
 }
 
 export interface ExtractedMetadata{
+	filename:string;
+}
 
+export interface FileMetadata{
+	id: string;
+	metadata: ExtractedMetadata;
 }
 
 export interface DatasetState{
