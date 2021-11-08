@@ -4,6 +4,7 @@ export interface Dataset {
 	description: string;
 	created: string;
 	status: string;
+	thumbnail: string;
 }
 
 export interface File {
@@ -46,6 +47,12 @@ export interface FilePreview{
 	"pv_contenttype": string;
 }
 
+export interface Path{
+	name: string,
+	id: string,
+	type:string
+}
+
 export interface ExtractedMetadata{
 
 }
@@ -67,3 +74,4 @@ export interface RootState {
 	file:FileState;
 	dataset:DatasetState;
 }
+

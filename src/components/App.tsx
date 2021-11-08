@@ -12,14 +12,14 @@ import fileSchema from "../schema/fileSchema.json";
 import {useDispatch, useSelector} from "react-redux";
 import {fileDeleted, fetchFileExtractedMetadata, fetchFileMetadataJsonld, fetchFilePreviews} from "../actions/file";
 import {datasetDeleted, fetchDatasetAbout, fetchDatasets, fetchFilesInDataset} from "../actions/dataset";
-import {ExtractedMetadata, RootState} from "../types/data";
+// import {Dataset as DatasetType, Path as PathType, RootState} from "../types/data";
+import {RootState} from "../types/data";
 
 
 export function App(): JSX.Element {
 
-	// props
+	// Props
 	const dispatch = useDispatch();
-
 	const listFileExtractedMetadata = (fileId:string) => dispatch(fetchFileExtractedMetadata(fileId));
 	const listFileMetadataJsonld = (fileId:string) => dispatch(fetchFileMetadataJsonld(fileId));
 	const listFilePreviews = (fileId:string) => dispatch(fetchFilePreviews(fileId));
@@ -36,18 +36,19 @@ export function App(): JSX.Element {
 	const datasetAbout = useSelector((state:RootState) => state.dataset.about);
 	const datasets = useSelector((state:RootState) => state.dataset.datasets);
 
-	const [selectedFileId, setSelectedFileId] = useState("");
-	const [,setSelectedFilename] = useState("");
-	const [selectedDatasetId, setSelectedDatasetId] = useState("");
-	const [selectedDatasetName, setSelectedDatasetName] = useState("");
+	// States
+	const [selectedFileId, setSelectedFileId] = useState<string>("");
+	const [,setSelectedFilename] = useState<string>("");
+	const [selectedDatasetId, setSelectedDatasetId] = useState<string>("");
+	const [selectedDatasetName, setSelectedDatasetName] = useState<string>("");
 	const [fileMetadataList, setFileMetadataList] = useState([]);
 	const [fileThumbnailList, setFileThumbnailList] = useState([]);
 	const [datasetThumbnailList, setDatasetThumbnailList] = useState([]);
-	const [lastDataset, setLastDataset] = useState([]);
-	const [firstDataset, setFirstDataset] = useState([]);
-	const [limit,] = useState(5);
+	const [lastDataset, setLastDataset] = useState<any>([]);
+	const [firstDataset, setFirstDataset] = useState<any>([]);
+	const [limit,] = useState<number>(5);
 
-	const [paths, setPaths] = useState([]);
+	const [paths, setPaths] = useState<any>([]);
 
 	// component did mount
 	useEffect(() => {
@@ -150,7 +151,7 @@ export function App(): JSX.Element {
 		if (date) listDatasets("a", date.toISOString(), limit);
 	}
 
-	const selectDataset = (selectedDatasetId) => {
+	const selectDataset = (selectedDatasetId: string) => {
 		// pass that id to dataset component
 		setSelectedDatasetId(selectedDatasetId);
 
@@ -159,7 +160,7 @@ export function App(): JSX.Element {
 		listDatasetAbout(selectedDatasetId);
 	}
 
-	const selectFile = (selectedFileId) => {
+	const selectFile = (selectedFileId: string) => {
 		// pass that id to file component
 		setSelectedFileId(selectedFileId);
 
@@ -169,7 +170,7 @@ export function App(): JSX.Element {
 		listFilePreviews(selectedFileId);
 	}
 
-	const goToPath = (pathType, id) => {
+	const goToPath = (pathType:string, id:string) => {
 		if (pathType === "dataset"){
 			selectDataset(id);
 			setSelectedFileId("");
