@@ -25,7 +25,7 @@ export interface About {
 	thumbnail: string;
 }
 
-export interface MetadataJsonld {
+export interface FileMetadata {
 	id: string;
 	"content-type": string;
 	size:number;
@@ -53,9 +53,8 @@ export interface ExtractedMetadata{
 	filename:string;
 }
 
-export interface FileMetadata{
+export interface MetadataJsonld{
 	id: string;
-	metadata: ExtractedMetadata;
 }
 
 export interface DatasetState{

@@ -100,7 +100,7 @@ type DatasetProps = {
 	selectDataset: (selectedDatasetId: string) => void,
 };
 
-export const Dataset= (props: DatasetProps) => {
+export const Dataset:React.FC<DatasetProps> = (props: DatasetProps) => {
 	const classes = useStyles();
 
 	const {files, deleteFile, thumbnails, about, selectFile, selectedDatasetId, deleteDataset, selectDataset } = props;

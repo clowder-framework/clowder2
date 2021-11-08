@@ -5,7 +5,7 @@ import {fetchFileMetadata} from "../utils/file";
 import {downloadThumbnail} from "../utils/thumbnail";
 import {Dashboard} from "./Dashbard";
 import {Dataset} from "./Dataset";
-import File from "./File";
+import {File} from "./File";
 import datasetSchema from "../schema/datasetSchema.json";
 
 import {useDispatch, useSelector} from "react-redux";
@@ -27,7 +27,6 @@ export const App = (): JSX.Element => {
 	const listDatasets = (when:string, date:string, limit:number) => dispatch(fetchDatasets(when, date, limit));
 	const deleteDataset = (datasetId:string) => dispatch(datasetDeleted(datasetId));
 
-	const fileExtractedMetadata = useSelector((state:RootState) =>  state.file.extractedMetadata);
 	const fileMetadataJsonld = useSelector((state:RootState) => state.file.metadataJsonld);
 	const filePreviews = useSelector((state:RootState) => state.file.previews);
 	const filesInDataset = useSelector((state:RootState) => state.dataset.files);
@@ -86,7 +85,7 @@ export const App = (): JSX.Element => {
 			if (filesInDataset !== undefined && filesInDataset.length > 0) {
 
 				// TODO any types fix later
-				let fileMetadataListTemp:any = [];
+				let fileMetadataListTemp:FileMetadata[] = [];
 				let fileThumbnailListTemp:any = [];
 				await Promise.all(filesInDataset.map(async (fileInDataset) => {
 
@@ -214,10 +213,9 @@ export const App = (): JSX.Element => {
 								if (selectedFileId === fileMetadata["id"]) {
 									return (
 										<File fileMetadata={fileMetadata["metadata"]}
-											  fileExtractedMetadata={fileExtractedMetadata}
 											  fileMetadataJsonld={fileMetadataJsonld}
 											  filePreviews={filePreviews}
-											  fileId={selectedFileId}/>
+										/>
 									)
 								}
 								else{

@@ -8,8 +8,9 @@ import Audio from "./previewers/Audio";
 import Video from "./previewers/Video";
 import {downloadResource} from "../utils/common";
 import Thumbnail from "./previewers/Thumbnail";
+import {FileMetadata, FilePreview, MetadataJsonld} from "../types/data";
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(() => ({
 	appBar: {
 		background: "#FFFFFF",
 		boxShadow: "none",
@@ -23,10 +24,17 @@ const useStyles = makeStyles((theme) => ({
 	}
 }));
 
-export default function File(props) {
+type FileProps = {
+	fileMetadata: FileMetadata,
+	fileMetadataJsonld: MetadataJsonld[],
+	filePreviews: FilePreview[],
+	fileId: string
+};
+
+export const File: React.FC<FileProps> = (props:FileProps) => {
 	const classes = useStyles();
 
-	const {fileMetadata, fileExtractedMetadata, fileMetadataJsonld, filePreviews, fileId, ...other} = props;
+	const {fileMetadata, fileMetadataJsonld, filePreviews} = props;
 
 	const [selectedTabIndex, setSelectedTabIndex] = useState(0);
 	const [previews, setPreviews] = useState([]);
@@ -34,7 +42,7 @@ export default function File(props) {
 	useEffect(() => {
 		(async () => {
 			if (filePreviews !== undefined && filePreviews.length > 0 && filePreviews[0].previews !== undefined) {
-				let previewsTemp = [];
+				let previewsTemp:any = [];
 				await Promise.all(filePreviews[0].previews.map(async (filePreview) => {
 					// download resources
 					let Configuration = {};
@@ -55,7 +63,7 @@ export default function File(props) {
 		})();
 	}, [filePreviews]);
 
-	const handleTabChange = (event, newTabIndex) => {
+	const handleTabChange = (_event:React.ChangeEvent<{}>, newTabIndex:number) => {
 		setSelectedTabIndex(newTabIndex);
 	};
 
@@ -157,7 +165,7 @@ export default function File(props) {
 	);
 }
 
-function TabPanel(props) {
+function TabPanel(props:any) {
 	const {children, value, index, ...other} = props;
 
 	return (
@@ -177,7 +185,7 @@ function TabPanel(props) {
 	);
 }
 
-function a11yProps(index) {
+function a11yProps(index:number) {
 	return {
 		id: `file-tab-${index}`,
 		"aria-controls": `file-tabpanel-${index}`,
