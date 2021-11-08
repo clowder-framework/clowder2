@@ -18,7 +18,7 @@ import {ClowderInput} from "./styledComponents/ClowderInput";
 import {ClowderButton} from "./styledComponents/ClowderButton";
 import DescriptionIcon from "@material-ui/icons/Description";
 import ArrowDropDownIcon from "@material-ui/icons/ArrowDropDown";
-import UploadFile from "./childComponents/UploadFile";
+import {UploadFile} from "./childComponents/UploadFile";
 import DeleteOutlineIcon from "@material-ui/icons/DeleteOutline";
 import StarBorderIcon from "@material-ui/icons/StarBorder";
 import CloudDownloadOutlinedIcon from "@material-ui/icons/CloudDownloadOutlined";

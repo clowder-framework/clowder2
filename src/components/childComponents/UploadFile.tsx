@@ -3,24 +3,26 @@ import React, {useState} from "react";
 import {Box, Button, Container} from "@material-ui/core";
 
 import LoadingOverlay from "react-loading-overlay";
-import {makeStyles} from "@material-ui/core/styles";
 
 import Form from "@rjsf/material-ui";
 
 import {uploadFile} from "../../utils/file.js";
 import fileSchema from "../../schema/fileSchema.json";
 
-const useStyles = makeStyles();
 
-export default function UploadFile(props) {
-	const {selectedDatasetId, selectDataset, setOpen, ...other} = props;
-	const classes = useStyles();
+type UploadFileProps ={
+	selectedDatasetId: string,
+	selectDataset: (selectedDatasetId: string) => void,
+	setOpen:(open:boolean) => void,
+}
 
-	const [disabled, setDisabled] = useState(true);
-	const [loading, setLoading] = useState(false);
+export const UploadFile: React.FC<UploadFileProps> = (props: UploadFileProps) => {
+	const {selectedDatasetId, selectDataset, setOpen,} = props;
+
+	const [loading, setLoading] = useState<boolean>(false);
 
 
-	const onSave = async (formData) => {
+	const onSave = async (formData:FormData) => {
 		setLoading(true);
 		const response = await uploadFile(formData, selectedDatasetId);
 		if (response !== {} && (response["id"] !== undefined || response["ids"] !== undefined)){
@@ -34,6 +36,8 @@ export default function UploadFile(props) {
 		setOpen(false);
 	};
 
+	// TODO
+	// @ts-ignore
 	return (
 		<Container>
 			<LoadingOverlay
