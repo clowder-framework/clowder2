@@ -12,7 +12,7 @@ import fileSchema from "../schema/fileSchema.json";
 import {useDispatch, useSelector} from "react-redux";
 import {fileDeleted, fetchFileExtractedMetadata, fetchFileMetadataJsonld, fetchFilePreviews} from "../actions/file";
 import {datasetDeleted, fetchDatasetAbout, fetchDatasets, fetchFilesInDataset} from "../actions/dataset";
-import {RootState} from "../types/data";
+import {ExtractedMetadata, RootState} from "../types/data";
 
 
 export function App(): JSX.Element {
@@ -26,7 +26,7 @@ export function App(): JSX.Element {
 	const listFilesInDataset = (datasetId:string) => dispatch(fetchFilesInDataset(datasetId));
 	const deleteFile = (fileId:string) => dispatch(fileDeleted(fileId));
 	const listDatasetAbout= (datasetId:string) => dispatch(fetchDatasetAbout(datasetId));
-	const listDatasets = (when:string, date:string, limit:string) => dispatch(fetchDatasets(when, date, limit));
+	const listDatasets = (when:string, date:string, limit:number) => dispatch(fetchDatasets(when, date, limit));
 	const deleteDataset= (datasetId:string) => dispatch(datasetDeleted(datasetId));
 
 	const fileExtractedMetadata = useSelector((state:RootState) =>  state.file.extractedMetadata);
@@ -51,14 +51,15 @@ export function App(): JSX.Element {
 
 	// component did mount
 	useEffect(() => {
-		listDatasets(null, null, limit);
+		listDatasets("null", "null", limit);
 	}, []);
 
 	useEffect(() => {
 		(async () => {
 			if (datasets !== undefined && datasets.length > 0) {
 
-				let datasetThumbnailListTemp = [];
+				// TODO change the type any to something else
+				let datasetThumbnailListTemp:any = [];
 				await Promise.all(datasets.map(async (dataset) => {
 					// add thumbnails
 					if (dataset["thumbnail"] !== null && dataset["thumbnail"] !== undefined) {
@@ -82,8 +83,9 @@ export function App(): JSX.Element {
 		(async () => {
 			if (filesInDataset !== undefined && filesInDataset.length > 0) {
 
-				let fileMetadataListTemp = [];
-				let fileThumbnailListTemp = [];
+				// TODO any types fix later
+				let fileMetadataListTemp:any = [];
+				let fileThumbnailListTemp:any = [];
 				await Promise.all(filesInDataset.map(async (fileInDataset) => {
 
 					let fileMetadata = await fetchFileMetadata(fileInDataset["id"]);
