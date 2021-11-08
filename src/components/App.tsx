@@ -15,6 +15,9 @@ import {Dataset as DatasetType,
 	ExtractedMetadata,
 	MetadataJsonld, Preview} from "../types/data";
 import {DataAction} from "../types/action";
+import {useDispatch} from "react-redux";
+import {deleteFile, fetchFileExtractedMetadata, fetchFileMetadataJsonld, fetchFilePreviews} from "../actions/file";
+import {deleteDataset, fetchDatasetAbout, fetchDatasets, fetchFilesInDataset} from "../actions/dataset";
 
 type Props = {
 	// files
@@ -38,7 +41,18 @@ type Props = {
 	datasets: DatasetType[],
 };
 
-export const App: React.FC<Props> = props  => {
+export function App(): JSX.Element {
+	const dispatch = useDispatch();
+
+	const listFileExtractedMetadata = (fileId:string) => dispatch(fetchFileExtractedMetadata(fileId));
+	const listFileMetadataJsonld = (fileId:string) => dispatch(fetchFileMetadataJsonld(fileId));
+	const listFilePreviews = (fileId:string) => dispatch(fetchFilePreviews(fileId));
+	const listFilesInDataset = datasetId:string) => dispatch(fetchFilesInDataset(datasetId));
+	const deleteFile = (fileId:string) => dispatch(deleteFile(fileId));
+	const listDatasetAbout= (datasetId:string) => dispatch(fetchDatasetAbout(datasetId));
+	const listDatasets = (when:string, date:string, limit:string) => dispatch(fetchDatasets(when, date, limit));
+	const deleteDataset= (datasetId:string) => dispatch(deleteDataset(datasetId));
+
 	const [selectedFileId, setSelectedFileId] = useState("");
 	const [,setSelectedFilename] = useState("");
 	const [selectedDatasetId, setSelectedDatasetId] = useState("");
@@ -51,22 +65,6 @@ export const App: React.FC<Props> = props  => {
 	const [limit,] = useState(5);
 
 	const [paths, setPaths] = useState([]);
-
-	const {
-		// files
-		listFileExtractedMetadata, fileExtractedMetadata,
-		listFileMetadataJsonld, fileMetadataJsonld,
-		listFilePreviews, filePreviews,
-
-		//dataset
-		listFilesInDataset, filesInDataset,
-		listDatasetAbout, datasetAbout,
-		deleteFile,
-
-		//dashboard
-		deleteDataset, listDatasets, datasets,
-
-	} = props;
 
 	// component did mount
 	useEffect(() => {
