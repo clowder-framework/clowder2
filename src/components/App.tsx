@@ -4,10 +4,9 @@ import Breadcrumbs from "./childComponents/BreadCrumb";
 import {fetchFileMetadata} from "../utils/file";
 import {downloadThumbnail} from "../utils/thumbnail";
 import {Dashboard} from "./Dashbard";
-import Dataset from "./Dataset";
+import {Dataset} from "./Dataset";
 import File from "./File";
 import datasetSchema from "../schema/datasetSchema.json";
-import fileSchema from "../schema/fileSchema.json";
 
 import {useDispatch, useSelector} from "react-redux";
 import {fileDeleted, fetchFileExtractedMetadata, fetchFileMetadataJsonld, fetchFilePreviews} from "../actions/file";
@@ -205,7 +204,6 @@ export const App = (): JSX.Element => {
 											selectFile={selectFile}
 											thumbnails={fileThumbnailList}
 											about={datasetAbout}
-											fileSchema={fileSchema}
 											selectedDatasetId = {selectedDatasetId}
 											selectDataset={selectDataset}
 											deleteDataset={deleteDataset}

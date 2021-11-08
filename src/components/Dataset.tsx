@@ -24,8 +24,9 @@ import StarBorderIcon from "@material-ui/icons/StarBorder";
 import CloudDownloadOutlinedIcon from "@material-ui/icons/CloudDownloadOutlined";
 import {downloadDataset} from "../utils/dataset";
 import {downloadFile} from "../utils/file";
+import {About as AboutType, File as FileType} from "../types/data";
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(() => ({
 	appBar: {
 		background: "#FFFFFF",
 		boxShadow: "none",
@@ -88,21 +89,30 @@ const useStyles = makeStyles((theme) => ({
 	}
 }));
 
-export default function Dataset(props) {
+type DatasetProps = {
+	files: FileType[],
+	deleteFile: (fileId:string) => void,
+	thumbnails: [],
+	about: AboutType,
+	selectFile: (selectedFileId: string) => void,
+	selectedDatasetId: string,
+	deleteDataset: (datasetId:string) => void,
+	selectDataset: (selectedDatasetId: string) => void,
+};
+
+export const Dataset= (props: DatasetProps) => {
 	const classes = useStyles();
 
-	const {files, deleteFile, thumbnails, about, selectFile, selectedDatasetId, deleteDataset, selectDataset,
-		fileSchema, ...other} = props;
-	const [selectedTabIndex, setSelectedTabIndex] = useState(0);
-	const [open, setOpen] = React.useState(false);
+	const {files, deleteFile, thumbnails, about, selectFile, selectedDatasetId, deleteDataset, selectDataset } = props;
+	const [selectedTabIndex, setSelectedTabIndex] = useState<number>(0);
+	const [open, setOpen] = React.useState<boolean>(false);
+	const [anchorEl, setAnchorEl] = React.useState<Element | null>(null);
 
-	const [anchorEl, setAnchorEl] = React.useState(null);
-
-	const handleTabChange = (event, newTabIndex) => {
+	const handleTabChange = (_event:React.ChangeEvent<{}>, newTabIndex:number) => {
 		setSelectedTabIndex(newTabIndex);
 	};
 
-	const handleOptionClick = (event) => {
+	const handleOptionClick = (event: React.MouseEvent<any>) => {
 		setAnchorEl(event.currentTarget);
 	};
 
@@ -268,7 +278,7 @@ export default function Dataset(props) {
 	);
 }
 
-function TabPanel(props) {
+function TabPanel(props:any) {
 	const {children, value, index, ...other} = props;
 
 	return (
@@ -288,7 +298,7 @@ function TabPanel(props) {
 	);
 }
 
-function a11yProps(index) {
+function a11yProps(index:number) {
 	return {
 		id: `dataset-tab-${index}`,
 		"aria-controls": `dataset-tabpanel-${index}`,
