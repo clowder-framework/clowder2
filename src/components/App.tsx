@@ -12,6 +12,7 @@ import fileSchema from "../schema/fileSchema.json";
 import {useDispatch, useSelector} from "react-redux";
 import {fileDeleted, fetchFileExtractedMetadata, fetchFileMetadataJsonld, fetchFilePreviews} from "../actions/file";
 import {datasetDeleted, fetchDatasetAbout, fetchDatasets, fetchFilesInDataset} from "../actions/dataset";
+import {RootState} from "../types/data";
 
 
 export function App(): JSX.Element {
@@ -28,12 +29,12 @@ export function App(): JSX.Element {
 	const listDatasets = (when:string, date:string, limit:string) => dispatch(fetchDatasets(when, date, limit));
 	const deleteDataset= (datasetId:string) => dispatch(datasetDeleted(datasetId));
 
-	const fileExtractedMetadata = useSelector(state =>  state.file.extractedMetadata);
-	const fileMetadataJsonld = useSelector(state => state.file.metadataJsonld);
-	const filePreviews = useSelector(state => state.file.previews);
-	const filesInDataset = useSelector(state => state.dataset.files);
-	const datasetAbout = useSelector(state => state.dataset.about);
-	const datasets = useSelector(state => state.dataset.datasets);
+	const fileExtractedMetadata = useSelector((state:RootState) =>  state.file.extractedMetadata);
+	const fileMetadataJsonld = useSelector((state:RootState) => state.file.metadataJsonld);
+	const filePreviews = useSelector((state:RootState) => state.file.previews);
+	const filesInDataset = useSelector((state:RootState) => state.dataset.files);
+	const datasetAbout = useSelector((state:RootState) => state.dataset.about);
+	const datasets = useSelector((state:RootState) => state.dataset.datasets);
 
 	const [selectedFileId, setSelectedFileId] = useState("");
 	const [,setSelectedFilename] = useState("");

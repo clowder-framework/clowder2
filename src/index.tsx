@@ -11,9 +11,6 @@ import {createTheme, MuiThemeProvider} from "@material-ui/core/styles";
 
 const store = configureStore();
 
-export type RootState = ReturnType<typeof store.getState>;
-export type AppDispatch = typeof store.dispatch;
-
 const theme = createTheme({
 
 	typography: {

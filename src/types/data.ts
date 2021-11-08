@@ -33,12 +33,12 @@ export interface MetadataJsonld {
 	authorId: string;
 	status: string;
 }
+//
+// export interface Preview{
+// 	previews: filePreview[];
+// }
 
-export interface Preview{
-	previews: filePreview[];
-}
-
-export interface filePreview{
+export interface FilePreview{
 	"p_id": string;
 	"pv_route": string;
 	"pv_id": string;
@@ -50,11 +50,20 @@ export interface ExtractedMetadata{
 
 }
 
-export interface DataState {
-	metadataJsonld: MetadataJsonld[];
-	previews: Preview[];
-	about: About;
+export interface DatasetState{
 	files: File[];
 	datasets: Dataset[];
-	status: string;
+	about: About;
+	status:string;
+}
+
+export interface FileState{
+	extractedMetadata: ExtractedMetadata;
+	metadataJsonld: MetadataJsonld[];
+	previews: FilePreview[];
+}
+
+export interface RootState {
+	file:FileState;
+	dataset:DatasetState;
 }
