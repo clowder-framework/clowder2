@@ -1,13 +1,12 @@
 import React, {useEffect, useState} from "react";
 import TopBar from "./childComponents/TopBar";
-import Breadcrumbs from "./childComponents/BreadCrumb";
+import {Breadcrumbs} from "./childComponents/BreadCrumb";
 import {fetchFileMetadata} from "../utils/file";
 import {downloadThumbnail} from "../utils/thumbnail";
 import {Dashboard} from "./Dashbard";
 import {Dataset} from "./Dataset";
 import {File} from "./File";
 import datasetSchema from "../schema/datasetSchema.json";
-
 import {useDispatch, useSelector} from "react-redux";
 import {fileDeleted, fetchFileExtractedMetadata, fetchFileMetadataJsonld, fetchFilePreviews} from "../actions/file";
 import {datasetDeleted, fetchDatasetAbout, fetchDatasets, fetchFilesInDataset} from "../actions/dataset";
