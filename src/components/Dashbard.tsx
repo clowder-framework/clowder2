@@ -6,7 +6,7 @@ import DeleteOutlineIcon from "@material-ui/icons/DeleteOutline";
 import StarBorderIcon from "@material-ui/icons/StarBorder";
 import CloudDownloadOutlinedIcon from "@material-ui/icons/CloudDownloadOutlined";
 
-import CreateDataset from "./childComponents/CreateDataset";
+import {CreateDataset} from "./childComponents/CreateDataset";
 import {downloadDataset} from "../utils/dataset";
 
 import {Dataset as DatasetType} from "../types/data";

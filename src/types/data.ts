@@ -33,14 +33,35 @@ export interface FileMetadata {
 	filename: string;
 	authorId: string;
 	status: string;
+	filedescription: string;
+	thumbnail:string;
 }
 
-export interface FilePreview{
+export interface FileMetadataList{
+	id: string;
+	metadata: FileMetadata;
+}
+
+export interface Preview{
 	"p_id": string;
 	"pv_route": string;
 	"pv_id": string;
 	"p_path": string;
 	"pv_contenttype": string;
+}
+
+export interface FilePreview{
+	"file_id": string;
+	previews: Preview[];
+}
+
+export interface PreviewConfiguration{
+	previewType: string;
+	url:string;
+	fileid:string;
+	previewer:string;
+	fileType:string;
+	resource:string | null;
 }
 
 export interface Path{
@@ -54,7 +75,28 @@ export interface ExtractedMetadata{
 }
 
 export interface MetadataJsonld{
-	id: string;
+	"id":string;
+	"@context": (Context|string)[];
+	agent:Agent;
+	"attached_to": AttatchTo;
+	content: any;
+	"created_at": string
+}
+
+interface Context{
+	database:string;
+	scan:string;
+}
+
+interface Agent{
+	"@type": string;
+	"extractor_id": string;
+	name: string
+}
+
+interface AttatchTo{
+	"resource_type": string;
+	url: string;
 }
 
 export interface DatasetState{

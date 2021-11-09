@@ -10,7 +10,7 @@ import datasetSchema from "../schema/datasetSchema.json";
 import {useDispatch, useSelector} from "react-redux";
 import {fileDeleted, fetchFileExtractedMetadata, fetchFileMetadataJsonld, fetchFilePreviews} from "../actions/file";
 import {datasetDeleted, fetchDatasetAbout, fetchDatasets, fetchFilesInDataset} from "../actions/dataset";
-import {Dataset as DatasetType, Path as PathType, RootState, FileMetadata} from "../types/data";
+import {Dataset as DatasetType, Path as PathType, RootState, FileMetadataList} from "../types/data";
 
 
 export const App = (): JSX.Element => {
@@ -37,7 +37,7 @@ export const App = (): JSX.Element => {
 	const [,setSelectedFilename] = useState<string>("");
 	const [selectedDatasetId, setSelectedDatasetId] = useState<string>("");
 	const [selectedDatasetName, setSelectedDatasetName] = useState<string>("");
-	const [fileMetadataList, setFileMetadataList] = useState<FileMetadata[]>([]);
+	const [fileMetadataList, setFileMetadataList] = useState<FileMetadataList[]>([]);
 	const [fileThumbnailList, setFileThumbnailList] = useState<any>([]);
 	const [datasetThumbnailList, setDatasetThumbnailList] = useState<any>([]);
 
@@ -84,7 +84,7 @@ export const App = (): JSX.Element => {
 			if (filesInDataset !== undefined && filesInDataset.length > 0) {
 
 				// TODO any types fix later
-				let fileMetadataListTemp:FileMetadata[] = [];
+				let fileMetadataListTemp:FileMetadataList[] = [];
 				let fileThumbnailListTemp:any = [];
 				await Promise.all(filesInDataset.map(async (fileInDataset) => {
 

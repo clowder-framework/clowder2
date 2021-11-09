@@ -2,12 +2,13 @@ import React, {useState} from "react";
 
 import {Box, Button, Container} from "@material-ui/core";
 
-import LoadingOverlay from "react-loading-overlay";
+import LoadingOverlay from "react-loading-overlay-ts";
 
 import Form from "@rjsf/material-ui";
 
 import {uploadFile} from "../../utils/file.js";
 import fileSchema from "../../schema/fileSchema.json";
+import {FormProps} from "@rjsf/core";
 
 
 type UploadFileProps ={
@@ -45,8 +46,9 @@ export const UploadFile: React.FC<UploadFileProps> = (props: UploadFileProps) =>
 				spinner
 				text="Saving..."
 			>
-				<Form schema={fileSchema["schema"]} uiSchema={fileSchema["uiSchema"]}
-					  onSubmit={({formData}, e) => {onSave(formData);}}>
+				<Form schema={fileSchema["schema"] as FormProps<any>["schema"]}
+					  uiSchema={fileSchema["uiSchema"] as FormProps<any>["uiSchema"]}
+					  onSubmit={({formData}) => {onSave(formData);}}>
 					<Box className="inputGroup">
 						<Button variant="contained" type="submit" className="form-button-block">Upload</Button>
 					</Box>

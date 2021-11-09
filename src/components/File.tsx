@@ -8,7 +8,7 @@ import Audio from "./previewers/Audio";
 import Video from "./previewers/Video";
 import {downloadResource} from "../utils/common";
 import Thumbnail from "./previewers/Thumbnail";
-import {FileMetadata, FilePreview, MetadataJsonld} from "../types/data";
+import {FileMetadata, FilePreview, MetadataJsonld, PreviewConfiguration} from "../types/data";
 
 const useStyles = makeStyles(() => ({
 	appBar: {
@@ -28,7 +28,6 @@ type FileProps = {
 	fileMetadata: FileMetadata,
 	fileMetadataJsonld: MetadataJsonld[],
 	filePreviews: FilePreview[],
-	fileId: string
 };
 
 export const File: React.FC<FileProps> = (props:FileProps) => {
@@ -45,7 +44,14 @@ export const File: React.FC<FileProps> = (props:FileProps) => {
 				let previewsTemp:any = [];
 				await Promise.all(filePreviews[0].previews.map(async (filePreview) => {
 					// download resources
-					let Configuration = {};
+					let Configuration:PreviewConfiguration = {
+						previewType:"",
+						url:"",
+						fileid:"",
+						previewer:"",
+						fileType:"",
+						resource: "",
+					};
 					Configuration.previewType = filePreview["p_id"].replace(" ", "-").toLowerCase();
 					Configuration.url = `${config.hostname}${filePreview["pv_route"]}?superAdmin=true`;
 					Configuration.fileid = filePreview["pv_id"];
@@ -104,7 +110,7 @@ export const File: React.FC<FileProps> = (props:FileProps) => {
 								fileMetadataJsonld !== undefined && fileMetadataJsonld.length > 0 ?
 									fileMetadataJsonld.map((item) => {
 										return Object.keys(item["content"]).map((key) => {
-												return (<p>{key} - {JSON.stringify(item["content"][key])}</p>);
+												return <p>{key} - {JSON.stringify(item["content"][key])}</p>;
 											}
 										);
 									}) : <></>
