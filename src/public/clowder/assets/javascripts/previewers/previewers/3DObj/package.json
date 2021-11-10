@@ -1,5 +1,0 @@
-{ "name" : "3DObj",
-  "main" : "some-library.js",
-  "preview": true,
-  "contentType" : ["none"]
-  }

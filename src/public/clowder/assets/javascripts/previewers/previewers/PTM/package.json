@@ -1,5 +1,0 @@
-{ "name": "PTM",
-  "main": "some-library.js",
-  "preview": true,
-  "contentType": ["application/x-ptm"]
-  }

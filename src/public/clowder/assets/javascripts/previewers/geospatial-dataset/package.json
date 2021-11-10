@@ -1,6 +1,0 @@
-{ "name" : "geospatial-dataset",
-  "main" : "geospatial-dataset.js",
-  "contentType" : [],
-  "dataset" : true,
-  "supported_previews" : []
-  }

@@ -1,5 +1,0 @@
-{ "name": "External resource",
-  "main": "some-library.js",
-  "file": true,
-  "contentType": ["text/iframe"]
-  }
