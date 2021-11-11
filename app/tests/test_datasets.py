@@ -15,6 +15,8 @@ user = {"name": "test@test.org", "password": "not_a_password"}
 
 
 def test_create():
+    response = client.post("/users", json=user)
+    assert response.status_code == 200
     response = client.post("/login", json=user)
     assert response.status_code == 200
     token = response.json().get("token")
