@@ -35,6 +35,21 @@ There are currently a few different ways of connecting to Mongo shown in this pr
 ## Dev Environment Setup
 1. To install Black python code formatter so it runs everytime you save in an IDE see https://black.readthedocs.io/en/stable/integrations/editors.html
 
+## Docker
+
+Build images with `docker compose -f docker-compose.yml build`
+
+Run docker services with `docker compose up --scale backend=4`. This will start the services with four instances of the backend
+running in parallel.
+
+Default url for backend will be `http://clowder.docker.localhost/` using a web browser. If using a different client (for
+example postman set the `HOST` header to `clowder.docker.localhost`).
+This variable is set using the `traefik.http.routers.backend.rule` for the backend service.
+
+To access the traefik dashboard go to `http://localhost:8080`. For the raw settings see `http://localhost:8080/api/rawdata`.
+
+Minio console is available at `minioconsole.docker.localhost`.
+
 # Notes
 
 Mongo ObjectId
