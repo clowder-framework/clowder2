@@ -39,6 +39,35 @@ def test_get_one():
     assert response.status_code == 200
     assert response.json().get("_id") is not None
 
+def test_delete():
+    response = client.post("/login", json=user)
+    assert response.status_code == 200
+    token = response.json().get("token")
+    assert token is not None
+    headers = {"Authorization": "Bearer " + token}
+    response = client.post("/datasets", json=dataset, headers=headers)
+    assert response.json().get("_id") is not None
+    assert response.status_code == 200
+    response = client.delete("/datasets", headers=headers)
+    assert response.status_code == 200
+
+def test_edit():
+    response = client.post("/login", json=user)
+    assert response.status_code == 200
+    token = response.json().get("token")
+    assert token is not None
+    headers = {"Authorization": "Bearer " + token}
+    response = client.post("/datasets", json=dataset, headers=headers)
+    assert response.json().get("_id") is not None
+    assert response.status_code == 200
+    new_dataset = response.json()
+    new_dataset["name"] = "edited name"
+    response = client.post("/datasets", json=new_dataset, headers=headers)
+    assert response.json().get("_id") is not None
+    assert response.status_code == 200
+
+
+
 
 def test_list():
     response = client.post("/login", json=user)
@@ -52,3 +81,6 @@ def test_list():
     response = client.get("/datasets", headers=headers)
     assert response.status_code == 200
     assert len(response.json()) > 0
+
+if __name__ == '__main__':
+    test_edit()
