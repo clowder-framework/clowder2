@@ -21,7 +21,7 @@ def test_create():
     assert token is not None
     headers = {"Authorization": "Bearer " + token}
     response = client.post("/datasets", json=dataset, headers=headers)
-    assert response.json().get("_id") is not None
+    assert response.json().get("id") is not None
     assert response.status_code == 200
 
 
@@ -32,12 +32,12 @@ def test_get_one():
     assert token is not None
     headers = {"Authorization": "Bearer " + token}
     response = client.post("/datasets", json=dataset, headers=headers)
-    assert response.json().get("_id") is not None
+    assert response.json().get("id") is not None
     assert response.status_code == 200
-    dataset_id = response.json().get("_id")
+    dataset_id = response.json().get("id")
     response = client.get(f"/datasets/{dataset_id}")
     assert response.status_code == 200
-    assert response.json().get("_id") is not None
+    assert response.json().get("id") is not None
 
 
 def test_list():
@@ -47,7 +47,7 @@ def test_list():
     assert token is not None
     headers = {"Authorization": "Bearer " + token}
     response = client.post("/datasets", json=dataset, headers=headers)
-    assert response.json().get("_id") is not None
+    assert response.json().get("id") is not None
     assert response.status_code == 200
     response = client.get("/datasets", headers=headers)
     assert response.status_code == 200

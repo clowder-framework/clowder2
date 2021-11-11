@@ -14,21 +14,21 @@ item = {
 
 def test_create():
     response = client.post("/items", json=item)
-    assert response.json().get("_id") is not None
+    assert response.json().get("id") is not None
     assert response.status_code == 200
 
 
 def test_get_one():
     response = client.post("/items", json=item)
-    item_id = response.json().get("_id")
+    item_id = response.json().get("id")
     response = client.get(f"/items/{item_id}")
     assert response.status_code == 200
-    assert response.json().get("_id") is not None
+    assert response.json().get("id") is not None
 
 
 def test_list():
     response = client.post("/items", json=item)
-    assert response.json().get("_id") is not None
+    assert response.json().get("id") is not None
     response = client.get("/items")
     assert response.status_code == 200
     assert len(response.json()) > 0
