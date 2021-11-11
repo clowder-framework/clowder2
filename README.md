@@ -1,11 +1,20 @@
-# Clowder FastAPI Example
+# Clowder 2 FastAPI
 
-## Try out
-1. Run mongo: `docker run --name clowder-mongo-fastapi -p 27017:27017 -d mongo`
+## Trying it out
 
-2. Install dependencies using [pipenv](https://github.com/pypa/pipenv).
+The easiest way is to use docker compose. Please see section below.
 
-3. Run app (or setup run configuration in pycharm):
+To manually run everything for development you can:
+
+1. Run mongo in docker: 
+   `docker run --name clowder-mongo-fastapi -p 27017:27017 -d mongo`
+
+2. Run minio in docker:
+   `docker run -p 9000:9000 -p 9001:9001 -e MINIO_ROOT_USER=clowder -e MINIO_ROOT_PASSWORD=clowdersecret quay.io/minio/minio server /data --console-address ":9001"`
+
+3. Install dependencies using `pipenv install`. See [pipenv](https://github.com/pypa/pipenv).
+
+4. Run app (or setup run configuration in pycharm):
     ```bash
     # Configure the location of your MongoDB database:
     export MONGODB_URL="mongodb://localhost:27017"
@@ -13,7 +22,7 @@
     uvicorn app.main:app --reload
     ```
    
-Linting is managed using (Black)((https://black.readthedocs.io/en/stable/)). You can set up pycharm to automatically
+Linting is managed using [Black]((https://black.readthedocs.io/en/stable/)). You can set up pycharm to automatically
 run it when you save a file using these [instructions](https://black.readthedocs.io/en/stable/integrations/editors.html).
 The repository includes an action to run Black on push and pull_request.
 
@@ -22,15 +31,6 @@ The repository includes an action to run Black on push and pull_request.
 1. Create a user with the POST /users endpoint in routes.users. Supply name and password
 2. Get token using the POST /login endpoint in main. This will provide Bearer Access token good for 120 minutes.
 3. Currently only the create dataset endpoint and the test /protected endpoing in main check for the token
-
-## Mongo
-
-There are currently a few different ways of connecting to Mongo shown in this project.
-
-1. Datasets use MongoEngine and its `DynamicDocument`
-2. Items use Motor directly and the custom `PyObjectId`
-3. Users use Motor directly as well, but a `OID` and `MongoModel`. This means that the pydantic objects have less boilderplate.
-4. `beanie_test.py` shows it the basic example from their documentation and it is not used in the routers yet.
 
 ## Dev Environment Setup
 1. To install Black python code formatter so it runs everytime you save in an IDE see https://black.readthedocs.io/en/stable/integrations/editors.html
@@ -50,7 +50,7 @@ To access the traefik dashboard go to `http://localhost:8080`. For the raw setti
 
 Minio console is available at `minioconsole.docker.localhost`.
 
-# Notes
+# Links
 
 Mongo ObjectId
 https://github.com/tiangolo/fastapi/issues/1515
