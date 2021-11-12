@@ -4,6 +4,7 @@ import json
 from bson import ObjectId
 from fastapi import APIRouter, Request, HTTPException, Depends
 from pymongo import MongoClient
+from pydantic import Json
 from fastapi.encoders import jsonable_encoder
 from app import dependencies
 from app.models.datasets import Dataset
@@ -16,25 +17,16 @@ auth_handler = AuthHandler()
 
 @router.post("/datasets")
 async def save_dataset(
-    request: Request,
+    dataset_info: Json[Dataset],
     user_id=Depends(auth_handler.auth_wrapper),
     db: MongoClient = Depends(dependencies.get_db),
 ):
-    res = await db["users"].find_one({"_id": ObjectId(user_id)})
-    request_json = await request.json()
-    request_json["author"] = res["_id"]
-    if "name" in request_json:
-        name = request_json["name"]
-    else:
-        name = "N/A"
-    if "description" in request_json:
-        description = request_json["description"]
-    else:
-        description = "N/A"
-    new_dataset = Dataset(author=res["_id"], name=name, description=description)
-    new_dataset_mongo = json.loads(new_dataset.json())
-    insert = await db["datasets"].insert_one(new_dataset_mongo)
-    found = await db["datasets"].find_one({"_id": insert.inserted_id})
+    ds = dict(dataset_info) if dataset_info is not None else {}
+    user = await db["users"].find_one({"_id": ObjectId(user_id)})
+    ds["author"] = user["_id"]
+    new_dataset = await db["datasets"].insert_one(ds)
+    found = await db["datasets"].find_one({"_id": new_dataset.inserted_id})
+
     return Dataset.from_mongo(found)
 
 
