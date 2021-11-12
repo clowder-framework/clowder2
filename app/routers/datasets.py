@@ -13,7 +13,7 @@ router = APIRouter()
 auth_handler = AuthHandler()
 
 
-@router.post("/datasets")
+@router.post("/")
 async def save_dataset(
     request: Request,
     user_id=Depends(auth_handler.auth_wrapper),
@@ -27,7 +27,7 @@ async def save_dataset(
     return Dataset.from_mongo(found)
 
 
-@router.get("/datasets", response_model=List[Dataset])
+@router.get("/", response_model=List[Dataset])
 async def get_datasets(
     user_id=Depends(auth_handler.auth_wrapper),
     db: MongoClient = Depends(dependencies.get_db),
@@ -53,7 +53,7 @@ async def get_datasets(
     return datasets
 
 
-@router.get("/datasets/{dataset_id}")
+@router.get("/{dataset_id}")
 async def get_dataset(dataset_id: str, db: MongoClient = Depends(dependencies.get_db)):
     if (
         dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})

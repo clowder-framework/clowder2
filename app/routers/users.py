@@ -11,7 +11,7 @@ from passlib.hash import bcrypt
 router = APIRouter()
 
 
-@router.post("/users", response_model=User)
+@router.post("/", response_model=User)
 async def save_user(request: Request, db: MongoClient = Depends(dependencies.get_db)):
     request_json = await request.json()
     plain_password = request_json["password"]
@@ -22,7 +22,7 @@ async def save_user(request: Request, db: MongoClient = Depends(dependencies.get
     return User.from_mongo(found).dict(exclude={"create_at"})
 
 
-@router.get("/users", response_model=List[User])
+@router.get("/", response_model=List[User])
 async def get_users(
     db: MongoClient = Depends(dependencies.get_db), skip: int = 0, limit: int = 2
 ):
@@ -32,14 +32,14 @@ async def get_users(
     return users
 
 
-@router.get("/users/{user_id}", response_model=User)
+@router.get("/{user_id}", response_model=User)
 async def get_user(user_id: str, db: MongoClient = Depends(dependencies.get_db)):
     if (user := await db["users"].find_one({"_id": ObjectId(user_id)})) is not None:
         return User.from_mongo(user)
     raise HTTPException(status_code=404, detail=f"User {user_id} not found")
 
 
-@router.get("/users/username/{name}", response_model=User)
+@router.get("/username/{name}", response_model=User)
 async def get_user_by_name(name: str, db: MongoClient = Depends(dependencies.get_db)):
     if (user := await db["users"].find_one({"name": name})) is not None:
         return User.from_mongo(user)

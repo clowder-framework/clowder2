@@ -1,11 +1,8 @@
 from typing import List
 
 from bson import ObjectId
-from fastapi import APIRouter, HTTPException, Body, Depends
-from fastapi.encoders import jsonable_encoder
+from fastapi import APIRouter, HTTPException, Depends
 from pymongo import MongoClient
-from starlette import status
-from starlette.responses import JSONResponse
 
 from app import dependencies
 from app.models.items import Item
@@ -13,7 +10,7 @@ from app.models.items import Item
 router = APIRouter()
 
 
-@router.post("/items", response_description="Add a new item", response_model=Item)
+@router.post("/", response_description="Add a new item", response_model=Item)
 async def create_item(
     item: Item,
     db: MongoClient = Depends(dependencies.get_db),
@@ -23,7 +20,7 @@ async def create_item(
     return Item.from_mongo(created)
 
 
-@router.get("/items", response_description="List items", response_model=List[Item])
+@router.get("/", response_description="List items", response_model=List[Item])
 async def read_items(
     db: MongoClient = Depends(dependencies.get_db), skip: int = 0, limit: int = 2
 ):
@@ -33,7 +30,7 @@ async def read_items(
     return tasks
 
 
-@router.get("/items/{item_id}", response_model=Item)
+@router.get("/{item_id}", response_model=Item)
 async def read_item(
     item_id: str,
     db: MongoClient = Depends(dependencies.get_db),

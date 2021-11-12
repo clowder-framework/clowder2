@@ -10,7 +10,7 @@ from app.models.collections import Collection
 router = APIRouter()
 
 
-@router.post("/collections", response_model=Collection)
+@router.post("/", response_model=Collection)
 async def save_collection(
     body: Collection, db: MongoClient = Depends(dependencies.get_db)
 ):
@@ -20,7 +20,7 @@ async def save_collection(
     return Collection.from_mongo(found)
 
 
-@router.get("/collections", response_model=List[Collection])
+@router.get("/", response_model=List[Collection])
 async def get_collections(
     db: MongoClient = Depends(dependencies.get_db), skip: int = 0, limit: int = 2
 ):
@@ -32,7 +32,7 @@ async def get_collections(
     return collections
 
 
-@router.get("/collections/{collection_id}")
+@router.get("/{collection_id}")
 async def get_collection(
     collection_id: str, db: MongoClient = Depends(dependencies.get_db)
 ):

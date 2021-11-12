@@ -29,7 +29,7 @@ clowder_bucket = os.getenv("MINIO_BUCKET_NAME", "clowder")
 upload_chunk_size = os.getenv("MINIO_UPLOAD_CHUNK_SIZE", 10 * 1024 * 1024)
 
 
-@router.post("/files")
+@router.post("/")
 async def save_file(
     user_id=Depends(auth_handler.auth_wrapper),
     db: MongoClient = Depends(dependencies.get_db),
@@ -58,7 +58,7 @@ async def save_file(
     return ClowderFile.from_mongo(found)
 
 
-@router.get("/files/{file_id}")
+@router.get("/{file_id}")
 async def download_file(
     file_id: str,
     user_id=Depends(auth_handler.auth_wrapper),
@@ -76,7 +76,7 @@ async def download_file(
         return response
 
 
-@router.get("/files/{file_id}/summary")
+@router.get("/{file_id}/summary")
 async def get_file_summary(
     file_id: str, db: MongoClient = Depends(dependencies.get_db)
 ):

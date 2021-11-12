@@ -21,8 +21,9 @@ To manually run everything for development you can:
     
     uvicorn app.main:app --reload
     ```
-   
-Linting is managed using [Black]((https://black.readthedocs.io/en/stable/)). You can set up pycharm to automatically
+5. By default app is deployed at `http://localhost:8000/api/v2`. Documentation is at `http://localhost:8000/api/v2`.
+
+6. Linting is managed using [Black]((https://black.readthedocs.io/en/stable/)). You can set up pycharm to automatically
 run it when you save a file using these [instructions](https://black.readthedocs.io/en/stable/integrations/editors.html).
 The repository includes an action to run Black on push and pull_request.
 
