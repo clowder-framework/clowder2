@@ -6,9 +6,11 @@ from pydantic import Field
 from app.models.pyobjectid import PyObjectId
 from app.models.mongomodel import OID, MongoModel
 
+
 class AutoName(Enum):
     def _generate_next_value_(name, start, count, last_values):
         return name
+
 
 class DatasetStatus(AutoName):
     PRIVATE = auto()
@@ -22,33 +24,12 @@ class Dataset(MongoModel):
     author: PyObjectId
     description: str = "N/A"
     created: datetime = Field(default_factory=datetime.utcnow)
+    modified: datetime = Field(default_factory=datetime.utcnow)
     files: List[PyObjectId] = []
     folders: List[PyObjectId] = []
-    stream_id: List[PyObjectId] = []
-    tags: List[str] = []
-    metadataCount: int = 0
-    collections: List[PyObjectId] = []
-    thumbnail_id: str = None
-    licenseData: str = ""
-    spaces: List[PyObjectId] = []
-    lastModifiedDate: datetime = Field(default_factory=datetime.utcnow)
-    trash: bool = False
-    dateMovedToTrash: datetime = None
-    followers: List[PyObjectId] = []
-    stats: str = ""
     status: str = DatasetStatus.PRIVATE.name
-    creators: List[PyObjectId] = []
     views: int = 0
     downloads: int = 0
-
-
-
-
-# class MongoDataset(Document):
-#     name = StringField()
-#     description = StringField()
-#     price = IntField()
-#     tax = IntField()
 
 
 class MongoDataset(DynamicDocument):

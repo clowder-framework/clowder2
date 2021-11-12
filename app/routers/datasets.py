@@ -26,11 +26,11 @@ async def save_dataset(
     if "name" in request_json:
         name = request_json["name"]
     else:
-        name = 'N/A'
+        name = "N/A"
     if "description" in request_json:
         description = request_json["description"]
     else:
-        description = 'N/A'
+        description = "N/A"
     new_dataset = Dataset(author=res["_id"], name=name, description=description)
     new_dataset_mongo = json.loads(new_dataset.json())
     insert = await db["datasets"].insert_one(new_dataset_mongo)
@@ -72,16 +72,18 @@ async def get_dataset(dataset_id: str, db: MongoClient = Depends(dependencies.ge
         return Dataset.from_mongo(dataset)
     raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
 
-@router.post("/datasets/edit/{dataset_id}")
-async def edit_dataset( request: Request, dataset_id: str, db: MongoClient = Depends(dependencies.get_db)):
+
+@router.put("/datasets/{dataset_id}")
+async def edit_dataset(
+    request: Request, dataset_id: str, db: MongoClient = Depends(dependencies.get_db)
+):
     request_json = await request.json()
     if (
         dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
-
     ) is not None:
         try:
             request_json["_id"] = dataset_id
-            request_json["lastModifiedDate"] = datetime.datetime.utcnow()
+            request_json["modified"] = datetime.datetime.utcnow()
             edited_dataset = Dataset.from_mongo(request_json)
             db["datasets"].replace_one({"_id": ObjectId(dataset_id)}, edited_dataset)
         except Exception as e:
@@ -89,8 +91,11 @@ async def edit_dataset( request: Request, dataset_id: str, db: MongoClient = Dep
         return Dataset.from_mongo(dataset)
     raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
 
+
 @router.delete("/datasets/delete/{dataset_id}")
-async def delete_dataset(dataset_id: str, db: MongoClient = Depends(dependencies.get_db)):
+async def delete_dataset(
+    dataset_id: str, db: MongoClient = Depends(dependencies.get_db)
+):
     if (
         dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
     ) is not None:

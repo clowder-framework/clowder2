@@ -39,6 +39,7 @@ def test_get_one():
     assert response.status_code == 200
     assert response.json().get("_id") is not None
 
+
 def test_delete():
     response = client.post("/login", json=user)
     assert response.status_code == 200
@@ -50,6 +51,7 @@ def test_delete():
     assert response.status_code == 200
     response = client.delete("/datasets", headers=headers)
     assert response.status_code == 200
+
 
 def test_edit():
     response = client.post("/login", json=user)
@@ -67,8 +69,6 @@ def test_edit():
     assert response.status_code == 200
 
 
-
-
 def test_list():
     response = client.post("/login", json=user)
     assert response.status_code == 200
@@ -82,5 +82,6 @@ def test_list():
     assert response.status_code == 200
     assert len(response.json()) > 0
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     test_edit()
