@@ -10,7 +10,7 @@ from app.models.items import Item
 router = APIRouter()
 
 
-@router.post("/", response_description="Add a new item", response_model=Item)
+@router.post("", response_description="Add a new item", response_model=Item)
 async def create_item(
     item: Item,
     db: MongoClient = Depends(dependencies.get_db),
@@ -20,7 +20,7 @@ async def create_item(
     return Item.from_mongo(created)
 
 
-@router.get("/", response_description="List items", response_model=List[Item])
+@router.get("", response_description="List items", response_model=List[Item])
 async def read_items(
     db: MongoClient = Depends(dependencies.get_db), skip: int = 0, limit: int = 2
 ):

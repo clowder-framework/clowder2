@@ -17,14 +17,14 @@ user = {"name": "test@test.org", "password": "not_a_password"}
 
 
 def test_create():
-    response = client.post(f"{API_V2_STR}/users/", json=user)
+    response = client.post(f"{API_V2_STR}/users", json=user)
     assert response.status_code == 200
     response = client.post(f"{API_V2_STR}/login", json=user)
     assert response.status_code == 200
     token = response.json().get("token")
     assert token is not None
     headers = {"Authorization": "Bearer " + token}
-    response = client.post(f"{API_V2_STR}/datasets/", json=dataset, headers=headers)
+    response = client.post(f"{API_V2_STR}/datasets", json=dataset, headers=headers)
     assert response.json().get("id") is not None
     assert response.status_code == 200
 
@@ -35,7 +35,7 @@ def test_get_one():
     token = response.json().get("token")
     assert token is not None
     headers = {"Authorization": "Bearer " + token}
-    response = client.post(f"{API_V2_STR}/datasets/", json=dataset, headers=headers)
+    response = client.post(f"{API_V2_STR}/datasets", json=dataset, headers=headers)
     assert response.json().get("id") is not None
     assert response.status_code == 200
     dataset_id = response.json().get("id")
@@ -50,9 +50,9 @@ def test_list():
     token = response.json().get("token")
     assert token is not None
     headers = {"Authorization": "Bearer " + token}
-    response = client.post(f"{API_V2_STR}/datasets/", json=dataset, headers=headers)
+    response = client.post(f"{API_V2_STR}/datasets", json=dataset, headers=headers)
     assert response.json().get("id") is not None
     assert response.status_code == 200
-    response = client.get(f"{API_V2_STR}/datasets/", headers=headers)
+    response = client.get(f"{API_V2_STR}/datasets", headers=headers)
     assert response.status_code == 200
     assert len(response.json()) > 0

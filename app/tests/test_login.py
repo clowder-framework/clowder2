@@ -8,7 +8,7 @@ user = {"name": "test@test.org", "password": "not_a_password"}
 
 
 def test_signup():
-    response = client.post(f"{API_V2_STR}/users/", json=user)
+    response = client.post(f"{API_V2_STR}/users", json=user)
     assert response.status_code == 200
 
 

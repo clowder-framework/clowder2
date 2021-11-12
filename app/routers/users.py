@@ -11,7 +11,7 @@ from passlib.hash import bcrypt
 router = APIRouter()
 
 
-@router.post("/", response_model=User)
+@router.post("", response_model=User)
 async def save_user(request: Request, db: MongoClient = Depends(dependencies.get_db)):
     request_json = await request.json()
     plain_password = request_json["password"]
@@ -22,7 +22,7 @@ async def save_user(request: Request, db: MongoClient = Depends(dependencies.get
     return User.from_mongo(found).dict(exclude={"create_at"})
 
 
-@router.get("/", response_model=List[User])
+@router.get("", response_model=List[User])
 async def get_users(
     db: MongoClient = Depends(dependencies.get_db), skip: int = 0, limit: int = 2
 ):

@@ -29,7 +29,7 @@ clowder_bucket = os.getenv("MINIO_BUCKET_NAME", "clowder")
 upload_chunk_size = os.getenv("MINIO_UPLOAD_CHUNK_SIZE", 10 * 1024 * 1024)
 
 
-@router.post("/")
+@router.post("")
 async def save_file(
     user_id=Depends(auth_handler.auth_wrapper),
     db: MongoClient = Depends(dependencies.get_db),

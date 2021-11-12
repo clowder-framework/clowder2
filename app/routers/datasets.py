@@ -13,7 +13,7 @@ router = APIRouter()
 auth_handler = AuthHandler()
 
 
-@router.post("/")
+@router.post("")
 async def save_dataset(
     request: Request,
     user_id=Depends(auth_handler.auth_wrapper),
@@ -27,7 +27,7 @@ async def save_dataset(
     return Dataset.from_mongo(found)
 
 
-@router.get("/", response_model=List[Dataset])
+@router.get("", response_model=List[Dataset])
 async def get_datasets(
     user_id=Depends(auth_handler.auth_wrapper),
     db: MongoClient = Depends(dependencies.get_db),

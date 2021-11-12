@@ -13,13 +13,13 @@ item = {
 
 
 def test_create():
-    response = client.post(f"{API_V2_STR}/items/", json=item)
+    response = client.post(f"{API_V2_STR}/items", json=item)
     assert response.json().get("id") is not None
     assert response.status_code == 200
 
 
 def test_get_one():
-    response = client.post(f"{API_V2_STR}/items/", json=item)
+    response = client.post(f"{API_V2_STR}/items", json=item)
     item_id = response.json().get("id")
     response = client.get(f"{API_V2_STR}/items/{item_id}")
     assert response.status_code == 200
@@ -27,8 +27,8 @@ def test_get_one():
 
 
 def test_list():
-    response = client.post(f"{API_V2_STR}/items/", json=item)
+    response = client.post(f"{API_V2_STR}/items", json=item)
     assert response.json().get("id") is not None
-    response = client.get(f"{API_V2_STR}/items/")
+    response = client.get(f"{API_V2_STR}/items")
     assert response.status_code == 200
     assert len(response.json()) > 0
