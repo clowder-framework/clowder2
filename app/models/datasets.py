@@ -21,7 +21,7 @@ class DatasetStatus(AutoName):
 
 class Dataset(MongoModel):
     name: str = "N/A"
-    author: PyObjectId
+    author: PyObjectId = Field(default_factory=PyObjectId)
     description: str = "N/A"
     created: datetime = Field(default_factory=datetime.utcnow)
     modified: datetime = Field(default_factory=datetime.utcnow)

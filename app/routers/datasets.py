@@ -15,9 +15,9 @@ router = APIRouter()
 auth_handler = AuthHandler()
 
 
-@router.post("/datasets")
+@router.post("/datasets", response_model=Dataset)
 async def save_dataset(
-    dataset_info: Json[Dataset],
+    dataset_info: Dataset,
     user_id=Depends(auth_handler.auth_wrapper),
     db: MongoClient = Depends(dependencies.get_db),
 ):
@@ -26,7 +26,6 @@ async def save_dataset(
     ds["author"] = user["_id"]
     new_dataset = await db["datasets"].insert_one(ds)
     found = await db["datasets"].find_one({"_id": new_dataset.inserted_id})
-
     return Dataset.from_mongo(found)
 
 
@@ -84,7 +83,7 @@ async def edit_dataset(
     raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
 
 
-@router.delete("/datasets/delete/{dataset_id}")
+@router.delete("/datasets/{dataset_id}")
 async def delete_dataset(
     dataset_id: str, db: MongoClient = Depends(dependencies.get_db)
 ):
