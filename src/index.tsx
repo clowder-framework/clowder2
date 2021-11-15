@@ -8,7 +8,6 @@ import { BrowserRouter } from "react-router-dom";
 import routes from "./routes";
 import configureStore from "./store/configureStore";
 import {createTheme, MuiThemeProvider} from "@material-ui/core/styles";
-import "./loader";
 
 const store = configureStore();
 
@@ -18,7 +17,7 @@ const theme = createTheme({
 		fontFamily: "'Open Sans', sans-serif"
 	},
 	palette:{
-		fontFamily: "'Open Sans', sans-serif"
+		// fontFamily: "'Open Sans', sans-serif"
 	}
 
 });

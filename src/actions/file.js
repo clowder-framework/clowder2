@@ -83,7 +83,7 @@ export function fetchFilePreviews(id){
 }
 
 export const DELETE_FILE = "DELETE_FILE";
-export function deleteFile(fileId){
+export function fileDeleted(fileId){
 	let url = `${config.hostname}/clowder/api/files/${fileId}?superAdmin=true`;
 	return (dispatch) => {
 		return fetch(url, {mode:"cors", method:"DELETE", headers: getHeader()})

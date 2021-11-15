@@ -1,8 +1,10 @@
 import { RECEIVE_FILE_EXTRACTED_METADATA, RECEIVE_FILE_METADATA_JSONLD, RECEIVE_PREVIEWS } from "../actions/file";
+import {DataAction} from "../types/action";
+import {FileState, ExtractedMetadata} from "../types/data";
 
-const defaultState = {metadata: {}, extractedMetadata: {}, metadataJsonld: [], previews: []};
+const defaultState: FileState = {extractedMetadata: <ExtractedMetadata>{}, metadataJsonld: [], previews: []};
 
-const file = (state=defaultState, action) => {
+const file = (state=defaultState, action: DataAction) => {
 	switch(action.type) {
 		case RECEIVE_FILE_EXTRACTED_METADATA:
 			return Object.assign({}, state, {extractedMetadata: action.extractedMetadata});

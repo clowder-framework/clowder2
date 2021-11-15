@@ -1,11 +1,12 @@
 import React from "react";
 import {Route, Switch} from "react-router-dom";
 
-import App from "./containers/App";
+// import App from "./containers/App";
+import {App} from "./components/App";
 
-
-export default (
+const Routes = (
 	<Switch>
 		<Route exact path="/" render={() => {return (<App/>);}}/>
-	</Switch>
-);
+	</Switch>);
+
+export default Routes;

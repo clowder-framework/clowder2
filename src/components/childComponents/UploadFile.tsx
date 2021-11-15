@@ -2,25 +2,28 @@ import React, {useState} from "react";
 
 import {Box, Button, Container} from "@material-ui/core";
 
-import LoadingOverlay from "react-loading-overlay";
-import {makeStyles} from "@material-ui/core/styles";
+import LoadingOverlay from "react-loading-overlay-ts";
 
 import Form from "@rjsf/material-ui";
 
 import {uploadFile} from "../../utils/file.js";
 import fileSchema from "../../schema/fileSchema.json";
-
-const useStyles = makeStyles();
-
-export default function UploadFile(props) {
-	const {selectedDatasetId, selectDataset, setOpen, ...other} = props;
-	const classes = useStyles();
-
-	const [disabled, setDisabled] = useState(true);
-	const [loading, setLoading] = useState(false);
+import {FormProps} from "@rjsf/core";
 
 
-	const onSave = async (formData) => {
+type UploadFileProps ={
+	selectedDatasetId: string,
+	selectDataset: (selectedDatasetId: string) => void,
+	setOpen:(open:boolean) => void,
+}
+
+export const UploadFile: React.FC<UploadFileProps> = (props: UploadFileProps) => {
+	const {selectedDatasetId, selectDataset, setOpen,} = props;
+
+	const [loading, setLoading] = useState<boolean>(false);
+
+
+	const onSave = async (formData:FormData) => {
 		setLoading(true);
 		const response = await uploadFile(formData, selectedDatasetId);
 		if (response !== {} && (response["id"] !== undefined || response["ids"] !== undefined)){
@@ -34,6 +37,8 @@ export default function UploadFile(props) {
 		setOpen(false);
 	};
 
+	// TODO
+	// @ts-ignore
 	return (
 		<Container>
 			<LoadingOverlay
@@ -41,8 +46,9 @@ export default function UploadFile(props) {
 				spinner
 				text="Saving..."
 			>
-				<Form schema={fileSchema["schema"]} uiSchema={fileSchema["uiSchema"]}
-					  onSubmit={({formData}, e) => {onSave(formData);}}>
+				<Form schema={fileSchema["schema"] as FormProps<any>["schema"]}
+					  uiSchema={fileSchema["uiSchema"] as FormProps<any>["uiSchema"]}
+					  onSubmit={({formData}) => {onSave(formData);}}>
 					<Box className="inputGroup">
 						<Button variant="contained" type="submit" className="form-button-block">Upload</Button>
 					</Box>

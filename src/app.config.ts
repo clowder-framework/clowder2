@@ -1,8 +1,13 @@
-let config = {};
+interface Config{
+	hostname: string;
+	apikey: string;
+}
+
+let config:Config = <Config>{};
 let hostname = process.env.CLOWDER_REMOTE_HOSTNAME || "";
 
 // TODO when add auth piece remove this env
-let apikey = process.env.APIKEY;
+let apikey = process.env.APIKEY || "";
 
 config["hostname"] = hostname;
 config["apikey"] = apikey;
