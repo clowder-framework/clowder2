@@ -21,19 +21,22 @@ To manually run everything for development you can:
     
     uvicorn app.main:app --reload
     ```
-   
-Linting is managed using [Black]((https://black.readthedocs.io/en/stable/)). You can set up pycharm to automatically
+5. By default app is deployed at `http://localhost:8000/api/v2`. Documentation is at `http://localhost:8000/api/v2`.
+
+6. Linting is managed using [Black]((https://black.readthedocs.io/en/stable/)). You can set up pycharm to automatically
 run it when you save a file using these [instructions](https://black.readthedocs.io/en/stable/integrations/editors.html).
 The repository includes an action to run Black on push and pull_request.
+
+7. You can manually run tests with `pipenv run pytest -v` or right-clicking on `test` folder and clicking `Run`.
 
 ## NOTES ON ROUTES
 
 1. Create a user with the POST /users endpoint in routes.users. Supply name and password
 2. Get token using the POST /login endpoint in main. This will provide Bearer Access token good for 120 minutes.
-3. Currently only the create dataset endpoint and the test /protected endpoing in main check for the token
+3. Currently, only the create dataset endpoint and the test /protected endpoint in main check for the token
 
 ## Dev Environment Setup
-1. To install Black python code formatter so it runs everytime you save in an IDE see https://black.readthedocs.io/en/stable/integrations/editors.html
+1. To install Black python code formatter, so it runs everytime you save in an IDE see https://black.readthedocs.io/en/stable/integrations/editors.html
 
 ## Docker
 
