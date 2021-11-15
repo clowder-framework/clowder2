@@ -1,78 +1,46 @@
-# Clowder 2 FastAPI
+# Clowder 2 FastAPI Backend
 
-## Trying it out
+## Running in Docker
 
-The easiest way is to use docker compose. Please see section below.
+To run the full stack in Docker compose please use the following instructions:
 
-To manually run everything for development you can:
+1. Build images with `docker compose -f docker-compose.yml build`
 
-1. Run mongo in docker: 
-   `docker run --name clowder-mongo-fastapi -p 27017:27017 -d mongo`
-
-2. Run minio in docker:
-   `docker run -p 9000:9000 -p 9001:9001 -e MINIO_ROOT_USER=clowder -e MINIO_ROOT_PASSWORD=clowdersecret quay.io/minio/minio server /data --console-address ":9001"`
-
-3. Install dependencies using `pipenv install`. See [pipenv](https://github.com/pypa/pipenv).
-
-4. Run app (or setup run configuration in pycharm):
-    ```bash
-    # Configure the location of your MongoDB database:
-    export MONGODB_URL="mongodb://localhost:27017"
-    
-    uvicorn app.main:app --reload
-    ```
-5. By default app is deployed at `http://localhost:8000/api/v2`. Documentation is at `http://localhost:8000/api/v2`.
-
-6. Linting is managed using [Black]((https://black.readthedocs.io/en/stable/)). You can set up pycharm to automatically
-run it when you save a file using these [instructions](https://black.readthedocs.io/en/stable/integrations/editors.html).
-The repository includes an action to run Black on push and pull_request.
-
-7. You can manually run tests with `pipenv run pytest -v` or right-clicking on `test` folder and clicking `Run`.
-
-## NOTES ON ROUTES
-
-1. Create a user with the POST /users endpoint in routes.users. Supply name and password
-2. Get token using the POST /login endpoint in main. This will provide Bearer Access token good for 120 minutes.
-3. Currently, only the create dataset endpoint and the test /protected endpoint in main check for the token
-
-## Dev Environment Setup
-1. To install Black python code formatter, so it runs everytime you save in an IDE see https://black.readthedocs.io/en/stable/integrations/editors.html
-
-## Docker
-
-Build images with `docker compose -f docker-compose.yml build`
-
-Run docker services with `docker compose up --scale backend=4`. This will start the services with four instances of the backend
+2. Run all docker services with `docker compose up --scale backend=4`. This will start the services with four instances of the backend
 running in parallel.
 
-Default url for backend will be `http://clowder.docker.localhost/` using a web browser. If using a different client (for
+3. Default url for backend will be `http://clowder.docker.localhost/` using a web browser. If using a different client (for
 example postman set the `HOST` header to `clowder.docker.localhost`).
 This variable is set using the `traefik.http.routers.backend.rule` for the backend service.
 
-To access the traefik dashboard go to `http://localhost:8080`. For the raw settings see `http://localhost:8080/api/rawdata`.
+4. To access the traefik dashboard go to `http://localhost:8080`. For the raw settings see `http://localhost:8080/api/rawdata`.
 
-Minio console is available at `minioconsole.docker.localhost`.
+5. Minio console is available at `minioconsole.docker.localhost`.
 
-# Links
+## Developing
 
-Mongo ObjectId
-https://github.com/tiangolo/fastapi/issues/1515
+When developing please follow the following instructions:
 
-ODM
-https://github.com/art049/odmantic/
+1. Start mongo and minio using provided development docker compose file:
 
-pymongo and fastapi
-https://medium.com/fastapi-tutorials/integrating-fastapi-and-mongodb-8ef4f2ca68ad
+   ```docker compose -f docker-compose.dev.yml up```
 
-mongoengine and fastapi
-https://stackoverflow.com/questions/60277170/how-to-convert-mongoengine-class-in-pedantic-basemodel-in-python-fastapi
+2. Install dependencies using `pipenv install`. See [pipenv](https://github.com/pypa/pipenv).
 
-pydantic and objectid
-https://stackoverflow.com/questions/59503461/how-to-parse-objectid-in-a-pydantic-model
+3. Run app from command line (if you set it up in PyCharm you can use its debug functions):
 
-mongoengine and fastapi
-https://stackoverflow.com/questions/60277170/how-to-convert-mongoengine-class-in-pedantic-basemodel-in-python-fastapi
+    ```uvicorn app.main:app --reload```
 
-beanie odm
-https://github.com/roman-right/beanie
+4. API docs are available at `http://localhost:8000/docs`. Default API is deployed at `http://localhost:8000/api/v2`.
+
+5. Create a user using `POST /api/v2/users` and getting a JWT token by using `POST /api/v2/login`. Place the token in
+   header of requests that require authentications using the `Authorization: Bearer <your token>` HTTP header.
+
+6. Manually run tests before pushing with `pipenv run pytest -v` or right-clicking on `test` folder and clicking `Run` in PyCharm.
+
+7. Linting is managed using [Black]((https://black.readthedocs.io/en/stable/)). You can set up PyCharm to automatically
+run it when you save a file using these [instructions](https://black.readthedocs.io/en/stable/integrations/editors.html).
+The git repository includes an action to run Black on push and pull_request.
+
+
 
