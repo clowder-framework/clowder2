@@ -1,10 +1,8 @@
 from typing import Optional
 
-from bson import ObjectId
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 from app.models.mongomodel import MongoModel
-from app.models.pyobjectid import PyObjectId
 
 
 class NestedValue(BaseModel):
