@@ -42,37 +42,37 @@ def test_get_one():
     assert response.status_code == 200
     assert response.json().get("id") is not None
     dataset_id = response.json().get("id")
-    response = client.get(f"/datasets/{dataset_id}")
+    response = client.get(f"{API_V2_STR}/datasets/{dataset_id}", headers=headers)
     assert response.status_code == 200
     assert response.json().get("id") is not None
 
 
 def test_delete():
-    response = client.post("/login", json=user)
+    response = client.post(f"{API_V2_STR}/login", json=user)
     assert response.status_code == 200
     token = response.json().get("token")
     assert token is not None
     headers = {"Authorization": f"Bearer {token}"}
-    response = client.post("/datasets", headers=headers, json=dataset_data)
+    response = client.post(f"{API_V2_STR}/datasets", headers=headers, json=dataset_data)
     assert response.status_code == 200
     assert response.json().get("id") is not None
     dataset_id = response.json().get("id")
-    response = client.delete(f"{API_V2_STR}/{dataset_id}", headers=headers)
+    response = client.delete(f"{API_V2_STR}/datasets/{dataset_id}", headers=headers)
     assert response.status_code == 200
 
 
 def test_edit():
-    response = client.post("/login", json=user)
+    response = client.post(f"{API_V2_STR}/login", json=user)
     assert response.status_code == 200
     token = response.json().get("token")
     assert token is not None
     headers = {"Authorization": "Bearer " + token}
-    response = client.post("/datasets", json=dataset_data, headers=headers)
+    response = client.post(f"{API_V2_STR}/datasets", json=dataset_data, headers=headers)
     assert response.status_code == 200
     assert response.json().get("id") is not None
     new_dataset = response.json()
     new_dataset["name"] = "edited name"
-    response = client.post("/datasets", json=new_dataset, headers=headers)
+    response = client.post(f"{API_V2_STR}/datasets", json=new_dataset, headers=headers)
     assert response.status_code == 200
     assert response.json().get("id") is not None
 

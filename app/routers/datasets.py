@@ -64,7 +64,7 @@ async def get_dataset(dataset_id: str, db: MongoClient = Depends(dependencies.ge
     raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
 
 
-@router.put("/datasets/{dataset_id}")
+@router.put("/{dataset_id}")
 async def edit_dataset(
     request: Request, dataset_id: str, db: MongoClient = Depends(dependencies.get_db)
 ):
@@ -83,7 +83,7 @@ async def edit_dataset(
     raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
 
 
-@router.delete("/datasets/{dataset_id}")
+@router.delete("/{dataset_id}")
 async def delete_dataset(
     dataset_id: str, db: MongoClient = Depends(dependencies.get_db)
 ):
