@@ -9,11 +9,14 @@ from fastapi.encoders import jsonable_encoder
 from app import dependencies
 from app.models.datasets import Dataset
 from app.auth import AuthHandler
+import os
+from minio import Minio
 
 router = APIRouter()
 
 auth_handler = AuthHandler()
 
+clowder_bucket = os.getenv("MINIO_BUCKET_NAME", "clowder")
 
 @router.post("", response_model=Dataset)
 async def save_dataset(
@@ -85,11 +88,18 @@ async def edit_dataset(
 
 @router.delete("/{dataset_id}")
 async def delete_dataset(
-    dataset_id: str, db: MongoClient = Depends(dependencies.get_db)
+    dataset_id: str, db: MongoClient = Depends(dependencies.get_db),
+    fs: Minio = Depends(dependencies.get_fs)
 ):
     if (
         dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
     ) is not None:
+        dataset_files = dataset['files']
+        for f in dataset_files:
+            fs.remove_object(
+                clowder_bucket,
+                str(f)
+            )
         res = await db["datasets"].delete_one({"_id": ObjectId(dataset_id)})
         return {"status": "deleted"}
     raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
