@@ -99,6 +99,11 @@ interface AttatchTo{
 	url: string;
 }
 
+export interface Thumbnail{
+	id: string;
+	thumbnail: string;
+}
+
 export interface DatasetState{
 	files: File[];
 	datasets: Dataset[];
@@ -107,6 +112,7 @@ export interface DatasetState{
 }
 
 export interface FileState{
+	fileMetadata: FileMetadata;
 	extractedMetadata: ExtractedMetadata;
 	metadataJsonld: MetadataJsonld[];
 	previews: FilePreview[];

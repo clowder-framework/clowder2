@@ -1,4 +1,4 @@
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import {makeStyles} from "@material-ui/core/styles";
 import {AppBar, Box, Link, Dialog, DialogTitle, Grid, ListItem, Tab, Tabs, Typography, Button} from "@material-ui/core";
 import BusinessCenterIcon from "@material-ui/icons/BusinessCenter";
@@ -9,7 +9,16 @@ import CloudDownloadOutlinedIcon from "@material-ui/icons/CloudDownloadOutlined"
 import {CreateDataset} from "./childComponents/CreateDataset";
 import {downloadDataset} from "../utils/dataset";
 
-import {Dataset as DatasetType} from "../types/data";
+import {Dataset as DatasetType, RootState, Thumbnail} from "../types/data";
+import {useDispatch, useSelector} from "react-redux";
+import {datasetDeleted, fetchDatasets} from "../actions/dataset";
+import {downloadThumbnail} from "../utils/thumbnail";
+import TopBar from "./childComponents/TopBar";
+
+import {TabPanel} from "./childComponents/TabComponent";
+import {a11yProps} from "./childComponents/TabComponent";
+import {useHistory} from "react-router-dom";
+import {Breadcrumbs} from "./childComponents/BreadCrumb";
 
 const useStyles = makeStyles(() => ({
 	appBar: {
@@ -58,161 +67,200 @@ const useStyles = makeStyles(() => ({
 	}
 }));
 
-type DashboardProps = {
-	datasets: DatasetType[],
-	selectDataset: (selectedDatasetId: string) => void,
-	deleteDataset: (datasetId: string) => void,
-	thumbnails: [],
-	previous: () => void,
-	next: () => void,
-	datasetSchema: any,
-};
+export const Dashboard = (): JSX.Element => {
 
-export const Dashboard: React.FC<DashboardProps> = (props: DashboardProps) => {
 	const classes = useStyles();
 
-	const {datasets, selectDataset, deleteDataset, thumbnails, previous, next} = props;
+	// use history hook to redirect/navigate between routes
+	let history = useHistory();
 
+	// Redux connect equivalent
+	const dispatch = useDispatch();
+	const deleteDataset = (datasetId: string) => dispatch(datasetDeleted(datasetId));
+	const listDatasets = (when: string, date: string, limit: number) => dispatch(fetchDatasets(when, date, limit));
+	const datasets = useSelector((state: RootState) => state.dataset.datasets);
+
+	const [datasetThumbnailList, setDatasetThumbnailList] = useState<any>([]);
+	const [limit,] = useState<number>(5);
+	const [lastDataset, setLastDataset] = useState<DatasetType>();
+	const [firstDataset, setFirstDataset] = useState<DatasetType>();
 	const [selectedTabIndex, setSelectedTabIndex] = useState(0);
 	const [open, setOpen] = React.useState(false);
 
+	// component did mount
+	useEffect(() => {
+		listDatasets("", "", limit);
+	}, []);
+
+	// fetch thumbnails from each individual dataset/id calls
+	useEffect(() => {
+		(async () => {
+			if (datasets !== undefined && datasets.length > 0) {
+
+				// TODO change the type any to something else
+				let datasetThumbnailListTemp: any = [];
+				await Promise.all(datasets.map(async (dataset) => {
+					// add thumbnails
+					if (dataset["thumbnail"] !== null && dataset["thumbnail"] !== undefined) {
+						let thumbnailURL = await downloadThumbnail(dataset["thumbnail"]);
+						datasetThumbnailListTemp.push({"id": dataset["id"], "thumbnail": thumbnailURL})
+					}
+				}));
+				setDatasetThumbnailList(datasetThumbnailListTemp);
+
+				// find last and first dataset for pagination
+				setFirstDataset(datasets[0])
+				setLastDataset(datasets[datasets.length - 1]);
+
+			}
+		})();
+	}, [datasets])
+
+	// switch tabs
 	const handleTabChange = (_event: React.ChangeEvent<{}>, newTabIndex: number) => {
 		setSelectedTabIndex(newTabIndex);
 	};
 
-	return (
-		<div className="inner-container">
-			<Grid container spacing={4}>
-				<Grid item lg={8} xl={8} md={8} sm={8} xs={12}>
-					<AppBar className={classes.appBar} position="static">
-						<Tabs value={selectedTabIndex} onChange={handleTabChange} aria-label="dashboard tabs">
-							<Tab className={classes.tab} label="Datasets" {...a11yProps(0)} />
-							<Tab className={classes.tab} label="Activity" {...a11yProps(1)} />
-							<Tab className={classes.tab} label="Collections" {...a11yProps(2)} />
-							<Tab className={classes.tab} label="Spaces" {...a11yProps(3)} />
-							<Tab className={classes.tab} label="API Keys" {...a11yProps(4)} />
-						</Tabs>
-					</AppBar>
-					<TabPanel value={selectedTabIndex} index={0}>
+	// pagination
+	const previous = () => {
+		let date = firstDataset ? new Date(firstDataset["created"]) : null;
+		if (date) listDatasets("b", date.toISOString(), limit);
+	}
 
-						{
-							datasets !== undefined && thumbnails !== undefined ?
-								datasets.map((dataset) => {
-									let thumbnailComp = <BusinessCenterIcon className={classes.fileCardImg}
-																			style={{fontSize: "5em"}}/>;
-									thumbnails.map((thumbnail) => {
-										if (dataset["id"] !== undefined && thumbnail["id"] !== undefined &&
-											thumbnail["thumbnail"] !== null && thumbnail["thumbnail"] !== undefined &&
-											dataset["id"] === thumbnail["id"]) {
-											thumbnailComp = <img src={thumbnail["thumbnail"]} alt="thumbnail"
-																 className={classes.fileCardImg}/>;
-										}
-									});
-									return (
-										<Box className={classes.fileCardOuterBox}>
-											<ListItem button className={classes.fileCard} key={dataset["id"]}
-													  onClick={() => selectDataset(dataset["id"])}>
-												<Grid item xl={2} lg={2} md={2} sm={2} xs={12}>
-													{thumbnailComp}
-												</Grid>
-												<Grid item xl={8} lg={8} md={8} sm={8} xs={12}>
-													<Box className={classes.fileCardText}>
-														<Typography>Dataset name: {dataset["name"]}</Typography>
-														<Typography>Description: {dataset["description"]}</Typography>
-														<Typography>Created on: {dataset["created"]}</Typography>
+	const next = () => {
+		let date = lastDataset ? new Date(lastDataset["created"]) : null;
+		if (date) listDatasets("a", date.toISOString(), limit);
+	}
+
+	const selectDataset = (selectedDatasetId: string) => {
+		// Redirect to dataset route with dataset Id
+		history.push(`/datasets/${selectedDatasetId}`);
+	}
+
+	// for breadcrumb
+	const paths = [
+		{
+			"name": "Explore",
+			"url": "/",
+		}
+	];
+
+	return (
+		<div>
+			<TopBar/>
+			<div className="outer-container">
+				<Breadcrumbs paths={paths}/>
+				<div className="inner-container">
+					<Grid container spacing={4}>
+						<Grid item lg={8} xl={8} md={8} sm={8} xs={12}>
+							<AppBar className={classes.appBar} position="static">
+								<Tabs value={selectedTabIndex} onChange={handleTabChange} aria-label="dashboard tabs">
+									<Tab className={classes.tab} label="Datasets" {...a11yProps(0)} />
+									<Tab className={classes.tab} label="Activity" {...a11yProps(1)} />
+									<Tab className={classes.tab} label="Collections" {...a11yProps(2)} />
+									<Tab className={classes.tab} label="Spaces" {...a11yProps(3)} />
+									<Tab className={classes.tab} label="API Keys" {...a11yProps(4)} />
+								</Tabs>
+							</AppBar>
+							<TabPanel value={selectedTabIndex} index={0}>
+
+								{
+									datasets !== undefined && datasetThumbnailList !== undefined ?
+										datasets.map((dataset) => {
+											let thumbnailComp = <BusinessCenterIcon className={classes.fileCardImg}
+																					style={{fontSize: "5em"}}/>;
+											datasetThumbnailList.map((thumbnail: Thumbnail) => {
+												if (dataset["id"] !== undefined && thumbnail["id"] !== undefined &&
+													thumbnail["thumbnail"] !== null && thumbnail["thumbnail"] !== undefined &&
+													dataset["id"] === thumbnail["id"]) {
+													thumbnailComp = <img src={thumbnail["thumbnail"]} alt="thumbnail"
+																		 className={classes.fileCardImg}/>;
+												}
+											});
+											return (
+												<Box className={classes.fileCardOuterBox}>
+													<ListItem button className={classes.fileCard} key={dataset["id"]}
+															  onClick={() => selectDataset(dataset["id"])}>
+														<Grid item xl={2} lg={2} md={2} sm={2} xs={12}>
+															{thumbnailComp}
+														</Grid>
+														<Grid item xl={8} lg={8} md={8} sm={8} xs={12}>
+															<Box className={classes.fileCardText}>
+																<Typography>Dataset name: {dataset["name"]}</Typography>
+																<Typography>Description: {dataset["description"]}</Typography>
+																<Typography>Created
+																	on: {dataset["created"]}</Typography>
+															</Box>
+														</Grid>
+													</ListItem>
+													<Box className={classes.fileCardActionBox}>
+														<Box className={classes.fileCardActionItem}>
+															<Button startIcon={<DeleteOutlineIcon/>}
+																	onClick={() => {
+																		deleteDataset(dataset["id"]);
+																	}}>
+																Delete</Button>
+														</Box>
+														<Box className={classes.fileCardActionItem}>
+															<Button startIcon={<StarBorderIcon/>}>Follow</Button>
+														</Box>
+														<Box className={classes.fileCardActionItem}>
+															<Button startIcon={<CloudDownloadOutlinedIcon/>}
+																	onClick={() => {
+																		downloadDataset(dataset["id"], dataset["name"]);
+																	}}>
+																Download</Button>
+														</Box>
 													</Box>
-												</Grid>
-											</ListItem>
-											<Box className={classes.fileCardActionBox}>
-												<Box className={classes.fileCardActionItem}>
-													<Button startIcon={<DeleteOutlineIcon/>}
-															onClick={() => {
-																deleteDataset(dataset["id"]);
-															}}>
-														Delete</Button>
 												</Box>
-												<Box className={classes.fileCardActionItem}>
-													<Button startIcon={<StarBorderIcon/>}>Follow</Button>
-												</Box>
-												<Box className={classes.fileCardActionItem}>
-													<Button startIcon={<CloudDownloadOutlinedIcon/>}
-															onClick={() => {
-																downloadDataset(dataset["id"], dataset["name"]);
-															}}>
-														Download</Button>
-												</Box>
-											</Box>
-										</Box>
-									);
-								})
-								:
-								<></>
-						}
-						<Button onClick={previous}>Prev</Button>
-						<Button onClick={next}>Next</Button>
-					</TabPanel>
-					<TabPanel value={selectedTabIndex} index={1}></TabPanel>
-					<TabPanel value={selectedTabIndex} index={2}></TabPanel>
-					<TabPanel value={selectedTabIndex} index={3}></TabPanel>
-					<TabPanel value={selectedTabIndex} index={4}></TabPanel>
-				</Grid>
-				<Grid item lg={4} md={4} xl={4} sm={4} xs={12}>
-					<Box className="actionCard">
-						<Typography className="title">Create your dataset</Typography>
-						<Typography className="content">Some quick example text to tell users why they should upload
-							their own data</Typography>
-						<Link className="link" onClick={() => {
-							setOpen(true);
-						}}>Create Dataset</Link>
-					</Box>
-					<Box className="actionCard">
-						<Typography className="title">Explore more dataset</Typography>
-						<Typography className="content">Some quick example text to tell users why they should follow
-							more people</Typography>
-						<Link href="" className="link">Go to Explore</Link>
-					</Box>
-					<Box className="actionCard">
-						<Typography className="title">Want to learn more about Clowder?</Typography>
-						<Typography className="content">Some quick example text to tell users why they should read
-							the tutorial</Typography>
-						<Link href="" className="link">Show me Tutorial</Link>
-					</Box>
-				</Grid>
-			</Grid>
-			<Dialog open={open} onClose={() => {
-				setOpen(false);
-			}} fullWidth={true} aria-labelledby="create-dataset">
-				<DialogTitle id="form-dialog-title">Create New Dataset</DialogTitle>
-				{/*pass select to uploader so once upload succeeded, can jump to that dataset/file page*/}
-				<CreateDataset selectDataset={selectDataset} setOpen={setOpen}/>
-			</Dialog>
+											);
+										})
+										:
+										<></>
+								}
+								<Button onClick={previous}>Prev</Button>
+								<Button onClick={next}>Next</Button>
+							</TabPanel>
+							<TabPanel value={selectedTabIndex} index={1}></TabPanel>
+							<TabPanel value={selectedTabIndex} index={2}></TabPanel>
+							<TabPanel value={selectedTabIndex} index={3}></TabPanel>
+							<TabPanel value={selectedTabIndex} index={4}></TabPanel>
+						</Grid>
+						<Grid item lg={4} md={4} xl={4} sm={4} xs={12}>
+							<Box className="actionCard">
+								<Typography className="title">Create your dataset</Typography>
+								<Typography className="content">Some quick example text to tell users why they should
+									upload
+									their own data</Typography>
+								<Link className="link" onClick={() => {
+									setOpen(true);
+								}}>Create Dataset</Link>
+							</Box>
+							<Box className="actionCard">
+								<Typography className="title">Explore more dataset</Typography>
+								<Typography className="content">Some quick example text to tell users why they should
+									follow
+									more people</Typography>
+								<Link href="" className="link">Go to Explore</Link>
+							</Box>
+							<Box className="actionCard">
+								<Typography className="title">Want to learn more about Clowder?</Typography>
+								<Typography className="content">Some quick example text to tell users why they should
+									read
+									the tutorial</Typography>
+								<Link href="" className="link">Show me Tutorial</Link>
+							</Box>
+						</Grid>
+					</Grid>
+					<Dialog open={open} onClose={() => {
+						setOpen(false);
+					}} fullWidth={true} aria-labelledby="create-dataset">
+						<DialogTitle id="form-dialog-title">Create New Dataset</DialogTitle>
+						{/*pass select to uploader so once upload succeeded, can jump to that dataset/file page*/}
+						<CreateDataset selectDataset={selectDataset} setOpen={setOpen}/>
+					</Dialog>
+				</div>
+			</div>
 		</div>
 	);
-}
-
-function TabPanel(props:any) {
-	const {children, value, index, ...other} = props;
-
-	return (
-		<div
-			role="tabpanel"
-			hidden={value !== index}
-			id={`dashboard-tabpanel-${index}`}
-			aria-labelledby={`dashboard-tab-${index}`}
-			{...other}
-		>
-			{value === index && (
-				<Box p={3}>
-					<Typography>{children}</Typography>
-				</Box>
-			)}
-		</div>
-	);
-}
-
-function a11yProps(index:number) {
-	return {
-		id: `dashboard-tab-${index}`,
-		"aria-controls": `dashboard-tabpanel-${index}`,
-	};
 }

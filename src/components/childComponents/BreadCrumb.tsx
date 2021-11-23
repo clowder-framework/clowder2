@@ -4,6 +4,7 @@ import MuiBreadcrumbs from '@material-ui/core/Breadcrumbs';
 import Divider from '@material-ui/core/Divider';
 import Link from '@material-ui/core/Link';
 import {makeStyles} from "@material-ui/core/styles";
+import {useHistory} from "react-router-dom";
 
 const useStyles = makeStyles(() => ({
 	breadCrumb:{
@@ -24,23 +25,23 @@ const useStyles = makeStyles(() => ({
 }));
 
 type BreadCrumbProps = {
-	paths: any,
-	goToPath: any
+	paths: any
 }
 export const Breadcrumbs: React.FC<BreadCrumbProps> = (props:BreadCrumbProps) => {
 	const classes = useStyles();
 
-	const { paths, goToPath,} = props;
+	const history = useHistory();
+
+	const { paths } = props;
 	return (
 		<div>
 			<MuiBreadcrumbs className={classes.breadCrumb} aria-label="breadcrumb">
 				<MuiBreadcrumbs className={classes.breadCrumb} aria-label="breadcrumb">
-					<Link color="inherit" className={classes.breadCrumbLink} href="">Explore</Link>
 					{
 						paths.map((path:any, index:number) => {
 							if (index !== paths.length -1){
 								return (<Link className={classes.breadCrumbLink}
-												onClick={() => goToPath(path["type"], path["id"])}>{path["name"]}
+												onClick={() => {history.push(path["url"])}}>{path["name"]}
 								</Link>);
 							}
 							else{

@@ -28,6 +28,33 @@ export function fetchFileExtractedMetadata(id){
 	};
 }
 
+export const RECEIVE_FILE_METADATA = "RECEIVE_FILE_METADATA";
+export function receiveFileMetadata(type, json){
+	return (dispatch) => {
+		dispatch({
+			type: type,
+			fileMetadata: json,
+			receivedAt: Date.now(),
+		});
+	};
+}
+export function fetchFileMetadata(id){
+	let url = `${config.hostname}/clowder/api/files/${id}/metadata?superAdmin=true`;
+	return (dispatch) => {
+		return fetch(url, {mode:"cors", headers: getHeader()})
+		.then((response) => {
+			if (response.status === 200) {
+				response.json().then(json =>{
+					dispatch(receiveFileMetadata(RECEIVE_FILE_METADATA, json));
+				});
+			}
+			else {
+				dispatch(receiveFileMetadata(RECEIVE_FILE_METADATA, []));
+			}
+		});
+	}
+}
+
 export const RECEIVE_FILE_METADATA_JSONLD = "RECEIVE_FILE_METADATA_JSONLD";
 export function receiveFileMetadataJsonld(type, json){
 	return (dispatch) => {
