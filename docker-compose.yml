@@ -1,0 +1,19 @@
+
+version: "3.9"
+
+services:
+
+
+  react:
+    container_name: "clowder2-react"
+    image: "clowder/clowder-react"
+    build:
+      context: .
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: production
+      CLOWDER_REMOTE_HOSTNAME: ${CLOWDER_REMOTE_HOSTNAME}
+      APIKEY: ${CLOWDER_REMOTE_APIKEY}
+
+

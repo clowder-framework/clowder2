@@ -29,7 +29,8 @@ RUN npm run build
 FROM nginx:alpine
 
 RUN apk add --no-cache jq
-RUN mkdir /usr/share/nginx/html && \
+RUN rm -rf /usr/share/nginx/html/ && \
+  mkdir /usr/share/nginx/html && \
   mkdir /usr/share/nginx/html/public
 
 COPY --from=builder /usr/src/app/dist/ /usr/share/nginx/html/

@@ -1,5 +1,4 @@
 import Cookies from "universal-cookie";
-import jwt_decode from "jwt-decode";
 import config from "../app.config";
 
 const cookies = new Cookies();
@@ -9,8 +8,8 @@ const cookies = new Cookies();
 export const isAuthorized = () => {
 	const authorization = cookies.get("Authorization");
 	return process.env.DEPLOY_ENV === "local" ||
-			(authorization !== undefined && authorization !== "" && authorization !==
-					null);
+		(authorization !== undefined && authorization !== "" && authorization !==
+			null);
 };
 
 // construct header
@@ -26,7 +25,7 @@ export function getHeader() {
 	// });
 }
 
-export async function downloadResource(url){
+export async function downloadResource(url) {
 	const authHeader = getHeader();
 	const response = await fetch(url, {
 		method: "GET",
@@ -34,15 +33,13 @@ export async function downloadResource(url){
 		headers: authHeader,
 	});
 
-	if (response.status  === 200){
-		const blob = await response.blob();
+	if (response.status === 200) {
+		let blob = await response.blob();
 		return window.URL.createObjectURL(blob);
-	}
-	else if  (response.status  === 401){
+	} else if (response.status === 401) {
 		// TODO handle error
 		return null;
-	}
-	else {
+	} else {
 		// TODO handle error
 		return null;
 	}

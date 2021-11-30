@@ -1,0 +1,117 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+      - 'release/*'
+
+    tags:
+      - '*'
+
+  pull_request:
+    branches:
+      - main
+      - develop
+      - 'release/*'
+
+env:
+  MAIN_REPO: clowder-framework/clowder2-react-frontend
+
+jobs:
+
+  # ----------------------------------------------------------------------
+  # NODE BUILD
+  # ----------------------------------------------------------------------
+  build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        node:
+          - "12"
+          - "14"
+
+    steps:
+      # checkout source code
+      - uses: actions/checkout@v2
+
+      # setup node
+      - uses: actions/setup-node@v2
+        with:
+          node-version: ${{ matrix.node }}
+
+      # install dependencies
+      - name: install dependencies
+        run: npm install
+
+      # compile UI
+      - name: build
+        run: npm run build
+
+  # ----------------------------------------------------------------------
+  # DOCKER BUILD
+  # ----------------------------------------------------------------------
+  docker:
+    runs-on: ubuntu-latest
+
+    steps:
+      # checkout source code
+      - uses: actions/checkout@v2
+
+      # calculate some variables that are used later
+      - name: version information
+        run: |
+          if [ "${{ github.event.release.target_commitish }}" != "" ]; then
+            BRANCH="${{ github.event.release.target_commitish }}"
+          elif [[ $GITHUB_REF =~ pull ]]; then
+            BRANCH="$(echo $GITHUB_REF | sed 's#refs/pull/\([0-9]*\)/merge#PR-\1#')"
+          else
+            BRANCH=${GITHUB_REF##*/}
+          fi
+          echo "GITHUB_BRANCH=${BRANCH}" >> $GITHUB_ENV
+          if [ "$BRANCH" == "master" ]; then
+            version=$(cat package.json | grep \"version\" | head -1 | awk -F= "{ print $2 }" | sed 's/[version:,",]//g' | tr -d '[[:space:]]')
+            tags="latest"
+            oldversion=""
+            while [ "${oldversion}" != "${version}" ]; do
+              oldversion="${version}"
+              tags="${tags},${version}"
+              version=${version%.*}
+            done
+            echo "VERSION=$(awk '/version = / { print $4 }' project/Build.scala | sed 's/"//g')" >> $GITHUB_ENV
+            echo "TAGS=${tags}" >> $GITHUB_ENV
+          elif [ "$BRANCH" == "develop" ]; then
+            echo "VERSION=develop" >> $GITHUB_ENV
+            echo "TAGS=develop" >> $GITHUB_ENV
+          else
+            echo "VERSION=testing" >> $GITHUB_ENV
+            echo "TAGS=${BRANCH}" >> $GITHUB_ENV
+          fi
+
+      # build image
+      - name: Build image
+        uses: elgohr/Publish-Docker-Github-Action@3.04
+        with:
+          name: clowder/clowder-react
+          no_push: true
+
+      # this will publish to NCSA
+      - name: Publish to NCSA Hub
+        #if: github.event_name != 'pull_request' && github.repository == env.MAIN_REPO
+        if: github.repository == env.MAIN_REPO
+        uses: elgohr/Publish-Docker-Github-Action@3.04
+        env:
+          BRANCH: ${{ env.GITHUB_BRANCH }}
+          VERSION: ${{ env.VERSION }}
+          BUILDNUMBER: ${{ github.run_number }}
+          GITSHA1: ${{ github.sha  }}
+        with:
+          registry: hub.ncsa.illinois.edu
+          name: clowder/clowder-react
+          username: ${{ secrets.HUB_USERNAME }}
+          password: ${{ secrets.HUB_PASSWORD }}
+          tags: "${{ env.TAGS }}"
+          buildargs: BRANCH,VERSION,BUILDNUMBER,GITSHA1

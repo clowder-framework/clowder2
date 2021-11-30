@@ -41,3 +41,6 @@ dist
 
 # Mac files
 .DS_Store
+
+# Ignore swap files (for files currently being edited)
+**/*.swp

@@ -29,13 +29,12 @@ export async function createDataset(formData) {
 	}
 }
 
-export async function downloadDataset(datasetId, filename=null){
+export async function downloadDataset(datasetId, filename = null) {
 
-	if (filename){
+	if (filename) {
 		filename = filename.replace(/\s+/g, "_");
 		filename = `${filename}.zip`;
-	}
-	else{
+	} else {
 		filename = `${datasetId}.zip`;
 	}
 	const endpoint = `${config.hostname}/clowder/api/datasets/${datasetId}/download?superAdmin=true`;
@@ -53,12 +52,10 @@ export async function downloadDataset(datasetId, filename=null){
 			anchor.click();
 			document.body.removeChild(anchor);
 		}
-	}
-	else if (response.status === 401) {
+	} else if (response.status === 401) {
 		// TODO
 		console.log(response.json());
-	}
-	else {
+	} else {
 		console.log(response.json());
 	}
 
