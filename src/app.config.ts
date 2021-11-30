@@ -3,11 +3,11 @@ interface Config{
 	apikey: string;
 }
 
-let config:Config = <Config>{};
-let hostname = process.env.CLOWDER_REMOTE_HOSTNAME || "";
+const config:Config = <Config>{};
+const hostname = process.env.CLOWDER_REMOTE_HOSTNAME || "";
 
 // TODO when add auth piece remove this env
-let apikey = process.env.APIKEY || "";
+const apikey = process.env.APIKEY || "";
 
 config["hostname"] = hostname;
 config["apikey"] = apikey;

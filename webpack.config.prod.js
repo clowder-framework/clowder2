@@ -32,6 +32,14 @@ export default {
 		filename: "[name].[chunkhash].js"
 	},
 	plugins: [
+		// NOTE: `npm run preinstall` currently runs eslint
+		/*
+		new ESLintPlugin({
+			extensions:["ts","js","tsx","jsx"],
+			exclude: ["node_modules", "dist", "build"]
+		}),
+		*/
+
 		// Hash the files using MD5 so that their names change when the content changes.
 		new WebpackMd5Hash(),
 

@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from "react";
 import config from "../app.config";
-import {AppBar, Box, Divider, Grid, Tab, Tabs, Typography} from "@material-ui/core"
+import {AppBar, Box, Divider, Grid, Tab, Tabs, Typography} from "@material-ui/core";
 import {makeStyles} from "@material-ui/core/styles";
 import {ClowderInput} from "./styledComponents/ClowderInput";
 import {ClowderButton} from "./styledComponents/ClowderButton";
@@ -36,12 +36,12 @@ export const File = (): JSX.Element => {
 	const classes = useStyles();
 
 	// path parameter
-	let { fileId } = useParams<{fileId?: string}>();
+	const { fileId } = useParams<{fileId?: string}>();
 
 	// query paramter get dataset id
 	const search = useLocation().search;
-	let datasetId = new URLSearchParams(search).get("dataset");
-	let datasetName = new URLSearchParams(search).get("name");
+	const datasetId = new URLSearchParams(search).get("dataset");
+	const datasetName = new URLSearchParams(search).get("name");
 
 	const dispatch = useDispatch();
 	const listFileMetadataJsonld = (fileId:string|undefined) => dispatch(fetchFileMetadataJsonld(fileId));
@@ -66,10 +66,10 @@ export const File = (): JSX.Element => {
 	useEffect(() => {
 		(async () => {
 			if (filePreviews !== undefined && filePreviews.length > 0 && filePreviews[0].previews !== undefined) {
-				let previewsTemp:any = [];
+				const previewsTemp:any = [];
 				await Promise.all(filePreviews[0].previews.map(async (filePreview) => {
 					// download resources
-					let Configuration:PreviewConfiguration = {
+					const Configuration:PreviewConfiguration = {
 						previewType:"",
 						url:"",
 						fileid:"",
@@ -83,7 +83,7 @@ export const File = (): JSX.Element => {
 					Configuration.previewer = `/public${filePreview["p_path"]}/`;
 					Configuration.fileType = filePreview["pv_contenttype"];
 
-					let resourceURL = `${config.hostname}${filePreview["pv_route"]}?superAdmin=true`;
+					const resourceURL = `${config.hostname}${filePreview["pv_route"]}?superAdmin=true`;
 					Configuration.resource = await downloadResource(resourceURL);
 
 					previewsTemp.push(Configuration);
@@ -119,100 +119,100 @@ export const File = (): JSX.Element => {
 			<div className="outer-container">
 				<Breadcrumbs paths={paths}/>
 				<div className="inner-container">
-						<Grid container spacing={4}>
-							<Grid item lg={8} sm={8} xl={8} xs={12}>
-								<AppBar className={classes.appBar} position="static">
-									<Tabs value={selectedTabIndex} onChange={handleTabChange} aria-label="file tabs">
-										<Tab className={classes.tab} label="Previews" {...a11yProps(0)} />
-										<Tab className={classes.tab} label="Sections" {...a11yProps(1)} />
-										<Tab className={classes.tab} label="Metadata" {...a11yProps(2)} />
-										<Tab className={classes.tab} label="Extractions" {...a11yProps(3)} />
-										<Tab className={classes.tab} label="Comments" {...a11yProps(4)} />
-									</Tabs>
-								</AppBar>
-								<TabPanel value={selectedTabIndex} index={0}>
-									{
-										previews.map((preview) =>{
-											if (preview["previewType"] === "audio"){
-												return <Audio fileId={preview["fileid"]} audioSrc={preview["resource"]} />;
-											}
-											else if (preview["previewType"] === "video"){
-												return <Video fileId={preview["fileid"]} videoSrc={preview["resource"]} />;
-											}
-											else if (preview["previewType"] === "thumbnail"){
-												return <Thumbnail fileId={preview["fileid"]} fileType={preview["fileType"]}
-																  imgSrc={preview["resource"]} />;
-											}
-										})
-									}
-								</TabPanel>
-								<TabPanel value={selectedTabIndex} index={1}>
-									NA
-								</TabPanel>
-								<TabPanel value={selectedTabIndex} index={2}>
-									{
-										fileMetadataJsonld !== undefined && fileMetadataJsonld.length > 0 ?
-											fileMetadataJsonld.map((item) => {
-												return Object.keys(item["content"]).map((key) => {
-														return <p>{key} - {JSON.stringify(item["content"][key])}</p>;
-													}
-												);
-											}) : <></>
-									}
-								</TabPanel>
-								<TabPanel value={selectedTabIndex} index={3}>
-									Extractions
-								</TabPanel>
-								<TabPanel value={selectedTabIndex} index={4}>
-									Comments
-								</TabPanel>
-							</Grid>
-							<Grid item lg={4} sm={4} xl={4} xs={12}>
+					<Grid container spacing={4}>
+						<Grid item lg={8} sm={8} xl={8} xs={12}>
+							<AppBar className={classes.appBar} position="static">
+								<Tabs value={selectedTabIndex} onChange={handleTabChange} aria-label="file tabs">
+									<Tab className={classes.tab} label="Previews" {...a11yProps(0)} />
+									<Tab className={classes.tab} label="Sections" {...a11yProps(1)} />
+									<Tab className={classes.tab} label="Metadata" {...a11yProps(2)} />
+									<Tab className={classes.tab} label="Extractions" {...a11yProps(3)} />
+									<Tab className={classes.tab} label="Comments" {...a11yProps(4)} />
+								</Tabs>
+							</AppBar>
+							<TabPanel value={selectedTabIndex} index={0}>
 								{
-									fileMetadata !== undefined ?
-										<Box className="infoCard">
-											<Typography className="title">About</Typography>
-											<Typography
-												className="content">File ID: {fileMetadata["id"]}</Typography>
-											<Typography
-												className="content">Type: {fileMetadata["content-type"]}</Typography>
-											<Typography className="content">File
-												size: {fileMetadata["size"]}</Typography>
-											<Typography className="content">Uploaded
-												on: {fileMetadata["date-created"]}</Typography>
-											<Typography className="content">Uploaded
-												as: {fileMetadata["filename"]}</Typography>
-											<Typography className="content">Uploaded
-												by: {fileMetadata["authorId"]}</Typography>
-											<Typography
-												className="content">Status: {fileMetadata["status"]}</Typography>
-										</Box> : <></>
+									previews.map((preview) =>{
+										if (preview["previewType"] === "audio"){
+											return <Audio fileId={preview["fileid"]} audioSrc={preview["resource"]} />;
+										}
+										else if (preview["previewType"] === "video"){
+											return <Video fileId={preview["fileid"]} videoSrc={preview["resource"]} />;
+										}
+										else if (preview["previewType"] === "thumbnail"){
+											return (<Thumbnail fileId={preview["fileid"]} fileType={preview["fileType"]}
+																  imgSrc={preview["resource"]} />);
+										}
+									})
 								}
-								<Divider light/>
-								<Box className="infoCard">
-									<Typography className="title">Statistics</Typography>
-									<Typography className="content">Views: 10</Typography>
-									<Typography className="content">Last viewed: Jun 07, 2021 21:49:09</Typography>
-									<Typography className="content">Downloads: 0</Typography>
-									<Typography className="content">Last downloaded: Never</Typography>
-								</Box>
-								<Divider light/>
-								<Box className="infoCard">
-									<Typography className="title">Tags</Typography>
-									<Grid container spacing={4}>
-										<Grid item lg={8} sm={8} xl={8} xs={12}>
-											<ClowderInput defaultValue="Tag"/>
-										</Grid>
-										<Grid item lg={4} sm={4} xl={4} xs={12}>
-											<ClowderButton>Search</ClowderButton>
-										</Grid>
-									</Grid>
-								</Box>
-								<Divider light/>
-							</Grid>
+							</TabPanel>
+							<TabPanel value={selectedTabIndex} index={1}>
+									NA
+							</TabPanel>
+							<TabPanel value={selectedTabIndex} index={2}>
+								{
+									fileMetadataJsonld !== undefined && fileMetadataJsonld.length > 0 ?
+										fileMetadataJsonld.map((item) => {
+											return Object.keys(item["content"]).map((key) => {
+												return <p>{key} - {JSON.stringify(item["content"][key])}</p>;
+											}
+											);
+										}) : <></>
+								}
+							</TabPanel>
+							<TabPanel value={selectedTabIndex} index={3}>
+									Extractions
+							</TabPanel>
+							<TabPanel value={selectedTabIndex} index={4}>
+									Comments
+							</TabPanel>
 						</Grid>
-					</div>
+						<Grid item lg={4} sm={4} xl={4} xs={12}>
+							{
+								fileMetadata !== undefined ?
+									<Box className="infoCard">
+										<Typography className="title">About</Typography>
+										<Typography
+											className="content">File ID: {fileMetadata["id"]}</Typography>
+										<Typography
+											className="content">Type: {fileMetadata["content-type"]}</Typography>
+										<Typography className="content">File
+												size: {fileMetadata["size"]}</Typography>
+										<Typography className="content">Uploaded
+												on: {fileMetadata["date-created"]}</Typography>
+										<Typography className="content">Uploaded
+												as: {fileMetadata["filename"]}</Typography>
+										<Typography className="content">Uploaded
+												by: {fileMetadata["authorId"]}</Typography>
+										<Typography
+											className="content">Status: {fileMetadata["status"]}</Typography>
+									</Box> : <></>
+							}
+							<Divider light/>
+							<Box className="infoCard">
+								<Typography className="title">Statistics</Typography>
+								<Typography className="content">Views: 10</Typography>
+								<Typography className="content">Last viewed: Jun 07, 2021 21:49:09</Typography>
+								<Typography className="content">Downloads: 0</Typography>
+								<Typography className="content">Last downloaded: Never</Typography>
+							</Box>
+							<Divider light/>
+							<Box className="infoCard">
+								<Typography className="title">Tags</Typography>
+								<Grid container spacing={4}>
+									<Grid item lg={8} sm={8} xl={8} xs={12}>
+										<ClowderInput defaultValue="Tag"/>
+									</Grid>
+									<Grid item lg={4} sm={4} xl={4} xs={12}>
+										<ClowderButton>Search</ClowderButton>
+									</Grid>
+								</Grid>
+							</Box>
+							<Divider light/>
+						</Grid>
+					</Grid>
+				</div>
 			</div>
 		</div>
 	);
-}
+};

@@ -62,4 +62,4 @@ export const UploadFile: React.FC<UploadFileProps> = (props: UploadFileProps) =>
 		</Container>
 	);
 
-}
+};

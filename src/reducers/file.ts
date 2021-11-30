@@ -15,16 +15,16 @@ const defaultState: FileState = {
 
 const file = (state=defaultState, action: DataAction) => {
 	switch(action.type) {
-		case RECEIVE_FILE_METADATA:
-			return Object.assign({}, state, {fileMetadata: action.fileMetadata});
-		case RECEIVE_FILE_EXTRACTED_METADATA:
-			return Object.assign({}, state, {extractedMetadata: action.extractedMetadata});
-		case RECEIVE_FILE_METADATA_JSONLD:
-			return Object.assign({}, state, {metadataJsonld: action.metadataJsonld});
-		case RECEIVE_PREVIEWS:
-			return Object.assign({}, state, {previews: action.previews});
-		default:
-			return state;
+	case RECEIVE_FILE_METADATA:
+		return Object.assign({}, state, {fileMetadata: action.fileMetadata});
+	case RECEIVE_FILE_EXTRACTED_METADATA:
+		return Object.assign({}, state, {extractedMetadata: action.extractedMetadata});
+	case RECEIVE_FILE_METADATA_JSONLD:
+		return Object.assign({}, state, {metadataJsonld: action.metadataJsonld});
+	case RECEIVE_PREVIEWS:
+		return Object.assign({}, state, {previews: action.previews});
+	default:
+		return state;
 	}
 };
 

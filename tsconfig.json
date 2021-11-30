@@ -2,6 +2,11 @@
   "compilerOptions": {
 	// Specify ECMAScript target version
 	"target": "es5",
+
+	// Specify where to search for @types
+	"typeRoots": [
+	  "node_modules/@types"
+	],
 	// List of library files to be included in the compilation
 	"lib": [
 	  "dom",
@@ -31,7 +36,7 @@
 	// Do not emit output (meaning do not compile code, only perform type checking)
 	"noEmit": true,
 	// Support JSX in .tsx files
-	"jsx": "react",
+	"jsx": "react-jsx",
 	// Generate corresponding .map file
 	"sourceMap": true,
 	// Generate corresponding .d.ts file
@@ -52,6 +57,7 @@
   // The files to not type check
   "exclude": [
 	"node_modules",
+	"dist",
 	"build"
   ]
 }

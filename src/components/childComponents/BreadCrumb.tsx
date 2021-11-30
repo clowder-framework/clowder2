@@ -1,8 +1,8 @@
-import React from 'react';
-import Typography from '@material-ui/core/Typography';
-import MuiBreadcrumbs from '@material-ui/core/Breadcrumbs';
-import Divider from '@material-ui/core/Divider';
-import Link from '@material-ui/core/Link';
+import React from "react";
+import Typography from "@material-ui/core/Typography";
+import MuiBreadcrumbs from "@material-ui/core/Breadcrumbs";
+import Divider from "@material-ui/core/Divider";
+import Link from "@material-ui/core/Link";
 import {makeStyles} from "@material-ui/core/styles";
 import {useHistory} from "react-router-dom";
 
@@ -41,7 +41,7 @@ export const Breadcrumbs: React.FC<BreadCrumbProps> = (props:BreadCrumbProps) =>
 						paths.map((path:any, index:number) => {
 							if (index !== paths.length -1){
 								return (<Link className={classes.breadCrumbLink}
-												onClick={() => {history.push(path["url"])}}>{path["name"]}
+									onClick={() => {history.push(path["url"]);}}>{path["name"]}
 								</Link>);
 							}
 							else{
@@ -54,4 +54,4 @@ export const Breadcrumbs: React.FC<BreadCrumbProps> = (props:BreadCrumbProps) =>
 			<Divider light />
 		</div>
 	);
-}
+};

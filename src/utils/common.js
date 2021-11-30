@@ -21,40 +21,40 @@ export function getHeader() {
 
 	return headers;
 
-		// const headers = new Headers({
-		// 	"Authorization": cookies.get("Authorization"),
-		// });
+	// const headers = new Headers({
+	// 	"Authorization": cookies.get("Authorization"),
+	// });
 }
 
 export async function downloadResource(url){
-		let authHeader = getHeader();
-		let response = await fetch(url, {
-			method: "GET",
-			mode: "cors",
-			headers: authHeader,
-		});
+	const authHeader = getHeader();
+	const response = await fetch(url, {
+		method: "GET",
+		mode: "cors",
+		headers: authHeader,
+	});
 
-		if (response.status  === 200){
-			let blob = await response.blob();
-			return window.URL.createObjectURL(blob);
-		}
-		else if  (response.status  === 401){
-			// TODO handle error
-			return null;
-		}
-		else {
-			// TODO handle error
-			return null;
-		}
+	if (response.status  === 200){
+		const blob = await response.blob();
+		return window.URL.createObjectURL(blob);
+	}
+	else if  (response.status  === 401){
+		// TODO handle error
+		return null;
+	}
+	else {
+		// TODO handle error
+		return null;
+	}
 }
 
 export function dataURItoFile(dataURI) {
-	let metadata = dataURI.split(",")[0];
-	let mime = metadata.match(/:(.*?);/)[1];
-	let filename = metadata.match(/name=(.*?);/)[1];
+	const metadata = dataURI.split(",")[0];
+	const mime = metadata.match(/:(.*?);/)[1];
+	const filename = metadata.match(/name=(.*?);/)[1];
 
-	let binary = atob(dataURI.split(",")[1]);
-	let array = [];
+	const binary = atob(dataURI.split(",")[1]);
+	const array = [];
 	for (let i = 0; i < binary.length; i++) {
 		array.push(binary.charCodeAt(i));
 	}

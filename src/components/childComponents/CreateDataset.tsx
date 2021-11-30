@@ -46,4 +46,4 @@ export const CreateDataset: React.FC<CreateDatasetProps> = (props: CreateDataset
 			</LoadingOverlay>
 		</Container>
 	);
-}
+};

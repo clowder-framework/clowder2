@@ -12,19 +12,19 @@ export function receiveFilesInDataset(type, json){
 	};
 }
 export function fetchFilesInDataset(id){
-	let url = `${config.hostname}/clowder/api/datasets/${id}/files?superAdmin=true`;
+	const url = `${config.hostname}/clowder/api/datasets/${id}/files?superAdmin=true`;
 	return (dispatch) => {
 		return fetch(url, {mode:"cors", headers: getHeader()})
-		.then((response) => {
-			if (response.status === 200) {
-				response.json().then(json =>{
-					dispatch(receiveFilesInDataset(RECEIVE_FILES_IN_DATASET, json));
-				});
-			}
-			else {
-				dispatch(receiveFilesInDataset(RECEIVE_FILES_IN_DATASET, []));
-			}
-		});
+			.then((response) => {
+				if (response.status === 200) {
+					response.json().then(json =>{
+						dispatch(receiveFilesInDataset(RECEIVE_FILES_IN_DATASET, json));
+					});
+				}
+				else {
+					dispatch(receiveFilesInDataset(RECEIVE_FILES_IN_DATASET, []));
+				}
+			});
 	};
 }
 
@@ -39,19 +39,19 @@ export function receiveDatasetAbout(type, json){
 	};
 }
 export function fetchDatasetAbout(id){
-	let url = `${config.hostname}/clowder/api/datasets/${id}?superAdmin=true`;
+	const url = `${config.hostname}/clowder/api/datasets/${id}?superAdmin=true`;
 	return (dispatch) => {
 		return fetch(url, {mode:"cors", headers: getHeader()})
-		.then((response) => {
-			if (response.status === 200) {
-				response.json().then(json =>{
-					dispatch(receiveDatasetAbout(RECEIVE_DATASET_ABOUT, json));
-				});
-			}
-			else {
-				dispatch(receiveDatasetAbout(RECEIVE_DATASET_ABOUT, []));
-			}
-		});
+			.then((response) => {
+				if (response.status === 200) {
+					response.json().then(json =>{
+						dispatch(receiveDatasetAbout(RECEIVE_DATASET_ABOUT, json));
+					});
+				}
+				else {
+					dispatch(receiveDatasetAbout(RECEIVE_DATASET_ABOUT, []));
+				}
+			});
 	};
 }
 
@@ -71,43 +71,43 @@ export function fetchDatasets(when, date, limit=5){
 	if (when !== "") url = `${url}&when=${when}`;
 	return (dispatch) => {
 		return fetch(url, {mode:"cors", headers: getHeader()})
-		.then((response) => {
-			if (response.status === 200) {
-				response.json().then(json =>{
-					dispatch(receiveDatasets(RECEIVE_DATASETS, json));
-				});
-			}
-			else {
-				dispatch(receiveDatasets(RECEIVE_DATASETS, []));
-			}
-		});
+			.then((response) => {
+				if (response.status === 200) {
+					response.json().then(json =>{
+						dispatch(receiveDatasets(RECEIVE_DATASETS, json));
+					});
+				}
+				else {
+					dispatch(receiveDatasets(RECEIVE_DATASETS, []));
+				}
+			});
 	};
 }
 
 export const DELETE_DATASET = "DELETE_DATASET";
 export function datasetDeleted(datasetId){
-	let url = `${config.hostname}/clowder/api/datasets/${datasetId}?superAdmin=true`;
+	const url = `${config.hostname}/clowder/api/datasets/${datasetId}?superAdmin=true`;
 	return (dispatch) => {
 		return fetch(url, {mode:"cors", method:"DELETE", headers: getHeader()})
-		.then((response) => {
-			if (response.status === 200) {
-				response.json().then(json =>{
-					dispatch({
-						type: DELETE_DATASET,
-						dataset: {"id": datasetId, "status": json["status"]===undefined?json["status"]:"success"},
-						receivedAt: Date.now(),
+			.then((response) => {
+				if (response.status === 200) {
+					response.json().then(json =>{
+						dispatch({
+							type: DELETE_DATASET,
+							dataset: {"id": datasetId, "status": json["status"]===undefined?json["status"]:"success"},
+							receivedAt: Date.now(),
+						});
 					});
-				});
-			}
-			else {
-				response.json().then(json => {
-					dispatch({
-						type: DELETE_DATASET,
-						dataset: {"id": null, "status": json["status"] === undefined ? json["status"] : "fail"},
-						receivedAt: Date.now(),
+				}
+				else {
+					response.json().then(json => {
+						dispatch({
+							type: DELETE_DATASET,
+							dataset: {"id": null, "status": json["status"] === undefined ? json["status"] : "fail"},
+							receivedAt: Date.now(),
+						});
 					});
-				});
-			}
-		});
+				}
+			});
 	};
 }

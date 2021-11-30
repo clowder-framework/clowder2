@@ -1,20 +1,20 @@
 {
   "root": true,
   "extends": [
-    "eslint:recommended"
+    "eslint:recommended",
+    "plugin:@typescript-eslint/eslint-recommended",
+	"plugin:react/recommended",
+	"plugin:react/jsx-runtime"
   ],
   "plugins": [
     "react"
   ],
-  "parser": "babel-eslint",
-  "parserOptions": {
-    "ecmaVersion": 6,
-    "sourceType": "module",
-    "ecmaFeatures": {
-      "jsx": true,
-      "experimentalObjectRestSpread": true
-    }
+  "settings": {
+	"react": {
+	  "version": "detect"
+	}
   },
+  "parser": "@babel/eslint-parser",
   "env": {
     "es6": true,
     "browser": true,
@@ -23,23 +23,27 @@
     "mocha": true
   },
   "rules": {
-	"no-mixed-spaces-and-tabs": ["error", "smart-tabs"],
-	"eqeqeq": ["error", "smart"],
+	"no-mixed-spaces-and-tabs": ["warn", "smart-tabs"],
+	"eqeqeq": ["warn", "smart"],
 	"no-eval": "warn",
-    "quotes": ["error", "double"],
-	"indent": ["error", "tab"],
+    "quotes": ["warn", "double"],
+    "indent": ["warn", "tab"],
     "no-console": 1,
     "no-debugger": 1,
     "no-var": "error",
-    "semi": ["error", "always"],
+    "semi": ["warn", "always"],
     "no-trailing-spaces": 0,
     "eol-last": "warn",
     "no-underscore-dangle": 0,
     "no-alert": 0,
     "no-lone-blocks": 0,
 	"no-unused-vars": "warn",
-	"prefer-template": "error",
+	"prefer-template": "warn",
     "jsx-quotes": 1,
+	"prefer-const": ["warn", {
+	  "destructuring": "any",
+	  "ignoreReadBeforeAssign": false
+	}],
     "react/display-name": [ 1, {"ignoreTranspilerName": false }],
     "react/forbid-prop-types": [1, {"forbid": ["any"]}],
     "react/jsx-boolean-value": 0,

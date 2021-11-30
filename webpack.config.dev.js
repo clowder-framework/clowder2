@@ -2,6 +2,7 @@ import webpack from "webpack";
 import HtmlWebpackPlugin from "html-webpack-plugin";
 import autoprefixer from "autoprefixer";
 import path from "path";
+import ESLintPlugin from "eslint-webpack-plugin";
 
 
 // eslint-disable-next-line no-console
@@ -37,6 +38,10 @@ export default {
 				"APIKEY": JSON.stringify(process.env.APIKEY)
 			},
 			__DEV__: true
+		}),
+		new ESLintPlugin({
+			extensions: ["ts","tsx","js","jsx"],
+			exclude: ["node_modules", "dist", "build"]
 		}),
 		new webpack.HotModuleReplacementPlugin(),
 		new webpack.NoEmitOnErrorsPlugin(),

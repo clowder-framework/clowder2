@@ -72,7 +72,7 @@ export const Dashboard = (): JSX.Element => {
 	const classes = useStyles();
 
 	// use history hook to redirect/navigate between routes
-	let history = useHistory();
+	const history = useHistory();
 
 	// Redux connect equivalent
 	const dispatch = useDispatch();
@@ -98,23 +98,23 @@ export const Dashboard = (): JSX.Element => {
 			if (datasets !== undefined && datasets.length > 0) {
 
 				// TODO change the type any to something else
-				let datasetThumbnailListTemp: any = [];
+				const datasetThumbnailListTemp: any = [];
 				await Promise.all(datasets.map(async (dataset) => {
 					// add thumbnails
 					if (dataset["thumbnail"] !== null && dataset["thumbnail"] !== undefined) {
-						let thumbnailURL = await downloadThumbnail(dataset["thumbnail"]);
-						datasetThumbnailListTemp.push({"id": dataset["id"], "thumbnail": thumbnailURL})
+						const thumbnailURL = await downloadThumbnail(dataset["thumbnail"]);
+						datasetThumbnailListTemp.push({"id": dataset["id"], "thumbnail": thumbnailURL});
 					}
 				}));
 				setDatasetThumbnailList(datasetThumbnailListTemp);
 
 				// find last and first dataset for pagination
-				setFirstDataset(datasets[0])
+				setFirstDataset(datasets[0]);
 				setLastDataset(datasets[datasets.length - 1]);
 
 			}
 		})();
-	}, [datasets])
+	}, [datasets]);
 
 	// switch tabs
 	const handleTabChange = (_event: React.ChangeEvent<{}>, newTabIndex: number) => {
@@ -123,19 +123,19 @@ export const Dashboard = (): JSX.Element => {
 
 	// pagination
 	const previous = () => {
-		let date = firstDataset ? new Date(firstDataset["created"]) : null;
+		const date = firstDataset ? new Date(firstDataset["created"]) : null;
 		if (date) listDatasets("b", date.toISOString(), limit);
-	}
+	};
 
 	const next = () => {
-		let date = lastDataset ? new Date(lastDataset["created"]) : null;
+		const date = lastDataset ? new Date(lastDataset["created"]) : null;
 		if (date) listDatasets("a", date.toISOString(), limit);
-	}
+	};
 
 	const selectDataset = (selectedDatasetId: string) => {
 		// Redirect to dataset route with dataset Id
 		history.push(`/datasets/${selectedDatasetId}`);
-	}
+	};
 
 	// for breadcrumb
 	const paths = [
@@ -167,14 +167,14 @@ export const Dashboard = (): JSX.Element => {
 								{
 									datasets !== undefined && datasetThumbnailList !== undefined ?
 										datasets.map((dataset) => {
-											let thumbnailComp = <BusinessCenterIcon className={classes.fileCardImg}
-																					style={{fontSize: "5em"}}/>;
+											let thumbnailComp = (<BusinessCenterIcon className={classes.fileCardImg}
+												style={{fontSize: "5em"}}/>);
 											datasetThumbnailList.map((thumbnail: Thumbnail) => {
 												if (dataset["id"] !== undefined && thumbnail["id"] !== undefined &&
 													thumbnail["thumbnail"] !== null && thumbnail["thumbnail"] !== undefined &&
 													dataset["id"] === thumbnail["id"]) {
-													thumbnailComp = <img src={thumbnail["thumbnail"]} alt="thumbnail"
-																		 className={classes.fileCardImg}/>;
+													thumbnailComp = (<img src={thumbnail["thumbnail"]} alt="thumbnail"
+																		 className={classes.fileCardImg}/>);
 												}
 											});
 											return (
@@ -196,9 +196,9 @@ export const Dashboard = (): JSX.Element => {
 													<Box className={classes.fileCardActionBox}>
 														<Box className={classes.fileCardActionItem}>
 															<Button startIcon={<DeleteOutlineIcon/>}
-																	onClick={() => {
-																		deleteDataset(dataset["id"]);
-																	}}>
+																onClick={() => {
+																	deleteDataset(dataset["id"]);
+																}}>
 																Delete</Button>
 														</Box>
 														<Box className={classes.fileCardActionItem}>
@@ -206,9 +206,9 @@ export const Dashboard = (): JSX.Element => {
 														</Box>
 														<Box className={classes.fileCardActionItem}>
 															<Button startIcon={<CloudDownloadOutlinedIcon/>}
-																	onClick={() => {
-																		downloadDataset(dataset["id"], dataset["name"]);
-																	}}>
+																onClick={() => {
+																	downloadDataset(dataset["id"], dataset["name"]);
+																}}>
 																Download</Button>
 														</Box>
 													</Box>
@@ -221,10 +221,10 @@ export const Dashboard = (): JSX.Element => {
 								<Button onClick={previous}>Prev</Button>
 								<Button onClick={next}>Next</Button>
 							</TabPanel>
-							<TabPanel value={selectedTabIndex} index={1}></TabPanel>
-							<TabPanel value={selectedTabIndex} index={2}></TabPanel>
-							<TabPanel value={selectedTabIndex} index={3}></TabPanel>
-							<TabPanel value={selectedTabIndex} index={4}></TabPanel>
+							<TabPanel value={selectedTabIndex} index={1} />
+							<TabPanel value={selectedTabIndex} index={2} />
+							<TabPanel value={selectedTabIndex} index={3} />
+							<TabPanel value={selectedTabIndex} index={4} />
 						</Grid>
 						<Grid item lg={4} md={4} xl={4} sm={4} xs={12}>
 							<Box className="actionCard">
@@ -263,4 +263,4 @@ export const Dashboard = (): JSX.Element => {
 			</div>
 		</div>
 	);
-}
+};

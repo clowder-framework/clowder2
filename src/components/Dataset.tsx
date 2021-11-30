@@ -105,10 +105,10 @@ export const Dataset = (): JSX.Element => {
 	const classes = useStyles();
 
 	// path parameter
-	let { datasetId } = useParams<{datasetId?: string}>();
+	const { datasetId } = useParams<{datasetId?: string}>();
 
 	// use history hook to redirect/navigate between routes
-	let history = useHistory();
+	const history = useHistory();
 
 	// Redux connect equivalent
 	const dispatch = useDispatch();
@@ -142,17 +142,17 @@ export const Dataset = (): JSX.Element => {
 			if (filesInDataset !== undefined && filesInDataset.length > 0) {
 
 				// TODO any types fix later
-				let fileMetadataListTemp:FileMetadataList[] = [];
-				let fileThumbnailListTemp:any = [];
+				const fileMetadataListTemp:FileMetadataList[] = [];
+				const fileThumbnailListTemp:any = [];
 				await Promise.all(filesInDataset.map(async (fileInDataset) => {
 
-					let fileMetadata = await fetchFileMetadata(fileInDataset["id"]);
+					const fileMetadata = await fetchFileMetadata(fileInDataset["id"]);
 					fileMetadataListTemp.push({"id": fileInDataset["id"], "metadata": fileMetadata});
 
 					// add thumbnails
 					if (fileMetadata["thumbnail"] !== null && fileMetadata["thumbnail"] !== undefined) {
-						let thumbnailURL = await downloadThumbnail(fileMetadata["thumbnail"]);
-						fileThumbnailListTemp.push({"id": fileInDataset["id"], "thumbnail": thumbnailURL})
+						const thumbnailURL = await downloadThumbnail(fileMetadata["thumbnail"]);
+						fileThumbnailListTemp.push({"id": fileInDataset["id"], "thumbnail": thumbnailURL});
 					}
 				}));
 
@@ -160,12 +160,12 @@ export const Dataset = (): JSX.Element => {
 				setFileThumbnailList(fileThumbnailListTemp);
 			}
 		})();
-	}, [filesInDataset])
+	}, [filesInDataset]);
 
 	const selectFile = (selectedFileId: string) => {
 		// Redirect to file route with file Id and dataset id
 		history.push(`/files/${selectedFileId}?dataset=${datasetId}&name=${about["name"]}`);
-	}
+	};
 
 	const handleTabChange = (_event:React.ChangeEvent<{}>, newTabIndex:number) => {
 		setSelectedTabIndex(newTabIndex);
@@ -210,56 +210,56 @@ export const Dataset = (): JSX.Element => {
 								</Tabs>
 								{/*option menus*/}
 								<Box>
-										<Button aria-haspopup="true" onClick={handleOptionClick}
-												className={classes.optionButton} endIcon={<ArrowDropDownIcon />}>
+									<Button aria-haspopup="true" onClick={handleOptionClick}
+										className={classes.optionButton} endIcon={<ArrowDropDownIcon />}>
 											Options
-										</Button>
-										<Menu
-											id="simple-menu"
-											anchorEl={anchorEl}
-											keepMounted
-											open={Boolean(anchorEl)}
-											onClose={handleOptionClose}
-										>
-											<MenuItem className={classes.optionMenuItem}
+									</Button>
+									<Menu
+										id="simple-menu"
+										anchorEl={anchorEl}
+										keepMounted
+										open={Boolean(anchorEl)}
+										onClose={handleOptionClose}
+									>
+										<MenuItem className={classes.optionMenuItem}
 													  onClick={()=>{
-														setOpen(true);
-														handleOptionClose();
+												setOpen(true);
+												handleOptionClose();
 													  }}>
 												Add Files
-											</MenuItem>
-											<MenuItem className={classes.optionMenuItem}
+										</MenuItem>
+										<MenuItem className={classes.optionMenuItem}
 													  onClick={() => {
-														downloadDataset(datasetId, about["name"]);
-														handleOptionClose();
+												downloadDataset(datasetId, about["name"]);
+												handleOptionClose();
 													  }}>
 												Download All
-											</MenuItem>
-											<MenuItem onClick={()=>{
-												deleteDataset(datasetId);
-												handleOptionClose();
-												// TODO go to the explore page
-											}
-											} className={classes.optionMenuItem}>Delete</MenuItem>
-											<MenuItem onClick={handleOptionClose} className={classes.optionMenuItem}>Follow</MenuItem>
-											<MenuItem onClick={handleOptionClose} className={classes.optionMenuItem}>Collaborators</MenuItem>
-											<MenuItem onClick={handleOptionClose} className={classes.optionMenuItem}>Extraction</MenuItem>
-										</Menu>
-									</Box>
+										</MenuItem>
+										<MenuItem onClick={()=>{
+											deleteDataset(datasetId);
+											handleOptionClose();
+											// TODO go to the explore page
+										}
+										} className={classes.optionMenuItem}>Delete</MenuItem>
+										<MenuItem onClick={handleOptionClose} className={classes.optionMenuItem}>Follow</MenuItem>
+										<MenuItem onClick={handleOptionClose} className={classes.optionMenuItem}>Collaborators</MenuItem>
+										<MenuItem onClick={handleOptionClose} className={classes.optionMenuItem}>Extraction</MenuItem>
+									</Menu>
+								</Box>
 							</AppBar>
 							<TabPanel value={selectedTabIndex} index={0}>
 
 								{
 									filesInDataset !== undefined && fileThumbnailList !== undefined ?
 										filesInDataset.map((file) => {
-											let thumbnailComp = <DescriptionIcon className={classes.fileCardImg}
-																				 style={{fontSize: "5em"}}/>;
+											let thumbnailComp = (<DescriptionIcon className={classes.fileCardImg}
+																				 style={{fontSize: "5em"}}/>);
 											fileThumbnailList.map((thumbnail:Thumbnail) => {
 												if (file["id"] !== undefined && thumbnail["id"] !== undefined &&
 													thumbnail["thumbnail"] !== null && thumbnail["thumbnail"] !== undefined &&
 													file["id"] === thumbnail["id"]) {
-													thumbnailComp = <img src={thumbnail["thumbnail"]} alt="thumbnail"
-																		 className={classes.fileCardImg}/>;
+													thumbnailComp = (<img src={thumbnail["thumbnail"]} alt="thumbnail"
+																		 className={classes.fileCardImg}/>);
 												}
 											});
 											return (
@@ -281,14 +281,14 @@ export const Dataset = (): JSX.Element => {
 													<Box className={classes.fileCardActionBox}>
 														<Box className={classes.fileCardActionItem}>
 															<Button startIcon={<DeleteOutlineIcon />}
-																	onClick={()=>{deleteFile(file["id"]);}}>Delete</Button>
+																onClick={()=>{deleteFile(file["id"]);}}>Delete</Button>
 														</Box>
 														<Box className={classes.fileCardActionItem}>
 															<Button startIcon={<StarBorderIcon />}>Follow</Button>
 														</Box>
 														<Box className={classes.fileCardActionItem}>
 															<Button startIcon={<CloudDownloadOutlinedIcon />}
-																	onClick={()=>{downloadFile(file["id"], file["filename"]);}}>
+																onClick={()=>{downloadFile(file["id"], file["filename"]);}}>
 																Download</Button>
 														</Box>
 													</Box>
@@ -299,10 +299,10 @@ export const Dataset = (): JSX.Element => {
 										<></>
 								}
 							</TabPanel>
-							<TabPanel value={selectedTabIndex} index={1}></TabPanel>
-							<TabPanel value={selectedTabIndex} index={2}></TabPanel>
-							<TabPanel value={selectedTabIndex} index={3}></TabPanel>
-							<TabPanel value={selectedTabIndex} index={4}></TabPanel>
+							<TabPanel value={selectedTabIndex} index={1} />
+							<TabPanel value={selectedTabIndex} index={2} />
+							<TabPanel value={selectedTabIndex} index={3} />
+							<TabPanel value={selectedTabIndex} index={4} />
 						</Grid>
 						<Grid item lg={4} md={4} xl={4} sm={4} xs={12}>
 							{
@@ -353,4 +353,4 @@ export const Dataset = (): JSX.Element => {
 			</div>
 		</div>
 	);
-}
+};
