@@ -7,7 +7,7 @@ services:
     image: 'clowder/clowder-fastapi:${TAG:-latest}'
     build:
       # export GH_ACCESS_TOKEN=your-personal=access-token
-      context: https://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:@github.com/clowder-framework/clowder2-fastapi
+      context: https://${GH_ACCESS_TOKEN}:@github.com/clowder-framework/clowder2-fastapi
     environment:
       MONGODB_URL: mongodb://mongo:27017
       MINIO_SERVER_URL: minio:9000
