@@ -56,15 +56,15 @@ services:
       retries: 3
     labels:
       # Minio Console
-#      - "traefik.http.routers.minioconsole.rule=Host(`minioconsole.docker.localhost`)"
-#      - "traefik.http.routers.minioconsole.service=minioConsoleService"
-#      - "traefik.http.services.minioConsoleService.loadbalancer.server.port=9001"
-#      - "traefik.http.services.minioConsoleService.loadbalancer.passhostheader=true"
+      - "traefik.http.routers.minioconsole.rule=Host(`minioconsole.docker.localhost`)"
+      - "traefik.http.routers.minioconsole.service=minioConsoleService"
+      - "traefik.http.services.minioConsoleService.loadbalancer.server.port=9001"
+      - "traefik.http.services.minioConsoleService.loadbalancer.passhostheader=true"
       # Minio itself
-      - "traefik.http.routers.minio.rule=Host(`minio.docker.localhost`)"
-      - "traefik.http.routers.minio.service=minioService"
-      - "traefik.http.services.minioService.loadbalancer.server.port=9000"
-      - "traefik.http.services.minioService.loadbalancer.passhostheader=true"
+#      - "traefik.http.routers.minio.rule=Host(`minio.docker.localhost`)"
+#      - "traefik.http.routers.minio.service=minioService"
+#      - "traefik.http.services.minioService.loadbalancer.server.port=9000"
+#      - "traefik.http.services.minioService.loadbalancer.passhostheader=true"
 
 ## By default this config uses default local driver,
 ## For custom volumes replace with volume driver configuration.
