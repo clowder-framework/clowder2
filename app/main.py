@@ -3,21 +3,15 @@ from fastapi import FastAPI, APIRouter
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.routers import users, files, datasets, collections, authentication, items
+from app.config import settings
 
-API_V2_STR: str = "/api/v2"
-PROJECT_NAME: str = "Clowder"
-
-app = FastAPI(title=PROJECT_NAME, openapi_url=f"{API_V2_STR}/openapi.json")
-
-origins = [
-    "http://localhost:3000",
-    "http://localhost:3001",
-    "http://localhost:3002",
-]
+app = FastAPI(
+    title=settings.APP_NAME, openapi_url=f"{settings.API_V2_STR}/openapi.json"
+)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=settings.CORS_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -33,7 +27,7 @@ api_router.include_router(
 api_router.include_router(authentication.router, tags=["login"])
 api_router.include_router(items.router, prefix="/items", tags=["items"])
 
-app.include_router(api_router, prefix=API_V2_STR)
+app.include_router(api_router, prefix=settings.API_V2_STR)
 
 
 @app.on_event("startup")
