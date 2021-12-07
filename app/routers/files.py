@@ -20,13 +20,11 @@ from minio import Minio
 from app import dependencies
 from app.models.files import ClowderFile
 from app.auth import AuthHandler
+from app.config import settings
 
 router = APIRouter()
 
 auth_handler = AuthHandler()
-
-clowder_bucket = os.getenv("MINIO_BUCKET_NAME", "clowder")
-upload_chunk_size = os.getenv("MINIO_UPLOAD_CHUNK_SIZE", 10 * 1024 * 1024)
 
 
 @router.post("")
@@ -46,13 +44,15 @@ async def save_file(
     found = await db["files"].find_one({"_id": new_file.inserted_id})
 
     # Second, use unique ID as key for file storage
-    while content := file.file.read(upload_chunk_size):  # async read chunk
+    while content := file.file.read(
+        settings.MINIO_UPLOAD_CHUNK_SIZE
+    ):  # async read chunk
         fs.put_object(
-            clowder_bucket,
+            settings.MINIO_BUCKET_NAME,
             str(new_file.inserted_id),
             io.BytesIO(content),
             length=-1,
-            part_size=upload_chunk_size,
+            part_size=settings.MINIO_UPLOAD_CHUNK_SIZE,
         )  # async write chunk to minio
 
     return ClowderFile.from_mongo(found)
@@ -68,8 +68,8 @@ async def download_file(
     # If file exists in MongoDB, download from Minio
     if (file := await db["files"].find_one({"_id": ObjectId(file_id)})) is not None:
         # Get content type & open file stream
-        content = fs.get_object(clowder_bucket, file_id)
-        response = StreamingResponse(content.stream(upload_chunk_size))
+        content = fs.get_object(settings.MINIO_BUCKET_NAME, file_id)
+        response = StreamingResponse(content.stream(settings.MINIO_UPLOAD_CHUNK_SIZE))
         response.headers["Content-Disposition"] = (
             "attachment; filename=%s" % file["name"]
         )
