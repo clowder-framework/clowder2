@@ -4,6 +4,8 @@ from typing import Generator
 import motor
 from minio import Minio
 from fastapi import Header, HTTPException
+from minio.commonconfig import ENABLED
+from minio.versioningconfig import VersioningConfig
 
 
 async def get_token_header(x_token: str = Header(...)):
@@ -38,4 +40,5 @@ async def get_fs() -> Generator:
     clowder_bucket = os.getenv("MINIO_BUCKET_NAME", "clowder")
     if not file_system.bucket_exists(clowder_bucket):
         file_system.make_bucket(clowder_bucket)
+    file_system.set_bucket_versioning(clowder_bucket, VersioningConfig(ENABLED))
     yield file_system
