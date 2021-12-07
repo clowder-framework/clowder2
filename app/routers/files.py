@@ -47,10 +47,11 @@ async def save_file(
     new_file = await db["files"].insert_one(f)
     found = await db["files"].find_one({"_id": new_file.inserted_id})
 
-    new_file_id = found['_id']
+    new_file_id = found["_id"]
 
-    updated_dataset = await db["datasets"].update_one({'_id': ObjectId(dataset_id)}, {
-        '$push': {'files': ObjectId(new_file_id)}})
+    updated_dataset = await db["datasets"].update_one(
+        {"_id": ObjectId(dataset_id)}, {"$push": {"files": ObjectId(new_file_id)}}
+    )
 
     # Second, use unique ID as key for file storage
     while content := file.file.read(upload_chunk_size):  # async read chunk
@@ -84,21 +85,21 @@ async def download_file(
 
 
 @router.delete("/{file_id}")
-async def delete_file(file_id: str,
+async def delete_file(
+    file_id: str,
     user_id=Depends(auth_handler.auth_wrapper),
     db: MongoClient = Depends(dependencies.get_db),
-    fs: Minio = Depends(dependencies.get_fs)
+    fs: Minio = Depends(dependencies.get_fs),
 ):
     if (file := await db["files"].find_one({"_id": ObjectId(file_id)})) is not None:
         dataset = await db["datasets"].find_one({"files": ObjectId(file_id)})
         if dataset is not None:
-            updated_dataset = await db["datasets"].update_one({'_id': ObjectId(dataset['id'])}, {
-                '$push': {'files': ObjectId(file_id)}})
-        fs.remove_object(
-            clowder_bucket,
-            str(file_id)
-        )
-        return {'deleted': file_id}
+            updated_dataset = await db["datasets"].update_one(
+                {"_id": ObjectId(dataset["id"])},
+                {"$push": {"files": ObjectId(file_id)}},
+            )
+        fs.remove_object(clowder_bucket, str(file_id))
+        return {"deleted": file_id}
     else:
         raise HTTPException(status_code=404, detail=f"File {file_id} not found")
 
