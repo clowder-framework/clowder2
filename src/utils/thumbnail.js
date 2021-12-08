@@ -3,7 +3,7 @@ import config from "../app.config";
 
 
 export async function downloadThumbnail(thumbnailId, title=null) {
-	const url = `${config.hostname}/clowder/api/thumbnails/${thumbnailId}/blob?superAdmin=true`;
+	const url = `${config.hostname}/thumbnails/${thumbnailId}/blob?superAdmin=true`;
 	const authHeader = getHeader();
 	const response = await fetch(url, {
 		method: "GET",

@@ -118,8 +118,15 @@ export interface FileState{
 	previews: FilePreview[];
 }
 
+export interface UserState{
+	Authorization: string | null;
+	loginError: boolean;
+	registerError: boolean;
+}
+
 export interface RootState {
 	file:FileState;
 	dataset:DatasetState;
+	user: UserState;
 }
 

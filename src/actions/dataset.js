@@ -13,8 +13,8 @@ export function receiveFilesInDataset(type, json) {
 	};
 }
 
-export function fetchFilesInDataset(id) {
-	const url = `${config.hostname}/clowder/api/datasets/${id}/files?superAdmin=true`;
+export function fetchFilesInDataset(id){
+	const url = `${config.hostname}/datasets/${id}/files?superAdmin=true`;
 	return (dispatch) => {
 		return fetch(url, {mode: "cors", headers: getHeader()})
 			.then((response) => {
@@ -41,8 +41,8 @@ export function receiveDatasetAbout(type, json) {
 	};
 }
 
-export function fetchDatasetAbout(id) {
-	const url = `${config.hostname}/clowder/api/datasets/${id}?superAdmin=true`;
+export function fetchDatasetAbout(id){
+	const url = `${config.hostname}/datasets/${id}?superAdmin=true`;
 	return (dispatch) => {
 		return fetch(url, {mode: "cors", headers: getHeader()})
 			.then((response) => {
@@ -69,18 +69,24 @@ export function receiveDatasets(type, json) {
 	};
 }
 
-export function fetchDatasets(when, date, limit = 5) {
-	let url = `${config.hostname}/clowder/api/datasets?superAdmin=true&limit=${limit}`;
-	if (date !== "") url = `${url}&date=${date}`;
-	if (when !== "") url = `${url}&when=${when}`;
+export function fetchDatasets(when, date, limit=5){
+	let url = `${config.hostname}/datasets?superAdmin=true&limit=${limit}`;
+	if (date) url = `${url}&date=${date}`;
+	if (when) url = `${url}&when=${when}`;
 	return (dispatch) => {
-		return fetch(url, {mode: "cors", headers: getHeader()})
+		return fetch(url, {mode:"cors", headers: getHeader()})
 			.then((response) => {
 				if (response.status === 200) {
-					response.json().then(json => {
+					response.json().then(json =>{
 						dispatch(receiveDatasets(RECEIVE_DATASETS, json));
 					});
-				} else {
+				}
+				else if (response.status === 401){
+				// auth failed
+					localStorage.removeItem("Authorization");
+					dispatch(receiveDatasets(RECEIVE_DATASETS, []));
+				}
+				else {
 					dispatch(receiveDatasets(RECEIVE_DATASETS, []));
 				}
 			});
@@ -88,9 +94,8 @@ export function fetchDatasets(when, date, limit = 5) {
 }
 
 export const DELETE_DATASET = "DELETE_DATASET";
-
-export function datasetDeleted(datasetId) {
-	const url = `${config.hostname}/clowder/api/datasets/${datasetId}?superAdmin=true`;
+export function datasetDeleted(datasetId){
+	const url = `${config.hostname}/datasets/${datasetId}?superAdmin=true`;
 	return (dispatch) => {
 		return fetch(url, {mode: "cors", method: "DELETE", headers: getHeader()})
 			.then((response) => {

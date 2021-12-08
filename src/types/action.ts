@@ -44,6 +44,27 @@ interface RECEIVE_PREVIEWS{
 	previews: FilePreview[];
 }
 
+interface SET_USER{
+	type: "SET_USER",
+	Authorization: string,
+}
+
+interface LOGIN_ERROR{
+	type: "LOGIN_ERROR",
+}
+
+interface LOGOUT{
+	type: "LOGOUT",
+}
+
+interface REGISTER_ERROR{
+	type: "REGISTER_ERROR"
+}
+
+interface REGISTER_USER{
+	type: "REGISTER_USER"
+}
+
 export type DataAction =
 	| RECEIVE_FILES_IN_DATASET
 	| DELETE_FILE
@@ -54,4 +75,9 @@ export type DataAction =
 	| RECEIVE_FILE_EXTRACTED_METADATA
 	| RECEIVE_FILE_METADATA_JSONLD
 	| RECEIVE_PREVIEWS
+	| SET_USER
+	| LOGIN_ERROR
+	| LOGOUT
+	| REGISTER_ERROR
+	| REGISTER_USER
 	;

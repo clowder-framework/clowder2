@@ -1,28 +1,26 @@
 import Cookies from "universal-cookie";
-import config from "../app.config";
 
 const cookies = new Cookies();
 
 
 //NOTE: This is only checking if a cookie is present, but not validating the cookie.
 export const isAuthorized = () => {
-	const authorization = cookies.get("Authorization");
+	const authorization = localStorage.getItem("Authorization");
 	return process.env.DEPLOY_ENV === "local" ||
-		(authorization !== undefined && authorization !== "" && authorization !==
-			null);
+			(authorization !== undefined && authorization !== "" && authorization !==
+					null && authorization !== "bearer none");
 };
 
 // construct header
 export function getHeader() {
-	const headers = new Headers({
-		"X-API-Key": config.apikey
-	});
+	// return authorization header with jwt token
+	const authorization = localStorage.getItem("Authorization");
 
-	return headers;
-
-	// const headers = new Headers({
-	// 	"Authorization": cookies.get("Authorization"),
-	// });
+	if (authorization) {
+		return new Headers({ "Authorization": authorization});
+	} else {
+		return {};
+	}
 }
 
 export async function downloadResource(url) {
@@ -34,7 +32,7 @@ export async function downloadResource(url) {
 	});
 
 	if (response.status === 200) {
-		let blob = await response.blob();
+		const blob = await response.blob();
 		return window.URL.createObjectURL(blob);
 	} else if (response.status === 401) {
 		// TODO handle error
