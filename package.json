@@ -24,6 +24,9 @@
 		"analyze-bundle": "babel-node ./tools/analyzeBundle.js",
 		"lint": "eslint src",
 		"lint:fix": "npm run lint -- --fix",
+		"codegen:v1": "./node_modules/.bin/openapi -i https://clowder.ncsa.illinois.edu/clowder/swagger -o src/openapi/v1",
+		"codegen:v2": "./node_modules/.bin/openapi -i http://localhost:8888/api/v2/openapi.json -o src/openapi/v2",
+		"codegen": "npm run codegen:v1 && npm run codegen:v2",
 		"docs": "typedoc"
 	},
 	"author": "NCSA",
@@ -127,6 +130,7 @@
 		"mini-css-extract-plugin": "^0.9.0",
 		"node-sass": "^4.14.1",
 		"npm-run-all": "4.0.1",
+		"openapi-typescript-codegen": "^0.12.3",
 		"postcss": "^8.3.11",
 		"postcss-loader": "^3.0.0",
 		"prettier": "^2.3.0",

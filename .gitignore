@@ -44,3 +44,7 @@ dist
 
 # Ignore swap files (for files currently being edited)
 **/*.swp
+
+# Ignore generatediOpenAPI client
+src/openapi/v1/*
+src/openapi/v2/*
