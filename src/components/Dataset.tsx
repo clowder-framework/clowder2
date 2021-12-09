@@ -36,6 +36,7 @@ import {a11yProps} from "./childComponents/TabComponent";
 import TopBar from "./childComponents/TopBar";
 import {Breadcrumbs} from "./childComponents/BreadCrumb";
 import {UploadFile} from "./childComponents/UploadFile";
+import {V2} from "../openapi";
 
 const useStyles = makeStyles(() => ({
 	appBar: {
@@ -127,6 +128,9 @@ export const Dataset = (): JSX.Element => {
 	const [anchorEl, setAnchorEl] = React.useState<Element | null>(null);
 	const [fileThumbnailList, setFileThumbnailList] = useState<any>([]);
 	// const [fileMetadataList, setFileMetadataList] = useState<FileMetadataList[]>([]);
+
+	const [editingName, setEditingName] = React.useState<boolean>(false);
+	const [, setNewDatasetName] = React.useState<string>("");
 
 	// component did mount list all files in dataset
 	useEffect(() => {
@@ -309,7 +313,25 @@ export const Dataset = (): JSX.Element => {
 								about !== undefined ?
 									<Box className="infoCard">
 										<Typography className="title">About</Typography>
-										<Typography className="content">Name: {about["name"]}</Typography>
+										{
+											editingName ? <>:
+													<ClowderInput required={true} onChange={(event) => {
+														const { value } = event.target;
+														setNewDatasetName(value);
+													}} defaultValue={about["name"]}/>
+													<Button onClick={() => {
+														V2.DatasetsService.editDatasetApiV2DatasetsDatasetIdPut(about["id"]).then(json => {
+															// TODO: Dispatch response back to Redux
+															console.log("PUT Dataset Response:", json);
+															setEditingName(false);
+														});
+													}}>Save</Button>
+													<Button onClick={() => setEditingName(false)}>Cancel</Button>
+												</> :
+												<Typography className="content">Name: {about["name"]}
+													<Button onClick={() => setEditingName(true)} size={"small"}>Edit</Button>
+												</Typography>
+										}
 										<Typography className="content">Dataset ID: {about["id"]}</Typography>
 										<Typography className="content">Owner: {about["authorId"]}</Typography>
 										<Typography className="content">Description: {about["description"]}</Typography>
