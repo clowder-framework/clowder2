@@ -1,33 +1,27 @@
 import {getHeader} from "./common";
 import config from "../app.config";
 
+import { V2 } from "../openapi/";
+
 export async function createDataset(formData) {
 	// let endpoint = `${config.hostname}/datasets/createempty?superAdmin=true`;
-	const endpoint = `${config.hostname}/datasets?superAdmin=true`;
+	//const endpoint = `${config.hostname}/datasets?superAdmin=true`;
 
-	const authHeader = getHeader();
-	authHeader.append("Accept", "application/json");
-	authHeader.append("Content-Type", "application/json");
+	//const authHeader = getHeader();
+	/*authHeader.append("Accept", "application/json");
+	authHeader.append("Content-Type", "application/json");*/
 
-	const body = JSON.stringify(formData);
-
-	const response = await fetch(endpoint, {
-		method: "POST",
-		mode: "cors",
-		headers: authHeader,
-		body: body,
+	return V2.DatasetsService.saveDatasetApiV2DatasetsPost(formData).catch(reason => {
+		if (reason.status === 401) {
+			console.error("Failed to create dataset: Not authenticated: ", reason);
+			return {};
+		} else {
+			console.error("Failed to create dataset: ", reason);
+			return {};
+		}
+	}).then(dataset => {
+		return dataset;
 	});
-
-	if (response.status === 200) {
-		// {id:xxx}
-		return response.json();
-	} else if (response.status === 401) {
-		// TODO handle error
-		return {};
-	} else {
-		// TODO handle error
-		return {};
-	}
 }
 
 export async function downloadDataset(datasetId, filename = "") {
