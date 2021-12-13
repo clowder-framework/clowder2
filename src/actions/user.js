@@ -1,4 +1,5 @@
 import config from "../app.config";
+import {V2} from "../openapi";
 
 export const userActions = {
 	login,
@@ -34,10 +35,12 @@ export const LOGOUT = "LOGOUT";
 export function login(username, password) {
 	return async (dispatch) => {
 		const json = await loginHelper(username, password, false);
+		V2.OpenAPI.TOKEN = undefined;
 		localStorage.removeItem("Authorization");
 
 		if (json["token"] !== undefined && json["token"] !== "none") {
 			localStorage.setItem("Authorization", `bearer ${json["token"]}`);
+			V2.OpenAPI.TOKEN = json["token"];
 			return dispatch({
 				type: SET_USER,
 				Authorization: `bearer ${json["token"]}`,
@@ -68,6 +71,7 @@ export function register(username, password) {
 
 export function logout() {
 	return (dispatch) => {
+		V2.OpenAPI.TOKEN = undefined;
 		localStorage.removeItem("Authorization");
 		return dispatch({
 			type: LOGOUT

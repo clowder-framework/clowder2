@@ -1,3 +1,5 @@
+import {V2} from "./openapi";
+
 interface Config{
 	hostname: string;
 	apikey: string;
@@ -11,5 +13,7 @@ const apikey = process.env.APIKEY || "";
 
 config["hostname"] = hostname;
 config["apikey"] = apikey;
+
+V2.OpenAPI.BASE = config.hostname;
 
 export default config;
