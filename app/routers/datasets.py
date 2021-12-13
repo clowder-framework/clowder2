@@ -18,9 +18,10 @@ auth_handler = AuthHandler()
 
 clowder_bucket = os.getenv("MINIO_BUCKET_NAME", "clowder")
 
+
 @router.post("", response_model=Dataset)
 async def save_dataset(
-    dataset_info: Dataset,
+    dataset_info: Json[Dataset],
     user_id=Depends(auth_handler.auth_wrapper),
     db: MongoClient = Depends(dependencies.get_db),
 ):
@@ -75,21 +76,15 @@ async def edit_dataset(
     db: MongoClient = Depends(dependencies.get_db),
 ):
     if (
-            dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
+        dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
     ) is not None:
+        # TODO: Refactor this with permissions checks etc.
         ds = dict(dataset_info) if dataset_info is not None else {}
         user = await db["users"].find_one({"_id": ObjectId(user_id)})
         ds["author"] = user["_id"]
-        new_dataset = await db["datasets"].insert_one(ds)
-        found = await db["datasets"].find_one({"_id": new_dataset.inserted_id})
-
-    request_json = await request.json()
-
+        ds["modified"] = datetime.datetime.utcnow()
         try:
-            request_json["_id"] = dataset_id
-            request_json["modified"] = datetime.datetime.utcnow()
-            edited_dataset = Dataset.from_mongo(request_json)
-            db["datasets"].replace_one({"_id": ObjectId(dataset_id)}, edited_dataset)
+            db["datasets"].replace_one({"_id": ObjectId(dataset_id)}, ds)
         except Exception as e:
             print(e)
         return Dataset.from_mongo(dataset)
@@ -98,18 +93,16 @@ async def edit_dataset(
 
 @router.delete("/{dataset_id}")
 async def delete_dataset(
-    dataset_id: str, db: MongoClient = Depends(dependencies.get_db),
-    fs: Minio = Depends(dependencies.get_fs)
+    dataset_id: str,
+    db: MongoClient = Depends(dependencies.get_db),
+    fs: Minio = Depends(dependencies.get_fs),
 ):
     if (
         dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
     ) is not None:
-        dataset_files = dataset['files']
+        dataset_files = dataset["files"]
         for f in dataset_files:
-            fs.remove_object(
-                clowder_bucket,
-                str(f)
-            )
+            fs.remove_object(clowder_bucket, str(f))
         res = await db["datasets"].delete_one({"_id": ObjectId(dataset_id)})
         return {"status": "deleted"}
     raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
