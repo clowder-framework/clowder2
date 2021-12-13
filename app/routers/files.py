@@ -27,7 +27,7 @@ router = APIRouter()
 auth_handler = AuthHandler()
 
 
-@router.post("/{dataset_id}")
+@router.post("/{dataset_id}", response_model=ClowderFile)
 async def save_file(
     dataset_id: str,
     user_id=Depends(auth_handler.auth_wrapper),
@@ -42,6 +42,8 @@ async def save_file(
     dataset = await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
     f["name"] = file.filename
     f["creator"] = user["_id"]
+    f["views"] = 0
+    f["downloads"] = 0
     new_file = await db["files"].insert_one(f)
     found = await db["files"].find_one({"_id": new_file.inserted_id})
 
