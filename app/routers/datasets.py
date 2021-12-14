@@ -8,6 +8,7 @@ from pydantic import Json
 from fastapi.encoders import jsonable_encoder
 from app import dependencies
 from app.models.datasets import Dataset
+from app.models.files import ClowderFile
 from app.auth import AuthHandler
 import os
 from minio import Minio
@@ -64,6 +65,19 @@ async def get_dataset(dataset_id: str, db: MongoClient = Depends(dependencies.ge
         dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
     ) is not None:
         return Dataset.from_mongo(dataset)
+    raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
+
+@router.get("/{dataset_id}/files")
+async def get_dataset_files(dataset_id: str, db: MongoClient = Depends(dependencies.get_db)):
+    if (
+        dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
+    ) is not None:
+        file_ids = dataset['files']
+        files = []
+        for file_id in file_ids:
+            if (file := await db["files"].find_one({"_id": ObjectId(file_id)})) is not None:
+                files.append(ClowderFile.from_mongo(file))
+        return files
     raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
 
 
