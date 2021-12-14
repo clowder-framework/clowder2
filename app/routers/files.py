@@ -100,7 +100,7 @@ async def delete_file(
                 {"_id": ObjectId(dataset["id"])},
                 {"$push": {"files": ObjectId(file_id)}},
             )
-        fs.remove_object(clowder_bucket, str(file_id))
+        fs.remove_object(settings.MINIO_BUCKET_NAME, str(file_id))
         return {"deleted": file_id}
     else:
         raise HTTPException(status_code=404, detail=f"File {file_id} not found")
