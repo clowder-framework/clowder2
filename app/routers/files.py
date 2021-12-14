@@ -111,5 +111,24 @@ async def get_file_summary(
     file_id: str, db: MongoClient = Depends(dependencies.get_db)
 ):
     if (file := await db["files"].find_one({"_id": ObjectId(file_id)})) is not None:
+        view_count = file["views"]
+        view_count += 1
+        file["views"] = view_count
+        db["files"].replace_one({"_id": ObjectId(file_id)}, file)
+        return ClowderFile.from_mongo(file)
+    raise HTTPException(status_code=404, detail=f"File {file_id} not found")
+
+@router.put("/{file_id}")
+async def edit_file(
+    request: Request, file_id: str, db: MongoClient = Depends(dependencies.get_db)
+):
+    request_json = await request.json()
+    if (file := await db["files"].find_one({"_id": ObjectId(file_id)})) is not None:
+        try:
+            request_json["_id"] = file_id
+            edited_file = ClowderFile.from_mongo(request_json)
+            db["files"].replace_one({"_id": ObjectId(file_id)}, edited_file)
+        except Exception as e:
+            print(e)
         return ClowderFile.from_mongo(file)
     raise HTTPException(status_code=404, detail=f"File {file_id} not found")
