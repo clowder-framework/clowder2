@@ -108,4 +108,22 @@ export class DatasetsService {
         });
     }
 
+    /**
+     * Get Dataset Files
+     * @param datasetId
+     * @returns any Successful Response
+     * @throws ApiError
+     */
+    public static getDatasetFilesApiV2DatasetsDatasetIdFilesGet(
+        datasetId: string,
+    ): CancelablePromise<any> {
+        return __request({
+            method: 'GET',
+            path: `/api/v2/datasets/${datasetId}/files`,
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+
 }

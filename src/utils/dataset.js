@@ -1,28 +1,6 @@
 import {getHeader} from "./common";
 import config from "../app.config";
-
-import { V2 } from "../openapi/";
-
-export async function createDataset(formData) {
-	// let endpoint = `${config.hostname}/datasets/createempty?superAdmin=true`;
-	//const endpoint = `${config.hostname}/datasets?superAdmin=true`;
-
-	//const authHeader = getHeader();
-	/*authHeader.append("Accept", "application/json");
-	authHeader.append("Content-Type", "application/json");*/
-
-	return V2.DatasetsService.saveDatasetApiV2DatasetsPost(formData).catch(reason => {
-		if (reason.status === 401) {
-			console.error("Failed to create dataset: Not authenticated: ", reason);
-			return {};
-		} else {
-			console.error("Failed to create dataset: ", reason);
-			return {};
-		}
-	}).then(dataset => {
-		return dataset;
-	});
-}
+import {logout} from "../actions/user";
 
 export async function downloadDataset(datasetId, filename = "") {
 
@@ -50,6 +28,7 @@ export async function downloadDataset(datasetId, filename = "") {
 	} else if (response.status === 401) {
 		// TODO
 		console.log(response.json());
+		logout();
 	} else {
 		console.log(response.json());
 	}

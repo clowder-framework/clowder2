@@ -1,59 +1,31 @@
-import {getHeader, dataURItoFile} from "./common";
+import {getHeader} from "./common";
+import {V2} from "../openapi";
 import config from "../app.config";
+import {logout} from "../actions/user";
 
 // TODO this need to go away in v2; same function already in redux
 // TODO this exist because on dataset page we need to call multiple files id to collect their thumbnail
-
-export async function fetchFileMetadata(id){
-	const url = `${config.hostname}/files/${id}/metadata?superAdmin=true`;
-	const response = await fetch(url, {mode:"cors", headers: getHeader()});
-	if (response.status  === 200){
-		return await response.json();
-	} else if (response.status === 401) {
-		// TODO handle error
-		return {};
-	} else {
-		// TODO handle error
-		return {};
-	}
-}
-
-export async function uploadFile(formData, selectedDatasetId) {
-	const endpoint = `${config.hostname}/datasets/${selectedDatasetId}/files?superAdmin=true`;
-	const authHeader = getHeader();
-	const body = new FormData();
-	formData.map((item) =>{
-		if (item["file"] !== undefined){
-			body.append("file", dataURItoFile(item["file"]));
+// TODO fixme when thumbnail is available in V2
+export async function fetchFileMetadata(id) {
+	return V2.FilesService.getFileSummaryApiV2FilesFileIdSummaryGet(id).catch(reason => {
+		if (reason.status === 401) {
+			console.error("Failed to get file summary: Not authenticated: ", reason);
+			logout();
+			return {};
+		} else {
+			console.error("Failed to get file summary: ", reason);
+			return {};
 		}
+	}).then(fileSummary => {
+		return fileSummary;
 	});
-
-	const response = await fetch(endpoint, {
-		method: "POST",
-		mode: "cors",
-		headers: authHeader,
-		body: body,
-	});
-
-	if (response.status === 200) {
-		// {id:xxx}
-		// {ids:[{id:xxx}, {id:xxx}]}
-		return response.json();
-	} else if (response.status === 401) {
-		// TODO handle error
-		return {};
-	} else {
-		// TODO handle error
-		return {};
-	}
 }
 
 export async function downloadFile(fileId, filename = "") {
-
 	if (filename === "") {
 		filename = `${fileId}.zip`;
 	}
-	const endpoint = `${config.hostname}/files/${fileId}/blob?superAdmin=true`;
+	const endpoint = `${config.hostname}/api/v2/files/${fileId}`;
 	const response = await fetch(endpoint, {method: "GET", mode: "cors", headers: await getHeader()});
 
 	if (response.status === 200) {
@@ -70,9 +42,33 @@ export async function downloadFile(fileId, filename = "") {
 		}
 	} else if (response.status === 401) {
 		// TODO
+		logout();
 		console.log(response.json());
 	} else {
 		console.log(response.json());
 	}
 
+	// TODO FIXME: this doesn't work. I think on swagger.json it needs a flag x-is-file to be able to get the response as a blob
+	// V2.FilesService.downloadFileApiV2FilesFileIdGet(fileId).catch(reason => {
+	// 	if (reason.status === 401) {
+	// 		console.error("Failed to download file: Not authenticated: ", reason);
+	// 		return {};
+	// 	} else {
+	// 		console.error("Failed to download file: ", reason);
+	// 		return {};
+	// 	}
+	// })
+	// 	.then(response => response.blob())
+	// 	.then(blob => {
+	// 		if (window.navigator.msSaveOrOpenBlob) {
+	// 			window.navigator.msSaveBlob(blob, filename);
+	// 		} else {
+	// 			const anchor = window.document.createElement("a");
+	// 			anchor.href = window.URL.createObjectURL(blob);
+	// 			anchor.download = filename;
+	// 			document.body.appendChild(anchor);
+	// 			anchor.click();
+	// 			document.body.removeChild(anchor);
+	// 		}
+	// 	});
 }

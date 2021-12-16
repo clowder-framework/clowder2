@@ -43,20 +43,21 @@ export default function TopBar() {
 				<Toolbar className={classes.toolBar}>
 					<img src="../../public/clowder-logo-sm.svg" alt="clowder-logo-sm"/>
 					<Typography className={classes.toolBarItem}>
-						<Link href="/" target="_blank" className={classes.toolBarlink}>
-							Home</Link>
+						<Link href="/" className={classes.toolBarlink}>Home</Link>
 					</Typography>
 					<Typography className={classes.toolBarItem}>
-						<Link href="/" target="_blank" className={classes.toolBarlink}>
+						<Link href="https://clowderframework.org/" target="_blank" className={classes.toolBarlink}>
 							Help</Link>
 					</Typography>
 					<Typography className={classes.toolBarItem}>
-						<Link href="/" target="_blank" className={classes.toolBarlink}>
-							Explore</Link>
+						<Link href="/" className={classes.toolBarlink}>Explore</Link>
 					</Typography>
+					{/*<Typography className={classes.toolBarItem}>*/}
+					{/*	<Link href="/" target="_blank" className={classes.toolBarlink}>*/}
+					{/*		Create</Link>*/}
+					{/*</Typography>*/}
 					<Typography className={classes.toolBarItem}>
-						<Link href="/" target="_blank" className={classes.toolBarlink}>
-							Create</Link>
+						<Link href="/logout" className={classes.toolBarlink}>Logout</Link>
 					</Typography>
 				</Toolbar>
 			</AppBar>

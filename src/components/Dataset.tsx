@@ -207,10 +207,10 @@ export const Dataset = (): JSX.Element => {
 								{/*Tabs*/}
 								<Tabs value={selectedTabIndex} onChange={handleTabChange} aria-label="dataset tabs">
 									<Tab className={classes.tab} label="Files" {...a11yProps(0)} />
-									<Tab className={classes.tab} label="Metadata" {...a11yProps(1)} />
-									<Tab className={classes.tab} label="Extractions" {...a11yProps(2)} />
-									<Tab className={classes.tab} label="Visualizations" {...a11yProps(3)} />
-									<Tab className={classes.tab} label="Comments" {...a11yProps(4)} />
+									<Tab className={classes.tab} label="Metadata" {...a11yProps(1)} disabled={true}/>
+									<Tab className={classes.tab} label="Extractions" {...a11yProps(2)} disabled={true}/>
+									<Tab className={classes.tab} label="Visualizations" {...a11yProps(3)} disabled={true}/>
+									<Tab className={classes.tab} label="Comments" {...a11yProps(4)} disabled={true}/>
 								</Tabs>
 								{/*option menus*/}
 								<Box>
@@ -236,18 +236,19 @@ export const Dataset = (): JSX.Element => {
 													  onClick={() => {
 												downloadDataset(datasetId, about["name"]);
 												handleOptionClose();
-													  }}>
+													  }} disabled={true}>
 												Download All
 										</MenuItem>
 										<MenuItem onClick={()=>{
 											deleteDataset(datasetId);
 											handleOptionClose();
-											// TODO go to the explore page
+											// Go to Explore page
+											history.push("/");
 										}
-										} className={classes.optionMenuItem}>Delete</MenuItem>
-										<MenuItem onClick={handleOptionClose} className={classes.optionMenuItem}>Follow</MenuItem>
-										<MenuItem onClick={handleOptionClose} className={classes.optionMenuItem}>Collaborators</MenuItem>
-										<MenuItem onClick={handleOptionClose} className={classes.optionMenuItem}>Extraction</MenuItem>
+										} className={classes.optionMenuItem}>Delete Dataset</MenuItem>
+										<MenuItem onClick={handleOptionClose} className={classes.optionMenuItem} disabled={true}>Follow</MenuItem>
+										<MenuItem onClick={handleOptionClose} className={classes.optionMenuItem} disabled={true}>Collaborators</MenuItem>
+										<MenuItem onClick={handleOptionClose} className={classes.optionMenuItem} disabled={true}>Extraction</MenuItem>
 									</Menu>
 								</Box>
 							</AppBar>
@@ -275,7 +276,7 @@ export const Dataset = (): JSX.Element => {
 														</Grid>
 														<Grid item xl={8} lg={8} md={8} sm={8} xs={12}>
 															<Box className={classes.fileCardText}>
-																<Typography>File name: {file["filename"]}</Typography>
+																<Typography>File name: {file["name"]}</Typography>
 																<Typography>File size: {file["size"]}</Typography>
 																<Typography>Created on: {file["date-created"]}</Typography>
 																<Typography>Content type: {file["contentType"]}</Typography>
@@ -288,11 +289,11 @@ export const Dataset = (): JSX.Element => {
 																onClick={()=>{deleteFile(file["id"]);}}>Delete</Button>
 														</Box>
 														<Box className={classes.fileCardActionItem}>
-															<Button startIcon={<StarBorderIcon />}>Follow</Button>
+															<Button startIcon={<StarBorderIcon />} disabled={true}>Follow</Button>
 														</Box>
 														<Box className={classes.fileCardActionItem}>
 															<Button startIcon={<CloudDownloadOutlinedIcon />}
-																onClick={()=>{downloadFile(file["id"], file["filename"]);}}>
+																onClick={()=>{downloadFile(file["id"], file["name"]);}}>
 																Download</Button>
 														</Box>
 													</Box>
@@ -315,19 +316,19 @@ export const Dataset = (): JSX.Element => {
 										<Typography className="title">About</Typography>
 										{
 											editingName ? <>:
-													<ClowderInput required={true} onChange={(event) => {
-														const { value } = event.target;
-														setNewDatasetName(value);
-													}} defaultValue={about["name"]}/>
-													<Button onClick={() => {
-														V2.DatasetsService.editDatasetApiV2DatasetsDatasetIdPut(about["id"]).then(json => {
-															// TODO: Dispatch response back to Redux
-															console.log("PUT Dataset Response:", json);
-															setEditingName(false);
-														});
-													}}>Save</Button>
-													<Button onClick={() => setEditingName(false)}>Cancel</Button>
-												</> :
+												<ClowderInput required={true} onChange={(event) => {
+													const { value } = event.target;
+													setNewDatasetName(value);
+												}} defaultValue={about["name"]}/>
+												<Button onClick={() => {
+													V2.DatasetsService.editDatasetApiV2DatasetsDatasetIdPut(about["id"]).then((json: any) => {
+														// TODO: Dispatch response back to Redux
+														console.log("PUT Dataset Response:", json);
+														setEditingName(false);
+													});
+												}} disabled={true}>Save</Button>
+												<Button onClick={() => setEditingName(false)}>Cancel</Button>
+											</> :
 												<Typography className="content">Name: {about["name"]}
 													<Button onClick={() => setEditingName(true)} size={"small"}>Edit</Button>
 												</Typography>
@@ -359,7 +360,7 @@ export const Dataset = (): JSX.Element => {
 										<ClowderInput defaultValue="Tag"/>
 									</Grid>
 									<Grid item lg={4} sm={4} xl={4} xs={12}>
-										<ClowderButton>Search</ClowderButton>
+										<ClowderButton disabled={true}>Search</ClowderButton>
 									</Grid>
 								</Grid>
 							</Box>
@@ -367,7 +368,7 @@ export const Dataset = (): JSX.Element => {
 						</Grid>
 					</Grid>
 					<Dialog open={open} onClose={()=>{setOpen(false);}} fullWidth={true} aria-labelledby="form-dialog">
-						<DialogTitle id="form-dialog-title">Add Files</DialogTitle>
+						<DialogTitle id="form-dialog-title">Add File</DialogTitle>
 						{/*TODO: pass select to uploader so once upload succeeded, can jump to that dataset/file page*/}
 						<UploadFile selectedDatasetId={datasetId} setOpen={setOpen}/>
 					</Dialog>

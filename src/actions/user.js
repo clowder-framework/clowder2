@@ -1,4 +1,3 @@
-import config from "../app.config";
 import {V2} from "../openapi";
 
 export const userActions = {
@@ -6,24 +5,23 @@ export const userActions = {
 	logout
 };
 
-export async function loginHelper(username, password, register=false) {
-	let url = config.hostname;
-	if (register) { url = `${url}/users`;}
-	else { url = `${url}/login`;}
-
+export async function loginHelper(username, password, register = false) {
 	const data = {"name": username, "password": password};
-	const tokenRequest = await fetch(url, {
-		method:"POST",
-		mode:"cors",
-		headers: {
-			"Content-Type": "application/json"
-		},
-		body: JSON.stringify(data)
-	});
-
-	const tokens = await tokenRequest.json();
-
-	return tokens;
+	if (register) {
+		return V2.UsersService.saveUserApiV2UsersPost(data).catch(reason => {
+			console.error("Failed to register a user! ", reason);
+			logout();
+			return {};
+		})
+			.then(user => {return user;});
+	} else {
+		return V2.LoginService.loginApiV2LoginPost(data).catch(reason => {
+			console.error("Failed to login a user! ", reason);
+			logout();
+			return {};
+		})
+			.then(user => {return user;});
+	}
 }
 
 export const LOGIN_ERROR = "LOGIN_ERROR";

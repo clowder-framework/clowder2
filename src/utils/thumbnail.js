@@ -1,5 +1,6 @@
 import {getHeader} from "./common";
 import config from "../app.config";
+import {logout} from "../actions/user";
 
 
 export async function downloadThumbnail(thumbnailId, title=null) {
@@ -22,6 +23,7 @@ export async function downloadThumbnail(thumbnailId, title=null) {
 	}
 	else if  (response.status  === 401){
 		// TODO handle error
+		logout();
 		return null;
 	}
 	else {

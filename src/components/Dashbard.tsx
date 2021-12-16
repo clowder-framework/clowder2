@@ -156,10 +156,10 @@ export const Dashboard = (): JSX.Element => {
 							<AppBar className={classes.appBar} position="static">
 								<Tabs value={selectedTabIndex} onChange={handleTabChange} aria-label="dashboard tabs">
 									<Tab className={classes.tab} label="Datasets" {...a11yProps(0)} />
-									<Tab className={classes.tab} label="Activity" {...a11yProps(1)} />
-									<Tab className={classes.tab} label="Collections" {...a11yProps(2)} />
-									<Tab className={classes.tab} label="Spaces" {...a11yProps(3)} />
-									<Tab className={classes.tab} label="API Keys" {...a11yProps(4)} />
+									<Tab className={classes.tab} label="Activity" {...a11yProps(1)} disabled={true}/>
+									<Tab className={classes.tab} label="Collections" {...a11yProps(2)} disabled={true}/>
+									<Tab className={classes.tab} label="Spaces" {...a11yProps(3)} disabled={true}/>
+									<Tab className={classes.tab} label="API Keys" {...a11yProps(4)} disabled={true}/>
 								</Tabs>
 							</AppBar>
 							<TabPanel value={selectedTabIndex} index={0}>
@@ -202,13 +202,13 @@ export const Dashboard = (): JSX.Element => {
 																Delete</Button>
 														</Box>
 														<Box className={classes.fileCardActionItem}>
-															<Button startIcon={<StarBorderIcon/>}>Follow</Button>
+															<Button startIcon={<StarBorderIcon/>} disabled={true}>Follow</Button>
 														</Box>
 														<Box className={classes.fileCardActionItem}>
 															<Button startIcon={<CloudDownloadOutlinedIcon/>}
 																onClick={() => {
 																	downloadDataset(dataset["id"], dataset["name"]);
-																}}>
+																}} disabled={true}>
 																Download</Button>
 														</Box>
 													</Box>
@@ -248,7 +248,7 @@ export const Dashboard = (): JSX.Element => {
 								<Typography className="content">Some quick example text to tell users why they should
 									read
 									the tutorial</Typography>
-								<Link href="" className="link">Show me Tutorial</Link>
+								<Link href="https://clowderframework.org/" className="link" target="_blank">Show me Tutorial</Link>
 							</Box>
 						</Grid>
 					</Grid>

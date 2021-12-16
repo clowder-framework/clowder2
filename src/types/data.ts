@@ -9,7 +9,7 @@ export interface Dataset {
 
 export interface File {
 	id: string;
-	filename: string;
+	name: string;
 	size: number;
 	"date-created": string;
 	contentType:string;
@@ -30,11 +30,13 @@ export interface FileMetadata {
 	"content-type": string;
 	size:number;
 	"date-created": string;
-	filename: string;
-	authorId: string;
+	name: string;
+	creator: string;
 	status: string;
 	filedescription: string;
 	thumbnail:string;
+	downloads:number;
+	views:number;
 }
 
 export interface FileMetadataList{

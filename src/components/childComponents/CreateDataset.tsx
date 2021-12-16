@@ -6,8 +6,11 @@ import LoadingOverlay from "react-loading-overlay-ts";
 
 import Form from "@rjsf/material-ui";
 import datasetSchema from "../../schema/datasetSchema.json";
-import {createDataset} from "../../utils/dataset";
+// import {createDataset} from "../../utils/dataset";
 import {FormProps} from "@rjsf/core";
+import {useDispatch,} from "react-redux";
+import {datasetCreated} from "../../actions/dataset";
+
 
 type CreateDatasetProps = {
 	selectDataset: (selectedDatasetId: string) => void,
@@ -15,16 +18,15 @@ type CreateDatasetProps = {
 }
 
 export const CreateDataset: React.FC<CreateDatasetProps> = (props: CreateDatasetProps) => {
-	const {selectDataset, setOpen} = props;
+	const dispatch = useDispatch();
+	const createDataset = (formData: FormData) => dispatch(datasetCreated(formData));
+	const {setOpen} = props;
 
 	const [loading, setLoading] = useState(false);
 
 	const onSave = async (formData:FormData) => {
 		setLoading(true);
-		const response = await createDataset(formData);
-		if (response !== {} && response["id"] !== undefined){
-			selectDataset(response["id"]);
-		}
+		createDataset(formData);
 		setLoading(false);
 		setOpen(false);
 	};

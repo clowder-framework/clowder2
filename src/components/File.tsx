@@ -109,7 +109,7 @@ export const File = (): JSX.Element => {
 			"url":`/datasets/${datasetId}`
 		},
 		{
-			"name":fileMetadata["filename"],
+			"name":fileMetadata["name"],
 			"url":`/files/${fileId}`
 		}
 	];
@@ -124,10 +124,10 @@ export const File = (): JSX.Element => {
 							<AppBar className={classes.appBar} position="static">
 								<Tabs value={selectedTabIndex} onChange={handleTabChange} aria-label="file tabs">
 									<Tab className={classes.tab} label="Previews" {...a11yProps(0)} />
-									<Tab className={classes.tab} label="Sections" {...a11yProps(1)} />
-									<Tab className={classes.tab} label="Metadata" {...a11yProps(2)} />
-									<Tab className={classes.tab} label="Extractions" {...a11yProps(3)} />
-									<Tab className={classes.tab} label="Comments" {...a11yProps(4)} />
+									<Tab className={classes.tab} label="Sections" {...a11yProps(1)} disabled={true}/>
+									<Tab className={classes.tab} label="Metadata" {...a11yProps(2)} disabled={true}/>
+									<Tab className={classes.tab} label="Extractions" {...a11yProps(3)} disabled={true}/>
+									<Tab className={classes.tab} label="Comments" {...a11yProps(4)} disabled={true}/>
 								</Tabs>
 							</AppBar>
 							<TabPanel value={selectedTabIndex} index={0}>
@@ -181,9 +181,9 @@ export const File = (): JSX.Element => {
 										<Typography className="content">Uploaded
 												on: {fileMetadata["date-created"]}</Typography>
 										<Typography className="content">Uploaded
-												as: {fileMetadata["filename"]}</Typography>
+												as: {fileMetadata["name"]}</Typography>
 										<Typography className="content">Uploaded
-												by: {fileMetadata["authorId"]}</Typography>
+												by: {fileMetadata["creator"]}</Typography>
 										<Typography
 											className="content">Status: {fileMetadata["status"]}</Typography>
 									</Box> : <></>
@@ -191,10 +191,10 @@ export const File = (): JSX.Element => {
 							<Divider light/>
 							<Box className="infoCard">
 								<Typography className="title">Statistics</Typography>
-								<Typography className="content">Views: 10</Typography>
-								<Typography className="content">Last viewed: Jun 07, 2021 21:49:09</Typography>
-								<Typography className="content">Downloads: 0</Typography>
-								<Typography className="content">Last downloaded: Never</Typography>
+								<Typography className="content">Views: {fileMetadata["views"]}</Typography>
+								{/*<Typography className="content">Last viewed: Jun 07, 2021 21:49:09</Typography>*/}
+								<Typography className="content">Downloads: {fileMetadata["downloads"]}</Typography>
+								{/*<Typography className="content">Last downloaded: Never</Typography>*/}
 							</Box>
 							<Divider light/>
 							<Box className="infoCard">
@@ -204,7 +204,7 @@ export const File = (): JSX.Element => {
 										<ClowderInput defaultValue="Tag"/>
 									</Grid>
 									<Grid item lg={4} sm={4} xl={4} xs={12}>
-										<ClowderButton>Search</ClowderButton>
+										<ClowderButton disabled={true}>Search</ClowderButton>
 									</Grid>
 								</Grid>
 							</Box>

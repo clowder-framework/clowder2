@@ -2,6 +2,7 @@
 /* tslint:disable */
 /* eslint-disable */
 import type { Body_save_file_api_v2_files__dataset_id__post } from '../models/Body_save_file_api_v2_files__dataset_id__post';
+import type { ClowderFile } from '../models/ClowderFile';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { request as __request } from '../core/request';
 
@@ -11,13 +12,13 @@ export class FilesService {
      * Save File
      * @param datasetId
      * @param formData
-     * @returns any Successful Response
+     * @returns ClowderFile Successful Response
      * @throws ApiError
      */
     public static saveFileApiV2FilesDatasetIdPost(
         datasetId: string,
         formData: Body_save_file_api_v2_files__dataset_id__post,
-    ): CancelablePromise<any> {
+    ): CancelablePromise<ClowderFile> {
         return __request({
             method: 'POST',
             path: `/api/v2/files/${datasetId}`,

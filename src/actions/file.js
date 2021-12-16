@@ -1,5 +1,8 @@
 import config from "../app.config";
-import {getHeader} from "../utils/common";
+import {dataURItoFile, getHeader} from "../utils/common";
+import {V2} from "../openapi";
+import {RECEIVE_DATASET_ABOUT, receiveDatasetAbout} from "./dataset";
+import {logout} from "./user";
 
 export const RECEIVE_FILE_EXTRACTED_METADATA = "RECEIVE_FILE_EXTRACTED_METADATA";
 export function receiveFileExtractedMetadata(type, json){
@@ -39,19 +42,16 @@ export function receiveFileMetadata(type, json){
 	};
 }
 export function fetchFileMetadata(id){
-	const url = `${config.hostname}/clowder/api/files/${id}/metadata?superAdmin=true`;
 	return (dispatch) => {
-		return fetch(url, {mode:"cors", headers: getHeader()})
-			.then((response) => {
-				if (response.status === 200) {
-					response.json().then(json =>{
-						dispatch(receiveFileMetadata(RECEIVE_FILE_METADATA, json));
-					});
-				}
-				else {
-					dispatch(receiveFileMetadata(RECEIVE_FILE_METADATA, []));
-				}
-			});
+		return V2.FilesService.getFileSummaryApiV2FilesFileIdSummaryGet(id).catch(reason => {
+			if (reason.status === 401){
+				console.log("Unauthorized!");
+				logout();
+			}
+			dispatch(receiveFileMetadata(RECEIVE_FILE_METADATA, []));
+		}).then(json => {
+			dispatch(receiveFileMetadata(RECEIVE_FILE_METADATA, json));
+		});
 	};
 }
 
@@ -111,28 +111,47 @@ export function fetchFilePreviews(id){
 
 export const DELETE_FILE = "DELETE_FILE";
 export function fileDeleted(fileId){
-	const url = `${config.hostname}/files/${fileId}?superAdmin=true`;
 	return (dispatch) => {
-		return fetch(url, {mode:"cors", method:"DELETE", headers: getHeader()})
-			.then((response) => {
-				if (response.status === 200) {
-					response.json().then(json =>{
-						dispatch({
-							type: DELETE_FILE,
-							file: {"id": fileId, "status": json["status"]===undefined?json["status"]:"success"},
-							receivedAt: Date.now(),
-						});
-					});
-				}
-				else {
-					response.json().then(json => {
-						dispatch({
-							type: DELETE_FILE,
-							file: {"id": null, "status": json["status"] === undefined ? json["status"] : "fail"},
-							receivedAt: Date.now(),
-						});
-					});
-				}
+		return V2.FilesService.deleteFileApiV2FilesFileIdDelete(fileId).catch(reason => {
+			if (reason.status === 401){
+				console.log("Unauthorized!");
+				logout();
+			}
+			dispatch({
+				type: DELETE_FILE,
+				file: {"id": null, "status": reason["status"] === undefined ? reason["status"] : "fail"},
+				receivedAt: Date.now(),
 			});
+		}).then(json => {
+			dispatch({
+				type: DELETE_FILE,
+				file: {"id": fileId, "status": json["status"]===undefined? json["status"]:"success"},
+				receivedAt: Date.now(),
+			});
+		});
+	};
+}
+
+export const CREATE_FILE = "CREATE_FILE";
+export function fileCreated(formData, selectedDatasetId){
+	return (dispatch) => {
+		formData["file"] = dataURItoFile(formData["file"]);
+		return V2.FilesService.saveFileApiV2FilesDatasetIdPost(selectedDatasetId, formData).catch(reason => {
+			if (reason.status === 401) {
+				console.error("Failed to create file: Not authenticated: ", reason);
+				logout();
+			}
+			dispatch({
+				type: CREATE_FILE,
+				file: {},
+				receivedAt: Date.now(),
+			});
+		}).then(file => {
+			dispatch({
+				type: CREATE_FILE,
+				file: file,
+				receivedAt: Date.now(),
+			});
+		});
 	};
 }

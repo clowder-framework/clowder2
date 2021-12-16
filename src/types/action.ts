@@ -65,6 +65,16 @@ interface REGISTER_USER{
 	type: "REGISTER_USER"
 }
 
+interface CREATE_DATASET{
+	type: "CREATE_DATASET",
+	dataset: Dataset
+}
+
+interface CREATE_FILE{
+	type: "CREATE_FILE",
+	file: File
+}
+
 export type DataAction =
 	| RECEIVE_FILES_IN_DATASET
 	| DELETE_FILE
@@ -80,4 +90,6 @@ export type DataAction =
 	| LOGOUT
 	| REGISTER_ERROR
 	| REGISTER_USER
+	| CREATE_DATASET
+	| CREATE_FILE
 	;

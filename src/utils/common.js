@@ -1,5 +1,6 @@
 import Cookies from "universal-cookie";
 import {V2} from "../openapi";
+import {logout} from "../actions/user";
 
 const cookies = new Cookies();
 
@@ -38,6 +39,7 @@ export async function downloadResource(url) {
 		return window.URL.createObjectURL(blob);
 	} else if (response.status === 401) {
 		// TODO handle error
+		logout();
 		return null;
 	} else {
 		// TODO handle error

@@ -1,6 +1,7 @@
 import config from "../app.config";
 import {getHeader} from "../utils/common";
 import {V2} from "../openapi";
+import {logout} from "./user";
 
 export const RECEIVE_FILES_IN_DATASET = "RECEIVE_FILES_IN_DATASET";
 
@@ -15,18 +16,16 @@ export function receiveFilesInDataset(type, json) {
 }
 
 export function fetchFilesInDataset(id){
-	const url = `${config.hostname}/datasets/${id}/files?superAdmin=true`;
 	return (dispatch) => {
-		return fetch(url, {mode: "cors", headers: getHeader()})
-			.then((response) => {
-				if (response.status === 200) {
-					response.json().then(json => {
-						dispatch(receiveFilesInDataset(RECEIVE_FILES_IN_DATASET, json));
-					});
-				} else {
-					dispatch(receiveFilesInDataset(RECEIVE_FILES_IN_DATASET, []));
-				}
-			});
+		return V2.DatasetsService.getDatasetFilesApiV2DatasetsDatasetIdFilesGet(id).catch(reason => {
+			if (reason.status === 401){
+				console.log("Unauthorized!");
+				logout();
+			}
+			dispatch(receiveFilesInDataset(RECEIVE_FILES_IN_DATASET, []));
+		}).then(json => {
+			dispatch(receiveFilesInDataset(RECEIVE_FILES_IN_DATASET, json));
+		});
 	};
 }
 
@@ -45,6 +44,10 @@ export function receiveDatasetAbout(type, json) {
 export function fetchDatasetAbout(id){
 	return (dispatch) => {
 		return V2.DatasetsService.getDatasetApiV2DatasetsDatasetIdGet(id).catch(reason => {
+			if (reason.status === 401){
+				console.log("Unauthorized!");
+				logout();
+			}
 			dispatch(receiveDatasetAbout(RECEIVE_DATASET_ABOUT, []));
 		}).then(json => {
 			dispatch(receiveDatasetAbout(RECEIVE_DATASET_ABOUT, json));
@@ -65,23 +68,39 @@ export function receiveDatasets(type, json) {
 }
 
 export function fetchDatasets(when, date, limit=5){
-	let url = `${config.hostname}/datasets?superAdmin=true&limit=${limit}`;
-	if (date) url = `${url}&date=${date}`;
-	if (when) url = `${url}&when=${when}`;
 	return (dispatch) => {
 		// TODO: Parameters for dates? paging?
 		return V2.DatasetsService.getDatasetsApiV2DatasetsGet(0, limit).catch(reason => {
 		    if (reason.status === 401){
-				// auth failed
-				V2.OpenAPI.TOKEN = undefined;
-				localStorage.removeItem("Authorization");
-				dispatch(receiveDatasets(RECEIVE_DATASETS, []));
+				console.log("Unauthorized!");
+				logout();
 			}
-			else {
-				dispatch(receiveDatasets(RECEIVE_DATASETS, []));
-			}
+		    dispatch(receiveDatasets(RECEIVE_DATASETS, []));
 		}).then(json => {
 			dispatch(receiveDatasets(RECEIVE_DATASETS, json));
+		});
+	};
+}
+
+export const CREATE_DATASET = "CREATE_DATASET";
+export function datasetCreated(formData){
+	return (dispatch) =>{
+		return V2.DatasetsService.saveDatasetApiV2DatasetsPost(formData).catch(reason => {
+			if (reason.status === 401) {
+				console.error("Failed to create dataset: Not authenticated: ", reason);
+				logout();
+			}
+			dispatch({
+				type: CREATE_DATASET,
+				dataset: {},
+				receivedAt: Date.now(),
+			});
+		}).then(dataset => {
+			dispatch({
+				type: CREATE_DATASET,
+				dataset: dataset,
+				receivedAt: Date.now(),
+			});
 		});
 	};
 }
@@ -90,6 +109,10 @@ export const DELETE_DATASET = "DELETE_DATASET";
 export function datasetDeleted(datasetId){
 	return (dispatch) => {
 		return V2.DatasetsService.deleteDatasetApiV2DatasetsDatasetIdDelete(datasetId).catch(reason => {
+			if (reason.status === 401){
+				console.log("Unauthorized!");
+				logout();
+			}
 			dispatch({
 				type: DELETE_DATASET,
 				// FIXME: is this right? Do we need to provide a body here for the failure case?

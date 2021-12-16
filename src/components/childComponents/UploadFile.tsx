@@ -6,10 +6,10 @@ import LoadingOverlay from "react-loading-overlay-ts";
 
 import Form from "@rjsf/material-ui";
 
-import {uploadFile} from "../../utils/file.js";
 import fileSchema from "../../schema/fileSchema.json";
 import {FormProps} from "@rjsf/core";
-import {useHistory} from "react-router-dom";
+import {useDispatch} from "react-redux";
+import {fileCreated} from "../../actions/file";
 
 
 type UploadFileProps ={
@@ -18,26 +18,16 @@ type UploadFileProps ={
 }
 
 export const UploadFile: React.FC<UploadFileProps> = (props: UploadFileProps) => {
-	const history = useHistory();
+	const dispatch = useDispatch();
+	const uploadFile = (formData: FormData, selectedDatasetId: string|undefined) => dispatch(fileCreated(formData, selectedDatasetId));
 
 	const {selectedDatasetId, setOpen,} = props;
 
 	const [loading, setLoading] = useState<boolean>(false);
 
-
 	const onSave = async (formData:FormData) => {
 		setLoading(true);
-		const response = await uploadFile(formData, selectedDatasetId);
-		if (response !== {} && (response["id"] !== undefined || response["ids"] !== undefined)){
-			// TODO once upload succeeded go to dataset page again
-			// TODO if upload return full file object then we can use redux to update files
-			// TODO but now it only returns id, so we have to "refresh" the dataset page to reflect
-			history.go(0);
-		}
-		else{
-			// TODO display error message to show upload unsuccess
-			console.log("fail to upload files!");
-		}
+		uploadFile(formData, selectedDatasetId);
 		setLoading(false);
 		setOpen(false);
 	};
