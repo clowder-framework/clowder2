@@ -6,7 +6,7 @@ services:
 
   react:
     container_name: "clowder2-react"
-    image: "clowder/clowder-react"
+    image: "hub.ncsa.illinois.edu/clowder/clowder-react"
     build:
       context: .
     ports:

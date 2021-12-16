@@ -25,7 +25,7 @@
 		"lint": "eslint src",
 		"lint:fix": "npm run lint -- --fix",
 		"codegen:v1": "./node_modules/.bin/openapi -i https://clowder.ncsa.illinois.edu/clowder/swagger -o src/openapi/v1",
-		"codegen:v2": "./node_modules/.bin/openapi -i http://clowder.docker.localhost/api/v2/openapi.json -o src/openapi/v2",
+		"codegen:v2": "./node_modules/.bin/openapi -i ${CLOWDER_REMOTE_HOST}/api/v2/openapi.json -o src/openapi/v2",
 		"codegen": "npm run codegen:v1 && npm run codegen:v2",
 		"docs": "typedoc"
 	},
