@@ -23,7 +23,7 @@ export async function downloadThumbnail(thumbnailId, title=null) {
 	}
 	else if  (response.status  === 401){
 		// TODO handle error
-		logout();
+		// logout();
 		return null;
 	}
 	else {

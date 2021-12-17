@@ -39,7 +39,7 @@ export async function downloadResource(url) {
 		return window.URL.createObjectURL(blob);
 	} else if (response.status === 401) {
 		// TODO handle error
-		logout();
+		// logout();
 		return null;
 	} else {
 		// TODO handle error

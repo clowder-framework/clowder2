@@ -10,14 +10,14 @@ export async function loginHelper(username, password, register = false) {
 	if (register) {
 		return V2.UsersService.saveUserApiV2UsersPost(data).catch(reason => {
 			console.error("Failed to register a user! ", reason);
-			logout();
+			// logout();
 			return {};
 		})
 			.then(user => {return user;});
 	} else {
 		return V2.LoginService.loginApiV2LoginPost(data).catch(reason => {
 			console.error("Failed to login a user! ", reason);
-			logout();
+			// logout();
 			return {};
 		})
 			.then(user => {return user;});

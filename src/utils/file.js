@@ -10,7 +10,7 @@ export async function fetchFileMetadata(id) {
 	return V2.FilesService.getFileSummaryApiV2FilesFileIdSummaryGet(id).catch(reason => {
 		if (reason.status === 401) {
 			console.error("Failed to get file summary: Not authenticated: ", reason);
-			logout();
+			// logout();
 			return {};
 		} else {
 			console.error("Failed to get file summary: ", reason);
@@ -42,7 +42,7 @@ export async function downloadFile(fileId, filename = "") {
 		}
 	} else if (response.status === 401) {
 		// TODO
-		logout();
+		// logout();
 		console.log(response.json());
 	} else {
 		console.log(response.json());

@@ -46,7 +46,7 @@ export function fetchFileMetadata(id){
 		return V2.FilesService.getFileSummaryApiV2FilesFileIdSummaryGet(id).catch(reason => {
 			if (reason.status === 401){
 				console.log("Unauthorized!");
-				logout();
+				// logout();
 			}
 			dispatch(receiveFileMetadata(RECEIVE_FILE_METADATA, []));
 		}).then(json => {
@@ -115,7 +115,7 @@ export function fileDeleted(fileId){
 		return V2.FilesService.deleteFileApiV2FilesFileIdDelete(fileId).catch(reason => {
 			if (reason.status === 401){
 				console.log("Unauthorized!");
-				logout();
+				// logout();
 			}
 			dispatch({
 				type: DELETE_FILE,
@@ -139,7 +139,7 @@ export function fileCreated(formData, selectedDatasetId){
 		return V2.FilesService.saveFileApiV2FilesDatasetIdPost(selectedDatasetId, formData).catch(reason => {
 			if (reason.status === 401) {
 				console.error("Failed to create file: Not authenticated: ", reason);
-				logout();
+				// logout();
 			}
 			dispatch({
 				type: CREATE_FILE,

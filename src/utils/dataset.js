@@ -28,7 +28,7 @@ export async function downloadDataset(datasetId, filename = "") {
 	} else if (response.status === 401) {
 		// TODO
 		console.log(response.json());
-		logout();
+		// logout();
 	} else {
 		console.log(response.json());
 	}

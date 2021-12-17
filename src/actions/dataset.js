@@ -20,7 +20,7 @@ export function fetchFilesInDataset(id){
 		return V2.DatasetsService.getDatasetFilesApiV2DatasetsDatasetIdFilesGet(id).catch(reason => {
 			if (reason.status === 401){
 				console.log("Unauthorized!");
-				logout();
+				// logout();
 			}
 			dispatch(receiveFilesInDataset(RECEIVE_FILES_IN_DATASET, []));
 		}).then(json => {
@@ -46,7 +46,7 @@ export function fetchDatasetAbout(id){
 		return V2.DatasetsService.getDatasetApiV2DatasetsDatasetIdGet(id).catch(reason => {
 			if (reason.status === 401){
 				console.log("Unauthorized!");
-				logout();
+				// logout();
 			}
 			dispatch(receiveDatasetAbout(RECEIVE_DATASET_ABOUT, []));
 		}).then(json => {
@@ -73,7 +73,7 @@ export function fetchDatasets(when, date, limit=5){
 		return V2.DatasetsService.getDatasetsApiV2DatasetsGet(0, limit).catch(reason => {
 		    if (reason.status === 401){
 				console.log("Unauthorized!");
-				logout();
+				// logout();
 			}
 		    dispatch(receiveDatasets(RECEIVE_DATASETS, []));
 		}).then(json => {
@@ -88,7 +88,7 @@ export function datasetCreated(formData){
 		return V2.DatasetsService.saveDatasetApiV2DatasetsPost(formData).catch(reason => {
 			if (reason.status === 401) {
 				console.error("Failed to create dataset: Not authenticated: ", reason);
-				logout();
+				// logout();
 			}
 			dispatch({
 				type: CREATE_DATASET,
@@ -111,7 +111,7 @@ export function datasetDeleted(datasetId){
 		return V2.DatasetsService.deleteDatasetApiV2DatasetsDatasetIdDelete(datasetId).catch(reason => {
 			if (reason.status === 401){
 				console.log("Unauthorized!");
-				logout();
+				// logout();
 			}
 			dispatch({
 				type: DELETE_DATASET,
