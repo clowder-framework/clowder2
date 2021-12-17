@@ -34,7 +34,7 @@ async def save_file(
     db: MongoClient = Depends(dependencies.get_db),
     fs: Minio = Depends(dependencies.get_fs),
     file: UploadFile = File(...),
-    file_info: Optional[Json[ClowderFile]] = None,
+    file_info: Optional[ClowderFile] = None,
 ):
     # First, add to database and get unique ID
     f = dict(file_info) if file_info is not None else {}
@@ -83,6 +83,10 @@ async def download_file(
         response.headers["Content-Disposition"] = (
             "attachment; filename=%s" % file["name"]
         )
+        # Increment download count
+        await db["files"].update_one(
+            {"_id": ObjectId(file_id)}, {"$inc": {"downloads": 1}}
+        )
         return response
 
 
@@ -94,12 +98,15 @@ async def delete_file(
     fs: Minio = Depends(dependencies.get_fs),
 ):
     if (file := await db["files"].find_one({"_id": ObjectId(file_id)})) is not None:
-        dataset = await db["datasets"].find_one({"files": ObjectId(file_id)})
-        if dataset is not None:
+        if (
+            dataset := await db["datasets"].find_one({"files": ObjectId(file_id)})
+        ) is not None:
             updated_dataset = await db["datasets"].update_one(
                 {"_id": ObjectId(dataset["id"])},
-                {"$push": {"files": ObjectId(file_id)}},
+                {"$pull": {"files": ObjectId(file_id)}},
             )
+        # TODO: Error catching
+        removed_file = await db["files"].delete_one({"_id": ObjectId(file_id)})
         fs.remove_object(settings.MINIO_BUCKET_NAME, str(file_id))
         return {"deleted": file_id}
     else:
@@ -111,5 +118,25 @@ async def get_file_summary(
     file_id: str, db: MongoClient = Depends(dependencies.get_db)
 ):
     if (file := await db["files"].find_one({"_id": ObjectId(file_id)})) is not None:
+        # TODO: Incrementing too often (3x per page view)
+        # file["views"] += 1
+        # db["files"].replace_one({"_id": ObjectId(file_id)}, file)
+        return ClowderFile.from_mongo(file)
+    raise HTTPException(status_code=404, detail=f"File {file_id} not found")
+
+
+@router.put("/{file_id}", response_model=ClowderFile)
+async def edit_file(
+    file_info: ClowderFile, file_id: str, db: MongoClient = Depends(dependencies.get_db)
+):
+    # TODO: Needs permissions checking here
+    if (file := await db["files"].find_one({"_id": ObjectId(file_id)})) is not None:
+        try:
+            file.update(file_info)
+            # TODO: Disallow changing other fields such as author
+            file["_id"] = file_id
+            db["files"].replace_one({"_id": ObjectId(file_id)}, file)
+        except Exception as e:
+            print(e)
         return ClowderFile.from_mongo(file)
     raise HTTPException(status_code=404, detail=f"File {file_id} not found")
