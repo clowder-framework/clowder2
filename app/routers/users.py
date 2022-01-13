@@ -5,18 +5,16 @@ from fastapi import APIRouter, Request, HTTPException, Depends
 from pymongo import MongoClient
 
 from app import dependencies
-from app.models.users import User
+from app.models.users import User, AuthDetails
 from passlib.hash import bcrypt
 
 router = APIRouter()
 
 
 @router.post("", response_model=User)
-async def save_user(request: Request, db: MongoClient = Depends(dependencies.get_db)):
-    request_json = await request.json()
-    plain_password = request_json["password"]
-    hashed_password = bcrypt.hash(plain_password)
-    new_user = User(name=request_json["name"], hashed_password=hashed_password)
+async def save_user(auth: AuthDetails, db: MongoClient = Depends(dependencies.get_db)):
+    hashed_password = bcrypt.hash(auth.password)
+    new_user = User(name=auth.name, hashed_password=hashed_password)
     res = await db["users"].insert_one(new_user.mongo())
     found = await db["users"].find_one({"_id": res.inserted_id})
     return User.from_mongo(found).dict(exclude={"create_at"})
