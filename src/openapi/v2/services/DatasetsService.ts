@@ -75,15 +75,19 @@ export class DatasetsService {
     /**
      * Edit Dataset
      * @param datasetId
-     * @returns any Successful Response
+     * @param requestBody
+     * @returns Dataset Successful Response
      * @throws ApiError
      */
     public static editDatasetApiV2DatasetsDatasetIdPut(
         datasetId: string,
-    ): CancelablePromise<any> {
+        requestBody: Dataset,
+    ): CancelablePromise<Dataset> {
         return __request({
             method: 'PUT',
             path: `/api/v2/datasets/${datasetId}`,
+            body: requestBody,
+            mediaType: 'application/json',
             errors: {
                 422: `Validation Error`,
             },

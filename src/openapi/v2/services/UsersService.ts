@@ -1,6 +1,7 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { AuthDetails } from '../models/AuthDetails';
 import type { User } from '../models/User';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { request as __request } from '../core/request';
@@ -33,13 +34,21 @@ export class UsersService {
 
     /**
      * Save User
+     * @param requestBody
      * @returns User Successful Response
      * @throws ApiError
      */
-    public static saveUserApiV2UsersPost(): CancelablePromise<User> {
+    public static saveUserApiV2UsersPost(
+        requestBody: AuthDetails,
+    ): CancelablePromise<User> {
         return __request({
             method: 'POST',
             path: `/api/v2/users`,
+            body: requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: `Validation Error`,
+            },
         });
     }
 

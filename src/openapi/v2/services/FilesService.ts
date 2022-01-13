@@ -49,6 +49,28 @@ export class FilesService {
     }
 
     /**
+     * Edit File
+     * @param fileId
+     * @param requestBody
+     * @returns ClowderFile Successful Response
+     * @throws ApiError
+     */
+    public static editFileApiV2FilesFileIdPut(
+        fileId: string,
+        requestBody: ClowderFile,
+    ): CancelablePromise<ClowderFile> {
+        return __request({
+            method: 'PUT',
+            path: `/api/v2/files/${fileId}`,
+            body: requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+
+    /**
      * Delete File
      * @param fileId
      * @returns any Successful Response
