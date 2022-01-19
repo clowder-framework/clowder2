@@ -232,7 +232,7 @@ export const Dashboard = (): JSX.Element => {
 								<Typography className="content">Some quick example text to tell users why they should
 									upload
 									their own data</Typography>
-								<Link className="link" onClick={() => {
+								<Link href="#" className="link" onClick={() => {
 									setOpen(true);
 								}}>Create Dataset</Link>
 							</Box>
@@ -241,7 +241,7 @@ export const Dashboard = (): JSX.Element => {
 								<Typography className="content">Some quick example text to tell users why they should
 									follow
 									more people</Typography>
-								<Link href="" className="link">Go to Explore</Link>
+								<Link href="#" className="link">Go to Explore</Link>
 							</Box>
 							<Box className="actionCard">
 								<Typography className="title">Want to learn more about Clowder?</Typography>

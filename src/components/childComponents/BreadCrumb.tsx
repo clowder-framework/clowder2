@@ -8,7 +8,7 @@ import {useHistory} from "react-router-dom";
 
 const useStyles = makeStyles(() => ({
 	breadCrumb:{
-		padding:"28px"
+		padding:"0px"
 	},
 	breadCrumbText:{
 		fontStyle: "normal",

@@ -85,13 +85,15 @@ const useStyles = makeStyles(() => ({
 		display:"block"
 	},
 	optionButton:{
-		float: "right",
 		padding: "6px 12px",
 		width: "100px",
 		background: "#6C757D",
 		borderRadius: "4px",
 		color: "white",
-		textTransform: "capitalize"
+		textTransform: "capitalize",
+		'&:hover': {
+			color: "black"
+		},
 	},
 	optionMenuItem:{
 		fontWeight: "normal",
@@ -202,7 +204,7 @@ export const Dataset = (): JSX.Element => {
 				<Breadcrumbs paths={paths}/>
 				<div className="inner-container">
 					<Grid container spacing={4}>
-						<Grid item lg={8} xl={8} md={8} sm={8} xs={12}>
+						<Grid item xs={8}>
 							<AppBar className={classes.appBar} position="static">
 								{/*Tabs*/}
 								<Tabs value={selectedTabIndex} onChange={handleTabChange} aria-label="dataset tabs">
@@ -212,45 +214,6 @@ export const Dataset = (): JSX.Element => {
 									<Tab className={classes.tab} label="Visualizations" {...a11yProps(3)} disabled={true}/>
 									<Tab className={classes.tab} label="Comments" {...a11yProps(4)} disabled={true}/>
 								</Tabs>
-								{/*option menus*/}
-								<Box>
-									<Button aria-haspopup="true" onClick={handleOptionClick}
-										className={classes.optionButton} endIcon={<ArrowDropDownIcon />}>
-											Options
-									</Button>
-									<Menu
-										id="simple-menu"
-										anchorEl={anchorEl}
-										keepMounted
-										open={Boolean(anchorEl)}
-										onClose={handleOptionClose}
-									>
-										<MenuItem className={classes.optionMenuItem}
-													  onClick={()=>{
-												setOpen(true);
-												handleOptionClose();
-													  }}>
-												Add Files
-										</MenuItem>
-										<MenuItem className={classes.optionMenuItem}
-													  onClick={() => {
-												downloadDataset(datasetId, about["name"]);
-												handleOptionClose();
-													  }} disabled={true}>
-												Download All
-										</MenuItem>
-										<MenuItem onClick={()=>{
-											deleteDataset(datasetId);
-											handleOptionClose();
-											// Go to Explore page
-											history.push("/");
-										}
-										} className={classes.optionMenuItem}>Delete Dataset</MenuItem>
-										<MenuItem onClick={handleOptionClose} className={classes.optionMenuItem} disabled={true}>Follow</MenuItem>
-										<MenuItem onClick={handleOptionClose} className={classes.optionMenuItem} disabled={true}>Collaborators</MenuItem>
-										<MenuItem onClick={handleOptionClose} className={classes.optionMenuItem} disabled={true}>Extraction</MenuItem>
-									</Menu>
-								</Box>
 							</AppBar>
 							<TabPanel value={selectedTabIndex} index={0}>
 
@@ -271,10 +234,10 @@ export const Dataset = (): JSX.Element => {
 												<Box className={classes.fileCardOuterBox}>
 													<ListItem button className={classes.fileCard} key={file["id"]}
 															  onClick={() => selectFile(file["id"])}>
-														<Grid item xl={2} lg={2} md={2} sm={2} xs={12}>
+														<Grid item xs={2}>
 															{thumbnailComp}
 														</Grid>
-														<Grid item xl={8} lg={8} md={8} sm={8} xs={12}>
+														<Grid item xs={8}>
 															<Box className={classes.fileCardText}>
 																<Typography>File name: {file["name"]}</Typography>
 																<Typography>File size: {file["size"]}</Typography>
@@ -309,7 +272,47 @@ export const Dataset = (): JSX.Element => {
 							<TabPanel value={selectedTabIndex} index={3} />
 							<TabPanel value={selectedTabIndex} index={4} />
 						</Grid>
-						<Grid item lg={4} md={4} xl={4} sm={4} xs={12}>
+						<Grid item xs={4}>
+							{/*option menus*/}
+							<Box className="infoCard">
+								<Button aria-haspopup="true" onClick={handleOptionClick}
+										className={classes.optionButton} endIcon={<ArrowDropDownIcon />}>
+									Options
+								</Button>
+								<Menu
+									id="simple-menu"
+									anchorEl={anchorEl}
+									keepMounted
+									open={Boolean(anchorEl)}
+									onClose={handleOptionClose}
+								>
+									<MenuItem className={classes.optionMenuItem}
+											  onClick={()=>{
+												  setOpen(true);
+												  handleOptionClose();
+											  }}>
+										Add Files
+									</MenuItem>
+									<MenuItem className={classes.optionMenuItem}
+											  onClick={() => {
+												  downloadDataset(datasetId, about["name"]);
+												  handleOptionClose();
+											  }} disabled={true}>
+										Download All
+									</MenuItem>
+									<MenuItem onClick={()=>{
+										deleteDataset(datasetId);
+										handleOptionClose();
+										// Go to Explore page
+										history.push("/");
+									}
+									} className={classes.optionMenuItem}>Delete Dataset</MenuItem>
+									<MenuItem onClick={handleOptionClose} className={classes.optionMenuItem} disabled={true}>Follow</MenuItem>
+									<MenuItem onClick={handleOptionClose} className={classes.optionMenuItem} disabled={true}>Collaborators</MenuItem>
+									<MenuItem onClick={handleOptionClose} className={classes.optionMenuItem} disabled={true}>Extraction</MenuItem>
+								</Menu>
+							</Box>
+							<Divider />
 							{
 								about !== undefined ?
 									<Box className="infoCard">
@@ -344,7 +347,7 @@ export const Dataset = (): JSX.Element => {
 										{/*<Typography className="content">Resource type: {about["resource_type"]}</Typography>*/}
 									</Box> : <></>
 							}
-							<Divider light/>
+							<Divider />
 							<Box className="infoCard">
 								<Typography className="title">Statistics</Typography>
 								<Typography className="content">Views: 10</Typography>
@@ -352,7 +355,7 @@ export const Dataset = (): JSX.Element => {
 								<Typography className="content">Downloads: 0</Typography>
 								<Typography className="content">Last downloaded: Never</Typography>
 							</Box>
-							<Divider light/>
+							<Divider />
 							<Box className="infoCard">
 								<Typography className="title">Tags</Typography>
 								<Grid container spacing={4}>
