@@ -1,6 +1,5 @@
 import {getHeader} from "./common";
 import config from "../app.config";
-import {logout} from "../actions/user";
 
 export async function downloadDataset(datasetId, filename = "") {
 

@@ -8,19 +8,19 @@ export const userActions = {
 export async function loginHelper(username, password, register = false) {
 	const data = {"name": username, "password": password};
 	if (register) {
-		return V2.UsersService.saveUserApiV2UsersPost(data).catch(reason => {
-			console.error("Failed to register a user! ", reason);
+		return V2.UsersService.saveUserApiV2UsersPost(data)
+			.then(user => {return user;})
+			.catch(reason => {
 			// logout();
-			return {};
-		})
-			.then(user => {return user;});
+				return {"errorMsg": `Failed to register a user! ${reason}`};
+			});
 	} else {
-		return V2.LoginService.loginApiV2LoginPost(data).catch(reason => {
-			console.error("Failed to login a user! ", reason);
+		return V2.LoginService.loginApiV2LoginPost(data)
+			.then(user => {return user;})
+			.catch(reason => {
 			// logout();
-			return {};
-		})
-			.then(user => {return user;});
+				return {"errorMsg": `Failed to login a user! ${reason}`};
+			});
 	}
 }
 
@@ -47,6 +47,7 @@ export function login(username, password) {
 			return dispatch({
 				type: LOGIN_ERROR,
 				Authorization: "",
+				errorMsg: json["errorMsg"] !== undefined && json["errorMsg"] !== "" ? json["errorMsg"]: "Username/Password incorrect!"
 			});
 		}
 	};
@@ -55,13 +56,14 @@ export function login(username, password) {
 export function register(username, password) {
 	return async (dispatch) => {
 		const json = await loginHelper(username, password, true);
-		if (json !== undefined) {
+		if (json["name"] !== undefined && json["hashed_password"] !== undefined) {
 			return dispatch({
 				type: REGISTER_USER,
 			});
 		} else {
 			return dispatch({
 				type: REGISTER_ERROR,
+				errorMsg: json["errorMsg"] !== undefined && json["errorMsg"] !== "" ? json["errorMsg"]: "Fail to register!"
 			});
 		}
 	};
@@ -72,7 +74,7 @@ export function logout() {
 		V2.OpenAPI.TOKEN = undefined;
 		localStorage.removeItem("Authorization");
 		return dispatch({
-			type: LOGOUT
+			type: LOGOUT,
 		});
 	};
 }

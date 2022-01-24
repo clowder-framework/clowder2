@@ -50,6 +50,7 @@ interface SET_USER{
 }
 
 interface LOGIN_ERROR{
+	errorMsg: string,
 	type: "LOGIN_ERROR",
 }
 
@@ -58,6 +59,7 @@ interface LOGOUT{
 }
 
 interface REGISTER_ERROR{
+	errorMsg: string,
 	type: "REGISTER_ERROR"
 }
 
@@ -73,6 +75,16 @@ interface CREATE_DATASET{
 interface CREATE_FILE{
 	type: "CREATE_FILE",
 	file: File
+}
+
+interface FAILED{
+	type: "FAILED",
+	reason: string
+}
+
+interface RESET_FAILED{
+	type: "RESET_FAILED",
+	reason: string
 }
 
 export type DataAction =
@@ -92,4 +104,6 @@ export type DataAction =
 	| REGISTER_USER
 	| CREATE_DATASET
 	| CREATE_FILE
+	| FAILED
+	| RESET_FAILED
 	;

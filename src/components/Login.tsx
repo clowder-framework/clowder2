@@ -57,33 +57,36 @@ export const Login = (): JSX.Element => {
 	const dispatch = useDispatch();
 	const login = (username:string, password:string) => dispatch(loginAction(username, password));
 	const loginError = useSelector((state:RootState) => state.user.loginError);
+	const errorMsg = useSelector((state:RootState) => state.user.errorMsg);
 
 	const [username, setUsername] = useState("");
 	const [password, setPassword] = useState("");
 	const [passwordErrorText, setPasswordErrorText] = useState("");
-	const [loginErrorText, setLoginErrorText] = useState("");
-	const [error, setError] = useState(false);
+	const [promptError, setPromptError] = useState(false);
 
-	const handleKeyPressed= (event: React.KeyboardEvent<{}>) => {
-		if (event.key === "Enter") { handleLoginButtonClick();}
+	// TODO need to figure out what to do when login succeeded
+	// // login success
+	// useEffect(() => {
+	// 	if (Authorization !== "") history.push("/");
+	// }, [Authorization]);
+
+	const handleKeyPressed= async (event: React.KeyboardEvent<{}>) => {
+		if (event.key === "Enter") { await handleLoginButtonClick();}
 	};
 
 	const changeUsername = (event: React.ChangeEvent<HTMLInputElement>) => {
 		setUsername(event.target.value);
-		setLoginErrorText("");
 	};
 
 	const changePassword = (event: React.ChangeEvent<HTMLInputElement>) => {
 		const password = event.target.value;
 
 		if (password.length <= 6) {
-			setError(true);
+			setPromptError(true);
 			setPasswordErrorText("Your password must be at least 6 characters long");
-			setLoginErrorText("");
 		} else {
-			setError(false);
+			setPromptError(false);
 			setPasswordErrorText("");
-			setLoginErrorText("");
 		}
 
 		setPassword(password);
@@ -91,13 +94,7 @@ export const Login = (): JSX.Element => {
 
 	 const handleLoginButtonClick = async () => {
 		 await login(username, password);
-		 if (loginError) {
-			 setLoginErrorText("Username/Password is not correct. Try again");
-		 }
-		 if (!loginError) {
-			 history.push("/");
-		 }
-
+		 if (!loginError) history.push("/");
 	 };
 
 	return (
@@ -114,7 +111,7 @@ export const Login = (): JSX.Element => {
 					<Divider/>
 					<ImageList cols={1} rowHeight="auto">
 						<ImageListItem>
-							<p style={{color: "red"}}>{loginErrorText} </p>
+							<p style={{color: "red"}}>{errorMsg} </p>
 						</ImageListItem>
 						<ImageListItem>
 							<TextField
@@ -139,7 +136,7 @@ export const Login = (): JSX.Element => {
 								label="Password"
 								name="password"
 								type="password"
-								error={error}
+								error={promptError}
 								helperText={passwordErrorText}
 								value={password}
 								onChange={changePassword}

@@ -13,13 +13,13 @@ import {datasetCreated} from "../../actions/dataset";
 
 
 type CreateDatasetProps = {
-	selectDataset: (selectedDatasetId: string) => void,
 	setOpen:(open:boolean) => void,
 }
 
 export const CreateDataset: React.FC<CreateDatasetProps> = (props: CreateDatasetProps) => {
 	const dispatch = useDispatch();
 	const createDataset = (formData: FormData) => dispatch(datasetCreated(formData));
+
 	const {setOpen} = props;
 
 	const [loading, setLoading] = useState(false);
