@@ -4,29 +4,20 @@
 import React from "react";
 import { render } from "react-dom";
 import { Provider } from "react-redux";
-import routes from "./routes";
+import AppRoutes from "./routes";
 import configureStore from "./store/configureStore";
-import {createTheme, MuiThemeProvider} from "@material-ui/core/styles";
-
+import {ThemeProvider} from '@mui/material/styles';
+import CssBaseline from '@mui/material/CssBaseline';
 const store = configureStore();
+import theme from './theme';
 
-const theme = createTheme({
-
-	typography: {
-		fontFamily: "'Open Sans', sans-serif"
-	},
-	palette:{
-		// fontFamily: "'Open Sans', sans-serif"
-	}
-
-});
 
 render(
-	<MuiThemeProvider theme={theme}>
+	<ThemeProvider theme={theme}>
 		<Provider store={store}>
-			{routes}
+			<CssBaseline />
+			{AppRoutes}
 		</Provider>
-
-	</MuiThemeProvider>
+	</ThemeProvider>
 	, document.getElementById("app")
 );

@@ -6,7 +6,7 @@ import {
 	DialogTitle,
 	DialogContentText,
 	DialogActions,
-} from "@material-ui/core";
+} from "@mui/material";
 
 type ActionModalProps = {
 	actionOpen: boolean,

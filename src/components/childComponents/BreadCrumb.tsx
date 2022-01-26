@@ -1,57 +1,33 @@
 import React from "react";
-import Typography from "@material-ui/core/Typography";
-import MuiBreadcrumbs from "@material-ui/core/Breadcrumbs";
-import Divider from "@material-ui/core/Divider";
-import Link from "@material-ui/core/Link";
-import {makeStyles} from "@material-ui/core/styles";
-import {useHistory} from "react-router-dom";
-
-const useStyles = makeStyles(() => ({
-	breadCrumb:{
-		padding:"0px"
-	},
-	breadCrumbText:{
-		fontStyle: "normal",
-		fontWeight: 600,
-		fontSize: "24px",
-		color: "#343A40"
-	},
-	breadCrumbLink:{
-		fontStyle: "normal",
-		fontWeight: 600,
-		fontSize: "24px",
-		color: "#6C757D",
-	}
-}));
+import Typography from "@mui/material/Typography";
+import Breadcrumbs from "@mui/material/Breadcrumbs";
+import Link from "@mui/material/Link";
+import {useNavigate} from "react-router-dom";
 
 type BreadCrumbProps = {
 	paths: any
 }
-export const Breadcrumbs: React.FC<BreadCrumbProps> = (props:BreadCrumbProps) => {
-	const classes = useStyles();
-
-	const history = useHistory();
+export const MainBreadcrumbs: React.FC<BreadCrumbProps> = (props:BreadCrumbProps) => {
+	const history = useNavigate();
 
 	const { paths } = props;
 	return (
 		<div>
-			<MuiBreadcrumbs className={classes.breadCrumb} aria-label="breadcrumb">
-				<MuiBreadcrumbs className={classes.breadCrumb} aria-label="breadcrumb">
-					{
-						paths.map((path:any, index:number) => {
-							if (index !== paths.length -1){
-								return (<Link className={classes.breadCrumbLink}
-									onClick={() => {history.push(path["url"]);}}>{path["name"]}
-								</Link>);
-							}
-							else{
-								return (<Typography className={classes.breadCrumbText}>{path["name"]}</Typography>);
-							}
-						})
-					}
-				</MuiBreadcrumbs>
-			</MuiBreadcrumbs>
-			<Divider light />
+			<Breadcrumbs aria-label="breadcrumb">
+				{
+					paths.map((path:any, index:number) => {
+						if (index !== paths.length -1){
+							return (<Link underline="hover" color="inherit" key={index}
+								onClick={() => {history(path["url"]);}}>{path["name"]}
+							</Link>);
+						}
+						else{
+							return (<Typography color="text.primary" key={index}>{path["name"]}</Typography>);
+						}
+					})
+				}
+			</Breadcrumbs>
+
 		</div>
 	);
 };

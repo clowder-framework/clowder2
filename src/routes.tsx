@@ -1,5 +1,5 @@
 import React from "react";
-import {Route, Redirect, Switch, BrowserRouter} from "react-router-dom";
+import {Route, Navigate, Routes, BrowserRouter} from "react-router-dom";
 
 import {Dashboard} from "./components/Dashbard";
 import {Dataset as DatasetComponent} from "./components/Dataset";
@@ -10,31 +10,26 @@ import {Register as RegisterComponent} from "./components/Register";
 
 import {isAuthorized} from "./utils/common";
 
-// @ts-ignore
-export const PrivateRoute = ({ component: Component, ...rest }) => (
-	<Route {...rest} render={props => (
-		isAuthorized()
-			? <Component {...props} />
-			: <Redirect to={{ pathname: "/login", state: { from: props.location } }} />
-	)} />
-);
+// https://dev.to/iamandrewluca/private-route-in-react-router-v6-lg5
+class PrivateRoute extends React.Component<{ children: JSX.Element }> {
+	render() {
+		let {children} = this.props;
+		return isAuthorized() ? children : <Navigate to="/login"/>;
+	}
+}
 
-const Routes = (
+
+const AppRoutes = (
 	<BrowserRouter>
-		<Switch>
-			<PrivateRoute exact path="/" component={Dashboard} />
-			<PrivateRoute path="/datasets/:datasetId" component={DatasetComponent} />
-			<PrivateRoute path="/files/:fileId" component={FileComponent} />
-			<Route exact path="/login" component={LoginComponent} />
-			<Route exact path="/logout" component={LogoutComponent} />
-			<Route exact path="/register" component={RegisterComponent} />
-		</Switch>
+		<Routes>
+			<Route path="/" element={<PrivateRoute><Dashboard/></PrivateRoute>} />
+			<Route path="/datasets/:datasetId" element={<PrivateRoute><DatasetComponent/></PrivateRoute>} />
+			<Route path="/files/:fileId" element={<PrivateRoute><FileComponent/></PrivateRoute>} />
+			<Route path="/login" element={<LoginComponent/>} />
+			<Route path="/logout" element={<LogoutComponent/>} />
+			<Route path="/register" element={<RegisterComponent/>} />
+		</Routes>
 	</BrowserRouter>
-
 );
+export default AppRoutes;
 
-
-
-
-
-export default Routes;

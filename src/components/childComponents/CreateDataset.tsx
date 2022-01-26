@@ -1,6 +1,6 @@
 import React, {useState} from "react";
 
-import {Box, Button, Container} from "@material-ui/core";
+import {Box, Button, Container} from "@mui/material";
 
 import LoadingOverlay from "react-loading-overlay-ts";
 

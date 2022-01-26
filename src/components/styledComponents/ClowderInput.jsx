@@ -1,5 +1,5 @@
-import {styled} from "@material-ui/core/styles";
-import {TextField} from "@material-ui/core";
+import {styled} from "@mui/styles";
+import {TextField} from "@mui/material";
 
 export const ClowderInput = styled(TextField)({
 	width: "100%",

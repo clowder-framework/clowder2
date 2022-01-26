@@ -1,5 +1,5 @@
-import {styled} from "@material-ui/core/styles";
-import {InputLabel} from "@material-ui/core";
+import {styled} from "@mui/styles";
+import {InputLabel} from "@mui/material";
 
 export const IncoreInputLabel = styled(InputLabel)({
 	color: "#2E384D",

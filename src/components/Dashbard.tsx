@@ -1,10 +1,9 @@
 import React, {useEffect, useState} from "react";
-import {makeStyles} from "@material-ui/core/styles";
-import {AppBar, Box, Link, Dialog, DialogTitle, Grid, ListItem, Tab, Tabs, Typography, Button} from "@material-ui/core";
-import BusinessCenterIcon from "@material-ui/icons/BusinessCenter";
-import DeleteOutlineIcon from "@material-ui/icons/DeleteOutline";
-import StarBorderIcon from "@material-ui/icons/StarBorder";
-import CloudDownloadOutlinedIcon from "@material-ui/icons/CloudDownloadOutlined";
+import {AppBar, Box, Link, Dialog, DialogTitle, Grid, ListItem, Tab, Tabs, Typography, Button} from "@mui/material";
+import BusinessCenterIcon from "@mui/icons-material/BusinessCenter";
+import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
+import StarBorderIcon from "@mui/icons-material/StarBorder";
+import CloudDownloadOutlinedIcon from "@mui/icons-material/CloudDownloadOutlined";
 
 import {CreateDataset} from "./childComponents/CreateDataset";
 import {downloadDataset} from "../utils/dataset";
@@ -18,63 +17,23 @@ import TopBar from "./childComponents/TopBar";
 
 import {TabPanel} from "./childComponents/TabComponent";
 import {a11yProps} from "./childComponents/TabComponent";
+import {useNavigate} from "react-router-dom";
+import {MainBreadcrumbs} from "./childComponents/BreadCrumb";
 import {useHistory} from "react-router-dom";
-import {Breadcrumbs} from "./childComponents/BreadCrumb";
 import {ActionModal} from "./childComponents/ActionModal";
 
-const useStyles = makeStyles(() => ({
-	appBar: {
-		background: "#FFFFFF",
-		boxShadow: "none",
-	},
-	tab: {
-		fontStyle: "normal",
-		fontWeight: "normal",
-		fontSize: "16px",
-		color: "#495057",
-		textTransform: "capitalize",
-	},
-	fileCardOuterBox: {
-		position: "relative"
-	},
-	fileCard: {
-		background: "#FFFFFF",
-		border: "1px solid #DFDFDF",
-		boxSizing: "border-box",
-		borderRadius: "4px",
-		margin: "20px auto",
-		"& > .MuiGrid-item": {
-			padding: 0,
-			height: "150px",
-		},
-	},
-	fileCardImg: {
-		height: "50%",
-		margin: "40px auto",
-		display: "block"
-	},
-	fileCardText: {
-		padding: "40px 20px",
-		fontSize: "16px",
-		fontWeight: "normal",
-		color: "#212529"
-	},
-	fileCardActionBox: {
-		position: "absolute",
-		right: "5%",
-		top: "40px",
-	},
-	fileCardActionItem: {
-		display: "block"
-	}
-}));
+const tab = {
+	fontStyle: "normal",
+	fontWeight: "normal",
+	fontSize: "16px",
+	color: "#495057",
+	textTransform: "capitalize",
+};
 
 export const Dashboard = (): JSX.Element => {
 
-	const classes = useStyles();
-
 	// use history hook to redirect/navigate between routes
-	const history = useHistory();
+	const history = useNavigate();
 
 	// Redux connect equivalent
 	const dispatch = useDispatch();
@@ -161,7 +120,7 @@ export const Dashboard = (): JSX.Element => {
 
 	const selectDataset = (selectedDatasetId: string) => {
 		// Redirect to dataset route with dataset Id
-		history.push(`/datasets/${selectedDatasetId}`);
+		history(`/datasets/${selectedDatasetId}`);
 	};
 
 	// for breadcrumb
@@ -176,6 +135,7 @@ export const Dashboard = (): JSX.Element => {
 		<div>
 			<TopBar/>
 			<div className="outer-container">
+				<MainBreadcrumbs paths={paths}/>
 				{/*Confirmation dialogue*/}
 				<ActionModal actionOpen={confirmationOpen} actionTitle="Are you sure?"
 							 actionText="Do you really want to delete? This process cannot be undone."
@@ -185,17 +145,19 @@ export const Dashboard = (): JSX.Element => {
 				<ActionModal actionOpen={errorOpen} actionTitle="Something went wrong..." actionText={reason}
 							 actionBtnName="Report" handleActionBtnClick={() => console.log(reason)}
 							 handleActionCancel={handleErrorCancel}/>
-				<Breadcrumbs paths={paths}/>
 				<div className="inner-container">
 					<Grid container spacing={4}>
 						<Grid item lg={8} xl={8} md={8} sm={8} xs={12}>
-							<AppBar className={classes.appBar} position="static">
+							<AppBar position="static" sx={{
+								background: "#FFFFFF",
+								boxShadow: "none",
+							}}>
 								<Tabs value={selectedTabIndex} onChange={handleTabChange} aria-label="dashboard tabs">
-									<Tab className={classes.tab} label="Datasets" {...a11yProps(0)} />
-									<Tab className={classes.tab} label="Activity" {...a11yProps(1)} disabled={true}/>
-									<Tab className={classes.tab} label="Collections" {...a11yProps(2)} disabled={true}/>
-									<Tab className={classes.tab} label="Spaces" {...a11yProps(3)} disabled={true}/>
-									<Tab className={classes.tab} label="API Keys" {...a11yProps(4)} disabled={true}/>
+									<Tab sx={tab} label="Datasets" {...a11yProps(0)} />
+									<Tab sx={tab} label="Activity" {...a11yProps(1)} disabled={true}/>
+									<Tab sx={tab} label="Collections" {...a11yProps(2)} disabled={true}/>
+									<Tab sx={tab} label="Spaces" {...a11yProps(3)} disabled={true}/>
+									<Tab sx={tab} label="API Keys" {...a11yProps(4)} disabled={true}/>
 								</Tabs>
 							</AppBar>
 							<TabPanel value={selectedTabIndex} index={0}>
@@ -203,25 +165,55 @@ export const Dashboard = (): JSX.Element => {
 								{
 									datasets !== undefined && datasetThumbnailList !== undefined ?
 										datasets.map((dataset) => {
-											let thumbnailComp = (<BusinessCenterIcon className={classes.fileCardImg}
+											let thumbnailComp = (<BusinessCenterIcon sx={{
+												height: "50%",
+												margin: "40px auto",
+												display: "block"
+											}}
 												style={{fontSize: "5em"}}/>);
 											datasetThumbnailList.map((thumbnail: Thumbnail) => {
 												if (dataset["id"] !== undefined && thumbnail["id"] !== undefined &&
 													thumbnail["thumbnail"] !== null && thumbnail["thumbnail"] !== undefined &&
 													dataset["id"] === thumbnail["id"]) {
-													thumbnailComp = (<img src={thumbnail["thumbnail"]} alt="thumbnail"
-																		 className={classes.fileCardImg}/>);
+													thumbnailComp = (
+															<Box
+																component="img"
+																sx={{
+																	height: "50%",
+																	margin: "40px auto",
+																	display: "block"
+																}}
+																src={thumbnail["thumbnail"]} alt="thumbnail"
+															/>
+													);
 												}
 											});
 											return (
-												<Box className={classes.fileCardOuterBox}>
-													<ListItem button className={classes.fileCard} key={dataset["id"]}
+												<Box sx={{
+													position: "relative"
+												}}>
+													<ListItem button sx={{
+														background: "#FFFFFF",
+														border: "1px solid #DFDFDF",
+														boxSizing: "border-box",
+														borderRadius: "4px",
+														margin: "20px auto",
+														"& > .MuiGrid-item": {
+															padding: 0,
+															height: "150px",
+														},
+													}} key={dataset["id"]}
 															  onClick={() => selectDataset(dataset["id"])}>
 														<Grid item xl={2} lg={2} md={2} sm={2} xs={12}>
 															{thumbnailComp}
 														</Grid>
 														<Grid item xl={8} lg={8} md={8} sm={8} xs={12}>
-															<Box className={classes.fileCardText}>
+															<Box sx={{
+																padding: "40px 20px",
+																fontSize: "16px",
+																fontWeight: "normal",
+																color: "#212529"
+															}}>
 																<Typography>Dataset name: {dataset["name"]}</Typography>
 																<Typography>Description: {dataset["description"]}</Typography>
 																<Typography>Created
@@ -229,8 +221,12 @@ export const Dashboard = (): JSX.Element => {
 															</Box>
 														</Grid>
 													</ListItem>
-													<Box className={classes.fileCardActionBox}>
-														<Box className={classes.fileCardActionItem}>
+													<Box sx={{
+														position: "absolute",
+														right: "5%",
+														top: "40px",
+													}}>
+														<Box sx={{display: "block"}}>
 															<Button startIcon={<DeleteOutlineIcon/>}
 																onClick={() => {
 																	setSelectedDataset(dataset);
@@ -238,10 +234,10 @@ export const Dashboard = (): JSX.Element => {
 																}>
 																Delete</Button>
 														</Box>
-														<Box className={classes.fileCardActionItem}>
+														<Box sx={{display: "block"}}>
 															<Button startIcon={<StarBorderIcon/>} disabled={true}>Follow</Button>
 														</Box>
-														<Box className={classes.fileCardActionItem}>
+														<Box sx={{display: "block"}}>
 															<Button startIcon={<CloudDownloadOutlinedIcon/>}
 																onClick={() => {
 																	downloadDataset(dataset["id"], dataset["name"]);

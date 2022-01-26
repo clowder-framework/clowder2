@@ -1,5 +1,4 @@
 import React, {useEffect, useState} from "react";
-import {makeStyles} from "@material-ui/core/styles";
 import {
 	AppBar,
 	Box,
@@ -13,18 +12,18 @@ import {
 	Tab,
 	Tabs,
 	Typography
-} from "@material-ui/core";
+} from "@mui/material";
 import {ClowderInput} from "./styledComponents/ClowderInput";
 import {ClowderButton} from "./styledComponents/ClowderButton";
-import DescriptionIcon from "@material-ui/icons/Description";
-import ArrowDropDownIcon from "@material-ui/icons/ArrowDropDown";
-import DeleteOutlineIcon from "@material-ui/icons/DeleteOutline";
-import StarBorderIcon from "@material-ui/icons/StarBorder";
-import CloudDownloadOutlinedIcon from "@material-ui/icons/CloudDownloadOutlined";
+import DescriptionIcon from "@mui/icons-material/Description";
+import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
+import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
+import StarBorderIcon from "@mui/icons-material/StarBorder";
+import CloudDownloadOutlinedIcon from "@mui/icons-material/CloudDownloadOutlined";
 import {downloadDataset} from "../utils/dataset";
 import {downloadFile, fetchFileMetadata} from "../utils/file";
+import {useNavigate, useParams} from "react-router-dom";
 import {File, FileMetadataList, RootState, Thumbnail} from "../types/data";
-import {useHistory, useParams} from "react-router-dom";
 import {useDispatch, useSelector} from "react-redux";
 import {downloadThumbnail} from "../utils/thumbnail";
 import {datasetDeleted, fetchDatasetAbout, fetchFilesInDataset} from "../actions/dataset";
@@ -34,85 +33,33 @@ import {fileDeleted} from "../actions/file";
 import {TabPanel} from "./childComponents/TabComponent";
 import {a11yProps} from "./childComponents/TabComponent";
 import TopBar from "./childComponents/TopBar";
-import {Breadcrumbs} from "./childComponents/BreadCrumb";
+import {MainBreadcrumbs} from "./childComponents/BreadCrumb";
 import {UploadFile} from "./childComponents/UploadFile";
 import {V2} from "../openapi";
 import {ActionModal} from "./childComponents/ActionModal";
 
-const useStyles = makeStyles(() => ({
-	appBar: {
-		background: "#FFFFFF",
-		boxShadow: "none",
-	},
-	tab: {
-		fontStyle: "normal",
-		fontWeight: "normal",
-		fontSize: "16px",
-		color: "#495057",
-		textTransform: "capitalize",
-		maxWidth: "50px",
-	},
-	fileCardOuterBox:{
-		position:"relative"
-	},
-	fileCard: {
-		background: "#FFFFFF",
-		border: "1px solid #DFDFDF",
-		boxSizing: "border-box",
-		borderRadius: "4px",
-		margin: "20px auto",
-		"& > .MuiGrid-item": {
-			padding: 0,
-			height: "150px",
-		}
-	},
-	fileCardImg: {
-		height: "50%",
-		margin: "40px auto",
-		display: "block"
-	},
-	fileCardText:{
-		padding: "40px 20px",
-		fontSize:"16px",
-		fontWeight:"normal",
-		color:"#212529"
-	},
-	fileCardActionBox:{
-		position:"absolute",
-		right:"5%",
-		top: "40px",
-	},
-	fileCardActionItem:{
-		display:"block"
-	},
-	optionButton:{
-		padding: "6px 12px",
-		width: "100px",
-		background: "#6C757D",
-		borderRadius: "4px",
-		color: "white",
-		textTransform: "capitalize",
-		'&:hover': {
-			color: "black"
-		},
-	},
-	optionMenuItem:{
-		fontWeight: "normal",
-		fontSize: "14px",
-		color: "#212529",
-		marginTop:"8px",
-	}
-}));
+const tab = {
+	fontStyle: "normal",
+	fontWeight: "normal",
+	fontSize: "16px",
+	color: "#495057",
+	textTransform: "capitalize",
+};
 
+const optionMenuItem = {
+	fontWeight: "normal",
+	fontSize: "14px",
+	color: "#212529",
+	marginTop:"8px",
+}
 
 export const Dataset = (): JSX.Element => {
-	const classes = useStyles();
 
 	// path parameter
 	const { datasetId } = useParams<{datasetId?: string}>();
 
 	// use history hook to redirect/navigate between routes
-	const history = useHistory();
+	const history = useNavigate();
 
 	// Redux connect equivalent
 	const dispatch = useDispatch();
@@ -196,7 +143,7 @@ export const Dataset = (): JSX.Element => {
 
 	const selectFile = (selectedFileId: string) => {
 		// Redirect to file route with file Id and dataset id
-		history.push(`/files/${selectedFileId}?dataset=${datasetId}&name=${about["name"]}`);
+		history(`/files/${selectedFileId}?dataset=${datasetId}&name=${about["name"]}`);
 	};
 
 	const handleTabChange = (_event:React.ChangeEvent<{}>, newTabIndex:number) => {
@@ -227,6 +174,7 @@ export const Dataset = (): JSX.Element => {
 		<div>
 			<TopBar/>
 			<div className="outer-container">
+				<MainBreadcrumbs paths={paths}/>
 				{/*Confirmation dialogue*/}
 				<ActionModal actionOpen={confirmationOpen} actionTitle="Are you sure?"
 							 actionText="Do you really want to delete? This process cannot be undone."
@@ -236,18 +184,20 @@ export const Dataset = (): JSX.Element => {
 				<ActionModal actionOpen={errorOpen} actionTitle="Something went wrong..." actionText={reason}
 							 actionBtnName="Report" handleActionBtnClick={() => console.log(reason)}
 							 handleActionCancel={handleErrorCancel}/>
-				<Breadcrumbs paths={paths}/>
 				<div className="inner-container">
 					<Grid container spacing={4}>
 						<Grid item xs={8}>
-							<AppBar className={classes.appBar} position="static">
+							<AppBar position="static" sx={{
+								background: "#FFFFFF",
+								boxShadow: "none",
+							}}>
 								{/*Tabs*/}
 								<Tabs value={selectedTabIndex} onChange={handleTabChange} aria-label="dataset tabs">
-									<Tab className={classes.tab} label="Files" {...a11yProps(0)} />
-									<Tab className={classes.tab} label="Metadata" {...a11yProps(1)} disabled={true}/>
-									<Tab className={classes.tab} label="Extractions" {...a11yProps(2)} disabled={true}/>
-									<Tab className={classes.tab} label="Visualizations" {...a11yProps(3)} disabled={true}/>
-									<Tab className={classes.tab} label="Comments" {...a11yProps(4)} disabled={true}/>
+									<Tab sx={tab} label="Files" {...a11yProps(0)} />
+									<Tab sx={tab} label="Metadata" {...a11yProps(1)} disabled={true}/>
+									<Tab sx={tab} label="Extractions" {...a11yProps(2)} disabled={true}/>
+									<Tab sx={tab} label="Visualizations" {...a11yProps(3)} disabled={true}/>
+									<Tab sx={tab} label="Comments" {...a11yProps(4)} disabled={true}/>
 								</Tabs>
 							</AppBar>
 							<TabPanel value={selectedTabIndex} index={0}>
@@ -255,25 +205,55 @@ export const Dataset = (): JSX.Element => {
 								{
 									filesInDataset !== undefined && fileThumbnailList !== undefined ?
 										filesInDataset.map((file) => {
-											let thumbnailComp = (<DescriptionIcon className={classes.fileCardImg}
-																				 style={{fontSize: "5em"}}/>);
+											let thumbnailComp = (<DescriptionIcon sx={{
+												height: "50%",
+												margin: "40px auto",
+												display: "block",
+												fontSize: "5em"
+											}}/>);
 											fileThumbnailList.map((thumbnail:Thumbnail) => {
 												if (file["id"] !== undefined && thumbnail["id"] !== undefined &&
 													thumbnail["thumbnail"] !== null && thumbnail["thumbnail"] !== undefined &&
 													file["id"] === thumbnail["id"]) {
-													thumbnailComp = (<img src={thumbnail["thumbnail"]} alt="thumbnail"
-																		 className={classes.fileCardImg}/>);
+													thumbnailComp = (
+														<Box
+															component="img"
+															sx={{
+																height: "50%",
+																margin: "40px auto",
+																display: "block"
+															}}
+															src={thumbnail["thumbnail"]} alt="thumbnail"
+														/>
+													);
 												}
 											});
 											return (
-												<Box className={classes.fileCardOuterBox}>
-													<ListItem button className={classes.fileCard} key={file["id"]}
+												<Box sx={{
+													position:"relative"
+												}} key={file["id"]}>
+													<ListItem button sx={{
+														background: "#FFFFFF",
+														border: "1px solid #DFDFDF",
+														boxSizing: "border-box",
+														borderRadius: "4px",
+														margin: "20px auto",
+														"& > .MuiGrid-item": {
+															padding: 0,
+															height: "150px",
+														}
+													}} key={file["id"]}
 															  onClick={() => selectFile(file["id"])}>
 														<Grid item xs={2}>
 															{thumbnailComp}
 														</Grid>
 														<Grid item xs={8}>
-															<Box className={classes.fileCardText}>
+															<Box sx={{
+																padding: "40px 20px",
+																fontSize:"16px",
+																fontWeight:"normal",
+																color:"#212529"
+															}}>
 																<Typography>File name: {file["name"]}</Typography>
 																<Typography>File size: {file["size"]}</Typography>
 																<Typography>Created on: {file["date-created"]}</Typography>
@@ -281,8 +261,12 @@ export const Dataset = (): JSX.Element => {
 															</Box>
 														</Grid>
 													</ListItem>
-													<Box className={classes.fileCardActionBox}>
-														<Box className={classes.fileCardActionItem}>
+													<Box sx={{
+														position:"absolute",
+														right:"5%",
+														top: "40px",
+													}}>
+														<Box sx={{display:"block"}}>
 															<Button startIcon={<DeleteOutlineIcon />}
 																onClick={()=>{
 																	setSelectedFile(file);
@@ -290,10 +274,10 @@ export const Dataset = (): JSX.Element => {
 																}
 																}>Delete</Button>
 														</Box>
-														<Box className={classes.fileCardActionItem}>
+														<Box sx={{display:"block"}}>
 															<Button startIcon={<StarBorderIcon />} disabled={true}>Follow</Button>
 														</Box>
-														<Box className={classes.fileCardActionItem}>
+														<Box sx={{display:"block"}}>
 															<Button startIcon={<CloudDownloadOutlinedIcon />}
 																onClick={()=>{downloadFile(file["id"], file["name"]);}}>
 																Download</Button>
@@ -315,7 +299,17 @@ export const Dataset = (): JSX.Element => {
 							{/*option menus*/}
 							<Box className="infoCard">
 								<Button aria-haspopup="true" onClick={handleOptionClick}
-										className={classes.optionButton} endIcon={<ArrowDropDownIcon />}>
+										sx={{
+											padding: "6px 12px",
+											width: "100px",
+											background: "#6C757D",
+											borderRadius: "4px",
+											color: "white",
+											textTransform: "capitalize",
+											'&:hover': {
+												color: "black"
+											},
+										}} endIcon={<ArrowDropDownIcon />}>
 									Options
 								</Button>
 								<Menu
@@ -325,14 +319,14 @@ export const Dataset = (): JSX.Element => {
 									open={Boolean(anchorEl)}
 									onClose={handleOptionClose}
 								>
-									<MenuItem className={classes.optionMenuItem}
+									<MenuItem sx={optionMenuItem}
 											  onClick={()=>{
 												  setOpen(true);
 												  handleOptionClose();
 											  }}>
 										Add Files
 									</MenuItem>
-									<MenuItem className={classes.optionMenuItem}
+									<MenuItem sx={optionMenuItem}
 											  onClick={() => {
 												  downloadDataset(datasetId, about["name"]);
 												  handleOptionClose();
@@ -343,12 +337,12 @@ export const Dataset = (): JSX.Element => {
 										deleteDataset(datasetId);
 										handleOptionClose();
 										// Go to Explore page
-										history.push("/");
+										history("/");
 									}
-									} className={classes.optionMenuItem}>Delete Dataset</MenuItem>
-									<MenuItem onClick={handleOptionClose} className={classes.optionMenuItem} disabled={true}>Follow</MenuItem>
-									<MenuItem onClick={handleOptionClose} className={classes.optionMenuItem} disabled={true}>Collaborators</MenuItem>
-									<MenuItem onClick={handleOptionClose} className={classes.optionMenuItem} disabled={true}>Extraction</MenuItem>
+									} sx={optionMenuItem}>Delete Dataset</MenuItem>
+									<MenuItem onClick={handleOptionClose} sx={optionMenuItem} disabled={true}>Follow</MenuItem>
+									<MenuItem onClick={handleOptionClose} sx={optionMenuItem} disabled={true}>Collaborators</MenuItem>
+									<MenuItem onClick={handleOptionClose} sx={optionMenuItem} disabled={true}>Extraction</MenuItem>
 								</Menu>
 							</Box>
 							<Divider />

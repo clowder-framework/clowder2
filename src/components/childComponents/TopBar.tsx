@@ -1,66 +1,39 @@
 import React from "react";
-import { makeStyles } from "@material-ui/core/styles";
 import {
 	AppBar,
 	Link,
-	Toolbar,
-	Typography,
-} from "@material-ui/core";
+	Toolbar
+} from "@mui/material";
+import Box from "@mui/material/Box";
 
-const useStyles = makeStyles((theme) => ({
-	root: {
-		flexGrow: 1,
-	},
-	appBar:{
-		background: "#FFFFFF",
-		boxShadow: "none",
-	},
-	toolBar:{
-		padding:"0 45px"
-	},
-	menuButton: {
-		marginRight: theme.spacing(2),
-	},
-	toolBarItem:{
-		margin:"auto 12px auto 12px",
-	},
-	toolBarlink:{
-		textDecoration: "none",
-		fontSize: "16px",
-		color: "#495057",
-	},
-	title: {
-		flexGrow: 1,
-	},
-}));
+const link = {
+	textDecoration: "none",
+	fontSize: "16px",
+	color: "#495057",
+	m: 2,
+};
 
 export default function TopBar() {
-	const classes = useStyles();
-
 	return (
-		<div className={classes.root}>
-			<AppBar position="static" className={classes.appBar}>
-				<Toolbar className={classes.toolBar}>
+		<Box sx={{
+			flexGrow: 1,
+		}}>
+			<AppBar position="static" sx={{
+				background: "#FFFFFF",
+				boxShadow: "none",
+			}}>
+				<Toolbar sx={{
+					padding: "0 45px"
+				}}>
 					<img src="../../public/clowder-logo-sm.svg" alt="clowder-logo-sm"/>
-					<Typography className={classes.toolBarItem}>
-						<Link href="/" className={classes.toolBarlink}>Home</Link>
-					</Typography>
-					<Typography className={classes.toolBarItem}>
-						<Link href="https://clowderframework.org/" target="_blank" className={classes.toolBarlink}>
-							Help</Link>
-					</Typography>
-					<Typography className={classes.toolBarItem}>
-						<Link href="/" className={classes.toolBarlink}>Explore</Link>
-					</Typography>
-					{/*<Typography className={classes.toolBarItem}>*/}
-					{/*	<Link href="/" target="_blank" className={classes.toolBarlink}>*/}
-					{/*		Create</Link>*/}
-					{/*</Typography>*/}
-					<Typography className={classes.toolBarItem}>
-						<Link href="/logout" className={classes.toolBarlink}>Logout</Link>
-					</Typography>
+					<Link href="/" sx={link}>Home</Link>
+					<Link href="https://clowderframework.org/" target="_blank" sx={link}>
+						Help</Link>
+
+					<Link href="/" sx={link}>Explore</Link>
+					<Link href="/logout" sx={link}>Logout</Link>
 				</Toolbar>
 			</AppBar>
-		</div>
+		</Box>
 	);
 }
