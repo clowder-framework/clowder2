@@ -191,7 +191,7 @@ export const Dashboard = (): JSX.Element => {
 											return (
 												<Box sx={{
 													position: "relative"
-												}}>
+												}} key={dataset["id"]}>
 													<ListItem button sx={{
 														background: "#FFFFFF",
 														border: "1px solid #DFDFDF",
