@@ -56,6 +56,12 @@ interface LOGIN_ERROR{
 
 interface LOGOUT{
 	type: "LOGOUT",
+	loggedOut: boolean,
+}
+
+interface RESET_LOGOUT{
+	type: "RESET_LOGOUT",
+	loggedOut: boolean
 }
 
 interface REGISTER_ERROR{
@@ -106,4 +112,5 @@ export type DataAction =
 	| CREATE_FILE
 	| FAILED
 	| RESET_FAILED
+	| RESET_LOGOUT
 	;

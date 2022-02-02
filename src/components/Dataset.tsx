@@ -27,7 +27,7 @@ import {File, FileMetadataList, RootState, Thumbnail} from "../types/data";
 import {useDispatch, useSelector} from "react-redux";
 import {downloadThumbnail} from "../utils/thumbnail";
 import {datasetDeleted, fetchDatasetAbout, fetchFilesInDataset} from "../actions/dataset";
-import {resetFailedReason} from "../actions/common"
+import {resetFailedReason, resetLogout} from "../actions/common"
 import {fileDeleted} from "../actions/file";
 
 import {TabPanel} from "./childComponents/TabComponent";
@@ -68,11 +68,13 @@ export const Dataset = (): JSX.Element => {
 	const listFilesInDataset = (datasetId:string|undefined) => dispatch(fetchFilesInDataset(datasetId));
 	const listDatasetAbout= (datasetId:string|undefined) => dispatch(fetchDatasetAbout(datasetId));
 	const dismissError = () => dispatch(resetFailedReason());
+	const dismissLogout = () => dispatch(resetLogout());
 
 	// mapStateToProps
 	const filesInDataset = useSelector((state:RootState) => state.dataset.files);
 	const about = useSelector((state:RootState) => state.dataset.about);
-	const reason = useSelector((state:RootState) => state.dataset.reason);
+	const reason = useSelector((state:RootState) => state.error.reason);
+	const loggedOut = useSelector((state: RootState) => state.error.loggedOut);
 
 	// state
 	const [selectedTabIndex, setSelectedTabIndex] = useState<number>(0);
@@ -112,6 +114,15 @@ export const Dataset = (): JSX.Element => {
 		dismissError();
 		setErrorOpen(false);
 	}
+
+	// log user out if token expired/unauthorized
+	useEffect(() => {
+		if (loggedOut) {
+			// reset loggedOut flag so it doesn't stuck in "true" state, then redirect to login page
+			dismissLogout();
+			history("/login");
+		}
+	}, [loggedOut]);
 
 	// TODO these code will go away in v2 dont worry about understanding them
 	// TODO get metadata of each files; because we need the thumbnail of each file!!!

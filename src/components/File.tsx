@@ -8,8 +8,9 @@ import Video from "./previewers/Video";
 import {downloadResource} from "../utils/common";
 import Thumbnail from "./previewers/Thumbnail";
 import {PreviewConfiguration, RootState} from "../types/data";
-import {useParams, useLocation} from "react-router-dom";
+import {useParams, useLocation, useNavigate} from "react-router-dom";
 import {useDispatch, useSelector} from "react-redux";
+import {resetFailedReason, resetLogout} from "../actions/common"
 
 import {TabPanel} from "./childComponents/TabComponent";
 import {a11yProps} from "./childComponents/TabComponent";
@@ -27,6 +28,8 @@ const tab = {
 }
 
 export const File = (): JSX.Element => {
+	// use history hook to redirect/navigate between routes
+	const history = useNavigate();
 
 	// path parameter
 	const { fileId } = useParams<{fileId?: string}>();
@@ -40,10 +43,14 @@ export const File = (): JSX.Element => {
 	// const listFileMetadataJsonld = (fileId:string|undefined) => dispatch(fetchFileMetadataJsonld(fileId));
 	// const listFilePreviews = (fileId:string|undefined) => dispatch(fetchFilePreviews(fileId));
 	const listFileMetadata = (fileId:string|undefined) => dispatch(fetchFileMetadata(fileId));
+	const dismissError = () => dispatch(resetFailedReason());
+	const dismissLogout = () => dispatch(resetLogout());
+
 	const fileMetadata = useSelector((state:RootState) => state.file.fileMetadata);
 	const fileMetadataJsonld = useSelector((state:RootState) => state.file.metadataJsonld);
 	const filePreviews = useSelector((state:RootState) => state.file.previews);
-	const reason = useSelector((state:RootState) => state.file.reason);
+	const reason = useSelector((state:RootState) => state.error.reason);
+	const loggedOut = useSelector((state: RootState) => state.error.loggedOut);
 
 	const [selectedTabIndex, setSelectedTabIndex] = useState(0);
 	const [previews, setPreviews] = useState([]);
@@ -64,6 +71,20 @@ export const File = (): JSX.Element => {
 			setErrorOpen(true);
 		}
 	}, [reason])
+	const handleErrorCancel = () => {
+		// reset error message and close the error window
+		dismissError();
+		setErrorOpen(false);
+	}
+
+	// log user out if token expired/unauthorized
+	useEffect(() => {
+		if (loggedOut) {
+			// reset loggedOut flag so it doesn't stuck in "true" state, then redirect to login page
+			dismissLogout();
+			history("/login");
+		}
+	}, [loggedOut]);
 
 	useEffect(() => {
 		(async () => {
@@ -123,7 +144,7 @@ export const File = (): JSX.Element => {
 				{/*Error Message dialogue*/}
 				<ActionModal actionOpen={errorOpen} actionTitle="Something went wrong..." actionText={reason}
 							 actionBtnName="Report" handleActionBtnClick={() => console.log(reason)}
-							 handleActionCancel={() => { setErrorOpen(false);}}/>
+							 handleActionCancel={handleErrorCancel}/>
 				<div className="inner-container">
 					<Grid container spacing={4}>
 						<Grid item lg={8} sm={8} xl={8} xs={12}>

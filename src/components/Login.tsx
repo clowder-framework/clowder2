@@ -1,4 +1,4 @@
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import {useNavigate} from "react-router-dom";
 import {Avatar, Button, Paper, TextField, Typography, Link} from "@mui/material";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
@@ -8,11 +8,8 @@ import {login as loginAction} from "../actions/user";
 import {RootState} from "../types/data";
 
 export const Login = (): JSX.Element => {
-
-	// if already login, redirect to homepage
 	// use history hook to redirect/navigate between routes
 	const history = useNavigate();
-	if (isAuthorized()) { history("/");}
 
 	const dispatch = useDispatch();
 	const login = (username:string, password:string) => dispatch(loginAction(username, password));
@@ -24,11 +21,12 @@ export const Login = (): JSX.Element => {
 	const [passwordErrorText, setPasswordErrorText] = useState("");
 	const [promptError, setPromptError] = useState(false);
 
-	// TODO need to figure out what to do when login succeeded
-	// // login success
-	// useEffect(() => {
-	// 	if (Authorization !== "") history.push("/");
-	// }, [Authorization]);
+	// if already login, redirect to homepage
+	// use history hook to redirect/navigate between routes
+	// component did mount
+	useEffect(() => {
+		if (isAuthorized()) { history("/");}
+		}, []);
 
 	const handleKeyPressed= async (event: React.KeyboardEvent<{}>) => {
 		if (event.key === "Enter") { await handleLoginButtonClick();}

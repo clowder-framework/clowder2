@@ -1,20 +1,11 @@
 import config from "../app.config";
 import {dataURItoFile, getHeader} from "../utils/common";
 import {V2} from "../openapi";
+import {handleErrors} from "./common";
 
 export const FAILED = "FAILED";
 
 export const RECEIVE_FILE_EXTRACTED_METADATA = "RECEIVE_FILE_EXTRACTED_METADATA";
-export function receiveFileExtractedMetadata(type, json, reason=""){
-	return (dispatch) => {
-		dispatch({
-			type: type,
-			extractedMetadata: json,
-			reason: reason,
-			receivedAt: Date.now(),
-		});
-	};
-}
 export function fetchFileExtractedMetadata(id){
 	const url = `${config.hostname}/files/${id}/extracted_metadata`;
 	return (dispatch) => {
@@ -22,57 +13,41 @@ export function fetchFileExtractedMetadata(id){
 			.then((response) => {
 				if (response.status === 200) {
 					response.json().then(json =>{
-						dispatch(receiveFileExtractedMetadata(RECEIVE_FILE_EXTRACTED_METADATA, json));
+						dispatch({
+							type: RECEIVE_FILE_EXTRACTED_METADATA,
+							extractedMetadata: json,
+							receivedAt: Date.now(),
+						});
 					});
 				}
 				else {
-					dispatch(receiveFileExtractedMetadata(FAILED, [], "Cannot fetch extracted file metadata!"));
+					dispatch(handleErrors(response));
 				}
 			})
 			.catch(reason => {
-				dispatch(receiveFileExtractedMetadata(FAILED, [], `Cannot fetch extracted file metadata!`));
+				dispatch(handleErrors(reason));
 			});
 	};
 }
 
 export const RECEIVE_FILE_METADATA = "RECEIVE_FILE_METADATA";
-export function receiveFileMetadata(type, json, reason=""){
-	return (dispatch) => {
-		dispatch({
-			type: type,
-			fileMetadata: json,
-			reason: reason,
-			receivedAt: Date.now(),
-		});
-	};
-}
 export function fetchFileMetadata(id){
 	return (dispatch) => {
 		return V2.FilesService.getFileSummaryApiV2FilesFileIdSummaryGet(id)
 			.then(json => {
-				dispatch(receiveFileMetadata(RECEIVE_FILE_METADATA, json));
+				dispatch({
+					type: RECEIVE_FILE_METADATA,
+					fileMetadata: json,
+					receivedAt: Date.now(),
+				});
 			})
 			.catch(reason => {
-				if (reason.status === 401){
-					console.log("Unauthorized!");
-				// logout();
-				}
-				dispatch(receiveFileMetadata(FAILED, [], `Cannot fetch file metadata! ${reason}`));
+				dispatch(handleErrors(reason));
 			});
 	};
 }
 
 export const RECEIVE_FILE_METADATA_JSONLD = "RECEIVE_FILE_METADATA_JSONLD";
-export function receiveFileMetadataJsonld(type, json, reason=""){
-	return (dispatch) => {
-		dispatch({
-			type: type,
-			metadataJsonld: json,
-			receivedAt: Date.now(),
-			reason: reason
-		});
-	};
-}
 export function fetchFileMetadataJsonld(id){
 	const url = `${config.hostname}/files/${id}/metadata.jsonld`;
 	return (dispatch) => {
@@ -80,30 +55,24 @@ export function fetchFileMetadataJsonld(id){
 			.then((response) => {
 				if (response.status === 200) {
 					response.json().then(json =>{
-						dispatch(receiveFileMetadataJsonld(RECEIVE_FILE_METADATA_JSONLD, json));
+						dispatch({
+							type: RECEIVE_FILE_METADATA_JSONLD,
+							metadataJsonld: json,
+							receivedAt: Date.now(),
+						});
 					});
 				}
 				else {
-					dispatch(receiveFileMetadataJsonld(FAILED, [], "Cannot fetch file metadata data jsonld!"));
+					dispatch(handleErrors(response));
 				}
 			})
 			.catch(reason => {
-				dispatch(receiveFileMetadataJsonld(FAILED, [], `Cannot fetch file metadata data jsonld!`));
+				dispatch(handleErrors(reason));
 			});
 	};
 }
 
 export const RECEIVE_PREVIEWS = "RECEIVE_PREVIEWS";
-export function receiveFilePreviews(type, json, reason=""){
-	return (dispatch) => {
-		dispatch({
-			type: type,
-			previews: json,
-			receivedAt: Date.now(),
-			reason: reason
-		});
-	};
-}
 export function fetchFilePreviews(id){
 	const url = `${config.hostname}/files/${id}/getPreviews`;
 	return (dispatch) => {
@@ -111,15 +80,19 @@ export function fetchFilePreviews(id){
 			.then((response) => {
 				if (response.status === 200) {
 					response.json().then(json =>{
-						dispatch(receiveFilePreviews(RECEIVE_PREVIEWS, json));
+						dispatch({
+							type: RECEIVE_PREVIEWS,
+							previews: json,
+							receivedAt: Date.now(),
+						});
 					});
 				}
 				else {
-					dispatch(receiveFileMetadataJsonld(FAILED, [], "Cannot fetch file previews!"));
+					dispatch(handleErrors(response));
 				}
 			})
 			.catch(reason => {
-				dispatch(receiveFileMetadataJsonld(FAILED, [], `Cannot fetch file previews!`));
+				dispatch(handleErrors(reason));
 			});
 	};
 }
@@ -131,22 +104,12 @@ export function fileDeleted(fileId){
 			.then(json => {
 				dispatch({
 					type: DELETE_FILE,
-					file: {"id": fileId},
-					reason: "",
+					file: {"id": json["id"]},
 					receivedAt: Date.now(),
 				});
 			})
 			.catch(reason => {
-				if (reason.status === 401){
-					console.log("Unauthorized!");
-				// logout();
-				}
-				dispatch({
-					type: FAILED,
-					file: {},
-					receivedAt: Date.now(),
-					reason: `Cannot delete file! ${reason}`,
-				});
+				dispatch(handleErrors(reason));
 			});
 	};
 }
@@ -164,16 +127,7 @@ export function fileCreated(formData, selectedDatasetId){
 				});
 			})
 			.catch(reason => {
-				if (reason.status === 401) {
-					console.error("Failed to create file: Not authenticated: ", reason);
-				// logout();
-				}
-				dispatch({
-					type: FAILED,
-					file: {},
-					reason: `Cannot create file! ${reason}`,
-					receivedAt: Date.now(),
-				});
+				dispatch(handleErrors(reason));
 			});
 	};
 }

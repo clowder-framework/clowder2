@@ -11,7 +11,7 @@ import {downloadDataset} from "../utils/dataset";
 import {Dataset, Dataset as DatasetType, RootState, Thumbnail} from "../types/data";
 import {useDispatch, useSelector} from "react-redux";
 import {datasetDeleted, fetchDatasets, } from "../actions/dataset";
-import {resetFailedReason} from "../actions/common";
+import {resetFailedReason, resetLogout} from "../actions/common";
 import {downloadThumbnail} from "../utils/thumbnail";
 import TopBar from "./childComponents/TopBar";
 
@@ -19,7 +19,6 @@ import {TabPanel} from "./childComponents/TabComponent";
 import {a11yProps} from "./childComponents/TabComponent";
 import {useNavigate} from "react-router-dom";
 import {MainBreadcrumbs} from "./childComponents/BreadCrumb";
-import {useHistory} from "react-router-dom";
 import {ActionModal} from "./childComponents/ActionModal";
 
 const tab = {
@@ -40,8 +39,10 @@ export const Dashboard = (): JSX.Element => {
 	const deleteDataset = (datasetId: string) => dispatch(datasetDeleted(datasetId));
 	const listDatasets = (when: string, date: string, limit: number) => dispatch(fetchDatasets(when, date, limit));
 	const dismissError = () => dispatch(resetFailedReason());
+	const dismissLogout = () => dispatch(resetLogout());
 	const datasets = useSelector((state: RootState) => state.dataset.datasets);
-	const reason = useSelector((state: RootState) => state.dataset.reason);
+	const reason = useSelector((state: RootState) => state.error.reason);
+	const loggedOut = useSelector((state: RootState) => state.error.loggedOut);
 
 	const [datasetThumbnailList, setDatasetThumbnailList] = useState<any>([]);
 	const [limit,] = useState<number>(5);
@@ -77,6 +78,15 @@ export const Dashboard = (): JSX.Element => {
 		dismissError();
 		setErrorOpen(false);
 	}
+
+	// log user out if token expired/unauthorized
+	useEffect(() => {
+		if (loggedOut) {
+			// reset loggedOut flag so it doesn't stuck in "true" state, then redirect to login page
+			dismissLogout();
+			history("/login");
+		}
+	}, [loggedOut]);
 
 	// fetch thumbnails from each individual dataset/id calls
 	useEffect(() => {
