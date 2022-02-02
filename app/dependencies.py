@@ -27,11 +27,10 @@ async def get_db() -> Generator:
 
 
 async def get_fs() -> Generator:
-    # TODO: Look at FastAPI configuration files instead of this
     file_system = Minio(
         settings.MINIO_SERVER_URL,
-        access_key=settings.MINIO_ACCESS_KEY,  # minioadmin as default?
-        secret_key=settings.MINIO_SECRET_KEY,  # minioadmin
+        access_key=settings.MINIO_ACCESS_KEY,
+        secret_key=settings.MINIO_SECRET_KEY,
         secure=False,
     )
     clowder_bucket = settings.MINIO_BUCKET_NAME
