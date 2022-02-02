@@ -13,6 +13,7 @@ services:
   minio:
     image: quay.io/minio/minio:RELEASE.2021-11-09T03-21-45Z
     command: server /data --console-address ":9001"
+    restart: always
     ports:
       - "9000:9000"
       - "9001:9001"
