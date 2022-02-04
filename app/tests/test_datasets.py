@@ -8,7 +8,7 @@ dataset_data = {
     "downloads": 0,
 }
 
-user = {"name": "test@test.org", "password": "not_a_password"}
+user = {"email": "test@test.org", "password": "not_a_password"}
 
 
 def test_create(client: TestClient):
