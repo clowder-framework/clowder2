@@ -1,17 +1,19 @@
 import datetime
-from typing import List
-import json
+import os
+from typing import List, Optional
+
 from bson import ObjectId
-from fastapi import APIRouter, Request, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Depends
+from minio import Minio
 from pymongo import MongoClient
-from pydantic import Json
-from fastapi.encoders import jsonable_encoder
+
 from app import dependencies
+from app.auth import AuthHandler
 from app.models.datasets import Dataset
 from app.models.files import ClowderFile
-from app.auth import AuthHandler
-import os
-from minio import Minio
+from app.models.folders import FolderOut, FolderIn, FolderDB
+from app.models.pyobjectid import PyObjectId
+from app.models.users import User
 
 router = APIRouter()
 
@@ -71,11 +73,24 @@ async def get_dataset(dataset_id: str, db: MongoClient = Depends(dependencies.ge
 
 @router.get("/{dataset_id}/files")
 async def get_dataset_files(
-    dataset_id: str, db: MongoClient = Depends(dependencies.get_db)
+    dataset_id: str,
+    parent_folder: Optional[str] = None,
+    db: MongoClient = Depends(dependencies.get_db),
 ):
     files = []
-    async for f in db["files"].find({"parent_dataset": ObjectId(dataset_id)}):
-        files.append(ClowderFile.from_mongo(f))
+    if parent_folder is None:
+        async for f in db["files"].find(
+            {"parent_dataset": ObjectId(dataset_id), "parent_folder": None}
+        ):
+            files.append(ClowderFile.from_mongo(f))
+    else:
+        async for f in db["files"].find(
+            {
+                "parent_dataset": ObjectId(dataset_id),
+                "parent_folder": ObjectId(parent_folder),
+            }
+        ):
+            files.append(ClowderFile.from_mongo(f))
     return files
 
 
@@ -113,3 +128,43 @@ async def delete_dataset(
         return {"deleted": dataset_id}
     else:
         raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
+
+
+@router.post("/{dataset_id}/folders", response_model=FolderOut)
+async def add_folder(
+    dataset_id: str,
+    folder_in: FolderIn,
+    user_id=Depends(auth_handler.auth_wrapper),
+    db: MongoClient = Depends(dependencies.get_db),
+):
+    user = await db["users"].find_one({"_id": ObjectId(user_id)})
+    folder_db = FolderDB(
+        **folder_in.dict(), author=user["_id"], parent_dataset=PyObjectId(dataset_id)
+    )
+    new_folder = await db["folders"].insert_one(folder_db.mongo())
+    found = await db["folders"].find_one({"_id": new_folder.inserted_id})
+    folder_out = FolderOut.from_mongo(found)
+    return folder_out
+
+
+@router.get("/{dataset_id}/folders")
+async def get_dataset_folders(
+    dataset_id: str,
+    parent_folder: Optional[str] = None,
+    db: MongoClient = Depends(dependencies.get_db),
+):
+    folders = []
+    if parent_folder is None:
+        async for f in db["folders"].find(
+            {"parent_dataset": ObjectId(dataset_id), "parent_folder": None}
+        ):
+            folders.append(FolderDB.from_mongo(f))
+    else:
+        async for f in db["folders"].find(
+            {
+                "parent_dataset": ObjectId(dataset_id),
+                "parent_folder": ObjectId(parent_folder),
+            }
+        ):
+            folders.append(FolderDB.from_mongo(f))
+    return folders

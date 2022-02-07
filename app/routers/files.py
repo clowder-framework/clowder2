@@ -47,7 +47,7 @@ async def save_file(
     f["downloads"] = 0
     f["parent_dataset"] = dataset["_id"]
     if parent_folder is not None:
-        f["parent_folder"] = parent_folder
+        f["parent_folder"] = ObjectId(parent_folder)
     new_file = await db["files"].insert_one(f)
     found = await db["files"].find_one({"_id": new_file.inserted_id})
 

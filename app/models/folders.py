@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime
 from typing import List, Optional
 
 from pydantic import Field
@@ -9,15 +9,15 @@ from app.models.pyobjectid import PyObjectId
 
 class FolderBase(MongoModel):
     name: str = "N/A"
-    parent_dataset: PyObjectId
-    parent_folder: Optional[PyObjectId]
 
 
 class FolderIn(FolderBase):
-    pass
+    parent_folder: Optional[PyObjectId]
 
 
 class FolderDB(FolderBase):
+    parent_dataset: PyObjectId
+    parent_folder: Optional[PyObjectId]
     author: PyObjectId = Field(default_factory=PyObjectId)
     created: datetime = Field(default_factory=datetime.utcnow)
     modified: datetime = Field(default_factory=datetime.utcnow)
