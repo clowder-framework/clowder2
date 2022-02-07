@@ -29,7 +29,7 @@ class DatasetIn(DatasetBase):
     pass
 
 
-class DatasetDB(DatasetBase, MongoModel):
+class DatasetDB(MongoModel, DatasetBase):
     author: UserOut
     created: datetime = Field(default_factory=datetime.utcnow)
     modified: datetime = Field(default_factory=datetime.utcnow)

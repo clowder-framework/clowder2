@@ -22,7 +22,7 @@ auth_handler = AuthHandler()
 clowder_bucket = os.getenv("MINIO_BUCKET_NAME", "clowder")
 
 
-@router.post("", response_model=DatasetBase)
+@router.post("", response_model=DatasetOut)
 async def save_dataset(
     dataset_in: DatasetIn,
     user_id=Depends(auth_handler.auth_wrapper),
@@ -30,12 +30,13 @@ async def save_dataset(
 ):
     user = await db["users"].find_one({"_id": ObjectId(user_id)})
     dataset_db = DatasetDB(**dataset_in.dict(), author=UserOut(**user))
-    new_dataset = await db["datasets"].insert_one(dataset_db.dict())
+    new_dataset = await db["datasets"].insert_one(dataset_db.mongo())
     found = await db["datasets"].find_one({"_id": new_dataset.inserted_id})
-    return DatasetOut.from_mongo(found)
+    dataset_out = DatasetOut.from_mongo(found)
+    return dataset_out
 
 
-@router.get("", response_model=List[DatasetBase])
+@router.get("", response_model=List[DatasetOut])
 async def get_datasets(
     user_id=Depends(auth_handler.auth_wrapper),
     db: MongoClient = Depends(dependencies.get_db),
@@ -52,16 +53,16 @@ async def get_datasets(
             .limit(limit)
             .to_list(length=limit)
         ):
-            datasets.append(doc)
+            datasets.append(DatasetOut.from_mongo(doc))
     else:
         for doc in (
             await db["datasets"].find().skip(skip).limit(limit).to_list(length=limit)
         ):
-            datasets.append(doc)
+            datasets.append(DatasetOut.from_mongo(doc))
     return datasets
 
 
-@router.get("/{dataset_id}")
+@router.get("/{dataset_id}", response_model=DatasetOut)
 async def get_dataset(dataset_id: str, db: MongoClient = Depends(dependencies.get_db)):
     # if (
     #     dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
@@ -74,7 +75,7 @@ async def get_dataset(dataset_id: str, db: MongoClient = Depends(dependencies.ge
     if (
         dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
     ) is not None:
-        return DatasetBase.from_mongo(dataset)
+        return DatasetOut.from_mongo(dataset)
     raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
 
 

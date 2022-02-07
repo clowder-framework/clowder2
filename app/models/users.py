@@ -17,12 +17,12 @@ class UserIn(UserBase):
     password: str
 
 
-class UserOut(UserBase):
-    pass
-
-
 class UserDB(UserBase):
     hashed_password: str = Field()
 
     def verify_password(self, password):
         return pwd_context.verify(password, self.hashed_password)
+
+
+class UserOut(UserBase):
+    pass
