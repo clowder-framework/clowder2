@@ -1,6 +1,7 @@
 import os
 import io
 from typing import List, Optional
+from datetime import datetime
 
 from bson import ObjectId
 from fastapi import (
@@ -54,10 +55,22 @@ async def update_file(
             length=-1,
             part_size=settings.MINIO_UPLOAD_CHUNK_SIZE,
         )  # async write chunk to minio
-    versions = fs.list_objects(
-        settings.MINIO_BUCKET_NAME, prefix=str(existing_file.id), include_version=True
+
+    # Get new version ID from Minio, update version/creator/created flags
+    updated_file = dict(existing_file)
+    updated_file["creator"] = user["id"]
+    updated_file["created"] = datetime.utcnow
+    minio_versions = fs.list_objects(
+        settings.MINIO_BUCKET_NAME,
+        prefix=file_id,
+        include_version=True,
     )
-    x = 1
+    for version in minio_versions:
+        if version._is_latest:
+            updated_file["version"] = version.version_id
+    await db["files"].update(updated_file)
+
+    return ClowderFile.from_mongo(updated_file)
 
 
 @router.get("/{file_id}")
@@ -112,12 +125,33 @@ async def get_file_summary(
     file_id: str,
     db: MongoClient = Depends(dependencies.get_db),
     fs: Minio = Depends(dependencies.get_fs),
+    versions: bool = True,
 ):
     if (file := await db["files"].find_one({"_id": ObjectId(file_id)})) is not None:
         # TODO: Incrementing too often (3x per page view)
         # file["views"] += 1
         # db["files"].replace_one({"_id": ObjectId(file_id)}, file)
-        return ClowderFile.from_mongo(file)
+        response = ClowderFile.from_mongo(file)
+
+        if versions:
+            file_versions = []
+            minio_versions = fs.list_objects(
+                settings.MINIO_BUCKET_NAME,
+                prefix=file_id,
+                include_version=True,
+            )
+            for version in minio_versions:
+                file_versions.append(
+                    {
+                        "version_id": version._version_id,
+                        "latest": version._is_latest,
+                        "modified": version._last_modified,
+                    }
+                )
+            # response["versions"] = file_versions
+            return file_versions
+        else:
+            return response
     raise HTTPException(status_code=404, detail=f"File {file_id} not found")
 
 

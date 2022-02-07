@@ -18,7 +18,7 @@ class Settings(BaseSettings):
     MONGODB_URL: str = "mongodb://localhost:27017"
     MONGO_DATABASE: str = "clowder2"
 
-    MINIO_SERVER_URL: str = "http://localhost:9000"
+    MINIO_SERVER_URL: str = "localhost:9000"
     MINIO_BUCKET_NAME: str = "clowder"
     MINIO_ACCESS_KEY: str = "minioadmin"
     MINIO_SECRET_KEY: str = "minioadmin"

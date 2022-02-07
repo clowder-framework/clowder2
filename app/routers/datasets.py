@@ -1,4 +1,5 @@
 import os
+import io
 import datetime
 from typing import List, Optional
 import json
@@ -149,10 +150,7 @@ async def save_file(
         f = dict(file_info) if file_info is not None else {}
         user = await db["users"].find_one({"_id": ObjectId(user_id)})
         f["name"] = file.filename
-        f["version"] = FileVersion(creator=user["_id"])
-        f["views"] = 0
-        f["downloads"] = 0
-
+        f["creator"] = user["_id"]
         # Add to db and update dataset
         new_file = await db["files"].insert_one(f)
         found = await db["files"].find_one({"_id": new_file.inserted_id})
