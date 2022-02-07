@@ -39,7 +39,7 @@ services:
       dockerfile: Dockerfile
     environment:
       MONGODB_URL: mongodb://mongo:27017
-      MINIO_SERVER_URL: nginx:9000
+      MINIO_SERVER_URL: minio-nginx:9000
     depends_on:
       - mongo
       - minio1
@@ -84,7 +84,7 @@ services:
     volumes:
       - data4:/data
 
-  nginx:
+  minio-nginx:
     image: nginx:1.19.2-alpine
     hostname: nginx
     volumes:
