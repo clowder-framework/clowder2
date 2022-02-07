@@ -15,7 +15,7 @@ router = APIRouter()
 async def save_user(userIn: UserIn, db: MongoClient = Depends(dependencies.get_db)):
     hashed_password = bcrypt.hash(userIn.password)
     userDB = UserDB(**userIn.dict(), hashed_password=hashed_password)
-    res = await db["users"].insert_one(userDB.mongo())
+    res = await db["users"].insert_one(userDB.to_mongo())
     found = await db["users"].find_one({"_id": res.inserted_id})
     return UserDB.from_mongo(found).dict(exclude={"create_at"})
 

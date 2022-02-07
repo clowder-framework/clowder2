@@ -1,18 +1,16 @@
 import datetime
+import os
 from typing import List
-import json
+
 from bson import ObjectId
-from fastapi import APIRouter, Request, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Depends
+from minio import Minio
 from pymongo import MongoClient
-from pydantic import Json
-from fastapi.encoders import jsonable_encoder
+
 from app import dependencies
+from app.auth import AuthHandler
 from app.models.datasets import DatasetBase, DatasetIn, DatasetDB, DatasetOut
 from app.models.files import ClowderFile
-from app.auth import AuthHandler
-import os
-from minio import Minio
-
 from app.models.users import UserOut
 
 router = APIRouter()
@@ -30,7 +28,7 @@ async def save_dataset(
 ):
     user = await db["users"].find_one({"_id": ObjectId(user_id)})
     dataset_db = DatasetDB(**dataset_in.dict(), author=UserOut(**user))
-    new_dataset = await db["datasets"].insert_one(dataset_db.mongo())
+    new_dataset = await db["datasets"].insert_one(dataset_db.to_mongo())
     found = await db["datasets"].find_one({"_id": new_dataset.inserted_id})
     dataset_out = DatasetOut.from_mongo(found)
     return dataset_out

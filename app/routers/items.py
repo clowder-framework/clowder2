@@ -15,7 +15,7 @@ async def create_item(
     item: Item,
     db: MongoClient = Depends(dependencies.get_db),
 ):
-    item_status = await db["items"].insert_one(item.mongo())
+    item_status = await db["items"].insert_one(item.to_mongo())
     created = await db["items"].find_one({"_id": item_status.inserted_id})
     return Item.from_mongo(created)
 

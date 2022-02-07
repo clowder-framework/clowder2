@@ -45,7 +45,7 @@ class MongoModel(BaseModel):
         id = data.pop("_id", None)
         return cls(**dict(data, id=id))
 
-    def mongo(self, **kwargs):
+    def to_mongo(self, **kwargs):
         # include all key/value pairs by default. Is this the correct default behaviour?
         exclude_unset = kwargs.pop("exclude_unset", False)
         by_alias = kwargs.pop("by_alias", True)
