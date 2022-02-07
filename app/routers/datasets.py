@@ -73,18 +73,10 @@ async def get_dataset(dataset_id: str, db: MongoClient = Depends(dependencies.ge
 async def get_dataset_files(
     dataset_id: str, db: MongoClient = Depends(dependencies.get_db)
 ):
-    if (
-        dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
-    ) is not None:
-        file_ids = dataset["files"]
-        files = []
-        for file_id in file_ids:
-            if (
-                file := await db["files"].find_one({"_id": ObjectId(file_id)})
-            ) is not None:
-                files.append(ClowderFile.from_mongo(file))
-        return files
-    raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
+    files = []
+    async for f in db["files"].find({"parent_dataset": ObjectId(dataset_id)}):
+        files.append(ClowderFile.from_mongo(f))
+    return files
 
 
 @router.put("/{dataset_id}", response_model=Dataset)
@@ -114,12 +106,10 @@ async def delete_dataset(
     db: MongoClient = Depends(dependencies.get_db),
     fs: Minio = Depends(dependencies.get_fs),
 ):
-    if (
-        dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
-    ) is not None:
-        dataset_files = dataset["files"]
-        for f in dataset_files:
+    if (await db["datasets"].find_one({"_id": ObjectId(dataset_id)})) is not None:
+        async for f in db["files"].find({"parent_dataset": ObjectId(dataset_id)}):
             fs.remove_object(clowder_bucket, str(f))
-        res = await db["datasets"].delete_one({"_id": ObjectId(dataset_id)})
+        await db["datasets"].delete_one({"_id": ObjectId(dataset_id)})
         return {"deleted": dataset_id}
-    raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
+    else:
+        raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")

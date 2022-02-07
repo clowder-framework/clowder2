@@ -1,3 +1,5 @@
+from typing import Optional
+
 from mongoengine import DynamicDocument
 from mongoengine import DynamicDocument
 from pydantic import Field
@@ -11,7 +13,5 @@ class ClowderFile(MongoModel):
     name: str = "_NA_"
     views: int = 0
     downloads: int = 0
-
-
-class MongoFile(DynamicDocument):
-    pass
+    parent_dataset: PyObjectId
+    parent_folder: Optional[PyObjectId]

@@ -15,7 +15,7 @@ class AutoName(Enum):
 class DatasetStatus(AutoName):
     PRIVATE = auto()
     PUBLIC = auto()
-    DEFALT = auto()
+    DEFAULT = auto()
     TRIAL = auto()
 
 
@@ -25,8 +25,6 @@ class Dataset(MongoModel):
     description: str = "N/A"
     created: datetime = Field(default_factory=datetime.utcnow)
     modified: datetime = Field(default_factory=datetime.utcnow)
-    files: List[PyObjectId] = []
-    folders: List[PyObjectId] = []
     status: str = DatasetStatus.PRIVATE.name
     views: int = 0
     downloads: int = 0
