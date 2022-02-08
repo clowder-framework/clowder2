@@ -74,6 +74,13 @@ async def update_file(
     updated_file["_id"] = existing_file.id
     await db["files"].replace_one({"_id": ObjectId(file_id)}, updated_file)
 
+    # Put entry in FileVersion collection
+    new_version = FileVersion(
+        version_id=updated_file["version"],
+        file_id=existing_file.id,
+        creator=user.id,
+    )
+    await db["file_versions"].insert_one(dict(new_version))
     return ClowderFile.from_mongo(updated_file)
 
 
@@ -117,8 +124,10 @@ async def delete_file(
                 {"$pull": {"files": ObjectId(file_id)}},
             )
 
-        removed_file = await db["files"].delete_one({"_id": ObjectId(file_id)})
+        # TODO: Deleting individual versions may require updating version_id in mongo, or deleting entire document
         fs.remove_object(settings.MINIO_BUCKET_NAME, str(file_id))
+        removed_file = await db["files"].delete_one({"_id": ObjectId(file_id)})
+        removed_vers = await db["file_versions"].delete({"file_id": ObjectId(file_id)})
         return {"deleted": file_id}
     else:
         raise HTTPException(status_code=404, detail=f"File {file_id} not found")
@@ -144,8 +153,12 @@ async def get_file_versions(
     file_id: str,
     db: MongoClient = Depends(dependencies.get_db),
     fs: Minio = Depends(dependencies.get_fs),
+    skip: int = 0,
+    limit: int = 20,
 ):
     if (file := await db["files"].find_one({"_id": ObjectId(file_id)})) is not None:
+        """
+        # DEPRECATED: Gett version information from Minio directly (no creator field)
         file_versions = []
         minio_versions = fs.list_objects(
             settings.MINIO_BUCKET_NAME,
@@ -160,8 +173,19 @@ async def get_file_versions(
                     "modified": version._last_modified,
                 }
             )
-        # response["versions"] = file_versions
         return file_versions
+        """
+
+        mongo_versions = []
+        for ver in (
+            await db["file_versions"]
+            .find({"file_id": ObjectId(file_id)})
+            .skip(skip)
+            .limit(limit)
+            .to_list(length=limit)
+        ):
+            mongo_versions.append(FileVersion.from_mongo(ver))
+        return mongo_versions
 
     raise HTTPException(status_code=404, detail=f"File {file_id} not found")
 

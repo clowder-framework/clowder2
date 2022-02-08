@@ -8,9 +8,9 @@ from app.models.pyobjectid import PyObjectId
 
 # MiniUser - id, name, email, gravatar (comes with email)
 class FileVersion(MongoModel):
-    id: str = "1"
-    file_id: str = "N/A"  # when v1 is initialized, this won't exist yet
-    creator: PyObjectId = Field(default_factory=PyObjectId)
+    version_id: str = "N/A"
+    file_id: PyObjectId
+    creator: PyObjectId
     created: datetime = Field(default_factory=datetime.utcnow)
 
 
