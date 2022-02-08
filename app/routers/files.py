@@ -20,6 +20,7 @@ from minio import Minio
 
 from app import dependencies
 from app.models.files import ClowderFile, FileVersion
+from app.models.users import User
 from app.auth import AuthHandler
 from app.config import settings
 
@@ -39,10 +40,11 @@ async def update_file(
 ):
     # First, add to database and get unique ID
     f = dict(file_info) if file_info is not None else {}
-    user = await db["users"].find_one({"_id": ObjectId(user_id)})
+    user_q = await db["users"].find_one({"_id": ObjectId(user_id)})
+    user = User.from_mongo(user_q)
     # TODO: Harden this piece for when data is missing
-    existing = await db["files"].find_one({"_id": ObjectId(file_id)})
-    existing_file = ClowderFile.from_mongo(existing)
+    existing_q = await db["files"].find_one({"_id": ObjectId(file_id)})
+    existing_file = ClowderFile.from_mongo(existing_q)
 
     # Update file in Minio and get the new version IDs
     while content := file.file.read(
@@ -58,8 +60,8 @@ async def update_file(
 
     # Get new version ID from Minio, update version/creator/created flags
     updated_file = dict(existing_file)
-    updated_file["creator"] = user["id"]
-    updated_file["created"] = datetime.utcnow
+    updated_file["creator"] = user.id
+    updated_file["created"] = datetime.utcnow()
     minio_versions = fs.list_objects(
         settings.MINIO_BUCKET_NAME,
         prefix=file_id,
@@ -68,7 +70,9 @@ async def update_file(
     for version in minio_versions:
         if version._is_latest:
             updated_file["version"] = version.version_id
-    await db["files"].update(updated_file)
+            break
+    updated_file["_id"] = existing_file.id
+    await db["files"].replace_one({"_id": ObjectId(file_id)}, updated_file)
 
     return ClowderFile.from_mongo(updated_file)
 
@@ -125,33 +129,40 @@ async def get_file_summary(
     file_id: str,
     db: MongoClient = Depends(dependencies.get_db),
     fs: Minio = Depends(dependencies.get_fs),
-    versions: bool = True,
 ):
     if (file := await db["files"].find_one({"_id": ObjectId(file_id)})) is not None:
         # TODO: Incrementing too often (3x per page view)
         # file["views"] += 1
         # db["files"].replace_one({"_id": ObjectId(file_id)}, file)
-        response = ClowderFile.from_mongo(file)
+        return ClowderFile.from_mongo(file)
 
-        if versions:
-            file_versions = []
-            minio_versions = fs.list_objects(
-                settings.MINIO_BUCKET_NAME,
-                prefix=file_id,
-                include_version=True,
+    raise HTTPException(status_code=404, detail=f"File {file_id} not found")
+
+
+@router.get("/{file_id}/versions")
+async def get_file_versions(
+    file_id: str,
+    db: MongoClient = Depends(dependencies.get_db),
+    fs: Minio = Depends(dependencies.get_fs),
+):
+    if (file := await db["files"].find_one({"_id": ObjectId(file_id)})) is not None:
+        file_versions = []
+        minio_versions = fs.list_objects(
+            settings.MINIO_BUCKET_NAME,
+            prefix=file_id,
+            include_version=True,
+        )
+        for version in minio_versions:
+            file_versions.append(
+                {
+                    "version_id": version._version_id,
+                    "latest": version._is_latest,
+                    "modified": version._last_modified,
+                }
             )
-            for version in minio_versions:
-                file_versions.append(
-                    {
-                        "version_id": version._version_id,
-                        "latest": version._is_latest,
-                        "modified": version._last_modified,
-                    }
-                )
-            # response["versions"] = file_versions
-            return file_versions
-        else:
-            return response
+        # response["versions"] = file_versions
+        return file_versions
+
     raise HTTPException(status_code=404, detail=f"File {file_id} not found")
 
 
