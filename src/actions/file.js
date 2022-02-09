@@ -118,7 +118,7 @@ export const CREATE_FILE = "CREATE_FILE";
 export function fileCreated(formData, selectedDatasetId){
 	return (dispatch) => {
 		formData["file"] = dataURItoFile(formData["file"]);
-		return V2.FilesService.saveFileApiV2FilesDatasetIdPost(selectedDatasetId, formData)
+		return V2.DatasetsService.saveFileApiV2DatasetsDatasetIdFilesPost(selectedDatasetId, formData)
 			.then(file => {
 				dispatch({
 					type: CREATE_FILE,

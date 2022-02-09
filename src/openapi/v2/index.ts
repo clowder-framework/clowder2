@@ -6,7 +6,8 @@ export { CancelablePromise } from './core/CancelablePromise';
 export { OpenAPI } from './core/OpenAPI';
 
 export type { AuthDetails } from './models/AuthDetails';
-export type { Body_save_file_api_v2_files__dataset_id__post } from './models/Body_save_file_api_v2_files__dataset_id__post';
+export type { Body_save_file_api_v2_datasets__dataset_id__files_post } from './models/Body_save_file_api_v2_datasets__dataset_id__files_post';
+export type { Body_update_file_api_v2_files__file_id__put } from './models/Body_update_file_api_v2_files__file_id__put';
 export type { ClowderFile } from './models/ClowderFile';
 export type { Collection } from './models/Collection';
 export type { Dataset } from './models/Dataset';

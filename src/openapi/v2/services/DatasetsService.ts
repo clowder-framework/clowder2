@@ -1,6 +1,8 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { Body_save_file_api_v2_datasets__dataset_id__files_post } from '../models/Body_save_file_api_v2_datasets__dataset_id__files_post';
+import type { ClowderFile } from '../models/ClowderFile';
 import type { Dataset } from '../models/Dataset';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { request as __request } from '../core/request';
@@ -124,6 +126,28 @@ export class DatasetsService {
         return __request({
             method: 'GET',
             path: `/api/v2/datasets/${datasetId}/files`,
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+
+    /**
+     * Save File
+     * @param datasetId
+     * @param formData
+     * @returns ClowderFile Successful Response
+     * @throws ApiError
+     */
+    public static saveFileApiV2DatasetsDatasetIdFilesPost(
+        datasetId: string,
+        formData: Body_save_file_api_v2_datasets__dataset_id__files_post,
+    ): CancelablePromise<ClowderFile> {
+        return __request({
+            method: 'POST',
+            path: `/api/v2/datasets/${datasetId}/files`,
+            formData: formData,
+            mediaType: 'multipart/form-data',
             errors: {
                 422: `Validation Error`,
             },
