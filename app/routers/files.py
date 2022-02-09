@@ -47,31 +47,27 @@ async def update_file(
     existing_file = ClowderFile.from_mongo(existing_q)
 
     # Update file in Minio and get the new version IDs
+    version_id = None
     while content := file.file.read(
         settings.MINIO_UPLOAD_CHUNK_SIZE
     ):  # async read chunk
-        fs.put_object(
+        response = fs.put_object(
             settings.MINIO_BUCKET_NAME,
             str(existing_file.id),
             io.BytesIO(content),
             length=-1,
             part_size=settings.MINIO_UPLOAD_CHUNK_SIZE,
         )  # async write chunk to minio
+        version_id = response.version_id
 
-    # Get new version ID from Minio, update version/creator/created flags
+    # Update version/creator/created flags
     updated_file = dict(existing_file)
     updated_file["creator"] = user.id
     updated_file["created"] = datetime.utcnow()
-    minio_versions = fs.list_objects(
-        settings.MINIO_BUCKET_NAME,
-        prefix=file_id,
-        include_version=True,
-    )
-    for version in minio_versions:
-        if version._is_latest:
-            updated_file["version"] = version.version_id
-            break
+    updated_file["version"] = version_id
+    # TODO: How to avoid this ID field shuffling? Omit ClowderFile() conversion?
     updated_file["_id"] = existing_file.id
+    del updated_file["id"]
     await db["files"].replace_one({"_id": ObjectId(file_id)}, updated_file)
 
     # Put entry in FileVersion collection
@@ -187,21 +183,4 @@ async def get_file_versions(
             mongo_versions.append(FileVersion.from_mongo(ver))
         return mongo_versions
 
-    raise HTTPException(status_code=404, detail=f"File {file_id} not found")
-
-
-@router.put("/{file_id}", response_model=ClowderFile)
-async def edit_file(
-    file_info: ClowderFile, file_id: str, db: MongoClient = Depends(dependencies.get_db)
-):
-    # TODO: Needs permissions checking here
-    if (file := await db["files"].find_one({"_id": ObjectId(file_id)})) is not None:
-        try:
-            file.update(file_info)
-            # TODO: Disallow changing other fields such as author
-            file["_id"] = file_id
-            db["files"].replace_one({"_id": ObjectId(file_id)}, file)
-        except Exception as e:
-            print(e)
-        return ClowderFile.from_mongo(file)
     raise HTTPException(status_code=404, detail=f"File {file_id} not found")
