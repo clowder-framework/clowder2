@@ -1,5 +1,18 @@
 import React, {useEffect, useState} from "react";
-import {AppBar, Box, Link, Dialog, DialogTitle, Grid, ListItem, Tab, Tabs, Typography, Button} from "@mui/material";
+import {
+	AppBar,
+	Box,
+	Link,
+	Dialog,
+	DialogTitle,
+	Grid,
+	ListItem,
+	Tab,
+	Tabs,
+	Typography,
+	Button,
+	Pagination
+} from "@mui/material";
 import BusinessCenterIcon from "@mui/icons-material/BusinessCenter";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import StarBorderIcon from "@mui/icons-material/StarBorder";
@@ -20,6 +33,7 @@ import {a11yProps} from "./childComponents/TabComponent";
 import {useNavigate} from "react-router-dom";
 import {MainBreadcrumbs} from "./childComponents/BreadCrumb";
 import {ActionModal} from "./childComponents/ActionModal";
+import DatasetCard from "./childComponents/DatasetCard";
 
 const tab = {
 	fontStyle: "normal",
@@ -30,9 +44,6 @@ const tab = {
 };
 
 export const Dashboard = (): JSX.Element => {
-
-	// use history hook to redirect/navigate between routes
-	const history = useNavigate();
 
 	// Redux connect equivalent
 	const dispatch = useDispatch();
@@ -128,9 +139,9 @@ export const Dashboard = (): JSX.Element => {
 		if (date) listDatasets("a", date.toISOString(), limit);
 	};
 
-	const selectDataset = (selectedDatasetId: string) => {
-		// Redirect to dataset route with dataset Id
-		history(`/datasets/${selectedDatasetId}`);
+	const handlePaginationChange = (event: any, value: number) => {
+		console.log("Paginating to page " + value);
+		// TODO implement
 	};
 
 	// for breadcrumb
@@ -157,11 +168,8 @@ export const Dashboard = (): JSX.Element => {
 							 handleActionCancel={handleErrorCancel}/>
 				<div className="inner-container">
 					<Grid container spacing={4}>
-						<Grid item lg={8} xl={8} md={8} sm={8} xs={12}>
-							<AppBar position="static" sx={{
-								background: "#FFFFFF",
-								boxShadow: "none",
-							}}>
+						<Grid item xs={8}>
+							<Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
 								<Tabs value={selectedTabIndex} onChange={handleTabChange} aria-label="dashboard tabs">
 									<Tab sx={tab} label="Datasets" {...a11yProps(0)} />
 									<Tab sx={tab} label="Activity" {...a11yProps(1)} disabled={true}/>
@@ -169,98 +177,24 @@ export const Dashboard = (): JSX.Element => {
 									<Tab sx={tab} label="Spaces" {...a11yProps(3)} disabled={true}/>
 									<Tab sx={tab} label="API Keys" {...a11yProps(4)} disabled={true}/>
 								</Tabs>
-							</AppBar>
+							</Box>
 							<TabPanel value={selectedTabIndex} index={0}>
-
+								<Grid container spacing={2}>
 								{
 									datasets !== undefined && datasetThumbnailList !== undefined ?
 										datasets.map((dataset) => {
-											let thumbnailComp = (<BusinessCenterIcon sx={{
-												height: "50%",
-												margin: "40px auto",
-												display: "block"
-											}}
-												style={{fontSize: "5em"}}/>);
-											datasetThumbnailList.map((thumbnail: Thumbnail) => {
-												if (dataset["id"] !== undefined && thumbnail["id"] !== undefined &&
-													thumbnail["thumbnail"] !== null && thumbnail["thumbnail"] !== undefined &&
-													dataset["id"] === thumbnail["id"]) {
-													thumbnailComp = (
-															<Box
-																component="img"
-																sx={{
-																	height: "50%",
-																	margin: "40px auto",
-																	display: "block"
-																}}
-																src={thumbnail["thumbnail"]} alt="thumbnail"
-															/>
-													);
-												}
-											});
 											return (
-												<Box sx={{
-													position: "relative"
-												}} key={dataset["id"]}>
-													<ListItem button sx={{
-														background: "#FFFFFF",
-														border: "1px solid #DFDFDF",
-														boxSizing: "border-box",
-														borderRadius: "4px",
-														margin: "20px auto",
-														"& > .MuiGrid-item": {
-															padding: 0,
-															height: "150px",
-														},
-													}} key={dataset["id"]}
-															  onClick={() => selectDataset(dataset["id"])}>
-														<Grid item xl={2} lg={2} md={2} sm={2} xs={12}>
-															{thumbnailComp}
-														</Grid>
-														<Grid item xl={8} lg={8} md={8} sm={8} xs={12}>
-															<Box sx={{
-																padding: "40px 20px",
-																fontSize: "16px",
-																fontWeight: "normal",
-																color: "#212529"
-															}}>
-																<Typography>Dataset name: {dataset["name"]}</Typography>
-																<Typography>Description: {dataset["description"]}</Typography>
-																<Typography>Created
-																	on: {dataset["created"]}</Typography>
-															</Box>
-														</Grid>
-													</ListItem>
-													<Box sx={{
-														position: "absolute",
-														right: "5%",
-														top: "40px",
-													}}>
-														<Box sx={{display: "block"}}>
-															<Button startIcon={<DeleteOutlineIcon/>}
-																onClick={() => {
-																	setSelectedDataset(dataset);
-																	setConfirmationOpen(true);}
-																}>
-																Delete</Button>
-														</Box>
-														<Box sx={{display: "block"}}>
-															<Button startIcon={<StarBorderIcon/>} disabled={true}>Follow</Button>
-														</Box>
-														<Box sx={{display: "block"}}>
-															<Button startIcon={<CloudDownloadOutlinedIcon/>}
-																onClick={() => {
-																	downloadDataset(dataset["id"], dataset["name"]);
-																}} disabled={true}>
-																Download</Button>
-														</Box>
-													</Box>
-												</Box>
+												<Grid item xs>
+												<DatasetCard id={dataset.id} name={dataset.name} author={dataset.author}
+															 created={dataset.created} description={dataset.description}/>
+												</Grid>
 											);
 										})
 										:
 										<></>
 								}
+								</Grid>
+								{/*<Box p={2}><Pagination count={10} onChange={handlePaginationChange}  /></Box>*/}
 								<Button onClick={previous}>Prev</Button>
 								<Button onClick={next}>Next</Button>
 							</TabPanel>
@@ -269,7 +203,7 @@ export const Dashboard = (): JSX.Element => {
 							<TabPanel value={selectedTabIndex} index={3} />
 							<TabPanel value={selectedTabIndex} index={4} />
 						</Grid>
-						<Grid item lg={4} md={4} xl={4} sm={4} xs={12}>
+						<Grid item xs={4}>
 							<Box className="actionCard">
 								<Typography className="title">Create your dataset</Typography>
 								<Typography className="content">Some quick example text to tell users why they should

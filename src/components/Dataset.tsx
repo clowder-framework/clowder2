@@ -1,42 +1,22 @@
 import React, {useEffect, useState} from "react";
-import {
-	AppBar,
-	Box,
-	Button, Dialog,
-	DialogTitle,
-	Divider,
-	Grid,
-	ListItem,
-	Menu,
-	MenuItem,
-	Tab,
-	Tabs,
-	Typography
-} from "@mui/material";
+import {Box, Button, Dialog, DialogTitle, Divider, Grid, Menu, MenuItem, Tab, Tabs, Typography} from "@mui/material";
 import {ClowderInput} from "./styledComponents/ClowderInput";
 import {ClowderButton} from "./styledComponents/ClowderButton";
-import DescriptionIcon from "@mui/icons-material/Description";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
-import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
-import StarBorderIcon from "@mui/icons-material/StarBorder";
-import CloudDownloadOutlinedIcon from "@mui/icons-material/CloudDownloadOutlined";
 import {downloadDataset} from "../utils/dataset";
-import {downloadFile, fetchFileMetadata} from "../utils/file";
 import {useNavigate, useParams} from "react-router-dom";
-import {File, FileMetadataList, RootState, Thumbnail} from "../types/data";
+import {RootState} from "../types/data";
 import {useDispatch, useSelector} from "react-redux";
-import {downloadThumbnail} from "../utils/thumbnail";
 import {datasetDeleted, fetchDatasetAbout, fetchFilesInDataset} from "../actions/dataset";
 import {resetFailedReason, resetLogout} from "../actions/common"
-import {fileDeleted} from "../actions/file";
 
-import {TabPanel} from "./childComponents/TabComponent";
-import {a11yProps} from "./childComponents/TabComponent";
+import {a11yProps, TabPanel} from "./childComponents/TabComponent";
 import TopBar from "./childComponents/TopBar";
 import {MainBreadcrumbs} from "./childComponents/BreadCrumb";
 import {UploadFile} from "./childComponents/UploadFile";
 import {V2} from "../openapi";
 import {ActionModal} from "./childComponents/ActionModal";
+import FilesTable from "./childComponents/FilesTable";
 
 const tab = {
 	fontStyle: "normal",
@@ -64,14 +44,12 @@ export const Dataset = (): JSX.Element => {
 	// Redux connect equivalent
 	const dispatch = useDispatch();
 	const deleteDataset = (datasetId:string|undefined) => dispatch(datasetDeleted(datasetId));
-	const deleteFile = (fileId:string|undefined) => dispatch(fileDeleted(fileId));
 	const listFilesInDataset = (datasetId:string|undefined) => dispatch(fetchFilesInDataset(datasetId));
 	const listDatasetAbout= (datasetId:string|undefined) => dispatch(fetchDatasetAbout(datasetId));
 	const dismissError = () => dispatch(resetFailedReason());
 	const dismissLogout = () => dispatch(resetLogout());
 
 	// mapStateToProps
-	const filesInDataset = useSelector((state:RootState) => state.dataset.files);
 	const about = useSelector((state:RootState) => state.dataset.about);
 	const reason = useSelector((state:RootState) => state.error.reason);
 	const loggedOut = useSelector((state: RootState) => state.error.loggedOut);
@@ -80,21 +58,8 @@ export const Dataset = (): JSX.Element => {
 	const [selectedTabIndex, setSelectedTabIndex] = useState<number>(0);
 	const [open, setOpen] = React.useState<boolean>(false);
 	const [anchorEl, setAnchorEl] = React.useState<Element | null>(null);
-	const [fileThumbnailList, setFileThumbnailList] = useState<any>([]);
-	const [selectedFile, setSelectedFile] = useState<File>();
-	// const [fileMetadataList, setFileMetadataList] = useState<FileMetadataList[]>([]);
-
 	const [editingName, setEditingName] = React.useState<boolean>(false);
 	const [, setNewDatasetName] = React.useState<string>("");
-
-	// confirmation dialog
-	const [confirmationOpen, setConfirmationOpen] = useState(false);
-	const deleteSelectedFile = () => {
-		if (selectedFile) {
-			deleteFile(selectedFile["id"]);
-		}
-		setConfirmationOpen(false);
-	}
 
 	// component did mount list all files in dataset
 	useEffect(() => {
@@ -123,39 +88,6 @@ export const Dataset = (): JSX.Element => {
 			history("/login");
 		}
 	}, [loggedOut]);
-
-	// TODO these code will go away in v2 dont worry about understanding them
-	// TODO get metadata of each files; because we need the thumbnail of each file!!!
-	useEffect(() => {
-
-		(async () => {
-			if (filesInDataset !== undefined && filesInDataset.length > 0) {
-
-				// TODO any types fix later
-				const fileMetadataListTemp:FileMetadataList[] = [];
-				const fileThumbnailListTemp:any = [];
-				await Promise.all(filesInDataset.map(async (fileInDataset) => {
-
-					const fileMetadata = await fetchFileMetadata(fileInDataset["id"]);
-					fileMetadataListTemp.push({"id": fileInDataset["id"], "metadata": fileMetadata});
-
-					// add thumbnails
-					if (fileMetadata["thumbnail"] !== null && fileMetadata["thumbnail"] !== undefined) {
-						const thumbnailURL = await downloadThumbnail(fileMetadata["thumbnail"]);
-						fileThumbnailListTemp.push({"id": fileInDataset["id"], "thumbnail": thumbnailURL});
-					}
-				}));
-
-				// setFileMetadataList(fileMetadataListTemp);
-				setFileThumbnailList(fileThumbnailListTemp);
-			}
-		})();
-	}, [filesInDataset]);
-
-	const selectFile = (selectedFileId: string) => {
-		// Redirect to file route with file Id and dataset id
-		history(`/files/${selectedFileId}?dataset=${datasetId}&name=${about["name"]}`);
-	};
 
 	const handleTabChange = (_event:React.ChangeEvent<{}>, newTabIndex:number) => {
 		setSelectedTabIndex(newTabIndex);
@@ -186,11 +118,6 @@ export const Dataset = (): JSX.Element => {
 			<TopBar/>
 			<div className="outer-container">
 				<MainBreadcrumbs paths={paths}/>
-				{/*Confirmation dialogue*/}
-				<ActionModal actionOpen={confirmationOpen} actionTitle="Are you sure?"
-							 actionText="Do you really want to delete? This process cannot be undone."
-							 actionBtnName="Delete" handleActionBtnClick={deleteSelectedFile}
-							 handleActionCancel={() => { setConfirmationOpen(false);}}/>
 				{/*Error Message dialogue*/}
 				<ActionModal actionOpen={errorOpen} actionTitle="Something went wrong..." actionText={reason}
 							 actionBtnName="Report" handleActionBtnClick={() => console.log(reason)}
@@ -198,11 +125,7 @@ export const Dataset = (): JSX.Element => {
 				<div className="inner-container">
 					<Grid container spacing={4}>
 						<Grid item xs={8}>
-							<AppBar position="static" sx={{
-								background: "#FFFFFF",
-								boxShadow: "none",
-							}}>
-								{/*Tabs*/}
+							<Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
 								<Tabs value={selectedTabIndex} onChange={handleTabChange} aria-label="dataset tabs">
 									<Tab sx={tab} label="Files" {...a11yProps(0)} />
 									<Tab sx={tab} label="Metadata" {...a11yProps(1)} disabled={true}/>
@@ -210,96 +133,9 @@ export const Dataset = (): JSX.Element => {
 									<Tab sx={tab} label="Visualizations" {...a11yProps(3)} disabled={true}/>
 									<Tab sx={tab} label="Comments" {...a11yProps(4)} disabled={true}/>
 								</Tabs>
-							</AppBar>
+							</Box>
 							<TabPanel value={selectedTabIndex} index={0}>
-
-								{
-									filesInDataset !== undefined && fileThumbnailList !== undefined ?
-										filesInDataset.map((file) => {
-											let thumbnailComp = (<DescriptionIcon sx={{
-												height: "50%",
-												margin: "40px auto",
-												display: "block",
-												fontSize: "5em"
-											}}/>);
-											fileThumbnailList.map((thumbnail:Thumbnail) => {
-												if (file["id"] !== undefined && thumbnail["id"] !== undefined &&
-													thumbnail["thumbnail"] !== null && thumbnail["thumbnail"] !== undefined &&
-													file["id"] === thumbnail["id"]) {
-													thumbnailComp = (
-														<Box
-															component="img"
-															sx={{
-																height: "50%",
-																margin: "40px auto",
-																display: "block"
-															}}
-															src={thumbnail["thumbnail"]} alt="thumbnail"
-														/>
-													);
-												}
-											});
-											return (
-												<Box sx={{
-													position:"relative"
-												}} key={file["id"]}>
-													<ListItem button sx={{
-														background: "#FFFFFF",
-														border: "1px solid #DFDFDF",
-														boxSizing: "border-box",
-														borderRadius: "4px",
-														margin: "20px auto",
-														"& > .MuiGrid-item": {
-															padding: 0,
-															height: "150px",
-														}
-													}} key={file["id"]}
-															  onClick={() => selectFile(file["id"])}>
-														<Grid item xs={2}>
-															{thumbnailComp}
-														</Grid>
-														<Grid item xs={8}>
-															<Box sx={{
-																padding: "40px 20px",
-																fontSize:"16px",
-																fontWeight:"normal",
-																color:"#212529"
-															}}>
-																<Typography>File name: {file["name"]}</Typography>
-																<Typography>File size: {file["size"]}</Typography>
-																<Typography>Created on: {file["date-created"]}</Typography>
-																<Typography>Content type: {file["contentType"]}</Typography>
-															</Box>
-														</Grid>
-													</ListItem>
-													<Box sx={{
-														position:"absolute",
-														right:"5%",
-														top: "40px",
-													}}>
-														<Box sx={{display:"block"}}>
-															<Button startIcon={<DeleteOutlineIcon />}
-																onClick={()=>{
-																	setSelectedFile(file);
-																	setConfirmationOpen(true);
-																}
-																}>Delete</Button>
-														</Box>
-														<Box sx={{display:"block"}}>
-															<Button startIcon={<StarBorderIcon />} disabled={true}>Follow</Button>
-														</Box>
-														<Box sx={{display:"block"}}>
-															<Button startIcon={<CloudDownloadOutlinedIcon />}
-																onClick={()=>{downloadFile(file["id"], file["name"]);}}>
-																Download</Button>
-														</Box>
-													</Box>
-												</Box>
-											);
-										})
-										:
-										<></>
-								}
+								<FilesTable datasetId={datasetId} datasetName={about.name}/>
 							</TabPanel>
 							<TabPanel value={selectedTabIndex} index={1} />
 							<TabPanel value={selectedTabIndex} index={2} />

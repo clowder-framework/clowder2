@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from "react";
 import config from "../app.config";
-import {AppBar, Box, Divider, Grid, Tab, Tabs, Typography} from "@mui/material";
+import {Box, Divider, Grid, Tab, Tabs, Typography} from "@mui/material";
 import {ClowderInput} from "./styledComponents/ClowderInput";
 import {ClowderButton} from "./styledComponents/ClowderButton";
 import Audio from "./previewers/Audio";
@@ -146,12 +146,9 @@ export const File = (): JSX.Element => {
 							 actionBtnName="Report" handleActionBtnClick={() => console.log(reason)}
 							 handleActionCancel={handleErrorCancel}/>
 				<div className="inner-container">
-					<Grid container spacing={4}>
-						<Grid item lg={8} sm={8} xl={8} xs={12}>
-							<AppBar position="static" sx={{
-								background: "#FFFFFF",
-								boxShadow: "none",
-							}}>
+					<Grid container spacing={8}>
+						<Grid item xs={8}>
+							<Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
 								<Tabs value={selectedTabIndex} onChange={handleTabChange} aria-label="file tabs">
 									<Tab sx={tab} label="Previews" {...a11yProps(0)} />
 									<Tab sx={tab} label="Sections" {...a11yProps(1)} disabled={true}/>
@@ -159,7 +156,7 @@ export const File = (): JSX.Element => {
 									<Tab sx={tab} label="Extractions" {...a11yProps(3)} disabled={true}/>
 									<Tab sx={tab} label="Comments" {...a11yProps(4)} disabled={true}/>
 								</Tabs>
-							</AppBar>
+							</Box>
 							<TabPanel value={selectedTabIndex} index={0}>
 								{
 									previews.map((preview) =>{
@@ -197,7 +194,7 @@ export const File = (): JSX.Element => {
 									Comments
 							</TabPanel>
 						</Grid>
-						<Grid item lg={4} sm={4} xl={4} xs={12}>
+						<Grid item xs={4}>
 							{
 								fileMetadata !== undefined ?
 									<Box className="infoCard">
