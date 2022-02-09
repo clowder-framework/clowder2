@@ -4,7 +4,6 @@ motor
 mongoengine
 beanie
 passlib
-jwt
 bcrypt
 pyjwt
 black
