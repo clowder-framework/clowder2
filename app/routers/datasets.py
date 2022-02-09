@@ -26,7 +26,7 @@ clowder_bucket = os.getenv("MINIO_BUCKET_NAME", "clowder")
 
 @router.post("", response_model=Dataset)
 async def save_dataset(
-    dataset_info: Json[Dataset],
+    dataset_info: Dataset,
     user_id=Depends(auth_handler.auth_wrapper),
     db: MongoClient = Depends(dependencies.get_db),
 ):
