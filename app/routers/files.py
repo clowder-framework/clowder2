@@ -62,6 +62,7 @@ async def update_file(
 
     # Update version/creator/created flags
     updated_file = dict(existing_file)
+    updated_file["name"] = file.filename
     updated_file["creator"] = user.id
     updated_file["created"] = datetime.utcnow()
     updated_file["version"] = version_id
