@@ -141,6 +141,13 @@ async def add_folder(
     folder_db = FolderDB(
         **folder_in.dict(), author=user["_id"], parent_dataset=PyObjectId(dataset_id)
     )
+    parent_folder = folder_in.parent_folder
+    if parent_folder is not None:
+        folder = await db["folders"].find_one({"_id": ObjectId(parent_folder)})
+        if folder is None:
+            raise HTTPException(
+                status_code=400, detail=f"Parent folder {parent_folder} not found"
+            )
     new_folder = await db["folders"].insert_one(folder_db.mongo())
     found = await db["folders"].find_one({"_id": new_folder.inserted_id})
     folder_out = FolderOut.from_mongo(found)

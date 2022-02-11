@@ -40,7 +40,13 @@ async def save_file(
     # First, add to database and get unique ID
     f = dict(file_info) if file_info is not None else {}
     user = await db["users"].find_one({"_id": ObjectId(user_id)})
+    if user is None:
+        raise HTTPException(
+            status_code=401, detail=f"User not found. Session might have expired."
+        )
     dataset = await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
+    if dataset is None:
+        raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
     f["name"] = file.filename
     f["creator"] = user["_id"]
     f["views"] = 0
