@@ -30,7 +30,7 @@ auth_handler = AuthHandler()
 @router.post("/{dataset_id}", response_model=ClowderFile)
 async def save_file(
     dataset_id: str,
-    parent_folder: Optional[str] = None,
+    folder_id: Optional[str] = Form(None),
     user_id=Depends(auth_handler.auth_wrapper),
     db: MongoClient = Depends(dependencies.get_db),
     fs: Minio = Depends(dependencies.get_fs),
@@ -51,9 +51,9 @@ async def save_file(
     f["creator"] = user["_id"]
     f["views"] = 0
     f["downloads"] = 0
-    f["parent_dataset"] = dataset["_id"]
-    if parent_folder is not None:
-        f["parent_folder"] = ObjectId(parent_folder)
+    f["dataset_id"] = dataset["_id"]
+    if folder_id is not None:
+        f["folder_id"] = ObjectId(folder_id)
     new_file = await db["files"].insert_one(f)
     found = await db["files"].find_one({"_id": new_file.inserted_id})
 

@@ -16,7 +16,7 @@ class FolderIn(FolderBase):
 
 
 class FolderDB(FolderBase):
-    parent_dataset: PyObjectId
+    dataset_id: PyObjectId
     parent_folder: Optional[PyObjectId]
     author: PyObjectId = Field(default_factory=PyObjectId)
     created: datetime = Field(default_factory=datetime.utcnow)

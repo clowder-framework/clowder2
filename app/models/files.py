@@ -13,5 +13,5 @@ class ClowderFile(MongoModel):
     name: str = "_NA_"
     views: int = 0
     downloads: int = 0
-    parent_dataset: PyObjectId
-    parent_folder: Optional[PyObjectId]
+    dataset_id: PyObjectId
+    folder_id: Optional[PyObjectId]

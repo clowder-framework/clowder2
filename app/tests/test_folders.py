@@ -52,7 +52,7 @@ def test_create_nested(client: TestClient):
     assert len(top_folders_res.json()) == 1
     # list nested folders
     nested_folders_res = client.get(
-        f"{settings.API_V2_STR}/datasets/{dataset_id}/folders?parent_folder={folder1_id}",
+        f"{settings.API_V2_STR}/datasets/{dataset_id}/folders?folder_id={folder1_id}",
         headers=headers,
     )
     assert nested_folders_res.status_code == 200

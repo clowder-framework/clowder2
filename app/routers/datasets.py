@@ -74,20 +74,20 @@ async def get_dataset(dataset_id: str, db: MongoClient = Depends(dependencies.ge
 @router.get("/{dataset_id}/files")
 async def get_dataset_files(
     dataset_id: str,
-    parent_folder: Optional[str] = None,
+    folder_id: Optional[str] = None,
     db: MongoClient = Depends(dependencies.get_db),
 ):
     files = []
-    if parent_folder is None:
+    if folder_id is None:
         async for f in db["files"].find(
-            {"parent_dataset": ObjectId(dataset_id), "parent_folder": None}
+            {"dataset_id": ObjectId(dataset_id), "folder_id": None}
         ):
             files.append(ClowderFile.from_mongo(f))
     else:
         async for f in db["files"].find(
             {
-                "parent_dataset": ObjectId(dataset_id),
-                "parent_folder": ObjectId(parent_folder),
+                "dataset_id": ObjectId(dataset_id),
+                "folder_id": ObjectId(folder_id),
             }
         ):
             files.append(ClowderFile.from_mongo(f))
@@ -122,7 +122,7 @@ async def delete_dataset(
     fs: Minio = Depends(dependencies.get_fs),
 ):
     if (await db["datasets"].find_one({"_id": ObjectId(dataset_id)})) is not None:
-        async for f in db["files"].find({"parent_dataset": ObjectId(dataset_id)}):
+        async for f in db["files"].find({"dataset_id": ObjectId(dataset_id)}):
             fs.remove_object(clowder_bucket, str(f))
         await db["datasets"].delete_one({"_id": ObjectId(dataset_id)})
         return {"deleted": dataset_id}
@@ -139,7 +139,7 @@ async def add_folder(
 ):
     user = await db["users"].find_one({"_id": ObjectId(user_id)})
     folder_db = FolderDB(
-        **folder_in.dict(), author=user["_id"], parent_dataset=PyObjectId(dataset_id)
+        **folder_in.dict(), author=user["_id"], dataset_id=PyObjectId(dataset_id)
     )
     parent_folder = folder_in.parent_folder
     if parent_folder is not None:
@@ -163,13 +163,13 @@ async def get_dataset_folders(
     folders = []
     if parent_folder is None:
         async for f in db["folders"].find(
-            {"parent_dataset": ObjectId(dataset_id), "parent_folder": None}
+            {"dataset_id": ObjectId(dataset_id), "parent_folder": None}
         ):
             folders.append(FolderDB.from_mongo(f))
     else:
         async for f in db["folders"].find(
             {
-                "parent_dataset": ObjectId(dataset_id),
+                "dataset_id": ObjectId(dataset_id),
                 "parent_folder": ObjectId(parent_folder),
             }
         ):
