@@ -122,9 +122,14 @@ async def delete_dataset(
     fs: Minio = Depends(dependencies.get_fs),
 ):
     if (await db["datasets"].find_one({"_id": ObjectId(dataset_id)})) is not None:
-        async for f in db["files"].find({"dataset_id": ObjectId(dataset_id)}):
-            fs.remove_object(clowder_bucket, str(f))
+        # delete dataset first to minimize files/folder being uploaded to a delete dataset
         await db["datasets"].delete_one({"_id": ObjectId(dataset_id)})
+        for file in await db["files"].find({"dataset_id": ObjectId(dataset_id)}):
+            fs.remove_object(clowder_bucket, str(file))
+        files_deleted = await db.files.delete_many({"dataset_id": ObjectId(dataset_id)})
+        folders_delete = await db["folders"].delete_many(
+            {"dataset_id": ObjectId(dataset_id)}
+        )
         return {"deleted": dataset_id}
     else:
         raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
@@ -175,3 +180,19 @@ async def get_dataset_folders(
         ):
             folders.append(FolderDB.from_mongo(f))
     return folders
+
+
+@router.delete("/{dataset_id}/folder/{folder_id}")
+async def delete_folder(
+    dataset_id: str,
+    folder_id: str,
+    db: MongoClient = Depends(dependencies.get_db),
+    fs: Minio = Depends(dependencies.get_fs),
+):
+    if (await db["folder"].find_one({"_id": ObjectId(dataset_id)})) is not None:
+        async for f in db["files"].find({"dataset_id": ObjectId(dataset_id)}):
+            fs.remove_object(clowder_bucket, str(f))
+        await db["datasets"].delete_one({"_id": ObjectId(dataset_id)})
+        return {"deleted": dataset_id}
+    else:
+        raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
