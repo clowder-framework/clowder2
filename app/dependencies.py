@@ -4,6 +4,8 @@ import motor.motor_asyncio
 from minio import Minio
 from fastapi import Header, HTTPException
 from app.config import settings
+from minio.commonconfig import ENABLED
+from minio.versioningconfig import VersioningConfig
 from app.mongo import crete_mongo_indexes
 
 
@@ -27,14 +29,14 @@ async def get_db() -> Generator:
 
 
 async def get_fs() -> Generator:
-    # TODO: Look at FastAPI configuration files instead of this
     file_system = Minio(
         settings.MINIO_SERVER_URL,
-        access_key=settings.MINIO_ACCESS_KEY,  # minioadmin as default?
-        secret_key=settings.MINIO_SECRET_KEY,  # minioadmin
+        access_key=settings.MINIO_ACCESS_KEY,
+        secret_key=settings.MINIO_SECRET_KEY,
         secure=False,
     )
     clowder_bucket = settings.MINIO_BUCKET_NAME
     if not file_system.bucket_exists(clowder_bucket):
         file_system.make_bucket(clowder_bucket)
+    file_system.set_bucket_versioning(clowder_bucket, VersioningConfig(ENABLED))
     yield file_system
