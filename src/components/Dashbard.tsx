@@ -1,35 +1,16 @@
 import React, {useEffect, useState} from "react";
-import {
-	AppBar,
-	Box,
-	Link,
-	Dialog,
-	DialogTitle,
-	Grid,
-	ListItem,
-	Tab,
-	Tabs,
-	Typography,
-	Button,
-	Pagination
-} from "@mui/material";
-import BusinessCenterIcon from "@mui/icons-material/BusinessCenter";
-import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
-import StarBorderIcon from "@mui/icons-material/StarBorder";
-import CloudDownloadOutlinedIcon from "@mui/icons-material/CloudDownloadOutlined";
+import {Box, Button, Dialog, DialogTitle, Grid, Link, Tab, Tabs, Typography} from "@mui/material";
 
 import {CreateDataset} from "./childComponents/CreateDataset";
-import {downloadDataset} from "../utils/dataset";
 
-import {Dataset, Dataset as DatasetType, RootState, Thumbnail} from "../types/data";
+import {Dataset, Dataset as DatasetType, RootState} from "../types/data";
 import {useDispatch, useSelector} from "react-redux";
-import {datasetDeleted, fetchDatasets, } from "../actions/dataset";
+import {datasetDeleted, fetchDatasets,} from "../actions/dataset";
 import {resetFailedReason, resetLogout} from "../actions/common";
 import {downloadThumbnail} from "../utils/thumbnail";
 import TopBar from "./childComponents/TopBar";
 
-import {TabPanel} from "./childComponents/TabComponent";
-import {a11yProps} from "./childComponents/TabComponent";
+import {a11yProps, TabPanel} from "./childComponents/TabComponent";
 import {useNavigate} from "react-router-dom";
 import {MainBreadcrumbs} from "./childComponents/BreadCrumb";
 import {ActionModal} from "./childComponents/ActionModal";
@@ -44,6 +25,9 @@ const tab = {
 };
 
 export const Dashboard = (): JSX.Element => {
+
+	// use history hook to redirect/navigate between routes
+	const history = useNavigate();
 
 	// Redux connect equivalent
 	const dispatch = useDispatch();
