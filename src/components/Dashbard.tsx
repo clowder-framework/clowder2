@@ -32,7 +32,7 @@ export const Dashboard = (): JSX.Element => {
 	// Redux connect equivalent
 	const dispatch = useDispatch();
 	const deleteDataset = (datasetId: string) => dispatch(datasetDeleted(datasetId));
-	const listDatasets = (when: string, date: string, limit: number) => dispatch(fetchDatasets(when, date, limit));
+	const listDatasets = (skip: number|undefined, limit: number|undefined, mine: boolean|undefined) => dispatch(fetchDatasets(skip, limit, mine));
 	const dismissError = () => dispatch(resetFailedReason());
 	const dismissLogout = () => dispatch(resetLogout());
 	const datasets = useSelector((state: RootState) => state.dataset.datasets);
@@ -40,9 +40,14 @@ export const Dashboard = (): JSX.Element => {
 	const loggedOut = useSelector((state: RootState) => state.error.loggedOut);
 
 	const [datasetThumbnailList, setDatasetThumbnailList] = useState<any>([]);
+	// TODO add option to determine limit number; default show 5 datasets each time
+	const [currPageNum, setCurrPageNum] = useState<number>(0);
 	const [limit,] = useState<number>(5);
-	const [lastDataset, setLastDataset] = useState<DatasetType>();
-	const [firstDataset, setFirstDataset] = useState<DatasetType>();
+	const [skip, setSkip] = useState<number|undefined>();
+	// TODO add switch to turn on and off "mine" dataset
+	const [mine, ] = useState<boolean>(false);
+	const [prevDisabled, setPrevDisabled] = useState<boolean>(true);
+	const [nextDisabled, setNextDisabled] = useState<boolean>(false);
 	const [selectedTabIndex, setSelectedTabIndex] = useState(0);
 	const [selectedDataset, setSelectedDataset] = useState<Dataset>();
 	const [creationOpen, setCreationOpen] = useState(false);
@@ -58,7 +63,7 @@ export const Dashboard = (): JSX.Element => {
 
 	// component did mount
 	useEffect(() => {
-		listDatasets("", "", limit);
+		listDatasets(0, limit, mine);
 	}, []);
 
 	// Error msg dialog
@@ -98,13 +103,13 @@ export const Dashboard = (): JSX.Element => {
 					}
 				}));
 				setDatasetThumbnailList(datasetThumbnailListTemp);
-
-				// find last and first dataset for pagination
-				setFirstDataset(datasets[0]);
-				setLastDataset(datasets[datasets.length - 1]);
-
 			}
 		})();
+
+		// disable flipping if reaches the last page
+		if (datasets.length < limit) setNextDisabled(true);
+		else setNextDisabled(false);
+
 	}, [datasets]);
 
 	// switch tabs
@@ -112,16 +117,26 @@ export const Dashboard = (): JSX.Element => {
 		setSelectedTabIndex(newTabIndex);
 	};
 
-	// pagination
+	// for pagination keep flipping until the return dataset is less than the limit
 	const previous = () => {
-		const date = firstDataset ? new Date(firstDataset["created"]) : null;
-		if (date) listDatasets("b", date.toISOString(), limit);
+		if (currPageNum - 1 >= 0) {
+			setSkip((currPageNum - 1) * limit);
+			setCurrPageNum(currPageNum - 1);
+		}
 	};
-
 	const next = () => {
-		const date = lastDataset ? new Date(lastDataset["created"]) : null;
-		if (date) listDatasets("a", date.toISOString(), limit);
+		if (datasets.length === limit){
+			setSkip((currPageNum + 1) * limit);
+			setCurrPageNum(currPageNum + 1);
+		}
 	};
+	useEffect(() => {
+		if ( skip !== null && skip !== undefined) {
+			listDatasets(skip, limit, mine);
+			if (skip === 0) setPrevDisabled(true);
+			else setPrevDisabled(false);
+		}
+	}, [skip]);
 
 	const handlePaginationChange = (event: any, value: number) => {
 		console.log("Paginating to page " + value);

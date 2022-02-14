@@ -37,10 +37,10 @@ export function fetchDatasetAbout(id){
 }
 
 export const RECEIVE_DATASETS = "RECEIVE_DATASETS";
-export function fetchDatasets(when, date, limit=5){
+export function fetchDatasets(skip=0, limit=5, mine=false){
 	return (dispatch) => {
 		// TODO: Parameters for dates? paging?
-		return V2.DatasetsService.getDatasetsApiV2DatasetsGet(0, limit)
+		return V2.DatasetsService.getDatasetsApiV2DatasetsGet(skip, limit, mine)
 			.then(json => {
 				dispatch({
 					type: RECEIVE_DATASETS,
