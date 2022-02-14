@@ -17,6 +17,7 @@ import {UploadFile} from "./childComponents/UploadFile";
 import {V2} from "../openapi";
 import {ActionModal} from "./childComponents/ActionModal";
 import FilesTable from "./childComponents/FilesTable";
+import {parseDate} from "../utils/common";
 
 const tab = {
 	fontStyle: "normal",
@@ -56,7 +57,7 @@ export const Dataset = (): JSX.Element => {
 
 	// state
 	const [selectedTabIndex, setSelectedTabIndex] = useState<number>(0);
-	const [open, setOpen] = React.useState<boolean>(false);
+	const [createFileOpen, setCreateFileOpen] = React.useState<boolean>(false);
 	const [anchorEl, setAnchorEl] = React.useState<Element | null>(null);
 	const [editingName, setEditingName] = React.useState<boolean>(false);
 	const [, setNewDatasetName] = React.useState<string>("");
@@ -168,7 +169,7 @@ export const Dataset = (): JSX.Element => {
 								>
 									<MenuItem sx={optionMenuItem}
 											  onClick={()=>{
-												  setOpen(true);
+												  setCreateFileOpen(true);
 												  handleOptionClose();
 											  }}>
 										Add Files
@@ -219,7 +220,7 @@ export const Dataset = (): JSX.Element => {
 										<Typography className="content">Dataset ID: {about["id"]}</Typography>
 										<Typography className="content">Owner: {about["authorId"]}</Typography>
 										<Typography className="content">Description: {about["description"]}</Typography>
-										<Typography className="content">Created on: {about["created"]}</Typography>
+										<Typography className="content">Created on: {parseDate(about["created"])}</Typography>
 										{/*/!*TODO use this to get thumbnail*!/*/}
 										<Typography className="content">Thumbnail: {about["thumbnail"]}</Typography>
 										{/*<Typography className="content">Belongs to spaces: {about["authorId"]}</Typography>*/}
@@ -250,9 +251,9 @@ export const Dataset = (): JSX.Element => {
 							<Divider light/>
 						</Grid>
 					</Grid>
-					<Dialog open={open} onClose={()=>{setOpen(false);}} fullWidth={true} aria-labelledby="form-dialog">
+					<Dialog open={createFileOpen} onClose={()=>{setCreateFileOpen(false);}} fullWidth={true} aria-labelledby="form-dialog">
 						<DialogTitle id="form-dialog-title">Add File</DialogTitle>
-						<UploadFile selectedDatasetId={datasetId} setOpen={setOpen}/>
+						<UploadFile selectedDatasetId={datasetId} setOpen={setCreateFileOpen}/>
 					</Dialog>
 				</div>
 			</div>

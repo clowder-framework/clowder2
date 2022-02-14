@@ -2,11 +2,14 @@ export interface Dataset {
 	id:string;
 	name: string;
 	description: string;
-	created: string;
+	created: string | Date;
 	thumbnail: string;
 }
 
 export interface File {
+	version: string;
+	creator: string;
+	created: string | Date;
 	id: string;
 	name: string;
 	size: number;
@@ -19,7 +22,7 @@ export interface About {
 	id: string;
 	authorId: string;
 	description: string;
-	created: string;
+	created: string | Date;
 	thumbnail: string;
 }
 
@@ -27,7 +30,7 @@ export interface FileMetadata {
 	id: string;
 	"content-type": string;
 	size:number;
-	"date-created": string;
+	created: string | Date;
 	name: string;
 	creator: string;
 	status: string;
@@ -35,6 +38,15 @@ export interface FileMetadata {
 	thumbnail:string;
 	downloads:number;
 	views:number;
+	version: string;
+}
+
+export interface FileVersion {
+	id: string;
+	"version_id": string;
+	"file_id": string;
+	"creator": string;
+	"created": string | Date;
 }
 
 export interface FileMetadataList{
@@ -80,7 +92,7 @@ export interface MetadataJsonld{
 	agent:Agent;
 	"attached_to": AttatchTo;
 	content: any;
-	"created_at": string
+	"created_at": string | Date;
 }
 
 interface Context{
@@ -115,6 +127,7 @@ export interface FileState{
 	extractedMetadata: ExtractedMetadata;
 	metadataJsonld: MetadataJsonld[];
 	previews: FilePreview[];
+	fileVersions: FileVersion[];
 }
 
 export interface UserState{

@@ -61,6 +61,12 @@ export function dataURItoFile(dataURI) {
 	return new File([blob], filename, {type: mime, lastModified: new Date()});
 }
 
+export function parseDate(dateString) {
+	const options = { year: "numeric", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" };
+	const mydate = new Date(dateString);
+	return mydate.toLocaleString("en-US", options);
+}
+
 // get current username
 // export function getCurrUsername(){
 // 	if (process.env.DEPLOY_ENV === "local"){
@@ -75,7 +81,7 @@ export function dataURItoFile(dataURI) {
 // 	}
 // }
 
-// get current user's encoded email address for datawolf use
+// get current user"s encoded email address for datawolf use
 // export function getCurrUserInfo(){
 // 	if (process.env.DEPLOY_ENV === "local"){
 // 		return config.testUserInfo;
@@ -100,7 +106,7 @@ export function dataURItoFile(dataURI) {
 // 	}
 // }
 //
-// // get current user's encoded email address for datawolf use
+// // get current user"s encoded email address for datawolf use
 // export function getCurrUserEmail(){
 // 	if (process.env.DEPLOY_ENV === "local"){
 // 		return config.testUserInfo;

@@ -1,7 +1,7 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { ClowderFile } from '../models/ClowderFile';
+import type { Body_update_file_api_v2_files__file_id__put } from '../models/Body_update_file_api_v2_files__file_id__put';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { request as __request } from '../core/request';
 
@@ -26,21 +26,21 @@ export class FilesService {
     }
 
     /**
-     * Edit File
+     * Update File
      * @param fileId
-     * @param requestBody
-     * @returns ClowderFile Successful Response
+     * @param formData
+     * @returns any Successful Response
      * @throws ApiError
      */
-    public static editFileApiV2FilesFileIdPut(
+    public static updateFileApiV2FilesFileIdPut(
         fileId: string,
-        requestBody: ClowderFile,
-    ): CancelablePromise<ClowderFile> {
+        formData: Body_update_file_api_v2_files__file_id__put,
+    ): CancelablePromise<any> {
         return __request({
             method: 'PUT',
             path: `/api/v2/files/${fileId}`,
-            body: requestBody,
-            mediaType: 'application/json',
+            formData: formData,
+            mediaType: 'multipart/form-data',
             errors: {
                 422: `Validation Error`,
             },

@@ -11,7 +11,9 @@ import {useDispatch} from "react-redux";
 import {ActionModal} from "./ActionModal";
 import DownloadIcon from '@mui/icons-material/Download';
 import DeleteIcon from '@mui/icons-material/Delete';
-import {ListItemIcon, ListItemText} from "@mui/material";
+import UploadIcon from '@mui/icons-material/Upload';
+import {Dialog, DialogTitle, ListItemIcon, ListItemText} from "@mui/material";
+import {UpdateFile} from "./UpdateFile";
 
 type FileMenuProps = {
 	file: File
@@ -32,6 +34,7 @@ export default function FileMenu(props: FileMenuProps) {
 	const dispatch = useDispatch();
 	const deleteFile = (fileId:string|undefined) => dispatch(fileDeleted(fileId));
 	const [confirmationOpen, setConfirmationOpen] = useState(false);
+	const [updateFileOpen, setUpdateFileOpen] = useState(false);
 	const deleteSelectedFile = () => {
 		if (file) {
 			deleteFile(file.id);
@@ -45,6 +48,10 @@ export default function FileMenu(props: FileMenuProps) {
 						 actionText="Do you really want to delete? This process cannot be undone."
 						 actionBtnName="Delete" handleActionBtnClick={deleteSelectedFile}
 						 handleActionCancel={() => { setConfirmationOpen(false);}}/>
+			<Dialog open={updateFileOpen} onClose={()=>{setUpdateFileOpen(false);}} fullWidth={true} aria-labelledby="form-dialog">
+				<DialogTitle id="form-dialog-title">Update File</DialogTitle>
+				<UpdateFile fileId={file.id} setOpen={setUpdateFileOpen}/>
+			</Dialog>
 			<Button
 				id="basic-button"
 				// variant="outlined"
@@ -65,7 +72,19 @@ export default function FileMenu(props: FileMenuProps) {
 					'aria-labelledby': 'basic-button',
 				}}
 			>
-				<MenuItem onClick={()=>{handleClose(); downloadFile(file.id, file.name);}}>
+				<MenuItem onClick={()=>{
+					handleClose();
+					setUpdateFileOpen(true);
+				}}>
+					<ListItemIcon>
+						<UploadIcon fontSize="small" />
+					</ListItemIcon>
+					<ListItemText>Update File</ListItemText>
+				</MenuItem>
+				<MenuItem onClick={()=>{
+					handleClose();
+					downloadFile(file.id, file.name);
+				}}>
 					<ListItemIcon>
 						<DownloadIcon fontSize="small" />
 					</ListItemIcon>

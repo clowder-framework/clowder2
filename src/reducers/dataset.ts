@@ -5,7 +5,7 @@ import {
 	DELETE_DATASET,
 	CREATE_DATASET,
 } from "../actions/dataset";
-import {CREATE_FILE, DELETE_FILE} from "../actions/file";
+import {CREATE_FILE, UPDATE_FILE, DELETE_FILE} from "../actions/file";
 import {DataAction} from "../types/action";
 import {DatasetState} from "../types/data";
 
@@ -26,6 +26,10 @@ const dataset = (state = defaultState, action: DataAction) => {
 	case CREATE_FILE:
 		return Object.assign({}, state, {
 			files: [...state.files, action.file]
+		});
+	case UPDATE_FILE:
+		return Object.assign({}, state, {
+			files: state.files.map(file => file.id === action.file.id ? action.file: file),
 		});
 	case RECEIVE_DATASET_ABOUT:
 		return Object.assign({}, state, {about: action.about});

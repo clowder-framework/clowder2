@@ -1,8 +1,6 @@
 import React, {useEffect, useState} from "react";
 import config from "../app.config";
-import {Box, Divider, Grid, Tab, Tabs, Typography} from "@mui/material";
-import {ClowderInput} from "./styledComponents/ClowderInput";
-import {ClowderButton} from "./styledComponents/ClowderButton";
+import {Box, Divider, Grid, Tab, Tabs} from "@mui/material";
 import Audio from "./previewers/Audio";
 import Video from "./previewers/Video";
 import {downloadResource} from "../utils/common";
@@ -14,10 +12,14 @@ import {resetFailedReason, resetLogout} from "../actions/common"
 
 import {TabPanel} from "./childComponents/TabComponent";
 import {a11yProps} from "./childComponents/TabComponent";
-import {fetchFileMetadata} from "../actions/file";
+import {fetchFileMetadata, fetchFileVersions} from "../actions/file";
 import TopBar from "./childComponents/TopBar";
 import {MainBreadcrumbs} from "./childComponents/BreadCrumb";
 import {ActionModal} from "./childComponents/ActionModal";
+import {FileAbout} from "./childComponents/FileAbout";
+import {FileStats} from "./childComponents/FileStats";
+import {FileSearch} from "./childComponents/FileSearch";
+import {FileVersionHistory} from "./childComponents/FileVersionHistory";
 
 const tab = {
 	fontStyle: "normal",
@@ -43,12 +45,14 @@ export const File = (): JSX.Element => {
 	// const listFileMetadataJsonld = (fileId:string|undefined) => dispatch(fetchFileMetadataJsonld(fileId));
 	// const listFilePreviews = (fileId:string|undefined) => dispatch(fetchFilePreviews(fileId));
 	const listFileMetadata = (fileId:string|undefined) => dispatch(fetchFileMetadata(fileId));
+	const listFileVersions = (fileId:string|undefined) => dispatch(fetchFileVersions(fileId));
 	const dismissError = () => dispatch(resetFailedReason());
 	const dismissLogout = () => dispatch(resetLogout());
 
 	const fileMetadata = useSelector((state:RootState) => state.file.fileMetadata);
 	const fileMetadataJsonld = useSelector((state:RootState) => state.file.metadataJsonld);
 	const filePreviews = useSelector((state:RootState) => state.file.previews);
+	const fileVersions = useSelector((state:RootState) => state.file.fileVersions);
 	const reason = useSelector((state:RootState) => state.error.reason);
 	const loggedOut = useSelector((state: RootState) => state.error.loggedOut);
 
@@ -61,6 +65,7 @@ export const File = (): JSX.Element => {
 		// listFileMetadataJsonld(fileId);
 		// listFilePreviews(fileId);
 		listFileMetadata(fileId);
+		listFileVersions(fileId);
 	}, []);
 
 
@@ -151,12 +156,14 @@ export const File = (): JSX.Element => {
 							<Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
 								<Tabs value={selectedTabIndex} onChange={handleTabChange} aria-label="file tabs">
 									<Tab sx={tab} label="Previews" {...a11yProps(0)} />
-									<Tab sx={tab} label="Sections" {...a11yProps(1)} disabled={true}/>
-									<Tab sx={tab} label="Metadata" {...a11yProps(2)} disabled={true}/>
-									<Tab sx={tab} label="Extractions" {...a11yProps(3)} disabled={true}/>
-									<Tab sx={tab} label="Comments" {...a11yProps(4)} disabled={true}/>
+									<Tab sx={tab} label="Version History" {...a11yProps(1)} />
+									<Tab sx={tab} label="Sections" {...a11yProps(2)} disabled={true}/>
+									<Tab sx={tab} label="Metadata" {...a11yProps(3)} disabled={true}/>
+									<Tab sx={tab} label="Extractions" {...a11yProps(4)} disabled={true}/>
+									<Tab sx={tab} label="Comments" {...a11yProps(5)} disabled={true}/>
 								</Tabs>
 							</Box>
+							{/*Preview Tab*/}
 							<TabPanel value={selectedTabIndex} index={0}>
 								{
 									previews.map((preview) =>{
@@ -173,10 +180,15 @@ export const File = (): JSX.Element => {
 									})
 								}
 							</TabPanel>
+							{/*Version History*/}
 							<TabPanel value={selectedTabIndex} index={1}>
-									NA
+								{ fileVersions !== undefined ?
+									<FileVersionHistory fileVersions={fileVersions}/> : <></> }
 							</TabPanel>
 							<TabPanel value={selectedTabIndex} index={2}>
+									NA
+							</TabPanel>
+							<TabPanel value={selectedTabIndex} index={3}>
 								{
 									fileMetadataJsonld !== undefined && fileMetadataJsonld.length > 0 ?
 										fileMetadataJsonld.map((item) => {
@@ -187,54 +199,24 @@ export const File = (): JSX.Element => {
 										}) : <></>
 								}
 							</TabPanel>
-							<TabPanel value={selectedTabIndex} index={3}>
+							<TabPanel value={selectedTabIndex} index={4}>
 									Extractions
 							</TabPanel>
-							<TabPanel value={selectedTabIndex} index={4}>
+							<TabPanel value={selectedTabIndex} index={5}>
 									Comments
 							</TabPanel>
 						</Grid>
 						<Grid item xs={4}>
-							{
-								fileMetadata !== undefined ?
-									<Box className="infoCard">
-										<Typography className="title">About</Typography>
-										<Typography
-											className="content">File ID: {fileMetadata["id"]}</Typography>
-										<Typography
-											className="content">Type: {fileMetadata["content-type"]}</Typography>
-										<Typography className="content">File
-												size: {fileMetadata["size"]}</Typography>
-										<Typography className="content">Uploaded
-												on: {fileMetadata["date-created"]}</Typography>
-										<Typography className="content">Uploaded
-												as: {fileMetadata["name"]}</Typography>
-										<Typography className="content">Uploaded
-												by: {fileMetadata["creator"]}</Typography>
-										<Typography
-											className="content">Status: {fileMetadata["status"]}</Typography>
-									</Box> : <></>
-							}
+							{/*About*/}
+							{ fileMetadata !== undefined ? <FileAbout fileMetadata={fileMetadata} /> : <></> }
 							<Divider light/>
-							<Box className="infoCard">
-								<Typography className="title">Statistics</Typography>
-								<Typography className="content">Views: {fileMetadata["views"]}</Typography>
-								{/*<Typography className="content">Last viewed: Jun 07, 2021 21:49:09</Typography>*/}
-								<Typography className="content">Downloads: {fileMetadata["downloads"]}</Typography>
-								{/*<Typography className="content">Last downloaded: Never</Typography>*/}
-							</Box>
+
+							{/*Stats*/}
+							{ fileMetadata !== undefined ? <FileStats fileMetadata={fileMetadata} /> : <></> }
 							<Divider light/>
-							<Box className="infoCard">
-								<Typography className="title">Tags</Typography>
-								<Grid container spacing={4}>
-									<Grid item lg={8} sm={8} xl={8} xs={12}>
-										<ClowderInput defaultValue="Tag"/>
-									</Grid>
-									<Grid item lg={4} sm={4} xl={4} xs={12}>
-										<ClowderButton disabled={true}>Search</ClowderButton>
-									</Grid>
-								</Grid>
-							</Box>
+
+							{/*Search*/}
+							<FileSearch />
 							<Divider light/>
 						</Grid>
 					</Grid>

@@ -4,20 +4,20 @@ import CardActions from '@mui/material/CardActions';
 import CardContent from '@mui/material/CardContent';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
-import { parseISO, format } from 'date-fns'
 import {useNavigate} from "react-router-dom";
+import {parseDate} from "../../utils/common";
 
 type DatasetCardProps = {
 	id: string,
 	name: string,
 	author: string,
-	created: string
+	created: string | Date,
 	description: string
 }
 
 export default function DatasetCard(props: DatasetCardProps) {
 	const {	id, name, author, created, description} = props;
-	const formattedCreated = format(parseISO(created), "MM/dd/yyyy");
+	const formattedCreated = parseDate(created);
 	// use history hook to redirect/navigate between routes
 	const history = useNavigate();
 	const selectDataset = (selectedDatasetId: string) => {

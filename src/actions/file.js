@@ -131,3 +131,40 @@ export function fileCreated(formData, selectedDatasetId){
 			});
 	};
 }
+
+export const UPDATE_FILE = "UPDATE_FILE";
+export function fileUpdated(formData, fileId){
+	return (dispatch) => {
+		formData["file"] = dataURItoFile(formData["file"]);
+		return V2.FilesService.updateFileApiV2FilesFileIdPut(fileId, formData)
+			.then(file => {
+				dispatch({
+					type: UPDATE_FILE,
+					file: file,
+					receivedAt: Date.now(),
+				});
+			})
+			.catch(reason => {
+				dispatch(handleErrors(reason));
+			});
+	};
+}
+
+export const RECEIVE_VERSIONS = "RECEIVE_VERSIONS";
+export function fetchFileVersions(fileId){
+	return (dispatch) => {
+		return V2.FilesService.getFileVersionsApiV2FilesFileIdVersionsGet(fileId)
+			.then(json => {
+				// sort by decending order
+				const version = json.sort((a, b) => new Date(b["created"]) - new Date(a["created"]));
+				dispatch({
+					type: RECEIVE_VERSIONS,
+					fileVersions: version,
+					receivedAt: Date.now(),
+				});
+			})
+			.catch(reason => {
+				dispatch(handleErrors(reason));
+			});
+	};
+}
