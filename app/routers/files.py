@@ -1,28 +1,25 @@
-import os
 import io
-from typing import List, Optional
 from datetime import datetime
+from typing import Optional
 
 from bson import ObjectId
 from fastapi import (
     APIRouter,
-    Request,
     HTTPException,
     Depends,
-    Form,
     File,
     UploadFile,
 )
-from fastapi.responses import FileResponse, StreamingResponse
+from fastapi.responses import StreamingResponse
+from minio import Minio
 from pydantic import Json
 from pymongo import MongoClient
-from minio import Minio
 
 from app import dependencies
-from app.models.files import ClowderFile, FileVersion
-from app.models.users import User
 from app.auth import AuthHandler
 from app.config import settings
+from app.models.files import ClowderFile, FileVersion
+from app.models.users import User
 
 router = APIRouter()
 

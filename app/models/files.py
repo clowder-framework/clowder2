@@ -1,12 +1,11 @@
 from datetime import datetime
 from typing import Optional
 
-from mongoengine import DynamicDocument
-from pydantic import BaseModel, Field
-from typing import List
+from pydantic import Field
 
 from app.models.mongomodel import MongoModel
 from app.models.pyobjectid import PyObjectId
+
 
 # MiniUser - id, name, email, gravatar (comes with email)
 class FileVersion(MongoModel):

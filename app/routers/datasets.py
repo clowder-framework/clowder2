@@ -1,32 +1,22 @@
-import os
 import io
 import datetime
+import io
 import os
 from typing import List, Optional
 
-from typing import List, Optional
-import json
 from bson import ObjectId
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Depends, File, UploadFile
+from fastapi import Form
 from minio import Minio
-from fastapi import APIRouter, Request, HTTPException, Depends, File, UploadFile
 from pymongo import MongoClient
-
-from pydantic import Json
-from minio import Minio
-from fastapi.encoders import jsonable_encoder
 
 from app import dependencies
 from app.auth import AuthHandler
+from app.config import settings
 from app.models.datasets import Dataset
-from app.models.files import ClowderFile
+from app.models.files import ClowderFile, FileVersion
 from app.models.folders import FolderOut, FolderIn, FolderDB
 from app.models.pyobjectid import PyObjectId
-from app.models.users import User
-from app.models.files import ClowderFile, FileVersion
-from app.auth import AuthHandler
-from app.config import settings
-
 
 router = APIRouter()
 
@@ -219,6 +209,7 @@ async def delete_folder(
 @router.post("/{dataset_id}/files", response_model=ClowderFile)
 async def save_file(
     dataset_id: str,
+    folder_id: Optional[str] = Form(None),
     user_id=Depends(auth_handler.auth_wrapper),
     db: MongoClient = Depends(dependencies.get_db),
     fs: Minio = Depends(dependencies.get_fs),
@@ -231,18 +222,27 @@ async def save_file(
         # Prepare new file entry
         f = dict(file_info) if file_info is not None else {}
         user = await db["users"].find_one({"_id": ObjectId(user_id)})
+        if user is None:
+            raise HTTPException(
+                status_code=401, detail=f"User not found. Session might have expired."
+            )
+        dataset = await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
+        if dataset is None:
+            raise HTTPException(
+                status_code=404, detail=f"Dataset {dataset_id} not found"
+            )
         f["name"] = file.filename
         f["creator"] = user["_id"]
         f["created"] = datetime.datetime.utcnow()
         f["views"] = 0
         f["downloads"] = 0
+        f["dataset_id"] = dataset["_id"]
+        if folder_id is not None:
+            f["folder_id"] = ObjectId(folder_id)
 
         # Add to db and update dataset
         new_file = await db["files"].insert_one(f)
         new_file_id = new_file.inserted_id
-        await db["datasets"].update_one(
-            {"_id": ObjectId(dataset_id)}, {"$push": {"files": ObjectId(new_file_id)}}
-        )
 
         # Use unique ID as key for Minio and get initial version ID
         version_id = None
