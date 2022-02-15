@@ -2,7 +2,15 @@ import uvicorn
 from fastapi import FastAPI, APIRouter
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.routers import users, files, datasets, collections, authentication, items
+from app.routers import (
+    users,
+    files,
+    datasets,
+    collections,
+    authentication,
+    items,
+    folders,
+)
 from app.config import settings
 
 app = FastAPI(
@@ -26,6 +34,7 @@ api_router.include_router(
 )
 api_router.include_router(authentication.router, tags=["login"])
 api_router.include_router(items.router, prefix="/items", tags=["items"])
+api_router.include_router(folders.router, prefix="/folders", tags=["folders"])
 
 app.include_router(api_router, prefix=settings.API_V2_STR)
 
