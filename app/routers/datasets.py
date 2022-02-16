@@ -12,7 +12,7 @@ from fastapi.encoders import jsonable_encoder
 from app.auth import AuthHandler
 from app import dependencies
 from app.models.datasets import DatasetBase, DatasetIn, DatasetDB, DatasetOut
-from app.models.files import ClowderFile, FileVersion
+from app.models.files import FileBase, FileVersion
 from app.models.users import UserOut
 from app.config import settings
 
@@ -93,7 +93,7 @@ async def get_dataset_files(
             if (
                 file := await db["files"].find_one({"_id": ObjectId(file_id)})
             ) is not None:
-                files.append(ClowderFile.from_mongo(file))
+                files.append(FileBase.from_mongo(file))
         return files
     raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
 
@@ -140,14 +140,14 @@ async def delete_dataset(
     raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
 
 
-@router.post("/{dataset_id}/files", response_model=ClowderFile)
+@router.post("/{dataset_id}/files", response_model=FileBase)
 async def save_file(
     dataset_id: str,
     user_id=Depends(auth_handler.auth_wrapper),
     db: MongoClient = Depends(dependencies.get_db),
     fs: Minio = Depends(dependencies.get_fs),
     file: UploadFile = File(...),
-    file_info: Optional[ClowderFile] = None,
+    file_info: Optional[FileBase] = None,
 ):
     if (
         dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
@@ -191,6 +191,6 @@ async def save_file(
             creator=user["_id"],
         )
         await db["file_versions"].insert_one(dict(new_version))
-        return ClowderFile.from_mongo(f)
+        return FileBase.from_mongo(f)
     else:
         raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
