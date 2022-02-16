@@ -1,17 +1,20 @@
-import datetime
 import os
-from typing import List
-
+import io
+import datetime
+from typing import List, Optional
 from bson import ObjectId
-from fastapi import APIRouter, HTTPException, Depends
-from minio import Minio
+from fastapi import APIRouter, Request, HTTPException, Depends, File, UploadFile
 from pymongo import MongoClient
+from pydantic import Json
+from minio import Minio
+from fastapi.encoders import jsonable_encoder
 
-from app import dependencies
 from app.auth import AuthHandler
+from app import dependencies
 from app.models.datasets import DatasetBase, DatasetIn, DatasetDB, DatasetOut
-from app.models.files import ClowderFile
+from app.models.files import ClowderFile, FileVersion
 from app.models.users import UserOut
+from app.config import settings
 
 router = APIRouter()
 
@@ -101,10 +104,14 @@ async def edit_dataset(
     dataset_info: DatasetBase,
     db: MongoClient = Depends(dependencies.get_db),
 ):
-    ds = dict(dataset_info) if dataset_info is not None else {}
     if (
         dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
     ) is not None:
+        # TODO: Refactor this with permissions checks etc.
+        ds = dict(dataset_info) if dataset_info is not None else {}
+        user = await db["users"].find_one({"_id": ObjectId(user_id)})
+        ds["author"] = user["_id"]
+        ds["modified"] = datetime.datetime.utcnow()
         try:
             dataset.update(ds)
             dataset["_id"] = dataset_id
@@ -131,3 +138,59 @@ async def delete_dataset(
         res = await db["datasets"].delete_one({"_id": ObjectId(dataset_id)})
         return {"deleted": dataset_id}
     raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
+
+
+@router.post("/{dataset_id}/files", response_model=ClowderFile)
+async def save_file(
+    dataset_id: str,
+    user_id=Depends(auth_handler.auth_wrapper),
+    db: MongoClient = Depends(dependencies.get_db),
+    fs: Minio = Depends(dependencies.get_fs),
+    file: UploadFile = File(...),
+    file_info: Optional[ClowderFile] = None,
+):
+    if (
+        dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
+    ) is not None:
+        # Prepare new file entry
+        f = dict(file_info) if file_info is not None else {}
+        user = await db["users"].find_one({"_id": ObjectId(user_id)})
+        f["name"] = file.filename
+        f["creator"] = user["_id"]
+        f["created"] = datetime.datetime.utcnow()
+        f["views"] = 0
+        f["downloads"] = 0
+
+        # Add to db and update dataset
+        new_file = await db["files"].insert_one(f)
+        new_file_id = new_file.inserted_id
+        await db["datasets"].update_one(
+            {"_id": ObjectId(dataset_id)}, {"$push": {"files": ObjectId(new_file_id)}}
+        )
+
+        # Use unique ID as key for Minio and get initial version ID
+        version_id = None
+        while content := file.file.read(
+            settings.MINIO_UPLOAD_CHUNK_SIZE
+        ):  # async read chunk
+            response = fs.put_object(
+                settings.MINIO_BUCKET_NAME,
+                str(new_file_id),
+                io.BytesIO(content),
+                length=-1,
+                part_size=settings.MINIO_UPLOAD_CHUNK_SIZE,
+            )  # async write chunk to minio
+            version_id = response.version_id
+        f["version"] = version_id
+        await db["files"].replace_one({"_id": ObjectId(new_file_id)}, f)
+
+        # Add FileVersion entry and update file
+        new_version = FileVersion(
+            version_id=version_id,
+            file_id=new_file_id,
+            creator=user["_id"],
+        )
+        await db["file_versions"].insert_one(dict(new_version))
+        return ClowderFile.from_mongo(f)
+    else:
+        raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")

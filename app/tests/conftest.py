@@ -6,6 +6,8 @@ from app.config import settings
 from app.dependencies import get_db
 from app.main import app
 
+user = {"name": "test@test.org", "password": "not_a_password"}
+
 
 async def override_get_db() -> Generator:
     mongo_client = motor.motor_asyncio.AsyncIOMotorClient(settings.MONGODB_URL)
@@ -13,7 +15,7 @@ async def override_get_db() -> Generator:
     yield db
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="session")
 def client() -> Generator:
     app.dependency_overrides[get_db] = override_get_db
     with TestClient(app) as c:
@@ -23,3 +25,19 @@ def client() -> Generator:
 @pytest.fixture(scope="session")
 def root_path() -> str:
     return settings.API_V2_STR
+
+
+@pytest.fixture(scope="session")
+def token(client: TestClient) -> str:
+    response = client.post(f"{settings.API_V2_STR}/users", json=user)
+    assert response.status_code == 200
+    response = client.post(f"{settings.API_V2_STR}/login", json=user)
+    assert response.status_code == 200
+    token = response.json().get("token")
+    assert token is not None
+    return token
+
+
+@pytest.fixture(scope="session")
+def headers(token: str) -> dict:
+    return {"Authorization": "Bearer " + token}
