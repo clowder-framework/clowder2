@@ -15,7 +15,7 @@ async def save_collection(
     body: Collection, db: MongoClient = Depends(dependencies.get_db)
 ):
     body = body
-    res = await db["collections"].insert_one(body.mongo())
+    res = await db["collections"].insert_one(body.to_mongo())
     found = await db["collections"].find_one({"_id": res.inserted_id})
     return Collection.from_mongo(found)
 

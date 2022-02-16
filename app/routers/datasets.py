@@ -10,13 +10,18 @@ from fastapi import Form
 from minio import Minio
 from pymongo import MongoClient
 
+from app.auth import AuthHandler
 from app import dependencies
 from app.auth import AuthHandler
+from app.models.datasets import DatasetBase, DatasetIn, DatasetDB, DatasetOut
+from app.models.files import ClowderFile, FileVersion
+from app.models.users import UserOut
 from app.config import settings
 from app.models.datasets import Dataset
 from app.models.files import ClowderFile, FileVersion
 from app.models.folders import FolderOut, FolderIn, FolderDB
 from app.models.pyobjectid import PyObjectId
+
 
 router = APIRouter()
 
@@ -25,21 +30,21 @@ auth_handler = AuthHandler()
 clowder_bucket = os.getenv("MINIO_BUCKET_NAME", "clowder")
 
 
-@router.post("", response_model=Dataset)
+@router.post("", response_model=DatasetOut)
 async def save_dataset(
-    dataset_info: Dataset,
+    dataset_in: DatasetIn,
     user_id=Depends(auth_handler.auth_wrapper),
     db: MongoClient = Depends(dependencies.get_db),
 ):
-    ds = dict(dataset_info) if dataset_info is not None else {}
     user = await db["users"].find_one({"_id": ObjectId(user_id)})
-    ds["author"] = user["_id"]
-    new_dataset = await db["datasets"].insert_one(ds)
+    dataset_db = DatasetDB(**dataset_in.dict(), author=UserOut(**user))
+    new_dataset = await db["datasets"].insert_one(dataset_db.to_mongo())
     found = await db["datasets"].find_one({"_id": new_dataset.inserted_id})
-    return Dataset.from_mongo(found)
+    dataset_out = DatasetOut.from_mongo(found)
+    return dataset_out
 
 
-@router.get("", response_model=List[Dataset])
+@router.get("", response_model=List[DatasetOut])
 async def get_datasets(
     user_id=Depends(auth_handler.auth_wrapper),
     db: MongoClient = Depends(dependencies.get_db),
@@ -56,21 +61,29 @@ async def get_datasets(
             .limit(limit)
             .to_list(length=limit)
         ):
-            datasets.append(doc)
+            datasets.append(DatasetOut.from_mongo(doc))
     else:
         for doc in (
             await db["datasets"].find().skip(skip).limit(limit).to_list(length=limit)
         ):
-            datasets.append(doc)
+            datasets.append(DatasetOut.from_mongo(doc))
     return datasets
 
 
-@router.get("/{dataset_id}")
+@router.get("/{dataset_id}", response_model=DatasetOut)
 async def get_dataset(dataset_id: str, db: MongoClient = Depends(dependencies.get_db)):
+    # if (
+    #     dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
+    # ) is not None:
+    #     if (
+    #         user := await db["users"].find_one({"_id": ObjectId(dataset["author"])})
+    #     ) is not None:
+    #         dataset["author"] = user
+    #         return Dataset.from_mongo(dataset)
     if (
         dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
     ) is not None:
-        return Dataset.from_mongo(dataset)
+        return DatasetOut.from_mongo(dataset)
     raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
 
 
@@ -97,11 +110,10 @@ async def get_dataset_files(
     return files
 
 
-@router.put("/{dataset_id}", response_model=Dataset)
+@router.put("/{dataset_id}", response_model=DatasetBase)
 async def edit_dataset(
     dataset_id: str,
-    dataset_info: Dataset,
-    user_id=Depends(auth_handler.auth_wrapper),
+    dataset_info: DatasetBase,
     db: MongoClient = Depends(dependencies.get_db),
 ):
     if (
@@ -119,7 +131,7 @@ async def edit_dataset(
             db["datasets"].replace_one({"_id": ObjectId(dataset_id)}, dataset)
         except Exception as e:
             print(e)
-        return Dataset.from_mongo(dataset)
+        return DatasetBase.from_mongo(dataset)
     raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
 
 

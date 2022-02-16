@@ -1,16 +1,11 @@
 from fastapi.testclient import TestClient
 from app.config import settings
 
-user = {"name": "test@test.org", "password": "not_a_password"}
+user = {"email": "test@test.org", "password": "not_a_password"}
 
 
 def test_signup(client: TestClient):
     response = client.post(f"{settings.API_V2_STR}/users", json=user)
-    assert response.status_code == 200
-
-
-def test_signin(client: TestClient):
-    response = client.post(f"{settings.API_V2_STR}/signin", json=user)
     assert response.status_code == 200
 
 

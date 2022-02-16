@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from pymongo import MongoClient
 
 from app import dependencies
-from app.models.users import User, AuthDetails
+from app.models.users import UserDB, UserIn
 from app.auth import AuthHandler
 
 auth_handler = AuthHandler()
@@ -12,8 +12,8 @@ router = APIRouter()
 
 
 @router.post("/login")
-async def login(auth: AuthDetails, db: MongoClient = Depends(dependencies.get_db)):
-    authenticated_user = await authenticate_user(auth.name, auth.password, db)
+async def login(userIn: UserIn, db: MongoClient = Depends(dependencies.get_db)):
+    authenticated_user = await authenticate_user(userIn.email, userIn.password, db)
     if authenticated_user is None:
         raise HTTPException(
             status_code=401, detail=f"Could not authenticate user credentials"
@@ -21,14 +21,6 @@ async def login(auth: AuthDetails, db: MongoClient = Depends(dependencies.get_db
     else:
         token = auth_handler.encode_token(str(authenticated_user.id))
         return {"token": token}
-
-
-@router.post("/signin")
-async def sign_in(auth: AuthDetails, db: MongoClient = Depends(dependencies.get_db)):
-    name = auth.name
-    password = auth.password
-    current_user = await authenticate_user(name, password, db)
-    return current_user
 
 
 @router.get("/unprotected")
@@ -42,14 +34,14 @@ async def protected(
     db: MongoClient = Depends(dependencies.get_db),
 ):
     result = await db["users"].find_one({"_id": ObjectId(userid)})
-    user = User.from_mongo(result)
-    name = user.name
+    user = UserDB.from_mongo(result)
+    name = user.email
     return {"name": name, "id": userid}
 
 
-async def authenticate_user(name: str, password: str, db: MongoClient):
-    user = await db["users"].find_one({"name": name})
-    current_user = User.from_mongo(user)
+async def authenticate_user(email: str, password: str, db: MongoClient):
+    user = await db["users"].find_one({"email": email})
+    current_user = UserDB.from_mongo(user)
     if not user:
         return None
     if not current_user.verify_password(password):
