@@ -52,7 +52,7 @@ async def get_datasets(
     if mine:
         for doc in (
             await db["datasets"]
-            .find({"author": ObjectId(user_id)})
+            .find({"author.id": ObjectId(user_id)})
             .skip(skip)
             .limit(limit)
             .to_list(length=limit)
