@@ -2,9 +2,10 @@ from datetime import datetime
 from typing import List
 from enum import Enum, auto
 from mongoengine import DynamicDocument
-from pydantic import Field
+from pydantic import Field, BaseModel
 from app.models.pyobjectid import PyObjectId
 from app.models.mongomodel import OID, MongoModel
+from app.models.users import UserOut
 
 
 class AutoName(Enum):
@@ -19,10 +20,17 @@ class DatasetStatus(AutoName):
     TRIAL = auto()
 
 
-class Dataset(MongoModel):
+class DatasetBase(BaseModel):
     name: str = "N/A"
-    author: PyObjectId = Field(default_factory=PyObjectId)
     description: str = "N/A"
+
+
+class DatasetIn(DatasetBase):
+    pass
+
+
+class DatasetDB(MongoModel, DatasetBase):
+    author: UserOut
     created: datetime = Field(default_factory=datetime.utcnow)
     modified: datetime = Field(default_factory=datetime.utcnow)
     files: List[PyObjectId] = []
@@ -32,5 +40,5 @@ class Dataset(MongoModel):
     downloads: int = 0
 
 
-class MongoDataset(DynamicDocument):
+class DatasetOut(DatasetDB):
     pass

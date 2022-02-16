@@ -1,4 +1,3 @@
-import os
 import io
 from typing import List, Optional
 from datetime import datetime
@@ -20,7 +19,7 @@ from minio import Minio
 
 from app import dependencies
 from app.models.files import ClowderFile, FileVersion
-from app.models.users import User
+from app.models.users import UserOut
 from app.auth import AuthHandler
 from app.config import settings
 
@@ -41,7 +40,7 @@ async def update_file(
     # First, add to database and get unique ID
     f = dict(file_info) if file_info is not None else {}
     user_q = await db["users"].find_one({"_id": ObjectId(user_id)})
-    user = User.from_mongo(user_q)
+    user = UserOut(**user_q)
     # TODO: Harden this piece for when data is missing
     existing_q = await db["files"].find_one({"_id": ObjectId(file_id)})
     existing_file = ClowderFile.from_mongo(existing_q)

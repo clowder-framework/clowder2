@@ -17,6 +17,7 @@ black = "*"
 minio = "*"
 python-multipart = "*"
 pipfile = "*"
+email-validator = "*"
 
 [dev-packages]
 requests = "*"
