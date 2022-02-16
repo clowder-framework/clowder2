@@ -38,11 +38,11 @@ export const Register = (): JSX.Element => {
 	const history = useNavigate();
 
 	const dispatch = useDispatch();
-	const register = (username:string, password:string) => dispatch(registerAction(username, password));
+	const register = (email:string, password:string) => dispatch(registerAction(email, password));
 	const registerSucceeded = useSelector((state:RootState) => state.user.registerSucceeded);
 	const errorMsg = useSelector((state:RootState) => state.user.errorMsg);
 
-	const [username, setUsername] = useState("");
+	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
 	const [passwordConfirm, setPasswordConfirm] = useState("");
 	const [passwordErrorText, setPasswordErrorText] = useState("");
@@ -54,7 +54,7 @@ export const Register = (): JSX.Element => {
 	}, [registerSucceeded])
 
 	const changeUsername = (event: React.ChangeEvent<HTMLInputElement>) => {
-		setUsername(event.target.value);
+		setEmail(event.target.value);
 	};
 
 	const changePassword = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -87,7 +87,7 @@ export const Register = (): JSX.Element => {
 
 	const handleRegisterButtonClick = async () => {
 		if (password === passwordConfirm){
-			await register(username, password);
+			await register(email, password);
 		}
 		else{
 			setPasswordConfirmErrorText("The password confirmation does not match!");
@@ -112,10 +112,10 @@ export const Register = (): JSX.Element => {
 						required
 						fullWidth
 						autoFocus
-						id="username"
-						label="Username"
-						name="username"
-						value={username}
+						id="email"
+						label="Email"
+						name="email"
+						value={email}
 						onChange={changeUsername}
 						sx={textField}
 					/>

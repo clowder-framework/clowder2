@@ -3,7 +3,7 @@ import {Box, Button, Dialog, DialogTitle, Grid, Link, Tab, Tabs, Typography} fro
 
 import {CreateDataset} from "./childComponents/CreateDataset";
 
-import {Dataset, Dataset as DatasetType, RootState} from "../types/data";
+import {Dataset, RootState} from "../types/data";
 import {useDispatch, useSelector} from "react-redux";
 import {datasetDeleted, fetchDatasets,} from "../actions/dataset";
 import {resetFailedReason, resetLogout} from "../actions/common";
@@ -32,7 +32,7 @@ export const Dashboard = (): JSX.Element => {
 	// Redux connect equivalent
 	const dispatch = useDispatch();
 	const deleteDataset = (datasetId: string) => dispatch(datasetDeleted(datasetId));
-	const listDatasets = (skip: number|undefined, limit: number|undefined, mine: boolean|undefined) => dispatch(fetchDatasets(skip, limit, mine));
+	const listDatasets = (skip: number | undefined, limit: number | undefined, mine: boolean | undefined) => dispatch(fetchDatasets(skip, limit, mine));
 	const dismissError = () => dispatch(resetFailedReason());
 	const dismissLogout = () => dispatch(resetLogout());
 	const datasets = useSelector((state: RootState) => state.dataset.datasets);
@@ -43,9 +43,9 @@ export const Dashboard = (): JSX.Element => {
 	// TODO add option to determine limit number; default show 5 datasets each time
 	const [currPageNum, setCurrPageNum] = useState<number>(0);
 	const [limit,] = useState<number>(5);
-	const [skip, setSkip] = useState<number|undefined>();
+	const [skip, setSkip] = useState<number | undefined>();
 	// TODO add switch to turn on and off "mine" dataset
-	const [mine, ] = useState<boolean>(false);
+	const [mine,] = useState<boolean>(false);
 	const [prevDisabled, setPrevDisabled] = useState<boolean>(true);
 	const [nextDisabled, setNextDisabled] = useState<boolean>(false);
 	const [selectedTabIndex, setSelectedTabIndex] = useState(0);
@@ -69,7 +69,7 @@ export const Dashboard = (): JSX.Element => {
 	// Error msg dialog
 	const [errorOpen, setErrorOpen] = useState(false);
 	useEffect(() => {
-		if (reason !== "" && reason !== null && reason !== undefined){
+		if (reason !== "" && reason !== null && reason !== undefined) {
 			setErrorOpen(true);
 		}
 	}, [reason])
@@ -125,23 +125,18 @@ export const Dashboard = (): JSX.Element => {
 		}
 	};
 	const next = () => {
-		if (datasets.length === limit){
+		if (datasets.length === limit) {
 			setSkip((currPageNum + 1) * limit);
 			setCurrPageNum(currPageNum + 1);
 		}
 	};
 	useEffect(() => {
-		if ( skip !== null && skip !== undefined) {
+		if (skip !== null && skip !== undefined) {
 			listDatasets(skip, limit, mine);
 			if (skip === 0) setPrevDisabled(true);
 			else setPrevDisabled(false);
 		}
 	}, [skip]);
-
-	const handlePaginationChange = (event: any, value: number) => {
-		console.log("Paginating to page " + value);
-		// TODO implement
-	};
 
 	// for breadcrumb
 	const paths = [
@@ -160,15 +155,17 @@ export const Dashboard = (): JSX.Element => {
 				<ActionModal actionOpen={confirmationOpen} actionTitle="Are you sure?"
 							 actionText="Do you really want to delete? This process cannot be undone."
 							 actionBtnName="Delete" handleActionBtnClick={deleteSelectedDataset}
-							 handleActionCancel={() => { setConfirmationOpen(false);}}/>
-			    {/*Error Message dialogue*/}
+							 handleActionCancel={() => {
+								 setConfirmationOpen(false);
+							 }}/>
+				{/*Error Message dialogue*/}
 				<ActionModal actionOpen={errorOpen} actionTitle="Something went wrong..." actionText={reason}
 							 actionBtnName="Report" handleActionBtnClick={() => console.log(reason)}
 							 handleActionCancel={handleErrorCancel}/>
 				<div className="inner-container">
 					<Grid container spacing={4}>
 						<Grid item xs={8}>
-							<Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+							<Box sx={{borderBottom: 1, borderColor: 'divider'}}>
 								<Tabs value={selectedTabIndex} onChange={handleTabChange} aria-label="dashboard tabs">
 									<Tab sx={tab} label="Datasets" {...a11yProps(0)} />
 									<Tab sx={tab} label="Activity" {...a11yProps(1)} disabled={true}/>
@@ -179,28 +176,29 @@ export const Dashboard = (): JSX.Element => {
 							</Box>
 							<TabPanel value={selectedTabIndex} index={0}>
 								<Grid container spacing={2}>
-								{
-									datasets !== undefined && datasetThumbnailList !== undefined ?
-										datasets.map((dataset) => {
-											return (
-												<Grid item xs>
-												<DatasetCard id={dataset.id} name={dataset.name} author={dataset.author}
-															 created={dataset.created} description={dataset.description}/>
-												</Grid>
-											);
-										})
-										:
-										<></>
-								}
+									{
+										datasets !== undefined && datasetThumbnailList !== undefined ?
+											datasets.map((dataset) => {
+												return (
+													<Grid item xs>
+														<DatasetCard id={dataset.id} name={dataset.name}
+																	 author={dataset.author.email}
+																	 created={dataset.created}
+																	 description={dataset.description}/>
+													</Grid>
+												);
+											})
+											:
+											<></>
+									}
 								</Grid>
-								{/*<Box p={2}><Pagination count={10} onChange={handlePaginationChange}  /></Box>*/}
-								<Button onClick={previous}>Prev</Button>
-								<Button onClick={next}>Next</Button>
+								<Button onClick={previous} disabled={prevDisabled}>Prev</Button>
+								<Button onClick={next} disabled={nextDisabled}>Next</Button>
 							</TabPanel>
-							<TabPanel value={selectedTabIndex} index={1} />
-							<TabPanel value={selectedTabIndex} index={2} />
-							<TabPanel value={selectedTabIndex} index={3} />
-							<TabPanel value={selectedTabIndex} index={4} />
+							<TabPanel value={selectedTabIndex} index={1}/>
+							<TabPanel value={selectedTabIndex} index={2}/>
+							<TabPanel value={selectedTabIndex} index={3}/>
+							<TabPanel value={selectedTabIndex} index={4}/>
 						</Grid>
 						<Grid item xs={4}>
 							<Box className="actionCard">
@@ -224,7 +222,8 @@ export const Dashboard = (): JSX.Element => {
 								<Typography className="content">Some quick example text to tell users why they should
 									read
 									the tutorial</Typography>
-								<Link href="https://clowderframework.org/" className="link" target="_blank">Show me Tutorial</Link>
+								<Link href="https://clowderframework.org/" className="link" target="_blank">Show me
+									Tutorial</Link>
 							</Box>
 						</Grid>
 					</Grid>

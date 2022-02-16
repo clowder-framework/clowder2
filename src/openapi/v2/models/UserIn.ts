@@ -2,8 +2,9 @@
 /* tslint:disable */
 /* eslint-disable */
 
-export type User = {
+export type UserIn = {
     id?: string;
-    name: string;
-    hashed_password: string;
+    email: string;
+    full_name?: string;
+    password: string;
 }

@@ -52,7 +52,6 @@ export default function FilesTable(props: FilesTableProps) {
 								{/*TODO this should be version number; for now put version ID instead*/}
 								<VersionChip versionNumber={file.version.slice(0,2)}/>
 							</TableCell>
-							{/*TODO replace creator with author name once have that */}
 							<TableCell align="right">{parseDate(file.created)} by {file.creator}</TableCell>
 							<TableCell align="right">{file.size}</TableCell>
 							<TableCell align="right">{file.contentType}</TableCell>

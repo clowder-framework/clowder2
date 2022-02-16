@@ -12,11 +12,11 @@ export const Login = (): JSX.Element => {
 	const history = useNavigate();
 
 	const dispatch = useDispatch();
-	const login = (username:string, password:string) => dispatch(loginAction(username, password));
+	const login = (email:string, password:string) => dispatch(loginAction(email, password));
 	const loginError = useSelector((state:RootState) => state.user.loginError);
 	const errorMsg = useSelector((state:RootState) => state.user.errorMsg);
 
-	const [username, setUsername] = useState("");
+	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
 	const [passwordErrorText, setPasswordErrorText] = useState("");
 	const [promptError, setPromptError] = useState(false);
@@ -33,7 +33,7 @@ export const Login = (): JSX.Element => {
 	};
 
 	const changeUsername = (event: React.ChangeEvent<HTMLInputElement>) => {
-		setUsername(event.target.value);
+		setEmail(event.target.value);
 	};
 
 	const changePassword = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -51,7 +51,7 @@ export const Login = (): JSX.Element => {
 	};
 
 	 const handleLoginButtonClick = async () => {
-		 await login(username, password);
+		 await login(email, password);
 		 if (!loginError) history("/");
 	 };
 
@@ -73,10 +73,10 @@ export const Login = (): JSX.Element => {
 						required
 						fullWidth
 						autoFocus
-						id="username"
-						label="Username"
-						name="username"
-						value={username}
+						id="email"
+						label="Email"
+						name="email"
+						value={email}
 						onChange={changeUsername}
 					/>
 					<TextField

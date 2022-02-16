@@ -5,8 +5,8 @@ export const userActions = {
 	logout
 };
 
-export async function loginHelper(username, password, register = false) {
-	const data = {"name": username, "password": password};
+export async function loginHelper(email, password, register = false) {
+	const data = {"email": email, "password": password};
 	if (register) {
 		return V2.UsersService.saveUserApiV2UsersPost(data)
 			.then(user => {return user;})
@@ -35,9 +35,9 @@ export const REGISTER_USER = "REGISTER_USER";
 export const REGISTER_ERROR = "REGISTER_ERROR";
 export const LOGOUT = "LOGOUT";
 
-export function login(username, password) {
+export function login(email, password) {
 	return async (dispatch) => {
-		const json = await loginHelper(username, password, false);
+		const json = await loginHelper(email, password, false);
 		V2.OpenAPI.TOKEN = undefined;
 		localStorage.removeItem("Authorization");
 
@@ -51,16 +51,16 @@ export function login(username, password) {
 		} else {
 			return dispatch({
 				type: LOGIN_ERROR,
-				errorMsg: json["errorMsg"] !== undefined && json["errorMsg"] !== "" ? json["errorMsg"]: "Username/Password incorrect!"
+				errorMsg: json["errorMsg"] !== undefined && json["errorMsg"] !== "" ? json["errorMsg"]: "Email/Password incorrect!"
 			});
 		}
 	};
 }
 
-export function register(username, password) {
+export function register(email, password) {
 	return async (dispatch) => {
-		const json = await loginHelper(username, password, true);
-		if (json["name"] !== undefined && json["hashed_password"] !== undefined) {
+		const json = await loginHelper(email, password, true);
+		if (json["email"] !== undefined && json["hashed_password"] !== undefined) {
 			return dispatch({
 				type: REGISTER_USER,
 			});

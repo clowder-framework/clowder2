@@ -1,8 +1,8 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { AuthDetails } from '../models/AuthDetails';
-import type { User } from '../models/User';
+import type { UserDB } from '../models/UserDB';
+import type { UserIn } from '../models/UserIn';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { request as __request } from '../core/request';
 
@@ -12,13 +12,13 @@ export class UsersService {
      * Get Users
      * @param skip
      * @param limit
-     * @returns User Successful Response
+     * @returns UserDB Successful Response
      * @throws ApiError
      */
     public static getUsersApiV2UsersGet(
         skip?: number,
         limit: number = 2,
-    ): CancelablePromise<Array<User>> {
+    ): CancelablePromise<Array<UserDB>> {
         return __request({
             method: 'GET',
             path: `/api/v2/users`,
@@ -35,12 +35,12 @@ export class UsersService {
     /**
      * Save User
      * @param requestBody
-     * @returns User Successful Response
+     * @returns UserDB Successful Response
      * @throws ApiError
      */
     public static saveUserApiV2UsersPost(
-        requestBody: AuthDetails,
-    ): CancelablePromise<User> {
+        requestBody: UserIn,
+    ): CancelablePromise<UserDB> {
         return __request({
             method: 'POST',
             path: `/api/v2/users`,
@@ -55,12 +55,12 @@ export class UsersService {
     /**
      * Get User
      * @param userId
-     * @returns User Successful Response
+     * @returns UserDB Successful Response
      * @throws ApiError
      */
     public static getUserApiV2UsersUserIdGet(
         userId: string,
-    ): CancelablePromise<User> {
+    ): CancelablePromise<UserDB> {
         return __request({
             method: 'GET',
             path: `/api/v2/users/${userId}`,
@@ -73,12 +73,12 @@ export class UsersService {
     /**
      * Get User By Name
      * @param name
-     * @returns User Successful Response
+     * @returns UserDB Successful Response
      * @throws ApiError
      */
     public static getUserByNameApiV2UsersUsernameNameGet(
         name: string,
-    ): CancelablePromise<User> {
+    ): CancelablePromise<UserDB> {
         return __request({
             method: 'GET',
             path: `/api/v2/users/username/${name}`,

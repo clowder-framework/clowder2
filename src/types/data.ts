@@ -1,9 +1,22 @@
 export interface Dataset {
-	id:string;
 	name: string;
 	description: string;
+	id:string;
+	author: Author;
 	created: string | Date;
+	modified: string | Date;
+	files: string[];
+	folders: string[];
+	status: string;
+	views: string;
+	downloads: string;
 	thumbnail: string;
+}
+
+export interface Author {
+	id: string;
+	email: string;
+	"full_name": string|null;
 }
 
 export interface File {

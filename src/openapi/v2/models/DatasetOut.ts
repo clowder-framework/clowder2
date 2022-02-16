@@ -2,11 +2,13 @@
 /* tslint:disable */
 /* eslint-disable */
 
-export type Dataset = {
-    id?: string;
+import type { UserOut } from './UserOut';
+
+export type DatasetOut = {
     name?: string;
-    author?: string;
     description?: string;
+    id?: string;
+    author: UserOut;
     created?: string;
     modified?: string;
     files?: Array<string>;

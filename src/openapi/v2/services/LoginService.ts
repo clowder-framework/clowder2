@@ -1,7 +1,7 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { AuthDetails } from '../models/AuthDetails';
+import type { UserIn } from '../models/UserIn';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { request as __request } from '../core/request';
 
@@ -14,31 +14,11 @@ export class LoginService {
      * @throws ApiError
      */
     public static loginApiV2LoginPost(
-        requestBody: AuthDetails,
+        requestBody: UserIn,
     ): CancelablePromise<any> {
         return __request({
             method: 'POST',
             path: `/api/v2/login`,
-            body: requestBody,
-            mediaType: 'application/json',
-            errors: {
-                422: `Validation Error`,
-            },
-        });
-    }
-
-    /**
-     * Sign In
-     * @param requestBody
-     * @returns any Successful Response
-     * @throws ApiError
-     */
-    public static signInApiV2SigninPost(
-        requestBody: AuthDetails,
-    ): CancelablePromise<any> {
-        return __request({
-            method: 'POST',
-            path: `/api/v2/signin`,
             body: requestBody,
             mediaType: 'application/json',
             errors: {
