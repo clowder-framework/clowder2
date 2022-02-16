@@ -1,4 +1,4 @@
-import io
+import datetime
 import datetime
 import io
 import os
@@ -10,18 +10,14 @@ from fastapi import Form
 from minio import Minio
 from pymongo import MongoClient
 
-from app.auth import AuthHandler
 from app import dependencies
 from app.auth import AuthHandler
-from app.models.datasets import DatasetBase, DatasetIn, DatasetDB, DatasetOut
-from app.models.files import ClowderFile, FileVersion
-from app.models.users import UserOut
 from app.config import settings
-from app.models.datasets import Dataset
+from app.models.datasets import DatasetBase, DatasetIn, DatasetDB, DatasetOut
 from app.models.files import ClowderFile, FileVersion
 from app.models.folders import FolderOut, FolderIn, FolderDB
 from app.models.pyobjectid import PyObjectId
-
+from app.models.users import UserOut
 
 router = APIRouter()
 
@@ -144,7 +140,7 @@ async def delete_dataset(
     if (await db["datasets"].find_one({"_id": ObjectId(dataset_id)})) is not None:
         # delete dataset first to minimize files/folder being uploaded to a delete dataset
         await db["datasets"].delete_one({"_id": ObjectId(dataset_id)})
-        for file in await db["files"].find({"dataset_id": ObjectId(dataset_id)}):
+        async for file in db["files"].find({"dataset_id": ObjectId(dataset_id)}):
             fs.remove_object(clowder_bucket, str(file))
         files_deleted = await db.files.delete_many({"dataset_id": ObjectId(dataset_id)})
         folders_delete = await db["folders"].delete_many(
@@ -173,7 +169,7 @@ async def add_folder(
             raise HTTPException(
                 status_code=400, detail=f"Parent folder {parent_folder} not found"
             )
-    new_folder = await db["folders"].insert_one(folder_db.mongo())
+    new_folder = await db["folders"].insert_one(folder_db.to_mongo())
     found = await db["folders"].find_one({"_id": new_folder.inserted_id})
     folder_out = FolderOut.from_mongo(found)
     return folder_out

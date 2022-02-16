@@ -16,12 +16,10 @@ from pydantic import Json
 from pymongo import MongoClient
 
 from app import dependencies
-from app.models.files import ClowderFile, FileVersion
-from app.models.users import UserOut
 from app.auth import AuthHandler
 from app.config import settings
 from app.models.files import ClowderFile, FileVersion
-from app.models.users import User
+from app.models.users import UserOut
 
 router = APIRouter()
 

@@ -25,6 +25,7 @@ async def download_file(
     ) is not None:
         path = []
         current_folder_id = folder_id
+        # TODO switch to $graphLookup
         while (
             current_folder := await db["folders"].find_one(
                 {"_id": ObjectId(current_folder_id)}

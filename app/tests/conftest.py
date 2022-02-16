@@ -6,7 +6,7 @@ from app.config import settings
 from app.dependencies import get_db
 from app.main import app
 
-user = {"name": "test@test.org", "password": "not_a_password"}
+user = {"email": "test@test.org", "password": "not_a_password"}
 
 
 async def override_get_db() -> Generator:
