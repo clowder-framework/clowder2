@@ -18,7 +18,7 @@ from pymongo import MongoClient
 from minio import Minio
 
 from app import dependencies
-from app.models.files import FileBase, FileVersion
+from app.models.files import FileIn, FileOut, FileVersion
 from app.models.users import UserOut
 from app.auth import AuthHandler
 from app.config import settings
@@ -35,7 +35,7 @@ async def update_file(
     db: MongoClient = Depends(dependencies.get_db),
     fs: Minio = Depends(dependencies.get_fs),
     file: UploadFile = File(...),
-    file_info: Optional[Json[FileBase]] = None,
+    file_info: Optional[Json[FileIn]] = None,
 ):
     # First, add to database and get unique ID
     f = dict(file_info) if file_info is not None else {}
@@ -43,7 +43,7 @@ async def update_file(
     user = UserOut(**user_q)
     # TODO: Harden this piece for when data is missing
     existing_q = await db["files"].find_one({"_id": ObjectId(file_id)})
-    existing_file = FileBase.from_mongo(existing_q)
+    existing_file = FileOut.from_mongo(existing_q)
 
     # Update file in Minio and get the new version IDs
     version_id = None
@@ -77,7 +77,7 @@ async def update_file(
         creator=user.id,
     )
     await db["file_versions"].insert_one(dict(new_version))
-    return FileBase.from_mongo(updated_file)
+    return FileOut.from_mongo(updated_file)
 
 
 @router.get("/{file_id}")
@@ -139,7 +139,7 @@ async def get_file_summary(
         # TODO: Incrementing too often (3x per page view)
         # file["views"] += 1
         # db["files"].replace_one({"_id": ObjectId(file_id)}, file)
-        return FileBase.from_mongo(file)
+        return FileOut.from_mongo(file)
 
     raise HTTPException(status_code=404, detail=f"File {file_id} not found")
 
