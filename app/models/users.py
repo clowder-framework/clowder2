@@ -1,14 +1,13 @@
 from typing import Optional
 
 from passlib.context import CryptContext
-from pydantic import Field, EmailStr, BaseModel
+from pydantic import Field, EmailStr
 
 from app.models.mongomodel import MongoModel
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
-# TODO: Add support for avatar URL
 class UserBase(MongoModel):
     email: EmailStr
     full_name: Optional[str] = None
