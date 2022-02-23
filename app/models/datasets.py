@@ -1,8 +1,11 @@
 from datetime import datetime
-from typing import List
 from enum import Enum, auto
+
 from mongoengine import DynamicDocument
 from pydantic import Field, BaseModel
+from pydantic import Field
+
+from app.models.mongomodel import MongoModel
 from app.models.pyobjectid import PyObjectId
 from app.models.mongomodel import OID, MongoModel
 from app.models.users import UserOut
@@ -16,7 +19,7 @@ class AutoName(Enum):
 class DatasetStatus(AutoName):
     PRIVATE = auto()
     PUBLIC = auto()
-    DEFALT = auto()
+    DEFAULT = auto()
     TRIAL = auto()
 
 
@@ -33,8 +36,6 @@ class DatasetDB(MongoModel, DatasetBase):
     author: UserOut
     created: datetime = Field(default_factory=datetime.utcnow)
     modified: datetime = Field(default_factory=datetime.utcnow)
-    files: List[PyObjectId] = []
-    folders: List[PyObjectId] = []
     status: str = DatasetStatus.PRIVATE.name
     views: int = 0
     downloads: int = 0

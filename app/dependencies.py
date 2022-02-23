@@ -6,6 +6,7 @@ from fastapi import Header, HTTPException
 from app.config import settings
 from minio.commonconfig import ENABLED
 from minio.versioningconfig import VersioningConfig
+from app.mongo import crete_mongo_indexes
 
 
 async def get_token_header(x_token: str = Header(...)):
@@ -23,6 +24,7 @@ async def get_query_token(token: str):
 async def get_db() -> Generator:
     mongo_client = motor.motor_asyncio.AsyncIOMotorClient(settings.MONGODB_URL)
     db = mongo_client[settings.MONGO_DATABASE]
+    await crete_mongo_indexes(db)
     yield db
 
 

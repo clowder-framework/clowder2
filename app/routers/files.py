@@ -1,34 +1,32 @@
 import io
-from typing import List, Optional
 from datetime import datetime
+from typing import Optional
 
 from bson import ObjectId
 from fastapi import (
     APIRouter,
-    Request,
     HTTPException,
     Depends,
-    Form,
     File,
     UploadFile,
 )
-from fastapi.responses import FileResponse, StreamingResponse
+from fastapi.responses import StreamingResponse
+from minio import Minio
 from pydantic import Json
 from pymongo import MongoClient
-from minio import Minio
 
 from app import dependencies
-from app.models.files import FileIn, FileOut, FileVersion
-from app.models.users import UserOut
 from app.auth import AuthHandler
 from app.config import settings
+from app.models.files import FileIn, FileOut, FileVersion
+from app.models.users import UserOut
 
 router = APIRouter()
 
 auth_handler = AuthHandler()
 
 
-@router.put("/{file_id}")
+@router.put("/{file_id}", response_model=FileOut)
 async def update_file(
     file_id: str,
     user_id=Depends(auth_handler.auth_wrapper),
@@ -65,7 +63,6 @@ async def update_file(
     updated_file["creator"] = user.id
     updated_file["created"] = datetime.utcnow()
     updated_file["version"] = version_id
-    # TODO: How to avoid this ID field shuffling? Omit ClowderFile() conversion?
     updated_file["_id"] = existing_file.id
     del updated_file["id"]
     await db["files"].replace_one({"_id": ObjectId(file_id)}, updated_file)

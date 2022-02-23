@@ -1,7 +1,7 @@
 from datetime import datetime
-from mongoengine import DynamicDocument
-from pydantic import BaseModel, Field
-from typing import List
+from typing import Optional
+
+from pydantic import Field
 
 from app.models.mongomodel import MongoModel
 from app.models.pyobjectid import PyObjectId
@@ -27,6 +27,8 @@ class FileDB(FileBase):
     creator: UserOut
     created: datetime = Field(default_factory=datetime.utcnow)
     version: str = "N/A"  # Minio version ID (if more than one version)
+    dataset_id: PyObjectId
+    folder_id: Optional[PyObjectId]
     views: int = 0
     downloads: int = 0
 
