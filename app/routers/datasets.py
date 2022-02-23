@@ -159,7 +159,7 @@ async def add_folder(
 ):
     user = await db["users"].find_one({"_id": ObjectId(user_id)})
     folder_db = FolderDB(
-        **folder_in.dict(), author=user["_id"], dataset_id=PyObjectId(dataset_id)
+        **folder_in.dict(), author=UserOut(**user), dataset_id=PyObjectId(dataset_id)
     )
     parent_folder = folder_in.parent_folder
     if parent_folder is not None:
@@ -239,7 +239,7 @@ async def save_file(
                 status_code=404, detail=f"Dataset {dataset_id} not found"
             )
         f["name"] = file.filename
-        f["creator"] = user["_id"]
+        f["creator"] = UserOut(**user)
         f["created"] = datetime.datetime.utcnow()
         f["views"] = 0
         f["downloads"] = 0
@@ -271,7 +271,7 @@ async def save_file(
         new_version = FileVersion(
             version_id=version_id,
             file_id=new_file_id,
-            creator=user["_id"],
+            creator=UserOut(**user),
         )
         await db["file_versions"].insert_one(dict(new_version))
         return FileOut.from_mongo(f)

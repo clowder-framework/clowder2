@@ -60,7 +60,7 @@ async def update_file(
     # Update version/creator/created flags
     updated_file = dict(existing_file)
     updated_file["name"] = file.filename
-    updated_file["creator"] = user.id
+    updated_file["creator"] = UserOut(**user)
     updated_file["created"] = datetime.utcnow()
     updated_file["version"] = version_id
     updated_file["_id"] = existing_file.id
@@ -71,7 +71,7 @@ async def update_file(
     new_version = FileVersion(
         version_id=updated_file["version"],
         file_id=existing_file.id,
-        creator=user.id,
+        creator=UserOut(**user),
     )
     await db["file_versions"].insert_one(dict(new_version))
     return FileOut.from_mongo(updated_file)
