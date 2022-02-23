@@ -1,10 +1,11 @@
 from datetime import datetime
-from mongoengine import DynamicDocument
-from pydantic import BaseModel, Field
-from typing import List
+from typing import Optional
+
+from pydantic import Field
 
 from app.models.mongomodel import MongoModel
 from app.models.pyobjectid import PyObjectId
+
 
 # MiniUser - id, name, email, gravatar (comes with email)
 class FileVersion(MongoModel):
@@ -21,3 +22,5 @@ class ClowderFile(MongoModel):
     version: str = "N/A"  # Minio version ID (if more than one version)
     views: int = 0
     downloads: int = 0
+    dataset_id: PyObjectId
+    folder_id: Optional[PyObjectId]
