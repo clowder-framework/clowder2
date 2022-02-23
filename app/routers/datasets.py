@@ -10,7 +10,7 @@ from minio import Minio
 from fastapi.encoders import jsonable_encoder
 
 from app.auth import AuthHandler
-from app import dependencies
+from app import dependencies, keycloak
 from app.models.datasets import DatasetBase, DatasetIn, DatasetDB, DatasetOut
 from app.models.files import ClowderFile, FileVersion
 from app.models.users import UserOut
@@ -39,7 +39,7 @@ async def save_dataset(
 
 @router.get("", response_model=List[DatasetOut])
 async def get_datasets(
-    user_id=Depends(auth_handler.auth_wrapper),
+    user_id=Depends(keycloak.get_auth),
     db: MongoClient = Depends(dependencies.get_db),
     skip: int = 0,
     limit: int = 2,

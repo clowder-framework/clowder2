@@ -24,5 +24,13 @@ class Settings(BaseSettings):
     MINIO_SECRET_KEY: str = "minioadmin"
     MINIO_UPLOAD_CHUNK_SIZE: int = 10 * 1024 * 1024
 
+    auth_base = "http://localhost:8080"
+    auth_url = f"{auth_base}/auth/realms/Clients/protocol/openid-connect/auth?client_id=app&response_type=code"
+    auth_token_url = f"{auth_base}/auth/realms/Clients/protocol/openid-connect/token"
+    auth_server_url = f"{auth_base}/auth/"
+    auth_client_id = "app"
+    auth_realm = "Clients"
+    auth_client_secret = ""
+
 
 settings = Settings()

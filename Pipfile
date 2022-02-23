@@ -18,6 +18,7 @@ minio = "*"
 python-multipart = "*"
 pipfile = "*"
 email-validator = "*"
+python-keycloak = "*"
 
 [dev-packages]
 requests = "*"
