@@ -38,6 +38,7 @@ export function handleErrors(reason){
 			dispatch({
 				type: FAILED,
 				reason: reason.message !== undefined? reason.message : "Backend Failure. Couldn't fetch!",
+				stack: reason.stack ? reason.stack : "",
 				receivedAt: Date.now()
 			});
 		};

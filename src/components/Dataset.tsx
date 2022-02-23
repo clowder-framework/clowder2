@@ -18,6 +18,7 @@ import {V2} from "../openapi";
 import {ActionModal} from "./childComponents/ActionModal";
 import FilesTable from "./childComponents/FilesTable";
 import {parseDate} from "../utils/common";
+import config from "../app.config";
 
 const tab = {
 	fontStyle: "normal",
@@ -53,6 +54,7 @@ export const Dataset = (): JSX.Element => {
 	// mapStateToProps
 	const about = useSelector((state:RootState) => state.dataset.about);
 	const reason = useSelector((state:RootState) => state.error.reason);
+	const stack = useSelector((state:RootState) => state.error.stack);
 	const loggedOut = useSelector((state: RootState) => state.error.loggedOut);
 
 	// state
@@ -79,6 +81,9 @@ export const Dataset = (): JSX.Element => {
 		// reset error message and close the error window
 		dismissError();
 		setErrorOpen(false);
+	}
+	const handleErrorReport = (reason:string) => {
+		window.open(`${config.GHIssueBaseURL}+${reason}&body=${encodeURIComponent(stack)}`);
 	}
 
 	// log user out if token expired/unauthorized
@@ -121,7 +126,7 @@ export const Dataset = (): JSX.Element => {
 				<MainBreadcrumbs paths={paths}/>
 				{/*Error Message dialogue*/}
 				<ActionModal actionOpen={errorOpen} actionTitle="Something went wrong..." actionText={reason}
-							 actionBtnName="Report" handleActionBtnClick={() => console.log(reason)}
+							 actionBtnName="Report" handleActionBtnClick={handleErrorReport}
 							 handleActionCancel={handleErrorCancel}/>
 				<div className="inner-container">
 					<Grid container spacing={4}>

@@ -89,6 +89,7 @@ interface CREATE_FILE{
 }
 
 interface FAILED{
+	stack: "string";
 	type: "FAILED",
 	reason: string
 }

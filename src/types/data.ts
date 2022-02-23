@@ -151,6 +151,7 @@ export interface UserState{
 }
 
 export interface ErrorState{
+	stack: string;
 	reason: string;
 	loggedOut: boolean;
 }
