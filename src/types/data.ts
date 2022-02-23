@@ -30,6 +30,12 @@ export interface File {
 	contentType:string;
 }
 
+export interface Folder {
+	id: string;
+	name: string;
+	"parent_folder": string|null;
+}
+
 export interface About {
 	name: string;
 	id: string;
@@ -133,6 +139,8 @@ export interface DatasetState{
 	files: File[];
 	datasets: Dataset[];
 	about: About;
+	folders: Folder[];
+	folderPath: string[];
 }
 
 export interface FileState{

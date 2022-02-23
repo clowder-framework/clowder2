@@ -7,7 +7,13 @@ import {downloadDataset} from "../utils/dataset";
 import {useNavigate, useParams} from "react-router-dom";
 import {RootState} from "../types/data";
 import {useDispatch, useSelector} from "react-redux";
-import {datasetDeleted, fetchDatasetAbout, fetchFilesInDataset} from "../actions/dataset";
+import {
+	datasetDeleted,
+	fetchDatasetAbout,
+	fetchFilesInDataset, fetchFolderPath,
+	fetchFoldersInDataset,
+	folderAdded
+} from "../actions/dataset";
 import {resetFailedReason, resetLogout} from "../actions/common"
 
 import {a11yProps, TabPanel} from "./childComponents/TabComponent";
@@ -17,6 +23,8 @@ import {UploadFile} from "./childComponents/UploadFile";
 import {V2} from "../openapi";
 import {ActionModal} from "./childComponents/ActionModal";
 import FilesTable from "./childComponents/FilesTable";
+import {CreateFolder} from "./childComponents/CreateFolder";
+import { useSearchParams } from "react-router-dom";
 import {parseDate} from "../utils/common";
 import config from "../app.config";
 
@@ -40,13 +48,24 @@ export const Dataset = (): JSX.Element => {
 	// path parameter
 	const { datasetId } = useParams<{datasetId?: string}>();
 
+	// search parameters
+	let [searchParams, setSearchParams] = useSearchParams();
+	const folder = searchParams.get("folder");
+	useEffect(() => {
+		const currentParams = Object.fromEntries([...searchParams]);
+		console.log(currentParams); // get new values onchange
+	}, [searchParams]);
+
 	// use history hook to redirect/navigate between routes
 	const history = useNavigate();
 
 	// Redux connect equivalent
 	const dispatch = useDispatch();
 	const deleteDataset = (datasetId:string|undefined) => dispatch(datasetDeleted(datasetId));
-	const listFilesInDataset = (datasetId:string|undefined) => dispatch(fetchFilesInDataset(datasetId));
+	const addFolder = (datasetId:string|undefined, folderName:string, parentFolder:string|null) => dispatch(folderAdded(datasetId, folderName, parentFolder));
+	const getFolderPath= (folderId:string|undefined) => dispatch(fetchFolderPath(folderId));
+	const listFilesInDataset = (datasetId:string|undefined, folderId:string|undefined) => dispatch(fetchFilesInDataset(datasetId, folderId));
+	const listFoldersInDataset = (datasetId:string|undefined, parentFolder:string|undefined) => dispatch(fetchFoldersInDataset(datasetId, parentFolder));
 	const listDatasetAbout= (datasetId:string|undefined) => dispatch(fetchDatasetAbout(datasetId));
 	const dismissError = () => dispatch(resetFailedReason());
 	const dismissLogout = () => dispatch(resetLogout());
@@ -56,6 +75,7 @@ export const Dataset = (): JSX.Element => {
 	const reason = useSelector((state:RootState) => state.error.reason);
 	const stack = useSelector((state:RootState) => state.error.stack);
 	const loggedOut = useSelector((state: RootState) => state.error.loggedOut);
+	const folderPath = useSelector((state:RootState) => state.dataset.folderPath);
 
 	// state
 	const [selectedTabIndex, setSelectedTabIndex] = useState<number>(0);
@@ -66,9 +86,11 @@ export const Dataset = (): JSX.Element => {
 
 	// component did mount list all files in dataset
 	useEffect(() => {
-		listFilesInDataset(datasetId);
+		listFilesInDataset(datasetId, folder);
+		listFoldersInDataset(datasetId, folder);
 		listDatasetAbout(datasetId);
-	}, []);
+		getFolderPath(folder);
+	}, [searchParams]);
 
 	// Error msg dialog
 	const [errorOpen, setErrorOpen] = useState(false);
@@ -95,6 +117,12 @@ export const Dataset = (): JSX.Element => {
 		}
 	}, [loggedOut]);
 
+	// new folder dialog
+	const [newFolder, setNewFolder] = React.useState<boolean>(false);
+	const handleCloseNewFolder = () => {
+		setNewFolder(false);
+	}
+
 	const handleTabChange = (_event:React.ChangeEvent<{}>, newTabIndex:number) => {
 		setSelectedTabIndex(newTabIndex);
 	};
@@ -118,6 +146,18 @@ export const Dataset = (): JSX.Element => {
 			"url":`/datasets/${datasetId}`
 		}
 	];
+
+
+	if (folderPath != null) {
+		for (const folderBread of folderPath) {
+			paths.push({
+				"name": folderBread["folder_name"],
+				"url": `/datasets/${datasetId}?folder=${folderBread["folder_id"]}`
+			})
+		}
+	} else {
+		paths.slice(0, 1)
+	}
 
 	return (
 		<div>
@@ -177,8 +217,16 @@ export const Dataset = (): JSX.Element => {
 												  setCreateFileOpen(true);
 												  handleOptionClose();
 											  }}>
-										Add Files
+										Upload File
 									</MenuItem>
+									<MenuItem sx={optionMenuItem}
+											  onClick={()=>{
+												  // addFolder(datasetId, "new folder", null);
+												  setNewFolder(true);
+												  handleOptionClose();
+											  }
+											  }>Add Folder</MenuItem>
+									<CreateFolder datasetId={datasetId} parentFolder={folder} open={newFolder} handleClose={handleCloseNewFolder}/>
 									<MenuItem sx={optionMenuItem}
 											  onClick={() => {
 												  downloadDataset(datasetId, about["name"]);
@@ -186,13 +234,14 @@ export const Dataset = (): JSX.Element => {
 											  }} disabled={true}>
 										Download All
 									</MenuItem>
-									<MenuItem onClick={()=>{
-										deleteDataset(datasetId);
-										handleOptionClose();
-										// Go to Explore page
-										history("/");
-									}
-									} sx={optionMenuItem}>Delete Dataset</MenuItem>
+									<MenuItem sx={optionMenuItem}
+											  onClick={()=>{
+												  deleteDataset(datasetId);
+												  handleOptionClose();
+												  // Go to Explore page
+												  history("/");
+											  }
+									}>Delete Dataset</MenuItem>
 									<MenuItem onClick={handleOptionClose} sx={optionMenuItem} disabled={true}>Follow</MenuItem>
 									<MenuItem onClick={handleOptionClose} sx={optionMenuItem} disabled={true}>Collaborators</MenuItem>
 									<MenuItem onClick={handleOptionClose} sx={optionMenuItem} disabled={true}>Extraction</MenuItem>
@@ -258,7 +307,7 @@ export const Dataset = (): JSX.Element => {
 					</Grid>
 					<Dialog open={createFileOpen} onClose={()=>{setCreateFileOpen(false);}} fullWidth={true} aria-labelledby="form-dialog">
 						<DialogTitle id="form-dialog-title">Add File</DialogTitle>
-						<UploadFile selectedDatasetId={datasetId} setOpen={setCreateFileOpen}/>
+						<UploadFile selectedDatasetId={datasetId} folderId={folder} setOpen={setCreateFileOpen}/>
 					</Dialog>
 				</div>
 			</div>

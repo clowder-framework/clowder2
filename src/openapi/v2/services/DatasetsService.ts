@@ -3,6 +3,9 @@
 /* eslint-disable */
 import type { Body_save_file_api_v2_datasets__dataset_id__files_post } from '../models/Body_save_file_api_v2_datasets__dataset_id__files_post';
 import type { ClowderFile } from '../models/ClowderFile';
+import type { Dataset } from '../models/Dataset';
+import type { FolderIn } from '../models/FolderIn';
+import type { FolderOut } from '../models/FolderOut';
 import type { DatasetBase } from '../models/DatasetBase';
 import type { DatasetIn } from '../models/DatasetIn';
 import type { DatasetOut } from '../models/DatasetOut';
@@ -119,15 +122,20 @@ export class DatasetsService {
     /**
      * Get Dataset Files
      * @param datasetId
+     * @param folderId
      * @returns any Successful Response
      * @throws ApiError
      */
     public static getDatasetFilesApiV2DatasetsDatasetIdFilesGet(
         datasetId: string,
+        folderId?: string,
     ): CancelablePromise<any> {
         return __request({
             method: 'GET',
             path: `/api/v2/datasets/${datasetId}/files`,
+            query: {
+                'folder_id': folderId,
+            },
             errors: {
                 422: `Validation Error`,
             },
@@ -150,6 +158,71 @@ export class DatasetsService {
             path: `/api/v2/datasets/${datasetId}/files`,
             formData: formData,
             mediaType: 'multipart/form-data',
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+
+    /**
+     * Get Dataset Folders
+     * @param datasetId
+     * @param parentFolder
+     * @returns any Successful Response
+     * @throws ApiError
+     */
+    public static getDatasetFoldersApiV2DatasetsDatasetIdFoldersGet(
+        datasetId: string,
+        parentFolder?: string,
+    ): CancelablePromise<any> {
+        return __request({
+            method: 'GET',
+            path: `/api/v2/datasets/${datasetId}/folders`,
+            query: {
+                'parent_folder': parentFolder,
+            },
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+
+    /**
+     * Add Folder
+     * @param datasetId
+     * @param requestBody
+     * @returns FolderOut Successful Response
+     * @throws ApiError
+     */
+    public static addFolderApiV2DatasetsDatasetIdFoldersPost(
+        datasetId: string,
+        requestBody: FolderIn,
+    ): CancelablePromise<FolderOut> {
+        return __request({
+            method: 'POST',
+            path: `/api/v2/datasets/${datasetId}/folders`,
+            body: requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+
+    /**
+     * Delete Folder
+     * @param datasetId
+     * @param folderId
+     * @returns any Successful Response
+     * @throws ApiError
+     */
+    public static deleteFolderApiV2DatasetsDatasetIdFolderFolderIdDelete(
+        datasetId: string,
+        folderId: string,
+    ): CancelablePromise<any> {
+        return __request({
+            method: 'DELETE',
+            path: `/api/v2/datasets/${datasetId}/folder/${folderId}`,
             errors: {
                 422: `Validation Error`,
             },

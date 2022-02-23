@@ -14,6 +14,7 @@ import {fileCreated} from "../../actions/file";
 
 type UploadFileProps ={
 	selectedDatasetId: string|undefined,
+	folderId: string|undefined,
 	setOpen:(open:boolean) => void,
 }
 
@@ -21,12 +22,13 @@ export const UploadFile: React.FC<UploadFileProps> = (props: UploadFileProps) =>
 	const dispatch = useDispatch();
 	const uploadFile = (formData: FormData, selectedDatasetId: string|undefined) => dispatch(fileCreated(formData, selectedDatasetId));
 
-	const {selectedDatasetId, setOpen,} = props;
+	const {selectedDatasetId, folderId, setOpen,} = props;
 
 	const [loading, setLoading] = useState<boolean>(false);
 
 	const onSave = async (formData:FormData) => {
 		setLoading(true);
+		formData["folder_id"] = folderId;
 		uploadFile(formData, selectedDatasetId);
 		setLoading(false);
 		setOpen(false);

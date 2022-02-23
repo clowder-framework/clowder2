@@ -1,4 +1,4 @@
-import {About, Dataset, ExtractedMetadata, File, MetadataJsonld, FilePreview, FileMetadata, FileVersion} from "./data";
+import {About, Dataset, ExtractedMetadata, File, MetadataJsonld, FilePreview, FileMetadata, FileVersion, Folder} from "./data";
 
 interface RECEIVE_FILES_IN_DATASET {
 	type: "RECEIVE_FILES_IN_DATASET";
@@ -99,8 +99,14 @@ interface RESET_FAILED{
 	reason: string
 }
 
+interface FOLDER_ADDED{
+	type: "FOLDER_ADDED",
+	folder: Folder
+}
+
 export type DataAction =
 	| RECEIVE_FILES_IN_DATASET
+	| RECEIVE_FOLDERS_IN_DATASET
 	| DELETE_FILE
 	| RECEIVE_DATASET_ABOUT
 	| RECEIVE_DATASETS
@@ -120,4 +126,5 @@ export type DataAction =
 	| FAILED
 	| RESET_FAILED
 	| RESET_LOGOUT
+	| FOLDER_ADDED
 	;

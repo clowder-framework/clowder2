@@ -11,8 +11,6 @@ export type DatasetOut = {
     author: UserOut;
     created?: string;
     modified?: string;
-    files?: Array<string>;
-    folders?: Array<string>;
     status?: string;
     views?: number;
     downloads?: number;

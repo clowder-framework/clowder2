@@ -3,13 +3,30 @@ import {LOGOUT, logoutHelper} from "./user";
 import {handleErrors} from "./common";
 
 export const RECEIVE_FILES_IN_DATASET = "RECEIVE_FILES_IN_DATASET";
-export function fetchFilesInDataset(id){
+export function fetchFilesInDataset(datasetId, folderId){
 	return (dispatch) => {
-		return V2.DatasetsService.getDatasetFilesApiV2DatasetsDatasetIdFilesGet(id)
+		return V2.DatasetsService.getDatasetFilesApiV2DatasetsDatasetIdFilesGet(datasetId, folderId)
 			.then(json => {
 				dispatch({
 					type: RECEIVE_FILES_IN_DATASET,
 					files: json,
+					receivedAt: Date.now(),
+				});
+			})
+			.catch(reason => {
+				dispatch(handleErrors(reason));
+			});
+	};
+}
+
+export const RECEIVE_FOLDERS_IN_DATASET = "RECEIVE_FOLDERS_IN_DATASET";
+export function fetchFoldersInDataset(datasetId, parentFolder){
+	return (dispatch) => {
+		return V2.DatasetsService.getDatasetFoldersApiV2DatasetsDatasetIdFoldersGet(datasetId, parentFolder)
+			.then(json => {
+				dispatch({
+					type: RECEIVE_FOLDERS_IN_DATASET,
+					folders: json,
 					receivedAt: Date.now(),
 				});
 			})
@@ -86,5 +103,49 @@ export function datasetDeleted(datasetId){
 			.catch(reason => {
 				dispatch(handleErrors(reason));
 			});
+	};
+}
+
+
+export const FOLDER_ADDED = "FOLDER_ADDED";
+export function folderAdded(datasetId, folderName, parentFolder = null){
+	return (dispatch) => {
+		const folder = {"name": folderName, "parent_folder": parentFolder}
+		return V2.DatasetsService.addFolderApiV2DatasetsDatasetIdFoldersPost(datasetId, folder)
+			.then(json => {
+				dispatch({
+					type: FOLDER_ADDED,
+					folder: json,
+					receivedAt: Date.now(),
+				});
+			})
+			.catch(reason => {
+				dispatch(handleErrors(reason));
+			});
+	};
+}
+
+export const GET_FOLDER_PATH = "GET_FOLDER_PATH";
+export function fetchFolderPath(folderId){
+	return (dispatch) => {
+		if (folderId != null) {
+			return V2.FoldersService.downloadFileApiV2FoldersFolderIdPathGet(folderId)
+				.then(json => {
+					dispatch({
+						type: GET_FOLDER_PATH,
+						folderPath: json,
+						receivedAt: Date.now(),
+					});
+				})
+				.catch(reason => {
+					dispatch(handleErrors(reason));
+				});
+		} else {
+			dispatch({
+				type: GET_FOLDER_PATH,
+				folderPath: [],
+				receivedAt: Date.now(),
+			});
+		}
 	};
 }

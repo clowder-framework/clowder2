@@ -2,6 +2,7 @@
 /* tslint:disable */
 /* eslint-disable */
 import type { Body_update_file_api_v2_files__file_id__put } from '../models/Body_update_file_api_v2_files__file_id__put';
+import type { ClowderFile } from '../models/ClowderFile';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { request as __request } from '../core/request';
 
@@ -29,7 +30,7 @@ export class FilesService {
      * Update File
      * @param fileId
      * @param formData
-     * @returns any Successful Response
+     * @returns ClowderFile Successful Response
      * @throws ApiError
      */
     public static updateFileApiV2FilesFileIdPut(

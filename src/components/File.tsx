@@ -139,12 +139,29 @@ export const File = (): JSX.Element => {
 		{
 			"name":datasetName,
 			"url":`/datasets/${datasetId}`
-		},
-		{
-			"name":fileMetadata["name"],
-			"url":`/files/${fileId}`
 		}
 	];
+
+	// add folder path to breadcrumbs
+	const folderPath = useSelector((state:RootState) => state.dataset.folderPath);
+	if (folderPath != null) {
+		for (const folderBread of folderPath) {
+			paths.push({
+				"name": folderBread["folder_name"],
+				"url": `/datasets/${datasetId}?folder=${folderBread["folder_id"]}`
+			})
+		}
+	} else {
+		paths.slice(0, 1)
+	}
+
+	// add file link to breadcrumbs
+	paths.push({
+		"name":fileMetadata["name"],
+		"url":`/files/${fileId}`
+	})
+
+
 	return (
 		<div>
 			<TopBar/>

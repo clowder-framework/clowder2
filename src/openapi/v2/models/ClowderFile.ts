@@ -10,4 +10,6 @@ export type ClowderFile = {
     version?: string;
     views?: number;
     downloads?: number;
+    dataset_id: string;
+    folder_id?: string;
 }
