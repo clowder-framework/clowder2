@@ -34,10 +34,11 @@ async def get_idp_public_key():
 
 async def get_auth(token: str = Security(oauth2_scheme)) -> Json:
     try:
+        # See https://github.com/marcospereirampj/python-keycloak/issues/89
         return keycloak_openid.decode_token(
             token,
             key=await get_idp_public_key(),
-            options={"verify_signature": True, "verify_aud": True, "exp": True},
+            options={"verify_signature": True, "verify_aud": False, "exp": True},
         )
     except Exception as e:
         raise HTTPException(
