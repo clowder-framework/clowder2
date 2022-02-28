@@ -2,6 +2,7 @@ from typing import Optional
 
 from passlib.context import CryptContext
 from pydantic import Field, EmailStr
+from pymongo import MongoClient
 
 from app.models.mongomodel import MongoModel
 
@@ -26,3 +27,9 @@ class UserDB(UserBase):
 
 class UserOut(UserBase):
     pass
+
+
+async def get_user_out(user_id: str, db: MongoClient) -> UserOut:
+    """Retrieve user from Mongo based on email address."""
+    user_out = await db["users"].find_one({"email": user_id})
+    return UserOut(**user_out)

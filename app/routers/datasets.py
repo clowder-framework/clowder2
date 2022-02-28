@@ -11,9 +11,10 @@ from fastapi.encoders import jsonable_encoder
 
 from app.auth import AuthHandler
 from app import dependencies, keycloak
+from app.keycloak import get_auth
 from app.models.datasets import DatasetBase, DatasetIn, DatasetDB, DatasetOut
 from app.models.files import ClowderFile, FileVersion
-from app.models.users import UserOut
+from app.models.users import UserOut, get_user_out
 from app.config import settings
 
 router = APIRouter()
@@ -26,11 +27,10 @@ clowder_bucket = os.getenv("MINIO_BUCKET_NAME", "clowder")
 @router.post("", response_model=DatasetOut)
 async def save_dataset(
     dataset_in: DatasetIn,
-    user_id=Depends(auth_handler.auth_wrapper),
+    user=Depends(keycloak.get_current_user),
     db: MongoClient = Depends(dependencies.get_db),
 ):
-    user = await db["users"].find_one({"_id": ObjectId(user_id)})
-    dataset_db = DatasetDB(**dataset_in.dict(), author=UserOut(**user))
+    dataset_db = DatasetDB(**dataset_in.dict(), author=user)
     new_dataset = await db["datasets"].insert_one(dataset_db.to_mongo())
     found = await db["datasets"].find_one({"_id": new_dataset.inserted_id})
     dataset_out = DatasetOut.from_mongo(found)
@@ -39,7 +39,7 @@ async def save_dataset(
 
 @router.get("", response_model=List[DatasetOut])
 async def get_datasets(
-    user_id=Depends(keycloak.get_auth),
+    user_id=Depends(keycloak.get_current_username),
     db: MongoClient = Depends(dependencies.get_db),
     skip: int = 0,
     limit: int = 2,
@@ -65,14 +65,6 @@ async def get_datasets(
 
 @router.get("/{dataset_id}", response_model=DatasetOut)
 async def get_dataset(dataset_id: str, db: MongoClient = Depends(dependencies.get_db)):
-    # if (
-    #     dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
-    # ) is not None:
-    #     if (
-    #         user := await db["users"].find_one({"_id": ObjectId(dataset["author"])})
-    #     ) is not None:
-    #         dataset["author"] = user
-    #         return Dataset.from_mongo(dataset)
     if (
         dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
     ) is not None:
