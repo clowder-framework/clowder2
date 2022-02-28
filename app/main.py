@@ -26,7 +26,12 @@ app.add_middleware(
 )
 
 api_router = APIRouter()
-api_router.include_router(users.router, prefix="/users", tags=["users"])
+api_router.include_router(
+    users.router,
+    prefix="/users",
+    tags=["users"],
+    dependencies=[Depends(auth_handler.auth_wrapper)],
+)
 api_router.include_router(
     files.router,
     prefix="/files",
@@ -45,13 +50,13 @@ api_router.include_router(
     tags=["collections"],
     dependencies=[Depends(auth_handler.auth_wrapper)],
 )
-api_router.include_router(authentication.router, tags=["login"])
 api_router.include_router(
     folders.router,
     prefix="/folders",
     tags=["folders"],
     dependencies=[Depends(auth_handler.auth_wrapper)],
 )
+api_router.include_router(authentication.router, tags=["login"])
 
 app.include_router(api_router, prefix=settings.API_V2_STR)
 
