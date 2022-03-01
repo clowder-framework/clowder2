@@ -116,8 +116,16 @@ def create_realm_and_client():
         user_realm_name=settings.keycloak_user_realm_name,
         verify=True,
     )
+    # For options see https://www.keycloak.org/docs-api/15.0/rest-api/index.html#_clientrepresentation
     keycloak_admin_client.create_client(
-        payload={"clientId": settings.auth_client_id, "enabled": True}, skip_exists=True
+        payload={
+            "clientId": settings.auth_client_id,
+            "publicClient": True,
+            "rootUrl": settings.auth_base,
+            "directAccessGrantsEnabled": True,
+            "enabled": True,
+        },
+        skip_exists=True,
     )
 
 
@@ -142,8 +150,8 @@ async def create_user(email: str, password: str, firstName: str, lastName: str):
             "lastName": lastName,
             "credentials": [
                 {
-                    "value": "secret",
-                    "type": password,
+                    "value": password,
+                    "type": "password",
                 }
             ],
         },
