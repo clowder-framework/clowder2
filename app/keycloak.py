@@ -4,6 +4,7 @@ import json
 from fastapi.security import OAuth2AuthorizationCodeBearer
 from keycloak.keycloak_openid import KeycloakOpenID
 from keycloak.exceptions import KeycloakAuthenticationError
+from keycloak.keycloak_admin import KeycloakAdmin
 from pymongo import MongoClient
 
 from . import dependencies
@@ -11,8 +12,7 @@ from .config import settings
 from fastapi import Security, HTTPException, status, Depends
 from pydantic import Json
 
-# This is just for fastapi docs
-from .models.users import UserBase, get_user_out
+from .models.users import get_user_out
 
 oauth2_scheme = OAuth2AuthorizationCodeBearer(
     authorizationUrl=settings.auth_url,
@@ -27,6 +27,17 @@ keycloak_openid = KeycloakOpenID(
     client_secret_key=settings.auth_client_secret,
     verify=True,
 )
+
+# manage users
+# keycloak_admin = KeycloakAdmin(
+#     server_url=settings.auth_server_url,
+#     username=settings.keycloak_username,
+#     password=settings.keycloak_password,
+#     realm_name=settings.keycloak_realm_name,
+#     # user_realm_name=settings.keycloak_user_realm_name,
+#     client_secret_key=settings.auth_client_secret,
+#     verify=True,
+# )
 
 
 async def get_idp_public_key():
@@ -83,3 +94,59 @@ async def get_current_keycloak_user_id(identity: Json = Depends(get_auth)) -> st
     """Retrieve internal Keycloak id."""
     keycloak_id = identity["sub"]
     return keycloak_id
+
+
+def create_realm_and_client():
+    """Create a realm and client at start up."""
+    keycloak_admin_realm = KeycloakAdmin(
+        server_url=settings.auth_server_url,
+        username=settings.keycloak_username,
+        password=settings.keycloak_password,
+        realm_name="master",
+        verify=True,
+    )
+    keycloak_admin_realm.create_realm(
+        payload={"realm": settings.auth_realm, "enabled": True}, skip_exists=True
+    )
+    keycloak_admin_client = KeycloakAdmin(
+        server_url=settings.auth_server_url,
+        username=settings.keycloak_username,
+        password=settings.keycloak_password,
+        realm_name=settings.keycloak_realm_name,
+        user_realm_name=settings.keycloak_user_realm_name,
+        verify=True,
+    )
+    keycloak_admin_client.create_client(
+        payload={"clientId": settings.auth_client_id, "enabled": True}, skip_exists=True
+    )
+
+
+async def create_user(email: str, password: str, firstName: str, lastName: str):
+    keycloak_admin = KeycloakAdmin(
+        server_url=settings.auth_server_url,
+        username=settings.keycloak_username,
+        password=settings.keycloak_password,
+        realm_name=settings.keycloak_realm_name,
+        user_realm_name=settings.keycloak_user_realm_name,
+        # client_secret_key=settings.auth_client_secret,
+        # client_id=settings.keycloak_client_id,
+        verify=True,
+    )
+    # Add user and set password
+    user = keycloak_admin.create_user(
+        {
+            "email": email,
+            "username": email,
+            "enabled": True,
+            "firstName": firstName,
+            "lastName": lastName,
+            "credentials": [
+                {
+                    "value": "secret",
+                    "type": password,
+                }
+            ],
+        },
+        exist_ok=False,
+    )
+    return user

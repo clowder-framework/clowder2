@@ -82,6 +82,11 @@ async def auth(code: str) -> RedirectResponse:
     token_body = json.loads(token_response.content)
     access_token = token_body["access_token"]
 
+    # should we redirect to frontend root? or return html with a copy/paste box with access_token?
+    # response = RedirectResponse(url="/")
+    # response.set_cookie("Authorization", value=f"Bearer {access_token}")
+    # return response
+
     return {"token": access_token}
 
 

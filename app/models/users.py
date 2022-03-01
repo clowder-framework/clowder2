@@ -20,6 +20,7 @@ class UserIn(UserBase):
 
 class UserDB(UserBase):
     hashed_password: str = Field()
+    keycloak_id: Optional[str] = None
 
     def verify_password(self, password):
         return pwd_context.verify(password, self.hashed_password)

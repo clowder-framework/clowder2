@@ -33,9 +33,18 @@ class Settings(BaseSettings):
     auth_url = f"{auth_base}/auth/realms/Clients/protocol/openid-connect/auth?client_id=app&response_type=code"
     auth_token_url = f"{auth_base}/auth/realms/Clients/protocol/openid-connect/token"
     auth_server_url = f"{auth_base}/auth/"
-    auth_client_id = "app"
-    auth_realm = "Clients"
+    auth_client_id = "clowder-api"
+    auth_realm = "clowder"
     auth_client_secret = ""
+
+    keycloak_enabled = True
+    keycloak_username = "admin"
+    keycloak_password = "Pa55w0rd"
+    # user here means where the token will be requested from
+    keycloak_user_realm_name = "master"
+    # this is the realm in which the user will be created
+    keycloak_realm_name = auth_realm
+    keycloak_client_id = auth_client_id
 
 
 settings = Settings()

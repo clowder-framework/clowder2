@@ -4,6 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.routers import users, files, datasets, collections, authentication, keycloak
 from app.config import settings
+from app.keycloak import create_realm_and_client
 
 app = FastAPI(
     title=settings.APP_NAME, openapi_url=f"{settings.API_V2_STR}/openapi.json"
@@ -32,7 +33,8 @@ app.include_router(api_router, prefix=settings.API_V2_STR)
 
 @app.on_event("startup")
 async def startup_db_client():
-    pass
+    # create a keycloak realm and client
+    create_realm_and_client()
 
 
 @app.on_event("shutdown")
