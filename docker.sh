@@ -22,4 +22,4 @@ else
 fi
 
 # Build docker image
-$DEBUG docker build --build-arg DEPLOY_ENV="${DEPLOY_ENV}" -t hub.ncsa.illinois.edu/incore/playbook/frontend:$VERSION .
+$DEBUG docker build --build-arg DEPLOY_ENV="${DEPLOY_ENV}" -t hub.ncsa.illinois.edu/clowder/clowder2-frontend:$VERSION .

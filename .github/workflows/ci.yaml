@@ -17,7 +17,7 @@ on:
       - 'release/*'
 
 env:
-  MAIN_REPO: clowder-framework/clowder2-react-frontend
+  MAIN_REPO: clowder-framework/clowder2-frontend
 
 jobs:
 
@@ -95,7 +95,7 @@ jobs:
       - name: Build image
         uses: elgohr/Publish-Docker-Github-Action@3.04
         with:
-          name: clowder/clowder-react
+          name: clowder/clowder2-fronted
           no_push: true
 
       # this will publish to NCSA
@@ -110,7 +110,7 @@ jobs:
           GITSHA1: ${{ github.sha  }}
         with:
           registry: hub.ncsa.illinois.edu
-          name: clowder/clowder-react
+          name: clowder/clowder2-frontend
           username: ${{ secrets.HUB_USERNAME }}
           password: ${{ secrets.HUB_PASSWORD }}
           tags: "${{ env.TAGS }}"

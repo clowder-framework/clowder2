@@ -12,6 +12,7 @@
 		"start-message": "babel-node tools/startMessage.js",
 		"prestart": "npm-run-all --parallel start-message",
 		"start": "npm-run-all --parallel open:src",
+	  	"start:dev": "export CLOWDER_REMOTE_HOSTNAME=http://localhost:8000 && npm run start",
 		"open:src": "babel-node tools/srcServer.js",
 		"open:dist": "babel-node tools/distServer.js",
 		"lint:watch": "npm run lint --watch",

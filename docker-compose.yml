@@ -5,8 +5,8 @@ services:
 
 
   react:
-    container_name: "clowder2-react"
-    image: "hub.ncsa.illinois.edu/clowder/clowder-react"
+    container_name: "clowder2-frontend"
+    image: "clowder/clowder2-frontend"
     build:
       context: .
     ports:
@@ -14,6 +14,5 @@ services:
     environment:
       NODE_ENV: production
       CLOWDER_REMOTE_HOSTNAME: ${CLOWDER_REMOTE_HOSTNAME}
-      APIKEY: ${CLOWDER_REMOTE_APIKEY}
 
 
