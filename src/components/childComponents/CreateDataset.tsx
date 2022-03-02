@@ -1,4 +1,4 @@
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 
 import {Box, Button, Container} from "@mui/material";
 
@@ -6,10 +6,11 @@ import LoadingOverlay from "react-loading-overlay-ts";
 
 import Form from "@rjsf/material-ui";
 import datasetSchema from "../../schema/datasetSchema.json";
-// import {createDataset} from "../../utils/dataset";
 import {FormProps} from "@rjsf/core";
-import {useDispatch,} from "react-redux";
-import {datasetCreated} from "../../actions/dataset";
+import {useDispatch, useSelector,} from "react-redux";
+import {datasetCreated, resetDatsetCreated} from "../../actions/dataset";
+import {RootState} from "../../types/data";
+import {useNavigate} from "react-router-dom";
 
 
 type CreateDatasetProps = {
@@ -17,9 +18,11 @@ type CreateDatasetProps = {
 }
 
 export const CreateDataset: React.FC<CreateDatasetProps> = (props: CreateDatasetProps) => {
+	const history = useNavigate();
+
 	const dispatch = useDispatch();
 	const createDataset = (formData: FormData) => dispatch(datasetCreated(formData));
-
+	const newDataset = useSelector((state:RootState) => state.dataset.newDataset);
 	const {setOpen} = props;
 
 	const [loading, setLoading] = useState(false);
@@ -30,6 +33,14 @@ export const CreateDataset: React.FC<CreateDatasetProps> = (props: CreateDataset
 		setLoading(false);
 		setOpen(false);
 	};
+
+	// zoom into that newly created dataset and reset newDataset
+	useEffect(() => {
+		if (newDataset !== undefined && newDataset.id !== undefined){
+			history(`/datasets/${newDataset.id}`);
+			dispatch(resetDatsetCreated());
+		}
+	}, [newDataset]);
 
 	return (
 		<Container>

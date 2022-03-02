@@ -54,7 +54,7 @@ export function fetchDatasetAbout(id){
 }
 
 export const RECEIVE_DATASETS = "RECEIVE_DATASETS";
-export function fetchDatasets(skip=0, limit=5, mine=false){
+export function fetchDatasets(skip=0, limit=20, mine=false){
 	return (dispatch) => {
 		// TODO: Parameters for dates? paging?
 		return V2.DatasetsService.getDatasetsApiV2DatasetsGet(skip, limit, mine)
@@ -86,6 +86,16 @@ export function datasetCreated(formData){
 			.catch(reason => {
 				dispatch(handleErrors(reason));
 			});
+	};
+}
+
+export const RESET_CREATE_DATASET = "RESET_CREATE_DATASET";
+export function resetDatsetCreated(){
+	return (dispatch) => {
+		dispatch({
+			type: RESET_CREATE_DATASET,
+			receivedAt: Date.now(),
+		});
 	};
 }
 

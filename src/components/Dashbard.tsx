@@ -44,7 +44,7 @@ export const Dashboard = (): JSX.Element => {
 	const [datasetThumbnailList, setDatasetThumbnailList] = useState<any>([]);
 	// TODO add option to determine limit number; default show 5 datasets each time
 	const [currPageNum, setCurrPageNum] = useState<number>(0);
-	const [limit,] = useState<number>(5);
+	const [limit,] = useState<number>(20);
 	const [skip, setSkip] = useState<number | undefined>();
 	// TODO add switch to turn on and off "mine" dataset
 	const [mine,] = useState<boolean>(false);
@@ -211,9 +211,14 @@ export const Dashboard = (): JSX.Element => {
 								<Typography className="content">Some quick example text to tell users why they should
 									upload
 									their own data</Typography>
-								<Link href="#" className="link" onClick={() => {
-									setCreationOpen(true);
-								}}>Create Dataset</Link>
+								<Link className="link"
+									  onClick={(e) => {
+										e.preventDefault();
+										setCreationOpen(true);
+									}}
+								>
+									Create Dataset
+								</Link>
 							</Box>
 							<Box className="actionCard">
 								<Typography className="title">Explore more dataset</Typography>

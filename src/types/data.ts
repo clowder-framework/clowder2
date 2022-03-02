@@ -138,6 +138,7 @@ export interface Thumbnail{
 export interface DatasetState{
 	files: File[];
 	datasets: Dataset[];
+	newDataset: Dataset;
 	about: About;
 	folders: Folder[];
 	folderPath: string[];
