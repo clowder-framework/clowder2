@@ -1,25 +1,25 @@
 import React, {useEffect, useState} from "react";
-import config from "../app.config";
+import config from "../../app.config";
 import {Box, Divider, Grid, Tab, Tabs} from "@mui/material";
-import Audio from "./previewers/Audio";
-import Video from "./previewers/Video";
-import {downloadResource} from "../utils/common";
-import Thumbnail from "./previewers/Thumbnail";
-import {PreviewConfiguration, RootState} from "../types/data";
+import Audio from "../previewers/Audio";
+import Video from "../previewers/Video";
+import {downloadResource} from "../../utils/common";
+import Thumbnail from "../previewers/Thumbnail";
+import {PreviewConfiguration, RootState} from "../../types/data";
 import {useParams, useLocation, useNavigate} from "react-router-dom";
 import {useDispatch, useSelector} from "react-redux";
-import {resetFailedReason, resetLogout} from "../actions/common"
+import {resetFailedReason, resetLogout} from "../../actions/common"
 
-import {TabPanel} from "./childComponents/TabComponent";
-import {a11yProps} from "./childComponents/TabComponent";
-import {fetchFileMetadata, fetchFileVersions} from "../actions/file";
-import TopBar from "./childComponents/TopBar";
-import {MainBreadcrumbs} from "./childComponents/BreadCrumb";
-import {ActionModal} from "./childComponents/ActionModal";
-import {FileAbout} from "./childComponents/FileAbout";
-import {FileStats} from "./childComponents/FileStats";
-import {FileSearch} from "./childComponents/FileSearch";
-import {FileVersionHistory} from "./childComponents/FileVersionHistory";
+import {TabPanel} from "../tabs/TabComponent";
+import {a11yProps} from "../tabs/TabComponent";
+import {fetchFileMetadata, fetchFileVersions} from "../../actions/file";
+import TopBar from "../navigation/TopBar";
+import {MainBreadcrumbs} from "../navigation/BreadCrumb";
+import {ActionModal} from "../dialog/ActionModal";
+import {FileAbout} from "./FileAbout";
+import {FileStats} from "./FileStats";
+import {FileSearch} from "./FileSearch";
+import {FileVersionHistory} from "../versions/FileVersionHistory";
 
 const tab = {
 	fontStyle: "normal",

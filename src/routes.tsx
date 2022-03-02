@@ -2,11 +2,11 @@ import React from "react";
 import {Route, Navigate, Routes, BrowserRouter} from "react-router-dom";
 
 import {Dashboard} from "./components/Dashbard";
-import {Dataset as DatasetComponent} from "./components/Dataset";
-import {File as FileComponent} from "./components/File";
-import {Login as LoginComponent} from "./components/Login";
-import {Logout as LogoutComponent} from "./components/Logout";
-import {Register as RegisterComponent} from "./components/Register";
+import {Dataset as DatasetComponent} from "./components/datasets/Dataset";
+import {File as FileComponent} from "./components/files/File";
+import {Login as LoginComponent} from "./components/auth/Login";
+import {Logout as LogoutComponent} from "./components/auth/Logout";
+import {Register as RegisterComponent} from "./components/auth/Register";
 
 import {isAuthorized} from "./utils/common";
 

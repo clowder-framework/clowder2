@@ -1,7 +1,7 @@
 import React from "react";
 import {render} from "@testing-library/react";
 
-import TobBar from "../../../src/components/childComponents/TopBar";
+import TobBar from "../../../src/components/navigation/TopBar";
 
 describe("Top Bar should", () => {
 

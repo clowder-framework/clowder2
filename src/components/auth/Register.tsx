@@ -10,8 +10,8 @@ import {
 } from "@mui/material";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import {useDispatch, useSelector} from "react-redux";
-import {register as registerAction} from "../actions/user";
-import {RootState} from "../types/data";
+import {register as registerAction} from "../../actions/user";
+import {RootState} from "../../types/data";
 
 
 const textField = {

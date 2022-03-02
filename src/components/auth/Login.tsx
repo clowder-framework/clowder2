@@ -2,10 +2,10 @@ import React, {useEffect, useState} from "react";
 import {useNavigate} from "react-router-dom";
 import {Avatar, Button, Paper, TextField, Typography, Link} from "@mui/material";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
-import {isAuthorized} from "../utils/common";
+import {isAuthorized} from "../../utils/common";
 import {useDispatch, useSelector} from "react-redux";
-import {login as loginAction} from "../actions/user";
-import {RootState} from "../types/data";
+import {login as loginAction} from "../../actions/user";
+import {RootState} from "../../types/data";
 
 export const Login = (): JSX.Element => {
 	// use history hook to redirect/navigate between routes

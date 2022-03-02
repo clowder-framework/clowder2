@@ -1,11 +1,11 @@
 import React, {useEffect, useState} from "react";
 import {Box, Button, Dialog, DialogTitle, Divider, Grid, Menu, MenuItem, Tab, Tabs, Typography} from "@mui/material";
-import {ClowderInput} from "./styledComponents/ClowderInput";
-import {ClowderButton} from "./styledComponents/ClowderButton";
+import {ClowderInput} from "../styledComponents/ClowderInput";
+import {ClowderButton} from "../styledComponents/ClowderButton";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
-import {downloadDataset} from "../utils/dataset";
+import {downloadDataset} from "../../utils/dataset";
 import {useNavigate, useParams} from "react-router-dom";
-import {RootState} from "../types/data";
+import {RootState} from "../../types/data";
 import {useDispatch, useSelector} from "react-redux";
 import {
 	datasetDeleted,
@@ -13,20 +13,20 @@ import {
 	fetchFilesInDataset, fetchFolderPath,
 	fetchFoldersInDataset,
 	folderAdded
-} from "../actions/dataset";
-import {resetFailedReason, resetLogout} from "../actions/common"
+} from "../../actions/dataset";
+import {resetFailedReason, resetLogout} from "../../actions/common"
 
-import {a11yProps, TabPanel} from "./childComponents/TabComponent";
-import TopBar from "./childComponents/TopBar";
-import {MainBreadcrumbs} from "./childComponents/BreadCrumb";
-import {UploadFile} from "./childComponents/UploadFile";
-import {V2} from "../openapi";
-import {ActionModal} from "./childComponents/ActionModal";
-import FilesTable from "./childComponents/FilesTable";
-import {CreateFolder} from "./childComponents/CreateFolder";
+import {a11yProps, TabPanel} from "../tabs/TabComponent";
+import TopBar from "../navigation/TopBar";
+import {MainBreadcrumbs} from "../navigation/BreadCrumb";
+import {UploadFile} from "../files/UploadFile";
+import {V2} from "../../openapi";
+import {ActionModal} from "../dialog/ActionModal";
+import FilesTable from "../files/FilesTable";
+import {CreateFolder} from "../folders/CreateFolder";
 import { useSearchParams } from "react-router-dom";
-import {parseDate} from "../utils/common";
-import config from "../app.config";
+import {parseDate} from "../../utils/common";
+import config from "../../app.config";
 
 const tab = {
 	fontStyle: "normal",

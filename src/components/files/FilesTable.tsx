@@ -14,7 +14,7 @@ import FileMenu from "./FileMenu";
 import FolderIcon from '@mui/icons-material/Folder';
 import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
 import {parseDate} from "../../utils/common";
-import {VersionChip} from "./VersionChip";
+import {VersionChip} from "../versions/VersionChip";
 
 type FilesTableProps = {
 	datasetId: string | undefined,

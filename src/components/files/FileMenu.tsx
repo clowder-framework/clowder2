@@ -8,7 +8,7 @@ import {File} from "../../types/data";
 import {useState} from "react";
 import {fileDeleted} from "../../actions/file";
 import {useDispatch} from "react-redux";
-import {ActionModal} from "./ActionModal";
+import {ActionModal} from "../dialog/ActionModal";
 import DownloadIcon from '@mui/icons-material/Download';
 import DeleteIcon from '@mui/icons-material/Delete';
 import UploadIcon from '@mui/icons-material/Upload';
