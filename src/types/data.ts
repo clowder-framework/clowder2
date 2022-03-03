@@ -38,15 +38,6 @@ export interface Folder {
 	"parent_folder": string|null;
 }
 
-export interface About {
-	name: string;
-	id: string;
-	authorId: string;
-	description: string;
-	created: string | Date;
-	thumbnail: string;
-}
-
 export interface FileMetadata {
 	id: string;
 	"content-type": string;
@@ -141,7 +132,7 @@ export interface DatasetState{
 	files: File[];
 	datasets: Dataset[];
 	newDataset: Dataset;
-	about: About;
+	about: Dataset;
 	folders: Folder[];
 	folderPath: string[];
 }

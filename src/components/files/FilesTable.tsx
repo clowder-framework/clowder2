@@ -57,7 +57,7 @@ export default function FilesTable(props: FilesTableProps) {
 								<TableCell component="th" scope="row">
 									<FolderIcon/><Button onClick={() => selectFolder(folder.id)}>{folder.name}</Button>
 								</TableCell>
-								<TableCell align="right">{folder.author.first_name} {folder.author.last_name}</TableCell>
+								<TableCell align="right">by {folder.author.first_name} {folder.author.last_name}</TableCell>
 								<TableCell align="right">-</TableCell>
 								<TableCell align="right">-</TableCell>
 								<TableCell align="right">-</TableCell>
