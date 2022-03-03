@@ -2,9 +2,9 @@
 /* tslint:disable */
 /* eslint-disable */
 
-import type { ClowderFile } from './ClowderFile';
+import type { FileIn } from './FileIn';
 
 export type Body_update_file_api_v2_files__file_id__put = {
     file: Blob;
-    file_info?: ClowderFile;
+    file_info?: FileIn;
 }

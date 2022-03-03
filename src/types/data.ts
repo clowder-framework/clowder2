@@ -21,7 +21,7 @@ export interface Author {
 
 export interface File {
 	version: string;
-	creator: string;
+	creator: Author;
 	created: string | Date;
 	id: string;
 	name: string;
@@ -33,6 +33,7 @@ export interface File {
 export interface Folder {
 	id: string;
 	name: string;
+	author: Author;
 	"parent_folder": string|null;
 }
 
@@ -51,7 +52,7 @@ export interface FileMetadata {
 	size:number;
 	created: string | Date;
 	name: string;
-	creator: string;
+	creator: Author;
 	status: string;
 	filedescription: string;
 	thumbnail:string;
@@ -64,7 +65,7 @@ export interface FileVersion {
 	id: string;
 	"version_id": string;
 	"file_id": string;
-	"creator": string;
+	"creator": Author;
 	"created": string | Date;
 }
 

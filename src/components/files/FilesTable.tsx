@@ -57,7 +57,7 @@ export default function FilesTable(props: FilesTableProps) {
 								<TableCell component="th" scope="row">
 									<FolderIcon/><Button onClick={() => selectFolder(folder.id)}>{folder.name}</Button>
 								</TableCell>
-								<TableCell align="right">{folder.author}</TableCell>
+								<TableCell align="right">{folder.author.full_name}</TableCell>
 								<TableCell align="right">-</TableCell>
 								<TableCell align="right">-</TableCell>
 								<TableCell align="right">-</TableCell>
@@ -75,7 +75,7 @@ export default function FilesTable(props: FilesTableProps) {
 								{/*TODO this should be version number; for now put version ID instead*/}
 								<VersionChip versionNumber={file.version.slice(0,2)}/>
 							</TableCell>
-							<TableCell align="right">{parseDate(file.created)} by {file.creator}</TableCell>
+							<TableCell align="right">{parseDate(file.created)} by {file.creator.full_name}</TableCell>
 							<TableCell align="right">{file.size}</TableCell>
 							<TableCell align="right">{file.contentType}</TableCell>
 							<TableCell align="right"><FileMenu file={file}/></TableCell>

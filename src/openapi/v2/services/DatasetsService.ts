@@ -2,13 +2,12 @@
 /* tslint:disable */
 /* eslint-disable */
 import type { Body_save_file_api_v2_datasets__dataset_id__files_post } from '../models/Body_save_file_api_v2_datasets__dataset_id__files_post';
-import type { ClowderFile } from '../models/ClowderFile';
-import type { Dataset } from '../models/Dataset';
-import type { FolderIn } from '../models/FolderIn';
-import type { FolderOut } from '../models/FolderOut';
 import type { DatasetBase } from '../models/DatasetBase';
 import type { DatasetIn } from '../models/DatasetIn';
 import type { DatasetOut } from '../models/DatasetOut';
+import type { FileOut } from '../models/FileOut';
+import type { FolderIn } from '../models/FolderIn';
+import type { FolderOut } from '../models/FolderOut';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { request as __request } from '../core/request';
 
@@ -146,13 +145,13 @@ export class DatasetsService {
      * Save File
      * @param datasetId
      * @param formData
-     * @returns ClowderFile Successful Response
+     * @returns FileOut Successful Response
      * @throws ApiError
      */
     public static saveFileApiV2DatasetsDatasetIdFilesPost(
         datasetId: string,
         formData: Body_save_file_api_v2_datasets__dataset_id__files_post,
-    ): CancelablePromise<ClowderFile> {
+    ): CancelablePromise<FileOut> {
         return __request({
             method: 'POST',
             path: `/api/v2/datasets/${datasetId}/files`,

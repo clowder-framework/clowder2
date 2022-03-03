@@ -2,14 +2,16 @@
 /* tslint:disable */
 /* eslint-disable */
 
-export type ClowderFile = {
+import type { UserOut } from './UserOut';
+
+export type FileOut = {
     id?: string;
     name?: string;
-    creator?: string;
+    creator: UserOut;
     created?: string;
     version?: string;
-    views?: number;
-    downloads?: number;
     dataset_id: string;
     folder_id?: string;
+    views?: number;
+    downloads?: number;
 }

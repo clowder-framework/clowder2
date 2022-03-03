@@ -17,16 +17,17 @@ export function FileVersionHistory(props: FileVersionHistoryProps) {
 			{
 				// sort by date decending
 				fileVersions.map((fileVersion) => {
+					const {version_id, creator, created} = fileVersion;
 					return (
 
 						<List dense={true}>
 							<ListItem>
 								<ListItemAvatar>
 									{/*TODO replace with pretty version name*/}
-									<VersionChip versionNumber={fileVersion["version_id"].slice(0,2)}/>
+									<VersionChip versionNumber={version_id.slice(0,2)}/>
 								</ListItemAvatar>
-								<ListItemText primary={`Uploaded by ${fileVersion["creator"]}`}
-									secondary={`Uploaded on ${parseDate(fileVersion["created"])}`}
+								<ListItemText primary={`Uploaded by ${creator != null? creator.full_name : ""}`}
+									secondary={`Uploaded on ${parseDate(created)}`}
 								/>
 								<Button disabled>Download</Button>
 								<Button disabled>Delete</Button>

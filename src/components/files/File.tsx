@@ -36,7 +36,7 @@ export const File = (): JSX.Element => {
 	// path parameter
 	const { fileId } = useParams<{fileId?: string}>();
 
-	// query paramter get dataset id
+	// query parameter get dataset id
 	const search = useLocation().search;
 	const datasetId = new URLSearchParams(search).get("dataset");
 	const datasetName = new URLSearchParams(search).get("name");
@@ -228,15 +228,14 @@ export const File = (): JSX.Element => {
 							</TabPanel>
 						</Grid>
 						<Grid item xs={4}>
-							{/*About*/}
-							{ fileMetadata !== undefined ? <FileAbout fileMetadata={fileMetadata} /> : <></> }
-							<Divider light/>
-
-							{/*Stats*/}
-							{ fileMetadata !== undefined ? <FileStats fileMetadata={fileMetadata} /> : <></> }
-							<Divider light/>
-
-							{/*Search*/}
+							{Object.keys(fileMetadata).length > 0 &&
+								<div>
+									<FileAbout fileMetadata={fileMetadata}/>
+									<Divider light/>
+									<FileStats fileMetadata={fileMetadata} />
+									<Divider light/>
+								</div>
+							}
 							<FileSearch />
 							<Divider light/>
 						</Grid>
