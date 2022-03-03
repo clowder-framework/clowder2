@@ -9,7 +9,7 @@ import Paper from '@mui/material/Paper';
 import {useSelector} from "react-redux";
 import {RootState} from "../../types/data";
 import {useNavigate} from "react-router-dom";
-import {Button, Typography} from "@mui/material";
+import {Button} from "@mui/material";
 import FileMenu from "./FileMenu";
 import FolderIcon from '@mui/icons-material/Folder';
 import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
@@ -57,7 +57,7 @@ export default function FilesTable(props: FilesTableProps) {
 								<TableCell component="th" scope="row">
 									<FolderIcon/><Button onClick={() => selectFolder(folder.id)}>{folder.name}</Button>
 								</TableCell>
-								<TableCell align="right">{creator.first_name} {creator.last_name}</TableCell>
+								<TableCell align="right">{folder.author.first_name} {folder.author.last_name}</TableCell>
 								<TableCell align="right">-</TableCell>
 								<TableCell align="right">-</TableCell>
 								<TableCell align="right">-</TableCell>
