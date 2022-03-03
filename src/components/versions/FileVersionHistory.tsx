@@ -26,7 +26,9 @@ export function FileVersionHistory(props: FileVersionHistoryProps) {
 									{/*TODO replace with pretty version name*/}
 									<VersionChip versionNumber={version_id.slice(0,2)}/>
 								</ListItemAvatar>
-								<ListItemText primary={`Uploaded by ${creator != null? creator.full_name : ""}`}
+								<ListItemText
+									primary={`Uploaded by ${creator != null?
+										`${creator.first_name} ${creator.last_name}` : ""}`}
 									secondary={`Uploaded on ${parseDate(created)}`}
 								/>
 								<Button disabled>Download</Button>
