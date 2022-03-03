@@ -1,5 +1,4 @@
 import datetime
-import datetime
 import io
 import os
 from typing import List, Optional
@@ -14,7 +13,7 @@ from app import dependencies
 from app.auth import AuthHandler
 from app.config import settings
 from app.models.datasets import DatasetBase, DatasetIn, DatasetDB, DatasetOut
-from app.models.files import ClowderFile, FileVersion
+from app.models.files import FileIn, FileOut, FileVersion, FileDB
 from app.models.folders import FolderOut, FolderIn, FolderDB
 from app.models.pyobjectid import PyObjectId
 from app.models.users import UserOut
@@ -94,7 +93,7 @@ async def get_dataset_files(
         async for f in db["files"].find(
             {"dataset_id": ObjectId(dataset_id), "folder_id": None}
         ):
-            files.append(ClowderFile.from_mongo(f))
+            files.append(FileOut.from_mongo(f))
     else:
         async for f in db["files"].find(
             {
@@ -102,7 +101,7 @@ async def get_dataset_files(
                 "folder_id": ObjectId(folder_id),
             }
         ):
-            files.append(ClowderFile.from_mongo(f))
+            files.append(FileOut.from_mongo(f))
     return files
 
 
@@ -160,7 +159,7 @@ async def add_folder(
 ):
     user = await db["users"].find_one({"_id": ObjectId(user_id)})
     folder_db = FolderDB(
-        **folder_in.dict(), author=user["_id"], dataset_id=PyObjectId(dataset_id)
+        **folder_in.dict(), author=UserOut(**user), dataset_id=PyObjectId(dataset_id)
     )
     parent_folder = folder_in.parent_folder
     if parent_folder is not None:
@@ -214,7 +213,7 @@ async def delete_folder(
         raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
 
 
-@router.post("/{dataset_id}/files", response_model=ClowderFile)
+@router.post("/{dataset_id}/files", response_model=FileOut)
 async def save_file(
     dataset_id: str,
     folder_id: Optional[str] = Form(None),
@@ -222,14 +221,13 @@ async def save_file(
     db: MongoClient = Depends(dependencies.get_db),
     fs: Minio = Depends(dependencies.get_fs),
     file: UploadFile = File(...),
-    file_info: Optional[ClowderFile] = None,
+    file_info: Optional[FileIn] = None,
 ):
     if (
         dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
     ) is not None:
-        # Prepare new file entry
-        f = dict(file_info) if file_info is not None else {}
         user = await db["users"].find_one({"_id": ObjectId(user_id)})
+        userOut = UserOut(**user)
         if user is None:
             raise HTTPException(
                 status_code=401, detail=f"User not found. Session might have expired."
@@ -239,17 +237,12 @@ async def save_file(
             raise HTTPException(
                 status_code=404, detail=f"Dataset {dataset_id} not found"
             )
-        f["name"] = file.filename
-        f["creator"] = user["_id"]
-        f["created"] = datetime.datetime.utcnow()
-        f["views"] = 0
-        f["downloads"] = 0
-        f["dataset_id"] = dataset["_id"]
+        fileDB = FileDB(name=file.filename, creator=userOut, dataset_id=dataset["_id"])
         if folder_id is not None:
-            f["folder_id"] = ObjectId(folder_id)
+            fileDB.folder_id = ObjectId(folder_id)
 
         # Add to db and update dataset
-        new_file = await db["files"].insert_one(f)
+        new_file = await db["files"].insert_one(fileDB.to_mongo())
         new_file_id = new_file.inserted_id
 
         # Use unique ID as key for Minio and get initial version ID
@@ -265,16 +258,16 @@ async def save_file(
                 part_size=settings.MINIO_UPLOAD_CHUNK_SIZE,
             )  # async write chunk to minio
             version_id = response.version_id
-        f["version"] = version_id
-        await db["files"].replace_one({"_id": ObjectId(new_file_id)}, f)
+        fileDB.version = version_id
+        await db["files"].replace_one({"_id": ObjectId(new_file_id)}, fileDB.to_mongo())
 
         # Add FileVersion entry and update file
         new_version = FileVersion(
             version_id=version_id,
             file_id=new_file_id,
-            creator=user["_id"],
+            creator=userOut,
         )
-        await db["file_versions"].insert_one(dict(new_version))
-        return ClowderFile.from_mongo(f)
+        await db["file_versions"].insert_one(new_version.to_mongo())
+        return fileDB
     else:
         raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")

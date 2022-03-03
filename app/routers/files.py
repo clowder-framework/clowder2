@@ -18,7 +18,7 @@ from pymongo import MongoClient
 from app import dependencies
 from app.auth import AuthHandler
 from app.config import settings
-from app.models.files import ClowderFile, FileVersion
+from app.models.files import FileIn, FileOut, FileVersion
 from app.models.users import UserOut
 
 router = APIRouter()
@@ -26,14 +26,14 @@ router = APIRouter()
 auth_handler = AuthHandler()
 
 
-@router.put("/{file_id}", response_model=ClowderFile)
+@router.put("/{file_id}", response_model=FileOut)
 async def update_file(
     file_id: str,
     user_id=Depends(auth_handler.auth_wrapper),
     db: MongoClient = Depends(dependencies.get_db),
     fs: Minio = Depends(dependencies.get_fs),
     file: UploadFile = File(...),
-    file_info: Optional[Json[ClowderFile]] = None,
+    file_info: Optional[Json[FileIn]] = None,
 ):
     # First, add to database and get unique ID
     f = dict(file_info) if file_info is not None else {}
@@ -41,7 +41,7 @@ async def update_file(
     user = UserOut(**user_q)
     # TODO: Harden this piece for when data is missing
     existing_q = await db["files"].find_one({"_id": ObjectId(file_id)})
-    existing_file = ClowderFile.from_mongo(existing_q)
+    existing_file = FileOut.from_mongo(existing_q)
 
     # Update file in Minio and get the new version IDs
     version_id = None
@@ -60,10 +60,9 @@ async def update_file(
     # Update version/creator/created flags
     updated_file = dict(existing_file)
     updated_file["name"] = file.filename
-    updated_file["creator"] = user.id
+    updated_file["creator"] = UserOut(**user)
     updated_file["created"] = datetime.utcnow()
     updated_file["version"] = version_id
-    # TODO: How to avoid this ID field shuffling? Omit ClowderFile() conversion?
     updated_file["_id"] = existing_file.id
     del updated_file["id"]
     await db["files"].replace_one({"_id": ObjectId(file_id)}, updated_file)
@@ -72,10 +71,10 @@ async def update_file(
     new_version = FileVersion(
         version_id=updated_file["version"],
         file_id=existing_file.id,
-        creator=user.id,
+        creator=UserOut(**user),
     )
     await db["file_versions"].insert_one(dict(new_version))
-    return ClowderFile.from_mongo(updated_file)
+    return FileOut.from_mongo(updated_file)
 
 
 @router.get("/{file_id}")
@@ -137,7 +136,7 @@ async def get_file_summary(
         # TODO: Incrementing too often (3x per page view)
         # file["views"] += 1
         # db["files"].replace_one({"_id": ObjectId(file_id)}, file)
-        return ClowderFile.from_mongo(file)
+        return FileOut.from_mongo(file)
 
     raise HTTPException(status_code=404, detail=f"File {file_id} not found")
 

@@ -1,10 +1,10 @@
 from datetime import datetime
 from typing import Optional
-
 from pydantic import Field
 
 from app.models.mongomodel import MongoModel
 from app.models.pyobjectid import PyObjectId
+from app.models.users import UserOut
 
 
 class FolderBase(MongoModel):
@@ -18,7 +18,7 @@ class FolderIn(FolderBase):
 class FolderDB(FolderBase):
     dataset_id: PyObjectId
     parent_folder: Optional[PyObjectId]
-    author: PyObjectId = Field(default_factory=PyObjectId)
+    author: UserOut
     created: datetime = Field(default_factory=datetime.utcnow)
     modified: datetime = Field(default_factory=datetime.utcnow)
 
