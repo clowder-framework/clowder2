@@ -72,7 +72,7 @@ async def login(userIn: UserIn):
 async def auth(code: str) -> RedirectResponse:
     payload = (
         f"grant_type=authorization_code&code={code}"
-        f"&redirect_uri={settings.auth_url}&client_id=app"
+        f"&redirect_uri={settings.auth_url}&client_id={settings.auth_client_id}"
     )
     headers = {"Content-Type": "application/x-www-form-urlencoded"}
     token_response = requests.request(

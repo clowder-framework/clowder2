@@ -121,7 +121,9 @@ def create_realm_and_client():
         payload={
             "clientId": settings.auth_client_id,
             "publicClient": True,
-            "rootUrl": settings.auth_base,
+            "rootUrl": settings.keycloak_base,
+            "redirectUris": settings.keycloak_redirect_uris,
+            "webOrigins": settings.keycloak_web_origins,
             "directAccessGrantsEnabled": True,
             "enabled": True,
         },
