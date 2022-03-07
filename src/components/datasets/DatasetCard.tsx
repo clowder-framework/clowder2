@@ -25,7 +25,7 @@ export default function DatasetCard(props: DatasetCardProps) {
 		history(`/datasets/${selectedDatasetId}`);
 	};
 	return (
-		<Card key={id}>
+		<Card key={id} sx={{ minWidth: 275 }}>
 			<CardContent>
 				<Typography variant="h5" component="div">
 					{name}

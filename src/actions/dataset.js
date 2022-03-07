@@ -54,7 +54,7 @@ export function fetchDatasetAbout(id){
 }
 
 export const RECEIVE_DATASETS = "RECEIVE_DATASETS";
-export function fetchDatasets(skip=0, limit=20, mine=false){
+export function fetchDatasets(skip=0, limit=21, mine=false){
 	return (dispatch) => {
 		// TODO: Parameters for dates? paging?
 		return V2.DatasetsService.getDatasetsApiV2DatasetsGet(skip, limit, mine)
