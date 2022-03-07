@@ -1,8 +1,9 @@
 import React, {useEffect} from "react";
 import {Link} from "react-router-dom";
+import config from "../../app.config";
 
 export const RedirectLogin = (): JSX.Element => {
-	const url = "http://localhost:8000/api/v2/keycloak/login";
+	const url = config.KeycloakLogin;
 	useEffect(() => {
 		window.location.href = url;
 	}, []);

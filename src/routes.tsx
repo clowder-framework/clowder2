@@ -8,6 +8,7 @@ import {Login as LoginComponent} from "./components/auth/Login";
 import {Logout as LogoutComponent} from "./components/auth/Logout";
 import {Register as RegisterComponent} from "./components/auth/Register";
 import {Auth as AuthComponent} from "./components/auth/Auth"
+import {RedirectLogin as RedirectLoginComponent} from "./components/auth/RedirectLogin"
 
 import {isAuthorized} from "./utils/common";
 
@@ -29,8 +30,8 @@ const AppRoutes = (
 			<Route path="/login" element={<LoginComponent/>} />
 			<Route path="/logout" element={<LogoutComponent/>} />
 			<Route path="/register" element={<RegisterComponent/>} />
-			<Route path="/auth" element={<AuthComponent/>} />
-			<Route path="/auth/login" element={<AuthComponent/>} />
+			<Route path="/keycloak/auth" element={<AuthComponent/>} />
+			<Route path="/keycloak/login" element={<RedirectLoginComponent/>} />
 		</Routes>
 	</BrowserRouter>
 );
