@@ -10,14 +10,10 @@ from minio import Minio
 from pymongo import MongoClient
 
 from app.auth import AuthHandler
-from app import dependencies, keycloak
-from app.keycloak import get_auth
+from app import keycloak
 from app import dependencies
 from app.auth import AuthHandler
-from app.config import settings
 from app.models.datasets import DatasetBase, DatasetIn, DatasetDB, DatasetOut
-from app.models.files import ClowderFile, FileVersion
-from app.models.users import UserOut, get_user_out
 from app.config import settings
 from app.models.files import FileIn, FileOut, FileVersion, FileDB
 from app.models.folders import FolderOut, FolderIn, FolderDB

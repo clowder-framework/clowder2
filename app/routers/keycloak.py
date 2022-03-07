@@ -2,19 +2,18 @@ import json
 import logging
 from typing import Dict
 
-import jwt
 import requests
-from fastapi import FastAPI, APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Depends
 from fastapi.security.utils import get_authorization_scheme_param
-from keycloak.keycloak_openid import KeycloakOpenID
 from keycloak.exceptions import KeycloakAuthenticationError, KeycloakGetError
+from keycloak.keycloak_openid import KeycloakOpenID
+from pydantic import Json
 from starlette import status
 from starlette.requests import Request
 from starlette.responses import RedirectResponse
 
 from app import keycloak
 from app.config import settings
-
 
 # This actually does the auth checks
 from app.models.users import UserIn
@@ -45,6 +44,12 @@ router = APIRouter()
 @router.get("/login")
 async def login() -> RedirectResponse:
     return RedirectResponse(settings.auth_url)
+
+
+@router.get("/logout")
+async def logout(token: Json = Depends(keycloak.get_auth)):
+    keycloak_openid.logout(token["refresh_token"])
+    return RedirectResponse(settings.frontend_url)
 
 
 @router.post("/login")
@@ -83,11 +88,10 @@ async def auth(code: str) -> RedirectResponse:
     access_token = token_body["access_token"]
 
     # should we redirect to frontend root? or return html with a copy/paste box with access_token?
-    # response = RedirectResponse(url="/")
-    # response.set_cookie("Authorization", value=f"Bearer {access_token}")
-    # return response
-
-    return {"token": access_token}
+    auth_url = f"{settings.frontend_url}/auth"
+    response = RedirectResponse(url=auth_url)
+    response.set_cookie("Authorization", value=f"Bearer {access_token}")
+    return response
 
 
 @router.get("")

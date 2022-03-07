@@ -2,17 +2,12 @@ import uvicorn
 from fastapi import FastAPI, APIRouter
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.config import settings
+from app.keycloak import create_realm_and_client
 from app.routers import (
-    users,
-    files,
-    datasets,
-    collections,
-    authentication,
     folders,
 )
 from app.routers import users, files, datasets, collections, authentication, keycloak
-from app.config import settings
-from app.keycloak import create_realm_and_client
 
 app = FastAPI(
     title=settings.APP_NAME, openapi_url=f"{settings.API_V2_STR}/openapi.json"

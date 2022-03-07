@@ -7,6 +7,7 @@ class Settings(BaseSettings):
     APP_NAME: str = "Clowder"
     API_V2_STR: str = "/api/v2"
     admin_email: str = "devnull@ncsa.illinois.edu"
+    frontend_url: str = "http://localhost:3000"
 
     # openssl rand -hex 32
     local_auth_secret = (
