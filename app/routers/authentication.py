@@ -1,6 +1,7 @@
 import json
 
 from bson import ObjectId
+from fastapi import APIRouter, Depends, HTTPException
 from fastapi import APIRouter, HTTPException, Depends
 from keycloak.exceptions import KeycloakAuthenticationError, KeycloakGetError
 from pymongo import MongoClient
@@ -39,10 +40,13 @@ async def login(userIn: UserIn, db: MongoClient = Depends(dependencies.get_db)):
             )
     else:  # local authentication
         authenticated_user = await authenticate_user(userIn.email, userIn.password, db)
-        if authenticated_user is not None:
+        if authenticated_user is None:
+            raise HTTPException(
+                status_code=401, detail=f"Could not authenticate user credentials"
+            )
+        else:
             token = auth_handler.encode_token(str(authenticated_user.id))
             return {"token": token}
-        return {"token": "none"}
 
 
 @router.get("/unprotected")

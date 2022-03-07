@@ -1,23 +1,37 @@
 from datetime import datetime
-from mongoengine import DynamicDocument
-from pydantic import BaseModel, Field
-from typing import List
+from typing import Optional
+
+from pydantic import Field
 
 from app.models.mongomodel import MongoModel
 from app.models.pyobjectid import PyObjectId
+from app.models.users import UserOut
 
-# MiniUser - id, name, email, gravatar (comes with email)
+
 class FileVersion(MongoModel):
     version_id: str = "N/A"
     file_id: PyObjectId
-    creator: PyObjectId
+    creator: UserOut
     created: datetime = Field(default_factory=datetime.utcnow)
 
 
-class ClowderFile(MongoModel):
+class FileBase(MongoModel):
     name: str = "N/A"
-    creator: PyObjectId = Field(default_factory=PyObjectId)
+
+
+class FileIn(FileBase):
+    pass
+
+
+class FileDB(FileBase):
+    creator: UserOut
     created: datetime = Field(default_factory=datetime.utcnow)
     version: str = "N/A"  # Minio version ID (if more than one version)
+    dataset_id: PyObjectId
+    folder_id: Optional[PyObjectId]
     views: int = 0
     downloads: int = 0
+
+
+class FileOut(FileDB):
+    pass

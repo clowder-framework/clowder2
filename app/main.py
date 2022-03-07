@@ -2,6 +2,14 @@ import uvicorn
 from fastapi import FastAPI, APIRouter
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.routers import (
+    users,
+    files,
+    datasets,
+    collections,
+    authentication,
+    folders,
+)
 from app.routers import users, files, datasets, collections, authentication, keycloak
 from app.config import settings
 from app.keycloak import create_realm_and_client
@@ -26,6 +34,7 @@ api_router.include_router(
     collections.router, prefix="/collections", tags=["collections"]
 )
 api_router.include_router(authentication.router, tags=["login"])
+api_router.include_router(folders.router, prefix="/folders", tags=["folders"])
 api_router.include_router(keycloak.router, prefix="/keycloak", tags=["keycloak"])
 
 app.include_router(api_router, prefix=settings.API_V2_STR)
