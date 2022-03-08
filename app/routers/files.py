@@ -1,6 +1,6 @@
 import io
 from datetime import datetime
-from typing import Optional
+from typing import Optional, List
 
 from bson import ObjectId
 from fastapi import (
@@ -141,7 +141,7 @@ async def get_file_summary(
     raise HTTPException(status_code=404, detail=f"File {file_id} not found")
 
 
-@router.get("/{file_id}/versions")
+@router.get("/{file_id}/versions", response_model=List[FileVersion])
 async def get_file_versions(
     file_id: str,
     db: MongoClient = Depends(dependencies.get_db),
