@@ -209,7 +209,7 @@ export const Register = (): JSX.Element => {
 						display:"block",
 						margin:"10px auto 5px auto",
 						color: "#212529"
-					}}>Alreday have an account? Log In.</Link>
+					}}>Already have an account? Log In.</Link>
 				</Paper>
 			</div>
 		</div>

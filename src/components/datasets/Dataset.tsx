@@ -242,6 +242,7 @@ export const Dataset = (): JSX.Element => {
 												  history("/");
 											  }
 									}>Delete Dataset</MenuItem>
+									<MenuItem onClick={handleOptionClose} sx={optionMenuItem} disabled={true}>Delete Folder</MenuItem>
 									<MenuItem onClick={handleOptionClose} sx={optionMenuItem} disabled={true}>Follow</MenuItem>
 									<MenuItem onClick={handleOptionClose} sx={optionMenuItem} disabled={true}>Collaborators</MenuItem>
 									<MenuItem onClick={handleOptionClose} sx={optionMenuItem} disabled={true}>Extraction</MenuItem>
