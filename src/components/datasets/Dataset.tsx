@@ -272,11 +272,13 @@ export const Dataset = (): JSX.Element => {
 												</Typography>
 										}
 										<Typography className="content">Dataset ID: {about["id"]}</Typography>
-										<Typography className="content">Owner: {about["authorId"]}</Typography>
+										<Typography className="content">
+											Owner: {about["author"]["first_name"]} {about["author"]["last_name"]}
+										</Typography>
 										<Typography className="content">Description: {about["description"]}</Typography>
 										<Typography className="content">Created on: {parseDate(about["created"])}</Typography>
 										{/*/!*TODO use this to get thumbnail*!/*/}
-										<Typography className="content">Thumbnail: {about["thumbnail"]}</Typography>
+										{/*<Typography className="content">Thumbnail: {about["thumbnail"]}</Typography>*/}
 										{/*<Typography className="content">Belongs to spaces: {about["authorId"]}</Typography>*/}
 										{/*/!*TODO not sure how to use this info*!/*/}
 										{/*<Typography className="content">Resource type: {about["resource_type"]}</Typography>*/}

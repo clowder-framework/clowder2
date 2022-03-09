@@ -38,10 +38,13 @@ export const Register = (): JSX.Element => {
 	const history = useNavigate();
 
 	const dispatch = useDispatch();
-	const register = (email:string, password:string) => dispatch(registerAction(email, password));
+	const register = (email:string, password:string, firstname:string, lastname: string) =>
+		dispatch(registerAction(email, password, firstname, lastname));
 	const registerSucceeded = useSelector((state:RootState) => state.user.registerSucceeded);
 	const errorMsg = useSelector((state:RootState) => state.user.errorMsg);
 
+	const [firstname, setFirstname] = useState("");
+	const [lastname, setLastname] = useState("");
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
 	const [passwordConfirm, setPasswordConfirm] = useState("");
@@ -53,7 +56,15 @@ export const Register = (): JSX.Element => {
 		if (registerSucceeded) history("/login");
 	}, [registerSucceeded])
 
-	const changeUsername = (event: React.ChangeEvent<HTMLInputElement>) => {
+	const changeFirstname = (event: React.ChangeEvent<HTMLInputElement>) => {
+		setFirstname(event.target.value);
+	};
+
+	const changeLastname = (event: React.ChangeEvent<HTMLInputElement>) => {
+		setLastname(event.target.value);
+	};
+
+	const changeEmail = (event: React.ChangeEvent<HTMLInputElement>) => {
 		setEmail(event.target.value);
 	};
 
@@ -87,7 +98,7 @@ export const Register = (): JSX.Element => {
 
 	const handleRegisterButtonClick = async () => {
 		if (password === passwordConfirm){
-			await register(email, password);
+			await register(email, password, firstname, lastname);
 		}
 		else{
 			setPasswordConfirmErrorText("The password confirmation does not match!");
@@ -112,11 +123,37 @@ export const Register = (): JSX.Element => {
 						required
 						fullWidth
 						autoFocus
+						id="firstname"
+						label="First Name"
+						name="firstname"
+						value={firstname}
+						onChange={changeFirstname}
+						sx={textField}
+					/>
+					<TextField
+						variant="outlined"
+						margin="normal"
+						required
+						fullWidth
+						autoFocus
+						id="lastname"
+						label="Last Name"
+						name="lastname"
+						value={lastname}
+						onChange={changeLastname}
+						sx={textField}
+					/>
+					<TextField
+						variant="outlined"
+						margin="normal"
+						required
+						fullWidth
+						autoFocus
 						id="email"
 						label="Email"
 						name="email"
 						value={email}
-						onChange={changeUsername}
+						onChange={changeEmail}
 						sx={textField}
 					/>
 					<TextField

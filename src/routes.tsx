@@ -28,6 +28,13 @@ const AppRoutes = (
 			<Route path="/login" element={<LoginComponent/>} />
 			<Route path="/logout" element={<LogoutComponent/>} />
 			<Route path="/register" element={<RegisterComponent/>} />
+			<Route path="*"
+				element={
+					<main style={{ padding: "1rem" }}>
+						<p>Page Not Found!</p>
+					</main>
+				}
+			/>
 		</Routes>
 	</BrowserRouter>
 );

@@ -16,7 +16,8 @@ export interface Dataset {
 export interface Author {
 	id: string;
 	email: string;
-	"full_name": string|null;
+	"first_name": string|null;
+	"last_name": string|null;
 }
 
 export interface File {
@@ -35,15 +36,6 @@ export interface Folder {
 	name: string;
 	author: Author;
 	"parent_folder": string|null;
-}
-
-export interface About {
-	name: string;
-	id: string;
-	authorId: string;
-	description: string;
-	created: string | Date;
-	thumbnail: string;
 }
 
 export interface FileMetadata {
@@ -140,7 +132,7 @@ export interface DatasetState{
 	files: File[];
 	datasets: Dataset[];
 	newDataset: Dataset;
-	about: About;
+	about: Dataset;
 	folders: Folder[];
 	folderPath: string[];
 }
