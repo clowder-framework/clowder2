@@ -92,7 +92,18 @@ async def auth(
     token_body = json.loads(token_response.content)
     access_token = token_body["access_token"]
 
-    # TODO create user in db if it doesn't already exist
+    # Get identity provider token if enabled. Here is an example for globus.
+    # TODO add for loop to do this for all idps. Move to standalone util.
+    if "globus" in settings.keycloak_ipds:
+        idp_url = f"{settings.auth_base}/auth/realms/{settings.auth_realm}/broker/globus/token"
+        idp_headers = {
+            "Content-Type": "application/x-www-form-urlencoded",
+            "Authorization": f"Bearer {access_token}",
+        }
+        idp_token = requests.request("GET", idp_url, headers=idp_headers)
+        itp_token_body = json.loads(idp_token.content)
+
+    # create user in db if it doesn't already exist
     userinfo = keycloak_openid.userinfo(access_token)
     keycloak_id = userinfo["sub"]
     given_name = userinfo["given_name"]

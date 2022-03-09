@@ -53,6 +53,8 @@ class Settings(BaseSettings):
     keycloak_base = "http://localhost:8000"
     keycloak_redirect_uris = [keycloak_base + "/api/v2/keycloak/auth"]
     keycloak_web_origins = [keycloak_base]
+    # identity providers registered in keycloak, for example cilogon, globus, twitter
+    keycloak_ipds = ["cilogon", "globus"]
 
 
 settings = Settings()
