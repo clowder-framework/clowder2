@@ -1,7 +1,7 @@
 from typing import List
 
 from bson import ObjectId
-from fastapi import APIRouter, Request, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Depends
 from pymongo import MongoClient
 
 from app import dependencies
