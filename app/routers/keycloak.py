@@ -2,21 +2,24 @@ import json
 import logging
 from typing import Dict
 
+import jwt
 import requests
 from fastapi import APIRouter, HTTPException, Depends
 from fastapi.security.utils import get_authorization_scheme_param
 from keycloak.exceptions import KeycloakAuthenticationError, KeycloakGetError
 from keycloak.keycloak_openid import KeycloakOpenID
 from pydantic import Json
+from pymongo import MongoClient
 from starlette import status
 from starlette.requests import Request
 from starlette.responses import RedirectResponse
 
-from app import keycloak
+from app import keycloak, dependencies
 from app.config import settings
+from app.auth import AuthHandler
 
 # This actually does the auth checks
-from app.models.users import UserIn
+from app.models.users import UserIn, UserDB
 
 keycloak_openid = KeycloakOpenID(
     server_url=settings.auth_server_url,
@@ -74,7 +77,9 @@ async def login(userIn: UserIn):
 
 
 @router.get("/auth")
-async def auth(code: str) -> RedirectResponse:
+async def auth(
+    code: str, db: MongoClient = Depends(dependencies.get_db)
+) -> RedirectResponse:
     payload = (
         f"grant_type=authorization_code&code={code}"
         f"&redirect_uri={settings.auth_url}&client_id={settings.auth_client_id}"
@@ -86,6 +91,21 @@ async def auth(code: str) -> RedirectResponse:
 
     token_body = json.loads(token_response.content)
     access_token = token_body["access_token"]
+
+    # TODO create user in db if it doesn't already exist
+    userinfo = keycloak_openid.userinfo(access_token)
+    keycloak_id = userinfo["sub"]
+    given_name = userinfo["given_name"]
+    family_name = userinfo["family_name"]
+    email = userinfo["email"]
+    user = UserDB(
+        email=email,
+        full_name=f"{given_name} {family_name}",
+        hashed_password="",
+        keycloak_id=keycloak_id,
+    )
+    if (await db["users"].find_one({"email": email})) is None:
+        await db["users"].insert_one(user.to_mongo())
 
     auth_url = f"{settings.frontend_url}/keycloak/auth"
     response = RedirectResponse(url=auth_url)
