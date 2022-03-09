@@ -1,4 +1,4 @@
-import {About, Dataset, ExtractedMetadata, File, MetadataJsonld, FilePreview, FileMetadata, FileVersion, Folder} from "./data";
+import {Dataset, ExtractedMetadata, File, MetadataJsonld, FilePreview, FileMetadata, FileVersion, Folder} from "./data";
 
 interface RECEIVE_FILES_IN_DATASET {
 	type: "RECEIVE_FILES_IN_DATASET";
@@ -12,7 +12,7 @@ interface DELETE_FILE {
 
 interface RECEIVE_DATASET_ABOUT{
 	type: "RECEIVE_DATASET_ABOUT";
-	about: About;
+	about: Dataset;
 }
 
 interface RECEIVE_DATASETS{
