@@ -21,6 +21,10 @@ type FilesTableProps = {
 	datasetName: string
 }
 
+const iconStyle = {
+	"vertical-align": "middle"
+}
+
 export default function FilesTable(props: FilesTableProps) {
 	// mapStateToProps
 	const filesInDataset = useSelector((state:RootState) => state.dataset.files);
@@ -55,12 +59,13 @@ export default function FilesTable(props: FilesTableProps) {
 								sx={{'&:last-child td, &:last-child th': {border: 0}}}
 							>
 								<TableCell component="th" scope="row">
-									<FolderIcon color="primary" sx={{verticalAlign: 'middle'}}/><Button onClick={() => selectFolder(folder.id)}>{folder.name}</Button>
+									<FolderIcon color="primary" sx={iconStyle}/>
+									<Button onClick={() => selectFolder(folder.id)}>{folder.name}</Button>
 								</TableCell>
 								<TableCell align="right">by {folder.author.first_name} {folder.author.last_name}</TableCell>
-								<TableCell align="right">-</TableCell>
-								<TableCell align="right">-</TableCell>
-								<TableCell align="right">-</TableCell>
+								<TableCell align="right">&nbsp;</TableCell>
+								<TableCell align="right">&nbsp;</TableCell>
+								<TableCell align="right">&nbsp;</TableCell>
 							</TableRow>))
 					}
 					{
@@ -70,7 +75,7 @@ export default function FilesTable(props: FilesTableProps) {
 							sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
 						>
 							<TableCell component="th" scope="row">
-								<InsertDriveFileIcon color="primary" sx={{verticalAlign: 'middle'}}/>
+								<InsertDriveFileIcon color="primary" sx={iconStyle}/>
 								<Button onClick={() => selectFile(file.id)}>{file.name}</Button>
 								{/*TODO this should be version number; for now put version ID instead*/}
 								<VersionChip versionNumber={file.version.slice(0,2)}/>
