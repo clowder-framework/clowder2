@@ -14,12 +14,8 @@ from pydantic import Json
 
 from .models.users import get_user_out
 
-oauth2_scheme = OAuth2AuthorizationCodeBearer(
-    authorizationUrl=settings.auth_url,
-    tokenUrl=settings.auth_token_url,
-)
 
-# This actually does the auth checks
+# Keycloak open id client configuration
 keycloak_openid = KeycloakOpenID(
     server_url=settings.auth_server_url,
     client_id=settings.auth_client_id,
@@ -28,24 +24,21 @@ keycloak_openid = KeycloakOpenID(
     verify=True,
 )
 
-# manage users
-# keycloak_admin = KeycloakAdmin(
-#     server_url=settings.auth_server_url,
-#     username=settings.keycloak_username,
-#     password=settings.keycloak_password,
-#     realm_name=settings.keycloak_realm_name,
-#     # user_realm_name=settings.keycloak_user_realm_name,
-#     client_secret_key=settings.auth_client_secret,
-#     verify=True,
-# )
 
-
+# Used to decode JWT token
 async def get_idp_public_key():
     return (
         "-----BEGIN PUBLIC KEY-----\n"
         f"{keycloak_openid.public_key()}"
         "\n-----END PUBLIC KEY-----"
     )
+
+
+# oauth2 config used by fastapi security scheme below
+oauth2_scheme = OAuth2AuthorizationCodeBearer(
+    authorizationUrl=settings.auth_url,
+    tokenUrl=settings.auth_token_url,
+)
 
 
 async def get_auth(token: str = Security(oauth2_scheme)) -> Json:
@@ -132,6 +125,7 @@ def create_realm_and_client():
 
 
 async def create_user(email: str, password: str, firstName: str, lastName: str):
+    """Create a user in Keycloak."""
     keycloak_admin = KeycloakAdmin(
         server_url=settings.auth_server_url,
         username=settings.keycloak_username,

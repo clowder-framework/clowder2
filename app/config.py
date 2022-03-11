@@ -44,7 +44,7 @@ class Settings(BaseSettings):
     # keycloak local config
     keycloak_enabled = True
     keycloak_username = "admin"
-    keycloak_password = "Pa55w0rd"
+    keycloak_password = "admin"
     # user here means where the token will be requested from
     keycloak_user_realm_name = "master"
     # this is the realm in which the user will be created
