@@ -91,6 +91,12 @@ services:
       depends_on:
         - postgres
 
+  maildev:
+    image: maildev/maildev
+    ports:
+      - "1080:80"
+      - "25:25"
+
 ## By default this config uses default local driver,
 ## For custom volumes replace with volume driver configuration.
 volumes:
