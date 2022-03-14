@@ -1,2 +1,5 @@
 .idea
 __pycache__
+/docs/.venv/
+/docs/build/
+/.env
