@@ -45,7 +45,7 @@ async def get_datasets(
     db: MongoClient = Depends(dependencies.get_db),
     skip: int = 0,
     limit: int = 2,
-    mine=False,
+    mine: bool = False,
 ):
     datasets = []
     if False:

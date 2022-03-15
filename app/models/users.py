@@ -11,7 +11,8 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 class UserBase(MongoModel):
     email: EmailStr
-    full_name: Optional[str] = None
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
 
 
 class UserIn(UserBase):
