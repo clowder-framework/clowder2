@@ -14,6 +14,11 @@ class Settings(BaseSettings):
         "47358d6ace318031e822d722c15d191ba0d3e2cc7594317514e553424ccf3e39"
     )
 
+    # openssl rand -hex 32
+    local_auth_secret = (
+        "47358d6ace318031e822d722c15d191ba0d3e2cc7594317514e553424ccf3e39"
+    )
+
     # exposing default ports for fronted
     CORS_ORIGINS: List[AnyHttpUrl] = [
         "http://localhost:3000",

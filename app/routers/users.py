@@ -12,6 +12,7 @@ from app.keycloak import create_user
 from keycloak.exceptions import KeycloakGetError
 from app.models.users import UserDB, UserIn, UserOut
 from passlib.hash import bcrypt
+from app.models.users import UserDB, UserOut
 
 router = APIRouter()
 
@@ -53,19 +54,21 @@ async def get_users(
 ):
     users = []
     for doc in await db["users"].find().skip(skip).limit(limit).to_list(length=limit):
-        users.append(doc)
+        users.append(UserOut(**doc))
     return users
 
 
 @router.get("/{user_id}", response_model=UserOut)
 async def get_user(user_id: str, db: MongoClient = Depends(dependencies.get_db)):
     if (user := await db["users"].find_one({"_id": ObjectId(user_id)})) is not None:
-        return UserDB.from_mongo(user)
+        return UserOut.from_mongo(user)
     raise HTTPException(status_code=404, detail=f"User {user_id} not found")
 
 
-@router.get("/username/{name}", response_model=UserOut)
-async def get_user_by_name(name: str, db: MongoClient = Depends(dependencies.get_db)):
-    if (user := await db["users"].find_one({"name": name})) is not None:
-        return UserDB.from_mongo(user)
-    raise HTTPException(status_code=404, detail=f"User {name} not found")
+@router.get("/username/{username}", response_model=UserOut)
+async def get_user_by_name(
+    username: str, db: MongoClient = Depends(dependencies.get_db)
+):
+    if (user := await db["users"].find_one({"email": username})) is not None:
+        return UserOut.from_mongo(user)
+    raise HTTPException(status_code=404, detail=f"User {username} not found")

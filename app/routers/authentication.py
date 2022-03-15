@@ -4,6 +4,7 @@ from bson import ObjectId
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi import APIRouter, HTTPException, Depends
 from keycloak.exceptions import KeycloakAuthenticationError, KeycloakGetError
+from passlib.hash import bcrypt
 from pymongo import MongoClient
 from starlette import status
 
@@ -16,6 +17,15 @@ from app.models.users import UserDB, UserIn
 auth_handler = AuthHandler()
 
 router = APIRouter()
+
+
+@router.post("/users", response_model=UserDB)
+async def save_user(userIn: UserIn, db: MongoClient = Depends(dependencies.get_db)):
+    hashed_password = bcrypt.hash(userIn.password)
+    userDB = UserDB(**userIn.dict(), hashed_password=hashed_password)
+    res = await db["users"].insert_one(userDB.to_mongo())
+    found = await db["users"].find_one({"_id": res.inserted_id})
+    return UserDB.from_mongo(found).dict(exclude={"create_at"})
 
 
 @router.post("/login")
