@@ -16,7 +16,7 @@ import {isAuthorized} from "./utils/common";
 class PrivateRoute extends React.Component<{ children: JSX.Element }> {
 	render() {
 		let {children} = this.props;
-		return isAuthorized() ? children : <Navigate to="/login"/>;
+		return isAuthorized() ? children : <Navigate to="/auth/login"/>;
 	}
 }
 
