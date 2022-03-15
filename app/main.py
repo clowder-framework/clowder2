@@ -30,7 +30,7 @@ api_router.include_router(
 )
 api_router.include_router(authentication.router, tags=["login"])
 api_router.include_router(folders.router, prefix="/folders", tags=["folders"])
-api_router.include_router(keycloak.router, prefix="/keycloak", tags=["keycloak"])
+api_router.include_router(keycloak.router, prefix="/auth", tags=["auth"])
 
 app.include_router(api_router, prefix=settings.API_V2_STR)
 

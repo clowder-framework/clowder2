@@ -9,7 +9,6 @@ from fastapi import Form
 from minio import Minio
 from pymongo import MongoClient
 
-from app.auth import AuthHandler
 from app import keycloak
 from app import dependencies
 from app.auth import AuthHandler

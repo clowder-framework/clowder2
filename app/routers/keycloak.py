@@ -51,7 +51,7 @@ async def login(userIn: UserIn):
         )
 
 
-@router.get("/auth")
+@router.get("")
 async def auth(
     code: str, db: MongoClient = Depends(dependencies.get_db)
 ) -> RedirectResponse:
@@ -96,7 +96,7 @@ async def auth(
         await db["users"].insert_one(user.to_mongo())
 
     # redirect to frontend
-    auth_url = f"{settings.frontend_url}/keycloak/auth"
+    auth_url = f"{settings.frontend_url}/auth"
     response = RedirectResponse(url=auth_url)
     response.set_cookie("Authorization", value=f"Bearer {access_token}")
     return response
