@@ -89,7 +89,7 @@ export const Dashboard = (): JSX.Element => {
 		if (loggedOut) {
 			// reset loggedOut flag so it doesn't stuck in "true" state, then redirect to login page
 			dismissLogout();
-			history("/login");
+			history("/auth/login");
 		}
 	}, [loggedOut]);
 

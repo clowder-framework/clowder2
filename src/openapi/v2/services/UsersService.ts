@@ -1,8 +1,7 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { UserDB } from '../models/UserDB';
-import type { UserIn } from '../models/UserIn';
+import type { UserOut } from '../models/UserOut';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { request as __request } from '../core/request';
 
@@ -12,13 +11,13 @@ export class UsersService {
      * Get Users
      * @param skip
      * @param limit
-     * @returns UserDB Successful Response
+     * @returns UserOut Successful Response
      * @throws ApiError
      */
     public static getUsersApiV2UsersGet(
         skip?: number,
         limit: number = 2,
-    ): CancelablePromise<Array<UserDB>> {
+    ): CancelablePromise<Array<UserOut>> {
         return __request({
             method: 'GET',
             path: `/api/v2/users`,
@@ -33,34 +32,14 @@ export class UsersService {
     }
 
     /**
-     * Save User
-     * @param requestBody
-     * @returns UserDB Successful Response
-     * @throws ApiError
-     */
-    public static saveUserApiV2UsersPost(
-        requestBody: UserIn,
-    ): CancelablePromise<UserDB> {
-        return __request({
-            method: 'POST',
-            path: `/api/v2/users`,
-            body: requestBody,
-            mediaType: 'application/json',
-            errors: {
-                422: `Validation Error`,
-            },
-        });
-    }
-
-    /**
      * Get User
      * @param userId
-     * @returns UserDB Successful Response
+     * @returns UserOut Successful Response
      * @throws ApiError
      */
     public static getUserApiV2UsersUserIdGet(
         userId: string,
-    ): CancelablePromise<UserDB> {
+    ): CancelablePromise<UserOut> {
         return __request({
             method: 'GET',
             path: `/api/v2/users/${userId}`,
@@ -72,16 +51,16 @@ export class UsersService {
 
     /**
      * Get User By Name
-     * @param name
-     * @returns UserDB Successful Response
+     * @param username
+     * @returns UserOut Successful Response
      * @throws ApiError
      */
-    public static getUserByNameApiV2UsersUsernameNameGet(
-        name: string,
-    ): CancelablePromise<UserDB> {
+    public static getUserByNameApiV2UsersUsernameUsernameGet(
+        username: string,
+    ): CancelablePromise<UserOut> {
         return __request({
             method: 'GET',
-            path: `/api/v2/users/username/${name}`,
+            path: `/api/v2/users/username/${username}`,
             errors: {
                 422: `Validation Error`,
             },

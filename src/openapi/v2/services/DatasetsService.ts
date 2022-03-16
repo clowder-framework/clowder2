@@ -24,7 +24,7 @@ export class DatasetsService {
     public static getDatasetsApiV2DatasetsGet(
         skip?: number,
         limit: number = 2,
-        mine?: any,
+        mine: boolean = false,
     ): CancelablePromise<Array<DatasetOut>> {
         return __request({
             method: 'GET',

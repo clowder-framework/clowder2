@@ -1,45 +1,38 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { UserDB } from '../models/UserDB';
 import type { UserIn } from '../models/UserIn';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { request as __request } from '../core/request';
 
-export class LoginService {
+export class AuthService {
 
     /**
-     * Save User
-     * @param requestBody
-     * @returns UserDB Successful Response
+     * Login
+     * Redirect to keycloak login page.
+     * @returns any Successful Response
      * @throws ApiError
      */
-    public static saveUserApiV2UsersPost(
-        requestBody: UserIn,
-    ): CancelablePromise<UserDB> {
+    public static loginApiV2AuthLoginGet(): CancelablePromise<any> {
         return __request({
-            method: 'POST',
-            path: `/api/v2/users`,
-            body: requestBody,
-            mediaType: 'application/json',
-            errors: {
-                422: `Validation Error`,
-            },
+            method: 'GET',
+            path: `/api/v2/auth/login`,
         });
     }
 
     /**
      * Login
+     * Client can use this to login when redirect is not available.
      * @param requestBody
      * @returns any Successful Response
      * @throws ApiError
      */
-    public static loginApiV2LoginPost(
+    public static loginApiV2AuthLoginPost(
         requestBody: UserIn,
     ): CancelablePromise<any> {
         return __request({
             method: 'POST',
-            path: `/api/v2/login`,
+            path: `/api/v2/auth/login`,
             body: requestBody,
             mediaType: 'application/json',
             errors: {
@@ -49,26 +42,37 @@ export class LoginService {
     }
 
     /**
-     * Unprotected
+     * Logout
+     * Logout of keycloak.
      * @returns any Successful Response
      * @throws ApiError
      */
-    public static unprotectedApiV2UnprotectedGet(): CancelablePromise<any> {
+    public static logoutApiV2AuthLogoutGet(): CancelablePromise<any> {
         return __request({
             method: 'GET',
-            path: `/api/v2/unprotected`,
+            path: `/api/v2/auth/logout`,
         });
     }
 
     /**
-     * Protected
+     * Auth
+     * Redirect endpoint Keycloak redirects to after login.
+     * @param code
      * @returns any Successful Response
      * @throws ApiError
      */
-    public static protectedApiV2ProtectedGet(): CancelablePromise<any> {
+    public static authApiV2AuthGet(
+        code: string,
+    ): CancelablePromise<any> {
         return __request({
             method: 'GET',
-            path: `/api/v2/protected`,
+            path: `/api/v2/auth`,
+            query: {
+                'code': code,
+            },
+            errors: {
+                422: `Validation Error`,
+            },
         });
     }
 

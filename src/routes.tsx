@@ -30,8 +30,8 @@ const AppRoutes = (
 			<Route path="/login" element={<LoginComponent/>} />
 			<Route path="/logout" element={<LogoutComponent/>} />
 			<Route path="/register" element={<RegisterComponent/>} />
-			<Route path="/auth" element={<AuthComponent/>} />
 			<Route path="/auth/login" element={<RedirectLoginComponent/>} />
+			<Route path="/auth" element={<AuthComponent/>} />
 		</Routes>
 	</BrowserRouter>
 );

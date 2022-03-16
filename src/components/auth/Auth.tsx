@@ -10,10 +10,10 @@ export const Auth = (): JSX.Element => {
 	const cookies = new Cookies();
 
 	useEffect(() => {
-		const token = cookies.get("Authorization").replace("Bearer ", "");
-		if (token !== undefined && token !== "none") {
-
-			V2.OpenAPI.TOKEN =token;
+		const header = cookies.get("Authorization");
+		if (header !== undefined && header !== "none") {
+			const token = header.replace("Bearer ", "")
+			V2.OpenAPI.TOKEN = token;
 			return dispatch({
 				type: SET_USER,
 				Authorization: `Bearer ${token}`,

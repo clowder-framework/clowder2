@@ -50,7 +50,7 @@ export const Register = (): JSX.Element => {
 	const [promptError, setPromptError] = useState(false);
 
 	useEffect(()=>{
-		if (registerSucceeded) history("/login");
+		if (registerSucceeded) history("/auth/login");
 	}, [registerSucceeded])
 
 	const changeUsername = (event: React.ChangeEvent<HTMLInputElement>) => {
