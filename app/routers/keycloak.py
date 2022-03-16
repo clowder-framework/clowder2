@@ -1,7 +1,7 @@
 import json
 
 import requests
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Depends, Security
 from keycloak.exceptions import KeycloakAuthenticationError, KeycloakGetError
 from pydantic import Json
 from pymongo import MongoClient
@@ -10,7 +10,7 @@ from starlette.responses import RedirectResponse
 
 from app import keycloak, dependencies
 from app.config import settings
-from app.keycloak import keycloak_openid
+from app.keycloak import keycloak_openid, get_token, oauth2_scheme
 from app.models.users import UserIn, UserDB
 
 router = APIRouter()
@@ -69,17 +69,6 @@ async def auth(
     token_body = json.loads(token_response.content)
     access_token = token_body["access_token"]
 
-    # get identity provider token if enabled. Here is an example for globus.
-    # TODO add for loop to do this for all idps. Move to standalone util.
-    if "globus" in settings.keycloak_ipds:
-        idp_url = f"{settings.auth_base}/auth/realms/{settings.auth_realm}/broker/globus/token"
-        idp_headers = {
-            "Content-Type": "application/x-www-form-urlencoded",
-            "Authorization": f"Bearer {access_token}",
-        }
-        idp_token = requests.request("GET", idp_url, headers=idp_headers)
-        itp_token_body = json.loads(idp_token.content)
-
     # create user in db if it doesn't already exist
     userinfo = keycloak_openid.userinfo(access_token)
     keycloak_id = userinfo["sub"]
@@ -100,3 +89,29 @@ async def auth(
     response = RedirectResponse(url=auth_url)
     response.set_cookie("Authorization", value=f"Bearer {access_token}")
     return response
+
+
+@router.get("/broker/{identity_provider}/token")
+def get_idenity_provider_token(
+    identity_provider: str, access_token: str = Security(oauth2_scheme)
+) -> Json:
+    """Get identity provider JWT token from keyclok. Keycloak must be configured to store external tokens."""
+    if identity_provider in settings.keycloak_ipds:
+        idp_url = f"{settings.auth_base}/auth/realms/{settings.auth_realm}/broker/{identity_provider}/token"
+        idp_headers = {
+            "Content-Type": "application/x-www-form-urlencoded",
+            "Authorization": f"Bearer {access_token}",
+        }
+        idp_token = requests.request("GET", idp_url, headers=idp_headers)
+        # FIXME is there a better way to know if the token as expired and the above call did not go through?
+        idp_token.raise_for_status()
+        itp_token_body = json.loads(idp_token.content)
+        return itp_token_body
+    else:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail={
+                "error_msg": f"Identy provider [{identity_provider}] not recognized."
+            },
+            headers={"WWW-Authenticate": "Bearer"},
+        )
