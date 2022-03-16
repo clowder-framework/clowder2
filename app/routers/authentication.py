@@ -1,29 +1,43 @@
 import json
 
-from bson import ObjectId
-from fastapi import APIRouter, Depends, HTTPException
 from fastapi import APIRouter, HTTPException, Depends
 from keycloak.exceptions import KeycloakAuthenticationError, KeycloakGetError
 from passlib.hash import bcrypt
 from pymongo import MongoClient
 from starlette import status
-from app.keycloak import get_user
 
 from app import dependencies
-from app.config import settings
+from app.keycloak import create_user
 from app.keycloak import keycloak_openid
-from app.models.users import UserDB, UserIn
+from app.models.users import UserDB, UserIn, UserOut
 
 router = APIRouter()
 
 
-@router.post("/users", response_model=UserDB)
+@router.post("/users", response_model=UserOut)
 async def save_user(userIn: UserIn, db: MongoClient = Depends(dependencies.get_db)):
+
+    try:
+        keycloak_user = await create_user(
+            userIn.email, userIn.password, userIn.first_name, userIn.last_name
+        )
+    except KeycloakGetError as e:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=json.loads(e.error_message),
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    # create local user
     hashed_password = bcrypt.hash(userIn.password)
-    userDB = UserDB(**userIn.dict(), hashed_password=hashed_password)
+    userDB = UserDB(
+        **userIn.dict(),
+        hashed_password=hashed_password,
+        keycloak_id=keycloak_user,
+    )
     res = await db["users"].insert_one(userDB.to_mongo())
     found = await db["users"].find_one({"_id": res.inserted_id})
-    return UserDB.from_mongo(found).dict(exclude={"create_at"})
+    return UserOut.from_mongo(found).dict(exclude={"create_at"})
 
 
 @router.post("/login")
