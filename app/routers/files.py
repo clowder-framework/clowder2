@@ -16,20 +16,18 @@ from pydantic import Json
 from pymongo import MongoClient
 
 from app import dependencies
-from app.auth import AuthHandler
 from app.config import settings
 from app.models.files import FileIn, FileOut, FileVersion
 from app.models.users import UserOut
+from app.keycloak import get_user
 
 router = APIRouter()
-
-auth_handler = AuthHandler()
 
 
 @router.put("/{file_id}", response_model=FileOut)
 async def update_file(
     file_id: str,
-    user_id=Depends(auth_handler.auth_wrapper),
+    user_id=Depends(get_user),
     db: MongoClient = Depends(dependencies.get_db),
     fs: Minio = Depends(dependencies.get_fs),
     file: UploadFile = File(...),
@@ -80,7 +78,6 @@ async def update_file(
 @router.get("/{file_id}")
 async def download_file(
     file_id: str,
-    user_id=Depends(auth_handler.auth_wrapper),
     db: MongoClient = Depends(dependencies.get_db),
     fs: Minio = Depends(dependencies.get_fs),
 ):
@@ -104,7 +101,6 @@ async def download_file(
 @router.delete("/{file_id}")
 async def delete_file(
     file_id: str,
-    user_id=Depends(auth_handler.auth_wrapper),
     db: MongoClient = Depends(dependencies.get_db),
     fs: Minio = Depends(dependencies.get_fs),
 ):
@@ -130,7 +126,6 @@ async def delete_file(
 async def get_file_summary(
     file_id: str,
     db: MongoClient = Depends(dependencies.get_db),
-    fs: Minio = Depends(dependencies.get_fs),
 ):
     if (file := await db["files"].find_one({"_id": ObjectId(file_id)})) is not None:
         # TODO: Incrementing too often (3x per page view)
@@ -145,7 +140,6 @@ async def get_file_summary(
 async def get_file_versions(
     file_id: str,
     db: MongoClient = Depends(dependencies.get_db),
-    fs: Minio = Depends(dependencies.get_fs),
     skip: int = 0,
     limit: int = 20,
 ):

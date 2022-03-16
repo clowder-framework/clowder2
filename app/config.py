@@ -47,7 +47,6 @@ class Settings(BaseSettings):
     auth_client_secret = ""
 
     # keycloak local config
-    keycloak_enabled = True
     keycloak_username = "admin"
     keycloak_password = "admin"
     # user here means where the token will be requested from

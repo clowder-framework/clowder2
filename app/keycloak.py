@@ -41,7 +41,8 @@ oauth2_scheme = OAuth2AuthorizationCodeBearer(
 )
 
 
-async def get_auth(token: str = Security(oauth2_scheme)) -> Json:
+async def get_token(token: str = Security(oauth2_scheme)) -> Json:
+    """Decode token. Use to secure endpoints."""
     try:
         # See https://github.com/marcospereirampj/python-keycloak/issues/89
         return keycloak_openid.decode_token(
@@ -55,6 +56,10 @@ async def get_auth(token: str = Security(oauth2_scheme)) -> Json:
             detail=str(e),  # "Invalid authentication credentials",
             headers={"WWW-Authenticate": "Bearer"},
         )
+
+
+async def get_user(identity: Json = Depends(get_token)):
+    return identity["preferred_username"]
 
 
 async def get_current_user(
@@ -83,7 +88,7 @@ async def get_current_username(token: str = Security(oauth2_scheme)) -> str:
         )
 
 
-async def get_current_keycloak_user_id(identity: Json = Depends(get_auth)) -> str:
+async def get_current_user_id(identity: Json = Depends(get_token)) -> str:
     """Retrieve internal Keycloak id."""
     keycloak_id = identity["sub"]
     return keycloak_id

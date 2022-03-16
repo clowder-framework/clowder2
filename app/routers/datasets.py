@@ -11,7 +11,7 @@ from pymongo import MongoClient
 
 from app import keycloak
 from app import dependencies
-from app.auth import AuthHandler
+from app.keycloak import get_user
 from app.models.datasets import DatasetBase, DatasetIn, DatasetDB, DatasetOut
 from app.config import settings
 from app.models.files import FileIn, FileOut, FileVersion, FileDB
@@ -20,8 +20,6 @@ from app.models.pyobjectid import PyObjectId
 from app.models.users import UserOut
 
 router = APIRouter()
-
-auth_handler = AuthHandler()
 
 clowder_bucket = os.getenv("MINIO_BUCKET_NAME", "clowder")
 
@@ -41,14 +39,14 @@ async def save_dataset(
 
 @router.get("", response_model=List[DatasetOut])
 async def get_datasets(
-    user_id=Depends(keycloak.get_current_username),
+    user_id=Depends(get_user),
     db: MongoClient = Depends(dependencies.get_db),
     skip: int = 0,
     limit: int = 2,
     mine: bool = False,
 ):
     datasets = []
-    if False:
+    if mine:
         for doc in (
             await db["datasets"]
             .find({"author.email": user_id})
@@ -102,6 +100,7 @@ async def edit_dataset(
     dataset_id: str,
     dataset_info: DatasetBase,
     db: MongoClient = Depends(dependencies.get_db),
+    user_id=Depends(get_user),
 ):
     if (
         dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
@@ -146,7 +145,7 @@ async def delete_dataset(
 async def add_folder(
     dataset_id: str,
     folder_in: FolderIn,
-    user_id=Depends(auth_handler.auth_wrapper),
+    user_id=Depends(get_user),
     db: MongoClient = Depends(dependencies.get_db),
 ):
     user = await db["users"].find_one({"_id": ObjectId(user_id)})
@@ -209,7 +208,7 @@ async def delete_folder(
 async def save_file(
     dataset_id: str,
     folder_id: Optional[str] = Form(None),
-    user_id=Depends(auth_handler.auth_wrapper),
+    user_id=Depends(get_user),
     db: MongoClient = Depends(dependencies.get_db),
     fs: Minio = Depends(dependencies.get_fs),
     file: UploadFile = File(...),

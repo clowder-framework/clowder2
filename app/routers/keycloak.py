@@ -23,7 +23,7 @@ async def login() -> RedirectResponse:
 
 
 @router.get("/logout")
-async def logout(token: Json = Depends(keycloak.get_auth)):
+async def logout(token: Json = Depends(keycloak.get_token)):
     """Logout of keycloak."""
     keycloak_openid.logout(token["refresh_token"])
     return RedirectResponse(settings.frontend_url)

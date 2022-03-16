@@ -3,13 +3,11 @@ from fastapi import FastAPI, APIRouter, Depends
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import settings
-from app.keycloak import create_realm_and_client
+from app.keycloak import create_realm_and_client, get_token
 from app.routers import (
     folders,
 )
 from app.routers import users, files, datasets, collections, authentication, keycloak
-from app.config import settings
-from app.routers.authentication import auth_handler
 
 app = FastAPI(
     title=settings.APP_NAME, openapi_url=f"{settings.API_V2_STR}/openapi.json"
@@ -28,34 +26,33 @@ api_router.include_router(
     users.router,
     prefix="/users",
     tags=["users"],
-    dependencies=[Depends(auth_handler.auth_wrapper)],
+    dependencies=[Depends(get_token)],
 )
 api_router.include_router(
     files.router,
     prefix="/files",
     tags=["files"],
-    dependencies=[Depends(auth_handler.auth_wrapper)],
+    dependencies=[Depends(get_token)],
 )
 api_router.include_router(
     datasets.router,
     prefix="/datasets",
     tags=["datasets"],
-    dependencies=[Depends(auth_handler.auth_wrapper)],
+    dependencies=[Depends(get_token)],
 )
 api_router.include_router(
     collections.router,
     prefix="/collections",
     tags=["collections"],
-    dependencies=[Depends(auth_handler.auth_wrapper)],
+    dependencies=[Depends(get_token)],
 )
 api_router.include_router(
     folders.router,
     prefix="/folders",
     tags=["folders"],
-    dependencies=[Depends(auth_handler.auth_wrapper)],
+    dependencies=[Depends(get_token)],
 )
 api_router.include_router(authentication.router, tags=["login"])
-api_router.include_router(folders.router, prefix="/folders", tags=["folders"])
 api_router.include_router(keycloak.router, prefix="/auth", tags=["auth"])
 
 app.include_router(api_router, prefix=settings.API_V2_STR)

@@ -3,16 +3,16 @@ from typing import List
 
 from bson import ObjectId
 from fastapi import APIRouter, HTTPException, Depends
+from keycloak.exceptions import KeycloakGetError
+from passlib.hash import bcrypt
 from pymongo import MongoClient
 from starlette import status
 
 from app import dependencies
 from app.config import settings
 from app.keycloak import create_user
-from keycloak.exceptions import KeycloakGetError
-from app.models.users import UserDB, UserIn, UserOut
-from passlib.hash import bcrypt
 from app.models.users import UserDB, UserOut
+from app.models.users import UserIn
 
 router = APIRouter()
 
