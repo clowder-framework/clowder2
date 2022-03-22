@@ -12,8 +12,7 @@ from .config import settings
 from fastapi import Security, HTTPException, status, Depends
 from pydantic import Json
 
-from .models.users import get_user_out
-
+from .models.users import get_user_out, UserOut
 
 # Keycloak open id client configuration
 keycloak_openid = KeycloakOpenID(
@@ -65,7 +64,7 @@ async def get_user(identity: Json = Depends(get_token)):
 async def get_current_user(
     token: str = Security(oauth2_scheme),
     db: MongoClient = Depends(dependencies.get_db),
-) -> str:
+) -> UserOut:
     """Retrieve the user object from Mongo by first getting user id from JWT and then querying Mongo.
     Potentially expensive. Use `get_current_username` if all you need is user name.
     """
@@ -82,7 +81,7 @@ async def get_current_username(token: str = Security(oauth2_scheme)) -> str:
     # expired token
     except KeycloakAuthenticationError as e:
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
+            status_code=e.response_code,
             detail=json.loads(e.error_message),
             headers={"WWW-Authenticate": "Bearer"},
         )

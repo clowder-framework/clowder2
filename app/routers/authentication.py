@@ -4,7 +4,6 @@ from fastapi import APIRouter, HTTPException, Depends
 from keycloak.exceptions import KeycloakAuthenticationError, KeycloakGetError
 from passlib.hash import bcrypt
 from pymongo import MongoClient
-from starlette import status
 
 from app import dependencies
 from app.keycloak import create_user
@@ -23,7 +22,7 @@ async def save_user(userIn: UserIn, db: MongoClient = Depends(dependencies.get_d
         )
     except KeycloakGetError as e:
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
+            status_code=e.response_code,
             detail=json.loads(e.error_message),
             headers={"WWW-Authenticate": "Bearer"},
         )
@@ -48,14 +47,14 @@ async def login(userIn: UserIn, db: MongoClient = Depends(dependencies.get_db)):
     # bad credentials
     except KeycloakAuthenticationError as e:
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
+            status_code=e.response_code,
             detail=json.loads(e.error_message),
             headers={"WWW-Authenticate": "Bearer"},
         )
     # account not fully setup (for example if new password is set to temporary)
     except KeycloakGetError as e:
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
+            status_code=e.response_code,
             detail=json.loads(e.error_message),
             headers={"WWW-Authenticate": "Bearer"},
         )

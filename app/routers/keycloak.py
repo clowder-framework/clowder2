@@ -38,14 +38,14 @@ async def login(userIn: UserIn):
     # bad credentials
     except KeycloakAuthenticationError as e:
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
+            status_code=e.response_code,
             detail=json.loads(e.error_message),
             headers={"WWW-Authenticate": "Bearer"},
         )
     # account not fully setup (for example if new password is set to temporary)
     except KeycloakGetError as e:
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
+            status_code=e.response_code,
             detail=json.loads(e.error_message),
             headers={"WWW-Authenticate": "Bearer"},
         )

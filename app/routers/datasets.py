@@ -11,7 +11,7 @@ from pymongo import MongoClient
 
 from app import keycloak
 from app import dependencies
-from app.keycloak import get_user
+from app.keycloak import get_user, get_current_user
 from app.models.datasets import DatasetBase, DatasetIn, DatasetDB, DatasetOut
 from app.config import settings
 from app.models.files import FileIn, FileOut, FileVersion, FileDB
@@ -145,12 +145,11 @@ async def delete_dataset(
 async def add_folder(
     dataset_id: str,
     folder_in: FolderIn,
-    user_id=Depends(get_user),
+    user=Depends(get_current_user),
     db: MongoClient = Depends(dependencies.get_db),
 ):
-    user = await db["users"].find_one({"_id": ObjectId(user_id)})
     folder_db = FolderDB(
-        **folder_in.dict(), author=UserOut(**user), dataset_id=PyObjectId(dataset_id)
+        **folder_in.dict(), author=user, dataset_id=PyObjectId(dataset_id)
     )
     parent_folder = folder_in.parent_folder
     if parent_folder is not None:

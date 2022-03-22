@@ -22,6 +22,7 @@ app.add_middleware(
 )
 
 api_router = APIRouter()
+api_router.include_router(authentication.router, tags=["login"])
 api_router.include_router(
     users.router,
     prefix="/users",
@@ -52,9 +53,7 @@ api_router.include_router(
     tags=["folders"],
     dependencies=[Depends(get_token)],
 )
-api_router.include_router(authentication.router, tags=["login"])
 api_router.include_router(keycloak.router, prefix="/auth", tags=["auth"])
-
 app.include_router(api_router, prefix=settings.API_V2_STR)
 
 
