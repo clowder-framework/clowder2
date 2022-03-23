@@ -97,10 +97,11 @@ async def get_dataset_files(
     return files
 
 
-@router.put("/{dataset_id}", response_model=DatasetBase)
+@router.put("/{dataset_id}", response_model=DatasetOut)
 async def edit_dataset(
     dataset_id: str,
     dataset_info: DatasetBase,
+    user_id=Depends(auth_handler.auth_wrapper),
     db: MongoClient = Depends(dependencies.get_db),
 ):
     if (
@@ -109,7 +110,7 @@ async def edit_dataset(
         # TODO: Refactor this with permissions checks etc.
         ds = dict(dataset_info) if dataset_info is not None else {}
         user = await db["users"].find_one({"_id": ObjectId(user_id)})
-        ds["author"] = user["_id"]
+        ds["author"] = UserOut(**user)
         ds["modified"] = datetime.datetime.utcnow()
         try:
             dataset.update(ds)
@@ -118,7 +119,7 @@ async def edit_dataset(
             db["datasets"].replace_one({"_id": ObjectId(dataset_id)}, dataset)
         except Exception as e:
             print(e)
-        return DatasetBase.from_mongo(dataset)
+        return DatasetOut.from_mongo(dataset)
     raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
 
 
