@@ -67,14 +67,6 @@ async def get_datasets(
 
 @router.get("/{dataset_id}", response_model=DatasetOut)
 async def get_dataset(dataset_id: str, db: MongoClient = Depends(dependencies.get_db)):
-    # if (
-    #     dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
-    # ) is not None:
-    #     if (
-    #         user := await db["users"].find_one({"_id": ObjectId(dataset["author"])})
-    #     ) is not None:
-    #         dataset["author"] = user
-    #         return Dataset.from_mongo(dataset)
     if (
         dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
     ) is not None:
