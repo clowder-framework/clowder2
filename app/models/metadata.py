@@ -2,21 +2,19 @@ from datetime import datetime
 from typing import Optional
 from enum import Enum
 
+from bson.dbref import DBRef
 from pydantic import Field, validator
 
 from app.models.mongomodel import MongoModel
 from app.models.pyobjectid import PyObjectId
 from app.models.users import UserOut
-
-
-class ExtractorOut(MongoModel):
-    pass
+from app.models.extractors import ExtractorOut
 
 
 class MetadataField(MongoModel):
     name: str
     type: str = "str"  # str,int,float,bool
-    allow_many: bool = False  # whether a list[type] is acceptable
+    list: bool = False  # whether a list[type] is acceptable
 
 
 class MetadataDefinition(MongoModel):
@@ -35,20 +33,13 @@ class MetadataDefinition(MongoModel):
 class MetadataAgent(MongoModel):
     creator: UserOut
     extractor: Optional[ExtractorOut]
-    client: str = "frontend"  # frontend, api, widget?
 
 
 class MetadataBase(MongoModel):
-    file_id: Optional[PyObjectId]
-    file_version: Optional[PyObjectId]
-    dataset_id: Optional[PyObjectId]
-    # does metadata need a version? or only when file bytes updated do we create new md document?
-    agent: MetadataAgent
     context: Optional[dict]  # https://json-ld.org/spec/latest/json-ld/#the-context
     context_url: Optional[str]  # single URL applying to contents
     definition: Optional[str]  # e.g.'map' used for validation
-    contents: dict = {}
-    key: Optional[str]  # can be arbitrary
+    contents: dict
 
     @validator("context")
     def contexts_are_valid(self, v):
@@ -59,16 +50,25 @@ class MetadataBase(MongoModel):
     @validator("context_url")
     def context_url_is_valid(self, v):
         if False:
-            raise ValueError("Problem with context.")
+            raise ValueError("Problem with context URL.")
+        return v
+
+    @validator("definition")
+    def definition_is_valid(self, v):
+        if False:
+            raise ValueError("Problem with definition.")
         return v
 
 
 class MetadataIn(MetadataBase):
-    pass
+    file: Optional[PyObjectId]
+    file_version: Optional[PyObjectId]
+    dataset: Optional[PyObjectId]
 
 
 class MetadataDB(MetadataBase):
-
+    resource: DBRef
+    agent: MetadataAgent
     created: datetime = Field(default_factory=datetime.utcnow)
 
 

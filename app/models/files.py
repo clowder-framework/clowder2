@@ -26,7 +26,7 @@ class FileIn(FileBase):
 class FileDB(FileBase):
     creator: UserOut
     created: datetime = Field(default_factory=datetime.utcnow)
-    version: str = "N/A"  # Minio version ID (if more than one version)
+    version: Optional[PyObjectId]
     dataset_id: PyObjectId
     folder_id: Optional[PyObjectId]
     views: int = 0

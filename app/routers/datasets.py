@@ -4,6 +4,7 @@ import os
 from typing import List, Optional
 
 from bson import ObjectId
+from bson.dbref import DBRef
 from fastapi import APIRouter, HTTPException, Depends, File, UploadFile
 from fastapi import Form
 from minio import Minio
@@ -17,6 +18,8 @@ from app.models.files import FileIn, FileOut, FileVersion, FileDB
 from app.models.folders import FolderOut, FolderIn, FolderDB
 from app.models.pyobjectid import PyObjectId
 from app.models.users import UserOut
+from app.models.extractors import ExtractorIn
+from app.models.metadata import MetadataAgent, MetadataIn, MetadataDB, MetadataOut
 
 router = APIRouter()
 
@@ -227,7 +230,7 @@ async def save_file(
         dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
     ) is not None:
         user = await db["users"].find_one({"_id": ObjectId(user_id)})
-        userOut = UserOut(**user)
+        user_out = UserOut(**user)
         if user is None:
             raise HTTPException(
                 status_code=401, detail=f"User not found. Session might have expired."
@@ -237,7 +240,7 @@ async def save_file(
             raise HTTPException(
                 status_code=404, detail=f"Dataset {dataset_id} not found"
             )
-        fileDB = FileDB(name=file.filename, creator=userOut, dataset_id=dataset["_id"])
+        fileDB = FileDB(name=file.filename, creator=user_out, dataset_id=dataset["_id"])
         if folder_id is not None:
             fileDB.folder_id = ObjectId(folder_id)
 
@@ -265,9 +268,49 @@ async def save_file(
         new_version = FileVersion(
             version_id=version_id,
             file_id=new_file_id,
-            creator=userOut,
+            creator=user_out,
         )
         await db["file_versions"].insert_one(new_version.to_mongo())
         return fileDB
     else:
         raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
+
+
+@router.post("/{dataset_id}/metadata", response_model=MetadataOut)
+async def add_metadata(
+    dataset_id: str,
+    in_metadata: MetadataIn,
+    extractor_info: dict = {},
+    user_id=Depends(auth_handler.auth_wrapper),
+    db: MongoClient = Depends(dependencies.get_db),
+):
+    if (
+        dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
+    ) is not None:
+        user = await db["users"].find_one({"_id": ObjectId(user_id)})
+        user = UserOut(**user)
+        dataset_ref = DBRef(collection="datasets", id=dataset.id)
+
+        # Build MetadataAgent depending on whether extractor info is present
+        if len(extractor_info) > 0:
+            extractor_in = ExtractorIn(**extractor_info.dict())
+            if (
+                extractor := await db["extractors"].find_one(
+                    {"_id": extractor_in.id, "version": extractor_in.version}
+                )
+            ) is not None:
+                agent = MetadataAgent(creator=user, extractor=extractor)
+            else:
+                raise HTTPException(status_code=404, detail=f"Extractor not found")
+        else:
+            agent = MetadataAgent(creator=user)
+
+    metadata = MetadataDB(
+        **in_metadata.dict(),
+        resource=dataset_ref,
+        agent=agent,
+    )
+    new_metadata = await db["metadata"].insert_one(metadata.to_mongo())
+    found = await db["metadata"].find_one({"_id": new_metadata.inserted_id})
+    metadata_out = MetadataOut.from_mongo(found)
+    return metadata_out

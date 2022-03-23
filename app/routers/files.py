@@ -3,6 +3,7 @@ from datetime import datetime
 from typing import Optional, List
 
 from bson import ObjectId
+from bson.dbref import DBRef
 from fastapi import (
     APIRouter,
     HTTPException,
@@ -20,6 +21,8 @@ from app.auth import AuthHandler
 from app.config import settings
 from app.models.files import FileIn, FileOut, FileVersion
 from app.models.users import UserOut
+from app.models.extractors import ExtractorIn
+from app.models.metadata import MetadataAgent, MetadataIn, MetadataDB, MetadataOut
 
 router = APIRouter()
 
@@ -181,3 +184,41 @@ async def get_file_versions(
         return mongo_versions
 
     raise HTTPException(status_code=404, detail=f"File {file_id} not found")
+
+
+@router.post("/{file_id}/metadata", response_model=MetadataOut)
+async def add_metadata(
+    file_id: str,
+    in_metadata: MetadataIn,
+    extractor_info: dict = {},
+    user_id=Depends(auth_handler.auth_wrapper),
+    db: MongoClient = Depends(dependencies.get_db),
+):
+    if (file := await db["files"].find_one({"_id": ObjectId(file_id)})) is not None:
+        user = await db["users"].find_one({"_id": ObjectId(user_id)})
+        user = UserOut(**user)
+        file_ref = DBRef(collection="files", id=file.id, version=file.version)
+
+        # Build MetadataAgent depending on whether extractor info is present
+        if len(extractor_info) > 0:
+            extractor_in = ExtractorIn(**extractor_info.dict())
+            if (
+                extractor := await db["extractors"].find_one(
+                    {"_id": extractor_in.id, "version": extractor_in.version}
+                )
+            ) is not None:
+                agent = MetadataAgent(creator=user, extractor=extractor)
+            else:
+                raise HTTPException(status_code=404, detail=f"Extractor not found")
+        else:
+            agent = MetadataAgent(creator=user)
+
+    metadata = MetadataDB(
+        **in_metadata.dict(),
+        resource=file_ref,
+        agent=agent,
+    )
+    new_metadata = await db["metadata"].insert_one(metadata.to_mongo())
+    found = await db["metadata"].find_one({"_id": new_metadata.inserted_id})
+    metadata_out = MetadataOut.from_mongo(found)
+    return metadata_out
