@@ -116,9 +116,9 @@ async def edit_dataset(
             dataset.update(ds)
             dataset["_id"] = dataset_id
             dataset["modified"] = datetime.datetime.utcnow()
-            db["datasets"].replace_one({"_id": ObjectId(dataset_id)}, dataset)
+            await db["datasets"].replace_one({"_id": ObjectId(dataset_id)}, DatasetDB(**dataset).to_mongo())
         except Exception as e:
-            print(e)
+            raise HTTPException(status_code=500, detail=e.args[0])
         return DatasetOut.from_mongo(dataset)
     raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
 
