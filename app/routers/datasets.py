@@ -114,7 +114,6 @@ async def edit_dataset(
         ds["modified"] = datetime.datetime.utcnow()
         try:
             dataset.update(ds)
-            dataset["_id"] = dataset_id
             dataset["modified"] = datetime.datetime.utcnow()
             await db["datasets"].replace_one({"_id": ObjectId(dataset_id)}, DatasetDB(**dataset).to_mongo())
         except Exception as e:
