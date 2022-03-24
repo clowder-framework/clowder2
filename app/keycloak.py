@@ -3,7 +3,7 @@ import json
 
 from fastapi.security import OAuth2AuthorizationCodeBearer
 from keycloak.keycloak_openid import KeycloakOpenID
-from keycloak.exceptions import KeycloakAuthenticationError
+from keycloak.exceptions import KeycloakAuthenticationError, KeycloakGetError
 from keycloak.keycloak_admin import KeycloakAdmin
 from pymongo import MongoClient
 
@@ -47,11 +47,11 @@ async def get_token(token: str = Security(oauth2_scheme)) -> Json:
         return keycloak_openid.decode_token(
             token,
             key=await get_idp_public_key(),
-            options={"verify_signature": True, "verify_aud": False, "exp": True},
+            options={"verify_aud": False},
         )
-    except Exception as e:
+    except KeycloakGetError as e:
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
+            status_code=e.response_code,
             detail=str(e),  # "Invalid authentication credentials",
             headers={"WWW-Authenticate": "Bearer"},
         )
@@ -74,7 +74,7 @@ async def get_current_user(
 
 
 async def get_current_username(token: str = Security(oauth2_scheme)) -> str:
-    """Retrieve the user id from the JWT token."""
+    """Retrieve the user id from the JWT token. Does not query MongoDB."""
     try:
         userinfo = keycloak_openid.userinfo(token)
         return userinfo["preferred_username"]
@@ -88,7 +88,7 @@ async def get_current_username(token: str = Security(oauth2_scheme)) -> str:
 
 
 async def get_current_user_id(identity: Json = Depends(get_token)) -> str:
-    """Retrieve internal Keycloak id."""
+    """Retrieve internal Keycloak id. Does not query MongoDB."""
     keycloak_id = identity["sub"]
     return keycloak_id
 

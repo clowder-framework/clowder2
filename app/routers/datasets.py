@@ -207,17 +207,14 @@ async def delete_folder(
 async def save_file(
     dataset_id: str,
     folder_id: Optional[str] = Form(None),
-    user_id=Depends(get_user),
+    user=Depends(get_current_user),
     db: MongoClient = Depends(dependencies.get_db),
     fs: Minio = Depends(dependencies.get_fs),
     file: UploadFile = File(...),
-    file_info: Optional[FileIn] = None,
 ):
     if (
         dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
     ) is not None:
-        user = await db["users"].find_one({"_id": ObjectId(user_id)})
-        userOut = UserOut(**user)
         if user is None:
             raise HTTPException(
                 status_code=401, detail=f"User not found. Session might have expired."
@@ -227,7 +224,7 @@ async def save_file(
             raise HTTPException(
                 status_code=404, detail=f"Dataset {dataset_id} not found"
             )
-        fileDB = FileDB(name=file.filename, creator=userOut, dataset_id=dataset["_id"])
+        fileDB = FileDB(name=file.filename, creator=user, dataset_id=dataset["_id"])
         if folder_id is not None:
             fileDB.folder_id = ObjectId(folder_id)
 
@@ -255,7 +252,7 @@ async def save_file(
         new_version = FileVersion(
             version_id=version_id,
             file_id=new_file_id,
-            creator=userOut,
+            creator=user,
         )
         await db["file_versions"].insert_one(new_version.to_mongo())
         return fileDB
