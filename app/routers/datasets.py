@@ -235,16 +235,15 @@ async def save_file(
             raise HTTPException(
                 status_code=401, detail=f"User not found. Session might have expired."
             )
-        dataset = await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
-        if dataset is None:
-            raise HTTPException(
-                status_code=404, detail=f"Dataset {dataset_id} not found"
-            )
         fileDB = FileDB(name=file.filename, creator=user_out, dataset_id=dataset["_id"])
         if folder_id is not None:
-            fileDB.folder_id = ObjectId(folder_id)
+            if (
+                folder := await db["folders"].find_one({"_id": ObjectId(folder_id)})
+            ) is not None:
+                fileDB.folder_id = folder.id
+        else:
+            raise HTTPException(status_code=404, detail=f"Folder {folder_id} not found")
 
-        # Add to db and update dataset
         new_file = await db["files"].insert_one(fileDB.to_mongo())
         new_file_id = new_file.inserted_id
 
@@ -261,7 +260,8 @@ async def save_file(
                 part_size=settings.MINIO_UPLOAD_CHUNK_SIZE,
             )  # async write chunk to minio
             version_id = response.version_id
-        fileDB.version = version_id
+        fileDB.version_id = version_id
+        fileDB.version_num = 1
         await db["files"].replace_one({"_id": ObjectId(new_file_id)}, fileDB.to_mongo())
 
         # Add FileVersion entry and update file

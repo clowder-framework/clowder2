@@ -12,7 +12,7 @@ from app.models.users import UserOut
 
 class ExtractorBase(MongoModel):
     name: str
-    version: str
+    version: float = 1.0
     description: str = ""
 
 

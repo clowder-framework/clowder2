@@ -9,6 +9,7 @@ from fastapi import (
     HTTPException,
     Depends,
     File,
+    Form,
     UploadFile,
 )
 from fastapi.responses import StreamingResponse
@@ -19,7 +20,7 @@ from pymongo import MongoClient
 from app import dependencies
 from app.auth import AuthHandler
 from app.config import settings
-from app.models.files import FileIn, FileOut, FileVersion
+from app.models.files import FileIn, FileDB, FileOut, FileVersion
 from app.models.users import UserOut
 from app.models.extractors import ExtractorIn
 from app.models.metadata import MetadataAgent, MetadataIn, MetadataDB, MetadataOut
@@ -36,48 +37,47 @@ async def update_file(
     db: MongoClient = Depends(dependencies.get_db),
     fs: Minio = Depends(dependencies.get_fs),
     file: UploadFile = File(...),
-    file_info: Optional[Json[FileIn]] = None,
 ):
-    # First, add to database and get unique ID
-    f = dict(file_info) if file_info is not None else {}
-    user_q = await db["users"].find_one({"_id": ObjectId(user_id)})
-    user = UserOut(**user_q)
-    # TODO: Harden this piece for when data is missing
-    existing_q = await db["files"].find_one({"_id": ObjectId(file_id)})
-    existing_file = FileOut.from_mongo(existing_q)
+    if (file_q := await db["files"].find_one({"_id": ObjectId(file_id)})) is not None:
+        # First, add to database and get unique ID
+        user_q = await db["users"].find_one({"_id": ObjectId(user_id)})
+        user = UserOut(**user_q)
+        existing_file = FileOut.from_mongo(file_q)
 
-    # Update file in Minio and get the new version IDs
-    version_id = None
-    while content := file.file.read(
-        settings.MINIO_UPLOAD_CHUNK_SIZE
-    ):  # async read chunk
-        response = fs.put_object(
-            settings.MINIO_BUCKET_NAME,
-            str(existing_file.id),
-            io.BytesIO(content),
-            length=-1,
-            part_size=settings.MINIO_UPLOAD_CHUNK_SIZE,
-        )  # async write chunk to minio
-        version_id = response.version_id
+        # Update file in Minio and get the new version IDs
+        version_id = None
+        while content := file.file.read(
+            settings.MINIO_UPLOAD_CHUNK_SIZE
+        ):  # async read chunk
+            response = fs.put_object(
+                settings.MINIO_BUCKET_NAME,
+                str(existing_file.id),
+                io.BytesIO(content),
+                length=-1,
+                part_size=settings.MINIO_UPLOAD_CHUNK_SIZE,
+            )  # async write chunk to minio
+            version_id = response.version_id
 
-    # Update version/creator/created flags
-    updated_file = dict(existing_file)
-    updated_file["name"] = file.filename
-    updated_file["creator"] = UserOut(**user)
-    updated_file["created"] = datetime.utcnow()
-    updated_file["version"] = version_id
-    updated_file["_id"] = existing_file.id
-    del updated_file["id"]
-    await db["files"].replace_one({"_id": ObjectId(file_id)}, updated_file)
+        # Update version/creator/created flags
+        updated_file = FileDB(**existing_file)
+        updated_file.name = file.filename
+        updated_file.creator = UserOut(**user)
+        updated_file.created = datetime.utcnow()
+        updated_file.version_id = version_id
+        updated_file.version_num = existing_file.version_num + 1
+        await db["files"].replace_one({"_id": ObjectId(file_id)}, updated_file)
 
-    # Put entry in FileVersion collection
-    new_version = FileVersion(
-        version_id=updated_file["version"],
-        file_id=existing_file.id,
-        creator=UserOut(**user),
-    )
-    await db["file_versions"].insert_one(dict(new_version))
-    return FileOut.from_mongo(updated_file)
+        # Put entry in FileVersion collection
+        new_version = FileVersion(
+            version_id=updated_file.version_id,
+            version_num=updated_file.version_num,
+            file_id=updated_file.id,
+            creator=UserOut(**user),
+        )
+        await db["file_versions"].insert_one(dict(new_version))
+        return FileOut.from_mongo(updated_file)
+    else:
+        raise HTTPException(status_code=404, detail=f"File {file_id} not found")
 
 
 @router.get("/{file_id}")
@@ -190,21 +190,34 @@ async def get_file_versions(
 async def add_metadata(
     file_id: str,
     in_metadata: MetadataIn,
-    extractor_info: dict = {},
+    file_version: Optional[int] = Form(None),
+    extractor_info: Optional[ExtractorIn] = Form(None),
     user_id=Depends(auth_handler.auth_wrapper),
     db: MongoClient = Depends(dependencies.get_db),
 ):
     if (file := await db["files"].find_one({"_id": ObjectId(file_id)})) is not None:
+        target_version = file.version
+        if file_version is not None:
+            if (
+                version_q := await db["file_versions"].find_one(
+                    {"file_id": ObjectId(file_id), "version_num": file_version}
+                )
+            ) is None:
+                raise HTTPException(
+                    status_code=404,
+                    detail=f"File version {file_version} does not exist",
+                )
+            target_version = file_version
+
         user = await db["users"].find_one({"_id": ObjectId(user_id)})
         user = UserOut(**user)
-        file_ref = DBRef(collection="files", id=file.id, version=file.version)
+        file_ref = DBRef(collection="files", id=file.id, version=target_version)
 
         # Build MetadataAgent depending on whether extractor info is present
-        if len(extractor_info) > 0:
-            extractor_in = ExtractorIn(**extractor_info.dict())
+        if extractor_info is not None:
             if (
                 extractor := await db["extractors"].find_one(
-                    {"_id": extractor_in.id, "version": extractor_in.version}
+                    {"_id": extractor_info.id, "version": extractor_info.version}
                 )
             ) is not None:
                 agent = MetadataAgent(creator=user, extractor=extractor)
@@ -213,12 +226,56 @@ async def add_metadata(
         else:
             agent = MetadataAgent(creator=user)
 
-    metadata = MetadataDB(
-        **in_metadata.dict(),
-        resource=file_ref,
-        agent=agent,
-    )
-    new_metadata = await db["metadata"].insert_one(metadata.to_mongo())
-    found = await db["metadata"].find_one({"_id": new_metadata.inserted_id})
-    metadata_out = MetadataOut.from_mongo(found)
-    return metadata_out
+        metadata = MetadataDB(
+            **in_metadata.dict(),
+            resource=file_ref,
+            agent=agent,
+        )
+        new_metadata = await db["metadata"].insert_one(metadata.to_mongo())
+        found = await db["metadata"].find_one({"_id": new_metadata.inserted_id})
+        metadata_out = MetadataOut.from_mongo(found)
+        return metadata_out
+
+
+@router.get("/{file_id}/metadata", response_model=MetadataOut)
+async def get_metadata(
+    file_id: str,
+    file_version: Optional[int] = Form(None),
+    all_versions: Optional[bool] = False,
+    extractor_name: Optional[str] = Form(None),
+    extractor_version: Optional[float] = Form(None),
+    user_id=Depends(auth_handler.auth_wrapper),
+    db: MongoClient = Depends(dependencies.get_db),
+):
+    if (file := await db["files"].find_one({"_id": ObjectId(file_id)})) is not None:
+        user = await db["users"].find_one({"_id": ObjectId(user_id)})
+        user = UserOut(**user)
+
+        query = {"resource.id": file_id}
+
+        if not all_versions:
+            # Default to latest version
+            target_version = file.version
+            if file_version is not None:
+                if (
+                    version_q := await db["file_versions"].find_one(
+                        {"file_id": ObjectId(file_id), "version_num": file_version}
+                    )
+                ) is None:
+                    raise HTTPException(
+                        status_code=404,
+                        detail=f"File version {file_version} does not exist",
+                    )
+                target_version = file_version
+            query["resource.version"] = target_version
+        if extractor_name is not None:
+            query["agent.extractor.name"] = extractor_name
+        if extractor_version is not None:
+            query["agent.extractor.version"] = extractor_version
+
+        metadata = []
+        async for md in db["metadata"].find(query):
+            metadata.append(MetadataOut.from_mongo(md))
+        return metadata
+    else:
+        raise HTTPException(status_code=404, detail=f"File {file_id} not found")
