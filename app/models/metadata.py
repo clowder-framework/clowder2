@@ -84,12 +84,13 @@ class MetadataBase(MongoModel):
 
 
 class MetadataIn(MetadataBase):
-    file: Optional[PyObjectId]
-    file_version: Optional[PyObjectId]
-    dataset: Optional[PyObjectId]
+    pass
 
 
 class MetadataDB(MetadataBase):
+    file: Optional[PyObjectId]
+    file_version: Optional[PyObjectId]
+    dataset: Optional[PyObjectId]
     resource: MongoDBRef
     agent: MetadataAgent
     created: datetime = Field(default_factory=datetime.utcnow)

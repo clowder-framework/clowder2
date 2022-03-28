@@ -246,8 +246,10 @@ async def save_file(
                 folder := await db["folders"].find_one({"_id": ObjectId(folder_id)})
             ) is not None:
                 fileDB.folder_id = folder.id
-        else:
-            raise HTTPException(status_code=404, detail=f"Folder {folder_id} not found")
+            else:
+                raise HTTPException(
+                    status_code=404, detail=f"Folder {folder_id} not found"
+                )
 
         new_file = await db["files"].insert_one(fileDB.to_mongo())
         new_file_id = new_file.inserted_id
