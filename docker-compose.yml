@@ -25,7 +25,7 @@ services:
     command: --api.insecure=true --providers.docker
     ports:
       # The HTTP port
-      - "3002:80"
+      - "80:80"
       # The Web UI (enabled by --api.insecure=true)
       - "8080:8080"
     volumes:
@@ -33,7 +33,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
 
   backend:
-    image: 'maxzilla2/clowder-fastapi'
+    image: 'clowder/clowder2-backend'
     build:
       context: .
       dockerfile: Dockerfile
@@ -46,10 +46,11 @@ services:
       - minio2
       - minio3
       - minio4
+      - keycloak
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.backend.rule=Host(`localhost`)"
-      - "traefik.http.services.backend.loadbalancer.server.port=80"
+      - "traefik.http.routers.backend.rule=Host(`clowder.docker.localhost`)"
+      - "traefik.http.services.backend.loadbalancer.server.port=8000"
 
   mongo:
     image: mongo:5.0
@@ -98,6 +99,35 @@ services:
       - minio3
       - minio4
 
+  postgres:
+      image: postgres
+      volumes:
+        - postgres_data:/var/lib/postgresql/data
+      environment:
+        POSTGRES_DB: keycloak
+        POSTGRES_USER: keycloak
+        POSTGRES_PASSWORD: password
+
+  keycloak:
+      image: quay.io/keycloak/keycloak:legacy
+      environment:
+        DB_VENDOR: POSTGRES
+        DB_ADDR: postgres
+        DB_DATABASE: keycloak
+        DB_USER: keycloak
+        DB_SCHEMA: public
+        DB_PASSWORD: password
+        KEYCLOAK_USER: admin
+        KEYCLOAK_PASSWORD: admin
+        # Uncomment the line below if you want to specify JDBC parameters. The parameter below is just an example, and it shouldn't be used in production without knowledge. It is highly recommended that you read the PostgreSQL JDBC driver documentation in order to use it.
+        #JDBC_PARAMS: "ssl=true"
+      depends_on:
+        - postgres
+      labels:
+        - "traefik.enable=true"
+        - "traefik.http.routers.keycloak.rule=Host(`localhost`) && PathPrefix(`/auth`)"
+        - "traefik.http.services.keycloak.loadbalancer.server.port=8080"
+
 ## By default this config uses default local driver,
 ## For custom volumes replace with volume driver configuration.
 volumes:
@@ -106,3 +136,4 @@ volumes:
   data2:
   data3:
   data4:
+  postgres_data:
