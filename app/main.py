@@ -1,4 +1,5 @@
 import uvicorn
+from pydantic import BaseConfig
 from fastapi import FastAPI, APIRouter
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -15,6 +16,7 @@ from app.config import settings
 app = FastAPI(
     title=settings.APP_NAME, openapi_url=f"{settings.API_V2_STR}/openapi.json"
 )
+BaseConfig.arbitrary_types_allowed = True
 
 app.add_middleware(
     CORSMiddleware,

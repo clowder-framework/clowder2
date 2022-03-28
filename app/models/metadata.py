@@ -3,12 +3,33 @@ from typing import Optional, List
 from enum import Enum
 
 from bson.dbref import DBRef
-from pydantic import Field, validator
+from pydantic import Field, validator, BaseModel, create_model
 
 from app.models.mongomodel import MongoModel
 from app.models.pyobjectid import PyObjectId
 from app.models.users import UserOut
 from app.models.extractors import ExtractorOut
+
+
+class MongoDBRef(BaseModel):
+    def __init__(
+        self, collection: str, resource_id: PyObjectId, version: Optional[int]
+    ):
+        if version is None:
+            self.dbref = DBRef(
+                collection=collection,
+                id=resource_id,
+            )
+        else:
+            self.dbref = DBRef(collection=collection, id=resource_id, version=version)
+            self.dbref = DBRef(collection=collection, id=resource_id, version=version)
+
+    __pydantic_model__ = create_model(
+        "DBRef",
+        collection=(str, "files"),
+        resource_id=(PyObjectId, ...),
+        version=(int, ...),
+    )
 
 
 class MetadataField(MongoModel):
@@ -69,7 +90,7 @@ class MetadataIn(MetadataBase):
 
 
 class MetadataDB(MetadataBase):
-    resource: DBRef
+    resource: MongoDBRef
     agent: MetadataAgent
     created: datetime = Field(default_factory=datetime.utcnow)
 

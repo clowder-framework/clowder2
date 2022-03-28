@@ -3,7 +3,6 @@ from datetime import datetime
 from typing import Optional, List
 
 from bson import ObjectId
-from bson.dbref import DBRef
 from fastapi import (
     APIRouter,
     HTTPException,
@@ -23,7 +22,13 @@ from app.config import settings
 from app.models.files import FileIn, FileDB, FileOut, FileVersion
 from app.models.users import UserOut
 from app.models.extractors import ExtractorIn
-from app.models.metadata import MetadataAgent, MetadataIn, MetadataDB, MetadataOut
+from app.models.metadata import (
+    MongoDBRef,
+    MetadataAgent,
+    MetadataIn,
+    MetadataDB,
+    MetadataOut,
+)
 
 router = APIRouter()
 
@@ -211,7 +216,7 @@ async def add_metadata(
 
         user = await db["users"].find_one({"_id": ObjectId(user_id)})
         user = UserOut(**user)
-        file_ref = DBRef(collection="files", id=file.id, version=target_version)
+        file_ref = MongoDBRef(collection="files", id=file.id, version=target_version)
 
         # Build MetadataAgent depending on whether extractor info is present
         if extractor_info is not None:

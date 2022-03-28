@@ -4,7 +4,6 @@ import os
 from typing import List, Optional
 
 from bson import ObjectId
-from bson.dbref import DBRef
 from fastapi import APIRouter, HTTPException, Depends, File, UploadFile
 from fastapi import Form
 from minio import Minio
@@ -19,7 +18,13 @@ from app.models.folders import FolderOut, FolderIn, FolderDB
 from app.models.pyobjectid import PyObjectId
 from app.models.users import UserOut
 from app.models.extractors import ExtractorIn
-from app.models.metadata import MetadataAgent, MetadataIn, MetadataDB, MetadataOut
+from app.models.metadata import (
+    MongoDBRef,
+    MetadataAgent,
+    MetadataIn,
+    MetadataDB,
+    MetadataOut,
+)
 
 router = APIRouter()
 
@@ -289,7 +294,7 @@ async def add_metadata(
     ) is not None:
         user = await db["users"].find_one({"_id": ObjectId(user_id)})
         user = UserOut(**user)
-        dataset_ref = DBRef(collection="datasets", id=dataset.id)
+        dataset_ref = MongoDBRef(collection="datasets", id=dataset.id)
 
         # Build MetadataAgent depending on whether extractor info is present
         if len(extractor_info) > 0:
