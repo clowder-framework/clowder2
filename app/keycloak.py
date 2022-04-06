@@ -2,6 +2,7 @@
 import json
 
 from fastapi.security import OAuth2AuthorizationCodeBearer
+from jose import ExpiredSignatureError
 from keycloak.keycloak_openid import KeycloakOpenID
 from keycloak.exceptions import KeycloakAuthenticationError, KeycloakGetError
 from keycloak.keycloak_admin import KeycloakAdmin
@@ -48,6 +49,14 @@ async def get_token(token: str = Security(oauth2_scheme)) -> Json:
             token,
             key=await get_idp_public_key(),
             options={"verify_aud": False},
+        )
+    except ExpiredSignatureError as e:
+        raise HTTPException(
+            status_code=401,
+            detail={
+                "error": "JWT token signature expired"
+            },  # "Invalid authentication credentials",
+            headers={"WWW-Authenticate": "Bearer"},
         )
     except KeycloakGetError as e:
         raise HTTPException(
