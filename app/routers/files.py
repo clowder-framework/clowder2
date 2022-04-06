@@ -17,9 +17,9 @@ from pymongo import MongoClient
 
 from app import dependencies
 from app.config import settings
-from app.models.files import FileIn, FileOut, FileVersion
+from app.models.files import FileIn, FileOut, FileVersion, FileDB
 from app.models.users import UserOut
-from app.keycloak import get_user
+from app.keycloak import get_user, get_current_user
 
 router = APIRouter()
 
@@ -27,16 +27,12 @@ router = APIRouter()
 @router.put("/{file_id}", response_model=FileOut)
 async def update_file(
     file_id: str,
-    user_id=Depends(get_user),
+    user=Depends(get_current_user),
     db: MongoClient = Depends(dependencies.get_db),
     fs: Minio = Depends(dependencies.get_fs),
     file: UploadFile = File(...),
     file_info: Optional[Json[FileIn]] = None,
 ):
-    # First, add to database and get unique ID
-    f = dict(file_info) if file_info is not None else {}
-    user_q = await db["users"].find_one({"_id": ObjectId(user_id)})
-    user = UserOut(**user_q)
     # TODO: Harden this piece for when data is missing
     existing_q = await db["files"].find_one({"_id": ObjectId(file_id)})
     existing_file = FileOut.from_mongo(existing_q)
@@ -56,23 +52,27 @@ async def update_file(
         version_id = response.version_id
 
     # Update version/creator/created flags
-    updated_file = dict(existing_file)
-    updated_file["name"] = file.filename
-    updated_file["creator"] = UserOut(**user)
-    updated_file["created"] = datetime.utcnow()
-    updated_file["version"] = version_id
-    updated_file["_id"] = existing_file.id
-    del updated_file["id"]
-    await db["files"].replace_one({"_id": ObjectId(file_id)}, updated_file)
+
+    # Add to db and update dataset
+
+    updated_file = FileDB(
+        name=file.filename,
+        creator=user,
+        created=datetime.utcnow(),
+        version=version_id,
+        _id=existing_file.id,
+        dataset_id=existing_file.dataset_id,
+    )
+    await db["files"].replace_one({"_id": ObjectId(file_id)}, updated_file.to_mongo())
 
     # Put entry in FileVersion collection
     new_version = FileVersion(
-        version_id=updated_file["version"],
+        version_id=updated_file.version,
         file_id=existing_file.id,
-        creator=UserOut(**user),
+        creator=user,
     )
-    await db["file_versions"].insert_one(dict(new_version))
-    return FileOut.from_mongo(updated_file)
+    await db["file_versions"].insert_one(new_version.to_mongo())
+    return updated_file
 
 
 @router.get("/{file_id}")
