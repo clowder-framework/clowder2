@@ -11,3 +11,6 @@ requests
 pytest
 minio
 python-multipart
+python-jose
+python-keycloak
+email-validator
