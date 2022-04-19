@@ -12,7 +12,7 @@
 		"start-message": "babel-node tools/startMessage.js",
 		"prestart": "npm-run-all --parallel start-message",
 		"start": "npm-run-all --parallel open:src",
-	  	"start:dev": "export CLOWDER_REMOTE_HOSTNAME=http://localhost:8000 && npm run start",
+		"start:dev": "export CLOWDER_REMOTE_HOSTNAME=http://localhost:8000 && npm run start",
 		"open:src": "babel-node tools/srcServer.js",
 		"open:dist": "babel-node tools/distServer.js",
 		"lint:watch": "npm run lint --watch",
@@ -27,6 +27,7 @@
 		"lint:fix": "npm run lint -- --fix",
 		"codegen:v1": "./node_modules/.bin/openapi -i https://clowder.ncsa.illinois.edu/clowder/swagger -o src/openapi/v1",
 		"codegen:v2": "./node_modules/.bin/openapi -i ${CLOWDER_REMOTE_HOSTNAME}/api/v2/openapi.json -o src/openapi/v2",
+		"codegen:v2:dev": "export CLOWDER_REMOTE_HOSTNAME=http://localhost:8000 && ./node_modules/.bin/openapi -i ${CLOWDER_REMOTE_HOSTNAME}/api/v2/openapi.json -o src/openapi/v2",
 		"codegen": "npm run codegen:v1 && npm run codegen:v2",
 		"docs": "typedoc"
 	},

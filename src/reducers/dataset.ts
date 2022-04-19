@@ -1,6 +1,7 @@
 import {
 	RECEIVE_FILES_IN_DATASET,
 	RECEIVE_DATASET_ABOUT,
+	UPDATE_DATASET,
 	RECEIVE_DATASETS,
 	DELETE_DATASET,
 	CREATE_DATASET,
@@ -40,6 +41,8 @@ const dataset = (state = defaultState, action: DataAction) => {
 			files: state.files.map(file => file.id === action.file.id ? action.file: file),
 		});
 	case RECEIVE_DATASET_ABOUT:
+		return Object.assign({}, state, {about: action.about});
+	case UPDATE_DATASET:
 		return Object.assign({}, state, {about: action.about});
 	case RECEIVE_DATASETS:
 		return Object.assign({}, state, {datasets: action.datasets});
