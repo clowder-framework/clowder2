@@ -21,7 +21,6 @@ const tab = {
 	fontStyle: "normal",
 	fontWeight: "normal",
 	fontSize: "16px",
-	color: "#495057",
 	textTransform: "capitalize",
 };
 

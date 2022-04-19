@@ -14,23 +14,6 @@ import {register as registerAction} from "../../actions/user";
 import {RootState} from "../../types/data";
 
 
-const textField = {
-	"& .MuiFormLabel-root": {
-		color: "#212529"
-	},
-	"& .MuiOutlinedInput-root": {
-		"& fieldset": {
-			borderColor: "#212529",
-		},
-		"&:hover fieldset": {
-			borderColor: "#212529",
-		},
-		"&.Mui-focused fieldset": {
-			borderColor: "#212529",
-		},
-	},
-}
-
 export const Register = (): JSX.Element => {
 
 
@@ -128,33 +111,28 @@ export const Register = (): JSX.Element => {
 						name="firstname"
 						value={firstname}
 						onChange={changeFirstname}
-						sx={textField}
 					/>
 					<TextField
 						variant="outlined"
 						margin="normal"
 						required
 						fullWidth
-						autoFocus
 						id="lastname"
 						label="Last Name"
 						name="lastname"
 						value={lastname}
 						onChange={changeLastname}
-						sx={textField}
 					/>
 					<TextField
 						variant="outlined"
 						margin="normal"
 						required
 						fullWidth
-						autoFocus
 						id="email"
 						label="Email"
 						name="email"
 						value={email}
 						onChange={changeEmail}
-						sx={textField}
 					/>
 					<TextField
 						variant="outlined"
@@ -169,7 +147,6 @@ export const Register = (): JSX.Element => {
 						helperText={passwordErrorText}
 						value={password}
 						onChange={changePassword}
-						sx={textField}
 					/>
 					<TextField
 						variant="outlined"
@@ -184,23 +161,17 @@ export const Register = (): JSX.Element => {
 						helperText={passwordConfirmErrorText}
 						value={passwordConfirm}
 						onChange={changePasswordConfirm}
-						sx={textField}
 					/>
 					<Link href="#" sx={{
 						display:"block",
 						textAlign:"right",
 						margin: "0 auto 10px auto",
-						color: "#212529"
 					}} target="_blank">Forgot password?</Link>
 					<Button
 						type="submit"
 						fullWidth
 						variant="contained"
 						onClick={handleRegisterButtonClick}
-						sx={{
-							backgroundColor: "#f7931d",
-							color:"#FFFFFF"
-						}}
 						disabled={!(password === passwordConfirm && password !== "")}
 					>Register</Button>
 					<Link href="/login" sx={{
@@ -208,7 +179,6 @@ export const Register = (): JSX.Element => {
 						fontSize:"15px",
 						display:"block",
 						margin:"10px auto 5px auto",
-						color: "#212529"
 					}}>Already have an account? Log In.</Link>
 				</Paper>
 			</div>

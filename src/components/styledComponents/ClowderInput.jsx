@@ -7,10 +7,8 @@ export const ClowderInput = styled(TextField)({
 		height: "41px",
 		width: "100%",
 		fontSize: "16px",
-		backgroundColor: "#FFFFFF",
 		padding:"6px 12px",
-		border:"1px solid #CED4DA",
+		border:"1px solid",
 		borderRadius: "4px",
-		color: "#6C757D",
 	},
 });
