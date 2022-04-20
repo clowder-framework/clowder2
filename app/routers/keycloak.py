@@ -8,9 +8,9 @@ from pymongo import MongoClient
 from starlette import status
 from starlette.responses import RedirectResponse
 
-from app import keycloak, dependencies
+from app import keycloak_auth, dependencies
 from app.config import settings
-from app.keycloak import keycloak_openid, get_token, oauth2_scheme
+from app.keycloak_auth import keycloak_openid, get_token, oauth2_scheme
 from app.models.users import UserIn, UserDB
 
 router = APIRouter()
@@ -23,7 +23,7 @@ async def login() -> RedirectResponse:
 
 
 @router.get("/logout")
-async def logout(token: Json = Depends(keycloak.get_token)):
+async def logout(token: Json = Depends(keycloak_auth.get_token)):
     """Logout of keycloak."""
     keycloak_openid.logout(token["refresh_token"])
     return RedirectResponse(settings.frontend_url)

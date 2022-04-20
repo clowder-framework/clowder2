@@ -19,7 +19,7 @@ from app import dependencies
 from app.config import settings
 from app.models.files import FileIn, FileOut, FileVersion, FileDB
 from app.models.users import UserOut
-from app.keycloak import get_user, get_current_user
+from app.keycloak_auth import get_user, get_current_user
 
 router = APIRouter()
 

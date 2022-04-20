@@ -6,8 +6,8 @@ from passlib.hash import bcrypt
 from pymongo import MongoClient
 
 from app import dependencies
-from app.keycloak import create_user
-from app.keycloak import keycloak_openid
+from app.keycloak_auth import create_user
+from app.keycloak_auth import keycloak_openid
 from app.models.users import UserDB, UserIn, UserOut
 
 router = APIRouter()

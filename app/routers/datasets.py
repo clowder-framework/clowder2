@@ -9,9 +9,9 @@ from fastapi import Form
 from minio import Minio
 from pymongo import MongoClient
 
-from app import keycloak
+from app import keycloak_auth
 from app import dependencies
-from app.keycloak import get_user, get_current_user
+from app.keycloak_auth import get_user, get_current_user
 from app.models.datasets import DatasetBase, DatasetIn, DatasetDB, DatasetOut
 from app.config import settings
 from app.models.files import FileIn, FileOut, FileVersion, FileDB
@@ -27,7 +27,7 @@ clowder_bucket = os.getenv("MINIO_BUCKET_NAME", "clowder")
 @router.post("", response_model=DatasetOut)
 async def save_dataset(
     dataset_in: DatasetIn,
-    user=Depends(keycloak.get_current_user),
+    user=Depends(keycloak_auth.get_current_user),
     db: MongoClient = Depends(dependencies.get_db),
 ):
     dataset_db = DatasetDB(**dataset_in.dict(), author=user)

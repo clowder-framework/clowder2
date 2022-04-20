@@ -3,7 +3,7 @@ from fastapi import FastAPI, APIRouter, Depends
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import settings
-from app.keycloak import create_realm_and_client, get_token
+from app.keycloak_auth import create_realm_and_client, get_token
 from app.routers import (
     folders,
 )
