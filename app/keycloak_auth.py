@@ -1,8 +1,9 @@
 # Based on https://github.com/tiangolo/fastapi/issues/1428
 import json
 
+from bson import ObjectId
 from fastapi.security import OAuth2AuthorizationCodeBearer
-from jose import ExpiredSignatureError
+from jose import ExpiredSignatureError, jwt
 from keycloak.keycloak_openid import KeycloakOpenID
 from keycloak.exceptions import KeycloakAuthenticationError, KeycloakGetError
 from keycloak.keycloak_admin import KeycloakAdmin
@@ -41,7 +42,7 @@ oauth2_scheme = OAuth2AuthorizationCodeBearer(
 )
 
 
-async def get_token(token: str = Security(oauth2_scheme)) -> Json:
+async def get_token(token: str = Security(oauth2_scheme), db: MongoClient = Depends(dependencies.get_db)) -> Json:
     """Decode token. Use to secure endpoints."""
     try:
         # See https://github.com/marcospereirampj/python-keycloak/issues/89
@@ -51,17 +52,41 @@ async def get_token(token: str = Security(oauth2_scheme)) -> Json:
             options={"verify_aud": False},
         )
     except ExpiredSignatureError as e:
-        raise HTTPException(
-            status_code=401,
-            detail={
-                "error": "JWT token signature expired"
-            },  # "Invalid authentication credentials",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
+        # retreive the refresh token and try refresh
+        claims = jwt.get_unverified_claims(token)
+        if (user_exist := await db["users"].find_one({"email": claims["email"]})) is not None:
+            user_id = user_exist["_id"]
+            if (token_exist := await db["tokens"].find_one({"user_id": user_id})) is not None:
+                try:
+                    new_tokens = keycloak_openid.refresh_token(token_exist["refresh_token"])
+
+                    # update the refresh token in the database
+                    token_exist.update({"refresh_token": new_tokens["refresh_token"]})
+                    await db["tokens"].replace_one({"_id": ObjectId(token_exist["_id"])}, token_exist)
+
+                    # TODO how to return the new access token to user
+                    return keycloak_openid.decode_token(
+                        new_tokens["access_token"],
+                        key=await get_idp_public_key(),
+                        options={"verify_aud": False},
+                    )
+                except KeycloakGetError as e:
+                    raise HTTPException(
+                        status_code=e.response_code,
+                        detail=str(e),  # "Invalid authentication credentials",
+                        headers={"WWW-Authenticate": "Bearer"},
+                    )
+
     except KeycloakGetError as e:
         raise HTTPException(
             status_code=e.response_code,
             detail=str(e),  # "Invalid authentication credentials",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    except KeycloakAuthenticationError as e:
+        raise HTTPException(
+            status_code=401,
+            detail=str(e),
             headers={"WWW-Authenticate": "Bearer"},
         )
 
