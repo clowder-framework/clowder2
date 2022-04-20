@@ -90,11 +90,12 @@ async def auth(
         user_id = user_create["_id"]
 
     # store/update refresh token and link to that userid
-    token = TokenDB(user_id = user_id, refresh_token=token_body["refresh_token"])
-    if (token_exist := await db["tokens"].find_one({"user_id":user_id})) is not None:
-        await db["tokens"].replace_one({"_id": ObjectId(token_exist["_id"])}, token)
+    if (token_exist := await db["tokens"].find_one({"user_id": user_id})) is not None:
+        token_exist.update({"refresh_token": token_body["refresh_token"]})
+        await db["tokens"].replace_one({"_id": ObjectId(token_exist["_id"])}, token_exist)
     else:
-        await db["tokens"].insert_one(token.to_mongo())
+        token_created = TokenDB(user_id=user_id, refresh_token=token_body["refresh_token"])
+        await db["tokens"].insert_one(token_created.to_mongo())
 
     # redirect to frontend
     auth_url = f"{settings.frontend_url}/auth"
