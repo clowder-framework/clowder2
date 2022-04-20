@@ -1,6 +1,7 @@
 import json
 
 import requests
+from bson import ObjectId
 from fastapi import APIRouter, HTTPException, Depends, Security
 from keycloak.exceptions import KeycloakAuthenticationError, KeycloakGetError
 from pydantic import Json
@@ -12,6 +13,7 @@ from app import keycloak_auth, dependencies
 from app.config import settings
 from app.keycloak_auth import keycloak_openid, get_token, oauth2_scheme
 from app.models.users import UserIn, UserDB
+from app.models.tokens import TokenDB
 
 router = APIRouter()
 
@@ -69,7 +71,7 @@ async def auth(
     token_body = json.loads(token_response.content)
     access_token = token_body["access_token"]
 
-    # create user in db if it doesn't already exist
+    # create user in db if it doesn't already exist; get the user_id
     userinfo = keycloak_openid.userinfo(access_token)
     keycloak_id = userinfo["sub"]
     given_name = userinfo["given_name"]
@@ -81,8 +83,18 @@ async def auth(
         hashed_password="",
         keycloak_id=keycloak_id,
     )
-    if (await db["users"].find_one({"email": email})) is None:
-        await db["users"].insert_one(user.to_mongo())
+    if (user_exist := await db["users"].find_one({"email": email})) is not None:
+        user_id = user_exist["_id"]
+    else:
+        user_create = await db["users"].insert_one(user.to_mongo())
+        user_id = user_create["_id"]
+
+    # store/update refresh token and link to that userid
+    token = TokenDB(user_id = user_id, refresh_token=token_body["refresh_token"])
+    if (token_exist := await db["tokens"].find_one({"user_id":user_id})) is not None:
+        await db["tokens"].replace_one({"_id": ObjectId(token_exist["_id"])}, token)
+    else:
+        await db["tokens"].insert_one(token.to_mongo())
 
     # redirect to frontend
     auth_url = f"{settings.frontend_url}/auth"
