@@ -27,19 +27,18 @@ async def login() -> RedirectResponse:
 @router.get("/logout")
 async def logout(access_token: str, db: MongoClient = Depends(dependencies.get_db)):
     """Logout of keycloak."""
+    # TODO this does not work
     # get user info
     user_info = keycloak_openid.userinfo(access_token)
-    if (user_exist := await db["users"].find_one({"email": user_info["email"]})) is not None:
-        user_id = user_exist["_id"]
-        if (token_exist := await db["tokens"].find_one({"user_id": user_id})) is not None:
-            # log user out
-            keycloak_openid.logout(token_exist["refresh_token"])
+    if (token_exist := await db["tokens"].find_one({"email": user_info["email"]})) is not None:
+        # log user out
+        keycloak_openid.logout(token_exist["refresh_token"])
 
-            # delete entry in the token database
-            await db["tokens"].delete_one({"_id": ObjectId(token_exist["_id"])})
+        # delete entry in the token database
+        await db["tokens"].delete_one({"_id": ObjectId(token_exist["_id"])})
 
-            # return RedirectResponse(settings.frontend_url)
-            return RedirectResponse("http://localhost:3000/hello-world")
+        # return RedirectResponse(settings.frontend_url)
+        return RedirectResponse("http://localhost:3000/hello-world")
 
     raise HTTPException(
         status_code=500,
@@ -100,18 +99,15 @@ async def auth(
         hashed_password="",
         keycloak_id=keycloak_id,
     )
-    if (user_exist := await db["users"].find_one({"email": email})) is not None:
-        user_id = user_exist["_id"]
-    else:
-        user_create = await db["users"].insert_one(user.to_mongo())
-        user_id = user_create["_id"]
+    if (await db["users"].find_one({"email": email})) is None:
+        await db["users"].insert_one(user.to_mongo())
 
     # store/update refresh token and link to that userid
-    if (token_exist := await db["tokens"].find_one({"user_id": user_id})) is not None:
+    if (token_exist := await db["tokens"].find_one({"email": email})) is not None:
         token_exist.update({"refresh_token": token_body["refresh_token"]})
         await db["tokens"].replace_one({"_id": ObjectId(token_exist["_id"])}, token_exist)
     else:
-        token_created = TokenDB(user_id=user_id, refresh_token=token_body["refresh_token"])
+        token_created = TokenDB(email=email, refresh_token=token_body["refresh_token"])
         await db["tokens"].insert_one(token_created.to_mongo())
 
     # redirect to frontend

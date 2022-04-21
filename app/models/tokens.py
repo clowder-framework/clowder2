@@ -1,9 +1,8 @@
 from app.models.mongomodel import MongoModel
-from app.models.pyobjectid import PyObjectId
 
 
 class TokenBase(MongoModel):
-    user_id: PyObjectId
+    email: str
     refresh_token: str
 
 

@@ -41,7 +41,6 @@ oauth2_scheme = OAuth2AuthorizationCodeBearer(
     tokenUrl=settings.auth_token_url,
 )
 
-
 async def get_token(token: str = Security(oauth2_scheme), db: MongoClient = Depends(dependencies.get_db)) -> Json:
     """Decode token. Use to secure endpoints."""
     try:
@@ -54,29 +53,35 @@ async def get_token(token: str = Security(oauth2_scheme), db: MongoClient = Depe
     except ExpiredSignatureError as e:
         # retreive the refresh token and try refresh
         claims = jwt.get_unverified_claims(token)
-        if (user_exist := await db["users"].find_one({"email": claims["email"]})) is not None:
-            user_id = user_exist["_id"]
-            if (token_exist := await db["tokens"].find_one({"user_id": user_id})) is not None:
-                try:
-                    new_tokens = keycloak_openid.refresh_token(token_exist["refresh_token"])
+        if (token_exist := await db["tokens"].find_one({"email": claims["email"]})) is not None:
+            try:
+                new_tokens = keycloak_openid.refresh_token(token_exist["refresh_token"])
+                # update the refresh token in the database
+                token_exist.update({"refresh_token": new_tokens["refresh_token"]})
+                await db["tokens"].replace_one({"_id": ObjectId(token_exist["_id"])}, token_exist)
 
-                    # update the refresh token in the database
-                    token_exist.update({"refresh_token": new_tokens["refresh_token"]})
-                    await db["tokens"].replace_one({"_id": ObjectId(token_exist["_id"])}, token_exist)
-
-                    # TODO how to return the new access token to user
-                    return keycloak_openid.decode_token(
-                        new_tokens["access_token"],
-                        key=await get_idp_public_key(),
-                        options={"verify_aud": False},
-                    )
-                except KeycloakGetError as e:
-                    raise HTTPException(
-                        status_code=e.response_code,
-                        detail=str(e),  # "Invalid authentication credentials",
-                        headers={"WWW-Authenticate": "Bearer"},
-                    )
-
+                # TODO how to return the new access token to user?
+                return keycloak_openid.decode_token(
+                    new_tokens["access_token"],
+                    key=await get_idp_public_key(),
+                    options={"verify_aud": False},
+                )
+            except KeycloakGetError as e:
+                # refresh token invalid; remove from database
+                db["tokens"].delete_one({"_id": ObjectId(token_exist["_id"])})
+                raise HTTPException(
+                    status_code=401,
+                    detail=str(e),  # "Invalid authentication credentials",
+                    headers={"WWW-Authenticate": "Bearer"},
+                )
+        else:
+            raise HTTPException(
+                status_code=401,
+                detail={
+                    "error": "JWT token signature expired and cannot be refreshed"
+                },  # "Invalid authentication credentials",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
     except KeycloakGetError as e:
         raise HTTPException(
             status_code=e.response_code,
