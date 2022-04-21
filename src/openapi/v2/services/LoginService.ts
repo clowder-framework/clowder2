@@ -1,8 +1,8 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { UserDB } from '../models/UserDB';
 import type { UserIn } from '../models/UserIn';
+import type { UserOut } from '../models/UserOut';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { request as __request } from '../core/request';
 
@@ -11,12 +11,12 @@ export class LoginService {
     /**
      * Save User
      * @param requestBody
-     * @returns UserDB Successful Response
+     * @returns UserOut Successful Response
      * @throws ApiError
      */
     public static saveUserApiV2UsersPost(
         requestBody: UserIn,
-    ): CancelablePromise<UserDB> {
+    ): CancelablePromise<UserOut> {
         return __request({
             method: 'POST',
             path: `/api/v2/users`,
@@ -45,30 +45,6 @@ export class LoginService {
             errors: {
                 422: `Validation Error`,
             },
-        });
-    }
-
-    /**
-     * Unprotected
-     * @returns any Successful Response
-     * @throws ApiError
-     */
-    public static unprotectedApiV2UnprotectedGet(): CancelablePromise<any> {
-        return __request({
-            method: 'GET',
-            path: `/api/v2/unprotected`,
-        });
-    }
-
-    /**
-     * Protected
-     * @returns any Successful Response
-     * @throws ApiError
-     */
-    public static protectedApiV2ProtectedGet(): CancelablePromise<any> {
-        return __request({
-            method: 'GET',
-            path: `/api/v2/protected`,
         });
     }
 

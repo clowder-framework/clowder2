@@ -17,7 +17,6 @@ export type { FileVersion } from './models/FileVersion';
 export type { FolderIn } from './models/FolderIn';
 export type { FolderOut } from './models/FolderOut';
 export type { HTTPValidationError } from './models/HTTPValidationError';
-export type { UserDB } from './models/UserDB';
 export type { UserIn } from './models/UserIn';
 export type { UserOut } from './models/UserOut';
 export type { ValidationError } from './models/ValidationError';

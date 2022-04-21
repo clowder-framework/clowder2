@@ -31,7 +31,7 @@ export default function TopBar() {
 						Help</Link>
 
 					<Link href="/" sx={link}>Explore</Link>
-					<Link href="/logout" sx={link}>Logout</Link>
+					<Link href="/auth/logout" sx={link}>Logout</Link>
 				</Toolbar>
 			</AppBar>
 		</Box>

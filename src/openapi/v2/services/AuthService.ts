@@ -44,13 +44,22 @@ export class AuthService {
     /**
      * Logout
      * Logout of keycloak.
+     * @param accessToken
      * @returns any Successful Response
      * @throws ApiError
      */
-    public static logoutApiV2AuthLogoutGet(): CancelablePromise<any> {
+    public static logoutApiV2AuthLogoutGet(
+        accessToken: string,
+    ): CancelablePromise<any> {
         return __request({
             method: 'GET',
             path: `/api/v2/auth/logout`,
+            query: {
+                'access_token': accessToken,
+            },
+            errors: {
+                422: `Validation Error`,
+            },
         });
     }
 
@@ -70,6 +79,25 @@ export class AuthService {
             query: {
                 'code': code,
             },
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+
+    /**
+     * Get Idenity Provider Token
+     * Get identity provider JWT token from keyclok. Keycloak must be configured to store external tokens.
+     * @param identityProvider
+     * @returns any Successful Response
+     * @throws ApiError
+     */
+    public static getIdenityProviderTokenApiV2AuthBrokerIdentityProviderTokenGet(
+        identityProvider: string,
+    ): CancelablePromise<any> {
+        return __request({
+            method: 'GET',
+            path: `/api/v2/auth/broker/${identityProvider}/token`,
             errors: {
                 422: `Validation Error`,
             },
