@@ -19,7 +19,7 @@ from app import dependencies
 from app.config import settings
 from app.models.files import FileIn, FileOut, FileVersion, FileDB
 from app.models.users import UserOut
-from app.keycloak_auth import get_user, get_current_user
+from app.keycloak_auth import get_user, get_current_user, get_token
 
 router = APIRouter()
 
@@ -27,6 +27,7 @@ router = APIRouter()
 @router.put("/{file_id}", response_model=FileOut)
 async def update_file(
     file_id: str,
+    token=Depends(get_token),
     user=Depends(get_current_user),
     db: MongoClient = Depends(dependencies.get_db),
     fs: Minio = Depends(dependencies.get_fs),
