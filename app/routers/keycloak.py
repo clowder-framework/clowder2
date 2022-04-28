@@ -31,8 +31,8 @@ async def logout(credentials: HTTPAuthorizationCredentials = Security(security),
     """Logout of keycloak."""
     # get user info
     access_token = credentials.credentials
-    user_info = keycloak_openid.userinfo(access_token)
-    if (token_exist := await db["tokens"].find_one({"email": user_info["email"]})) is not None:
+    claims = jwt.get_unverified_claims(access_token)
+    if (token_exist := await db["tokens"].find_one({"email": claims["email"]})) is not None:
         # log user out
         keycloak_openid.logout(token_exist["refresh_token"])
 
