@@ -1,5 +1,6 @@
 import {V2} from "../openapi";
 import Cookies from "universal-cookie";
+import config from "../app.config";
 
 const cookies = new Cookies();
 
@@ -28,9 +29,15 @@ export async function loginHelper(email, password, register = false) {
 }
 
 export async function logoutHelper(){
-	V2.AuthService.logoutApiV2AuthLogoutGet();
-	// V2.OpenAPI.TOKEN = undefined;
-	cookies.remove("Authorization");
+	const headers = {"Authorization": cookies.get("Authorization")}
+	fetch(config.KeycloakLogout, { method: 'GET', headers: headers, redirect: "follow"})
+		.then(response => {
+			V2.OpenAPI.TOKEN = undefined;
+			cookies.remove("Authorization");
+		})
+		.catch(function(err) {
+			console.log(err);
+		});
 }
 
 export const LOGIN_ERROR = "LOGIN_ERROR";

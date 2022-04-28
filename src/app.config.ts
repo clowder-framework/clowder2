@@ -23,5 +23,6 @@ config["GHIssueBaseURL"] = "https://github.com/clowder-framework/clowder2-fronte
 
 // Backend Keycloak login url
 config["KeycloakLogin"] = "http://localhost:8000/api/v2/auth/login";
+config["KeycloakLogout"] = "http://localhost:8000/api/v2/auth/logout";
 
 export default config;
