@@ -3,6 +3,8 @@ import json
 import requests
 from bson import ObjectId
 from fastapi import APIRouter, HTTPException, Depends, Security
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from jose import jwt
 from keycloak.exceptions import KeycloakAuthenticationError, KeycloakGetError
 from pydantic import Json
 from pymongo import MongoClient
@@ -16,7 +18,7 @@ from app.models.users import UserIn, UserDB
 from app.models.tokens import TokenDB
 
 router = APIRouter()
-
+security = HTTPBearer()
 
 @router.get("/login")
 async def login() -> RedirectResponse:
@@ -68,7 +70,6 @@ async def login(userIn: UserIn):
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-
 @router.get("")
 async def auth(
     code: str, db: MongoClient = Depends(dependencies.get_db)
@@ -116,6 +117,35 @@ async def auth(
     response.set_cookie("Authorization", value=f"Bearer {access_token}")
     return response
 
+@router.get('/refresh_token')
+async def refresh_token(credentials: HTTPAuthorizationCredentials = Security(security), db: MongoClient = Depends(
+    dependencies.get_db)):
+    access_token = credentials.credentials
+    claims = jwt.get_unverified_claims(access_token)
+    if (token_exist := await db["tokens"].find_one({"email": claims["email"]})) is not None:
+        try:
+            new_tokens = keycloak_openid.refresh_token(token_exist["refresh_token"])
+            # update the refresh token in the database
+            token_exist.update({"refresh_token": new_tokens["refresh_token"]})
+            await db["tokens"].replace_one({"_id": ObjectId(token_exist["_id"])}, token_exist)
+            return {'access_token': new_tokens["access_token"]}
+
+        except KeycloakGetError as e:
+            # refresh token invalid; remove from database
+            db["tokens"].delete_one({"_id": ObjectId(token_exist["_id"])})
+            raise HTTPException(
+                status_code=401,
+                detail=str(e),  # "Invalid authentication credentials",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+    else:
+        raise HTTPException(
+            status_code=401,
+            detail={
+                "error": "JWT token signature expired and cannot be refreshed"
+            },  # "Invalid authentication credentials",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
 
 @router.get("/broker/{identity_provider}/token")
 def get_idenity_provider_token(
