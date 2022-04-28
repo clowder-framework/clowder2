@@ -27,10 +27,10 @@ async def login() -> RedirectResponse:
 
 
 @router.get("/logout")
-async def logout(access_token: str, db: MongoClient = Depends(dependencies.get_db)):
+async def logout(credentials: HTTPAuthorizationCredentials = Security(security), db: MongoClient = Depends(dependencies.get_db)):
     """Logout of keycloak."""
-    # TODO this does not work
     # get user info
+    access_token = credentials.credentials
     user_info = keycloak_openid.userinfo(access_token)
     if (token_exist := await db["tokens"].find_one({"email": user_info["email"]})) is not None:
         # log user out
@@ -39,8 +39,7 @@ async def logout(access_token: str, db: MongoClient = Depends(dependencies.get_d
         # delete entry in the token database
         await db["tokens"].delete_one({"_id": ObjectId(token_exist["_id"])})
 
-        # return RedirectResponse(settings.frontend_url)
-        return RedirectResponse("http://localhost:3000/hello-world")
+        return RedirectResponse(settings.frontend_url)
 
     raise HTTPException(
         status_code=500,
