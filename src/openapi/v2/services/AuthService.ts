@@ -44,22 +44,13 @@ export class AuthService {
     /**
      * Logout
      * Logout of keycloak.
-     * @param accessToken
      * @returns any Successful Response
      * @throws ApiError
      */
-    public static logoutApiV2AuthLogoutGet(
-        accessToken: string,
-    ): CancelablePromise<any> {
+    public static logoutApiV2AuthLogoutGet(): CancelablePromise<any> {
         return __request({
             method: 'GET',
             path: `/api/v2/auth/logout`,
-            query: {
-                'access_token': accessToken,
-            },
-            errors: {
-                422: `Validation Error`,
-            },
         });
     }
 
@@ -82,6 +73,18 @@ export class AuthService {
             errors: {
                 422: `Validation Error`,
             },
+        });
+    }
+
+    /**
+     * Refresh Token
+     * @returns any Successful Response
+     * @throws ApiError
+     */
+    public static refreshTokenApiV2AuthRefreshTokenGet(): CancelablePromise<any> {
+        return __request({
+            method: 'GET',
+            path: `/api/v2/auth/refresh_token`,
         });
     }
 
