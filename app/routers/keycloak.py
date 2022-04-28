@@ -31,15 +31,29 @@ async def logout(credentials: HTTPAuthorizationCredentials = Security(security),
     """Logout of keycloak."""
     # get user info
     access_token = credentials.credentials
-    claims = jwt.get_unverified_claims(access_token)
-    if (token_exist := await db["tokens"].find_one({"email": claims["email"]})) is not None:
-        # log user out
-        keycloak_openid.logout(token_exist["refresh_token"])
+    try:
+        user_info = keycloak_openid.userinfo(access_token)
+        if (token_exist := await db["tokens"].find_one({"email": user_info["email"]})) is not None:
+            # log user out
+            try:
+                keycloak_openid.logout(token_exist["refresh_token"])
 
-        # delete entry in the token database
-        await db["tokens"].delete_one({"_id": ObjectId(token_exist["_id"])})
+                # delete entry in the token database
+                await db["tokens"].delete_one({"_id": ObjectId(token_exist["_id"])})
 
-        return RedirectResponse(settings.frontend_url)
+                return RedirectResponse(settings.frontend_url)
+            except:
+                raise HTTPException(
+                    status_code=403,
+                    detail="Refresh token invalid/expired! Cannot log user out.",
+                    headers={"WWW-Authenticate": "Bearer"},
+                )
+    except:
+        raise HTTPException(
+            status_code=403,
+            detail="Access token invalid! Cannot get user info.",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
 
     raise HTTPException(
         status_code=500,
