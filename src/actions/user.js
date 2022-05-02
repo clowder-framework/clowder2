@@ -29,15 +29,10 @@ export async function loginHelper(email, password, register = false) {
 }
 
 export async function logoutHelper(){
-	const headers = {"Authorization": cookies.get("Authorization")}
-	fetch(config.KeycloakLogout, { method: 'GET', headers: headers, redirect: "follow"})
-		.then(response => {
-			V2.OpenAPI.TOKEN = undefined;
-			cookies.remove("Authorization");
-		})
-		.catch(function(err) {
-			console.log(err);
-		});
+	const headers = {"Authorization": cookies.get("Authorization")};
+	V2.OpenAPI.TOKEN = undefined;
+	cookies.remove("Authorization", { path: "/" });
+	return await fetch(config.KeycloakLogout, { method: "GET", headers: headers});
 }
 
 export const LOGIN_ERROR = "LOGIN_ERROR";
@@ -50,7 +45,7 @@ export function login(email, password) {
 	return async (dispatch) => {
 		const json = await loginHelper(email, password, false);
 		V2.OpenAPI.TOKEN = undefined;
-		cookies.remove("Authorization");
+		cookies.remove("Authorization", { path: "/" });
 
 		if (json["token"] !== undefined && json["token"] !== "none") {
 			cookies.set("Authorization", `Bearer ${json["token"]}`);
