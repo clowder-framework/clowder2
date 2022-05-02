@@ -40,8 +40,7 @@ async def logout(credentials: HTTPAuthorizationCredentials = Security(security),
 
                 # delete entry in the token database
                 await db["tokens"].delete_one({"_id": ObjectId(token_exist["_id"])})
-
-                return RedirectResponse(settings.frontend_url)
+                return {"status": f"Successfully log user: {user_info} out!"}
             except:
                 raise HTTPException(
                     status_code=403,
@@ -54,7 +53,6 @@ async def logout(credentials: HTTPAuthorizationCredentials = Security(security),
             detail="Access token invalid! Cannot get user info.",
             headers={"WWW-Authenticate": "Bearer"},
         )
-
     raise HTTPException(
         status_code=500,
         detail="Unable to the current log user out!",
