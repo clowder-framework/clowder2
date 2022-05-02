@@ -58,12 +58,6 @@ api_router.include_router(
 api_router.include_router(keycloak.router, prefix="/auth", tags=["auth"])
 app.include_router(api_router, prefix=settings.API_V2_STR)
 
-# @app.middleware("http")
-# async def add_process_time_header(request: Request, call_next):
-#     response = await call_next(request)
-#     response.set_cookie("lalala", value="lelele")
-#     # response.set_cookie("Authorization", value=f"Bearer {access_token}")
-#     return response
 
 @app.on_event("startup")
 async def startup_db_client():
