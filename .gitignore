@@ -4,4 +4,3 @@ __pycache__
 /docs/.venv/
 /docs/build/
 /.env
-.DS_Store
