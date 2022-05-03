@@ -9,10 +9,17 @@ from fastapi import Form
 from minio import Minio
 from pymongo import MongoClient
 
+from app import keycloak_auth
 from app import dependencies
-from app.auth import AuthHandler
+from app.keycloak_auth import get_user, get_current_user
 from app.config import settings
-from app.models.datasets import DatasetBase, DatasetIn, DatasetDB, DatasetOut, DatasetPatch
+from app.models.datasets import (
+    DatasetBase,
+    DatasetIn,
+    DatasetDB,
+    DatasetOut,
+    DatasetPatch,
+)
 from app.models.files import FileIn, FileOut, FileVersion, FileDB
 from app.models.folders import FolderOut, FolderIn, FolderDB
 from app.models.pyobjectid import PyObjectId
@@ -20,19 +27,16 @@ from app.models.users import UserOut
 
 router = APIRouter()
 
-auth_handler = AuthHandler()
-
 clowder_bucket = os.getenv("MINIO_BUCKET_NAME", "clowder")
 
 
 @router.post("", response_model=DatasetOut)
 async def save_dataset(
     dataset_in: DatasetIn,
-    user_id=Depends(auth_handler.auth_wrapper),
+    user=Depends(keycloak_auth.get_current_user),
     db: MongoClient = Depends(dependencies.get_db),
 ):
-    user = await db["users"].find_one({"_id": ObjectId(user_id)})
-    dataset_db = DatasetDB(**dataset_in.dict(), author=UserOut(**user))
+    dataset_db = DatasetDB(**dataset_in.dict(), author=user)
     new_dataset = await db["datasets"].insert_one(dataset_db.to_mongo())
     found = await db["datasets"].find_one({"_id": new_dataset.inserted_id})
     dataset_out = DatasetOut.from_mongo(found)
@@ -41,7 +45,7 @@ async def save_dataset(
 
 @router.get("", response_model=List[DatasetOut])
 async def get_datasets(
-    user_id=Depends(auth_handler.auth_wrapper),
+    user_id=Depends(get_user),
     db: MongoClient = Depends(dependencies.get_db),
     skip: int = 0,
     limit: int = 2,
@@ -51,7 +55,7 @@ async def get_datasets(
     if mine:
         for doc in (
             await db["datasets"]
-            .find({"author.id": ObjectId(user_id)})
+            .find({"author.email": user_id})
             .skip(skip)
             .limit(limit)
             .to_list(length=limit)
@@ -101,8 +105,8 @@ async def get_dataset_files(
 async def edit_dataset(
     dataset_id: str,
     dataset_info: DatasetBase,
-    user_id=Depends(auth_handler.auth_wrapper),
     db: MongoClient = Depends(dependencies.get_db),
+    user_id=Depends(get_user),
 ):
     if (
         dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
@@ -114,7 +118,9 @@ async def edit_dataset(
         ds["modified"] = datetime.datetime.utcnow()
         try:
             dataset.update(ds)
-            await db["datasets"].replace_one({"_id": ObjectId(dataset_id)}, DatasetDB(**dataset).to_mongo())
+            await db["datasets"].replace_one(
+                {"_id": ObjectId(dataset_id)}, DatasetDB(**dataset).to_mongo()
+            )
         except Exception as e:
             raise HTTPException(status_code=500, detail=e.args[0])
         return DatasetOut.from_mongo(dataset)
@@ -125,11 +131,11 @@ async def edit_dataset(
 async def patch_dataset(
     dataset_id: str,
     dataset_info: DatasetPatch,
-    user_id=Depends(auth_handler.auth_wrapper),
+    user_id=Depends(get_user),
     db: MongoClient = Depends(dependencies.get_db),
 ):
     if (
-            dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
+        dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
     ) is not None:
         # TODO: Refactor this with permissions checks etc.
         ds = dict(dataset_info) if dataset_info is not None else {}
@@ -138,7 +144,9 @@ async def patch_dataset(
         ds["modified"] = datetime.datetime.utcnow()
         try:
             dataset.update((k, v) for k, v in ds.items() if v is not None)
-            await db["datasets"].replace_one({"_id": ObjectId(dataset_id)}, DatasetDB(**dataset).to_mongo())
+            await db["datasets"].replace_one(
+                {"_id": ObjectId(dataset_id)}, DatasetDB(**dataset).to_mongo()
+            )
         except Exception as e:
             raise HTTPException(status_code=500, detail=e.args[0])
         return DatasetOut.from_mongo(dataset)
@@ -168,12 +176,11 @@ async def delete_dataset(
 async def add_folder(
     dataset_id: str,
     folder_in: FolderIn,
-    user_id=Depends(auth_handler.auth_wrapper),
+    user=Depends(get_current_user),
     db: MongoClient = Depends(dependencies.get_db),
 ):
-    user = await db["users"].find_one({"_id": ObjectId(user_id)})
     folder_db = FolderDB(
-        **folder_in.dict(), author=UserOut(**user), dataset_id=PyObjectId(dataset_id)
+        **folder_in.dict(), author=user, dataset_id=PyObjectId(dataset_id)
     )
     parent_folder = folder_in.parent_folder
     if parent_folder is not None:
@@ -231,17 +238,14 @@ async def delete_folder(
 async def save_file(
     dataset_id: str,
     folder_id: Optional[str] = Form(None),
-    user_id=Depends(auth_handler.auth_wrapper),
+    user=Depends(get_current_user),
     db: MongoClient = Depends(dependencies.get_db),
     fs: Minio = Depends(dependencies.get_fs),
     file: UploadFile = File(...),
-    file_info: Optional[FileIn] = None,
 ):
     if (
         dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
     ) is not None:
-        user = await db["users"].find_one({"_id": ObjectId(user_id)})
-        userOut = UserOut(**user)
         if user is None:
             raise HTTPException(
                 status_code=401, detail=f"User not found. Session might have expired."
@@ -251,7 +255,7 @@ async def save_file(
             raise HTTPException(
                 status_code=404, detail=f"Dataset {dataset_id} not found"
             )
-        fileDB = FileDB(name=file.filename, creator=userOut, dataset_id=dataset["_id"])
+        fileDB = FileDB(name=file.filename, creator=user, dataset_id=dataset["_id"])
         if folder_id is not None:
             fileDB.folder_id = ObjectId(folder_id)
 
@@ -279,7 +283,7 @@ async def save_file(
         new_version = FileVersion(
             version_id=version_id,
             file_id=new_file_id,
-            creator=userOut,
+            creator=user,
         )
         await db["file_versions"].insert_one(new_version.to_mongo())
         return fileDB

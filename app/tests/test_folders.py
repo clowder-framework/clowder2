@@ -11,13 +11,6 @@ user = {"email": "test@test.org", "password": "not_a_password"}
 
 
 def test_create_nested(client: TestClient, headers: dict):
-    response = client.post(f"{settings.API_V2_STR}/users", json=user)
-    assert response.status_code == 200
-    response = client.post(f"{settings.API_V2_STR}/login", json=user)
-    assert response.status_code == 200
-    token = response.json().get("token")
-    assert token is not None
-    headers = {"Authorization": "Bearer " + token}
     # create dataset
     dataset_res = client.post(
         f"{settings.API_V2_STR}/datasets", json=dataset, headers=headers

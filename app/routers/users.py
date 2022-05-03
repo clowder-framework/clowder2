@@ -5,7 +5,7 @@ from fastapi import APIRouter, HTTPException, Depends
 from pymongo import MongoClient
 
 from app import dependencies
-from app.models.users import UserDB, UserOut
+from app.models.users import UserOut
 
 router = APIRouter()
 

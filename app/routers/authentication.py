@@ -1,52 +1,63 @@
-from bson import ObjectId
-from fastapi import APIRouter, Depends, HTTPException
+import json
+
+from fastapi import APIRouter, HTTPException, Depends
+from keycloak.exceptions import KeycloakAuthenticationError, KeycloakGetError
 from passlib.hash import bcrypt
 from pymongo import MongoClient
 
 from app import dependencies
-from app.models.users import UserDB, UserIn
-from app.auth import AuthHandler
-
-auth_handler = AuthHandler()
+from app.keycloak_auth import create_user
+from app.keycloak_auth import keycloak_openid
+from app.models.users import UserDB, UserIn, UserOut
 
 router = APIRouter()
 
 
-@router.post("/users", response_model=UserDB)
+@router.post("/users", response_model=UserOut)
 async def save_user(userIn: UserIn, db: MongoClient = Depends(dependencies.get_db)):
+
+    try:
+        keycloak_user = await create_user(
+            userIn.email, userIn.password, userIn.first_name, userIn.last_name
+        )
+    except KeycloakGetError as e:
+        raise HTTPException(
+            status_code=e.response_code,
+            detail=json.loads(e.error_message),
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    # create local user
     hashed_password = bcrypt.hash(userIn.password)
-    userDB = UserDB(**userIn.dict(), hashed_password=hashed_password)
+    userDB = UserDB(
+        **userIn.dict(),
+        hashed_password=hashed_password,
+        keycloak_id=keycloak_user,
+    )
     res = await db["users"].insert_one(userDB.to_mongo())
     found = await db["users"].find_one({"_id": res.inserted_id})
-    return UserDB.from_mongo(found).dict(exclude={"create_at"})
+    return UserOut.from_mongo(found).dict(exclude={"create_at"})
 
 
 @router.post("/login")
 async def login(userIn: UserIn, db: MongoClient = Depends(dependencies.get_db)):
-    authenticated_user = await authenticate_user(userIn.email, userIn.password, db)
-    if authenticated_user is None:
+    try:
+        token = keycloak_openid.token(userIn.email, userIn.password)
+        return {"token": token["access_token"]}
+    # bad credentials
+    except KeycloakAuthenticationError as e:
         raise HTTPException(
-            status_code=401, detail=f"Could not authenticate user credentials"
+            status_code=e.response_code,
+            detail=json.loads(e.error_message),
+            headers={"WWW-Authenticate": "Bearer"},
         )
-    else:
-        token = auth_handler.encode_token(str(authenticated_user.id))
-        return {"token": token}
-
-
-@router.get("/unprotected")
-def unprotected():
-    return {"hello": "world"}
-
-
-@router.get("/protected")
-async def protected(
-    userid=Depends(auth_handler.auth_wrapper),
-    db: MongoClient = Depends(dependencies.get_db),
-):
-    result = await db["users"].find_one({"_id": ObjectId(userid)})
-    user = UserDB.from_mongo(result)
-    name = user.email
-    return {"name": name, "id": userid}
+    # account not fully setup (for example if new password is set to temporary)
+    except KeycloakGetError as e:
+        raise HTTPException(
+            status_code=e.response_code,
+            detail=json.loads(e.error_message),
+            headers={"WWW-Authenticate": "Bearer"},
+        )
 
 
 async def authenticate_user(email: str, password: str, db: MongoClient):
