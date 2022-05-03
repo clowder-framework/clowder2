@@ -23,6 +23,7 @@ export type { UserIn } from './models/UserIn';
 export type { UserOut } from './models/UserOut';
 export type { ValidationError } from './models/ValidationError';
 
+export { AuthService } from './services/AuthService';
 export { CollectionsService } from './services/CollectionsService';
 export { DatasetsService } from './services/DatasetsService';
 export { FilesService } from './services/FilesService';

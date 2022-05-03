@@ -1,4 +1,7 @@
 import {V2} from "../openapi";
+import Cookies from "universal-cookie";
+
+const cookies = new Cookies();
 
 export const userActions = {
 	login,
@@ -26,7 +29,7 @@ export async function loginHelper(email, password, first_name=null, last_name=nu
 
 export async function logoutHelper(){
 	V2.OpenAPI.TOKEN = undefined;
-	localStorage.removeItem("Authorization");
+	cookies.remove("Authorization");
 }
 
 export const LOGIN_ERROR = "LOGIN_ERROR";
@@ -39,14 +42,14 @@ export function login(email, password) {
 	return async (dispatch) => {
 		const json = await loginHelper(email, password, false);
 		V2.OpenAPI.TOKEN = undefined;
-		localStorage.removeItem("Authorization");
+		cookies.remove("Authorization");
 
 		if (json["token"] !== undefined && json["token"] !== "none") {
-			localStorage.setItem("Authorization", `bearer ${json["token"]}`);
+			cookies.set("Authorization", `Bearer ${json["token"]}`);
 			V2.OpenAPI.TOKEN = json["token"];
 			return dispatch({
 				type: SET_USER,
-				Authorization: `bearer ${json["token"]}`,
+				Authorization: `Bearer ${json["token"]}`,
 			});
 		} else {
 			return dispatch({

@@ -10,6 +10,6 @@ export const Logout = (): JSX.Element => {
 	useEffect(() => { logout();}, []);
 
 	return (
-		<Navigate to={"/login"}/>
+		<Navigate to={"/auth/login"}/>
 	)
 }

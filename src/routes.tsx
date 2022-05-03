@@ -7,6 +7,8 @@ import {File as FileComponent} from "./components/files/File";
 import {Login as LoginComponent} from "./components/auth/Login";
 import {Logout as LogoutComponent} from "./components/auth/Logout";
 import {Register as RegisterComponent} from "./components/auth/Register";
+import {Auth as AuthComponent} from "./components/auth/Auth"
+import {RedirectLogin as RedirectLoginComponent} from "./components/auth/RedirectLogin"
 
 import {isAuthorized} from "./utils/common";
 
@@ -14,7 +16,7 @@ import {isAuthorized} from "./utils/common";
 class PrivateRoute extends React.Component<{ children: JSX.Element }> {
 	render() {
 		let {children} = this.props;
-		return isAuthorized() ? children : <Navigate to="/login"/>;
+		return isAuthorized() ? children : <Navigate to="/auth/login"/>;
 	}
 }
 
@@ -28,6 +30,8 @@ const AppRoutes = (
 			<Route path="/login" element={<LoginComponent/>} />
 			<Route path="/logout" element={<LogoutComponent/>} />
 			<Route path="/register" element={<RegisterComponent/>} />
+			<Route path="/auth/login" element={<RedirectLoginComponent/>} />
+			<Route path="/auth" element={<AuthComponent/>} />
 			<Route path="*"
 				element={
 					<main style={{ padding: "1rem" }}>

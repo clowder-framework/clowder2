@@ -8,4 +8,5 @@ export type UserDB = {
     first_name?: string;
     last_name?: string;
     hashed_password: string;
+    keycloak_id?: string;
 }
