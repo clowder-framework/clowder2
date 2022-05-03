@@ -30,9 +30,9 @@ export const ActionModal:React.FC<ActionModalProps> = (props: ActionModalProps) 
 				</DialogContent>
 				<DialogActions>
 					{/*handleActionBtnClick This could be used to report error/ confirm deletion and so on*/}
-					<Button onClick={handleActionBtnClick} style={{color:"#007BFF"}}>{actionBtnName}
+					<Button onClick={handleActionBtnClick}>{actionBtnName}
 					</Button>
-					<Button onClick={handleActionCancel} style={{color:"#007BFF"}}>Cancel</Button>
+					<Button onClick={handleActionCancel}>Cancel</Button>
 				</DialogActions>
 			</Dialog>
 	);

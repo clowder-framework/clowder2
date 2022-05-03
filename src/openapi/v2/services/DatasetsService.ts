@@ -5,6 +5,7 @@ import type { Body_save_file_api_v2_datasets__dataset_id__files_post } from '../
 import type { DatasetBase } from '../models/DatasetBase';
 import type { DatasetIn } from '../models/DatasetIn';
 import type { DatasetOut } from '../models/DatasetOut';
+import type { DatasetPatch } from '../models/DatasetPatch';
 import type { FileOut } from '../models/FileOut';
 import type { FolderIn } from '../models/FolderIn';
 import type { FolderOut } from '../models/FolderOut';
@@ -82,13 +83,13 @@ export class DatasetsService {
      * Edit Dataset
      * @param datasetId
      * @param requestBody
-     * @returns DatasetBase Successful Response
+     * @returns DatasetOut Successful Response
      * @throws ApiError
      */
     public static editDatasetApiV2DatasetsDatasetIdPut(
         datasetId: string,
         requestBody: DatasetBase,
-    ): CancelablePromise<DatasetBase> {
+    ): CancelablePromise<DatasetOut> {
         return __request({
             method: 'PUT',
             path: `/api/v2/datasets/${datasetId}`,
@@ -112,6 +113,28 @@ export class DatasetsService {
         return __request({
             method: 'DELETE',
             path: `/api/v2/datasets/${datasetId}`,
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+
+    /**
+     * Patch Dataset
+     * @param datasetId
+     * @param requestBody
+     * @returns DatasetOut Successful Response
+     * @throws ApiError
+     */
+    public static patchDatasetApiV2DatasetsDatasetIdPatch(
+        datasetId: string,
+        requestBody: DatasetPatch,
+    ): CancelablePromise<DatasetOut> {
+        return __request({
+            method: 'PATCH',
+            path: `/api/v2/datasets/${datasetId}`,
+            body: requestBody,
+            mediaType: 'application/json',
             errors: {
                 422: `Validation Error`,
             },

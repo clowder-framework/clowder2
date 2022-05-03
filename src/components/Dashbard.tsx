@@ -21,7 +21,6 @@ const tab = {
 	fontStyle: "normal",
 	fontWeight: "normal",
 	fontSize: "16px",
-	color: "#495057",
 	textTransform: "capitalize",
 };
 
@@ -187,7 +186,7 @@ export const Dashboard = (): JSX.Element => {
 												return (
 													<Grid item xs>
 														<DatasetCard id={dataset.id} name={dataset.name}
-																	 author={dataset.author.email}
+																	 author={`${dataset.author.first_name} ${dataset.author.last_name}`}
 																	 created={dataset.created}
 																	 description={dataset.description}/>
 													</Grid>

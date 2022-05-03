@@ -1,5 +1,5 @@
 import React from "react";
-import {Route, Navigate, Routes, BrowserRouter, Link} from "react-router-dom";
+import {Route, Navigate, Routes, BrowserRouter} from "react-router-dom";
 
 import {Dashboard} from "./components/Dashbard";
 import {Dataset as DatasetComponent} from "./components/datasets/Dataset";
@@ -32,6 +32,13 @@ const AppRoutes = (
 			<Route path="/register" element={<RegisterComponent/>} />
 			<Route path="/auth/login" element={<RedirectLoginComponent/>} />
 			<Route path="/auth" element={<AuthComponent/>} />
+			<Route path="*"
+				element={
+					<main style={{ padding: "1rem" }}>
+						<p>Page Not Found!</p>
+					</main>
+				}
+			/>
 		</Routes>
 	</BrowserRouter>
 );

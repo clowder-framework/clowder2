@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from "react";
-import {Box, Button, Dialog, DialogTitle, Divider, Grid, Menu, MenuItem, Tab, Tabs, Typography} from "@mui/material";
+import {Box, Button, Dialog, DialogTitle, Divider, Grid, Menu, MenuItem, Tab, Tabs, Typography, TextField} from "@mui/material";
 import {ClowderInput} from "../styledComponents/ClowderInput";
 import {ClowderButton} from "../styledComponents/ClowderButton";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
@@ -12,7 +12,7 @@ import {
 	fetchDatasetAbout,
 	fetchFilesInDataset, fetchFolderPath,
 	fetchFoldersInDataset,
-	folderAdded
+	folderAdded, updateDataset
 } from "../../actions/dataset";
 import {resetFailedReason, resetLogout} from "../../actions/common"
 
@@ -20,26 +20,24 @@ import {a11yProps, TabPanel} from "../tabs/TabComponent";
 import TopBar from "../navigation/TopBar";
 import {MainBreadcrumbs} from "../navigation/BreadCrumb";
 import {UploadFile} from "../files/UploadFile";
-import {V2} from "../../openapi";
 import {ActionModal} from "../dialog/ActionModal";
 import FilesTable from "../files/FilesTable";
 import {CreateFolder} from "../folders/CreateFolder";
 import { useSearchParams } from "react-router-dom";
 import {parseDate} from "../../utils/common";
 import config from "../../app.config";
+import {DatasetIn} from "../../openapi/v2";
 
 const tab = {
 	fontStyle: "normal",
 	fontWeight: "normal",
 	fontSize: "16px",
-	color: "#495057",
 	textTransform: "capitalize",
 };
 
 const optionMenuItem = {
 	fontWeight: "normal",
 	fontSize: "14px",
-	color: "#212529",
 	marginTop:"8px",
 }
 
@@ -62,6 +60,7 @@ export const Dataset = (): JSX.Element => {
 	// Redux connect equivalent
 	const dispatch = useDispatch();
 	const deleteDataset = (datasetId:string|undefined) => dispatch(datasetDeleted(datasetId));
+	const editDataset = (datasetId: string|undefined, formData: DatasetIn) => dispatch(updateDataset(datasetId, formData));
 	const addFolder = (datasetId:string|undefined, folderName:string, parentFolder:string|null) => dispatch(folderAdded(datasetId, folderName, parentFolder));
 	const getFolderPath= (folderId:string|undefined) => dispatch(fetchFolderPath(folderId));
 	const listFilesInDataset = (datasetId:string|undefined, folderId:string|undefined) => dispatch(fetchFilesInDataset(datasetId, folderId));
@@ -81,8 +80,10 @@ export const Dataset = (): JSX.Element => {
 	const [selectedTabIndex, setSelectedTabIndex] = useState<number>(0);
 	const [createFileOpen, setCreateFileOpen] = React.useState<boolean>(false);
 	const [anchorEl, setAnchorEl] = React.useState<Element | null>(null);
-	const [editingName, setEditingName] = React.useState<boolean>(false);
-	const [, setNewDatasetName] = React.useState<string>("");
+	const [editingNameOpen, setEditingNameOpen] = React.useState<boolean>(false);
+	const [editDescriptionOpen, setEditDescriptionOpen] = React.useState<boolean>(false);
+	const [datasetName, setDatasetName] = React.useState<string>("");
+	const [datasetDescription, setDatasetDescription] = React.useState<string>("");
 
 	// component did mount list all files in dataset
 	useEffect(() => {
@@ -135,6 +136,16 @@ export const Dataset = (): JSX.Element => {
 		setAnchorEl(null);
 	};
 
+	const handleDatasetNameEdit = () => {
+		editDataset(about["id"], {"name": datasetName});
+		setEditingNameOpen(false);
+	};
+
+	const handleDatasetDescriptionEdit = () => {
+		editDataset(about["id"], {"description": datasetDescription});
+		setEditDescriptionOpen(false);
+	};
+
 	// for breadcrumb
 	const paths = [
 		{
@@ -146,7 +157,6 @@ export const Dataset = (): JSX.Element => {
 			"url":`/datasets/${datasetId}`
 		}
 	];
-
 
 	if (folderPath != null) {
 		for (const folderBread of folderPath) {
@@ -242,6 +252,7 @@ export const Dataset = (): JSX.Element => {
 												  history("/");
 											  }
 									}>Delete Dataset</MenuItem>
+									<MenuItem onClick={handleOptionClose} sx={optionMenuItem} disabled={true}>Delete Folder</MenuItem>
 									<MenuItem onClick={handleOptionClose} sx={optionMenuItem} disabled={true}>Follow</MenuItem>
 									<MenuItem onClick={handleOptionClose} sx={optionMenuItem} disabled={true}>Collaborators</MenuItem>
 									<MenuItem onClick={handleOptionClose} sx={optionMenuItem} disabled={true}>Extraction</MenuItem>
@@ -252,31 +263,59 @@ export const Dataset = (): JSX.Element => {
 								about !== undefined ?
 									<Box className="infoCard">
 										<Typography className="title">About</Typography>
-										{
-											editingName ? <>:
-												<ClowderInput required={true} onChange={(event) => {
-													const { value } = event.target;
-													setNewDatasetName(value);
-												}} defaultValue={about["name"]}/>
-												<Button onClick={() => {
-													V2.DatasetsService.editDatasetApiV2DatasetsDatasetIdPut(about["id"]).then((json: any) => {
-														// TODO: Dispatch response back to Redux
-														console.log("PUT Dataset Response:", json);
-														setEditingName(false);
-													});
-												}} disabled={true}>Save</Button>
-												<Button onClick={() => setEditingName(false)}>Cancel</Button>
-											</> :
-												<Typography className="content">Name: {about["name"]}
-													<Button onClick={() => setEditingName(true)} size={"small"}>Edit</Button>
-												</Typography>
-										}
+										<Box>
+											<Typography className="content" sx={{display:"inline-block"}}>Name:&nbsp;</Typography>
+											{
+												editingNameOpen ?
+													<>
+														<ClowderInput required={true} id="name" onChange={(event) => {
+															setDatasetName(event.target.value);}} defaultValue={about["name"]}
+														/>
+														<Box sx={{margin:"5px auto"}}>
+															<Button onClick={()=>{ handleDatasetNameEdit();}} size={"small"} variant="outlined">Save</Button>
+															<Button onClick={() => setEditingNameOpen(false)} size={"small"}>Cancel</Button>
+														</Box>
+													</>
+													:
+													<>
+														<Typography className="content" sx={{display:"inline"}}>{about["name"]}</Typography>
+														<Button onClick={() => setEditingNameOpen(true)} size={"small"} sx={{display:"inline"}}>Edit</Button>
+													</>
+											}
+										</Box>
+										<Box>
+											<Typography className="content" sx={{display:"inline-block"}}>Description:&nbsp;</Typography>
+											{
+												editDescriptionOpen ?
+													<>
+														<ClowderInput
+															id="description"
+															defaultValue={about["description"]}
+															multiline
+															rows={4}
+															onChange={(event) => {
+																setDatasetDescription(event.target.value);}}
+														/>
+														<Box sx={{margin:"5px auto"}}>
+															<Button onClick={handleDatasetDescriptionEdit} size={"small"} variant={"outlined"}>Save</Button>
+															<Button onClick={() => setEditDescriptionOpen(false)} size={"small"}>Cancel</Button>
+														</Box>
+													</>
+													:
+													<>
+														<Typography className="content" sx={{display:"inline"}}>{about["description"]}</Typography>
+														<Button onClick={() => setEditDescriptionOpen(true)} size={"small"} sx={{display:"inline"}}>Edit</Button>
+													</>
+											}
+										</Box>
 										<Typography className="content">Dataset ID: {about["id"]}</Typography>
-										<Typography className="content">Owner: {about["authorId"]}</Typography>
-										<Typography className="content">Description: {about["description"]}</Typography>
+										<Typography className="content">
+											Owner: {about["author"]["first_name"]} {about["author"]["last_name"]}
+										</Typography>
 										<Typography className="content">Created on: {parseDate(about["created"])}</Typography>
+										<Typography className="content">Modified on: {parseDate(about["modified"])}</Typography>
 										{/*/!*TODO use this to get thumbnail*!/*/}
-										<Typography className="content">Thumbnail: {about["thumbnail"]}</Typography>
+										{/*<Typography className="content">Thumbnail: {about["thumbnail"]}</Typography>*/}
 										{/*<Typography className="content">Belongs to spaces: {about["authorId"]}</Typography>*/}
 										{/*/!*TODO not sure how to use this info*!/*/}
 										{/*<Typography className="content">Resource type: {about["resource_type"]}</Typography>*/}

@@ -19,7 +19,7 @@ export function FileAbout(props: FileAboutProps) {
 			{/*<Typography className="content">File size: {fileMetadata["size"]}</Typography>*/}
 			<Typography className="content">Updated on: {parseDate(created)}</Typography>
 			<Typography className="content">Uploaded as: {name}</Typography>
-			<Typography className="content">Uploaded by: {creator.full_name}</Typography>
+			<Typography className="content">Uploaded by: {creator.first_name} {creator.last_name}</Typography>
 			<Typography className="content">Latest Version: {version}</Typography>
 			{/*<Typography className="content">Status: {fileMetadata["status"]}</Typography>*/}
 		</Box>
