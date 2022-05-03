@@ -13,7 +13,13 @@ from app import keycloak_auth
 from app import dependencies
 from app.keycloak_auth import get_user, get_current_user
 from app.config import settings
-from app.models.datasets import DatasetBase, DatasetIn, DatasetDB, DatasetOut
+from app.models.datasets import (
+    DatasetBase,
+    DatasetIn,
+    DatasetDB,
+    DatasetOut,
+    DatasetPatch,
+)
 from app.models.files import FileIn, FileOut, FileVersion, FileDB
 from app.models.folders import FolderOut, FolderIn, FolderDB
 from app.models.pyobjectid import PyObjectId
@@ -99,7 +105,6 @@ async def get_dataset_files(
 async def edit_dataset(
     dataset_id: str,
     dataset_info: DatasetBase,
-    user_id=Depends(auth_handler.auth_wrapper),
     db: MongoClient = Depends(dependencies.get_db),
     user_id=Depends(get_user),
 ):
@@ -113,7 +118,9 @@ async def edit_dataset(
         ds["modified"] = datetime.datetime.utcnow()
         try:
             dataset.update(ds)
-            await db["datasets"].replace_one({"_id": ObjectId(dataset_id)}, DatasetDB(**dataset).to_mongo())
+            await db["datasets"].replace_one(
+                {"_id": ObjectId(dataset_id)}, DatasetDB(**dataset).to_mongo()
+            )
         except Exception as e:
             raise HTTPException(status_code=500, detail=e.args[0])
         return DatasetOut.from_mongo(dataset)
@@ -124,11 +131,11 @@ async def edit_dataset(
 async def patch_dataset(
     dataset_id: str,
     dataset_info: DatasetPatch,
-    user_id=Depends(auth_handler.auth_wrapper),
+    user_id=Depends(get_user),
     db: MongoClient = Depends(dependencies.get_db),
 ):
     if (
-            dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
+        dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
     ) is not None:
         # TODO: Refactor this with permissions checks etc.
         ds = dict(dataset_info) if dataset_info is not None else {}
@@ -137,7 +144,9 @@ async def patch_dataset(
         ds["modified"] = datetime.datetime.utcnow()
         try:
             dataset.update((k, v) for k, v in ds.items() if v is not None)
-            await db["datasets"].replace_one({"_id": ObjectId(dataset_id)}, DatasetDB(**dataset).to_mongo())
+            await db["datasets"].replace_one(
+                {"_id": ObjectId(dataset_id)}, DatasetDB(**dataset).to_mongo()
+            )
         except Exception as e:
             raise HTTPException(status_code=500, detail=e.args[0])
         return DatasetOut.from_mongo(dataset)
