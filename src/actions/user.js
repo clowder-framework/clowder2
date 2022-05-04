@@ -1,5 +1,6 @@
 import {V2} from "../openapi";
 import Cookies from "universal-cookie";
+import config from "../app.config";
 
 const cookies = new Cookies();
 
@@ -28,8 +29,10 @@ export async function loginHelper(email, password, first_name=null, last_name=nu
 }
 
 export async function logoutHelper(){
+	const headers = {"Authorization": cookies.get("Authorization")};
 	V2.OpenAPI.TOKEN = undefined;
-	cookies.remove("Authorization");
+	cookies.remove("Authorization", { path: "/" });
+	return await fetch(config.KeycloakLogout, { method: "GET", headers: headers});
 }
 
 export const LOGIN_ERROR = "LOGIN_ERROR";
@@ -42,7 +45,7 @@ export function login(email, password) {
 	return async (dispatch) => {
 		const json = await loginHelper(email, password, false);
 		V2.OpenAPI.TOKEN = undefined;
-		cookies.remove("Authorization");
+		cookies.remove("Authorization", { path: "/" });
 
 		if (json["token"] !== undefined && json["token"] !== "none") {
 			cookies.set("Authorization", `Bearer ${json["token"]}`);

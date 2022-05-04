@@ -5,6 +5,7 @@ interface Config{
 	apikey: string;
 	GHIssueBaseURL: string;
 	KeycloakLogin: string;
+	KeycloakLogout: string;
 }
 
 const config:Config = <Config>{};
