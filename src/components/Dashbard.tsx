@@ -43,7 +43,7 @@ export const Dashboard = (): JSX.Element => {
 	const [datasetThumbnailList, setDatasetThumbnailList] = useState<any>([]);
 	// TODO add option to determine limit number; default show 5 datasets each time
 	const [currPageNum, setCurrPageNum] = useState<number>(0);
-	const [limit,] = useState<number>(20);
+	const [limit,] = useState<number>(21);
 	const [skip, setSkip] = useState<number | undefined>();
 	// TODO add switch to turn on and off "mine" dataset
 	const [mine,] = useState<boolean>(false);
@@ -168,7 +168,7 @@ export const Dashboard = (): JSX.Element => {
 							 handleActionCancel={handleErrorCancel}/>
 				<div className="inner-container">
 					<Grid container spacing={4}>
-						<Grid item xs={8}>
+						<Grid item xs={12} md={8}>
 							<Box sx={{borderBottom: 1, borderColor: 'divider'}}>
 								<Tabs value={selectedTabIndex} onChange={handleTabChange} aria-label="dashboard tabs">
 									<Tab sx={tab} label="Datasets" {...a11yProps(0)} />
@@ -204,7 +204,7 @@ export const Dashboard = (): JSX.Element => {
 							<TabPanel value={selectedTabIndex} index={3}/>
 							<TabPanel value={selectedTabIndex} index={4}/>
 						</Grid>
-						<Grid item xs={4}>
+						<Grid item xs={12} md={4}>
 							<Box className="actionCard">
 								<Typography className="title">Create your dataset</Typography>
 								<Typography className="content">Some quick example text to tell users why they should

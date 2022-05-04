@@ -25,15 +25,15 @@ export default function DatasetCard(props: DatasetCardProps) {
 		history(`/datasets/${selectedDatasetId}`);
 	};
 	return (
-		<Card key={id}>
+		<Card key={id} sx={{ minWidth: 275 }}>
 			<CardContent>
 				<Typography variant="h5" component="div">
 					{name}
 				</Typography>
-				<Typography color="text.secondary">
+				<Typography color="secondary">
 					{author}
 				</Typography>
-				<Typography sx={{ mb: 1.5 }} color="text.secondary">
+				<Typography sx={{ mb: 1.5 }} color="secondary">
 					{formattedCreated}
 				</Typography>
 				<Typography variant="body2">
