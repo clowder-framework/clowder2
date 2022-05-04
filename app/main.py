@@ -1,3 +1,5 @@
+from urllib.request import Request
+
 import uvicorn
 from fastapi import FastAPI, APIRouter, Depends
 from fastapi.middleware.cors import CORSMiddleware

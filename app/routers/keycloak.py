@@ -1,7 +1,10 @@
 import json
 
 import requests
+from bson import ObjectId
 from fastapi import APIRouter, HTTPException, Depends, Security
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from jose import jwt, ExpiredSignatureError
 from keycloak.exceptions import KeycloakAuthenticationError, KeycloakGetError
 from pydantic import Json
 from pymongo import MongoClient
@@ -10,11 +13,12 @@ from starlette.responses import RedirectResponse
 
 from app import keycloak_auth, dependencies
 from app.config import settings
-from app.keycloak_auth import keycloak_openid, get_token, oauth2_scheme
+from app.keycloak_auth import keycloak_openid, get_token, oauth2_scheme, get_idp_public_key, retreive_refresh_token
 from app.models.users import UserIn, UserDB
+from app.models.tokens import TokenDB
 
 router = APIRouter()
-
+security = HTTPBearer()
 
 @router.get("/login")
 async def login() -> RedirectResponse:
@@ -23,10 +27,37 @@ async def login() -> RedirectResponse:
 
 
 @router.get("/logout")
-async def logout(token: Json = Depends(keycloak_auth.get_token)):
+async def logout(credentials: HTTPAuthorizationCredentials = Security(security), db: MongoClient = Depends(dependencies.get_db)):
     """Logout of keycloak."""
-    keycloak_openid.logout(token["refresh_token"])
-    return RedirectResponse(settings.frontend_url)
+    # get user info
+    access_token = credentials.credentials
+    try:
+        user_info = keycloak_openid.userinfo(access_token)
+        if (token_exist := await db["tokens"].find_one({"email": user_info["email"]})) is not None:
+            # log user out
+            try:
+                keycloak_openid.logout(token_exist["refresh_token"])
+
+                # delete entry in the token database
+                await db["tokens"].delete_one({"_id": ObjectId(token_exist["_id"])})
+                return {"status": f"Successfully log user: {user_info} out!"}
+            except:
+                raise HTTPException(
+                    status_code=403,
+                    detail="Refresh token invalid/expired! Cannot log user out.",
+                    headers={"WWW-Authenticate": "Bearer"},
+                )
+    except:
+        raise HTTPException(
+            status_code=403,
+            detail="Access token invalid! Cannot get user info.",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    raise HTTPException(
+        status_code=500,
+        detail="Unable to the current log user out!",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
 
 
 @router.post("/login")
@@ -50,7 +81,6 @@ async def login(userIn: UserIn):
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-
 @router.get("")
 async def auth(
     code: str, db: MongoClient = Depends(dependencies.get_db)
@@ -69,7 +99,7 @@ async def auth(
     token_body = json.loads(token_response.content)
     access_token = token_body["access_token"]
 
-    # create user in db if it doesn't already exist
+    # create user in db if it doesn't already exist; get the user_id
     userinfo = keycloak_openid.userinfo(access_token)
     keycloak_id = userinfo["sub"]
     given_name = userinfo["given_name"]
@@ -84,11 +114,46 @@ async def auth(
     if (await db["users"].find_one({"email": email})) is None:
         await db["users"].insert_one(user.to_mongo())
 
+    # store/update refresh token and link to that userid
+    if (token_exist := await db["tokens"].find_one({"email": email})) is not None:
+        token_exist.update({"refresh_token": token_body["refresh_token"]})
+        await db["tokens"].replace_one({"_id": ObjectId(token_exist["_id"])}, token_exist)
+    else:
+        token_created = TokenDB(email=email, refresh_token=token_body["refresh_token"])
+        await db["tokens"].insert_one(token_created.to_mongo())
+
     # redirect to frontend
     auth_url = f"{settings.frontend_url}/auth"
     response = RedirectResponse(url=auth_url)
     response.set_cookie("Authorization", value=f"Bearer {access_token}")
     return response
+
+
+@router.get('/refresh_token')
+async def refresh_token(credentials: HTTPAuthorizationCredentials = Security(security), db: MongoClient = Depends(
+    dependencies.get_db)):
+    access_token = credentials.credentials
+
+    try:
+        # token still valid
+        email = keycloak_openid.userinfo(access_token)["email"]
+        return await retreive_refresh_token(email, db)
+    except ExpiredSignatureError:
+        # retreive the refresh token and try refresh
+        email = jwt.get_unverified_claims(access_token)["email"]
+        return await retreive_refresh_token(email, db)
+    except KeycloakGetError as e:
+        raise HTTPException(
+            status_code=e.response_code,
+            detail=str(e),  # "Invalid authentication credentials",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    except KeycloakAuthenticationError as e:
+        raise HTTPException(
+            status_code=401,
+            detail=str(e),
+            headers={"WWW-Authenticate": "Bearer"},
+        )
 
 
 @router.get("/broker/{identity_provider}/token")

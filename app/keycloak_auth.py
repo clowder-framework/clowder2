@@ -1,8 +1,9 @@
 # Based on https://github.com/tiangolo/fastapi/issues/1428
 import json
 
+from bson import ObjectId
 from fastapi.security import OAuth2AuthorizationCodeBearer
-from jose import ExpiredSignatureError
+from jose import ExpiredSignatureError, jwt
 from keycloak.keycloak_openid import KeycloakOpenID
 from keycloak.exceptions import KeycloakAuthenticationError, KeycloakGetError
 from keycloak.keycloak_admin import KeycloakAdmin
@@ -40,8 +41,7 @@ oauth2_scheme = OAuth2AuthorizationCodeBearer(
     tokenUrl=settings.auth_token_url,
 )
 
-
-async def get_token(token: str = Security(oauth2_scheme)) -> Json:
+async def get_token(token: str = Security(oauth2_scheme), db: MongoClient = Depends(dependencies.get_db)) -> Json:
     """Decode token. Use to secure endpoints."""
     try:
         # See https://github.com/marcospereirampj/python-keycloak/issues/89
@@ -53,15 +53,19 @@ async def get_token(token: str = Security(oauth2_scheme)) -> Json:
     except ExpiredSignatureError as e:
         raise HTTPException(
             status_code=401,
-            detail={
-                "error": "JWT token signature expired"
-            },  # "Invalid authentication credentials",
+            detail=str(e),  # "token expired",
             headers={"WWW-Authenticate": "Bearer"},
         )
     except KeycloakGetError as e:
         raise HTTPException(
             status_code=e.response_code,
             detail=str(e),  # "Invalid authentication credentials",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    except KeycloakAuthenticationError as e:
+        raise HTTPException(
+            status_code=401,
+            detail=str(e),
             headers={"WWW-Authenticate": "Bearer"},
         )
 
@@ -167,3 +171,29 @@ async def create_user(email: str, password: str, firstName: str, lastName: str):
         exist_ok=False,
     )
     return user
+
+
+async def retreive_refresh_token(email: str, db: MongoClient = Depends(dependencies.get_db)):
+    if (token_exist := await db["tokens"].find_one({"email": email})) is not None:
+        try:
+            new_tokens = keycloak_openid.refresh_token(token_exist["refresh_token"])
+            # update the refresh token in the database
+            token_exist.update({"refresh_token": new_tokens["refresh_token"]})
+            await db["tokens"].replace_one({"_id": ObjectId(token_exist["_id"])}, token_exist)
+            return {'access_token': new_tokens["access_token"]}
+        except KeycloakGetError as e:
+            # refresh token invalid; remove from database
+            db["tokens"].delete_one({"_id": ObjectId(token_exist["_id"])})
+            raise HTTPException(
+                status_code=401,
+                detail=str(e),  # "Invalid authentication credentials",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+    else:
+        raise HTTPException(
+            status_code=401,
+            detail={
+                "error": "JWT token signature expired and cannot be refreshed"
+            },  # "Invalid authentication credentials",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
