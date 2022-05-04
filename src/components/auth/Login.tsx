@@ -98,24 +98,18 @@ export const Login = (): JSX.Element => {
 						display:"block",
 						textAlign:"right",
 						margin: "0 auto 10px auto",
-						color: "#212529"
 					}} target="_blank">Forgot password?</Link>
 					<Button
 						type="submit"
 						fullWidth
 						variant="contained"
 						onClick={handleLoginButtonClick}
-						sx={{
-							backgroundColor: "#f7931d",
-							color:"#FFFFFF"
-						}}
 					>Sign In</Button>
 					<Link href="/register" sx={{
 						fontWeight: 500,
 						fontSize:"15px",
 						display:"block",
 						margin:"10px auto 5px auto",
-						color: "#212529"
 					}}>Don&apos;t have an account? Sign up.</Link>
 				</Paper>
 			</div>

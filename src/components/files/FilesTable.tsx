@@ -15,10 +15,16 @@ import FolderIcon from '@mui/icons-material/Folder';
 import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
 import {parseDate} from "../../utils/common";
 import {VersionChip} from "../versions/VersionChip";
+import theme from "../../theme";
 
 type FilesTableProps = {
 	datasetId: string | undefined,
 	datasetName: string
+}
+
+const iconStyle = {
+	"vertical-align": "middle",
+	color: theme.palette.primary.main
 }
 
 export default function FilesTable(props: FilesTableProps) {
@@ -55,12 +61,13 @@ export default function FilesTable(props: FilesTableProps) {
 								sx={{'&:last-child td, &:last-child th': {border: 0}}}
 							>
 								<TableCell component="th" scope="row">
-									<FolderIcon/><Button onClick={() => selectFolder(folder.id)}>{folder.name}</Button>
+									<FolderIcon sx={iconStyle}/>
+									<Button onClick={() => selectFolder(folder.id)}>{folder.name}</Button>
 								</TableCell>
-								<TableCell align="right">{folder.author.full_name}</TableCell>
-								<TableCell align="right">-</TableCell>
-								<TableCell align="right">-</TableCell>
-								<TableCell align="right">-</TableCell>
+								<TableCell align="right">by {folder.author.first_name} {folder.author.last_name}</TableCell>
+								<TableCell align="right">&nbsp;</TableCell>
+								<TableCell align="right">&nbsp;</TableCell>
+								<TableCell align="right">&nbsp;</TableCell>
 							</TableRow>))
 					}
 					{
@@ -70,12 +77,12 @@ export default function FilesTable(props: FilesTableProps) {
 							sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
 						>
 							<TableCell component="th" scope="row">
-								<InsertDriveFileIcon/>
+								<InsertDriveFileIcon sx={iconStyle}/>
 								<Button onClick={() => selectFile(file.id)}>{file.name}</Button>
 								{/*TODO this should be version number; for now put version ID instead*/}
 								<VersionChip versionNumber={file.version.slice(0,2)}/>
 							</TableCell>
-							<TableCell align="right">{parseDate(file.created)} by {file.creator.full_name}</TableCell>
+							<TableCell align="right">{parseDate(file.created)} by {file.creator.first_name} {file.creator.last_name}</TableCell>
 							<TableCell align="right">{file.size}</TableCell>
 							<TableCell align="right">{file.contentType}</TableCell>
 							<TableCell align="right"><FileMenu file={file}/></TableCell>

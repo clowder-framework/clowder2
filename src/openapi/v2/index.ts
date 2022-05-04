@@ -11,6 +11,7 @@ export type { Collection } from './models/Collection';
 export type { DatasetBase } from './models/DatasetBase';
 export type { DatasetIn } from './models/DatasetIn';
 export type { DatasetOut } from './models/DatasetOut';
+export type { DatasetPatch } from './models/DatasetPatch';
 export type { FileIn } from './models/FileIn';
 export type { FileOut } from './models/FileOut';
 export type { FileVersion } from './models/FileVersion';

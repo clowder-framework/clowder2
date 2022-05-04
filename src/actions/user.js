@@ -9,10 +9,10 @@ export const userActions = {
 	logout
 };
 
-export async function loginHelper(email, password, register = false) {
+export async function loginHelper(email, password, first_name=null, last_name=null, register = false) {
 	const data = {"email": email, "password": password};
 	if (register) {
-		return V2.UsersService.saveUserApiV2UsersPost(data)
+		return V2.LoginService.saveUserApiV2UsersPost({...data, "first_name":first_name, "last_name": last_name})
 			.then(user => {return user;})
 			.catch(reason => {
 			// logout();
@@ -63,9 +63,9 @@ export function login(email, password) {
 	};
 }
 
-export function register(email, password) {
+export function register(email, password, firstname, lastname) {
 	return async (dispatch) => {
-		const json = await loginHelper(email, password, true);
+		const json = await loginHelper(email, password, firstname, lastname, true);
 		if (json["email"] !== undefined && json["hashed_password"] !== undefined) {
 			return dispatch({
 				type: REGISTER_USER,

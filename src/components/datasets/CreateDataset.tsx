@@ -8,7 +8,7 @@ import Form from "@rjsf/material-ui";
 import datasetSchema from "../../schema/datasetSchema.json";
 import {FormProps} from "@rjsf/core";
 import {useDispatch, useSelector,} from "react-redux";
-import {datasetCreated, resetDatsetCreated} from "../../actions/dataset";
+import {datasetCreated, resetDatsetCreated, updateDataset} from "../../actions/dataset";
 import {RootState} from "../../types/data";
 import {useNavigate} from "react-router-dom";
 
