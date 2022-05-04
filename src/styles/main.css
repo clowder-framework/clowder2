@@ -1,0 +1,79 @@
+body {
+	font-family: 'Open Sans', sans-serif;
+	font-weight: 300;
+}
+
+.outer-container{
+	padding: 45px;
+}
+
+.inner-container{
+	padding: 20px 0;
+}
+
+.fileCard{
+	border: 1px solid #DFDFDF;
+	box-sizing: border-box;
+	border-radius: 4px;
+	height:140px;
+	margin: 25px auto;
+}
+
+.infoCard {
+	padding: 20px 0;
+}
+
+.infoCard .title{
+	font-weight: 600;
+	font-size: 16px;
+	margin-bottom: 8px;
+}
+
+.infoCard .content{
+	font-size: 14px;
+	margin-bottom:2px;
+}
+
+.actionCard {
+	padding: 20px;
+	margin: 20px 20px;
+	border: 1px solid #DFDFDF;
+	box-sizing: border-box;
+	border-radius: 4px;
+}
+
+.actionCard .title{
+	font-weight: 600;
+	font-size: 20px;
+	margin-bottom: 12px;
+}
+
+.actionCard .content{
+	font-size: 16px;
+	margin-bottom:12px;
+}
+
+.actionCard .link{
+	font-size: 16px;
+}
+
+.appBar {
+	background: #FFFFFF;
+	box-shadow: none;
+}
+
+.tab{
+	font-style: normal;
+	font-weight: normal;
+	font-size: 16px;
+	text-transform: capitalize;
+}
+
+.form-button-block{
+	width: 100%;
+	font-weight: 600;
+}
+
+.inputGroup{
+	margin: 20px auto;
+}

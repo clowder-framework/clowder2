@@ -1,0 +1,24 @@
+
+version: "3.9"
+
+services:
+
+  # V1 Clowder API
+  mongo:
+    container_name: "clowder2-mongo"
+    image: mongo:3.6
+    ports:
+      - "27017:27017"
+
+  rabbitmq:
+    container_name: "clowder2-legacyrabbitmq"
+    image: rabbitmq:management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+
+  clowder:
+    container_name: "clowder2-legacyapi"
+    image: clowder/clowder
+    ports:
+      - "9000:9000"
