@@ -1,6 +1,7 @@
 from urllib.request import Request
 
 import uvicorn
+from pydantic import BaseConfig
 from fastapi import FastAPI, APIRouter, Depends
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -14,6 +15,7 @@ from app.routers import users, files, datasets, collections, authentication, key
 app = FastAPI(
     title=settings.APP_NAME, openapi_url=f"{settings.API_V2_STR}/openapi.json"
 )
+BaseConfig.arbitrary_types_allowed = True
 
 app.add_middleware(
     CORSMiddleware,

@@ -24,6 +24,14 @@ from app.models.files import FileIn, FileOut, FileVersion, FileDB
 from app.models.folders import FolderOut, FolderIn, FolderDB
 from app.models.pyobjectid import PyObjectId
 from app.models.users import UserOut
+from app.models.extractors import ExtractorIn
+from app.models.metadata import (
+    MongoDBRef,
+    MetadataAgent,
+    MetadataIn,
+    MetadataDB,
+    MetadataOut,
+)
 
 router = APIRouter()
 
@@ -250,16 +258,24 @@ async def save_file(
             raise HTTPException(
                 status_code=401, detail=f"User not found. Session might have expired."
             )
+
         dataset = await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
         if dataset is None:
             raise HTTPException(
                 status_code=404, detail=f"Dataset {dataset_id} not found"
             )
         fileDB = FileDB(name=file.filename, creator=user, dataset_id=dataset["_id"])
-        if folder_id is not None:
-            fileDB.folder_id = ObjectId(folder_id)
 
-        # Add to db and update dataset
+        if folder_id is not None:
+            if (
+                folder := await db["folders"].find_one({"_id": ObjectId(folder_id)})
+            ) is not None:
+                fileDB.folder_id = folder.id
+            else:
+                raise HTTPException(
+                    status_code=404, detail=f"Folder {folder_id} not found"
+                )
+
         new_file = await db["files"].insert_one(fileDB.to_mongo())
         new_file_id = new_file.inserted_id
 
@@ -276,7 +292,8 @@ async def save_file(
                 part_size=settings.MINIO_UPLOAD_CHUNK_SIZE,
             )  # async write chunk to minio
             version_id = response.version_id
-        fileDB.version = version_id
+        fileDB.version_id = version_id
+        fileDB.version_num = 1
         await db["files"].replace_one({"_id": ObjectId(new_file_id)}, fileDB.to_mongo())
 
         # Add FileVersion entry and update file
@@ -289,3 +306,43 @@ async def save_file(
         return fileDB
     else:
         raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
+
+
+@router.post("/{dataset_id}/metadata", response_model=MetadataOut)
+async def add_metadata(
+    dataset_id: str,
+    in_metadata: MetadataIn,
+    extractor_info: dict = {},
+    user_id=Depends(auth_handler.auth_wrapper),
+    db: MongoClient = Depends(dependencies.get_db),
+):
+    if (
+        dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
+    ) is not None:
+        user = await db["users"].find_one({"_id": ObjectId(user_id)})
+        user = UserOut(**user)
+        dataset_ref = MongoDBRef(collection="datasets", id=dataset.id)
+
+        # Build MetadataAgent depending on whether extractor info is present
+        if len(extractor_info) > 0:
+            extractor_in = ExtractorIn(**extractor_info.dict())
+            if (
+                extractor := await db["extractors"].find_one(
+                    {"_id": extractor_in.id, "version": extractor_in.version}
+                )
+            ) is not None:
+                agent = MetadataAgent(creator=user, extractor=extractor)
+            else:
+                raise HTTPException(status_code=404, detail=f"Extractor not found")
+        else:
+            agent = MetadataAgent(creator=user)
+
+    metadata = MetadataDB(
+        **in_metadata.dict(),
+        resource=dataset_ref,
+        agent=agent,
+    )
+    new_metadata = await db["metadata"].insert_one(metadata.to_mongo())
+    found = await db["metadata"].find_one({"_id": new_metadata.inserted_id})
+    metadata_out = MetadataOut.from_mongo(found)
+    return metadata_out

@@ -9,7 +9,8 @@ from app.models.users import UserOut
 
 
 class FileVersion(MongoModel):
-    version_id: str = "N/A"
+    version_id: str
+    version_num: int = 1
     file_id: PyObjectId
     creator: UserOut
     created: datetime = Field(default_factory=datetime.utcnow)
@@ -26,7 +27,8 @@ class FileIn(FileBase):
 class FileDB(FileBase):
     creator: UserOut
     created: datetime = Field(default_factory=datetime.utcnow)
-    version: str = "N/A"  # Minio version ID (if more than one version)
+    version_id: str = "N/A"
+    version_num: int = 0
     dataset_id: PyObjectId
     folder_id: Optional[PyObjectId]
     views: int = 0
