@@ -190,7 +190,7 @@ async def add_metadata(
     in_metadata: MetadataIn,
     file_version: Optional[int] = Form(None),
     extractor_info: Optional[ExtractorIn] = Form(None),
-    user_id=Depends(auth_handler.auth_wrapper),
+    user=Depends(get_current_user),
     db: MongoClient = Depends(dependencies.get_db),
 ):
     if (file := await db["files"].find_one({"_id": ObjectId(file_id)})) is not None:
@@ -207,8 +207,6 @@ async def add_metadata(
                 )
             target_version = file_version
 
-        user = await db["users"].find_one({"_id": ObjectId(user_id)})
-        user = UserOut(**user)
         file_ref = MongoDBRef(collection="files", id=file.id, version=target_version)
 
         # Build MetadataAgent depending on whether extractor info is present
@@ -242,13 +240,10 @@ async def get_metadata(
     all_versions: Optional[bool] = False,
     extractor_name: Optional[str] = Form(None),
     extractor_version: Optional[float] = Form(None),
-    user_id=Depends(auth_handler.auth_wrapper),
+    user=Depends(get_current_user),
     db: MongoClient = Depends(dependencies.get_db),
 ):
     if (file := await db["files"].find_one({"_id": ObjectId(file_id)})) is not None:
-        user = await db["users"].find_one({"_id": ObjectId(user_id)})
-        user = UserOut(**user)
-
         query = {"resource.id": file_id}
 
         if not all_versions:

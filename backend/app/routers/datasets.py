@@ -313,14 +313,12 @@ async def add_metadata(
     dataset_id: str,
     in_metadata: MetadataIn,
     extractor_info: dict = {},
-    user_id=Depends(auth_handler.auth_wrapper),
+    user=Depends(get_current_user),
     db: MongoClient = Depends(dependencies.get_db),
 ):
     if (
         dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
     ) is not None:
-        user = await db["users"].find_one({"_id": ObjectId(user_id)})
-        user = UserOut(**user)
         dataset_ref = MongoDBRef(collection="datasets", id=dataset.id)
 
         # Build MetadataAgent depending on whether extractor info is present
