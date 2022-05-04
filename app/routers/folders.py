@@ -7,17 +7,13 @@ from fastapi import (
 from pymongo import MongoClient
 
 from app import dependencies
-from app.auth import AuthHandler
 
 router = APIRouter()
-
-auth_handler = AuthHandler()
 
 
 @router.get("/{folder_id}/path")
 async def download_file(
     folder_id: str,
-    user_id=Depends(auth_handler.auth_wrapper),
     db: MongoClient = Depends(dependencies.get_db),
 ):
     if (

@@ -17,9 +17,8 @@ from pydantic import Json
 from pymongo import MongoClient
 
 from app import dependencies
-from app.auth import AuthHandler
 from app.config import settings
-from app.models.files import FileIn, FileDB, FileOut, FileVersion
+from app.models.files import FileIn, FileOut, FileVersion, FileDB
 from app.models.users import UserOut
 from app.models.extractors import ExtractorIn
 from app.models.metadata import (
@@ -29,24 +28,22 @@ from app.models.metadata import (
     MetadataDB,
     MetadataOut,
 )
+from app.keycloak_auth import get_user, get_current_user, get_token
 
 router = APIRouter()
-
-auth_handler = AuthHandler()
 
 
 @router.put("/{file_id}", response_model=FileOut)
 async def update_file(
     file_id: str,
-    user_id=Depends(auth_handler.auth_wrapper),
+    token=Depends(get_token),
+    user=Depends(get_current_user),
     db: MongoClient = Depends(dependencies.get_db),
     fs: Minio = Depends(dependencies.get_fs),
     file: UploadFile = File(...),
 ):
     if (file_q := await db["files"].find_one({"_id": ObjectId(file_id)})) is not None:
         # First, add to database and get unique ID
-        user_q = await db["users"].find_one({"_id": ObjectId(user_id)})
-        user = UserOut(**user_q)
         existing_file = FileOut.from_mongo(file_q)
 
         # Update file in Minio and get the new version IDs
@@ -77,7 +74,7 @@ async def update_file(
             version_id=updated_file.version_id,
             version_num=updated_file.version_num,
             file_id=updated_file.id,
-            creator=UserOut(**user),
+            creator=user,
         )
         await db["file_versions"].insert_one(dict(new_version))
         return FileOut.from_mongo(updated_file)
@@ -88,7 +85,6 @@ async def update_file(
 @router.get("/{file_id}")
 async def download_file(
     file_id: str,
-    user_id=Depends(auth_handler.auth_wrapper),
     db: MongoClient = Depends(dependencies.get_db),
     fs: Minio = Depends(dependencies.get_fs),
 ):
@@ -112,7 +108,6 @@ async def download_file(
 @router.delete("/{file_id}")
 async def delete_file(
     file_id: str,
-    user_id=Depends(auth_handler.auth_wrapper),
     db: MongoClient = Depends(dependencies.get_db),
     fs: Minio = Depends(dependencies.get_fs),
 ):
@@ -138,7 +133,6 @@ async def delete_file(
 async def get_file_summary(
     file_id: str,
     db: MongoClient = Depends(dependencies.get_db),
-    fs: Minio = Depends(dependencies.get_fs),
 ):
     if (file := await db["files"].find_one({"_id": ObjectId(file_id)})) is not None:
         # TODO: Incrementing too often (3x per page view)
@@ -153,7 +147,6 @@ async def get_file_summary(
 async def get_file_versions(
     file_id: str,
     db: MongoClient = Depends(dependencies.get_db),
-    fs: Minio = Depends(dependencies.get_fs),
     skip: int = 0,
     limit: int = 20,
 ):

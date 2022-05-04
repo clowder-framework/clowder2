@@ -6,7 +6,12 @@ dataset_data = {
     "description": "a dataset is a container of files and metadata",
 }
 
-user = {"email": "test@test.org", "password": "not_a_password"}
+user = {
+    "email": "test@test.org",
+    "password": "not_a_password",
+    "first_name": "Foo",
+    "last_name": "Bar",
+}
 
 
 def test_create(client: TestClient, headers: dict):

@@ -1,5 +1,6 @@
 from datetime import datetime
 from enum import Enum, auto
+from typing import Optional
 
 from mongoengine import DynamicDocument
 from pydantic import Field, BaseModel
@@ -30,6 +31,11 @@ class DatasetBase(BaseModel):
 
 class DatasetIn(DatasetBase):
     pass
+
+
+class DatasetPatch(BaseModel):
+    name: Optional[str]
+    description: Optional[str]
 
 
 class DatasetDB(MongoModel, DatasetBase):
