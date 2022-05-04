@@ -1,0 +1,16 @@
+fastapi
+uvicorn
+motor
+mongoengine
+beanie
+passlib
+bcrypt
+pyjwt
+black
+requests
+pytest
+minio
+python-multipart
+python-jose
+python-keycloak
+email-validator

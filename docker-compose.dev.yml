@@ -1,0 +1,109 @@
+version: '3.7'
+
+# Settings and configurations that are common for all containers
+x-minio-common: &minio-common
+  image: quay.io/minio/minio:RELEASE.2022-01-25T19-56-04Z
+  command: server --console-address ":9001" http://minio{1...4}/data
+  expose:
+    - "9000"
+    - "9001"
+  environment:
+    MINIO_ROOT_USER: minioadmin
+    MINIO_ROOT_PASSWORD: minioadmin
+  healthcheck:
+    test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+    interval: 30s
+    timeout: 20s
+    retries: 3
+
+services:
+
+  mongo:
+    image: mongo:5.0
+    restart: always
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo:/data/db
+
+  minio1:
+    <<: *minio-common
+    hostname: minio1
+    volumes:
+      - data1:/data
+
+  minio2:
+    <<: *minio-common
+    hostname: minio2
+    volumes:
+      - data2:/data
+
+  minio3:
+    <<: *minio-common
+    hostname: minio3
+    volumes:
+      - data3:/data
+
+  minio4:
+    <<: *minio-common
+    hostname: minio4
+    volumes:
+      - data4:/data
+
+  minio-nginx:
+    image: nginx:1.19.2-alpine
+    hostname: nginx
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    depends_on:
+      - minio1
+      - minio2
+      - minio3
+      - minio4
+
+  postgres:
+      image: postgres
+      volumes:
+        - postgres_data:/var/lib/postgresql/data
+      environment:
+        POSTGRES_DB: keycloak
+        POSTGRES_USER: keycloak
+        POSTGRES_PASSWORD: password
+
+  keycloak:
+      image: quay.io/keycloak/keycloak:legacy
+      environment:
+        DB_VENDOR: POSTGRES
+        DB_ADDR: postgres
+        DB_DATABASE: keycloak
+        DB_USER: keycloak
+        DB_SCHEMA: public
+        DB_PASSWORD: password
+        KEYCLOAK_USER: admin
+        KEYCLOAK_PASSWORD: admin
+        # Uncomment the line below if you want to specify JDBC parameters. The parameter below is just an example, and it shouldn't be used in production without knowledge. It is highly recommended that you read the PostgreSQL JDBC driver documentation in order to use it.
+        #JDBC_PARAMS: "ssl=true"
+      ports:
+        - 8080:8080
+      depends_on:
+        - postgres
+
+  maildev:
+    image: maildev/maildev
+    ports:
+      - "1080:80"
+      - "25:25"
+
+## By default this config uses default local driver,
+## For custom volumes replace with volume driver configuration.
+volumes:
+  mongo:
+  data1:
+  data2:
+  data3:
+  data4:
+  postgres_data:
+    driver: local

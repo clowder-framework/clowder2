@@ -1,0 +1,6 @@
+.idea
+__pycache__
+/scripts/.pytest_cache/
+/docs/.venv/
+/docs/build/
+/.env
