@@ -1,9 +1,14 @@
 import React, {useEffect} from "react";
-import {refreshHelper} from "../../actions/user";
+import {useDispatch} from "react-redux";
+import {refresh as refreshAction} from "../../actions/user";
 
 export const Refresh = (): JSX.Element => {
+
+	const dispatch = useDispatch();
+	const refresh = () => dispatch(refreshAction());
+
 	useEffect(() => {
-		refreshHelper();
+		refresh();
 	}, []);
 
 	return (
