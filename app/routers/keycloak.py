@@ -13,12 +13,19 @@ from starlette.responses import RedirectResponse
 
 from app import keycloak_auth, dependencies
 from app.config import settings
-from app.keycloak_auth import keycloak_openid, get_token, oauth2_scheme, get_idp_public_key, retreive_refresh_token
+from app.keycloak_auth import (
+    keycloak_openid,
+    get_token,
+    oauth2_scheme,
+    get_idp_public_key,
+    retreive_refresh_token,
+)
 from app.models.users import UserIn, UserDB
 from app.models.tokens import TokenDB
 
 router = APIRouter()
 security = HTTPBearer()
+
 
 @router.get("/login")
 async def login() -> RedirectResponse:
@@ -27,13 +34,18 @@ async def login() -> RedirectResponse:
 
 
 @router.get("/logout")
-async def logout(credentials: HTTPAuthorizationCredentials = Security(security), db: MongoClient = Depends(dependencies.get_db)):
+async def logout(
+    credentials: HTTPAuthorizationCredentials = Security(security),
+    db: MongoClient = Depends(dependencies.get_db),
+):
     """Logout of keycloak."""
     # get user info
     access_token = credentials.credentials
     try:
         user_info = keycloak_openid.userinfo(access_token)
-        if (token_exist := await db["tokens"].find_one({"email": user_info["email"]})) is not None:
+        if (
+            token_exist := await db["tokens"].find_one({"email": user_info["email"]})
+        ) is not None:
             # log user out
             try:
                 keycloak_openid.logout(token_exist["refresh_token"])
@@ -81,6 +93,7 @@ async def login(userIn: UserIn):
             headers={"WWW-Authenticate": "Bearer"},
         )
 
+
 @router.get("")
 async def auth(
     code: str, db: MongoClient = Depends(dependencies.get_db)
@@ -117,7 +130,9 @@ async def auth(
     # store/update refresh token and link to that userid
     if (token_exist := await db["tokens"].find_one({"email": email})) is not None:
         token_exist.update({"refresh_token": token_body["refresh_token"]})
-        await db["tokens"].replace_one({"_id": ObjectId(token_exist["_id"])}, token_exist)
+        await db["tokens"].replace_one(
+            {"_id": ObjectId(token_exist["_id"])}, token_exist
+        )
     else:
         token_created = TokenDB(email=email, refresh_token=token_body["refresh_token"])
         await db["tokens"].insert_one(token_created.to_mongo())
@@ -129,9 +144,11 @@ async def auth(
     return response
 
 
-@router.get('/refresh_token')
-async def refresh_token(credentials: HTTPAuthorizationCredentials = Security(security), db: MongoClient = Depends(
-    dependencies.get_db)):
+@router.get("/refresh_token")
+async def refresh_token(
+    credentials: HTTPAuthorizationCredentials = Security(security),
+    db: MongoClient = Depends(dependencies.get_db),
+):
     access_token = credentials.credentials
 
     try:

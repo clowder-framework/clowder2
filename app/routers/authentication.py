@@ -59,6 +59,7 @@ async def login(userIn: UserIn, db: MongoClient = Depends(dependencies.get_db)):
             headers={"WWW-Authenticate": "Bearer"},
         )
 
+
 async def authenticate_user(email: str, password: str, db: MongoClient):
     user = await db["users"].find_one({"email": email})
     current_user = UserDB.from_mongo(user)
