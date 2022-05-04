@@ -4,6 +4,8 @@ interface Config{
 	hostname: string;
 	apikey: string;
 	GHIssueBaseURL: string;
+	KeycloakLogin: string;
+	KeycloakLogout: string;
 }
 
 const config:Config = <Config>{};
@@ -18,5 +20,8 @@ config["apikey"] = apikey;
 V2.OpenAPI.BASE = config.hostname;
 
 config["GHIssueBaseURL"] = "https://github.com/clowder-framework/clowder2-frontend/issues/new?title=%5BClowder+V2%5D";
+
+// Backend Keycloak login url
+config["KeycloakLogin"] = "http://localhost:8000/api/v2/auth/login";
 
 export default config;

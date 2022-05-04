@@ -1,4 +1,8 @@
 import {V2} from "../openapi";
+import Cookies from "universal-cookie";
+import config from "../app.config";
+
+const cookies = new Cookies();
 
 export const userActions = {
 	login,
@@ -8,7 +12,7 @@ export const userActions = {
 export async function loginHelper(email, password, first_name=null, last_name=null, register = false) {
 	const data = {"email": email, "password": password};
 	if (register) {
-		return V2.UsersService.saveUserApiV2UsersPost({...data, "first_name":first_name, "last_name": last_name})
+		return V2.LoginService.saveUserApiV2UsersPost({...data, "first_name":first_name, "last_name": last_name})
 			.then(user => {return user;})
 			.catch(reason => {
 			// logout();
@@ -25,8 +29,10 @@ export async function loginHelper(email, password, first_name=null, last_name=nu
 }
 
 export async function logoutHelper(){
+	const headers = {"Authorization": cookies.get("Authorization")};
 	V2.OpenAPI.TOKEN = undefined;
-	localStorage.removeItem("Authorization");
+	cookies.remove("Authorization", { path: "/" });
+	return await fetch(config.KeycloakLogout, { method: "GET", headers: headers});
 }
 
 export const LOGIN_ERROR = "LOGIN_ERROR";
@@ -39,14 +45,14 @@ export function login(email, password) {
 	return async (dispatch) => {
 		const json = await loginHelper(email, password, false);
 		V2.OpenAPI.TOKEN = undefined;
-		localStorage.removeItem("Authorization");
+		cookies.remove("Authorization", { path: "/" });
 
 		if (json["token"] !== undefined && json["token"] !== "none") {
-			localStorage.setItem("Authorization", `bearer ${json["token"]}`);
+			cookies.set("Authorization", `Bearer ${json["token"]}`);
 			V2.OpenAPI.TOKEN = json["token"];
 			return dispatch({
 				type: SET_USER,
-				Authorization: `bearer ${json["token"]}`,
+				Authorization: `Bearer ${json["token"]}`,
 			});
 		} else {
 			return dispatch({

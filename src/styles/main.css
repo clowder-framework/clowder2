@@ -26,13 +26,11 @@ body {
 .infoCard .title{
 	font-weight: 600;
 	font-size: 16px;
-	color: #000000;
 	margin-bottom: 8px;
 }
 
 .infoCard .content{
 	font-size: 14px;
-	color: #000000;
 	margin-bottom:2px;
 }
 
@@ -47,19 +45,16 @@ body {
 .actionCard .title{
 	font-weight: 600;
 	font-size: 20px;
-	color: #212529;
 	margin-bottom: 12px;
 }
 
 .actionCard .content{
 	font-size: 16px;
-	color: #212529;
 	margin-bottom:12px;
 }
 
 .actionCard .link{
 	font-size: 16px;
-	color: #007BFF;
 }
 
 .appBar {
@@ -71,7 +66,6 @@ body {
 	font-style: normal;
 	font-weight: normal;
 	font-size: 16px;
-	color: #495057;
 	text-transform: capitalize;
 }
 

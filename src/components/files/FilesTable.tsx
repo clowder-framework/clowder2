@@ -15,6 +15,7 @@ import FolderIcon from '@mui/icons-material/Folder';
 import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
 import {parseDate} from "../../utils/common";
 import {VersionChip} from "../versions/VersionChip";
+import theme from "../../theme";
 
 type FilesTableProps = {
 	datasetId: string | undefined,
@@ -22,7 +23,8 @@ type FilesTableProps = {
 }
 
 const iconStyle = {
-	"vertical-align": "middle"
+	"vertical-align": "middle",
+	color: theme.palette.primary.main
 }
 
 export default function FilesTable(props: FilesTableProps) {
