@@ -87,3 +87,8 @@ export function logout() {
 		});
 	};
 }
+
+export async function refreshHelper(){
+	const headers = {"Authorization": cookies.get("Authorization")};
+	return await fetch(config.KeycloakRefresh, { method: "GET", headers: headers});
+}

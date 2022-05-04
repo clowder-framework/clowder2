@@ -3,7 +3,9 @@ import {logoutHelper} from "../../actions/user";
 
 export const RedirectLogout = (): JSX.Element => {
 	useEffect(() => {
-		logoutHelper();
+		logoutHelper().then(res => {
+			console.log(res);
+		});
 	}, []);
 
 	return (

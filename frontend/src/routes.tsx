@@ -9,6 +9,7 @@ import {Register as RegisterComponent} from "./components/auth/Register";
 import {Auth as AuthComponent} from "./components/auth/Auth";
 import {RedirectLogin as RedirectLoginComponent} from "./components/auth/RedirectLogin";
 import {RedirectLogout as RedirectLogoutComponent} from "./components/auth/RedirectLogout";
+import {RefreshComponent} from "./components/auth/Refresh";
 
 import {isAuthorized} from "./utils/common";
 
@@ -30,6 +31,7 @@ const AppRoutes = (
 			<Route path="/register" element={<RegisterComponent/>} />
 			<Route path="/auth/login" element={<RedirectLoginComponent/>} />
 			<Route path="/auth/logout" element={<RedirectLogoutComponent/>} />
+			<Route path="/auth/refresh" element={<RefreshComponent/>} />
 			<Route path="/auth" element={<AuthComponent/>} />
 			<Route path="*"
 				element={
