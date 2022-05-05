@@ -1,5 +1,6 @@
 import {getHeader} from "./common";
 import config from "../app.config";
+import {handleErrors} from "../actions/common";
 
 export async function downloadDataset(datasetId, filename = "") {
 
@@ -25,9 +26,7 @@ export async function downloadDataset(datasetId, filename = "") {
 			document.body.removeChild(anchor);
 		}
 	} else if (response.status === 401) {
-		// TODO
-		console.log(response.json());
-		// logout();
+		handleErrors(response, downloadDataset(datasetId, filename));
 	} else {
 		console.log(response.json());
 	}

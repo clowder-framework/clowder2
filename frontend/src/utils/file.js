@@ -2,6 +2,7 @@ import {getHeader} from "./common";
 import {V2} from "../openapi";
 import config from "../app.config";
 import {logout} from "../actions/user";
+import {handleErrors} from "../actions/common";
 
 // TODO this need to go away in v2; same function already in redux
 // TODO this exist because on dataset page we need to call multiple files id to collect their thumbnail
@@ -44,9 +45,7 @@ export async function downloadFile(fileId, filename = "") {
 			document.body.removeChild(anchor);
 		}
 	} else if (response.status === 401) {
-		// TODO
-		// logout();
-		console.log(response.json());
+		handleErrors(response, downloadFile(fileId, filename));
 	} else {
 		console.log(response.json());
 	}
