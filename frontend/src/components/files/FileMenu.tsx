@@ -3,10 +3,9 @@ import Button from '@mui/material/Button';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import MenuIcon from '@mui/icons-material/Menu';
-import { downloadFile } from '../../utils/file';
 import {File} from "../../types/data";
 import {useState} from "react";
-import {fileDeleted} from "../../actions/file";
+import {fileDeleted, fileDownloaded} from "../../actions/file";
 import {useDispatch} from "react-redux";
 import {ActionModal} from "../dialog/ActionModal";
 import DownloadIcon from '@mui/icons-material/Download';
@@ -33,6 +32,7 @@ export default function FileMenu(props: FileMenuProps) {
 	// confirmation dialog
 	const dispatch = useDispatch();
 	const deleteFile = (fileId:string|undefined) => dispatch(fileDeleted(fileId));
+	const downloadFile = (fileId:string|undefined, filename:string|undefined) => dispatch(fileDownloaded(fileId, filename))
 	const [confirmationOpen, setConfirmationOpen] = useState(false);
 	const [updateFileOpen, setUpdateFileOpen] = useState(false);
 	const deleteSelectedFile = () => {

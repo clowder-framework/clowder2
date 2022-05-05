@@ -1,5 +1,8 @@
 import {V2} from "../openapi";
 import {handleErrors} from "./common";
+import config from "../app.config";
+import {getHeader} from "../utils/common";
+import {DOWNLOAD_FILE} from "./file";
 
 export const RECEIVE_FILES_IN_DATASET = "RECEIVE_FILES_IN_DATASET";
 export function fetchFilesInDataset(datasetId, folderId){
@@ -172,6 +175,41 @@ export function fetchFolderPath(folderId){
 				folderPath: [],
 				receivedAt: Date.now(),
 			});
+		}
+	};
+}
+
+export const DOWNLOAD_DATASET = "DOWNLOAD_DATASET";
+export function datasetDownloaded(datasetId, filename = "") {
+	return async (dispatch) =>{
+		if (filename !== "") {
+			filename = filename.replace(/\s+/g, "_");
+			filename = `${filename}.zip`;
+		} else {
+			filename = `${datasetId}.zip`;
+		}
+		const endpoint = `${config.hostname}/datasets/${datasetId}/download?superAdmin=true`;
+		const response = await fetch(endpoint, {method: "GET", mode: "cors", headers: await getHeader()});
+
+		if (response.status === 200) {
+			const blob = await response.blob();
+			if (window.navigator.msSaveOrOpenBlob) {
+				window.navigator.msSaveBlob(blob, filename);
+			} else {
+				const anchor = window.document.createElement("a");
+				anchor.href = window.URL.createObjectURL(blob);
+				anchor.download = filename;
+				document.body.appendChild(anchor);
+				anchor.click();
+				document.body.removeChild(anchor);
+			}
+			dispatch({
+				type: DOWNLOAD_DATASET,
+				receivedAt: Date.now(),
+			});
+		}
+		else {
+			dispatch(handleErrors(response, datasetDownloaded(datasetId, filename)));
 		}
 	};
 }
