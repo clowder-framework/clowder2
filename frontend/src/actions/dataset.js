@@ -1,5 +1,4 @@
 import {V2} from "../openapi";
-import {LOGOUT, logoutHelper} from "./user";
 import {handleErrors} from "./common";
 
 export const RECEIVE_FILES_IN_DATASET = "RECEIVE_FILES_IN_DATASET";
@@ -14,7 +13,7 @@ export function fetchFilesInDataset(datasetId, folderId){
 				});
 			})
 			.catch(reason => {
-				dispatch(handleErrors(reason));
+				dispatch(handleErrors(reason), fetchFilesInDataset(datasetId, folderId));
 			});
 	};
 }
@@ -31,7 +30,7 @@ export function fetchFoldersInDataset(datasetId, parentFolder){
 				});
 			})
 			.catch(reason => {
-				dispatch(handleErrors(reason));
+				dispatch(handleErrors(reason), fetchFoldersInDataset(datasetId, parentFolder));
 			});
 	};
 }
@@ -48,7 +47,7 @@ export function updateDataset(datasetId, formData){
 				});
 			})
 			.catch(reason => {
-				dispatch(handleErrors(reason));
+				dispatch(handleErrors(reason), updateDataset(datasetId, formData));
 			});
 	};
 }
@@ -65,7 +64,7 @@ export function fetchDatasetAbout(id){
 				});
 			})
 			.catch(reason => {
-				dispatch(handleErrors(reason, this));
+				dispatch(handleErrors(reason, fetchDatasetAbout(id)));
 			});
 	};
 }
@@ -83,7 +82,7 @@ export function fetchDatasets(skip=0, limit=21, mine=false){
 				});
 			})
 			.catch(reason => {
-				dispatch(handleErrors(reason, this));
+				dispatch(handleErrors(reason, fetchDatasets(skip, limit, mine)));
 			});
 
 	};
@@ -101,7 +100,7 @@ export function datasetCreated(formData){
 				});
 			})
 			.catch(reason => {
-				dispatch(handleErrors(reason));
+				dispatch(handleErrors(reason), datasetCreated(formData));
 			});
 	};
 }
@@ -128,7 +127,7 @@ export function datasetDeleted(datasetId){
 				});
 			})
 			.catch(reason => {
-				dispatch(handleErrors(reason));
+				dispatch(handleErrors(reason, datasetDeleted(datasetId)));
 			});
 	};
 }
@@ -147,7 +146,7 @@ export function folderAdded(datasetId, folderName, parentFolder = null){
 				});
 			})
 			.catch(reason => {
-				dispatch(handleErrors(reason));
+				dispatch(handleErrors(reason, folderAdded(datasetId, folderName, parentFolder)));
 			});
 	};
 }
@@ -165,7 +164,7 @@ export function fetchFolderPath(folderId){
 					});
 				})
 				.catch(reason => {
-					dispatch(handleErrors(reason));
+					dispatch(handleErrors(reason, fetchFolderPath(folderId)));
 				});
 		} else {
 			dispatch({

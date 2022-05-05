@@ -38,7 +38,7 @@ export function handleErrors(reason, originFunc){
 				if (json["access_token"] !== undefined && json["access_token"] !== "none") {
 					cookies.set("Authorization", `Bearer ${json["access_token"]}`);
 					V2.OpenAPI.TOKEN = json["access_token"];
-					dispatch(originFunc());
+					dispatch(originFunc);
 					// return dispatch({
 					// 	type: SET_USER,
 					// 	Authorization: `Bearer ${json["access_token"]}`,

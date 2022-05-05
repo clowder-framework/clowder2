@@ -21,11 +21,11 @@ export function fetchFileExtractedMetadata(id){
 					});
 				}
 				else {
-					dispatch(handleErrors(response));
+					dispatch(handleErrors(response, fetchFileExtractedMetadata(id)));
 				}
 			})
 			.catch(reason => {
-				dispatch(handleErrors(reason));
+				dispatch(handleErrors(reason, fetchFileExtractedMetadata(id)));
 			});
 	};
 }
@@ -42,7 +42,7 @@ export function fetchFileMetadata(id){
 				});
 			})
 			.catch(reason => {
-				dispatch(handleErrors(reason));
+				dispatch(handleErrors(reason, fetchFileMetadata(id)));
 			});
 	};
 }
@@ -63,11 +63,11 @@ export function fetchFileMetadataJsonld(id){
 					});
 				}
 				else {
-					dispatch(handleErrors(response));
+					dispatch(handleErrors(response, fetchFileMetadataJsonld(id)));
 				}
 			})
 			.catch(reason => {
-				dispatch(handleErrors(reason));
+				dispatch(handleErrors(reason, fetchFileMetadataJsonld(id)));
 			});
 	};
 }
@@ -88,11 +88,11 @@ export function fetchFilePreviews(id){
 					});
 				}
 				else {
-					dispatch(handleErrors(response));
+					dispatch(handleErrors(response, fetchFilePreviews(id)));
 				}
 			})
 			.catch(reason => {
-				dispatch(handleErrors(reason));
+				dispatch(handleErrors(reason, fetchFilePreviews(id)));
 			});
 	};
 }
@@ -109,7 +109,7 @@ export function fileDeleted(fileId){
 				});
 			})
 			.catch(reason => {
-				dispatch(handleErrors(reason));
+				dispatch(handleErrors(reason, fileDeleted(fileId)));
 			});
 	};
 }
@@ -127,7 +127,7 @@ export function fileCreated(formData, selectedDatasetId){
 				});
 			})
 			.catch(reason => {
-				dispatch(handleErrors(reason));
+				dispatch(handleErrors(reason, fileCreated(formData, selectedDatasetId)));
 			});
 	};
 }
@@ -145,7 +145,7 @@ export function fileUpdated(formData, fileId){
 				});
 			})
 			.catch(reason => {
-				dispatch(handleErrors(reason));
+				dispatch(handleErrors(reason, fileUpdated(formData, fileId)));
 			});
 	};
 }
@@ -164,7 +164,7 @@ export function fetchFileVersions(fileId){
 				});
 			})
 			.catch(reason => {
-				dispatch(handleErrors(reason));
+				dispatch(handleErrors(reason, fetchFileVersions(fileId)));
 			});
 	};
 }
