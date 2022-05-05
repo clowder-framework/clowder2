@@ -27,7 +27,7 @@ export function resetLogout(){
 }
 
 export const FAILED = "FAILED";
-export function handleErrors(reason, originFunc){
+export function handleErrors(reason, callback){
 	// Authorization error we need to automatically logout user
 	if (reason.status === 401){
 		return async (dispatch) => {
@@ -38,11 +38,7 @@ export function handleErrors(reason, originFunc){
 				if (json["access_token"] !== undefined && json["access_token"] !== "none") {
 					cookies.set("Authorization", `Bearer ${json["access_token"]}`);
 					V2.OpenAPI.TOKEN = json["access_token"];
-					dispatch(originFunc);
-					// return dispatch({
-					// 	type: SET_USER,
-					// 	Authorization: `Bearer ${json["access_token"]}`,
-					// });
+					dispatch(callback);
 				}
 			}
 			else {

@@ -60,7 +60,6 @@ export const Dataset = (): JSX.Element => {
 	const dispatch = useDispatch();
 	const deleteDataset = (datasetId:string|undefined) => dispatch(datasetDeleted(datasetId));
 	const editDataset = (datasetId: string|undefined, formData: DatasetIn) => dispatch(updateDataset(datasetId, formData));
-	const addFolder = (datasetId:string|undefined, folderName:string, parentFolder:string|null) => dispatch(folderAdded(datasetId, folderName, parentFolder));
 	const getFolderPath= (folderId:string|undefined) => dispatch(fetchFolderPath(folderId));
 	const listFilesInDataset = (datasetId:string|undefined, folderId:string|undefined) => dispatch(fetchFilesInDataset(datasetId, folderId));
 	const listFoldersInDataset = (datasetId:string|undefined, parentFolder:string|undefined) => dispatch(fetchFoldersInDataset(datasetId, parentFolder));
@@ -231,12 +230,12 @@ export const Dataset = (): JSX.Element => {
 									</MenuItem>
 									<MenuItem sx={optionMenuItem}
 											  onClick={()=>{
-												  // addFolder(datasetId, "new folder", null);
 												  setNewFolder(true);
 												  handleOptionClose();
 											  }
 											  }>Add Folder</MenuItem>
 									<CreateFolder datasetId={datasetId} parentFolder={folder} open={newFolder} handleClose={handleCloseNewFolder}/>
+									{/*backend not implemented yet*/}
 									<MenuItem sx={optionMenuItem}
 											  onClick={() => {
 												  downloadDataset(datasetId, about["name"]);
