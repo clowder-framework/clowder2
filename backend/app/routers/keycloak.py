@@ -153,7 +153,12 @@ async def refresh_token(
 
     try:
         # token still valid
-        email = keycloak_openid.userinfo(access_token)["email"]
+        token_json = keycloak_openid.decode_token(
+            access_token,
+            key=await get_idp_public_key(),
+            options={"verify_aud": False},
+        )
+        email = token_json["email"]
         return await retreive_refresh_token(email, db)
     except ExpiredSignatureError:
         # retreive the refresh token and try refresh

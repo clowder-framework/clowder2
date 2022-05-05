@@ -1,7 +1,6 @@
 import {V2} from "../openapi";
 import Cookies from "universal-cookie";
 import config from "../app.config";
-import {handleErrors} from "./common";
 
 const cookies = new Cookies();
 
@@ -86,26 +85,5 @@ export function logout() {
 		return dispatch({
 			type: LOGOUT,
 		});
-	};
-}
-
-export function refresh(){
-	return async (dispatch) => {
-		const headers = {"Authorization": cookies.get("Authorization")};
-		let response = await fetch(config.KeycloakRefresh, {method: "GET", headers: headers});
-		if (response.status === 200) {
-			const json = await response.json();
-			if (json["access_token"] !== undefined && json["access_token"] !== "none") {
-				cookies.set("Authorization", `Bearer ${json["access_token"]}`);
-				V2.OpenAPI.TOKEN = json["access_token"];
-				return dispatch({
-					type: SET_USER,
-					Authorization: `Bearer ${json["access_token"]}`,
-				});
-			}
-		}
-		else {
-			dispatch(handleErrors(response));
-		}
 	};
 }

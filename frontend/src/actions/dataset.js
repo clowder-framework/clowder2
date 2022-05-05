@@ -65,7 +65,7 @@ export function fetchDatasetAbout(id){
 				});
 			})
 			.catch(reason => {
-				dispatch(handleErrors(reason));
+				dispatch(handleErrors(reason, this));
 			});
 	};
 }
@@ -83,7 +83,7 @@ export function fetchDatasets(skip=0, limit=21, mine=false){
 				});
 			})
 			.catch(reason => {
-				dispatch(handleErrors(reason));
+				dispatch(handleErrors(reason, this));
 			});
 
 	};
