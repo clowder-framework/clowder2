@@ -80,7 +80,7 @@ export default function FilesTable(props: FilesTableProps) {
 								<InsertDriveFileIcon color="primary" sx={iconStyle}/>
 								<Button onClick={() => selectFile(file.id)}>{file.name}</Button>
 								{/*TODO this should be version number; for now put version ID instead*/}
-								<VersionChip versionNumber={file.version.slice(0,2)}/>
+								<VersionChip versionNumber={file.version_id.slice(0,2)}/>
 							</TableCell>
 							<TableCell align="right">{parseDate(file.created)} by {file.creator.first_name} {file.creator.last_name}</TableCell>
 							<TableCell align="right">{file.size}</TableCell>

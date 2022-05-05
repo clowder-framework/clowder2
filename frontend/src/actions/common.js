@@ -1,4 +1,4 @@
-import {LOGOUT, logoutHelper, SET_USER} from "./user";
+import {LOGOUT, logoutHelper} from "./user";
 import config from "../app.config";
 import {V2} from "../openapi";
 import Cookies from "universal-cookie";
