@@ -49,7 +49,7 @@ export function updateDataset(datasetId, formData){
 				});
 			})
 			.catch(reason => {
-				dispatch(handleErrors(reason, updateDataset(datasetId, formData));
+				dispatch(handleErrors(reason, updateDataset(datasetId, formData)));
 			});
 	};
 }
