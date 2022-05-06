@@ -2,7 +2,6 @@ import {V2} from "../openapi";
 import {handleErrors} from "./common";
 import config from "../app.config";
 import {getHeader} from "../utils/common";
-import {DOWNLOAD_FILE} from "./file";
 
 export const RECEIVE_FILES_IN_DATASET = "RECEIVE_FILES_IN_DATASET";
 export function fetchFilesInDataset(datasetId, folderId){
@@ -16,7 +15,7 @@ export function fetchFilesInDataset(datasetId, folderId){
 				});
 			})
 			.catch(reason => {
-				dispatch(handleErrors(reason), fetchFilesInDataset(datasetId, folderId));
+				dispatch(handleErrors(reason, fetchFilesInDataset(datasetId, folderId)));
 			});
 	};
 }
@@ -33,7 +32,7 @@ export function fetchFoldersInDataset(datasetId, parentFolder){
 				});
 			})
 			.catch(reason => {
-				dispatch(handleErrors(reason), fetchFoldersInDataset(datasetId, parentFolder));
+				dispatch(handleErrors(reason, fetchFoldersInDataset(datasetId, parentFolder)));
 			});
 	};
 }
@@ -50,7 +49,7 @@ export function updateDataset(datasetId, formData){
 				});
 			})
 			.catch(reason => {
-				dispatch(handleErrors(reason), updateDataset(datasetId, formData));
+				dispatch(handleErrors(reason, updateDataset(datasetId, formData));
 			});
 	};
 }
@@ -103,7 +102,7 @@ export function datasetCreated(formData){
 				});
 			})
 			.catch(reason => {
-				dispatch(handleErrors(reason), datasetCreated(formData));
+				dispatch(handleErrors(reason, datasetCreated(formData)));
 			});
 	};
 }
@@ -134,7 +133,6 @@ export function datasetDeleted(datasetId){
 			});
 	};
 }
-
 
 export const FOLDER_ADDED = "FOLDER_ADDED";
 export function folderAdded(datasetId, folderName, parentFolder = null){
