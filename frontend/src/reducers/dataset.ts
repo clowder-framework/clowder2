@@ -7,6 +7,7 @@ import {
 	CREATE_DATASET,
 	RESET_CREATE_DATASET,
 	FOLDER_ADDED, RECEIVE_FOLDERS_IN_DATASET, GET_FOLDER_PATH,
+	DOWNLOAD_DATASET
 } from "../actions/dataset";
 import {CREATE_FILE, UPDATE_FILE, DELETE_FILE} from "../actions/file";
 import {DataAction} from "../types/action";
@@ -62,6 +63,9 @@ const dataset = (state = defaultState, action: DataAction) => {
 		return Object.assign({}, state, {
 			folderPath: action.folderPath
 		});
+	case DOWNLOAD_DATASET:
+		// TODO do nothing for now; but in the future can utilize to display certain effects
+		return Object.assign({}, state, {});
 	default:
 		return state;
 	}

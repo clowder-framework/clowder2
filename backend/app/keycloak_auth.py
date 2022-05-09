@@ -85,7 +85,7 @@ async def get_current_user(
     Potentially expensive. Use `get_current_username` if all you need is user name.
     """
     userinfo = keycloak_openid.userinfo(token)
-    user = await get_user_out(userinfo["preferred_username"], db)
+    user = await get_user_out(userinfo["email"], db)
     return user
 
 

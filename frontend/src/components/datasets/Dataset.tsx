@@ -3,12 +3,11 @@ import {Box, Button, Dialog, DialogTitle, Divider, Grid, Menu, MenuItem, Tab, Ta
 import {ClowderInput} from "../styledComponents/ClowderInput";
 import {ClowderButton} from "../styledComponents/ClowderButton";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
-import {downloadDataset} from "../../utils/dataset";
 import {useNavigate, useParams} from "react-router-dom";
 import {RootState} from "../../types/data";
 import {useDispatch, useSelector} from "react-redux";
 import {
-	datasetDeleted,
+	datasetDeleted, datasetDownloaded,
 	fetchDatasetAbout,
 	fetchFilesInDataset, fetchFolderPath,
 	fetchFoldersInDataset,
@@ -61,13 +60,13 @@ export const Dataset = (): JSX.Element => {
 	const dispatch = useDispatch();
 	const deleteDataset = (datasetId:string|undefined) => dispatch(datasetDeleted(datasetId));
 	const editDataset = (datasetId: string|undefined, formData: DatasetIn) => dispatch(updateDataset(datasetId, formData));
-	const addFolder = (datasetId:string|undefined, folderName:string, parentFolder:string|null) => dispatch(folderAdded(datasetId, folderName, parentFolder));
 	const getFolderPath= (folderId:string|undefined) => dispatch(fetchFolderPath(folderId));
 	const listFilesInDataset = (datasetId:string|undefined, folderId:string|undefined) => dispatch(fetchFilesInDataset(datasetId, folderId));
 	const listFoldersInDataset = (datasetId:string|undefined, parentFolder:string|undefined) => dispatch(fetchFoldersInDataset(datasetId, parentFolder));
 	const listDatasetAbout= (datasetId:string|undefined) => dispatch(fetchDatasetAbout(datasetId));
 	const dismissError = () => dispatch(resetFailedReason());
 	const dismissLogout = () => dispatch(resetLogout());
+	const downloadDataset = (datasetId:string|undefined, filename:string|undefined) => dispatch(datasetDownloaded(datasetId, filename))
 
 	// mapStateToProps
 	const about = useSelector((state:RootState) => state.dataset.about);
@@ -231,12 +230,12 @@ export const Dataset = (): JSX.Element => {
 									</MenuItem>
 									<MenuItem sx={optionMenuItem}
 											  onClick={()=>{
-												  // addFolder(datasetId, "new folder", null);
 												  setNewFolder(true);
 												  handleOptionClose();
 											  }
 											  }>Add Folder</MenuItem>
 									<CreateFolder datasetId={datasetId} parentFolder={folder} open={newFolder} handleClose={handleCloseNewFolder}/>
+									{/*backend not implemented yet*/}
 									<MenuItem sx={optionMenuItem}
 											  onClick={() => {
 												  downloadDataset(datasetId, about["name"]);

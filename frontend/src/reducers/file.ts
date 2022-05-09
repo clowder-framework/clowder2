@@ -4,6 +4,7 @@ import {
 	RECEIVE_FILE_METADATA_JSONLD,
 	RECEIVE_PREVIEWS,
 	RECEIVE_VERSIONS,
+	DOWNLOAD_FILE
 } from "../actions/file";
 import {DataAction} from "../types/action";
 import {FileState, ExtractedMetadata, FileMetadata} from "../types/data";
@@ -28,6 +29,9 @@ const file = (state=defaultState, action: DataAction) => {
 		return Object.assign({}, state, {previews: action.previews});
 	case RECEIVE_VERSIONS:
 		return Object.assign({}, state, {fileVersions: action.fileVersions});
+	case DOWNLOAD_FILE:
+		// TODO do nothing for now; but in the future can utilize to display certain effects
+		return Object.assign({}, state, {});
 	default:
 		return state;
 	}

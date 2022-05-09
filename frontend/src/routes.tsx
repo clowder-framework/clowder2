@@ -9,6 +9,7 @@ import {Register as RegisterComponent} from "./components/auth/Register";
 import {Auth as AuthComponent} from "./components/auth/Auth";
 import {RedirectLogin as RedirectLoginComponent} from "./components/auth/RedirectLogin";
 import {RedirectLogout as RedirectLogoutComponent} from "./components/auth/RedirectLogout";
+import {Refresh as RefreshComponent} from "./components/auth/Refresh";
 
 import {isAuthorized} from "./utils/common";
 

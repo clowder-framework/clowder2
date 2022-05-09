@@ -2,13 +2,11 @@
 /* tslint:disable */
 /* eslint-disable */
 
+import type { ExtractorOut } from './ExtractorOut';
 import type { UserOut } from './UserOut';
 
-export type FileVersion = {
+export type MetadataAgent = {
     id?: string;
-    version_id: string;
-    version_num?: number;
-    file_id: string;
     creator: UserOut;
-    created?: string;
+    extractor?: ExtractorOut;
 }
