@@ -31,7 +31,6 @@ const AppRoutes = (
 			<Route path="/register" element={<RegisterComponent/>} />
 			<Route path="/auth/login" element={<RedirectLoginComponent/>} />
 			<Route path="/auth/logout" element={<RedirectLogoutComponent/>} />
-			<Route path="/auth/refresh" element={<RefreshComponent/>} />
 			<Route path="/auth" element={<AuthComponent/>} />
 			<Route path="*"
 				element={
