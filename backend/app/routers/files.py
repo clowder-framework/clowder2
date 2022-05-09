@@ -240,7 +240,8 @@ async def add_metadata(
             agent=agent,
         )
         new_metadata = await db["metadata"].insert_one(md.to_mongo())
-        metadata_out = MetadataOut.from_mongo(new_metadata)
+        found = await db["metadata"].find_one({"_id": new_metadata.inserted_id})
+        metadata_out = MetadataOut.from_mongo(found)
         return metadata_out
 
 

@@ -39,7 +39,7 @@ class MetadataField(MongoModel):
     required: bool = False  # TODO: Eventually move this to space level?
 
 
-class MetadataDefinition(MongoModel):
+class MetadataDefinitionBase(MongoModel):
     """This describes a metadata object with a short name and description, predefined set of fields, and context.
     These provide a shorthand for use by extractors as well as a source for building GUI widgets to add new entries.
 
@@ -65,6 +65,18 @@ class MetadataDefinition(MongoModel):
     context: Optional[dict]  # https://json-ld.org/spec/latest/json-ld/#the-context
     context_url: Optional[str]  # single URL applying to contents
     fields: List[MetadataField]
+
+
+class MetadataDefinitionIn(MetadataDefinitionBase):
+    pass
+
+
+class MetadataDefinitionDB(MetadataDefinitionBase):
+    creator: UserOut
+
+
+class MetadataDefinitionOut(MetadataDefinitionDB):
+    pass
 
 
 class MetadataAgent(MongoModel):
