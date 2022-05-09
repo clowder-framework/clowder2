@@ -187,12 +187,24 @@ async def get_file_versions(
 @router.post("/{file_id}/metadata", response_model=MetadataOut)
 async def add_metadata(
     file_id: str,
-    in_metadata: MetadataIn,
+    metadata_in: MetadataIn,
     file_version: Optional[int] = Form(None),
     extractor_info: Optional[ExtractorIn] = Form(None),
     user=Depends(get_current_user),
     db: MongoClient = Depends(dependencies.get_db),
 ):
+    """Attach new metadata to a file.
+
+    Args:
+        file_id: UUID of target file
+        metadata_in: Metadata contents and associated context
+        file_version: Version number of file; if omitted latest version is assumed
+        extractor_info: If extractor generated the metadata, extractor info should be provided
+        user: User who is uploading metadata or who triggered extractor
+        db: MongoDB database client
+    Returns:
+        Metadata document that was added to database
+    """
     if (file := await db["files"].find_one({"_id": ObjectId(file_id)})) is not None:
         target_version = file.version
         if file_version is not None:
@@ -222,18 +234,17 @@ async def add_metadata(
         else:
             agent = MetadataAgent(creator=user)
 
-        metadata = MetadataDB(
-            **in_metadata.dict(),
+        md = MetadataDB(
+            **metadata_in.dict(),
             resource=file_ref,
             agent=agent,
         )
-        new_metadata = await db["metadata"].insert_one(metadata.to_mongo())
-        found = await db["metadata"].find_one({"_id": new_metadata.inserted_id})
-        metadata_out = MetadataOut.from_mongo(found)
+        new_metadata = await db["metadata"].insert_one(md.to_mongo())
+        metadata_out = MetadataOut.from_mongo(new_metadata)
         return metadata_out
 
 
-@router.get("/{file_id}/metadata", response_model=MetadataOut)
+@router.get("/{file_id}/metadata", response_model=List[MetadataOut])
 async def get_metadata(
     file_id: str,
     file_version: Optional[int] = Form(None),
@@ -245,10 +256,11 @@ async def get_metadata(
 ):
     if (file := await db["files"].find_one({"_id": ObjectId(file_id)})) is not None:
         query = {"resource.id": file_id}
+        file = FileOut.from_mongo(file)
 
         if not all_versions:
             # Default to latest version
-            target_version = file.version
+            target_version = file.version_num
             if file_version is not None:
                 if (
                     version_q := await db["file_versions"].find_one(

@@ -87,6 +87,10 @@ class MetadataIn(MetadataBase):
     pass
 
 
+class MetadataPatch(MetadataBase):
+    pass
+
+
 class MetadataDB(MetadataBase):
     file: Optional[PyObjectId]
     file_version: Optional[PyObjectId]
