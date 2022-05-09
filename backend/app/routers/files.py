@@ -188,8 +188,6 @@ async def get_file_versions(
 async def add_metadata(
     file_id: str,
     metadata_in: MetadataIn,
-    file_version: Optional[int] = Form(None),
-    extractor_info: Optional[ExtractorIn] = Form(None),
     user=Depends(get_current_user),
     db: MongoClient = Depends(dependencies.get_db),
 ):
@@ -198,15 +196,14 @@ async def add_metadata(
     Args:
         file_id: UUID of target file
         metadata_in: Metadata contents and associated context
-        file_version: Version number of file; if omitted latest version is assumed
-        extractor_info: If extractor generated the metadata, extractor info should be provided
         user: User who is uploading metadata or who triggered extractor
         db: MongoDB database client
     Returns:
         Metadata document that was added to database
     """
     if (file := await db["files"].find_one({"_id": ObjectId(file_id)})) is not None:
-        target_version = file.version
+        file = FileOut(**file)
+        file_version = metadata_in.file_version
         if file_version is not None:
             if (
                 version_q := await db["file_versions"].find_one(
@@ -215,13 +212,17 @@ async def add_metadata(
             ) is None:
                 raise HTTPException(
                     status_code=404,
-                    detail=f"File version {file_version} does not exist",
+                    detail=f"File {file_id} version {file_version} does not exist",
                 )
             target_version = file_version
+        else:
+            # Use latest version of file if none specified
+            target_version = file.version_num
 
-        file_ref = MongoDBRef(collection="files", id=file.id, version=target_version)
+        file_ref = MongoDBRef(collection="files", resource_id=file.id, version=target_version)
 
         # Build MetadataAgent depending on whether extractor info is present
+        extractor_info = metadata_in.extractor_info
         if extractor_info is not None:
             if (
                 extractor := await db["extractors"].find_one(

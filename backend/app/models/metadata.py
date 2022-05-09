@@ -8,28 +8,13 @@ from pydantic import Field, validator, BaseModel, create_model
 from app.models.mongomodel import MongoModel
 from app.models.pyobjectid import PyObjectId
 from app.models.users import UserOut
-from app.models.extractors import ExtractorOut
+from app.models.extractors import ExtractorIn, ExtractorOut
 
 
 class MongoDBRef(BaseModel):
-    def __init__(
-        self, collection: str, resource_id: PyObjectId, version: Optional[int]
-    ):
-        if version is None:
-            self.dbref = DBRef(
-                collection=collection,
-                id=resource_id,
-            )
-        else:
-            self.dbref = DBRef(collection=collection, id=resource_id, version=version)
-            self.dbref = DBRef(collection=collection, id=resource_id, version=version)
-
-    __pydantic_model__ = create_model(
-        "DBRef",
-        collection=(str, "files"),
-        resource_id=(PyObjectId, ...),
-        version=(int, ...),
-    )
+    collection: str
+    resource_id: PyObjectId
+    version: Optional[int]
 
 
 class MetadataField(MongoModel):
@@ -88,7 +73,7 @@ class MetadataBase(MongoModel):
     context: Optional[dict]  # https://json-ld.org/spec/latest/json-ld/#the-context
     context_url: Optional[str]  # single URL applying to contents
     definition: Optional[str]  # e.g.'map' used for validation
-    contents: dict
+    contents: Optional[dict]
 
     @validator("context")
     def contexts_are_valid(cls, v):
@@ -110,7 +95,8 @@ class MetadataBase(MongoModel):
 
 
 class MetadataIn(MetadataBase):
-    pass
+    file_version: Optional[int]
+    extractor_info: Optional[ExtractorIn]
 
 
 class MetadataPatch(MetadataBase):
