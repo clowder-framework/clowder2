@@ -14,16 +14,26 @@ from pydantic import Json
 from pymongo import MongoClient
 
 from app import dependencies
-from app.auth import AuthHandler
+from app.keycloak_auth import get_user, get_current_user
 from app.config import settings
 from app.models.files import FileIn, FileOut, FileVersion
 from app.models.users import UserOut
-from app.models.metadata import MetadataIn, MetadataDB, MetadataOut
+from app.models.metadata import MetadataDefinition, MetadataIn, MetadataDB, MetadataOut
 
 router = APIRouter()
 
-auth_handler = AuthHandler()
 
+@router.post("/definition", response_model=MetadataDefinition)
+async def save_definition(
+    definition_in: MetadataDefinition,
+    user=Depends(get_current_user),
+    db: MongoClient = Depends(dependencies.get_db),
+):
+    md_def = MetadataDefinition(**definition_in.dict())
+    new_md_def = await db["metadata.definitions"].insert_one(md_def.to_mongo())
+    found = await db["metadata.definitions"].find_one({"_id": new_md_def.inserted_id})
+    md_def_out = MetadataDefinition.from_mongo(found)
+    return md_def_out
 
 
 @router.patch("/{metadata_id}", response_model=MetadataOut)
