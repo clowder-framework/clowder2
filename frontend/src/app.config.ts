@@ -7,6 +7,7 @@ interface Config{
 	KeycloakLogin: string;
 	KeycloakLogout: string;
 	KeycloakRefresh: string;
+	KeycloakRegister: string;
 }
 
 const config:Config = <Config>{};
@@ -26,5 +27,6 @@ config["GHIssueBaseURL"] = "https://github.com/clowder-framework/clowder2-fronte
 config["KeycloakLogin"] = "http://localhost:8000/api/v2/auth/login";
 config["KeycloakLogout"] = "http://localhost:8000/api/v2/auth/logout";
 config["KeycloakRefresh"] = "http://localhost:8000/api/v2/auth/refresh_token";
+config["KeycloakRegister"] = "http://localhost:8000/api/v2/auth/register";
 
 export default config;
