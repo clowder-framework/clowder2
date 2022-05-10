@@ -23,10 +23,12 @@ from app.models.users import UserOut
 from app.models.extractors import ExtractorIn
 from app.models.metadata import (
     MongoDBRef,
+    MetadataDefinitionOut,
     MetadataAgent,
     MetadataIn,
     MetadataDB,
     MetadataOut,
+    validate_definition
 )
 from app.keycloak_auth import get_user, get_current_user, get_token
 
@@ -204,9 +206,11 @@ async def add_metadata(
     if (file := await db["files"].find_one({"_id": ObjectId(file_id)})) is not None:
         file = FileOut(**file)
         file_version = metadata_in.file_version
+
+        # Validate specified version, or use latest by default
         if file_version is not None:
             if (
-                version_q := await db["file_versions"].find_one(
+                version := await db["file_versions"].find_one(
                     {"file_id": ObjectId(file_id), "version_num": file_version}
                 )
             ) is None:
@@ -219,9 +223,34 @@ async def add_metadata(
             # Use latest version of file if none specified
             target_version = file.version_num
 
+        # Validate context
+        definition = metadata_in.definition
+        context = metadata_in.context
+        context_url = metadata_in.context_url
+        contents = metadata_in.contents
+        if context is None and context_url is None and definition is None:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Context is required",
+            )
+        if context is not None:
+            # TODO: How should JSON-LD context be validated?
+            pass
+        if context_url is not None:
+            # TODO: How should a context URL be validated?
+            pass
+        if definition is not None:
+            if (
+                md_def := await db["metadata.definitions"].find_one(
+                    {"name": definition}
+                )
+            ) is not None:
+                md_def = MetadataDefinitionOut(**md_def)
+                validate_definition(contents, md_def)
+
         file_ref = MongoDBRef(collection="files", resource_id=file.id, version=target_version)
 
-        # Build MetadataAgent depending on whether extractor info is present
+        # Build MetadataAgent depending on whether extractor info is present/valid
         extractor_info = metadata_in.extractor_info
         if extractor_info is not None:
             if (
@@ -260,9 +289,8 @@ async def get_metadata(
         query = {"resource.resource_id": ObjectId(file_id)}
         file = FileOut.from_mongo(file)
 
+        # Validate specified version, or use latest by default
         if not all_versions:
-            # Default to latest version
-            target_version = file.version_num
             if file_version is not None:
                 if (
                     version_q := await db["file_versions"].find_one(
@@ -274,7 +302,10 @@ async def get_metadata(
                         detail=f"File version {file_version} does not exist",
                     )
                 target_version = file_version
+            else:
+                target_version = file.version_num
             query["resource.version"] = target_version
+
         if extractor_name is not None:
             query["agent.extractor.name"] = extractor_name
         if extractor_version is not None:

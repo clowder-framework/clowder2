@@ -328,6 +328,31 @@ async def add_metadata(
     if (
         dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
     ) is not None:
+        # Validate context
+        definition = metadata_in.definition
+        context = metadata_in.context
+        context_url = metadata_in.context_url
+        contents = metadata_in.contents
+        if context is None and context_url is None and definition is None:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Context is required",
+            )
+        if context is not None:
+            # TODO: How should JSON-LD context be validated?
+            pass
+        if context_url is not None:
+            # TODO: How should a context URL be validated?
+            pass
+        if definition is not None:
+            if (
+                    md_def := await db["metadata.definitions"].find_one(
+                        {"name": definition}
+                    )
+            ) is not None:
+                md_def = MetadataDefinitionOut(**md_def)
+                validate_definition(contents, md_def)
+
         dataset_ref = MongoDBRef(collection="datasets", id=dataset.id)
 
         # Build MetadataAgent depending on whether extractor info is present
@@ -365,7 +390,6 @@ async def get_metadata(
 ):
     if (dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})) is not None:
         query = {"resource.resource_id": ObjectId(dataset_id)}
-        dataset = DatasetOut.from_mongo(dataset)
 
         if extractor_name is not None:
             query["agent.extractor.name"] = extractor_name

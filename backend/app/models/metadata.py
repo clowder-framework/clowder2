@@ -4,6 +4,7 @@ from enum import Enum
 
 from bson.dbref import DBRef
 from pydantic import Field, validator, BaseModel, create_model
+from fastapi import HTTPException
 
 from app.models.mongomodel import MongoModel
 from app.models.pyobjectid import PyObjectId
@@ -17,9 +18,20 @@ class MongoDBRef(BaseModel):
     version: Optional[int]
 
 
+# List of valid types that can be specified for metadata fields
+FIELD_TYPES = {
+    'int': int,
+    'float': float,
+    'str': str,
+    'bool': bool,
+    'date': datetime.date,
+    'time': datetime.time
+}
+
+
 class MetadataField(MongoModel):
     name: str
-    type: str = "str"  # str,int,float,bool
+    type: str = "str"  # must be one of FIELD_TYPES
     list: bool = False  # whether a list[type] is acceptable
     required: bool = False  # TODO: Eventually move this to space level?
 
@@ -64,6 +76,27 @@ class MetadataDefinitionOut(MetadataDefinitionDB):
     pass
 
 
+def validate_definition(contents, metadata_def: MetadataDefinitionOut):
+    """Convenience function for checking if a value matches MetadataDefinition criteria"""
+    for field in metadata_def.fields:
+        if field.name in contents:
+            t = FIELD_TYPES[field.type]
+            try:
+                t(contents[field.name])
+            except ValueError:
+                if field.list and type(value) is list:
+                    try:
+                        for v in value:
+                            t(v)
+                    except:
+                        raise HTTPException(status_code=400,
+                                            detail=f"{metadata_def.name} field {field.name} requires {field.type} for all values in list")
+                raise HTTPException(status_code=400,
+                                    detail=f"{metadata_def.name} field {field.name} requires {field.type}")
+        elif field.required:
+            raise HTTPException(status_code=400, detail=f"{metadata_def.name} requires field {field.name}")
+
+
 class MetadataAgent(MongoModel):
     creator: UserOut
     extractor: Optional[ExtractorOut]
@@ -89,6 +122,7 @@ class MetadataBase(MongoModel):
 
     @validator("definition")
     def definition_is_valid(cls, v):
+        # TODO: Possible to query MongoDB here with name? Currently done in routers
         if False:
             raise ValueError("Problem with definition.")
         return v
