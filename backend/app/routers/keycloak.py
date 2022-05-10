@@ -124,7 +124,8 @@ async def auth(
     email = userinfo["email"]
     user = UserDB(
         email=email,
-        full_name=f"{given_name} {family_name}",
+        first_name=given_name,
+        last_name=family_name,
         hashed_password="",
         keycloak_id=keycloak_id,
     )
