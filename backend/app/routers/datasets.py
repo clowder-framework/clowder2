@@ -310,18 +310,28 @@ async def save_file(
 
 @router.post("/{dataset_id}/metadata", response_model=MetadataOut)
 async def add_metadata(
+    metadata_in: MetadataIn,
     dataset_id: str,
-    in_metadata: MetadataIn,
-    extractor_info: dict = {},
     user=Depends(get_current_user),
     db: MongoClient = Depends(dependencies.get_db),
 ):
+    """Attach new metadata to a dataset.
+
+        Args:
+            metadata_in: Metadata contents and associated context
+            dataset_id: UUID of target dataset
+            user: User who is uploading metadata or who triggered extractor
+            db: MongoDB database client
+        Returns:
+            Metadata document that was added to database
+        """
     if (
         dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
     ) is not None:
         dataset_ref = MongoDBRef(collection="datasets", id=dataset.id)
 
         # Build MetadataAgent depending on whether extractor info is present
+        extractor_info = metadata_in.extractor_info
         if len(extractor_info) > 0:
             extractor_in = ExtractorIn(**extractor_info.dict())
             if (
@@ -344,3 +354,28 @@ async def add_metadata(
     found = await db["metadata"].find_one({"_id": new_metadata.inserted_id})
     metadata_out = MetadataOut.from_mongo(found)
     return metadata_out
+
+@router.get("/{dataset_id}/metadata", response_model=List[MetadataOut])
+async def get_metadata(
+    dataset_id: str,
+    extractor_name: Optional[str] = Form(None),
+    extractor_version: Optional[float] = Form(None),
+    user=Depends(get_current_user),
+    db: MongoClient = Depends(dependencies.get_db),
+):
+    if (dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})) is not None:
+        query = {"resource.resource_id": ObjectId(dataset_id)}
+        dataset = DatasetOut.from_mongo(dataset)
+
+        if extractor_name is not None:
+            query["agent.extractor.name"] = extractor_name
+        if extractor_version is not None:
+            query["agent.extractor.version"] = extractor_version
+
+        metadata = []
+        async for md in db["metadata"].find(query):
+            metadata.append(MetadataOut.from_mongo(md))
+        return metadata
+    else:
+        raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
+

@@ -194,8 +194,8 @@ async def add_metadata(
     """Attach new metadata to a file.
 
     Args:
-        file_id: UUID of target file
         metadata_in: Metadata contents and associated context
+        file_id: UUID of target file
         user: User who is uploading metadata or who triggered extractor
         db: MongoDB database client
     Returns:
