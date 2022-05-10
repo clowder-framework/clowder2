@@ -72,8 +72,8 @@ class MetadataAgent(MongoModel):
 class MetadataBase(MongoModel):
     context: Optional[dict]  # https://json-ld.org/spec/latest/json-ld/#the-context
     context_url: Optional[str]  # single URL applying to contents
-    definition: Optional[str]  # e.g.'map' used for validation
-    contents: Optional[dict]
+    definition: Optional[str]  # name of a metadata definition
+    contents: dict
 
     @validator("context")
     def contexts_are_valid(cls, v):
@@ -104,9 +104,6 @@ class MetadataPatch(MetadataBase):
 
 
 class MetadataDB(MetadataBase):
-    file: Optional[PyObjectId]
-    file_version: Optional[PyObjectId]
-    dataset: Optional[PyObjectId]
     resource: MongoDBRef
     agent: MetadataAgent
     created: datetime = Field(default_factory=datetime.utcnow)

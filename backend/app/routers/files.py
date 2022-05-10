@@ -186,8 +186,8 @@ async def get_file_versions(
 
 @router.post("/{file_id}/metadata", response_model=MetadataOut)
 async def add_metadata(
-    file_id: str,
     metadata_in: MetadataIn,
+    file_id: str,
     user=Depends(get_current_user),
     db: MongoClient = Depends(dependencies.get_db),
 ):
@@ -257,7 +257,7 @@ async def get_metadata(
     db: MongoClient = Depends(dependencies.get_db),
 ):
     if (file := await db["files"].find_one({"_id": ObjectId(file_id)})) is not None:
-        query = {"resource.id": file_id}
+        query = {"resource.resource_id": ObjectId(file_id)}
         file = FileOut.from_mongo(file)
 
         if not all_versions:
