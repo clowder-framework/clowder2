@@ -28,6 +28,7 @@ from app.models.metadata import (
     MetadataIn,
     MetadataDB,
     MetadataOut,
+    MetadataPatch,
     validate_definition
 )
 from app.keycloak_auth import get_user, get_current_user, get_token
@@ -246,7 +247,7 @@ async def add_metadata(
                 )
             ) is not None:
                 md_def = MetadataDefinitionOut(**md_def)
-                validate_definition(contents, md_def)
+                contents = validate_definition(contents, md_def)
 
         file_ref = MongoDBRef(collection="files", resource_id=file.id, version=target_version)
 
@@ -264,8 +265,11 @@ async def add_metadata(
         else:
             agent = MetadataAgent(creator=user)
 
+        # Apply any typecast fixes from definition validation
+        metadata_in = metadata_in.dict()
+        metadata_in["contents"] = contents
         md = MetadataDB(
-            **metadata_in.dict(),
+            **metadata_in,
             resource=file_ref,
             agent=agent,
         )
@@ -275,10 +279,53 @@ async def add_metadata(
         return metadata_out
 
 
+@router.patch("/{file_id}/metadata", response_model=MetadataOut)
+async def update_metadata(
+    metadata_in: MetadataPatch,
+    file_id: str,
+    user=Depends(get_current_user),
+    db: MongoClient = Depends(dependencies.get_db),
+):
+    """Update some or all fields of metadata contents.
+
+    Args:
+        metadata_in: Metadata contents and/or context. Only provided fields will be changed, everything else is kept.
+        file_id: UUID of target file
+        user: User who is uploading metadata or who triggered extractor
+        db: MongoDB database client
+    Returns:
+        Metadata document that was updated
+    """
+    if (file := await db["files"].find_one({"_id": ObjectId(file_id)})) is not None:
+        query = {"resource.resource_id": ObjectId(file_id)}
+
+        version = metadata_in.file_version
+        if version is not None:
+            if (
+                version_q := await db["file_versions"].find_one(
+                    {"file_id": ObjectId(file_id), "version_num": version}
+                )
+            ) is None:
+                raise HTTPException(
+                    status_code=404,
+                    detail=f"File version {version} does not exist",
+                )
+            target_version = version
+        else:
+            target_version = file.version_num
+        query["resource.version"] = target_version
+
+        if (md := await db["metadata"].find_one(query)) is not None:
+            # TODO: Refactor this with permissions checks etc.
+            return patch_metadata(md, dict(metadata_in), db)
+    else:
+        raise HTTPException(status_code=404, detail=f"File {file_id} not found")
+
+
 @router.get("/{file_id}/metadata", response_model=List[MetadataOut])
 async def get_metadata(
     file_id: str,
-    file_version: Optional[int] = Form(None),
+    version: Optional[int] = Form(None),
     all_versions: Optional[bool] = False,
     extractor_name: Optional[str] = Form(None),
     extractor_version: Optional[float] = Form(None),
@@ -291,17 +338,17 @@ async def get_metadata(
 
         # Validate specified version, or use latest by default
         if not all_versions:
-            if file_version is not None:
+            if version is not None:
                 if (
                     version_q := await db["file_versions"].find_one(
-                        {"file_id": ObjectId(file_id), "version_num": file_version}
+                        {"file_id": ObjectId(file_id), "version_num": version}
                     )
                 ) is None:
                     raise HTTPException(
                         status_code=404,
-                        detail=f"File version {file_version} does not exist",
+                        detail=f"File version {version} does not exist",
                     )
-                target_version = file_version
+                target_version = version
             else:
                 target_version = file.version_num
             query["resource.version"] = target_version

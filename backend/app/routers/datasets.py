@@ -31,6 +31,8 @@ from app.models.metadata import (
     MetadataIn,
     MetadataDB,
     MetadataOut,
+    MetadataPatch,
+    patch_metadata
 )
 
 router = APIRouter()
@@ -379,6 +381,34 @@ async def add_metadata(
     found = await db["metadata"].find_one({"_id": new_metadata.inserted_id})
     metadata_out = MetadataOut.from_mongo(found)
     return metadata_out
+
+
+@router.patch("/{dataset_id}/metadata", response_model=MetadataOut)
+async def update_metadata(
+    metadata_in: MetadataPatch,
+    dataset_id: str,
+    user=Depends(get_current_user),
+    db: MongoClient = Depends(dependencies.get_db),
+):
+    """Update some or all fields of metadata contents.
+
+    Args:
+        metadata_in: Metadata contents and/or context. Only provided fields will be changed, everything else is kept.
+        dataset_id: UUID of target dataset
+        user: User who is uploading metadata or who triggered extractor
+        db: MongoDB database client
+    Returns:
+        Metadata document that was updated
+    """
+    if (dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})) is not None:
+        query = {"resource.resource_id": ObjectId(dataset_id)}
+
+        if (md := await db["metadata"].find_one(query)) is not None:
+            # TODO: Refactor this with permissions checks etc.
+            return patch_metadata(md, dict(metadata_in), db)
+    else:
+        raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
+
 
 @router.get("/{dataset_id}/metadata", response_model=List[MetadataOut])
 async def get_metadata(

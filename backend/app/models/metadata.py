@@ -1,10 +1,13 @@
+import collections.abc
 from datetime import datetime
 from typing import Optional, List
 from enum import Enum
 
+from bson import ObjectId
 from bson.dbref import DBRef
 from pydantic import Field, validator, BaseModel, create_model
 from fastapi import HTTPException
+from pymongo import MongoClient
 
 from app.models.mongomodel import MongoModel
 from app.models.pyobjectid import PyObjectId
@@ -76,18 +79,20 @@ class MetadataDefinitionOut(MetadataDefinitionDB):
     pass
 
 
-def validate_definition(contents, metadata_def: MetadataDefinitionOut):
+def validate_definition(contents: dict, metadata_def: MetadataDefinitionOut):
     """Convenience function for checking if a value matches MetadataDefinition criteria"""
     for field in metadata_def.fields:
         if field.name in contents:
             t = FIELD_TYPES[field.type]
             try:
-                t(contents[field.name])
+                contents[field.name] = t(contents[field.name])
             except ValueError:
                 if field.list and type(value) is list:
+                    typecast_list = []
                     try:
                         for v in value:
-                            t(v)
+                            typecast_list.append(t(v))
+                        contents[field.name] = typecast_list
                     except:
                         raise HTTPException(status_code=400,
                                             detail=f"{metadata_def.name} field {field.name} requires {field.type} for all values in list")
@@ -95,7 +100,8 @@ def validate_definition(contents, metadata_def: MetadataDefinitionOut):
                                     detail=f"{metadata_def.name} field {field.name} requires {field.type}")
         elif field.required:
             raise HTTPException(status_code=400, detail=f"{metadata_def.name} requires field {field.name}")
-
+    # Return original dict with any type castings applied
+    return contents
 
 class MetadataAgent(MongoModel):
     creator: UserOut
@@ -133,7 +139,7 @@ class MetadataIn(MetadataBase):
     extractor_info: Optional[ExtractorIn]
 
 
-class MetadataPatch(MetadataBase):
+class MetadataPatch(MetadataIn):
     pass
 
 
@@ -154,3 +160,28 @@ class MetadataDB(MetadataBase):
 
 class MetadataOut(MetadataDB):
     pass
+
+
+def deep_update(orig, new):
+    """Recursively update a nested dict with any proivded values."""
+    for k, v in new.items():
+        if isinstance(v, collections.abc.Mapping):
+            orig[k] = deep_update(orig.get(k, {}), v)
+        else:
+            orig[k] = v
+    return orig
+
+
+def patch_metadata(metadata: dict, new_entries: dict, db: MongoClient):
+    """Convenience function for updating original metadata with some new entries."""
+    try:
+        # TODO: Need to handle if they are changing context
+        # TODO: Need to validate new_entries against context
+        metadata = deep_update(metadata, new_entries)
+        print(metadata)
+        db["metadata"].replace_one(
+            {"_id": metadata["_id"]}, MetadataDB(**metadata).to_mongo()
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=e.args[0])
+    return MetadataOut.from_mongo(metadata)

@@ -19,7 +19,7 @@ from app.config import settings
 from app.models.files import FileIn, FileOut, FileVersion
 from app.models.users import UserOut
 from app.models.metadata import MetadataDefinitionIn, MetadataDefinitionDB, MetadataDefinitionOut, \
-    MetadataIn, MetadataDB, MetadataOut
+    MetadataIn, MetadataDB, MetadataOut, MetadataPatch, patch_metadata
 
 router = APIRouter()
 
@@ -58,29 +58,21 @@ async def get_definition(
 
 @router.patch("/{metadata_id}", response_model=MetadataOut)
 async def update_metadata(
+    metadata_in: MetadataPatch,
     metadata_id: str,
-    in_metadata: MetadataIn,
     user=Depends(get_current_user),
     db: MongoClient = Depends(dependencies.get_db),
 ):
-    """Patch endpoint to update only specific subset of fields in a metadata object."""
+    """Update some or all fields of metadata contents.
+
+    Args:
+        metadata_in: Metadata contents and/or context. Only provided fields will be changed, everything else is kept.
+        metadata_id: UUID of target metadata object
+        user: User who is uploading metadata or who triggered extractor
+        db: MongoDB database client
+    Returns:
+        Metadata document that was updated
+    """
     if (md := await db["metadata"].find_one({"_id": ObjectId(metadata_id)})) is not None:
         # TODO: Refactor this with permissions checks etc.
-        try:
-            md.update({"contents": dict(in_metadata)})
-            await db["metadata"].replace_one(
-                {"_id": ObjectId(metadata_id)}, MetadataDB(**metadata).to_mongo()
-            )
-        except Exception as e:
-            raise HTTPException(status_code=500, detail=e.args[0])
-        return MetadataOut.from_mongo(metadata)
-
-    metadata = MetadataDB(
-        **in_metadata.dict(),
-        resource=file_ref,
-        agent=agent,
-    )
-    new_metadata = await db["metadata"].insert_one(metadata.to_mongo())
-    found = await db["metadata"].find_one({"_id": new_metadata.inserted_id})
-    metadata_out = MetadataOut.from_mongo(found)
-    return metadata_out
+        return patch_metadata(md, dict(metadata_in), db)
