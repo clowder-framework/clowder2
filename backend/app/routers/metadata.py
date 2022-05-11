@@ -63,13 +63,9 @@ async def update_metadata(
     user=Depends(get_current_user),
     db: MongoClient = Depends(dependencies.get_db),
 ):
-    """Update some or all fields of metadata contents.
+    """Update metadata. Any fields provided in the contents JSON will be added or updated in the metadata. If context or
+    agent should be changed, use PUT.
 
-    Args:
-        metadata_in: Metadata contents and/or context. Only provided fields will be changed, everything else is kept.
-        metadata_id: UUID of target metadata object
-        user: User who is uploading metadata or who triggered extractor
-        db: MongoDB database client
     Returns:
         Metadata document that was updated
     """

@@ -177,9 +177,8 @@ def deep_update(orig, new):
 def patch_metadata(metadata: dict, new_entries: dict, db: MongoClient):
     """Convenience function for updating original metadata with some new entries."""
     try:
-        # TODO: Need to handle if they are changing context
         # TODO: Need to validate new_entries against context
-        metadata = deep_update(metadata, new_entries)
+        metadata["contents"] = deep_update(metadata["contents"], new_entries["contents"])
         db["metadata"].replace_one(
             {"_id": metadata["_id"]}, MetadataDB(**metadata).to_mongo()
         )

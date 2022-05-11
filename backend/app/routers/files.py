@@ -283,8 +283,8 @@ async def update_metadata(
     user=Depends(get_current_user),
     db: MongoClient = Depends(dependencies.get_db),
 ):
-    """Update metadata. Any fields provided in the contents JSON will be added or updated in the metadata.
-    Context is not required again.
+    """Update metadata. Any fields provided in the contents JSON will be added or updated in the metadata. If context or
+    agent should be changed, use PUT.
 
     Returns:
         Metadata document that was updated
