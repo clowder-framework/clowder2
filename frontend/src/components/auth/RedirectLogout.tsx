@@ -16,7 +16,7 @@ export const RedirectLogout = (): JSX.Element => {
 		<div>
 			<TopBar/>
 			<div className="outer-container">
-				<p>you have logged out.</p>
+				<p>You have logged out. <a href="/auth/login">Log in again.</a></p>
 			</div>
 
 		</div>
