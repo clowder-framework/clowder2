@@ -29,7 +29,8 @@ from app.models.metadata import (
     MetadataDB,
     MetadataOut,
     MetadataPatch,
-    validate_definition
+    validate_definition,
+    patch_metadata
 )
 from app.keycloak_auth import get_user, get_current_user, get_token
 
@@ -155,7 +156,7 @@ async def get_file_versions(
 ):
     if (file := await db["files"].find_one({"_id": ObjectId(file_id)})) is not None:
         """
-        # DEPRECATED: Gett version information from Minio directly (no creator field)
+        # DEPRECATED: Get version information from Minio directly (no creator field)
         file_versions = []
         minio_versions = fs.list_objects(
             settings.MINIO_BUCKET_NAME,
@@ -194,13 +195,9 @@ async def add_metadata(
     user=Depends(get_current_user),
     db: MongoClient = Depends(dependencies.get_db),
 ):
-    """Attach new metadata to a file.
+    """Attach new metadata to a file. The body must include a contents field with the JSON metadata, and either a
+    context JSON-LD object, context_url, or definition (name of a metadata definition) to be valid.
 
-    Args:
-        metadata_in: Metadata contents and associated context
-        file_id: UUID of target file
-        user: User who is uploading metadata or who triggered extractor
-        db: MongoDB database client
     Returns:
         Metadata document that was added to database
     """
@@ -256,7 +253,7 @@ async def add_metadata(
         if extractor_info is not None:
             if (
                 extractor := await db["extractors"].find_one(
-                    {"_id": extractor_info.id, "version": extractor_info.version}
+                    {"name": extractor_info.name, "version": extractor_info.version}
                 )
             ) is not None:
                 agent = MetadataAgent(creator=user, extractor=extractor)
@@ -286,18 +283,15 @@ async def update_metadata(
     user=Depends(get_current_user),
     db: MongoClient = Depends(dependencies.get_db),
 ):
-    """Update some or all fields of metadata contents.
+    """Update metadata. Any fields provided in the contents JSON will be added or updated in the metadata.
+    Context is not required again.
 
-    Args:
-        metadata_in: Metadata contents and/or context. Only provided fields will be changed, everything else is kept.
-        file_id: UUID of target file
-        user: User who is uploading metadata or who triggered extractor
-        db: MongoDB database client
     Returns:
         Metadata document that was updated
     """
     if (file := await db["files"].find_one({"_id": ObjectId(file_id)})) is not None:
         query = {"resource.resource_id": ObjectId(file_id)}
+        file = FileOut(**file)
 
         version = metadata_in.file_version
         if version is not None:
@@ -315,9 +309,29 @@ async def update_metadata(
             target_version = file.version_num
         query["resource.version"] = target_version
 
+        # Filter by MetadataAgent
+        extractor_info = metadata_in.extractor_info
+        if extractor_info is not None:
+            if (
+                    extractor := await db["extractors"].find_one(
+                        {"name": extractor_info.name, "version": extractor_info.version}
+                    )
+            ) is not None:
+                agent = MetadataAgent(creator=user, extractor=extractor)
+                # TODO: How do we handle two different users creating extractor metadata? Currently we ignore user
+                query["agent.extractor.name"] = agent.extractor.name
+                query["agent.extractor.version"] = agent.extractor.version
+            else:
+                raise HTTPException(status_code=404, detail=f"Extractor not found")
+        else:
+            agent = MetadataAgent(creator=user)
+            query["agent.creator.id"] = agent.creator.id
+
         if (md := await db["metadata"].find_one(query)) is not None:
             # TODO: Refactor this with permissions checks etc.
             return patch_metadata(md, dict(metadata_in), db)
+        else:
+            raise HTTPException(status_code=404, detail=f"No metadata found to update")
     else:
         raise HTTPException(status_code=404, detail=f"File {file_id} not found")
 

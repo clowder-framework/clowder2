@@ -403,6 +403,24 @@ async def update_metadata(
     if (dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})) is not None:
         query = {"resource.resource_id": ObjectId(dataset_id)}
 
+        # Filter by MetadataAgent
+        extractor_info = metadata_in.extractor_info
+        if extractor_info is not None:
+            if (
+                    extractor := await db["extractors"].find_one(
+                        {"name": extractor_info.name, "version": extractor_info.version}
+                    )
+            ) is not None:
+                agent = MetadataAgent(creator=user, extractor=extractor)
+                # TODO: How do we handle two different users creating extractor metadata? Currently we ignore user
+                query["agent.extractor.name"] = agent.extractor.name
+                query["agent.extractor.version"] = agent.extractor.version
+            else:
+                raise HTTPException(status_code=404, detail=f"Extractor not found")
+        else:
+            agent = MetadataAgent(creator=user)
+            query["agent.creator.id"] = agent.creator.id
+
         if (md := await db["metadata"].find_one(query)) is not None:
             # TODO: Refactor this with permissions checks etc.
             return patch_metadata(md, dict(metadata_in), db)

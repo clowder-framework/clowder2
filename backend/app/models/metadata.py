@@ -28,8 +28,9 @@ FIELD_TYPES = {
     'str': str,
     'bool': bool,
     'date': datetime.date,
-    'time': datetime.time
-}
+    'time': datetime.time,
+    'dict': dict # TODO: does this work?
+} # JSON schema can handle this for us?
 
 
 class MetadataField(MongoModel):
@@ -102,6 +103,7 @@ def validate_definition(contents: dict, metadata_def: MetadataDefinitionOut):
             raise HTTPException(status_code=400, detail=f"{metadata_def.name} requires field {field.name}")
     # Return original dict with any type castings applied
     return contents
+
 
 class MetadataAgent(MongoModel):
     creator: UserOut
@@ -178,7 +180,6 @@ def patch_metadata(metadata: dict, new_entries: dict, db: MongoClient):
         # TODO: Need to handle if they are changing context
         # TODO: Need to validate new_entries against context
         metadata = deep_update(metadata, new_entries)
-        print(metadata)
         db["metadata"].replace_one(
             {"_id": metadata["_id"]}, MetadataDB(**metadata).to_mongo()
         )
