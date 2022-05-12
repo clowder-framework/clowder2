@@ -1,8 +1,6 @@
 body {
-    background-image: url(../img/clowder_logo_sm.png);
-    background-attachment: fixed;
-    background-repeat: space;
-    color: #fff;
+    background:#F8F8F8;
+    color: #868E96;
     font-family: "Open Sans",sans-serif;
     margin: 0;
 }
@@ -10,17 +8,18 @@ body {
 /*links*/
 a {
     color: #F7941E;
+    text-decoration: none;
 }
 
 /*text inputs*/
 input[type=text],
 input[type=password]{
     color: #333333;
-    font-size: 24px;
-    margin: 10px 0 35px 0;
+    font-size: 16px;
+    margin: 10px 0 25px 0;
     background: none;
-    padding: 12px;
-    width: 95%;
+    padding: 2%;
+    width: 96%;
     box-sizing: content-box;
     border: 1px solid #CED4DA;
     border-radius: 4px;
@@ -39,7 +38,8 @@ input[type=password]:active
 }
 
 /*Submit buttons*/
-input[type=submit] {
+input[type=submit]
+{
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -48,61 +48,55 @@ input[type=submit] {
     text-decoration: none;
     border: none;
     border-radius: 4px;
-    padding: 20px;
-    font-size: 24px;
+    padding: 12px;
+    font-size: 16px;
     color: #ffffff;
     background-color: #F7941E;
     box-shadow: 0px 3px 1px -2px rgb(0 0 0 / 20%), 0px 2px 2px 0px rgb(0 0 0 / 14%), 0px 1px 5px 0px rgb(0 0 0 / 12%);
-    text-transform: uppercase;
-    width: 98%;
+    width: 100%;
 }
 
 input[type=submit]:hover,
 input[type=submit]:focus,
-input[type=submit]:focus-visible
+input[type=submit]:focus-visible,
+input[type=submit]:active
 {
     background-color: #e65100;
 }
 
 /* Change content to change the title of the page*/
-div#kc-header::after {
-    padding-top: 3px;
-    content: 'Welcome to Clowder';
-    font-size: 40px;
-    line-height: 50px;
-    margin-bottom: 15px;
-}
-
-div#kc-info {
-}
-
-/*title banner size and colour*/
 div#kc-header {
-    width:100%;
-    padding-top: 2.5em;
-    padding-bottom: 2.5em;
-    padding-right: 2em;
-    padding-left: 3em;
-    background-color: #333333;
-    text-align: center;
+    width: 100%;
+    background-color: #ffffff;
+    display: flex;
+    padding: 13px 45px;
+}
+div#kc-header::after {
+    width: 100%;
+    background-color: #ffffff;
+    content: url(../img/clowder-logo-sm.svg);
 }
 
 /*Sign in to your account*/
-div#kc-page-title {
-    font-weight: normal;
-    display: block;
+header{
+    margin-top: 5%;
     text-align: center;
-    margin-top: 3%;
-    color: #333333;
+}
+header::after{
+    content:url("../img/clowder-logo-md.png");
+}
+h1{
+    display: none;
 }
 
 div#kc-content {
     display: block;
-    margin: auto auto;
-    width: 60%;
+    margin: 20px auto auto auto;
+    width: 30%;
 }
 
 div#kc-content-wrapper {
+    background:#ffffff;
     padding: 10%;
     transition: box-shadow 300ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
     border-radius: 4px;
@@ -112,11 +106,15 @@ div#kc-content-wrapper {
 
 /* label change Username, Password text*/
 div#kc-form label {
-    color: #6C757D !important;
+    color: #868E96 !important;
     display: block;
-    font-size: 20px;
+    font-size: 16px;
 }
 
+div#kc-form a{
+    display: block;
+    margin-bottom: 5px;
+}
 /**/
 div#kc-form-login {
     text-align: center;
@@ -124,12 +122,12 @@ div#kc-form-login {
 
 div#kc-form-options div {
     display: inline-block;
-    margin-right: 20px;
+    margin-right: 16px;
     font-size: 25px;
 }
 
 div#kc-form-options div label {
-    font-size: 20px;
+    font-size: 16px;
 }
 
 div#kc-feedback {
@@ -162,8 +160,7 @@ div#kc-header-wrapper {
 }
 
 div#kc-registration {
-    color: rgba(255, 255, 255, 0.7) !important;
-    font-size: 24px;
+    font-size: 16px;
     margin-bottom: 20px;
     margin-top: 2em;
 }
