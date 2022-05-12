@@ -1,0 +1,212 @@
+body {
+    background-image: url(../img/clowder_logo_sm.png);
+    background-attachment: fixed;
+    background-repeat: space;
+    color: #fff;
+    font-family: "Open Sans",sans-serif;
+    margin: 0;
+}
+
+/*links*/
+a {
+    color: #F7941E;
+}
+
+/*text inputs*/
+input[type=text],
+input[type=password]{
+    color: #333333;
+    font-size: 24px;
+    margin: 10px 0 35px 0;
+    background: none;
+    padding: 12px;
+    width: 95%;
+    box-sizing: content-box;
+    border: 1px solid #CED4DA;
+    border-radius: 4px;
+}
+
+input[type=text]:hover,
+input[type=text]:focus,
+input[type=text]:focus-visible,
+input[type=text]:active,
+input[type=password]:hover,
+input[type=password]:focus,
+input[type=password]:focus-visible,
+input[type=password]:active
+{
+    border: 1px solid #F7941E;
+}
+
+/*Submit buttons*/
+input[type=submit] {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    box-sizing: border-box;
+    text-decoration: none;
+    border: none;
+    border-radius: 4px;
+    padding: 20px;
+    font-size: 24px;
+    color: #ffffff;
+    background-color: #F7941E;
+    box-shadow: 0px 3px 1px -2px rgb(0 0 0 / 20%), 0px 2px 2px 0px rgb(0 0 0 / 14%), 0px 1px 5px 0px rgb(0 0 0 / 12%);
+    text-transform: uppercase;
+    width: 98%;
+}
+
+input[type=submit]:hover,
+input[type=submit]:focus,
+input[type=submit]:focus-visible
+{
+    background-color: #e65100;
+}
+
+/* Change content to change the title of the page*/
+div#kc-header::after {
+    padding-top: 3px;
+    content: 'Welcome to Clowder';
+    font-size: 40px;
+    line-height: 50px;
+    margin-bottom: 15px;
+}
+
+div#kc-info {
+}
+
+/*title banner size and colour*/
+div#kc-header {
+    width:100%;
+    padding-top: 2.5em;
+    padding-bottom: 2.5em;
+    padding-right: 2em;
+    padding-left: 3em;
+    background-color: #333333;
+    text-align: center;
+}
+
+/*Sign in to your account*/
+div#kc-page-title {
+    font-weight: normal;
+    display: block;
+    text-align: center;
+    margin-top: 3%;
+    color: #333333;
+}
+
+div#kc-content {
+    display: block;
+    margin: auto auto;
+    width: 60%;
+}
+
+div#kc-content-wrapper {
+    padding: 10%;
+    transition: box-shadow 300ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
+    border-radius: 4px;
+    box-shadow: 0px 2px 1px -1px rgb(0 0 0 / 20%), 0px 1px 1px 0px rgb(0 0 0 / 14%), 0px 1px 3px 0px rgb(0 0 0 / 12%);
+}
+
+
+/* label change Username, Password text*/
+div#kc-form label {
+    color: #6C757D !important;
+    display: block;
+    font-size: 20px;
+}
+
+/**/
+div#kc-form-login {
+    text-align: center;
+}
+
+div#kc-form-options div {
+    display: inline-block;
+    margin-right: 20px;
+    font-size: 25px;
+}
+
+div#kc-form-options div label {
+    font-size: 20px;
+}
+
+div#kc-feedback {
+    box-shadow: 0px 0px 6px rgba(0,0,0,0.5);
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    text-align: center;
+}
+
+div#kc-feedback-wrapper {
+    padding: 1em;
+}
+
+div.feedback-success {
+    color:#F7941E;
+}
+
+div.feedback-warning {
+    color:#CED4DA;
+}
+
+div.feedback-error {
+   color:#e65100;
+}
+
+div#kc-header-wrapper {
+    display: none;
+}
+
+div#kc-registration {
+    color: rgba(255, 255, 255, 0.7) !important;
+    font-size: 24px;
+    margin-bottom: 20px;
+    margin-top: 2em;
+}
+
+/*div#social-login {*/
+/*    border-left: 1px solid rgba(255, 255, 255, 0.2);*/
+/*    float: right;*/
+/*    width: 150px;*/
+/*    padding: 20px 0 200px 40px;*/
+/*}*/
+
+/*div.social-login span {*/
+/*    display: none;*/
+/*}*/
+
+/*div#kc-social-providers ul {*/
+/*    list-style: none;*/
+/*    margin: 0;*/
+/*    padding: 0;*/
+/*}*/
+
+/*div#kc-social-providers ul li {*/
+/*    margin-bottom: 20px;*/
+/*}*/
+
+/*div#kc-social-providers ul li span {*/
+/*    display: inline;*/
+/*    width: 100px;*/
+/*}*/
+
+/*a.zocial {*/
+/*    border: none;*/
+/*    background: -webkit-linear-gradient(top, rgba(255,255,255,0.8), rgba(255,255,255,0.1)) !important;*/
+/*    background: -moz-linear-gradient(top, rgba(255,255,255,0.8), rgba(255,255,255,0.1)) !important;*/
+/*    background: -ms-linear-gradient(top, rgba(255,255,255,0.8), rgba(255,255,255,0.1)) !important;*/
+/*    background: -o-linear-gradient(top, rgba(255,255,255,0.8), rgba(255,255,255,0.1)) !important;*/
+/*    box-shadow: 0px 0px 6px rgba(0,0,0,0.5);*/
+/*    color: rgba(0,0,0,0.6);*/
+/*    width: 130px;*/
+/*    text-shadow: none;*/
+/*    -webkit-border-radius: 0;*/
+/*    -moz-border-radius: 0;*/
+/*    border-radius: 0;*/
+/*    padding-top: 0.2em;*/
+/*    padding-bottom: 0.2em;*/
+/*}*/
