@@ -9,6 +9,7 @@ body {
 a {
     color: #F7941E;
     text-decoration: none;
+    font-size: 16px;
 }
 
 /*text inputs*/
@@ -111,7 +112,8 @@ div#kc-form label {
     font-size: 16px;
 }
 
-div#kc-form a{
+div#kc-form a,
+div#kc-form-options a{
     display: block;
     margin-bottom: 5px;
 }
