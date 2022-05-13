@@ -9,6 +9,8 @@ export const userActions = {
 	logout
 };
 
+// TODO need to clean up this file with all the mixed login/logout methods
+
 export async function loginHelper(email, password, first_name=null, last_name=null, register = false) {
 	const data = {"email": email, "password": password};
 	if (register) {

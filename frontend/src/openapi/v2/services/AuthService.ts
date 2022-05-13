@@ -8,6 +8,18 @@ import { request as __request } from '../core/request';
 export class AuthService {
 
     /**
+     * Register
+     * @returns any Successful Response
+     * @throws ApiError
+     */
+    public static registerApiV2AuthRegisterGet(): CancelablePromise<any> {
+        return __request({
+            method: 'GET',
+            path: `/api/v2/auth/register`,
+        });
+    }
+
+    /**
      * Login
      * Redirect to keycloak login page.
      * @returns any Successful Response
