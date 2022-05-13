@@ -32,12 +32,44 @@ from app.models.metadata import (
     MetadataDB,
     MetadataOut,
     MetadataPatch,
+    validate_context,
     patch_metadata
 )
 
 router = APIRouter()
 
 clowder_bucket = os.getenv("MINIO_BUCKET_NAME", "clowder")
+
+
+async def _build_metadata_db_obj(metadata_in: MetadataIn, dataset: DatasetOut, agent: MetadataAgent = None):
+    contents = await validate_context(metadata_in, db)
+
+    if agent is None:
+        # Build MetadataAgent depending on whether extractor info is present
+        extractor_info = metadata_in.extractor_info
+        if len(extractor_info) > 0:
+            extractor_in = ExtractorIn(**extractor_info.dict())
+            if (
+                    extractor := await db["extractors"].find_one(
+                        {"_id": extractor_in.id, "version": extractor_in.version}
+                    )
+            ) is not None:
+                agent = MetadataAgent(creator=user, extractor=extractor)
+            else:
+                raise HTTPException(status_code=404, detail=f"Extractor not found")
+        else:
+            agent = MetadataAgent(creator=user)
+
+    dataset_ref = MongoDBRef(collection="datasets", id=dataset.id)
+
+    # Apply any typecast fixes from definition validation
+    metadata_in = metadata_in.dict()
+    metadata_in["contents"] = contents
+    return MetadataDB(
+        **in_metadata.dict(),
+        resource=dataset_ref,
+        agent=agent,
+    )
 
 
 @router.post("", response_model=DatasetOut)
@@ -317,70 +349,67 @@ async def add_metadata(
     user=Depends(get_current_user),
     db: MongoClient = Depends(dependencies.get_db),
 ):
-    """Attach new metadata to a dataset.
+    """Attach new metadata to a dataset. The body must include a contents field with the JSON metadata, and either a
+    context JSON-LD object, context_url, or definition (name of a metadata definition) to be valid.
 
-        Args:
-            metadata_in: Metadata contents and associated context
-            dataset_id: UUID of target dataset
-            user: User who is uploading metadata or who triggered extractor
-            db: MongoDB database client
-        Returns:
-            Metadata document that was added to database
-        """
+    Returns:
+        Metadata document that was added to database
+    """
     if (
         dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
     ) is not None:
-        # Validate context
-        definition = metadata_in.definition
-        context = metadata_in.context
-        context_url = metadata_in.context_url
-        contents = metadata_in.contents
-        if context is None and context_url is None and definition is None:
-            raise HTTPException(
-                status_code=400,
-                detail=f"Context is required",
-            )
-        if context is not None:
-            # TODO: How should JSON-LD context be validated?
-            pass
-        if context_url is not None:
-            # TODO: How should a context URL be validated?
-            pass
-        if definition is not None:
+        md = _build_metadata_db_obj(metadata_in, dataset)
+        new_metadata = await db["metadata"].insert_one(md.to_mongo())
+        found = await db["metadata"].find_one({"_id": new_metadata.inserted_id})
+        metadata_out = MetadataOut.from_mongo(found)
+        return metadata_out
+
+
+@router.put("/{dataset_id}/metadata", response_model=MetadataOut)
+async def replace_metadata(
+    metadata_in: MetadataIn,
+    dataset_id: str,
+    user=Depends(get_current_user),
+    db: MongoClient = Depends(dependencies.get_db),
+):
+    """Update metadata. Any fields provided in the contents JSON will be added or updated in the metadata. If context or
+    agent should be changed, use PUT.
+
+    Returns:
+        Metadata document that was updated
+    """
+    if (dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})) is not None:
+        query = {"resource.resource_id": ObjectId(dataset_id)}
+
+        # Filter by MetadataAgent
+        extractor_info = metadata_in.extractor_info
+        if extractor_info is not None:
             if (
-                    md_def := await db["metadata.definitions"].find_one(
-                        {"name": definition}
+                    extractor := await db["extractors"].find_one(
+                        {"name": extractor_info.name, "version": extractor_info.version}
                     )
             ) is not None:
-                md_def = MetadataDefinitionOut(**md_def)
-                validate_definition(contents, md_def)
-
-        dataset_ref = MongoDBRef(collection="datasets", id=dataset.id)
-
-        # Build MetadataAgent depending on whether extractor info is present
-        extractor_info = metadata_in.extractor_info
-        if len(extractor_info) > 0:
-            extractor_in = ExtractorIn(**extractor_info.dict())
-            if (
-                extractor := await db["extractors"].find_one(
-                    {"_id": extractor_in.id, "version": extractor_in.version}
-                )
-            ) is not None:
                 agent = MetadataAgent(creator=user, extractor=extractor)
+                # TODO: How do we handle two different users creating extractor metadata? Currently we ignore user
+                query["agent.extractor.name"] = agent.extractor.name
+                query["agent.extractor.version"] = agent.extractor.version
             else:
                 raise HTTPException(status_code=404, detail=f"Extractor not found")
         else:
             agent = MetadataAgent(creator=user)
+            query["agent.creator.id"] = agent.creator.id
 
-    metadata = MetadataDB(
-        **in_metadata.dict(),
-        resource=dataset_ref,
-        agent=agent,
-    )
-    new_metadata = await db["metadata"].insert_one(metadata.to_mongo())
-    found = await db["metadata"].find_one({"_id": new_metadata.inserted_id})
-    metadata_out = MetadataOut.from_mongo(found)
-    return metadata_out
+        if (md := await db["metadata"].find_one(query)) is not None:
+            # Metadata exists, so prepare the new document we are going to replace it with
+            md_obj = _build_metadata_db_obj(metadata_in, db, agent=agent)
+            new_metadata = await db["metadata"].replace_one(
+                {"_id": md["_id"]},
+                md_obj.to_mongo())
+            found = await db["metadata"].find_one({"_id": md["_id"]})
+            metadata_out = MetadataOut.from_mongo(found)
+            return metadata_out
+    else:
+        raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
 
 
 @router.patch("/{dataset_id}/metadata", response_model=MetadataOut)
@@ -419,7 +448,8 @@ async def update_metadata(
 
         if (md := await db["metadata"].find_one(query)) is not None:
             # TODO: Refactor this with permissions checks etc.
-            return patch_metadata(md, dict(metadata_in), db)
+            result = await patch_metadata(md, dict(metadata_in), db)
+            return result
     else:
         raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
 

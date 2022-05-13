@@ -29,12 +29,64 @@ from app.models.metadata import (
     MetadataDB,
     MetadataOut,
     MetadataPatch,
-    validate_definition,
+    validate_context,
     patch_metadata
 )
 from app.keycloak_auth import get_user, get_current_user, get_token
 
 router = APIRouter()
+
+
+async def _build_metadata_db_obj(metadata_in: MetadataIn, file: FileOut,
+                                 agent: MetadataAgent = None, version: int = None):
+    """Convenience function for building a MetadataDB object from incoming metadata plus a file. Agent and file version
+    will be determined based on inputs if they are not provided directly."""
+    contents = await validate_context(metadata_in, db)
+
+    if version is None:
+        # Validate specified version, or use latest by default
+        file_version = metadata_in.file_version
+        if file_version is not None:
+            if (await db["file_versions"].find_one(
+                        {"file_id": ObjectId(file_id), "version_num": file_version})
+            ) is None:
+                raise HTTPException(
+                    status_code=404,
+                    detail=f"File {file_id} version {file_version} does not exist",
+                )
+            target_version = file_version
+        else:
+            # Use latest version of file if none specified
+            target_version = file.version_num
+    else:
+        # Assume version has already been validated elsewhere if it is passed in
+        target_version = version
+
+    if agent is None:
+        # Build MetadataAgent depending on whether extractor info is present/valid
+        extractor_info = metadata_in.extractor_info
+        if extractor_info is not None:
+            if (
+                    extractor := await db["extractors"].find_one(
+                        {"name": extractor_info.name, "version": extractor_info.version}
+                    )
+            ) is not None:
+                agent = MetadataAgent(creator=user, extractor=extractor)
+            else:
+                raise HTTPException(status_code=404, detail=f"Extractor not found")
+        else:
+            agent = MetadataAgent(creator=user)
+
+    file_ref = MongoDBRef(collection="files", resource_id=file.id, version=target_version)
+
+    # Apply any typecast fixes from definition validation
+    metadata_in = metadata_in.dict()
+    metadata_in["contents"] = contents
+    return MetadataDB(
+        **metadata_in,
+        resource=file_ref,
+        agent=agent,
+    )
 
 
 @router.put("/{file_id}", response_model=FileOut)
@@ -202,78 +254,77 @@ async def add_metadata(
         Metadata document that was added to database
     """
     if (file := await db["files"].find_one({"_id": ObjectId(file_id)})) is not None:
-        file = FileOut(**file)
-        file_version = metadata_in.file_version
-
-        # Validate specified version, or use latest by default
-        if file_version is not None:
-            if (
-                version := await db["file_versions"].find_one(
-                    {"file_id": ObjectId(file_id), "version_num": file_version}
-                )
-            ) is None:
-                raise HTTPException(
-                    status_code=404,
-                    detail=f"File {file_id} version {file_version} does not exist",
-                )
-            target_version = file_version
-        else:
-            # Use latest version of file if none specified
-            target_version = file.version_num
-
-        # Validate context
-        definition = metadata_in.definition
-        context = metadata_in.context
-        context_url = metadata_in.context_url
-        contents = metadata_in.contents
-        if context is None and context_url is None and definition is None:
-            raise HTTPException(
-                status_code=400,
-                detail=f"Context is required",
-            )
-        if context is not None:
-            # TODO: How should JSON-LD context be validated?
-            pass
-        if context_url is not None:
-            # TODO: How should a context URL be validated?
-            pass
-        if definition is not None:
-            if (
-                md_def := await db["metadata.definitions"].find_one(
-                    {"name": definition}
-                )
-            ) is not None:
-                md_def = MetadataDefinitionOut(**md_def)
-                contents = validate_definition(contents, md_def)
-
-        file_ref = MongoDBRef(collection="files", resource_id=file.id, version=target_version)
-
-        # Build MetadataAgent depending on whether extractor info is present/valid
-        extractor_info = metadata_in.extractor_info
-        if extractor_info is not None:
-            if (
-                extractor := await db["extractors"].find_one(
-                    {"name": extractor_info.name, "version": extractor_info.version}
-                )
-            ) is not None:
-                agent = MetadataAgent(creator=user, extractor=extractor)
-            else:
-                raise HTTPException(status_code=404, detail=f"Extractor not found")
-        else:
-            agent = MetadataAgent(creator=user)
-
-        # Apply any typecast fixes from definition validation
-        metadata_in = metadata_in.dict()
-        metadata_in["contents"] = contents
-        md = MetadataDB(
-            **metadata_in,
-            resource=file_ref,
-            agent=agent,
-        )
+        md = _build_metadata_db_obj(metadata_in, FileOut(**file))
         new_metadata = await db["metadata"].insert_one(md.to_mongo())
         found = await db["metadata"].find_one({"_id": new_metadata.inserted_id})
         metadata_out = MetadataOut.from_mongo(found)
         return metadata_out
+
+
+@router.put("/{file_id}/metadata", response_model=MetadataOut)
+async def replace_metadata(
+        metadata_in: MetadataPatch,
+        file_id: str,
+        user=Depends(get_current_user),
+        db: MongoClient = Depends(dependencies.get_db),
+):
+    """Replace metadata, including agent and context. If only metadata contents should be updated, use PATCH instead.
+
+    Returns:
+        Metadata document that was updated
+    """
+    if (file := await db["files"].find_one({"_id": ObjectId(file_id)})) is not None:
+        # First, make sure the metadata we are replacing actually exists.
+        query = {"resource.resource_id": ObjectId(file_id)}
+        file = FileOut(**file)
+
+        version = metadata_in.file_version
+        if version is not None:
+            if (
+                    version_q := await db["file_versions"].find_one(
+                        {"file_id": ObjectId(file_id), "version_num": version}
+                    )
+            ) is None:
+                raise HTTPException(
+                    status_code=404,
+                    detail=f"File version {version} does not exist",
+                )
+            target_version = version
+        else:
+            target_version = file.version_num
+        query["resource.version"] = target_version
+
+        # Filter by MetadataAgent
+        extractor_info = metadata_in.extractor_info
+        if extractor_info is not None:
+            if (
+                    extractor := await db["extractors"].find_one(
+                        {"name": extractor_info.name, "version": extractor_info.version}
+                    )
+            ) is not None:
+                agent = MetadataAgent(creator=user, extractor=extractor)
+                # TODO: How do we handle two different users creating extractor metadata? Currently we ignore user
+                query["agent.extractor.name"] = agent.extractor.name
+                query["agent.extractor.version"] = agent.extractor.version
+            else:
+                raise HTTPException(status_code=404, detail=f"Extractor not found")
+        else:
+            agent = MetadataAgent(creator=user)
+            query["agent.creator.id"] = agent.creator.id
+
+        if (md := await db["metadata"].find_one(query)) is not None:
+            # Metadata exists, so prepare the new document we are going to replace it with
+            md_obj = _build_metadata_db_obj(metadata_in, db, agent=agent, version=target_version)
+            new_metadata = await db["metadata"].replace_one(
+                {"_id": md["_id"]},
+                md_obj.to_mongo())
+            found = await db["metadata"].find_one({"_id": md["_id"]})
+            metadata_out = MetadataOut.from_mongo(found)
+            return metadata_out
+        else:
+            raise HTTPException(status_code=404, detail=f"No metadata found to update")
+    else:
+        raise HTTPException(status_code=404, detail=f"File {file_id} not found")
 
 
 @router.patch("/{file_id}/metadata", response_model=MetadataOut)
@@ -319,6 +370,7 @@ async def update_metadata(
             ) is not None:
                 agent = MetadataAgent(creator=user, extractor=extractor)
                 # TODO: How do we handle two different users creating extractor metadata? Currently we ignore user
+
                 query["agent.extractor.name"] = agent.extractor.name
                 query["agent.extractor.version"] = agent.extractor.version
             else:
@@ -329,7 +381,8 @@ async def update_metadata(
 
         if (md := await db["metadata"].find_one(query)) is not None:
             # TODO: Refactor this with permissions checks etc.
-            return patch_metadata(md, dict(metadata_in), db)
+            result = await patch_metadata(md, dict(metadata_in), db)
+            return result
         else:
             raise HTTPException(status_code=404, detail=f"No metadata found to update")
     else:
@@ -376,5 +429,49 @@ async def get_metadata(
         async for md in db["metadata"].find(query):
             metadata.append(MetadataOut.from_mongo(md))
         return metadata
+    else:
+        raise HTTPException(status_code=404, detail=f"File {file_id} not found")
+
+
+@router.delete("/{file_id}/metadata", response_model=List[MetadataOut])
+async def delete_metadata(
+    file_id: str,
+    version: Optional[int] = Form(None),
+    extractor_name: Optional[str] = Form(None),
+    extractor_version: Optional[float] = Form(None),
+    user=Depends(get_current_user),
+    db: MongoClient = Depends(dependencies.get_db),
+):
+    if (file := await db["files"].find_one({"_id": ObjectId(file_id)})) is not None:
+        query = {"resource.resource_id": ObjectId(file_id)}
+        file = FileOut.from_mongo(file)
+
+        # Validate specified version, or use latest by default
+        if not all_versions:
+            if version is not None:
+                if (
+                    version_q := await db["file_versions"].find_one(
+                        {"file_id": ObjectId(file_id), "version_num": version}
+                    )
+                ) is None:
+                    raise HTTPException(
+                        status_code=404,
+                        detail=f"File version {version} does not exist",
+                    )
+                target_version = version
+            else:
+                target_version = file.version_num
+            query["resource.version"] = target_version
+
+        if extractor_name is not None:
+            query["agent.extractor.name"] = extractor_name
+        if extractor_version is not None:
+            query["agent.extractor.version"] = extractor_version
+
+        if (md := await db["metadata"].find_one(query)) is not None:
+            db["metadata"].remove({"_id": md["_id"]})
+            return 200
+        else:
+            raise HTTPException(status_code=404, detail=f"No metadata found with that criteria")
     else:
         raise HTTPException(status_code=404, detail=f"File {file_id} not found")

@@ -106,6 +106,8 @@ def validate_definition(contents: dict, metadata_def: MetadataDefinitionOut):
 
 
 class MetadataAgent(MongoModel):
+    """Describes the user who created a piece of metadata. If extractor is provided, user refers to the user who
+    triggered the extraction."""
     creator: UserOut
     extractor: Optional[ExtractorOut]
 
@@ -164,6 +166,39 @@ class MetadataOut(MetadataDB):
     pass
 
 
+async def validate_context(metadata_in: MetadataIn, db: MongoClient):
+    """Convenience function for making sure incoming metadata has valid definitions or resolvable context.
+
+    Returns:
+        Metadata contents with incoming values typecast to match expected data type of any definitions
+    """
+    definition = metadata_in.definition
+    context = metadata_in.context
+    context_url = metadata_in.context_url
+    contents = metadata_in.contents
+    if context is None and context_url is None and definition is None:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Context is required",
+        )
+    if context is not None:
+        # TODO: How should JSON-LD context be validated?
+        pass
+    if context_url is not None:
+        # TODO: How should a context URL be validated?
+        pass
+    if definition is not None:
+        if (md_def := await db["metadata.definitions"].find_one({"name": definition})) is not None:
+            md_def = MetadataDefinitionOut(**md_def)
+            contents = validate_definition(contents, md_def)
+        else:
+            raise HTTPException(
+                status_code=400,
+                detail=f"{definition} is not valid metadata definition",
+            )
+    return contents
+
+
 def deep_update(orig, new):
     """Recursively update a nested dict with any proivded values."""
     for k, v in new.items():
@@ -174,8 +209,8 @@ def deep_update(orig, new):
     return orig
 
 
-def patch_metadata(metadata: dict, new_entries: dict, db: MongoClient):
-    """Convenience function for updating original metadata with some new entries."""
+async def patch_metadata(metadata: dict, new_entries: dict, db: MongoClient):
+    """Convenience function for updating original metadata contents with new entries."""
     try:
         # TODO: Need to validate new_entries against context
         metadata["contents"] = deep_update(metadata["contents"], new_entries["contents"])
