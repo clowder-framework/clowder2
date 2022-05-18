@@ -25,7 +25,7 @@ router = APIRouter()
 
 
 @router.post("/definition", response_model=MetadataDefinitionOut)
-async def save_definition(
+async def save_metadata_definition(
     definition_in: MetadataDefinitionIn,
     user=Depends(get_current_user),
     db: MongoClient = Depends(dependencies.get_db),
@@ -38,7 +38,7 @@ async def save_definition(
 
 
 @router.get("/definition", response_model=List[MetadataDefinitionOut])
-async def get_definition(
+async def get_metadata_definition(
     name: Optional[str] = None,
     user=Depends(get_current_user),
     db: MongoClient = Depends(dependencies.get_db),

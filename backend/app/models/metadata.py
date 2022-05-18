@@ -37,7 +37,14 @@ class MetadataField(MongoModel):
     name: str
     type: str = "str"  # must be one of FIELD_TYPES
     list: bool = False  # whether a list[type] is acceptable
-    required: bool = False  # TODO: Eventually move this to space level?
+    # TODO: Eventually move this to space level?
+    required: bool = False  # Whether the definition requires this field
+
+    """
+    Required metadata
+    
+    
+    """
 
 
 class MetadataDefinitionBase(MongoModel):
@@ -66,6 +73,14 @@ class MetadataDefinitionBase(MongoModel):
     context: Optional[dict]  # https://json-ld.org/spec/latest/json-ld/#the-context
     context_url: Optional[str]  # single URL applying to contents
     fields: List[MetadataField]
+    # TODO: Space-level requirements?
+
+
+class RequiredMetadata(MongoModel):
+    # TODO: Endpoints to get lists of what is required, and update these flags
+    definition_name: str
+    required_on_files: bool
+    required_on_datasets: bool
 
 
 class MetadataDefinitionIn(MetadataDefinitionBase):
