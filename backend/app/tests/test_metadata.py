@@ -54,7 +54,7 @@ def test_create_definition(client: TestClient, headers: dict):
     assert response.json().get("id") is not None
     dataset_id = response.json().get("id")
     response = client.post(
-        f"{settings.API_V2_STR}/datasets/{dataset_id}/metadata", headers=headers, json=metadata_using_context_url
+        f"{settings.API_V2_STR}/datasets/{dataset_id}/metadata", headers=headers, json=metadata_using_definition
     )
     assert response.status_code == 200
     assert response.json().get("id") is not None

@@ -54,23 +54,3 @@ async def get_definition(
     ):
         definitions.append(MetadataDefinitionOut.from_mongo(doc))
     return definitions
-
-
-@router.patch("/{metadata_id}", response_model=MetadataOut)
-async def update_metadata(
-    metadata_in: MetadataPatch,
-    metadata_id: str,
-    user=Depends(get_current_user),
-    db: MongoClient = Depends(dependencies.get_db),
-):
-    """Update metadata. Any fields provided in the contents JSON will be added or updated in the metadata. If context or
-    agent should be changed, use PUT instead.
-
-    Returns:
-        Metadata document that was updated
-    """
-    if (md := await db["metadata"].find_one({"_id": ObjectId(metadata_id)})) is not None:
-        # TODO: Refactor this with permissions checks etc.
-        result = await patch_metadata(md, dict(metadata_in), db)
-        return result
-
