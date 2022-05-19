@@ -1,16 +1,8 @@
 import React, {useEffect, useState} from "react";
 
-import {Box, Button, Container, Stepper, Step, StepLabel, StepContent, Typography,} from "@mui/material";
-
-import LoadingOverlay from "react-loading-overlay-ts";
-
-import Form from "@rjsf/material-ui";
-import datasetSchema from "../../schema/datasetSchema.json";
-import {FormProps} from "@rjsf/core";
+import {Box, Button, Stepper, Step, StepLabel, StepContent, Typography,} from "@mui/material";
 import {useDispatch, useSelector,} from "react-redux";
-import {datasetCreated, resetDatsetCreated, updateDataset} from "../../actions/dataset";
 import {RootState} from "../../types/data";
-import {useNavigate} from "react-router-dom";
 
 import {CreateDatasetModal} from "./CreateDatasetModal";
 import {Metadata} from "../metadata/Metadata";
@@ -74,6 +66,9 @@ export const CreateDataset = (): JSX.Element => {
 	const handleSkip = () => {
 		setActiveStep((prevActiveStep) => prevActiveStep + 1);
 	};
+	const handleBack = () => {
+		setActiveStep((prevActiveStep) => prevActiveStep - 1);
+	}
 	const handleFinish = () => {
 		/// redirect to the dataset page
 	}
