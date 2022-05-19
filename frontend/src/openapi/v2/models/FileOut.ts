@@ -9,7 +9,8 @@ export type FileOut = {
     name?: string;
     creator: UserOut;
     created?: string;
-    version?: string;
+    version_id?: string;
+    version_num?: number;
     dataset_id: string;
     folder_id?: string;
     views?: number;
