@@ -7,12 +7,7 @@ const textStyle = {
 	fontSize: "10px",
 	fontStyle: "italic",
 	color: theme.palette.secondary.light,
-	textAlign: "right"
 };
-
-const boxStyle = {
-	float: "right"
-}
 
 
 export const Agent = (props) => {
@@ -21,7 +16,7 @@ export const Agent = (props) => {
 
 	return (
 		<>
-			<Box key={id} sx={boxStyle}>
+			<Box key={id}>
 				<Typography sx={textStyle}>Created at: {created}</Typography>
 				<Typography sx={textStyle}>Created by: {agent.creator.first_name} {agent.creator.last_name}</Typography>
 			</Box>
