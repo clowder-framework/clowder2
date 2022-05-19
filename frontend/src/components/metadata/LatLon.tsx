@@ -2,7 +2,7 @@ import React, {useState} from "react";
 import {TextField, Typography} from "@mui/material";
 
 export const LatLon = (props) => {
-	const {widgetName, key, contents, readOnly, created, agent} = props;
+	const {widgetName, key, contents, readOnly} = props;
 	const [lat, setLat] = useState("");
 	const [lon, setLon] = useState("");
 	const id = `lat-lon-${key}`;

@@ -6,12 +6,11 @@ import {Unit} from "./components/metadata/Unit";
 import {LatLon} from "./components/metadata/LatLon";
 
 const configMetadata = {
-	"alternative_title": <AlternativeTitle/>,
-	"doi":<DOI/>,
-	"time": <Time/>,
-	"unit": <Unit/>,
+	"AlternativeTitle": <AlternativeTitle/>,
+	"DOI":<DOI/>,
+	"Time": <Time/>,
+	"Unit": <Unit/>,
 	"LatLon": <LatLon/>,
-	// "color": <Color/>
 };
 
 export default configMetadata

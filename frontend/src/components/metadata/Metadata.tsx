@@ -89,9 +89,6 @@ export const Metadata = (props) => {
 					}
 				})
 			}
-			{/*<Box className="inputGroup">*/}
-			{/*	<Button variant="contained" type="submit" className="form-button-block">Create Metadata</Button>*/}
-			{/*</Box>*/}
 		</>
 	)
 }
