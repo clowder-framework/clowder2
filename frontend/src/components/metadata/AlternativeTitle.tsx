@@ -1,21 +1,40 @@
 import React, {useState} from "react";
-import {TextField, Typography} from "@mui/material";
+import {Button, TextField, Typography} from "@mui/material";
 
 export const AlternativeTitle = (props) => {
-	const {widgetName, key, contents, readOnly} = props;
-	const [alternativeTitle, setAlternativeTitle] = useState("");
-	const id = `alternative-title-${key}`;
+	const {widgetName, resourceId, contents, saveMetadata, metadataId } = props;
+	const [alternativeName, setAlternativeName] = useState("");
+	const [readOnly, setReadOnly] = useState(!!contents);
+
+	const resetForm = () => {
+		setAlternativeName("");
+	}
 
 	return (
 		<>
-			<Typography>{widgetName}</Typography>
 			<TextField label={widgetName} variant="outlined" margin="normal"
-					   fullWidth id={id}
+					   fullWidth
 					   name={widgetName}
-					   value={readOnly? contents.alternateName: alternativeTitle}
-					   onChange={(event: React.ChangeEvent<HTMLInputElement>) => { setAlternativeTitle(event.target.value);}}
-					   disabled={readOnly ? true: false}
+					   value={readOnly? contents.alternateName: alternativeName}
+					   onChange={(event: React.ChangeEvent<HTMLInputElement>) => { setAlternativeName(event.target.value);}}
+					   disabled={readOnly}
 			/>
+			{
+				readOnly ?
+					<Button variant="text" sx={{float:"right"}} onClick={() => {setReadOnly(false);}}>Edit</Button>
+					:
+					<Button variant="contained" sx={{float:"right"}} onClick={() => {
+						// update metadata
+						saveMetadata(resourceId, {
+							"id":metadataId,
+							"definition": widgetName,
+							"contents": {
+								alternateName: alternativeName
+							}});
+						resetForm();
+						setReadOnly(true);
+					}}>Save</Button>
+			}
 		</>
 	)
 }

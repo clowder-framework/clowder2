@@ -29,7 +29,7 @@ import {parseDate} from "../../utils/common";
 import config from "../../app.config";
 import {DatasetIn} from "../../openapi/v2";
 import {Metadata} from "../metadata/Metadata";
-import {fetchDatasetMetadata} from "../../actions/metadata";
+import {fetchDatasetMetadata, patchDatasetMetadata} from "../../actions/metadata";
 
 const tab = {
 	fontStyle: "normal",
@@ -72,6 +72,7 @@ export const Dataset = (): JSX.Element => {
 	const dismissError = () => dispatch(resetFailedReason());
 	const dismissLogout = () => dispatch(resetLogout());
 	const listDatasetMetadata = (datasetId: string | undefined) => dispatch(fetchDatasetMetadata(datasetId));
+	const updateDatasetMetadata = (datasetId: string | undefined, content:object) => dispatch(patchDatasetMetadata(datasetId,content));
 
 	// mapStateToProps
 	const about = useSelector((state: RootState) => state.dataset.about);
@@ -104,6 +105,7 @@ export const Dataset = (): JSX.Element => {
 	useEffect(() => {
 		if (reason !== "" && reason !== null && reason !== undefined) {
 			setErrorOpen(true);
+
 		}
 	}, [reason])
 	const handleErrorCancel = () => {
@@ -200,7 +202,7 @@ export const Dataset = (): JSX.Element => {
 								<FilesTable datasetId={datasetId} datasetName={about.name}/>
 							</TabPanel>
 							<TabPanel value={selectedTabIndex} index={1}>
-								<Metadata metadata={datasetMetadata}/>
+								<Metadata metadata={datasetMetadata} saveMetadata={updateDatasetMetadata} resourceId={datasetId}/>
 							</TabPanel>
 							<TabPanel value={selectedTabIndex} index={2}/>
 							<TabPanel value={selectedTabIndex} index={3}/>

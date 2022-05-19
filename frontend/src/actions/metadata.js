@@ -18,3 +18,20 @@ export function fetchDatasetMetadata(datasetId){
 			});
 	};
 }
+
+export const UPDATE_DATASET_METADATA = "UPDATE_DATASET_METADATA";
+export function patchDatasetMetadata(datasetId, metadata){
+	return (dispatch) => {
+		return V2.MetadataService.updateDatasetMetadataApiV2DatasetsDatasetIdMetadataPatch(datasetId, metadata)
+			.then(json => {
+				dispatch({
+					type: UPDATE_DATASET_METADATA,
+					updatedMetadata: json,
+					receivedAt: Date.now(),
+				});
+			})
+			.catch(reason => {
+				dispatch(handleErrors(reason));
+			});
+	};
+}
