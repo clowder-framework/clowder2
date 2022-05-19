@@ -20,6 +20,8 @@ import {FileAbout} from "./FileAbout";
 import {FileStats} from "./FileStats";
 import {FileSearch} from "./FileSearch";
 import {FileVersionHistory} from "../versions/FileVersionHistory";
+import {Metadata} from "../metadata/Metadata";
+
 
 const tab = {
 	fontStyle: "normal",
@@ -177,8 +179,8 @@ export const File = (): JSX.Element => {
 								<Tabs value={selectedTabIndex} onChange={handleTabChange} aria-label="file tabs">
 									<Tab sx={tab} label="Previews" {...a11yProps(0)} />
 									<Tab sx={tab} label="Version History" {...a11yProps(1)} />
+									<Tab sx={tab} label="Metadata" {...a11yProps(3)} disabled={false}/>
 									<Tab sx={tab} label="Sections" {...a11yProps(2)} disabled={true}/>
-									<Tab sx={tab} label="Metadata" {...a11yProps(3)} disabled={true}/>
 									<Tab sx={tab} label="Extractions" {...a11yProps(4)} disabled={true}/>
 									<Tab sx={tab} label="Comments" {...a11yProps(5)} disabled={true}/>
 								</Tabs>
@@ -206,7 +208,7 @@ export const File = (): JSX.Element => {
 									<FileVersionHistory fileVersions={fileVersions}/> : <></> }
 							</TabPanel>
 							<TabPanel value={selectedTabIndex} index={2}>
-									NA
+								<Metadata />
 							</TabPanel>
 							<TabPanel value={selectedTabIndex} index={3}>
 								{
