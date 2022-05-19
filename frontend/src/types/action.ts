@@ -1,4 +1,5 @@
 import {Dataset, ExtractedMetadata, File, MetadataJsonld, FilePreview, FileMetadata, FileVersion, Folder} from "./data";
+import {MetadataOut as Metadata} from "../openapi/v2";
 
 interface RECEIVE_FILES_IN_DATASET {
 	type: "RECEIVE_FILES_IN_DATASET";
@@ -104,12 +105,23 @@ interface FOLDER_ADDED{
 	folder: Folder
 }
 
+interface RECEIVE_DATASET_METADATA{
+	type: "RECEIVE_DATASET_METADATA",
+	datasetMetadata: Metadata
+}
+
+interface RECEIVE_FOLDERS_IN_DATASET{
+	type: "RECEIVE_FOLDERS_IN_DATASET",
+	folders: Folder[]
+}
+
 export type DataAction =
 	| RECEIVE_FILES_IN_DATASET
 	| RECEIVE_FOLDERS_IN_DATASET
 	| DELETE_FILE
 	| RECEIVE_DATASET_ABOUT
 	| RECEIVE_DATASETS
+	| RECEIVE_DATASET_METADATA
 	| DELETE_DATASET
 	| RECEIVE_FILE_METADATA
 	| RECEIVE_FILE_EXTRACTED_METADATA
