@@ -23,7 +23,7 @@ export const CreateDataset = (): JSX.Element => {
 	const createDatasetMetadata = (datasetId: string|undefined, metadata:MetadataIn) => dispatch(postDatasetMetadata(datasetId, metadata));
 	const metadataDefinitionList = useSelector((state: RootState) => state.metadata.metadataDefinitionList);
 	useEffect(() => {
-		getMetadatDefinitions("", 0, 100);
+		getMetadatDefinitions(0, 100);
 	}, []);
 
 	// Error msg dialog

@@ -1,13 +1,16 @@
 import React, {useEffect, useState} from "react";
-import {TextField} from "@mui/material";
+import {Button, TextField} from "@mui/material";
 
 export const DOI = (props) => {
-	const {widgetName, key} = props;
+	const {widgetName, metadataId, contents, saveMetadata, resourceId} = props;
 	const [DOI, setDOI] = useState("");
 	const [promptError, setPromptError] = useState(false);
+	const [readOnly, setReadOnly] = useState(!!contents);
 	const DOIErrorText = "DOI must follow the format of doi:0000000/000000000000!";
 
-	const id = `DOI-${key}`;
+	const resetForm = () => {
+		setDOI("");
+	}
 
 	useEffect(() => {
 		// If DOI doesn't follow the format (Regex)
@@ -21,13 +24,37 @@ export const DOI = (props) => {
 		}
 	}, [DOI]);
 	return (
-		<TextField label={widgetName} variant="outlined" margin="normal"
-				   fullWidth id={id}
-				   name={widgetName}
-				   value={DOI}
-				   onChange={(event: React.ChangeEvent<HTMLInputElement>) => { setDOI(event.target.value);}}
-				   error={promptError}
-				   helperText={DOIErrorText}
-		/>
+		<>
+			<TextField label={widgetName} variant="outlined" margin="normal"
+					   fullWidth
+					   name={widgetName}
+					   value={readOnly? contents.doi: DOI}
+					   onChange={(event: React.ChangeEvent<HTMLInputElement>) => { setDOI(event.target.value);}}
+					   error={promptError}
+					   helperText={DOIErrorText}
+					   disabled={readOnly}
+					   sx={{background:"#ffffff"}}
+			/>
+			{
+				readOnly ?
+					<Button variant="text" sx={{float:"right"}} onClick={() => {setReadOnly(false);}}>Edit</Button>
+					:
+					<>
+						{/*<Button variant="text" sx={{float:"right"}} onClick={() => {setReadOnly(true);}}>Cancel</Button>*/}
+						<Button variant="contained" sx={{float:"right"}} onClick={() => {
+							// update metadata
+							saveMetadata(resourceId, {
+								"id":metadataId,
+								"definition": widgetName,
+								"contents": {
+									"doi":DOI
+								}});
+							resetForm();
+							setReadOnly(true);
+						}}>Save</Button>
+					</>
+			}
+		</>
+
 	)
 }

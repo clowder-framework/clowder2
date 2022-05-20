@@ -25,7 +25,6 @@ export const Metadata = (props) => {
 												widgetName: item.definition,
 												metadataId: item.id,
 												contents: item.contents,
-												readOnly:true,
 												saveMetadata: saveMetadata
 											}
 										);
@@ -48,7 +47,6 @@ export const Metadata = (props) => {
 											{
 												resourceId:resourceId,
 												widgetName: item.name,
-												readOnly:false,
 												saveMetadata: saveMetadata
 											}
 										);

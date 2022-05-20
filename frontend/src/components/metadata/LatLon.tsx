@@ -51,7 +51,6 @@ export const LatLon = (props) => {
 						}}>Save</Button>
 					</>
 			}
-
 		</>
 	)
 }
