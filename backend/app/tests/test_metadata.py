@@ -42,11 +42,14 @@ metadata_using_context_url = {
 
 
 def test_create_definition(client: TestClient, headers: dict):
+    # Post the definition itself
     response = client.post(
         f"{settings.API_V2_STR}/metadata/definition", json=metadata_definition, headers=headers
     )
     assert response.json().get("id") is not None
     assert response.status_code == 200
+
+    # Create dataset and add metadata to it using correct definition
     response = client.post(
         f"{settings.API_V2_STR}/datasets", headers=headers, json=dataset_data
     )
@@ -58,7 +61,16 @@ def test_create_definition(client: TestClient, headers: dict):
     )
     assert response.status_code == 200
     assert response.json().get("id") is not None
-    # TODO: Assert that the other metadata fails this definition
+
+    # Add metadata that doesn't match definition
+    bad_md = metadata_using_definition
+    bad_md["contents"] = {"x": "24.4", "y": 32.04}
+    response = client.post(
+        f"{settings.API_V2_STR}/datasets/{dataset_id}/metadata", headers=headers, json=bad_md
+    )
+    assert response.status_code == 400
+
+
 
 
 def test_create_context_url(client: TestClient, headers: dict):
