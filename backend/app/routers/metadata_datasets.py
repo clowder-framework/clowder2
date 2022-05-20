@@ -17,6 +17,7 @@ from app.models.extractors import ExtractorIn
 from app.models.metadata import (
     MongoDBRef,
     MetadataAgent,
+    MetadataDefinitionOut,
     MetadataIn,
     MetadataDB,
     MetadataOut,
@@ -192,7 +193,12 @@ async def get_dataset_metadata(
 
         metadata = []
         async for md in db["metadata"].find(query):
-            metadata.append(MetadataOut.from_mongo(md))
+            md_out = MetadataOut.from_mongo(md)
+            if md_out.definition is not None:
+                if (md_def := await db["metadata.definitions"].find_one({"name": md_out.definition})) is not None:
+                    md_def = MetadataDefinitionOut(**md_def)
+                    md_out.description = md_def.description
+            metadata.append(md_out)
         return metadata
     else:
         raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")

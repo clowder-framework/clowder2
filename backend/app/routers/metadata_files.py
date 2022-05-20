@@ -17,6 +17,7 @@ from app.models.files import FileOut
 from app.models.metadata import (
     MongoDBRef,
     MetadataAgent,
+    MetadataDefinitionOut,
     MetadataIn,
     MetadataDB,
     MetadataOut,
@@ -184,6 +185,18 @@ async def update_file_metadata(
     if (file := await db["files"].find_one({"_id": ObjectId(file_id)})) is not None:
         query = {"resource.resource_id": ObjectId(file_id)}
         file = FileOut(**file)
+        contents = dict(metadata_in)
+
+        if metadata_in.metadata_id is not None:
+            # TODO: If a specific metadata_id is provided, validate this against its context
+            pass
+        else:
+            # Validate the context provided, and use as a filter
+            contents = await validate_context(metadata_in, db)
+            definition = metadata_in.definition
+            if definition is not None:
+                query["definition"] = definition
+
 
         version = metadata_in.file_version
         if version is not None:
@@ -222,7 +235,7 @@ async def update_file_metadata(
 
         if (md := await db["metadata"].find_one(query)) is not None:
             # TODO: Refactor this with permissions checks etc.
-            result = await patch_metadata(md, dict(metadata_in), db)
+            result = await patch_metadata(md, contents, db)
             return result
         else:
             raise HTTPException(status_code=404, detail=f"No metadata found to update")
@@ -235,6 +248,7 @@ async def get_file_metadata(
     file_id: str,
     version: Optional[int] = Form(None),
     all_versions: Optional[bool] = False,
+    definition: Optional[str] = Form(None),
     extractor_name: Optional[str] = Form(None),
     extractor_version: Optional[float] = Form(None),
     user=Depends(get_current_user),
@@ -262,6 +276,10 @@ async def get_file_metadata(
                 target_version = file.version_num
             query["resource.version"] = target_version
 
+        if definition is not None:
+            # TODO: Check if definition exists in database and raise error if not
+            query["definition"] = definition
+
         if extractor_name is not None:
             query["agent.extractor.name"] = extractor_name
         if extractor_version is not None:
@@ -269,7 +287,12 @@ async def get_file_metadata(
 
         metadata = []
         async for md in db["metadata"].find(query):
-            metadata.append(MetadataOut.from_mongo(md))
+            md_out = MetadataOut.from_mongo(md)
+            if md_out.definition is not None:
+                if (md_def := await db["metadata.definitions"].find_one({"name": md_out.definition})) is not None:
+                    md_def = MetadataDefinitionOut(**md_def)
+                    md_out.description = md_def.description
+            metadata.append(md_out)
         return metadata
     else:
         raise HTTPException(status_code=404, detail=f"File {file_id} not found")

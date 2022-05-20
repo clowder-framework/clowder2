@@ -41,7 +41,24 @@ metadata_using_context_url = {
 }
 
 
-def test_create_definition(client: TestClient, headers: dict):
+def test_metadata_no_context(client: TestClient, headers: dict):
+    # Create dataset and add metadata that doesn't have any context
+    response = client.post(
+        f"{settings.API_V2_STR}/datasets", headers=headers, json=dataset_data
+    )
+    assert response.status_code == 200
+    assert response.json().get("id") is not None
+
+    dataset_id = response.json().get("id")
+    bad_md = dict(metadata_using_context_url)
+    del bad_md["context_url"]
+    response = client.post(
+        f"{settings.API_V2_STR}/datasets/{dataset_id}/metadata", headers=headers, json=bad_md
+    )
+    assert response.status_code == 400
+
+
+def test_metadata_definition(client: TestClient, headers: dict):
     # Post the definition itself
     response = client.post(
         f"{settings.API_V2_STR}/metadata/definition", json=metadata_definition, headers=headers
@@ -49,12 +66,13 @@ def test_create_definition(client: TestClient, headers: dict):
     assert response.json().get("id") is not None
     assert response.status_code == 200
 
-    # Create dataset and add metadata to it using correct definition
+    # Create dataset and add metadata to it using new definition
     response = client.post(
         f"{settings.API_V2_STR}/datasets", headers=headers, json=dataset_data
     )
     assert response.status_code == 200
     assert response.json().get("id") is not None
+
     dataset_id = response.json().get("id")
     response = client.post(
         f"{settings.API_V2_STR}/datasets/{dataset_id}/metadata", headers=headers, json=metadata_using_definition
@@ -63,7 +81,7 @@ def test_create_definition(client: TestClient, headers: dict):
     assert response.json().get("id") is not None
 
     # Add metadata that doesn't match definition
-    bad_md = metadata_using_definition
+    bad_md = dict(metadata_using_definition)
     bad_md["contents"] = {"x": "24.4", "y": 32.04}
     response = client.post(
         f"{settings.API_V2_STR}/datasets/{dataset_id}/metadata", headers=headers, json=bad_md
@@ -71,14 +89,14 @@ def test_create_definition(client: TestClient, headers: dict):
     assert response.status_code == 400
 
 
-
-
-def test_create_context_url(client: TestClient, headers: dict):
+def test_metadata_context_url(client: TestClient, headers: dict):
+    # Create dataset and add metadata to it using context_url
     response = client.post(
         f"{settings.API_V2_STR}/datasets", headers=headers, json=dataset_data
     )
     assert response.status_code == 200
     assert response.json().get("id") is not None
+
     dataset_id = response.json().get("id")
     response = client.post(
         f"{settings.API_V2_STR}/datasets/{dataset_id}/metadata", headers=headers, json=metadata_using_context_url

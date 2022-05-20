@@ -42,6 +42,7 @@ class MetadataField(MongoModel):
 
     """
     Required metadata
+    Add description to metadata object on API endpoint
     
     
     """
@@ -159,7 +160,7 @@ class MetadataIn(MetadataBase):
 
 
 class MetadataPatch(MetadataIn):
-    pass
+    metadata_id: Optional[str]  # specific metadata ID we are patching
 
 
 class MetadataDB(MetadataBase):
@@ -178,7 +179,7 @@ class MetadataDB(MetadataBase):
 
 
 class MetadataOut(MetadataDB):
-    pass
+    description: Optional[str]  # This will be fetched from metadata definition if one is provided (shown by GUI)
 
 
 async def validate_context(metadata_in: MetadataIn, db: MongoClient):
