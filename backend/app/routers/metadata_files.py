@@ -95,7 +95,7 @@ async def add_file_metadata(
         Metadata document that was added to database
     """
     if (file := await db["files"].find_one({"_id": ObjectId(file_id)})) is not None:
-        md = _build_metadata_db_obj(db, metadata_in, FileOut(**file))
+        md = await _build_metadata_db_obj(db, metadata_in, FileOut(**file), user)
         new_metadata = await db["metadata"].insert_one(md.to_mongo())
         found = await db["metadata"].find_one({"_id": new_metadata.inserted_id})
         metadata_out = MetadataOut.from_mongo(found)
