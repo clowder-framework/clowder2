@@ -1,18 +1,20 @@
 import React, {useEffect, useState} from "react";
-import {Box, Button, Dialog, DialogTitle, Divider, Grid, Menu, MenuItem, Tab, Tabs, Typography, TextField} from "@mui/material";
+import {Box, Button, Dialog, DialogTitle, Divider, Grid, Menu, MenuItem, Tab, Tabs, Typography} from "@mui/material";
 import {ClowderInput} from "../styledComponents/ClowderInput";
 import {ClowderButton} from "../styledComponents/ClowderButton";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import {downloadDataset} from "../../utils/dataset";
-import {useNavigate, useParams} from "react-router-dom";
+import {useNavigate, useParams, useSearchParams} from "react-router-dom";
 import {RootState} from "../../types/data";
 import {useDispatch, useSelector} from "react-redux";
 import {
 	datasetDeleted,
 	fetchDatasetAbout,
-	fetchFilesInDataset, fetchFolderPath,
+	fetchFilesInDataset,
+	fetchFolderPath,
 	fetchFoldersInDataset,
-	folderAdded, updateDataset
+	folderAdded,
+	updateDataset
 } from "../../actions/dataset";
 import {resetFailedReason, resetLogout} from "../../actions/common"
 
@@ -23,10 +25,11 @@ import {UploadFile} from "../files/UploadFile";
 import {ActionModal} from "../dialog/ActionModal";
 import FilesTable from "../files/FilesTable";
 import {CreateFolder} from "../folders/CreateFolder";
-import { useSearchParams } from "react-router-dom";
 import {parseDate} from "../../utils/common";
 import config from "../../app.config";
 import {DatasetIn} from "../../openapi/v2";
+import {Metadata} from "../metadata/Metadata";
+import {fetchDatasetMetadata, patchDatasetMetadata} from "../../actions/metadata";
 
 const tab = {
 	fontStyle: "normal",
@@ -38,13 +41,13 @@ const tab = {
 const optionMenuItem = {
 	fontWeight: "normal",
 	fontSize: "14px",
-	marginTop:"8px",
+	marginTop: "8px",
 }
 
 export const Dataset = (): JSX.Element => {
 
 	// path parameter
-	const { datasetId } = useParams<{datasetId?: string}>();
+	const {datasetId} = useParams<{ datasetId?: string }>();
 
 	// search parameters
 	let [searchParams, setSearchParams] = useSearchParams();
@@ -59,22 +62,25 @@ export const Dataset = (): JSX.Element => {
 
 	// Redux connect equivalent
 	const dispatch = useDispatch();
-	const deleteDataset = (datasetId:string|undefined) => dispatch(datasetDeleted(datasetId));
-	const editDataset = (datasetId: string|undefined, formData: DatasetIn) => dispatch(updateDataset(datasetId, formData));
-	const addFolder = (datasetId:string|undefined, folderName:string, parentFolder:string|null) => dispatch(folderAdded(datasetId, folderName, parentFolder));
-	const getFolderPath= (folderId:string|undefined) => dispatch(fetchFolderPath(folderId));
-	const listFilesInDataset = (datasetId:string|undefined, folderId:string|undefined) => dispatch(fetchFilesInDataset(datasetId, folderId));
-	const listFoldersInDataset = (datasetId:string|undefined, parentFolder:string|undefined) => dispatch(fetchFoldersInDataset(datasetId, parentFolder));
-	const listDatasetAbout= (datasetId:string|undefined) => dispatch(fetchDatasetAbout(datasetId));
+	const deleteDataset = (datasetId: string | undefined) => dispatch(datasetDeleted(datasetId));
+	const editDataset = (datasetId: string | undefined, formData: DatasetIn) => dispatch(updateDataset(datasetId, formData));
+	const addFolder = (datasetId: string | undefined, folderName: string, parentFolder: string | null) => dispatch(folderAdded(datasetId, folderName, parentFolder));
+	const getFolderPath = (folderId: string | undefined) => dispatch(fetchFolderPath(folderId));
+	const listFilesInDataset = (datasetId: string | undefined, folderId: string | undefined) => dispatch(fetchFilesInDataset(datasetId, folderId));
+	const listFoldersInDataset = (datasetId: string | undefined, parentFolder: string | undefined) => dispatch(fetchFoldersInDataset(datasetId, parentFolder));
+	const listDatasetAbout = (datasetId: string | undefined) => dispatch(fetchDatasetAbout(datasetId));
 	const dismissError = () => dispatch(resetFailedReason());
 	const dismissLogout = () => dispatch(resetLogout());
+	const listDatasetMetadata = (datasetId: string | undefined) => dispatch(fetchDatasetMetadata(datasetId));
+	const updateDatasetMetadata = (datasetId: string | undefined, content:object) => dispatch(patchDatasetMetadata(datasetId,content));
 
 	// mapStateToProps
-	const about = useSelector((state:RootState) => state.dataset.about);
-	const reason = useSelector((state:RootState) => state.error.reason);
-	const stack = useSelector((state:RootState) => state.error.stack);
+	const about = useSelector((state: RootState) => state.dataset.about);
+	const reason = useSelector((state: RootState) => state.error.reason);
+	const stack = useSelector((state: RootState) => state.error.stack);
 	const loggedOut = useSelector((state: RootState) => state.error.loggedOut);
-	const folderPath = useSelector((state:RootState) => state.dataset.folderPath);
+	const folderPath = useSelector((state: RootState) => state.dataset.folderPath);
+	const datasetMetadata = useSelector((state: RootState) => state.metadata.datasetMetadata);
 
 	// state
 	const [selectedTabIndex, setSelectedTabIndex] = useState<number>(0);
@@ -91,13 +97,15 @@ export const Dataset = (): JSX.Element => {
 		listFoldersInDataset(datasetId, folder);
 		listDatasetAbout(datasetId);
 		getFolderPath(folder);
+		listDatasetMetadata(datasetId);
 	}, [searchParams]);
 
 	// Error msg dialog
 	const [errorOpen, setErrorOpen] = useState(false);
 	useEffect(() => {
-		if (reason !== "" && reason !== null && reason !== undefined){
+		if (reason !== "" && reason !== null && reason !== undefined) {
 			setErrorOpen(true);
+
 		}
 	}, [reason])
 	const handleErrorCancel = () => {
@@ -105,7 +113,7 @@ export const Dataset = (): JSX.Element => {
 		dismissError();
 		setErrorOpen(false);
 	}
-	const handleErrorReport = (reason:string) => {
+	const handleErrorReport = (reason: string) => {
 		window.open(`${config.GHIssueBaseURL}+${reason}&body=${encodeURIComponent(stack)}`);
 	}
 
@@ -124,7 +132,7 @@ export const Dataset = (): JSX.Element => {
 		setNewFolder(false);
 	}
 
-	const handleTabChange = (_event:React.ChangeEvent<{}>, newTabIndex:number) => {
+	const handleTabChange = (_event: React.ChangeEvent<{}>, newTabIndex: number) => {
 		setSelectedTabIndex(newTabIndex);
 	};
 
@@ -153,8 +161,8 @@ export const Dataset = (): JSX.Element => {
 			"url": "/",
 		},
 		{
-			"name":about["name"],
-			"url":`/datasets/${datasetId}`
+			"name": about["name"],
+			"url": `/datasets/${datasetId}`
 		}
 	];
 
@@ -181,10 +189,10 @@ export const Dataset = (): JSX.Element => {
 				<div className="inner-container">
 					<Grid container spacing={4}>
 						<Grid item xs={8}>
-							<Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+							<Box sx={{borderBottom: 1, borderColor: 'divider'}}>
 								<Tabs value={selectedTabIndex} onChange={handleTabChange} aria-label="dataset tabs">
 									<Tab sx={tab} label="Files" {...a11yProps(0)} />
-									<Tab sx={tab} label="Metadata" {...a11yProps(1)} disabled={true}/>
+									<Tab sx={tab} label="Metadata" {...a11yProps(1)} disabled={false}/>
 									<Tab sx={tab} label="Extractions" {...a11yProps(2)} disabled={true}/>
 									<Tab sx={tab} label="Visualizations" {...a11yProps(3)} disabled={true}/>
 									<Tab sx={tab} label="Comments" {...a11yProps(4)} disabled={true}/>
@@ -193,10 +201,12 @@ export const Dataset = (): JSX.Element => {
 							<TabPanel value={selectedTabIndex} index={0}>
 								<FilesTable datasetId={datasetId} datasetName={about.name}/>
 							</TabPanel>
-							<TabPanel value={selectedTabIndex} index={1} />
-							<TabPanel value={selectedTabIndex} index={2} />
-							<TabPanel value={selectedTabIndex} index={3} />
-							<TabPanel value={selectedTabIndex} index={4} />
+							<TabPanel value={selectedTabIndex} index={1}>
+								<Metadata metadata={datasetMetadata} saveMetadata={updateDatasetMetadata} resourceId={datasetId}/>
+							</TabPanel>
+							<TabPanel value={selectedTabIndex} index={2}/>
+							<TabPanel value={selectedTabIndex} index={3}/>
+							<TabPanel value={selectedTabIndex} index={4}/>
 						</Grid>
 						<Grid item xs={4}>
 							{/*option menus*/}
@@ -212,7 +222,7 @@ export const Dataset = (): JSX.Element => {
 											'&:hover': {
 												color: "black"
 											},
-										}} endIcon={<ArrowDropDownIcon />}>
+										}} endIcon={<ArrowDropDownIcon/>}>
 									Options
 								</Button>
 								<Menu
@@ -223,20 +233,21 @@ export const Dataset = (): JSX.Element => {
 									onClose={handleOptionClose}
 								>
 									<MenuItem sx={optionMenuItem}
-											  onClick={()=>{
+											  onClick={() => {
 												  setCreateFileOpen(true);
 												  handleOptionClose();
 											  }}>
 										Upload File
 									</MenuItem>
 									<MenuItem sx={optionMenuItem}
-											  onClick={()=>{
+											  onClick={() => {
 												  // addFolder(datasetId, "new folder", null);
 												  setNewFolder(true);
 												  handleOptionClose();
 											  }
 											  }>Add Folder</MenuItem>
-									<CreateFolder datasetId={datasetId} parentFolder={folder} open={newFolder} handleClose={handleCloseNewFolder}/>
+									<CreateFolder datasetId={datasetId} parentFolder={folder} open={newFolder}
+												  handleClose={handleCloseNewFolder}/>
 									<MenuItem sx={optionMenuItem}
 											  onClick={() => {
 												  downloadDataset(datasetId, about["name"]);
@@ -245,46 +256,58 @@ export const Dataset = (): JSX.Element => {
 										Download All
 									</MenuItem>
 									<MenuItem sx={optionMenuItem}
-											  onClick={()=>{
+											  onClick={() => {
 												  deleteDataset(datasetId);
 												  handleOptionClose();
 												  // Go to Explore page
 												  history("/");
 											  }
-									}>Delete Dataset</MenuItem>
-									<MenuItem onClick={handleOptionClose} sx={optionMenuItem} disabled={true}>Delete Folder</MenuItem>
-									<MenuItem onClick={handleOptionClose} sx={optionMenuItem} disabled={true}>Follow</MenuItem>
-									<MenuItem onClick={handleOptionClose} sx={optionMenuItem} disabled={true}>Collaborators</MenuItem>
-									<MenuItem onClick={handleOptionClose} sx={optionMenuItem} disabled={true}>Extraction</MenuItem>
+											  }>Delete Dataset</MenuItem>
+									<MenuItem onClick={handleOptionClose} sx={optionMenuItem} disabled={true}>Delete
+										Folder</MenuItem>
+									<MenuItem onClick={handleOptionClose} sx={optionMenuItem}
+											  disabled={true}>Follow</MenuItem>
+									<MenuItem onClick={handleOptionClose} sx={optionMenuItem}
+											  disabled={true}>Collaborators</MenuItem>
+									<MenuItem onClick={handleOptionClose} sx={optionMenuItem}
+											  disabled={true}>Extraction</MenuItem>
 								</Menu>
 							</Box>
-							<Divider />
+							<Divider/>
 							{
 								about !== undefined ?
 									<Box className="infoCard">
 										<Typography className="title">About</Typography>
 										<Box>
-											<Typography className="content" sx={{display:"inline-block"}}>Name:&nbsp;</Typography>
+											<Typography className="content"
+														sx={{display: "inline-block"}}>Name:&nbsp;</Typography>
 											{
 												editingNameOpen ?
 													<>
 														<ClowderInput required={true} id="name" onChange={(event) => {
-															setDatasetName(event.target.value);}} defaultValue={about["name"]}
+															setDatasetName(event.target.value);
+														}} defaultValue={about["name"]}
 														/>
-														<Box sx={{margin:"5px auto"}}>
-															<Button onClick={()=>{ handleDatasetNameEdit();}} size={"small"} variant="outlined">Save</Button>
-															<Button onClick={() => setEditingNameOpen(false)} size={"small"}>Cancel</Button>
+														<Box sx={{margin: "5px auto"}}>
+															<Button onClick={() => {
+																handleDatasetNameEdit();
+															}} size={"small"} variant="outlined">Save</Button>
+															<Button onClick={() => setEditingNameOpen(false)}
+																	size={"small"}>Cancel</Button>
 														</Box>
 													</>
 													:
 													<>
-														<Typography className="content" sx={{display:"inline"}}>{about["name"]}</Typography>
-														<Button onClick={() => setEditingNameOpen(true)} size={"small"} sx={{display:"inline"}}>Edit</Button>
+														<Typography className="content"
+																	sx={{display: "inline"}}>{about["name"]}</Typography>
+														<Button onClick={() => setEditingNameOpen(true)} size={"small"}
+																sx={{display: "inline"}}>Edit</Button>
 													</>
 											}
 										</Box>
 										<Box>
-											<Typography className="content" sx={{display:"inline-block"}}>Description:&nbsp;</Typography>
+											<Typography className="content"
+														sx={{display: "inline-block"}}>Description:&nbsp;</Typography>
 											{
 												editDescriptionOpen ?
 													<>
@@ -294,17 +317,22 @@ export const Dataset = (): JSX.Element => {
 															multiline
 															rows={4}
 															onChange={(event) => {
-																setDatasetDescription(event.target.value);}}
+																setDatasetDescription(event.target.value);
+															}}
 														/>
-														<Box sx={{margin:"5px auto"}}>
-															<Button onClick={handleDatasetDescriptionEdit} size={"small"} variant={"outlined"}>Save</Button>
-															<Button onClick={() => setEditDescriptionOpen(false)} size={"small"}>Cancel</Button>
+														<Box sx={{margin: "5px auto"}}>
+															<Button onClick={handleDatasetDescriptionEdit}
+																	size={"small"} variant={"outlined"}>Save</Button>
+															<Button onClick={() => setEditDescriptionOpen(false)}
+																	size={"small"}>Cancel</Button>
 														</Box>
 													</>
 													:
 													<>
-														<Typography className="content" sx={{display:"inline"}}>{about["description"]}</Typography>
-														<Button onClick={() => setEditDescriptionOpen(true)} size={"small"} sx={{display:"inline"}}>Edit</Button>
+														<Typography className="content"
+																	sx={{display: "inline"}}>{about["description"]}</Typography>
+														<Button onClick={() => setEditDescriptionOpen(true)}
+																size={"small"} sx={{display: "inline"}}>Edit</Button>
 													</>
 											}
 										</Box>
@@ -312,8 +340,10 @@ export const Dataset = (): JSX.Element => {
 										<Typography className="content">
 											Owner: {about["author"]["first_name"]} {about["author"]["last_name"]}
 										</Typography>
-										<Typography className="content">Created on: {parseDate(about["created"])}</Typography>
-										<Typography className="content">Modified on: {parseDate(about["modified"])}</Typography>
+										<Typography className="content">Created
+											on: {parseDate(about["created"])}</Typography>
+										<Typography className="content">Modified
+											on: {parseDate(about["modified"])}</Typography>
 										{/*/!*TODO use this to get thumbnail*!/*/}
 										{/*<Typography className="content">Thumbnail: {about["thumbnail"]}</Typography>*/}
 										{/*<Typography className="content">Belongs to spaces: {about["authorId"]}</Typography>*/}
@@ -321,7 +351,7 @@ export const Dataset = (): JSX.Element => {
 										{/*<Typography className="content">Resource type: {about["resource_type"]}</Typography>*/}
 									</Box> : <></>
 							}
-							<Divider />
+							<Divider/>
 							<Box className="infoCard">
 								<Typography className="title">Statistics</Typography>
 								<Typography className="content">Views: 10</Typography>
@@ -329,7 +359,7 @@ export const Dataset = (): JSX.Element => {
 								<Typography className="content">Downloads: 0</Typography>
 								<Typography className="content">Last downloaded: Never</Typography>
 							</Box>
-							<Divider />
+							<Divider/>
 							<Box className="infoCard">
 								<Typography className="title">Tags</Typography>
 								<Grid container spacing={4}>
@@ -344,7 +374,9 @@ export const Dataset = (): JSX.Element => {
 							<Divider light/>
 						</Grid>
 					</Grid>
-					<Dialog open={createFileOpen} onClose={()=>{setCreateFileOpen(false);}} fullWidth={true} aria-labelledby="form-dialog">
+					<Dialog open={createFileOpen} onClose={() => {
+						setCreateFileOpen(false);
+					}} fullWidth={true} aria-labelledby="form-dialog">
 						<DialogTitle id="form-dialog-title">Add File</DialogTitle>
 						<UploadFile selectedDatasetId={datasetId} folderId={folder} setOpen={setCreateFileOpen}/>
 					</Dialog>

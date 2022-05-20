@@ -1,3 +1,5 @@
+import {MetadataOut as Metadata} from "../openapi/v2";
+
 export interface Dataset {
 	name: string;
 	description: string;
@@ -136,7 +138,10 @@ export interface DatasetState{
 	folders: Folder[];
 	folderPath: string[];
 }
-
+export interface MetadataState{
+	datasetMetadata: Metadata[],
+	fileMetadata:Metadata[]
+}
 export interface FileState{
 	fileMetadata: FileMetadata;
 	extractedMetadata: ExtractedMetadata;
@@ -159,6 +164,7 @@ export interface ErrorState{
 }
 
 export interface RootState {
+	metadata: MetadataState;
 	error: ErrorState;
 	file:FileState;
 	dataset:DatasetState;
