@@ -22,6 +22,7 @@ from app.models.metadata import (
     MetadataDB,
     MetadataOut,
     MetadataPatch,
+    validate_definition,
     validate_context,
     patch_metadata
 )
@@ -34,7 +35,8 @@ async def _build_metadata_db_obj(db: MongoClient, metadata_in: MetadataIn, file:
                                  agent: MetadataAgent = None, version: int = None):
     """Convenience function for building a MetadataDB object from incoming metadata plus a file. Agent and file version
     will be determined based on inputs if they are not provided directly."""
-    contents = await validate_context(metadata_in, db)
+    contents = await validate_context(db, metadata_in.contents,
+                                      metadata_in.definition, metadata_in.context_url, metadata_in.context)
 
     if version is None:
         # Validate specified version, or use latest by default
@@ -145,7 +147,7 @@ async def replace_file_metadata(
                     )
             ) is not None:
                 agent = MetadataAgent(creator=user, extractor=extractor)
-                # TODO: How do we handle two different users creating extractor metadata? Currently we ignore user
+                # TODO: How do we handle two different users creating extractor metadata? Currently we ignore user...
                 query["agent.extractor.name"] = agent.extractor.name
                 query["agent.extractor.version"] = agent.extractor.version
             else:
@@ -188,15 +190,19 @@ async def update_file_metadata(
         contents = dict(metadata_in)
 
         if metadata_in.metadata_id is not None:
-            # TODO: If a specific metadata_id is provided, validate this against its context
-            pass
+            # If a specific metadata_id is provided, validate the patch against existing context
+            if (existing_md := await db["metadata"].find_one({"_id": ObjectId(metadata_in.metadata_id)})) is not None:
+                contents = await validate_context(db, metadata_in.contents,
+                                              existing_md.definition, existing_md.context_url, existing_md.context)
+                query["_id"] = metadata_in.metadata_id
         else:
-            # Validate the context provided, and use as a filter
-            contents = await validate_context(metadata_in, db)
+            # Validate the definition provided with patch, and use as a filter
+            # TODO: Should context_url also be unique to the file version?
+            contents = await validate_context(db, metadata_in.contents,
+                                              metadata_in.definition, metadata_in.context_url, metadata_in.context)
             definition = metadata_in.definition
             if definition is not None:
                 query["definition"] = definition
-
 
         version = metadata_in.file_version
         if version is not None:

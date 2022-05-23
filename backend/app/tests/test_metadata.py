@@ -2,7 +2,7 @@ from fastapi.testclient import TestClient
 from app.config import settings
 
 dataset_data = {
-    "name": "first dataset",
+    "name": "test dataset",
     "description": "a dataset is a container of files and metadata",
 }
 
@@ -41,7 +41,7 @@ metadata_using_context_url = {
 }
 
 
-def test_metadata_no_context(client: TestClient, headers: dict):
+def test_dataset_metadata_no_context(client: TestClient, headers: dict):
     # Create dataset and add metadata that doesn't have any context
     response = client.post(
         f"{settings.API_V2_STR}/datasets", headers=headers, json=dataset_data
@@ -58,7 +58,7 @@ def test_metadata_no_context(client: TestClient, headers: dict):
     assert response.status_code == 400
 
 
-def test_metadata_definition(client: TestClient, headers: dict):
+def test_dataset_metadata_definition(client: TestClient, headers: dict):
     # Post the definition itself
     response = client.post(
         f"{settings.API_V2_STR}/metadata/definition", json=metadata_definition, headers=headers
@@ -89,7 +89,7 @@ def test_metadata_definition(client: TestClient, headers: dict):
     assert response.status_code == 400
 
 
-def test_metadata_context_url(client: TestClient, headers: dict):
+def test_dataset_metadata_context_url(client: TestClient, headers: dict):
     # Create dataset and add metadata to it using context_url
     response = client.post(
         f"{settings.API_V2_STR}/datasets", headers=headers, json=dataset_data

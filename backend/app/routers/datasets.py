@@ -41,37 +41,6 @@ router = APIRouter()
 clowder_bucket = os.getenv("MINIO_BUCKET_NAME", "clowder")
 
 
-async def _build_metadata_db_obj(metadata_in: MetadataIn, dataset: DatasetOut, agent: MetadataAgent = None):
-    contents = await validate_context(metadata_in, db)
-
-    if agent is None:
-        # Build MetadataAgent depending on whether extractor info is present
-        extractor_info = metadata_in.extractor_info
-        if len(extractor_info) > 0:
-            extractor_in = ExtractorIn(**extractor_info.dict())
-            if (
-                    extractor := await db["extractors"].find_one(
-                        {"_id": extractor_in.id, "version": extractor_in.version}
-                    )
-            ) is not None:
-                agent = MetadataAgent(creator=user, extractor=extractor)
-            else:
-                raise HTTPException(status_code=404, detail=f"Extractor not found")
-        else:
-            agent = MetadataAgent(creator=user)
-
-    dataset_ref = MongoDBRef(collection="datasets", id=dataset.id)
-
-    # Apply any typecast fixes from definition validation
-    metadata_in = metadata_in.dict()
-    metadata_in["contents"] = contents
-    return MetadataDB(
-        **in_metadata.dict(),
-        resource=dataset_ref,
-        agent=agent,
-    )
-
-
 @router.post("", response_model=DatasetOut)
 async def save_dataset(
     dataset_in: DatasetIn,
@@ -326,8 +295,12 @@ async def save_file(
                 part_size=settings.MINIO_UPLOAD_CHUNK_SIZE,
             )  # async write chunk to minio
             version_id = response.version_id
+        if version_id is None:
+            # TODO: This occurs in testing when minio is not running
+            version_id = 999999999
         fileDB.version_id = version_id
         fileDB.version_num = 1
+        print(fileDB)
         await db["files"].replace_one({"_id": ObjectId(new_file_id)}, fileDB.to_mongo())
 
         # Add FileVersion entry and update file

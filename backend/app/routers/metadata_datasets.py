@@ -33,7 +33,8 @@ clowder_bucket = os.getenv("MINIO_BUCKET_NAME", "clowder")
 
 async def _build_metadata_db_obj(db: MongoClient, metadata_in: MetadataIn, dataset: DatasetOut, user: UserOut,
                                  agent: MetadataAgent = None):
-    contents = await validate_context(metadata_in, db)
+    contents = await validate_context(db, metadata_in.contents,
+                                              metadata_in.definition, metadata_in.context_url, metadata_in.context)
 
     if agent is None:
         # Build MetadataAgent depending on whether extractor info is present
