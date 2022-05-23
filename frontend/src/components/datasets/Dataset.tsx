@@ -80,7 +80,7 @@ export const Dataset = (): JSX.Element => {
 	const stack = useSelector((state: RootState) => state.error.stack);
 	const loggedOut = useSelector((state: RootState) => state.error.loggedOut);
 	const folderPath = useSelector((state: RootState) => state.dataset.folderPath);
-	const datasetMetadata = useSelector((state: RootState) => state.metadata.datasetMetadata);
+	const datasetMetadataList = useSelector((state: RootState) => state.metadata.datasetMetadataList);
 
 	// state
 	const [selectedTabIndex, setSelectedTabIndex] = useState<number>(0);
@@ -202,7 +202,7 @@ export const Dataset = (): JSX.Element => {
 								<FilesTable datasetId={datasetId} datasetName={about.name}/>
 							</TabPanel>
 							<TabPanel value={selectedTabIndex} index={1}>
-								<Metadata metadata={datasetMetadata} saveMetadata={updateDatasetMetadata} resourceId={datasetId}/>
+								<Metadata metadata={datasetMetadataList} saveMetadata={updateDatasetMetadata} resourceId={datasetId}/>
 							</TabPanel>
 							<TabPanel value={selectedTabIndex} index={2}/>
 							<TabPanel value={selectedTabIndex} index={3}/>

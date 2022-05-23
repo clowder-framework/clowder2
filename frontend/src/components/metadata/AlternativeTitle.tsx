@@ -18,22 +18,26 @@ export const AlternativeTitle = (props) => {
 					   value={readOnly? contents.alternateName: alternativeName}
 					   onChange={(event: React.ChangeEvent<HTMLInputElement>) => { setAlternativeName(event.target.value);}}
 					   disabled={readOnly}
+					   sx={{background:"#ffffff"}}
 			/>
 			{
 				readOnly ?
 					<Button variant="text" sx={{float:"right"}} onClick={() => {setReadOnly(false);}}>Edit</Button>
 					:
-					<Button variant="contained" sx={{float:"right"}} onClick={() => {
-						// update metadata
-						saveMetadata(resourceId, {
-							"id":metadataId,
-							"definition": widgetName,
-							"contents": {
-								alternateName: alternativeName
-							}});
-						resetForm();
-						setReadOnly(true);
-					}}>Save</Button>
+					<>
+						{/*<Button variant="text" sx={{float:"right"}} onClick={() => {setReadOnly(true);}}>Cancel</Button>*/}
+						<Button variant="contained" sx={{float:"right"}} onClick={() => {
+							// update metadata
+							saveMetadata(resourceId, {
+								"id":metadataId,
+								"definition": widgetName,
+								"contents": {
+									alternateName: alternativeName
+								}});
+							resetForm();
+							setReadOnly(true);
+						}}>Save</Button>
+					</>
 			}
 		</>
 	)
