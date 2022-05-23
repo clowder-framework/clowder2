@@ -187,7 +187,7 @@ async def update_file_metadata(
     if (file := await db["files"].find_one({"_id": ObjectId(file_id)})) is not None:
         query = {"resource.resource_id": ObjectId(file_id)}
         file = FileOut(**file)
-        contents = dict(metadata_in)
+        contents = metadata_in.contents
 
         if metadata_in.metadata_id is not None:
             # If a specific metadata_id is provided, validate the patch against existing context
@@ -196,10 +196,8 @@ async def update_file_metadata(
                                               existing_md.definition, existing_md.context_url, existing_md.context)
                 query["_id"] = metadata_in.metadata_id
         else:
-            # Validate the definition provided with patch, and use as a filter
+            # Use provided definition name as filter (don't validate yet, as patched data doesn't require completeness)
             # TODO: Should context_url also be unique to the file version?
-            contents = await validate_context(db, metadata_in.contents,
-                                              metadata_in.definition, metadata_in.context_url, metadata_in.context)
             definition = metadata_in.definition
             if definition is not None:
                 query["definition"] = definition

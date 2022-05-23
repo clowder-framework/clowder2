@@ -149,6 +149,20 @@ async def update_dataset_metadata(
     """
     if (dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})) is not None:
         query = {"resource.resource_id": ObjectId(dataset_id)}
+        contents = metadata_in.contents
+
+        if metadata_in.metadata_id is not None:
+            # If a specific metadata_id is provided, validate the patch against existing context
+            if (existing_md := await db["metadata"].find_one({"_id": ObjectId(metadata_in.metadata_id)})) is not None:
+                contents = await validate_context(db, metadata_in.contents,
+                                              existing_md.definition, existing_md.context_url, existing_md.context)
+                query["_id"] = metadata_in.metadata_id
+        else:
+            # Use provided definition name as filter (don't validate yet, as patched data doesn't require completeness)
+            # TODO: Should context_url also be unique to the file version?
+            definition = metadata_in.definition
+            if definition is not None:
+                query["definition"] = definition
 
         # Filter by MetadataAgent
         extractor_info = metadata_in.extractor_info
@@ -170,7 +184,7 @@ async def update_dataset_metadata(
 
         if (md := await db["metadata"].find_one(query)) is not None:
             # TODO: Refactor this with permissions checks etc.
-            result = await patch_metadata(md, dict(metadata_in), db)
+            result = await patch_metadata(md, contents, db)
             return result
     else:
         raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")

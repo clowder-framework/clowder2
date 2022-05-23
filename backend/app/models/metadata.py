@@ -1,4 +1,5 @@
 import collections.abc
+import traceback
 from datetime import datetime
 from typing import Optional, List
 from enum import Enum
@@ -91,6 +92,18 @@ class MetadataDefinitionOut(MetadataDefinitionDB):
 
 def validate_definition(contents: dict, metadata_def: MetadataDefinitionOut):
     """Convenience function for checking if a value matches MetadataDefinition criteria"""
+    # Reject if there are any extraneous fields
+    for entry in contents:
+        found = False
+        for field in metadata_def.fields:
+            if field.name == entry:
+                found = True
+                break
+        if not found:
+            raise HTTPException(status_code=400,
+                                detail=f"{metadata_def.name} field does not have a field called {entry}")
+
+    # For all fields in definition, are they present and matching format?
     for field in metadata_def.fields:
         if field.name in contents:
             value = contents[field.name]
@@ -205,7 +218,7 @@ async def validate_context(db: MongoClient, contents: dict, definition: Optional
     return contents
 
 
-def deep_update(orig, new):
+def deep_update(orig: dict, new: dict):
     """Recursively update a nested dict with any proivded values."""
     for k, v in new.items():
         if isinstance(v, collections.abc.Mapping):
@@ -218,11 +231,15 @@ def deep_update(orig, new):
 async def patch_metadata(metadata: dict, new_entries: dict, db: MongoClient):
     """Convenience function for updating original metadata contents with new entries."""
     try:
-        # TODO: Need to validate new_entries against context
-        metadata["contents"] = deep_update(metadata["contents"], new_entries["contents"])
+        updated_contents = deep_update(metadata["contents"], new_entries)
+        updated_contents = await validate_context(db, updated_contents,
+                                    metadata.get("definition", None),
+                                    metadata.get("context_url", None),
+                                    metadata.get("context", None))
+        metadata["contents"] = updated_contents
         db["metadata"].replace_one(
             {"_id": metadata["_id"]}, MetadataDB(**metadata).to_mongo()
         )
     except Exception as e:
-        raise HTTPException(status_code=500, detail=e.args[0])
+        raise e
     return MetadataOut.from_mongo(metadata)

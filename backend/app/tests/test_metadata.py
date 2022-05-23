@@ -41,7 +41,7 @@ metadata_using_context_url = {
 }
 
 
-def test_dataset_metadata_no_context(client: TestClient, headers: dict):
+def test_dataset_create_metadata_no_context(client: TestClient, headers: dict):
     # Create dataset and add metadata that doesn't have any context
     response = client.post(
         f"{settings.API_V2_STR}/datasets", headers=headers, json=dataset_data
@@ -58,7 +58,7 @@ def test_dataset_metadata_no_context(client: TestClient, headers: dict):
     assert response.status_code == 400
 
 
-def test_dataset_metadata_definition(client: TestClient, headers: dict):
+def test_dataset_create_metadata_definition(client: TestClient, headers: dict):
     # Post the definition itself
     response = client.post(
         f"{settings.API_V2_STR}/metadata/definition", json=metadata_definition, headers=headers
@@ -89,7 +89,33 @@ def test_dataset_metadata_definition(client: TestClient, headers: dict):
     assert response.status_code == 400
 
 
-def test_dataset_metadata_context_url(client: TestClient, headers: dict):
+def test_dataset_patch_metadata_definition(client: TestClient, headers: dict):
+    # Post the definition itself
+    response = client.post(
+        f"{settings.API_V2_STR}/metadata/definition", json=metadata_definition, headers=headers
+    )
+    assert response.json().get("id") is not None
+    assert response.status_code == 200
+
+    # Create dataset and add metadata to it using new definition
+    response = client.post(
+        f"{settings.API_V2_STR}/datasets", headers=headers, json=dataset_data
+    )
+    assert response.status_code == 200
+    assert response.json().get("id") is not None
+
+    dataset_id = response.json().get("id")
+    response = client.post(
+        f"{settings.API_V2_STR}/datasets/{dataset_id}/metadata", headers=headers, json=metadata_using_definition
+    )
+    assert response.status_code == 200
+    assert response.json().get("id") is not None
+
+    # Patch metadata that doesn't match definition
+
+
+
+def test_dataset_create_metadata_context_url(client: TestClient, headers: dict):
     # Create dataset and add metadata to it using context_url
     response = client.post(
         f"{settings.API_V2_STR}/datasets", headers=headers, json=dataset_data
