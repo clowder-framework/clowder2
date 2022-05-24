@@ -12,4 +12,5 @@ export type MetadataPatch = {
     contents: any;
     file_version?: number;
     extractor_info?: ExtractorIn;
+    metadata_id?: string;
 }
