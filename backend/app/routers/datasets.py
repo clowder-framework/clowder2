@@ -363,7 +363,6 @@ async def download_dataset(
         s = io.BytesIO()
         z= zipfile.ZipFile(s, "w")
         files = []
-        file_content = []
         async for f in db["files"].find(
                 {"dataset_id": ObjectId(dataset_id)}
         ):
@@ -380,9 +379,9 @@ async def download_dataset(
                 except Exception as e:
                     print(e)
                     print('did not get content')
-            z.close()
-            resp = Response(s.getvalue(), media_type="application/x-zip-compressed", headers={
-                'Content-Disposition': f'attachment;filename={zip_name}'
-            })
-            return resp
+        z.close()
+        resp = Response(s.getvalue(), media_type="application/x-zip-compressed", headers={
+            'Content-Disposition': f'attachment;filename={zip_name}'
+        })
+        return resp
         return None
