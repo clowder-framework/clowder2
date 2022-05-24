@@ -344,3 +344,15 @@ async def add_metadata(
     found = await db["metadata"].find_one({"_id": new_metadata.inserted_id})
     metadata_out = MetadataOut.from_mongo(found)
     return metadata_out
+
+@router.get("/{dataset_id}/download", response_model=DatasetOut)
+async def download(
+    dataset_id: str,
+    user=Depends(get_current_user),
+    db: MongoClient = Depends(dependencies.get_db),
+):
+    if (
+            dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
+    ) is not None:
+
+    return
