@@ -2,9 +2,9 @@ import datetime
 import io
 import os
 from typing import List, Optional
-
+import zipfile
 from bson import ObjectId
-from fastapi import APIRouter, HTTPException, Depends, File, UploadFile
+from fastapi import APIRouter, HTTPException, Depends, File, UploadFile, Response
 from fastapi import Form
 from minio import Minio
 from pymongo import MongoClient
@@ -346,18 +346,43 @@ async def add_metadata(
     return metadata_out
 
 @router.get("/{dataset_id}/download", response_model=DatasetOut)
-async def download(
+async def download_dataset(
     dataset_id: str,
     user=Depends(get_current_user),
     db: MongoClient = Depends(dependencies.get_db),
+    fs: Minio = Depends(dependencies.get_fs),
+
 ):
     if (
             dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
     ) is not None:
-        files = []
 
+
+
+        zip_name = dataset['name'] + '.zip'
+        s = io.BytesIO()
+        z= zipfile.ZipFile(s, "w")
+        files = []
+        file_content = []
         async for f in db["files"].find(
                 {"dataset_id": ObjectId(dataset_id)}
         ):
             files.append(FileOut.from_mongo(f))
+            for file in files:
+                file_name = file.name
+                file_id = str(file.id)
+                try:
+                    if (file := await db["files"].find_one({"_id": ObjectId(file_id)})) is not None:
+                        content = fs.get_object(settings.MINIO_BUCKET_NAME, file_id)
+                        data = str(content.data)
+                        z.writestr(file_name, data)
+                        print('got content')
+                except Exception as e:
+                    print(e)
+                    print('did not get content')
+            z.close()
+            resp = Response(s.getvalue(), media_type="application/x-zip-compressed", headers={
+                'Content-Disposition': f'attachment;filename={zip_name}'
+            })
+            return resp
         return None
