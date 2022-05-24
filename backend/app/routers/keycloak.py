@@ -26,6 +26,10 @@ from app.models.tokens import TokenDB
 router = APIRouter()
 security = HTTPBearer()
 
+@router.get("/register")
+async def register() -> RedirectResponse:
+    return RedirectResponse(settings.auth_register_url)
+
 
 @router.get("/login")
 async def login() -> RedirectResponse:
@@ -120,7 +124,8 @@ async def auth(
     email = userinfo["email"]
     user = UserDB(
         email=email,
-        full_name=f"{given_name} {family_name}",
+        first_name=given_name,
+        last_name=family_name,
         hashed_password="",
         keycloak_id=keycloak_id,
     )
@@ -153,7 +158,12 @@ async def refresh_token(
 
     try:
         # token still valid
-        email = keycloak_openid.userinfo(access_token)["email"]
+        token_json = keycloak_openid.decode_token(
+            access_token,
+            key=await get_idp_public_key(),
+            options={"verify_aud": False},
+        )
+        email = token_json["email"]
         return await retreive_refresh_token(email, db)
     except ExpiredSignatureError:
         # retreive the refresh token and try refresh

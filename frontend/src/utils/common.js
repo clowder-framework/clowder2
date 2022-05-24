@@ -1,6 +1,5 @@
 import Cookies from "universal-cookie";
 import {V2} from "../openapi";
-import {logout} from "../actions/user";
 
 const cookies = new Cookies();
 

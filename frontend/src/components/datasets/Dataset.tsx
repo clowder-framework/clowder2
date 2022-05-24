@@ -3,8 +3,7 @@ import {Box, Button, Dialog, DialogTitle, Divider, Grid, Menu, MenuItem, Tab, Ta
 import {ClowderInput} from "../styledComponents/ClowderInput";
 import {ClowderButton} from "../styledComponents/ClowderButton";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
-import {downloadDataset} from "../../utils/dataset";
-import {useNavigate, useParams, useSearchParams} from "react-router-dom";
+import {useNavigate, useParams} from "react-router-dom";
 import {RootState} from "../../types/data";
 import {useDispatch, useSelector} from "react-redux";
 import {
@@ -13,7 +12,6 @@ import {
 	fetchFilesInDataset,
 	fetchFolderPath,
 	fetchFoldersInDataset,
-	folderAdded,
 	updateDataset
 } from "../../actions/dataset";
 import {resetFailedReason, resetLogout} from "../../actions/common"
@@ -25,6 +23,7 @@ import {UploadFile} from "../files/UploadFile";
 import {ActionModal} from "../dialog/ActionModal";
 import FilesTable from "../files/FilesTable";
 import {CreateFolder} from "../folders/CreateFolder";
+import {useSearchParams} from "react-router-dom";
 import {parseDate} from "../../utils/common";
 import config from "../../app.config";
 import {DatasetIn} from "../../openapi/v2";
@@ -62,17 +61,16 @@ export const Dataset = (): JSX.Element => {
 
 	// Redux connect equivalent
 	const dispatch = useDispatch();
-	const deleteDataset = (datasetId: string | undefined) => dispatch(datasetDeleted(datasetId));
-	const editDataset = (datasetId: string | undefined, formData: DatasetIn) => dispatch(updateDataset(datasetId, formData));
-	const addFolder = (datasetId: string | undefined, folderName: string, parentFolder: string | null) => dispatch(folderAdded(datasetId, folderName, parentFolder));
-	const getFolderPath = (folderId: string | undefined) => dispatch(fetchFolderPath(folderId));
-	const listFilesInDataset = (datasetId: string | undefined, folderId: string | undefined) => dispatch(fetchFilesInDataset(datasetId, folderId));
-	const listFoldersInDataset = (datasetId: string | undefined, parentFolder: string | undefined) => dispatch(fetchFoldersInDataset(datasetId, parentFolder));
-	const listDatasetAbout = (datasetId: string | undefined) => dispatch(fetchDatasetAbout(datasetId));
-	const dismissError = () => dispatch(resetFailedReason());
-	const dismissLogout = () => dispatch(resetLogout());
 	const listDatasetMetadata = (datasetId: string | undefined) => dispatch(fetchDatasetMetadata(datasetId));
 	const updateDatasetMetadata = (datasetId: string | undefined, content:object) => dispatch(patchDatasetMetadata(datasetId,content));
+	const deleteDataset = (datasetId:string|undefined) => dispatch(datasetDeleted(datasetId));
+	const editDataset = (datasetId: string|undefined, formData: DatasetIn) => dispatch(updateDataset(datasetId, formData));
+	const getFolderPath= (folderId:string|undefined) => dispatch(fetchFolderPath(folderId));
+	const listFilesInDataset = (datasetId:string|undefined, folderId:string|undefined) => dispatch(fetchFilesInDataset(datasetId, folderId));
+	const listFoldersInDataset = (datasetId:string|undefined, parentFolder:string|undefined) => dispatch(fetchFoldersInDataset(datasetId, parentFolder));
+	const listDatasetAbout= (datasetId:string|undefined) => dispatch(fetchDatasetAbout(datasetId));
+	const dismissError = () => dispatch(resetFailedReason());
+	const dismissLogout = () => dispatch(resetLogout());
 
 	// mapStateToProps
 	const about = useSelector((state: RootState) => state.dataset.about);
@@ -240,17 +238,16 @@ export const Dataset = (): JSX.Element => {
 										Upload File
 									</MenuItem>
 									<MenuItem sx={optionMenuItem}
-											  onClick={() => {
-												  // addFolder(datasetId, "new folder", null);
+											  onClick={()=>{
 												  setNewFolder(true);
 												  handleOptionClose();
 											  }
 											  }>Add Folder</MenuItem>
 									<CreateFolder datasetId={datasetId} parentFolder={folder} open={newFolder}
 												  handleClose={handleCloseNewFolder}/>
+									{/*backend not implemented yet*/}
 									<MenuItem sx={optionMenuItem}
 											  onClick={() => {
-												  downloadDataset(datasetId, about["name"]);
 												  handleOptionClose();
 											  }} disabled={true}>
 										Download All

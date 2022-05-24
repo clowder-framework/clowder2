@@ -6,7 +6,7 @@ import {Dataset as DatasetComponent} from "./components/datasets/Dataset";
 import {File as FileComponent} from "./components/files/File";
 import {CreateDataset} from "./components/datasets/CreateDataset";
 
-import {Register as RegisterComponent} from "./components/auth/Register";
+import {RedirectRegister as RedirectRegisterComponent} from "./components/auth/RedirectRegister";
 import {Auth as AuthComponent} from "./components/auth/Auth";
 import {RedirectLogin as RedirectLoginComponent} from "./components/auth/RedirectLogin";
 import {RedirectLogout as RedirectLogoutComponent} from "./components/auth/RedirectLogout";
@@ -32,7 +32,7 @@ const AppRoutes = (
 			<Route path="/datasets/:datasetId/metadata" element={<PrivateRoute><Metadata/></PrivateRoute>} />
 			<Route path="/files/:fileId" element={<PrivateRoute><FileComponent/></PrivateRoute>} />
 			<Route path="/files/:fileId/metadata" element={<PrivateRoute><Metadata/></PrivateRoute>} />
-			<Route path="/register" element={<RegisterComponent/>} />
+			<Route path="/auth/register" element={<RedirectRegisterComponent/>} />
 			<Route path="/auth/login" element={<RedirectLoginComponent/>} />
 			<Route path="/auth/logout" element={<RedirectLogoutComponent/>} />
 			<Route path="/auth" element={<AuthComponent/>} />
