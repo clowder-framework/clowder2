@@ -367,21 +367,21 @@ async def download_dataset(
                 {"dataset_id": ObjectId(dataset_id)}
         ):
             files.append(FileOut.from_mongo(f))
-            for file in files:
-                file_name = file.name
-                file_id = str(file.id)
-                try:
-                    if (file := await db["files"].find_one({"_id": ObjectId(file_id)})) is not None:
-                        content = fs.get_object(settings.MINIO_BUCKET_NAME, file_id)
-                        data = str(content.data)
-                        z.writestr(file_name, data)
-                        print('got content')
-                except Exception as e:
-                    print(e)
-                    print('did not get content')
+        for file in files:
+            file_name = file.name
+            file_id = str(file.id)
+            try:
+                if (file := await db["files"].find_one({"_id": ObjectId(file_id)})) is not None:
+                    content = fs.get_object(settings.MINIO_BUCKET_NAME, file_id)
+                    data = str(content.data)
+                    z.writestr(file_name, data)
+                    print('got content')
+            except Exception as e:
+                print(e)
+                print('did not get content')
         z.close()
         resp = Response(s.getvalue(), media_type="application/x-zip-compressed", headers={
             'Content-Disposition': f'attachment;filename={zip_name}'
         })
         return resp
-        return None
+    return None
