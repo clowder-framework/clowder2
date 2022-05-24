@@ -10,10 +10,16 @@ import {FormProps} from "@rjsf/core";
 import {useDispatch, useSelector,} from "react-redux";
 import {datasetCreated, resetDatsetCreated} from "../../actions/dataset";
 import {RootState} from "../../types/data";
-import {useNavigate} from "react-router-dom";
+// import {useNavigate} from "react-router-dom";
 
-export const CreateDatasetModal: React.FC<CreateDatasetProps> = () => {
-	const history = useNavigate();
+type CreateDatasetModalProps = {
+	setDatasetId: any,
+}
+
+export const CreateDatasetModal: React.FC<CreateDatasetModalProps> = (props:CreateDatasetModalProps) => {
+	const {setDatasetId,} = props;
+
+	// const history = useNavigate();
 
 	const dispatch = useDispatch();
 	const createDataset = (formData: FormData) => dispatch(datasetCreated(formData));
@@ -30,7 +36,8 @@ export const CreateDatasetModal: React.FC<CreateDatasetProps> = () => {
 	// zoom into that newly created dataset and reset newDataset
 	useEffect(() => {
 		if (newDataset !== undefined && newDataset.id !== undefined){
-			history(`/datasets/${newDataset.id}`);
+			// history(`/datasets/${newDataset.id}`);
+			setDatasetId(newDataset.id);
 			dispatch(resetDatsetCreated());
 		}
 	}, [newDataset]);

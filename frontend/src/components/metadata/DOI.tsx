@@ -5,7 +5,7 @@ export const DOI = (props) => {
 	const {widgetName, metadataId, contents, saveMetadata, resourceId} = props;
 	const [DOI, setDOI] = useState("");
 	const [promptError, setPromptError] = useState(false);
-	const [readOnly, setReadOnly] = useState(!!contents);
+	const [readOnly, setReadOnly] = useState(!!metadataId);
 	const DOIErrorText = "DOI must follow the format of doi:0000000/000000000000!";
 
 	const resetForm = () => {
@@ -28,7 +28,7 @@ export const DOI = (props) => {
 			<TextField label={widgetName} variant="outlined" margin="normal"
 					   fullWidth
 					   name={widgetName}
-					   value={readOnly? contents.doi: DOI}
+					   value={readOnly && contents ? contents.doi: DOI}
 					   onChange={(event: React.ChangeEvent<HTMLInputElement>) => { setDOI(event.target.value);}}
 					   error={promptError}
 					   helperText={DOIErrorText}
@@ -40,7 +40,7 @@ export const DOI = (props) => {
 					<Button variant="text" sx={{float:"right"}} onClick={() => {setReadOnly(false);}}>Edit</Button>
 					:
 					<>
-						{/*<Button variant="text" sx={{float:"right"}} onClick={() => {setReadOnly(true);}}>Cancel</Button>*/}
+						<Button variant="text" sx={{float:"right"}} onClick={() => {setReadOnly(true);}}>Cancel</Button>
 						<Button variant="contained" sx={{float:"right"}} onClick={() => {
 							// update metadata
 							saveMetadata(resourceId, {

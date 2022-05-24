@@ -1,12 +1,17 @@
-import React, {useEffect} from "react";
+import React, {useEffect, useState} from "react";
 import {Box, Typography} from "@mui/material";
 import metadataConfig from "../../metadata.config";
 import {useSelector, useDispatch} from "react-redux";
 import {RootState} from "../../types/data";
 import {fetchDatasetMetadata, fetchMetadataDefinitions} from "../../actions/metadata";
 
+type MetadataType = {
+	saveMetadata: any,
+	resourceType:string|undefined,
+	resourceId:string|undefined,
+}
 
-export const Metadata = (props) => {
+export const Metadata = (props: MetadataType) => {
 
 	const {saveMetadata, resourceType, resourceId} = props;
 
@@ -17,63 +22,62 @@ export const Metadata = (props) => {
 	const metadataDefinitionList = useSelector((state: RootState) => state.metadata.metadataDefinitionList);
 	const datasetMetadataList = useSelector((state: RootState) => state.metadata.datasetMetadataList);
 
+	// complete metadata list with both definition and values
+	const [complMetadataList, setComplMetadatList] = useState(metadataDefinitionList);
+
 	useEffect(() => {
 		getMetadatDefinitions(null, 0, 100);
 		if (resourceType === "dataset") listDatasetMetadata(resourceId);
+
+
 		// else if (resourceType === "file") listFileMetadata(resourceId);
 	}, []);
+
+	useEffect(() => {
+		const tempMetadataList = [];
+
+		for (let i = 0; i < metadataDefinitionList.length; i++) {
+			let matched = false;
+			for (let j= 0; j <datasetMetadataList.length; j++){
+				if (metadataDefinitionList[i].name === datasetMetadataList[j].definition) {
+					tempMetadataList.push({...metadataDefinitionList[i],
+						contents: datasetMetadataList[j].contents,
+						metadataId: datasetMetadataList[j].id});
+					matched = true;
+				}
+			}
+			if (!matched) tempMetadataList.push(metadataDefinitionList[i]);
+		}
+
+		setComplMetadatList(tempMetadataList);
+	}, [datasetMetadataList])
 
 	return (
 		<>
 			{
-				metadataDefinitionList.map((definition) => {
-					// list metadata form from definition
-					if (resourceType === "dataset"){
-						// fill in the values if there is an instance of such metadata
-						return datasetMetadataList.map((metadata) => {
-							if (metadata.definition === definition.name){
-								return (
-									<Box className="inputGroup">
-										<Typography variant="h6">{definition.name}</Typography>
-										<Typography variant="subtitle2">{definition.description}</Typography>
+				complMetadataList.map((metadata) => {
+					return (
+						<Box className="inputGroup">
+							<Typography variant="h6">{metadata.name}</Typography>
+							<Typography variant="subtitle2">{metadata.description}</Typography>
+							{
+								(() => {
+									return React.cloneElement(
+										metadataConfig[metadata.name],
 										{
-											(() => {
-												return React.cloneElement(
-													metadataConfig[definition.name],
-													{
-														resourceId:resourceId,
-														widgetName: definition.name,
-														saveMetadata: saveMetadata,
-														contents: metadata.contents,
-														metadataId: metadata.id,
-													}
-												);
-											})()
+											resourceId:resourceId,
+											widgetName: metadata.name,
+											saveMetadata: saveMetadata,
+											contents: metadata.contents ?? null,
+											metadataId: metadata.id ?? null,
 										}
-									</Box>
-								)
+									);
+								})()
 							}
-						});
-					}
+						</Box>
+					);
 				})
 			}
-			{
-				datasetMetadataList.map((metadata) => {
-					// list metadata form from definition
-					if (resourceType === "dataset"){
-						// empty form for those not mentioned
-						return metadataDefinitionList.map((definition) => {
-							if (definition.name === metadata.definitiond){
-								return
-							}
-							else{
-
-							}
-						});
-					}
-				})
-			}
-			);
 		</>
 	)
 }

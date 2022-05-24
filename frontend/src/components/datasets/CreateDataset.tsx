@@ -19,9 +19,7 @@ export const CreateDataset = (): JSX.Element => {
 
 	const dispatch = useDispatch();
 	const getMetadatDefinitions = (name:string|null, skip:number, limit:number) => dispatch(fetchMetadataDefinitions(name, skip,limit));
-	const updateDatasetMetadata = (datasetId: string|undefined, content:object) => dispatch(patchDatasetMetadata(datasetId,content));
 	const createDatasetMetadata = (datasetId: string|undefined, metadata:MetadataIn) => dispatch(postDatasetMetadata(datasetId, metadata));
-	const metadataDefinitionList = useSelector((state: RootState) => state.metadata.metadataDefinitionList);
 	useEffect(() => {
 		getMetadatDefinitions(null, 0, 100);
 	}, []);
@@ -31,6 +29,8 @@ export const CreateDataset = (): JSX.Element => {
 	const stack = useSelector((state: RootState) => state.error.stack);
 	const dismissError = () => dispatch(resetFailedReason());
 	const [errorOpen, setErrorOpen] = useState(false);
+	const [datasetId, setDatasetId] = useState();
+
 	useEffect(() => {
 		if (reason !== "" && reason !== null && reason !== undefined) {
 			setErrorOpen(true);
@@ -64,13 +64,12 @@ export const CreateDataset = (): JSX.Element => {
 		{
 			label: "Create Dataset",
 			description: "",
-			component: <CreateDatasetModal />
+			component: <CreateDatasetModal setDatasetId={setDatasetId}/>
 		},
 		{
 			label: "Fill in Metadata",
 			description: "",
-			// TODO how to port the datasetId in here
-			component: <Metadata metadata={metadataDefinitionList} saveMetadata={createDatasetMetadata} resourceId={""}/>
+			component: <Metadata saveMetadata={createDatasetMetadata} resourceType="dataset" resourceId={datasetId}/>
 		},
 		{
 			label: "Create Folders",
