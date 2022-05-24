@@ -354,5 +354,10 @@ async def download(
     if (
             dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
     ) is not None:
+        files = []
 
-    return
+        async for f in db["files"].find(
+                {"dataset_id": ObjectId(dataset_id)}
+        ):
+            files.append(FileOut.from_mongo(f))
+        return None
