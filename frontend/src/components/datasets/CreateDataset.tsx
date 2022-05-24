@@ -18,12 +18,12 @@ import {MetadataIn} from "../../openapi/v2";
 export const CreateDataset = (): JSX.Element => {
 
 	const dispatch = useDispatch();
-	const getMetadatDefinitions = (skip:number, limit:number) => dispatch(fetchMetadataDefinitions(skip,limit));
+	const getMetadatDefinitions = (name:string|null, skip:number, limit:number) => dispatch(fetchMetadataDefinitions(name, skip,limit));
 	const updateDatasetMetadata = (datasetId: string|undefined, content:object) => dispatch(patchDatasetMetadata(datasetId,content));
 	const createDatasetMetadata = (datasetId: string|undefined, metadata:MetadataIn) => dispatch(postDatasetMetadata(datasetId, metadata));
 	const metadataDefinitionList = useSelector((state: RootState) => state.metadata.metadataDefinitionList);
 	useEffect(() => {
-		getMetadatDefinitions(0, 100);
+		getMetadatDefinitions(null, 0, 100);
 	}, []);
 
 	// Error msg dialog

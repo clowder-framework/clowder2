@@ -2,10 +2,10 @@ import {handleErrors} from "./common";
 import {V2} from "../openapi";
 
 export const RECEIVE_METADATA_DEFINITIONS = "RECEIVE_METADATA_DEFINITIONS";
-export function fetchMetadataDefinitions(skip=0, limit=10){
+export function fetchMetadataDefinitions(name=null, skip=0, limit=10){
 	return (dispatch) => {
 		// TODO need to think pagination
-		return V2.MetadataService.getMetadataDefinitionApiV2MetadataDefinitionGet(null, skip, limit)
+		return V2.MetadataService.getMetadataDefinitionApiV2MetadataDefinitionGet(name, skip, limit)
 			.then(json => {
 				dispatch({
 					type: RECEIVE_METADATA_DEFINITIONS,
@@ -14,7 +14,7 @@ export function fetchMetadataDefinitions(skip=0, limit=10){
 				});
 			})
 			.catch(reason => {
-				dispatch(handleErrors(reason));
+				dispatch(handleErrors(reason, fetchMetadataDefinitions(name, skip, limit)));
 			});
 	};
 }
@@ -31,7 +31,7 @@ export function fetchDatasetMetadata(datasetId){
 				});
 			})
 			.catch(reason => {
-				dispatch(handleErrors(reason));
+				dispatch(handleErrors(reason, fetchDatasetMetadata(datasetId)));
 			});
 	};
 }
@@ -48,7 +48,7 @@ export function postDatasetMetadata(datasetId, metadata){
 				});
 			})
 			.catch(reason => {
-				dispatch(handleErrors(reason));
+				dispatch(handleErrors(reason, postDatasetMetadata(datasetId, metadata)));
 			});
 	};
 }
@@ -65,7 +65,7 @@ export function patchDatasetMetadata(datasetId, metadata){
 				});
 			})
 			.catch(reason => {
-				dispatch(handleErrors(reason));
+				dispatch(handleErrors(reason, patchDatasetMetadata(datasetId, metadata)));
 			});
 	};
 }
