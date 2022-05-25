@@ -26,7 +26,7 @@ const theme = createTheme({
 		background: {
 			default: "#F8F8F8"
 		}
-	},
+	}
 });
 
 export default theme;
