@@ -37,7 +37,8 @@ export const Time = (props) => {
 								 contents={{
 									 "time": value
 								 }}
-								 resetForm={resetForm}/>
+								 resetForm={resetForm}
+								 widgetName={widgetName}/>
 		</>
 	);
 }

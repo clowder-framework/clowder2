@@ -41,7 +41,9 @@ export const LatLon = (props) => {
 									 "latitude":lat,
 									 "longitude":lon
 								 }}
-								 resetForm={resetForm}/>
+								 resetForm={resetForm}
+								 widgetName={widgetName}
+			/>
 		</>
 	)
 }

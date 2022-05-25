@@ -29,7 +29,9 @@ export const AlternativeTitle = (props) => {
 								 contents={{
 									 alternateName: alternativeName
 								 }}
-								 resetForm={resetForm}/>
+								 resetForm={resetForm}
+								 widgetName={widgetName}
+			/>
 		</>
 	)
 }

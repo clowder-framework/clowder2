@@ -3,7 +3,7 @@ import {Button} from "@mui/material";
 
 export const MetadataButtonGroup = (props) => {
 
-	const {readOnly, setReadOnly, metadataId, saveMetadata, resourceId, contents, resetForm} = props;
+	const {readOnly, setReadOnly, metadataId, saveMetadata, resourceId, contents, resetForm, widgetName} = props;
 
 	return (
 		<>

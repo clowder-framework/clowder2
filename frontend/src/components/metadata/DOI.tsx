@@ -46,7 +46,9 @@ export const DOI = (props) => {
 								 saveMetadata={saveMetadata}
 								 resourceId={resourceId}
 								 contents={{"doi":DOI}}
-								 resetForm={resetForm}/>
+								 resetForm={resetForm}
+								 widgetName={widgetName}
+			/>
 		</>
 
 	)

@@ -40,7 +40,9 @@ export const Unit = (props) => {
 								 contents={{
 									 "unit":unit
 								 }}
-								 resetForm={resetForm}/>
+								 resetForm={resetForm}
+								 widgetName={widgetName}
+			/>
 		</>
 	);
 }
