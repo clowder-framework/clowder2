@@ -1,5 +1,6 @@
 import React, {useState} from "react";
 import {Button, TextField, Typography} from "@mui/material";
+import {MetadataButtonGroup} from "./MetadataButtonGroup";
 
 export const LatLon = (props) => {
 
@@ -31,26 +32,16 @@ export const LatLon = (props) => {
 					   disabled={readOnly}
 					   sx={{background:"#ffffff"}}
 			/>
-			{
-				readOnly ?
-					<Button variant="text" sx={{float:"right"}} onClick={() => {setReadOnly(false);}}>Edit</Button>
-					:
-					<>
-						<Button variant="text" sx={{float:"right"}} onClick={() => {setReadOnly(true);}}>Cancel</Button>
-						<Button variant="contained" sx={{float:"right"}} onClick={() => {
-							// update metadata
-							saveMetadata(resourceId, {
-								"id":metadataId,
-								"definition": widgetName,
-								"contents": {
-									"latitude":lat,
-									"longitude":lon
-								}});
-							resetForm();
-							setReadOnly(true);
-						}}>Save</Button>
-					</>
-			}
+			<MetadataButtonGroup readOnly={readOnly}
+								 setReadOnly={setReadOnly}
+								 metadataId={metadataId}
+								 saveMetadata={saveMetadata}
+								 resourceId={resourceId}
+								 contents={{
+									 "latitude":lat,
+									 "longitude":lon
+								 }}
+								 resetForm={resetForm}/>
 		</>
 	)
 }

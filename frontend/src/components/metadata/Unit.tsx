@@ -2,6 +2,7 @@ import * as React from "react";
 import {InputLabel, MenuItem, Select, FormControl, Button} from "@mui/material";
 import crypto from "crypto";
 import {useState} from "react";
+import {MetadataButtonGroup} from "./MetadataButtonGroup";
 
 export const Unit = (props) => {
 	const {widgetName, metadataId, contents, saveMetadata, resourceId} = props;
@@ -18,34 +19,28 @@ export const Unit = (props) => {
 
 	return (
 		<>
-			<FormControl fullWidth>
-				<InputLabel>{widgetName}</InputLabel>
-				<Select value={readOnly && contents ? contents.unit: unit} label="Unit" onChange={handleChange}
-				>
-					<MenuItem value={"A"}>Ampere</MenuItem>
-					<MenuItem value={"K"}>Kelvin</MenuItem>
-					<MenuItem value={"s"}>Second</MenuItem>
-				</Select>
-			</FormControl>
-			{
-				readOnly ?
-					<Button variant="text" sx={{float:"right"}} onClick={() => {setReadOnly(false);}}>Edit</Button>
-					:
-					<>
-						<Button variant="text" sx={{float:"right"}} onClick={() => {setReadOnly(true);}}>Cancel</Button>
-						<Button variant="contained" sx={{float:"right"}} onClick={() => {
-							// update metadata
-							saveMetadata(resourceId, {
-								"id":metadataId,
-								"definition": widgetName,
-								"contents": {
-									"unit":unit
-								}});
-							resetForm();
-							setReadOnly(true);
-						}}>Save</Button>
-					</>
-			}
+			<div style={{margin: "1em auto"}}>
+				<FormControl fullWidth>
+					<InputLabel>{widgetName}</InputLabel>
+					<Select value={readOnly && contents ? contents.unit: unit}
+							label="Unit" onChange={handleChange}
+							sx={{background:"#ffffff"}}
+					>
+						<MenuItem value={"A"}>Ampere</MenuItem>
+						<MenuItem value={"K"}>Kelvin</MenuItem>
+						<MenuItem value={"s"}>Second</MenuItem>
+					</Select>
+				</FormControl>
+			</div>
+			<MetadataButtonGroup readOnly={readOnly}
+								 setReadOnly={setReadOnly}
+								 metadataId={metadataId}
+								 saveMetadata={saveMetadata}
+								 resourceId={resourceId}
+								 contents={{
+									 "unit":unit
+								 }}
+								 resetForm={resetForm}/>
 		</>
 	);
 }

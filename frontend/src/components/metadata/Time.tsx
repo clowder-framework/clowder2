@@ -2,6 +2,7 @@ import React, {useState} from "react";
 import {LocalizationProvider, DateTimePicker} from "@mui/lab";
 import DateAdapter from "@mui/lab/AdapterDateFns";
 import {Button, TextField} from "@mui/material";
+import {MetadataButtonGroup} from "./MetadataButtonGroup";
 
 export const Time = (props) => {
 	const {widgetName, metadataId, contents, saveMetadata, resourceId} = props;
@@ -18,33 +19,25 @@ export const Time = (props) => {
 
 	return (
 		<>
-			<LocalizationProvider dateAdapter={DateAdapter}>
-				<DateTimePicker
-					label={widgetName}
-					value={readOnly && contents ? contents.time: value}
-					onChange={handleChange}
-					renderInput={(params) => <TextField {...params} fullWidth/>}
-				/>
-			</LocalizationProvider>
-			{
-				readOnly ?
-					<Button variant="text" sx={{float:"right"}} onClick={() => {setReadOnly(false);}}>Edit</Button>
-					:
-					<>
-						<Button variant="text" sx={{float:"right"}} onClick={() => {setReadOnly(true);}}>Cancel</Button>
-						<Button variant="contained" sx={{float:"right"}} onClick={() => {
-							// update metadata
-							saveMetadata(resourceId, {
-								"id":metadataId,
-								"definition": widgetName,
-								"contents": {
-									"time":time
-								}});
-							resetForm();
-							setReadOnly(true);
-						}}>Save</Button>
-					</>
-			}
+			<div style={{margin:"1.1em auto", background:"#ffffff"}}>
+				<LocalizationProvider dateAdapter={DateAdapter}>
+					<DateTimePicker
+						label={widgetName}
+						value={readOnly && contents ? contents.time: value}
+						onChange={handleChange}
+						renderInput={(params) => <TextField {...params} fullWidth/>}
+					/>
+				</LocalizationProvider>
+			</div>
+			<MetadataButtonGroup readOnly={readOnly}
+								 setReadOnly={setReadOnly}
+								 metadataId={metadataId}
+								 saveMetadata={saveMetadata}
+								 resourceId={resourceId}
+								 contents={{
+									 "time": value
+								 }}
+								 resetForm={resetForm}/>
 		</>
 	);
 }

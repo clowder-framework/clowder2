@@ -69,7 +69,7 @@ export const Metadata = (props: MetadataType) => {
 											widgetName: metadata.name,
 											saveMetadata: saveMetadata,
 											contents: metadata.contents ?? null,
-											metadataId: metadata.id ?? null,
+											metadataId: metadata.metadataId ?? null,
 										}
 									);
 								})()

@@ -1,5 +1,6 @@
 import React, {useState} from "react";
 import {Button, TextField, Typography} from "@mui/material";
+import {MetadataButtonGroup} from "./MetadataButtonGroup";
 
 export const AlternativeTitle = (props) => {
 	const {widgetName, resourceId, contents, saveMetadata, metadataId } = props;
@@ -20,25 +21,15 @@ export const AlternativeTitle = (props) => {
 					   disabled={readOnly}
 					   sx={{background:"#ffffff"}}
 			/>
-			{
-				readOnly ?
-					<Button variant="text" sx={{float:"right"}} onClick={() => {setReadOnly(false);}}>Edit</Button>
-					:
-					<>
-						<Button variant="text" sx={{float:"right"}} onClick={() => {setReadOnly(true);}}>Cancel</Button>
-						<Button variant="contained" sx={{float:"right"}} onClick={() => {
-							// update metadata
-							saveMetadata(resourceId, {
-								"id":metadataId,
-								"definition": widgetName,
-								"contents": {
-									alternateName: alternativeName
-								}});
-							resetForm();
-							setReadOnly(true);
-						}}>Save</Button>
-					</>
-			}
+			<MetadataButtonGroup readOnly={readOnly}
+								 setReadOnly={setReadOnly}
+								 metadataId={metadataId}
+								 saveMetadata={saveMetadata}
+								 resourceId={resourceId}
+								 contents={{
+									 alternateName: alternativeName
+								 }}
+								 resetForm={resetForm}/>
 		</>
 	)
 }
