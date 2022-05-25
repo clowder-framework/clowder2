@@ -270,7 +270,7 @@ async def save_file(
             if (
                 folder := await db["folders"].find_one({"_id": ObjectId(folder_id)})
             ) is not None:
-                fileDB.folder_id = folder.id
+                fileDB.folder_id = folder['_id']
             else:
                 raise HTTPException(
                     status_code=404, detail=f"Folder {folder_id} not found"
@@ -375,10 +375,8 @@ async def download_dataset(
                     content = fs.get_object(settings.MINIO_BUCKET_NAME, file_id)
                     data = str(content.data)
                     z.writestr(file_name, data)
-                    print('got content')
             except Exception as e:
                 print(e)
-                print('did not get content')
         z.close()
         resp = Response(s.getvalue(), media_type="application/x-zip-compressed", headers={
             'Content-Disposition': f'attachment;filename={zip_name}'
