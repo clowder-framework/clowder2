@@ -371,10 +371,13 @@ async def download_dataset(
             file_name = file.name
             file_id = str(file.id)
             try:
-                if (current_file := await db["files"].find_one({"_id": ObjectId(file_id)})) is not None:
-                    content = fs.get_object(settings.MINIO_BUCKET_NAME, file_id)
-                    data = str(content.data)
-                    z.writestr(file_name, data)
+                content = fs.get_object(settings.MINIO_BUCKET_NAME, file_id)
+                data = str(content.data)
+                z.writestr(file_name, data)
+                # if (current_file := await db["files"].find_one({"_id": ObjectId(file_id)})) is not None:
+                #     content = fs.get_object(settings.MINIO_BUCKET_NAME, file_id)
+                #     data = str(content.data)
+                #     z.writestr(file_name, data)
             except Exception as e:
                 print(e)
         z.close()
