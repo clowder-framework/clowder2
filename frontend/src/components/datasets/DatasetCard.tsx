@@ -6,6 +6,8 @@ import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import {useNavigate} from "react-router-dom";
 import {parseDate} from "../../utils/common";
+import {datasetDownloaded} from "../../actions/dataset";
+import {useDispatch} from "react-redux";
 
 type DatasetCardProps = {
 	id: string,
@@ -17,6 +19,10 @@ type DatasetCardProps = {
 
 export default function DatasetCard(props: DatasetCardProps) {
 	const {	id, name, author, created, description} = props;
+
+	const dispatch = useDispatch();
+	const downloadDataset = (datasetId:string|undefined, filename:string|undefined) => dispatch(datasetDownloaded(datasetId, filename))
+
 	const formattedCreated = parseDate(created);
 	// use history hook to redirect/navigate between routes
 	const history = useNavigate();
@@ -42,7 +48,7 @@ export default function DatasetCard(props: DatasetCardProps) {
 			</CardContent>
 			<CardActions>
 				<Button size="small" onClick={() => selectDataset(id)}>View</Button>
-				<Button size="small" disabled={true}>Share</Button>
+				<Button size="small" onClick={() => downloadDataset(id, name)}>Download</Button>
 			</CardActions>
 		</Card>
 	);
