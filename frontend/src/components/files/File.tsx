@@ -20,7 +20,7 @@ import {FileAbout} from "./FileAbout";
 import {FileStats} from "./FileStats";
 import {FileSearch} from "./FileSearch";
 import {FileVersionHistory} from "../versions/FileVersionHistory";
-import {Metadata} from "../metadata/Metadata";
+import {DisplayMetadata} from "../metadata/DisplayMetadata";
 
 
 const tab = {
@@ -208,7 +208,7 @@ export const File = (): JSX.Element => {
 									<FileVersionHistory fileVersions={fileVersions}/> : <></> }
 							</TabPanel>
 							<TabPanel value={selectedTabIndex} index={2}>
-								<Metadata />
+								<DisplayMetadata resourceType="file" resourceId={fileId} />
 							</TabPanel>
 							<TabPanel value={selectedTabIndex} index={3}>
 								{

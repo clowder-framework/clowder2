@@ -10,7 +10,7 @@ export const Time = (props) => {
 	const [readOnly, setReadOnly] = useState(!!metadataId);
 
 	const resetForm = () => {
-		setValue("");
+		setValue(new Date());
 	}
 
 	const handleChange = (newValue:Date) => {

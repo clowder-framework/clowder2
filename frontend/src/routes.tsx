@@ -12,7 +12,7 @@ import {RedirectLogin as RedirectLoginComponent} from "./components/auth/Redirec
 import {RedirectLogout as RedirectLogoutComponent} from "./components/auth/RedirectLogout";
 
 import {isAuthorized} from "./utils/common";
-import {Metadata} from "./components/metadata/Metadata";
+// import {DisplayMetadata} from "./components/metadata/DisplayMetadata";
 
 // https://dev.to/iamandrewluca/private-route-in-react-router-v6-lg5
 class PrivateRoute extends React.Component<{ children: JSX.Element }> {
@@ -29,9 +29,9 @@ const AppRoutes = (
 			<Route path="/" element={<PrivateRoute><Dashboard/></PrivateRoute>} />
 			<Route path="/create-dataset/" element={<PrivateRoute><CreateDataset/></PrivateRoute>} />
 			<Route path="/datasets/:datasetId" element={<PrivateRoute><DatasetComponent/></PrivateRoute>} />
-			<Route path="/datasets/:datasetId/metadata" element={<PrivateRoute><Metadata/></PrivateRoute>} />
+			{/*<Route path="/datasets/:datasetId/metadata" element={<PrivateRoute><DisplayMetadata/></PrivateRoute>} />*/}
 			<Route path="/files/:fileId" element={<PrivateRoute><FileComponent/></PrivateRoute>} />
-			<Route path="/files/:fileId/metadata" element={<PrivateRoute><Metadata/></PrivateRoute>} />
+			{/*<Route path="/files/:fileId/metadata" element={<PrivateRoute><DisplayMetadata/></PrivateRoute>} />*/}
 			<Route path="/auth/register" element={<RedirectRegisterComponent/>} />
 			<Route path="/auth/login" element={<RedirectLoginComponent/>} />
 			<Route path="/auth/logout" element={<RedirectLogoutComponent/>} />

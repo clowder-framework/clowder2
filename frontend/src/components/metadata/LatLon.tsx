@@ -1,6 +1,6 @@
 import React, {useState} from "react";
-import {Button, TextField, Typography} from "@mui/material";
 import {MetadataButtonGroup} from "./MetadataButtonGroup";
+import {ClowderMetadataTextField} from "../styledComponents/ClowderMetadataTextField";
 
 export const LatLon = (props) => {
 
@@ -16,21 +16,19 @@ export const LatLon = (props) => {
 
 	return (
 		<>
-			<TextField label="Lat" variant="outlined" margin="normal"
+			<ClowderMetadataTextField label="Lat" variant="outlined" margin="normal"
 					   fullWidth
 					   name={widgetName}
 					   value={readOnly && contents? contents.latitude: lat}
 					   onChange={(event: React.ChangeEvent<HTMLInputElement>) => { setLat(event.target.value);}}
 					   disabled={readOnly}
-					   sx={{background:"#ffffff"}}
 			/>
-			<TextField label="Lon" variant="outlined" margin="normal"
+			<ClowderMetadataTextField label="Lon" variant="outlined" margin="normal"
 					   fullWidth
 					   name={widgetName}
 					   value={readOnly? contents.longitude: lon}
 					   onChange={(event: React.ChangeEvent<HTMLInputElement>) => { setLon(event.target.value);}}
 					   disabled={readOnly}
-					   sx={{background:"#ffffff"}}
 			/>
 			<MetadataButtonGroup readOnly={readOnly}
 								 setReadOnly={setReadOnly}

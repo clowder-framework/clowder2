@@ -1,6 +1,6 @@
 import React, {useState} from "react";
-import {Button, TextField, Typography} from "@mui/material";
 import {MetadataButtonGroup} from "./MetadataButtonGroup";
+import { ClowderMetadataTextField } from "../styledComponents/ClowderMetadataTextField";
 
 export const AlternativeTitle = (props) => {
 	const {widgetName, resourceId, contents, saveMetadata, metadataId } = props;
@@ -13,13 +13,12 @@ export const AlternativeTitle = (props) => {
 
 	return (
 		<>
-			<TextField label={widgetName} variant="outlined" margin="normal"
+			<ClowderMetadataTextField label={widgetName} variant="outlined" margin="normal"
 					   fullWidth
 					   name={widgetName}
 					   value={readOnly && contents? contents.alternateName: alternativeName}
 					   onChange={(event: React.ChangeEvent<HTMLInputElement>) => { setAlternativeName(event.target.value);}}
 					   disabled={readOnly}
-					   sx={{background:"#ffffff"}}
 			/>
 			<MetadataButtonGroup readOnly={readOnly}
 								 setReadOnly={setReadOnly}

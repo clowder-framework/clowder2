@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from "react";
-import {Button, TextField} from "@mui/material";
 import {MetadataButtonGroup} from "./MetadataButtonGroup";
+import { ClowderMetadataTextField } from "../styledComponents/ClowderMetadataTextField";
 
 export const DOI = (props) => {
 	const {widgetName, metadataId, contents, saveMetadata, resourceId} = props;
@@ -30,7 +30,7 @@ export const DOI = (props) => {
 	}, [DOI]);
 	return (
 		<>
-			<TextField label={widgetName} variant="outlined" margin="normal"
+			<ClowderMetadataTextField label={widgetName} variant="outlined" margin="normal"
 					   fullWidth
 					   name={widgetName}
 					   value={readOnly && contents ? contents.doi: DOI}
@@ -38,7 +38,6 @@ export const DOI = (props) => {
 					   error={promptError}
 					   helperText={DOIErrorText}
 					   disabled={readOnly}
-					   style={{background:"#ffffff"}}
 			/>
 			<MetadataButtonGroup readOnly={readOnly}
 								 setReadOnly={setReadOnly}

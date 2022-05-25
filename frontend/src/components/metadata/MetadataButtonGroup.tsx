@@ -28,16 +28,16 @@ export const MetadataButtonGroup = (props) => {
 						</>
 						:
 						<>
-							{/*{Create}*/}
-							{/*TODO need to rewrite the post body of creating a new metadata*/}
-							<Button variant="contained" sx={{float:"right"}} onClick={() => {
-								saveMetadata(resourceId, {
-									"id":metadataId,
-									"definition": widgetName,
-									"contents": contents});
-								resetForm();
-								setReadOnly(true);
-							}}>Create</Button>
+							{/*/!*{Create}*!/*/}
+							{/*/!*TODO need to rewrite the post body of creating a new metadata*!/*/}
+							{/*<Button variant="contained" sx={{float:"right"}} onClick={() => {*/}
+							{/*	saveMetadata(resourceId, {*/}
+							{/*		"id":metadataId,*/}
+							{/*		"definition": widgetName,*/}
+							{/*		"contents": contents});*/}
+							{/*	resetForm();*/}
+							{/*	setReadOnly(true);*/}
+							{/*}}>Create</Button>*/}
 						</>
 					}
 				</>

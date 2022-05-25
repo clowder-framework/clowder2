@@ -27,7 +27,7 @@ import {useSearchParams} from "react-router-dom";
 import {parseDate} from "../../utils/common";
 import config from "../../app.config";
 import {DatasetIn} from "../../openapi/v2";
-import {Metadata} from "../metadata/Metadata";
+import {DisplayMetadata} from "../metadata/DisplayMetadata";
 import {patchDatasetMetadata} from "../../actions/metadata";
 
 const tab = {
@@ -197,7 +197,7 @@ export const Dataset = (): JSX.Element => {
 								<FilesTable datasetId={datasetId} datasetName={about.name}/>
 							</TabPanel>
 							<TabPanel value={selectedTabIndex} index={1}>
-								<Metadata saveMetadata={updateDatasetMetadata} resourceType="dataset" resourceId={datasetId}/>
+								<DisplayMetadata saveMetadata={updateDatasetMetadata} resourceType="dataset" resourceId={datasetId}/>
 							</TabPanel>
 							<TabPanel value={selectedTabIndex} index={2}/>
 							<TabPanel value={selectedTabIndex} index={3}/>

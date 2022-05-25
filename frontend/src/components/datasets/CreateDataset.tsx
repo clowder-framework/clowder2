@@ -5,13 +5,13 @@ import {useDispatch, useSelector,} from "react-redux";
 import {RootState} from "../../types/data";
 
 import {CreateDatasetModal} from "./CreateDatasetModal";
-import {Metadata} from "../metadata/Metadata";
+import {CreateMetadata} from "../metadata/CreateMetadata";
 import {UploadFile} from "../files/UploadFile";
 import TopBar from "../navigation/TopBar";
 import {ActionModal} from "../dialog/ActionModal";
 import config from "../../app.config";
 import {resetFailedReason} from "../../actions/common";
-import {fetchMetadataDefinitions, patchDatasetMetadata, postDatasetMetadata} from "../../actions/metadata";
+import {fetchMetadataDefinitions, postDatasetMetadata} from "../../actions/metadata";
 import {MetadataIn} from "../../openapi/v2";
 
 
@@ -69,7 +69,7 @@ export const CreateDataset = (): JSX.Element => {
 		{
 			label: "Fill in Metadata",
 			description: "",
-			component: <Metadata saveMetadata={createDatasetMetadata} resourceType="dataset" resourceId={datasetId}/>
+			component: <CreateMetadata saveMetadata={createDatasetMetadata} resourceType="dataset" resourceId={datasetId}/>
 		},
 		{
 			label: "Create Folders",
