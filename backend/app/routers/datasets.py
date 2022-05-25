@@ -37,7 +37,6 @@ router = APIRouter()
 
 clowder_bucket = os.getenv("MINIO_BUCKET_NAME", "clowder")
 
-
 @router.post("", response_model=DatasetOut)
 async def save_dataset(
     dataset_in: DatasetIn,
@@ -374,7 +373,7 @@ async def download_dataset(
                 if (current_file := await db["files"].find_one({"_id": ObjectId(file_id)})) is not None:
                     file_folder = current_file['folder_id']
                     if file_folder is not None:
-                        print('we need to get the folder name')
+                        current_folder_id = current_file['folder_id']
                         if (current_folder := await db["folders"].find_one({"_id": ObjectId(file_folder)})) is not None:
                             file_name = current_folder['name']+'/'+file_name
                     content = fs.get_object(settings.MINIO_BUCKET_NAME, file_id)
@@ -383,9 +382,9 @@ async def download_dataset(
             except Exception as e:
                 print(e)
         z.close()
-        return 0
         resp = Response(s.getvalue(), media_type="application/x-zip-compressed", headers={
             'Content-Disposition': f'attachment;filename={zip_name}'
         })
         return resp
     return None
+
