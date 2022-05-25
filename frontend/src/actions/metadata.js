@@ -53,6 +53,13 @@ export function postDatasetMetadata(datasetId, metadata){
 	};
 }
 
+// export const DELETE_DATASET_METADATA = "DELETE_DATASET_METADATA";
+// export function deleteDatasetMetadata(datasetId, metadataId){
+// 	return (dispatch) =>{
+// 		return V2.MetadataService.deleteDatasetMetadataApiV2DatasetsDatasetIdMetadataDelete()
+// 	}
+// }
+
 export const UPDATE_DATASET_METADATA = "UPDATE_DATASET_METADATA";
 export function patchDatasetMetadata(datasetId, metadata){
 	return (dispatch) => {

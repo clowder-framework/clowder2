@@ -4,6 +4,7 @@ import metadataConfig from "../../metadata.config";
 import {useSelector, useDispatch} from "react-redux";
 import {RootState} from "../../types/data";
 import {fetchDatasetMetadata, fetchMetadataDefinitions} from "../../actions/metadata";
+import {Agent} from "./Agent";
 
 type MetadataType = {
 	saveMetadata: any,
@@ -13,7 +14,7 @@ type MetadataType = {
 
 export const DisplayMetadata = (props: MetadataType) => {
 
-	const {saveMetadata, resourceType, resourceId} = props;
+	const {saveMetadata, deleteMetadata, resourceType, resourceId} = props;
 
 	const dispatch = useDispatch();
 	const listDatasetMetadata = (datasetId: string | undefined) => dispatch(fetchDatasetMetadata(datasetId));
@@ -49,6 +50,7 @@ export const DisplayMetadata = (props: MetadataType) => {
 										);
 									})()
 								}
+								<Agent created={metadata.created} agent={metadata.agent} />
 							</Box>
 						);
 					}
