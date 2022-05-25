@@ -356,9 +356,6 @@ async def download_dataset(
     if (
             dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
     ) is not None:
-
-
-
         zip_name = dataset['name'] + '.zip'
         s = io.BytesIO()
         z= zipfile.ZipFile(s, "w")
@@ -371,16 +368,22 @@ async def download_dataset(
             file_name = file.name
             file_id = str(file.id)
             try:
-                content = fs.get_object(settings.MINIO_BUCKET_NAME, file_id)
-                data = str(content.data)
-                z.writestr(file_name, data)
-                # if (current_file := await db["files"].find_one({"_id": ObjectId(file_id)})) is not None:
-                #     content = fs.get_object(settings.MINIO_BUCKET_NAME, file_id)
-                #     data = str(content.data)
-                #     z.writestr(file_name, data)
+                # content = fs.get_object(settings.MINIO_BUCKET_NAME, file_id)
+                # data = str(content.data)
+                # z.writestr(file_name, data)
+                if (current_file := await db["files"].find_one({"_id": ObjectId(file_id)})) is not None:
+                    file_folder = current_file['folder_id']
+                    if file_folder is not None:
+                        print('we need to get the folder name')
+                        if (current_folder := await db["folders"].find_one({"_id": ObjectId(file_folder)})) is not None:
+                            file_name = current_folder['name']+'/'+file_name
+                    content = fs.get_object(settings.MINIO_BUCKET_NAME, file_id)
+                    data = str(content.data)
+                    z.writestr(file_name, data)
             except Exception as e:
                 print(e)
         z.close()
+        return 0
         resp = Response(s.getvalue(), media_type="application/x-zip-compressed", headers={
             'Content-Disposition': f'attachment;filename={zip_name}'
         })
