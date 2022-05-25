@@ -231,6 +231,7 @@ def deep_update(orig: dict, new: dict):
 async def patch_metadata(metadata: dict, new_entries: dict, db: MongoClient):
     """Convenience function for updating original metadata contents with new entries."""
     try:
+        # TODO: For list-type definitions, should we append to list instead?
         updated_contents = deep_update(metadata["contents"], new_entries)
         updated_contents = await validate_context(db, updated_contents,
                                     metadata.get("definition", None),

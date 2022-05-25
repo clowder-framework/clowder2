@@ -98,6 +98,23 @@ async def add_file_metadata(
         Metadata document that was added to database
     """
     if (file := await db["files"].find_one({"_id": ObjectId(file_id)})) is not None:
+        file = FileOut(**file)
+        # If dataset already has metadata using this definition, don't allow duplication
+        definition = metadata_in.definition
+        if definition is not None:
+            existing_q = {
+                "resource.resource_id": file.id,
+                "definition": definition
+            }
+            # Extracted metadata doesn't care about user
+            if metadata_in.extractor_info is not None:
+                existing_q["agent.extractor.name"] = metadata_in.extractor_info.name
+                existing_q["agent.extractor.version"] = metadata_in.extractor_info.version
+            else:
+                existing_q["agent.creator.id"] = user.id
+            if (existing := await db["metadata"].find_one(existing_q)) is not None:
+                raise HTTPException(409, f"Metadata for {definition} already exists on this file")
+
         md = await _build_metadata_db_obj(db, metadata_in, FileOut(**file), user)
         new_metadata = await db["metadata"].insert_one(md.to_mongo())
         found = await db["metadata"].find_one({"_id": new_metadata.inserted_id})

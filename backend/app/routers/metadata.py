@@ -30,6 +30,9 @@ async def save_metadata_definition(
     user=Depends(get_current_user),
     db: MongoClient = Depends(dependencies.get_db),
 ):
+    if (md_def := await db["metadata.definitions"].find_one({"name": definition_in.name})) is not None:
+        raise HTTPException(status_code=409, detail=f"Metadata definition named {definition_in.name} already exists.")
+
     md_def = MetadataDefinitionDB(**definition_in.dict(), creator=user)
     new_md_def = await db["metadata.definitions"].insert_one(md_def.to_mongo())
     found = await db["metadata.definitions"].find_one({"_id": new_md_def.inserted_id})
