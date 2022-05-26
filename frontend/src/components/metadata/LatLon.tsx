@@ -4,7 +4,7 @@ import {ClowderMetadataTextField} from "../styledComponents/ClowderMetadataTextF
 
 export const LatLon = (props) => {
 
-	const {widgetName, metadataId, contents, saveMetadata, deleteMetadata, resourceId} = props;
+	const {widgetName, metadataId, contents, updateMetadata, saveMetadata, deleteMetadata, resourceId} = props;
 	const [lat, setLat] = useState("");
 	const [lon, setLon] = useState("");
 	const [readOnly, setReadOnly] = useState(!!metadataId); // if metdataID doesn't exist meaning it's a new form
@@ -33,6 +33,7 @@ export const LatLon = (props) => {
 			<MetadataButtonGroup readOnly={readOnly}
 								 setReadOnly={setReadOnly}
 								 metadataId={metadataId}
+								 updateMetadata={updateMetadata}
 								 saveMetadata={saveMetadata}
 								 deleteMetadata={deleteMetadata}
 								 resourceId={resourceId}

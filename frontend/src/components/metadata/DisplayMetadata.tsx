@@ -7,14 +7,14 @@ import {fetchDatasetMetadata, fetchMetadataDefinitions} from "../../actions/meta
 import {Agent} from "./Agent";
 
 type MetadataType = {
-	saveMetadata: any,
+	updateMetadata: any,
 	resourceType:string|undefined,
 	resourceId:string|undefined,
 }
 
 export const DisplayMetadata = (props: MetadataType) => {
 
-	const {saveMetadata, deleteMetadata, resourceType, resourceId} = props;
+	const {updateMetadata, deleteMetadata, resourceType, resourceId} = props;
 
 	const dispatch = useDispatch();
 	const listDatasetMetadata = (datasetId: string | undefined) => dispatch(fetchDatasetMetadata(datasetId));
@@ -43,7 +43,7 @@ export const DisplayMetadata = (props: MetadataType) => {
 											{
 												resourceId: resourceId,
 												widgetName: metadata.definition,
-												saveMetadata: saveMetadata,
+												updateMetadata: updateMetadata,
 												contents: metadata.contents ?? null,
 												metadataId: metadata.id ?? null,
 											}

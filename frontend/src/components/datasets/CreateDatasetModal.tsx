@@ -18,7 +18,7 @@ type CreateDatasetModalProps = {
 }
 
 export const CreateDatasetModal: React.FC<CreateDatasetModalProps> = (props:CreateDatasetModalProps) => {
-	const {setDatasetId, onSave} = props;
+	const {onSave} = props;
 
 	// const history = useNavigate();
 

@@ -3,7 +3,7 @@ import {Button} from "@mui/material";
 
 export const MetadataButtonGroup = (props) => {
 
-	const {readOnly, setReadOnly, metadataId, saveMetadata, deleteMetadata, resourceId, contents, resetForm, widgetName} = props;
+	const {readOnly, setReadOnly, metadataId, updateMetadata, saveMetadata, deleteMetadata, resourceId, contents, resetForm, widgetName} = props;
 
 	return (
 		<>
@@ -21,7 +21,7 @@ export const MetadataButtonGroup = (props) => {
 							<Button variant="text" sx={{float:"right"}} onClick={() => {setReadOnly(true);}}>Cancel</Button>
 							<Button variant="contained" sx={{float:"right"}} onClick={() => {
 								// update metadata
-								saveMetadata(resourceId, {
+								updateMetadata(resourceId, {
 									"id":metadataId,
 									"definition": widgetName,
 									"contents": contents});
@@ -34,10 +34,11 @@ export const MetadataButtonGroup = (props) => {
 							{/*{Create}*/}
 							{/*TODO need to rewrite the post body of creating a new metadata*/}
 							<Button variant="contained" sx={{float:"right"}} onClick={() => {
-								saveMetadata(resourceId, {
-									"id":metadataId,
+								// save the form info and in parent component create metadata
+								saveMetadata({
 									"definition": widgetName,
-									"contents": contents});
+									"contents": contents
+								});
 								resetForm();
 								setReadOnly(true);
 							}}>Create</Button>
