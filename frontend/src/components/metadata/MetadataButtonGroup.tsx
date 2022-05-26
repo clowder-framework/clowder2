@@ -10,7 +10,7 @@ export const MetadataButtonGroup = (props) => {
 		{
 			readOnly ?
 				<>
-					<Button variant="text" sx={{float:"right"}} onClick={() => {deleteMetadata(resourceId);}}>Delete</Button>
+					{/*<Button variant="text" sx={{float:"right"}} onClick={() => {deleteMetadata(resourceId);}}>Delete</Button>*/}
 					<Button variant="text" sx={{float:"right"}} onClick={() => {setReadOnly(false);}}>Edit</Button>
 				</>
 				:
@@ -31,16 +31,16 @@ export const MetadataButtonGroup = (props) => {
 						</>
 						:
 						<>
-							{/*/!*{Create}*!/*/}
-							{/*/!*TODO need to rewrite the post body of creating a new metadata*!/*/}
-							{/*<Button variant="contained" sx={{float:"right"}} onClick={() => {*/}
-							{/*	saveMetadata(resourceId, {*/}
-							{/*		"id":metadataId,*/}
-							{/*		"definition": widgetName,*/}
-							{/*		"contents": contents});*/}
-							{/*	resetForm();*/}
-							{/*	setReadOnly(true);*/}
-							{/*}}>Create</Button>*/}
+							{/*{Create}*/}
+							{/*TODO need to rewrite the post body of creating a new metadata*/}
+							<Button variant="contained" sx={{float:"right"}} onClick={() => {
+								saveMetadata(resourceId, {
+									"id":metadataId,
+									"definition": widgetName,
+									"contents": contents});
+								resetForm();
+								setReadOnly(true);
+							}}>Create</Button>
 						</>
 					}
 				</>

@@ -19,7 +19,7 @@ export const CreateDataset = (): JSX.Element => {
 
 	const dispatch = useDispatch();
 	const getMetadatDefinitions = (name:string|null, skip:number, limit:number) => dispatch(fetchMetadataDefinitions(name, skip,limit));
-	const createDatasetMetadata = (datasetId: string|undefined, metadata:MetadataIn) => dispatch(postDatasetMetadata(datasetId, metadata));
+	// const createDatasetMetadata = (datasetId: string|undefined, metadata:MetadataIn) => dispatch(postDatasetMetadata(datasetId, metadata));
 	useEffect(() => {
 		getMetadatDefinitions(null, 0, 100);
 	}, []);
@@ -30,6 +30,9 @@ export const CreateDataset = (): JSX.Element => {
 	const dismissError = () => dispatch(resetFailedReason());
 	const [errorOpen, setErrorOpen] = useState(false);
 	const [datasetId, setDatasetId] = useState();
+
+	const [datasetRequest, setdatasetRequest] = useState("");
+	const [metadataRequests, setMetadataRequests] = useState([]);
 
 	useEffect(() => {
 		if (reason !== "" && reason !== null && reason !== undefined) {
@@ -43,6 +46,17 @@ export const CreateDataset = (): JSX.Element => {
 	}
 	const handleErrorReport = () => {
 		window.open(`${config.GHIssueBaseURL}+${reason}&body=${encodeURIComponent(stack)}`);
+	}
+
+	// step 1
+	const onDatasetSave = (formData) =>{
+		setdatasetRequest(formData);
+		handleNext();
+	}
+	// step 2
+	const onMetadataSave = (resourceId, contents) =>{
+		setMetadataRequests(contents);
+		// handleNext();
 	}
 
 	// step
@@ -64,12 +78,12 @@ export const CreateDataset = (): JSX.Element => {
 		{
 			label: "Create Dataset",
 			description: "",
-			component: <CreateDatasetModal setDatasetId={setDatasetId}/>
+			component: <CreateDatasetModal setDatasetId={setDatasetId} onSave={onDatasetSave}/>
 		},
 		{
 			label: "Fill in Metadata",
 			description: "",
-			component: <CreateMetadata saveMetadata={createDatasetMetadata} resourceType="dataset" resourceId={datasetId}/>
+			component: <CreateMetadata saveMetadata={onMetadataSave} resourceType="dataset" resourceId={datasetId}/>
 		},
 		{
 			label: "Create Folders",
@@ -122,7 +136,6 @@ export const CreateDataset = (): JSX.Element => {
 													>
 														Finish
 													</Button>
-
 													:
 
 													<Button

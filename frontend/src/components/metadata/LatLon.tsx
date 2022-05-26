@@ -26,7 +26,7 @@ export const LatLon = (props) => {
 			<ClowderMetadataTextField label="Lon" variant="outlined" margin="normal"
 					   fullWidth
 					   name={widgetName}
-					   value={readOnly? contents.longitude: lon}
+					   value={readOnly && contents? contents.longitude: lon}
 					   onChange={(event: React.ChangeEvent<HTMLInputElement>) => { setLon(event.target.value);}}
 					   disabled={readOnly}
 			/>

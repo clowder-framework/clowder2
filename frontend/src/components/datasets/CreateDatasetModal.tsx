@@ -14,38 +14,33 @@ import {RootState} from "../../types/data";
 
 type CreateDatasetModalProps = {
 	setDatasetId: any,
+	onSave: any
 }
 
 export const CreateDatasetModal: React.FC<CreateDatasetModalProps> = (props:CreateDatasetModalProps) => {
-	const {setDatasetId,} = props;
+	const {setDatasetId, onSave} = props;
 
 	// const history = useNavigate();
 
-	const dispatch = useDispatch();
-	const createDataset = (formData: FormData) => dispatch(datasetCreated(formData));
-	const newDataset = useSelector((state:RootState) => state.dataset.newDataset);
+	// const dispatch = useDispatch();
+	// const createDataset = (formData: FormData) => dispatch(datasetCreated(formData));
+	// const newDataset = useSelector((state:RootState) => state.dataset.newDataset);
 
-	const [loading, setLoading] = useState(false);
+	// const [loading, setLoading] = useState(false);
 
-	const onSave = async (formData:FormData) => {
-		setLoading(true);
-		createDataset(formData);
-		setLoading(false);
-	};
-
-	// zoom into that newly created dataset and reset newDataset
-	useEffect(() => {
-		if (newDataset !== undefined && newDataset.id !== undefined){
-			// history(`/datasets/${newDataset.id}`);
-			setDatasetId(newDataset.id);
-			dispatch(resetDatsetCreated());
-		}
-	}, [newDataset]);
+	// // zoom into that newly created dataset and reset newDataset
+	// useEffect(() => {
+	// 	if (newDataset !== undefined && newDataset.id !== undefined){
+	// 		// history(`/datasets/${newDataset.id}`);
+	// 		setDatasetId(newDataset.id);
+	// 		dispatch(resetDatsetCreated());
+	// 	}
+	// }, [newDataset]);
 
 	return (
 		<Container>
 			<LoadingOverlay
-				active={loading}
+				// active={loading}
 				spinner
 				text="Saving..."
 			>
