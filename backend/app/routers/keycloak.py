@@ -22,9 +22,12 @@ from app.keycloak_auth import (
 )
 from app.models.users import UserIn, UserDB
 from app.models.tokens import TokenDB
+import logging
 
 router = APIRouter()
 security = HTTPBearer()
+
+logger = logging.getLogger(__name__)
 
 @router.get("/register")
 async def register() -> RedirectResponse:
@@ -103,7 +106,7 @@ async def auth(
     code: str, db: MongoClient = Depends(dependencies.get_db)
 ) -> RedirectResponse:
     """Redirect endpoint Keycloak redirects to after login."""
-
+    logger.info(f"In /api/v2/auth")
     # get token from Keycloak
     payload = (
         f"grant_type=authorization_code&code={code}"
@@ -115,6 +118,7 @@ async def auth(
     )
     token_body = json.loads(token_response.content)
     access_token = token_body["access_token"]
+    print(access_token)
 
     # create user in db if it doesn't already exist; get the user_id
     userinfo = keycloak_openid.userinfo(access_token)
@@ -146,6 +150,7 @@ async def auth(
     auth_url = f"{settings.frontend_url}/auth"
     response = RedirectResponse(url=auth_url)
     response.set_cookie("Authorization", value=f"Bearer {access_token}")
+    logger.info(f"Authenticated by keycloak. Redirecting to {auth_url}")
     return response
 
 

@@ -40,6 +40,7 @@ class Settings(BaseSettings):
     auth_realm = "clowder"
     auth_client_id = "clowder2-backend"
     auth_url = f"{auth_base}/auth/realms/{auth_realm}/protocol/openid-connect/auth?client_id={auth_client_id}&response_type=code"
+    oauth2_scheme_auth_url = f"{auth_base}/auth/realms/{auth_realm}/protocol/openid-connect/auth?client_id={auth_client_id}&response_type=code"
     # scope=openid email&redirect_uri=http://<domain.com>/<redirect-path>&kc_locale=<two-digit-lang-code>
     auth_register_url = f"{auth_base}/auth/realms/{auth_realm}/protocol/openid-connect/registrations?client_id" \
                 f"={auth_client_id}&response_type=code"
@@ -57,9 +58,9 @@ class Settings(BaseSettings):
     # this is the realm in which the user will be created
     keycloak_realm_name = auth_realm
     keycloak_client_id = auth_client_id
-    keycloak_base = "http://localhost:8000"
-    keycloak_redirect_uris = [keycloak_base + "/api/v2/keycloak/auth"]
-    keycloak_web_origins = [keycloak_base]
+    # keycloak_base = "http://localhost:8000"
+    # keycloak_redirect_uris = [keycloak_base + "/api/v2/keycloak/auth"]
+    # keycloak_web_origins = [keycloak_base]
     # identity providers registered in keycloak, for example cilogon, globus, twitter
     keycloak_ipds = ["cilogon", "globus"]
 

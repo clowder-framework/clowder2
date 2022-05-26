@@ -1,5 +1,6 @@
 # Based on https://github.com/tiangolo/fastapi/issues/1428
 import json
+import logging
 
 from bson import ObjectId
 from fastapi.security import OAuth2AuthorizationCodeBearer
@@ -16,9 +17,12 @@ from pydantic import Json
 
 from .models.users import get_user_out, UserOut
 
+logger = logging.getLogger(__name__)
+
 # Keycloak open id client configuration
+logging.info(f"Keycloak open id server {settings.auth_server_url}")
 keycloak_openid = KeycloakOpenID(
-    server_url=settings.auth_server_url,
+    server_url="http://keycloak:8080/keycloak/", #settings.auth_server_url,
     client_id=settings.auth_client_id,
     realm_name=settings.auth_realm,
     client_secret_key=settings.auth_client_secret,
@@ -37,7 +41,7 @@ async def get_idp_public_key():
 
 # oauth2 config used by fastapi security scheme below
 oauth2_scheme = OAuth2AuthorizationCodeBearer(
-    authorizationUrl=settings.auth_url,
+    authorizationUrl=settings.oauth2_scheme_auth_url,
     tokenUrl=settings.auth_token_url,
 )
 
@@ -109,39 +113,39 @@ async def get_current_user_id(identity: Json = Depends(get_token)) -> str:
     return keycloak_id
 
 
-def create_realm_and_client():
-    """Create a realm and client at start up."""
-    keycloak_admin_realm = KeycloakAdmin(
-        server_url=settings.auth_server_url,
-        username=settings.keycloak_username,
-        password=settings.keycloak_password,
-        realm_name="master",
-        verify=True,
-    )
-    keycloak_admin_realm.create_realm(
-        payload={"realm": settings.auth_realm, "enabled": True}, skip_exists=True
-    )
-    keycloak_admin_client = KeycloakAdmin(
-        server_url=settings.auth_server_url,
-        username=settings.keycloak_username,
-        password=settings.keycloak_password,
-        realm_name=settings.keycloak_realm_name,
-        user_realm_name=settings.keycloak_user_realm_name,
-        verify=True,
-    )
-    # For options see https://www.keycloak.org/docs-api/15.0/rest-api/index.html#_clientrepresentation
-    keycloak_admin_client.create_client(
-        payload={
-            "clientId": settings.auth_client_id,
-            "publicClient": True,
-            "rootUrl": settings.keycloak_base,
-            "redirectUris": settings.keycloak_redirect_uris,
-            "webOrigins": settings.keycloak_web_origins,
-            "directAccessGrantsEnabled": True,
-            "enabled": True,
-        },
-        skip_exists=True,
-    )
+# def create_realm_and_client():
+#     """Create a realm and client at start up."""
+#     keycloak_admin_realm = KeycloakAdmin(
+#         server_url=settings.auth_server_url,
+#         username=settings.keycloak_username,
+#         password=settings.keycloak_password,
+#         realm_name="master",
+#         verify=True,
+#     )
+#     keycloak_admin_realm.create_realm(
+#         payload={"realm": settings.auth_realm, "enabled": True}, skip_exists=True
+#     )
+#     keycloak_admin_client = KeycloakAdmin(
+#         server_url=settings.auth_server_url,
+#         username=settings.keycloak_username,
+#         password=settings.keycloak_password,
+#         realm_name=settings.keycloak_realm_name,
+#         user_realm_name=settings.keycloak_user_realm_name,
+#         verify=True,
+#     )
+#     # For options see https://www.keycloak.org/docs-api/15.0/rest-api/index.html#_clientrepresentation
+#     keycloak_admin_client.create_client(
+#         payload={
+#             "clientId": settings.auth_client_id,
+#             "publicClient": True,
+#             "rootUrl": settings.keycloak_base,
+#             "redirectUris": settings.keycloak_redirect_uris,
+#             "webOrigins": settings.keycloak_web_origins,
+#             "directAccessGrantsEnabled": True,
+#             "enabled": True,
+#         },
+#         skip_exists=True,
+#     )
 
 
 async def create_user(email: str, password: str, firstName: str, lastName: str):
