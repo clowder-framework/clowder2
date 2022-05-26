@@ -39,14 +39,21 @@ clowder_bucket = os.getenv("MINIO_BUCKET_NAME", "clowder")
 
 async def get_folder_hierarchy(
   folder_id: str,
-  previous_hierarchy: str,
-  db: MongoClient = Depends(dependencies.get_db),
+  hierarchy: str,
+  db: MongoClient,
 ):
     print('in this method')
     found = await db["folders"].find_one({"_id": ObjectId(folder_id)})
     folder = FolderOut.from_mongo(found)
-    print('got folder')
-    return "this is a test"
+    folder_name = folder.name
+    hierarchy = folder_name
+    folder_parent = folder.parent_folder
+    if folder_parent is not None:
+        parent_folder_found = await db["folders"].find_one({"_id": ObjectId(folder_parent)})
+        parent_folder = FolderOut.from_mongo(parent_folder_found)
+        hierarchy = parent_folder + '/' + hierarchy
+        hierarchy = await get_folder_hierarchy(str(parent_folder.id), hierarchy, db)
+    return hierarchy
 
 @router.post("", response_model=DatasetOut)
 async def save_dataset(
@@ -386,7 +393,7 @@ async def download_dataset(
                     if file_folder is not None:
                         current_folder_id = current_file['folder_id']
                         try:
-                            hierarchy = await get_folder_hierarchy(current_folder_id, "")
+                            hierarchy = await get_folder_hierarchy(current_folder_id, "", db)
                         except Exception as e:
                             print('could not get folder hierarchy')
                             print(e)
