@@ -42,17 +42,18 @@ async def get_folder_hierarchy(
   hierarchy: str,
   db: MongoClient,
 ):
-    print('in this method')
     found = await db["folders"].find_one({"_id": ObjectId(folder_id)})
     folder = FolderOut.from_mongo(found)
     folder_name = folder.name
-    hierarchy = folder_name
+    hierarchy = folder_name + '/' + hierarchy
     folder_parent = folder.parent_folder
     if folder_parent is not None:
         parent_folder_found = await db["folders"].find_one({"_id": ObjectId(folder_parent)})
         parent_folder = FolderOut.from_mongo(parent_folder_found)
-        hierarchy = parent_folder + '/' + hierarchy
-        hierarchy = await get_folder_hierarchy(str(parent_folder.id), hierarchy, db)
+        hierarchy = parent_folder.name + '/' + hierarchy
+        parent_folder_parent = parent_folder.parent_folder
+        if parent_folder_parent is not None:
+            hierarchy = await get_folder_hierarchy(str(parent_folder.id), hierarchy, db)
     return hierarchy
 
 @router.post("", response_model=DatasetOut)
@@ -391,6 +392,7 @@ async def download_dataset(
                 if (current_file := await db["files"].find_one({"_id": ObjectId(file_id)})) is not None:
                     file_folder = current_file['folder_id']
                     if file_folder is not None:
+                        hierarchy = ""
                         current_folder_id = current_file['folder_id']
                         try:
                             hierarchy = await get_folder_hierarchy(current_folder_id, "", db)
@@ -398,7 +400,7 @@ async def download_dataset(
                             print('could not get folder hierarchy')
                             print(e)
                         if (current_folder := await db["folders"].find_one({"_id": ObjectId(file_folder)})) is not None:
-                            file_name = current_folder['name']+'/'+file_name
+                            file_name = "/"+hierarchy + file_name
                     content = fs.get_object(settings.MINIO_BUCKET_NAME, file_id)
                     data = str(content.data)
                     z.writestr(file_name, data)
