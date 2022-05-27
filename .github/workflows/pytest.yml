@@ -1,6 +1,9 @@
-# .github/workflows/app.yaml
-name: PyTest
+name: Pytest
 on: push
+
+defaults:
+  run:
+    working-directory: backend
 
 jobs:
   test:

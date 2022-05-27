@@ -1,6 +1,10 @@
-name: Lint
+name: Backend Lint
 
 on: [push, pull_request]
+
+defaults:
+  run:
+    working-directory: backend
 
 jobs:
   lint:
