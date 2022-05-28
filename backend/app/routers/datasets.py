@@ -376,36 +376,20 @@ async def download_dataset(
     ) is not None:
         zip_name = dataset['name'] + '.zip'
         s = io.BytesIO()
-        z= zipfile.ZipFile(s, "w")
-        files = []
+        z = zipfile.ZipFile(s, "w")
         async for f in db["files"].find(
                 {"dataset_id": ObjectId(dataset_id)}
         ):
-            files.append(FileOut.from_mongo(f))
-        for file in files:
+            file = FileOut.from_mongo(f)
             file_name = file.name
             file_id = str(file.id)
-            try:
-                # content = fs.get_object(settings.MINIO_BUCKET_NAME, file_id)
-                # data = str(content.data)
-                # z.writestr(file_name, data)
-                if (current_file := await db["files"].find_one({"_id": ObjectId(file_id)})) is not None:
-                    file_folder = current_file['folder_id']
-                    if file_folder is not None:
-                        hierarchy = ""
-                        current_folder_id = current_file['folder_id']
-                        try:
-                            hierarchy = await get_folder_hierarchy(current_folder_id, "", db)
-                        except Exception as e:
-                            print('could not get folder hierarchy')
-                            print(e)
-                        if (current_folder := await db["folders"].find_one({"_id": ObjectId(file_folder)})) is not None:
-                            file_name = "/"+hierarchy + file_name
-                    content = fs.get_object(settings.MINIO_BUCKET_NAME, file_id)
-                    data = str(content.data)
-                    z.writestr(file_name, data)
-            except Exception as e:
-                print(e)
+            file_folder = file.folder_id
+            if file_folder is not None:
+                hierarchy = await get_folder_hierarchy(file_folder,"", db)
+                file_name = "/" + hierarchy + file_name
+            content = fs.get_object(settings.MINIO_BUCKET_NAME, file_id)
+            data = str(content.data)
+            z.writestr(file_name, data)
         z.close()
         resp = Response(s.getvalue(), media_type="application/x-zip-compressed", headers={
             'Content-Disposition': f'attachment;filename={zip_name}'
