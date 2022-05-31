@@ -6,14 +6,13 @@ import {RootState} from "../../types/data";
 
 import {CreateDatasetModal} from "./CreateDatasetModal";
 import {CreateMetadata} from "../metadata/CreateMetadata";
-import {UploadFile} from "../files/UploadFile";
 import TopBar from "../navigation/TopBar";
 import {ActionModal} from "../dialog/ActionModal";
 import config from "../../app.config";
 import {resetFailedReason} from "../../actions/common";
 import {fetchMetadataDefinitions, postDatasetMetadata} from "../../actions/metadata";
 import {MetadataIn} from "../../openapi/v2";
-import {datasetCreated} from "../../actions/dataset";
+import {datasetCreated, resetDatsetCreated} from "../../actions/dataset";
 import {useNavigate} from "react-router-dom";
 
 
@@ -34,7 +33,6 @@ export const CreateDataset = (): JSX.Element => {
 	const stack = useSelector((state: RootState) => state.error.stack);
 	const dismissError = () => dispatch(resetFailedReason());
 	const [errorOpen, setErrorOpen] = useState(false);
-	const [datasetId, setDatasetId] = useState();
 
 	const [datasetRequestForm, setdatasetRequestForm] = useState("");
 	const [metadataRequestForms, setMetadataRequestForms] = useState({});
@@ -73,24 +71,26 @@ export const CreateDataset = (): JSX.Element => {
 	const handleBack = () => {
 		setActiveStep((prevActiveStep) => prevActiveStep - 1);
 	}
+
+	// finish button post dataset; dataset ID triggers metadata posting
 	const handleFinish = () => {
 		// create dataset
 		createDataset(datasetRequestForm);
-		// post new metadatas
-		Object.keys(metadataRequestForms).map(key => {
-			createDatasetMetadata(datasetId, metadataRequestForms[key]);
-		})
-		// redirect to the dataset page
 	}
 
-	// // zoom into that newly created dataset and reset newDataset
-	// useEffect(() => {
-	// 	if (newDataset !== undefined && newDataset.id !== undefined){
-	// 		// history(`/datasets/${newDataset.id}`);
-	// 		setDatasetId(newDataset.id);
-	// 		dispatch(resetDatsetCreated());
-	// 	}
-	// }, [newDataset]);
+	useEffect(() => {
+		if (newDataset.id) {
+			// post new metadata
+			Object.keys(metadataRequestForms).map(key => {
+				createDatasetMetadata(newDataset.id, metadataRequestForms[key]);
+			});
+
+			// zoom into that newly created dataset
+			history(`/datasets/${newDataset.id}`);
+			dispatch(resetDatsetCreated());
+		}
+
+	},[newDataset]);
 
 	return (
 		<>
@@ -110,7 +110,7 @@ export const CreateDataset = (): JSX.Element => {
 								<StepContent>
 									<Typography>Create a dataset.</Typography>
 									<Box>
-										<CreateDatasetModal setDatasetId={setDatasetId} onSave={onDatasetSave}/>
+										<CreateDatasetModal onSave={onDatasetSave}/>
 									</Box>
 								</StepContent>
 							</Step>
