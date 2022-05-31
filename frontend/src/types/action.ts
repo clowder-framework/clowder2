@@ -1,4 +1,4 @@
-import {Dataset, ExtractedMetadata, File, MetadataJsonld, FilePreview, FileMetadata, FileVersion, Folder} from "./data";
+import {Dataset, ExtractedMetadata, File, MetadataJsonld, FilePreview, FileVersion, Folder} from "./data";
 import {MetadataOut as Metadata} from "../openapi/v2";
 import {MetadataDefinitionOut as MetadataDefinition} from "../openapi/v2";
 import {POST_DATASET_METADATA, UPDATE_DATASET_METADATA} from "../actions/metadata";
@@ -26,10 +26,6 @@ interface RECEIVE_DATASETS{
 interface DELETE_DATASET{
 	type: "DELETE_DATASET";
 	dataset: Dataset;
-}
-interface RECEIVE_FILE_METADATA{
-	type:"RECEIVE_FILE_METADATA";
-	fileMetadata: FileMetadata;
 }
 
 interface RECEIVE_FILE_EXTRACTED_METADATA{
@@ -109,7 +105,12 @@ interface FOLDER_ADDED{
 
 interface RECEIVE_DATASET_METADATA{
 	type: "RECEIVE_DATASET_METADATA",
-	datasetMetadataList: Metadata[]
+	metadataList: Metadata[]
+}
+
+interface RECEIVE_FILE_METADATA{
+	type:"RECEIVE_FILE_METADATA";
+	metadataList: Metadata[];
 }
 
 interface RECEIVE_FOLDERS_IN_DATASET{
@@ -122,8 +123,18 @@ interface UPDATE_DATASET_METADATA{
 	metadata: Metadata
 }
 
+interface UPDATE_FILE_METADATA{
+	type:"UPDATE_FILE_METADATA",
+	metadata: Metadata
+}
+
 interface POST_DATASET_METADATA{
 	type:"POST_DATASET_METADATA",
+	metadata: Metadata
+}
+
+interface POST_FILE_METADATA{
+	type:"POST_FILE_METADATA",
 	metadata: Metadata
 }
 
@@ -138,9 +149,7 @@ export type DataAction =
 	| DELETE_FILE
 	| RECEIVE_DATASET_ABOUT
 	| RECEIVE_DATASETS
-	| RECEIVE_DATASET_METADATA
 	| DELETE_DATASET
-	| RECEIVE_FILE_METADATA
 	| RECEIVE_FILE_EXTRACTED_METADATA
 	| RECEIVE_FILE_METADATA_JSONLD
 	| RECEIVE_PREVIEWS
@@ -157,6 +166,11 @@ export type DataAction =
 	| RESET_LOGOUT
 	| FOLDER_ADDED
 	| UPDATE_DATASET_METADATA
+	| UPDATE_FILE_METADATA
 	| POST_DATASET_METADATA
+	| POST_FILE_METADATA
 	| RECEIVE_METADATA_DEFINITIONS
+	| RECEIVE_DATASET_METADATA
+	| RECEIVE_FILE_METADATA
+
 	;

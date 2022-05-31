@@ -19,6 +19,7 @@ export function fetchMetadataDefinitions(name=null, skip=0, limit=10){
 	};
 }
 
+
 export const RECEIVE_DATASET_METADATA = "RECEIVE_DATASET_METADATA";
 export function fetchDatasetMetadata(datasetId){
 	return (dispatch) => {
@@ -26,12 +27,29 @@ export function fetchDatasetMetadata(datasetId){
 			.then(json => {
 				dispatch({
 					type: RECEIVE_DATASET_METADATA,
-					datasetMetadataList: json,
+					metadataList: json,
 					receivedAt: Date.now(),
 				});
 			})
 			.catch(reason => {
 				dispatch(handleErrors(reason, fetchDatasetMetadata(datasetId)));
+			});
+	};
+}
+
+export const RECEIVE_FILE_METADATA = "RECEIVE_FILE_METADATA";
+export function fetchFileMetadata(fileId){
+	return (dispatch) => {
+		return V2.MetadataService.getFileMetadataApiV2FilesFileIdMetadataGet(fileId)
+			.then(json => {
+				dispatch({
+					type: RECEIVE_FILE_METADATA,
+					metadataList: json,
+					receivedAt: Date.now(),
+				});
+			})
+			.catch(reason => {
+				dispatch(handleErrors(reason, fetchFileMetadata(fileId)));
 			});
 	};
 }
@@ -49,6 +67,23 @@ export function postDatasetMetadata(datasetId, metadata){
 			})
 			.catch(reason => {
 				dispatch(handleErrors(reason, postDatasetMetadata(datasetId, metadata)));
+			});
+	};
+}
+
+export const POST_FILE_METADATA = "POST_FILE_METADATA";
+export function postFileMetadata(fileId, metadata){
+	return (dispatch) => {
+		return V2.MetadataService.addFileMetadataApiV2FilesFileIdMetadataPost(fileId, metadata)
+			.then(json =>{
+				dispatch({
+					type: POST_FILE_METADATA,
+					metadata: json,
+					receivedAt: Date.now(),
+				});
+			})
+			.catch(reason => {
+				dispatch(handleErrors(reason, postFileMetadata(fileId, metadata)));
 			});
 	};
 }
@@ -73,6 +108,23 @@ export function patchDatasetMetadata(datasetId, metadata){
 			})
 			.catch(reason => {
 				dispatch(handleErrors(reason, patchDatasetMetadata(datasetId, metadata)));
+			});
+	};
+}
+
+export const UPDATE_FILE_METADATA = "UPDATE_FILE_METADATA";
+export function patchFileMetadata(fileId, metadata){
+	return (dispatch) => {
+		return V2.MetadataService.updateFileMetadataApiV2FilesFileIdMetadataPatch(fileId, metadata)
+			.then(json => {
+				dispatch({
+					type: UPDATE_FILE_METADATA,
+					metadata: json,
+					receivedAt: Date.now(),
+				});
+			})
+			.catch(reason => {
+				dispatch(handleErrors(reason, patchFileMetadata(fileId, metadata)));
 			});
 	};
 }

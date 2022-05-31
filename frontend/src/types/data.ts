@@ -141,7 +141,7 @@ export interface DatasetState{
 export interface MetadataState{
 	metadataDefinitionList: MetadataDefinitionOut[],
 	datasetMetadataList: Metadata[],
-	fileMetadata:Metadata[]
+	fileMetadataList: Metadata[],
 }
 export interface FileState{
 	fileMetadata: FileMetadata;

@@ -19,6 +19,7 @@ import {useNavigate} from "react-router-dom";
 export const CreateDataset = (): JSX.Element => {
 
 	const dispatch = useDispatch();
+	// @ts-ignore
 	const getMetadatDefinitions = (name:string|null, skip:number, limit:number) => dispatch(fetchMetadataDefinitions(name, skip,limit));
 	const createDatasetMetadata = (datasetId: string|undefined, metadata:MetadataIn) => dispatch(postDatasetMetadata(datasetId, metadata));
 	const createDataset = (formData: FormData) => dispatch(datasetCreated(formData));
@@ -34,7 +35,7 @@ export const CreateDataset = (): JSX.Element => {
 	const dismissError = () => dispatch(resetFailedReason());
 	const [errorOpen, setErrorOpen] = useState(false);
 
-	const [datasetRequestForm, setdatasetRequestForm] = useState("");
+	const [datasetRequestForm, setdatasetRequestForm] = useState({});
 	const [metadataRequestForms, setMetadataRequestForms] = useState({});
 
 	const history = useNavigate();
