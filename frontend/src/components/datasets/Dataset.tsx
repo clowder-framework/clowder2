@@ -370,9 +370,8 @@ export const Dataset = (): JSX.Element => {
 					</Grid>
 					<Dialog open={createFileOpen} onClose={() => {
 						setCreateFileOpen(false);
-					}} fullWidth={true} aria-labelledby="form-dialog">
-						<DialogTitle id="form-dialog-title">Add File</DialogTitle>
-						<UploadFile selectedDatasetId={datasetId} folderId={folder} setOpen={setCreateFileOpen}/>
+					}} fullWidth={true}  maxWidth="lg" aria-labelledby="form-dialog">
+						<UploadFile selectedDatasetId={datasetId} selectedDatasetName={datasetName} folderId={folder}/>
 					</Dialog>
 				</div>
 			</div>

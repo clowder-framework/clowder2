@@ -137,31 +137,6 @@ export const CreateDataset = (): JSX.Element => {
 									</Box>
 								</StepContent>
 							</Step>
-
-							{/*/!* step 3 attach files *!/*/}
-							{/*<Step key="attach-files">*/}
-							{/*	<StepLabel*/}
-							{/*		optional={<Typography variant="caption">Last step</Typography>}>*/}
-							{/*		Attach Files*/}
-							{/*	</StepLabel>*/}
-							{/*	<StepContent>*/}
-							{/*		<Typography>Upload files to the dataset.</Typography>*/}
-							{/*		<Box>*/}
-							{/*			<UploadFile />*/}
-							{/*		</Box>*/}
-							{/*		/!*buttons*!/*/}
-							{/*		<Box sx={{ mb: 2 }}>*/}
-							{/*			<>*/}
-							{/*				<Button variant="contained" onClick={handleFinish} sx={{ mt: 1, mr: 1 }}>*/}
-							{/*					Finish*/}
-							{/*				</Button>*/}
-							{/*				<Button onClick={handleBack} sx={{ mt: 1, mr: 1 }}>*/}
-							{/*					Back*/}
-							{/*				</Button>*/}
-							{/*			</>*/}
-							{/*		</Box>*/}
-							{/*	</StepContent>*/}
-							{/*</Step>*/}
 						</Stepper>
 					</Box>
 				</Box>

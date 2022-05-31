@@ -134,6 +134,7 @@ export interface DatasetState{
 	files: File[];
 	datasets: Dataset[];
 	newDataset: Dataset;
+	newFile: File;
 	about: Dataset;
 	folders: Folder[];
 	folderPath: string[];
