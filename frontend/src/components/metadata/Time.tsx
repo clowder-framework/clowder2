@@ -1,17 +1,13 @@
 import React, {useState} from "react";
 import {LocalizationProvider, DateTimePicker} from "@mui/lab";
 import DateAdapter from "@mui/lab/AdapterDateFns";
-import {Button, TextField} from "@mui/material";
+import {TextField} from "@mui/material";
 import {MetadataButtonGroup} from "./MetadataButtonGroup";
 
 export const Time = (props) => {
 	const {widgetName, metadataId, contents, updateMetadata, saveMetadata, resourceId} = props;
-	const [value, setValue] = useState(new Date());
+	const [value, setValue] = useState(contents && contents.time? contents.time: new Date());
 	const [readOnly, setReadOnly] = useState(!!metadataId);
-
-	const resetForm = () => {
-		setValue(new Date());
-	}
 
 	const handleChange = (newValue:Date) => {
 		setValue(newValue);
@@ -38,7 +34,6 @@ export const Time = (props) => {
 								 contents={{
 									 "time": value
 								 }}
-								 resetForm={resetForm}
 								 widgetName={widgetName}/>
 		</>
 	);

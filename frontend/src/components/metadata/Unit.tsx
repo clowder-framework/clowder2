@@ -1,21 +1,16 @@
 import * as React from "react";
-import {InputLabel, MenuItem, Select, FormControl, Button} from "@mui/material";
-import crypto from "crypto";
+import {InputLabel, MenuItem, Select, FormControl} from "@mui/material";
 import {useState} from "react";
 import {MetadataButtonGroup} from "./MetadataButtonGroup";
 
 export const Unit = (props) => {
 	const {widgetName, metadataId, contents, updateMetadata, saveMetadata, resourceId} = props;
-	const [unit, setUnit] = React.useState("");
+	const [unit, setUnit] = React.useState(contents && contents.unit? contents.unit: "");
 	const [readOnly, setReadOnly] = useState(!!metadataId);
 
 	const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
 		setUnit(event.target.value);
 	};
-
-	const resetForm = () => {
-		setUnit("");
-	}
 
 	return (
 		<>
@@ -41,7 +36,6 @@ export const Unit = (props) => {
 								 contents={{
 									 "unit":unit
 								 }}
-								 resetForm={resetForm}
 								 widgetName={widgetName}
 			/>
 		</>

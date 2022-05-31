@@ -1,9 +1,10 @@
 import React from "react";
 import {Button} from "@mui/material";
 
+
 export const MetadataButtonGroup = (props) => {
 
-	const {readOnly, setReadOnly, metadataId, updateMetadata, saveMetadata, deleteMetadata, resourceId, contents, resetForm, widgetName} = props;
+	const {readOnly, setReadOnly, metadataId, updateMetadata, saveMetadata, resourceId, contents, widgetName} = props;
 
 	return (
 		<>
@@ -25,7 +26,6 @@ export const MetadataButtonGroup = (props) => {
 									"id":metadataId,
 									"definition": widgetName,
 									"contents": contents});
-								resetForm();
 								setReadOnly(true);
 							}}>Update</Button>
 						</>
@@ -39,7 +39,6 @@ export const MetadataButtonGroup = (props) => {
 									"definition": widgetName,
 									"contents": contents
 								});
-								resetForm();
 								setReadOnly(true);
 							}}>Create</Button>
 						</>

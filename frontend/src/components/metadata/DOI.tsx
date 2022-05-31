@@ -4,14 +4,10 @@ import { ClowderMetadataTextField } from "../styledComponents/ClowderMetadataTex
 
 export const DOI = (props) => {
 	const {widgetName, metadataId, contents, updateMetadata, saveMetadata, resourceId} = props;
-	const [DOI, setDOI] = useState("");
+	const [DOI, setDOI] = useState(contents && contents.doi ? contents.doi: "");
 	const [promptError, setPromptError] = useState(false);
 	const [readOnly, setReadOnly] = useState(false);
 	const DOIErrorText = "DOI must follow the format of doi:0000000/000000000000!";
-
-	const resetForm = () => {
-		setDOI("");
-	}
 
 	useEffect(() => {
 		setReadOnly(!!metadataId);
@@ -46,7 +42,6 @@ export const DOI = (props) => {
 								 saveMetadata={saveMetadata}
 								 resourceId={resourceId}
 								 contents={{"doi":DOI}}
-								 resetForm={resetForm}
 								 widgetName={widgetName}
 			/>
 		</>
