@@ -52,7 +52,7 @@ async def _build_metadata_db_obj(db: MongoClient, metadata_in: MetadataIn, datas
         else:
             agent = MetadataAgent(creator=user)
 
-    dataset_ref = MongoDBRef(collection="datasets", resource_id=dataset["_id"])
+    dataset_ref = MongoDBRef(collection="datasets", resource_id=dataset.id)
 
     # Apply any typecast fixes from definition validation
     metadata_in = metadata_in.dict()
@@ -80,6 +80,7 @@ async def add_dataset_metadata(
     if (
         dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
     ) is not None:
+        dataset = DatasetOut(**dataset)
         # If dataset already has metadata using this definition, don't allow duplication
         definition = metadata_in.definition
         if definition is not None:
