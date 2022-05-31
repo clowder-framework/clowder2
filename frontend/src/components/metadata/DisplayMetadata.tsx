@@ -40,7 +40,7 @@ export const DisplayMetadata = (props: MetadataType) => {
 					if (resourceType === "dataset") metadataList = datasetMetadataList;
 					else if (resourceType === "file") metadataList = fileMetadataList;
 
-					metadataList.map((metadata) => {
+					return metadataList.map((metadata) => {
 						if (metadataConfig[metadata.definition]) {
 							return (
 								<Box className="inputGroup">
