@@ -29,6 +29,7 @@ security = HTTPBearer()
 
 logger = logging.getLogger(__name__)
 
+
 @router.get("/register")
 async def register() -> RedirectResponse:
     return RedirectResponse(settings.auth_register_url)

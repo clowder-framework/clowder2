@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 # Keycloak open id client configuration
 logging.info(f"Keycloak open id server {settings.auth_server_url}")
 keycloak_openid = KeycloakOpenID(
-    server_url="http://keycloak:8080/keycloak/", #settings.auth_server_url,
+    server_url="http://keycloak:8080/keycloak/",  # settings.auth_server_url,
     client_id=settings.auth_client_id,
     realm_name=settings.auth_realm,
     client_secret_key=settings.auth_client_secret,

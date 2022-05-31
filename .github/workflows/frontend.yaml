@@ -1,26 +1,26 @@
-name: CI
+name: Frontend Container
+
+defaults:
+  run:
+    working-directory: frontend
 
 on:
   push:
     branches:
       - main
-      - develop
       - 'release/*'
-
     tags:
       - '*'
 
   pull_request:
     branches:
       - main
-      - develop
       - 'release/*'
 
 env:
-  MAIN_REPO: clowder-framework/clowder2-frontend
+  MAIN_REPO: clowder-framework/clowder2
 
 jobs:
-
   # ----------------------------------------------------------------------
   # NODE BUILD
   # ----------------------------------------------------------------------
@@ -95,7 +95,7 @@ jobs:
       - name: Build image
         uses: elgohr/Publish-Docker-Github-Action@3.04
         with:
-          name: clowder/clowder2-fronted
+          name: clowder/clowder2-frontend
           no_push: true
 
       # this will publish to NCSA
