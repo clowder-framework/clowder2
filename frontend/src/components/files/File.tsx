@@ -12,7 +12,7 @@ import {resetFailedReason, resetLogout} from "../../actions/common"
 
 import {TabPanel} from "../tabs/TabComponent";
 import {a11yProps} from "../tabs/TabComponent";
-import {fetchFileMetadata, fetchFileVersions} from "../../actions/file";
+import {fetchFileSummary, fetchFileVersions} from "../../actions/file";
 import TopBar from "../navigation/TopBar";
 import {MainBreadcrumbs} from "../navigation/BreadCrumb";
 import {ActionModal} from "../dialog/ActionModal";
@@ -44,16 +44,13 @@ export const File = (): JSX.Element => {
 	const datasetName = new URLSearchParams(search).get("name");
 
 	const dispatch = useDispatch();
-	// const listFileMetadataJsonld = (fileId:string|undefined) => dispatch(fetchFileMetadataJsonld(fileId));
-	// const listFilePreviews = (fileId:string|undefined) => dispatch(fetchFilePreviews(fileId));
-	const listFileMetadata = (fileId:string|undefined) => dispatch(fetchFileMetadata(fileId));
+	const listFileSummary = (fileId:string|undefined) => dispatch(fetchFileSummary(fileId));
 	const listFileVersions = (fileId:string|undefined) => dispatch(fetchFileVersions(fileId));
 	const dismissError = () => dispatch(resetFailedReason());
 	const dismissLogout = () => dispatch(resetLogout());
 	const updateFileMetadata = (fileId: string | undefined, content:object) => dispatch(patchFileMetadata(fileId,content));
 
-	const fileMetadata = useSelector((state:RootState) => state.file.fileMetadata);
-	const fileMetadataJsonld = useSelector((state:RootState) => state.file.metadataJsonld);
+	const fileSummary = useSelector((state:RootState) => state.file.fileSummary);
 	const filePreviews = useSelector((state:RootState) => state.file.previews);
 	const fileVersions = useSelector((state:RootState) => state.file.fileVersions);
 	const reason = useSelector((state:RootState) => state.error.reason);
@@ -66,9 +63,7 @@ export const File = (): JSX.Element => {
 	// component did mount
 	useEffect(() => {
 		// load file information
-		// listFileMetadataJsonld(fileId);
-		// listFilePreviews(fileId);
-		listFileMetadata(fileId);
+		listFileSummary(fileId);
 		listFileVersions(fileId);
 	}, []);
 
@@ -160,7 +155,7 @@ export const File = (): JSX.Element => {
 
 	// add file link to breadcrumbs
 	paths.push({
-		"name":fileMetadata["name"],
+		"name":fileSummary["name"],
 		"url":`/files/${fileId}`
 	})
 
@@ -212,17 +207,6 @@ export const File = (): JSX.Element => {
 							<TabPanel value={selectedTabIndex} index={2}>
 								<DisplayMetadata updateMetadata={updateFileMetadata} resourceType="file" resourceId={fileId} />
 							</TabPanel>
-							<TabPanel value={selectedTabIndex} index={3}>
-								{
-									fileMetadataJsonld !== undefined && fileMetadataJsonld.length > 0 ?
-										fileMetadataJsonld.map((item) => {
-											return Object.keys(item["content"]).map((key) => {
-												return <p>{key} - {JSON.stringify(item["content"][key])}</p>;
-											}
-											);
-										}) : <></>
-								}
-							</TabPanel>
 							<TabPanel value={selectedTabIndex} index={4}>
 									Extractions
 							</TabPanel>
@@ -231,11 +215,11 @@ export const File = (): JSX.Element => {
 							</TabPanel>
 						</Grid>
 						<Grid item xs={4}>
-							{Object.keys(fileMetadata).length > 0 &&
+							{Object.keys(fileSummary).length > 0 &&
 								<div>
-									<FileAbout fileMetadata={fileMetadata}/>
+									<FileAbout fileSummary={fileSummary}/>
 									<Divider light/>
-									<FileStats fileMetadata={fileMetadata} />
+									<FileStats fileSummary={fileSummary} />
 									<Divider light/>
 								</div>
 							}
