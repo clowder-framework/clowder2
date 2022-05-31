@@ -43,7 +43,7 @@ export function postDatasetMetadata(datasetId, metadata){
 			.then(json =>{
 				dispatch({
 					type: POST_DATASET_METADATA,
-					newMetadata: json,
+					metadata: json,
 					receivedAt: Date.now(),
 				});
 			})

@@ -1,9 +1,9 @@
-import React, {useEffect, useState} from "react";
+import React, {useEffect} from "react";
 import {Box, Typography} from "@mui/material";
 import metadataConfig from "../../metadata.config";
 import {useSelector, useDispatch} from "react-redux";
 import {RootState} from "../../types/data";
-import {fetchDatasetMetadata, fetchMetadataDefinitions} from "../../actions/metadata";
+import {fetchDatasetMetadata} from "../../actions/metadata";
 import {Agent} from "./Agent";
 
 type MetadataType = {
@@ -14,7 +14,7 @@ type MetadataType = {
 
 export const DisplayMetadata = (props: MetadataType) => {
 
-	const {updateMetadata, deleteMetadata, resourceType, resourceId} = props;
+	const {updateMetadata, resourceType, resourceId} = props;
 
 	const dispatch = useDispatch();
 	const listDatasetMetadata = (datasetId: string | undefined) => dispatch(fetchDatasetMetadata(datasetId));
@@ -23,9 +23,11 @@ export const DisplayMetadata = (props: MetadataType) => {
 	// complete metadata list with both definition and values
 
 	useEffect(() => {
-		if (resourceType === "dataset") listDatasetMetadata(resourceId);
+		if (resourceType === "dataset"){
+			listDatasetMetadata(resourceId);
+		}
 		// else if (resourceType === "file") listFileMetadata(resourceId);
-	}, []);
+	}, [resourceType, resourceId]);
 
 	return (
 		<>
