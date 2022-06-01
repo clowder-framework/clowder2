@@ -2,22 +2,16 @@ import io
 from datetime import datetime
 from typing import Optional, List
 
-from bson import ObjectId
-from bson.dbref import DBRef
 from fastapi import (
     APIRouter,
     HTTPException,
     Depends,
 )
-from minio import Minio
-from pydantic import Json
 from pymongo import MongoClient
 
 from app import dependencies
 from app.keycloak_auth import get_user, get_current_user
-from app.config import settings
-from app.models.files import FileIn, FileOut, FileVersion
-from app.models.users import UserOut
+from app.models.pyobjectid import PyObjectId
 from app.models.metadata import MetadataDefinitionIn, MetadataDefinitionDB, MetadataDefinitionOut, \
     MetadataIn, MetadataDB, MetadataOut, MetadataPatch, patch_metadata
 
@@ -57,3 +51,25 @@ async def get_metadata_definition(
     ):
         definitions.append(MetadataDefinitionOut.from_mongo(doc))
     return definitions
+
+
+@router.patch("/{metadata_id}", response_model=MetadataOut)
+async def update_metadata(
+    metadata_in: MetadataPatch,
+    metadata_id: str,
+    user=Depends(get_current_user),
+    db: MongoClient = Depends(dependencies.get_db),
+):
+    """Update metadata. Any fields provided in the contents JSON will be added or updated in the metadata. If context or
+    agent should be changed, use PUT.
+
+    Returns:
+        Metadata document that was updated
+    """
+    if (md := await db["metadata"].find_one({"_id": PyObjectId(metadata_id)})) is not None:
+        # TODO: Refactor this with permissions checks etc.
+        contents = metadata_in.contents
+        result = await patch_metadata(md, contents, db)
+        return result
+    else:
+        raise HTTPException(status_code=404, detail=f"Metadata {metadata_id} found to update")

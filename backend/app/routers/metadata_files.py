@@ -251,8 +251,10 @@ async def update_file_metadata(
             else:
                 raise HTTPException(status_code=404, detail=f"Extractor not found")
         else:
-            agent = MetadataAgent(creator=user)
-            query["agent.creator.id"] = agent.creator.id
+            # Don't apply user filter on a PATCH
+            #agent = MetadataAgent(creator=user)
+            #query["agent.creator.id"] = agent.creator.id
+            pass
 
         if (md := await db["metadata"].find_one(query)) is not None:
             # TODO: Refactor this with permissions checks etc.
