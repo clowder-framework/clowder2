@@ -1,10 +1,11 @@
 import React, {useState} from "react";
-import {Button, TextField, Typography} from "@mui/material";
+import {MetadataButtonGroup} from "./MetadataButtonGroup";
+import { ClowderMetadataTextField } from "../styledComponents/ClowderMetadataTextField";
 
 export const AlternativeTitle = (props) => {
-	const {widgetName, resourceId, contents, saveMetadata, metadataId } = props;
+	const {widgetName, resourceId, contents, updateMetadata, saveMetadata, metadataId } = props;
 	const [alternativeName, setAlternativeName] = useState("");
-	const [readOnly, setReadOnly] = useState(!!contents);
+	const [readOnly, setReadOnly] = useState(!!metadataId);
 
 	const resetForm = () => {
 		setAlternativeName("");
@@ -12,33 +13,25 @@ export const AlternativeTitle = (props) => {
 
 	return (
 		<>
-			<TextField label={widgetName} variant="outlined" margin="normal"
+			<ClowderMetadataTextField label={widgetName} variant="outlined" margin="normal"
 					   fullWidth
 					   name={widgetName}
-					   value={readOnly? contents.alternateName: alternativeName}
+					   value={readOnly && contents? contents.alternateName: alternativeName}
 					   onChange={(event: React.ChangeEvent<HTMLInputElement>) => { setAlternativeName(event.target.value);}}
 					   disabled={readOnly}
-					   sx={{background:"#ffffff"}}
 			/>
-			{
-				readOnly ?
-					<Button variant="text" sx={{float:"right"}} onClick={() => {setReadOnly(false);}}>Edit</Button>
-					:
-					<>
-						{/*<Button variant="text" sx={{float:"right"}} onClick={() => {setReadOnly(true);}}>Cancel</Button>*/}
-						<Button variant="contained" sx={{float:"right"}} onClick={() => {
-							// update metadata
-							saveMetadata(resourceId, {
-								"id":metadataId,
-								"definition": widgetName,
-								"contents": {
-									alternateName: alternativeName
-								}});
-							resetForm();
-							setReadOnly(true);
-						}}>Save</Button>
-					</>
-			}
+			<MetadataButtonGroup readOnly={readOnly}
+								 setReadOnly={setReadOnly}
+								 metadataId={metadataId}
+								 updateMetadata={updateMetadata}
+								 saveMetadata={saveMetadata}
+								 resourceId={resourceId}
+								 contents={{
+									 alternateName: alternativeName
+								 }}
+								 resetForm={resetForm}
+								 widgetName={widgetName}
+			/>
 		</>
 	)
 }

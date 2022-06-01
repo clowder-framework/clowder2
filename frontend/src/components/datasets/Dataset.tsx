@@ -27,8 +27,8 @@ import {useSearchParams} from "react-router-dom";
 import {parseDate} from "../../utils/common";
 import config from "../../app.config";
 import {DatasetIn} from "../../openapi/v2";
-import {Metadata} from "../metadata/Metadata";
-import {fetchDatasetMetadata, patchDatasetMetadata} from "../../actions/metadata";
+import {DisplayMetadata} from "../metadata/DisplayMetadata";
+import {patchDatasetMetadata} from "../../actions/metadata";
 
 const tab = {
 	fontStyle: "normal",
@@ -61,7 +61,6 @@ export const Dataset = (): JSX.Element => {
 
 	// Redux connect equivalent
 	const dispatch = useDispatch();
-	const listDatasetMetadata = (datasetId: string | undefined) => dispatch(fetchDatasetMetadata(datasetId));
 	const updateDatasetMetadata = (datasetId: string | undefined, content:object) => dispatch(patchDatasetMetadata(datasetId,content));
 	const deleteDataset = (datasetId:string|undefined) => dispatch(datasetDeleted(datasetId));
 	const editDataset = (datasetId: string|undefined, formData: DatasetIn) => dispatch(updateDataset(datasetId, formData));
@@ -78,7 +77,6 @@ export const Dataset = (): JSX.Element => {
 	const stack = useSelector((state: RootState) => state.error.stack);
 	const loggedOut = useSelector((state: RootState) => state.error.loggedOut);
 	const folderPath = useSelector((state: RootState) => state.dataset.folderPath);
-	const datasetMetadataList = useSelector((state: RootState) => state.metadata.datasetMetadataList);
 
 	// state
 	const [selectedTabIndex, setSelectedTabIndex] = useState<number>(0);
@@ -95,7 +93,6 @@ export const Dataset = (): JSX.Element => {
 		listFoldersInDataset(datasetId, folder);
 		listDatasetAbout(datasetId);
 		getFolderPath(folder);
-		listDatasetMetadata(datasetId);
 	}, [searchParams]);
 
 	// Error msg dialog
@@ -200,7 +197,7 @@ export const Dataset = (): JSX.Element => {
 								<FilesTable datasetId={datasetId} datasetName={about.name}/>
 							</TabPanel>
 							<TabPanel value={selectedTabIndex} index={1}>
-								<Metadata metadata={datasetMetadataList} saveMetadata={updateDatasetMetadata} resourceId={datasetId}/>
+								<DisplayMetadata updateMetadata={updateDatasetMetadata} resourceType="dataset" resourceId={datasetId}/>
 							</TabPanel>
 							<TabPanel value={selectedTabIndex} index={2}/>
 							<TabPanel value={selectedTabIndex} index={3}/>
@@ -373,9 +370,8 @@ export const Dataset = (): JSX.Element => {
 					</Grid>
 					<Dialog open={createFileOpen} onClose={() => {
 						setCreateFileOpen(false);
-					}} fullWidth={true} aria-labelledby="form-dialog">
-						<DialogTitle id="form-dialog-title">Add File</DialogTitle>
-						<UploadFile selectedDatasetId={datasetId} folderId={folder} setOpen={setCreateFileOpen}/>
+					}} fullWidth={true}  maxWidth="lg" aria-labelledby="form-dialog">
+						<UploadFile selectedDatasetId={datasetId} selectedDatasetName={datasetName} folderId={folder}/>
 					</Dialog>
 				</div>
 			</div>

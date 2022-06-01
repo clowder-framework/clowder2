@@ -1,16 +1,17 @@
 import {
 	RECEIVE_FILE_EXTRACTED_METADATA,
-	RECEIVE_FILE_METADATA,
+	RECEIVE_FILE_SUMMARY,
 	RECEIVE_FILE_METADATA_JSONLD,
 	RECEIVE_PREVIEWS,
 	RECEIVE_VERSIONS,
 	DOWNLOAD_FILE
 } from "../actions/file";
 import {DataAction} from "../types/action";
-import {FileState, ExtractedMetadata, FileMetadata} from "../types/data";
+import {FileState, ExtractedMetadata} from "../types/data";
+import {FileOut as FileSummary} from "../openapi/v2";
 
 const defaultState: FileState = {
-	fileMetadata: <FileMetadata>{},
+	fileSummary: <FileSummary>{},
 	extractedMetadata: <ExtractedMetadata>{},
 	metadataJsonld: [],
 	previews: [],
@@ -19,8 +20,8 @@ const defaultState: FileState = {
 
 const file = (state=defaultState, action: DataAction) => {
 	switch(action.type) {
-	case RECEIVE_FILE_METADATA:
-		return Object.assign({}, state, {fileMetadata: action.fileMetadata});
+	case RECEIVE_FILE_SUMMARY:
+		return Object.assign({}, state, {fileSummary: action.fileSummary});
 	case RECEIVE_FILE_EXTRACTED_METADATA:
 		return Object.assign({}, state, {extractedMetadata: action.extractedMetadata});
 	case RECEIVE_FILE_METADATA_JSONLD:

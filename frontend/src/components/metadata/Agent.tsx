@@ -1,6 +1,7 @@
 import React from "react";
 import {Box, Typography} from "@mui/material";
 import theme from "../../theme";
+import {parseDate} from "../../utils/common";
 
 const textStyle = {
 	fontWeight: "normal",
@@ -17,7 +18,7 @@ export const Agent = (props) => {
 	return (
 		<>
 			<Box key={id}>
-				<Typography sx={textStyle}>Created at: {created}</Typography>
+				<Typography sx={textStyle}>Created at: {parseDate(created)}</Typography>
 				<Typography sx={textStyle}>Created by: {agent.creator.first_name} {agent.creator.last_name}</Typography>
 			</Box>
 		</>

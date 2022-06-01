@@ -1,12 +1,13 @@
 import React, {useState} from "react";
-import {Button, TextField, Typography} from "@mui/material";
+import {MetadataButtonGroup} from "./MetadataButtonGroup";
+import {ClowderMetadataTextField} from "../styledComponents/ClowderMetadataTextField";
 
 export const LatLon = (props) => {
 
-	const {widgetName, metadataId, contents, saveMetadata, resourceId} = props;
+	const {widgetName, metadataId, contents, updateMetadata, saveMetadata, deleteMetadata, resourceId} = props;
 	const [lat, setLat] = useState("");
 	const [lon, setLon] = useState("");
-	const [readOnly, setReadOnly] = useState(!!contents);
+	const [readOnly, setReadOnly] = useState(!!metadataId); // if metdataID doesn't exist meaning it's a new form
 
 	const resetForm = () => {
 		setLat("");
@@ -15,42 +16,34 @@ export const LatLon = (props) => {
 
 	return (
 		<>
-			<TextField label="Lat" variant="outlined" margin="normal"
+			<ClowderMetadataTextField label="Lat" variant="outlined" margin="normal"
 					   fullWidth
 					   name={widgetName}
-					   value={readOnly? contents.latitude: lat}
+					   value={readOnly && contents? contents.latitude: lat}
 					   onChange={(event: React.ChangeEvent<HTMLInputElement>) => { setLat(event.target.value);}}
 					   disabled={readOnly}
-					   sx={{background:"#ffffff"}}
 			/>
-			<TextField label="Lon" variant="outlined" margin="normal"
+			<ClowderMetadataTextField label="Lon" variant="outlined" margin="normal"
 					   fullWidth
 					   name={widgetName}
-					   value={readOnly? contents.longitude: lon}
+					   value={readOnly && contents? contents.longitude: lon}
 					   onChange={(event: React.ChangeEvent<HTMLInputElement>) => { setLon(event.target.value);}}
 					   disabled={readOnly}
-					   sx={{background:"#ffffff"}}
 			/>
-			{
-				readOnly ?
-					<Button variant="text" sx={{float:"right"}} onClick={() => {setReadOnly(false);}}>Edit</Button>
-					:
-					<>
-						{/*<Button variant="text" sx={{float:"right"}} onClick={() => {setReadOnly(true);}}>Cancel</Button>*/}
-						<Button variant="contained" sx={{float:"right"}} onClick={() => {
-							// update metadata
-							saveMetadata(resourceId, {
-								"id":metadataId,
-								"definition": widgetName,
-								"contents": {
-									"latitude":lat,
-									"longitude":lon
-								}});
-							resetForm();
-							setReadOnly(true);
-						}}>Save</Button>
-					</>
-			}
+			<MetadataButtonGroup readOnly={readOnly}
+								 setReadOnly={setReadOnly}
+								 metadataId={metadataId}
+								 updateMetadata={updateMetadata}
+								 saveMetadata={saveMetadata}
+								 deleteMetadata={deleteMetadata}
+								 resourceId={resourceId}
+								 contents={{
+									 "latitude":lat,
+									 "longitude":lon
+								 }}
+								 resetForm={resetForm}
+								 widgetName={widgetName}
+			/>
 		</>
 	)
 }

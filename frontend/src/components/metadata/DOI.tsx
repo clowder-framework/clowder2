@@ -1,16 +1,21 @@
 import React, {useEffect, useState} from "react";
-import {Button, TextField} from "@mui/material";
+import {MetadataButtonGroup} from "./MetadataButtonGroup";
+import { ClowderMetadataTextField } from "../styledComponents/ClowderMetadataTextField";
 
 export const DOI = (props) => {
-	const {widgetName, metadataId, contents, saveMetadata, resourceId} = props;
+	const {widgetName, metadataId, contents, updateMetadata, saveMetadata, resourceId} = props;
 	const [DOI, setDOI] = useState("");
 	const [promptError, setPromptError] = useState(false);
-	const [readOnly, setReadOnly] = useState(!!contents);
+	const [readOnly, setReadOnly] = useState(false);
 	const DOIErrorText = "DOI must follow the format of doi:0000000/000000000000!";
 
 	const resetForm = () => {
 		setDOI("");
 	}
+
+	useEffect(() => {
+		setReadOnly(!!metadataId);
+	}, [metadataId]);
 
 	useEffect(() => {
 		// If DOI doesn't follow the format (Regex)
@@ -25,35 +30,25 @@ export const DOI = (props) => {
 	}, [DOI]);
 	return (
 		<>
-			<TextField label={widgetName} variant="outlined" margin="normal"
+			<ClowderMetadataTextField label={widgetName} variant="outlined" margin="normal"
 					   fullWidth
 					   name={widgetName}
-					   value={readOnly? contents.doi: DOI}
+					   value={readOnly && contents ? contents.doi: DOI}
 					   onChange={(event: React.ChangeEvent<HTMLInputElement>) => { setDOI(event.target.value);}}
 					   error={promptError}
 					   helperText={DOIErrorText}
 					   disabled={readOnly}
-					   sx={{background:"#ffffff"}}
 			/>
-			{
-				readOnly ?
-					<Button variant="text" sx={{float:"right"}} onClick={() => {setReadOnly(false);}}>Edit</Button>
-					:
-					<>
-						{/*<Button variant="text" sx={{float:"right"}} onClick={() => {setReadOnly(true);}}>Cancel</Button>*/}
-						<Button variant="contained" sx={{float:"right"}} onClick={() => {
-							// update metadata
-							saveMetadata(resourceId, {
-								"id":metadataId,
-								"definition": widgetName,
-								"contents": {
-									"doi":DOI
-								}});
-							resetForm();
-							setReadOnly(true);
-						}}>Save</Button>
-					</>
-			}
+			<MetadataButtonGroup readOnly={readOnly}
+								 setReadOnly={setReadOnly}
+								 metadataId={metadataId}
+								 updateMetadata={updateMetadata}
+								 saveMetadata={saveMetadata}
+								 resourceId={resourceId}
+								 contents={{"doi":DOI}}
+								 resetForm={resetForm}
+								 widgetName={widgetName}
+			/>
 		</>
 
 	)
