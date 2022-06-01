@@ -36,7 +36,7 @@ async def update_file(
 ):
     if (file_q := await db["files"].find_one({"_id": ObjectId(file_id)})) is not None:
         # First, add to database and get unique ID
-        existing_file = FileOut.from_mongo(file_q)
+        updated_file = FileOut.from_mongo(file_q)
 
         # Update file in Minio and get the new version IDs
         version_id = None
@@ -45,7 +45,7 @@ async def update_file(
         ):  # async read chunk
             response = fs.put_object(
                 settings.MINIO_BUCKET_NAME,
-                str(existing_file.id),
+                str(updated_file.id),
                 io.BytesIO(content),
                 length=-1,
                 part_size=settings.MINIO_UPLOAD_CHUNK_SIZE,
@@ -53,13 +53,12 @@ async def update_file(
             version_id = response.version_id
 
         # Update version/creator/created flags
-        updated_file = FileDB(**existing_file)
         updated_file.name = file.filename
-        updated_file.creator = UserOut(**user)
+        updated_file.creator = user
         updated_file.created = datetime.utcnow()
         updated_file.version_id = version_id
-        updated_file.version_num = existing_file.version_num + 1
-        await db["files"].replace_one({"_id": ObjectId(file_id)}, updated_file)
+        updated_file.version_num = updated_file.version_num + 1
+        await db["files"].replace_one({"_id": ObjectId(file_id)}, updated_file.to_mongo())
 
         # Put entry in FileVersion collection
         new_version = FileVersion(
@@ -68,8 +67,8 @@ async def update_file(
             file_id=updated_file.id,
             creator=user,
         )
-        await db["file_versions"].insert_one(dict(new_version))
-        return FileOut.from_mongo(updated_file)
+        await db["file_versions"].insert_one(new_version.to_mongo())
+        return updated_file
     else:
         raise HTTPException(status_code=404, detail=f"File {file_id} not found")
 
