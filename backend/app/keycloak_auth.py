@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 # Keycloak open id client configuration
 logging.info(f"Keycloak open id server {settings.auth_server_url}")
 keycloak_openid = KeycloakOpenID(
-    server_url="http://keycloak:8080/keycloak/",  # settings.auth_server_url,
+    server_url=settings.auth_server_url,
     client_id=settings.auth_client_id,
     realm_name=settings.auth_realm,
     client_secret_key=settings.auth_client_secret,
@@ -111,41 +111,6 @@ async def get_current_user_id(identity: Json = Depends(get_token)) -> str:
     """Retrieve internal Keycloak id. Does not query MongoDB."""
     keycloak_id = identity["sub"]
     return keycloak_id
-
-
-# def create_realm_and_client():
-#     """Create a realm and client at start up."""
-#     keycloak_admin_realm = KeycloakAdmin(
-#         server_url=settings.auth_server_url,
-#         username=settings.keycloak_username,
-#         password=settings.keycloak_password,
-#         realm_name="master",
-#         verify=True,
-#     )
-#     keycloak_admin_realm.create_realm(
-#         payload={"realm": settings.auth_realm, "enabled": True}, skip_exists=True
-#     )
-#     keycloak_admin_client = KeycloakAdmin(
-#         server_url=settings.auth_server_url,
-#         username=settings.keycloak_username,
-#         password=settings.keycloak_password,
-#         realm_name=settings.keycloak_realm_name,
-#         user_realm_name=settings.keycloak_user_realm_name,
-#         verify=True,
-#     )
-#     # For options see https://www.keycloak.org/docs-api/15.0/rest-api/index.html#_clientrepresentation
-#     keycloak_admin_client.create_client(
-#         payload={
-#             "clientId": settings.auth_client_id,
-#             "publicClient": True,
-#             "rootUrl": settings.keycloak_base,
-#             "redirectUris": settings.keycloak_redirect_uris,
-#             "webOrigins": settings.keycloak_web_origins,
-#             "directAccessGrantsEnabled": True,
-#             "enabled": True,
-#         },
-#         skip_exists=True,
-#     )
 
 
 async def create_user(email: str, password: str, firstName: str, lastName: str):

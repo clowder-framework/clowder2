@@ -81,7 +81,7 @@ jobs:
               tags="${tags},${version}"
               version=${version%.*}
             done
-            echo "VERSION=$(awk '/version = / { print $4 }' project/Build.scala | sed 's/"//g')" >> $GITHUB_ENV
+            echo "VERSION=${version}" >> $GITHUB_ENV
             echo "TAGS=${tags}" >> $GITHUB_ENV
           elif [ "$BRANCH" == "develop" ]; then
             echo "VERSION=develop" >> $GITHUB_ENV
