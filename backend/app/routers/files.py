@@ -114,7 +114,7 @@ async def delete_file(
         # TODO: Deleting individual versions may require updating version_id in mongo, or deleting entire document
         fs.remove_object(settings.MINIO_BUCKET_NAME, str(file_id))
         await db["files"].delete_one({"_id": ObjectId(file_id)})
-        await db.files.delete_many({"resource.resource_id": ObjectId(file_id)})
+        await db.metadata.delete_many({"resource.resource_id": ObjectId(file_id)})
         await db["file_versions"].delete({"file_id": ObjectId(file_id)})
         return {"deleted": file_id}
     else:
