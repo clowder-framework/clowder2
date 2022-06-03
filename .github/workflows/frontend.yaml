@@ -1,4 +1,4 @@
-name: Frontend Container
+name: Frontend
 
 defaults:
   run:
@@ -7,111 +7,46 @@ defaults:
 on:
   push:
     branches:
-      - main
+      - 'main'
       - 'release/*'
     tags:
-      - '*'
-
+      - 'v*'
   pull_request:
     branches:
-      - main
+      - 'main'
       - 'release/*'
 
-env:
-  MAIN_REPO: clowder-framework/clowder2
-
 jobs:
-  # ----------------------------------------------------------------------
-  # NODE BUILD
-  # ----------------------------------------------------------------------
-  build:
-    runs-on: ubuntu-latest
-
-    strategy:
-      fail-fast: false
-      matrix:
-        node:
-          - "12"
-          - "14"
-
-    steps:
-      # checkout source code
-      - uses: actions/checkout@v2
-
-      # setup node
-      - uses: actions/setup-node@v2
-        with:
-          node-version: ${{ matrix.node }}
-
-      # install dependencies
-      - name: install dependencies
-        run: npm install
-
-      # compile UI
-      - name: build
-        run: npm run build
-
-  # ----------------------------------------------------------------------
-  # DOCKER BUILD
-  # ----------------------------------------------------------------------
   docker:
     runs-on: ubuntu-latest
-
     steps:
-      # checkout source code
-      - uses: actions/checkout@v2
-
-      # calculate some variables that are used later
-      - name: version information
-        run: |
-          if [ "${{ github.event.release.target_commitish }}" != "" ]; then
-            BRANCH="${{ github.event.release.target_commitish }}"
-          elif [[ $GITHUB_REF =~ pull ]]; then
-            BRANCH="$(echo $GITHUB_REF | sed 's#refs/pull/\([0-9]*\)/merge#PR-\1#')"
-          else
-            BRANCH=${GITHUB_REF##*/}
-          fi
-          echo "GITHUB_BRANCH=${BRANCH}" >> $GITHUB_ENV
-          if [ "$BRANCH" == "main" ]; then
-            version=$(cat package.json | grep \"version\" | head -1 | awk -F= "{ print $2 }" | sed 's/[version:,",]//g' | tr -d '[[:space:]]')
-            tags="latest"
-            oldversion=""
-            while [ "${oldversion}" != "${version}" ]; do
-              oldversion="${version}"
-              tags="${tags},${version}"
-              version=${version%.*}
-            done
-            echo "VERSION=${version}" >> $GITHUB_ENV
-            echo "TAGS=${tags}" >> $GITHUB_ENV
-          elif [ "$BRANCH" == "develop" ]; then
-            echo "VERSION=develop" >> $GITHUB_ENV
-            echo "TAGS=develop" >> $GITHUB_ENV
-          else
-            echo "VERSION=testing" >> $GITHUB_ENV
-            echo "TAGS=${BRANCH}" >> $GITHUB_ENV
-          fi
-
-      # build image
-      - name: Build image
-        uses: elgohr/Publish-Docker-Github-Action@3.04
+      -
+        name: Checkout
+        uses: actions/checkout@v2
+      -
+        name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v4
         with:
-          name: clowder/clowder2-frontend
-          no_push: true
-
-      # this will publish to NCSA
-      - name: Publish to NCSA Hub
-        #if: github.event_name != 'pull_request' && github.repository == env.MAIN_REPO
-        if: github.repository == env.MAIN_REPO
-        uses: elgohr/Publish-Docker-Github-Action@3.04
-        env:
-          BRANCH: ${{ env.GITHUB_BRANCH }}
-          VERSION: ${{ env.VERSION }}
-          BUILDNUMBER: ${{ github.run_number }}
-          GITSHA1: ${{ github.sha  }}
+          images: |
+            clowder/clowder2-frontend
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+      -
+        name: Login to DockerHub
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v2
         with:
-          registry: hub.ncsa.illinois.edu
-          name: clowder/clowder2-frontend
-          username: ${{ secrets.HUB_USERNAME }}
-          password: ${{ secrets.HUB_PASSWORD }}
-          tags: "${{ env.TAGS }}"
-          buildargs: BRANCH,VERSION,BUILDNUMBER,GITSHA1
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      -
+        name: Build and push
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
