@@ -350,8 +350,7 @@ async def download_dataset(
                 hierarchy = await get_folder_hierarchy(file.folder_id, "", db)
                 file_name = "/" + hierarchy + file_name
             content = fs.get_object(settings.MINIO_BUCKET_NAME, str(file.id))
-            data = str(content.data)
-            z.writestr(file_name, data)
+            z.writestr(file_name, content.data)
             content.close()
             content.release_conn()
         z.close()
