@@ -14,8 +14,17 @@ from app.keycloak_auth import get_token
 from app.routers import (
     folders,
 )
-from app.routers import users, metadata, files, metadata_files, datasets, metadata_datasets, \
-    collections, authentication, keycloak
+from app.routers import (
+    users,
+    metadata,
+    files,
+    metadata_files,
+    datasets,
+    metadata_datasets,
+    collections,
+    authentication,
+    keycloak,
+)
 
 # setup loggers
 # logging.config.fileConfig('logging.conf', disable_existing_loggers=False)

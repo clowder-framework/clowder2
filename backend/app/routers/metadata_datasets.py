@@ -23,7 +23,7 @@ from app.models.metadata import (
     MetadataOut,
     MetadataPatch,
     validate_context,
-    patch_metadata
+    patch_metadata,
 )
 
 router = APIRouter()
@@ -31,10 +31,20 @@ router = APIRouter()
 clowder_bucket = os.getenv("MINIO_BUCKET_NAME", "clowder")
 
 
-async def _build_metadata_db_obj(db: MongoClient, metadata_in: MetadataIn, dataset: DatasetOut, user: UserOut,
-                                 agent: MetadataAgent = None):
-    contents = await validate_context(db, metadata_in.contents,
-                                              metadata_in.definition, metadata_in.context_url, metadata_in.context)
+async def _build_metadata_db_obj(
+    db: MongoClient,
+    metadata_in: MetadataIn,
+    dataset: DatasetOut,
+    user: UserOut,
+    agent: MetadataAgent = None,
+):
+    contents = await validate_context(
+        db,
+        metadata_in.contents,
+        metadata_in.definition,
+        metadata_in.context_url,
+        metadata_in.context,
+    )
 
     if agent is None:
         # Build MetadataAgent depending on whether extractor info is present
@@ -42,9 +52,9 @@ async def _build_metadata_db_obj(db: MongoClient, metadata_in: MetadataIn, datas
         if extractor_info is not None:
             extractor_in = ExtractorIn(**extractor_info.dict())
             if (
-                    extractor := await db["extractors"].find_one(
-                        {"_id": extractor_in.id, "version": extractor_in.version}
-                    )
+                extractor := await db["extractors"].find_one(
+                    {"_id": extractor_in.id, "version": extractor_in.version}
+                )
             ) is not None:
                 agent = MetadataAgent(creator=user, extractor=extractor)
             else:
@@ -84,18 +94,19 @@ async def add_dataset_metadata(
         # If dataset already has metadata using this definition, don't allow duplication
         definition = metadata_in.definition
         if definition is not None:
-            existing_q = {
-                "resource.resource_id": dataset.id,
-                "definition": definition
-            }
+            existing_q = {"resource.resource_id": dataset.id, "definition": definition}
             # Extracted metadata doesn't care about user
             if metadata_in.extractor_info is not None:
                 existing_q["agent.extractor.name"] = metadata_in.extractor_info.name
-                existing_q["agent.extractor.version"] = metadata_in.extractor_info.version
+                existing_q[
+                    "agent.extractor.version"
+                ] = metadata_in.extractor_info.version
             else:
                 existing_q["agent.creator.id"] = user.id
             if (existing := await db["metadata"].find_one(existing_q)) is not None:
-                raise HTTPException(409, f"Metadata for {definition} already exists on this dataset")
+                raise HTTPException(
+                    409, f"Metadata for {definition} already exists on this dataset"
+                )
 
         md = await _build_metadata_db_obj(db, metadata_in, dataset, user)
         new_metadata = await db["metadata"].insert_one(md.to_mongo())
@@ -117,16 +128,18 @@ async def replace_dataset_metadata(
     Returns:
         Metadata document that was updated
     """
-    if (dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})) is not None:
+    if (
+        dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
+    ) is not None:
         query = {"resource.resource_id": ObjectId(dataset_id)}
 
         # Filter by MetadataAgent
         extractor_info = metadata_in.extractor_info
         if extractor_info is not None:
             if (
-                    extractor := await db["extractors"].find_one(
-                        {"name": extractor_info.name, "version": extractor_info.version}
-                    )
+                extractor := await db["extractors"].find_one(
+                    {"name": extractor_info.name, "version": extractor_info.version}
+                )
             ) is not None:
                 agent = MetadataAgent(creator=user, extractor=extractor)
                 # TODO: How do we handle two different users creating extractor metadata? Currently we ignore user
@@ -142,8 +155,8 @@ async def replace_dataset_metadata(
             # Metadata exists, so prepare the new document we are going to replace it with
             md_obj = _build_metadata_db_obj(db, metadata_in, dataset, user, agent=agent)
             new_metadata = await db["metadata"].replace_one(
-                {"_id": md["_id"]},
-                md_obj.to_mongo())
+                {"_id": md["_id"]}, md_obj.to_mongo()
+            )
             found = await db["metadata"].find_one({"_id": md["_id"]})
             metadata_out = MetadataOut.from_mongo(found)
             return metadata_out
@@ -164,15 +177,26 @@ async def update_dataset_metadata(
     Returns:
         Metadata document that was updated
     """
-    if (dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})) is not None:
+    if (
+        dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
+    ) is not None:
         query = {"resource.resource_id": ObjectId(dataset_id)}
         contents = metadata_in.contents
 
         if metadata_in.metadata_id is not None:
             # If a specific metadata_id is provided, validate the patch against existing context
-            if (existing_md := await db["metadata"].find_one({"_id": ObjectId(metadata_in.metadata_id)})) is not None:
-                contents = await validate_context(db, metadata_in.contents,
-                                              existing_md.definition, existing_md.context_url, existing_md.context)
+            if (
+                existing_md := await db["metadata"].find_one(
+                    {"_id": ObjectId(metadata_in.metadata_id)}
+                )
+            ) is not None:
+                contents = await validate_context(
+                    db,
+                    metadata_in.contents,
+                    existing_md.definition,
+                    existing_md.context_url,
+                    existing_md.context,
+                )
                 query["_id"] = metadata_in.metadata_id
         else:
             # Use provided definition name as filter (don't validate yet, as patched data doesn't require completeness)
@@ -185,9 +209,9 @@ async def update_dataset_metadata(
         extractor_info = metadata_in.extractor_info
         if extractor_info is not None:
             if (
-                    extractor := await db["extractors"].find_one(
-                        {"name": extractor_info.name, "version": extractor_info.version}
-                    )
+                extractor := await db["extractors"].find_one(
+                    {"name": extractor_info.name, "version": extractor_info.version}
+                )
             ) is not None:
                 agent = MetadataAgent(creator=user, extractor=extractor)
                 # TODO: How do we handle two different users creating extractor metadata? Currently we ignore user
@@ -215,7 +239,9 @@ async def get_dataset_metadata(
     user=Depends(get_current_user),
     db: MongoClient = Depends(dependencies.get_db),
 ):
-    if (dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})) is not None:
+    if (
+        dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
+    ) is not None:
         query = {"resource.resource_id": ObjectId(dataset_id)}
 
         if extractor_name is not None:
@@ -227,7 +253,11 @@ async def get_dataset_metadata(
         async for md in db["metadata"].find(query):
             md_out = MetadataOut.from_mongo(md)
             if md_out.definition is not None:
-                if (md_def := await db["metadata.definitions"].find_one({"name": md_out.definition})) is not None:
+                if (
+                    md_def := await db["metadata.definitions"].find_one(
+                        {"name": md_out.definition}
+                    )
+                ) is not None:
                     md_def = MetadataDefinitionOut(**md_def)
                     md_out.description = md_def.description
             metadata.append(md_out)
@@ -244,7 +274,9 @@ async def delete_dataset_metadata(
     user=Depends(get_current_user),
     db: MongoClient = Depends(dependencies.get_db),
 ):
-    if (dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})) is not None:
+    if (
+        dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
+    ) is not None:
         query = {"resource.resource_id": ObjectId(file_id)}
 
         if extractor_name is not None:
@@ -256,6 +288,8 @@ async def delete_dataset_metadata(
             db["metadata"].remove({"_id": md["_id"]})
             return 200
         else:
-            raise HTTPException(status_code=404, detail=f"No metadata found with that criteria")
+            raise HTTPException(
+                status_code=404, detail=f"No metadata found with that criteria"
+            )
     else:
         raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")

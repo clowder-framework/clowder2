@@ -24,14 +24,14 @@ class MongoDBRef(BaseModel):
 
 # List of valid types that can be specified for metadata fields
 FIELD_TYPES = {
-    'int': int,
-    'float': float,
-    'str': str,
-    'bool': bool,
-    'date': datetime.date,
-    'time': datetime.time,
-    'dict': dict # TODO: does this work?
-} # JSON schema can handle this for us?
+    "int": int,
+    "float": float,
+    "str": str,
+    "bool": bool,
+    "date": datetime.date,
+    "time": datetime.time,
+    "dict": dict,  # TODO: does this work?
+}  # JSON schema can handle this for us?
 
 
 class MetadataField(MongoModel):
@@ -62,7 +62,8 @@ class MetadataDefinitionBase(MongoModel):
             "type": "float",
             "required": "True"
         }]
-    } """
+    }"""
+
     name: str
     description: Optional[str]
     context: Optional[dict]  # https://json-ld.org/spec/latest/json-ld/#the-context
@@ -100,8 +101,10 @@ def validate_definition(contents: dict, metadata_def: MetadataDefinitionOut):
                 found = True
                 break
         if not found:
-            raise HTTPException(status_code=400,
-                                detail=f"{metadata_def.name} field does not have a field called {entry}")
+            raise HTTPException(
+                status_code=400,
+                detail=f"{metadata_def.name} field does not have a field called {entry}",
+            )
 
     # For all fields in definition, are they present and matching format?
     for field in metadata_def.fields:
@@ -119,12 +122,19 @@ def validate_definition(contents: dict, metadata_def: MetadataDefinitionOut):
                             typecast_list.append(t(v))
                         contents[field.name] = typecast_list
                     except:
-                        raise HTTPException(status_code=400,
-                                            detail=f"{metadata_def.name} field {field.name} requires {field.type} for all values in list")
-                raise HTTPException(status_code=400,
-                                    detail=f"{metadata_def.name} field {field.name} requires {field.type}")
+                        raise HTTPException(
+                            status_code=400,
+                            detail=f"{metadata_def.name} field {field.name} requires {field.type} for all values in list",
+                        )
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"{metadata_def.name} field {field.name} requires {field.type}",
+                )
         elif field.required:
-            raise HTTPException(status_code=400, detail=f"{metadata_def.name} requires field {field.name}")
+            raise HTTPException(
+                status_code=400,
+                detail=f"{metadata_def.name} requires field {field.name}",
+            )
     # Return original dict with any type castings applied
     return contents
 
@@ -132,6 +142,7 @@ def validate_definition(contents: dict, metadata_def: MetadataDefinitionOut):
 class MetadataAgent(MongoModel):
     """Describes the user who created a piece of metadata. If extractor is provided, user refers to the user who
     triggered the extraction."""
+
     creator: UserOut
     extractor: Optional[ExtractorOut]
 
@@ -187,11 +198,18 @@ class MetadataDB(MetadataBase):
 
 
 class MetadataOut(MetadataDB):
-    description: Optional[str]  # This will be fetched from metadata definition if one is provided (shown by GUI)
+    description: Optional[
+        str
+    ]  # This will be fetched from metadata definition if one is provided (shown by GUI)
 
 
-async def validate_context(db: MongoClient, contents: dict, definition: Optional[str] = None,
-                           context_url: Optional[str] = None, context: Optional[dict] = None):
+async def validate_context(
+    db: MongoClient,
+    contents: dict,
+    definition: Optional[str] = None,
+    context_url: Optional[str] = None,
+    context: Optional[dict] = None,
+):
     """Convenience function for making sure incoming metadata has valid definitions or resolvable context.
 
     Returns:
@@ -207,7 +225,9 @@ async def validate_context(db: MongoClient, contents: dict, definition: Optional
     if context_url is not None:
         pass
     if definition is not None:
-        if (md_def := await db["metadata.definitions"].find_one({"name": definition})) is not None:
+        if (
+            md_def := await db["metadata.definitions"].find_one({"name": definition})
+        ) is not None:
             md_def = MetadataDefinitionOut(**md_def)
             contents = validate_definition(contents, md_def)
         else:
@@ -233,10 +253,13 @@ async def patch_metadata(metadata: dict, new_entries: dict, db: MongoClient):
     try:
         # TODO: For list-type definitions, should we append to list instead?
         updated_contents = deep_update(metadata["contents"], new_entries)
-        updated_contents = await validate_context(db, updated_contents,
-                                    metadata.get("definition", None),
-                                    metadata.get("context_url", None),
-                                    metadata.get("context", None))
+        updated_contents = await validate_context(
+            db,
+            updated_contents,
+            metadata.get("definition", None),
+            metadata.get("context_url", None),
+            metadata.get("context", None),
+        )
         metadata["contents"] = updated_contents
         db["metadata"].replace_one(
             {"_id": metadata["_id"]}, MetadataDB(**metadata).to_mongo()
