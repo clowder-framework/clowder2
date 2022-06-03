@@ -245,7 +245,7 @@ async def delete_dataset_metadata(
     db: MongoClient = Depends(dependencies.get_db),
 ):
     if (dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})) is not None:
-        query = {"resource.resource_id": ObjectId(file_id)}
+        query = {"resource.resource_id": ObjectId(dataset_id)}
 
         if extractor_name is not None:
             query["agent.extractor.name"] = extractor_name
