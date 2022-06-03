@@ -20,7 +20,6 @@ def test_create(client: TestClient, headers: dict):
     )
     assert response.json().get("id") is not None
     assert response.status_code == 200
-    assert response.json().get("id") is not None
 
 
 def test_get_one(client: TestClient, headers: dict):

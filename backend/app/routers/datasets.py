@@ -31,6 +31,9 @@ from app.models.metadata import (
     MetadataIn,
     MetadataDB,
     MetadataOut,
+    MetadataPatch,
+    validate_context,
+    patch_metadata
 )
 
 router = APIRouter()
@@ -310,8 +313,12 @@ async def save_file(
                 part_size=settings.MINIO_UPLOAD_CHUNK_SIZE,
             )  # async write chunk to minio
             version_id = response.version_id
+        if version_id is None:
+            # TODO: This occurs in testing when minio is not running
+            version_id = 999999999
         fileDB.version_id = version_id
         fileDB.version_num = 1
+        print(fileDB)
         await db["files"].replace_one({"_id": ObjectId(new_file_id)}, fileDB.to_mongo())
 
         # Add FileVersion entry and update file
@@ -325,43 +332,6 @@ async def save_file(
     else:
         raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
 
-
-@router.post("/{dataset_id}/metadata", response_model=MetadataOut)
-async def add_metadata(
-    dataset_id: str,
-    in_metadata: MetadataIn,
-    extractor_info: dict = {},
-    user=Depends(get_current_user),
-    db: MongoClient = Depends(dependencies.get_db),
-):
-    if (
-        dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
-    ) is not None:
-        dataset_ref = MongoDBRef(collection="datasets", id=dataset.id)
-
-        # Build MetadataAgent depending on whether extractor info is present
-        if len(extractor_info) > 0:
-            extractor_in = ExtractorIn(**extractor_info.dict())
-            if (
-                extractor := await db["extractors"].find_one(
-                    {"_id": extractor_in.id, "version": extractor_in.version}
-                )
-            ) is not None:
-                agent = MetadataAgent(creator=user, extractor=extractor)
-            else:
-                raise HTTPException(status_code=404, detail=f"Extractor not found")
-        else:
-            agent = MetadataAgent(creator=user)
-
-    metadata = MetadataDB(
-        **in_metadata.dict(),
-        resource=dataset_ref,
-        agent=agent,
-    )
-    new_metadata = await db["metadata"].insert_one(metadata.to_mongo())
-    found = await db["metadata"].find_one({"_id": new_metadata.inserted_id})
-    metadata_out = MetadataOut.from_mongo(found)
-    return metadata_out
 
 @router.get("/{dataset_id}/download", response_model=DatasetOut)
 async def download_dataset(
@@ -396,4 +366,3 @@ async def download_dataset(
         })
         return resp
     return None
-

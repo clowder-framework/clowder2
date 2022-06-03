@@ -1,3 +1,5 @@
+import {MetadataDefinitionOut, MetadataOut as Metadata, FileOut as FileSummary} from "../openapi/v2";
+
 export interface Dataset {
 	name: string;
 	description: string;
@@ -132,13 +134,18 @@ export interface DatasetState{
 	files: File[];
 	datasets: Dataset[];
 	newDataset: Dataset;
+	newFile: File;
 	about: Dataset;
 	folders: Folder[];
 	folderPath: string[];
 }
-
+export interface MetadataState{
+	metadataDefinitionList: MetadataDefinitionOut[],
+	datasetMetadataList: Metadata[],
+	fileMetadataList: Metadata[],
+}
 export interface FileState{
-	fileMetadata: FileMetadata;
+	fileSummary: FileSummary;
 	extractedMetadata: ExtractedMetadata;
 	metadataJsonld: MetadataJsonld[];
 	previews: FilePreview[];
@@ -159,6 +166,7 @@ export interface ErrorState{
 }
 
 export interface RootState {
+	metadata: MetadataState;
 	error: ErrorState;
 	file:FileState;
 	dataset:DatasetState;
