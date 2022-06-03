@@ -11,13 +11,14 @@ import {
 } from "../actions/dataset";
 import {CREATE_FILE, UPDATE_FILE, DELETE_FILE} from "../actions/file";
 import {DataAction} from "../types/action";
-import {Author, Dataset, DatasetState} from "../types/data";
+import {Author, Dataset, File, DatasetState} from "../types/data";
 
 const defaultState: DatasetState = {
 	files: [],
 	about: <Dataset>{"author":<Author>{}},
 	datasets: [],
 	newDataset: <Dataset>{},
+	newFile: <File>{},
 	folders: [],
 	folderPath: []
 };
@@ -33,9 +34,13 @@ const dataset = (state = defaultState, action: DataAction) => {
 			files: state.files.filter(file => file.id !== action.file.id),
 		});
 	// TODO rethink the pattern for file creation
+	// case CREATE_FILE:
+	// 	return Object.assign({}, state, {
+	// 		files: [...state.files, action.file]
+	// 	});
 	case CREATE_FILE:
 		return Object.assign({}, state, {
-			files: [...state.files, action.file]
+			newFile: action.file
 		});
 	case UPDATE_FILE:
 		return Object.assign({}, state, {

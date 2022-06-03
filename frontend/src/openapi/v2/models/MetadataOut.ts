@@ -2,8 +2,8 @@
 /* tslint:disable */
 /* eslint-disable */
 
-import type { DBRef } from './DBRef';
 import type { MetadataAgent } from './MetadataAgent';
+import type { MongoDBRef } from './MongoDBRef';
 
 export type MetadataOut = {
     id?: string;
@@ -11,10 +11,8 @@ export type MetadataOut = {
     context_url?: string;
     definition?: string;
     contents: any;
-    file?: string;
-    file_version?: string;
-    dataset?: string;
-    resource: DBRef;
+    resource: MongoDBRef;
     agent: MetadataAgent;
     created?: string;
+    description?: string;
 }

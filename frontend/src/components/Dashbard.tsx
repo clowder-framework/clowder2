@@ -1,7 +1,5 @@
 import React, {useEffect, useState} from "react";
-import {Box, Button, Dialog, DialogTitle, Grid, Link, Tab, Tabs, Typography} from "@mui/material";
-
-import {CreateDataset} from "./datasets/CreateDataset";
+import {Box, Button, Grid, Link, Tab, Tabs, Typography} from "@mui/material";
 
 import {Dataset, RootState} from "../types/data";
 import {useDispatch, useSelector} from "react-redux";
@@ -51,7 +49,6 @@ export const Dashboard = (): JSX.Element => {
 	const [nextDisabled, setNextDisabled] = useState<boolean>(false);
 	const [selectedTabIndex, setSelectedTabIndex] = useState(0);
 	const [selectedDataset, _] = useState<Dataset>();
-	const [creationOpen, setCreationOpen] = useState(false);
 
 	// confirmation dialog
 	const [confirmationOpen, setConfirmationOpen] = useState(false);
@@ -210,12 +207,7 @@ export const Dashboard = (): JSX.Element => {
 								<Typography className="content">Some quick example text to tell users why they should
 									upload
 									their own data</Typography>
-								<Link className="link"
-									  onClick={(e) => {
-										e.preventDefault();
-										setCreationOpen(true);
-									}}
-								>
+								<Link className="link" href="/create-dataset">
 									Create Dataset
 								</Link>
 							</Box>
@@ -236,13 +228,6 @@ export const Dashboard = (): JSX.Element => {
 							</Box>
 						</Grid>
 					</Grid>
-					<Dialog open={creationOpen} onClose={() => {
-						setCreationOpen(false);
-					}} fullWidth={true} aria-labelledby="create-dataset">
-						<DialogTitle id="form-dialog-title">Create New Dataset</DialogTitle>
-						{/*pass select to uploader so once upload succeeded, can jump to that dataset/file page*/}
-						<CreateDataset setOpen={setCreationOpen}/>
-					</Dialog>
 				</div>
 			</div>
 		</div>

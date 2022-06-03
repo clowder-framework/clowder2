@@ -30,19 +30,19 @@ export function fetchFileExtractedMetadata(id){
 	};
 }
 
-export const RECEIVE_FILE_METADATA = "RECEIVE_FILE_METADATA";
-export function fetchFileMetadata(id){
+export const RECEIVE_FILE_SUMMARY = "RECEIVE_FILE_SUMMARY";
+export function fetchFileSummary(id){
 	return (dispatch) => {
 		return V2.FilesService.getFileSummaryApiV2FilesFileIdSummaryGet(id)
 			.then(json => {
 				dispatch({
-					type: RECEIVE_FILE_METADATA,
-					fileMetadata: json,
+					type: RECEIVE_FILE_SUMMARY,
+					fileSummary: json,
 					receivedAt: Date.now(),
 				});
 			})
 			.catch(reason => {
-				dispatch(handleErrors(reason, fetchFileMetadata(id)));
+				dispatch(handleErrors(reason, fetchFileSummary(id)));
 			});
 	};
 }

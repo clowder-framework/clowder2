@@ -2,8 +2,8 @@
 /* tslint:disable */
 /* eslint-disable */
 
-export type DBRef = {
-    collection?: string;
+export type MongoDBRef = {
+    collection: string;
     resource_id: string;
-    version: number;
+    version?: number;
 }
