@@ -78,7 +78,7 @@ services:
         - ./backend/keycloak/clowder-realm-dev.json:/opt/keycloak/data/import/realm.json:ro
       command:
         - start-dev
-        - --http-relative-path /auth
+        - --http-relative-path /keycloak
         - --import-realm
       environment:
         DB_VENDOR: POSTGRES

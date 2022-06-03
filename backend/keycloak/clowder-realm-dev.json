@@ -1859,9 +1859,10 @@
     "parRequestUriLifespan": "60",
     "clientSessionMaxLifespan": "0",
     "clientOfflineSessionIdleTimeout": "0",
-    "cibaInterval": "5"
+    "cibaInterval": "5",
+    "frontendUrl": "http://localhost:8080/keycloak"
   },
-  "keycloakVersion": "17.0.0",
+  "keycloakVersion": "18.0.0",
   "userManagedAccessAllowed": false,
   "clientProfiles": {
     "profiles": []
