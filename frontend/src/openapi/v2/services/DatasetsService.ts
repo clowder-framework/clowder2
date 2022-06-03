@@ -1,7 +1,6 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { Body_add_metadata_api_v2_datasets__dataset_id__metadata_post } from '../models/Body_add_metadata_api_v2_datasets__dataset_id__metadata_post';
 import type { Body_save_file_api_v2_datasets__dataset_id__files_post } from '../models/Body_save_file_api_v2_datasets__dataset_id__files_post';
 import type { DatasetBase } from '../models/DatasetBase';
 import type { DatasetIn } from '../models/DatasetIn';
@@ -10,7 +9,6 @@ import type { DatasetPatch } from '../models/DatasetPatch';
 import type { FileOut } from '../models/FileOut';
 import type { FolderIn } from '../models/FolderIn';
 import type { FolderOut } from '../models/FolderOut';
-import type { MetadataOut } from '../models/MetadataOut';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { request as __request } from '../core/request';
 
@@ -247,28 +245,6 @@ export class DatasetsService {
         return __request({
             method: 'DELETE',
             path: `/api/v2/datasets/${datasetId}/folder/${folderId}`,
-            errors: {
-                422: `Validation Error`,
-            },
-        });
-    }
-
-    /**
-     * Add Metadata
-     * @param datasetId
-     * @param requestBody
-     * @returns MetadataOut Successful Response
-     * @throws ApiError
-     */
-    public static addMetadataApiV2DatasetsDatasetIdMetadataPost(
-        datasetId: string,
-        requestBody: Body_add_metadata_api_v2_datasets__dataset_id__metadata_post,
-    ): CancelablePromise<MetadataOut> {
-        return __request({
-            method: 'POST',
-            path: `/api/v2/datasets/${datasetId}/metadata`,
-            body: requestBody,
-            mediaType: 'application/json',
             errors: {
                 422: `Validation Error`,
             },

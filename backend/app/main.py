@@ -14,7 +14,8 @@ from app.keycloak_auth import get_token
 from app.routers import (
     folders,
 )
-from app.routers import users, files, datasets, collections, authentication, keycloak
+from app.routers import users, metadata, files, metadata_files, datasets, metadata_datasets, \
+    collections, authentication, keycloak
 
 # setup loggers
 # logging.config.fileConfig('logging.conf', disable_existing_loggers=False)
@@ -58,15 +59,33 @@ api_router.include_router(
     dependencies=[Depends(get_token)],
 )
 api_router.include_router(
+    metadata.router,
+    prefix="/metadata",
+    tags=["metadata"],
+    dependencies=[Depends(get_token)],
+)
+api_router.include_router(
     files.router,
     prefix="/files",
     tags=["files"],
     dependencies=[Depends(get_token)],
 )
 api_router.include_router(
+    metadata_files.router,
+    prefix="/files",
+    tags=["metadata"],
+    dependencies=[Depends(get_token)],
+)
+api_router.include_router(
     datasets.router,
     prefix="/datasets",
     tags=["datasets"],
+    dependencies=[Depends(get_token)],
+)
+api_router.include_router(
+    metadata_datasets.router,
+    prefix="/datasets",
+    tags=["metadata"],
     dependencies=[Depends(get_token)],
 )
 api_router.include_router(
