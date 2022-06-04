@@ -2,6 +2,8 @@ import datetime
 import io
 import os
 from typing import List, Optional
+import zipfile
+import shutil
 
 from bson import ObjectId
 from fastapi import APIRouter, HTTPException, Depends, File, UploadFile
@@ -40,6 +42,50 @@ router = APIRouter()
 
 clowder_bucket = os.getenv("MINIO_BUCKET_NAME", "clowder")
 
+async def process_folders_zip_upload(
+    path_to_folder: str,
+    dataset_id: str,
+    current_folder_id: str,
+    user=Depends(get_current_user),
+    db: MongoClient = Depends(dependencies.get_db),
+    fs: Minio = Depends(dependencies.get_fs),
+):
+    print('creating a dataset from a zip file')
+    contents = os.listdir(path_to_folder)
+    for item in contents:
+        if item != '.DS_Store':
+            path_to_item = os.path.join(path_to_folder, item)
+            if os.path.isdir(path_to_item):
+                print('create folder and call again')
+            if os.path.isfile(path_to_item):
+                with open(path_to_item, 'rb') as fh:
+                    # buf = io.BytesIO(fh.read())
+                    fileDB = FileDB(name=item, creator=user, dataset_id=dataset_id)
+                    new_file = await db["files"].insert_one(fileDB.to_mongo())
+                    new_file_id = new_file.inserted_id
+
+                    # Use unique ID as key for Minio and get initial version ID
+                    version_id = None
+                    # while content := file.file.read(
+                    #         settings.MINIO_UPLOAD_CHUNK_SIZE
+                    # ):  # async read chunk
+                    response = fs.put_object(
+                            settings.MINIO_BUCKET_NAME,
+                            str(new_file_id),
+                            fh,
+                            length=-1,
+                            part_size=settings.MINIO_UPLOAD_CHUNK_SIZE,
+                        )  # async write chunk to minio
+                    version_id = response.version_id
+                    if version_id is None:
+                        # TODO: This occurs in testing when minio is not running
+                        version_id = 999999999
+                    fileDB.version_id = version_id
+                    fileDB.version_num = 1
+                    print(fileDB)
+                    await db["files"].replace_one({"_id": ObjectId(new_file_id)}, fileDB.to_mongo())
+                print('add file to the current folder in the dataset')
+
 
 @router.post("", response_model=DatasetOut)
 async def save_dataset(
@@ -47,6 +93,7 @@ async def save_dataset(
     user=Depends(keycloak_auth.get_current_user),
     db: MongoClient = Depends(dependencies.get_db),
 ):
+    result = dataset_in.dict()
     dataset_db = DatasetDB(**dataset_in.dict(), author=user)
     new_dataset = await db["datasets"].insert_one(dataset_db.to_mongo())
     found = await db["datasets"].find_one({"_id": new_dataset.inserted_id})
@@ -190,6 +237,7 @@ async def add_folder(
     user=Depends(get_current_user),
     db: MongoClient = Depends(dependencies.get_db),
 ):
+    folder_dict = folder_in.dict()
     folder_db = FolderDB(
         **folder_in.dict(), author=user, dataset_id=PyObjectId(dataset_id)
     )
@@ -313,3 +361,36 @@ async def save_file(
         return fileDB
     else:
         raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
+
+
+@router.post("/createFromZip", response_model=DatasetOut)
+async def create_dataset_from_zip(
+    user=Depends(get_current_user),
+    db: MongoClient = Depends(dependencies.get_db),
+    fs: Minio = Depends(dependencies.get_fs),
+    file: UploadFile = File(...),
+):
+    # print('we have an upload file')
+    # with open(file.filename, "wb") as buffer:
+    #     shutil.copyfileobj(file.file, buffer)
+    unzipped_folder_name = file.filename.rstrip(".zip")
+    # path_to_zip = os.path.join(os.getcwd(), file.filename)
+    # print('where is the zip file?', path_to_zip)
+    # print(os.path.exists(path_to_zip))
+    # with zipfile.ZipFile(path_to_zip, 'r') as zip:
+    #     zip.extractall(os.getcwd())
+    # MACOSX_FOLDER = os.path.join(os.getcwd(), '__MACOSX')
+    # if os.path.exists(MACOSX_FOLDER):
+    #     shutil.rmtree(MACOSX_FOLDER)
+    print('now we create a dataset ')
+    dataset_name = unzipped_folder_name
+    dataset_description = unzipped_folder_name
+    ds_dict = {'name': dataset_name, 'description':dataset_description}
+    dataset_db = DatasetDB(**ds_dict, author=user)
+    new_dataset = await db["datasets"].insert_one(dataset_db.to_mongo())
+    found = await db["datasets"].find_one({"_id": new_dataset.inserted_id})
+    result = await process_folders_zip_upload(unzipped_folder_name, new_dataset.inserted_id, "", user, db, fs)
+    print('here')
+    # with zipfile.ZipFile(io.BytesIO(file.read()), 'r') as zip:
+    #     print('we unzipped')
+    raise HTTPException(status_code=404, detail=f"Method not implemented")
