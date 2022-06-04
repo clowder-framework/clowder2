@@ -381,6 +381,8 @@ async def create_dataset_from_zip(
     fs: Minio = Depends(dependencies.get_fs),
     file: UploadFile = File(...),
 ):
+    if file.endswith('.zip') == False:
+        raise HTTPException(status_code=404, detail=f"File is not a zip file")
     with open(file.filename, "wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
     unzipped_folder_name = file.filename.rstrip(".zip")
