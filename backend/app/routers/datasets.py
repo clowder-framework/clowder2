@@ -50,13 +50,11 @@ async def process_folders_zip_upload(
     db: MongoClient = Depends(dependencies.get_db),
     fs: Minio = Depends(dependencies.get_fs),
 ):
-    print('creating a dataset from a zip file')
     contents = os.listdir(path_to_folder)
     for item in contents:
         if item != '.DS_Store':
             path_to_item = os.path.join(path_to_folder, item)
             if os.path.isdir(path_to_item):
-                print('create folder and call again')
                 if current_folder_id == "":
                     folder_dict = {'dataset_id': dataset_id, 'name': item}
                 else:
@@ -74,11 +72,6 @@ async def process_folders_zip_upload(
                     new_file = await db["files"].insert_one(fileDB.to_mongo())
                     new_file_id = new_file.inserted_id
 
-                    # Use unique ID as key for Minio and get initial version ID
-                    version_id = None
-                    # while content := file.file.read(
-                    #         settings.MINIO_UPLOAD_CHUNK_SIZE
-                    # ):  # async read chunk
                     response = fs.put_object(
                             settings.MINIO_BUCKET_NAME,
                             str(new_file_id),
@@ -86,6 +79,7 @@ async def process_folders_zip_upload(
                             length=-1,
                             part_size=settings.MINIO_UPLOAD_CHUNK_SIZE,
                         )  # async write chunk to minio
+
                     version_id = response.version_id
                     if version_id is None:
                         # TODO: This occurs in testing when minio is not running
@@ -93,8 +87,6 @@ async def process_folders_zip_upload(
                     fileDB.version_id = version_id
                     fileDB.version_num = 1
                     print(fileDB)
-                    await db["files"].replace_one({"_id": ObjectId(new_file_id)}, fileDB.to_mongo())
-                print('add file to the current folder in the dataset')
 
 
 
@@ -387,20 +379,22 @@ async def create_dataset_from_zip(
         shutil.copyfileobj(file.file, buffer)
     unzipped_folder_name = file.filename.rstrip(".zip")
     path_to_zip = os.path.join(os.getcwd(), file.filename)
-    print('where is the zip file?', path_to_zip)
-    print(os.path.exists(path_to_zip))
+
     with zipfile.ZipFile(path_to_zip, 'r') as zip:
         zip.extractall(os.getcwd())
-    MACOSX_FOLDER = os.path.join(os.getcwd(), '__MACOSX')
-    if os.path.exists(MACOSX_FOLDER):
-        shutil.rmtree(MACOSX_FOLDER)
+
+    macos_folder = os.path.join(os.getcwd(), '__MACOSX')
+    if os.path.exists(macos_folder):
+        shutil.rmtree(macos_folder)
+
     dataset_name = unzipped_folder_name
     dataset_description = unzipped_folder_name
-    ds_dict = {'name': dataset_name, 'description':dataset_description}
+    ds_dict = {'name': dataset_name, 'description': dataset_description}
     dataset_db = DatasetDB(**ds_dict, author=user)
     new_dataset = await db["datasets"].insert_one(dataset_db.to_mongo())
     found = await db["datasets"].find_one({"_id": new_dataset.inserted_id})
     result = await process_folders_zip_upload(unzipped_folder_name, new_dataset.inserted_id, "", user, db, fs)
+
     try:
         os.remove(file.filename)
     except Exception as e:
