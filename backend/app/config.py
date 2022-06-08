@@ -41,8 +41,10 @@ class Settings(BaseSettings):
     auth_client_id = "clowder2-backend"
     auth_url = f"{auth_base}/auth/realms/{auth_realm}/protocol/openid-connect/auth?client_id={auth_client_id}&response_type=code"
     # scope=openid email&redirect_uri=http://<domain.com>/<redirect-path>&kc_locale=<two-digit-lang-code>
-    auth_register_url = f"{auth_base}/auth/realms/{auth_realm}/protocol/openid-connect/registrations?client_id" \
-                f"={auth_client_id}&response_type=code"
+    auth_register_url = (
+        f"{auth_base}/auth/realms/{auth_realm}/protocol/openid-connect/registrations?client_id"
+        f"={auth_client_id}&response_type=code"
+    )
     auth_token_url = (
         f"{auth_base}/auth/realms/{auth_realm}/protocol/openid-connect/token"
     )

@@ -33,31 +33,35 @@ from app.models.metadata import (
     MetadataOut,
     MetadataPatch,
     validate_context,
-    patch_metadata
+    patch_metadata,
 )
 
 router = APIRouter()
 
 clowder_bucket = os.getenv("MINIO_BUCKET_NAME", "clowder")
 
+
 async def get_folder_hierarchy(
-  folder_id: str,
-  hierarchy: str,
-  db: MongoClient,
+    folder_id: str,
+    hierarchy: str,
+    db: MongoClient,
 ):
     found = await db["folders"].find_one({"_id": ObjectId(folder_id)})
     folder = FolderOut.from_mongo(found)
     folder_name = folder.name
-    hierarchy = folder_name + '/' + hierarchy
+    hierarchy = folder_name + "/" + hierarchy
     folder_parent = folder.parent_folder
     if folder_parent is not None:
-        parent_folder_found = await db["folders"].find_one({"_id": ObjectId(folder_parent)})
+        parent_folder_found = await db["folders"].find_one(
+            {"_id": ObjectId(folder_parent)}
+        )
         parent_folder = FolderOut.from_mongo(parent_folder_found)
-        hierarchy = parent_folder.name + '/' + hierarchy
+        hierarchy = parent_folder.name + "/" + hierarchy
         parent_folder_parent = parent_folder.parent_folder
         if parent_folder_parent is not None:
             hierarchy = await get_folder_hierarchy(str(parent_folder.id), hierarchy, db)
     return hierarchy
+
 
 @router.post("", response_model=DatasetOut)
 async def save_dataset(
@@ -335,10 +339,9 @@ async def download_dataset(
     user=Depends(get_current_user),
     db: MongoClient = Depends(dependencies.get_db),
     fs: Minio = Depends(dependencies.get_fs),
-
 ):
     if (
-            dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
+        dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
     ) is not None:
         dataset = DatasetOut.from_mongo(dataset)
         stream = io.BytesIO()
@@ -354,8 +357,12 @@ async def download_dataset(
             content.close()
             content.release_conn()
         z.close()
-        return Response(stream.getvalue(), media_type="application/x-zip-compressed", headers={
-            'Content-Disposition': f'attachment;filename={dataset.name + ".zip"}'
-        })
+        return Response(
+            stream.getvalue(),
+            media_type="application/x-zip-compressed",
+            headers={
+                "Content-Disposition": f'attachment;filename={dataset.name + ".zip"}'
+            },
+        )
     else:
         raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")

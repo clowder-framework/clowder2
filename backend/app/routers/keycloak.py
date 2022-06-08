@@ -26,6 +26,7 @@ from app.models.tokens import TokenDB
 router = APIRouter()
 security = HTTPBearer()
 
+
 @router.get("/register")
 async def register() -> RedirectResponse:
     return RedirectResponse(settings.auth_register_url)

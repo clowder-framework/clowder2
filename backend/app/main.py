@@ -10,8 +10,17 @@ from app.keycloak_auth import create_realm_and_client, get_token
 from app.routers import (
     folders,
 )
-from app.routers import users, metadata, files, metadata_files, datasets, metadata_datasets, \
-    collections, authentication, keycloak
+from app.routers import (
+    users,
+    metadata,
+    files,
+    metadata_files,
+    datasets,
+    metadata_datasets,
+    collections,
+    authentication,
+    keycloak,
+)
 
 app = FastAPI(
     title=settings.APP_NAME, openapi_url=f"{settings.API_V2_STR}/openapi.json"

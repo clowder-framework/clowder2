@@ -22,10 +22,13 @@ def test_create(client: TestClient, headers: dict):
 
     # Upload test file to dataset
     dataset_id = response.json().get("id")
-    with open(dummy_file, "w") as dummy: pass
+    with open(dummy_file, "w") as dummy:
+        pass
     file_data = {"file": open(dummy_file, "rb")}
     response = client.post(
-        f"{settings.API_V2_STR}/datasets/{dataset_id}/files", headers=headers, files=file_data
+        f"{settings.API_V2_STR}/datasets/{dataset_id}/files",
+        headers=headers,
+        files=file_data,
     )
     os.remove(dummy_file)
     assert response.status_code == 200
@@ -41,10 +44,13 @@ def test_get_one(client: TestClient, headers: dict):
 
     # Upload test file to dataset
     dataset_id = response.json().get("id")
-    with open(dummy_file, "w") as dummy: pass
+    with open(dummy_file, "w") as dummy:
+        pass
     file_data = {"file": open(dummy_file, "rb")}
     response = client.post(
-        f"{settings.API_V2_STR}/datasets/{dataset_id}/files", headers=headers, files=file_data
+        f"{settings.API_V2_STR}/datasets/{dataset_id}/files",
+        headers=headers,
+        files=file_data,
     )
     os.remove(dummy_file)
     assert response.status_code == 200
