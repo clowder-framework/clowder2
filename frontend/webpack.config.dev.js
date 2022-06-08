@@ -36,7 +36,8 @@ export default {
 				"NODE_ENV": JSON.stringify("development"),
 				// if left not set, it will default to same host/port as frontend
 				"CLOWDER_REMOTE_HOSTNAME": JSON.stringify(process.env.CLOWDER_REMOTE_HOSTNAME),
-				"APIKEY": JSON.stringify(process.env.APIKEY)
+				"APIKEY": JSON.stringify(process.env.APIKEY),
+				"KeycloakBaseURL": JSON.stringify(process.env.KeycloakBaseURL),
 			},
 			__DEV__: true
 		}),

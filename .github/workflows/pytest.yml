@@ -1,6 +1,9 @@
-# .github/workflows/app.yaml
-name: PyTest
+name: Pytest
 on: push
+
+defaults:
+  run:
+    working-directory: backend
 
 jobs:
   test:
@@ -30,10 +33,20 @@ jobs:
         if: steps.cache-pipenv.outputs.cache-hit != 'true'
         run: |
           pipenv install --deploy --dev
-      - name: Start MongoDB
-        uses: supercharge/mongodb-github-action@1.6.0
-        with:
-          mongodb-version: 5.0
+
+#      - name: Start MongoDB
+#        uses: supercharge/mongodb-github-action@1.6.0
+#        with:
+#          mongodb-version: 5.0
+
+      - name: Start env
+        run: docker-compose -f ../docker-compose.dev.yml up -d
+
+      # wait for docker containers to come up before running tests
+      - name: Sleep for 60 seconds
+        run: sleep 60s
+        shell: bash
+
       - name: Run test suite
         run: |
           pipenv run pytest -v

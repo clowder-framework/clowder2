@@ -33,7 +33,7 @@ from app.models.metadata import (
     MetadataOut,
     MetadataPatch,
     validate_context,
-    patch_metadata
+    patch_metadata,
 )
 
 router = APIRouter()
