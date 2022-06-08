@@ -12,7 +12,6 @@ beanie = "*"
 passlib = "*"
 bcrypt = "*"
 pyjwt = "*"
-black = "*"
 minio = "*"
 python-multipart = "*"
 pipfile = "*"
@@ -22,6 +21,7 @@ python-keycloak = "*"
 [dev-packages]
 requests = "*"
 pytest = "*"
+black = "*"
 
 [requires]
 python_version = "3.9"
