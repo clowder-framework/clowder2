@@ -304,8 +304,8 @@ export class MetadataService {
      */
     public static deleteDatasetMetadataApiV2DatasetsDatasetIdMetadataDelete(
         datasetId: string,
-        formData?: Body_delete_dataset_metadata_api_v2_datasets__dataset_id__metadata_delete,
-    ): CancelablePromise<Array<MetadataOut>> {
+        formData: Body_delete_dataset_metadata_api_v2_datasets__dataset_id__metadata_delete,
+    ): CancelablePromise<MetadataOut> {
         return __request({
             method: 'DELETE',
             path: `/api/v2/datasets/${datasetId}/metadata`,

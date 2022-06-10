@@ -26,6 +26,7 @@ export type { HTTPValidationError } from './models/HTTPValidationError';
 export type { MetadataAgent } from './models/MetadataAgent';
 export type { MetadataDefinitionIn } from './models/MetadataDefinitionIn';
 export type { MetadataDefinitionOut } from './models/MetadataDefinitionOut';
+export type { MetadataDelete } from './models/MetadataDelete';
 export type { MetadataField } from './models/MetadataField';
 export type { MetadataIn } from './models/MetadataIn';
 export type { MetadataOut } from './models/MetadataOut';

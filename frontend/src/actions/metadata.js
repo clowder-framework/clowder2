@@ -89,10 +89,20 @@ export function postFileMetadata(fileId, metadata){
 }
 
 export const DELETE_DATASET_METADATA = "DELETE_DATASET_METADATA";
-export function deleteDatasetMetadata(datasetId, metadataId){
+export function deleteDatasetMetadata(datasetId, metadata){
 	return (dispatch) =>{
-		return V2.MetadataService.deleteDatasetMetadataApiV2DatasetsDatasetIdMetadataDelete(datasetId, )
-	}
+		return V2.MetadataService.deleteDatasetMetadataApiV2DatasetsDatasetIdMetadataDelete(datasetId, metadata).
+			then(json => {
+				dispatch({
+					type: DELETE_DATASET_METADATA,
+					metadata: json,
+					receivedAt: Date.now(),
+				});
+			})
+			.catch(reason => {
+				dispatch(handleErrors(reason, deleteDatasetMetadata(datasetId, metadata)));
+			});
+	};
 }
 
 export const UPDATE_DATASET_METADATA = "UPDATE_DATASET_METADATA";
