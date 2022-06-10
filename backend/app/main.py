@@ -1,3 +1,7 @@
+import logging
+import random
+import string
+import time
 from urllib.request import Request
 
 import uvicorn
@@ -6,7 +10,7 @@ from fastapi import FastAPI, APIRouter, Depends
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import settings
-from app.keycloak_auth import create_realm_and_client, get_token
+from app.keycloak_auth import get_token
 from app.routers import (
     folders,
 )
@@ -22,10 +26,30 @@ from app.routers import (
     keycloak,
 )
 
+# setup loggers
+# logging.config.fileConfig('logging.conf', disable_existing_loggers=False)
+
+logger = logging.getLogger(__name__)
+
 app = FastAPI(
     title=settings.APP_NAME, openapi_url=f"{settings.API_V2_STR}/openapi.json"
 )
 BaseConfig.arbitrary_types_allowed = True
+
+
+# @app.middleware("http")
+# async def log_requests(request: Request, call_next):
+#     idem = ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
+#     logger.info(f"rid={idem} start request path={request.url.path}")
+#     start_time = time.time()
+#
+#     response = await call_next(request)
+#
+#     process_time = (time.time() - start_time) * 1000
+#     formatted_process_time = '{0:.2f}'.format(process_time)
+#     logger.info(f"rid={idem} completed_in={formatted_process_time}ms status_code={response.status_code}")
+#
+#     return response
 
 app.add_middleware(
     CORSMiddleware,
@@ -92,7 +116,8 @@ app.include_router(api_router, prefix=settings.API_V2_STR)
 @app.on_event("startup")
 async def startup_db_client():
     # create a keycloak realm and client
-    create_realm_and_client()
+    # create_realm_and_client()
+    pass
 
 
 @app.on_event("shutdown")

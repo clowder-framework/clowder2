@@ -4,6 +4,7 @@ interface Config{
 	hostname: string;
 	apikey: string;
 	GHIssueBaseURL: string;
+	KeycloakBaseURL: string;
 	KeycloakLogin: string;
 	KeycloakLogout: string;
 	KeycloakRefresh: string;
@@ -24,9 +25,10 @@ V2.OpenAPI.BASE = config.hostname;
 config["GHIssueBaseURL"] = "https://github.com/clowder-framework/clowder2-frontend/issues/new?title=%5BClowder+V2%5D";
 
 // Backend Keycloak login url
-config["KeycloakLogin"] = "http://localhost:8000/api/v2/auth/login";
-config["KeycloakLogout"] = "http://localhost:8000/api/v2/auth/logout";
-config["KeycloakRefresh"] = "http://localhost:8000/api/v2/auth/refresh_token";
-config["KeycloakRegister"] = "http://localhost:8000/api/v2/auth/register";
+config["KeycloakBaseURL"] = process.env.KeycloakBaseURL || config.hostname + "/api/v2/auth";
+config["KeycloakLogin"] = config.KeycloakBaseURL + "/login";
+config["KeycloakLogout"] = config.KeycloakBaseURL + "/logout";
+config["KeycloakRefresh"] = config.KeycloakBaseURL + "/refresh_token";
+config["KeycloakRegister"] = "/register";
 
 export default config;

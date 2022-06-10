@@ -196,6 +196,7 @@ async def delete_dataset(
         await db["datasets"].delete_one({"_id": ObjectId(dataset_id)})
         async for file in db["files"].find({"dataset_id": ObjectId(dataset_id)}):
             fs.remove_object(clowder_bucket, str(file))
+            db["file_versions"].delete_many({"file_id": file['_id']})
         files_deleted = await db.files.delete_many({"dataset_id": ObjectId(dataset_id)})
         folders_delete = await db["folders"].delete_many(
             {"dataset_id": ObjectId(dataset_id)}

@@ -18,48 +18,12 @@ x-minio-common: &minio-common
 
 services:
 
-  reverse-proxy:
-    # The official v2 Traefik docker image
-    image: traefik:v2.5
-    # Enables the web UI and tells Traefik to listen to docker
-    command: --api.insecure=true --providers.docker
-    ports:
-      # The HTTP port
-      - "80:80"
-      # The Web UI (enabled by --api.insecure=true)
-      - "8080:8080"
-    volumes:
-      # So that Traefik can listen to the Docker events
-      - /var/run/docker.sock:/var/run/docker.sock
-
-  backend:
-    image: 'clowder/clowder2-backend'
-    build:
-      context: .
-      dockerfile: Dockerfile
-    environment:
-      MONGODB_URL: mongodb://mongo:27017
-      MINIO_SERVER_URL: minio-nginx:9000
-    depends_on:
-      - mongo
-      - minio1
-      - minio2
-      - minio3
-      - minio4
-      - keycloak
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.backend.rule=Host(`clowder.docker.localhost`)"
-      - "traefik.http.services.backend.loadbalancer.server.port=8000"
-
   mongo:
     image: mongo:5.0
-    restart: always
+    ports:
+      - "27017:27017"
     volumes:
       - mongo:/data/db
-#    environment:
-#      MONGO_INITDB_ROOT_USERNAME: root
-#      MONGO_INITDB_ROOT_PASSWORD: example
 
   minio1:
     <<: *minio-common
@@ -109,7 +73,13 @@ services:
         POSTGRES_PASSWORD: password
 
   keycloak:
-      image: quay.io/keycloak/keycloak:legacy
+      image: quay.io/keycloak/keycloak:latest
+      volumes:
+        - ./backend/keycloak/clowder-realm-dev.json:/opt/keycloak/data/import/realm.json:ro
+      command:
+        - start-dev
+        - --http-relative-path /keycloak
+        - --import-realm
       environment:
         DB_VENDOR: POSTGRES
         DB_ADDR: postgres
@@ -117,16 +87,18 @@ services:
         DB_USER: keycloak
         DB_SCHEMA: public
         DB_PASSWORD: password
-        KEYCLOAK_USER: admin
-        KEYCLOAK_PASSWORD: admin
-        # Uncomment the line below if you want to specify JDBC parameters. The parameter below is just an example, and it shouldn't be used in production without knowledge. It is highly recommended that you read the PostgreSQL JDBC driver documentation in order to use it.
-        #JDBC_PARAMS: "ssl=true"
+        KEYCLOAK_ADMIN: admin
+        KEYCLOAK_ADMIN_PASSWORD: admin
+      ports:
+        - 8080:8080
       depends_on:
         - postgres
-      labels:
-        - "traefik.enable=true"
-        - "traefik.http.routers.keycloak.rule=Host(`localhost`) && PathPrefix(`/auth`)"
-        - "traefik.http.services.keycloak.loadbalancer.server.port=8080"
+
+  maildev:
+    image: maildev/maildev
+    ports:
+      - "1080:80"
+      - "25:25"
 
 ## By default this config uses default local driver,
 ## For custom volumes replace with volume driver configuration.
@@ -137,3 +109,4 @@ volumes:
   data3:
   data4:
   postgres_data:
+    driver: local
