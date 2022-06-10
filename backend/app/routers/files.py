@@ -58,7 +58,9 @@ async def update_file(
         updated_file.created = datetime.utcnow()
         updated_file.version_id = version_id
         updated_file.version_num = updated_file.version_num + 1
-        await db["files"].replace_one({"_id": ObjectId(file_id)}, updated_file.to_mongo())
+        await db["files"].replace_one(
+            {"_id": ObjectId(file_id)}, updated_file.to_mongo()
+        )
 
         # Put entry in FileVersion collection
         new_version = FileVersion(
@@ -114,7 +116,7 @@ async def delete_file(
         # TODO: Deleting individual versions may require updating version_id in mongo, or deleting entire document
         fs.remove_object(settings.MINIO_BUCKET_NAME, str(file_id))
         removed_file = await db["files"].delete_one({"_id": ObjectId(file_id)})
-        removed_vers = await db["file_versions"].delete({"file_id": ObjectId(file_id)})
+        removed_vers = await db["file_versions"].delete_many({"file_id": ObjectId(file_id)})
         return {"deleted": file_id}
     else:
         raise HTTPException(status_code=404, detail=f"File {file_id} not found")

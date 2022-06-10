@@ -12,8 +12,16 @@ from pymongo import MongoClient
 from app import dependencies
 from app.keycloak_auth import get_user, get_current_user
 from app.models.pyobjectid import PyObjectId
-from app.models.metadata import MetadataDefinitionIn, MetadataDefinitionDB, MetadataDefinitionOut, \
-    MetadataIn, MetadataDB, MetadataOut, MetadataPatch, patch_metadata
+from app.models.metadata import (
+    MetadataDefinitionIn,
+    MetadataDefinitionDB,
+    MetadataDefinitionOut,
+    MetadataIn,
+    MetadataDB,
+    MetadataOut,
+    MetadataPatch,
+    patch_metadata,
+)
 
 router = APIRouter()
 
@@ -24,8 +32,15 @@ async def save_metadata_definition(
     user=Depends(get_current_user),
     db: MongoClient = Depends(dependencies.get_db),
 ):
-    if (md_def := await db["metadata.definitions"].find_one({"name": definition_in.name})) is not None:
-        raise HTTPException(status_code=409, detail=f"Metadata definition named {definition_in.name} already exists.")
+    if (
+        md_def := await db["metadata.definitions"].find_one(
+            {"name": definition_in.name}
+        )
+    ) is not None:
+        raise HTTPException(
+            status_code=409,
+            detail=f"Metadata definition named {definition_in.name} already exists.",
+        )
 
     md_def = MetadataDefinitionDB(**definition_in.dict(), creator=user)
     new_md_def = await db["metadata.definitions"].insert_one(md_def.to_mongo())
@@ -40,15 +55,15 @@ async def get_metadata_definition(
     user=Depends(get_current_user),
     db: MongoClient = Depends(dependencies.get_db),
     skip: int = 0,
-    limit: int = 2
+    limit: int = 2,
 ):
     definitions = []
-    if name is None: root_query = db["metadata.definitions"].find()
-    else: root_query = db["metadata.definitions"].find({"name": name})
+    if name is None:
+        root_query = db["metadata.definitions"].find()
+    else:
+        root_query = db["metadata.definitions"].find({"name": name})
 
-    for doc in (
-        await root_query.skip(skip).limit(limit).to_list(length=limit)
-    ):
+    for doc in await root_query.skip(skip).limit(limit).to_list(length=limit):
         definitions.append(MetadataDefinitionOut.from_mongo(doc))
     return definitions
 
@@ -66,10 +81,14 @@ async def update_metadata(
     Returns:
         Metadata document that was updated
     """
-    if (md := await db["metadata"].find_one({"_id": PyObjectId(metadata_id)})) is not None:
+    if (
+        md := await db["metadata"].find_one({"_id": PyObjectId(metadata_id)})
+    ) is not None:
         # TODO: Refactor this with permissions checks etc.
         contents = metadata_in.contents
         result = await patch_metadata(md, contents, db)
         return result
     else:
-        raise HTTPException(status_code=404, detail=f"Metadata {metadata_id} found to update")
+        raise HTTPException(
+            status_code=404, detail=f"Metadata {metadata_id} found to update"
+        )

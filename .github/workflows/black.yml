@@ -1,6 +1,20 @@
-name: Lint
+name: Backend Lint
 
-on: [push, pull_request]
+on:
+  push:
+    branches:
+      - 'main'
+      - 'release/*'
+    tags:
+      - 'v*'
+  pull_request:
+    branches:
+      - 'main'
+      - 'release/*'
+
+defaults:
+  run:
+    working-directory: backend
 
 jobs:
   lint:
