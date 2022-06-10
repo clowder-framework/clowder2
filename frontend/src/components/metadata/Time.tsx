@@ -5,7 +5,7 @@ import {TextField} from "@mui/material";
 import {MetadataButtonGroup} from "./MetadataButtonGroup";
 
 export const Time = (props) => {
-	const {widgetName, metadataId, contents, updateMetadata, saveMetadata, resourceId} = props;
+	const {widgetName, metadataId, contents, updateMetadata, saveMetadata, deleteMetadata, resourceId} = props;
 	const [value, setValue] = useState(contents && contents.time? contents.time: new Date());
 	const [readOnly, setReadOnly] = useState(!!metadataId);
 
@@ -30,6 +30,7 @@ export const Time = (props) => {
 								 metadataId={metadataId}
 								 updateMetadata={updateMetadata}
 								 saveMetadata={saveMetadata}
+								 deleteMetadata={deleteMetadata}
 								 resourceId={resourceId}
 								 contents={{
 									 "time": value

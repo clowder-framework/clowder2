@@ -4,7 +4,7 @@ import {Button} from "@mui/material";
 
 export const MetadataButtonGroup = (props) => {
 
-	const {readOnly, setReadOnly, metadataId, updateMetadata, saveMetadata, resourceId, contents, widgetName} = props;
+	const {readOnly, setReadOnly, metadataId, updateMetadata, deleteMetadata, saveMetadata, resourceId, contents, widgetName} = props;
 
 	return (
 		<>
@@ -28,6 +28,12 @@ export const MetadataButtonGroup = (props) => {
 									"contents": contents});
 								setReadOnly(true);
 							}}>Update</Button>
+							<Button variant="contained" sx={{float:"right"}} onClick={() => {
+								// update metadata
+								deleteMetadata(resourceId, {
+									"id":metadataId,
+									"definition": widgetName});
+							}}>Delete</Button>
 						</>
 						:
 						<>

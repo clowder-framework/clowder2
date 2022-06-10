@@ -4,7 +4,7 @@ import {useState} from "react";
 import {MetadataButtonGroup} from "./MetadataButtonGroup";
 
 export const Unit = (props) => {
-	const {widgetName, metadataId, contents, updateMetadata, saveMetadata, resourceId} = props;
+	const {widgetName, metadataId, contents, updateMetadata, saveMetadata, deleteMetadata, resourceId} = props;
 	const [unit, setUnit] = React.useState(contents && contents.unit? contents.unit: "");
 	const [readOnly, setReadOnly] = useState(!!metadataId);
 
@@ -32,6 +32,7 @@ export const Unit = (props) => {
 								 metadataId={metadataId}
 								 updateMetadata={updateMetadata}
 								 saveMetadata={saveMetadata}
+								 deleteMetadata={deleteMetadata}
 								 resourceId={resourceId}
 								 contents={{
 									 "unit":unit
