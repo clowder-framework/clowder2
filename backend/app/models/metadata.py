@@ -182,6 +182,10 @@ class MetadataPatch(MetadataIn):
     metadata_id: Optional[str]  # specific metadata ID we are patching
 
 
+class MetadataDelete(MetadataIn):
+    metadata_id: Optional[str]  # specific metadata ID we are deleting
+
+
 class MetadataDB(MetadataBase):
     resource: MongoDBRef
     agent: MetadataAgent

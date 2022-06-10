@@ -23,7 +23,7 @@ from app.models.metadata import (
     MetadataOut,
     MetadataPatch,
     validate_context,
-    patch_metadata,
+    patch_metadata, MetadataDelete,
 )
 
 router = APIRouter()
@@ -266,9 +266,10 @@ async def get_dataset_metadata(
         raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
 
 
-@router.delete("/{dataset_id}/metadata", response_model=List[MetadataOut])
+@router.delete("/{dataset_id}/metadata", response_model=MetadataOut)
 async def delete_dataset_metadata(
     dataset_id: str,
+    metadata_in: Optional[MetadataDelete],
     extractor_name: Optional[str] = Form(None),
     extractor_version: Optional[float] = Form(None),
     user=Depends(get_current_user),
@@ -277,16 +278,35 @@ async def delete_dataset_metadata(
     if (
         dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
     ) is not None:
-        query = {"resource.resource_id": ObjectId(file_id)}
 
+        # filter by metadata_id or definition
+        query = {"resource.resource_id": ObjectId(dataset_id)}
+        contents = metadata_in.contents
+        if metadata_in.metadata_id is not None:
+            # If a specific metadata_id is provided, delete the matching entry
+            if (
+                existing_md := await db["metadata"].find_one(
+                    {"_id": ObjectId(metadata_in.metadata_id)}
+                )
+            ) is not None:
+                query["_id"] = metadata_in.metadata_id
+        else:
+            # Use provided definition name as filter
+            # TODO: Should context_url also be unique to the file version?
+            definition = metadata_in.definition
+            if definition is not None:
+                query["definition"] = definition
+
+        # if extractor info is provided
+        # TODO question can metadata have multiple entries for the same extractor?
         if extractor_name is not None:
             query["agent.extractor.name"] = extractor_name
         if extractor_version is not None:
             query["agent.extractor.version"] = extractor_version
 
         if (md := await db["metadata"].find_one(query)) is not None:
-            db["metadata"].remove({"_id": md["_id"]})
-            return 200
+            metadata_deleted = db["metadata"].remove({"_id": md["_id"]})
+            return MetadataOut.from_mongo(metadata_deleted)
         else:
             raise HTTPException(
                 status_code=404, detail=f"No metadata found with that criteria"
