@@ -197,12 +197,12 @@ async def delete_dataset(
         await db.metadata.delete_many({"resource.resource_id": ObjectId(dataset_id)})
         async for file in db["files"].find({"dataset_id": ObjectId(dataset_id)}):
             fs.remove_object(clowder_bucket, str(file))
-            await db.metadata.delete_many({"resource.resource_id": ObjectId(file["_id"])})
+            await db.metadata.delete_many(
+                {"resource.resource_id": ObjectId(file["_id"])}
+            )
             await db["file_versions"].delete_many({"file_id": ObjectId(file["_id"])})
         await db.files.delete_many({"dataset_id": ObjectId(dataset_id)})
-        await db["folders"].delete_many(
-            {"dataset_id": ObjectId(dataset_id)}
-        )
+        await db["folders"].delete_many({"dataset_id": ObjectId(dataset_id)})
         return {"deleted": dataset_id}
     else:
         raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
