@@ -269,7 +269,7 @@ async def get_dataset_metadata(
 @router.delete("/{dataset_id}/metadata", response_model=MetadataOut)
 async def delete_dataset_metadata(
     dataset_id: str,
-    metadata_in: Optional[MetadataDelete],
+    metadata_in: MetadataDelete,
     extractor_name: Optional[str] = Form(None),
     extractor_version: Optional[float] = Form(None),
     user=Depends(get_current_user),
@@ -281,7 +281,6 @@ async def delete_dataset_metadata(
 
         # filter by metadata_id or definition
         query = {"resource.resource_id": ObjectId(dataset_id)}
-        contents = metadata_in.contents
         if metadata_in.metadata_id is not None:
             # If a specific metadata_id is provided, delete the matching entry
             if (
