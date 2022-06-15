@@ -246,8 +246,8 @@ export const Dataset = (): JSX.Element => {
 									<MenuItem sx={optionMenuItem}
 											  onClick={() => {
 												  handleOptionClose();
-											  }} disabled={true}>
-										Download All
+											  }}>
+										Download Dataset
 									</MenuItem>
 									<MenuItem sx={optionMenuItem}
 											  onClick={() => {
