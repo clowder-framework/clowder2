@@ -186,7 +186,7 @@ export function datasetDownloaded(datasetId, filename = "") {
 		} else {
 			filename = `${datasetId}.zip`;
 		}
-		const endpoint = `${config.hostname}/datasets/${datasetId}/download?superAdmin=true`;
+		const endpoint = `${config.hostname}/api/v2/datasets/${datasetId}/download`;
 		const response = await fetch(endpoint, {method: "GET", mode: "cors", headers: await getHeader()});
 
 		if (response.status === 200) {
