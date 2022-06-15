@@ -268,10 +268,10 @@ async def get_dataset_metadata(
 
 @router.delete("/{dataset_id}/metadata", response_model=MetadataOut)
 async def delete_dataset_metadata(
-    dataset_id: str,
     metadata_in: MetadataDelete,
-    extractor_name: Optional[str] = Form(None),
-    extractor_version: Optional[float] = Form(None),
+    dataset_id: str,
+    # extractor_name: Optional[str] = Form(None),
+    # extractor_version: Optional[float] = Form(None),
     user=Depends(get_current_user),
     db: MongoClient = Depends(dependencies.get_db),
 ):
@@ -298,10 +298,10 @@ async def delete_dataset_metadata(
 
         # if extractor info is provided
         # TODO question can metadata have multiple entries for the same extractor?
-        if extractor_name is not None:
-            query["agent.extractor.name"] = extractor_name
-        if extractor_version is not None:
-            query["agent.extractor.version"] = extractor_version
+        if metadata_in.extractor_info.name is not None:
+            query["agent.extractor.name"] = metadata_in.extractor_info.name
+        if metadata_in.extractor_info.version is not None:
+            query["agent.extractor.version"] = metadata_in.extractor_info.version
 
         if (md := await db["metadata"].find_one(query)) is not None:
             metadata_deleted = db["metadata"].remove({"_id": md["_id"]})

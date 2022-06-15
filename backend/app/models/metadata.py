@@ -13,7 +13,7 @@ from pymongo import MongoClient
 from app.models.mongomodel import MongoModel
 from app.models.pyobjectid import PyObjectId
 from app.models.users import UserOut
-from app.models.extractors import ExtractorIn, ExtractorOut
+from app.models.extractors import ExtractorIn, ExtractorOut, ExtractorIdentifier
 
 
 class MongoDBRef(BaseModel):
@@ -182,8 +182,10 @@ class MetadataPatch(MetadataIn):
     metadata_id: Optional[str]  # specific metadata ID we are patching
 
 
-class MetadataDelete(MetadataIn):
+class MetadataDelete(MongoModel):
     metadata_id: Optional[str]  # specific metadata ID we are deleting
+    definition: Optional[str]
+    extractor_info: Optional[ExtractorIdentifier]
 
 
 class MetadataDB(MetadataBase):

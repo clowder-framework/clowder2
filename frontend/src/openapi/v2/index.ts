@@ -5,7 +5,6 @@ export { ApiError } from './core/ApiError';
 export { CancelablePromise } from './core/CancelablePromise';
 export { OpenAPI } from './core/OpenAPI';
 
-export type { Body_delete_dataset_metadata_api_v2_datasets__dataset_id__metadata_delete } from './models/Body_delete_dataset_metadata_api_v2_datasets__dataset_id__metadata_delete';
 export type { Body_delete_file_metadata_api_v2_files__file_id__metadata_delete } from './models/Body_delete_file_metadata_api_v2_files__file_id__metadata_delete';
 export type { Body_get_dataset_metadata_api_v2_datasets__dataset_id__metadata_get } from './models/Body_get_dataset_metadata_api_v2_datasets__dataset_id__metadata_get';
 export type { Body_get_file_metadata_api_v2_files__file_id__metadata_get } from './models/Body_get_file_metadata_api_v2_files__file_id__metadata_get';
