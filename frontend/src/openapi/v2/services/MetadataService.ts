@@ -179,7 +179,7 @@ export class MetadataService {
     public static deleteFileMetadataApiV2FilesFileIdMetadataDelete(
         fileId: string,
         requestBody: MetadataDelete,
-    ): CancelablePromise<Array<MetadataOut>> {
+    ): CancelablePromise<MetadataOut> {
         return __request({
             method: 'DELETE',
             path: `/api/v2/files/${fileId}/metadata`,

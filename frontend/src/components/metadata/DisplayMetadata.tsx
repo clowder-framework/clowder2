@@ -8,6 +8,7 @@ import {Agent} from "./Agent";
 
 type MetadataType = {
 	updateMetadata: any,
+	deleteMetadata: any,
 	resourceType:string|undefined,
 	resourceId:string|undefined,
 }
