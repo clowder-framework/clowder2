@@ -21,8 +21,7 @@ import {FileStats} from "./FileStats";
 import {FileSearch} from "./FileSearch";
 import {FileVersionHistory} from "../versions/FileVersionHistory";
 import {DisplayMetadata} from "../metadata/DisplayMetadata";
-import {patchFileMetadata} from "../../actions/metadata";
-
+import {deleteFileMetadata as deleteFileMetadataAction} from "../../actions/metadata";
 
 const tab = {
 	fontStyle: "normal",
@@ -48,7 +47,8 @@ export const File = (): JSX.Element => {
 	const listFileVersions = (fileId:string|undefined) => dispatch(fetchFileVersions(fileId));
 	const dismissError = () => dispatch(resetFailedReason());
 	const dismissLogout = () => dispatch(resetLogout());
-	const updateFileMetadata = (fileId: string | undefined, content:object) => dispatch(patchFileMetadata(fileId,content));
+	const updateFileMetadata = (fileId: string | undefined, content:object) => dispatch(patchFileMetadataAction(fileId,content));
+	const deleteFileMetadata = (fileId: string | undefined, metadata:object) => dispatch(deleteFileMetadataAction(fileId, metadata));
 
 	const fileSummary = useSelector((state:RootState) => state.file.fileSummary);
 	const filePreviews = useSelector((state:RootState) => state.file.previews);
@@ -205,7 +205,9 @@ export const File = (): JSX.Element => {
 									<FileVersionHistory fileVersions={fileVersions}/> : <></> }
 							</TabPanel>
 							<TabPanel value={selectedTabIndex} index={2}>
-								<DisplayMetadata updateMetadata={updateFileMetadata} resourceType="file" resourceId={fileId} />
+								<DisplayMetadata updateMetadata={updateFileMetadata}
+												 deleteMetadata={deleteFileMetadata}
+												 resourceType="file" resourceId={fileId} />
 							</TabPanel>
 							<TabPanel value={selectedTabIndex} index={4}>
 									Extractions

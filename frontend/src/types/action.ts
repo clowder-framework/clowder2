@@ -1,7 +1,12 @@
 import {Dataset, ExtractedMetadata, File, MetadataJsonld, FilePreview, FileVersion, Folder} from "./data";
 import {MetadataOut as Metadata, FileOut as FileSummary} from "../openapi/v2";
 import {MetadataDefinitionOut as MetadataDefinition} from "../openapi/v2";
-import {DELETE_DATASET_METADATA, POST_DATASET_METADATA, UPDATE_DATASET_METADATA} from "../actions/metadata";
+import {
+	DELETE_DATASET_METADATA,
+	DELETE_FILE_METADATA,
+	POST_DATASET_METADATA,
+	UPDATE_DATASET_METADATA
+} from "../actions/metadata";
 
 interface RECEIVE_FILES_IN_DATASET {
 	type: "RECEIVE_FILES_IN_DATASET";
@@ -157,6 +162,11 @@ interface DELETE_DATASET_METADATA{
 	metadata: Metadata
 }
 
+interface DELETE_FILE_METADATA{
+	type: "DELETE_FILE_METADATA"
+	metadata: Metadata
+}
+
 export type DataAction =
 	| RECEIVE_FILES_IN_DATASET
 	| RECEIVE_FOLDERS_IN_DATASET
@@ -188,5 +198,6 @@ export type DataAction =
 	| RECEIVE_DATASET_METADATA
 	| RECEIVE_FILE_METADATA
 	| DELETE_DATASET_METADATA
+	| DELETE_FILE_METADATA
 	| DOWNLOAD_FILE
 	;
