@@ -316,7 +316,7 @@ async def delete_dataset_metadata(
         if (md := await db["metadata"].find_one(query)) is not None:
             metadata_deleted = md
             if await db["metadata"].delete_one({"_id": md["_id"]}) is not None:
-                return metadata_deleted.from_mongo()
+                return MetadataOut.from_mongo(metadata_deleted)
         else:
             raise HTTPException(
                 status_code=404, detail=f"No metadata found with that criteria"
