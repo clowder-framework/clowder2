@@ -1,5 +1,5 @@
 import React, {useState} from "react";
-import {Button} from "@mui/material";
+import {Box, Button} from "@mui/material";
 import {ActionModal} from "../dialog/ActionModal";
 
 
@@ -25,16 +25,16 @@ export const MetadataButtonGroup = (props) => {
 			/>
 		{
 			readOnly ?
-				<>
-					<Button variant="text" sx={{float:"right"}} onClick={() => {setReadOnly(false);}}>Edit</Button>
+				<Box sx={{textAlign: "right"}}>
+					<Button variant="text" onClick={() => {setReadOnly(false);}}>Edit</Button>
 					{
 						deleteMetadata ?
-							<Button variant="text" sx={{float:"right"}} onClick={() => {setConfirmationOpen(true);}}>
+							<Button variant="text" onClick={() => {setConfirmationOpen(true);}}>
 								Delete</Button>
 							:
 							<></>
 					}
-				</>
+				</Box>
 				:
 				<>
 					{ metadataId ?
