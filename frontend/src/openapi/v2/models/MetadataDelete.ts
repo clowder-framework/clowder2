@@ -2,11 +2,11 @@
 /* tslint:disable */
 /* eslint-disable */
 
-import type { ExtractorIn } from './ExtractorIn';
+import type { ExtractorIdentifier } from './ExtractorIdentifier';
 
 export type MetadataDelete = {
     id?: string;
     metadata_id?: string;
     definition?: string;
-    extractor_info?: ExtractorIn;
+    extractor_info?: ExtractorIdentifier;
 }

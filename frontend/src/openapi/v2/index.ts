@@ -15,6 +15,7 @@ export type { DatasetBase } from './models/DatasetBase';
 export type { DatasetIn } from './models/DatasetIn';
 export type { DatasetOut } from './models/DatasetOut';
 export type { DatasetPatch } from './models/DatasetPatch';
+export type { ExtractorIdentifier } from './models/ExtractorIdentifier';
 export type { ExtractorIn } from './models/ExtractorIn';
 export type { ExtractorOut } from './models/ExtractorOut';
 export type { FileOut } from './models/FileOut';

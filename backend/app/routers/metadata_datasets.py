@@ -298,10 +298,11 @@ async def delete_dataset_metadata(
 
         # if extractor info is provided
         # TODO question can metadata have multiple entries for the same extractor?
-        if metadata_in.extractor_info.name is not None:
-            query["agent.extractor.name"] = metadata_in.extractor_info.name
-        if metadata_in.extractor_info.version is not None:
-            query["agent.extractor.version"] = metadata_in.extractor_info.version
+        if metadata_in.extractor_info is not None:
+            if metadata_in.extractor_info.name is not None:
+                query["agent.extractor.name"] = metadata_in.extractor_info.name
+            if metadata_in.extractor_info.version is not None:
+                query["agent.extractor.version"] = metadata_in.extractor_info.version
 
         if (md := await db["metadata"].find_one(query)) is not None:
             metadata_deleted = db["metadata"].remove({"_id": md["_id"]})

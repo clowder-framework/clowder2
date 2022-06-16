@@ -182,6 +182,22 @@ class MetadataPatch(MetadataIn):
     metadata_id: Optional[str]  # specific metadata ID we are patching
 
 
+# class MetadataRes():
+#     pass
+#
+#
+# class MetadataReqPatch():
+#     pass
+#
+#
+# class MetadataResPatch(MetadataRes):
+#     pass
+#
+#
+# class MetadataResDelete(MetadataRes):
+#     pass
+
+
 class MetadataDelete(MongoModel):
     metadata_id: Optional[str]  # specific metadata ID we are deleting
     definition: Optional[str]
