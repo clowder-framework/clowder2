@@ -266,12 +266,10 @@ async def get_dataset_metadata(
         raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
 
 
-@router.delete("/{dataset_id}/metadata")
+@router.delete("/{dataset_id}/metadata", response_model=MetadataOut)
 async def delete_dataset_metadata(
     metadata_in: MetadataDelete,
     dataset_id: str,
-    # extractor_name: Optional[str] = Form(None),
-    # extractor_version: Optional[float] = Form(None),
     user=Depends(get_current_user),
     db: MongoClient = Depends(dependencies.get_db),
 ):
@@ -316,9 +314,9 @@ async def delete_dataset_metadata(
             query["agent.creator.id"] = agent.creator.id
 
         if (md := await db["metadata"].find_one(query)) is not None:
-            md_id = str(md["_id"])
-            if (metadata_deleted := await db["metadata"].delete_one({"_id": md["_id"]})) is not None:
-                return {"deleted": md_id}
+            metadata_deleted = md
+            if await db["metadata"].delete_one({"_id": md["_id"]}) is not None:
+                return metadata_deleted.from_mongo()
         else:
             raise HTTPException(
                 status_code=404, detail=f"No metadata found with that criteria"
