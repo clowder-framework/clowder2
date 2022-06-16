@@ -1,7 +1,8 @@
 import * as React from "react";
-import {InputLabel, MenuItem, Select, FormControl} from "@mui/material";
+import {InputLabel, MenuItem, FormControl} from "@mui/material";
 import {useState} from "react";
 import {MetadataButtonGroup} from "./MetadataButtonGroup";
+import {ClowderMetadataSelect} from "../styledComponents/ClowderMetadataSelect";
 
 export const Unit = (props) => {
 	const {widgetName, metadataId, contents, updateMetadata, saveMetadata, deleteMetadata, resourceId} = props;
@@ -17,14 +18,15 @@ export const Unit = (props) => {
 			<div style={{margin: "1em auto"}}>
 				<FormControl fullWidth>
 					<InputLabel>{widgetName}</InputLabel>
-					<Select value={readOnly && contents ? contents.unit: unit}
+					<ClowderMetadataSelect value={readOnly && contents ? contents.unit: unit}
 							label="Unit" onChange={handleChange}
 							sx={{background:"#ffffff"}}
+							disabled={readOnly}
 					>
 						<MenuItem value={"A"}>Ampere</MenuItem>
 						<MenuItem value={"K"}>Kelvin</MenuItem>
 						<MenuItem value={"s"}>Second</MenuItem>
-					</Select>
+					</ClowderMetadataSelect>
 				</FormControl>
 			</div>
 			<MetadataButtonGroup readOnly={readOnly}
