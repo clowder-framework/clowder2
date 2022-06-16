@@ -1,8 +1,8 @@
 import React, {useState} from "react";
 import {LocalizationProvider, DateTimePicker} from "@mui/lab";
 import DateAdapter from "@mui/lab/AdapterDateFns";
-import {TextField} from "@mui/material";
 import {MetadataButtonGroup} from "./MetadataButtonGroup";
+import {ClowderMetadataTextField} from "../styledComponents/ClowderMetadataTextField";
 
 export const Time = (props) => {
 	const {widgetName, metadataId, contents, updateMetadata, saveMetadata, deleteMetadata, resourceId} = props;
@@ -21,7 +21,8 @@ export const Time = (props) => {
 						label={widgetName}
 						value={readOnly && contents ? contents.time: value}
 						onChange={handleChange}
-						renderInput={(params) => <TextField {...params} fullWidth/>}
+						renderInput={(params) => <ClowderMetadataTextField {...params} fullWidth/>}
+						disabled={readOnly}
 					/>
 				</LocalizationProvider>
 			</div>
