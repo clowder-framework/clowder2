@@ -352,11 +352,11 @@ async def get_file_metadata(
         raise HTTPException(status_code=404, detail=f"File {file_id} not found")
 
 
-@router.delete("/{file_id}/metadata", response_model=List[MetadataOut])
+@router.delete("/{file_id}/metadata", response_model=MetadataOut)
 async def delete_file_metadata(
     metadata_in: MetadataDelete,
     file_id: str,
-    version: Optional[int] = Form(None),
+    # version: Optional[int] = Form(None),
     user=Depends(get_current_user),
     db: MongoClient = Depends(dependencies.get_db),
 ):
@@ -364,21 +364,21 @@ async def delete_file_metadata(
         query = {"resource.resource_id": ObjectId(file_id)}
         file = FileOut.from_mongo(file)
 
-        # Validate specified version, or use latest by default
-        if version is not None:
-            if (
-                version_q := await db["file_versions"].find_one(
-                    {"file_id": ObjectId(file_id), "version_num": version}
-                )
-            ) is None:
-                raise HTTPException(
-                    status_code=404,
-                    detail=f"File version {version} does not exist",
-                )
-            target_version = version
-        else:
-            target_version = file.version_num
-        query["resource.version"] = target_version
+        # # Validate specified version, or use latest by default
+        # if version is not None:
+        #     if (
+        #         version_q := await db["file_versions"].find_one(
+        #             {"file_id": ObjectId(file_id), "version_num": version}
+        #         )
+        #     ) is None:
+        #         raise HTTPException(
+        #             status_code=404,
+        #             detail=f"File version {version} does not exist",
+        #         )
+        #     target_version = version
+        # else:
+        #     target_version = file.version_num
+        # query["resource.version"] = target_version
 
         # filter by metadata_id or definition
         if metadata_in.metadata_id is not None:
