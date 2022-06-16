@@ -14,7 +14,7 @@ export const MetadataButtonGroup = (props) => {
 					<Button variant="text" sx={{float:"right"}} onClick={() => {
 						// update metadata
 						deleteMetadata(resourceId, {
-							"metadata_id":metadataId,
+							"id":metadataId,
 							"definition": widgetName});
 					}}>Delete</Button>
 					<Button variant="text" sx={{float:"right"}} onClick={() => {setReadOnly(false);}}>Edit</Button>
@@ -29,7 +29,7 @@ export const MetadataButtonGroup = (props) => {
 							<Button variant="contained" sx={{float:"right"}} onClick={() => {
 								// update metadata
 								updateMetadata(resourceId, {
-									"metadata_id":metadataId,
+									"id":metadataId,
 									"definition": widgetName,
 									"contents": contents});
 								setReadOnly(true);

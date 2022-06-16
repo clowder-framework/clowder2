@@ -266,7 +266,7 @@ async def get_dataset_metadata(
         raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
 
 
-@router.delete("/{dataset_id}/metadata", response_model=MetadataOut)
+@router.delete("/{dataset_id}/metadata")
 async def delete_dataset_metadata(
     metadata_in: MetadataDelete,
     dataset_id: str,
@@ -285,10 +285,10 @@ async def delete_dataset_metadata(
             # If a specific metadata_id is provided, delete the matching entry
             if (
                 existing_md := await db["metadata"].find_one(
-                    {"_id": ObjectId(metadata_in.metadata_id)}
+                    {"metadata_id": ObjectId(metadata_in.metadata_id)}
                 )
             ) is not None:
-                query["_id"] = metadata_in.metadata_id
+                query["metadata_id"] = metadata_in.metadata_id
         else:
             # Use provided definition name as filter
             # TODO: Should context_url also be unique to the file version?
@@ -297,16 +297,28 @@ async def delete_dataset_metadata(
                 query["definition"] = definition
 
         # if extractor info is provided
-        # TODO question can metadata have multiple entries for the same extractor?
-        if metadata_in.extractor_info is not None:
-            if metadata_in.extractor_info.name is not None:
-                query["agent.extractor.name"] = metadata_in.extractor_info.name
-            if metadata_in.extractor_info.version is not None:
-                query["agent.extractor.version"] = metadata_in.extractor_info.version
+        # Filter by MetadataAgent
+        extractor_info = metadata_in.extractor_info
+        if extractor_info is not None:
+            if (
+                    extractor := await db["extractors"].find_one(
+                        {"name": extractor_info.name, "version": extractor_info.version}
+                    )
+            ) is not None:
+                agent = MetadataAgent(creator=user, extractor=extractor)
+                # TODO: How do we handle two different users creating extractor metadata? Currently we ignore user
+                query["agent.extractor.name"] = agent.extractor.name
+                query["agent.extractor.version"] = agent.extractor.version
+            else:
+                raise HTTPException(status_code=404, detail=f"Extractor not found")
+        else:
+            agent = MetadataAgent(creator=user)
+            query["agent.creator.id"] = agent.creator.id
 
         if (md := await db["metadata"].find_one(query)) is not None:
-            metadata_deleted = db["metadata"].remove({"_id": md["_id"]})
-            return MetadataOut.from_mongo(metadata_deleted)
+            md_id = str(md["_id"])
+            if (metadata_deleted := await db["metadata"].delete_one({"_id": md["_id"]})) is not None:
+                return {"deleted": md_id}
         else:
             raise HTTPException(
                 status_code=404, detail=f"No metadata found with that criteria"
