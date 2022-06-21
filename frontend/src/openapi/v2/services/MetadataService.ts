@@ -63,6 +63,33 @@ export class MetadataService {
     }
 
     /**
+     * Update Metadata
+     * Update metadata. Any fields provided in the contents JSON will be added or updated in the metadata. If context or
+     * agent should be changed, use PUT.
+     *
+     * Returns:
+     * Metadata document that was updated
+     * @param metadataId
+     * @param requestBody
+     * @returns MetadataOut Successful Response
+     * @throws ApiError
+     */
+    public static updateMetadataApiV2MetadataMetadataIdPatch(
+        metadataId: string,
+        requestBody: MetadataPatch,
+    ): CancelablePromise<MetadataOut> {
+        return __request({
+            method: 'PATCH',
+            path: `/api/v2/metadata/${metadataId}`,
+            body: requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+
+    /**
      * Get File Metadata
      * Get file metadata.
      * @param fileId
