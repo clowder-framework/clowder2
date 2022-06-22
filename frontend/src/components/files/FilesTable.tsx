@@ -83,8 +83,8 @@ export default function FilesTable(props: FilesTableProps) {
 								<VersionChip versionNumber={file.version_id.slice(0,2)}/>
 							</TableCell>
 							<TableCell align="right">{parseDate(file.created)} by {file.creator.first_name} {file.creator.last_name}</TableCell>
-							<TableCell align="right">{file.size}</TableCell>
-							<TableCell align="right">{file.contentType}</TableCell>
+							<TableCell align="right">{file.bytes}</TableCell>
+							<TableCell align="right">{file.content_type}</TableCell>
 							<TableCell align="right"><FileMenu file={file}/></TableCell>
 						</TableRow>))
 					}
