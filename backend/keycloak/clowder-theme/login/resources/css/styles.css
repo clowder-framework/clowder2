@@ -178,11 +178,11 @@ div#kc-registration {
 /*    display: none;*/
 /*}*/
 
-/*div#kc-social-providers ul {*/
-/*    list-style: none;*/
-/*    margin: 0;*/
-/*    padding: 0;*/
-/*}*/
+div#kc-social-providers ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
 
 /*div#kc-social-providers ul li {*/
 /*    margin-bottom: 20px;*/
@@ -192,6 +192,15 @@ div#kc-registration {
 /*    display: inline;*/
 /*    width: 100px;*/
 /*}*/
+
+div#kc-social-providers a{
+    display: block;
+    margin: 15px auto;
+    text-align: center;
+    border: solid 0.5px;
+    border-radius: 4px;
+    padding: 5px 0;
+}
 
 /*a.zocial {*/
 /*    border: none;*/
