@@ -955,7 +955,7 @@
     "auth": "",
     "ssl": ""
   },
-  "loginTheme": "keycloak",
+  "loginTheme": "clowder-theme",
   "eventsEnabled": false,
   "eventsListeners": [
     "jboss-logging"

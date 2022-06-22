@@ -144,6 +144,7 @@ services:
         - clowder2
       volumes:
         - ./backend/keycloak/clowder-realm-prod.json:/opt/keycloak/data/import/realm.json:ro
+        - ./backend/keycloak/clowder-theme/:/opt/keycloak/themes/clowder-theme/:ro
       command:
         - start-dev
         - --http-relative-path /keycloak
@@ -159,8 +160,6 @@ services:
         KEYCLOAK_ADMIN_PASSWORD: admin
       depends_on:
         - postgres
-      healthcheck:
-        test: [ "CMD", "curl", "--fail", "http://localhost:8080/health" ]
       labels:
         - "traefik.enable=true"
         - "traefik.http.routers.keycloak.rule=PathPrefix(`/keycloak`)"
