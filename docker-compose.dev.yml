@@ -76,6 +76,7 @@ services:
       image: quay.io/keycloak/keycloak:latest
       volumes:
         - ./backend/keycloak/clowder-realm-dev.json:/opt/keycloak/data/import/realm.json:ro
+        - ./backend/keycloak/clowder-theme/:/opt/keycloak/themes/clowder-theme/:ro
       command:
         - start-dev
         - --http-relative-path /keycloak
