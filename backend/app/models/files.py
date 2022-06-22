@@ -33,6 +33,8 @@ class FileDB(FileBase):
     folder_id: Optional[PyObjectId]
     views: int = 0
     downloads: int = 0
+    bytes: int = 0
+    content_type: str = "N/A"
 
 
 class FileOut(FileDB):

@@ -316,11 +316,14 @@ async def save_file(
                 part_size=settings.MINIO_UPLOAD_CHUNK_SIZE,
             )  # async write chunk to minio
             version_id = response.version_id
+        bytes = len(fs.get_object(settings.MINIO_BUCKET_NAME, str(new_file_id)).data)
         if version_id is None:
             # TODO: This occurs in testing when minio is not running
             version_id = 999999999
         fileDB.version_id = version_id
         fileDB.version_num = 1
+        fileDB.bytes = bytes
+        fileDB.content_type = file.content_type
         print(fileDB)
         await db["files"].replace_one({"_id": ObjectId(new_file_id)}, fileDB.to_mongo())
 
