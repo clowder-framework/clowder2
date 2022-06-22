@@ -51,9 +51,6 @@ export const Dataset = (): JSX.Element => {
 	// search parameters
 	let [searchParams, setSearchParams] = useSearchParams();
 	const folder = searchParams.get("folder");
-	useEffect(() => {
-		const currentParams = Object.fromEntries([...searchParams]);
-	}, [searchParams]);
 
 	// use history hook to redirect/navigate between routes
 	const history = useNavigate();
