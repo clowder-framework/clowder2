@@ -2,6 +2,7 @@ import {Dataset, ExtractedMetadata, File, MetadataJsonld, FilePreview, FileVersi
 import {MetadataOut as Metadata, FileOut as FileSummary} from "../openapi/v2";
 import {MetadataDefinitionOut as MetadataDefinition} from "../openapi/v2";
 import {POST_DATASET_METADATA, UPDATE_DATASET_METADATA} from "../actions/metadata";
+import {RESET_CREATE_FILE} from "../actions/file";
 
 interface RECEIVE_FILES_IN_DATASET {
 	type: "RECEIVE_FILES_IN_DATASET";
@@ -81,10 +82,19 @@ interface CREATE_DATASET{
 	type: "CREATE_DATASET",
 	dataset: Dataset
 }
+interface RESET_CREATE_DATASET{
+	type: "RESET_CREATE_DATASET",
+	newDataset: Dataset
+}
 
 interface CREATE_FILE{
 	type: "CREATE_FILE",
-	file: File
+	newFile: File
+}
+
+interface RESET_CREATE_FILE{
+	type: "RESET_CREATE_FILE",
+	newFile: File
 }
 
 interface FAILED{
@@ -170,7 +180,9 @@ export type DataAction =
 	| REGISTER_ERROR
 	| REGISTER_USER
 	| CREATE_DATASET
+	| RESET_CREATE_DATASET
 	| CREATE_FILE
+	| RESET_CREATE_FILE
 	| FAILED
 	| RESET_FAILED
 	| RESET_LOGOUT
