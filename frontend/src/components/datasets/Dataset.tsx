@@ -53,7 +53,6 @@ export const Dataset = (): JSX.Element => {
 	const folder = searchParams.get("folder");
 	useEffect(() => {
 		const currentParams = Object.fromEntries([...searchParams]);
-		console.log(currentParams); // get new values onchange
 	}, [searchParams]);
 
 	// use history hook to redirect/navigate between routes
@@ -371,7 +370,7 @@ export const Dataset = (): JSX.Element => {
 					<Dialog open={createFileOpen} onClose={() => {
 						setCreateFileOpen(false);
 					}} fullWidth={true}  maxWidth="lg" aria-labelledby="form-dialog">
-						<UploadFile selectedDatasetId={datasetId} selectedDatasetName={datasetName} folderId={folder}/>
+						<UploadFile selectedDatasetId={datasetId} selectedDatasetName={about.name} folderId={folder}/>
 					</Dialog>
 				</div>
 			</div>
