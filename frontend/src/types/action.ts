@@ -1,17 +1,17 @@
-import {Dataset, ExtractedMetadata, File, MetadataJsonld, FilePreview, FileVersion, Folder} from "./data";
-import {MetadataOut as Metadata, FileOut as FileSummary} from "../openapi/v2";
+import {Dataset, ExtractedMetadata, MetadataJsonld, FilePreview, Folder} from "./data";
+import {MetadataOut as Metadata, FileOut as FileSummary, FileVersion} from "../openapi/v2";
 import {MetadataDefinitionOut as MetadataDefinition} from "../openapi/v2";
 import {POST_DATASET_METADATA, UPDATE_DATASET_METADATA} from "../actions/metadata";
 import {RESET_CREATE_FILE} from "../actions/file";
 
 interface RECEIVE_FILES_IN_DATASET {
 	type: "RECEIVE_FILES_IN_DATASET";
-	files: File[];
+	files: FileSummary[];
 }
 
 interface DELETE_FILE {
 	type: "DELETE_FILE";
-	file: File;
+	file: FileSummary;
 }
 
 interface RECEIVE_DATASET_ABOUT{
@@ -95,6 +95,7 @@ interface CREATE_FILE{
 interface RESET_CREATE_FILE{
 	type: "RESET_CREATE_FILE",
 	newFile: File
+	file: FileSummary
 }
 
 interface FAILED{
