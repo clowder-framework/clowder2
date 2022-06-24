@@ -9,9 +9,13 @@ type MetadataType = {
 	saveMetadata: any,
 }
 
+/*
+This is the interface when create new dataset and new files
+Uses only registered metadata definition to populate the form
+ */
 export const CreateMetadata = (props: MetadataType) => {
 
-	const {saveMetadata, resourceId} = props;
+	const {saveMetadata} = props;
 
 	const dispatch = useDispatch();
 	const getMetadatDefinitions = (name:string|null, skip:number, limit:number) => dispatch(fetchMetadataDefinitions(name, skip,limit));
@@ -35,7 +39,6 @@ export const CreateMetadata = (props: MetadataType) => {
 										return React.cloneElement(
 											metadataConfig[metadata.name],
 											{
-												resourceId: resourceId,
 												widgetName: metadata.name,
 												saveMetadata: saveMetadata,
 											}

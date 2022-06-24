@@ -12,6 +12,10 @@ type MetadataType = {
 	resourceId:string|undefined,
 }
 
+/*
+This is the interface displayed already created metadata and allow eidts
+Uses only the list of metadata
+*/
 export const DisplayMetadata = (props: MetadataType) => {
 
 	const {updateMetadata, resourceType, resourceId} = props;

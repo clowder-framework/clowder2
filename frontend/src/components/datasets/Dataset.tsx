@@ -28,7 +28,8 @@ import {parseDate} from "../../utils/common";
 import config from "../../app.config";
 import {DatasetIn, MetadataIn} from "../../openapi/v2";
 import {DisplayMetadata} from "../metadata/DisplayMetadata";
-import {CreateMetadata} from "../metadata/CreateMetadata";
+import {AddMetadata} from "../metadata/AddMetadata";
+
 import {fetchMetadataDefinitions, patchDatasetMetadata, postDatasetMetadata} from "../../actions/metadata";
 
 const tab = {
@@ -204,7 +205,7 @@ export const Dataset = (): JSX.Element => {
 							</TabPanel>
 							<TabPanel value={selectedTabIndex} index={1}>
 								<DisplayMetadata updateMetadata={updateDatasetMetadata} resourceType="dataset" resourceId={datasetId}/>
-								<CreateMetadata resourceId={datasetId} saveMetadata={createDatasetMetadata}/>
+								<AddMetadata resourceType="dataset" resourceId={datasetId} saveMetadata={createDatasetMetadata}/>
 							</TabPanel>
 							<TabPanel value={selectedTabIndex} index={2}/>
 							<TabPanel value={selectedTabIndex} index={3}/>
