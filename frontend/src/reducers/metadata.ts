@@ -1,8 +1,12 @@
 import {
 	POST_DATASET_METADATA,
-	RECEIVE_DATASET_METADATA, RECEIVE_METADATA_DEFINITIONS,
+	POST_FILE_METADATA,
+	RECEIVE_DATASET_METADATA,
+	RECEIVE_METADATA_DEFINITIONS,
 	RECEIVE_FILE_METADATA,
-	UPDATE_DATASET_METADATA, UPDATE_FILE_METADATA, POST_FILE_METADATA
+	UPDATE_DATASET_METADATA,
+	UPDATE_FILE_METADATA,
+	DELETE_DATASET_METADATA, DELETE_FILE_METADATA
 } from "../actions/metadata";
 import {DataAction} from "../types/action";
 import {MetadataState} from "../types/data";
@@ -29,6 +33,14 @@ const metadata = (state = defaultState, action: DataAction) => {
 					}
 					return dm
 				} ),
+			});
+		case DELETE_DATASET_METADATA:
+			return Object.assign({}, state, {
+				datasetMetadataList: state.datasetMetadataList.filter(metadata => metadata.id !== action.metadata.id),
+			});
+		case DELETE_FILE_METADATA:
+			return Object.assign({}, state, {
+				fileMetadataList: state.fileMetadataList.filter(metadata => metadata.id !== action.metadata.id),
 			});
 		case UPDATE_FILE_METADATA:
 			return Object.assign({}, state, {

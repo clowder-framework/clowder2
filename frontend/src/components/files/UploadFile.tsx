@@ -9,7 +9,7 @@ import {CreateMetadata} from "../metadata/CreateMetadata";
 import {fetchMetadataDefinitions, postFileMetadata} from "../../actions/metadata";
 import {MetadataIn} from "../../openapi/v2";
 import {useNavigate} from "react-router-dom";
-import {fileCreated} from "../../actions/file";
+import {fileCreated, resetFileCreated} from "../../actions/file";
 
 type UploadFileProps ={
 	selectedDatasetId: string|undefined,
@@ -25,6 +25,7 @@ export const UploadFile:React.FC<UploadFileProps> = (props: UploadFileProps) => 
 	const getMetadatDefinitions = (name:string|null, skip:number, limit:number) => dispatch(fetchMetadataDefinitions(name, skip,limit));
 	const createFileMetadata = (fileId: string|undefined, metadata:MetadataIn) => dispatch(postFileMetadata(fileId, metadata));
 	const uploadFile = (formData: FormData, selectedDatasetId: string|undefined) => dispatch(fileCreated(formData, selectedDatasetId));
+	const resetUploadFile = () => dispatch(resetFileCreated());
 	const newFile = useSelector((state:RootState) => state.dataset.newFile);
 
 	useEffect(() => {
@@ -65,12 +66,16 @@ export const UploadFile:React.FC<UploadFileProps> = (props: UploadFileProps) => 
 	useEffect(() => {
 		if (newFile.id) {
 			// post new metadata
+			const file = newFile;
 			Object.keys(metadataRequestForms).map(key => {
-				createFileMetadata(newFile.id, metadataRequestForms[key]);
+				createFileMetadata(file.id, metadataRequestForms[key]);
 			});
 
+			// reset newFile so next upload can be done
+			resetUploadFile();
+
 			// Redirect to file route with file Id and dataset id
-			history(`/files/${newFile.id}?dataset=${selectedDatasetId}&name=${selectedDatasetName}`);
+			history(`/files/${file.id}?dataset=${selectedDatasetId}&name=${selectedDatasetName}`);
 			// TODO dispatch(resetFileUploaded());
 		}
 

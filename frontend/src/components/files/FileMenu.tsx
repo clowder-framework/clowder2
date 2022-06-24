@@ -3,7 +3,7 @@ import Button from '@mui/material/Button';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import MenuIcon from '@mui/icons-material/Menu';
-import {File} from "../../types/data";
+import {FileOut as File} from "../../openapi/v2";
 import {useState} from "react";
 import {fileDeleted, fileDownloaded} from "../../actions/file";
 import {useDispatch} from "react-redux";

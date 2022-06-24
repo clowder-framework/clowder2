@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from "react";
-import {Box, Button, Dialog, DialogTitle, Divider, Grid, Menu, MenuItem, Tab, Tabs, Typography} from "@mui/material";
+import {Box, Button, Dialog, Divider, Grid, Menu, MenuItem, Tab, Tabs, Typography} from "@mui/material";
 import {ClowderInput} from "../styledComponents/ClowderInput";
 import {ClowderButton} from "../styledComponents/ClowderButton";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
@@ -26,11 +26,10 @@ import {CreateFolder} from "../folders/CreateFolder";
 import {useSearchParams} from "react-router-dom";
 import {parseDate} from "../../utils/common";
 import config from "../../app.config";
-import {DatasetIn, MetadataIn} from "../../openapi/v2";
+import {DatasetIn} from "../../openapi/v2";
 import {DisplayMetadata} from "../metadata/DisplayMetadata";
 import {AddMetadata} from "../metadata/AddMetadata";
-
-import {fetchMetadataDefinitions, patchDatasetMetadata, postDatasetMetadata} from "../../actions/metadata";
+import {patchDatasetMetadata as patchDatasetMetadataAction, deleteDatasetMetadata as deleteDatasetMetadataAction} from "../../actions/metadata";
 
 const tab = {
 	fontStyle: "normal",
@@ -53,19 +52,14 @@ export const Dataset = (): JSX.Element => {
 	// search parameters
 	let [searchParams, setSearchParams] = useSearchParams();
 	const folder = searchParams.get("folder");
-	useEffect(() => {
-		const currentParams = Object.fromEntries([...searchParams]);
-		console.log(currentParams); // get new values onchange
-	}, [searchParams]);
 
 	// use history hook to redirect/navigate between routes
 	const history = useNavigate();
 
 	// Redux connect equivalent
 	const dispatch = useDispatch();
-	const updateDatasetMetadata = (datasetId: string | undefined, content:object) => dispatch(patchDatasetMetadata(datasetId,content));
-	const getMetadatDefinitions = (name:string|null, skip:number, limit:number) => dispatch(fetchMetadataDefinitions(name, skip,limit));
-	const createDatasetMetadata = (datasetId: string|undefined, metadata:MetadataIn) => dispatch(postDatasetMetadata(datasetId, metadata));
+	const updateDatasetMetadata = (datasetId: string | undefined, content:object) => dispatch(patchDatasetMetadataAction(datasetId,content));
+	const deleteDatasetMetadata = (datasetId: string | undefined, metadata:object) => dispatch(deleteDatasetMetadataAction(datasetId, metadata));
 	const deleteDataset = (datasetId:string|undefined) => dispatch(datasetDeleted(datasetId));
 	const editDataset = (datasetId: string|undefined, formData: DatasetIn) => dispatch(updateDataset(datasetId, formData));
 	const getFolderPath= (folderId:string|undefined) => dispatch(fetchFolderPath(folderId));
@@ -98,9 +92,6 @@ export const Dataset = (): JSX.Element => {
 		listFoldersInDataset(datasetId, folder);
 		listDatasetAbout(datasetId);
 		getFolderPath(folder);
-
-		// get registered metadata definitions
-		getMetadatDefinitions(null, 0, 100);
 	}, [searchParams]);
 
 	// Error msg dialog
@@ -205,7 +196,9 @@ export const Dataset = (): JSX.Element => {
 								<FilesTable datasetId={datasetId} datasetName={about.name}/>
 							</TabPanel>
 							<TabPanel value={selectedTabIndex} index={1}>
-								<DisplayMetadata updateMetadata={updateDatasetMetadata} resourceType="dataset" resourceId={datasetId}/>
+								<DisplayMetadata updateMetadata={updateDatasetMetadata}
+												 deleteMetadata={deleteDatasetMetadata}
+												 resourceType="dataset" resourceId={datasetId}/>
 								<AddMetadata resourceType="dataset" resourceId={datasetId} saveMetadata={createDatasetMetadata}/>
 								<Button>Add more metadata...</Button>
 							</TabPanel>
@@ -381,7 +374,7 @@ export const Dataset = (): JSX.Element => {
 					<Dialog open={createFileOpen} onClose={() => {
 						setCreateFileOpen(false);
 					}} fullWidth={true}  maxWidth="lg" aria-labelledby="form-dialog">
-						<UploadFile selectedDatasetId={datasetId} selectedDatasetName={datasetName} folderId={folder}/>
+						<UploadFile selectedDatasetId={datasetId} selectedDatasetName={about.name} folderId={folder}/>
 					</Dialog>
 				</div>
 			</div>

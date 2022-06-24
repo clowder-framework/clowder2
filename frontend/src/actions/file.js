@@ -132,6 +132,16 @@ export function fileCreated(formData, selectedDatasetId){
 	};
 }
 
+export const RESET_CREATE_FILE = "RESET_CREATE_FILE";
+export function resetFileCreated(){
+	return (dispatch) => {
+		dispatch({
+			type: RESET_CREATE_FILE,
+			receivedAt: Date.now(),
+		});
+	};
+}
+
 export const UPDATE_FILE = "UPDATE_FILE";
 export function fileUpdated(formData, fileId){
 	return (dispatch) => {
