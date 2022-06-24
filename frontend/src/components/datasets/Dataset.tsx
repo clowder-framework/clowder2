@@ -90,6 +90,7 @@ export const Dataset = (): JSX.Element => {
 	const [editDescriptionOpen, setEditDescriptionOpen] = React.useState<boolean>(false);
 	const [datasetName, setDatasetName] = React.useState<string>("");
 	const [datasetDescription, setDatasetDescription] = React.useState<string>("");
+	const [enableAddMetadata, setEnableAddMetadata] = React.useState<boolean>(false);
 
 	// component did mount list all files in dataset
 	useEffect(() => {
@@ -206,6 +207,7 @@ export const Dataset = (): JSX.Element => {
 							<TabPanel value={selectedTabIndex} index={1}>
 								<DisplayMetadata updateMetadata={updateDatasetMetadata} resourceType="dataset" resourceId={datasetId}/>
 								<AddMetadata resourceType="dataset" resourceId={datasetId} saveMetadata={createDatasetMetadata}/>
+								<Button>Add more metadata...</Button>
 							</TabPanel>
 							<TabPanel value={selectedTabIndex} index={2}/>
 							<TabPanel value={selectedTabIndex} index={3}/>
