@@ -35,7 +35,7 @@ export const MetadataButtonGroup = (props) => {
 							{/*TODO need to rewrite the post body of creating a new metadata*/}
 							<Button variant="contained" sx={{float:"right"}} onClick={() => {
 								// save the form info and in parent component create metadata
-								saveMetadata({
+								saveMetadata(resourceId, {
 									"definition": widgetName,
 									"contents": contents
 								});

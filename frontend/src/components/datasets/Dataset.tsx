@@ -26,9 +26,10 @@ import {CreateFolder} from "../folders/CreateFolder";
 import {useSearchParams} from "react-router-dom";
 import {parseDate} from "../../utils/common";
 import config from "../../app.config";
-import {DatasetIn} from "../../openapi/v2";
+import {DatasetIn, MetadataIn} from "../../openapi/v2";
 import {DisplayMetadata} from "../metadata/DisplayMetadata";
-import {patchDatasetMetadata} from "../../actions/metadata";
+import {CreateMetadata} from "../metadata/CreateMetadata";
+import {fetchMetadataDefinitions, patchDatasetMetadata, postDatasetMetadata} from "../../actions/metadata";
 
 const tab = {
 	fontStyle: "normal",
@@ -62,6 +63,8 @@ export const Dataset = (): JSX.Element => {
 	// Redux connect equivalent
 	const dispatch = useDispatch();
 	const updateDatasetMetadata = (datasetId: string | undefined, content:object) => dispatch(patchDatasetMetadata(datasetId,content));
+	const getMetadatDefinitions = (name:string|null, skip:number, limit:number) => dispatch(fetchMetadataDefinitions(name, skip,limit));
+	const createDatasetMetadata = (datasetId: string|undefined, metadata:MetadataIn) => dispatch(postDatasetMetadata(datasetId, metadata));
 	const deleteDataset = (datasetId:string|undefined) => dispatch(datasetDeleted(datasetId));
 	const editDataset = (datasetId: string|undefined, formData: DatasetIn) => dispatch(updateDataset(datasetId, formData));
 	const getFolderPath= (folderId:string|undefined) => dispatch(fetchFolderPath(folderId));
@@ -93,6 +96,9 @@ export const Dataset = (): JSX.Element => {
 		listFoldersInDataset(datasetId, folder);
 		listDatasetAbout(datasetId);
 		getFolderPath(folder);
+
+		// get registered metadata definitions
+		getMetadatDefinitions(null, 0, 100);
 	}, [searchParams]);
 
 	// Error msg dialog
@@ -198,6 +204,7 @@ export const Dataset = (): JSX.Element => {
 							</TabPanel>
 							<TabPanel value={selectedTabIndex} index={1}>
 								<DisplayMetadata updateMetadata={updateDatasetMetadata} resourceType="dataset" resourceId={datasetId}/>
+								<CreateMetadata resourceId={datasetId} saveMetadata={createDatasetMetadata}/>
 							</TabPanel>
 							<TabPanel value={selectedTabIndex} index={2}/>
 							<TabPanel value={selectedTabIndex} index={3}/>
