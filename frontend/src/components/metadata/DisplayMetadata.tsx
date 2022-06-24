@@ -8,13 +8,14 @@ import {Agent} from "./Agent";
 
 type MetadataType = {
 	updateMetadata: any,
+	deleteMetadata: any,
 	resourceType:string|undefined,
 	resourceId:string|undefined,
 }
 
 export const DisplayMetadata = (props: MetadataType) => {
 
-	const {updateMetadata, resourceType, resourceId} = props;
+	const {updateMetadata, deleteMetadata, resourceType, resourceId} = props;
 
 	const dispatch = useDispatch();
 	const listDatasetMetadata = (datasetId: string | undefined) => dispatch(fetchDatasetMetadata(datasetId));
@@ -54,6 +55,7 @@ export const DisplayMetadata = (props: MetadataType) => {
 													resourceId: resourceId,
 													widgetName: metadata.definition,
 													updateMetadata: updateMetadata,
+													deleteMetadata: deleteMetadata,
 													contents: metadata.contents ?? null,
 													metadataId: metadata.id ?? null,
 												}

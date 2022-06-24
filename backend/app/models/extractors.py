@@ -1,18 +1,12 @@
-from datetime import datetime
-from typing import Optional
-from enum import Enum
-
-from bson.dbref import DBRef
-from pydantic import Field, validator
-
 from app.models.mongomodel import MongoModel
-from app.models.pyobjectid import PyObjectId
-from app.models.users import UserOut
 
 
-class ExtractorBase(MongoModel):
+class ExtractorIdentifier(MongoModel):
     name: str
     version: float = 1.0
+
+
+class ExtractorBase(ExtractorIdentifier):
     description: str = ""
 
 

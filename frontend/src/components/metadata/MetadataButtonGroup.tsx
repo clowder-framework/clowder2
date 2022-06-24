@@ -1,19 +1,40 @@
-import React from "react";
-import {Button} from "@mui/material";
+import React, {useState} from "react";
+import {Box, Button} from "@mui/material";
+import {ActionModal} from "../dialog/ActionModal";
 
 
 export const MetadataButtonGroup = (props) => {
 
-	const {readOnly, setReadOnly, metadataId, updateMetadata, saveMetadata, resourceId, contents, widgetName} = props;
+	const {readOnly, setReadOnly, metadataId, updateMetadata, deleteMetadata, saveMetadata, resourceId, contents, widgetName} = props;
+	const [confirmationOpen, setConfirmationOpen] = useState(false);
 
 	return (
 		<>
+			{/*Confirmation dialogue*/}
+			<ActionModal actionOpen={confirmationOpen} actionTitle="Are you sure?"
+						 actionText="Do you really want to delete? This process cannot be undone."
+						 actionBtnName="Delete"
+						 handleActionBtnClick={() => {
+							 deleteMetadata(resourceId, {
+								 "id":metadataId,
+								 "definition": widgetName});
+						 }}
+						 handleActionCancel={() => {
+							 setConfirmationOpen(false);
+						 }}
+			/>
 		{
 			readOnly ?
-				<>
-					{/*<Button variant="text" sx={{float:"right"}} onClick={() => {deleteMetadata(resourceId);}}>Delete</Button>*/}
-					<Button variant="text" sx={{float:"right"}} onClick={() => {setReadOnly(false);}}>Edit</Button>
-				</>
+				<Box sx={{textAlign: "right"}}>
+					<Button variant="text" onClick={() => {setReadOnly(false);}}>Edit</Button>
+					{
+						deleteMetadata ?
+							<Button variant="text" onClick={() => {setConfirmationOpen(true);}}>
+								Delete</Button>
+							:
+							<></>
+					}
+				</Box>
 				:
 				<>
 					{ metadataId ?
