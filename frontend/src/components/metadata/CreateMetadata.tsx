@@ -11,7 +11,7 @@ type MetadataType = {
 
 export const CreateMetadata = (props: MetadataType) => {
 
-	const {saveMetadata} = props;
+	const {saveMetadata, resourceId} = props;
 
 	const dispatch = useDispatch();
 	const getMetadatDefinitions = (name:string|null, skip:number, limit:number) => dispatch(fetchMetadataDefinitions(name, skip,limit));
@@ -35,6 +35,7 @@ export const CreateMetadata = (props: MetadataType) => {
 										return React.cloneElement(
 											metadataConfig[metadata.name],
 											{
+												resourceId: resourceId,
 												widgetName: metadata.name,
 												saveMetadata: saveMetadata,
 											}
