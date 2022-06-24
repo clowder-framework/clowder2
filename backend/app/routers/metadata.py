@@ -100,12 +100,7 @@ async def delete_metadata(
     user=Depends(get_current_user),
     db: MongoClient = Depends(dependencies.get_db),
 ):
-    """Delete metadata. Any fields provided in the contents JSON will be added or updated in the metadata. If context or
-    agent should be changed, use PUT.
-
-    Returns:
-        Metadata document that was updated
-    """
+    """Delete metadata by specific ID."""
     if (
         md := await db["metadata"].find_one({"_id": PyObjectId(metadata_id)})
     ) is not None:
