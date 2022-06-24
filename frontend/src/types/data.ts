@@ -1,4 +1,7 @@
-import {MetadataDefinitionOut, MetadataOut as Metadata, FileOut as FileSummary} from "../openapi/v2";
+import {MetadataDefinitionOut,
+	MetadataOut as Metadata,
+	FileOut as FileSummary,
+	FileVersion} from "../openapi/v2";
 
 export interface Dataset {
 	name: string;
@@ -22,17 +25,6 @@ export interface Author {
 	"last_name": string|null;
 }
 
-export interface File {
-	version: string;
-	creator: Author;
-	created: string | Date;
-	id: string;
-	name: string;
-	size: number;
-	"date-created": string;
-	contentType:string;
-}
-
 export interface Folder {
 	id: string;
 	name: string;
@@ -53,14 +45,6 @@ export interface FileMetadata {
 	downloads:number;
 	views:number;
 	version: string;
-}
-
-export interface FileVersion {
-	id: string;
-	"version_id": string;
-	"file_id": string;
-	"creator": Author;
-	"created": string | Date;
 }
 
 export interface FileMetadataList{
@@ -131,10 +115,10 @@ export interface Thumbnail{
 }
 
 export interface DatasetState{
-	files: File[];
+	files: FileSummary[];
 	datasets: Dataset[];
 	newDataset: Dataset;
-	newFile: File;
+	newFile: FileSummary;
 	about: Dataset;
 	folders: Folder[];
 	folderPath: string[];

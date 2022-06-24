@@ -11,7 +11,8 @@ import {
 } from "../actions/dataset";
 import {CREATE_FILE, UPDATE_FILE, DELETE_FILE} from "../actions/file";
 import {DataAction} from "../types/action";
-import {Author, Dataset, File, DatasetState} from "../types/data";
+import {Author, Dataset, DatasetState} from "../types/data";
+import {FileOut as File} from "../openapi/v2";
 
 const defaultState: DatasetState = {
 	files: [],
