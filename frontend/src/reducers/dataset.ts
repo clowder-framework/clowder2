@@ -9,7 +9,7 @@ import {
 	FOLDER_ADDED, RECEIVE_FOLDERS_IN_DATASET, GET_FOLDER_PATH,
 	DOWNLOAD_DATASET
 } from "../actions/dataset";
-import {CREATE_FILE, UPDATE_FILE, DELETE_FILE} from "../actions/file";
+import {CREATE_FILE, UPDATE_FILE, DELETE_FILE, RESET_CREATE_FILE} from "../actions/file";
 import {DataAction} from "../types/action";
 import {Author, Dataset, DatasetState} from "../types/data";
 import {FileOut as File} from "../openapi/v2";
@@ -43,6 +43,8 @@ const dataset = (state = defaultState, action: DataAction) => {
 		return Object.assign({}, state, {
 			newFile: action.file
 		});
+	case RESET_CREATE_FILE:
+		return Object.assign({}, state, {newFile: {}})
 	case UPDATE_FILE:
 		return Object.assign({}, state, {
 			files: state.files.map(file => file.id === action.file.id ? action.file: file),
