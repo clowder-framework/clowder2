@@ -20,19 +20,12 @@ metadata_definition = {
 }
 
 metadata_definition2 = {
-        "name": "AlternativeTitle",
-        "description": "Alternative title",
-        "context": {
-            "title": "https://schema.org/alternateName"
-        },
-        "fields": [
-            {
-                "name": "alternateName",
-                "type": "str",
-                "list": False,
-                "required": True
-            }
-        ]
+    "name": "AlternativeTitle",
+    "description": "Alternative title",
+    "context": {"title": "https://schema.org/alternateName"},
+    "fields": [
+        {"name": "alternateName", "type": "str", "list": False, "required": True}
+    ],
 }
 
 metadata_using_definition = {
