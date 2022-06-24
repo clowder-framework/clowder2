@@ -22,6 +22,7 @@ import {FileSearch} from "./FileSearch";
 import {FileVersionHistory} from "../versions/FileVersionHistory";
 import {DisplayMetadata} from "../metadata/DisplayMetadata";
 import {deleteFileMetadata as deleteFileMetadataAction} from "../../actions/metadata";
+import {patchFileMetadata as patchFileMetadataAction} from "../../actions/metadata";
 
 const tab = {
 	fontStyle: "normal",
