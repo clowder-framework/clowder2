@@ -17,6 +17,7 @@ python-multipart = "*"
 pipfile = "*"
 email-validator = "*"
 python-keycloak = "*"
+pika = "*"
 
 [dev-packages]
 requests = "*"
