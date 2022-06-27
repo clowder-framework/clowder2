@@ -349,19 +349,6 @@ export const Dataset = (): JSX.Element => {
 								<Typography className="content">Downloads: 0</Typography>
 								<Typography className="content">Last downloaded: Never</Typography>
 							</Box>
-							<Divider/>
-							<Box className="infoCard">
-								<Typography className="title">Tags</Typography>
-								<Grid container spacing={4}>
-									<Grid item lg={8} sm={8} xl={8} xs={12}>
-										<ClowderInput defaultValue="Tag"/>
-									</Grid>
-									<Grid item lg={4} sm={4} xl={4} xs={12}>
-										<ClowderButton disabled={true}>Search</ClowderButton>
-									</Grid>
-								</Grid>
-							</Box>
-							<Divider light/>
 						</Grid>
 					</Grid>
 					<Dialog open={createFileOpen} onClose={() => {

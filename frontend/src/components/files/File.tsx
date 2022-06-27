@@ -223,8 +223,6 @@ export const File = (): JSX.Element => {
 									<Divider light/>
 								</div>
 							}
-							<FileSearch />
-							<Divider light/>
 						</Grid>
 					</Grid>
 				</div>
