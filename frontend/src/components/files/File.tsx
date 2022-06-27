@@ -183,9 +183,6 @@ export const File = (): JSX.Element => {
 									<Tab sx={tab} label="Previews" {...a11yProps(0)} />
 									<Tab sx={tab} label="Version History" {...a11yProps(1)} />
 									<Tab sx={tab} label="Metadata" {...a11yProps(3)} disabled={false}/>
-									<Tab sx={tab} label="Sections" {...a11yProps(2)} disabled={true}/>
-									<Tab sx={tab} label="Extractions" {...a11yProps(4)} disabled={true}/>
-									<Tab sx={tab} label="Comments" {...a11yProps(5)} disabled={true}/>
 								</Tabs>
 							</Box>
 							{/*Preview Tab*/}

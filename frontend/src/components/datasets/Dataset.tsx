@@ -213,9 +213,6 @@ export const Dataset = (): JSX.Element => {
 								<Tabs value={selectedTabIndex} onChange={handleTabChange} aria-label="dataset tabs">
 									<Tab sx={tab} label="Files" {...a11yProps(0)} />
 									<Tab sx={tab} label="Metadata" {...a11yProps(1)} disabled={false}/>
-									<Tab sx={tab} label="Extractions" {...a11yProps(2)} disabled={true}/>
-									<Tab sx={tab} label="Visualizations" {...a11yProps(3)} disabled={true}/>
-									<Tab sx={tab} label="Comments" {...a11yProps(4)} disabled={true}/>
 								</Tabs>
 							</Box>
 							<TabPanel value={selectedTabIndex} index={0}>
