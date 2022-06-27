@@ -53,7 +53,8 @@ jobs:
         uses: docker/build-push-action@v3
         with:
           context: ./frontend
-          platforms: linux/amd64,linux/arm64
+          # FIXME linux/arm64 requires special build for npm sharp library (and others)
+          # platforms: linux/amd64,linux/arm64
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
