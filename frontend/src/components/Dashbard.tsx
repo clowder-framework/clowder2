@@ -169,10 +169,6 @@ export const Dashboard = (): JSX.Element => {
 							<Box sx={{borderBottom: 1, borderColor: 'divider'}}>
 								<Tabs value={selectedTabIndex} onChange={handleTabChange} aria-label="dashboard tabs">
 									<Tab sx={tab} label="Datasets" {...a11yProps(0)} />
-									<Tab sx={tab} label="Activity" {...a11yProps(1)} disabled={true}/>
-									<Tab sx={tab} label="Collections" {...a11yProps(2)} disabled={true}/>
-									<Tab sx={tab} label="Spaces" {...a11yProps(3)} disabled={true}/>
-									<Tab sx={tab} label="API Keys" {...a11yProps(4)} disabled={true}/>
 								</Tabs>
 							</Box>
 							<TabPanel value={selectedTabIndex} index={0}>
