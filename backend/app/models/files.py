@@ -13,6 +13,8 @@ class FileVersion(MongoModel):
     version_num: int = 1
     file_id: PyObjectId
     creator: UserOut
+    bytes: int = 0
+    content_type: str = "N/A"
     created: datetime = Field(default_factory=datetime.utcnow)
 
 
