@@ -174,7 +174,6 @@ def test_dataset_delete_metadata(client: TestClient, headers: dict):
     assert response.status_code == 200
 
 
-
 # File tests
 def test_file_create_metadata_no_context(client: TestClient, headers: dict):
     # Create dataset, upload file and try to add metadata that doesn't have any context
@@ -215,7 +214,7 @@ def test_file_create_metadata_definition(client: TestClient, headers: dict):
         headers=headers,
     )
     assert (
-            response.status_code == 200 or response.status_code == 409
+        response.status_code == 200 or response.status_code == 409
     )  # 409 = definition already exists
 
     # Create dataset and add metadata to it using new definition
@@ -243,4 +242,3 @@ def test_file_create_metadata_definition(client: TestClient, headers: dict):
         json=bad_md,
     )
     assert response.status_code == 409
-
