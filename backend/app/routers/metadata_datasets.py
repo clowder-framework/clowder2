@@ -23,7 +23,8 @@ from app.models.metadata import (
     MetadataOut,
     MetadataPatch,
     validate_context,
-    patch_metadata, MetadataDelete,
+    patch_metadata,
+    MetadataDelete,
 )
 
 router = APIRouter()
@@ -299,9 +300,9 @@ async def delete_dataset_metadata(
         extractor_info = metadata_in.extractor_info
         if extractor_info is not None:
             if (
-                    extractor := await db["extractors"].find_one(
-                        {"name": extractor_info.name, "version": extractor_info.version}
-                    )
+                extractor := await db["extractors"].find_one(
+                    {"name": extractor_info.name, "version": extractor_info.version}
+                )
             ) is not None:
                 agent = MetadataAgent(creator=user, extractor=extractor)
                 # TODO: How do we handle two different users creating extractor metadata? Currently we ignore user
