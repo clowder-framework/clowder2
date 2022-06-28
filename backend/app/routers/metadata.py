@@ -89,9 +89,7 @@ async def update_metadata(
         result = await patch_metadata(md, contents, db)
         return result
     else:
-        raise HTTPException(
-            status_code=404, detail=f"Metadata {metadata_id} not found"
-        )
+        raise HTTPException(status_code=404, detail=f"Metadata {metadata_id} not found")
 
 
 @router.delete("/{metadata_id}")
@@ -108,6 +106,4 @@ async def delete_metadata(
         await db["metadata"].delete_one({"_id": PyObjectId(metadata_id)})
         return {"deleted": metadata_id}
     else:
-        raise HTTPException(
-            status_code=404, detail=f"Metadata {metadata_id} not found"
-        )
+        raise HTTPException(status_code=404, detail=f"Metadata {metadata_id} not found")
