@@ -89,6 +89,21 @@ async def update_metadata(
         result = await patch_metadata(md, contents, db)
         return result
     else:
-        raise HTTPException(
-            status_code=404, detail=f"Metadata {metadata_id} found to update"
-        )
+        raise HTTPException(status_code=404, detail=f"Metadata {metadata_id} not found")
+
+
+@router.delete("/{metadata_id}")
+async def delete_metadata(
+    metadata_id: str,
+    user=Depends(get_current_user),
+    db: MongoClient = Depends(dependencies.get_db),
+):
+    """Delete metadata by specific ID."""
+    if (
+        md := await db["metadata"].find_one({"_id": PyObjectId(metadata_id)})
+    ) is not None:
+        # TODO: Refactor this with permissions checks etc.
+        await db["metadata"].delete_one({"_id": PyObjectId(metadata_id)})
+        return {"deleted": metadata_id}
+    else:
+        raise HTTPException(status_code=404, detail=f"Metadata {metadata_id} not found")

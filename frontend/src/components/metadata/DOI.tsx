@@ -3,7 +3,7 @@ import {MetadataButtonGroup} from "./MetadataButtonGroup";
 import { ClowderMetadataTextField } from "../styledComponents/ClowderMetadataTextField";
 
 export const DOI = (props) => {
-	const {widgetName, metadataId, contents, updateMetadata, saveMetadata, resourceId} = props;
+	const {widgetName, metadataId, contents, updateMetadata, saveMetadata, deleteMetadata, resourceId} = props;
 	const [DOI, setDOI] = useState(contents && contents.doi ? contents.doi: "");
 	const [promptError, setPromptError] = useState(false);
 	const [readOnly, setReadOnly] = useState(false);
@@ -40,6 +40,7 @@ export const DOI = (props) => {
 								 metadataId={metadataId}
 								 updateMetadata={updateMetadata}
 								 saveMetadata={saveMetadata}
+								 deleteMetadata={deleteMetadata}
 								 resourceId={resourceId}
 								 contents={{"doi":DOI}}
 								 widgetName={widgetName}

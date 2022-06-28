@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from "react";
-import {Box, Button, Dialog, DialogTitle, Divider, Grid, Menu, MenuItem, Tab, Tabs, Typography} from "@mui/material";
+import {Box, Button, Dialog, Divider, Grid, Menu, MenuItem, Tab, Tabs, Typography} from "@mui/material";
 import {ClowderInput} from "../styledComponents/ClowderInput";
 import {ClowderButton} from "../styledComponents/ClowderButton";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
@@ -28,7 +28,7 @@ import {parseDate} from "../../utils/common";
 import config from "../../app.config";
 import {DatasetIn} from "../../openapi/v2";
 import {DisplayMetadata} from "../metadata/DisplayMetadata";
-import {patchDatasetMetadata} from "../../actions/metadata";
+import {patchDatasetMetadata as patchDatasetMetadataAction, deleteDatasetMetadata as deleteDatasetMetadataAction} from "../../actions/metadata";
 
 const tab = {
 	fontStyle: "normal",
@@ -51,17 +51,14 @@ export const Dataset = (): JSX.Element => {
 	// search parameters
 	let [searchParams, setSearchParams] = useSearchParams();
 	const folder = searchParams.get("folder");
-	useEffect(() => {
-		const currentParams = Object.fromEntries([...searchParams]);
-		console.log(currentParams); // get new values onchange
-	}, [searchParams]);
 
 	// use history hook to redirect/navigate between routes
 	const history = useNavigate();
 
 	// Redux connect equivalent
 	const dispatch = useDispatch();
-	const updateDatasetMetadata = (datasetId: string | undefined, content:object) => dispatch(patchDatasetMetadata(datasetId,content));
+	const updateDatasetMetadata = (datasetId: string | undefined, content:object) => dispatch(patchDatasetMetadataAction(datasetId,content));
+	const deleteDatasetMetadata = (datasetId: string | undefined, metadata:object) => dispatch(deleteDatasetMetadataAction(datasetId, metadata));
 	const deleteDataset = (datasetId:string|undefined) => dispatch(datasetDeleted(datasetId));
 	const editDataset = (datasetId: string|undefined, formData: DatasetIn) => dispatch(updateDataset(datasetId, formData));
 	const getFolderPath= (folderId:string|undefined) => dispatch(fetchFolderPath(folderId));
@@ -197,7 +194,9 @@ export const Dataset = (): JSX.Element => {
 								<FilesTable datasetId={datasetId} datasetName={about.name}/>
 							</TabPanel>
 							<TabPanel value={selectedTabIndex} index={1}>
-								<DisplayMetadata updateMetadata={updateDatasetMetadata} resourceType="dataset" resourceId={datasetId}/>
+								<DisplayMetadata updateMetadata={updateDatasetMetadata}
+												 deleteMetadata={deleteDatasetMetadata}
+												 resourceType="dataset" resourceId={datasetId}/>
 							</TabPanel>
 							<TabPanel value={selectedTabIndex} index={2}/>
 							<TabPanel value={selectedTabIndex} index={3}/>
@@ -371,7 +370,7 @@ export const Dataset = (): JSX.Element => {
 					<Dialog open={createFileOpen} onClose={() => {
 						setCreateFileOpen(false);
 					}} fullWidth={true}  maxWidth="lg" aria-labelledby="form-dialog">
-						<UploadFile selectedDatasetId={datasetId} selectedDatasetName={datasetName} folderId={folder}/>
+						<UploadFile selectedDatasetId={datasetId} selectedDatasetName={about.name} folderId={folder}/>
 					</Dialog>
 				</div>
 			</div>

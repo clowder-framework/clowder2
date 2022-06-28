@@ -25,6 +25,7 @@ from app.models.metadata import (
     validate_definition,
     validate_context,
     patch_metadata,
+    MetadataDelete,
 )
 from app.keycloak_auth import get_user, get_current_user, get_token, UserOut
 
@@ -352,12 +353,11 @@ async def get_file_metadata(
         raise HTTPException(status_code=404, detail=f"File {file_id} not found")
 
 
-@router.delete("/{file_id}/metadata", response_model=List[MetadataOut])
+@router.delete("/{file_id}/metadata", response_model=MetadataOut)
 async def delete_file_metadata(
+    metadata_in: MetadataDelete,
     file_id: str,
-    version: Optional[int] = Form(None),
-    extractor_name: Optional[str] = Form(None),
-    extractor_version: Optional[float] = Form(None),
+    # version: Optional[int] = Form(None),
     user=Depends(get_current_user),
     db: MongoClient = Depends(dependencies.get_db),
 ):
@@ -365,30 +365,61 @@ async def delete_file_metadata(
         query = {"resource.resource_id": ObjectId(file_id)}
         file = FileOut.from_mongo(file)
 
-        # Validate specified version, or use latest by default
-        if version is not None:
-            if (
-                version_q := await db["file_versions"].find_one(
-                    {"file_id": ObjectId(file_id), "version_num": version}
-                )
-            ) is None:
-                raise HTTPException(
-                    status_code=404,
-                    detail=f"File version {version} does not exist",
-                )
-            target_version = version
-        else:
-            target_version = file.version_num
-        query["resource.version"] = target_version
+        # # Validate specified version, or use latest by default
+        # if version is not None:
+        #     if (
+        #         version_q := await db["file_versions"].find_one(
+        #             {"file_id": ObjectId(file_id), "version_num": version}
+        #         )
+        #     ) is None:
+        #         raise HTTPException(
+        #             status_code=404,
+        #             detail=f"File version {version} does not exist",
+        #         )
+        #     target_version = version
+        # else:
+        #     target_version = file.version_num
+        # query["resource.version"] = target_version
 
-        if extractor_name is not None:
-            query["agent.extractor.name"] = extractor_name
-        if extractor_version is not None:
-            query["agent.extractor.version"] = extractor_version
+        # filter by metadata_id or definition
+        if metadata_in.metadata_id is not None:
+            # If a specific metadata_id is provided, delete the matching entry
+            if (
+                existing_md := await db["metadata"].find_one(
+                    {"metadata_id": ObjectId(metadata_in.metadata_id)}
+                )
+            ) is not None:
+                query["metadata_id"] = metadata_in.metadata_id
+        else:
+            # Use provided definition name as filter
+            # TODO: Should context_url also be unique to the file version?
+            definition = metadata_in.definition
+            if definition is not None:
+                query["definition"] = definition
+
+        # if extractor info is provided
+        # Filter by MetadataAgent
+        extractor_info = metadata_in.extractor_info
+        if extractor_info is not None:
+            if (
+                extractor := await db["extractors"].find_one(
+                    {"name": extractor_info.name, "version": extractor_info.version}
+                )
+            ) is not None:
+                agent = MetadataAgent(creator=user, extractor=extractor)
+                # TODO: How do we handle two different users creating extractor metadata? Currently we ignore user
+                query["agent.extractor.name"] = agent.extractor.name
+                query["agent.extractor.version"] = agent.extractor.version
+            else:
+                raise HTTPException(status_code=404, detail=f"Extractor not found")
+        else:
+            agent = MetadataAgent(creator=user)
+            query["agent.creator.id"] = agent.creator.id
 
         if (md := await db["metadata"].find_one(query)) is not None:
-            db["metadata"].remove({"_id": md["_id"]})
-            return 200
+            metadata_deleted = md
+            if await db["metadata"].delete_one({"_id": md["_id"]}) is not None:
+                return MetadataOut.from_mongo(metadata_deleted)
         else:
             raise HTTPException(
                 status_code=404, detail=f"No metadata found with that criteria"
