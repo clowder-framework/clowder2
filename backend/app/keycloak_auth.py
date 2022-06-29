@@ -3,19 +3,18 @@ import json
 import logging
 
 from bson import ObjectId
+from fastapi import Security, HTTPException, Depends
 from fastapi.security import OAuth2AuthorizationCodeBearer
-from jose import ExpiredSignatureError, jwt
-from keycloak.keycloak_openid import KeycloakOpenID
+from jose import ExpiredSignatureError
 from keycloak.exceptions import KeycloakAuthenticationError, KeycloakGetError
 from keycloak.keycloak_admin import KeycloakAdmin
+from keycloak.keycloak_openid import KeycloakOpenID
+from pydantic import Json
 from pymongo import MongoClient
 
-from . import dependencies
 from .config import settings
-from fastapi import Security, HTTPException, status, Depends
-from pydantic import Json
-
 from .models.users import get_user_out, UserOut
+from .dependencies import get_db
 
 logger = logging.getLogger(__name__)
 
@@ -47,7 +46,7 @@ oauth2_scheme = OAuth2AuthorizationCodeBearer(
 
 
 async def get_token(
-    token: str = Security(oauth2_scheme), db: MongoClient = Depends(dependencies.get_db)
+    token: str = Security(oauth2_scheme)
 ) -> Json:
     """Decode token. Use to secure endpoints."""
     try:
@@ -83,7 +82,7 @@ async def get_user(identity: Json = Depends(get_token)):
 
 async def get_current_user(
     token: str = Security(oauth2_scheme),
-    db: MongoClient = Depends(dependencies.get_db),
+    db: MongoClient = Depends(get_db),
 ) -> UserOut:
     """Retrieve the user object from Mongo by first getting user id from JWT and then querying Mongo.
     Potentially expensive. Use `get_current_username` if all you need is user name.
@@ -146,7 +145,7 @@ async def create_user(email: str, password: str, firstName: str, lastName: str):
 
 
 async def retreive_refresh_token(
-    email: str, db: MongoClient = Depends(dependencies.get_db)
+    email: str, db: MongoClient = Depends(get_db)
 ):
     if (token_exist := await db["tokens"].find_one({"email": email})) is not None:
         try:

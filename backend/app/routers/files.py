@@ -16,7 +16,7 @@ from minio import Minio
 from pydantic import Json
 from pymongo import MongoClient
 
-from app import dependencies
+import app.dependencies as deps
 from app.config import settings
 from app.models.files import FileIn, FileOut, FileVersion, FileDB
 from app.models.users import UserOut
@@ -30,8 +30,8 @@ async def update_file(
     file_id: str,
     token=Depends(get_token),
     user=Depends(get_current_user),
-    db: MongoClient = Depends(dependencies.get_db),
-    fs: Minio = Depends(dependencies.get_fs),
+    db: MongoClient = Depends(deps.get_db),
+    fs: Minio = Depends(deps.get_fs),
     file: UploadFile = File(...),
 ):
     if (file_q := await db["files"].find_one({"_id": ObjectId(file_id)})) is not None:
@@ -78,8 +78,8 @@ async def update_file(
 @router.get("/{file_id}")
 async def download_file(
     file_id: str,
-    db: MongoClient = Depends(dependencies.get_db),
-    fs: Minio = Depends(dependencies.get_fs),
+    db: MongoClient = Depends(deps.get_db),
+    fs: Minio = Depends(deps.get_fs),
 ):
     # If file exists in MongoDB, download from Minio
     if (file := await db["files"].find_one({"_id": ObjectId(file_id)})) is not None:
@@ -101,8 +101,8 @@ async def download_file(
 @router.delete("/{file_id}")
 async def delete_file(
     file_id: str,
-    db: MongoClient = Depends(dependencies.get_db),
-    fs: Minio = Depends(dependencies.get_fs),
+    db: MongoClient = Depends(deps.get_db),
+    fs: Minio = Depends(deps.get_fs),
 ):
     if (file := await db["files"].find_one({"_id": ObjectId(file_id)})) is not None:
         if (
@@ -126,7 +126,7 @@ async def delete_file(
 @router.get("/{file_id}/summary")
 async def get_file_summary(
     file_id: str,
-    db: MongoClient = Depends(dependencies.get_db),
+    db: MongoClient = Depends(deps.get_db),
 ):
     if (file := await db["files"].find_one({"_id": ObjectId(file_id)})) is not None:
         # TODO: Incrementing too often (3x per page view)
@@ -140,7 +140,7 @@ async def get_file_summary(
 @router.get("/{file_id}/versions", response_model=List[FileVersion])
 async def get_file_versions(
     file_id: str,
-    db: MongoClient = Depends(dependencies.get_db),
+    db: MongoClient = Depends(deps.get_db),
     skip: int = 0,
     limit: int = 20,
 ):

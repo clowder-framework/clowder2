@@ -1,11 +1,12 @@
 from typing import Generator
 
 import motor.motor_asyncio
-from minio import Minio
 from fastapi import Header, HTTPException
-from app.config import settings
+from minio import Minio
 from minio.commonconfig import ENABLED
 from minio.versioningconfig import VersioningConfig
+
+from app.config import settings
 from app.mongo import crete_mongo_indexes
 
 
@@ -40,3 +41,4 @@ async def get_fs() -> Generator:
         file_system.make_bucket(clowder_bucket)
     file_system.set_bucket_versioning(clowder_bucket, VersioningConfig(ENABLED))
     yield file_system
+

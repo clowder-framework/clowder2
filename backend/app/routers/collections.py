@@ -4,7 +4,7 @@ from bson import ObjectId
 from fastapi import APIRouter, HTTPException, Depends
 from pymongo import MongoClient
 
-from app import dependencies
+import app.dependencies as deps
 from app.models.collections import Collection
 
 router = APIRouter()
@@ -12,7 +12,7 @@ router = APIRouter()
 
 @router.post("/", response_model=Collection)
 async def save_collection(
-    body: Collection, db: MongoClient = Depends(dependencies.get_db)
+    body: Collection, db: MongoClient = Depends(deps.get_db)
 ):
     body = body
     res = await db["collections"].insert_one(body.to_mongo())
@@ -22,7 +22,7 @@ async def save_collection(
 
 @router.get("/", response_model=List[Collection])
 async def get_collections(
-    db: MongoClient = Depends(dependencies.get_db), skip: int = 0, limit: int = 2
+    db: MongoClient = Depends(deps.get_db), skip: int = 0, limit: int = 2
 ):
     collections = []
     for doc in (
@@ -34,7 +34,7 @@ async def get_collections(
 
 @router.get("/{collection_id}")
 async def get_collection(
-    collection_id: str, db: MongoClient = Depends(dependencies.get_db)
+    collection_id: str, db: MongoClient = Depends(deps.get_db)
 ):
     if (
         collection := await db["collections"].find_one({"_id": ObjectId(collection_id)})

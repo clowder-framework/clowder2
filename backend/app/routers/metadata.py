@@ -9,7 +9,7 @@ from fastapi import (
 )
 from pymongo import MongoClient
 
-from app import dependencies
+import app.dependencies as deps
 from app.keycloak_auth import get_user, get_current_user
 from app.models.pyobjectid import PyObjectId
 from app.models.metadata import (
@@ -30,7 +30,7 @@ router = APIRouter()
 async def save_metadata_definition(
     definition_in: MetadataDefinitionIn,
     user=Depends(get_current_user),
-    db: MongoClient = Depends(dependencies.get_db),
+    db: MongoClient = Depends(deps.get_db),
 ):
     if (
         md_def := await db["metadata.definitions"].find_one(
@@ -53,7 +53,7 @@ async def save_metadata_definition(
 async def get_metadata_definition(
     name: Optional[str] = None,
     user=Depends(get_current_user),
-    db: MongoClient = Depends(dependencies.get_db),
+    db: MongoClient = Depends(deps.get_db),
     skip: int = 0,
     limit: int = 2,
 ):
@@ -73,7 +73,7 @@ async def update_metadata(
     metadata_in: MetadataPatch,
     metadata_id: str,
     user=Depends(get_current_user),
-    db: MongoClient = Depends(dependencies.get_db),
+    db: MongoClient = Depends(deps.get_db),
 ):
     """Update metadata. Any fields provided in the contents JSON will be added or updated in the metadata. If context or
     agent should be changed, use PUT.
@@ -98,7 +98,7 @@ async def update_metadata(
 async def delete_metadata(
     metadata_id: str,
     user=Depends(get_current_user),
-    db: MongoClient = Depends(dependencies.get_db),
+    db: MongoClient = Depends(deps.get_db),
 ):
     """Delete metadata by specific ID."""
     if (

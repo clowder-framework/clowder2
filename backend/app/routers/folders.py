@@ -6,7 +6,8 @@ from fastapi import (
 )
 from pymongo import MongoClient
 
-from app import dependencies
+from app import deps
+from app.dependencies import get_db
 
 router = APIRouter()
 
@@ -14,7 +15,7 @@ router = APIRouter()
 @router.get("/{folder_id}/path")
 async def download_file(
     folder_id: str,
-    db: MongoClient = Depends(dependencies.get_db),
+    db: MongoClient = Depends(get_db),
 ):
     if (
         folder := await db["folders"].find_one({"_id": ObjectId(folder_id)})

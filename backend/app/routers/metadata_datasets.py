@@ -9,7 +9,7 @@ from fastapi import Form
 from pymongo import MongoClient
 
 from app import keycloak_auth
-from app import dependencies
+import app.dependencies as deps
 from app.keycloak_auth import get_user, get_current_user, UserOut
 from app.config import settings
 from app.models.datasets import DatasetOut
@@ -79,7 +79,7 @@ async def add_dataset_metadata(
     metadata_in: MetadataIn,
     dataset_id: str,
     user=Depends(get_current_user),
-    db: MongoClient = Depends(dependencies.get_db),
+    db: MongoClient = Depends(deps.get_db),
 ):
     """Attach new metadata to a dataset. The body must include a contents field with the JSON metadata, and either a
     context JSON-LD object, context_url, or definition (name of a metadata definition) to be valid.
@@ -120,7 +120,7 @@ async def replace_dataset_metadata(
     metadata_in: MetadataIn,
     dataset_id: str,
     user=Depends(get_current_user),
-    db: MongoClient = Depends(dependencies.get_db),
+    db: MongoClient = Depends(deps.get_db),
 ):
     """Update metadata. Any fields provided in the contents JSON will be added or updated in the metadata. If context or
     agent should be changed, use PUT.
@@ -169,7 +169,7 @@ async def update_dataset_metadata(
     metadata_in: MetadataPatch,
     dataset_id: str,
     user=Depends(get_current_user),
-    db: MongoClient = Depends(dependencies.get_db),
+    db: MongoClient = Depends(deps.get_db),
 ):
     """Update metadata. Any fields provided in the contents JSON will be added or updated in the metadata. If context or
     agent should be changed, use PUT.
@@ -237,7 +237,7 @@ async def get_dataset_metadata(
     extractor_name: Optional[str] = Form(None),
     extractor_version: Optional[float] = Form(None),
     user=Depends(get_current_user),
-    db: MongoClient = Depends(dependencies.get_db),
+    db: MongoClient = Depends(deps.get_db),
 ):
     if (
         dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
@@ -271,7 +271,7 @@ async def delete_dataset_metadata(
     metadata_in: MetadataDelete,
     dataset_id: str,
     user=Depends(get_current_user),
-    db: MongoClient = Depends(dependencies.get_db),
+    db: MongoClient = Depends(deps.get_db),
 ):
     if (
         dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})

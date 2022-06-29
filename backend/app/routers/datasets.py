@@ -10,7 +10,7 @@ from minio import Minio
 from pymongo import MongoClient
 
 from app import keycloak_auth
-from app import dependencies
+import app.dependencies as deps
 from app.keycloak_auth import get_user, get_current_user
 from app.config import settings
 from app.models.datasets import (
@@ -67,7 +67,7 @@ async def get_folder_hierarchy(
 async def save_dataset(
     dataset_in: DatasetIn,
     user=Depends(keycloak_auth.get_current_user),
-    db: MongoClient = Depends(dependencies.get_db),
+    db: MongoClient = Depends(deps.get_db),
 ):
     dataset_db = DatasetDB(**dataset_in.dict(), author=user)
     new_dataset = await db["datasets"].insert_one(dataset_db.to_mongo())
@@ -79,7 +79,7 @@ async def save_dataset(
 @router.get("", response_model=List[DatasetOut])
 async def get_datasets(
     user_id=Depends(get_user),
-    db: MongoClient = Depends(dependencies.get_db),
+    db: MongoClient = Depends(deps.get_db),
     skip: int = 0,
     limit: int = 2,
     mine: bool = False,
@@ -103,7 +103,7 @@ async def get_datasets(
 
 
 @router.get("/{dataset_id}", response_model=DatasetOut)
-async def get_dataset(dataset_id: str, db: MongoClient = Depends(dependencies.get_db)):
+async def get_dataset(dataset_id: str, db: MongoClient = Depends(deps.get_db)):
     if (
         dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
     ) is not None:
@@ -115,7 +115,7 @@ async def get_dataset(dataset_id: str, db: MongoClient = Depends(dependencies.ge
 async def get_dataset_files(
     dataset_id: str,
     folder_id: Optional[str] = None,
-    db: MongoClient = Depends(dependencies.get_db),
+    db: MongoClient = Depends(deps.get_db),
 ):
     files = []
     if folder_id is None:
@@ -138,7 +138,7 @@ async def get_dataset_files(
 async def edit_dataset(
     dataset_id: str,
     dataset_info: DatasetBase,
-    db: MongoClient = Depends(dependencies.get_db),
+    db: MongoClient = Depends(deps.get_db),
     user_id=Depends(get_user),
 ):
     if (
@@ -165,7 +165,7 @@ async def patch_dataset(
     dataset_id: str,
     dataset_info: DatasetPatch,
     user_id=Depends(get_user),
-    db: MongoClient = Depends(dependencies.get_db),
+    db: MongoClient = Depends(deps.get_db),
 ):
     if (
         dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
@@ -188,8 +188,8 @@ async def patch_dataset(
 @router.delete("/{dataset_id}")
 async def delete_dataset(
     dataset_id: str,
-    db: MongoClient = Depends(dependencies.get_db),
-    fs: Minio = Depends(dependencies.get_fs),
+    db: MongoClient = Depends(deps.get_db),
+    fs: Minio = Depends(deps.get_fs),
 ):
     if (await db["datasets"].find_one({"_id": ObjectId(dataset_id)})) is not None:
         # delete dataset first to minimize files/folder being uploaded to a delete dataset
@@ -213,7 +213,7 @@ async def add_folder(
     dataset_id: str,
     folder_in: FolderIn,
     user=Depends(get_current_user),
-    db: MongoClient = Depends(dependencies.get_db),
+    db: MongoClient = Depends(deps.get_db),
 ):
     folder_db = FolderDB(
         **folder_in.dict(), author=user, dataset_id=PyObjectId(dataset_id)
@@ -235,7 +235,7 @@ async def add_folder(
 async def get_dataset_folders(
     dataset_id: str,
     parent_folder: Optional[str] = None,
-    db: MongoClient = Depends(dependencies.get_db),
+    db: MongoClient = Depends(deps.get_db),
 ):
     folders = []
     if parent_folder is None:
@@ -258,8 +258,8 @@ async def get_dataset_folders(
 async def delete_folder(
     dataset_id: str,
     folder_id: str,
-    db: MongoClient = Depends(dependencies.get_db),
-    fs: Minio = Depends(dependencies.get_fs),
+    db: MongoClient = Depends(deps.get_db),
+    fs: Minio = Depends(deps.get_fs),
 ):
     if (await db["folder"].find_one({"_id": ObjectId(dataset_id)})) is not None:
         async for f in db["files"].find({"dataset_id": ObjectId(dataset_id)}):
@@ -275,8 +275,8 @@ async def save_file(
     dataset_id: str,
     folder_id: Optional[str] = Form(None),
     user=Depends(get_current_user),
-    db: MongoClient = Depends(dependencies.get_db),
-    fs: Minio = Depends(dependencies.get_fs),
+    db: MongoClient = Depends(deps.get_db),
+    fs: Minio = Depends(deps.get_fs),
     file: UploadFile = File(...),
 ):
     if (
@@ -340,8 +340,8 @@ async def save_file(
 async def download_dataset(
     dataset_id: str,
     user=Depends(get_current_user),
-    db: MongoClient = Depends(dependencies.get_db),
-    fs: Minio = Depends(dependencies.get_fs),
+    db: MongoClient = Depends(deps.get_db),
+    fs: Minio = Depends(deps.get_fs),
 ):
     if (
         dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})

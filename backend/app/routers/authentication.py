@@ -5,7 +5,7 @@ from keycloak.exceptions import KeycloakAuthenticationError, KeycloakGetError
 from passlib.hash import bcrypt
 from pymongo import MongoClient
 
-from app import dependencies
+import app.dependencies as deps
 from app.keycloak_auth import create_user
 from app.keycloak_auth import keycloak_openid
 from app.models.users import UserDB, UserIn, UserOut
@@ -14,7 +14,7 @@ router = APIRouter()
 
 
 @router.post("/users", response_model=UserOut)
-async def save_user(userIn: UserIn, db: MongoClient = Depends(dependencies.get_db)):
+async def save_user(userIn: UserIn, db: MongoClient = Depends(deps.get_db)):
 
     try:
         keycloak_user = await create_user(
@@ -40,7 +40,7 @@ async def save_user(userIn: UserIn, db: MongoClient = Depends(dependencies.get_d
 
 
 @router.post("/login")
-async def login(userIn: UserIn, db: MongoClient = Depends(dependencies.get_db)):
+async def login(userIn: UserIn, db: MongoClient = Depends(deps.get_db)):
     try:
         token = keycloak_openid.token(userIn.email, userIn.password)
         return {"token": token["access_token"]}

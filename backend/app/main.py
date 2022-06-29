@@ -1,16 +1,12 @@
 import logging
-import random
-import string
-import time
-from urllib.request import Request
 
 import uvicorn
-from pydantic import BaseConfig
 from fastapi import FastAPI, APIRouter, Depends
 from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseConfig
 
 from app.config import settings
-from app.keycloak_auth import get_token
+from app.deps.auth import jwt_or_key_auth
 from app.routers import (
     folders,
 )
@@ -65,49 +61,49 @@ api_router.include_router(
     users.router,
     prefix="/users",
     tags=["users"],
-    dependencies=[Depends(get_token)],
+    dependencies=[Depends(jwt_or_key_auth)],
 )
 api_router.include_router(
     metadata.router,
     prefix="/metadata",
     tags=["metadata"],
-    dependencies=[Depends(get_token)],
+    dependencies=[Depends(jwt_or_key_auth)],
 )
 api_router.include_router(
     files.router,
     prefix="/files",
     tags=["files"],
-    dependencies=[Depends(get_token)],
+    dependencies=[Depends(jwt_or_key_auth)],
 )
 api_router.include_router(
     metadata_files.router,
     prefix="/files",
     tags=["metadata"],
-    dependencies=[Depends(get_token)],
+    dependencies=[Depends(jwt_or_key_auth)],
 )
 api_router.include_router(
     datasets.router,
     prefix="/datasets",
     tags=["datasets"],
-    dependencies=[Depends(get_token)],
+    dependencies=[Depends(jwt_or_key_auth)],
 )
 api_router.include_router(
     metadata_datasets.router,
     prefix="/datasets",
     tags=["metadata"],
-    dependencies=[Depends(get_token)],
+    dependencies=[Depends(jwt_or_key_auth)],
 )
 api_router.include_router(
     collections.router,
     prefix="/collections",
     tags=["collections"],
-    dependencies=[Depends(get_token)],
+    dependencies=[Depends(jwt_or_key_auth)],
 )
 api_router.include_router(
     folders.router,
     prefix="/folders",
     tags=["folders"],
-    dependencies=[Depends(get_token)],
+    dependencies=[Depends(jwt_or_key_auth)],
 )
 api_router.include_router(keycloak.router, prefix="/auth", tags=["auth"])
 app.include_router(api_router, prefix=settings.API_V2_STR)

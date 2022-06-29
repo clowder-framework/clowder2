@@ -63,5 +63,9 @@ class Settings(BaseSettings):
     # identity providers registered in keycloak, for example cilogon, globus, twitter
     keycloak_ipds = ["cilogon", "globus"]
 
+    # API Keys
+    API_KEY_NAME = "X_API_KEY"
+    API_MASTER_KEY = "d4d997c640e63281641a608df86cfed4eaeb4b05"
+
 
 settings = Settings()

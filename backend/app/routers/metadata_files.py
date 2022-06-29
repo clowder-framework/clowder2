@@ -11,7 +11,7 @@ from fastapi import (
 )
 from pymongo import MongoClient
 
-from app import dependencies
+import app.dependencies as deps
 from app.config import settings
 from app.models.files import FileOut
 from app.models.metadata import (
@@ -104,7 +104,7 @@ async def add_file_metadata(
     metadata_in: MetadataIn,
     file_id: str,
     user=Depends(get_current_user),
-    db: MongoClient = Depends(dependencies.get_db),
+    db: MongoClient = Depends(deps.get_db),
 ):
     """Attach new metadata to a file. The body must include a contents field with the JSON metadata, and either a
     context JSON-LD object, context_url, or definition (name of a metadata definition) to be valid.
@@ -143,7 +143,7 @@ async def replace_file_metadata(
     metadata_in: MetadataPatch,
     file_id: str,
     user=Depends(get_current_user),
-    db: MongoClient = Depends(dependencies.get_db),
+    db: MongoClient = Depends(deps.get_db),
 ):
     """Replace metadata, including agent and context. If only metadata contents should be updated, use PATCH instead.
 
@@ -211,7 +211,7 @@ async def update_file_metadata(
     metadata_in: MetadataPatch,
     file_id: str,
     user=Depends(get_current_user),
-    db: MongoClient = Depends(dependencies.get_db),
+    db: MongoClient = Depends(deps.get_db),
 ):
     """Update metadata. Any fields provided in the contents JSON will be added or updated in the metadata. If context or
     agent should be changed, use PUT.
@@ -302,7 +302,7 @@ async def get_file_metadata(
     extractor_name: Optional[str] = Form(None),
     extractor_version: Optional[float] = Form(None),
     user=Depends(get_current_user),
-    db: MongoClient = Depends(dependencies.get_db),
+    db: MongoClient = Depends(deps.get_db),
 ):
     """Get file metadata."""
     if (file := await db["files"].find_one({"_id": ObjectId(file_id)})) is not None:
@@ -358,7 +358,7 @@ async def delete_file_metadata(
     file_id: str,
     # version: Optional[int] = Form(None),
     user=Depends(get_current_user),
-    db: MongoClient = Depends(dependencies.get_db),
+    db: MongoClient = Depends(deps.get_db),
 ):
     if (file := await db["files"].find_one({"_id": ObjectId(file_id)})) is not None:
         query = {"resource.resource_id": ObjectId(file_id)}

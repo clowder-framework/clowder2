@@ -3,7 +3,7 @@ import pytest
 from typing import Generator
 from fastapi.testclient import TestClient
 from app.config import settings
-from app.dependencies import get_db
+from app.deps import get_db
 from app.main import app
 
 user = {

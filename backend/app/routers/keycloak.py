@@ -11,7 +11,7 @@ from pymongo import MongoClient
 from starlette import status
 from starlette.responses import RedirectResponse
 
-from app import keycloak_auth, dependencies
+import app.dependencies as deps
 from app.config import settings
 from app.keycloak_auth import (
     keycloak_openid,
@@ -44,7 +44,7 @@ async def login() -> RedirectResponse:
 @router.get("/logout")
 async def logout(
     credentials: HTTPAuthorizationCredentials = Security(security),
-    db: MongoClient = Depends(dependencies.get_db),
+    db: MongoClient = Depends(deps.get_db),
 ):
     """Logout of keycloak."""
     # get user info
@@ -104,7 +104,7 @@ async def login(userIn: UserIn):
 
 @router.get("")
 async def auth(
-    code: str, db: MongoClient = Depends(dependencies.get_db)
+    code: str, db: MongoClient = Depends(deps.get_db)
 ) -> RedirectResponse:
     """Redirect endpoint Keycloak redirects to after login."""
     logger.info(f"In /api/v2/auth")
@@ -158,7 +158,7 @@ async def auth(
 @router.get("/refresh_token")
 async def refresh_token(
     credentials: HTTPAuthorizationCredentials = Security(security),
-    db: MongoClient = Depends(dependencies.get_db),
+    db: MongoClient = Depends(deps.get_db),
 ):
     access_token = credentials.credentials
 
