@@ -124,7 +124,7 @@ export function datasetDeleted(datasetId){
 			.then(json => {
 				dispatch({
 					type: DELETE_DATASET,
-					dataset: json,
+					dataset: {"id": datasetId},
 					receivedAt: Date.now(),
 				});
 			})
