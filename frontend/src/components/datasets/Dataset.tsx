@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from "react";
-import {Box, Button, Dialog, Divider, Grid, Menu, MenuItem, Tab, Tabs, Typography} from "@mui/material";
+import {Box, Button, Dialog, Divider, Grid, IconButton, Menu, MenuItem, Tab, Tabs, Typography} from "@mui/material";
 import {ClowderInput} from "../styledComponents/ClowderInput";
 import {ClowderButton} from "../styledComponents/ClowderButton";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
@@ -34,6 +34,7 @@ import {
 	deleteDatasetMetadata as deleteDatasetMetadataAction,
 	postDatasetMetadata
 } from "../../actions/metadata";
+import CloseIcon from '@mui/icons-material/Close';
 
 const tab = {
 	fontStyle: "normal",
@@ -46,6 +47,12 @@ const optionMenuItem = {
 	fontWeight: "normal",
 	fontSize: "14px",
 	marginTop: "8px",
+}
+
+const addMetadataStyle = {
+	padding: "10px 20px",
+	borderRadius: "4px",
+	backgroundColor: "#ffffff",
 }
 
 export const Dataset = (): JSX.Element => {
@@ -201,11 +208,32 @@ export const Dataset = (): JSX.Element => {
 								<FilesTable datasetId={datasetId} datasetName={about.name}/>
 							</TabPanel>
 							<TabPanel value={selectedTabIndex} index={1}>
+								{
+									!enableAddMetadata ?
+										<ClowderButton onClick={() => {
+											setEnableAddMetadata(true);
+										}}>Add more metadata...</ClowderButton>
+										:
+										<></>
+								}
+
+								{
+									enableAddMetadata ?
+										<Box sx={addMetadataStyle}>
+											<IconButton aria-label="close"
+														onClick={()=>{setEnableAddMetadata(false);}}
+														sx={{float:"right"}}>
+												<CloseIcon/>
+											</IconButton>
+											<AddMetadata resourceType="dataset" resourceId={datasetId} saveMetadata={createDatasetMetadata}/>
+										</Box>
+										:
+										<></>
+								}
 								<DisplayMetadata updateMetadata={updateDatasetMetadata}
 												 deleteMetadata={deleteDatasetMetadata}
 												 resourceType="dataset" resourceId={datasetId}/>
-								<AddMetadata resourceType="dataset" resourceId={datasetId} saveMetadata={createDatasetMetadata}/>
-								<Button>Add more metadata...</Button>
+
 							</TabPanel>
 							<TabPanel value={selectedTabIndex} index={2}/>
 							<TabPanel value={selectedTabIndex} index={3}/>

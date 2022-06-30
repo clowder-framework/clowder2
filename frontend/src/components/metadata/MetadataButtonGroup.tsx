@@ -36,12 +36,12 @@ export const MetadataButtonGroup = (props) => {
 					}
 				</Box>
 				:
-				<>
+				<Box sx={{textAlign: "right"}}>
 					{ metadataId ?
 						<>
 							{/*Patch*/}
-							<Button variant="text" sx={{float:"right"}} onClick={() => {setReadOnly(true);}}>Cancel</Button>
-							<Button variant="contained" sx={{float:"right"}} onClick={() => {
+							<Button variant="text" onClick={() => {setReadOnly(true);}}>Cancel</Button>
+							<Button variant="contained" onClick={() => {
 								// update metadata
 								updateMetadata(resourceId, {
 									"id":metadataId,
@@ -54,7 +54,7 @@ export const MetadataButtonGroup = (props) => {
 						<>
 							{/*{Create}*/}
 							{/*TODO need to rewrite the post body of creating a new metadata*/}
-							<Button variant="contained" sx={{float:"right"}} onClick={() => {
+							<Button variant="contained" onClick={() => {
 								// save the form info and in parent component create metadata
 								saveMetadata(resourceId, {
 									"definition": widgetName,
@@ -64,7 +64,7 @@ export const MetadataButtonGroup = (props) => {
 							}}>Create</Button>
 						</>
 					}
-				</>
+				</Box>
 		}
 		</>
 	);
