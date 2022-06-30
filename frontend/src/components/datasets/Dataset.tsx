@@ -26,10 +26,14 @@ import {CreateFolder} from "../folders/CreateFolder";
 import {useSearchParams} from "react-router-dom";
 import {parseDate} from "../../utils/common";
 import config from "../../app.config";
-import {DatasetIn} from "../../openapi/v2";
+import {DatasetIn, MetadataIn} from "../../openapi/v2";
 import {DisplayMetadata} from "../metadata/DisplayMetadata";
 import {AddMetadata} from "../metadata/AddMetadata";
-import {patchDatasetMetadata as patchDatasetMetadataAction, deleteDatasetMetadata as deleteDatasetMetadataAction} from "../../actions/metadata";
+import {
+	patchDatasetMetadata as patchDatasetMetadataAction,
+	deleteDatasetMetadata as deleteDatasetMetadataAction,
+	postDatasetMetadata
+} from "../../actions/metadata";
 
 const tab = {
 	fontStyle: "normal",
@@ -59,6 +63,7 @@ export const Dataset = (): JSX.Element => {
 	// Redux connect equivalent
 	const dispatch = useDispatch();
 	const updateDatasetMetadata = (datasetId: string | undefined, content:object) => dispatch(patchDatasetMetadataAction(datasetId,content));
+	const createDatasetMetadata = (datasetId: string|undefined, metadata:MetadataIn) => dispatch(postDatasetMetadata(datasetId, metadata));
 	const deleteDatasetMetadata = (datasetId: string | undefined, metadata:object) => dispatch(deleteDatasetMetadataAction(datasetId, metadata));
 	const deleteDataset = (datasetId:string|undefined) => dispatch(datasetDeleted(datasetId));
 	const editDataset = (datasetId: string|undefined, formData: DatasetIn) => dispatch(updateDataset(datasetId, formData));
