@@ -8,6 +8,10 @@ from fastapi import APIRouter, HTTPException, Depends, File, UploadFile, Respons
 from fastapi import Form
 from minio import Minio
 from pymongo import MongoClient
+import rocrate
+import shutil
+from rocrate.rocrate import ROCrate
+from rocrate.model.person import Person
 
 from app import keycloak_auth
 from app import dependencies
@@ -39,6 +43,10 @@ from app.models.metadata import (
 router = APIRouter()
 
 clowder_bucket = os.getenv("MINIO_BUCKET_NAME", "clowder")
+
+async def clean_out_tmp():
+    temp_dir = os.path.join(os.getcwd(), 'tmp')
+    files_inside = os.listdir()
 
 
 async def get_folder_hierarchy(
@@ -346,6 +354,12 @@ async def download_dataset(
     if (
         dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
     ) is not None:
+        crate = ROCrate()
+        user_first_name = user.first_name
+        user_last_name = user.last_name
+        user_full_name = user_first_name + " " + user_last_name
+        user_crate_id = "placeholdervalue"
+        crate.add(Person(crate, user_crate_id, properties={'name': user_full_name}))
         dataset = DatasetOut.from_mongo(dataset)
         stream = io.BytesIO()
         z = zipfile.ZipFile(stream, "w")
@@ -356,10 +370,20 @@ async def download_dataset(
                 hierarchy = await get_folder_hierarchy(file.folder_id, "", db)
                 file_name = "/" + hierarchy + file_name
             content = fs.get_object(settings.MINIO_BUCKET_NAME, str(file.id))
+            temp_path = os.path.join(os.getcwd(), 'tmp')
+            if not os.path.exists(temp_path):
+                os.mkdir(temp_path)
+            current_file_path = os.path.join(temp_path, file_name)
+            f1 = open(current_file_path, 'wb')
+            f1.write(content.data)
+            f1.close()
+            crate.add_file(current_file_path, dest_path="data/"+file_name, properties={'name':file_name})
             z.writestr(file_name, content.data)
             content.close()
             content.release_conn()
         z.close()
+        crate.write_zip("exp_crate.zip")
+        shutil.rmtree(temp_path)
         return Response(
             stream.getvalue(),
             media_type="application/x-zip-compressed",
