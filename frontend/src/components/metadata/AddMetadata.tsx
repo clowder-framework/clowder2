@@ -4,9 +4,12 @@ import metadataConfig from "../../metadata.config";
 import {useSelector, useDispatch} from "react-redux";
 import {RootState} from "../../types/data";
 import {fetchDatasetMetadata, fetchFileMetadata, fetchMetadataDefinitions} from "../../actions/metadata";
+import {Agent} from "./Agent";
 
 type MetadataType = {
 	saveMetadata: any,
+	updateMetadata: any,
+	deleteMetadata: any,
 	resourceType: string,
 	resourceId: string|undefined,
 }
@@ -17,7 +20,7 @@ Uses metadata definition as well as created metadata
 */
 export const AddMetadata = (props: MetadataType) => {
 
-	const {saveMetadata, resourceType, resourceId} = props;
+	const {saveMetadata, updateMetadata, deleteMetadata, resourceType, resourceId} = props;
 
 	const dispatch = useDispatch();
 	const getMetadatDefinitions = (name:string|null, skip:number, limit:number) => dispatch(fetchMetadataDefinitions(name, skip,limit));
@@ -41,25 +44,29 @@ export const AddMetadata = (props: MetadataType) => {
 		}
 	}, [resourceType, resourceId]);
 
+	// TODO merge existing metadata with new metadata definition
 	return (
 		<>
 			{
 				(() => {
-					let metadataList: string[] = [];
+					let metadataList = [];
+					let metadataNameList = [];
 					if (resourceType === "dataset"){
-						metadataList = datasetMetadataList.reduce((list:string[], item) => {
+						metadataList = datasetMetadataList;
+						metadataNameList = datasetMetadataList.reduce((list:string[], item) => {
 							return [...list, item.definition];
 						}, []);
 					}
 					else if (resourceType === "file") {
-						metadataList = fileMetadataList.reduce((list:string[], item) => {
+						metadataList = fileMetadataList;
+						metadataNameList = fileMetadataList.reduce((list:string[], item) => {
 							return [...list, item.definition];
 						}, []);
 					}
 
 					return metadataDefinitionList.map((metadataDef) => {
 						// filter and only show those do not already created
-						if (!metadataList.includes(metadataDef.name) && metadataConfig[metadataDef.name]) {
+						if (!metadataNameList.includes(metadataDef.name) && metadataConfig[metadataDef.name]) {
 							return (
 								<Box className="inputGroup">
 									<Typography variant="h6">{metadataDef.name}</Typography>
@@ -78,6 +85,34 @@ export const AddMetadata = (props: MetadataType) => {
 									}
 								</Box>
 							);
+						}
+						else{
+							return metadataList.map((metadata) => {
+								if (metadataDef.name === metadata.definition && metadataConfig[metadata.definition]) {
+									return (
+										<Box className="inputGroup">
+											<Typography variant="h6">{metadata.definition}</Typography>
+											<Typography variant="subtitle2">{metadata.description}</Typography>
+											{
+												(() => {
+													return React.cloneElement(
+														metadataConfig[metadata.definition],
+														{
+															resourceId: resourceId,
+															widgetName: metadata.definition,
+															updateMetadata: updateMetadata,
+															deleteMetadata: deleteMetadata,
+															contents: metadata.contents ?? null,
+															metadataId: metadata.id ?? null,
+														}
+													);
+												})()
+											}
+											<Agent created={metadata.created} agent={metadata.agent}/>
+										</Box>
+									);
+								}
+							})
 						}
 					})
 				})()
