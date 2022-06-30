@@ -1,5 +1,18 @@
 import React, {useEffect, useState} from "react";
-import {Box, Button, Dialog, Divider, Grid, IconButton, Menu, MenuItem, Tab, Tabs, Typography} from "@mui/material";
+import {
+	Box,
+	Button,
+	Dialog,
+	Divider,
+	FormControlLabel,
+	Grid,
+	IconButton,
+	Menu,
+	MenuItem, Switch,
+	Tab,
+	Tabs,
+	Typography
+} from "@mui/material";
 import {ClowderInput} from "../styledComponents/ClowderInput";
 import {ClowderButton} from "../styledComponents/ClowderButton";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
@@ -35,6 +48,7 @@ import {
 	postDatasetMetadata
 } from "../../actions/metadata";
 import CloseIcon from '@mui/icons-material/Close';
+import theme from "../../theme";
 
 const tab = {
 	fontStyle: "normal",
@@ -208,15 +222,25 @@ export const Dataset = (): JSX.Element => {
 								<FilesTable datasetId={datasetId} datasetName={about.name}/>
 							</TabPanel>
 							<TabPanel value={selectedTabIndex} index={1}>
-								<AddMetadata resourceType="dataset" resourceId={datasetId}
-											 saveMetadata={createDatasetMetadata}
-											 updateMetadata={updateDatasetMetadata}
-											 deleteMetadata={deleteDatasetMetadata}
-								/>
-								{/*<DisplayMetadata updateMetadata={updateDatasetMetadata}*/}
-								{/*				 deleteMetadata={deleteDatasetMetadata}*/}
-								{/*				 resourceType="dataset" resourceId={datasetId}/>*/}
-
+								<FormControlLabel control={<Switch
+									defaultChecked={false}
+									onChange={()=>{setEnableAddMetadata(prevState => !prevState);}}/>}
+												  label="Add More Metadata..."
+												  sx={{
+												  	float:"right", color:theme.palette.primary.main, fontWeight:"bold"
+												  }}/>
+								{
+									enableAddMetadata ?
+										<AddMetadata resourceType="dataset" resourceId={datasetId}
+													 saveMetadata={createDatasetMetadata}
+													 updateMetadata={updateDatasetMetadata}
+													 deleteMetadata={deleteDatasetMetadata}
+										/>
+										:
+										<DisplayMetadata updateMetadata={updateDatasetMetadata}
+												 deleteMetadata={deleteDatasetMetadata}
+												 resourceType="dataset" resourceId={datasetId}/>
+								}
 							</TabPanel>
 							<TabPanel value={selectedTabIndex} index={2}/>
 							<TabPanel value={selectedTabIndex} index={3}/>
