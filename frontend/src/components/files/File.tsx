@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from "react";
 import config from "../../app.config";
-import {Box, Divider, Grid, Tab, Tabs} from "@mui/material";
+import {Box, Divider, FormControlLabel, Grid, Switch, Tab, Tabs} from "@mui/material";
 import Audio from "../previewers/Audio";
 import Video from "../previewers/Video";
 import {downloadResource} from "../../utils/common";
@@ -23,6 +23,9 @@ import {FileVersionHistory} from "../versions/FileVersionHistory";
 import {DisplayMetadata} from "../metadata/DisplayMetadata";
 import {deleteFileMetadata as deleteFileMetadataAction} from "../../actions/metadata";
 import {patchFileMetadata as patchFileMetadataAction} from "../../actions/metadata";
+import {createFileMetadata as createFileMetadataAction} from "../../actions/metadata";
+import theme from "../../theme";
+import {AddMetadata} from "../metadata/AddMetadata";
 
 const tab = {
 	fontStyle: "normal",
@@ -48,7 +51,8 @@ export const File = (): JSX.Element => {
 	const listFileVersions = (fileId:string|undefined) => dispatch(fetchFileVersions(fileId));
 	const dismissError = () => dispatch(resetFailedReason());
 	const dismissLogout = () => dispatch(resetLogout());
-	const updateFileMetadata = (fileId: string | undefined, content:object) => dispatch(patchFileMetadataAction(fileId,content));
+	const createFileMetadata = (fileId: string | undefined, metadata:object) => dispatch(createFileMetadataAction(fileId, metadata));
+	const updateFileMetadata = (fileId: string | undefined, metadata:object) => dispatch(patchFileMetadataAction(fileId,metadata));
 	const deleteFileMetadata = (fileId: string | undefined, metadata:object) => dispatch(deleteFileMetadataAction(fileId, metadata));
 
 	const fileSummary = useSelector((state:RootState) => state.file.fileSummary);
@@ -60,6 +64,7 @@ export const File = (): JSX.Element => {
 
 	const [selectedTabIndex, setSelectedTabIndex] = useState(0);
 	const [previews, setPreviews] = useState([]);
+	const [enableAddMetadata, setEnableAddMetadata] = useState(false);
 
 	// component did mount
 	useEffect(() => {
@@ -206,9 +211,25 @@ export const File = (): JSX.Element => {
 									<FileVersionHistory fileVersions={fileVersions}/> : <></> }
 							</TabPanel>
 							<TabPanel value={selectedTabIndex} index={2}>
-								<DisplayMetadata updateMetadata={updateFileMetadata}
-												 deleteMetadata={deleteFileMetadata}
-												 resourceType="file" resourceId={fileId} />
+								<FormControlLabel control={<Switch
+									defaultChecked={false}
+									onChange={()=>{setEnableAddMetadata(prevState => !prevState);}}/>}
+												  label="Add More Metadata..."
+												  sx={{
+													  float:"right", color:theme.palette.primary.main, fontWeight:"bold"
+												  }}/>
+								{
+									enableAddMetadata ?
+										<AddMetadata resourceType="file" resourceId={fileId}
+													 saveMetadata={createFileMetadata}
+													 updateMetadata={updateFileMetadata}
+													 deleteMetadata={deleteFileMetadata}
+										/>
+										:
+										<DisplayMetadata updateMetadata={updateFileMetadata}
+														 deleteMetadata={deleteFileMetadata}
+														 resourceType="file" resourceId={fileId} />
+								}
 							</TabPanel>
 							<TabPanel value={selectedTabIndex} index={4}>
 									Extractions
