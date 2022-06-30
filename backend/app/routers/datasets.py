@@ -384,8 +384,11 @@ async def download_dataset(
         z.close()
         crate.write_zip("exp_crate.zip")
         shutil.rmtree(temp_path)
+        f = open("exp_crate.zip", "rb", buffering=0).read()
+        new_stream = io.BytesIO(f)
+        v = stream.getvalue()
         return Response(
-            stream.getvalue(),
+            new_stream.getvalue(),
             media_type="application/x-zip-compressed",
             headers={
                 "Content-Disposition": f'attachment;filename={dataset.name + ".zip"}'
