@@ -8,7 +8,7 @@ from pydantic import BaseConfig
 from app.config import settings
 from app.deps.auth import jwt_or_key_auth
 from app.routers import (
-    folders,
+    folders, api_keys,
 )
 from app.routers import (
     users,
@@ -57,6 +57,12 @@ app.add_middleware(
 
 api_router = APIRouter()
 api_router.include_router(authentication.router, tags=["login"])
+api_router.include_router(
+    api_keys.router,
+    prefix="/keys",
+    tags=["keys"],
+    dependencies=[Depends(jwt_or_key_auth)],
+)
 api_router.include_router(
     users.router,
     prefix="/users",

@@ -11,6 +11,7 @@ from pymongo import MongoClient
 
 from app import keycloak_auth
 import app.dependencies as deps
+from app.deps.auth import jwt_or_key_auth
 from app.keycloak_auth import get_user, get_current_user
 from app.config import settings
 from app.models.datasets import (
@@ -78,7 +79,7 @@ async def save_dataset(
 
 @router.get("", response_model=List[DatasetOut])
 async def get_datasets(
-    user_id=Depends(get_user),
+    user_id=Depends(jwt_or_key_auth),
     db: MongoClient = Depends(deps.get_db),
     skip: int = 0,
     limit: int = 2,

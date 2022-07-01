@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from pydantic import Field
+from pydantic import Field, BaseModel
 
 from app.models.mongomodel import MongoModel
 from app.models.users import UserOut
@@ -17,7 +17,7 @@ class APIKeyPOST(MongoModel):
     name: str
 
 
-class APIKeyCreate():
+class APIKeyCreate(BaseModel):
     name: str
     key: str
 
