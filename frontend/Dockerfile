@@ -2,7 +2,7 @@
 # First stage, compile application
 # ----------------------------------------------------------------------
 
-FROM node:14 AS builder
+FROM node:14 AS clowder-build
 
 WORKDIR /usr/src/app
 
@@ -26,7 +26,7 @@ RUN npm run build
 # Second stage, final image
 # ----------------------------------------------------------------------
 
-FROM nginx:alpine
+FROM nginx:alpine as clowder-runtime
 
 RUN apk add --no-cache jq
 RUN rm -rf /usr/share/nginx/html/ && \
