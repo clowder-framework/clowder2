@@ -104,7 +104,7 @@ export function fileDeleted(fileId){
 			.then(json => {
 				dispatch({
 					type: DELETE_FILE,
-					file: {"id": json["id"]},
+					file: {"id": fileId},
 					receivedAt: Date.now(),
 				});
 			})
