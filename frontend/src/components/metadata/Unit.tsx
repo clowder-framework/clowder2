@@ -5,9 +5,10 @@ import {MetadataButtonGroup} from "./MetadataButtonGroup";
 import {ClowderMetadataSelect} from "../styledComponents/ClowderMetadataSelect";
 
 export const Unit = (props) => {
-	const {widgetName, metadataId, contents, updateMetadata, saveMetadata, deleteMetadata, resourceId, readOnly,
-		setReadOnly} = props;
+	const {widgetName, metadataId, contents, updateMetadata, saveMetadata, deleteMetadata, resourceId, initialReadOnly} = props;
 	const [unit, setUnit] = React.useState(contents && contents.unit? contents.unit: "");
+
+	const [readOnly, setReadOnly] = useState(initialReadOnly);
 
 	const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
 		setUnit(event.target.value);

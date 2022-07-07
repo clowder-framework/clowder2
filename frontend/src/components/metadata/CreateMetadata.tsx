@@ -41,6 +41,7 @@ export const CreateMetadata = (props: MetadataType) => {
 											{
 												widgetName: metadata.name,
 												saveMetadata: saveMetadata,
+												initialReadOnly: false
 											}
 										);
 									})()

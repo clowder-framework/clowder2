@@ -4,11 +4,12 @@ import {ClowderMetadataTextField} from "../styledComponents/ClowderMetadataTextF
 
 export const LatLon = (props) => {
 
-	const {widgetName, metadataId, contents, updateMetadata, saveMetadata, deleteMetadata, resourceId, readOnly,
-		setReadOnly} = props;
+	const {widgetName, metadataId, contents, updateMetadata, saveMetadata, deleteMetadata, resourceId, initialReadOnly} = props;
 	// default to last existing values
 	const [lat, setLat] = useState(contents && contents.latitude? contents.latitude: "");
 	const [lon, setLon] = useState(contents && contents.longitude? contents.longitude: "");
+
+	const [readOnly, setReadOnly] = useState(initialReadOnly);
 
 	return (
 		<>

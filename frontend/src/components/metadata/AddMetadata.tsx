@@ -81,6 +81,7 @@ export const AddMetadata = (props: MetadataType) => {
 													resourceId: resourceId,
 													widgetName: metadataDef.name,
 													saveMetadata: saveMetadata,
+													initialReadOnly: false
 												}
 											);
 										})()
@@ -106,8 +107,7 @@ export const AddMetadata = (props: MetadataType) => {
 															deleteMetadata: deleteMetadata,
 															contents: metadata.contents ?? null,
 															metadataId: metadata.id ?? null,
-															readOnly:readOnly,
-															setReadOnly: setReadOnly
+															initialReadOnly: false
 														}
 													);
 												})()

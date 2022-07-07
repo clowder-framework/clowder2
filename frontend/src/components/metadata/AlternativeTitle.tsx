@@ -4,8 +4,10 @@ import { ClowderMetadataTextField } from "../styledComponents/ClowderMetadataTex
 
 export const AlternativeTitle = (props) => {
 	const {widgetName, resourceId, contents, updateMetadata, saveMetadata, deleteMetadata, metadataId,
-		readOnly, setReadOnly} = props;
+		initialReadOnly} = props;
 	const [alternativeName, setAlternativeName] = useState(contents && contents.alternateName ? contents.alternateName: "");
+
+	const [readOnly, setReadOnly] = useState(initialReadOnly);
 
 	return (
 		<>

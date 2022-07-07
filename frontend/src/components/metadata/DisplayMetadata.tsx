@@ -27,7 +27,7 @@ export const DisplayMetadata = (props: MetadataType) => {
 	const datasetMetadataList = useSelector((state: RootState) => state.metadata.datasetMetadataList);
 	const fileMetadataList = useSelector((state: RootState) => state.metadata.fileMetadataList)
 
-	const [readOnly, setReadOnly] = useState(true);
+	// const [readOnly, setReadOnly] = useState(true);
 
 	// complete metadata list with both definition and values
 	useEffect(() => {
@@ -64,8 +64,7 @@ export const DisplayMetadata = (props: MetadataType) => {
 													deleteMetadata: deleteMetadata,
 													contents: metadata.contents ?? null,
 													metadataId: metadata.id ?? null,
-													readOnly: readOnly,
-													setReadOnly: setReadOnly
+													initialReadOnly: true
 												}
 											);
 										})()
