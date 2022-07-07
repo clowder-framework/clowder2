@@ -219,13 +219,9 @@ export const Dataset = (): JSX.Element => {
 								<FilesTable datasetId={datasetId} datasetName={about.name}/>
 							</TabPanel>
 							<TabPanel value={selectedTabIndex} index={1}>
-								<FormControlLabel control={<Switch
-									defaultChecked={false}
-									onChange={()=>{setEnableAddMetadata(prevState => !prevState);}}/>}
-												  label="Add More Metadata..."
-												  sx={{
-												  	float:"right", color:theme.palette.primary.main, fontWeight:"bold"
-												  }}/>
+								<ClowderButton onClick={()=>{setEnableAddMetadata(true);}}>
+									Add More Metadata...
+								</ClowderButton>
 								{
 									enableAddMetadata ?
 										<AddMetadata resourceType="dataset" resourceId={datasetId}
