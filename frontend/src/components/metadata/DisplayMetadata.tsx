@@ -1,4 +1,4 @@
-import React, {useEffect} from "react";
+import React, {useEffect, useState} from "react";
 import {Box, Typography} from "@mui/material";
 import metadataConfig from "../../metadata.config";
 import {useSelector, useDispatch} from "react-redux";
@@ -26,6 +26,8 @@ export const DisplayMetadata = (props: MetadataType) => {
 	const listFileMetadata = (fileId: string | undefined) => dispatch(fetchFileMetadata(fileId));
 	const datasetMetadataList = useSelector((state: RootState) => state.metadata.datasetMetadataList);
 	const fileMetadataList = useSelector((state: RootState) => state.metadata.fileMetadataList)
+
+	const [readOnly, setReadOnly] = useState(true);
 
 	// complete metadata list with both definition and values
 	useEffect(() => {
@@ -62,6 +64,8 @@ export const DisplayMetadata = (props: MetadataType) => {
 													deleteMetadata: deleteMetadata,
 													contents: metadata.contents ?? null,
 													metadataId: metadata.id ?? null,
+													readOnly: readOnly,
+													setReadOnly: setReadOnly
 												}
 											);
 										})()

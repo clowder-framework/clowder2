@@ -3,10 +3,10 @@ import {MetadataButtonGroup} from "./MetadataButtonGroup";
 import { ClowderMetadataTextField } from "../styledComponents/ClowderMetadataTextField";
 
 export const DOI = (props) => {
-	const {widgetName, metadataId, contents, updateMetadata, saveMetadata, deleteMetadata, resourceId} = props;
+	const {widgetName, metadataId, contents, updateMetadata, saveMetadata, deleteMetadata, resourceId, readOnly,
+		setReadOnly} = props;
 	const [DOI, setDOI] = useState(contents && contents.doi ? contents.doi: "");
 	const [promptError, setPromptError] = useState(false);
-	const [readOnly, setReadOnly] = useState(false);
 	const DOIErrorText = "DOI must follow the format of doi:0000000/000000000000!";
 
 	useEffect(() => {

@@ -3,9 +3,9 @@ import {MetadataButtonGroup} from "./MetadataButtonGroup";
 import { ClowderMetadataTextField } from "../styledComponents/ClowderMetadataTextField";
 
 export const AlternativeTitle = (props) => {
-	const {widgetName, resourceId, contents, updateMetadata, saveMetadata, deleteMetadata, metadataId } = props;
+	const {widgetName, resourceId, contents, updateMetadata, saveMetadata, deleteMetadata, metadataId,
+		readOnly, setReadOnly} = props;
 	const [alternativeName, setAlternativeName] = useState(contents && contents.alternateName ? contents.alternateName: "");
-	const [readOnly, setReadOnly] = useState(!!metadataId);
 
 	return (
 		<>
