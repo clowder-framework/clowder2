@@ -220,10 +220,11 @@ export const Dataset = (): JSX.Element => {
 							</TabPanel>
 							<TabPanel value={selectedTabIndex} index={1}>
 								<ClowderButton onClick={()=>{setEnableAddMetadata(true);}}>
-									Add More Metadata...
+									Edit Metadata
 								</ClowderButton>
 								{
 									enableAddMetadata ?
+										// TODO add a close button to return to display mode
 										<AddMetadata resourceType="dataset" resourceId={datasetId}
 													 saveMetadata={createDatasetMetadata}
 													 updateMetadata={updateDatasetMetadata}

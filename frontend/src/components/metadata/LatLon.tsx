@@ -4,7 +4,8 @@ import {ClowderMetadataTextField} from "../styledComponents/ClowderMetadataTextF
 
 export const LatLon = (props) => {
 
-	const {widgetName, metadataId, contents, updateMetadata, saveMetadata, deleteMetadata, resourceId, initialReadOnly} = props;
+	const {widgetName, metadataId, contents, updateMetadata, saveMetadata, deleteMetadata, resourceId,
+		initialReadOnly, setContents} = props;
 	// default to last existing values
 	const [lat, setLat] = useState(contents && contents.latitude? contents.latitude: "");
 	const [lon, setLon] = useState(contents && contents.longitude? contents.longitude: "");
@@ -15,12 +16,24 @@ export const LatLon = (props) => {
 		<>
 			<ClowderMetadataTextField label="Lat" variant="outlined" margin="normal" fullWidth name={widgetName}
 									  value={readOnly && contents? contents.latitude: lat}
-									  onChange={(event: React.ChangeEvent<HTMLInputElement>) => { setLat(event.target.value);}}
+									  onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+									  	setLat(event.target.value);
+									  	setContents({
+											"latitude":event.target.value,
+											"longitude":lon
+										  });
+									  }}
 									  disabled={readOnly}
 			/>
 			<ClowderMetadataTextField label="Lon" variant="outlined" margin="normal" fullWidth name={widgetName}
 									  value={readOnly && contents? contents.longitude: lon}
-									  onChange={(event: React.ChangeEvent<HTMLInputElement>) => { setLon(event.target.value);}}
+									  onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+									  	setLon(event.target.value);
+									  	setContents({
+										  "latitude":lat,
+										  "longitude":lon
+									  	});
+									  }}
 									  disabled={readOnly}
 			/>
 			<MetadataButtonGroup readOnly={readOnly}

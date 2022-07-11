@@ -4,6 +4,7 @@ import metadataConfig from "../../metadata.config";
 import {useSelector, useDispatch} from "react-redux";
 import {RootState} from "../../types/data";
 import {fetchMetadataDefinitions} from "../../actions/metadata";
+import {useTabContext} from "@mui/lab";
 
 type MetadataType = {
 	saveMetadata: any,
@@ -15,7 +16,7 @@ Uses only registered metadata definition to populate the form
  */
 export const CreateMetadata = (props: MetadataType) => {
 
-	const {saveMetadata} = props;
+	const {saveMetadata, setContents} = props;
 
 	const dispatch = useDispatch();
 	const getMetadatDefinitions = (name:string|null, skip:number, limit:number) => dispatch(fetchMetadataDefinitions(name, skip,limit));
@@ -41,7 +42,8 @@ export const CreateMetadata = (props: MetadataType) => {
 											{
 												widgetName: metadata.name,
 												saveMetadata: saveMetadata,
-												initialReadOnly: false
+												initialReadOnly: false,
+												setContents: setContents
 											}
 										);
 									})()
