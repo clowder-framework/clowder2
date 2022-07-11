@@ -91,7 +91,6 @@ async def get_current_user(
 
     try:
         userinfo = keycloak_openid.userinfo(token)
-        userinfo = keycloak_openid.userinfo(token)
         user = await get_user_out(userinfo["email"], db)
         return user
     except KeycloakAuthenticationError as e:
