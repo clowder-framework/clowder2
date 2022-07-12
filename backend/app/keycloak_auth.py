@@ -167,7 +167,7 @@ async def retreive_refresh_token(
             return {"access_token": new_tokens["access_token"]}
         except KeycloakGetError as e:
             # refresh token invalid; remove from database
-            db["tokens"].delete_one({"_id": ObjectId(token_exist["_id"])})
+            await db["tokens"].delete_one({"_id": ObjectId(token_exist["_id"])})
             raise HTTPException(
                 status_code=401,
                 detail=str(e),  # "Invalid authentication credentials",
