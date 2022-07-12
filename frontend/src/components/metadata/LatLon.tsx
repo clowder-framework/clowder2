@@ -4,8 +4,8 @@ import {ClowderMetadataTextField} from "../styledComponents/ClowderMetadataTextF
 
 export const LatLon = (props) => {
 
-	const {widgetName, metadataId, contents, updateMetadata, saveMetadata, deleteMetadata, resourceId,
-		initialReadOnly, setContents} = props;
+	const {widgetName, metadataId, contents, updateMetadata, setMetadata, deleteMetadata, resourceId,
+		initialReadOnly} = props;
 	// default to last existing values
 	const [lat, setLat] = useState(contents && contents.latitude? contents.latitude: "");
 	const [lon, setLon] = useState(contents && contents.longitude? contents.longitude: "");
@@ -18,10 +18,13 @@ export const LatLon = (props) => {
 									  value={readOnly && contents? contents.latitude: lat}
 									  onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
 									  	setLat(event.target.value);
-									  	setContents({
-											"latitude":event.target.value,
-											"longitude":lon
-										  });
+									  	setMetadata({
+									  		"definition": widgetName,
+											"contents": {
+												"latitude":event.target.value,
+												"longitude":lon
+											}
+									  	});
 									  }}
 									  disabled={readOnly}
 			/>
@@ -29,9 +32,12 @@ export const LatLon = (props) => {
 									  value={readOnly && contents? contents.longitude: lon}
 									  onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
 									  	setLon(event.target.value);
-									  	setContents({
-										  "latitude":lat,
-										  "longitude":lon
+									  	setMetadata({
+									  		"definition": widgetName,
+											"contents": {
+												"latitude":lat,
+												"longitude":event.target.value
+											}
 									  	});
 									  }}
 									  disabled={readOnly}
@@ -40,7 +46,6 @@ export const LatLon = (props) => {
 								 setReadOnly={setReadOnly}
 								 metadataId={metadataId}
 								 updateMetadata={updateMetadata}
-								 saveMetadata={saveMetadata}
 								 deleteMetadata={deleteMetadata}
 								 resourceId={resourceId}
 								 contents={{

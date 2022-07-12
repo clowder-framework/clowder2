@@ -60,7 +60,7 @@ export const CreateDataset = (): JSX.Element => {
 		handleNext();
 	}
 	// step 2
-	const onMetadataSave = (_:any, metadata:any) =>{
+	const setMetadata = (metadata:any) =>{
 		setMetadataRequestForms(prevState => ({...prevState, [metadata.definition]: metadata}));
 	}
 
@@ -122,7 +122,7 @@ export const CreateDataset = (): JSX.Element => {
 								<StepContent>
 									<Typography>Provide us your metadata about data.</Typography>
 									<Box>
-										<CreateMetadata saveMetadata={onMetadataSave}/>
+										<CreateMetadata setMetadata={setMetadata}/>
 									</Box>
 									{/*buttons*/}
 									<Box sx={{ mb: 2 }}>

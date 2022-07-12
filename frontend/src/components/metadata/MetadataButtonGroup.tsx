@@ -5,7 +5,7 @@ import {ActionModal} from "../dialog/ActionModal";
 
 export const MetadataButtonGroup = (props) => {
 
-	const {readOnly, setReadOnly, metadataId, updateMetadata, deleteMetadata, saveMetadata, resourceId, contents, widgetName} = props;
+	const {readOnly, setReadOnly, metadataId, updateMetadata, deleteMetadata, resourceId, contents, widgetName} = props;
 	const [confirmationOpen, setConfirmationOpen] = useState(false);
 
 	return (
@@ -52,16 +52,16 @@ export const MetadataButtonGroup = (props) => {
 						</>
 						:
 						<>
-							{/*{Create}*/}
-							{/*TODO need to rewrite the post body of creating a new metadata*/}
-							<Button variant="contained" onClick={() => {
-								// save the form info and in parent component create metadata
-								saveMetadata(resourceId, {
-									"definition": widgetName,
-									"contents": contents
-								});
-								setReadOnly(true);
-							}}>Create</Button>
+							{/*/!*{Create}*!/*/}
+							{/*/!*TODO need to rewrite the post body of creating a new metadata*!/*/}
+							{/*<Button variant="contained" onClick={() => {*/}
+							{/*	// save the form info and in parent component create metadata*/}
+							{/*	saveMetadata(resourceId, {*/}
+							{/*		"definition": widgetName,*/}
+							{/*		"contents": contents*/}
+							{/*	});*/}
+							{/*	setReadOnly(true);*/}
+							{/*}}>Create</Button>*/}
 						</>
 					}
 				</Box>
