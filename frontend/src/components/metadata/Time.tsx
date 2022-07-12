@@ -5,13 +5,22 @@ import {MetadataButtonGroup} from "./MetadataButtonGroup";
 import {ClowderMetadataTextField} from "../styledComponents/ClowderMetadataTextField";
 
 export const Time = (props) => {
-	const {widgetName, metadataId, contents, updateMetadata, saveMetadata, deleteMetadata, resourceId, initialReadOnly} = props;
+	const {widgetName, metadataId, contents, updateMetadata, setMetadata, deleteMetadata, resourceId, initialReadOnly} = props;
 	const [value, setValue] = useState(contents && contents.time? contents.time: new Date());
 
 	const [readOnly, setReadOnly] = useState(initialReadOnly);
 
 	const handleChange = (newValue:Date) => {
 		setValue(newValue);
+		setMetadata ?
+			setMetadata({
+				"definition": widgetName,
+				"contents": {
+					"time":newValue,
+				}
+			})
+			:
+			null
 	};
 
 	return (
@@ -31,7 +40,6 @@ export const Time = (props) => {
 								 setReadOnly={setReadOnly}
 								 metadataId={metadataId}
 								 updateMetadata={updateMetadata}
-								 saveMetadata={saveMetadata}
 								 deleteMetadata={deleteMetadata}
 								 resourceId={resourceId}
 								 contents={{

@@ -5,13 +5,22 @@ import {MetadataButtonGroup} from "./MetadataButtonGroup";
 import {ClowderMetadataSelect} from "../styledComponents/ClowderMetadataSelect";
 
 export const Unit = (props) => {
-	const {widgetName, metadataId, contents, updateMetadata, saveMetadata, deleteMetadata, resourceId, initialReadOnly} = props;
+	const {widgetName, metadataId, contents, updateMetadata, setMetadata, deleteMetadata, resourceId, initialReadOnly} = props;
 	const [unit, setUnit] = React.useState(contents && contents.unit? contents.unit: "");
 
 	const [readOnly, setReadOnly] = useState(initialReadOnly);
 
 	const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
 		setUnit(event.target.value);
+		setMetadata ?
+			setMetadata({
+				"definition": widgetName,
+				"contents": {
+					"unit":event.target.value,
+				}
+			})
+			:
+			null
 	};
 
 	return (
@@ -34,7 +43,6 @@ export const Unit = (props) => {
 								 setReadOnly={setReadOnly}
 								 metadataId={metadataId}
 								 updateMetadata={updateMetadata}
-								 saveMetadata={saveMetadata}
 								 deleteMetadata={deleteMetadata}
 								 resourceId={resourceId}
 								 contents={{

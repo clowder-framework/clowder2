@@ -3,7 +3,7 @@ import {MetadataButtonGroup} from "./MetadataButtonGroup";
 import { ClowderMetadataTextField } from "../styledComponents/ClowderMetadataTextField";
 
 export const AlternativeTitle = (props) => {
-	const {widgetName, resourceId, contents, updateMetadata, saveMetadata, deleteMetadata, metadataId,
+	const {widgetName, resourceId, contents, updateMetadata, setMetadata, deleteMetadata, metadataId,
 		initialReadOnly} = props;
 	const [alternativeName, setAlternativeName] = useState(contents && contents.alternateName ? contents.alternateName: "");
 
@@ -15,14 +15,24 @@ export const AlternativeTitle = (props) => {
 					   fullWidth
 					   name={widgetName}
 					   value={readOnly && contents? contents.alternateName: alternativeName}
-					   onChange={(event: React.ChangeEvent<HTMLInputElement>) => { setAlternativeName(event.target.value);}}
+					   onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+					   	setAlternativeName(event.target.value);
+						   setMetadata ?
+							   setMetadata({
+								   "definition": widgetName,
+								   "contents": {
+									   "alternateName":event.target.value,
+								   }
+							   })
+							   :
+							   null
+					   }}
 					   disabled={readOnly}
 			/>
 			<MetadataButtonGroup readOnly={readOnly}
 								 setReadOnly={setReadOnly}
 								 metadataId={metadataId}
 								 updateMetadata={updateMetadata}
-								 saveMetadata={saveMetadata}
 								 deleteMetadata={deleteMetadata}
 								 resourceId={resourceId}
 								 contents={{

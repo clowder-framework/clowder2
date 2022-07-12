@@ -51,18 +51,7 @@ export const MetadataButtonGroup = (props) => {
 							}}>Update</Button>
 						</>
 						:
-						<>
-							{/*/!*{Create}*!/*/}
-							{/*/!*TODO need to rewrite the post body of creating a new metadata*!/*/}
-							{/*<Button variant="contained" onClick={() => {*/}
-							{/*	// save the form info and in parent component create metadata*/}
-							{/*	saveMetadata(resourceId, {*/}
-							{/*		"definition": widgetName,*/}
-							{/*		"contents": contents*/}
-							{/*	});*/}
-							{/*	setReadOnly(true);*/}
-							{/*}}>Create</Button>*/}
-						</>
+						<></>
 					}
 				</Box>
 		}

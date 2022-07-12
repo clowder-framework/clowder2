@@ -43,7 +43,7 @@ export const UploadFile:React.FC<UploadFileProps> = (props: UploadFileProps) => 
 		handleNext();
 	}
 	// step 2
-	const onMetadataSave = (_:any, metadata:any) =>{
+	const setMetadata = (_:any, metadata:any) =>{
 		setMetadataRequestForms(prevState => ({...prevState, [metadata.definition]: metadata}));
 	}
 
@@ -102,7 +102,7 @@ export const UploadFile:React.FC<UploadFileProps> = (props: UploadFileProps) => 
 					<StepContent>
 						<Typography>Provide us your metadata about file.</Typography>
 						<Box>
-							<CreateMetadata saveMetadata={onMetadataSave}/>
+							<CreateMetadata setMetadata={setMetadata}/>
 						</Box>
 						{/*buttons*/}
 						<Box sx={{ mb: 2 }}>

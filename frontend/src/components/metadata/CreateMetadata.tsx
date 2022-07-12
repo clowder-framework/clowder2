@@ -15,9 +15,8 @@ Uses only registered metadata definition to populate the form
  */
 export const CreateMetadata = (props: MetadataType) => {
 
-	// const {saveMetadata, setContents} = props;
-
 	const {setMetadata} = props;
+
 	const dispatch = useDispatch();
 	const getMetadatDefinitions = (name:string|null, skip:number, limit:number) => dispatch(fetchMetadataDefinitions(name, skip,limit));
 	const metadataDefinitionList = useSelector((state: RootState) => state.metadata.metadataDefinitionList);

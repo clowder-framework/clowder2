@@ -3,7 +3,7 @@ import {MetadataButtonGroup} from "./MetadataButtonGroup";
 import { ClowderMetadataTextField } from "../styledComponents/ClowderMetadataTextField";
 
 export const DOI = (props) => {
-	const {widgetName, metadataId, contents, updateMetadata, saveMetadata, deleteMetadata, resourceId, initialReadOnly} = props;
+	const {widgetName, metadataId, contents, updateMetadata, setMetadata, deleteMetadata, resourceId, initialReadOnly} = props;
 	const [DOI, setDOI] = useState(contents && contents.doi ? contents.doi: "");
 	const [promptError, setPromptError] = useState(false);
 	const DOIErrorText = "DOI must follow the format of doi:0000000/000000000000!";
@@ -27,7 +27,18 @@ export const DOI = (props) => {
 					   fullWidth
 					   name={widgetName}
 					   value={readOnly && contents ? contents.doi: DOI}
-					   onChange={(event: React.ChangeEvent<HTMLInputElement>) => { setDOI(event.target.value);}}
+					   onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+					   		setDOI(event.target.value);
+					   		setMetadata ?
+								setMetadata({
+								   "definition": widgetName,
+								   "contents": {
+									   "doi":event.target.value,
+								   }
+								})
+								:
+								null
+					   }}
 					   error={promptError}
 					   helperText={DOIErrorText}
 					   disabled={readOnly}
@@ -36,7 +47,6 @@ export const DOI = (props) => {
 								 setReadOnly={setReadOnly}
 								 metadataId={metadataId}
 								 updateMetadata={updateMetadata}
-								 saveMetadata={saveMetadata}
 								 deleteMetadata={deleteMetadata}
 								 resourceId={resourceId}
 								 contents={{"doi":DOI}}
