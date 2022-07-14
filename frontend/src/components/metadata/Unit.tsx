@@ -13,12 +13,21 @@ export const Unit = (props) => {
 	const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
 		setUnit(event.target.value);
 		setMetadata ?
-			setMetadata({
-				"definition": widgetName,
-				"contents": {
-					"unit":event.target.value,
-				}
-			})
+			metadataId?
+				setMetadata({
+					"definition": widgetName,
+					"contents": {
+						"unit":event.target.value,
+					}
+				})
+				:
+				setMetadata({
+					"id":metadataId,
+					"definition": widgetName,
+					"contents": {
+						"unit":event.target.value,
+					}
+				})
 			:
 			null
 	};

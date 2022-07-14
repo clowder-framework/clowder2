@@ -18,12 +18,21 @@ export const AlternativeTitle = (props) => {
 					   onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
 					   	setAlternativeName(event.target.value);
 						   setMetadata ?
-							   setMetadata({
-								   "definition": widgetName,
-								   "contents": {
-									   "alternateName":event.target.value,
-								   }
-							   })
+							   metadataId ?
+								   setMetadata({
+									   "id":metadataId,
+									   "definition": widgetName,
+									   "contents": {
+										   "alternateName":event.target.value,
+									   }
+								   })
+							  	 :
+								   setMetadata({
+									   "definition": widgetName,
+									   "contents": {
+										   "alternateName":event.target.value,
+									   }
+								   })
 							   :
 							   null
 					   }}

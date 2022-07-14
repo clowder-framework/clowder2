@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from "react";
+import React, {useEffect} from "react";
 import {Box, Typography} from "@mui/material";
 import metadataConfig from "../../metadata.config";
 import {useSelector, useDispatch} from "react-redux";
@@ -7,9 +7,7 @@ import {fetchDatasetMetadata, fetchFileMetadata, fetchMetadataDefinitions} from 
 import {Agent} from "./Agent";
 
 type MetadataType = {
-	saveMetadata: any,
-	updateMetadata: any,
-	deleteMetadata: any,
+	setMetadata: any,
 	resourceType: string,
 	resourceId: string|undefined,
 }
@@ -20,7 +18,7 @@ Uses metadata definition as well as created metadata
 */
 export const AddMetadata = (props: MetadataType) => {
 
-	const {setMetadata, updateMetadata, deleteMetadata, resourceType, resourceId} = props;
+	const {setMetadata, resourceType, resourceId} = props;
 
 	const dispatch = useDispatch();
 	const getMetadatDefinitions = (name:string|null, skip:number, limit:number) => dispatch(fetchMetadataDefinitions(name, skip,limit));
@@ -29,8 +27,6 @@ export const AddMetadata = (props: MetadataType) => {
 	const listFileMetadata = (fileId: string | undefined) => dispatch(fetchFileMetadata(fileId));
 	const datasetMetadataList = useSelector((state: RootState) => state.metadata.datasetMetadataList);
 	const fileMetadataList = useSelector((state: RootState) => state.metadata.fileMetadataList);
-
-	const [readOnly, setReadOnly] = useState(false);
 
 	useEffect(() => {
 		getMetadatDefinitions(null, 0, 100);
@@ -105,10 +101,8 @@ export const AddMetadata = (props: MetadataType) => {
 															widgetName: metadata.name,
 															setMetadata: setMetadata,
 															initialReadOnly: false,
-															// updateMetadata: updateMetadata,
-															// deleteMetadata: deleteMetadata,
 															contents: metadata.contents ?? null,
-															// metadataId: metadata.id ?? null,
+															metadataId: metadata.id ?? null,
 														}
 													);
 												})()

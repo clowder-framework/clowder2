@@ -19,14 +19,24 @@ export const LatLon = (props) => {
 									  onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
 									  	setLat(event.target.value);
 									  	setMetadata ?
-											setMetadata({
-												"definition": widgetName,
-												"contents": {
-													"latitude":event.target.value,
-													"longitude":lon
-												}
-											})
-									  		:
+											metadataId ?
+												setMetadata({
+													"id": metadataId,
+													"definition": widgetName,
+													"contents": {
+														"latitude":event.target.value,
+														"longitude":lon
+													}
+												})
+												:
+												setMetadata({
+													"definition": widgetName,
+													"contents": {
+														"latitude":event.target.value,
+														"longitude":lon
+													}
+												})
+											:
 										  	null
 									  }}
 									  disabled={readOnly}

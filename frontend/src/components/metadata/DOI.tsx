@@ -30,12 +30,21 @@ export const DOI = (props) => {
 					   onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
 					   		setDOI(event.target.value);
 					   		setMetadata ?
-								setMetadata({
-								   "definition": widgetName,
-								   "contents": {
-									   "doi":event.target.value,
-								   }
-								})
+								metadataId ?
+									setMetadata({
+										"id": metadataId,
+										"definition": widgetName,
+										"contents": {
+										   "doi":event.target.value,
+										}
+									})
+									:
+									setMetadata({
+										"definition": widgetName,
+										"contents": {
+											"doi":event.target.value,
+										}
+									})
 								:
 								null
 					   }}

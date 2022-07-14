@@ -102,6 +102,7 @@ export const Dataset = (): JSX.Element => {
 	const [datasetName, setDatasetName] = React.useState<string>("");
 	const [datasetDescription, setDatasetDescription] = React.useState<string>("");
 	const [enableAddMetadata, setEnableAddMetadata] = React.useState<boolean>(false);
+	const [metadataRequestForms, setMetadataRequestForms] = useState({});
 
 	// component did mount list all files in dataset
 	useEffect(() => {
@@ -165,8 +166,27 @@ export const Dataset = (): JSX.Element => {
 		setEditDescriptionOpen(false);
 	};
 
-	const handleMetadataUpdateFinish = () =>{
+	const setMetadata = (metadata:any) =>{
+		setMetadataRequestForms(prevState => ({...prevState, [metadata.definition]: metadata}));
+	}
 
+	const handleMetadataUpdateFinish = () =>{
+		Object.keys(metadataRequestForms).map(key => {
+			if ("id" in metadataRequestForms[key] && metadataRequestForms[key]["id"] !== undefined
+				&& metadataRequestForms[key]["id"] !== null
+				&& metadataRequestForms[key]["id"] !== "" )
+			{
+				// update existing metadata
+				updateDatasetMetadata(datasetId, metadataRequestForms[key]);
+			}
+			else{
+				// post new metadata if metadata id doesn't exist
+				createDatasetMetadata(datasetId, metadataRequestForms[key]);
+			}
+
+
+
+		});
 	};
 
 	// for breadcrumb
@@ -224,9 +244,7 @@ export const Dataset = (): JSX.Element => {
 												<CloseIcon />
 											</IconButton>
 											<AddMetadata resourceType="dataset" resourceId={datasetId}
-														 saveMetadata={createDatasetMetadata}
-														 updateMetadata={updateDatasetMetadata}
-														 deleteMetadata={deleteDatasetMetadata}
+														 setMetadata={setMetadata}
 											/>
 											<Button variant="contained" onClick={handleMetadataUpdateFinish} sx={{ mt: 1, mr: 1 }}>
 												Update

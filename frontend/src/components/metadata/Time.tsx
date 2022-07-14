@@ -13,12 +13,21 @@ export const Time = (props) => {
 	const handleChange = (newValue:Date) => {
 		setValue(newValue);
 		setMetadata ?
-			setMetadata({
-				"definition": widgetName,
-				"contents": {
-					"time":newValue,
-				}
-			})
+			metadataId ?
+				setMetadata({
+					"id": metadataId,
+					"definition": widgetName,
+					"contents": {
+						"time":newValue,
+					}
+				})
+				:
+				setMetadata({
+					"definition": widgetName,
+					"contents": {
+						"time":newValue,
+					}
+				})
 			:
 			null
 	};
