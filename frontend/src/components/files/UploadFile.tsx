@@ -43,7 +43,7 @@ export const UploadFile:React.FC<UploadFileProps> = (props: UploadFileProps) => 
 		handleNext();
 	}
 	// step 2
-	const setMetadata = (_:any, metadata:any) =>{
+	const setMetadata = (metadata:any) =>{
 		setMetadataRequestForms(prevState => ({...prevState, [metadata.definition]: metadata}));
 	}
 
