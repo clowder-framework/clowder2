@@ -20,7 +20,7 @@ Uses metadata definition as well as created metadata
 */
 export const AddMetadata = (props: MetadataType) => {
 
-	const {saveMetadata, updateMetadata, deleteMetadata, resourceType, resourceId} = props;
+	const {setMetadata, updateMetadata, deleteMetadata, resourceType, resourceId} = props;
 
 	const dispatch = useDispatch();
 	const getMetadatDefinitions = (name:string|null, skip:number, limit:number) => dispatch(fetchMetadataDefinitions(name, skip,limit));
@@ -80,8 +80,8 @@ export const AddMetadata = (props: MetadataType) => {
 												{
 													resourceId: resourceId,
 													widgetName: metadataDef.name,
-													saveMetadata: saveMetadata,
-													initialReadOnly: false
+													setMetadata: setMetadata,
+													initialReadOnly: false,
 												}
 											);
 										})()
@@ -102,12 +102,13 @@ export const AddMetadata = (props: MetadataType) => {
 														metadataConfig[metadata.definition],
 														{
 															resourceId: resourceId,
-															widgetName: metadata.definition,
-															updateMetadata: updateMetadata,
-															deleteMetadata: deleteMetadata,
+															widgetName: metadata.name,
+															setMetadata: setMetadata,
+															initialReadOnly: false,
+															// updateMetadata: updateMetadata,
+															// deleteMetadata: deleteMetadata,
 															contents: metadata.contents ?? null,
-															metadataId: metadata.id ?? null,
-															initialReadOnly: false
+															// metadataId: metadata.id ?? null,
 														}
 													);
 												})()

@@ -4,11 +4,9 @@ import {
 	Button,
 	Dialog,
 	Divider,
-	FormControlLabel,
-	Grid,
-	IconButton,
+	Grid, IconButton,
 	Menu,
-	MenuItem, Switch,
+	MenuItem,
 	Tab,
 	Tabs,
 	Typography
@@ -48,7 +46,6 @@ import {
 	postDatasetMetadata
 } from "../../actions/metadata";
 import CloseIcon from '@mui/icons-material/Close';
-import theme from "../../theme";
 
 const tab = {
 	fontStyle: "normal",
@@ -61,12 +58,6 @@ const optionMenuItem = {
 	fontWeight: "normal",
 	fontSize: "14px",
 	marginTop: "8px",
-}
-
-const addMetadataStyle = {
-	padding: "10px 20px",
-	borderRadius: "4px",
-	backgroundColor: "#ffffff",
 }
 
 export const Dataset = (): JSX.Element => {
@@ -174,6 +165,10 @@ export const Dataset = (): JSX.Element => {
 		setEditDescriptionOpen(false);
 	};
 
+	const handleMetadataUpdateFinish = () =>{
+
+	};
+
 	// for breadcrumb
 	const paths = [
 		{
@@ -219,21 +214,38 @@ export const Dataset = (): JSX.Element => {
 								<FilesTable datasetId={datasetId} datasetName={about.name}/>
 							</TabPanel>
 							<TabPanel value={selectedTabIndex} index={1}>
-								<ClowderButton onClick={()=>{setEnableAddMetadata(true);}}>
-									Edit Metadata
-								</ClowderButton>
 								{
 									enableAddMetadata ?
-										// TODO add a close button to return to display mode
-										<AddMetadata resourceType="dataset" resourceId={datasetId}
-													 saveMetadata={createDatasetMetadata}
-													 updateMetadata={updateDatasetMetadata}
-													 deleteMetadata={deleteDatasetMetadata}
-										/>
+										<>
+											<IconButton color="primary" aria-label="close"
+														onClick={()=>{setEnableAddMetadata(false);}}
+														sx={{float:"right"}}
+											>
+												<CloseIcon />
+											</IconButton>
+											<AddMetadata resourceType="dataset" resourceId={datasetId}
+														 saveMetadata={createDatasetMetadata}
+														 updateMetadata={updateDatasetMetadata}
+														 deleteMetadata={deleteDatasetMetadata}
+											/>
+											<Button variant="contained" onClick={handleMetadataUpdateFinish} sx={{ mt: 1, mr: 1 }}>
+												Update
+											</Button>
+											<Button onClick={()=>{setEnableAddMetadata(false);}}
+													sx={{ mt: 1, mr: 1 }}>
+												Cancel
+											</Button>
+										</>
 										:
-										<DisplayMetadata updateMetadata={updateDatasetMetadata}
-												 deleteMetadata={deleteDatasetMetadata}
-												 resourceType="dataset" resourceId={datasetId}/>
+										<>
+											<ClowderButton onClick={()=>{setEnableAddMetadata(true);}}>
+												Edit Metadata
+											</ClowderButton>
+											<DisplayMetadata updateMetadata={updateDatasetMetadata}
+															 deleteMetadata={deleteDatasetMetadata}
+															 resourceType="dataset" resourceId={datasetId}/>
+										</>
+
 								}
 							</TabPanel>
 							<TabPanel value={selectedTabIndex} index={2}/>

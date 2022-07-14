@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from "react";
 import config from "../../app.config";
-import {Box, Divider, FormControlLabel, Grid, Switch, Tab, Tabs} from "@mui/material";
+import {Box, Divider, FormControlLabel, Grid, IconButton, Switch, Tab, Tabs} from "@mui/material";
 import Audio from "../previewers/Audio";
 import Video from "../previewers/Video";
 import {downloadResource} from "../../utils/common";
@@ -26,6 +26,8 @@ import {patchFileMetadata as patchFileMetadataAction} from "../../actions/metada
 import {createFileMetadata as createFileMetadataAction} from "../../actions/metadata";
 import theme from "../../theme";
 import {AddMetadata} from "../metadata/AddMetadata";
+import {ClowderButton} from "../styledComponents/ClowderButton";
+import CloseIcon from "@mui/icons-material/Close";
 
 const tab = {
 	fontStyle: "normal",
@@ -208,20 +210,22 @@ export const File = (): JSX.Element => {
 									<FileVersionHistory fileVersions={fileVersions}/> : <></> }
 							</TabPanel>
 							<TabPanel value={selectedTabIndex} index={2}>
-								<FormControlLabel control={<Switch
-									defaultChecked={false}
-									onChange={()=>{setEnableAddMetadata(prevState => !prevState);}}/>}
-												  label="Add More Metadata..."
-												  sx={{
-													  float:"right", color:theme.palette.primary.main, fontWeight:"bold"
-												  }}/>
+								<ClowderButton onClick={()=>{setEnableAddMetadata(true);}}>
+									Edit Metadata
+								</ClowderButton>
 								{
 									enableAddMetadata ?
-										<AddMetadata resourceType="file" resourceId={fileId}
-													 saveMetadata={createFileMetadata}
-													 updateMetadata={updateFileMetadata}
-													 deleteMetadata={deleteFileMetadata}
-										/>
+										<>
+											<IconButton color="primary" aria-label="close"
+														onClick={()=>{setEnableAddMetadata(false);}}>
+												<CloseIcon />
+											</IconButton>
+											<AddMetadata resourceType="file" resourceId={fileId}
+														 saveMetadata={createFileMetadata}
+														 updateMetadata={updateFileMetadata}
+														 deleteMetadata={deleteFileMetadata}
+											/>
+										</>
 										:
 										<DisplayMetadata updateMetadata={updateFileMetadata}
 														 deleteMetadata={deleteFileMetadata}
