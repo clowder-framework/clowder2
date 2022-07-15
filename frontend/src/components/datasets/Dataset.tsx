@@ -186,8 +186,13 @@ export const Dataset = (): JSX.Element => {
 			}
 		});
 
+		// reset the form
+		setMetadataRequestForms({});
+
 		// pulling lastest from the API endpoint
 		listDatasetMetadata(datasetId);
+
+		// switch to display mode
 		setEnableAddMetadata(false);
 	};
 

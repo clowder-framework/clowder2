@@ -86,9 +86,13 @@ export const CreateDataset = (): JSX.Element => {
 				createDatasetMetadata(newDataset.id, metadataRequestForms[key]);
 			});
 
+			//reset dataset so next creation can be done
+			dispatch(resetDatsetCreated());
+			setMetadataRequestForms({});
+			setdatasetRequestForm({});
+
 			// zoom into that newly created dataset
 			history(`/datasets/${newDataset.id}`);
-			dispatch(resetDatsetCreated());
 		}
 
 	},[newDataset]);

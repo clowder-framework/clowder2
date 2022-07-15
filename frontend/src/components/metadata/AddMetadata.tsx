@@ -42,7 +42,6 @@ export const AddMetadata = (props: MetadataType) => {
 		}
 	}, [resourceType, resourceId]);
 
-	// TODO merge existing metadata with new metadata definition
 	return (
 		<>
 			{
