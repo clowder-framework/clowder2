@@ -15,6 +15,7 @@ export const Unit = (props) => {
 		setMetadata ?
 			metadataId?
 				setMetadata({
+					"id":metadataId,
 					"definition": widgetName,
 					"contents": {
 						"unit":event.target.value,
@@ -22,7 +23,6 @@ export const Unit = (props) => {
 				})
 				:
 				setMetadata({
-					"id":metadataId,
 					"definition": widgetName,
 					"contents": {
 						"unit":event.target.value,

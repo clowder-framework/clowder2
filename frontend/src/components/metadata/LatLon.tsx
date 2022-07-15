@@ -45,13 +45,26 @@ export const LatLon = (props) => {
 									  value={readOnly && contents? contents.longitude: lon}
 									  onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
 									  	setLon(event.target.value);
-									  	setMetadata({
-									  		"definition": widgetName,
-											"contents": {
-												"latitude":lat,
-												"longitude":event.target.value
-											}
-									  	});
+										  setMetadata ?
+											  metadataId ?
+												  setMetadata({
+													  "id": metadataId,
+													  "definition": widgetName,
+													  "contents": {
+														  "latitude": lat,
+														  "longitude":event.target.value
+													  }
+												  })
+												  :
+												  setMetadata({
+													  "definition": widgetName,
+													  "contents": {
+														  "latitude":lat,
+														  "longitude":event.target.value
+													  }
+												  })
+											  :
+											  null
 									  }}
 									  disabled={readOnly}
 			/>
