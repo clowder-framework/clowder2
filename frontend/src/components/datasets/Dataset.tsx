@@ -43,7 +43,7 @@ import {AddMetadata} from "../metadata/AddMetadata";
 import {
 	patchDatasetMetadata as patchDatasetMetadataAction,
 	deleteDatasetMetadata as deleteDatasetMetadataAction,
-	postDatasetMetadata
+	postDatasetMetadata, fetchDatasetMetadata
 } from "../../actions/metadata";
 import CloseIcon from '@mui/icons-material/Close';
 
@@ -83,6 +83,7 @@ export const Dataset = (): JSX.Element => {
 	const listFilesInDataset = (datasetId:string|undefined, folderId:string|undefined) => dispatch(fetchFilesInDataset(datasetId, folderId));
 	const listFoldersInDataset = (datasetId:string|undefined, parentFolder:string|undefined) => dispatch(fetchFoldersInDataset(datasetId, parentFolder));
 	const listDatasetAbout= (datasetId:string|undefined) => dispatch(fetchDatasetAbout(datasetId));
+	const listDatasetMetadata = (datasetId: string | undefined) => dispatch(fetchDatasetMetadata(datasetId));
 	const dismissError = () => dispatch(resetFailedReason());
 	const dismissLogout = () => dispatch(resetLogout());
 
@@ -184,6 +185,10 @@ export const Dataset = (): JSX.Element => {
 				createDatasetMetadata(datasetId, metadataRequestForms[key]);
 			}
 		});
+
+		// pulling lastest from the API endpoint
+		listDatasetMetadata(datasetId);
+		setEnableAddMetadata(false);
 	};
 
 	// for breadcrumb
