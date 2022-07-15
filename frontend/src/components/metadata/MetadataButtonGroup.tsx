@@ -5,7 +5,7 @@ import {ActionModal} from "../dialog/ActionModal";
 
 export const MetadataButtonGroup = (props) => {
 
-	const {readOnly, setReadOnly, metadataId, updateMetadata, deleteMetadata, resourceId, contents, widgetName} = props;
+	const {readOnly, setReadOnly, metadataId, setMetadata, updateMetadata, deleteMetadata, resourceId, contents, widgetName} = props;
 	const [confirmationOpen, setConfirmationOpen] = useState(false);
 
 	return (
@@ -38,18 +38,23 @@ export const MetadataButtonGroup = (props) => {
 				:
 				<Box sx={{textAlign: "right"}}>
 					{ metadataId ?
-						<>
-							{/*Patch*/}
-							<Button variant="text" onClick={() => {setReadOnly(true);}}>Cancel</Button>
-							<Button variant="contained" onClick={() => {
-								// update metadata
-								updateMetadata(resourceId, {
-									"id":metadataId,
-									"definition": widgetName,
-									"contents": contents});
-								setReadOnly(true);
-							}}>Update</Button>
-						</>
+						// if setMetadata exist; don't show the individual update button;
+						// will update all metadata at form level
+						setMetadata ?
+							<></>
+							:
+							<>
+								{/*Patch*/}
+								<Button variant="text" onClick={() => {setReadOnly(true);}}>Cancel</Button>
+								<Button variant="contained" onClick={() => {
+									// update metadata
+									updateMetadata(resourceId, {
+										"id":metadataId,
+										"definition": widgetName,
+										"contents": contents});
+									setReadOnly(true);
+								}}>Update</Button>
+							</>
 						:
 						<></>
 					}

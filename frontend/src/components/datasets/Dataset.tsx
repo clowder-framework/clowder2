@@ -254,7 +254,7 @@ export const Dataset = (): JSX.Element => {
 										:
 										<>
 											<ClowderButton onClick={()=>{setEnableAddMetadata(true);}}>
-												Edit Metadata
+												Add/Edit Metadata
 											</ClowderButton>
 											<DisplayMetadata updateMetadata={updateDatasetMetadata}
 															 deleteMetadata={deleteDatasetMetadata}

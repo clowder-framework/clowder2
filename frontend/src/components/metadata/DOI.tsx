@@ -55,6 +55,7 @@ export const DOI = (props) => {
 			<MetadataButtonGroup readOnly={readOnly}
 								 setReadOnly={setReadOnly}
 								 metadataId={metadataId}
+								 setMetadata={setMetadata}
 								 updateMetadata={updateMetadata}
 								 deleteMetadata={deleteMetadata}
 								 resourceId={resourceId}
