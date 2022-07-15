@@ -98,7 +98,7 @@ export const AddMetadata = (props: MetadataType) => {
 														metadataConfig[metadata.definition],
 														{
 															resourceId: resourceId,
-															widgetName: metadata.name,
+															widgetName: metadata.definition,
 															setMetadata: setMetadata,
 															initialReadOnly: false,
 															contents: metadata.contents ?? null,

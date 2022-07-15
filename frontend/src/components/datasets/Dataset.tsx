@@ -183,9 +183,6 @@ export const Dataset = (): JSX.Element => {
 				// post new metadata if metadata id doesn't exist
 				createDatasetMetadata(datasetId, metadataRequestForms[key]);
 			}
-
-
-
 		});
 	};
 
