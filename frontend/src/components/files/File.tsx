@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from "react";
 import config from "../../app.config";
-import {Box, Divider, FormControlLabel, Grid, IconButton, Switch, Tab, Tabs} from "@mui/material";
+import {Box, Button, Divider, FormControlLabel, Grid, IconButton, Switch, Tab, Tabs} from "@mui/material";
 import Audio from "../previewers/Audio";
 import Video from "../previewers/Video";
 import {downloadResource} from "../../utils/common";
@@ -18,16 +18,15 @@ import {MainBreadcrumbs} from "../navigation/BreadCrumb";
 import {ActionModal} from "../dialog/ActionModal";
 import {FileAbout} from "./FileAbout";
 import {FileStats} from "./FileStats";
-import {FileSearch} from "./FileSearch";
 import {FileVersionHistory} from "../versions/FileVersionHistory";
 import {DisplayMetadata} from "../metadata/DisplayMetadata";
-import {deleteFileMetadata as deleteFileMetadataAction} from "../../actions/metadata";
+import {deleteFileMetadata as deleteFileMetadataAction, fetchFileMetadata} from "../../actions/metadata";
 import {patchFileMetadata as patchFileMetadataAction} from "../../actions/metadata";
-import {createFileMetadata as createFileMetadataAction} from "../../actions/metadata";
-import theme from "../../theme";
+import {postFileMetadata as createFileMetadataAction} from "../../actions/metadata";
 import {AddMetadata} from "../metadata/AddMetadata";
 import {ClowderButton} from "../styledComponents/ClowderButton";
 import CloseIcon from "@mui/icons-material/Close";
+import file from "../../reducers/file";
 
 const tab = {
 	fontStyle: "normal",
@@ -51,6 +50,7 @@ export const File = (): JSX.Element => {
 	const dispatch = useDispatch();
 	const listFileSummary = (fileId:string|undefined) => dispatch(fetchFileSummary(fileId));
 	const listFileVersions = (fileId:string|undefined) => dispatch(fetchFileVersions(fileId));
+	const listFileMetadata = (fileId: string | undefined) => dispatch(fetchFileMetadata(fileId));
 	const dismissError = () => dispatch(resetFailedReason());
 	const dismissLogout = () => dispatch(resetLogout());
 	const createFileMetadata = (fileId: string | undefined, metadata:object) => dispatch(createFileMetadataAction(fileId, metadata));
@@ -66,7 +66,8 @@ export const File = (): JSX.Element => {
 
 	const [selectedTabIndex, setSelectedTabIndex] = useState(0);
 	const [previews, setPreviews] = useState([]);
-	const [enableAddMetadata, setEnableAddMetadata] = useState(false);
+	const [enableAddMetadata, setEnableAddMetadata] = React.useState<boolean>(false);
+	const [metadataRequestForms, setMetadataRequestForms] = useState({});
 
 	// component did mount
 	useEffect(() => {
@@ -134,6 +135,35 @@ export const File = (): JSX.Element => {
 
 	const handleTabChange = (_event:React.ChangeEvent<{}>, newTabIndex:number) => {
 		setSelectedTabIndex(newTabIndex);
+	};
+
+	const setMetadata = (metadata:any) =>{
+		setMetadataRequestForms(prevState => ({...prevState, [metadata.definition]: metadata}));
+	};
+
+	const handleMetadataUpdateFinish = () =>{
+		Object.keys(metadataRequestForms).map(key => {
+			if ("id" in metadataRequestForms[key] && metadataRequestForms[key]["id"] !== undefined
+				&& metadataRequestForms[key]["id"] !== null
+				&& metadataRequestForms[key]["id"] !== "" )
+			{
+				// update existing metadata
+				updateFileMetadata(fileId, metadataRequestForms[key]);
+			}
+			else{
+				// post new metadata if metadata id doesn't exist
+				createFileMetadata(fileId, metadataRequestForms[key]);
+			}
+		});
+
+		// reset the form
+		setMetadataRequestForms({});
+
+		// pulling lastest from the API endpoint
+		listFileMetadata(fileId);
+
+		// switch to display mode
+		setEnableAddMetadata(false);
 	};
 
 	// for breadcrumb
@@ -210,26 +240,35 @@ export const File = (): JSX.Element => {
 									<FileVersionHistory fileVersions={fileVersions}/> : <></> }
 							</TabPanel>
 							<TabPanel value={selectedTabIndex} index={2}>
-								<ClowderButton onClick={()=>{setEnableAddMetadata(true);}}>
-									Edit Metadata
-								</ClowderButton>
 								{
 									enableAddMetadata ?
 										<>
 											<IconButton color="primary" aria-label="close"
-														onClick={()=>{setEnableAddMetadata(false);}}>
+														onClick={()=>{setEnableAddMetadata(false);}}
+														sx={{float:"right"}}
+											>
 												<CloseIcon />
 											</IconButton>
 											<AddMetadata resourceType="file" resourceId={fileId}
-														 saveMetadata={createFileMetadata}
-														 updateMetadata={updateFileMetadata}
-														 deleteMetadata={deleteFileMetadata}
+														 setMetadata={setMetadata}
 											/>
+											<Button variant="contained" onClick={handleMetadataUpdateFinish} sx={{ mt: 1, mr: 1 }}>
+												Update
+											</Button>
+											<Button onClick={()=>{setEnableAddMetadata(false);}}
+													sx={{ mt: 1, mr: 1 }}>
+												Cancel
+											</Button>
 										</>
 										:
-										<DisplayMetadata updateMetadata={updateFileMetadata}
-														 deleteMetadata={deleteFileMetadata}
-														 resourceType="file" resourceId={fileId} />
+										<>
+											<ClowderButton onClick={()=>{setEnableAddMetadata(true);}}>
+												Add/Edit Metadata
+											</ClowderButton>
+											<DisplayMetadata updateMetadata={updateFileMetadata}
+															 deleteMetadata={deleteFileMetadata}
+															 resourceType="file" resourceId={fileId} />
+									    </>
 								}
 							</TabPanel>
 							<TabPanel value={selectedTabIndex} index={4}>

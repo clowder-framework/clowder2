@@ -169,7 +169,7 @@ export const Dataset = (): JSX.Element => {
 
 	const setMetadata = (metadata:any) =>{
 		setMetadataRequestForms(prevState => ({...prevState, [metadata.definition]: metadata}));
-	}
+	};
 
 	const handleMetadataUpdateFinish = () =>{
 		Object.keys(metadataRequestForms).map(key => {
