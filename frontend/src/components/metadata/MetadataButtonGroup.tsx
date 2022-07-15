@@ -5,7 +5,8 @@ import {ActionModal} from "../dialog/ActionModal";
 
 export const MetadataButtonGroup = (props) => {
 
-	const {readOnly, setReadOnly, metadataId, setMetadata, updateMetadata, deleteMetadata, resourceId, contents, widgetName} = props;
+	const {readOnly, setReadOnly, metadataId, setMetadata, updateMetadata, deleteMetadata, resourceId,
+		contents, widgetName, setInputChanged} = props;
 	const [confirmationOpen, setConfirmationOpen] = useState(false);
 
 	return (
@@ -45,7 +46,10 @@ export const MetadataButtonGroup = (props) => {
 							:
 							<>
 								{/*Patch*/}
-								<Button variant="text" onClick={() => {setReadOnly(true);}}>Cancel</Button>
+								<Button variant="text" onClick={() => {
+									setReadOnly(true);
+									setInputChanged(false);
+								}}>Cancel</Button>
 								<Button variant="contained" onClick={() => {
 									// update metadata
 									updateMetadata(resourceId, {
@@ -53,6 +57,7 @@ export const MetadataButtonGroup = (props) => {
 										"definition": widgetName,
 										"contents": contents});
 									setReadOnly(true);
+									setInputChanged(false);
 								}}>Update</Button>
 							</>
 						:

@@ -10,7 +10,10 @@ export const Time = (props) => {
 
 	const [readOnly, setReadOnly] = useState(initialReadOnly);
 
+	const [inputChanged, setInputChanged] = useState(false);
+
 	const handleChange = (newValue:Date) => {
+		setInputChanged(true);
 		setValue(newValue);
 		setMetadata ?
 			metadataId ?
@@ -40,7 +43,10 @@ export const Time = (props) => {
 						label={widgetName}
 						value={readOnly && contents ? contents.time: value}
 						onChange={handleChange}
-						renderInput={(params) => <ClowderMetadataTextField {...params} fullWidth/>}
+						renderInput={(params) =>
+							<ClowderMetadataTextField {...params} fullWidth
+													  helperText={inputChanged? "* You have changed this field. " +
+														  "Remember to save/ update.": ""}/>}
 						disabled={readOnly}
 					/>
 				</LocalizationProvider>
@@ -51,6 +57,7 @@ export const Time = (props) => {
 								 setMetadata={setMetadata}
 								 updateMetadata={updateMetadata}
 								 deleteMetadata={deleteMetadata}
+								 setInputChanged={setInputChanged}
 								 resourceId={resourceId}
 								 contents={{
 									 "time": value

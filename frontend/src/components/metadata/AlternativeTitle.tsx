@@ -9,6 +9,8 @@ export const AlternativeTitle = (props) => {
 
 	const [readOnly, setReadOnly] = useState(initialReadOnly);
 
+	const [inputChanged, setInputChanged] = useState(false);
+
 	return (
 		<>
 			<ClowderMetadataTextField label={widgetName} variant="outlined" margin="normal"
@@ -16,27 +18,29 @@ export const AlternativeTitle = (props) => {
 					   name={widgetName}
 					   value={readOnly && contents? contents.alternateName: alternativeName}
 					   onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-					   	setAlternativeName(event.target.value);
-						   setMetadata ?
-							   metadataId ?
-								   setMetadata({
-									   "id":metadataId,
-									   "definition": widgetName,
-									   "contents": {
-										   "alternateName":event.target.value,
-									   }
-								   })
-							  	 :
-								   setMetadata({
-									   "definition": widgetName,
-									   "contents": {
-										   "alternateName":event.target.value,
-									   }
-								   })
-							   :
-							   null
+							setInputChanged(true);
+							setAlternativeName(event.target.value);
+							   setMetadata ?
+								   metadataId ?
+									   setMetadata({
+										   "id":metadataId,
+										   "definition": widgetName,
+										   "contents": {
+											   "alternateName":event.target.value,
+										   }
+									   })
+									 :
+									   setMetadata({
+										   "definition": widgetName,
+										   "contents": {
+											   "alternateName":event.target.value,
+										   }
+									   })
+								   :
+								   null
 					   }}
 					   disabled={readOnly}
+					   helperText={inputChanged? "* You have changed this field. Remember to save/ update.": ""}
 			/>
 			<MetadataButtonGroup readOnly={readOnly}
 								 setReadOnly={setReadOnly}
@@ -44,6 +48,7 @@ export const AlternativeTitle = (props) => {
 								 setMetadata={setMetadata}
 								 updateMetadata={updateMetadata}
 								 deleteMetadata={deleteMetadata}
+								 setInputChanged={setInputChanged}
 								 resourceId={resourceId}
 								 contents={{
 									 alternateName: alternativeName

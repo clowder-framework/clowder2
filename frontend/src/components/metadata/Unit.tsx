@@ -3,6 +3,7 @@ import {InputLabel, MenuItem, FormControl} from "@mui/material";
 import {useState} from "react";
 import {MetadataButtonGroup} from "./MetadataButtonGroup";
 import {ClowderMetadataSelect} from "../styledComponents/ClowderMetadataSelect";
+import {ClowderMetadataFormHelperText} from "../styledComponents/ClowderMetadataFormHelperText";
 
 export const Unit = (props) => {
 	const {widgetName, metadataId, contents, updateMetadata, setMetadata, deleteMetadata, resourceId, initialReadOnly} = props;
@@ -10,7 +11,10 @@ export const Unit = (props) => {
 
 	const [readOnly, setReadOnly] = useState(initialReadOnly);
 
+	const [inputChanged, setInputChanged] = useState(false);
+
 	const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+		setInputChanged(true);
 		setUnit(event.target.value);
 		setMetadata ?
 			metadataId?
@@ -46,6 +50,8 @@ export const Unit = (props) => {
 						<MenuItem value={"K"}>Kelvin</MenuItem>
 						<MenuItem value={"s"}>Second</MenuItem>
 					</ClowderMetadataSelect>
+					<ClowderMetadataFormHelperText>{inputChanged? "* You have changed this field. Remember to save/ update.": ""}
+					</ClowderMetadataFormHelperText>
 				</FormControl>
 			</div>
 			<MetadataButtonGroup readOnly={readOnly}
@@ -58,6 +64,7 @@ export const Unit = (props) => {
 								 contents={{
 									 "unit":unit
 								 }}
+								 setInputChanged={setInputChanged}
 								 widgetName={widgetName}
 			/>
 		</>

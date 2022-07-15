@@ -5,22 +5,24 @@ import { ClowderMetadataTextField } from "../styledComponents/ClowderMetadataTex
 export const DOI = (props) => {
 	const {widgetName, metadataId, contents, updateMetadata, setMetadata, deleteMetadata, resourceId, initialReadOnly} = props;
 	const [DOI, setDOI] = useState(contents && contents.doi ? contents.doi: "");
-	const [promptError, setPromptError] = useState(false);
-	const DOIErrorText = "DOI must follow the format of doi:0000000/000000000000!";
+	// const [promptError, setPromptError] = useState(false);
+	// const DOIErrorText = "DOI must follow the format of doi:0000000/000000000000!";
 
 	const [readOnly, setReadOnly] = useState(initialReadOnly);
 
-	useEffect(() => {
-		// If DOI doesn't follow the format (Regex)
-		if (DOI !== ""){
-			if (!/doi:[0-9]{7}\/[0-9]{12}/.test(DOI)){
-				setPromptError(true);
-			}
-			else{
-				setPromptError(false);
-			}
-		}
-	}, [DOI]);
+	const [inputChanged, setInputChanged] = useState(false);
+
+	// useEffect(() => {
+	// 	// If DOI doesn't follow the format (Regex)
+	// 	if (DOI !== ""){
+	// 		if (!/doi:[0-9]{7}\/[0-9]{12}/.test(DOI)){
+	// 			setPromptError(true);
+	// 		}
+	// 		else{
+	// 			setPromptError(false);
+	// 		}
+	// 	}
+	// }, [DOI]);
 	return (
 		<>
 			<ClowderMetadataTextField label={widgetName} variant="outlined" margin="normal"
@@ -28,6 +30,7 @@ export const DOI = (props) => {
 					   name={widgetName}
 					   value={readOnly && contents ? contents.doi: DOI}
 					   onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+					   		setInputChanged(true);
 					   		setDOI(event.target.value);
 					   		setMetadata ?
 								metadataId ?
@@ -48,8 +51,9 @@ export const DOI = (props) => {
 								:
 								null
 					   }}
-					   error={promptError}
-					   helperText={DOIErrorText}
+					   // error={promptError}
+					   // helperText={DOIErrorText}
+					   helperText={inputChanged? "* You have changed this field. Remember to save/ update.": ""}
 					   disabled={readOnly}
 			/>
 			<MetadataButtonGroup readOnly={readOnly}
@@ -58,6 +62,7 @@ export const DOI = (props) => {
 								 setMetadata={setMetadata}
 								 updateMetadata={updateMetadata}
 								 deleteMetadata={deleteMetadata}
+								 setInputChanged={setInputChanged}
 								 resourceId={resourceId}
 								 contents={{"doi":DOI}}
 								 widgetName={widgetName}
