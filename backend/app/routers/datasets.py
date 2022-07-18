@@ -316,11 +316,15 @@ async def save_file(
                 part_size=settings.MINIO_UPLOAD_CHUNK_SIZE,
             )  # async write chunk to minio
             version_id = response.version_id
+        bytes = len(fs.get_object(settings.MINIO_BUCKET_NAME, str(new_file_id)).data)
+        content_type = file.content_type
         if version_id is None:
             # TODO: This occurs in testing when minio is not running
             version_id = 999999999
         fileDB.version_id = version_id
         fileDB.version_num = 1
+        fileDB.bytes = bytes
+        fileDB.content_type = content_type
         print(fileDB)
         await db["files"].replace_one({"_id": ObjectId(new_file_id)}, fileDB.to_mongo())
 
@@ -329,6 +333,8 @@ async def save_file(
             version_id=version_id,
             file_id=new_file_id,
             creator=user,
+            bytes=bytes,
+            content_type=content_type
         )
         await db["file_versions"].insert_one(new_version.to_mongo())
         return fileDB
