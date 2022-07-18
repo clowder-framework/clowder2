@@ -229,7 +229,9 @@ async def update_dataset_metadata(
             result = await patch_metadata(md, contents, db)
             return result
         else:
-            raise HTTPException(status_code=404, detail=f"Metadata matching the query not found")
+            raise HTTPException(
+                status_code=404, detail=f"Metadata matching the query not found"
+            )
     else:
         raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
 

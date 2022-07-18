@@ -334,7 +334,7 @@ async def save_file(
             file_id=new_file_id,
             creator=user,
             bytes=bytes,
-            content_type=content_type
+            content_type=content_type,
         )
         await db["file_versions"].insert_one(new_version.to_mongo())
         return fileDB
