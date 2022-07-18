@@ -15,4 +15,6 @@ export type FileOut = {
     folder_id?: string;
     views?: number;
     downloads?: number;
+    bytes?: number;
+    content_type?: string;
 }
