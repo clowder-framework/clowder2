@@ -2,7 +2,7 @@
 # First stage, compile application
 # ----------------------------------------------------------------------
 
-FROM node:14 AS builder
+FROM node:14-bullseye AS builder
 
 WORKDIR /usr/src/app
 
