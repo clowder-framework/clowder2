@@ -6,12 +6,16 @@ import {RootState} from "../../types/data";
 import {fetchMetadataDefinitions} from "../../actions/metadata";
 
 type MetadataType = {
-	saveMetadata: any,
+	setMetadata: any,
 }
 
+/*
+This is the interface when create new dataset and new files
+Uses only registered metadata definition to populate the form
+ */
 export const CreateMetadata = (props: MetadataType) => {
 
-	const {saveMetadata} = props;
+	const {setMetadata} = props;
 
 	const dispatch = useDispatch();
 	const getMetadatDefinitions = (name:string|null, skip:number, limit:number) => dispatch(fetchMetadataDefinitions(name, skip,limit));
@@ -36,7 +40,8 @@ export const CreateMetadata = (props: MetadataType) => {
 											metadataConfig[metadata.name],
 											{
 												widgetName: metadata.name,
-												saveMetadata: saveMetadata,
+												setMetadata: setMetadata,
+												initialReadOnly: false,
 											}
 										);
 									})()

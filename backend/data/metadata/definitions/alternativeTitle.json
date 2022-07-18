@@ -1,0 +1,15 @@
+{
+    "name" : "AlternativeTitle",
+    "description" : "Alternative title",
+    "context" : {
+        "title" : "https://schema.org/alternateName"
+    },
+    "fields" : [
+        {
+            "name" : "alternateName",
+            "type" : "str",
+            "list" : false,
+            "required" : true
+        }
+    ]
+}

@@ -25,7 +25,6 @@ export const UploadFile:React.FC<UploadFileProps> = (props: UploadFileProps) => 
 	const getMetadatDefinitions = (name:string|null, skip:number, limit:number) => dispatch(fetchMetadataDefinitions(name, skip,limit));
 	const createFileMetadata = (fileId: string|undefined, metadata:MetadataIn) => dispatch(postFileMetadata(fileId, metadata));
 	const uploadFile = (formData: FormData, selectedDatasetId: string|undefined) => dispatch(fileCreated(formData, selectedDatasetId));
-	const resetUploadFile = () => dispatch(resetFileCreated());
 	const newFile = useSelector((state:RootState) => state.dataset.newFile);
 
 	useEffect(() => {
@@ -43,8 +42,8 @@ export const UploadFile:React.FC<UploadFileProps> = (props: UploadFileProps) => 
 		handleNext();
 	}
 	// step 2
-	const onMetadataSave = (contents:any) =>{
-		setMetadataRequestForms(prevState => ({...prevState, [contents.definition]: contents}));
+	const setMetadata = (metadata:any) =>{
+		setMetadataRequestForms(prevState => ({...prevState, [metadata.definition]: metadata}));
 	}
 
 	// step
@@ -72,11 +71,12 @@ export const UploadFile:React.FC<UploadFileProps> = (props: UploadFileProps) => 
 			});
 
 			// reset newFile so next upload can be done
-			resetUploadFile();
+			dispatch(resetFileCreated());
+			setMetadataRequestForms({});
+			setFileRequestForm({});
 
 			// Redirect to file route with file Id and dataset id
 			history(`/files/${file.id}?dataset=${selectedDatasetId}&name=${selectedDatasetName}`);
-			// TODO dispatch(resetFileUploaded());
 		}
 
 	},[newFile]);
@@ -102,7 +102,7 @@ export const UploadFile:React.FC<UploadFileProps> = (props: UploadFileProps) => 
 					<StepContent>
 						<Typography>Provide us your metadata about file.</Typography>
 						<Box>
-							<CreateMetadata saveMetadata={onMetadataSave}/>
+							<CreateMetadata setMetadata={setMetadata}/>
 						</Box>
 						{/*buttons*/}
 						<Box sx={{ mb: 2 }}>

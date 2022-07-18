@@ -11,4 +11,8 @@ export const ClowderMetadataSelect = styled(Select)({
 		"-webkit-text-fill-color": theme.palette.secondary.dark,
 		"background": theme.palette.background.default
 	},
+	"& .MuiFormHelperText-root":{
+		"color": theme.palette.primary.main,
+		"background": "#ffffff"
+	}
 });

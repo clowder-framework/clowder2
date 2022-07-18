@@ -1,0 +1,15 @@
+{
+    "name" : "Unit",
+    "description" : "Unit",
+    "context" : {
+        "doi" : "https://schema.org/QuantitativeValue"
+    },
+    "fields" : [
+        {
+            "name" : "unit",
+            "type" : "str",
+            "list" : false,
+            "required" : true
+        }
+    ]
+}
