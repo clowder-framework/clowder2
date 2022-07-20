@@ -60,8 +60,8 @@ export const CreateDataset = (): JSX.Element => {
 		handleNext();
 	}
 	// step 2
-	const onMetadataSave = (contents:any) =>{
-		setMetadataRequestForms(prevState => ({...prevState, [contents.definition]: contents}));
+	const setMetadata = (metadata:any) =>{
+		setMetadataRequestForms(prevState => ({...prevState, [metadata.definition]: metadata}));
 	}
 
 	// step
@@ -86,9 +86,13 @@ export const CreateDataset = (): JSX.Element => {
 				createDatasetMetadata(newDataset.id, metadataRequestForms[key]);
 			});
 
+			//reset dataset so next creation can be done
+			dispatch(resetDatsetCreated());
+			setMetadataRequestForms({});
+			setdatasetRequestForm({});
+
 			// zoom into that newly created dataset
 			history(`/datasets/${newDataset.id}`);
-			dispatch(resetDatsetCreated());
 		}
 
 	},[newDataset]);
@@ -122,7 +126,7 @@ export const CreateDataset = (): JSX.Element => {
 								<StepContent>
 									<Typography>Provide us your metadata about data.</Typography>
 									<Box>
-										<CreateMetadata saveMetadata={onMetadataSave}/>
+										<CreateMetadata setMetadata={setMetadata}/>
 									</Box>
 									{/*buttons*/}
 									<Box sx={{ mb: 2 }}>
