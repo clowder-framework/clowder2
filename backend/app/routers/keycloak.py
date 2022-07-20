@@ -119,7 +119,6 @@ async def auth(
     )
     token_body = json.loads(token_response.content)
     access_token = token_body["access_token"]
-    print(access_token)
 
     # create user in db if it doesn't already exist; get the user_id
     userinfo = keycloak_openid.userinfo(access_token)

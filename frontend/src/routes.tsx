@@ -1,5 +1,5 @@
-import React from "react";
-import {Route, Navigate, Routes, BrowserRouter} from "react-router-dom";
+import React, {useEffect} from "react";
+import {Route, Navigate, Routes, BrowserRouter, useNavigate} from "react-router-dom";
 
 import {Dashboard} from "./components/Dashbard";
 import {Dataset as DatasetComponent} from "./components/datasets/Dataset";
@@ -12,36 +12,58 @@ import {RedirectLogin as RedirectLoginComponent} from "./components/auth/Redirec
 import {RedirectLogout as RedirectLogoutComponent} from "./components/auth/RedirectLogout";
 
 import {isAuthorized} from "./utils/common";
+import {useDispatch, useSelector} from "react-redux";
+import {RootState} from "./types/data";
+import {resetLogout} from "./actions/common";
 
 // https://dev.to/iamandrewluca/private-route-in-react-router-v6-lg5
-class PrivateRoute extends React.Component<{ children: JSX.Element }> {
-	render() {
-		let {children} = this.props;
-		return isAuthorized() ? children : <Navigate to="/auth/login"/>;
-	}
+const PrivateRoute = (props): JSX.Element => {
+	const {children} = props;
+
+	const history = useNavigate();
+	const dispatch = useDispatch();
+	const loggedOut = useSelector((state: RootState) => state.error.loggedOut);
+	const dismissLogout = () => dispatch(resetLogout());
+
+	// log user out if token expired/unauthorized
+	useEffect(() => {
+		if (loggedOut) {
+			// reset loggedOut flag so it doesn't stuck in "true" state, then redirect to login page
+			dismissLogout();
+			history("/auth/login");
+		}
+	}, [loggedOut]);
+
+	return (
+		<>
+			{
+				isAuthorized() ?
+					children : <Navigate to="/auth/login"/>
+			}
+		</>
+	)
 }
 
-
-const AppRoutes = (
-	<BrowserRouter>
-		<Routes>
-			<Route path="/" element={<PrivateRoute><Dashboard/></PrivateRoute>} />
-			<Route path="/create-dataset/" element={<PrivateRoute><CreateDataset/></PrivateRoute>} />
-			<Route path="/datasets/:datasetId" element={<PrivateRoute><DatasetComponent/></PrivateRoute>} />
-			<Route path="/files/:fileId" element={<PrivateRoute><FileComponent/></PrivateRoute>} />
-			<Route path="/auth/register" element={<RedirectRegisterComponent/>} />
-			<Route path="/auth/login" element={<RedirectLoginComponent/>} />
-			<Route path="/auth/logout" element={<RedirectLogoutComponent/>} />
-			<Route path="/auth" element={<AuthComponent/>} />
-			<Route path="*"
-				element={
-					<main style={{ padding: "1rem" }}>
-						<p>Page Not Found!</p>
-					</main>
-				}
-			/>
-		</Routes>
-	</BrowserRouter>
-);
-export default AppRoutes;
-
+export const AppRoutes = (): JSX.Element => {
+	return (
+		<BrowserRouter>
+			<Routes>
+				<Route path="/" element={<PrivateRoute><Dashboard/></PrivateRoute>} />
+				<Route path="/create-dataset/" element={<PrivateRoute><CreateDataset/></PrivateRoute>} />
+				<Route path="/datasets/:datasetId" element={<PrivateRoute><DatasetComponent/></PrivateRoute>} />
+				<Route path="/files/:fileId" element={<PrivateRoute><FileComponent/></PrivateRoute>} />
+				<Route path="/auth/register" element={<RedirectRegisterComponent/>} />
+				<Route path="/auth/login" element={<RedirectLoginComponent/>} />
+				<Route path="/auth/logout" element={<RedirectLogoutComponent/>} />
+				<Route path="/auth" element={<AuthComponent/>} />
+				<Route path="*"
+					   element={
+						   <main style={{ padding: "1rem" }}>
+							   <p>Page Not Found!</p>
+						   </main>
+					   }
+				/>
+			</Routes>
+		</BrowserRouter>
+	)
+}

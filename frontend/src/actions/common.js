@@ -30,26 +30,31 @@ export const FAILED = "FAILED";
 export function handleErrors(reason, originalFunc){
 	// Authorization error we need to automatically logout user
 	if (reason.status === 401){
-		return async (dispatch) => {
-			const headers = {"Authorization": cookies.get("Authorization")};
-			let response = await fetch(config.KeycloakRefresh, {method: "GET", headers: headers});
-			if (response.status === 200) {
-				const json = await response.json();
-				if (json["access_token"] !== undefined && json["access_token"] !== "none") {
-					cookies.set("Authorization", `Bearer ${json["access_token"]}`);
-					V2.OpenAPI.TOKEN = json["access_token"];
-					dispatch(originalFunc);
-				}
-			}
-			else {
-				logoutHelper();
-				return (dispatch) => {
+
+		const headers = {"Authorization": cookies.get("Authorization")};
+		V2.OpenAPI.TOKEN = undefined;
+		cookies.remove("Authorization", { path: "/" });
+
+		return (dispatch) => {
+			return fetch(config.KeycloakRefresh, {method: "GET", headers: headers})
+				.then((response) => {
+					if (response.status === 200) return response.json();
+				})
+				.then(json =>{
+					// refresh
+					if (json["access_token"] !== undefined && json["access_token"] !== "none") {
+						cookies.set("Authorization", `Bearer ${json["access_token"]}`);
+						V2.OpenAPI.TOKEN = json["access_token"];
+						dispatch(originalFunc);
+					}
+				})
+				.catch(() => {
+					// logout
 					dispatch({
 						type: LOGOUT,
 						receivedAt: Date.now()
 					});
-				};
-			}
+				});
 		};
 	}
 	else{

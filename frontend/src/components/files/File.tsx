@@ -6,9 +6,9 @@ import Video from "../previewers/Video";
 import {downloadResource} from "../../utils/common";
 import Thumbnail from "../previewers/Thumbnail";
 import {PreviewConfiguration, RootState} from "../../types/data";
-import {useParams, useLocation, useNavigate} from "react-router-dom";
+import {useParams, useLocation} from "react-router-dom";
 import {useDispatch, useSelector} from "react-redux";
-import {resetFailedReason, resetLogout} from "../../actions/common"
+import {resetFailedReason} from "../../actions/common"
 
 import {TabPanel} from "../tabs/TabComponent";
 import {a11yProps} from "../tabs/TabComponent";
@@ -36,8 +36,6 @@ const tab = {
 }
 
 export const File = (): JSX.Element => {
-	// use history hook to redirect/navigate between routes
-	const history = useNavigate();
 
 	// path parameter
 	const { fileId } = useParams<{fileId?: string}>();
@@ -52,7 +50,6 @@ export const File = (): JSX.Element => {
 	const listFileVersions = (fileId:string|undefined) => dispatch(fetchFileVersions(fileId));
 	const listFileMetadata = (fileId: string | undefined) => dispatch(fetchFileMetadata(fileId));
 	const dismissError = () => dispatch(resetFailedReason());
-	const dismissLogout = () => dispatch(resetLogout());
 	const createFileMetadata = (fileId: string | undefined, metadata:object) => dispatch(createFileMetadataAction(fileId, metadata));
 	const updateFileMetadata = (fileId: string | undefined, metadata:object) => dispatch(patchFileMetadataAction(fileId,metadata));
 	const deleteFileMetadata = (fileId: string | undefined, metadata:object) => dispatch(deleteFileMetadataAction(fileId, metadata));
@@ -62,7 +59,6 @@ export const File = (): JSX.Element => {
 	const fileVersions = useSelector((state:RootState) => state.file.fileVersions);
 	const reason = useSelector((state:RootState) => state.error.reason);
 	const stack = useSelector((state:RootState) => state.error.stack);
-	const loggedOut = useSelector((state: RootState) => state.error.loggedOut);
 
 	const [selectedTabIndex, setSelectedTabIndex] = useState(0);
 	const [previews, setPreviews] = useState([]);
@@ -92,15 +88,6 @@ export const File = (): JSX.Element => {
 	const handleErrorReport = (reason:string) => {
 		window.open(`${config.GHIssueBaseURL}+${reason}&body=${encodeURIComponent(stack)}`);
 	}
-
-	// log user out if token expired/unauthorized
-	useEffect(() => {
-		if (loggedOut) {
-			// reset loggedOut flag so it doesn't stuck in "true" state, then redirect to login page
-			dismissLogout();
-			history("/auth/login");
-		}
-	}, [loggedOut]);
 
 	useEffect(() => {
 		(async () => {
