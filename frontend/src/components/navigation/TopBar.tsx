@@ -1,12 +1,10 @@
-import React, {useEffect} from "react";
+import React from "react";
 import {
 	AppBar,
 	Link,
 	Toolbar
 } from "@mui/material";
 import Box from "@mui/material/Box";
-import {useSelector} from "react-redux";
-import {RootState} from "../../types/data";
 
 const link = {
 	textDecoration: "none",

@@ -9,7 +9,7 @@ import {CreateMetadata} from "../metadata/CreateMetadata";
 import TopBar from "../navigation/TopBar";
 import {ActionModal} from "../dialog/ActionModal";
 import config from "../../app.config";
-import {resetFailedReason, resetLogout} from "../../actions/common";
+import {resetFailedReason} from "../../actions/common";
 import {fetchMetadataDefinitions, postDatasetMetadata} from "../../actions/metadata";
 import {MetadataIn} from "../../openapi/v2";
 import {datasetCreated, resetDatsetCreated} from "../../actions/dataset";
@@ -25,21 +25,9 @@ export const CreateDataset = (): JSX.Element => {
 	const createDataset = (formData: FormData) => dispatch(datasetCreated(formData));
 	const newDataset = useSelector((state:RootState) => state.dataset.newDataset);
 
-	const loggedOut = useSelector((state: RootState) => state.error.loggedOut);
-	const dismissLogout = () => dispatch(resetLogout());
-
 	useEffect(() => {
 		getMetadatDefinitions(null, 0, 100);
 	}, []);
-
-	// log user out if token expired/unauthorized
-	useEffect(() => {
-		if (loggedOut) {
-			// reset loggedOut flag so it doesn't stuck in "true" state, then redirect to login page
-			dismissLogout();
-			history("/auth/login");
-		}
-	}, [loggedOut]);
 
 	// Error msg dialog
 	const reason = useSelector((state: RootState) => state.error.reason);

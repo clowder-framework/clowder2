@@ -1,7 +1,6 @@
 import React, {useEffect, useState} from "react";
 import {Box, Button, Dialog, Divider, Grid, Menu, MenuItem, Tab, Tabs, Typography} from "@mui/material";
 import {ClowderInput} from "../styledComponents/ClowderInput";
-import {ClowderButton} from "../styledComponents/ClowderButton";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import {useNavigate, useParams} from "react-router-dom";
 import {RootState} from "../../types/data";
@@ -14,7 +13,7 @@ import {
 	fetchFoldersInDataset,
 	updateDataset
 } from "../../actions/dataset";
-import {resetFailedReason, resetLogout} from "../../actions/common"
+import {resetFailedReason, } from "../../actions/common"
 
 import {a11yProps, TabPanel} from "../tabs/TabComponent";
 import TopBar from "../navigation/TopBar";
@@ -66,13 +65,11 @@ export const Dataset = (): JSX.Element => {
 	const listFoldersInDataset = (datasetId:string|undefined, parentFolder:string|undefined) => dispatch(fetchFoldersInDataset(datasetId, parentFolder));
 	const listDatasetAbout= (datasetId:string|undefined) => dispatch(fetchDatasetAbout(datasetId));
 	const dismissError = () => dispatch(resetFailedReason());
-	const dismissLogout = () => dispatch(resetLogout());
 
 	// mapStateToProps
 	const about = useSelector((state: RootState) => state.dataset.about);
 	const reason = useSelector((state: RootState) => state.error.reason);
 	const stack = useSelector((state: RootState) => state.error.stack);
-	const loggedOut = useSelector((state: RootState) => state.error.loggedOut);
 	const folderPath = useSelector((state: RootState) => state.dataset.folderPath);
 
 	// state
@@ -108,15 +105,6 @@ export const Dataset = (): JSX.Element => {
 	const handleErrorReport = (reason: string) => {
 		window.open(`${config.GHIssueBaseURL}+${reason}&body=${encodeURIComponent(stack)}`);
 	}
-
-	// log user out if token expired/unauthorized
-	useEffect(() => {
-		if (loggedOut) {
-			// reset loggedOut flag so it doesn't stuck in "true" state, then redirect to login page
-			dismissLogout();
-			history("/auth/login");
-		}
-	}, [loggedOut]);
 
 	// new folder dialog
 	const [newFolder, setNewFolder] = React.useState<boolean>(false);
