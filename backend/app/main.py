@@ -65,57 +65,49 @@ api_router.include_router(
     users.router,
     prefix="/users",
     tags=["users"],
-    dependencies=[Depends(get_token),
-                  Depends(get_current_username)],
+    dependencies=[Depends(get_current_username)],
 )
 api_router.include_router(
     metadata.router,
     prefix="/metadata",
     tags=["metadata"],
-    dependencies=[Depends(get_token),
-                  Depends(get_current_username)],
+    dependencies=[Depends(get_current_username)],
 )
 api_router.include_router(
     files.router,
     prefix="/files",
     tags=["files"],
-    dependencies=[Depends(get_token),
-                  Depends(get_current_username)],
+    dependencies=[Depends(get_current_username)],
 )
 api_router.include_router(
     metadata_files.router,
     prefix="/files",
     tags=["metadata"],
-    dependencies=[Depends(get_token),
-                  Depends(get_current_username)],
+    dependencies=[Depends(get_current_username)],
 )
 api_router.include_router(
     datasets.router,
     prefix="/datasets",
     tags=["datasets"],
-    dependencies=[Depends(get_token),
-                  Depends(get_current_username)],
+    dependencies=[Depends(get_current_username)],
 )
 api_router.include_router(
     metadata_datasets.router,
     prefix="/datasets",
     tags=["metadata"],
-    dependencies=[Depends(get_token),
-                  Depends(get_current_username)],
+    dependencies=[Depends(get_current_username)],
 )
 api_router.include_router(
     collections.router,
     prefix="/collections",
     tags=["collections"],
-    dependencies=[Depends(get_token),
-                  Depends(get_current_username)],
+    dependencies=[Depends(get_current_username)],
 )
 api_router.include_router(
     folders.router,
     prefix="/folders",
     tags=["folders"],
-    dependencies=[Depends(get_token),
-                  Depends(get_current_username)],
+    dependencies=[Depends(get_current_username)],
 )
 api_router.include_router(keycloak.router, prefix="/auth", tags=["auth"])
 app.include_router(api_router, prefix=settings.API_V2_STR)
