@@ -8,6 +8,7 @@ from fastapi import APIRouter, HTTPException, Depends, File, UploadFile, Respons
 from fastapi import Form
 from minio import Minio
 from pymongo import MongoClient
+import tempfile
 import rocrate
 import shutil
 from rocrate.rocrate import ROCrate
@@ -354,12 +355,61 @@ async def download_dataset(
     if (
         dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
     ) is not None:
+        current_temp_dir = tempfile.mkdtemp(prefix='rocratedownload')
         crate = ROCrate()
         user_first_name = user.first_name
         user_last_name = user.last_name
         user_full_name = user_first_name + " " + user_last_name
         user_crate_id = "placeholdervalue"
         crate.add(Person(crate, user_crate_id, properties={'name': user_full_name}))
+        async for f in db["files"].find({"dataset_id": ObjectId(dataset_id)}):
+            print('found a file')
+            file = FileOut.from_mongo(f)
+            file_name = file.name
+            if file.folder_id is not None:
+                hierarchy = await get_folder_hierarchy(file.folder_id, "", db)
+                file_name = "/" + hierarchy + file_name
+            content = fs.get_object(settings.MINIO_BUCKET_NAME, str(file.id))
+            current_file_path = os.path.join(current_temp_dir, file_name)
+            f1 = open(current_file_path, 'wb')
+            f1.write(content.data)
+            f1.close()
+            crate.add_file(current_file_path, dest_path="data/"+file_name, properties={'name':file_name})
+            content.close()
+            content.release_conn()
+        dataset_name = dataset['name']
+        path_to_zip = os.path.join(current_temp_dir, dataset['name'] + '.zip')
+        crate.write_zip(path_to_zip)
+        f = open(path_to_zip, "rb", buffering=0)
+        bytes = f.read()
+        stream = io.BytesIO(bytes)
+        f.close()
+        try:
+            shutil.rmtree(current_temp_dir)
+        except Exception as e:
+            print('could not delete file')
+            print(e)
+        return Response(
+            stream.getvalue(),
+            media_type="application/x-zip-compressed",
+            headers={
+                "Content-Disposition": f'attachment;filename={dataset_name + ".zip"}'
+            },
+        )
+    else:
+        raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
+
+
+@router.get("/{dataset_id}/downloadold", response_model=DatasetOut)
+async def download_dataset_old(
+    dataset_id: str,
+    user=Depends(get_current_user),
+    db: MongoClient = Depends(dependencies.get_db),
+    fs: Minio = Depends(dependencies.get_fs),
+):
+    if (
+        dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
+    ) is not None:
         dataset = DatasetOut.from_mongo(dataset)
         stream = io.BytesIO()
         z = zipfile.ZipFile(stream, "w")
@@ -370,28 +420,12 @@ async def download_dataset(
                 hierarchy = await get_folder_hierarchy(file.folder_id, "", db)
                 file_name = "/" + hierarchy + file_name
             content = fs.get_object(settings.MINIO_BUCKET_NAME, str(file.id))
-            temp_path = os.path.join(os.getcwd(), 'tmp')
-            if not os.path.exists(temp_path):
-                os.mkdir(temp_path)
-            current_file_path = os.path.join(temp_path, file_name)
-            f1 = open(current_file_path, 'wb')
-            f1.write(content.data)
-            f1.close()
-            crate.add_file(current_file_path, dest_path="data/"+file_name, properties={'name':file_name})
             z.writestr(file_name, content.data)
             content.close()
             content.release_conn()
         z.close()
-        crate.write_zip("exp_crate.zip")
-        shutil.rmtree(temp_path)
-        f = open("exp_crate.zip", "rb", buffering=0)
-        bytes = f.read()
-        new_stream = io.BytesIO(bytes)
-        f.close()
-        os.remove("exp_crate.zip")
-        v = stream.getvalue()
         return Response(
-            new_stream.getvalue(),
+            stream.getvalue(),
             media_type="application/x-zip-compressed",
             headers={
                 "Content-Disposition": f'attachment;filename={dataset.name + ".zip"}'
@@ -399,3 +433,4 @@ async def download_dataset(
         )
     else:
         raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
+
