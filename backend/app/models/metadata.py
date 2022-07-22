@@ -1,7 +1,7 @@
 import collections.abc
 import traceback
 from datetime import datetime
-from typing import Optional, List
+from typing import Optional, List, Union
 from enum import Enum
 
 from bson import ObjectId
@@ -38,9 +38,18 @@ class MetadataField(MongoModel):
     name: str
     type: str = "str"  # must be one of FIELD_TYPES
     list: bool = False  # whether a list[type] is acceptable
+    widgetType: str = "TextField" # match material ui widget name?
     # TODO: Eventually move this to space level?
     required: bool = False  # Whether the definition requires this field
 
+class MetadataFieldEnum(MongoModel):
+    name: str
+    type: str = "enum"  # must be one of FIELD_TYPES
+    list: bool = False  # whether a list[type] is acceptable
+    widgetType: str = "Select"  # match material ui widget name?
+    options: list = [] # a list of options must be provided
+    # TODO: Eventually move this to space level?
+    required: bool = False  # Whether the definition requires this field
 
 class MetadataDefinitionBase(MongoModel):
     """This describes a metadata object with a short name and description, predefined set of fields, and context.
@@ -68,7 +77,7 @@ class MetadataDefinitionBase(MongoModel):
     description: Optional[str]
     context: Optional[dict]  # https://json-ld.org/spec/latest/json-ld/#the-context
     context_url: Optional[str]  # single URL applying to contents
-    fields: List[MetadataField]
+    fields: List[Union[MetadataField, MetadataFieldEnum]]
     # TODO: Space-level requirements?
 
 

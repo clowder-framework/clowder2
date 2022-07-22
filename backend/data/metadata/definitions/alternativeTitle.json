@@ -9,6 +9,7 @@
             "name" : "alternateName",
             "type" : "str",
             "list" : false,
+            "widgetType": "TextField",
             "required" : true
         }
     ]
