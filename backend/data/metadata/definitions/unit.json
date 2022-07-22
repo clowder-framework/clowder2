@@ -7,7 +7,7 @@
     "fields" : [
         {
             "name" : "unit",
-            "type" : "str",
+            "type" : "enum",
             "list" : false,
             "widgetType": "Select",
             "options": ["Ampere", "Kelvin", "Second"],

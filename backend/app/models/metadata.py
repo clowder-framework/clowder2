@@ -79,7 +79,7 @@ class MetadataDefinitionBase(MongoModel):
     description: Optional[str]
     context: Optional[dict]  # https://json-ld.org/spec/latest/json-ld/#the-context
     context_url: Optional[str]  # single URL applying to contents
-    fields: List[Union[MetadataField, MetadataFieldEnum]]
+    fields: List[Union[MetadataFieldEnum, MetadataField]]
     # TODO: Space-level requirements?
 
 
