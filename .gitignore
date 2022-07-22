@@ -53,4 +53,4 @@ dist
 **/*.swp
 
 # keycloak mounted volumn
-keycloak/data/*.*
+backend/keycloak/data/*.*
