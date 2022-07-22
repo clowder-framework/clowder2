@@ -38,18 +38,20 @@ class MetadataField(MongoModel):
     name: str
     type: str = "str"  # must be one of FIELD_TYPES
     list: bool = False  # whether a list[type] is acceptable
-    widgetType: str = "TextField" # match material ui widget name?
+    widgetType: str = "TextField"  # match material ui widget name?
     # TODO: Eventually move this to space level?
     required: bool = False  # Whether the definition requires this field
+
 
 class MetadataFieldEnum(MongoModel):
     name: str
     type: str = "enum"  # must be one of FIELD_TYPES
     list: bool = False  # whether a list[type] is acceptable
     widgetType: str = "Select"  # match material ui widget name?
-    options: list = [] # a list of options must be provided
+    options: List[str]  # a list of options must be provided
     # TODO: Eventually move this to space level?
     required: bool = False  # Whether the definition requires this field
+
 
 class MetadataDefinitionBase(MongoModel):
     """This describes a metadata object with a short name and description, predefined set of fields, and context.

@@ -27,6 +27,7 @@ export type { MetadataDefinitionIn } from './models/MetadataDefinitionIn';
 export type { MetadataDefinitionOut } from './models/MetadataDefinitionOut';
 export type { MetadataDelete } from './models/MetadataDelete';
 export type { MetadataField } from './models/MetadataField';
+export type { MetadataFieldEnum } from './models/MetadataFieldEnum';
 export type { MetadataIn } from './models/MetadataIn';
 export type { MetadataOut } from './models/MetadataOut';
 export type { MetadataPatch } from './models/MetadataPatch';

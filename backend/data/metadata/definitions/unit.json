@@ -9,6 +9,8 @@
             "name" : "unit",
             "type" : "str",
             "list" : false,
+            "widgetType": "Select",
+            "options": ["Ampere", "Kelvin", "Second"],
             "required" : true
         }
     ]

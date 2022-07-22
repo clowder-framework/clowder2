@@ -3,6 +3,7 @@
 /* eslint-disable */
 
 import type { MetadataField } from './MetadataField';
+import type { MetadataFieldEnum } from './MetadataFieldEnum';
 import type { UserOut } from './UserOut';
 
 /**
@@ -33,6 +34,6 @@ import type { UserOut } from './UserOut';
                     description?: string;
                     context?: any;
                     context_url?: string;
-                    fields: Array<MetadataField>;
+                    fields: Array<(MetadataField | MetadataFieldEnum)>;
                     creator: UserOut;
                 }

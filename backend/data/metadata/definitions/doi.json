@@ -9,6 +9,7 @@
             "name" : "doi",
             "type" : "str",
             "list" : false,
+            "widgetType": "TextField",
             "required" : true
         }
     ]

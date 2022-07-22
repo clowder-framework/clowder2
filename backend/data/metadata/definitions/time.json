@@ -9,12 +9,8 @@
             "name" : "time",
             "type" : "str",
             "list" : false,
+            "widgetType": "DateTimePicker",
             "required" : true
         }
-    ],
-    "creator" : {
-        "email" : "cwang138@illinois.edu",
-        "first_name" : "Chen",
-        "last_name" : "Wang"
-    }
+    ]
 }
