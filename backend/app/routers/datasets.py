@@ -13,6 +13,7 @@ import rocrate
 import shutil
 from rocrate.rocrate import ROCrate
 from rocrate.model.person import Person
+import hashlib
 
 from app import keycloak_auth
 from app import dependencies
@@ -362,6 +363,22 @@ async def download_dataset(
         user_full_name = user_first_name + " " + user_last_name
         user_crate_id = "placeholdervalue"
         crate.add(Person(crate, user_crate_id, properties={'name': user_full_name}))
+
+        # TODO add bagit related files
+        manifest_path = os.path.join(current_temp_dir, 'manifest-md5.txt')
+        bagit_path = os.path.join(current_temp_dir, 'bagit.txt')
+        bag_info_path = os.path.join(current_temp_dir, 'bag-info.txt')
+
+        bag_size = 0
+
+        with open(bagit_path, 'w') as f:
+            f.write('Bag-Software-Agent: clowder.ncsa.illinois.edu' + '\n')
+            f.write('Bagging-Date: ' + str(datetime.datetime.now()) + '\n')
+
+        with open(bag_info_path, 'w') as f:
+            f.write('BagIt-Version: 0.97' + '\n')
+            f.write('Tag-File-Character-Encoding: UTF-8' + '\n')
+
         async for f in db["files"].find({"dataset_id": ObjectId(dataset_id)}):
             print('found a file')
             file = FileOut.from_mongo(f)
@@ -373,11 +390,29 @@ async def download_dataset(
             current_file_path = os.path.join(current_temp_dir, file_name)
             f1 = open(current_file_path, 'wb')
             f1.write(content.data)
+            current_file_size = os.path.getsize(current_file_path)
+            bag_size += current_file_size
+            file_md5_hash = hashlib.md5(content.data).hexdigest()
+            with open(manifest_path, 'a') as mpf:
+                mpf.write(file_md5_hash + ' ' + file_name + '\n')
             f1.close()
             crate.add_file(current_file_path, dest_path="data/"+file_name, properties={'name':file_name})
             content.close()
             content.release_conn()
         dataset_name = dataset['name']
+
+        with open(bagit_path, 'a') as f:
+            f.write('Bag-Size: ' + str(bag_size) + ' B' + '\n')
+            f.write('Payload-Oxum: ' + '\n')
+            f.write('Internal-Sender-Identifier: ' + str(user.id) + '\n')
+            f.write('Internal-Sender-Description: ' + '\n')
+            f.write('Contact-Name: ' + user_full_name + '\n')
+            f.write('Contact-Email: ' + user.email + '\n')
+
+
+        crate.add_file(manifest_path, dest_path='manifest-md5.txt', properties={'name': 'manifest-md5.txt'})
+        crate.add_file(bag_info_path, dest_path='bag-info.txt', properties={'name': 'bag-info.txt'})
+        crate.add_file(bagit_path, dest_path='bagit.txt', properties={'name': 'bagit.txt'})
         path_to_zip = os.path.join(current_temp_dir, dataset['name'] + '.zip')
         crate.write_zip(path_to_zip)
         f = open(path_to_zip, "rb", buffering=0)
