@@ -364,7 +364,6 @@ async def download_dataset(
         user_crate_id = "placeholdervalue"
         crate.add(Person(crate, user_crate_id, properties={'name': user_full_name}))
 
-        # TODO add bagit related files
         manifest_path = os.path.join(current_temp_dir, 'manifest-md5.txt')
         bagit_path = os.path.join(current_temp_dir, 'bagit.txt')
         bag_info_path = os.path.join(current_temp_dir, 'bag-info.txt')
@@ -404,8 +403,8 @@ async def download_dataset(
         with open(bagit_path, 'a') as f:
             f.write('Bag-Size: ' + str(bag_size) + ' B' + '\n')
             f.write('Payload-Oxum: ' + '\n')
-            f.write('Internal-Sender-Identifier: ' + str(user.id) + '\n')
-            f.write('Internal-Sender-Description: ' + '\n')
+            f.write('Internal-Sender-Identifier: ' + dataset_id + '\n')
+            f.write('Internal-Sender-Description: ' + dataset['description'] + '\n')
             f.write('Contact-Name: ' + user_full_name + '\n')
             f.write('Contact-Email: ' + user.email + '\n')
 
