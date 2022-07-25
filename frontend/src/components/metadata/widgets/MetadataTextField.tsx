@@ -2,9 +2,9 @@ import React, {useState} from "react";
 import { ClowderMetadataTextField } from "../../styledComponents/ClowderMetadataTextField";
 
 export const MetadataTextField = (props) => {
-	const {widgetName, contents, setMetadata, metadataId,
+	const {widgetName, fieldName, contents, setMetadata, metadataId,
 		initialReadOnly} = props;
-	const [text, setText] = useState(contents && contents.alternateName ? contents.alternateName: "");
+	const [text, setText] = useState(contents && contents[fieldName] ? contents[fieldName]: "");
 
 	const [readOnly, setReadOnly] = useState(initialReadOnly);
 
@@ -12,25 +12,24 @@ export const MetadataTextField = (props) => {
 
 	return (
 		<ClowderMetadataTextField label={widgetName} variant="outlined" margin="normal" fullWidth name={widgetName}
-			  value={readOnly && contents? contents.alternateName: text}
+			  value={readOnly && contents? contents[fieldName]: text}
 			  onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
 				  setInputChanged(true);
 				  setText(event.target.value);
+
+				  let contents = {};
+				  contents[fieldName] = event.target.value;
 				  setMetadata ?
 					  metadataId ?
 						  setMetadata({
 							  "id":metadataId,
 							  "definition": widgetName,
-							  "contents": {
-								  "alternateName":event.target.value,
-							  }
+							  "contents": contents
 						  })
 						  :
 						  setMetadata({
 							  "definition": widgetName,
-							  "contents": {
-								  "alternateName":event.target.value,
-							  }
+							  "contents": contents
 						  })
 					  :
 					  null
