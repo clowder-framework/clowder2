@@ -185,9 +185,6 @@ export const Dataset = (): JSX.Element => {
 								<Tabs value={selectedTabIndex} onChange={handleTabChange} aria-label="dataset tabs">
 									<Tab sx={tab} label="Files" {...a11yProps(0)} />
 									<Tab sx={tab} label="Metadata" {...a11yProps(1)} disabled={false}/>
-									<Tab sx={tab} label="Extractions" {...a11yProps(2)} disabled={true}/>
-									<Tab sx={tab} label="Visualizations" {...a11yProps(3)} disabled={true}/>
-									<Tab sx={tab} label="Comments" {...a11yProps(4)} disabled={true}/>
 								</Tabs>
 							</Box>
 							<TabPanel value={selectedTabIndex} index={0}>
@@ -352,19 +349,6 @@ export const Dataset = (): JSX.Element => {
 								<Typography className="content">Downloads: 0</Typography>
 								<Typography className="content">Last downloaded: Never</Typography>
 							</Box>
-							<Divider/>
-							<Box className="infoCard">
-								<Typography className="title">Tags</Typography>
-								<Grid container spacing={4}>
-									<Grid item lg={8} sm={8} xl={8} xs={12}>
-										<ClowderInput defaultValue="Tag"/>
-									</Grid>
-									<Grid item lg={4} sm={4} xl={4} xs={12}>
-										<ClowderButton disabled={true}>Search</ClowderButton>
-									</Grid>
-								</Grid>
-							</Box>
-							<Divider light/>
 						</Grid>
 					</Grid>
 					<Dialog open={createFileOpen} onClose={() => {
