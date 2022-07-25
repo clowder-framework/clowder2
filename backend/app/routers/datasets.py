@@ -363,7 +363,7 @@ async def download_dataset(
         user_first_name = user.first_name
         user_last_name = user.last_name
         user_full_name = user_first_name + " " + user_last_name
-        user_crate_id = "placeholdervalue"
+        user_crate_id = str(user.id)
         crate.add(Person(crate, user_crate_id, properties={'name': user_full_name}))
 
         manifest_path = os.path.join(current_temp_dir, 'manifest-md5.txt')
