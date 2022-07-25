@@ -9,7 +9,7 @@ import {CreateMetadata} from "../metadata/CreateMetadata";
 import {fetchMetadataDefinitions, postFileMetadata} from "../../actions/metadata";
 import {MetadataIn} from "../../openapi/v2";
 import {useNavigate} from "react-router-dom";
-import {fileCreated} from "../../actions/file";
+import {fileCreated, resetFileCreated} from "../../actions/file";
 
 type UploadFileProps ={
 	selectedDatasetId: string|undefined,
@@ -42,8 +42,8 @@ export const UploadFile:React.FC<UploadFileProps> = (props: UploadFileProps) => 
 		handleNext();
 	}
 	// step 2
-	const onMetadataSave = (contents:any) =>{
-		setMetadataRequestForms(prevState => ({...prevState, [contents.definition]: contents}));
+	const setMetadata = (metadata:any) =>{
+		setMetadataRequestForms(prevState => ({...prevState, [metadata.definition]: metadata}));
 	}
 
 	// step
@@ -65,13 +65,18 @@ export const UploadFile:React.FC<UploadFileProps> = (props: UploadFileProps) => 
 	useEffect(() => {
 		if (newFile.id) {
 			// post new metadata
+			const file = newFile;
 			Object.keys(metadataRequestForms).map(key => {
-				createFileMetadata(newFile.id, metadataRequestForms[key]);
+				createFileMetadata(file.id, metadataRequestForms[key]);
 			});
 
+			// reset newFile so next upload can be done
+			dispatch(resetFileCreated());
+			setMetadataRequestForms({});
+			setFileRequestForm({});
+
 			// Redirect to file route with file Id and dataset id
-			history(`/files/${newFile.id}?dataset=${selectedDatasetId}&name=${selectedDatasetName}`);
-			// TODO dispatch(resetFileUploaded());
+			history(`/files/${file.id}?dataset=${selectedDatasetId}&name=${selectedDatasetName}`);
 		}
 
 	},[newFile]);
@@ -97,7 +102,7 @@ export const UploadFile:React.FC<UploadFileProps> = (props: UploadFileProps) => 
 					<StepContent>
 						<Typography>Provide us your metadata about file.</Typography>
 						<Box>
-							<CreateMetadata saveMetadata={onMetadataSave}/>
+							<CreateMetadata setMetadata={setMetadata}/>
 						</Box>
 						{/*buttons*/}
 						<Box sx={{ mb: 2 }}>

@@ -1,7 +1,9 @@
 import io
+import json
 from datetime import datetime
 from typing import Optional, List
 
+import pika
 from bson import ObjectId
 from fastapi import (
     APIRouter,
@@ -13,6 +15,7 @@ from fastapi import (
 )
 from fastapi.responses import StreamingResponse
 from minio import Minio
+from pika.adapters.blocking_connection import BlockingChannel
 from pydantic import Json
 from pymongo import MongoClient
 
@@ -108,15 +111,16 @@ async def delete_file(
         if (
             dataset := await db["datasets"].find_one({"files": ObjectId(file_id)})
         ) is not None:
-            updated_dataset = await db["datasets"].update_one(
+            await db["datasets"].update_one(
                 {"_id": ObjectId(dataset["id"])},
                 {"$pull": {"files": ObjectId(file_id)}},
             )
 
         # TODO: Deleting individual versions may require updating version_id in mongo, or deleting entire document
         fs.remove_object(settings.MINIO_BUCKET_NAME, str(file_id))
-        removed_file = await db["files"].delete_one({"_id": ObjectId(file_id)})
-        removed_vers = await db["file_versions"].delete_many({"file_id": ObjectId(file_id)})
+        await db["files"].delete_one({"_id": ObjectId(file_id)})
+        await db.metadata.delete_many({"resource.resource_id": ObjectId(file_id)})
+        await db["file_versions"].delete_many({"file_id": ObjectId(file_id)})
         return {"deleted": file_id}
     else:
         raise HTTPException(status_code=404, detail=f"File {file_id} not found")
@@ -175,3 +179,18 @@ async def get_file_versions(
         return mongo_versions
 
     raise HTTPException(status_code=404, detail=f"File {file_id} not found")
+
+
+@router.post("/{file_id}/extract")
+async def get_file_extract(
+    file_id: str,
+    rabbitmq_client: BlockingChannel = Depends(dependencies.get_rabbitmq),
+):
+    msg = {"message": "testing", "file_id": file_id}
+    rabbitmq_client.basic_publish(
+        "",
+        "standard_key",
+        json.dumps(msg, ensure_ascii=False),
+        pika.BasicProperties(content_type="application/json", delivery_mode=1),
+    )
+    return msg

@@ -7,7 +7,8 @@ export const ClowderButton = styled(Button)({
 	fontSize: "16px",
 	border:"1px solid",
 	borderRadius: "4px",
-	textTransform: "capitalize"
+	textTransform: "capitalize",
+	backgroundColor: "#ffffff",
 });
 
 

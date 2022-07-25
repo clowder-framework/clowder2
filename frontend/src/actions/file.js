@@ -104,7 +104,7 @@ export function fileDeleted(fileId){
 			.then(json => {
 				dispatch({
 					type: DELETE_FILE,
-					file: {"id": json["id"]},
+					file: {"id": fileId},
 					receivedAt: Date.now(),
 				});
 			})
@@ -129,6 +129,16 @@ export function fileCreated(formData, selectedDatasetId){
 			.catch(reason => {
 				dispatch(handleErrors(reason, fileCreated(formData, selectedDatasetId)));
 			});
+	};
+}
+
+export const RESET_CREATE_FILE = "RESET_CREATE_FILE";
+export function resetFileCreated(){
+	return (dispatch) => {
+		dispatch({
+			type: RESET_CREATE_FILE,
+			receivedAt: Date.now(),
+		});
 	};
 }
 

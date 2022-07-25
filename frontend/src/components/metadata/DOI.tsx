@@ -3,43 +3,66 @@ import {MetadataButtonGroup} from "./MetadataButtonGroup";
 import { ClowderMetadataTextField } from "../styledComponents/ClowderMetadataTextField";
 
 export const DOI = (props) => {
-	const {widgetName, metadataId, contents, updateMetadata, saveMetadata, resourceId} = props;
+	const {widgetName, metadataId, contents, updateMetadata, setMetadata, deleteMetadata, resourceId, initialReadOnly} = props;
 	const [DOI, setDOI] = useState(contents && contents.doi ? contents.doi: "");
-	const [promptError, setPromptError] = useState(false);
-	const [readOnly, setReadOnly] = useState(false);
-	const DOIErrorText = "DOI must follow the format of doi:0000000/000000000000!";
+	// const [promptError, setPromptError] = useState(false);
+	// const DOIErrorText = "DOI must follow the format of doi:0000000/000000000000!";
 
-	useEffect(() => {
-		setReadOnly(!!metadataId);
-	}, [metadataId]);
+	const [readOnly, setReadOnly] = useState(initialReadOnly);
 
-	useEffect(() => {
-		// If DOI doesn't follow the format (Regex)
-		if (DOI !== ""){
-			if (!/doi:[0-9]{7}\/[0-9]{12}/.test(DOI)){
-				setPromptError(true);
-			}
-			else{
-				setPromptError(false);
-			}
-		}
-	}, [DOI]);
+	const [inputChanged, setInputChanged] = useState(false);
+
+	// useEffect(() => {
+	// 	// If DOI doesn't follow the format (Regex)
+	// 	if (DOI !== ""){
+	// 		if (!/doi:[0-9]{7}\/[0-9]{12}/.test(DOI)){
+	// 			setPromptError(true);
+	// 		}
+	// 		else{
+	// 			setPromptError(false);
+	// 		}
+	// 	}
+	// }, [DOI]);
 	return (
 		<>
 			<ClowderMetadataTextField label={widgetName} variant="outlined" margin="normal"
 					   fullWidth
 					   name={widgetName}
 					   value={readOnly && contents ? contents.doi: DOI}
-					   onChange={(event: React.ChangeEvent<HTMLInputElement>) => { setDOI(event.target.value);}}
-					   error={promptError}
-					   helperText={DOIErrorText}
+					   onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+					   		setInputChanged(true);
+					   		setDOI(event.target.value);
+					   		setMetadata ?
+								metadataId ?
+									setMetadata({
+										"id": metadataId,
+										"definition": widgetName,
+										"contents": {
+										   "doi":event.target.value,
+										}
+									})
+									:
+									setMetadata({
+										"definition": widgetName,
+										"contents": {
+											"doi":event.target.value,
+										}
+									})
+								:
+								null
+					   }}
+					   // error={promptError}
+					   // helperText={DOIErrorText}
+					   helperText={inputChanged? "* You have changed this field. Remember to save/ update.": ""}
 					   disabled={readOnly}
 			/>
 			<MetadataButtonGroup readOnly={readOnly}
 								 setReadOnly={setReadOnly}
 								 metadataId={metadataId}
+								 setMetadata={setMetadata}
 								 updateMetadata={updateMetadata}
-								 saveMetadata={saveMetadata}
+								 deleteMetadata={deleteMetadata}
+								 setInputChanged={setInputChanged}
 								 resourceId={resourceId}
 								 contents={{"doi":DOI}}
 								 widgetName={widgetName}

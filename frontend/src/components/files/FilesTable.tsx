@@ -33,7 +33,7 @@ export default function FilesTable(props: FilesTableProps) {
 	const foldersInDataset = useSelector((state:RootState) => state.dataset.folders);
 	// use history hook to redirect/navigate between routes
 	const history = useNavigate();
-	const selectFile = (selectedFileId: string) => {
+	const selectFile = (selectedFileId: string | undefined) => {
 		// Redirect to file route with file Id and dataset id
 		history(`/files/${selectedFileId}?dataset=${props.datasetId}&name=${props.datasetName}`);
 	};
@@ -80,11 +80,11 @@ export default function FilesTable(props: FilesTableProps) {
 								<InsertDriveFileIcon color="primary" sx={iconStyle}/>
 								<Button onClick={() => selectFile(file.id)}>{file.name}</Button>
 								{/*TODO this should be version number; for now put version ID instead*/}
-								<VersionChip versionNumber={file.version_id.slice(0,2)}/>
+								<VersionChip versionNumber={file.version_num}/>
 							</TableCell>
 							<TableCell align="right">{parseDate(file.created)} by {file.creator.first_name} {file.creator.last_name}</TableCell>
-							<TableCell align="right">{file.size}</TableCell>
-							<TableCell align="right">{file.contentType}</TableCell>
+							<TableCell align="right">{file.bytes} bytes</TableCell>
+							<TableCell align="right">{file.content_type}</TableCell>
 							<TableCell align="right"><FileMenu file={file}/></TableCell>
 						</TableRow>))
 					}

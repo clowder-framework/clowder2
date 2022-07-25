@@ -10,5 +10,7 @@ export type FileVersion = {
     version_num?: number;
     file_id: string;
     creator: UserOut;
+    bytes?: number;
+    content_type?: string;
     created?: string;
 }

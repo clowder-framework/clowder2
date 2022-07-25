@@ -1,13 +1,13 @@
 import datetime
 import io
 import os
-from typing import List, Optional, BinaryIO
-from collections.abc import Mapping, Iterable
 import zipfile
 import tempfile
-
+import mimetypes
+from typing import List, Optional, BinaryIO
+from collections.abc import Mapping, Iterable
 from bson import ObjectId
-from fastapi import APIRouter, HTTPException, Depends, File, UploadFile
+from fastapi import APIRouter, HTTPException, Depends, File, UploadFile, Response
 from fastapi import Form
 from minio import Minio
 from pymongo import MongoClient
@@ -74,6 +74,7 @@ async def _add_file_entry(
                 part_size=settings.MINIO_UPLOAD_CHUNK_SIZE,
             )  # async write chunk to minio
             version_id = response.version_id
+        content_type = file_stream.content_type
     else:
         response = fs.put_object(
             settings.MINIO_BUCKET_NAME,
@@ -83,11 +84,15 @@ async def _add_file_entry(
             part_size=settings.MINIO_UPLOAD_CHUNK_SIZE,
         )  # async write chunk to minio
         version_id = response.version_id
+        content_type = mimetypes.guess_type(file_db.name)
+    bytes = len(fs.get_object(settings.MINIO_BUCKET_NAME, str(new_file_id)).data)
     if version_id is None:
         # TODO: This occurs in testing when minio is not running
         version_id = 999999999
     file_db.version_id = version_id
     file_db.version_num = 1
+    file_db.bytes = bytes
+    file_db.content_type = content_type
     await db["files"].replace_one({"_id": ObjectId(new_file_id)}, file_db.to_mongo())
 
     # Add FileVersion entry and update file
@@ -95,6 +100,8 @@ async def _add_file_entry(
         version_id=version_id,
         file_id=new_file_id,
         creator=user,
+        bytes=bytes,
+        content_type=content_type
     )
     await db["file_versions"].insert_one(new_version.to_mongo())
 
@@ -206,6 +213,28 @@ async def _create_folder_structure(
             folder_lookup = await _create_folder_structure(dataset_id, v, new_folder_path, folder_lookup, user, db, new_folder_id)
 
     return folder_lookup
+
+
+async def get_folder_hierarchy(
+    folder_id: str,
+    hierarchy: str,
+    db: MongoClient,
+):
+    found = await db["folders"].find_one({"_id": ObjectId(folder_id)})
+    folder = FolderOut.from_mongo(found)
+    folder_name = folder.name
+    hierarchy = folder_name + "/" + hierarchy
+    folder_parent = folder.parent_folder
+    if folder_parent is not None:
+        parent_folder_found = await db["folders"].find_one(
+            {"_id": ObjectId(folder_parent)}
+        )
+        parent_folder = FolderOut.from_mongo(parent_folder_found)
+        hierarchy = parent_folder.name + "/" + hierarchy
+        parent_folder_parent = parent_folder.parent_folder
+        if parent_folder_parent is not None:
+            hierarchy = await get_folder_hierarchy(str(parent_folder.id), hierarchy, db)
+    return hierarchy
 
 
 @router.post("", response_model=DatasetOut)
@@ -340,13 +369,15 @@ async def delete_dataset(
     if (await db["datasets"].find_one({"_id": ObjectId(dataset_id)})) is not None:
         # delete dataset first to minimize files/folder being uploaded to a delete dataset
         await db["datasets"].delete_one({"_id": ObjectId(dataset_id)})
+        await db.metadata.delete_many({"resource.resource_id": ObjectId(dataset_id)})
         async for file in db["files"].find({"dataset_id": ObjectId(dataset_id)}):
             fs.remove_object(clowder_bucket, str(file))
-            db["file_versions"].delete_many({"file_id": file['_id']})
-        files_deleted = await db.files.delete_many({"dataset_id": ObjectId(dataset_id)})
-        folders_delete = await db["folders"].delete_many(
-            {"dataset_id": ObjectId(dataset_id)}
-        )
+            await db.metadata.delete_many(
+                {"resource.resource_id": ObjectId(file["_id"])}
+            )
+            await db["file_versions"].delete_many({"file_id": ObjectId(file["_id"])})
+        await db.files.delete_many({"dataset_id": ObjectId(dataset_id)})
+        await db["folders"].delete_many({"dataset_id": ObjectId(dataset_id)})
         return {"deleted": dataset_id}
     else:
         raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
@@ -432,17 +463,13 @@ async def save_file(
                 status_code=401, detail=f"User not found. Session might have expired."
             )
 
-        dataset = await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
-        if dataset is None:
-            raise HTTPException(
-                status_code=404, detail=f"Dataset {dataset_id} not found"
-            )
         fileDB = FileDB(name=file.filename, creator=user, dataset_id=dataset["_id"])
 
         if folder_id is not None:
             if (
                 folder := await db["folders"].find_one({"_id": ObjectId(folder_id)})
             ) is not None:
+                folder = FolderOut.from_mongo(folder)
                 fileDB.folder_id = folder.id
             else:
                 raise HTTPException(
@@ -518,3 +545,39 @@ async def create_dataset_from_zip(
     found = await db["datasets"].find_one({"_id": new_dataset.inserted_id})
     dataset_out = DatasetOut.from_mongo(found)
     return dataset_out
+
+
+@router.get("/{dataset_id}/download", response_model=DatasetOut)
+async def download_dataset(
+    dataset_id: str,
+    user=Depends(get_current_user),
+    db: MongoClient = Depends(dependencies.get_db),
+    fs: Minio = Depends(dependencies.get_fs),
+):
+    if (
+        dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
+    ) is not None:
+        dataset = DatasetOut.from_mongo(dataset)
+        stream = io.BytesIO()
+        z = zipfile.ZipFile(stream, "w")
+        async for f in db["files"].find({"dataset_id": dataset.id}):
+            file = FileOut.from_mongo(f)
+            file_name = file.name
+            if file.folder_id is not None:
+                hierarchy = await get_folder_hierarchy(file.folder_id, "", db)
+                file_name = "/" + hierarchy + file_name
+            content = fs.get_object(settings.MINIO_BUCKET_NAME, str(file.id))
+            z.writestr(file_name, content.data)
+            content.close()
+            content.release_conn()
+        z.close()
+        return Response(
+            stream.getvalue(),
+            media_type="application/x-zip-compressed",
+            headers={
+                "Content-Disposition": f'attachment;filename={dataset.name + ".zip"}'
+            },
+        )
+    else:
+        raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
+

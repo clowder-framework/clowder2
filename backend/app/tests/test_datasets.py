@@ -49,6 +49,38 @@ def test_delete(client: TestClient, headers: dict):
     assert response.status_code == 200
 
 
+def test_delete_with_metadata(client: TestClient, headers: dict):
+    response = client.post(
+        f"{settings.API_V2_STR}/datasets", headers=headers, json=dataset_data
+    )
+    assert response.status_code == 200
+    assert response.json().get("id") is not None
+
+    dataset_id = response.json().get("id")
+    response = client.post(
+        f"{settings.API_V2_STR}/datasets/{dataset_id}/metadata",
+        headers=headers,
+        json={
+            "contents": {"color": "blue"},
+            "context_url": "clowder.org",
+        },
+    )
+    assert response.status_code == 200
+    assert response.json().get("id") is not None
+    metadata_id = response.json().get("id")
+
+    # Delete dataset, then ensure metadata is already deleted
+    response = client.delete(
+        f"{settings.API_V2_STR}/datasets/{dataset_id}", headers=headers
+    )
+    assert response.status_code == 200
+    response = client.delete(
+        f"{settings.API_V2_STR}/metadata/{metadata_id}",
+        headers=headers,
+    )
+    assert response.status_code == 404
+
+
 def test_edit(client: TestClient, headers: dict):
     response = client.post(
         f"{settings.API_V2_STR}/datasets", json=dataset_data, headers=headers

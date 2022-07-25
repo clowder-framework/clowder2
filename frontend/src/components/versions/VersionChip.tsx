@@ -3,7 +3,7 @@ import {Chip} from "@mui/material";
 
 
 type VersionChipProps = {
-	versionNumber: string,
+	versionNumber: number|undefined,
 }
 
 export function VersionChip(props: VersionChipProps) {
@@ -11,7 +11,7 @@ export function VersionChip(props: VersionChipProps) {
 	const { versionNumber } = props;
 
 	return (
-		<Chip label={versionNumber}/>
+		<Chip label={`V${versionNumber}`}/>
 		// TODO can make this a clickable item
 		// <Chip label={`V${versionNumber}`} component="a" href="/" clickable/> : <></>
 	);

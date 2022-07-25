@@ -1,12 +1,11 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { Body_delete_dataset_metadata_api_v2_datasets__dataset_id__metadata_delete } from '../models/Body_delete_dataset_metadata_api_v2_datasets__dataset_id__metadata_delete';
-import type { Body_delete_file_metadata_api_v2_files__file_id__metadata_delete } from '../models/Body_delete_file_metadata_api_v2_files__file_id__metadata_delete';
 import type { Body_get_dataset_metadata_api_v2_datasets__dataset_id__metadata_get } from '../models/Body_get_dataset_metadata_api_v2_datasets__dataset_id__metadata_get';
 import type { Body_get_file_metadata_api_v2_files__file_id__metadata_get } from '../models/Body_get_file_metadata_api_v2_files__file_id__metadata_get';
 import type { MetadataDefinitionIn } from '../models/MetadataDefinitionIn';
 import type { MetadataDefinitionOut } from '../models/MetadataDefinitionOut';
+import type { MetadataDelete } from '../models/MetadataDelete';
 import type { MetadataIn } from '../models/MetadataIn';
 import type { MetadataOut } from '../models/MetadataOut';
 import type { MetadataPatch } from '../models/MetadataPatch';
@@ -54,6 +53,52 @@ export class MetadataService {
         return __request({
             method: 'POST',
             path: `/api/v2/metadata/definition`,
+            body: requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+
+    /**
+     * Delete Metadata
+     * Delete metadata by specific ID.
+     * @param metadataId
+     * @returns any Successful Response
+     * @throws ApiError
+     */
+    public static deleteMetadataApiV2MetadataMetadataIdDelete(
+        metadataId: string,
+    ): CancelablePromise<any> {
+        return __request({
+            method: 'DELETE',
+            path: `/api/v2/metadata/${metadataId}`,
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+
+    /**
+     * Update Metadata
+     * Update metadata. Any fields provided in the contents JSON will be added or updated in the metadata. If context or
+     * agent should be changed, use PUT.
+     *
+     * Returns:
+     * Metadata document that was updated
+     * @param metadataId
+     * @param requestBody
+     * @returns MetadataOut Successful Response
+     * @throws ApiError
+     */
+    public static updateMetadataApiV2MetadataMetadataIdPatch(
+        metadataId: string,
+        requestBody: MetadataPatch,
+    ): CancelablePromise<MetadataOut> {
+        return __request({
+            method: 'PATCH',
+            path: `/api/v2/metadata/${metadataId}`,
             body: requestBody,
             mediaType: 'application/json',
             errors: {
@@ -146,19 +191,19 @@ export class MetadataService {
     /**
      * Delete File Metadata
      * @param fileId
-     * @param formData
+     * @param requestBody
      * @returns MetadataOut Successful Response
      * @throws ApiError
      */
     public static deleteFileMetadataApiV2FilesFileIdMetadataDelete(
         fileId: string,
-        formData?: Body_delete_file_metadata_api_v2_files__file_id__metadata_delete,
-    ): CancelablePromise<Array<MetadataOut>> {
+        requestBody: MetadataDelete,
+    ): CancelablePromise<MetadataOut> {
         return __request({
             method: 'DELETE',
             path: `/api/v2/files/${fileId}/metadata`,
-            formData: formData,
-            mediaType: 'application/x-www-form-urlencoded',
+            body: requestBody,
+            mediaType: 'application/json',
             errors: {
                 422: `Validation Error`,
             },
@@ -271,19 +316,19 @@ export class MetadataService {
     /**
      * Delete Dataset Metadata
      * @param datasetId
-     * @param formData
+     * @param requestBody
      * @returns MetadataOut Successful Response
      * @throws ApiError
      */
     public static deleteDatasetMetadataApiV2DatasetsDatasetIdMetadataDelete(
         datasetId: string,
-        formData?: Body_delete_dataset_metadata_api_v2_datasets__dataset_id__metadata_delete,
-    ): CancelablePromise<Array<MetadataOut>> {
+        requestBody: MetadataDelete,
+    ): CancelablePromise<MetadataOut> {
         return __request({
             method: 'DELETE',
             path: `/api/v2/datasets/${datasetId}/metadata`,
-            formData: formData,
-            mediaType: 'application/x-www-form-urlencoded',
+            body: requestBody,
+            mediaType: 'application/json',
             errors: {
                 422: `Validation Error`,
             },
