@@ -8,12 +8,14 @@ from fastapi import APIRouter, HTTPException, Depends, File, UploadFile, Respons
 from fastapi import Form
 from minio import Minio
 from pymongo import MongoClient
+from bson import json_util
 import tempfile
 import rocrate
 import shutil
 from rocrate.rocrate import ROCrate
 from rocrate.model.person import Person
 import hashlib
+import json
 
 from app import keycloak_auth
 from app import dependencies
@@ -385,6 +387,7 @@ async def download_dataset(
             file_count += 1
             file = FileOut.from_mongo(f)
             file_name = file.name
+
             if file.folder_id is not None:
                 hierarchy = await get_folder_hierarchy(file.folder_id, "", db)
                 file_name = "/" + hierarchy + file_name
@@ -401,6 +404,20 @@ async def download_dataset(
             crate.add_file(current_file_path, dest_path="data/"+file_name, properties={'name':file_name})
             content.close()
             content.release_conn()
+
+            # TODO add file metadata
+            query = {"resource.resource_id": ObjectId(file.id)}
+            metadata = []
+            async for md in db["metadata"].find(query):
+                metadata.append(md)
+            if len(metadata) > 0:
+                metadata_filename = file_name + '_metadata.json'
+                metadata_filename_temp_path = os.path.join(current_temp_dir, metadata_filename)
+                metadata_content = json_util.dumps(metadata)
+                with open(metadata_filename_temp_path, 'w') as f:
+                    f.write(metadata_content)
+                crate.add_file(metadata_filename_temp_path, dest_path="data/"+metadata_filename, properties={'name':metadata_filename})
+
         dataset_name = dataset['name']
 
         bag_size_kb = bag_size/1024
@@ -412,7 +429,6 @@ async def download_dataset(
             f.write('Internal-Sender-Description: ' + dataset['description'] + '\n')
             f.write('Contact-Name: ' + user_full_name + '\n')
             f.write('Contact-Email: ' + user.email + '\n')
-
 
         crate.add_file(manifest_path, dest_path='manifest-md5.txt', properties={'name': 'manifest-md5.txt'})
         crate.add_file(bag_info_path, dest_path='bag-info.txt', properties={'name': 'bag-info.txt'})
@@ -432,8 +448,8 @@ async def download_dataset(
         path_to_zip = os.path.join(current_temp_dir, dataset['name'] + '.zip')
         crate.write_zip(path_to_zip)
         f = open(path_to_zip, "rb", buffering=0)
-        bytes = f.read()
-        stream = io.BytesIO(bytes)
+        zip_bytes = f.read()
+        stream = io.BytesIO(zip_bytes)
         f.close()
         try:
             shutil.rmtree(current_temp_dir)
