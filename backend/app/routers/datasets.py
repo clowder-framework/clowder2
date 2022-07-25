@@ -465,39 +465,3 @@ async def download_dataset(
         )
     else:
         raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
-
-
-@router.get("/{dataset_id}/downloadold", response_model=DatasetOut)
-async def download_dataset_old(
-    dataset_id: str,
-    user=Depends(get_current_user),
-    db: MongoClient = Depends(dependencies.get_db),
-    fs: Minio = Depends(dependencies.get_fs),
-):
-    if (
-        dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
-    ) is not None:
-        dataset = DatasetOut.from_mongo(dataset)
-        stream = io.BytesIO()
-        z = zipfile.ZipFile(stream, "w")
-        async for f in db["files"].find({"dataset_id": dataset.id}):
-            file = FileOut.from_mongo(f)
-            file_name = file.name
-            if file.folder_id is not None:
-                hierarchy = await get_folder_hierarchy(file.folder_id, "", db)
-                file_name = "/" + hierarchy + file_name
-            content = fs.get_object(settings.MINIO_BUCKET_NAME, str(file.id))
-            z.writestr(file_name, content.data)
-            content.close()
-            content.release_conn()
-        z.close()
-        return Response(
-            stream.getvalue(),
-            media_type="application/x-zip-compressed",
-            headers={
-                "Content-Disposition": f'attachment;filename={dataset.name + ".zip"}'
-            },
-        )
-    else:
-        raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
-
