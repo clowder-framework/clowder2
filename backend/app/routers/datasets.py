@@ -1,9 +1,10 @@
 import datetime
 import io
 import os
-from typing import List, Optional
+from typing import List, Optional, BinaryIO
+from collections.abc import Mapping, Iterable
 import zipfile
-import shutil
+import tempfile
 
 from bson import ObjectId
 from fastapi import APIRouter, HTTPException, Depends, File, UploadFile
@@ -42,52 +43,169 @@ router = APIRouter()
 
 clowder_bucket = os.getenv("MINIO_BUCKET_NAME", "clowder")
 
-async def process_folders_zip_upload(
-    path_to_folder: str,
-    dataset_id: str,
-    current_folder_id: str,
-    user=Depends(get_current_user),
-    db: MongoClient = Depends(dependencies.get_db),
-    fs: Minio = Depends(dependencies.get_fs),
+async def _add_file_entry(
+    file_db: FileDB,
+    user: UserOut,
+    db: MongoClient,
+    fs: Minio,
+    file_stream: Optional[BinaryIO] = None,
+    file_obj: Optional[io.BytesIO] = None,
 ):
-    contents = os.listdir(path_to_folder)
-    for item in contents:
-        if item != '.DS_Store':
-            path_to_item = os.path.join(path_to_folder, item)
-            if os.path.isdir(path_to_item):
-                if current_folder_id == "":
-                    folder_dict = {'dataset_id': dataset_id, 'name': item}
-                else:
-                    folder_dict = {'dataset_id': dataset_id, 'name': item, 'parent_folder': current_folder_id}
-                folder_db = FolderDB(**folder_dict, author=user)
-                new_folder = await db["folders"].insert_one(folder_db.to_mongo())
-                found = await db["folders"].find_one({"_id": new_folder.inserted_id})
-                result = await process_folders_zip_upload(path_to_item, dataset_id, new_folder.inserted_id, user, db, fs)
-            if os.path.isfile(path_to_item):
-                with open(path_to_item, 'rb') as fh:
-                    if current_folder_id != "":
-                        fileDB = FileDB(name=item, creator=user, dataset_id=dataset_id, folder_id=current_folder_id)
-                    else:
-                        fileDB = FileDB(name=item, creator=user, dataset_id=dataset_id)
-                    new_file = await db["files"].insert_one(fileDB.to_mongo())
-                    new_file_id = new_file.inserted_id
+    """Insert FileDB object into MongoDB (makes Clowder ID), then Minio (makes version ID), then update MongoDB with
+    the version ID from Minio.
 
-                    response = fs.put_object(
-                            settings.MINIO_BUCKET_NAME,
-                            str(new_file_id),
-                            fh,
-                            length=-1,
-                            part_size=settings.MINIO_UPLOAD_CHUNK_SIZE,
-                        )  # async write chunk to minio
+    Arguments:
+        file_db: FileDB object controlling dataset and folder destination
+        file_stream: Use this when passing directly from a request e.g. UploadFile.file
+        file_obj: Use this when passing a file bytestream e.g. open(file, 'rb')
+    """
+    new_file = await db["files"].insert_one(file_db.to_mongo())
+    new_file_id = new_file.inserted_id
 
-                    version_id = response.version_id
-                    if version_id is None:
-                        # TODO: This occurs in testing when minio is not running
-                        version_id = 999999999
-                    fileDB.version_id = version_id
-                    fileDB.version_num = 1
-                    print(fileDB)
+    # Use unique ID as key for Minio and get initial version ID
+    version_id = None
+    if file_stream:
+        while content := file_stream:  # async read chunk
+            response = fs.put_object(
+                settings.MINIO_BUCKET_NAME,
+                str(new_file_id),
+                io.BytesIO(content),
+                length=-1,
+                part_size=settings.MINIO_UPLOAD_CHUNK_SIZE,
+            )  # async write chunk to minio
+            version_id = response.version_id
+    else:
+        response = fs.put_object(
+            settings.MINIO_BUCKET_NAME,
+            str(new_file_id),
+            file_obj,
+            length=-1,
+            part_size=settings.MINIO_UPLOAD_CHUNK_SIZE,
+        )  # async write chunk to minio
+        version_id = response.version_id
+    if version_id is None:
+        # TODO: This occurs in testing when minio is not running
+        version_id = 999999999
+    file_db.version_id = version_id
+    file_db.version_num = 1
+    await db["files"].replace_one({"_id": ObjectId(new_file_id)}, file_db.to_mongo())
 
+    # Add FileVersion entry and update file
+    new_version = FileVersion(
+        version_id=version_id,
+        file_id=new_file_id,
+        creator=user,
+    )
+    await db["file_versions"].insert_one(new_version.to_mongo())
+
+
+def _describe_zip_contents(file_list: list):
+    """Traverse a list of zipfile entries and create a dictionary structure like so:
+
+        {
+            ""__CLOWDER_FILE_LIST__"": ['list', 'of', 'root', 'files'],
+            "folder_1": {
+                ""__CLOWDER_FILE_LIST__"": ['list', 'of', 'folder_1', 'files']
+            },
+            "folder_2": {
+                ""__CLOWDER_FILE_LIST__"": ['list', 'of', 'folder_2', 'files'],
+                "subfolder_3": {
+                    ""__CLOWDER_FILE_LIST__"": ['list', 'of', subfolder_3', 'files']
+                },
+            },
+            ...
+        }
+    """
+    empty_entry = {"__CLOWDER_FILE_LIST__": []}
+
+    def path_parts_to_dict(entries, last_is_file=True):
+        if len(entries) == 1:
+            if last_is_file:
+                return {"__CLOWDER_FILE_LIST__": [entries[0]]}
+            else:
+                return {entries[0]: empty_entry.copy()}
+        else:
+            return {
+                entries[0]: path_parts_to_dict(entries[1:])
+            }
+
+    def nested_update(target_dict, update_dict):
+        for k, v in update_dict.items():
+            if isinstance(v, Mapping):
+                current = target_dict[k] if k in target_dict else {}
+                target_dict[k] = nested_update(current, v)
+            elif isinstance(v, Iterable):
+                current = target_dict[k] if k in target_dict else []
+                if v not in current:
+                    target_dict[k] = list(set(current + v))
+            else:
+                target_dict[k] = v
+        return target_dict
+
+    zip_structure = empty_entry.copy()
+    for entry in file_list:
+        if "__MACOSX" in entry or entry.endswith(".DS_Store"):
+            # TODO: These are not visible in OSX 10.3+ and hard to delete. Leaving this in to minimize user frustration.
+            continue
+        if entry.endswith(os.path.sep):
+            # this is a folder, not a file
+            folder_parts = os.path.normpath(entry).split(os.path.sep)
+            if len(folder_parts) > 1:
+                folder_dict = path_parts_to_dict(folder_parts, False)
+                zip_structure = nested_update(zip_structure, folder_dict)
+            elif entry not in zip_structure:
+                zip_structure[entry.rstrip(os.path.sep)] = empty_entry.copy()
+            continue
+
+        parts = os.path.normpath(entry).split(os.path.sep)
+        if len(parts) > 1:
+            parts_dict = path_parts_to_dict(parts)
+            zip_structure = nested_update(zip_structure, parts_dict)
+        else:
+            zip_structure["__CLOWDER_FILE_LIST__"].append(entry)
+
+    return zip_structure
+
+
+async def _create_folder_structure(
+        dataset_id: str,
+        contents: dict,
+        folder_path: str,
+        folder_lookup: dict,
+        user: UserOut,
+        db: MongoClient,
+        parent_folder_id: Optional[str] = None,
+):
+    """Recursively create folders encountered in folder_path until the target folder is created.
+
+    Arguments:
+        - dataset_id: destination dataset
+        - contents: list of contents in folder (see _describe_zip_contents() for structure)
+        - folder_path: full path to folder from dataset root (e.g. folder/subfolder/subfolder2)
+        - folder_lookup: mapping from folder_path to folder_id for reference later
+        - parent_folder_id: destination folder
+
+    """
+    for k, v in contents.items():
+        if k == "__CLOWDER_FILE_LIST__":
+            continue
+
+        # Create the folder
+        if parent_folder_id is not None:
+            folder_dict = {'dataset_id': dataset_id, 'name': k}
+        else:
+            folder_dict = {'dataset_id': dataset_id, 'name': k, 'parent_folder': parent_folder_id}
+        folder_db = FolderDB(**folder_dict, author=user)
+        new_folder = await db["folders"].insert_one(folder_db.to_mongo())
+        new_folder_id = new_folder.inserted_id
+
+        # Store ID and call recursively on child folders
+        new_folder_path = folder_path + os.path.sep + k
+        folder_lookup[new_folder_path] = new_folder_id
+        if isinstance(v, Mapping):
+            folder_lookup = await _create_folder_structure(dataset_id, v, new_folder_path, folder_lookup, user, db, new_folder_id)
+
+    return folder_lookup
 
 
 @router.post("", response_model=DatasetOut)
@@ -331,37 +449,8 @@ async def save_file(
                     status_code=404, detail=f"Folder {folder_id} not found"
                 )
 
-        new_file = await db["files"].insert_one(fileDB.to_mongo())
-        new_file_id = new_file.inserted_id
+        await _add_file_entry(fileDB, user, db, fs, file_stream=file.file)
 
-        # Use unique ID as key for Minio and get initial version ID
-        version_id = None
-        while content := file.file.read(
-            settings.MINIO_UPLOAD_CHUNK_SIZE
-        ):  # async read chunk
-            response = fs.put_object(
-                settings.MINIO_BUCKET_NAME,
-                str(new_file_id),
-                io.BytesIO(content),
-                length=-1,
-                part_size=settings.MINIO_UPLOAD_CHUNK_SIZE,
-            )  # async write chunk to minio
-            version_id = response.version_id
-        if version_id is None:
-            # TODO: This occurs in testing when minio is not running
-            version_id = 999999999
-        fileDB.version_id = version_id
-        fileDB.version_num = 1
-        print(fileDB)
-        await db["files"].replace_one({"_id": ObjectId(new_file_id)}, fileDB.to_mongo())
-
-        # Add FileVersion entry and update file
-        new_version = FileVersion(
-            version_id=version_id,
-            file_id=new_file_id,
-            creator=user,
-        )
-        await db["file_versions"].insert_one(new_version.to_mongo())
         return fileDB
     else:
         raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
@@ -374,37 +463,58 @@ async def create_dataset_from_zip(
     fs: Minio = Depends(dependencies.get_fs),
     file: UploadFile = File(...),
 ):
-    if file.endswith('.zip') == False:
+    if user is None:
+        raise HTTPException(
+            status_code=401, detail=f"User not found. Session might have expired."
+        )
+
+    if file.filename.endswith('.zip') == False:
         raise HTTPException(status_code=404, detail=f"File is not a zip file")
-    with open(file.filename, "wb") as buffer:
-        shutil.copyfileobj(file.file, buffer)
-    unzipped_folder_name = file.filename.rstrip(".zip")
-    path_to_zip = os.path.join(os.getcwd(), file.filename)
 
-    with zipfile.ZipFile(path_to_zip, 'r') as zip:
-        zip.extractall(os.getcwd())
+    # Read contents of zip file into temporary location
+    with tempfile.TemporaryFile() as tmp_zip:
+        tmp_zip.write(file.file.read())
 
-    macos_folder = os.path.join(os.getcwd(), '__MACOSX')
-    if os.path.exists(macos_folder):
-        shutil.rmtree(macos_folder)
+        with zipfile.ZipFile(tmp_zip, 'r') as zip_file:
+            zip_contents = zip_file.namelist()
+            zip_directory = _describe_zip_contents(zip_contents)
 
-    dataset_name = unzipped_folder_name
-    dataset_description = unzipped_folder_name
-    ds_dict = {'name': dataset_name, 'description': dataset_description}
-    dataset_db = DatasetDB(**ds_dict, author=user)
-    new_dataset = await db["datasets"].insert_one(dataset_db.to_mongo())
+        # Create dataset
+        dataset_name = file.filename.rstrip(".zip")
+        dataset_description = "Uploaded as %s" % file.filename
+        ds_dict = {
+            'name': dataset_name,
+            'description': dataset_description
+        }
+        dataset_db = DatasetDB(**ds_dict, author=user)
+        new_dataset = await db["datasets"].insert_one(dataset_db.to_mongo())
+        dataset_id = new_dataset.inserted_id
+
+        # Create folders
+        folder_lookup = await _create_folder_structure(dataset_id, zip_directory, "", {}, user, db)
+
+        # Go back through zipfile, this time uploading files to folders
+        with zipfile.ZipFile(tmp_zip, 'r') as zip_file:
+            for entry in zip_contents:
+                if "__MACOSX" in entry or entry.endswith(".DS_Store"):
+                    # TODO: These are not visible in OSX 10.3+ and hard to delete. Leaving this in to minimize user frustration.
+                    continue
+
+                # Create temporary file and upload
+                if not entry.endswith(os.path.sep):
+                    filename = os.path.basename(entry)
+                    foldername = os.path.sep+os.path.dirname(entry)
+                    extracted = zip_file.extract(entry, path="/tmp")
+                    if foldername in folder_lookup:
+                        folder_id = folder_lookup[foldername]
+                        fileDB = FileDB(name=filename, creator=user, dataset_id=dataset_id, folder_id=folder_id)
+                    else:
+                        fileDB = FileDB(name=filename, creator=user, dataset_id=dataset_id)
+                    with open(extracted, 'rb') as file_reader:
+                        await _add_file_entry(fileDB, user, db, fs, file_obj=file_reader)
+                    if os.path.isfile(extracted):
+                        os.remove(extracted)
+
     found = await db["datasets"].find_one({"_id": new_dataset.inserted_id})
-    result = await process_folders_zip_upload(unzipped_folder_name, new_dataset.inserted_id, "", user, db, fs)
-
-    try:
-        os.remove(file.filename)
-    except Exception as e:
-        print(e)
-        print("could not delete", file.filename)
-    try:
-        shutil.rmtree(unzipped_folder_name)
-    except Exception as e:
-        print(e)
-        print("could not delete", file.filename)
     dataset_out = DatasetOut.from_mongo(found)
     return dataset_out
