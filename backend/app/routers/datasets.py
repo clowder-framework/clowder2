@@ -367,6 +367,7 @@ async def download_dataset(
         manifest_path = os.path.join(current_temp_dir, 'manifest-md5.txt')
         bagit_path = os.path.join(current_temp_dir, 'bagit.txt')
         bag_info_path = os.path.join(current_temp_dir, 'bag-info.txt')
+        tagmanifest_path = os.path.join(current_temp_dir, 'tagmanifest-md5.txt')
 
         bag_size = 0
 
@@ -378,8 +379,10 @@ async def download_dataset(
             f.write('BagIt-Version: 0.97' + '\n')
             f.write('Tag-File-Character-Encoding: UTF-8' + '\n')
 
+        file_count = 0
+
         async for f in db["files"].find({"dataset_id": ObjectId(dataset_id)}):
-            print('found a file')
+            file_count += 1
             file = FileOut.from_mongo(f)
             file_name = file.name
             if file.folder_id is not None:
@@ -400,9 +403,11 @@ async def download_dataset(
             content.release_conn()
         dataset_name = dataset['name']
 
+        bag_size_kb = bag_size/1024
+
         with open(bagit_path, 'a') as f:
-            f.write('Bag-Size: ' + str(bag_size) + ' B' + '\n')
-            f.write('Payload-Oxum: ' + '\n')
+            f.write('Bag-Size: ' + str(bag_size_kb) + ' kB' + '\n')
+            f.write('Payload-Oxum: ' + str(bag_size) + '.' + str(file_count)+ '\n')
             f.write('Internal-Sender-Identifier: ' + dataset_id + '\n')
             f.write('Internal-Sender-Description: ' + dataset['description'] + '\n')
             f.write('Contact-Name: ' + user_full_name + '\n')
@@ -412,6 +417,18 @@ async def download_dataset(
         crate.add_file(manifest_path, dest_path='manifest-md5.txt', properties={'name': 'manifest-md5.txt'})
         crate.add_file(bag_info_path, dest_path='bag-info.txt', properties={'name': 'bag-info.txt'})
         crate.add_file(bagit_path, dest_path='bagit.txt', properties={'name': 'bagit.txt'})
+
+        manifest_md5_hash = hashlib.md5(open(manifest_path,'rb').read()).hexdigest()
+        bagit_md5_hash = hashlib.md5(open(bagit_path,'rb').read()).hexdigest()
+        bag_info_md5_hash = hashlib.md5(open(bag_info_path,'rb').read()).hexdigest()
+
+        with open(tagmanifest_path, 'w') as f:
+            f.write(bagit_md5_hash + ' ' + 'bagit.txt' + '\n')
+            f.write(manifest_md5_hash + ' ' + 'manifest-md5.txt' + '\n')
+            f.write(bag_info_md5_hash + ' ' + 'bag-info.txt' + '\n')
+
+        crate.add_file(tagmanifest_path, dest_path='tagmanifest-md5.txt', properties={'name': 'tagmanifest-md5.txt'})
+
         path_to_zip = os.path.join(current_temp_dir, dataset['name'] + '.zip')
         crate.write_zip(path_to_zip)
         f = open(path_to_zip, "rb", buffering=0)
