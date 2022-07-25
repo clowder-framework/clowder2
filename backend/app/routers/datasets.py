@@ -65,6 +65,7 @@ async def _add_file_entry(
     # Use unique ID as key for Minio and get initial version ID
     version_id = None
     if file_stream:
+        content_type = file_stream.content_type
         while content := file_stream:  # async read chunk
             response = fs.put_object(
                 settings.MINIO_BUCKET_NAME,
@@ -74,8 +75,8 @@ async def _add_file_entry(
                 part_size=settings.MINIO_UPLOAD_CHUNK_SIZE,
             )  # async write chunk to minio
             version_id = response.version_id
-        content_type = file_stream.content_type
     else:
+        content_type = mimetypes.guess_type(file_db.name)
         response = fs.put_object(
             settings.MINIO_BUCKET_NAME,
             str(new_file_id),
@@ -84,7 +85,7 @@ async def _add_file_entry(
             part_size=settings.MINIO_UPLOAD_CHUNK_SIZE,
         )  # async write chunk to minio
         version_id = response.version_id
-        content_type = mimetypes.guess_type(file_db.name)
+    content_type = content_type[0] if len(content_type) > 1 else content_type
     bytes = len(fs.get_object(settings.MINIO_BUCKET_NAME, str(new_file_id)).data)
     if version_id is None:
         # TODO: This occurs in testing when minio is not running
@@ -92,7 +93,7 @@ async def _add_file_entry(
     file_db.version_id = version_id
     file_db.version_num = 1
     file_db.bytes = bytes
-    file_db.content_type = content_type
+    file_db.content_type = content_type if type(content_type) is str else "N/A"
     await db["files"].replace_one({"_id": ObjectId(new_file_id)}, file_db.to_mongo())
 
     # Add FileVersion entry and update file
@@ -101,7 +102,7 @@ async def _add_file_entry(
         file_id=new_file_id,
         creator=user,
         bytes=bytes,
-        content_type=content_type
+        content_type=file_db.content_type
     )
     await db["file_versions"].insert_one(new_version.to_mongo())
 
@@ -198,10 +199,7 @@ async def _create_folder_structure(
             continue
 
         # Create the folder
-        if parent_folder_id is not None:
-            folder_dict = {'dataset_id': dataset_id, 'name': k}
-        else:
-            folder_dict = {'dataset_id': dataset_id, 'name': k, 'parent_folder': parent_folder_id}
+        folder_dict = {'dataset_id': dataset_id, 'name': k, 'parent_folder': parent_folder_id}
         folder_db = FolderDB(**folder_dict, author=user)
         new_folder = await db["folders"].insert_one(folder_db.to_mongo())
         new_folder_id = new_folder.inserted_id
