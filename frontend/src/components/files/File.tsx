@@ -23,7 +23,7 @@ import {DisplayMetadata} from "../metadata/DisplayMetadata";
 import {deleteFileMetadata as deleteFileMetadataAction, fetchFileMetadata} from "../../actions/metadata";
 import {patchFileMetadata as patchFileMetadataAction} from "../../actions/metadata";
 import {postFileMetadata as createFileMetadataAction} from "../../actions/metadata";
-import {AddMetadata} from "../metadata/AddMetadata";
+import {EditMetadata} from "../metadata/EditMetadata";
 import {ClowderButton} from "../styledComponents/ClowderButton";
 import CloseIcon from "@mui/icons-material/Close";
 import file from "../../reducers/file";
@@ -249,8 +249,8 @@ export const File = (): JSX.Element => {
 											>
 												<CloseIcon />
 											</IconButton>
-											<AddMetadata resourceType="file" resourceId={fileId}
-														 setMetadata={setMetadata}
+											<EditMetadata resourceType="file" resourceId={fileId}
+														  setMetadata={setMetadata}
 											/>
 											<Button variant="contained" onClick={handleMetadataUpdateFinish} sx={{ mt: 1, mr: 1 }}>
 												Update

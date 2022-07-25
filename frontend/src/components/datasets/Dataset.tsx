@@ -39,7 +39,7 @@ import {parseDate} from "../../utils/common";
 import config from "../../app.config";
 import {DatasetIn, MetadataIn} from "../../openapi/v2";
 import {DisplayMetadata} from "../metadata/DisplayMetadata";
-import {AddMetadata} from "../metadata/AddMetadata";
+import {EditMetadata} from "../metadata/EditMetadata";
 import {
 	patchDatasetMetadata as patchDatasetMetadataAction,
 	deleteDatasetMetadata as deleteDatasetMetadataAction,
@@ -250,8 +250,8 @@ export const Dataset = (): JSX.Element => {
 											>
 												<CloseIcon />
 											</IconButton>
-											<AddMetadata resourceType="dataset" resourceId={datasetId}
-														 setMetadata={setMetadata}
+											<EditMetadata resourceType="dataset" resourceId={datasetId}
+														  setMetadata={setMetadata}
 											/>
 											<Button variant="contained" onClick={handleMetadataUpdateFinish} sx={{ mt: 1, mr: 1 }}>
 												Update

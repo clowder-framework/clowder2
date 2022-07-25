@@ -33,5 +33,5 @@ import type { MetadataFieldEnum } from './MetadataFieldEnum';
                     description?: string;
                     context?: any;
                     context_url?: string;
-                    fields: Array<(MetadataField | MetadataFieldEnum)>;
+                    fields: Array<(MetadataFieldEnum | MetadataField)>;
                 }

@@ -16,7 +16,7 @@ type MetadataType = {
 This is the interface add more metadata on a existing resource
 Uses metadata definition as well as created metadata
 */
-export const AddMetadata = (props: MetadataType) => {
+export const EditMetadata = (props: MetadataType) => {
 
 	const {setMetadata, resourceType, resourceId} = props;
 

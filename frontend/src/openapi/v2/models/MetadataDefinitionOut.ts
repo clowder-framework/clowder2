@@ -34,6 +34,6 @@ import type { UserOut } from './UserOut';
                     description?: string;
                     context?: any;
                     context_url?: string;
-                    fields: Array<(MetadataField | MetadataFieldEnum)>;
+                    fields: Array<(MetadataFieldEnum | MetadataField)>;
                     creator: UserOut;
                 }
