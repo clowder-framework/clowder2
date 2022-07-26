@@ -138,7 +138,15 @@ export const File = (): JSX.Element => {
 	};
 
 	const setMetadata = (metadata:any) =>{
-		setMetadataRequestForms(prevState => ({...prevState, [metadata.definition]: metadata}));
+		// TODO wrap this in to a function
+		setMetadataRequestForms(prevState => {
+			// merge the contents field; e.g. lat lon
+			if (metadata.definition in prevState){
+				const prevContent = prevState[metadata.definition].contents;
+				metadata.contents = {...prevContent, ...metadata.contents};
+			}
+			return ({...prevState, [metadata.definition]: metadata});
+		});
 	};
 
 	const handleMetadataUpdateFinish = () =>{
