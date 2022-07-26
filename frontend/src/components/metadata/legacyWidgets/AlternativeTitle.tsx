@@ -1,6 +1,6 @@
 import React, {useState} from "react";
-import {MetadataButtonGroup} from "./MetadataButtonGroup";
-import { ClowderMetadataTextField } from "../styledComponents/ClowderMetadataTextField";
+import {MetadataButtonGroup} from "../MetadataButtonGroup";
+import { ClowderMetadataTextField } from "../../styledComponents/ClowderMetadataTextField";
 
 export const AlternativeTitle = (props) => {
 	const {widgetName, resourceId, contents, updateMetadata, setMetadata, deleteMetadata, metadataId,

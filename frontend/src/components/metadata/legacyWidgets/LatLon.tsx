@@ -1,6 +1,6 @@
 import React, {useState} from "react";
-import {MetadataButtonGroup} from "./MetadataButtonGroup";
-import {ClowderMetadataTextField} from "../styledComponents/ClowderMetadataTextField";
+import {MetadataButtonGroup} from "../MetadataButtonGroup";
+import {ClowderMetadataTextField} from "../../styledComponents/ClowderMetadataTextField";
 
 export const LatLon = (props) => {
 

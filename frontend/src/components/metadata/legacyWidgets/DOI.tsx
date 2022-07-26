@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from "react";
-import {MetadataButtonGroup} from "./MetadataButtonGroup";
-import { ClowderMetadataTextField } from "../styledComponents/ClowderMetadataTextField";
+import {MetadataButtonGroup} from "../MetadataButtonGroup";
+import { ClowderMetadataTextField } from "../../styledComponents/ClowderMetadataTextField";
 
 export const DOI = (props) => {
 	const {widgetName, metadataId, contents, updateMetadata, setMetadata, deleteMetadata, resourceId, initialReadOnly} = props;

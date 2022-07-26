@@ -1,9 +1,9 @@
 import * as React from "react";
 import {InputLabel, MenuItem, FormControl} from "@mui/material";
 import {useState} from "react";
-import {MetadataButtonGroup} from "./MetadataButtonGroup";
-import {ClowderMetadataSelect} from "../styledComponents/ClowderMetadataSelect";
-import {ClowderMetadataFormHelperText} from "../styledComponents/ClowderMetadataFormHelperText";
+import {MetadataButtonGroup} from "../MetadataButtonGroup";
+import {ClowderMetadataSelect} from "../../styledComponents/ClowderMetadataSelect";
+import {ClowderMetadataFormHelperText} from "../../styledComponents/ClowderMetadataFormHelperText";
 
 export const Unit = (props) => {
 	const {widgetName, metadataId, contents, updateMetadata, setMetadata, deleteMetadata, resourceId, initialReadOnly} = props;

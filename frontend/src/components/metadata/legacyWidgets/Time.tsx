@@ -1,8 +1,8 @@
 import React, {useState} from "react";
 import {LocalizationProvider, DateTimePicker} from "@mui/lab";
 import DateAdapter from "@mui/lab/AdapterDateFns";
-import {MetadataButtonGroup} from "./MetadataButtonGroup";
-import {ClowderMetadataTextField} from "../styledComponents/ClowderMetadataTextField";
+import {MetadataButtonGroup} from "../MetadataButtonGroup";
+import {ClowderMetadataTextField} from "../../styledComponents/ClowderMetadataTextField";
 
 export const Time = (props) => {
 	const {widgetName, metadataId, contents, updateMetadata, setMetadata, deleteMetadata, resourceId, initialReadOnly} = props;
