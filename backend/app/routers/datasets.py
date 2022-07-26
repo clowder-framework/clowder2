@@ -47,19 +47,19 @@ clowder_bucket = os.getenv("MINIO_BUCKET_NAME", "clowder")
 def _describe_zip_contents(file_list: list):
     """Traverse a list of zipfile entries and create a dictionary structure like so:
 
-        {
-            ""__CLOWDER_FILE_LIST__"": ['list', 'of', 'root', 'files'],
-            "folder_1": {
-                ""__CLOWDER_FILE_LIST__"": ['list', 'of', 'folder_1', 'files']
+    {
+        ""__CLOWDER_FILE_LIST__"": ['list', 'of', 'root', 'files'],
+        "folder_1": {
+            ""__CLOWDER_FILE_LIST__"": ['list', 'of', 'folder_1', 'files']
+        },
+        "folder_2": {
+            ""__CLOWDER_FILE_LIST__"": ['list', 'of', 'folder_2', 'files'],
+            "subfolder_3": {
+                ""__CLOWDER_FILE_LIST__"": ['list', 'of', subfolder_3', 'files']
             },
-            "folder_2": {
-                ""__CLOWDER_FILE_LIST__"": ['list', 'of', 'folder_2', 'files'],
-                "subfolder_3": {
-                    ""__CLOWDER_FILE_LIST__"": ['list', 'of', subfolder_3', 'files']
-                },
-            },
-            ...
-        }
+        },
+        ...
+    }
     """
     empty_entry = {"__CLOWDER_FILE_LIST__": []}
 
@@ -70,9 +70,7 @@ def _describe_zip_contents(file_list: list):
             else:
                 return {entries[0]: empty_entry.copy()}
         else:
-            return {
-                entries[0]: path_parts_to_dict(entries[1:])
-            }
+            return {entries[0]: path_parts_to_dict(entries[1:])}
 
     def nested_update(target_dict, update_dict):
         for k, v in update_dict.items():
@@ -113,13 +111,13 @@ def _describe_zip_contents(file_list: list):
 
 
 async def _create_folder_structure(
-        dataset_id: str,
-        contents: dict,
-        folder_path: str,
-        folder_lookup: dict,
-        user: UserOut,
-        db: MongoClient,
-        parent_folder_id: Optional[str] = None,
+    dataset_id: str,
+    contents: dict,
+    folder_path: str,
+    folder_lookup: dict,
+    user: UserOut,
+    db: MongoClient,
+    parent_folder_id: Optional[str] = None,
 ):
     """Recursively create folders encountered in folder_path until the target folder is created.
 
@@ -136,7 +134,11 @@ async def _create_folder_structure(
             continue
 
         # Create the folder
-        folder_dict = {'dataset_id': dataset_id, 'name': k, 'parent_folder': parent_folder_id}
+        folder_dict = {
+            "dataset_id": dataset_id,
+            "name": k,
+            "parent_folder": parent_folder_id,
+        }
         folder_db = FolderDB(**folder_dict, author=user)
         new_folder = await db["folders"].insert_one(folder_db.to_mongo())
         new_folder_id = new_folder.inserted_id
@@ -145,7 +147,9 @@ async def _create_folder_structure(
         new_folder_path = folder_path + os.path.sep + k
         folder_lookup[new_folder_path] = new_folder_id
         if isinstance(v, Mapping):
-            folder_lookup = await _create_folder_structure(dataset_id, v, new_folder_path, folder_lookup, user, db, new_folder_id)
+            folder_lookup = await _create_folder_structure(
+                dataset_id, v, new_folder_path, folder_lookup, user, db, new_folder_id
+            )
 
     return folder_lookup
 
@@ -402,33 +406,32 @@ async def create_dataset_from_zip(
             status_code=401, detail=f"User not found. Session might have expired."
         )
 
-    if file.filename.endswith('.zip') == False:
+    if file.filename.endswith(".zip") == False:
         raise HTTPException(status_code=404, detail=f"File is not a zip file")
 
     # Read contents of zip file into temporary location
     with tempfile.TemporaryFile() as tmp_zip:
         tmp_zip.write(file.file.read())
 
-        with zipfile.ZipFile(tmp_zip, 'r') as zip_file:
+        with zipfile.ZipFile(tmp_zip, "r") as zip_file:
             zip_contents = zip_file.namelist()
             zip_directory = _describe_zip_contents(zip_contents)
 
         # Create dataset
         dataset_name = file.filename.rstrip(".zip")
         dataset_description = "Uploaded as %s" % file.filename
-        ds_dict = {
-            'name': dataset_name,
-            'description': dataset_description
-        }
+        ds_dict = {"name": dataset_name, "description": dataset_description}
         dataset_db = DatasetDB(**ds_dict, author=user)
         new_dataset = await db["datasets"].insert_one(dataset_db.to_mongo())
         dataset_id = new_dataset.inserted_id
 
         # Create folders
-        folder_lookup = await _create_folder_structure(dataset_id, zip_directory, "", {}, user, db)
+        folder_lookup = await _create_folder_structure(
+            dataset_id, zip_directory, "", {}, user, db
+        )
 
         # Go back through zipfile, this time uploading files to folders
-        with zipfile.ZipFile(tmp_zip, 'r') as zip_file:
+        with zipfile.ZipFile(tmp_zip, "r") as zip_file:
             for entry in zip_contents:
                 if "__MACOSX" in entry or entry.endswith(".DS_Store"):
                     # TODO: These are not visible in OSX 10.3+ and hard to delete. Leaving this in to minimize user frustration.
@@ -437,14 +440,21 @@ async def create_dataset_from_zip(
                 # Create temporary file and upload
                 if not entry.endswith(os.path.sep):
                     filename = os.path.basename(entry)
-                    foldername = os.path.sep+os.path.dirname(entry)
+                    foldername = os.path.sep + os.path.dirname(entry)
                     extracted = zip_file.extract(entry, path="/tmp")
                     if foldername in folder_lookup:
                         folder_id = folder_lookup[foldername]
-                        fileDB = FileDB(name=filename, creator=user, dataset_id=dataset_id, folder_id=folder_id)
+                        fileDB = FileDB(
+                            name=filename,
+                            creator=user,
+                            dataset_id=dataset_id,
+                            folder_id=folder_id,
+                        )
                     else:
-                        fileDB = FileDB(name=filename, creator=user, dataset_id=dataset_id)
-                    with open(extracted, 'rb') as file_reader:
+                        fileDB = FileDB(
+                            name=filename, creator=user, dataset_id=dataset_id
+                        )
+                    with open(extracted, "rb") as file_reader:
                         await add_file_entry(fileDB, user, db, fs, file_obj=file_reader)
                     if os.path.isfile(extracted):
                         os.remove(extracted)
@@ -482,9 +492,8 @@ async def download_dataset(
             stream.getvalue(),
             media_type="application/x-zip-compressed",
             headers={
-                "Content-Disposition": f"attachment;filename=\"{dataset.name}.zip\""
+                "Content-Disposition": f'attachment;filename="{dataset.name}.zip"'
             },
         )
     else:
         raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
-

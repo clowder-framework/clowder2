@@ -86,12 +86,16 @@ async def add_file_entry(
         file_id=new_file_id,
         creator=user,
         bytes=bytes,
-        content_type=file_db.content_type
+        content_type=file_db.content_type,
     )
     await db["file_versions"].insert_one(new_version.to_mongo())
 
 
-async def remove_file_entry(file_id: str, db: MongoClient, fs: Minio,):
+async def remove_file_entry(
+    file_id: str,
+    db: MongoClient,
+    fs: Minio,
+):
     """Remove FileDB object into MongoDB, Minio, and associated metadata and version information."""
     # TODO: Deleting individual versions will require updating version_id in mongo, or deleting entire document
     fs.remove_object(settings.MINIO_BUCKET_NAME, str(file_id))
