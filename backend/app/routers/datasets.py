@@ -306,7 +306,7 @@ async def save_file(
         # Use unique ID as key for Minio and get initial version ID
         version_id = None
         while content := file.file.read(
-            settings.MINIO_UPLOAD_CHUNK_SIZE
+            
         ):  # async read chunk
             response = fs.put_object(
                 settings.MINIO_BUCKET_NAME,
