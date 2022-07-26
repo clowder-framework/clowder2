@@ -426,14 +426,16 @@ async def delete_folder(
     db: MongoClient = Depends(dependencies.get_db),
     fs: Minio = Depends(dependencies.get_fs),
 ):
-    if (await db["folder"].find_one({"_id": ObjectId(dataset_id)})) is not None:
-        async for f in db["files"].find({"dataset_id": ObjectId(dataset_id)}):
-            fs.remove_object(clowder_bucket, str(f))
-        await db["datasets"].delete_one({"_id": ObjectId(dataset_id)})
-        # TODO: This needs to delete the folder from the folders collection as well
-        return {"deleted": dataset_id}
-    else:
-        raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
+    if (dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})) is not None:
+        # TODO: Should dataset_id be necessary here?
+        if (await db["folders"].find_one({"_id": ObjectId(folder_id)})) is not None:
+            async for f in db["files"].find({"folder_id": ObjectId(folder_id)}):
+                fs.remove_object(clowder_bucket, str(f))
+            await db["folders"].delete_one({"_id": ObjectId(folder_id)})
+            return {"deleted": folder_id}
+        else:
+            raise HTTPException(status_code=404, detail=f"Folder {folder_id} not found")
+    raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
 
 
 @router.post("/{dataset_id}/files", response_model=FileOut)
