@@ -419,7 +419,7 @@ async def get_dataset_folders(
     return folders
 
 
-@router.delete("/{dataset_id}/folder/{folder_id}")
+@router.delete("/{dataset_id}/folders/{folder_id}")
 async def delete_folder(
     dataset_id: str,
     folder_id: str,
