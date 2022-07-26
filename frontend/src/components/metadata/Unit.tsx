@@ -46,9 +46,9 @@ export const Unit = (props) => {
 							sx={{background:"#ffffff"}}
 							disabled={readOnly}
 					>
-						<MenuItem value={"A"}>Ampere</MenuItem>
-						<MenuItem value={"K"}>Kelvin</MenuItem>
-						<MenuItem value={"s"}>Second</MenuItem>
+						<MenuItem value={"Ampere"}>Ampere</MenuItem>
+						<MenuItem value={"Kelvin"}>Kelvin</MenuItem>
+						<MenuItem value={"Second"}>Second</MenuItem>
 					</ClowderMetadataSelect>
 					<ClowderMetadataFormHelperText>{inputChanged? "* You have changed this field. Remember to save/ update.": ""}
 					</ClowderMetadataFormHelperText>

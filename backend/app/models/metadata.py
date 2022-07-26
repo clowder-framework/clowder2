@@ -31,6 +31,7 @@ FIELD_TYPES = {
     "date": datetime.date,
     "time": datetime.time,
     "dict": dict,  # TODO: does this work?
+    "enum": str,  # TODO: need a way to validate enum
 }  # JSON schema can handle this for us?
 
 
