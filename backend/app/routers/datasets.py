@@ -213,25 +213,16 @@ async def _create_folder_structure(
     return folder_lookup
 
 
-async def get_folder_hierarchy(
+async def _get_folder_hierarchy(
     folder_id: str,
     hierarchy: str,
     db: MongoClient,
 ):
     found = await db["folders"].find_one({"_id": ObjectId(folder_id)})
     folder = FolderOut.from_mongo(found)
-    folder_name = folder.name
-    hierarchy = folder_name + "/" + hierarchy
-    folder_parent = folder.parent_folder
-    if folder_parent is not None:
-        parent_folder_found = await db["folders"].find_one(
-            {"_id": ObjectId(folder_parent)}
-        )
-        parent_folder = FolderOut.from_mongo(parent_folder_found)
-        hierarchy = parent_folder.name + "/" + hierarchy
-        parent_folder_parent = parent_folder.parent_folder
-        if parent_folder_parent is not None:
-            hierarchy = await get_folder_hierarchy(str(parent_folder.id), hierarchy, db)
+    hierarchy = folder.name + "/" + hierarchy
+    if folder.parent_folder is not None:
+        hierarchy = await _get_folder_hierarchy(folder.parent_folder, hierarchy, db)
     return hierarchy
 
 
@@ -439,6 +430,7 @@ async def delete_folder(
         async for f in db["files"].find({"dataset_id": ObjectId(dataset_id)}):
             fs.remove_object(clowder_bucket, str(f))
         await db["datasets"].delete_one({"_id": ObjectId(dataset_id)})
+        # TODO: This needs to delete the folder from the folders collection as well
         return {"deleted": dataset_id}
     else:
         raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
@@ -562,7 +554,7 @@ async def download_dataset(
             file = FileOut.from_mongo(f)
             file_name = file.name
             if file.folder_id is not None:
-                hierarchy = await get_folder_hierarchy(file.folder_id, "", db)
+                hierarchy = await _get_folder_hierarchy(file.folder_id, "", db)
                 file_name = "/" + hierarchy + file_name
             content = fs.get_object(settings.MINIO_BUCKET_NAME, str(file.id))
             z.writestr(file_name, content.data)
@@ -573,7 +565,7 @@ async def download_dataset(
             stream.getvalue(),
             media_type="application/x-zip-compressed",
             headers={
-                "Content-Disposition": f'attachment;filename={dataset.name + ".zip"}'
+                "Content-Disposition": f"attachment;filename=\"{dataset.name}.zip\""
             },
         )
     else:
