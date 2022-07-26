@@ -3,7 +3,6 @@ import io
 import os
 import zipfile
 import tempfile
-import mimetypes
 from typing import List, Optional, BinaryIO
 from collections.abc import Mapping, Iterable
 from bson import ObjectId
@@ -38,73 +37,11 @@ from app.models.metadata import (
     validate_context,
     patch_metadata,
 )
+from app.routers.files import add_file_entry, remove_file_entry
 
 router = APIRouter()
 
 clowder_bucket = os.getenv("MINIO_BUCKET_NAME", "clowder")
-
-async def _add_file_entry(
-    file_db: FileDB,
-    user: UserOut,
-    db: MongoClient,
-    fs: Minio,
-    file_stream: Optional[BinaryIO] = None,
-    file_obj: Optional[io.BytesIO] = None,
-):
-    """Insert FileDB object into MongoDB (makes Clowder ID), then Minio (makes version ID), then update MongoDB with
-    the version ID from Minio.
-
-    Arguments:
-        file_db: FileDB object controlling dataset and folder destination
-        file_stream: Use this when passing directly from a request e.g. UploadFile.file
-        file_obj: Use this when passing a file bytestream e.g. open(file, 'rb')
-    """
-    new_file = await db["files"].insert_one(file_db.to_mongo())
-    new_file_id = new_file.inserted_id
-
-    # Use unique ID as key for Minio and get initial version ID
-    version_id = None
-    if file_stream:
-        content_type = file_stream.content_type
-        while content := file_stream:  # async read chunk
-            response = fs.put_object(
-                settings.MINIO_BUCKET_NAME,
-                str(new_file_id),
-                io.BytesIO(content),
-                length=-1,
-                part_size=settings.MINIO_UPLOAD_CHUNK_SIZE,
-            )  # async write chunk to minio
-            version_id = response.version_id
-    else:
-        content_type = mimetypes.guess_type(file_db.name)
-        response = fs.put_object(
-            settings.MINIO_BUCKET_NAME,
-            str(new_file_id),
-            file_obj,
-            length=-1,
-            part_size=settings.MINIO_UPLOAD_CHUNK_SIZE,
-        )  # async write chunk to minio
-        version_id = response.version_id
-    content_type = content_type[0] if len(content_type) > 1 else content_type
-    bytes = len(fs.get_object(settings.MINIO_BUCKET_NAME, str(new_file_id)).data)
-    if version_id is None:
-        # TODO: This occurs in testing when minio is not running
-        version_id = 999999999
-    file_db.version_id = version_id
-    file_db.version_num = 1
-    file_db.bytes = bytes
-    file_db.content_type = content_type if type(content_type) is str else "N/A"
-    await db["files"].replace_one({"_id": ObjectId(new_file_id)}, file_db.to_mongo())
-
-    # Add FileVersion entry and update file
-    new_version = FileVersion(
-        version_id=version_id,
-        file_id=new_file_id,
-        creator=user,
-        bytes=bytes,
-        content_type=file_db.content_type
-    )
-    await db["file_versions"].insert_one(new_version.to_mongo())
 
 
 def _describe_zip_contents(file_list: list):
@@ -218,6 +155,7 @@ async def _get_folder_hierarchy(
     hierarchy: str,
     db: MongoClient,
 ):
+    """Generate a string of nested path to folder for use in zip file creation."""
     found = await db["folders"].find_one({"_id": ObjectId(folder_id)})
     folder = FolderOut.from_mongo(found)
     hierarchy = folder.name + "/" + hierarchy
@@ -357,15 +295,11 @@ async def delete_dataset(
 ):
     if (await db["datasets"].find_one({"_id": ObjectId(dataset_id)})) is not None:
         # delete dataset first to minimize files/folder being uploaded to a delete dataset
+
         await db["datasets"].delete_one({"_id": ObjectId(dataset_id)})
         await db.metadata.delete_many({"resource.resource_id": ObjectId(dataset_id)})
         async for file in db["files"].find({"dataset_id": ObjectId(dataset_id)}):
-            fs.remove_object(clowder_bucket, str(file))
-            await db.metadata.delete_many(
-                {"resource.resource_id": ObjectId(file["_id"])}
-            )
-            await db["file_versions"].delete_many({"file_id": ObjectId(file["_id"])})
-        await db.files.delete_many({"dataset_id": ObjectId(dataset_id)})
+            remove_file_entry(file.id, db, fs)
         await db["folders"].delete_many({"dataset_id": ObjectId(dataset_id)})
         return {"deleted": dataset_id}
     else:
@@ -419,25 +353,6 @@ async def get_dataset_folders(
     return folders
 
 
-@router.delete("/{dataset_id}/folders/{folder_id}")
-async def delete_folder(
-    dataset_id: str,
-    folder_id: str,
-    db: MongoClient = Depends(dependencies.get_db),
-    fs: Minio = Depends(dependencies.get_fs),
-):
-    if (dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})) is not None:
-        # TODO: Should dataset_id be necessary here?
-        if (await db["folders"].find_one({"_id": ObjectId(folder_id)})) is not None:
-            async for f in db["files"].find({"folder_id": ObjectId(folder_id)}):
-                fs.remove_object(clowder_bucket, str(f))
-            await db["folders"].delete_one({"_id": ObjectId(folder_id)})
-            return {"deleted": folder_id}
-        else:
-            raise HTTPException(status_code=404, detail=f"Folder {folder_id} not found")
-    raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
-
-
 @router.post("/{dataset_id}/files", response_model=FileOut)
 async def save_file(
     dataset_id: str,
@@ -468,7 +383,7 @@ async def save_file(
                     status_code=404, detail=f"Folder {folder_id} not found"
                 )
 
-        await _add_file_entry(fileDB, user, db, fs, file_stream=file.file)
+        await add_file_entry(fileDB, user, db, fs, file_stream=file.file)
 
         return fileDB
     else:
@@ -530,7 +445,7 @@ async def create_dataset_from_zip(
                     else:
                         fileDB = FileDB(name=filename, creator=user, dataset_id=dataset_id)
                     with open(extracted, 'rb') as file_reader:
-                        await _add_file_entry(fileDB, user, db, fs, file_obj=file_reader)
+                        await add_file_entry(fileDB, user, db, fs, file_obj=file_reader)
                     if os.path.isfile(extracted):
                         os.remove(extracted)
 
