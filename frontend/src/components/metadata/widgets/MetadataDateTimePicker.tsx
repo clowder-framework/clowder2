@@ -5,7 +5,7 @@ import {ClowderMetadataTextField} from "../../styledComponents/ClowderMetadataTe
 
 
 export const MetadataDateTimePicker = (props) => {
-	const {widgetName, metadataId, contents, setMetadata, initialReadOnly} = props;
+	const {widgetName, fieldName, metadataId, contents, setMetadata, initialReadOnly} = props;
 	const [value, setValue] = useState(contents && contents.time? contents.time: new Date());
 
 	const [readOnly, setReadOnly] = useState(initialReadOnly);
@@ -15,21 +15,20 @@ export const MetadataDateTimePicker = (props) => {
 	const handleChange = (newValue:Date) => {
 		setInputChanged(true);
 		setValue(newValue);
+
+		let contents: { [key: string]: Date; } = {};
+		contents[fieldName] = newValue;
 		setMetadata ?
 			metadataId ?
 				setMetadata({
 					"id": metadataId,
 					"definition": widgetName,
-					"contents": {
-						"time":newValue,
-					}
+					"contents": contents
 				})
 				:
 				setMetadata({
 					"definition": widgetName,
-					"contents": {
-						"time":newValue,
-					}
+					"contents": contents
 				})
 			:
 			null

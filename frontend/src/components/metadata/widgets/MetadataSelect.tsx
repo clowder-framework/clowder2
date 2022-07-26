@@ -5,7 +5,7 @@ import {ClowderMetadataSelect} from "../../styledComponents/ClowderMetadataSelec
 import {ClowderMetadataFormHelperText} from "../../styledComponents/ClowderMetadataFormHelperText";
 
 export const MetadataSelect = (props) => {
-	const {widgetName, metadataId, contents, setMetadata, initialReadOnly, options} = props;
+	const {widgetName, fieldName, metadataId, contents, setMetadata, initialReadOnly, options} = props;
 	const [unit, setUnit] = React.useState(contents && contents.unit? contents.unit: "");
 
 	const [readOnly, setReadOnly] = useState(initialReadOnly);
@@ -15,21 +15,20 @@ export const MetadataSelect = (props) => {
 	const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
 		setInputChanged(true);
 		setUnit(event.target.value);
+
+		let contents: { [key: string]: string; } = {};
+		contents[fieldName] = event.target.value;
 		setMetadata ?
-			metadataId?
+			metadataId ?
 				setMetadata({
 					"id":metadataId,
 					"definition": widgetName,
-					"contents": {
-						"unit":event.target.value,
-					}
+					"contents": contents
 				})
 				:
 				setMetadata({
 					"definition": widgetName,
-					"contents": {
-						"unit":event.target.value,
-					}
+					"contents": contents
 				})
 			:
 			null

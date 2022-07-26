@@ -61,7 +61,7 @@ export const CreateDataset = (): JSX.Element => {
 	}
 	// step 2
 	const setMetadata = (metadata:any) =>{
-
+		// TODO wrap this in to a function
 		setMetadataRequestForms(prevState => {
 			// merge the contents field; e.g. lat lon
 			if (metadata.definition in prevState){

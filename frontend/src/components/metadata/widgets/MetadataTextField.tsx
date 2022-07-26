@@ -17,7 +17,7 @@ export const MetadataTextField = (props) => {
 				  setInputChanged(true);
 				  setText(event.target.value);
 
-				  let contents = {};
+				  let contents: { [key: string]: string|number; } = {};
 				  contents[fieldName] = event.target.value;
 				  setMetadata ?
 					  metadataId ?
