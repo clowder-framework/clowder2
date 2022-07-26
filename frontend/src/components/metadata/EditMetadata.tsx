@@ -68,18 +68,21 @@ export const EditMetadata = (props: MetadataType) => {
 								<Box className="inputGroup">
 									<Typography variant="h6">{metadataDef.name}</Typography>
 									<Typography variant="subtitle2">{metadataDef.description}</Typography>
+
 									{
-										(() => {
+										// construct metadata using its definition
+										metadataDef.fields.map(field => {
 											return React.cloneElement(
-												metadataConfig[metadataDef.name],
+												metadataConfig[field.widgetType ?? "NA"],
 												{
-													resourceId: resourceId,
 													widgetName: metadataDef.name,
+													fieldName: field.name,
+													options: field.options ?? [],
 													setMetadata: setMetadata,
 													initialReadOnly: false,
 												}
-											);
-										})()
+											)
+										})
 									}
 								</Box>
 							);
@@ -91,20 +94,24 @@ export const EditMetadata = (props: MetadataType) => {
 										<Box className="inputGroup">
 											<Typography variant="h6">{metadata.definition}</Typography>
 											<Typography variant="subtitle2">{metadata.description}</Typography>
+
 											{
-												(() => {
+												// construct metadata using its definition
+												metadataDef.fields.map(field => {
 													return React.cloneElement(
-														metadataConfig[metadata.definition],
+														metadataConfig[field.widgetType ?? "NA"],
 														{
-															resourceId: resourceId,
-															widgetName: metadata.definition,
+															widgetName: metadataDef.name,
+															fieldName: field.name,
+															options: field.options ?? [],
 															setMetadata: setMetadata,
 															initialReadOnly: false,
+															resourceId: resourceId,
 															contents: metadata.contents ?? null,
 															metadataId: metadata.id ?? null,
 														}
-													);
-												})()
+													)
+												})
 											}
 											<Agent created={metadata.created} agent={metadata.agent}/>
 										</Box>

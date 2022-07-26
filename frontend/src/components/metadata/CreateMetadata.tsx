@@ -38,11 +38,11 @@ export const CreateMetadata = (props: MetadataType) => {
 								{
 									metadata.fields.map(field => {
 										return React.cloneElement(
-											metadataConfig[field.widgetType ? field.widgetType : "NA"],
+											metadataConfig[field.widgetType ?? "NA"],
 											{
 												widgetName: metadata.name,
 												fieldName: field.name,
-												options: field.options ? field.options : [],
+												options: field.options ?? [],
 												setMetadata: setMetadata,
 												initialReadOnly: false,
 											}
