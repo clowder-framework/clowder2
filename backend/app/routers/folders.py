@@ -4,15 +4,17 @@ from fastapi import (
     HTTPException,
     Depends,
 )
+from minio import Minio
 from pymongo import MongoClient
 
 from app import dependencies
+from app.routers.files import remove_file_entry
 
 router = APIRouter()
 
 
 @router.get("/{folder_id}/path")
-async def download_file(
+async def download_folder(
     folder_id: str,
     db: MongoClient = Depends(dependencies.get_db),
 ):
@@ -36,3 +38,18 @@ async def download_file(
         return path
     else:
         raise HTTPException(status_code=404, detail=f"File {folder_id} not found")
+
+
+@router.delete("/{folder_id}")
+async def delete_folder(
+    folder_id: str,
+    db: MongoClient = Depends(dependencies.get_db),
+    fs: Minio = Depends(dependencies.get_fs),
+):
+    if (await db["folders"].find_one({"_id": ObjectId(folder_id)})) is not None:
+        await db["folders"].delete_one({"_id": ObjectId(folder_id)})
+        async for file in db["files"].find({"folder_id": ObjectId(folder_id)}):
+            remove_file_entry(file.id, db, fs)
+        return {"deleted": folder_id}
+    else:
+        raise HTTPException(status_code=404, detail=f"Folder {folder_id} not found")
