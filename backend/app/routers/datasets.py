@@ -48,8 +48,9 @@ router = APIRouter()
 
 clowder_bucket = os.getenv("MINIO_BUCKET_NAME", "clowder")
 
+
 async def clean_out_tmp():
-    temp_dir = os.path.join(os.getcwd(), 'tmp')
+    temp_dir = os.path.join(os.getcwd(), "tmp")
     files_inside = os.listdir()
 
 
@@ -358,28 +359,28 @@ async def download_dataset(
     if (
         dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
     ) is not None:
-        current_temp_dir = tempfile.mkdtemp(prefix='rocratedownload')
+        current_temp_dir = tempfile.mkdtemp(prefix="rocratedownload")
         crate = ROCrate()
         user_first_name = user.first_name
         user_last_name = user.last_name
         user_full_name = user_first_name + " " + user_last_name
         user_crate_id = str(user.id)
-        crate.add(Person(crate, user_crate_id, properties={'name': user_full_name}))
+        crate.add(Person(crate, user_crate_id, properties={"name": user_full_name}))
 
-        manifest_path = os.path.join(current_temp_dir, 'manifest-md5.txt')
-        bagit_path = os.path.join(current_temp_dir, 'bagit.txt')
-        bag_info_path = os.path.join(current_temp_dir, 'bag-info.txt')
-        tagmanifest_path = os.path.join(current_temp_dir, 'tagmanifest-md5.txt')
+        manifest_path = os.path.join(current_temp_dir, "manifest-md5.txt")
+        bagit_path = os.path.join(current_temp_dir, "bagit.txt")
+        bag_info_path = os.path.join(current_temp_dir, "bag-info.txt")
+        tagmanifest_path = os.path.join(current_temp_dir, "tagmanifest-md5.txt")
 
         bag_size = 0
 
-        with open(bagit_path, 'w') as f:
-            f.write('Bag-Software-Agent: clowder.ncsa.illinois.edu' + '\n')
-            f.write('Bagging-Date: ' + str(datetime.datetime.now()) + '\n')
+        with open(bagit_path, "w") as f:
+            f.write("Bag-Software-Agent: clowder.ncsa.illinois.edu" + "\n")
+            f.write("Bagging-Date: " + str(datetime.datetime.now()) + "\n")
 
-        with open(bag_info_path, 'w') as f:
-            f.write('BagIt-Version: 0.97' + '\n')
-            f.write('Tag-File-Character-Encoding: UTF-8' + '\n')
+        with open(bag_info_path, "w") as f:
+            f.write("BagIt-Version: 0.97" + "\n")
+            f.write("Tag-File-Character-Encoding: UTF-8" + "\n")
 
         file_count = 0
 
@@ -393,15 +394,19 @@ async def download_dataset(
                 file_name = "/" + hierarchy + file_name
             content = fs.get_object(settings.MINIO_BUCKET_NAME, str(file.id))
             current_file_path = os.path.join(current_temp_dir, file_name)
-            f1 = open(current_file_path, 'wb')
+            f1 = open(current_file_path, "wb")
             f1.write(content.data)
             current_file_size = os.path.getsize(current_file_path)
             bag_size += current_file_size
             file_md5_hash = hashlib.md5(content.data).hexdigest()
-            with open(manifest_path, 'a') as mpf:
-                mpf.write(file_md5_hash + ' ' + file_name + '\n')
+            with open(manifest_path, "a") as mpf:
+                mpf.write(file_md5_hash + " " + file_name + "\n")
             f1.close()
-            crate.add_file(current_file_path, dest_path="data/"+file_name, properties={'name':file_name})
+            crate.add_file(
+                current_file_path,
+                dest_path="data/" + file_name,
+                properties={"name": file_name},
+            )
             content.close()
             content.release_conn()
 
@@ -411,41 +416,59 @@ async def download_dataset(
             async for md in db["metadata"].find(query):
                 metadata.append(md)
             if len(metadata) > 0:
-                metadata_filename = file_name + '_metadata.json'
-                metadata_filename_temp_path = os.path.join(current_temp_dir, metadata_filename)
+                metadata_filename = file_name + "_metadata.json"
+                metadata_filename_temp_path = os.path.join(
+                    current_temp_dir, metadata_filename
+                )
                 metadata_content = json_util.dumps(metadata)
-                with open(metadata_filename_temp_path, 'w') as f:
+                with open(metadata_filename_temp_path, "w") as f:
                     f.write(metadata_content)
-                crate.add_file(metadata_filename_temp_path, dest_path="metadata/"+metadata_filename, properties={'name':metadata_filename})
+                crate.add_file(
+                    metadata_filename_temp_path,
+                    dest_path="metadata/" + metadata_filename,
+                    properties={"name": metadata_filename},
+                )
 
-        dataset_name = dataset['name']
+        dataset_name = dataset["name"]
 
-        bag_size_kb = bag_size/1024
+        bag_size_kb = bag_size / 1024
 
-        with open(bagit_path, 'a') as f:
-            f.write('Bag-Size: ' + str(bag_size_kb) + ' kB' + '\n')
-            f.write('Payload-Oxum: ' + str(bag_size) + '.' + str(file_count)+ '\n')
-            f.write('Internal-Sender-Identifier: ' + dataset_id + '\n')
-            f.write('Internal-Sender-Description: ' + dataset['description'] + '\n')
-            f.write('Contact-Name: ' + user_full_name + '\n')
-            f.write('Contact-Email: ' + user.email + '\n')
+        with open(bagit_path, "a") as f:
+            f.write("Bag-Size: " + str(bag_size_kb) + " kB" + "\n")
+            f.write("Payload-Oxum: " + str(bag_size) + "." + str(file_count) + "\n")
+            f.write("Internal-Sender-Identifier: " + dataset_id + "\n")
+            f.write("Internal-Sender-Description: " + dataset["description"] + "\n")
+            f.write("Contact-Name: " + user_full_name + "\n")
+            f.write("Contact-Email: " + user.email + "\n")
 
-        crate.add_file(manifest_path, dest_path='manifest-md5.txt', properties={'name': 'manifest-md5.txt'})
-        crate.add_file(bag_info_path, dest_path='bag-info.txt', properties={'name': 'bag-info.txt'})
-        crate.add_file(bagit_path, dest_path='bagit.txt', properties={'name': 'bagit.txt'})
+        crate.add_file(
+            manifest_path,
+            dest_path="manifest-md5.txt",
+            properties={"name": "manifest-md5.txt"},
+        )
+        crate.add_file(
+            bag_info_path, dest_path="bag-info.txt", properties={"name": "bag-info.txt"}
+        )
+        crate.add_file(
+            bagit_path, dest_path="bagit.txt", properties={"name": "bagit.txt"}
+        )
 
-        manifest_md5_hash = hashlib.md5(open(manifest_path,'rb').read()).hexdigest()
-        bagit_md5_hash = hashlib.md5(open(bagit_path,'rb').read()).hexdigest()
-        bag_info_md5_hash = hashlib.md5(open(bag_info_path,'rb').read()).hexdigest()
+        manifest_md5_hash = hashlib.md5(open(manifest_path, "rb").read()).hexdigest()
+        bagit_md5_hash = hashlib.md5(open(bagit_path, "rb").read()).hexdigest()
+        bag_info_md5_hash = hashlib.md5(open(bag_info_path, "rb").read()).hexdigest()
 
-        with open(tagmanifest_path, 'w') as f:
-            f.write(bagit_md5_hash + ' ' + 'bagit.txt' + '\n')
-            f.write(manifest_md5_hash + ' ' + 'manifest-md5.txt' + '\n')
-            f.write(bag_info_md5_hash + ' ' + 'bag-info.txt' + '\n')
+        with open(tagmanifest_path, "w") as f:
+            f.write(bagit_md5_hash + " " + "bagit.txt" + "\n")
+            f.write(manifest_md5_hash + " " + "manifest-md5.txt" + "\n")
+            f.write(bag_info_md5_hash + " " + "bag-info.txt" + "\n")
 
-        crate.add_file(tagmanifest_path, dest_path='tagmanifest-md5.txt', properties={'name': 'tagmanifest-md5.txt'})
+        crate.add_file(
+            tagmanifest_path,
+            dest_path="tagmanifest-md5.txt",
+            properties={"name": "tagmanifest-md5.txt"},
+        )
 
-        path_to_zip = os.path.join(current_temp_dir, dataset['name'] + '.zip')
+        path_to_zip = os.path.join(current_temp_dir, dataset["name"] + ".zip")
         crate.write_zip(path_to_zip)
         f = open(path_to_zip, "rb", buffering=0)
         zip_bytes = f.read()
@@ -454,7 +477,7 @@ async def download_dataset(
         try:
             shutil.rmtree(current_temp_dir)
         except Exception as e:
-            print('could not delete file')
+            print("could not delete file")
             print(e)
         return Response(
             stream.getvalue(),
