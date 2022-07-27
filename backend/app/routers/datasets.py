@@ -51,6 +51,7 @@ router = APIRouter()
 
 clowder_bucket = os.getenv("MINIO_BUCKET_NAME", "clowder")
 
+
 def _describe_zip_contents(file_list: list):
     """Traverse a list of zipfile entries and create a dictionary structure like so:
     {
