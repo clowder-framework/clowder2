@@ -222,19 +222,32 @@ async def get_dataset_files(
     dataset_id: str,
     folder_id: Optional[str] = None,
     db: MongoClient = Depends(dependencies.get_db),
+    skip: int = 0,
+    limit: int = 2,
 ):
     files = []
-    if folder_id is None:
-        async for f in db["files"].find(
-            {"dataset_id": ObjectId(dataset_id), "folder_id": None}
+    if folder_id is not None:
+        for f in (
+            await db["files"]
+            .find({
+                "dataset_id": ObjectId(dataset_id),
+                "folder_id": ObjectId(folder_id),
+            })
+            .skip(skip)
+            .limit(limit)
+            .to_list(length=limit)
         ):
             files.append(FileOut.from_mongo(f))
     else:
-        async for f in db["files"].find(
-            {
+        for f in (
+            await db["files"]
+            .find({
                 "dataset_id": ObjectId(dataset_id),
-                "folder_id": ObjectId(folder_id),
-            }
+                "folder_id": None,
+            })
+            .skip(skip)
+            .limit(limit)
+            .to_list(length=limit)
         ):
             files.append(FileOut.from_mongo(f))
     return files
@@ -387,7 +400,7 @@ async def save_file(
                     status_code=404, detail=f"Folder {folder_id} not found"
                 )
 
-        await add_file_entry(fileDB, user, db, fs, file_stream=file.file)
+        await add_file_entry(fileDB, user, db, fs, file.file, content_type=file.content_type)
 
         return fileDB
     else:
@@ -455,7 +468,7 @@ async def create_dataset_from_zip(
                             name=filename, creator=user, dataset_id=dataset_id
                         )
                     with open(extracted, "rb") as file_reader:
-                        await add_file_entry(fileDB, user, db, fs, file_obj=file_reader)
+                        await add_file_entry(fileDB, user, db, fs, file_reader)
                     if os.path.isfile(extracted):
                         os.remove(extracted)
 

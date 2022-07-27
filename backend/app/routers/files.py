@@ -1,6 +1,7 @@
 import io
 import json
 import pika
+import mimetypes
 from datetime import datetime
 from typing import Optional, List, BinaryIO
 from bson import ObjectId
@@ -32,44 +33,31 @@ async def add_file_entry(
     user: UserOut,
     db: MongoClient,
     fs: Minio,
-    file_stream: Optional[BinaryIO] = None,
-    file_obj: Optional[io.BytesIO] = None,
+    file: Optional[io.BytesIO] = None,
+    content_type: Optional[str] = None,
 ):
     """Insert FileDB object into MongoDB (makes Clowder ID), then Minio (makes version ID), then update MongoDB with
     the version ID from Minio.
 
     Arguments:
         file_db: FileDB object controlling dataset and folder destination
-        file_stream: Use this when passing directly from a request e.g. UploadFile.file
-        file_obj: Use this when passing a file bytestream e.g. open(file, 'rb')
+        file: bytes to upload
     """
     new_file = await db["files"].insert_one(file_db.to_mongo())
     new_file_id = new_file.inserted_id
+    if content_type is None:
+        content_type = mimetypes.guess_type(file_db.name)
+    content_type = content_type[0] if len(content_type) > 1 else content_type
 
     # Use unique ID as key for Minio and get initial version ID
-    version_id = None
-    if file_stream:
-        content_type = file_stream.content_type
-        while content := file_stream:  # async read chunk
-            response = fs.put_object(
-                settings.MINIO_BUCKET_NAME,
-                str(new_file_id),
-                io.BytesIO(content),
-                length=-1,
-                part_size=settings.MINIO_UPLOAD_CHUNK_SIZE,
-            )  # async write chunk to minio
-            version_id = response.version_id
-    else:
-        content_type = mimetypes.guess_type(file_db.name)
-        response = fs.put_object(
-            settings.MINIO_BUCKET_NAME,
-            str(new_file_id),
-            file_obj,
-            length=-1,
-            part_size=settings.MINIO_UPLOAD_CHUNK_SIZE,
-        )  # async write chunk to minio
-        version_id = response.version_id
-    content_type = content_type[0] if len(content_type) > 1 else content_type
+    response = fs.put_object(
+        settings.MINIO_BUCKET_NAME,
+        str(new_file_id),
+        file,
+        length=-1,
+        part_size=settings.MINIO_UPLOAD_CHUNK_SIZE,
+    )  # async write chunk to minio
+    version_id = response.version_id
     bytes = len(fs.get_object(settings.MINIO_BUCKET_NAME, str(new_file_id)).data)
     if version_id is None:
         # TODO: This occurs in testing when minio is not running
