@@ -229,10 +229,12 @@ async def get_dataset_files(
     if folder_id is not None:
         for f in (
             await db["files"]
-            .find({
-                "dataset_id": ObjectId(dataset_id),
-                "folder_id": ObjectId(folder_id),
-            })
+            .find(
+                {
+                    "dataset_id": ObjectId(dataset_id),
+                    "folder_id": ObjectId(folder_id),
+                }
+            )
             .skip(skip)
             .limit(limit)
             .to_list(length=limit)
@@ -241,10 +243,12 @@ async def get_dataset_files(
     else:
         for f in (
             await db["files"]
-            .find({
-                "dataset_id": ObjectId(dataset_id),
-                "folder_id": None,
-            })
+            .find(
+                {
+                    "dataset_id": ObjectId(dataset_id),
+                    "folder_id": None,
+                }
+            )
             .skip(skip)
             .limit(limit)
             .to_list(length=limit)
@@ -400,7 +404,9 @@ async def save_file(
                     status_code=404, detail=f"Folder {folder_id} not found"
                 )
 
-        await add_file_entry(fileDB, user, db, fs, file.file, content_type=file.content_type)
+        await add_file_entry(
+            fileDB, user, db, fs, file.file, content_type=file.content_type
+        )
 
         return fileDB
     else:
