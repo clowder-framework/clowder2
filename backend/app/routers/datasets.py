@@ -416,7 +416,7 @@ async def download_dataset(
                 metadata_content = json_util.dumps(metadata)
                 with open(metadata_filename_temp_path, 'w') as f:
                     f.write(metadata_content)
-                crate.add_file(metadata_filename_temp_path, dest_path="data/"+metadata_filename, properties={'name':metadata_filename})
+                crate.add_file(metadata_filename_temp_path, dest_path="metadata/"+metadata_filename, properties={'name':metadata_filename})
 
         dataset_name = dataset['name']
 
