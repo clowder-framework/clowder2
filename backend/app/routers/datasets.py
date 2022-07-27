@@ -51,16 +51,8 @@ router = APIRouter()
 
 clowder_bucket = os.getenv("MINIO_BUCKET_NAME", "clowder")
 
-
-async def clean_out_tmp():
-    temp_dir = os.path.join(os.getcwd(), "tmp")
-    files_inside = os.listdir()
-
-
-async def get_folder_hierarchy(
 def _describe_zip_contents(file_list: list):
     """Traverse a list of zipfile entries and create a dictionary structure like so:
-
     {
         ""__CLOWDER_FILE_LIST__"": ['list', 'of', 'root', 'files'],
         "folder_1": {
@@ -134,14 +126,12 @@ async def _create_folder_structure(
     parent_folder_id: Optional[str] = None,
 ):
     """Recursively create folders encountered in folder_path until the target folder is created.
-
     Arguments:
         - dataset_id: destination dataset
         - contents: list of contents in folder (see _describe_zip_contents() for structure)
         - folder_path: full path to folder from dataset root (e.g. folder/subfolder/subfolder2)
         - folder_lookup: mapping from folder_path to folder_id for reference later
         - parent_folder_id: destination folder
-
     """
     for k, v in contents.items():
         if k == "__CLOWDER_FILE_LIST__":
@@ -166,6 +156,20 @@ async def _create_folder_structure(
             )
 
     return folder_lookup
+
+
+async def _get_folder_hierarchy(
+    folder_id: str,
+    hierarchy: str,
+    db: MongoClient,
+):
+    """Generate a string of nested path to folder for use in zip file creation."""
+    found = await db["folders"].find_one({"_id": ObjectId(folder_id)})
+    folder = FolderOut.from_mongo(found)
+    hierarchy = folder.name + "/" + hierarchy
+    if folder.parent_folder is not None:
+        hierarchy = await _get_folder_hierarchy(folder.parent_folder, hierarchy, db)
+    return hierarchy
 
 
 async def _get_folder_hierarchy(
@@ -536,11 +540,14 @@ async def download_dataset(
             file_count += 1
             file = FileOut.from_mongo(f)
             file_name = file.name
-
+            hierarchy = None
             if file.folder_id is not None:
                 hierarchy = await _get_folder_hierarchy(file.folder_id, "", db)
-                file_name = "/" + hierarchy + file_name
+                file_name = hierarchy + file_name
             content = fs.get_object(settings.MINIO_BUCKET_NAME, str(file.id))
+            if hierarchy:
+                path_to_hierarchy = os.path.join(current_temp_dir, hierarchy)
+                os.mkdir(path_to_hierarchy)
             current_file_path = os.path.join(current_temp_dir, file_name)
             f1 = open(current_file_path, "wb")
             f1.write(content.data)
