@@ -1,0 +1,15 @@
+{
+    "name" : "DOI",
+    "description" : "Digital object identifier",
+    "context" : {
+        "doi" : "https://schema.org/DigitalDocument"
+    },
+    "fields" : [
+        {
+            "name" : "doi",
+            "type" : "str",
+            "list" : false,
+            "required" : true
+        }
+    ]
+}

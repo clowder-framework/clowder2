@@ -1,4 +1,4 @@
-import React, {useEffect} from "react";
+import React, {useEffect, useState} from "react";
 import {Box, Typography} from "@mui/material";
 import metadataConfig from "../../metadata.config";
 import {useSelector, useDispatch} from "react-redux";
@@ -13,6 +13,10 @@ type MetadataType = {
 	resourceId:string|undefined,
 }
 
+/*
+This is the interface displayed already created metadata and allow eidts
+Uses only the list of metadata
+*/
 export const DisplayMetadata = (props: MetadataType) => {
 
 	const {updateMetadata, deleteMetadata, resourceType, resourceId} = props;
@@ -58,6 +62,7 @@ export const DisplayMetadata = (props: MetadataType) => {
 													deleteMetadata: deleteMetadata,
 													contents: metadata.contents ?? null,
 													metadataId: metadata.id ?? null,
+													initialReadOnly: true
 												}
 											);
 										})()
