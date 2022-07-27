@@ -35,21 +35,23 @@ export const MetadataSelect = (props) => {
 	};
 
 	return (
-		<FormControl fullWidth>
-			<InputLabel>{widgetName}</InputLabel>
-			<ClowderMetadataSelect value={readOnly && contents ? contents.unit: unit}
-								   label="Unit" onChange={handleChange}
-								   sx={{background:"#ffffff"}}
-								   disabled={readOnly}
-			>
-				{
-					options.map((option) => {
-						return <MenuItem value={option}>{option}</MenuItem>
-					})
-				}
-			</ClowderMetadataSelect>
-			<ClowderMetadataFormHelperText>{inputChanged? "* You have changed this field. Remember to save/ update.": ""}
-			</ClowderMetadataFormHelperText>
-		</FormControl>
+		<div style={{margin: "1em auto"}}>
+			<FormControl fullWidth>
+				<InputLabel>{widgetName}</InputLabel>
+				<ClowderMetadataSelect value={readOnly && contents ? contents.unit: unit}
+									   label="Unit" onChange={handleChange}
+									   sx={{background:"#ffffff"}}
+									   disabled={readOnly}
+				>
+					{
+						options.map((option) => {
+							return <MenuItem value={option}>{option}</MenuItem>
+						})
+					}
+				</ClowderMetadataSelect>
+				<ClowderMetadataFormHelperText>{inputChanged? "* You have changed this field. Remember to save/ update.": ""}
+				</ClowderMetadataFormHelperText>
+			</FormControl>
+		</div>
 	);
 }

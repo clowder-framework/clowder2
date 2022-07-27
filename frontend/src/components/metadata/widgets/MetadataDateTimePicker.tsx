@@ -35,17 +35,19 @@ export const MetadataDateTimePicker = (props) => {
 	};
 
 	return (
-		<LocalizationProvider dateAdapter={DateAdapter}>
-			<DateTimePicker
-				label={widgetName}
-				value={readOnly && contents ? contents.time: value}
-				onChange={handleChange}
-				renderInput={(params) =>
-					<ClowderMetadataTextField {...params} fullWidth
-											  helperText={inputChanged? "* You have changed this field. " +
-												  "Remember to save/ update.": ""}/>}
-				disabled={readOnly}
-			/>
-		</LocalizationProvider>
+		<div style={{margin:"1.1em auto"}}>
+			<LocalizationProvider dateAdapter={DateAdapter}>
+				<DateTimePicker
+					label={widgetName}
+					value={readOnly && contents ? contents.time: value}
+					onChange={handleChange}
+					renderInput={(params) =>
+						<ClowderMetadataTextField {...params} fullWidth
+												  helperText={inputChanged? "* You have changed this field. " +
+													  "Remember to save/ update.": ""}/>}
+					disabled={readOnly}
+				/>
+			</LocalizationProvider>
+		</div>
 	);
 }

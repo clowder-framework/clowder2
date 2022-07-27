@@ -29,10 +29,8 @@ export const MetadataDeleteButton = (props: MetadataDeleteButtonType) => {
 							 setConfirmationOpen(false);
 						 }}
 			/>
-			<Box sx={{textAlign: "right"}}>
-				<Button variant="text" onClick={() => {setConfirmationOpen(true);}}>
-							Delete</Button>
-			</Box>
+			<Button variant="text" onClick={() => {setConfirmationOpen(true);}} sx={{float:"right"}}>
+						Delete</Button>
 		</>
 	);
 }
