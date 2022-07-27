@@ -30,28 +30,27 @@ export const CreateMetadata = (props: MetadataType) => {
 		<>
 			{
 				metadataDefinitionList.map((metadata) => {
-					if (metadataConfig[metadata.name]) {
-						return (
-							<Box className="inputGroup">
-								<Typography variant="h6">{metadata.name}</Typography>
-								<Typography variant="subtitle2">{metadata.description}</Typography>
-								{
-									metadata.fields.map(field => {
-										return React.cloneElement(
-											metadataConfig[field.widgetType ?? "NA"],
-											{
-												widgetName: metadata.name,
-												fieldName: field.name,
-												options: field.options ?? [],
-												setMetadata: setMetadata,
-												initialReadOnly: false,
-											}
-										)
-									})
-								}
-							</Box>
-						);
-					}
+					return (
+						<Box className="inputGroup">
+							<Typography variant="h6">{metadata.name}</Typography>
+							<Typography variant="subtitle2">{metadata.description}</Typography>
+							{
+								metadata.fields.map(field => {
+									return React.cloneElement(
+										// if nothing match fall back to default widget
+										metadataConfig[field.widgetType ?? "NA"] ?? metadataConfig["NA"],
+										{
+											widgetName: metadata.name,
+											fieldName: field.name,
+											options: field.options ?? [],
+											setMetadata: setMetadata,
+											initialReadOnly: false,
+										}
+									)
+								})
+							}
+						</Box>
+					);
 				})
 			}
 		</>

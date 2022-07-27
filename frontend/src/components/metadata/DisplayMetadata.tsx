@@ -54,7 +54,7 @@ export const DisplayMetadata = (props: MetadataType) => {
 
 					return metadataDefinitionList.map((metadataDef) => {
 						return metadataList.map((metadata) => {
-							if (metadataDef.name === metadata.definition && metadataConfig[metadata.definition]) {
+							if (metadataDef.name === metadata.definition) {
 								return (
 									<Box className="inputGroup">
 										<Typography variant="h6">{metadata.definition}</Typography>
@@ -63,7 +63,7 @@ export const DisplayMetadata = (props: MetadataType) => {
 											// construct metadata using its definition
 											metadataDef.fields.map(field => {
 												return React.cloneElement(
-													metadataConfig[field.widgetType ?? "NA"],
+													metadataConfig[field.widgetType ?? "NA"] ?? metadataConfig["NA"],
 													{
 														widgetName: metadataDef.name,
 														fieldName: field.name,

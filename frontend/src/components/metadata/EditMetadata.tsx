@@ -63,7 +63,7 @@ export const EditMetadata = (props: MetadataType) => {
 
 					return metadataDefinitionList.map((metadataDef) => {
 						// filter and only show those do not already created
-						if (!metadataNameList.includes(metadataDef.name) && metadataConfig[metadataDef.name]) {
+						if (!metadataNameList.includes(metadataDef.name)) {
 							return (
 								<Box className="inputGroup">
 									<Typography variant="h6">{metadataDef.name}</Typography>
@@ -73,7 +73,7 @@ export const EditMetadata = (props: MetadataType) => {
 										// construct metadata using its definition
 										metadataDef.fields.map(field => {
 											return React.cloneElement(
-												metadataConfig[field.widgetType ?? "NA"],
+												metadataConfig[field.widgetType ?? "NA"] ?? metadataConfig["NA"],
 												{
 													widgetName: metadataDef.name,
 													fieldName: field.name,
@@ -89,7 +89,7 @@ export const EditMetadata = (props: MetadataType) => {
 						}
 						else{
 							return metadataList.map((metadata) => {
-								if (metadataDef.name === metadata.definition && metadataConfig[metadata.definition]) {
+								if (metadataDef.name === metadata.definition) {
 									return (
 										<Box className="inputGroup">
 											<Typography variant="h6">{metadata.definition}</Typography>
@@ -99,7 +99,7 @@ export const EditMetadata = (props: MetadataType) => {
 												// construct metadata using its definition
 												metadataDef.fields.map(field => {
 													return React.cloneElement(
-														metadataConfig[field.widgetType ?? "NA"],
+														metadataConfig[field.widgetType ?? "NA"] ?? metadataConfig["NA"],
 														{
 															widgetName: metadataDef.name,
 															fieldName: field.name,
