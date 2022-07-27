@@ -1,5 +1,5 @@
 import React, {useState} from "react";
-import {MetadataButtonGroup} from "../MetadataButtonGroup";
+import {MetadataDeleteButton} from "../widgets/MetadataDeleteButton";
 import {ClowderMetadataTextField} from "../../styledComponents/ClowderMetadataTextField";
 
 export const LatLon = (props) => {
@@ -74,19 +74,19 @@ export const LatLon = (props) => {
 									  disabled={readOnly}
 									  helperText={inputChanged? "* You have changed this field. Remember to save/ update.": ""}
 			/>
-			<MetadataButtonGroup readOnly={readOnly}
-								 setReadOnly={setReadOnly}
-								 metadataId={metadataId}
-								 setMetadata={setMetadata}
-								 updateMetadata={updateMetadata}
-								 deleteMetadata={deleteMetadata}
-								 setInputChanged={setInputChanged}
-								 resourceId={resourceId}
-								 contents={{
+			<MetadataDeleteButton readOnly={readOnly}
+								  setReadOnly={setReadOnly}
+								  metadataId={metadataId}
+								  setMetadata={setMetadata}
+								  updateMetadata={updateMetadata}
+								  deleteMetadata={deleteMetadata}
+								  setInputChanged={setInputChanged}
+								  resourceId={resourceId}
+								  contents={{
 									 "latitude":lat,
 									 "longitude":lon
 								 }}
-								 widgetName={widgetName}
+								  widgetName={widgetName}
 			/>
 		</>
 	)

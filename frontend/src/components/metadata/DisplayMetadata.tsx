@@ -1,10 +1,11 @@
-import React, {useEffect, useState} from "react";
+import React, {useEffect} from "react";
 import {Box, Typography} from "@mui/material";
 import metadataConfig from "../../metadata.config";
 import {useSelector, useDispatch} from "react-redux";
 import {RootState} from "../../types/data";
 import {fetchDatasetMetadata, fetchFileMetadata, fetchMetadataDefinitions} from "../../actions/metadata";
 import {Agent} from "./Agent";
+import {MetadataDeleteButton} from "./widgets/MetadataDeleteButton";
 
 type MetadataType = {
 	updateMetadata: any,
@@ -68,8 +69,6 @@ export const DisplayMetadata = (props: MetadataType) => {
 														widgetName: metadataDef.name,
 														fieldName: field.name,
 														options: field.options ?? [],
-														updateMetadata: updateMetadata,
-														deleteMetadata: deleteMetadata,
 														initialReadOnly: true,
 														resourceId: resourceId,
 														contents: metadata.contents ?? null,
@@ -78,6 +77,11 @@ export const DisplayMetadata = (props: MetadataType) => {
 												)
 											})
 										}
+										<MetadataDeleteButton metadataId={metadata.id ?? null}
+															  deleteMetadata={deleteMetadata}
+															  resourceId={resourceId}
+															  widgetName={metadataDef.name}
+										/>
 										<Agent created={metadata.created} agent={metadata.agent} />
 									</Box>
 								);

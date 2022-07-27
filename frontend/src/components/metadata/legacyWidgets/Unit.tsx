@@ -1,7 +1,7 @@
 import * as React from "react";
 import {InputLabel, MenuItem, FormControl} from "@mui/material";
 import {useState} from "react";
-import {MetadataButtonGroup} from "../MetadataButtonGroup";
+import {MetadataDeleteButton} from "../widgets/MetadataDeleteButton";
 import {ClowderMetadataSelect} from "../../styledComponents/ClowderMetadataSelect";
 import {ClowderMetadataFormHelperText} from "../../styledComponents/ClowderMetadataFormHelperText";
 
@@ -54,18 +54,18 @@ export const Unit = (props) => {
 					</ClowderMetadataFormHelperText>
 				</FormControl>
 			</div>
-			<MetadataButtonGroup readOnly={readOnly}
-								 setReadOnly={setReadOnly}
-								 metadataId={metadataId}
-								 setMetadata={setMetadata}
-								 updateMetadata={updateMetadata}
-								 deleteMetadata={deleteMetadata}
-								 resourceId={resourceId}
-								 contents={{
+			<MetadataDeleteButton readOnly={readOnly}
+								  setReadOnly={setReadOnly}
+								  metadataId={metadataId}
+								  setMetadata={setMetadata}
+								  updateMetadata={updateMetadata}
+								  deleteMetadata={deleteMetadata}
+								  resourceId={resourceId}
+								  contents={{
 									 "unit":unit
 								 }}
-								 setInputChanged={setInputChanged}
-								 widgetName={widgetName}
+								  setInputChanged={setInputChanged}
+								  widgetName={widgetName}
 			/>
 		</>
 	);

@@ -1,7 +1,7 @@
 import React, {useState} from "react";
 import {LocalizationProvider, DateTimePicker} from "@mui/lab";
 import DateAdapter from "@mui/lab/AdapterDateFns";
-import {MetadataButtonGroup} from "../MetadataButtonGroup";
+import {MetadataDeleteButton} from "../widgets/MetadataDeleteButton";
 import {ClowderMetadataTextField} from "../../styledComponents/ClowderMetadataTextField";
 
 export const Time = (props) => {
@@ -51,18 +51,18 @@ export const Time = (props) => {
 					/>
 				</LocalizationProvider>
 			</div>
-			<MetadataButtonGroup readOnly={readOnly}
-								 setReadOnly={setReadOnly}
-								 metadataId={metadataId}
-								 setMetadata={setMetadata}
-								 updateMetadata={updateMetadata}
-								 deleteMetadata={deleteMetadata}
-								 setInputChanged={setInputChanged}
-								 resourceId={resourceId}
-								 contents={{
+			<MetadataDeleteButton readOnly={readOnly}
+								  setReadOnly={setReadOnly}
+								  metadataId={metadataId}
+								  setMetadata={setMetadata}
+								  updateMetadata={updateMetadata}
+								  deleteMetadata={deleteMetadata}
+								  setInputChanged={setInputChanged}
+								  resourceId={resourceId}
+								  contents={{
 									 "time": value
 								 }}
-								 widgetName={widgetName}/>
+								  widgetName={widgetName}/>
 		</>
 	);
 }

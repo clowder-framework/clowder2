@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from "react";
-import {MetadataButtonGroup} from "../MetadataButtonGroup";
+import {MetadataDeleteButton} from "../widgets/MetadataDeleteButton";
 import { ClowderMetadataTextField } from "../../styledComponents/ClowderMetadataTextField";
 
 export const DOI = (props) => {
@@ -56,16 +56,16 @@ export const DOI = (props) => {
 					   helperText={inputChanged? "* You have changed this field. Remember to save/ update.": ""}
 					   disabled={readOnly}
 			/>
-			<MetadataButtonGroup readOnly={readOnly}
-								 setReadOnly={setReadOnly}
-								 metadataId={metadataId}
-								 setMetadata={setMetadata}
-								 updateMetadata={updateMetadata}
-								 deleteMetadata={deleteMetadata}
-								 setInputChanged={setInputChanged}
-								 resourceId={resourceId}
-								 contents={{"doi":DOI}}
-								 widgetName={widgetName}
+			<MetadataDeleteButton readOnly={readOnly}
+								  setReadOnly={setReadOnly}
+								  metadataId={metadataId}
+								  setMetadata={setMetadata}
+								  updateMetadata={updateMetadata}
+								  deleteMetadata={deleteMetadata}
+								  setInputChanged={setInputChanged}
+								  resourceId={resourceId}
+								  contents={{"doi":DOI}}
+								  widgetName={widgetName}
 			/>
 		</>
 
