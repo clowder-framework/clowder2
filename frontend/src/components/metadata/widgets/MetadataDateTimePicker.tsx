@@ -2,10 +2,11 @@ import React, {useState} from "react";
 import {LocalizationProvider, DateTimePicker} from "@mui/lab";
 import DateAdapter from "@mui/lab/AdapterDateFns";
 import {ClowderMetadataTextField} from "../../styledComponents/ClowderMetadataTextField";
+import {MetadataEditButton} from "./MetadataEditButton";
 
 
 export const MetadataDateTimePicker = (props) => {
-	const {widgetName, fieldName, metadataId, contents, setMetadata, initialReadOnly} = props;
+	const {widgetName, fieldName, metadataId, contents, setMetadata, initialReadOnly, resourceId, updateMetadata} = props;
 	const [value, setValue] = useState(contents && contents.time? contents.time: new Date());
 
 	const [readOnly, setReadOnly] = useState(initialReadOnly);
@@ -48,6 +49,10 @@ export const MetadataDateTimePicker = (props) => {
 					disabled={readOnly}
 				/>
 			</LocalizationProvider>
+			<MetadataEditButton readOnly={readOnly} setReadOnly={setReadOnly} updateMetadata={updateMetadata}
+								contents={contents} metadataId={metadataId} resourceId={resourceId}
+								widgetName={widgetName} setInputChanged={setInputChanged}
+								setMetadata={setMetadata}/>
 		</div>
 	);
 }

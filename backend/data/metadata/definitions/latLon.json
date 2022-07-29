@@ -8,16 +8,20 @@
     "fields" : [
         {
             "name" : "longitude",
-            "type" : "float",
             "list" : false,
             "widgetType": "TextField",
+            "config": {
+                "type" : "float"
+            },
             "required" : true
         },
         {
             "name" : "latitude",
-            "type" : "float",
             "list" : false,
             "widgetType": "TextField",
+            "config": {
+                "type" : "float"
+            },
             "required" : true
         }
     ]
