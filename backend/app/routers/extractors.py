@@ -40,7 +40,8 @@ async def get_extractors(
 ):
     extractors = []
     for doc in (
-        await db["datasets"]
+        await db["extractors"]
+        .find()
         .skip(skip)
         .limit(limit)
         .to_list(length=limit)
