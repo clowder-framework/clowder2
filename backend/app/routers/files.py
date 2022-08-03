@@ -239,10 +239,13 @@ async def get_file_extract(
     rabbitmq_client: BlockingChannel = Depends(dependencies.get_rabbitmq),
 ):
     msg = {"message": "testing", "file_id": file_id}
+
+    rabbitmq_client.queue_bind(exchange='extractors', queue='ncsa.wordcount', routing_key='extractors.ncsa.wordcount')
     rabbitmq_client.basic_publish(
-        "",
-        "standard_key",
-        json.dumps(msg, ensure_ascii=False),
-        pika.BasicProperties(content_type="application/json", delivery_mode=1),
+        exchange="extractors",
+        routing_key="extractors.ncsa.wordcount",
+        body=json.dumps(msg, ensure_ascii=False),
+        properties=pika.BasicProperties(content_type="application/json", delivery_mode=1),
+
     )
     return msg
