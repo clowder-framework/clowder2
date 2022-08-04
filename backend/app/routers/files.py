@@ -250,7 +250,7 @@ async def get_file_extract(
             rabbitmq_client.queue_bind(exchange='extractors', queue=current_queue, routing_key=current_routing_key)
             rabbitmq_client.basic_publish(
                 exchange="extractors",
-                routing_key="extractors.ncsa.wordcount",
+                routing_key=current_routing_key,
                 body=json.dumps(msg, ensure_ascii=False),
                 properties=pika.BasicProperties(content_type="application/json", delivery_mode=1),
 
