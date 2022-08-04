@@ -12,6 +12,7 @@ from fastapi import (
     File,
     Form,
     UploadFile,
+    Request,
 )
 from fastapi.responses import StreamingResponse
 from minio import Minio
@@ -236,16 +237,26 @@ async def get_file_versions(
 @router.post("/{file_id}/extract")
 async def get_file_extract(
     file_id: str,
+    info: Request,
     rabbitmq_client: BlockingChannel = Depends(dependencies.get_rabbitmq),
+    db: MongoClient = Depends(dependencies.get_db())
 ):
-    msg = {"message": "testing", "file_id": file_id}
+    if (file := await db["files"].find_one({"_id": ObjectId(file_id)})) is not None:
+        req_info = await info.json()
+        if 'extractor' in req_info:
+            msg = {"message": "testing", "file_id": file_id}
+            current_queue = req_info['extractor']
+            current_routing_key = 'extractors.' + current_queue
+            rabbitmq_client.queue_bind(exchange='extractors', queue=current_queue, routing_key=current_routing_key)
+            rabbitmq_client.basic_publish(
+                exchange="extractors",
+                routing_key="extractors.ncsa.wordcount",
+                body=json.dumps(msg, ensure_ascii=False),
+                properties=pika.BasicProperties(content_type="application/json", delivery_mode=1),
 
-    rabbitmq_client.queue_bind(exchange='extractors', queue='ncsa.wordcount', routing_key='extractors.ncsa.wordcount')
-    rabbitmq_client.basic_publish(
-        exchange="extractors",
-        routing_key="extractors.ncsa.wordcount",
-        body=json.dumps(msg, ensure_ascii=False),
-        properties=pika.BasicProperties(content_type="application/json", delivery_mode=1),
-
-    )
-    return msg
+            )
+            return msg
+        else:
+            raise HTTPException(status_code=404, detail=f"No extractor submitted")
+    else:
+        raise HTTPException(status_code=404, detail=f"File {file_id} not found")
