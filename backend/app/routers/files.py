@@ -246,6 +246,8 @@ async def get_file_extract(
         if 'extractor' in req_info:
             msg = {"message": "testing", "file_id": file_id}
             current_queue = req_info['extractor']
+            if 'parameters' in req_info:
+                current_parameters = req_info['parameters']
             current_routing_key = 'extractors.' + current_queue
             rabbitmq_client.queue_bind(exchange='extractors', queue=current_queue, routing_key=current_routing_key)
             rabbitmq_client.basic_publish(
