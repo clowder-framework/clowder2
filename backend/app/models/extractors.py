@@ -1,6 +1,6 @@
 from datetime import datetime
 from pydantic import Field
-from typing import Optional, List
+from typing import Optional, List, Union
 from app.models.mongomodel import MongoModel
 
 
@@ -20,15 +20,17 @@ class ExtractorIdentifier(MongoModel):
     author: str
     contributors: List[str] = []
     # contexts: str
-    repository: Repository
+    # TODO contexts is jsvalue in clowder1
+    repository: Union[Repository, None] = None
     external_services: List[str]
-    libraries: List[str]
+    libraries: List[str] = []
     bibtex: List[str]
     maturity: str = "Development"
     default_labels: List[str] = []
-    process: ExtractionProcessTriggers = ExtractionProcessTriggers()
-    categories: List[str]
+    process: Union[ExtractionProcessTriggers, None] = None
+    categories: List[str] = []
     # parameters: str
+    # TODO parameters is jsvalue is clowder1
 
 
 

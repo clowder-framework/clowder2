@@ -238,13 +238,27 @@ async def get_file_versions(
 async def get_file_extract(
     file_id: str,
     info: Request,
+    db: MongoClient = Depends(dependencies.get_db),
     rabbitmq_client: BlockingChannel = Depends(dependencies.get_rabbitmq),
-    db: MongoClient = Depends(dependencies.get_db())
 ):
     if (file := await db["files"].find_one({"_id": ObjectId(file_id)})) is not None:
+        resource = {}
+        resource['filename'] = file['name']
+        resource['id'] = file_id
+        resource['datasetId'] = str(file['dataset_id'])
+        resource['host'] = 'http://127.0.0.1:8000'
+        resource['secretKey'] = 'secretKey'
+        resource['fileSize'] = file['bytes']
+        resource['flags'] = ""
+
         req_info = await info.json()
         if 'extractor' in req_info:
             msg = {"message": "testing", "file_id": file_id}
+            body = {}
+            body['host'] = 'http://127.0.0.1:8000'
+            body['secretKey'] = 'secretKey'
+            body['retry_count'] = 0
+            body['resource'] = resource
             current_queue = req_info['extractor']
             if 'parameters' in req_info:
                 current_parameters = req_info['parameters']
@@ -253,7 +267,7 @@ async def get_file_extract(
             rabbitmq_client.basic_publish(
                 exchange="extractors",
                 routing_key=current_routing_key,
-                body=json.dumps(msg, ensure_ascii=False),
+                body=json.dumps(body, ensure_ascii=False),
                 properties=pika.BasicProperties(content_type="application/json", delivery_mode=1),
 
             )
