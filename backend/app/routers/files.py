@@ -243,13 +243,7 @@ async def get_file_extract(
 ):
     if (file := await db["files"].find_one({"_id": ObjectId(file_id)})) is not None:
         resource = {}
-        resource['filename'] = file['name']
-        resource['id'] = file_id
-        resource['datasetId'] = str(file['dataset_id'])
-        resource['host'] = 'http://127.0.0.1:8000'
-        resource['secretKey'] = 'secretKey'
-        resource['fileSize'] = file['bytes']
-        resource['flags'] = ""
+
 
         req_info = await info.json()
         if 'extractor' in req_info:
@@ -258,7 +252,14 @@ async def get_file_extract(
             body['host'] = 'http://127.0.0.1:8000'
             body['secretKey'] = 'secretKey'
             body['retry_count'] = 0
-            body['resource'] = resource
+            body['filename'] = file['name']
+            body['id'] = file_id
+            body['datasetId'] = str(file['dataset_id'])
+            body['host'] = 'http://127.0.0.1:8000'
+            body['secretKey'] = 'secretKey'
+            body['fileSize'] = file['bytes']
+            body['resource_type'] = 'file'
+            body['flags'] = ""
             current_queue = req_info['extractor']
             if 'parameters' in req_info:
                 current_parameters = req_info['parameters']
