@@ -8,10 +8,6 @@ class Repository(MongoModel):
     repository_type: str = 'git'
     repository_url: str = ''
 
-class ExtractionProcessTriggers(MongoModel):
-    dataset: List[str] = []
-    file: List[str] = []
-    metadata: List[str] = []
 
 class ExtractorIdentifier(MongoModel):
     name: str
@@ -26,10 +22,9 @@ class ExtractorIdentifier(MongoModel):
     bibtex: List[str]
     maturity: str = "Development"
     default_labels: List[str] = []
-    process: Union[ExtractionProcessTriggers, None] = None
+    process: dict
     categories: List[str] = []
     parameters: List[dict] = []
-
 
 
 class ExtractorBase(ExtractorIdentifier):
@@ -42,7 +37,6 @@ class ExtractorIn(ExtractorBase):
 
 class ExtractorDB(ExtractorBase):
     pass
-
 
 
 class ExtractorOut(ExtractorDB):
