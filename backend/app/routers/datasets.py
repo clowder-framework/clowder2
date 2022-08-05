@@ -528,7 +528,6 @@ async def get_dataset_extract(
     rabbitmq_client: BlockingChannel = Depends(dependencies.get_rabbitmq),
 ):
     if (dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})) is not None:
-        resource = {}
         req_info = await info.json()
         if 'extractor' in req_info:
             msg = {"message": "testing", "dataseet_id": dataset_id}

@@ -242,9 +242,6 @@ async def get_file_extract(
     rabbitmq_client: BlockingChannel = Depends(dependencies.get_rabbitmq),
 ):
     if (file := await db["files"].find_one({"_id": ObjectId(file_id)})) is not None:
-        resource = {}
-
-
         req_info = await info.json()
         if 'extractor' in req_info:
             msg = {"message": "testing", "file_id": file_id}
