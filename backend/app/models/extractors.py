@@ -19,8 +19,7 @@ class ExtractorIdentifier(MongoModel):
     updated: datetime = Field(default_factory=datetime.utcnow)
     author: str
     contributors: List[str] = []
-    # contexts: str
-    # TODO contexts is jsvalue in clowder1
+    contexts: List[dict] = []
     repository: Union[Repository, None] = None
     external_services: List[str]
     libraries: List[str] = []
@@ -29,8 +28,7 @@ class ExtractorIdentifier(MongoModel):
     default_labels: List[str] = []
     process: Union[ExtractionProcessTriggers, None] = None
     categories: List[str] = []
-    # parameters: str
-    # TODO parameters is jsvalue is clowder1
+    parameters: List[dict] = []
 
 
 

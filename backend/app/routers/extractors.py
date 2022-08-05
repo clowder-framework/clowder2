@@ -1,7 +1,7 @@
 from typing import List
 import os
 from bson import ObjectId
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Depends, Request
 from pymongo import MongoClient
 import datetime
 from app import dependencies
@@ -30,6 +30,7 @@ async def save_extractor(
     found = await db["extractors"].find_one({"_id": new_extractor.inserted_id})
     extractor_out = ExtractorOut.from_mongo(found)
     return extractor_out
+
 
 @router.get("/{extractor_id}", response_model=ExtractorOut)
 async def get_extractor(extractor_id: str, db: MongoClient = Depends(dependencies.get_db)):
