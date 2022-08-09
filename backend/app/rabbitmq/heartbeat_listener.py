@@ -8,20 +8,12 @@ from app.config import settings
 from aio_pika.abc import AbstractIncomingMessage
 from app import dependencies
 from pymongo import MongoClient
-import app
-from app.mongo import crete_mongo_indexes
 from app.models.extractors import (
     ExtractorBase,
     ExtractorIn,
     ExtractorDB,
     ExtractorOut,
 )
-
-async def get_db() -> Generator:
-    mongo_client = motor.motor_asyncio.AsyncIOMotorClient(settings.MONGODB_URL)
-    db = mongo_client[settings.MONGO_DATABASE]
-    await crete_mongo_indexes(db)
-    yield db
 
 async def on_message(message: AbstractIncomingMessage) -> None:
     async with message.process():
