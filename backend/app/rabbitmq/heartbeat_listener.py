@@ -1,12 +1,8 @@
 import asyncio
 import json
 from aio_pika import ExchangeType, connect
-import motor.motor_asyncio
-from typing import Generator
-from fastapi import APIRouter, HTTPException, Depends, Request
 from app.config import settings
 from aio_pika.abc import AbstractIncomingMessage
-from app import dependencies
 from pymongo import MongoClient
 from app.models.extractors import (
     ExtractorBase,
@@ -24,7 +20,7 @@ async def on_message(message: AbstractIncomingMessage) -> None:
         extractor_info = statusBody['extractor_info']
         extractor_name = extractor_info['name']
         extractor_db = ExtractorDB(**extractor_info)
-        client = MongoClient(app.config.settings.MONGODB_URL)
+        client = MongoClient(settings.MONGODB_URL)
         db = client['clowder2']
         existing_extractor = db["extractors"].find_one({"name": extractor_queue})
         if existing_extractor is not None:
