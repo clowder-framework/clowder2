@@ -530,6 +530,7 @@ async def get_dataset_extract(
     if (dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})) is not None:
         req_info = await info.json()
         if 'extractor' in req_info:
+            # TODO check of extractor exists
             msg = {"message": "testing", "dataseet_id": dataset_id}
             body = {}
             body['host'] = 'http://127.0.0.1:8000'

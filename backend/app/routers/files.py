@@ -244,6 +244,7 @@ async def get_file_extract(
     if (file := await db["files"].find_one({"_id": ObjectId(file_id)})) is not None:
         req_info = await info.json()
         if 'extractor' in req_info:
+            # TODO check if extractor is registered
             msg = {"message": "testing", "file_id": file_id}
             body = {}
             body['host'] = 'http://127.0.0.1:8000'
