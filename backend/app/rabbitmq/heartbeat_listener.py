@@ -25,7 +25,8 @@ async def on_message(message: AbstractIncomingMessage) -> None:
         existing_extractor = db["extractors"].find_one({"name": extractor_queue})
         if existing_extractor is not None:
             existing_version = existing_extractor['version']
-            if extractor_info['version'] > existing_version:
+            new_version = float(extractor_info['version'])
+            if new_version > existing_version:
                 new_extractor = db["extractors"].insert_one(extractor_db.to_mongo())
                 found = db["extractors"].find_one({"_id": new_extractor.inserted_id})
                 removed = db["extractors"].delete_one({"_id":existing_extractor['_id']})
