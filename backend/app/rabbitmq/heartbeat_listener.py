@@ -1,11 +1,15 @@
 import asyncio
 import json
 from aio_pika import ExchangeType, connect
+import motor.motor_asyncio
+from typing import Generator
 from fastapi import APIRouter, HTTPException, Depends, Request
-
+from app.config import settings
 from aio_pika.abc import AbstractIncomingMessage
 from app import dependencies
 from pymongo import MongoClient
+import app
+from app.mongo import crete_mongo_indexes
 from app.models.extractors import (
     ExtractorBase,
     ExtractorIn,
@@ -13,25 +17,37 @@ from app.models.extractors import (
     ExtractorOut,
 )
 
-async def on_message(message: AbstractIncomingMessage,
-                     db: MongoClient = Depends(dependencies.get_db),
-                     ) -> None:
-    async with message.process():
-        print(f"[x] {message.body!r}")
-        statusBody = json.loads(message.body.decode("utf-8"))
+async def get_db() -> Generator:
+    mongo_client = motor.motor_asyncio.AsyncIOMotorClient(settings.MONGODB_URL)
+    db = mongo_client[settings.MONGO_DATABASE]
+    await crete_mongo_indexes(db)
+    yield db
 
+async def on_message(message: AbstractIncomingMessage) -> None:
+    async with message.process():
+        statusBody = json.loads(message.body.decode("utf-8"))
         print("received extractor heartbeat: " + str(statusBody))
         extractor_id = statusBody['id']
         extractor_queue = statusBody['queue']
         extractor_info = statusBody['extractor_info']
         extractor_name = extractor_info['name']
         extractor_db = ExtractorDB(**extractor_info)
-        # existing_extractor = await db["extractors"].find_one({"name": extractor_queue})
-        print('got existing extractor')
-        new_extractor = await db["extractors"].insert_one(extractor_db.to_mongo())
-        found = await db["extractors"].find_one({"_id": new_extractor.inserted_id})
-        extractor_out = ExtractorOut.from_mongo(found)
-        return extractor_out
+        client = MongoClient(app.config.settings.MONGODB_URL)
+        db = client['clowder2']
+        existing_extractor = db["extractors"].find_one({"name": extractor_queue})
+        if existing_extractor is not None:
+            existing_version = existing_extractor['version']
+            if extractor_info['version'] > existing_version:
+                new_extractor = db["extractors"].insert_one(extractor_db.to_mongo())
+                found = db["extractors"].find_one({"_id": new_extractor.inserted_id})
+                removed = db["extractors"].delete_one({"_id":existing_extractor['_id']})
+                extractor_out = ExtractorOut.from_mongo(found)
+                return extractor_out
+        else:
+            new_extractor = db["extractors"].insert_one(extractor_db.to_mongo())
+            found = db["extractors"].find_one({"_id": new_extractor.inserted_id})
+            extractor_out = ExtractorOut.from_mongo(found)
+            return extractor_out
 
 
 async def main() -> None:
@@ -57,7 +73,7 @@ async def main() -> None:
         # Start listening the queue
         await queue.consume(on_message)
 
-        print(" [*] Waiting for logs. To exit press CTRL+C")
+        print(" [*] Heartbeat extractor, waiting for extractors.")
         await asyncio.Future()
 
 
