@@ -7,7 +7,7 @@ import {MetadataEditButton} from "./MetadataEditButton";
 
 export const MetadataDateTimePicker = (props) => {
 	const {widgetName, fieldName, metadataId, contents, setMetadata, initialReadOnly, resourceId, updateMetadata} = props;
-	const [value, setValue] = useState(contents && contents.time? contents.time: new Date());
+	const [localContent, setLocalContent] = useState(contents && contents[fieldName] ? contents: {});
 
 	const [readOnly, setReadOnly] = useState(initialReadOnly);
 
@@ -15,24 +15,24 @@ export const MetadataDateTimePicker = (props) => {
 
 	const handleChange = (newValue:Date) => {
 		setInputChanged(true);
-		setValue(newValue);
 
-		let contents: { [key: string]: Date; } = {};
-		contents[fieldName] = newValue;
+		let tempContents: { [key: string]: Date; } = {};
+		tempContents[fieldName] = newValue;
 		setMetadata ?
 			metadataId ?
 				setMetadata({
 					"id": metadataId,
 					"definition": widgetName,
-					"contents": contents
+					"contents": tempContents
 				})
 				:
 				setMetadata({
 					"definition": widgetName,
-					"contents": contents
+					"contents": tempContents
 				})
 			:
 			null
+		setLocalContent(tempContents)
 	};
 
 	return (
@@ -40,7 +40,7 @@ export const MetadataDateTimePicker = (props) => {
 			<LocalizationProvider dateAdapter={DateAdapter}>
 				<DateTimePicker
 					label={widgetName}
-					value={readOnly && contents ? contents.time: value}
+					value={readOnly && contents ? contents[fieldName]: localContent[fieldName]}
 					onChange={handleChange}
 					renderInput={(params) =>
 						<ClowderMetadataTextField {...params} fullWidth
@@ -50,7 +50,7 @@ export const MetadataDateTimePicker = (props) => {
 				/>
 			</LocalizationProvider>
 			<MetadataEditButton readOnly={readOnly} setReadOnly={setReadOnly} updateMetadata={updateMetadata}
-								contents={contents} metadataId={metadataId} resourceId={resourceId}
+								contents={localContent} metadataId={metadataId} resourceId={resourceId}
 								widgetName={widgetName} setInputChanged={setInputChanged}
 								setMetadata={setMetadata}/>
 		</div>
