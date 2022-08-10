@@ -8,7 +8,7 @@ import {MetadataEditButton} from "./MetadataEditButton";
 export const MetadataSelect = (props) => {
 	const {widgetName, fieldName, metadataId, contents, setMetadata, initialReadOnly, options, resourceId,
 		updateMetadata} = props;
-	const [unit, setUnit] = React.useState(contents && contents.unit? contents.unit: "");
+	const [localContent, setLocalContent] = useState(contents && contents[fieldName] ? contents: {});
 
 	const [readOnly, setReadOnly] = useState(initialReadOnly);
 
@@ -16,31 +16,30 @@ export const MetadataSelect = (props) => {
 
 	const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
 		setInputChanged(true);
-		setUnit(event.target.value);
-
-		let contents: { [key: string]: string; } = {};
-		contents[fieldName] = event.target.value;
+		let tempContents: { [key: string]: string; } = {};
+		tempContents[fieldName] = event.target.value;
 		setMetadata ?
 			metadataId ?
 				setMetadata({
 					"id":metadataId,
 					"definition": widgetName,
-					"contents": contents
+					"contents": tempContents
 				})
 				:
 				setMetadata({
 					"definition": widgetName,
-					"contents": contents
+					"contents": tempContents
 				})
 			:
 			null
+		setLocalContent(tempContents)
 	};
 
 	return (
 		<div style={{margin: "1em auto"}}>
 			<FormControl fullWidth>
 				<InputLabel>{widgetName}</InputLabel>
-				<ClowderMetadataSelect value={readOnly && contents ? contents.unit: unit}
+				<ClowderMetadataSelect value={readOnly && contents ? contents[fieldName]: localContent[fieldName]}
 									   label="Unit" onChange={handleChange}
 									   sx={{background:"#ffffff"}}
 									   disabled={readOnly}
@@ -55,7 +54,7 @@ export const MetadataSelect = (props) => {
 				</ClowderMetadataFormHelperText>
 			</FormControl>
 			<MetadataEditButton readOnly={readOnly} setReadOnly={setReadOnly} updateMetadata={updateMetadata}
-								contents={contents} metadataId={metadataId} resourceId={resourceId}
+								contents={localContent} metadataId={metadataId} resourceId={resourceId}
 								widgetName={widgetName} setInputChanged={setInputChanged}
 								setMetadata={setMetadata}/>
 		</div>

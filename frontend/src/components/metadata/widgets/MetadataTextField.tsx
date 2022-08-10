@@ -4,7 +4,6 @@ import { MetadataEditButton } from "./MetadataEditButton";
 
 export const MetadataTextField = (props) => {
 	const {widgetName, fieldName, contents, setMetadata, metadataId, updateMetadata, resourceId, initialReadOnly} = props;
-	// const [text, setText] = useState(contents && contents[fieldName] ? contents[fieldName]: "");
 	const [localContent, setLocalContent] = useState(contents && contents[fieldName] ? contents: {});
 
 	const [readOnly, setReadOnly] = useState(initialReadOnly);
