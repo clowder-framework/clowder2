@@ -7,9 +7,11 @@
     "fields" : [
         {
             "name" : "doi",
-            "type" : "str",
             "list" : false,
             "widgetType": "TextField",
+            "config": {
+                "type" : "str"
+            },
             "required" : true
         }
     ]

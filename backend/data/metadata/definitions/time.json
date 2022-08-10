@@ -7,9 +7,11 @@
     "fields" : [
         {
             "name" : "time",
-            "type" : "str",
             "list" : false,
             "widgetType": "DateTimePicker",
+            "config": {
+                "type" : "str"
+            },
             "required" : true
         }
     ]
