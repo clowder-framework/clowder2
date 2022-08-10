@@ -2,12 +2,8 @@
 /* tslint:disable */
 /* eslint-disable */
 
-export type MetadataFieldEnum = {
+export type MetadataEnumConfig = {
     id?: string;
-    name: string;
     type?: string;
-    list?: boolean;
-    widgetType?: string;
     options: Array<string>;
-    required?: boolean;
 }

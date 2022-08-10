@@ -77,7 +77,7 @@ export const EditMetadata = (props: MetadataType) => {
 												{
 													widgetName: metadataDef.name,
 													fieldName: field.name,
-													options: field.options ?? [],
+													options: field.config.options ?? [],
 													setMetadata: setMetadata,
 													initialReadOnly: false,
 												}
@@ -103,7 +103,7 @@ export const EditMetadata = (props: MetadataType) => {
 														{
 															widgetName: metadataDef.name,
 															fieldName: field.name,
-															options: field.options ?? [],
+															options: field.config.options ?? [],
 															setMetadata: setMetadata,
 															initialReadOnly: false,
 															resourceId: resourceId,

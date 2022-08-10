@@ -42,7 +42,7 @@ export const CreateMetadata = (props: MetadataType) => {
 										{
 											widgetName: metadata.name,
 											fieldName: field.name,
-											options: field.options ?? [],
+											options: field.config.options ?? [],
 											setMetadata: setMetadata,
 											initialReadOnly: false,
 										}

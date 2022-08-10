@@ -122,7 +122,7 @@ def validate_definition(contents: dict, metadata_def: MetadataDefinitionOut):
     for field in metadata_def.fields:
         if field.name in contents:
             value = contents[field.name]
-            t = FIELD_TYPES[field.type]
+            t = FIELD_TYPES[field.config.type]
             try:
                 # Try casting value as required type, raise exception if unable
                 contents[field.name] = t(contents[field.name])
@@ -136,11 +136,11 @@ def validate_definition(contents: dict, metadata_def: MetadataDefinitionOut):
                     except:
                         raise HTTPException(
                             status_code=400,
-                            detail=f"{metadata_def.name} field {field.name} requires {field.type} for all values in list",
+                            detail=f"{metadata_def.name} field {field.name} requires {field.config.type} for all values in list",
                         )
                 raise HTTPException(
                     status_code=400,
-                    detail=f"{metadata_def.name} field {field.name} requires {field.type}",
+                    detail=f"{metadata_def.name} field {field.name} requires {field.config.type}",
                 )
         elif field.required:
             raise HTTPException(

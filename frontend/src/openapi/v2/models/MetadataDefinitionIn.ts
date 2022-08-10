@@ -3,7 +3,6 @@
 /* eslint-disable */
 
 import type { MetadataField } from './MetadataField';
-import type { MetadataFieldEnum } from './MetadataFieldEnum';
 
 /**
  * This describes a metadata object with a short name and description, predefined set of fields, and context.
@@ -33,5 +32,5 @@ import type { MetadataFieldEnum } from './MetadataFieldEnum';
                     description?: string;
                     context?: any;
                     context_url?: string;
-                    fields: Array<(MetadataFieldEnum | MetadataField)>;
+                    fields: Array<MetadataField>;
                 }
