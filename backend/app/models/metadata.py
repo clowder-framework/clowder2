@@ -31,25 +31,25 @@ FIELD_TYPES = {
     "date": datetime.date,
     "time": datetime.time,
     "dict": dict,  # TODO: does this work?
-    "enum": str,  # TODO: need a way to validate enum
+    "enum": str,  # TODO: need a way to validate enum,
+    "tuple": tuple
 }  # JSON schema can handle this for us?
+
+
+class MetadataConfig(MongoModel):
+    type: str = "str"  # must be one of FIELD_TYPES
+
+
+class MetadataEnumConfig(MongoModel):
+    type: str = "enum"
+    options: List[str]  # a list of options must be provided if type is enum
 
 
 class MetadataField(MongoModel):
     name: str
-    type: str = "str"  # must be one of FIELD_TYPES
     list: bool = False  # whether a list[type] is acceptable
     widgetType: str = "TextField"  # match material ui widget name?
-    # TODO: Eventually move this to space level?
-    required: bool = False  # Whether the definition requires this field
-
-
-class MetadataFieldEnum(MongoModel):
-    name: str
-    type: str = "enum"  # must be one of FIELD_TYPES
-    list: bool = False  # whether a list[type] is acceptable
-    widgetType: str = "Select"  # match material ui widget name?
-    options: List[str]  # a list of options must be provided
+    config: Union[MetadataEnumConfig, MetadataConfig]
     # TODO: Eventually move this to space level?
     required: bool = False  # Whether the definition requires this field
 
@@ -80,7 +80,7 @@ class MetadataDefinitionBase(MongoModel):
     description: Optional[str]
     context: Optional[dict]  # https://json-ld.org/spec/latest/json-ld/#the-context
     context_url: Optional[str]  # single URL applying to contents
-    fields: List[Union[MetadataFieldEnum, MetadataField]]
+    fields: List[MetadataField]
     # TODO: Space-level requirements?
 
 
