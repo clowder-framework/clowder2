@@ -1,5 +1,8 @@
 import React from "react";
-import {Box, Button} from "@mui/material";
+import {Box, IconButton} from "@mui/material";
+import HighlightOffIcon from '@mui/icons-material/HighlightOff';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import EditIcon from '@mui/icons-material/Edit';
 
 type MetadataEditButtonType = {
 	readOnly: boolean,
@@ -23,7 +26,9 @@ export const MetadataEditButton = (props: MetadataEditButtonType) => {
 			{
 				readOnly ?
 					<Box sx={{textAlign: "right"}}>
-						<Button variant="text" onClick={() => {setReadOnly(false);}}>Edit</Button>
+						<IconButton color="primary" aria-label="Cancel" onClick={() => {setReadOnly(false);}}>
+							<EditIcon />
+						</IconButton>
 					</Box>
 					:
 					<Box sx={{textAlign: "right"}}>
@@ -34,11 +39,13 @@ export const MetadataEditButton = (props: MetadataEditButtonType) => {
 								<></>
 								:
 								<>
-									<Button variant="text" onClick={() => {
+									<IconButton color="primary" aria-label="Cancel" onClick={() => {
 										setReadOnly(true);
 										setInputChanged(false);
-									}}>Cancel</Button>
-									<Button variant="contained" onClick={() => {
+									}}>
+										<HighlightOffIcon />
+									</IconButton>
+									<IconButton color="primary" aria-label="Update" onClick={() => {
 										// update metadata
 										updateMetadata(resourceId, {
 											"id":metadataId,
@@ -47,7 +54,9 @@ export const MetadataEditButton = (props: MetadataEditButtonType) => {
 										});
 										setReadOnly(true);
 										setInputChanged(false);
-									}}>Update</Button>
+									}}>
+										<CheckCircleIcon />
+									</IconButton>
 								</>
 							:
 							<></>
