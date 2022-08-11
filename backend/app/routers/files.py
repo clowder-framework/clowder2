@@ -238,10 +238,18 @@ async def get_file_versions(
 async def get_file_extract(
     file_id: str,
     info: Request,
+    token: str = Depends(get_token),
     db: MongoClient = Depends(dependencies.get_db),
     rabbitmq_client: BlockingChannel = Depends(dependencies.get_rabbitmq),
+
 ):
     if (file := await db["files"].find_one({"_id": ObjectId(file_id)})) is not None:
+        req_headers = info.headers
+        raw = req_headers.raw
+        authorization = raw[1]
+        token = authorization[1].decode('utf-8')
+        token = token.lstrip('Bearer')
+        token = token.lstrip(' ')
         req_info = await info.json()
         if 'extractor' in req_info:
             # TODO check if extractor is registered
@@ -249,6 +257,7 @@ async def get_file_extract(
             body = {}
             body['host'] = 'http://127.0.0.1:8000'
             body['secretKey'] = 'secretKey'
+            body['token'] = token
             body['retry_count'] = 0
             body['filename'] = file['name']
             body['id'] = file_id
