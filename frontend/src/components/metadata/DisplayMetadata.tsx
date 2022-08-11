@@ -1,5 +1,5 @@
 import React, {useEffect} from "react";
-import {Box, Typography} from "@mui/material";
+import {Box, Grid, Typography} from "@mui/material";
 import metadataConfig from "../../metadata.config";
 import {useSelector, useDispatch} from "react-redux";
 import {RootState} from "../../types/data";
@@ -78,12 +78,16 @@ export const DisplayMetadata = (props: MetadataType) => {
 												)
 											})
 										}
-										<MetadataDeleteButton metadataId={metadata.id ?? null}
-															  deleteMetadata={deleteMetadata}
-															  resourceId={resourceId}
-															  widgetName={metadataDef.name}
-										/>
-										<Agent created={metadata.created} agent={metadata.agent} />
+										<Grid container spacing={2}>
+											<Grid item xs={11} sm={11} md={11} lg={11} xl={11}>
+												<Agent created={metadata.created} agent={metadata.agent} />
+												<MetadataDeleteButton metadataId={metadata.id ?? null}
+																	  deleteMetadata={deleteMetadata}
+																	  resourceId={resourceId}
+																	  widgetName={metadataDef.name}
+												/>
+											</Grid>
+										</Grid>
 									</Box>
 								);
 							}

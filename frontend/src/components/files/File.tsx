@@ -270,9 +270,13 @@ export const File = (): JSX.Element => {
 										</>
 										:
 										<>
-											<ClowderButton onClick={()=>{setEnableAddMetadata(true);}}>
-												Add/Edit Metadata
-											</ClowderButton>
+											<Grid container spacing={2} sx={{ "alignItems": "center"}}>
+												<Grid item xs={11} sm={11} md={11} lg={11} xl={11}>
+													<ClowderButton onClick={()=>{setEnableAddMetadata(true);}}>
+														Add/Edit Metadata
+													</ClowderButton>
+												</Grid>
+											</Grid>
 											<DisplayMetadata updateMetadata={updateFileMetadata}
 															 deleteMetadata={deleteFileMetadata}
 															 resourceType="file" resourceId={fileId} />

@@ -25,13 +25,13 @@ export const MetadataEditButton = (props: MetadataEditButtonType) => {
 		<>
 			{
 				readOnly ?
-					<Box sx={{textAlign: "right"}}>
+					<Box>
 						<IconButton color="primary" aria-label="Cancel" onClick={() => {setReadOnly(false);}}>
 							<EditIcon />
 						</IconButton>
 					</Box>
 					:
-					<Box sx={{textAlign: "right"}}>
+					<Box>
 						{ metadataId ?
 							// if setMetadata exist; don't show the individual update button;
 							// will update all metadata at form level
