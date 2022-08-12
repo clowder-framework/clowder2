@@ -34,6 +34,7 @@ The Listeners dashboard provides a list of listeners that Clowder has received a
 - Most recent heartbeat
 - Number of feeds associated
 - Activate/deactivate
+- unique identifiers seen
 
 When a heartbeat is received from a new listener, Clowder will attempt to match it to any existing feeds
 according to the extractor_info JSON. Legacy extractors 
@@ -48,7 +49,7 @@ The Feeds dashboard helps users manage this:
 - Possible criteria include:
    - Filename (regular expressions supported)
    - MIME type
-   - File size
+   - File size or count
    - Parent collection / dataset / folder
    - User or user group
    - Metadata fields
@@ -58,6 +59,10 @@ The Feeds dashboard helps users manage this:
    - Dataset feeds allow multiple file criteria to be listed
    - When a dataset contains files that match every criteria, notify listeners
    - Process every file/dataset that comes in automatically, or only manually? (toggle)
+   - approval process when criteria met? get a report on login, submit by hand
+   - what parameters to include with jobs from this feed
+   - cron job for the criteria checks on newly created resources?
+   - order criteria so we can evaluate rapidly
    
 - On request, users can calculate feed statistics:
    - Number of files meeting criteria
@@ -76,7 +81,9 @@ Each Submission includes:
 - listener id
 - submission origin (API, feed, GUI, etc.)
 - any parameters to be sent to the listener
-- submission status (`SUBMITTED`, `SUCCESS`, `FAILURE`)
+- submission status (`PENDING APPROVAL`, `SUBMITTED`, `SUCCESS`, `FAILURE`)
+- submitted, started, finished
+- most recent message?
 - events list
 
 Each Event in the events list includes:
@@ -115,7 +122,7 @@ The entry and event history are kept for record-keeping purposes.
     - Associate a listener with a feed.
     - Parameters: `type` (file or dataset), `auto` (default True), `backfill` (default False)
 
-- `POST /api/feeds/:feed_id/submit/:listener_id` 
+- `POST /api/feeds/:feed_id/execute/:listener_id` 
     - Sends feed contents to listener. Default is to send only contents
 that have not already been processed, but flag can force all feed contents (search results) to be submitted.
     - Parameters: `force_all`, `skip`, `limit`
@@ -124,4 +131,4 @@ that have not already been processed, but flag can force all feed contents (sear
 - `GET /api/feeds/:feed_id/counts/:listener_id` 
     - Calculate counts for feed contents that have been successfully
 and unsuccessfully processed by a given listener.
-    - JSON: `{"total": 123, "success": 119, "failure": 2, "submitted": 1, "not_submitted": 1}`
+    - JSON: `{"total": 123, "success": 119, "failure": 2, "submitted": 1, "not_submitted": 1, "pending_approval": 0}`
