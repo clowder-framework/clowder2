@@ -93,29 +93,35 @@ All submissions for a specific resource can be viewed on its page, regardless of
 The API can also be used to programatically manage these features. Note that there is no endpoint for registering 
 listeners (that is done via RabbitMQ heartbeats).
 
-- `GET /api/listeners` List known listeners.
+- `GET /api/listeners` 
+    - List known listeners.
     - Parameters: `id`, `name`, `~status~`, `skip`, `limit`
     
-- `DELETE /api/listeners/:listener_id` Unsubscribe from all feeds, mark as inactive (not shown except to admins). 
+- `DELETE /api/listeners/:listener_id` 
+    - Unsubscribe from all feeds, mark as inactive (not shown except to admins). 
 The entry and event history are kept for record-keeping purposes.
 
 - `POST /api/feeds`
     - JSON body: `{"query": "title:*.xlsx", "name":"Excel spreadsheets"}`
     - Return `feed_id`
 
-- `GET /api/feeds` List feeds.
+- `GET /api/feeds` 
+    - List feeds.
     - Parameters: `id`, `name`, `listener`, `skip`, `limit`
 
 - `DELETE /api/feeds/:feed_id`
 
-- `POST /api/feeds/:feed_id/subscribe/:listener_id` Associate a listener with a feed.
+- `POST /api/feeds/:feed_id/subscribe/:listener_id` 
+    - Associate a listener with a feed.
     - Parameters: `type` (file or dataset), `auto` (default True), `backfill` (default False)
 
-- `POST /api/feeds/:feed_id/submit/:listener_id` Sends feed contents to listener. Default is to send only contents
+- `POST /api/feeds/:feed_id/submit/:listener_id` 
+    - Sends feed contents to listener. Default is to send only contents
 that have not already been processed, but flag can force all feed contents (search results) to be submitted.
     - Parameters: `force_all`, `skip`, `limit`
     - Return count of resources sent to listener.
     
-- `GET /api/feeds/:feed_id/counts/:listener_id` Calculate counts for feed contents that have been successfully
+- `GET /api/feeds/:feed_id/counts/:listener_id` 
+    - Calculate counts for feed contents that have been successfully
 and unsuccessfully processed by a given listener.
     - JSON: `{"total": 123, "success": 119, "failure": 2, "submitted": 1, "not_submitted": 1}`
