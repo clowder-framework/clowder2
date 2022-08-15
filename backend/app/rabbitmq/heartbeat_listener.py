@@ -18,6 +18,13 @@ async def on_message(message: AbstractIncomingMessage) -> None:
         extractor_id = statusBody['id']
         extractor_queue = statusBody['queue']
         extractor_info = statusBody['extractor_info']
+        extractor_repository = extractor_info['repository']
+        if type(extractor_repository) == list:
+            if len(extractor_repository) == 1:
+                repo_details = extractor_repository[0]
+                if 'repType' in repo_details and 'repUrl' in repo_details:
+                    extractor_info['repository'] = {'repository_type': repo_details['repType'],
+                                                    'repository_url': repo_details['repUrl']}
         extractor_name = extractor_info['name']
         extractor_db = ExtractorDB(**extractor_info)
         client = MongoClient(settings.MONGODB_URL)
