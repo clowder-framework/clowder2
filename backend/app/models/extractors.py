@@ -16,7 +16,7 @@ class ExtractorIdentifier(MongoModel):
     author: str
     contributors: List[str] = []
     contexts: List[dict] = []
-    repository: Union[Repository, None] = None
+    repository: Union[list[Repository], None] = None
     external_services: List[str]
     libraries: List[str] = []
     bibtex: List[str]

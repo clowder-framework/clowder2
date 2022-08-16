@@ -32,10 +32,14 @@ async def on_message(message: AbstractIncomingMessage) -> None:
         extractor_repository = extractor_info['repository']
         if type(extractor_repository) == list:
             if len(extractor_repository) >= 1:
-                repo_details = extractor_repository[0]
-                if 'repType' in repo_details and 'repUrl' in repo_details:
-                    extractor_info['repository'] = {'repository_type': repo_details['repType'],
+                repositories = []
+                for i in range(0, len(extractor_repository)):
+                    repo_details = extractor_repository[i]
+                    if 'repType' in repo_details and 'repUrl' in repo_details:
+                        current_repo = {'repository_type': repo_details['repType'],
                                                     'repository_url': repo_details['repUrl']}
+                        repositories.append(current_repo)
+                extractor_info['repository'] = repositories
         extractor_name = extractor_info['name']
         extractor_db = ExtractorDB(**extractor_info)
         client = MongoClient(settings.MONGODB_URL)
