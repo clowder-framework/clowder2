@@ -18,9 +18,20 @@ async def on_message(message: AbstractIncomingMessage) -> None:
         extractor_id = statusBody['id']
         extractor_queue = statusBody['queue']
         extractor_info = statusBody['extractor_info']
+        extractor_info_version = extractor_info['version']
+        try:
+            version = float(extractor_info_version)
+            extractor_info['version'] = version
+        except Exception as e:
+            first_period = extractor_info_version.index('.')
+            start_version = extractor_info_version[0: first_period+1]
+            rest_version = extractor_info_version[first_period+1:]
+            rest_version = rest_version.replace('.', '')
+            version = start_version + rest_version
+            extractor_info['version'] = version
         extractor_repository = extractor_info['repository']
         if type(extractor_repository) == list:
-            if len(extractor_repository) == 1:
+            if len(extractor_repository) >= 1:
                 repo_details = extractor_repository[0]
                 if 'repType' in repo_details and 'repUrl' in repo_details:
                     extractor_info['repository'] = {'repository_type': repo_details['repType'],
