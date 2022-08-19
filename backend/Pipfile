@@ -18,6 +18,7 @@ pipfile = "*"
 email-validator = "*"
 python-keycloak = "*"
 pika = "*"
+aio_pika = "*"
 
 [dev-packages]
 requests = "*"
