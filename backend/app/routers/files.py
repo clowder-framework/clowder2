@@ -263,7 +263,7 @@ async def get_file_extract(
             body['id'] = file_id
             body['datasetId'] = str(file['dataset_id'])
             body['host'] = 'http://127.0.0.1:8000'
-            body['secretKey'] = 'secretKey'
+            body['secretKey'] = token
             body['fileSize'] = file['bytes']
             body['resource_type'] = 'file'
             body['flags'] = ""

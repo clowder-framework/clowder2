@@ -63,5 +63,9 @@ class Settings(BaseSettings):
     # identity providers registered in keycloak, for example cilogon, globus, twitter
     keycloak_ipds = ["cilogon", "globus"]
 
+    RABBITMQ_USER = "guest"
+    RABBITMQ_PASS = "guest"
+    RABBITMQ_URL = "amqp://" + RABBITMQ_USER + ":" + RABBITMQ_PASS + "@localhost/"
+
 
 settings = Settings()

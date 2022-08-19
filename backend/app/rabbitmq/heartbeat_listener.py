@@ -63,7 +63,8 @@ async def on_message(message: AbstractIncomingMessage) -> None:
 
 async def main() -> None:
     # Perform connection
-    connection = await connect("amqp://guest:guest@localhost/")
+    RABBITMQ_URL = settings.RABBITMQ_URL
+    connection = await connect(RABBITMQ_URL)
 
     async with connection:
         # Creating a channel

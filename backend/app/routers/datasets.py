@@ -530,17 +530,22 @@ async def get_dataset_extract(
     if (dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})) is not None:
         req_info = await info.json()
         if 'extractor' in req_info:
+            req_headers = info.headers
+            raw = req_headers.raw
+            authorization = raw[1]
+            token = authorization[1].decode('utf-8')
+            token = token.lstrip('Bearer')
+            token = token.lstrip(' ')
             # TODO check of extractor exists
             msg = {"message": "testing", "dataseet_id": dataset_id}
             body = {}
+            body['secretKey'] = token
+            body['token'] = token
             body['host'] = 'http://127.0.0.1:8000'
-            body['secretKey'] = 'secretKey'
             body['retry_count'] = 0
             body['filename'] = dataset['name']
             body['id'] = dataset_id
             body['datasetId'] = dataset_id
-            body['host'] = 'http://127.0.0.1:8000'
-            body['secretKey'] = 'secretKey'
             body['resource_type'] = 'dataset'
             body['flags'] = ""
             current_queue = req_info['extractor']
