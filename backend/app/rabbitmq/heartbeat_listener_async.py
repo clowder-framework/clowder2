@@ -1,5 +1,6 @@
 import asyncio
 import json
+from packaging import version
 from aio_pika import ExchangeType, connect
 from app.config import settings
 from aio_pika.abc import AbstractIncomingMessage
@@ -18,28 +19,6 @@ async def on_message(message: AbstractIncomingMessage) -> None:
         extractor_id = statusBody['id']
         extractor_queue = statusBody['queue']
         extractor_info = statusBody['extractor_info']
-        extractor_info_version = extractor_info['version']
-        try:
-            version = float(extractor_info_version)
-            extractor_info['version'] = version
-        except Exception as e:
-            first_period = extractor_info_version.index('.')
-            start_version = extractor_info_version[0: first_period+1]
-            rest_version = extractor_info_version[first_period+1:]
-            rest_version = rest_version.replace('.', '')
-            version = start_version + rest_version
-            extractor_info['version'] = version
-        extractor_repository = extractor_info['repository']
-        if type(extractor_repository) == list:
-            if len(extractor_repository) >= 1:
-                repositories = []
-                for i in range(0, len(extractor_repository)):
-                    repo_details = extractor_repository[i]
-                    if 'repType' in repo_details and 'repUrl' in repo_details:
-                        current_repo = {'repository_type': repo_details['repType'],
-                                                    'repository_url': repo_details['repUrl']}
-                        repositories.append(current_repo)
-                extractor_info['repository'] = repositories
         extractor_name = extractor_info['name']
         extractor_db = ExtractorDB(**extractor_info)
         client = MongoClient(settings.MONGODB_URL)
@@ -47,17 +26,20 @@ async def on_message(message: AbstractIncomingMessage) -> None:
         existing_extractor = db["extractors"].find_one({"name": extractor_queue})
         if existing_extractor is not None:
             existing_version = existing_extractor['version']
-            new_version = float(extractor_info['version'])
-            if new_version > existing_version:
+            new_version = extractor_db.version
+            if version.parse(new_version) > version.parse(existing_version):
                 new_extractor = db["extractors"].insert_one(extractor_db.to_mongo())
                 found = db["extractors"].find_one({"_id": new_extractor.inserted_id})
-                removed = db["extractors"].delete_one({"_id":existing_extractor['_id']})
+                removed = db["extractors"].delete_one({"_id": existing_extractor['_id']})
                 extractor_out = ExtractorOut.from_mongo(found)
+                print(
+                    'extractor updated: ' + extractor_name + ', old version: ' + existing_version + ', new version: ' + new_version)
                 return extractor_out
         else:
             new_extractor = db["extractors"].insert_one(extractor_db.to_mongo())
             found = db["extractors"].find_one({"_id": new_extractor.inserted_id})
             extractor_out = ExtractorOut.from_mongo(found)
+            print('new extractor registered: ' + extractor_name)
             return extractor_out
 
 
