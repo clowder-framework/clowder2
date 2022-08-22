@@ -11,7 +11,7 @@ class Repository(MongoModel):
 
 class ExtractorIdentifier(MongoModel):
     name: str
-    version: float = 1.0
+    version: str = "1.0"
     updated: datetime = Field(default_factory=datetime.utcnow)
     author: str
     contributors: List[str] = []

@@ -1,5 +1,6 @@
 import pika
 import json
+from packaging import version
 from app.config import settings
 from pymongo import MongoClient
 from app.models.extractors import (
@@ -22,22 +23,31 @@ def callback(ch, method, properties, body):
     existing_extractor = db["extractors"].find_one({"name": extractor_queue})
     if existing_extractor is not None:
         existing_version = existing_extractor['version']
-        new_version = float(extractor_info['version'])
-        if new_version > existing_version:
+        new_version = extractor_db.version
+        if version.parse(new_version) > version.parse(existing_version):
             new_extractor = db["extractors"].insert_one(extractor_db.to_mongo())
             found = db["extractors"].find_one({"_id": new_extractor.inserted_id})
             removed = db["extractors"].delete_one({"_id": existing_extractor['_id']})
             extractor_out = ExtractorOut.from_mongo(found)
+            print('extractor updated: '+extractor_name+', old version: '+existing_version+', new version: '+new_version)
             return extractor_out
     else:
         new_extractor = db["extractors"].insert_one(extractor_db.to_mongo())
         found = db["extractors"].find_one({"_id": new_extractor.inserted_id})
         extractor_out = ExtractorOut.from_mongo(found)
+        print('new extractor registered: '+extractor_name)
         return extractor_out
 
-def receive_logs():
-    connection = pika.BlockingConnection(
-        pika.ConnectionParameters(host='localhost'))
+def listen_for_heartbeats():
+    credentials = pika.PlainCredentials(settings.RABBITMQ_USER, settings.RABBITMQ_PASS)
+
+    parameters = pika.ConnectionParameters(settings.RABBITMQ_HOST,
+                                           5672,
+                                           '/',
+                                           credentials)
+
+    connection = pika.BlockingConnection(parameters)
+
     channel = connection.channel()
 
     channel.exchange_declare(exchange='extractors', exchange_type='fanout', durable=True)
@@ -47,7 +57,7 @@ def receive_logs():
 
     channel.queue_bind(exchange='extractors', queue=queue_name)
 
-    print(' [*] Waiting for logs. To exit press CTRL+C')
+    print(' [*] Waiting for heartbeats. To exit press CTRL+C')
 
     channel.basic_consume(
         queue=queue_name, on_message_callback=callback, auto_ack=True)
@@ -55,5 +65,5 @@ def receive_logs():
     channel.start_consuming()
 
 if __name__ == "__main__":
-    print('about to start')
-    receive_logs()
+    print('starting heartbeat listener')
+    listen_for_heartbeats()
