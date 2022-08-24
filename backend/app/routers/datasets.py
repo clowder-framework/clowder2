@@ -173,20 +173,6 @@ async def _get_folder_hierarchy(
     return hierarchy
 
 
-async def _get_folder_hierarchy(
-    folder_id: str,
-    hierarchy: str,
-    db: MongoClient,
-):
-    """Generate a string of nested path to folder for use in zip file creation."""
-    found = await db["folders"].find_one({"_id": ObjectId(folder_id)})
-    folder = FolderOut.from_mongo(found)
-    hierarchy = folder.name + "/" + hierarchy
-    if folder.parent_folder is not None:
-        hierarchy = await _get_folder_hierarchy(folder.parent_folder, hierarchy, db)
-    return hierarchy
-
-
 @router.post("", response_model=DatasetOut)
 async def save_dataset(
     dataset_in: DatasetIn,
@@ -514,9 +500,7 @@ async def download_dataset(
     ) is not None:
         current_temp_dir = tempfile.mkdtemp(prefix="rocratedownload")
         crate = ROCrate()
-        user_first_name = user.first_name
-        user_last_name = user.last_name
-        user_full_name = user_first_name + " " + user_last_name
+        user_full_name = user.first_name + " " + user.last_name
         user_crate_id = str(user.id)
         crate.add(Person(crate, user_crate_id, properties={"name": user_full_name}))
 
@@ -524,8 +508,6 @@ async def download_dataset(
         bagit_path = os.path.join(current_temp_dir, "bagit.txt")
         bag_info_path = os.path.join(current_temp_dir, "bag-info.txt")
         tagmanifest_path = os.path.join(current_temp_dir, "tagmanifest-md5.txt")
-
-        bag_size = 0
 
         with open(bagit_path, "w") as f:
             f.write("Bag-Software-Agent: clowder.ncsa.illinois.edu" + "\n")
@@ -535,29 +517,28 @@ async def download_dataset(
             f.write("BagIt-Version: 0.97" + "\n")
             f.write("Tag-File-Character-Encoding: UTF-8" + "\n")
 
+        bag_size = 0  # bytes
         file_count = 0
 
         async for f in db["files"].find({"dataset_id": ObjectId(dataset_id)}):
             file_count += 1
             file = FileOut.from_mongo(f)
             file_name = file.name
-            hierarchy = None
             if file.folder_id is not None:
                 hierarchy = await _get_folder_hierarchy(file.folder_id, "", db)
+                os.mkdir(os.path.join(current_temp_dir, hierarchy))
                 file_name = hierarchy + file_name
-            content = fs.get_object(settings.MINIO_BUCKET_NAME, str(file.id))
-            if hierarchy:
-                path_to_hierarchy = os.path.join(current_temp_dir, hierarchy)
-                os.mkdir(path_to_hierarchy)
+
             current_file_path = os.path.join(current_temp_dir, file_name)
-            f1 = open(current_file_path, "wb")
-            f1.write(content.data)
             current_file_size = os.path.getsize(current_file_path)
             bag_size += current_file_size
+
+            content = fs.get_object(settings.MINIO_BUCKET_NAME, str(file.id))
             file_md5_hash = hashlib.md5(content.data).hexdigest()
+            with open(current_file_path, "wb") as f1:
+                f1.write(content.data)
             with open(manifest_path, "a") as mpf:
                 mpf.write(file_md5_hash + " " + file_name + "\n")
-            f1.close()
             crate.add_file(
                 current_file_path,
                 dest_path="data/" + file_name,
@@ -567,9 +548,10 @@ async def download_dataset(
             content.release_conn()
 
             # TODO add file metadata
-            query = {"resource.resource_id": ObjectId(file.id)}
             metadata = []
-            async for md in db["metadata"].find(query):
+            async for md in db["metadata"].find(
+                {"resource.resource_id": ObjectId(file.id)}
+            ):
                 metadata.append(md)
             if len(metadata) > 0:
                 metadata_filename = file_name + "_metadata.json"
@@ -585,8 +567,6 @@ async def download_dataset(
                     properties={"name": metadata_filename},
                 )
 
-        dataset_name = dataset["name"]
-
         bag_size_kb = bag_size / 1024
 
         with open(bagit_path, "a") as f:
@@ -596,7 +576,9 @@ async def download_dataset(
             f.write("Internal-Sender-Description: " + dataset["description"] + "\n")
             f.write("Contact-Name: " + user_full_name + "\n")
             f.write("Contact-Email: " + user.email + "\n")
-
+        crate.add_file(
+            bagit_path, dest_path="bagit.txt", properties={"name": "bagit.txt"}
+        )
         crate.add_file(
             manifest_path,
             dest_path="manifest-md5.txt",
@@ -605,10 +587,8 @@ async def download_dataset(
         crate.add_file(
             bag_info_path, dest_path="bag-info.txt", properties={"name": "bag-info.txt"}
         )
-        crate.add_file(
-            bagit_path, dest_path="bagit.txt", properties={"name": "bagit.txt"}
-        )
 
+        # Generate tag manifest file
         manifest_md5_hash = hashlib.md5(open(manifest_path, "rb").read()).hexdigest()
         bagit_md5_hash = hashlib.md5(open(bagit_path, "rb").read()).hexdigest()
         bag_info_md5_hash = hashlib.md5(open(bag_info_path, "rb").read()).hexdigest()
@@ -617,7 +597,6 @@ async def download_dataset(
             f.write(bagit_md5_hash + " " + "bagit.txt" + "\n")
             f.write(manifest_md5_hash + " " + "manifest-md5.txt" + "\n")
             f.write(bag_info_md5_hash + " " + "bag-info.txt" + "\n")
-
         crate.add_file(
             tagmanifest_path,
             dest_path="tagmanifest-md5.txt",
@@ -639,7 +618,7 @@ async def download_dataset(
             stream.getvalue(),
             media_type="application/x-zip-compressed",
             headers={
-                "Content-Disposition": f'attachment;filename={dataset_name + ".zip"}'
+                "Content-Disposition": f'attachment;filename={dataset["name"] + ".zip"}'
             },
         )
     else:
