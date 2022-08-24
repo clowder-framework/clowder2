@@ -5,8 +5,8 @@ from app.models.mongomodel import MongoModel
 
 
 class Repository(MongoModel):
-    repository_type: str = 'git'
-    repository_url: str = ''
+    repository_type: str = "git"
+    repository_url: str = ""
 
 
 class ExtractorIdentifier(MongoModel):

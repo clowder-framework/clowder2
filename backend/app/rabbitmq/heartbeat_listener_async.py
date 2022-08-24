@@ -12,34 +12,43 @@ from app.models.extractors import (
     ExtractorOut,
 )
 
+
 async def on_message(message: AbstractIncomingMessage) -> None:
     async with message.process():
         statusBody = json.loads(message.body.decode("utf-8"))
         print("received extractor heartbeat: " + str(statusBody))
-        extractor_id = statusBody['id']
-        extractor_queue = statusBody['queue']
-        extractor_info = statusBody['extractor_info']
-        extractor_name = extractor_info['name']
+        extractor_id = statusBody["id"]
+        extractor_queue = statusBody["queue"]
+        extractor_info = statusBody["extractor_info"]
+        extractor_name = extractor_info["name"]
         extractor_db = ExtractorDB(**extractor_info)
         client = MongoClient(settings.MONGODB_URL)
-        db = client['clowder2']
+        db = client["clowder2"]
         existing_extractor = db["extractors"].find_one({"name": extractor_queue})
         if existing_extractor is not None:
-            existing_version = existing_extractor['version']
+            existing_version = existing_extractor["version"]
             new_version = extractor_db.version
             if version.parse(new_version) > version.parse(existing_version):
                 new_extractor = db["extractors"].insert_one(extractor_db.to_mongo())
                 found = db["extractors"].find_one({"_id": new_extractor.inserted_id})
-                removed = db["extractors"].delete_one({"_id": existing_extractor['_id']})
+                removed = db["extractors"].delete_one(
+                    {"_id": existing_extractor["_id"]}
+                )
                 extractor_out = ExtractorOut.from_mongo(found)
                 print(
-                    'extractor updated: ' + extractor_name + ', old version: ' + existing_version + ', new version: ' + new_version)
+                    "extractor updated: "
+                    + extractor_name
+                    + ", old version: "
+                    + existing_version
+                    + ", new version: "
+                    + new_version
+                )
                 return extractor_out
         else:
             new_extractor = db["extractors"].insert_one(extractor_db.to_mongo())
             found = db["extractors"].find_one({"_id": new_extractor.inserted_id})
             extractor_out = ExtractorOut.from_mongo(found)
-            print('new extractor registered: ' + extractor_name)
+            print("new extractor registered: " + extractor_name)
             return extractor_out
 
 
@@ -54,7 +63,8 @@ async def main() -> None:
         await channel.set_qos(prefetch_count=1)
 
         logs_exchange = await channel.declare_exchange(
-            "extractors", ExchangeType.FANOUT,
+            "extractors",
+            ExchangeType.FANOUT,
             durable=True,
         )
 

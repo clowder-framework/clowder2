@@ -66,7 +66,9 @@ class Settings(BaseSettings):
     RABBITMQ_USER = "guest"
     RABBITMQ_PASS = "guest"
     RABBITMQ_HOST = "localhost"
-    RABBITMQ_URL = "amqp://" + RABBITMQ_USER + ":" + RABBITMQ_PASS + "@" + RABBITMQ_HOST + "/"
+    RABBITMQ_URL = (
+        "amqp://" + RABBITMQ_USER + ":" + RABBITMQ_PASS + "@" + RABBITMQ_HOST + "/"
+    )
 
 
 settings = Settings()

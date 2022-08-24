@@ -6,7 +6,15 @@ import tempfile
 from typing import List, Optional, BinaryIO
 from collections.abc import Mapping, Iterable
 from bson import ObjectId
-from fastapi import APIRouter, HTTPException, Depends, File, UploadFile, Response, Request
+from fastapi import (
+    APIRouter,
+    HTTPException,
+    Depends,
+    File,
+    UploadFile,
+    Response,
+    Request,
+)
 from fastapi import Form
 from minio import Minio
 from pymongo import MongoClient
@@ -520,6 +528,7 @@ async def download_dataset(
     else:
         raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
 
+
 @router.post("/{dataset_id}/extract")
 async def get_dataset_extract(
     dataset_id: str,
@@ -527,38 +536,45 @@ async def get_dataset_extract(
     db: MongoClient = Depends(dependencies.get_db),
     rabbitmq_client: BlockingChannel = Depends(dependencies.get_rabbitmq),
 ):
-    if (dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})) is not None:
+    if (
+        dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
+    ) is not None:
         req_info = await info.json()
-        if 'extractor' in req_info:
+        if "extractor" in req_info:
             req_headers = info.headers
             raw = req_headers.raw
             authorization = raw[1]
-            token = authorization[1].decode('utf-8')
-            token = token.lstrip('Bearer')
-            token = token.lstrip(' ')
+            token = authorization[1].decode("utf-8")
+            token = token.lstrip("Bearer")
+            token = token.lstrip(" ")
             # TODO check of extractor exists
             msg = {"message": "testing", "dataseet_id": dataset_id}
             body = {}
-            body['secretKey'] = token
-            body['token'] = token
-            body['host'] = 'http://127.0.0.1:8000'
-            body['retry_count'] = 0
-            body['filename'] = dataset['name']
-            body['id'] = dataset_id
-            body['datasetId'] = dataset_id
-            body['resource_type'] = 'dataset'
-            body['flags'] = ""
-            current_queue = req_info['extractor']
-            if 'parameters' in req_info:
-                current_parameters = req_info['parameters']
-            current_routing_key = 'extractors.' + current_queue
-            rabbitmq_client.queue_bind(exchange='extractors', queue=current_queue, routing_key=current_routing_key)
+            body["secretKey"] = token
+            body["token"] = token
+            body["host"] = "http://127.0.0.1:8000"
+            body["retry_count"] = 0
+            body["filename"] = dataset["name"]
+            body["id"] = dataset_id
+            body["datasetId"] = dataset_id
+            body["resource_type"] = "dataset"
+            body["flags"] = ""
+            current_queue = req_info["extractor"]
+            if "parameters" in req_info:
+                current_parameters = req_info["parameters"]
+            current_routing_key = "extractors." + current_queue
+            rabbitmq_client.queue_bind(
+                exchange="extractors",
+                queue=current_queue,
+                routing_key=current_routing_key,
+            )
             rabbitmq_client.basic_publish(
                 exchange="extractors",
                 routing_key=current_routing_key,
                 body=json.dumps(body, ensure_ascii=False),
-                properties=pika.BasicProperties(content_type="application/json", delivery_mode=1),
-
+                properties=pika.BasicProperties(
+                    content_type="application/json", delivery_mode=1
+                ),
             )
             return msg
         else:
