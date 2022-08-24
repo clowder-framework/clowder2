@@ -111,4 +111,22 @@ export class FilesService {
         });
     }
 
+    /**
+     * Get File Extract
+     * @param fileId
+     * @returns any Successful Response
+     * @throws ApiError
+     */
+    public static getFileExtractApiV2FilesFileIdExtractPost(
+        fileId: string,
+    ): CancelablePromise<any> {
+        return __request({
+            method: 'POST',
+            path: `/api/v2/files/${fileId}/extract`,
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+
 }

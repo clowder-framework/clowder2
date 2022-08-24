@@ -24,7 +24,8 @@ from app.models.metadata import (
     MetadataPatch,
     validate_definition,
     validate_context,
-    patch_metadata, MetadataDelete,
+    patch_metadata,
+    MetadataDelete,
 )
 from app.keycloak_auth import get_user, get_current_user, get_token, UserOut
 
@@ -384,9 +385,9 @@ async def delete_file_metadata(
         if metadata_in.metadata_id is not None:
             # If a specific metadata_id is provided, delete the matching entry
             if (
-                    existing_md := await db["metadata"].find_one(
-                        {"metadata_id": ObjectId(metadata_in.metadata_id)}
-                    )
+                existing_md := await db["metadata"].find_one(
+                    {"metadata_id": ObjectId(metadata_in.metadata_id)}
+                )
             ) is not None:
                 query["metadata_id"] = metadata_in.metadata_id
         else:
@@ -401,9 +402,9 @@ async def delete_file_metadata(
         extractor_info = metadata_in.extractor_info
         if extractor_info is not None:
             if (
-                    extractor := await db["extractors"].find_one(
-                        {"name": extractor_info.name, "version": extractor_info.version}
-                    )
+                extractor := await db["extractors"].find_one(
+                    {"name": extractor_info.name, "version": extractor_info.version}
+                )
             ) is not None:
                 agent = MetadataAgent(creator=user, extractor=extractor)
                 # TODO: How do we handle two different users creating extractor metadata? Currently we ignore user

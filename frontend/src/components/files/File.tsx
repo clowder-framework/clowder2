@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from "react";
 import config from "../../app.config";
-import {Box, Divider, Grid, Tab, Tabs} from "@mui/material";
+import {Box, Button, Divider, FormControlLabel, Grid, IconButton, Switch, Tab, Tabs} from "@mui/material";
 import Audio from "../previewers/Audio";
 import Video from "../previewers/Video";
 import {downloadResource} from "../../utils/common";
@@ -18,11 +18,15 @@ import {MainBreadcrumbs} from "../navigation/BreadCrumb";
 import {ActionModal} from "../dialog/ActionModal";
 import {FileAbout} from "./FileAbout";
 import {FileStats} from "./FileStats";
-import {FileSearch} from "./FileSearch";
 import {FileVersionHistory} from "../versions/FileVersionHistory";
 import {DisplayMetadata} from "../metadata/DisplayMetadata";
-import {deleteFileMetadata as deleteFileMetadataAction} from "../../actions/metadata";
+import {deleteFileMetadata as deleteFileMetadataAction, fetchFileMetadata} from "../../actions/metadata";
 import {patchFileMetadata as patchFileMetadataAction} from "../../actions/metadata";
+import {postFileMetadata as createFileMetadataAction} from "../../actions/metadata";
+import {AddMetadata} from "../metadata/AddMetadata";
+import {ClowderButton} from "../styledComponents/ClowderButton";
+import CloseIcon from "@mui/icons-material/Close";
+import file from "../../reducers/file";
 
 const tab = {
 	fontStyle: "normal",
@@ -46,9 +50,11 @@ export const File = (): JSX.Element => {
 	const dispatch = useDispatch();
 	const listFileSummary = (fileId:string|undefined) => dispatch(fetchFileSummary(fileId));
 	const listFileVersions = (fileId:string|undefined) => dispatch(fetchFileVersions(fileId));
+	const listFileMetadata = (fileId: string | undefined) => dispatch(fetchFileMetadata(fileId));
 	const dismissError = () => dispatch(resetFailedReason());
 	const dismissLogout = () => dispatch(resetLogout());
-	const updateFileMetadata = (fileId: string | undefined, content:object) => dispatch(patchFileMetadataAction(fileId,content));
+	const createFileMetadata = (fileId: string | undefined, metadata:object) => dispatch(createFileMetadataAction(fileId, metadata));
+	const updateFileMetadata = (fileId: string | undefined, metadata:object) => dispatch(patchFileMetadataAction(fileId,metadata));
 	const deleteFileMetadata = (fileId: string | undefined, metadata:object) => dispatch(deleteFileMetadataAction(fileId, metadata));
 
 	const fileSummary = useSelector((state:RootState) => state.file.fileSummary);
@@ -60,6 +66,8 @@ export const File = (): JSX.Element => {
 
 	const [selectedTabIndex, setSelectedTabIndex] = useState(0);
 	const [previews, setPreviews] = useState([]);
+	const [enableAddMetadata, setEnableAddMetadata] = React.useState<boolean>(false);
+	const [metadataRequestForms, setMetadataRequestForms] = useState({});
 
 	// component did mount
 	useEffect(() => {
@@ -129,6 +137,35 @@ export const File = (): JSX.Element => {
 		setSelectedTabIndex(newTabIndex);
 	};
 
+	const setMetadata = (metadata:any) =>{
+		setMetadataRequestForms(prevState => ({...prevState, [metadata.definition]: metadata}));
+	};
+
+	const handleMetadataUpdateFinish = () =>{
+		Object.keys(metadataRequestForms).map(key => {
+			if ("id" in metadataRequestForms[key] && metadataRequestForms[key]["id"] !== undefined
+				&& metadataRequestForms[key]["id"] !== null
+				&& metadataRequestForms[key]["id"] !== "" )
+			{
+				// update existing metadata
+				updateFileMetadata(fileId, metadataRequestForms[key]);
+			}
+			else{
+				// post new metadata if metadata id doesn't exist
+				createFileMetadata(fileId, metadataRequestForms[key]);
+			}
+		});
+
+		// reset the form
+		setMetadataRequestForms({});
+
+		// pulling lastest from the API endpoint
+		listFileMetadata(fileId);
+
+		// switch to display mode
+		setEnableAddMetadata(false);
+	};
+
 	// for breadcrumb
 	const paths = [
 		{
@@ -178,9 +215,6 @@ export const File = (): JSX.Element => {
 									<Tab sx={tab} label="Previews" {...a11yProps(0)} />
 									<Tab sx={tab} label="Version History" {...a11yProps(1)} />
 									<Tab sx={tab} label="Metadata" {...a11yProps(3)} disabled={false}/>
-									<Tab sx={tab} label="Sections" {...a11yProps(2)} disabled={true}/>
-									<Tab sx={tab} label="Extractions" {...a11yProps(4)} disabled={true}/>
-									<Tab sx={tab} label="Comments" {...a11yProps(5)} disabled={true}/>
 								</Tabs>
 							</Box>
 							{/*Preview Tab*/}
@@ -206,9 +240,36 @@ export const File = (): JSX.Element => {
 									<FileVersionHistory fileVersions={fileVersions}/> : <></> }
 							</TabPanel>
 							<TabPanel value={selectedTabIndex} index={2}>
-								<DisplayMetadata updateMetadata={updateFileMetadata}
-												 deleteMetadata={deleteFileMetadata}
-												 resourceType="file" resourceId={fileId} />
+								{
+									enableAddMetadata ?
+										<>
+											<IconButton color="primary" aria-label="close"
+														onClick={()=>{setEnableAddMetadata(false);}}
+														sx={{float:"right"}}
+											>
+												<CloseIcon />
+											</IconButton>
+											<AddMetadata resourceType="file" resourceId={fileId}
+														 setMetadata={setMetadata}
+											/>
+											<Button variant="contained" onClick={handleMetadataUpdateFinish} sx={{ mt: 1, mr: 1 }}>
+												Update
+											</Button>
+											<Button onClick={()=>{setEnableAddMetadata(false);}}
+													sx={{ mt: 1, mr: 1 }}>
+												Cancel
+											</Button>
+										</>
+										:
+										<>
+											<ClowderButton onClick={()=>{setEnableAddMetadata(true);}}>
+												Add/Edit Metadata
+											</ClowderButton>
+											<DisplayMetadata updateMetadata={updateFileMetadata}
+															 deleteMetadata={deleteFileMetadata}
+															 resourceType="file" resourceId={fileId} />
+									    </>
+								}
 							</TabPanel>
 							<TabPanel value={selectedTabIndex} index={4}>
 									Extractions
@@ -226,8 +287,6 @@ export const File = (): JSX.Element => {
 									<Divider light/>
 								</div>
 							}
-							<FileSearch />
-							<Divider light/>
 						</Grid>
 					</Grid>
 				</div>

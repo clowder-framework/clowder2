@@ -1,5 +1,16 @@
 import React, {useEffect, useState} from "react";
-import {Box, Button, Dialog, Divider, Grid, Menu, MenuItem, Tab, Tabs, Typography} from "@mui/material";
+import {
+	Box,
+	Button,
+	Dialog,
+	Divider,
+	Grid, IconButton,
+	Menu,
+	MenuItem,
+	Tab,
+	Tabs,
+	Typography
+} from "@mui/material";
 import {ClowderInput} from "../styledComponents/ClowderInput";
 import {ClowderButton} from "../styledComponents/ClowderButton";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
@@ -26,9 +37,15 @@ import {CreateFolder} from "../folders/CreateFolder";
 import {useSearchParams} from "react-router-dom";
 import {parseDate} from "../../utils/common";
 import config from "../../app.config";
-import {DatasetIn} from "../../openapi/v2";
+import {DatasetIn, MetadataIn} from "../../openapi/v2";
 import {DisplayMetadata} from "../metadata/DisplayMetadata";
-import {patchDatasetMetadata as patchDatasetMetadataAction, deleteDatasetMetadata as deleteDatasetMetadataAction} from "../../actions/metadata";
+import {AddMetadata} from "../metadata/AddMetadata";
+import {
+	patchDatasetMetadata as patchDatasetMetadataAction,
+	deleteDatasetMetadata as deleteDatasetMetadataAction,
+	postDatasetMetadata, fetchDatasetMetadata
+} from "../../actions/metadata";
+import CloseIcon from '@mui/icons-material/Close';
 
 const tab = {
 	fontStyle: "normal",
@@ -58,6 +75,7 @@ export const Dataset = (): JSX.Element => {
 	// Redux connect equivalent
 	const dispatch = useDispatch();
 	const updateDatasetMetadata = (datasetId: string | undefined, content:object) => dispatch(patchDatasetMetadataAction(datasetId,content));
+	const createDatasetMetadata = (datasetId: string|undefined, metadata:MetadataIn) => dispatch(postDatasetMetadata(datasetId, metadata));
 	const deleteDatasetMetadata = (datasetId: string | undefined, metadata:object) => dispatch(deleteDatasetMetadataAction(datasetId, metadata));
 	const deleteDataset = (datasetId:string|undefined) => dispatch(datasetDeleted(datasetId));
 	const editDataset = (datasetId: string|undefined, formData: DatasetIn) => dispatch(updateDataset(datasetId, formData));
@@ -65,6 +83,7 @@ export const Dataset = (): JSX.Element => {
 	const listFilesInDataset = (datasetId:string|undefined, folderId:string|undefined) => dispatch(fetchFilesInDataset(datasetId, folderId));
 	const listFoldersInDataset = (datasetId:string|undefined, parentFolder:string|undefined) => dispatch(fetchFoldersInDataset(datasetId, parentFolder));
 	const listDatasetAbout= (datasetId:string|undefined) => dispatch(fetchDatasetAbout(datasetId));
+	const listDatasetMetadata = (datasetId: string | undefined) => dispatch(fetchDatasetMetadata(datasetId));
 	const dismissError = () => dispatch(resetFailedReason());
 	const dismissLogout = () => dispatch(resetLogout());
 
@@ -83,6 +102,8 @@ export const Dataset = (): JSX.Element => {
 	const [editDescriptionOpen, setEditDescriptionOpen] = React.useState<boolean>(false);
 	const [datasetName, setDatasetName] = React.useState<string>("");
 	const [datasetDescription, setDatasetDescription] = React.useState<string>("");
+	const [enableAddMetadata, setEnableAddMetadata] = React.useState<boolean>(false);
+	const [metadataRequestForms, setMetadataRequestForms] = useState({});
 
 	// component did mount list all files in dataset
 	useEffect(() => {
@@ -146,6 +167,35 @@ export const Dataset = (): JSX.Element => {
 		setEditDescriptionOpen(false);
 	};
 
+	const setMetadata = (metadata:any) =>{
+		setMetadataRequestForms(prevState => ({...prevState, [metadata.definition]: metadata}));
+	};
+
+	const handleMetadataUpdateFinish = () =>{
+		Object.keys(metadataRequestForms).map(key => {
+			if ("id" in metadataRequestForms[key] && metadataRequestForms[key]["id"] !== undefined
+				&& metadataRequestForms[key]["id"] !== null
+				&& metadataRequestForms[key]["id"] !== "" )
+			{
+				// update existing metadata
+				updateDatasetMetadata(datasetId, metadataRequestForms[key]);
+			}
+			else{
+				// post new metadata if metadata id doesn't exist
+				createDatasetMetadata(datasetId, metadataRequestForms[key]);
+			}
+		});
+
+		// reset the form
+		setMetadataRequestForms({});
+
+		// pulling lastest from the API endpoint
+		listDatasetMetadata(datasetId);
+
+		// switch to display mode
+		setEnableAddMetadata(false);
+	};
+
 	// for breadcrumb
 	const paths = [
 		{
@@ -185,18 +235,43 @@ export const Dataset = (): JSX.Element => {
 								<Tabs value={selectedTabIndex} onChange={handleTabChange} aria-label="dataset tabs">
 									<Tab sx={tab} label="Files" {...a11yProps(0)} />
 									<Tab sx={tab} label="Metadata" {...a11yProps(1)} disabled={false}/>
-									<Tab sx={tab} label="Extractions" {...a11yProps(2)} disabled={true}/>
-									<Tab sx={tab} label="Visualizations" {...a11yProps(3)} disabled={true}/>
-									<Tab sx={tab} label="Comments" {...a11yProps(4)} disabled={true}/>
 								</Tabs>
 							</Box>
 							<TabPanel value={selectedTabIndex} index={0}>
 								<FilesTable datasetId={datasetId} datasetName={about.name}/>
 							</TabPanel>
 							<TabPanel value={selectedTabIndex} index={1}>
-								<DisplayMetadata updateMetadata={updateDatasetMetadata}
-												 deleteMetadata={deleteDatasetMetadata}
-												 resourceType="dataset" resourceId={datasetId}/>
+								{
+									enableAddMetadata ?
+										<>
+											<IconButton color="primary" aria-label="close"
+														onClick={()=>{setEnableAddMetadata(false);}}
+														sx={{float:"right"}}
+											>
+												<CloseIcon />
+											</IconButton>
+											<AddMetadata resourceType="dataset" resourceId={datasetId}
+														 setMetadata={setMetadata}
+											/>
+											<Button variant="contained" onClick={handleMetadataUpdateFinish} sx={{ mt: 1, mr: 1 }}>
+												Update
+											</Button>
+											<Button onClick={()=>{setEnableAddMetadata(false);}}
+													sx={{ mt: 1, mr: 1 }}>
+												Cancel
+											</Button>
+										</>
+										:
+										<>
+											<ClowderButton onClick={()=>{setEnableAddMetadata(true);}}>
+												Add/Edit Metadata
+											</ClowderButton>
+											<DisplayMetadata updateMetadata={updateDatasetMetadata}
+															 deleteMetadata={deleteDatasetMetadata}
+															 resourceType="dataset" resourceId={datasetId}/>
+										</>
+
+								}
 							</TabPanel>
 							<TabPanel value={selectedTabIndex} index={2}/>
 							<TabPanel value={selectedTabIndex} index={3}/>
@@ -352,19 +427,6 @@ export const Dataset = (): JSX.Element => {
 								<Typography className="content">Downloads: 0</Typography>
 								<Typography className="content">Last downloaded: Never</Typography>
 							</Box>
-							<Divider/>
-							<Box className="infoCard">
-								<Typography className="title">Tags</Typography>
-								<Grid container spacing={4}>
-									<Grid item lg={8} sm={8} xl={8} xs={12}>
-										<ClowderInput defaultValue="Tag"/>
-									</Grid>
-									<Grid item lg={4} sm={4} xl={4} xs={12}>
-										<ClowderButton disabled={true}>Search</ClowderButton>
-									</Grid>
-								</Grid>
-							</Box>
-							<Divider light/>
 						</Grid>
 					</Grid>
 					<Dialog open={createFileOpen} onClose={() => {

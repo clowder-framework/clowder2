@@ -1,0 +1,23 @@
+{
+    "name" : "LatLon",
+    "description" : "A set of Latitude/Longitude coordinates",
+    "context" : {
+        "longitude" : "https://schema.org/longitude",
+        "latitude" : "https://schema.org/latitude"
+    },
+    "context_url" : null,
+    "fields" : [
+        {
+            "name" : "longitude",
+            "type" : "float",
+            "list" : false,
+            "required" : true
+        },
+        {
+            "name" : "latitude",
+            "type" : "float",
+            "list" : false,
+            "required" : true
+        }
+    ]
+}

@@ -3,14 +3,37 @@ import {InputLabel, MenuItem, FormControl} from "@mui/material";
 import {useState} from "react";
 import {MetadataButtonGroup} from "./MetadataButtonGroup";
 import {ClowderMetadataSelect} from "../styledComponents/ClowderMetadataSelect";
+import {ClowderMetadataFormHelperText} from "../styledComponents/ClowderMetadataFormHelperText";
 
 export const Unit = (props) => {
-	const {widgetName, metadataId, contents, updateMetadata, saveMetadata, deleteMetadata, resourceId} = props;
+	const {widgetName, metadataId, contents, updateMetadata, setMetadata, deleteMetadata, resourceId, initialReadOnly} = props;
 	const [unit, setUnit] = React.useState(contents && contents.unit? contents.unit: "");
-	const [readOnly, setReadOnly] = useState(!!metadataId);
+
+	const [readOnly, setReadOnly] = useState(initialReadOnly);
+
+	const [inputChanged, setInputChanged] = useState(false);
 
 	const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+		setInputChanged(true);
 		setUnit(event.target.value);
+		setMetadata ?
+			metadataId?
+				setMetadata({
+					"id":metadataId,
+					"definition": widgetName,
+					"contents": {
+						"unit":event.target.value,
+					}
+				})
+				:
+				setMetadata({
+					"definition": widgetName,
+					"contents": {
+						"unit":event.target.value,
+					}
+				})
+			:
+			null
 	};
 
 	return (
@@ -27,18 +50,21 @@ export const Unit = (props) => {
 						<MenuItem value={"K"}>Kelvin</MenuItem>
 						<MenuItem value={"s"}>Second</MenuItem>
 					</ClowderMetadataSelect>
+					<ClowderMetadataFormHelperText>{inputChanged? "* You have changed this field. Remember to save/ update.": ""}
+					</ClowderMetadataFormHelperText>
 				</FormControl>
 			</div>
 			<MetadataButtonGroup readOnly={readOnly}
 								 setReadOnly={setReadOnly}
 								 metadataId={metadataId}
+								 setMetadata={setMetadata}
 								 updateMetadata={updateMetadata}
-								 saveMetadata={saveMetadata}
 								 deleteMetadata={deleteMetadata}
 								 resourceId={resourceId}
 								 contents={{
 									 "unit":unit
 								 }}
+								 setInputChanged={setInputChanged}
 								 widgetName={widgetName}
 			/>
 		</>

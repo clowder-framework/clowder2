@@ -26,7 +26,7 @@ RUN npm run build
 # Second stage, final image
 # ----------------------------------------------------------------------
 
-FROM nginx:alpine
+FROM nginx:alpine as clowder-runtime
 
 RUN apk add --no-cache jq
 RUN rm -rf /usr/share/nginx/html/ && \
@@ -34,7 +34,7 @@ RUN rm -rf /usr/share/nginx/html/ && \
   mkdir /usr/share/nginx/html/public \
   mkdir /usr/share/nginx/html/styles
 
-COPY --from=builder /usr/src/app/dist/ /usr/share/nginx/html/
+COPY --from=clowder-build /usr/src/app/dist/ /usr/share/nginx/html/
 COPY src/public /usr/share/nginx/html/public/
 COPY src/styles /usr/share/nginx/html/styles/
 COPY clowder.conf /etc/nginx/conf.d/default.conf

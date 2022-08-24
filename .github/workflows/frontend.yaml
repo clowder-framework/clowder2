@@ -49,10 +49,21 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
       -
-        name: Build and push
+        name: Build and push clowder-build
         uses: docker/build-push-action@v3
         with:
           context: ./frontend
+          target: clowder-build
+          platforms: linux/amd64
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+      -
+        name: Build and push clowder-runtime
+        uses: docker/build-push-action@v3
+        with:
+          context: ./frontend
+          target: clowder-runtime
           platforms: linux/amd64,linux/arm64
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}

@@ -62,6 +62,25 @@ export class MetadataService {
     }
 
     /**
+     * Delete Metadata
+     * Delete metadata by specific ID.
+     * @param metadataId
+     * @returns any Successful Response
+     * @throws ApiError
+     */
+    public static deleteMetadataApiV2MetadataMetadataIdDelete(
+        metadataId: string,
+    ): CancelablePromise<any> {
+        return __request({
+            method: 'DELETE',
+            path: `/api/v2/metadata/${metadataId}`,
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+
+    /**
      * Update Metadata
      * Update metadata. Any fields provided in the contents JSON will be added or updated in the metadata. If context or
      * agent should be changed, use PUT.
