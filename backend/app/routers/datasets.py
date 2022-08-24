@@ -184,7 +184,7 @@ async def save_dataset(
 
 @router.get("", response_model=List[DatasetOut])
 async def get_datasets(
-    user_id=Depends(get_user),
+    user=Depends(get_user),
     db: MongoClient = Depends(dependencies.get_db),
     skip: int = 0,
     limit: int = 2,
@@ -194,7 +194,7 @@ async def get_datasets(
     if mine:
         for doc in (
             await db["datasets"]
-            .find({"author.email": user_id})
+            .find({"author.email": user.email})
             .skip(skip)
             .limit(limit)
             .to_list(length=limit)

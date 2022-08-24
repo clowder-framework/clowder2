@@ -17,7 +17,7 @@ from app.models.extractors import ExtractorIn, ExtractorOut, ExtractorIdentifier
 
 
 class MongoDBRef(BaseModel):
-    collection: str
+    collection: str  # MongoDB collection
     resource_id: PyObjectId
     version: Optional[int]
 
