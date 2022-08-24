@@ -269,7 +269,7 @@ async def edit_dataset(
     ) is not None:
         # TODO: Refactor this with permissions checks etc.
         ds = dict(dataset_info) if dataset_info is not None else {}
-        user = await db["users"].find_one({"_id": ObjectId(user_id)})
+        user = await db["users"].find_one({"email": user_id})
         ds["author"] = UserOut(**user)
         ds["modified"] = datetime.datetime.utcnow()
         try:
@@ -295,7 +295,7 @@ async def patch_dataset(
     ) is not None:
         # TODO: Refactor this with permissions checks etc.
         ds = dict(dataset_info) if dataset_info is not None else {}
-        user = await db["users"].find_one({"_id": ObjectId(user_id)})
+        user = await db["users"].find_one({"email": user_id})
         ds["author"] = UserOut(**user)
         ds["modified"] = datetime.datetime.utcnow()
         try:
