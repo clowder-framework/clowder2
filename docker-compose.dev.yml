@@ -126,3 +126,4 @@ volumes:
   postgres_data:
     driver: local
   rabbitmq:
+  keycloak:
