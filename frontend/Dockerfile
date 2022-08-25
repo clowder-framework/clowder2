@@ -2,7 +2,7 @@
 # First stage, compile application
 # ----------------------------------------------------------------------
 
-FROM node:16.15.1 AS builder
+FROM node:16.15.1 AS clowder-build
 #ENV NODE_ENV=production
 WORKDIR /usr/src/app
 
