@@ -187,7 +187,7 @@ async def get_datasets(
     user_id=Depends(get_user),
     db: MongoClient = Depends(dependencies.get_db),
     skip: int = 0,
-    limit: int = 2,
+    limit: int = 10,
     mine: bool = False,
 ):
     datasets = []
@@ -223,7 +223,7 @@ async def get_dataset_files(
     folder_id: Optional[str] = None,
     db: MongoClient = Depends(dependencies.get_db),
     skip: int = 0,
-    limit: int = 2,
+    limit: int = 10,
 ):
     files = []
     if folder_id is not None:
