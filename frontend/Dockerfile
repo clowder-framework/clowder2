@@ -2,16 +2,16 @@
 # First stage, compile application
 # ----------------------------------------------------------------------
 
-FROM node:14 AS clowder-build
-
+FROM node:16.15.1 AS clowder-build
+#ENV NODE_ENV=production
 WORKDIR /usr/src/app
 
 # development or production
-ARG DEPLOY_ENV=""
-ENV DEPLOY_ENV="${DEPLOY_ENV:-}"
+#ARG DEPLOY_ENV=""
+#ENV DEPLOY_ENV="${DEPLOY_ENV:-}"
 
 # copy only package for caching purposes
-COPY package*.json /usr/src/app/
+COPY ["package.json", "package-lock.json*", "./"]
 COPY tools/ /usr/src/app/tools/
 RUN npm install
 
