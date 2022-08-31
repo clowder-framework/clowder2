@@ -115,6 +115,8 @@ services:
     volumes:
       - rabbitmq:/var/lib/rabbitmq
 
+  # heartbeat listener
+
 ## By default this config uses default local driver,
 ## For custom volumes replace with volume driver configuration.
 volumes:
