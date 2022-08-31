@@ -1,21 +1,23 @@
 import time
 from datetime import datetime
 
-from app.elasticsearch.connect import connect_elasticsearch, create_index, insert_record, search_index, delete_index
+from app.elasticsearch.connect import (
+    connect_elasticsearch,
+    create_index,
+    insert_record,
+    search_index,
+    delete_index,
+)
 
-dummy_index_name = 'dummy_file'
-dummy_record = {'name': 'test',
-            'creator': 'xyz',
-            'created': datetime.now(),
-            'download': 0
-          }
-dummy_query = {
-  "query": {
-      "match": {
-          "name": "test"
-      }
-  }
+dummy_index_name = "dummy_file"
+dummy_record = {
+    "name": "test",
+    "creator": "xyz",
+    "created": datetime.now(),
+    "download": 0,
 }
+dummy_query = {"query": {"match": {"name": "test"}}}
+
 
 def test_elasticsearch():
     es = connect_elasticsearch()
@@ -24,5 +26,5 @@ def test_elasticsearch():
         insert_record(es, dummy_index_name, dummy_record)
         time.sleep(5)
         result = search_index(es, dummy_index_name, dummy_query)
-        assert result['hits']['hits'][0]['_source']['creator'] == 'xyz'
+        assert result["hits"]["hits"][0]["_source"]["creator"] == "xyz"
         delete_index(es, dummy_index_name)

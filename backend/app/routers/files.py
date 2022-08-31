@@ -79,14 +79,15 @@ async def add_file_entry(
     )
     await db["file_versions"].insert_one(new_version.to_mongo())
 
-    #Create an entry in index file in elasticsearch
+    # Create an entry in index file in elasticsearch
     es = connect_elasticsearch()
     create_index(es, "file")
-    doc = { 'name': file_db.name,
-            'creator': file_db.creator.email,
-            'created': datetime.now(),
-            'download': file_db.downloads
-          }
+    doc = {
+        "name": file_db.name,
+        "creator": file_db.creator.email,
+        "created": datetime.now(),
+        "download": file_db.downloads,
+    }
     insert_record(es, "file", doc)
 
 
