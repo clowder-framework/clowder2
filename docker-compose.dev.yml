@@ -116,6 +116,13 @@ services:
       - rabbitmq:/var/lib/rabbitmq
 
   # heartbeat listener
+  extractor-heartbeat:
+    image: "tcnichol/heartbeat"
+    build:
+      context: extractor-heartbeat
+    depends_on:
+      - rabbitmq
+      - mongo
 
 ## By default this config uses default local driver,
 ## For custom volumes replace with volume driver configuration.

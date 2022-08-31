@@ -3,6 +3,7 @@ import json
 from packaging import version
 from app.config import settings
 from pymongo import MongoClient
+import time
 from app.models.extractors import (
     ExtractorBase,
     ExtractorIn,
@@ -76,4 +77,10 @@ def listen_for_heartbeats():
 
 if __name__ == "__main__":
     print("starting heartbeat listener")
-    listen_for_heartbeats()
+    not_connected = True
+    while not_connected:
+        try:
+            listen_for_heartbeats()
+        except Exception as e:
+            print('could not connect trying again in 60 seconds')
+            time.sleep(60)
