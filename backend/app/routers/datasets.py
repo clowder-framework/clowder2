@@ -530,11 +530,11 @@ async def download_dataset(
             file_name = file.name
             if file.folder_id is not None:
                 hierarchy = await _get_folder_hierarchy(file.folder_id, "", db)
-                dest_folder = os.path.join(current_temp_dir, hierarchy.lstrip('/'))
+                dest_folder = os.path.join(current_temp_dir, hierarchy.lstrip("/"))
                 if not os.path.isdir(dest_folder):
                     os.mkdir(dest_folder)
                 file_name = hierarchy + file_name
-            current_file_path = os.path.join(current_temp_dir, file_name.lstrip('/'))
+            current_file_path = os.path.join(current_temp_dir, file_name.lstrip("/"))
 
             content = fs.get_object(settings.MINIO_BUCKET_NAME, str(file.id))
             file_md5_hash = hashlib.md5(content.data).hexdigest()
@@ -624,9 +624,7 @@ async def download_dataset(
         return Response(
             stream.getvalue(),
             media_type="application/x-zip-compressed",
-            headers={
-                "Content-Disposition": f'attachment;filename="{zip_name}"'
-            },
+            headers={"Content-Disposition": f'attachment;filename="{zip_name}"'},
         )
     else:
         raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
