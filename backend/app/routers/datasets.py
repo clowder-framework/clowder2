@@ -498,6 +498,7 @@ async def download_dataset(
     if (
         dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
     ) is not None:
+        dataset = DatasetOut(**dataset)
         current_temp_dir = tempfile.mkdtemp(prefix="rocratedownload")
         crate = ROCrate()
         user_full_name = user.first_name + " " + user.last_name
@@ -508,6 +509,9 @@ async def download_dataset(
         bagit_path = os.path.join(current_temp_dir, "bagit.txt")
         bag_info_path = os.path.join(current_temp_dir, "bag-info.txt")
         tagmanifest_path = os.path.join(current_temp_dir, "tagmanifest-md5.txt")
+
+        with open(manifest_path, "w") as f:
+            pass  # Create empty file so no errors later if the dataset is empty
 
         with open(bagit_path, "w") as f:
             f.write("Bag-Software-Agent: clowder.ncsa.illinois.edu" + "\n")
@@ -526,12 +530,11 @@ async def download_dataset(
             file_name = file.name
             if file.folder_id is not None:
                 hierarchy = await _get_folder_hierarchy(file.folder_id, "", db)
-                os.mkdir(os.path.join(current_temp_dir, hierarchy))
+                dest_folder = os.path.join(current_temp_dir, hierarchy.lstrip('/'))
+                if not os.path.isdir(dest_folder):
+                    os.mkdir(dest_folder)
                 file_name = hierarchy + file_name
-
-            current_file_path = os.path.join(current_temp_dir, file_name)
-            current_file_size = os.path.getsize(current_file_path)
-            bag_size += current_file_size
+            current_file_path = os.path.join(current_temp_dir, file_name.lstrip('/'))
 
             content = fs.get_object(settings.MINIO_BUCKET_NAME, str(file.id))
             file_md5_hash = hashlib.md5(content.data).hexdigest()
@@ -546,6 +549,9 @@ async def download_dataset(
             )
             content.close()
             content.release_conn()
+
+            current_file_size = os.path.getsize(current_file_path)
+            bag_size += current_file_size
 
             # TODO add file metadata
             metadata = []
@@ -573,7 +579,7 @@ async def download_dataset(
             f.write("Bag-Size: " + str(bag_size_kb) + " kB" + "\n")
             f.write("Payload-Oxum: " + str(bag_size) + "." + str(file_count) + "\n")
             f.write("Internal-Sender-Identifier: " + dataset_id + "\n")
-            f.write("Internal-Sender-Description: " + dataset["description"] + "\n")
+            f.write("Internal-Sender-Description: " + dataset.description + "\n")
             f.write("Contact-Name: " + user_full_name + "\n")
             f.write("Contact-Email: " + user.email + "\n")
         crate.add_file(
@@ -603,7 +609,8 @@ async def download_dataset(
             properties={"name": "tagmanifest-md5.txt"},
         )
 
-        path_to_zip = os.path.join(current_temp_dir, dataset["name"] + ".zip")
+        zip_name = dataset.name + ".zip"
+        path_to_zip = os.path.join(current_temp_dir, zip_name)
         crate.write_zip(path_to_zip)
         f = open(path_to_zip, "rb", buffering=0)
         zip_bytes = f.read()
@@ -618,7 +625,7 @@ async def download_dataset(
             stream.getvalue(),
             media_type="application/x-zip-compressed",
             headers={
-                "Content-Disposition": f'attachment;filename={dataset["name"] + ".zip"}'
+                "Content-Disposition": f'attachment;filename="{zip_name}"'
             },
         )
     else:
