@@ -44,7 +44,7 @@ jobs:
 
       # wait for docker containers to come up before running tests
       - name: Sleep for 120 seconds
-        run: sleep 120s
+        run: sleep 180s
         shell: bash
 
       - name: Run test suite
