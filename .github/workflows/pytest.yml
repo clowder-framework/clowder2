@@ -43,8 +43,8 @@ jobs:
         run: docker-compose -f ../docker-compose.dev.yml up -d
 
       # wait for docker containers to come up before running tests
-      - name: Sleep for 60 seconds
-        run: sleep 60s
+      - name: Sleep for 120 seconds
+        run: sleep 120s
         shell: bash
 
       - name: Run test suite
