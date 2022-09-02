@@ -66,7 +66,7 @@ async def add_file_entry(
     file_db.version_num = 1
     file_db.bytes = bytes
     file_db.content_type = content_type if type(content_type) is str else "N/A"
-    new_file = await db["files"].replace_one({"_id": ObjectId(new_file_id)}, file_db.to_mongo())
+    await db["files"].replace_one({"_id": ObjectId(new_file_id)}, file_db.to_mongo())
 
     # Add FileVersion entry and update file
     new_version = FileVersion(
@@ -76,9 +76,7 @@ async def add_file_entry(
         bytes=bytes,
         content_type=file_db.content_type,
     )
-    new_file_version = await db["file_versions"].insert_one(new_version.to_mongo())
-
-    return new_file
+    await db["file_versions"].insert_one(new_version.to_mongo())
 
 
 async def remove_file_entry(
