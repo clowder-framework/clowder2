@@ -59,7 +59,8 @@ export const UploadFile:React.FC<UploadFileProps> = (props: UploadFileProps) => 
 	const handleFinish = () => {
 		// create dataset
 		setFileRequestForm(prevState => ({...prevState, "folder_id":folderId}))
-		uploadFile(fileRequestForm, selectedDatasetId);
+		// setState does not immediately reflect
+		uploadFile({...fileRequestForm, "forder_id": folderId}, selectedDatasetId);
 	}
 
 	useEffect(() => {

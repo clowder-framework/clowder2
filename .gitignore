@@ -52,3 +52,4 @@ dist
 # Ignore swap files (for files currently being edited)
 **/*.swp
 
+backend/keycloak/*
