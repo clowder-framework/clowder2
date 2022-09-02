@@ -1,5 +1,6 @@
 import pika
 import json
+import os
 from packaging import version
 from app.config import settings
 from pymongo import MongoClient
@@ -49,11 +50,16 @@ def callback(ch, method, properties, body):
 
 
 def listen_for_heartbeats():
+    print('connecting with')
+    print('rabbitmqhost is', settings.RABBITMQ_HOST)
     credentials = pika.PlainCredentials(settings.RABBITMQ_USER, settings.RABBITMQ_PASS)
 
     parameters = pika.ConnectionParameters(
         settings.RABBITMQ_HOST, 5672, "/", credentials
     )
+
+    print("the parameters are")
+    print(parameters)
 
     connection = pika.BlockingConnection(parameters)
 
@@ -76,6 +82,8 @@ def listen_for_heartbeats():
 
 
 if __name__ == "__main__":
+    value = os.getenv("TEST", "this is not put in")
+    print(value)
     print("starting heartbeat listener")
     not_connected = True
     while not_connected:

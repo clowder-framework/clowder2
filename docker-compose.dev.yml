@@ -123,6 +123,8 @@ services:
     depends_on:
       - rabbitmq
       - mongo
+    environment:
+      - RABBITMQ_HOST=docker.host.internal
 
 ## By default this config uses default local driver,
 ## For custom volumes replace with volume driver configuration.

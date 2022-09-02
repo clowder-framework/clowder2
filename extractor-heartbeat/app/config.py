@@ -1,5 +1,5 @@
 from typing import List
-
+import os
 from pydantic import BaseSettings, AnyHttpUrl
 
 
@@ -65,7 +65,7 @@ class Settings(BaseSettings):
 
     RABBITMQ_USER = "guest"
     RABBITMQ_PASS = "guest"
-    RABBITMQ_HOST = "localhost"
+    RABBITMQ_HOST = os.getenv("RABBITMQ_HOST", "localhost")
     RABBITMQ_URL = (
         "amqp://" + RABBITMQ_USER + ":" + RABBITMQ_PASS + "@" + RABBITMQ_HOST + "/"
     )
