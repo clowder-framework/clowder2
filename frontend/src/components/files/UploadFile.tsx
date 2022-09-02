@@ -24,7 +24,7 @@ export const UploadFile:React.FC<UploadFileProps> = (props: UploadFileProps) => 
 	// @ts-ignore
 	const getMetadatDefinitions = (name:string|null, skip:number, limit:number) => dispatch(fetchMetadataDefinitions(name, skip,limit));
 	const createFileMetadata = (fileId: string|undefined, metadata:MetadataIn) => dispatch(postFileMetadata(fileId, metadata));
-	const uploadFile = (formData: FormData, selectedDatasetId: string|undefined) => dispatch(fileCreated(formData, selectedDatasetId));
+	const uploadFile = (selectedDatasetId: string|undefined, selectedFolderId: string|undefined, formData: FormData) => dispatch(fileCreated(selectedDatasetId, selectedFolderId, formData));
 	const newFile = useSelector((state:RootState) => state.dataset.newFile);
 
 	useEffect(() => {
@@ -58,9 +58,7 @@ export const UploadFile:React.FC<UploadFileProps> = (props: UploadFileProps) => 
 	// finish button post dataset; dataset ID triggers metadata posting
 	const handleFinish = () => {
 		// create dataset
-		setFileRequestForm(prevState => ({...prevState, "folder_id":folderId}))
-		// setState does not immediately reflect
-		uploadFile({...fileRequestForm, "forder_id": folderId}, selectedDatasetId);
+		uploadFile(selectedDatasetId, folderId, fileRequestForm);
 	}
 
 	useEffect(() => {

@@ -5,6 +5,7 @@ export { ApiError } from './core/ApiError';
 export { CancelablePromise } from './core/CancelablePromise';
 export { OpenAPI } from './core/OpenAPI';
 
+export type { Body_create_dataset_from_zip_api_v2_datasets_createFromZip_post } from './models/Body_create_dataset_from_zip_api_v2_datasets_createFromZip_post';
 export type { Body_get_dataset_metadata_api_v2_datasets__dataset_id__metadata_get } from './models/Body_get_dataset_metadata_api_v2_datasets__dataset_id__metadata_get';
 export type { Body_get_file_metadata_api_v2_files__file_id__metadata_get } from './models/Body_get_file_metadata_api_v2_files__file_id__metadata_get';
 export type { Body_save_file_api_v2_datasets__dataset_id__files_post } from './models/Body_save_file_api_v2_datasets__dataset_id__files_post';
