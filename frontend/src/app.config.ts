@@ -22,7 +22,7 @@ config["apikey"] = apikey;
 
 V2.OpenAPI.BASE = config.hostname;
 
-config["GHIssueBaseURL"] = "https://github.com/clowder-framework/clowder2/issues/new?title=%5BClowder+V2%5D";
+config["GHIssueBaseURL"] = "https://github.com/clowder-framework/clowder2-frontend/issues/new?title=%5BClowder+V2%5D";
 
 // Backend Keycloak login url
 config["KeycloakBaseURL"] = process.env.KeycloakBaseURL || config.hostname + "/api/v2/auth";
