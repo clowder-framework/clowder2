@@ -47,7 +47,7 @@ async def add_file_entry(
     new_file_id = new_file.inserted_id
     if content_type is None:
         content_type = mimetypes.guess_type(file_db.name)
-    content_type = content_type[0] if len(content_type) > 1 else content_type
+        content_type = content_type[0] if len(content_type) > 1 else content_type
 
     # Use unique ID as key for Minio and get initial version ID
     response = fs.put_object(
@@ -66,7 +66,7 @@ async def add_file_entry(
     file_db.version_num = 1
     file_db.bytes = bytes
     file_db.content_type = content_type if type(content_type) is str else "N/A"
-    await db["files"].replace_one({"_id": ObjectId(new_file_id)}, file_db.to_mongo())
+    new_file = await db["files"].replace_one({"_id": ObjectId(new_file_id)}, file_db.to_mongo())
 
     # Add FileVersion entry and update file
     new_version = FileVersion(
@@ -76,7 +76,9 @@ async def add_file_entry(
         bytes=bytes,
         content_type=file_db.content_type,
     )
-    await db["file_versions"].insert_one(new_version.to_mongo())
+    new_file_version = await db["file_versions"].insert_one(new_version.to_mongo())
+
+    return new_file
 
 
 async def remove_file_entry(
