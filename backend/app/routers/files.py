@@ -23,6 +23,7 @@ from app.config import settings
 from app.models.files import FileIn, FileOut, FileVersion, FileDB
 from app.models.users import UserOut
 from app.keycloak_auth import get_user, get_current_user, get_token
+from typing import Union
 
 router = APIRouter()
 
@@ -79,7 +80,7 @@ async def add_file_entry(
 
 
 async def remove_file_entry(
-    file_id: str,
+    file_id: Union[str, ObjectId],
     db: MongoClient,
     fs: Minio,
 ):
