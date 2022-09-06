@@ -16,7 +16,6 @@ from fastapi import (
 from fastapi.responses import StreamingResponse
 from minio import Minio
 from pika.adapters.blocking_connection import BlockingChannel
-from pydantic import Json
 from pymongo import MongoClient
 
 from app import dependencies
@@ -172,7 +171,7 @@ async def delete_file(
     fs: Minio = Depends(dependencies.get_fs),
 ):
     if (file := await db["files"].find_one({"_id": ObjectId(file_id)})) is not None:
-        remove_file_entry(file_id, db, fs)
+        await remove_file_entry(file_id, db, fs)
         return {"deleted": file_id}
     else:
         raise HTTPException(status_code=404, detail=f"File {file_id} not found")

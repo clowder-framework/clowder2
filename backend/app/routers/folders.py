@@ -49,7 +49,7 @@ async def delete_folder(
     if (await db["folders"].find_one({"_id": ObjectId(folder_id)})) is not None:
         await db["folders"].delete_one({"_id": ObjectId(folder_id)})
         async for file in db["files"].find({"folder_id": ObjectId(folder_id)}):
-            remove_file_entry(file.id, db, fs)
+            await remove_file_entry(file.id, db, fs)
         return {"deleted": folder_id}
     else:
         raise HTTPException(status_code=404, detail=f"Folder {folder_id} not found")
