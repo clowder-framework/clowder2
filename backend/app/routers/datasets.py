@@ -325,6 +325,7 @@ async def delete_dataset(
         await db["datasets"].delete_one({"_id": ObjectId(dataset_id)})
         await db.metadata.delete_many({"resource.resource_id": ObjectId(dataset_id)})
         async for file in db["files"].find({"dataset_id": ObjectId(dataset_id)}):
+            file = FileOut(**file)
             await remove_file_entry(file.id, db, fs)
         await db["folders"].delete_many({"dataset_id": ObjectId(dataset_id)})
         return {"deleted": dataset_id}

@@ -9,6 +9,7 @@ from pymongo import MongoClient
 
 from app import dependencies
 from app.routers.files import remove_file_entry
+from app.models.files import FileOut
 
 router = APIRouter()
 
@@ -49,6 +50,7 @@ async def delete_folder(
     if (await db["folders"].find_one({"_id": ObjectId(folder_id)})) is not None:
         await db["folders"].delete_one({"_id": ObjectId(folder_id)})
         async for file in db["files"].find({"folder_id": ObjectId(folder_id)}):
+            file = FileOut(**file)
             await remove_file_entry(file.id, db, fs)
         return {"deleted": folder_id}
     else:
