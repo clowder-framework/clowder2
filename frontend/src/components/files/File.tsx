@@ -26,7 +26,6 @@ import {postFileMetadata as createFileMetadataAction} from "../../actions/metada
 import {AddMetadata} from "../metadata/AddMetadata";
 import {ClowderButton} from "../styledComponents/ClowderButton";
 import CloseIcon from "@mui/icons-material/Close";
-import file from "../../reducers/file";
 
 const tab = {
 	fontStyle: "normal",

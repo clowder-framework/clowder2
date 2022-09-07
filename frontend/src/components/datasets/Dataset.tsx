@@ -128,6 +128,27 @@ export const Dataset = (): JSX.Element => {
 		window.open(`${config.GHIssueBaseURL}+${reason}&body=${encodeURIComponent(stack)}`);
 	}
 
+	// confirmation dialog
+	const [deleteDatasetConfirmOpen, setDeleteDatasetConfirmOpen] = useState(false);
+	const deleteSelectedDataset = () => {
+		if (datasetId) {
+			deleteDataset(datasetId);
+		}
+		setDeleteDatasetConfirmOpen(false);
+		 // Go to Explore page
+		history("/");
+	}
+
+	const [deleteFolderConfirmOpen, setDeleteFolderConfirmOpen] = useState(false);
+	const deleteSelectedFolder = () => {
+		if (folderId) {
+			deleteFolder(folderId);
+		}
+		setDeleteFolderConfirmOpen(false);
+		 // Go to Explore page
+		history(`/datasets/${datasetId}`);
+	}
+
 	// new folder dialog
 	const [newFolder, setNewFolder] = React.useState<boolean>(false);
 	const handleCloseNewFolder = () => {
@@ -213,6 +234,19 @@ export const Dataset = (): JSX.Element => {
 			<TopBar/>
 			<div className="outer-container">
 				<MainBreadcrumbs paths={paths}/>
+				{/*Confirmation dialogue*/}
+				<ActionModal actionOpen={deleteDatasetConfirmOpen} actionTitle="Are you sure?"
+							 actionText="Do you really want to delete this dataset? This process cannot be undone."
+							 actionBtnName="Delete" handleActionBtnClick={deleteSelectedDataset}
+							 handleActionCancel={() => {
+								 setDeleteDatasetConfirmOpen(false);
+							 }}/>
+			    <ActionModal actionOpen={deleteFolderConfirmOpen} actionTitle="Are you sure?"
+							 actionText="Do you really want to delete this folder? This process cannot be undone."
+							 actionBtnName="Delete" handleActionBtnClick={deleteSelectedFolder}
+							 handleActionCancel={() => {
+								 setDeleteFolderConfirmOpen(false);
+							 }}/>
 				{/*Error Message dialogue*/}
 				<ActionModal actionOpen={errorOpen} actionTitle="Something went wrong..." actionText={reason}
 							 actionBtnName="Report" handleActionBtnClick={handleErrorReport}
@@ -314,14 +348,17 @@ export const Dataset = (): JSX.Element => {
 									</MenuItem>
 									<MenuItem sx={optionMenuItem}
 											  onClick={() => {
-												  deleteDataset(datasetId);
 												  handleOptionClose();
-												  // Go to Explore page
-												  history("/");
+												  setDeleteDatasetConfirmOpen(true);
 											  }
 											  }>Delete Dataset</MenuItem>
-									<MenuItem onClick={handleOptionClose} sx={optionMenuItem} disabled={true}>Delete
-										Folder</MenuItem>
+									<MenuItem sx={optionMenuItem}
+											  onClick={() => {
+												  handleOptionClose();
+												  setDeleteFolderConfirmOpen(true);
+											  	}
+											  }>
+										Delete Folder</MenuItem>
 									<MenuItem onClick={handleOptionClose} sx={optionMenuItem}
 											  disabled={true}>Follow</MenuItem>
 									<MenuItem onClick={handleOptionClose} sx={optionMenuItem}
