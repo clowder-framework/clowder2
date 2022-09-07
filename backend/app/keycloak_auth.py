@@ -88,9 +88,17 @@ async def get_current_user(
     """Retrieve the user object from Mongo by first getting user id from JWT and then querying Mongo.
     Potentially expensive. Use `get_current_username` if all you need is user name.
     """
-    userinfo = keycloak_openid.userinfo(token)
-    user = await get_user_out(userinfo["email"], db)
-    return user
+
+    try:
+        userinfo = keycloak_openid.userinfo(token)
+        user = await get_user_out(userinfo["email"], db)
+        return user
+    except KeycloakAuthenticationError as e:
+        raise HTTPException(
+            status_code=e.response_code,
+            detail=json.loads(e.error_message),
+            headers={"WWW-Authenticate": "Bearer"},
+        )
 
 
 async def get_current_username(token: str = Security(oauth2_scheme)) -> str:
@@ -159,7 +167,7 @@ async def retreive_refresh_token(
             return {"access_token": new_tokens["access_token"]}
         except KeycloakGetError as e:
             # refresh token invalid; remove from database
-            db["tokens"].delete_one({"_id": ObjectId(token_exist["_id"])})
+            await db["tokens"].delete_one({"_id": ObjectId(token_exist["_id"])})
             raise HTTPException(
                 status_code=401,
                 detail=str(e),  # "Invalid authentication credentials",

@@ -18,6 +18,9 @@ pipfile = "*"
 email-validator = "*"
 python-keycloak = "*"
 pika = "*"
+pipenv = "*"
+install = "*"
+rocrate = "*"
 
 [dev-packages]
 requests = "*"

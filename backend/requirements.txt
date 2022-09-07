@@ -14,3 +14,4 @@ python-multipart
 python-jose
 python-keycloak
 email-validator
+rocrate
