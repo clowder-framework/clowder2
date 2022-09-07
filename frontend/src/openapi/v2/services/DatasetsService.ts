@@ -1,6 +1,7 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { Body_create_dataset_from_zip_api_v2_datasets_createFromZip_post } from '../models/Body_create_dataset_from_zip_api_v2_datasets_createFromZip_post';
 import type { Body_save_file_api_v2_datasets__dataset_id__files_post } from '../models/Body_save_file_api_v2_datasets__dataset_id__files_post';
 import type { DatasetBase } from '../models/DatasetBase';
 import type { DatasetIn } from '../models/DatasetIn';
@@ -24,7 +25,7 @@ export class DatasetsService {
      */
     public static getDatasetsApiV2DatasetsGet(
         skip?: number,
-        limit: number = 2,
+        limit: number = 10,
         mine: boolean = false,
     ): CancelablePromise<Array<DatasetOut>> {
         return __request({
@@ -145,18 +146,24 @@ export class DatasetsService {
      * Get Dataset Files
      * @param datasetId
      * @param folderId
+     * @param skip
+     * @param limit
      * @returns any Successful Response
      * @throws ApiError
      */
     public static getDatasetFilesApiV2DatasetsDatasetIdFilesGet(
         datasetId: string,
         folderId?: string,
+        skip?: number,
+        limit: number = 10,
     ): CancelablePromise<any> {
         return __request({
             method: 'GET',
             path: `/api/v2/datasets/${datasetId}/files`,
             query: {
                 'folder_id': folderId,
+                'skip': skip,
+                'limit': limit,
             },
             errors: {
                 422: `Validation Error`,
@@ -232,19 +239,19 @@ export class DatasetsService {
     }
 
     /**
-     * Delete Folder
-     * @param datasetId
-     * @param folderId
-     * @returns any Successful Response
+     * Create Dataset From Zip
+     * @param formData
+     * @returns DatasetOut Successful Response
      * @throws ApiError
      */
-    public static deleteFolderApiV2DatasetsDatasetIdFolderFolderIdDelete(
-        datasetId: string,
-        folderId: string,
-    ): CancelablePromise<any> {
+    public static createDatasetFromZipApiV2DatasetsCreateFromZipPost(
+        formData: Body_create_dataset_from_zip_api_v2_datasets_createFromZip_post,
+    ): CancelablePromise<DatasetOut> {
         return __request({
-            method: 'DELETE',
-            path: `/api/v2/datasets/${datasetId}/folder/${folderId}`,
+            method: 'POST',
+            path: `/api/v2/datasets/createFromZip`,
+            formData: formData,
+            mediaType: 'multipart/form-data',
             errors: {
                 422: `Validation Error`,
             },

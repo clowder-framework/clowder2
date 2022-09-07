@@ -1,7 +1,7 @@
 import {MetadataDefinitionOut,
 	MetadataOut as Metadata,
 	FileOut as FileSummary,
-	FileVersion} from "../openapi/v2";
+	FileVersion, FolderOut} from "../openapi/v2";
 
 export interface Dataset {
 	name: string;
@@ -149,11 +149,16 @@ export interface ErrorState{
 	loggedOut: boolean;
 }
 
+export interface FolderState{
+	folders: FolderOut[];
+}
+
 export interface RootState {
 	metadata: MetadataState;
 	error: ErrorState;
 	file:FileState;
 	dataset:DatasetState;
 	user: UserState;
+	folder: FolderState;
 }
 

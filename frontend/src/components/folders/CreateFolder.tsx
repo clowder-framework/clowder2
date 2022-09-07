@@ -11,7 +11,7 @@ import {
 import LoadingOverlay from "react-loading-overlay-ts";
 
 import {useDispatch,} from "react-redux";
-import {folderAdded} from "../../actions/dataset";
+import {folderAdded} from "../../actions/folder";
 
 
 type CreateFolderProps = {

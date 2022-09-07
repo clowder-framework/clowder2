@@ -6,9 +6,10 @@ import {
 	DELETE_DATASET,
 	CREATE_DATASET,
 	RESET_CREATE_DATASET,
-	FOLDER_ADDED, RECEIVE_FOLDERS_IN_DATASET, GET_FOLDER_PATH,
+	RECEIVE_FOLDERS_IN_DATASET,
 	DOWNLOAD_DATASET
 } from "../actions/dataset";
+import {FOLDER_ADDED, GET_FOLDER_PATH} from "../actions/folder";
 import {CREATE_FILE, UPDATE_FILE, DELETE_FILE, RESET_CREATE_FILE} from "../actions/file";
 import {DataAction} from "../types/action";
 import {Author, Dataset, DatasetState} from "../types/data";

@@ -21,10 +21,10 @@ import {
 	datasetDeleted,
 	fetchDatasetAbout,
 	fetchFilesInDataset,
-	fetchFolderPath,
 	fetchFoldersInDataset,
 	updateDataset
 } from "../../actions/dataset";
+import {fetchFolderPath, folderDeleted} from "../../actions/folder";
 import {resetFailedReason, } from "../../actions/common"
 
 import {a11yProps, TabPanel} from "../tabs/TabComponent";
@@ -78,6 +78,7 @@ export const Dataset = (): JSX.Element => {
 	const createDatasetMetadata = (datasetId: string|undefined, metadata:MetadataIn) => dispatch(postDatasetMetadata(datasetId, metadata));
 	const deleteDatasetMetadata = (datasetId: string | undefined, metadata:object) => dispatch(deleteDatasetMetadataAction(datasetId, metadata));
 	const deleteDataset = (datasetId:string|undefined) => dispatch(datasetDeleted(datasetId));
+	const deleteFolder = (folderId:string|undefined) => dispatch(folderDeleted(folderId));
 	const editDataset = (datasetId: string|undefined, formData: DatasetIn) => dispatch(updateDataset(datasetId, formData));
 	const getFolderPath= (folderId:string|undefined) => dispatch(fetchFolderPath(folderId));
 	const listFilesInDataset = (datasetId:string|undefined, folderId:string|undefined) => dispatch(fetchFilesInDataset(datasetId, folderId));
@@ -141,8 +142,8 @@ export const Dataset = (): JSX.Element => {
 
 	const [deleteFolderConfirmOpen, setDeleteFolderConfirmOpen] = useState(false);
 	const deleteSelectedFolder = () => {
-		if (folderId) {
-			deleteFolder(folderId);
+		if (folder) {
+			deleteFolder(folder);
 		}
 		setDeleteFolderConfirmOpen(false);
 		 // Go to Explore page

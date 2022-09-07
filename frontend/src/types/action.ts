@@ -178,6 +178,11 @@ interface DELETE_FILE_METADATA{
 	metadata: Metadata
 }
 
+interface FOLDER_DELETED{
+	type: "FOLDER_DELETED"
+	folder:Folder
+}
+
 export type DataAction =
 	| RECEIVE_FILES_IN_DATASET
 	| RECEIVE_FOLDERS_IN_DATASET
@@ -213,4 +218,5 @@ export type DataAction =
 	| DELETE_DATASET_METADATA
 	| DELETE_FILE_METADATA
 	| DOWNLOAD_FILE
+	| FOLDER_DELETED
 	;
