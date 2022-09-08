@@ -179,9 +179,6 @@ services:
       - "xpack.security.http.ssl.enabled=false"
     volumes:
       - elasticsearch:/usr/share/elasticsearch/data
-    ports:
-      - 9200:9200
-      - 9300:9300
 
 ## By default this config uses default local driver,
 ## For custom volumes replace with volume driver configuration.

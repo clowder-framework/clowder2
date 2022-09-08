@@ -63,5 +63,10 @@ class Settings(BaseSettings):
     # identity providers registered in keycloak, for example cilogon, globus, twitter
     keycloak_ipds = ["cilogon", "globus"]
 
+    # elastic_search local config
+    elasticsearch_url = "http://localhost:9200"
+    elasticsearch_no_of_shards = 5
+    elasticsearch_no_of_replicas = 5
+
 
 settings = Settings()

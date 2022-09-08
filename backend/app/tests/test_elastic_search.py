@@ -1,7 +1,7 @@
 import time
 from datetime import datetime
 
-from app.elasticsearch.connect import (
+from app.elastic_search.connect import (
     connect_elasticsearch,
     create_index,
     insert_record,
@@ -19,7 +19,7 @@ dummy_record = {
 dummy_query = {"query": {"match": {"name": "test"}}}
 
 
-def test_elasticsearch():
+def test_elastic_search():
     es = connect_elasticsearch()
     if es is not None:
         create_index(es, dummy_index_name)
