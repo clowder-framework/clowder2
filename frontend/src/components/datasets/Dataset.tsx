@@ -146,8 +146,14 @@ export const Dataset = (): JSX.Element => {
 			deleteFolder(folderId);
 		}
 		setDeleteFolderConfirmOpen(false);
-		 // TODO: Go to upper level not properly working
-		history(`/datasets/${datasetId}`);
+		 // Go to upper level not properly working
+		if (folderPath != null && folderPath.length > 1) {
+			const parentFolderId = folderPath.at(-2)["folder_id"]
+			history(`/datasets/${datasetId}?folder=${parentFolderId}`);
+		}
+		else{
+			history(`/datasets/${datasetId}`);
+		}
 	}
 
 	// new folder dialog

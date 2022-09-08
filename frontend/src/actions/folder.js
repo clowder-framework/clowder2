@@ -51,7 +51,7 @@ export function folderDeleted(folderId){
 			.then(json => {
 				dispatch({
 					type: FOLDER_DELETED,
-					folder: json,
+					folder: {"id":folderId},
 					receivedAt: Date.now(),
 				});
 			})
