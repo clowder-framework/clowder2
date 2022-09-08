@@ -53,7 +53,8 @@ export default {
 				removeComments: true,
 				collapseWhitespace: true
 			},
-			inject: true
+			inject: true,
+			favicon: "./src/public/favicon.ico"
 		}),
 		new webpack.LoaderOptionsPlugin({
 			debug: true,
