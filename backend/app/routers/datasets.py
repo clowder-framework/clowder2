@@ -10,6 +10,14 @@ from fastapi import APIRouter, HTTPException, Depends, File, UploadFile, Respons
 from fastapi import Form
 from minio import Minio
 from pymongo import MongoClient
+from bson import json_util
+import tempfile
+import rocrate
+import shutil
+from rocrate.rocrate import ROCrate
+from rocrate.model.person import Person
+import hashlib
+import json
 
 from app import keycloak_auth
 from app import dependencies
@@ -46,7 +54,6 @@ clowder_bucket = os.getenv("MINIO_BUCKET_NAME", "clowder")
 
 def _describe_zip_contents(file_list: list):
     """Traverse a list of zipfile entries and create a dictionary structure like so:
-
     {
         ""__CLOWDER_FILE_LIST__"": ['list', 'of', 'root', 'files'],
         "folder_1": {
@@ -120,14 +127,12 @@ async def _create_folder_structure(
     parent_folder_id: Optional[str] = None,
 ):
     """Recursively create folders encountered in folder_path until the target folder is created.
-
     Arguments:
         - dataset_id: destination dataset
         - contents: list of contents in folder (see _describe_zip_contents() for structure)
         - folder_path: full path to folder from dataset root (e.g. folder/subfolder/subfolder2)
         - folder_lookup: mapping from folder_path to folder_id for reference later
         - parent_folder_id: destination folder
-
     """
     for k, v in contents.items():
         if k == "__CLOWDER_FILE_LIST__":
@@ -320,7 +325,8 @@ async def delete_dataset(
         await db["datasets"].delete_one({"_id": ObjectId(dataset_id)})
         await db.metadata.delete_many({"resource.resource_id": ObjectId(dataset_id)})
         async for file in db["files"].find({"dataset_id": ObjectId(dataset_id)}):
-            remove_file_entry(file.id, db, fs)
+            file = FileOut(**file)
+            await remove_file_entry(file.id, db, fs)
         await db["folders"].delete_many({"dataset_id": ObjectId(dataset_id)})
         return {"deleted": dataset_id}
     else:
@@ -493,26 +499,133 @@ async def download_dataset(
     if (
         dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
     ) is not None:
-        dataset = DatasetOut.from_mongo(dataset)
-        stream = io.BytesIO()
-        z = zipfile.ZipFile(stream, "w")
-        async for f in db["files"].find({"dataset_id": dataset.id}):
+        dataset = DatasetOut(**dataset)
+        current_temp_dir = tempfile.mkdtemp(prefix="rocratedownload")
+        crate = ROCrate()
+        user_full_name = user.first_name + " " + user.last_name
+        user_crate_id = str(user.id)
+        crate.add(Person(crate, user_crate_id, properties={"name": user_full_name}))
+
+        manifest_path = os.path.join(current_temp_dir, "manifest-md5.txt")
+        bagit_path = os.path.join(current_temp_dir, "bagit.txt")
+        bag_info_path = os.path.join(current_temp_dir, "bag-info.txt")
+        tagmanifest_path = os.path.join(current_temp_dir, "tagmanifest-md5.txt")
+
+        with open(manifest_path, "w") as f:
+            pass  # Create empty file so no errors later if the dataset is empty
+
+        with open(bagit_path, "w") as f:
+            f.write("Bag-Software-Agent: clowder.ncsa.illinois.edu" + "\n")
+            f.write("Bagging-Date: " + str(datetime.datetime.now()) + "\n")
+
+        with open(bag_info_path, "w") as f:
+            f.write("BagIt-Version: 0.97" + "\n")
+            f.write("Tag-File-Character-Encoding: UTF-8" + "\n")
+
+        bag_size = 0  # bytes
+        file_count = 0
+
+        async for f in db["files"].find({"dataset_id": ObjectId(dataset_id)}):
+            file_count += 1
             file = FileOut.from_mongo(f)
             file_name = file.name
             if file.folder_id is not None:
                 hierarchy = await _get_folder_hierarchy(file.folder_id, "", db)
-                file_name = "/" + hierarchy + file_name
+                dest_folder = os.path.join(current_temp_dir, hierarchy.lstrip("/"))
+                if not os.path.isdir(dest_folder):
+                    os.mkdir(dest_folder)
+                file_name = hierarchy + file_name
+            current_file_path = os.path.join(current_temp_dir, file_name.lstrip("/"))
+
             content = fs.get_object(settings.MINIO_BUCKET_NAME, str(file.id))
-            z.writestr(file_name, content.data)
+            file_md5_hash = hashlib.md5(content.data).hexdigest()
+            with open(current_file_path, "wb") as f1:
+                f1.write(content.data)
+            with open(manifest_path, "a") as mpf:
+                mpf.write(file_md5_hash + " " + file_name + "\n")
+            crate.add_file(
+                current_file_path,
+                dest_path="data/" + file_name,
+                properties={"name": file_name},
+            )
             content.close()
             content.release_conn()
-        z.close()
+
+            current_file_size = os.path.getsize(current_file_path)
+            bag_size += current_file_size
+
+            # TODO add file metadata
+            metadata = []
+            async for md in db["metadata"].find(
+                {"resource.resource_id": ObjectId(file.id)}
+            ):
+                metadata.append(md)
+            if len(metadata) > 0:
+                metadata_filename = file_name + "_metadata.json"
+                metadata_filename_temp_path = os.path.join(
+                    current_temp_dir, metadata_filename
+                )
+                metadata_content = json_util.dumps(metadata)
+                with open(metadata_filename_temp_path, "w") as f:
+                    f.write(metadata_content)
+                crate.add_file(
+                    metadata_filename_temp_path,
+                    dest_path="metadata/" + metadata_filename,
+                    properties={"name": metadata_filename},
+                )
+
+        bag_size_kb = bag_size / 1024
+
+        with open(bagit_path, "a") as f:
+            f.write("Bag-Size: " + str(bag_size_kb) + " kB" + "\n")
+            f.write("Payload-Oxum: " + str(bag_size) + "." + str(file_count) + "\n")
+            f.write("Internal-Sender-Identifier: " + dataset_id + "\n")
+            f.write("Internal-Sender-Description: " + dataset.description + "\n")
+            f.write("Contact-Name: " + user_full_name + "\n")
+            f.write("Contact-Email: " + user.email + "\n")
+        crate.add_file(
+            bagit_path, dest_path="bagit.txt", properties={"name": "bagit.txt"}
+        )
+        crate.add_file(
+            manifest_path,
+            dest_path="manifest-md5.txt",
+            properties={"name": "manifest-md5.txt"},
+        )
+        crate.add_file(
+            bag_info_path, dest_path="bag-info.txt", properties={"name": "bag-info.txt"}
+        )
+
+        # Generate tag manifest file
+        manifest_md5_hash = hashlib.md5(open(manifest_path, "rb").read()).hexdigest()
+        bagit_md5_hash = hashlib.md5(open(bagit_path, "rb").read()).hexdigest()
+        bag_info_md5_hash = hashlib.md5(open(bag_info_path, "rb").read()).hexdigest()
+
+        with open(tagmanifest_path, "w") as f:
+            f.write(bagit_md5_hash + " " + "bagit.txt" + "\n")
+            f.write(manifest_md5_hash + " " + "manifest-md5.txt" + "\n")
+            f.write(bag_info_md5_hash + " " + "bag-info.txt" + "\n")
+        crate.add_file(
+            tagmanifest_path,
+            dest_path="tagmanifest-md5.txt",
+            properties={"name": "tagmanifest-md5.txt"},
+        )
+
+        zip_name = dataset.name + ".zip"
+        path_to_zip = os.path.join(current_temp_dir, zip_name)
+        crate.write_zip(path_to_zip)
+        f = open(path_to_zip, "rb", buffering=0)
+        zip_bytes = f.read()
+        stream = io.BytesIO(zip_bytes)
+        f.close()
+        try:
+            shutil.rmtree(current_temp_dir)
+        except Exception as e:
+            print("could not delete file")
+            print(e)
         return Response(
             stream.getvalue(),
             media_type="application/x-zip-compressed",
-            headers={
-                "Content-Disposition": f'attachment;filename="{dataset.name}.zip"'
-            },
+            headers={"Content-Disposition": f'attachment;filename="{zip_name}"'},
         )
     else:
         raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
