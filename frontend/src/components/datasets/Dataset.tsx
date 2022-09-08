@@ -80,7 +80,7 @@ export const Dataset = (): JSX.Element => {
 	const deleteDataset = (datasetId:string|undefined) => dispatch(datasetDeleted(datasetId));
 	const deleteFolder = (folderId:string|undefined) => dispatch(folderDeleted(folderId));
 	const editDataset = (datasetId: string|undefined, formData: DatasetIn) => dispatch(updateDataset(datasetId, formData));
-	const getFolderPath= (folderId: string|undefined) => dispatch(fetchFolderPath(folderId));
+	const getFolderPath= (folderId: string | null) => dispatch(fetchFolderPath(folderId));
 	const listFilesInDataset = (datasetId: string|undefined, folderId: string | null) => dispatch(fetchFilesInDataset(datasetId, folderId));
 	const listFoldersInDataset = (datasetId: string|undefined, parentFolder: string | null) => dispatch(fetchFoldersInDataset(datasetId, parentFolder));
 	const listDatasetAbout= (datasetId:string|undefined) => dispatch(fetchDatasetAbout(datasetId));
@@ -92,7 +92,6 @@ export const Dataset = (): JSX.Element => {
 	const reason = useSelector((state: RootState) => state.error.reason);
 	const stack = useSelector((state: RootState) => state.error.stack);
 	const folderPath = useSelector((state: RootState) => state.folder.folderPath);
-	const folders = useSelector((state: RootState) => state.folder.folders);
 
 	// state
 	const [selectedTabIndex, setSelectedTabIndex] = useState<number>(0);
@@ -147,8 +146,8 @@ export const Dataset = (): JSX.Element => {
 			deleteFolder(folderId);
 		}
 		setDeleteFolderConfirmOpen(false);
-		 // Go to Explore page
-		// history(`/datasets/${datasetId}`);
+		 // TODO: Go to upper level not properly working
+		history(`/datasets/${datasetId}`);
 	}
 
 	// new folder dialog
