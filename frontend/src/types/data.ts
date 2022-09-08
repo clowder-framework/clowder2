@@ -11,7 +11,6 @@ export interface Dataset {
 	created: string | Date;
 	modified: string | Date;
 	files: string[];
-	folders: string[];
 	status: string;
 	views: string;
 	downloads: string;
@@ -120,8 +119,6 @@ export interface DatasetState{
 	newDataset: Dataset;
 	newFile: FileSummary;
 	about: Dataset;
-	folders: Folder[];
-	folderPath: string[];
 }
 export interface MetadataState{
 	metadataDefinitionList: MetadataDefinitionOut[],
@@ -151,6 +148,7 @@ export interface ErrorState{
 
 export interface FolderState{
 	folders: FolderOut[];
+	folderPath: String[];
 }
 
 export interface RootState {

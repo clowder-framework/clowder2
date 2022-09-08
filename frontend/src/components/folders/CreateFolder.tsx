@@ -15,8 +15,8 @@ import {folderAdded} from "../../actions/folder";
 
 
 type CreateFolderProps = {
-	datasetId: string,
-	parentFolder: string,
+	datasetId: string|undefined,
+	parentFolder: string|undefined|null,
 	handleClose:(open:boolean) => void,
 	open: boolean;
 }

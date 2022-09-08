@@ -67,31 +67,32 @@ export const Dataset = (): JSX.Element => {
 
 	// search parameters
 	let [searchParams, setSearchParams] = useSearchParams();
-	const folder = searchParams.get("folder");
+	const folderId = searchParams.get("folder");
 
 	// use history hook to redirect/navigate between routes
 	const history = useNavigate();
 
 	// Redux connect equivalent
 	const dispatch = useDispatch();
-	const updateDatasetMetadata = (datasetId: string | undefined, content:object) => dispatch(patchDatasetMetadataAction(datasetId,content));
+	const updateDatasetMetadata = (datasetId: string|undefined, content:object) => dispatch(patchDatasetMetadataAction(datasetId,content));
 	const createDatasetMetadata = (datasetId: string|undefined, metadata:MetadataIn) => dispatch(postDatasetMetadata(datasetId, metadata));
-	const deleteDatasetMetadata = (datasetId: string | undefined, metadata:object) => dispatch(deleteDatasetMetadataAction(datasetId, metadata));
+	const deleteDatasetMetadata = (datasetId: string|undefined, metadata:object) => dispatch(deleteDatasetMetadataAction(datasetId, metadata));
 	const deleteDataset = (datasetId:string|undefined) => dispatch(datasetDeleted(datasetId));
 	const deleteFolder = (folderId:string|undefined) => dispatch(folderDeleted(folderId));
 	const editDataset = (datasetId: string|undefined, formData: DatasetIn) => dispatch(updateDataset(datasetId, formData));
-	const getFolderPath= (folderId:string|undefined) => dispatch(fetchFolderPath(folderId));
-	const listFilesInDataset = (datasetId:string|undefined, folderId:string|undefined) => dispatch(fetchFilesInDataset(datasetId, folderId));
-	const listFoldersInDataset = (datasetId:string|undefined, parentFolder:string|undefined) => dispatch(fetchFoldersInDataset(datasetId, parentFolder));
+	const getFolderPath= (folderId: string|undefined) => dispatch(fetchFolderPath(folderId));
+	const listFilesInDataset = (datasetId: string|undefined, folderId: string | null) => dispatch(fetchFilesInDataset(datasetId, folderId));
+	const listFoldersInDataset = (datasetId: string|undefined, parentFolder: string | null) => dispatch(fetchFoldersInDataset(datasetId, parentFolder));
 	const listDatasetAbout= (datasetId:string|undefined) => dispatch(fetchDatasetAbout(datasetId));
-	const listDatasetMetadata = (datasetId: string | undefined) => dispatch(fetchDatasetMetadata(datasetId));
+	const listDatasetMetadata = (datasetId: string|undefined) => dispatch(fetchDatasetMetadata(datasetId));
 	const dismissError = () => dispatch(resetFailedReason());
 
 	// mapStateToProps
 	const about = useSelector((state: RootState) => state.dataset.about);
 	const reason = useSelector((state: RootState) => state.error.reason);
 	const stack = useSelector((state: RootState) => state.error.stack);
-	const folderPath = useSelector((state: RootState) => state.dataset.folderPath);
+	const folderPath = useSelector((state: RootState) => state.folder.folderPath);
+	const folders = useSelector((state: RootState) => state.folder.folders);
 
 	// state
 	const [selectedTabIndex, setSelectedTabIndex] = useState<number>(0);
@@ -106,10 +107,10 @@ export const Dataset = (): JSX.Element => {
 
 	// component did mount list all files in dataset
 	useEffect(() => {
-		listFilesInDataset(datasetId, folder);
-		listFoldersInDataset(datasetId, folder);
+		listFilesInDataset(datasetId, folderId);
+		listFoldersInDataset(datasetId, folderId);
 		listDatasetAbout(datasetId);
-		getFolderPath(folder);
+		getFolderPath(folderId);
 	}, [searchParams]);
 
 	// Error msg dialog
@@ -142,12 +143,12 @@ export const Dataset = (): JSX.Element => {
 
 	const [deleteFolderConfirmOpen, setDeleteFolderConfirmOpen] = useState(false);
 	const deleteSelectedFolder = () => {
-		if (folder) {
-			deleteFolder(folder);
+		if (folderId) {
+			deleteFolder(folderId);
 		}
 		setDeleteFolderConfirmOpen(false);
 		 // Go to Explore page
-		history(`/datasets/${datasetId}`);
+		// history(`/datasets/${datasetId}`);
 	}
 
 	// new folder dialog
@@ -338,7 +339,7 @@ export const Dataset = (): JSX.Element => {
 												  handleOptionClose();
 											  }
 											  }>Add Folder</MenuItem>
-									<CreateFolder datasetId={datasetId} parentFolder={folder} open={newFolder}
+									<CreateFolder datasetId={datasetId} parentFolder={folderId} open={newFolder}
 												  handleClose={handleCloseNewFolder}/>
 									{/*backend not implemented yet*/}
 									<MenuItem sx={optionMenuItem}
@@ -459,7 +460,7 @@ export const Dataset = (): JSX.Element => {
 					<Dialog open={createFileOpen} onClose={() => {
 						setCreateFileOpen(false);
 					}} fullWidth={true}  maxWidth="lg" aria-labelledby="form-dialog">
-						<UploadFile selectedDatasetId={datasetId} selectedDatasetName={about.name} folderId={folder}/>
+						<UploadFile selectedDatasetId={datasetId} selectedDatasetName={about.name} folderId={folderId}/>
 					</Dialog>
 				</div>
 			</div>
