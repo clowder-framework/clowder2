@@ -16,7 +16,7 @@ dummy_record = {
     "created": datetime.now(),
     "download": 0,
 }
-dummy_query = {"query": {"match": {"name": "test"}}}
+dummy_query = {"match": {"name": "test"}}
 
 
 def test_elastic_search():

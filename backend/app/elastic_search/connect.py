@@ -23,7 +23,7 @@ def connect_elasticsearch():
 
 
 # Create index
-def create_index(es_object, index_name):
+def create_index(es_client, index_name):
     created = False
     # index settings
     settings = {
@@ -38,14 +38,12 @@ def create_index(es_object, index_name):
                 "creator": {"type": "text"},
                 "download": {"type": "long"},
             }
-        },
+        }
     }
 
-    doc = {"name": "text", "created": "date", "creator": "text", "download": "long"}
-    created = False
     try:
-        if not es_object.indices.exists(index=index_name):
-            es_object.indices.create(index=index_name, body=settings)
+        if not es_client.indices.exists(index=index_name):
+            es_client.indices.create(index=index_name, settings=settings)
             logger.info("Created Index")
             created = True
     except BadRequestError as ex:
@@ -55,17 +53,17 @@ def create_index(es_object, index_name):
 
 
 # Insert a record
-def insert_record(es_object, index_name, doc):
+def insert_record(es_client, index_name, doc):
     try:
-        es_object.index(index=index_name, document=doc)
+        es_client.index(index=index_name, document=doc)
     except BadRequestError as ex:
         logger.error(str(ex))
 
 
 # Search
-def search_index(es_object, index_name, query):
+def search_index(es_client, index_name, query):
     try:
-        res = es_object.search(index=index_name, body=query)
+        res = es_client.search(index=index_name, query=query)
         logger.info("Got %d Hits:" % res["hits"]["total"]["value"])
         return res
     except BadRequestError as ex:
@@ -73,8 +71,8 @@ def search_index(es_object, index_name, query):
 
 
 # Delete an index
-def delete_index(es_object, index_name):
+def delete_index(es_client, index_name):
     try:
-        es_object.options(ignore_status=[400, 404]).indices.delete(index=index_name)
+        es_client.options(ignore_status=[400, 404]).indices.delete(index=index_name)
     except BadRequestError as ex:
         logger.error(str(ex))
