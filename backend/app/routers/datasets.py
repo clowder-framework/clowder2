@@ -3,7 +3,7 @@ import io
 import os
 import zipfile
 import tempfile
-from typing import List, Optional, BinaryIO
+from typing import List, Optional, BinaryIO, Union
 from collections.abc import Mapping, Iterable
 from bson import ObjectId
 from fastapi import APIRouter, HTTPException, Depends, File, UploadFile, Response
@@ -171,6 +171,14 @@ async def _get_folder_hierarchy(
     if folder.parent_folder is not None:
         hierarchy = await _get_folder_hierarchy(folder.parent_folder, hierarchy, db)
     return hierarchy
+
+
+async def remove_folder_entry(
+    folder_id: Union[str, ObjectId],
+    db: MongoClient,
+):
+    """Remove FolderDB object into MongoDB"""
+    await db["folders"].delete_one({"_id": ObjectId(folder_id)})
 
 
 @router.post("", response_model=DatasetOut)
@@ -379,6 +387,36 @@ async def get_dataset_folders(
             folders.append(FolderDB.from_mongo(f))
     return folders
 
+@router.delete("/{dataset_id}/folders/{folder_id}")
+async def delete_folder(
+    dataset_id: str,
+    folder_id: str,
+    db: MongoClient = Depends(dependencies.get_db),
+    fs: Minio = Depends(dependencies.get_fs),
+):
+    if (await db["folders"].find_one({"_id": ObjectId(folder_id)})) is not None:
+        # delete current folder and files
+        await remove_folder_entry(folder_id, db)
+        async for file in db["files"].find({"folder_id": ObjectId(folder_id)}):
+            file = FileOut(**file)
+            await remove_file_entry(file.id, db, fs)
+
+        # list all child folders and delete child folders/files
+        async for folder in db["folders"].find(
+            {
+                "dataset_id": ObjectId(dataset_id),
+                "parent_folder": ObjectId(folder_id),
+            }
+        ):
+            folder = FolderOut(**folder)
+            await remove_folder_entry(folder.id, db)
+            async for file in db["files"].find({"folder_id": ObjectId(folder.id)}):
+                file = FileOut(**file)
+                await remove_file_entry(file.id, db, fs)
+
+        return {"deleted": folder_id}
+    else:
+        raise HTTPException(status_code=404, detail=f"Folder {folder_id} not found")
 
 @router.post("/{dataset_id}/files", response_model=FileOut)
 async def save_file(
