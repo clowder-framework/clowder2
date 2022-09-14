@@ -38,7 +38,7 @@ def create_index(es_client, index_name):
                 "creator": {"type": "text"},
                 "download": {"type": "long"},
             }
-        }
+        },
     }
 
     try:
