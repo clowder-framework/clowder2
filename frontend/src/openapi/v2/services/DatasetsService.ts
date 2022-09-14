@@ -239,6 +239,26 @@ export class DatasetsService {
     }
 
     /**
+     * Delete Folder
+     * @param datasetId
+     * @param folderId
+     * @returns any Successful Response
+     * @throws ApiError
+     */
+    public static deleteFolderApiV2DatasetsDatasetIdFoldersFolderIdDelete(
+        datasetId: string,
+        folderId: string,
+    ): CancelablePromise<any> {
+        return __request({
+            method: 'DELETE',
+            path: `/api/v2/datasets/${datasetId}/folders/${folderId}`,
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+
+    /**
      * Create Dataset From Zip
      * @param formData
      * @returns DatasetOut Successful Response

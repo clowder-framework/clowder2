@@ -45,9 +45,9 @@ export function fetchFolderPath(folderId){
 }
 
 export const FOLDER_DELETED = "FOLDER_DELETED";
-export function folderDeleted(folderId){
+export function folderDeleted(datasetId, folderId){
 	return (dispatch) => {
-		return V2.FoldersService.deleteFolderApiV2FoldersFolderIdDelete(folderId)
+		return V2.DatasetsService.deleteFolderApiV2DatasetsDatasetIdFoldersFolderIdDelete(datasetId, folderId)
 			.then(json => {
 				dispatch({
 					type: FOLDER_DELETED,
@@ -56,7 +56,7 @@ export function folderDeleted(folderId){
 				});
 			})
 			.catch(reason => {
-				dispatch(handleErrors(reason, folderDeleted(folderId)));
+				dispatch(handleErrors(reason, folderDeleted(datasetId, folderId)));
 			});
 	};
 }

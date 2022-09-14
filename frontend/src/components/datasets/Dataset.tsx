@@ -46,6 +46,7 @@ import {
 	postDatasetMetadata, fetchDatasetMetadata
 } from "../../actions/metadata";
 import CloseIcon from '@mui/icons-material/Close';
+import dataset from "../../reducers/dataset";
 
 const tab = {
 	fontStyle: "normal",
@@ -78,7 +79,7 @@ export const Dataset = (): JSX.Element => {
 	const createDatasetMetadata = (datasetId: string|undefined, metadata:MetadataIn) => dispatch(postDatasetMetadata(datasetId, metadata));
 	const deleteDatasetMetadata = (datasetId: string|undefined, metadata:object) => dispatch(deleteDatasetMetadataAction(datasetId, metadata));
 	const deleteDataset = (datasetId:string|undefined) => dispatch(datasetDeleted(datasetId));
-	const deleteFolder = (folderId:string|undefined) => dispatch(folderDeleted(folderId));
+	const deleteFolder = (datasetId:string|undefined, folderId:string|undefined) => dispatch(folderDeleted(datasetId, folderId));
 	const editDataset = (datasetId: string|undefined, formData: DatasetIn) => dispatch(updateDataset(datasetId, formData));
 	const getFolderPath= (folderId: string | null) => dispatch(fetchFolderPath(folderId));
 	const listFilesInDataset = (datasetId: string|undefined, folderId: string | null) => dispatch(fetchFilesInDataset(datasetId, folderId));
@@ -143,7 +144,7 @@ export const Dataset = (): JSX.Element => {
 	const [deleteFolderConfirmOpen, setDeleteFolderConfirmOpen] = useState(false);
 	const deleteSelectedFolder = () => {
 		if (folderId) {
-			deleteFolder(folderId);
+			deleteFolder(datasetId, folderId);
 		}
 		setDeleteFolderConfirmOpen(false);
 		 // Go to upper level not properly working
