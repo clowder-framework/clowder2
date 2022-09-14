@@ -1,7 +1,7 @@
 import collections.abc
 import traceback
 from datetime import datetime
-from typing import Optional, List
+from typing import Optional, List, Union
 from enum import Enum
 
 from bson import ObjectId
@@ -31,13 +31,25 @@ FIELD_TYPES = {
     "date": datetime.date,
     "time": datetime.time,
     "dict": dict,  # TODO: does this work?
+    "enum": str,  # TODO: need a way to validate enum,
+    "tuple": tuple,
 }  # JSON schema can handle this for us?
+
+
+class MetadataConfig(MongoModel):
+    type: str = "str"  # must be one of FIELD_TYPES
+
+
+class MetadataEnumConfig(MongoModel):
+    type: str = "enum"
+    options: List[str]  # a list of options must be provided if type is enum
 
 
 class MetadataField(MongoModel):
     name: str
-    type: str = "str"  # must be one of FIELD_TYPES
     list: bool = False  # whether a list[type] is acceptable
+    widgetType: str = "TextField"  # match material ui widget name?
+    config: Union[MetadataEnumConfig, MetadataConfig]
     # TODO: Eventually move this to space level?
     required: bool = False  # Whether the definition requires this field
 
@@ -110,7 +122,7 @@ def validate_definition(contents: dict, metadata_def: MetadataDefinitionOut):
     for field in metadata_def.fields:
         if field.name in contents:
             value = contents[field.name]
-            t = FIELD_TYPES[field.type]
+            t = FIELD_TYPES[field.config.type]
             try:
                 # Try casting value as required type, raise exception if unable
                 contents[field.name] = t(contents[field.name])
@@ -124,11 +136,11 @@ def validate_definition(contents: dict, metadata_def: MetadataDefinitionOut):
                     except:
                         raise HTTPException(
                             status_code=400,
-                            detail=f"{metadata_def.name} field {field.name} requires {field.type} for all values in list",
+                            detail=f"{metadata_def.name} field {field.name} requires {field.config.type} for all values in list",
                         )
                 raise HTTPException(
                     status_code=400,
-                    detail=f"{metadata_def.name} field {field.name} requires {field.type}",
+                    detail=f"{metadata_def.name} field {field.name} requires {field.config.type}",
                 )
         elif field.required:
             raise HTTPException(

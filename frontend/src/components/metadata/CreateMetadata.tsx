@@ -1,9 +1,10 @@
-import React, {useEffect, useState} from "react";
+import React, {useEffect} from "react";
 import {Box, Typography} from "@mui/material";
 import metadataConfig from "../../metadata.config";
 import {useSelector, useDispatch} from "react-redux";
 import {RootState} from "../../types/data";
 import {fetchMetadataDefinitions} from "../../actions/metadata";
+
 
 type MetadataType = {
 	setMetadata: any,
@@ -29,26 +30,27 @@ export const CreateMetadata = (props: MetadataType) => {
 		<>
 			{
 				metadataDefinitionList.map((metadata) => {
-					if (metadataConfig[metadata.name]) {
-						return (
-							<Box className="inputGroup">
-								<Typography variant="h6">{metadata.name}</Typography>
-								<Typography variant="subtitle2">{metadata.description}</Typography>
-								{
-									(() => {
-										return React.cloneElement(
-											metadataConfig[metadata.name],
-											{
-												widgetName: metadata.name,
-												setMetadata: setMetadata,
-												initialReadOnly: false,
-											}
-										);
-									})()
-								}
-							</Box>
-						);
-					}
+					return (
+						<Box className="inputGroup">
+							<Typography variant="h6">{metadata.name}</Typography>
+							<Typography variant="subtitle2">{metadata.description}</Typography>
+							{
+								metadata.fields.map(field => {
+									return React.cloneElement(
+										// if nothing match fall back to default widget
+										metadataConfig[field.widgetType ?? "NA"] ?? metadataConfig["NA"],
+										{
+											widgetName: metadata.name,
+											fieldName: field.name,
+											options: field.config.options ?? [],
+											setMetadata: setMetadata,
+											initialReadOnly: false,
+										}
+									)
+								})
+							}
+						</Box>
+					);
 				})
 			}
 		</>

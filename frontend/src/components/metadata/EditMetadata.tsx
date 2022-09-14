@@ -16,7 +16,7 @@ type MetadataType = {
 This is the interface add more metadata on a existing resource
 Uses metadata definition as well as created metadata
 */
-export const AddMetadata = (props: MetadataType) => {
+export const EditMetadata = (props: MetadataType) => {
 
 	const {setMetadata, resourceType, resourceId} = props;
 
@@ -63,48 +63,55 @@ export const AddMetadata = (props: MetadataType) => {
 
 					return metadataDefinitionList.map((metadataDef) => {
 						// filter and only show those do not already created
-						if (!metadataNameList.includes(metadataDef.name) && metadataConfig[metadataDef.name]) {
+						if (!metadataNameList.includes(metadataDef.name)) {
 							return (
 								<Box className="inputGroup">
 									<Typography variant="h6">{metadataDef.name}</Typography>
 									<Typography variant="subtitle2">{metadataDef.description}</Typography>
+
 									{
-										(() => {
+										// construct metadata using its definition
+										metadataDef.fields.map(field => {
 											return React.cloneElement(
-												metadataConfig[metadataDef.name],
+												metadataConfig[field.widgetType ?? "NA"] ?? metadataConfig["NA"],
 												{
-													resourceId: resourceId,
 													widgetName: metadataDef.name,
+													fieldName: field.name,
+													options: field.config.options ?? [],
 													setMetadata: setMetadata,
 													initialReadOnly: false,
 												}
-											);
-										})()
+											)
+										})
 									}
 								</Box>
 							);
 						}
 						else{
 							return metadataList.map((metadata) => {
-								if (metadataDef.name === metadata.definition && metadataConfig[metadata.definition]) {
+								if (metadataDef.name === metadata.definition) {
 									return (
 										<Box className="inputGroup">
 											<Typography variant="h6">{metadata.definition}</Typography>
 											<Typography variant="subtitle2">{metadata.description}</Typography>
+
 											{
-												(() => {
+												// construct metadata using its definition
+												metadataDef.fields.map(field => {
 													return React.cloneElement(
-														metadataConfig[metadata.definition],
+														metadataConfig[field.widgetType ?? "NA"] ?? metadataConfig["NA"],
 														{
-															resourceId: resourceId,
-															widgetName: metadata.definition,
+															widgetName: metadataDef.name,
+															fieldName: field.name,
+															options: field.config.options ?? [],
 															setMetadata: setMetadata,
 															initialReadOnly: false,
+															resourceId: resourceId,
 															contents: metadata.contents ?? null,
 															metadataId: metadata.id ?? null,
 														}
-													);
-												})()
+													)
+												})
 											}
 											<Agent created={metadata.created} agent={metadata.agent}/>
 										</Box>
