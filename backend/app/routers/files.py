@@ -20,6 +20,11 @@ from pymongo import MongoClient
 
 from app import dependencies
 from app.config import settings
+from app.elastic_search.connect import (
+    connect_elasticsearch,
+    create_index,
+    insert_record,
+)
 from app.models.files import FileIn, FileOut, FileVersion, FileDB
 from app.models.users import UserOut
 from app.keycloak_auth import get_user, get_current_user, get_token
@@ -77,6 +82,17 @@ async def add_file_entry(
         content_type=file_db.content_type,
     )
     await db["file_versions"].insert_one(new_version.to_mongo())
+
+    # Create an entry in index file in elastic_search
+    es = connect_elasticsearch()
+    create_index(es, "file")
+    doc = {
+        "name": file_db.name,
+        "creator": file_db.creator.email,
+        "created": datetime.now(),
+        "download": file_db.downloads,
+    }
+    insert_record(es, "file", doc)
 
 
 async def remove_file_entry(
