@@ -1,7 +1,11 @@
 import json
 
 from fastapi import APIRouter, HTTPException, Depends
-from keycloak.exceptions import KeycloakAuthenticationError, KeycloakGetError, KeycloakPostError
+from keycloak.exceptions import (
+    KeycloakAuthenticationError,
+    KeycloakGetError,
+    KeycloakPostError,
+)
 from passlib.hash import bcrypt
 from pymongo import MongoClient
 
