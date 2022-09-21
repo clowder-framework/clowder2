@@ -123,8 +123,8 @@ async def auth(
     # create user in db if it doesn't already exist; get the user_id
     userinfo = keycloak_openid.userinfo(access_token)
     keycloak_id = userinfo["sub"]
-    given_name = userinfo["given_name"]
-    family_name = userinfo["family_name"]
+    given_name = userinfo.get("given_name", " ")
+    family_name = userinfo.get("family_name", " ")
     email = userinfo["email"]
     user = UserDB(
         email=email,

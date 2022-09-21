@@ -2,6 +2,6 @@
 /* tslint:disable */
 /* eslint-disable */
 
-export type Body_save_file_api_v2_datasets__dataset_id__files_post = {
+export type Body_create_dataset_from_zip_api_v2_datasets_createFromZip_post = {
     file: Blob;
 }

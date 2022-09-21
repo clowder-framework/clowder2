@@ -16,14 +16,19 @@ from fastapi import (
 from fastapi.responses import StreamingResponse
 from minio import Minio
 from pika.adapters.blocking_connection import BlockingChannel
-from pydantic import Json
 from pymongo import MongoClient
 
 from app import dependencies
 from app.config import settings
+from app.elastic_search.connect import (
+    connect_elasticsearch,
+    create_index,
+    insert_record,
+)
 from app.models.files import FileIn, FileOut, FileVersion, FileDB
 from app.models.users import UserOut
 from app.keycloak_auth import get_user, get_current_user, get_token
+from typing import Union
 
 router = APIRouter()
 
@@ -47,7 +52,7 @@ async def add_file_entry(
     new_file_id = new_file.inserted_id
     if content_type is None:
         content_type = mimetypes.guess_type(file_db.name)
-    content_type = content_type[0] if len(content_type) > 1 else content_type
+        content_type = content_type[0] if len(content_type) > 1 else content_type
 
     # Use unique ID as key for Minio and get initial version ID
     response = fs.put_object(
@@ -78,9 +83,20 @@ async def add_file_entry(
     )
     await db["file_versions"].insert_one(new_version.to_mongo())
 
+    # Create an entry in index file in elastic_search
+    es = connect_elasticsearch()
+    create_index(es, "file")
+    doc = {
+        "name": file_db.name,
+        "creator": file_db.creator.email,
+        "created": datetime.now(),
+        "download": file_db.downloads,
+    }
+    insert_record(es, "file", doc)
+
 
 async def remove_file_entry(
-    file_id: str,
+    file_id: Union[str, ObjectId],
     db: MongoClient,
     fs: Minio,
 ):
@@ -172,7 +188,7 @@ async def delete_file(
     fs: Minio = Depends(dependencies.get_fs),
 ):
     if (file := await db["files"].find_one({"_id": ObjectId(file_id)})) is not None:
-        remove_file_entry(file_id, db, fs)
+        await remove_file_entry(file_id, db, fs)
         return {"deleted": file_id}
     else:
         raise HTTPException(status_code=404, detail=f"File {file_id} not found")

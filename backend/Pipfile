@@ -18,6 +18,10 @@ pipfile = "*"
 email-validator = "*"
 python-keycloak = "*"
 pika = "*"
+elasticsearch = "*"
+pipenv = "*"
+install = "*"
+rocrate = "*"
 
 [dev-packages]
 requests = "*"
