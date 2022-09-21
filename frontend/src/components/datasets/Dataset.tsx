@@ -39,7 +39,7 @@ import {parseDate} from "../../utils/common";
 import config from "../../app.config";
 import {DatasetIn, MetadataIn} from "../../openapi/v2";
 import {DisplayMetadata} from "../metadata/DisplayMetadata";
-import {AddMetadata} from "../metadata/AddMetadata";
+import {EditMetadata} from "../metadata/EditMetadata";
 import {
 	patchDatasetMetadata as patchDatasetMetadataAction,
 	deleteDatasetMetadata as deleteDatasetMetadataAction,
@@ -186,7 +186,15 @@ export const Dataset = (): JSX.Element => {
 	};
 
 	const setMetadata = (metadata:any) =>{
-		setMetadataRequestForms(prevState => ({...prevState, [metadata.definition]: metadata}));
+		// TODO wrap this in to a function
+		setMetadataRequestForms(prevState => {
+			// merge the contents field; e.g. lat lon
+			if (metadata.definition in prevState){
+				const prevContent = prevState[metadata.definition].contents;
+				metadata.contents = {...prevContent, ...metadata.contents};
+			}
+			return ({...prevState, [metadata.definition]: metadata});
+		});
 	};
 
 	const handleMetadataUpdateFinish = () =>{
@@ -281,8 +289,8 @@ export const Dataset = (): JSX.Element => {
 											>
 												<CloseIcon />
 											</IconButton>
-											<AddMetadata resourceType="dataset" resourceId={datasetId}
-														 setMetadata={setMetadata}
+											<EditMetadata resourceType="dataset" resourceId={datasetId}
+														  setMetadata={setMetadata}
 											/>
 											<Button variant="contained" onClick={handleMetadataUpdateFinish} sx={{ mt: 1, mr: 1 }}>
 												Update
@@ -294,9 +302,13 @@ export const Dataset = (): JSX.Element => {
 										</>
 										:
 										<>
-											<ClowderButton onClick={()=>{setEnableAddMetadata(true);}}>
-												Add/Edit Metadata
-											</ClowderButton>
+											<Grid container spacing={2} sx={{ "alignItems": "center"}}>
+												<Grid item xs={11} sm={11} md={11} lg={11} xl={11}>
+													<ClowderButton onClick={()=>{setEnableAddMetadata(true);}}>
+														Add/Edit Metadata
+													</ClowderButton>
+												</Grid>
+											</Grid>
 											<DisplayMetadata updateMetadata={updateDatasetMetadata}
 															 deleteMetadata={deleteDatasetMetadata}
 															 resourceType="dataset" resourceId={datasetId}/>

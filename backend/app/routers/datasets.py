@@ -443,7 +443,7 @@ async def delete_folder(
 @router.post("/{dataset_id}/files", response_model=FileOut)
 async def save_file(
     dataset_id: str,
-    folder_id: Optional[str] = Form(None),
+    folder_id: Optional[str],
     user=Depends(get_current_user),
     db: MongoClient = Depends(dependencies.get_db),
     fs: Minio = Depends(dependencies.get_fs),

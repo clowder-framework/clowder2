@@ -167,6 +167,19 @@ services:
         - "traefik.http.services.keycloak.loadbalancer.server.port=8080"
         - "traefik.http.routers.keycloak.priority=10"
 
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.3.3
+    networks:
+      - clowder2
+    restart: unless-stopped
+    environment:
+      - "cluster.name=clowder2"
+      - "discovery.type=single-node"
+      - "xpack.security.enabled=false"
+      - "xpack.security.http.ssl.enabled=false"
+    volumes:
+      - elasticsearch:/usr/share/elasticsearch/data
+
 ## By default this config uses default local driver,
 ## For custom volumes replace with volume driver configuration.
 volumes:
@@ -176,6 +189,7 @@ volumes:
   data3:
   data4:
   postgres_data:
+  elasticsearch:
 
 networks:
   clowder2:
