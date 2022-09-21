@@ -11,6 +11,7 @@ Welcome to Clowder v2's documentation!
    :caption: Contents:
 
    mongo-fastapi.md
+   pycharm.md
 
 
 
