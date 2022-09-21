@@ -77,7 +77,7 @@ services:
       volumes:
         - ./backend/keycloak/clowder-realm-dev.json:/opt/keycloak/data/import/realm.json:ro
         - ./backend/keycloak/clowder-theme/:/opt/keycloak/themes/clowder-theme/:ro
-        - ./backend/keycloak/data/:/opt/keycloak/data
+#        - ./backend/keycloak/data/:/opt/keycloak/data
       command:
         - start-dev
         - --http-relative-path /keycloak
@@ -141,5 +141,5 @@ volumes:
   data3:
   data4:
   postgres_data:
-    driver: local
   rabbitmq:
+  elasticsearch:
