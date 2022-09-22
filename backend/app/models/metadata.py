@@ -49,7 +49,8 @@ class MetadataEnumConfig(MongoModel):
 class MetadataField(MongoModel):
     name: str
     list: bool = False  # whether a list[type] is acceptable
-    type: str = "TextField"  # match material ui widget name?
+    widgetType: str = "TextField"  # match material ui widget name?
+    config: Union[MetadataEnumConfig, MetadataConfig]
     # TODO: Eventually move this to space level?
     required: bool = False  # Whether the definition requires this field
 
@@ -59,21 +60,32 @@ class MetadataDefinitionBase(MongoModel):
     These provide a shorthand for use by extractors as well as a source for building GUI widgets to add new entries.
 
     Example: {
-        "name": "LatLon",
-        "description": "A set of Latitude/Longitude coordinates",
-        "context": {
-            "longitude": "https://schema.org/longitude",
-            "latitude": "https://schema.org/latitude"
+        "name" : "LatLon",
+        "description" : "A set of Latitude/Longitude coordinates",
+        "context" : {
+            "longitude" : "https://schema.org/longitude",
+            "latitude" : "https://schema.org/latitude"
         },
-        "fields": [{
-            "name": "longitude",
-            "type": "float",
-            "required": "True"
-        },{
-            "name": "latitude",
-            "type": "float",
-            "required": "True"
-        }]
+        "fields" : [
+            {
+                "name" : "longitude",
+                "list" : false,
+                "widgetType": "TextField",
+                "config": {
+                    "type" : "float"
+                },
+                "required" : true
+            },
+            {
+                "name" : "latitude",
+                "list" : false,
+                "widgetType": "TextField",
+                "config": {
+                    "type" : "float"
+                },
+                "required" : true
+            }
+        ]
     }"""
 
     name: str
@@ -122,7 +134,7 @@ def validate_definition(contents: dict, metadata_def: MetadataDefinitionOut):
     for field in metadata_def.fields:
         if field.name in contents:
             value = contents[field.name]
-            t = FIELD_TYPES[field.type]
+            t = FIELD_TYPES[field.config.type]
             try:
                 # Try casting value as required type, raise exception if unable
                 contents[field.name] = t(contents[field.name])
