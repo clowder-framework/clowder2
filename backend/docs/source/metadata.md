@@ -1,7 +1,14 @@
 # Metadata in Clowder
 
+In Clowder 2 we decide to continue supporting both user-defined and machine-defined metadata in a flexible 
+representation based on JSON-LD. We enforce that, to register a new metadata, either the definition
+or a context URL that contains the schema of given vocabulary needs to be provided. Leveraging the 
+React Component, we would like to explore dynamic rendering as well as the reusability of the metadata user interface.
+Our metadata definition are designed to facilitate that process.
+
+
 ## Structure of Metadata Definition
-The structure of metadata definition could look like below
+The structure of metadata definition looks like below:
 ```
 {
     "name" : "Unit",
@@ -63,9 +70,11 @@ A metadata entry could have multiple widgets (fields). For example:
     ]
 }
 ```
+This corresponds to the Lat/Lon at the user interface: ![img](img/multiple_widgets.png)
 
 ### Configure widget
-The content of config field can be flexible. It will be used to hold information that populates the frontend appearances, as well as validate the posted values. For example 
+The content of config field can be flexible. It will be used to hold information that populates the frontend 
+appearances, as well as validate the posted values. For example:
 ```
    "config": {
                  "type" : "enum",
@@ -73,8 +82,9 @@ The content of config field can be flexible. It will be used to hold information
             },
 ```
 
+### List
 There will also be scenarios that a widget needs the input of "undetermined number of input values". For example, 
-collecting as many data points on a map. The usage of `"list": true` is designed for that. For example:
+collecting as many data points on a map. The field `{"list": true}` is designed for that. For example:
 ```
 {
     "name" : "Coordinates",
@@ -96,7 +106,7 @@ collecting as many data points on a map. The usage of `"list": true` is designed
 }
 ```
 
-And the correspondent posted metadata entry could look like:
+The correspondent metadata entry could look like:
 ```
 { 
     ...
