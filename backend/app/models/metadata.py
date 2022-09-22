@@ -48,8 +48,7 @@ class MetadataEnumConfig(MongoModel):
 class MetadataField(MongoModel):
     name: str
     list: bool = False  # whether a list[type] is acceptable
-    widgetType: str = "TextField"  # match material ui widget name?
-    config: Union[MetadataEnumConfig, MetadataConfig]
+    type: str = "TextField"  # match material ui widget name?
     # TODO: Eventually move this to space level?
     required: bool = False  # Whether the definition requires this field
 
@@ -122,7 +121,7 @@ def validate_definition(contents: dict, metadata_def: MetadataDefinitionOut):
     for field in metadata_def.fields:
         if field.name in contents:
             value = contents[field.name]
-            t = FIELD_TYPES[field.config.type]
+            t = FIELD_TYPES[field.type]
             try:
                 # Try casting value as required type, raise exception if unable
                 contents[field.name] = t(contents[field.name])
