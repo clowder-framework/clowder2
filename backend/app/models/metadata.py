@@ -27,6 +27,7 @@ FIELD_TYPES = {
     "int": int,
     "float": float,
     "str": str,
+    "TextField": str,
     "bool": bool,
     "date": datetime.date,
     "time": datetime.time,
