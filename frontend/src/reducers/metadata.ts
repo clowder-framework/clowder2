@@ -1,5 +1,6 @@
 import {
 	POST_DATASET_METADATA,
+	SAVE_METADATA_DEFINITIONS,
 	POST_FILE_METADATA,
 	RECEIVE_DATASET_METADATA,
 	RECEIVE_METADATA_DEFINITIONS,
@@ -20,6 +21,8 @@ const defaultState: MetadataState = {
 const metadata = (state = defaultState, action: DataAction) => {
 	switch (action.type) {
 		case RECEIVE_METADATA_DEFINITIONS:
+			return Object.assign({}, state, {metadataDefinitionList: action.metadataDefinitionList});
+		case SAVE_METADATA_DEFINITIONS:
 			return Object.assign({}, state, {metadataDefinitionList: action.metadataDefinitionList});
 		case RECEIVE_DATASET_METADATA:
 			return Object.assign({}, state, {datasetMetadataList: action.metadataList});

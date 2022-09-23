@@ -19,6 +19,23 @@ export function fetchMetadataDefinitions(name=null, skip=0, limit=10){
 	};
 }
 
+export const SAVE_METADATA_DEFINITIONS = "SAVE_METADATA_DEFINITIONS";
+export function postMetadataDefinitions(metadataDefinition){
+	return (dispatch) => {
+		return V2.MetadataService.saveMetadataDefinitionApiV2MetadataDefinitionPost(metadataDefinition)
+			.then(json => {
+				dispatch({
+					type: SAVE_METADATA_DEFINITIONS,
+					metadataDefinitionList: json,
+					receivedAt: Date.now(),
+				});
+			})
+			.catch(reason => {
+				dispatch(handleErrors(reason, postMetadataDefinitions(metadataDefinition)));
+			});
+	};
+}
+
 
 export const RECEIVE_DATASET_METADATA = "RECEIVE_DATASET_METADATA";
 export function fetchDatasetMetadata(datasetId){
