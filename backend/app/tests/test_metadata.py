@@ -18,8 +18,20 @@ metadata_definition = {
         "latitude": "https://schema.org/latitude",
     },
     "fields": [
-        {"name": "longitude", "type": "float", "required": "True"},
-        {"name": "latitude", "type": "float", "required": "True"},
+        {
+            "name": "longitude",
+            "list": False,
+            "widgetType": "TextField",
+            "config": {"type": "float"},
+            "required": True,
+        },
+        {
+            "name": "latitude",
+            "list": False,
+            "widgetType": "TextField",
+            "config": {"type": "float"},
+            "required": True,
+        },
     ],
 }
 
@@ -28,7 +40,13 @@ metadata_definition2 = {
     "description": "Alternative title",
     "context": {"title": "https://schema.org/alternateName"},
     "fields": [
-        {"name": "alternateName", "type": "str", "list": False, "required": True}
+        {
+            "name": "alternateName",
+            "list": False,
+            "widgetType": "TextField",
+            "config": {"type": "str"},
+            "required": True,
+        }
     ],
 }
 
@@ -38,8 +56,8 @@ metadata_using_definition = {
 }
 
 metadata_using_context_url = {
-    "contents": {"color": "blue"},
-    "context_url": "clowder.org",
+    "contents": {"alternateName": "different name"},
+    "context_url": "http://clowderframework.org",
 }
 
 
