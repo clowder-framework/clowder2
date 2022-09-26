@@ -76,4 +76,5 @@ class Settings(BaseSettings):
         "amqp://" + RABBITMQ_USER + ":" + RABBITMQ_PASS + "@" + RABBITMQ_HOST + "/"
     )
 
+
 settings = Settings()
