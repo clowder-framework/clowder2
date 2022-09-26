@@ -6,27 +6,23 @@ import shutil
 import tempfile
 import zipfile
 from collections.abc import Mapping, Iterable
-from typing import List, Optional
+from typing import List, Optional, Union
 
-from bson import ObjectId, json_util
+import pika
+from bson import ObjectId
+from bson import json_util
 from fastapi import (
     APIRouter,
     HTTPException,
     Depends,
     File,
-    Form,
     UploadFile,
     Response,
     Request,
 )
 from minio import Minio
-from pymongo import MongoClient
-import pika
 from pika.adapters.blocking_connection import BlockingChannel
-from bson import json_util
-import tempfile
-import rocrate
-import shutil
+from pymongo import MongoClient
 from rocrate.model.person import Person
 from rocrate.rocrate import ROCrate
 
@@ -171,6 +167,14 @@ async def _get_folder_hierarchy(
     if folder.parent_folder is not None:
         hierarchy = await _get_folder_hierarchy(folder.parent_folder, hierarchy, db)
     return hierarchy
+
+
+async def remove_folder_entry(
+    folder_id: Union[str, ObjectId],
+    db: MongoClient,
+):
+    """Remove FolderDB object into MongoDB"""
+    await db["folders"].delete_one({"_id": ObjectId(folder_id)})
 
 
 @router.post("", response_model=DatasetOut)
@@ -378,6 +382,58 @@ async def get_dataset_folders(
         ):
             folders.append(FolderDB.from_mongo(f))
     return folders
+
+
+@router.delete("/{dataset_id}/folders/{folder_id}")
+async def delete_folder(
+    dataset_id: str,
+    folder_id: str,
+    db: MongoClient = Depends(dependencies.get_db),
+    fs: Minio = Depends(dependencies.get_fs),
+):
+    if (await db["folders"].find_one({"_id": ObjectId(folder_id)})) is not None:
+        # delete current folder and files
+        await remove_folder_entry(folder_id, db)
+        async for file in db["files"].find({"folder_id": ObjectId(folder_id)}):
+            file = FileOut(**file)
+            await remove_file_entry(file.id, db, fs)
+
+        # list all child folders and delete child folders/files
+        parent_folder_id = folder_id
+
+        async def _delete_nested_folders(parent_folder_id):
+            while (
+                folders := await db["folders"].find_one(
+                    {
+                        "dataset_id": ObjectId(dataset_id),
+                        "parent_folder": ObjectId(parent_folder_id),
+                    }
+                )
+            ) is not None:
+                async for folder in db["folders"].find(
+                    {
+                        "dataset_id": ObjectId(dataset_id),
+                        "parent_folder": ObjectId(parent_folder_id),
+                    }
+                ):
+                    folder = FolderOut(**folder)
+                    parent_folder_id = folder.id
+
+                    # recursively delete child folder and files
+                    await _delete_nested_folders(parent_folder_id)
+
+                    await remove_folder_entry(folder.id, db)
+                    async for file in db["files"].find(
+                        {"folder_id": ObjectId(folder.id)}
+                    ):
+                        file = FileOut(**file)
+                        await remove_file_entry(file.id, db, fs)
+
+        await _delete_nested_folders(parent_folder_id)
+
+        return {"deleted": folder_id}
+    else:
+        raise HTTPException(status_code=404, detail=f"Folder {folder_id} not found")
 
 
 @router.post("/{dataset_id}/files", response_model=FileOut)
