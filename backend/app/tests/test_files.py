@@ -23,7 +23,7 @@ def test_create(client: TestClient, headers: dict):
     # Upload test file to dataset
     dataset_id = response.json().get("id")
     with open(dummy_file, "w") as dummy:
-        pass
+        dummy.write("1,2,3")
     file_data = {"file": open(dummy_file, "rb")}
     response = client.post(
         f"{settings.API_V2_STR}/datasets/{dataset_id}/files",

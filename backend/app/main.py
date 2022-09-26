@@ -24,6 +24,7 @@ from app.routers import (
     collections,
     authentication,
     keycloak,
+    extractors,
 )
 
 # setup loggers
@@ -107,6 +108,12 @@ api_router.include_router(
     folders.router,
     prefix="/folders",
     tags=["folders"],
+    dependencies=[Depends(get_current_username)],
+)
+api_router.include_router(
+    extractors.router,
+    prefix="/extractors",
+    tags=["extractors"],
     dependencies=[Depends(get_current_username)],
 )
 api_router.include_router(keycloak.router, prefix="/auth", tags=["auth"])

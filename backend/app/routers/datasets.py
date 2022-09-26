@@ -1,28 +1,39 @@
 import datetime
+import hashlib
 import io
 import os
-import zipfile
+import shutil
 import tempfile
-from typing import List, Optional, BinaryIO, Union
+import zipfile
 from collections.abc import Mapping, Iterable
-from bson import ObjectId
-from fastapi import APIRouter, HTTPException, Depends, File, UploadFile, Response
-from fastapi import Form
+from typing import List, Optional
+
+from bson import ObjectId, json_util
+from fastapi import (
+    APIRouter,
+    HTTPException,
+    Depends,
+    File,
+    Form,
+    UploadFile,
+    Response,
+    Request,
+)
 from minio import Minio
 from pymongo import MongoClient
+import pika
+from pika.adapters.blocking_connection import BlockingChannel
 from bson import json_util
 import tempfile
 import rocrate
 import shutil
-from rocrate.rocrate import ROCrate
 from rocrate.model.person import Person
-import hashlib
-import json
+from rocrate.rocrate import ROCrate
 
-from app import keycloak_auth
 from app import dependencies
-from app.keycloak_auth import get_user, get_current_user
+from app import keycloak_auth
 from app.config import settings
+from app.keycloak_auth import get_user, get_current_user
 from app.models.datasets import (
     DatasetBase,
     DatasetIn,
@@ -30,21 +41,10 @@ from app.models.datasets import (
     DatasetOut,
     DatasetPatch,
 )
-from app.models.files import FileIn, FileOut, FileVersion, FileDB
+from app.models.files import FileOut, FileDB
 from app.models.folders import FolderOut, FolderIn, FolderDB
 from app.models.pyobjectid import PyObjectId
 from app.models.users import UserOut
-from app.models.extractors import ExtractorIn
-from app.models.metadata import (
-    MongoDBRef,
-    MetadataAgent,
-    MetadataIn,
-    MetadataDB,
-    MetadataOut,
-    MetadataPatch,
-    validate_context,
-    patch_metadata,
-)
 from app.routers.files import add_file_entry, remove_file_entry
 
 router = APIRouter()
@@ -443,7 +443,7 @@ async def delete_folder(
 @router.post("/{dataset_id}/files", response_model=FileOut)
 async def save_file(
     dataset_id: str,
-    folder_id: Optional[str],
+    folder_id: Optional[str] = None,
     user=Depends(get_current_user),
     db: MongoClient = Depends(dependencies.get_db),
     fs: Minio = Depends(dependencies.get_fs),
@@ -689,3 +689,57 @@ async def download_dataset(
         )
     else:
         raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
+
+
+@router.post("/{dataset_id}/extract")
+async def get_dataset_extract(
+    dataset_id: str,
+    info: Request,
+    db: MongoClient = Depends(dependencies.get_db),
+    rabbitmq_client: BlockingChannel = Depends(dependencies.get_rabbitmq),
+):
+    if (
+        dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
+    ) is not None:
+        req_info = await info.json()
+        if "extractor" in req_info:
+            req_headers = info.headers
+            raw = req_headers.raw
+            authorization = raw[1]
+            token = authorization[1].decode("utf-8")
+            token = token.lstrip("Bearer")
+            token = token.lstrip(" ")
+            # TODO check of extractor exists
+            msg = {"message": "testing", "dataseet_id": dataset_id}
+            body = {}
+            body["secretKey"] = token
+            body["token"] = token
+            body["host"] = "http://127.0.0.1:8000"
+            body["retry_count"] = 0
+            body["filename"] = dataset["name"]
+            body["id"] = dataset_id
+            body["datasetId"] = dataset_id
+            body["resource_type"] = "dataset"
+            body["flags"] = ""
+            current_queue = req_info["extractor"]
+            if "parameters" in req_info:
+                current_parameters = req_info["parameters"]
+            current_routing_key = "extractors." + current_queue
+            rabbitmq_client.queue_bind(
+                exchange="extractors",
+                queue=current_queue,
+                routing_key=current_routing_key,
+            )
+            rabbitmq_client.basic_publish(
+                exchange="extractors",
+                routing_key=current_routing_key,
+                body=json.dumps(body, ensure_ascii=False),
+                properties=pika.BasicProperties(
+                    content_type="application/json", delivery_mode=1
+                ),
+            )
+            return msg
+        else:
+            raise HTTPException(status_code=404, detail=f"No extractor submitted")
+    else:
+        raise HTTPException(status_code=404, detail=f"File {dataset_id} not found")
