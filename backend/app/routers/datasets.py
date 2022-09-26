@@ -1,21 +1,24 @@
 import datetime
+import hashlib
 import io
 import os
-import zipfile
+import shutil
 import tempfile
-from typing import List, Optional, BinaryIO
+import zipfile
 from collections.abc import Mapping, Iterable
-from bson import ObjectId
+from typing import List, Optional
+
+from bson import ObjectId, json_util
 from fastapi import (
     APIRouter,
     HTTPException,
     Depends,
     File,
+    Form,
     UploadFile,
     Response,
     Request,
 )
-from fastapi import Form
 from minio import Minio
 from pymongo import MongoClient
 import pika
@@ -24,15 +27,13 @@ from bson import json_util
 import tempfile
 import rocrate
 import shutil
-from rocrate.rocrate import ROCrate
 from rocrate.model.person import Person
-import hashlib
-import json
+from rocrate.rocrate import ROCrate
 
-from app import keycloak_auth
 from app import dependencies
-from app.keycloak_auth import get_user, get_current_user
+from app import keycloak_auth
 from app.config import settings
+from app.keycloak_auth import get_user, get_current_user
 from app.models.datasets import (
     DatasetBase,
     DatasetIn,
@@ -40,21 +41,10 @@ from app.models.datasets import (
     DatasetOut,
     DatasetPatch,
 )
-from app.models.files import FileIn, FileOut, FileVersion, FileDB
+from app.models.files import FileOut, FileDB
 from app.models.folders import FolderOut, FolderIn, FolderDB
 from app.models.pyobjectid import PyObjectId
 from app.models.users import UserOut
-from app.models.extractors import ExtractorIn
-from app.models.metadata import (
-    MongoDBRef,
-    MetadataAgent,
-    MetadataIn,
-    MetadataDB,
-    MetadataOut,
-    MetadataPatch,
-    validate_context,
-    patch_metadata,
-)
 from app.routers.files import add_file_entry, remove_file_entry
 
 router = APIRouter()
