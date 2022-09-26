@@ -15,23 +15,20 @@ for x in range(10):
     }
     response = requests.post(f"{API_V2_STR}/users", json=user)
     users.append(user)
+    print(f"User created: {user}")
 
 for x in range(0, 100):
     n = random.randint(0, 9)
     user = users[n]
     response = requests.post(f"{API_V2_STR}/login", json=user)
     token = response.json().get("token")
-    print(user)
-    print(token)
     headers = {"Authorization": "Bearer " + token}
-
     dataset_data = {
         "name": fake.sentence(),
         "description": fake.paragraph(),
     }
-
     response = requests.post(
         f"{API_V2_STR}/datasets", json=dataset_data, headers=headers
     )
-
-    print(response.json().get("id"))
+    dataset_id = response.json().get("id")
+    print(f"Dataset created: {dataset_id}")
