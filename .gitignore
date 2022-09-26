@@ -52,3 +52,5 @@ dist
 # Ignore swap files (for files currently being edited)
 **/*.swp
 
+# keycloak mounted volume
+backend/keycloak/data/*

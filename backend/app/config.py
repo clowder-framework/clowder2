@@ -63,12 +63,17 @@ class Settings(BaseSettings):
     # identity providers registered in keycloak, for example cilogon, globus, twitter
     keycloak_ipds = ["cilogon", "globus"]
 
+    # Elasticsearch local config
+    elasticsearch_url = "http://localhost:9200"
+    elasticsearch_no_of_shards = 5
+    elasticsearch_no_of_replicas = 5
+
+    # RabbitMQ message bus
     RABBITMQ_USER = "guest"
     RABBITMQ_PASS = "guest"
     RABBITMQ_HOST = "localhost"
     RABBITMQ_URL = (
         "amqp://" + RABBITMQ_USER + ":" + RABBITMQ_PASS + "@" + RABBITMQ_HOST + "/"
     )
-
 
 settings = Settings()
