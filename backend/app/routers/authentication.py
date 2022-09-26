@@ -1,7 +1,11 @@
 import json
 
 from fastapi import APIRouter, HTTPException, Depends
-from keycloak.exceptions import KeycloakAuthenticationError, KeycloakGetError
+from keycloak.exceptions import (
+    KeycloakAuthenticationError,
+    KeycloakGetError,
+    KeycloakPostError,
+)
 from passlib.hash import bcrypt
 from pymongo import MongoClient
 
@@ -21,6 +25,13 @@ async def save_user(userIn: UserIn, db: MongoClient = Depends(dependencies.get_d
             userIn.email, userIn.password, userIn.first_name, userIn.last_name
         )
     except KeycloakGetError as e:
+        raise HTTPException(
+            status_code=e.response_code,
+            detail=json.loads(e.error_message),
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    except KeycloakPostError as e:
+        print(f"User {userIn.email} already exists")
         raise HTTPException(
             status_code=e.response_code,
             detail=json.loads(e.error_message),

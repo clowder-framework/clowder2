@@ -139,6 +139,5 @@ volumes:
   data3:
   data4:
   postgres_data:
-    driver: local
   rabbitmq:
   elasticsearch:
