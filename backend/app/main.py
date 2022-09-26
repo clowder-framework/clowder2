@@ -10,6 +10,7 @@ from fastapi import FastAPI, APIRouter, Depends
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import settings
+from app.elastic_search.connect import connect_elasticsearch, create_index
 from app.keycloak_auth import get_token, get_current_username
 from app.routers import (
     folders,
@@ -124,6 +125,11 @@ app.include_router(api_router, prefix=settings.API_V2_STR)
 async def startup_db_client():
     # create a keycloak realm and client
     # create_realm_and_client()
+
+    # create elasticsearch indices
+    es = connect_elasticsearch()
+    create_index(es, "file", settings.file_settings)
+    create_index(es, "dataset", settings.file_settings)
     pass
 
 

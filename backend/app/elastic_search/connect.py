@@ -10,7 +10,8 @@ no_of_shards = settings.elasticsearch_no_of_shards
 no_of_replicas = settings.elasticsearch_no_of_replicas
 
 
-# To confirm if it can connect to elastic_search serevr
+""" To connect to elasticsearch server and return the elasticsearch client """
+
 def connect_elasticsearch():
     _es = None
     logger.info(settings.elasticsearch_url)
@@ -22,28 +23,20 @@ def connect_elasticsearch():
     return _es
 
 
-# Create index
-def create_index(es_client, index_name):
+""" Generate an index in elasticsearch
+    Arguments:
+        es_client -- elasticsearch client which you get as return object from connect_elasticsearch()
+        index_name -- name of index you want to create (Index in elasticsearch is synonymous to table in SQL)
+        settings -- schema of the index with additional details
+        (For more details, refer to https://www.elastic.co/guide/en/elasticsearch/reference/current/mapping.html)
+"""
+
+def create_index(es_client, index_name, settings):
     created = False
-    # index settings
-    settings = {
-        "settings": {
-            "number_of_shards": no_of_shards,
-            "number_of_replicas": no_of_replicas,
-        },
-        "mappings": {
-            "properties": {
-                "name": {"type": "text"},
-                "created": {"type": "date"},
-                "creator": {"type": "text"},
-                "download": {"type": "long"},
-            }
-        },
-    }
 
     try:
         if not es_client.indices.exists(index=index_name):
-            es_client.indices.create(index=index_name, settings=settings)
+            es_client.indices.create(index=index_name, body=settings)
             logger.info("Created Index")
             created = True
     except BadRequestError as ex:
@@ -52,15 +45,29 @@ def create_index(es_client, index_name):
         return created
 
 
-# Insert a record
-def insert_record(es_client, index_name, doc):
+""" Add a document to the index
+    Arguments:
+        es_client -- elasticsearch client which you get as return object from connect_elasticsearch()
+        index_name -- name of index 
+        doc -- document you want to put in the index (It's similar to a record in SQL)
+        id -- unique key by which you can identify the document when needed
+"""
+
+def insert_record(es_client, index_name, doc, id):
     try:
-        es_client.index(index=index_name, document=doc)
+        es_client.index(index=index_name, document=doc, id=id)
     except BadRequestError as ex:
         logger.error(str(ex))
 
 
-# Search
+""" Search a keyword or conjuction of several keywords in an index
+    Arguments:
+        es_client -- elasticsearch client which you get as return object from connect_elasticsearch()
+        index_name -- name of index
+        query -- query to be searches 
+        (For more details, refer to https://www.elastic.co/guide/en/elasticsearch/reference/current/search-search.html)
+"""
+
 def search_index(es_client, index_name, query):
     try:
         res = es_client.search(index=index_name, query=query)
@@ -70,9 +77,29 @@ def search_index(es_client, index_name, query):
         logger.error(str(ex))
 
 
-# Delete an index
+""" Deleting an index
+    Arguments:
+        es_client -- elasticsearch client which you get as return object from connect_elasticsearch()
+        index_name -- name of index you want to delete
+"""
+
 def delete_index(es_client, index_name):
     try:
         es_client.options(ignore_status=[400, 404]).indices.delete(index=index_name)
+    except BadRequestError as ex:
+        logger.error(str(ex))
+
+
+""" Deleting a document from an index
+    Arguments:
+        es_client -- elasticsearch client which you get as return object from connect_elasticsearch()
+        index_name -- name of index you want to delete
+        id -- unique identifier of the document
+"""
+
+def delete_document_by_id(es_client, index_name, id):
+    try:
+        query = {"match": {"_id": id}}
+        es_client.delete_by_query(index=index_name, query=query)
     except BadRequestError as ex:
         logger.error(str(ex))

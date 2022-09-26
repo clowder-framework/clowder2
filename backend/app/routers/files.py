@@ -25,6 +25,7 @@ from app.elastic_search.connect import (
     connect_elasticsearch,
     create_index,
     insert_record,
+    delete_document_by_id,
 )
 from app.models.files import FileIn, FileOut, FileVersion, FileDB
 from app.models.users import UserOut
@@ -84,16 +85,15 @@ async def add_file_entry(
     )
     await db["file_versions"].insert_one(new_version.to_mongo())
 
-    # Create an entry in index file in elastic_search
+    # Add en entry to the file index
     es = connect_elasticsearch()
-    create_index(es, "file")
     doc = {
         "name": file_db.name,
         "creator": file_db.creator.email,
         "created": datetime.now(),
         "download": file_db.downloads,
     }
-    insert_record(es, "file", doc)
+    insert_record(es, "file", doc, file_db.id)
 
 
 async def remove_file_entry(
@@ -104,6 +104,8 @@ async def remove_file_entry(
     """Remove FileDB object into MongoDB, Minio, and associated metadata and version information."""
     # TODO: Deleting individual versions will require updating version_id in mongo, or deleting entire document
     fs.remove_object(settings.MINIO_BUCKET_NAME, str(file_id))
+    # delete from elasticsearch
+    delete_document_by_id(connect_elasticsearch(), "file", str(file_id))
     await db["files"].delete_one({"_id": ObjectId(file_id)})
     await db.metadata.delete_many({"resource.resource_id": ObjectId(file_id)})
     await db["file_versions"].delete_many({"file_id": ObjectId(file_id)})
