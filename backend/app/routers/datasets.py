@@ -393,7 +393,7 @@ async def get_dataset_folders(
 @router.post("/{dataset_id}/files", response_model=FileOut)
 async def save_file(
     dataset_id: str,
-    folder_id: Optional[str],
+    folder_id: Optional[str] = None,
     user=Depends(get_current_user),
     db: MongoClient = Depends(dependencies.get_db),
     fs: Minio = Depends(dependencies.get_fs),
