@@ -6,27 +6,23 @@ import shutil
 import tempfile
 import zipfile
 from collections.abc import Mapping, Iterable
-from typing import List, Optional
+from typing import List, Optional, Union
 
-from bson import ObjectId, json_util
+import pika
+from bson import ObjectId
+from bson import json_util
 from fastapi import (
     APIRouter,
     HTTPException,
     Depends,
     File,
-    Form,
     UploadFile,
     Response,
     Request,
 )
 from minio import Minio
-from pymongo import MongoClient
-import pika
 from pika.adapters.blocking_connection import BlockingChannel
-from bson import json_util
-import tempfile
-import rocrate
-import shutil
+from pymongo import MongoClient
 from rocrate.model.person import Person
 from rocrate.rocrate import ROCrate
 
