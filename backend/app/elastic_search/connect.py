@@ -12,6 +12,7 @@ no_of_replicas = settings.elasticsearch_no_of_replicas
 
 """ To connect to elasticsearch server and return the elasticsearch client """
 
+
 def connect_elasticsearch():
     _es = None
     logger.info(settings.elasticsearch_url)
@@ -30,6 +31,7 @@ def connect_elasticsearch():
         settings -- schema of the index with additional details
         (For more details, refer to https://www.elastic.co/guide/en/elasticsearch/reference/current/mapping.html)
 """
+
 
 def create_index(es_client, index_name, settings):
     created = False
@@ -53,6 +55,7 @@ def create_index(es_client, index_name, settings):
         id -- unique key by which you can identify the document when needed
 """
 
+
 def insert_record(es_client, index_name, doc, id):
     try:
         es_client.index(index=index_name, document=doc, id=id)
@@ -67,6 +70,7 @@ def insert_record(es_client, index_name, doc, id):
         query -- query to be searches 
         (For more details, refer to https://www.elastic.co/guide/en/elasticsearch/reference/current/search-search.html)
 """
+
 
 def search_index(es_client, index_name, query):
     try:
@@ -83,6 +87,7 @@ def search_index(es_client, index_name, query):
         index_name -- name of index you want to delete
 """
 
+
 def delete_index(es_client, index_name):
     try:
         es_client.options(ignore_status=[400, 404]).indices.delete(index=index_name)
@@ -96,6 +101,7 @@ def delete_index(es_client, index_name):
         index_name -- name of index you want to delete
         id -- unique identifier of the document
 """
+
 
 def delete_document_by_id(es_client, index_name, id):
     try:
