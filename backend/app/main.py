@@ -116,12 +116,6 @@ api_router.include_router(
     tags=["extractors"],
     dependencies=[Depends(get_current_username)],
 )
-api_router.include_router(
-    extractors.router,
-    prefix="/extractors",
-    tags=["extractors"],
-    dependencies=[Depends(get_token), Depends(get_current_user)],
-)
 api_router.include_router(keycloak.router, prefix="/auth", tags=["auth"])
 app.include_router(api_router, prefix=settings.API_V2_STR)
 
