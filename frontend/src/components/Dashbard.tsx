@@ -4,12 +4,11 @@ import {Box, Button, Grid, Link, Tab, Tabs, Typography} from "@mui/material";
 import {Dataset, RootState} from "../types/data";
 import {useDispatch, useSelector} from "react-redux";
 import {datasetDeleted, fetchDatasets,} from "../actions/dataset";
-import {resetFailedReason, resetLogout} from "../actions/common";
+import {resetFailedReason} from "../actions/common";
 import {downloadThumbnail} from "../utils/thumbnail";
 import TopBar from "./navigation/TopBar";
 
 import {a11yProps, TabPanel} from "./tabs/TabComponent";
-import {useNavigate} from "react-router-dom";
 import {MainBreadcrumbs} from "./navigation/BreadCrumb";
 import {ActionModal} from "./dialog/ActionModal";
 import DatasetCard from "./datasets/DatasetCard";
@@ -24,19 +23,14 @@ const tab = {
 
 export const Dashboard = (): JSX.Element => {
 
-	// use history hook to redirect/navigate between routes
-	const history = useNavigate();
-
 	// Redux connect equivalent
 	const dispatch = useDispatch();
 	const deleteDataset = (datasetId: string) => dispatch(datasetDeleted(datasetId));
 	const listDatasets = (skip: number | undefined, limit: number | undefined, mine: boolean | undefined) => dispatch(fetchDatasets(skip, limit, mine));
 	const dismissError = () => dispatch(resetFailedReason());
-	const dismissLogout = () => dispatch(resetLogout());
 	const datasets = useSelector((state: RootState) => state.dataset.datasets);
 	const reason = useSelector((state: RootState) => state.error.reason);
 	const stack = useSelector((state: RootState) => state.error.stack);
-	const loggedOut = useSelector((state: RootState) => state.error.loggedOut);
 
 	const [datasetThumbnailList, setDatasetThumbnailList] = useState<any>([]);
 	// TODO add option to determine limit number; default show 5 datasets each time
@@ -49,15 +43,6 @@ export const Dashboard = (): JSX.Element => {
 	const [nextDisabled, setNextDisabled] = useState<boolean>(false);
 	const [selectedTabIndex, setSelectedTabIndex] = useState(0);
 	const [selectedDataset, _] = useState<Dataset>();
-
-	// confirmation dialog
-	const [confirmationOpen, setConfirmationOpen] = useState(false);
-	const deleteSelectedDataset = () => {
-		if (selectedDataset) {
-			deleteDataset(selectedDataset["id"]);
-		}
-		setConfirmationOpen(false);
-	}
 
 	// component did mount
 	useEffect(() => {
@@ -79,15 +64,6 @@ export const Dashboard = (): JSX.Element => {
 	const handleErrorReport = () => {
 		window.open(`${config.GHIssueBaseURL}+${reason}&body=${encodeURIComponent(stack)}`);
 	}
-
-	// log user out if token expired/unauthorized
-	useEffect(() => {
-		if (loggedOut) {
-			// reset loggedOut flag so it doesn't stuck in "true" state, then redirect to login page
-			dismissLogout();
-			history("/auth/login");
-		}
-	}, [loggedOut]);
 
 	// fetch thumbnails from each individual dataset/id calls
 	useEffect(() => {
@@ -152,13 +128,6 @@ export const Dashboard = (): JSX.Element => {
 			<TopBar/>
 			<div className="outer-container">
 				<MainBreadcrumbs paths={paths}/>
-				{/*Confirmation dialogue*/}
-				<ActionModal actionOpen={confirmationOpen} actionTitle="Are you sure?"
-							 actionText="Do you really want to delete? This process cannot be undone."
-							 actionBtnName="Delete" handleActionBtnClick={deleteSelectedDataset}
-							 handleActionCancel={() => {
-								 setConfirmationOpen(false);
-							 }}/>
 				{/*Error Message dialogue*/}
 				<ActionModal actionOpen={errorOpen} actionTitle="Something went wrong..." actionText={reason}
 							 actionBtnName="Report" handleActionBtnClick={handleErrorReport}

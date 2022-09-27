@@ -11,12 +11,12 @@ import {
 import LoadingOverlay from "react-loading-overlay-ts";
 
 import {useDispatch,} from "react-redux";
-import {folderAdded} from "../../actions/dataset";
+import {folderAdded} from "../../actions/folder";
 
 
 type CreateFolderProps = {
-	datasetId: string,
-	parentFolder: string,
+	datasetId: string|undefined,
+	parentFolder: string|undefined|null,
 	handleClose:(open:boolean) => void,
 	open: boolean;
 }

@@ -1,7 +1,7 @@
 import collections.abc
 import traceback
 from datetime import datetime
-from typing import Optional, List
+from typing import Optional, List, Union
 from enum import Enum
 
 from bson import ObjectId
@@ -27,17 +27,30 @@ FIELD_TYPES = {
     "int": int,
     "float": float,
     "str": str,
+    "TextField": str,
     "bool": bool,
     "date": datetime.date,
     "time": datetime.time,
     "dict": dict,  # TODO: does this work?
+    "enum": str,  # TODO: need a way to validate enum,
+    "tuple": tuple,
 }  # JSON schema can handle this for us?
+
+
+class MetadataConfig(MongoModel):
+    type: str = "str"  # must be one of FIELD_TYPES
+
+
+class MetadataEnumConfig(MongoModel):
+    type: str = "enum"
+    options: List[str]  # a list of options must be provided if type is enum
 
 
 class MetadataField(MongoModel):
     name: str
-    type: str = "str"  # must be one of FIELD_TYPES
     list: bool = False  # whether a list[type] is acceptable
+    widgetType: str = "TextField"  # match material ui widget name?
+    config: Union[MetadataEnumConfig, MetadataConfig]
     # TODO: Eventually move this to space level?
     required: bool = False  # Whether the definition requires this field
 
@@ -47,21 +60,32 @@ class MetadataDefinitionBase(MongoModel):
     These provide a shorthand for use by extractors as well as a source for building GUI widgets to add new entries.
 
     Example: {
-        "name": "LatLon",
-        "description": "A set of Latitude/Longitude coordinates",
-        "context": {
-            "longitude": "https://schema.org/longitude",
-            "latitude": "https://schema.org/latitude"
+        "name" : "LatLon",
+        "description" : "A set of Latitude/Longitude coordinates",
+        "context" : {
+            "longitude" : "https://schema.org/longitude",
+            "latitude" : "https://schema.org/latitude"
         },
-        "fields": [{
-            "name": "longitude",
-            "type": "float",
-            "required": "True"
-        },{
-            "name": "latitude",
-            "type": "float",
-            "required": "True"
-        }]
+        "fields" : [
+            {
+                "name" : "longitude",
+                "list" : false,
+                "widgetType": "TextField",
+                "config": {
+                    "type" : "float"
+                },
+                "required" : true
+            },
+            {
+                "name" : "latitude",
+                "list" : false,
+                "widgetType": "TextField",
+                "config": {
+                    "type" : "float"
+                },
+                "required" : true
+            }
+        ]
     }"""
 
     name: str
@@ -110,7 +134,7 @@ def validate_definition(contents: dict, metadata_def: MetadataDefinitionOut):
     for field in metadata_def.fields:
         if field.name in contents:
             value = contents[field.name]
-            t = FIELD_TYPES[field.type]
+            t = FIELD_TYPES[field.config.type]
             try:
                 # Try casting value as required type, raise exception if unable
                 contents[field.name] = t(contents[field.name])
@@ -124,11 +148,11 @@ def validate_definition(contents: dict, metadata_def: MetadataDefinitionOut):
                     except:
                         raise HTTPException(
                             status_code=400,
-                            detail=f"{metadata_def.name} field {field.name} requires {field.type} for all values in list",
+                            detail=f"{metadata_def.name} field {field.name} requires {field.config.type} for all values in list",
                         )
                 raise HTTPException(
                     status_code=400,
-                    detail=f"{metadata_def.name} field {field.name} requires {field.type}",
+                    detail=f"{metadata_def.name} field {field.name} requires {field.config.type}",
                 )
         elif field.required:
             raise HTTPException(

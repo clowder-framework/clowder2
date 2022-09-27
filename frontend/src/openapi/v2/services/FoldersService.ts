@@ -7,12 +7,12 @@ import { request as __request } from '../core/request';
 export class FoldersService {
 
     /**
-     * Download File
+     * Download Folder
      * @param folderId
      * @returns any Successful Response
      * @throws ApiError
      */
-    public static downloadFileApiV2FoldersFolderIdPathGet(
+    public static downloadFolderApiV2FoldersFolderIdPathGet(
         folderId: string,
     ): CancelablePromise<any> {
         return __request({

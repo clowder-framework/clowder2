@@ -19,6 +19,10 @@ email-validator = "*"
 python-keycloak = "*"
 pika = "*"
 aio_pika = "*"
+elasticsearch = "*"
+pipenv = "*"
+install = "*"
+rocrate = "*"
 
 [dev-packages]
 requests = "*"

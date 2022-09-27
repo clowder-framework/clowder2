@@ -5,10 +5,10 @@ Uses [Sphinx](https://www.sphinx-doc.org). Requires [enchant](https://pyenchant.
 
 ```shell
 # build
-make build
+make html
 
 # view
-python -m http.server --directory build/html
+python3 -m http.server --directory build/html
 
 # check links
 make linkcheck
