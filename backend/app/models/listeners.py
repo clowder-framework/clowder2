@@ -9,7 +9,7 @@ class Repository(MongoModel):
     repository_url: str = ""
 
 
-class ExtractorIdentifier(MongoModel):
+class Listener(MongoModel):
     name: str
     version: str = "1.0"
     updated: datetime = Field(default_factory=datetime.utcnow)
@@ -27,17 +27,17 @@ class ExtractorIdentifier(MongoModel):
     parameters: List[dict] = []
 
 
-class ExtractorBase(ExtractorIdentifier):
+class ListenerBase(Listener):
     description: str = ""
 
 
-class ExtractorIn(ExtractorBase):
+class ListenerIn(Listener):
     pass
 
 
-class ExtractorDB(ExtractorBase):
+class ListenerDB(Listener):
     pass
 
 
-class ExtractorOut(ExtractorDB):
+class ListenerOut(Listener):
     pass

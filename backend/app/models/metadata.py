@@ -13,7 +13,7 @@ from pymongo import MongoClient
 from app.models.mongomodel import MongoModel
 from app.models.pyobjectid import PyObjectId
 from app.models.users import UserOut
-from app.models.extractors import ExtractorIn, ExtractorOut, ExtractorIdentifier
+from app.models.listeners import ListenerIn, ListenerOut, Listener
 
 
 class MongoDBRef(BaseModel):
@@ -57,7 +57,7 @@ class MetadataField(MongoModel):
 
 class MetadataDefinitionBase(MongoModel):
     """This describes a metadata object with a short name and description, predefined set of fields, and context.
-    These provide a shorthand for use by extractors as well as a source for building GUI widgets to add new entries.
+    These provide a shorthand for use by listeners as well as a source for building GUI widgets to add new entries.
 
     Example: {
         "name" : "LatLon",
@@ -164,11 +164,11 @@ def validate_definition(contents: dict, metadata_def: MetadataDefinitionOut):
 
 
 class MetadataAgent(MongoModel):
-    """Describes the user who created a piece of metadata. If extractor is provided, user refers to the user who
-    triggered the extraction."""
+    """Describes the user who created a piece of metadata. If listener is provided, user refers to the user who
+    triggered the job."""
 
     creator: UserOut
-    extractor: Optional[ExtractorOut]
+    listener: Optional[ListenerOut]
 
 
 class MetadataBase(MongoModel):
@@ -199,7 +199,7 @@ class MetadataBase(MongoModel):
 
 class MetadataIn(MetadataBase):
     file_version: Optional[int]
-    extractor_info: Optional[ExtractorIn]
+    listener: Optional[ListenerIn]
 
 
 class MetadataPatch(MetadataIn):
@@ -225,7 +225,7 @@ class MetadataPatch(MetadataIn):
 class MetadataDelete(MongoModel):
     metadata_id: Optional[str]  # specific metadata ID we are deleting
     definition: Optional[str]
-    extractor_info: Optional[ExtractorIdentifier]
+    listener: Optional[ListenerIn]
 
 
 class MetadataDB(MetadataBase):

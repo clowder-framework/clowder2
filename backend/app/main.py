@@ -24,7 +24,7 @@ from app.routers import (
     collections,
     authentication,
     keycloak,
-    extractors,
+    listeners,
 )
 
 # setup loggers
@@ -111,7 +111,7 @@ api_router.include_router(
     dependencies=[Depends(get_current_username)],
 )
 api_router.include_router(
-    extractors.router,
+    listeners.router,
     prefix="/extractors",
     tags=["extractors"],
     dependencies=[Depends(get_current_username)],
