@@ -112,6 +112,12 @@ api_router.include_router(
 )
 api_router.include_router(
     listeners.router,
+    prefix="/listeners",
+    tags=["listeners"],
+    dependencies=[Depends(get_current_username)],
+)
+api_router.include_router(
+    listeners.legacy_router,
     prefix="/extractors",
     tags=["extractors"],
     dependencies=[Depends(get_current_username)],

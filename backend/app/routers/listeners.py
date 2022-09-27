@@ -4,16 +4,18 @@ from bson import ObjectId
 from fastapi import APIRouter, HTTPException, Depends, Request
 from pymongo import MongoClient
 import datetime
-from app import dependencies
-from app import keycloak_auth
-from app.keycloak_auth import get_user, get_current_user
+from app.dependencies import get_db
+from app.keycloak_auth import get_user
 from app.models.listeners import (
+    ListenerProperties,
     ListenerIn,
+    LegacyListenerIn,
     ListenerDB,
     ListenerOut,
 )
 
 router = APIRouter()
+legacy_router = APIRouter() # for back-compatibilty with v1 extractors
 
 clowder_bucket = os.getenv("MINIO_BUCKET_NAME", "clowder")
 
@@ -21,8 +23,8 @@ clowder_bucket = os.getenv("MINIO_BUCKET_NAME", "clowder")
 @router.post("", response_model=ListenerOut)
 async def save_listener(
     listener_in: ListenerIn,
-    user=Depends(keycloak_auth.get_current_user),
-    db: MongoClient = Depends(dependencies.get_db),
+    user=Depends(get_user),
+    db: MongoClient = Depends(get_db),
 ):
     listener = ListenerDB(**listener_in.dict())
     new_listener = await db["listeners"].insert_one(listener.to_mongo())
@@ -31,9 +33,33 @@ async def save_listener(
     return listener_out
 
 
+@legacy_router.post("", response_model=ListenerOut)
+async def save_legacy_listener(
+    legacy_in: LegacyListenerIn,
+    user=Depends(get_user),
+    db: MongoClient = Depends(get_db),
+):
+    """This will take a POST with Clowder v1 extractor_info dict info, and convert to a v2 Listener."""
+    listener_properties = ListenerProperties(**legacy_in.dict)
+    listener = ListenerDB(
+        name=legacy_in.name,
+        version=legacy_in.version,
+        description=legacy_in.description,
+        author=user,
+        properties=listener_properties
+    )
+    new_listener = await db["listeners"].insert_one(listener.to_mongo())
+    found = await db["listeners"].find_one({"_id": new_listener.inserted_id})
+    listener_out = ListenerOut.from_mongo(found)
+
+    # TODO: Automatically match or create a Feed based on listener_in.process rules
+
+    return listener_out
+
+
 @router.get("/{listener_id}", response_model=ListenerOut)
 async def get_listener(
-    listener_id: str, db: MongoClient = Depends(dependencies.get_db)
+    listener_id: str, db: MongoClient = Depends(get_db)
 ):
     if (
         listener := await db["listeners"].find_one({"_id": ObjectId(listener_id)})
@@ -45,7 +71,7 @@ async def get_listener(
 @router.get("", response_model=List[ListenerOut])
 async def get_listeners(
     user_id=Depends(get_user),
-    db: MongoClient = Depends(dependencies.get_db),
+    db: MongoClient = Depends(get_db),
     skip: int = 0,
     limit: int = 2,
 ):
@@ -61,7 +87,7 @@ async def get_listeners(
 async def edit_listener(
     listener_id: str,
     listener_in: ListenerIn,
-    db: MongoClient = Depends(dependencies.get_db),
+    db: MongoClient = Depends(get_db),
     user_id=Depends(get_user),
 ):
     if (
@@ -85,7 +111,7 @@ async def edit_listener(
 @router.delete("/{listener_id}")
 async def delete_listener(
     listener_id: str,
-    db: MongoClient = Depends(dependencies.get_db),
+    db: MongoClient = Depends(get_db),
 ):
     if (await db["listeners"].find_one({"_id": ObjectId(listener_id)})) is not None:
         # delete dataset first to minimize files/folder being uploaded to a delete dataset

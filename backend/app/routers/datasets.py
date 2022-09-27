@@ -183,7 +183,6 @@ async def save_dataset(
     user=Depends(keycloak_auth.get_current_user),
     db: MongoClient = Depends(dependencies.get_db),
 ):
-    result = dataset_in.dict()
     dataset_db = DatasetDB(**dataset_in.dict(), author=user)
     new_dataset = await db["datasets"].insert_one(dataset_db.to_mongo())
     found = await db["datasets"].find_one({"_id": new_dataset.inserted_id})

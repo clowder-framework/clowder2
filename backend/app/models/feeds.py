@@ -2,6 +2,7 @@ from datetime import datetime
 from pydantic import Field
 from typing import Optional, List, Union
 from app.models.mongomodel import MongoModel
+from app.models.users import UserOut
 from app.models.listeners import ListenerOut
 
 
@@ -12,25 +13,24 @@ class SearchCriteria(MongoModel):
     value: str
 
 
-class ListenerFeed(MongoModel):
+class JobFeed(MongoModel):
     name: str
-    updated: datetime = Field(default_factory=datetime.utcnow)
-    author: str
-    criteria: List[str] = []
-    listeners: List[ListenerOut]
+    criteria: List[SearchCriteria] = []
+    listeners: List[ListenerOut] = []
 
 
-class FeedBase(ListenerFeed):
+class FeedBase(JobFeed):
     description: str = ""
 
 
-class FeedIn(ListenerFeed):
+class FeedIn(JobFeed):
     pass
 
 
-class FeedDB(ListenerFeed):
-    pass
+class FeedDB(JobFeed):
+    author: UserOut
+    updated: datetime = Field(default_factory=datetime.utcnow)
 
 
-class FeedOut(ListenerFeed):
+class FeedOut(JobFeed):
     pass

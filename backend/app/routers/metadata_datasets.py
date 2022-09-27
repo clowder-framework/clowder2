@@ -13,7 +13,7 @@ from app import dependencies
 from app.keycloak_auth import get_user, get_current_user, UserOut
 from app.config import settings
 from app.models.datasets import DatasetOut
-from app.models.extractors import ExtractorIn
+from app.models.listeners import ListenerIn
 from app.models.metadata import (
     MongoDBRef,
     MetadataAgent,
@@ -51,7 +51,7 @@ async def _build_metadata_db_obj(
         # Build MetadataAgent depending on whether extractor info is present
         extractor_info = metadata_in.extractor_info
         if extractor_info is not None:
-            extractor_in = ExtractorIn(**extractor_info.dict())
+            extractor_in = ListenerIn(**extractor_info.dict())
             if (
                 extractor := await db["extractors"].find_one(
                     {"_id": extractor_in.id, "version": extractor_in.version}

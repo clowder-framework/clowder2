@@ -1,7 +1,8 @@
 from datetime import datetime
-from pydantic import Field
+from pydantic import Field, BaseModel
 from typing import Optional, List, Union
 from app.models.mongomodel import MongoModel
+from app.models.users import UserOut
 
 
 class Repository(MongoModel):
@@ -9,35 +10,44 @@ class Repository(MongoModel):
     repository_url: str = ""
 
 
-class Listener(MongoModel):
-    name: str
-    version: str = "1.0"
-    updated: datetime = Field(default_factory=datetime.utcnow)
-    author: str
+# Currently for extractor_info JSON from Clowder v1 extractors POSTing to /api/extractors
+class ListenerProperties(BaseModel):
+    author: str  # Referring to author of listener script (e.g. name or email), not Clowder user
+    process: dict
+    maturity: str = "Development"
     contributors: List[str] = []
     contexts: List[dict] = []
-    repository: Union[list[Repository], None] = None
-    external_services: List[str]
+    repository: List[Repository] = []
+    external_services: List[str] = []
     libraries: List[str] = []
-    bibtex: List[str]
-    maturity: str = "Development"
+    bibtex: List[str] = []
     default_labels: List[str] = []
-    process: dict
     categories: List[str] = []
     parameters: List[dict] = []
 
 
-class ListenerBase(Listener):
+class ListenerBase(BaseModel):
+    name: str
+    version: str = "1.0"
     description: str = ""
 
 
-class ListenerIn(Listener):
+class ListenerIn(ListenerBase):
     pass
 
 
-class ListenerDB(Listener):
-    pass
+class LegacyListenerIn(ListenerProperties):
+    name: str
+    version: str = "1.0"
+    description: str = ""
 
 
-class ListenerOut(Listener):
+class ListenerDB(ListenerBase, MongoModel):
+    author: UserOut
+    created: datetime = Field(default_factory=datetime.utcnow)
+    modified: datetime = Field(default_factory=datetime.utcnow)
+    properties: Optional[ListenerProperties] = None
+
+
+class ListenerOut(ListenerBase):
     pass
