@@ -8,6 +8,7 @@ import {
 	UPDATE_DATASET_METADATA
 } from "../actions/metadata";
 import {RESET_CREATE_FILE} from "../actions/file";
+import {GET_FOLDER_PATH} from "../actions/folder";
 
 interface RECEIVE_FILES_IN_DATASET {
 	type: "RECEIVE_FILES_IN_DATASET";
@@ -178,6 +179,16 @@ interface DELETE_FILE_METADATA{
 	metadata: Metadata
 }
 
+interface FOLDER_DELETED{
+	type: "FOLDER_DELETED"
+	folder: Folder
+}
+
+interface GET_FOLDER_PATH{
+	type: "GET_FOLDER_PATH"
+	folderPath: String[]
+}
+
 export type DataAction =
 	| RECEIVE_FILES_IN_DATASET
 	| RECEIVE_FOLDERS_IN_DATASET
@@ -213,4 +224,6 @@ export type DataAction =
 	| DELETE_DATASET_METADATA
 	| DELETE_FILE_METADATA
 	| DOWNLOAD_FILE
+	| FOLDER_DELETED
+	| GET_FOLDER_PATH
 	;

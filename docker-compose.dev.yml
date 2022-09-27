@@ -77,20 +77,18 @@ services:
       volumes:
         - ./backend/keycloak/clowder-realm-dev.json:/opt/keycloak/data/import/realm.json:ro
         - ./backend/keycloak/clowder-theme/:/opt/keycloak/themes/clowder-theme/:ro
-        - ./backend/keycloak/data/:/opt/keycloak/data
       command:
         - start-dev
         - --http-relative-path /keycloak
         - --import-realm
       environment:
-        DB_VENDOR: POSTGRES
-        DB_ADDR: postgres
-        DB_DATABASE: keycloak
-        DB_USER: keycloak
-        DB_SCHEMA: public
-        DB_PASSWORD: password
         KEYCLOAK_ADMIN: admin
         KEYCLOAK_ADMIN_PASSWORD: admin
+        KC_DB: postgres
+        KC_DB_URL_HOST: postgres
+        KC_DB_URL_DATABASE: keycloak
+        KC_DB_USERNAME: keycloak
+        KC_DB_PASSWORD: password
       ports:
         - 8080:8080
       depends_on:
@@ -115,6 +113,22 @@ services:
     volumes:
       - rabbitmq:/var/lib/rabbitmq
 
+  # ELasticsearch
+  elasticsearch:
+#    platform: amd64
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.3.3
+    ports:
+      - 9200:9200
+      - 9300:9300
+    restart: unless-stopped
+    environment:
+      - cluster.name=clowder2
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - xpack.security.http.ssl.enabled=false
+    volumes:
+      - elasticsearch:/usr/share/elasticsearch/data
+    
   # heartbeat listener
   extractor-heartbeat:
     image: "tcnichol/heartbeat"
@@ -124,7 +138,7 @@ services:
       - rabbitmq
       - mongo
     environment:
-      - RABBITMQ_HOST=docker.host.internal
+      - RABBITMQ_HOST=rabbitmq
 
 ## By default this config uses default local driver,
 ## For custom volumes replace with volume driver configuration.
@@ -135,5 +149,5 @@ volumes:
   data3:
   data4:
   postgres_data:
-    driver: local
   rabbitmq:
+  elasticsearch:

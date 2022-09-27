@@ -156,7 +156,7 @@ export const GET_FOLDER_PATH = "GET_FOLDER_PATH";
 export function fetchFolderPath(folderId){
 	return (dispatch) => {
 		if (folderId != null) {
-			return V2.FoldersService.downloadFileApiV2FoldersFolderIdPathGet(folderId)
+			return V2.FoldersService.downloadFolderApiV2FoldersFolderIdPathGet(folderId)
 				.then(json => {
 					dispatch({
 						type: GET_FOLDER_PATH,

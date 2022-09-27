@@ -145,20 +145,18 @@ services:
       volumes:
         - ./backend/keycloak/clowder-realm-prod.json:/opt/keycloak/data/import/realm.json:ro
         - ./backend/keycloak/clowder-theme/:/opt/keycloak/themes/clowder-theme/:ro
-        - ./backend/keycloak/data/:/opt/keycloak/data
       command:
         - start-dev
         - --http-relative-path /keycloak
         - --import-realm
       environment:
-        DB_VENDOR: POSTGRES
-        DB_ADDR: postgres
-        DB_DATABASE: keycloak
-        DB_USER: keycloak
-        DB_SCHEMA: public
-        DB_PASSWORD: password
         KEYCLOAK_ADMIN: admin
         KEYCLOAK_ADMIN_PASSWORD: admin
+        KC_DB: postgres
+        KC_DB_URL_HOST: postgres
+        KC_DB_URL_DATABASE: keycloak
+        KC_DB_USERNAME: keycloak
+        KC_DB_PASSWORD: password
       depends_on:
         - postgres
       labels:
@@ -166,6 +164,19 @@ services:
         - "traefik.http.routers.keycloak.rule=PathPrefix(`/keycloak`)"
         - "traefik.http.services.keycloak.loadbalancer.server.port=8080"
         - "traefik.http.routers.keycloak.priority=10"
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.3.3
+    networks:
+      - clowder2
+    restart: unless-stopped
+    environment:
+      - "cluster.name=clowder2"
+      - "discovery.type=single-node"
+      - "xpack.security.enabled=false"
+      - "xpack.security.http.ssl.enabled=false"
+    volumes:
+      - elasticsearch:/usr/share/elasticsearch/data
 
 ## By default this config uses default local driver,
 ## For custom volumes replace with volume driver configuration.
@@ -176,6 +187,7 @@ volumes:
   data3:
   data4:
   postgres_data:
+  elasticsearch:
 
 networks:
   clowder2:

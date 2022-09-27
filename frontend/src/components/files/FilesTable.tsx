@@ -30,14 +30,14 @@ const iconStyle = {
 export default function FilesTable(props: FilesTableProps) {
 	// mapStateToProps
 	const filesInDataset = useSelector((state:RootState) => state.dataset.files);
-	const foldersInDataset = useSelector((state:RootState) => state.dataset.folders);
+	const foldersInDataset = useSelector((state:RootState) => state.folder.folders);
 	// use history hook to redirect/navigate between routes
 	const history = useNavigate();
-	const selectFile = (selectedFileId: string | undefined) => {
+	const selectFile = (selectedFileId: string|undefined) => {
 		// Redirect to file route with file Id and dataset id
 		history(`/files/${selectedFileId}?dataset=${props.datasetId}&name=${props.datasetName}`);
 	};
-	const selectFolder = (selectedFolderId: string) => {
+	const selectFolder = (selectedFolderId: string|undefined) => {
 		// Redirect to file route with file Id and dataset id
 		history(`/datasets/${props.datasetId}?folder=${selectedFolderId}`);
 	};

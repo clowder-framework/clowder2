@@ -21,11 +21,11 @@ import {
 	datasetDeleted,
 	fetchDatasetAbout,
 	fetchFilesInDataset,
-	fetchFolderPath,
 	fetchFoldersInDataset,
 	updateDataset
 } from "../../actions/dataset";
-import {resetFailedReason, resetLogout} from "../../actions/common"
+import {fetchFolderPath, folderDeleted} from "../../actions/folder";
+import {resetFailedReason, } from "../../actions/common"
 
 import {a11yProps, TabPanel} from "../tabs/TabComponent";
 import TopBar from "../navigation/TopBar";
@@ -39,13 +39,14 @@ import {parseDate} from "../../utils/common";
 import config from "../../app.config";
 import {DatasetIn, MetadataIn} from "../../openapi/v2";
 import {DisplayMetadata} from "../metadata/DisplayMetadata";
-import {AddMetadata} from "../metadata/AddMetadata";
+import {EditMetadata} from "../metadata/EditMetadata";
 import {
 	patchDatasetMetadata as patchDatasetMetadataAction,
 	deleteDatasetMetadata as deleteDatasetMetadataAction,
 	postDatasetMetadata, fetchDatasetMetadata
 } from "../../actions/metadata";
 import CloseIcon from '@mui/icons-material/Close';
+import dataset from "../../reducers/dataset";
 
 const tab = {
 	fontStyle: "normal",
@@ -67,32 +68,31 @@ export const Dataset = (): JSX.Element => {
 
 	// search parameters
 	let [searchParams, setSearchParams] = useSearchParams();
-	const folder = searchParams.get("folder");
+	const folderId = searchParams.get("folder");
 
 	// use history hook to redirect/navigate between routes
 	const history = useNavigate();
 
 	// Redux connect equivalent
 	const dispatch = useDispatch();
-	const updateDatasetMetadata = (datasetId: string | undefined, content:object) => dispatch(patchDatasetMetadataAction(datasetId,content));
+	const updateDatasetMetadata = (datasetId: string|undefined, content:object) => dispatch(patchDatasetMetadataAction(datasetId,content));
 	const createDatasetMetadata = (datasetId: string|undefined, metadata:MetadataIn) => dispatch(postDatasetMetadata(datasetId, metadata));
-	const deleteDatasetMetadata = (datasetId: string | undefined, metadata:object) => dispatch(deleteDatasetMetadataAction(datasetId, metadata));
+	const deleteDatasetMetadata = (datasetId: string|undefined, metadata:object) => dispatch(deleteDatasetMetadataAction(datasetId, metadata));
 	const deleteDataset = (datasetId:string|undefined) => dispatch(datasetDeleted(datasetId));
+	const deleteFolder = (datasetId:string|undefined, folderId:string|undefined) => dispatch(folderDeleted(datasetId, folderId));
 	const editDataset = (datasetId: string|undefined, formData: DatasetIn) => dispatch(updateDataset(datasetId, formData));
-	const getFolderPath= (folderId:string|undefined) => dispatch(fetchFolderPath(folderId));
-	const listFilesInDataset = (datasetId:string|undefined, folderId:string|undefined) => dispatch(fetchFilesInDataset(datasetId, folderId));
-	const listFoldersInDataset = (datasetId:string|undefined, parentFolder:string|undefined) => dispatch(fetchFoldersInDataset(datasetId, parentFolder));
+	const getFolderPath= (folderId: string | null) => dispatch(fetchFolderPath(folderId));
+	const listFilesInDataset = (datasetId: string|undefined, folderId: string | null) => dispatch(fetchFilesInDataset(datasetId, folderId));
+	const listFoldersInDataset = (datasetId: string|undefined, parentFolder: string | null) => dispatch(fetchFoldersInDataset(datasetId, parentFolder));
 	const listDatasetAbout= (datasetId:string|undefined) => dispatch(fetchDatasetAbout(datasetId));
-	const listDatasetMetadata = (datasetId: string | undefined) => dispatch(fetchDatasetMetadata(datasetId));
+	const listDatasetMetadata = (datasetId: string|undefined) => dispatch(fetchDatasetMetadata(datasetId));
 	const dismissError = () => dispatch(resetFailedReason());
-	const dismissLogout = () => dispatch(resetLogout());
 
 	// mapStateToProps
 	const about = useSelector((state: RootState) => state.dataset.about);
 	const reason = useSelector((state: RootState) => state.error.reason);
 	const stack = useSelector((state: RootState) => state.error.stack);
-	const loggedOut = useSelector((state: RootState) => state.error.loggedOut);
-	const folderPath = useSelector((state: RootState) => state.dataset.folderPath);
+	const folderPath = useSelector((state: RootState) => state.folder.folderPath);
 
 	// state
 	const [selectedTabIndex, setSelectedTabIndex] = useState<number>(0);
@@ -107,10 +107,10 @@ export const Dataset = (): JSX.Element => {
 
 	// component did mount list all files in dataset
 	useEffect(() => {
-		listFilesInDataset(datasetId, folder);
-		listFoldersInDataset(datasetId, folder);
+		listFilesInDataset(datasetId, folderId);
+		listFoldersInDataset(datasetId, folderId);
 		listDatasetAbout(datasetId);
-		getFolderPath(folder);
+		getFolderPath(folderId);
 	}, [searchParams]);
 
 	// Error msg dialog
@@ -130,14 +130,32 @@ export const Dataset = (): JSX.Element => {
 		window.open(`${config.GHIssueBaseURL}+${reason}&body=${encodeURIComponent(stack)}`);
 	}
 
-	// log user out if token expired/unauthorized
-	useEffect(() => {
-		if (loggedOut) {
-			// reset loggedOut flag so it doesn't stuck in "true" state, then redirect to login page
-			dismissLogout();
-			history("/auth/login");
+	// confirmation dialog
+	const [deleteDatasetConfirmOpen, setDeleteDatasetConfirmOpen] = useState(false);
+	const deleteSelectedDataset = () => {
+		if (datasetId) {
+			deleteDataset(datasetId);
 		}
-	}, [loggedOut]);
+		setDeleteDatasetConfirmOpen(false);
+		 // Go to Explore page
+		history("/");
+	}
+
+	const [deleteFolderConfirmOpen, setDeleteFolderConfirmOpen] = useState(false);
+	const deleteSelectedFolder = () => {
+		if (folderId) {
+			deleteFolder(datasetId, folderId);
+		}
+		setDeleteFolderConfirmOpen(false);
+		 // Go to upper level not properly working
+		if (folderPath != null && folderPath.length > 1) {
+			const parentFolderId = folderPath.at(-2)["folder_id"]
+			history(`/datasets/${datasetId}?folder=${parentFolderId}`);
+		}
+		else{
+			history(`/datasets/${datasetId}`);
+		}
+	}
 
 	// new folder dialog
 	const [newFolder, setNewFolder] = React.useState<boolean>(false);
@@ -168,7 +186,15 @@ export const Dataset = (): JSX.Element => {
 	};
 
 	const setMetadata = (metadata:any) =>{
-		setMetadataRequestForms(prevState => ({...prevState, [metadata.definition]: metadata}));
+		// TODO wrap this in to a function
+		setMetadataRequestForms(prevState => {
+			// merge the contents field; e.g. lat lon
+			if (metadata.definition in prevState){
+				const prevContent = prevState[metadata.definition].contents;
+				metadata.contents = {...prevContent, ...metadata.contents};
+			}
+			return ({...prevState, [metadata.definition]: metadata});
+		});
 	};
 
 	const handleMetadataUpdateFinish = () =>{
@@ -224,6 +250,19 @@ export const Dataset = (): JSX.Element => {
 			<TopBar/>
 			<div className="outer-container">
 				<MainBreadcrumbs paths={paths}/>
+				{/*Confirmation dialogue*/}
+				<ActionModal actionOpen={deleteDatasetConfirmOpen} actionTitle="Are you sure?"
+							 actionText="Do you really want to delete this dataset? This process cannot be undone."
+							 actionBtnName="Delete" handleActionBtnClick={deleteSelectedDataset}
+							 handleActionCancel={() => {
+								 setDeleteDatasetConfirmOpen(false);
+							 }}/>
+			    <ActionModal actionOpen={deleteFolderConfirmOpen} actionTitle="Are you sure?"
+							 actionText="Do you really want to delete this folder? This process cannot be undone."
+							 actionBtnName="Delete" handleActionBtnClick={deleteSelectedFolder}
+							 handleActionCancel={() => {
+								 setDeleteFolderConfirmOpen(false);
+							 }}/>
 				{/*Error Message dialogue*/}
 				<ActionModal actionOpen={errorOpen} actionTitle="Something went wrong..." actionText={reason}
 							 actionBtnName="Report" handleActionBtnClick={handleErrorReport}
@@ -250,8 +289,8 @@ export const Dataset = (): JSX.Element => {
 											>
 												<CloseIcon />
 											</IconButton>
-											<AddMetadata resourceType="dataset" resourceId={datasetId}
-														 setMetadata={setMetadata}
+											<EditMetadata resourceType="dataset" resourceId={datasetId}
+														  setMetadata={setMetadata}
 											/>
 											<Button variant="contained" onClick={handleMetadataUpdateFinish} sx={{ mt: 1, mr: 1 }}>
 												Update
@@ -263,9 +302,13 @@ export const Dataset = (): JSX.Element => {
 										</>
 										:
 										<>
-											<ClowderButton onClick={()=>{setEnableAddMetadata(true);}}>
-												Add/Edit Metadata
-											</ClowderButton>
+											<Grid container spacing={2} sx={{ "alignItems": "center"}}>
+												<Grid item xs={11} sm={11} md={11} lg={11} xl={11}>
+													<ClowderButton onClick={()=>{setEnableAddMetadata(true);}}>
+														Add/Edit Metadata
+													</ClowderButton>
+												</Grid>
+											</Grid>
 											<DisplayMetadata updateMetadata={updateDatasetMetadata}
 															 deleteMetadata={deleteDatasetMetadata}
 															 resourceType="dataset" resourceId={datasetId}/>
@@ -314,7 +357,7 @@ export const Dataset = (): JSX.Element => {
 												  handleOptionClose();
 											  }
 											  }>Add Folder</MenuItem>
-									<CreateFolder datasetId={datasetId} parentFolder={folder} open={newFolder}
+									<CreateFolder datasetId={datasetId} parentFolder={folderId} open={newFolder}
 												  handleClose={handleCloseNewFolder}/>
 									{/*backend not implemented yet*/}
 									<MenuItem sx={optionMenuItem}
@@ -325,14 +368,17 @@ export const Dataset = (): JSX.Element => {
 									</MenuItem>
 									<MenuItem sx={optionMenuItem}
 											  onClick={() => {
-												  deleteDataset(datasetId);
 												  handleOptionClose();
-												  // Go to Explore page
-												  history("/");
+												  setDeleteDatasetConfirmOpen(true);
 											  }
 											  }>Delete Dataset</MenuItem>
-									<MenuItem onClick={handleOptionClose} sx={optionMenuItem} disabled={true}>Delete
-										Folder</MenuItem>
+									<MenuItem sx={optionMenuItem}
+											  onClick={() => {
+												  handleOptionClose();
+												  setDeleteFolderConfirmOpen(true);
+											  	}
+											  }>
+										Delete Folder</MenuItem>
 									<MenuItem onClick={handleOptionClose} sx={optionMenuItem}
 											  disabled={true}>Follow</MenuItem>
 									<MenuItem onClick={handleOptionClose} sx={optionMenuItem}
@@ -432,7 +478,7 @@ export const Dataset = (): JSX.Element => {
 					<Dialog open={createFileOpen} onClose={() => {
 						setCreateFileOpen(false);
 					}} fullWidth={true}  maxWidth="lg" aria-labelledby="form-dialog">
-						<UploadFile selectedDatasetId={datasetId} selectedDatasetName={about.name} folderId={folder}/>
+						<UploadFile selectedDatasetId={datasetId} selectedDatasetName={about.name} folderId={folderId}/>
 					</Dialog>
 				</div>
 			</div>
