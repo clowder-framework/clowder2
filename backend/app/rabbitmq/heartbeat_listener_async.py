@@ -5,7 +5,7 @@ from aio_pika import ExchangeType, connect
 from app.config import settings
 from aio_pika.abc import AbstractIncomingMessage
 from pymongo import MongoClient
-from app.models.extractors import (
+from models.extractors import (
     ExtractorBase,
     ExtractorIn,
     ExtractorDB,
