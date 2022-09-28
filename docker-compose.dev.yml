@@ -126,6 +126,11 @@ services:
       - discovery.type=single-node
       - xpack.security.enabled=false
       - xpack.security.http.ssl.enabled=false
+      # to enable CORS
+      - http.cors.allow-origin=http://localhost:3000
+      - http.cors.enabled=true
+      - http.cors.allow-headers=X-Requested-With,X-Auth-Token,Content-Type,Content-Length,Authorization
+      - http.cors.allow-credentials=true
     volumes:
       - elasticsearch:/usr/share/elasticsearch/data
     
