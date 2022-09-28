@@ -7,8 +7,7 @@ export function Search() {
     <ReactiveBase
       url="http://localhost:9200"
       app="file"
-      // credentials="04717bb076f7:be54685e-db84-4243-975b-5b32ee241d31"
-      enableAppbase
+      // enableAppbase
     >
       <DataSearch
 	componentId="searchbox"
