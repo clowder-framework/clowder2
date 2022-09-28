@@ -14,7 +14,7 @@ The structure of metadata definition looks like below:
     "name" : "Unit",
     "description" : "Unit",
     "context" : {
-        "doi" : "https://schema.org/QuantitativeValue"
+        "unit" : "https://schema.org/QuantitativeValue"
     },
     "fields" : [
         {
