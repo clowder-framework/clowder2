@@ -1,9 +1,8 @@
 import pika
 import json
 import os
-import app
 from packaging import version
-from app.config import settings
+from config import settings
 from pymongo import MongoClient
 import time
 from app.models.extractors import (
