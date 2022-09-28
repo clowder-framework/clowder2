@@ -2,7 +2,7 @@ import pika
 import json
 import os
 from packaging import version
-from config import settings
+from app.config import settings
 from pymongo import MongoClient
 import time
 from app.models.extractors import (

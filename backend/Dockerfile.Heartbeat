@@ -22,4 +22,4 @@ ENV PATH="/code/.venv/bin:$PATH"
 COPY ./app /code/app
 
 # launch app using uvicorn
-CMD ["python3", "/code/app/heartbeat_listener_sync.py"]
+CMD ["python", "/code/app/heartbeat_listener_sync.py"]
