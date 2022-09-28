@@ -24,7 +24,9 @@ dummy_query = {"match": {"name": "test"}}
 def test_elastic_search():
     es = connect_elasticsearch()
     if es is not None:
-        create_index(es, dummy_index_name, settings.file_settings)
+        create_index(
+            es, dummy_index_name, settings.elasticsearch_setting, settings.file_mappings
+        )
         insert_record(es, dummy_index_name, dummy_record, 1)
         time.sleep(5)
         result = search_index(es, dummy_index_name, dummy_query)
