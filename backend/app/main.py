@@ -128,8 +128,10 @@ async def startup_db_client():
 
     # create elasticsearch indices
     es = connect_elasticsearch()
-    create_index(es, "file", settings.file_settings)
-    create_index(es, "dataset", settings.file_settings)
+    create_index(es, "file", settings.elasticsearch_setting, settings.file_mappings)
+    create_index(
+        es, "dataset", settings.elasticsearch_setting, settings.dataset_mappings
+    )
     pass
 
 
