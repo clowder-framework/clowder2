@@ -51,8 +51,8 @@ def callback(ch, method, properties, body):
 
 
 def listen_for_heartbeats():
-    print('connecting with')
-    print('rabbitmqhost is', settings.RABBITMQ_HOST)
+    print("connecting with")
+    print("rabbitmqhost is", settings.RABBITMQ_HOST)
     credentials = pika.PlainCredentials(settings.RABBITMQ_USER, settings.RABBITMQ_PASS)
 
     parameters = pika.ConnectionParameters(
@@ -91,5 +91,5 @@ if __name__ == "__main__":
         try:
             listen_for_heartbeats()
         except Exception as e:
-            print('could not connect trying again in 60 seconds')
+            print("could not connect trying again in 60 seconds")
             time.sleep(60)
