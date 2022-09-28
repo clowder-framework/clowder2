@@ -13,23 +13,15 @@ export function Search() {
 	componentId="searchbox"
 	dataField={[
 		{
-			"field": "authors",
+			"field": "name",
 			"weight": 3
 		},
 		{
-			"field": "authors.autosuggest",
+			"field": "creator",
 			"weight": 1
-		},
-		{
-			"field": "original_title",
-			"weight": 5
-		},
-		{
-			"field": "original_title.autosuggest",
-			"weight": 1
-		},
+		}
 	]}
-	placeholder="Search for books or authors"
+	placeholder="Search for file"
 	  />
     </ReactiveBase>
   );
