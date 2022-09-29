@@ -35,7 +35,7 @@ def create_index(es_client, index_name):
             "properties": {
                 "name": {"type": "text"},
                 "created": {"type": "date"},
-                "creator": {"type": "text"},
+                "creator": {"type": "keyword"},
                 "download": {"type": "long"},
             }
         },
