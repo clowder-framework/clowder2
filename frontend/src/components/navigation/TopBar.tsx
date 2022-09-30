@@ -33,6 +33,7 @@ export default function TopBar() {
 					<Box display="flex" flexGrow={1}>
 						<img src="../../public/clowder-logo-sm.svg" alt="clowder-logo-sm"/>
 						<Link href="/" sx={link}>Explore</Link>
+						<Link href="/new-metadata-definition" sx={link}>Create New Metadata</Link>
 						<Link href="https://clowderframework.org/" target="_blank" sx={link}>
 							Help</Link>
 					</Box>

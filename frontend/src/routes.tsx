@@ -5,6 +5,7 @@ import {Dashboard} from "./components/Dashbard";
 import {Dataset as DatasetComponent} from "./components/datasets/Dataset";
 import {File as FileComponent} from "./components/files/File";
 import {CreateDataset} from "./components/datasets/CreateDataset";
+import {CreateMetadataDefinitionPage} from "./components/metadata/CreateMetadataDefinition";
 
 import {RedirectRegister as RedirectRegisterComponent} from "./components/auth/RedirectRegister";
 import {Auth as AuthComponent} from "./components/auth/Auth";
@@ -49,6 +50,7 @@ export const AppRoutes = (): JSX.Element => {
 		<BrowserRouter>
 			<Routes>
 				<Route path="/" element={<PrivateRoute><Dashboard/></PrivateRoute>} />
+				<Route path="/new-metadata-definition" element={<PrivateRoute><CreateMetadataDefinitionPage/></PrivateRoute>} />
 				<Route path="/create-dataset/" element={<PrivateRoute><CreateDataset/></PrivateRoute>} />
 				<Route path="/datasets/:datasetId" element={<PrivateRoute><DatasetComponent/></PrivateRoute>} />
 				<Route path="/files/:fileId" element={<PrivateRoute><FileComponent/></PrivateRoute>} />

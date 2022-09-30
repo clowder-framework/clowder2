@@ -3,6 +3,10 @@ import {
 	Box,
 	Button,
 	Dialog,
+	DialogActions,
+	DialogContent,
+	DialogContentText,
+	DialogTitle,
 	Divider,
 	Grid, IconButton,
 	Menu,
@@ -38,6 +42,7 @@ import {useSearchParams} from "react-router-dom";
 import {parseDate} from "../../utils/common";
 import config from "../../app.config";
 import {DatasetIn, MetadataIn} from "../../openapi/v2";
+import {CreateMetadataDefinition} from "../metadata/CreateMetadataDefinition";
 import {DisplayMetadata} from "../metadata/DisplayMetadata";
 import {EditMetadata} from "../metadata/EditMetadata";
 import {
@@ -102,6 +107,7 @@ export const Dataset = (): JSX.Element => {
 	const [datasetDescription, setDatasetDescription] = React.useState<string>("");
 	const [enableAddMetadata, setEnableAddMetadata] = React.useState<boolean>(false);
 	const [metadataRequestForms, setMetadataRequestForms] = useState({});
+	const [openPopup, setOpenPopup] = React.useState<boolean>(false)
 
 	// component did mount list all files in dataset
 	useEffect(() => {
@@ -247,9 +253,15 @@ export const Dataset = (): JSX.Element => {
 											>
 												<CloseIcon />
 											</IconButton>
+											<Button variant="contained" onClick={() => {setOpenPopup(true);}} sx={{ mt: 1, mr: 1, "alignItems": "right" }}>
+												Add new field
+											</Button>
 											<EditMetadata resourceType="dataset" resourceId={datasetId}
 														  setMetadata={setMetadata}
 											/>
+											<Button onClick={() => {setOpenPopup(true);}} sx={{ mt: 1, mr: 1, "alignItems": "right" }}>
+												Add new field
+											</Button>
 											<Button variant="contained" onClick={handleMetadataUpdateFinish} sx={{ mt: 1, mr: 1 }}>
 												Update
 											</Button>
@@ -257,6 +269,22 @@ export const Dataset = (): JSX.Element => {
 													sx={{ mt: 1, mr: 1 }}>
 												Cancel
 											</Button>
+											{
+												openPopup ?
+												<>
+													<Dialog open={openPopup} onClose={() => {setOpenPopup(false);}}>
+														<DialogTitle>Add a new field</DialogTitle>
+														<DialogContent>
+															<DialogContentText>Please fill out the metadata information here.</DialogContentText>
+															<CreateMetadataDefinition/>
+														</DialogContent>
+														<DialogActions>
+															<Button onClick={() => {setOpenPopup(false);}}>Cancel</Button>
+														</DialogActions>
+													</Dialog>
+												</>
+												: <></>
+											}
 										</>
 										:
 										<>
