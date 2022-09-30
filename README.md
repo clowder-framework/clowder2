@@ -44,7 +44,7 @@ After starting up the required services, setup and run the backend.
 The backend is developed using [Python](https://www.python.org/), [FastAPI](https://fastapi.tiangolo.com/), [Motor](https://motor.readthedocs.io/en/stable/).
 
 1. Switch to backend directory `cd backend`.
-2. Install dependencies using `pipenv install`. See [pipenv](https://github.com/pypa/pipenv).
+2. Install dependencies using `pipenv install --dev`. See [pipenv](https://github.com/pypa/pipenv).
 3. Run app from command line (if you set it up in PyCharm you can use its debug functions):
     ```pipenv run uvicorn app.main:app --reload```
 4. API docs are available at `http://localhost:8000/docs`. Default API is deployed at `http://localhost:8000/api/v2`.
