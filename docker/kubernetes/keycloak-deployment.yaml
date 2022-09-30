@@ -1,0 +1,76 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose convert -f docker-compose.yml
+    kompose.version: 1.26.1 (HEAD)
+    traefik.enable: "true"
+    traefik.http.routers.keycloak.priority: "10"
+    traefik.http.routers.keycloak.rule: PathPrefix(`/keycloak`)
+    traefik.http.services.keycloak.loadbalancer.server.port: "8080"
+  creationTimestamp: null
+  labels:
+    io.kompose.service: keycloak
+  name: keycloak
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: keycloak
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose convert -f docker-compose.yml
+        kompose.version: 1.26.1 (HEAD)
+        traefik.enable: "true"
+        traefik.http.routers.keycloak.priority: "10"
+        traefik.http.routers.keycloak.rule: PathPrefix(`/keycloak`)
+        traefik.http.services.keycloak.loadbalancer.server.port: "8080"
+      creationTimestamp: null
+      labels:
+        io.kompose.network/clowder2: "true"
+        io.kompose.service: keycloak
+    spec:
+      containers:
+        - args:
+            - start-dev
+            - --http-relative-path /keycloak
+            - --import-realm
+          env:
+            - name: KC_DB
+              value: postgres
+            - name: KC_DB_PASSWORD
+              value: password
+            - name: KC_DB_URL_DATABASE
+              value: keycloak
+            - name: KC_DB_URL_HOST
+              value: postgres
+            - name: KC_DB_USERNAME
+              value: keycloak
+            - name: KEYCLOAK_ADMIN
+              value: admin
+            - name: KEYCLOAK_ADMIN_PASSWORD
+              value: admin
+          image: quay.io/keycloak/keycloak:19.0.2
+          name: keycloak
+          resources: {}
+          volumeMounts:
+            - mountPath: /opt/keycloak/data/import/realm.json
+              name: keycloak-claim0
+              readOnly: true
+            - mountPath: /opt/keycloak/themes/clowder-theme/
+              name: keycloak-claim1
+              readOnly: true
+      restartPolicy: Always
+      volumes:
+        - name: keycloak-claim0
+          persistentVolumeClaim:
+            claimName: keycloak-claim0
+            readOnly: true
+        - name: keycloak-claim1
+          persistentVolumeClaim:
+            claimName: keycloak-claim1
+            readOnly: true
+status: {}

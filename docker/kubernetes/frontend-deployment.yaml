@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose convert -f docker-compose.yml
+    kompose.version: 1.26.1 (HEAD)
+    traefik.enable: "true"
+    traefik.http.routers.frontend.priority: "1"
+    traefik.http.routers.frontend.rule: PathPrefix(`/`)
+    traefik.http.services.frontend.loadbalancer.server.port: "80"
+  creationTimestamp: null
+  labels:
+    io.kompose.service: frontend
+  name: frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: frontend
+  strategy: {}
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose convert -f docker-compose.yml
+        kompose.version: 1.26.1 (HEAD)
+        traefik.enable: "true"
+        traefik.http.routers.frontend.priority: "1"
+        traefik.http.routers.frontend.rule: PathPrefix(`/`)
+        traefik.http.services.frontend.loadbalancer.server.port: "80"
+      creationTimestamp: null
+      labels:
+        io.kompose.network/clowder2: "true"
+        io.kompose.service: frontend
+    spec:
+      containers:
+        - env:
+            - name: CLOWDER_REMOTE_HOSTNAME
+              value: http://localhost
+            - name: NODE_ENV
+              value: production
+          image: clowder/clowder2-frontend
+          name: frontend
+          resources: {}
+      restartPolicy: Always
+status: {}

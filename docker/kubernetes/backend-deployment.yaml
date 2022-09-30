@@ -1,0 +1,61 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose convert -f docker-compose.yml
+    kompose.version: 1.26.1 (HEAD)
+    traefik.enable: "true"
+    traefik.http.routers.backend.priority: "5"
+    traefik.http.routers.backend.rule: PathPrefix(`/api`)
+    traefik.http.services.backend.loadbalancer.server.port: "80"
+  creationTimestamp: null
+  labels:
+    io.kompose.service: backend
+  name: backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: backend
+  strategy: {}
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose convert -f docker-compose.yml
+        kompose.version: 1.26.1 (HEAD)
+        traefik.enable: "true"
+        traefik.http.routers.backend.priority: "5"
+        traefik.http.routers.backend.rule: PathPrefix(`/api`)
+        traefik.http.services.backend.loadbalancer.server.port: "80"
+      creationTimestamp: null
+      labels:
+        io.kompose.network/clowder2: "true"
+        io.kompose.service: backend
+    spec:
+      containers:
+        - env:
+            - name: MINIO_SERVER_URL
+              value: minio-nginx:9000
+            - name: MONGODB_URL
+              value: mongodb://mongo:27017
+            - name: auth_base
+              value: http://localhost
+            - name: auth_register_url
+              value: http://localhost/keycloak/realms/clowder/protocol/openid-connect/registrations?client_id=clowder2-backend&response_type=code
+            - name: auth_server_url
+              value: http://keycloak:8080/keycloak/
+            - name: auth_token_url
+              value: http://keycloak:8080/keycloak/realms/clowder/protocol/openid-connect/token
+            - name: auth_url
+              value: http://localhost/keycloak/realms/clowder/protocol/openid-connect/auth?client_id=clowder2-backend&response_type=code
+            - name: frontend_url
+              value: http://localhost
+            - name: keycloak_base
+              value: http://localhost/api
+            - name: oauth2_scheme_auth_url
+              value: http://keycloak:8080/keycloak/realms/clowder/protocol/openid-connect/auth?client_id=clowder2-backend&response_type=code
+          image: clowder/clowder2-backend
+          name: backend
+          resources: {}
+      restartPolicy: Always
+status: {}
