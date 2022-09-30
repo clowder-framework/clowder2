@@ -31,7 +31,6 @@ def _check_name_match(value: str, operator: str, criteria: str):
     else:
         return False
 
-
 async def process_search_index(
         search_index: SearchIndexContents,
         user: UserOut,

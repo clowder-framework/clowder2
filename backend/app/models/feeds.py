@@ -22,6 +22,7 @@ class JobFeed(BaseModel):
     name: str
     criteria: List[SearchCriteria] = []
     listeners: List[MiniListener] = []
+    mode: str = "and"  # and / or
 
 
 class FeedBase(JobFeed):

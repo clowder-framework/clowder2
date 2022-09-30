@@ -53,6 +53,20 @@ async def save_legacy_listener(
     listener_out = ListenerOut.from_mongo(found)
 
     # TODO: Automatically match or create a Feed based on listener_in.process rules
+    for process_key in listener_properties.process:
+        if process_key == "file":
+            mimetypes = listener_properties.process[process_key]
+            new_feed = {
+                "name": legacy_in.name + " " + legacy_in.version,
+                "mode": "or",
+                "listeners": [{"listener_id": listener_out.id, "automatic": True}],
+                "criteria": []
+            }
+            for mimetype in mimetypes:
+                new_feed["criteria"].append({"field": "MIMEtype", "operator": "==", "value": mimetype})
+
+            # Save feed
+            pass
 
     return listener_out
 
