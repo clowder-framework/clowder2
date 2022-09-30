@@ -1,22 +1,27 @@
 from datetime import datetime
-from pydantic import Field
+from pydantic import Field, BaseModel
 from typing import Optional, List, Union
 from app.models.mongomodel import MongoModel
+from app.models.pyobjectid import PyObjectId
 from app.models.users import UserOut
 from app.models.listeners import ListenerOut
 
 
-
-class SearchCriteria(MongoModel):
+class SearchCriteria(BaseModel):
     field: str
     operator: str
     value: str
 
 
-class JobFeed(MongoModel):
+class MiniListener(BaseModel):
+    listener_id: PyObjectId
+    automatic: bool
+
+
+class JobFeed(BaseModel):
     name: str
     criteria: List[SearchCriteria] = []
-    listeners: List[ListenerOut] = []
+    listeners: List[MiniListener] = []
 
 
 class FeedBase(JobFeed):
@@ -27,10 +32,10 @@ class FeedIn(JobFeed):
     pass
 
 
-class FeedDB(JobFeed):
+class FeedDB(JobFeed, MongoModel):
     author: UserOut
     updated: datetime = Field(default_factory=datetime.utcnow)
 
 
-class FeedOut(JobFeed):
+class FeedOut(FeedDB):
     pass

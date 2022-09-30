@@ -28,6 +28,8 @@ from app.elastic_search.connect import (
 )
 from app.models.files import FileIn, FileOut, FileVersion, FileDB
 from app.models.users import UserOut
+from app.models.search import SearchIndexContents
+from app.routers.feeds import process_search_index
 from app.keycloak_auth import get_user, get_current_user, get_token
 from typing import Union
 
@@ -93,7 +95,12 @@ async def add_file_entry(
         "created": datetime.now(),
         "download": file_db.downloads,
     }
+    # TODO: Make this handle a SearchIndexContents object
     insert_record(es, "file", doc)
+
+    # Submit file job to any qualifying feeds
+    search_index = SearchIndexContents(**doc)
+    await process_search_index(search_index, user, db)
 
 
 async def remove_file_entry(

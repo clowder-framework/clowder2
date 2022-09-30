@@ -465,7 +465,7 @@ async def save_file(
                     status_code=404, detail=f"Folder {folder_id} not found"
                 )
 
-        await add_file_entry(
+        new_entry = await add_file_entry(
             fileDB, user, db, fs, file.file, content_type=file.content_type
         )
 

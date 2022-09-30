@@ -25,6 +25,7 @@ from app.routers import (
     authentication,
     keycloak,
     listeners,
+    feeds,
 )
 
 # setup loggers
@@ -120,6 +121,12 @@ api_router.include_router(
     listeners.legacy_router,
     prefix="/extractors",
     tags=["extractors"],
+    dependencies=[Depends(get_current_username)],
+)
+api_router.include_router(
+    feeds.router,
+    prefix="/feeds",
+    tags=["feeds"],
     dependencies=[Depends(get_current_username)],
 )
 api_router.include_router(keycloak.router, prefix="/auth", tags=["auth"])

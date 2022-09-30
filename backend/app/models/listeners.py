@@ -28,7 +28,7 @@ class ListenerProperties(BaseModel):
 
 class ListenerBase(BaseModel):
     name: str
-    version: str = "1.0"
+    version: int = 1
     description: str = ""
 
 
@@ -49,5 +49,5 @@ class ListenerDB(ListenerBase, MongoModel):
     properties: Optional[ListenerProperties] = None
 
 
-class ListenerOut(ListenerBase):
+class ListenerOut(ListenerDB):
     pass

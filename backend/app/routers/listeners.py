@@ -5,7 +5,7 @@ from fastapi import APIRouter, HTTPException, Depends, Request
 from pymongo import MongoClient
 import datetime
 from app.dependencies import get_db
-from app.keycloak_auth import get_user
+from app.keycloak_auth import get_user, get_current_user
 from app.models.listeners import (
     ListenerProperties,
     ListenerIn,
@@ -15,7 +15,7 @@ from app.models.listeners import (
 )
 
 router = APIRouter()
-legacy_router = APIRouter() # for back-compatibilty with v1 extractors
+legacy_router = APIRouter()  # for back-compatibilty with v1 extractors
 
 clowder_bucket = os.getenv("MINIO_BUCKET_NAME", "clowder")
 
@@ -23,10 +23,10 @@ clowder_bucket = os.getenv("MINIO_BUCKET_NAME", "clowder")
 @router.post("", response_model=ListenerOut)
 async def save_listener(
     listener_in: ListenerIn,
-    user=Depends(get_user),
+    user=Depends(get_current_user),
     db: MongoClient = Depends(get_db),
 ):
-    listener = ListenerDB(**listener_in.dict())
+    listener = ListenerDB(**listener_in.dict(), author=user)
     new_listener = await db["listeners"].insert_one(listener.to_mongo())
     found = await db["listeners"].find_one({"_id": new_listener.inserted_id})
     listener_out = ListenerOut.from_mongo(found)
@@ -43,10 +43,10 @@ async def save_legacy_listener(
     listener_properties = ListenerProperties(**legacy_in.dict)
     listener = ListenerDB(
         name=legacy_in.name,
-        version=legacy_in.version,
+        version=int(legacy_in.version),
         description=legacy_in.description,
         author=user,
-        properties=listener_properties
+        properties=listener_properties,
     )
     new_listener = await db["listeners"].insert_one(listener.to_mongo())
     found = await db["listeners"].find_one({"_id": new_listener.inserted_id})
@@ -58,9 +58,7 @@ async def save_legacy_listener(
 
 
 @router.get("/{listener_id}", response_model=ListenerOut)
-async def get_listener(
-    listener_id: str, db: MongoClient = Depends(get_db)
-):
+async def get_listener(listener_id: str, db: MongoClient = Depends(get_db)):
     if (
         listener := await db["listeners"].find_one({"_id": ObjectId(listener_id)})
     ) is not None:
@@ -119,6 +117,4 @@ async def delete_listener(
         await db["listeners"].delete_one({"_id": ObjectId(listener_id)})
         return {"deleted": listener_id}
     else:
-        raise HTTPException(
-            status_code=404, detail=f"listener {listener_id} not found"
-        )
+        raise HTTPException(status_code=404, detail=f"listener {listener_id} not found")
