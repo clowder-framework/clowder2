@@ -1,0 +1,34 @@
+# helm upgrade --install --namespace clowder2 --create-namespace --values radiant.yaml clowder2 .
+
+frontend:
+  ingress:
+    hosts:
+      - host: clowder2.software.ncsa.cloud
+        paths:
+          - path: /
+            pathType: ImplementationSpecific
+
+backend:
+  ingress:
+    hosts:
+      - host: clowder2.software.ncsa.cloud
+        paths:
+          - path: /api
+            pathType: ImplementationSpecific
+
+minio:
+  auth:
+    rootUser: clowder
+    rootPassword: ilikecats
+  ingress:
+    hostname: minio.software.clowder2.ncsa.cloud
+  apiIngress:
+    hostname: minio.software.clowder2.ncsa.cloud
+
+rabbitmq:
+  ingress:
+    hostname: rabbitmq.software.clowder2.ncsa.cloud
+
+keycloak:
+  ingress:
+    hostname: clowder2.software.ncsa.cloud
