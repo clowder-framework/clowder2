@@ -36,24 +36,26 @@ spec:
           image: "{{ .Values.backend.image.repository }}:{{ .Values.backend.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.backend.image.pullPolicy }}
           env:
+            - name: WEB_CONCURRENCY
+              value: "4"
             - name: MINIO_SERVER_URL
-              value: {{ include "clowder2.name" . }}-minio:9000
+              value: {{ include "clowder2.name" . }}-minio-headless:9000
             - name: MONGODB_URL
               value: mongodb://{{ include "clowder2.name" . }}-mongodb:27017
             - name: CLOWDER2_URL
-              value: http://clowder2.software.ncsa.cloud
+              value: http://{{ .Values.hostname }}
             - name: auth_base
               value: $(CLOWDER2_URL)
             - name: auth_url
               value: $(CLOWDER2_URL)/keycloak/realms/clowder/protocol/openid-connect/auth?client_id=clowder2-backend&response_type=code
             - name: oauth2_scheme_auth_url
-              value: http://{{ include "clowder2.name" .}}-keycloak:8080/keycloak/realms/clowder/protocol/openid-connect/auth?client_id=clowder2-backend&response_type=code
+              value: http://{{ include "clowder2.name" .}}-keycloak-headless:8080/keycloak/realms/clowder/protocol/openid-connect/auth?client_id=clowder2-backend&response_type=code
             - name: auth_register_url
               value: $(CLOWDER2_URL)/keycloak/realms/clowder/protocol/openid-connect/registrations?client_id=clowder2-backend&response_type=code
             - name: auth_token_url
-              value: http://{{ include "clowder2.name" .}}-keycloak:8080/keycloak/realms/clowder/protocol/openid-connect/token
+              value: http://{{ include "clowder2.name" .}}-keycloak-headless:8080/keycloak/realms/clowder/protocol/openid-connect/token
             - name: auth_server_url
-              value: http://{{ include "clowder2.name" .}}keycloak:8080/keycloak/
+              value: http://{{ include "clowder2.name" .}}-keycloak-headless:8080/keycloak/
             - name: keycloak_base
               value: $(CLOWDER2_URL)/api
             - name: frontend_url

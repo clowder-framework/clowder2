@@ -1,29 +1,28 @@
-{{- if .Values.frontend.ingress.enabled -}}
-{{- $fullName := include "clowder2.fullname" . -}}
-{{- $svcPort := .Values.frontend.service.port -}}
-{{- if and .Values.frontend.ingress.className (not (semverCompare ">=1.18-0" .Capabilities.KubeVersion.GitVersion)) }}
-  {{- if not (hasKey .Values.frontend.ingress.annotations "kubernetes.io/ingress.class") }}
-  {{- $_ := set .Values.frontend.ingress.annotations "kubernetes.io/ingress.class" .Values.ingress.className}}
+{{- if .Values.ingress.enabled -}}
+{{- if and .Values.ingress.className (not (semverCompare ">=1.18-0" .Capabilities.KubeVersion.GitVersion)) }}
+  {{- if not (hasKey .Values.ingress.annotations "kubernetes.io/ingress.class") }}
+  {{- $_ := set .Values.ingress.annotations "kubernetes.io/ingress.class" .Values.ingress.className}}
   {{- end }}
 {{- end }}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: {{ $fullName }}-frontend
+  name: {{ include "clowder2.fullname" . }}-frontend
   labels:
     {{- include "clowder2.labels" . | nindent 4 }}
-  {{- with .Values.frontend.ingress.annotations }}
+  {{- with .Values.ingress.annotations }}
   annotations:
     {{- toYaml . | nindent 4 }}
   {{- end }}
 spec:
-  {{- if and .Values.frontend.ingress.className (semverCompare ">=1.18-0" .Capabilities.KubeVersion.GitVersion) }}
-  ingressClassName: {{ .Values.frontend.ingress.className }}
+  {{- if and .Values.ingress.className (semverCompare ">=1.18-0" .Capabilities.KubeVersion.GitVersion) }}
+  ingressClassName: {{ .Values.ingress.className }}
   {{- end }}
-  {{- if .Values.frontend.ingress.tls }}
+  {{- if .Values.ingress.tls }}
   tls:
-    {{- range .Values.frontend.ingress.tls }}
     - hosts:
+        - {{ .Values.hostname }}
+    {{- range .Values.ingress.tls }}
         {{- range .hosts }}
         - {{ . | quote }}
         {{- end }}
@@ -31,18 +30,14 @@ spec:
     {{- end }}
   {{- end }}
   rules:
-    {{- range .Values.frontend.ingress.hosts }}
-    - host: {{ .host | quote }}
+    - host: {{ .Values.hostname }}
       http:
         paths:
-          {{- range .paths }}
-          - path: {{ .path }}
-            pathType: {{ .pathType }}
+          - path: /
+            pathType: ImplementationSpecific
             backend:
               service:
-                name: {{ $fullName }}-frontend
+                name: {{ include "clowder2.fullname" . }}-frontend
                 port:
-                  number: {{ $svcPort }}
-          {{- end }}
-    {{- end }}
+                  number: {{ .Values.frontend.service.port }}
 {{- end }}

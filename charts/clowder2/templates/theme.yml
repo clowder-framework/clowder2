@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: clowder2-theme
+binaryData:
+  custom_theme.tgz: |
+    {{ .Files.Get "files/clowder-theme.tgz" | b64enc }}

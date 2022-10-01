@@ -54,3 +54,6 @@ dist
 
 # keycloak mounted volume
 scripts/keycloak/data/*
+
+# ignore clowder chart deps
+charts/clowder2/charts
