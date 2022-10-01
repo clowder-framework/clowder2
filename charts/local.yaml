@@ -1,20 +1,6 @@
 # helm upgrade --install --namespace clowder2 --create-namespace --values local.yaml clowder2 .
 
-frontend:
-  ingress:
-    hosts:
-      - host: clowder2.ncsa.cloud
-        paths:
-          - path: /
-            pathType: ImplementationSpecific
-
-backend:
-  ingress:
-    hosts:
-      - host: clowder2.ncsa.cloud
-        paths:
-          - path: /api
-            pathType: ImplementationSpecific
+hostname: clowder2.ncsa.cloud
 
 minio:
   auth:
