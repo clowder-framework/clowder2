@@ -11,7 +11,11 @@ export function Search() {
     >
 		{/*search*/}
 		<DataSearch componentId="searchbox"
-					dataField={[{field: "name", weight: 3}, {field: "creator", weight: 2}, {field:"creator.keyword", weight:1}]}
+					dataField={[
+						{field: "name", weight: 3},
+						{field: "creator", weight: 2},
+						{field:"creator.keyword", weight:1}
+						]}
 					placeholder="Search for file"/>
 
 		{/*filters*/}
