@@ -27,7 +27,7 @@ export default function DatasetCard(props: DatasetCardProps) {
 	const formattedCreated = parseDate(created);
 
 	return (
-		<Card key={id} sx={{minWidth: 350}}>
+		<Card key={id} sx={{minWidth: 350, height: "100%", display: "flex", flexDirection: "column"}}>
 			<CardActionArea component={Link} to={`/datasets/${id}`}>
 				<CardContent>
 					<Typography variant="h5" component="div">
@@ -39,12 +39,18 @@ export default function DatasetCard(props: DatasetCardProps) {
 					<Typography sx={{mb: 1.5}} color="secondary">
 						{formattedCreated}
 					</Typography>
-					<Typography variant="body2">
+					<Typography variant="body2"    sx={{
+      overflow: 'hidden',
+      textOverflow: 'ellipsis',
+      display: '-webkit-box',
+      WebkitLineClamp: '5',
+      WebkitBoxOrient: 'vertical',
+   }}>
 						{description}
 					</Typography>
 				</CardContent>
 			</CardActionArea>
-			<CardActions>
+			<CardActions sx={{ marginTop: "auto" }}>
 				<Button size="small" onClick={() => downloadDataset(id, name)}>Download</Button>
 			</CardActions>
 		</Card>

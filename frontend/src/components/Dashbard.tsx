@@ -149,6 +149,7 @@ export const Dashboard = (): JSX.Element => {
 							 actionBtnName="Report" handleActionBtnClick={handleErrorReport}
 							 handleActionCancel={handleErrorCancel}/>
 				<div className="inner-container">
+					<div><Link className="link" href="/create-dataset">Create Dataset</Link></div>
 					<Grid container spacing={4}>
 						<Grid item>
 							<Box sx={{borderBottom: 1, borderColor: 'divider'}}>
