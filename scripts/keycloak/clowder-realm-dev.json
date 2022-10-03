@@ -4,13 +4,6 @@
   "enabled": true,
   "registrationAllowed": true,
   "registrationEmailAsUsername": true,
-  "defaultRole": {
-    "name": "default-roles-clowder",
-    "description": "${role_default-roles}",
-    "composite": true,
-    "clientRole": false,
-    "containerId": "a95a9b0c-dfc0-42fc-a89d-6fab3a37fcf3"
-  },
   "clients": [
     {
       "clientId": "clowder2-backend",
