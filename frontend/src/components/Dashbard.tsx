@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from "react";
-import {Box, Button, Grid, Link, Tab, Tabs, Typography} from "@mui/material";
+import {Box, Button, Grid, Tab, Tabs, Link} from "@mui/material";
 
 import {Dataset, RootState} from "../types/data";
 import {useDispatch, useSelector} from "react-redux";
@@ -136,7 +136,7 @@ export const Dashboard = (): JSX.Element => {
 		<div>
 			<TopBar/>
 			<div className="outer-container">
-				<MainBreadcrumbs paths={paths}/>
+
 				{/*Confirmation dialogue*/}
 				<ActionModal actionOpen={confirmationOpen} actionTitle="Are you sure?"
 							 actionText="Do you really want to delete? This process cannot be undone."
@@ -148,8 +148,10 @@ export const Dashboard = (): JSX.Element => {
 				<ActionModal actionOpen={errorOpen} actionTitle="Something went wrong..." actionText={reason}
 							 actionBtnName="Report" handleActionBtnClick={handleErrorReport}
 							 handleActionCancel={handleErrorCancel}/>
+				<Box  m={1} display="flex" justifyContent="space-between" alignItems="flex-end">
+					<MainBreadcrumbs paths={paths}/>
+					<Button href="/create-dataset" variant="contained" sx={{display: "flex", alignItems: "center"}}>New Dataset</Button></Box>
 				<div className="inner-container">
-					<div><Link className="link" href="/create-dataset">Create Dataset</Link></div>
 					<Grid container spacing={4}>
 						<Grid item>
 							<Box sx={{borderBottom: 1, borderColor: 'divider'}}>

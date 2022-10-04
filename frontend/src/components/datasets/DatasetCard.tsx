@@ -4,7 +4,7 @@ import CardActions from '@mui/material/CardActions';
 import CardContent from '@mui/material/CardContent';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
-import {Link, useNavigate} from "react-router-dom";
+import {Link} from "react-router-dom";
 import {parseDate} from "../../utils/common";
 import {datasetDownloaded} from "../../actions/dataset";
 import {useDispatch} from "react-redux";
@@ -19,16 +19,16 @@ type DatasetCardProps = {
 }
 
 export default function DatasetCard(props: DatasetCardProps) {
-	const {	id, name, author, created, description} = props;
+	const {id, name, author, created, description} = props;
 
 	const dispatch = useDispatch();
-	const downloadDataset = (datasetId:string|undefined, filename:string|undefined) => dispatch(datasetDownloaded(datasetId, filename))
+	const downloadDataset = (datasetId: string | undefined, filename: string | undefined) => dispatch(datasetDownloaded(datasetId, filename))
 
 	const formattedCreated = parseDate(created);
 
 	return (
 		<Card key={id} sx={{minWidth: 350, height: "100%", display: "flex", flexDirection: "column"}}>
-			<CardActionArea component={Link} to={`/datasets/${id}`}>
+			<CardActionArea component={Link} to={`/datasets/${id}`} sx={{height:"100%"}}>
 				<CardContent>
 					<Typography variant="h5" component="div">
 						{name}
@@ -39,18 +39,18 @@ export default function DatasetCard(props: DatasetCardProps) {
 					<Typography sx={{mb: 1.5}} color="secondary">
 						{formattedCreated}
 					</Typography>
-					<Typography variant="body2"    sx={{
-      overflow: 'hidden',
-      textOverflow: 'ellipsis',
-      display: '-webkit-box',
-      WebkitLineClamp: '5',
-      WebkitBoxOrient: 'vertical',
-   }}>
+					<Typography variant="body2" sx={{
+						overflow: 'hidden',
+						textOverflow: 'ellipsis',
+						display: '-webkit-box',
+						WebkitLineClamp: '5',
+						WebkitBoxOrient: 'vertical',
+					}}>
 						{description}
 					</Typography>
 				</CardContent>
 			</CardActionArea>
-			<CardActions sx={{ marginTop: "auto" }}>
+			<CardActions sx={{marginTop: "auto"}}>
 				<Button size="small" onClick={() => downloadDataset(id, name)}>Download</Button>
 			</CardActions>
 		</Card>
