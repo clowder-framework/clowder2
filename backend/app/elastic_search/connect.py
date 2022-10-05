@@ -68,7 +68,8 @@ def search_index(es_client, index_name, query):
         (For more details, refer to https://www.elastic.co/guide/en/elasticsearch/reference/current/search-search.html)
     """
     try:
-        res = es_client.search(index=index_name, query=query)
+        # res = es_client.search(index=index_name, query=query)
+        res = es_client.msearch(index=index_name, searches=query)
         logger.info("Got %d Hits:" % res["hits"]["total"]["value"])
         return res
     except BadRequestError as ex:
