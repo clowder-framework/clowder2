@@ -6,7 +6,8 @@ export function Search() {
 	// @ts-ignore
 	return (
     <ReactiveBase
-      url="http://localhost:9200"
+      // url="http://localhost:9200"
+      url="http://localhost:8000/api/v2/elasticsearch"
       app="file"
     >
 		{/*search*/}
