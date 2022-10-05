@@ -54,6 +54,10 @@ def listen_for_heartbeats():
     print("rabbitmqhost is", settings.RABBITMQ_HOST)
     credentials = pika.PlainCredentials(settings.RABBITMQ_USER, settings.RABBITMQ_PASS)
 
+    # parameters = pika.ConnectionParameters(
+    #     '192.168.1.131', 5672, "/", credentials
+    # )
+
     parameters = pika.ConnectionParameters(
         settings.RABBITMQ_HOST, 5672, "/", credentials
     )
