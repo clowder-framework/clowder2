@@ -165,7 +165,7 @@ export const Dashboard = (): JSX.Element => {
 										datasets !== undefined && datasetThumbnailList !== undefined ?
 											datasets.map((dataset) => {
 												return (
-													<Grid item xs>
+													<Grid item key={dataset.id} xs={12} sm={6} md={4} lg={3}>
 														<DatasetCard id={dataset.id} name={dataset.name}
 																	 author={`${dataset.author.first_name} ${dataset.author.last_name}`}
 																	 created={dataset.created}

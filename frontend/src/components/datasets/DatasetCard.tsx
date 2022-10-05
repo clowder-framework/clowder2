@@ -27,7 +27,7 @@ export default function DatasetCard(props: DatasetCardProps) {
 	const formattedCreated = parseDate(created);
 
 	return (
-		<Card key={id} sx={{minWidth: 350, height: "100%", display: "flex", flexDirection: "column"}}>
+		<Card key={id} sx={{height: "100%", display: "flex", flexDirection: "column"}}>
 			<CardActionArea component={Link} to={`/datasets/${id}`} sx={{height:"100%"}}>
 				<CardContent>
 					<Typography variant="h5" component="div">
