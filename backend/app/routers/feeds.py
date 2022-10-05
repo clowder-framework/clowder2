@@ -4,12 +4,11 @@ from bson import ObjectId
 from fastapi import APIRouter, HTTPException, Depends, Request
 from pymongo import MongoClient
 import datetime
-from app import dependencies
+from app.dependencies import get_db
 from app.keycloak_auth import get_user, get_current_user
 from app.models.users import UserOut
 from app.models.listeners import (
-    ListenerIn,
-    ListenerDB,
+    FeedListener,
     ListenerOut,
 )
 from app.models.feeds import (
@@ -42,7 +41,6 @@ async def process_search_index(
             {'listeners': {"$ne": []}}
     ):
         feed_match = True
-        print(feed)
         feed_db = FeedDB(**feed)
 
         # If feed doesn't have any auto-triggering listeners, we're done
@@ -70,10 +68,32 @@ async def process_search_index(
 async def save_feed(
     feed_in: FeedIn,
     user=Depends(get_current_user),
-    db: MongoClient = Depends(dependencies.get_db),
+    db: MongoClient = Depends(get_db),
 ):
     feed = FeedDB(**feed_in.dict(), author=user)
     new_feed = await db["feeds"].insert_one(feed.to_mongo())
     found = await db["feeds"].find_one({"_id": new_feed.inserted_id})
     feed_out = FeedOut.from_mongo(found)
     return feed_out
+
+@router.post("/{feed_id}/listeners", response_model=FeedOut)
+async def assign_listener(
+    feed_id: str,
+    listener: FeedListener,
+    user=Depends(get_current_user),
+    db: MongoClient = Depends(get_db),
+):
+    if (
+            feed := await db["feeds"].find_one({"_id": ObjectId(feed_id)})
+    ) is not None:
+        feed_out = FeedOut.from_mongo(feed)
+        if (
+                listener_q := await db["listeners"].find_one({"_id": ObjectId(listener.listener_id)})
+        ) is not None:
+            feed_out.listeners.append(listener)
+            await db["feeds"].replace_one(
+                {"_id": ObjectId(feed_id)}, FeedDB(**feed_out.dict()).to_mongo()
+            )
+            return feed_out
+        raise HTTPException(status_code=404, detail=f"listener {listener.listener_id} not found")
+    raise HTTPException(status_code=404, detail=f"feed {feed_id} not found")

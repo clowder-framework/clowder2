@@ -2,9 +2,8 @@ from datetime import datetime
 from pydantic import Field, BaseModel
 from typing import Optional, List, Union
 from app.models.mongomodel import MongoModel
-from app.models.pyobjectid import PyObjectId
 from app.models.users import UserOut
-from app.models.listeners import ListenerOut
+from app.models.listeners import ListenerOut, FeedListener
 
 
 class SearchCriteria(BaseModel):
@@ -13,15 +12,10 @@ class SearchCriteria(BaseModel):
     value: str
 
 
-class MiniListener(BaseModel):
-    listener_id: PyObjectId
-    automatic: bool
-
-
 class JobFeed(BaseModel):
     name: str
     criteria: List[SearchCriteria] = []
-    listeners: List[MiniListener] = []
+    listeners: List[FeedListener] = []
     mode: str = "and"  # and / or
 
 

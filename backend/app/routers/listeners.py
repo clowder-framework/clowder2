@@ -7,7 +7,7 @@ import datetime
 from app.dependencies import get_db
 from app.keycloak_auth import get_user, get_current_user
 from app.models.listeners import (
-    ListenerProperties,
+    ExtractorInfo,
     ListenerIn,
     LegacyListenerIn,
     ListenerDB,
@@ -40,7 +40,7 @@ async def save_legacy_listener(
     db: MongoClient = Depends(get_db),
 ):
     """This will take a POST with Clowder v1 extractor_info dict info, and convert to a v2 Listener."""
-    listener_properties = ListenerProperties(**legacy_in.dict)
+    listener_properties = ExtractorInfo(**legacy_in.dict)
     listener = ListenerDB(
         name=legacy_in.name,
         version=int(legacy_in.version),

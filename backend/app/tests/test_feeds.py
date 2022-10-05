@@ -10,7 +10,6 @@ listener_data = {
     "name": "Test Listener",
     "version": 2,
     "description": "Created for testing purposes."
-
 }
 feed_data = {
     "name": "XYZ Test Feed",
@@ -30,12 +29,18 @@ def test_feeds(client: TestClient, headers: dict):
 
     # Create a new search feed for file foo
     test_feed_data = feed_data
-    test_feed_data["listeners"] = [{"listener_id": listener_id, "automatic": True}]
     response = client.post(
         f"{settings.API_V2_STR}/feeds", json=test_feed_data, headers=headers
     )
     assert response.json().get("id") is not None
     feed_id = response.json().get("id")
+    assert response.status_code == 200
+
+    # Assign listener to feed
+    response = client.post(
+        f"{settings.API_V2_STR}/feeds/{feed_id}/listeners",
+        json={"listener_id": listener_id, "automatic": True}, headers=headers
+    )
     assert response.status_code == 200
 
     # Create dataset to hold file
@@ -60,4 +65,5 @@ def test_feeds(client: TestClient, headers: dict):
     assert response.status_code == 200
 
     # Verify the message
+
 

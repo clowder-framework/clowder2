@@ -1,6 +1,7 @@
 from datetime import datetime
 from pydantic import Field, BaseModel
 from typing import Optional, List, Union
+from app.models.pyobjectid import PyObjectId
 from app.models.mongomodel import MongoModel
 from app.models.users import UserOut
 
@@ -11,7 +12,7 @@ class Repository(MongoModel):
 
 
 # Currently for extractor_info JSON from Clowder v1 extractors POSTing to /api/extractors
-class ListenerProperties(BaseModel):
+class ExtractorInfo(BaseModel):
     author: str  # Referring to author of listener script (e.g. name or email), not Clowder user
     process: dict
     maturity: str = "Development"
@@ -36,7 +37,7 @@ class ListenerIn(ListenerBase):
     pass
 
 
-class LegacyListenerIn(ListenerProperties):
+class LegacyListenerIn(ExtractorInfo):
     name: str
     version: str = "1.0"
     description: str = ""
@@ -46,8 +47,12 @@ class ListenerDB(ListenerBase, MongoModel):
     author: UserOut
     created: datetime = Field(default_factory=datetime.utcnow)
     modified: datetime = Field(default_factory=datetime.utcnow)
-    properties: Optional[ListenerProperties] = None
+    properties: Optional[ExtractorInfo] = None
 
 
 class ListenerOut(ListenerDB):
     pass
+
+class FeedListener(BaseModel):
+    listener_id: PyObjectId
+    automatic: bool  # Listeners can trigger automatically or not on a per-feed basis.
