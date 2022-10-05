@@ -38,7 +38,7 @@ export const Dashboard = (): JSX.Element => {
 	const [datasetThumbnailList, setDatasetThumbnailList] = useState<any>([]);
 	// TODO add option to determine limit number; default show 5 datasets each time
 	const [currPageNum, setCurrPageNum] = useState<number>(0);
-	const [limit,] = useState<number>(21);
+	const [limit,] = useState<number>(20);
 	const [skip, setSkip] = useState<number | undefined>();
 	// TODO add switch to turn on and off "mine" dataset
 	const [mine,] = useState<boolean>(false);
