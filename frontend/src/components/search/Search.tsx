@@ -2,6 +2,9 @@ import React from "react";
 import {ReactiveBase, DataSearch, MultiList, SingleRange, ReactiveList, ResultCard} from "@appbaseio/reactivesearch";
 import {parseDate} from "../../utils/common";
 
+import Cookies from "universal-cookie";
+const cookies = new Cookies();
+
 export function Search() {
 	// @ts-ignore
 	return (
@@ -9,6 +12,7 @@ export function Search() {
       // url="http://localhost:9200"
       url="http://localhost:8000/api/v2/elasticsearch"
       app="file"
+	  headers={{"Authorization": cookies.get("Authorization")}}
     >
 		{/*search*/}
 		<DataSearch componentId="searchbox"

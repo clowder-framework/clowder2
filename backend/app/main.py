@@ -121,7 +121,9 @@ api_router.include_router(
 api_router.include_router(
     elasticsearch.router,
     prefix="/elasticsearch",
-    tags=["elasticsearch"])
+    tags=["elasticsearch"],
+    dependencies=[Depends(get_current_username)],
+)
 api_router.include_router(keycloak.router, prefix="/auth", tags=["auth"])
 app.include_router(api_router, prefix=settings.API_V2_STR)
 
