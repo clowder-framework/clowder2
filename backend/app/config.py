@@ -67,6 +67,37 @@ class Settings(BaseSettings):
     elasticsearch_url = "http://localhost:9200"
     elasticsearch_no_of_shards = 5
     elasticsearch_no_of_replicas = 5
+    file_settings = {
+        "settings": {
+            "number_of_shards": elasticsearch_no_of_shards,
+            "number_of_replicas": elasticsearch_no_of_replicas,
+        },
+        "mappings": {
+            "properties": {
+                "name": {"type": "text"},
+                "created": {"type": "date"},
+                "creator": {"type": "text"},
+                "download": {"type": "long"},
+            }
+        },
+    }
+
+    dataset_settings = {
+        "settings": {
+            "number_of_shards": elasticsearch_no_of_shards,
+            "number_of_replicas": elasticsearch_no_of_replicas,
+        },
+        "mappings": {
+            "properties": {
+                "name": {"type": "text"},
+                "description": {"type": "text"},
+                "author": {"type": "text"},
+                "created": {"type": "date"},
+                "modified": {"type": "date"},
+                "download": {"type": "long"},
+            }
+        },
+    }
 
     # RabbitMQ message bus
     RABBITMQ_USER = "guest"
