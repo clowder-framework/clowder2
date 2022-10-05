@@ -165,6 +165,19 @@ services:
         - "traefik.http.services.keycloak.loadbalancer.server.port=8080"
         - "traefik.http.routers.keycloak.priority=10"
 
+  # message broker
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    environment:
+      - RABBITMQ_SERVER_ADDITIONAL_ERL_ARGS=-rabbitmq_management path_prefix "/rabbitmq"
+      - RABBITMQ_DEFAULT_USER=${RABBITMQ_DEFAULT_USER:-guest}
+      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_DEFAULT_PASS:-guest}
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - rabbitmq:/var/lib/rabbitmq
+
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.3.3
     networks:
@@ -188,6 +201,7 @@ volumes:
   data4:
   postgres_data:
   elasticsearch:
+  rabbitmq:
 
 networks:
   clowder2:
