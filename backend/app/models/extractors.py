@@ -24,7 +24,7 @@ class ExtractorIdentifier(MongoModel):
     default_labels: List[str] = []
     process: dict
     categories: List[str] = []
-    parameters: List[dict] = []
+    parameters: dict = {}
 
 
 class ExtractorBase(ExtractorIdentifier):

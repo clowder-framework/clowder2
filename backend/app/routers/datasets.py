@@ -7,7 +7,7 @@ import tempfile
 import zipfile
 from collections.abc import Mapping, Iterable
 from typing import List, Optional, Union
-
+import json
 import pika
 from bson import ObjectId
 from bson import json_util
@@ -706,7 +706,7 @@ async def get_dataset_extract(
             token = token.lstrip("Bearer")
             token = token.lstrip(" ")
             # TODO check of extractor exists
-            msg = {"message": "testing", "dataseet_id": dataset_id}
+            msg = {"message": "testing", "dataset_id": dataset_id}
             body = {}
             body["secretKey"] = token
             body["token"] = token
