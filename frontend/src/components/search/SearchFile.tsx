@@ -5,11 +5,10 @@ import {parseDate} from "../../utils/common";
 import Cookies from "universal-cookie";
 const cookies = new Cookies();
 
-export function Search() {
+export function SearchFile() {
 	// @ts-ignore
 	return (
     <ReactiveBase
-      // url="http://localhost:9200"
       url="http://localhost:8000/api/v2/elasticsearch"
       app="file"
 	  headers={{"Authorization": cookies.get("Authorization")}}
