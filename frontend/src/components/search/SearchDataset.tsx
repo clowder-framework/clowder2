@@ -18,13 +18,12 @@ export function SearchDataset() {
 					dataField={[
 						{field: "name", weight: 3},
 						{field: "description", weight: 2},
-						{field: "author", weight: 1},
 						{field: "author.keyword", weight: 2},
 						]}
 					placeholder="Search for Dataset"/>
 
 		{/*filters*/}
-		<MultiList componentId="creatorfilter" dataField="author.keyword" title="Filter by author" aggregationSize={5} showCheckbox/>
+		<MultiList componentId="creatorfilter" dataField="author" title="Filter by author" aggregationSize={5} showCheckbox/>
 		<SingleRange componentId="downloadfilter" dataField="download" title="Filter by Download Times"
 				   data={[{ start: 0, label: '0 time and up' },
 					   { start: 1, label: '1 times and up' }]}

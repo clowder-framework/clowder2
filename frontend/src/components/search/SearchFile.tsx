@@ -17,13 +17,12 @@ export function SearchFile() {
 		<DataSearch componentId="searchbox"
 					dataField={[
 						{field: "name", weight: 3},
-						{field: "creator", weight: 2},
 						{field:"creator.keyword", weight:1}
 						]}
 					placeholder="Search for file"/>
 
 		{/*filters*/}
-		<MultiList componentId="creatorfilter" dataField="creator.keyword" title="Filter by Creator" aggregationSize={5} showCheckbox/>
+		<MultiList componentId="creatorfilter" dataField="creator" title="Filter by Creator" aggregationSize={5} showCheckbox/>
 		<SingleRange componentId="ratingsfilter" dataField="download" title="Filter by Download Times"
 				   data={[{ start: 0, label: '0 time and up' },
 					   { start: 1, label: '1 times and up' }]}
