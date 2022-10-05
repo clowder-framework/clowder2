@@ -213,11 +213,9 @@ def datasetout_str2jsonld(jstr):
         if k in jstr:
             ks=f'"{k}":'
             vs=f'"{v}":'
-            print(f'replace:{ks} with:{vs}')
+            #print(f'replace:{ks} with:{vs}')
             jstr = jstr.replace(ks,vs)
-    #print(f'==jstr:{jstr}')
     jstr = jstr.replace("{",'{"@context": {"@vocab": "https://schema.org/"},',1)
-    #print(f'==jstr:{jstr}')
     return jstr
 
 def datasetout2jsonld(dso):
