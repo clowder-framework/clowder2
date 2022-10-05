@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from "react";
-import {Box, Button, Grid, Tab, Tabs, Link} from "@mui/material";
+import {Box, Button, Grid, Tab, Tabs, Link, IconButton, Typography, ButtonGroup} from "@mui/material";
 
 import {Dataset, RootState} from "../types/data";
 import {useDispatch, useSelector} from "react-redux";
@@ -13,6 +13,9 @@ import {MainBreadcrumbs} from "./navigation/BreadCrumb";
 import {ActionModal} from "./dialog/ActionModal";
 import DatasetCard from "./datasets/DatasetCard";
 import config from "../app.config";
+import {Pagination} from "@mui/lab";
+import {ArrowBack, ArrowBackIos, ArrowForward, ArrowForwardIos} from "@material-ui/icons";
+import {ArrowBackIosNew} from "@mui/icons-material";
 
 const tab = {
 	fontStyle: "normal",
@@ -148,9 +151,10 @@ export const Dashboard = (): JSX.Element => {
 				<ActionModal actionOpen={errorOpen} actionTitle="Something went wrong..." actionText={reason}
 							 actionBtnName="Report" handleActionBtnClick={handleErrorReport}
 							 handleActionCancel={handleErrorCancel}/>
-				<Box  m={1} display="flex" justifyContent="space-between" alignItems="flex-end">
+				<Box m={1} display="flex" justifyContent="space-between" alignItems="flex-end">
 					<MainBreadcrumbs paths={paths}/>
-					<Button href="/create-dataset" variant="contained" sx={{display: "flex", alignItems: "center"}}>New Dataset</Button></Box>
+					<Button href="/create-dataset" variant="contained" sx={{display: "flex", alignItems: "center"}}>New
+						Dataset</Button></Box>
 				<div className="inner-container">
 					<Grid container spacing={4}>
 						<Grid item>
@@ -177,8 +181,16 @@ export const Dashboard = (): JSX.Element => {
 											<></>
 									}
 								</Grid>
-								<Button onClick={previous} disabled={prevDisabled}>Prev</Button>
-								<Button onClick={next} disabled={nextDisabled}>Next</Button>
+								<Box display="flex" justifyContent="center" sx={{m: 1}}>
+									<ButtonGroup variant="contained" aria-label="previous next buttons">
+										<Button aria-label="previous" onClick={previous} disabled={prevDisabled}>
+											<ArrowBack/> Prev
+										</Button>
+										<Button aria-label="next" onClick={next} disabled={nextDisabled}>
+											Next <ArrowForward/>
+										</Button>
+									</ButtonGroup>
+								</Box>
 							</TabPanel>
 							<TabPanel value={selectedTabIndex} index={1}/>
 							<TabPanel value={selectedTabIndex} index={2}/>
