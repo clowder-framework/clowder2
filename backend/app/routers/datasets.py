@@ -191,6 +191,40 @@ async def save_dataset(
     return dataset_out
 
 
+def is_str(v):
+    return type(v) is str
+
+schemaOrg_mapping = {
+    "id": "identifier",
+    "first_name": "givenName",
+    "last_name": "familyName",
+    "created": "dateCreated",
+    "modified": "dateModified",
+    "views": "interactionStatistic",
+    "downloads": "DataDownload"
+}
+def datasetout_str2jsonld(jstr):
+    if not is_str(jstr):
+        jt=type(jstr)
+        print(f'str2jsonld:{jstr},wrong type:{jt}')
+        return None
+    global schemaOrg_mapping
+    for k,v in schemaOrg_mapping.items():
+        if k in jstr:
+            ks=f'"{k}":'
+            vs=f'"{v}":'
+            print(f'replace:{ks} with:{vs}')
+            jstr = jstr.replace(ks,vs)
+    #print(f'==jstr:{jstr}')
+    jstr = jstr.replace("{",'{"@context": {"@vocab": "https://schema.org/"},',1)
+    #print(f'==jstr:{jstr}')
+    return jstr
+
+def datasetout2jsonld(dso):
+    jstr=dso.json()
+    return datasetout_str2jsonld(jstr)
+
+
 @router.get("", response_model=List[DatasetOut])
 async def get_datasets(
     user_id=Depends(get_user),
@@ -214,7 +248,15 @@ async def get_datasets(
             await db["datasets"].find().skip(skip).limit(limit).to_list(length=limit)
         ):
             datasets.append(DatasetOut.from_mongo(doc))
+            #for now print here, till decide on route/etc
+            if datasets and len(datasets) >0:
+                for ds in datasets:
+                    jld=datasetout2jsonld(ds)
+                    print(f'<script type="application/ld+json">{jld}</script>')
     return datasets
+
+#should this be a route?
+#def get_datasets_jsonld
 
 
 @router.get("/{dataset_id}", response_model=DatasetOut)
