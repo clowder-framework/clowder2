@@ -24,22 +24,4 @@ export class FoldersService {
         });
     }
 
-    /**
-     * Delete Folder
-     * @param folderId
-     * @returns any Successful Response
-     * @throws ApiError
-     */
-    public static deleteFolderApiV2FoldersFolderIdDelete(
-        folderId: string,
-    ): CancelablePromise<any> {
-        return __request({
-            method: 'DELETE',
-            path: `/api/v2/folders/${folderId}`,
-            errors: {
-                422: `Validation Error`,
-            },
-        });
-    }
-
 }

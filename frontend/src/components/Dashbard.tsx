@@ -44,15 +44,6 @@ export const Dashboard = (): JSX.Element => {
 	const [selectedTabIndex, setSelectedTabIndex] = useState(0);
 	const [selectedDataset, _] = useState<Dataset>();
 
-	// confirmation dialog
-	const [confirmationOpen, setConfirmationOpen] = useState(false);
-	const deleteSelectedDataset = () => {
-		if (selectedDataset) {
-			deleteDataset(selectedDataset["id"]);
-		}
-		setConfirmationOpen(false);
-	}
-
 	// component did mount
 	useEffect(() => {
 		listDatasets(0, limit, mine);
@@ -137,13 +128,6 @@ export const Dashboard = (): JSX.Element => {
 			<TopBar/>
 			<div className="outer-container">
 				<MainBreadcrumbs paths={paths}/>
-				{/*Confirmation dialogue*/}
-				<ActionModal actionOpen={confirmationOpen} actionTitle="Are you sure?"
-							 actionText="Do you really want to delete? This process cannot be undone."
-							 actionBtnName="Delete" handleActionBtnClick={deleteSelectedDataset}
-							 handleActionCancel={() => {
-								 setConfirmationOpen(false);
-							 }}/>
 				{/*Error Message dialogue*/}
 				<ActionModal actionOpen={errorOpen} actionTitle="Something went wrong..." actionText={reason}
 							 actionBtnName="Report" handleActionBtnClick={handleErrorReport}

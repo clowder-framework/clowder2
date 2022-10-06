@@ -6,7 +6,6 @@ import {
 	DELETE_DATASET,
 	CREATE_DATASET,
 	RESET_CREATE_DATASET,
-	FOLDER_ADDED, RECEIVE_FOLDERS_IN_DATASET, GET_FOLDER_PATH,
 	DOWNLOAD_DATASET
 } from "../actions/dataset";
 import {CREATE_FILE, UPDATE_FILE, DELETE_FILE, RESET_CREATE_FILE} from "../actions/file";
@@ -19,17 +18,13 @@ const defaultState: DatasetState = {
 	about: <Dataset>{"author":<Author>{}},
 	datasets: [],
 	newDataset: <Dataset>{},
-	newFile: <File>{},
-	folders: [],
-	folderPath: []
+	newFile: <File>{}
 };
 
 const dataset = (state = defaultState, action: DataAction) => {
 	switch (action.type) {
 	case RECEIVE_FILES_IN_DATASET:
 		return Object.assign({}, state, {files: action.files});
-	case RECEIVE_FOLDERS_IN_DATASET:
-		return Object.assign({}, state, {folders: action.folders});
 	case DELETE_FILE:
 		return Object.assign({}, state, {
 			files: state.files.filter(file => file.id !== action.file.id),
@@ -62,14 +57,6 @@ const dataset = (state = defaultState, action: DataAction) => {
 	case DELETE_DATASET:
 		return Object.assign({}, state, {
 			datasets: state.datasets.filter(dataset => dataset.id !== action.dataset.id),
-		});
-	case FOLDER_ADDED:
-		return Object.assign({}, state, {
-			folders: [...state.folders, action.folder]
-		});
-	case GET_FOLDER_PATH:
-		return Object.assign({}, state, {
-			folderPath: action.folderPath
 		});
 	case DOWNLOAD_DATASET:
 		// TODO do nothing for now; but in the future can utilize to display certain effects
