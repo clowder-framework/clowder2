@@ -2,7 +2,9 @@ import requests
 from faker import Faker
 import random
 
-API_V2_STR: str = "http://localhost:8000/api/v2" # for production use http://localhost/api/v2
+API_V2_STR: str = (
+    "http://localhost:8000/api/v2"  # for production use http://localhost/api/v2
+)
 fake = Faker()
 
 users = []
@@ -11,7 +13,7 @@ for x in range(10):
         "email": fake.ascii_email(),
         "password": "not_a_password",
         "first_name": fake.first_name(),
-        "last_name": fake.last_name()
+        "last_name": fake.last_name(),
     }
     response = requests.post(f"{API_V2_STR}/users", json=user)
     users.append(user)
