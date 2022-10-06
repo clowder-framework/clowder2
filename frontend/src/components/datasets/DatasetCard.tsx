@@ -8,7 +8,9 @@ import {Link} from "react-router-dom";
 import {parseDate} from "../../utils/common";
 import {datasetDownloaded} from "../../actions/dataset";
 import {useDispatch} from "react-redux";
-import {CardActionArea} from "@mui/material";
+import {CardActionArea, IconButton, Tooltip} from "@mui/material";
+import {Download} from "@mui/icons-material";
+import {Favorite, Share} from "@material-ui/icons";
 
 type DatasetCardProps = {
 	id: string,
@@ -28,7 +30,7 @@ export default function DatasetCard(props: DatasetCardProps) {
 
 	return (
 		<Card key={id} sx={{height: "100%", display: "flex", flexDirection: "column"}}>
-			<CardActionArea component={Link} to={`/datasets/${id}`} sx={{height:"100%"}}>
+			<CardActionArea component={Link} to={`/datasets/${id}`} sx={{height: "100%"}}>
 				<CardContent>
 					<Typography variant="h5" component="div">
 						{name}
@@ -51,7 +53,21 @@ export default function DatasetCard(props: DatasetCardProps) {
 				</CardContent>
 			</CardActionArea>
 			<CardActions sx={{marginTop: "auto"}}>
-				<Button size="small" onClick={() => downloadDataset(id, name)}>Download</Button>
+				<Tooltip title="Download">
+					<IconButton onClick={() => downloadDataset(id, name)} color="primary" aria-label="download">
+						<Download/>
+					</IconButton>
+				</Tooltip>
+				<Tooltip title="Favorite">
+					<IconButton color="primary" aria-label="favorite" disabled>
+						<Favorite/>
+					</IconButton>
+				</Tooltip>
+				<Tooltip title="Share">
+					<IconButton color="primary" aria-label="share" disabled>
+						<Share/>
+					</IconButton>
+				</Tooltip>
 			</CardActions>
 		</Card>
 	);
