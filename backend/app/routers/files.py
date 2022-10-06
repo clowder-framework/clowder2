@@ -12,6 +12,7 @@ from fastapi import (
     File,
     Form,
     UploadFile,
+    Request,
 )
 from fastapi.responses import StreamingResponse
 from minio import Minio
@@ -252,13 +253,54 @@ async def get_file_versions(
 @router.post("/{file_id}/extract")
 async def get_file_extract(
     file_id: str,
+    info: Request,
+    token: str = Depends(get_token),
+    db: MongoClient = Depends(dependencies.get_db),
     rabbitmq_client: BlockingChannel = Depends(dependencies.get_rabbitmq),
 ):
-    msg = {"message": "testing", "file_id": file_id}
-    rabbitmq_client.basic_publish(
-        "",
-        "standard_key",
-        json.dumps(msg, ensure_ascii=False),
-        pika.BasicProperties(content_type="application/json", delivery_mode=1),
-    )
-    return msg
+    if (file := await db["files"].find_one({"_id": ObjectId(file_id)})) is not None:
+        req_headers = info.headers
+        raw = req_headers.raw
+        authorization = raw[1]
+        token = authorization[1].decode("utf-8")
+        token = token.lstrip("Bearer")
+        token = token.lstrip(" ")
+        req_info = await info.json()
+        if "extractor" in req_info:
+            # TODO check if extractor is registered
+            msg = {"message": "testing", "file_id": file_id}
+            body = {}
+            body["host"] = "http://127.0.0.1:8000"
+            body["secretKey"] = "secretKey"
+            body["token"] = token
+            body["retry_count"] = 0
+            body["filename"] = file["name"]
+            body["id"] = file_id
+            body["datasetId"] = str(file["dataset_id"])
+            body["host"] = "http://127.0.0.1:8000"
+            body["secretKey"] = token
+            body["fileSize"] = file["bytes"]
+            body["resource_type"] = "file"
+            body["flags"] = ""
+            current_queue = req_info["extractor"]
+            if "parameters" in req_info:
+                current_parameters = req_info["parameters"]
+            current_routing_key = "extractors." + current_queue
+            rabbitmq_client.queue_bind(
+                exchange="extractors",
+                queue=current_queue,
+                routing_key=current_routing_key,
+            )
+            rabbitmq_client.basic_publish(
+                exchange="extractors",
+                routing_key=current_routing_key,
+                body=json.dumps(body, ensure_ascii=False),
+                properties=pika.BasicProperties(
+                    content_type="application/json", delivery_mode=1
+                ),
+            )
+            return msg
+        else:
+            raise HTTPException(status_code=404, detail=f"No extractor submitted")
+    else:
+        raise HTTPException(status_code=404, detail=f"File {file_id} not found")

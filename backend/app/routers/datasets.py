@@ -6,13 +6,23 @@ import shutil
 import tempfile
 import zipfile
 from collections.abc import Mapping, Iterable
-from typing import List, Optional
+from typing import List, Optional, Union
 
 import pymongo
+import pika
 from bson import ObjectId
 from bson import json_util
-from fastapi import APIRouter, HTTPException, Depends, File, UploadFile, Response
+from fastapi import (
+    APIRouter,
+    HTTPException,
+    Depends,
+    File,
+    UploadFile,
+    Response,
+    Request,
+)
 from minio import Minio
+from pika.adapters.blocking_connection import BlockingChannel
 from pymongo import MongoClient
 from rocrate.model.person import Person
 from rocrate.rocrate import ROCrate
@@ -158,6 +168,14 @@ async def _get_folder_hierarchy(
     if folder.parent_folder is not None:
         hierarchy = await _get_folder_hierarchy(folder.parent_folder, hierarchy, db)
     return hierarchy
+
+
+async def remove_folder_entry(
+    folder_id: Union[str, ObjectId],
+    db: MongoClient,
+):
+    """Remove FolderDB object into MongoDB"""
+    await db["folders"].delete_one({"_id": ObjectId(folder_id)})
 
 
 @router.post("", response_model=DatasetOut)
@@ -366,6 +384,58 @@ async def get_dataset_folders(
         ):
             folders.append(FolderDB.from_mongo(f))
     return folders
+
+
+@router.delete("/{dataset_id}/folders/{folder_id}")
+async def delete_folder(
+    dataset_id: str,
+    folder_id: str,
+    db: MongoClient = Depends(dependencies.get_db),
+    fs: Minio = Depends(dependencies.get_fs),
+):
+    if (await db["folders"].find_one({"_id": ObjectId(folder_id)})) is not None:
+        # delete current folder and files
+        await remove_folder_entry(folder_id, db)
+        async for file in db["files"].find({"folder_id": ObjectId(folder_id)}):
+            file = FileOut(**file)
+            await remove_file_entry(file.id, db, fs)
+
+        # list all child folders and delete child folders/files
+        parent_folder_id = folder_id
+
+        async def _delete_nested_folders(parent_folder_id):
+            while (
+                folders := await db["folders"].find_one(
+                    {
+                        "dataset_id": ObjectId(dataset_id),
+                        "parent_folder": ObjectId(parent_folder_id),
+                    }
+                )
+            ) is not None:
+                async for folder in db["folders"].find(
+                    {
+                        "dataset_id": ObjectId(dataset_id),
+                        "parent_folder": ObjectId(parent_folder_id),
+                    }
+                ):
+                    folder = FolderOut(**folder)
+                    parent_folder_id = folder.id
+
+                    # recursively delete child folder and files
+                    await _delete_nested_folders(parent_folder_id)
+
+                    await remove_folder_entry(folder.id, db)
+                    async for file in db["files"].find(
+                        {"folder_id": ObjectId(folder.id)}
+                    ):
+                        file = FileOut(**file)
+                        await remove_file_entry(file.id, db, fs)
+
+        await _delete_nested_folders(parent_folder_id)
+
+        return {"deleted": folder_id}
+    else:
+        raise HTTPException(status_code=404, detail=f"Folder {folder_id} not found")
 
 
 @router.post("/{dataset_id}/files", response_model=FileOut)
@@ -617,3 +687,57 @@ async def download_dataset(
         )
     else:
         raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
+
+
+@router.post("/{dataset_id}/extract")
+async def get_dataset_extract(
+    dataset_id: str,
+    info: Request,
+    db: MongoClient = Depends(dependencies.get_db),
+    rabbitmq_client: BlockingChannel = Depends(dependencies.get_rabbitmq),
+):
+    if (
+        dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
+    ) is not None:
+        req_info = await info.json()
+        if "extractor" in req_info:
+            req_headers = info.headers
+            raw = req_headers.raw
+            authorization = raw[1]
+            token = authorization[1].decode("utf-8")
+            token = token.lstrip("Bearer")
+            token = token.lstrip(" ")
+            # TODO check of extractor exists
+            msg = {"message": "testing", "dataseet_id": dataset_id}
+            body = {}
+            body["secretKey"] = token
+            body["token"] = token
+            body["host"] = "http://127.0.0.1:8000"
+            body["retry_count"] = 0
+            body["filename"] = dataset["name"]
+            body["id"] = dataset_id
+            body["datasetId"] = dataset_id
+            body["resource_type"] = "dataset"
+            body["flags"] = ""
+            current_queue = req_info["extractor"]
+            if "parameters" in req_info:
+                current_parameters = req_info["parameters"]
+            current_routing_key = "extractors." + current_queue
+            rabbitmq_client.queue_bind(
+                exchange="extractors",
+                queue=current_queue,
+                routing_key=current_routing_key,
+            )
+            rabbitmq_client.basic_publish(
+                exchange="extractors",
+                routing_key=current_routing_key,
+                body=json.dumps(body, ensure_ascii=False),
+                properties=pika.BasicProperties(
+                    content_type="application/json", delivery_mode=1
+                ),
+            )
+            return msg
+        else:
+            raise HTTPException(status_code=404, detail=f"No extractor submitted")
+    else:
+        raise HTTPException(status_code=404, detail=f"File {dataset_id} not found")
