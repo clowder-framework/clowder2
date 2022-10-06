@@ -285,7 +285,7 @@ async def get_file_extract(
             current_queue = req_info["extractor"]
             if "parameters" in req_info:
                 current_parameters = req_info["parameters"]
-                body['parameters'] = current_parameters
+                body["parameters"] = current_parameters
             current_routing_key = "extractors." + current_queue
             rabbitmq_client.queue_bind(
                 exchange="extractors",
