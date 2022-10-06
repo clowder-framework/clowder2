@@ -21,9 +21,8 @@ from pymongo import MongoClient
 
 from app import dependencies
 from app.config import settings
-from app.elastic_search.connect import (
+from app.search.connect import (
     connect_elasticsearch,
-    create_index,
     insert_record,
     delete_document_by_id,
 )
@@ -50,6 +49,14 @@ async def add_file_entry(
         file_db: FileDB object controlling dataset and folder destination
         file: bytes to upload
     """
+    # Make connection to elatsicsearch
+    es = connect_elasticsearch()
+
+    # Check all connection and abort if any one of them is not available
+    if db is None or fs is None or es is None:
+        raise HTTPException(status_code=503, detail="Service not available")
+        return
+
     new_file = await db["files"].insert_one(file_db.to_mongo())
     new_file_id = new_file.inserted_id
     if content_type is None:
@@ -85,8 +92,7 @@ async def add_file_entry(
     )
     await db["file_versions"].insert_one(new_version.to_mongo())
 
-    # Add en entry to the file index
-    es = connect_elasticsearch()
+    # Add entry to the file index
     doc = {
         "name": file_db.name,
         "creator": file_db.creator.email,
@@ -103,6 +109,14 @@ async def remove_file_entry(
 ):
     """Remove FileDB object into MongoDB, Minio, and associated metadata and version information."""
     # TODO: Deleting individual versions will require updating version_id in mongo, or deleting entire document
+
+    # Make connection to elatsicsearch
+    es = connect_elasticsearch()
+
+    # Check all connection and abort if any one of them is not available
+    if db is None or fs is None or es is None:
+        raise HTTPException(status_code=503, detail="Service not available")
+        return
     fs.remove_object(settings.MINIO_BUCKET_NAME, str(file_id))
     # delete from elasticsearch
     delete_document_by_id(connect_elasticsearch(), "file", str(file_id))

@@ -71,25 +71,6 @@ class Settings(BaseSettings):
         "number_of_shards": elasticsearch_no_of_shards,
         "number_of_replicas": elasticsearch_no_of_replicas,
     }
-    file_mappings = {
-        "properties": {
-            "name": {"type": "text"},
-            "created": {"type": "date"},
-            "creator": {"type": "keyword"},
-            "download": {"type": "long"},
-        }
-    }
-
-    dataset_mappings = {
-        "properties": {
-            "name": {"type": "text"},
-            "description": {"type": "text"},
-            "author": {"type": "keyword"},
-            "created": {"type": "date"},
-            "modified": {"type": "date"},
-            "download": {"type": "long"},
-        }
-    }
 
     # RabbitMQ message bus
     RABBITMQ_USER = "guest"
