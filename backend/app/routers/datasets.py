@@ -28,9 +28,8 @@ from rocrate.rocrate import ROCrate
 
 from app import dependencies
 from app import keycloak_auth
-from app.elastic_search.connect import (
+from app.search.connect import (
     connect_elasticsearch,
-    create_index,
     insert_record,
     delete_document_by_id,
 )
@@ -189,6 +188,14 @@ async def save_dataset(
     user=Depends(keycloak_auth.get_current_user),
     db: MongoClient = Depends(dependencies.get_db),
 ):
+    # Make connection to elatsicsearch
+    es = connect_elasticsearch()
+
+    # Check all connection and abort if any one of them is not available
+    if db is None or es is None:
+        raise HTTPException(status_code=503, detail="Service not available")
+        return
+
     result = dataset_in.dict()
     dataset_db = DatasetDB(**dataset_in.dict(), author=user)
     new_dataset = await db["datasets"].insert_one(dataset_db.to_mongo())
@@ -196,7 +203,6 @@ async def save_dataset(
     dataset_out = DatasetOut.from_mongo(found)
 
     # Add en entry to the dataset index
-    es = connect_elasticsearch()
     doc = {
         "name": dataset_out.name,
         "description": dataset_out.description,
@@ -341,9 +347,17 @@ async def delete_dataset(
     db: MongoClient = Depends(dependencies.get_db),
     fs: Minio = Depends(dependencies.get_fs),
 ):
+    # Make connection to elatsicsearch
+    es = connect_elasticsearch()
+
+    # Check all connection and abort if any one of them is not available
+    if db is None or fs is None or es is None:
+        raise HTTPException(status_code=503, detail="Service not available")
+        return
+
     if (await db["datasets"].find_one({"_id": ObjectId(dataset_id)})) is not None:
         # delete from elasticsearch
-        delete_document_by_id(connect_elasticsearch(), "dataset", dataset_id)
+        delete_document_by_id(es, "dataset", dataset_id)
         # delete dataset first to minimize files/folder being uploaded to a delete dataset
 
         await db["datasets"].delete_one({"_id": ObjectId(dataset_id)})

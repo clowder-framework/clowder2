@@ -10,7 +10,7 @@ from fastapi import FastAPI, APIRouter, Depends
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import settings
-from app.elastic_search.connect import connect_elasticsearch, create_index
+from app.search.connect import connect_elasticsearch, create_index
 from app.keycloak_auth import get_token, get_current_username
 from app.routers import (
     folders,
@@ -30,6 +30,7 @@ from app.routers import (
 
 # setup loggers
 # logging.config.fileConfig('logging.conf', disable_existing_loggers=False)
+from app.search.config import indexSettings
 
 logger = logging.getLogger(__name__)
 
@@ -122,17 +123,15 @@ app.include_router(api_router, prefix=settings.API_V2_STR)
 
 
 @app.on_event("startup")
-async def startup_db_client():
-    # create a keycloak realm and client
-    # create_realm_and_client()
-
+async def startup_elasticsearch():
     # create elasticsearch indices
     es = connect_elasticsearch()
-    create_index(es, "file", settings.elasticsearch_setting, settings.file_mappings)
     create_index(
-        es, "dataset", settings.elasticsearch_setting, settings.dataset_mappings
+        es, "file", settings.elasticsearch_setting, indexSettings.file_mappings
     )
-    pass
+    create_index(
+        es, "dataset", settings.elasticsearch_setting, indexSettings.dataset_mappings
+    )
 
 
 @app.on_event("shutdown")
