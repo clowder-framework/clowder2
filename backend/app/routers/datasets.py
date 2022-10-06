@@ -205,7 +205,7 @@ async def get_datasets(
         for doc in (
             await db["datasets"]
             .find({"author.email": user_id})
-            .sort([('created', pymongo.DESCENDING)])
+            .sort([("created", pymongo.DESCENDING)])
             .skip(skip)
             .limit(limit)
             .to_list(length=limit)
@@ -213,7 +213,12 @@ async def get_datasets(
             datasets.append(DatasetOut.from_mongo(doc))
     else:
         for doc in (
-            await db["datasets"].find().sort([('created', pymongo.DESCENDING)]).skip(skip).limit(limit).to_list(length=limit)
+            await db["datasets"]
+            .find()
+            .sort([("created", pymongo.DESCENDING)])
+            .skip(skip)
+            .limit(limit)
+            .to_list(length=limit)
         ):
             datasets.append(DatasetOut.from_mongo(doc))
     return datasets
