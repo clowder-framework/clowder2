@@ -218,11 +218,38 @@ def datasetout_str2jsonld(jstr):
     jstr = jstr.replace("{",'{"@context": {"@vocab": "https://schema.org/"},',1)
     return jstr
 
-def datasetout2jsonld(dso):
+def datasetout2jsonld(dso)_:
+    "original easy version before getting un serializables from mongo"
     jstr=dso.json()
     return datasetout_str2jsonld(jstr)
 
+serializable_keys = ['name', 'description' ,  'status', 'views', 'downloads']
 
+def datasetout2jsonld(dso):
+    "dataset attributes as jsonld"
+    dt=type(dso)
+    print(f'datasetout2jsonld:{dso},type:{dt}')
+    if is_dict(dso): #why am I getting this from get_dataset
+        import json
+        dso2={}
+        for k,v in dso.items():
+            if k in serializable_keys:
+                print(f'k:{k}')
+                v2=dso[k]
+                dso2[k]=v2
+        print(f'dso2:{dso2}')
+        jstr=json.dumps(dso2) #getting a dict w/objectId
+        #TypeError: Object of type ObjectId is not JSON serializable 
+    else:       #while get_datasets can have this
+        jstr=dso.json()
+    return datasetout_str2jsonld(jstr)
+
+def datasetout2jsonld_script(dso):
+    "dataset attributes in scrapable jsonld"
+    jld=datasetout2jsonld(dso)
+    print(f'<script type="application/ld+json">{jld}</script>')
+    
+    
 @router.get("", response_model=List[DatasetOut])
 async def get_datasets(
     user_id=Depends(get_user),
@@ -253,8 +280,9 @@ async def get_datasets(
                     print(f'<script type="application/ld+json">{jld}</script>')
     return datasets
 
-#should this be a route?
-#def get_datasets_jsonld
+#the route should be around/call get_dataset, and is called get_dataset_jsonld, for the frontend
+#only problem is the mongo returns have objectid and datetime in the dict which is not serializable
+#so till I can eval and get that out, I might skip it
 
 
 @router.get("/{dataset_id}", response_model=DatasetOut)
@@ -264,6 +292,14 @@ async def get_dataset(dataset_id: str, db: MongoClient = Depends(dependencies.ge
     ) is not None:
         return DatasetOut.from_mongo(dataset)
     raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
+
+    
+@router.get("/{dataset_id}", response_model=DatasetOut)
+async def get_dataset_jsonld(dataset_id: str, db: MongoClient = Depends(dependencies.get_db)):
+    dataset=get_dataset(dataset_id, db)
+    jlds=datasetout2jsonld_script(dataset)
+    print(f'get_dataset:{jlds}')
+    return jlds
 
 
 @router.get("/{dataset_id}/files")
