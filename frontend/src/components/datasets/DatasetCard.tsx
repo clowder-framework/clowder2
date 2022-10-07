@@ -54,17 +54,17 @@ export default function DatasetCard(props: DatasetCardProps) {
 			</CardActionArea>
 			<CardActions sx={{marginTop: "auto"}}>
 				<Tooltip title="Download">
-					<IconButton onClick={() => downloadDataset(id, name)} color="primary" aria-label="download">
+					<IconButton onClick={() => downloadDataset(id, name)} color="primary" aria-label="download" sx={{mr: 3}}>
 						<Download/>
 					</IconButton>
 				</Tooltip>
 				<Tooltip title="Favorite">
-					<IconButton color="primary" aria-label="favorite" disabled>
+					<IconButton color="primary" aria-label="favorite"  sx={{mr: 3}} disabled>
 						<Favorite/>
 					</IconButton>
 				</Tooltip>
 				<Tooltip title="Share">
-					<IconButton color="primary" aria-label="share" disabled>
+					<IconButton color="primary" aria-label="share"  sx={{mr: 3}} disabled>
 						<Share/>
 					</IconButton>
 				</Tooltip>
