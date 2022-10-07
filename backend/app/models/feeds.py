@@ -3,20 +3,14 @@ from pydantic import Field, BaseModel
 from typing import Optional, List, Union
 from app.models.mongomodel import MongoModel
 from app.models.users import UserOut
+from app.models.search import SearchObject
 from app.models.listeners import ListenerOut, FeedListener
-
-
-class SearchCriteria(BaseModel):
-    field: str
-    operator: str
-    value: str
 
 
 class JobFeed(BaseModel):
     name: str
-    criteria: List[SearchCriteria] = []
+    search: SearchObject
     listeners: List[FeedListener] = []
-    mode: str = "and"  # and / or
 
 
 class FeedBase(JobFeed):

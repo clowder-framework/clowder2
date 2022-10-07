@@ -11,6 +11,7 @@ from app.elastic_search.connect import (
 
 dummy_index_name = "dummy_file"
 dummy_record = {
+    "id": "-1",
     "name": "test",
     "creator": "xyz",
     "created": datetime.now(),

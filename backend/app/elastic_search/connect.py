@@ -4,6 +4,8 @@ from elasticsearch import Elasticsearch
 from elasticsearch import BadRequestError
 
 from app.config import settings
+from app.models.search import SearchIndexContents, SearchCriteria, SearchObject
+
 
 logger = logging.getLogger(__name__)
 no_of_shards = settings.elasticsearch_no_of_shards
@@ -76,3 +78,29 @@ def delete_index(es_client, index_name):
         es_client.options(ignore_status=[400, 404]).indices.delete(index=index_name)
     except BadRequestError as ex:
         logger.error(str(ex))
+
+
+# Convert SearchObject into an Elasticsearch JSON object and perform search
+def execute_search_obj(es_client, search_obj: SearchObject):
+    match_list = []
+
+    # TODO: This will need to be more complex to support other operators
+    for criteria in search_obj.criteria:
+        crit = {criteria.field: criteria.value}
+        match_list.append({"match": crit})
+
+    if search_obj.mode == "and":
+        query = {"bool": {"must": match_list}}
+    if search_obj.mode == "or":
+        query = {"bool": {"should": match_list}}
+
+    print(query)
+    return search_index(es_client, search_obj.index_name, query)
+
+
+# Verify a search for provided criteria returns resource with match_id
+def verify_match(es_client, new_index: SearchIndexContents, search_obj: SearchObject):
+    # TODO: There is an opportunity here to do some basic checks here first, without talking to elasticsearch
+    search_obj.criteria.insert(0, SearchCriteria(field="id", value=new_index.id))
+    results = execute_search_obj(es_client, search_obj)
+    return len(results) > 0

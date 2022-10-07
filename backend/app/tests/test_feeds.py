@@ -9,14 +9,16 @@ dataset_data = {
 listener_data = {
     "name": "Test Listener",
     "version": 2,
-    "description": "Created for testing purposes."
+    "description": "Created for testing purposes.",
 }
 feed_data = {
     "name": "XYZ Test Feed",
-    "criteria": [
-        {"field": "name", "operator": "==", "value": "xyz"}
-    ]
+    "search": {
+        "index_name": "file",
+        "criteria": [{"field": "name", "operator": "==", "value": "xyz"}]
+    },
 }
+
 
 def test_feeds(client: TestClient, headers: dict):
     # Create a listener (extractor)
@@ -39,7 +41,8 @@ def test_feeds(client: TestClient, headers: dict):
     # Assign listener to feed
     response = client.post(
         f"{settings.API_V2_STR}/feeds/{feed_id}/listeners",
-        json={"listener_id": listener_id, "automatic": True}, headers=headers
+        json={"listener_id": listener_id, "automatic": True},
+        headers=headers,
     )
     assert response.status_code == 200
 
@@ -65,5 +68,3 @@ def test_feeds(client: TestClient, headers: dict):
     assert response.status_code == 200
 
     # Verify the message
-
-

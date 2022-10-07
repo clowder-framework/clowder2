@@ -53,6 +53,7 @@ class ListenerDB(ListenerBase, MongoModel):
 class ListenerOut(ListenerDB):
     pass
 
+
 class FeedListener(BaseModel):
     listener_id: PyObjectId
     automatic: bool  # Listeners can trigger automatically or not on a per-feed basis.

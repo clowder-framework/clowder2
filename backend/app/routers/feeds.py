@@ -17,6 +17,7 @@ from app.models.feeds import (
     FeedOut,
 )
 from app.models.search import SearchIndexContents
+from app.elastic_search.connect import verify_match
 
 router = APIRouter()
 
@@ -30,17 +31,16 @@ def _check_name_match(value: str, operator: str, criteria: str):
     else:
         return False
 
-async def process_search_index(
-        search_index: SearchIndexContents,
-        user: UserOut,
-        db: MongoClient,
+
+async def check_feed_triggers(
+    es_client,
+    new_index: SearchIndexContents,
+    user: UserOut,
+    db: MongoClient,
 ):
     """Automatically submit jobs to listeners on feeds that fit the new search criteria."""
     listeners_found = []
-    async for feed in db["feeds"].find(
-            {'listeners': {"$ne": []}}
-    ):
-        feed_match = True
+    async for feed in db["feeds"].find({"listeners": {"$ne": []}}):
         feed_db = FeedDB(**feed)
 
         # If feed doesn't have any auto-triggering listeners, we're done
@@ -48,21 +48,19 @@ async def process_search_index(
         for listener in feed_db.listeners:
             if listener.automatic:
                 found_auto = True
+                break
 
         if found_auto:
-            for criteria in feed_db.criteria:
-                if criteria.field == "name":
-                    if not _check_name_match(search_index.name, criteria.operator, criteria.value):
-                        feed_match = False
-
+            # Verify whether resource_id is found when searching the specified criteria
+            feed_match = verify_match(es_client, new_index, feed_db.search)
             if feed_match:
-                # No criteria rules rejected file, so submit to listeners
                 for listener in feed_db.listeners:
                     if listener.automatic:
                         listeners_found.append(listener.listener_id)
 
     print(listeners_found)
     return listeners_found
+
 
 @router.post("", response_model=FeedOut)
 async def save_feed(
@@ -76,6 +74,7 @@ async def save_feed(
     feed_out = FeedOut.from_mongo(found)
     return feed_out
 
+
 @router.post("/{feed_id}/listeners", response_model=FeedOut)
 async def assign_listener(
     feed_id: str,
@@ -83,17 +82,19 @@ async def assign_listener(
     user=Depends(get_current_user),
     db: MongoClient = Depends(get_db),
 ):
-    if (
-            feed := await db["feeds"].find_one({"_id": ObjectId(feed_id)})
-    ) is not None:
+    if (feed := await db["feeds"].find_one({"_id": ObjectId(feed_id)})) is not None:
         feed_out = FeedOut.from_mongo(feed)
         if (
-                listener_q := await db["listeners"].find_one({"_id": ObjectId(listener.listener_id)})
+            listener_q := await db["listeners"].find_one(
+                {"_id": ObjectId(listener.listener_id)}
+            )
         ) is not None:
             feed_out.listeners.append(listener)
             await db["feeds"].replace_one(
                 {"_id": ObjectId(feed_id)}, FeedDB(**feed_out.dict()).to_mongo()
             )
             return feed_out
-        raise HTTPException(status_code=404, detail=f"listener {listener.listener_id} not found")
+        raise HTTPException(
+            status_code=404, detail=f"listener {listener.listener_id} not found"
+        )
     raise HTTPException(status_code=404, detail=f"feed {feed_id} not found")

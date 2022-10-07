@@ -60,10 +60,12 @@ async def save_legacy_listener(
                 "name": legacy_in.name + " " + legacy_in.version,
                 "mode": "or",
                 "listeners": [{"listener_id": listener_out.id, "automatic": True}],
-                "criteria": []
+                "criteria": [],
             }
             for mimetype in mimetypes:
-                new_feed["criteria"].append({"field": "MIMEtype", "operator": "==", "value": mimetype})
+                new_feed["criteria"].append(
+                    {"field": "MIMEtype", "operator": "==", "value": mimetype}
+                )
 
             # Save feed
             pass
