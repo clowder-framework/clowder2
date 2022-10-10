@@ -24,12 +24,19 @@ router = APIRouter()
 clowder_bucket = os.getenv("MINIO_BUCKET_NAME", "clowder")
 
 
-def _check_name_match(value: str, operator: str, criteria: str):
-    if operator == "==":
-        filename_no_ext = os.path.splitext(value)[0]
-        return value == criteria or filename_no_ext == criteria
-    else:
-        return False
+# TODO: Move this to MongoDB middle layer
+async def disassociate_listener_db(feed_id: str, listener_id: str, db: MongoClient):
+    """Remove a specific listener_id from the listeners associated with a feed."""
+    async for feed in db["feeds"].find({"listeners.listener_id": ObjectId(listener_id)}):
+        feed_db = FeedDB.from_mongo(feed)
+        new_listeners = []
+        for feed_listener in feed_db.listeners:
+            if feed_listener.listener_id != listener_id:
+                new_listeners.append(feed_listener)
+        feed_db.listeners = new_listeners
+        await db["feeds"].replace_one(
+            {"_id": ObjectId(feed_id)}, FeedDB(**feed_db).to_mongo()
+        )
 
 
 async def check_feed_triggers(
@@ -75,8 +82,21 @@ async def save_feed(
     return feed_out
 
 
+@router.delete("/{feed_id}")
+async def delete_feed(
+        feed_id: str,
+        user=Depends(get_current_user),
+        db: MongoClient = Depends(get_db),
+):
+    if (await db["feeds"].find_one({"_id": ObjectId(feed_id)})) is not None:
+        await db["feeds"].delete_one({"_id": ObjectId(feed_id)})
+        return {"deleted": feed_id}
+    else:
+        raise HTTPException(status_code=404, detail=f"Feed {feed_id} not found")
+
+
 @router.post("/{feed_id}/listeners", response_model=FeedOut)
-async def assign_listener(
+async def associate_listener(
     feed_id: str,
     listener: FeedListener,
     user=Depends(get_current_user),
@@ -97,4 +117,16 @@ async def assign_listener(
         raise HTTPException(
             status_code=404, detail=f"listener {listener.listener_id} not found"
         )
+    raise HTTPException(status_code=404, detail=f"feed {feed_id} not found")
+
+@router.delete("/{feed_id}/listeners/{listener_id}", response_model=FeedOut)
+async def disassociate_listener(
+    feed_id: str,
+    listener_id: str,
+    user=Depends(get_current_user),
+    db: MongoClient = Depends(get_db),
+):
+    if (feed := await db["feeds"].find_one({"_id": ObjectId(feed_id)})) is not None:
+        disassociate_listener_db(feed_id, listener_id, db)
+        return {"disassociated": listener_id}
     raise HTTPException(status_code=404, detail=f"feed {feed_id} not found")

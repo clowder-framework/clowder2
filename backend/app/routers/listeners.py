@@ -13,6 +13,8 @@ from app.models.listeners import (
     ListenerDB,
     ListenerOut,
 )
+from app.models.feeds import FeedOut
+from app.routers.feeds import disassociate_listener_db
 
 router = APIRouter()
 legacy_router = APIRouter()  # for back-compatibilty with v1 extractors
@@ -128,8 +130,10 @@ async def delete_listener(
     db: MongoClient = Depends(get_db),
 ):
     if (await db["listeners"].find_one({"_id": ObjectId(listener_id)})) is not None:
-        # delete dataset first to minimize files/folder being uploaded to a delete dataset
-
+        # unsubscribe the listener from any feeds
+        async for feed in db["feeds"].find({"listeners.listener_id": ObjectId(listener_id)}):
+            feed_out = FeedOut.from_mongo(feed)
+            disassociate_listener_db(feed_out.id, listener_id, db)
         await db["listeners"].delete_one({"_id": ObjectId(listener_id)})
         return {"deleted": listener_id}
     else:

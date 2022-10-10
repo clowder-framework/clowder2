@@ -37,6 +37,7 @@ from typing import Union
 router = APIRouter()
 
 
+# TODO: Move this to MongoDB middle layer
 async def add_file_entry(
     file_db: FileDB,
     user: UserOut,
@@ -110,6 +111,7 @@ async def add_file_entry(
     await check_feed_triggers(es, new_index, user, db)
 
 
+# TODO: Move this to MongoDB middle layer
 async def remove_file_entry(
     file_id: Union[str, ObjectId],
     db: MongoClient,
