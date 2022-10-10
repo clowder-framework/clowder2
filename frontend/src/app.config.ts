@@ -29,6 +29,6 @@ config["KeycloakBaseURL"] = process.env.KeycloakBaseURL || config.hostname + "/a
 config["KeycloakLogin"] = config.KeycloakBaseURL + "/login";
 config["KeycloakLogout"] = config.KeycloakBaseURL + "/logout";
 config["KeycloakRefresh"] = config.KeycloakBaseURL + "/refresh_token";
-config["KeycloakRegister"] = "/register";
+config["KeycloakRegister"] = config.KeycloakBaseURL + "/register";
 
 export default config;

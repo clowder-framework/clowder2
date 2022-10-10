@@ -14,6 +14,7 @@ import {fetchMetadataDefinitions, postDatasetMetadata} from "../../actions/metad
 import {MetadataIn} from "../../openapi/v2";
 import {datasetCreated, resetDatsetCreated} from "../../actions/dataset";
 import {useNavigate} from "react-router-dom";
+import Layout from "../Layout";
 
 
 export const CreateDataset = (): JSX.Element => {
@@ -106,8 +107,7 @@ export const CreateDataset = (): JSX.Element => {
 	},[newDataset]);
 
 	return (
-		<>
-			<TopBar/>
+		<Layout>
 			<Box className="outer-container">
 				{/*Error Message dialogue*/}
 				<ActionModal actionOpen={errorOpen} actionTitle="Something went wrong..." actionText={reason}
@@ -153,6 +153,6 @@ export const CreateDataset = (): JSX.Element => {
 					</Box>
 				</Box>
 			</Box>
-		</>
+		</Layout>
 	);
 };

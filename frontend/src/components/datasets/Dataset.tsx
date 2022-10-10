@@ -47,6 +47,7 @@ import {
 } from "../../actions/metadata";
 import CloseIcon from '@mui/icons-material/Close';
 import dataset from "../../reducers/dataset";
+import Layout from "../Layout";
 
 const tab = {
 	fontStyle: "normal",
@@ -246,8 +247,7 @@ export const Dataset = (): JSX.Element => {
 	}
 
 	return (
-		<div>
-			<TopBar/>
+		<Layout>
 			<div className="outer-container">
 				<MainBreadcrumbs paths={paths}/>
 				{/*Confirmation dialogue*/}
@@ -482,6 +482,6 @@ export const Dataset = (): JSX.Element => {
 					</Dialog>
 				</div>
 			</div>
-		</div>
+		</Layout>
 	);
 };

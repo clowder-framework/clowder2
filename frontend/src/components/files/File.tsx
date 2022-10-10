@@ -26,6 +26,7 @@ import {postFileMetadata as createFileMetadataAction} from "../../actions/metada
 import {EditMetadata} from "../metadata/EditMetadata";
 import {ClowderButton} from "../styledComponents/ClowderButton";
 import CloseIcon from "@mui/icons-material/Close";
+import Layout from "../Layout";
 
 const tab = {
 	fontStyle: "normal",
@@ -193,8 +194,7 @@ export const File = (): JSX.Element => {
 
 
 	return (
-		<div>
-			<TopBar/>
+		<Layout>
 			<div className="outer-container">
 				<MainBreadcrumbs paths={paths}/>
 				{/*Error Message dialogue*/}
@@ -289,6 +289,6 @@ export const File = (): JSX.Element => {
 					</Grid>
 				</div>
 			</div>
-		</div>
+		</Layout>
 	);
 };

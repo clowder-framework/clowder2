@@ -26,7 +26,20 @@ const theme = createTheme({
 		background: {
 			default: "#F8F8F8"
 		}
-	}
+	},
+	components: {
+		MuiAppBar: {
+			styleOverrides: {
+				colorInherit: {
+					backgroundColor: "#F8F8F8",
+					boxShadow: "none",
+				},
+			},
+			defaultProps: {
+				color: "inherit",
+			},
+		},
+	},
 });
 
 export default theme;
