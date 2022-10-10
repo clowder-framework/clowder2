@@ -98,8 +98,8 @@ def execute_search_obj(es_client, search_obj: SearchObject):
     return search_index(es_client, search_obj.index_name, query)
 
 
-# Verify a search for provided criteria returns resource with match_id
-def verify_match(es_client, new_index: SearchIndexContents, search_obj: SearchObject):
+def check_search_result(es_client, new_index: SearchIndexContents, search_obj: SearchObject):
+    """Check whether the contents of new_index match the search criteria in search_obj."""
     # TODO: There is an opportunity to do some basic checks here first, without talking to elasticsearch
     search_obj.criteria.insert(0, SearchCriteria(field="id", value=new_index.id))
     results = execute_search_obj(es_client, search_obj)

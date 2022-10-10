@@ -25,12 +25,11 @@ from app.elastic_search.connect import (
     connect_elasticsearch,
     create_index,
     insert_record,
-    verify_match,
 )
 from app.models.files import FileIn, FileOut, FileVersion, FileDB
 from app.models.users import UserOut
 from app.models.search import SearchIndexContents
-from app.routers.feeds import check_feed_triggers
+from app.routers.feeds import check_feed_listeners
 from app.keycloak_auth import get_user, get_current_user, get_token
 from typing import Union
 
@@ -108,7 +107,7 @@ async def add_file_entry(
     insert_record(es, "file", doc)
 
     # Submit file job to any qualifying feeds
-    await check_feed_triggers(es, new_index, user, db)
+    await check_feed_listeners(es, new_index, user, db)
 
 
 # TODO: Move this to MongoDB middle layer

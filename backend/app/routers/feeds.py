@@ -17,7 +17,7 @@ from app.models.feeds import (
     FeedOut,
 )
 from app.models.search import SearchIndexContents
-from app.elastic_search.connect import verify_match
+from app.elastic_search.connect import check_search_result
 
 router = APIRouter()
 
@@ -39,7 +39,7 @@ async def disassociate_listener_db(feed_id: str, listener_id: str, db: MongoClie
         )
 
 
-async def check_feed_triggers(
+async def check_feed_listeners(
     es_client,
     new_index: SearchIndexContents,
     user: UserOut,
@@ -59,7 +59,7 @@ async def check_feed_triggers(
 
         if found_auto:
             # Verify whether resource_id is found when searching the specified criteria
-            feed_match = verify_match(es_client, new_index, feed_db.search)
+            feed_match = check_search_result(es_client, new_index, feed_db.search)
             if feed_match:
                 for listener in feed_db.listeners:
                     if listener.automatic:
@@ -118,6 +118,7 @@ async def associate_listener(
             status_code=404, detail=f"listener {listener.listener_id} not found"
         )
     raise HTTPException(status_code=404, detail=f"feed {feed_id} not found")
+
 
 @router.delete("/{feed_id}/listeners/{listener_id}", response_model=FeedOut)
 async def disassociate_listener(
