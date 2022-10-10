@@ -140,7 +140,7 @@ export const Dashboard = (): JSX.Element => {
 						Dataset</Button></Box>
 				<div className="inner-container">
 					<Grid container spacing={4}>
-						<Grid item>
+						<Grid item xs>
 							<Box sx={{borderBottom: 1, borderColor: 'divider'}}>
 								<Tabs value={selectedTabIndex} onChange={handleTabChange} aria-label="dashboard tabs">
 									<Tab sx={tab} label="Datasets" {...a11yProps(0)} />
