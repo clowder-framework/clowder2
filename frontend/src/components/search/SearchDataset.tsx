@@ -1,10 +1,9 @@
 import React from "react";
-import {ReactiveBase, DataSearch, MultiList, SingleRange, ReactiveList, ResultCard} from "@appbaseio/reactivesearch";
+import {ReactiveBase, DataSearch, MultiList, SingleRange, ReactiveList} from "@appbaseio/reactivesearch";
 import {parseDate} from "../../utils/common";
 
 import Cookies from "universal-cookie";
 import DatasetCard from "../datasets/DatasetCard";
-import { ClowderInput } from "../styledComponents/ClowderInput";
 const cookies = new Cookies();
 
 export function SearchDataset() {
@@ -22,8 +21,7 @@ export function SearchDataset() {
 						{field: "description", weight: 2},
 						{field: "author.keyword", weight: 2},
 						]}
-					placeholder="Search for Dataset"
-		/>
+					placeholder="Search for Dataset"/>
 
 		{/*filters*/}
 		<MultiList componentId="creatorfilter" dataField="author" title="Filter by author" aggregationSize={5} showCheckbox/>

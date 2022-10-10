@@ -29,6 +29,11 @@ from rocrate.rocrate import ROCrate
 
 from app import dependencies
 from app import keycloak_auth
+from app.search.connect import (
+    connect_elasticsearch,
+    insert_record,
+    delete_document_by_id,
+)
 from app.config import settings
 from app.keycloak_auth import get_user, get_current_user
 from app.models.datasets import (
@@ -184,11 +189,30 @@ async def save_dataset(
     user=Depends(keycloak_auth.get_current_user),
     db: MongoClient = Depends(dependencies.get_db),
 ):
+    # Make connection to elatsicsearch
+    es = connect_elasticsearch()
+
+    # Check all connection and abort if any one of them is not available
+    if db is None or es is None:
+        raise HTTPException(status_code=503, detail="Service not available")
+        return
+
     result = dataset_in.dict()
     dataset_db = DatasetDB(**dataset_in.dict(), author=user)
     new_dataset = await db["datasets"].insert_one(dataset_db.to_mongo())
     found = await db["datasets"].find_one({"_id": new_dataset.inserted_id})
     dataset_out = DatasetOut.from_mongo(found)
+
+    # Add en entry to the dataset index
+    doc = {
+        "name": dataset_out.name,
+        "description": dataset_out.description,
+        "author": dataset_out.author.email,
+        "created": dataset_out.created,
+        "modified": dataset_out.modified,
+        "download": dataset_out.downloads,
+    }
+    insert_record(es, "dataset", doc, dataset_out.id)
     return dataset_out
 
 
@@ -330,7 +354,17 @@ async def delete_dataset(
     db: MongoClient = Depends(dependencies.get_db),
     fs: Minio = Depends(dependencies.get_fs),
 ):
+    # Make connection to elatsicsearch
+    es = connect_elasticsearch()
+
+    # Check all connection and abort if any one of them is not available
+    if db is None or fs is None or es is None:
+        raise HTTPException(status_code=503, detail="Service not available")
+        return
+
     if (await db["datasets"].find_one({"_id": ObjectId(dataset_id)})) is not None:
+        # delete from elasticsearch
+        delete_document_by_id(es, "dataset", dataset_id)
         # delete dataset first to minimize files/folder being uploaded to a delete dataset
 
         await db["datasets"].delete_one({"_id": ObjectId(dataset_id)})
