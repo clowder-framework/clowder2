@@ -204,6 +204,7 @@ schemaOrg_mapping = {
     "downloads": "DataDownload"
 }
 def datasetout_str2jsonld(jstr):
+    "remap to schema.org key in a json str"
     if not is_str(jstr):
         jt=type(jstr)
         print(f'str2jsonld:{jstr},wrong type:{jt}')
@@ -219,33 +220,17 @@ def datasetout_str2jsonld(jstr):
     return jstr
 
 def datasetout2jsonld(dso)_:
-    "original easy version before getting un serializables from mongo"
+    "pydantic to easily remapped json str"
     jstr=dso.json()
     return datasetout_str2jsonld(jstr)
 
-serializable_keys = ['name', 'description' ,  'status', 'views', 'downloads']
-
-def datasetout2jsonld(dso):
+def datasetout2jsonld(dso): 
     "dataset attributes as jsonld"
-    dt=type(dso)
-    print(f'datasetout2jsonld:{dso},type:{dt}')
-    if is_dict(dso): #why am I getting this from get_dataset
-        import json
-        dso2={}
-        for k,v in dso.items():
-            if k in serializable_keys:
-                print(f'k:{k}')
-                v2=dso[k]
-                dso2[k]=v2
-        print(f'dso2:{dso2}')
-        jstr=json.dumps(dso2) #getting a dict w/objectId
-        #TypeError: Object of type ObjectId is not JSON serializable 
-    else:       #while get_datasets can have this
-        jstr=dso.json()
+    jstr=dso.json()
     return datasetout_str2jsonld(jstr)
 
 def datasetout2jsonld_script(dso):
-    "dataset attributes in scrapable jsonld"
+    "dataset attributes in scrapable ld+json script"
     jld=datasetout2jsonld(dso)
     print(f'<script type="application/ld+json">{jld}</script>')
     
@@ -296,9 +281,10 @@ async def get_dataset(dataset_id: str, db: MongoClient = Depends(dependencies.ge
     
 @router.get("/{dataset_id}", response_model=DatasetOut)
 async def get_dataset_jsonld(dataset_id: str, db: MongoClient = Depends(dependencies.get_db)):
-    dataset=get_dataset(dataset_id, db)
-    jlds=datasetout2jsonld_script(dataset)
-    print(f'get_dataset:{jlds}')
+    "get ld+json script for inside the dataset page, for scraping"
+    dso=get_dataset(dataset_id, db)
+    jlds=datasetout2jsonld_script(dso)
+    #print(f'get_dataset:{jlds}')
     return jlds
 
 
