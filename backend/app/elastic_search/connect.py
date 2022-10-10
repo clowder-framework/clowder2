@@ -4,6 +4,7 @@ from elasticsearch import Elasticsearch
 from elasticsearch import BadRequestError
 
 from app.config import settings
+from app.models.files import FileOut
 from app.models.search import SearchIndexContents, SearchCriteria, SearchObject
 
 
@@ -94,13 +95,12 @@ def execute_search_obj(es_client, search_obj: SearchObject):
     if search_obj.mode == "or":
         query = {"bool": {"should": match_list}}
 
-    print(query)
     return search_index(es_client, search_obj.index_name, query)
 
 
-def check_search_result(es_client, new_index: SearchIndexContents, search_obj: SearchObject):
+def check_search_result(es_client, file_out: FileOut, search_obj: SearchObject):
     """Check whether the contents of new_index match the search criteria in search_obj."""
     # TODO: There is an opportunity to do some basic checks here first, without talking to elasticsearch
-    search_obj.criteria.insert(0, SearchCriteria(field="id", value=new_index.id))
+    search_obj.criteria.insert(0, SearchCriteria(field="id", value=file_out.id))
     results = execute_search_obj(es_client, search_obj)
     return len(results) > 0

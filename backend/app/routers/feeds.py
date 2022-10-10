@@ -7,6 +7,7 @@ import datetime
 from app.dependencies import get_db
 from app.keycloak_auth import get_user, get_current_user
 from app.models.users import UserOut
+from app.models.files import FileOut
 from app.models.listeners import (
     FeedListener,
     ListenerOut,
@@ -18,6 +19,7 @@ from app.models.feeds import (
 )
 from app.models.search import SearchIndexContents
 from app.elastic_search.connect import check_search_result
+from app.rabbitmq.listeners import submit_file_message
 
 router = APIRouter()
 
@@ -41,11 +43,11 @@ async def disassociate_listener_db(feed_id: str, listener_id: str, db: MongoClie
 
 async def check_feed_listeners(
     es_client,
-    new_index: SearchIndexContents,
+    file_out: FileOut,
     user: UserOut,
     db: MongoClient,
 ):
-    """Automatically submit jobs to listeners on feeds that fit the new search criteria."""
+    """Automatically submit new file to listeners on feeds that fit the search criteria."""
     listeners_found = []
     async for feed in db["feeds"].find({"listeners": {"$ne": []}}):
         feed_db = FeedDB(**feed)
@@ -59,13 +61,18 @@ async def check_feed_listeners(
 
         if found_auto:
             # Verify whether resource_id is found when searching the specified criteria
-            feed_match = check_search_result(es_client, new_index, feed_db.search)
+            feed_match = check_search_result(es_client, file_out, feed_db.search)
             if feed_match:
                 for listener in feed_db.listeners:
                     if listener.automatic:
                         listeners_found.append(listener.listener_id)
 
-    print(listeners_found)
+    for targ_listener in listeners_found:
+        queue = ""
+        routing_key = ""
+        parameters = {}
+        submit_file_message(file_out, queue, routing_key, parameters)
+
     return listeners_found
 
 

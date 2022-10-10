@@ -57,3 +57,16 @@ class ListenerOut(ListenerDB):
 class FeedListener(BaseModel):
     listener_id: PyObjectId
     automatic: bool  # Listeners can trigger automatically or not on a per-feed basis.
+
+
+class ListenerMessage(BaseModel):
+    host: str = "http://127.0.0.1:8000"
+    secretKey: str = "secretKey"
+    retry_count: int = 0
+    resource_type: str = "file"
+    flags: str = ""
+    filename: str
+    fileSize: int
+    id: str
+    datasetId: str
+    token: str
