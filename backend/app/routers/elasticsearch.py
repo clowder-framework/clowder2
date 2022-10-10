@@ -6,7 +6,7 @@ router = APIRouter()
 
 
 @router.put("/search", response_model=str)
-async def update_file(index_name: str, query: str):
+async def search(index_name: str, query: str):
     es = connect_elasticsearch()
     return search_index(es, index_name, query)
 
