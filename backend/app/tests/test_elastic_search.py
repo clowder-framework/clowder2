@@ -45,15 +45,18 @@ def test_files():
         time.sleep(5)
         dummy_file_query = []
         # header
-        dummy_file_query.append({'index': dummy_file_index_name})
+        dummy_file_query.append({"index": dummy_file_index_name})
         # body
         dummy_file_query.append({"query": {"match": {"creator": "xyz"}}})
-        file_query = ''
+        file_query = ""
         for each in dummy_file_query:
-            file_query += '%s \n' % json.dumps(each)
+            file_query += "%s \n" % json.dumps(each)
 
         result = search_index(es, dummy_file_index_name, file_query)
-        assert result.body["responses"][0]["hits"]["hits"][0]["_source"]["name"] == "test file"
+        assert (
+            result.body["responses"][0]["hits"]["hits"][0]["_source"]["name"]
+            == "test file"
+        )
         delete_document_by_id(es, dummy_file_index_name, 1)
         delete_index(es, dummy_file_index_name)
 
@@ -71,13 +74,16 @@ def test_datasets():
         time.sleep(5)
         dummy_dataset_query = []
         # header
-        dummy_dataset_query.append({'index': dummy_dataset_index_name})
+        dummy_dataset_query.append({"index": dummy_dataset_index_name})
         # body
         dummy_dataset_query.append({"query": {"match": {"author": "abcd"}}})
-        dataset_query = ''
+        dataset_query = ""
         for each in dummy_dataset_query:
-            dataset_query += '%s \n' % json.dumps(each)
+            dataset_query += "%s \n" % json.dumps(each)
         result = search_index(es, dummy_dataset_index_name, dataset_query)
-        assert result.body["responses"][0]["hits"]["hits"][0]["_source"]["author"] == "abcd"
+        assert (
+            result.body["responses"][0]["hits"]["hits"][0]["_source"]["author"]
+            == "abcd"
+        )
         delete_document_by_id(es, dummy_dataset_index_name, 1)
         delete_index(es, dummy_dataset_index_name)

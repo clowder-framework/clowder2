@@ -26,7 +26,7 @@ from app.routers import (
     authentication,
     keycloak,
     extractors,
-    elasticsearch
+    elasticsearch,
 )
 
 # setup loggers
