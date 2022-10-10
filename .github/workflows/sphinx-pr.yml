@@ -9,8 +9,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+    - name: Update apt-get
+      run: sudo apt-get update
     - name: Install enchant
-      run: sudo apt-get update -y && sudo apt-get install -y enchant
+      run: sudo apt-get install -y enchant
     - uses: actions/checkout@v1
     # Standard drop-in approach that should work for most people.
     - uses: ammaraskar/sphinx-action@master
