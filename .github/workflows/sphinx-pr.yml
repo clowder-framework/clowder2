@@ -10,7 +10,7 @@ jobs:
 
     steps:
     - name: Install sudo apt-get update -y
-      run: sudo apt-get update -y && sudo apt-get install -y python-enchant
+      run: sudo apt-get update -y && sudo apt-get install -y python3-enchant
     - uses: actions/checkout@v1
     # Standard drop-in approach that should work for most people.
     - uses: ammaraskar/sphinx-action@master
