@@ -1,20 +1,9 @@
 import React, {useEffect, useState} from "react";
-import {
-	Box,
-	Button,
-	Dialog,
-	Divider,
-	Grid, IconButton,
-	Menu,
-	MenuItem,
-	Tab,
-	Tabs,
-	Typography
-} from "@mui/material";
+import {Box, Button, Dialog, Divider, Grid, IconButton, Menu, MenuItem, Tab, Tabs, Typography} from "@mui/material";
 import {ClowderInput} from "../styledComponents/ClowderInput";
 import {ClowderButton} from "../styledComponents/ClowderButton";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
-import {useNavigate, useParams} from "react-router-dom";
+import {useNavigate, useParams, useSearchParams} from "react-router-dom";
 import {RootState} from "../../types/data";
 import {useDispatch, useSelector} from "react-redux";
 import {
@@ -25,28 +14,26 @@ import {
 	updateDataset
 } from "../../actions/dataset";
 import {fetchFolderPath, folderDeleted} from "../../actions/folder";
-import {resetFailedReason, } from "../../actions/common"
+import {resetFailedReason,} from "../../actions/common"
 
 import {a11yProps, TabPanel} from "../tabs/TabComponent";
-import TopBar from "../navigation/TopBar";
 import {MainBreadcrumbs} from "../navigation/BreadCrumb";
 import {UploadFile} from "../files/UploadFile";
 import {ActionModal} from "../dialog/ActionModal";
 import FilesTable from "../files/FilesTable";
 import {CreateFolder} from "../folders/CreateFolder";
-import {useSearchParams} from "react-router-dom";
 import {parseDate} from "../../utils/common";
 import config from "../../app.config";
 import {DatasetIn, MetadataIn} from "../../openapi/v2";
 import {DisplayMetadata} from "../metadata/DisplayMetadata";
 import {EditMetadata} from "../metadata/EditMetadata";
 import {
-	patchDatasetMetadata as patchDatasetMetadataAction,
 	deleteDatasetMetadata as deleteDatasetMetadataAction,
-	postDatasetMetadata, fetchDatasetMetadata
+	fetchDatasetMetadata,
+	patchDatasetMetadata as patchDatasetMetadataAction,
+	postDatasetMetadata
 } from "../../actions/metadata";
 import CloseIcon from '@mui/icons-material/Close';
-import dataset from "../../reducers/dataset";
 import Layout from "../Layout";
 
 const tab = {

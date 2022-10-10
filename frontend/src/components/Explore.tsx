@@ -1,21 +1,18 @@
 import React, {useEffect, useState} from "react";
-import {Box, Button, Grid, Tab, Tabs, Link, IconButton, Typography, ButtonGroup} from "@mui/material";
+import {Box, Button, ButtonGroup, Grid, Tab, Tabs} from "@mui/material";
 
 import {Dataset, RootState} from "../types/data";
 import {useDispatch, useSelector} from "react-redux";
 import {datasetDeleted, fetchDatasets,} from "../actions/dataset";
 import {resetFailedReason} from "../actions/common";
 import {downloadThumbnail} from "../utils/thumbnail";
-import TopBar from "./navigation/TopBar";
 
 import {a11yProps, TabPanel} from "./tabs/TabComponent";
 import {MainBreadcrumbs} from "./navigation/BreadCrumb";
 import {ActionModal} from "./dialog/ActionModal";
 import DatasetCard from "./datasets/DatasetCard";
 import config from "../app.config";
-import {Pagination} from "@mui/lab";
-import {ArrowBack, ArrowBackIos, ArrowForward, ArrowForwardIos} from "@material-ui/icons";
-import {ArrowBackIosNew} from "@mui/icons-material";
+import {ArrowBack, ArrowForward} from "@material-ui/icons";
 import Layout from "./Layout";
 
 const tab = {

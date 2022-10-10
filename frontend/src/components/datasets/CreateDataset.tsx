@@ -1,12 +1,11 @@
 import React, {useEffect, useState} from "react";
 
-import {Box, Button, Stepper, Step, StepLabel, StepContent, Typography,} from "@mui/material";
+import {Box, Button, Step, StepContent, StepLabel, Stepper, Typography,} from "@mui/material";
 import {useDispatch, useSelector,} from "react-redux";
 import {RootState} from "../../types/data";
 
 import {CreateDatasetModal} from "./CreateDatasetModal";
 import {CreateMetadata} from "../metadata/CreateMetadata";
-import TopBar from "../navigation/TopBar";
 import {ActionModal} from "../dialog/ActionModal";
 import config from "../../app.config";
 import {resetFailedReason} from "../../actions/common";
