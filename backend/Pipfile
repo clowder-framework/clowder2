@@ -28,6 +28,7 @@ rocrate = "*"
 requests = "*"
 pytest = "*"
 black = "*"
+faker = "*"
 
 [requires]
 python_version = "3.9"
