@@ -3,7 +3,7 @@ class IndexSettings:
         "properties": {
             "name": {"type": "text"},
             "created": {"type": "date"},
-            "creator": {"type""keyword"},
+            "creator": {"type": "keyword"},
             "download": {"type": "long"},
         }
     }
@@ -12,7 +12,7 @@ class IndexSettings:
         "properties": {
             "name": {"type": "text"},
             "description": {"type": "text"},
-            "author": {"type""keyword"},
+            "author": {"type": "keyword"},
             "created": {"type": "date"},
             "modified": {"type": "date"},
             "download": {"type": "long"},
