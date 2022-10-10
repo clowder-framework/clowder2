@@ -68,8 +68,9 @@ def search_index(es_client, index_name, query):
         (For more details, refer to https://www.elastic.co/guide/en/elasticsearch/reference/current/search-search.html)
     """
     try:
-        res = es_client.search(index=index_name, query=query)
-        logger.info("Got %d Hits:" % res["hits"]["total"]["value"])
+        res = es_client.msearch(index=index_name, searches=query)
+        # TODO when there is error this structure response-hits-total-value does not exist
+        # logger.info("Got %d Hits:" % res.body["responses"][0]["hits"]["total"]["value"])
         return res
     except BadRequestError as ex:
         logger.error(str(ex))

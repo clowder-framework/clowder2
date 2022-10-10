@@ -26,6 +26,7 @@ from app.routers import (
     authentication,
     keycloak,
     extractors,
+    elasticsearch
 )
 
 # setup loggers
@@ -116,6 +117,12 @@ api_router.include_router(
     extractors.router,
     prefix="/extractors",
     tags=["extractors"],
+    dependencies=[Depends(get_current_username)],
+)
+api_router.include_router(
+    elasticsearch.router,
+    prefix="/elasticsearch",
+    tags=["elasticsearch"],
     dependencies=[Depends(get_current_username)],
 )
 api_router.include_router(keycloak.router, prefix="/auth", tags=["auth"])
