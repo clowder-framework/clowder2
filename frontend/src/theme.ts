@@ -13,7 +13,7 @@ const theme = createTheme({
 			light: "#F7941E",
 			main: "#F7941E",
 			dark: "#e65100",
-			contrastText: '#ffffff',
+			contrastText: '#FFFFFF',
 		},
 		secondary:{
 			light: "#868E96",
@@ -31,7 +31,7 @@ const theme = createTheme({
 		MuiAppBar: {
 			styleOverrides: {
 				colorInherit: {
-					backgroundColor: "#F8F8F8",
+					backgroundColor: "#FFFFFF",
 					boxShadow: "none",
 				},
 			},
