@@ -1,7 +1,6 @@
 import React, {useEffect} from "react";
 import {Route, Navigate, Routes, BrowserRouter, useNavigate} from "react-router-dom";
 
-import {Dashboard} from "./components/Dashbard";
 import {Dataset as DatasetComponent} from "./components/datasets/Dataset";
 import {File as FileComponent} from "./components/files/File";
 import {CreateDataset} from "./components/datasets/CreateDataset";
@@ -17,8 +16,6 @@ import {isAuthorized} from "./utils/common";
 import {useDispatch, useSelector} from "react-redux";
 import {RootState} from "./types/data";
 import {resetLogout} from "./actions/common";
-import Layout from "./components/Layout";
-import {Paragraph} from "./components/Paragraph";
 import {Explore} from "./components/Explore";
 
 // https://dev.to/iamandrewluca/private-route-in-react-router-v6-lg5

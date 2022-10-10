@@ -77,7 +77,7 @@ export default function FilesTable(props: FilesTableProps) {
 							sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
 						>
 							<TableCell component="th" scope="row">
-								<InsertDriveFileIcon color="primary" sx={iconStyle}/>
+								<InsertDriveFileIcon sx={iconStyle}/>
 								<Button onClick={() => selectFile(file.id)}>{file.name}</Button>
 								{/*TODO this should be version number; for now put version ID instead*/}
 								<VersionChip versionNumber={file.version_num}/>
