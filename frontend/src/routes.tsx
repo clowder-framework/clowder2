@@ -17,6 +17,9 @@ import {isAuthorized} from "./utils/common";
 import {useDispatch, useSelector} from "react-redux";
 import {RootState} from "./types/data";
 import {resetLogout} from "./actions/common";
+import Layout from "./components/Layout";
+import {Paragraph} from "./components/Paragraph";
+import {Explore} from "./components/Explore";
 
 // https://dev.to/iamandrewluca/private-route-in-react-router-v6-lg5
 const PrivateRoute = (props): JSX.Element => {
@@ -50,7 +53,7 @@ export const AppRoutes = (): JSX.Element => {
 	return (
 		<BrowserRouter>
 			<Routes>
-				<Route path="/" element={<PrivateRoute><Dashboard/></PrivateRoute>} />
+				<Route path="/" element={<PrivateRoute><Explore/></PrivateRoute>} />
 				<Route path="/create-dataset/" element={<PrivateRoute><CreateDataset/></PrivateRoute>} />
 				<Route path="/datasets/:datasetId" element={<PrivateRoute><DatasetComponent/></PrivateRoute>} />
 				<Route path="/files/:fileId" element={<PrivateRoute><FileComponent/></PrivateRoute>} />

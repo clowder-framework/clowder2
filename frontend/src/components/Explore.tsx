@@ -1,21 +1,19 @@
 import React, {useEffect, useState} from "react";
-import {Box, Button, Grid, Tab, Tabs, Link, IconButton, Typography, ButtonGroup} from "@mui/material";
+import {Box, Button, ButtonGroup, Grid, Tab, Tabs} from "@mui/material";
 
 import {Dataset, RootState} from "../types/data";
 import {useDispatch, useSelector} from "react-redux";
 import {datasetDeleted, fetchDatasets,} from "../actions/dataset";
 import {resetFailedReason} from "../actions/common";
 import {downloadThumbnail} from "../utils/thumbnail";
-import TopBar from "./navigation/TopBar";
 
 import {a11yProps, TabPanel} from "./tabs/TabComponent";
 import {MainBreadcrumbs} from "./navigation/BreadCrumb";
 import {ActionModal} from "./dialog/ActionModal";
 import DatasetCard from "./datasets/DatasetCard";
 import config from "../app.config";
-import {Pagination} from "@mui/lab";
-import {ArrowBack, ArrowBackIos, ArrowForward, ArrowForwardIos} from "@material-ui/icons";
-import {ArrowBackIosNew} from "@mui/icons-material";
+import {ArrowBack, ArrowForward} from "@material-ui/icons";
+import Layout from "./Layout";
 
 const tab = {
 	fontStyle: "normal",
@@ -24,7 +22,8 @@ const tab = {
 	textTransform: "capitalize",
 };
 
-export const Dashboard = (): JSX.Element => {
+export const Explore = (): JSX.Element => {
+
 
 	// Redux connect equivalent
 	const dispatch = useDispatch();
@@ -127,8 +126,7 @@ export const Dashboard = (): JSX.Element => {
 	];
 
 	return (
-		<div>
-			<TopBar/>
+		<Layout>
 			<div className="outer-container">
 				{/*Error Message dialogue*/}
 				<ActionModal actionOpen={errorOpen} actionTitle="Something went wrong..." actionText={reason}
@@ -136,8 +134,9 @@ export const Dashboard = (): JSX.Element => {
 							 handleActionCancel={handleErrorCancel}/>
 				<Box m={1} display="flex" justifyContent="space-between" alignItems="flex-end">
 					<MainBreadcrumbs paths={paths}/>
-					<Button href="/create-dataset" variant="contained" sx={{display: "flex", alignItems: "center"}}>New
-						Dataset</Button></Box>
+					{/*<Button href="/create-dataset" variant="contained" sx={{display: "flex", alignItems: "center"}}>New*/}
+					{/*	Dataset</Button>*/}
+				</Box>
 				<div className="inner-container">
 					<Grid container spacing={4}>
 						<Grid item xs>
@@ -180,36 +179,9 @@ export const Dashboard = (): JSX.Element => {
 							<TabPanel value={selectedTabIndex} index={3}/>
 							<TabPanel value={selectedTabIndex} index={4}/>
 						</Grid>
-						{/* Commented out for now until we flesh it out and add the ability to close it and not show it */}
-						{/*<Grid item xs={12} md={4}>*/}
-						{/*	<Box className="actionCard">*/}
-						{/*		<Typography className="title">Create your dataset</Typography>*/}
-						{/*		<Typography className="content">Some quick example text to tell users why they should*/}
-						{/*			upload*/}
-						{/*			their own data</Typography>*/}
-						{/*		<Link className="link" href="/create-dataset">*/}
-						{/*			Create Dataset*/}
-						{/*		</Link>*/}
-						{/*	</Box>*/}
-						{/*	<Box className="actionCard">*/}
-						{/*		<Typography className="title">Explore more dataset</Typography>*/}
-						{/*		<Typography className="content">Some quick example text to tell users why they should*/}
-						{/*			follow*/}
-						{/*			more people</Typography>*/}
-						{/*		<Link href="#" className="link">Go to Explore</Link>*/}
-						{/*	</Box>*/}
-						{/*	<Box className="actionCard">*/}
-						{/*		<Typography className="title">Want to learn more about Clowder?</Typography>*/}
-						{/*		<Typography className="content">Some quick example text to tell users why they should*/}
-						{/*			read*/}
-						{/*			the tutorial</Typography>*/}
-						{/*		<Link href="https://clowderframework.org/" className="link" target="_blank">Show me*/}
-						{/*			Tutorial</Link>*/}
-						{/*	</Box>*/}
-						{/*</Grid>*/}
 					</Grid>
 				</div>
 			</div>
-		</div>
-	);
-};
+		</Layout>
+	)
+}
