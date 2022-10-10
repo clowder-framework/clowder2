@@ -1,3 +1,4 @@
+import json
 import time
 from datetime import datetime
 
@@ -30,9 +31,6 @@ dummy_dataset_record = {
     "download": 0,
 }
 
-dummy_file_query = {"match": {"name": "test file"}}
-dummy_dataset_query = {"match": {"name": "test dataset"}}
-
 
 def test_files():
     es = connect_elasticsearch()
@@ -45,8 +43,17 @@ def test_files():
         )
         insert_record(es, dummy_file_index_name, dummy_file_record, 1)
         time.sleep(5)
-        result = search_index(es, dummy_file_index_name, dummy_file_query)
-        assert result["hits"]["hits"][0]["_source"]["name"] == "test file"
+        dummy_file_query = []
+        # header
+        dummy_file_query.append({'index': dummy_file_index_name})
+        # body
+        dummy_file_query.append({"query": {"match": {"creator": "xyz"}}})
+        file_query = ''
+        for each in dummy_file_query:
+            file_query += '%s \n' % json.dumps(each)
+
+        result = search_index(es, dummy_file_index_name, file_query)
+        assert result.body["responses"][0]["hits"]["hits"][0]["_source"]["name"] == "test file"
         delete_document_by_id(es, dummy_file_index_name, 1)
         delete_index(es, dummy_file_index_name)
 
@@ -60,9 +67,17 @@ def test_datasets():
             settings.elasticsearch_setting,
             indexSettings.dataset_mappings,
         )
-        insert_record(es, dummy_dataset_index_name, dummy_file_record, 1)
+        insert_record(es, dummy_dataset_index_name, dummy_dataset_record, 1)
         time.sleep(5)
-        result = search_index(es, dummy_dataset_index_name, dummy_file_query)
-        assert result["hits"]["hits"][0]["_source"]["creator"] == "xyz"
+        dummy_dataset_query = []
+        # header
+        dummy_dataset_query.append({'index': dummy_dataset_index_name})
+        # body
+        dummy_dataset_query.append({"query": {"match": {"author": "abcd"}}})
+        dataset_query = ''
+        for each in dummy_dataset_query:
+            dataset_query += '%s \n' % json.dumps(each)
+        result = search_index(es, dummy_dataset_index_name, dataset_query)
+        assert result.body["responses"][0]["hits"]["hits"][0]["_source"]["author"] == "abcd"
         delete_document_by_id(es, dummy_dataset_index_name, 1)
         delete_index(es, dummy_dataset_index_name)
