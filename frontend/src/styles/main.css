@@ -81,10 +81,19 @@ body {
 }
 
 .search-input{
-	width: 100%;
-	font-size: 14px;
-	background-color: #FFFFFF;
-	border: 1px solid #CED4DA;
+	background-color: #FFFFFF!important;
+	border: 1px solid #CED4DA!important;
 	border-radius: 4px;
-	box-shadow: none;
+}
+
+/*turn off the shadow box on search*/
+.input-group{
+	box-shadow: none!important;
+}
+
+.filter-select{
+	border: none!important;
+    background: transparent!important;
+    border-bottom: 1px solid grey!important;
+    font-weight: bold;
 }
