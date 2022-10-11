@@ -15,7 +15,8 @@ import FolderIcon from '@mui/icons-material/Folder';
 import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
 import {parseDate} from "../../utils/common";
 import {VersionChip} from "../versions/VersionChip";
-import theme from "../../theme";
+import {theme} from "../../theme";
+import {FilesTableFileEntry} from "./FilesTableFileEntry";
 
 type FilesTableProps = {
 	datasetId: string | undefined,
@@ -72,21 +73,11 @@ export default function FilesTable(props: FilesTableProps) {
 					}
 					{
 						filesInDataset.map((file) => (
-						<TableRow
-							key={file.id}
-							sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
-						>
-							<TableCell component="th" scope="row">
-								<InsertDriveFileIcon sx={iconStyle}/>
-								<Button onClick={() => selectFile(file.id)}>{file.name}</Button>
-								{/*TODO this should be version number; for now put version ID instead*/}
-								<VersionChip versionNumber={file.version_num}/>
-							</TableCell>
-							<TableCell align="right">{parseDate(file.created)} by {file.creator.first_name} {file.creator.last_name}</TableCell>
-							<TableCell align="right">{file.bytes} bytes</TableCell>
-							<TableCell align="right">{file.content_type}</TableCell>
-							<TableCell align="right"><FileMenu file={file}/></TableCell>
-						</TableRow>))
+							<FilesTableFileEntry
+								iconStyle={iconStyle}
+								selectFile={selectFile}
+								file={file} />
+						))
 					}
 				</TableBody>
 			</Table>

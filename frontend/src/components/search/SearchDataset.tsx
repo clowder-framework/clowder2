@@ -4,26 +4,12 @@ import {parseDate} from "../../utils/common";
 
 import Cookies from "universal-cookie";
 import DatasetCard from "../datasets/DatasetCard";
-import {Box, Grid} from "@mui/material";
+import {Grid} from "@mui/material";
 import Layout from "../Layout";
-import theme from "../../theme";
+import {searchTheme} from "../../theme";
 
 const cookies = new Cookies();
 
-const searchTheme = {
-	typography: {
-    	fontFamily: theme.typography.fontFamily,
-    	fontSize: "16px",
-	},
-	colors: {
-		textColor: theme.palette.secondary.dark,
-		primaryTextColor: theme.palette.primary.contrastText,
-		primaryColor: theme.palette.primary.main,
-		titleColor: theme.palette.secondary.dark,
-		alertColor: theme.palette.primary.dark,
-		// backgroundColor: theme.palette.primary.contrastText
-	}
-};
 
 export function SearchDataset() {
 	// @ts-ignore
@@ -48,29 +34,29 @@ export function SearchDataset() {
 							<DataSearch
 								title="Search for Dataset"
 								componentId="searchbox"
-										autosuggest={true}
-										highlight={true}
-										queryFormat="or"
-										fuzziness={0}
-										debounce={100}
-										react={{ and: ["creatorfilter",
-												"downloadfilter",
-												"modifyfilter"]}}
-										// apply react to the filter
-										URLParams={true}
-										showFilter={true}
-										showClear
-										renderNoSuggestion="No suggestions found."
-										dataField={[
-											{field: "name", weight: 3},
-											{field: "description", weight: 2},
-											{field: "author.keyword", weight: 2},
-											]}
-										// placeholder="Search for Dataset"
-										innerClass={{
-											title: "search-title",
-											input: "search-input",
-										}}
+								autosuggest={true}
+								highlight={true}
+								queryFormat="or"
+								fuzziness={0}
+								debounce={100}
+								react={{ and: ["creatorfilter",
+										"downloadfilter",
+										"modifyfilter"]}}
+								// apply react to the filter
+								URLParams={true}
+								showFilter={true}
+								showClear
+								renderNoSuggestion="No suggestions found."
+								dataField={[
+									{field: "name", weight: 3},
+									{field: "description", weight: 2},
+									{field: "author.keyword", weight: 2},
+									]}
+								// placeholder="Search for Dataset"
+								innerClass={{
+									title: "search-title",
+									input: "search-input",
+								}}
 							/>
 							{/*filters*/}
 							<Grid container spacing={2} sx={{marginBottom: "20px"}}>
@@ -126,8 +112,12 @@ export function SearchDataset() {
 												<Grid container spacing={2}>
 													{data.map((item) => (
 														<Grid item key={item._id} xs={12} sm={6} md={4} lg={3}>
-															<DatasetCard id={item._id} name={item.name} author={item.author}
-																		 created={parseDate(item.created)} description={item.description}/>
+															<DatasetCard
+																id={item._id}
+																name={item.name}
+																author={item.author}
+																created={parseDate(item.created)}
+																description={item.description}/>
 														</Grid>
 														))}
 												</Grid>
