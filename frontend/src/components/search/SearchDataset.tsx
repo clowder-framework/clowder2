@@ -4,10 +4,28 @@ import {parseDate} from "../../utils/common";
 
 import Cookies from "universal-cookie";
 import DatasetCard from "../datasets/DatasetCard";
-import {Box, Grid} from "@mui/material";
+import {Grid} from "@mui/material";
 import Layout from "../Layout";
-import {MainBreadcrumbs} from "../navigation/BreadCrumb";
+import theme from "../../theme";
+
+
 const cookies = new Cookies();
+
+const searchTheme = {
+	typography: {
+    	fontFamily: theme.typography.fontFamily,
+    	fontSize: "16px",
+	},
+
+	colors: {
+		textColor: theme.palette.secondary.dark,
+		primaryTextColor: theme.palette.primary.contrastText,
+		primaryColor: theme.palette.primary.main,
+		titleColor: theme.palette.secondary.dark,
+		alertColor: theme.palette.primary.dark,
+		borderColor: theme.palette.primary.main,
+	}
+};
 
 export function SearchDataset() {
 	// @ts-ignore
@@ -21,15 +39,24 @@ export function SearchDataset() {
 							  url="http://localhost:8000/api/v2/elasticsearch"
 							  app="dataset"
 							  headers={{"Authorization": cookies.get("Authorization")}}
+							  theme={searchTheme}
 							>
 								{/*search*/}
 								<DataSearch componentId="searchbox"
+											highlight
+											URLParams
+											enablePopularSuggestions
+											enableRecentSuggestions
+											enablePredictiveSuggestions
+											showClear
+											renderNoSuggestion="No suggestions found."
 											dataField={[
 												{field: "name", weight: 3},
 												{field: "description", weight: 2},
 												{field: "author.keyword", weight: 2},
 												]}
-											placeholder="Search for Dataset"/>
+											placeholder="Search for Dataset"
+								/>
 
 								{/*filters*/}
 								<MultiList componentId="creatorfilter" dataField="author" title="Filter by author" aggregationSize={5} showCheckbox/>
@@ -42,7 +69,7 @@ export function SearchDataset() {
 													   { start: 1, label: '1 times and up' }]}
 												   defaultValue="0 time and up" showRadio/>
 								{/*result*/}
-								<ReactiveList componentId="results" dataField="_score" size={6} pagination={true}
+								<ReactiveList componentId="results" dataField="_score" size={20} pagination={true}
 											  react={{
 												and: ["searchbox", "creatorfilter", "downloadfilter", "modifyfilter"]
 											  }}
