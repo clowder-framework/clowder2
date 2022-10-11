@@ -11,34 +11,29 @@ user = {
 }
 
 extractor_info = {
-  "@context": "http://clowder.ncsa.illinois.edu/contexts/extractors.jsonld",
-  "name": "ncsa.wordcount",
-  "version": "2.0",
-  "description": "WordCount extractor. Counts the number of characters, words and lines in the text file that was uploaded.",
-  "author": "Rob Kooper <kooper@illinois.edu>",
-  "contributors": [],
-  "contexts": [
-    {
-      "lines": "http://clowder.ncsa.illinois.edu/metadata/ncsa.wordcount#lines",
-      "words": "http://clowder.ncsa.illinois.edu/metadata/ncsa.wordcount#words",
-      "characters": "http://clowder.ncsa.illinois.edu/metadata/ncsa.wordcount#characters"
-    }
-  ],
-  "repository": [
-    {
-      "repType": "git",
-      "repUrl": "https://opensource.ncsa.illinois.edu/stash/scm/cats/pyclowder.git"
-    }
-  ],
-  "process": {
-    "file": [
-      "text/*",
-      "application/json"
-    ]
-  },
-  "external_services": [],
-  "dependencies": [],
-  "bibtex": []
+    "@context": "http://clowder.ncsa.illinois.edu/contexts/extractors.jsonld",
+    "name": "ncsa.wordcount",
+    "version": "2.0",
+    "description": "WordCount extractor. Counts the number of characters, words and lines in the text file that was uploaded.",
+    "author": "Rob Kooper <kooper@illinois.edu>",
+    "contributors": [],
+    "contexts": [
+        {
+            "lines": "http://clowder.ncsa.illinois.edu/metadata/ncsa.wordcount#lines",
+            "words": "http://clowder.ncsa.illinois.edu/metadata/ncsa.wordcount#words",
+            "characters": "http://clowder.ncsa.illinois.edu/metadata/ncsa.wordcount#characters",
+        }
+    ],
+    "repository": [
+        {
+            "repType": "git",
+            "repUrl": "https://opensource.ncsa.illinois.edu/stash/scm/cats/pyclowder.git",
+        }
+    ],
+    "process": {"file": ["text/*", "application/json"]},
+    "external_services": [],
+    "dependencies": [],
+    "bibtex": [],
 }
 
 # extractor_info_file = os.path.join(os.getcwd(), 'extractor_info.json')
@@ -50,6 +45,7 @@ def test_register(client: TestClient, headers: dict):
     )
     assert response.json().get("id") is not None
     assert response.status_code == 200
+
 
 def test_get_one(client: TestClient, headers: dict):
     response = client.post(
@@ -63,6 +59,7 @@ def test_get_one(client: TestClient, headers: dict):
     )
     assert response.status_code == 200
     assert response.json().get("id") is not None
+
 
 def test_delete(client: TestClient, headers: dict):
     response = client.post(
