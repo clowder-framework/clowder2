@@ -3,12 +3,41 @@ from fastapi.testclient import TestClient
 from app.config import settings
 from app.models.pyobjectid import PyObjectId
 
-extractor_info_file = os.path.join(os.getcwd(), 'extractor_info.json')
+extractor_info = {
+  "@context": "http://clowder.ncsa.illinois.edu/contexts/extractors.jsonld",
+  "name": "ncsa.wordcount",
+  "version": "2.0",
+  "description": "WordCount extractor. Counts the number of characters, words and lines in the text file that was uploaded.",
+  "author": "Rob Kooper <kooper@illinois.edu>",
+  "contributors": [],
+  "contexts": [
+    {
+      "lines": "http://clowder.ncsa.illinois.edu/metadata/ncsa.wordcount#lines",
+      "words": "http://clowder.ncsa.illinois.edu/metadata/ncsa.wordcount#words",
+      "characters": "http://clowder.ncsa.illinois.edu/metadata/ncsa.wordcount#characters"
+    }
+  ],
+  "repository": [
+    {
+      "repType": "git",
+      "repUrl": "https://opensource.ncsa.illinois.edu/stash/scm/cats/pyclowder.git"
+    }
+  ],
+  "process": {
+    "file": [
+      "text/*",
+      "application/json"
+    ]
+  },
+  "external_services": [],
+  "dependencies": [],
+  "bibtex": []
+}
+
+# extractor_info_file = os.path.join(os.getcwd(), 'extractor_info.json')
 
 
 def test_register(client: TestClient, headers: dict):
-    with open(extractor_info_file, 'r') as f:
-        extractor_info = f.read()
     response = client.post(
         f"{settings.API_V2_STR}/extractors", json=extractor_info, headers=headers
     )
@@ -16,8 +45,6 @@ def test_register(client: TestClient, headers: dict):
     assert response.status_code == 200
 
 def test_get_one(client: TestClient, headers: dict):
-    with open(extractor_info_file, 'r') as f:
-        extractor_info = f.read()
     response = client.post(
         f"{settings.API_V2_STR}/extractors", json=extractor_info, headers=headers
     )
@@ -31,8 +58,6 @@ def test_get_one(client: TestClient, headers: dict):
     assert response.json().get("id") is not None
 
 def test_delete(client: TestClient, headers: dict):
-    with open(extractor_info_file, 'r') as f:
-        extractor_info = f.read()
     response = client.post(
         f"{settings.API_V2_STR}/extractors", json=extractor_info, headers=headers
     )
