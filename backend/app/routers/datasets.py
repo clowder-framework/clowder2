@@ -232,7 +232,8 @@ def datasetout2jsonld(dso):
 def datasetout2jsonld_script(dso):
     "dataset attributes in scrapable ld+json script"
     jld=datasetout2jsonld(dso)
-    print(f'<script type="application/ld+json">{jld}</script>')
+    return f'<script type="application/ld+json">{jld}</script>'
+    
     
     
 @router.get("", response_model=List[DatasetOut])
@@ -259,15 +260,11 @@ async def get_datasets(
         ):
             datasets.append(DatasetOut.from_mongo(doc))
             #for now print here, till decide on route/etc
-            if datasets and len(datasets) >0:
-                for ds in datasets:
-                    jld=datasetout2jsonld(ds)
-                    print(f'<script type="application/ld+json">{jld}</script>')
+            #if datasets and len(datasets) >0:
+            #    for ds in datasets:
+            #        jld=datasetout2jsonld(ds)
+            #        print(f'<script type="application/ld+json">{jld}</script>')
     return datasets
-
-#the route should be around/call get_dataset, and is called get_dataset_jsonld, for the frontend
-#only problem is the mongo returns have objectid and datetime in the dict which is not serializable
-#so till I can eval and get that out, I might skip it
 
 
 @router.get("/{dataset_id}", response_model=DatasetOut)
@@ -279,7 +276,7 @@ async def get_dataset(dataset_id: str, db: MongoClient = Depends(dependencies.ge
     raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
 
     
-@router.get("/{dataset_id}", response_model=DatasetOut)
+@router.get("/{dataset_id}/jsonld", response_model=DatasetOut)
 async def get_dataset_jsonld(dataset_id: str, db: MongoClient = Depends(dependencies.get_db)):
     "get ld+json script for inside the dataset page, for scraping"
     dso=get_dataset(dataset_id, db)
