@@ -219,11 +219,6 @@ def datasetout_str2jsonld(jstr):
     jstr = jstr.replace("{",'{"@context": {"@vocab": "https://schema.org/"},',1)
     return jstr
 
-def datasetout2jsonld(dso)_:
-    "pydantic to easily remapped json str"
-    jstr=dso.json()
-    return datasetout_str2jsonld(jstr)
-
 def datasetout2jsonld(dso): 
     "dataset attributes as jsonld"
     jstr=dso.json()
@@ -232,8 +227,7 @@ def datasetout2jsonld(dso):
 def datasetout2jsonld_script(dso):
     "dataset attributes in scrapable ld+json script"
     jld=datasetout2jsonld(dso)
-    return f'<script type="application/ld+json">{jld}</script>'
-    
+    return f'<script type="application/ld+json">{jld}</script>'    
     
     
 @router.get("", response_model=List[DatasetOut])
@@ -259,11 +253,6 @@ async def get_datasets(
             await db["datasets"].find().skip(skip).limit(limit).to_list(length=limit)
         ):
             datasets.append(DatasetOut.from_mongo(doc))
-            #for now print here, till decide on route/etc
-            #if datasets and len(datasets) >0:
-            #    for ds in datasets:
-            #        jld=datasetout2jsonld(ds)
-            #        print(f'<script type="application/ld+json">{jld}</script>')
     return datasets
 
 
@@ -281,7 +270,6 @@ async def get_dataset_jsonld(dataset_id: str, db: MongoClient = Depends(dependen
     "get ld+json script for inside the dataset page, for scraping"
     dso=get_dataset(dataset_id, db)
     jlds=datasetout2jsonld_script(dso)
-    #print(f'get_dataset:{jlds}')
     return jlds
 
 
