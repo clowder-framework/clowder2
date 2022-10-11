@@ -26,14 +26,10 @@ export function FilesTableFileEntry(props) {
 			<TableCell component="th" scope="row">
 				<InsertDriveFileIcon sx={iconStyle}/>
 				<Button onClick={() => selectFile(file.id)}>{file.name}</Button>
+				{/*TODO this should be version number; for now put version ID instead*/}
 				<VersionChip versionNumber={file.version_num}/>
 			</TableCell>
-			{
-				file.creator.first_name && file.creator.last_name ?
-					<TableCell align="right">{parseDate(file.created)} by {file.creator.first_name} {file.creator.last_name}</TableCell>
-					:
-					<TableCell align="right">{parseDate(file.created)} by {file.creator}</TableCell>
-			}
+			<TableCell align="right">{parseDate(file.created)} by {file.creator.first_name} {file.creator.last_name}</TableCell>
 			<TableCell align="right">{file.bytes} bytes</TableCell>
 			<TableCell align="right">{file.content_type}</TableCell>
 			<TableCell align="right"><FileMenu file={file}/></TableCell>
