@@ -3,6 +3,13 @@ from fastapi.testclient import TestClient
 from app.config import settings
 from app.models.pyobjectid import PyObjectId
 
+user = {
+    "email": "test@test.org",
+    "password": "not_a_password",
+    "first_name": "Foo",
+    "last_name": "Bar",
+}
+
 extractor_info = {
   "@context": "http://clowder.ncsa.illinois.edu/contexts/extractors.jsonld",
   "name": "ncsa.wordcount",
