@@ -8,7 +8,6 @@ import {Grid} from "@mui/material";
 import Layout from "../Layout";
 import theme from "../../theme";
 
-
 const cookies = new Cookies();
 
 const searchTheme = {
@@ -16,7 +15,6 @@ const searchTheme = {
     	fontFamily: theme.typography.fontFamily,
     	fontSize: "16px",
 	},
-
 	colors: {
 		textColor: theme.palette.secondary.dark,
 		primaryTextColor: theme.palette.primary.contrastText,
@@ -24,6 +22,7 @@ const searchTheme = {
 		titleColor: theme.palette.secondary.dark,
 		alertColor: theme.palette.primary.dark,
 		borderColor: theme.palette.primary.main,
+		backgroundColor: theme.palette.primary.contrastText,
 	}
 };
 
@@ -39,15 +38,29 @@ export function SearchDataset() {
 							  url="http://localhost:8000/api/v2/elasticsearch"
 							  app="dataset"
 							  headers={{"Authorization": cookies.get("Authorization")}}
+							  // transformResponse={(elasticsearchResponse) => {
+							  // 	console.log(elasticsearchResponse)
+							  // 	// if (elasticsearchResponse.detail.error === "invalid_token"){
+							  // 	// 	console.log("token expired!");
+								// // }
+							  // }}
 							  theme={searchTheme}
 							>
 								{/*search*/}
-								<DataSearch componentId="searchbox"
-											highlight
-											URLParams
-											enablePopularSuggestions
-											enableRecentSuggestions
-											enablePredictiveSuggestions
+								<DataSearch
+									title="Search for Dataset"
+									componentId="searchbox"
+											autosuggest={true}
+											highlight={true}
+											queryFormat="or"
+											fuzziness={0}
+											debounce={100}
+											react={{ and: ["creatorfilter",
+													"downloadfilter",
+													"modifyfilter"]}}
+											// apply react to the filter
+											URLParams={true}
+											showFilter={true}
 											showClear
 											renderNoSuggestion="No suggestions found."
 											dataField={[
@@ -55,7 +68,11 @@ export function SearchDataset() {
 												{field: "description", weight: 2},
 												{field: "author.keyword", weight: 2},
 												]}
-											placeholder="Search for Dataset"
+											// placeholder="Search for Dataset"
+											innerClass={{
+												title: 'search-title',
+												input: 'search-input'
+											}}
 								/>
 
 								{/*filters*/}

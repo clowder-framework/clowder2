@@ -42,7 +42,9 @@ body {
 	border-radius: 4px;
 }
 
-.actionCard .title{
+.actionCard .title,
+.search-title
+{
 	font-weight: 600;
 	font-size: 20px;
 	margin-bottom: 12px;
@@ -76,4 +78,13 @@ body {
 
 .inputGroup{
 	margin: 20px auto;
+}
+
+.search-input{
+	width: 100%;
+	font-size: 14px;
+	background-color: #FFFFFF;
+	border: 1px solid #CED4DA;
+	border-radius: 4px;
+	box-shadow: none;
 }
