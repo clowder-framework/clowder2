@@ -6,18 +6,17 @@ import CssBaseline from '@mui/material/CssBaseline';
 import MuiAppBar, {AppBarProps as MuiAppBarProps} from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
 import List from '@mui/material/List';
-import Typography from '@mui/material/Typography';
 import Divider from '@mui/material/Divider';
 import IconButton from '@mui/material/IconButton';
 import MenuIcon from '@mui/icons-material/Menu';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+import SearchDatasetIcon from '@mui/icons-material/Search';
+import SearchFileIcon from '@mui/icons-material/Plagiarism';
 import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
-import InboxIcon from '@mui/icons-material/MoveToInbox';
-import MailIcon from '@mui/icons-material/Mail';
 import {Link} from "@mui/material";
 import {Link as RouterLink} from 'react-router-dom';
 import {useSelector} from "react-redux";
@@ -154,6 +153,28 @@ export default function PersistentDrawerLeft(props) {
 								<Explore/>
 							</ListItemIcon>
 							<ListItemText primary={"Explore"}/>
+						</ListItemButton>
+					</ListItem>
+				</List>
+				<Divider/>
+				<List>
+					<ListItem key={"search-dataset"} disablePadding>
+						<ListItemButton component={RouterLink} to="/search-dataset">
+							<ListItemIcon>
+								<SearchDatasetIcon/>
+							</ListItemIcon>
+							<ListItemText primary={"Search Datasets"}/>
+						</ListItemButton>
+					</ListItem>
+				</List>
+				<Divider/>
+				<List>
+					<ListItem key={"search-file"} disablePadding>
+						<ListItemButton component={RouterLink} to="/search-file">
+							<ListItemIcon>
+								<SearchFileIcon/>
+							</ListItemIcon>
+							<ListItemText primary={"Search Files"}/>
 						</ListItemButton>
 					</ListItem>
 				</List>
