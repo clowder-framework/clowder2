@@ -13,8 +13,7 @@ jobs:
     - name: install dependencies
       run: >-
         sudo apt-get update -y &&
-        sudo apt-get install -y enchant python3-pip &&
-        sudo pip3 install --upgrade -r ./docs/requirements.txt
+        sudo apt-get install -y enchant
     # Standard drop-in approach that should work for most people.
     - uses: ammaraskar/sphinx-action@master
       with:
