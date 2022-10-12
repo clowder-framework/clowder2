@@ -10,11 +10,16 @@ import {RedirectRegister as RedirectRegisterComponent} from "./components/auth/R
 import {Auth as AuthComponent} from "./components/auth/Auth";
 import {RedirectLogin as RedirectLoginComponent} from "./components/auth/RedirectLogin";
 import {RedirectLogout as RedirectLogoutComponent} from "./components/auth/RedirectLogout";
+import {SearchFile} from "./components/search/SearchFile";
+import {SearchDataset} from "./components/search/SearchDataset";
 
 import {isAuthorized} from "./utils/common";
 import {useDispatch, useSelector} from "react-redux";
 import {RootState} from "./types/data";
 import {resetLogout} from "./actions/common";
+import Layout from "./components/Layout";
+import {Paragraph} from "./components/Paragraph";
+import {Explore} from "./components/Explore";
 
 // https://dev.to/iamandrewluca/private-route-in-react-router-v6-lg5
 const PrivateRoute = (props): JSX.Element => {
@@ -48,7 +53,7 @@ export const AppRoutes = (): JSX.Element => {
 	return (
 		<BrowserRouter>
 			<Routes>
-				<Route path="/" element={<PrivateRoute><Dashboard/></PrivateRoute>} />
+				<Route path="/" element={<PrivateRoute><Explore/></PrivateRoute>} />
 				<Route path="/create-dataset/" element={<PrivateRoute><CreateDataset/></PrivateRoute>} />
 				<Route path="/datasets/:datasetId" element={<PrivateRoute><DatasetComponent/></PrivateRoute>} />
 				<Route path="/files/:fileId" element={<PrivateRoute><FileComponent/></PrivateRoute>} />
@@ -56,6 +61,8 @@ export const AppRoutes = (): JSX.Element => {
 				<Route path="/auth/login" element={<RedirectLoginComponent/>} />
 				<Route path="/auth/logout" element={<RedirectLogoutComponent/>} />
 				<Route path="/auth" element={<AuthComponent/>} />
+				<Route path="/search-file" element={<PrivateRoute><SearchFile/></PrivateRoute>} />
+				<Route path="/search-dataset" element={<PrivateRoute><SearchDataset/></PrivateRoute>} />
 				<Route path="*"
 					   element={
 						   <main style={{ padding: "1rem" }}>
