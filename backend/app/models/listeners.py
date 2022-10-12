@@ -13,18 +13,21 @@ class Repository(MongoModel):
 
 # Currently for extractor_info JSON from Clowder v1 extractors POSTing to /api/extractors
 class ExtractorInfo(BaseModel):
-    author: str  # Referring to author of listener script (e.g. name or email), not Clowder user
-    process: dict
-    maturity: str = "Development"
+    name: str
+    version: str = "1.0"
+    updated: datetime = Field(default_factory=datetime.utcnow)
+    author: str
     contributors: List[str] = []
     contexts: List[dict] = []
-    repository: List[Repository] = []
-    external_services: List[str] = []
+    repository: Union[list[Repository], None] = None
+    external_services: List[str]
     libraries: List[str] = []
-    bibtex: List[str] = []
+    bibtex: List[str]
+    maturity: str = "Development"
     default_labels: List[str] = []
+    process: dict
     categories: List[str] = []
-    parameters: List[dict] = []
+    parameters: dict = {}
 
 
 class ListenerBase(BaseModel):
