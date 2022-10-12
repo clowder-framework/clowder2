@@ -216,6 +216,50 @@ async def save_dataset(
     return dataset_out
 
 
+def is_str(v):
+    return type(v) is str
+
+
+schemaOrg_mapping = {
+    "id": "identifier",
+    "first_name": "givenName",
+    "last_name": "familyName",
+    "created": "dateCreated",
+    "modified": "dateModified",
+    "views": "interactionStatistic",
+    "downloads": "DataDownload",
+}
+
+
+def datasetout_str2jsonld(jstr):
+    "remap to schema.org key in a json str"
+    if not is_str(jstr):
+        jt = type(jstr)
+        print(f"str2jsonld:{jstr},wrong type:{jt}")
+        return None
+    global schemaOrg_mapping
+    for k, v in schemaOrg_mapping.items():
+        if k in jstr:
+            ks = f'"{k}":'
+            vs = f'"{v}":'
+            # print(f'replace:{ks} with:{vs}')
+            jstr = jstr.replace(ks, vs)
+    jstr = jstr.replace("{", '{"@context": {"@vocab": "https://schema.org/"},', 1)
+    return jstr
+
+
+def datasetout2jsonld(dso):
+    "dataset attributes as jsonld"
+    jstr = dso.json()
+    return datasetout_str2jsonld(jstr)
+
+
+def datasetout2jsonld_script(dso):
+    "dataset attributes in scrapable ld+json script"
+    jld = datasetout2jsonld(dso)
+    return f'<script type="application/ld+json">{jld}</script>'
+
+
 @router.get("", response_model=List[DatasetOut])
 async def get_datasets(
     user_id=Depends(get_user),
@@ -255,6 +299,56 @@ async def get_dataset(dataset_id: str, db: MongoClient = Depends(dependencies.ge
     ) is not None:
         return DatasetOut.from_mongo(dataset)
     raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
+
+
+@router.get("/{dataset_id}/summary.jsonld", response_model=DatasetOut)
+async def get_dataset_jsonld(
+    dataset_id: str, db: MongoClient = Depends(dependencies.get_db)
+):
+    "get ld+json script for inside the dataset page, for scraping"
+    dso = get_dataset(dataset_id, db)
+    jlds = datasetout2jsonld_script(dso)
+    return jlds
+
+
+def put_txtfile(fn, s, wa="a"):
+    with open(fn, wa) as f:
+        return f.write(s)
+
+
+def datasets2sitemap(datasets):
+    "given an array of datasetObjs put out sitemap.xml"
+    top = """<?xml version="1.0" encoding="UTF-8"?>
+    <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+    """
+    sm = "sitemap.xml"  # could write to string and ret it all
+    if datasets and len(datasets) > 0:
+        put_txtfile(sm, top, "w")
+        URLb = settings.frontend_url
+        for ds in datasets:
+            objid = getattr(ds, "id")
+            if objid:
+                id = str(objid)
+                put_txtfile(sm, f"<url><loc>{URLb}/datasets/{id}</loc></url> ")
+        put_txtfile(sm, "</urlset>")
+
+
+# now the route
+
+
+def get_txtfile(fn):
+    "ret str from file"
+    with open(fn, "r") as f:
+        return f.read()
+
+
+@router.get("/sitemap.xml")
+async def sitemap() -> str:
+    datasets = get_datasets()
+    # could compare len(datasets) w/len of sitemap-file to see if could use cached one
+    datasets2sitemap(datasets)  # creates the sitemap.xml file, in case want to cache it
+    s = get_txtfile("sitemap.xml")
+    return s
 
 
 @router.get("/{dataset_id}/files")
