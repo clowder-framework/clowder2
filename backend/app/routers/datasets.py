@@ -300,8 +300,8 @@ def get_txtfile(fn):
     with open(fn, "r") as f:
         return f.read()
 
-@router.get("/sitemap.xml", response_model=string)
-async def sitemap():
+@router.get("/sitemap.xml")
+async def sitemap() -> str:
     datasets=get_datasets()
     #could compare len(datasets) w/len of sitemap-file to see if could use cached one
     datasets2sitemap(datasets) #creates the sitemap.xml file, in case want to cache it
