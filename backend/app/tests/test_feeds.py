@@ -15,7 +15,7 @@ feed_data = {
     "name": "XYZ Test Feed",
     "search": {
         "index_name": "file",
-        "criteria": [{"field": "name", "operator": "==", "value": "xyz"}]
+        "criteria": [{"field": "name", "operator": "==", "value": "xyz"}],
     },
 }
 

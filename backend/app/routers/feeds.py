@@ -29,7 +29,9 @@ clowder_bucket = os.getenv("MINIO_BUCKET_NAME", "clowder")
 # TODO: Move this to MongoDB middle layer
 async def disassociate_listener_db(feed_id: str, listener_id: str, db: MongoClient):
     """Remove a specific listener_id from the listeners associated with a feed."""
-    async for feed in db["feeds"].find({"listeners.listener_id": ObjectId(listener_id)}):
+    async for feed in db["feeds"].find(
+        {"listeners.listener_id": ObjectId(listener_id)}
+    ):
         feed_db = FeedDB.from_mongo(feed)
         new_listeners = []
         for feed_listener in feed_db.listeners:
@@ -68,7 +70,7 @@ async def check_feed_listeners(
                         listeners_found.append(listener.listener_id)
 
     for targ_listener in listeners_found:
-        queue = ""
+        queue = ""  # TODO: Each extractor gets a queue - routing key same as name?
         routing_key = ""
         parameters = {}
         submit_file_message(file_out, queue, routing_key, parameters)
@@ -91,9 +93,9 @@ async def save_feed(
 
 @router.delete("/{feed_id}")
 async def delete_feed(
-        feed_id: str,
-        user=Depends(get_current_user),
-        db: MongoClient = Depends(get_db),
+    feed_id: str,
+    user=Depends(get_current_user),
+    db: MongoClient = Depends(get_db),
 ):
     if (await db["feeds"].find_one({"_id": ObjectId(feed_id)})) is not None:
         await db["feeds"].delete_one({"_id": ObjectId(feed_id)})

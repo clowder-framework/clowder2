@@ -12,13 +12,13 @@ from app.models.listeners import ListenerMessage
 
 
 def submit_file_message(
-        file_out: FileOut,
-        queue: str,
-        routing_key: str,
-        parameters: dict,
-        token: str = Depends(get_token),
-        db: MongoClient = Depends(dependencies.get_db),
-        rabbitmq_client: BlockingChannel = Depends(dependencies.get_rabbitmq),
+    file_out: FileOut,
+    queue: str,
+    routing_key: str,
+    parameters: dict,
+    token: str = Depends(get_token),
+    db: MongoClient = Depends(dependencies.get_db),
+    rabbitmq_client: BlockingChannel = Depends(dependencies.get_rabbitmq),
 ):
     # TODO check if extractor is registered
     msg_body = ListenerMessage(
@@ -26,7 +26,7 @@ def submit_file_message(
         fileSize=file_out.bytes,
         id=file_out.id,
         datasetId=file_out.dataset_id,
-        secretKey=token
+        secretKey=token,
     )
 
     rabbitmq_client.queue_bind(

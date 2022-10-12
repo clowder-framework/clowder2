@@ -131,7 +131,9 @@ async def delete_listener(
 ):
     if (await db["listeners"].find_one({"_id": ObjectId(listener_id)})) is not None:
         # unsubscribe the listener from any feeds
-        async for feed in db["feeds"].find({"listeners.listener_id": ObjectId(listener_id)}):
+        async for feed in db["feeds"].find(
+            {"listeners.listener_id": ObjectId(listener_id)}
+        ):
             feed_out = FeedOut.from_mongo(feed)
             disassociate_listener_db(feed_out.id, listener_id, db)
         await db["listeners"].delete_one({"_id": ObjectId(listener_id)})

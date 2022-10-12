@@ -293,7 +293,9 @@ async def get_file_extract(
             parameters = req_info["parameters"]
         routing_key = "extractors." + queue
 
-        submit_file_message(file_out, queue, routing_key, parameters, token, db, rabbitmq_client)
+        submit_file_message(
+            file_out, queue, routing_key, parameters, token, db, rabbitmq_client
+        )
 
         return {"message": "testing", "file_id": file_id}
     else:
