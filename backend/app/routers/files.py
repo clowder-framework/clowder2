@@ -249,7 +249,8 @@ async def get_file_versions(
 
     raise HTTPException(status_code=404, detail=f"File {file_id} not found")
 
-
+# submits file to extractor
+# can handle parameeters pass in as key/values in info
 @router.post("/{file_id}/extract")
 async def get_file_extract(
     file_id: str,
@@ -270,14 +271,14 @@ async def get_file_extract(
             # TODO check if extractor is registered
             msg = {"message": "testing", "file_id": file_id}
             body = {}
+            # TODO better solution for host
             body["host"] = "http://127.0.0.1:8000"
-            body["secretKey"] = "secretKey"
+            body["secretKey"] = token
             body["token"] = token
             body["retry_count"] = 0
             body["filename"] = file["name"]
             body["id"] = file_id
             body["datasetId"] = str(file["dataset_id"])
-            body["host"] = "http://127.0.0.1:8000"
             body["secretKey"] = token
             body["fileSize"] = file["bytes"]
             body["resource_type"] = "file"

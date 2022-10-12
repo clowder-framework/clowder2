@@ -686,7 +686,8 @@ async def download_dataset(
     else:
         raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
 
-
+# submits file to extractor
+# can handle parameeters pass in as key/values in info
 @router.post("/{dataset_id}/extract")
 async def get_dataset_extract(
     dataset_id: str,
@@ -710,6 +711,7 @@ async def get_dataset_extract(
             body = {}
             body["secretKey"] = token
             body["token"] = token
+            # TODO better solution for host
             body["host"] = "http://127.0.0.1:8000"
             body["retry_count"] = 0
             body["filename"] = dataset["name"]
