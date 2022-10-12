@@ -265,12 +265,48 @@ async def get_dataset(dataset_id: str, db: MongoClient = Depends(dependencies.ge
     raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
 
     
-@router.get("/{dataset_id}/jsonld", response_model=DatasetOut)
+@router.get("/{dataset_id}/summary.jsonld", response_model=DatasetOut)
 async def get_dataset_jsonld(dataset_id: str, db: MongoClient = Depends(dependencies.get_db)):
     "get ld+json script for inside the dataset page, for scraping"
     dso=get_dataset(dataset_id, db)
     jlds=datasetout2jsonld_script(dso)
     return jlds
+
+
+def put_txtfile(fn,s,wa="a"):
+    with open(fn, wa) as f:
+        return f.write(s)
+
+def datasets2sitemap(datasets):
+    "given an array of datasetObjs put out sitemap.xml"
+    top= """<?xml version="1.0" encoding="UTF-8"?>
+    <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+    """
+    sm="sitemap.xml" #could write to string and ret it all
+    if datasets and len(datasets) >0:
+        put_txtfile(sm,top,"w")
+        URLb = settings.frontend_url
+        for ds in datasets:
+            objid=getattr(ds,'id')
+            if objid:
+                id=str(objid)
+                put_txtfile(sm,f'<url><loc>{URLb}/datasets/{id}</loc></url> ')
+        put_txtfile(sm,"</urlset>")
+
+#now the route
+
+def get_txtfile(fn):
+    "ret str from file"
+    with open(fn, "r") as f:
+        return f.read()
+
+@router.get("/sitemap.xml", response_model=string)
+async def sitemap():
+    datasets=get_datasets()
+    #could compare len(datasets) w/len of sitemap-file to see if could use cached one
+    datasets2sitemap(datasets) #creates the sitemap.xml file, in case want to cache it
+    s=get_txtfile("sitemap.xml")
+    return s
 
 
 @router.get("/{dataset_id}/files")
