@@ -87,6 +87,7 @@ body {
 }
 
 /*turn off the shadow box on search*/
+/*TODO pass in outer div id*/
 .input-group{
 	box-shadow: none!important;
 }
