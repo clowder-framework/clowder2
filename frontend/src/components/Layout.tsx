@@ -101,7 +101,7 @@ export default function PersistentDrawerLeft(props) {
 	const theme = useTheme();
 	const [open, setOpen] = React.useState(false);
 	const [elasticsearchIndex, setElasticsearchIndex] = React.useState("dataset");
-
+	const [embeddedSearchHidden, setEmbeddedSearchHidden] = React.useState(false);
 
 	const handleDrawerOpen = () => {
 		setOpen(true);
@@ -114,9 +114,18 @@ export default function PersistentDrawerLeft(props) {
 	const location = useLocation();
 
 	useEffect(()=>{
-		// TODO default to search dataset; need to be decided or replaced with multiple search once it's ready
-		if (location.pathname.includes("search-file")) setElasticsearchIndex("file");
-		else setElasticsearchIndex("dataset");
+		if (location.pathname.includes("search-file")){
+			setElasticsearchIndex("file");
+			setEmbeddedSearchHidden(true);
+		}
+		else if(location.pathname.includes("search-dataset")){
+			setElasticsearchIndex("dataset");
+			setEmbeddedSearchHidden(true);
+		}
+		else {
+			// TODO default to search dataset; need to be decided or replaced with multiple search once it's ready
+			setElasticsearchIndex("dataset");
+		}
 	}, [location])
 
 	const loggedOut = useSelector((state: RootState) => state.error.loggedOut);
@@ -155,14 +164,9 @@ export default function PersistentDrawerLeft(props) {
 						</Link>
 
 						{/*for searching*/}
-						{
-							location.pathname.includes("search-dataset") || location.pathname.includes("search-file") ?
-							<></>
-							:
-							<SearchDiv>
-								<EmbeddedSearch />
-							</SearchDiv>
-						}
+						<SearchDiv hidden={embeddedSearchHidden}>
+							<EmbeddedSearch />
+						</SearchDiv>
 						<Box sx={{ flexGrow: 1 }} />
 						<Box sx={{marginLeft: "auto"}}>
 							{

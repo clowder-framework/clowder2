@@ -5,6 +5,7 @@ import {useNavigate} from "react-router-dom";
 
 
 export function EmbeddedSearch() {
+	// TODO pass down a props to determine which index to search
 
 	const history = useNavigate();
 
@@ -30,9 +31,10 @@ export function EmbeddedSearch() {
 			}}
 			onValueSelected={
 				function(value, cause, source) {
-					if (cause === "ENTER_PRESS" || cause === "SEARCH_ICON_CLICK"){
-						console.log("current value: ", value);
-						history(`/search-dataset`);
+					if (cause === "SUGGESTION_SELECT" ||
+						cause === "ENTER_PRESS" ||
+						cause === "SEARCH_ICON_CLICK"){
+						history(`/search-dataset?searchbox="${value}"`);
 					}
 				}
 			  }
