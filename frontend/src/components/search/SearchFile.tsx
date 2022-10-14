@@ -1,18 +1,11 @@
 import React from "react";
 import {
-	ReactiveBase,
 	DataSearch,
-	MultiList,
-	SingleRange,
 	ReactiveList,
-	ResultCard,
 	MultiDropdownList, SingleDropdownRange
 } from "@appbaseio/reactivesearch";
-import {parseDate} from "../../utils/common";
 import {Grid} from "@mui/material";
 import Layout from "../Layout";
-import {searchTheme} from "../../theme";
-import Cookies from "universal-cookie";
 import {FilesTableFileEntry} from "../files/FilesTableFileEntry";
 import TableBody from "@mui/material/TableBody";
 import Table from "@mui/material/Table";
@@ -21,7 +14,6 @@ import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import TableCell from "@mui/material/TableCell";
 import TableContainer from "@mui/material/TableContainer";
-const cookies = new Cookies();
 
 export function SearchFile() {
 	// @ts-ignore
@@ -30,12 +22,6 @@ export function SearchFile() {
 			<div className="outer-container">
 				<Grid container spacing={4}>
 					<Grid item xs>
-						<ReactiveBase
-						  url="http://localhost:8000/api/v2/elasticsearch"
-						  app="file"
-						  headers={{"Authorization": cookies.get("Authorization")}}
-						  theme={searchTheme}
-						>
 							{/*search*/}
 							<DataSearch
 								componentId="searchbox"
@@ -121,8 +107,6 @@ export function SearchFile() {
 													</Table>
 												</TableContainer>
 										)}/>
-
-						</ReactiveBase>
 					</Grid>
 				</Grid>
 			</div>
