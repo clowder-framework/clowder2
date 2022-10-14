@@ -64,7 +64,7 @@ def search_index(es_client, index_name, query):
     Arguments:
         es_client -- elasticsearch client which you get as return object from connect_elasticsearch()
         index_name -- name of index
-        query -- query to be searches
+        query -- query to be searched
         (For more details, refer to https://www.elastic.co/guide/en/elasticsearch/reference/current/search-search.html)
     """
     try:
