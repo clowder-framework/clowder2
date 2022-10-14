@@ -136,7 +136,7 @@ export default function PersistentDrawerLeft(props) {
 		<ReactiveBase
 			// TODO put it in the Config file or other ways to dynamically pass in
 		  url="http://localhost:8000/api/v2/elasticsearch"
-		  app={elasticsearchIndex}
+		  app="file,dataset"
 		  headers={{"Authorization": cookies.get("Authorization")}}
 		  // transformResponse={(elasticsearchResponse) => {
 		  // 	console.log(elasticsearchResponse)
