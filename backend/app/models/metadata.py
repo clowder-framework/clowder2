@@ -13,7 +13,7 @@ from pymongo import MongoClient
 from app.models.mongomodel import MongoModel
 from app.models.pyobjectid import PyObjectId
 from app.models.users import UserOut
-from app.models.listeners import ListenerIn, ListenerOut
+from app.models.listeners import ListenerIn, LegacyListenerIn, ListenerOut
 
 
 class MongoDBRef(BaseModel):
@@ -200,6 +200,7 @@ class MetadataBase(MongoModel):
 class MetadataIn(MetadataBase):
     file_version: Optional[int]
     listener: Optional[ListenerIn]
+    extractor: Optional[LegacyListenerIn]
 
 
 class MetadataPatch(MetadataIn):

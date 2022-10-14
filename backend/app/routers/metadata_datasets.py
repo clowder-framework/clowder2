@@ -13,7 +13,7 @@ from app import dependencies
 from app.keycloak_auth import get_user, get_current_user, UserOut
 from app.config import settings
 from app.models.datasets import DatasetOut
-from app.models.listeners import ListenerIn
+from app.models.listeners import LegacyListenerIn
 from app.models.metadata import (
     MongoDBRef,
     MetadataAgent,
@@ -49,17 +49,16 @@ async def _build_metadata_db_obj(
 
     if agent is None:
         # Build MetadataAgent depending on whether extractor info is present
-        extractor_info = metadata_in.extractor_info
-        if extractor_info is not None:
-            extractor_in = ListenerIn(**extractor_info.dict())
+        if metadata_in.extractor is not None:
+            extractor_in = LegacyListenerIn(**metadata_in.extractor.dict())
             if (
-                extractor := await db["extractors"].find_one(
+                extractor := await db["listeners"].find_one(
                     {"_id": extractor_in.id, "version": extractor_in.version}
                 )
             ) is not None:
                 agent = MetadataAgent(creator=user, extractor=extractor)
             else:
-                raise HTTPException(status_code=404, detail=f"Extractor not found")
+                raise HTTPException(status_code=404, detail=f"Listener not found")
         else:
             agent = MetadataAgent(creator=user)
 
@@ -97,11 +96,11 @@ async def add_dataset_metadata(
         if definition is not None:
             existing_q = {"resource.resource_id": dataset.id, "definition": definition}
             # Extracted metadata doesn't care about user
-            if metadata_in.extractor_info is not None:
-                existing_q["agent.extractor.name"] = metadata_in.extractor_info.name
+            if metadata_in.extractor is not None:
+                existing_q["agent.listener.name"] = metadata_in.extractor.name
                 existing_q[
-                    "agent.extractor.version"
-                ] = metadata_in.extractor_info.version
+                    "agent.listener.version"
+                ] = metadata_in.extractor.version
             else:
                 existing_q["agent.creator.id"] = user.id
             if (existing := await db["metadata"].find_one(existing_q)) is not None:
@@ -135,19 +134,18 @@ async def replace_dataset_metadata(
         query = {"resource.resource_id": ObjectId(dataset_id)}
 
         # Filter by MetadataAgent
-        extractor_info = metadata_in.extractor_info
-        if extractor_info is not None:
+        if metadata_in.extractor is not None:
             if (
-                extractor := await db["extractors"].find_one(
-                    {"name": extractor_info.name, "version": extractor_info.version}
+                extractor := await db["listeners"].find_one(
+                    {"name": metadata_in.extractor.name, "version": metadata_in.extractor.version}
                 )
             ) is not None:
                 agent = MetadataAgent(creator=user, extractor=extractor)
                 # TODO: How do we handle two different users creating extractor metadata? Currently we ignore user
-                query["agent.extractor.name"] = agent.extractor.name
-                query["agent.extractor.version"] = agent.extractor.version
+                query["agent.listener.name"] = agent.listener.name
+                query["agent.listener.version"] = agent.listener.version
             else:
-                raise HTTPException(status_code=404, detail=f"Extractor not found")
+                raise HTTPException(status_code=404, detail=f"Listener not found")
         else:
             agent = MetadataAgent(creator=user)
             query["agent.creator.id"] = agent.creator.id
@@ -207,17 +205,16 @@ async def update_dataset_metadata(
                 query["definition"] = definition
 
         # Filter by MetadataAgent
-        extractor_info = metadata_in.extractor_info
-        if extractor_info is not None:
+        if metadata_in.extractor is not None:
             if (
-                extractor := await db["extractors"].find_one(
-                    {"name": extractor_info.name, "version": extractor_info.version}
+                listener := await db["listeners"].find_one(
+                    {"name": metadata_in.extractor.name, "version": metadata_in.extractor.version}
                 )
             ) is not None:
-                agent = MetadataAgent(creator=user, extractor=extractor)
+                agent = MetadataAgent(creator=user, listener=listener)
                 # TODO: How do we handle two different users creating extractor metadata? Currently we ignore user
-                query["agent.extractor.name"] = agent.extractor.name
-                query["agent.extractor.version"] = agent.extractor.version
+                query["agent.listener.name"] = agent.listener.name
+                query["agent.listener.version"] = agent.listener.version
             else:
                 raise HTTPException(status_code=404, detail=f"Extractor not found")
         else:
@@ -239,8 +236,8 @@ async def update_dataset_metadata(
 @router.get("/{dataset_id}/metadata", response_model=List[MetadataOut])
 async def get_dataset_metadata(
     dataset_id: str,
-    extractor_name: Optional[str] = Form(None),
-    extractor_version: Optional[float] = Form(None),
+    listener_name: Optional[str] = Form(None),
+    listener_version: Optional[float] = Form(None),
     user=Depends(get_current_user),
     db: MongoClient = Depends(dependencies.get_db),
 ):
@@ -249,10 +246,10 @@ async def get_dataset_metadata(
     ) is not None:
         query = {"resource.resource_id": ObjectId(dataset_id)}
 
-        if extractor_name is not None:
-            query["agent.extractor.name"] = extractor_name
-        if extractor_version is not None:
-            query["agent.extractor.version"] = extractor_version
+        if listener_name is not None:
+            query["agent.listener.name"] = listener_name
+        if listener_version is not None:
+            query["agent.listener.version"] = listener_version
 
         metadata = []
         async for md in db["metadata"].find(query):
@@ -304,14 +301,14 @@ async def delete_dataset_metadata(
         extractor_info = metadata_in.extractor_info
         if extractor_info is not None:
             if (
-                extractor := await db["extractors"].find_one(
+                extractor := await db["listeners"].find_one(
                     {"name": extractor_info.name, "version": extractor_info.version}
                 )
             ) is not None:
                 agent = MetadataAgent(creator=user, extractor=extractor)
                 # TODO: How do we handle two different users creating extractor metadata? Currently we ignore user
-                query["agent.extractor.name"] = agent.extractor.name
-                query["agent.extractor.version"] = agent.extractor.version
+                query["agent.listener.name"] = agent.listener.name
+                query["agent.listener.version"] = agent.listener.version
             else:
                 raise HTTPException(status_code=404, detail=f"Extractor not found")
         else:

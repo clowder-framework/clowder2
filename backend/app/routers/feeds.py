@@ -18,7 +18,7 @@ from app.models.feeds import (
     FeedOut,
 )
 from app.models.search import SearchIndexContents
-from app.elastic_search.connect import check_search_result
+from app.search.connect import check_search_result
 from app.rabbitmq.listeners import submit_file_message
 
 router = APIRouter()
