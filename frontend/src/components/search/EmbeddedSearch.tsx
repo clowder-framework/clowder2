@@ -40,8 +40,7 @@ export function EmbeddedSearch() {
 				// placeholder="Search for Dataset"
 				innerClass={{
 					title: "search-title",
-					input: "search-input",
-					"selected-tag": "search-selected-tag"
+					input: "embedded-search-input",
 				}}
 			/>
 		</ReactiveBase>

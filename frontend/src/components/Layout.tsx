@@ -22,6 +22,7 @@ import {Link as RouterLink} from 'react-router-dom';
 import {useSelector} from "react-redux";
 import {RootState} from "../types/data";
 import {AddBox, Explore} from "@material-ui/icons";
+import {EmbeddedSearch} from "./search/EmbeddedSearch";
 
 const drawerWidth = 240;
 
@@ -42,6 +43,13 @@ const Main = styled('main', {shouldForwardProp: (prop) => prop !== 'open'})<{
 		}),
 		marginLeft: 0,
 	}),
+}));
+
+const SearchDiv = styled("div")(({ theme }) => ({
+	position: "relative",
+	marginLeft: theme.spacing(3),
+	marginBottom: "-5px",  // to compoensate the tags div
+	width: "50%",
 }));
 
 interface AppBarProps extends MuiAppBarProps {
@@ -114,6 +122,10 @@ export default function PersistentDrawerLeft(props) {
 					<Link href="/">
 						<Box component="img" src="../../public/clowder-logo-sm.svg" alt="clowder-logo-sm" sx={{verticalAlign:"middle"}}/>
 					</Link>
+					<SearchDiv>
+						<EmbeddedSearch />
+					</SearchDiv>
+				 	<Box sx={{ flexGrow: 1 }} />
 					<Box sx={{marginLeft: "auto"}}>
 						{
 							loggedOut ?

@@ -7,9 +7,6 @@ import {
 import Box from "@mui/material/Box";
 import {useSelector} from "react-redux";
 import {RootState} from "../../types/data";
-import {EmbeddedSearch} from "../search/EmbeddedSearch";
-import {styled} from "@mui/styles";
-
 
 const link = {
 	textDecoration: "none",
@@ -17,13 +14,6 @@ const link = {
 	color: "#495057",
 	m: 2,
 };
-
-const SearchDiv = styled("div")(({ theme }) => ({
-	position: "relative",
-	marginLeft: theme.spacing(3),
-	marginBottom: "-10px",  // to compoensate the tags div
-	width: "50%",
-}));
 
 export default function TopBar() {
 
@@ -40,22 +30,18 @@ export default function TopBar() {
 				<Toolbar sx={{
 					padding: "0 45px"
 				}}>
-					<img src="../../public/clowder-logo-sm.svg" alt="clowder-logo-sm"/>
-					<SearchDiv>
-						<EmbeddedSearch />
-					</SearchDiv>
-					 <Box sx={{ flexGrow: 1 }} />
-					 <Box sx={{ display: "flex" }}>
-						{
-							loggedOut ?
-								<>
-									<Link href="/auth/register" sx={link}>Register</Link>
-									<Link href="/auth/login" sx={link}>Login</Link>
-								</>
-								:
-								<Link href="/auth/logout" sx={link}>Logout</Link>
-						}
-					 </Box>
+					<Box display="flex" flexGrow={1}>
+						<img src="../../public/clowder-logo-sm.svg" alt="clowder-logo-sm"/>
+					</Box>
+					{
+						loggedOut ?
+							<>
+								<Link href="/auth/register" sx={link}>Register</Link>
+								<Link href="/auth/login" sx={link}>Login</Link>
+							</>
+							:
+							<Link href="/auth/logout" sx={link}>Logout</Link>
+					}
 				</Toolbar>
 			</AppBar>
 		</Box>
