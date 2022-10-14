@@ -1,31 +1,33 @@
 import React, {useEffect, useState} from "react";
 import config from "../../app.config";
-import {Box, Button, Divider, FormControlLabel, Grid, IconButton, Switch, Tab, Tabs} from "@mui/material";
+import {Box, Button, Divider, Grid, IconButton, Tab, Tabs} from "@mui/material";
 import Audio from "../previewers/Audio";
 import Video from "../previewers/Video";
 import {downloadResource} from "../../utils/common";
 import Thumbnail from "../previewers/Thumbnail";
 import {PreviewConfiguration, RootState} from "../../types/data";
-import {useParams, useLocation} from "react-router-dom";
+import {useLocation, useParams} from "react-router-dom";
 import {useDispatch, useSelector} from "react-redux";
 import {resetFailedReason} from "../../actions/common"
 
-import {TabPanel} from "../tabs/TabComponent";
-import {a11yProps} from "../tabs/TabComponent";
+import {a11yProps, TabPanel} from "../tabs/TabComponent";
 import {fetchFileSummary, fetchFileVersions} from "../../actions/file";
-import TopBar from "../navigation/TopBar";
 import {MainBreadcrumbs} from "../navigation/BreadCrumb";
 import {ActionModal} from "../dialog/ActionModal";
 import {FileAbout} from "./FileAbout";
 import {FileStats} from "./FileStats";
 import {FileVersionHistory} from "../versions/FileVersionHistory";
 import {DisplayMetadata} from "../metadata/DisplayMetadata";
-import {deleteFileMetadata as deleteFileMetadataAction, fetchFileMetadata} from "../../actions/metadata";
-import {patchFileMetadata as patchFileMetadataAction} from "../../actions/metadata";
-import {postFileMetadata as createFileMetadataAction} from "../../actions/metadata";
+import {
+	deleteFileMetadata as deleteFileMetadataAction,
+	fetchFileMetadata,
+	patchFileMetadata as patchFileMetadataAction,
+	postFileMetadata as createFileMetadataAction
+} from "../../actions/metadata";
 import {EditMetadata} from "../metadata/EditMetadata";
 import {ClowderButton} from "../styledComponents/ClowderButton";
 import CloseIcon from "@mui/icons-material/Close";
+import Layout from "../Layout";
 
 const tab = {
 	fontStyle: "normal",
@@ -193,8 +195,7 @@ export const File = (): JSX.Element => {
 
 
 	return (
-		<div>
-			<TopBar/>
+		<Layout>
 			<div className="outer-container">
 				<MainBreadcrumbs paths={paths}/>
 				{/*Error Message dialogue*/}
@@ -289,6 +290,6 @@ export const File = (): JSX.Element => {
 					</Grid>
 				</div>
 			</div>
-		</div>
+		</Layout>
 	);
 };
