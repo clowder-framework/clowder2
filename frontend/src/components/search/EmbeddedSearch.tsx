@@ -34,7 +34,7 @@ export function EmbeddedSearch() {
 					if (cause === "SUGGESTION_SELECT" ||
 						cause === "ENTER_PRESS" ||
 						cause === "SEARCH_ICON_CLICK"){
-						history(`/search-dataset?searchbox="${value}"`);
+						history(`/search?searchbox="${value}"`);
 					}
 				}
 			  }

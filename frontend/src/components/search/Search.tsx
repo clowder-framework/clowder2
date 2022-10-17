@@ -7,7 +7,7 @@ import {Grid} from "@mui/material";
 import Layout from "../Layout";
 
 
-export function SearchDataset() {
+export function Search() {
 	// @ts-ignore
 	return (
 		<Layout>
@@ -16,7 +16,7 @@ export function SearchDataset() {
 					<Grid item xs>
 						{/*search*/}
 						<DataSearch
-							title="Search for Dataset"
+							title="Search for Datasets and Files"
 							componentId="searchbox"
 							autosuggest={true}
 							highlight={true}
@@ -34,7 +34,8 @@ export function SearchDataset() {
 							dataField={[
 								{field: "name", weight: 3},
 								{field: "description", weight: 2},
-								{field: "author.keyword", weight: 2},
+								{field: "author.keyword", weight: 1},
+								{field: "creator.keyword", weight:1}
 								]}
 							// placeholder="Search for Dataset"
 							innerClass={{

@@ -100,7 +100,6 @@ export default function PersistentDrawerLeft(props) {
 	const {children} = props;
 	const theme = useTheme();
 	const [open, setOpen] = React.useState(false);
-	const [elasticsearchIndex, setElasticsearchIndex] = React.useState("dataset");
 	const [embeddedSearchHidden, setEmbeddedSearchHidden] = React.useState(false);
 
 	const handleDrawerOpen = () => {
@@ -114,17 +113,11 @@ export default function PersistentDrawerLeft(props) {
 	const location = useLocation();
 
 	useEffect(()=>{
-		if (location.pathname.includes("search-file")){
-			setElasticsearchIndex("file");
+		if (location.pathname.includes("search")){
 			setEmbeddedSearchHidden(true);
 		}
-		else if(location.pathname.includes("search-dataset")){
-			setElasticsearchIndex("dataset");
-			setEmbeddedSearchHidden(true);
-		}
-		else {
-			// TODO default to search dataset; need to be decided or replaced with multiple search once it's ready
-			setElasticsearchIndex("dataset");
+		else{
+			setEmbeddedSearchHidden(false);
 		}
 	}, [location])
 
@@ -212,23 +205,12 @@ export default function PersistentDrawerLeft(props) {
 					</List>
 					<Divider/>
 					<List>
-						<ListItem key={"search-dataset"} disablePadding>
-							<ListItemButton component={RouterLink} to="/search-dataset">
+						<ListItem key={"search"} disablePadding>
+							<ListItemButton component={RouterLink} to="/search">
 								<ListItemIcon>
 									<SearchDatasetIcon/>
 								</ListItemIcon>
-								<ListItemText primary={"Search Datasets"}/>
-							</ListItemButton>
-						</ListItem>
-					</List>
-					<Divider/>
-					<List>
-						<ListItem key={"search-file"} disablePadding>
-							<ListItemButton component={RouterLink} to="/search-file">
-								<ListItemIcon>
-									<SearchFileIcon/>
-								</ListItemIcon>
-								<ListItemText primary={"Search Files"}/>
+								<ListItemText primary={"Search"}/>
 							</ListItemButton>
 						</ListItem>
 					</List>
