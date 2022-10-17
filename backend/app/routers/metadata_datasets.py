@@ -98,9 +98,7 @@ async def add_dataset_metadata(
             # Extracted metadata doesn't care about user
             if metadata_in.extractor is not None:
                 existing_q["agent.listener.name"] = metadata_in.extractor.name
-                existing_q[
-                    "agent.listener.version"
-                ] = metadata_in.extractor.version
+                existing_q["agent.listener.version"] = metadata_in.extractor.version
             else:
                 existing_q["agent.creator.id"] = user.id
             if (existing := await db["metadata"].find_one(existing_q)) is not None:
@@ -137,7 +135,10 @@ async def replace_dataset_metadata(
         if metadata_in.extractor is not None:
             if (
                 extractor := await db["listeners"].find_one(
-                    {"name": metadata_in.extractor.name, "version": metadata_in.extractor.version}
+                    {
+                        "name": metadata_in.extractor.name,
+                        "version": metadata_in.extractor.version,
+                    }
                 )
             ) is not None:
                 agent = MetadataAgent(creator=user, extractor=extractor)
@@ -208,7 +209,10 @@ async def update_dataset_metadata(
         if metadata_in.extractor is not None:
             if (
                 listener := await db["listeners"].find_one(
-                    {"name": metadata_in.extractor.name, "version": metadata_in.extractor.version}
+                    {
+                        "name": metadata_in.extractor.name,
+                        "version": metadata_in.extractor.version,
+                    }
                 )
             ) is not None:
                 agent = MetadataAgent(creator=user, listener=listener)
