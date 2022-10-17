@@ -6,6 +6,7 @@ import DatasetCard from "../datasets/DatasetCard";
 import {Grid} from "@mui/material";
 import Layout from "../Layout";
 import {FilesTableFileEntry} from "../files/FilesTableFileEntry";
+import { SearchResult } from "./SearchResult";
 
 
 export function Search() {
@@ -94,25 +95,7 @@ export function Search() {
 									  react={{
 										and: ["searchbox", "creatorfilter", "downloadfilter", "modifyfilter"]
 									  }}
-									  render={({ data }) => (
-											<Grid container spacing={2}>
-												{data.map((item) => (
-													<Grid item key={item._id} xs={12} sm={6} md={4} lg={3}>
-														{
-															item._index === "dataset"?
-																<DatasetCard
-																	id={item._id}
-																	name={item.name}
-																	author={item.author}
-																	created={parseDate(item.created)}
-																	description={item.description}/>
-															:
-																<FilesTableFileEntry file={item}/>
-														}
-													</Grid>
-													))}
-											</Grid>
-											)}/>
+									  render={({ data }) => (<SearchResult data={data} />)}/>
 					</Grid>
 				</Grid>
 			</div>
