@@ -8,7 +8,7 @@ class IndexSettings:
             "dataset_id": {"type": "string"},
             "folder_id": {"type": "string"},
             "bytes": {"type": "long"},
-            "content_type:": {"type": "keyword"},
+            "content_type": {"type": "keyword"},
         }
     }
 
