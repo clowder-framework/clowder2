@@ -23,7 +23,7 @@ dummy_file_record = {
     "creator": "xyz",
     "created": datetime.now(),
     "download": 0,
-    "dataset_id": str(ObjectId('63458339aaecb776733354ea')),
+    "dataset_id": str(ObjectId("63458339aaecb776733354ea")),
     "folder_id": None,
     "bytes": 123456,
     "content_type": "application/json",
