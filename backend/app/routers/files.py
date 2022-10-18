@@ -98,6 +98,10 @@ async def add_file_entry(
         "creator": file_db.creator.email,
         "created": datetime.now(),
         "download": file_db.downloads,
+        "dataset_id": file_db.dataset_id,
+        "folder_id": file_db.folder_id,
+        "bytes": file_db.bytes,
+        "content_type:": file_db.content_type,
     }
     insert_record(es, "file", doc, file_db.id)
 

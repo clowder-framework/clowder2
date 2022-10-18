@@ -5,6 +5,10 @@ class IndexSettings:
             "created": {"type": "date"},
             "creator": {"type": "keyword"},
             "download": {"type": "long"},
+            "dataset_id": {"type": "string"},
+            "folder_id": {"type": "string"},
+            "bytes": {"type": "long"},
+            "content_type:": {"type": "keyword"},
         }
     }
 

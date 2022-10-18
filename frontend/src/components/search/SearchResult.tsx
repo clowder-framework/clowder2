@@ -42,11 +42,7 @@ export function SearchResult(props) {
 									}
 								</Typography>
 								<Typography variant="body2" color={theme.palette.secondary.dark}>
-									{ item._index === "dataset" ? item.description : "" }
-								</Typography>
-								<Typography component="span" variant="caption" color="text.third">
-									{/*replace with actual data type and bytes*/}
-									{ item._index === "file" ? "application/json | 12345 bytes" : "" }
+									{ item._index === "dataset" ? item.description : "application/json | 12345 bytes"}
 								</Typography>
 							</React.Fragment>
 						}

@@ -21,6 +21,10 @@ dummy_file_record = {
     "creator": "xyz",
     "created": datetime.now(),
     "download": 0,
+    "dataset_id": "1eago21oirfqwf",
+    "folder_id": None,
+    "bytes": 123456,
+    "content_type:": "application/json",
 }
 dummy_dataset_record = {
     "name": "test dataset",
