@@ -20,7 +20,6 @@ import {FilesTableFileEntry} from "./FilesTableFileEntry";
 
 type FilesTableProps = {
 	datasetId: string | undefined,
-	datasetName: string
 }
 
 const iconStyle = {
@@ -36,7 +35,7 @@ export default function FilesTable(props: FilesTableProps) {
 	const history = useNavigate();
 	const selectFile = (selectedFileId: string|undefined) => {
 		// Redirect to file route with file Id and dataset id
-		history(`/files/${selectedFileId}?dataset=${props.datasetId}&name=${props.datasetName}`);
+		history(`/files/${selectedFileId}?dataset=${props.datasetId}`);
 	};
 	const selectFolder = (selectedFolderId: string|undefined) => {
 		// Redirect to file route with file Id and dataset id

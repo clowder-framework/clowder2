@@ -21,11 +21,13 @@ export function SearchResult(props) {
 							<React.Fragment>
 								{
 									item._index === "dataset" ?
-										<Link href={`/datasets/${item._id}`} sx={{ fontWeight: 600, fontSize: "18px"}}>
+										<Link href={`/datasets/${item._id}`}
+											  sx={{ fontWeight: 600, fontSize: "18px"}}>
 											{item.name}
 										</Link>
 										:
-										<Link href={`/datasets/${item._id}`} sx={{ fontWeight: 600, fontSize: "18px"}}>
+										<Link href={`/files/${item._id}?dataset=${item.dataset_id}`}
+											  sx={{ fontWeight: 600, fontSize: "18px"}}>
 											{item.name}
 										</Link>
 								}
