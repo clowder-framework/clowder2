@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from "react";
-import {Box, Button, Dialog, Divider, Grid, IconButton, Menu, MenuItem, Tab, Tabs, Typography} from "@mui/material";
+import {Box, Button, Dialog, Divider, Grid, IconButton, Menu, MenuItem, Tab, Tabs, Typography, DialogActions, DialogContent, DialogContentText, DialogTitle,} from "@mui/material";
 import {ClowderInput} from "../styledComponents/ClowderInput";
 import {ClowderButton} from "../styledComponents/ClowderButton";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
@@ -26,6 +26,7 @@ import {parseDate} from "../../utils/common";
 import config from "../../app.config";
 import {DatasetIn, MetadataIn} from "../../openapi/v2";
 import {DisplayMetadata} from "../metadata/DisplayMetadata";
+import {CreateMetadataDefinition} from "../metadata/CreateMetadataDefinition";
 import {EditMetadata} from "../metadata/EditMetadata";
 import {
 	deleteDatasetMetadata as deleteDatasetMetadataAction,
@@ -92,6 +93,7 @@ export const Dataset = (): JSX.Element => {
 	const [datasetDescription, setDatasetDescription] = React.useState<string>("");
 	const [enableAddMetadata, setEnableAddMetadata] = React.useState<boolean>(false);
 	const [metadataRequestForms, setMetadataRequestForms] = useState({});
+	const [openPopup, setOpenPopup] = React.useState<boolean>(false)
 
 	// component did mount list all files in dataset
 	useEffect(() => {
@@ -276,6 +278,9 @@ export const Dataset = (): JSX.Element => {
 											>
 												<CloseIcon />
 											</IconButton>
+											<Button variant="contained" onClick={() => {setOpenPopup(true);}} sx={{ mt: 1, mr: 1, "alignItems": "right" }}>
+												Add new field
+											</Button>
 											<EditMetadata resourceType="dataset" resourceId={datasetId}
 														  setMetadata={setMetadata}
 											/>
@@ -286,6 +291,22 @@ export const Dataset = (): JSX.Element => {
 													sx={{ mt: 1, mr: 1 }}>
 												Cancel
 											</Button>
+											{
+												openPopup ?
+												<>
+													<Dialog open={openPopup} onClose={() => {setOpenPopup(false);}}>
+														<DialogTitle>Add a new field</DialogTitle>
+														<DialogContent>
+															<DialogContentText>Please fill out the metadata information here.</DialogContentText>
+															<CreateMetadataDefinition/>
+														</DialogContent>
+														<DialogActions>
+															<Button onClick={() => {setOpenPopup(false);}}>Cancel</Button>
+														</DialogActions>
+													</Dialog>
+												</>
+												: <></>
+											}
 										</>
 										:
 										<>
