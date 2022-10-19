@@ -1,5 +1,6 @@
 import * as React from "react";
-import {Link, List, ListItem, ListItemAvatar, ListItemText, Typography} from "@mui/material";
+import {Link as MuiLink, List, ListItem, ListItemAvatar, ListItemText, Typography} from "@mui/material";
+import {Link} from "react-router-dom";
 import FolderIcon from "@mui/icons-material/Folder";
 import ArticleIcon from "@mui/icons-material/Article";
 import {parseDate} from "../../utils/common";
@@ -21,15 +22,15 @@ export function SearchResult(props) {
 							<React.Fragment>
 								{
 									item._index === "dataset" ?
-										<Link href={`/datasets/${item._id}`}
+										<MuiLink component={Link} to={`/datasets/${item._id}`}
 											  sx={{ fontWeight: 600, fontSize: "18px"}}>
 											{item.name}
-										</Link>
+										</MuiLink>
 										:
-										<Link href={`/files/${item._id}?dataset=${item.dataset_id}`}
+										<MuiLink component={Link} to={`/files/${item._id}?dataset=${item.dataset_id}`}
 											  sx={{ fontWeight: 600, fontSize: "18px"}}>
 											{item.name}
-										</Link>
+										</MuiLink>
 								}
 							</React.Fragment>
 						}
