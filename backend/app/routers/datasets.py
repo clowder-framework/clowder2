@@ -9,6 +9,7 @@ from collections.abc import Mapping, Iterable
 from typing import List, Optional, Union
 
 import pymongo
+from pymongo import MongoClient
 import pika
 from bson import ObjectId
 from bson import json_util
