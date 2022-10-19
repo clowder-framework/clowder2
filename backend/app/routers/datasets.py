@@ -22,6 +22,7 @@ from fastapi import (
 )
 from minio import Minio
 from pika.adapters.blocking_connection import BlockingChannel
+import pymongo
 from pymongo import MongoClient
 from rocrate.model.person import Person
 from rocrate.rocrate import ROCrate
