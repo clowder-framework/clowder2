@@ -4,6 +4,8 @@ from elasticsearch import Elasticsearch
 from elasticsearch import BadRequestError
 
 from app.config import settings
+from app.models.errors import ServiceUnreachable
+from app.database.errors import log_error
 
 logger = logging.getLogger(__name__)
 no_of_shards = settings.elasticsearch_no_of_shards
@@ -15,10 +17,13 @@ def connect_elasticsearch():
     _es = None
     logger.info(settings.elasticsearch_url)
     _es = Elasticsearch(settings.elasticsearch_url)
-    if _es.ping():
-        logger.info("Successfully connected to Elasticsearch")
-    else:
-        logger.info("Can not connect to Elasticsearch")
+    try:
+        if _es.ping():
+            logger.info("Successfully connected to Elasticsearch")
+        else:
+            raise ServiceUnreachable("Elasticsearch")
+    except ServiceUnreachable as e:
+        log_error(e)
     return _es
 
 
