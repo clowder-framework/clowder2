@@ -23,7 +23,7 @@ import {RootState} from "../types/data";
 import {AddBox, Explore} from "@material-ui/icons";
 import {EmbeddedSearch} from "./search/EmbeddedSearch";
 import {searchTheme} from "../theme";
-import {ReactiveBase} from "@appbaseio/reactivesearch";
+import {ErrorBoundary, ReactiveBase} from "@appbaseio/reactivesearch";
 import Cookies from "universal-cookie";
 import {useEffect} from "react";
 
@@ -130,15 +130,25 @@ export default function PersistentDrawerLeft(props) {
 		  url="http://localhost:8000/api/v2/elasticsearch"
 		  app="file,dataset"
 		  headers={{"Authorization": cookies.get("Authorization")}}
-		  // transformResponse={(elasticsearchResponse) => {
-		  // 	console.log(elasticsearchResponse)
-		  // 	// if (elasticsearchResponse.detail.error === "invalid_token"){
-		  // 	// 	console.log("token expired!");
-			// // }
-		  // }}
+		  transformResponse={(elasticsearchResponse) => {
+		  	console.log("catch response?")
+		  	console.log(elasticsearchResponse);
+
+		  	// if (elasticsearchResponse.detail.error === "invalid_token"){
+		  	// 	console.log("token expired!");
+			// }
+		  }}
 		  theme={searchTheme}
 		>
-			<Box sx={{display: 'flex'}}>
+			<ErrorBoundary
+				renderError={error => (
+					<div>
+						<h1>Oops! Error occured.</h1>
+						<p>{error.message}</p>
+					</div>
+				)}
+			>
+				<Box sx={{display: 'flex'}}>
 				<CssBaseline/>
 				<AppBar position="fixed" open={open}>
 					<Toolbar>
@@ -230,6 +240,7 @@ export default function PersistentDrawerLeft(props) {
 					{children}
 				</Main>
 			</Box>
+			</ErrorBoundary>
 		</ReactiveBase>
 	);
 }
