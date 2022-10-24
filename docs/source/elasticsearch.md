@@ -13,3 +13,8 @@ If you see error in elasticsearch docker container and that is related to heap m
 8Gb in docker setting.
  
 For all the implemented elasticsearch APIs, please refere to the code in backend/app/elasticsearch/connect.py 
+
+## Common Commands
+
+* List indices: `http://localhost:9200/_cat/indices`
+* Delete index: `curl -X DELETE http://localhost:9200/{index name}`
