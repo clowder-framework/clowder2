@@ -11,6 +11,7 @@ from app.config import settings
 from minio.commonconfig import ENABLED
 from minio.versioningconfig import VersioningConfig
 from app.mongo import crete_mongo_indexes
+from app.search.connect import connect_elasticsearch
 
 
 async def get_token_header(x_token: str = Header(...)):
@@ -60,3 +61,7 @@ def get_rabbitmq() -> BlockingChannel:
     )
     channel.queue_declare(queue="standard_key")
     return channel
+
+
+def get_elasticsearchclient():
+    return connect_elasticsearch()
