@@ -13,8 +13,8 @@ logger = logging.getLogger(__name__)
 
 async def log_error(
         exception: Exception,
-        resource: Optional[MongoDBRef],
-        user: Optional[str],
+        resource: Optional[MongoDBRef] = None,
+        user: Optional[str] = None,
         db: MongoClient = Depends(dependencies.get_db),
 ):
     """Insert new Error into the database.
@@ -27,12 +27,5 @@ async def log_error(
     trace = traceback.format_exc(exception, limit=4)
 
     logger.error(message)
-
-    error_log = Error(message=message, trace=trace)
-    # TODO: Is FastAPI able to understand Optional[...] and omit this, pass them in above?
-    if resource:
-        error_log.resource = resource
-    if user:
-        error_log.user = user
-
+    error_log = Error(message=message, trace=trace, resource=resource, user=user)
     await db["errors"].insert_one(error_log.to_mongo())

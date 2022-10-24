@@ -19,6 +19,6 @@ class ServiceUnreachable(Exception):
 class Error(MongoModel):
     message: str  # Shorthand message of the error
     trace: str  # Full stack trace of the error
-    resource: Optional[MongoDBRef]
-    user_id: Optional[str]
+    resource: Optional[MongoDBRef] = None
+    user_id: Optional[str] = None
     timestamp: datetime = Field(default_factory=datetime.utcnow)
