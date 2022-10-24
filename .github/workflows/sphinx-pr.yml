@@ -1,20 +1,12 @@
-# From https://github.com/ammaraskar/sphinx-action-test/blob/master/.github/workflows/pull_request.yml
-name: Sphinx PR
-
-on: [pull_request]
+name: "Pull Request Docs Check"
+on:
+- pull_request
 
 jobs:
-  build:
-
+  docs:
     runs-on: ubuntu-latest
-
     steps:
     - uses: actions/checkout@v1
-#    - name: install dependencies
-#      run: >-
-#        sudo apt-get update -y &&
-#        sudo apt-get install -y enchant
-    # Standard drop-in approach that should work for most people.
     - uses: ammaraskar/sphinx-action@master
       with:
         docs-folder: "docs/"
