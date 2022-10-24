@@ -22,7 +22,6 @@ from pymongo import MongoClient
 from app import dependencies
 from app.config import settings
 from app.search.connect import (
-    connect_elasticsearch,
     insert_record,
     delete_document_by_id,
     update_record,
@@ -42,6 +41,7 @@ async def add_file_entry(
     fs: Minio,
     file: Optional[io.BytesIO] = None,
     content_type: Optional[str] = None,
+    es=Depends(dependencies.get_elasticsearchclient),
 ):
     """Insert FileDB object into MongoDB (makes Clowder ID), then Minio (makes version ID), then update MongoDB with
     the version ID from Minio.
@@ -50,8 +50,6 @@ async def add_file_entry(
         file_db: FileDB object controlling dataset and folder destination
         file: bytes to upload
     """
-    # Make connection to elatsicsearch
-    es = connect_elasticsearch()
 
     # Check all connection and abort if any one of them is not available
     if db is None or fs is None or es is None:
@@ -107,12 +105,10 @@ async def remove_file_entry(
     file_id: Union[str, ObjectId],
     db: MongoClient,
     fs: Minio,
+    es=Depends(dependencies.get_elasticsearchclient),
 ):
     """Remove FileDB object into MongoDB, Minio, and associated metadata and version information."""
     # TODO: Deleting individual versions will require updating version_id in mongo, or deleting entire document
-
-    # Make connection to elatsicsearch
-    es = connect_elasticsearch()
 
     # Check all connection and abort if any one of them is not available
     if db is None or fs is None or es is None:
@@ -120,7 +116,7 @@ async def remove_file_entry(
         return
     fs.remove_object(settings.MINIO_BUCKET_NAME, str(file_id))
     # delete from elasticsearch
-    delete_document_by_id(connect_elasticsearch(), "file", str(file_id))
+    delete_document_by_id(es, "file", str(file_id))
     await db["files"].delete_one({"_id": ObjectId(file_id)})
     await db.metadata.delete_many({"resource.resource_id": ObjectId(file_id)})
     await db["file_versions"].delete_many({"file_id": ObjectId(file_id)})
@@ -134,9 +130,8 @@ async def update_file(
     db: MongoClient = Depends(dependencies.get_db),
     fs: Minio = Depends(dependencies.get_fs),
     file: UploadFile = File(...),
+    es=Depends(dependencies.get_elasticsearchclient),
 ):
-    # Make connection to elatsicsearch
-    es = connect_elasticsearch()
 
     # Check all connection and abort if any one of them is not available
     if db is None or fs is None or es is None:
