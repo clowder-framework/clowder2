@@ -10,5 +10,5 @@ jobs:
     - uses: ammaraskar/sphinx-action@master
       with:
         docs-folder: "docs/"
-        pre-build-command: "apt-get update -y && apt-get install -y python-dev build-essential"
+        pre-build-command: "apt-get update -y && apt-get install -y python-dev build-essential gcc"
         build-command: "sphinx-build -b html . _build"
