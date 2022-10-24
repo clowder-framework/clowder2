@@ -18,17 +18,15 @@ import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 import {Link} from "@mui/material";
-import {Link as RouterLink, Navigate, useLocation} from 'react-router-dom';
+import {Link as RouterLink, useLocation} from 'react-router-dom';
 import {useSelector} from "react-redux";
 import {RootState} from "../types/data";
 import {AddBox, Explore} from "@material-ui/icons";
 import {EmbeddedSearch} from "./search/EmbeddedSearch";
+import {SearchErrorBoundary} from "./search/SearchErrorBoundary";
 import {searchTheme} from "../theme";
-import {ErrorBoundary, ReactiveBase} from "@appbaseio/reactivesearch";
+import {ReactiveBase} from "@appbaseio/reactivesearch";
 import Cookies from "universal-cookie";
-import {V2} from '../openapi';
-import config from "../app.config";
-import {LOGOUT} from "../actions/user";
 
 const cookies = new Cookies();
 
@@ -136,133 +134,101 @@ export default function PersistentDrawerLeft(props) {
 			headers={headers}
 			theme={searchTheme}
 		>
-			<Box sx={{display: 'flex'}}>
-				<CssBaseline/>
-				<AppBar position="fixed" open={open}>
-					<Toolbar>
-						<IconButton
-							color="inherit"
-							aria-label="open drawer"
-							onClick={handleDrawerOpen}
-							edge="start"
-							sx={{mr: 2, ...(open && {display: 'none'})}}
-						>
-							<MenuIcon/>
-						</IconButton>
-						<Link href="/">
-							<Box component="img" src="../../public/clowder-logo-sm.svg" alt="clowder-logo-sm"
-								 sx={{verticalAlign: "middle"}}/>
-						</Link>
-
-						{/*for searching*/}
-						<SearchDiv hidden={embeddedSearchHidden}>
-							<ErrorBoundary
-								renderError={error => (
-									<>
-										{
-											(() => {
-												if (error["status"] === 401) {
-													V2.OpenAPI.TOKEN = undefined;
-													cookies.remove("Authorization", {path: "/"});
-													fetch(config.KeycloakRefresh, {method: "GET", headers: headers})
-														.then((response) => {
-															if (response.status === 200) return response.json();
-														})
-														.then(json => {
-															// refresh token and direct to the current route
-															if (json["access_token"] !== undefined && json["access_token"] !== "none") {
-																cookies.set("Authorization", `Bearer ${json["access_token"]}`);
-																V2.OpenAPI.TOKEN = json["access_token"];
-																return <Navigate to={location.pathname}/>
-															}
-														})
-														.catch(() => {
-															return <Navigate to="/auth/login"/>
-														});
-
-												} else {
-													// TODO add prettier message or report function
-													return <h1>An error has happened.</h1>
-												}
-											})()
-										}
-									</>
-								)}
+			<SearchErrorBoundary>
+				<Box sx={{display: 'flex'}}>
+					<CssBaseline/>
+					<AppBar position="fixed" open={open}>
+						<Toolbar>
+							<IconButton
+								color="inherit"
+								aria-label="open drawer"
+								onClick={handleDrawerOpen}
+								edge="start"
+								sx={{mr: 2, ...(open && {display: 'none'})}}
 							>
+								<MenuIcon/>
+							</IconButton>
+							<Link href="/">
+								<Box component="img" src="../../public/clowder-logo-sm.svg" alt="clowder-logo-sm"
+									 sx={{verticalAlign: "middle"}}/>
+							</Link>
+
+							{/*for searching*/}
+							<SearchDiv hidden={embeddedSearchHidden}>
 								<EmbeddedSearch/>
-							</ErrorBoundary>
-						</SearchDiv>
-						<Box sx={{flexGrow: 1}}/>
-						<Box sx={{marginLeft: "auto"}}>
-							{
-								loggedOut ?
-									<>
-										<Link href="/auth/register" sx={link}>Register</Link>
-										<Link href="/auth/login" sx={link}>Login</Link>
-									</>
-									:
-									<Link href="/auth/logout" sx={link}>Logout</Link>
-							}
-						</Box>
-					</Toolbar>
-				</AppBar>
-				<Drawer
-					sx={{
-						width: drawerWidth,
-						flexShrink: 0,
-						'& .MuiDrawer-paper': {
+							</SearchDiv>
+							<Box sx={{flexGrow: 1}}/>
+							<Box sx={{marginLeft: "auto"}}>
+								{
+									loggedOut ?
+										<>
+											<Link href="/auth/register" sx={link}>Register</Link>
+											<Link href="/auth/login" sx={link}>Login</Link>
+										</>
+										:
+										<Link href="/auth/logout" sx={link}>Logout</Link>
+								}
+							</Box>
+						</Toolbar>
+					</AppBar>
+					<Drawer
+						sx={{
 							width: drawerWidth,
-							boxSizing: 'border-box',
-						},
-					}}
-					variant="persistent"
-					anchor="left"
-					open={open}
-				>
-					<DrawerHeader>
-						<IconButton onClick={handleDrawerClose}>
-							{theme.direction === 'ltr' ? <ChevronLeftIcon/> : <ChevronRightIcon/>}
-						</IconButton>
-					</DrawerHeader>
-					<Divider/>
-					<List>
-						<ListItem key={"explore"} disablePadding>
-							<ListItemButton component={RouterLink} to="/">
-								<ListItemIcon>
-									<Explore/>
-								</ListItemIcon>
-								<ListItemText primary={"Explore"}/>
-							</ListItemButton>
-						</ListItem>
-					</List>
-					<Divider/>
-					<List>
-						<ListItem key={"search"} disablePadding>
-							<ListItemButton component={RouterLink} to="/search">
-								<ListItemIcon>
-									<SearchDatasetIcon/>
-								</ListItemIcon>
-								<ListItemText primary={"Search"}/>
-							</ListItemButton>
-						</ListItem>
-					</List>
-					<Divider/>
-					<List>
-						<ListItem key={"newdataset"} disablePadding>
-							<ListItemButton component={RouterLink} to="/create-dataset">
-								<ListItemIcon>
-									<AddBox/>
-								</ListItemIcon>
-								<ListItemText primary={"New Dataset"}/>
-							</ListItemButton>
-						</ListItem>
-					</List>
-				</Drawer>
-				<Main open={open}>
-					<DrawerHeader/>
-					{children}
-				</Main>
-			</Box>
+							flexShrink: 0,
+							'& .MuiDrawer-paper': {
+								width: drawerWidth,
+								boxSizing: 'border-box',
+							},
+						}}
+						variant="persistent"
+						anchor="left"
+						open={open}
+					>
+						<DrawerHeader>
+							<IconButton onClick={handleDrawerClose}>
+								{theme.direction === 'ltr' ? <ChevronLeftIcon/> : <ChevronRightIcon/>}
+							</IconButton>
+						</DrawerHeader>
+						<Divider/>
+						<List>
+							<ListItem key={"explore"} disablePadding>
+								<ListItemButton component={RouterLink} to="/">
+									<ListItemIcon>
+										<Explore/>
+									</ListItemIcon>
+									<ListItemText primary={"Explore"}/>
+								</ListItemButton>
+							</ListItem>
+						</List>
+						<Divider/>
+						<List>
+							<ListItem key={"search"} disablePadding>
+								<ListItemButton component={RouterLink} to="/search">
+									<ListItemIcon>
+										<SearchDatasetIcon/>
+									</ListItemIcon>
+									<ListItemText primary={"Search"}/>
+								</ListItemButton>
+							</ListItem>
+						</List>
+						<Divider/>
+						<List>
+							<ListItem key={"newdataset"} disablePadding>
+								<ListItemButton component={RouterLink} to="/create-dataset">
+									<ListItemIcon>
+										<AddBox/>
+									</ListItemIcon>
+									<ListItemText primary={"New Dataset"}/>
+								</ListItemButton>
+							</ListItem>
+						</List>
+					</Drawer>
+					<Main open={open}>
+						<DrawerHeader/>
+						{children}
+					</Main>
+				</Box>
+			</SearchErrorBoundary>
 		</ReactiveBase>
 	);
 }
