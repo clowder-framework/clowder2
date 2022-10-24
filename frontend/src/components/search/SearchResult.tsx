@@ -1,7 +1,7 @@
 import * as React from "react";
 import {Link as MuiLink, List, ListItem, ListItemAvatar, ListItemText, Typography} from "@mui/material";
 import {Link} from "react-router-dom";
-import FolderIcon from "@mui/icons-material/Folder";
+import DatasetIcon from "@mui/icons-material/Dataset";
 import ArticleIcon from "@mui/icons-material/Article";
 import {parseDate} from "../../utils/common";
 import {theme} from "../../theme";
@@ -15,7 +15,7 @@ export function SearchResult(props) {
 			{data.map((item) => (
 				<ListItem alignItems="flex-start">
 					<ListItemAvatar sx={{color: theme.palette.primary.main}}>
-						{ item._index === "dataset" ? <FolderIcon/> : <ArticleIcon /> }
+						{ item._index === "dataset" ? <DatasetIcon/> : <ArticleIcon /> }
 					</ListItemAvatar>
 					<ListItemText
 						primary={
