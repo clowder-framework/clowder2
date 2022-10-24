@@ -6,9 +6,13 @@ jobs:
   docs:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v1
-    - uses: ammaraskar/sphinx-action@master
+    - name: Checkout repository
+      uses: actions/checkout@v1
+    - name: Install python dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y python-dev build-essential gcc
+    - name: Build sphinx documentation
+      uses: ammaraskar/sphinx-action@master
       with:
         docs-folder: "docs/"
-        pre-build-command: "apt-get update -y && apt-get install -y python-dev build-essential gcc"
-        build-command: "sphinx-build -b html . _build"
