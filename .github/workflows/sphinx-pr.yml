@@ -11,3 +11,4 @@ jobs:
       with:
         docs-folder: "docs/"
         pre-build-command: "apt-get update -y && apt-get install -y python-dev build-essential"
+        build-command: "sphinx-build -b html . _build"
