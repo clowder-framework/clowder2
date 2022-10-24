@@ -26,6 +26,8 @@ import {searchTheme} from "../theme";
 import {ErrorBoundary, ReactiveBase} from "@appbaseio/reactivesearch";
 import Cookies from "universal-cookie";
 import {useEffect} from "react";
+import {V2} from "../openapi";
+import config from "../app.config";
 
 const cookies = new Cookies();
 
@@ -94,6 +96,7 @@ const link = {
 	m: 2,
 };
 
+const headers = {"Authorization": cookies.get("Authorization")};
 
 export default function PersistentDrawerLeft(props) {
 	const {children} = props;
@@ -123,13 +126,14 @@ export default function PersistentDrawerLeft(props) {
 	const loggedOut = useSelector((state: RootState) => state.error.loggedOut);
 
 
+	// @ts-ignore
 	return (
 		// Wrap reactive search base on the most outside component
 		<ReactiveBase
 			// TODO put it in the Config file or other ways to dynamically pass in
 		  url="http://localhost:8000/api/v2/elasticsearch"
 		  app="file,dataset"
-		  headers={{"Authorization": cookies.get("Authorization")}}
+		  headers={headers}
 		  transformResponse={(elasticsearchResponse) => {
 		  	console.log("catch response?")
 		  	console.log(elasticsearchResponse);
@@ -142,10 +146,35 @@ export default function PersistentDrawerLeft(props) {
 		>
 			<ErrorBoundary
 				renderError={error => (
-					<div>
-						<h1>Oops! Error occured.</h1>
-						<p>{error.message}</p>
-					</div>
+					<>
+						{
+						   (() => {
+							   if (error["status"] === 401){
+									 fetch(config.KeycloakRefresh, {method: "GET", headers: headers})
+										.then((response) => {
+											if (response.status === 200) return response.json();
+										})
+										.then(json =>{
+											// refresh
+											if (json["access_token"] !== undefined && json["access_token"] !== "none") {
+												cookies.set("Authorization", `Bearer ${json["access_token"]}`);
+												V2.OpenAPI.TOKEN = json["access_token"];
+											}
+										})
+										.catch(() => {
+											// logout
+											return <h1>Token expired. Cannot refresh.</h1>
+										});
+							   }
+							   else{
+									return <>
+										  <h1>An Error has happened.</h1>
+										  <p>{error["statusText"]}</p>
+										 </>
+							   }
+						   })()
+						}
+					</>
 				)}
 			>
 				<Box sx={{display: 'flex'}}>
