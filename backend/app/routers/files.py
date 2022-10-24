@@ -25,6 +25,7 @@ from app.search.connect import (
     connect_elasticsearch,
     insert_record,
     delete_document_by_id,
+    update_record,
 )
 from app.models.files import FileIn, FileOut, FileVersion, FileDB
 from app.models.users import UserOut
@@ -96,7 +97,7 @@ async def add_file_entry(
     doc = {
         "name": file_db.name,
         "creator": file_db.creator.email,
-        "created": datetime.now(),
+        "created": file_db.created,
         "download": file_db.downloads,
         "dataset_id": str(file_db.dataset_id),
         "folder_id": str(file_db.folder_id),
@@ -138,6 +139,14 @@ async def update_file(
     fs: Minio = Depends(dependencies.get_fs),
     file: UploadFile = File(...),
 ):
+    # Make connection to elatsicsearch
+    es = connect_elasticsearch()
+
+    # Check all connection and abort if any one of them is not available
+    if db is None or fs is None or es is None:
+        raise HTTPException(status_code=503, detail="Service not available")
+        return
+
     if (file_q := await db["files"].find_one({"_id": ObjectId(file_id)})) is not None:
         # First, add to database and get unique ID
         updated_file = FileOut.from_mongo(file_q)
@@ -174,6 +183,16 @@ async def update_file(
             creator=user,
         )
         await db["file_versions"].insert_one(new_version.to_mongo())
+        # Update entry to the file index
+        doc = {
+            "doc": {
+                "name": updated_file.name,
+                "creator": updated_file.creator.email,
+                "created": datetime.utcnow(),
+                "download": updated_file.downloads,
+            }
+        }
+        update_record(es, "file", doc, updated_file.id)
         return updated_file
     else:
         raise HTTPException(status_code=404, detail=f"File {file_id} not found")
