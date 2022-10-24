@@ -9,6 +9,7 @@ from collections.abc import Mapping, Iterable
 from typing import List, Optional, Union
 
 import pymongo
+from pymongo import MongoClient
 import pika
 from bson import ObjectId
 from bson import json_util
@@ -33,6 +34,7 @@ from app.search.connect import (
     connect_elasticsearch,
     insert_record,
     delete_document_by_id,
+    update_record,
 )
 from app.config import settings
 from app.keycloak_auth import get_user, get_current_user
@@ -304,6 +306,14 @@ async def edit_dataset(
     db: MongoClient = Depends(dependencies.get_db),
     user_id=Depends(get_user),
 ):
+    # Make connection to elatsicsearch
+    es = connect_elasticsearch()
+
+    # Check all connection and abort if any one of them is not available
+    if db is None or es is None:
+        raise HTTPException(status_code=503, detail="Service not available")
+        return
+
     if (
         dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
     ) is not None:
@@ -317,6 +327,16 @@ async def edit_dataset(
             await db["datasets"].replace_one(
                 {"_id": ObjectId(dataset_id)}, DatasetDB(**dataset).to_mongo()
             )
+            # Update entry to the dataset index
+            doc = {
+                "doc": {
+                    "name": ds["name"],
+                    "description": ds["description"],
+                    "author": UserOut(**user).email,
+                    "modified": ds["modified"],
+                }
+            }
+            update_record(es, "dataset", doc, dataset_id)
         except Exception as e:
             raise HTTPException(status_code=500, detail=e.args[0])
         return DatasetOut.from_mongo(dataset)
@@ -330,6 +350,14 @@ async def patch_dataset(
     user_id=Depends(get_user),
     db: MongoClient = Depends(dependencies.get_db),
 ):
+    # Make connection to elatsicsearch
+    es = connect_elasticsearch()
+
+    # Check all connection and abort if any one of them is not available
+    if db is None or es is None:
+        raise HTTPException(status_code=503, detail="Service not available")
+        return
+
     if (
         dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
     ) is not None:
@@ -343,6 +371,16 @@ async def patch_dataset(
             await db["datasets"].replace_one(
                 {"_id": ObjectId(dataset_id)}, DatasetDB(**dataset).to_mongo()
             )
+            # Update entry to the dataset index
+            doc = {
+                "doc": {
+                    "name": ds["name"],
+                    "description": ds["description"],
+                    "author": UserOut(**user).email,
+                    "modified": ds["modified"],
+                }
+            }
+            update_record(es, "dataset", doc, dataset_id)
         except Exception as e:
             raise HTTPException(status_code=500, detail=e.args[0])
         return DatasetOut.from_mongo(dataset)
