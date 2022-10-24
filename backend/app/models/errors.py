@@ -8,12 +8,13 @@ from app.models.metadata import MongoDBRef
 
 class ServiceUnreachable(Exception):
     """Raised when Clowder can't connect to an outside service e.g. MongoDB, Elasticsearch."""
+
     def __init__(self, service, *args):
         super().__init__(args)
         self.service = service
 
     def __str__(self):
-        return f'{self.service} could not be reached.'
+        return f"{self.service} could not be reached."
 
 
 class Error(MongoModel):

@@ -12,10 +12,10 @@ logger = logging.getLogger(__name__)
 
 
 async def log_error(
-        exception: Exception,
-        resource: Optional[MongoDBRef] = None,
-        user: Optional[str] = None,
-        db: MongoClient = Depends(dependencies.get_db),
+    exception: Exception,
+    resource: Optional[MongoDBRef] = None,
+    user: Optional[str] = None,
+    db: MongoClient = Depends(dependencies.get_db),
 ):
     """Insert new Error into the database.
 
