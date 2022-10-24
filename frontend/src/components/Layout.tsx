@@ -1,4 +1,5 @@
 import * as React from 'react';
+import {useEffect} from 'react';
 import {styled, useTheme} from '@mui/material/styles';
 import Box from '@mui/material/Box';
 import Drawer from '@mui/material/Drawer';
@@ -16,8 +17,8 @@ import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
-import {Link} from "@mui/material";
-import {Link as RouterLink, useLocation} from 'react-router-dom';
+import {Grid, Link} from "@mui/material";
+import {Link as RouterLink, Navigate, useLocation} from 'react-router-dom';
 import {useSelector} from "react-redux";
 import {RootState} from "../types/data";
 import {AddBox, Explore} from "@material-ui/icons";
@@ -25,9 +26,7 @@ import {EmbeddedSearch} from "./search/EmbeddedSearch";
 import {searchTheme} from "../theme";
 import {ErrorBoundary, ReactiveBase} from "@appbaseio/reactivesearch";
 import Cookies from "universal-cookie";
-import {useEffect} from "react";
-import {V2} from "../openapi";
-import config from "../app.config";
+import { V2 } from '../openapi';
 
 const cookies = new Cookies();
 
@@ -52,7 +51,7 @@ const Main = styled('main', {shouldForwardProp: (prop) => prop !== 'open'})<{
 	}),
 }));
 
-const SearchDiv = styled("div")(({ theme }) => ({
+const SearchDiv = styled("div")(({theme}) => ({
 	position: "relative",
 	marginLeft: theme.spacing(3),
 	marginBottom: "-5px",  // to compoensate the tags div
@@ -96,8 +95,6 @@ const link = {
 	m: 2,
 };
 
-const headers = {"Authorization": cookies.get("Authorization")};
-
 export default function PersistentDrawerLeft(props) {
 	const {children} = props;
 	const theme = useTheme();
@@ -114,11 +111,10 @@ export default function PersistentDrawerLeft(props) {
 
 	const location = useLocation();
 
-	useEffect(()=>{
-		if (location.pathname.includes("search")){
+	useEffect(() => {
+		if (location.pathname.includes("search")) {
 			setEmbeddedSearchHidden(true);
-		}
-		else{
+		} else {
 			setEmbeddedSearchHidden(false);
 		}
 	}, [location])
@@ -131,53 +127,12 @@ export default function PersistentDrawerLeft(props) {
 		// Wrap reactive search base on the most outside component
 		<ReactiveBase
 			// TODO put it in the Config file or other ways to dynamically pass in
-		  url="http://localhost:8000/api/v2/elasticsearch"
-		  app="file,dataset"
-		  headers={headers}
-		  transformResponse={(elasticsearchResponse) => {
-		  	console.log("catch response?")
-		  	console.log(elasticsearchResponse);
-
-		  	// if (elasticsearchResponse.detail.error === "invalid_token"){
-		  	// 	console.log("token expired!");
-			// }
-		  }}
-		  theme={searchTheme}
+			url="http://localhost:8000/api/v2/elasticsearch"
+			app="file,dataset"
+			headers={{"Authorization": cookies.get("Authorization")}}
+			theme={searchTheme}
 		>
-			<ErrorBoundary
-				renderError={error => (
-					<>
-						{
-						   (() => {
-							   if (error["status"] === 401){
-									 fetch(config.KeycloakRefresh, {method: "GET", headers: headers})
-										.then((response) => {
-											if (response.status === 200) return response.json();
-										})
-										.then(json =>{
-											// refresh
-											if (json["access_token"] !== undefined && json["access_token"] !== "none") {
-												cookies.set("Authorization", `Bearer ${json["access_token"]}`);
-												V2.OpenAPI.TOKEN = json["access_token"];
-											}
-										})
-										.catch(() => {
-											// logout
-											return <h1>Token expired. Cannot refresh.</h1>
-										});
-							   }
-							   else{
-									return <>
-										  <h1>An Error has happened.</h1>
-										  <p>{error["statusText"]}</p>
-										 </>
-							   }
-						   })()
-						}
-					</>
-				)}
-			>
-				<Box sx={{display: 'flex'}}>
+			<Box sx={{display: 'flex'}}>
 				<CssBaseline/>
 				<AppBar position="fixed" open={open}>
 					<Toolbar>
@@ -191,14 +146,34 @@ export default function PersistentDrawerLeft(props) {
 							<MenuIcon/>
 						</IconButton>
 						<Link href="/">
-							<Box component="img" src="../../public/clowder-logo-sm.svg" alt="clowder-logo-sm" sx={{verticalAlign:"middle"}}/>
+							<Box component="img" src="../../public/clowder-logo-sm.svg" alt="clowder-logo-sm"
+								 sx={{verticalAlign: "middle"}}/>
 						</Link>
 
 						{/*for searching*/}
 						<SearchDiv hidden={embeddedSearchHidden}>
-							<EmbeddedSearch />
+								<ErrorBoundary
+									renderError={error => (
+										<>
+											{
+												(() => {
+													if (error["status"] === 401) {
+														V2.OpenAPI.TOKEN = undefined;
+														cookies.remove("Authorization", {path: "/"});
+														return <Navigate to="/auth/login"/>
+													} else {
+														// TODO add prettier message or report function
+														return <h1>An error has happened.</h1>
+													}
+												})()
+											}
+										</>
+									)}
+								>
+									<EmbeddedSearch/>
+								</ErrorBoundary>
 						</SearchDiv>
-						<Box sx={{ flexGrow: 1 }} />
+						<Box sx={{flexGrow: 1}}/>
 						<Box sx={{marginLeft: "auto"}}>
 							{
 								loggedOut ?
@@ -269,7 +244,6 @@ export default function PersistentDrawerLeft(props) {
 					{children}
 				</Main>
 			</Box>
-			</ErrorBoundary>
 		</ReactiveBase>
 	);
 }
