@@ -17,7 +17,7 @@ import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
-import {Grid, Link} from "@mui/material";
+import {Link} from "@mui/material";
 import {Link as RouterLink, Navigate, useLocation} from 'react-router-dom';
 import {useSelector} from "react-redux";
 import {RootState} from "../types/data";
@@ -26,7 +26,9 @@ import {EmbeddedSearch} from "./search/EmbeddedSearch";
 import {searchTheme} from "../theme";
 import {ErrorBoundary, ReactiveBase} from "@appbaseio/reactivesearch";
 import Cookies from "universal-cookie";
-import { V2 } from '../openapi';
+import {V2} from '../openapi';
+import config from "../app.config";
+import {LOGOUT} from "../actions/user";
 
 const cookies = new Cookies();
 
@@ -95,6 +97,8 @@ const link = {
 	m: 2,
 };
 
+const headers = {"Authorization": cookies.get("Authorization")};
+
 export default function PersistentDrawerLeft(props) {
 	const {children} = props;
 	const theme = useTheme();
@@ -129,7 +133,7 @@ export default function PersistentDrawerLeft(props) {
 			// TODO put it in the Config file or other ways to dynamically pass in
 			url="http://localhost:8000/api/v2/elasticsearch"
 			app="file,dataset"
-			headers={{"Authorization": cookies.get("Authorization")}}
+			headers={headers}
 			theme={searchTheme}
 		>
 			<Box sx={{display: 'flex'}}>
@@ -152,26 +156,41 @@ export default function PersistentDrawerLeft(props) {
 
 						{/*for searching*/}
 						<SearchDiv hidden={embeddedSearchHidden}>
-								<ErrorBoundary
-									renderError={error => (
-										<>
-											{
-												(() => {
-													if (error["status"] === 401) {
-														V2.OpenAPI.TOKEN = undefined;
-														cookies.remove("Authorization", {path: "/"});
-														return <Navigate to="/auth/login"/>
-													} else {
-														// TODO add prettier message or report function
-														return <h1>An error has happened.</h1>
-													}
-												})()
-											}
-										</>
-									)}
-								>
-									<EmbeddedSearch/>
-								</ErrorBoundary>
+							<ErrorBoundary
+								renderError={error => (
+									<>
+										{
+											(() => {
+												if (error["status"] === 401) {
+													V2.OpenAPI.TOKEN = undefined;
+													cookies.remove("Authorization", {path: "/"});
+													fetch(config.KeycloakRefresh, {method: "GET", headers: headers})
+														.then((response) => {
+															if (response.status === 200) return response.json();
+														})
+														.then(json => {
+															// refresh token and direct to the current route
+															if (json["access_token"] !== undefined && json["access_token"] !== "none") {
+																cookies.set("Authorization", `Bearer ${json["access_token"]}`);
+																V2.OpenAPI.TOKEN = json["access_token"];
+																return <Navigate to={location.pathname}/>
+															}
+														})
+														.catch(() => {
+															return <Navigate to="/auth/login"/>
+														});
+
+												} else {
+													// TODO add prettier message or report function
+													return <h1>An error has happened.</h1>
+												}
+											})()
+										}
+									</>
+								)}
+							>
+								<EmbeddedSearch/>
+							</ErrorBoundary>
 						</SearchDiv>
 						<Box sx={{flexGrow: 1}}/>
 						<Box sx={{marginLeft: "auto"}}>
