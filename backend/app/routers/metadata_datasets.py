@@ -13,7 +13,7 @@ from app import dependencies
 from app.keycloak_auth import get_user, get_current_user, UserOut
 from app.config import settings
 from app.models.datasets import DatasetOut
-from app.models.listeners import LegacyListenerIn
+from app.models.listeners import LegacyEventListenerIn
 from app.models.metadata import (
     MongoDBRef,
     MetadataAgent,
@@ -50,7 +50,7 @@ async def _build_metadata_db_obj(
     if agent is None:
         # Build MetadataAgent depending on whether extractor info is present
         if metadata_in.extractor is not None:
-            extractor_in = LegacyListenerIn(**metadata_in.extractor.dict())
+            extractor_in = LegacyEventListenerIn(**metadata_in.extractor.dict())
             if (
                 extractor := await db["listeners"].find_one(
                     {"_id": extractor_in.id, "version": extractor_in.version}

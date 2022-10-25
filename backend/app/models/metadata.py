@@ -172,7 +172,7 @@ class MetadataAgent(MongoModel):
     triggered the job."""
 
     creator: UserOut
-    listener: Optional[ListenerOut]
+    listener: Optional[EventListenerOut]
 
 
 class MetadataBase(MongoModel):
@@ -203,8 +203,8 @@ class MetadataBase(MongoModel):
 
 class MetadataIn(MetadataBase):
     file_version: Optional[int]
-    listener: Optional[ListenerIn]
-    extractor: Optional[LegacyListenerIn]
+    listener: Optional[EventListenerIn]
+    extractor: Optional[LegacyEventListenerIn]
 
 
 class MetadataPatch(MetadataIn):
@@ -230,7 +230,7 @@ class MetadataPatch(MetadataIn):
 class MetadataDelete(MongoModel):
     metadata_id: Optional[str]  # specific metadata ID we are deleting
     definition: Optional[str]
-    listener: Optional[ListenerIn]
+    listener: Optional[EventListenerIn]
 
 
 class MetadataDB(MetadataBase):
