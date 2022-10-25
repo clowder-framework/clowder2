@@ -1,1 +1,16 @@
-*    @lmarini @max-zilla @longshuicy
+# Always add
+*    @lmarini
+
+# Backend
+/backend/ @max-zilla
+
+# Frontend
+/frontend/ @longshuicy
+
+# Devops
+/docker/ @max-zilla @longshuicy
+/scripts/ @max-zilla @longshuicy
+/.github/ @max-zilla @longshuicy
+
+# Docs
+/docs @max-zilla @longshuicy

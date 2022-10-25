@@ -23,3 +23,10 @@ async def search_dataset(request: Request):
     es = connect_elasticsearch()
     query = await request.body()
     return search_index(es, "dataset", query)
+
+
+@router.post("/file,dataset/_msearch")
+async def search_file_and_dataset(request: Request):
+    es = connect_elasticsearch()
+    query = await request.body()
+    return search_index(es, ["file", "dataset"], query)
