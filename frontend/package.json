@@ -128,7 +128,7 @@
 		"jsdoc": "^3.6.7",
 		"json-loader": "^0.5.7",
 		"lint-staged": "^11.0.0",
-		"mini-css-extract-plugin": "^2.6.1",
+		"mini-css-extract-plugin": "^1.6.2",
 		"node-sass": "^6.0",
 		"npm-run-all": "4.0.1",
 		"openapi-typescript-codegen": "^0.12.3",
@@ -151,7 +151,6 @@
 		"webpack-dev-middleware": "^5.3.3",
 		"webpack-dev-server": "^4.11.1",
 		"webpack-hot-middleware": "^2.25.2",
-		"webpack-md5-hash": "^0.0.6",
 		"webpack-merge": "^5.7.3"
 	},
 	"keywords": [

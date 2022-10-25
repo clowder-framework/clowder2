@@ -2,7 +2,6 @@
 // For info on how we"re generating bundles with hashed filenames for cache busting: https://medium.com/@okonetchnikov/long-term-caching-of-static-assets-with-webpack-1ecb139adb95#.w99i89nsz
 import webpack from "webpack";
 import MiniCssExtractPlugin from "mini-css-extract-plugin";
-import WebpackMd5Hash from "webpack-md5-hash";
 import HtmlWebpackPlugin from "html-webpack-plugin";
 import autoprefixer from "autoprefixer";
 import path from "path";
@@ -39,13 +38,6 @@ export default {
 			exclude: ["node_modules", "dist", "build"]
 		}),
 		*/
-
-		// Hash the files using MD5 so that their names change when the content changes.
-		new WebpackMd5Hash(),
-
-		// Optimize the order that items are bundled. This assures the hash is deterministic.
-		new webpack.optimize.OccurrenceOrderPlugin(),
-
 		new webpack.DefinePlugin({
 			"process.env": {
 				"NODE_ENV": JSON.stringify("production"),
