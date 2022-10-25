@@ -97,38 +97,58 @@ export default {
 	],
 	module: {
 		rules: [
-			{test: /\.[tj]sx?$/, exclude: /node_modules/, loaders: ["babel-loader"]},
-			{test: /\.eot(\?v=\d+.\d+.\d+)?$/, loader: "url-loader?name=[name].[ext]"},
+			{
+				test: /\.[tj]sx?$/,
+				exclude: /node_modules/,
+				loader: "babel-loader"
+			},
+			{
+				test: /\.eot(\?v=\d+.\d+.\d+)?$/,
+				type: "asset/inline"
+			},
 			{
 				test: /\.woff(2)?(\?v=[0-9]\.[0-9]\.[0-9])?$/,
-				loader: "url-loader?limit=10000&mimetype=application/font-woff&name=[name].[ext]"
+				type: "asset/inline"
 			},
 			{
 				test: /\.[ot]tf(\?v=\d+.\d+.\d+)?$/,
-				loader: "url-loader?limit=10000&mimetype=application/octet-stream&name=[name].[ext]"
+				type: "asset/inline"
 			},
 			{
 				test: /\.svg(\?v=\d+.\d+.\d+)?$/,
-				loader: "url-loader?limit=10000&mimetype=image/svg+xml&name=[name].[ext]"
+				type: "asset/inline"
 			},
-			{test: /\.(jpe?g|png|gif)$/i, loader: "file-loader?name=[name].[ext]"},
-			{test: /\.ico$/, loader: "file-loader?name=[name].[ext]"},
-			{test: /\.html$/i, loader: "html-loader"},
+			{
+				test: /\.(jpe?g|png|gif)$/i,
+				type: "asset/resource"
+			},
+			{	test: /\.ico$/,
+				type: "asset/resource"
+			},
 			{
 				test: /(\.css|\.scss)$/,
 				use: [
 					MiniCssExtractPlugin.loader,
-					{ loader: "css-loader", options: { sourceMap: true } },
-					{ loader: "postcss-loader", options: { plugins: () => [require("autoprefixer")] } },
-					{ loader: "sass-loader", options: { sourceMap: true } }
+					"css-loader",
+					{
+						loader: "postcss-loader",
+						options: {
+							postcssOptions: {
+								plugins: ["autoprefixer"]
+							}
+						}
+					},
+					"sass-loader"
 				]
 			},
-			// {test: /\.json$/, loader: "json-loader"}
+			// {
+			// 	test: /\.json$/,
+			// 	loader: "json-loader"
+			// }
 		]
 	},
 	optimization:{
 		minimizer: [new TerserPlugin({
-			sourceMap: true,
 			terserOptions: {
 				ecma:8,
 				compress: {
