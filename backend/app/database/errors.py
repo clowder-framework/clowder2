@@ -20,8 +20,9 @@ async def log_error(
     """Insert new Error into the database.
 
     Arguments:
-        module -- module name e.g. __import__(__name__)
-        method --
+        exception -- instance of an Exception or subclass
+        resource -- if error relates to a specific resource, you can include it
+        user --- if error relates to actions performed by a user, you can include them
     """
     message = str(exception)
     trace = traceback.format_exc(exception, limit=4)
