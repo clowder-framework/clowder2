@@ -10,29 +10,40 @@ import type { UserOut } from './UserOut';
  * These provide a shorthand for use by extractors as well as a source for building GUI widgets to add new entries.
  *
  * Example: {
-     * "name": "LatLon",
-     * "description": "A set of Latitude/Longitude coordinates",
-     * "context": {
-         * "longitude": "https://schema.org/longitude",
-         * "latitude": "https://schema.org/latitude"
+     * "name" : "LatLon",
+     * "description" : "A set of Latitude/Longitude coordinates",
+     * "context" : {
+         * "longitude" : "https://schema.org/longitude",
+         * "latitude" : "https://schema.org/latitude"
          * },
-         * "fields": [{
-             * "name": "longitude",
-             * "type": "float",
-             * "required": "True"
-             * },{
-                 * "name": "latitude",
-                 * "type": "float",
-                 * "required": "True"
-                 * }]
-                 * }
-                 */
-                export type MetadataDefinitionOut = {
-                    id?: string;
-                    name: string;
-                    description?: string;
-                    context?: any;
-                    context_url?: string;
-                    fields: Array<MetadataField>;
-                    creator: UserOut;
-                }
+         * "fields" : [
+             * {
+                 * "name" : "longitude",
+                 * "list" : false,
+                 * "widgetType": "TextField",
+                 * "config": {
+                     * "type" : "float"
+                     * },
+                     * "required" : true
+                     * },
+                     * {
+                         * "name" : "latitude",
+                         * "list" : false,
+                         * "widgetType": "TextField",
+                         * "config": {
+                             * "type" : "float"
+                             * },
+                             * "required" : true
+                             * }
+                             * ]
+                             * }
+                             */
+                            export type MetadataDefinitionOut = {
+                                id?: string;
+                                name: string;
+                                description?: string;
+                                context?: any;
+                                context_url?: string;
+                                fields: Array<MetadataField>;
+                                creator: UserOut;
+                            }

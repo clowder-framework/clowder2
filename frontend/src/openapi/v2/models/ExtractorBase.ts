@@ -4,7 +4,7 @@
 
 import type { Repository } from './Repository';
 
-export type ExtractorIn = {
+export type ExtractorBase = {
     id?: string;
     name: string;
     version?: string;
