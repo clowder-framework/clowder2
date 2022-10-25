@@ -64,6 +64,20 @@ def insert_record(es_client, index_name, doc, id):
         logger.error(str(ex))
 
 
+def update_record(es_client, index_name, body, id):
+    """Update a document in the index
+    Arguments:
+        es_client -- elasticsearch client which you get as return object from connect_elasticsearch()
+        index_name -- name of index
+        doc -- document you want to update in the index
+        id -- unique key by which you can identify the document when needed
+    """
+    try:
+        es_client.update(index=index_name, id=id, body=body)
+    except BadRequestError as ex:
+        logger.error(str(ex))
+
+
 def search_index(es_client, index_name, query):
     """Search a keyword or conjuction of several keywords in an index
     Arguments:
