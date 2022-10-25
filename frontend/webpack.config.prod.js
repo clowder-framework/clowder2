@@ -50,7 +50,7 @@ export default {
 		}),
 
 		// Generate an external css file with a hash in the filename
-		new MiniCssExtractPlugin("[name].[contenthash].css"),
+		new MiniCssExtractPlugin({filename:"[name].[contenthash].css"}),
 
 		// Generate HTML file that contains references to generated bundles. See here for how this works: https://github.com/ampedandwired/html-webpack-plugin#basic-usage
 		new HtmlWebpackPlugin({
