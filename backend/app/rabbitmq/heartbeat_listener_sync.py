@@ -4,8 +4,8 @@ from packaging import version
 from app.config import settings
 from pymongo import MongoClient
 from app.models.listeners import (
-    ListenerDB,
-    ListenerOut,
+    EventListenerDB,
+    EventListenerOut,
 )
 
 
@@ -16,7 +16,7 @@ def callback(ch, method, properties, body):
     extractor_queue = statusBody["queue"]
     extractor_info = statusBody["extractor_info"]
     extractor_name = extractor_info["name"]
-    extractor_db = ListenerDB(**extractor_info)
+    extractor_db = EventListenerDB(**extractor_info)
     client = MongoClient(settings.MONGODB_URL)
     db = client["clowder2"]
     existing_extractor = db["extractors"].find_one({"name": extractor_queue})
@@ -27,7 +27,7 @@ def callback(ch, method, properties, body):
             new_extractor = db["extractors"].insert_one(extractor_db.to_mongo())
             found = db["extractors"].find_one({"_id": new_extractor.inserted_id})
             removed = db["extractors"].delete_one({"_id": existing_extractor["_id"]})
-            extractor_out = ListenerOut.from_mongo(found)
+            extractor_out = EventListenerOut.from_mongo(found)
             print(
                 "extractor updated: "
                 + extractor_name
@@ -40,7 +40,7 @@ def callback(ch, method, properties, body):
     else:
         new_extractor = db["extractors"].insert_one(extractor_db.to_mongo())
         found = db["extractors"].find_one({"_id": new_extractor.inserted_id})
-        extractor_out = ListenerOut.from_mongo(found)
+        extractor_out = EventListenerOut.from_mongo(found)
         print("new extractor registered: " + extractor_name)
         return extractor_out
 

@@ -27,7 +27,7 @@ from app.search.connect import (
     delete_document_by_id,
 )
 from app.models.files import FileIn, FileOut, FileVersion, FileDB
-from app.models.listeners import ListenerMessage
+from app.models.listeners import EventListenerMessage
 from app.models.users import UserOut
 from app.models.search import SearchIndexContents
 from app.routers.feeds import check_feed_listeners

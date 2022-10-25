@@ -10,7 +10,7 @@ from app.models.users import UserOut
 from app.models.files import FileOut
 from app.models.listeners import (
     FeedListener,
-    ListenerOut,
+    EventListenerOut,
 )
 from app.models.feeds import (
     FeedIn,
@@ -28,7 +28,9 @@ clowder_bucket = os.getenv("MINIO_BUCKET_NAME", "clowder")
 
 # TODO: Move this to MongoDB middle layer
 async def disassociate_listener_db(feed_id: str, listener_id: str, db: MongoClient):
-    """Remove a specific listener_id from the listeners associated with a feed."""
+    """Remove a specific Event Listener from a feed. Does not delete either resource, just removes relationship.
+
+    This actually performs the database operations, and can be used by any endpoints that need this functionality."""
     async for feed in db["feeds"].find(
         {"listeners.listener_id": ObjectId(listener_id)}
     ):
@@ -84,6 +86,7 @@ async def save_feed(
     user=Depends(get_current_user),
     db: MongoClient = Depends(get_db),
 ):
+    """Create a new Feed (i.e. saved search) in the database."""
     feed = FeedDB(**feed_in.dict(), author=user)
     new_feed = await db["feeds"].insert_one(feed.to_mongo())
     found = await db["feeds"].find_one({"_id": new_feed.inserted_id})
@@ -97,6 +100,7 @@ async def delete_feed(
     user=Depends(get_current_user),
     db: MongoClient = Depends(get_db),
 ):
+    """Delete an existing saved search Feed."""
     if (await db["feeds"].find_one({"_id": ObjectId(feed_id)})) is not None:
         await db["feeds"].delete_one({"_id": ObjectId(feed_id)})
         return {"deleted": feed_id}
@@ -111,6 +115,12 @@ async def associate_listener(
     user=Depends(get_current_user),
     db: MongoClient = Depends(get_db),
 ):
+    """Associate an existing Event Listener with a Feed, e.g. so it will be triggered on new Feed results.
+
+    Arguments:
+        feed_id: Feed that should have new Event Listener associated
+        listener: JSON object with "listener_id" field and "automatic" bool field (whether to auto-trigger on new data)
+    """
     if (feed := await db["feeds"].find_one({"_id": ObjectId(feed_id)})) is not None:
         feed_out = FeedOut.from_mongo(feed)
         if (
@@ -136,6 +146,12 @@ async def disassociate_listener(
     user=Depends(get_current_user),
     db: MongoClient = Depends(get_db),
 ):
+    """Disassociate an Event Listener from a Feed.
+
+    Arguments:
+        feed_id: UUID of search Feed that is being changed
+        listener_id: UUID of Event Listener that should be disassociated
+    """
     if (feed := await db["feeds"].find_one({"_id": ObjectId(feed_id)})) is not None:
         disassociate_listener_db(feed_id, listener_id, db)
         return {"disassociated": listener_id}

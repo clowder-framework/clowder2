@@ -27,30 +27,30 @@ class ExtractorInfo(BaseModel):
     parameters: List[dict] = []
 
 
-class ListenerBase(BaseModel):
+class EventListenerBase(BaseModel):
     name: str
     version: int = 1
     description: str = ""
 
 
-class ListenerIn(ListenerBase):
+class EventListenerIn(EventListenerBase):
     pass
 
 
-class LegacyListenerIn(ExtractorInfo):
+class LegacyEventListenerIn(ExtractorInfo):
     name: str
     version: str = "1.0"
     description: str = ""
 
 
-class ListenerDB(ListenerBase, MongoModel):
+class EventListenerDB(EventListenerBase, MongoModel):
     author: UserOut
     created: datetime = Field(default_factory=datetime.utcnow)
     modified: datetime = Field(default_factory=datetime.utcnow)
     properties: Optional[ExtractorInfo] = None
 
 
-class ListenerOut(ListenerDB):
+class EventListenerOut(EventListenerDB):
     pass
 
 
@@ -59,7 +59,7 @@ class FeedListener(BaseModel):
     automatic: bool  # Listeners can trigger automatically or not on a per-feed basis.
 
 
-class ListenerMessage(BaseModel):
+class EventListenerMessage(BaseModel):
     host: str = "http://127.0.0.1:8000"
     secretKey: str = "secretKey"
     retry_count: int = 0

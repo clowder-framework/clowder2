@@ -8,7 +8,7 @@ from pika.adapters.blocking_connection import BlockingChannel
 from app.keycloak_auth import get_token
 from app import dependencies
 from app.models.files import FileOut
-from app.models.listeners import ListenerMessage
+from app.models.listeners import EventListenerMessage
 
 
 def submit_file_message(
@@ -21,7 +21,7 @@ def submit_file_message(
     rabbitmq_client: BlockingChannel = Depends(dependencies.get_rabbitmq),
 ):
     # TODO check if extractor is registered
-    msg_body = ListenerMessage(
+    msg_body = EventListenerMessage(
         filename=file_out.name,
         fileSize=file_out.bytes,
         id=file_out.id,

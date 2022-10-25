@@ -13,7 +13,11 @@ from pymongo import MongoClient
 from app.models.mongomodel import MongoModel
 from app.models.pyobjectid import PyObjectId
 from app.models.users import UserOut
-from app.models.listeners import ListenerIn, LegacyListenerIn, ListenerOut
+from app.models.listeners import (
+    EventListenerIn,
+    LegacyEventListenerIn,
+    EventListenerOut,
+)
 
 
 class MongoDBRef(BaseModel):
