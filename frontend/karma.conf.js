@@ -49,7 +49,8 @@ module.exports = function (config) {
 						test: /\.jsx?$/,
 						exclude: path.resolve("node_modules"),
 						include: path.resolve("src"),
-						loaders: ["isparta-loader"]
+						loaders: ["babel-loader"]
+
 					}
 				]
 			},
