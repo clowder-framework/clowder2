@@ -79,6 +79,7 @@ export function Search() {
 									data={[{start: 0, label: "0 time and up"},
 										{start: 10, label: "10 times and up"},
 										{start: 100, label: "100 times and up"},
+
 									]}
 									placeholder="Modify Times: All"
 									innerClass={{
@@ -90,12 +91,12 @@ export function Search() {
 						{/*result*/}
 						<ReactiveList componentId="results" dataField="_score" size={20} pagination={true}
 									  react={{
-										  and: ["searchbox", "creatorfilter", "downloadfilter", "modifyfilter"]
+										and: ["searchbox", "creatorfilter", "downloadfilter", "modifyfilter"]
 									  }}
-									  render={({data}) => (<SearchResult data={data}/>)}/>
+									  render={({ data }) => (<SearchResult data={data} />)}/>
 					</Grid>
 				</Grid>
 			</div>
 		</Layout>
-	);
+  );
 }

@@ -51,7 +51,8 @@ const Main = styled('main', {shouldForwardProp: (prop) => prop !== 'open'})<{
 	}),
 }));
 
-const SearchDiv = styled("div")(({theme}) => ({
+
+const SearchDiv = styled("div")(({ theme }) => ({
 	position: "relative",
 	marginLeft: theme.spacing(3),
 	marginBottom: "-5px",  // to compoensate the tags div
@@ -113,10 +114,11 @@ export default function PersistentDrawerLeft(props) {
 
 	const location = useLocation();
 
-	useEffect(() => {
-		if (location.pathname.includes("search")) {
+	useEffect(()=>{
+		if (location.pathname.includes("search")){
 			setEmbeddedSearchHidden(true);
-		} else {
+		}
+		else{
 			setEmbeddedSearchHidden(false);
 		}
 	}, [location])
