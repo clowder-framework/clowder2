@@ -2,7 +2,6 @@
 // For info on how we"re generating bundles with hashed filenames for cache busting: https://medium.com/@okonetchnikov/long-term-caching-of-static-assets-with-webpack-1ecb139adb95#.w99i89nsz
 import webpack from "webpack";
 import MiniCssExtractPlugin from "mini-css-extract-plugin";
-import WebpackMd5Hash from "webpack-md5-hash";
 import HtmlWebpackPlugin from "html-webpack-plugin";
 import autoprefixer from "autoprefixer";
 import path from "path";
@@ -39,13 +38,6 @@ export default {
 			exclude: ["node_modules", "dist", "build"]
 		}),
 		*/
-
-		// Hash the files using MD5 so that their names change when the content changes.
-		new WebpackMd5Hash(),
-
-		// Optimize the order that items are bundled. This assures the hash is deterministic.
-		new webpack.optimize.OccurrenceOrderPlugin(),
-
 		new webpack.DefinePlugin({
 			"process.env": {
 				"NODE_ENV": JSON.stringify("production"),
@@ -58,7 +50,7 @@ export default {
 		}),
 
 		// Generate an external css file with a hash in the filename
-		new MiniCssExtractPlugin("[name].[contenthash].css"),
+		new MiniCssExtractPlugin({filename:"[name].[contenthash].css"}),
 
 		// Generate HTML file that contains references to generated bundles. See here for how this works: https://github.com/ampedandwired/html-webpack-plugin#basic-usage
 		new HtmlWebpackPlugin({
@@ -97,38 +89,58 @@ export default {
 	],
 	module: {
 		rules: [
-			{test: /\.[tj]sx?$/, exclude: /node_modules/, loaders: ["babel-loader"]},
-			{test: /\.eot(\?v=\d+.\d+.\d+)?$/, loader: "url-loader?name=[name].[ext]"},
+			{
+				test: /\.[tj]sx?$/,
+				exclude: /node_modules/,
+				loader: "babel-loader"
+			},
+			{
+				test: /\.eot(\?v=\d+.\d+.\d+)?$/,
+				type: "asset/inline"
+			},
 			{
 				test: /\.woff(2)?(\?v=[0-9]\.[0-9]\.[0-9])?$/,
-				loader: "url-loader?limit=10000&mimetype=application/font-woff&name=[name].[ext]"
+				type: "asset/inline"
 			},
 			{
 				test: /\.[ot]tf(\?v=\d+.\d+.\d+)?$/,
-				loader: "url-loader?limit=10000&mimetype=application/octet-stream&name=[name].[ext]"
+				type: "asset/inline"
 			},
 			{
 				test: /\.svg(\?v=\d+.\d+.\d+)?$/,
-				loader: "url-loader?limit=10000&mimetype=image/svg+xml&name=[name].[ext]"
+				type: "asset/inline"
 			},
-			{test: /\.(jpe?g|png|gif)$/i, loader: "file-loader?name=[name].[ext]"},
-			{test: /\.ico$/, loader: "file-loader?name=[name].[ext]"},
-			{test: /\.html$/i, loader: "html-loader"},
+			{
+				test: /\.(jpe?g|png|gif)$/i,
+				type: "asset/resource"
+			},
+			{	test: /\.ico$/,
+				type: "asset/resource"
+			},
 			{
 				test: /(\.css|\.scss)$/,
 				use: [
 					MiniCssExtractPlugin.loader,
-					{ loader: "css-loader", options: { sourceMap: true } },
-					{ loader: "postcss-loader", options: { plugins: () => [require("autoprefixer")] } },
-					{ loader: "sass-loader", options: { sourceMap: true } }
+					"css-loader",
+					{
+						loader: "postcss-loader",
+						options: {
+							postcssOptions: {
+								plugins: ["autoprefixer"]
+							}
+						}
+					},
+					"sass-loader"
 				]
 			},
-			// {test: /\.json$/, loader: "json-loader"}
+			// {
+			// 	test: /\.json$/,
+			// 	loader: "json-loader"
+			// }
 		]
 	},
 	optimization:{
 		minimizer: [new TerserPlugin({
-			sourceMap: true,
 			terserOptions: {
 				ecma:8,
 				compress: {
