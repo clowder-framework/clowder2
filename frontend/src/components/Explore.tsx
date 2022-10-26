@@ -4,6 +4,7 @@ import {Box, Button, ButtonGroup, Grid, Tab, Tabs} from "@mui/material";
 import {Dataset, RootState} from "../types/data";
 import {useDispatch, useSelector} from "react-redux";
 import {datasetDeleted, fetchDatasets,} from "../actions/dataset";
+import {fetchExtractors} from "../actions/extractors";
 import {resetFailedReason} from "../actions/common";
 import {downloadThumbnail} from "../utils/thumbnail";
 
@@ -31,6 +32,8 @@ export const Explore = (): JSX.Element => {
 	const listDatasets = (skip: number | undefined, limit: number | undefined, mine: boolean | undefined) => dispatch(fetchDatasets(skip, limit, mine));
 	const dismissError = () => dispatch(resetFailedReason());
 	const datasets = useSelector((state: RootState) => state.dataset.datasets);
+	const listExtractors = () => dispatch(fetchExtractors());
+	const extractors = useSelector((state: RootState) => state.extractors.extractors);
 	const reason = useSelector((state: RootState) => state.error.reason);
 	const stack = useSelector((state: RootState) => state.error.stack);
 
@@ -49,6 +52,7 @@ export const Explore = (): JSX.Element => {
 	// component did mount
 	useEffect(() => {
 		listDatasets(0, limit, mine);
+		listExtractors();
 	}, []);
 
 	// Error msg dialog
@@ -143,6 +147,7 @@ export const Explore = (): JSX.Element => {
 							<Box sx={{borderBottom: 1, borderColor: 'divider'}}>
 								<Tabs value={selectedTabIndex} onChange={handleTabChange} aria-label="dashboard tabs">
 									<Tab sx={tab} label="Datasets" {...a11yProps(0)} />
+									<Tab sx={tab} label="Extractors" {...a11yProps(5)} />
 								</Tabs>
 							</Box>
 							<TabPanel value={selectedTabIndex} index={0}>
@@ -178,6 +183,15 @@ export const Explore = (): JSX.Element => {
 							<TabPanel value={selectedTabIndex} index={2}/>
 							<TabPanel value={selectedTabIndex} index={3}/>
 							<TabPanel value={selectedTabIndex} index={4}/>
+							<TabPanel value={selectedTabIndex} index={5}>
+								{extractors.map((extractor) => {
+									return (
+										<Grid item key={extractor.id} xs={12} sm={6} md={4} lg={3}>
+											<DatasetCard id={extractor.id} name={extractor.name}/>
+										</Grid>
+									);
+								})
+							</TabPanel>
 						</Grid>
 					</Grid>
 				</div>
