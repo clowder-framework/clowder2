@@ -27,6 +27,7 @@ import {SearchErrorBoundary} from "./search/SearchErrorBoundary";
 import {searchTheme} from "../theme";
 import {ReactiveBase} from "@appbaseio/reactivesearch";
 import Cookies from "universal-cookie";
+import config from '../app.config';
 
 const cookies = new Cookies();
 
@@ -130,8 +131,7 @@ export default function PersistentDrawerLeft(props) {
 	return (
 		// Wrap reactive search base on the most outside component
 		<ReactiveBase
-			// TODO put it in the Config file or other ways to dynamically pass in
-			url="http://localhost:8000/api/v2/elasticsearch"
+			url={config.searchEndpoint}
 			app="file,dataset"
 			headers={headers}
 			theme={searchTheme}
