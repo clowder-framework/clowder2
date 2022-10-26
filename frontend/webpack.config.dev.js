@@ -71,27 +71,47 @@ export default {
 	],
 	module: {
 		rules: [
-			{test: /\.[tj]sx?$/, exclude: /node_modules/, loaders: ["babel-loader"]},
-			{test: /\.eot(\?v=\d+.\d+.\d+)?$/, loader: "file-loader"},
+			{
+				test: /\.[tj]sx?$/,
+				exclude: /node_modules/,
+				loader: "babel-loader"
+			},
+			{
+				test: /\.eot(\?v=\d+.\d+.\d+)?$/,
+				type: "asset/inline"
+			},
 			{
 				test: /\.woff(2)?(\?v=[0-9]\.[0-9]\.[0-9])?$/,
-				loader: "url-loader?limit=10000&mimetype=application/font-woff"
+				type: "asset/inline"
 			},
-			{test: /\.[ot]tf(\?v=\d+.\d+.\d+)?$/, loader: "url-loader?limit=10000&mimetype=application/octet-stream"},
-			{test: /\.svg(\?v=\d+\.\d+\.\d+)?$/, loader: "url-loader?limit=10000&mimetype=image/svg+xml"},
-			{test: /\.(jpe?g|png|gif)$/i, loader: "file-loader?name=[name].[ext]"},
-			{test: /\.ico$/, loader: "file-loader?name=[name].[ext]"},
-			{test: /\.html$/i, loader: "html-loader"},
 			{
-				test: /(\.css|\.scss)$/,
+				test: /\.[ot]tf(\?v=\d+.\d+.\d+)?$/,
+				type: "asset/inline"
+			},
+			{	test: /\.ico$/,
+				type: "asset/resource"
+			},
+			{
+				test: /\.svg(\?v=\d+.\d+.\d+)?$/,
+				type: "asset/inline"
+			},
+			{
+				test: /\.(jpe?g|png|gif)$/i,
+				type: "asset/resource"
+			},
+			{
+				test: /(\.css|\.scss)$/i,
 				use:[
-					{ loader: "style-loader"},
-					{ loader: "css-loader", options: { sourceMap: true } },
-					{ loader: "postcss-loader", options: { plugins: () => [require("autoprefixer")] } },
+					"style-loader",
+					"css-loader",
+					{ loader: "postcss-loader", options: { postcssOptions: { plugins: ["autoprefixer"] }}},
 					{ loader: "sass-loader", options: { sourceMap: true } }
 				]
 			},
-			// {test: /\.json$/, loader: "json-loader"}
+			// {
+			// 	test: /\.json$/,
+			// 	loader: "json-loader"
+			// }
 		]
 	},
 };
