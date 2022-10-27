@@ -279,7 +279,7 @@ export const Dataset = (): JSX.Element => {
 												<CloseIcon />
 											</IconButton>
 											<Button variant="contained" onClick={() => {setOpenPopup(true);}} sx={{ mt: 1, mr: 1, "alignItems": "right" }}>
-												Add new field
+                                                Add new metadata definition
 											</Button>
 											<EditMetadata resourceType="dataset" resourceId={datasetId}
 														  setMetadata={setMetadata}
@@ -295,7 +295,7 @@ export const Dataset = (): JSX.Element => {
 												openPopup ?
 												<>
 													<Dialog open={openPopup} onClose={() => {setOpenPopup(false);}}>
-														<DialogTitle>Add a new field</DialogTitle>
+														<DialogTitle>Add new metadata definition</DialogTitle>
 														<DialogContent>
 															<DialogContentText>Please fill out the metadata information here.</DialogContentText>
 															<CreateMetadataDefinition/>

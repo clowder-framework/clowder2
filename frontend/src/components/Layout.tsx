@@ -20,7 +20,7 @@ import {Link} from "@mui/material";
 import {Link as RouterLink, useLocation} from 'react-router-dom';
 import {useSelector} from "react-redux";
 import {RootState} from "../types/data";
-import {AddBox, Explore} from "@material-ui/icons";
+import {AddBox, Create, Explore} from "@material-ui/icons";
 import {EmbeddedSearch} from "./search/EmbeddedSearch";
 import {searchTheme} from "../theme";
 import {ReactiveBase} from "@appbaseio/reactivesearch";
@@ -230,6 +230,17 @@ export default function PersistentDrawerLeft(props) {
                             <ListItemButton component={RouterLink} to="/new-metadata-definition">
                                 <ListItemIcon>
                                     <AddBox/>
+                                </ListItemIcon>
+                                <ListItemText primary={"Create Metadata Definition"}/>
+                            </ListItemButton>
+                        </ListItem>
+                    </List>
+                    <Divider/>
+                    <List>
+                        <ListItem key={"newmetadata"} disablePadding>
+                            <ListItemButton component={RouterLink} to="/new-metadata-definition">
+                                <ListItemIcon>
+                                    <Create/>
                                 </ListItemIcon>
                                 <ListItemText primary={"Create Metadata Definition"}/>
                             </ListItemButton>

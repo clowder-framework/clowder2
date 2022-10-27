@@ -1,12 +1,15 @@
 import React, {useEffect, useState} from "react";
 
-import {Button, Checkbox, Grid, TextField, Step, StepContent, StepLabel, Stepper, FormControl, Select, MenuItem, InputLabel, FormGroup, FormControlLabel, IconButton} from "@mui/material";
+import {Button, Checkbox, Grid, TextField, Step, StepContent, StepLabel, Stepper, FormControl, Select, MenuItem, InputLabel, FormGroup, FormControlLabel, IconButton, StepButton} from "@mui/material";
 import {useDispatch, useSelector,} from "react-redux";
 import AddBoxIcon from '@mui/icons-material/AddBox';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 
 import { postMetadataDefinitions } from "../../actions/metadata";
 import Layout from "../Layout";
+
+import widgetTypes from "../../../../scripts/metadata/config/widgetTypes.json";
+import inputTypes from "../../../../scripts/metadata/config/inputTypes.json";
 
 export const CreateMetadataDefinitionPage = (): JSX.Element => {
 	return (
@@ -15,7 +18,6 @@ export const CreateMetadataDefinitionPage = (): JSX.Element => {
 		</Layout>
 	);
 }
-const widgetTypes = ['TextField', 'DateTimePicker', 'Select'];
 
 export const CreateMetadataDefinition = (): JSX.Element => {
 
@@ -24,10 +26,11 @@ export const CreateMetadataDefinition = (): JSX.Element => {
 	const saveMetadataDefinitions = (metadata: object) => dispatch(postMetadataDefinitions(metadata));
 	
 	const [activeStep, setActiveStep] = React.useState(0);
+	const [parsedInput, setParsedInput] = React.useState("");
 	const [formInput, setFormInput] = React.useState({
-		metadataName: "",
-		metadataDescription: "",
-		context: "https://schema.org/",
+		name: "",
+		description: "",
+		context: "",
 		fields: [{
 			name: "",
 			list: false,
@@ -40,28 +43,29 @@ export const CreateMetadataDefinition = (): JSX.Element => {
 		}]
 	})
 
-	const handleInputChange = (index: number, key: string, value: string) => {
+	const handleInputChange = (idx: number, key: string, value: string) => {
 		let data = {...formInput}
 
-		if (key == "metadataName" || key == "metadataDescription" || key == "context") {
-			data[key] = value
-		
-		} else {
-			if (key == "list" || key == "required") {
-				data["fields"][index][key] = !data["fields"][index][key]
+        // Handle input change of name, description, context high level fields
+        if (idx == -1) {
+            data[key] = value
+        
+        } else {
+           if (key == "list" || key == "required") {
+				data["fields"][idx][key] = !data["fields"][idx][key]
 			
 			} else if (key == "type" || key == "options") {
-				data["fields"][index].config[key] = value
+				data["fields"][idx].config[key] = value
 			
 			} else if (key == "name" || key == "widgetType") {
-				data["fields"][index][key] = value
+				data["fields"][idx][key] = value
 			}
 		}
 
 		setFormInput(data)
 	}
 
-	const addNewField = (index: number) => {
+	const addNewField = (idx: number) => {
 		let newitem = {
 			name: "",
 			list: false,
@@ -75,39 +79,91 @@ export const CreateMetadataDefinition = (): JSX.Element => {
 
 		let newfield = formInput["fields"]
 		
-		// Add newfield to ith index of list
-		newfield.splice(index + 1, 0, newitem)
+		// Add newfield to ith idx of list
+		newfield.splice(idx + 1, 0, newitem)
 
 		setFormInput({
-			metadataName: formInput.metadataName,
-			metadataDescription: formInput.metadataDescription,
+			name: formInput.name,
+			description: formInput.description,
 			context: formInput.context,
 			fields: newfield
 		})
 	}
 
-	const removeField = (index: number) => {
+	const removeField = (idx: number) => {
 		let data = formInput["fields"]
-		data.splice(index, 1)
+		data.splice(idx, 1)
 
 		setFormInput({
-			metadataName: formInput.metadataName,
-			metadataDescription: formInput.metadataDescription,
+			name: formInput.name,
+			description: formInput.description,
 			context: formInput.context,
 			fields: data
 		})
+
+        // Render the stepper correctly after deleting a field
+        handleBack()
 	}
 
     const postMetadata = () => {
-		// First check if the input is valid
-		if (formInput.metadataName != "" && formInput.metadataDescription != "" && formInput.context != "") {
-			// Invoke post request
-			saveMetadataDefinitions(formInput);
-					
-			// Reset form
-			clearForm();
-		}
+        // Parse the context
+        let context = JSON.parse(formInput.context)
+        formInput.context = context
+
+        // Remove the options field if widgetType != enum
+        for (let i = 0; i < formInput.fields.length; i++) {
+            if (formInput.fields[i].widgetType != "enum") {
+                delete formInput.fields[i].config.options
+            }
+        }
+
+        // Invoke post request
+		saveMetadataDefinitions(formInput);
+
+        // Reset form
+        clearForm();
 	}
+
+    const validateFormData = (stepNumber: number) => {
+        let isFormValid = false
+
+        if (stepNumber == 0) {
+            if (formInput.name !== "" && formInput.description != "" && formInput.context != "") {
+                isFormValid = true
+            }
+
+        } else {
+            let idx = stepNumber - 1
+
+            if (formInput.fields[idx].name !== "" && formInput.fields[idx].widgetType != "" && formInput.fields[idx].config.type != "") {
+                if ((formInput.fields[idx].config.type == "enum" && formInput.fields[idx].config.options != "") || formInput.fields[idx].config.type != "enum") {
+                    isFormValid = true
+                }
+            }
+        }
+
+        if (isFormValid) {
+            let data = {...formInput}
+
+            // Parse the context
+            let context = JSON.parse(data.context)
+            data.context = context
+
+            // Remove the options field if widgetType != enum
+            for (let i = 0; i < data.fields.length; i++) {
+                if (data.fields[i].config.type != "enum") {
+                    delete data.fields[i].config.options
+                } else {
+                    let listOfOptions = data.fields[i].config.options.split(",")
+                    data.fields[i].config.options = listOfOptions
+                }
+            }
+
+            setParsedInput(JSON.stringify(data, null, 4))
+
+            handleNext()
+        }
+    }
 
 	const clearForm = () => {
 		// Reset stepper
@@ -115,9 +171,9 @@ export const CreateMetadataDefinition = (): JSX.Element => {
 
 		// Reset state
 		setFormInput({
-			metadataName: "",
-			metadataDescription: "",
-			context: "https://schema.org/",
+			name: "",
+			description: "",
+			context: "",
 			fields: [{
 				name: "",
 				list: false,
@@ -144,72 +200,93 @@ export const CreateMetadataDefinition = (): JSX.Element => {
 			<div className="inner-container">
 				<Stepper activeStep={activeStep} orientation="vertical">
 					<Step key="create-metadata">
-						<StepLabel>Create Metadata Definition*</StepLabel>
+                        <StepButton color="inherit" onClick={() => {setActiveStep(0)}}>
+                            Create Metadata Definition*
+                        </StepButton>
 						<StepContent>
-							<TextField
-								variant="outlined"
-								margin="normal"
-								required
-								fullWidth
-								autoFocus
-								id="metadataName"
-								label="Metadata Name"
-								placeholder="Please enter metadata name"
-								value={formInput["metadataName"]}
-								onChange={(event) => { handleInputChange(0, "metadataName", event.target.value); }}
-							/>
-							<TextField
-								variant="outlined"
-								margin="normal"
-								required
-								fullWidth
-								id="metadata-description"
-								label="Metadata Description"
-								placeholder="Please enter metadata description"
-								value={formInput.metadataDescription}
-								onChange={(event) => { handleInputChange(0, "metadataDescription", event.target.value); }}
-							/>
-							<TextField
-								variant="outlined"
-								margin="normal"
-								required
-								fullWidth
-								id="metadata-context"
-								label="Metadata Context"
-								placeholder="Please enter metadata context"
-								value={formInput.context}
-								onChange={(event) => { handleInputChange(0, "context", event.target.value); }}
-							/>
-							<Button variant="contained" onClick={handleNext}>Next</Button>
+                            <form onSubmit={handleNext}>
+                                <TextField
+                                    variant="outlined"
+                                    margin="normal"
+                                    required
+                                    fullWidth
+                                    autoFocus
+                                    id="name"
+                                    label="Metadata Name"
+                                    InputLabelProps={{ shrink: true }}
+                                    placeholder="Please enter metadata name"
+                                    value={formInput["name"]}
+                                    onChange={(event) => { handleInputChange(-1, "name", event.target.value); }}
+                                />
+                                <TextField
+                                    variant="outlined"
+                                    margin="normal"
+                                    required
+                                    fullWidth
+                                    id="metadata-description"
+                                    label="Metadata Description"
+                                    InputLabelProps={{ shrink: true }}
+                                    placeholder="Please enter metadata description"
+                                    value={formInput.description}
+                                    onChange={(event) => { handleInputChange(-1, "description", event.target.value); }}
+                                />
+                                {/*
+                                  * TODO: Expand context field to pick-up the most frequently used namespaces first
+                                  * https://github.com/clowder-framework/clowder2/issues/153
+                                  */}
+                                <TextField
+                                    variant="outlined"
+                                    margin="normal"
+                                    required
+                                    fullWidth
+                                    id="metadata-context"
+                                    label="Metadata Context"
+                                    InputLabelProps={{ shrink: true }}
+                                    placeholder='Please enter metadata context in JSON format
+e.g.
+{
+"doi": "https://schema.org/Date"
+}'
+                                    value={formInput.context}
+                                    onChange={(event) => { handleInputChange(-1, "context", event.target.value); }}
+                                    multiline
+                                    maxRows={6}
+                                />
+                                <Button variant="contained" onClick={() => validateFormData(activeStep)}>Next</Button>
+                            </form>
 						</StepContent>
 					</Step>
 
-					{formInput.fields.map((input, index) => {
-						return (<Step key={index}>
-								{index == 0 ? 
-									<StepLabel>Add metadata entry*
-										{index == activeStep - 1 ? 
-										<IconButton color="primary" size="small" onClick={() => addNewField(index)}>
-											<AddBoxIcon />
-										</IconButton>
-										: <></>}
-									</StepLabel>
+					{formInput.fields.map((input, idx) => {
+						return (<Step key={idx}>
+								{idx == 0 ? 
+                                    <StepButton color="inherit" onClick={() => {setActiveStep(idx + 1)}}>
+                                        <StepLabel>Add metadata entry*
+                                            {idx == activeStep - 1 ? 
+                                            <IconButton color="primary" size="small" onClick={() => addNewField(idx)}>
+                                                <AddBoxIcon />
+                                            </IconButton>
+                                            : <></>}
+                                        </StepLabel>
+                                    </StepButton>
 								:
-									<StepLabel>Add additional entry
-										{index == activeStep - 1 ? 
-										<>
-											<IconButton color="primary" size="small" onClick={() => addNewField(index)}>
-												<AddBoxIcon />
-											</IconButton>
-											<IconButton color="primary" size="small" onClick={() => removeField(index)}>
-												<DeleteOutlineIcon />
-											</IconButton>
-										</>
-										: 
-										<IconButton size="small" onClick={() => removeField(index)}>
-											<DeleteOutlineIcon />
-										</IconButton>}
-									</StepLabel>
+                                    <StepButton color="inherit" onClick={() => {setActiveStep(idx + 1)}}>
+                                        <StepLabel>Add additional entry
+                                            {idx == activeStep - 1 ? 
+                                            <>
+                                                <IconButton color="primary" size="small" onClick={() => addNewField(idx)}>
+                                                    <AddBoxIcon />
+                                                </IconButton>
+                                                <IconButton color="primary" size="small" onClick={() => removeField(idx)}>
+                                                    <DeleteOutlineIcon />
+                                                </IconButton>
+                                            </>
+                                            : 
+                                            <IconButton size="small" onClick={() => removeField(idx)}>
+                                                <DeleteOutlineIcon />
+                                            </IconButton>}
+                                        </StepLabel>
+                                    </StepButton>
 								}
 								<StepContent>
 									<Grid container>
@@ -217,11 +294,11 @@ export const CreateMetadataDefinition = (): JSX.Element => {
 											<FormGroup>
 												<FormControlLabel control={<Checkbox 
 													checked={input.list}
-													onChange={(event) => { handleInputChange(index, "list", event.target.value); }}
+													onChange={(event) => { handleInputChange(idx, "list", event.target.value); }}
 													/>} label="Contains List" />
 												<FormControlLabel control={<Checkbox 
 													checked={input.required}
-													onChange={(event) => { handleInputChange(index, "required", event.target.value); }}
+													onChange={(event) => { handleInputChange(idx, "required", event.target.value); }}
 													/>} label="Required" />
 											</FormGroup>
 										</Grid>
@@ -234,36 +311,51 @@ export const CreateMetadataDefinition = (): JSX.Element => {
 										id="field-name"
 										label="Field Name"
 										placeholder="Please enter field name"
+                                        InputLabelProps={{ shrink: true }}
 										value={input.name}
-										onChange={(event) => { handleInputChange(index, "name", event.target.value); }}
+										onChange={(event) => { handleInputChange(idx, "name", event.target.value); }}
 									/>
-									<FormControl fullWidth>
-										<InputLabel id="widget-type-select">Select Widget Type</InputLabel>
-										<Select
-											labelId="widget-type-select-label"
-											id="widget-type-select-label"
-											value={input.widgetType}
-											onChange={(event) => { handleInputChange(index, "widgetType", event.target.value); }}
-											label="widgetType">
-											{widgetTypes.map((input, index) => {
-												return (
-													<MenuItem value={input}>{input}</MenuItem>
-												);
-											})}
-										</Select>
-									</FormControl>
 									<TextField
 										variant="outlined"
 										margin="normal"
 										required
 										fullWidth
-										id="datatype"
-										label="Field Data Type"
-										placeholder="Please enter field data type (e.g. int, str, enum)"
-										name="Field Data Type"
-										value={input.config.type}
-										onChange={(event) => { handleInputChange(index, "type", event.target.value); }}
-									/>
+                                        id="widget-type-select-label"
+                                        label="Widget Type"
+                                        placeholder="Please enter metadata description"
+                                        value={input.widgetType}
+                                        onChange={(event) => { handleInputChange(idx, "widgetType", event.target.value); }}
+                                        InputLabelProps={{ shrink: true }}
+                                        helperText="Please select metadata widget type"
+                                        select>
+                                        {Object.keys(widgetTypes).map((key) => {
+                                            return (
+                                                <MenuItem value={key}>{widgetTypes[key]}</MenuItem>
+                                            );
+                                        })}
+                                    </TextField>
+                                    <TextField
+										variant="outlined"
+										margin="normal"
+										required
+										fullWidth
+										id="input-type-select-label"
+                                        label="Field Data Type"
+                                        value={input.config.type}
+                                        onChange={(event) => { handleInputChange(idx, "type", event.target.value); }}
+                                        InputLabelProps={{ shrink: true }}
+                                        helperText="Please select metadata field data type"
+                                        select>
+                                        {Object.keys(inputTypes).map((key) => {
+                                            return (
+                                                <MenuItem value={key}>{inputTypes[key]}</MenuItem>
+                                            );
+                                        })}
+                                    </TextField>
+                                    {/*
+                                      * TODO: Expand to support different config data type actions 
+                                      * https://github.com/clowder-framework/clowder2/issues/169
+                                      */}
 									{(input.config.type == "enum") ? <>
 										<TextField
 											variant="outlined"
@@ -271,22 +363,28 @@ export const CreateMetadataDefinition = (): JSX.Element => {
 											required
 											fullWidth
 											id="options"
-											label="options"
+											label="Supported List Values"
+                                            InputLabelProps={{ shrink: true }}
+                                            value={input.config.options}
+                                            onChange={(event) => { handleInputChange(idx, "options", event.target.value); }}
 											name="Field Data Options"
 											multiline
 											maxRows={6}
 										/>
 									</> : <></>}
-									{index != formInput.fields.length - 1 ? <Button  variant="contained" onClick={handleNext}>Next</Button> : <Button  variant="contained" onClick={handleNext}>Finish</Button> }
+                                    <Button variant="contained" onClick={() => {validateFormData(activeStep)}}>
+                                        Next
+                                    </Button>
 									<Button onClick={handleBack}>Back</Button>
 								</StepContent>
 							</Step>
 						);
 					})}
-					
 					<Step key="submit">
 						<StepLabel>Submit</StepLabel>
 						<StepContent>
+                            <TextField disabled value={parsedInput} multiline fullWidth/>
+                            <br/>
 							<Button
 								variant="contained"
 								onClick={postMetadata}
