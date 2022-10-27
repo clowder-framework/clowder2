@@ -110,6 +110,8 @@ services:
     ports:
       - "5672:5672"
       - "15672:15672"
+    networks:
+      - clowder2
     volumes:
       - rabbitmq:/var/lib/rabbitmq
 
@@ -129,16 +131,21 @@ services:
     volumes:
       - elasticsearch:/usr/share/elasticsearch/data
     
-  # heartbeat listener
-#  extractor-heartbeat:
-#    image: "tcnichol/heartbeat"
-#    build:
-#      context: extractor-heartbeat
-#    depends_on:
-#      - rabbitmq
-#      - mongo
-#    environment:
-#      - RABBITMQ_HOST=rabbitmq
+  extractors-heartbeat:
+    image: "clowder/clowder2-heartbeat"
+    build:
+      context: backend
+      dockerfile: heartbeat.Dockerfile
+    networks:
+      - clowder2
+    environment:
+      - MONGODB_URL=mongodb://mongo:27017
+      - RABBITMQ_HOST=localhost
+      - RABBITMQ_USER=${RABBITMQ_USER:-guest}
+      - RABBITMQ_PASS=${RABBITMQ_PASS:-guest}
+    depends_on:
+      - mongo
+      - rabbitmq
 
 ## By default this config uses default local driver,
 ## For custom volumes replace with volume driver configuration.
