@@ -23,8 +23,6 @@ from app.rabbitmq.listeners import submit_file_message
 
 router = APIRouter()
 
-clowder_bucket = os.getenv("MINIO_BUCKET_NAME", "clowder")
-
 
 # TODO: Move this to MongoDB middle layer
 async def disassociate_listener_db(feed_id: str, listener_id: str, db: MongoClient):
@@ -76,7 +74,7 @@ async def check_feed_listeners(
             listener_db := await db["listeners"].find_one({"_id": ObjectId(targ_listener)})
         ) is not None:
             listener_info = EventListenerOut.from_mongo(listener_db)
-            queue = f"{listener_info.name}:{listener_info.version}"
+            queue = listener_info.name
             routing_key = ""
             parameters = {}
             submit_file_message(file_out, queue, routing_key, parameters)
