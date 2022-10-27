@@ -7,62 +7,75 @@ from app.models.users import UserOut
 
 
 class Repository(MongoModel):
+    """Reference to a repository associated with Event Listener/Extractor."""
+
     repository_type: str = "git"
     repository_url: str = ""
 
 
-# Currently for extractor_info JSON from Clowder v1 extractors POSTing to /api/extractors
 class ExtractorInfo(BaseModel):
-    name: str
-    version: str = "1.0"
-    updated: datetime = Field(default_factory=datetime.utcnow)
-    author: str
+    """Currently for extractor_info JSON from Clowder v1 extractors for use with to /api/extractors endpoint."""
+
+    author: str  # Referring to author of listener script (e.g. name or email), not Clowder user
+    process: dict
+    maturity: str = "Development"
     contributors: List[str] = []
     contexts: List[dict] = []
-    repository: Union[list[Repository], None] = None
-    external_services: List[str]
+    repository: List[Repository] = []
+    external_services: List[str] = []
     libraries: List[str] = []
-    bibtex: List[str]
-    maturity: str = "Development"
+    bibtex: List[str] = []
     default_labels: List[str] = []
-    process: dict
     categories: List[str] = []
-    parameters: dict = {}
+    parameters: List[dict] = []
 
 
-class ListenerBase(BaseModel):
+class EventListenerBase(BaseModel):
+    """An Event Listener is the expanded version of v1 Extractors."""
+
     name: str
     version: int = 1
     description: str = ""
 
 
-class ListenerIn(ListenerBase):
+class EventListenerIn(EventListenerBase):
+    """On submission, minimum info for a listener is name, version and description. Clowder will use name and version to locate queue."""
+
     pass
 
 
-class LegacyListenerIn(ExtractorInfo):
+class LegacyEventListenerIn(ExtractorInfo):
+    """v1 Extractors can submit data formatted as a LegacyEventListener (i.e. v1 format) and it will be converted to a v2 EventListener."""
+
     name: str
     version: str = "1.0"
     description: str = ""
 
 
-class ListenerDB(ListenerBase, MongoModel):
+class EventListenerDB(EventListenerBase, MongoModel):
+    """EventListeners have a name, version, author, description, and optionally properties where extractor_info will be saved."""
+
     author: UserOut
     created: datetime = Field(default_factory=datetime.utcnow)
     modified: datetime = Field(default_factory=datetime.utcnow)
     properties: Optional[ExtractorInfo] = None
 
 
-class ListenerOut(ListenerDB):
+class EventListenerOut(EventListenerDB):
     pass
 
 
 class FeedListener(BaseModel):
+    """This is a shorthand POST class for associating an existing EventListener with a Feed. The automatic flag determines
+    whether the Feed will automatically send new matches to the Event Listener."""
+
     listener_id: PyObjectId
     automatic: bool  # Listeners can trigger automatically or not on a per-feed basis.
 
 
-class ListenerMessage(BaseModel):
+class EventListenerMessage(BaseModel):
+    """This describes contents of JSON object that is submitted to RabbitMQ for the Event Listeners/Extractors to consume."""
+
     host: str = "http://127.0.0.1:8000"
     secretKey: str = "secretKey"
     retry_count: int = 0
