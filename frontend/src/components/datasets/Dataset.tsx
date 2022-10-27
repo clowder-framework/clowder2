@@ -294,7 +294,7 @@ export const Dataset = (): JSX.Element => {
 											{
 												openPopup ?
 												<>
-													<Dialog open={openPopup} onClose={() => {setOpenPopup(false);}}>
+                                                    <Dialog open={openPopup} onClose={() => {setOpenPopup(false);}} fullWidth={true} maxWidth={"md"}>
 														<DialogTitle>Add new metadata definition</DialogTitle>
 														<DialogContent>
 															<DialogContentText>Please fill out the metadata information here.</DialogContentText>
