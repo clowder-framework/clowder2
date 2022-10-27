@@ -88,6 +88,9 @@ export const CreateMetadataDefinition = (): JSX.Element => {
 			context: formInput.context,
 			fields: newfield
 		})
+
+        // Update the preview text
+        parseInput()
 	}
 
 	const removeField = (idx: number) => {
@@ -100,6 +103,9 @@ export const CreateMetadataDefinition = (): JSX.Element => {
 			context: formInput.context,
 			fields: data
 		})
+
+        // Update the preview text
+        parseInput()
 
         // Render the stepper correctly after deleting a field
         handleBack()
@@ -124,12 +130,38 @@ export const CreateMetadataDefinition = (): JSX.Element => {
         clearForm();
 	}
 
+    const parseInput = () => {
+        let data = {...formInput}
+
+        // Parse the context JSON
+        data.context = JSON.parse(data.context)
+
+        // Remove the options field if widgetType != enum
+        for (let i = 0; i < data.fields.length; i++) {
+            if (data.fields[i].config.type != "enum") {
+                delete data.fields[i].config.options
+            } else {
+                let listOfOptions = data.fields[i].config.options.split(",")
+                data.fields[i].config.options = listOfOptions
+            }
+        }
+
+        setParsedInput(JSON.stringify(data, null, 4))
+    }
+
     const validateFormData = (stepNumber: number) => {
         let isFormValid = false
 
         if (stepNumber == 0) {
-            if (formInput.name !== "" && formInput.description != "" && formInput.context != "") {
-                isFormValid = true
+            if (formInput.name !== "" && formInput.description != "") {
+                // Validate JSON string schema
+                try {
+                    let jsonString = JSON.parse(formInput.context)
+                    isFormValid = true
+
+                } catch (error) {
+                    isFormValid = false
+                }
             }
 
         } else {
@@ -143,25 +175,8 @@ export const CreateMetadataDefinition = (): JSX.Element => {
         }
 
         if (isFormValid) {
-            let data = {...formInput}
-
-            // Parse the context
-            let context = JSON.parse(data.context)
-            data.context = context
-
-            // Remove the options field if widgetType != enum
-            for (let i = 0; i < data.fields.length; i++) {
-                if (data.fields[i].config.type != "enum") {
-                    delete data.fields[i].config.options
-                } else {
-                    let listOfOptions = data.fields[i].config.options.split(",")
-                    data.fields[i].config.options = listOfOptions
-                }
-            }
-
-            setParsedInput(JSON.stringify(data, null, 4))
-
             handleNext()
+            parseInput()
         }
     }
 
@@ -365,6 +380,7 @@ e.g.
 											id="options"
 											label="Supported List Values"
                                             InputLabelProps={{ shrink: true }}
+                                            placeholder="Please enter list options delimited by comma"
                                             value={input.config.options}
                                             onChange={(event) => { handleInputChange(idx, "options", event.target.value); }}
 											name="Field Data Options"
