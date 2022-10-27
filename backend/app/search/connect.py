@@ -23,7 +23,7 @@ def connect_elasticsearch():
         else:
             raise ServiceUnreachable("Elasticsearch")
     except ServiceUnreachable as e:
-        log_error(e)
+        await log_error(e)
     return _es
 
 
