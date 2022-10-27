@@ -136,8 +136,6 @@ services:
     build:
       context: backend
       dockerfile: heartbeat.Dockerfile
-    networks:
-      - clowder2
     environment:
       - MONGODB_URL=mongodb://mongo:27017
       - RABBITMQ_HOST=localhost
