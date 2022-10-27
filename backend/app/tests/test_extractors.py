@@ -14,7 +14,8 @@ extractor_info = {
     "@context": "http://clowder.ncsa.illinois.edu/contexts/extractors.jsonld",
     "name": "ncsa.wordcount",
     "version": "2.0",
-    "description": "WordCount extractor. Counts the number of characters, words and lines in the text file that was uploaded.",    "contributors": [],
+    "description": "WordCount extractor. Counts the number of characters, words and lines in the text file that was uploaded.",
+    "contributors": [],
     "contexts": [
         {
             "lines": "http://clowder.ncsa.illinois.edu/metadata/ncsa.wordcount#lines",
