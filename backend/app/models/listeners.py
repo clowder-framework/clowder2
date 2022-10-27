@@ -34,7 +34,7 @@ class EventListenerBase(BaseModel):
     """An Event Listener is the expanded version of v1 Extractors."""
 
     name: str
-    version: int = 1
+    version: str = "1.0"
     description: str = ""
 
 
@@ -55,7 +55,7 @@ class LegacyEventListenerIn(ExtractorInfo):
 class EventListenerDB(EventListenerBase, MongoModel):
     """EventListeners have a name, version, author, description, and optionally properties where extractor_info will be saved."""
 
-    author: UserOut
+    author: str
     created: datetime = Field(default_factory=datetime.utcnow)
     modified: datetime = Field(default_factory=datetime.utcnow)
     properties: Optional[ExtractorInfo] = None
