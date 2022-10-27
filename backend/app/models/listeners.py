@@ -55,7 +55,7 @@ class LegacyEventListenerIn(ExtractorInfo):
 class EventListenerDB(EventListenerBase, MongoModel):
     """EventListeners have a name, version, author, description, and optionally properties where extractor_info will be saved."""
 
-    author: str
+    author: UserOut
     created: datetime = Field(default_factory=datetime.utcnow)
     modified: datetime = Field(default_factory=datetime.utcnow)
     properties: Optional[ExtractorInfo] = None
