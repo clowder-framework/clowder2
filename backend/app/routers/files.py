@@ -314,46 +314,17 @@ async def get_file_extract(
         req_headers = info.headers
         raw = req_headers.raw
         authorization = raw[1]
-        token = authorization[1].decode("utf-8")
-        token = token.lstrip("Bearer")
-        token = token.lstrip(" ")
-        req_info = await info.json()
-        if "extractor" in req_info:
-            # TODO check if extractor is registered
-            msg = {"message": "testing", "file_id": file_id}
-            body = {}
-            # TODO better solution for host
-            body["host"] = "http://127.0.0.1:8000"
-            body["secretKey"] = token
-            body["token"] = token
-            body["retry_count"] = 0
-            body["filename"] = file["name"]
-            body["id"] = file_id
-            body["datasetId"] = str(file["dataset_id"])
-            body["secretKey"] = token
-            body["fileSize"] = file["bytes"]
-            body["resource_type"] = "file"
-            body["flags"] = ""
-            current_queue = req_info["extractor"]
-            if "parameters" in req_info:
-                current_parameters = req_info["parameters"]
-                body["parameters"] = current_parameters
-            current_routing_key = "extractors." + current_queue
-            rabbitmq_client.queue_bind(
-                exchange="extractors",
-                queue=current_queue,
-                routing_key=current_routing_key,
-            )
-            rabbitmq_client.basic_publish(
-                exchange="extractors",
-                routing_key=current_routing_key,
-                body=json.dumps(body, ensure_ascii=False),
-                properties=pika.BasicProperties(
-                    content_type="application/json", delivery_mode=1
-                ),
-            )
-            return msg
-        else:
-            raise HTTPException(status_code=404, detail=f"No extractor submitted")
+        token = authorization[1].decode("utf-8").lstrip("Bearer").lstrip(" ")
+
+        queue = req_info["extractor"]
+        if "parameters" in req_info:
+            parameters = req_info["parameters"]
+        routing_key = "extractors." + queue
+
+        submit_file_message(
+            file_out, queue, routing_key, parameters, token, db, rabbitmq_client
+        )
+
+        return {"message": "testing", "file_id": file_id}
     else:
         raise HTTPException(status_code=404, detail=f"File {file_id} not found")
