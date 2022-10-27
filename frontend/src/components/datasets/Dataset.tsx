@@ -264,7 +264,7 @@ export const Dataset = (): JSX.Element => {
 								</Tabs>
 							</Box>
 							<TabPanel value={selectedTabIndex} index={0}>
-								<FilesTable datasetId={datasetId} datasetName={about.name}/>
+								<FilesTable datasetId={datasetId}/>
 							</TabPanel>
 							<TabPanel value={selectedTabIndex} index={1}>
 								{

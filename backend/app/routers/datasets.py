@@ -8,6 +8,7 @@ import zipfile
 from collections.abc import Mapping, Iterable
 from typing import List, Optional, Union
 import json
+
 import pika
 from bson import ObjectId
 from bson import json_util
@@ -30,9 +31,9 @@ from rocrate.rocrate import ROCrate
 from app import dependencies
 from app import keycloak_auth
 from app.search.connect import (
-    connect_elasticsearch,
     insert_record,
     delete_document_by_id,
+    update_record,
 )
 from app.config import settings
 from app.keycloak_auth import get_user, get_current_user
@@ -188,9 +189,8 @@ async def save_dataset(
     dataset_in: DatasetIn,
     user=Depends(keycloak_auth.get_current_user),
     db: MongoClient = Depends(dependencies.get_db),
+    es=Depends(dependencies.get_elasticsearchclient),
 ):
-    # Make connection to elatsicsearch
-    es = connect_elasticsearch()
 
     # Check all connection and abort if any one of them is not available
     if db is None or es is None:
@@ -303,7 +303,14 @@ async def edit_dataset(
     dataset_info: DatasetBase,
     db: MongoClient = Depends(dependencies.get_db),
     user_id=Depends(get_user),
+    es=Depends(dependencies.get_elasticsearchclient),
 ):
+
+    # Check all connection and abort if any one of them is not available
+    if db is None or es is None:
+        raise HTTPException(status_code=503, detail="Service not available")
+        return
+
     if (
         dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
     ) is not None:
@@ -317,6 +324,16 @@ async def edit_dataset(
             await db["datasets"].replace_one(
                 {"_id": ObjectId(dataset_id)}, DatasetDB(**dataset).to_mongo()
             )
+            # Update entry to the dataset index
+            doc = {
+                "doc": {
+                    "name": ds["name"],
+                    "description": ds["description"],
+                    "author": UserOut(**user).email,
+                    "modified": ds["modified"],
+                }
+            }
+            update_record(es, "dataset", doc, dataset_id)
         except Exception as e:
             raise HTTPException(status_code=500, detail=e.args[0])
         return DatasetOut.from_mongo(dataset)
@@ -329,7 +346,14 @@ async def patch_dataset(
     dataset_info: DatasetPatch,
     user_id=Depends(get_user),
     db: MongoClient = Depends(dependencies.get_db),
+    es=Depends(dependencies.get_elasticsearchclient),
 ):
+
+    # Check all connection and abort if any one of them is not available
+    if db is None or es is None:
+        raise HTTPException(status_code=503, detail="Service not available")
+        return
+
     if (
         dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
     ) is not None:
@@ -343,6 +367,16 @@ async def patch_dataset(
             await db["datasets"].replace_one(
                 {"_id": ObjectId(dataset_id)}, DatasetDB(**dataset).to_mongo()
             )
+            # Update entry to the dataset index
+            doc = {
+                "doc": {
+                    "name": ds["name"],
+                    "description": ds["description"],
+                    "author": UserOut(**user).email,
+                    "modified": ds["modified"],
+                }
+            }
+            update_record(es, "dataset", doc, dataset_id)
         except Exception as e:
             raise HTTPException(status_code=500, detail=e.args[0])
         return DatasetOut.from_mongo(dataset)
@@ -353,9 +387,8 @@ async def delete_dataset(
     dataset_id: str,
     db: MongoClient = Depends(dependencies.get_db),
     fs: Minio = Depends(dependencies.get_fs),
+    es=Depends(dependencies.get_elasticsearchclient),
 ):
-    # Make connection to elatsicsearch
-    es = connect_elasticsearch()
 
     # Check all connection and abort if any one of them is not available
     if db is None or fs is None or es is None:
@@ -371,7 +404,7 @@ async def delete_dataset(
         await db.metadata.delete_many({"resource.resource_id": ObjectId(dataset_id)})
         async for file in db["files"].find({"dataset_id": ObjectId(dataset_id)}):
             file = FileOut(**file)
-            await remove_file_entry(file.id, db, fs)
+            await remove_file_entry(file.id, db, fs, es)
         await db["folders"].delete_many({"dataset_id": ObjectId(dataset_id)})
         return {"deleted": dataset_id}
     else:
@@ -485,6 +518,7 @@ async def save_file(
     db: MongoClient = Depends(dependencies.get_db),
     fs: Minio = Depends(dependencies.get_fs),
     file: UploadFile = File(...),
+    es=Depends(dependencies.get_elasticsearchclient),
 ):
     if (
         dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
@@ -508,7 +542,7 @@ async def save_file(
                 )
 
         await add_file_entry(
-            fileDB, user, db, fs, file.file, content_type=file.content_type
+            fileDB, user, db, fs, file.file, content_type=file.content_type, es=es
         )
 
         return fileDB
@@ -577,7 +611,7 @@ async def create_dataset_from_zip(
                             name=filename, creator=user, dataset_id=dataset_id
                         )
                     with open(extracted, "rb") as file_reader:
-                        await add_file_entry(fileDB, user, db, fs, file_reader)
+                        await add_file_entry(fileDB, user, db, fs, file_reader, es)
                     if os.path.isfile(extracted):
                         os.remove(extracted)
 

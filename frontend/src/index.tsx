@@ -9,7 +9,7 @@ import configureStore from "./store/configureStore";
 import {ThemeProvider} from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 const store = configureStore();
-import theme from './theme';
+import {theme} from './theme';
 
 
 render(
