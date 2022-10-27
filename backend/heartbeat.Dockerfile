@@ -5,6 +5,7 @@ WORKDIR /code
 # set python env variables
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
+ENV PYTHONPATH "/code"
 
 # install pipenv
 RUN pip install pipenv
@@ -21,5 +22,4 @@ ENV PATH="/code/.venv/bin:$PATH"
 # copy app code at end to make it easier to change code and not have to rebuild requirement layers
 COPY ./app /code/app
 
-# launch app using uvicorn
-CMD ["python", "/code/app/heartbeat_listener_sync.py"]
+CMD ["python", "app/heartbeat_listener_sync.py"]

@@ -45,6 +45,7 @@ services:
     environment:
       MONGODB_URL: mongodb://mongo:27017
       MINIO_SERVER_URL: minio-nginx:9000
+      RABBITMQ_HOST: rabbitmq:15672
       auth_base: http://localhost
       auth_url: http://localhost/keycloak/realms/clowder/protocol/openid-connect/auth?client_id=clowder2-backend&response_type=code
       oauth2_scheme_auth_url: http://keycloak:8080/keycloak/realms/clowder/protocol/openid-connect/auth?client_id=clowder2-backend&response_type=code
@@ -80,19 +81,21 @@ services:
       - "traefik.http.services.frontend.loadbalancer.server.port=80"
       - "traefik.http.routers.frontend.priority=1"
 
-  extractor-heartbeat:
-    image: "tcnichol/extractor-heartbeat"
+  extractors-heartbeat:
+    image: "clowder/clowder2-heartbeat"
     build:
-      context: extractor-heartbeat
+      context: backend
+      dockerfile: heartbeat.Dockerfile
     networks:
       - clowder2
     environment:
       - MONGODB_URL=mongodb://mongo:27017
-      - RABBITMQ_SERVER_ADDITIONAL_ERL_ARGS=-rabbitmq_management path_prefix "/rabbitmq"
+      - RABBITMQ_HOST=rabbitmq
       - RABBITMQ_DEFAULT_USER=${RABBITMQ_DEFAULT_USER:-guest}
       - RABBITMQ_DEFAULT_PASS=${RABBITMQ_DEFAULT_PASS:-guest}
     depends_on:
       - mongo
+      - rabbitmq
 
   mongo:
     image: mongo:5.0
