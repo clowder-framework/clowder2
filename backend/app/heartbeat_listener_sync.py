@@ -86,6 +86,6 @@ if __name__ == "__main__":
         try:
             listen_for_heartbeats()
         except Exception as e:
-            print("Could not connect trying again in 60 seconds")
+            print("Could not connect trying again in 10 seconds")
             print(e)
-            time.sleep(60)
+            time.sleep(10)

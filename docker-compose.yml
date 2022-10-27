@@ -192,6 +192,8 @@ services:
     ports:
       - "5672:5672"
       - "15672:15672"
+    networks:
+      - clowder2
     volumes:
       - rabbitmq:/var/lib/rabbitmq
 
