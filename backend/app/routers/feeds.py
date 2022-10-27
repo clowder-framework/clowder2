@@ -72,10 +72,14 @@ async def check_feed_listeners(
                         listeners_found.append(listener.listener_id)
 
     for targ_listener in listeners_found:
-        queue = ""  # TODO: Each extractor gets a queue - routing key same as name?
-        routing_key = ""
-        parameters = {}
-        submit_file_message(file_out, queue, routing_key, parameters)
+        if (
+            listener_db := await db["listeners"].find_one({"_id": ObjectId(targ_listener)})
+        ) is not None:
+            listener_info = EventListenerOut.from_mongo(listener_db)
+            queue = f"{listener_info.name}:{listener_info.version}"
+            routing_key = ""
+            parameters = {}
+            submit_file_message(file_out, queue, routing_key, parameters)
 
     return listeners_found
 
