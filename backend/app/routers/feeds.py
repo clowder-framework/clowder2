@@ -71,7 +71,9 @@ async def check_feed_listeners(
 
     for targ_listener in listeners_found:
         if (
-            listener_db := await db["listeners"].find_one({"_id": ObjectId(targ_listener)})
+            listener_db := await db["listeners"].find_one(
+                {"_id": ObjectId(targ_listener)}
+            )
         ) is not None:
             listener_info = EventListenerOut.from_mongo(listener_db)
             queue = listener_info.name
