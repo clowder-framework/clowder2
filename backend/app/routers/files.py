@@ -27,13 +27,18 @@ from app.search.connect import (
     update_record,
 )
 from app.models.files import FileIn, FileOut, FileVersion, FileDB
+from app.models.listeners import EventListenerMessage
 from app.models.users import UserOut
+from app.models.search import SearchIndexContents
+from app.routers.feeds import check_feed_listeners
 from app.keycloak_auth import get_user, get_current_user, get_token
+from app.rabbitmq.listeners import submit_file_message
 from typing import Union
 
 router = APIRouter()
 
 
+# TODO: Move this to MongoDB middle layer
 async def add_file_entry(
     file_db: FileDB,
     user: UserOut,
@@ -80,6 +85,7 @@ async def add_file_entry(
     file_db.bytes = bytes
     file_db.content_type = content_type if type(content_type) is str else "N/A"
     await db["files"].replace_one({"_id": ObjectId(new_file_id)}, file_db.to_mongo())
+    file_out = FileOut(**file_db.dict())
 
     # Add FileVersion entry and update file
     new_version = FileVersion(
@@ -104,7 +110,11 @@ async def add_file_entry(
     }
     insert_record(es, "file", doc, file_db.id)
 
+    # Submit file job to any qualifying feeds
+    await check_feed_listeners(es, file_out, user, db)
 
+
+# TODO: Move this to MongoDB middle layer
 async def remove_file_entry(
     file_id: Union[str, ObjectId],
     db: MongoClient,
@@ -292,49 +302,27 @@ async def get_file_extract(
     db: MongoClient = Depends(dependencies.get_db),
     rabbitmq_client: BlockingChannel = Depends(dependencies.get_rabbitmq),
 ):
+    req_info = await info.json()
+    if "extractor" not in req_info:
+        raise HTTPException(status_code=404, detail=f"No extractor submitted")
     if (file := await db["files"].find_one({"_id": ObjectId(file_id)})) is not None:
+        file_out = FileOut.from_mongo(file)
+
+        # Get extractor info from request (Clowder v1)
         req_headers = info.headers
         raw = req_headers.raw
         authorization = raw[1]
-        token = authorization[1].decode("utf-8")
-        token = token.lstrip("Bearer")
-        token = token.lstrip(" ")
-        req_info = await info.json()
-        if "extractor" in req_info:
-            # TODO check if extractor is registered
-            msg = {"message": "testing", "file_id": file_id}
-            body = {}
-            body["host"] = "http://127.0.0.1:8000"
-            body["secretKey"] = "secretKey"
-            body["token"] = token
-            body["retry_count"] = 0
-            body["filename"] = file["name"]
-            body["id"] = file_id
-            body["datasetId"] = str(file["dataset_id"])
-            body["host"] = "http://127.0.0.1:8000"
-            body["secretKey"] = token
-            body["fileSize"] = file["bytes"]
-            body["resource_type"] = "file"
-            body["flags"] = ""
-            current_queue = req_info["extractor"]
-            if "parameters" in req_info:
-                current_parameters = req_info["parameters"]
-            current_routing_key = "extractors." + current_queue
-            rabbitmq_client.queue_bind(
-                exchange="extractors",
-                queue=current_queue,
-                routing_key=current_routing_key,
-            )
-            rabbitmq_client.basic_publish(
-                exchange="extractors",
-                routing_key=current_routing_key,
-                body=json.dumps(body, ensure_ascii=False),
-                properties=pika.BasicProperties(
-                    content_type="application/json", delivery_mode=1
-                ),
-            )
-            return msg
-        else:
-            raise HTTPException(status_code=404, detail=f"No extractor submitted")
+        token = authorization[1].decode("utf-8").lstrip("Bearer").lstrip(" ")
+
+        queue = req_info["extractor"]
+        if "parameters" in req_info:
+            parameters = req_info["parameters"]
+        routing_key = "extractors." + queue
+
+        submit_file_message(
+            file_out, queue, routing_key, parameters, token, db, rabbitmq_client
+        )
+
+        return {"message": "testing", "file_id": file_id}
     else:
         raise HTTPException(status_code=404, detail=f"File {file_id} not found")

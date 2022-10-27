@@ -25,8 +25,9 @@ from app.routers import (
     collections,
     authentication,
     keycloak,
-    extractors,
     elasticsearch,
+    listeners,
+    feeds,
 )
 
 # setup loggers
@@ -114,7 +115,13 @@ api_router.include_router(
     dependencies=[Depends(get_current_username)],
 )
 api_router.include_router(
-    extractors.router,
+    listeners.router,
+    prefix="/listeners",
+    tags=["listeners"],
+    dependencies=[Depends(get_current_username)],
+)
+api_router.include_router(
+    listeners.legacy_router,
     prefix="/extractors",
     tags=["extractors"],
     dependencies=[Depends(get_current_username)],
@@ -123,6 +130,12 @@ api_router.include_router(
     elasticsearch.router,
     prefix="/elasticsearch",
     tags=["elasticsearch"],
+    dependencies=[Depends(get_current_username)],
+)
+api_router.include_router(
+    feeds.router,
+    prefix="/feeds",
+    tags=["feeds"],
     dependencies=[Depends(get_current_username)],
 )
 api_router.include_router(keycloak.router, prefix="/auth", tags=["auth"])

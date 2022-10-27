@@ -197,7 +197,6 @@ async def save_dataset(
         raise HTTPException(status_code=503, detail="Service not available")
         return
 
-    result = dataset_in.dict()
     dataset_db = DatasetDB(**dataset_in.dict(), author=user)
     new_dataset = await db["datasets"].insert_one(dataset_db.to_mongo())
     found = await db["datasets"].find_one({"_id": new_dataset.inserted_id})
