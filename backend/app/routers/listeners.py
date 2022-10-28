@@ -29,7 +29,7 @@ async def save_listener(
     db: MongoClient = Depends(get_db),
 ):
     """Register a new Event Listener with the system."""
-    listener = EventListenerDB(**listener_in.dict(), author=user)
+    listener = EventListenerDB(**listener_in.dict(), creator=user)
     # TODO: Check for duplicates somehow?
     new_listener = await db["listeners"].insert_one(listener.to_mongo())
     found = await db["listeners"].find_one({"_id": new_listener.inserted_id})
@@ -49,7 +49,7 @@ async def save_legacy_listener(
         name=legacy_in.name,
         version=int(legacy_in.version),
         description=legacy_in.description,
-        author=user,
+        creator=user,
         properties=listener_properties,
     )
     new_listener = await db["listeners"].insert_one(listener.to_mongo())
