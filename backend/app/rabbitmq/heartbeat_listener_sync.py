@@ -19,14 +19,14 @@ def callback(ch, method, properties, body):
     extractor_db = EventListenerDB(**extractor_info)
     client = MongoClient(settings.MONGODB_URL)
     db = client["clowder2"]
-    existing_extractor = db["extractors"].find_one({"name": extractor_queue})
+    existing_extractor = db["listeners"].find_one({"name": extractor_queue})
     if existing_extractor is not None:
         existing_version = existing_extractor["version"]
         new_version = extractor_db.version
         if version.parse(new_version) > version.parse(existing_version):
-            new_extractor = db["extractors"].insert_one(extractor_db.to_mongo())
-            found = db["extractors"].find_one({"_id": new_extractor.inserted_id})
-            removed = db["extractors"].delete_one({"_id": existing_extractor["_id"]})
+            new_extractor = db["listeners"].insert_one(extractor_db.to_mongo())
+            found = db["listeners"].find_one({"_id": new_extractor.inserted_id})
+            removed = db["listeners"].delete_one({"_id": existing_extractor["_id"]})
             extractor_out = EventListenerOut.from_mongo(found)
             print(
                 "extractor updated: "
@@ -38,8 +38,8 @@ def callback(ch, method, properties, body):
             )
             return extractor_out
     else:
-        new_extractor = db["extractors"].insert_one(extractor_db.to_mongo())
-        found = db["extractors"].find_one({"_id": new_extractor.inserted_id})
+        new_extractor = db["listeners"].insert_one(extractor_db.to_mongo())
+        found = db["listeners"].find_one({"_id": new_extractor.inserted_id})
         extractor_out = EventListenerOut.from_mongo(found)
         print("new extractor registered: " + extractor_name)
         return extractor_out
