@@ -76,7 +76,7 @@ async def _build_metadata_db_obj(
         extractor_info = metadata_in.extractor_info
         if extractor_info is not None:
             if (
-                extractor := await db["extractors"].find_one(
+                extractor := await db["listeners"].find_one(
                     {"name": extractor_info.name, "version": extractor_info.version}
                 )
             ) is not None:
@@ -176,7 +176,7 @@ async def replace_file_metadata(
         extractor_info = metadata_in.extractor_info
         if extractor_info is not None:
             if (
-                extractor := await db["extractors"].find_one(
+                extractor := await db["listeners"].find_one(
                     {"name": extractor_info.name, "version": extractor_info.version}
                 )
             ) is not None:
@@ -267,7 +267,7 @@ async def update_file_metadata(
         extractor_info = metadata_in.extractor_info
         if extractor_info is not None:
             if (
-                extractor := await db["extractors"].find_one(
+                extractor := await db["listeners"].find_one(
                     {"name": extractor_info.name, "version": extractor_info.version}
                 )
             ) is not None:
@@ -402,7 +402,7 @@ async def delete_file_metadata(
         extractor_info = metadata_in.extractor_info
         if extractor_info is not None:
             if (
-                extractor := await db["extractors"].find_one(
+                extractor := await db["listeners"].find_one(
                     {"name": extractor_info.name, "version": extractor_info.version}
                 )
             ) is not None:

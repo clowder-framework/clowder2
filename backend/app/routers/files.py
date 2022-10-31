@@ -294,6 +294,8 @@ async def get_file_versions(
     raise HTTPException(status_code=404, detail=f"File {file_id} not found")
 
 
+# submits file to extractor
+# can handle parameeters pass in as key/values in info
 @router.post("/{file_id}/extract")
 async def get_file_extract(
     file_id: str,

@@ -7,9 +7,8 @@ import tempfile
 import zipfile
 from collections.abc import Mapping, Iterable
 from typing import List, Optional, Union
+import json
 
-import pymongo
-from pymongo import MongoClient
 import pika
 from bson import ObjectId
 from bson import json_util
@@ -24,6 +23,7 @@ from fastapi import (
 )
 from minio import Minio
 from pika.adapters.blocking_connection import BlockingChannel
+import pymongo
 from pymongo import MongoClient
 from rocrate.model.person import Person
 from rocrate.rocrate import ROCrate
@@ -761,6 +761,8 @@ async def download_dataset(
         raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
 
 
+# submits file to extractor
+# can handle parameeters pass in as key/values in info
 @router.post("/{dataset_id}/extract")
 async def get_dataset_extract(
     dataset_id: str,
@@ -780,10 +782,11 @@ async def get_dataset_extract(
             token = token.lstrip("Bearer")
             token = token.lstrip(" ")
             # TODO check of extractor exists
-            msg = {"message": "testing", "dataseet_id": dataset_id}
+            msg = {"message": "testing", "dataset_id": dataset_id}
             body = {}
             body["secretKey"] = token
             body["token"] = token
+            # TODO better solution for host
             body["host"] = "http://127.0.0.1:8000"
             body["retry_count"] = 0
             body["filename"] = dataset["name"]
@@ -794,6 +797,7 @@ async def get_dataset_extract(
             current_queue = req_info["extractor"]
             if "parameters" in req_info:
                 current_parameters = req_info["parameters"]
+                body["parameters"] = current_parameters
             current_routing_key = "extractors." + current_queue
             rabbitmq_client.queue_bind(
                 exchange="extractors",
