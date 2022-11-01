@@ -23,5 +23,11 @@ class IndexSettings:
         }
     }
 
-
+    metadata_mappings = {
+        "resource_id": "string",
+        "reource_type": "string",
+        "created": {"type": "date"},
+        "creator": {"type": "keyword"},
+        "contents": "object"
+    }
 indexSettings = IndexSettings()

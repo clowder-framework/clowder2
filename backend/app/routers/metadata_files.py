@@ -2,6 +2,7 @@ import io
 from datetime import datetime
 from typing import Optional, List
 
+import Elasticsearch as Elasticsearch
 from bson import ObjectId
 from fastapi import (
     APIRouter,
@@ -28,6 +29,7 @@ from app.models.metadata import (
     MetadataDelete,
 )
 from app.keycloak_auth import get_user, get_current_user, get_token, UserOut
+from app.search.connect import insert_record, update_record, delete_document_by_id
 
 router = APIRouter()
 
@@ -106,6 +108,7 @@ async def add_file_metadata(
     file_id: str,
     user=Depends(get_current_user),
     db: MongoClient = Depends(dependencies.get_db),
+    es: Elasticsearch = Depends(dependencies.get_elasticsearchclient)
 ):
     """Attach new metadata to a file. The body must include a contents field with the JSON metadata, and either a
     context JSON-LD object, context_url, or definition (name of a metadata definition) to be valid.
@@ -136,6 +139,18 @@ async def add_file_metadata(
         new_metadata = await db["metadata"].insert_one(md.to_mongo())
         found = await db["metadata"].find_one({"_id": new_metadata.inserted_id})
         metadata_out = MetadataOut.from_mongo(found)
+
+        # Add an entry to the metadata index
+        doc = {
+            "doc": {
+                "resource_id": file_id,
+                "reource_type": "file",
+                "created": metadata_out.created.utcnow(),
+                "creator": user.id,
+                "contents": metadata_out.contents
+            }
+        }
+        insert_record(es, "metadata", doc, metadata_out.id)
         return metadata_out
 
 
@@ -145,6 +160,7 @@ async def replace_file_metadata(
     file_id: str,
     user=Depends(get_current_user),
     db: MongoClient = Depends(dependencies.get_db),
+    es: Elasticsearch = Depends(dependencies.get_elasticsearchclient)
 ):
     """Replace metadata, including agent and context. If only metadata contents should be updated, use PATCH instead.
 
@@ -200,6 +216,14 @@ async def replace_file_metadata(
             )
             found = await db["metadata"].find_one({"_id": md["_id"]})
             metadata_out = MetadataOut.from_mongo(found)
+
+            # Update entry to the metadata index
+            doc = {
+                "doc": {
+                    "contents": metadata_out["contents"]
+                }
+            }
+            update_record(es, "metadata", doc, metadata_out["_id"])
             return metadata_out
         else:
             raise HTTPException(status_code=404, detail=f"No metadata found to update")
@@ -360,6 +384,7 @@ async def delete_file_metadata(
     # version: Optional[int] = Form(None),
     user=Depends(get_current_user),
     db: MongoClient = Depends(dependencies.get_db),
+    es: Elasticsearch = Depends(dependencies.get_elasticsearchclient)
 ):
     if (file := await db["files"].find_one({"_id": ObjectId(file_id)})) is not None:
         query = {"resource.resource_id": ObjectId(file_id)}
@@ -424,5 +449,7 @@ async def delete_file_metadata(
             raise HTTPException(
                 status_code=404, detail=f"No metadata found with that criteria"
             )
+        # delete from elasticsearch
+        delete_document_by_id(es, "metadata", str(metadata_in.id))
     else:
         raise HTTPException(status_code=404, detail=f"File {file_id} not found")
