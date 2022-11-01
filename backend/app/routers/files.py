@@ -25,7 +25,7 @@ from app.search.connect import (
     connect_elasticsearch,
     insert_record,
     delete_document_by_id,
-    update_record
+    update_record,
 )
 from app.models.files import FileIn, FileOut, FileVersion, FileDB
 from app.models.listeners import EventListenerMessage
