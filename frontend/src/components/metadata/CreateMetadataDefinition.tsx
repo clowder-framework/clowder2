@@ -30,7 +30,7 @@ export const CreateMetadataDefinition = (): JSX.Element => {
 	const [formInput, setFormInput] = React.useState({
 		name: "",
 		description: "",
-		context: "",
+		context: '{\n\t"abstract": "http://purl.org/dc/terms/abstract"\n}',
 		fields: [{
 			name: "",
 			list: false,
@@ -188,7 +188,7 @@ export const CreateMetadataDefinition = (): JSX.Element => {
 		setFormInput({
 			name: "",
 			description: "",
-			context: "",
+			context: '{\n\t"abstract": "http://purl.org/dc/terms/abstract"\n}',
 			fields: [{
 				name: "",
 				list: false,
@@ -216,7 +216,7 @@ export const CreateMetadataDefinition = (): JSX.Element => {
 				<Stepper activeStep={activeStep} orientation="vertical">
 					<Step key="create-metadata">
                         <StepButton color="inherit" onClick={() => {setActiveStep(0)}}>
-                            Create Metadata Definition*
+                            Create metadata definition*
                         </StepButton>
 						<StepContent>
                             <form onSubmit={handleNext}>
@@ -257,11 +257,7 @@ export const CreateMetadataDefinition = (): JSX.Element => {
                                     id="metadata-context"
                                     label="Metadata Context"
                                     InputLabelProps={{ shrink: true }}
-                                    placeholder='Please enter metadata context in JSON format
-e.g.
-{
-"doi": "https://schema.org/Date"
-}'
+                                    placeholder="Please enter metadata context in JSON format"
                                     value={formInput.context}
                                     onChange={(event) => { handleInputChange(-1, "context", event.target.value); }}
                                     multiline
@@ -306,7 +302,7 @@ e.g.
 								<StepContent>
 									<Grid container>
 										<Grid xs={4} md={4}>
-											<FormGroup>
+											<FormGroup row>
 												<FormControlLabel control={<Checkbox 
 													checked={input.list}
 													onChange={(event) => { handleInputChange(idx, "list", event.target.value); }}
