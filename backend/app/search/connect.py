@@ -12,7 +12,7 @@ no_of_shards = settings.elasticsearch_no_of_shards
 no_of_replicas = settings.elasticsearch_no_of_replicas
 
 
-def connect_elasticsearch():
+async def connect_elasticsearch():
     """To connect to elasticsearch server and return the elasticsearch client"""
     _es = None
     logger.info(settings.elasticsearch_url)

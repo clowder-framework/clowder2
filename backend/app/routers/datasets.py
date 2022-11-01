@@ -192,7 +192,7 @@ async def save_dataset(
     db: MongoClient = Depends(dependencies.get_db),
 ):
     # Make connection to elatsicsearch
-    es = connect_elasticsearch()
+    es = await connect_elasticsearch()
 
     # Check all connection and abort if any one of them is not available
     if db is None or es is None:
@@ -307,7 +307,7 @@ async def edit_dataset(
     user_id=Depends(get_user),
 ):
     # Make connection to elatsicsearch
-    es = connect_elasticsearch()
+    es = await connect_elasticsearch()
 
     # Check all connection and abort if any one of them is not available
     if db is None or es is None:
@@ -351,7 +351,7 @@ async def patch_dataset(
     db: MongoClient = Depends(dependencies.get_db),
 ):
     # Make connection to elatsicsearch
-    es = connect_elasticsearch()
+    es = await connect_elasticsearch()
 
     # Check all connection and abort if any one of them is not available
     if db is None or es is None:
@@ -393,7 +393,7 @@ async def delete_dataset(
     fs: Minio = Depends(dependencies.get_fs),
 ):
     # Make connection to elatsicsearch
-    es = connect_elasticsearch()
+    es = await connect_elasticsearch()
 
     # Check all connection and abort if any one of them is not available
     if db is None or fs is None or es is None:

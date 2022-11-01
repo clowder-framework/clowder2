@@ -51,7 +51,7 @@ async def add_file_entry(
         file: bytes to upload
     """
     # Make connection to elatsicsearch
-    es = connect_elasticsearch()
+    es = await connect_elasticsearch()
 
     # Check all connection and abort if any one of them is not available
     if db is None or fs is None or es is None:
@@ -112,7 +112,7 @@ async def remove_file_entry(
     # TODO: Deleting individual versions will require updating version_id in mongo, or deleting entire document
 
     # Make connection to elatsicsearch
-    es = connect_elasticsearch()
+    es = await connect_elasticsearch()
 
     # Check all connection and abort if any one of them is not available
     if db is None or fs is None or es is None:
@@ -120,7 +120,7 @@ async def remove_file_entry(
         return
     fs.remove_object(settings.MINIO_BUCKET_NAME, str(file_id))
     # delete from elasticsearch
-    delete_document_by_id(connect_elasticsearch(), "file", str(file_id))
+    delete_document_by_id(es, "file", str(file_id))
     await db["files"].delete_one({"_id": ObjectId(file_id)})
     await db.metadata.delete_many({"resource.resource_id": ObjectId(file_id)})
     await db["file_versions"].delete_many({"file_id": ObjectId(file_id)})
@@ -136,7 +136,7 @@ async def update_file(
     file: UploadFile = File(...),
 ):
     # Make connection to elatsicsearch
-    es = connect_elasticsearch()
+    es = await connect_elasticsearch()
 
     # Check all connection and abort if any one of them is not available
     if db is None or fs is None or es is None:
