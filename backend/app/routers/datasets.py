@@ -7,9 +7,8 @@ import tempfile
 import zipfile
 from collections.abc import Mapping, Iterable
 from typing import List, Optional, Union
+import json
 
-import pymongo
-from pymongo import MongoClient
 import pika
 from bson import ObjectId
 from bson import json_util
@@ -24,6 +23,7 @@ from fastapi import (
 )
 from minio import Minio
 from pika.adapters.blocking_connection import BlockingChannel
+import pymongo
 from pymongo import MongoClient
 from rocrate.model.person import Person
 from rocrate.rocrate import ROCrate
@@ -190,8 +190,8 @@ async def save_dataset(
     dataset_in: DatasetIn,
     user=Depends(keycloak_auth.get_current_user),
     db: MongoClient = Depends(dependencies.get_db),
+    es=Depends(dependencies.get_elasticsearchclient),
 ):
-    # Make connection to elatsicsearch
     es = await connect_elasticsearch()
 
     # Check all connection and abort if any one of them is not available
@@ -199,7 +199,6 @@ async def save_dataset(
         raise HTTPException(status_code=503, detail="Service not available")
         return
 
-    result = dataset_in.dict()
     dataset_db = DatasetDB(**dataset_in.dict(), author=user)
     new_dataset = await db["datasets"].insert_one(dataset_db.to_mongo())
     found = await db["datasets"].find_one({"_id": new_dataset.inserted_id})
@@ -305,8 +304,8 @@ async def edit_dataset(
     dataset_info: DatasetBase,
     db: MongoClient = Depends(dependencies.get_db),
     user_id=Depends(get_user),
+    es=Depends(dependencies.get_elasticsearchclient),
 ):
-    # Make connection to elatsicsearch
     es = await connect_elasticsearch()
 
     # Check all connection and abort if any one of them is not available
@@ -349,8 +348,8 @@ async def patch_dataset(
     dataset_info: DatasetPatch,
     user_id=Depends(get_user),
     db: MongoClient = Depends(dependencies.get_db),
+    es=Depends(dependencies.get_elasticsearchclient),
 ):
-    # Make connection to elatsicsearch
     es = await connect_elasticsearch()
 
     # Check all connection and abort if any one of them is not available
@@ -391,8 +390,8 @@ async def delete_dataset(
     dataset_id: str,
     db: MongoClient = Depends(dependencies.get_db),
     fs: Minio = Depends(dependencies.get_fs),
+    es=Depends(dependencies.get_elasticsearchclient),
 ):
-    # Make connection to elatsicsearch
     es = await connect_elasticsearch()
 
     # Check all connection and abort if any one of them is not available
@@ -409,7 +408,7 @@ async def delete_dataset(
         await db.metadata.delete_many({"resource.resource_id": ObjectId(dataset_id)})
         async for file in db["files"].find({"dataset_id": ObjectId(dataset_id)}):
             file = FileOut(**file)
-            await remove_file_entry(file.id, db, fs)
+            await remove_file_entry(file.id, db, fs, es)
         await db["folders"].delete_many({"dataset_id": ObjectId(dataset_id)})
         return {"deleted": dataset_id}
     else:
@@ -523,6 +522,7 @@ async def save_file(
     db: MongoClient = Depends(dependencies.get_db),
     fs: Minio = Depends(dependencies.get_fs),
     file: UploadFile = File(...),
+    es=Depends(dependencies.get_elasticsearchclient),
 ):
     if (
         dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
@@ -546,7 +546,7 @@ async def save_file(
                 )
 
         await add_file_entry(
-            fileDB, user, db, fs, file.file, content_type=file.content_type
+            fileDB, user, db, fs, file.file, content_type=file.content_type, es=es
         )
 
         return fileDB
@@ -615,7 +615,7 @@ async def create_dataset_from_zip(
                             name=filename, creator=user, dataset_id=dataset_id
                         )
                     with open(extracted, "rb") as file_reader:
-                        await add_file_entry(fileDB, user, db, fs, file_reader)
+                        await add_file_entry(fileDB, user, db, fs, file_reader, es)
                     if os.path.isfile(extracted):
                         os.remove(extracted)
 
@@ -766,6 +766,8 @@ async def download_dataset(
         raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
 
 
+# submits file to extractor
+# can handle parameeters pass in as key/values in info
 @router.post("/{dataset_id}/extract")
 async def get_dataset_extract(
     dataset_id: str,
@@ -785,10 +787,11 @@ async def get_dataset_extract(
             token = token.lstrip("Bearer")
             token = token.lstrip(" ")
             # TODO check of extractor exists
-            msg = {"message": "testing", "dataseet_id": dataset_id}
+            msg = {"message": "testing", "dataset_id": dataset_id}
             body = {}
             body["secretKey"] = token
             body["token"] = token
+            # TODO better solution for host
             body["host"] = "http://127.0.0.1:8000"
             body["retry_count"] = 0
             body["filename"] = dataset["name"]
@@ -799,6 +802,7 @@ async def get_dataset_extract(
             current_queue = req_info["extractor"]
             if "parameters" in req_info:
                 current_parameters = req_info["parameters"]
+                body["parameters"] = current_parameters
             current_routing_key = "extractors." + current_queue
             rabbitmq_client.queue_bind(
                 exchange="extractors",

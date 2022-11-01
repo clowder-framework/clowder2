@@ -3,6 +3,8 @@ import time
 import pytest
 from datetime import datetime
 
+from bson import ObjectId
+
 from app.config import settings
 from app.search.config import indexSettings
 from app.search.connect import (
@@ -23,6 +25,10 @@ dummy_file_record = {
     "creator": "xyz",
     "created": datetime.now(),
     "download": 0,
+    "dataset_id": str(ObjectId("63458339aaecb776733354ea")),
+    "folder_id": None,
+    "bytes": 123456,
+    "content_type": "application/json",
 }
 updated_dummy_file_record = {
     "doc": {

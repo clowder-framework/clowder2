@@ -4,6 +4,9 @@ from elasticsearch import Elasticsearch
 from elasticsearch import BadRequestError
 
 from app.config import settings
+from app.models.files import FileOut
+from app.models.search import SearchCriteria
+from app.models.feeds import SearchObject
 from app.models.errors import ServiceUnreachable
 from app.database.errors import log_error
 
@@ -119,3 +122,28 @@ def delete_document_by_id(es_client, index_name, id):
         es_client.delete_by_query(index=index_name, query=query)
     except BadRequestError as ex:
         logger.error(str(ex))
+
+
+# Convert SearchObject into an Elasticsearch JSON object and perform search
+def execute_search_obj(es_client, search_obj: SearchObject):
+    match_list = []
+
+    # TODO: This will need to be more complex to support other operators
+    for criteria in search_obj.criteria:
+        crit = {criteria.field: criteria.value}
+        match_list.append({"match": crit})
+
+    if search_obj.mode == "and":
+        query = {"bool": {"must": match_list}}
+    if search_obj.mode == "or":
+        query = {"bool": {"should": match_list}}
+
+    return search_index(es_client, search_obj.index_name, query)
+
+
+def check_search_result(es_client, file_out: FileOut, search_obj: SearchObject):
+    """Check whether the contents of new_index match the search criteria in search_obj."""
+    # TODO: There is an opportunity to do some basic checks here first, without talking to elasticsearch
+    search_obj.criteria.insert(0, SearchCriteria(field="id", value=str(file_out.id)))
+    results = execute_search_obj(es_client, search_obj)
+    return results and len(results) > 0

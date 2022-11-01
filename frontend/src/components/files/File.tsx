@@ -28,6 +28,7 @@ import {EditMetadata} from "../metadata/EditMetadata";
 import {ClowderButton} from "../styledComponents/ClowderButton";
 import CloseIcon from "@mui/icons-material/Close";
 import Layout from "../Layout";
+import {fetchDatasetAbout} from "../../actions/dataset";
 
 const tab = {
 	fontStyle: "normal",
@@ -44,7 +45,8 @@ export const File = (): JSX.Element => {
 	// query parameter get dataset id
 	const search = useLocation().search;
 	const datasetId = new URLSearchParams(search).get("dataset");
-	const datasetName = new URLSearchParams(search).get("name");
+	const listDatasetAbout= (datasetId:string|undefined) => dispatch(fetchDatasetAbout(datasetId));
+	const about = useSelector((state: RootState) => state.dataset.about);
 
 	const dispatch = useDispatch();
 	const listFileSummary = (fileId:string|undefined) => dispatch(fetchFileSummary(fileId));
@@ -71,6 +73,7 @@ export const File = (): JSX.Element => {
 		// load file information
 		listFileSummary(fileId);
 		listFileVersions(fileId);
+		listDatasetAbout(datasetId); // get dataset name
 	}, []);
 
 
@@ -169,7 +172,7 @@ export const File = (): JSX.Element => {
 			"url": "/",
 		},
 		{
-			"name":datasetName,
+			"name":about["name"],
 			"url":`/datasets/${datasetId}`
 		}
 	];
