@@ -9,6 +9,7 @@ interface Config{
 	KeycloakLogout: string;
 	KeycloakRefresh: string;
 	KeycloakRegister: string;
+	searchEndpoint: string;
 }
 
 const config:Config = <Config>{};
@@ -30,5 +31,8 @@ config["KeycloakLogin"] = config.KeycloakBaseURL + "/login";
 config["KeycloakLogout"] = config.KeycloakBaseURL + "/logout";
 config["KeycloakRefresh"] = config.KeycloakBaseURL + "/refresh_token";
 config["KeycloakRegister"] = config.KeycloakBaseURL + "/register";
+
+// elasticsearch
+config["searchEndpoint"] = config.hostname + "/api/v2/elasticsearch";
 
 export default config;

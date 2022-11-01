@@ -1,12 +1,8 @@
 import React from "react";
-import {DataSearch, ReactiveList, MultiDropdownList, SingleDropdownRange} from "@appbaseio/reactivesearch";
-import {parseDate} from "../../utils/common";
-
-import DatasetCard from "../datasets/DatasetCard";
+import {DataSearch, MultiDropdownList, ReactiveList, SingleDropdownRange} from "@appbaseio/reactivesearch";
 import {Grid} from "@mui/material";
 import Layout from "../Layout";
-import {FilesTableFileEntry} from "../files/FilesTableFileEntry";
-import { SearchResult } from "./SearchResult";
+import {SearchResult} from "./SearchResult";
 
 
 export function Search() {
@@ -25,9 +21,11 @@ export function Search() {
 							queryFormat="or"
 							fuzziness={0}
 							debounce={100}
-							react={{ and: ["creatorfilter",
+							react={{
+								and: ["creatorfilter",
 									"downloadfilter",
-									"modifyfilter"]}}
+									"modifyfilter"]
+							}}
 							// apply react to the filter
 							URLParams={true}
 							showFilter={true}
@@ -37,8 +35,8 @@ export function Search() {
 								{field: "name", weight: 3},
 								{field: "description", weight: 2},
 								{field: "author.keyword", weight: 1},
-								{field: "creator.keyword", weight:1}
-								]}
+								{field: "creator.keyword", weight: 1}
+							]}
 							// placeholder="Search for Dataset"
 							innerClass={{
 								title: "search-title",
@@ -64,9 +62,9 @@ export function Search() {
 								<SingleDropdownRange
 									componentId="downloadfilter"
 									dataField="download"
-									data={[{ start: 0, label: "0 time and up" },
-										   { start: 10, label: "10 times and up" },
-										   { start: 100, label: "100 times and up" },
+									data={[{start: 0, label: "0 time and up"},
+										{start: 10, label: "10 times and up"},
+										{start: 100, label: "100 times and up"},
 									]}
 									placeholder="Download Times: All"
 									innerClass={{
@@ -78,9 +76,10 @@ export function Search() {
 								<SingleDropdownRange
 									componentId="modifyfilter"
 									dataField="modified"
-									data={[{ start: 0, label: "0 time and up" },
-										   { start: 10, label: "10 times and up" },
-										   { start: 100, label: "100 times and up" },
+									data={[{start: 0, label: "0 time and up"},
+										{start: 10, label: "10 times and up"},
+										{start: 100, label: "100 times and up"},
+
 									]}
 									placeholder="Modify Times: All"
 									innerClass={{
@@ -89,7 +88,6 @@ export function Search() {
 								/>
 							</Grid>
 						</Grid>
-
 						{/*result*/}
 						<ReactiveList componentId="results" dataField="_score" size={20} pagination={true}
 									  react={{
