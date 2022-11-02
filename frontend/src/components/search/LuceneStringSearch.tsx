@@ -3,20 +3,9 @@ import {DataSearch, ReactiveList} from "@appbaseio/reactivesearch";
 import {Grid} from "@mui/material";
 import Layout from "../Layout";
 import {SearchResult} from "./SearchResult";
-import {fromKueryExpression, toElasticsearchQuery} from "@cybernetex/kbn-es-query"
+
 
 export function LuceneStringSearch() {
-
-	// // custom Query to turn Lucene syntax search into DSL syntax search
-	// // TODO need to turn off automatic suggest and react because it's not always a valid Lucene query when typing
-	// // TODO need to use the official kbn-es-query
-	// const customQuery = (text:string) => {
-	// 	const node = fromKueryExpression(text)
-	// 	const query = toElasticsearchQuery(node);
-	// 	return {
-	// 		"query": query
-	// 	};
-	// }
 
 	// @ts-ignore
 	return (

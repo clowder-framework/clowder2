@@ -33,7 +33,6 @@
 	"author": "NCSA",
 	"dependencies": {
 		"@appbaseio/reactivesearch": "^3.40.2",
-		"@cybernetex/kbn-es-query": "^1.0.2",
 		"@emotion/react": "^11.7.1",
 		"@emotion/styled": "^11.6.0",
 		"@material-ui/core": "^4.12.3",
