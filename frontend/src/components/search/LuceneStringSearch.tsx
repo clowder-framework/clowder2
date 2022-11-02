@@ -1,11 +1,32 @@
-import React from "react";
+import React, {useState} from "react";
 import {DataSearch, ReactiveList} from "@appbaseio/reactivesearch";
 import {Grid} from "@mui/material";
 import Layout from "../Layout";
 import {SearchResult} from "./SearchResult";
 
-
 export function LuceneStringSearch() {
+
+	// // custom Query to turn Lucene syntax search into DSL syntax search
+	// // TODO need to turn off automatic suggest and react because it's not always a valid Lucene query when typing
+	// // TODO need to use the official kbn-es-query
+	// const customQuery = (text:string) => {
+	// 	return {
+	// 		"query": text
+	// 	};
+	// }
+
+	const [query, setQuery] = React.useState<string>("");
+
+	const handleChange = (value: string) => {
+		setQuery(value);
+	};
+
+	const handleKey = (e:KeyboardEvent, triggerQuery: Function) => {
+		if (e.key === "Enter") {
+			console.log("enter")
+			triggerQuery();
+		}
+	};
 
 	// @ts-ignore
 	return (
@@ -21,8 +42,7 @@ export function LuceneStringSearch() {
 							highlight={false}
 							queryFormat="or"
 							fuzziness={0}
-							debounce={100}
-							URLParams={true}
+							debounce={1000}
 							showFilter={false}
 							showClear
 							renderNoSuggestion="No suggestions found."
@@ -31,6 +51,21 @@ export function LuceneStringSearch() {
 								input: "search-input",
 							}}
 							queryString={true}
+							onKeyDown={handleKey}
+      						onChange={handleChange}
+							value={query}
+							// onKeyDown={(event, triggerQuery) => {
+							// 	//
+							// 	if (event.key === "Enter") {
+							// 		setSearchText((event.key));
+							// 		console.log("pressed enter");
+							// 		}
+							// 	}
+							// }
+							// onChange = {(value, _) => {
+							// 		setSearchText(value);
+							// 	}
+							// }
 							// customQuery={customQuery}
 						/>
 						{/*result*/}
