@@ -30,7 +30,7 @@ export function EmbeddedSearch() {
 				input: "embedded-search-input",
 			}}
 			onValueSelected={
-				function(value, cause, source) {
+				function(value, cause, _) {
 					if (cause === "SUGGESTION_SELECT" ||
 						cause === "ENTER_PRESS" ||
 						cause === "SEARCH_ICON_CLICK"){
@@ -38,6 +38,7 @@ export function EmbeddedSearch() {
 					}
 				}
 			  }
+			queryString={true}
 		/>
   );
 }

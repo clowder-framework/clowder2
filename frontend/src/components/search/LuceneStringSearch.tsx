@@ -3,18 +3,20 @@ import {DataSearch, ReactiveList} from "@appbaseio/reactivesearch";
 import {Grid} from "@mui/material";
 import Layout from "../Layout";
 import {SearchResult} from "./SearchResult";
-
+import {fromKueryExpression, toElasticsearchQuery} from "@cybernetex/kbn-es-query"
 
 export function LuceneStringSearch() {
 
-	// custom Query to turn Lucene syntax search into DSL syntax search
-	const customQuery = (text:string) => {
-		 return {
-			"query": {
-			  "match": { "name": text }
-			}
-		 }
-	}
+	// // custom Query to turn Lucene syntax search into DSL syntax search
+	// // TODO need to turn off automatic suggest and react because it's not always a valid Lucene query when typing
+	// // TODO need to use the official kbn-es-query
+	// const customQuery = (text:string) => {
+	// 	const node = fromKueryExpression(text)
+	// 	const query = toElasticsearchQuery(node);
+	// 	return {
+	// 		"query": query
+	// 	};
+	// }
 
 	// @ts-ignore
 	return (
@@ -27,19 +29,20 @@ export function LuceneStringSearch() {
 							title="String Search for Datasets and Files"
 							componentId="string-searchbox"
 							autosuggest={false}
-							highlight={true}
+							highlight={false}
 							queryFormat="or"
 							fuzziness={0}
 							debounce={100}
-							// URLParams={true}
-							showFilter={true}
+							URLParams={true}
+							showFilter={false}
 							showClear
 							renderNoSuggestion="No suggestions found."
 							innerClass={{
 								title: "search-title",
 								input: "search-input",
 							}}
-							customQuery={customQuery}
+							queryString={true}
+							// customQuery={customQuery}
 						/>
 						{/*result*/}
 						<ReactiveList componentId="results" dataField="_score" size={20} pagination={true}
