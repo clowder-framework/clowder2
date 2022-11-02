@@ -42,7 +42,9 @@ body {
 	border-radius: 4px;
 }
 
-.actionCard .title{
+.actionCard .title,
+.search-title
+{
 	font-weight: 600;
 	font-size: 20px;
 	margin-bottom: 12px;
@@ -76,4 +78,29 @@ body {
 
 .inputGroup{
 	margin: 20px auto;
+}
+
+.search-input{
+	background-color: #FFFFFF!important;
+	border: 1px solid #CED4DA!important;
+	border-radius: 4px;
+}
+
+.embedded-search-input{
+	border: none!important;
+    background: transparent!important;
+    border-bottom: 0.5px solid #868E96!important;
+}
+
+/*turn off the shadow box on search*/
+/*TODO pass in outer div id*/
+.input-group{
+	box-shadow: none!important;
+}
+
+.filter-select{
+	border: none!important;
+    background: transparent!important;
+    border-bottom: 1px solid #868E96!important;
+    font-weight: bold;
 }

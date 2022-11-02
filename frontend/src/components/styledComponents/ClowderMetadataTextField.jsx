@@ -1,7 +1,7 @@
 import React from "react";
 import {styled} from "@mui/styles";
 import {TextField} from "@mui/material";
-import theme from "../../theme";
+import {theme} from "../../theme";
 
 
 export const ClowderMetadataTextField = styled(TextField)({

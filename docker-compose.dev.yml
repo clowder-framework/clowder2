@@ -53,7 +53,7 @@ services:
     image: nginx:1.19.2-alpine
     hostname: nginx
     volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./docker/minio-nginx.conf:/etc/nginx/nginx.conf:ro
     ports:
       - "9000:9000"
       - "9001:9001"
@@ -75,8 +75,8 @@ services:
   keycloak:
       image: quay.io/keycloak/keycloak:latest
       volumes:
-        - ./backend/keycloak/clowder-realm-dev.json:/opt/keycloak/data/import/realm.json:ro
-        - ./backend/keycloak/clowder-theme/:/opt/keycloak/themes/clowder-theme/:ro
+        - ./scripts/keycloak/clowder-realm-dev.json:/opt/keycloak/data/import/realm.json:ro
+        - ./scripts/keycloak/clowder-theme/:/opt/keycloak/themes/clowder-theme/:ro
       command:
         - start-dev
         - --http-relative-path /keycloak
@@ -126,6 +126,12 @@ services:
       - discovery.type=single-node
       - xpack.security.enabled=false
       - xpack.security.http.ssl.enabled=false
+      - http.cors.allow-origin='*'
+      - http.cors.enabled=true
+      - http.cors.allow-headers=X-Requested-With,X-Auth-Token,Content-Type,Content-Length,Authorization
+      - http.cors.allow-credentials=true
+      - http.cors.allow-methods=OPTIONS, HEAD, GET, POST, PUT, DELETE
+      - logger.level=debug
     volumes:
       - elasticsearch:/usr/share/elasticsearch/data
     

@@ -1,12 +1,11 @@
 import React, {useEffect, useState} from "react";
 
-import {Box, Button, Stepper, Step, StepLabel, StepContent, Typography,} from "@mui/material";
+import {Box, Button, Step, StepContent, StepLabel, Stepper, Typography,} from "@mui/material";
 import {useDispatch, useSelector,} from "react-redux";
 import {RootState} from "../../types/data";
 
 import {CreateDatasetModal} from "./CreateDatasetModal";
 import {CreateMetadata} from "../metadata/CreateMetadata";
-import TopBar from "../navigation/TopBar";
 import {ActionModal} from "../dialog/ActionModal";
 import config from "../../app.config";
 import {resetFailedReason} from "../../actions/common";
@@ -14,6 +13,7 @@ import {fetchMetadataDefinitions, postDatasetMetadata} from "../../actions/metad
 import {MetadataIn} from "../../openapi/v2";
 import {datasetCreated, resetDatsetCreated} from "../../actions/dataset";
 import {useNavigate} from "react-router-dom";
+import Layout from "../Layout";
 
 
 export const CreateDataset = (): JSX.Element => {
@@ -106,8 +106,7 @@ export const CreateDataset = (): JSX.Element => {
 	},[newDataset]);
 
 	return (
-		<>
-			<TopBar/>
+		<Layout>
 			<Box className="outer-container">
 				{/*Error Message dialogue*/}
 				<ActionModal actionOpen={errorOpen} actionTitle="Something went wrong..." actionText={reason}
@@ -153,6 +152,6 @@ export const CreateDataset = (): JSX.Element => {
 					</Box>
 				</Box>
 			</Box>
-		</>
+		</Layout>
 	);
 };

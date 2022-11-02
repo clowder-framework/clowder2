@@ -67,6 +67,10 @@ class Settings(BaseSettings):
     elasticsearch_url = "http://localhost:9200"
     elasticsearch_no_of_shards = 5
     elasticsearch_no_of_replicas = 5
+    elasticsearch_setting = {
+        "number_of_shards": elasticsearch_no_of_shards,
+        "number_of_replicas": elasticsearch_no_of_replicas,
+    }
 
     # RabbitMQ message bus
     RABBITMQ_USER = "guest"
