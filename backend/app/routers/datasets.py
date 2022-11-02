@@ -652,6 +652,25 @@ async def download_dataset(
             f.write("BagIt-Version: 0.97" + "\n")
             f.write("Tag-File-Character-Encoding: UTF-8" + "\n")
 
+        # Write dataset metadata if found
+        metadata = []
+        async for md in db["metadata"].find(
+            {"resource.resource_id": ObjectId(dataset_id)}
+        ):
+            metadata.append(md)
+        if len(metadata) > 0:
+            datasetmetadata_path = os.path.join(
+                current_temp_dir, "_dataset_metadata.json"
+            )
+            metadata_content = json_util.dumps(metadata)
+            with open(datasetmetadata_path, "w") as f:
+                f.write(metadata_content)
+            crate.add_file(
+                datasetmetadata_path,
+                dest_path="metadata/_dataset_metadata.json",
+                properties={"name": "_dataset_metadata.json"},
+            )
+
         bag_size = 0  # bytes
         file_count = 0
 
@@ -684,7 +703,6 @@ async def download_dataset(
             current_file_size = os.path.getsize(current_file_path)
             bag_size += current_file_size
 
-            # TODO add file metadata
             metadata = []
             async for md in db["metadata"].find(
                 {"resource.resource_id": ObjectId(file.id)}
