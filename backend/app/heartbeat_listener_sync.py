@@ -2,13 +2,10 @@ import pika
 import json
 import os
 from packaging import version
-from config import settings
+from app.config import settings
 from pymongo import MongoClient
 import time
-from models.extractors import (
-    ExtractorDB,
-    ExtractorOut,
-)
+from app.models.listeners import LegacyEventListenerIn, EventListenerOut
 
 
 def callback(ch, method, properties, body):
@@ -18,7 +15,7 @@ def callback(ch, method, properties, body):
     extractor_queue = statusBody["queue"]
     extractor_info = statusBody["extractor_info"]
     extractor_name = extractor_info["name"]
-    extractor_db = EventListenerDB(**extractor_info)
+    extractor_db = LegacyEventListenerIn(**extractor_info)
     client = MongoClient(settings.MONGODB_URL)
     db = client["clowder2"]
     existing_extractor = db["listeners"].find_one({"name": extractor_queue})
