@@ -654,10 +654,14 @@ async def download_dataset(
 
         # Write dataset metadata if found
         metadata = []
-        async for md in db["metadata"].find({"resource.resource_id": ObjectId(dataset_id)}):
+        async for md in db["metadata"].find(
+            {"resource.resource_id": ObjectId(dataset_id)}
+        ):
             metadata.append(md)
         if len(metadata) > 0:
-            datasetmetadata_path = os.path.join(current_temp_dir, "_dataset_metadata.json")
+            datasetmetadata_path = os.path.join(
+                current_temp_dir, "_dataset_metadata.json"
+            )
             metadata_content = json_util.dumps(metadata)
             with open(datasetmetadata_path, "w") as f:
                 f.write(metadata_content)
