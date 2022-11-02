@@ -31,6 +31,7 @@ from rocrate.rocrate import ROCrate
 from app import dependencies
 from app import keycloak_auth
 from app.search.connect import (
+    connect_elasticsearch,
     insert_record,
     delete_document_by_id,
     update_record,
@@ -191,6 +192,7 @@ async def save_dataset(
     db: MongoClient = Depends(dependencies.get_db),
     es=Depends(dependencies.get_elasticsearchclient),
 ):
+    es = await connect_elasticsearch()
 
     # Check all connection and abort if any one of them is not available
     if db is None or es is None:
@@ -304,6 +306,7 @@ async def edit_dataset(
     user_id=Depends(get_user),
     es=Depends(dependencies.get_elasticsearchclient),
 ):
+    es = await connect_elasticsearch()
 
     # Check all connection and abort if any one of them is not available
     if db is None or es is None:
@@ -347,6 +350,7 @@ async def patch_dataset(
     db: MongoClient = Depends(dependencies.get_db),
     es=Depends(dependencies.get_elasticsearchclient),
 ):
+    es = await connect_elasticsearch()
 
     # Check all connection and abort if any one of them is not available
     if db is None or es is None:
@@ -388,6 +392,7 @@ async def delete_dataset(
     fs: Minio = Depends(dependencies.get_fs),
     es=Depends(dependencies.get_elasticsearchclient),
 ):
+    es = await connect_elasticsearch()
 
     # Check all connection and abort if any one of them is not available
     if db is None or fs is None or es is None:

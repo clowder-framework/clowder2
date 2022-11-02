@@ -145,7 +145,7 @@ app.include_router(api_router, prefix=settings.API_V2_STR)
 @app.on_event("startup")
 async def startup_elasticsearch():
     # create elasticsearch indices
-    es = connect_elasticsearch()
+    es = await connect_elasticsearch()
     create_index(
         es, "file", settings.elasticsearch_setting, indexSettings.file_mappings
     )
