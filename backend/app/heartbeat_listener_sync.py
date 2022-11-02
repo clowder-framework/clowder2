@@ -47,7 +47,9 @@ def callback(ch, method, properties, body):
 def listen_for_heartbeats():
     credentials = pika.PlainCredentials(settings.RABBITMQ_USER, settings.RABBITMQ_PASS)
 
-    parameters = pika.ConnectionParameters(settings.RABBITMQ_HOST, credentials=credentials)
+    parameters = pika.ConnectionParameters(
+        settings.RABBITMQ_HOST, credentials=credentials
+    )
 
     connection = pika.BlockingConnection(parameters)
 

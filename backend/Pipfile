@@ -24,6 +24,8 @@ pipenv = "*"
 install = "*"
 rocrate = "*"
 packaging= "*"
+black = "*"
+app = "*"
 
 [dev-packages]
 requests = "*"
