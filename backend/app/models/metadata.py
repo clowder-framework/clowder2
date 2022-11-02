@@ -4,7 +4,7 @@ from datetime import datetime
 from typing import Optional, List, Union
 from enum import Enum
 
-import Elasticsearch as Elasticsearch
+from elasticsearch import Elasticsearch
 from bson import ObjectId
 from bson.dbref import DBRef
 from fastapi.param_functions import Depends

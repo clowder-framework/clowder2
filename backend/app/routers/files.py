@@ -1,7 +1,7 @@
 import io
 import json
 
-import Elasticsearch as Elasticsearch
+from elasticsearch import Elasticsearch
 import pika
 import mimetypes
 from datetime import datetime

@@ -3,7 +3,7 @@ import io
 import os
 from typing import List, Optional
 
-import Elasticsearch as Elasticsearch
+from elasticsearch import Elasticsearch
 from bson import ObjectId
 from fastapi import APIRouter, HTTPException, Depends
 from fastapi import Form
@@ -120,8 +120,10 @@ async def add_dataset_metadata(
                 "resource_id": dataset_id,
                 "reource_type": "dataset",
                 "created": metadata_out.created.utcnow(),
-                "creator": user.id,
-                "contents": metadata_out.contents
+                "creator": user.email,
+                "contents": metadata_out.contents,
+                "context_url": metadata_out.context_url,
+                "context": metadata_out.context
             }
         }
         insert_record(es, "metadata", doc, metadata_out.id)

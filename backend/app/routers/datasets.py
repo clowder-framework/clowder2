@@ -9,7 +9,7 @@ from collections.abc import Mapping, Iterable
 from typing import List, Optional, Union
 import json
 
-import Elasticsearch as Elasticsearch
+from elasticsearch import Elasticsearch
 import pika
 from bson import ObjectId
 from bson import json_util

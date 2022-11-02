@@ -2,7 +2,7 @@ import io
 from datetime import datetime
 from typing import Optional, List
 
-import Elasticsearch as Elasticsearch
+from elasticsearch import Elasticsearch
 from bson import ObjectId
 from fastapi import (
     APIRouter,
@@ -147,7 +147,9 @@ async def add_file_metadata(
                 "reource_type": "file",
                 "created": metadata_out.created.utcnow(),
                 "creator": user.id,
-                "contents": metadata_out.contents
+                "contents": metadata_out.contents,
+                "context_url": metadata_out.context_url,
+                "context": metadata_out.context
             }
         }
         insert_record(es, "metadata", doc, metadata_out.id)
