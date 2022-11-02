@@ -2,11 +2,12 @@ import pika
 import json
 import os
 from packaging import version
-from app.config import settings
+from config import settings
 from pymongo import MongoClient
-from app.models.listeners import (
-    EventListenerDB,
-    EventListenerOut,
+import time
+from models.extractors import (
+    ExtractorDB,
+    ExtractorOut,
 )
 
 
@@ -49,9 +50,7 @@ def callback(ch, method, properties, body):
 def listen_for_heartbeats():
     credentials = pika.PlainCredentials(settings.RABBITMQ_USER, settings.RABBITMQ_PASS)
 
-    parameters = pika.ConnectionParameters(
-        settings.RABBITMQ_HOST, 5672, "/", credentials
-    )
+    parameters = pika.ConnectionParameters(settings.RABBITMQ_HOST, credentials=credentials)
 
     connection = pika.BlockingConnection(parameters)
 
@@ -76,3 +75,11 @@ def listen_for_heartbeats():
 if __name__ == "__main__":
     print("starting heartbeat listener")
     listen_for_heartbeats()
+    not_connected = True
+    while not_connected:
+        try:
+            listen_for_heartbeats()
+        except Exception as e:
+            print("Could not connect trying again in 10 seconds")
+            print(e)
+            time.sleep(10)

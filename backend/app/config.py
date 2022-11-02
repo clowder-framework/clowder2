@@ -76,8 +76,9 @@ class Settings(BaseSettings):
     RABBITMQ_USER = "guest"
     RABBITMQ_PASS = "guest"
     RABBITMQ_HOST = "localhost"
+    RABBITMQ_PORT = "5672"
     RABBITMQ_URL = (
-        "amqp://" + RABBITMQ_USER + ":" + RABBITMQ_PASS + "@" + RABBITMQ_HOST + "/"
+        "amqp://" + RABBITMQ_USER + ":" + RABBITMQ_PASS + "@" + RABBITMQ_HOST + ":" + RABBITMQ_PORT + "/"
     )
 
 
