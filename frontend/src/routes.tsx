@@ -16,6 +16,7 @@ import {useDispatch, useSelector} from "react-redux";
 import {RootState} from "./types/data";
 import {resetLogout} from "./actions/common";
 import {Explore} from "./components/Explore";
+import {LuceneStringSearch} from "./components/search/LuceneStringSearch";
 
 // https://dev.to/iamandrewluca/private-route-in-react-router-v6-lg5
 const PrivateRoute = (props): JSX.Element => {
@@ -58,6 +59,7 @@ export const AppRoutes = (): JSX.Element => {
 				<Route path="/auth/logout" element={<RedirectLogoutComponent/>} />
 				<Route path="/auth" element={<AuthComponent/>} />
 				<Route path="/search" element={<PrivateRoute><Search/></PrivateRoute>} />
+				<Route path="/string-search" element={<PrivateRoute><LuceneStringSearch/></PrivateRoute>} />
 				<Route path="*"
 					   element={
 						   <main style={{ padding: "1rem" }}>

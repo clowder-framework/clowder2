@@ -6,16 +6,6 @@ import {SearchResult} from "./SearchResult";
 
 
 export function Search() {
-
-	// custom Query to turn Lucene syntax search into DSL syntax search
-	const customQuery = () => {
-		 return {
-			"query": {
-			  "match": { "name": "water" }
-			}
-		 }
-	}
-
 	// @ts-ignore
 	return (
 		<Layout>
@@ -52,7 +42,6 @@ export function Search() {
 								title: "search-title",
 								input: "search-input",
 							}}
-							customQuery={customQuery}
 						/>
 						{/*filters*/}
 						<Grid container spacing={2} sx={{marginBottom: "20px"}}>
