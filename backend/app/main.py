@@ -25,8 +25,9 @@ from app.routers import (
     collections,
     authentication,
     keycloak,
-    extractors,
     elasticsearch,
+    listeners,
+    feeds,
 )
 
 # setup loggers
@@ -114,7 +115,13 @@ api_router.include_router(
     dependencies=[Depends(get_current_username)],
 )
 api_router.include_router(
-    extractors.router,
+    listeners.router,
+    prefix="/listeners",
+    tags=["listeners"],
+    dependencies=[Depends(get_current_username)],
+)
+api_router.include_router(
+    listeners.legacy_router,
     prefix="/extractors",
     tags=["extractors"],
     dependencies=[Depends(get_current_username)],
@@ -125,6 +132,12 @@ api_router.include_router(
     tags=["elasticsearch"],
     dependencies=[Depends(get_current_username)],
 )
+api_router.include_router(
+    feeds.router,
+    prefix="/feeds",
+    tags=["feeds"],
+    dependencies=[Depends(get_current_username)],
+)
 api_router.include_router(keycloak.router, prefix="/auth", tags=["auth"])
 app.include_router(api_router, prefix=settings.API_V2_STR)
 
@@ -132,7 +145,7 @@ app.include_router(api_router, prefix=settings.API_V2_STR)
 @app.on_event("startup")
 async def startup_elasticsearch():
     # create elasticsearch indices
-    es = connect_elasticsearch()
+    es = await connect_elasticsearch()
     create_index(
         es, "file", settings.elasticsearch_setting, indexSettings.file_mappings
     )

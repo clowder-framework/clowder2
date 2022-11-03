@@ -1,7 +1,7 @@
 import { createTheme } from '@mui/material/styles';
 
 // A custom theme for this app
-const theme = createTheme({
+export const theme = createTheme({
 	typography: {
 		fontFamily: [
 			'Open Sans',
@@ -42,4 +42,16 @@ const theme = createTheme({
 	},
 });
 
-export default theme;
+export const searchTheme = {
+	typography: {
+    	fontFamily: theme.typography.fontFamily,
+    	fontSize: "16px",
+	},
+	colors: {
+		textColor: theme.palette.secondary.dark,
+		primaryTextColor: theme.palette.primary.contrastText,
+		primaryColor: theme.palette.primary.main,
+		titleColor: theme.palette.secondary.dark,
+		alertColor: theme.palette.primary.dark,
+	}
+};

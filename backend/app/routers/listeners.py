@@ -8,10 +8,10 @@ from app.dependencies import get_db
 from app.keycloak_auth import get_user, get_current_user
 from app.models.listeners import (
     ExtractorInfo,
-    ListenerIn,
-    LegacyListenerIn,
-    ListenerDB,
-    ListenerOut,
+    EventListenerIn,
+    LegacyEventListenerIn,
+    EventListenerDB,
+    EventListenerOut,
 )
 from app.models.feeds import FeedOut
 from app.routers.feeds import disassociate_listener_db
@@ -22,37 +22,39 @@ legacy_router = APIRouter()  # for back-compatibilty with v1 extractors
 clowder_bucket = os.getenv("MINIO_BUCKET_NAME", "clowder")
 
 
-@router.post("", response_model=ListenerOut)
+@router.post("", response_model=EventListenerOut)
 async def save_listener(
-    listener_in: ListenerIn,
+    listener_in: EventListenerIn,
     user=Depends(get_current_user),
     db: MongoClient = Depends(get_db),
 ):
-    listener = ListenerDB(**listener_in.dict(), author=user)
+    """Register a new Event Listener with the system."""
+    listener = EventListenerDB(**listener_in.dict(), creator=user)
+    # TODO: Check for duplicates somehow?
     new_listener = await db["listeners"].insert_one(listener.to_mongo())
     found = await db["listeners"].find_one({"_id": new_listener.inserted_id})
-    listener_out = ListenerOut.from_mongo(found)
+    listener_out = EventListenerOut.from_mongo(found)
     return listener_out
 
 
-@legacy_router.post("", response_model=ListenerOut)
+@legacy_router.post("", response_model=EventListenerOut)
 async def save_legacy_listener(
-    legacy_in: LegacyListenerIn,
+    legacy_in: LegacyEventListenerIn,
     user=Depends(get_user),
     db: MongoClient = Depends(get_db),
 ):
-    """This will take a POST with Clowder v1 extractor_info dict info, and convert to a v2 Listener."""
+    """This will take a POST with Clowder v1 extractor_info included, and convert/update to a v2 Listener."""
     listener_properties = ExtractorInfo(**legacy_in.dict)
-    listener = ListenerDB(
+    listener = EventListenerDB(
         name=legacy_in.name,
         version=int(legacy_in.version),
         description=legacy_in.description,
-        author=user,
+        creator=user,
         properties=listener_properties,
     )
     new_listener = await db["listeners"].insert_one(listener.to_mongo())
     found = await db["listeners"].find_one({"_id": new_listener.inserted_id})
-    listener_out = ListenerOut.from_mongo(found)
+    listener_out = EventListenerOut.from_mongo(found)
 
     # TODO: Automatically match or create a Feed based on listener_in.process rules
     for process_key in listener_properties.process:
@@ -75,37 +77,50 @@ async def save_legacy_listener(
     return listener_out
 
 
-@router.get("/{listener_id}", response_model=ListenerOut)
+@router.get("/{listener_id}", response_model=EventListenerOut)
 async def get_listener(listener_id: str, db: MongoClient = Depends(get_db)):
+    """Return JSON information about an Event Listener if it exists."""
     if (
         listener := await db["listeners"].find_one({"_id": ObjectId(listener_id)})
     ) is not None:
-        return ListenerOut.from_mongo(listener)
+        return EventListenerOut.from_mongo(listener)
     raise HTTPException(status_code=404, detail=f"listener {listener_id} not found")
 
 
-@router.get("", response_model=List[ListenerOut])
+@router.get("", response_model=List[EventListenerOut])
 async def get_listeners(
     user_id=Depends(get_user),
     db: MongoClient = Depends(get_db),
     skip: int = 0,
     limit: int = 2,
 ):
+    """Get a list of all Event Listeners in the db.
+
+    Arguments:
+        skip -- number of initial records to skip (i.e. for pagination)
+        limit -- restrict number of records to be returned (i.e. for pagination)
+    """
     listeners = []
     for doc in (
         await db["listeners"].find().skip(skip).limit(limit).to_list(length=limit)
     ):
-        listeners.append(ListenerOut.from_mongo(doc))
+        listeners.append(EventListenerOut.from_mongo(doc))
     return listeners
 
 
-@router.put("/{listener_id}", response_model=ListenerOut)
+@router.put("/{listener_id}", response_model=EventListenerOut)
 async def edit_listener(
     listener_id: str,
-    listener_in: ListenerIn,
+    listener_in: EventListenerIn,
     db: MongoClient = Depends(get_db),
     user_id=Depends(get_user),
 ):
+    """Update the information about an existing Event Listener..
+
+    Arguments:
+        listener_id -- UUID of the listener to be udpated
+        listener_in -- JSON object including updated information
+    """
     if (
         listener := await db["listeners"].find_one({"_id": ObjectId(listener_id)})
     ) is not None:
@@ -116,11 +131,11 @@ async def edit_listener(
         try:
             listener.update(listener_update)
             await db["listeners"].replace_one(
-                {"_id": ObjectId(listener_id)}, ListenerDB(**listener).to_mongo()
+                {"_id": ObjectId(listener_id)}, EventListenerDB(**listener).to_mongo()
             )
         except Exception as e:
             raise HTTPException(status_code=500, detail=e.args[0])
-        return ListenerOut.from_mongo(listener)
+        return EventListenerOut.from_mongo(listener)
     raise HTTPException(status_code=404, detail=f"listener {listener_id} not found")
 
 
@@ -129,6 +144,7 @@ async def delete_listener(
     listener_id: str,
     db: MongoClient = Depends(get_db),
 ):
+    """Remove an Event Listener from the database. Will not clear event history for the listener."""
     if (await db["listeners"].find_one({"_id": ObjectId(listener_id)})) is not None:
         # unsubscribe the listener from any feeds
         async for feed in db["feeds"].find(
