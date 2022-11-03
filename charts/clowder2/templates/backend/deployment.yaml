@@ -60,6 +60,8 @@ spec:
               value: $(CLOWDER2_URL)/api
             - name: frontend_url
               value: $(CLOWDER2_URL)
+            - name: elasticsearch_url
+              value: $(CLOWDER2_URL):9200
           ports:
             - name: http
               containerPort: 80
