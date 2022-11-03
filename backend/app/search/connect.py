@@ -7,21 +7,26 @@ from app.config import settings
 from app.models.files import FileOut
 from app.models.search import SearchCriteria
 from app.models.feeds import SearchObject
+from app.models.errors import ServiceUnreachable
+from app.database.errors import log_error
 
 logger = logging.getLogger(__name__)
 no_of_shards = settings.elasticsearch_no_of_shards
 no_of_replicas = settings.elasticsearch_no_of_replicas
 
 
-def connect_elasticsearch():
+async def connect_elasticsearch():
     """To connect to elasticsearch server and return the elasticsearch client"""
     _es = None
     logger.info(settings.elasticsearch_url)
     _es = Elasticsearch(settings.elasticsearch_url)
-    if _es.ping():
-        logger.info("Successfully connected to Elasticsearch")
-    else:
-        logger.info("Can not connect to Elasticsearch")
+    try:
+        if _es.ping():
+            logger.info("Successfully connected to Elasticsearch")
+        else:
+            raise ServiceUnreachable("Elasticsearch")
+    except ServiceUnreachable as e:
+        await log_error(e)
     return _es
 
 

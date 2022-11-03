@@ -1,6 +1,7 @@
 import React, {useEffect} from "react";
 import {Route, Navigate, Routes, BrowserRouter, useNavigate} from "react-router-dom";
 
+import {CreateMetadataDefinitionPage} from "./components/metadata/CreateMetadataDefinition";
 import {Dataset as DatasetComponent} from "./components/datasets/Dataset";
 import {File as FileComponent} from "./components/files/File";
 import {CreateDataset} from "./components/datasets/CreateDataset";
@@ -50,6 +51,7 @@ export const AppRoutes = (): JSX.Element => {
 		<BrowserRouter>
 			<Routes>
 				<Route path="/" element={<PrivateRoute><Explore/></PrivateRoute>} />
+                <Route path="/new-metadata-definition" element={<PrivateRoute><CreateMetadataDefinitionPage/></PrivateRoute>} />
 				<Route path="/create-dataset/" element={<PrivateRoute><CreateDataset/></PrivateRoute>} />
 				<Route path="/datasets/:datasetId" element={<PrivateRoute><DatasetComponent/></PrivateRoute>} />
 				<Route path="/files/:fileId" element={<PrivateRoute><FileComponent/></PrivateRoute>} />

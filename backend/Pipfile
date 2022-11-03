@@ -27,6 +27,7 @@ rocrate = "*"
 [dev-packages]
 requests = "*"
 pytest = "*"
+pytest-asyncio = "*"
 black = "*"
 faker = "*"
 
