@@ -16,7 +16,6 @@ import {useDispatch, useSelector} from "react-redux";
 import {RootState} from "./types/data";
 import {resetLogout} from "./actions/common";
 import {Explore} from "./components/Explore";
-import {LuceneStringSearch} from "./components/search/LuceneStringSearch";
 
 // https://dev.to/iamandrewluca/private-route-in-react-router-v6-lg5
 const PrivateRoute = (props): JSX.Element => {
