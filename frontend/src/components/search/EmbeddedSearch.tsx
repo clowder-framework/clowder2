@@ -14,7 +14,6 @@ export function EmbeddedSearch() {
 	return (
 		<>
 			<SearchErrorBoundary>
-
 				<DataSearch componentId="searchbox" autosuggest={true}
 							highlight={true} queryFormat="or" fuzziness={0}
 							debounce={100}

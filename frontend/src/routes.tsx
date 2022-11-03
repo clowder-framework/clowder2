@@ -59,7 +59,6 @@ export const AppRoutes = (): JSX.Element => {
 				<Route path="/auth/logout" element={<RedirectLogoutComponent/>} />
 				<Route path="/auth" element={<AuthComponent/>} />
 				<Route path="/search" element={<PrivateRoute><Search/></PrivateRoute>} />
-				<Route path="/string-search" element={<PrivateRoute><LuceneStringSearch/></PrivateRoute>} />
 				<Route path="*"
 					   element={
 						   <main style={{ padding: "1rem" }}>
