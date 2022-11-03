@@ -23,6 +23,13 @@ export interface Extractor {
 	id: string;
 	parameters: any;
 }
+export interface Listener {
+	name: string;
+	description: string;
+	id: string;
+	parameters: any;
+}
+
 
 
 
@@ -129,8 +136,8 @@ export interface DatasetState{
 	newFile: FileSummary;
 	about: Dataset;
 }
-export interface ExtractorState{
-	extractors: Extractor[];
+export interface ListenerState{
+	listeners: Listener[];
 }
 export interface MetadataState{
 	metadataDefinitionList: MetadataDefinitionOut[],
@@ -168,7 +175,7 @@ export interface RootState {
 	error: ErrorState;
 	file:FileState;
 	dataset:DatasetState;
-	extractor:ExtractorState;
+	listener: ListenerState;
 	user: UserState;
 	folder: FolderState;
 }

@@ -194,6 +194,11 @@ interface GET_FOLDER_PATH{
 	folderPath: String[]
 }
 
+interface RECEIVE_LISTENERS{
+	type: "RECEIVE_LISTENERS"
+	listeners: []
+}
+
 export type DataAction =
 	| RECEIVE_FILES_IN_DATASET
 	| RECEIVE_FOLDERS_IN_DATASET
@@ -233,4 +238,5 @@ export type DataAction =
 	| DOWNLOAD_FILE
 	| FOLDER_DELETED
 	| GET_FOLDER_PATH
+	| RECEIVE_LISTENERS
 	;

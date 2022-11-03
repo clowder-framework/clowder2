@@ -2,9 +2,11 @@ import React, {useEffect, useState} from "react";
 import {Box, Button, ButtonGroup, Grid, Tab, Tabs} from "@mui/material";
 
 import {Dataset, RootState} from "../types/data";
+import {ListenerState} from "../types/data";
 import {useDispatch, useSelector} from "react-redux";
 import {datasetDeleted, fetchDatasets,} from "../actions/dataset";
 import {fetchExtractors} from "../actions/extractors";
+import {fetchListeners} from "../actions/listeners";
 import {resetFailedReason} from "../actions/common";
 import {downloadThumbnail} from "../utils/thumbnail";
 
@@ -33,7 +35,8 @@ export const Explore = (): JSX.Element => {
 	const dismissError = () => dispatch(resetFailedReason());
 	const datasets = useSelector((state: RootState) => state.dataset.datasets);
 	const listExtractors = () => dispatch(fetchExtractors());
-	const extractors = useSelector((state: RootState) => state.extractors.extractors);
+	const listeners = useSelector((state: RootState) => state.listener.listeners);
+	const listListeners = (skip: number | undefined, limit: number | undefined) => dispatch(fetchListeners(skip, limit));
 	const reason = useSelector((state: RootState) => state.error.reason);
 	const stack = useSelector((state: RootState) => state.error.stack);
 
@@ -52,6 +55,7 @@ export const Explore = (): JSX.Element => {
 	// component did mount
 	useEffect(() => {
 		listDatasets(0, limit, mine);
+		listListeners(0, limit);
 		listExtractors();
 	}, []);
 
