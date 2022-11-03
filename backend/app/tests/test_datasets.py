@@ -1,5 +1,6 @@
 from fastapi.testclient import TestClient
 from app.config import settings
+from app.models.pyobjectid import PyObjectId
 
 dataset_data = {
     "name": "first dataset",

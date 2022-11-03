@@ -1,7 +1,7 @@
 import React from "react";
 import {styled} from "@mui/styles";
 import {Select} from "@mui/material";
-import theme from "../../theme";
+import {theme} from "../../theme";
 
 
 export const ClowderMetadataSelect = styled(Select)({
