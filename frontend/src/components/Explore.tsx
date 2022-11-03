@@ -17,6 +17,7 @@ import DatasetCard from "./datasets/DatasetCard";
 import config from "../app.config";
 import {ArrowBack, ArrowForward} from "@material-ui/icons";
 import Layout from "./Layout";
+import ListenerCard from "./listeners/ListenerCard";
 
 const tab = {
 	fontStyle: "normal",
@@ -188,10 +189,10 @@ export const Explore = (): JSX.Element => {
 							<TabPanel value={selectedTabIndex} index={3}/>
 							<TabPanel value={selectedTabIndex} index={4}/>
 							<TabPanel value={selectedTabIndex} index={5}>
-								{extractors.map((extractor) => {
+								{listeners.map((listener) => {
 									return (
-										<Grid item key={extractor.id} xs={12} sm={6} md={4} lg={3}>
-											<DatasetCard id={extractor.id} name={extractor.name}/>
+										<Grid item key={listener.id} xs={12} sm={6} md={4} lg={3}>
+											<ListenerCard id={listener.id} name={listener.name} description={listener.description}/>
 										</Grid>
 									);
 								})
