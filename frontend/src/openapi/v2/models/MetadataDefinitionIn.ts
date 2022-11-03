@@ -6,7 +6,7 @@ import type { MetadataField } from './MetadataField';
 
 /**
  * This describes a metadata object with a short name and description, predefined set of fields, and context.
- * These provide a shorthand for use by extractors as well as a source for building GUI widgets to add new entries.
+ * These provide a shorthand for use by listeners as well as a source for building GUI widgets to add new entries.
  *
  * Example: {
      * "name" : "LatLon",

@@ -54,4 +54,16 @@ export class ElasticsearchService {
         });
     }
 
+    /**
+     * Search File And Dataset
+     * @returns any Successful Response
+     * @throws ApiError
+     */
+    public static searchFileAndDatasetApiV2ElasticsearchFileDatasetMsearchPost(): CancelablePromise<any> {
+        return __request({
+            method: 'POST',
+            path: `/api/v2/elasticsearch/file,dataset/_msearch`,
+        });
+    }
+
 }

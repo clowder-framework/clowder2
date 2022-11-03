@@ -174,15 +174,15 @@ export class DatasetsService {
     /**
      * Save File
      * @param datasetId
-     * @param folderId
      * @param formData
+     * @param folderId
      * @returns FileOut Successful Response
      * @throws ApiError
      */
     public static saveFileApiV2DatasetsDatasetIdFilesPost(
         datasetId: string,
-        folderId: string,
         formData: Body_save_file_api_v2_datasets__dataset_id__files_post,
+        folderId?: string,
     ): CancelablePromise<FileOut> {
         return __request({
             method: 'POST',
