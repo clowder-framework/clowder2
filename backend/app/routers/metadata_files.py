@@ -108,7 +108,7 @@ async def add_file_metadata(
     file_id: str,
     user=Depends(get_current_user),
     db: MongoClient = Depends(dependencies.get_db),
-    es: Elasticsearch = Depends(dependencies.get_elasticsearchclient)
+    es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
 ):
     """Attach new metadata to a file. The body must include a contents field with the JSON metadata, and either a
     context JSON-LD object, context_url, or definition (name of a metadata definition) to be valid.
@@ -149,7 +149,7 @@ async def add_file_metadata(
                 "creator": user.id,
                 "contents": metadata_out.contents,
                 "context_url": metadata_out.context_url,
-                "context": metadata_out.context
+                "context": metadata_out.context,
             }
         }
         insert_record(es, "metadata", doc, metadata_out.id)
@@ -162,7 +162,7 @@ async def replace_file_metadata(
     file_id: str,
     user=Depends(get_current_user),
     db: MongoClient = Depends(dependencies.get_db),
-    es: Elasticsearch = Depends(dependencies.get_elasticsearchclient)
+    es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
 ):
     """Replace metadata, including agent and context. If only metadata contents should be updated, use PATCH instead.
 
@@ -220,11 +220,7 @@ async def replace_file_metadata(
             metadata_out = MetadataOut.from_mongo(found)
 
             # Update entry to the metadata index
-            doc = {
-                "doc": {
-                    "contents": metadata_out["contents"]
-                }
-            }
+            doc = {"doc": {"contents": metadata_out["contents"]}}
             update_record(es, "metadata", doc, metadata_out["_id"])
             return metadata_out
         else:
@@ -386,7 +382,7 @@ async def delete_file_metadata(
     # version: Optional[int] = Form(None),
     user=Depends(get_current_user),
     db: MongoClient = Depends(dependencies.get_db),
-    es: Elasticsearch = Depends(dependencies.get_elasticsearchclient)
+    es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
 ):
     if (file := await db["files"].find_one({"_id": ObjectId(file_id)})) is not None:
         query = {"resource.resource_id": ObjectId(file_id)}

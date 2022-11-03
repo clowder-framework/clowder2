@@ -1,6 +1,9 @@
 import os
 from fastapi.testclient import TestClient
+import json
+
 from app.config import settings
+from app.search.connect import connect_elasticsearch, search_index
 
 dataset_data = {
     "name": "test dataset",
@@ -146,7 +149,21 @@ def test_dataset_patch_metadata_definition(client: TestClient, headers: dict):
     assert response.status_code == 200
     assert response.json().get("id") is not None
 
-    # Patch metadata that doesn't match definition
+    # check for metadata def in elasticsearch
+    es = connect_elasticsearch()
+    metadata_query = []
+    # header
+    metadata_query.append({"index": "metadata"})
+    # body
+    metadata_query.append({"query": {"match": {"doc.contents.latitude": "24.4"}}})
+    result = search_index(es, "metadata", metadata_query)
+    print(result)
+    assert (
+        result.body["responses"][0]["hits"]["hits"][0]["_source"]["doc"]["contents"][
+            "latitude"
+        ]
+        == 24.4
+    )
 
 
 def test_dataset_create_metadata_context_url(client: TestClient, headers: dict):
@@ -165,6 +182,24 @@ def test_dataset_create_metadata_context_url(client: TestClient, headers: dict):
     )
     assert response.status_code == 200
     assert response.json().get("id") is not None
+
+    # check for metadata def in elasticsearch
+    es = connect_elasticsearch()
+    metadata_query = []
+    # header
+    metadata_query.append({"index": "metadata"})
+    # body
+    metadata_query.append(
+        {"query": {"match": {"doc.contents.alternateName": "different name"}}}
+    )
+    result = search_index(es, "metadata", metadata_query)
+    print(result)
+    assert (
+        result.body["responses"][0]["hits"]["hits"][0]["_source"]["doc"]["contents"][
+            "alternateName"
+        ]
+        == "different name"
+    )
 
 
 def test_dataset_delete_metadata(client: TestClient, headers: dict):

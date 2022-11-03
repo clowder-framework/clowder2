@@ -82,7 +82,7 @@ async def add_dataset_metadata(
     dataset_id: str,
     user=Depends(get_current_user),
     db: MongoClient = Depends(dependencies.get_db),
-    es: Elasticsearch = Depends(dependencies.get_elasticsearchclient)
+    es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
 ):
     """Attach new metadata to a dataset. The body must include a contents field with the JSON metadata, and either a
     context JSON-LD object, context_url, or definition (name of a metadata definition) to be valid.
@@ -123,7 +123,7 @@ async def add_dataset_metadata(
                 "creator": user.email,
                 "contents": metadata_out.contents,
                 "context_url": metadata_out.context_url,
-                "context": metadata_out.context
+                "context": metadata_out.context,
             }
         }
         insert_record(es, "metadata", doc, metadata_out.id)
@@ -136,7 +136,7 @@ async def replace_dataset_metadata(
     dataset_id: str,
     user=Depends(get_current_user),
     db: MongoClient = Depends(dependencies.get_db),
-    es: Elasticsearch = Depends(dependencies.get_elasticsearchclient)
+    es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
 ):
     """Update metadata. Any fields provided in the contents JSON will be added or updated in the metadata. If context or
     agent should be changed, use PUT.
@@ -178,11 +178,7 @@ async def replace_dataset_metadata(
             found = await db["metadata"].find_one({"_id": md["_id"]})
             metadata_out = MetadataOut.from_mongo(found)
             # Update entry to the metadata index
-            doc = {
-                "doc": {
-                    "contents": metadata_out["contents"]
-                }
-            }
+            doc = {"doc": {"contents": metadata_out["contents"]}}
             update_record(es, "metadata", doc, metadata_out["_id"])
             return metadata_out
     else:
@@ -303,7 +299,7 @@ async def delete_dataset_metadata(
     dataset_id: str,
     user=Depends(get_current_user),
     db: MongoClient = Depends(dependencies.get_db),
-    es: Elasticsearch = Depends(dependencies.get_elasticsearchclient)
+    es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
 ):
     if (
         dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})

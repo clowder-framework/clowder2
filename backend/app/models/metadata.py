@@ -303,7 +303,12 @@ def deep_update(orig: dict, new: dict):
     return orig
 
 
-async def patch_metadata(metadata: dict, new_entries: dict, db: MongoClient, es: Elasticsearch = Depends(dependencies.get_elasticsearchclient)):
+async def patch_metadata(
+    metadata: dict,
+    new_entries: dict,
+    db: MongoClient,
+    es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
+):
     """Convenience function for updating original metadata contents with new entries."""
     try:
         # TODO: For list-type definitions, should we append to list instead?
@@ -320,11 +325,7 @@ async def patch_metadata(metadata: dict, new_entries: dict, db: MongoClient, es:
             {"_id": metadata["_id"]}, MetadataDB(**metadata).to_mongo()
         )
         # Update entry to the metadata index
-        doc = {
-            "doc": {
-                "contents": metadata["contents"]
-            }
-        }
+        doc = {"doc": {"contents": metadata["contents"]}}
         update_record(es, "metadata", doc, metadata["_id"])
     except Exception as e:
         raise e

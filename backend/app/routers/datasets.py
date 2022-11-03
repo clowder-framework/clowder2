@@ -190,7 +190,7 @@ async def save_dataset(
     dataset_in: DatasetIn,
     user=Depends(keycloak_auth.get_current_user),
     db: MongoClient = Depends(dependencies.get_db),
-    es: Elasticsearch = Depends(dependencies.get_elasticsearchclient)
+    es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
 ):
 
     # Check all connection and abort if any one of them is not available
@@ -346,7 +346,7 @@ async def patch_dataset(
     dataset_info: DatasetPatch,
     user_id=Depends(get_user),
     db: MongoClient = Depends(dependencies.get_db),
-    es: Elasticsearch = Depends(dependencies.get_elasticsearchclient)
+    es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
 ):
 
     # Check all connection and abort if any one of them is not available
@@ -387,7 +387,7 @@ async def delete_dataset(
     dataset_id: str,
     db: MongoClient = Depends(dependencies.get_db),
     fs: Minio = Depends(dependencies.get_fs),
-    es: Elasticsearch = Depends(dependencies.get_elasticsearchclient)
+    es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
 ):
 
     # Check all connection and abort if any one of them is not available

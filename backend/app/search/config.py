@@ -23,16 +23,16 @@ class IndexSettings:
         }
     }
 
-    metadata_mappings = {
-        "properties": {
-            "resource_id": {"type": "text"},
-            "resource_type": {"type": "text"},
-            "created": {"type": "date"},
-            "creator": {"type": "keyword"},
-            "contents": {"type": "object",
-                        "dynamic":  True},
-            "context_url": {"type": "text"},
-            "content": {"type": "text"}
-        }
-    }
+    metadata_mappings = {}
+    # "properties": {
+    #         "resource_id": {"type": "text"},
+    #         "resource_type": {"type": "text"},
+    #         "created": {"type": "date"},
+    #         "creator": {"type": "keyword"},
+    #         "contents": {"type": "object"},
+    #         "context_url": {"type": "text"},
+    #         "context": {"type": "text"}
+    #     }
+
+
 indexSettings = IndexSettings()
