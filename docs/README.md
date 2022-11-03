@@ -1,7 +1,9 @@
 Clowder 2 Backend Documentation
 ===
 
-Uses [Sphinx](https://www.sphinx-doc.org). Requires [enchant](https://pyenchant.github.io/pyenchant/install.html) for spell checking
+Uses [Sphinx](https://www.sphinx-doc.org). Requires [enchant](https://pyenchant.github.io/pyenchant/install.html) for spell checking.
+
+Currently deployed at https://clowder2.readthedocs.io.
 
 ```shell
 # build
