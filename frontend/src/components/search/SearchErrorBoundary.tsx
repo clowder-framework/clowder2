@@ -5,6 +5,7 @@ import {Navigate} from "react-router-dom";
 
 
 import Cookies from "universal-cookie";
+import {LuceneStringSearch} from "./LuceneStringSearch";
 
 const cookies = new Cookies();
 
@@ -24,7 +25,7 @@ export function SearchErrorBoundary(props) {
 								return <Navigate to="/auth/login"/>;
 							} else {
 								// TODO add prettier message or report function
-								return <h1>An error has happened.</h1>
+								return <h1>{error["status"]}</h1>
 							}
 						})()
 					}

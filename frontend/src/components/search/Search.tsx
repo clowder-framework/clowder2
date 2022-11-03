@@ -3,6 +3,7 @@ import {DataSearch, MultiDropdownList, ReactiveList, SingleDropdownRange} from "
 import {Grid} from "@mui/material";
 import Layout from "../Layout";
 import {SearchResult} from "./SearchResult";
+import {SearchErrorBoundary} from "./SearchErrorBoundary";
 
 
 export function Search() {
@@ -88,12 +89,14 @@ export function Search() {
 								/>
 							</Grid>
 						</Grid>
-						{/*result*/}
-						<ReactiveList componentId="results" dataField="_score" size={20} pagination={true}
-									  react={{
-										and: ["searchbox", "creatorfilter", "downloadfilter", "modifyfilter"]
-									  }}
-									  render={({ data }) => (<SearchResult data={data} />)}/>
+						<SearchErrorBoundary>
+							{/*result*/}
+							<ReactiveList componentId="results" dataField="_score" size={20} pagination={true}
+										  react={{
+											and: ["searchbox", "creatorfilter", "downloadfilter", "modifyfilter"]
+										  }}
+										  render={({ data }) => (<SearchResult data={data} />)}/>
+						</SearchErrorBoundary>
 					</Grid>
 				</Grid>
 			</div>

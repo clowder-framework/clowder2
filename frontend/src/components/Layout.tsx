@@ -23,7 +23,6 @@ import {useSelector} from "react-redux";
 import {RootState} from "../types/data";
 import {AddBox, Explore} from "@material-ui/icons";
 import {EmbeddedSearch} from "./search/EmbeddedSearch";
-import {SearchErrorBoundary} from "./search/SearchErrorBoundary";
 import {searchTheme} from "../theme";
 import {ReactiveBase} from "@appbaseio/reactivesearch";
 import Cookies from "universal-cookie";
@@ -53,7 +52,7 @@ const Main = styled('main', {shouldForwardProp: (prop) => prop !== 'open'})<{
 }));
 
 
-const SearchDiv = styled("div")(({ theme }) => ({
+const SearchDiv = styled("div")(({theme}) => ({
 	position: "relative",
 	marginLeft: theme.spacing(3),
 	marginBottom: "-5px",  // to compoensate the tags div
@@ -115,11 +114,10 @@ export default function PersistentDrawerLeft(props) {
 
 	const location = useLocation();
 
-	useEffect(()=>{
-		if (location.pathname.includes("search")){
+	useEffect(() => {
+		if (location.pathname.includes("search")) {
 			setEmbeddedSearchHidden(true);
-		}
-		else{
+		} else {
 			setEmbeddedSearchHidden(false);
 		}
 	}, [location])
@@ -136,101 +134,99 @@ export default function PersistentDrawerLeft(props) {
 			headers={headers}
 			theme={searchTheme}
 		>
-			<SearchErrorBoundary>
-				<Box sx={{display: 'flex'}}>
-					<CssBaseline/>
-					<AppBar position="fixed" open={open}>
-						<Toolbar>
-							<IconButton
-								color="inherit"
-								aria-label="open drawer"
-								onClick={handleDrawerOpen}
-								edge="start"
-								sx={{mr: 2, ...(open && {display: 'none'})}}
-							>
-								<MenuIcon/>
-							</IconButton>
-							<Link href="/">
-								<Box component="img" src="../../public/clowder-logo-sm.svg" alt="clowder-logo-sm"
-									 sx={{verticalAlign: "middle"}}/>
-							</Link>
+			<Box sx={{display: 'flex'}}>
+				<CssBaseline/>
+				<AppBar position="fixed" open={open}>
+					<Toolbar>
+						<IconButton
+							color="inherit"
+							aria-label="open drawer"
+							onClick={handleDrawerOpen}
+							edge="start"
+							sx={{mr: 2, ...(open && {display: 'none'})}}
+						>
+							<MenuIcon/>
+						</IconButton>
+						<Link href="/">
+							<Box component="img" src="../../public/clowder-logo-sm.svg" alt="clowder-logo-sm"
+								 sx={{verticalAlign: "middle"}}/>
+						</Link>
 
-							{/*for searching*/}
-							<SearchDiv hidden={embeddedSearchHidden}>
-								<EmbeddedSearch/>
-							</SearchDiv>
-							<Box sx={{flexGrow: 1}}/>
-							<Box sx={{marginLeft: "auto"}}>
-								{
-									loggedOut ?
-										<>
-											<Link href="/auth/register" sx={link}>Register</Link>
-											<Link href="/auth/login" sx={link}>Login</Link>
-										</>
-										:
-										<Link href="/auth/logout" sx={link}>Logout</Link>
-								}
-							</Box>
-						</Toolbar>
-					</AppBar>
-					<Drawer
-						sx={{
+						{/*for searching*/}
+						<SearchDiv hidden={embeddedSearchHidden}>
+							<EmbeddedSearch/>
+						</SearchDiv>
+						<Box sx={{flexGrow: 1}}/>
+						<Box sx={{marginLeft: "auto"}}>
+							{
+								loggedOut ?
+									<>
+										<Link href="/auth/register" sx={link}>Register</Link>
+										<Link href="/auth/login" sx={link}>Login</Link>
+									</>
+									:
+									<Link href="/auth/logout" sx={link}>Logout</Link>
+							}
+						</Box>
+					</Toolbar>
+				</AppBar>
+				<Drawer
+					sx={{
+						width: drawerWidth,
+						flexShrink: 0,
+						'& .MuiDrawer-paper': {
 							width: drawerWidth,
-							flexShrink: 0,
-							'& .MuiDrawer-paper': {
-								width: drawerWidth,
-								boxSizing: 'border-box',
-							},
-						}}
-						variant="persistent"
-						anchor="left"
-						open={open}
-					>
-						<DrawerHeader>
-							<IconButton onClick={handleDrawerClose}>
-								{theme.direction === 'ltr' ? <ChevronLeftIcon/> : <ChevronRightIcon/>}
-							</IconButton>
-						</DrawerHeader>
-						<Divider/>
-						<List>
-							<ListItem key={"explore"} disablePadding>
-								<ListItemButton component={RouterLink} to="/">
-									<ListItemIcon>
-										<Explore/>
-									</ListItemIcon>
-									<ListItemText primary={"Explore"}/>
-								</ListItemButton>
-							</ListItem>
-						</List>
-						<Divider/>
-						<List>
-							<ListItem key={"search"} disablePadding>
-								<ListItemButton component={RouterLink} to="/search">
-									<ListItemIcon>
-										<SearchDatasetIcon/>
-									</ListItemIcon>
-									<ListItemText primary={"Search"}/>
-								</ListItemButton>
-							</ListItem>
-						</List>
-						<Divider/>
-						<List>
-							<ListItem key={"newdataset"} disablePadding>
-								<ListItemButton component={RouterLink} to="/create-dataset">
-									<ListItemIcon>
-										<AddBox/>
-									</ListItemIcon>
-									<ListItemText primary={"New Dataset"}/>
-								</ListItemButton>
-							</ListItem>
-						</List>
-					</Drawer>
-					<Main open={open}>
-						<DrawerHeader/>
-						{children}
-					</Main>
-				</Box>
-			</SearchErrorBoundary>
+							boxSizing: 'border-box',
+						},
+					}}
+					variant="persistent"
+					anchor="left"
+					open={open}
+				>
+					<DrawerHeader>
+						<IconButton onClick={handleDrawerClose}>
+							{theme.direction === 'ltr' ? <ChevronLeftIcon/> : <ChevronRightIcon/>}
+						</IconButton>
+					</DrawerHeader>
+					<Divider/>
+					<List>
+						<ListItem key={"explore"} disablePadding>
+							<ListItemButton component={RouterLink} to="/">
+								<ListItemIcon>
+									<Explore/>
+								</ListItemIcon>
+								<ListItemText primary={"Explore"}/>
+							</ListItemButton>
+						</ListItem>
+					</List>
+					<Divider/>
+					<List>
+						<ListItem key={"search"} disablePadding>
+							<ListItemButton component={RouterLink} to="/search">
+								<ListItemIcon>
+									<SearchDatasetIcon/>
+								</ListItemIcon>
+								<ListItemText primary={"Search"}/>
+							</ListItemButton>
+						</ListItem>
+					</List>
+					<Divider/>
+					<List>
+						<ListItem key={"newdataset"} disablePadding>
+							<ListItemButton component={RouterLink} to="/create-dataset">
+								<ListItemIcon>
+									<AddBox/>
+								</ListItemIcon>
+								<ListItemText primary={"New Dataset"}/>
+							</ListItemButton>
+						</ListItem>
+					</List>
+				</Drawer>
+				<Main open={open}>
+					<DrawerHeader/>
+					{children}
+				</Main>
+			</Box>
 		</ReactiveBase>
 	);
 }
