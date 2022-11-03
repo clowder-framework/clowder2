@@ -7,6 +7,7 @@ import tempfile
 import zipfile
 from collections.abc import Mapping, Iterable
 from typing import List, Optional, Union
+import json
 
 import pika
 from bson import ObjectId
@@ -22,12 +23,19 @@ from fastapi import (
 )
 from minio import Minio
 from pika.adapters.blocking_connection import BlockingChannel
+import pymongo
 from pymongo import MongoClient
 from rocrate.model.person import Person
 from rocrate.rocrate import ROCrate
 
 from app import dependencies
 from app import keycloak_auth
+from app.search.connect import (
+    connect_elasticsearch,
+    insert_record,
+    delete_document_by_id,
+    update_record,
+)
 from app.config import settings
 from app.keycloak_auth import get_user, get_current_user
 from app.models.datasets import (
@@ -182,12 +190,30 @@ async def save_dataset(
     dataset_in: DatasetIn,
     user=Depends(keycloak_auth.get_current_user),
     db: MongoClient = Depends(dependencies.get_db),
+    es=Depends(dependencies.get_elasticsearchclient),
 ):
-    result = dataset_in.dict()
+    es = await connect_elasticsearch()
+
+    # Check all connection and abort if any one of them is not available
+    if db is None or es is None:
+        raise HTTPException(status_code=503, detail="Service not available")
+        return
+
     dataset_db = DatasetDB(**dataset_in.dict(), author=user)
     new_dataset = await db["datasets"].insert_one(dataset_db.to_mongo())
     found = await db["datasets"].find_one({"_id": new_dataset.inserted_id})
     dataset_out = DatasetOut.from_mongo(found)
+
+    # Add en entry to the dataset index
+    doc = {
+        "name": dataset_out.name,
+        "description": dataset_out.description,
+        "author": dataset_out.author.email,
+        "created": dataset_out.created,
+        "modified": dataset_out.modified,
+        "download": dataset_out.downloads,
+    }
+    insert_record(es, "dataset", doc, dataset_out.id)
     return dataset_out
 
 
@@ -204,6 +230,7 @@ async def get_datasets(
         for doc in (
             await db["datasets"]
             .find({"author.email": user_id})
+            .sort([("created", pymongo.DESCENDING)])
             .skip(skip)
             .limit(limit)
             .to_list(length=limit)
@@ -211,7 +238,12 @@ async def get_datasets(
             datasets.append(DatasetOut.from_mongo(doc))
     else:
         for doc in (
-            await db["datasets"].find().skip(skip).limit(limit).to_list(length=limit)
+            await db["datasets"]
+            .find()
+            .sort([("created", pymongo.DESCENDING)])
+            .skip(skip)
+            .limit(limit)
+            .to_list(length=limit)
         ):
             datasets.append(DatasetOut.from_mongo(doc))
     return datasets
@@ -272,7 +304,15 @@ async def edit_dataset(
     dataset_info: DatasetBase,
     db: MongoClient = Depends(dependencies.get_db),
     user_id=Depends(get_user),
+    es=Depends(dependencies.get_elasticsearchclient),
 ):
+    es = await connect_elasticsearch()
+
+    # Check all connection and abort if any one of them is not available
+    if db is None or es is None:
+        raise HTTPException(status_code=503, detail="Service not available")
+        return
+
     if (
         dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
     ) is not None:
@@ -286,6 +326,16 @@ async def edit_dataset(
             await db["datasets"].replace_one(
                 {"_id": ObjectId(dataset_id)}, DatasetDB(**dataset).to_mongo()
             )
+            # Update entry to the dataset index
+            doc = {
+                "doc": {
+                    "name": ds["name"],
+                    "description": ds["description"],
+                    "author": UserOut(**user).email,
+                    "modified": ds["modified"],
+                }
+            }
+            update_record(es, "dataset", doc, dataset_id)
         except Exception as e:
             raise HTTPException(status_code=500, detail=e.args[0])
         return DatasetOut.from_mongo(dataset)
@@ -298,7 +348,15 @@ async def patch_dataset(
     dataset_info: DatasetPatch,
     user_id=Depends(get_user),
     db: MongoClient = Depends(dependencies.get_db),
+    es=Depends(dependencies.get_elasticsearchclient),
 ):
+    es = await connect_elasticsearch()
+
+    # Check all connection and abort if any one of them is not available
+    if db is None or es is None:
+        raise HTTPException(status_code=503, detail="Service not available")
+        return
+
     if (
         dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
     ) is not None:
@@ -312,6 +370,16 @@ async def patch_dataset(
             await db["datasets"].replace_one(
                 {"_id": ObjectId(dataset_id)}, DatasetDB(**dataset).to_mongo()
             )
+            # Update entry to the dataset index
+            doc = {
+                "doc": {
+                    "name": ds["name"],
+                    "description": ds["description"],
+                    "author": UserOut(**user).email,
+                    "modified": ds["modified"],
+                }
+            }
+            update_record(es, "dataset", doc, dataset_id)
         except Exception as e:
             raise HTTPException(status_code=500, detail=e.args[0])
         return DatasetOut.from_mongo(dataset)
@@ -322,15 +390,25 @@ async def delete_dataset(
     dataset_id: str,
     db: MongoClient = Depends(dependencies.get_db),
     fs: Minio = Depends(dependencies.get_fs),
+    es=Depends(dependencies.get_elasticsearchclient),
 ):
+    es = await connect_elasticsearch()
+
+    # Check all connection and abort if any one of them is not available
+    if db is None or fs is None or es is None:
+        raise HTTPException(status_code=503, detail="Service not available")
+        return
+
     if (await db["datasets"].find_one({"_id": ObjectId(dataset_id)})) is not None:
+        # delete from elasticsearch
+        delete_document_by_id(es, "dataset", dataset_id)
         # delete dataset first to minimize files/folder being uploaded to a delete dataset
 
         await db["datasets"].delete_one({"_id": ObjectId(dataset_id)})
         await db.metadata.delete_many({"resource.resource_id": ObjectId(dataset_id)})
         async for file in db["files"].find({"dataset_id": ObjectId(dataset_id)}):
             file = FileOut(**file)
-            await remove_file_entry(file.id, db, fs)
+            await remove_file_entry(file.id, db, fs, es)
         await db["folders"].delete_many({"dataset_id": ObjectId(dataset_id)})
         return {"deleted": dataset_id}
     else:
@@ -444,6 +522,7 @@ async def save_file(
     db: MongoClient = Depends(dependencies.get_db),
     fs: Minio = Depends(dependencies.get_fs),
     file: UploadFile = File(...),
+    es=Depends(dependencies.get_elasticsearchclient),
 ):
     if (
         dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
@@ -467,7 +546,7 @@ async def save_file(
                 )
 
         await add_file_entry(
-            fileDB, user, db, fs, file.file, content_type=file.content_type
+            fileDB, user, db, fs, file.file, content_type=file.content_type, es=es
         )
 
         return fileDB
@@ -536,7 +615,7 @@ async def create_dataset_from_zip(
                             name=filename, creator=user, dataset_id=dataset_id
                         )
                     with open(extracted, "rb") as file_reader:
-                        await add_file_entry(fileDB, user, db, fs, file_reader)
+                        await add_file_entry(fileDB, user, db, fs, file_reader, es)
                     if os.path.isfile(extracted):
                         os.remove(extracted)
 
@@ -578,6 +657,25 @@ async def download_dataset(
             f.write("BagIt-Version: 0.97" + "\n")
             f.write("Tag-File-Character-Encoding: UTF-8" + "\n")
 
+        # Write dataset metadata if found
+        metadata = []
+        async for md in db["metadata"].find(
+            {"resource.resource_id": ObjectId(dataset_id)}
+        ):
+            metadata.append(md)
+        if len(metadata) > 0:
+            datasetmetadata_path = os.path.join(
+                current_temp_dir, "_dataset_metadata.json"
+            )
+            metadata_content = json_util.dumps(metadata)
+            with open(datasetmetadata_path, "w") as f:
+                f.write(metadata_content)
+            crate.add_file(
+                datasetmetadata_path,
+                dest_path="metadata/_dataset_metadata.json",
+                properties={"name": "_dataset_metadata.json"},
+            )
+
         bag_size = 0  # bytes
         file_count = 0
 
@@ -610,7 +708,6 @@ async def download_dataset(
             current_file_size = os.path.getsize(current_file_path)
             bag_size += current_file_size
 
-            # TODO add file metadata
             metadata = []
             async for md in db["metadata"].find(
                 {"resource.resource_id": ObjectId(file.id)}
@@ -687,6 +784,8 @@ async def download_dataset(
         raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
 
 
+# submits file to extractor
+# can handle parameeters pass in as key/values in info
 @router.post("/{dataset_id}/extract")
 async def get_dataset_extract(
     dataset_id: str,
@@ -706,10 +805,11 @@ async def get_dataset_extract(
             token = token.lstrip("Bearer")
             token = token.lstrip(" ")
             # TODO check of extractor exists
-            msg = {"message": "testing", "dataseet_id": dataset_id}
+            msg = {"message": "testing", "dataset_id": dataset_id}
             body = {}
             body["secretKey"] = token
             body["token"] = token
+            # TODO better solution for host
             body["host"] = "http://127.0.0.1:8000"
             body["retry_count"] = 0
             body["filename"] = dataset["name"]
@@ -720,6 +820,7 @@ async def get_dataset_extract(
             current_queue = req_info["extractor"]
             if "parameters" in req_info:
                 current_parameters = req_info["parameters"]
+                body["parameters"] = current_parameters
             current_routing_key = "extractors." + current_queue
             rabbitmq_client.queue_bind(
                 exchange="extractors",

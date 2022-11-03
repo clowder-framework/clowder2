@@ -1,20 +1,9 @@
 import React, {useEffect, useState} from "react";
-import {
-	Box,
-	Button,
-	Dialog,
-	Divider,
-	Grid, IconButton,
-	Menu,
-	MenuItem,
-	Tab,
-	Tabs,
-	Typography
-} from "@mui/material";
+import {Box, Button, Dialog, Divider, Grid, IconButton, Menu, MenuItem, Tab, Tabs, Typography, DialogActions, DialogContent, DialogContentText, DialogTitle,} from "@mui/material";
 import {ClowderInput} from "../styledComponents/ClowderInput";
 import {ClowderButton} from "../styledComponents/ClowderButton";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
-import {useNavigate, useParams} from "react-router-dom";
+import {useNavigate, useParams, useSearchParams} from "react-router-dom";
 import {RootState} from "../../types/data";
 import {useDispatch, useSelector} from "react-redux";
 import {
@@ -25,28 +14,28 @@ import {
 	updateDataset
 } from "../../actions/dataset";
 import {fetchFolderPath, folderDeleted} from "../../actions/folder";
-import {resetFailedReason, } from "../../actions/common"
+import {resetFailedReason,} from "../../actions/common"
 
 import {a11yProps, TabPanel} from "../tabs/TabComponent";
-import TopBar from "../navigation/TopBar";
 import {MainBreadcrumbs} from "../navigation/BreadCrumb";
 import {UploadFile} from "../files/UploadFile";
 import {ActionModal} from "../dialog/ActionModal";
 import FilesTable from "../files/FilesTable";
 import {CreateFolder} from "../folders/CreateFolder";
-import {useSearchParams} from "react-router-dom";
 import {parseDate} from "../../utils/common";
 import config from "../../app.config";
 import {DatasetIn, MetadataIn} from "../../openapi/v2";
 import {DisplayMetadata} from "../metadata/DisplayMetadata";
+import {CreateMetadataDefinition} from "../metadata/CreateMetadataDefinition";
 import {EditMetadata} from "../metadata/EditMetadata";
 import {
-	patchDatasetMetadata as patchDatasetMetadataAction,
 	deleteDatasetMetadata as deleteDatasetMetadataAction,
-	postDatasetMetadata, fetchDatasetMetadata
+	fetchDatasetMetadata,
+	patchDatasetMetadata as patchDatasetMetadataAction,
+	postDatasetMetadata
 } from "../../actions/metadata";
 import CloseIcon from '@mui/icons-material/Close';
-import dataset from "../../reducers/dataset";
+import Layout from "../Layout";
 
 const tab = {
 	fontStyle: "normal",
@@ -104,6 +93,7 @@ export const Dataset = (): JSX.Element => {
 	const [datasetDescription, setDatasetDescription] = React.useState<string>("");
 	const [enableAddMetadata, setEnableAddMetadata] = React.useState<boolean>(false);
 	const [metadataRequestForms, setMetadataRequestForms] = useState({});
+	const [openPopup, setOpenPopup] = React.useState<boolean>(false)
 
 	// component did mount list all files in dataset
 	useEffect(() => {
@@ -246,8 +236,7 @@ export const Dataset = (): JSX.Element => {
 	}
 
 	return (
-		<div>
-			<TopBar/>
+		<Layout>
 			<div className="outer-container">
 				<MainBreadcrumbs paths={paths}/>
 				{/*Confirmation dialogue*/}
@@ -277,7 +266,7 @@ export const Dataset = (): JSX.Element => {
 								</Tabs>
 							</Box>
 							<TabPanel value={selectedTabIndex} index={0}>
-								<FilesTable datasetId={datasetId} datasetName={about.name}/>
+								<FilesTable datasetId={datasetId}/>
 							</TabPanel>
 							<TabPanel value={selectedTabIndex} index={1}>
 								{
@@ -289,6 +278,9 @@ export const Dataset = (): JSX.Element => {
 											>
 												<CloseIcon />
 											</IconButton>
+											<Button variant="contained" onClick={() => {setOpenPopup(true);}} sx={{ mt: 1, mr: 1, "alignItems": "right" }}>
+                                                Add new metadata definition
+											</Button>
 											<EditMetadata resourceType="dataset" resourceId={datasetId}
 														  setMetadata={setMetadata}
 											/>
@@ -299,6 +291,22 @@ export const Dataset = (): JSX.Element => {
 													sx={{ mt: 1, mr: 1 }}>
 												Cancel
 											</Button>
+											{
+												openPopup ?
+												<>
+                                                    <Dialog open={openPopup} onClose={() => {setOpenPopup(false);}} fullWidth={true} maxWidth={"md"}>
+														<DialogTitle>Add new metadata definition</DialogTitle>
+														<DialogContent>
+															<DialogContentText>Please fill out the metadata information here.</DialogContentText>
+															<CreateMetadataDefinition/>
+														</DialogContent>
+														<DialogActions>
+															<Button onClick={() => {setOpenPopup(false);}}>Cancel</Button>
+														</DialogActions>
+													</Dialog>
+												</>
+												: <></>
+											}
 										</>
 										:
 										<>
@@ -482,6 +490,6 @@ export const Dataset = (): JSX.Element => {
 					</Dialog>
 				</div>
 			</div>
-		</div>
+		</Layout>
 	);
 };

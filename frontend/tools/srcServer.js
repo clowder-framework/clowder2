@@ -28,10 +28,6 @@ browserSync({
 			webpackDevMiddleware(bundler, {
 				// Dev middleware can"t access config, so we provide publicPath
 				publicPath: config.output.publicPath,
-
-				// These settings suppress noisy webpack output so only errors are displayed to the console.
-				noInfo: false,
-				quiet: false,
 				stats: {
 					assets: false,
 					colors: true,
