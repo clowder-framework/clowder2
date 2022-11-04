@@ -12,7 +12,7 @@ export function fetchListeners(skip=0, limit=21){
 			.then(json => {
 				dispatch({
 					type: RECEIVE_LISTENERS,
-					extractors: json,
+					listeners: json,
 					receivedAt: Date.now(),
 				});
 			})
