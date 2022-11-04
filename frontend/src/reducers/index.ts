@@ -5,7 +5,6 @@ import folder from "./folder";
 import user from "./user";
 import error from "./error";
 import metadata from "./metadata";
-import extractors from "./extractors";
 import listeners from "./listeners";
 
 const rootReducer = combineReducers({
@@ -15,7 +14,6 @@ const rootReducer = combineReducers({
 	user: user,
 	error: error,
 	metadata: metadata,
-	extractors: extractors,
 	listener: listeners
 });
 
