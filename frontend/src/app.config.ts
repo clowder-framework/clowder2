@@ -27,10 +27,10 @@ config["GHIssueBaseURL"] = "https://github.com/clowder-framework/clowder2/issues
 
 // Backend Keycloak login url
 config["KeycloakBaseURL"] = process.env.KeycloakBaseURL || config.hostname + "/api/v2/auth";
-config["KeycloakLogin"] = config.KeycloakBaseURL || config.hostname + "/login";
-config["KeycloakLogout"] = config.KeycloakBaseURL || config.hostname + "/logout";
-config["KeycloakRefresh"] = config.KeycloakBaseURL || config.hostname + "/refresh_token";
-config["KeycloakRegister"] = config.KeycloakBaseURL || config.hostname + "/register";
+config["KeycloakLogin"] = config.KeycloakBaseURL + "/login";
+config["KeycloakLogout"] = config.KeycloakBaseURL + "/logout";
+config["KeycloakRefresh"] = config.KeycloakBaseURL + "/refresh_token";
+config["KeycloakRegister"] = config.KeycloakBaseURL + "/register";
 
 // elasticsearch
 config["searchEndpoint"] = `${hostname}/api/v2/elasticsearch`;
