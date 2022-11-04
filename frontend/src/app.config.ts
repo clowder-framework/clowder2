@@ -33,6 +33,6 @@ config["KeycloakRefresh"] = config.KeycloakBaseURL + "/refresh_token";
 config["KeycloakRegister"] = config.KeycloakBaseURL + "/register";
 
 // elasticsearch
-config["searchEndpoint"] = config.hostname + "/api/v2/elasticsearch";
+config["searchEndpoint"] = `http://${config.hostname}/api/v2/elasticsearch`;
 
 export default config;
