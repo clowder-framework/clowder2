@@ -13,7 +13,7 @@ interface Config{
 }
 
 const config:Config = <Config>{};
-const hostname = process.env.CLOWDER_REMOTE_HOSTNAME || "";
+const hostname = process.env.CLOWDER_REMOTE_HOSTNAME || `${window.location.protocol}//${window.location.host}`;
 
 // TODO when add auth piece remove this env
 const apikey = process.env.APIKEY || "";
@@ -27,12 +27,12 @@ config["GHIssueBaseURL"] = "https://github.com/clowder-framework/clowder2/issues
 
 // Backend Keycloak login url
 config["KeycloakBaseURL"] = process.env.KeycloakBaseURL || config.hostname + "/api/v2/auth";
-config["KeycloakLogin"] = config.KeycloakBaseURL + "/login";
-config["KeycloakLogout"] = config.KeycloakBaseURL + "/logout";
-config["KeycloakRefresh"] = config.KeycloakBaseURL + "/refresh_token";
-config["KeycloakRegister"] = config.KeycloakBaseURL + "/register";
+config["KeycloakLogin"] = config.KeycloakBaseURL || config.hostname + "/login";
+config["KeycloakLogout"] = config.KeycloakBaseURL || config.hostname + "/logout";
+config["KeycloakRefresh"] = config.KeycloakBaseURL || config.hostname + "/refresh_token";
+config["KeycloakRegister"] = config.KeycloakBaseURL || config.hostname + "/register";
 
 // elasticsearch
-config["searchEndpoint"] = `http://${config.hostname}/api/v2/elasticsearch`;
+config["searchEndpoint"] = `${hostname}/api/v2/elasticsearch`;
 
 export default config;
