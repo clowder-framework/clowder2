@@ -2,7 +2,6 @@ import React, {useEffect, useState} from "react";
 import {Box, Button, ButtonGroup, Grid, Tab, Tabs} from "@mui/material";
 
 import {Dataset, RootState} from "../types/data";
-import {ListenerState} from "../types/data";
 import {useDispatch, useSelector} from "react-redux";
 import {datasetDeleted, fetchDatasets,} from "../actions/dataset";
 import {fetchExtractors} from "../actions/extractors";
@@ -189,13 +188,16 @@ export const Explore = (): JSX.Element => {
 							<TabPanel value={selectedTabIndex} index={3}/>
 							<TabPanel value={selectedTabIndex} index={4}/>
 							<TabPanel value={selectedTabIndex} index={5}>
-								{listeners.map((listener) => {
+								{
+									listeners.map((listener) => {
 									return (
 										<Grid item key={listener.id} xs={12} sm={6} md={4} lg={3}>
-											<ListenerCard id={listener.id} name={listener.name} description={listener.description}/>
+											<ListenerCard id={listener.id} name={listener.name}
+														  description={listener.description}/>
 										</Grid>
-									);
-								})
+										);
+									})
+								}
 							</TabPanel>
 						</Grid>
 					</Grid>
