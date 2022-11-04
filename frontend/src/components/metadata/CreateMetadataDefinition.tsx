@@ -8,8 +8,7 @@ import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import { postMetadataDefinitions } from "../../actions/metadata";
 import Layout from "../Layout";
 
-import widgetTypes from "../../../../scripts/metadata/config/widgetTypes.json";
-import inputTypes from "../../../../scripts/metadata/config/inputTypes.json";
+import {widgetTypes, inputTypes} from "../../metadata.config";
 
 export const CreateMetadataDefinitionPage = (): JSX.Element => {
 	return (
@@ -24,7 +23,7 @@ export const CreateMetadataDefinition = (): JSX.Element => {
 	const dispatch = useDispatch();
 	// @ts-ignore
 	const saveMetadataDefinitions = (metadata: object) => dispatch(postMetadataDefinitions(metadata));
-	
+
 	const [activeStep, setActiveStep] = React.useState(0);
 	const [parsedInput, setParsedInput] = React.useState("");
 	const [formInput, setFormInput] = React.useState({
@@ -49,14 +48,14 @@ export const CreateMetadataDefinition = (): JSX.Element => {
         // Handle input change of name, description, context high level fields
         if (idx == -1) {
             data[key] = value
-        
+
         } else {
            if (key == "list" || key == "required") {
 				data["fields"][idx][key] = !data["fields"][idx][key]
-			
+
 			} else if (key == "type" || key == "options") {
 				data["fields"][idx].config[key] = value
-			
+
 			} else if (key == "name" || key == "widgetType") {
 				data["fields"][idx][key] = value
 			}
@@ -78,7 +77,7 @@ export const CreateMetadataDefinition = (): JSX.Element => {
 		}
 
 		let newfield = formInput["fields"]
-		
+
 		// Add newfield to ith idx of list
 		newfield.splice(idx + 1, 0, newitem)
 
@@ -270,10 +269,10 @@ export const CreateMetadataDefinition = (): JSX.Element => {
 
 					{formInput.fields.map((input, idx) => {
 						return (<Step key={idx}>
-								{idx == 0 ? 
+								{idx == 0 ?
                                     <StepButton color="inherit" onClick={() => {setActiveStep(idx + 1)}}>
                                         <StepLabel>Add metadata entry*
-                                            {idx == activeStep - 1 ? 
+                                            {idx == activeStep - 1 ?
                                             <IconButton color="primary" size="small" onClick={() => addNewField(idx)}>
                                                 <AddBoxIcon />
                                             </IconButton>
@@ -283,7 +282,7 @@ export const CreateMetadataDefinition = (): JSX.Element => {
 								:
                                     <StepButton color="inherit" onClick={() => {setActiveStep(idx + 1)}}>
                                         <StepLabel>Add additional entry
-                                            {idx == activeStep - 1 ? 
+                                            {idx == activeStep - 1 ?
                                             <>
                                                 <IconButton color="primary" size="small" onClick={() => addNewField(idx)}>
                                                     <AddBoxIcon />
@@ -292,7 +291,7 @@ export const CreateMetadataDefinition = (): JSX.Element => {
                                                     <DeleteOutlineIcon />
                                                 </IconButton>
                                             </>
-                                            : 
+                                            :
                                             <IconButton size="small" onClick={() => removeField(idx)}>
                                                 <DeleteOutlineIcon />
                                             </IconButton>}
@@ -303,11 +302,11 @@ export const CreateMetadataDefinition = (): JSX.Element => {
 									<Grid container>
 										<Grid xs={4} md={4}>
 											<FormGroup row>
-												<FormControlLabel control={<Checkbox 
+												<FormControlLabel control={<Checkbox
 													checked={input.list}
 													onChange={(event) => { handleInputChange(idx, "list", event.target.value); }}
 													/>} label="Contains List" />
-												<FormControlLabel control={<Checkbox 
+												<FormControlLabel control={<Checkbox
 													checked={input.required}
 													onChange={(event) => { handleInputChange(idx, "required", event.target.value); }}
 													/>} label="Required" />
@@ -364,7 +363,7 @@ export const CreateMetadataDefinition = (): JSX.Element => {
                                         })}
                                     </TextField>
                                     {/*
-                                      * TODO: Expand to support different config data type actions 
+                                      * TODO: Expand to support different config data type actions
                                       * https://github.com/clowder-framework/clowder2/issues/169
                                       */}
 									{(input.config.type == "enum") ? <>
