@@ -12,6 +12,8 @@ import {RedirectLogin as RedirectLoginComponent} from "./components/auth/Redirec
 import {RedirectLogout as RedirectLogoutComponent} from "./components/auth/RedirectLogout";
 import {Search} from "./components/search/Search";
 
+import {Listeners} from "./components/listeners/Listeners";
+
 import {isAuthorized} from "./utils/common";
 import {useDispatch, useSelector} from "react-redux";
 import {RootState} from "./types/data";
@@ -60,6 +62,7 @@ export const AppRoutes = (): JSX.Element => {
 				<Route path="/auth/logout" element={<RedirectLogoutComponent/>} />
 				<Route path="/auth" element={<AuthComponent/>} />
 				<Route path="/search" element={<PrivateRoute><Search/></PrivateRoute>} />
+				<Route path="/listeners" element={<Listeners/>}/>
 				<Route path="*"
 					   element={
 						   <main style={{ padding: "1rem" }}>
