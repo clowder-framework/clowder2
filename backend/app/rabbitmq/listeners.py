@@ -9,7 +9,7 @@ from app.keycloak_auth import get_token
 from app import dependencies
 from app.models.files import FileOut
 from app.models.datasets import DatasetOut
-from app.models.listeners import EventListenerDatasetMessage
+from app.models.listeners import EventListenerDatasetMessage, EventListenerMessage
 
 
 def submit_file_message(

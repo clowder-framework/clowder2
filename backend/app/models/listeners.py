@@ -95,7 +95,7 @@ class EventListenerDatasetMessage(BaseModel):
     host: str = "http://127.0.0.1:8000"
     secretKey: str = "secretKey"
     retry_count: int = 0
-    resource_type: str = "file"
+    resource_type: str = "dataset"
     flags: str = ""
     datasetName: str
     id: str
