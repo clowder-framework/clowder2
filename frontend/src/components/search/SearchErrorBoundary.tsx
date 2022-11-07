@@ -30,7 +30,8 @@ export function SearchErrorBoundary(props) {
 											{error["responses"][0].error.root_cause[0].reason}
 										</Typography>
 										<Typography variant="body2">
-											If you have not finish your query. Please resume typing...
+											Incorrect query syntax. For more information on query syntax please see
+											<a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html">docs</a>.
 										</Typography>
 									</>
 								);
