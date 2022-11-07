@@ -32,6 +32,7 @@ from rocrate.rocrate import ROCrate
 from app import dependencies
 from app import keycloak_auth
 from app.search.connect import (
+    connect_elasticsearch,
     insert_record,
     delete_document_by_id,
     update_record,
@@ -192,6 +193,7 @@ async def save_dataset(
     db: MongoClient = Depends(dependencies.get_db),
     es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
 ):
+    es = await connect_elasticsearch()
 
     # Check all connection and abort if any one of them is not available
     if db is None or es is None:
@@ -305,6 +307,7 @@ async def edit_dataset(
     user_id=Depends(get_user),
     es=Depends(dependencies.get_elasticsearchclient),
 ):
+    es = await connect_elasticsearch()
 
     # Check all connection and abort if any one of them is not available
     if db is None or es is None:
@@ -348,6 +351,7 @@ async def patch_dataset(
     db: MongoClient = Depends(dependencies.get_db),
     es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
 ):
+    es = await connect_elasticsearch()
 
     # Check all connection and abort if any one of them is not available
     if db is None or es is None:
@@ -389,6 +393,7 @@ async def delete_dataset(
     fs: Minio = Depends(dependencies.get_fs),
     es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
 ):
+    es = await connect_elasticsearch()
 
     # Check all connection and abort if any one of them is not available
     if db is None or fs is None or es is None:
@@ -653,6 +658,25 @@ async def download_dataset(
             f.write("BagIt-Version: 0.97" + "\n")
             f.write("Tag-File-Character-Encoding: UTF-8" + "\n")
 
+        # Write dataset metadata if found
+        metadata = []
+        async for md in db["metadata"].find(
+            {"resource.resource_id": ObjectId(dataset_id)}
+        ):
+            metadata.append(md)
+        if len(metadata) > 0:
+            datasetmetadata_path = os.path.join(
+                current_temp_dir, "_dataset_metadata.json"
+            )
+            metadata_content = json_util.dumps(metadata)
+            with open(datasetmetadata_path, "w") as f:
+                f.write(metadata_content)
+            crate.add_file(
+                datasetmetadata_path,
+                dest_path="metadata/_dataset_metadata.json",
+                properties={"name": "_dataset_metadata.json"},
+            )
+
         bag_size = 0  # bytes
         file_count = 0
 
@@ -685,7 +709,6 @@ async def download_dataset(
             current_file_size = os.path.getsize(current_file_path)
             bag_size += current_file_size
 
-            # TODO add file metadata
             metadata = []
             async for md in db["metadata"].find(
                 {"resource.resource_id": ObjectId(file.id)}

@@ -1,0 +1,11 @@
+{
+    "int": "Integer",
+    "float": "Floating point",
+    "str": "String",
+    "bool": "Boolean",
+    "date": "Date",
+    "time": "Time",
+    "dict": "Dictionary", 
+    "enum": "List",
+    "tuple": "Tuple"
+}

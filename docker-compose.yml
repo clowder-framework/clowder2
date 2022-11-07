@@ -140,7 +140,7 @@ services:
         POSTGRES_PASSWORD: password
 
   keycloak:
-      image: quay.io/keycloak/keycloak:19.0.2
+      image: quay.io/keycloak/keycloak:19.0
       networks:
         - clowder2
       volumes:

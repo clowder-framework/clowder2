@@ -1,4 +1,5 @@
 import * as React from 'react';
+import {useEffect} from 'react';
 import {styled, useTheme} from '@mui/material/styles';
 import Box from '@mui/material/Box';
 import Drawer from '@mui/material/Drawer';
@@ -20,12 +21,12 @@ import {Link} from "@mui/material";
 import {Link as RouterLink, useLocation} from 'react-router-dom';
 import {useSelector} from "react-redux";
 import {RootState} from "../types/data";
-import {AddBox, Explore} from "@material-ui/icons";
+import {AddBox, Create, Explore} from "@material-ui/icons";
 import {EmbeddedSearch} from "./search/EmbeddedSearch";
 import {searchTheme} from "../theme";
 import {ReactiveBase} from "@appbaseio/reactivesearch";
 import Cookies from "universal-cookie";
-import {useEffect} from "react";
+import config from '../app.config';
 
 const cookies = new Cookies();
 
@@ -50,7 +51,8 @@ const Main = styled('main', {shouldForwardProp: (prop) => prop !== 'open'})<{
 	}),
 }));
 
-const SearchDiv = styled("div")(({ theme }) => ({
+
+const SearchDiv = styled("div")(({theme}) => ({
 	position: "relative",
 	marginLeft: theme.spacing(3),
 	marginBottom: "-5px",  // to compoensate the tags div
@@ -94,6 +96,7 @@ const link = {
 	m: 2,
 };
 
+const headers = {"Authorization": cookies.get("Authorization")};
 
 export default function PersistentDrawerLeft(props) {
 	const {children} = props;
@@ -111,11 +114,10 @@ export default function PersistentDrawerLeft(props) {
 
 	const location = useLocation();
 
-	useEffect(()=>{
-		if (location.pathname.includes("search")){
+	useEffect(() => {
+		if (location.pathname.includes("search")) {
 			setEmbeddedSearchHidden(true);
-		}
-		else{
+		} else {
 			setEmbeddedSearchHidden(false);
 		}
 	}, [location])
@@ -123,20 +125,14 @@ export default function PersistentDrawerLeft(props) {
 	const loggedOut = useSelector((state: RootState) => state.error.loggedOut);
 
 
+	// @ts-ignore
 	return (
 		// Wrap reactive search base on the most outside component
 		<ReactiveBase
-			// TODO put it in the Config file or other ways to dynamically pass in
-		  url="http://localhost:8000/api/v2/elasticsearch"
-		  app="file,dataset,metadata"
-		  headers={{"Authorization": cookies.get("Authorization")}}
-		  // transformResponse={(elasticsearchResponse) => {
-		  // 	console.log(elasticsearchResponse)
-		  // 	// if (elasticsearchResponse.detail.error === "invalid_token"){
-		  // 	// 	console.log("token expired!");
-			// // }
-		  // }}
-		  theme={searchTheme}
+			url={config.searchEndpoint}
+			app="file,dataset,metadata"
+			headers={headers}
+			theme={searchTheme}
 		>
 			<Box sx={{display: 'flex'}}>
 				<CssBaseline/>
@@ -152,14 +148,15 @@ export default function PersistentDrawerLeft(props) {
 							<MenuIcon/>
 						</IconButton>
 						<Link href="/">
-							<Box component="img" src="../../public/clowder-logo-sm.svg" alt="clowder-logo-sm" sx={{verticalAlign:"middle"}}/>
+							<Box component="img" src="../../public/clowder-logo-sm.svg" alt="clowder-logo-sm"
+								 sx={{verticalAlign: "middle"}}/>
 						</Link>
 
 						{/*for searching*/}
 						<SearchDiv hidden={embeddedSearchHidden}>
-							<EmbeddedSearch />
+							<EmbeddedSearch/>
 						</SearchDiv>
-						<Box sx={{ flexGrow: 1 }} />
+						<Box sx={{flexGrow: 1}}/>
 						<Box sx={{marginLeft: "auto"}}>
 							{
 								loggedOut ?

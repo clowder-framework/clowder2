@@ -1,5 +1,6 @@
 import json
 import time
+import pytest
 from datetime import datetime
 
 from bson import ObjectId
@@ -57,8 +58,9 @@ updated_dummy_dataset_record = {
 }
 
 
-def test_files():
-    es = connect_elasticsearch()
+@pytest.mark.asyncio
+async def test_files():
+    es = await connect_elasticsearch()
     if es is not None:
         create_index(
             es,
@@ -95,8 +97,9 @@ def test_files():
         delete_index(es, dummy_file_index_name)
 
 
-def test_datasets():
-    es = connect_elasticsearch()
+@pytest.mark.asyncio
+async def test_datasets():
+    es = await connect_elasticsearch()
     if es is not None:
         create_index(
             es,

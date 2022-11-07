@@ -24,6 +24,7 @@ from pymongo import MongoClient
 from app import dependencies
 from app.config import settings
 from app.search.connect import (
+    connect_elasticsearch,
     insert_record,
     delete_document_by_id,
     update_record,
@@ -57,6 +58,7 @@ async def add_file_entry(
         file_db: FileDB object controlling dataset and folder destination
         file: bytes to upload
     """
+    es = await connect_elasticsearch()
 
     # Check all connection and abort if any one of them is not available
     if db is None or fs is None or es is None:
@@ -126,6 +128,8 @@ async def remove_file_entry(
     """Remove FileDB object into MongoDB, Minio, and associated metadata and version information."""
     # TODO: Deleting individual versions will require updating version_id in mongo, or deleting entire document
 
+    es = await connect_elasticsearch()
+
     # Check all connection and abort if any one of them is not available
     if db is None or fs is None or es is None:
         raise HTTPException(status_code=503, detail="Service not available")
@@ -148,6 +152,7 @@ async def update_file(
     file: UploadFile = File(...),
     es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
 ):
+    es = await connect_elasticsearch()
 
     # Check all connection and abort if any one of them is not available
     if db is None or fs is None or es is None:
