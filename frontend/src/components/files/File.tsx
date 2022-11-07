@@ -6,7 +6,7 @@ import Video from "../previewers/Video";
 import {downloadResource} from "../../utils/common";
 import Thumbnail from "../previewers/Thumbnail";
 import {PreviewConfiguration, RootState} from "../../types/data";
-import {useLocation, useParams} from "react-router-dom";
+import {useLocation, useNavigate, useParams} from "react-router-dom";
 import {useDispatch, useSelector} from "react-redux";
 import {resetFailedReason} from "../../actions/common"
 
@@ -31,6 +31,7 @@ import Layout from "../Layout";
 import {fetchDatasetAbout} from "../../actions/dataset";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 
+
 const tab = {
 	fontStyle: "normal",
 		fontWeight: "normal",
@@ -48,6 +49,9 @@ export const File = (): JSX.Element => {
 
 	// path parameter
 	const { fileId } = useParams<{fileId?: string}>();
+
+	// use history hook to redirect/navigate between routes
+	const history = useNavigate();
 
 	// query parameter get dataset id
 	const search = useLocation().search;
@@ -180,6 +184,13 @@ export const File = (): JSX.Element => {
 		// switch to display mode
 		setEnableAddMetadata(false);
 	};
+
+	const submitToListener = ()=> {
+		console.log("submitting to listener")
+		console.log('file id is', fileId);
+		const filename = fileSummary['name']
+		history(`/listeners?fileId=${fileId}&name=${filename}`);
+	}
 
 	// for breadcrumb
 	const paths = [
@@ -323,8 +334,8 @@ export const File = (): JSX.Element => {
 									>
 									<MenuItem sx={optionMenuItem}
 											  onClick={() => {
-												  console.log("We will now to to extractions")
-												  handleOptionClose();
+											  		submitToListener();
+												  	handleOptionClose();
 											  }}>
 										Extractions
 									</MenuItem>

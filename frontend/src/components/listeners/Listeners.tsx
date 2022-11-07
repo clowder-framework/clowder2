@@ -14,6 +14,8 @@ import ListenerCard from "./ListenerCard";
 import config from "../../app.config";
 import {ArrowBack, ArrowForward} from "@material-ui/icons";
 import Layout from "../Layout";
+import {useLocation, useParams} from "react-router-dom";
+import * as Url from "url";
 
 const tab = {
 	fontStyle: "normal",
@@ -23,6 +25,13 @@ const tab = {
 };
 
 export const Listeners = (): JSX.Element => {
+
+	// parameters
+	const search = useLocation().search;
+	const {datasetId} = useParams<{ datasetId?: string }>();
+	const {fileId} = useParams<{fileId?: string}>();
+	console.log('we got a dataset id and it is ', datasetId);
+	console.log("we got a file id and it is", fileId);
 
 
 	// Redux connect equivalent

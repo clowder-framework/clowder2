@@ -213,6 +213,14 @@ export const Dataset = (): JSX.Element => {
 		setEnableAddMetadata(false);
 	};
 
+	const submitToListener = ()=> {
+		console.log("submitting to listener")
+		console.log('dataset id is', datasetId)
+		// const datasetName = about["name"];
+		console.log("and the name is", datasetName)
+		history(`/listeners?datasetId=${datasetId}`);
+	}
+
 	// for breadcrumb
 	const paths = [
 		{
@@ -394,9 +402,8 @@ export const Dataset = (): JSX.Element => {
 											  disabled={true}>Collaborators</MenuItem>
 									<MenuItem sx={optionMenuItem}
 											  onClick={()=>{
-											  	console.log('we are going to extract!');
-
-												  handleOptionClose();
+											  	handleOptionClose();
+											  	submitToListener();
 											  }
 											  }>Extraction</MenuItem>
 								</Menu>
