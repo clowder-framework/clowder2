@@ -25,8 +25,15 @@ async def search_dataset(request: Request):
     return search_index(es, "dataset", query)
 
 
-@router.post("/file,dataset/_msearch")
-async def search_file_and_dataset(request: Request):
+@router.post("/metadata/_msearch")
+async def search_metadata(request: Request):
     es = connect_elasticsearch()
     query = await request.body()
-    return search_index(es, ["file", "dataset"], query)
+    return search_index(es, "metadata", query)
+
+
+@router.post("/file,dataset,metadata/_msearch")
+async def search_file_dataset_and_metadata(request: Request):
+    es = connect_elasticsearch()
+    query = await request.body()
+    return search_index(es, ["file", "dataset", "metadata"], query)
