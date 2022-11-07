@@ -1,5 +1,21 @@
 import React, {useEffect, useState} from "react";
-import {Box, Button, Dialog, Divider, Grid, IconButton, Menu, MenuItem, Tab, Tabs, Typography, DialogActions, DialogContent, DialogContentText, DialogTitle,} from "@mui/material";
+import {
+	Box,
+	Button,
+	Dialog,
+	Divider,
+	Grid,
+	IconButton,
+	Menu,
+	MenuItem,
+	Tab,
+	Tabs,
+	Typography,
+	DialogActions,
+	DialogContent,
+	DialogContentText,
+	DialogTitle,
+} from "@mui/material";
 import {ClowderInput} from "../styledComponents/ClowderInput";
 import {ClowderButton} from "../styledComponents/ClowderButton";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
@@ -21,7 +37,6 @@ import {MainBreadcrumbs} from "../navigation/BreadCrumb";
 import {UploadFile} from "../files/UploadFile";
 import {ActionModal} from "../dialog/ActionModal";
 import FilesTable from "../files/FilesTable";
-import {CreateFolder} from "../folders/CreateFolder";
 import {parseDate} from "../../utils/common";
 import config from "../../app.config";
 import {DatasetIn, MetadataIn} from "../../openapi/v2";
@@ -36,6 +51,7 @@ import {
 } from "../../actions/metadata";
 import CloseIcon from '@mui/icons-material/Close';
 import Layout from "../Layout";
+import {ActionsMenu} from "./ActionsMenu";
 
 const tab = {
 	fontStyle: "normal",
@@ -44,49 +60,37 @@ const tab = {
 	textTransform: "capitalize",
 };
 
-const optionMenuItem = {
-	fontWeight: "normal",
-	fontSize: "14px",
-	marginTop: "8px",
-}
-
 export const Dataset = (): JSX.Element => {
 
 	// path parameter
 	const {datasetId} = useParams<{ datasetId?: string }>();
 
 	// search parameters
-	let [searchParams, setSearchParams] = useSearchParams();
+	let [searchParams] = useSearchParams();
 	const folderId = searchParams.get("folder");
-
-	// use history hook to redirect/navigate between routes
-	const history = useNavigate();
 
 	// Redux connect equivalent
 	const dispatch = useDispatch();
-	const updateDatasetMetadata = (datasetId: string|undefined, content:object) => dispatch(patchDatasetMetadataAction(datasetId,content));
-	const createDatasetMetadata = (datasetId: string|undefined, metadata:MetadataIn) => dispatch(postDatasetMetadata(datasetId, metadata));
-	const deleteDatasetMetadata = (datasetId: string|undefined, metadata:object) => dispatch(deleteDatasetMetadataAction(datasetId, metadata));
-	const deleteDataset = (datasetId:string|undefined) => dispatch(datasetDeleted(datasetId));
-	const deleteFolder = (datasetId:string|undefined, folderId:string|undefined) => dispatch(folderDeleted(datasetId, folderId));
-	const editDataset = (datasetId: string|undefined, formData: DatasetIn) => dispatch(updateDataset(datasetId, formData));
-	const getFolderPath= (folderId: string | null) => dispatch(fetchFolderPath(folderId));
-	const listFilesInDataset = (datasetId: string|undefined, folderId: string | null) => dispatch(fetchFilesInDataset(datasetId, folderId));
-	const listFoldersInDataset = (datasetId: string|undefined, parentFolder: string | null) => dispatch(fetchFoldersInDataset(datasetId, parentFolder));
-	const listDatasetAbout= (datasetId:string|undefined) => dispatch(fetchDatasetAbout(datasetId));
-	const listDatasetMetadata = (datasetId: string|undefined) => dispatch(fetchDatasetMetadata(datasetId));
+	const updateDatasetMetadata = (datasetId: string | undefined, content: object) => dispatch(patchDatasetMetadataAction(datasetId, content));
+	const createDatasetMetadata = (datasetId: string | undefined, metadata: MetadataIn) => dispatch(postDatasetMetadata(datasetId, metadata));
+	const deleteDatasetMetadata = (datasetId: string | undefined, metadata: object) => dispatch(deleteDatasetMetadataAction(datasetId, metadata));
+	const editDataset = (datasetId: string | undefined, formData: DatasetIn) => dispatch(updateDataset(datasetId, formData));
+	const getFolderPath = (folderId: string | null) => dispatch(fetchFolderPath(folderId));
+	const listFilesInDataset = (datasetId: string | undefined, folderId: string | null) => dispatch(fetchFilesInDataset(datasetId, folderId));
+	const listFoldersInDataset = (datasetId: string | undefined, parentFolder: string | null) => dispatch(fetchFoldersInDataset(datasetId, parentFolder));
+	const listDatasetAbout = (datasetId: string | undefined) => dispatch(fetchDatasetAbout(datasetId));
+	const listDatasetMetadata = (datasetId: string | undefined) => dispatch(fetchDatasetMetadata(datasetId));
 	const dismissError = () => dispatch(resetFailedReason());
 
 	// mapStateToProps
-	const about = useSelector((state: RootState) => state.dataset.about);
 	const reason = useSelector((state: RootState) => state.error.reason);
 	const stack = useSelector((state: RootState) => state.error.stack);
 	const folderPath = useSelector((state: RootState) => state.folder.folderPath);
+	const about = useSelector((state: RootState) => state.dataset.about);
 
 	// state
 	const [selectedTabIndex, setSelectedTabIndex] = useState<number>(0);
-	const [createFileOpen, setCreateFileOpen] = React.useState<boolean>(false);
-	const [anchorEl, setAnchorEl] = React.useState<Element | null>(null);
+
 	const [editingNameOpen, setEditingNameOpen] = React.useState<boolean>(false);
 	const [editDescriptionOpen, setEditDescriptionOpen] = React.useState<boolean>(false);
 	const [datasetName, setDatasetName] = React.useState<string>("");
@@ -120,50 +124,11 @@ export const Dataset = (): JSX.Element => {
 		window.open(`${config.GHIssueBaseURL}+${reason}&body=${encodeURIComponent(stack)}`);
 	}
 
-	// confirmation dialog
-	const [deleteDatasetConfirmOpen, setDeleteDatasetConfirmOpen] = useState(false);
-	const deleteSelectedDataset = () => {
-		if (datasetId) {
-			deleteDataset(datasetId);
-		}
-		setDeleteDatasetConfirmOpen(false);
-		 // Go to Explore page
-		history("/");
-	}
-
-	const [deleteFolderConfirmOpen, setDeleteFolderConfirmOpen] = useState(false);
-	const deleteSelectedFolder = () => {
-		if (folderId) {
-			deleteFolder(datasetId, folderId);
-		}
-		setDeleteFolderConfirmOpen(false);
-		 // Go to upper level not properly working
-		if (folderPath != null && folderPath.length > 1) {
-			const parentFolderId = folderPath.at(-2)["folder_id"]
-			history(`/datasets/${datasetId}?folder=${parentFolderId}`);
-		}
-		else{
-			history(`/datasets/${datasetId}`);
-		}
-	}
-
-	// new folder dialog
-	const [newFolder, setNewFolder] = React.useState<boolean>(false);
-	const handleCloseNewFolder = () => {
-		setNewFolder(false);
-	}
 
 	const handleTabChange = (_event: React.ChangeEvent<{}>, newTabIndex: number) => {
 		setSelectedTabIndex(newTabIndex);
 	};
 
-	const handleOptionClick = (event: React.MouseEvent<any>) => {
-		setAnchorEl(event.currentTarget);
-	};
-
-	const handleOptionClose = () => {
-		setAnchorEl(null);
-	};
 
 	const handleDatasetNameEdit = () => {
 		editDataset(about["id"], {"name": datasetName});
@@ -175,11 +140,11 @@ export const Dataset = (): JSX.Element => {
 		setEditDescriptionOpen(false);
 	};
 
-	const setMetadata = (metadata:any) =>{
+	const setMetadata = (metadata: any) => {
 		// TODO wrap this in to a function
 		setMetadataRequestForms(prevState => {
 			// merge the contents field; e.g. lat lon
-			if (metadata.definition in prevState){
+			if (metadata.definition in prevState) {
 				const prevContent = prevState[metadata.definition].contents;
 				metadata.contents = {...prevContent, ...metadata.contents};
 			}
@@ -187,16 +152,14 @@ export const Dataset = (): JSX.Element => {
 		});
 	};
 
-	const handleMetadataUpdateFinish = () =>{
+	const handleMetadataUpdateFinish = () => {
 		Object.keys(metadataRequestForms).map(key => {
 			if ("id" in metadataRequestForms[key] && metadataRequestForms[key]["id"] !== undefined
 				&& metadataRequestForms[key]["id"] !== null
-				&& metadataRequestForms[key]["id"] !== "" )
-			{
+				&& metadataRequestForms[key]["id"] !== "") {
 				// update existing metadata
 				updateDatasetMetadata(datasetId, metadataRequestForms[key]);
-			}
-			else{
+			} else {
 				// post new metadata if metadata id doesn't exist
 				createDatasetMetadata(datasetId, metadataRequestForms[key]);
 			}
@@ -237,25 +200,26 @@ export const Dataset = (): JSX.Element => {
 
 	return (
 		<Layout>
+			{/*Error Message dialogue*/}
+			<ActionModal actionOpen={errorOpen} actionTitle="Something went wrong..." actionText={reason}
+						 actionBtnName="Report" handleActionBtnClick={handleErrorReport}
+						 handleActionCancel={handleErrorCancel}/>
 			<div className="outer-container">
-				<MainBreadcrumbs paths={paths}/>
-				{/*Confirmation dialogue*/}
-				<ActionModal actionOpen={deleteDatasetConfirmOpen} actionTitle="Are you sure?"
-							 actionText="Do you really want to delete this dataset? This process cannot be undone."
-							 actionBtnName="Delete" handleActionBtnClick={deleteSelectedDataset}
-							 handleActionCancel={() => {
-								 setDeleteDatasetConfirmOpen(false);
-							 }}/>
-			    <ActionModal actionOpen={deleteFolderConfirmOpen} actionTitle="Are you sure?"
-							 actionText="Do you really want to delete this folder? This process cannot be undone."
-							 actionBtnName="Delete" handleActionBtnClick={deleteSelectedFolder}
-							 handleActionCancel={() => {
-								 setDeleteFolderConfirmOpen(false);
-							 }}/>
-				{/*Error Message dialogue*/}
-				<ActionModal actionOpen={errorOpen} actionTitle="Something went wrong..." actionText={reason}
-							 actionBtnName="Report" handleActionBtnClick={handleErrorReport}
-							 handleActionCancel={handleErrorCancel}/>
+				<Grid container>
+					<Grid item xs={8} sx={{display: 'flex',  alignItems: 'center'}}>
+						<MainBreadcrumbs paths={paths}/>
+					</Grid>
+					<Grid item xs={4}>
+						<Box
+							m={1}
+							display="flex"
+							justifyContent="flex-end"
+							alignItems="flex-end"
+						>
+							<ActionsMenu datasetId={datasetId} folderId={folderId}/>
+						</Box>
+					</Grid>
+				</Grid>
 				<div className="inner-container">
 					<Grid container spacing={4}>
 						<Grid item xs={8}>
@@ -273,46 +237,60 @@ export const Dataset = (): JSX.Element => {
 									enableAddMetadata ?
 										<>
 											<IconButton color="primary" aria-label="close"
-														onClick={()=>{setEnableAddMetadata(false);}}
-														sx={{float:"right"}}
+														onClick={() => {
+															setEnableAddMetadata(false);
+														}}
+														sx={{float: "right"}}
 											>
-												<CloseIcon />
+												<CloseIcon/>
 											</IconButton>
-											<Button variant="contained" onClick={() => {setOpenPopup(true);}} sx={{ mt: 1, mr: 1, "alignItems": "right" }}>
-                                                Add new metadata definition
+											<Button variant="contained" onClick={() => {
+												setOpenPopup(true);
+											}} sx={{mt: 1, mr: 1, "alignItems": "right"}}>
+												Add new metadata definition
 											</Button>
 											<EditMetadata resourceType="dataset" resourceId={datasetId}
 														  setMetadata={setMetadata}
 											/>
-											<Button variant="contained" onClick={handleMetadataUpdateFinish} sx={{ mt: 1, mr: 1 }}>
+											<Button variant="contained" onClick={handleMetadataUpdateFinish}
+													sx={{mt: 1, mr: 1}}>
 												Update
 											</Button>
-											<Button onClick={()=>{setEnableAddMetadata(false);}}
-													sx={{ mt: 1, mr: 1 }}>
+											<Button onClick={() => {
+												setEnableAddMetadata(false);
+											}}
+													sx={{mt: 1, mr: 1}}>
 												Cancel
 											</Button>
 											{
 												openPopup ?
-												<>
-                                                    <Dialog open={openPopup} onClose={() => {setOpenPopup(false);}} fullWidth={true} maxWidth={"md"}>
-														<DialogTitle>Add new metadata definition</DialogTitle>
-														<DialogContent>
-															<DialogContentText>Please fill out the metadata information here.</DialogContentText>
-															<CreateMetadataDefinition/>
-														</DialogContent>
-														<DialogActions>
-															<Button onClick={() => {setOpenPopup(false);}}>Cancel</Button>
-														</DialogActions>
-													</Dialog>
-												</>
-												: <></>
+													<>
+														<Dialog open={openPopup} onClose={() => {
+															setOpenPopup(false);
+														}} fullWidth={true} maxWidth={"md"}>
+															<DialogTitle>Add new metadata definition</DialogTitle>
+															<DialogContent>
+																<DialogContentText>Please fill out the metadata
+																	information here.</DialogContentText>
+																<CreateMetadataDefinition/>
+															</DialogContent>
+															<DialogActions>
+																<Button onClick={() => {
+																	setOpenPopup(false);
+																}}>Cancel</Button>
+															</DialogActions>
+														</Dialog>
+													</>
+													: <></>
 											}
 										</>
 										:
 										<>
-											<Grid container spacing={2} sx={{ "alignItems": "center"}}>
+											<Grid container spacing={2} sx={{"alignItems": "center"}}>
 												<Grid item xs={11} sm={11} md={11} lg={11} xl={11}>
-													<ClowderButton onClick={()=>{setEnableAddMetadata(true);}}>
+													<ClowderButton onClick={() => {
+														setEnableAddMetadata(true);
+													}}>
 														Add/Edit Metadata
 													</ClowderButton>
 												</Grid>
@@ -329,73 +307,6 @@ export const Dataset = (): JSX.Element => {
 							<TabPanel value={selectedTabIndex} index={4}/>
 						</Grid>
 						<Grid item xs={4}>
-							{/*option menus*/}
-							<Box className="infoCard">
-								<Button aria-haspopup="true" onClick={handleOptionClick}
-										sx={{
-											padding: "6px 12px",
-											width: "100px",
-											background: "#6C757D",
-											borderRadius: "4px",
-											color: "white",
-											textTransform: "capitalize",
-											'&:hover': {
-												color: "black"
-											},
-										}} endIcon={<ArrowDropDownIcon/>}>
-									Options
-								</Button>
-								<Menu
-									id="simple-menu"
-									anchorEl={anchorEl}
-									keepMounted
-									open={Boolean(anchorEl)}
-									onClose={handleOptionClose}
-								>
-									<MenuItem sx={optionMenuItem}
-											  onClick={() => {
-												  setCreateFileOpen(true);
-												  handleOptionClose();
-											  }}>
-										Upload File
-									</MenuItem>
-									<MenuItem sx={optionMenuItem}
-											  onClick={()=>{
-												  setNewFolder(true);
-												  handleOptionClose();
-											  }
-											  }>Add Folder</MenuItem>
-									<CreateFolder datasetId={datasetId} parentFolder={folderId} open={newFolder}
-												  handleClose={handleCloseNewFolder}/>
-									{/*backend not implemented yet*/}
-									<MenuItem sx={optionMenuItem}
-											  onClick={() => {
-												  handleOptionClose();
-											  }}>
-										Download Dataset
-									</MenuItem>
-									<MenuItem sx={optionMenuItem}
-											  onClick={() => {
-												  handleOptionClose();
-												  setDeleteDatasetConfirmOpen(true);
-											  }
-											  }>Delete Dataset</MenuItem>
-									<MenuItem sx={optionMenuItem}
-											  onClick={() => {
-												  handleOptionClose();
-												  setDeleteFolderConfirmOpen(true);
-											  	}
-											  }>
-										Delete Folder</MenuItem>
-									<MenuItem onClick={handleOptionClose} sx={optionMenuItem}
-											  disabled={true}>Follow</MenuItem>
-									<MenuItem onClick={handleOptionClose} sx={optionMenuItem}
-											  disabled={true}>Collaborators</MenuItem>
-									<MenuItem onClick={handleOptionClose} sx={optionMenuItem}
-											  disabled={true}>Extraction</MenuItem>
-								</Menu>
-							</Box>
-							<Divider/>
 							{
 								about !== undefined ?
 									<Box className="infoCard">
@@ -483,11 +394,6 @@ export const Dataset = (): JSX.Element => {
 							</Box>
 						</Grid>
 					</Grid>
-					<Dialog open={createFileOpen} onClose={() => {
-						setCreateFileOpen(false);
-					}} fullWidth={true}  maxWidth="lg" aria-labelledby="form-dialog">
-						<UploadFile selectedDatasetId={datasetId} selectedDatasetName={about.name} folderId={folderId}/>
-					</Dialog>
 				</div>
 			</div>
 		</Layout>
