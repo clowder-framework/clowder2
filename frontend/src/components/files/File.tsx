@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from "react";
 import config from "../../app.config";
-import {Box, Button, Divider, Grid, IconButton, Tab, Tabs} from "@mui/material";
+import {Box, Button, Divider, Grid, IconButton, Menu, MenuItem, Tab, Tabs} from "@mui/material";
 import Audio from "../previewers/Audio";
 import Video from "../previewers/Video";
 import {downloadResource} from "../../utils/common";
@@ -29,12 +29,19 @@ import {ClowderButton} from "../styledComponents/ClowderButton";
 import CloseIcon from "@mui/icons-material/Close";
 import Layout from "../Layout";
 import {fetchDatasetAbout} from "../../actions/dataset";
+import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 
 const tab = {
 	fontStyle: "normal",
 		fontWeight: "normal",
 		fontSize: "16px",
 		textTransform: "capitalize",
+}
+
+const optionMenuItem = {
+	fontWeight: "normal",
+	fontSize: "14px",
+	marginTop: "8px",
 }
 
 export const File = (): JSX.Element => {
@@ -56,7 +63,7 @@ export const File = (): JSX.Element => {
 	const createFileMetadata = (fileId: string | undefined, metadata:object) => dispatch(createFileMetadataAction(fileId, metadata));
 	const updateFileMetadata = (fileId: string | undefined, metadata:object) => dispatch(patchFileMetadataAction(fileId,metadata));
 	const deleteFileMetadata = (fileId: string | undefined, metadata:object) => dispatch(deleteFileMetadataAction(fileId, metadata));
-
+	const [anchorEl, setAnchorEl] = React.useState<Element | null>(null);
 	const fileSummary = useSelector((state:RootState) => state.file.fileSummary);
 	const filePreviews = useSelector((state:RootState) => state.file.previews);
 	const fileVersions = useSelector((state:RootState) => state.file.fileVersions);
@@ -92,6 +99,15 @@ export const File = (): JSX.Element => {
 	const handleErrorReport = (reason:string) => {
 		window.open(`${config.GHIssueBaseURL}+${reason}&body=${encodeURIComponent(stack)}`);
 	}
+
+	const handleOptionClick = (event: React.MouseEvent<any>) => {
+		setAnchorEl(event.currentTarget);
+	};
+
+	const handleOptionClose = () => {
+		console.log('options');
+		setAnchorEl(null);
+	};
 
 	useEffect(() => {
 		(async () => {
@@ -280,6 +296,40 @@ export const File = (): JSX.Element => {
 									Comments
 							</TabPanel>
 						</Grid>
+						<Grid item xs={4}>
+							{/*option menus*/}
+						</Grid>
+						<Box className="infoCard">
+							<Button aria-haspopup="true" onClick={handleOptionClick}
+										sx={{
+											padding: "6px 12px",
+											width: "100px",
+											background: "#6C757D",
+											borderRadius: "4px",
+											color: "white",
+											textTransform: "capitalize",
+											'&:hover': {
+												color: "black"
+											},
+										}} endIcon={<ArrowDropDownIcon/>}>
+									Options
+								</Button>
+								<Menu
+										id="simple-menu"
+										anchorEl={anchorEl}
+										keepMounted
+										open={Boolean(anchorEl)}
+										onClose={handleOptionClose}
+									>
+									<MenuItem sx={optionMenuItem}
+											  onClick={() => {
+												  console.log("We will now to to extractions")
+												  handleOptionClose();
+											  }}>
+										Extractions
+									</MenuItem>
+								</Menu>
+						</Box>
 						<Grid item xs={4}>
 							{Object.keys(fileSummary).length > 0 &&
 								<div>

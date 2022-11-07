@@ -93,6 +93,7 @@ export const Dataset = (): JSX.Element => {
 	const [datasetDescription, setDatasetDescription] = React.useState<string>("");
 	const [enableAddMetadata, setEnableAddMetadata] = React.useState<boolean>(false);
 	const [metadataRequestForms, setMetadataRequestForms] = useState({});
+	const [submitExtraction, setSubmitExtraction] = React.useState<string>("");
 	const [openPopup, setOpenPopup] = React.useState<boolean>(false)
 
 	// component did mount list all files in dataset
@@ -391,8 +392,13 @@ export const Dataset = (): JSX.Element => {
 											  disabled={true}>Follow</MenuItem>
 									<MenuItem onClick={handleOptionClose} sx={optionMenuItem}
 											  disabled={true}>Collaborators</MenuItem>
-									<MenuItem onClick={handleOptionClose} sx={optionMenuItem}
-											  disabled={true}>Extraction</MenuItem>
+									<MenuItem sx={optionMenuItem}
+											  onClick={()=>{
+											  	console.log('we are going to extract!');
+
+												  handleOptionClose();
+											  }
+											  }>Extraction</MenuItem>
 								</Menu>
 							</Box>
 							<Divider/>
