@@ -7,6 +7,8 @@ import {useNavigate} from "react-router-dom";
 import {useDispatch, useSelector} from "react-redux";
 import {RootState} from "../../types/data";
 import {folderDeleted} from "../../actions/folder";
+import EditNameModal from "./EditNameModal";
+import EditDescriptionModal from "./EditDescriptionModal";
 
 type ActionsMenuProps = {
 	datasetId: string,
@@ -25,6 +27,8 @@ export const OtherMenu = (props: ActionsMenuProps): JSX.Element => {
 	const deleteFolder = (datasetId: string | undefined, folderId: string | undefined) => dispatch(folderDeleted(datasetId, folderId));
 
 	// state
+	const [rename, setRename] = React.useState<boolean>(false);
+	const [description, setDescription] = React.useState<boolean>(false);
 	const [deleteDatasetConfirmOpen, setDeleteDatasetConfirmOpen] = useState(false);
 	const folderPath = useSelector((state: RootState) => state.folder.folderPath);
 
@@ -63,8 +67,16 @@ export const OtherMenu = (props: ActionsMenuProps): JSX.Element => {
 	const handleOptionClose = () => {
 		setAnchorEl(null);
 	};
+	const handleSetRename = () => {
+		setRename(false);
+	}
+	const handleSetDescription = () => {
+		setDescription(false);
+	}
 	return (
 		<Box>
+			<EditNameModal datasetId={datasetId} handleClose={handleSetRename} open={rename}/>
+			<EditDescriptionModal datasetId={datasetId} handleClose={handleSetDescription} open={description}/>
 			<ActionModal actionOpen={deleteDatasetConfirmOpen} actionTitle="Are you sure?"
 						 actionText="Do you really want to delete this dataset? This process cannot be undone."
 						 actionBtnName="Delete" handleActionBtnClick={deleteSelectedDataset}
@@ -88,6 +100,18 @@ export const OtherMenu = (props: ActionsMenuProps): JSX.Element => {
 					open={Boolean(anchorEl)}
 					onClose={handleOptionClose}
 				>
+					<MenuItem
+						onClick={() => {
+							handleOptionClose();
+							setRename(true);
+						}
+						}>Rename Dataset</MenuItem>
+					<MenuItem
+						onClick={() => {
+							handleOptionClose();
+							setDescription(true);
+						}
+						}>Update Description</MenuItem>
 					<MenuItem
 						onClick={() => {
 							handleOptionClose();

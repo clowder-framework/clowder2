@@ -20,6 +20,7 @@ export const NewMenu = (props: ActionsMenuProps): JSX.Element => {
 	const [anchorEl, setAnchorEl] = React.useState<Element | null>(null);
 	const [createFileOpen, setCreateFileOpen] = React.useState<boolean>(false);
 	const [newFolder, setNewFolder] = React.useState<boolean>(false);
+
 	const handleCloseNewFolder = () => {
 		setNewFolder(false);
 	}
@@ -39,9 +40,10 @@ export const NewMenu = (props: ActionsMenuProps): JSX.Element => {
 			</Dialog>
 
 			<CreateFolder datasetId={datasetId} parentFolder={folderId} open={newFolder}
-			  handleClose={handleCloseNewFolder}/>
+						  handleClose={handleCloseNewFolder}/>
 
-			<Button variant="outlined"  sx={{ m: 1 }} aria-haspopup="true" onClick={handleOptionClick} endIcon={<ArrowDropDownIcon/>}>
+			<Button variant="outlined" sx={{m: 1}} aria-haspopup="true" onClick={handleOptionClick}
+					endIcon={<ArrowDropDownIcon/>}>
 				New
 			</Button>
 			<Menu
@@ -52,18 +54,18 @@ export const NewMenu = (props: ActionsMenuProps): JSX.Element => {
 				onClose={handleOptionClose}
 			>
 				<MenuItem
-						  onClick={() => {
-							  setCreateFileOpen(true);
-							  handleOptionClose();
-						  }}>
+					onClick={() => {
+						setCreateFileOpen(true);
+						handleOptionClose();
+					}}>
 					Upload File
 				</MenuItem>
 				<MenuItem
-						  onClick={() => {
-							  setNewFolder(true);
-							  handleOptionClose();
-						  }
-						  }>Add Folder</MenuItem>
+					onClick={() => {
+						setNewFolder(true);
+						handleOptionClose();
+					}
+					}>Add Folder</MenuItem>
 			</Menu>
 		</Box>)
 }

@@ -7,7 +7,6 @@ import {
 	DialogContent,
 	DialogContentText,
 	DialogTitle,
-	Divider,
 	Grid,
 	IconButton,
 	Tab,
@@ -42,6 +41,7 @@ import {
 import CloseIcon from '@mui/icons-material/Close';
 import Layout from "../Layout";
 import {ActionsMenu} from "./ActionsMenu";
+import DatasetName from "./DatasetName";
 
 const tab = {
 	fontStyle: "normal",
@@ -61,10 +61,10 @@ export const Dataset = (): JSX.Element => {
 
 	// Redux connect equivalent
 	const dispatch = useDispatch();
+	const editDataset = (datasetId: string | undefined, formData: DatasetIn) => dispatch(updateDataset(datasetId, formData));
 	const updateDatasetMetadata = (datasetId: string | undefined, content: object) => dispatch(patchDatasetMetadataAction(datasetId, content));
 	const createDatasetMetadata = (datasetId: string | undefined, metadata: MetadataIn) => dispatch(postDatasetMetadata(datasetId, metadata));
 	const deleteDatasetMetadata = (datasetId: string | undefined, metadata: object) => dispatch(deleteDatasetMetadataAction(datasetId, metadata));
-	const editDataset = (datasetId: string | undefined, formData: DatasetIn) => dispatch(updateDataset(datasetId, formData));
 	const getFolderPath = (folderId: string | null) => dispatch(fetchFolderPath(folderId));
 	const listFilesInDataset = (datasetId: string | undefined, folderId: string | null) => dispatch(fetchFilesInDataset(datasetId, folderId));
 	const listFoldersInDataset = (datasetId: string | undefined, parentFolder: string | null) => dispatch(fetchFoldersInDataset(datasetId, parentFolder));
@@ -81,9 +81,8 @@ export const Dataset = (): JSX.Element => {
 	// state
 	const [selectedTabIndex, setSelectedTabIndex] = useState<number>(0);
 
-	const [editingNameOpen, setEditingNameOpen] = React.useState<boolean>(false);
+
 	const [editDescriptionOpen, setEditDescriptionOpen] = React.useState<boolean>(false);
-	const [datasetName, setDatasetName] = React.useState<string>("");
 	const [datasetDescription, setDatasetDescription] = React.useState<string>("");
 	const [enableAddMetadata, setEnableAddMetadata] = React.useState<boolean>(false);
 	const [metadataRequestForms, setMetadataRequestForms] = useState({});
@@ -114,15 +113,8 @@ export const Dataset = (): JSX.Element => {
 		window.open(`${config.GHIssueBaseURL}+${reason}&body=${encodeURIComponent(stack)}`);
 	}
 
-
 	const handleTabChange = (_event: React.ChangeEvent<{}>, newTabIndex: number) => {
 		setSelectedTabIndex(newTabIndex);
-	};
-
-
-	const handleDatasetNameEdit = () => {
-		editDataset(about["id"], {"name": datasetName});
-		setEditingNameOpen(false);
 	};
 
 	const handleDatasetDescriptionEdit = () => {
@@ -206,6 +198,8 @@ export const Dataset = (): JSX.Element => {
 				<div className="inner-container">
 					<Grid container spacing={4}>
 						<Grid item xs={8}>
+							<Typography variant="h3" paragraph>{about["name"]}</Typography>
+							<Typography variant="body1" paragraph>{about["description"]}</Typography>
 							<Box sx={{borderBottom: 1, borderColor: 'divider'}}>
 								<Tabs value={selectedTabIndex} onChange={handleTabChange} aria-label="dataset tabs">
 									<Tab sx={tab} label="Files" {...a11yProps(0)} />
@@ -294,65 +288,6 @@ export const Dataset = (): JSX.Element => {
 								about !== undefined ?
 									<Box className="infoCard">
 										<Typography className="title">About</Typography>
-										<Box>
-											<Typography className="content"
-														sx={{display: "inline-block"}}>Name:&nbsp;</Typography>
-											{
-												editingNameOpen ?
-													<>
-														<ClowderInput required={true} id="name" onChange={(event) => {
-															setDatasetName(event.target.value);
-														}} defaultValue={about["name"]}
-														/>
-														<Box sx={{margin: "5px auto"}}>
-															<Button onClick={() => {
-																handleDatasetNameEdit();
-															}} size={"small"} variant="outlined">Save</Button>
-															<Button onClick={() => setEditingNameOpen(false)}
-																	size={"small"}>Cancel</Button>
-														</Box>
-													</>
-													:
-													<>
-														<Typography className="content"
-																	sx={{display: "inline"}}>{about["name"]}</Typography>
-														<Button onClick={() => setEditingNameOpen(true)} size={"small"}
-																sx={{display: "inline"}}>Edit</Button>
-													</>
-											}
-										</Box>
-										<Box>
-											<Typography className="content"
-														sx={{display: "inline-block"}}>Description:&nbsp;</Typography>
-											{
-												editDescriptionOpen ?
-													<>
-														<ClowderInput
-															id="description"
-															defaultValue={about["description"]}
-															multiline
-															rows={4}
-															onChange={(event) => {
-																setDatasetDescription(event.target.value);
-															}}
-														/>
-														<Box sx={{margin: "5px auto"}}>
-															<Button onClick={handleDatasetDescriptionEdit}
-																	size={"small"} variant={"outlined"}>Save</Button>
-															<Button onClick={() => setEditDescriptionOpen(false)}
-																	size={"small"}>Cancel</Button>
-														</Box>
-													</>
-													:
-													<>
-														<Typography className="content"
-																	sx={{display: "inline"}}>{about["description"]}</Typography>
-														<Button onClick={() => setEditDescriptionOpen(true)}
-																size={"small"} sx={{display: "inline"}}>Edit</Button>
-													</>
-											}
-										</Box>
-										<Typography className="content">Dataset ID: {about["id"]}</Typography>
 										<Typography className="content">
 											Owner: {about["author"]["first_name"]} {about["author"]["last_name"]}
 										</Typography>
