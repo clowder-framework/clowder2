@@ -3,38 +3,28 @@ import {
 	Box,
 	Button,
 	Dialog,
-	Divider,
-	Grid,
-	IconButton,
-	Menu,
-	MenuItem,
-	Tab,
-	Tabs,
-	Typography,
 	DialogActions,
 	DialogContent,
 	DialogContentText,
 	DialogTitle,
+	Divider,
+	Grid,
+	IconButton,
+	Tab,
+	Tabs,
+	Typography,
 } from "@mui/material";
 import {ClowderInput} from "../styledComponents/ClowderInput";
 import {ClowderButton} from "../styledComponents/ClowderButton";
-import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
-import {useNavigate, useParams, useSearchParams} from "react-router-dom";
+import {useParams, useSearchParams} from "react-router-dom";
 import {RootState} from "../../types/data";
 import {useDispatch, useSelector} from "react-redux";
-import {
-	datasetDeleted,
-	fetchDatasetAbout,
-	fetchFilesInDataset,
-	fetchFoldersInDataset,
-	updateDataset
-} from "../../actions/dataset";
-import {fetchFolderPath, folderDeleted} from "../../actions/folder";
+import {fetchDatasetAbout, fetchFilesInDataset, fetchFoldersInDataset, updateDataset} from "../../actions/dataset";
+import {fetchFolderPath} from "../../actions/folder";
 import {resetFailedReason,} from "../../actions/common"
 
 import {a11yProps, TabPanel} from "../tabs/TabComponent";
 import {MainBreadcrumbs} from "../navigation/BreadCrumb";
-import {UploadFile} from "../files/UploadFile";
 import {ActionModal} from "../dialog/ActionModal";
 import FilesTable from "../files/FilesTable";
 import {parseDate} from "../../utils/common";
@@ -210,14 +200,7 @@ export const Dataset = (): JSX.Element => {
 						<MainBreadcrumbs paths={paths}/>
 					</Grid>
 					<Grid item xs={4}>
-						<Box
-							m={1}
-							display="flex"
-							justifyContent="flex-end"
-							alignItems="flex-end"
-						>
-							<ActionsMenu datasetId={datasetId} folderId={folderId}/>
-						</Box>
+						<ActionsMenu datasetId={datasetId} folderId={folderId}/>
 					</Grid>
 				</Grid>
 				<div className="inner-container">
@@ -384,7 +367,6 @@ export const Dataset = (): JSX.Element => {
 										{/*<Typography className="content">Resource type: {about["resource_type"]}</Typography>*/}
 									</Box> : <></>
 							}
-							<Divider/>
 							<Box className="infoCard">
 								<Typography className="title">Statistics</Typography>
 								<Typography className="content">Views: 10</Typography>
