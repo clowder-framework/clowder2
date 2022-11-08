@@ -64,6 +64,8 @@ class EventListenerDB(EventListenerBase, MongoModel):
 class EventListenerOut(EventListenerDB):
     pass
 
+class EventListenerSubmit(BaseModel):
+    name: str = ""
 
 class FeedListener(BaseModel):
     """This is a shorthand POST class for associating an existing EventListener with a Feed. The automatic flag determines

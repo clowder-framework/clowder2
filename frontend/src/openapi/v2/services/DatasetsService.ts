@@ -7,6 +7,7 @@ import type { DatasetBase } from '../models/DatasetBase';
 import type { DatasetIn } from '../models/DatasetIn';
 import type { DatasetOut } from '../models/DatasetOut';
 import type { DatasetPatch } from '../models/DatasetPatch';
+import type {EventListenerSubmit} from '../models/EventListenerSubmit';
 import type { FileOut } from '../models/FileOut';
 import type { FolderIn } from '../models/FolderIn';
 import type { FolderOut } from '../models/FolderOut';
@@ -309,6 +310,7 @@ export class DatasetsService {
      */
     public static getDatasetExtractApiV2DatasetsDatasetIdExtractPost(
         datasetId: string,
+		requestBody: EventListenerSubmit,
     ): CancelablePromise<any> {
         return __request({
             method: 'POST',
