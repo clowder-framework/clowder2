@@ -186,8 +186,6 @@ export const File = (): JSX.Element => {
 	};
 
 	const submitToListener = ()=> {
-		console.log("submitting to listener")
-		console.log('file id is', fileId);
 		const filename = fileSummary['name']
 		history(`/listeners?fileId=${fileId}&name=${filename}`);
 	}

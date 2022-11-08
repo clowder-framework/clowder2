@@ -35,10 +35,13 @@ export const Listeners = (): JSX.Element => {
 	const datasetName = searchParams.get("datasetName");
 	const fileName = searchParams.get("fileName")
 
-	console.log('we got a dataset id and it is ', datasetId);
-	console.log("dataset name is", datasetName);
-	console.log("we got a file id and it is", fileId);
-	console.log("file name is", fileName)
+	if (datasetId !== null && datasetName !== null) {
+		console.log("We have a dataset", datasetId, datasetName);
+	}
+
+	if (fileId !== null && fileName!== null){
+		console.log("We have a file", fileId, fileName);
+	}
 
 
 	// Redux connect equivalent
@@ -142,7 +145,7 @@ export const Listeners = (): JSX.Element => {
 						<Grid item xs>
 							<Box sx={{borderBottom: 1, borderColor: 'divider'}}>
 								<Tabs value={selectedTabIndex} onChange={handleTabChange} aria-label="dashboard tabs">
-									<Tab sx={tab} label="Datasets" {...a11yProps(0)} />
+									<Tab sx={tab} label="Listeners" {...a11yProps(0)} />
 								</Tabs>
 							</Box>
 							<TabPanel value={selectedTabIndex} index={0}>

@@ -214,12 +214,7 @@ export const Dataset = (): JSX.Element => {
 	};
 
 	const submitToListener = ()=> {
-		console.log("submitting to listener")
-		console.log('dataset id is', datasetId)
-		// const datasetName = about["name"];
-		console.log("and the name is", about.name)
 		const currentDatasetName = about.name;
-		console.log(currentDatasetName);
 		history(`/listeners?datasetId=${datasetId}&datasetName=${currentDatasetName}`);
 	}
 

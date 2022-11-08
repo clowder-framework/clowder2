@@ -14,14 +14,21 @@ import {Favorite, Share} from "@material-ui/icons";
 type ListenerCardProps = {
 	id: string,
 	name: string,
-	description: string
+	description: string,
+	fileId: string,
+	fileName: string,
+	datasetId: string,
+	datasetName: string
 }
 
 export default function ListenerCard(props: ListenerCardProps) {
-	const {id, name, description} = props;
+	const {id, name, description, fileId, fileName, datasetId, datasetName} = props;
 
 	const dispatch = useDispatch();
 	const downloadDataset = (datasetId: string | undefined, filename: string | undefined) => dispatch(datasetDownloaded(datasetId, filename))
+	const submitExtraction = (datasetId: string | undefined, datasetName: string| undefined, fileId: string | undefined, fileName: string | undefined, extractor: string | undefined) => {
+		console.log('submitting extraction');
+	}
 
 
 	return (
@@ -49,8 +56,8 @@ export default function ListenerCard(props: ListenerCardProps) {
 				</CardContent>
 			</CardActionArea>
 			<CardActions sx={{marginTop: "auto"}}>
-				<Tooltip title="Download">
-					<IconButton onClick={() => downloadDataset(id, name)} color="primary" aria-label="download" sx={{mr: 3}}>
+				<Tooltip title="Submit">
+					<IconButton onClick={() => submitExtraction(datasetId, datasetName, fileId, fileName, name)} color="primary" aria-label="download" sx={{mr: 3}}>
 						<Download/>
 					</IconButton>
 				</Tooltip>
