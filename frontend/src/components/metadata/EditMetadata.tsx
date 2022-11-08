@@ -1,6 +1,6 @@
 import React, {useEffect} from "react";
 import {Box, Typography} from "@mui/material";
-import metadataConfig from "../../metadata.config";
+import {metadataConfig} from "../../metadata.config";
 import {useSelector, useDispatch} from "react-redux";
 import {RootState} from "../../types/data";
 import {fetchDatasetMetadata, fetchFileMetadata, fetchMetadataDefinitions} from "../../actions/metadata";
