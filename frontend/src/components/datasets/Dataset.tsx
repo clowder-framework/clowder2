@@ -217,8 +217,10 @@ export const Dataset = (): JSX.Element => {
 		console.log("submitting to listener")
 		console.log('dataset id is', datasetId)
 		// const datasetName = about["name"];
-		console.log("and the name is", datasetName)
-		history(`/listeners?datasetId=${datasetId}`);
+		console.log("and the name is", about.name)
+		const currentDatasetName = about.name;
+		console.log(currentDatasetName);
+		history(`/listeners?datasetId=${datasetId}&datasetName=${currentDatasetName}`);
 	}
 
 	// for breadcrumb

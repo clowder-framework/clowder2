@@ -32,9 +32,13 @@ export const Listeners = (): JSX.Element => {
 	let [searchParams, setSearchParams] = useSearchParams();
 	const datasetId = searchParams.get("datasetId");
 	const fileId = searchParams.get("fileId");
+	const datasetName = searchParams.get("datasetName");
+	const fileName = searchParams.get("fileName")
 
 	console.log('we got a dataset id and it is ', datasetId);
-	console.log("we got a file id and it is", fileId)
+	console.log("dataset name is", datasetName);
+	console.log("we got a file id and it is", fileId);
+	console.log("file name is", fileName)
 
 
 	// Redux connect equivalent
