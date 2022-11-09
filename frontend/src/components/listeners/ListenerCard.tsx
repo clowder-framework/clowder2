@@ -3,13 +3,16 @@ import Card from '@mui/material/Card';
 import CardActions from '@mui/material/CardActions';
 import CardContent from '@mui/material/CardContent';
 import Typography from '@mui/material/Typography';
-import {Link, useSearchParams} from "react-router-dom";
+import {Link, useParams, useSearchParams} from "react-router-dom";
 import {parseDate} from "../../utils/common";
 import {datasetDownloaded} from "../../actions/dataset";
 import {useDispatch} from "react-redux";
 import {CardActionArea, IconButton, Tooltip} from "@mui/material";
 import {Download} from "@mui/icons-material";
 import {Favorite, Share} from "@material-ui/icons";
+import {patchDatasetMetadata as patchDatasetMetadataAction} from "../../actions/metadata";
+import {submitDatasetExtractionAction} from "../../actions/dataset";
+import {submitFileExtractionAction} from "../../actions/file";
 
 type ListenerCardProps = {
 	id: string,
@@ -27,6 +30,8 @@ export default function ListenerCard(props: ListenerCardProps) {
 	const datasetId = searchParams.get("datasetId");
 
 	const dispatch = useDispatch();
+	const submitFileExtraction = (fileId: string|undefined, extractor: string| undefined) => dispatch(submitFileExtractionAction(fileId,extractor));
+	const submitDatasetExtraction = (datasetId: string| undefined, extractor: string| undefined) => dispatch(submitDatasetExtractionAction(datasetId, extractor));
 	// const downloadDataset = (datasetId: string | undefined, filename: string | undefined) => dispatch(datasetDownloaded(datasetId, filename))
 	const submitExtraction = (datasetId: string | undefined, datasetName: string| undefined, fileId: string | undefined, fileName: string | undefined, extractor: string | undefined) => {
 		console.log('submitting extraction');
@@ -36,9 +41,13 @@ export default function ListenerCard(props: ListenerCardProps) {
 		console.log(typeof(extractionJson));
 		if (fileId !== null && fileId !== undefined) {
 			console.log("We have a file to extract");
+			submitFileExtraction(fileId, name);
+
+
 		}
 		if (datasetId !== null && datasetId !== undefined){
 			console.log("We have a dataset to extract")
+			submitDatasetExtraction(datasetId, name);
 		}
 
 

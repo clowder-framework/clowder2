@@ -314,7 +314,9 @@ export class DatasetsService {
     ): CancelablePromise<any> {
         return __request({
             method: 'POST',
+			body: requestBody,
             path: `/api/v2/datasets/${datasetId}/extract`,
+			mediaType: 'application/json',
             errors: {
                 422: `Validation Error`,
             },

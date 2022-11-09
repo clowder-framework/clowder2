@@ -38,22 +38,23 @@ export function fetchFoldersInDataset(datasetId, parentFolder){
 }
 
 
-// export const SUBMIT_DATSET_EXTRACTION = "SUBMIT_DATASET_EXTRACTION";
-// export function submitDatasetExtraction(datasetId, requestBody){
-// 	return (dispatch) => {
-// 		return V2.DatasetsService.(datasetId, formData)
-// 			.then(json => {
-// 				dispatch({
-// 					type: UPDATE_DATASET,
-// 					about: json,
-// 					receivedAt: Date.now(),
-// 				});
-// 			})
-// 			.catch(reason => {
-// 				dispatch(handleErrors(reason, updateDataset(datasetId, formData)));
-// 			});
-// 	};
-// }
+export const SUBMIT_DATSET_EXTRACTION = "SUBMIT_DATASET_EXTRACTION";
+export function submitDatasetExtractionAction(datasetId, extractorName){
+	return (dispatch) => {
+		const requestBody = {'name': extractorName};
+		return V2.DatasetsService.getDatasetExtractApiV2DatasetsDatasetIdExtractPost(datasetId, requestBody)
+			.then(json => {
+				dispatch({
+					type: SUBMIT_DATSET_EXTRACTION,
+					about: json,
+					receivedAt: Date.now(),
+				});
+			})
+			.catch(reason => {
+				dispatch(handleErrors(reason, submitDatasetExtractionAction(datasetId, requestBody)));
+			});
+	};
+}
 
 export const UPDATE_DATASET = "UPDATE_DATASET";
 export function updateDataset(datasetId, formData){

@@ -125,6 +125,7 @@ export class FilesService {
             method: 'POST',
 			body: requestBody,
             path: `/api/v2/files/${fileId}/extract`,
+			mediaType: 'application/json',
             errors: {
                 422: `Validation Error`,
             },
