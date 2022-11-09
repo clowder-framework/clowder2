@@ -30,33 +30,18 @@ export const Listeners = (): JSX.Element => {
 
 
 	let [searchParams, setSearchParams] = useSearchParams();
-	if (searchParams.get("datasetId") == null ) {
-		searchParams.set("datasetId", "");
-      	setSearchParams(searchParams)
-	}
-	if (searchParams.get("fileId") == null ) {
-		searchParams.set("fileId", "");
-      	setSearchParams(searchParams)
-	}
-	if (searchParams.get("datasetName") == null ) {
-		searchParams.set("datasetName", "");
-      	setSearchParams(searchParams)
-	}
-	if (searchParams.get("fileName") == null ) {
-      	setSearchParams(searchParams)
-	}
 	const fileId = searchParams.get("fileId");
 	const datasetName = searchParams.get("datasetName");
-	const fileName = searchParams.get("fileName");
+	const fileName = searchParams.get("filename");
 	const datasetId = searchParams.get("datasetId");
 
 
 	if (datasetId !== null && datasetName !== null) {
 		console.log("We have a dataset", datasetId, datasetName);
 	}
-
+	console.log("we log here", fileId, fileName);
 	if (fileId !== null && fileName!== null){
-		console.log("We have a file", fileId, fileName);
+		console.log("We have a file", fileId, filename);
 	}
 
 
@@ -172,9 +157,7 @@ export const Listeners = (): JSX.Element => {
 												return (
 													<Grid item key={listener.id} xs={12} sm={6} md={4} lg={3}>
 														<ListenerCard id={listener.id} name={listener.name}
-																	 description={listener.description} fileId={fileId} fileName={fileName}
-																	  datasetId={datasetId} datasetName={datasetName}
-														/>
+																	 description={listener.description}/>
 													</Grid>
 												);
 											})

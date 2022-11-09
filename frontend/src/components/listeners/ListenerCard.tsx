@@ -3,7 +3,7 @@ import Card from '@mui/material/Card';
 import CardActions from '@mui/material/CardActions';
 import CardContent from '@mui/material/CardContent';
 import Typography from '@mui/material/Typography';
-import {Link} from "react-router-dom";
+import {Link, useSearchParams} from "react-router-dom";
 import {parseDate} from "../../utils/common";
 import {datasetDownloaded} from "../../actions/dataset";
 import {useDispatch} from "react-redux";
@@ -14,21 +14,23 @@ import {Favorite, Share} from "@material-ui/icons";
 type ListenerCardProps = {
 	id: string,
 	name: string,
-	description: string,
-	fileId: string,
-	fileName: string,
-	datasetId: string,
-	datasetName: string
+	description: string
 }
 
 export default function ListenerCard(props: ListenerCardProps) {
-	const {id, name, description, fileId, fileName, datasetId, datasetName} = props;
+	const {id, name, description} = props;
+
+	let [searchParams, setSearchParams] = useSearchParams();
+	const fileId = searchParams.get("fileId");
+	const datasetName = searchParams.get("datasetName");
+	const fileName = searchParams.get("fileName");
+	const datasetId = searchParams.get("datasetId");
 
 	const dispatch = useDispatch();
 	// const downloadDataset = (datasetId: string | undefined, filename: string | undefined) => dispatch(datasetDownloaded(datasetId, filename))
 	const submitExtraction = (datasetId: string | undefined, datasetName: string| undefined, fileId: string | undefined, fileName: string | undefined, extractor: string | undefined) => {
 		console.log('submitting extraction');
-		console.log(datasetId, datasetName, fileId, filename);
+		console.log(datasetId, datasetName, fileId, fileName);
 		const extractionJson = {"extractor": name}
 		console.log(extractionJson);
 		console.log(typeof(extractionJson));

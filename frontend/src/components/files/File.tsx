@@ -187,7 +187,10 @@ export const File = (): JSX.Element => {
 
 	const submitToListener = ()=> {
 		const filename = fileSummary['name']
-		history(`/listeners?fileId=${fileId}&name=${filename}`);
+		console.log('submit to listener');
+		console.log("the file name is", filename);
+		console.log('the file id is', fileId);
+		history(`/listeners?fileId=${fileId}&fileName=${filename}`);
 	}
 
 	// for breadcrumb
