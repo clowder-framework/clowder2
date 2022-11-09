@@ -25,9 +25,21 @@ export default function ListenerCard(props: ListenerCardProps) {
 	const {id, name, description, fileId, fileName, datasetId, datasetName} = props;
 
 	const dispatch = useDispatch();
-	const downloadDataset = (datasetId: string | undefined, filename: string | undefined) => dispatch(datasetDownloaded(datasetId, filename))
+	// const downloadDataset = (datasetId: string | undefined, filename: string | undefined) => dispatch(datasetDownloaded(datasetId, filename))
 	const submitExtraction = (datasetId: string | undefined, datasetName: string| undefined, fileId: string | undefined, fileName: string | undefined, extractor: string | undefined) => {
 		console.log('submitting extraction');
+		console.log(datasetId, datasetName, fileId, filename);
+		const extractionJson = {"extractor": name}
+		console.log(extractionJson);
+		console.log(typeof(extractionJson));
+		if (fileId !== null && fileId !== undefined) {
+			console.log("We have a file to extract");
+		}
+		if (datasetId !== null && datasetId !== undefined){
+			console.log("We have a dataset to extract")
+		}
+
+
 	}
 
 
