@@ -22,13 +22,21 @@ def submit_file_message(
     rabbitmq_client: BlockingChannel = Depends(dependencies.get_rabbitmq),
 ):
     # TODO check if extractor is registered
-    msg_body = EventListenerMessage(
-        filename=file_out.name,
-        fileSize=file_out.bytes,
-        id=file_out.id,
-        datasetId=file_out.dataset_id,
-        secretKey=token,
-    )
+    current_filename = file_out.name
+    current_fileSize = file_out.bytes
+    current_id = file_out.id
+    current_datasetId = file_out.dataset_id
+    current_secretKey = token
+    try:
+        msg_body = EventListenerMessage(
+            filename=file_out.name,
+            fileSize=file_out.bytes,
+            id=current_id,
+            datasetId=current_datasetId,
+            secretKey=token,
+        )
+    except Exception as e:
+        print(e)
 
     rabbitmq_client.queue_bind(
         exchange="extractors",
