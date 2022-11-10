@@ -1,3 +1,4 @@
+from typing import Optional
 from datetime import datetime
 from bson import ObjectId
 from bson.errors import InvalidId
@@ -61,3 +62,9 @@ class MongoModel(BaseModel):
             parsed["_id"] = parsed.pop("id")
 
         return parsed
+
+
+class MongoDBRef(BaseModel):
+    collection: str
+    resource_id: PyObjectId
+    version: Optional[int]

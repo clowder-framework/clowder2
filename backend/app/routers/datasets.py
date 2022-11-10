@@ -193,8 +193,6 @@ async def save_dataset(
     db: MongoClient = Depends(dependencies.get_db),
     es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
 ):
-    es = await connect_elasticsearch()
-
     # Check all connection and abort if any one of them is not available
     if db is None or es is None:
         raise HTTPException(status_code=503, detail="Service not available")

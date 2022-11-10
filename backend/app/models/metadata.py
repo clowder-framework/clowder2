@@ -13,7 +13,7 @@ from fastapi import HTTPException
 from pymongo import MongoClient
 
 from app import dependencies
-from app.models.mongomodel import MongoModel
+from app.models.mongomodel import MongoModel, MongoDBRef
 from app.models.pyobjectid import PyObjectId
 from app.models.users import UserOut
 from app.models.listeners import (
@@ -22,12 +22,6 @@ from app.models.listeners import (
     EventListenerOut,
 )
 from app.search.connect import update_record
-
-
-class MongoDBRef(BaseModel):
-    collection: str
-    resource_id: PyObjectId
-    version: Optional[int]
 
 
 # List of valid types that can be specified for metadata fields
