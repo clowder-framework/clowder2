@@ -9,7 +9,7 @@ from app.keycloak_auth import get_token
 from app import dependencies
 from app.models.files import FileOut
 from app.models.datasets import DatasetOut
-from app.models.listeners import EventListenerMessage
+from app.models.listeners import EventListenerDatasetMessage
 
 
 def submit_file_message(
@@ -66,11 +66,10 @@ def submit_dataset_message(
     rabbitmq_client: BlockingChannel = Depends(dependencies.get_rabbitmq),
 ):
     # TODO check if extractor is registered
-    msg_body = EventListenerMessage(
-        filename=dataset_out.name,
-        fileSize=dataset_out.bytes,
-        id=dataset_out.id,
-        datasetId=dataset_out.dataset_id,
+    msg_body = EventListenerDatasetMessage(
+        datasetName=dataset_out.name,
+        id=str(dataset_out.id),
+        datasetId=str(dataset_out.id),
         secretKey=token,
     )
 

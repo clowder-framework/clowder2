@@ -88,3 +88,15 @@ class EventListenerMessage(BaseModel):
     id: str
     datasetId: str
     secretKey: str
+
+class EventListenerDatasetMessage(BaseModel):
+    """This describes contents of JSON object that is submitted to RabbitMQ for the Event Listeners/Extractors to consume."""
+
+    host: str = "http://127.0.0.1:8000"
+    secretKey: str = "secretKey"
+    retry_count: int = 0
+    resource_type: str = "file"
+    flags: str = ""
+    datasetName: str
+    id: str
+    datasetId: str

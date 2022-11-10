@@ -50,6 +50,7 @@ from app.models.folders import FolderOut, FolderIn, FolderDB
 from app.models.pyobjectid import PyObjectId
 from app.models.users import UserOut
 from app.routers.files import add_file_entry, remove_file_entry
+from app.rabbitmq.listeners import submit_dataset_message
 
 router = APIRouter()
 
@@ -796,6 +797,7 @@ async def get_dataset_extract(
     if (
         dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
     ) is not None:
+        dataset_out = DatasetOut.from_mongo(dataset)
         req_info = await info.json()
         if "extractor" in req_info:
             req_headers = info.headers
@@ -823,20 +825,12 @@ async def get_dataset_extract(
                 current_parameters = req_info["parameters"]
                 body["parameters"] = current_parameters
             current_routing_key = "extractors." + current_queue
-            rabbitmq_client.queue_bind(
-                exchange="extractors",
-                queue=current_queue,
-                routing_key=current_routing_key,
+
+            submit_dataset_message(
+                dataset_out, current_queue, current_routing_key, parameters, token, db, rabbitmq_client
             )
-            rabbitmq_client.basic_publish(
-                exchange="extractors",
-                routing_key=current_routing_key,
-                body=json.dumps(body, ensure_ascii=False),
-                properties=pika.BasicProperties(
-                    content_type="application/json", delivery_mode=1
-                ),
-            )
-            return msg
+
+            return {"message": "testing", "dataset_id": dataset_id}
         else:
             raise HTTPException(status_code=404, detail=f"No extractor submitted")
     else:
