@@ -87,4 +87,4 @@ class EventListenerMessage(BaseModel):
     fileSize: int
     id: str
     datasetId: str
-    token: str
+    secretKey: str

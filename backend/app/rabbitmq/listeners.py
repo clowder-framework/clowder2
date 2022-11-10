@@ -27,13 +27,15 @@ def submit_file_message(
     current_id = file_out.id
     current_datasetId = file_out.dataset_id
     current_secretKey = token
+    print(current_secretKey)
+    print(type(current_secretKey))
     try:
         msg_body = EventListenerMessage(
             filename=file_out.name,
             fileSize=file_out.bytes,
-            id=current_id,
-            datasetId=current_datasetId,
-            secretKey=token,
+            id=str(current_id),
+            datasetId=str(current_datasetId),
+            secretKey=current_secretKey,
         )
     except Exception as e:
         print(e)

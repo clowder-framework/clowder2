@@ -818,6 +818,7 @@ async def get_dataset_extract(
             body["resource_type"] = "dataset"
             body["flags"] = ""
             current_queue = req_info["extractor"]
+            parameters = {}
             if "parameters" in req_info:
                 current_parameters = req_info["parameters"]
                 body["parameters"] = current_parameters
