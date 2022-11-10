@@ -41,7 +41,7 @@ export function fetchFoldersInDataset(datasetId, parentFolder){
 export const SUBMIT_DATSET_EXTRACTION = "SUBMIT_DATASET_EXTRACTION";
 export function submitDatasetExtractionAction(datasetId, extractorName){
 	return (dispatch) => {
-		const requestBody = {'name': extractorName};
+		const requestBody = {'extractor': extractorName};
 		return V2.DatasetsService.getDatasetExtractApiV2DatasetsDatasetIdExtractPost(datasetId, requestBody)
 			.then(json => {
 				dispatch({

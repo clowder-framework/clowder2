@@ -322,6 +322,7 @@ async def get_file_extract(
         token = authorization[1].decode("utf-8").lstrip("Bearer").lstrip(" ")
 
         queue = req_info["extractor"]
+        parameters = {}
         if "parameters" in req_info:
             parameters = req_info["parameters"]
         routing_key = "extractors." + queue
