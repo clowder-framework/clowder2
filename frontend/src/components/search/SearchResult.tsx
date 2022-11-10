@@ -6,6 +6,8 @@ import ArticleIcon from "@mui/icons-material/Article";
 import {parseDate} from "../../utils/common";
 import {theme} from "../../theme";
 
+import parse from "html-react-parser";
+
 export function SearchResult(props) {
 
 	const {data} = props;
@@ -23,13 +25,13 @@ export function SearchResult(props) {
 								{
 									item._index === "dataset" ?
 										<MuiLink component={Link} to={`/datasets/${item._id}`}
-											  sx={{ fontWeight: 600, fontSize: "18px"}}>
-											{item.name}
+											  sx={{ fontWeight: "bold", fontSize: "18px"}}>
+											{parse(item.name)}
 										</MuiLink>
 										:
 										<MuiLink component={Link} to={`/files/${item._id}?dataset=${item.dataset_id}`}
-											  sx={{ fontWeight: 600, fontSize: "18px"}}>
-											{item.name}
+											  sx={{ fontWeight: "bold", fontSize: "18px"}}>
+											{parse(item.name)}
 										</MuiLink>
 								}
 							</React.Fragment>
@@ -39,13 +41,13 @@ export function SearchResult(props) {
 								<Typography variant="body2" color={theme.palette.secondary.light}>
 									{
 										item._index === "dataset" ?
-										`Created by ${item.author} at ${parseDate(item.created)}`
+										`Created by ${parse(item.author)} at ${parseDate(item.created)}`
 										:
-										`Created by ${item.creator} at ${parseDate(item.created)}`
+										`Created by ${parse(item.creator)} at ${parseDate(item.created)}`
 									}
 								</Typography>
 								<Typography variant="body2" color={theme.palette.secondary.dark}>
-									{ item._index === "dataset" ? item.description : `${item.content_type} | ${item.bytes} bytes`}
+									{ item._index === "dataset" ? parse(item.description) : `${item.content_type} | ${item.bytes} bytes`}
 								</Typography>
 							</React.Fragment>
 						}
