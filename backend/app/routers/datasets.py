@@ -21,6 +21,8 @@ from fastapi import (
     Response,
     Request,
 )
+from fastapi import APIRouter, HTTPException, Depends, Security
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from minio import Minio
 from pika.adapters.blocking_connection import BlockingChannel
 import pymongo
@@ -30,6 +32,7 @@ from rocrate.rocrate import ROCrate
 
 from app import dependencies
 from app import keycloak_auth
+from app.keycloak_auth import get_token
 from app.search.connect import (
     connect_elasticsearch,
     insert_record,
@@ -53,6 +56,7 @@ from app.routers.files import add_file_entry, remove_file_entry
 from app.rabbitmq.listeners import submit_dataset_message
 
 router = APIRouter()
+security = HTTPBearer()
 
 clowder_bucket = os.getenv("MINIO_BUCKET_NAME", "clowder")
 
@@ -791,6 +795,8 @@ async def download_dataset(
 async def get_dataset_extract(
     dataset_id: str,
     info: Request,
+    token: str = Depends(get_token),
+    credentials: HTTPAuthorizationCredentials = Security(security),
     db: MongoClient = Depends(dependencies.get_db),
     rabbitmq_client: BlockingChannel = Depends(dependencies.get_rabbitmq),
 ):
@@ -799,6 +805,7 @@ async def get_dataset_extract(
     ) is not None:
         dataset_out = DatasetOut.from_mongo(dataset)
         req_info = await info.json()
+        access_token = credentials.credentials
         if "extractor" in req_info:
             req_headers = info.headers
             raw = req_headers.raw
@@ -809,8 +816,8 @@ async def get_dataset_extract(
             # TODO check of extractor exists
             msg = {"message": "testing", "dataset_id": dataset_id}
             body = {}
-            body["secretKey"] = token
-            body["token"] = token
+            body["secretKey"] = access_token
+            body["token"] = access_token
             # TODO better solution for host
             body["host"] = "http://127.0.0.1:8000"
             body["retry_count"] = 0
@@ -827,7 +834,7 @@ async def get_dataset_extract(
             current_routing_key = "extractors." + current_queue
 
             submit_dataset_message(
-                dataset_out, current_queue, current_routing_key, parameters, token, db, rabbitmq_client
+                dataset_out, current_queue, current_routing_key, parameters, access_token, db, rabbitmq_client
             )
 
             return {"message": "testing", "dataset_id": dataset_id}
