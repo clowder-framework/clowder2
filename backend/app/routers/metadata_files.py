@@ -73,7 +73,11 @@ async def _build_metadata_db_obj(
 
     if agent is None:
         # Build MetadataAgent depending on whether extractor info is present/valid
-        extractor_info = metadata_in.extractor_info
+        extractor_info = None
+        try:
+            extractor_info = metadata_in.extractor_info
+        except Exception as e:
+            print("No extractor info")
         if extractor_info is not None:
             if (
                 extractor := await db["listeners"].find_one(

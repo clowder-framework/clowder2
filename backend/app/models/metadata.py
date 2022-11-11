@@ -17,6 +17,8 @@ from app.models.listeners import (
     EventListenerIn,
     LegacyEventListenerIn,
     EventListenerOut,
+    ExtractorInfo,
+
 )
 
 
@@ -205,6 +207,7 @@ class MetadataIn(MetadataBase):
     file_version: Optional[int]
     listener: Optional[EventListenerIn]
     extractor: Optional[LegacyEventListenerIn]
+    extractor_info: Optional[ExtractorInfo]
 
 
 class MetadataPatch(MetadataIn):
