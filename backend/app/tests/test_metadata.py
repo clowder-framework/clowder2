@@ -1,4 +1,5 @@
 import os
+import time
 
 import pytest as pytest
 from fastapi.testclient import TestClient
@@ -152,6 +153,7 @@ async def test_dataset_patch_metadata_definition(client: TestClient, headers: di
     assert response.status_code == 200
     assert response.json().get("id") is not None
 
+    time.sleep(5)
     # check for metadata def in elasticsearch
     es = await connect_elasticsearch()
     metadata_query = []
@@ -187,6 +189,7 @@ async def test_dataset_create_metadata_context_url(client: TestClient, headers: 
     assert response.status_code == 200
     assert response.json().get("id") is not None
 
+    time.sleep(5)
     # check for metadata def in elasticsearch
     es = await connect_elasticsearch()
     metadata_query = []
