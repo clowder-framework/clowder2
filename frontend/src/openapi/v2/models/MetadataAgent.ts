@@ -2,15 +2,15 @@
 /* tslint:disable */
 /* eslint-disable */
 
-import type { ExtractorOut } from './ExtractorOut';
+import type { EventListenerOut } from './EventListenerOut';
 import type { UserOut } from './UserOut';
 
 /**
- * Describes the user who created a piece of metadata. If extractor is provided, user refers to the user who
- * triggered the extraction.
+ * Describes the user who created a piece of metadata. If listener is provided, user refers to the user who
+ * triggered the job.
  */
 export type MetadataAgent = {
     id?: string;
     creator: UserOut;
-    extractor?: ExtractorOut;
+    listener?: EventListenerOut;
 }
