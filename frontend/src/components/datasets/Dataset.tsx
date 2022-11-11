@@ -196,16 +196,14 @@ export const Dataset = (): JSX.Element => {
 					</Grid>
 				</Grid>
 				<div className="inner-container">
-					<Grid container spacing={4}>
-						<Grid item xs={8}>
+					<Grid container spacing={2}>
+						<Grid item xs={10}>
 							<Typography variant="h3" paragraph>{about["name"]}</Typography>
 							<Typography variant="body1" paragraph>{about["description"]}</Typography>
-							<Box sx={{borderBottom: 1, borderColor: 'divider'}}>
-								<Tabs value={selectedTabIndex} onChange={handleTabChange} aria-label="dataset tabs">
-									<Tab sx={tab} label="Files" {...a11yProps(0)} />
-									<Tab sx={tab} label="Metadata" {...a11yProps(1)} disabled={false}/>
-								</Tabs>
-							</Box>
+							<Tabs value={selectedTabIndex} onChange={handleTabChange} aria-label="dataset tabs">
+								<Tab sx={tab} label="Files" {...a11yProps(0)} />
+								<Tab sx={tab} label="Metadata" {...a11yProps(1)} disabled={false}/>
+							</Tabs>
 							<TabPanel value={selectedTabIndex} index={0}>
 								<FilesTable datasetId={datasetId}/>
 							</TabPanel>
@@ -283,7 +281,7 @@ export const Dataset = (): JSX.Element => {
 							<TabPanel value={selectedTabIndex} index={3}/>
 							<TabPanel value={selectedTabIndex} index={4}/>
 						</Grid>
-						<Grid item xs={4}>
+						<Grid item xs={2} justifyContent="center">
 							{
 								about !== undefined ?
 									<Box className="infoCard">

@@ -9,6 +9,7 @@ import {RootState} from "../../types/data";
 import {folderDeleted} from "../../actions/folder";
 import EditNameModal from "./EditNameModal";
 import EditDescriptionModal from "./EditDescriptionModal";
+import {MoreHoriz} from "@material-ui/icons";
 
 type ActionsMenuProps = {
 	datasetId: string,
@@ -91,7 +92,7 @@ export const OtherMenu = (props: ActionsMenuProps): JSX.Element => {
 						 }}/>
 				<Button variant="outlined" onClick={handleOptionClick}
 						endIcon={<ArrowDropDownIcon/>}>
-					...
+					<MoreHoriz/>
 				</Button>
 				<Menu
 					id="simple-menu"
