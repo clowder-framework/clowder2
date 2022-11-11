@@ -1,4 +1,4 @@
-import {Box, Button, Menu, MenuItem} from "@mui/material";
+import {Box, Button, ListItemIcon, ListItemText, Menu, MenuItem} from "@mui/material";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import React, {useState} from "react";
 import {ActionModal} from "../dialog/ActionModal";
@@ -8,6 +8,8 @@ import {useDispatch} from "react-redux";
 import EditNameModal from "./EditNameModal";
 import EditDescriptionModal from "./EditDescriptionModal";
 import {MoreHoriz} from "@material-ui/icons";
+import DeleteIcon from "@mui/icons-material/Delete";
+import {DriveFileRenameOutline} from "@mui/icons-material";
 
 type ActionsMenuProps = {
 	datasetId: string
@@ -63,35 +65,45 @@ export const OtherMenu = (props: ActionsMenuProps): JSX.Element => {
 						 handleActionCancel={() => {
 							 setDeleteDatasetConfirmOpen(false);
 						 }}/>
-				<Button variant="outlined" onClick={handleOptionClick}
-						endIcon={<ArrowDropDownIcon/>}>
-					<MoreHoriz/>
-				</Button>
-				<Menu
-					id="simple-menu"
-					anchorEl={anchorEl}
-					keepMounted
-					open={Boolean(anchorEl)}
-					onClose={handleOptionClose}
-				>
-					<MenuItem
-						onClick={() => {
-							handleOptionClose();
-							setRename(true);
-						}
-						}>Rename Dataset</MenuItem>
-					<MenuItem
-						onClick={() => {
-							handleOptionClose();
-							setDescription(true);
-						}
-						}>Update Description</MenuItem>
-					<MenuItem
-						onClick={() => {
-							handleOptionClose();
-							setDeleteDatasetConfirmOpen(true);
-						}
-						}>Delete Dataset</MenuItem>
-				</Menu>
+			<Button variant="outlined" onClick={handleOptionClick}
+					endIcon={<ArrowDropDownIcon/>}>
+				<MoreHoriz/>
+			</Button>
+			<Menu
+				id="simple-menu"
+				anchorEl={anchorEl}
+				keepMounted
+				open={Boolean(anchorEl)}
+				onClose={handleOptionClose}
+			>
+				<MenuItem
+					onClick={() => {
+						handleOptionClose();
+						setRename(true);
+					}
+					}> <ListItemIcon>
+					<DriveFileRenameOutline fontSize="small"/>
+				</ListItemIcon>
+					<ListItemText>Rename</ListItemText></MenuItem>
+				<MenuItem
+					onClick={() => {
+						handleOptionClose();
+						setDescription(true);
+					}
+					}> <ListItemIcon>
+					<DriveFileRenameOutline fontSize="small"/>
+				</ListItemIcon>
+					<ListItemText>Update Description</ListItemText></MenuItem>
+				<MenuItem
+					onClick={() => {
+						handleOptionClose();
+						setDeleteDatasetConfirmOpen(true);
+					}
+					}>
+					<ListItemIcon>
+						<DeleteIcon fontSize="small"/>
+					</ListItemIcon>
+					<ListItemText>Delete Dataset</ListItemText></MenuItem>
+			</Menu>
 		</Box>)
 }

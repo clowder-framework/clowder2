@@ -1,10 +1,12 @@
-import {Box, Button, Dialog, Menu, MenuItem} from "@mui/material";
+import {Box, Button, Dialog, ListItemIcon, ListItemText, Menu, MenuItem} from "@mui/material";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import {CreateFolder} from "../folders/CreateFolder";
 import React from "react";
 import {useSelector} from "react-redux";
 import {RootState} from "../../types/data";
 import {UploadFile} from "../files/UploadFile";
+import UploadIcon from "@mui/icons-material/Upload";
+import {Folder} from "@material-ui/icons";
 
 type ActionsMenuProps = {
 	datasetId: string,
@@ -58,14 +60,22 @@ export const NewMenu = (props: ActionsMenuProps): JSX.Element => {
 						setCreateFileOpen(true);
 						handleOptionClose();
 					}}>
-					Upload File
+					<ListItemIcon>
+						<UploadIcon fontSize="small" />
+					</ListItemIcon>
+					<ListItemText>Upload File</ListItemText>
 				</MenuItem>
 				<MenuItem
 					onClick={() => {
 						setNewFolder(true);
 						handleOptionClose();
 					}
-					}>Add Folder</MenuItem>
+					}>
+					<ListItemIcon>
+						<Folder fontSize="small" />
+					</ListItemIcon>
+					<ListItemText>New Folder</ListItemText>
+				</MenuItem>
 			</Menu>
 		</Box>)
 }
