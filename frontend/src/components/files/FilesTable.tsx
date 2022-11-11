@@ -17,6 +17,7 @@ import {parseDate} from "../../utils/common";
 import {VersionChip} from "../versions/VersionChip";
 import {theme} from "../../theme";
 import {FilesTableFileEntry} from "./FilesTableFileEntry";
+import FolderMenu from "./FolderMenu";
 
 type FilesTableProps = {
 	datasetId: string | undefined,
@@ -67,7 +68,7 @@ export default function FilesTable(props: FilesTableProps) {
 								<TableCell align="right">by {folder.author.first_name} {folder.author.last_name}</TableCell>
 								<TableCell align="right">&nbsp;</TableCell>
 								<TableCell align="right">&nbsp;</TableCell>
-								<TableCell align="right">&nbsp;</TableCell>
+								<TableCell align="right"><FolderMenu folder={folder}/></TableCell>
 							</TableRow>))
 					}
 					{
