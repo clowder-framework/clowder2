@@ -1,4 +1,6 @@
 import os
+
+import pytest as pytest
 from fastapi.testclient import TestClient
 import json
 
@@ -122,7 +124,8 @@ def test_dataset_create_metadata_definition(client: TestClient, headers: dict):
     assert response.status_code == 409
 
 
-def test_dataset_patch_metadata_definition(client: TestClient, headers: dict):
+@pytest.mark.asyncio
+async def test_dataset_patch_metadata_definition(client: TestClient, headers: dict):
     # Post the definition itself
     response = client.post(
         f"{settings.API_V2_STR}/metadata/definition",
@@ -150,7 +153,7 @@ def test_dataset_patch_metadata_definition(client: TestClient, headers: dict):
     assert response.json().get("id") is not None
 
     # check for metadata def in elasticsearch
-    es = connect_elasticsearch()
+    es = await connect_elasticsearch()
     metadata_query = []
     # header
     metadata_query.append({"index": "metadata"})
@@ -166,7 +169,8 @@ def test_dataset_patch_metadata_definition(client: TestClient, headers: dict):
     )
 
 
-def test_dataset_create_metadata_context_url(client: TestClient, headers: dict):
+@pytest.mark.asyncio
+async def test_dataset_create_metadata_context_url(client: TestClient, headers: dict):
     # Create dataset and add metadata to it using context_url
     response = client.post(
         f"{settings.API_V2_STR}/datasets", headers=headers, json=dataset_data
@@ -184,7 +188,7 @@ def test_dataset_create_metadata_context_url(client: TestClient, headers: dict):
     assert response.json().get("id") is not None
 
     # check for metadata def in elasticsearch
-    es = connect_elasticsearch()
+    es = await connect_elasticsearch()
     metadata_query = []
     # header
     metadata_query.append({"index": "metadata"})
