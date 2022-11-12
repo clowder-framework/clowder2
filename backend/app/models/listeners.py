@@ -19,6 +19,7 @@ class ExtractorInfo(BaseModel):
     author: str  # Referring to author of listener script (e.g. name or email), not Clowder user
     process: dict
     maturity: str = "Development"
+    name: str = ""
     contributors: List[str] = []
     contexts: List[dict] = []
     repository: List[Repository] = []
@@ -28,6 +29,7 @@ class ExtractorInfo(BaseModel):
     default_labels: List[str] = []
     categories: List[str] = []
     parameters: List[dict] = []
+    version: str = "1.0"
 
 
 class EventListenerBase(BaseModel):
