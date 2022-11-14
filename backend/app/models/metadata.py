@@ -298,10 +298,7 @@ def deep_update(orig: dict, new: dict):
 
 
 async def patch_metadata(
-    metadata: dict,
-    new_entries: dict,
-    db: MongoClient,
-    es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
+    metadata: dict, new_entries: dict, db: MongoClient, es: Elasticsearch
 ):
     """Convenience function for updating original metadata contents with new entries."""
     try:

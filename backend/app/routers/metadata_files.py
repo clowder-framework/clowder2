@@ -235,6 +235,7 @@ async def update_file_metadata(
     file_id: str,
     user=Depends(get_current_user),
     db: MongoClient = Depends(dependencies.get_db),
+    es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
 ):
     """Update metadata. Any fields provided in the contents JSON will be added or updated in the metadata. If context or
     agent should be changed, use PUT.
@@ -308,7 +309,7 @@ async def update_file_metadata(
 
         if (md := await db["metadata"].find_one(query)) is not None:
             # TODO: Refactor this with permissions checks etc.
-            result = await patch_metadata(md, contents, db)
+            result = await patch_metadata(md, contents, db, es)
             return result
         else:
             raise HTTPException(status_code=404, detail=f"No metadata found to update")
