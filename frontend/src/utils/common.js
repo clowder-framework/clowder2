@@ -49,7 +49,7 @@ export async function downloadResource(url) {
 export function dataURItoFile(dataURI) {
 	const metadata = dataURI.split(",")[0];
 	const mime = metadata.match(/:(.*?);/)[1];
-	const filename = metadata.match(/name=(.*?);/)[1];
+	const filename = decodeURIComponent(metadata.match(/name=(.*?);/)[1]);
 
 	const binary = atob(dataURI.split(",")[1]);
 	const array = [];
