@@ -221,6 +221,17 @@ export default function PersistentDrawerLeft(props) {
 							</ListItemButton>
 						</ListItem>
 					</List>
+                    <Divider/>
+					<List>
+						<ListItem key={"newmetadata"} disablePadding>
+							<ListItemButton component={RouterLink} to="/new-metadata-definition">
+								<ListItemIcon>
+									<Create/>
+								</ListItemIcon>
+								<ListItemText primary={"Create New Metadata"}/>
+							</ListItemButton>
+						</ListItem>
+					</List>
 				</Drawer>
 				<Main open={open}>
 					<DrawerHeader/>
