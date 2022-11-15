@@ -75,7 +75,7 @@ async def _build_metadata_db_obj(
 
     if agent is None:
         # Build MetadataAgent depending on whether extractor info is present/valid
-        extractor_info = metadata_in.extractor_info
+        extractor_info = metadata_in.extractor
         if extractor_info is not None:
             if (
                 extractor := await db["listeners"].find_one(
@@ -123,7 +123,7 @@ async def add_file_metadata(
         if definition is not None:
             existing_q = {"resource.resource_id": file.id, "definition": definition}
             # Extracted metadata doesn't care about user
-            if metadata_in.extractor_info is not None:
+            if metadata_in.extractor is not None:
                 existing_q["agent.extractor.name"] = metadata_in.extractor_info.name
                 existing_q[
                     "agent.extractor.version"
@@ -144,9 +144,9 @@ async def add_file_metadata(
         doc = {
             "doc": {
                 "resource_id": file_id,
-                "reource_type": "file",
+                "resource_type": "file",
                 "created": metadata_out.created.utcnow(),
-                "creator": user.id,
+                "creator": user.email,
                 "contents": metadata_out.contents,
                 "context_url": metadata_out.context_url,
                 "context": metadata_out.context,
@@ -191,7 +191,7 @@ async def replace_file_metadata(
         query["resource.version"] = target_version
 
         # Filter by MetadataAgent
-        extractor_info = metadata_in.extractor_info
+        extractor_info = metadata_in.extractor
         if extractor_info is not None:
             if (
                 extractor := await db["listeners"].find_one(
@@ -287,7 +287,7 @@ async def update_file_metadata(
         query["resource.version"] = target_version
 
         # Filter by MetadataAgent
-        extractor_info = metadata_in.extractor_info
+        extractor_info = metadata_in.extractor
         if extractor_info is not None:
             if (
                 extractor := await db["listeners"].find_one(
@@ -423,7 +423,7 @@ async def delete_file_metadata(
 
         # if extractor info is provided
         # Filter by MetadataAgent
-        extractor_info = metadata_in.extractor_info
+        extractor_info = metadata_in.extractor
         if extractor_info is not None:
             if (
                 extractor := await db["listeners"].find_one(

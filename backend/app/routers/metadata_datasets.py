@@ -118,7 +118,7 @@ async def add_dataset_metadata(
         doc = {
             "doc": {
                 "resource_id": dataset_id,
-                "reource_type": "dataset",
+                "resource_type": "dataset",
                 "created": metadata_out.created.utcnow(),
                 "creator": user.email,
                 "contents": metadata_out.contents,
