@@ -17,14 +17,14 @@ const iconStyle = {
 
 export function FilesTableFileEntry(props) {
 
-	const {selectFile, file,} = props;
+	const {selectFile, file, key} = props;
 
 	return (
 		<TableRow
-			key={file.id}
+			key={key}
 			sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
 		>
-			<TableCell component="th" scope="row">
+			<TableCell component="th" scope="row" key={`${file.id}-icon`}>
 				<InsertDriveFileIcon sx={iconStyle}/>
 				<Button onClick={() => selectFile(file.id)}>{file.name}</Button>
 				{/*TODO this should be version number; for now put version ID instead*/}
