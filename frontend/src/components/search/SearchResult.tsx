@@ -15,7 +15,7 @@ export function SearchResult(props) {
 	return (
 		<List sx={{width: "100%", padding:"2% 5%", bgcolor: theme.palette.primary.contrastText}}>
 			{data.map((item) => (
-				<ListItem alignItems="flex-start">
+				<ListItem alignItems="flex-start" key={item._id}>
 					<ListItemAvatar sx={{color: theme.palette.primary.main}}>
 						{ item._index === "dataset" ? <DatasetIcon/> : <ArticleIcon /> }
 					</ListItemAvatar>

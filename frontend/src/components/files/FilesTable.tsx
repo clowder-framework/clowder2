@@ -20,7 +20,7 @@ type FilesTableProps = {
 }
 
 const iconStyle = {
-	"vertical-align": "middle",
+	verticalAlign: "middle",
 	color: theme.palette.primary.main
 }
 

@@ -9,7 +9,7 @@ import {datasetDownloaded} from "../../actions/dataset";
 import {useDispatch} from "react-redux";
 import {CardActionArea, IconButton, Tooltip} from "@mui/material";
 import {Download} from "@mui/icons-material";
-import {Favorite, Share} from "@material-ui/icons";
+// import {Favorite, Share} from "@material-ui/icons";
 
 type DatasetCardProps = {
 	id: string,
@@ -57,16 +57,16 @@ export default function DatasetCard(props: DatasetCardProps) {
 						<Download/>
 					</IconButton>
 				</Tooltip>
-				<Tooltip title="Favorite">
-					<IconButton color="primary" aria-label="favorite"  sx={{mr: 3}} disabled>
-						<Favorite/>
-					</IconButton>
-				</Tooltip>
-				<Tooltip title="Share">
-					<IconButton color="primary" aria-label="share"  sx={{mr: 3}} disabled>
-						<Share/>
-					</IconButton>
-				</Tooltip>
+				{/*<Tooltip title="Favorite">*/}
+				{/*	<IconButton color="primary" aria-label="favorite"  sx={{mr: 3}} disabled>*/}
+				{/*		<Favorite/>*/}
+				{/*	</IconButton>*/}
+				{/*</Tooltip>*/}
+				{/*<Tooltip title="Share">*/}
+				{/*	<IconButton color="primary" aria-label="share"  sx={{mr: 3}} disabled>*/}
+				{/*		<Share/>*/}
+				{/*	</IconButton>*/}
+				{/*</Tooltip>*/}
 			</CardActions>
 		</Card>
 	);

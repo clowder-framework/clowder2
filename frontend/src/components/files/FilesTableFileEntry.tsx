@@ -11,17 +11,17 @@ import {theme} from "../../theme";
 import prettyBytes from 'pretty-bytes';
 
 const iconStyle = {
-	"vertical-align": "middle",
+	verticalAlign: "middle",
 	color: theme.palette.primary.main
 }
 
 export function FilesTableFileEntry(props) {
 
-	const {selectFile, file, key} = props;
+	const {selectFile, file} = props;
 
 	return (
 		<TableRow
-			key={key}
+			key={file.id}
 			sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
 		>
 			<TableCell component="th" scope="row" key={`${file.id}-icon`}>
