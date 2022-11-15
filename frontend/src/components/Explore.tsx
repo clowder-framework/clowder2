@@ -3,12 +3,11 @@ import {Box, Button, ButtonGroup, Grid, Tab, Tabs} from "@mui/material";
 
 import {Dataset, RootState} from "../types/data";
 import {useDispatch, useSelector} from "react-redux";
-import {datasetDeleted, fetchDatasets,} from "../actions/dataset";
+import {fetchDatasets} from "../actions/dataset";
 import {resetFailedReason} from "../actions/common";
 import {downloadThumbnail} from "../utils/thumbnail";
 
 import {a11yProps, TabPanel} from "./tabs/TabComponent";
-import {MainBreadcrumbs} from "./navigation/BreadCrumb";
 import {ActionModal} from "./dialog/ActionModal";
 import DatasetCard from "./datasets/DatasetCard";
 import config from "../app.config";
@@ -27,7 +26,6 @@ export const Explore = (): JSX.Element => {
 
 	// Redux connect equivalent
 	const dispatch = useDispatch();
-	const deleteDataset = (datasetId: string) => dispatch(datasetDeleted(datasetId));
 	const listDatasets = (skip: number | undefined, limit: number | undefined, mine: boolean | undefined) => dispatch(fetchDatasets(skip, limit, mine));
 	const dismissError = () => dispatch(resetFailedReason());
 	const datasets = useSelector((state: RootState) => state.dataset.datasets);
@@ -117,14 +115,6 @@ export const Explore = (): JSX.Element => {
 		}
 	}, [skip]);
 
-	// for breadcrumb
-	const paths = [
-		{
-			"name": "Explore",
-			"url": "/",
-		}
-	];
-
 	return (
 		<Layout>
 			<div className="outer-container">
@@ -132,11 +122,6 @@ export const Explore = (): JSX.Element => {
 				<ActionModal actionOpen={errorOpen} actionTitle="Something went wrong..." actionText={reason}
 							 actionBtnName="Report" handleActionBtnClick={handleErrorReport}
 							 handleActionCancel={handleErrorCancel}/>
-				<Box m={1} display="flex" justifyContent="space-between" alignItems="flex-end">
-					<MainBreadcrumbs paths={paths}/>
-					{/*<Button href="/create-dataset" variant="contained" sx={{display: "flex", alignItems: "center"}}>New*/}
-					{/*	Dataset</Button>*/}
-				</Box>
 				<div className="inner-container">
 					<Grid container spacing={4}>
 						<Grid item xs>
