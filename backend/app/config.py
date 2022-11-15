@@ -63,6 +63,10 @@ class Settings(BaseSettings):
     # identity providers registered in keycloak, for example cilogon, globus, twitter
     keycloak_ipds = ["cilogon", "globus"]
 
+    # user storage quota
+    user_quota_enabled = True
+    max_user_bytes = 1048576 * 3 # set low for testing
+
     # Elasticsearch local config
     elasticsearch_url = "http://localhost:9200"
     elasticsearch_no_of_shards = 5

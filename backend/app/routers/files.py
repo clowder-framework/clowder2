@@ -38,6 +38,8 @@ from typing import Union
 
 router = APIRouter()
 
+user_quota_enabled = settings.user_quota_enabled
+max_user_bytes = settings.max_user_bytes
 
 # TODO: Move this to MongoDB middle layer
 async def add_file_entry(
@@ -93,6 +95,11 @@ async def add_file_entry(
     old_user_bytes = user_from_db['total_user_bytes']
 
     new_user_bytes = old_user_bytes + bytes
+    if user_quota_enabled:
+        if new_user_bytes > max_user_bytes:
+            fs.remove_object(settings.MINIO_BUCKET_NAME, str(new_user_bytes), file_db.version_id)
+            raise HTTPException(status_code=507, detail=f"Exceeded user storage quota")
+
     user_from_db['total_user_bytes'] = new_user_bytes
     user_db = UserDB(**user_from_db)
     file_db.content_type = content_type if type(content_type) is str else "N/A"
