@@ -1,5 +1,5 @@
 import * as React from "react";
-import {Link as MuiLink, List, ListItem, ListItemAvatar, ListItemText, Typography} from "@mui/material";
+import {Box, Link as MuiLink, List, ListItem, ListItemAvatar, Typography} from "@mui/material";
 import {Link} from "react-router-dom";
 import DatasetIcon from "@mui/icons-material/Dataset";
 import ArticleIcon from "@mui/icons-material/Article";
@@ -19,39 +19,31 @@ export function SearchResult(props) {
 					<ListItemAvatar sx={{color: theme.palette.primary.main}}>
 						{ item._index === "dataset" ? <DatasetIcon/> : <ArticleIcon /> }
 					</ListItemAvatar>
-					<ListItemText
-						primary={
-							<React.Fragment>
-								{
-									item._index === "dataset" ?
-										<MuiLink component={Link} to={`/datasets/${item._id}`}
-											  sx={{ fontWeight: "bold", fontSize: "18px"}}>
-											{parse(item.name)}
-										</MuiLink>
-										:
-										<MuiLink component={Link} to={`/files/${item._id}?dataset=${item.dataset_id}`}
-											  sx={{ fontWeight: "bold", fontSize: "18px"}}>
-											{parse(item.name)}
-										</MuiLink>
-								}
-							</React.Fragment>
+					<Box sx={{marginTop:"5px"}}>
+						{
+							item._index === "dataset" ?
+								<MuiLink component={Link} to={`/datasets/${item._id}`}
+										 sx={{fontWeight: "bold", fontSize: "18px"}}>
+									{parse(item.name)}
+								</MuiLink>
+								:
+								<MuiLink component={Link} to={`/files/${item._id}?dataset=${item.dataset_id}`}
+										 sx={{fontWeight: "bold", fontSize: "18px"}}>
+									{parse(item.name)}
+								</MuiLink>
 						}
-						secondary={
-							<React.Fragment>
-								<Typography variant="body2" color={theme.palette.secondary.light}>
-									{
-										item._index === "dataset" ?
-										`Created by ${parse(item.author)} at ${parseDate(item.created)}`
-										:
-										`Created by ${parse(item.creator)} at ${parseDate(item.created)}`
-									}
-								</Typography>
-								<Typography variant="body2" color={theme.palette.secondary.dark}>
-									{ item._index === "dataset" ? parse(item.description) : `${item.content_type} | ${item.bytes} bytes`}
-								</Typography>
-							</React.Fragment>
-						}
-					/>
+						<Typography variant="body2" color={theme.palette.secondary.light}>
+							{
+								item._index === "dataset" ?
+									`Created by ${parse(item.author)} at ${parseDate(item.created)}`
+									:
+									`Created by ${parse(item.creator)} at ${parseDate(item.created)}`
+							}
+						</Typography>
+						<Typography variant="body2" color={theme.palette.secondary.dark}>
+							{item._index === "dataset" ? parse(item.description) : `${item.content_type} | ${item.bytes} bytes`}
+						</Typography>
+					</Box>
 				</ListItem>
 				))}
 		</List>
