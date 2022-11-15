@@ -97,6 +97,7 @@ async def add_file_entry(
     new_user_bytes = old_user_bytes + bytes
     if user_quota_enabled:
         if new_user_bytes > max_user_bytes:
+            await db["files"].delete_one({"_id": ObjectId(new_file_id)})
             fs.remove_object(settings.MINIO_BUCKET_NAME, str(new_user_bytes), file_db.version_id)
             raise HTTPException(status_code=507, detail=f"Exceeded user storage quota")
 
