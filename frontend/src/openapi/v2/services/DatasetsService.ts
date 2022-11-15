@@ -174,15 +174,15 @@ export class DatasetsService {
     /**
      * Save File
      * @param datasetId
-     * @param folderId
      * @param formData
+     * @param folderId
      * @returns FileOut Successful Response
      * @throws ApiError
      */
     public static saveFileApiV2DatasetsDatasetIdFilesPost(
         datasetId: string,
-        folderId: string,
         formData: Body_save_file_api_v2_datasets__dataset_id__files_post,
+        folderId?: string,
     ): CancelablePromise<FileOut> {
         return __request({
             method: 'POST',
@@ -295,6 +295,24 @@ export class DatasetsService {
         return __request({
             method: 'GET',
             path: `/api/v2/datasets/${datasetId}/download`,
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+
+    /**
+     * Get Dataset Extract
+     * @param datasetId
+     * @returns any Successful Response
+     * @throws ApiError
+     */
+    public static getDatasetExtractApiV2DatasetsDatasetIdExtractPost(
+        datasetId: string,
+    ): CancelablePromise<any> {
+        return __request({
+            method: 'POST',
+            path: `/api/v2/datasets/${datasetId}/extract`,
             errors: {
                 422: `Validation Error`,
             },

@@ -16,6 +16,8 @@ for x in range(10):
         "last_name": fake.last_name(),
     }
     response = requests.post(f"{API_V2_STR}/users", json=user)
+    if response.status_code != 200:
+        raise ValueError(response.json())
     users.append(user)
     print(f"User created: {user}")
 
@@ -32,5 +34,7 @@ for x in range(0, 100):
     response = requests.post(
         f"{API_V2_STR}/datasets", json=dataset_data, headers=headers
     )
+    if response.status_code != 200:
+        raise ValueError(response.json())
     dataset_id = response.json().get("id")
     print(f"Dataset created: {dataset_id}")
