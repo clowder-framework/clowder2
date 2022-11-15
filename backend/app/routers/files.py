@@ -29,7 +29,7 @@ from app.search.connect import (
 )
 from app.models.files import FileIn, FileOut, FileVersion, FileDB
 from app.models.listeners import EventListenerMessage
-from app.models.users import UserOut
+from app.models.users import UserOut, UserDB
 from app.models.search import SearchIndexContents
 from app.routers.feeds import check_feed_listeners
 from app.keycloak_auth import get_user, get_current_user, get_token
@@ -47,6 +47,7 @@ async def add_file_entry(
     fs: Minio,
     file: Optional[io.BytesIO] = None,
     content_type: Optional[str] = None,
+
     es=Depends(dependencies.get_elasticsearchclient),
 ):
     """Insert FileDB object into MongoDB (makes Clowder ID), then Minio (makes version ID), then update MongoDB with
@@ -85,8 +86,18 @@ async def add_file_entry(
     file_db.version_id = version_id
     file_db.version_num = 1
     file_db.bytes = bytes
+    current_user_id = dict(user)['id']
+    user_from_db = await db["users"].find_one({"_id": ObjectId(current_user_id)})
+
+
+    old_user_bytes = user_from_db['total_user_bytes']
+
+    new_user_bytes = old_user_bytes + bytes
+    user_from_db['total_user_bytes'] = new_user_bytes
+    user_db = UserDB(**user_from_db)
     file_db.content_type = content_type if type(content_type) is str else "N/A"
     await db["files"].replace_one({"_id": ObjectId(new_file_id)}, file_db.to_mongo())
+    await db["users"].replace_one({"_id": ObjectId(current_user_id)}, user_db.to_mongo())
     file_out = FileOut(**file_db.dict())
 
     # Add FileVersion entry and update file

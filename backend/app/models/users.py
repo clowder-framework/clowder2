@@ -13,6 +13,7 @@ class UserBase(MongoModel):
     email: EmailStr
     first_name: str
     last_name: str
+    total_user_bytes : int = 0
 
 
 class UserIn(UserBase):
