@@ -21,7 +21,6 @@ export function FileVersionHistory(props: FileVersionHistoryProps) {
 						return (
 							<ListItem key={version_num}>
 								<ListItemAvatar>
-									{/*TODO replace with pretty version name*/}
 									<VersionChip versionNumber={version_num}/>
 								</ListItemAvatar>
 								<ListItemText
