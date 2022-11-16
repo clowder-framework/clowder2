@@ -1,0 +1,57 @@
+apiVersion: v2
+type: application
+
+# Information about clowder.
+name: clowder2
+icon: https://isda.ncsa.illinois.edu/~kooper/charts/images/clowder.png
+home: https://clowderframework.org/
+description: >
+  Open Source Data Management for Long Tail Data. Clowder is a customizable and
+  scalable data management framework to support any data format and multiple
+  research domains.
+
+# This is the chart version. This version number should be incremented each time you make changes
+# to the chart and its templates, including the app version.
+# Versions are expected to follow Semantic Versioning (https://semver.org/)
+version: 0.1.0
+
+# This is the version number of the application being deployed. This version number should be
+# incremented each time you make changes to the application. Versions are not expected to
+# follow Semantic Versioning. They should reflect the version the application is using.
+# It is recommended to use it with quotes.
+appVersion: "main"
+
+# List of people that maintain this helm chart.
+maintainers:
+  - name: Rob Kooper
+    email: kooper@illinois.edu
+  - name: Chen Wang
+    email: cwang138@illinois.edu
+
+# location of source code
+sources:
+  - https://github.com/clowder-framework/clowder2
+
+# Dependencies for clowder. Some of the dependencies are only installed if they
+# are enabled.
+dependencies:
+  - name: mongodb
+    version: ~12
+    repository: https://charts.bitnami.com/bitnami
+    condition: mongodb.enabled
+  - name: minio
+    version: ~11
+    repository: https://charts.bitnami.com/bitnami
+    condition: minio.enabled
+  - name: rabbitmq
+    version: ~10
+    repository: https://charts.bitnami.com/bitnami
+    condition: rabbitmq.enabled
+  - name: elasticsearch
+    version: ~19
+    repository: https://charts.bitnami.com/bitnami
+    condition: elasticsearch.enabled
+  - name: keycloak
+    version: ~10
+    repository: https://charts.bitnami.com/bitnami
+    condition: keycloak.enabled
