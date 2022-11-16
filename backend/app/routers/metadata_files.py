@@ -142,15 +142,13 @@ async def add_file_metadata(
 
         # Add an entry to the metadata index
         doc = {
-            "doc": {
-                "resource_id": file_id,
-                "resource_type": "file",
-                "created": metadata_out.created.utcnow(),
-                "creator": user.email,
-                "contents": metadata_out.contents,
-                "context_url": metadata_out.context_url,
-                "context": metadata_out.context,
-            }
+            "resource_id": file_id,
+            "resource_type": "file",
+            "created": metadata_out.created.utcnow(),
+            "creator": user.email,
+            "contents": metadata_out.contents,
+            "context_url": metadata_out.context_url,
+            "context": metadata_out.context,
         }
         insert_record(es, "metadata", doc, metadata_out.id)
         return metadata_out

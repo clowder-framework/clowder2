@@ -116,15 +116,13 @@ async def add_dataset_metadata(
 
         # Add an entry to the metadata index
         doc = {
-            "doc": {
-                "resource_id": dataset_id,
-                "resource_type": "dataset",
-                "created": metadata_out.created.utcnow(),
-                "creator": user.email,
-                "contents": metadata_out.contents,
-                "context_url": metadata_out.context_url,
-                "context": metadata_out.context,
-            }
+            "resource_id": dataset_id,
+            "resource_type": "dataset",
+            "created": metadata_out.created.utcnow(),
+            "creator": user.email,
+            "contents": metadata_out.contents,
+            "context_url": metadata_out.context_url,
+            "context": metadata_out.context,
         }
         insert_record(es, "metadata", doc, metadata_out.id)
         return metadata_out
