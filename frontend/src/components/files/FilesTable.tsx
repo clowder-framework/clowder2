@@ -10,11 +10,7 @@ import {useSelector} from "react-redux";
 import {RootState} from "../../types/data";
 import {useNavigate} from "react-router-dom";
 import {Button} from "@mui/material";
-import FileMenu from "./FileMenu";
 import FolderIcon from '@mui/icons-material/Folder';
-import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
-import {parseDate} from "../../utils/common";
-import {VersionChip} from "../versions/VersionChip";
 import {theme} from "../../theme";
 import {FilesTableFileEntry} from "./FilesTableFileEntry";
 import FolderMenu from "./FolderMenu";
@@ -24,27 +20,27 @@ type FilesTableProps = {
 }
 
 const iconStyle = {
-	"vertical-align": "middle",
+	verticalAlign: "middle",
 	color: theme.palette.primary.main
 }
 
 export default function FilesTable(props: FilesTableProps) {
 	// mapStateToProps
-	const filesInDataset = useSelector((state:RootState) => state.dataset.files);
-	const foldersInDataset = useSelector((state:RootState) => state.folder.folders);
+	const filesInDataset = useSelector((state: RootState) => state.dataset.files);
+	const foldersInDataset = useSelector((state: RootState) => state.folder.folders);
 	// use history hook to redirect/navigate between routes
 	const history = useNavigate();
-	const selectFile = (selectedFileId: string|undefined) => {
+	const selectFile = (selectedFileId: string | undefined) => {
 		// Redirect to file route with file Id and dataset id
 		history(`/files/${selectedFileId}?dataset=${props.datasetId}`);
 	};
-	const selectFolder = (selectedFolderId: string|undefined) => {
+	const selectFolder = (selectedFolderId: string | undefined) => {
 		// Redirect to file route with file Id and dataset id
 		history(`/datasets/${props.datasetId}?folder=${selectedFolderId}`);
 	};
 	return (
 		<TableContainer component={Paper}>
-			<Table sx={{ minWidth: 650 }} aria-label="simple table">
+			<Table sx={{minWidth: 650}} aria-label="simple table">
 				<TableHead>
 					<TableRow>
 						<TableCell>Name</TableCell>
@@ -65,7 +61,8 @@ export default function FilesTable(props: FilesTableProps) {
 									<FolderIcon sx={iconStyle}/>
 									<Button onClick={() => selectFolder(folder.id)}>{folder.name}</Button>
 								</TableCell>
-								<TableCell align="right">by {folder.author.first_name} {folder.author.last_name}</TableCell>
+								<TableCell
+									align="right">by {folder.author.first_name} {folder.author.last_name}</TableCell>
 								<TableCell align="right">&nbsp;</TableCell>
 								<TableCell align="right">&nbsp;</TableCell>
 								<TableCell align="right"><FolderMenu folder={folder}/></TableCell>
@@ -76,7 +73,9 @@ export default function FilesTable(props: FilesTableProps) {
 							<FilesTableFileEntry
 								iconStyle={iconStyle}
 								selectFile={selectFile}
-								file={file} />
+								file={file}
+								key={file.id}
+							/>
 						))
 					}
 				</TableBody>

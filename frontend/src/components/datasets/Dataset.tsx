@@ -41,7 +41,6 @@ import {
 import CloseIcon from '@mui/icons-material/Close';
 import Layout from "../Layout";
 import {ActionsMenu} from "./ActionsMenu";
-import DatasetName from "./DatasetName";
 
 const tab = {
 	fontStyle: "normal",

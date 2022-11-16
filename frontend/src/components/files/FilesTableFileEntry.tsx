@@ -11,20 +11,20 @@ import {theme} from "../../theme";
 import prettyBytes from 'pretty-bytes';
 
 const iconStyle = {
-	"vertical-align": "middle",
+	verticalAlign: "middle",
 	color: theme.palette.primary.main
 }
 
 export function FilesTableFileEntry(props) {
 
-	const {selectFile, file,} = props;
+	const {selectFile, file} = props;
 
 	return (
 		<TableRow
 			key={file.id}
 			sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
 		>
-			<TableCell component="th" scope="row">
+			<TableCell component="th" scope="row" key={`${file.id}-icon`}>
 				<InsertDriveFileIcon sx={iconStyle}/>
 				<Button onClick={() => selectFile(file.id)}>{file.name}</Button>
 				{/*TODO this should be version number; for now put version ID instead*/}
