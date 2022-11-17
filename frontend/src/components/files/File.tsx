@@ -275,9 +275,7 @@ export const File = (): JSX.Element => {
 					{Object.keys(fileSummary).length > 0 &&
 						<div>
 							<FileAbout fileSummary={fileSummary}/>
-							<Divider light/>
 							<FileStats fileSummary={fileSummary}/>
-							<Divider light/>
 						</div>
 					}
 				</Grid>
