@@ -67,6 +67,10 @@ class Settings(BaseSettings):
     user_quota_enabled = True
     max_user_bytes = 1048576 * 3 # set low for testing
 
+    # instance storage quotas
+    instance_quota_enabled = True
+    max_instance_bytes = 1048576 * 50 # set low for testing
+
     # Elasticsearch local config
     elasticsearch_url = "http://localhost:9200"
     elasticsearch_no_of_shards = 5

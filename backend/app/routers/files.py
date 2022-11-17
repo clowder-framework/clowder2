@@ -41,6 +41,9 @@ router = APIRouter()
 user_quota_enabled = settings.user_quota_enabled
 max_user_bytes = settings.max_user_bytes
 
+instance_quota_enabled = settings.instance_quota_enabled
+max_instance_bytes = settings.max_instance_bytes
+
 # TODO: Move this to MongoDB middle layer
 async def add_file_entry(
     file_db: FileDB,
@@ -72,6 +75,7 @@ async def add_file_entry(
         content_type = mimetypes.guess_type(file_db.name)
         content_type = content_type[0] if len(content_type) > 1 else content_type
 
+
     # Use unique ID as key for Minio and get initial version ID
     response = fs.put_object(
         settings.MINIO_BUCKET_NAME,
@@ -80,6 +84,14 @@ async def add_file_entry(
         length=-1,
         part_size=settings.MINIO_UPLOAD_CHUNK_SIZE,
     )  # async write chunk to minio
+    try:
+        objects_in_bucket = fs.list_objects(settings.MINIO_BUCKET_NAME)
+        for obs in objects_in_bucket:
+            print('size of object')
+            print(obs.size)
+        print('here')
+    except Exception as e:
+        print(e)
     version_id = response.version_id
     bytes = len(fs.get_object(settings.MINIO_BUCKET_NAME, str(new_file_id)).data)
     if version_id is None:
@@ -95,6 +107,10 @@ async def add_file_entry(
     old_user_bytes = user_from_db['total_user_bytes']
 
     new_user_bytes = old_user_bytes + bytes
+
+    if instance_quota_enabled:
+        print("not implemented")
+
     if user_quota_enabled:
         if new_user_bytes > max_user_bytes:
             await db["files"].delete_one({"_id": ObjectId(new_file_id)})
