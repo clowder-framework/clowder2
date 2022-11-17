@@ -30,38 +30,31 @@ import CloseIcon from "@mui/icons-material/Close";
 import Layout from "../Layout";
 import {fetchDatasetAbout} from "../../actions/dataset";
 
-const tab = {
-	fontStyle: "normal",
-		fontWeight: "normal",
-		fontSize: "16px",
-		textTransform: "capitalize",
-}
-
 export const File = (): JSX.Element => {
 
 	// path parameter
-	const { fileId } = useParams<{fileId?: string}>();
+	const {fileId} = useParams<{ fileId?: string }>();
 
 	// query parameter get dataset id
 	const search = useLocation().search;
 	const datasetId = new URLSearchParams(search).get("dataset");
-	const listDatasetAbout= (datasetId:string|undefined) => dispatch(fetchDatasetAbout(datasetId));
+	const listDatasetAbout = (datasetId: string | undefined) => dispatch(fetchDatasetAbout(datasetId));
 	const about = useSelector((state: RootState) => state.dataset.about);
 
 	const dispatch = useDispatch();
-	const listFileSummary = (fileId:string|undefined) => dispatch(fetchFileSummary(fileId));
-	const listFileVersions = (fileId:string|undefined) => dispatch(fetchFileVersions(fileId));
+	const listFileSummary = (fileId: string | undefined) => dispatch(fetchFileSummary(fileId));
+	const listFileVersions = (fileId: string | undefined) => dispatch(fetchFileVersions(fileId));
 	const listFileMetadata = (fileId: string | undefined) => dispatch(fetchFileMetadata(fileId));
 	const dismissError = () => dispatch(resetFailedReason());
-	const createFileMetadata = (fileId: string | undefined, metadata:object) => dispatch(createFileMetadataAction(fileId, metadata));
-	const updateFileMetadata = (fileId: string | undefined, metadata:object) => dispatch(patchFileMetadataAction(fileId,metadata));
-	const deleteFileMetadata = (fileId: string | undefined, metadata:object) => dispatch(deleteFileMetadataAction(fileId, metadata));
+	const createFileMetadata = (fileId: string | undefined, metadata: object) => dispatch(createFileMetadataAction(fileId, metadata));
+	const updateFileMetadata = (fileId: string | undefined, metadata: object) => dispatch(patchFileMetadataAction(fileId, metadata));
+	const deleteFileMetadata = (fileId: string | undefined, metadata: object) => dispatch(deleteFileMetadataAction(fileId, metadata));
 
-	const fileSummary = useSelector((state:RootState) => state.file.fileSummary);
-	const filePreviews = useSelector((state:RootState) => state.file.previews);
-	const fileVersions = useSelector((state:RootState) => state.file.fileVersions);
-	const reason = useSelector((state:RootState) => state.error.reason);
-	const stack = useSelector((state:RootState) => state.error.stack);
+	const fileSummary = useSelector((state: RootState) => state.file.fileSummary);
+	const filePreviews = useSelector((state: RootState) => state.file.previews);
+	const fileVersions = useSelector((state: RootState) => state.file.fileVersions);
+	const reason = useSelector((state: RootState) => state.error.reason);
+	const stack = useSelector((state: RootState) => state.error.stack);
 
 	const [selectedTabIndex, setSelectedTabIndex] = useState(0);
 	const [previews, setPreviews] = useState([]);
@@ -80,7 +73,7 @@ export const File = (): JSX.Element => {
 	// Error msg dialog
 	const [errorOpen, setErrorOpen] = useState(false);
 	useEffect(() => {
-		if (reason !== "" && reason !== null && reason !== undefined){
+		if (reason !== "" && reason !== null && reason !== undefined) {
 			setErrorOpen(true);
 		}
 	}, [reason])
@@ -89,22 +82,22 @@ export const File = (): JSX.Element => {
 		dismissError();
 		setErrorOpen(false);
 	}
-	const handleErrorReport = (reason:string) => {
+	const handleErrorReport = (reason: string) => {
 		window.open(`${config.GHIssueBaseURL}+${reason}&body=${encodeURIComponent(stack)}`);
 	}
 
 	useEffect(() => {
 		(async () => {
 			if (filePreviews !== undefined && filePreviews.length > 0 && filePreviews[0].previews !== undefined) {
-				const previewsTemp:any = [];
+				const previewsTemp: any = [];
 				await Promise.all(filePreviews[0].previews.map(async (filePreview) => {
 					// download resources
-					const Configuration:PreviewConfiguration = {
-						previewType:"",
-						url:"",
-						fileid:"",
-						previewer:"",
-						fileType:"",
+					const Configuration: PreviewConfiguration = {
+						previewType: "",
+						url: "",
+						fileid: "",
+						previewer: "",
+						fileType: "",
 						resource: "",
 					};
 					Configuration.previewType = filePreview["p_id"].replace(" ", "-").toLowerCase();
@@ -124,15 +117,15 @@ export const File = (): JSX.Element => {
 		})();
 	}, [filePreviews]);
 
-	const handleTabChange = (_event:React.ChangeEvent<{}>, newTabIndex:number) => {
+	const handleTabChange = (_event: React.ChangeEvent<{}>, newTabIndex: number) => {
 		setSelectedTabIndex(newTabIndex);
 	};
 
-	const setMetadata = (metadata:any) =>{
+	const setMetadata = (metadata: any) => {
 		// TODO wrap this in to a function
 		setMetadataRequestForms(prevState => {
 			// merge the contents field; e.g. lat lon
-			if (metadata.definition in prevState){
+			if (metadata.definition in prevState) {
 				const prevContent = prevState[metadata.definition].contents;
 				metadata.contents = {...prevContent, ...metadata.contents};
 			}
@@ -140,16 +133,14 @@ export const File = (): JSX.Element => {
 		});
 	};
 
-	const handleMetadataUpdateFinish = () =>{
+	const handleMetadataUpdateFinish = () => {
 		Object.keys(metadataRequestForms).map(key => {
 			if ("id" in metadataRequestForms[key] && metadataRequestForms[key]["id"] !== undefined
 				&& metadataRequestForms[key]["id"] !== null
-				&& metadataRequestForms[key]["id"] !== "" )
-			{
+				&& metadataRequestForms[key]["id"] !== "") {
 				// update existing metadata
 				updateFileMetadata(fileId, metadataRequestForms[key]);
-			}
-			else{
+			} else {
 				// post new metadata if metadata id doesn't exist
 				createFileMetadata(fileId, metadataRequestForms[key]);
 			}
@@ -172,13 +163,13 @@ export const File = (): JSX.Element => {
 			"url": "/",
 		},
 		{
-			"name":about["name"],
-			"url":`/datasets/${datasetId}`
+			"name": about["name"],
+			"url": `/datasets/${datasetId}`
 		}
 	];
 
 	// add folder path to breadcrumbs
-	const folderPath = useSelector((state:RootState) => state.dataset.folderPath);
+	const folderPath = useSelector((state: RootState) => state.dataset.folderPath);
 	if (folderPath != null) {
 		for (const folderBread of folderPath) {
 			paths.push({
@@ -192,107 +183,105 @@ export const File = (): JSX.Element => {
 
 	// add file link to breadcrumbs
 	paths.push({
-		"name":fileSummary["name"],
-		"url":`/files/${fileId}`
+		"name": fileSummary["name"],
+		"url": `/files/${fileId}`
 	})
-
 
 	return (
 		<Layout>
-			<div className="outer-container">
-				<MainBreadcrumbs paths={paths}/>
-				{/*Error Message dialogue*/}
-				<ActionModal actionOpen={errorOpen} actionTitle="Something went wrong..." actionText={reason}
-							 actionBtnName="Report" handleActionBtnClick={handleErrorReport}
-							 handleActionCancel={handleErrorCancel}/>
-				<div className="inner-container">
-					<Grid container spacing={8}>
-						<Grid item xs={8}>
-							<Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-								<Tabs value={selectedTabIndex} onChange={handleTabChange} aria-label="file tabs">
-									<Tab sx={tab} label="Previews" {...a11yProps(0)} />
-									<Tab sx={tab} label="Version History" {...a11yProps(1)} />
-									<Tab sx={tab} label="Metadata" {...a11yProps(3)} disabled={false}/>
-								</Tabs>
-							</Box>
-							{/*Preview Tab*/}
-							<TabPanel value={selectedTabIndex} index={0}>
-								{
-									previews.map((preview) =>{
-										if (preview["previewType"] === "audio"){
-											return <Audio fileId={preview["fileid"]} audioSrc={preview["resource"]} />;
-										}
-										else if (preview["previewType"] === "video"){
-											return <Video fileId={preview["fileid"]} videoSrc={preview["resource"]} />;
-										}
-										else if (preview["previewType"] === "thumbnail"){
-											return (<Thumbnail fileId={preview["fileid"]} fileType={preview["fileType"]}
-																  imgSrc={preview["resource"]} />);
-										}
-									})
+			<MainBreadcrumbs paths={paths}/>
+			{/*Error Message dialogue*/}
+			<ActionModal actionOpen={errorOpen} actionTitle="Something went wrong..." actionText={reason}
+						 actionBtnName="Report" handleActionBtnClick={handleErrorReport}
+						 handleActionCancel={handleErrorCancel}/>
+			<Grid container spacing={8}>
+				<Grid item xs={8}>
+					<Tabs value={selectedTabIndex} onChange={handleTabChange} aria-label="file tabs">
+						<Tab label="Previews" {...a11yProps(0)} />
+						<Tab label="Version History" {...a11yProps(1)} />
+						<Tab label="Metadata" {...a11yProps(3)} disabled={false}/>
+					</Tabs>
+					{/*Preview Tab*/}
+					<TabPanel value={selectedTabIndex} index={0}>
+						{
+							previews.map((preview) => {
+								if (preview["previewType"] === "audio") {
+									return <Audio fileId={preview["fileid"]} audioSrc={preview["resource"]}/>;
+								} else if (preview["previewType"] === "video") {
+									return <Video fileId={preview["fileid"]} videoSrc={preview["resource"]}/>;
+								} else if (preview["previewType"] === "thumbnail") {
+									return (<Thumbnail fileId={preview["fileid"]} fileType={preview["fileType"]}
+													   imgSrc={preview["resource"]}/>);
 								}
-							</TabPanel>
-							{/*Version History*/}
-							<TabPanel value={selectedTabIndex} index={1}>
-								{ fileVersions !== undefined ?
-									<FileVersionHistory fileVersions={fileVersions}/> : <></> }
-							</TabPanel>
-							<TabPanel value={selectedTabIndex} index={2}>
-								{
-									enableAddMetadata ?
-										<>
-											<IconButton color="primary" aria-label="close"
-														onClick={()=>{setEnableAddMetadata(false);}}
-														sx={{float:"right"}}
-											>
-												<CloseIcon />
-											</IconButton>
-											<EditMetadata resourceType="file" resourceId={fileId}
-														  setMetadata={setMetadata}
-											/>
-											<Button variant="contained" onClick={handleMetadataUpdateFinish} sx={{ mt: 1, mr: 1 }}>
-												Update
-											</Button>
-											<Button onClick={()=>{setEnableAddMetadata(false);}}
-													sx={{ mt: 1, mr: 1 }}>
-												Cancel
-											</Button>
-										</>
-										:
-										<>
-											<Grid container spacing={2} sx={{ "alignItems": "center"}}>
-												<Grid item xs={11} sm={11} md={11} lg={11} xl={11}>
-													<ClowderButton onClick={()=>{setEnableAddMetadata(true);}}>
-														Add/Edit Metadata
-													</ClowderButton>
-												</Grid>
-											</Grid>
-											<DisplayMetadata updateMetadata={updateFileMetadata}
-															 deleteMetadata={deleteFileMetadata}
-															 resourceType="file" resourceId={fileId} />
-									    </>
-								}
-							</TabPanel>
-							<TabPanel value={selectedTabIndex} index={4}>
-									Extractions
-							</TabPanel>
-							<TabPanel value={selectedTabIndex} index={5}>
-									Comments
-							</TabPanel>
-						</Grid>
-						<Grid item xs={4}>
-							{Object.keys(fileSummary).length > 0 &&
-								<div>
-									<FileAbout fileSummary={fileSummary}/>
-									<Divider light/>
-									<FileStats fileSummary={fileSummary} />
-									<Divider light/>
-								</div>
-							}
-						</Grid>
-					</Grid>
-				</div>
-			</div>
+							})
+						}
+					</TabPanel>
+					{/*Version History*/}
+					<TabPanel value={selectedTabIndex} index={1}>
+						{fileVersions !== undefined ?
+							<FileVersionHistory fileVersions={fileVersions}/> : <></>}
+					</TabPanel>
+					<TabPanel value={selectedTabIndex} index={2}>
+						{
+							enableAddMetadata ?
+								<>
+									<IconButton color="primary" aria-label="close"
+												onClick={() => {
+													setEnableAddMetadata(false);
+												}}
+												sx={{float: "right"}}
+									>
+										<CloseIcon/>
+									</IconButton>
+									<EditMetadata resourceType="file" resourceId={fileId}
+												  setMetadata={setMetadata}
+									/>
+									<Button variant="contained" onClick={handleMetadataUpdateFinish}
+											sx={{mt: 1, mr: 1}}>
+										Update
+									</Button>
+									<Button onClick={() => {
+										setEnableAddMetadata(false);
+									}}
+											sx={{mt: 1, mr: 1}}>
+										Cancel
+									</Button>
+								</>
+								:
+								<>
+									<Grid container spacing={2} sx={{"alignItems": "center"}}>
+										<Grid item xs={11} sm={11} md={11} lg={11} xl={11}>
+											<ClowderButton onClick={() => {
+												setEnableAddMetadata(true);
+											}}>
+												Add/Edit Metadata
+											</ClowderButton>
+										</Grid>
+									</Grid>
+									<DisplayMetadata updateMetadata={updateFileMetadata}
+													 deleteMetadata={deleteFileMetadata}
+													 resourceType="file" resourceId={fileId}/>
+								</>
+						}
+					</TabPanel>
+					<TabPanel value={selectedTabIndex} index={4}>
+						Extractions
+					</TabPanel>
+					<TabPanel value={selectedTabIndex} index={5}>
+						Comments
+					</TabPanel>
+				</Grid>
+				<Grid item xs={4}>
+					{Object.keys(fileSummary).length > 0 &&
+						<div>
+							<FileAbout fileSummary={fileSummary}/>
+							<Divider light/>
+							<FileStats fileSummary={fileSummary}/>
+							<Divider light/>
+						</div>
+					}
+				</Grid>
+			</Grid>
 		</Layout>
 	);
 };
