@@ -178,7 +178,7 @@ export const File = (): JSX.Element => {
 	];
 
 	// add folder path to breadcrumbs
-	const folderPath = useSelector((state:RootState) => state.dataset.folderPath);
+	const folderPath = useSelector((state:RootState) => state.folder.folderPath);
 	if (folderPath != null) {
 		for (const folderBread of folderPath) {
 			paths.push({
