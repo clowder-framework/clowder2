@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from "react";
 import config from "../../app.config";
-import {Box, Button, Divider, Grid, IconButton, Tab, Tabs} from "@mui/material";
+import {Button, Grid, IconButton, Tab, Tabs} from "@mui/material";
 import Audio from "../previewers/Audio";
 import Video from "../previewers/Video";
 import {downloadResource} from "../../utils/common";
@@ -11,7 +11,7 @@ import {useDispatch, useSelector} from "react-redux";
 import {resetFailedReason} from "../../actions/common"
 
 import {a11yProps, TabPanel} from "../tabs/TabComponent";
-import {fetchFileSummary, fetchFileVersions} from "../../actions/file";
+import {fetchFileSummary, fetchFileVersions, fileDownloaded} from "../../actions/file";
 import {MainBreadcrumbs} from "../navigation/BreadCrumb";
 import {ActionModal} from "../dialog/ActionModal";
 import {FileAbout} from "./FileAbout";
@@ -29,6 +29,7 @@ import {ClowderButton} from "../styledComponents/ClowderButton";
 import CloseIcon from "@mui/icons-material/Close";
 import Layout from "../Layout";
 import {fetchDatasetAbout} from "../../actions/dataset";
+import {Download} from "@mui/icons-material";
 
 export const File = (): JSX.Element => {
 
@@ -49,6 +50,7 @@ export const File = (): JSX.Element => {
 	const createFileMetadata = (fileId: string | undefined, metadata: object) => dispatch(createFileMetadataAction(fileId, metadata));
 	const updateFileMetadata = (fileId: string | undefined, metadata: object) => dispatch(patchFileMetadataAction(fileId, metadata));
 	const deleteFileMetadata = (fileId: string | undefined, metadata: object) => dispatch(deleteFileMetadataAction(fileId, metadata));
+	const downloadFile = (fileId: string | undefined, filename: string | undefined) => dispatch(fileDownloaded(fileId, filename))
 
 	const fileSummary = useSelector((state: RootState) => state.file.fileSummary);
 	const filePreviews = useSelector((state: RootState) => state.file.previews);
@@ -189,12 +191,25 @@ export const File = (): JSX.Element => {
 
 	return (
 		<Layout>
-			<MainBreadcrumbs paths={paths}/>
 			{/*Error Message dialogue*/}
 			<ActionModal actionOpen={errorOpen} actionTitle="Something went wrong..." actionText={reason}
 						 actionBtnName="Report" handleActionBtnClick={handleErrorReport}
 						 handleActionCancel={handleErrorCancel}/>
-			<Grid container spacing={8}>
+
+			<Grid container>
+				<Grid item xs={8} sx={{display: 'flex', alignItems: 'center'}}>
+					<MainBreadcrumbs paths={paths}/>
+				</Grid>
+				<Grid item xs={4}>
+					<Button variant="contained"
+							onClick={() => {
+								downloadFile(fileId, fileSummary.name);
+							}} endIcon={<Download/>}>
+						Download
+					</Button>
+				</Grid>
+			</Grid>
+			<Grid container>
 				<Grid item xs={8}>
 					<Tabs value={selectedTabIndex} onChange={handleTabChange} aria-label="file tabs">
 						<Tab label="Previews" {...a11yProps(0)} />
