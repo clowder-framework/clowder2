@@ -1,5 +1,5 @@
 import React, {useState} from "react";
-import {DataSearch, MultiDropdownList, ReactiveList, SingleDropdownRange} from "@appbaseio/reactivesearch";
+import {DataSearch, DatePicker, DateRange, MultiDropdownList, ReactiveList, SingleDropdownRange} from "@appbaseio/reactivesearch";
 import {FormControlLabel, Grid, Switch, Typography} from "@mui/material";
 import Layout from "../Layout";
 import {SearchResult} from "./SearchResult";
@@ -107,29 +107,31 @@ export function Search() {
 											<SingleDropdownRange
 												componentId="downloadfilter"
 												dataField="download"
-												data={[{start: 0, label: "0 time and up"},
-													{start: 10, label: "10 times and up"},
+												data={[
+													{start: 0, label: "Download Times: All"},
+													{start: 10, label: "10 time and up"},
 													{start: 100, label: "100 times and up"},
+													{start: 1000, label: "1000 times and up"},
 												]}
-												placeholder="Download Times: All"
 												innerClass={{
 													select: "filter-select"
 												}}
+												defaultValue={"Download Times: All"}
 											/>
 										</Grid>
 										<Grid item xs={12} sm={4} md={4} lg={4}>
-											<SingleDropdownRange
+											<DatePicker
 												componentId="modifyfilter"
-												dataField="modified"
-												data={[{start: 0, label: "0 time and up"},
-													{start: 10, label: "10 times and up"},
-													{start: 100, label: "100 times and up"},
-
-												]}
-												placeholder="Modify Times: All"
-												innerClass={{
-													select: "filter-select"
-												}}
+												dataField="created"
+												defaultValue=""
+												focused={false}
+												numberOfMonths={1}
+												queryFormat="date_time_no_millis"
+												showClear={true}
+												showFilter={true}
+												filterLabel="Date"
+												URLParams={false}
+												placeholder="Created at: All"
 											/>
 										</Grid>
 									</Grid>
