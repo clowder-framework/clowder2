@@ -105,6 +105,11 @@ body {
     font-weight: bold;
 }
 
+.DayPickerInput{
+	border-radius: 0;
+	border-bottom: 1px solid #868E96!important;
+}
+
 .DayPickerInput > input{
 	font-weight: bold;
 	background:transparent!important;
@@ -119,10 +124,9 @@ body {
 	font-size:16px;
 }
 
-[class*="-DateContainer-DateContainer"] > div:first-of-type{
+[class*="-DateContainer-DateContainer"] > div:first-of-type > div{
 	border: none!important;
 	background: transparent!important;
-    border-bottom: 1px solid #868E96!important;
 }
 
 mark{

@@ -61,7 +61,8 @@ export function dataURItoFile(dataURI) {
 }
 
 export function parseDate(dateString) {
-	const options = { year: "numeric", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" };
+	const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+	const options = { year: "numeric", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" , timeZone: timeZone };
 	const mydate = new Date(dateString);
 	return mydate.toLocaleString("en-US", options);
 }

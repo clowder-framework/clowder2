@@ -1,5 +1,5 @@
 import React, {useState} from "react";
-import {DataSearch, DatePicker, DateRange, MultiDropdownList, ReactiveList, SingleDropdownRange} from "@appbaseio/reactivesearch";
+import {DataSearch, DateRange, MultiDropdownList, ReactiveList, SingleDropdownRange} from "@appbaseio/reactivesearch";
 import {FormControlLabel, Grid, Switch, Typography} from "@mui/material";
 import Layout from "../Layout";
 import {SearchResult} from "./SearchResult";
@@ -120,18 +120,21 @@ export function Search() {
 											/>
 										</Grid>
 										<Grid item xs={12} sm={4} md={4} lg={4}>
-											<DatePicker
+											<DateRange
 												componentId="modifyfilter"
 												dataField="created"
-												defaultValue=""
 												focused={false}
+												autoFocusEnd={true}
 												numberOfMonths={1}
 												queryFormat="date_time_no_millis"
 												showClear={true}
 												showFilter={true}
 												filterLabel="Date"
 												URLParams={false}
-												placeholder="Created at: All"
+												placeholder={{
+												  start: "From Date",
+												  end: "To Date"
+												}}
 											/>
 										</Grid>
 									</Grid>
