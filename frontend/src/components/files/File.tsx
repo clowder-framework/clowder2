@@ -187,10 +187,10 @@ export const File = (): JSX.Element => {
 						 handleActionCancel={handleErrorCancel}/>
 
 			<Grid container>
-				<Grid item xs={8} sx={{display: 'flex', alignItems: 'center'}}>
+				<Grid item xs={10} sx={{display: 'flex', alignItems: 'center'}}>
 					<MainBreadcrumbs paths={paths}/>
 				</Grid>
-				<Grid item xs={4}>
+				<Grid item xs={2}>
 					<Button variant="contained"
 							onClick={() => {
 								downloadFile(fileId, fileSummary.name);
@@ -200,7 +200,7 @@ export const File = (): JSX.Element => {
 				</Grid>
 			</Grid>
 			<Grid container>
-				<Grid item xs={8}>
+				<Grid item xs={10}>
 					<Typography variant="h4" paragraph>{fileSummary.name}</Typography>
 					{Object.keys(fileSummary).length > 0 &&
 						<Typography variant="subtitle2"
@@ -281,13 +281,9 @@ export const File = (): JSX.Element => {
 						Comments
 					</TabPanel>
 				</Grid>
-				<Grid item xs={4}>
+				<Grid item xs={2}>
 					{Object.keys(fileSummary).length > 0 &&
-						<div>
-							{/*<FileAbout fileSummary={fileSummary}/>*/}
-							<FileDetail fileSummary={fileSummary}/>
-							{/*<FileStats fileSummary={fileSummary}/>*/}
-						</div>
+						<FileDetail fileSummary={fileSummary}/>
 					}
 				</Grid>
 			</Grid>
