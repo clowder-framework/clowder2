@@ -149,29 +149,6 @@ export const Dataset = (): JSX.Element => {
 		setEnableAddMetadata(false);
 	};
 
-	// for breadcrumb
-	const paths = [
-		{
-			"name": "Explore",
-			"url": "/",
-		},
-		{
-			"name": about["name"],
-			"url": `/datasets/${datasetId}`
-		}
-	];
-
-	if (folderPath != null) {
-		for (const folderBread of folderPath) {
-			paths.push({
-				"name": folderBread["folder_name"],
-				"url": `/datasets/${datasetId}?folder=${folderBread["folder_id"]}`
-			})
-		}
-	} else {
-		paths.slice(0, 1)
-	}
-
 	return (
 		<Layout>
 			{/*Error Message dialogue*/}
@@ -180,7 +157,7 @@ export const Dataset = (): JSX.Element => {
 						 handleActionCancel={handleErrorCancel}/>
 			<Grid container>
 				<Grid item xs={8} sx={{display: 'flex', alignItems: 'center'}}>
-					<MainBreadcrumbs paths={paths}/>
+					<Typography variant="h3" paragraph>{about["name"]}</Typography>
 				</Grid>
 				<Grid item xs={4}>
 					<ActionsMenu datasetId={datasetId} folderId={folderId}/>
@@ -188,7 +165,6 @@ export const Dataset = (): JSX.Element => {
 			</Grid>
 			<Grid container spacing={2}>
 				<Grid item xs={10}>
-					<Typography variant="h3" paragraph>{about["name"]}</Typography>
 					<Typography variant="body1" paragraph>{about["description"]}</Typography>
 					<Tabs value={selectedTabIndex} onChange={handleTabChange} aria-label="dataset tabs">
 						<Tab sx={tab} label="Files" {...a11yProps(0)} />
