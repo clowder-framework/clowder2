@@ -1,6 +1,5 @@
 import React, {useEffect, useState} from "react";
 import {
-	Box,
 	Button,
 	Dialog,
 	DialogActions,
@@ -25,7 +24,6 @@ import {a11yProps, TabPanel} from "../tabs/TabComponent";
 import {MainBreadcrumbs} from "../navigation/BreadCrumb";
 import {ActionModal} from "../dialog/ActionModal";
 import FilesTable from "../files/FilesTable";
-import {parseDate} from "../../utils/common";
 import config from "../../app.config";
 import {DatasetIn, MetadataIn} from "../../openapi/v2";
 import {DisplayMetadata} from "../metadata/DisplayMetadata";
@@ -40,6 +38,7 @@ import {
 import CloseIcon from '@mui/icons-material/Close';
 import Layout from "../Layout";
 import {ActionsMenu} from "./ActionsMenu";
+import {DatasetDetails} from "./DatasetDetails";
 
 const tab = {
 	fontStyle: "normal",
@@ -272,32 +271,8 @@ export const Dataset = (): JSX.Element => {
 					<TabPanel value={selectedTabIndex} index={3}/>
 					<TabPanel value={selectedTabIndex} index={4}/>
 				</Grid>
-				<Grid item xs={2} justifyContent="center">
-					{
-						about !== undefined ?
-							<Box className="infoCard">
-								<Typography className="title">About</Typography>
-								<Typography className="content">
-									Owner: {about["author"]["first_name"]} {about["author"]["last_name"]}
-								</Typography>
-								<Typography className="content">Created
-									on: {parseDate(about["created"])}</Typography>
-								<Typography className="content">Modified
-									on: {parseDate(about["modified"])}</Typography>
-								{/*/!*TODO use this to get thumbnail*!/*/}
-								{/*<Typography className="content">Thumbnail: {about["thumbnail"]}</Typography>*/}
-								{/*<Typography className="content">Belongs to spaces: {about["authorId"]}</Typography>*/}
-								{/*/!*TODO not sure how to use this info*!/*/}
-								{/*<Typography className="content">Resource type: {about["resource_type"]}</Typography>*/}
-							</Box> : <></>
-					}
-					<Box className="infoCard">
-						<Typography className="title">Statistics</Typography>
-						<Typography className="content">Views: 10</Typography>
-						<Typography className="content">Last viewed: Jun 07, 2021 21:49:09</Typography>
-						<Typography className="content">Downloads: 0</Typography>
-						<Typography className="content">Last downloaded: Never</Typography>
-					</Box>
+				<Grid item>
+					<DatasetDetails details={about}/>
 				</Grid>
 			</Grid>
 		</Layout>

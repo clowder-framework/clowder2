@@ -25,7 +25,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import Layout from "../Layout";
 import {fetchDatasetAbout} from "../../actions/dataset";
 import {Download} from "@mui/icons-material";
-import {FileDetail} from "./FileDetail";
+import {FileDetails} from "./FileDetails";
 
 export const File = (): JSX.Element => {
 
@@ -283,7 +283,7 @@ export const File = (): JSX.Element => {
 				</Grid>
 				<Grid item xs={2}>
 					{Object.keys(fileSummary).length > 0 &&
-						<FileDetail fileSummary={fileSummary}/>
+						<FileDetails fileSummary={fileSummary}/>
 					}
 				</Grid>
 			</Grid>

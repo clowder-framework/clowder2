@@ -10,7 +10,7 @@ type FileAboutProps = {
 	fileSummary: FileOut
 }
 
-export function FileDetail(props: FileAboutProps) {
+export function FileDetails(props: FileAboutProps) {
 	const {id, created, name, creator, version_id, bytes, content_type, views, downloads} = props.fileSummary;
 
 	const details = new Map<string, string>();
