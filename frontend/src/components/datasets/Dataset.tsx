@@ -39,6 +39,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import Layout from "../Layout";
 import {ActionsMenu} from "./ActionsMenu";
 import {DatasetDetails} from "./DatasetDetails";
+import {FormatListBulleted, InsertDriveFile} from "@material-ui/icons";
 
 const tab = {
 	fontStyle: "normal",
@@ -167,8 +168,8 @@ export const Dataset = (): JSX.Element => {
 				<Grid item xs={10}>
 					<Typography variant="body1" paragraph>{about["description"]}</Typography>
 					<Tabs value={selectedTabIndex} onChange={handleTabChange} aria-label="dataset tabs">
-						<Tab sx={tab} label="Files" {...a11yProps(0)} />
-						<Tab sx={tab} label="Metadata" {...a11yProps(1)} disabled={false}/>
+						<Tab icon={<InsertDriveFile/>} iconPosition="start" sx={tab} label="Files" {...a11yProps(0)} />
+						<Tab icon={<FormatListBulleted/>} iconPosition="start" sx={tab} label="Metadata" {...a11yProps(1)} disabled={false}/>
 					</Tabs>
 					<TabPanel value={selectedTabIndex} index={0}>
 						<FilesTable datasetId={datasetId}/>
