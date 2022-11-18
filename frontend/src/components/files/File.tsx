@@ -1,10 +1,7 @@
 import React, {useEffect, useState} from "react";
 import config from "../../app.config";
-import {Button, Grid, IconButton, Tab, Tabs} from "@mui/material";
-import Audio from "../previewers/Audio";
-import Video from "../previewers/Video";
-import {downloadResource} from "../../utils/common";
-import Thumbnail from "../previewers/Thumbnail";
+import {Button, Grid, IconButton, Tab, Tabs, Typography} from "@mui/material";
+import {downloadResource, parseDate} from "../../utils/common";
 import {PreviewConfiguration, RootState} from "../../types/data";
 import {useLocation, useParams} from "react-router-dom";
 import {useDispatch, useSelector} from "react-redux";
@@ -14,8 +11,6 @@ import {a11yProps, TabPanel} from "../tabs/TabComponent";
 import {fetchFileSummary, fetchFileVersions, fileDownloaded} from "../../actions/file";
 import {MainBreadcrumbs} from "../navigation/BreadCrumb";
 import {ActionModal} from "../dialog/ActionModal";
-import {FileAbout} from "./FileAbout";
-import {FileStats} from "./FileStats";
 import {FileVersionHistory} from "../versions/FileVersionHistory";
 import {DisplayMetadata} from "../metadata/DisplayMetadata";
 import {
@@ -30,6 +25,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import Layout from "../Layout";
 import {fetchDatasetAbout} from "../../actions/dataset";
 import {Download} from "@mui/icons-material";
+import {FileDetail} from "./FileDetail";
 
 export const File = (): JSX.Element => {
 
@@ -183,12 +179,6 @@ export const File = (): JSX.Element => {
 		paths.slice(0, 1)
 	}
 
-	// add file link to breadcrumbs
-	paths.push({
-		"name": fileSummary["name"],
-		"url": `/files/${fileId}`
-	})
-
 	return (
 		<Layout>
 			{/*Error Message dialogue*/}
@@ -211,32 +201,37 @@ export const File = (): JSX.Element => {
 			</Grid>
 			<Grid container>
 				<Grid item xs={8}>
+					<Typography variant="h4" paragraph>{fileSummary.name}</Typography>
+					{Object.keys(fileSummary).length > 0 &&
+						<Typography variant="subtitle2"
+									paragraph>Uploaded {parseDate(fileSummary.created)} by {fileSummary.creator.first_name} {fileSummary.creator.last_name}</Typography>
+					}
 					<Tabs value={selectedTabIndex} onChange={handleTabChange} aria-label="file tabs">
-						<Tab label="Previews" {...a11yProps(0)} />
-						<Tab label="Version History" {...a11yProps(1)} />
-						<Tab label="Metadata" {...a11yProps(3)} disabled={false}/>
+						{/*<Tab label="Previews" {...a11yProps(0)} />*/}
+						<Tab label="Version History" {...a11yProps(0)} />
+						<Tab label="Metadata" {...a11yProps(2)} disabled={false}/>
 					</Tabs>
 					{/*Preview Tab*/}
-					<TabPanel value={selectedTabIndex} index={0}>
-						{
-							previews.map((preview) => {
-								if (preview["previewType"] === "audio") {
-									return <Audio fileId={preview["fileid"]} audioSrc={preview["resource"]}/>;
-								} else if (preview["previewType"] === "video") {
-									return <Video fileId={preview["fileid"]} videoSrc={preview["resource"]}/>;
-								} else if (preview["previewType"] === "thumbnail") {
-									return (<Thumbnail fileId={preview["fileid"]} fileType={preview["fileType"]}
-													   imgSrc={preview["resource"]}/>);
-								}
-							})
-						}
-					</TabPanel>
+					{/*<TabPanel value={selectedTabIndex} index={0}>*/}
+					{/*	{*/}
+					{/*		previews.map((preview) => {*/}
+					{/*			if (preview["previewType"] === "audio") {*/}
+					{/*				return <Audio fileId={preview["fileid"]} audioSrc={preview["resource"]}/>;*/}
+					{/*			} else if (preview["previewType"] === "video") {*/}
+					{/*				return <Video fileId={preview["fileid"]} videoSrc={preview["resource"]}/>;*/}
+					{/*			} else if (preview["previewType"] === "thumbnail") {*/}
+					{/*				return (<Thumbnail fileId={preview["fileid"]} fileType={preview["fileType"]}*/}
+					{/*								   imgSrc={preview["resource"]}/>);*/}
+					{/*			}*/}
+					{/*		})*/}
+					{/*	}*/}
+					{/*</TabPanel>*/}
 					{/*Version History*/}
-					<TabPanel value={selectedTabIndex} index={1}>
+					<TabPanel value={selectedTabIndex} index={0}>
 						{fileVersions !== undefined ?
 							<FileVersionHistory fileVersions={fileVersions}/> : <></>}
 					</TabPanel>
-					<TabPanel value={selectedTabIndex} index={2}>
+					<TabPanel value={selectedTabIndex} index={1}>
 						{
 							enableAddMetadata ?
 								<>
@@ -289,8 +284,9 @@ export const File = (): JSX.Element => {
 				<Grid item xs={4}>
 					{Object.keys(fileSummary).length > 0 &&
 						<div>
-							<FileAbout fileSummary={fileSummary}/>
-							<FileStats fileSummary={fileSummary}/>
+							{/*<FileAbout fileSummary={fileSummary}/>*/}
+							<FileDetail fileSummary={fileSummary}/>
+							{/*<FileStats fileSummary={fileSummary}/>*/}
 						</div>
 					}
 				</Grid>
