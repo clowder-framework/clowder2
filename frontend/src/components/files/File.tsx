@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from "react";
 import config from "../../app.config";
-import {Button, Grid, IconButton, Tab, Tabs, Typography} from "@mui/material";
+import {Button, Grid, Tab, Tabs, Typography} from "@mui/material";
 import {downloadResource, parseDate} from "../../utils/common";
 import {PreviewConfiguration, RootState} from "../../types/data";
 import {useLocation, useParams} from "react-router-dom";
@@ -20,8 +20,6 @@ import {
 	postFileMetadata as createFileMetadataAction
 } from "../../actions/metadata";
 import {EditMetadata} from "../metadata/EditMetadata";
-import {ClowderButton} from "../styledComponents/ClowderButton";
-import CloseIcon from "@mui/icons-material/Close";
 import Layout from "../Layout";
 import {fetchDatasetAbout} from "../../actions/dataset";
 import {Download} from "@mui/icons-material";
@@ -235,14 +233,6 @@ export const File = (): JSX.Element => {
 						{
 							enableAddMetadata ?
 								<>
-									<IconButton color="primary" aria-label="close"
-												onClick={() => {
-													setEnableAddMetadata(false);
-												}}
-												sx={{float: "right"}}
-									>
-										<CloseIcon/>
-									</IconButton>
 									<EditMetadata resourceType="file" resourceId={fileId}
 												  setMetadata={setMetadata}
 									/>
@@ -259,18 +249,14 @@ export const File = (): JSX.Element => {
 								</>
 								:
 								<>
-									<Grid container spacing={2} sx={{"alignItems": "center"}}>
-										<Grid item xs={11} sm={11} md={11} lg={11} xl={11}>
-											<ClowderButton onClick={() => {
-												setEnableAddMetadata(true);
-											}}>
-												Add/Edit Metadata
-											</ClowderButton>
-										</Grid>
-									</Grid>
 									<DisplayMetadata updateMetadata={updateFileMetadata}
 													 deleteMetadata={deleteFileMetadata}
 													 resourceType="file" resourceId={fileId}/>
+									<Button variant="contained" onClick={() => {
+										setEnableAddMetadata(true);
+									}}>
+										Add Metadata
+									</Button>
 								</>
 						}
 					</TabPanel>

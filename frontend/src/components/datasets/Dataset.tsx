@@ -1,18 +1,5 @@
 import React, {useEffect, useState} from "react";
-import {
-	Button,
-	Dialog,
-	DialogActions,
-	DialogContent,
-	DialogContentText,
-	DialogTitle,
-	Grid,
-	IconButton,
-	Tab,
-	Tabs,
-	Typography,
-} from "@mui/material";
-import {ClowderButton} from "../styledComponents/ClowderButton";
+import {Button, Grid, Tab, Tabs, Typography,} from "@mui/material";
 import {useParams, useSearchParams} from "react-router-dom";
 import {RootState} from "../../types/data";
 import {useDispatch, useSelector} from "react-redux";
@@ -21,13 +8,11 @@ import {fetchFolderPath} from "../../actions/folder";
 import {resetFailedReason,} from "../../actions/common"
 
 import {a11yProps, TabPanel} from "../tabs/TabComponent";
-import {MainBreadcrumbs} from "../navigation/BreadCrumb";
 import {ActionModal} from "../dialog/ActionModal";
 import FilesTable from "../files/FilesTable";
 import config from "../../app.config";
 import {DatasetIn, MetadataIn} from "../../openapi/v2";
 import {DisplayMetadata} from "../metadata/DisplayMetadata";
-import {CreateMetadataDefinition} from "../metadata/CreateMetadataDefinition";
 import {EditMetadata} from "../metadata/EditMetadata";
 import {
 	deleteDatasetMetadata as deleteDatasetMetadataAction,
@@ -35,7 +20,6 @@ import {
 	patchDatasetMetadata as patchDatasetMetadataAction,
 	postDatasetMetadata
 } from "../../actions/metadata";
-import CloseIcon from '@mui/icons-material/Close';
 import Layout from "../Layout";
 import {ActionsMenu} from "./ActionsMenu";
 import {DatasetDetails} from "./DatasetDetails";
@@ -169,7 +153,8 @@ export const Dataset = (): JSX.Element => {
 					<Typography variant="body1" paragraph>{about["description"]}</Typography>
 					<Tabs value={selectedTabIndex} onChange={handleTabChange} aria-label="dataset tabs">
 						<Tab icon={<InsertDriveFile/>} iconPosition="start" sx={tab} label="Files" {...a11yProps(0)} />
-						<Tab icon={<FormatListBulleted/>} iconPosition="start" sx={tab} label="Metadata" {...a11yProps(1)} disabled={false}/>
+						<Tab icon={<FormatListBulleted/>} iconPosition="start" sx={tab}
+							 label="Metadata" {...a11yProps(1)} disabled={false}/>
 					</Tabs>
 					<TabPanel value={selectedTabIndex} index={0}>
 						<FilesTable datasetId={datasetId}/>
@@ -178,19 +163,6 @@ export const Dataset = (): JSX.Element => {
 						{
 							enableAddMetadata ?
 								<>
-									<IconButton color="primary" aria-label="close"
-												onClick={() => {
-													setEnableAddMetadata(false);
-												}}
-												sx={{float: "right"}}
-									>
-										<CloseIcon/>
-									</IconButton>
-									<Button variant="contained" onClick={() => {
-										setOpenPopup(true);
-									}} sx={{mt: 1, mr: 1, "alignItems": "right"}}>
-										Add new metadata definition
-									</Button>
 									<EditMetadata resourceType="dataset" resourceId={datasetId}
 												  setMetadata={setMetadata}
 									/>
@@ -204,42 +176,17 @@ export const Dataset = (): JSX.Element => {
 											sx={{mt: 1, mr: 1}}>
 										Cancel
 									</Button>
-									{
-										openPopup ?
-											<>
-												<Dialog open={openPopup} onClose={() => {
-													setOpenPopup(false);
-												}} fullWidth={true} maxWidth={"md"}>
-													<DialogTitle>Add new metadata definition</DialogTitle>
-													<DialogContent>
-														<DialogContentText>Please fill out the metadata
-															information here.</DialogContentText>
-														<CreateMetadataDefinition/>
-													</DialogContent>
-													<DialogActions>
-														<Button onClick={() => {
-															setOpenPopup(false);
-														}}>Cancel</Button>
-													</DialogActions>
-												</Dialog>
-											</>
-											: <></>
-									}
 								</>
 								:
 								<>
-									<Grid container spacing={2} sx={{"alignItems": "center"}}>
-										<Grid item xs={11} sm={11} md={11} lg={11} xl={11}>
-											<ClowderButton onClick={() => {
-												setEnableAddMetadata(true);
-											}}>
-												Add/Edit Metadata
-											</ClowderButton>
-										</Grid>
-									</Grid>
 									<DisplayMetadata updateMetadata={updateDatasetMetadata}
 													 deleteMetadata={deleteDatasetMetadata}
 													 resourceType="dataset" resourceId={datasetId}/>
+									<Button variant="contained" onClick={() => {
+										setEnableAddMetadata(true);
+									}}>
+										Add Metadata
+									</Button>
 								</>
 
 						}
