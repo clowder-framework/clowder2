@@ -1,6 +1,7 @@
 import React, {useState} from "react";
-import {LocalizationProvider, DateTimePicker} from "@mui/lab";
-import DateAdapter from "@mui/lab/AdapterDateFns";
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 import {ClowderMetadataTextField} from "../../styledComponents/ClowderMetadataTextField";
 import {MetadataEditButton} from "./MetadataEditButton";
 import {Grid} from "@mui/material";
@@ -40,7 +41,7 @@ export const MetadataDateTimePicker = (props) => {
 		<div style={{margin:"1.1em auto"}}>
 			<Grid container spacing={2} sx={{ "alignItems": "center"}}>
 				<Grid item xs={11} sm={11} md={11} lg={11} xl={11}>
-					<LocalizationProvider dateAdapter={DateAdapter}>
+                    <LocalizationProvider dateAdapter={AdapterDayjs}>
 						<DateTimePicker
 							label={widgetName}
 							value={readOnly && contents ? contents[fieldName]: localContent[fieldName]}
