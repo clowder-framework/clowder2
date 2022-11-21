@@ -24,6 +24,7 @@ import Layout from "../Layout";
 import {ActionsMenu} from "./ActionsMenu";
 import {DatasetDetails} from "./DatasetDetails";
 import {FormatListBulleted, InsertDriveFile} from "@material-ui/icons";
+import {MainBreadcrumbs} from "../navigation/BreadCrumb";
 
 const tab = {
 	fontStyle: "normal",
@@ -57,7 +58,6 @@ export const Dataset = (): JSX.Element => {
 	// mapStateToProps
 	const reason = useSelector((state: RootState) => state.error.reason);
 	const stack = useSelector((state: RootState) => state.error.stack);
-	const folderPath = useSelector((state: RootState) => state.folder.folderPath);
 	const about = useSelector((state: RootState) => state.dataset.about);
 
 	// state
@@ -134,12 +134,41 @@ export const Dataset = (): JSX.Element => {
 		setEnableAddMetadata(false);
 	};
 
+	// for breadcrumb
+	const paths = [
+		{
+			"name": "Explore",
+			"url": "/",
+		},
+		{
+			"name": about["name"],
+			"url": `/datasets/${datasetId}`
+		}
+	];
+	// add folder path to breadcrumbs
+	const folderPath = useSelector((state: RootState) => state.folder.folderPath);
+	if (folderPath != null) {
+		for (const folderBread of folderPath) {
+			paths.push({
+				"name": folderBread["folder_name"],
+				"url": `/datasets/${datasetId}?folder=${folderBread["folder_id"]}`
+			})
+		}
+	} else {
+		paths.slice(0, 1)
+	}
+
 	return (
 		<Layout>
 			{/*Error Message dialogue*/}
 			<ActionModal actionOpen={errorOpen} actionTitle="Something went wrong..." actionText={reason}
 						 actionBtnName="Report" handleActionBtnClick={handleErrorReport}
 						 handleActionCancel={handleErrorCancel}/>
+		 	<Grid container>
+				<Grid item xs={10} sx={{display: 'flex', alignItems: 'center'}}>
+					<MainBreadcrumbs paths={paths}/>
+				</Grid>
+			</Grid>
 			<Grid container>
 				<Grid item xs={8} sx={{display: 'flex', alignItems: 'center'}}>
 					<Typography variant="h3" paragraph>{about["name"]}</Typography>
