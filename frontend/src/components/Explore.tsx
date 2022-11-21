@@ -13,6 +13,7 @@ import DatasetCard from "./datasets/DatasetCard";
 import config from "../app.config";
 import {ArrowBack, ArrowForward} from "@material-ui/icons";
 import Layout from "./Layout";
+import DatasetIcon from "@mui/icons-material/Dataset";
 
 export const Explore = (): JSX.Element => {
 
@@ -115,7 +116,7 @@ export const Explore = (): JSX.Element => {
 			<Grid container spacing={4}>
 				<Grid item xs>
 					<Tabs value={selectedTabIndex} onChange={handleTabChange} aria-label="dashboard tabs">
-						<Tab label="Datasets" {...a11yProps(0)} />
+						<Tab icon={<DatasetIcon/>} iconPosition="start" label="Datasets" {...a11yProps(0)} />
 					</Tabs>
 					<TabPanel value={selectedTabIndex} index={0}>
 						<Grid container spacing={2}>
