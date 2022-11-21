@@ -228,7 +228,7 @@ export default function PersistentDrawerLeft(props) {
 								<ListItemIcon>
 									<Create/>
 								</ListItemIcon>
-								<ListItemText primary={"Create New Metadata"}/>
+								<ListItemText primary={"Metadata Definitions"}/>
 							</ListItemButton>
 						</ListItem>
 					</List>

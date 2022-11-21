@@ -1,20 +1,5 @@
 import React, {useEffect, useState} from "react";
-import {
-	Box,
-	Button,
-	Dialog,
-	DialogActions,
-	DialogContent,
-	DialogContentText,
-	DialogTitle,
-	Grid,
-	IconButton,
-	Tab,
-	Tabs,
-	Typography,
-} from "@mui/material";
-import {ClowderInput} from "../styledComponents/ClowderInput";
-import {ClowderButton} from "../styledComponents/ClowderButton";
+import {Button, Grid, Tab, Tabs, Typography,} from "@mui/material";
 import {useParams, useSearchParams} from "react-router-dom";
 import {RootState} from "../../types/data";
 import {useDispatch, useSelector} from "react-redux";
@@ -23,14 +8,11 @@ import {fetchFolderPath} from "../../actions/folder";
 import {resetFailedReason,} from "../../actions/common"
 
 import {a11yProps, TabPanel} from "../tabs/TabComponent";
-import {MainBreadcrumbs} from "../navigation/BreadCrumb";
 import {ActionModal} from "../dialog/ActionModal";
 import FilesTable from "../files/FilesTable";
-import {parseDate} from "../../utils/common";
 import config from "../../app.config";
 import {DatasetIn, MetadataIn} from "../../openapi/v2";
 import {DisplayMetadata} from "../metadata/DisplayMetadata";
-import {CreateMetadataDefinition} from "../metadata/CreateMetadataDefinition";
 import {EditMetadata} from "../metadata/EditMetadata";
 import {
 	deleteDatasetMetadata as deleteDatasetMetadataAction,
@@ -38,9 +20,10 @@ import {
 	patchDatasetMetadata as patchDatasetMetadataAction,
 	postDatasetMetadata
 } from "../../actions/metadata";
-import CloseIcon from '@mui/icons-material/Close';
 import Layout from "../Layout";
 import {ActionsMenu} from "./ActionsMenu";
+import {DatasetDetails} from "./DatasetDetails";
+import {FormatListBulleted, InsertDriveFile} from "@material-ui/icons";
 
 const tab = {
 	fontStyle: "normal",
@@ -116,11 +99,6 @@ export const Dataset = (): JSX.Element => {
 		setSelectedTabIndex(newTabIndex);
 	};
 
-	const handleDatasetDescriptionEdit = () => {
-		editDataset(about["id"], {"description": datasetDescription});
-		setEditDescriptionOpen(false);
-	};
-
 	const setMetadata = (metadata: any) => {
 		// TODO wrap this in to a function
 		setMetadataRequestForms(prevState => {
@@ -156,160 +134,71 @@ export const Dataset = (): JSX.Element => {
 		setEnableAddMetadata(false);
 	};
 
-	// for breadcrumb
-	const paths = [
-		{
-			"name": "Explore",
-			"url": "/",
-		},
-		{
-			"name": about["name"],
-			"url": `/datasets/${datasetId}`
-		}
-	];
-
-	if (folderPath != null) {
-		for (const folderBread of folderPath) {
-			paths.push({
-				"name": folderBread["folder_name"],
-				"url": `/datasets/${datasetId}?folder=${folderBread["folder_id"]}`
-			})
-		}
-	} else {
-		paths.slice(0, 1)
-	}
-
 	return (
 		<Layout>
 			{/*Error Message dialogue*/}
 			<ActionModal actionOpen={errorOpen} actionTitle="Something went wrong..." actionText={reason}
 						 actionBtnName="Report" handleActionBtnClick={handleErrorReport}
 						 handleActionCancel={handleErrorCancel}/>
-			<div className="outer-container">
-				<Grid container>
-					<Grid item xs={8} sx={{display: 'flex',  alignItems: 'center'}}>
-						<MainBreadcrumbs paths={paths}/>
-					</Grid>
-					<Grid item xs={4}>
-						<ActionsMenu datasetId={datasetId} folderId={folderId}/>
-					</Grid>
+			<Grid container>
+				<Grid item xs={8} sx={{display: 'flex', alignItems: 'center'}}>
+					<Typography variant="h3" paragraph>{about["name"]}</Typography>
 				</Grid>
-				<div className="inner-container">
-					<Grid container spacing={2}>
-						<Grid item xs={10}>
-							<Typography variant="h3" paragraph>{about["name"]}</Typography>
-							<Typography variant="body1" paragraph>{about["description"]}</Typography>
-							<Tabs value={selectedTabIndex} onChange={handleTabChange} aria-label="dataset tabs">
-								<Tab sx={tab} label="Files" {...a11yProps(0)} />
-								<Tab sx={tab} label="Metadata" {...a11yProps(1)} disabled={false}/>
-							</Tabs>
-							<TabPanel value={selectedTabIndex} index={0}>
-								<FilesTable datasetId={datasetId}/>
-							</TabPanel>
-							<TabPanel value={selectedTabIndex} index={1}>
-								{
-									enableAddMetadata ?
-										<>
-											<IconButton color="primary" aria-label="close"
-														onClick={() => {
-															setEnableAddMetadata(false);
-														}}
-														sx={{float: "right"}}
-											>
-												<CloseIcon/>
-											</IconButton>
-											<Button variant="contained" onClick={() => {
-												setOpenPopup(true);
-											}} sx={{mt: 1, mr: 1, "alignItems": "right"}}>
-												Add new metadata definition
-											</Button>
-											<EditMetadata resourceType="dataset" resourceId={datasetId}
-														  setMetadata={setMetadata}
-											/>
-											<Button variant="contained" onClick={handleMetadataUpdateFinish}
-													sx={{mt: 1, mr: 1}}>
-												Update
-											</Button>
-											<Button onClick={() => {
-												setEnableAddMetadata(false);
-											}}
-													sx={{mt: 1, mr: 1}}>
-												Cancel
-											</Button>
-											{
-												openPopup ?
-													<>
-														<Dialog open={openPopup} onClose={() => {
-															setOpenPopup(false);
-														}} fullWidth={true} maxWidth={"md"}>
-															<DialogTitle>Add new metadata definition</DialogTitle>
-															<DialogContent>
-																<DialogContentText>Please fill out the metadata
-																	information here.</DialogContentText>
-																<CreateMetadataDefinition/>
-															</DialogContent>
-															<DialogActions>
-																<Button onClick={() => {
-																	setOpenPopup(false);
-																}}>Cancel</Button>
-															</DialogActions>
-														</Dialog>
-													</>
-													: <></>
-											}
-										</>
-										:
-										<>
-											<Grid container spacing={2} sx={{"alignItems": "center"}}>
-												<Grid item xs={11} sm={11} md={11} lg={11} xl={11}>
-													<ClowderButton onClick={() => {
-														setEnableAddMetadata(true);
-													}}>
-														Add/Edit Metadata
-													</ClowderButton>
-												</Grid>
-											</Grid>
-											<DisplayMetadata updateMetadata={updateDatasetMetadata}
-															 deleteMetadata={deleteDatasetMetadata}
-															 resourceType="dataset" resourceId={datasetId}/>
-										</>
+				<Grid item xs={4}>
+					<ActionsMenu datasetId={datasetId} folderId={folderId}/>
+				</Grid>
+			</Grid>
+			<Grid container spacing={2}>
+				<Grid item xs={10}>
+					<Typography variant="body1" paragraph>{about["description"]}</Typography>
+					<Tabs value={selectedTabIndex} onChange={handleTabChange} aria-label="dataset tabs">
+						<Tab icon={<InsertDriveFile/>} iconPosition="start" sx={tab} label="Files" {...a11yProps(0)} />
+						<Tab icon={<FormatListBulleted/>} iconPosition="start" sx={tab}
+							 label="Metadata" {...a11yProps(1)} disabled={false}/>
+					</Tabs>
+					<TabPanel value={selectedTabIndex} index={0}>
+						<FilesTable datasetId={datasetId}/>
+					</TabPanel>
+					<TabPanel value={selectedTabIndex} index={1}>
+						{
+							enableAddMetadata ?
+								<>
+									<EditMetadata resourceType="dataset" resourceId={datasetId}
+												  setMetadata={setMetadata}
+									/>
+									<Button variant="contained" onClick={handleMetadataUpdateFinish}
+											sx={{mt: 1, mr: 1}}>
+										Update
+									</Button>
+									<Button onClick={() => {
+										setEnableAddMetadata(false);
+									}}
+											sx={{mt: 1, mr: 1}}>
+										Cancel
+									</Button>
+								</>
+								:
+								<>
+									<DisplayMetadata updateMetadata={updateDatasetMetadata}
+													 deleteMetadata={deleteDatasetMetadata}
+													 resourceType="dataset" resourceId={datasetId}/>
+									<Button variant="contained" onClick={() => {
+										setEnableAddMetadata(true);
+									}}>
+										Add Metadata
+									</Button>
+								</>
 
-								}
-							</TabPanel>
-							<TabPanel value={selectedTabIndex} index={2}/>
-							<TabPanel value={selectedTabIndex} index={3}/>
-							<TabPanel value={selectedTabIndex} index={4}/>
-						</Grid>
-						<Grid item xs={2} justifyContent="center">
-							{
-								about !== undefined ?
-									<Box className="infoCard">
-										<Typography className="title">About</Typography>
-										<Typography className="content">
-											Owner: {about["author"]["first_name"]} {about["author"]["last_name"]}
-										</Typography>
-										<Typography className="content">Created
-											on: {parseDate(about["created"])}</Typography>
-										<Typography className="content">Modified
-											on: {parseDate(about["modified"])}</Typography>
-										{/*/!*TODO use this to get thumbnail*!/*/}
-										{/*<Typography className="content">Thumbnail: {about["thumbnail"]}</Typography>*/}
-										{/*<Typography className="content">Belongs to spaces: {about["authorId"]}</Typography>*/}
-										{/*/!*TODO not sure how to use this info*!/*/}
-										{/*<Typography className="content">Resource type: {about["resource_type"]}</Typography>*/}
-									</Box> : <></>
-							}
-							<Box className="infoCard">
-								<Typography className="title">Statistics</Typography>
-								<Typography className="content">Views: 10</Typography>
-								<Typography className="content">Last viewed: Jun 07, 2021 21:49:09</Typography>
-								<Typography className="content">Downloads: 0</Typography>
-								<Typography className="content">Last downloaded: Never</Typography>
-							</Box>
-						</Grid>
-					</Grid>
-				</div>
-			</div>
+						}
+					</TabPanel>
+					<TabPanel value={selectedTabIndex} index={2}/>
+					<TabPanel value={selectedTabIndex} index={3}/>
+					<TabPanel value={selectedTabIndex} index={4}/>
+				</Grid>
+				<Grid item>
+					<DatasetDetails details={about}/>
+				</Grid>
+			</Grid>
 		</Layout>
-	);
-};
+	)
+}
