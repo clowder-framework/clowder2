@@ -8,7 +8,7 @@ import {useDispatch, useSelector} from "react-redux";
 import {resetFailedReason} from "../../actions/common"
 
 import {a11yProps, TabPanel} from "../tabs/TabComponent";
-import {fetchFileSummary, fetchFileVersions} from "../../actions/file";
+import {fetchFileSummary, fetchFileVersions, fileDownloaded} from "../../actions/file";
 import {MainBreadcrumbs} from "../navigation/BreadCrumb";
 import {ActionModal} from "../dialog/ActionModal";
 import {FileVersionHistory} from "../versions/FileVersionHistory";
@@ -48,7 +48,7 @@ export const File = (): JSX.Element => {
 	const createFileMetadata = (fileId: string | undefined, metadata: object) => dispatch(createFileMetadataAction(fileId, metadata));
 	const updateFileMetadata = (fileId: string | undefined, metadata: object) => dispatch(patchFileMetadataAction(fileId, metadata));
 	const deleteFileMetadata = (fileId: string | undefined, metadata: object) => dispatch(deleteFileMetadataAction(fileId, metadata));
-	const getFolderPath = (folderId: string | null) => dispatch(fetchFolderPath(folderId));
+	const downloadFile = (fileId: string | undefined, filename: string | undefined) => dispatch(fileDownloaded(fileId, filename))
 
 	const fileSummary = useSelector((state: RootState) => state.file.fileSummary);
 	const filePreviews = useSelector((state: RootState) => state.file.previews);
@@ -67,10 +67,10 @@ export const File = (): JSX.Element => {
 		listFileSummary(fileId);
 		listFileVersions(fileId);
 		// FIXME replace checks for null with logic to load this info from redux instead of the page parameters
-		if (datasetId != "null") {
+		if (datasetId != "null" && datasetId != "undefined") {
 			listDatasetAbout(datasetId); // get dataset name
 		}
-		if (folderId != "null") {
+		if (folderId != "null" && folderId != "undefined") {
 			getFolderPath(folderId); // get folder path
 		}
 	}, []);
@@ -175,7 +175,7 @@ export const File = (): JSX.Element => {
 	];
 
 	// add folder path to breadcrumbs
-	const folderPath = useSelector((state:RootState) => state.folder.folderPath);
+	const folderPath = useSelector((state: RootState) => state.folder.folderPath);
 	if (folderPath != null) {
 		for (const folderBread of folderPath) {
 			paths.push({
