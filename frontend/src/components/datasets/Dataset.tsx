@@ -157,7 +157,7 @@ export const Dataset = (): JSX.Element => {
 							 label="Metadata" {...a11yProps(1)} disabled={false}/>
 					</Tabs>
 					<TabPanel value={selectedTabIndex} index={0}>
-						<FilesTable datasetId={datasetId}/>
+						<FilesTable datasetId={datasetId} folderId={folderId}/>
 					</TabPanel>
 					<TabPanel value={selectedTabIndex} index={1}>
 						{
