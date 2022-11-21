@@ -131,7 +131,7 @@ export const CreateMetadataDefinition = (): JSX.Element => {
 
 		// Remove the options field if widgetType != enum
 		for (let i = 0; i < formInput.fields.length; i++) {
-			if (formInput.fields[i].widgetType != "enum") {
+            if (formInput.fields[i].config.type != "enum") {
 				delete formInput.fields[i].config.options
 			}
 		}
