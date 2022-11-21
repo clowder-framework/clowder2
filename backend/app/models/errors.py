@@ -2,8 +2,7 @@ from datetime import datetime
 from typing import Optional
 from pydantic import Field
 
-from app.models.mongomodel import MongoModel
-from app.models.metadata import MongoDBRef
+from app.models.mongomodel import MongoModel, MongoDBRef
 
 
 class ServiceUnreachable(Exception):

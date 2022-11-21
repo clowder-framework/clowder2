@@ -7,3 +7,4 @@ mongo clowder2 < mongo-delete.js
 # Delete data from elasticsearch
 curl -X DELETE http://localhost:9200/dataset
 curl -X DELETE http://localhost:9200/file
+curl -X DELETE http://localhost:9200/metadata

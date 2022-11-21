@@ -2,6 +2,7 @@ import io
 from datetime import datetime
 from typing import Optional, List
 
+from elasticsearch import Elasticsearch
 from bson import ObjectId
 from fastapi import (
     APIRouter,
@@ -28,6 +29,7 @@ from app.models.metadata import (
     MetadataDelete,
 )
 from app.keycloak_auth import get_user, get_current_user, get_token, UserOut
+from app.search.connect import insert_record, update_record, delete_document_by_id
 
 router = APIRouter()
 
@@ -73,7 +75,7 @@ async def _build_metadata_db_obj(
 
     if agent is None:
         # Build MetadataAgent depending on whether extractor info is present/valid
-        extractor_info = metadata_in.extractor_info
+        extractor_info = metadata_in.extractor
         if extractor_info is not None:
             if (
                 extractor := await db["listeners"].find_one(
@@ -106,6 +108,7 @@ async def add_file_metadata(
     file_id: str,
     user=Depends(get_current_user),
     db: MongoClient = Depends(dependencies.get_db),
+    es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
 ):
     """Attach new metadata to a file. The body must include a contents field with the JSON metadata, and either a
     context JSON-LD object, context_url, or definition (name of a metadata definition) to be valid.
@@ -120,7 +123,7 @@ async def add_file_metadata(
         if definition is not None:
             existing_q = {"resource.resource_id": file.id, "definition": definition}
             # Extracted metadata doesn't care about user
-            if metadata_in.extractor_info is not None:
+            if metadata_in.extractor is not None:
                 existing_q["agent.extractor.name"] = metadata_in.extractor_info.name
                 existing_q[
                     "agent.extractor.version"
@@ -136,6 +139,18 @@ async def add_file_metadata(
         new_metadata = await db["metadata"].insert_one(md.to_mongo())
         found = await db["metadata"].find_one({"_id": new_metadata.inserted_id})
         metadata_out = MetadataOut.from_mongo(found)
+
+        # Add an entry to the metadata index
+        doc = {
+            "resource_id": file_id,
+            "resource_type": "file",
+            "created": metadata_out.created.utcnow(),
+            "creator": user.email,
+            "contents": metadata_out.contents,
+            "context_url": metadata_out.context_url,
+            "context": metadata_out.context,
+        }
+        insert_record(es, "metadata", doc, metadata_out.id)
         return metadata_out
 
 
@@ -145,6 +160,7 @@ async def replace_file_metadata(
     file_id: str,
     user=Depends(get_current_user),
     db: MongoClient = Depends(dependencies.get_db),
+    es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
 ):
     """Replace metadata, including agent and context. If only metadata contents should be updated, use PATCH instead.
 
@@ -173,7 +189,7 @@ async def replace_file_metadata(
         query["resource.version"] = target_version
 
         # Filter by MetadataAgent
-        extractor_info = metadata_in.extractor_info
+        extractor_info = metadata_in.extractor
         if extractor_info is not None:
             if (
                 extractor := await db["listeners"].find_one(
@@ -200,6 +216,10 @@ async def replace_file_metadata(
             )
             found = await db["metadata"].find_one({"_id": md["_id"]})
             metadata_out = MetadataOut.from_mongo(found)
+
+            # Update entry to the metadata index
+            doc = {"doc": {"contents": metadata_out["contents"]}}
+            update_record(es, "metadata", doc, metadata_out["_id"])
             return metadata_out
         else:
             raise HTTPException(status_code=404, detail=f"No metadata found to update")
@@ -213,6 +233,7 @@ async def update_file_metadata(
     file_id: str,
     user=Depends(get_current_user),
     db: MongoClient = Depends(dependencies.get_db),
+    es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
 ):
     """Update metadata. Any fields provided in the contents JSON will be added or updated in the metadata. If context or
     agent should be changed, use PUT.
@@ -264,7 +285,7 @@ async def update_file_metadata(
         query["resource.version"] = target_version
 
         # Filter by MetadataAgent
-        extractor_info = metadata_in.extractor_info
+        extractor_info = metadata_in.extractor
         if extractor_info is not None:
             if (
                 extractor := await db["listeners"].find_one(
@@ -286,7 +307,7 @@ async def update_file_metadata(
 
         if (md := await db["metadata"].find_one(query)) is not None:
             # TODO: Refactor this with permissions checks etc.
-            result = await patch_metadata(md, contents, db)
+            result = await patch_metadata(md, contents, db, es)
             return result
         else:
             raise HTTPException(status_code=404, detail=f"No metadata found to update")
@@ -360,6 +381,7 @@ async def delete_file_metadata(
     # version: Optional[int] = Form(None),
     user=Depends(get_current_user),
     db: MongoClient = Depends(dependencies.get_db),
+    es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
 ):
     if (file := await db["files"].find_one({"_id": ObjectId(file_id)})) is not None:
         query = {"resource.resource_id": ObjectId(file_id)}
@@ -399,7 +421,7 @@ async def delete_file_metadata(
 
         # if extractor info is provided
         # Filter by MetadataAgent
-        extractor_info = metadata_in.extractor_info
+        extractor_info = metadata_in.extractor
         if extractor_info is not None:
             if (
                 extractor := await db["listeners"].find_one(
@@ -424,5 +446,7 @@ async def delete_file_metadata(
             raise HTTPException(
                 status_code=404, detail=f"No metadata found with that criteria"
             )
+        # delete from elasticsearch
+        delete_document_by_id(es, "metadata", str(metadata_in.id))
     else:
         raise HTTPException(status_code=404, detail=f"File {file_id} not found")

@@ -130,7 +130,7 @@ export default function PersistentDrawerLeft(props) {
 		// Wrap reactive search base on the most outside component
 		<ReactiveBase
 			url={config.searchEndpoint}
-			app="file,dataset"
+			app="file,dataset,metadata"
 			headers={headers}
 			theme={searchTheme}
 		>
