@@ -8,7 +8,7 @@ from pymongo import MongoClient
 from app.config import settings
 from app.mongo import crete_mongo_indexes
 from app.models.errors import Error
-from app.models.metadata import MongoDBRef
+from app.models.mongomodel import MongoDBRef
 
 logger = logging.getLogger(__name__)
 

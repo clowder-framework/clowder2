@@ -105,6 +105,30 @@ body {
     font-weight: bold;
 }
 
+.DayPickerInput{
+	border-radius: 0;
+	border-bottom: 1px solid #868E96!important;
+}
+
+.DayPickerInput > input{
+	font-weight: bold;
+	background:transparent!important;
+}
+
+.DayPickerInput > input::placeholder { /* Chrome, Firefox, Opera, Safari 10.1+ */
+  color: #424242;
+  opacity: 1; /* Firefox */
+}
+
+.DayPickerInput-OverlayWrapper{
+	font-size:16px;
+}
+
+[class*="-DateContainer-DateContainer"] > div:first-of-type > div{
+	border: none!important;
+	background: transparent!important;
+}
+
 mark{
 	font-weight: bold;
 	background: inherit;

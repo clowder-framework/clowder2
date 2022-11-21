@@ -1,6 +1,12 @@
 import os
+import time
+
+import pytest as pytest
 from fastapi.testclient import TestClient
+import json
+
 from app.config import settings
+from app.search.connect import connect_elasticsearch, search_index
 
 dataset_data = {
     "name": "test dataset",
@@ -119,7 +125,8 @@ def test_dataset_create_metadata_definition(client: TestClient, headers: dict):
     assert response.status_code == 409
 
 
-def test_dataset_patch_metadata_definition(client: TestClient, headers: dict):
+@pytest.mark.asyncio
+async def test_dataset_patch_metadata_definition(client: TestClient, headers: dict):
     # Post the definition itself
     response = client.post(
         f"{settings.API_V2_STR}/metadata/definition",
@@ -146,10 +153,26 @@ def test_dataset_patch_metadata_definition(client: TestClient, headers: dict):
     assert response.status_code == 200
     assert response.json().get("id") is not None
 
-    # Patch metadata that doesn't match definition
+    time.sleep(5)
+    # check for metadata def in elasticsearch
+    es = await connect_elasticsearch()
+    metadata_query = []
+    # header
+    metadata_query.append({"index": "metadata"})
+    # body
+    metadata_query.append({"query": {"match": {"contents.latitude": "24.4"}}})
+    result = search_index(es, "metadata", metadata_query)
+    print(result)
+    assert (
+        result.body["responses"][0]["hits"]["hits"][0]["_source"]["contents"][
+            "latitude"
+        ]
+        == 24.4
+    )
 
 
-def test_dataset_create_metadata_context_url(client: TestClient, headers: dict):
+@pytest.mark.asyncio
+async def test_dataset_create_metadata_context_url(client: TestClient, headers: dict):
     # Create dataset and add metadata to it using context_url
     response = client.post(
         f"{settings.API_V2_STR}/datasets", headers=headers, json=dataset_data
@@ -165,6 +188,25 @@ def test_dataset_create_metadata_context_url(client: TestClient, headers: dict):
     )
     assert response.status_code == 200
     assert response.json().get("id") is not None
+
+    time.sleep(5)
+    # check for metadata def in elasticsearch
+    es = await connect_elasticsearch()
+    metadata_query = []
+    # header
+    metadata_query.append({"index": "metadata"})
+    # body
+    metadata_query.append(
+        {"query": {"match": {"contents.alternateName": "different name"}}}
+    )
+    result = search_index(es, "metadata", metadata_query)
+    print(result)
+    assert (
+        result.body["responses"][0]["hits"]["hits"][0]["_source"]["contents"][
+            "alternateName"
+        ]
+        == "different name"
+    )
 
 
 def test_dataset_delete_metadata(client: TestClient, headers: dict):

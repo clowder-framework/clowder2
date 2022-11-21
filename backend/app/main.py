@@ -152,6 +152,9 @@ async def startup_elasticsearch():
     create_index(
         es, "dataset", settings.elasticsearch_setting, indexSettings.dataset_mappings
     )
+    create_index(
+        es, "metadata", settings.elasticsearch_setting, indexSettings.metadata_mappings
+    )
 
 
 @app.on_event("shutdown")

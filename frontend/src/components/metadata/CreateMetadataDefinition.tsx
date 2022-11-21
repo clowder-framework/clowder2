@@ -131,7 +131,7 @@ export const CreateMetadataDefinition = (): JSX.Element => {
 
 		// Remove the options field if widgetType != enum
 		for (let i = 0; i < formInput.fields.length; i++) {
-			if (formInput.fields[i].widgetType != "enum") {
+            if (formInput.fields[i].config.type != "enum") {
 				delete formInput.fields[i].config.options
 			}
 		}
@@ -155,6 +155,9 @@ export const CreateMetadataDefinition = (): JSX.Element => {
 				delete data.fields[i].config.options
 			} else {
 				let listOfOptions = data.fields[i].config.options.split(",")
+                // Remove any trailing whitespace from each list entry
+                listOfOptions.forEach((value, index, arr) => arr[index] = value.trim())
+
 				data.fields[i].config.options = listOfOptions
 			}
 		}
@@ -336,7 +339,7 @@ export const CreateMetadataDefinition = (): JSX.Element => {
 													onChange={(event) => {
 														handleInputChange(idx, "list", event.target.value);
 													}}
-												/>} label="Contains List"/>
+												/>} label="Allow Many"/>
 												<FormControlLabel control={<Checkbox
 													checked={input.required}
 													onChange={(event) => {
