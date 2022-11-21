@@ -5,9 +5,6 @@ import {useSelector, useDispatch} from "react-redux";
 import {RootState} from "../../types/data";
 import {fetchDatasetMetadata, fetchFileMetadata, fetchMetadataDefinitions} from "../../actions/metadata";
 import {Agent} from "./Agent";
-import { MetadataDateTimePicker } from "./widgets/MetadataDateTimePicker";
-import { MetadataTextField } from "./widgets/MetadataTextField";
-import { MetadataSelect } from "./widgets/MetadataSelect";
 
 type MetadataType = {
 	setMetadata: any,
