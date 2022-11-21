@@ -77,8 +77,13 @@ export const File = (): JSX.Element => {
 		// load file information
 		listFileSummary(fileId);
 		listFileVersions(fileId);
-		listDatasetAbout(datasetId); // get dataset name
-		getFolderPath(folderId); // get folder path
+		// FIXME replace checks for null with logic to load this info from redux instead of the page parameters
+		if (datasetId != "null") {
+			listDatasetAbout(datasetId); // get dataset name
+		}
+		if (folderId != "null") {
+			getFolderPath(folderId); // get folder path
+		}
 	}, []);
 
 
