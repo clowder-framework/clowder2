@@ -141,6 +141,9 @@ export const CreateMetadataDefinition = (): JSX.Element => {
 
 		// Reset form
 		clearForm();
+
+        // TODO: refresh current page
+        window.location.reload();
 	}
 
 	const parseInput = () => {
