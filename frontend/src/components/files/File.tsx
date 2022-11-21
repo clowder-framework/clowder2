@@ -6,7 +6,7 @@ import Video from "../previewers/Video";
 import {downloadResource} from "../../utils/common";
 import Thumbnail from "../previewers/Thumbnail";
 import {PreviewConfiguration, RootState} from "../../types/data";
-import {useLocation, useParams} from "react-router-dom";
+import {useParams, useSearchParams} from "react-router-dom";
 import {useDispatch, useSelector} from "react-redux";
 import {resetFailedReason} from "../../actions/common"
 
@@ -29,6 +29,7 @@ import {ClowderButton} from "../styledComponents/ClowderButton";
 import CloseIcon from "@mui/icons-material/Close";
 import Layout from "../Layout";
 import {fetchDatasetAbout} from "../../actions/dataset";
+import {fetchFolderPath} from "../../actions/folder";
 
 const tab = {
 	fontStyle: "normal",
@@ -42,9 +43,11 @@ export const File = (): JSX.Element => {
 	// path parameter
 	const { fileId } = useParams<{fileId?: string}>();
 
-	// query parameter get dataset id
-	const search = useLocation().search;
-	const datasetId = new URLSearchParams(search).get("dataset");
+	// search parameters
+	let [searchParams] = useSearchParams();
+	const folderId = searchParams.get("folder");
+	const datasetId = searchParams.get("dataset");
+
 	const listDatasetAbout= (datasetId:string|undefined) => dispatch(fetchDatasetAbout(datasetId));
 	const about = useSelector((state: RootState) => state.dataset.about);
 
@@ -56,6 +59,7 @@ export const File = (): JSX.Element => {
 	const createFileMetadata = (fileId: string | undefined, metadata:object) => dispatch(createFileMetadataAction(fileId, metadata));
 	const updateFileMetadata = (fileId: string | undefined, metadata:object) => dispatch(patchFileMetadataAction(fileId,metadata));
 	const deleteFileMetadata = (fileId: string | undefined, metadata:object) => dispatch(deleteFileMetadataAction(fileId, metadata));
+	const getFolderPath = (folderId: string | null) => dispatch(fetchFolderPath(folderId));
 
 	const fileSummary = useSelector((state:RootState) => state.file.fileSummary);
 	const filePreviews = useSelector((state:RootState) => state.file.previews);
@@ -74,6 +78,7 @@ export const File = (): JSX.Element => {
 		listFileSummary(fileId);
 		listFileVersions(fileId);
 		listDatasetAbout(datasetId); // get dataset name
+		getFolderPath(folderId); // get folder path
 	}, []);
 
 
