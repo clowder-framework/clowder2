@@ -3,7 +3,7 @@ import config from "../../app.config";
 import {Button, Grid, Tab, Tabs, Typography} from "@mui/material";
 import {downloadResource, parseDate} from "../../utils/common";
 import {PreviewConfiguration, RootState} from "../../types/data";
-import {useLocation, useParams} from "react-router-dom";
+import {useParams, useSearchParams} from "react-router-dom";
 import {useDispatch, useSelector} from "react-redux";
 import {resetFailedReason} from "../../actions/common"
 
@@ -24,15 +24,19 @@ import Layout from "../Layout";
 import {fetchDatasetAbout} from "../../actions/dataset";
 import {Download} from "@mui/icons-material";
 import {FileDetails} from "./FileDetails";
+import {fetchFolderPath} from "../../actions/folder";
+
 
 export const File = (): JSX.Element => {
 
 	// path parameter
 	const {fileId} = useParams<{ fileId?: string }>();
 
-	// query parameter get dataset id
-	const search = useLocation().search;
-	const datasetId = new URLSearchParams(search).get("dataset");
+	// search parameters
+	let [searchParams] = useSearchParams();
+	const folderId = searchParams.get("folder");
+	const datasetId = searchParams.get("dataset");
+
 	const listDatasetAbout = (datasetId: string | undefined) => dispatch(fetchDatasetAbout(datasetId));
 	const about = useSelector((state: RootState) => state.dataset.about);
 
@@ -45,6 +49,7 @@ export const File = (): JSX.Element => {
 	const updateFileMetadata = (fileId: string | undefined, metadata: object) => dispatch(patchFileMetadataAction(fileId, metadata));
 	const deleteFileMetadata = (fileId: string | undefined, metadata: object) => dispatch(deleteFileMetadataAction(fileId, metadata));
 	const downloadFile = (fileId: string | undefined, filename: string | undefined) => dispatch(fileDownloaded(fileId, filename))
+	const getFolderPath = (folderId: string | null) => dispatch(fetchFolderPath(folderId));
 
 	const fileSummary = useSelector((state: RootState) => state.file.fileSummary);
 	const filePreviews = useSelector((state: RootState) => state.file.previews);
@@ -62,7 +67,13 @@ export const File = (): JSX.Element => {
 		// load file information
 		listFileSummary(fileId);
 		listFileVersions(fileId);
-		listDatasetAbout(datasetId); // get dataset name
+		// FIXME replace checks for null with logic to load this info from redux instead of the page parameters
+		if (datasetId != "null" && datasetId != "undefined") {
+			listDatasetAbout(datasetId); // get dataset name
+		}
+		if (folderId != "null" && folderId != "undefined") {
+			getFolderPath(folderId); // get folder path
+		}
 	}, []);
 
 
@@ -165,7 +176,7 @@ export const File = (): JSX.Element => {
 	];
 
 	// add folder path to breadcrumbs
-	const folderPath = useSelector((state: RootState) => state.dataset.folderPath);
+	const folderPath = useSelector((state: RootState) => state.folder.folderPath);
 	if (folderPath != null) {
 		for (const folderBread of folderPath) {
 			paths.push({

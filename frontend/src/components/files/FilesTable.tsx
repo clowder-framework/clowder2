@@ -17,6 +17,7 @@ import FolderMenu from "./FolderMenu";
 
 type FilesTableProps = {
 	datasetId: string | undefined,
+	folderId: string | null
 }
 
 const iconStyle = {
@@ -30,9 +31,11 @@ export default function FilesTable(props: FilesTableProps) {
 	const foldersInDataset = useSelector((state: RootState) => state.folder.folders);
 	// use history hook to redirect/navigate between routes
 	const history = useNavigate();
+	// get existing folder
+	const parentFolderId = props.folderId;
 	const selectFile = (selectedFileId: string | undefined) => {
-		// Redirect to file route with file Id and dataset id
-		history(`/files/${selectedFileId}?dataset=${props.datasetId}`);
+		// Redirect to file route with file Id and dataset id and folderId
+		history(`/files/${selectedFileId}?dataset=${props.datasetId}&folder=${parentFolderId}`);
 	};
 	const selectFolder = (selectedFolderId: string | undefined) => {
 		// Redirect to file route with file Id and dataset id

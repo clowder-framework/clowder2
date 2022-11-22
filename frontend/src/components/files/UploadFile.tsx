@@ -26,6 +26,7 @@ export const UploadFile:React.FC<UploadFileProps> = (props: UploadFileProps) => 
 	const createFileMetadata = (fileId: string|undefined, metadata:MetadataIn) => dispatch(postFileMetadata(fileId, metadata));
 	const uploadFile = (selectedDatasetId: string|undefined, selectedFolderId: string|undefined, formData: FormData) => dispatch(fileCreated(selectedDatasetId, selectedFolderId, formData));
 	const newFile = useSelector((state:RootState) => state.dataset.newFile);
+	const folderPath = useSelector((state: RootState) => state.folder.folderPath);
 
 	useEffect(() => {
 		getMetadatDefinitions(null, 0, 100);
@@ -83,7 +84,7 @@ export const UploadFile:React.FC<UploadFileProps> = (props: UploadFileProps) => 
 			setFileRequestForm({});
 
 			// Redirect to file route with file Id and dataset id
-			history(`/files/${file.id}?dataset=${selectedDatasetId}&name=${selectedDatasetName}`);
+			history(`/files/${file.id}?dataset=${selectedDatasetId}&folder=${folderId}`);
 		}
 
 	},[newFile]);
