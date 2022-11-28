@@ -28,7 +28,9 @@ images can also be build with `docker compose build`.
 ## Developing
 
 When developing, the required services can be run using [Docker](https://www.docker.com/). You can then run the backend 
-and frontend standalone from the command line or in your favorite IDE (to make debugging easier).
+and frontend standalone from the command line or in your favorite IDE (to make debugging easier). We use Pycharm and have
+made our run configurations available in the `.run` folder. Pycharm should automatically pick it up, but you will have
+to change the path to the Python virtual environment to point to your path on your host.
 
 ### Required Services
 
@@ -42,14 +44,19 @@ and frontend standalone from the command line or in your favorite IDE (to make d
 After starting up the required services, setup and run the backend. 
 
 The backend is developed using [Python](https://www.python.org/), [FastAPI](https://fastapi.tiangolo.com/), [Motor](https://motor.readthedocs.io/en/stable/).
+We recommend using Python v3.9 and [pipenv](https://github.com/pypa/pipenv) for dependency management.
+
+You can run the backend using the Pycharm run configuration provided under `.run` or from the command line using the 
+following steps.
 
 1. Switch to backend directory `cd backend`.
-2. Install dependencies using `pipenv install --dev`. See [pipenv](https://github.com/pypa/pipenv).
+2. Install dependencies using `pipenv install --dev`.
 3. Run app from command line (if you set it up in PyCharm you can use its debug functions):
     ```pipenv run uvicorn app.main:app --reload```
 4. API docs are available at `http://localhost:8000/docs`. Default API is deployed at `http://localhost:8000/api/v2`.
 5. Create a user using `POST /api/v2/users` and getting a JWT token by using `POST /api/v2/login`. Place the token in
    header of requests that require authentications using the `Authorization: Bearer <your token>` HTTP header.
+    * You can also run the frontend below and use the Login link available there. 
 6. Manually run tests before pushing with `pipenv run pytest -v` or right-clicking on `test` folder and clicking `Run` in PyCharm.
 7. Linting is done using [Black]((https://black.readthedocs.io/en/stable/)). You can set up PyCharm to automatically
 run it when you save a file using these [instructions](https://black.readthedocs.io/en/stable/integrations/editors.html).
@@ -64,7 +71,10 @@ To run the frontend, both required services and backend must be running successf
 
 The frontend is developed using [TypeScript](https://www.typescriptlang.org/), [React](https://reactjs.org/),
 [Material UI](https://mui.com/), [Redux](https://redux.js.org/), [webpack](https://webpack.js.org/),
-[Node.js](https://nodejs.org).
+[Node.js](https://nodejs.org). We recommend using Node v16.15 LTS.
+
+You can run the backend using the Pycharm run configuration provided under `.run` or from the command line using the 
+following steps.
 
 1. Switch to frontend directory `cd ../frontend`.
 2. Install dependencies:
