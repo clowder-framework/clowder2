@@ -116,10 +116,10 @@ export function fileDeleted(fileId){
 }
 
 export const CREATE_FILE = "CREATE_FILE";
-export function fileCreated(selectedDatasetId, forderId, formData){
+export function fileCreated(selectedDatasetId, folderId, formData){
 	return (dispatch) => {
 		formData["file"] = dataURItoFile(formData["file"]);
-		return V2.DatasetsService.saveFileApiV2DatasetsDatasetIdFilesPost(selectedDatasetId, forderId, formData)
+		return V2.DatasetsService.saveFileApiV2DatasetsDatasetIdFilesPost(selectedDatasetId, formData, folderId)
 			.then(file => {
 				dispatch({
 					type: CREATE_FILE,
@@ -128,7 +128,7 @@ export function fileCreated(selectedDatasetId, forderId, formData){
 				});
 			})
 			.catch(reason => {
-				dispatch(handleErrors(reason, fileCreated(selectedDatasetId, forderId, formData)));
+				dispatch(handleErrors(reason, fileCreated(selectedDatasetId, formData, folderId)));
 			});
 	};
 }

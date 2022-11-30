@@ -1,0 +1,8 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Clowder2 Dev" type="CompoundRunConfigurationType">
+    <toRun name="Docker Dev" type="docker-deploy" />
+    <toRun name="start:dev" type="js.build_tools.npm" />
+    <toRun name="uvicorn" type="PythonConfigurationType" />
+    <method v="2" />
+  </configuration>
+</component>

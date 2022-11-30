@@ -9,27 +9,18 @@ import {resetFailedReason} from "../actions/common";
 import {downloadThumbnail} from "../utils/thumbnail";
 
 import {a11yProps, TabPanel} from "./tabs/TabComponent";
-import {MainBreadcrumbs} from "./navigation/BreadCrumb";
 import {ActionModal} from "./dialog/ActionModal";
 import DatasetCard from "./datasets/DatasetCard";
 import ListenerCard from "./listeners/ListenerCard";
 import config from "../app.config";
 import {ArrowBack, ArrowForward} from "@material-ui/icons";
 import Layout from "./Layout";
-
-const tab = {
-	fontStyle: "normal",
-	fontWeight: "normal",
-	fontSize: "16px",
-	textTransform: "capitalize",
-};
+import DatasetIcon from "@mui/icons-material/Dataset";
 
 export const Explore = (): JSX.Element => {
 
-
 	// Redux connect equivalent
 	const dispatch = useDispatch();
-	const deleteDataset = (datasetId: string) => dispatch(datasetDeleted(datasetId));
 	const listDatasets = (skip: number | undefined, limit: number | undefined, mine: boolean | undefined) => dispatch(fetchDatasets(skip, limit, mine));
 	const dismissError = () => dispatch(resetFailedReason());
 	const datasets = useSelector((state: RootState) => state.dataset.datasets);
@@ -54,7 +45,6 @@ export const Explore = (): JSX.Element => {
 	useEffect(() => {
 		listDatasets(0, limit, mine);
 		listListeners(0, limit);
-		// listExtractors();
 	}, []);
 
 	// Error msg dialog

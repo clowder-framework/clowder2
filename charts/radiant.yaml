@@ -1,0 +1,47 @@
+# helm upgrade --install --namespace clowder2 --create-namespace --values radiant.yaml clowder2 clowder2
+
+hostname: clowder2.software-dev.ncsa.cloud
+
+minio:
+  auth:
+    rootUser: clowder
+    rootPassword: ilikecats
+  persistence:
+    storageClass: nfs-taiga
+    size: 20Gi
+  ingress:
+    hostname: minio.clowder2.software-dev.ncsa.cloud
+  apiIngress:
+    hostname: minio.clowder2.software-dev.ncsa.cloud
+
+rabbitmq:
+  ingress:
+    hostname: rabbitmq.clowder2.software-dev.ncsa.cloud
+  persistence:
+    storageClass: csi-cinder-sc-retain
+    size: 8Gi
+
+mongodb:
+  persistence:
+    storageClass: csi-cinder-sc-retain
+    size: 8Gi
+
+elasticsearch:
+  master:
+    persistence:
+      storageClass: csi-cinder-sc-retain
+      size: 8Gi
+  data:
+    persistence:
+      storageClass: csi-cinder-sc-retain
+      size: 8Gi
+
+keycloak:
+  ingress:
+    hostname: clowder2.software-dev.ncsa.cloud
+  postgresql:
+    primary:
+      persistence:
+        storageClass: csi-cinder-sc-retain
+        size: 8Gi
+

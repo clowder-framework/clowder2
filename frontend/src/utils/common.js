@@ -49,7 +49,7 @@ export async function downloadResource(url) {
 export function dataURItoFile(dataURI) {
 	const metadata = dataURI.split(",")[0];
 	const mime = metadata.match(/:(.*?);/)[1];
-	const filename = metadata.match(/name=(.*?);/)[1];
+	const filename = decodeURIComponent(metadata.match(/name=(.*?);/)[1]);
 
 	const binary = atob(dataURI.split(",")[1]);
 	const array = [];
@@ -61,7 +61,8 @@ export function dataURItoFile(dataURI) {
 }
 
 export function parseDate(dateString) {
-	const options = { year: "numeric", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" };
+	const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+	const options = { year: "numeric", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" , timeZone: timeZone };
 	const mydate = new Date(dateString);
 	return mydate.toLocaleString("en-US", options);
 }

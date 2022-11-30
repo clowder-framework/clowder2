@@ -1,6 +1,6 @@
 import React, {useEffect} from "react";
 import {Box, Typography} from "@mui/material";
-import metadataConfig from "../../metadata.config";
+import {metadataConfig} from "../../metadata.config";
 import {useSelector, useDispatch} from "react-redux";
 import {RootState} from "../../types/data";
 import {fetchDatasetMetadata, fetchFileMetadata, fetchMetadataDefinitions} from "../../actions/metadata";
@@ -88,16 +88,16 @@ export const EditMetadata = (props: MetadataType) => {
 							);
 						}
 						else{
-							return metadataList.map((metadata) => {
+							return metadataList.map((metadata, idx) => {
 								if (metadataDef.name === metadata.definition) {
 									return (
-										<Box className="inputGroup">
+										<Box className="inputGroup" key={idx}>
 											<Typography variant="h6">{metadata.definition}</Typography>
 											<Typography variant="subtitle2">{metadata.description}</Typography>
 
 											{
 												// construct metadata using its definition
-												metadataDef.fields.map(field => {
+												metadataDef.fields.map((field, idxx) => {
 													return React.cloneElement(
 														metadataConfig[field.widgetType ?? "NA"] ?? metadataConfig["NA"],
 														{
@@ -109,6 +109,7 @@ export const EditMetadata = (props: MetadataType) => {
 															resourceId: resourceId,
 															contents: metadata.contents ?? null,
 															metadataId: metadata.id ?? null,
+															key:idxx
 														}
 													)
 												})

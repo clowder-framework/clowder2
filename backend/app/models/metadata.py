@@ -4,13 +4,16 @@ from datetime import datetime
 from typing import Optional, List, Union
 from enum import Enum
 
+from elasticsearch import Elasticsearch
 from bson import ObjectId
 from bson.dbref import DBRef
+from fastapi.param_functions import Depends
 from pydantic import Field, validator, BaseModel, create_model
 from fastapi import HTTPException
 from pymongo import MongoClient
 
-from app.models.mongomodel import MongoModel
+from app import dependencies
+from app.models.mongomodel import MongoModel, MongoDBRef
 from app.models.pyobjectid import PyObjectId
 from app.models.users import UserOut
 from app.models.listeners import (
@@ -20,12 +23,7 @@ from app.models.listeners import (
     ExtractorInfo,
 
 )
-
-
-class MongoDBRef(BaseModel):
-    collection: str
-    resource_id: PyObjectId
-    version: Optional[int]
+from app.search.connect import update_record
 
 
 # List of valid types that can be specified for metadata fields
@@ -302,7 +300,9 @@ def deep_update(orig: dict, new: dict):
     return orig
 
 
-async def patch_metadata(metadata: dict, new_entries: dict, db: MongoClient):
+async def patch_metadata(
+    metadata: dict, new_entries: dict, db: MongoClient, es: Elasticsearch
+):
     """Convenience function for updating original metadata contents with new entries."""
     try:
         # TODO: For list-type definitions, should we append to list instead?
@@ -318,6 +318,9 @@ async def patch_metadata(metadata: dict, new_entries: dict, db: MongoClient):
         db["metadata"].replace_one(
             {"_id": metadata["_id"]}, MetadataDB(**metadata).to_mongo()
         )
+        # Update entry to the metadata index
+        doc = {"doc": {"contents": metadata["contents"]}}
+        update_record(es, "metadata", doc, metadata["_id"])
     except Exception as e:
         raise e
     return MetadataOut.from_mongo(metadata)
