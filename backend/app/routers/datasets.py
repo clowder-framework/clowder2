@@ -367,12 +367,9 @@ async def patch_dataset(
         ds = dict(dataset_info) if dataset_info is not None else {}
         user = await db["users"].find_one({"email": user_id})
         dataset_original_author = dataset["author"]
-        dataset_original_author_email = dataset_original_author["email"]
         current_user = UserOut(**user)
-        current_user_email = current_user.email
         if dataset_original_author["email"] != current_user.email:
             print("No permission to edit this dataset")
-            # raise HTTPException(status_code=401, detail='Not authorized to edit this dataset')
             return DatasetOut.from_mongo(dataset)
         ds["author"] = UserOut(**user)
         ds["modified"] = datetime.datetime.utcnow()
