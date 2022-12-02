@@ -7,6 +7,7 @@ import {useNavigate} from "react-router-dom";
 import {useDispatch} from "react-redux";
 import EditNameModal from "./EditNameModal";
 import EditDescriptionModal from "./EditDescriptionModal";
+import EditStatusModal from "./EditStatusModal";
 import {MoreHoriz} from "@material-ui/icons";
 import DeleteIcon from "@mui/icons-material/Delete";
 import {DriveFileRenameOutline} from "@mui/icons-material";
@@ -28,6 +29,7 @@ export const OtherMenu = (props: ActionsMenuProps): JSX.Element => {
 	// state
 	const [rename, setRename] = React.useState<boolean>(false);
 	const [description, setDescription] = React.useState<boolean>(false);
+	const [status, setStatus] = React.useState<boolean>(false);
 	const [deleteDatasetConfirmOpen, setDeleteDatasetConfirmOpen] = useState(false);
 
 	// delete dataset
@@ -55,10 +57,14 @@ export const OtherMenu = (props: ActionsMenuProps): JSX.Element => {
 	const handleSetDescription = () => {
 		setDescription(false);
 	}
+	const handleSetStatus = () => {
+		setStatus(false);
+	}
 	return (
 		<Box>
 			<EditNameModal datasetId={datasetId} handleClose={handleSetRename} open={rename}/>
 			<EditDescriptionModal datasetId={datasetId} handleClose={handleSetDescription} open={description}/>
+			<EditStatusModal datasetId={datasetId} handleClose={handleSetStatus} open={status}/>
 			<ActionModal actionOpen={deleteDatasetConfirmOpen} actionTitle="Are you sure?"
 						 actionText="Do you really want to delete this dataset? This process cannot be undone."
 						 actionBtnName="Delete" handleActionBtnClick={deleteSelectedDataset}
@@ -94,6 +100,15 @@ export const OtherMenu = (props: ActionsMenuProps): JSX.Element => {
 					<DriveFileRenameOutline fontSize="small"/>
 				</ListItemIcon>
 					<ListItemText>Update Description</ListItemText></MenuItem>
+				<MenuItem
+					onClick={() => {
+						handleOptionClose();
+						setStatus(true);
+					}
+					}> <ListItemIcon>
+					<DriveFileRenameOutline fontSize="small"/>
+				</ListItemIcon>
+					<ListItemText>Change Status</ListItemText></MenuItem>
 				<MenuItem
 					onClick={() => {
 						handleOptionClose();
