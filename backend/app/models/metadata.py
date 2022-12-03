@@ -21,7 +21,6 @@ from app.models.listeners import (
     LegacyEventListenerIn,
     EventListenerOut,
     ExtractorInfo,
-
 )
 from app.search.connect import update_record
 
