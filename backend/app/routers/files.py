@@ -15,7 +15,6 @@ from fastapi import (
     Form,
     UploadFile,
     Request,
-
 )
 from fastapi import APIRouter, HTTPException, Depends, Security
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer

@@ -66,8 +66,10 @@ class EventListenerDB(EventListenerBase, MongoModel):
 class EventListenerOut(EventListenerDB):
     pass
 
+
 class EventListenerSubmit(BaseModel):
     name: str = ""
+
 
 class FeedListener(BaseModel):
     """This is a shorthand POST class for associating an existing EventListener with a Feed. The automatic flag determines
@@ -90,6 +92,7 @@ class EventListenerMessage(BaseModel):
     id: str
     datasetId: str
     secretKey: str
+
 
 class EventListenerDatasetMessage(BaseModel):
     """This describes contents of JSON object that is submitted to RabbitMQ for the Event Listeners/Extractors to consume."""

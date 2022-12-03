@@ -833,7 +833,13 @@ async def get_dataset_extract(
             current_routing_key = "extractors." + current_queue
 
             submit_dataset_message(
-                dataset_out, current_queue, current_routing_key, parameters, access_token, db, rabbitmq_client
+                dataset_out,
+                current_queue,
+                current_routing_key,
+                parameters,
+                access_token,
+                db,
+                rabbitmq_client,
             )
 
             return {"message": "testing", "dataset_id": dataset_id}
