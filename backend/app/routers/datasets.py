@@ -245,7 +245,7 @@ async def get_datasets(
             .to_list(length=limit)
         ):
             if doc["author"]["email"] != user_id:
-                if doc["status"] == 'PUBLIC':
+                if doc["status"] == "PUBLIC":
                     datasets.append(DatasetOut.from_mongo(doc))
             else:
                 datasets.append(DatasetOut.from_mongo(doc))
