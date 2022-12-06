@@ -29,9 +29,10 @@ import {fetchFolderPath} from "../../actions/folder";
 
 export const File = (): JSX.Element => {
 
+	const history = useNavigate();
 	// path parameter
 	const {fileId} = useParams<{ fileId?: string }>();
-	const history = useNavigate();
+
 
 	// search parameters
 	let [searchParams] = useSearchParams();
