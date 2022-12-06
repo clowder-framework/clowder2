@@ -40,6 +40,7 @@ class EventListenerBase(BaseModel):
     version: str = "1.0"
     description: str = ""
 
+
 class EventListenerIn(EventListenerBase):
     """On submission, minimum info for a listener is name, version and description. Clowder will use name and version to locate queue."""
 
