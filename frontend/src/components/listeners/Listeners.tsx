@@ -67,6 +67,7 @@ export const Listeners = (): JSX.Element => {
 
 	// component did mount
 	useEffect(() => {
+		console.log('listing listeners')
 		listListeners(0, limit);
 	}, []);
 
@@ -154,6 +155,7 @@ export const Listeners = (): JSX.Element => {
 									{
 										listeners !== undefined?
 											listeners.map((listener) => {
+												console.log('we got one');
 												return (
 													<Grid item key={listener.id} xs={12} sm={6} md={4} lg={3}>
 														<ListenerCard id={listener.id} name={listener.name}

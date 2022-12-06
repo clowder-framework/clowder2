@@ -29,6 +29,7 @@ export const File = (): JSX.Element => {
 
 	// path parameter
 	const {fileId} = useParams<{ fileId?: string }>();
+	const history = useNavigate();
 
 	// query parameter get dataset id
 	const search = useLocation().search;
@@ -202,6 +203,14 @@ export const File = (): JSX.Element => {
 								downloadFile(fileId, fileSummary.name);
 							}} endIcon={<Download/>}>
 						Download
+					</Button>
+				</Grid>
+				<Grid item xs={2}>
+					<Button variant="contained"
+							onClick={() => {
+								submitToListener();
+							}} endIcon={<Download/>}>
+						Extract
 					</Button>
 				</Grid>
 			</Grid>

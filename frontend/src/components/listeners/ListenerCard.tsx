@@ -21,10 +21,12 @@ type ListenerCardProps = {
 }
 
 export default function ListenerCard(props: ListenerCardProps) {
+	console.log("Listener card");
 	const {id, name, description} = props;
 
 	let [searchParams, setSearchParams] = useSearchParams();
 	const fileId = searchParams.get("fileId");
+	console.log('the file id is', fileId);
 	const datasetName = searchParams.get("datasetName");
 	const fileName = searchParams.get("fileName");
 	const datasetId = searchParams.get("datasetId");
@@ -32,7 +34,7 @@ export default function ListenerCard(props: ListenerCardProps) {
 	const dispatch = useDispatch();
 	const submitFileExtraction = (fileId: string|undefined, extractor: string| undefined) => dispatch(submitFileExtractionAction(fileId,extractor));
 	const submitDatasetExtraction = (datasetId: string| undefined, extractor: string| undefined) => dispatch(submitDatasetExtractionAction(datasetId, extractor));
-	// const downloadDataset = (datasetId: string | undefined, filename: string | undefined) => dispatch(datasetDownloaded(datasetId, filename))
+	const downloadDataset = (datasetId: string | undefined, filename: string | undefined) => dispatch(datasetDownloaded(datasetId, filename))
 	const submitExtraction = (datasetId: string | undefined, datasetName: string| undefined, fileId: string | undefined, fileName: string | undefined, extractor: string | undefined) => {
 		console.log('submitting extraction');
 		console.log(datasetId, datasetName, fileId, fileName);
@@ -56,7 +58,7 @@ export default function ListenerCard(props: ListenerCardProps) {
 
 	return (
 		<Card key={id} sx={{height: "100%", display: "flex", flexDirection: "column"}}>
-			<CardActionArea component={Link} to={`/datasets/${id}`} sx={{height: "100%"}}>
+			<CardActionArea component={Link} to={`/listeners/${id}`} sx={{height: "100%"}}>
 				<CardContent>
 					<Typography variant="h5" component="div">
 						{name}
@@ -84,16 +86,16 @@ export default function ListenerCard(props: ListenerCardProps) {
 						<Download/>
 					</IconButton>
 				</Tooltip>
-				<Tooltip title="Favorite">
-					<IconButton color="primary" aria-label="favorite"  sx={{mr: 3}} disabled>
-						<Favorite/>
-					</IconButton>
-				</Tooltip>
-				<Tooltip title="Share">
-					<IconButton color="primary" aria-label="share"  sx={{mr: 3}} disabled>
-						<Share/>
-					</IconButton>
-				</Tooltip>
+				{/*<Tooltip title="Favorite">*/}
+				{/*	<IconButton color="primary" aria-label="favorite"  sx={{mr: 3}} disabled>*/}
+				{/*		<Favorite/>*/}
+				{/*	</IconButton>*/}
+				{/*</Tooltip>*/}
+				{/*<Tooltip title="Share">*/}
+				{/*	<IconButton color="primary" aria-label="share"  sx={{mr: 3}} disabled>*/}
+				{/*		<Share/>*/}
+				{/*	</IconButton>*/}
+				{/*</Tooltip>*/}
 			</CardActions>
 		</Card>
 	);

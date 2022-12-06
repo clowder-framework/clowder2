@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from "react";
 import {Box, Button, ButtonGroup, Grid, Tab, Tabs} from "@mui/material";
 
-import {Dataset, RootState} from "../types/data";
+import {Dataset, RootState, Listener} from "../types/data";
 import {useDispatch, useSelector} from "react-redux";
 import {fetchDatasets} from "../actions/dataset";
 import {fetchListeners} from "../actions/listeners";
@@ -98,10 +98,9 @@ export const Explore = (): JSX.Element => {
 	useEffect(() => {
 		(async () => {
 			if (listeners !== undefined && listeners.length > 0) {
-
 				// TODO change the type any to something else
 				await Promise.all(listeners.map(async (listener) => {
-					// add thumbnails
+					//
 				}));
 			}
 		})();
@@ -190,8 +189,8 @@ export const Explore = (): JSX.Element => {
 							<TabPanel value={selectedTabIndex} index={4}>
 								<Grid container spacing={2}>
 									{
-										listeners !== undefined  ?
-											listeners.map((listener : Listener) => {
+										listeners !== undefined ?
+											listeners.map((listener) =>  {
 												return (
 													<Grid item key={listener.id} xs={12} sm={6} md={4} lg={3}>
 														<ListenerCard id={listener.id} name={listener.name}
