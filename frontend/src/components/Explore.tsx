@@ -1,9 +1,9 @@
 import React, {useEffect, useState} from "react";
 import {Box, Button, ButtonGroup, Grid, Tab, Tabs} from "@mui/material";
 
-import {Dataset, Listener, RootState} from "../types/data";
+import {Dataset, RootState} from "../types/data";
 import {useDispatch, useSelector} from "react-redux";
-import {datasetDeleted, fetchDatasets,} from "../actions/dataset";
+import {fetchDatasets} from "../actions/dataset";
 import {fetchListeners} from "../actions/listeners";
 import {resetFailedReason} from "../actions/common";
 import {downloadThumbnail} from "../utils/thumbnail";
@@ -15,9 +15,16 @@ import ListenerCard from "./listeners/ListenerCard";
 import config from "../app.config";
 import {ArrowBack, ArrowForward} from "@material-ui/icons";
 import Layout from "./Layout";
-import DatasetIcon from "@mui/icons-material/Dataset";
+
+const tab = {
+	fontStyle: "normal",
+	fontWeight: "normal",
+	fontSize: "16px",
+	textTransform: "capitalize",
+};
 
 export const Explore = (): JSX.Element => {
+
 
 	// Redux connect equivalent
 	const dispatch = useDispatch();
@@ -132,14 +139,6 @@ export const Explore = (): JSX.Element => {
 		}
 	}, [skip]);
 
-	// for breadcrumb
-	const paths = [
-		{
-			"name": "Explore",
-			"url": "/",
-		}
-	];
-
 	return (
 		<Layout>
 			<div className="outer-container">
@@ -147,11 +146,6 @@ export const Explore = (): JSX.Element => {
 				<ActionModal actionOpen={errorOpen} actionTitle="Something went wrong..." actionText={reason}
 							 actionBtnName="Report" handleActionBtnClick={handleErrorReport}
 							 handleActionCancel={handleErrorCancel}/>
-				<Box m={1} display="flex" justifyContent="space-between" alignItems="flex-end">
-					<MainBreadcrumbs paths={paths}/>
-					{/*<Button href="/create-dataset" variant="contained" sx={{display: "flex", alignItems: "center"}}>New*/}
-					{/*	Dataset</Button>*/}
-				</Box>
 				<div className="inner-container">
 					<Grid container spacing={4}>
 						<Grid item xs>
