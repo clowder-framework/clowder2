@@ -41,7 +41,7 @@ export const Listeners = (): JSX.Element => {
 	}
 	console.log("we log here", fileId, fileName);
 	if (fileId !== null && fileName!== null){
-		console.log("We have a file", fileId, filename);
+		console.log("We have a file", fileId, fileName);
 	}
 
 
