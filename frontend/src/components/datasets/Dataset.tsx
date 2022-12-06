@@ -135,11 +135,6 @@ export const Dataset = (): JSX.Element => {
 		setEnableAddMetadata(false);
 	};
 
-	const submitToListener = ()=> {
-		const currentDatasetName = about.name;
-		history(`/listeners?datasetId=${datasetId}&datasetName=${currentDatasetName}`);
-	}
-
 	// for breadcrumb
 	const paths = [
 		{
