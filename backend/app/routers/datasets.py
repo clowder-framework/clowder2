@@ -368,32 +368,32 @@ async def add_users(
         if 'viewers' in req_info:
             new_viewers = req_info["viewers"]
             for new_viewer in new_viewers:
-                user = await db["users"].find_one({"_id": ObjectId(new_viewer)})
-                if user is not None:
+                current_user = await db["users"].find_one({"_id": ObjectId(new_viewer)})
+                if current_user is not None:
                     dataset_viewers = dataset["viewers"]
                     dataset_viewers.append(new_viewer)
                     dataset["viewers"]= dataset_viewers
         if 'uploaders' in req_info:
             new_uploaders = req_info["uploaders"]
             for new_uploader in new_uploaders:
-                user = await db["users"].find_one({"_id": ObjectId(new_uploader)})
-                if user is not None:
+                current_user = await db["users"].find_one({"_id": ObjectId(new_uploader)})
+                if current_user is not None:
                     dataset_uploaders = dataset["uploaders"]
                     dataset_uploaders.append(new_uploader)
                     dataset["uploaders"] = dataset_uploaders
         if 'editors' in req_info:
             new_editors = req_info["editors"]
             for new_editor in new_editors:
-                user = await db["users"].find_one({"_id": ObjectId(new_editor)})
-                if user is not None:
+                current_user = await db["users"].find_one({"_id": ObjectId(new_editor)})
+                if current_user is not None:
                     dataset_editors = dataset["editors"]
                     dataset_editors.append(new_editor)
                     dataset["editors"] = dataset_editors
         if 'owners' in req_info:
             new_owners = req_info["owners"]
             for new_owner in new_owners:
-                user = await db["users"].find_one({"_id": ObjectId(new_owner)})
-                if user is not None:
+                current_user = await db["users"].find_one({"_id": ObjectId(new_owner)})
+                if current_user is not None:
                     dataset_owners = dataset["owners"]
                     dataset_owners.append(new_owner)
                     dataset["owners"] = dataset_owners
@@ -445,39 +445,39 @@ async def remove_users(
         if 'viewers' in req_info:
             new_viewers = req_info["viewers"]
             for new_viewer in new_viewers:
-                user = await db["users"].find_one({"_id": ObjectId(new_viewer)})
-                if user is not None:
+                current_user = await db["users"].find_one({"_id": ObjectId(new_viewer)})
+                if current_user is not None:
                     dataset_viewers = dataset["viewers"]
-                    if user in dataset_viewers:
+                    if new_viewer in dataset_viewers:
                         dataset_viewers.remove(user)
                         dataset["viewers"] = dataset_viewers
         if 'uploaders' in req_info:
             new_uploaders = req_info["uploaders"]
             for new_uploader in new_uploaders:
-                user = await db["users"].find_one({"_id": ObjectId(new_uploader)})
-                if user is not None:
+                current_user = await db["users"].find_one({"_id": ObjectId(new_viewer)})
+                if current_user is not None:
                     dataset_uploaders = dataset["uploaders"]
-                    if user in dataset_uploaders:
+                    if new_uploader in dataset_uploaders:
                         dataset_uploaders.remove(new_uploader)
                     dataset["uploaders"] = dataset_uploaders
         if 'editors' in req_info:
             new_editors = req_info["editors"]
             for new_editor in new_editors:
-                user = await db["users"].find_one({"_id": ObjectId(new_editor)})
-                if user is not None:
+                current_user = await db["users"].find_one({"_id": ObjectId(new_editor)})
+                if current_user is not None:
                     dataset_editors = dataset["editors"]
-                    if user in dataset_editors:
+                    if new_editor in dataset_editors:
                         dataset_editors.remove(new_editor)
                     dataset["editors"] = dataset_editors
         if 'owners' in req_info:
             new_owners = req_info["owners"]
             for new_owner in new_owners:
-                user = await db["users"].find_one({"_id": ObjectId(new_owner)})
-                if user is not None:
+                current_user = await db["users"].find_one({"_id": ObjectId(new_owner)})
+                if current_user is not None:
                     dataset_owners = dataset["owners"]
-                if user in dataset_owners:
-                    dataset_owners.remove(new_owner)
-                dataset["owners"] = dataset_owners
+                    if new_owner in dataset_owners:
+                        dataset_owners.remove(new_owner)
+                    dataset["owners"] = dataset_owners
         dataset["modified"] = datetime.datetime.utcnow()
         try:
             await db["datasets"].replace_one(
