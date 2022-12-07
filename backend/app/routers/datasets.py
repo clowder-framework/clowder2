@@ -402,16 +402,17 @@ async def edit_user(
             await db["datasets"].replace_one(
                 {"_id": ObjectId(dataset_id)}, DatasetDB(**dataset).to_mongo()
             )
+            # TODO this throws errors, figure out
             # Update entry to the dataset index
-            doc = {
-                "doc": {
-                    "name": dataset["name"],
-                    "description": dataset["description"],
-                    "author": UserOut(**user).email,
-                    "modified": dataset["modified"],
-                }
-            }
-            update_record(es, "dataset", doc, dataset_id)
+            # doc = {
+            #     "doc": {
+            #         "name": dataset["name"],
+            #         "description": dataset["description"],
+            #         "author": UserOut(**user).email,
+            #         "modified": dataset["modified"],
+            #     }
+            # }
+            # update_record(es, "dataset", doc, dataset_id)
         except Exception as e:
             raise HTTPException(status_code=500, detail=e.args[0])
         return DatasetOut.from_mongo(dataset)
