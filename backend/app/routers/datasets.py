@@ -199,6 +199,10 @@ async def save_dataset(
         return
 
     dataset_db = DatasetDB(**dataset_in.dict(), author=user)
+    user_id = str(user.id)
+    dataset_owners = dataset_db.owners
+    dataset_owners.append(user_id)
+    dataset_db.owners = dataset_owners
     new_dataset = await db["datasets"].insert_one(dataset_db.to_mongo())
     found = await db["datasets"].find_one({"_id": new_dataset.inserted_id})
     dataset_out = DatasetOut.from_mongo(found)
@@ -340,6 +344,81 @@ async def edit_dataset(
         return DatasetOut.from_mongo(dataset)
     raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
 
+@router.post("/{dataset_id}/edit_user", response_model=DatasetOut)
+async def edit_user(
+    dataset_id: str,
+    info: Request,
+    user_id=Depends(get_user),
+    db: MongoClient = Depends(dependencies.get_db),
+    es=Depends(dependencies.get_elasticsearchclient),
+):
+    es = await connect_elasticsearch()
+    if db is None and es is not None:
+        raise HTTPException(status_code=503, detail="Service not available")
+        return
+
+    if (
+        dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
+    ) is not None:
+        user = await db["users"].find_one({"email": user_id})
+        dataset_author = dataset["author"]["email"]
+        if user_id != dataset_author:
+            return DatasetOut.from_mongo(dataset)
+        req_info = info.json()
+        if 'viewers' in req_info:
+            new_viewers = req_info["viewers"]
+            for new_viewer in new_viewers:
+                user = await db["users"].find_one({"_id": ObjectId(new_viewer)})
+                if user is not None:
+                    dataset_viewers = dataset.viewers
+                    dataset_viewers.append(new_viewer)
+                    dataset.viewers = dataset_viewers
+        if 'uploaders' in req_info:
+            new_uploaders = req_info["uploaders"]
+            for new_uploader in new_uploaders:
+                user = await db["users"].find_one({"_id": ObjectId(new_uploader)})
+                if user is not None:
+                    dataset_uploaders = dataset.uploaders
+                    dataset_uploaders.append(new_uploader)
+                    dataset.uploaders = dataset_uploaders
+        if 'editors' in req_info:
+            new_editors = req_info["editors"]
+            for new_editor in new_editors:
+                user = await db["users"].find_one({"_id": ObjectId(new_editor)})
+                if user is not None:
+                    dataset_editors = dataset.editors
+                    dataset_editors.append(new_editor)
+                    dataset.editors = dataset_editors
+        if 'owners' in req_info:
+            new_owners = req_info["owners"]
+            for new_owner in new_owners:
+                user = await db["users"].find_one({"_id": ObjectId(new_owner)})
+                if user is not None:
+                    dataset_owners = dataset.owners
+                    dataset_owners.append(new_owner)
+                    dataset.owners = dataset_owners
+        dataset["modified"] = datetime.datetime.utcnow()
+        try:
+            await db["datasets"].replace_one(
+                {"_id": ObjectId(dataset_id)}, DatasetDB(**dataset).to_mongo()
+            )
+            # Update entry to the dataset index
+            doc = {
+                "doc": {
+                    "name": dataset["name"],
+                    "description": dataset["description"],
+                    "author": UserOut(**user).email,
+                    "modified": dataset["modified"],
+                }
+            }
+            update_record(es, "dataset", doc, dataset_id)
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=e.args[0])
+        return DatasetOut.from_mongo(dataset)
+
+
+    else:
+        raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
 
 @router.patch("/{dataset_id}", response_model=DatasetOut)
 async def patch_dataset(
@@ -361,6 +440,7 @@ async def patch_dataset(
     ) is not None:
         # TODO: Refactor this with permissions checks etc.
         ds = dict(dataset_info) if dataset_info is not None else {}
+        dataset_author = dataset["author"]["email"]
         user = await db["users"].find_one({"email": user_id})
         ds["author"] = UserOut(**user)
         ds["modified"] = datetime.datetime.utcnow()

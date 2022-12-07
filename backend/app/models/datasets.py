@@ -1,6 +1,6 @@
 from datetime import datetime
 from enum import Enum, auto
-from typing import Optional
+from typing import Optional, List
 
 from mongoengine import DynamicDocument
 from pydantic import Field, BaseModel
@@ -45,6 +45,10 @@ class DatasetDB(MongoModel, DatasetBase):
     status: str = DatasetStatus.PRIVATE.name
     views: int = 0
     downloads: int = 0
+    viewers: List[PyObjectId] = []
+    uploaders: List[PyObjectId] = []
+    editors: List[PyObjectId] = []
+    owners: List[PyObjectId] = []
 
 
 class DatasetOut(DatasetDB):
