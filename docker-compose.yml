@@ -88,6 +88,7 @@ services:
       dockerfile: heartbeat.Dockerfile
     networks:
       - clowder2
+    restart: unless-stopped
     environment:
       - MONGODB_URL=mongodb://mongo:27017
       - RABBITMQ_HOST=rabbitmq
