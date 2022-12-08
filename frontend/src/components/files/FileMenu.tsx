@@ -13,6 +13,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import UploadIcon from '@mui/icons-material/Upload';
 import {Dialog, DialogTitle, ListItemIcon, ListItemText} from "@mui/material";
 import {UpdateFile} from "./UpdateFile";
+import {MoreHoriz} from "@material-ui/icons";
 
 type FileMenuProps = {
 	file: File
@@ -61,7 +62,7 @@ export default function FileMenu(props: FileMenuProps) {
 				aria-expanded={open ? 'true' : undefined}
 				onClick={handleClick}
 			>
-				<MenuIcon/>
+				<MoreHoriz/>
 			</Button>
 			<Menu
 				id="basic-menu"

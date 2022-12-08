@@ -32,8 +32,6 @@ export function handleErrors(reason, originalFunc){
 	if (reason.status === 401){
 
 		const headers = {"Authorization": cookies.get("Authorization")};
-		V2.OpenAPI.TOKEN = undefined;
-		cookies.remove("Authorization", { path: "/" });
 
 		return (dispatch) => {
 			return fetch(config.KeycloakRefresh, {method: "GET", headers: headers})
@@ -54,6 +52,9 @@ export function handleErrors(reason, originalFunc){
 						type: LOGOUT,
 						receivedAt: Date.now()
 					});
+					// Delete bad JWT token
+					V2.OpenAPI.TOKEN = undefined;
+					cookies.remove("Authorization", { path: "/" });
 				});
 		};
 	}

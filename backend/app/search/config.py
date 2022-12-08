@@ -5,8 +5,8 @@ class IndexSettings:
             "created": {"type": "date"},
             "creator": {"type": "keyword"},
             "download": {"type": "long"},
-            "dataset_id": {"type": "string"},
-            "folder_id": {"type": "string"},
+            "dataset_id": {"type": "text"},
+            "folder_id": {"type": "text"},
             "bytes": {"type": "long"},
             "content_type": {"type": "keyword"},
         }
@@ -22,6 +22,17 @@ class IndexSettings:
             "download": {"type": "long"},
         }
     }
+
+    metadata_mappings = {}
+    # "properties": {
+    #         "resource_id": {"type": "text"},
+    #         "resource_type": {"type": "text"},
+    #         "created": {"type": "date"},
+    #         "creator": {"type": "keyword"},
+    #         "contents": {"type": "object"},
+    #         "context_url": {"type": "text"},
+    #         "context": {"type": "text"}
+    #     }
 
 
 indexSettings = IndexSettings()

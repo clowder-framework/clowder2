@@ -1,6 +1,6 @@
 import React, {useEffect} from "react";
 import {Box, Typography} from "@mui/material";
-import metadataConfig from "../../metadata.config";
+import {metadataConfig} from "../../metadata.config";
 import {useSelector, useDispatch} from "react-redux";
 import {RootState} from "../../types/data";
 import {fetchMetadataDefinitions} from "../../actions/metadata";
@@ -29,13 +29,13 @@ export const CreateMetadata = (props: MetadataType) => {
 	return (
 		<>
 			{
-				metadataDefinitionList.map((metadata) => {
+				metadataDefinitionList.map((metadata,idx) => {
 					return (
-						<Box className="inputGroup">
+						<Box className="inputGroup" key={idx}>
 							<Typography variant="h6">{metadata.name}</Typography>
 							<Typography variant="subtitle2">{metadata.description}</Typography>
 							{
-								metadata.fields.map(field => {
+								metadata.fields.map((field, idxx) => {
 									return React.cloneElement(
 										// if nothing match fall back to default widget
 										metadataConfig[field.widgetType ?? "NA"] ?? metadataConfig["NA"],
@@ -45,6 +45,7 @@ export const CreateMetadata = (props: MetadataType) => {
 											options: field.config.options ?? [],
 											setMetadata: setMetadata,
 											initialReadOnly: false,
+											key:idxx
 										}
 									)
 								})

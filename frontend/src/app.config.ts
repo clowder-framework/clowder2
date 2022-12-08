@@ -13,7 +13,7 @@ interface Config{
 }
 
 const config:Config = <Config>{};
-const hostname = process.env.CLOWDER_REMOTE_HOSTNAME || "";
+const hostname = process.env.CLOWDER_REMOTE_HOSTNAME || `${window.location.protocol}//${window.location.host}`;
 
 // TODO when add auth piece remove this env
 const apikey = process.env.APIKEY || "";
@@ -33,6 +33,6 @@ config["KeycloakRefresh"] = config.KeycloakBaseURL + "/refresh_token";
 config["KeycloakRegister"] = config.KeycloakBaseURL + "/register";
 
 // elasticsearch
-config["searchEndpoint"] = config.hostname + "/api/v2/elasticsearch";
+config["searchEndpoint"] = `${hostname}/api/v2/elasticsearch`;
 
 export default config;

@@ -1,0 +1,246 @@
+hostname: clowder2.localhost
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+ingress:
+  enabled: true
+  className: ""
+  annotations: {}
+    # kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+  tls: []
+  #  - secretName: chart-example-tls
+  #    hosts:
+  #      - chart-example.local
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+
+# ----------------------------------------------------------------------
+# FRONTEND
+# ----------------------------------------------------------------------
+frontend:
+  image:
+    repository: clowder/clowder2-frontend
+    pullPolicy: IfNotPresent
+    # Overrides the image tag whose default is the chart appVersion.
+    tag: ""
+
+  service:
+    type: ClusterIP
+    port: 80
+
+# ----------------------------------------------------------------------
+# BACKEND
+# ----------------------------------------------------------------------
+backend:
+  image:
+    repository: clowder/clowder2-backend
+    pullPolicy: IfNotPresent
+    # Overrides the image tag whose default is the chart appVersion.
+    tag: ""
+
+  service:
+    type: ClusterIP
+    port: 80
+
+# ----------------------------------------------------------------------
+# MINIO
+# ----------------------------------------------------------------------
+minio:
+  enabled: true
+
+  # login to minio
+  auth:
+    rootUser: minioadmin
+    rootPassword: minioadmin
+    
+  # enable webui
+  disableWebUI: false
+
+  # enable ingress for webui
+  ingress:
+    enabled: true
+    hostname: minio.clowder2.localhost
+
+  # enable ingress for api
+  apiIngress:
+    enabled: true
+    hostname: minio.clowder2.localhost
+
+  # enabled distributed mode (or standalone)
+  mode: distributed
+
+  # if you pick distributed, this needs to be >= 4
+  statefulset:
+    replicaCount: 4
+
+  # persistence
+  persistence:
+    # storage size for the data
+    size: 20Gi
+
+    # where to store data, can be network storage
+    #storageClass: nfs-taiga
+
+# ----------------------------------------------------------------------
+# MONGODB
+# ----------------------------------------------------------------------
+mongodb:
+  # either mongodb is installed as part of this chart, or you need to
+  # specify the mongodb uri
+  enabled: true
+  #uri: mongobd://server:27017/database
+
+  # right now no password
+  auth:
+    enabled: false
+
+  # storage
+  persistence:
+    # storage size for database
+    #size: 8Gi
+    
+    # pick fast non network storage
+    #storageClass: csi-cinder-sc-retain
+
+# ----------------------------------------------------------------------
+# RABBITMQ
+# ----------------------------------------------------------------------
+rabbitmq:
+  # either rabbitmq is installed as part of this chart, or you need to
+  # specify the rabbitmq uri. If neither is specified rabbitmq will not
+  # be used by clowder.
+  enabled: true
+  #uri: amqp://username:password@server/database
+
+  # login
+  auth:
+    username: guest
+    password: guest
+    erlangCookie: kittencookie
+
+  # enable webfrontend
+  ingress:
+    enabled: true
+    hostname: rabbitmq.clowder2.localhost
+
+  persistence:
+    # pick fast storage
+    #storageClass: csi-cinder-sc-retain
+
+# ----------------------------------------------------------------------
+# ELASTICSEARCH
+# ----------------------------------------------------------------------
+elasticsearch:
+  clusterName: clowder2
+
+  master:
+    persistence:
+      # storageClass: csi-cinder-sc-retain
+      # size: 8Gi
+  data:
+    persistence:
+      # storageClass: csi-cinder-sc-retain
+      # size: 8Gi
+
+# ----------------------------------------------------------------------
+# KEYCLOAK
+# ----------------------------------------------------------------------
+keycloak:
+  httpRelativePath: /keycloak/
+
+  auth:
+    adminUser: admin
+    adminPassword: admin
+
+  ingress:
+    enabled: true
+    hostname: clowder2.localhost
+    path: /keycloak
+
+  service:
+    type: ClusterIP
+
+  postgresql:
+    auth:
+      username: keycloak
+      password: password
+      database: keycloak
+
+    primary:
+      persistence:
+        # storageClass: csi-cinder-sc-retain
+        # size: 8Gi
+
+  # Mount configmap with theme and untar
+  initContainers:
+    - name: init-customtheme
+      image: busybox:1.28
+      command: ['sh', '-c', 'cd /keycloak && tar zxf /theme/custom_theme.tgz']
+      volumeMounts:
+      - mountPath: /keycloak
+        name: keycloak-theme
+      - mountPath: /theme
+        name: clowder2-theme
+
+  extraVolumeMounts:
+    - name: keycloak-theme
+      mountPath: /opt/bitnami/keycloak/themes
+  extraVolumes:
+    - name: keycloak-theme
+      emptyDir: {}
+    - name: clowder2-theme
+      configMap:
+        name: clowder2-theme
+
+# ----------------------------------------------------------------------
+# OTHERS
+# ----------------------------------------------------------------------
+
+podAnnotations: {}
+
+podSecurityContext: {}
+  # fsGroup: 2000
+
+securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+
+resources: {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 100
+  targetCPUUtilizationPercentage: 80
+  # targetMemoryUtilizationPercentage: 80
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}

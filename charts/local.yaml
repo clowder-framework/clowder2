@@ -1,0 +1,20 @@
+# helm upgrade --install --namespace clowder2 --create-namespace --values local.yaml clowder2 .
+
+hostname: clowder2.ncsa.cloud
+
+minio:
+  auth:
+    rootUser: clowder
+    rootPassword: ilikecats
+  ingress:
+    hostname: minio.clowder2.ncsa.cloud
+  apiIngress:
+    hostname: minio.clowder2.ncsa.cloud
+
+rabbitmq:
+  ingress:
+    hostname: rabbitmq.clowder2.ncsa.cloud
+
+keycloak:
+  ingress:
+    hostname: clowder2.ncsa.cloud

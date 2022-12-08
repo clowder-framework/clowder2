@@ -1,5 +1,7 @@
 import io
 import json
+
+from elasticsearch import Elasticsearch
 import pika
 import mimetypes
 from datetime import datetime
@@ -47,7 +49,7 @@ async def add_file_entry(
     fs: Minio,
     file: Optional[io.BytesIO] = None,
     content_type: Optional[str] = None,
-    es=Depends(dependencies.get_elasticsearchclient),
+    es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
 ):
     """Insert FileDB object into MongoDB (makes Clowder ID), then Minio (makes version ID), then update MongoDB with
     the version ID from Minio.
@@ -121,7 +123,7 @@ async def remove_file_entry(
     file_id: Union[str, ObjectId],
     db: MongoClient,
     fs: Minio,
-    es=Depends(dependencies.get_elasticsearchclient),
+    es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
 ):
     """Remove FileDB object into MongoDB, Minio, and associated metadata and version information."""
     # TODO: Deleting individual versions will require updating version_id in mongo, or deleting entire document
@@ -148,7 +150,7 @@ async def update_file(
     db: MongoClient = Depends(dependencies.get_db),
     fs: Minio = Depends(dependencies.get_fs),
     file: UploadFile = File(...),
-    es=Depends(dependencies.get_elasticsearchclient),
+    es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
 ):
     es = await connect_elasticsearch()
 
