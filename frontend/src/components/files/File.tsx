@@ -33,7 +33,6 @@ export const File = (): JSX.Element => {
 	// path parameter
 	const {fileId} = useParams<{ fileId?: string }>();
 
-
 	// search parameters
 	let [searchParams] = useSearchParams();
 	const folderId = searchParams.get("folder");

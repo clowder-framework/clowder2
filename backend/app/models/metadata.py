@@ -32,8 +32,11 @@ FIELD_TYPES = {
     "str": str,
     "TextField": str,
     "bool": bool,
-    "date": datetime.date,
-    "time": datetime.time,
+    # TODO figure out how to parse "yyyymmdd hh:mm:ssssssz" into datetime object
+    # "date": datetime.date,
+    # "time": datetime.time,
+    "date": str,
+    "time": str,
     "dict": dict,  # TODO: does this work?
     "enum": str,  # TODO: need a way to validate enum,
     "tuple": tuple,

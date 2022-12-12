@@ -57,7 +57,7 @@ const metadata = (state = defaultState, action: DataAction) => {
 				datasetMetadataList: [...state.datasetMetadataList, action.metadata]
 			});
         case SAVE_METADATA_DEFINITIONS:
-            return Object.assign({}, state, {metadataDefinitionList: action.metadataDefinitionList});
+            return Object.assign({}, state, {metadataDefinitionList: [...state.metadataDefinitionList, action.metadataDefinitionList]});
 		case POST_FILE_METADATA:
 			return Object.assign({}, state, {
 				fileMetadataList: [...state.fileMetadataList, action.metadata]

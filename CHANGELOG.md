@@ -6,7 +6,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
 
-## [0.0.1] - 2021-11-10
+## [alpha-2] - 2022-11-28
 
 ### Added
-- Allow for missing first/last names in userinfo, defaulting to " "
+- Use Keycloak for user management, JWT tokens and federated identity.
+- Initial implementation of file versioning and nested folders within datasets.
+- Initial implementation of metadata entries and metadata definitions.
+- Initial implementation of search using Elasticsearch.
+- Improvements to overall UI and UX. Standardized components and widgets used.
+- Helm charts for Kubernetes deployment.
