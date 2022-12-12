@@ -20,7 +20,7 @@ type Config = {
 
 export const OpenAPI: Config = {
     BASE: 'https://clowder.ncsa.illinois.edu/clowder/api',
-    VERSION: '1.19.0',
+    VERSION: '1.21.0',
     WITH_CREDENTIALS: false,
     CREDENTIALS: 'include',
     TOKEN: undefined,

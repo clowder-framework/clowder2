@@ -16,6 +16,8 @@ from fastapi import (
     UploadFile,
     Request,
 )
+from fastapi import APIRouter, HTTPException, Depends, Security
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from fastapi.responses import StreamingResponse
 from minio import Minio
 from pika.adapters.blocking_connection import BlockingChannel
@@ -39,7 +41,7 @@ from app.rabbitmq.listeners import submit_file_message
 from typing import Union
 
 router = APIRouter()
-
+security = HTTPBearer()
 
 # TODO: Move this to MongoDB middle layer
 async def add_file_entry(
@@ -308,10 +310,12 @@ async def get_file_extract(
     file_id: str,
     info: Request,
     token: str = Depends(get_token),
+    credentials: HTTPAuthorizationCredentials = Security(security),
     db: MongoClient = Depends(dependencies.get_db),
     rabbitmq_client: BlockingChannel = Depends(dependencies.get_rabbitmq),
 ):
     req_info = await info.json()
+    access_token = credentials.credentials
     if "extractor" not in req_info:
         raise HTTPException(status_code=404, detail=f"No extractor submitted")
     if (file := await db["files"].find_one({"_id": ObjectId(file_id)})) is not None:
@@ -321,15 +325,17 @@ async def get_file_extract(
         req_headers = info.headers
         raw = req_headers.raw
         authorization = raw[1]
+        # TODO this got the wrong thing, changing
         token = authorization[1].decode("utf-8").lstrip("Bearer").lstrip(" ")
 
         queue = req_info["extractor"]
+        parameters = {}
         if "parameters" in req_info:
             parameters = req_info["parameters"]
         routing_key = "extractors." + queue
 
         submit_file_message(
-            file_out, queue, routing_key, parameters, token, db, rabbitmq_client
+            file_out, queue, routing_key, parameters, access_token, db, rabbitmq_client
         )
 
         return {"message": "testing", "file_id": file_id}

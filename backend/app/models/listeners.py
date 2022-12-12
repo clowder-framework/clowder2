@@ -19,6 +19,7 @@ class ExtractorInfo(BaseModel):
     author: str  # Referring to author of listener script (e.g. name or email), not Clowder user
     process: dict
     maturity: str = "Development"
+    name: str = ""
     contributors: List[str] = []
     contexts: List[dict] = []
     repository: List[Repository] = []
@@ -28,11 +29,13 @@ class ExtractorInfo(BaseModel):
     default_labels: List[str] = []
     categories: List[str] = []
     parameters: List[dict] = []
+    version: str = "1.0"
 
 
 class EventListenerBase(BaseModel):
     """An Event Listener is the expanded version of v1 Extractors."""
 
+    author: str = ""
     name: str
     version: str = "1.0"
     description: str = ""
@@ -65,6 +68,10 @@ class EventListenerOut(EventListenerDB):
     pass
 
 
+class EventListenerSubmit(BaseModel):
+    name: str = ""
+
+
 class FeedListener(BaseModel):
     """This is a shorthand POST class for associating an existing EventListener with a Feed. The automatic flag determines
     whether the Feed will automatically send new matches to the Event Listener."""
@@ -85,4 +92,17 @@ class EventListenerMessage(BaseModel):
     fileSize: int
     id: str
     datasetId: str
-    token: str
+    secretKey: str
+
+
+class EventListenerDatasetMessage(BaseModel):
+    """This describes contents of JSON object that is submitted to RabbitMQ for the Event Listeners/Extractors to consume."""
+
+    host: str = "http://127.0.0.1:8000"
+    secretKey: str = "secretKey"
+    retry_count: int = 0
+    resource_type: str = "dataset"
+    flags: str = ""
+    datasetName: str
+    id: str
+    datasetId: str

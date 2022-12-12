@@ -3,7 +3,7 @@ import config from "../../app.config";
 import {Button, Grid, Tab, Tabs, Typography} from "@mui/material";
 import {downloadResource, parseDate} from "../../utils/common";
 import {PreviewConfiguration, RootState} from "../../types/data";
-import {useParams, useSearchParams} from "react-router-dom";
+import {useParams, useSearchParams, useNavigate} from "react-router-dom";
 import {useDispatch, useSelector} from "react-redux";
 import {resetFailedReason} from "../../actions/common"
 
@@ -29,6 +29,7 @@ import {fetchFolderPath} from "../../actions/folder";
 
 export const File = (): JSX.Element => {
 
+	const history = useNavigate();
 	// path parameter
 	const {fileId} = useParams<{ fileId?: string }>();
 
@@ -163,6 +164,14 @@ export const File = (): JSX.Element => {
 		setEnableAddMetadata(false);
 	};
 
+	const submitToListener = ()=> {
+		const filename = fileSummary['name']
+		console.log('submit to listener');
+		console.log("the file name is", filename);
+		console.log('the file id is', fileId);
+		history(`/listeners?fileId=${fileId}&fileName=${filename}`);
+	}
+
 	// for breadcrumb
 	const paths = [
 		{
@@ -205,6 +214,14 @@ export const File = (): JSX.Element => {
 								downloadFile(fileId, fileSummary.name);
 							}} endIcon={<Download/>}>
 						Download
+					</Button>
+				</Grid>
+				<Grid item xs={2}>
+					<Button variant="contained"
+							onClick={() => {
+								submitToListener();
+							}} endIcon={<Download/>}>
+						Extract
 					</Button>
 				</Grid>
 			</Grid>

@@ -2,6 +2,7 @@ import config from "../app.config";
 import {dataURItoFile, getHeader} from "../utils/common";
 import {V2} from "../openapi";
 import {handleErrors} from "./common";
+import {UPDATE_DATASET, updateDataset} from "./dataset";
 
 export const FAILED = "FAILED";
 
@@ -204,12 +205,29 @@ export function fileDownloaded(fileId, filename = "") {
 				type: DOWNLOAD_FILE,
 				receivedAt: Date.now(),
 			});
-		}
-		else {
+		} else {
 			dispatch(handleErrors(response, fileDownloaded(fileId, filename)));
 		}
 	};
+}
 
+export const SUBMIT_FILE_EXTRACTION = "SUBMIT_FILE_EXTRACTION";
+export function submitFileExtractionAction(fileId, extractorName) {
+	return (dispatch) => {
+		const requestBody = {'extractor': extractorName};
+		return V2.FilesService.getFileExtractApiV2FilesFileIdExtractPost(fileId, requestBody)
+			.then(json => {
+				dispatch({
+					type: SUBMIT_FILE_EXTRACTION,
+					about: json,
+					receivedAt: Date.now(),
+				});
+			})
+			.catch(reason => {
+				dispatch(handleErrors(reason, submitFileExtractionAction(fileId, requestBody)));
+			});
+	};
+}
 	// TODO FIXME: this doesn't work. I think on swagger.json it needs a flag x-is-file to be able to get the response as a blob
 	// V2.FilesService.downloadFileApiV2FilesFileIdGet(fileId).catch(reason => {
 	// 	if (reason.status === 401) {
@@ -233,4 +251,3 @@ export function fileDownloaded(fileId, filename = "") {
 	// 			document.body.removeChild(anchor);
 	// 		}
 	// 	});
-}

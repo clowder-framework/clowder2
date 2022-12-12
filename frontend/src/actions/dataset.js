@@ -37,6 +37,25 @@ export function fetchFoldersInDataset(datasetId, parentFolder){
 	};
 }
 
+
+export const SUBMIT_DATSET_EXTRACTION = "SUBMIT_DATASET_EXTRACTION";
+export function submitDatasetExtractionAction(datasetId, extractorName){
+	return (dispatch) => {
+		const requestBody = {'extractor': extractorName};
+		return V2.DatasetsService.getDatasetExtractApiV2DatasetsDatasetIdExtractPost(datasetId, requestBody)
+			.then(json => {
+				dispatch({
+					type: SUBMIT_DATSET_EXTRACTION,
+					about: json,
+					receivedAt: Date.now(),
+				});
+			})
+			.catch(reason => {
+				dispatch(handleErrors(reason, submitDatasetExtractionAction(datasetId, requestBody)));
+			});
+	};
+}
+
 export const UPDATE_DATASET = "UPDATE_DATASET";
 export function updateDataset(datasetId, formData){
 	return (dispatch) => {
