@@ -31,6 +31,7 @@ from rocrate.rocrate import ROCrate
 
 from app import dependencies
 from app import keycloak_auth
+from app.dependencies import Authorization
 from app.search.connect import (
     connect_elasticsearch,
     insert_record,
@@ -839,3 +840,10 @@ async def get_dataset_extract(
             raise HTTPException(status_code=404, detail=f"No extractor submitted")
     else:
         raise HTTPException(status_code=404, detail=f"File {dataset_id} not found")
+
+@router.get("/{dataset_id}/permissions")
+async def get_dataset_extract(
+    dataset_id: str,
+    allow: bool = Depends(Authorization("read"))
+):
+    return {"status": "ok", "dataset_id": dataset_id, "allow": allow}

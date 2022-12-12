@@ -14,16 +14,17 @@ from app.mongo import crete_mongo_indexes
 from app.search.connect import connect_elasticsearch
 
 
-async def get_token_header(x_token: str = Header(...)):
-    # Not currently used. Here as an example.
-    if x_token != "fake-super-secret-token":
-        raise HTTPException(status_code=400, detail="X-Token header invalid")
+class Authorization:
+    """ We use class dependency so that we can provide the `permission` parameter to the dependency.
+    For more info see https://fastapi.tiangolo.com/advanced/advanced-dependencies/."""
+    def __init__(self, permission: str):
+        self.permission = permission
 
-
-async def get_query_token(token: str):
-    # Not currently used. Here as an example.
-    if token != "jessica":
-        raise HTTPException(status_code=400, detail="No Jessica token provided")
+    def __call__(self, dataset_id: str = None):
+        if self.permission != "read":
+            raise HTTPException(status_code=403, detail=f"No `{self.permission}` permission on dataset {dataset_id}")
+        else:
+            return True
 
 
 async def get_db() -> Generator:
