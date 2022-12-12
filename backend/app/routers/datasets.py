@@ -32,7 +32,6 @@ from rocrate.rocrate import ROCrate
 from app import dependencies
 from app import keycloak_auth
 from app.search.connect import (
-    connect_elasticsearch,
     insert_record,
     delete_document_by_id,
     update_record,
@@ -303,9 +302,8 @@ async def edit_dataset(
     dataset_info: DatasetBase,
     db: MongoClient = Depends(dependencies.get_db),
     user_id=Depends(get_user),
-    es=Depends(dependencies.get_elasticsearchclient),
+    es=Depends(dependencies.get_elasticsearchclient)
 ):
-    es = await connect_elasticsearch()
 
     # Check all connection and abort if any one of them is not available
     if db is None or es is None:
@@ -328,13 +326,21 @@ async def edit_dataset(
             # Update entry to the dataset index
             doc = {
                 "doc": {
-                    "name": ds["name"],
-                    "description": ds["description"],
+                    "name": dataset["name"],
+                    "description": dataset["description"],
                     "author": UserOut(**user).email,
-                    "modified": ds["modified"],
+                    "modified": dataset["modified"],
                 }
             }
             update_record(es, "dataset", doc, dataset_id)
+            # updating metadata in elasticsearch
+            if (
+                    metadata := await db["metadata"].find_one({"resource.resource_id": ObjectId(dataset_id)})
+            ) is not None:
+                doc = {"doc": {"name": dataset["name"],
+                               "description": dataset["description"],
+                               "author": UserOut(**user).email}}
+                update_record(es, "metadata", doc, str(metadata["_id"]))
         except Exception as e:
             raise HTTPException(status_code=500, detail=e.args[0])
         return DatasetOut.from_mongo(dataset)
@@ -347,9 +353,8 @@ async def patch_dataset(
     dataset_info: DatasetPatch,
     user_id=Depends(get_user),
     db: MongoClient = Depends(dependencies.get_db),
-    es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
+    es: Elasticsearch = Depends(dependencies.get_elasticsearchclient)
 ):
-    es = await connect_elasticsearch()
 
     # Check all connection and abort if any one of them is not available
     if db is None or es is None:
@@ -372,13 +377,21 @@ async def patch_dataset(
             # Update entry to the dataset index
             doc = {
                 "doc": {
-                    "name": ds["name"],
-                    "description": ds["description"],
+                    "name": dataset["name"],
+                    "description": dataset["description"],
                     "author": UserOut(**user).email,
-                    "modified": ds["modified"],
+                    "modified": dataset["modified"],
                 }
             }
             update_record(es, "dataset", doc, dataset_id)
+            # updating metadata in elasticsearch
+            if (
+                    metadata := await db["metadata"].find_one({"resource.resource_id": ObjectId(dataset_id)})
+            ) is not None:
+                doc = {"doc": {"name": dataset["name"],
+                               "description": dataset["description"],
+                               "author": UserOut(**user).email}}
+                update_record(es, "metadata", doc, str(metadata["_id"]))
         except Exception as e:
             raise HTTPException(status_code=500, detail=e.args[0])
         return DatasetOut.from_mongo(dataset)
@@ -391,7 +404,6 @@ async def delete_dataset(
     fs: Minio = Depends(dependencies.get_fs),
     es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
 ):
-    es = await connect_elasticsearch()
 
     # Check all connection and abort if any one of them is not available
     if db is None or fs is None or es is None:
