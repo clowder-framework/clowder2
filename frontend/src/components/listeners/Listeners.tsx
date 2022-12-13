@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from "react";
-import {Box, Button, ButtonGroup, Grid, List, ListItem, Tab, Tabs, Typography} from "@mui/material";
+import {Box, Button, ButtonGroup, Divider, Grid, List, ListItem, Tab, Tabs, Typography} from "@mui/material";
 
 import {Listener, RootState} from "../../types/data";
 import {useDispatch, useSelector} from "react-redux";
@@ -154,14 +154,16 @@ export const Listeners = (): JSX.Element => {
 										listeners !== undefined ?
 											listeners.map((listener) => {
 												return (
-													<ListItem>
-														<Typography>
-															{listener.name}
-														</Typography>
-														<Typography>
-															{listener.description}
-														</Typography>
-													</ListItem>
+													<>
+														<ListItem>
+															<Typography>
+																{listener.name}
+															</Typography>
+															<Typography>
+																{listener.description}
+															</Typography>
+														</ListItem>
+													</>
 												);
 											})
 											:

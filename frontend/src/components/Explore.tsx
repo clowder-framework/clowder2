@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from "react";
-import {Box, Button, ButtonGroup, Grid, List, ListItem, Tab, Tabs, Typography} from "@mui/material";
+import {Box, Button, ButtonGroup, Divider, Grid, List, Tab, Tabs} from "@mui/material";
 
-import {Dataset, RootState, Listener} from "../types/data";
+import {Dataset, RootState} from "../types/data";
 import {useDispatch, useSelector} from "react-redux";
 import {fetchDatasets} from "../actions/dataset";
 import {fetchListeners} from "../actions/listeners";
@@ -45,7 +45,7 @@ export const Explore = (): JSX.Element => {
 	const [mine,] = useState<boolean>(false);
 	const [prevDisabled, setPrevDisabled] = useState<boolean>(true);
 	const [nextDisabled, setNextDisabled] = useState<boolean>(false);
-	const [selectedTabIndex, setSelectedTabIndex] = useState(0);
+	const [selectedTabIndex, setSelectedTabIndex] = useState(1);
 	const [selectedDataset, _] = useState<Dataset>();
 
 	// component did mount
@@ -187,17 +187,16 @@ export const Explore = (): JSX.Element => {
 								<List>
 									{
 										listeners !== undefined ?
-											listeners.map((listener) =>  {
-												return (
-													<ListItem>
-														<Typography>
-															{listener.name}
-														</Typography>
-														<Typography>
-															{listener.description}
-														</Typography>
-													</ListItem>
-												);
+											listeners.map((listener) => {
+												return (<>
+													<ListenerItem id={listener.id}
+																  extractorName={listener.name}
+																  extractorDescription={listener.description}
+																  version={listener.version??""}
+																  author={listener.author??""}
+													/>
+													<Divider/>
+												</>);
 											})
 											:
 											<></>
