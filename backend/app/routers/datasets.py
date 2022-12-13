@@ -38,7 +38,7 @@ from app.search.connect import (
     connect_elasticsearch,
     insert_record,
     delete_document_by_id,
-    update_record,
+    update_record, delete_document_by_query,
 )
 from app.config import settings
 from app.keycloak_auth import get_user, get_current_user
@@ -406,6 +406,8 @@ async def delete_dataset(
     if (await db["datasets"].find_one({"_id": ObjectId(dataset_id)})) is not None:
         # delete from elasticsearch
         delete_document_by_id(es, "dataset", dataset_id)
+        query = {"match": {"resource_id": dataset_id}}
+        delete_document_by_query(es, "metadata", query)
         # delete dataset first to minimize files/folder being uploaded to a delete dataset
 
         await db["datasets"].delete_one({"_id": ObjectId(dataset_id)})

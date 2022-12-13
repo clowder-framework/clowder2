@@ -29,7 +29,7 @@ from app.search.connect import (
     connect_elasticsearch,
     insert_record,
     delete_document_by_id,
-    update_record,
+    update_record, delete_document_by_query,
 )
 from app.models.files import FileIn, FileOut, FileVersion, FileDB
 from app.models.listeners import EventListenerMessage
@@ -139,6 +139,8 @@ async def remove_file_entry(
     fs.remove_object(settings.MINIO_BUCKET_NAME, str(file_id))
     # delete from elasticsearch
     delete_document_by_id(es, "file", str(file_id))
+    query = {"match": {"resource_id": str(file_id)}}
+    delete_document_by_query(es, "metadata", query)
     await db["files"].delete_one({"_id": ObjectId(file_id)})
     await db.metadata.delete_many({"resource.resource_id": ObjectId(file_id)})
     await db["file_versions"].delete_many({"file_id": ObjectId(file_id)})
