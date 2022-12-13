@@ -9,11 +9,11 @@ import MoreVertIcon from "@mui/icons-material/MoreVert";
 type ListenerCardProps = {
 	id: string,
 	extractorName: string,
-	extractorDescription: string
+	extractorDescription: string,
 }
 
 export default function ListenerItem(props: ListenerCardProps) {
-	const {id, extractorName, extractorDescription, version, author} = props;
+	const {id, extractorName, extractorDescription} = props;
 
 	let [searchParams, setSearchParams] = useSearchParams();
 	const fileId = searchParams.get("fileId");
@@ -30,13 +30,11 @@ export default function ListenerItem(props: ListenerCardProps) {
 	}
 
 	return (
-		<ListItem>
+		<ListItem key={id}>
 			<Button>
 				{extractorName}
 			</Button>
-			<ListItemText primary={extractorDescription}
-						  secondary={`version ${version} created by ${author}`} />
-		  	<IconButton component="label">
+			<ListItemText secondary={extractorDescription} /><IconButton component="label">
 				<MoreVertIcon />
 			</IconButton>
 		</ListItem>

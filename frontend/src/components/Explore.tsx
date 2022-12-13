@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from "react";
-import {Box, Button, ButtonGroup, Divider, Grid, List, Tab, Tabs} from "@mui/material";
+import {Box, Button, ButtonGroup, Grid, Tab, Tabs} from "@mui/material";
 
 import {Dataset, RootState} from "../types/data";
 import {useDispatch, useSelector} from "react-redux";
@@ -11,10 +11,10 @@ import {downloadThumbnail} from "../utils/thumbnail";
 import {a11yProps, TabPanel} from "./tabs/TabComponent";
 import {ActionModal} from "./dialog/ActionModal";
 import DatasetCard from "./datasets/DatasetCard";
-import ListenerItem from "./listeners/ListenerItem";
 import config from "../app.config";
 import {ArrowBack, ArrowForward} from "@material-ui/icons";
 import Layout from "./Layout";
+import {Listeners} from "./listeners/Listeners";
 
 const tab = {
 	fontStyle: "normal",
@@ -184,34 +184,7 @@ export const Explore = (): JSX.Element => {
 								</Box>
 							</TabPanel>
 							<TabPanel value={selectedTabIndex} index={1}>
-								<List>
-									{
-										listeners !== undefined ?
-											listeners.map((listener) => {
-												return (<>
-													<ListenerItem id={listener.id}
-																  extractorName={listener.name}
-																  extractorDescription={listener.description}
-																  version={listener.version??""}
-																  author={listener.author??""}
-													/>
-													<Divider/>
-												</>);
-											})
-											:
-											<></>
-									}
-								</List>
-								<Box display="flex" justifyContent="center" sx={{m: 1}}>
-									<ButtonGroup variant="contained" aria-label="previous next buttons">
-										<Button aria-label="previous" onClick={previous} disabled={prevDisabled}>
-											<ArrowBack/> Prev
-										</Button>
-										<Button aria-label="next" onClick={next} disabled={nextDisabled}>
-											Next <ArrowForward/>
-										</Button>
-									</ButtonGroup>
-								</Box>
+								<Listeners/>
 							</TabPanel>
 							<TabPanel value={selectedTabIndex} index={4}/>
 							<TabPanel value={selectedTabIndex} index={2}/>
