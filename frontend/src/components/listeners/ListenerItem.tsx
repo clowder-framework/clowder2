@@ -20,7 +20,7 @@ type ListenerCardProps = {
 	description: string
 }
 
-export default function ListenerCard(props: ListenerCardProps) {
+export default function ListenerItem(props: ListenerCardProps) {
 	console.log("Listener card");
 	const {id, name, description} = props;
 

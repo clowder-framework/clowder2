@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from "react";
-import {Box, Button, ButtonGroup, Grid, Tab, Tabs} from "@mui/material";
+import {Box, Button, ButtonGroup, Grid, List, ListItem, Tab, Tabs, Typography} from "@mui/material";
 
 import {Dataset, RootState, Listener} from "../types/data";
 import {useDispatch, useSelector} from "react-redux";
@@ -11,7 +11,7 @@ import {downloadThumbnail} from "../utils/thumbnail";
 import {a11yProps, TabPanel} from "./tabs/TabComponent";
 import {ActionModal} from "./dialog/ActionModal";
 import DatasetCard from "./datasets/DatasetCard";
-import ListenerCard from "./listeners/ListenerCard";
+import ListenerItem from "./listeners/ListenerItem";
 import config from "../app.config";
 import {ArrowBack, ArrowForward} from "@material-ui/icons";
 import Layout from "./Layout";
@@ -151,7 +151,7 @@ export const Explore = (): JSX.Element => {
 							<Box sx={{borderBottom: 1, borderColor: 'divider'}}>
 								<Tabs value={selectedTabIndex} onChange={handleTabChange} aria-label="dashboard tabs">
 									<Tab sx={tab} label="Datasets" {...a11yProps(0)} />
-									<Tab sx={tab} label="Extractors" {...a11yProps(4)} />
+									<Tab sx={tab} label="Extractors" {...a11yProps(1)} />
 								</Tabs>
 							</Box>
 							<TabPanel value={selectedTabIndex} index={0}>
@@ -183,25 +183,26 @@ export const Explore = (): JSX.Element => {
 									</ButtonGroup>
 								</Box>
 							</TabPanel>
-							<TabPanel value={selectedTabIndex} index={1}/>
-							<TabPanel value={selectedTabIndex} index={2}/>
-							<TabPanel value={selectedTabIndex} index={3}/>
-							<TabPanel value={selectedTabIndex} index={4}>
-								<Grid container spacing={2}>
+							<TabPanel value={selectedTabIndex} index={1}>
+								<List>
 									{
 										listeners !== undefined ?
 											listeners.map((listener) =>  {
 												return (
-													<Grid item key={listener.id} xs={12} sm={6} md={4} lg={3}>
-														<ListenerCard id={listener.id} name={listener.name}
-																	 description={listener.description}/>
-													</Grid>
+													<ListItem>
+														<Typography>
+															{listener.name}
+														</Typography>
+														<Typography>
+															{listener.description}
+														</Typography>
+													</ListItem>
 												);
 											})
 											:
 											<></>
 									}
-								</Grid>
+								</List>
 								<Box display="flex" justifyContent="center" sx={{m: 1}}>
 									<ButtonGroup variant="contained" aria-label="previous next buttons">
 										<Button aria-label="previous" onClick={previous} disabled={prevDisabled}>
@@ -213,6 +214,10 @@ export const Explore = (): JSX.Element => {
 									</ButtonGroup>
 								</Box>
 							</TabPanel>
+							<TabPanel value={selectedTabIndex} index={4}/>
+							<TabPanel value={selectedTabIndex} index={2}/>
+							<TabPanel value={selectedTabIndex} index={3}/>
+
 
 						</Grid>
 					</Grid>

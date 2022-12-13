@@ -1,21 +1,18 @@
 import React, {useEffect, useState} from "react";
-import {Box, Button, ButtonGroup, Grid, Tab, Tabs} from "@mui/material";
+import {Box, Button, ButtonGroup, Grid, List, ListItem, Tab, Tabs, Typography} from "@mui/material";
 
 import {Listener, RootState} from "../../types/data";
 import {useDispatch, useSelector} from "react-redux";
 import {fetchListeners} from "../../actions/listeners";
 import {resetFailedReason} from "../../actions/common";
-import {downloadThumbnail} from "../../utils/thumbnail";
 
 import {a11yProps, TabPanel} from "../tabs/TabComponent";
 import {MainBreadcrumbs} from "../navigation/BreadCrumb";
 import {ActionModal} from "../dialog/ActionModal";
-import ListenerCard from "./ListenerCard";
 import config from "../../app.config";
 import {ArrowBack, ArrowForward} from "@material-ui/icons";
 import Layout from "../Layout";
-import {useLocation, useParams, useSearchParams} from "react-router-dom";
-import * as Url from "url";
+import {useSearchParams} from "react-router-dom";
 
 const tab = {
 	fontStyle: "normal",
@@ -40,7 +37,7 @@ export const Listeners = (): JSX.Element => {
 		console.log("We have a dataset", datasetId, datasetName);
 	}
 	console.log("we log here", fileId, fileName);
-	if (fileId !== null && fileName!== null){
+	if (fileId !== null && fileName !== null) {
 		console.log("We have a file", fileId, fileName);
 	}
 
@@ -67,7 +64,6 @@ export const Listeners = (): JSX.Element => {
 
 	// component did mount
 	useEffect(() => {
-		console.log('listing listeners')
 		listListeners(0, limit);
 	}, []);
 
@@ -151,22 +147,27 @@ export const Listeners = (): JSX.Element => {
 								</Tabs>
 							</Box>
 							<TabPanel value={selectedTabIndex} index={0}>
-								<Grid container spacing={2}>
+								<List>
+
+
 									{
-										listeners !== undefined?
+										listeners !== undefined ?
 											listeners.map((listener) => {
-												console.log('we got one');
 												return (
-													<Grid item key={listener.id} xs={12} sm={6} md={4} lg={3}>
-														<ListenerCard id={listener.id} name={listener.name}
-																	 description={listener.description}/>
-													</Grid>
+													<ListItem>
+														<Typography>
+															{listener.name}
+														</Typography>
+														<Typography>
+															{listener.description}
+														</Typography>
+													</ListItem>
 												);
 											})
 											:
 											<></>
 									}
-								</Grid>
+								</List>
 								<Box display="flex" justifyContent="center" sx={{m: 1}}>
 									<ButtonGroup variant="contained" aria-label="previous next buttons">
 										<Button aria-label="previous" onClick={previous} disabled={prevDisabled}>
