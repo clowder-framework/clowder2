@@ -38,7 +38,8 @@ from app.search.connect import (
     connect_elasticsearch,
     insert_record,
     delete_document_by_id,
-    update_record, delete_document_by_query,
+    update_record,
+    delete_document_by_query,
 )
 from app.config import settings
 from app.keycloak_auth import get_user, get_current_user
