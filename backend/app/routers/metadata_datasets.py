@@ -126,7 +126,7 @@ async def add_dataset_metadata(
             "name": dataset.name,
             "resource_created": dataset.created,
             "author": dataset.author.email,
-            "description": dataset.description
+            "description": dataset.description,
         }
         insert_record(es, "metadata", doc, metadata_out.id)
         return metadata_out
