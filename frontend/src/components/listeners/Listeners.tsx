@@ -3,7 +3,7 @@ import {Box, Button, ButtonGroup, Divider, List} from "@mui/material";
 
 import {RootState} from "../../types/data";
 import {useDispatch, useSelector} from "react-redux";
-import {fetchListeners} from "../../actions/listeners";
+import {fetchListeners, queryListeners} from "../../actions/listeners";
 import {ArrowBack, ArrowForward} from "@material-ui/icons";
 import ListenerItem from "./ListenerItem";
 
@@ -13,6 +13,8 @@ export const Listeners = (): JSX.Element => {
 	// Redux connect equivalent
 	const dispatch = useDispatch();
 	const listListeners = (skip: number | undefined, limit: number | undefined) => dispatch(fetchListeners(skip, limit));
+	const searchListeners = (text: string, skip: number | undefined, limit: number | undefined) =>
+		dispatch(queryListeners(text, skip, limit));
 
 	const listeners = useSelector((state: RootState) => state.listener.listeners);
 
@@ -26,6 +28,7 @@ export const Listeners = (): JSX.Element => {
 	// component did mount
 	useEffect(() => {
 		listListeners(skip, limit);
+		searchListeners("word", skip, limit);
 	}, []);
 
 	// fetch thumbnails from each individual dataset/id calls

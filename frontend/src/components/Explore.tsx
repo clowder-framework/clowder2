@@ -32,7 +32,6 @@ export const Explore = (): JSX.Element => {
 	const dismissError = () => dispatch(resetFailedReason());
 	const datasets = useSelector((state: RootState) => state.dataset.datasets);
 	const listeners = useSelector((state: RootState) => state.listener.listeners);
-	const listListeners = (skip: number | undefined, limit: number | undefined) => dispatch(fetchListeners(skip, limit));
 	const reason = useSelector((state: RootState) => state.error.reason);
 	const stack = useSelector((state: RootState) => state.error.stack);
 
@@ -51,7 +50,6 @@ export const Explore = (): JSX.Element => {
 	// component did mount
 	useEffect(() => {
 		listDatasets(0, limit, mine);
-		listListeners(0, limit);
 	}, []);
 
 	// Error msg dialog
