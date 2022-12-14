@@ -1,3 +1,4 @@
+import re
 from typing import List
 import os
 from bson import ObjectId
@@ -92,12 +93,15 @@ async def search_listeners(
         limit -- restrict number of records to be returned (i.e. for pagination)
     """
     listeners = []
+
+    query_regx = re.compile(text, re.IGNORECASE)
+
     for doc in (
         # TODO either use regex or index search
         await db["listeners"].find({"$or":
             [
-                {"name": text},
-                {"description": text}
+                {"name": query_regx},
+                {"description": query_regx}
             ]}).skip(skip).limit(limit).to_list(length=limit)
     ):
         listeners.append(EventListenerOut.from_mongo(doc))
