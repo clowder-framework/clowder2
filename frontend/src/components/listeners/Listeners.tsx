@@ -101,7 +101,8 @@ export const Listeners = (): JSX.Element => {
 			</Grid>
 			<Grid item xs={8}>
 				<Box sx={{
-					backgroundColor:theme.palette.primary.contrastText
+					backgroundColor:theme.palette.primary.contrastText,
+					padding: "3em"
 				}}>
 					<List>
 						{
