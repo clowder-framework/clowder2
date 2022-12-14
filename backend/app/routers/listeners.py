@@ -98,11 +98,11 @@ async def search_listeners(
 
     for doc in (
         # TODO either use regex or index search
-        await db["listeners"].find({"$or":
-            [
-                {"name": query_regx},
-                {"description": query_regx}
-            ]}).skip(skip).limit(limit).to_list(length=limit)
+        await db["listeners"]
+        .find({"$or": [{"name": query_regx}, {"description": query_regx}]})
+        .skip(skip)
+        .limit(limit)
+        .to_list(length=limit)
     ):
         listeners.append(EventListenerOut.from_mongo(doc))
     return listeners
