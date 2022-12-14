@@ -45,7 +45,7 @@ services:
     environment:
       MONGODB_URL: mongodb://mongo:27017
       MINIO_SERVER_URL: minio-nginx:9000
-      elasticsearch_url: elasticsearch:9200
+      elasticsearch_url: http://elasticsearch:9200
       auth_base: http://localhost
       auth_url: http://localhost/keycloak/realms/clowder/protocol/openid-connect/auth?client_id=clowder2-backend&response_type=code
       oauth2_scheme_auth_url: http://keycloak:8080/keycloak/realms/clowder/protocol/openid-connect/auth?client_id=clowder2-backend&response_type=code
@@ -58,6 +58,7 @@ services:
       - mongo
       - minio-nginx
       - keycloak
+      - elasticsearch
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.backend.rule=PathPrefix(`/api`)"
