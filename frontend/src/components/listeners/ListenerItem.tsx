@@ -10,10 +10,11 @@ type ListenerCardProps = {
 	id: string,
 	extractorName: string,
 	extractorDescription: string,
+	setOpenSubmitExtraction: any,
 }
 
 export default function ListenerItem(props: ListenerCardProps) {
-	const {id, extractorName, extractorDescription} = props;
+	const {id, extractorName, extractorDescription, setOpenSubmitExtraction} = props;
 
 	let [searchParams, setSearchParams] = useSearchParams();
 	const fileId = searchParams.get("fileId");
@@ -31,7 +32,7 @@ export default function ListenerItem(props: ListenerCardProps) {
 
 	return (
 		<ListItem key={id}>
-			<Button>
+			<Button onClick={()=> {setOpenSubmitExtraction(true);}}>
 				{extractorName}
 			</Button>
 			<ListItemText secondary={extractorDescription} /><IconButton component="label">

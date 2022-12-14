@@ -18,6 +18,7 @@ export default function SubmitExtraction(props) {
 	const {open, handleClose} = props;
 
 	return (
+		// TODO replace this with submit extraction content
 		<Container>
 			<Dialog open={open} onClose={handleClose}>
 				<DialogTitle><ListenerInfo /></DialogTitle>

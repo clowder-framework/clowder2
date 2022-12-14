@@ -4,7 +4,6 @@ import {Box, Button, ButtonGroup, Grid, Tab, Tabs} from "@mui/material";
 import {Dataset, RootState} from "../types/data";
 import {useDispatch, useSelector} from "react-redux";
 import {fetchDatasets} from "../actions/dataset";
-import {fetchListeners} from "../actions/listeners";
 import {resetFailedReason} from "../actions/common";
 import {downloadThumbnail} from "../utils/thumbnail";
 
@@ -31,7 +30,6 @@ export const Explore = (): JSX.Element => {
 	const listDatasets = (skip: number | undefined, limit: number | undefined, mine: boolean | undefined) => dispatch(fetchDatasets(skip, limit, mine));
 	const dismissError = () => dispatch(resetFailedReason());
 	const datasets = useSelector((state: RootState) => state.dataset.datasets);
-	const listeners = useSelector((state: RootState) => state.listener.listeners);
 	const reason = useSelector((state: RootState) => state.error.reason);
 	const stack = useSelector((state: RootState) => state.error.stack);
 
@@ -44,7 +42,7 @@ export const Explore = (): JSX.Element => {
 	const [mine,] = useState<boolean>(false);
 	const [prevDisabled, setPrevDisabled] = useState<boolean>(true);
 	const [nextDisabled, setNextDisabled] = useState<boolean>(false);
-	const [selectedTabIndex, setSelectedTabIndex] = useState(1);
+	const [selectedTabIndex, setSelectedTabIndex] = useState(0);
 	const [selectedDataset, _] = useState<Dataset>();
 
 	// component did mount
@@ -92,23 +90,6 @@ export const Explore = (): JSX.Element => {
 
 	}, [datasets]);
 
-	// TODO trying to replicate for extractors not sure if it's working
-	useEffect(() => {
-		(async () => {
-			if (listeners !== undefined && listeners.length > 0) {
-				// TODO change the type any to something else
-				await Promise.all(listeners.map(async (listener) => {
-					//
-				}));
-			}
-		})();
-
-		// disable flipping if reaches the last page
-		if (listeners.length < limit) setNextDisabled(true);
-		else setNextDisabled(false);
-
-	}, [listeners]);
-
 	// switch tabs
 	const handleTabChange = (_event: React.ChangeEvent<{}>, newTabIndex: number) => {
 		setSelectedTabIndex(newTabIndex);
@@ -130,7 +111,6 @@ export const Explore = (): JSX.Element => {
 	useEffect(() => {
 		if (skip !== null && skip !== undefined) {
 			listDatasets(skip, limit, mine);
-			listListeners(skip, limit)
 			if (skip === 0) setPrevDisabled(true);
 			else setPrevDisabled(false);
 		}

@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from "react";
-import {Box, Button, ButtonGroup, Divider, Grid, IconButton, List, Paper, TextField, InputBase} from "@mui/material";
+import {Box, Button, ButtonGroup, Divider, Grid, IconButton, InputBase, List} from "@mui/material";
 
 import {RootState} from "../../types/data";
 import {useDispatch, useSelector} from "react-redux";
@@ -7,6 +7,7 @@ import {fetchListeners, queryListeners} from "../../actions/listeners";
 import {ArrowBack, ArrowForward, SearchOutlined} from "@material-ui/icons";
 import ListenerItem from "./ListenerItem";
 import {theme} from "../../theme";
+import SubmitExtraction from "./SubmitExtraction";
 
 
 export const Listeners = (): JSX.Element => {
@@ -26,13 +27,14 @@ export const Listeners = (): JSX.Element => {
 	const [prevDisabled, setPrevDisabled] = useState<boolean>(true);
 	const [nextDisabled, setNextDisabled] = useState<boolean>(false);
 	const [searchText, setSearchText] = useState<string>("");
+	const [openSubmitExtraction, setOpenSubmitExtraction] = useState<boolean>(false);
 
 	// component did mount
 	useEffect(() => {
 		listListeners(skip, limit);
 	}, []);
 
-	// fetch thumbnails from each individual dataset/id calls
+	// fetch extractors from each individual dataset/id calls
 	useEffect(() => {
 
 		// disable flipping if reaches the last page
@@ -66,73 +68,83 @@ export const Listeners = (): JSX.Element => {
 		searchListeners(searchText, skip, limit);
 	}
 
+	const handleSubmitExtractionClose = () => {
+		// Cleanup the form
+		setOpenSubmitExtraction(false);
+	}
+
 	return (
-		<Grid container>
-			<Grid item xs={4}>
-				<Box
-					component="form"
-					sx={{p: "2px 4px",
-						display: "flex",
-						alignItems: "left",
-						backgroundColor:theme.palette.primary.contrastText,
-						width:"80%"
-					}}
-				>
-					<InputBase
-						sx={{ml: 1, flex: 1}}
-						placeholder="keyword for extractor"
-						inputProps={{"aria-label": "Type in keyword to search for extractor"}}
-						onChange={(e) => {
-							setSearchText(e.target.value);
-						   }}
-						onKeyDown = {(e) => {
-							if (e.key === "Enter") {
-								e.preventDefault();
-								handleListenerSearch();
-							}
+		<>
+			<Grid container>
+				<Grid item xs={3}>
+					<Box
+						component="form"
+						sx={{
+							p: "2px 4px",
+							display: "flex",
+							alignItems: "left",
+							backgroundColor: theme.palette.primary.contrastText,
+							width: "80%"
 						}}
-					   value={searchText}
-					/>
-					<IconButton type="button" sx={{p: "10px"}} aria-label="search"
-								onClick={handleListenerSearch}>
-						<SearchOutlined/>
-					</IconButton>
-				</Box>
-			</Grid>
-			<Grid item xs={8}>
-				<Box sx={{
-					backgroundColor:theme.palette.primary.contrastText,
-					padding: "3em"
-				}}>
-					<List>
-						{
-							listeners !== undefined ?
-								listeners.map((listener) => {
-									return (<>
-										<ListenerItem key={listener.id}
-													  id={listener.id}
-													  extractorName={listener.name}
-													  extractorDescription={listener.description}
-										/>
-										<Divider/>
-									</>);
-								})
-								:
-								<></>
-						}
-					</List>
-					<Box display="flex" justifyContent="center" sx={{m: 1}}>
-						<ButtonGroup variant="contained" aria-label="previous next buttons">
-							<Button aria-label="previous" onClick={previous} disabled={prevDisabled}>
-								<ArrowBack/> Prev
-							</Button>
-							<Button aria-label="next" onClick={next} disabled={nextDisabled}>
-								Next <ArrowForward/>
-							</Button>
-						</ButtonGroup>
+					>
+						<InputBase
+							sx={{ml: 1, flex: 1}}
+							placeholder="keyword for extractor"
+							inputProps={{"aria-label": "Type in keyword to search for extractor"}}
+							onChange={(e) => {
+								setSearchText(e.target.value);
+							}}
+							onKeyDown={(e) => {
+								if (e.key === "Enter") {
+									e.preventDefault();
+									handleListenerSearch();
+								}
+							}}
+							value={searchText}
+						/>
+						<IconButton type="button" sx={{p: "10px"}} aria-label="search"
+									onClick={handleListenerSearch}>
+							<SearchOutlined/>
+						</IconButton>
 					</Box>
-				</Box>
+				</Grid>
+				<Grid item xs={9}>
+					<Box sx={{
+						backgroundColor: theme.palette.primary.contrastText,
+						padding: "3em"
+					}}>
+						<List>
+							{
+								listeners !== undefined ?
+									listeners.map((listener) => {
+										return (<>
+											<ListenerItem key={listener.id}
+														  id={listener.id}
+														  extractorName={listener.name}
+														  extractorDescription={listener.description}
+														  setOpenSubmitExtraction={setOpenSubmitExtraction}
+											/>
+											<Divider/>
+										</>);
+									})
+									:
+									<></>
+							}
+						</List>
+						<Box display="flex" justifyContent="center" sx={{m: 1}}>
+							<ButtonGroup variant="contained" aria-label="previous next buttons">
+								<Button aria-label="previous" onClick={previous} disabled={prevDisabled}>
+									<ArrowBack/> Prev
+								</Button>
+								<Button aria-label="next" onClick={next} disabled={nextDisabled}>
+									Next <ArrowForward/>
+								</Button>
+							</ButtonGroup>
+						</Box>
+					</Box>
+				</Grid>
 			</Grid>
-		</Grid>
+			<SubmitExtraction open={openSubmitExtraction} handleClose={handleSubmitExtractionClose}/>
+		</>
 	);
 }
