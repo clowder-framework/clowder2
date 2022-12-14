@@ -77,6 +77,33 @@ async def save_legacy_listener(
     return listener_out
 
 
+@router.get("/search", response_model=List[EventListenerOut])
+async def search_listeners(
+    db: MongoClient = Depends(get_db),
+    text: str = "",
+    skip: int = 0,
+    limit: int = 2,
+):
+    """Search all Event Listeners in the db based on text.
+
+    Arguments:
+        text -- any text matching name or description
+        skip -- number of initial records to skip (i.e. for pagination)
+        limit -- restrict number of records to be returned (i.e. for pagination)
+    """
+    listeners = []
+    for doc in (
+        # TODO either use regex or index search
+        await db["listeners"].find({"$or":
+            [
+                {"name": text},
+                {"description": text}
+            ]}).skip(skip).limit(limit).to_list(length=limit)
+    ):
+        listeners.append(EventListenerOut.from_mongo(doc))
+    return listeners
+
+
 @router.get("/{listener_id}", response_model=EventListenerOut)
 async def get_listener(listener_id: str, db: MongoClient = Depends(get_db)):
     """Return JSON information about an Event Listener if it exists."""
@@ -103,33 +130,6 @@ async def get_listeners(
     listeners = []
     for doc in (
         await db["listeners"].find().skip(skip).limit(limit).to_list(length=limit)
-    ):
-        listeners.append(EventListenerOut.from_mongo(doc))
-    return listeners
-
-
-@router.get("/search", response_model=List[EventListenerOut])
-async def search_listeners(
-    user_id=Depends(get_user),
-    db: MongoClient = Depends(get_db),
-    text: str = "",
-    skip: int = 0,
-    limit: int = 2,
-):
-    """Search all Event Listeners in the db based on text.
-
-    Arguments:
-        text -- any text matching name or description
-        skip -- number of initial records to skip (i.e. for pagination)
-        limit -- restrict number of records to be returned (i.e. for pagination)
-    """
-    listeners = []
-    for doc in (
-        await db["listeners"].find({"$or":
-            [
-                {"name": "/"+text+"/i" },
-                {"description": "/"+text+"/i"}
-            ]}).skip(skip).limit(limit).to_list(length=limit)
     ):
         listeners.append(EventListenerOut.from_mongo(doc))
     return listeners

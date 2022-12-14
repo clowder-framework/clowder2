@@ -1,11 +1,13 @@
 import React, {useEffect, useState} from "react";
-import {Box, Button, ButtonGroup, Divider, List} from "@mui/material";
+import {Box, Button, ButtonGroup, Divider, Grid, List, TextField} from "@mui/material";
 
 import {RootState} from "../../types/data";
 import {useDispatch, useSelector} from "react-redux";
 import {fetchListeners, queryListeners} from "../../actions/listeners";
 import {ArrowBack, ArrowForward} from "@material-ui/icons";
 import ListenerItem from "./ListenerItem";
+import {MainBreadcrumbs} from "../navigation/BreadCrumb";
+import {ClowderButton} from "../styledComponents/ClowderButton";
 
 
 export const Listeners = (): JSX.Element => {
@@ -24,11 +26,11 @@ export const Listeners = (): JSX.Element => {
 	const [skip, setSkip] = useState<number | undefined>();
 	const [prevDisabled, setPrevDisabled] = useState<boolean>(true);
 	const [nextDisabled, setNextDisabled] = useState<boolean>(false);
+	const [searchText, setSearchText] = useState<string>("");
 
 	// component did mount
 	useEffect(() => {
 		listListeners(skip, limit);
-		searchListeners("word", skip, limit);
 	}, []);
 
 	// fetch thumbnails from each individual dataset/id calls
@@ -61,35 +63,51 @@ export const Listeners = (): JSX.Element => {
 		}
 	}, [skip]);
 
+	const handleListenerSearch = () => {
+		searchListeners(searchText, skip, limit);
+	}
+
 	return (
-		<Box>
-			<List>
-				{
-					listeners !== undefined ?
-						listeners.map((listener) => {
-							return (<>
-								<ListenerItem key={listener.id}
-											  id={listener.id}
-											  extractorName={listener.name}
-											  extractorDescription={listener.description}
-								/>
-								<Divider/>
-							</>);
-						})
-						:
-						<></>
-				}
-			</List>
-			<Box display="flex" justifyContent="center" sx={{m: 1}}>
-				<ButtonGroup variant="contained" aria-label="previous next buttons">
-					<Button aria-label="previous" onClick={previous} disabled={prevDisabled}>
-						<ArrowBack/> Prev
-					</Button>
-					<Button aria-label="next" onClick={next} disabled={nextDisabled}>
-						Next <ArrowForward/>
-					</Button>
-				</ButtonGroup>
-			</Box>
+		<Grid container>
+			<Grid item xs={4}>
+				<TextField id="outlined-search"
+						   label="Type in keyword to search for extractor..."
+						   onChange={(e) => {setSearchText(e.target.value);}}
+						   value={searchText}
+				/>
+				<Button variant="contained" onClick={handleListenerSearch}>Search</Button>
+			</Grid>
+			<Grid item xs={8}>
+				<Box>
+		<List>
+			{
+				listeners !== undefined ?
+					listeners.map((listener) => {
+						return (<>
+							<ListenerItem key={listener.id}
+										  id={listener.id}
+										  extractorName={listener.name}
+										  extractorDescription={listener.description}
+							/>
+							<Divider/>
+						</>);
+					})
+					:
+					<></>
+			}
+		</List>
+		<Box display="flex" justifyContent="center" sx={{m: 1}}>
+			<ButtonGroup variant="contained" aria-label="previous next buttons">
+				<Button aria-label="previous" onClick={previous} disabled={prevDisabled}>
+					<ArrowBack/> Prev
+				</Button>
+				<Button aria-label="next" onClick={next} disabled={nextDisabled}>
+					Next <ArrowForward/>
+				</Button>
+			</ButtonGroup>
 		</Box>
-	)
+	</Box>
+			</Grid>
+		</Grid>
+	);
 }
