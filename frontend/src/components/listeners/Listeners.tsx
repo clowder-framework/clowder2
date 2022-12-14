@@ -1,13 +1,12 @@
 import React, {useEffect, useState} from "react";
-import {Box, Button, ButtonGroup, Divider, Grid, List, TextField} from "@mui/material";
+import {Box, Button, ButtonGroup, Divider, Grid, IconButton, List, Paper, TextField, InputBase} from "@mui/material";
 
 import {RootState} from "../../types/data";
 import {useDispatch, useSelector} from "react-redux";
 import {fetchListeners, queryListeners} from "../../actions/listeners";
-import {ArrowBack, ArrowForward} from "@material-ui/icons";
+import {ArrowBack, ArrowForward, SearchOutlined} from "@material-ui/icons";
 import ListenerItem from "./ListenerItem";
-import {MainBreadcrumbs} from "../navigation/BreadCrumb";
-import {ClowderButton} from "../styledComponents/ClowderButton";
+import {theme} from "../../theme";
 
 
 export const Listeners = (): JSX.Element => {
@@ -70,43 +69,68 @@ export const Listeners = (): JSX.Element => {
 	return (
 		<Grid container>
 			<Grid item xs={4}>
-				<TextField id="outlined-search"
-						   label="Type in keyword to search for extractor..."
-						   onChange={(e) => {setSearchText(e.target.value);}}
-						   value={searchText}
-				/>
-				<Button variant="contained" onClick={handleListenerSearch}>Search</Button>
+				<Box
+					component="form"
+					sx={{p: "2px 4px",
+						display: "flex",
+						alignItems: "left",
+						backgroundColor:theme.palette.primary.contrastText,
+						width:"80%"
+					}}
+				>
+					<InputBase
+						sx={{ml: 1, flex: 1}}
+						placeholder="keyword for extractor"
+						inputProps={{"aria-label": "Type in keyword to search for extractor"}}
+						onChange={(e) => {
+							setSearchText(e.target.value);
+						   }}
+						onKeyDown = {(e) => {
+							if (e.key === "Enter") {
+								e.preventDefault();
+								handleListenerSearch();
+							}
+						}}
+					   value={searchText}
+					/>
+					<IconButton type="button" sx={{p: "10px"}} aria-label="search"
+								onClick={handleListenerSearch}>
+						<SearchOutlined/>
+					</IconButton>
+				</Box>
 			</Grid>
 			<Grid item xs={8}>
-				<Box>
-		<List>
-			{
-				listeners !== undefined ?
-					listeners.map((listener) => {
-						return (<>
-							<ListenerItem key={listener.id}
-										  id={listener.id}
-										  extractorName={listener.name}
-										  extractorDescription={listener.description}
-							/>
-							<Divider/>
-						</>);
-					})
-					:
-					<></>
-			}
-		</List>
-		<Box display="flex" justifyContent="center" sx={{m: 1}}>
-			<ButtonGroup variant="contained" aria-label="previous next buttons">
-				<Button aria-label="previous" onClick={previous} disabled={prevDisabled}>
-					<ArrowBack/> Prev
-				</Button>
-				<Button aria-label="next" onClick={next} disabled={nextDisabled}>
-					Next <ArrowForward/>
-				</Button>
-			</ButtonGroup>
-		</Box>
-	</Box>
+				<Box sx={{
+					backgroundColor:theme.palette.primary.contrastText
+				}}>
+					<List>
+						{
+							listeners !== undefined ?
+								listeners.map((listener) => {
+									return (<>
+										<ListenerItem key={listener.id}
+													  id={listener.id}
+													  extractorName={listener.name}
+													  extractorDescription={listener.description}
+										/>
+										<Divider/>
+									</>);
+								})
+								:
+								<></>
+						}
+					</List>
+					<Box display="flex" justifyContent="center" sx={{m: 1}}>
+						<ButtonGroup variant="contained" aria-label="previous next buttons">
+							<Button aria-label="previous" onClick={previous} disabled={prevDisabled}>
+								<ArrowBack/> Prev
+							</Button>
+							<Button aria-label="next" onClick={next} disabled={nextDisabled}>
+								Next <ArrowForward/>
+							</Button>
+						</ButtonGroup>
+					</Box>
+				</Box>
 			</Grid>
 		</Grid>
 	);
