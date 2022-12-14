@@ -17,6 +17,7 @@ from app.routers import (
 )
 from app.routers import (
     users,
+    authorization,
     metadata,
     files,
     metadata_files,
@@ -70,6 +71,12 @@ api_router.include_router(
     users.router,
     prefix="/users",
     tags=["users"],
+    dependencies=[Depends(get_current_username)],
+)
+api_router.include_router(
+    authorization.router,
+    prefix="/authorization",
+    tags=["authorization"],
     dependencies=[Depends(get_current_username)],
 )
 api_router.include_router(
