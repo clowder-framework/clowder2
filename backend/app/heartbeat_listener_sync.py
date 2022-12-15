@@ -4,11 +4,7 @@ import time
 from packaging import version
 from app.config import settings
 from pymongo import MongoClient
-from app.models.listeners import (
-    EventListenerDB,
-    EventListenerOut,
-    ExtractorInfo
-)
+from app.models.listeners import EventListenerDB, EventListenerOut, ExtractorInfo
 
 
 def callback(ch, method, properties, body):
@@ -17,10 +13,12 @@ def callback(ch, method, properties, body):
     extractor_id = statusBody["id"]
     extractor_queue = statusBody["queue"]
     extractor_info = statusBody["extractor_info"]
-    current_info = ExtractorInfo(**extractor_info)
+    # statusBody["properties"] = extractor_info
+    current_extractor_info = ExtractorInfo(**extractor_info)
     extractor_name = extractor_info["name"]
     extractor_db = EventListenerDB(**extractor_info)
-    extractor_db.properties = current_info
+    # TODO check why properties was not working
+    extractor_db.properties = current_extractor_info
     client = MongoClient(settings.MONGODB_URL)
     db = client["clowder2"]
     existing_extractor = db["listeners"].find_one({"name": extractor_queue})
