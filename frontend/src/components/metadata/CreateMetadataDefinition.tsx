@@ -41,7 +41,7 @@ export const CreateMetadataDefinition = (): JSX.Element => {
 
 	const [activeStep, setActiveStep] = React.useState(0);
 	const [parsedInput, setParsedInput] = React.useState("");
-	const [contextMap, setContextMap] = React.useState([{"context_name": "", "context_val": ""}]);
+	const [contextMap, setContextMap] = React.useState([{"context_name": "", "context_url": ""}]);
 	const [formInput, setFormInput] = React.useState({
 		name: "",
 		description: "",
@@ -82,7 +82,7 @@ export const CreateMetadataDefinition = (): JSX.Element => {
 
     const addNewContext = (idx: number) => {
         setContextMap(
-            [...contextMap, {"context_name": "", "context_val": ""}]
+            [...contextMap, {"context_name": "", "context_url": ""}]
         )
     }
 
@@ -92,20 +92,18 @@ export const CreateMetadataDefinition = (): JSX.Element => {
         )
     }
 
-    const updateContext = (idx: number, key: String, value: String) => {
-        if (key == 'name') {
-            let newContextMap = [...contextMap]
-            // TODO: Test below code
-            // contextMap.map((item, index) => {
-            //     var temp = Object.assign({}, item)
-            //     if (index == idx) {
-            //         temp["context_name"] = value
-            //     }
-            //     return temp
-            // })
+    const updateContext = (idx: number, key: string, value: string) => {
+        let currItem = contextMap[idx]
+        let newContextMap = [...contextMap]
 
-            setContextMap(newContextMap)
+        if (key == 'name') {
+            newContextMap.splice(idx, 1, {"context_name": value, "context_url": currItem.context_url}) // Replaces item with new value inserted
+
+        } else if (key == 'url') {
+            newContextMap.splice(idx, 1, {"context_name": currItem.context_name, "context_url": value})
         }
+        
+        setContextMap(newContextMap)
     }
 
 	const addNewField = (idx: number) => {
@@ -318,7 +316,9 @@ export const CreateMetadataDefinition = (): JSX.Element => {
                                             <Autocomplete
                                                 id="metadata-auto-complete"
                                                 freeSolo
+                                                autoHighlight
                                                 options={contextUrlMap["frequently_used"].map((option) => option.url)}
+                                                onInputChange={(event, value) => {updateContext(idx, "url", value);}}
                                                 renderInput={(params) => <TextField {...params} sx={{ mt: 1, mr: 1, "alignItems": "right", "width": "450px" }} label="Context URL" />}
                                             />
                                         </Grid>
