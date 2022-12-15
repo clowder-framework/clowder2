@@ -40,6 +40,7 @@ def submit_file_message(
     except Exception as e:
         print(e)
 
+    # TODO: Change default name to listeners
     rabbitmq_client.queue_bind(
         exchange="extractors",
         queue=queue,
@@ -73,6 +74,7 @@ def submit_dataset_message(
         secretKey=token,
     )
 
+    # TODO: Change default name to listeners
     rabbitmq_client.queue_bind(
         exchange="extractors",
         queue=queue,
