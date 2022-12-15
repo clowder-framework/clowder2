@@ -1,6 +1,7 @@
 import React from "react";
 
 import {
+    Autocomplete,
 	Button,
 	Checkbox,
 	FormControlLabel,
@@ -22,7 +23,7 @@ import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import {postMetadataDefinitions} from "../../actions/metadata";
 import Layout from "../Layout";
 
-import {inputTypes, widgetTypes} from "../../metadata.config";
+import {contextUrlMap, inputTypes, widgetTypes} from "../../metadata.config";
 
 export const CreateMetadataDefinitionPage = (): JSX.Element => {
 	return (
@@ -40,6 +41,7 @@ export const CreateMetadataDefinition = (): JSX.Element => {
 
 	const [activeStep, setActiveStep] = React.useState(0);
 	const [parsedInput, setParsedInput] = React.useState("");
+	const [contextMap, setContextMap] = React.useState([{"context_name": "", "context_val": ""}]);
 	const [formInput, setFormInput] = React.useState({
 		name: "",
 		description: "",
@@ -77,6 +79,34 @@ export const CreateMetadataDefinition = (): JSX.Element => {
 
 		setFormInput(data)
 	}
+
+    const addNewContext = (idx: number) => {
+        setContextMap(
+            [...contextMap, {"context_name": "", "context_val": ""}]
+        )
+    }
+
+    const removeContext = (idx: number) => {
+        setContextMap(
+            contextMap.splice(idx)
+        )
+    }
+
+    const updateContext = (idx: number, key: String, value: String) => {
+        if (key == 'name') {
+            let newContextMap = [...contextMap]
+            // TODO: Test below code
+            // contextMap.map((item, index) => {
+            //     var temp = Object.assign({}, item)
+            //     if (index == idx) {
+            //         temp["context_name"] = value
+            //     }
+            //     return temp
+            // })
+
+            setContextMap(newContextMap)
+        }
+    }
 
 	const addNewField = (idx: number) => {
 		let newitem = {
@@ -267,26 +297,43 @@ export const CreateMetadataDefinition = (): JSX.Element => {
 										handleInputChange(-1, "description", event.target.value);
 									}}
 								/>
-								{/*
-                                  * TODO: Expand context field to pick-up the most frequently used namespaces first
-                                  * https://github.com/clowder-framework/clowder2/issues/153
-                                  */}
-								<TextField
-									variant="outlined"
-									margin="normal"
-									required
-									fullWidth
-									id="metadata-context"
-									label="Metadata Context"
-									InputLabelProps={{shrink: true}}
-									placeholder="Please enter metadata context in JSON format"
-									value={formInput.context}
-									onChange={(event) => {
-										handleInputChange(-1, "context", event.target.value);
-									}}
-									multiline
-									maxRows={6}
-								/>
+                                {contextMap.map((item, idx) => {
+								    return (<Grid container>
+                                        <Grid item>
+                                            <TextField
+                                                variant="outlined"
+                                                margin="normal"
+                                                fullWidth
+                                                required
+                                                id="metadata-context"
+                                                label="Metadata Context Name"
+                                                InputLabelProps={{ shrink: true }}
+                                                placeholder="Please enter metadata context name"
+                                                value={item["context_name"]}
+                                                sx={{ mt: 1, mr: 1, "alignItems": "right", "width": "300px"  }}
+                                                onChange={(event) => { updateContext(idx, "name", event.target.value); }}
+                                            />
+                                        </Grid>
+                                        <Grid item>
+                                            <Autocomplete
+                                                id="metadata-auto-complete"
+                                                freeSolo
+                                                options={contextUrlMap["frequently_used"].map((option) => option.url)}
+                                                renderInput={(params) => <TextField {...params} sx={{ mt: 1, mr: 1, "alignItems": "right", "width": "450px" }} label="Context URL" />}
+                                            />
+                                        </Grid>
+                                        <IconButton color="primary" size="small"
+                                                    onClick={() => addNewContext(idx)}>
+                                            <AddBoxIcon/>
+                                        </IconButton>
+                                        {idx == 0 ? <></> : 
+													<IconButton color="primary" size="small"
+																onClick={() => removeContext(idx)}>
+														<DeleteOutlineIcon/>
+													</IconButton>}
+                                    </Grid>)
+                                 })}
+                                    
 								<Button variant="contained" onClick={() => validateFormData(activeStep)}>Next</Button>
 							</form>
 						</StepContent>
