@@ -1,9 +1,10 @@
 version: '3.7'
 
-# Settings and configurations that are common for all containers
+# Settings and configurations that are common for all minio containers
 x-minio-common: &minio-common
   image: quay.io/minio/minio:RELEASE.2022-01-25T19-56-04Z
   command: server --console-address ":9001" http://minio{1...4}/data
+  restart: unless-stopped
   environment:
     MINIO_ROOT_USER: minioadmin
     MINIO_ROOT_PASSWORD: minioadmin
@@ -18,9 +19,8 @@ x-minio-common: &minio-common
 services:
 
   reverse-proxy:
-    # The official v2 Traefik docker image
     image: traefik:v2.5
-    # Enables the web UI and tells Traefik to listen to docker
+    restart: unless-stopped
     command:
       - --api.insecure=true
       - --providers.docker
@@ -38,6 +38,7 @@ services:
 
   backend:
     image: 'clowder/clowder2-backend'
+    restart: unless-stopped
     build:
       context: ./backend
     networks:
@@ -67,6 +68,7 @@ services:
 
   frontend:
     image: "clowder/clowder2-frontend"
+    restart: unless-stopped
     build:
       context: ./frontend
     networks:
@@ -84,6 +86,7 @@ services:
 
   mongo:
     image: mongo:5.0
+    restart: unless-stopped
     networks:
       - clowder2
     volumes:
@@ -118,6 +121,7 @@ services:
 
   minio-nginx:
     image: nginx:1.19.2-alpine
+    restart: unless-stopped
     hostname: nginx
     networks:
       - clowder2
@@ -131,6 +135,7 @@ services:
 
   postgres:
       image: postgres
+      restart: unless-stopped
       networks:
         - clowder2
       volumes:
@@ -142,6 +147,7 @@ services:
 
   keycloak:
       image: quay.io/keycloak/keycloak:19.0
+      restart: unless-stopped
       networks:
         - clowder2
       volumes:
@@ -169,9 +175,9 @@ services:
 
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.3.3
+    restart: unless-stopped
     networks:
       - clowder2
-    restart: unless-stopped
     environment:
       - "cluster.name=clowder2"
       - "discovery.type=single-node"
