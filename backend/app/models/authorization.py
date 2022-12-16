@@ -5,7 +5,7 @@ from pydantic import BaseModel, EmailStr, Field
 
 from app.models.mongomodel import MongoModel
 from app.models.pyobjectid import PyObjectId
-from app.models.users import UserDB
+from app.models.users import UserDB, UserOut
 
 
 class RoleType(str, Enum):
@@ -25,7 +25,7 @@ class AuthorizationBase(BaseModel):
         use_enum_values = True
 
 class Provenance(BaseModel):
-    author: UserDB
+    creator: EmailStr
     created: datetime = Field(default_factory=datetime.utcnow)
     modified: datetime = Field(default_factory=datetime.utcnow)
 

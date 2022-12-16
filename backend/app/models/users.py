@@ -11,11 +11,11 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 class UserBase(MongoModel):
     email: EmailStr
-    first_name: str
-    last_name: str
 
 
 class UserIn(UserBase):
+    first_name: str
+    last_name: str
     password: str
 
 

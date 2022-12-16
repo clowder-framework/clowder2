@@ -10,9 +10,10 @@ router = APIRouter()
 @router.post("", response_model=AuthorizationDB)
 async def save_authorization(
     authorization_in: AuthorizationBase,
-    user=Depends(keycloak_auth.get_current_user),
+    user=Depends(keycloak_auth.get_current_username),
     db: MongoClient = Depends(dependencies.get_db),
 ):
-    authorization_db = AuthorizationDB(**authorization_in.dict(), author=user)
+    authorization_db = AuthorizationDB(**authorization_in.dict(), creator=user)
     new_authorization = await db["authorization"].insert_one(authorization_db.to_mongo())
-    return new_authorization
+    found = await db["authorization"].find_one({"_id": new_authorization.inserted_id})
+    return AuthorizationDB.from_mongo(found)
