@@ -45,7 +45,7 @@ export const CreateMetadataDefinition = (): JSX.Element => {
 	const [formInput, setFormInput] = React.useState({
 		name: "",
 		description: "",
-		context: '{\n\t"abstract": "http://purl.org/dc/terms/abstract"\n}',
+		context: "",
 		fields: [{
 			name: "",
 			list: false,
@@ -81,18 +81,22 @@ export const CreateMetadataDefinition = (): JSX.Element => {
 	}
 
     const addNewContext = (idx: number) => {
-        setContextMap(
-            [...contextMap, {"context_name": "", "context_url": ""}]
-        )
+        let newContextMap = [...contextMap]
+        newContextMap.splice(idx + 1, 0, {"context_name": "", "context_url": ""})
+
+        setContextMap(newContextMap)
+        constructContextJson(newContextMap)
     }
 
     const removeContext = (idx: number) => {
-        setContextMap(
-            contextMap.splice(idx)
-        )
+        let newContextMap = [...contextMap]
+        newContextMap.splice(idx, 1)
+
+        setContextMap(newContextMap)
+        constructContextJson(newContextMap)
     }
 
-    const updateContext = (idx: number, key: string, value: string) => {
+    const updateContext = (idx: number, key: string, value: string | null) => {
         let currItem = contextMap[idx]
         let newContextMap = [...contextMap]
 
@@ -104,6 +108,22 @@ export const CreateMetadataDefinition = (): JSX.Element => {
         }
         
         setContextMap(newContextMap)
+        constructContextJson(newContextMap)
+    }
+
+    const constructContextJson = (newContextMap: any) => {
+        let contextJson = {}
+
+        newContextMap.forEach((item, idx) => {
+            contextJson[item["context_name"]] = item["context_url"]
+        })
+
+        setFormInput({
+			name: formInput.name,
+			description: formInput.description,
+			context: JSON.stringify(contextJson),
+			fields: formInput.fields
+		})
     }
 
 	const addNewField = (idx: number) => {
@@ -198,14 +218,14 @@ export const CreateMetadataDefinition = (): JSX.Element => {
 
 		if (stepNumber == 0) {
 			if (formInput.name !== "" && formInput.description != "") {
-				// Validate JSON string schema
-				try {
-					let jsonString = JSON.parse(formInput.context)
-					isFormValid = true
+				// Validate context inputs are not empty
+                isFormValid = true
 
-				} catch (error) {
-					isFormValid = false
-				}
+				contextMap.forEach((item) => {
+                    if (item.context_name == "" || item.context_url == "") {
+                        isFormValid = false
+                    }
+                })
 			}
 
 		} else {
@@ -232,7 +252,7 @@ export const CreateMetadataDefinition = (): JSX.Element => {
 		setFormInput({
 			name: "",
 			description: "",
-			context: '{\n\t"abstract": "http://purl.org/dc/terms/abstract"\n}',
+			context: "",
 			fields: [{
 				name: "",
 				list: false,
@@ -244,6 +264,8 @@ export const CreateMetadataDefinition = (): JSX.Element => {
 				required: false,
 			}]
 		})
+
+        setContextMap([{"context_name": "", "context_url": ""}])
 	}
 
 	const handleNext = () => {
@@ -309,7 +331,9 @@ export const CreateMetadataDefinition = (): JSX.Element => {
                                                 placeholder="Please enter metadata context name"
                                                 value={item["context_name"]}
                                                 sx={{ mt: 1, mr: 1, "alignItems": "right", "width": "300px"  }}
-                                                onChange={(event) => { updateContext(idx, "name", event.target.value); }}
+                                                onChange={(event) => { 
+                                                    updateContext(idx, "name", event.target.value);
+                                                }}
                                             />
                                         </Grid>
                                         <Grid item>
@@ -317,8 +341,15 @@ export const CreateMetadataDefinition = (): JSX.Element => {
                                                 id="metadata-auto-complete"
                                                 freeSolo
                                                 autoHighlight
+                                                value={item["context_url"]}
+                                                inputValue={item["context_url"]}
                                                 options={contextUrlMap["frequently_used"].map((option) => option.url)}
-                                                onInputChange={(event, value) => {updateContext(idx, "url", value);}}
+                                                onChange={(event, value) => { 
+                                                    updateContext(idx, "url", value);
+                                                }}
+                                                onInputChange={(event, value) => {
+                                                    updateContext(idx, "url", value);
+                                                }}
                                                 renderInput={(params) => <TextField {...params} sx={{ mt: 1, mr: 1, "alignItems": "right", "width": "450px" }} label="Context URL" />}
                                             />
                                         </Grid>
