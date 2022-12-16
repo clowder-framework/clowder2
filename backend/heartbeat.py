@@ -17,22 +17,19 @@ logger = logging.getLogger(__name__)
 
 def callback(ch, method, properties, body):
     """This method receives messages from RabbitMQ and processes them."""
-    statusBody = json.loads(body.decode("utf-8"))
-    logger.info("Received extractor heartbeat: " + str(statusBody))
+    msg = json.loads(body.decode("utf-8"))
 
-    extractor_id = statusBody["id"]
-    extractor_queue = statusBody["queue"]
-    extractor_info = statusBody["extractor_info"]
-    current_info = ExtractorInfo(**extractor_info)
+    extractor_info = msg["extractor_info"]
     extractor_name = extractor_info["name"]
-    extractor_db = EventListenerDB(**extractor_info)
-    extractor_db.properties = current_info
+    extractor_db = EventListenerDB(**extractor_info, properties=ExtractorInfo(**extractor_info))
+
     mongo_client = MongoClient(settings.MONGODB_URL)
     db = mongo_client[settings.MONGO_DATABASE]
 
-    # TODO: This block could go in app.rabbitmq.listeners register_listener and update_listener methods
-    existing_extractor = db["listeners"].find_one({"name": extractor_queue})
+    # TODO: This block could go in app.rabbitmq.listeners register_listener and update_listener methods?
+    existing_extractor = db["listeners"].find_one({"name": msg["queue"]})
     if existing_extractor is not None:
+        # Update existing listener
         existing_version = existing_extractor["version"]
         new_version = extractor_db.version
         if version.parse(new_version) > version.parse(existing_version):
@@ -44,6 +41,7 @@ def callback(ch, method, properties, body):
             logger.info("%s updated from %s to %s" % (extractor_name, existing_version, new_version))
             return extractor_out
     else:
+        # Register new listener
         new_extractor = db["listeners"].insert_one(extractor_db.to_mongo())
         found = db["listeners"].find_one({"_id": new_extractor.inserted_id})
         extractor_out = EventListenerOut.from_mongo(found)
@@ -59,18 +57,16 @@ def listen_for_heartbeats():
     connection = pika.BlockingConnection(parameters)
     channel = connection.channel()
 
-    # TODO: Change default name to listeners
     channel.exchange_declare(
-        exchange="extractors", exchange_type="fanout", durable=True
+        exchange=settings.HEARTBEAT_EXCHANGE, exchange_type="fanout", durable=True
     )
     result = channel.queue_declare(queue="", exclusive=True)
     queue_name = result.method.queue
-    channel.queue_bind(exchange="extractors", queue=queue_name)
+    channel.queue_bind(exchange=settings.HEARTBEAT_EXCHANGE, queue=queue_name)
 
     logger.info(" [*] Waiting for heartbeats. To exit press CTRL+C")
     channel.basic_consume(queue=queue_name, on_message_callback=callback, auto_ack=True)
     channel.start_consuming()
 
 if __name__ == "__main__":
-    print()
     listen_for_heartbeats()

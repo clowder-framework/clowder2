@@ -1,6 +1,8 @@
 from datetime import datetime
 from pydantic import Field, BaseModel
 from typing import Optional, List, Union
+
+from app.config import settings
 from app.models.pyobjectid import PyObjectId
 from app.models.mongomodel import MongoModel
 from app.models.users import UserOut
@@ -83,7 +85,8 @@ class FeedListener(BaseModel):
 class EventListenerMessage(BaseModel):
     """This describes contents of JSON object that is submitted to RabbitMQ for the Event Listeners/Extractors to consume."""
 
-    host: str = "http://127.0.0.1:8000"
+    # TODO better solution for host
+    host: str = settings.API_HOST
     secretKey: str = "secretKey"
     retry_count: int = 0
     resource_type: str = "file"
@@ -98,7 +101,7 @@ class EventListenerMessage(BaseModel):
 class EventListenerDatasetMessage(BaseModel):
     """This describes contents of JSON object that is submitted to RabbitMQ for the Event Listeners/Extractors to consume."""
 
-    host: str = "http://127.0.0.1:8000"
+    host: str = settings.API_HOST
     secretKey: str = "secretKey"
     retry_count: int = 0
     resource_type: str = "dataset"

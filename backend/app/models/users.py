@@ -1,7 +1,7 @@
 from typing import Optional
 
 from passlib.context import CryptContext
-from pydantic import Field, EmailStr
+from pydantic import Field, EmailStr, BaseModel
 from pymongo import MongoClient
 
 from app.models.mongomodel import MongoModel
@@ -14,10 +14,12 @@ class UserBase(MongoModel):
     first_name: str
     last_name: str
 
-
 class UserIn(UserBase):
     password: str
 
+class UserLogin(BaseModel):
+    email: EmailStr
+    password: str
 
 class UserDB(UserBase):
     hashed_password: str = Field()

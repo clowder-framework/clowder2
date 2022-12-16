@@ -2,9 +2,9 @@ import json
 import pika
 from fastapi import Request, HTTPException, Depends
 from pymongo import MongoClient
-from bson import ObjectId
 from pika.adapters.blocking_connection import BlockingChannel
 
+from app.config import settings
 from app.keycloak_auth import get_token
 from app import dependencies
 from app.models.files import FileOut
@@ -27,8 +27,6 @@ def submit_file_message(
     current_id = file_out.id
     current_datasetId = file_out.dataset_id
     current_secretKey = token
-    print(current_secretKey)
-    print(type(current_secretKey))
     try:
         msg_body = EventListenerMessage(
             filename=file_out.name,
@@ -40,14 +38,8 @@ def submit_file_message(
     except Exception as e:
         print(e)
 
-    # TODO: Change default name to listeners
-    rabbitmq_client.queue_bind(
-        exchange="extractors",
-        queue=queue,
-        routing_key=routing_key,
-    )
     rabbitmq_client.basic_publish(
-        exchange="extractors",
+        exchange='',
         routing_key=routing_key,
         body=json.dumps(msg_body.dict(), ensure_ascii=False),
         properties=pika.BasicProperties(
@@ -76,12 +68,10 @@ def submit_dataset_message(
 
     # TODO: Change default name to listeners
     rabbitmq_client.queue_bind(
-        exchange="extractors",
         queue=queue,
         routing_key=routing_key,
     )
     rabbitmq_client.basic_publish(
-        exchange="extractors",
         routing_key=routing_key,
         body=json.dumps(msg_body.dict(), ensure_ascii=False),
         properties=pika.BasicProperties(

@@ -303,17 +303,21 @@ async def get_file_versions(
     raise HTTPException(status_code=404, detail=f"File {file_id} not found")
 
 
-# submits file to extractor
-# can handle parameeters pass in as key/values in info
 @router.post("/{file_id}/extract")
 async def get_file_extract(
     file_id: str,
-    info: Request,
+    info: Request, # TODO: Pydantic class?
     token: str = Depends(get_token),
     credentials: HTTPAuthorizationCredentials = Security(security),
     db: MongoClient = Depends(dependencies.get_db),
     rabbitmq_client: BlockingChannel = Depends(dependencies.get_rabbitmq),
 ):
+    """
+    Submit file to an extractor.
+
+    :param file_id: UUID of file
+    :param info: must include "extractor" field with name, can also include key/value pairs in "parameters"
+    """
     req_info = await info.json()
     access_token = credentials.credentials
     if "extractor" not in req_info:
@@ -332,7 +336,7 @@ async def get_file_extract(
         parameters = {}
         if "parameters" in req_info:
             parameters = req_info["parameters"]
-        routing_key = "extractors." + queue
+        routing_key = queue
 
         submit_file_message(
             file_out, queue, routing_key, parameters, access_token, db, rabbitmq_client
