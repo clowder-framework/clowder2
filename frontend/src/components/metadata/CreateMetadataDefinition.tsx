@@ -341,12 +341,8 @@ export const CreateMetadataDefinition = (): JSX.Element => {
                                                 id="metadata-auto-complete"
                                                 freeSolo
                                                 autoHighlight
-                                                value={item["context_url"]}
                                                 inputValue={item["context_url"]}
                                                 options={contextUrlMap["frequently_used"].map((option) => option.url)}
-                                                onChange={(event, value) => { 
-                                                    updateContext(idx, "url", value);
-                                                }}
                                                 onInputChange={(event, value) => {
                                                     updateContext(idx, "url", value);
                                                 }}
