@@ -66,10 +66,6 @@ def submit_dataset_message(
         secretKey=token,
     )
 
-    rabbitmq_client.queue_bind(
-        queue=queue,
-        routing_key=routing_key,
-    )
     rabbitmq_client.basic_publish(
         exchange='',
         routing_key=routing_key,
