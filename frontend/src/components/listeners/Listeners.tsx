@@ -97,8 +97,8 @@ export const Listeners = (): JSX.Element => {
 							onKeyDown={(e) => {
 								if (e.key === "Enter") {
 									e.preventDefault();
-									handleListenerSearch();
 								}
+								handleListenerSearch();
 							}}
 							value={searchText}
 						/>
