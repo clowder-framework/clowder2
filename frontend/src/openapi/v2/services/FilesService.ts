@@ -6,7 +6,6 @@ import type { FileOut } from '../models/FileOut';
 import type { FileVersion } from '../models/FileVersion';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { request as __request } from '../core/request';
-import {EventListenerSubmit} from "../models/EventListenerSubmit";
 
 export class FilesService {
 
@@ -119,13 +118,11 @@ export class FilesService {
      * @throws ApiError
      */
     public static getFileExtractApiV2FilesFileIdExtractPost(
-        fileId: string, requestBody: EventListenerSubmit,
+        fileId: string,
     ): CancelablePromise<any> {
         return __request({
             method: 'POST',
-			body: requestBody,
             path: `/api/v2/files/${fileId}/extract`,
-			mediaType: 'application/json',
             errors: {
                 422: `Validation Error`,
             },
