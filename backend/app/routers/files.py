@@ -306,7 +306,7 @@ async def get_file_versions(
 @router.post("/{file_id}/extract")
 async def get_file_extract(
     file_id: str,
-    info: Request, # TODO: Pydantic class?
+    info: Request,  # TODO: Pydantic class?
     token: str = Depends(get_token),
     credentials: HTTPAuthorizationCredentials = Security(security),
     db: MongoClient = Depends(dependencies.get_db),

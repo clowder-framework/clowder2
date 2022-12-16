@@ -39,7 +39,7 @@ def submit_file_message(
         print(e)
 
     rabbitmq_client.basic_publish(
-        exchange='',
+        exchange="",
         routing_key=routing_key,
         body=json.dumps(msg_body.dict(), ensure_ascii=False),
         properties=pika.BasicProperties(
@@ -67,7 +67,7 @@ def submit_dataset_message(
     )
 
     rabbitmq_client.basic_publish(
-        exchange='',
+        exchange="",
         routing_key=routing_key,
         body=json.dumps(msg_body.dict(), ensure_ascii=False),
         properties=pika.BasicProperties(

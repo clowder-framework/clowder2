@@ -14,12 +14,15 @@ class UserBase(MongoModel):
     first_name: str
     last_name: str
 
+
 class UserIn(UserBase):
     password: str
+
 
 class UserLogin(BaseModel):
     email: EmailStr
     password: str
+
 
 class UserDB(UserBase):
     hashed_password: str = Field()
