@@ -5,11 +5,7 @@ from packaging import version
 from pymongo import MongoClient
 
 from app.config import settings
-from app.models.listeners import (
-    EventListenerDB,
-    EventListenerOut,
-    ExtractorInfo
-)
+from app.models.listeners import EventListenerDB, EventListenerOut, ExtractorInfo
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -21,9 +17,9 @@ def callback(ch, method, properties, body):
 
     extractor_info = msg["extractor_info"]
     extractor_name = extractor_info["name"]
-    parameters = extractor_info["parameters"]["schema"]
-    extractor_info["parameters"] = parameters
-    extractor_db = EventListenerDB(**extractor_info, properties=ExtractorInfo(**extractor_info))
+    extractor_db = EventListenerDB(
+        **extractor_info, properties=ExtractorInfo(**extractor_info)
+    )
 
     mongo_client = MongoClient(settings.MONGODB_URL)
     db = mongo_client[settings.MONGO_DATABASE]
@@ -40,7 +36,10 @@ def callback(ch, method, properties, body):
             found = db["listeners"].find_one({"_id": new_extractor.inserted_id})
             removed = db["listeners"].delete_one({"_id": existing_extractor["_id"]})
             extractor_out = EventListenerOut.from_mongo(found)
-            logger.info("%s updated from %s to %s" % (extractor_name, existing_version, new_version))
+            logger.info(
+                "%s updated from %s to %s"
+                % (extractor_name, existing_version, new_version)
+            )
             return extractor_out
     else:
         # Register new listener
@@ -69,6 +68,7 @@ def listen_for_heartbeats():
     logger.info(" [*] Waiting for heartbeats. To exit press CTRL+C")
     channel.basic_consume(queue=queue_name, on_message_callback=callback, auto_ack=True)
     channel.start_consuming()
+
 
 if __name__ == "__main__":
     listen_for_heartbeats()
