@@ -117,11 +117,13 @@ export const Listeners = (): JSX.Element => {
 							{
 								listeners !== undefined ?
 									listeners.map((listener) => {
+										console.log('listener is', listener);
 										return (<>
 											<ListenerItem key={listener.id}
 														  id={listener.id}
 														  extractorName={listener.name}
 														  extractorDescription={listener.description}
+														  extractorParameters={listener.parameters}
 														  setOpenSubmitExtraction={setOpenSubmitExtraction}
 											/>
 											<Divider/>

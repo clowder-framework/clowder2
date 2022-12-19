@@ -10,16 +10,17 @@ type ListenerCardProps = {
 	id: string,
 	extractorName: string,
 	extractorDescription: string,
+	extractorParameters: any,
 	setOpenSubmitExtraction: any,
 }
 
 export default function ListenerItem(props: ListenerCardProps) {
-	const {id, extractorName, extractorDescription, setOpenSubmitExtraction} = props;
+	const {id, extractorName, extractorDescription, extractorParameters, setOpenSubmitExtraction} = props;
 
 	let [searchParams, setSearchParams] = useSearchParams();
 	const fileId = searchParams.get("fileId");
 	const datasetId = searchParams.get("datasetId");
-
+	console.log('the parameters', extractorParameters);
 	const dispatch = useDispatch();
 	const submitFileExtraction = (fileId: string | undefined, extractor: string | undefined) => dispatch(submitFileExtractionAction(fileId, extractor));
 	const submitDatasetExtraction = (datasetId: string | undefined, extractor: string | undefined) => dispatch(submitDatasetExtractionAction(datasetId, extractor));
