@@ -3,7 +3,7 @@ import config from "../../app.config";
 import {Button, Grid, Tab, Tabs, Typography} from "@mui/material";
 import {downloadResource, parseDate} from "../../utils/common";
 import {PreviewConfiguration, RootState} from "../../types/data";
-import {useParams, useSearchParams} from "react-router-dom";
+import {useParams, useSearchParams, useNavigate} from "react-router-dom";
 import {useDispatch, useSelector} from "react-redux";
 import {resetFailedReason} from "../../actions/common"
 
@@ -25,10 +25,12 @@ import {fetchDatasetAbout} from "../../actions/dataset";
 import {Download} from "@mui/icons-material";
 import {FileDetails} from "./FileDetails";
 import {fetchFolderPath} from "../../actions/folder";
+import {Listeners} from "../listeners/Listeners";
 
 
 export const File = (): JSX.Element => {
 
+	const history = useNavigate();
 	// path parameter
 	const {fileId} = useParams<{ fileId?: string }>();
 
@@ -163,6 +165,14 @@ export const File = (): JSX.Element => {
 		setEnableAddMetadata(false);
 	};
 
+	// const submitToListener = ()=> {
+	// 	const filename = fileSummary['name']
+	// 	console.log('submit to listener');
+	// 	console.log("the file name is", filename);
+	// 	console.log('the file id is', fileId);
+	// 	history(`/listeners?fileId=${fileId}&fileName=${filename}`);
+	// }
+
 	// for breadcrumb
 	const paths = [
 		{
@@ -218,7 +228,8 @@ export const File = (): JSX.Element => {
 					<Tabs value={selectedTabIndex} onChange={handleTabChange} aria-label="file tabs">
 						{/*<Tab label="Previews" {...a11yProps(0)} />*/}
 						<Tab label="Version History" {...a11yProps(0)} />
-						<Tab label="Metadata" {...a11yProps(2)} disabled={false}/>
+						<Tab label="Metadata" {...a11yProps(1)} disabled={false}/>
+						<Tab label="Extractors" {...a11yProps(2)} disabled={false}/>
 					</Tabs>
 					{/*Preview Tab*/}
 					{/*<TabPanel value={selectedTabIndex} index={0}>*/}
@@ -271,10 +282,10 @@ export const File = (): JSX.Element => {
 								</>
 						}
 					</TabPanel>
-					<TabPanel value={selectedTabIndex} index={4}>
-						Extractions
+					<TabPanel value={selectedTabIndex} index={2}>
+						<Listeners />
 					</TabPanel>
-					<TabPanel value={selectedTabIndex} index={5}>
+					<TabPanel value={selectedTabIndex} index={3}>
 						Comments
 					</TabPanel>
 				</Grid>

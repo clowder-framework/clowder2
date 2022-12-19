@@ -11,6 +11,7 @@ export type LegacyEventListenerIn = {
     author: string;
     process: any;
     maturity?: string;
+    name: string;
     contributors?: Array<string>;
     contexts?: Array<any>;
     repository?: Array<Repository>;
@@ -20,7 +21,6 @@ export type LegacyEventListenerIn = {
     default_labels?: Array<string>;
     categories?: Array<string>;
     parameters?: Array<any>;
-    name: string;
     version?: string;
     description?: string;
 }

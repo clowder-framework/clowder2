@@ -34,6 +34,7 @@ export default function FileMenu(props: FileMenuProps) {
 	const dispatch = useDispatch();
 	const deleteFile = (fileId:string|undefined) => dispatch(fileDeleted(fileId));
 	const downloadFile = (fileId:string|undefined, filename:string|undefined) => dispatch(fileDownloaded(fileId, filename))
+
 	const [confirmationOpen, setConfirmationOpen] = useState(false);
 	const [updateFileOpen, setUpdateFileOpen] = useState(false);
 	const deleteSelectedFile = () => {
