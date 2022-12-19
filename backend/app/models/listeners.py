@@ -28,7 +28,7 @@ class ExtractorInfo(BaseModel):
     bibtex: Optional[List[str]] = []
     default_labels: Optional[List[str]] = []
     categories: Optional[List[str]] = []
-    parameters: Optional[dict] = {}
+    parameters: Optional[dict] = None
     version: Optional[str] = "1.0"
 
 

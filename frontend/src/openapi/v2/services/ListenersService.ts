@@ -59,6 +59,39 @@ export class ListenersService {
     }
 
     /**
+     * Search Listeners
+     * Search all Event Listeners in the db based on text.
+     *
+     * Arguments:
+     * text -- any text matching name or description
+     * skip -- number of initial records to skip (i.e. for pagination)
+     * limit -- restrict number of records to be returned (i.e. for pagination)
+     * @param text
+     * @param skip
+     * @param limit
+     * @returns EventListenerOut Successful Response
+     * @throws ApiError
+     */
+    public static searchListenersApiV2ListenersSearchGet(
+        text: string = '',
+        skip?: number,
+        limit: number = 2,
+    ): CancelablePromise<Array<EventListenerOut>> {
+        return __request({
+            method: 'GET',
+            path: `/api/v2/listeners/search`,
+            query: {
+                'text': text,
+                'skip': skip,
+                'limit': limit,
+            },
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+
+    /**
      * Get Listener
      * Return JSON information about an Event Listener if it exists.
      * @param listenerId
@@ -117,39 +150,6 @@ export class ListenersService {
         return __request({
             method: 'DELETE',
             path: `/api/v2/listeners/${listenerId}`,
-            errors: {
-                422: `Validation Error`,
-            },
-        });
-    }
-
-    /**
-     * Search Listeners
-     * Search all Event Listeners in the db based on text.
-     *
-     * Arguments:
-     * text -- any text matching name or description
-     * skip -- number of initial records to skip (i.e. for pagination)
-     * limit -- restrict number of records to be returned (i.e. for pagination)
-     * @param text
-     * @param skip
-     * @param limit
-     * @returns EventListenerOut Successful Response
-     * @throws ApiError
-     */
-    public static searchListenersApiV2ListenersSearchGet(
-        text: string = '',
-        skip?: number,
-        limit: number = 2,
-    ): CancelablePromise<Array<EventListenerOut>> {
-        return __request({
-            method: 'GET',
-            path: `/api/v2/listeners/search`,
-            query: {
-                'text': text,
-                'skip': skip,
-                'limit': limit,
-            },
             errors: {
                 422: `Validation Error`,
             },

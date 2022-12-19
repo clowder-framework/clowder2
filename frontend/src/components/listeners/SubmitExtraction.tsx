@@ -1,41 +1,61 @@
 import React from "react";
 import {
+	Box,
 	Button,
 	Container,
 	Dialog,
 	DialogActions,
 	DialogContent,
 	DialogContentText,
-	DialogTitle,
-	TextField
+	DialogTitle
 } from "@mui/material";
 
 import {ListenerInfo} from "./ListenerInfo";
+import Form from "@rjsf/material-ui";
+import {FormProps} from "@rjsf/core";
 
+type SubmitExtractionProps = {
+	open: boolean,
+	handleClose: any
+	selectedExtractor: object
+}
+export default function SubmitExtraction(props: SubmitExtractionProps) {
 
-export default function SubmitExtraction(props) {
+	const {open, handleClose, selectedExtractor} = props;
 
-	const {open, handleClose} = props;
+	const onSubmit = (formData: FormProps<any>) => {
+		console.log(formData);
+	}
 
 	return (
 		// TODO replace this with submit extraction content
 		<Container>
 			<Dialog open={open} onClose={handleClose}>
-				<DialogTitle><ListenerInfo /></DialogTitle>
+				<DialogTitle><ListenerInfo/></DialogTitle>
 				<DialogContent>
 					<DialogContentText>
-						To subscribe to this website, please enter your email address here. We
-						will send updates occasionally.
+						Fill in the required extractor parameters
 					</DialogContentText>
-					<TextField
-						autoFocus
-						margin="dense"
-						id="name"
-						label="Email Address"
-						type="email"
-						fullWidth
-						variant="standard"
-					/>
+					{
+						selectedExtractor &&
+						selectedExtractor["properties"]
+						&& selectedExtractor["properties"]["parameters"]
+						&& selectedExtractor["properties"]["parameters"]["schema"] ?
+							<Container>
+								<Form
+									schema={selectedExtractor["properties"]["parameters"]["schema"] as FormProps<any>["schema"]}
+									// uiSchema={datasetSchema["uiSchema"] as FormProps<any>["uiSchema"]} // widgets={widgets}
+									onSubmit={({formData}) => {
+										onSubmit(formData);
+									}}>
+									<Box className="inputGroup">
+										<Button variant="contained" type="submit"
+												className="form-button-block">Submit</Button>
+									</Box>
+								</Form>
+							</Container>
+							: null
+					}
 				</DialogContent>
 				<DialogActions>
 					<Button onClick={handleClose}>Cancel</Button>

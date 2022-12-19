@@ -28,6 +28,7 @@ export const Listeners = (): JSX.Element => {
 	const [nextDisabled, setNextDisabled] = useState<boolean>(false);
 	const [searchText, setSearchText] = useState<string>("");
 	const [openSubmitExtraction, setOpenSubmitExtraction] = useState<boolean>(false);
+	const [selectedExtractor, setSelectedExtractor] = useState();
 
 	// component did mount
 	useEffect(() => {
@@ -120,9 +121,11 @@ export const Listeners = (): JSX.Element => {
 										return (<>
 											<ListenerItem key={listener.id}
 														  id={listener.id}
+														  extractorInfo ={listener}
 														  extractorName={listener.name}
 														  extractorDescription={listener.description}
 														  setOpenSubmitExtraction={setOpenSubmitExtraction}
+														  setSelectedExtractor={setSelectedExtractor}
 											/>
 											<Divider/>
 										</>);
@@ -144,7 +147,7 @@ export const Listeners = (): JSX.Element => {
 					</Box>
 				</Grid>
 			</Grid>
-			<SubmitExtraction open={openSubmitExtraction} handleClose={handleSubmitExtractionClose}/>
+			<SubmitExtraction open={openSubmitExtraction} handleClose={handleSubmitExtractionClose} selectedExtractor={selectedExtractor}/>
 		</>
 	);
 }

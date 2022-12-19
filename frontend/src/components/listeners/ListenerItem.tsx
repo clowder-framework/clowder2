@@ -5,16 +5,19 @@ import {useDispatch} from "react-redux";
 import {Button, IconButton, ListItem, ListItemText} from "@mui/material";
 import {submitFileExtractionAction} from "../../actions/file";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
+import {ExtractorInfo} from "../../openapi/v2";
 
 type ListenerCardProps = {
 	id: string,
+	extractorInfo: ExtractorInfo,
 	extractorName: string,
 	extractorDescription: string,
 	setOpenSubmitExtraction: any,
+	setSelectedExtractor: any
 }
 
 export default function ListenerItem(props: ListenerCardProps) {
-	const {id, extractorName, extractorDescription, setOpenSubmitExtraction} = props;
+	const {id, extractorInfo, extractorName, extractorDescription, setOpenSubmitExtraction, setSelectedExtractor} = props;
 
 	let [searchParams, setSearchParams] = useSearchParams();
 	const fileId = searchParams.get("fileId");
@@ -32,7 +35,10 @@ export default function ListenerItem(props: ListenerCardProps) {
 
 	return (
 		<ListItem key={id}>
-			<Button onClick={()=> {setOpenSubmitExtraction(true);}}>
+			<Button onClick={()=> {
+				setOpenSubmitExtraction(true);
+				setSelectedExtractor(extractorInfo);
+			}}>
 				{extractorName}
 			</Button>
 			<ListItemText secondary={extractorDescription} /><IconButton component="label">
