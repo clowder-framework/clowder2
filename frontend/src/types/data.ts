@@ -27,6 +27,7 @@ export interface Listener {
 	name: string;
 	description: string;
 	id: string;
+	properties: any;
 	parameters: any;
 }
 

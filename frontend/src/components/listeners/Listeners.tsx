@@ -117,7 +117,6 @@ export const Listeners = (): JSX.Element => {
 							{
 								listeners !== undefined ?
 									listeners.map((listener) => {
-										console.log('listener is', listener);
 										return (<>
 											<ListenerItem key={listener.id}
 														  id={listener.id}
