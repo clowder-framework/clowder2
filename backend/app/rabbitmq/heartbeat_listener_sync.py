@@ -17,8 +17,6 @@ def callback(ch, method, properties, body):
 
     extractor_info = msg["extractor_info"]
     extractor_name = extractor_info["name"]
-    extractor_parameters = extractor_info["parameters"]["schema"]
-    extractor_info["parameters"] = extractor_parameters
     extractor_db = EventListenerDB(
         **extractor_info, properties=ExtractorInfo(**extractor_info)
     )
