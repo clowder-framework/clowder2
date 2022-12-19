@@ -43,8 +43,7 @@ export default function SubmitExtraction(props: SubmitExtractionProps) {
 						&& selectedExtractor["properties"]["parameters"]["schema"] ?
 							<Container>
 								<Form
-									schema={selectedExtractor["properties"]["parameters"]["schema"] as FormProps<any>["schema"]}
-									// uiSchema={datasetSchema["uiSchema"] as FormProps<any>["uiSchema"]} // widgets={widgets}
+									schema={{"properties": selectedExtractor["properties"]["parameters"]["schema"] as FormProps<any>["schema"]}}
 									onSubmit={({formData}) => {
 										onSubmit(formData);
 									}}>
