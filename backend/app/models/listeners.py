@@ -30,7 +30,7 @@ class ExtractorInfo(BaseModel):
     bibtex: List[str] = []
     default_labels: List[str] = []
     categories: List[str] = []
-    parameters: List[dict] = []
+    parameters: Optional[dict] = None
     version: str = "1.0"
 
 
