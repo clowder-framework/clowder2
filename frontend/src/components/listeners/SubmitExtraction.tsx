@@ -31,17 +31,21 @@ export default function SubmitExtraction(props: SubmitExtractionProps) {
 	const {fileId, datasetId, open, handleClose, selectedExtractor} = props;
 	const dispatch = useDispatch();
 
-	const submitFileExtraction = (fileId: string | undefined, extractor: string | undefined) => dispatch(submitFileExtractionAction(fileId, extractor));
-	const submitDatasetExtraction = (datasetId: string | undefined, extractor: string | undefined) => dispatch(submitDatasetExtractionAction(datasetId, extractor));
+	const submitFileExtraction = (fileId: string | undefined, extractor: string | undefined) => dispatch(submitFileExtractionAction(fileId, extractor, formData));
+	const submitDatasetExtraction = (datasetId: string | undefined, extractor: string | undefined) => dispatch(submitDatasetExtractionAction(datasetId, extractor, formData));
 	const onSubmit = (formData: FormProps<any>, ) => {
 		console.log(formData);
 		console.log(selectedExtractor);
+		const extractorName = selectedExtractor.name
+		const json = JSON.stringify(formData);
 		console.log('values')
 		// TODO send parameters here
 		if (fileId === undefined && datasetId !== undefined) {
 			console.log('file id is undefined');
+			submitDatasetExtractionAction(datasetId, extractorName, formData);
 		} else if (fileId !== undefined) {
 			console.log("We have a file");
+			submitFileExtractionAction(fileId, extractorName, formData);
 		}
 
 		// TODO submit here using method that submits extractor
