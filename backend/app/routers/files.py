@@ -304,7 +304,7 @@ async def get_file_versions(
 
 
 # submits file to extractor
-# can handle parameeters pass in as key/values in info
+# can handle parameters pass in as key/values in info
 @router.post("/{file_id}/extract")
 async def get_file_extract(
     file_id: str,

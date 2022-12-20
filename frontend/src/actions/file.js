@@ -212,7 +212,7 @@ export function fileDownloaded(fileId, filename = "") {
 }
 
 export const SUBMIT_FILE_EXTRACTION = "SUBMIT_FILE_EXTRACTION";
-export function submitFileExtractionAction(fileId, extractorName, formData) {
+export function submitFileExtractionAction(fileId, extractorName) {
 	return (dispatch) => {
 		const requestBody = {'extractor': extractorName}
 		console.log(requestBody);
