@@ -45,7 +45,8 @@ export default function SubmitExtraction(props: SubmitExtractionProps) {
 			submitDatasetExtractionAction(datasetId, extractorName);
 		} else if (fileId !== undefined) {
 			console.log("We have a file");
-			submitFileExtractionAction(fileId, extractorName);
+			const requestBody = {"extractor":extractorName}
+			submitFileExtractionAction(fileId, requestBody);
 		}
 
 		// TODO submit here using method that submits extractor

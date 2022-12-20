@@ -212,11 +212,8 @@ export function fileDownloaded(fileId, filename = "") {
 }
 
 export const SUBMIT_FILE_EXTRACTION = "SUBMIT_FILE_EXTRACTION";
-export function submitFileExtractionAction(fileId, extractorName) {
+export function submitFileExtractionAction(fileId, requestBody) {
 	return (dispatch) => {
-		const requestBody = {'extractor': extractorName}
-		console.log(requestBody);
-		console.log('was the request body');
 		return V2.FilesService.getFileExtractApiV2FilesFileIdExtractPost(fileId, requestBody)
 			.then(json => {
 				dispatch({
