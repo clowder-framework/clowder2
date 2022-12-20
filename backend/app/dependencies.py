@@ -2,33 +2,16 @@ from typing import Generator
 
 import motor.motor_asyncio
 import pika
-from bson import ObjectId
 from minio import Minio
-from fastapi import Header, HTTPException, Depends
-from pika.adapters.blocking_connection import BlockingChannel
-from pika.exchange_type import ExchangeType
-from pymongo import MongoClient
-
-from app.config import settings
 from minio.commonconfig import ENABLED
 from minio.versioningconfig import VersioningConfig
+from pika.adapters.blocking_connection import BlockingChannel
+from pika.exchange_type import ExchangeType
 
-from app.models.authorization import RoleType
+from app.config import settings
 from app.mongo import crete_mongo_indexes
 from app.search.connect import connect_elasticsearch
 
-
-class Authorization:
-    """ We use class dependency so that we can provide the `permission` parameter to the dependency.
-    For more info see https://fastapi.tiangolo.com/advanced/advanced-dependencies/."""
-    def __init__(self, permission: str):
-        self.permission = permission
-
-    def __call__(self, dataset_id: str, current_user: str):
-        if self.permission != "read":
-            raise HTTPException(status_code=403, detail=f"User `{current_user} does not have `{self.permission}` permission on dataset {dataset_id}")
-        else:
-            return True
 
 async def get_db() -> Generator:
     mongo_client = motor.motor_asyncio.AsyncIOMotorClient(settings.MONGODB_URL)
@@ -72,5 +55,4 @@ async def get_elasticsearchclient():
     return es
 
 
-async def get_role(dataset_id: str, db: MongoClient = Depends(get_db)) -> RoleType:
-    authorization = await db["authorization"].find_one({"_id": ObjectId(dataset_id)})
+

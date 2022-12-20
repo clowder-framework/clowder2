@@ -31,7 +31,7 @@ from rocrate.rocrate import ROCrate
 
 from app import dependencies
 from app import keycloak_auth
-from app.dependencies import Authorization, get_role
+from app.deps.authorization_deps import Authorization, get_role
 from app.models.authorization import RoleType
 from app.search.connect import (
     connect_elasticsearch,
@@ -845,15 +845,13 @@ async def get_dataset_extract(
 @router.get("/{dataset_id}/permissions")
 async def get_dataset_extract(
     dataset_id: str,
-    current_user=Depends(get_current_username),
     allow: bool = Depends(Authorization("read"))
 ):
     return {"status": "ok", "dataset_id": dataset_id, "allow": allow}
 
 @router.get("/{dataset_id}/role")
-async def get_dataset_extract(
+async def get_dataset_role(
     dataset_id: str,
-    current_user =Depends(get_current_username),
     role: RoleType = Depends(get_role)
 ):
     return {"status": "ok", "dataset_id": dataset_id, "role": role}
