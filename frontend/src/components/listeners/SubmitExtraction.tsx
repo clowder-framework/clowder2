@@ -42,7 +42,7 @@ export default function SubmitExtraction(props: SubmitExtractionProps) {
 		// TODO send parameters here
 		if (fileId === undefined && datasetId !== undefined) {
 			console.log('file id is undefined');
-			submitDatasetExtractionAction(datasetId, extractorName, formData);
+			submitDatasetExtractionAction(datasetId, extractorName);
 		} else if (fileId !== undefined) {
 			console.log("We have a file");
 			submitFileExtractionAction(fileId, extractorName);
