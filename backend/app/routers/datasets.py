@@ -842,10 +842,17 @@ async def get_dataset_extract(
     else:
         raise HTTPException(status_code=404, detail=f"File {dataset_id} not found")
 
-@router.get("/{dataset_id}/permissions")
+@router.get("/{dataset_id}/permissions/viewer")
 async def get_dataset_extract(
     dataset_id: str,
-    allow: bool = Depends(Authorization("read"))
+    allow: bool = Depends(Authorization("viewer"))
+):
+    return {"status": "ok", "dataset_id": dataset_id, "allow": allow}
+
+@router.get("/{dataset_id}/permissions/owner")
+async def get_dataset_extract(
+    dataset_id: str,
+    allow: bool = Depends(Authorization("owner"))
 ):
     return {"status": "ok", "dataset_id": dataset_id, "allow": allow}
 

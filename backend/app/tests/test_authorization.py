@@ -11,8 +11,20 @@ def test_create(client: TestClient, headers: dict):
     assert response.status_code == 200
 
 
-def test_get(client: TestClient, headers: dict):
+def test_get_role(client: TestClient, headers: dict):
     response = client.get(
         f"{settings.API_V2_STR}/datasets/6373acfad19c970d5dab6473/role", headers=headers
     )
     assert response.status_code == 200
+
+
+def test_dep_role(client: TestClient, headers: dict):
+    response = client.get(
+        f"{settings.API_V2_STR}/datasets/6373acfad19c970d5dab6473/permissions/owner", headers=headers
+    )
+    assert response.status_code == 200
+
+    response = client.get(
+        f"{settings.API_V2_STR}/datasets/6373acfad19c970d5dab6473/permissions/viewer", headers=headers
+    )
+    assert response.status_code == 403 # not authorized
