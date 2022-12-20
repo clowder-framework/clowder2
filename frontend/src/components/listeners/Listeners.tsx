@@ -154,7 +154,14 @@ export function Listeners(props: ListenerProps) {
 					</Box>
 				</Grid>
 			</Grid>
-			<SubmitExtraction open={openSubmitExtraction} handleClose={handleSubmitExtractionClose} selectedExtractor={selectedExtractor}/>
+			<SubmitExtraction
+				fileId={fileId}
+				datsetId={datasetId}
+				open={openSubmitExtraction}
+				handleClose={handleSubmitExtractionClose}
+				selectedExtractor={selectedExtractor}
+
+			/>
 		</>
 	);
 }

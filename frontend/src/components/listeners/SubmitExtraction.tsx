@@ -1,4 +1,5 @@
 import React from "react";
+import {useDispatch} from "react-redux";
 import {
 	Box,
 	Button,
@@ -13,18 +14,33 @@ import {
 import {ListenerInfo} from "./ListenerInfo";
 import Form from "@rjsf/material-ui";
 import {FormProps} from "@rjsf/core";
+import {submitFileExtractionAction} from "../../actions/file";
+import {submitDatasetExtractionAction} from "../../actions/dataset";
 
 type SubmitExtractionProps = {
+	fileId: string,
+	datasetId: string,
 	open: boolean,
-	handleClose: any
+	handleClose: any,
 	selectedExtractor: object
+
 }
 export default function SubmitExtraction(props: SubmitExtractionProps) {
 
-	const {open, handleClose, selectedExtractor} = props;
 
+	const {fileId, datasetId, open, handleClose, selectedExtractor} = props;
+
+	const submitFileExtraction = (fileId: string | undefined, extractor: string | undefined) => dispatch(submitFileExtractionAction(fileId, extractor));
+	const submitDatasetExtraction = (datasetId: string | undefined, extractor: string | undefined) => dispatch(submitDatasetExtractionAction(datasetId, extractor));
+	const dispatch = useDispatch();
 	const onSubmit = (formData: FormProps<any>) => {
 		console.log(formData);
+		console.log(selectedExtractor);
+		// console.log(fileId;
+		// console.log(datasetId);
+		console.log('values')
+		// TODO submit here using method that submits extractor
+
 	}
 
 	return (
