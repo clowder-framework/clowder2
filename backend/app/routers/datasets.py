@@ -1,18 +1,19 @@
 import datetime
 import hashlib
 import io
+import json
 import os
 import shutil
 import tempfile
 import zipfile
 from collections.abc import Mapping, Iterable
 from typing import List, Optional, Union
-import json
 
-from elasticsearch import Elasticsearch
 import pika
+import pymongo
 from bson import ObjectId
 from bson import json_util
+from elasticsearch import Elasticsearch
 from fastapi import (
     APIRouter,
     HTTPException,
@@ -24,23 +25,14 @@ from fastapi import (
 )
 from minio import Minio
 from pika.adapters.blocking_connection import BlockingChannel
-import pymongo
 from pymongo import MongoClient
 from rocrate.model.person import Person
 from rocrate.rocrate import ROCrate
 
 from app import dependencies
 from app import keycloak_auth
-from app.deps.authorization_deps import Authorization, get_role
-from app.models.authorization import RoleType
-from app.search.connect import (
-    connect_elasticsearch,
-    insert_record,
-    delete_document_by_id,
-    update_record,
-)
 from app.config import settings
-from app.keycloak_auth import get_user, get_current_user, get_current_username
+from app.keycloak_auth import get_user, get_current_user
 from app.models.datasets import (
     DatasetBase,
     DatasetIn,
@@ -53,6 +45,12 @@ from app.models.folders import FolderOut, FolderIn, FolderDB
 from app.models.pyobjectid import PyObjectId
 from app.models.users import UserOut
 from app.routers.files import add_file_entry, remove_file_entry
+from app.search.connect import (
+    connect_elasticsearch,
+    insert_record,
+    delete_document_by_id,
+    update_record,
+)
 
 router = APIRouter()
 
@@ -841,24 +839,3 @@ async def get_dataset_extract(
             raise HTTPException(status_code=404, detail=f"No extractor submitted")
     else:
         raise HTTPException(status_code=404, detail=f"File {dataset_id} not found")
-
-@router.get("/{dataset_id}/permissions/viewer")
-async def get_dataset_extract(
-    dataset_id: str,
-    allow: bool = Depends(Authorization("viewer"))
-):
-    return {"status": "ok", "dataset_id": dataset_id, "allow": allow}
-
-@router.get("/{dataset_id}/permissions/owner")
-async def get_dataset_extract(
-    dataset_id: str,
-    allow: bool = Depends(Authorization("owner"))
-):
-    return {"status": "ok", "dataset_id": dataset_id, "allow": allow}
-
-@router.get("/{dataset_id}/role")
-async def get_dataset_role(
-    dataset_id: str,
-    role: RoleType = Depends(get_role)
-):
-    return {"status": "ok", "dataset_id": dataset_id, "role": role}

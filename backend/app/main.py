@@ -75,7 +75,7 @@ api_router.include_router(
 )
 api_router.include_router(
     authorization.router,
-    prefix="/authorization",
+    prefix="/authorizations",
     tags=["authorization"],
     dependencies=[Depends(get_current_username)],
 )
