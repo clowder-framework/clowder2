@@ -36,13 +36,12 @@ export default function SubmitExtraction(props: SubmitExtractionProps) {
 	const onSubmit = (formData: FormProps<any>, ) => {
 		console.log(formData);
 		console.log(selectedExtractor);
-		// console.log(fileId;
-		// console.log(datasetId);
 		console.log('values')
-		if (datasetId !== undefined) {
-			console.log('submit the dataset');
+		// TODO send parameters here
+		if (fileId === undefined && datasetId !== undefined) {
+			console.log('file id is undefined');
 		} else if (fileId !== undefined) {
-			console.log('submit the file');
+			console.log("We have a file");
 		}
 
 		// TODO submit here using method that submits extractor

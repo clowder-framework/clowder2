@@ -32,14 +32,6 @@ export default function ListenerItem(props: ListenerCardProps) {
 
 	let [searchParams, setSearchParams] = useSearchParams();
 	const dispatch = useDispatch();
-	const submitFileExtraction = (fileId: string | undefined, extractor: string | undefined) => dispatch(submitFileExtractionAction(fileId, extractor));
-	const submitDatasetExtraction = (datasetId: string | undefined, extractor: string | undefined) => dispatch(submitDatasetExtractionAction(datasetId, extractor));
-	if (fileId !== null && fileId !== undefined) {
-		// submitFileExtraction(fileId, extractorName);
-	}
-	if (datasetId !== null && datasetId !== undefined) {
-		// submitDatasetExtraction(datasetId, extractorName);
-	}
 
 	return (
 		<ListItem key={id}>
