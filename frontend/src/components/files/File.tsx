@@ -283,7 +283,9 @@ export const File = (): JSX.Element => {
 						}
 					</TabPanel>
 					<TabPanel value={selectedTabIndex} index={2}>
-						<Listeners />
+						<Listeners fileId={fileId}
+								   datasetId={datasetId}
+						/>
 					</TabPanel>
 					<TabPanel value={selectedTabIndex} index={3}>
 						Comments

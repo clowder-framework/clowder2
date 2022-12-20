@@ -225,7 +225,9 @@ export const Dataset = (): JSX.Element => {
 						}
 					</TabPanel>
 					<TabPanel value={selectedTabIndex} index={2}>
-						<Listeners/>
+						<Listeners
+							datasetId={datasetId}
+						/>
 					</TabPanel>
 					<TabPanel value={selectedTabIndex} index={3}/>
 					<TabPanel value={selectedTabIndex} index={4}/>

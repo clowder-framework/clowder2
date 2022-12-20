@@ -8,10 +8,15 @@ import {ArrowBack, ArrowForward, SearchOutlined} from "@material-ui/icons";
 import ListenerItem from "./ListenerItem";
 import {theme} from "../../theme";
 import SubmitExtraction from "./SubmitExtraction";
+import {ExtractorInfo} from "../../openapi/v2";
 
+type ListenerProps = {
+	fileId: string,
+	datasetId: string,
+}
 
-export const Listeners = (): JSX.Element => {
-
+export function Listeners(props: ListenerProps) {
+	const {fileId, datasetId} = props;
 	// Redux connect equivalent
 	const dispatch = useDispatch();
 	const listListeners = (skip: number | undefined, limit: number | undefined) => dispatch(fetchListeners(skip, limit));
@@ -121,6 +126,8 @@ export const Listeners = (): JSX.Element => {
 										return (<>
 											<ListenerItem key={listener.id}
 														  id={listener.id}
+														  fileId={fileId}
+														  datasetId={datasetId}
 														  extractorInfo ={listener}
 														  extractorName={listener.name}
 														  extractorDescription={listener.description}
