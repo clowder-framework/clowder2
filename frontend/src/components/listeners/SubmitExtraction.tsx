@@ -48,7 +48,7 @@ export default function SubmitExtraction(props: SubmitExtractionProps) {
 	return (
 		// TODO replace this with submit extraction content
 		<Container>
-			<Dialog open={open} onClose={handleClose}>
+			<Dialog open={open} onClose={handleClose} fullWidth={true} maxWidth="sm">
 				<DialogTitle><ListenerInfo/></DialogTitle>
 				<DialogContent>
 					<DialogContentText>

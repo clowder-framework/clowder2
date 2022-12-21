@@ -32,7 +32,7 @@ from app.search.connect import (
     update_record,
 )
 from app.models.files import FileIn, FileOut, FileVersion, FileDB
-from app.models.listeners import EventListenerMessage
+from app.models.listeners import EventListenerMessage, ExtractorInfo
 from app.models.users import UserOut
 from app.models.search import SearchIndexContents
 from app.routers.feeds import check_feed_listeners
@@ -308,30 +308,32 @@ async def get_file_versions(
 @router.post("/{file_id}/extract")
 async def get_file_extract(
     file_id: str,
-    info: Request,
+    extractorName: str,
+    request: Request,
+    info: ExtractorInfo,
     token: str = Depends(get_token),
     credentials: HTTPAuthorizationCredentials = Security(security),
     db: MongoClient = Depends(dependencies.get_db),
     rabbitmq_client: BlockingChannel = Depends(dependencies.get_rabbitmq),
 ):
-    req_info = await info.json()
     access_token = credentials.credentials
-    if "extractor" not in req_info:
+    if extractorName is None:
         raise HTTPException(status_code=404, detail=f"No extractor submitted")
     if (file := await db["files"].find_one({"_id": ObjectId(file_id)})) is not None:
         file_out = FileOut.from_mongo(file)
 
-        # Get extractor info from request (Clowder v1)
-        req_headers = info.headers
+        # backward compatibility? Get extractor info from request (Clowder v1)
+        req_headers = request.headers
         raw = req_headers.raw
         authorization = raw[1]
         # TODO this got the wrong thing, changing
         token = authorization[1].decode("utf-8").lstrip("Bearer").lstrip(" ")
 
-        queue = req_info["extractor"]
+        # for Clowder v2
+        queue = extractorName
         parameters = {}
-        if "parameters" in req_info:
-            parameters = req_info["parameters"]
+        if "parameters" in info:
+            parameters = info.parameters
         routing_key = "extractors." + queue
 
         submit_file_message(
