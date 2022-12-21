@@ -11,6 +11,7 @@ export type ExtractorInfo = {
     author: string;
     process: any;
     maturity?: string;
+    name?: string;
     contributors?: Array<string>;
     contexts?: Array<any>;
     repository?: Array<Repository>;
@@ -20,4 +21,5 @@ export type ExtractorInfo = {
     default_labels?: Array<string>;
     categories?: Array<string>;
     parameters?: Array<any>;
+    version?: string;
 }

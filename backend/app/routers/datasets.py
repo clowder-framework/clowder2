@@ -23,6 +23,8 @@ from fastapi import (
     Response,
     Request,
 )
+from fastapi import APIRouter, HTTPException, Depends, Security
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from minio import Minio
 from pika.adapters.blocking_connection import BlockingChannel
 from pymongo import MongoClient
@@ -31,6 +33,13 @@ from rocrate.rocrate import ROCrate
 
 from app import dependencies
 from app import keycloak_auth
+from app.keycloak_auth import get_token
+from app.search.connect import (
+    connect_elasticsearch,
+    insert_record,
+    delete_document_by_id,
+    update_record,
+)
 from app.config import settings
 from app.keycloak_auth import get_user, get_current_user
 from app.models.datasets import (
@@ -51,8 +60,10 @@ from app.search.connect import (
     delete_document_by_id,
     update_record,
 )
+from app.rabbitmq.listeners import submit_dataset_message
 
 router = APIRouter()
+security = HTTPBearer()
 
 clowder_bucket = os.getenv("MINIO_BUCKET_NAME", "clowder")
 
@@ -789,13 +800,17 @@ async def download_dataset(
 async def get_dataset_extract(
     dataset_id: str,
     info: Request,
+    token: str = Depends(get_token),
+    credentials: HTTPAuthorizationCredentials = Security(security),
     db: MongoClient = Depends(dependencies.get_db),
     rabbitmq_client: BlockingChannel = Depends(dependencies.get_rabbitmq),
 ):
     if (
         dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
     ) is not None:
+        dataset_out = DatasetOut.from_mongo(dataset)
         req_info = await info.json()
+        access_token = credentials.credentials
         if "extractor" in req_info:
             req_headers = info.headers
             raw = req_headers.raw
@@ -806,10 +821,9 @@ async def get_dataset_extract(
             # TODO check of extractor exists
             msg = {"message": "testing", "dataset_id": dataset_id}
             body = {}
-            body["secretKey"] = token
-            body["token"] = token
-            # TODO better solution for host
-            body["host"] = "http://127.0.0.1:8000"
+            body["secretKey"] = access_token
+            body["token"] = access_token
+            body["host"] = settings.API_HOST
             body["retry_count"] = 0
             body["filename"] = dataset["name"]
             body["id"] = dataset_id
@@ -817,24 +831,23 @@ async def get_dataset_extract(
             body["resource_type"] = "dataset"
             body["flags"] = ""
             current_queue = req_info["extractor"]
+            parameters = {}
             if "parameters" in req_info:
                 current_parameters = req_info["parameters"]
                 body["parameters"] = current_parameters
-            current_routing_key = "extractors." + current_queue
-            rabbitmq_client.queue_bind(
-                exchange="extractors",
-                queue=current_queue,
-                routing_key=current_routing_key,
+            current_routing_key = current_queue
+
+            submit_dataset_message(
+                dataset_out,
+                current_queue,
+                current_routing_key,
+                parameters,
+                access_token,
+                db,
+                rabbitmq_client,
             )
-            rabbitmq_client.basic_publish(
-                exchange="extractors",
-                routing_key=current_routing_key,
-                body=json.dumps(body, ensure_ascii=False),
-                properties=pika.BasicProperties(
-                    content_type="application/json", delivery_mode=1
-                ),
-            )
-            return msg
+
+            return {"message": "testing", "dataset_id": dataset_id}
         else:
             raise HTTPException(status_code=404, detail=f"No extractor submitted")
     else:

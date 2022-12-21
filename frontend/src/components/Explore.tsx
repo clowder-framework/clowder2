@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from "react";
 import {Box, Button, ButtonGroup, Grid, Tab, Tabs} from "@mui/material";
 
-import {RootState} from "../types/data";
+import {Dataset, RootState} from "../types/data";
 import {useDispatch, useSelector} from "react-redux";
 import {fetchDatasets} from "../actions/dataset";
 import {resetFailedReason} from "../actions/common";
@@ -13,9 +13,17 @@ import DatasetCard from "./datasets/DatasetCard";
 import config from "../app.config";
 import {ArrowBack, ArrowForward} from "@material-ui/icons";
 import Layout from "./Layout";
-import DatasetIcon from "@mui/icons-material/Dataset";
+import {Listeners} from "./listeners/Listeners";
+
+const tab = {
+	fontStyle: "normal",
+	fontWeight: "normal",
+	fontSize: "16px",
+	textTransform: "capitalize",
+};
 
 export const Explore = (): JSX.Element => {
+
 
 	// Redux connect equivalent
 	const dispatch = useDispatch();
@@ -35,6 +43,7 @@ export const Explore = (): JSX.Element => {
 	const [prevDisabled, setPrevDisabled] = useState<boolean>(true);
 	const [nextDisabled, setNextDisabled] = useState<boolean>(false);
 	const [selectedTabIndex, setSelectedTabIndex] = useState(0);
+	const [selectedDataset, _] = useState<Dataset>();
 
 	// component did mount
 	useEffect(() => {
@@ -109,50 +118,61 @@ export const Explore = (): JSX.Element => {
 
 	return (
 		<Layout>
-			{/*Error Message dialogue*/}
-			<ActionModal actionOpen={errorOpen} actionTitle="Something went wrong..." actionText={reason}
-						 actionBtnName="Report" handleActionBtnClick={handleErrorReport}
-						 handleActionCancel={handleErrorCancel}/>
-			<Grid container spacing={4}>
-				<Grid item xs>
-					<Tabs value={selectedTabIndex} onChange={handleTabChange} aria-label="dashboard tabs">
-						<Tab icon={<DatasetIcon/>} iconPosition="start" label="Datasets" {...a11yProps(0)} />
-					</Tabs>
-					<TabPanel value={selectedTabIndex} index={0}>
-						<Grid container spacing={2}>
-							{
-								datasets !== undefined && datasetThumbnailList !== undefined ?
-									datasets.map((dataset) => {
-										return (
-											<Grid item key={dataset.id} xs={12} sm={6} md={4} lg={3}>
-												<DatasetCard id={dataset.id} name={dataset.name}
-															 author={`${dataset.author.first_name} ${dataset.author.last_name}`}
-															 created={dataset.created}
-															 description={dataset.description}/>
-											</Grid>
-										);
-									})
-									:
-									<></>
-							}
+			<div className="outer-container">
+				{/*Error Message dialogue*/}
+				<ActionModal actionOpen={errorOpen} actionTitle="Something went wrong..." actionText={reason}
+							 actionBtnName="Report" handleActionBtnClick={handleErrorReport}
+							 handleActionCancel={handleErrorCancel}/>
+				<div className="inner-container">
+					<Grid container spacing={4}>
+						<Grid item xs>
+							<Box sx={{borderBottom: 1, borderColor: 'divider'}}>
+								<Tabs value={selectedTabIndex} onChange={handleTabChange} aria-label="dashboard tabs">
+									<Tab sx={tab} label="Datasets" {...a11yProps(0)} />
+									<Tab sx={tab} label="Extractors" {...a11yProps(1)} />
+								</Tabs>
+							</Box>
+							<TabPanel value={selectedTabIndex} index={0}>
+								<Grid container spacing={2}>
+									{
+										datasets !== undefined && datasetThumbnailList !== undefined ?
+											datasets.map((dataset) => {
+												return (
+													<Grid item key={dataset.id} xs={12} sm={6} md={4} lg={3}>
+														<DatasetCard id={dataset.id} name={dataset.name}
+																	 author={`${dataset.author.first_name} ${dataset.author.last_name}`}
+																	 created={dataset.created}
+																	 description={dataset.description}/>
+													</Grid>
+												);
+											})
+											:
+											<></>
+									}
+								</Grid>
+								<Box display="flex" justifyContent="center" sx={{m: 1}}>
+									<ButtonGroup variant="contained" aria-label="previous next buttons">
+										<Button aria-label="previous" onClick={previous} disabled={prevDisabled}>
+											<ArrowBack/> Prev
+										</Button>
+										<Button aria-label="next" onClick={next} disabled={nextDisabled}>
+											Next <ArrowForward/>
+										</Button>
+									</ButtonGroup>
+								</Box>
+							</TabPanel>
+							<TabPanel value={selectedTabIndex} index={1}>
+								<Listeners/>
+							</TabPanel>
+							<TabPanel value={selectedTabIndex} index={4}/>
+							<TabPanel value={selectedTabIndex} index={2}/>
+							<TabPanel value={selectedTabIndex} index={3}/>
+
+
 						</Grid>
-						<Box display="flex" justifyContent="center" sx={{m: 1}}>
-							<ButtonGroup variant="contained" aria-label="previous next buttons">
-								<Button aria-label="previous" onClick={previous} disabled={prevDisabled}>
-									<ArrowBack/> Prev
-								</Button>
-								<Button aria-label="next" onClick={next} disabled={nextDisabled}>
-									Next <ArrowForward/>
-								</Button>
-							</ButtonGroup>
-						</Box>
-					</TabPanel>
-					<TabPanel value={selectedTabIndex} index={1}/>
-					<TabPanel value={selectedTabIndex} index={2}/>
-					<TabPanel value={selectedTabIndex} index={3}/>
-					<TabPanel value={selectedTabIndex} index={4}/>
-				</Grid>
-			</Grid>
+					</Grid>
+				</div>
+			</div>
 		</Layout>
 	)
 }

@@ -23,7 +23,6 @@ from app.routers import (
     metadata_files,
     datasets,
     metadata_datasets,
-    collections,
     authentication,
     keycloak,
     elasticsearch,
@@ -107,12 +106,6 @@ api_router.include_router(
     metadata_datasets.router,
     prefix="/datasets",
     tags=["metadata"],
-    dependencies=[Depends(get_current_username)],
-)
-api_router.include_router(
-    collections.router,
-    prefix="/collections",
-    tags=["collections"],
     dependencies=[Depends(get_current_username)],
 )
 api_router.include_router(

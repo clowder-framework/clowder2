@@ -1,6 +1,7 @@
 import React from "react";
 
 import {
+    Autocomplete,
 	Button,
 	Checkbox,
 	FormControlLabel,
@@ -22,7 +23,7 @@ import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import {postMetadataDefinitions} from "../../actions/metadata";
 import Layout from "../Layout";
 
-import {inputTypes, widgetTypes} from "../../metadata.config";
+import {contextUrlMap, inputTypes, widgetTypes} from "../../metadata.config";
 
 export const CreateMetadataDefinitionPage = (): JSX.Element => {
 	return (
@@ -40,10 +41,11 @@ export const CreateMetadataDefinition = (): JSX.Element => {
 
 	const [activeStep, setActiveStep] = React.useState(0);
 	const [parsedInput, setParsedInput] = React.useState("");
+	const [contextMap, setContextMap] = React.useState([{"term": "", "iri": ""}]);
 	const [formInput, setFormInput] = React.useState({
 		name: "",
 		description: "",
-		context: '{\n\t"abstract": "http://purl.org/dc/terms/abstract"\n}',
+		context: "",
 		fields: [{
 			name: "",
 			list: false,
@@ -77,6 +79,52 @@ export const CreateMetadataDefinition = (): JSX.Element => {
 
 		setFormInput(data)
 	}
+
+    const addNewContext = (idx: number) => {
+        let newContextMap = [...contextMap]
+        newContextMap.splice(idx + 1, 0, {"term": "", "iri": ""})
+
+        setContextMap(newContextMap)
+        constructContextJson(newContextMap)
+    }
+
+    const removeContext = (idx: number) => {
+        let newContextMap = [...contextMap]
+        newContextMap.splice(idx, 1)
+
+        setContextMap(newContextMap)
+        constructContextJson(newContextMap)
+    }
+
+    const updateContext = (idx: number, key: string, value: string | null) => {
+        let currItem = contextMap[idx]
+        let newContextMap = [...contextMap]
+
+        if (key == 'term') {
+            newContextMap.splice(idx, 1, {"term": value, "iri": currItem.iri}) // Replaces item with new value inserted
+
+        } else if (key == 'iri') {
+            newContextMap.splice(idx, 1, {"term": currItem.term, "iri": value})
+        }
+        
+        setContextMap(newContextMap)
+        constructContextJson(newContextMap)
+    }
+
+    const constructContextJson = (newContextMap: any) => {
+        let contextJson = {}
+
+        newContextMap.forEach((item, idx) => {
+            contextJson[item["term"]] = item["iri"]
+        })
+
+        setFormInput({
+			name: formInput.name,
+			description: formInput.description,
+			context: JSON.stringify(contextJson),
+			fields: formInput.fields
+		})
+    }
 
 	const addNewField = (idx: number) => {
 		let newitem = {
@@ -170,14 +218,14 @@ export const CreateMetadataDefinition = (): JSX.Element => {
 
 		if (stepNumber == 0) {
 			if (formInput.name !== "" && formInput.description != "") {
-				// Validate JSON string schema
-				try {
-					let jsonString = JSON.parse(formInput.context)
-					isFormValid = true
+				// Validate context inputs are not empty
+                isFormValid = true
 
-				} catch (error) {
-					isFormValid = false
-				}
+				contextMap.forEach((item) => {
+                    if (item.term == "" || item.iri == "") {
+                        isFormValid = false
+                    }
+                })
 			}
 
 		} else {
@@ -204,7 +252,7 @@ export const CreateMetadataDefinition = (): JSX.Element => {
 		setFormInput({
 			name: "",
 			description: "",
-			context: '{\n\t"abstract": "http://purl.org/dc/terms/abstract"\n}',
+			context: "",
 			fields: [{
 				name: "",
 				list: false,
@@ -216,6 +264,8 @@ export const CreateMetadataDefinition = (): JSX.Element => {
 				required: false,
 			}]
 		})
+
+        setContextMap([{"term": "", "iri": ""}])
 	}
 
 	const handleNext = () => {
@@ -267,26 +317,50 @@ export const CreateMetadataDefinition = (): JSX.Element => {
 										handleInputChange(-1, "description", event.target.value);
 									}}
 								/>
-								{/*
-                                  * TODO: Expand context field to pick-up the most frequently used namespaces first
-                                  * https://github.com/clowder-framework/clowder2/issues/153
-                                  */}
-								<TextField
-									variant="outlined"
-									margin="normal"
-									required
-									fullWidth
-									id="metadata-context"
-									label="Metadata Context"
-									InputLabelProps={{shrink: true}}
-									placeholder="Please enter metadata context in JSON format"
-									value={formInput.context}
-									onChange={(event) => {
-										handleInputChange(-1, "context", event.target.value);
-									}}
-									multiline
-									maxRows={6}
-								/>
+                                {contextMap.map((item, idx) => {
+								    return (<Grid container>
+                                        <Grid item>
+                                            <TextField
+                                                variant="outlined"
+                                                margin="normal"
+                                                fullWidth
+                                                required
+                                                id="metadata-context"
+                                                label="Term"
+                                                InputLabelProps={{ shrink: true }}
+                                                placeholder="Please enter context term"
+                                                value={item["term"]}
+                                                sx={{ mt: 1, mr: 1, "alignItems": "right", "width": "300px"  }}
+                                                onChange={(event) => { 
+                                                    updateContext(idx, "term", event.target.value);
+                                                }}
+                                            />
+                                        </Grid>
+                                        <Grid item>
+                                            <Autocomplete
+                                                id="metadata-auto-complete"
+                                                freeSolo
+                                                autoHighlight
+                                                inputValue={item["iri"]}
+                                                options={contextUrlMap["frequently_used"].map((option) => option.url)}
+                                                onInputChange={(event, value) => {
+                                                    updateContext(idx, "iri", value);
+                                                }}
+                                                renderInput={(params) => <TextField {...params} sx={{ mt: 1, mr: 1, "alignItems": "right", "width": "450px" }} required label="IRI" />}
+                                            />
+                                        </Grid>
+                                        <IconButton color="primary" size="small"
+                                                    onClick={() => addNewContext(idx)}>
+                                            <AddBoxIcon/>
+                                        </IconButton>
+                                        {idx == 0 ? <></> : 
+													<IconButton color="primary" size="small"
+																onClick={() => removeContext(idx)}>
+														<DeleteOutlineIcon/>
+													</IconButton>}
+                                    </Grid>)
+                                 })}
+                                    
 								<Button variant="contained" onClick={() => validateFormData(activeStep)}>Next</Button>
 							</form>
 						</StepContent>

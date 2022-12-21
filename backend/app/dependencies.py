@@ -39,6 +39,7 @@ def get_rabbitmq() -> BlockingChannel:
     parameters = pika.ConnectionParameters("localhost", credentials=credentials)
     connection = pika.BlockingConnection(parameters)
     channel = connection.channel()
+    """
     channel.exchange_declare(
         exchange="test_exchange",
         exchange_type=ExchangeType.direct,
@@ -47,6 +48,7 @@ def get_rabbitmq() -> BlockingChannel:
         auto_delete=False,
     )
     channel.queue_declare(queue="standard_key")
+    """
     return channel
 
 
