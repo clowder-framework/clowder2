@@ -329,10 +329,7 @@ async def get_file_extract(
         authorization = raw[1]
         # TODO this got the wrong thing, changing
         token = authorization[1].decode("utf-8").lstrip("Bearer").lstrip(" ")
-
-        # for Clowder v2
         queue = extractorName
-        # routing_key = "extractors." + queue
         routing_key = queue
 
         if parameters is None:
