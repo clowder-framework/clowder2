@@ -20,6 +20,7 @@ from app.models.listeners import (
     EventListenerIn,
     LegacyEventListenerIn,
     EventListenerOut,
+    ExtractorInfo,
 )
 from app.search.connect import update_record
 
@@ -206,6 +207,7 @@ class MetadataIn(MetadataBase):
     file_version: Optional[int]
     listener: Optional[EventListenerIn]
     extractor: Optional[LegacyEventListenerIn]
+    extractor_info: Optional[ExtractorInfo]
 
 
 class MetadataPatch(MetadataIn):

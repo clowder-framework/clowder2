@@ -2,14 +2,14 @@ import json
 import pika
 from fastapi import Request, HTTPException, Depends
 from pymongo import MongoClient
-from bson import ObjectId
 from pika.adapters.blocking_connection import BlockingChannel
 
+from app.config import settings
 from app.keycloak_auth import get_token
 from app import dependencies
 from app.models.files import FileOut
 from app.models.datasets import DatasetOut
-from app.models.listeners import EventListenerMessage
+from app.models.listeners import EventListenerDatasetMessage, EventListenerMessage
 
 
 def submit_file_message(
@@ -22,21 +22,24 @@ def submit_file_message(
     rabbitmq_client: BlockingChannel = Depends(dependencies.get_rabbitmq),
 ):
     # TODO check if extractor is registered
-    msg_body = EventListenerMessage(
-        filename=file_out.name,
-        fileSize=file_out.bytes,
-        id=file_out.id,
-        datasetId=file_out.dataset_id,
-        secretKey=token,
-    )
+    current_filename = file_out.name
+    current_fileSize = file_out.bytes
+    current_id = file_out.id
+    current_datasetId = file_out.dataset_id
+    current_secretKey = token
+    try:
+        msg_body = EventListenerMessage(
+            filename=file_out.name,
+            fileSize=file_out.bytes,
+            id=str(current_id),
+            datasetId=str(current_datasetId),
+            secretKey=current_secretKey,
+        )
+    except Exception as e:
+        print(e)
 
-    rabbitmq_client.queue_bind(
-        exchange="extractors",
-        queue=queue,
-        routing_key=routing_key,
-    )
     rabbitmq_client.basic_publish(
-        exchange="extractors",
+        exchange="",
         routing_key=routing_key,
         body=json.dumps(msg_body.dict(), ensure_ascii=False),
         properties=pika.BasicProperties(
@@ -56,21 +59,15 @@ def submit_dataset_message(
     rabbitmq_client: BlockingChannel = Depends(dependencies.get_rabbitmq),
 ):
     # TODO check if extractor is registered
-    msg_body = EventListenerMessage(
-        filename=dataset_out.name,
-        fileSize=dataset_out.bytes,
-        id=dataset_out.id,
-        datasetId=dataset_out.dataset_id,
+    msg_body = EventListenerDatasetMessage(
+        datasetName=dataset_out.name,
+        id=str(dataset_out.id),
+        datasetId=str(dataset_out.id),
         secretKey=token,
     )
 
-    rabbitmq_client.queue_bind(
-        exchange="extractors",
-        queue=queue,
-        routing_key=routing_key,
-    )
     rabbitmq_client.basic_publish(
-        exchange="extractors",
+        exchange="",
         routing_key=routing_key,
         body=json.dumps(msg_body.dict(), ensure_ascii=False),
         properties=pika.BasicProperties(

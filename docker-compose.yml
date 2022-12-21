@@ -1,9 +1,10 @@
 version: '3.7'
 
-# Settings and configurations that are common for all containers
+# Settings and configurations that are common for all minio containers
 x-minio-common: &minio-common
   image: quay.io/minio/minio:RELEASE.2022-01-25T19-56-04Z
   command: server --console-address ":9001" http://minio{1...4}/data
+  restart: unless-stopped
   environment:
     MINIO_ROOT_USER: minioadmin
     MINIO_ROOT_PASSWORD: minioadmin
@@ -18,9 +19,8 @@ x-minio-common: &minio-common
 services:
 
   reverse-proxy:
-    # The official v2 Traefik docker image
     image: traefik:v2.5
-    # Enables the web UI and tells Traefik to listen to docker
+    restart: unless-stopped
     command:
       - --api.insecure=true
       - --providers.docker
@@ -38,14 +38,16 @@ services:
 
   backend:
     image: 'clowder/clowder2-backend'
+    restart: unless-stopped
     build:
-      context: backend
+      context: ./backend
     networks:
       - clowder2
     environment:
       MONGODB_URL: mongodb://mongo:27017
       MINIO_SERVER_URL: minio-nginx:9000
       RABBITMQ_HOST: rabbitmq:15672
+      elasticsearch_url: http://elasticsearch:9200
       auth_base: http://localhost
       auth_url: http://localhost/keycloak/realms/clowder/protocol/openid-connect/auth?client_id=clowder2-backend&response_type=code
       oauth2_scheme_auth_url: http://keycloak:8080/keycloak/realms/clowder/protocol/openid-connect/auth?client_id=clowder2-backend&response_type=code
@@ -58,6 +60,7 @@ services:
       - mongo
       - minio-nginx
       - keycloak
+      - elasticsearch
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.backend.rule=PathPrefix(`/api`)"
@@ -66,8 +69,9 @@ services:
 
   frontend:
     image: "clowder/clowder2-frontend"
+    restart: unless-stopped
     build:
-      context: frontend
+      context: ./frontend
     networks:
       - clowder2
     depends_on:
@@ -100,6 +104,7 @@ services:
 
   mongo:
     image: mongo:5.0
+    restart: unless-stopped
     networks:
       - clowder2
     volumes:
@@ -134,11 +139,12 @@ services:
 
   minio-nginx:
     image: nginx:1.19.2-alpine
+    restart: unless-stopped
     hostname: nginx
     networks:
       - clowder2
     volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./docker/minio-nginx.conf:/etc/nginx/nginx.conf:ro
     depends_on:
       - minio1
       - minio2
@@ -147,22 +153,24 @@ services:
 
   postgres:
       image: postgres
+      restart: unless-stopped
       networks:
         - clowder2
       volumes:
         - postgres_data:/var/lib/postgresql/data
       environment:
-        POSTGRES_DB: keycloak
+        POSTGRES_DB: keycloak_prod
         POSTGRES_USER: keycloak
         POSTGRES_PASSWORD: password
 
   keycloak:
       image: quay.io/keycloak/keycloak:19.0
+      restart: unless-stopped
       networks:
         - clowder2
       volumes:
-        - ./backend/keycloak/clowder-realm-prod.json:/opt/keycloak/data/import/realm.json:ro
-        - ./backend/keycloak/clowder-theme/:/opt/keycloak/themes/clowder-theme/:ro
+        - ./scripts/keycloak/clowder-realm-prod.json:/opt/keycloak/data/import/realm.json:ro
+        - ./scripts/keycloak/clowder-theme/:/opt/keycloak/themes/clowder-theme/:ro
       command:
         - start-dev
         - --http-relative-path /keycloak
@@ -172,7 +180,7 @@ services:
         KEYCLOAK_ADMIN_PASSWORD: admin
         KC_DB: postgres
         KC_DB_URL_HOST: postgres
-        KC_DB_URL_DATABASE: keycloak
+        KC_DB_URL_DATABASE: keycloak_prod
         KC_DB_USERNAME: keycloak
         KC_DB_PASSWORD: password
       depends_on:
@@ -200,9 +208,9 @@ services:
 
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.3.3
+    restart: unless-stopped
     networks:
       - clowder2
-    restart: unless-stopped
     environment:
       - "cluster.name=clowder2"
       - "discovery.type=single-node"
