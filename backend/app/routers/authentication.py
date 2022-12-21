@@ -12,7 +12,7 @@ from pymongo import MongoClient
 from app import dependencies
 from app.keycloak_auth import create_user
 from app.keycloak_auth import keycloak_openid
-from app.models.users import UserDB, UserIn, UserOut
+from app.models.users import UserDB, UserIn, UserOut, UserLogin
 
 router = APIRouter()
 
@@ -51,7 +51,7 @@ async def save_user(userIn: UserIn, db: MongoClient = Depends(dependencies.get_d
 
 
 @router.post("/login")
-async def login(userIn: UserIn, db: MongoClient = Depends(dependencies.get_db)):
+async def login(userIn: UserLogin, db: MongoClient = Depends(dependencies.get_db)):
     try:
         token = keycloak_openid.token(userIn.email, userIn.password)
         return {"token": token["access_token"]}
