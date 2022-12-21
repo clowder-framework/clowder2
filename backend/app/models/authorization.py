@@ -10,6 +10,7 @@ class RoleType(str, Enum):
     """A user can have one of the following roles for a specific dataset. Since we don't currently implement permissions
     there is an implied hierarchy between these roles OWNER > EDITOR > UPLOADER > VIEWER. For example, if a route
     requires VIEWER any of the roles can access that resource."""
+
     OWNER = "owner"
     VIEWER = "viewer"
     UPLOADER = "uploader"
@@ -30,9 +31,10 @@ class AuthorizationBase(BaseModel):
 
 class Provenance(BaseModel):
     """Store user who created model, when and last time it was updated.
-        TODO: this generic model should be moved to a global util module in models for all those models that want to
-         store basic provenance.
+    TODO: this generic model should be moved to a global util module in models for all those models that want to
+     store basic provenance.
     """
+
     creator: EmailStr
     created: datetime = Field(default_factory=datetime.utcnow)
     modified: datetime = Field(default_factory=datetime.utcnow)

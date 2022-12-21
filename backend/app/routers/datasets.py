@@ -1,7 +1,6 @@
 import datetime
 import hashlib
 import io
-import json
 import os
 import shutil
 import tempfile
@@ -9,21 +8,17 @@ import zipfile
 from collections.abc import Mapping, Iterable
 from typing import List, Optional, Union
 
-import pika
 import pymongo
 from bson import ObjectId
 from bson import json_util
 from elasticsearch import Elasticsearch
+from fastapi import APIRouter, HTTPException, Depends, Security
 from fastapi import (
-    APIRouter,
-    HTTPException,
-    Depends,
     File,
     UploadFile,
     Response,
     Request,
 )
-from fastapi import APIRouter, HTTPException, Depends, Security
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from minio import Minio
 from pika.adapters.blocking_connection import BlockingChannel
@@ -33,14 +28,8 @@ from rocrate.rocrate import ROCrate
 
 from app import dependencies
 from app import keycloak_auth
-from app.keycloak_auth import get_token
-from app.search.connect import (
-    connect_elasticsearch,
-    insert_record,
-    delete_document_by_id,
-    update_record,
-)
 from app.config import settings
+from app.keycloak_auth import get_token
 from app.keycloak_auth import get_user, get_current_user
 from app.models.datasets import (
     DatasetBase,
@@ -53,6 +42,7 @@ from app.models.files import FileOut, FileDB
 from app.models.folders import FolderOut, FolderIn, FolderDB
 from app.models.pyobjectid import PyObjectId
 from app.models.users import UserOut
+from app.rabbitmq.listeners import submit_dataset_message
 from app.routers.files import add_file_entry, remove_file_entry
 from app.search.connect import (
     connect_elasticsearch,
@@ -60,7 +50,6 @@ from app.search.connect import (
     delete_document_by_id,
     update_record,
 )
-from app.rabbitmq.listeners import submit_dataset_message
 
 router = APIRouter()
 security = HTTPBearer()

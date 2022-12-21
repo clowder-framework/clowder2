@@ -55,6 +55,3 @@ def get_rabbitmq() -> BlockingChannel:
 async def get_elasticsearchclient():
     es = await connect_elasticsearch()
     return es
-
-
-
