@@ -27,8 +27,22 @@ class Authorization:
         authorization = await db["authorization"].find_one(
             {"dataset_id": dataset_id, "user_id": current_user, "creator": current_user})
         role = AuthorizationDB.from_mongo(authorization).role
-        if self.role != role:
+        if access(role, self.role):
+            return True
+        else:
             raise HTTPException(status_code=403,
                                 detail=f"User `{current_user} does not have `{self.role}` permission on dataset {dataset_id}")
-        else:
-            return True
+
+
+def access(user_role: RoleType, role_required: RoleType) -> bool:
+    """Enforce implied role hierarchy OWNER > EDITOR > UPLOADER > VIEWER"""
+    if user_role == RoleType.OWNER:
+        return True
+    elif user_role == RoleType.EDITOR and role_required in [RoleType.EDITOR, RoleType.UPLOADER, RoleType.VIEWER]:
+        return True
+    elif user_role == RoleType.UPLOADER and role_required in [RoleType.UPLOADER, RoleType.VIEWER]:
+        return True
+    elif user_role == RoleType.VIEWER and role_required == RoleType.VIEWER:
+        return True
+    else:
+        return False
