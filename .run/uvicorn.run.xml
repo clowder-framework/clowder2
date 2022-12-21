@@ -6,7 +6,7 @@
     <envs>
       <env name="PYTHONUNBUFFERED" value="1" />
     </envs>
-    <option name="SDK_HOME" value="$USER_HOME$/.local/share/virtualenvs/clowder2-pkRZ1537/bin/python" />
+    <option name="SDK_HOME" value="$USER_HOME$/.local/share/virtualenvs/backend-pkZ6g-7g/bin/python" />
     <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/backend" />
     <option name="IS_MODULE_SDK" value="false" />
     <option name="ADD_CONTENT_ROOTS" value="true" />

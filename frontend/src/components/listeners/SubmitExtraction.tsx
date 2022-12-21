@@ -32,16 +32,16 @@ export default function SubmitExtraction(props: SubmitExtractionProps) {
 	const {fileId, datasetId, open, handleClose, selectedExtractor} = props;
 	const dispatch = useDispatch();
 
-	const submitFileExtraction = (fileId: string | undefined, extractor: string | undefined) => dispatch(submitFileExtractionAction(fileId, extractor)) ///, formData));
-	const submitDatasetExtraction = (datasetId: string | undefined, extractor: string | undefined) => dispatch(submitDatasetExtractionAction(datasetId, extractor)) //, formData));
-	const onSubmit = (formData: FormProps<any>, ) => {
+	const submitFileExtraction =
+		(fileId: string | undefined, extractorName: string | undefined, requestBody:FormData) => dispatch(submitFileExtractionAction(fileId, extractorName, requestBody));
+	const submitDatasetExtraction =
+		(datasetId: string | undefined, extractorName: string | undefined, requestBody:FormData) => dispatch(submitDatasetExtractionAction(datasetId, extractorName, requestBody));
+	const onSubmit = (formData: FormData) => {
 		const extractorName = selectedExtractor.name
-		// TODO need to pass in the parameters
-		if (fileId === undefined && datasetId !== undefined) {
-			submitDatasetExtraction(datasetId, extractorName);
+		if (datasetId !== undefined) {
+			submitDatasetExtraction(datasetId, extractorName, formData);
 		} else if (fileId !== undefined) {
-			const requestBody = {"extractor":extractorName, "name":extractorName}
-			submitFileExtraction(fileId, requestBody);
+			submitFileExtraction(fileId, extractorName, formData);
 		}
 	}
 
