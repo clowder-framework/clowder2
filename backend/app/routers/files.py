@@ -310,7 +310,8 @@ async def get_file_extract(
     file_id: str,
     extractorName: str,
     request: Request,
-    info: ExtractorInfo,
+    # parameters don't have a fixed model shape
+    parameters: dict = None,
     token: str = Depends(get_token),
     credentials: HTTPAuthorizationCredentials = Security(security),
     db: MongoClient = Depends(dependencies.get_db),
@@ -331,10 +332,9 @@ async def get_file_extract(
 
         # for Clowder v2
         queue = extractorName
-        parameters = {}
-        if "parameters" in info:
-            parameters = info.parameters
         routing_key = "extractors." + queue
+        if parameters is None:
+            parameters = {}
 
         submit_file_message(
             file_out, queue, routing_key, parameters, access_token, db, rabbitmq_client
