@@ -3,6 +3,7 @@ import {dataURItoFile, getHeader} from "../utils/common";
 import {V2} from "../openapi";
 import {handleErrors} from "./common";
 import {UPDATE_DATASET, updateDataset} from "./dataset";
+import {ExtractorInfo} from "../openapi/v2";
 
 export const FAILED = "FAILED";
 
@@ -212,9 +213,9 @@ export function fileDownloaded(fileId, filename = "") {
 }
 
 export const SUBMIT_FILE_EXTRACTION = "SUBMIT_FILE_EXTRACTION";
-export function submitFileExtractionAction(fileId, requestBody) {
+export function submitFileExtractionAction(fileId, extractorName, requestBody) {
 	return (dispatch) => {
-		return V2.FilesService.getFileExtractApiV2FilesFileIdExtractPost(fileId, requestBody)
+		return V2.FilesService.getFileExtractApiV2FilesFileIdExtractPost(fileId, extractorName, requestBody)
 			.then(json => {
 				dispatch({
 					type: SUBMIT_FILE_EXTRACTION,
@@ -223,7 +224,7 @@ export function submitFileExtractionAction(fileId, requestBody) {
 				});
 			})
 			.catch(reason => {
-				dispatch(handleErrors(reason, submitFileExtractionAction(fileId, requestBody)));
+				dispatch(handleErrors(reason, submitFileExtractionAction(fileId, extractorName, requestBody)));
 			});
 	};
 }
