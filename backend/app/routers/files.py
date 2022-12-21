@@ -332,7 +332,9 @@ async def get_file_extract(
 
         # for Clowder v2
         queue = extractorName
-        routing_key = "extractors." + queue
+        # routing_key = "extractors." + queue
+        routing_key = queue
+
         if parameters is None:
             parameters = {}
 

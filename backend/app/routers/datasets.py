@@ -815,12 +815,10 @@ async def get_dataset_extract(
         token = token.lstrip(" ")
         # TODO check of extractor exists
         msg = {"message": "testing", "dataset_id": dataset_id}
-
         body = {}
         body["secretKey"] = access_token
         body["token"] = access_token
-        # TODO better solution for host
-        body["host"] = "http://127.0.0.1:8000"
+        body["host"] = settings.API_HOST
         body["retry_count"] = 0
         body["filename"] = dataset["name"]
         body["id"] = dataset_id
