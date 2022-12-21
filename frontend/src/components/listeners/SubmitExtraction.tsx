@@ -16,13 +16,14 @@ import Form from "@rjsf/material-ui";
 import {FormProps} from "@rjsf/core";
 import {submitFileExtractionAction} from "../../actions/file";
 import {submitDatasetExtractionAction} from "../../actions/dataset";
+import {Extractor} from "../../types/data";
 
 type SubmitExtractionProps = {
 	fileId: string,
 	datasetId: string,
 	open: boolean,
 	handleClose: any,
-	selectedExtractor: object
+	selectedExtractor: Extractor
 
 }
 export default function SubmitExtraction(props: SubmitExtractionProps) {
@@ -31,26 +32,17 @@ export default function SubmitExtraction(props: SubmitExtractionProps) {
 	const {fileId, datasetId, open, handleClose, selectedExtractor} = props;
 	const dispatch = useDispatch();
 
-	const submitFileExtraction = (fileId: string | undefined, extractor: string | undefined) => dispatch(submitFileExtractionAction(fileId, extractor, formData));
-	const submitDatasetExtraction = (datasetId: string | undefined, extractor: string | undefined) => dispatch(submitDatasetExtractionAction(datasetId, extractor, formData));
+	const submitFileExtraction = (fileId: string | undefined, extractor: string | undefined) => dispatch(submitFileExtractionAction(fileId, extractor)) ///, formData));
+	const submitDatasetExtraction = (datasetId: string | undefined, extractor: string | undefined) => dispatch(submitDatasetExtractionAction(datasetId, extractor)) //, formData));
 	const onSubmit = (formData: FormProps<any>, ) => {
-		console.log(formData);
-		console.log(selectedExtractor);
 		const extractorName = selectedExtractor.name
-		const json = JSON.stringify(formData);
-		console.log('values')
-		// TODO send parameters here
+		// TODO need to pass in the parameters
 		if (fileId === undefined && datasetId !== undefined) {
-			console.log('file id is undefined');
-			submitDatasetExtractionAction(datasetId, extractorName);
+			submitDatasetExtraction(datasetId, extractorName);
 		} else if (fileId !== undefined) {
-			console.log("We have a file");
 			const requestBody = {"extractor":extractorName, "name":extractorName}
-			submitFileExtractionAction(fileId, requestBody);
+			submitFileExtraction(fileId, requestBody);
 		}
-
-		// TODO submit here using method that submits extractor
-
 	}
 
 	return (
@@ -75,11 +67,25 @@ export default function SubmitExtraction(props: SubmitExtractionProps) {
 									}}>
 									<Box className="inputGroup">
 										<Button variant="contained" type="submit"
-												className="form-button-block">Submit</Button>
+												className="form-button-block"
+										>Submit</Button>
 									</Box>
 								</Form>
 							</Container>
-							: null
+							:
+							<Container>
+								<Form
+									schema={{"properties": {}}}
+									onSubmit={({formData}) => {
+										onSubmit(formData);
+									}}>
+									<Box className="inputGroup">
+										<Button variant="contained" type="submit"
+												className="form-button-block"
+										>Submit</Button>
+									</Box>
+								</Form>
+							</Container>
 					}
 				</DialogContent>
 				<DialogActions>
