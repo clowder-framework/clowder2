@@ -38,7 +38,7 @@ export default function SubmitExtraction(props: SubmitExtractionProps) {
 		(datasetId: string | undefined, extractorName: string | undefined, requestBody:FormData) => dispatch(submitDatasetExtractionAction(datasetId, extractorName, requestBody));
 	const onSubmit = (formData: FormData) => {
 		const extractorName = selectedExtractor.name
-		if (datasetId !== undefined) {
+		if (fileId === undefined && datasetId !== undefined) {
 			submitDatasetExtraction(datasetId, extractorName, formData);
 		} else if (fileId !== undefined) {
 			submitFileExtraction(fileId, extractorName, formData);
@@ -89,8 +89,7 @@ export default function SubmitExtraction(props: SubmitExtractionProps) {
 					}
 				</DialogContent>
 				<DialogActions>
-					<Button onClick={handleClose}>Cancel</Button>
-					<Button onClick={handleClose}>Subscribe</Button>
+					<Button onClick={handleClose}>Close</Button>
 				</DialogActions>
 			</Dialog>
 		</Container>
