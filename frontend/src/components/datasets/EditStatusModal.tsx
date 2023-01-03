@@ -27,12 +27,15 @@ export default function EditStatusModal(props: EditStatusModalProps) {
 	const dispatch = useDispatch();
 	const editDataset = (datasetId: string | undefined, formData: DatasetIn) => dispatch(updateDataset(datasetId, formData));
 
-
 	const about = useSelector((state: RootState) => state.dataset.about);
 
 	const [loading, setLoading] = useState(false);
 	const [status, setStatus] = useState(about["status"]);
 
+
+	const handleSubmit = (event: React.ChangeEvent<HTMLInputElement>) => {
+		setStatus(event.target.value);
+	};
 
 
 	const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -42,7 +45,7 @@ export default function EditStatusModal(props: EditStatusModalProps) {
 	const onSave = async () => {
 		setLoading(true);
 		editDataset(datasetId, {"status": status});
-		setStatus("");
+		setStatus(status);
 		setLoading(false);
 		handleClose(true);
 	};
@@ -57,15 +60,16 @@ export default function EditStatusModal(props: EditStatusModalProps) {
 				<Dialog open={open} onClose={handleClose} fullWidth={true}>
 					<DialogTitle>Updated Dataset Status</DialogTitle>
 					<DialogContent>
-							<TextField
-								id="outlined-name"
-								variant="standard"
-								fullWidth
-								multiline
-								rows={4}
-								defaultValue={about["status"]}
-								onChange={handleChange}
-							/>
+						<form onSubmit={handleSubmit}>
+							<label>
+							  Set status of dataset:
+							  <select value={status} onChange={handleChange}>
+								<option value="PRIVATE">PRIVATE</option>
+								<option value="PUBLIC">PUBLIC</option>
+								<option value="SHARED">SHARED</option>
+							  </select>
+							</label>
+						  </form>
 					</DialogContent>
 					<DialogActions>
 						<Button variant="contained" onClick={onSave} disabled={status == ""}>Save</Button>
