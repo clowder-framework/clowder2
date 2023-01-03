@@ -66,7 +66,7 @@ export default function EditStatusModal(props: EditStatusModalProps) {
 							  <select value={status} onChange={handleChange}>
 								<option value="PRIVATE">PRIVATE</option>
 								<option value="PUBLIC">PUBLIC</option>
-								<option value="SHARED">SHARED</option>
+								{/*<option value="SHARED">SHARED</option>*/}
 							  </select>
 							</label>
 						  </form>
