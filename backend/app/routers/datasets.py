@@ -826,8 +826,7 @@ async def get_dataset_extract(
             body = {}
             body["secretKey"] = access_token
             body["token"] = access_token
-            # TODO better solution for host
-            body["host"] = "http://127.0.0.1:8000"
+            body["host"] = settings.API_HOST
             body["retry_count"] = 0
             body["filename"] = dataset["name"]
             body["id"] = dataset_id
@@ -839,7 +838,7 @@ async def get_dataset_extract(
             if "parameters" in req_info:
                 current_parameters = req_info["parameters"]
                 body["parameters"] = current_parameters
-            current_routing_key = "extractors." + current_queue
+            current_routing_key = current_queue
 
             submit_dataset_message(
                 dataset_out,
