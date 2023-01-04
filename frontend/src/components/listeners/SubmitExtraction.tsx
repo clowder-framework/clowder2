@@ -61,11 +61,15 @@ export default function SubmitExtraction(props: SubmitExtractionProps) {
 	const handleFinish = () => {
 		setActiveStep(0);
 	}
+	const onClose = () => {
+		handleClose();
+		setActiveStep(0);
+	}
 
 	return (
 		// TODO replace this with submit extraction content
 		<Container>
-			<Dialog open={open} onClose={handleClose} fullWidth={true} maxWidth="sm">
+			<Dialog open={open} onClose={onClose} fullWidth={true} maxWidth="sm">
 				<DialogTitle><ListenerInfo/></DialogTitle>
 				<DialogContent>
 					<Stepper activeStep={activeStep} orientation="vertical">
@@ -140,7 +144,7 @@ export default function SubmitExtraction(props: SubmitExtractionProps) {
 					</Stepper>
 				</DialogContent>
 				<DialogActions>
-					<Button onClick={handleClose}>Close</Button>
+					<Button onClick={onClose}>Close</Button>
 				</DialogActions>
 			</Dialog>
 		</Container>
