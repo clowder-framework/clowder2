@@ -7,7 +7,8 @@ import {
 	Dialog,
 	DialogActions,
 	DialogContent,
-	DialogTitle, Divider,
+	DialogTitle,
+	Divider,
 	Step,
 	StepContent,
 	StepLabel,
@@ -68,9 +69,14 @@ export default function SubmitExtraction(props: SubmitExtractionProps) {
 	return (
 		// TODO replace this with submit extraction content
 		<Container>
-			<Dialog open={open} onClose={onClose} fullWidth={true} maxWidth="md">
+			<Dialog open={open} onClose={onClose} fullWidth={true} maxWidth="md"
+					sx={{
+						'.MuiPaper-root': {
+							padding: "2em",
+						},
+					}}>
 				<DialogTitle><ListenerInfo selectedExtractor={selectedExtractor}/></DialogTitle>
-				<Divider />
+				<Divider/>
 				<DialogContent>
 					<Stepper activeStep={activeStep} orientation="vertical">
 						{/*step 1 fill in parameters and submit extractions*/}
@@ -117,8 +123,8 @@ export default function SubmitExtraction(props: SubmitExtractionProps) {
 							<StepLabel>Extraction Status</StepLabel>
 							<StepContent>
 								{/*buttons*/}
-								<Box sx={{ mb: 2 }}>
-									<Button variant="contained" onClick={handleNext} sx={{ mt: 1, mr: 1 }}>
+								<Box sx={{mb: 2}}>
+									<Button variant="contained" onClick={handleNext} sx={{mt: 1, mr: 1}}>
 										Next
 									</Button>
 								</Box>
@@ -129,12 +135,12 @@ export default function SubmitExtraction(props: SubmitExtractionProps) {
 							<StepLabel>Extracted Results</StepLabel>
 							<StepContent>
 								{/*buttons*/}
-								<Box sx={{ mb: 2 }}>
+								<Box sx={{mb: 2}}>
 									<>
-										<Button variant="contained" onClick={handleFinish} sx={{ mt: 1, mr: 1 }}>
+										<Button variant="contained" onClick={handleFinish} sx={{mt: 1, mr: 1}}>
 											Restart
 										</Button>
-										<Button onClick={handleBack} sx={{ mt: 1, mr: 1 }}>
+										<Button onClick={handleBack} sx={{mt: 1, mr: 1}}>
 											Back
 										</Button>
 									</>

@@ -7,8 +7,8 @@ import {Extractor} from "../../types/data";
 
 type ListenerInfoProps = {
 	selectedExtractor: Extractor
-
 }
+
 export const ListenerInfo = (props: ListenerInfoProps) => {
 
 	const {selectedExtractor} = props;

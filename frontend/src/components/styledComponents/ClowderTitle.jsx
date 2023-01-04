@@ -5,6 +5,7 @@ import {theme} from "../../theme";
 
 export const ClowderTitle = styled(Typography)({
 	color: theme.palette.primary.main,
-	fontSize: "18px",
+	fontSize: "16px",
+	fontWeight: "500",
 	textTransform: "uppercase"
 });
