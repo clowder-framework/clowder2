@@ -1,0 +1,67 @@
+import React, {useEffect} from "react";
+import {Box, Grid, Typography} from "@mui/material";
+import {metadataConfig} from "../../metadata.config";
+import {useSelector, useDispatch} from "react-redux";
+import {RootState} from "../../types/data";
+import {fetchDatasetMetadata, fetchFileMetadata, fetchMetadataDefinitions} from "../../actions/metadata";
+import {Agent} from "./Agent";
+import {MetadataDeleteButton} from "./widgets/MetadataDeleteButton";
+
+type MetadataType = {
+	updateMetadata: any,
+	deleteMetadata: any,
+	resourceType:string|undefined,
+	resourceId:string|undefined,
+}
+
+/*
+This is the interface displayed already created metadata and allow eidts
+Uses only the list of metadata
+*/
+export const DisplayListenerMetadata = (props: MetadataType) => {
+
+	const {updateMetadata, deleteMetadata, resourceType, resourceId} = props;
+
+	const dispatch = useDispatch();
+
+	const getMetadatDefinitions = (name:string|null, skip:number, limit:number) => dispatch(fetchMetadataDefinitions(name, skip,limit));
+	const metadataDefinitionList = useSelector((state: RootState) => state.metadata.metadataDefinitionList);
+	const listDatasetMetadata = (datasetId: string | undefined) => dispatch(fetchDatasetMetadata(datasetId));
+	const listFileMetadata = (fileId: string | undefined) => dispatch(fetchFileMetadata(fileId));
+	const datasetMetadataList = useSelector((state: RootState) => state.metadata.datasetMetadataList);
+	const fileMetadataList = useSelector((state: RootState) => state.metadata.fileMetadataList);
+
+	useEffect(() => {
+		getMetadatDefinitions(null, 0, 100);
+	}, []);
+
+	// complete metadata list with both definition and values
+	useEffect(() => {
+		if (resourceType === "dataset"){
+			listDatasetMetadata(resourceId);
+		}
+		else if (resourceType === "file"){
+			listFileMetadata(resourceId);
+		}
+	}, [resourceType, resourceId]);
+
+	return (
+		<>
+			{
+				(() => {
+					let metadataList = [];
+					if (resourceType === "dataset") metadataList = datasetMetadataList;
+					else if (resourceType === "file") metadataList = fileMetadataList;
+					let listenerMetadataList = [];
+					metadataList.map((metadata,idx) => {
+						if (metadata.agent.listener !== null) {
+							listenerMetadataList.push(metadata);
+						}
+					});
+					return "nothing yet"
+
+				})()
+			}
+		</>
+	)
+}

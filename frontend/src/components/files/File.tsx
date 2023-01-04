@@ -13,6 +13,7 @@ import {MainBreadcrumbs} from "../navigation/BreadCrumb";
 import {ActionModal} from "../dialog/ActionModal";
 import {FileVersionHistory} from "../versions/FileVersionHistory";
 import {DisplayMetadata} from "../metadata/DisplayMetadata";
+import {DisplayListenerMetadata} from "../metadata/DisplayListenerMetadata";
 import {
 	deleteFileMetadata as deleteFileMetadataAction,
 	fetchFileMetadata,
@@ -291,7 +292,9 @@ export const File = (): JSX.Element => {
 						/>
 					</TabPanel>
 					<TabPanel value={selectedTabIndex} index={3}>
-						Extractor Metadata goes here
+						<DisplayListenerMetadata updateMetadata={updateFileMetadata}
+													 deleteMetadata={deleteFileMetadata}
+													 resourceType="file" resourceId={fileId}/>
 					</TabPanel>
 					<TabPanel value={selectedTabIndex} index={4}>
 						Comments
