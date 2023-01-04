@@ -7,11 +7,11 @@ import {
 	Dialog,
 	DialogActions,
 	DialogContent,
-	DialogTitle,
+	DialogTitle, Divider,
 	Step,
 	StepContent,
 	StepLabel,
-	Stepper, Typography
+	Stepper,
 } from "@mui/material";
 
 import {ListenerInfo} from "./ListenerInfo";
@@ -20,7 +20,6 @@ import {FormProps} from "@rjsf/core";
 import {submitFileExtractionAction} from "../../actions/file";
 import {submitDatasetExtractionAction} from "../../actions/dataset";
 import {Extractor} from "../../types/data";
-import {CreateMetadata} from "../metadata/CreateMetadata";
 
 type SubmitExtractionProps = {
 	fileId: string,
@@ -69,8 +68,9 @@ export default function SubmitExtraction(props: SubmitExtractionProps) {
 	return (
 		// TODO replace this with submit extraction content
 		<Container>
-			<Dialog open={open} onClose={onClose} fullWidth={true} maxWidth="sm">
-				<DialogTitle><ListenerInfo/></DialogTitle>
+			<Dialog open={open} onClose={onClose} fullWidth={true} maxWidth="md">
+				<DialogTitle><ListenerInfo selectedExtractor={selectedExtractor}/></DialogTitle>
+				<Divider />
 				<DialogContent>
 					<Stepper activeStep={activeStep} orientation="vertical">
 						{/*step 1 fill in parameters and submit extractions*/}

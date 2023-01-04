@@ -1,6 +1,41 @@
-import React, {useEffect, useState} from "react";
+import React from "react";
+import {Box, Typography} from "@mui/material";
+import {ClowderTitle} from "../styledComponents/ClowderTitle";
+import {ClowderFootnote} from "../styledComponents/ClowderFootnote";
+import {parseDate} from "../../utils/common";
+import {Extractor} from "../../types/data";
 
-export const ListenerInfo = () => {
-	// TODO implement listener info header
-	return (<></>);
+type ListenerInfoProps = {
+	selectedExtractor: Extractor
+
+}
+export const ListenerInfo = (props: ListenerInfoProps) => {
+
+	const {selectedExtractor} = props;
+
+	return (
+		<Box>
+			{selectedExtractor && selectedExtractor["name"] ?
+				<ClowderTitle>
+					{selectedExtractor["name"]}
+				</ClowderTitle>
+				:
+				null
+			}
+			{selectedExtractor && selectedExtractor["description"] ?
+				<Typography>
+					{selectedExtractor["description"]}
+				</Typography>
+				:
+				null
+			}
+			{selectedExtractor && selectedExtractor["created"] && selectedExtractor["author"]?
+				<ClowderFootnote>
+					{`Created by ${selectedExtractor["author"]} at ${parseDate(selectedExtractor["created"])}`}
+				</ClowderFootnote>
+				:
+				null
+			}
+		</Box>
+	);
 }
