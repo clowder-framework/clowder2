@@ -1,20 +1,19 @@
 import React, {useEffect, useState} from "react";
 import {Box, Button, ButtonGroup, Grid, Tab, Tabs} from "@mui/material";
 
-import {Dataset, RootState, Listener} from "../types/data";
+import {Dataset, RootState} from "../types/data";
 import {useDispatch, useSelector} from "react-redux";
 import {fetchDatasets} from "../actions/dataset";
-import {fetchListeners} from "../actions/listeners";
 import {resetFailedReason} from "../actions/common";
 import {downloadThumbnail} from "../utils/thumbnail";
 
 import {a11yProps, TabPanel} from "./tabs/TabComponent";
 import {ActionModal} from "./dialog/ActionModal";
 import DatasetCard from "./datasets/DatasetCard";
-import ListenerCard from "./listeners/ListenerCard";
 import config from "../app.config";
 import {ArrowBack, ArrowForward} from "@material-ui/icons";
 import Layout from "./Layout";
+import {Listeners} from "./listeners/Listeners";
 
 const tab = {
 	fontStyle: "normal",
@@ -31,8 +30,6 @@ export const Explore = (): JSX.Element => {
 	const listDatasets = (skip: number | undefined, limit: number | undefined, mine: boolean | undefined) => dispatch(fetchDatasets(skip, limit, mine));
 	const dismissError = () => dispatch(resetFailedReason());
 	const datasets = useSelector((state: RootState) => state.dataset.datasets);
-	const listeners = useSelector((state: RootState) => state.listener.listeners);
-	const listListeners = (skip: number | undefined, limit: number | undefined) => dispatch(fetchListeners(skip, limit));
 	const reason = useSelector((state: RootState) => state.error.reason);
 	const stack = useSelector((state: RootState) => state.error.stack);
 
@@ -51,7 +48,6 @@ export const Explore = (): JSX.Element => {
 	// component did mount
 	useEffect(() => {
 		listDatasets(0, limit, mine);
-		listListeners(0, limit);
 	}, []);
 
 	// Error msg dialog
@@ -94,23 +90,6 @@ export const Explore = (): JSX.Element => {
 
 	}, [datasets]);
 
-	// TODO trying to replicate for extractors not sure if it's working
-	useEffect(() => {
-		(async () => {
-			if (listeners !== undefined && listeners.length > 0) {
-				// TODO change the type any to something else
-				await Promise.all(listeners.map(async (listener) => {
-					//
-				}));
-			}
-		})();
-
-		// disable flipping if reaches the last page
-		if (listeners.length < limit) setNextDisabled(true);
-		else setNextDisabled(false);
-
-	}, [listeners]);
-
 	// switch tabs
 	const handleTabChange = (_event: React.ChangeEvent<{}>, newTabIndex: number) => {
 		setSelectedTabIndex(newTabIndex);
@@ -132,7 +111,6 @@ export const Explore = (): JSX.Element => {
 	useEffect(() => {
 		if (skip !== null && skip !== undefined) {
 			listDatasets(skip, limit, mine);
-			listListeners(skip, limit)
 			if (skip === 0) setPrevDisabled(true);
 			else setPrevDisabled(false);
 		}
@@ -151,7 +129,7 @@ export const Explore = (): JSX.Element => {
 							<Box sx={{borderBottom: 1, borderColor: 'divider'}}>
 								<Tabs value={selectedTabIndex} onChange={handleTabChange} aria-label="dashboard tabs">
 									<Tab sx={tab} label="Datasets" {...a11yProps(0)} />
-									<Tab sx={tab} label="Extractors" {...a11yProps(4)} />
+									<Tab sx={tab} label="Extractors" {...a11yProps(1)} />
 								</Tabs>
 							</Box>
 							<TabPanel value={selectedTabIndex} index={0}>
@@ -183,36 +161,13 @@ export const Explore = (): JSX.Element => {
 									</ButtonGroup>
 								</Box>
 							</TabPanel>
-							<TabPanel value={selectedTabIndex} index={1}/>
+							<TabPanel value={selectedTabIndex} index={1}>
+								<Listeners/>
+							</TabPanel>
+							<TabPanel value={selectedTabIndex} index={4}/>
 							<TabPanel value={selectedTabIndex} index={2}/>
 							<TabPanel value={selectedTabIndex} index={3}/>
-							<TabPanel value={selectedTabIndex} index={4}>
-								<Grid container spacing={2}>
-									{
-										listeners !== undefined ?
-											listeners.map((listener) =>  {
-												return (
-													<Grid item key={listener.id} xs={12} sm={6} md={4} lg={3}>
-														<ListenerCard id={listener.id} name={listener.name}
-																	 description={listener.description}/>
-													</Grid>
-												);
-											})
-											:
-											<></>
-									}
-								</Grid>
-								<Box display="flex" justifyContent="center" sx={{m: 1}}>
-									<ButtonGroup variant="contained" aria-label="previous next buttons">
-										<Button aria-label="previous" onClick={previous} disabled={prevDisabled}>
-											<ArrowBack/> Prev
-										</Button>
-										<Button aria-label="next" onClick={next} disabled={nextDisabled}>
-											Next <ArrowForward/>
-										</Button>
-									</ButtonGroup>
-								</Box>
-							</TabPanel>
+
 
 						</Grid>
 					</Grid>

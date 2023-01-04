@@ -10,6 +10,7 @@ import type { UserOut } from './UserOut';
  */
 export type EventListenerOut = {
     id?: string;
+    author?: string;
     name: string;
     version?: string;
     description?: string;
