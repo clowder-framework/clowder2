@@ -132,6 +132,8 @@ export const File = (): JSX.Element => {
 
 	const setMetadata = (metadata: any) => {
 		// TODO wrap this in to a function
+		console.log('metadata in file component');
+		console.log(metadata);
 		setMetadataRequestForms(prevState => {
 			// merge the contents field; e.g. lat lon
 			if (metadata.definition in prevState) {
@@ -230,6 +232,7 @@ export const File = (): JSX.Element => {
 						<Tab label="Version History" {...a11yProps(0)} />
 						<Tab label="Metadata" {...a11yProps(1)} disabled={false}/>
 						<Tab label="Extractors" {...a11yProps(2)} disabled={false}/>
+						<Tab label="Extractor Metadata" {...a11yProps(3)} disabled={false}/>
 					</Tabs>
 					{/*Preview Tab*/}
 					{/*<TabPanel value={selectedTabIndex} index={0}>*/}
@@ -288,6 +291,9 @@ export const File = (): JSX.Element => {
 						/>
 					</TabPanel>
 					<TabPanel value={selectedTabIndex} index={3}>
+						Extractor Metadata goes here
+					</TabPanel>
+					<TabPanel value={selectedTabIndex} index={4}>
 						Comments
 					</TabPanel>
 				</Grid>
