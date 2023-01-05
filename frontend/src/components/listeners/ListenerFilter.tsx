@@ -5,7 +5,7 @@ import {Box, FormControl, FormControlLabel, FormLabel, Radio, RadioGroup} from "
 
 
 export const ListenerFilter = (props) => {
-	const {skip, limit} = props;
+	const {skip, limit, categories} = props;
 	const dispatch = useDispatch();
 	const listListeners = (skip: number | undefined, limit: number | undefined) => dispatch(fetchListeners(skip, limit));
 
@@ -15,12 +15,15 @@ export const ListenerFilter = (props) => {
 				<FormLabel id="radio-buttons-group-label">Filter by category</FormLabel>
 				<RadioGroup
 					aria-labelledby="radio-buttons-group-label"
-					defaultValue="female"
+					defaultValue="all"
 					name="radio-buttons-group"
 				>
-					<FormControlLabel value="female" control={<Radio/>} label="Female"/>
-					<FormControlLabel value="male" control={<Radio/>} label="Male"/>
-					<FormControlLabel value="other" control={<Radio/>} label="Other"/>
+					<FormControlLabel value="all" control={<Radio/>} label="All"/>
+					{
+						categories.map((category: string) => {
+							return <FormControlLabel value={category} control={<Radio/>} label={category}/>
+						})
+					}
 				</RadioGroup>
 			</FormControl>
 		</Box>

@@ -32,6 +32,7 @@ export function Listeners(props: ListenerProps) {
 	const [nextDisabled, setNextDisabled] = useState<boolean>(false);
 	const [openSubmitExtraction, setOpenSubmitExtraction] = useState<boolean>(false);
 	const [selectedExtractor, setSelectedExtractor] = useState();
+	const [categories, setCategories] = useState([]);
 
 	// component did mount
 	useEffect(() => {
@@ -44,6 +45,20 @@ export function Listeners(props: ListenerProps) {
 		// disable flipping if reaches the last page
 		if (listeners.length < limit) setNextDisabled(true);
 		else setNextDisabled(false);
+
+		// extract all the categories
+		setCategories(listeners.reduce((categories, listener) => {
+			// @ts-ignore
+			if (listener["properties"] && listener["properties"]["categories"]) {
+				// @ts-ignore
+				listener["properties"]["categories"].map((c) => {
+					// @ts-ignore
+					if (!categories.includes(c)) categories.push(c);
+				})
+			}
+
+			return categories;
+		}, []));
 
 	}, [listeners]);
 
@@ -68,7 +83,6 @@ export function Listeners(props: ListenerProps) {
 		}
 	}, [skip]);
 
-
 	const handleSubmitExtractionClose = () => {
 		// Cleanup the form
 		setOpenSubmitExtraction(false);
@@ -79,7 +93,7 @@ export function Listeners(props: ListenerProps) {
 			<Grid container>
 				<Grid item xs={3}>
 					<ListenerSearch skip={skip} limit={limit}/>
-					<ListenerFilter skip={skip} limit={limit}/>
+					<ListenerFilter skip={skip} limit={limit} categories={categories}/>
 				</Grid>
 				<Grid item xs={9}>
 					<Box sx={{
