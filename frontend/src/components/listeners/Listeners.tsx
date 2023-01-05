@@ -1,14 +1,14 @@
 import React, {useEffect, useState} from "react";
-import {Box, Button, ButtonGroup, Divider, Grid, IconButton, InputBase, List} from "@mui/material";
+import {Box, Button, ButtonGroup, Divider, Grid, List} from "@mui/material";
 
 import {RootState} from "../../types/data";
 import {useDispatch, useSelector} from "react-redux";
-import {fetchListeners, queryListeners} from "../../actions/listeners";
-import {ArrowBack, ArrowForward, SearchOutlined} from "@material-ui/icons";
+import {fetchListeners} from "../../actions/listeners";
+import {ArrowBack, ArrowForward} from "@material-ui/icons";
 import ListenerItem from "./ListenerItem";
 import {theme} from "../../theme";
 import SubmitExtraction from "./SubmitExtraction";
-import {ExtractorInfo} from "../../openapi/v2";
+import {ListenerSearch} from "./ListenerSearch";
 
 type ListenerProps = {
 	fileId: string,
@@ -20,8 +20,6 @@ export function Listeners(props: ListenerProps) {
 	// Redux connect equivalent
 	const dispatch = useDispatch();
 	const listListeners = (skip: number | undefined, limit: number | undefined) => dispatch(fetchListeners(skip, limit));
-	const searchListeners = (text: string, skip: number | undefined, limit: number | undefined) =>
-		dispatch(queryListeners(text, skip, limit));
 
 	const listeners = useSelector((state: RootState) => state.listener.listeners);
 
@@ -31,7 +29,6 @@ export function Listeners(props: ListenerProps) {
 	const [skip, setSkip] = useState<number | undefined>();
 	const [prevDisabled, setPrevDisabled] = useState<boolean>(true);
 	const [nextDisabled, setNextDisabled] = useState<boolean>(false);
-	const [searchText, setSearchText] = useState<string>("");
 	const [openSubmitExtraction, setOpenSubmitExtraction] = useState<boolean>(false);
 	const [selectedExtractor, setSelectedExtractor] = useState();
 
@@ -70,9 +67,6 @@ export function Listeners(props: ListenerProps) {
 		}
 	}, [skip]);
 
-	const handleListenerSearch = () => {
-		searchListeners(searchText, skip, limit);
-	}
 
 	const handleSubmitExtractionClose = () => {
 		// Cleanup the form
@@ -93,25 +87,7 @@ export function Listeners(props: ListenerProps) {
 							width: "80%"
 						}}
 					>
-						<InputBase
-							sx={{ml: 1, flex: 1}}
-							placeholder="keyword for extractor"
-							inputProps={{"aria-label": "Type in keyword to search for extractor"}}
-							onChange={(e) => {
-								setSearchText(e.target.value);
-							}}
-							onKeyDown={(e) => {
-								if (e.key === "Enter") {
-									e.preventDefault();
-								}
-								handleListenerSearch();
-							}}
-							value={searchText}
-						/>
-						<IconButton type="button" sx={{p: "10px"}} aria-label="search"
-									onClick={handleListenerSearch}>
-							<SearchOutlined/>
-						</IconButton>
+						<ListenerSearch skip={skip} limit={limit}/>
 					</Box>
 				</Grid>
 				<Grid item xs={9}>
@@ -128,7 +104,7 @@ export function Listeners(props: ListenerProps) {
 														  id={listener.id}
 														  fileId={fileId}
 														  datasetId={datasetId}
-														  extractorInfo ={listener}
+														  extractorInfo={listener}
 														  extractorName={listener.name}
 														  extractorDescription={listener.description}
 														  setOpenSubmitExtraction={setOpenSubmitExtraction}
