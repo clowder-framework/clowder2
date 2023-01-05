@@ -110,6 +110,17 @@ async def search_listeners(
     return listeners
 
 
+@router.get("/categories", response_model=List[str])
+async def list_categories(
+    db: MongoClient = Depends(get_db),
+):
+    """Get all the distinct categories of registered listeners in the db
+
+    Arguments:
+    """
+    return await db["listeners"].distinct("properties.categories")
+
+
 @router.get("/{listener_id}", response_model=EventListenerOut)
 async def get_listener(listener_id: str, db: MongoClient = Depends(get_db)):
     """Return JSON information about an Event Listener if it exists."""
