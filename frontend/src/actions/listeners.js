@@ -40,3 +40,20 @@ export function queryListeners(text, skip=0, limit=21){
 
 	};
 }
+
+export const RECEIVE_LISTENER_CATEGORIES = "RECEIVE_LISTENER_CATEGORIES";
+export function fetchListenerCategories(){
+	return (dispatch) => {
+		return V2.ListenersService.listCategoriesApiV2ListenersCategoriesGet()
+		.then(json => {
+				dispatch({
+					type: RECEIVE_LISTENER_CATEGORIES,
+					categories: json,
+					receivedAt: Date.now(),
+				});
+			})
+			.catch(reason => {
+				dispatch(handleErrors(reason, fetchListenerCategories()));
+			});
+	}
+}

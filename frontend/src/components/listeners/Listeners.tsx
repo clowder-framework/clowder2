@@ -17,7 +17,7 @@ import {
 
 import {RootState} from "../../types/data";
 import {useDispatch, useSelector} from "react-redux";
-import {fetchListeners, queryListeners} from "../../actions/listeners";
+import {fetchListenerCategories, fetchListeners, queryListeners} from "../../actions/listeners";
 import {ArrowBack, ArrowForward, SearchOutlined} from "@material-ui/icons";
 import ListenerItem from "./ListenerItem";
 import {theme} from "../../theme";
@@ -36,8 +36,10 @@ export function Listeners(props: ListenerProps) {
 		dispatch(fetchListeners(skip, limit, selectedCategory));
 	const searchListeners = (text: string, skip: number | undefined, limit: number | undefined) =>
 		dispatch(queryListeners(text, skip, limit));
+	const listAvailableCategories = () => dispatch(fetchListenerCategories());
 
 	const listeners = useSelector((state: RootState) => state.listener.listeners);
+	const categories = useSelector((state: RootState) => state.listener.categories);
 
 	// TODO add option to determine limit number; default show 5 datasets each time
 	const [currPageNum, setCurrPageNum] = useState<number>(0);
@@ -47,13 +49,13 @@ export function Listeners(props: ListenerProps) {
 	const [nextDisabled, setNextDisabled] = useState<boolean>(false);
 	const [openSubmitExtraction, setOpenSubmitExtraction] = useState<boolean>(false);
 	const [selectedExtractor, setSelectedExtractor] = useState();
-	const [categories, setCategories] = useState([]);
 	const [searchText, setSearchText] = useState<string>("");
 	const [selectedCategory, setSelectedCategory] = useState("");
 
 	// component did mount
 	useEffect(() => {
 		listListeners(skip, limit, null);
+		listAvailableCategories();
 	}, []);
 
 	// fetch extractors from each individual dataset/id calls
@@ -62,21 +64,6 @@ export function Listeners(props: ListenerProps) {
 		// disable flipping if reaches the last page
 		if (listeners.length < limit) setNextDisabled(true);
 		else setNextDisabled(false);
-
-		// extract all the categories
-		setCategories(listeners.reduce((categories, listener) => {
-			// @ts-ignore
-			if (listener["properties"] && listener["properties"]["categories"]) {
-				// @ts-ignore
-				listener["properties"]["categories"].map((c) => {
-					// @ts-ignore
-					if (!categories.includes(c)) categories.push(c);
-				})
-			}
-
-			return categories;
-		}, []));
-
 	}, [listeners]);
 
 	useEffect(() => {

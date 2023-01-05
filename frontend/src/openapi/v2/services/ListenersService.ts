@@ -96,6 +96,21 @@ export class ListenersService {
     }
 
     /**
+     * List Categories
+     * Get all the distinct categories of registered listeners in the db
+     *
+     * Arguments:
+     * @returns string Successful Response
+     * @throws ApiError
+     */
+    public static listCategoriesApiV2ListenersCategoriesGet(): CancelablePromise<Array<string>> {
+        return __request({
+            method: 'GET',
+            path: `/api/v2/listeners/categories`,
+        });
+    }
+
+    /**
      * Get Listener
      * Return JSON information about an Event Listener if it exists.
      * @param listenerId

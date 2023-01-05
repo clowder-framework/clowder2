@@ -9,6 +9,7 @@ import {
 } from "../actions/metadata";
 import {RESET_CREATE_FILE} from "../actions/file";
 import {GET_FOLDER_PATH} from "../actions/folder";
+import {RECEIVE_LISTENER_CATEGORIES, SEARCH_LISTENERS} from "../actions/listeners";
 
 interface RECEIVE_FILES_IN_DATASET {
 	type: "RECEIVE_FILES_IN_DATASET";
@@ -199,6 +200,16 @@ interface RECEIVE_LISTENERS{
 	listeners: []
 }
 
+interface SEARCH_LISTENERS{
+	type: "SEARCH_LISTENERS"
+	listeners: []
+}
+
+interface RECEIVE_LISTENER_CATEGORIES{
+	type: "RECEIVE_LISTENER_CATEGORIES"
+	categories:[]
+}
+
 export type DataAction =
 	| RECEIVE_FILES_IN_DATASET
 	| RECEIVE_FOLDERS_IN_DATASET
@@ -231,7 +242,6 @@ export type DataAction =
 	| RECEIVE_METADATA_DEFINITIONS
 	| SAVE_METADATA_DEFINITIONS
 	| RECEIVE_DATASET_METADATA
-    | SAVE_METADATA_DEFINITIONS
 	| RECEIVE_FILE_METADATA
 	| DELETE_DATASET_METADATA
 	| DELETE_FILE_METADATA
@@ -239,4 +249,6 @@ export type DataAction =
 	| FOLDER_DELETED
 	| GET_FOLDER_PATH
 	| RECEIVE_LISTENERS
+	| SEARCH_LISTENERS
+	| RECEIVE_LISTENER_CATEGORIES
 	;
