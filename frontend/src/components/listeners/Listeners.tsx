@@ -1,15 +1,27 @@
 import React, {useEffect, useState} from "react";
-import {Box, Button, ButtonGroup, Divider, Grid, List} from "@mui/material";
+import {
+	Box,
+	Button,
+	ButtonGroup,
+	Divider,
+	FormControl,
+	FormControlLabel,
+	FormLabel,
+	Grid,
+	IconButton,
+	InputBase,
+	List,
+	Radio,
+	RadioGroup
+} from "@mui/material";
 
 import {RootState} from "../../types/data";
 import {useDispatch, useSelector} from "react-redux";
-import {fetchListeners} from "../../actions/listeners";
-import {ArrowBack, ArrowForward} from "@material-ui/icons";
+import {fetchListeners, queryListeners} from "../../actions/listeners";
+import {ArrowBack, ArrowForward, SearchOutlined} from "@material-ui/icons";
 import ListenerItem from "./ListenerItem";
 import {theme} from "../../theme";
 import SubmitExtraction from "./SubmitExtraction";
-import {ListenerSearch} from "./ListenerSearch";
-import {ListenerFilter} from "./ListenerFilter";
 
 type ListenerProps = {
 	fileId: string,
@@ -20,7 +32,10 @@ export function Listeners(props: ListenerProps) {
 	const {fileId, datasetId} = props;
 	// Redux connect equivalent
 	const dispatch = useDispatch();
-	const listListeners = (skip: number | undefined, limit: number | undefined, selectedCategory:string) => dispatch(fetchListeners(skip, limit, selectedCategory));
+	const listListeners = (skip: number | undefined, limit: number | undefined, selectedCategory: string | null) =>
+		dispatch(fetchListeners(skip, limit, selectedCategory));
+	const searchListeners = (text: string, skip: number | undefined, limit: number | undefined) =>
+		dispatch(queryListeners(text, skip, limit));
 
 	const listeners = useSelector((state: RootState) => state.listener.listeners);
 
@@ -33,10 +48,12 @@ export function Listeners(props: ListenerProps) {
 	const [openSubmitExtraction, setOpenSubmitExtraction] = useState<boolean>(false);
 	const [selectedExtractor, setSelectedExtractor] = useState();
 	const [categories, setCategories] = useState([]);
+	const [searchText, setSearchText] = useState<string>("");
+	const [selectedCategory, setSelectedCategory] = useState("");
 
 	// component did mount
 	useEffect(() => {
-		listListeners(skip, limit);
+		listListeners(skip, limit, null);
 	}, []);
 
 	// fetch extractors from each individual dataset/id calls
@@ -62,6 +79,14 @@ export function Listeners(props: ListenerProps) {
 
 	}, [listeners]);
 
+	useEffect(() => {
+		if (skip !== null && skip !== undefined) {
+			listListeners(skip, limit, null);
+			if (skip === 0) setPrevDisabled(true);
+			else setPrevDisabled(false);
+		}
+	}, [skip]);
+
 	// for pagination keep flipping until the return dataset is less than the limit
 	const previous = () => {
 		if (currPageNum - 1 >= 0) {
@@ -75,13 +100,18 @@ export function Listeners(props: ListenerProps) {
 			setCurrPageNum(currPageNum + 1);
 		}
 	};
-	useEffect(() => {
-		if (skip !== null && skip !== undefined) {
-			listListeners(skip, limit);
-			if (skip === 0) setPrevDisabled(true);
-			else setPrevDisabled(false);
-		}
-	}, [skip]);
+
+	const handleListenerSearch = () => {
+		setSelectedCategory("");
+		searchListeners(searchText, skip, limit);
+	};
+
+	const handleCategoryChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+		const selectedCategory = (event.target as HTMLInputElement).value;
+		setSelectedCategory(selectedCategory);
+		setSearchText("");
+		listListeners(skip, limit, selectedCategory);
+	}
 
 	const handleSubmitExtractionClose = () => {
 		// Cleanup the form
@@ -92,8 +122,58 @@ export function Listeners(props: ListenerProps) {
 		<>
 			<Grid container>
 				<Grid item xs={3}>
-					<ListenerSearch skip={skip} limit={limit}/>
-					<ListenerFilter skip={skip} limit={limit} categories={categories}/>
+					{/*searchbox*/}
+					<Box
+						component="form"
+						sx={{
+							p: "2px 4px",
+							display: "flex",
+							alignItems: "left",
+							backgroundColor: theme.palette.primary.contrastText,
+							width: "80%"
+						}}
+					>
+						<InputBase
+							sx={{ml: 1, flex: 1}}
+							placeholder="keyword for extractor"
+							inputProps={{"aria-label": "Type in keyword to search for extractor"}}
+							onChange={(e) => {
+								setSearchText(e.target.value);
+							}}
+							onKeyDown={(e) => {
+								if (e.key === "Enter") {
+									e.preventDefault();
+								}
+								handleListenerSearch();
+							}}
+							value={searchText}
+						/>
+						<IconButton type="button" sx={{p: "10px"}} aria-label="search"
+									onClick={handleListenerSearch}>
+							<SearchOutlined/>
+						</IconButton>
+					</Box>
+					<Box sx={{margin: "2em auto", padding: "0.5em"}}>
+						{/*filters*/}
+						<FormControl>
+							<FormLabel id="radio-buttons-group-label">Filter by category</FormLabel>
+							<RadioGroup
+								aria-labelledby="radio-buttons-group-label"
+								defaultValue="all"
+								name="radio-buttons-group"
+								value={selectedCategory}
+								onChange={handleCategoryChange}
+							>
+								<FormControlLabel value="" control={<Radio/>} label="all"/>
+								{
+									categories.map((category: string) => {
+										return <FormControlLabel value={category} control={<Radio/>}
+																 label={category.toLowerCase()}/>
+									})
+								}
+							</RadioGroup>
+						</FormControl>
+					</Box>
 				</Grid>
 				<Grid item xs={9}>
 					<Box sx={{
