@@ -126,7 +126,7 @@ async def get_listeners(
     db: MongoClient = Depends(get_db),
     skip: int = 0,
     limit: int = 2,
-    categories: Optional[list[str]] = None,
+    category: Optional[str] = None,
 ):
     """Get a list of all Event Listeners in the db.
 
@@ -137,10 +137,10 @@ async def get_listeners(
     """
     listeners = []
 
-    if categories:
+    if category:
         for doc in (
             await db["listeners"]
-            .find({"properties.categories": {"$all": categories}})
+            .find({"properties.categories": category})
             .skip(skip)
             .limit(limit)
             .to_list(length=limit)

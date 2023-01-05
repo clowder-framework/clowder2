@@ -8,7 +8,5 @@ export const ListenerFilter = (props) => {
 	const dispatch = useDispatch();
 	const listListeners = (skip: number | undefined, limit: number | undefined) => dispatch(fetchListeners(skip, limit));
 
-	return (
-
-	);
+	return ();
 }
