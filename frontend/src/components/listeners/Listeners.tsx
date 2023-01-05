@@ -20,7 +20,7 @@ export function Listeners(props: ListenerProps) {
 	const {fileId, datasetId} = props;
 	// Redux connect equivalent
 	const dispatch = useDispatch();
-	const listListeners = (skip: number | undefined, limit: number | undefined) => dispatch(fetchListeners(skip, limit));
+	const listListeners = (skip: number | undefined, limit: number | undefined, selectedCategory:string) => dispatch(fetchListeners(skip, limit, selectedCategory));
 
 	const listeners = useSelector((state: RootState) => state.listener.listeners);
 
