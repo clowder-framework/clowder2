@@ -9,6 +9,7 @@ import ListenerItem from "./ListenerItem";
 import {theme} from "../../theme";
 import SubmitExtraction from "./SubmitExtraction";
 import {ListenerSearch} from "./ListenerSearch";
+import {ListenerFilter} from "./ListenerFilter";
 
 type ListenerProps = {
 	fileId: string,
@@ -77,18 +78,8 @@ export function Listeners(props: ListenerProps) {
 		<>
 			<Grid container>
 				<Grid item xs={3}>
-					<Box
-						component="form"
-						sx={{
-							p: "2px 4px",
-							display: "flex",
-							alignItems: "left",
-							backgroundColor: theme.palette.primary.contrastText,
-							width: "80%"
-						}}
-					>
-						<ListenerSearch skip={skip} limit={limit}/>
-					</Box>
+					<ListenerSearch skip={skip} limit={limit}/>
+					<ListenerFilter skip={skip} limit={limit}/>
 				</Grid>
 				<Grid item xs={9}>
 					<Box sx={{
@@ -136,7 +127,6 @@ export function Listeners(props: ListenerProps) {
 				open={openSubmitExtraction}
 				handleClose={handleSubmitExtractionClose}
 				selectedExtractor={selectedExtractor}
-
 			/>
 		</>
 	);
