@@ -4,7 +4,8 @@ import {metadataConfig} from "../../metadata.config";
 import {useSelector, useDispatch} from "react-redux";
 import {RootState} from "../../types/data";
 import {fetchDatasetMetadata, fetchFileMetadata, fetchMetadataDefinitions} from "../../actions/metadata";
-import {Agent} from "./Agent";
+import {ListenerAgent} from "./ListenerAgent";
+import {ListenerContents} from "./ListnerContents";
 import {MetadataDeleteButton} from "./widgets/MetadataDeleteButton";
 
 
@@ -30,8 +31,13 @@ export const ListenerMetadataEntry = (props: ListenerMetadata) => {
 		<>
 			{
 				(() => {
-					console.log(contents);
-					return "Nothing yet"
+					return <Grid container spacing={2}>
+						<Grid item xs={11} sm={11} md={11} lg={11} xl={11}>
+							<ListenerAgent created={created} agent={agent} />
+							<ListenerContents contents={contents}/>
+						</Grid>
+					</Grid>
+
 
 				})()
 			}
