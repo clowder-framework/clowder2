@@ -6,6 +6,7 @@ import {RootState} from "../../types/data";
 import {fetchDatasetMetadata, fetchFileMetadata, fetchMetadataDefinitions} from "../../actions/metadata";
 import {Agent} from "./Agent";
 import {MetadataDeleteButton} from "./widgets/MetadataDeleteButton";
+import {ListenerMetadataEntry} from "../metadata/ListenerMetadataEntry";
 
 type MetadataType = {
 	updateMetadata: any,
@@ -53,13 +54,22 @@ export const DisplayListenerMetadata = (props: MetadataType) => {
 					if (resourceType === "dataset") metadataList = datasetMetadataList;
 					else if (resourceType === "file") metadataList = fileMetadataList;
 					let listenerMetadataList = [];
-					metadataList.map((metadata,idx) => {
+					let listenerMetadataContent = [];
+					return metadataList.map((metadata,idx) => {
 						if (metadata.agent.listener !== null) {
-							listenerMetadataList.push(metadata);
+							console.log('listener metadata', metadata);
+							return (<Box className="inputGroup" key={idx}>
+									<ListenerMetadataEntry agent={metadata.agent}
+														   contents={metadata.contents}
+															context={metadata.context}
+															context_url={metadata.context_url}
+															created={metadata.created}
+									/>
+							</Box>);
+
+
 						}
 					});
-					return "nothing yet"
-
 				})()
 			}
 		</>
