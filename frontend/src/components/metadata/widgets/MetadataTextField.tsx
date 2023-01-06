@@ -4,8 +4,9 @@ import { MetadataEditButton } from "./MetadataEditButton";
 import {Grid} from "@mui/material";
 
 export const MetadataTextField = (props) => {
-	const {widgetName, fieldName, content, setMetadata, metadataId, updateMetadata, resourceId, initialReadOnly} = props;
-	const [localContent, setLocalContent] = useState(content && content[fieldName] ? content: {});
+	const {widgetName, fieldName, contents, setMetadata, metadataId, updateMetadata, resourceId, initialReadOnly, isRequired} = props;
+	const [localContent, setLocalContent] = useState(contents && contents[fieldName] ? contents: {});
+
 	const [readOnly, setReadOnly] = useState(initialReadOnly);
 
 	const [inputChanged, setInputChanged] = useState(false);
@@ -13,8 +14,8 @@ export const MetadataTextField = (props) => {
 	return (
 		<Grid container spacing={2} sx={{ "alignItems": "center"}}>
 			<Grid item xs={11} sm={11} md={11} lg={11} xl={11}>
-				<ClowderMetadataTextField label={widgetName} variant="outlined" margin="normal" fullWidth name={widgetName}
-										  value={readOnly && content? content[fieldName]: localContent[fieldName]}
+				<ClowderMetadataTextField label={fieldName} variant="outlined" margin="normal" fullWidth name={widgetName} required={isRequired}
+										  value={readOnly && contents? contents[fieldName]: localContent[fieldName]}
 										  onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
 											  setInputChanged(true);
 											  let tempContents: { [key: string]: string|number; } = {};

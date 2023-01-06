@@ -74,6 +74,8 @@ export const DisplayMetadata = (props: MetadataType) => {
 														resourceId: resourceId,
 														content: metadata.content ?? null,
 														metadataId: metadata.id ?? null,
+														updateMetadata: updateMetadata,
+														isRequired: field.required,
 														key:idxx
 													}
 												)
