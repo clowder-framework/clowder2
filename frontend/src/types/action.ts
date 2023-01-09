@@ -207,7 +207,12 @@ interface SEARCH_LISTENERS{
 
 interface RECEIVE_LISTENER_CATEGORIES{
 	type: "RECEIVE_LISTENER_CATEGORIES"
-	categories:[]
+	categories: []
+}
+
+interface RECEIVE_LISTNER_LABELS{
+	type: "RECEIVE_LISTNER_LABELS"
+	labels: []
 }
 
 export type DataAction =
@@ -251,4 +256,5 @@ export type DataAction =
 	| RECEIVE_LISTENERS
 	| SEARCH_LISTENERS
 	| RECEIVE_LISTENER_CATEGORIES
+	| RECEIVE_LISTNER_LABELS
 	;

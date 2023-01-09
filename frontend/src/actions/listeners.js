@@ -57,3 +57,20 @@ export function fetchListenerCategories(){
 			});
 	}
 }
+
+export const RECEIVE_LISTENER_LABELS = "RECEIVE_LISTENER_LABELS";
+export function fetchListenerLabels(){
+	return (dispatch) => {
+		return V2.ListenersService.listDefaultLabelsApiV2ListenersDefaultLabelsGet()
+		.then(json => {
+				dispatch({
+					type: RECEIVE_LISTENER_LABELS,
+					labels: json,
+					receivedAt: Date.now(),
+				});
+			})
+			.catch(reason => {
+				dispatch(handleErrors(reason, fetchListenerLabels()));
+			});
+	}
+}

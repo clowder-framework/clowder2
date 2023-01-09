@@ -139,6 +139,7 @@ export interface DatasetState{
 export interface ListenerState{
 	listeners: Listener[];
 	categories: string[];
+	labels: string[];
 }
 export interface MetadataState{
 	metadataDefinitionList: MetadataDefinitionOut[],
