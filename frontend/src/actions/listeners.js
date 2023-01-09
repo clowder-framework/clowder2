@@ -3,10 +3,10 @@ import {handleErrors} from "./common";
 
 export const RECEIVE_LISTENERS = "RECEIVE_LISTENERS";
 
-export function fetchListeners(skip=0, limit=21, category=null){
+export function fetchListeners(skip=0, limit=21, category=null, label=null){
 	return (dispatch) => {
 		// TODO: Parameters for dates? paging?
-		return V2.ListenersService.getListenersApiV2ListenersGet(skip, limit, category)
+		return V2.ListenersService.getListenersApiV2ListenersGet(skip, limit, category, label)
 			.then(json => {
 				dispatch({
 					type: RECEIVE_LISTENERS,
@@ -15,7 +15,7 @@ export function fetchListeners(skip=0, limit=21, category=null){
 				});
 			})
 			.catch(reason => {
-				dispatch(handleErrors(reason, fetchListeners(skip, limit, category)));
+				dispatch(handleErrors(reason, fetchListeners(skip, limit, category, label)));
 			});
 
 	};

@@ -17,7 +17,7 @@ import {
 
 import {RootState} from "../../types/data";
 import {useDispatch, useSelector} from "react-redux";
-import {fetchListenerCategories, fetchListeners, queryListeners} from "../../actions/listeners";
+import {fetchListenerCategories, fetchListenerLabels, fetchListeners, queryListeners} from "../../actions/listeners";
 import {ArrowBack, ArrowForward, SearchOutlined} from "@material-ui/icons";
 import ListenerItem from "./ListenerItem";
 import {theme} from "../../theme";
@@ -32,14 +32,17 @@ export function Listeners(props: ListenerProps) {
 	const {fileId, datasetId} = props;
 	// Redux connect equivalent
 	const dispatch = useDispatch();
-	const listListeners = (skip: number | undefined, limit: number | undefined, selectedCategory: string | null) =>
-		dispatch(fetchListeners(skip, limit, selectedCategory));
+	const listListeners = (skip: number | undefined, limit: number | undefined, selectedCategory: string | null,
+						   selectedLabel: string | null ) =>
+		dispatch(fetchListeners(skip, limit, selectedCategory, selectedLabel));
 	const searchListeners = (text: string, skip: number | undefined, limit: number | undefined) =>
 		dispatch(queryListeners(text, skip, limit));
 	const listAvailableCategories = () => dispatch(fetchListenerCategories());
+	const listAvailableLabels = () => dispatch(fetchListenerLabels());
 
 	const listeners = useSelector((state: RootState) => state.listener.listeners);
 	const categories = useSelector((state: RootState) => state.listener.categories);
+	const labels = useSelector((state: RootState) => state.listener.labels);
 
 	// TODO add option to determine limit number; default show 5 datasets each time
 	const [currPageNum, setCurrPageNum] = useState<number>(0);
@@ -51,11 +54,13 @@ export function Listeners(props: ListenerProps) {
 	const [selectedExtractor, setSelectedExtractor] = useState();
 	const [searchText, setSearchText] = useState<string>("");
 	const [selectedCategory, setSelectedCategory] = useState("");
+	const [selectedLabel, setSelectedLabel] = useState("");
 
 	// component did mount
 	useEffect(() => {
-		listListeners(skip, limit, null);
+		listListeners(skip, limit, null, null);
 		listAvailableCategories();
+		listAvailableLabels();
 	}, []);
 
 	// fetch extractors from each individual dataset/id calls
@@ -68,7 +73,7 @@ export function Listeners(props: ListenerProps) {
 
 	useEffect(() => {
 		if (skip !== null && skip !== undefined) {
-			listListeners(skip, limit, null);
+			listListeners(skip, limit, null, null);
 			if (skip === 0) setPrevDisabled(true);
 			else setPrevDisabled(false);
 		}
@@ -94,10 +99,17 @@ export function Listeners(props: ListenerProps) {
 	};
 
 	const handleCategoryChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-		const selectedCategory = (event.target as HTMLInputElement).value;
-		setSelectedCategory(selectedCategory);
+		const selectedCategoryValue = (event.target as HTMLInputElement).value;
+		setSelectedCategory(selectedCategoryValue);
 		setSearchText("");
-		listListeners(skip, limit, selectedCategory);
+		listListeners(skip, limit, selectedCategoryValue, selectedLabel);
+	}
+
+	const handleLabelChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+		const selectedLabelValue = (event.target as HTMLInputElement).value;
+		setSelectedLabel(selectedLabelValue);
+		setSearchText("");
+		listListeners(skip, limit, selectedCategory, selectedLabelValue);
 	}
 
 	const handleSubmitExtractionClose = () => {
@@ -141,11 +153,11 @@ export function Listeners(props: ListenerProps) {
 						</IconButton>
 					</Box>
 					<Box sx={{margin: "2em auto", padding: "0.5em"}}>
-						{/*filters*/}
+						{/*categories*/}
 						<FormControl>
-							<FormLabel id="radio-buttons-group-label">Filter by category</FormLabel>
+							<FormLabel id="radio-buttons-group-label-categories">Filter by category</FormLabel>
 							<RadioGroup
-								aria-labelledby="radio-buttons-group-label"
+								aria-labelledby="radio-buttons-group-label-categories"
 								defaultValue="all"
 								name="radio-buttons-group"
 								value={selectedCategory}
@@ -156,6 +168,27 @@ export function Listeners(props: ListenerProps) {
 									categories.map((category: string) => {
 										return <FormControlLabel value={category} control={<Radio/>}
 																 label={category.toLowerCase()}/>
+									})
+								}
+							</RadioGroup>
+						</FormControl>
+					</Box>
+					<Box sx={{margin: "2em auto", padding: "0.5em"}}>
+						{/*labels*/}
+						<FormControl>
+							<FormLabel id="radio-buttons-group-label-labels">Filter by labels</FormLabel>
+							<RadioGroup
+								aria-labelledby="radio-buttons-group-label-labels"
+								defaultValue="all"
+								name="radio-buttons-group"
+								value={selectedLabel}
+								onChange={handleLabelChange}
+							>
+								<FormControlLabel value="" control={<Radio/>} label="all"/>
+								{
+									labels.map((label: string) => {
+										return <FormControlLabel value={label} control={<Radio/>}
+																 label={label.toLowerCase()}/>
 									})
 								}
 							</RadioGroup>

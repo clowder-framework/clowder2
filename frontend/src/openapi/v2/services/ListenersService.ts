@@ -16,9 +16,11 @@ export class ListenersService {
      * skip -- number of initial records to skip (i.e. for pagination)
      * limit -- restrict number of records to be returned (i.e. for pagination)
      * category -- filter by category has to be exact match
+     * label -- filter by label has to be exact match
      * @param skip
      * @param limit
      * @param category
+     * @param label
      * @returns EventListenerOut Successful Response
      * @throws ApiError
      */
@@ -26,6 +28,7 @@ export class ListenersService {
         skip?: number,
         limit: number = 2,
         category?: string,
+        label?: string,
     ): CancelablePromise<Array<EventListenerOut>> {
         return __request({
             method: 'GET',
@@ -34,6 +37,7 @@ export class ListenersService {
                 'skip': skip,
                 'limit': limit,
                 'category': category,
+                'label': label,
             },
             errors: {
                 422: `Validation Error`,

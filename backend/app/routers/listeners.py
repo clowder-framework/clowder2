@@ -149,6 +149,7 @@ async def get_listeners(
     skip: int = 0,
     limit: int = 2,
     category: Optional[str] = None,
+    label: Optional[str] = None,
 ):
     """Get a list of all Event Listeners in the db.
 
@@ -156,24 +157,26 @@ async def get_listeners(
         skip -- number of initial records to skip (i.e. for pagination)
         limit -- restrict number of records to be returned (i.e. for pagination)
         category -- filter by category has to be exact match
+        label -- filter by label has to be exact match
     """
     listeners = []
-
-    if category:
-        for doc in (
-            await db["listeners"]
-            .find({"properties.categories": category})
-            .skip(skip)
-            .limit(limit)
-            .to_list(length=limit)
-        ):
-            listeners.append(EventListenerOut.from_mongo(doc))
+    if category and label:
+        query = {"$and": [{"properties.categories": category},{"properties.defaultLabels": label}]}
+    elif category:
+        query = {"properties.categories": category}
+    elif label:
+        query = {"properties.defaultLabels": label}
     else:
-        for doc in (
-            await db["listeners"].find().skip(skip).limit(limit).to_list(length=limit)
-        ):
-            listeners.append(EventListenerOut.from_mongo(doc))
+        query = {}
 
+    for doc in (
+        await db["listeners"]
+        .find(query)
+        .skip(skip)
+        .limit(limit)
+        .to_list(length=limit)
+    ):
+        listeners.append(EventListenerOut.from_mongo(doc))
     return listeners
 
 

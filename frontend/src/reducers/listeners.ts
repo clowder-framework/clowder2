@@ -18,7 +18,7 @@ const listeners = (state = defaultState, action: DataAction) => {
 		case RECEIVE_LISTENER_CATEGORIES:
 			return Object.assign({}, state, {categories: action.categories});
 		case RECEIVE_LISTENER_LABELS:
-			return Object.assign({}, state, {categories: action.labels});
+			return Object.assign({}, state, {labels: action.labels});
 		default:
 			return state;
 	}
