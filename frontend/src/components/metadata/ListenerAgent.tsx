@@ -15,7 +15,6 @@ export const ListenerAgent = (props) => {
 	const {created, agent} = props;
 	const id = `agent-${agent.id}`;
 	const listener = agent.listener;
-	console.log(listener);
 
 	return (
 		<>
