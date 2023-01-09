@@ -121,6 +121,17 @@ async def list_categories(
     return await db["listeners"].distinct("properties.categories")
 
 
+@router.get("/defaultLabels", response_model=List[str])
+async def list_default_labels(
+    db: MongoClient = Depends(get_db),
+):
+    """Get all the distinct default labels of registered listeners in the db
+
+    Arguments:
+    """
+    return await db["listeners"].distinct("properties.defaultLabels")
+
+
 @router.get("/{listener_id}", response_model=EventListenerOut)
 async def get_listener(listener_id: str, db: MongoClient = Depends(get_db)):
     """Return JSON information about an Event Listener if it exists."""
