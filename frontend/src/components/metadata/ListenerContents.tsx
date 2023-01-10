@@ -12,13 +12,12 @@ const textStyle = {
 
 type ListenerContentsEntry = {
 	contents: any,
-	objectKey: any|undefined,
 }
 
 
 
 export const ListenerContents = (props: ListenerContentsEntry) => {
-	const {contents, objectKey} = props;
+	const {contents} = props;
 	// console.log(contents, 'are the contents');
 	// console.log(typeof(contents));
 

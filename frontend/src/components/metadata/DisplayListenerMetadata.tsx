@@ -1,4 +1,4 @@
-import React, {useEffect} from "react";
+import React, {useEffect, useState} from "react";
 import {Box, Grid, Typography} from "@mui/material";
 import {metadataConfig} from "../../metadata.config";
 import {useSelector, useDispatch} from "react-redux";
@@ -57,7 +57,7 @@ export const DisplayListenerMetadata = (props: MetadataType) => {
 					let listenerMetadataContent = [];
 					return metadataList.map((metadata,idx) => {
 						if (metadata.agent.listener !== null) {
-							return (<Box className="inputGroup" key={idx}>
+							return (<Box className="inputGroup" key={idx} sx={{ p: 2, border: '1px dashed grey' }}>
 									<Grid>
 										<ListenerMetadataEntry agent={metadata.agent}
 														   contents={metadata.contents}
