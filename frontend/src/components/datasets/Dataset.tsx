@@ -13,6 +13,7 @@ import FilesTable from "../files/FilesTable";
 import config from "../../app.config";
 import {DatasetIn, MetadataIn} from "../../openapi/v2";
 import {DisplayMetadata} from "../metadata/DisplayMetadata";
+import {DisplayListenerMetadata} from "../metadata/DisplayListenerMetadata";
 import {EditMetadata} from "../metadata/EditMetadata";
 import {
 	deleteDatasetMetadata as deleteDatasetMetadataAction,
@@ -188,6 +189,9 @@ export const Dataset = (): JSX.Element => {
 							 label="Metadata" {...a11yProps(1)} disabled={false}/>
 						 <Tab icon={<AssessmentIcon/>} iconPosition="start" sx={tab}
 							 label="Extractors" {...a11yProps(2)} disabled={false}/>
+						<Tab icon={<AssessmentIcon/>} iconPosition="start" sx={tab}
+							 label="Extractor Metadata" {...a11yProps(3)} disabled={false}/>
+
 					</Tabs>
 					<TabPanel value={selectedTabIndex} index={0}>
 						<FilesTable datasetId={datasetId} folderId={folderId}/>
@@ -229,7 +233,11 @@ export const Dataset = (): JSX.Element => {
 							datasetId={datasetId}
 						/>
 					</TabPanel>
-					<TabPanel value={selectedTabIndex} index={3}/>
+							<TabPanel value={selectedTabIndex} index={3}>
+						<DisplayListenerMetadata updateMetadata={updateDatasetMetadata}
+													 deleteMetadata={deleteDatasetMetadata}
+													 resourceType="dataset" resourceId={datasetId}/>
+					</TabPanel>
 					<TabPanel value={selectedTabIndex} index={4}/>
 				</Grid>
 				<Grid item>
