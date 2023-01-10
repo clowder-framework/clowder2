@@ -5,7 +5,6 @@ WORKDIR /code
 # set python env variables
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
-ENV PYTHONPATH "/code"
 
 # install pipenv
 RUN pip install pipenv
