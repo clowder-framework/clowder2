@@ -830,7 +830,7 @@ async def get_dataset_extract(
             body["parameters"] = parameters
         else:
             parameters = {}
-        current_routing_key =  current_queue
+        current_routing_key = current_queue
 
         submit_dataset_message(
             dataset_out,
