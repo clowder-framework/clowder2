@@ -22,4 +22,6 @@ ENV PATH="/code/.venv/bin:$PATH"
 # copy app code at end to make it easier to change code and not have to rebuild requirement layers
 COPY ./app /code/app
 
+RUN ls /code
+
 CMD ["python", "./code/app/heartbeat_listener_sync.py"]
