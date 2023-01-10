@@ -21,27 +21,30 @@ export const ListenerContents = (props: ListenerContentsEntry) => {
 	const {contents, objectKey} = props;
 	// console.log(contents, 'are the contents');
 	// console.log(typeof(contents));
-	return Object.entries(contents).map(([key, value], idx) => {
-		// console.log('objectKey', objectKey)
-		// console.log(key, 'key');
-		// console.log(value, typeof(value), 'value');
-		if (typeof(value) == 'object') {
-			// console.log("value is an object");
-			// console.log(objectKey, key, value);
-			//
-			console.log(idx, objectKey, key, value);
-			let currentKey = key
-			let entry = currentKey + ': ' + 'value goes here'
-			return <li>{entry}</li>
 
+	return <div><pre>{JSON.stringify(contents, null, 2)}</pre></div>
 
-		} else {
-			if (objectKey !== undefined) {
-				console.log("objectKey is not undefined", objectKey);
-				console.log(value);
-			}
-			let entry = key + ": " +value
-			return <li>{entry}</li>
-		}
-	});
+	// return Object.entries(contents).map(([key, value], idx) => {
+	// 	// console.log('objectKey', objectKey)
+	// 	// console.log(key, 'key');
+	// 	// console.log(value, typeof(value), 'value');
+	// 	if (typeof(value) == 'object') {
+	// 		// console.log("value is an object");
+	// 		// console.log(objectKey, key, value);
+	// 		//
+	// 		console.log(idx, objectKey, key, value);
+	// 		let currentKey = key
+	// 		let entry = currentKey + ': ' + 'value goes here'
+	// 		return <li>{entry}</li>
+	//
+	//
+	// 	} else {
+	// 		if (objectKey !== undefined) {
+	// 			console.log("objectKey is not undefined", objectKey);
+	// 			console.log(value);
+	// 		}
+	// 		let entry = key + ": " +value
+	// 		return <li>{entry}</li>
+	// 	}
+	// });
 }
