@@ -3,6 +3,12 @@ import {Box, Typography} from "@mui/material";
 import {theme} from "../../theme";
 import {parseDate} from "../../utils/common";
 
+const textStyle = {
+	fontWeight: "normal",
+	fontSize: "16x",
+	color: theme.palette.primary,
+};
+
 type ListenerContentsEntry = {
 	contents: any,
 }

@@ -57,7 +57,7 @@ export const DisplayListenerMetadata = (props: MetadataType) => {
 					let listenerMetadataContent = [];
 					return metadataList.map((metadata,idx) => {
 						if (metadata.agent.listener !== null) {
-							return (<Box className="inputGroup" key={idx} sx={{ p: 2, border: '1px dashed grey' }}>
+							return (<Box className="inputGroup" key={idx} sx={{ p: 2, border: '2px solid grey' }}>
 									<Grid>
 										<ListenerMetadataEntry agent={metadata.agent}
 														   contents={metadata.contents}

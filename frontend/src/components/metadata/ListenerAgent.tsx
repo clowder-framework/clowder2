@@ -6,8 +6,7 @@ import {parseDate} from "../../utils/common";
 const textStyle = {
 	fontWeight: "normal",
 	fontSize: "16x",
-	fontStyle: "italic",
-	color: theme.palette.secondary.light,
+	color: theme.palette.primary,
 };
 
 
