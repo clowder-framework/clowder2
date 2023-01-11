@@ -231,9 +231,9 @@ export const File = (): JSX.Element => {
 					<Tabs value={selectedTabIndex} onChange={handleTabChange} aria-label="file tabs">
 						{/*<Tab label="Previews" {...a11yProps(0)} />*/}
 						<Tab label="Version History" {...a11yProps(0)} />
-						<Tab label="Metadata" {...a11yProps(1)} disabled={false}/>
-						<Tab label="Extractors" {...a11yProps(2)} disabled={false}/>
-						<Tab label="Extractor Metadata" {...a11yProps(3)} disabled={false}/>
+						<Tab label="User Metadata" {...a11yProps(1)} disabled={false}/>
+						<Tab label="Extracted Metadata" {...a11yProps(2)} disabled={false}/>
+						<Tab label="Extractors" {...a11yProps(3)} disabled={false}/>
 					</Tabs>
 					{/*Preview Tab*/}
 					{/*<TabPanel value={selectedTabIndex} index={0}>*/}
@@ -287,14 +287,14 @@ export const File = (): JSX.Element => {
 						}
 					</TabPanel>
 					<TabPanel value={selectedTabIndex} index={2}>
-						<Listeners fileId={fileId}
-								   datasetId={datasetId}
-						/>
-					</TabPanel>
-					<TabPanel value={selectedTabIndex} index={3}>
 						<DisplayListenerMetadata updateMetadata={updateFileMetadata}
 													 deleteMetadata={deleteFileMetadata}
 													 resourceType="file" resourceId={fileId}/>
+					</TabPanel>
+					<TabPanel value={selectedTabIndex} index={3}>
+						<Listeners fileId={fileId}
+								   datasetId={datasetId}
+						/>
 					</TabPanel>
 					<TabPanel value={selectedTabIndex} index={4}>
 						Comments

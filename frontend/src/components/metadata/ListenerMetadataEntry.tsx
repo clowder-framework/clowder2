@@ -27,10 +27,10 @@ export const ListenerMetadataEntry = (props: ListenerMetadata) => {
 
 	const dispatch = useDispatch();
 
-	const [isOpened, setIsOpened] = useState(false);
+	const [isOpened, setIsOpened] = useState(true);
 	const buttonTextClosed = "View Metadata";
 	const buttonTextOpened = "Hide Metadata";
-	const [buttonText, setButtonText] = useState(buttonTextClosed);
+	const [buttonText, setButtonText] = useState(buttonTextOpened);
 
 	function toggle() {
     	setIsOpened(wasOpened => !wasOpened);
