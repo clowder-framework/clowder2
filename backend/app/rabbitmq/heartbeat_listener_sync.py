@@ -4,8 +4,8 @@ import json
 from packaging import version
 from pymongo import MongoClient
 
-from ..config import settings
-from ..models.listeners import EventListenerDB, EventListenerOut, ExtractorInfo
+from app.config import settings
+from app.models.listeners import EventListenerDB, EventListenerOut, ExtractorInfo
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)

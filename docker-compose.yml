@@ -88,7 +88,7 @@ services:
   extractors-heartbeat:
     image: "clowder/clowder2-heartbeat"
     build:
-      context: backend
+      context: ./backend
       dockerfile: heartbeat.Dockerfile
     networks:
       - clowder2

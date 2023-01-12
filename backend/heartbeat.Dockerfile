@@ -18,8 +18,9 @@ RUN PIPENV_VENV_IN_PROJECT=1 pipenv install --deploy
 # add requirements to path
 ENV PATH="/code/.venv/bin:$PATH"
 
+ENV PYTHONPATH=/code
+
 # copy app code at end to make it easier to change code and not have to rebuild requirement layers
 COPY ./app /code/app
-
 
 CMD ["python", "app/heartbeat_listener_sync.py"]
