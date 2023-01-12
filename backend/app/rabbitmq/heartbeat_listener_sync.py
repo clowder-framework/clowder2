@@ -12,7 +12,10 @@ logger = logging.getLogger(__name__)
 
 
 def callback(ch, method, properties, body):
-    """This method receives messages from RabbitMQ and processes them."""
+    """ This method receives messages from RabbitMQ and processes them.
+        the extractor info is parsed from the message and if the extractor is new
+        or is a later version, the db is updated.
+    """
     msg = json.loads(body.decode("utf-8"))
 
     extractor_info = msg["extractor_info"]
@@ -24,17 +27,18 @@ def callback(ch, method, properties, body):
     mongo_client = MongoClient(settings.MONGODB_URL)
     db = mongo_client[settings.MONGO_DATABASE]
 
-    # TODO: This block could go in app.rabbitmq.listeners register_listener and update_listener methods?
+    # check to see if extractor alredy exists
     existing_extractor = db["listeners"].find_one({"name": msg["queue"]})
     if existing_extractor is not None:
         # Update existing listener
         existing_version = existing_extractor["version"]
         new_version = extractor_db.version
         if version.parse(new_version) > version.parse(existing_version):
-            # TODO: Should this delete old version, or just add new entry? If 1st one, why not update?
+            # if this is a new version, add it to the database
             new_extractor = db["listeners"].insert_one(extractor_db.to_mongo())
             found = db["listeners"].find_one({"_id": new_extractor.inserted_id})
-            removed = db["listeners"].delete_one({"_id": existing_extractor["_id"]})
+            # TODO - for now we are not deleting an older version of the extractor, just adding a new one
+            # removed = db["listeners"].delete_one({"_id": existing_extractor["_id"]})
             extractor_out = EventListenerOut.from_mongo(found)
             logger.info(
                 "%s updated from %s to %s"
@@ -51,6 +55,11 @@ def callback(ch, method, properties, body):
 
 
 def listen_for_heartbeats():
+    """
+
+    this method runs continuously listening for extractor heartbeats send over rabbitmq
+
+    """
     credentials = pika.PlainCredentials(settings.RABBITMQ_USER, settings.RABBITMQ_PASS)
     parameters = pika.ConnectionParameters(
         settings.RABBITMQ_HOST, 5672, "/", credentials
