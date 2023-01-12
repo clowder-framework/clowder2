@@ -22,7 +22,6 @@ aio_pika = "*"
 elasticsearch = "*"
 pipenv = "*"
 install = "*"
-rocrate = "*"
 
 [dev-packages]
 requests = "*"
