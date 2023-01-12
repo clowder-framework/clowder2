@@ -234,6 +234,8 @@ class MetadataDelete(MongoModel):
     metadata_id: Optional[str]  # specific metadata ID we are deleting
     definition: Optional[str]
     listener: Optional[EventListenerIn]
+    extractor: Optional[LegacyEventListenerIn]
+    extractor_info: Optional[ExtractorInfo]
 
 
 class MetadataDB(MetadataBase):

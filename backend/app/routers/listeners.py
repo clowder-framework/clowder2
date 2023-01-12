@@ -1,3 +1,4 @@
+import re
 from typing import List
 import os
 from bson import ObjectId
@@ -75,6 +76,36 @@ async def save_legacy_listener(
             pass
 
     return listener_out
+
+
+@router.get("/search", response_model=List[EventListenerOut])
+async def search_listeners(
+    db: MongoClient = Depends(get_db),
+    text: str = "",
+    skip: int = 0,
+    limit: int = 2,
+):
+    """Search all Event Listeners in the db based on text.
+
+    Arguments:
+        text -- any text matching name or description
+        skip -- number of initial records to skip (i.e. for pagination)
+        limit -- restrict number of records to be returned (i.e. for pagination)
+    """
+    listeners = []
+
+    query_regx = re.compile(text, re.IGNORECASE)
+
+    for doc in (
+        # TODO either use regex or index search
+        await db["listeners"]
+        .find({"$or": [{"name": query_regx}, {"description": query_regx}]})
+        .skip(skip)
+        .limit(limit)
+        .to_list(length=limit)
+    ):
+        listeners.append(EventListenerOut.from_mongo(doc))
+    return listeners
 
 
 @router.get("/{listener_id}", response_model=EventListenerOut)

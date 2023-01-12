@@ -55,14 +55,26 @@ export class ElasticsearchService {
     }
 
     /**
-     * Search File And Dataset
+     * Search Metadata
      * @returns any Successful Response
      * @throws ApiError
      */
-    public static searchFileAndDatasetApiV2ElasticsearchFileDatasetMsearchPost(): CancelablePromise<any> {
+    public static searchMetadataApiV2ElasticsearchMetadataMsearchPost(): CancelablePromise<any> {
         return __request({
             method: 'POST',
-            path: `/api/v2/elasticsearch/file,dataset/_msearch`,
+            path: `/api/v2/elasticsearch/metadata/_msearch`,
+        });
+    }
+
+    /**
+     * Search File Dataset And Metadata
+     * @returns any Successful Response
+     * @throws ApiError
+     */
+    public static searchFileDatasetAndMetadataApiV2ElasticsearchFileDatasetMetadataMsearchPost(): CancelablePromise<any> {
+        return __request({
+            method: 'POST',
+            path: `/api/v2/elasticsearch/file,dataset,metadata/_msearch`,
         });
     }
 

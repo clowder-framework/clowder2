@@ -28,3 +28,32 @@ export const widgetTypes ={
     "DateTimePicker": "Date Time Picker",
     "Select": "Dropdown"
 }
+
+export const contextUrlMap = {
+    "frequently_used": [
+        {
+            "name": "abstract",
+            "url": "http://purl.org/dc/terms/abstract"
+        },
+        {
+            "name": "point",
+            "url": "https://schema.org/point"
+        },
+        {
+            "name": "DigitalDocument",
+            "url": "https://schema.org/DigitalDocument"
+        },
+        {
+            "name": "longitude",
+            "url": "https://schema.org/longitude"
+        },
+        {
+            "name": "latitude",
+            "url": "https://schema.org/latitude"
+        },
+        {
+            "name": "QuantitativeValue",
+            "url": "https://schema.org/QuantitativeValue"
+        }
+    ]
+}

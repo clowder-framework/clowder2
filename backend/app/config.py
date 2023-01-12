@@ -5,6 +5,7 @@ from pydantic import BaseSettings, AnyHttpUrl
 
 class Settings(BaseSettings):
     APP_NAME: str = "Clowder"
+    API_HOST: str = "http://127.0.0.1:8000"
     API_V2_STR: str = "/api/v2"
     admin_email: str = "devnull@ncsa.illinois.edu"
     frontend_url: str = "http://localhost:3000"
@@ -26,9 +27,11 @@ class Settings(BaseSettings):
         "http://localhost:3002",
     ]
 
+    # Mongo database connection
     MONGODB_URL: str = "mongodb://localhost:27017"
     MONGO_DATABASE: str = "clowder2"
 
+    # Minio (file storage) information
     MINIO_SERVER_URL: str = "localhost:9000"
     MINIO_BUCKET_NAME: str = "clowder"
     MINIO_ACCESS_KEY: str = "minioadmin"
@@ -73,12 +76,13 @@ class Settings(BaseSettings):
     }
 
     # RabbitMQ message bus
-    RABBITMQ_USER = "guest"
-    RABBITMQ_PASS = "guest"
-    RABBITMQ_HOST = "localhost"
-    RABBITMQ_URL = (
+    RABBITMQ_USER: str = "guest"
+    RABBITMQ_PASS: str = "guest"
+    RABBITMQ_HOST: str = "localhost"
+    RABBITMQ_URL: str = (
         "amqp://" + RABBITMQ_USER + ":" + RABBITMQ_PASS + "@" + RABBITMQ_HOST + "/"
     )
+    HEARTBEAT_EXCHANGE: str = "extractors"
 
 
 settings = Settings()

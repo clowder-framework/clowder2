@@ -25,6 +25,8 @@ import {ActionsMenu} from "./ActionsMenu";
 import {DatasetDetails} from "./DatasetDetails";
 import {FormatListBulleted, InsertDriveFile} from "@material-ui/icons";
 import {MainBreadcrumbs} from "../navigation/BreadCrumb";
+import {Listeners} from "../listeners/Listeners";
+import AssessmentIcon from '@mui/icons-material/Assessment';
 
 const tab = {
 	fontStyle: "normal",
@@ -184,6 +186,8 @@ export const Dataset = (): JSX.Element => {
 						<Tab icon={<InsertDriveFile/>} iconPosition="start" sx={tab} label="Files" {...a11yProps(0)} />
 						<Tab icon={<FormatListBulleted/>} iconPosition="start" sx={tab}
 							 label="Metadata" {...a11yProps(1)} disabled={false}/>
+						 <Tab icon={<AssessmentIcon/>} iconPosition="start" sx={tab}
+							 label="Extractors" {...a11yProps(2)} disabled={false}/>
 					</Tabs>
 					<TabPanel value={selectedTabIndex} index={0}>
 						<FilesTable datasetId={datasetId} folderId={folderId}/>
@@ -220,7 +224,9 @@ export const Dataset = (): JSX.Element => {
 
 						}
 					</TabPanel>
-					<TabPanel value={selectedTabIndex} index={2}/>
+					<TabPanel value={selectedTabIndex} index={2}>
+						<Listeners/>
+					</TabPanel>
 					<TabPanel value={selectedTabIndex} index={3}/>
 					<TabPanel value={selectedTabIndex} index={4}/>
 				</Grid>
