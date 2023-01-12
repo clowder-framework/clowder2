@@ -12,9 +12,9 @@ logger = logging.getLogger(__name__)
 
 
 def callback(ch, method, properties, body):
-    """ This method receives messages from RabbitMQ and processes them.
-        the extractor info is parsed from the message and if the extractor is new
-        or is a later version, the db is updated.
+    """This method receives messages from RabbitMQ and processes them.
+    the extractor info is parsed from the message and if the extractor is new
+    or is a later version, the db is updated.
     """
     msg = json.loads(body.decode("utf-8"))
 
