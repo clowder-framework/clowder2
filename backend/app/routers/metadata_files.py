@@ -438,6 +438,9 @@ async def delete_file_metadata(
             agent = MetadataAgent(creator=user)
             query["agent.creator.id"] = agent.creator.id
 
+        # delete from elasticsearch
+        delete_document_by_id(es, "metadata", str(metadata_in.id))
+
         if (md := await db["metadata"].find_one(query)) is not None:
             metadata_deleted = md
             if await db["metadata"].delete_one({"_id": md["_id"]}) is not None:
@@ -446,7 +449,5 @@ async def delete_file_metadata(
             raise HTTPException(
                 status_code=404, detail=f"No metadata found with that criteria"
             )
-        # delete from elasticsearch
-        delete_document_by_id(es, "metadata", str(metadata_in.id))
     else:
         raise HTTPException(status_code=404, detail=f"File {file_id} not found")
