@@ -7,12 +7,14 @@ import {fetchDatasetMetadata, fetchFileMetadata, fetchMetadataDefinitions} from 
 import {Agent} from "./Agent";
 import {MetadataDeleteButton} from "./widgets/MetadataDeleteButton";
 import {ListenerMetadataEntry} from "../metadata/ListenerMetadataEntry";
+import Card from "@mui/material/Card";
+import CardContent from "@mui/material/CardContent";
 
 type MetadataType = {
 	updateMetadata: any,
 	deleteMetadata: any,
-	resourceType:string|undefined,
-	resourceId:string|undefined,
+	resourceType: string | undefined,
+	resourceId: string | undefined,
 }
 
 /*
@@ -25,7 +27,7 @@ export const DisplayListenerMetadata = (props: MetadataType) => {
 
 	const dispatch = useDispatch();
 
-	const getMetadatDefinitions = (name:string|null, skip:number, limit:number) => dispatch(fetchMetadataDefinitions(name, skip,limit));
+	const getMetadatDefinitions = (name: string | null, skip: number, limit: number) => dispatch(fetchMetadataDefinitions(name, skip, limit));
 	const metadataDefinitionList = useSelector((state: RootState) => state.metadata.metadataDefinitionList);
 	const listDatasetMetadata = (datasetId: string | undefined) => dispatch(fetchDatasetMetadata(datasetId));
 	const listFileMetadata = (fileId: string | undefined) => dispatch(fetchFileMetadata(fileId));
@@ -38,10 +40,9 @@ export const DisplayListenerMetadata = (props: MetadataType) => {
 
 	// complete metadata list with both definition and values
 	useEffect(() => {
-		if (resourceType === "dataset"){
+		if (resourceType === "dataset") {
 			listDatasetMetadata(resourceId);
-		}
-		else if (resourceType === "file"){
+		} else if (resourceType === "file") {
 			listFileMetadata(resourceId);
 		}
 	}, [resourceType, resourceId]);
@@ -55,25 +56,24 @@ export const DisplayListenerMetadata = (props: MetadataType) => {
 					else if (resourceType === "file") metadataList = fileMetadataList;
 					let listenerMetadataList = [];
 					let listenerMetadataContent = [];
-					return metadataList.map((metadata,idx) => {
+
+					return (<Grid container spacing={2}>
+						{metadataList.map((metadata, idx) => {
 						if (metadata.agent.listener !== null) {
-							return (<Box className="inputGroup" key={idx} sx={{ p: 2, border: '2px solid grey' }}>
-									<Grid>
-										<ListenerMetadataEntry agent={metadata.agent}
+							return (<Grid item xs={12}><Card key={idx}>
+								<CardContent>
+									<ListenerMetadataEntry agent={metadata.agent}
 														   contents={metadata.contents}
-															context={metadata.context}
-															context_url={metadata.context_url}
-															created={metadata.created}
-										/>
-									</Grid>
-
-							</Box>);
-
-
-
+														   context={metadata.context}
+														   context_url={metadata.context_url}
+														   created={metadata.created}
+									/>
+								</CardContent>
+							</Card></Grid>);
 						}
-					});
-				})()
+						})}
+					</Grid>);
+			})()
 			}
 		</>
 	)
