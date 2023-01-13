@@ -55,6 +55,7 @@ async def _get_extraction_events(file_id, db: MongoClient):
                 extractors_run_on_file.apppend(listener_name)
     return extractors_run_on_file
 
+
 # TODO: Move this to MongoDB middle layer
 async def add_file_entry(
     file_db: FileDB,
@@ -357,3 +358,27 @@ async def get_file_extract(
         return {"message": "testing", "file_id": file_id}
     else:
         raise HTTPException(status_code=404, detail=f"File {file_id} not found")
+
+@router.post("/{file_id}/extract")
+async def resubmit_file_extractions(
+    file_id: str,
+    credentials: HTTPAuthorizationCredentials = Security(security),
+    db: MongoClient = Depends(dependencies.get_db),
+    rabbitmq_client: BlockingChannel = Depends(dependencies.get_rabbitmq),
+):
+    if (file := await db["files"].find_one({"_id": ObjectId(file_id)})) is not None:
+        file_out = FileOut.from_mongo(file)
+        query = {"resource.resource_id": ObjectId(file_id)}
+        async for md in db["metadata"].find(query):
+            md_out = MetadataOut.from_mongo(md)
+            if md_out.agent.listener is not None:
+                listener_name = md_out.agent.listener.name
+                # TODO find way  to get the parameters used
+                parameters = {}
+                access_token = credentials.credentials
+                queue = listener_name
+                routing_key = queue
+                submit_file_message(
+                    file_out, queue, routing_key, parameters, access_token, db, rabbitmq_client
+                )
+    return {"message": "reran file extractors", "file_id": file_id}
