@@ -18,7 +18,9 @@ class Repository(MongoModel):
 class ExtractorInfo(BaseModel):
     """Currently for extractor_info JSON from Clowder v1 extractors for use with to /api/extractors endpoint."""
 
-    author: Optional[str] # Referring to author of listener script (e.g. name or email), not Clowder user
+    author: Optional[
+        str
+    ]  # Referring to author of listener script (e.g. name or email), not Clowder user
     process: Optional[dict]
     maturity: str = "Development"
     name: Optional[str] = ""

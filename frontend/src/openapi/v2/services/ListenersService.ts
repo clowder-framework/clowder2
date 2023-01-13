@@ -15,14 +15,20 @@ export class ListenersService {
      * Arguments:
      * skip -- number of initial records to skip (i.e. for pagination)
      * limit -- restrict number of records to be returned (i.e. for pagination)
+     * category -- filter by category has to be exact match
+     * label -- filter by label has to be exact match
      * @param skip
      * @param limit
+     * @param category
+     * @param label
      * @returns EventListenerOut Successful Response
      * @throws ApiError
      */
     public static getListenersApiV2ListenersGet(
         skip?: number,
         limit: number = 2,
+        category?: string,
+        label?: string,
     ): CancelablePromise<Array<EventListenerOut>> {
         return __request({
             method: 'GET',
@@ -30,6 +36,8 @@ export class ListenersService {
             query: {
                 'skip': skip,
                 'limit': limit,
+                'category': category,
+                'label': label,
             },
             errors: {
                 422: `Validation Error`,
@@ -88,6 +96,36 @@ export class ListenersService {
             errors: {
                 422: `Validation Error`,
             },
+        });
+    }
+
+    /**
+     * List Categories
+     * Get all the distinct categories of registered listeners in the db
+     *
+     * Arguments:
+     * @returns string Successful Response
+     * @throws ApiError
+     */
+    public static listCategoriesApiV2ListenersCategoriesGet(): CancelablePromise<Array<string>> {
+        return __request({
+            method: 'GET',
+            path: `/api/v2/listeners/categories`,
+        });
+    }
+
+    /**
+     * List Default Labels
+     * Get all the distinct default labels of registered listeners in the db
+     *
+     * Arguments:
+     * @returns string Successful Response
+     * @throws ApiError
+     */
+    public static listDefaultLabelsApiV2ListenersDefaultLabelsGet(): CancelablePromise<Array<string>> {
+        return __request({
+            method: 'GET',
+            path: `/api/v2/listeners/defaultLabels`,
         });
     }
 
