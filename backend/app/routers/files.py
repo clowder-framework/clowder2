@@ -34,6 +34,7 @@ from app.search.connect import (
 from app.models.files import FileIn, FileOut, FileVersion, FileDB
 from app.models.listeners import EventListenerMessage
 from app.models.users import UserOut
+from app.models.metadata import MetadataOut
 from app.models.search import SearchIndexContents
 from app.routers.feeds import check_feed_listeners
 from app.keycloak_auth import get_user, get_current_user, get_token
@@ -42,6 +43,17 @@ from typing import Union
 
 router = APIRouter()
 security = HTTPBearer()
+
+async def _get_extraction_events(file_id, db: MongoClient):
+    if (file_q := await db["files"].find_one({"_id": ObjectId(file_id)})) is not None:
+        query = {"resource.resource_id": ObjectId(file_id)}
+        extractors_run_on_file = []
+        async for md in db["metadata"].find(query):
+            md_out = MetadataOut.from_mongo(md)
+            if md_out.agent.listener is not None:
+                listener_name = md_out.agent.listener.name
+                extractors_run_on_file.apppend(listener_name)
+    return extractors_run_on_file
 
 # TODO: Move this to MongoDB middle layer
 async def add_file_entry(
