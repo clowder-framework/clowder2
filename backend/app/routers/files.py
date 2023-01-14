@@ -242,7 +242,7 @@ async def update_file(
             }
         }
         update_record(es, "file", doc, updated_file.id)
-        _resubmit_file_extractors(file_id,credentials,db, rabbitmq_client)
+        await _resubmit_file_extractors(file_id,credentials,db, rabbitmq_client)
         return updated_file
     else:
         raise HTTPException(status_code=404, detail=f"File {file_id} not found")
