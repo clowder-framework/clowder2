@@ -55,6 +55,26 @@ async def _get_extraction_events(file_id, db: MongoClient):
                 extractors_run_on_file.apppend(listener_name)
     return extractors_run_on_file
 
+async def _resubmit_file_extractors(file_id: str,
+                                    credentials: HTTPAuthorizationCredentials = Security(security),
+                                    db: MongoClient = Depends(dependencies.get_db),
+                                    rabbitmq_client: BlockingChannel = Depends(dependencies.get_rabbitmq)):
+    if (file := await db["files"].find_one({"_id": ObjectId(file_id)})) is not None:
+        file_out = FileOut.from_mongo(file)
+        query = {"resource.resource_id": ObjectId(file_id)}
+        async for md in db["metadata"].find(query):
+            md_out = MetadataOut.from_mongo(md)
+            if md_out.agent.listener is not None:
+                listener_name = md_out.agent.listener.name
+                # TODO find way  to get the parameters used
+                parameters = {}
+                access_token = credentials.credentials
+                queue = listener_name
+                routing_key = queue
+                submit_file_message(
+                    file_out, queue, routing_key, parameters, access_token, db, rabbitmq_client
+                )
+
 
 # TODO: Move this to MongoDB middle layer
 async def add_file_entry(
@@ -166,6 +186,8 @@ async def update_file(
     fs: Minio = Depends(dependencies.get_fs),
     file: UploadFile = File(...),
     es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
+    credentials: HTTPAuthorizationCredentials = Security(security),
+    rabbitmq_client: BlockingChannel = Depends(dependencies.get_rabbitmq),
 ):
     es = await connect_elasticsearch()
 
@@ -220,6 +242,7 @@ async def update_file(
             }
         }
         update_record(es, "file", doc, updated_file.id)
+        _resubmit_file_extractors(file_id,credentials,db, rabbitmq_client)
         return updated_file
     else:
         raise HTTPException(status_code=404, detail=f"File {file_id} not found")
