@@ -44,6 +44,7 @@ from typing import Union
 router = APIRouter()
 security = HTTPBearer()
 
+
 async def _get_extraction_events(file_id, db: MongoClient):
     if (file_q := await db["files"].find_one({"_id": ObjectId(file_id)})) is not None:
         query = {"resource.resource_id": ObjectId(file_id)}
@@ -55,10 +56,13 @@ async def _get_extraction_events(file_id, db: MongoClient):
                 extractors_run_on_file.apppend(listener_name)
     return extractors_run_on_file
 
-async def _resubmit_file_extractors(file_id: str,
-                                    credentials: HTTPAuthorizationCredentials = Security(security),
-                                    db: MongoClient = Depends(dependencies.get_db),
-                                    rabbitmq_client: BlockingChannel = Depends(dependencies.get_rabbitmq)):
+
+async def _resubmit_file_extractors(
+    file_id: str,
+    credentials: HTTPAuthorizationCredentials = Security(security),
+    db: MongoClient = Depends(dependencies.get_db),
+    rabbitmq_client: BlockingChannel = Depends(dependencies.get_rabbitmq),
+):
     if (file := await db["files"].find_one({"_id": ObjectId(file_id)})) is not None:
         file_out = FileOut.from_mongo(file)
         query = {"resource.resource_id": ObjectId(file_id)}
@@ -72,7 +76,13 @@ async def _resubmit_file_extractors(file_id: str,
                 queue = listener_name
                 routing_key = queue
                 submit_file_message(
-                    file_out, queue, routing_key, parameters, access_token, db, rabbitmq_client
+                    file_out,
+                    queue,
+                    routing_key,
+                    parameters,
+                    access_token,
+                    db,
+                    rabbitmq_client,
                 )
 
 
@@ -242,7 +252,7 @@ async def update_file(
             }
         }
         update_record(es, "file", doc, updated_file.id)
-        await _resubmit_file_extractors(file_id,credentials,db, rabbitmq_client)
+        await _resubmit_file_extractors(file_id, credentials, db, rabbitmq_client)
         return updated_file
     else:
         raise HTTPException(status_code=404, detail=f"File {file_id} not found")
@@ -382,6 +392,7 @@ async def get_file_extract(
     else:
         raise HTTPException(status_code=404, detail=f"File {file_id} not found")
 
+
 @router.post("/{file_id}/extract")
 async def resubmit_file_extractions(
     file_id: str,
@@ -402,6 +413,12 @@ async def resubmit_file_extractions(
                 queue = listener_name
                 routing_key = queue
                 submit_file_message(
-                    file_out, queue, routing_key, parameters, access_token, db, rabbitmq_client
+                    file_out,
+                    queue,
+                    routing_key,
+                    parameters,
+                    access_token,
+                    db,
+                    rabbitmq_client,
                 )
     return {"message": "reran file extractors", "file_id": file_id}
