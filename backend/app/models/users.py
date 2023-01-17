@@ -25,6 +25,8 @@ class UserLogin(BaseModel):
 
 
 class UserDB(UserBase):
+    first_name: str
+    last_name: str
     hashed_password: str = Field()
     keycloak_id: Optional[str] = None
 
