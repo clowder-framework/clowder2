@@ -4,7 +4,7 @@ from typing import Optional, List, Union
 
 from app.config import settings
 from app.models.pyobjectid import PyObjectId
-from app.models.mongomodel import MongoModel
+from app.models.mongomodel import MongoModel, MongoDBRef
 from app.models.users import UserOut
 
 
@@ -82,10 +82,20 @@ class FeedListener(BaseModel):
     automatic: bool  # Listeners can trigger automatically or not on a per-feed basis.
 
 
+class EventListenerJob(MongoModel):
+    """This summarizes a submission to an extractor. All messages from that extraction should include this job's ID."""
+
+    listener_id: str
+    resource_ref: MongoDBRef
+    parameters: Optional[dict] = None
+    created: datetime = Field(default_factory=datetime.utcnow)
+    updated: datetime = Field(default_factory=datetime.utcnow)
+    latest_message: Optional[str] = None
+
+
 class EventListenerMessage(BaseModel):
     """This describes contents of JSON object that is submitted to RabbitMQ for the Event Listeners/Extractors to consume."""
 
-    # TODO better solution for host
     host: str = settings.API_HOST
     secretKey: str = "secretKey"
     retry_count: int = 0
@@ -95,7 +105,7 @@ class EventListenerMessage(BaseModel):
     fileSize: int
     id: str
     datasetId: str
-    secretKey: str
+    job_id: str
 
 
 class EventListenerDatasetMessage(BaseModel):

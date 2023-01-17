@@ -77,7 +77,7 @@ async def check_feed_listeners(
         ) is not None:
             listener_info = EventListenerOut.from_mongo(listener_db)
             queue = listener_info.name
-            routing_key = ""
+            routing_key = listener_info.name
             parameters = {}
             submit_file_message(file_out, queue, routing_key, parameters)
 

@@ -7,9 +7,10 @@ from pika.adapters.blocking_connection import BlockingChannel
 from app.config import settings
 from app.keycloak_auth import get_token
 from app import dependencies
+from app.models.mongomodel import MongoDBRef
 from app.models.files import FileOut
 from app.models.datasets import DatasetOut
-from app.models.listeners import EventListenerDatasetMessage, EventListenerMessage
+from app.models.listeners import EventListenerJob, EventListenerDatasetMessage, EventListenerMessage
 
 
 def submit_file_message(
@@ -22,8 +23,16 @@ def submit_file_message(
     rabbitmq_client: BlockingChannel = Depends(dependencies.get_rabbitmq),
 ):
     # TODO check if extractor is registered
-    current_filename = file_out.name
-    current_fileSize = file_out.bytes
+
+    # Create an entry in job history with unique ID
+    job = EventListenerJob(
+        listener_name = routing_key,
+        resource_ref = MongoDBRef(
+            collection="file", resource_id=file_out.id, version=file_out.version_num
+        ),
+        parameters=parameters
+    )
+
     current_id = file_out.id
     current_datasetId = file_out.dataset_id
     current_secretKey = token
@@ -34,6 +43,7 @@ def submit_file_message(
             id=str(current_id),
             datasetId=str(current_datasetId),
             secretKey=current_secretKey,
+            job_id=job.id
         )
     except Exception as e:
         print(e)
@@ -59,11 +69,22 @@ def submit_dataset_message(
     rabbitmq_client: BlockingChannel = Depends(dependencies.get_rabbitmq),
 ):
     # TODO check if extractor is registered
+
+    # Create an entry in job history with unique ID
+    job = EventListenerJob(
+        listener_name=routing_key,
+        resource_ref=MongoDBRef(
+            collection="dataset", resource_id=dataset_out.id
+        ),
+        parameters=parameters
+    )
+    
     msg_body = EventListenerDatasetMessage(
         datasetName=dataset_out.name,
         id=str(dataset_out.id),
         datasetId=str(dataset_out.id),
         secretKey=token,
+        job_id=job.id
     )
 
     rabbitmq_client.basic_publish(
