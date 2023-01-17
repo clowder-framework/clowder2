@@ -186,7 +186,7 @@ async def replace_file_metadata(
             target_version = version
         else:
             target_version = file.version_num
-        #query["resource.version"] = target_version
+        # query["resource.version"] = target_version
 
         # Filter by MetadataAgent
         extractor_info = metadata_in.extractor
@@ -243,10 +243,15 @@ async def update_file_metadata(
     """
 
     # check if metadata with file version exists, replace metadata if none exists
-    if (version_md := await db["metadata"].find_one(
-                    {"_id": ObjectId(metadata_in.metadata_id), "resource.resource_id": ObjectId(file_id),
-                     "resource.version": metadata_in.file_version}
-                )) is None:
+    if (
+        version_md := await db["metadata"].find_one(
+            {
+                "_id": ObjectId(metadata_in.metadata_id),
+                "resource.resource_id": ObjectId(file_id),
+                "resource.version": metadata_in.file_version,
+            }
+        )
+    ) is None:
         result = await replace_file_metadata(metadata_in, file_id, user, db, es)
         return result
 
