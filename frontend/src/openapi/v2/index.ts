@@ -10,7 +10,6 @@ export type { Body_get_dataset_metadata_api_v2_datasets__dataset_id__metadata_ge
 export type { Body_get_file_metadata_api_v2_files__file_id__metadata_get } from './models/Body_get_file_metadata_api_v2_files__file_id__metadata_get';
 export type { Body_save_file_api_v2_datasets__dataset_id__files_post } from './models/Body_save_file_api_v2_datasets__dataset_id__files_post';
 export type { Body_update_file_api_v2_files__file_id__put } from './models/Body_update_file_api_v2_files__file_id__put';
-export type { Collection } from './models/Collection';
 export type { DatasetBase } from './models/DatasetBase';
 export type { DatasetIn } from './models/DatasetIn';
 export type { DatasetOut } from './models/DatasetOut';
@@ -42,11 +41,11 @@ export type { Repository } from './models/Repository';
 export type { SearchCriteria } from './models/SearchCriteria';
 export type { SearchObject } from './models/SearchObject';
 export type { UserIn } from './models/UserIn';
+export type { UserLogin } from './models/UserLogin';
 export type { UserOut } from './models/UserOut';
 export type { ValidationError } from './models/ValidationError';
 
 export { AuthService } from './services/AuthService';
-export { CollectionsService } from './services/CollectionsService';
 export { DatasetsService } from './services/DatasetsService';
 export { ElasticsearchService } from './services/ElasticsearchService';
 export { ExtractorsService } from './services/ExtractorsService';
