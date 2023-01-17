@@ -149,6 +149,13 @@ async def add_file_metadata(
             "contents": metadata_out.contents,
             "context_url": metadata_out.context_url,
             "context": metadata_out.context,
+            "name": file.name,
+            "folder_id": str(file.folder_id),
+            "dataset_id": str(file.dataset_id),
+            "content_type": file.content_type,
+            "resource_created": file.created.utcnow(),
+            "resource_creator": file.creator.email,
+            "bytes": file.bytes,
         }
         insert_record(es, "metadata", doc, metadata_out.id)
         return metadata_out

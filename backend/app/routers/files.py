@@ -26,7 +26,6 @@ from pymongo import MongoClient
 from app import dependencies
 from app.config import settings
 from app.search.connect import (
-    connect_elasticsearch,
     insert_record,
     delete_document_by_id,
     update_record,
@@ -60,7 +59,6 @@ async def add_file_entry(
         file_db: FileDB object controlling dataset and folder destination
         file: bytes to upload
     """
-    es = await connect_elasticsearch()
 
     # Check all connection and abort if any one of them is not available
     if db is None or fs is None or es is None:
@@ -130,8 +128,6 @@ async def remove_file_entry(
     """Remove FileDB object into MongoDB, Minio, and associated metadata and version information."""
     # TODO: Deleting individual versions will require updating version_id in mongo, or deleting entire document
 
-    es = await connect_elasticsearch()
-
     # Check all connection and abort if any one of them is not available
     if db is None or fs is None or es is None:
         raise HTTPException(status_code=503, detail="Service not available")
@@ -154,7 +150,6 @@ async def update_file(
     file: UploadFile = File(...),
     es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
 ):
-    es = await connect_elasticsearch()
 
     # Check all connection and abort if any one of them is not available
     if db is None or fs is None or es is None:
@@ -204,9 +199,28 @@ async def update_file(
                 "creator": updated_file.creator.email,
                 "created": datetime.utcnow(),
                 "download": updated_file.downloads,
+                "bytes": updated_file.bytes,
+                "content_type": updated_file.content_type,
             }
         }
         update_record(es, "file", doc, updated_file.id)
+        # updating metadata in elasticsearch
+        if (
+            metadata := await db["metadata"].find_one(
+                {"resource.resource_id": ObjectId(updated_file.id)}
+            )
+        ) is not None:
+            print("updating metadata")
+            doc = {
+                "doc": {
+                    "name": updated_file.name,
+                    "content_type": updated_file.content_type,
+                    "resource_created": updated_file.created.utcnow(),
+                    "resource_creator": updated_file.creator.email,
+                    "bytes": updated_file.bytes,
+                }
+            }
+            update_record(es, "metadata", doc, str(metadata["_id"]))
         return updated_file
     else:
         raise HTTPException(status_code=404, detail=f"File {file_id} not found")

@@ -123,6 +123,10 @@ async def add_dataset_metadata(
             "contents": metadata_out.contents,
             "context_url": metadata_out.context_url,
             "context": metadata_out.context,
+            "name": dataset.name,
+            "resource_created": dataset.created,
+            "author": dataset.author.email,
+            "description": dataset.description,
         }
         insert_record(es, "metadata", doc, metadata_out.id)
         return metadata_out
