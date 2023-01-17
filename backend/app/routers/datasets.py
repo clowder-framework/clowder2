@@ -49,6 +49,7 @@ from app.search.connect import (
     connect_elasticsearch,
     insert_record,
     delete_document_by_id,
+    delete_document_by_query,
     update_record,
 )
 
