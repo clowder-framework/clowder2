@@ -33,7 +33,8 @@ class UserDB(UserBase):
 
 
 class UserOut(UserBase):
-    pass
+    first_name: str
+    last_name: str
 
 
 async def get_user_out(user_id: str, db: MongoClient) -> UserOut:
