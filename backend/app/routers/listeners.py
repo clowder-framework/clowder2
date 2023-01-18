@@ -16,6 +16,7 @@ from app.models.listeners import (
     LegacyEventListenerIn,
     EventListenerDB,
     EventListenerOut,
+    ExecutionLogs,
 )
 from app.routers.feeds import disassociate_listener_db
 
@@ -161,7 +162,12 @@ async def get_listeners(
     """
     listeners = []
     if category and label:
-        query = {"$and": [{"properties.categories": category},{"properties.defaultLabels": label}]}
+        query = {
+            "$and": [
+                {"properties.categories": category},
+                {"properties.defaultLabels": label},
+            ]
+        }
     elif category:
         query = {"properties.categories": category}
     elif label:
@@ -170,11 +176,7 @@ async def get_listeners(
         query = {}
 
     for doc in (
-        await db["listeners"]
-        .find(query)
-        .skip(skip)
-        .limit(limit)
-        .to_list(length=limit)
+        await db["listeners"].find(query).skip(skip).limit(limit).to_list(length=limit)
     ):
         listeners.append(EventListenerOut.from_mongo(doc))
     return listeners
@@ -228,3 +230,24 @@ async def delete_listener(
         return {"deleted": listener_id}
     else:
         raise HTTPException(status_code=404, detail=f"listener {listener_id} not found")
+
+
+@router.get("/logs", response_model=List[ExecutionLogs])
+async def get_execution_logs(
+    db: MongoClient = Depends(get_db),
+    skip: int = 0,
+    limit: int = 2,
+):
+    """
+    Get a list of all execution logs the db.
+
+    Arguments:
+       skip -- number of initial records to skip (i.e. for pagination)
+       limit -- restrict number of records to be returned (i.e. for pagination)
+    """
+    logs = []
+    for doc in (
+        await db["executions_view"].find().skip(skip).limit(limit).to_list(length=limit)
+    ):
+        logs.append(ExecutionLogs.from_mongo(doc))
+    return logs

@@ -1,8 +1,9 @@
 from datetime import datetime
 from pydantic import Field, BaseModel
-from typing import Optional, List, Union
+from typing import Optional, List
 
 from app.config import settings
+from app.models.files import FileOut
 from app.models.pyobjectid import PyObjectId
 from app.models.mongomodel import MongoModel
 from app.models.users import UserOut
@@ -111,3 +112,17 @@ class EventListenerDatasetMessage(BaseModel):
     datasetName: str
     id: str
     datasetId: str
+
+
+class ExecutionLogs(BaseModel, MongoModel):
+    id: str
+    _typeHint: str
+    file_id: str
+    job_id: str
+    extractor_id: str
+    status: str
+    start: datetime
+    user_id: str
+    file: Optional[FileOut]
+    user: Optional[UserOut]
+    listener: Optional[EventListenerOut]
