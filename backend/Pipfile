@@ -23,6 +23,8 @@ elasticsearch = "*"
 pipenv = "*"
 install = "*"
 rocrate = "*"
+httpx= "*"
+packaging= "*"
 
 [dev-packages]
 requests = "*"
