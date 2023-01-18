@@ -156,7 +156,13 @@ async def get_execution_logs(
 
 @router.get("/logs/extractors/{extractor_id}", response_model=List[ExecutionLogs])
 async def get_execution_logs_by_extractor(
+    extractor_id:str,
     db: MongoClient = Depends(get_db),
+    job_id: Optional[str] = None,
+    status: Optional[str] = None,
+    user_id: Optional[str] = None,
+    file_id: Optional[str] = None,
+    dataset_id: Optional[str] = None,
     skip: int = 0,
     limit: int = 2,
 ):
@@ -168,8 +174,24 @@ async def get_execution_logs_by_extractor(
        limit -- restrict number of records to be returned (i.e. for pagination)
     """
     logs = []
+
+    filters = []
+    if job_id is not None:
+        filters.append({"job_id": job_id})
+    if status is not None:
+        filters.append({"status": status})
+    if user_id is not None:
+        filters.append({"user_id": user_id})
+    if file_id is not None:
+        filters.append({"file_id": file_id})
+    if dataset_id is not None:
+        filters.append({"dataset_id": dataset_id})
+    query = {"$and": filters}
+
     for doc in (
-        await db["executions_view"].find().skip(skip).limit(limit).to_list(length=limit)
+        await db["executions_view"]
+                .find({"extractor_id": ObjectId(extractor_id)})
+                .find(query).skip(skip).limit(limit).to_list(length=limit)
     ):
         logs.append(ExecutionLogs.from_mongo(doc))
     return logs
