@@ -35,7 +35,7 @@ from app.models.files import FileIn, FileOut, FileVersion, FileDB
 from app.models.users import UserOut
 from app.routers.feeds import check_feed_listeners
 from app.keycloak_auth import get_user, get_current_user, get_token
-from app.rabbitmq.listeners import submit_file_message
+from app.rabbitmq.listeners import submit_file_job
 from typing import Union
 
 router = APIRouter()
@@ -336,7 +336,7 @@ async def get_file_extract(
             parameters = req_info["parameters"]
         routing_key = queue
 
-        submit_file_message(
+        submit_file_job(
             file_out, queue, routing_key, parameters, access_token, db, rabbitmq_client
         )
 

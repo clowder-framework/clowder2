@@ -1,6 +1,7 @@
 from datetime import datetime
 from pydantic import Field, BaseModel
 from typing import Optional, List, Union
+from enum import Enum
 
 from app.config import settings
 from app.models.pyobjectid import PyObjectId
@@ -82,15 +83,30 @@ class FeedListener(BaseModel):
     automatic: bool  # Listeners can trigger automatically or not on a per-feed basis.
 
 
+class EventListenerJobStatus(str, Enum):
+    """This is a basic status description of an extraction job for easier filtering of lists/views."""
+
+    CREATED = "created"
+    STARTED = "started"
+    COMPLETED = "completed"
+    FAILED = "failed"
+
+
 class EventListenerJob(MongoModel):
     """This summarizes a submission to an extractor. All messages from that extraction should include this job's ID."""
 
     listener_id: str
     resource_ref: MongoDBRef
+    creator: UserOut
     parameters: Optional[dict] = None
     created: datetime = Field(default_factory=datetime.utcnow)
     updated: datetime = Field(default_factory=datetime.utcnow)
     latest_message: Optional[str] = None
+    status: EventListenerJobStatus = EventListenerJobStatus.CREATED
+
+    class Config:
+        # required for Enum to properly work
+        use_enum_values = True
 
 
 class EventListenerMessage(BaseModel):
@@ -119,3 +135,4 @@ class EventListenerDatasetMessage(BaseModel):
     datasetName: str
     id: str
     datasetId: str
+    job_id: str

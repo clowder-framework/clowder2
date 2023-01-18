@@ -13,7 +13,7 @@ from app.models.datasets import DatasetOut
 from app.models.listeners import EventListenerJob, EventListenerDatasetMessage, EventListenerMessage
 
 
-def submit_file_message(
+def submit_file_job(
     file_out: FileOut,
     queue: str,
     routing_key: str,
@@ -78,7 +78,7 @@ def submit_dataset_message(
         ),
         parameters=parameters
     )
-    
+
     msg_body = EventListenerDatasetMessage(
         datasetName=dataset_out.name,
         id=str(dataset_out.id),
