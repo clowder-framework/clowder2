@@ -120,7 +120,7 @@ class ExecutionLogs(MongoModel, BaseModel):
     file_id: PyObjectId
     dataset_id: Optional[PyObjectId]
     job_id: PyObjectId
-    extractor_id: PyObjectId
+    extractor_id: str
     status: str
     start: datetime
     user_id: PyObjectId
