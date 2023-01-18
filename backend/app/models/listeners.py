@@ -118,6 +118,7 @@ class ExecutionLogs(BaseModel, MongoModel):
     id: str
     _typeHint: str
     file_id: str
+    dataset_id: Optional[str]
     job_id: str
     extractor_id: str
     status: str
