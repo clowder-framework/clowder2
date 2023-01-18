@@ -133,6 +133,69 @@ async def list_default_labels(
     return await db["listeners"].distinct("properties.defaultLabels")
 
 
+@router.get("/logs", response_model=List[ExecutionLogs])
+async def get_execution_logs(
+    db: MongoClient = Depends(get_db),
+    skip: int = 0,
+    limit: int = 2,
+):
+    """
+    Get a list of all execution logs the db.
+
+    Arguments:
+       skip -- number of initial records to skip (i.e. for pagination)
+       limit -- restrict number of records to be returned (i.e. for pagination)
+    """
+    logs = []
+    for doc in (
+        await db["executions_view"].find().skip(skip).limit(limit).to_list(length=limit)
+    ):
+        logs.append(ExecutionLogs.from_mongo(doc))
+    return logs
+
+
+@router.get("/logs/extractors/{extractor_id}", response_model=List[ExecutionLogs])
+async def get_execution_logs_by_extractor(
+    db: MongoClient = Depends(get_db),
+    skip: int = 0,
+    limit: int = 2,
+):
+    """
+    Get a list of all execution logs the db.
+
+    Arguments:
+       skip -- number of initial records to skip (i.e. for pagination)
+       limit -- restrict number of records to be returned (i.e. for pagination)
+    """
+    logs = []
+    for doc in (
+        await db["executions_view"].find().skip(skip).limit(limit).to_list(length=limit)
+    ):
+        logs.append(ExecutionLogs.from_mongo(doc))
+    return logs
+
+
+@router.get("/logs/jobs/{job_id}", response_model=List[ExecutionLogs])
+async def get_execution_logs_by_job(
+    db: MongoClient = Depends(get_db),
+    skip: int = 0,
+    limit: int = 2,
+):
+    """
+    Get a list of all execution logs the db.
+
+    Arguments:
+       skip -- number of initial records to skip (i.e. for pagination)
+       limit -- restrict number of records to be returned (i.e. for pagination)
+    """
+    logs = []
+    for doc in (
+        await db["executions_view"].find().skip(skip).limit(limit).to_list(length=limit)
+    ):
+        logs.append(ExecutionLogs.from_mongo(doc))
+    return logs
+
+
 @router.get("/{listener_id}", response_model=EventListenerOut)
 async def get_listener(listener_id: str, db: MongoClient = Depends(get_db)):
     """Return JSON information about an Event Listener if it exists."""
@@ -231,65 +294,3 @@ async def delete_listener(
     else:
         raise HTTPException(status_code=404, detail=f"listener {listener_id} not found")
 
-
-@router.get("/logs", response_model=List[ExecutionLogs])
-async def get_execution_logs(
-    db: MongoClient = Depends(get_db),
-    skip: int = 0,
-    limit: int = 2,
-):
-    """
-    Get a list of all execution logs the db.
-
-    Arguments:
-       skip -- number of initial records to skip (i.e. for pagination)
-       limit -- restrict number of records to be returned (i.e. for pagination)
-    """
-    logs = []
-    for doc in (
-        await db["executions_view"].find().skip(skip).limit(limit).to_list(length=limit)
-    ):
-        logs.append(ExecutionLogs.from_mongo(doc))
-    return logs
-
-
-@router.get("/logs/extractors/{extractor_id}", response_model=List[ExecutionLogs])
-async def get_execution_logs_by_extractor(
-    db: MongoClient = Depends(get_db),
-    skip: int = 0,
-    limit: int = 2,
-):
-    """
-    Get a list of all execution logs the db.
-
-    Arguments:
-       skip -- number of initial records to skip (i.e. for pagination)
-       limit -- restrict number of records to be returned (i.e. for pagination)
-    """
-    logs = []
-    for doc in (
-        await db["executions_view"].find().skip(skip).limit(limit).to_list(length=limit)
-    ):
-        logs.append(ExecutionLogs.from_mongo(doc))
-    return logs
-
-
-@router.get("/logs/jobs/{job_id}", response_model=List[ExecutionLogs])
-async def get_execution_logs_by_job(
-    db: MongoClient = Depends(get_db),
-    skip: int = 0,
-    limit: int = 2,
-):
-    """
-    Get a list of all execution logs the db.
-
-    Arguments:
-       skip -- number of initial records to skip (i.e. for pagination)
-       limit -- restrict number of records to be returned (i.e. for pagination)
-    """
-    logs = []
-    for doc in (
-        await db["executions_view"].find().skip(skip).limit(limit).to_list(length=limit)
-    ):
-        logs.append(ExecutionLogs.from_mongo(doc))
-    return logs

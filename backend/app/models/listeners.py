@@ -114,16 +114,16 @@ class EventListenerDatasetMessage(BaseModel):
     datasetId: str
 
 
-class ExecutionLogs(BaseModel, MongoModel):
-    id: str
+class ExecutionLogs(MongoModel, BaseModel):
+    id: PyObjectId
     _typeHint: str
-    file_id: str
-    dataset_id: Optional[str]
-    job_id: str
-    extractor_id: str
+    file_id: PyObjectId
+    dataset_id: Optional[PyObjectId]
+    job_id: PyObjectId
+    extractor_id: PyObjectId
     status: str
     start: datetime
-    user_id: str
+    user_id: PyObjectId
     file: Optional[FileOut]
     user: Optional[UserOut]
     listener: Optional[EventListenerOut]
