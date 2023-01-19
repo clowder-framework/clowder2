@@ -16,6 +16,7 @@ export type { DatasetOut } from './models/DatasetOut';
 export type { DatasetPatch } from './models/DatasetPatch';
 export type { EventListenerIn } from './models/EventListenerIn';
 export type { EventListenerOut } from './models/EventListenerOut';
+export type { ExecutionLogs } from './models/ExecutionLogs';
 export type { ExtractorInfo } from './models/ExtractorInfo';
 export type { FeedIn } from './models/FeedIn';
 export type { FeedListener } from './models/FeedListener';
