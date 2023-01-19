@@ -57,12 +57,24 @@ async def _get_extraction_events(file_id, db: MongoClient):
     return extractors_run_on_file
 
 
+
 async def _resubmit_file_extractors(
     file_id: str,
     credentials: HTTPAuthorizationCredentials = Security(security),
     db: MongoClient = Depends(dependencies.get_db),
     rabbitmq_client: BlockingChannel = Depends(dependencies.get_rabbitmq),
 ):
+    """This method will check metadata. We get the extractors run from metadata from extractors.
+    Then they are resubmitted. At present parameters are not stored. This will change once Jobs are
+    implemented.
+
+        Arguments:
+        file_idd: Id of file
+        credentials: credentials of logged in user
+        db: MongoDB Client
+        rabbitmq_client: Rabbitmq Client
+
+    """
     if (file := await db["files"].find_one({"_id": ObjectId(file_id)})) is not None:
         file_out = FileOut.from_mongo(file)
         query = {"resource.resource_id": ObjectId(file_id)}
