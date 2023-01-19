@@ -5,8 +5,11 @@ from bson import ObjectId
 from fastapi import APIRouter, HTTPException, Depends, Request
 from pymongo import MongoClient
 import datetime
+import random
+import string
 from app.dependencies import get_db
 from app.keycloak_auth import get_user, get_current_user
+from app.models.config import ConfigEntryDB, ConfigEntryOut
 from app.models.listeners import (
     ExtractorInfo,
     EventListenerIn,
@@ -21,6 +24,28 @@ router = APIRouter()
 legacy_router = APIRouter()  # for back-compatibilty with v1 extractors
 
 clowder_bucket = os.getenv("MINIO_BUCKET_NAME", "clowder")
+
+
+@router.get("/instance")
+async def get_instance_id(
+    user=Depends(get_current_user),
+    db: MongoClient = Depends(get_db),
+):
+    # Check all connection and abort if any one of them is not available
+    if db is None:
+        raise HTTPException(status_code=503, detail="Service not available")
+        return
+
+    if (instance_id := await db["config"].find_one({"key": "instance_id"})) is not None:
+        return ConfigEntryOut.from_mongo(instance_id).value
+    else:
+        # If no ID has been generated for this instance, generate a 10-digit alphanumeric identifier
+        instance_id = ''.join(random.choice(string.ascii_uppercase + string.ascii_lowercase + string.digits) for _ in range(10))
+        config_entry = ConfigEntryDB(key="instance_id", value=instance_id)
+        await db["config"].insert_one(config_entry.to_mongo())
+        found = await db["config"].find_one({"key": "instance_id"})
+        new_entry = ConfigEntryOut.from_mongo(found)
+        return instance_id
 
 
 @router.post("", response_model=EventListenerOut)
