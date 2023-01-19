@@ -184,15 +184,15 @@ async def get_execution_logs_by_extractor(
     filters = [{"extractor_id": extractor_id}]
 
     if job_id is not None:
-        filters.append({"job_id": job_id})
+        filters.append({"job_id": ObjectId(job_id)})
     if status is not None:
-        filters.append({"status": status})
+        filters.append({"status": re.compile(status, re.IGNORECASE)})
     if user_id is not None:
-        filters.append({"user_id": user_id})
+        filters.append({"user_id": ObjectId(user_id)})
     if file_id is not None:
-        filters.append({"file_id": file_id})
+        filters.append({"file_id": ObjectId(file_id)})
     if dataset_id is not None:
-        filters.append({"dataset_id": dataset_id})
+        filters.append({"dataset_id": ObjectId(dataset_id)})
     query = {"$and": filters}
 
     for doc in (
@@ -233,22 +233,22 @@ async def get_execution_logs_by_job(
     """
     logs = []
 
-    filters = []
+    filters = [{"job_id": ObjectId(job_id)}]
+
     if job_id is not None:
         filters.append({"execution_id": execution_id})
     if status is not None:
-        filters.append({"status": status})
+        filters.append({"status": re.compile(status, re.IGNORECASE)})
     if user_id is not None:
-        filters.append({"user_id": user_id})
+        filters.append({"user_id": ObjectId(user_id)})
     if file_id is not None:
-        filters.append({"file_id": file_id})
+        filters.append({"file_id": ObjectId(file_id)})
     if dataset_id is not None:
-        filters.append({"dataset_id": dataset_id})
+        filters.append({"dataset_id": ObjectId(dataset_id)})
     query = {"$and": filters}
 
     for doc in (
         await db["executions_view"]
-        .find({"job_id": ObjectId(job_id)})
         .find(query)
         .skip(skip)
         .limit(limit)
