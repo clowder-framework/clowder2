@@ -156,7 +156,7 @@ async def get_execution_logs(
 
 @router.get("/logs/extractors/{extractor_id}", response_model=List[ExecutionLogs])
 async def get_execution_logs_by_extractor(
-    extractor_id:str,
+    extractor_id: str,
     db: MongoClient = Depends(get_db),
     job_id: Optional[str] = None,
     status: Optional[str] = None,
@@ -170,12 +170,19 @@ async def get_execution_logs_by_extractor(
     Get a list of all execution logs the db.
 
     Arguments:
+        extractor_id -- extractor id
+        job_id -- execution running job id
+        status -- filter by status
+        user_id -- filter by user id
+        file_id -- filter by file id
+        dataset_id -- filter by dataset id
        skip -- number of initial records to skip (i.e. for pagination)
        limit -- restrict number of records to be returned (i.e. for pagination)
     """
     logs = []
 
-    filters = []
+    filters = [{"extractor_id": extractor_id}]
+
     if job_id is not None:
         filters.append({"job_id": job_id})
     if status is not None:
@@ -190,8 +197,10 @@ async def get_execution_logs_by_extractor(
 
     for doc in (
         await db["executions_view"]
-                .find({"extractor_id": ObjectId(extractor_id)})
-                .find(query).skip(skip).limit(limit).to_list(length=limit)
+        .find(query)
+        .skip(skip)
+        .limit(limit)
+        .to_list(length=limit)
     ):
         logs.append(ExecutionLogs.from_mongo(doc))
     return logs
@@ -199,7 +208,13 @@ async def get_execution_logs_by_extractor(
 
 @router.get("/logs/jobs/{job_id}", response_model=List[ExecutionLogs])
 async def get_execution_logs_by_job(
+    job_id: str,
     db: MongoClient = Depends(get_db),
+    execution_id: Optional[str] = None,
+    status: Optional[str] = None,
+    user_id: Optional[str] = None,
+    file_id: Optional[str] = None,
+    dataset_id: Optional[str] = None,
     skip: int = 0,
     limit: int = 2,
 ):
@@ -207,12 +222,37 @@ async def get_execution_logs_by_job(
     Get a list of all execution logs the db.
 
     Arguments:
+        extractor_id -- extractor id
+        job_id -- execution running job id
+        status -- filter by status
+        user_id -- filter by user id
+        file_id -- filter by file id
+        dataset_id -- filter by dataset id
        skip -- number of initial records to skip (i.e. for pagination)
        limit -- restrict number of records to be returned (i.e. for pagination)
     """
     logs = []
+
+    filters = []
+    if job_id is not None:
+        filters.append({"execution_id": execution_id})
+    if status is not None:
+        filters.append({"status": status})
+    if user_id is not None:
+        filters.append({"user_id": user_id})
+    if file_id is not None:
+        filters.append({"file_id": file_id})
+    if dataset_id is not None:
+        filters.append({"dataset_id": dataset_id})
+    query = {"$and": filters}
+
     for doc in (
-        await db["executions_view"].find().skip(skip).limit(limit).to_list(length=limit)
+        await db["executions_view"]
+        .find({"job_id": ObjectId(job_id)})
+        .find(query)
+        .skip(skip)
+        .limit(limit)
+        .to_list(length=limit)
     ):
         logs.append(ExecutionLogs.from_mongo(doc))
     return logs
@@ -315,4 +355,3 @@ async def delete_listener(
         return {"deleted": listener_id}
     else:
         raise HTTPException(status_code=404, detail=f"listener {listener_id} not found")
-
