@@ -48,20 +48,11 @@ async def get_fs() -> Generator:
 
 
 def get_rabbitmq() -> BlockingChannel:
-    credentials = pika.PlainCredentials("guest", "guest")
-    parameters = pika.ConnectionParameters("localhost", credentials=credentials)
+    """Client to connect to RabbitMQ for listeners/extractors interactions."""
+    credentials = pika.PlainCredentials(settings.RABBITMQ_USER, settings.RABBITMQ_PASS)
+    parameters = pika.ConnectionParameters(settings.RABBITMQ_HOST, credentials=credentials)
     connection = pika.BlockingConnection(parameters)
     channel = connection.channel()
-    """
-    channel.exchange_declare(
-        exchange="test_exchange",
-        exchange_type=ExchangeType.direct,
-        passive=False,
-        durable=True,
-        auto_delete=False,
-    )
-    channel.queue_declare(queue="standard_key")
-    """
     return channel
 
 
