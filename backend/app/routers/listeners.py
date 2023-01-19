@@ -258,14 +258,22 @@ async def get_execution_logs_by_job(
     return logs
 
 
-@router.get("/{listener_id}", response_model=EventListenerOut)
-async def get_listener(listener_id: str, db: MongoClient = Depends(get_db)):
-    """Return JSON information about an Event Listener if it exists."""
+@router.get("/logs/{log_id}", response_model=ExecutionLogs)
+async def get_log(
+    log_id: str,
+    db: MongoClient = Depends(get_db)
+):
+    """
+    Endpoint to get one match log given log id
+
+    Arguments:
+       log_id -- log ID
+    """
     if (
-        listener := await db["listeners"].find_one({"_id": ObjectId(listener_id)})
+        log := await db["executions_view"].find_one({"_id": ObjectId(log_id)})
     ) is not None:
-        return EventListenerOut.from_mongo(listener)
-    raise HTTPException(status_code=404, detail=f"listener {listener_id} not found")
+        return ExecutionLogs.from_mongo(log)
+    raise HTTPException(status_code=404, detail=f"Log {log_id} not found")
 
 
 @router.get("", response_model=List[EventListenerOut])
@@ -305,6 +313,16 @@ async def get_listeners(
     ):
         listeners.append(EventListenerOut.from_mongo(doc))
     return listeners
+
+
+@router.get("/{listener_id}", response_model=EventListenerOut)
+async def get_listener(listener_id: str, db: MongoClient = Depends(get_db)):
+    """Return JSON information about an Event Listener if it exists."""
+    if (
+        listener := await db["listeners"].find_one({"_id": ObjectId(listener_id)})
+    ) is not None:
+        return EventListenerOut.from_mongo(listener)
+    raise HTTPException(status_code=404, detail=f"listener {listener_id} not found")
 
 
 @router.put("/{listener_id}", response_model=EventListenerOut)
