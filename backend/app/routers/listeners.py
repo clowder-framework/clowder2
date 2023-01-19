@@ -259,10 +259,7 @@ async def get_execution_logs_by_job(
 
 
 @router.get("/logs/{log_id}", response_model=ExecutionLogs)
-async def get_log(
-    log_id: str,
-    db: MongoClient = Depends(get_db)
-):
+async def get_log(log_id: str, db: MongoClient = Depends(get_db)):
     """
     Endpoint to get one match log given log id
 
