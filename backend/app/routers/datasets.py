@@ -831,7 +831,7 @@ async def get_dataset_extract(
                 body["parameters"] = current_parameters
             current_routing_key = current_queue
 
-            submit_dataset_message(
+            await submit_dataset_message(
                 dataset_out,
                 current_queue,
                 current_routing_key,

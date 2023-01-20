@@ -4,12 +4,15 @@ import json
 import asyncio
 import random
 import string
+import datetime
 from packaging import version
 from pymongo import MongoClient
+from bson import ObjectId
 
 from app.config import settings
 from app.models.config import ConfigEntryDB, ConfigEntryOut
-from app.models.listeners import EventListenerDB, EventListenerOut, ExtractorInfo
+from app.models.listeners import EventListenerDB, EventListenerOut, ExtractorInfo, \
+    EventListenerJob, EventListenerJobUpdate
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -19,39 +22,39 @@ def callback(ch, method, properties, body):
     """This method receives messages from RabbitMQ and processes them."""
     msg = json.loads(body.decode("utf-8"))
 
-    extractor_info = msg["extractor_info"]
-    extractor_name = extractor_info["name"]
-    extractor_db = EventListenerDB(
-        **extractor_info, properties=ExtractorInfo(**extractor_info)
-    )
+    # Add the extractor message to the database
+    file_id = msg["file_id"]
+    user_id = msg["user_id"]
+    job_id = msg["job_id"]
+    queue = msg["queue"]
+    extractor_id = msg["extractor_id"]
+    status = msg["status"]
+    timestamp = datetime.strptime(msg["start"], '%Y-%m-%dT%H:%M:%S%z')  # incoming format: '2023-01-20T08:30:27-05:00'
 
     mongo_client = MongoClient(settings.MONGODB_URL)
     db = mongo_client[settings.MONGO_DATABASE]
 
-    # TODO: This block could go in app.rabbitmq.listeners register_listener and update_listener methods?
-    existing_extractor = db["listeners"].find_one({"name": msg["queue"]})
-    if existing_extractor is not None:
-        # Update existing listener
-        existing_version = existing_extractor["version"]
-        new_version = extractor_db.version
-        if version.parse(new_version) > version.parse(existing_version):
-            # TODO: Should this delete old version, or just add new entry? If 1st one, why not update?
-            new_extractor = db["listeners"].insert_one(extractor_db.to_mongo())
-            found = db["listeners"].find_one({"_id": new_extractor.inserted_id})
-            removed = db["listeners"].delete_one({"_id": existing_extractor["_id"]})
-            extractor_out = EventListenerOut.from_mongo(found)
-            logger.info(
-                "%s updated from %s to %s"
-                % (extractor_name, existing_version, new_version)
-            )
-            return extractor_out
+    # Check if the job exists, and update if so
+    existing_job = db["listener_jobs"].find_one({"_id": ObjectId(job_id)})
+    if existing_job is not None:
+        # Update existing job with newest info
+        updated_job = EventListenerJob.from_mongo(existing_job)
+        updated_job.latest_message = status
+        updated_job.updated = timestamp
+        # TODO: How to handle "status" (completed/failed) with v1's "status" (the actual message)?
+        #updated_job.status = status
+        await db["listener_jobs"].replace_one(
+            {"_id": ObjectId(job_id)}, updated_job.to_mongo()
+        )
+
+        # Add latest message to the job updates
+        event_msg = EventListenerJobUpdate(job_id=job_id, status=status, timestamp=timestamp)
+        db["listener_job_updates"].insert_one(event_msg.to_mongo())
+        return True
     else:
-        # Register new listener
-        new_extractor = db["listeners"].insert_one(extractor_db.to_mongo())
-        found = db["listeners"].find_one({"_id": new_extractor.inserted_id})
-        extractor_out = EventListenerOut.from_mongo(found)
-        logger.info("New extractor registered: " + extractor_name)
-        return extractor_out
+        # We don't know what this job is. Reject the message.
+        logger.error("Job ID %s not found in database, skipping message." % job_id)
+        return False
 
 
 async def listen_for_messages():

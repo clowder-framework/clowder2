@@ -10,10 +10,10 @@ from app import dependencies
 from app.models.mongomodel import MongoDBRef
 from app.models.files import FileOut
 from app.models.datasets import DatasetOut
-from app.models.listeners import EventListenerJob, EventListenerDatasetMessage, EventListenerMessage
+from app.models.listeners import EventListenerJob, EventListenerJobMessage, EventListenerDatasetJobMessage
 
 
-def submit_file_job(
+async def submit_file_job(
     file_out: FileOut,
     queue: str,
     routing_key: str,
@@ -32,18 +32,20 @@ def submit_file_job(
         ),
         parameters=parameters
     )
+    new_job = await db["listener_jobs"].insert_one(job.to_mongo())
+    new_job_id = new_job.inserted_id
 
     current_id = file_out.id
     current_datasetId = file_out.dataset_id
     current_secretKey = token
     try:
-        msg_body = EventListenerMessage(
+        msg_body = EventListenerJobMessage(
             filename=file_out.name,
             fileSize=file_out.bytes,
             id=str(current_id),
             datasetId=str(current_datasetId),
             secretKey=current_secretKey,
-            job_id=job.id
+            job_id=new_job_id
         )
     except Exception as e:
         print(e)
@@ -59,7 +61,7 @@ def submit_file_job(
     return {"message": "testing", "file_id": file_out.id}
 
 
-def submit_dataset_message(
+async def submit_dataset_message(
     dataset_out: DatasetOut,
     queue: str,
     routing_key: str,
@@ -78,13 +80,15 @@ def submit_dataset_message(
         ),
         parameters=parameters
     )
+    new_job = await db["listener_jobs"].insert_one(job.to_mongo())
+    new_job_id = new_job.inserted_id
 
-    msg_body = EventListenerDatasetMessage(
+    msg_body = EventListenerDatasetJobMessage(
         datasetName=dataset_out.name,
         id=str(dataset_out.id),
         datasetId=str(dataset_out.id),
         secretKey=token,
-        job_id=job.id
+        job_id=new_job_id
     )
 
     rabbitmq_client.basic_publish(

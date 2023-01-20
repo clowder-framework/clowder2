@@ -160,7 +160,6 @@ async def update_file(
         return
 
     if (file_q := await db["files"].find_one({"_id": ObjectId(file_id)})) is not None:
-        # First, add to database and get unique ID
         updated_file = FileOut.from_mongo(file_q)
 
         # Update file in Minio and get the new version IDs
@@ -336,7 +335,7 @@ async def get_file_extract(
             parameters = req_info["parameters"]
         routing_key = queue
 
-        submit_file_job(
+        await submit_file_job(
             file_out, queue, routing_key, parameters, access_token, db, rabbitmq_client
         )
 

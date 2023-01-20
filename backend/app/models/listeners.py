@@ -109,7 +109,7 @@ class EventListenerJob(MongoModel):
         use_enum_values = True
 
 
-class EventListenerMessage(BaseModel):
+class EventListenerJobMessage(BaseModel):
     """This describes contents of JSON object that is submitted to RabbitMQ for the Event Listeners/Extractors to consume."""
 
     host: str = settings.API_HOST
@@ -124,7 +124,7 @@ class EventListenerMessage(BaseModel):
     job_id: str
 
 
-class EventListenerDatasetMessage(BaseModel):
+class EventListenerDatasetJobMessage(BaseModel):
     """This describes contents of JSON object that is submitted to RabbitMQ for the Event Listeners/Extractors to consume."""
 
     host: str = settings.API_HOST
@@ -136,3 +136,11 @@ class EventListenerDatasetMessage(BaseModel):
     id: str
     datasetId: str
     job_id: str
+
+
+class EventListenerJobUpdate(MongoModel):
+    """This is a status update message coming from the extractors back to Clowder."""
+
+    job_id: str
+    timestamp: datetime = Field(default_factory=datetime.utcnow)
+    status: str

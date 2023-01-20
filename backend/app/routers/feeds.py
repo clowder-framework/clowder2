@@ -79,7 +79,7 @@ async def check_feed_listeners(
             queue = listener_info.name
             routing_key = listener_info.name
             parameters = {}
-            submit_file_job(file_out, queue, routing_key, parameters)
+            await submit_file_job(file_out, queue, routing_key, parameters)
 
     return listeners_found
 
