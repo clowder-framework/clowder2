@@ -118,7 +118,7 @@ export class MetadataService {
      */
     public static getFileMetadataApiV2FilesFileIdMetadataGet(
         fileId: string,
-        allVersions: boolean = true,
+        allVersions: boolean = false,
         formData?: Body_get_file_metadata_api_v2_files__file_id__metadata_get,
     ): CancelablePromise<Array<MetadataOut>> {
         return __request({

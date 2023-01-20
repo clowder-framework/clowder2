@@ -113,6 +113,10 @@ export class FilesService {
 
     /**
      * Get File Extract
+     * Submit file to an extractor.
+     *
+     * :param file_id: UUID of file
+     * :param info: must include "extractor" field with name, can also include key/value pairs in "parameters"
      * @param fileId
      * @returns any Successful Response
      * @throws ApiError

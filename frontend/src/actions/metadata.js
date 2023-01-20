@@ -57,7 +57,7 @@ export function fetchDatasetMetadata(datasetId){
 export const RECEIVE_FILE_METADATA = "RECEIVE_FILE_METADATA";
 export function fetchFileMetadata(fileId){
 	return (dispatch) => {
-		return V2.MetadataService.getFileMetadataApiV2FilesFileIdMetadataGet(fileId)
+		return V2.MetadataService.getFileMetadataApiV2FilesFileIdMetadataGet(fileId, true)
 			.then(json => {
 				dispatch({
 					type: RECEIVE_FILE_METADATA,

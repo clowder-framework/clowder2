@@ -20,7 +20,7 @@ export type LegacyEventListenerIn = {
     bibtex?: Array<string>;
     default_labels?: Array<string>;
     categories?: Array<string>;
-    parameters?: Array<any>;
+    parameters?: any;
     version?: string;
     description?: string;
 }
