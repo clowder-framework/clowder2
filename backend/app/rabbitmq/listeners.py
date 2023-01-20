@@ -1,5 +1,7 @@
 import json
 import pika
+import string
+import random
 from fastapi import Request, HTTPException, Depends
 from pymongo import MongoClient
 from pika.adapters.blocking_connection import BlockingChannel
@@ -8,9 +10,32 @@ from app.config import settings
 from app.keycloak_auth import get_token
 from app import dependencies
 from app.models.mongomodel import MongoDBRef
+from app.models.config import ConfigEntryDB, ConfigEntryOut
 from app.models.files import FileOut
 from app.models.datasets import DatasetOut
 from app.models.listeners import EventListenerJob, EventListenerJobMessage, EventListenerDatasetJobMessage
+
+
+async def create_reply_queue(
+    db: MongoClient = Depends(dependencies.get_db),
+    rabbitmq_client: BlockingChannel = Depends(dependencies.get_rabbitmq),
+):
+    if (instance_id := db["config"].find_one({"key": "instance_id"})) is not None:
+        instance_id = ConfigEntryOut.from_mongo(instance_id).value
+    else:
+        # If no ID has been generated for this instance, generate a 10-digit alphanumeric identifier
+        instance_id = ''.join(random.choice(string.ascii_uppercase + string.ascii_lowercase + string.digits) for _ in range(10))
+        config_entry = ConfigEntryDB(key="instance_id", value=instance_id)
+        await db["config"].insert_one(config_entry.to_mongo())
+
+    queue_name = "clowder.%s" % instance_id
+    rabbitmq_client.exchange_declare(
+        exchange="clowder", durable=True
+    )
+    result = rabbitmq_client.queue_declare(queue=queue_name, durable=True, exclusive=False, auto_delete=False)
+    queue_name = result.method.queue
+    rabbitmq_client.queue_bind(exchange="clowder", queue=queue_name)
+    return queue_name
 
 
 async def submit_file_job(
@@ -50,6 +75,8 @@ async def submit_file_job(
     except Exception as e:
         print(e)
 
+    reply_to = create_reply_queue()
+
     rabbitmq_client.basic_publish(
         exchange="",
         routing_key=routing_key,
@@ -57,6 +84,7 @@ async def submit_file_job(
         properties=pika.BasicProperties(
             content_type="application/json", delivery_mode=1
         ),
+        reply_to=reply_to
     )
     return {"message": "testing", "file_id": file_out.id}
 
@@ -91,6 +119,8 @@ async def submit_dataset_message(
         job_id=new_job_id
     )
 
+    reply_to = create_reply_queue()
+
     rabbitmq_client.basic_publish(
         exchange="",
         routing_key=routing_key,
@@ -98,5 +128,6 @@ async def submit_dataset_message(
         properties=pika.BasicProperties(
             content_type="application/json", delivery_mode=1
         ),
+        reply_to=reply_to
     )
     return {"message": "testing", "dataset_id": dataset_out.id}
