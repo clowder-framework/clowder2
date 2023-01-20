@@ -326,23 +326,18 @@ async def get_file_extract(
     request: Request,
     # parameters don't have a fixed model shape
     parameters: dict = None,
-    token: str = Depends(get_token),
+    user=Depends(get_current_user),
     credentials: HTTPAuthorizationCredentials = Security(security),
     db: MongoClient = Depends(dependencies.get_db),
     rabbitmq_client: BlockingChannel = Depends(dependencies.get_rabbitmq),
 ):
-    access_token = credentials.credentials
     if extractorName is None:
-        raise HTTPException(status_code=404, detail=f"No extractor submitted")
+        raise HTTPException(status_code=400, detail=f"No extractorName specified")
     if (file := await db["files"].find_one({"_id": ObjectId(file_id)})) is not None:
         file_out = FileOut.from_mongo(file)
+        access_token = credentials.credentials
 
         # backward compatibility? Get extractor info from request (Clowder v1)
-        req_headers = request.headers
-        raw = req_headers.raw
-        authorization = raw[1]
-        # TODO this got the wrong thing, changing
-        token = authorization[1].decode("utf-8").lstrip("Bearer").lstrip(" ")
         queue = extractorName
         routing_key = queue
 
@@ -350,7 +345,7 @@ async def get_file_extract(
             parameters = {}
 
         await submit_file_job(
-            file_out, queue, routing_key, parameters, access_token, db, rabbitmq_client
+            file_out, queue, routing_key, parameters, user, access_token, db, rabbitmq_client
         )
 
         return {"message": "testing", "file_id": file_id}

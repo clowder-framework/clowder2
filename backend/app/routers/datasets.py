@@ -824,7 +824,7 @@ async def get_dataset_extract(
     request: Request,
     # parameters don't have a fixed model shape
     parameters: dict = None,
-    token: str = Depends(get_token),
+    user=Depends(get_current_user),
     credentials: HTTPAuthorizationCredentials = Security(security),
     db: MongoClient = Depends(dependencies.get_db),
     rabbitmq_client: BlockingChannel = Depends(dependencies.get_rabbitmq),
@@ -864,6 +864,7 @@ async def get_dataset_extract(
             current_queue,
             current_routing_key,
             parameters,
+            user,
             access_token,
             db,
             rabbitmq_client,
