@@ -1,14 +1,17 @@
-import re
-from typing import List
-import os
-from bson import ObjectId
-from fastapi import APIRouter, HTTPException, Depends, Request
-from pymongo import MongoClient
 import datetime
+import os
+import re
 import random
 import string
+from typing import List, Optional
+
+from bson import ObjectId
+from fastapi import APIRouter, HTTPException, Depends
+from pymongo import MongoClient
+
 from app.dependencies import get_db
 from app.keycloak_auth import get_user, get_current_user
+from app.models.feeds import FeedOut
 from app.models.config import ConfigEntryDB, ConfigEntryOut
 from app.models.listeners import (
     ExtractorInfo,
@@ -17,7 +20,6 @@ from app.models.listeners import (
     EventListenerDB,
     EventListenerOut,
 )
-from app.models.feeds import FeedOut
 from app.routers.feeds import disassociate_listener_db
 
 router = APIRouter()
@@ -133,6 +135,28 @@ async def search_listeners(
     return listeners
 
 
+@router.get("/categories", response_model=List[str])
+async def list_categories(
+    db: MongoClient = Depends(get_db),
+):
+    """Get all the distinct categories of registered listeners in the db
+
+    Arguments:
+    """
+    return await db["listeners"].distinct("properties.categories")
+
+
+@router.get("/defaultLabels", response_model=List[str])
+async def list_default_labels(
+    db: MongoClient = Depends(get_db),
+):
+    """Get all the distinct default labels of registered listeners in the db
+
+    Arguments:
+    """
+    return await db["listeners"].distinct("properties.defaultLabels")
+
+
 @router.get("/{listener_id}", response_model=EventListenerOut)
 async def get_listener(listener_id: str, db: MongoClient = Depends(get_db)):
     """Return JSON information about an Event Listener if it exists."""
@@ -149,16 +173,33 @@ async def get_listeners(
     db: MongoClient = Depends(get_db),
     skip: int = 0,
     limit: int = 2,
+    category: Optional[str] = None,
+    label: Optional[str] = None,
 ):
     """Get a list of all Event Listeners in the db.
 
     Arguments:
         skip -- number of initial records to skip (i.e. for pagination)
         limit -- restrict number of records to be returned (i.e. for pagination)
+        category -- filter by category has to be exact match
+        label -- filter by label has to be exact match
     """
     listeners = []
+    if category and label:
+        query = {"$and": [{"properties.categories": category},{"properties.defaultLabels": label}]}
+    elif category:
+        query = {"properties.categories": category}
+    elif label:
+        query = {"properties.defaultLabels": label}
+    else:
+        query = {}
+
     for doc in (
-        await db["listeners"].find().skip(skip).limit(limit).to_list(length=limit)
+        await db["listeners"]
+        .find(query)
+        .skip(skip)
+        .limit(limit)
+        .to_list(length=limit)
     ):
         listeners.append(EventListenerOut.from_mongo(doc))
     return listeners

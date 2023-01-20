@@ -35,10 +35,10 @@ from app import dependencies
 from app import keycloak_auth
 from app.keycloak_auth import get_token
 from app.search.connect import (
-    connect_elasticsearch,
     insert_record,
     delete_document_by_id,
     update_record,
+    delete_document_by_query,
 )
 from app.config import settings
 from app.keycloak_auth import get_user, get_current_user
@@ -54,7 +54,7 @@ from app.models.folders import FolderOut, FolderIn, FolderDB
 from app.models.pyobjectid import PyObjectId
 from app.models.users import UserOut
 from app.routers.files import add_file_entry, remove_file_entry
-from app.rabbitmq.listeners import submit_dataset_message
+from app.rabbitmq.listeners import submit_dataset_job
 
 router = APIRouter()
 security = HTTPBearer()
@@ -310,7 +310,6 @@ async def edit_dataset(
     user_id=Depends(get_user),
     es=Depends(dependencies.get_elasticsearchclient),
 ):
-    es = await connect_elasticsearch()
 
     # Check all connection and abort if any one of them is not available
     if db is None or es is None:
@@ -333,13 +332,27 @@ async def edit_dataset(
             # Update entry to the dataset index
             doc = {
                 "doc": {
-                    "name": ds["name"],
-                    "description": ds["description"],
+                    "name": dataset["name"],
+                    "description": dataset["description"],
                     "author": UserOut(**user).email,
-                    "modified": ds["modified"],
+                    "modified": dataset["modified"],
                 }
             }
             update_record(es, "dataset", doc, dataset_id)
+            # updating metadata in elasticsearch
+            if (
+                metadata := await db["metadata"].find_one(
+                    {"resource.resource_id": ObjectId(dataset_id)}
+                )
+            ) is not None:
+                doc = {
+                    "doc": {
+                        "name": dataset["name"],
+                        "description": dataset["description"],
+                        "author": UserOut(**user).email,
+                    }
+                }
+                update_record(es, "metadata", doc, str(metadata["_id"]))
         except Exception as e:
             raise HTTPException(status_code=500, detail=e.args[0])
         return DatasetOut.from_mongo(dataset)
@@ -354,7 +367,6 @@ async def patch_dataset(
     db: MongoClient = Depends(dependencies.get_db),
     es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
 ):
-    es = await connect_elasticsearch()
 
     # Check all connection and abort if any one of them is not available
     if db is None or es is None:
@@ -377,13 +389,27 @@ async def patch_dataset(
             # Update entry to the dataset index
             doc = {
                 "doc": {
-                    "name": ds["name"],
-                    "description": ds["description"],
+                    "name": dataset["name"],
+                    "description": dataset["description"],
                     "author": UserOut(**user).email,
-                    "modified": ds["modified"],
+                    "modified": dataset["modified"],
                 }
             }
             update_record(es, "dataset", doc, dataset_id)
+            # updating metadata in elasticsearch
+            if (
+                metadata := await db["metadata"].find_one(
+                    {"resource.resource_id": ObjectId(dataset_id)}
+                )
+            ) is not None:
+                doc = {
+                    "doc": {
+                        "name": dataset["name"],
+                        "description": dataset["description"],
+                        "author": UserOut(**user).email,
+                    }
+                }
+                update_record(es, "metadata", doc, str(metadata["_id"]))
         except Exception as e:
             raise HTTPException(status_code=500, detail=e.args[0])
         return DatasetOut.from_mongo(dataset)
@@ -396,7 +422,6 @@ async def delete_dataset(
     fs: Minio = Depends(dependencies.get_fs),
     es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
 ):
-    es = await connect_elasticsearch()
 
     # Check all connection and abort if any one of them is not available
     if db is None or fs is None or es is None:
@@ -406,6 +431,8 @@ async def delete_dataset(
     if (await db["datasets"].find_one({"_id": ObjectId(dataset_id)})) is not None:
         # delete from elasticsearch
         delete_document_by_id(es, "dataset", dataset_id)
+        query = {"match": {"resource_id": dataset_id}}
+        delete_document_by_query(es, "metadata", query)
         # delete dataset first to minimize files/folder being uploaded to a delete dataset
 
         await db["datasets"].delete_one({"_id": ObjectId(dataset_id)})
@@ -793,7 +820,10 @@ async def download_dataset(
 @router.post("/{dataset_id}/extract")
 async def get_dataset_extract(
     dataset_id: str,
-    info: Request,
+    extractorName: str,
+    request: Request,
+    # parameters don't have a fixed model shape
+    parameters: dict = None,
     token: str = Depends(get_token),
     credentials: HTTPAuthorizationCredentials = Security(security),
     db: MongoClient = Depends(dependencies.get_db),
@@ -803,46 +833,42 @@ async def get_dataset_extract(
         dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
     ) is not None:
         dataset_out = DatasetOut.from_mongo(dataset)
-        req_info = await info.json()
         access_token = credentials.credentials
-        if "extractor" in req_info:
-            req_headers = info.headers
-            raw = req_headers.raw
-            authorization = raw[1]
-            token = authorization[1].decode("utf-8")
-            token = token.lstrip("Bearer")
-            token = token.lstrip(" ")
-            # TODO check of extractor exists
-            msg = {"message": "testing", "dataset_id": dataset_id}
-            body = {}
-            body["secretKey"] = access_token
-            body["token"] = access_token
-            body["host"] = settings.API_HOST
-            body["retry_count"] = 0
-            body["filename"] = dataset["name"]
-            body["id"] = dataset_id
-            body["datasetId"] = dataset_id
-            body["resource_type"] = "dataset"
-            body["flags"] = ""
-            current_queue = req_info["extractor"]
-            parameters = {}
-            if "parameters" in req_info:
-                current_parameters = req_info["parameters"]
-                body["parameters"] = current_parameters
-            current_routing_key = current_queue
-
-            await submit_dataset_message(
-                dataset_out,
-                current_queue,
-                current_routing_key,
-                parameters,
-                access_token,
-                db,
-                rabbitmq_client,
-            )
-
-            return {"message": "testing", "dataset_id": dataset_id}
+        req_headers = request.headers
+        raw = req_headers.raw
+        authorization = raw[1]
+        token = authorization[1].decode("utf-8")
+        token = token.lstrip("Bearer")
+        token = token.lstrip(" ")
+        # TODO check of extractor exists
+        msg = {"message": "testing", "dataset_id": dataset_id}
+        body = {}
+        body["secretKey"] = access_token
+        body["token"] = access_token
+        body["host"] = settings.API_HOST
+        body["retry_count"] = 0
+        body["filename"] = dataset["name"]
+        body["id"] = dataset_id
+        body["datasetId"] = dataset_id
+        body["resource_type"] = "dataset"
+        body["flags"] = ""
+        current_queue = extractorName
+        if parameters is not None:
+            body["parameters"] = parameters
         else:
-            raise HTTPException(status_code=404, detail=f"No extractor submitted")
+            parameters = {}
+        current_routing_key = current_queue
+
+        submit_dataset_job(
+            dataset_out,
+            current_queue,
+            current_routing_key,
+            parameters,
+            access_token,
+            db,
+            rabbitmq_client,
+        )
+
+        return {"message": "testing", "dataset_id": dataset_id}
     else:
         raise HTTPException(status_code=404, detail=f"File {dataset_id} not found")

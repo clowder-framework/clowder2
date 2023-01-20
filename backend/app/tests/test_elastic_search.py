@@ -15,6 +15,7 @@ from app.search.connect import (
     delete_index,
     delete_document_by_id,
     update_record,
+    delete_document_by_query,
 )
 
 dummy_file_index_name = "dummy_file"
@@ -93,7 +94,9 @@ async def test_files():
             result.body["responses"][0]["hits"]["hits"][0]["_source"]["name"]
             == "test file 2"
         )
-        delete_document_by_id(es, dummy_file_index_name, 1)
+        query = {"match": {"name": "test file 2"}}
+        # delete_document_by_id(es, dummy_file_index_name, 1)
+        delete_document_by_query(es, dummy_file_index_name, query)
         delete_index(es, dummy_file_index_name)
 
 

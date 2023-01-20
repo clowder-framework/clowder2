@@ -124,6 +124,19 @@ def delete_document_by_id(es_client, index_name, id):
         logger.error(str(ex))
 
 
+def delete_document_by_query(es_client, index_name, query):
+    """Deleting a document from an index
+    Arguments:
+        es_client -- elasticsearch client which you get as return object from connect_elasticsearch()
+        index_name -- name of index you want to delete
+        query -- query to be searched
+    """
+    try:
+        es_client.delete_by_query(index=index_name, query=query)
+    except BadRequestError as ex:
+        logger.error(str(ex))
+
+
 # Convert SearchObject into an Elasticsearch JSON object and perform search
 def execute_search_obj(es_client, search_obj: SearchObject):
     match_list = []

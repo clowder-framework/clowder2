@@ -8,8 +8,8 @@ import type { Repository } from './Repository';
  * Currently for extractor_info JSON from Clowder v1 extractors for use with to /api/extractors endpoint.
  */
 export type ExtractorInfo = {
-    author: string;
-    process: any;
+    author?: string;
+    process?: any;
     maturity?: string;
     name?: string;
     contributors?: Array<string>;
@@ -20,6 +20,6 @@ export type ExtractorInfo = {
     bibtex?: Array<string>;
     default_labels?: Array<string>;
     categories?: Array<string>;
-    parameters?: Array<any>;
+    parameters?: any;
     version?: string;
 }
