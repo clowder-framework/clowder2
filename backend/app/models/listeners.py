@@ -86,10 +86,11 @@ class FeedListener(BaseModel):
 class EventListenerJobStatus(str, Enum):
     """This is a basic status description of an extraction job for easier filtering of lists/views."""
 
-    CREATED = "created"
-    STARTED = "started"
-    COMPLETED = "completed"
-    FAILED = "failed"
+    CREATED = "CREATED"
+    STARTED = "STARTED"
+    SUCCEEDED = "SUCCEEDED"
+    ERROR = "ERROR"
+    RESUBMITTED = "RESUBMITTED"
 
 
 class EventListenerJob(MongoModel):

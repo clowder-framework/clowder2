@@ -22,12 +22,7 @@ def callback(ch, method, properties, body):
     """This method receives messages from RabbitMQ and processes them."""
     msg = json.loads(body.decode("utf-8"))
 
-    # Add the extractor message to the database
-    file_id = msg["file_id"]
-    user_id = msg["user_id"]
     job_id = msg["job_id"]
-    queue = msg["queue"]
-    extractor_id = msg["extractor_id"]
     status = msg["status"]
     timestamp = datetime.strptime(msg["start"], '%Y-%m-%dT%H:%M:%S%z')  # incoming format: '2023-01-20T08:30:27-05:00'
 
@@ -41,8 +36,7 @@ def callback(ch, method, properties, body):
         updated_job = EventListenerJob.from_mongo(existing_job)
         updated_job.latest_message = status
         updated_job.updated = timestamp
-        # TODO: How to handle "status" (completed/failed) with v1's "status" (the actual message)?
-        #updated_job.status = status
+        updated_job.status = status  # TODO: How to handle "status" (completed/failed) with v1's "status" (the actual message)?
         await db["listener_jobs"].replace_one(
             {"_id": ObjectId(job_id)}, updated_job.to_mongo()
         )
