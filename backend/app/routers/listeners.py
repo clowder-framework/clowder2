@@ -161,7 +161,12 @@ async def get_listeners(
     """
     listeners = []
     if category and label:
-        query = {"$and": [{"properties.categories": category},{"properties.defaultLabels": label}]}
+        query = {
+            "$and": [
+                {"properties.categories": category},
+                {"properties.defaultLabels": label},
+            ]
+        }
     elif category:
         query = {"properties.categories": category}
     elif label:
@@ -170,11 +175,7 @@ async def get_listeners(
         query = {}
 
     for doc in (
-        await db["listeners"]
-        .find(query)
-        .skip(skip)
-        .limit(limit)
-        .to_list(length=limit)
+        await db["listeners"].find(query).skip(skip).limit(limit).to_list(length=limit)
     ):
         listeners.append(EventListenerOut.from_mongo(doc))
     return listeners

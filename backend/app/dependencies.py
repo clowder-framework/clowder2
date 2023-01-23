@@ -50,7 +50,9 @@ async def get_fs() -> Generator:
 def get_rabbitmq() -> BlockingChannel:
     """Client to connect to RabbitMQ for listeners/extractors interactions."""
     credentials = pika.PlainCredentials(settings.RABBITMQ_USER, settings.RABBITMQ_PASS)
-    parameters = pika.ConnectionParameters(settings.RABBITMQ_HOST, credentials=credentials)
+    parameters = pika.ConnectionParameters(
+        settings.RABBITMQ_HOST, credentials=credentials
+    )
     connection = pika.BlockingConnection(parameters)
     channel = connection.channel()
     return channel
