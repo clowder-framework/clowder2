@@ -8,8 +8,8 @@ import type { Repository } from './Repository';
  * v1 Extractors can submit data formatted as a LegacyEventListener (i.e. v1 format) and it will be converted to a v2 EventListener.
  */
 export type LegacyEventListenerIn = {
-    author: string;
-    process: any;
+    author?: string;
+    process?: any;
     maturity?: string;
     name: string;
     contributors?: Array<string>;
@@ -20,7 +20,7 @@ export type LegacyEventListenerIn = {
     bibtex?: Array<string>;
     default_labels?: Array<string>;
     categories?: Array<string>;
-    parameters?: Array<any>;
+    parameters?: any;
     version?: string;
     description?: string;
 }

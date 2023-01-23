@@ -75,14 +75,14 @@ async def _build_metadata_db_obj(
 
     if agent is None:
         # Build MetadataAgent depending on whether extractor info is present/valid
-        extractor_info = metadata_in.extractor
+        extractor_info = metadata_in.extractor_info
         if extractor_info is not None:
             if (
                 extractor := await db["listeners"].find_one(
                     {"name": extractor_info.name, "version": extractor_info.version}
                 )
             ) is not None:
-                agent = MetadataAgent(creator=user, extractor=extractor)
+                agent = MetadataAgent(creator=user, listener=extractor)
             else:
                 raise HTTPException(status_code=404, detail=f"Extractor not found")
         else:
@@ -123,7 +123,7 @@ async def add_file_metadata(
         if definition is not None:
             existing_q = {"resource.resource_id": file.id, "definition": definition}
             # Extracted metadata doesn't care about user
-            if metadata_in.extractor is not None:
+            if metadata_in.extractor_info is not None:
                 existing_q["agent.extractor.name"] = metadata_in.extractor_info.name
                 existing_q[
                     "agent.extractor.version"
@@ -149,6 +149,13 @@ async def add_file_metadata(
             "contents": metadata_out.contents,
             "context_url": metadata_out.context_url,
             "context": metadata_out.context,
+            "name": file.name,
+            "folder_id": str(file.folder_id),
+            "dataset_id": str(file.dataset_id),
+            "content_type": file.content_type,
+            "resource_created": file.created.utcnow(),
+            "resource_creator": file.creator.email,
+            "bytes": file.bytes,
         }
         insert_record(es, "metadata", doc, metadata_out.id)
         return metadata_out

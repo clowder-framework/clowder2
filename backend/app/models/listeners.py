@@ -18,20 +18,22 @@ class Repository(MongoModel):
 class ExtractorInfo(BaseModel):
     """Currently for extractor_info JSON from Clowder v1 extractors for use with to /api/extractors endpoint."""
 
-    author: str  # Referring to author of listener script (e.g. name or email), not Clowder user
-    process: dict
+    author: Optional[
+        str
+    ]  # Referring to author of listener script (e.g. name or email), not Clowder user
+    process: Optional[dict]
     maturity: str = "Development"
-    name: str = ""
-    contributors: List[str] = []
-    contexts: List[dict] = []
-    repository: List[Repository] = []
-    external_services: List[str] = []
-    libraries: List[str] = []
-    bibtex: List[str] = []
-    default_labels: List[str] = []
-    categories: List[str] = []
+    name: Optional[str] = ""
+    contributors: Optional[List[str]] = []
+    contexts: Optional[List[dict]] = []
+    repository: Optional[List[Repository]] = []
+    external_services: Optional[List[str]] = []
+    libraries: Optional[List[str]] = []
+    bibtex: Optional[List[str]] = []
+    default_labels: Optional[List[str]] = []
+    categories: Optional[List[str]] = []
     parameters: Optional[dict] = None
-    version: str = "1.0"
+    version: Optional[str] = "1.0"
 
 
 class EventListenerBase(BaseModel):

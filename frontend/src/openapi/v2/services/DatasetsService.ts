@@ -304,15 +304,24 @@ export class DatasetsService {
     /**
      * Get Dataset Extract
      * @param datasetId
+     * @param extractorName
+     * @param requestBody
      * @returns any Successful Response
      * @throws ApiError
      */
     public static getDatasetExtractApiV2DatasetsDatasetIdExtractPost(
         datasetId: string,
+        extractorName: string,
+        requestBody?: any,
     ): CancelablePromise<any> {
         return __request({
             method: 'POST',
             path: `/api/v2/datasets/${datasetId}/extract`,
+            query: {
+                'extractorName': extractorName,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
             errors: {
                 422: `Validation Error`,
             },

@@ -46,6 +46,7 @@ services:
     environment:
       MONGODB_URL: mongodb://mongo:27017
       MINIO_SERVER_URL: minio-nginx:9000
+      RABBITMQ_HOST: rabbitmq:15672
       elasticsearch_url: http://elasticsearch:9200
       auth_base: http://localhost
       auth_url: http://localhost/keycloak/realms/clowder/protocol/openid-connect/auth?client_id=clowder2-backend&response_type=code
@@ -83,6 +84,23 @@ services:
       - "traefik.http.routers.frontend.rule=PathPrefix(`/`)"
       - "traefik.http.services.frontend.loadbalancer.server.port=80"
       - "traefik.http.routers.frontend.priority=1"
+
+  extractors-heartbeat:
+    image: "clowder/clowder2-heartbeat"
+    build:
+      context: ./backend
+      dockerfile: heartbeat.Dockerfile
+    networks:
+      - clowder2
+    restart: unless-stopped
+    environment:
+      - MONGODB_URL=mongodb://mongo:27017
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_USER=${RABBITMQ_USER:-guest}
+      - RABBITMQ_PASS=${RABBITMQ_PASS:-guest}
+    depends_on:
+      - mongo
+      - rabbitmq
 
   mongo:
     image: mongo:5.0
@@ -173,6 +191,21 @@ services:
         - "traefik.http.services.keycloak.loadbalancer.server.port=8080"
         - "traefik.http.routers.keycloak.priority=10"
 
+  # message broker
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    environment:
+      - RABBITMQ_SERVER_ADDITIONAL_ERL_ARGS=-rabbitmq_management path_prefix "/rabbitmq"
+      - RABBITMQ_DEFAULT_USER=${RABBITMQ_DEFAULT_USER:-guest}
+      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_DEFAULT_PASS:-guest}
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    networks:
+      - clowder2
+    volumes:
+      - rabbitmq:/var/lib/rabbitmq
+
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.3.3
     restart: unless-stopped
@@ -196,6 +229,7 @@ volumes:
   data4:
   postgres_data:
   elasticsearch:
+  rabbitmq:
 
 networks:
   clowder2:
