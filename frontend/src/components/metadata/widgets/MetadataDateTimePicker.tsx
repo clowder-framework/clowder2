@@ -9,7 +9,7 @@ import {Grid} from "@mui/material";
 
 export const MetadataDateTimePicker = (props) => {
 	const {widgetName, fieldName, metadataId, contents, setMetadata, initialReadOnly, resourceId, updateMetadata} = props;
-	const [localContent, setLocalContent] = useState(contents && contents[fieldName] ? contents: {});
+	const [localContent, setLocalContent] = useState(content && content[fieldName] ? content: {});
 
 	const [readOnly, setReadOnly] = useState(initialReadOnly);
 
@@ -25,12 +25,12 @@ export const MetadataDateTimePicker = (props) => {
 				setMetadata({
 					"id": metadataId,
 					"definition": widgetName,
-					"contents": tempContents
+					"content": tempContents
 				})
 				:
 				setMetadata({
 					"definition": widgetName,
-					"contents": tempContents
+					"content": tempContents
 				})
 			:
 			null

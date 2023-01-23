@@ -107,7 +107,7 @@ export const EditMetadata = (props: MetadataType) => {
 															setMetadata: setMetadata,
 															initialReadOnly: false,
 															resourceId: resourceId,
-															contents: metadata.contents ?? null,
+															content: metadata.content ?? null,
 															metadataId: metadata.id ?? null,
 															key:idxx
 														}

@@ -67,11 +67,11 @@ export const DisplayMetadata = (props: MetadataType) => {
 													metadataConfig[field.widgetType ?? "NA"] ?? metadataConfig["NA"],
 													{
 														widgetName: metadataDef.name,
-														fieldName: field.name,
+														fieldName: field.,
 														options: field.config.options ?? [],
 														initialReadOnly: true,
 														resourceId: resourceId,
-														contents: metadata.contents ?? null,
+														content: metadata.content ?? null,
 														metadataId: metadata.id ?? null,
 														updateMetadata: updateMetadata,
 														key:idxx

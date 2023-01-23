@@ -11,7 +11,7 @@ import {MetadataDeleteButton} from "./widgets/MetadataDeleteButton";
 
 type ListenerMetadata = {
 	agent: any,
-	contents: any,
+	content: any,
 	context: any,
 	context_url: any,
 	created: string,
@@ -23,7 +23,7 @@ Uses only the list of metadata
 */
 export const ListenerMetadataEntry = (props: ListenerMetadata) => {
 
-	const {agent, contents, context, context_url, created} = props;
+	const {agent, content, context, context_url, created} = props;
 
 	const dispatch = useDispatch();
 
@@ -60,7 +60,7 @@ export const ListenerMetadataEntry = (props: ListenerMetadata) => {
 							</Button>
 							{isOpened && (
 								<ListenerContents
-									contents={contents}/>
+									content={content}/>
      						 )}
 
 

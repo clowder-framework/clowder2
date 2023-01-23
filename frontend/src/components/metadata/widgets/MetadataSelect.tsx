@@ -23,12 +23,12 @@ export const MetadataSelect = (props) => {
 				setMetadata({
 					"id":metadataId,
 					"definition": widgetName,
-					"contents": tempContents
+					"content": tempContents
 				})
 				:
 				setMetadata({
 					"definition": widgetName,
-					"contents": tempContents
+					"content": tempContents
 				})
 			:
 			null
