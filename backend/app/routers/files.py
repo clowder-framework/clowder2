@@ -89,7 +89,7 @@ async def _resubmit_file_extractors(
                     listeners_resubmitted.append(listener_name)
                 except Exception as e:
                     listeners_resubitted_failed.append(listener_name)
-        return {"listeners resubmitted successfully": str(len(listeners_resubmitted)), "listeners resubmitted failed": str(len(listeners_resubmitted))}
+        return {"listeners resubmitted successfully": str(listeners_resubmitted), "listeners resubmitted failed": str(listeners_resubmitted)}
 
 
 # TODO: Move this to MongoDB middle layer
