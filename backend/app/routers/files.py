@@ -56,7 +56,7 @@ async def _resubmit_file_extractors(
     implemented.
 
         Arguments:
-        file_idd: Id of file
+        file_id: Id of file
         credentials: credentials of logged in user
         db: MongoDB Client
         rabbitmq_client: Rabbitmq Client
@@ -65,6 +65,8 @@ async def _resubmit_file_extractors(
     if (file := await db["files"].find_one({"_id": ObjectId(file_id)})) is not None:
         file_out = FileOut.from_mongo(file)
         query = {"resource.resource_id": ObjectId(file_id)}
+        listeners_resubmitted = []
+        listeners_resubitted_failed = []
         async for md in db["metadata"].find(query):
             md_out = MetadataOut.from_mongo(md)
             if md_out.agent.listener is not None:
@@ -74,15 +76,20 @@ async def _resubmit_file_extractors(
                 access_token = credentials.credentials
                 queue = listener_name
                 routing_key = queue
-                submit_file_message(
-                    file_out,
-                    queue,
-                    routing_key,
-                    parameters,
-                    access_token,
-                    db,
-                    rabbitmq_client,
-                )
+                try:
+                    submit_file_message(
+                        file_out,
+                        queue,
+                        routing_key,
+                        parameters,
+                        access_token,
+                        db,
+                        rabbitmq_client,
+                    )
+                    listeners_resubmitted.append(listener_name)
+                except Exception as e:
+                    listeners_resubitted_failed.append(listener_name)
+        return {"listeners resubmitted successfully": str(len(listeners_resubmitted)), "listeners resubmitted failed": str(len(listeners_resubmitted))}
 
 
 # TODO: Move this to MongoDB middle layer
@@ -405,31 +412,12 @@ async def resubmit_file_extractions(
     implemented.
 
         Arguments:
-        file_idd: Id of file
+        file_id: Id of file
         credentials: credentials of logged in user
         db: MongoDB Client
         rabbitmq_client: Rabbitmq Client
 
     """
     if (file := await db["files"].find_one({"_id": ObjectId(file_id)})) is not None:
-        file_out = FileOut.from_mongo(file)
-        query = {"resource.resource_id": ObjectId(file_id)}
-        async for md in db["metadata"].find(query):
-            md_out = MetadataOut.from_mongo(md)
-            if md_out.agent.listener is not None:
-                listener_name = md_out.agent.listener.name
-                # TODO find way  to get the parameters used
-                parameters = {}
-                access_token = credentials.credentials
-                queue = listener_name
-                routing_key = queue
-                submit_file_message(
-                    file_out,
-                    queue,
-                    routing_key,
-                    parameters,
-                    access_token,
-                    db,
-                    rabbitmq_client,
-                )
-    return {"message": "reran file extractors", "file_id": file_id}
+        resubmit_success_fail = _resubmit_file_extractors(file_id, credentials, db, rabbitmq_client)
+    return resubmit_success_fail
