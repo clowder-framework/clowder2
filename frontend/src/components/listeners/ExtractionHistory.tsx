@@ -16,12 +16,12 @@ import {resetFailedReason} from "../../actions/common";
 import {useNavigate} from "react-router-dom";
 import Layout from "../Layout";
 import {fetchListeners} from "../../actions/listeners";
-import ListenerItem from "./ListenerItem";
 import {ArrowBack, ArrowForward} from "@material-ui/icons";
 import {ListenerInfo} from "./ListenerInfo";
+import {ExtractionJobs} from "./ExtractionJobs";
 
 
-export const ListenerExtractionHistory = (): JSX.Element => {
+export const ExtractionHistory = (): JSX.Element => {
 
 	const dispatch = useDispatch();
 	const listListeners = (skip: number | undefined, limit: number | undefined, selectedCategory: string | null,
@@ -55,6 +55,14 @@ export const ListenerExtractionHistory = (): JSX.Element => {
 			else setPrevDisabled(false);
 		}
 	}, [skip]);
+
+	// fetch extractors from each individual dataset/id calls
+	useEffect(() => {
+
+		// disable flipping if reaches the last page
+		if (listeners.length < limit) setNextDisabled(true);
+		else setNextDisabled(false);
+	}, [listeners]);
 
 	// for pagination keep flipping until the return dataset is less than the limit
 	const previous = () => {
@@ -117,7 +125,10 @@ export const ListenerExtractionHistory = (): JSX.Element => {
 								<></>
 						}
 					</List>
+					{/*Extractor infos when selected*/}
 					<ListenerInfo selectedExtractor={selectedExtractor}/>
+					{/*list of jobs*/}
+					<ExtractionJobs />
 					{/*pagination*/}
 					<Box display="flex" justifyContent="center" sx={{m: 1}}>
 							<ButtonGroup variant="contained" aria-label="previous next buttons">
