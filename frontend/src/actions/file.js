@@ -3,6 +3,7 @@ import {dataURItoFile, getHeader} from "../utils/common";
 import {V2} from "../openapi";
 import {handleErrors} from "./common";
 import {UPDATE_DATASET, updateDataset} from "./dataset";
+import {ExtractorInfo} from "../openapi/v2";
 
 export const FAILED = "FAILED";
 
@@ -212,10 +213,9 @@ export function fileDownloaded(fileId, filename = "") {
 }
 
 export const SUBMIT_FILE_EXTRACTION = "SUBMIT_FILE_EXTRACTION";
-export function submitFileExtractionAction(fileId, extractorName) {
+export function submitFileExtractionAction(fileId, extractorName, requestBody) {
 	return (dispatch) => {
-		const requestBody = {'extractor': extractorName};
-		return V2.FilesService.getFileExtractApiV2FilesFileIdExtractPost(fileId, requestBody)
+		return V2.FilesService.getFileExtractApiV2FilesFileIdExtractPost(fileId, extractorName, requestBody)
 			.then(json => {
 				dispatch({
 					type: SUBMIT_FILE_EXTRACTION,
@@ -224,30 +224,31 @@ export function submitFileExtractionAction(fileId, extractorName) {
 				});
 			})
 			.catch(reason => {
-				dispatch(handleErrors(reason, submitFileExtractionAction(fileId, requestBody)));
+				dispatch(handleErrors(reason, submitFileExtractionAction(fileId, extractorName, requestBody)));
 			});
 	};
 }
-	// TODO FIXME: this doesn't work. I think on swagger.json it needs a flag x-is-file to be able to get the response as a blob
-	// V2.FilesService.downloadFileApiV2FilesFileIdGet(fileId).catch(reason => {
-	// 	if (reason.status === 401) {
-	// 		console.error("Failed to download file: Not authenticated: ", reason);
-	// 		return {};
-	// 	} else {
-	// 		console.error("Failed to download file: ", reason);
-	// 		return {};
-	// 	}
-	// })
-	// 	.then(response => response.blob())
-	// 	.then(blob => {
-	// 		if (window.navigator.msSaveOrOpenBlob) {
-	// 			window.navigator.msSaveBlob(blob, filename);
-	// 		} else {
-	// 			const anchor = window.document.createElement("a");
-	// 			anchor.href = window.URL.createObjectURL(blob);
-	// 			anchor.download = filename;
-	// 			document.body.appendChild(anchor);
-	// 			anchor.click();
-	// 			document.body.removeChild(anchor);
-	// 		}
-	// 	});
+
+// TODO FIXME: this doesn't work. I think on swagger.json it needs a flag x-is-file to be able to get the response as a blob
+// V2.FilesService.downloadFileApiV2FilesFileIdGet(fileId).catch(reason => {
+// 	if (reason.status === 401) {
+// 		console.error("Failed to download file: Not authenticated: ", reason);
+// 		return {};
+// 	} else {
+// 		console.error("Failed to download file: ", reason);
+// 		return {};
+// 	}
+// })
+// 	.then(response => response.blob())
+// 	.then(blob => {
+// 		if (window.navigator.msSaveOrOpenBlob) {
+// 			window.navigator.msSaveBlob(blob, filename);
+// 		} else {
+// 			const anchor = window.document.createElement("a");
+// 			anchor.href = window.URL.createObjectURL(blob);
+// 			anchor.download = filename;
+// 			document.body.appendChild(anchor);
+// 			anchor.click();
+// 			document.body.removeChild(anchor);
+// 		}
+// 	});

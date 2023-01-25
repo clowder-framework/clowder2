@@ -39,10 +39,9 @@ export function fetchFoldersInDataset(datasetId, parentFolder){
 
 
 export const SUBMIT_DATSET_EXTRACTION = "SUBMIT_DATASET_EXTRACTION";
-export function submitDatasetExtractionAction(datasetId, extractorName){
+export function submitDatasetExtractionAction(datasetId, extractorName, requestBody){
 	return (dispatch) => {
-		const requestBody = {'extractor': extractorName};
-		return V2.DatasetsService.getDatasetExtractApiV2DatasetsDatasetIdExtractPost(datasetId, requestBody)
+		return V2.DatasetsService.getDatasetExtractApiV2DatasetsDatasetIdExtractPost(datasetId, extractorName, requestBody)
 			.then(json => {
 				dispatch({
 					type: SUBMIT_DATSET_EXTRACTION,
@@ -51,7 +50,7 @@ export function submitDatasetExtractionAction(datasetId, extractorName){
 				});
 			})
 			.catch(reason => {
-				dispatch(handleErrors(reason, submitDatasetExtractionAction(datasetId, requestBody)));
+				dispatch(handleErrors(reason, submitDatasetExtractionAction(datasetId, extractorName, requestBody)));
 			});
 	};
 }

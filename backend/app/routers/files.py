@@ -26,13 +26,13 @@ from pymongo import MongoClient
 from app import dependencies
 from app.config import settings
 from app.search.connect import (
-    connect_elasticsearch,
     insert_record,
     delete_document_by_id,
     update_record,
+    delete_document_by_query,
 )
 from app.models.files import FileIn, FileOut, FileVersion, FileDB
-from app.models.listeners import EventListenerMessage
+from app.models.listeners import EventListenerMessage, ExtractorInfo
 from app.models.users import UserOut
 from app.models.search import SearchIndexContents
 from app.routers.feeds import check_feed_listeners
@@ -60,7 +60,6 @@ async def add_file_entry(
         file_db: FileDB object controlling dataset and folder destination
         file: bytes to upload
     """
-    es = await connect_elasticsearch()
 
     # Check all connection and abort if any one of them is not available
     if db is None or fs is None or es is None:
@@ -130,8 +129,6 @@ async def remove_file_entry(
     """Remove FileDB object into MongoDB, Minio, and associated metadata and version information."""
     # TODO: Deleting individual versions will require updating version_id in mongo, or deleting entire document
 
-    es = await connect_elasticsearch()
-
     # Check all connection and abort if any one of them is not available
     if db is None or fs is None or es is None:
         raise HTTPException(status_code=503, detail="Service not available")
@@ -139,6 +136,8 @@ async def remove_file_entry(
     fs.remove_object(settings.MINIO_BUCKET_NAME, str(file_id))
     # delete from elasticsearch
     delete_document_by_id(es, "file", str(file_id))
+    query = {"match": {"resource_id": str(file_id)}}
+    delete_document_by_query(es, "metadata", query)
     await db["files"].delete_one({"_id": ObjectId(file_id)})
     await db.metadata.delete_many({"resource.resource_id": ObjectId(file_id)})
     await db["file_versions"].delete_many({"file_id": ObjectId(file_id)})
@@ -154,7 +153,6 @@ async def update_file(
     file: UploadFile = File(...),
     es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
 ):
-    es = await connect_elasticsearch()
 
     # Check all connection and abort if any one of them is not available
     if db is None or fs is None or es is None:
@@ -204,9 +202,28 @@ async def update_file(
                 "creator": updated_file.creator.email,
                 "created": datetime.utcnow(),
                 "download": updated_file.downloads,
+                "bytes": updated_file.bytes,
+                "content_type": updated_file.content_type,
             }
         }
         update_record(es, "file", doc, updated_file.id)
+        # updating metadata in elasticsearch
+        if (
+            metadata := await db["metadata"].find_one(
+                {"resource.resource_id": ObjectId(updated_file.id)}
+            )
+        ) is not None:
+            print("updating metadata")
+            doc = {
+                "doc": {
+                    "name": updated_file.name,
+                    "content_type": updated_file.content_type,
+                    "resource_created": updated_file.created.utcnow(),
+                    "resource_creator": updated_file.creator.email,
+                    "bytes": updated_file.bytes,
+                }
+            }
+            update_record(es, "metadata", doc, str(metadata["_id"]))
         return updated_file
     else:
         raise HTTPException(status_code=404, detail=f"File {file_id} not found")
@@ -303,40 +320,37 @@ async def get_file_versions(
     raise HTTPException(status_code=404, detail=f"File {file_id} not found")
 
 
+# submits file to extractor
+# can handle parameters pass in as key/values in info
 @router.post("/{file_id}/extract")
 async def get_file_extract(
     file_id: str,
-    info: Request,  # TODO: Pydantic class?
+    extractorName: str,
+    request: Request,
+    # parameters don't have a fixed model shape
+    parameters: dict = None,
     token: str = Depends(get_token),
     credentials: HTTPAuthorizationCredentials = Security(security),
     db: MongoClient = Depends(dependencies.get_db),
     rabbitmq_client: BlockingChannel = Depends(dependencies.get_rabbitmq),
 ):
-    """
-    Submit file to an extractor.
-
-    :param file_id: UUID of file
-    :param info: must include "extractor" field with name, can also include key/value pairs in "parameters"
-    """
-    req_info = await info.json()
     access_token = credentials.credentials
-    if "extractor" not in req_info:
+    if extractorName is None:
         raise HTTPException(status_code=404, detail=f"No extractor submitted")
     if (file := await db["files"].find_one({"_id": ObjectId(file_id)})) is not None:
         file_out = FileOut.from_mongo(file)
 
-        # Get extractor info from request (Clowder v1)
-        req_headers = info.headers
+        # backward compatibility? Get extractor info from request (Clowder v1)
+        req_headers = request.headers
         raw = req_headers.raw
         authorization = raw[1]
         # TODO this got the wrong thing, changing
         token = authorization[1].decode("utf-8").lstrip("Bearer").lstrip(" ")
-
-        queue = req_info["extractor"]
-        parameters = {}
-        if "parameters" in req_info:
-            parameters = req_info["parameters"]
+        queue = extractorName
         routing_key = queue
+
+        if parameters is None:
+            parameters = {}
 
         submit_file_message(
             file_out, queue, routing_key, parameters, access_token, db, rabbitmq_client

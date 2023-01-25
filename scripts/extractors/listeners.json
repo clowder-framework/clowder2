@@ -1,0 +1,153 @@
+{
+    "_id" : ObjectId("639c9da337362c464e2b88e5"),
+    "name" : "ncsa.archival.s3",
+    "version" : "1.0.1",
+    "description" : "Archive files from Clowder to AWS S3",
+    "author" : "Mike Lambert <lambert8@illinois.edu>",
+    "properties" : {
+        "@context" : "http://clowder.ncsa.illinois.edu/contexts/extractors.jsonld",
+        "name" : "ncsa.archival.s3",
+        "version" : "1.0.1",
+        "description" : "Archive files from Clowder to AWS S3",
+        "author" : "Mike Lambert <lambert8@illinois.edu>",
+        "contributors" : [
+
+        ],
+        "contexts" : [
+
+        ],
+        "repository" : [
+            {
+                "repType" : "git",
+                "repUrl" : "https://git.ncsa.illinois.edu/syngenta/extractors-archival-s3.git"
+            },
+            {
+                "repType" : "docker",
+                "repUrl" : "clowder/extractors-archival-s3"
+            }
+        ],
+        "process" : {
+            "file" : [
+                "s3/manualsubmission"
+            ]
+        },
+        "external_services" : [
+
+        ],
+        "dependencies" : [
+
+        ],
+        "bibtex" : [
+
+        ],
+        "categories" : [
+            "EXTRACT"
+        ],
+        "parameters" : {
+            "schema" : {
+                "operation" : {
+                    "type" : "string",
+                    "title" : "Operation",
+                    "enum" : [
+                        "archive",
+                        "unarchive"
+                    ],
+                    "default" : "archive"
+                }
+            },
+            "form" : [
+                {
+                    "key" : "operation",
+                    "type" : "select"
+                }
+            ]
+        },
+        "changelog" : {
+            "1.0.0" : [
+                "initial release"
+            ]
+        }
+    }
+}
+{
+    "_id" : ObjectId("639c9dd937362c464e2b88e7"),
+    "name" : "ncsa.landsat.pipeline",
+    "version" : "1.0",
+    "description" : "Populates a dataset for the landsat extractor.",
+    "author" : "Luigi Marini <lmarini@illinois.edu>",
+    "properties" : {
+        "@context" : "http://clowder.ncsa.illinois.edu/contexts/extractors.jsonld",
+        "name" : "ncsa.landsat.pipeline",
+        "version" : "1.0",
+        "description" : "Populates a dataset for the landsat extractor.",
+        "author" : "Luigi Marini <lmarini@illinois.edu>",
+        "contributors" : [
+
+        ],
+        "contexts" : [
+            {
+                "lines" : "http://clowder.ncsa.illinois.edu/metadata/ncsa.wordcount#lines"
+            }
+        ],
+        "repository" : [
+            {
+                "repType" : "git",
+                "repUrl" : "https://github.com/PermafrostDiscoveryGateway/landsattrend-pipeline.git"
+            }
+        ],
+        "process" : {
+            "dataset" : [
+                "*"
+            ]
+        },
+        "external_services" : [
+
+        ],
+        "dependencies" : [
+            "MAPLE"
+        ],
+        "bibtex" : [
+
+        ],
+        "parameters" : {
+            "schema" : {
+                "X_MIN_START" : {
+                    "type" : "integer",
+                    "title" : "X_MIN_START"
+                },
+                "X_MIN_END" : {
+                    "type" : "integer",
+                    "title" : "X_MIN_END"
+                },
+                "Y_MIN_START" : {
+                    "type" : "integer",
+                    "title" : "Y_MIN_START"
+                },
+                "Y_MIN_END" : {
+                    "type" : "integer",
+                    "title" : "Y_MIN_END"
+                },
+                "ZONE" : {
+                    "type" : "string",
+                    "title" : "ZONE"
+                }
+            }
+        }
+    }
+}
+{
+    "_id" : ObjectId("638fa0300cd22e3fc2102dd9"),
+    "author" : "Rob Kooper <kooper@illinois.edu>",
+    "name" : "ncsa.wordcount",
+    "version" : "2.0",
+    "description" : "WordCount extractor. Counts the number of characters, words and lines in the text file that was uploaded.",
+    "properties" : {
+        "author" : "Rob Kooper <kooper@illinois.edu>",
+        "name" : "ncsa.wordcount",
+        "version" : "2.0",
+        "description" : "WordCount extractor. Counts the number of characters, words and lines in the text file that was uploaded.",
+        "creator" : null,
+        "created" : ISODate("2022-12-06T20:04:00.160+0000"),
+        "modified" : ISODate("2022-12-06T20:04:00.160+0000")
+    }
+}

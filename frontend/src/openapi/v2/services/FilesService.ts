@@ -118,15 +118,24 @@ export class FilesService {
      * :param file_id: UUID of file
      * :param info: must include "extractor" field with name, can also include key/value pairs in "parameters"
      * @param fileId
+     * @param extractorName
+     * @param requestBody
      * @returns any Successful Response
      * @throws ApiError
      */
     public static getFileExtractApiV2FilesFileIdExtractPost(
         fileId: string,
+        extractorName: string,
+        requestBody?: any,
     ): CancelablePromise<any> {
         return __request({
             method: 'POST',
             path: `/api/v2/files/${fileId}/extract`,
+            query: {
+                'extractorName': extractorName,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
             errors: {
                 422: `Validation Error`,
             },

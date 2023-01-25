@@ -123,6 +123,10 @@ async def add_dataset_metadata(
             "contents": metadata_out.contents,
             "context_url": metadata_out.context_url,
             "context": metadata_out.context,
+            "name": dataset.name,
+            "resource_created": dataset.created,
+            "author": dataset.author.email,
+            "description": dataset.description,
         }
         insert_record(es, "metadata", doc, metadata_out.id)
         return metadata_out
@@ -340,6 +344,9 @@ async def delete_dataset_metadata(
             agent = MetadataAgent(creator=user)
             query["agent.creator.id"] = agent.creator.id
 
+        # delete from elasticsearch
+        delete_document_by_id(es, "metadata", str(metadata_in.id))
+
         if (md := await db["metadata"].find_one(query)) is not None:
             metadata_deleted = md
             if await db["metadata"].delete_one({"_id": md["_id"]}) is not None:
@@ -348,7 +355,5 @@ async def delete_dataset_metadata(
             raise HTTPException(
                 status_code=404, detail=f"No metadata found with that criteria"
             )
-        # delete from elasticsearch
-        delete_document_by_id(es, "metadata", str(metadata_in.id))
     else:
         raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
