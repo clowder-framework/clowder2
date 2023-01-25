@@ -164,9 +164,7 @@ async def test_dataset_patch_metadata_definition(client: TestClient, headers: di
     result = search_index(es, "metadata", metadata_query)
     print(result)
     assert (
-        result.body["responses"][0]["hits"]["hits"][0]["_source"]["content"][
-            "latitude"
-        ]
+        result.body["responses"][0]["hits"]["hits"][0]["_source"]["content"]["latitude"]
         == 24.4
     )
 
