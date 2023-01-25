@@ -41,9 +41,9 @@ async def _build_metadata_db_obj(
     user: UserOut,
     agent: MetadataAgent = None,
 ):
-    contents = await validate_context(
+    content = await validate_context(
         db,
-        metadata_in.contents,
+        metadata_in.content,
         metadata_in.definition,
         metadata_in.context_url,
         metadata_in.context,
@@ -68,7 +68,7 @@ async def _build_metadata_db_obj(
 
     # Apply any typecast fixes from definition validation
     metadata_in = metadata_in.dict()
-    metadata_in["contents"] = contents
+    metadata_in["content"] = content
     return MetadataDB(
         **metadata_in,
         resource=dataset_ref,
@@ -120,7 +120,7 @@ async def add_dataset_metadata(
             "resource_type": "dataset",
             "created": metadata_out.created.utcnow(),
             "creator": user.email,
-            "contents": metadata_out.contents,
+            "content": metadata_out.content,
             "context_url": metadata_out.context_url,
             "context": metadata_out.context,
             "name": dataset.name,
@@ -180,7 +180,7 @@ async def replace_dataset_metadata(
             found = await db["metadata"].find_one({"_id": md["_id"]})
             metadata_out = MetadataOut.from_mongo(found)
             # Update entry to the metadata index
-            doc = {"doc": {"contents": metadata_out["contents"]}}
+            doc = {"doc": {"content": metadata_out["content"]}}
             update_record(es, "metadata", doc, metadata_out["_id"])
             return metadata_out
     else:
@@ -205,7 +205,7 @@ async def update_dataset_metadata(
         dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
     ) is not None:
         query = {"resource.resource_id": ObjectId(dataset_id)}
-        contents = metadata_in.contents
+        content = metadata_in.content
 
         if metadata_in.metadata_id is not None:
             # If a specific metadata_id is provided, validate the patch against existing context
@@ -214,9 +214,9 @@ async def update_dataset_metadata(
                     {"_id": ObjectId(metadata_in.metadata_id)}
                 )
             ) is not None:
-                contents = await validate_context(
+                content = await validate_context(
                     db,
-                    metadata_in.contents,
+                    metadata_in.content,
                     existing_md.definition,
                     existing_md.context_url,
                     existing_md.context,
@@ -251,7 +251,7 @@ async def update_dataset_metadata(
 
         if (md := await db["metadata"].find_one(query)) is not None:
             # TODO: Refactor this with permissions checks etc.
-            result = await patch_metadata(md, contents, db, es)
+            result = await patch_metadata(md, content, db, es)
             return result
         else:
             raise HTTPException(

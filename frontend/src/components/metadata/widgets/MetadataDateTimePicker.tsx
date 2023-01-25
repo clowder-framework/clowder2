@@ -8,7 +8,7 @@ import {Grid} from "@mui/material";
 
 
 export const MetadataDateTimePicker = (props) => {
-	const {widgetName, fieldName, metadataId, contents, setMetadata, initialReadOnly, resourceId, updateMetadata} = props;
+	const {widgetName, fieldName, metadataId, content, setMetadata, initialReadOnly, resourceId, updateMetadata} = props;
 	const [localContent, setLocalContent] = useState(content && content[fieldName] ? content: {});
 
 	const [readOnly, setReadOnly] = useState(initialReadOnly);
@@ -44,7 +44,7 @@ export const MetadataDateTimePicker = (props) => {
                     <LocalizationProvider dateAdapter={AdapterDayjs}>
 						<DateTimePicker
 							label={widgetName}
-							value={readOnly && contents ? contents[fieldName]: localContent[fieldName]}
+							value={readOnly && content ? content[fieldName]: localContent[fieldName]}
 							onChange={handleChange}
 							renderInput={(params) =>
 								<ClowderMetadataTextField {...params} fullWidth
