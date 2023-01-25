@@ -181,6 +181,7 @@ class MetadataBase(MongoModel):
     context: Optional[dict]  # https://json-ld.org/spec/latest/json-ld/#the-context
     context_url: Optional[str]  # single URL applying to contents
     definition: Optional[str]  # name of a metadata definition
+    content: dict
 
     @validator("context")
     def contexts_are_valid(cls, v):
