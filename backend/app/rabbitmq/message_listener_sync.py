@@ -11,8 +11,13 @@ from bson import ObjectId
 
 from app.config import settings
 from app.models.config import ConfigEntryDB, ConfigEntryOut
-from app.models.listeners import EventListenerDB, EventListenerOut, ExtractorInfo, \
-    EventListenerJob, EventListenerJobUpdate
+from app.models.listeners import (
+    EventListenerDB,
+    EventListenerOut,
+    ExtractorInfo,
+    EventListenerJob,
+    EventListenerJobUpdate,
+)
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -24,7 +29,9 @@ def callback(ch, method, properties, body):
 
     job_id = msg["job_id"]
     status = msg["status"]
-    timestamp = datetime.strptime(msg["start"], '%Y-%m-%dT%H:%M:%S%z')  # incoming format: '2023-01-20T08:30:27-05:00'
+    timestamp = datetime.strptime(
+        msg["start"], "%Y-%m-%dT%H:%M:%S%z"
+    )  # incoming format: '2023-01-20T08:30:27-05:00'
 
     mongo_client = MongoClient(settings.MONGODB_URL)
     db = mongo_client[settings.MONGO_DATABASE]
@@ -47,7 +54,9 @@ def callback(ch, method, properties, body):
         )
 
         # Add latest message to the job updates
-        event_msg = EventListenerJobUpdate(job_id=job_id, status=status, timestamp=timestamp)
+        event_msg = EventListenerJobUpdate(
+            job_id=job_id, status=status, timestamp=timestamp
+        )
         db["listener_job_updates"].insert_one(event_msg.to_mongo())
         return True
     else:
@@ -70,19 +79,29 @@ async def listen_for_messages():
         instance_id = ConfigEntryOut.from_mongo(instance_id).value
     else:
         # If no ID has been generated for this instance, generate a 10-digit alphanumeric identifier
-        instance_id = ''.join(random.choice(string.ascii_uppercase + string.ascii_lowercase + string.digits) for _ in range(10))
+        instance_id = "".join(
+            random.choice(
+                string.ascii_uppercase + string.ascii_lowercase + string.digits
+            )
+            for _ in range(10)
+        )
         config_entry = ConfigEntryDB(key="instance_id", value=instance_id)
         await db["config"].insert_one(config_entry.to_mongo())
 
-    channel.exchange_declare(
-        exchange="clowder", durable=True
+    channel.exchange_declare(exchange="clowder", durable=True)
+    result = channel.queue_declare(
+        queue="clowder.%s" % instance_id,
+        durable=True,
+        exclusive=False,
+        auto_delete=False,
     )
-    result = channel.queue_declare(queue="clowder.%s" % instance_id, durable=True, exclusive=False, auto_delete=False)
     queue_name = result.method.queue
     channel.queue_bind(exchange="clowder", queue=queue_name)
 
     logger.info(" [*] Waiting for messages. To exit press CTRL+C")
-    channel.basic_consume(queue=queue_name, on_message_callback=callback, auto_ack=False)
+    channel.basic_consume(
+        queue=queue_name, on_message_callback=callback, auto_ack=False
+    )
     channel.start_consuming()
 
 

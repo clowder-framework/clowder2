@@ -42,7 +42,12 @@ async def get_instance_id(
         return ConfigEntryOut.from_mongo(instance_id).value
     else:
         # If no ID has been generated for this instance, generate a 10-digit alphanumeric identifier
-        instance_id = ''.join(random.choice(string.ascii_uppercase + string.ascii_lowercase + string.digits) for _ in range(10))
+        instance_id = "".join(
+            random.choice(
+                string.ascii_uppercase + string.ascii_lowercase + string.digits
+            )
+            for _ in range(10)
+        )
         config_entry = ConfigEntryDB(key="instance_id", value=instance_id)
         await db["config"].insert_one(config_entry.to_mongo())
         found = await db["config"].find_one({"key": "instance_id"})
@@ -186,7 +191,12 @@ async def get_listeners(
     """
     listeners = []
     if category and label:
-        query = {"$and": [{"properties.categories": category},{"properties.defaultLabels": label}]}
+        query = {
+            "$and": [
+                {"properties.categories": category},
+                {"properties.defaultLabels": label},
+            ]
+        }
     elif category:
         query = {"properties.categories": category}
     elif label:
@@ -195,11 +205,7 @@ async def get_listeners(
         query = {}
 
     for doc in (
-        await db["listeners"]
-        .find(query)
-        .skip(skip)
-        .limit(limit)
-        .to_list(length=limit)
+        await db["listeners"].find(query).skip(skip).limit(limit).to_list(length=limit)
     ):
         listeners.append(EventListenerOut.from_mongo(doc))
     return listeners

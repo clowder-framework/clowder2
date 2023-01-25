@@ -9,5 +9,6 @@ class ConfigEntryBase(MongoModel):
 class ConfigEntryDB(ConfigEntryBase):
     pass
 
+
 class ConfigEntryOut(ConfigEntryBase):
     pass

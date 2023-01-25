@@ -14,7 +14,11 @@ from app.models.config import ConfigEntryDB, ConfigEntryOut
 from app.models.files import FileOut
 from app.models.datasets import DatasetOut
 from app.models.users import UserOut
-from app.models.listeners import EventListenerJob, EventListenerJobMessage, EventListenerDatasetJobMessage
+from app.models.listeners import (
+    EventListenerJob,
+    EventListenerJobMessage,
+    EventListenerDatasetJobMessage,
+)
 
 
 async def create_reply_queue():
@@ -31,15 +35,20 @@ async def create_reply_queue():
         instance_id = ConfigEntryOut.from_mongo(instance_id).value
     else:
         # If no ID has been generated for this instance, generate a 10-digit alphanumeric identifier
-        instance_id = ''.join(random.choice(string.ascii_uppercase + string.ascii_lowercase + string.digits) for _ in range(10))
+        instance_id = "".join(
+            random.choice(
+                string.ascii_uppercase + string.ascii_lowercase + string.digits
+            )
+            for _ in range(10)
+        )
         config_entry = ConfigEntryDB(key="instance_id", value=instance_id)
         await db["config"].insert_one(config_entry.to_mongo())
 
     queue_name = "clowder.%s" % instance_id
-    channel.exchange_declare(
-        exchange="clowder", durable=True
+    channel.exchange_declare(exchange="clowder", durable=True)
+    result = channel.queue_declare(
+        queue=queue_name, durable=True, exclusive=False, auto_delete=False
     )
-    result = channel.queue_declare(queue=queue_name, durable=True, exclusive=False, auto_delete=False)
     queue_name = result.method.queue
     channel.queue_bind(exchange="clowder", queue=queue_name)
     return queue_name
@@ -64,7 +73,7 @@ async def submit_file_job(
         resource_ref=MongoDBRef(
             collection="file", resource_id=file_out.id, version=file_out.version_num
         ),
-        parameters=parameters
+        parameters=parameters,
     )
     new_job = await db["listener_jobs"].insert_one(job.to_mongo())
     new_job_id = str(new_job.inserted_id)
@@ -79,7 +88,7 @@ async def submit_file_job(
             id=str(current_id),
             datasetId=str(current_datasetId),
             secretKey=current_secretKey,
-            job_id=new_job_id
+            job_id=new_job_id,
         )
     except Exception as e:
         print(e)
@@ -114,10 +123,8 @@ async def submit_dataset_job(
     job = EventListenerJob(
         listener_id=routing_key,
         creator=user,
-        resource_ref=MongoDBRef(
-            collection="dataset", resource_id=dataset_out.id
-        ),
-        parameters=parameters
+        resource_ref=MongoDBRef(collection="dataset", resource_id=dataset_out.id),
+        parameters=parameters,
     )
     new_job = await db["listener_jobs"].insert_one(job.to_mongo())
     new_job_id = str(new_job.inserted_id)
@@ -127,7 +134,7 @@ async def submit_dataset_job(
         id=str(dataset_out.id),
         datasetId=str(dataset_out.id),
         secretKey=token,
-        job_id=new_job_id
+        job_id=new_job_id,
     )
 
     reply_to = await create_reply_queue()
@@ -139,6 +146,6 @@ async def submit_dataset_job(
         properties=pika.BasicProperties(
             content_type="application/json", delivery_mode=1
         ),
-        #reply_to=reply_to
+        # reply_to=reply_to
     )
     return {"message": "testing", "dataset_id": dataset_out.id}

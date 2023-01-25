@@ -345,7 +345,14 @@ async def get_file_extract(
             parameters = {}
 
         await submit_file_job(
-            file_out, queue, routing_key, parameters, user, access_token, db, rabbitmq_client
+            file_out,
+            queue,
+            routing_key,
+            parameters,
+            user,
+            access_token,
+            db,
+            rabbitmq_client,
         )
 
         return {"message": "testing", "file_id": file_id}
