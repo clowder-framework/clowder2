@@ -88,7 +88,10 @@ async def _resubmit_file_extractors(
                     listeners_resubmitted.append(listener_name)
                 except Exception as e:
                     listeners_resubitted_failed.append(listener_name)
-        return {"listeners resubmitted successfully": str(listeners_resubmitted), "listeners resubmitted failed": str(listeners_resubmitted)}
+        return {
+            "listeners resubmitted successfully": str(listeners_resubmitted),
+            "listeners resubmitted failed": str(listeners_resubmitted),
+        }
 
 
 # TODO: Move this to MongoDB middle layer
@@ -430,5 +433,7 @@ async def resubmit_file_extractions(
 
     """
     if (file := await db["files"].find_one({"_id": ObjectId(file_id)})) is not None:
-        resubmit_success_fail = _resubmit_file_extractors(file_id, credentials, db, rabbitmq_client)
+        resubmit_success_fail = _resubmit_file_extractors(
+            file_id, credentials, db, rabbitmq_client
+        )
     return resubmit_success_fail
