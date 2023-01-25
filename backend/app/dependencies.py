@@ -3,27 +3,14 @@ from typing import Generator
 import motor.motor_asyncio
 import pika
 from minio import Minio
-from fastapi import Header, HTTPException
+from minio.commonconfig import ENABLED
+from minio.versioningconfig import VersioningConfig
 from pika.adapters.blocking_connection import BlockingChannel
 from pika.exchange_type import ExchangeType
 
 from app.config import settings
-from minio.commonconfig import ENABLED
-from minio.versioningconfig import VersioningConfig
 from app.mongo import crete_mongo_indexes
 from app.search.connect import connect_elasticsearch
-
-
-async def get_token_header(x_token: str = Header(...)):
-    # Not currently used. Here as an example.
-    if x_token != "fake-super-secret-token":
-        raise HTTPException(status_code=400, detail="X-Token header invalid")
-
-
-async def get_query_token(token: str):
-    # Not currently used. Here as an example.
-    if token != "jessica":
-        raise HTTPException(status_code=400, detail="No Jessica token provided")
 
 
 async def get_db() -> Generator:
