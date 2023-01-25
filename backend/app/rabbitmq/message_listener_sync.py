@@ -29,6 +29,8 @@ def callback(ch, method, properties, body):
     mongo_client = MongoClient(settings.MONGODB_URL)
     db = mongo_client[settings.MONGO_DATABASE]
 
+    # TODO: Updating an event message could go in rabbitmq/listeners
+
     # Check if the job exists, and update if so
     existing_job = db["listener_jobs"].find_one({"_id": ObjectId(job_id)})
     if existing_job is not None:
@@ -36,8 +38,11 @@ def callback(ch, method, properties, body):
         updated_job = EventListenerJob.from_mongo(existing_job)
         updated_job.latest_message = status
         updated_job.updated = timestamp
-        updated_job.status = status  # TODO: How to handle "status" (completed/failed) with v1's "status" (the actual message)?
-        await db["listener_jobs"].replace_one(
+        if updated_job.started is not None:
+            updated_job.duration = timestamp - updated_job.started
+        # TODO: How to handle "status" (completed/failed) with v1's "status" (the actual message)? Should interpret STARTED etc.
+        updated_job.status = status
+        db["listener_jobs"].replace_one(
             {"_id": ObjectId(job_id)}, updated_job.to_mongo()
         )
 
@@ -83,4 +88,3 @@ async def listen_for_messages():
 
 if __name__ == "__main__":
     asyncio.run(listen_for_messages())
-

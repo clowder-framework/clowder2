@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from pydantic import Field, BaseModel
 from typing import Optional, List, Union
 from enum import Enum
@@ -103,7 +103,10 @@ class EventListenerJob(MongoModel):
     creator: UserOut
     parameters: Optional[dict] = None
     created: datetime = Field(default_factory=datetime.utcnow)
-    updated: datetime = Field(default_factory=datetime.utcnow)
+    started: Optional[datetime] = None
+    updated: Optional[datetime] = None
+    finished: Optional[datetime] = None
+    duration: Optional[timedelta] = None
     latest_message: Optional[str] = None
     status: EventListenerJobStatus = EventListenerJobStatus.CREATED
 
