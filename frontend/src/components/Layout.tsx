@@ -232,6 +232,16 @@ export default function PersistentDrawerLeft(props) {
 							</ListItemButton>
 						</ListItem>
 					</List>
+					<List>
+						<ListItem key={"extractions"} disablePadding>
+							<ListItemButton component={RouterLink} to="/extractions">
+								<ListItemIcon>
+									<Create/>
+								</ListItemIcon>
+								<ListItemText primary={"Extraction History"}/>
+							</ListItemButton>
+						</ListItem>
+					</List>
 				</Drawer>
 				<Main open={open}>
 					<DrawerHeader/>
