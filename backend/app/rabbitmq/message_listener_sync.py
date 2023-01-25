@@ -4,7 +4,7 @@ import json
 import asyncio
 import random
 import string
-import datetime
+from datetime import datetime
 from packaging import version
 from pymongo import MongoClient
 from bson import ObjectId

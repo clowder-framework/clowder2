@@ -108,7 +108,7 @@ class EventListenerJob(MongoModel):
     finished: Optional[datetime] = None
     duration: Optional[timedelta] = None
     latest_message: Optional[str] = None
-    status: EventListenerJobStatus = EventListenerJobStatus.CREATED
+    status: str = EventListenerJobStatus.CREATED
 
     class Config:
         # required for Enum to properly work

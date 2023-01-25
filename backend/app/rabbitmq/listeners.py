@@ -87,17 +87,13 @@ async def submit_file_job(
 
     reply_to = await create_reply_queue()
 
-    print(reply_to)
-    print(msg_body)
-
     rabbitmq_client.basic_publish(
         exchange="",
         routing_key=routing_key,
         body=json.dumps(msg_body.dict(), ensure_ascii=False),
         properties=pika.BasicProperties(
-            content_type="application/json", delivery_mode=1
+            content_type="application/json", delivery_mode=1, reply_to=reply_to
         ),
-        #reply_to=reply_to
     )
     return {"message": "testing", "file_id": file_out.id}
 
