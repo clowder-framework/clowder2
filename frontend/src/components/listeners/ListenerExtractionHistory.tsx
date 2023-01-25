@@ -8,7 +8,7 @@ import {
 	ListSubheader,
 } from "@mui/material";
 import {useDispatch, useSelector,} from "react-redux";
-import {RootState} from "../../types/data";
+import {Listener, RootState} from "../../types/data";
 
 import {ActionModal} from "../dialog/ActionModal";
 import config from "../../app.config";
@@ -39,7 +39,7 @@ export const ListenerExtractionHistory = (): JSX.Element => {
 	const [skip, setSkip] = useState<number | undefined>();
 	const [prevDisabled, setPrevDisabled] = useState<boolean>(true);
 	const [nextDisabled, setNextDisabled] = useState<boolean>(false);
-	const [selectedExtractor, setSelectedExtractor] = useState();
+	const [selectedExtractor, setSelectedExtractor] = useState<Listener>();
 
 	useEffect(() => {
 		listListeners(skip, limit, null, null);
@@ -108,7 +108,7 @@ export const ListenerExtractionHistory = (): JSX.Element => {
 							listeners !== undefined ?
 								listeners.map((listener) => {
 									return (
-										  <ListItemButton>
+										  <ListItemButton onClick={() => { setSelectedExtractor(listener); }}>
 											<ListItemText primary={listener.name} />
 										  </ListItemButton>
 									);
