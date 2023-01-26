@@ -13,7 +13,7 @@ import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import PlayCircleOutlineIcon from "@mui/icons-material/PlayCircleOutline";
 import {theme} from "../../theme";
 import {ExtractionJobsToolbar} from "./ExtractionJobsToolbar";
-import {EnhancedTableHead} from "./ExtractionJobsTableHeader";
+import {EnhancedTableHead as ExtractionJobsTableHeader} from "./ExtractionJobsTableHeader";
 
 export interface Data {
 	status: string;
@@ -21,7 +21,7 @@ export interface Data {
 	created: string;
 	creator: string;
 	duration: number;
-	fileId: string;
+	resourceId: string;
 	datasetId: string;
 }
 
@@ -102,7 +102,7 @@ export const ExtractionJobs = (props) => {
 						aria-labelledby="tableTitle"
 						size={"medium"}
 					>
-						<EnhancedTableHead
+						<ExtractionJobsTableHeader
 							order={order}
 							orderBy={orderBy}
 							onRequestSort={handleRequestSort}
@@ -137,7 +137,7 @@ export const ExtractionJobs = (props) => {
 												<TableCell align="left">{row.created}</TableCell>
 												<TableCell align="left">{row.creator}</TableCell>
 												<TableCell align="left">{row.duration}</TableCell>
-												<TableCell align="left">{row.fileId}</TableCell>
+												<TableCell align="left">{row.resourceId}</TableCell>
 											</TableRow>
 										);
 									})

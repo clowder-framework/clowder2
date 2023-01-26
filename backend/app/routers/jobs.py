@@ -39,20 +39,23 @@ async def get_all_job_summary(
     jobs = []
     filters = []
     if listener_id is not None:
-        filters.append({"listener_id": ObjectId(listener_id)})
+        filters.append({"listener_id": listener_id})
     if status is not None:
         filters.append({"status": re.compile(status, re.IGNORECASE)})
     if created is not None:
         filters.append({"created": created})
     if user_id is not None:
-        filters.append({"creator._id": ObjectId(user_id)})
+        filters.append({"creator.email": user_id})
     if file_id is not None:
         filters.append({"resource_ref.collection": "file"})
         filters.append({"resource_ref.resource_id": ObjectId(file_id)})
     if dataset_id is not None:
         filters.append({"resource_ref.collection": "dataset"})
         filters.append({"resource_ref.resource_id": ObjectId(dataset_id)})
-    query = {"$and": filters}
+    if len(filters) == 0:
+        query = {}
+    else:
+        query = {"$and": filters}
 
     for doc in (
         await db["listener_jobs"]

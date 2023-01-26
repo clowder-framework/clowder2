@@ -9,7 +9,7 @@ import {
 } from "../actions/metadata";
 import {RESET_CREATE_FILE} from "../actions/file";
 import {GET_FOLDER_PATH} from "../actions/folder";
-import {RECEIVE_LISTENER_CATEGORIES, SEARCH_LISTENERS} from "../actions/listeners";
+import {RECEIVE_LISTENER_CATEGORIES, RECEIVE_LISTENER_JOBS, SEARCH_LISTENERS} from "../actions/listeners";
 
 interface RECEIVE_FILES_IN_DATASET {
 	type: "RECEIVE_FILES_IN_DATASET";
@@ -215,6 +215,11 @@ interface RECEIVE_LISTENER_LABELS{
 	labels: []
 }
 
+interface RECEIVE_LISTENER_JOBS{
+	type: "RECEIVE_LISTENER_JOBS"
+	jobs: []
+}
+
 export type DataAction =
 	| RECEIVE_FILES_IN_DATASET
 	| RECEIVE_FOLDERS_IN_DATASET
@@ -257,4 +262,5 @@ export type DataAction =
 	| SEARCH_LISTENERS
 	| RECEIVE_LISTENER_CATEGORIES
 	| RECEIVE_LISTENER_LABELS
+	| RECEIVE_LISTENER_JOBS
 	;
