@@ -54,7 +54,7 @@ from app.models.folders import FolderOut, FolderIn, FolderDB
 from app.models.pyobjectid import PyObjectId
 from app.models.users import UserOut
 from app.routers.files import add_file_entry, remove_file_entry
-from app.rabbitmq.listeners import submit_dataset_message
+from app.rabbitmq.listeners import submit_dataset_job
 
 router = APIRouter()
 security = HTTPBearer()
@@ -824,7 +824,7 @@ async def get_dataset_extract(
     request: Request,
     # parameters don't have a fixed model shape
     parameters: dict = None,
-    token: str = Depends(get_token),
+    user=Depends(get_current_user),
     credentials: HTTPAuthorizationCredentials = Security(security),
     db: MongoClient = Depends(dependencies.get_db),
     rabbitmq_client: BlockingChannel = Depends(dependencies.get_rabbitmq),
@@ -859,11 +859,12 @@ async def get_dataset_extract(
             parameters = {}
         current_routing_key = current_queue
 
-        submit_dataset_message(
+        submit_dataset_job(
             dataset_out,
             current_queue,
             current_routing_key,
             parameters,
+            user,
             access_token,
             db,
             rabbitmq_client,

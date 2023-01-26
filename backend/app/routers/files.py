@@ -32,12 +32,10 @@ from app.search.connect import (
     delete_document_by_query,
 )
 from app.models.files import FileIn, FileOut, FileVersion, FileDB
-from app.models.listeners import EventListenerMessage, ExtractorInfo
 from app.models.users import UserOut
-from app.models.search import SearchIndexContents
 from app.routers.feeds import check_feed_listeners
 from app.keycloak_auth import get_user, get_current_user, get_token
-from app.rabbitmq.listeners import submit_file_message
+from app.rabbitmq.listeners import submit_file_job
 from typing import Union
 
 router = APIRouter()
@@ -160,7 +158,6 @@ async def update_file(
         return
 
     if (file_q := await db["files"].find_one({"_id": ObjectId(file_id)})) is not None:
-        # First, add to database and get unique ID
         updated_file = FileOut.from_mongo(file_q)
 
         # Update file in Minio and get the new version IDs
@@ -329,31 +326,33 @@ async def get_file_extract(
     request: Request,
     # parameters don't have a fixed model shape
     parameters: dict = None,
-    token: str = Depends(get_token),
+    user=Depends(get_current_user),
     credentials: HTTPAuthorizationCredentials = Security(security),
     db: MongoClient = Depends(dependencies.get_db),
     rabbitmq_client: BlockingChannel = Depends(dependencies.get_rabbitmq),
 ):
-    access_token = credentials.credentials
     if extractorName is None:
-        raise HTTPException(status_code=404, detail=f"No extractor submitted")
+        raise HTTPException(status_code=400, detail=f"No extractorName specified")
     if (file := await db["files"].find_one({"_id": ObjectId(file_id)})) is not None:
         file_out = FileOut.from_mongo(file)
+        access_token = credentials.credentials
 
         # backward compatibility? Get extractor info from request (Clowder v1)
-        req_headers = request.headers
-        raw = req_headers.raw
-        authorization = raw[1]
-        # TODO this got the wrong thing, changing
-        token = authorization[1].decode("utf-8").lstrip("Bearer").lstrip(" ")
         queue = extractorName
         routing_key = queue
 
         if parameters is None:
             parameters = {}
 
-        submit_file_message(
-            file_out, queue, routing_key, parameters, access_token, db, rabbitmq_client
+        await submit_file_job(
+            file_out,
+            queue,
+            routing_key,
+            parameters,
+            user,
+            access_token,
+            db,
+            rabbitmq_client,
         )
 
         return {"message": "testing", "file_id": file_id}
