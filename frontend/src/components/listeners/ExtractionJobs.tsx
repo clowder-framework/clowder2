@@ -10,15 +10,20 @@ import TableRow from "@mui/material/TableRow";
 import TableSortLabel from "@mui/material/TableSortLabel";
 import Toolbar from "@mui/material/Toolbar";
 import Paper from "@mui/material/Paper";
-import IconButton from "@mui/material/IconButton";
-import Tooltip from "@mui/material/Tooltip";
-import FilterListIcon from "@mui/icons-material/FilterList";
 import {visuallyHidden} from "@mui/utils";
 import CancelIcon from "@mui/icons-material/Cancel";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import PlayCircleOutlineIcon from "@mui/icons-material/PlayCircleOutline";
 import {theme} from "../../theme";
+import {FormControl, InputLabel, MenuItem, Select, Typography} from "@mui/material";
+import {useState} from "react";
+import {DateRange} from "@appbaseio/reactivesearch";
+import {AdapterDayjs} from "@mui/x-date-pickers/AdapterDayjs";
+import {DateTimePicker} from "@mui/x-date-pickers/DateTimePicker";
+import {ClowderMetadataTextField} from "../styledComponents/ClowderMetadataTextField";
+import {LocalizationProvider} from "@mui/x-date-pickers/LocalizationProvider";
+import {ClowderFootnote} from "../styledComponents/ClowderFootnote";
 
 interface Data {
 	status: string;
@@ -112,25 +117,45 @@ function EnhancedTableHead(props: EnhancedTableProps) {
 }
 
 interface EnhancedTableToolbarProps {
+	numExecution:number;
 }
 
 const EnhancedTableToolbar = (props: EnhancedTableToolbarProps) => {
-	const {...others} = props;
+	const {numExecution} = props;
+	const [selectedStatus, setSelectedStatus] = useState("all");
+	const [selectedCreatedTime, setSelectedCreatedTime] = useState();
 
 	return (
-		<Toolbar
-			sx={{
-				pl: {sm: 2},
-				pr: {xs: 1, sm: 1},
-				}}
-		>
-
-			<Tooltip title="Filter list">
-				<IconButton>
-					<FilterListIcon/>
-				</IconButton>
-			</Tooltip>
-		</Toolbar>
+		 <Box sx={{ flexGrow: 1, padding: "1em 0"}}>
+			<Toolbar>
+				<Typography sx={{ flexGrow: 1 }}>{numExecution} extractions run</Typography>
+				{/*filter by status*/}
+				<FormControl variant="standard" sx={{ m: 1, minWidth: 120 }}>
+					<InputLabel id="demo-simple-select-label">Status</InputLabel>
+					  <Select
+						labelId="demo-simple-select-label"
+						id="demo-simple-select"
+						value={selectedStatus}
+						label="Status"
+						onChange={(e: React.ChangeEvent<HTMLInputElement>)=>{setSelectedStatus(e.target.value);}}
+					  >
+						<MenuItem value="all">All</MenuItem>
+						<MenuItem value="StatusMessage.start">Start</MenuItem>
+						<MenuItem value="StatusMessage.processing">Processing</MenuItem>
+						<MenuItem value="StatusMessage.done">Done</MenuItem>
+						<MenuItem value="StatusMessage.failed">Failed</MenuItem>
+					  </Select>
+				</FormControl>
+				<LocalizationProvider dateAdapter={AdapterDayjs}>
+					<DateTimePicker
+						label="Submitted at"
+						value={selectedCreatedTime}
+						onChange={(value)=>{setSelectedCreatedTime(value);}}
+						renderInput={(props) => <ClowderMetadataTextField {...props} variant="standard"/>}
+					/>
+				</LocalizationProvider>
+			</Toolbar>
+		 </Box>
 	);
 };
 
@@ -167,7 +192,7 @@ export const ExtractionJobs = (props) => {
 		<Box sx={{width: "100%"}}>
 			<Paper sx={{width: "100%", mb: 2}}>
 				<TableContainer>
-					<EnhancedTableToolbar />
+					<EnhancedTableToolbar numExecution={rows.length}/>
 					<Table
 						sx={{minWidth: 750}}
 						aria-labelledby="tableTitle"

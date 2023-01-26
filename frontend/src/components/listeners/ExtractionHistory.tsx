@@ -150,8 +150,20 @@ export const ExtractionHistory = (): JSX.Element => {
 				<ActionModal actionOpen={errorOpen} actionTitle="Something went wrong..." actionText={reason}
 							 actionBtnName="Report" handleActionBtnClick={handleErrorReport}
 							 handleActionCancel={handleErrorCancel}/>
-				<Box className="inner-container">
+				{/*<Box className="inner-container">*/}
 					<Grid container spacing={4}>
+						<Grid item xs={12} sm={3} md={3} lg={3} xl={3} />
+						<Grid item xs={12} sm={9} md={9} lg={9} xl={9}>
+							{/*Extractor infos when selected*/}
+							{
+								selectedExtractor ?
+										<ListenerInfo selectedExtractor={selectedExtractor}/>
+
+									:
+									<ClowderTitle>All Extractions</ClowderTitle>
+
+							}
+						</Grid>
 						<Grid item xs={12} sm={3} md={3} lg={3} xl={3}>
 							{/*Item list of listeners*/}
 							<List
@@ -192,26 +204,12 @@ export const ExtractionHistory = (): JSX.Element => {
 							</List>
 						</Grid>
 						<Grid item xs={12} sm={9} md={9} lg={9} xl={9}>
-							{/*Extractor infos when selected*/}
-							<Box sx={{marginBottom: "2em"}}>
-								{
-									selectedExtractor ?
-											<ListenerInfo selectedExtractor={selectedExtractor}/>
-
-										:
-										<ClowderTitle>All Extractions</ClowderTitle>
-
-								}
-							</Box>
-
 							{/*list of jobs*/}
-							<Box>
-								<ExtractionJobs rows={rows} headCells={headCells}/>
-							</Box>
+							<ExtractionJobs rows={rows} headCells={headCells}/>
 						</Grid>
 					</Grid>
 				</Box>
-			</Box>
+			{/*</Box>*/}
 		</Layout>
 	);
 }
