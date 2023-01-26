@@ -15,6 +15,7 @@ import {theme} from "../../theme";
 import {ExtractionJobsToolbar} from "./ExtractionJobsToolbar";
 import {EnhancedTableHead as ExtractionJobsTableHeader} from "./ExtractionJobsTableHeader";
 
+
 export interface Data {
 	status: string;
 	jobId: string;
@@ -22,7 +23,7 @@ export interface Data {
 	creator: string;
 	duration: number;
 	resourceId: string;
-	datasetId: string;
+	resourceType: string;
 }
 
 function descendingComparator<T>(a: T, b: T, orderBy: keyof T) {
@@ -64,7 +65,7 @@ function stableSort<T>(array: readonly T[], comparator: (a: T, b: T) => number) 
 }
 
 export const ExtractionJobs = (props) => {
-	const {rows, headCells} = props;
+	const {rows, headCells, selectedStatus, selectedCreatedTime, setSelectedStatus, setSelectedCreatedTime} = props;
 
 	const [order, setOrder] = React.useState<Order>("desc");
 	const [orderBy, setOrderBy] = React.useState<keyof Data>("created");
@@ -96,7 +97,10 @@ export const ExtractionJobs = (props) => {
 		<Box sx={{width: "100%"}}>
 			<Paper sx={{width: "100%", mb: 2}}>
 				<TableContainer>
-					<ExtractionJobsToolbar numExecution={rows.length}/>
+					<ExtractionJobsToolbar numExecution={rows.length} selectedStatus={selectedStatus}
+										   selectedCreatedTime={selectedCreatedTime}
+										   setSelectedStatus={setSelectedStatus}
+										   setSelectedCreatedTime={setSelectedCreatedTime}/>
 					<Table
 						sx={{minWidth: 750}}
 						aria-labelledby="tableTitle"
@@ -136,7 +140,7 @@ export const ExtractionJobs = (props) => {
 												<TableCell align="left">{row.jobId}</TableCell>
 												<TableCell align="left">{row.created}</TableCell>
 												<TableCell align="left">{row.creator}</TableCell>
-												<TableCell align="left">{row.duration}</TableCell>
+												<TableCell align="left">{row.duration/1000} sec </TableCell>
 												<TableCell align="left">{row.resourceId}</TableCell>
 											</TableRow>
 										);

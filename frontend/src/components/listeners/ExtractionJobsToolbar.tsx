@@ -4,22 +4,25 @@ import Toolbar from "@mui/material/Toolbar";
 import {FormControl, InputLabel, MenuItem, Select, Typography} from "@mui/material";
 import {LocalizationProvider} from "@mui/x-date-pickers/LocalizationProvider";
 import {AdapterDayjs} from "@mui/x-date-pickers/AdapterDayjs";
-import {DateTimePicker} from "@mui/x-date-pickers/DateTimePicker";
 import {ClowderMetadataTextField} from "../styledComponents/ClowderMetadataTextField";
+import {DatePicker} from "@mui/x-date-pickers";
 
 interface ExtractionJobsToolbarProps {
 	numExecution:number;
+	selectedStatus: string;
+	selectedCreatedTime: string;
+	setSelectedStatus: any;
+	setSelectedCreatedTime: any
 }
 
 export const ExtractionJobsToolbar = (props: ExtractionJobsToolbarProps) => {
-	const {numExecution} = props;
-	const [selectedStatus, setSelectedStatus] = useState("all");
-	const [selectedCreatedTime, setSelectedCreatedTime] = useState();
+	const {numExecution, selectedStatus, selectedCreatedTime, setSelectedStatus, setSelectedCreatedTime} = props;
+
 
 	return (
 		 <Box sx={{ flexGrow: 1, padding: "1em 0"}}>
 			<Toolbar>
-				<Typography sx={{ flexGrow: 1 }}>{numExecution} extractions run</Typography>
+				<Typography sx={{ flexGrow: 1 }}>{numExecution} extractions</Typography>
 				{/*filter by status*/}
 				<FormControl variant="standard" sx={{ m: 1, minWidth: 120 }}>
 					<InputLabel id="demo-simple-select-label">Status</InputLabel>
@@ -30,7 +33,6 @@ export const ExtractionJobsToolbar = (props: ExtractionJobsToolbarProps) => {
 						label="Status"
 						onChange={(e: React.ChangeEvent<HTMLInputElement>)=>{setSelectedStatus(e.target.value);}}
 					  >
-						<MenuItem value="all">All</MenuItem>
 						<MenuItem value="StatusMessage.start">Start</MenuItem>
 						<MenuItem value="StatusMessage.processing">Processing</MenuItem>
 						<MenuItem value="StatusMessage.done">Done</MenuItem>
@@ -38,7 +40,7 @@ export const ExtractionJobsToolbar = (props: ExtractionJobsToolbarProps) => {
 					  </Select>
 				</FormControl>
 				<LocalizationProvider dateAdapter={AdapterDayjs}>
-					<DateTimePicker
+					<DatePicker
 						label="Submitted at"
 						value={selectedCreatedTime}
 						onChange={(value)=>{setSelectedCreatedTime(value);}}

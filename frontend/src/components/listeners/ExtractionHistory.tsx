@@ -12,13 +12,12 @@ import {fetchListenerJobs, fetchListeners} from "../../actions/listeners";
 import {ArrowBack, ArrowForward} from "@material-ui/icons";
 import {ListenerInfo} from "./ListenerInfo";
 import {ExtractionJobs} from "./ExtractionJobs";
-import {parseDate} from "../../utils/common";
 import {ClowderTitle} from "../styledComponents/ClowderTitle";
 
 
-const createData = (status: string, jobId: string, created: string, creator: string, duration: number, resourceId: string) => {
+const createData = (status: string, jobId: string, created: string, creator: string, duration: number, resourceType:string, resourceId: string) => {
 	return {
-		status, jobId, created, creator, duration, resourceId
+		status, jobId, created, creator, duration, resourceType, resourceId
 	};
 }
 
@@ -73,6 +72,8 @@ export const ExtractionHistory = (): JSX.Element => {
 	const [nextDisabled, setNextDisabled] = useState<boolean>(false);
 	const [selectedExtractor, setSelectedExtractor] = useState<Listener>();
 	const [executionJobsTableRow, setExecutionJobsTableRow] = useState([]);
+	const [selectedStatus, setSelectedStatus] = useState("");
+	const [selectedCreatedTime, setSelectedCreatedTime] = useState("");
 
 	useEffect(() => {
 		listListeners(skip, limit, null, null);
@@ -85,15 +86,43 @@ export const ExtractionHistory = (): JSX.Element => {
 		// TODO add pagination for jobs
 		if (selectedExtractor) {
 			listListenerJobs(selectedExtractor["name"], null, null, null, null, null, 0, 100);
+			// clear filters
+			setSelectedStatus("");
+			setSelectedCreatedTime("");
 		}
 	}, [selectedExtractor]);
+
+	useEffect(() => {
+		// TODO add pagination for jobs
+		if (selectedStatus) {
+			if (selectedExtractor) {
+				listListenerJobs(selectedExtractor["name"], selectedStatus, null, null, null, null, 0, 100);
+			}
+			else{
+				listListenerJobs(null, selectedStatus, null, null, null, null, 0, 100);
+			}
+		}
+	}, [selectedStatus]);
+
+	useEffect(() => {
+		// TODO add pagination for jobs
+		if (selectedCreatedTime) {
+			if (selectedExtractor) {
+				listListenerJobs(selectedExtractor["name"], null, null, null, null, selectedCreatedTime, 0, 100);
+			}
+			else{
+				listListenerJobs(null, null, null, null, null, selectedCreatedTime, 0, 100);
+			}
+		}
+	}, [selectedCreatedTime]);
+
 
 	useEffect(() => {
 		let rows = [];
 		if (jobs.length > 0){
 			jobs.map((job)=>{
-				rows.push(createData(job["status"], job["id"], parseDate(job["created"]), job["creator"]["email"],
-					job["duration"], job["resource_ref"]["resource_id"]));
+				rows.push(createData(job["status"], job["id"], job["created"], job["creator"]["email"],
+					job["duration"], job["resource_ref"]["collection"], job["resource_ref"]["resource_id"]));
 			});
 		}
 		setExecutionJobsTableRow(rows);
@@ -205,7 +234,11 @@ export const ExtractionHistory = (): JSX.Element => {
 					</Grid>
 					<Grid item xs={12} sm={9} md={9} lg={9} xl={9}>
 						{/*list of jobs*/}
-						<ExtractionJobs rows={executionJobsTableRow} headCells={headCells}/>
+						<ExtractionJobs rows={executionJobsTableRow} headCells={headCells}
+										selectedStatus={selectedStatus}
+										selectedCreatedTime={selectedCreatedTime}
+										setSelectedStatus={setSelectedStatus}
+										setSelectedCreatedTime={setSelectedCreatedTime}/>
 					</Grid>
 				</Grid>
 			</Box>
