@@ -20,7 +20,7 @@ async def get_all_job_summary(
     user_id: Optional[str] = None,
     file_id: Optional[str] = None,
     dataset_id: Optional[str] = None,
-    created: Optional[datetime] = None,
+    created: Optional[str] = None,
     skip: int = 0,
     limit: int = 2,
 ):
@@ -43,11 +43,9 @@ async def get_all_job_summary(
     if status is not None:
         filters.append({"status": re.compile(status, re.IGNORECASE)})
     if created is not None:
-        # TODO
-        # datetime.strptime(created, format)
-        # filters.append({"created": { "$gte": ISODate("2010-04-29T00:00:00.000Z"),
-        #                              "$lt": ISODate("2010-05-01T00:00:00.000Z")}})
-        filters.append({"created": created})
+        created_datetime_object = datetime.strptime(created, '%Y-%m-%d')
+        filters.append({"created": { "$gte": created_datetime_object - timedelta(days=1),
+                                     "$lt": created_datetime_object + timedelta(days=1)}})
     if user_id is not None:
         filters.append({"creator.email": user_id})
     if file_id is not None:
