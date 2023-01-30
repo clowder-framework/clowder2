@@ -73,7 +73,7 @@ export const ExtractionHistory = (): JSX.Element => {
 	const [selectedExtractor, setSelectedExtractor] = useState<Listener>();
 	const [executionJobsTableRow, setExecutionJobsTableRow] = useState([]);
 	const [selectedStatus, setSelectedStatus] = useState("");
-	const [selectedCreatedTime, setSelectedCreatedTime] = useState("");
+	const [selectedCreatedTime, setSelectedCreatedTime] = useState(null);
 
 	useEffect(() => {
 		listListeners(skip, limit, null, null);
