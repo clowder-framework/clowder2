@@ -17,7 +17,6 @@ from app.models.feeds import (
     FeedDB,
     FeedOut,
 )
-from app.models.search import SearchIndexContents
 from app.search.connect import check_search_result
 from app.rabbitmq.listeners import submit_file_message
 

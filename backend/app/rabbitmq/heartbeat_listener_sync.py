@@ -5,6 +5,8 @@ from packaging import version
 from pymongo import MongoClient
 
 from app.config import settings
+from app.models.search import SearchCriteria
+from app.routers.feeds import FeedIn, FeedListener, save_feed, associate_listener
 from app.models.listeners import EventListenerDB, EventListenerOut, ExtractorInfo
 
 logging.basicConfig(level=logging.INFO)
@@ -51,6 +53,31 @@ def callback(ch, method, properties, body):
         found = db["listeners"].find_one({"_id": new_extractor.inserted_id})
         extractor_out = EventListenerOut.from_mongo(found)
         logger.info("New extractor registered: " + extractor_name)
+
+        # Assign MIME-based listener if needed
+        criteria_list = []
+        if extractor_out.properties and extractor_out.properties.process:
+            # { "file" : [ "text/*", "application/json" ] }
+            process = extractor_out.properties.process
+            if "file" in process:
+                # Create a MIME-based feed for this v1 extractor
+                for mime in process["file"]:
+                    criteria_list.append(
+                        SearchCriteria(field="content_type", value=mime)
+                    )
+                feed_data = {
+                    "name": extractor_name,
+                    "search": {
+                        "index_name": "file",
+                        "criteria": criteria_list,
+                    },
+                }
+                new_feed = await save_feed(FeedIn(feed_data))
+
+                # Assign the extractor to the new feed
+                feed_listener = FeedListener(listener_id=extractor_out.id, automatic=True)
+                await associate_listener(new_feed.id, feed_listener)
+
         return extractor_out
 
 

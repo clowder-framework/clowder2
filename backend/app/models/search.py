@@ -3,17 +3,6 @@ from pydantic import BaseModel
 from typing import Optional, List
 
 
-# TODO: may eventually be split by index (resource type)
-class SearchIndexContents(BaseModel):
-    """This describes what is indexed in Elasticsearch for a given resource."""
-
-    id: str
-    name: str
-    creator: str  # currently just email
-    created: datetime
-    download: int
-
-
 class SearchCriteria(BaseModel):
     field: str
     operator: str = "=="
