@@ -88,7 +88,7 @@ export const ExtractionHistory = (): JSX.Element => {
 			listListenerJobs(selectedExtractor["name"], null, null, null, null, null, 0, 100);
 			// clear filters
 			setSelectedStatus("");
-			setSelectedCreatedTime("");
+			setSelectedCreatedTime(null);
 		}
 	}, [selectedExtractor]);
 
