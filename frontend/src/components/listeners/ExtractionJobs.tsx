@@ -11,6 +11,8 @@ import CancelIcon from "@mui/icons-material/Cancel";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import PlayCircleOutlineIcon from "@mui/icons-material/PlayCircleOutline";
+import RestartAltIcon from '@mui/icons-material/RestartAlt';
+import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import {theme} from "../../theme";
 import {ExtractionJobsToolbar} from "./ExtractionJobsToolbar";
 import {EnhancedTableHead as ExtractionJobsTableHeader} from "./ExtractionJobsTableHeader";
@@ -120,8 +122,18 @@ export const ExtractionJobs = (props) => {
 										return (
 											<TableRow key={row.jobId}>
 												<TableCell align="right" sx={{color: theme.palette.primary.main}}>
+													{/*v1 vs v2*/}
 													{
-														row.status.includes("StatusMessage.start") ?
+														row.status.includes("CREATED") ?
+															<PlayCircleOutlineIcon/> : null
+													}
+													{
+														row.status.includes("RESUBMITTED") ?
+															<AddCircleOutlineIcon/> : null
+													}
+													{
+														row.status.includes("StatusMessage.start") ||
+														row.status.includes("STARTED") ?
 															<PlayCircleOutlineIcon/> : null
 													}
 													{
@@ -129,11 +141,14 @@ export const ExtractionJobs = (props) => {
 															<AccessTimeIcon/> : null
 													}
 													{
-														row.status.includes("StatusMessage.done") ?
+														row.status.includes("StatusMessage.done") ||
+														row.status.includes("SUCCEEDED")
+															?
 															<CheckCircleIcon/> : null
 													}
 													{
-														row.status.includes("StatusMessage.failed") ?
+														row.status.includes("StatusMessage.failed") ||
+														row.status.includes("ERROR")?
 															<CancelIcon/> : null
 													}
 												</TableCell>
