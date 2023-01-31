@@ -13,6 +13,8 @@ import {ArrowBack, ArrowForward} from "@material-ui/icons";
 import {ListenerInfo} from "./ListenerInfo";
 import {ExtractionJobs} from "./ExtractionJobs";
 import {ClowderTitle} from "../styledComponents/ClowderTitle";
+import {format} from "date-fns";
+import {parseDate} from "../../utils/common";
 
 
 const createData = (status: string, jobId: string, created: string, creator: string, duration: number, resourceType:string, resourceId: string) => {
@@ -85,7 +87,8 @@ export const ExtractionHistory = (): JSX.Element => {
 	useEffect(() => {
 		// TODO add pagination for jobs
 		if (selectedExtractor) {
-			listListenerJobs(selectedExtractor["name"], null, null, null, null, null, 0, 100);
+			listListenerJobs(selectedExtractor["name"], null, null, null, null,
+				null, 0, 100);
 			// clear filters
 			setSelectedStatus("");
 			setSelectedCreatedTime(null);
@@ -108,10 +111,10 @@ export const ExtractionHistory = (): JSX.Element => {
 		// TODO add pagination for jobs
 		if (selectedCreatedTime) {
 			if (selectedExtractor) {
-				listListenerJobs(selectedExtractor["name"], null, null, null, null, selectedCreatedTime, 0, 100);
+				listListenerJobs(selectedExtractor["name"], null, null, null, null, format(selectedCreatedTime, "yyyy-MM-dd"), 0, 100);
 			}
 			else{
-				listListenerJobs(null, null, null, null, null, selectedCreatedTime, 0, 100);
+				listListenerJobs(null, null, null, null, null, format(selectedCreatedTime, "yyyy-MM-dd"),0, 100);
 			}
 		}
 	}, [selectedCreatedTime]);
@@ -121,8 +124,7 @@ export const ExtractionHistory = (): JSX.Element => {
 		let rows = [];
 		if (jobs.length > 0){
 			jobs.map((job)=>{
-				rows.push(createData(job["status"], job["id"], job["created"], job["creator"]["email"],
-					job["duration"], job["resource_ref"]["collection"], job["resource_ref"]["resource_id"]));
+				rows.push(createData(job["status"], job["id"], parseDate(job["created"]), job["creator"]["email"], job["duration"], job["resource_ref"]["collection"], job["resource_ref"]["resource_id"]));
 			});
 		}
 		setExecutionJobsTableRow(rows);

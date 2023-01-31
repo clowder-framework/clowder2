@@ -1,12 +1,11 @@
-import React, {useState} from "react";
+import React from "react";
 import Box from "@mui/material/Box";
 import Toolbar from "@mui/material/Toolbar";
 import {FormControl, InputLabel, MenuItem, Select, Typography} from "@mui/material";
 import {LocalizationProvider} from "@mui/x-date-pickers/LocalizationProvider";
-import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
-import { format } from "date-fns"
 import {ClowderMetadataTextField} from "../styledComponents/ClowderMetadataTextField";
 import {DatePicker} from "@mui/x-date-pickers";
+import {AdapterDateFns} from "@mui/x-date-pickers/AdapterDateFns";
 
 interface ExtractionJobsToolbarProps {
 	numExecution:number;
@@ -45,7 +44,7 @@ export const ExtractionJobsToolbar = (props: ExtractionJobsToolbarProps) => {
 						label="Submitted at"
 						value={selectedCreatedTime}
 						onChange={(value)=>{
-							setSelectedCreatedTime(format(value, "yyyy-MM-dd"),);
+							setSelectedCreatedTime(value);
 						}}
 						renderInput={(props) => <ClowderMetadataTextField {...props} variant="standard"/>}
 					/>
