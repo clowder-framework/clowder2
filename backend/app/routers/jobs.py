@@ -44,7 +44,7 @@ async def get_all_job_summary(
         filters.append({"status": re.compile(status, re.IGNORECASE)})
     if created is not None:
         created_datetime_object = datetime.strptime(created, '%Y-%m-%d')
-        filters.append({"created": { "$gte": created_datetime_object - timedelta(days=1),
+        filters.append({"created": { "$gte": created_datetime_object,
                                      "$lt": created_datetime_object + timedelta(days=1)}})
     if user_id is not None:
         filters.append({"creator.email": user_id})
