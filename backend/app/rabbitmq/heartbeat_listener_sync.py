@@ -6,7 +6,7 @@ from pymongo import MongoClient
 
 from app.config import settings
 from app.models.search import SearchCriteria
-from app.routers.feeds import FeedIn, FeedListener, save_feed, associate_listener
+from app.routers.feeds import FeedIn, FeedListener, FeedOut, FeedDB, associate_listener
 from app.models.listeners import EventListenerDB, EventListenerOut, ExtractorInfo
 
 logging.basicConfig(level=logging.INFO)
@@ -64,22 +64,16 @@ def callback(ch, method, properties, body):
                     criteria_list.append(
                         SearchCriteria(field="content_type", value=mime)
                     )
-                feed_data = FeedIn(
-                    {
-                        "name": extractor_name,
-                        "search": {
+                # TODO: Who should the author be for an auto-generated feed? Currently None.
+                new_feed = FeedDB(
+                    name=extractor_name,
+                    search={
                             "index_name": "file",
                             "criteria": criteria_list,
                         },
-                    }
+                     listeners=[FeedListener(listener_id=extractor_out.id, automatic=True)]
                 )
-                new_feed = await save_feed(feed_data)
-
-                # Assign the extractor to the new feed
-                feed_listener = FeedListener(
-                    listener_id=extractor_out.id, automatic=True
-                )
-                await associate_listener(new_feed.id, feed_listener)
+                db["feeds"].insert_one(new_feed.to_mongo())
 
         return extractor_out
 
