@@ -70,6 +70,7 @@ def callback(ch, method, properties, body):
                     search={
                             "index_name": "file",
                             "criteria": criteria_list,
+                            "mode": "or",
                         },
                      listeners=[FeedListener(listener_id=extractor_out.id, automatic=True)]
                 )
