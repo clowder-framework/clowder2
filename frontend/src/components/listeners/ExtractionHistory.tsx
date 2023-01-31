@@ -17,7 +17,7 @@ import {format} from "date-fns";
 import {parseDate} from "../../utils/common";
 
 
-const createData = (status: string, jobId: string, created: string, creator: string, duration: number, resourceType:string, resourceId: string) => {
+const createData = (status: string, jobId: string, created: string, creator: string, duration: number, resourceType: string, resourceId: string) => {
 	return {
 		status, jobId, created, creator, duration, resourceType, resourceId
 	};
@@ -74,8 +74,9 @@ export const ExtractionHistory = (): JSX.Element => {
 	const [nextDisabled, setNextDisabled] = useState<boolean>(false);
 	const [selectedExtractor, setSelectedExtractor] = useState<Listener>();
 	const [executionJobsTableRow, setExecutionJobsTableRow] = useState([]);
-	const [selectedStatus, setSelectedStatus] = useState("");
+	const [selectedStatus, setSelectedStatus] = useState(null);
 	const [selectedCreatedTime, setSelectedCreatedTime] = useState(null);
+
 
 	useEffect(() => {
 		listListeners(skip, limit, null, null);
@@ -85,45 +86,30 @@ export const ExtractionHistory = (): JSX.Element => {
 
 
 	useEffect(() => {
-		// TODO add pagination for jobs
 		if (selectedExtractor) {
 			listListenerJobs(selectedExtractor["name"], null, null, null, null,
 				null, 0, 100);
 			// clear filters
-			setSelectedStatus("");
+			setSelectedStatus(null);
 			setSelectedCreatedTime(null);
 		}
 	}, [selectedExtractor]);
 
-	useEffect(() => {
-		// TODO add pagination for jobs
-		if (selectedStatus) {
-			if (selectedExtractor) {
-				listListenerJobs(selectedExtractor["name"], selectedStatus, null, null, null, null, 0, 100);
-			}
-			else{
-				listListenerJobs(null, selectedStatus, null, null, null, null, 0, 100);
-			}
-		}
-	}, [selectedStatus]);
+	const handleRefresh = () => {
+		listListenerJobs(selectedExtractor? selectedExtractor["name"] : null,
+			selectedStatus, null, null, null,
+			selectedCreatedTime ? format(selectedCreatedTime, "yyyy-MM-dd") : null, 0, 100);
+	}
 
 	useEffect(() => {
 		// TODO add pagination for jobs
-		if (selectedCreatedTime) {
-			if (selectedExtractor) {
-				listListenerJobs(selectedExtractor["name"], null, null, null, null, format(selectedCreatedTime, "yyyy-MM-dd"), 0, 100);
-			}
-			else{
-				listListenerJobs(null, null, null, null, null, format(selectedCreatedTime, "yyyy-MM-dd"),0, 100);
-			}
-		}
-	}, [selectedCreatedTime]);
-
+		handleRefresh();
+	}, [selectedStatus, selectedCreatedTime]);
 
 	useEffect(() => {
 		let rows = [];
-		if (jobs.length > 0){
-			jobs.map((job)=>{
+		if (jobs.length > 0) {
+			jobs.map((job) => {
 				rows.push(createData(job["status"], job["id"], parseDate(job["created"]), job["creator"]["email"], job["duration"], job["resource_ref"]["collection"], job["resource_ref"]["resource_id"]));
 			});
 		}
@@ -144,6 +130,7 @@ export const ExtractionHistory = (): JSX.Element => {
 		if (listeners.length < limit) setNextDisabled(true);
 		else setNextDisabled(false);
 	}, [listeners]);
+
 
 	// for pagination keep flipping until the return dataset is less than the limit
 	const previous = () => {
@@ -240,7 +227,9 @@ export const ExtractionHistory = (): JSX.Element => {
 										selectedStatus={selectedStatus}
 										selectedCreatedTime={selectedCreatedTime}
 										setSelectedStatus={setSelectedStatus}
-										setSelectedCreatedTime={setSelectedCreatedTime}/>
+										setSelectedCreatedTime={setSelectedCreatedTime}
+										handleRefresh={handleRefresh}
+						/>
 					</Grid>
 				</Grid>
 			</Box>

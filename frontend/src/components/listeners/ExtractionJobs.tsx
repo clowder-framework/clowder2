@@ -67,7 +67,8 @@ function stableSort<T>(array: readonly T[], comparator: (a: T, b: T) => number) 
 }
 
 export const ExtractionJobs = (props) => {
-	const {rows, headCells, selectedStatus, selectedCreatedTime, setSelectedStatus, setSelectedCreatedTime} = props;
+	const {rows, headCells, selectedStatus, selectedCreatedTime, setSelectedStatus, setSelectedCreatedTime,
+		handleRefresh} = props;
 
 	const [order, setOrder] = React.useState<Order>("desc");
 	const [orderBy, setOrderBy] = React.useState<keyof Data>("created");
@@ -102,7 +103,9 @@ export const ExtractionJobs = (props) => {
 					<ExtractionJobsToolbar numExecution={rows.length} selectedStatus={selectedStatus}
 										   selectedCreatedTime={selectedCreatedTime}
 										   setSelectedStatus={setSelectedStatus}
-										   setSelectedCreatedTime={setSelectedCreatedTime}/>
+										   setSelectedCreatedTime={setSelectedCreatedTime}
+										   handleRefresh={handleRefresh}
+					/>
 					<Table
 						sx={{minWidth: 750}}
 						aria-labelledby="tableTitle"
