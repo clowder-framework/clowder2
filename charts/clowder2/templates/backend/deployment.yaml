@@ -42,17 +42,21 @@ spec:
               value: {{ include "clowder2.name" . }}-minio-headless:9000
             - name: MINIO_BUCKET_NAME
               value: clowder
-#              TODO use telegraf.sealed.yaml
             - name: MINIO_ACCESS_KEY
-              value: minioadmin
+              value: {{ .Values.minio.auth.rootUser }}
+            # TODO use existing secrets
             - name: MINIO_SECRET_KEY
-              value: minioadmin
+              valueFrom:
+                secretKeyRef:
+                  name: secretminio
+                  key: password
+              value: {{ .Values.minio.auth.rootPassword }}
             - name: MINIO_UPLOAD_CHUNK_SIZE
-              value: 10 * 1024 * 1024
+              value: "10485760"
             - name: MONGODB_URL
               value: mongodb://{{ include "clowder2.name" . }}-mongodb:27017
             - name: MONGO_DATABASE
-              value: clowder2
+              value: {{ .Values.mongodb.database }}
             - name: CLOWDER2_URL
               value: http://{{ .Values.hostname }}
             - name: auth_base
@@ -74,10 +78,9 @@ spec:
             - name: elasticsearch_url
               value: http://{{ include "clowder2.name" . }}-elasticsearch:9200
             - name: elasticsearch_no_of_shards
-              value: 5
+              value: "5"
             - name: elasticsearch_no_of_replicas
-              value: 5
-#              TODO use telegraf.sealed.yaml
+              value: "5"
             - name: RABBITMQ_USER
               value: guest
             - name: RABBITMQ_PASS
@@ -85,8 +88,7 @@ spec:
             - name: RABBITMQ_HOST
               value: {{ include "clowder2.name" .  }}
             - name: RABBITMQ_URL
-              value:
-                  "amqp://" + $(RABBITMQ_USER) + ":" + $(RABBITMQ_PASS) + "@" + $(RABBITMQ_HOST) + "/"
+              value: "amqp://" + $(RABBITMQ_USER) + ":" + $(RABBITMQ_PASS) + "@" + $(RABBITMQ_HOST) + "/"
             - name: HEARTBEAT_EXCHANGE
               value: "extractors"
           ports:
