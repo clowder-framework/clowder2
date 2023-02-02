@@ -2,13 +2,10 @@ from datetime import datetime
 from enum import Enum, auto
 from typing import Optional
 
-from mongoengine import DynamicDocument
-from pydantic import Field, BaseModel
+from pydantic import BaseModel
 from pydantic import Field
 
 from app.models.mongomodel import MongoModel
-from app.models.pyobjectid import PyObjectId
-from app.models.mongomodel import OID, MongoModel
 from app.models.users import UserOut
 
 
