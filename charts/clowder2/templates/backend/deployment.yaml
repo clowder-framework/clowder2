@@ -47,9 +47,8 @@ spec:
             - name: MINIO_SECRET_KEY
               valueFrom:
                 secretKeyRef:
-                  name: secretminio
-                  key: password
-              value: {{ .Values.minio.auth.rootPassword }}
+                  name: clowder2-minio
+                  key: root-password
             - name: MINIO_UPLOAD_CHUNK_SIZE
               value: "10485760"
             - name: MONGODB_URL
@@ -85,9 +84,8 @@ spec:
             - name: RABBITMQ_PASS
               valueFrom:
                 secretKeyRef:
-                  name: secretrabbitmq
-                  key: password
-              value: {{ .Values.rabbitmq.auth.password }}
+                  name: clowder2-rabbitmq
+                  key: rabbitmq-password
             - name: RABBITMQ_HOST
               value: {{ include "clowder2.name" .  }}
             - name: RABBITMQ_URL
