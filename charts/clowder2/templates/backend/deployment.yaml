@@ -44,7 +44,6 @@ spec:
               value: clowder
             - name: MINIO_ACCESS_KEY
               value: {{ .Values.minio.auth.rootUser }}
-            # TODO use existing secrets
             - name: MINIO_SECRET_KEY
               valueFrom:
                 secretKeyRef:
@@ -82,13 +81,17 @@ spec:
             - name: elasticsearch_no_of_replicas
               value: "5"
             - name: RABBITMQ_USER
-              value: guest
+              value: {{ .Values.rabbitmq.auth.username }}
             - name: RABBITMQ_PASS
-              value: guest
+              valueFrom:
+                secretKeyRef:
+                  name: secretrabbitmq
+                  key: password
+              value: {{ .Values.rabbitmq.auth.password }}
             - name: RABBITMQ_HOST
               value: {{ include "clowder2.name" .  }}
             - name: RABBITMQ_URL
-              value: "amqp://" + $(RABBITMQ_USER) + ":" + $(RABBITMQ_PASS) + "@" + $(RABBITMQ_HOST) + "/"
+              value: amqp://$(RABBITMQ_USER):$(RABBITMQ_PASS)@$(RABBITMQ_HOST)/
             - name: HEARTBEAT_EXCHANGE
               value: "extractors"
           ports:
