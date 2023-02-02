@@ -61,9 +61,24 @@ def callback(ch, method, properties, body):
                 # Create a MIME-based feed for this v1 extractor
                 criteria_list = []
                 for mime in process["file"]:
-                    criteria_list.append(
-                        SearchCriteria(field="content_type", value=mime)
-                    )
+                    main_type = mime.split("/")[0] if mime.find("/") > -1 else mime
+                    sub_type = mime.split("/")[1] if mime.find("/") > -1 else None
+                    if sub_type:
+                        if sub_type == "*":
+                            # If a wildcard, just match on main type
+                            criteria_list.append(
+                                SearchCriteria(field="content_type_main", value=main_type)
+                            )
+                        else:
+                            # Otherwise match the whole string
+                            criteria_list.append(
+                                SearchCriteria(field="content_type", value=mime)
+                            )
+                    else:
+                        criteria_list.append(
+                            SearchCriteria(field="content_type", value=mime)
+                        )
+
                 # TODO: Who should the author be for an auto-generated feed? Currently None.
                 new_feed = FeedDB(
                     name=extractor_name,
