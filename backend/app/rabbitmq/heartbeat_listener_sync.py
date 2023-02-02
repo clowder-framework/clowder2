@@ -67,7 +67,9 @@ def callback(ch, method, properties, body):
                         if sub_type == "*":
                             # If a wildcard, just match on main type
                             criteria_list.append(
-                                SearchCriteria(field="content_type_main", value=main_type)
+                                SearchCriteria(
+                                    field="content_type_main", value=main_type
+                                )
                             )
                         else:
                             # Otherwise match the whole string
@@ -83,11 +85,13 @@ def callback(ch, method, properties, body):
                 new_feed = FeedDB(
                     name=extractor_name,
                     search={
-                            "index_name": "file",
-                            "criteria": criteria_list,
-                            "mode": "or",
-                        },
-                     listeners=[FeedListener(listener_id=extractor_out.id, automatic=True)]
+                        "index_name": "file",
+                        "criteria": criteria_list,
+                        "mode": "or",
+                    },
+                    listeners=[
+                        FeedListener(listener_id=extractor_out.id, automatic=True)
+                    ],
                 )
                 db["feeds"].insert_one(new_feed.to_mongo())
 

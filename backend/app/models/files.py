@@ -14,8 +14,10 @@ class FileContentType(BaseModel):
     split into main ("text") and secondary ("plain") parts so the dynamic matching with * can still be done.
 
     """
+
     content_type: str = "N/A"
     main_type: str = "N/A"
+
 
 class FileVersion(MongoModel):
     version_id: str
