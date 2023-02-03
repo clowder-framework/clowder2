@@ -11,11 +11,11 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 class UserBase(MongoModel):
     email: EmailStr
-    first_name: str
-    last_name: str
 
 
 class UserIn(UserBase):
+    first_name: str
+    last_name: str
     password: str
 
 
@@ -25,6 +25,8 @@ class UserLogin(BaseModel):
 
 
 class UserDB(UserBase):
+    first_name: str
+    last_name: str
     hashed_password: str = Field()
     keycloak_id: Optional[str] = None
 
@@ -33,7 +35,8 @@ class UserDB(UserBase):
 
 
 class UserOut(UserBase):
-    pass
+    first_name: str
+    last_name: str
 
 
 async def get_user_out(user_id: str, db: MongoClient) -> UserOut:
