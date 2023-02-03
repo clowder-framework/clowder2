@@ -21,6 +21,8 @@ import {FormProps} from "@rjsf/core";
 import {submitFileExtractionAction} from "../../actions/file";
 import {submitDatasetExtractionAction} from "../../actions/dataset";
 import {Extractor} from "../../types/data";
+import {ClowderRjsfSelectWidget} from "../styledComponents/ClowderRjsfSelectWidget";
+import {ClowderRjsfTextWidget} from "../styledComponents/ClowderRjsfTextWidget";
 
 type SubmitExtractionProps = {
 	fileId: string,
@@ -28,8 +30,13 @@ type SubmitExtractionProps = {
 	open: boolean,
 	handleClose: any,
 	selectedExtractor: Extractor
-
 }
+
+const widgets = {
+		TextWidget: ClowderRjsfTextWidget,
+		SelectWidget: ClowderRjsfSelectWidget
+	};
+
 export default function SubmitExtraction(props: SubmitExtractionProps) {
 
 
@@ -90,6 +97,7 @@ export default function SubmitExtraction(props: SubmitExtractionProps) {
 									&& selectedExtractor["properties"]["parameters"]["schema"] ?
 										<Container>
 											<Form
+												widgets={widgets}
 												schema={{"properties": selectedExtractor["properties"]["parameters"]["schema"] as FormProps<any>["schema"]}}
 												onSubmit={({formData}) => {
 													onSubmit(formData);

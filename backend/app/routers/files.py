@@ -43,6 +43,7 @@ from typing import Union
 router = APIRouter()
 security = HTTPBearer()
 
+
 # TODO: Move this to MongoDB middle layer
 async def add_file_entry(
     file_db: FileDB,
@@ -153,7 +154,6 @@ async def update_file(
     file: UploadFile = File(...),
     es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
 ):
-
     # Check all connection and abort if any one of them is not available
     if db is None or fs is None or es is None:
         raise HTTPException(status_code=503, detail="Service not available")
