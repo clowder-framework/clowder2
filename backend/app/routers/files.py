@@ -63,13 +63,11 @@ async def _resubmit_file_extractors(
 
     """
     query = {"resource.resource_id": ObjectId(file.id)}
-    file_version = file.version_num
-    former_file_version = file_version - 1
     listeners_resubmitted = []
     listeners_resubitted_failed = []
     async for md in db["metadata"].find(query):
         md_out = MetadataOut.from_mongo(md)
-        if md_out.agent.listener is not None and md_out.file_version == former_file_version:
+        if md_out.agent.listener is not None:
             listener_name = md_out.agent.listener.name
             # TODO find way  to get the parameters used
             parameters = {}

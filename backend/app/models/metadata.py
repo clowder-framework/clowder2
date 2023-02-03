@@ -254,7 +254,7 @@ class MetadataDB(MetadataBase):
 
 
 class MetadataOut(MetadataDB):
-    file_version: Optional[int]
+    resource: MongoDBRef
     description: Optional[
         str
     ]  # This will be fetched from metadata definition if one is provided (shown by GUI)
