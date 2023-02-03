@@ -6,9 +6,9 @@ import {ClowderMetadataFormHelperText} from "../../styledComponents/ClowderMetad
 import {MetadataEditButton} from "./MetadataEditButton";
 
 export const MetadataSelect = (props) => {
-	const {widgetName, fieldName, metadataId, contents, setMetadata, initialReadOnly, options, resourceId,
+	const {widgetName, fieldName, metadataId, content, setMetadata, initialReadOnly, options, resourceId,
 		updateMetadata} = props;
-	const [localContent, setLocalContent] = useState(contents && contents[fieldName] ? contents: {});
+	const [localContent, setLocalContent] = useState(content && content[fieldName] ? content: {});
 
 	const [readOnly, setReadOnly] = useState(initialReadOnly);
 
@@ -41,7 +41,7 @@ export const MetadataSelect = (props) => {
 				<Grid item xs={11} sm={11} md={11} lg={11} xl={11}>
 					<FormControl fullWidth>
 						<InputLabel>{widgetName}</InputLabel>
-						<ClowderMetadataSelect value={readOnly && contents ? contents[fieldName]: localContent[fieldName]}
+						<ClowderMetadataSelect value={readOnly && content ? content[fieldName]: localContent[fieldName]}
 											   label="Unit" onChange={handleChange}
 											   sx={{background:"#ffffff"}}
 											   disabled={readOnly}
@@ -58,7 +58,7 @@ export const MetadataSelect = (props) => {
 				</Grid>
 				<Grid item xs={1} sm={1} md={1} lg={1} xl={1}>
 					<MetadataEditButton readOnly={readOnly} setReadOnly={setReadOnly} updateMetadata={updateMetadata}
-										contents={localContent} metadataId={metadataId} resourceId={resourceId}
+										content={localContent} metadataId={metadataId} resourceId={resourceId}
 										widgetName={widgetName} setInputChanged={setInputChanged}
 										setMetadata={setMetadata}/>
 				</Grid>

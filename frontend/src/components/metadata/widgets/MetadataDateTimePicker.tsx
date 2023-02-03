@@ -56,7 +56,7 @@ export const MetadataDateTimePicker = (props) => {
 				</Grid>
 				<Grid item xs={1} sm={1} md={1} lg={1} xl={1}>
 					<MetadataEditButton readOnly={readOnly} setReadOnly={setReadOnly} updateMetadata={updateMetadata}
-										contents={localContent} metadataId={metadataId} resourceId={resourceId}
+										content={localContent} metadataId={metadataId} resourceId={resourceId}
 										widgetName={widgetName} setInputChanged={setInputChanged}
 										setMetadata={setMetadata}/>
 				</Grid>
