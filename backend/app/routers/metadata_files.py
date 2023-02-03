@@ -44,9 +44,9 @@ async def _build_metadata_db_obj(
 ):
     """Convenience function for building a MetadataDB object from incoming metadata plus a file. Agent and file version
     will be determined based on inputs if they are not provided directly."""
-    contents = await validate_context(
+    content = await validate_context(
         db,
-        metadata_in.contents,
+        metadata_in.content,
         metadata_in.definition,
         metadata_in.context_url,
         metadata_in.context,
@@ -94,7 +94,7 @@ async def _build_metadata_db_obj(
 
     # Apply any typecast fixes from definition validation
     metadata_in = metadata_in.dict()
-    metadata_in["contents"] = contents
+    metadata_in["content"] = content
     return MetadataDB(
         **metadata_in,
         resource=file_ref,
@@ -146,7 +146,7 @@ async def add_file_metadata(
             "resource_type": "file",
             "created": metadata_out.created.utcnow(),
             "creator": user.email,
-            "contents": metadata_out.contents,
+            "content": metadata_out.content,
             "context_url": metadata_out.context_url,
             "context": metadata_out.context,
             "name": file.name,

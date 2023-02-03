@@ -61,7 +61,7 @@ def test_delete_with_metadata(client: TestClient, headers: dict):
         f"{settings.API_V2_STR}/datasets/{dataset_id}/metadata",
         headers=headers,
         json={
-            "contents": {"color": "blue"},
+            "content": {"color": "blue"},
             "context_url": "clowder.org",
         },
     )

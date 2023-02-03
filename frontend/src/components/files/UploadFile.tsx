@@ -48,8 +48,8 @@ export const UploadFile:React.FC<UploadFileProps> = (props: UploadFileProps) => 
 		setMetadataRequestForms(prevState => {
 			// merge the contents field; e.g. lat lon
 			if (metadata.definition in prevState){
-				const prevContent = prevState[metadata.definition].contents;
-				metadata.contents = {...prevContent, ...metadata.contents};
+				const prevContent = prevState[metadata.definition].content;
+				metadata.content = {...prevContent, ...metadata.content};
 			}
 			return ({...prevState, [metadata.definition]: metadata});
 		});

@@ -8,7 +8,7 @@ type MetadataEditButtonType = {
 	readOnly: boolean,
 	setReadOnly: any,
 	updateMetadata: any,
-	contents: object,
+	content: object,
 	metadataId: string|undefined,
 	resourceId: string|undefined,
 	widgetName: string,
@@ -19,7 +19,7 @@ type MetadataEditButtonType = {
 export const MetadataEditButton = (props: MetadataEditButtonType) => {
 
 	const {readOnly, setReadOnly, metadataId, updateMetadata, setMetadata,
-		resourceId, contents, widgetName, setInputChanged} = props;
+		resourceId, content, widgetName, setInputChanged} = props;
 
 	return (
 		<>
@@ -50,7 +50,7 @@ export const MetadataEditButton = (props: MetadataEditButtonType) => {
 										updateMetadata(resourceId, {
 											"id":metadataId,
 											"definition": widgetName,
-											"contents": contents
+											"content": content
 										});
 										setReadOnly(true);
 										setInputChanged(false);

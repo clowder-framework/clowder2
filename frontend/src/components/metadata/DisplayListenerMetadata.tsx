@@ -63,7 +63,7 @@ export const DisplayListenerMetadata = (props: MetadataType) => {
 							return (<Grid item xs={12}><Card key={idx}>
 								<CardContent>
 									<ListenerMetadataEntry agent={metadata.agent}
-														   contents={metadata.contents}
+														   content={metadata.content}
 														   context={metadata.context}
 														   context_url={metadata.context_url}
 														   created={metadata.created}

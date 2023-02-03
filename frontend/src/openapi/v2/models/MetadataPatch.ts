@@ -11,7 +11,7 @@ export type MetadataPatch = {
     context?: any;
     context_url?: string;
     definition?: string;
-    contents: any;
+    content: any;
     file_version?: number;
     listener?: EventListenerIn;
     extractor?: LegacyEventListenerIn;
