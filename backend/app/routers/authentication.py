@@ -19,7 +19,6 @@ router = APIRouter()
 
 @router.post("/users", response_model=UserOut)
 async def save_user(userIn: UserIn, db: MongoClient = Depends(dependencies.get_db)):
-
     try:
         keycloak_user = await create_user(
             userIn.email, userIn.password, userIn.first_name, userIn.last_name
