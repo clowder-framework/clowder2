@@ -28,6 +28,7 @@ from app.routers import (
     elasticsearch,
     listeners,
     feeds,
+    jobs,
 )
 
 # setup loggers
@@ -124,6 +125,12 @@ api_router.include_router(
     listeners.legacy_router,
     prefix="/extractors",
     tags=["extractors"],
+    dependencies=[Depends(get_current_username)],
+)
+api_router.include_router(
+    jobs.router,
+    prefix="/jobs",
+    tags=["jobs"],
     dependencies=[Depends(get_current_username)],
 )
 api_router.include_router(

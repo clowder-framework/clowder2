@@ -1,10 +1,11 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from pydantic import Field, BaseModel
 from typing import Optional, List, Union
+from enum import Enum
 
 from app.config import settings
 from app.models.pyobjectid import PyObjectId
-from app.models.mongomodel import MongoModel
+from app.models.mongomodel import MongoModel, MongoDBRef
 from app.models.users import UserOut
 
 
@@ -84,10 +85,39 @@ class FeedListener(BaseModel):
     automatic: bool  # Listeners can trigger automatically or not on a per-feed basis.
 
 
-class EventListenerMessage(BaseModel):
+class EventListenerJobStatus(str, Enum):
+    """This is a basic status description of an extraction job for easier filtering of lists/views."""
+
+    CREATED = "CREATED"
+    STARTED = "STARTED"
+    SUCCEEDED = "SUCCEEDED"
+    ERROR = "ERROR"
+    RESUBMITTED = "RESUBMITTED"
+
+
+class EventListenerJob(MongoModel):
+    """This summarizes a submission to an extractor. All messages from that extraction should include this job's ID."""
+
+    listener_id: str
+    resource_ref: MongoDBRef
+    creator: UserOut
+    parameters: Optional[dict] = None
+    created: datetime = Field(default_factory=datetime.utcnow)
+    started: Optional[datetime] = None
+    updated: Optional[datetime] = None
+    finished: Optional[datetime] = None
+    duration: Optional[timedelta] = None
+    latest_message: Optional[str] = None
+    status: str = EventListenerJobStatus.CREATED
+
+    class Config:
+        # required for Enum to properly work
+        use_enum_values = True
+
+
+class EventListenerJobMessage(BaseModel):
     """This describes contents of JSON object that is submitted to RabbitMQ for the Event Listeners/Extractors to consume."""
 
-    # TODO better solution for host
     host: str = settings.API_HOST
     secretKey: str = "secretKey"
     retry_count: int = 0
@@ -97,10 +127,10 @@ class EventListenerMessage(BaseModel):
     fileSize: int
     id: str
     datasetId: str
-    secretKey: str
+    job_id: str
 
 
-class EventListenerDatasetMessage(BaseModel):
+class EventListenerDatasetJobMessage(BaseModel):
     """This describes contents of JSON object that is submitted to RabbitMQ for the Event Listeners/Extractors to consume."""
 
     host: str = settings.API_HOST
@@ -111,3 +141,12 @@ class EventListenerDatasetMessage(BaseModel):
     datasetName: str
     id: str
     datasetId: str
+    job_id: str
+
+
+class EventListenerJobUpdate(MongoModel):
+    """This is a status update message coming from the extractors back to Clowder."""
+
+    job_id: str
+    timestamp: datetime = Field(default_factory=datetime.utcnow)
+    status: str
