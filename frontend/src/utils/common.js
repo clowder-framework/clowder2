@@ -1,5 +1,6 @@
 import Cookies from "universal-cookie";
 import {V2} from "../openapi";
+import {format} from "date-fns";
 
 const cookies = new Cookies();
 
@@ -61,10 +62,7 @@ export function dataURItoFile(dataURI) {
 }
 
 export function parseDate(dateString) {
-	const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-	const options = { year: "numeric", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" , timeZone: timeZone };
-	const mydate = new Date(dateString);
-	return mydate.toLocaleString("en-US", options);
+	return format(new Date(dateString), "yyyy-MM-dd HH:mm:ss");
 }
 
 // get current username
