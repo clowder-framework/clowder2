@@ -313,7 +313,6 @@ async def delete_file(
 ):
     if (file := await db["files"].find_one({"_id": ObjectId(file_id)})) is not None:
         await remove_file_entry(file_id, db, fs)
-        await remove_file_entry(file_id, db, fs)
         return {"deleted": file_id}
     else:
         raise HTTPException(status_code=404, detail=f"File {file_id} not found")
