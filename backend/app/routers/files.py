@@ -74,19 +74,20 @@ async def _resubmit_file_extractors(
             access_token = credentials.credentials
             queue = listener_name
             routing_key = queue
-            try:
-                submit_file_message(
-                    file,
-                    queue,
-                    routing_key,
-                    parameters,
-                    access_token,
-                    db,
-                    rabbitmq_client,
-                )
-                listeners_resubmitted.append(listener_name)
-            except Exception as e:
-                listeners_resubitted_failed.append(listener_name)
+            if listener_name not in listeners_resubmitted:
+                try:
+                    submit_file_message(
+                        file,
+                        queue,
+                        routing_key,
+                        parameters,
+                        access_token,
+                        db,
+                        rabbitmq_client,
+                    )
+                    listeners_resubmitted.append(listener_name)
+                except Exception as e:
+                    listeners_resubitted_failed.append(listener_name)
     return {
         "listeners resubmitted successfully": str(listeners_resubmitted),
         "listeners resubmitted failed": str(listeners_resubmitted),

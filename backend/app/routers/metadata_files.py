@@ -118,6 +118,9 @@ async def add_file_metadata(
     """
     if (file := await db["files"].find_one({"_id": ObjectId(file_id)})) is not None:
         file = FileOut(**file)
+        current_file_version = file.version_num
+        # change metadata_in file version to match the current file version
+        metadata_in.file_version = current_file_version
         # If dataset already has metadata using this definition, don't allow duplication
         definition = metadata_in.definition
         if definition is not None:
