@@ -3,6 +3,7 @@
   "accessTokenLifespan": 300,
   "enabled": true,
   "registrationAllowed": true,
+  "resetPasswordAllowed": true,
   "registrationEmailAsUsername": true,
   "clients": [
     {
