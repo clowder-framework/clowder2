@@ -38,7 +38,6 @@ from app.keycloak_auth import get_user, get_current_user, get_token
 from app.rabbitmq.listeners import submit_file_job
 from typing import Union
 from app.models.metadata import MetadataOut
-from app.models.listeners import EventListenerMessage, ExtractorInfo
 
 router = APIRouter()
 security = HTTPBearer()
