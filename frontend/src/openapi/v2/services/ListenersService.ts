@@ -9,6 +9,18 @@ import { request as __request } from '../core/request';
 export class ListenersService {
 
     /**
+     * Get Instance Id
+     * @returns any Successful Response
+     * @throws ApiError
+     */
+    public static getInstanceIdApiV2ListenersInstanceGet(): CancelablePromise<any> {
+        return __request({
+            method: 'GET',
+            path: `/api/v2/listeners/instance`,
+        });
+    }
+
+    /**
      * Get Listeners
      * Get a list of all Event Listeners in the db.
      *

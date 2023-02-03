@@ -9,14 +9,16 @@ from pika.adapters.blocking_connection import BlockingChannel
 from pika.exchange_type import ExchangeType
 
 from app.config import settings
-from app.mongo import crete_mongo_indexes
+from minio.commonconfig import ENABLED
+from minio.versioningconfig import VersioningConfig
+from app.mongo import create_mongo_indexes
 from app.search.connect import connect_elasticsearch
 
 
 async def get_db() -> Generator:
     mongo_client = motor.motor_asyncio.AsyncIOMotorClient(settings.MONGODB_URL)
     db = mongo_client[settings.MONGO_DATABASE]
-    await crete_mongo_indexes(db)
+    await create_mongo_indexes(db)
     yield db
 
 

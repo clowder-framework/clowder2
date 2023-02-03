@@ -19,7 +19,7 @@ from app.models.feeds import (
 )
 from app.models.search import SearchIndexContents
 from app.search.connect import check_search_result
-from app.rabbitmq.listeners import submit_file_message
+from app.rabbitmq.listeners import submit_file_job
 
 router = APIRouter()
 
@@ -28,7 +28,8 @@ router = APIRouter()
 async def disassociate_listener_db(feed_id: str, listener_id: str, db: MongoClient):
     """Remove a specific Event Listener from a feed. Does not delete either resource, just removes relationship.
 
-    This actually performs the database operations, and can be used by any endpoints that need this functionality."""
+    This actually performs the database operations, and can be used by any endpoints that need this functionality.
+    """
     async for feed in db["feeds"].find(
         {"listeners.listener_id": ObjectId(listener_id)}
     ):
@@ -77,9 +78,9 @@ async def check_feed_listeners(
         ) is not None:
             listener_info = EventListenerOut.from_mongo(listener_db)
             queue = listener_info.name
-            routing_key = ""
+            routing_key = listener_info.name
             parameters = {}
-            submit_file_message(file_out, queue, routing_key, parameters)
+            await submit_file_job(file_out, queue, routing_key, parameters)
 
     return listeners_found
 

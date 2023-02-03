@@ -3,10 +3,10 @@ import {Box, Typography} from "@mui/material";
 import {ClowderTitle} from "../styledComponents/ClowderTitle";
 import {ClowderFootnote} from "../styledComponents/ClowderFootnote";
 import {parseDate} from "../../utils/common";
-import {Extractor} from "../../types/data";
+import {Listener} from "../../types/data";
 
 type ListenerInfoProps = {
-	selectedExtractor: Extractor
+	selectedExtractor: Listener | undefined
 }
 
 export const ListenerInfo = (props: ListenerInfoProps) => {
