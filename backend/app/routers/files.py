@@ -35,7 +35,7 @@ from app.models.files import FileIn, FileOut, FileVersion, FileDB
 from app.models.users import UserOut
 from app.routers.feeds import check_feed_listeners
 from app.keycloak_auth import get_user, get_current_user, get_token
-from app.rabbitmq.listeners import submit_file_job
+from app.rabbitmq.listeners import submit_file_job,  submit_file_job
 from typing import Union
 from app.models.metadata import MetadataOut
 
@@ -74,7 +74,7 @@ async def _resubmit_file_extractors(
             routing_key = queue
             if listener_name not in listeners_resubmitted:
                 try:
-                    submit_file_message(
+                    submit_file_job(
                         file,
                         queue,
                         routing_key,
