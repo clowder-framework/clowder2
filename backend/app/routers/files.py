@@ -32,6 +32,7 @@ from app.search.connect import (
     delete_document_by_query,
 )
 from app.models.files import FileIn, FileOut, FileVersion, FileDB
+from app.models.metadata import MetadataOut
 from app.models.listeners import EventListenerMessage, ExtractorInfo
 from app.models.users import UserOut
 from app.models.search import SearchIndexContents
@@ -45,7 +46,7 @@ security = HTTPBearer()
 
 
 async def _resubmit_file_extractors(
-    file_id: str,
+    file: FileOut,
     credentials: HTTPAuthorizationCredentials = Security(security),
     db: MongoClient = Depends(dependencies.get_db),
     rabbitmq_client: BlockingChannel = Depends(dependencies.get_rabbitmq),
@@ -61,37 +62,35 @@ async def _resubmit_file_extractors(
         rabbitmq_client: Rabbitmq Client
 
     """
-    if (file := await db["files"].find_one({"_id": ObjectId(file_id)})) is not None:
-        file_out = FileOut.from_mongo(file)
-        query = {"resource.resource_id": ObjectId(file_id)}
-        listeners_resubmitted = []
-        listeners_resubitted_failed = []
-        async for md in db["metadata"].find(query):
-            md_out = MetadataOut.from_mongo(md)
-            if md_out.agent.listener is not None:
-                listener_name = md_out.agent.listener.name
-                # TODO find way  to get the parameters used
-                parameters = {}
-                access_token = credentials.credentials
-                queue = listener_name
-                routing_key = queue
-                try:
-                    submit_file_message(
-                        file_out,
-                        queue,
-                        routing_key,
-                        parameters,
-                        access_token,
-                        db,
-                        rabbitmq_client,
-                    )
-                    listeners_resubmitted.append(listener_name)
-                except Exception as e:
-                    listeners_resubitted_failed.append(listener_name)
-        return {
-            "listeners resubmitted successfully": str(listeners_resubmitted),
-            "listeners resubmitted failed": str(listeners_resubmitted),
-        }
+    query = {"resource.resource_id": ObjectId(file.id)}
+    listeners_resubmitted = []
+    listeners_resubitted_failed = []
+    async for md in db["metadata"].find(query):
+        md_out = MetadataOut.from_mongo(md)
+        if md_out.agent.listener is not None:
+            listener_name = md_out.agent.listener.name
+            # TODO find way  to get the parameters used
+            parameters = {}
+            access_token = credentials.credentials
+            queue = listener_name
+            routing_key = queue
+            try:
+                submit_file_message(
+                    file,
+                    queue,
+                    routing_key,
+                    parameters,
+                    access_token,
+                    db,
+                    rabbitmq_client,
+                )
+                listeners_resubmitted.append(listener_name)
+            except Exception as e:
+                listeners_resubitted_failed.append(listener_name)
+    return {
+        "listeners resubmitted successfully": str(listeners_resubmitted),
+        "listeners resubmitted failed": str(listeners_resubmitted),
+    }
 
 
 # TODO: Move this to MongoDB middle layer
@@ -203,6 +202,8 @@ async def update_file(
     fs: Minio = Depends(dependencies.get_fs),
     file: UploadFile = File(...),
     es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
+    credentials: HTTPAuthorizationCredentials = Security(security),
+    rabbitmq_client: BlockingChannel = Depends(dependencies.get_rabbitmq),
 ):
 
     # Check all connection and abort if any one of them is not available
@@ -258,7 +259,7 @@ async def update_file(
             }
         }
         update_record(es, "file", doc, updated_file.id)
-        await _resubmit_file_extractors(file_id, credentials, db, rabbitmq_client)
+        await _resubmit_file_extractors(updated_file, credentials, db, rabbitmq_client)
         # updating metadata in elasticsearch
         if (
             metadata := await db["metadata"].find_one(
