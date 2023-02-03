@@ -28,7 +28,8 @@ router = APIRouter()
 async def disassociate_listener_db(feed_id: str, listener_id: str, db: MongoClient):
     """Remove a specific Event Listener from a feed. Does not delete either resource, just removes relationship.
 
-    This actually performs the database operations, and can be used by any endpoints that need this functionality."""
+    This actually performs the database operations, and can be used by any endpoints that need this functionality.
+    """
     async for feed in db["feeds"].find(
         {"listeners.listener_id": ObjectId(listener_id)}
     ):

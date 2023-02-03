@@ -307,7 +307,6 @@ async def edit_dataset(
     user_id=Depends(get_user),
     es=Depends(dependencies.get_elasticsearchclient),
 ):
-
     # Check all connection and abort if any one of them is not available
     if db is None or es is None:
         raise HTTPException(status_code=503, detail="Service not available")
@@ -364,7 +363,6 @@ async def patch_dataset(
     db: MongoClient = Depends(dependencies.get_db),
     es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
 ):
-
     # Check all connection and abort if any one of them is not available
     if db is None or es is None:
         raise HTTPException(status_code=503, detail="Service not available")
@@ -419,7 +417,6 @@ async def delete_dataset(
     fs: Minio = Depends(dependencies.get_fs),
     es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
 ):
-
     # Check all connection and abort if any one of them is not available
     if db is None or fs is None or es is None:
         raise HTTPException(status_code=503, detail="Service not available")
