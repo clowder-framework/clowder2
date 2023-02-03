@@ -3,7 +3,8 @@ from typing import Generator
 import motor.motor_asyncio
 import pika
 from minio import Minio
-from fastapi import Header, HTTPException
+from minio.commonconfig import ENABLED
+from minio.versioningconfig import VersioningConfig
 from pika.adapters.blocking_connection import BlockingChannel
 from pika.exchange_type import ExchangeType
 
@@ -12,18 +13,6 @@ from minio.commonconfig import ENABLED
 from minio.versioningconfig import VersioningConfig
 from app.mongo import create_mongo_indexes
 from app.search.connect import connect_elasticsearch
-
-
-async def get_token_header(x_token: str = Header(...)):
-    # Not currently used. Here as an example.
-    if x_token != "fake-super-secret-token":
-        raise HTTPException(status_code=400, detail="X-Token header invalid")
-
-
-async def get_query_token(token: str):
-    # Not currently used. Here as an example.
-    if token != "jessica":
-        raise HTTPException(status_code=400, detail="No Jessica token provided")
 
 
 async def get_db() -> Generator:
@@ -48,20 +37,13 @@ async def get_fs() -> Generator:
 
 
 def get_rabbitmq() -> BlockingChannel:
-    credentials = pika.PlainCredentials("guest", "guest")
-    parameters = pika.ConnectionParameters("localhost", credentials=credentials)
+    """Client to connect to RabbitMQ for listeners/extractors interactions."""
+    credentials = pika.PlainCredentials(settings.RABBITMQ_USER, settings.RABBITMQ_PASS)
+    parameters = pika.ConnectionParameters(
+        settings.RABBITMQ_HOST, credentials=credentials
+    )
     connection = pika.BlockingConnection(parameters)
     channel = connection.channel()
-    """
-    channel.exchange_declare(
-        exchange="test_exchange",
-        exchange_type=ExchangeType.direct,
-        passive=False,
-        durable=True,
-        auto_delete=False,
-    )
-    channel.queue_declare(queue="standard_key")
-    """
     return channel
 
 

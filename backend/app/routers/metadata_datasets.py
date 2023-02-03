@@ -307,7 +307,6 @@ async def delete_dataset_metadata(
     if (
         dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
     ) is not None:
-
         # filter by metadata_id or definition
         query = {"resource.resource_id": ObjectId(dataset_id)}
         if metadata_in.metadata_id is not None:
