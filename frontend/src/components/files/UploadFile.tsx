@@ -50,7 +50,6 @@ export const UploadFile:React.FC<UploadFileProps> = (props: UploadFileProps) => 
 			if (metadata.definition in prevState){
 				const prevContent = prevState[metadata.definition].content;
 				metadata.content = {...prevContent, ...metadata.content};
-				metadata.content = {...prevContent, ...metadata.content};
 			}
 			return ({...prevState, [metadata.definition]: metadata});
 		});
