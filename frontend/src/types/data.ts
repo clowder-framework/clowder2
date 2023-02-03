@@ -1,7 +1,7 @@
 import {MetadataDefinitionOut,
 	MetadataOut as Metadata,
 	FileOut as FileSummary,
-	FileVersion, FolderOut } from "../openapi/v2";
+	FileVersion, FolderOut, EventListenerJob} from "../openapi/v2";
 
 export interface Dataset {
 	name: string;
@@ -140,6 +140,7 @@ export interface ListenerState{
 	listeners: Listener[];
 	categories: string[];
 	labels: string[];
+	jobs: EventListenerJob[];
 }
 export interface MetadataState{
 	metadataDefinitionList: MetadataDefinitionOut[],

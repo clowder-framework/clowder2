@@ -74,3 +74,24 @@ export function fetchListenerLabels(){
 			});
 	}
 }
+
+
+export const RECEIVE_LISTENER_JOBS = "RECEIVE_LISTENER_JOBS";
+export function fetchListenerJobs(listenerId, status, userId=null, fileId=null, datasetId = null,
+	created, skip=0, limit=100){
+	return (dispatch) => {
+		return V2.JobsService.getAllJobSummaryApiV2JobsGet(listenerId, status, userId, fileId, datasetId, created,
+			skip, limit)
+		.then(json => {
+				dispatch({
+					type: RECEIVE_LISTENER_JOBS,
+					jobs: json,
+					receivedAt: Date.now(),
+				});
+			})
+			.catch(reason => {
+				dispatch(handleErrors(reason, fetchListenerLabels(listenerId, status, userId=null, fileId=null,
+					datasetId = null, created, skip=0, limit=100)));
+			});
+	}
+}
