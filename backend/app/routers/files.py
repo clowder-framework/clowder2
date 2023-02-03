@@ -32,14 +32,14 @@ from app.search.connect import (
     delete_document_by_query,
 )
 from app.models.files import FileIn, FileOut, FileVersion, FileDB
-from app.models.metadata import MetadataOut
-from app.models.listeners import EventListenerMessage, ExtractorInfo
 from app.models.users import UserOut
 from app.models.search import SearchIndexContents
 from app.routers.feeds import check_feed_listeners
 from app.keycloak_auth import get_user, get_current_user, get_token
 from app.rabbitmq.listeners import submit_file_message
 from typing import Union
+from app.models.metadata import MetadataOut
+from app.models.listeners import EventListenerMessage, ExtractorInfo
 
 router = APIRouter()
 security = HTTPBearer()
