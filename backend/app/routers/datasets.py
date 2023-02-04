@@ -493,13 +493,14 @@ async def delete_folder(
     folder_id: str,
     db: MongoClient = Depends(dependencies.get_db),
     fs: Minio = Depends(dependencies.get_fs),
+    es: Elasticsearch = Depends(dependencies.get_elasticsearchclient)
 ):
     if (await db["folders"].find_one({"_id": ObjectId(folder_id)})) is not None:
         # delete current folder and files
         await remove_folder_entry(folder_id, db)
         async for file in db["files"].find({"folder_id": ObjectId(folder_id)}):
             file = FileOut(**file)
-            await remove_file_entry(file.id, db, fs)
+            await remove_file_entry(file.id, db, fs, es)
 
         # list all child folders and delete child folders/files
         parent_folder_id = folder_id
@@ -530,7 +531,7 @@ async def delete_folder(
                         {"folder_id": ObjectId(folder.id)}
                     ):
                         file = FileOut(**file)
-                        await remove_file_entry(file.id, db, fs)
+                        await remove_file_entry(file.id, db, fs, es)
 
         await _delete_nested_folders(parent_folder_id)
 
