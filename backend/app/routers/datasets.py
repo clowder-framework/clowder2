@@ -493,7 +493,7 @@ async def delete_folder(
     folder_id: str,
     db: MongoClient = Depends(dependencies.get_db),
     fs: Minio = Depends(dependencies.get_fs),
-    es: Elasticsearch = Depends(dependencies.get_elasticsearchclient)
+    es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
 ):
     if (await db["folders"].find_one({"_id": ObjectId(folder_id)})) is not None:
         # delete current folder and files

@@ -120,10 +120,7 @@ async def add_file_entry(
 
 # TODO: Move this to MongoDB middle layer
 async def remove_file_entry(
-    file_id: Union[str, ObjectId],
-    db: MongoClient,
-    fs: Minio,
-    es: Elasticsearch
+    file_id: Union[str, ObjectId], db: MongoClient, fs: Minio, es: Elasticsearch
 ):
     """Remove FileDB object into MongoDB, Minio, and associated metadata and version information."""
     # TODO: Deleting individual versions will require updating version_id in mongo, or deleting entire document
@@ -254,7 +251,7 @@ async def delete_file(
     file_id: str,
     db: MongoClient = Depends(dependencies.get_db),
     fs: Minio = Depends(dependencies.get_fs),
-    es: Elasticsearch = Depends(dependencies.get_elasticsearchclient)
+    es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
 ):
     if (file := await db["files"].find_one({"_id": ObjectId(file_id)})) is not None:
         await remove_file_entry(file_id, db, fs, es)
