@@ -35,11 +35,61 @@ from app.models.files import FileIn, FileOut, FileVersion, FileContentType, File
 from app.models.users import UserOut
 from app.routers.feeds import check_feed_listeners
 from app.keycloak_auth import get_user, get_current_user, get_token
-from app.rabbitmq.listeners import submit_file_job
+from app.rabbitmq.listeners import submit_file_job, submit_file_job
 from typing import Union
+from app.models.metadata import MetadataOut
 
 router = APIRouter()
 security = HTTPBearer()
+
+
+async def _resubmit_file_extractors(
+    file: FileOut,
+    credentials: HTTPAuthorizationCredentials = Security(security),
+    db: MongoClient = Depends(dependencies.get_db),
+    rabbitmq_client: BlockingChannel = Depends(dependencies.get_rabbitmq),
+):
+    """This helper method will check metadata. We get the extractors run from metadata from extractors.
+    Then they are resubmitted. At present parameters are not stored. This will change once Jobs are
+    implemented.
+
+        Arguments:
+        file_id: Id of file
+        credentials: credentials of logged in user
+        db: MongoDB Client
+        rabbitmq_client: Rabbitmq Client
+
+    """
+    query = {"resource.resource_id": ObjectId(file.id)}
+    listeners_resubmitted = []
+    listeners_resubitted_failed = []
+    async for md in db["metadata"].find(query):
+        md_out = MetadataOut.from_mongo(md)
+        if md_out.agent.listener is not None:
+            listener_name = md_out.agent.listener.name
+            # TODO find way  to get the parameters used
+            parameters = {}
+            access_token = credentials.credentials
+            queue = listener_name
+            routing_key = queue
+            if listener_name not in listeners_resubmitted:
+                try:
+                    submit_file_job(
+                        file,
+                        queue,
+                        routing_key,
+                        parameters,
+                        access_token,
+                        db,
+                        rabbitmq_client,
+                    )
+                    listeners_resubmitted.append(listener_name)
+                except Exception as e:
+                    listeners_resubitted_failed.append(listener_name)
+    return {
+        "listeners resubmitted successfully": str(listeners_resubmitted),
+        "listeners resubmitted failed": str(listeners_resubmitted),
+    }
 
 
 # TODO: Move this to MongoDB middle layer
@@ -154,6 +204,8 @@ async def update_file(
     fs: Minio = Depends(dependencies.get_fs),
     file: UploadFile = File(...),
     es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
+    credentials: HTTPAuthorizationCredentials = Security(security),
+    rabbitmq_client: BlockingChannel = Depends(dependencies.get_rabbitmq),
 ):
     # Check all connection and abort if any one of them is not available
     if db is None or fs is None or es is None:
@@ -207,6 +259,7 @@ async def update_file(
             }
         }
         update_record(es, "file", doc, updated_file.id)
+        await _resubmit_file_extractors(updated_file, credentials, db, rabbitmq_client)
         # updating metadata in elasticsearch
         if (
             metadata := await db["metadata"].find_one(
@@ -360,3 +413,28 @@ async def get_file_extract(
         return {"message": "testing", "file_id": file_id}
     else:
         raise HTTPException(status_code=404, detail=f"File {file_id} not found")
+
+
+@router.post("/{file_id}/extract")
+async def resubmit_file_extractions(
+    file_id: str,
+    credentials: HTTPAuthorizationCredentials = Security(security),
+    db: MongoClient = Depends(dependencies.get_db),
+    rabbitmq_client: BlockingChannel = Depends(dependencies.get_rabbitmq),
+):
+    """This route will check metadata. We get the extractors run from metadata from extractors.
+    Then they are resubmitted. At present parameters are not stored. This will change once Jobs are
+    implemented.
+
+        Arguments:
+        file_id: Id of file
+        credentials: credentials of logged in user
+        db: MongoDB Client
+        rabbitmq_client: Rabbitmq Client
+
+    """
+    if (file := await db["files"].find_one({"_id": ObjectId(file_id)})) is not None:
+        resubmit_success_fail = _resubmit_file_extractors(
+            file_id, credentials, db, rabbitmq_client
+        )
+    return resubmit_success_fail
