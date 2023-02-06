@@ -31,7 +31,7 @@ from app.search.connect import (
     update_record,
     delete_document_by_query,
 )
-from app.models.files import FileIn, FileOut, FileVersion, FileDB
+from app.models.files import FileIn, FileOut, FileVersion, FileContentType, FileDB
 from app.models.users import UserOut
 from app.routers.feeds import check_feed_listeners
 from app.keycloak_auth import get_user, get_current_user, get_token
@@ -70,6 +70,8 @@ async def add_file_entry(
     if content_type is None:
         content_type = mimetypes.guess_type(file_db.name)
         content_type = content_type[0] if len(content_type) > 1 else content_type
+    type_main = content_type.split("/")[0] if type(content_type) is str else "N/A"
+    content_type_obj = FileContentType(content_type=content_type, main_type=type_main)
 
     # Use unique ID as key for Minio and get initial version ID
     response = fs.put_object(
@@ -87,7 +89,7 @@ async def add_file_entry(
     file_db.version_id = version_id
     file_db.version_num = 1
     file_db.bytes = bytes
-    file_db.content_type = content_type if type(content_type) is str else "N/A"
+    file_db.content_type = content_type_obj
     await db["files"].replace_one({"_id": ObjectId(new_file_id)}, file_db.to_mongo())
     file_out = FileOut(**file_db.dict())
 
@@ -97,7 +99,7 @@ async def add_file_entry(
         file_id=new_file_id,
         creator=user,
         bytes=bytes,
-        content_type=file_db.content_type,
+        content_type=content_type_obj,
     )
     await db["file_versions"].insert_one(new_version.to_mongo())
 
@@ -110,7 +112,8 @@ async def add_file_entry(
         "dataset_id": str(file_db.dataset_id),
         "folder_id": str(file_db.folder_id),
         "bytes": file_db.bytes,
-        "content_type": file_db.content_type,
+        "content_type": content_type_obj.content_type,
+        "content_type_main": content_type_obj.main_type,
     }
     insert_record(es, "file", doc, file_db.id)
 
@@ -210,7 +213,6 @@ async def update_file(
                 {"resource.resource_id": ObjectId(updated_file.id)}
             )
         ) is not None:
-            print("updating metadata")
             doc = {
                 "doc": {
                     "name": updated_file.name,
