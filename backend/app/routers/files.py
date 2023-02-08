@@ -146,11 +146,9 @@ async def add_file_entry(
     # Add FileVersion entry and update file
     new_version = FileVersion(
         file_id=new_file_id,
-        name=file_db.name,
         creator=user,
         version_id=version_id,
         bytes=bytes,
-        content_type=content_type_obj,
     )
     await db["file_versions"].insert_one(new_version.to_mongo())
 
@@ -213,6 +211,15 @@ async def update_file(
     if (file_q := await db["files"].find_one({"_id": ObjectId(file_id)})) is not None:
         updated_file = FileOut.from_mongo(file_q)
 
+        if (
+            file.filename != updated_file.name
+            or file.content_type != updated_file.content_type
+        ):
+            raise HTTPException(
+                status_code=400,
+                detail=f"File name and content type must match existing: {updated_file.name} & {updated_file.content_type}",
+            )
+
         # Update file in Minio and get the new version IDs
         version_id = None
         while content := file.file.read(
@@ -240,12 +247,10 @@ async def update_file(
         # Put entry in FileVersion collection
         new_version = FileVersion(
             file_id=updated_file.id,
-            name=updated_file.name,
             creator=user,
             version_id=updated_file.version_id,
             version_num=updated_file.version_num,
             bytes=updated_file.bytes,
-            content_type=updated_file.content_type,
         )
 
         await db["file_versions"].insert_one(new_version.to_mongo())
@@ -292,8 +297,8 @@ async def download_file(
 ):
     # If file exists in MongoDB, download from Minio
     if (file := await db["files"].find_one({"_id": ObjectId(file_id)})) is not None:
-        filename = file["name"]
         if version is not None:
+            file_obj = FileOut.from_mongo(file)
             # Version is specified, so get the minio ID from versions table if possible
             if (
                 file_vers := await db["file_versions"].find_one(
@@ -304,7 +309,6 @@ async def download_file(
                 content = fs.get_object(
                     settings.MINIO_BUCKET_NAME, file_id, version_id=vers.version_id
                 )
-                filename = vers.name
             else:
                 raise HTTPException(
                     status_code=404,
@@ -316,7 +320,9 @@ async def download_file(
 
         # Get content type & open file stream
         response = StreamingResponse(content.stream(settings.MINIO_UPLOAD_CHUNK_SIZE))
-        response.headers["Content-Disposition"] = "attachment; filename=%s" % filename
+        response.headers["Content-Disposition"] = (
+            "attachment; filename=%s" % file_obj.name
+        )
         # Increment download count
         await db["files"].update_one(
             {"_id": ObjectId(file_id)}, {"$inc": {"downloads": 1}}
