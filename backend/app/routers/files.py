@@ -145,9 +145,10 @@ async def add_file_entry(
 
     # Add FileVersion entry and update file
     new_version = FileVersion(
-        version_id=version_id,
         file_id=new_file_id,
+        name=file_db.name,
         creator=user,
+        version_id=version_id,
         bytes=bytes,
         content_type=content_type_obj,
     )
@@ -238,11 +239,15 @@ async def update_file(
 
         # Put entry in FileVersion collection
         new_version = FileVersion(
+            file_id=updated_file.id,
+            name=updated_file.name,
+            creator=user,
             version_id=updated_file.version_id,
             version_num=updated_file.version_num,
-            file_id=updated_file.id,
-            creator=user,
+            bytes=updated_file.bytes,
+            content_type=updated_file.content_type,
         )
+
         await db["file_versions"].insert_one(new_version.to_mongo())
         # Update entry to the file index
         doc = {
@@ -281,17 +286,37 @@ async def update_file(
 @router.get("/{file_id}")
 async def download_file(
     file_id: str,
+    version: Optional[int] = None,
     db: MongoClient = Depends(dependencies.get_db),
     fs: Minio = Depends(dependencies.get_fs),
 ):
     # If file exists in MongoDB, download from Minio
     if (file := await db["files"].find_one({"_id": ObjectId(file_id)})) is not None:
+        filename = file["name"]
+        if version is not None:
+            # Version is specified, so get the minio ID from versions table if possible
+            if (
+                file_vers := await db["file_versions"].find_one(
+                    {"file_id": ObjectId(file_id), "version_num": version}
+                )
+            ) is not None:
+                vers = FileVersion.from_mongo(file_vers)
+                content = fs.get_object(
+                    settings.MINIO_BUCKET_NAME, file_id, version_id=vers.version_id
+                )
+                filename = vers.name
+            else:
+                raise HTTPException(
+                    status_code=404,
+                    detail=f"File {file_id} version {version} not found",
+                )
+        else:
+            # If no version specified, get latest version directly
+            content = fs.get_object(settings.MINIO_BUCKET_NAME, file_id)
+
         # Get content type & open file stream
-        content = fs.get_object(settings.MINIO_BUCKET_NAME, file_id)
         response = StreamingResponse(content.stream(settings.MINIO_UPLOAD_CHUNK_SIZE))
-        response.headers["Content-Disposition"] = (
-            "attachment; filename=%s" % file["name"]
-        )
+        response.headers["Content-Disposition"] = "attachment; filename=%s" % filename
         # Increment download count
         await db["files"].update_one(
             {"_id": ObjectId(file_id)}, {"$inc": {"downloads": 1}}
@@ -337,25 +362,6 @@ async def get_file_versions(
     limit: int = 20,
 ):
     if (file := await db["files"].find_one({"_id": ObjectId(file_id)})) is not None:
-        """
-        # DEPRECATED: Get version information from Minio directly (no creator field)
-        file_versions = []
-        minio_versions = fs.list_objects(
-            settings.MINIO_BUCKET_NAME,
-            prefix=file_id,
-            include_version=True,
-        )
-        for version in minio_versions:
-            file_versions.append(
-                {
-                    "version_id": version._version_id,
-                    "latest": version._is_latest,
-                    "modified": version._last_modified,
-                }
-            )
-        return file_versions
-        """
-
         mongo_versions = []
         for ver in (
             await db["file_versions"]
