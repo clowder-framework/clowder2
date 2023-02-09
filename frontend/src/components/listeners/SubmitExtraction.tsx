@@ -23,6 +23,8 @@ import {submitDatasetExtractionAction} from "../../actions/dataset";
 import {Extractor} from "../../types/data";
 import {ClowderRjsfSelectWidget} from "../styledComponents/ClowderRjsfSelectWidget";
 import {ClowderRjsfTextWidget} from "../styledComponents/ClowderRjsfTextWidget";
+import ExtractorStatus from "./ExtractorStatus";
+
 
 type SubmitExtractionProps = {
 	fileId: string,
@@ -130,6 +132,7 @@ export default function SubmitExtraction(props: SubmitExtractionProps) {
 						<Step key="status">
 							<StepLabel>Extraction Status</StepLabel>
 							<StepContent>
+                                <ExtractorStatus />
 								{/*buttons*/}
 								<Box sx={{mb: 2}}>
 									<Button variant="contained" onClick={handleNext} sx={{mt: 1, mr: 1}}>
