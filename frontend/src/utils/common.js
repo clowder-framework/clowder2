@@ -62,7 +62,18 @@ export function dataURItoFile(dataURI) {
 }
 
 export function parseDate(dateString) {
-	return format(new Date(dateString), "yyyy-MM-dd HH:mm:ss");
+	if (dateString){
+		try {
+			return format(new Date(dateString), "yyyy-MM-dd HH:mm:ss");
+		}
+		catch (error) {
+			console.error(error);
+			return error["message"];
+		}
+	}
+	else{
+		return "Invalid time value!";
+	}
 }
 
 // get current username
