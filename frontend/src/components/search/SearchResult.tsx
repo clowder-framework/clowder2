@@ -41,7 +41,7 @@ export function SearchResult(props) {
 							}
 						</Typography>
 						<Typography variant="body2" color={theme.palette.secondary.dark}>
-							{item._index === "dataset" ? parse(item.description) : `${item.content_type} | ${item.bytes} bytes`}
+							{item._index === "dataset" ? parse(item.description) : `${item.content_type.content_type} | ${item.bytes} bytes`}
 						</Typography>
 					</Box>
 				</ListItem>
