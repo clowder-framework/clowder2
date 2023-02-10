@@ -43,6 +43,8 @@ export function submitDatasetExtractionAction(datasetId, extractorName, requestB
 	return (dispatch) => {
 		return V2.DatasetsService.getDatasetExtractApiV2DatasetsDatasetIdExtractPost(datasetId, extractorName, requestBody)
 			.then(json => {
+                console.log("After receiving data submitDatasetExtractionAction")
+                console.log(json)
 				dispatch({
 					type: SUBMIT_DATSET_EXTRACTION,
 					about: json,

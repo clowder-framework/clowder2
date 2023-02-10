@@ -217,6 +217,8 @@ export function submitFileExtractionAction(fileId, extractorName, requestBody) {
 	return (dispatch) => {
 		return V2.FilesService.getFileExtractApiV2FilesFileIdExtractPost(fileId, extractorName, requestBody)
 			.then(json => {
+                console.log("After receiving data submitDatasetExtractionAction")
+                console.log(json)
 				dispatch({
 					type: SUBMIT_FILE_EXTRACTION,
 					about: json,
