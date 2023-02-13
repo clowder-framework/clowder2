@@ -294,7 +294,7 @@ async def update_file(
             doc = {
                 "doc": {
                     "name": updated_file.name,
-                    "content_type": updated_file.content_type,
+                    "content_type": updated_file.content_typed.content_type,
                     "resource_created": updated_file.created.utcnow(),
                     "resource_creator": updated_file.creator.email,
                     "bytes": updated_file.bytes,
