@@ -2,6 +2,7 @@
 /* tslint:disable */
 /* eslint-disable */
 
+import type { FileContentType } from './FileContentType';
 import type { UserOut } from './UserOut';
 
 export type FileVersion = {
@@ -11,6 +12,6 @@ export type FileVersion = {
     file_id: string;
     creator: UserOut;
     bytes?: number;
-    content_type?: string;
+    content_type?: FileContentType;
     created?: string;
 }

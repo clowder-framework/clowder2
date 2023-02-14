@@ -15,6 +15,6 @@ export type FeedOut = {
     name: string;
     search: SearchObject;
     listeners?: Array<FeedListener>;
-    author: UserOut;
+    author?: UserOut;
     updated?: string;
 }
