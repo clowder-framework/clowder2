@@ -197,6 +197,7 @@ async def update_file(
     file_id: str,
     token=Depends(get_token),
     user=Depends(get_current_user),
+    content_type: Optional[str] = None,
     db: MongoClient = Depends(dependencies.get_db),
     fs: Minio = Depends(dependencies.get_fs),
     file: UploadFile = File(...),
@@ -232,6 +233,22 @@ async def update_file(
         updated_file.created = datetime.utcnow()
         updated_file.version_id = version_id
         updated_file.version_num = updated_file.version_num + 1
+
+        # Update byte size
+        updated_file.bytes = len(
+            fs.get_object(settings.MINIO_BUCKET_NAME, str(updated_file.id)).data
+        )
+
+        # Update content type
+        if content_type is None:
+            content_type = mimetypes.guess_type(file.filename)
+            content_type = content_type[0] if len(content_type) > 1 else content_type
+        type_main = content_type.split("/")[0] if type(content_type) is str else "N/A"
+        content_type_obj = FileContentType(
+            content_type=content_type, main_type=type_main
+        )
+        updated_file.content_type = content_type_obj
+
         await db["files"].replace_one(
             {"_id": ObjectId(file_id)}, updated_file.to_mongo()
         )
@@ -252,7 +269,8 @@ async def update_file(
                 "created": datetime.utcnow(),
                 "download": updated_file.downloads,
                 "bytes": updated_file.bytes,
-                "content_type": updated_file.content_type,
+                "content_type": content_type_obj.content_type,
+                "content_type_main": content_type_obj.main_type,
             }
         }
         update_record(es, "file", doc, updated_file.id)
@@ -266,7 +284,7 @@ async def update_file(
             doc = {
                 "doc": {
                     "name": updated_file.name,
-                    "content_type": updated_file.content_type,
+                    "content_type": content_type_obj.content_type,
                     "resource_created": updated_file.created.utcnow(),
                     "resource_creator": updated_file.creator.email,
                     "bytes": updated_file.bytes,
