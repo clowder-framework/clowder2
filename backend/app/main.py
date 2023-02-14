@@ -13,7 +13,8 @@ from app.config import settings
 from app.search.connect import connect_elasticsearch, create_index
 from app.keycloak_auth import get_token, get_current_username
 from app.routers import (
-    folders, groups,
+    folders,
+    groups,
 )
 from app.routers import (
     users,

@@ -8,15 +8,12 @@ user = {
     "last_name": "Bar",
 }
 
-member = {
-    "user": user,
-    "is_owner": True
-}
+member = {"user": user, "is_owner": True}
 
 group_data_in = {
     "name": "first group",
     "description": "a group is a container of several users",
-    "userList": [member]
+    "userList": [member],
 }
 
 user2 = {
@@ -26,10 +23,8 @@ user2 = {
     "last_name": "user",
 }
 
-member2 = {
-    "user": user2,
-    "is_owner": False
-}
+member2 = {"user": user2, "is_owner": False}
+
 
 def test_create_group(client: TestClient, headers: dict):
     response = client.post(
@@ -38,17 +33,17 @@ def test_create_group(client: TestClient, headers: dict):
     assert response.json().get("id") is not None
     assert response.status_code == 200
 
+
 def test_get_group(client: TestClient, headers: dict):
     response = client.post(
         f"{settings.API_V2_STR}/groups", json=group_data_in, headers=headers
     )
     assert response.json().get("id") is not None
     group_id = response.json().get("id")
-    response = client.get(
-        f"{settings.API_V2_STR}/groups/{group_id}", headers=headers
-    )
+    response = client.get(f"{settings.API_V2_STR}/groups/{group_id}", headers=headers)
     assert response.status_code == 200
     assert response.json().get("id") is not None
+
 
 def test_edit_group(client: TestClient, headers: dict):
     response = client.post(
@@ -62,6 +57,7 @@ def test_edit_group(client: TestClient, headers: dict):
     )
     assert response.status_code == 200
     assert response.json().get("id") is not None
+
 
 def test_add_and_remove_member(client: TestClient, headers: dict):
     response = client.post(
@@ -88,6 +84,7 @@ def test_add_and_remove_member(client: TestClient, headers: dict):
     assert response.status_code == 200
     assert response.json().get("id") is not None
 
+
 def test_delete_group(client: TestClient, headers: dict):
     response = client.post(
         f"{settings.API_V2_STR}/groups", json=group_data_in, headers=headers
@@ -98,6 +95,7 @@ def test_delete_group(client: TestClient, headers: dict):
         f"{settings.API_V2_STR}/groups/{group_id}", headers=headers
     )
     assert response.status_code == 200
+
 
 def test_search_group(client: TestClient, headers: dict):
     response = client.post(

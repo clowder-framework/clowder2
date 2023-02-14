@@ -9,7 +9,7 @@ from app.models.mongomodel import OID, MongoModel
 from app.models.users import UserOut
 
 
-class Member():
+class Member:
     user: UserOut
     isOwner: bool = False
 
