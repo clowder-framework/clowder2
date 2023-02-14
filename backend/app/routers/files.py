@@ -79,6 +79,7 @@ async def _resubmit_file_extractors(
                 job_listener_queue,
                 routing_key,
                 job_parameters,
+                user,
                 access_token,
                 db,
                 rabbitmq_client,
@@ -294,7 +295,7 @@ async def update_file(
             doc = {
                 "doc": {
                     "name": updated_file.name,
-                    "content_type": updated_file.content_typed.content_type,
+                    "content_type": updated_file.content_type.content_type,
                     "resource_created": updated_file.created.utcnow(),
                     "resource_creator": updated_file.creator.email,
                     "bytes": updated_file.bytes,
