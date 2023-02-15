@@ -86,6 +86,13 @@ following steps.
 `CLOWDER_REMOTE_HOSTNAME=http://localhost:8000 npm run codegen:v2`
 
 
-
-
+### Configuring Keycloak
+- If you are developer running the dev stack on your local machine, please import the keycloak realm setting file
+`/scripts/keycloak/clowder-realm-dev.json`
+- If you are running production docker compose on local machine, please import the keycloak realm setting file
+`/scripts/keycloak/clowder-realm-prod.json`
+- If you are deploying on the kubernetes cluster (https://clowder2.software-dev.ncsa.cloud/), please import the 
+  keycloak realm setting file `/scripts/keycloak/mini-kube-clowder-realm-prod.json`
+  
+For more details on how to set up keycloak, please refer to []()
 
