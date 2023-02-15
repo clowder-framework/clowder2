@@ -61,11 +61,6 @@ export const ExtractionHistoryTab = (props): JSX.Element => {
 	const stack = useSelector((state: RootState) => state.error.stack);
 	const dismissError = () => dispatch(resetFailedReason());
 	const [errorOpen, setErrorOpen] = useState(false);
-	const [currPageNum, setCurrPageNum] = useState<number>(0);
-	const [limit,] = useState<number>(20);
-	const [skip, setSkip] = useState<number | undefined>();
-	const [prevDisabled, setPrevDisabled] = useState<boolean>(true);
-	const [nextDisabled, setNextDisabled] = useState<boolean>(false);
 	const [executionJobsTableRow, setExecutionJobsTableRow] = useState([]);
 	const [selectedStatus, setSelectedStatus] = useState(null);
 	const [selectedCreatedTime, setSelectedCreatedTime] = useState(null);
@@ -91,43 +86,20 @@ export const ExtractionHistoryTab = (props): JSX.Element => {
 		let rows = [];
 		if (jobs.length > 0) {
 			jobs.map((job) => {
-				rows.push(createData(job["status"], job["id"], parseDate(job["created"]), job["creator"]["email"], job["duration"], job["resource_ref"]["collection"], job["resource_ref"]["resource_id"]));
+				rows.push(createData(job["status"], job["id"], parseDate(job["created"]), job["creator"]["email"],
+					job["duration"], job["resource_ref"]["collection"], job["resource_ref"]["resource_id"]));
 			});
 		}
 		setExecutionJobsTableRow(rows);
 	}, [jobs]);
 
-	useEffect(() => {
-		if (reason !== "" && reason !== null && reason !== undefined) {
-			setErrorOpen(true);
-		}
-	}, [reason]);
-
-	const handleErrorCancel = () => {
-		// reset error message and close the error window
-		dismissError();
-		setErrorOpen(false);
-	}
-	const handleErrorReport = () => {
-		window.open(`${config.GHIssueBaseURL}+${reason}&body=${encodeURIComponent(stack)}`);
-	}
-
 	return (
-		<Layout>
-			<Box className="outer-container">
-				{/*Error Message dialogue*/}
-				<ActionModal actionOpen={errorOpen} actionTitle="Something went wrong..." actionText={reason}
-							 actionBtnName="Report" handleActionBtnClick={handleErrorReport}
-							 handleActionCancel={handleErrorCancel}/>
-				{/*list of jobs*/}
-				<ExtractionJobs rows={executionJobsTableRow} headCells={headCells}
-								selectedStatus={selectedStatus}
-								selectedCreatedTime={selectedCreatedTime}
-								setSelectedStatus={setSelectedStatus}
-								setSelectedCreatedTime={setSelectedCreatedTime}
-								handleRefresh={handleRefresh}
-				/>
-			</Box>
-		</Layout>
+		<ExtractionJobs rows={executionJobsTableRow} headCells={headCells}
+						selectedStatus={selectedStatus}
+						selectedCreatedTime={selectedCreatedTime}
+						setSelectedStatus={setSelectedStatus}
+						setSelectedCreatedTime={setSelectedCreatedTime}
+						handleRefresh={handleRefresh}
+		/>
 	);
 }
