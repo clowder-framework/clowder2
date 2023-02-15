@@ -94,5 +94,5 @@ following steps.
 - If you are deploying on the kubernetes cluster (https://clowder2.software-dev.ncsa.cloud/), please import the 
   keycloak realm setting file `/scripts/keycloak/mini-kube-clowder-realm-prod.json`
   
-For more details on how to set up keycloak, please refer to []()
+**For more details on how to set up keycloak, please refer to this [Documentation](docs/source/configure-keycloak-realm.md)**
 
