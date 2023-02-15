@@ -1,22 +1,17 @@
 import React, {useEffect, useState} from "react";
 
-import {Box,} from "@mui/material";
 import {useDispatch, useSelector,} from "react-redux";
 import {RootState} from "../../types/data";
-
-import {ActionModal} from "../dialog/ActionModal";
-import config from "../../app.config";
-import {resetFailedReason} from "../../actions/common";
-import Layout from "../Layout";
 import {fetchListenerJobs} from "../../actions/listeners";
 import {ExtractionJobs} from "./ExtractionJobs";
 import {format} from "date-fns";
 import {parseDate} from "../../utils/common";
 
 
-const createData = (status: string, jobId: string, created: string, creator: string, duration: number, resourceType: string, resourceId: string) => {
+const createData = (status: string, jobId: string, listener_id: string, created: string, creator: string,
+					duration: number) => {
 	return {
-		status, jobId, created, creator, duration, resourceType, resourceId
+		status, listener_id, jobId, created, creator, duration
 	};
 }
 
@@ -24,6 +19,10 @@ const headCells = [
 	{
 		id: "status",
 		label: "",
+	},
+	{
+		id: "listener_id",
+		label: "Extractor Name"
 	},
 	{
 		id: "jobId",
@@ -41,10 +40,6 @@ const headCells = [
 		id: "duration",
 		label: "Duration",
 	},
-	{
-		id: "resourceId",
-		label: "Resource Id",
-	},
 ];
 export const ExtractionHistoryTab = (props): JSX.Element => {
 	const {datasetId, fileId} = props;
@@ -56,11 +51,6 @@ export const ExtractionHistoryTab = (props): JSX.Element => {
 
 	const jobs = useSelector((state: RootState) => state.listener.jobs);
 
-	// Error msg dialog
-	const reason = useSelector((state: RootState) => state.error.reason);
-	const stack = useSelector((state: RootState) => state.error.stack);
-	const dismissError = () => dispatch(resetFailedReason());
-	const [errorOpen, setErrorOpen] = useState(false);
 	const [executionJobsTableRow, setExecutionJobsTableRow] = useState([]);
 	const [selectedStatus, setSelectedStatus] = useState(null);
 	const [selectedCreatedTime, setSelectedCreatedTime] = useState(null);
@@ -86,8 +76,8 @@ export const ExtractionHistoryTab = (props): JSX.Element => {
 		let rows = [];
 		if (jobs.length > 0) {
 			jobs.map((job) => {
-				rows.push(createData(job["status"], job["id"], parseDate(job["created"]), job["creator"]["email"],
-					job["duration"], job["resource_ref"]["collection"], job["resource_ref"]["resource_id"]));
+				rows.push(createData(job["status"], job["id"], job["listener_id"], parseDate(job["created"]),
+					job["creator"]["email"], `${job["duration"]/1000} sec`));
 			});
 		}
 		setExecutionJobsTableRow(rows);
