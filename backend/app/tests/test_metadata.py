@@ -19,10 +19,12 @@ dummy_file = "test_upload.csv"
 metadata_definition = {
     "name": "LatLon",
     "description": "A set of Latitude/Longitude coordinates",
-    "context": {
-        "longitude": "https://schema.org/longitude",
-        "latitude": "https://schema.org/latitude",
-    },
+    "context": [
+        {
+            "longitude": "https://schema.org/longitude",
+            "latitude": "https://schema.org/latitude",
+        }
+    ],
     "fields": [
         {
             "name": "longitude",
@@ -44,7 +46,7 @@ metadata_definition = {
 metadata_definition2 = {
     "name": "AlternativeTitle",
     "description": "Alternative title",
-    "context": {"title": "https://schema.org/alternateName"},
+    "context": [{"title": "https://schema.org/alternateName"}],
     "fields": [
         {
             "name": "alternateName",

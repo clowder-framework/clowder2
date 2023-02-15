@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-from pydantic import Field, BaseModel
+from pydantic import Field, BaseModel, AnyUrl
 from typing import Optional, List, Union
 from enum import Enum
 
@@ -16,6 +16,10 @@ class Repository(MongoModel):
     repository_url: str = ""
 
 
+class ContextElement(BaseModel):
+    context_element: Union[dict, AnyUrl]
+
+
 class ExtractorInfo(BaseModel):
     """Currently for extractor_info JSON from Clowder v1 extractors for use with to /api/extractors endpoint."""
 
@@ -26,7 +30,7 @@ class ExtractorInfo(BaseModel):
     maturity: str = "Development"
     name: Optional[str] = ""
     contributors: Optional[List[str]] = []
-    contexts: Optional[List[dict]] = []
+    contexts: Optional[List[ContextElement]] = []
     repository: Optional[List[Repository]] = []
     external_services: Optional[List[str]] = []
     libraries: Optional[List[str]] = []
