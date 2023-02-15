@@ -1,11 +1,8 @@
-import React, {useState} from "react";
-import {useParams, useSearchParams} from "react-router-dom";
-import {submitDatasetExtractionAction} from "../../actions/dataset";
-import {useDispatch} from "react-redux";
-import {Button, IconButton, ListItem, ListItemText} from "@mui/material";
-import {submitFileExtractionAction} from "../../actions/file";
+import React from "react";
+import {Box, Button, IconButton, Typography} from "@mui/material";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import {ExtractorInfo} from "../../openapi/v2";
+import {theme} from "../../theme";
 
 type ListenerCardProps = {
 	id: string,
@@ -30,28 +27,31 @@ export default function ListenerItem(props: ListenerCardProps) {
 		setSelectedExtractor
 	} = props;
 
-	let [searchParams, setSearchParams] = useSearchParams();
-	const dispatch = useDispatch();
 
 	return (
-		<ListItem key={id}>
-			<Button
-				disabled={(fileId !== undefined || datasetId !== undefined)
-					?
-					false
-					:
-					true}
-				onClick={() => {
-					setOpenSubmitExtraction(true);
-					setSelectedExtractor(extractorInfo);
+		<Box key={id} sx={{ display: "flex" }}>
+			<Box sx={{flexGrow: 1}}>
+				<Button
+					disabled={(fileId !== undefined || datasetId !== undefined)
+						?
+						false
+						:
+						true}
+					onClick={() => {
+						setOpenSubmitExtraction(true);
+						setSelectedExtractor(extractorInfo);
 
-				}}>
-				{extractorName}
-			</Button>
-			<ListItemText secondary={extractorDescription}/><IconButton component="label">
+					}}
+				>
+					{extractorName}
+				</Button>
+				<Typography sx={{padding: "0.5em", color:theme.palette.secondary.main, fontSize:"14px"}}>
+					{extractorDescription}</Typography>
+			</Box>
+			<IconButton component="label">
 			<MoreVertIcon/>
 		</IconButton>
-		</ListItem>
+		</Box>
 	);
 
 }
