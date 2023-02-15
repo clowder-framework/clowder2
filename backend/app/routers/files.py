@@ -232,6 +232,12 @@ async def update_file(
         updated_file.created = datetime.utcnow()
         updated_file.version_id = version_id
         updated_file.version_num = updated_file.version_num + 1
+
+        # Update byte size
+        updated_file.bytes = len(
+            fs.get_object(settings.MINIO_BUCKET_NAME, str(updated_file.id)).data
+        )
+
         await db["files"].replace_one(
             {"_id": ObjectId(file_id)}, updated_file.to_mongo()
         )
@@ -252,7 +258,6 @@ async def update_file(
                 "created": datetime.utcnow(),
                 "download": updated_file.downloads,
                 "bytes": updated_file.bytes,
-                "content_type": updated_file.content_type,
             }
         }
         update_record(es, "file", doc, updated_file.id)
@@ -266,7 +271,6 @@ async def update_file(
             doc = {
                 "doc": {
                     "name": updated_file.name,
-                    "content_type": updated_file.content_type,
                     "resource_created": updated_file.created.utcnow(),
                     "resource_creator": updated_file.creator.email,
                     "bytes": updated_file.bytes,

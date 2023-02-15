@@ -72,7 +72,7 @@ def update_record(es_client, index_name, body, id):
     Arguments:
         es_client -- elasticsearch client which you get as return object from connect_elasticsearch()
         index_name -- name of index
-        doc -- document you want to update in the index
+        body -- document you want to update in the index
         id -- unique key by which you can identify the document when needed
     """
     try:
