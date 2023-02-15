@@ -15,7 +15,7 @@ export function FileDetails(props: FileAboutProps) {
 
 	const details = new Map<string, string>();
 	details.set("Size", prettyBytes(bytes));
-	details.set("Content type", content_type);
+	details.set("Content type", content_type.content_type);
 	details.set("Updated on", parseDate(created));
 	details.set("Uploaded as", name);
 	details.set("Uploaded by", creator.first_name + " " + creator.last_name);
