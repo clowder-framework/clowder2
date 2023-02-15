@@ -8,7 +8,7 @@ from elasticsearch import Elasticsearch
 from bson import ObjectId
 from bson.dbref import DBRef
 from fastapi.param_functions import Depends
-from pydantic import Field, validator, BaseModel, create_model
+from pydantic import Field, validator, BaseModel, create_model, AnyUrl
 from fastapi import HTTPException
 from pymongo import MongoClient
 
@@ -96,7 +96,7 @@ class MetadataDefinitionBase(MongoModel):
 
     name: str
     description: Optional[str]
-    context: Optional[dict]  # https://json-ld.org/spec/latest/json-ld/#the-context
+    context: Optional[List[Union[dict, AnyUrl]]] = []  # https://json-ld.org/spec/latest/json-ld/#the-context
     context_url: Optional[str]  # single URL applying to contents
     fields: List[MetadataField]
     # TODO: Space-level requirements?
@@ -178,7 +178,7 @@ class MetadataAgent(MongoModel):
 
 
 class MetadataBase(MongoModel):
-    context: Optional[dict]  # https://json-ld.org/spec/latest/json-ld/#the-context
+    context: Optional[List[Union[dict, AnyUrl]]] = []# https://json-ld.org/spec/latest/json-ld/#the-context
     context_url: Optional[str]  # single URL applying to contents
     definition: Optional[str]  # name of a metadata definition
     content: dict
@@ -265,7 +265,7 @@ async def validate_context(
     content: dict,
     definition: Optional[str] = None,
     context_url: Optional[str] = None,
-    context: Optional[dict] = None,
+    context: Optional[List[Union[dict, AnyUrl]]] = []
 ):
     """Convenience function for making sure incoming metadata has valid definitions or resolvable context.
 
