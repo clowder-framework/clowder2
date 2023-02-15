@@ -105,10 +105,10 @@ export const Dataset = (): JSX.Element => {
 	const setMetadata = (metadata: any) => {
 		// TODO wrap this in to a function
 		setMetadataRequestForms(prevState => {
-			// merge the contents field; e.g. lat lon
+			// merge the content field; e.g. lat lon
 			if (metadata.definition in prevState) {
-				const prevContent = prevState[metadata.definition].contents;
-				metadata.contents = {...prevContent, ...metadata.contents};
+				const prevContent = prevState[metadata.definition].content;
+				metadata.content = {...prevContent, ...metadata.content};
 			}
 			return ({...prevState, [metadata.definition]: metadata});
 		});

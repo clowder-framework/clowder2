@@ -7,17 +7,19 @@ import {Button} from "@mui/material";
 import {VersionChip} from "../versions/VersionChip";
 import {parseDate} from "../../utils/common";
 import FileMenu from "./FileMenu";
-import {theme} from "../../theme";
 import prettyBytes from 'pretty-bytes';
+import { FileOut } from "../../openapi/v2";
 
-const iconStyle = {
-	verticalAlign: "middle",
-	color: theme.palette.primary.main
+
+type FilesTableFileEntryProps = {
+	iconStyle: {}
+	selectFile: any
+	file:FileOut
 }
 
-export function FilesTableFileEntry(props) {
+export function FilesTableFileEntry(props: FilesTableFileEntryProps) {
 
-	const {selectFile, file} = props;
+	const {iconStyle, selectFile, file} = props;
 
 	return (
 		<TableRow
@@ -31,8 +33,8 @@ export function FilesTableFileEntry(props) {
 				<VersionChip versionNumber={file.version_num}/>
 			</TableCell>
 			<TableCell align="right">{parseDate(file.created)} by {file.creator.first_name} {file.creator.last_name}</TableCell>
-			<TableCell align="right">{prettyBytes(file.bytes)}</TableCell>
-			<TableCell align="right">{file.content_type}</TableCell>
+			<TableCell align="right">{file.bytes? prettyBytes(file.bytes):"NA"}</TableCell>
+			<TableCell align="right">{file.content_type? file.content_type.content_type: "NA"}</TableCell>
 			<TableCell align="right"><FileMenu file={file}/></TableCell>
 		</TableRow>
 	)

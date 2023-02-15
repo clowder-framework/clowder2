@@ -43,7 +43,7 @@ from app.models.files import FileOut, FileDB
 from app.models.folders import FolderOut, FolderIn, FolderDB
 from app.models.pyobjectid import PyObjectId
 from app.models.users import UserOut
-from app.rabbitmq.listeners import submit_dataset_message
+from app.rabbitmq.listeners import submit_dataset_job
 from app.routers.files import add_file_entry, remove_file_entry
 from app.search.connect import (
     connect_elasticsearch,
@@ -493,13 +493,14 @@ async def delete_folder(
     folder_id: str,
     db: MongoClient = Depends(dependencies.get_db),
     fs: Minio = Depends(dependencies.get_fs),
+    es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
 ):
     if (await db["folders"].find_one({"_id": ObjectId(folder_id)})) is not None:
         # delete current folder and files
         await remove_folder_entry(folder_id, db)
         async for file in db["files"].find({"folder_id": ObjectId(folder_id)}):
             file = FileOut(**file)
-            await remove_file_entry(file.id, db, fs)
+            await remove_file_entry(file.id, db, fs, es)
 
         # list all child folders and delete child folders/files
         parent_folder_id = folder_id
@@ -530,7 +531,7 @@ async def delete_folder(
                         {"folder_id": ObjectId(folder.id)}
                     ):
                         file = FileOut(**file)
-                        await remove_file_entry(file.id, db, fs)
+                        await remove_file_entry(file.id, db, fs, es)
 
         await _delete_nested_folders(parent_folder_id)
 
@@ -818,7 +819,7 @@ async def get_dataset_extract(
     request: Request,
     # parameters don't have a fixed model shape
     parameters: dict = None,
-    token: str = Depends(get_token),
+    user=Depends(get_current_user),
     credentials: HTTPAuthorizationCredentials = Security(security),
     db: MongoClient = Depends(dependencies.get_db),
     rabbitmq_client: BlockingChannel = Depends(dependencies.get_rabbitmq),
@@ -853,11 +854,12 @@ async def get_dataset_extract(
             parameters = {}
         current_routing_key = current_queue
 
-        submit_dataset_message(
+        submit_dataset_job(
             dataset_out,
             current_queue,
             current_routing_key,
             parameters,
+            user,
             access_token,
             db,
             rabbitmq_client,

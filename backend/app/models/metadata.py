@@ -121,10 +121,10 @@ class MetadataDefinitionOut(MetadataDefinitionDB):
     pass
 
 
-def validate_definition(contents: dict, metadata_def: MetadataDefinitionOut):
+def validate_definition(content: dict, metadata_def: MetadataDefinitionOut):
     """Convenience function for checking if a value matches MetadataDefinition criteria"""
     # Reject if there are any extraneous fields
-    for entry in contents:
+    for entry in content:
         found = False
         for field in metadata_def.fields:
             if field.name == entry:
@@ -138,19 +138,19 @@ def validate_definition(contents: dict, metadata_def: MetadataDefinitionOut):
 
     # For all fields in definition, are they present and matching format?
     for field in metadata_def.fields:
-        if field.name in contents:
-            value = contents[field.name]
+        if field.name in content:
+            value = content[field.name]
             t = FIELD_TYPES[field.config.type]
             try:
                 # Try casting value as required type, raise exception if unable
-                contents[field.name] = t(contents[field.name])
+                content[field.name] = t(content[field.name])
             except ValueError:
                 if field.list and type(value) is list:
                     typecast_list = []
                     try:
                         for v in value:
                             typecast_list.append(t(v))
-                        contents[field.name] = typecast_list
+                        content[field.name] = typecast_list
                     except:
                         raise HTTPException(
                             status_code=400,
@@ -166,7 +166,7 @@ def validate_definition(contents: dict, metadata_def: MetadataDefinitionOut):
                 detail=f"{metadata_def.name} requires field {field.name}",
             )
     # Return original dict with any type castings applied
-    return contents
+    return content
 
 
 class MetadataAgent(MongoModel):
@@ -181,7 +181,7 @@ class MetadataBase(MongoModel):
     context: Optional[dict]  # https://json-ld.org/spec/latest/json-ld/#the-context
     context_url: Optional[str]  # single URL applying to contents
     definition: Optional[str]  # name of a metadata definition
-    contents: dict
+    content: dict
 
     @validator("context")
     def contexts_are_valid(cls, v):
@@ -254,6 +254,7 @@ class MetadataDB(MetadataBase):
 
 
 class MetadataOut(MetadataDB):
+    resource: MongoDBRef
     description: Optional[
         str
     ]  # This will be fetched from metadata definition if one is provided (shown by GUI)
@@ -261,7 +262,7 @@ class MetadataOut(MetadataDB):
 
 async def validate_context(
     db: MongoClient,
-    contents: dict,
+    content: dict,
     definition: Optional[str] = None,
     context_url: Optional[str] = None,
     context: Optional[dict] = None,
@@ -269,7 +270,7 @@ async def validate_context(
     """Convenience function for making sure incoming metadata has valid definitions or resolvable context.
 
     Returns:
-        Metadata contents with incoming values typecast to match expected data type of any definitions
+        Metadata content with incoming values typecast to match expected data type of any definitions
     """
     if context is None and context_url is None and definition is None:
         raise HTTPException(
@@ -285,13 +286,13 @@ async def validate_context(
             md_def := await db["metadata.definitions"].find_one({"name": definition})
         ) is not None:
             md_def = MetadataDefinitionOut(**md_def)
-            contents = validate_definition(contents, md_def)
+            content = validate_definition(content, md_def)
         else:
             raise HTTPException(
                 status_code=400,
                 detail=f"{definition} is not valid metadata definition",
             )
-    return contents
+    return content
 
 
 def deep_update(orig: dict, new: dict):
@@ -310,20 +311,20 @@ async def patch_metadata(
     """Convenience function for updating original metadata contents with new entries."""
     try:
         # TODO: For list-type definitions, should we append to list instead?
-        updated_contents = deep_update(metadata["contents"], new_entries)
-        updated_contents = await validate_context(
+        updated_content = deep_update(metadata["content"], new_entries)
+        updated_content = await validate_context(
             db,
-            updated_contents,
+            updated_content,
             metadata.get("definition", None),
             metadata.get("context_url", None),
             metadata.get("context", None),
         )
-        metadata["contents"] = updated_contents
+        metadata["content"] = updated_content
         db["metadata"].replace_one(
             {"_id": metadata["_id"]}, MetadataDB(**metadata).to_mongo()
         )
         # Update entry to the metadata index
-        doc = {"doc": {"contents": metadata["contents"]}}
+        doc = {"doc": {"content": metadata["content"]}}
         update_record(es, "metadata", doc, metadata["_id"])
     except Exception as e:
         raise e

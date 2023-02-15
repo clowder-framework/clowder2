@@ -111,8 +111,12 @@ export class FilesService {
         });
     }
 
-    /**
+     /**
      * Get File Extract
+     * Submit file to an extractor.
+     *
+     * :param file_id: UUID of file
+     * :param info: must include "extractor" field with name, can also include key/value pairs in "parameters"
      * @param fileId
      * @param extractorName
      * @param requestBody
@@ -132,6 +136,33 @@ export class FilesService {
             },
             body: requestBody,
             mediaType: 'application/json',
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+
+    /**
+     * Resubmit File Extractions
+     * This route will check metadata. We get the extractors run from metadata from extractors.
+     * Then they are resubmitted. At present parameters are not stored. This will change once Jobs are
+     * implemented.
+     *
+     * Arguments:
+     * file_id: Id of file
+     * credentials: credentials of logged in user
+     * db: MongoDB Client
+     * rabbitmq_client: Rabbitmq Client
+     * @param fileId
+     * @returns any Successful Response
+     * @throws ApiError
+     */
+    public static resubmitFileExtractionsApiV2FilesFileIdExtractPost(
+        fileId: string,
+    ): CancelablePromise<any> {
+        return __request({
+            method: 'POST',
+            path: `/api/v2/files/${fileId}/extract`,
             errors: {
                 422: `Validation Error`,
             },

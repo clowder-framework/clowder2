@@ -6,7 +6,7 @@ from fastapi import Depends
 from pymongo import MongoClient
 
 from app.config import settings
-from app.mongo import crete_mongo_indexes
+from app.mongo import create_mongo_indexes
 from app.models.errors import Error
 from app.models.mongomodel import MongoDBRef
 
@@ -17,7 +17,7 @@ async def _get_db() -> Generator:
     """Duplicate of app.dependencies.get_db(), but importing that causes circular import."""
     mongo_client = motor.motor_asyncio.AsyncIOMotorClient(settings.MONGODB_URL)
     db = mongo_client[settings.MONGO_DATABASE]
-    await crete_mongo_indexes(db)
+    await create_mongo_indexes(db)
     yield db
 
 

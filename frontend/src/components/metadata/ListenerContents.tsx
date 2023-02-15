@@ -9,14 +9,14 @@ const textStyle = {
 	color: theme.palette.primary,
 };
 
-type ListenerContentsEntry = {
-	contents: any,
+type ListenerContentEntry = {
+	content: any,
 }
 
 
 
-export const ListenerContents = (props: ListenerContentsEntry) => {
-	const {contents} = props;
+export const ListenerContents = (props: ListenerContentEntry) => {
+	const {content} = props;
 
-	return <div><pre>{JSON.stringify(contents, null, 2)}</pre></div>
+	return <div><pre>{JSON.stringify(content, null, 2)}</pre></div>
 }

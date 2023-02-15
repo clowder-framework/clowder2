@@ -44,9 +44,9 @@ async def _build_metadata_db_obj(
 ):
     """Convenience function for building a MetadataDB object from incoming metadata plus a file. Agent and file version
     will be determined based on inputs if they are not provided directly."""
-    contents = await validate_context(
+    content = await validate_context(
         db,
-        metadata_in.contents,
+        metadata_in.content,
         metadata_in.definition,
         metadata_in.context_url,
         metadata_in.context,
@@ -94,7 +94,7 @@ async def _build_metadata_db_obj(
 
     # Apply any typecast fixes from definition validation
     metadata_in = metadata_in.dict()
-    metadata_in["contents"] = contents
+    metadata_in["content"] = content
     return MetadataDB(
         **metadata_in,
         resource=file_ref,
@@ -118,6 +118,9 @@ async def add_file_metadata(
     """
     if (file := await db["files"].find_one({"_id": ObjectId(file_id)})) is not None:
         file = FileOut(**file)
+        current_file_version = file.version_num
+        # change metadata_in file version to match the current file version
+        metadata_in.file_version = current_file_version
         # If dataset already has metadata using this definition, don't allow duplication
         definition = metadata_in.definition
         if definition is not None:
@@ -146,13 +149,13 @@ async def add_file_metadata(
             "resource_type": "file",
             "created": metadata_out.created.utcnow(),
             "creator": user.email,
-            "contents": metadata_out.contents,
+            "content": metadata_out.content,
             "context_url": metadata_out.context_url,
             "context": metadata_out.context,
             "name": file.name,
             "folder_id": str(file.folder_id),
             "dataset_id": str(file.dataset_id),
-            "content_type": file.content_type,
+            "content_type": file.content_type.content_type,
             "resource_created": file.created.utcnow(),
             "resource_creator": file.creator.email,
             "bytes": file.bytes,
@@ -193,7 +196,6 @@ async def replace_file_metadata(
             target_version = version
         else:
             target_version = file.version_num
-        query["resource.version"] = target_version
 
         # Filter by MetadataAgent
         extractor_info = metadata_in.extractor
@@ -215,8 +217,8 @@ async def replace_file_metadata(
 
         if (md := await db["metadata"].find_one(query)) is not None:
             # Metadata exists, so prepare the new document we are going to replace it with
-            md_obj = _build_metadata_db_obj(
-                db, metadata_in, file, agent=agent, version=target_version
+            md_obj = await _build_metadata_db_obj(
+                db, metadata_in, file, user, agent=agent, version=target_version
             )
             new_metadata = await db["metadata"].replace_one(
                 {"_id": md["_id"]}, md_obj.to_mongo()
@@ -225,8 +227,8 @@ async def replace_file_metadata(
             metadata_out = MetadataOut.from_mongo(found)
 
             # Update entry to the metadata index
-            doc = {"doc": {"contents": metadata_out["contents"]}}
-            update_record(es, "metadata", doc, metadata_out["_id"])
+            doc = {"doc": {"contents": found["contents"]}}
+            update_record(es, "metadata", doc, md["_id"])
             return metadata_out
         else:
             raise HTTPException(status_code=404, detail=f"No metadata found to update")
@@ -248,6 +250,19 @@ async def update_file_metadata(
     Returns:
         Metadata document that was updated
     """
+
+    # check if metadata with file version exists, replace metadata if none exists
+    if (
+        version_md := await db["metadata"].find_one(
+            {
+                "resource.resource_id": ObjectId(file_id),
+                "resource.version": metadata_in.file_version,
+            }
+        )
+    ) is None:
+        result = await replace_file_metadata(metadata_in, file_id, user, db, es)
+        return result
+
     if (file := await db["files"].find_one({"_id": ObjectId(file_id)})) is not None:
         query = {"resource.resource_id": ObjectId(file_id)}
         file = FileOut(**file)

@@ -25,7 +25,7 @@ class FeedIn(JobFeed):
 
 
 class FeedDB(JobFeed, MongoModel):
-    author: UserOut
+    author: Optional[UserOut] = None
     updated: datetime = Field(default_factory=datetime.utcnow)
 
 

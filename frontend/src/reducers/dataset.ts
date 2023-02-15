@@ -14,7 +14,7 @@ import {Author, Dataset, DatasetState} from "../types/data";
 import {FileOut as File} from "../openapi/v2";
 
 const defaultState: DatasetState = {
-	files: [],
+	files: <File[]>[],
 	about: <Dataset>{"author":<Author>{}},
 	datasets: [],
 	newDataset: <Dataset>{},

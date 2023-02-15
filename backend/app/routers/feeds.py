@@ -17,9 +17,8 @@ from app.models.feeds import (
     FeedDB,
     FeedOut,
 )
-from app.models.search import SearchIndexContents
 from app.search.connect import check_search_result
-from app.rabbitmq.listeners import submit_file_message
+from app.rabbitmq.listeners import submit_file_job
 
 router = APIRouter()
 
@@ -78,9 +77,9 @@ async def check_feed_listeners(
         ) is not None:
             listener_info = EventListenerOut.from_mongo(listener_db)
             queue = listener_info.name
-            routing_key = ""
+            routing_key = listener_info.name
             parameters = {}
-            submit_file_message(file_out, queue, routing_key, parameters)
+            await submit_file_job(file_out, queue, routing_key, parameters)
 
     return listeners_found
 

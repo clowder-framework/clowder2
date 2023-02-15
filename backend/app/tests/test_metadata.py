@@ -57,12 +57,12 @@ metadata_definition2 = {
 }
 
 metadata_using_definition = {
-    "contents": {"latitude": "24.4", "longitude": 32.04},
+    "content": {"latitude": "24.4", "longitude": 32.04},
     "definition": "LatLon",
 }
 
 metadata_using_context_url = {
-    "contents": {"alternateName": "different name"},
+    "content": {"alternateName": "different name"},
     "context_url": "http://clowderframework.org",
 }
 
@@ -116,7 +116,7 @@ def test_dataset_create_metadata_definition(client: TestClient, headers: dict):
 
     # Add metadata that doesn't match definition
     bad_md = dict(metadata_using_definition)
-    bad_md["contents"] = {"x": "24.4", "y": 32.04}
+    bad_md["content"] = {"x": "24.4", "y": 32.04}
     response = client.post(
         f"{settings.API_V2_STR}/datasets/{dataset_id}/metadata",
         headers=headers,
@@ -160,13 +160,11 @@ async def test_dataset_patch_metadata_definition(client: TestClient, headers: di
     # header
     metadata_query.append({"index": "metadata"})
     # body
-    metadata_query.append({"query": {"match": {"contents.latitude": "24.4"}}})
+    metadata_query.append({"query": {"match": {"content.latitude": "24.4"}}})
     result = search_index(es, "metadata", metadata_query)
     print(result)
     assert (
-        result.body["responses"][0]["hits"]["hits"][0]["_source"]["contents"][
-            "latitude"
-        ]
+        result.body["responses"][0]["hits"]["hits"][0]["_source"]["content"]["latitude"]
         == 24.4
     )
 
@@ -197,12 +195,12 @@ async def test_dataset_create_metadata_context_url(client: TestClient, headers: 
     metadata_query.append({"index": "metadata"})
     # body
     metadata_query.append(
-        {"query": {"match": {"contents.alternateName": "different name"}}}
+        {"query": {"match": {"content.alternateName": "different name"}}}
     )
     result = search_index(es, "metadata", metadata_query)
     print(result)
     assert (
-        result.body["responses"][0]["hits"]["hits"][0]["_source"]["contents"][
+        result.body["responses"][0]["hits"]["hits"][0]["_source"]["content"][
             "alternateName"
         ]
         == "different name"
@@ -295,7 +293,7 @@ def test_file_create_metadata_definition(client: TestClient, headers: dict):
 
     # Add metadata that doesn't match definition
     bad_md = dict(metadata_using_definition)
-    bad_md["contents"] = {"x": "24.4", "y": 32.04}
+    bad_md["content"] = {"x": "24.4", "y": 32.04}
     response = client.post(
         f"{settings.API_V2_STR}/datasets/{dataset_id}/metadata",
         headers=headers,
