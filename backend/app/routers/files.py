@@ -239,6 +239,12 @@ async def update_file(
         updated_file.created = datetime.utcnow()
         updated_file.version_id = version_id
         updated_file.version_num = updated_file.version_num + 1
+
+        # Update byte size
+        updated_file.bytes = len(
+            fs.get_object(settings.MINIO_BUCKET_NAME, str(updated_file.id)).data
+        )
+
         await db["files"].replace_one(
             {"_id": ObjectId(file_id)}, updated_file.to_mongo()
         )
