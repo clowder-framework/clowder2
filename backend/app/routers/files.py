@@ -213,7 +213,7 @@ async def update_file(
 
         if (
             file.filename != updated_file.name
-            or file.content_type != updated_file.content_type
+            or file.content_type != updated_file.content_type.content_type
         ):
             raise HTTPException(
                 status_code=400,
@@ -262,7 +262,7 @@ async def update_file(
                 "created": datetime.utcnow(),
                 "download": updated_file.downloads,
                 "bytes": updated_file.bytes,
-                "content_type": updated_file.content_type,
+                "content_type": updated_file.content_type.content_type,
             }
         }
         update_record(es, "file", doc, updated_file.id)
@@ -276,7 +276,7 @@ async def update_file(
             doc = {
                 "doc": {
                     "name": updated_file.name,
-                    "content_type": updated_file.content_type,
+                    "content_type": updated_file.content_type.content_type,
                     "resource_created": updated_file.created.utcnow(),
                     "resource_creator": updated_file.creator.email,
                     "bytes": updated_file.bytes,
