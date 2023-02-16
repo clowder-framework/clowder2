@@ -312,8 +312,8 @@ async def download_file(
 ):
     # If file exists in MongoDB, download from Minio
     if (file := await db["files"].find_one({"_id": ObjectId(file_id)})) is not None:
+        file_obj = FileOut.from_mongo(file)
         if version is not None:
-            file_obj = FileOut.from_mongo(file)
             # Version is specified, so get the minio ID from versions table if possible
             if (
                 file_vers := await db["file_versions"].find_one(
