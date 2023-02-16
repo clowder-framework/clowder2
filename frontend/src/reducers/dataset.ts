@@ -6,7 +6,8 @@ import {
 	DELETE_DATASET,
 	CREATE_DATASET,
 	RESET_CREATE_DATASET,
-	DOWNLOAD_DATASET
+	DOWNLOAD_DATASET,
+    SUBMIT_DATASET_EXTRACTION
 } from "../actions/dataset";
 import {CREATE_FILE, UPDATE_FILE, DELETE_FILE, RESET_CREATE_FILE} from "../actions/file";
 import {DataAction} from "../types/action";
@@ -40,6 +41,9 @@ const dataset = (state = defaultState, action: DataAction) => {
 		});
 	case RESET_CREATE_FILE:
 		return Object.assign({}, state, {newFile: {}})
+    case SUBMIT_DATASET_EXTRACTION:
+        console.log(action)
+		return Object.assign({}, state, {job_id: action.job_id})
 	case UPDATE_FILE:
 		return Object.assign({}, state, {
 			files: state.files.map(file => file.id === action.file.id ? action.file: file),
