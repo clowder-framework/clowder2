@@ -102,8 +102,6 @@ export function fetchJobSummary(jobId){
 	return (dispatch) => {
 		return V2.JobsService.getJobSummaryApiV2JobsJobIdSummaryGet(jobId)
 		.then(json => {
-                console.log("INSIDE fetchJobSummary")
-                console.log(json)
 				dispatch({
 					type: FETCH_JOB_SUMMARY,
 					jobs: json,
@@ -122,8 +120,6 @@ export function fetchJobUpdates(jobId){
 	return (dispatch) => {
 		return V2.JobsService.getJobUpdatesApiV2JobsJobIdUpdatesGet(jobId)
 		.then(json => {
-                console.log("INSIDE fetchJobUpdates")
-                console.log(json)
 				dispatch({
 					type: FETCH_JOB_UPDATES,
 					jobs: json,
