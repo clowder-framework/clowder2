@@ -30,9 +30,6 @@ function Row(props: { row: ReturnType<typeof createData> }) {
             {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
           </IconButton>
         </TableCell >
-        <TableCell component="th" scope="row" style={{ borderBottom: "none" }}>
-            <Button>{row.name}</Button>
-        </TableCell>
         <TableCell style={{ borderBottom: "none" }}>{row.started}</TableCell>
         <TableCell style={{ borderBottom: "none" }}>{row.latestUpdated}</TableCell>
         <TableCell style={{ borderBottom: "none" }}>{row.latestStatus}</TableCell>
@@ -53,14 +50,16 @@ function Row(props: { row: ReturnType<typeof createData> }) {
   );
 }
 
-export default function ExtractorStatus() {
-  return (
+export default function ExtractorStatus(props: { job_id: string; }) {
+    let job_id = props.job_id
+    console.log("Job id updated")
+    console.log(job_id)
+    return (
     <TableContainer>
       <Table aria-label="collapsible table">
         <TableHead>
           <TableRow>
             <TableCell />
-            <TableCell><b>Extractor</b></TableCell>
             <TableCell><b>Started</b></TableCell>
             <TableCell><b>Latest Updated</b></TableCell>
             <TableCell><b>Latest Status</b></TableCell>
@@ -82,14 +81,12 @@ export default function ExtractorStatus() {
 // Currently used to render the static UI
 
 function createData(
-    name: string,
     started: string,
     latestUpdated: string,
     latestStatus: string,
     timeElapsed: string
   ) {
     return {
-      name,
       started,
       latestUpdated,
       latestStatus,
@@ -121,6 +118,6 @@ function createData(
   
   
   const rows = [
-    createData('word-count-example', 'Wednesday, December 9, 2020 3:46:55.319 PM', 'Wednesday, December 9, 2020 4:32:55.319 PM', 'DONE', '2 mins'),
+    createData('Wednesday, December 9, 2020 3:46:55.319 PM', 'Wednesday, December 9, 2020 4:32:55.319 PM', 'DONE', '2 mins'),
   ];
   

@@ -1,5 +1,5 @@
 import React, {useState} from "react";
-import {useDispatch} from "react-redux";
+import {useDispatch, useSelector} from "react-redux";
 import {
 	Box,
 	Button,
@@ -19,8 +19,9 @@ import {ListenerInfo} from "./ListenerInfo";
 import Form from "@rjsf/material-ui";
 import {FormProps} from "@rjsf/core";
 import {submitFileExtractionAction} from "../../actions/file";
+import {fetchJobSummary, fetchJobUpdates} from "../../actions/listeners";
 import {submitDatasetExtractionAction} from "../../actions/dataset";
-import {Extractor} from "../../types/data";
+import {Extractor, RootState} from "../../types/data";
 import {ClowderRjsfSelectWidget} from "../styledComponents/ClowderRjsfSelectWidget";
 import {ClowderRjsfTextWidget} from "../styledComponents/ClowderRjsfTextWidget";
 import ExtractorStatus from "./ExtractorStatus";
@@ -45,6 +46,8 @@ export default function SubmitExtraction(props: SubmitExtractionProps) {
 	const {fileId, datasetId, open, handleClose, selectedExtractor} = props;
 	const dispatch = useDispatch();
 
+	const job_id = useSelector((state: RootState) => state.job_id);
+
 	const submitFileExtraction =
 		(fileId: string | undefined, extractorName: string | undefined, requestBody: FormData) => dispatch(submitFileExtractionAction(fileId, extractorName, requestBody));
 	const submitDatasetExtraction =
@@ -53,6 +56,7 @@ export default function SubmitExtraction(props: SubmitExtractionProps) {
 		const extractorName = selectedExtractor.name
 		if (fileId === undefined && datasetId !== undefined) {
 			submitDatasetExtraction(datasetId, extractorName, formData);
+            console.log("handling next")
 			handleNext();
 		} else if (fileId !== undefined) {
 			submitFileExtraction(fileId, extractorName, formData);
@@ -62,6 +66,9 @@ export default function SubmitExtraction(props: SubmitExtractionProps) {
 
 	const [activeStep, setActiveStep] = useState(0);
 	const handleNext = () => {
+        if (activeStep == 0) {
+            dispatch(fetchJobSummary("63d146bc79a3d39c71d0e0b1"))
+        }
 		setActiveStep((prevActiveStep) => prevActiveStep + 1);
 	};
 	const handleBack = () => {
@@ -132,7 +139,9 @@ export default function SubmitExtraction(props: SubmitExtractionProps) {
 						<Step key="status">
 							<StepLabel>Extraction Status</StepLabel>
 							<StepContent>
-                                <ExtractorStatus />
+                                <ExtractorStatus 
+                                    job_id={job_id}
+                                />
 								{/*buttons*/}
 								<Box sx={{mb: 2}}>
 									<Button variant="contained" onClick={handleNext} sx={{mt: 1, mr: 1}}>
