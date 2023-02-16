@@ -14,6 +14,7 @@ from app.search.connect import connect_elasticsearch, create_index
 from app.keycloak_auth import get_token, get_current_username
 from app.routers import (
     folders,
+    groups,
 )
 from app.routers import (
     users,
@@ -143,6 +144,12 @@ api_router.include_router(
     feeds.router,
     prefix="/feeds",
     tags=["feeds"],
+    dependencies=[Depends(get_current_username)],
+)
+api_router.include_router(
+    groups.router,
+    prefix="/groups",
+    tags=["groups"],
     dependencies=[Depends(get_current_username)],
 )
 api_router.include_router(keycloak.router, prefix="/auth", tags=["auth"])
