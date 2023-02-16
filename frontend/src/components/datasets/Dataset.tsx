@@ -27,7 +27,10 @@ import {DatasetDetails} from "./DatasetDetails";
 import {FormatListBulleted, InsertDriveFile} from "@material-ui/icons";
 import {MainBreadcrumbs} from "../navigation/BreadCrumb";
 import {Listeners} from "../listeners/Listeners";
-import AssessmentIcon from '@mui/icons-material/Assessment';
+import AssessmentIcon from "@mui/icons-material/Assessment";
+import HistoryIcon from "@mui/icons-material/History";
+import BuildIcon from "@mui/icons-material/Build";
+import {ExtractionHistoryTab} from "../listeners/ExtractionHistoryTab";
 
 const tab = {
 	fontStyle: "normal",
@@ -122,7 +125,7 @@ export const Dataset = (): JSX.Element => {
 				// update existing metadata
 				updateDatasetMetadata(datasetId, metadataRequestForms[key]);
 			} else {
-				// post new metadata if metadata id doesn't exist
+				// post new metadata if metadata id doesn"t exist
 				createDatasetMetadata(datasetId, metadataRequestForms[key]);
 			}
 		});
@@ -168,12 +171,12 @@ export const Dataset = (): JSX.Element => {
 						 actionBtnName="Report" handleActionBtnClick={handleErrorReport}
 						 handleActionCancel={handleErrorCancel}/>
 		 	<Grid container>
-				<Grid item xs={10} sx={{display: 'flex', alignItems: 'center'}}>
+				<Grid item xs={10} sx={{display: "flex", alignItems: "center"}}>
 					<MainBreadcrumbs paths={paths}/>
 				</Grid>
 			</Grid>
 			<Grid container>
-				<Grid item xs={8} sx={{display: 'flex', alignItems: 'center'}}>
+				<Grid item xs={8} sx={{display: "flex", alignItems: "center"}}>
 					<Typography variant="h3" paragraph>{about["name"]}</Typography>
 				</Grid>
 				<Grid item xs={4}>
@@ -189,8 +192,10 @@ export const Dataset = (): JSX.Element => {
 							 label="User Metadata" {...a11yProps(1)} disabled={false}/>
 						 <Tab icon={<AssessmentIcon/>} iconPosition="start" sx={tab}
 							 label="Extracted Metadata" {...a11yProps(2)} disabled={false}/>
-						<Tab icon={<AssessmentIcon/>} iconPosition="start" sx={tab}
+						<Tab icon={<BuildIcon/>} iconPosition="start" sx={tab}
 							 label="Extractors" {...a11yProps(3)} disabled={false}/>
+						 <Tab icon={<HistoryIcon/>} iconPosition="start" sx={tab}
+							 label="Extraction History" {...a11yProps(4)} disabled={false}/>
 
 					</Tabs>
 					<TabPanel value={selectedTabIndex} index={0}>
@@ -234,11 +239,11 @@ export const Dataset = (): JSX.Element => {
 													 resourceType="dataset" resourceId={datasetId}/>
 					</TabPanel>
 					<TabPanel value={selectedTabIndex} index={3}>
-						<Listeners
-							datasetId={datasetId}
-						/>
+						<Listeners datasetId={datasetId}/>
 					</TabPanel>
-					<TabPanel value={selectedTabIndex} index={4}/>
+					<TabPanel value={selectedTabIndex} index={4}>
+						<ExtractionHistoryTab datasetId={datasetId} />
+					</TabPanel>
 				</Grid>
 				<Grid item>
 					<DatasetDetails details={about}/>

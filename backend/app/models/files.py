@@ -20,13 +20,12 @@ class FileContentType(BaseModel):
 
 
 class FileVersion(MongoModel):
-    version_id: str
-    version_num: int = 1
     file_id: PyObjectId
     creator: UserOut
-    bytes: int = 0
-    content_type: FileContentType = FileContentType()
     created: datetime = Field(default_factory=datetime.utcnow)
+    version_id: str
+    version_num: int = 1
+    bytes: int = 0
 
 
 class FileBase(MongoModel):

@@ -45,6 +45,10 @@ const headCells = [
 		label: "Duration",
 	},
 	{
+		id: "resourceType",
+		label: "Resource Type",
+	},
+	{
 		id: "resourceId",
 		label: "Resource Id",
 	},
@@ -110,7 +114,8 @@ export const ExtractionHistory = (): JSX.Element => {
 		let rows = [];
 		if (jobs.length > 0) {
 			jobs.map((job) => {
-				rows.push(createData(job["status"], job["id"], parseDate(job["created"]), job["creator"]["email"], job["duration"], job["resource_ref"]["collection"], job["resource_ref"]["resource_id"]));
+				rows.push(createData(job["status"], job["id"], parseDate(job["created"]), job["creator"]["email"],
+					`${job["duration"]/1000} sec`, job["resource_ref"]["collection"], job["resource_ref"]["resource_id"]));
 			});
 		}
 		setExecutionJobsTableRow(rows);
