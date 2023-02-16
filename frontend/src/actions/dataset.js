@@ -38,16 +38,14 @@ export function fetchFoldersInDataset(datasetId, parentFolder){
 }
 
 
-export const SUBMIT_DATSET_EXTRACTION = "SUBMIT_DATASET_EXTRACTION";
+export const SUBMIT_DATASET_EXTRACTION = "SUBMIT_DATASET_EXTRACTION";
 export function submitDatasetExtractionAction(datasetId, extractorName, requestBody){
 	return (dispatch) => {
 		return V2.DatasetsService.getDatasetExtractApiV2DatasetsDatasetIdExtractPost(datasetId, extractorName, requestBody)
 			.then(json => {
-                console.log("After receiving data submitDatasetExtractionAction")
-                console.log(json)
 				dispatch({
-					type: SUBMIT_DATSET_EXTRACTION,
-					about: json,
+					type: SUBMIT_DATASET_EXTRACTION,
+					job_id: json,
 					receivedAt: Date.now(),
 				});
 			})
