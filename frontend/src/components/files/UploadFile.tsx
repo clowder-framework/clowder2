@@ -11,7 +11,7 @@ import {MetadataIn} from "../../openapi/v2";
 import {useNavigate} from "react-router-dom";
 import {fileCreated, resetFileCreated} from "../../actions/file";
 
-import LoadingOverlay from 'react-loading-overlay-ts';
+import LoadingOverlay from "react-loading-overlay-ts";
 
 type UploadFileProps ={
 	selectedDatasetId: string|undefined,
@@ -22,7 +22,7 @@ type UploadFileProps ={
 export const UploadFile:React.FC<UploadFileProps> = (props: UploadFileProps) => {
 	const {selectedDatasetId, folderId, selectedDatasetName} = props;
 
-    const [loading, setLoading] = useState(false);
+	const [loading, setLoading] = useState(false);
 
 	const dispatch = useDispatch();
 	// @ts-ignore
@@ -45,7 +45,7 @@ export const UploadFile:React.FC<UploadFileProps> = (props: UploadFileProps) => 
 	const onFileSave = (formData:any) =>{
 		setFileRequestForm(formData);
 		handleNext();
-	}
+	};
 	// step 2
 	const setMetadata = (metadata:any) =>{
 		// TODO wrap this in to a function
@@ -57,7 +57,7 @@ export const UploadFile:React.FC<UploadFileProps> = (props: UploadFileProps) => 
 			}
 			return ({...prevState, [metadata.definition]: metadata});
 		});
-	}
+	};
 
 	// step
 	const [activeStep, setActiveStep] = useState(0);
@@ -66,21 +66,21 @@ export const UploadFile:React.FC<UploadFileProps> = (props: UploadFileProps) => 
 	};
 	const handleBack = () => {
 		setActiveStep((prevActiveStep) => prevActiveStep - 1);
-	}
+	};
 
 	// finish button post dataset; dataset ID triggers metadata posting
 	const handleFinish = () => {
-        // Triggers spinner
-        setLoading(true);
+		// Triggers spinner
+		setLoading(true);
 
 		// create dataset
 		uploadFile(selectedDatasetId, folderId, fileRequestForm);
-	}
+	};
 
 	useEffect(() => {
 		if (newFile.id) {
-            // Stop spinner
-            setLoading(false);
+			// Stop spinner
+			setLoading(false);
 
 			// post new metadata
 			const file = newFile;
@@ -125,14 +125,14 @@ export const UploadFile:React.FC<UploadFileProps> = (props: UploadFileProps) => 
 						{/*buttons*/}
 						<Box sx={{ mb: 2 }}>
 							<>
-                                <LoadingOverlay active={loading} spinner text='Uploading file...'>
-                                    <Button variant="contained" onClick={handleFinish} sx={{ mt: 1, mr: 1 }}>
+								<LoadingOverlay active={loading} spinner text="Uploading file...">
+									<Button variant="contained" onClick={handleFinish} sx={{ mt: 1, mr: 1 }}>
                                         Finish
-                                    </Button>
-                                    <Button onClick={handleBack} sx={{ mt: 1, mr: 1 }}>
+									</Button>
+									<Button onClick={handleBack} sx={{ mt: 1, mr: 1 }}>
                                         Back
-                                    </Button>
-                                </LoadingOverlay>
+									</Button>
+								</LoadingOverlay>
 							</>
 						</Box>
 					</StepContent>
