@@ -11,6 +11,7 @@ from app.models.listeners import EventListenerDB, EventListenerOut, ExtractorInf
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 
 def callback(ch, method, properties, body):
