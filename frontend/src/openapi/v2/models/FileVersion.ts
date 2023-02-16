@@ -7,7 +7,6 @@ import type { UserOut } from './UserOut';
 export type FileVersion = {
     id?: string;
     file_id: string;
-	file_name: string;
     creator: UserOut;
     created?: string;
     version_id: string;
