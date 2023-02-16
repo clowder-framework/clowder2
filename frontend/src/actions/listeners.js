@@ -95,3 +95,39 @@ export function fetchListenerJobs(listenerId, status, userId=null, fileId=null, 
 			});
 	}
 }
+
+
+export const FETCH_JOB_SUMMARY = "FETCH_JOB_SUMMARY";
+export function fetchJobSummary(jobId){
+	return (dispatch) => {
+		return V2.JobsService.getJobSummaryApiV2JobsJobIdSummaryGet(jobId)
+		.then(json => {
+				dispatch({
+					type: FETCH_JOB_SUMMARY,
+					jobs: json,
+					receivedAt: Date.now(),
+				});
+			})
+			.catch(reason => {
+				dispatch(handleErrors(reason, fetchListenerLabels()));
+			});
+	}
+}
+
+
+export const FETCH_JOB_UPDATES = "FETCH_JOB_UPDATES";
+export function fetchJobUpdates(jobId){
+	return (dispatch) => {
+		return V2.JobsService.getJobUpdatesApiV2JobsJobIdUpdatesGet(jobId)
+		.then(json => {
+				dispatch({
+					type: FETCH_JOB_UPDATES,
+					jobs: json,
+					receivedAt: Date.now(),
+				});
+			})
+			.catch(reason => {
+				dispatch(handleErrors(reason, fetchListenerLabels()));
+			});
+	}
+}
