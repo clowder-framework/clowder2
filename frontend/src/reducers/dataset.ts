@@ -42,7 +42,6 @@ const dataset = (state = defaultState, action: DataAction) => {
 	case RESET_CREATE_FILE:
 		return Object.assign({}, state, {newFile: {}})
     case SUBMIT_DATASET_EXTRACTION:
-        console.log(action)
 		return Object.assign({}, state, {job_id: action.job_id})
 	case UPDATE_FILE:
 		return Object.assign({}, state, {
