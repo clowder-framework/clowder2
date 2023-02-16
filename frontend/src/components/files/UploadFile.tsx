@@ -100,44 +100,44 @@ export const UploadFile:React.FC<UploadFileProps> = (props: UploadFileProps) => 
 	},[newFile]);
 
 	return (
-		<Box sx={{padding: "5%"}}>
-			<Stepper activeStep={activeStep} orientation="vertical">
+		<LoadingOverlay active={loading} spinner text="Uploading file...">
+			<Box sx={{padding: "5%"}}>
+				<Stepper activeStep={activeStep} orientation="vertical">
 
-				{/* step 1 attach files */}
-				<Step key="attach-files">
-					<StepLabel>Attach Files</StepLabel>
-					<StepContent>
-						<Typography>Upload files to the dataset.</Typography>
-						<Box>
-							<UploadFileModal onSave={onFileSave}/>
-						</Box>
-					</StepContent>
-				</Step>
+					{/* step 1 attach files */}
+					<Step key="attach-files">
+						<StepLabel>Attach Files</StepLabel>
+						<StepContent>
+							<Typography>Upload files to the dataset.</Typography>
+							<Box>
+								<UploadFileModal onSave={onFileSave}/>
+							</Box>
+						</StepContent>
+					</Step>
 
-				{/*step 2 Metadata*/}
-				<Step key="fill-in-metadata">
-					<StepLabel>Fill In Metadata</StepLabel>
-					<StepContent>
-						<Typography>Provide us your metadata about file.</Typography>
-						<Box>
-							<CreateMetadata setMetadata={setMetadata}/>
-						</Box>
-						{/*buttons*/}
-						<Box sx={{ mb: 2 }}>
-							<>
-								<LoadingOverlay active={loading} spinner text="Uploading file...">
+					{/*step 2 Metadata*/}
+					<Step key="fill-in-metadata">
+						<StepLabel>Fill In Metadata</StepLabel>
+						<StepContent>
+							<Typography>Provide us your metadata about file.</Typography>
+							<Box>
+								<CreateMetadata setMetadata={setMetadata}/>
+							</Box>
+							{/*buttons*/}
+							<Box sx={{ mb: 2 }}>
+								<>
 									<Button variant="contained" onClick={handleFinish} sx={{ mt: 1, mr: 1 }}>
                                         Finish
 									</Button>
 									<Button onClick={handleBack} sx={{ mt: 1, mr: 1 }}>
                                         Back
 									</Button>
-								</LoadingOverlay>
-							</>
-						</Box>
-					</StepContent>
-				</Step>
-			</Stepper>
-		</Box>
+								</>
+							</Box>
+						</StepContent>
+					</Step>
+				</Stepper>
+			</Box>
+		</LoadingOverlay>
 	);
 };
