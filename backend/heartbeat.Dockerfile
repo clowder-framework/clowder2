@@ -23,4 +23,4 @@ ENV PYTHONPATH=/code
 # copy app code at end to make it easier to change code and not have to rebuild requirement layers
 COPY ./app /code/app
 
-CMD ["python", "app/heartbeat_listener_sync.py"]
+CMD ["python", "app/rabbitmq/heartbeat_listener_sync.py"]
