@@ -11,6 +11,8 @@ import {MetadataIn} from "../../openapi/v2";
 import {useNavigate} from "react-router-dom";
 import {fileCreated, resetFileCreated} from "../../actions/file";
 
+import LoadingOverlay from 'react-loading-overlay-ts';
+
 type UploadFileProps ={
 	selectedDatasetId: string|undefined,
 	folderId: string|undefined,
@@ -19,6 +21,8 @@ type UploadFileProps ={
 
 export const UploadFile:React.FC<UploadFileProps> = (props: UploadFileProps) => {
 	const {selectedDatasetId, folderId, selectedDatasetName} = props;
+
+    const [loading, setLoading] = useState(false);
 
 	const dispatch = useDispatch();
 	// @ts-ignore
@@ -66,12 +70,18 @@ export const UploadFile:React.FC<UploadFileProps> = (props: UploadFileProps) => 
 
 	// finish button post dataset; dataset ID triggers metadata posting
 	const handleFinish = () => {
+        // Triggers spinner
+        setLoading(true);
+
 		// create dataset
 		uploadFile(selectedDatasetId, folderId, fileRequestForm);
 	}
 
 	useEffect(() => {
 		if (newFile.id) {
+            // Stop spinner
+            setLoading(false);
+
 			// post new metadata
 			const file = newFile;
 			Object.keys(metadataRequestForms).map(key => {
@@ -115,12 +125,14 @@ export const UploadFile:React.FC<UploadFileProps> = (props: UploadFileProps) => 
 						{/*buttons*/}
 						<Box sx={{ mb: 2 }}>
 							<>
-								<Button variant="contained" onClick={handleFinish} sx={{ mt: 1, mr: 1 }}>
-									Finish
-								</Button>
-								<Button onClick={handleBack} sx={{ mt: 1, mr: 1 }}>
-									Back
-								</Button>
+                                <LoadingOverlay active={loading} spinner text='Uploading file...'>
+                                    <Button variant="contained" onClick={handleFinish} sx={{ mt: 1, mr: 1 }}>
+                                        Finish
+                                    </Button>
+                                    <Button onClick={handleBack} sx={{ mt: 1, mr: 1 }}>
+                                        Back
+                                    </Button>
+                                </LoadingOverlay>
 							</>
 						</Box>
 					</StepContent>

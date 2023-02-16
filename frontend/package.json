@@ -154,7 +154,8 @@
 		"webpack-dev-server": "^4.11.1",
 		"webpack-hot-middleware": "^2.25.2",
 		"webpack-merge": "^5.7.3",
-		"dayjs": "^1.11.6"
+		"dayjs": "^1.11.6",
+        "react-loading-overlay-ts": "2.0.0"
 	},
 	"keywords": [
 		"clowder-frontend"
