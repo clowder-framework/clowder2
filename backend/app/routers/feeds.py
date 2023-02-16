@@ -1,4 +1,5 @@
-from typing import List
+import pymongo
+from typing import List, Optional
 import os
 from bson import ObjectId
 from fastapi import APIRouter, HTTPException, Depends, Request
@@ -96,6 +97,52 @@ async def save_feed(
     found = await db["feeds"].find_one({"_id": new_feed.inserted_id})
     feed_out = FeedOut.from_mongo(found)
     return feed_out
+
+
+@router.get("", response_model=List[FeedOut])
+async def get_feeds(
+    name: Optional[str] = None,
+    user=Depends(get_current_user),
+    db: MongoClient = Depends(get_db),
+    skip: int = 0,
+    limit: int = 10,
+):
+    """Fetch all existing Feeds."""
+    feeds = []
+    if name is not None:
+        docs = (
+            await db["feeds"]
+            .find({"name": name})
+            .sort([("created", pymongo.DESCENDING)])
+            .skip(skip)
+            .limit(limit)
+            .to_list(length=limit)
+        )
+    else:
+        docs = (
+            await db["feeds"]
+            .find()
+            .sort([("created", pymongo.DESCENDING)])
+            .skip(skip)
+            .limit(limit)
+            .to_list(length=limit)
+        )
+    for doc in docs:
+        feeds.append(FeedOut.from_mongo(doc))
+    return feeds
+
+
+@router.get("/{feed_id}", response_model=FeedOut)
+async def get_feed(
+    feed_id: str,
+    user=Depends(get_current_user),
+    db: MongoClient = Depends(get_db),
+):
+    """Fetch an existing saved search Feed."""
+    if (feed := await db["feeds"].find_one({"_id": ObjectId(feed_id)})) is not None:
+        return FeedOut.from_mongo(feed)
+    else:
+        raise HTTPException(status_code=404, detail=f"Feed {feed_id} not found")
 
 
 @router.delete("/{feed_id}")
