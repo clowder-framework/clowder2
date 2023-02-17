@@ -42,7 +42,7 @@ async def create_reply_queue():
             for _ in range(10)
         )
         config_entry = ConfigEntryDB(key="instance_id", value=instance_id)
-        await db["config"].insert_one(config_entry.to_mongo())
+        db["config"].insert_one(config_entry.to_mongo())
 
     queue_name = "clowder.%s" % instance_id
     channel.exchange_declare(exchange="clowder", durable=True)

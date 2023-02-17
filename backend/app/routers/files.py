@@ -440,7 +440,7 @@ async def get_file_extract(
         raise HTTPException(status_code=404, detail=f"File {file_id} not found")
 
 
-@router.post("/{file_id}/extract")
+@router.post("/{file_id}/resubmit_extract")
 async def resubmit_file_extractions(
     file_id: str,
     credentials: HTTPAuthorizationCredentials = Security(security),

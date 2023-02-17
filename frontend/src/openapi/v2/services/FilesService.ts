@@ -117,6 +117,33 @@ export class FilesService {
     }
 
     /**
+     * Get File Extract
+     * @param fileId
+     * @param extractorName
+     * @param requestBody
+     * @returns any Successful Response
+     * @throws ApiError
+     */
+    public static getFileExtractApiV2FilesFileIdExtractPost(
+        fileId: string,
+        extractorName: string,
+        requestBody?: any,
+    ): CancelablePromise<any> {
+        return __request({
+            method: 'POST',
+            path: `/api/v2/files/${fileId}/extract`,
+            query: {
+                'extractorName': extractorName,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+
+    /**
      * Resubmit File Extractions
      * This route will check metadata. We get the extractors run from metadata from extractors.
      * Then they are resubmitted. At present parameters are not stored. This will change once Jobs are
@@ -131,12 +158,12 @@ export class FilesService {
      * @returns any Successful Response
      * @throws ApiError
      */
-    public static resubmitFileExtractionsApiV2FilesFileIdExtractPost(
+    public static resubmitFileExtractionsApiV2FilesFileIdResubmitExtractPost(
         fileId: string,
     ): CancelablePromise<any> {
         return __request({
             method: 'POST',
-            path: `/api/v2/files/${fileId}/extract`,
+            path: `/api/v2/files/${fileId}/resubmit_extract`,
             errors: {
                 422: `Validation Error`,
             },
