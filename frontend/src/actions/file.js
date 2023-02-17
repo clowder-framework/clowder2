@@ -182,12 +182,14 @@ export function fetchFileVersions(fileId){
 }
 
 export const DOWNLOAD_FILE = "DOWNLOAD_FILE";
-export function fileDownloaded(fileId, filename = "") {
+export function fileDownloaded(fileId, filename = "", fileVersionNum = 0) {
 	return async (dispatch) => {
 		if (filename === "") {
 			filename = `${fileId}.zip`;
 		}
-		const endpoint = `${config.hostname}/api/v2/files/${fileId}`;
+		let endpoint = `${config.hostname}/api/v2/files/${fileId}`;
+		if (fileVersionNum != 0)
+			endpoint = endpoint + '?version=' + fileVersionNum;
 		const response = await fetch(endpoint, {method: "GET", mode: "cors", headers: await getHeader()});
 
 		if (response.status === 200) {
