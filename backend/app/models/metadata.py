@@ -68,10 +68,12 @@ class MetadataDefinitionBase(MongoModel):
     Example: {
         "name" : "LatLon",
         "description" : "A set of Latitude/Longitude coordinates",
-        "context" : {
+        "context" : [
+            {
             "longitude" : "https://schema.org/longitude",
             "latitude" : "https://schema.org/latitude"
-        },
+            },
+        ],
         "fields" : [
             {
                 "name" : "longitude",
@@ -96,9 +98,7 @@ class MetadataDefinitionBase(MongoModel):
 
     name: str
     description: Optional[str]
-    context: Optional[
-        List[Union[dict, AnyUrl]]
-    ] = []  # https://json-ld.org/spec/latest/json-ld/#the-context
+    context: List[Union[dict, AnyUrl]] = []  # https://json-ld.org/spec/latest/json-ld/#the-context
     context_url: Optional[str]  # single URL applying to contents
     fields: List[MetadataField]
     # TODO: Space-level requirements?
@@ -180,9 +180,7 @@ class MetadataAgent(MongoModel):
 
 
 class MetadataBase(MongoModel):
-    context: Optional[
-        List[Union[dict, AnyUrl]]
-    ] = []  # https://json-ld.org/spec/latest/json-ld/#the-context
+    context: List[Union[dict, AnyUrl]] = []  # https://json-ld.org/spec/latest/json-ld/#the-context
     context_url: Optional[str]  # single URL applying to contents
     definition: Optional[str]  # name of a metadata definition
     content: dict
@@ -269,7 +267,7 @@ async def validate_context(
     content: dict,
     definition: Optional[str] = None,
     context_url: Optional[str] = None,
-    context: Optional[List[Union[dict, AnyUrl]]] = [],
+    context: List[Union[dict, AnyUrl]] = [],
 ):
     """Convenience function for making sure incoming metadata has valid definitions or resolvable context.
 
@@ -321,7 +319,7 @@ async def patch_metadata(
             updated_content,
             metadata.get("definition", None),
             metadata.get("context_url", None),
-            metadata.get("context", None),
+            metadata.get("context", []),
         )
         metadata["content"] = updated_content
         db["metadata"].replace_one(
