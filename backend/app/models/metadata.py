@@ -98,7 +98,7 @@ class MetadataDefinitionBase(MongoModel):
 
     name: str
     description: Optional[str]
-    context: List[Union[dict, AnyUrl]] = []  # https://json-ld.org/spec/latest/json-ld/#the-context
+    context: Optional[List[Union[dict, AnyUrl]]]  # https://json-ld.org/spec/latest/json-ld/#the-context
     context_url: Optional[str]  # single URL applying to contents
     fields: List[MetadataField]
     # TODO: Space-level requirements?
@@ -180,7 +180,7 @@ class MetadataAgent(MongoModel):
 
 
 class MetadataBase(MongoModel):
-    context: List[Union[dict, AnyUrl]] = []  # https://json-ld.org/spec/latest/json-ld/#the-context
+    context: Optional[List[Union[dict, AnyUrl]]]  # https://json-ld.org/spec/latest/json-ld/#the-context
     context_url: Optional[str]  # single URL applying to contents
     definition: Optional[str]  # name of a metadata definition
     content: dict
@@ -267,7 +267,7 @@ async def validate_context(
     content: dict,
     definition: Optional[str] = None,
     context_url: Optional[str] = None,
-    context: List[Union[dict, AnyUrl]] = [],
+    context: Optional[List[Union[dict, AnyUrl]]] = None,
 ):
     """Convenience function for making sure incoming metadata has valid definitions or resolvable context.
 
