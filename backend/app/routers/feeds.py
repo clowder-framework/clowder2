@@ -82,7 +82,16 @@ async def check_feed_listeners(
             queue = listener_info.name
             routing_key = listener_info.name
             parameters = {}
-            await submit_file_job(file_out, queue, routing_key, parameters, user, db, rabbitmq_client, token)
+            await submit_file_job(
+                file_out,
+                queue,
+                routing_key,
+                parameters,
+                user,
+                db,
+                rabbitmq_client,
+                token,
+            )
 
     return listeners_found
 

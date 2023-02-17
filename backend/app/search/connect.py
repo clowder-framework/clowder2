@@ -172,16 +172,9 @@ def check_search_result(es_client, file_out: FileOut, search_obj: SearchObject):
     # Wrap the normal criteria with restriction of file ID also
     query_string = '{"preference":"results"}\n'
     query = {
-        "query": {
-            "bool": {
-                "must": [
-                    {"match": {"name": str(file_out.name)}},
-                    subquery
-                ]
-            }
-        }
+        "query": {"bool": {"must": [{"match": {"name": str(file_out.name)}}, subquery]}}
     }
-    query_string += json.dumps(query)+"\n"
+    query_string += json.dumps(query) + "\n"
 
     results = search_index(es_client, search_obj.index_name, query_string)
     return results and len(results) > 0

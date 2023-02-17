@@ -16,7 +16,7 @@ router = APIRouter()
 @router.get("", response_model=List[EventListenerJob])
 async def get_all_job_summary(
     db: MongoClient = Depends(dependencies.get_db),
-    user = Depends(get_current_user),
+    user=Depends(get_current_user),
     listener_id: Optional[str] = None,
     status: Optional[str] = None,
     user_id: Optional[str] = None,

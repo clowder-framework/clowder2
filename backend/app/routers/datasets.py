@@ -574,7 +574,15 @@ async def save_file(
                 )
 
         await add_file_entry(
-            fileDB, user, db, fs, es, rabbitmq_client, token, file.file, content_type=file.content_type
+            fileDB,
+            user,
+            db,
+            fs,
+            es,
+            rabbitmq_client,
+            token,
+            file.file,
+            content_type=file.content_type,
         )
 
         return fileDB
@@ -646,7 +654,16 @@ async def create_dataset_from_zip(
                             name=filename, creator=user, dataset_id=dataset_id
                         )
                     with open(extracted, "rb") as file_reader:
-                        await add_file_entry(fileDB, user, db, fs, es, rabbitmq_client, token, file_reader)
+                        await add_file_entry(
+                            fileDB,
+                            user,
+                            db,
+                            fs,
+                            es,
+                            rabbitmq_client,
+                            token,
+                            file_reader,
+                        )
                     if os.path.isfile(extracted):
                         os.remove(extracted)
 

@@ -21,19 +21,19 @@ extractor_info = {
         {
             "lines": "http://clowder.ncsa.illinois.edu/metadata/ncsa.wordcount#lines",
             "words": "http://clowder.ncsa.illinois.edu/metadata/ncsa.wordcount#words",
-            "characters": "http://clowder.ncsa.illinois.edu/metadata/ncsa.wordcount#characters"
+            "characters": "http://clowder.ncsa.illinois.edu/metadata/ncsa.wordcount#characters",
         }
     ],
     "repository": [
         {
             "repType": "git",
-            "repUrl": "https://opensource.ncsa.illinois.edu/stash/scm/cats/pyclowder.git"
+            "repUrl": "https://opensource.ncsa.illinois.edu/stash/scm/cats/pyclowder.git",
         }
     ],
     "process": {"file": ["text/*", "application/json"]},
     "external_services": [],
     "dependencies": [],
-    "bibtex": []
+    "bibtex": [],
 }
 
 # extractor_info_file = os.path.join(os.getcwd(), 'extractor_info.json')
@@ -77,7 +77,7 @@ def test_delete(client: TestClient, headers: dict):
 
 def test_v1_mime_trigger(client: TestClient, headers: dict):
     # Need a new listener otherwise this will collide with test_register above
-    extractor_info['name'] = "ncsa.wordcount.test2"
+    extractor_info["name"] = "ncsa.wordcount.test2"
 
     # Create the listener
     response = client.post(
@@ -121,7 +121,7 @@ def test_v1_mime_trigger(client: TestClient, headers: dict):
     file_id = response.json().get("id")
     response = client.get(
         f"{settings.API_V2_STR}/jobs?listener_id={extractor_info['name']}&file_id={file_id}",
-        headers=headers
+        headers=headers,
     )
     assert len(response.json()) > 0
     assert response.status_code == 200

@@ -281,7 +281,9 @@ async def update_file(
             }
         }
         update_record(es, "file", doc, updated_file.id)
-        await _resubmit_file_extractors(updated_file, db, rabbitmq_client, user, credentials)
+        await _resubmit_file_extractors(
+            updated_file, db, rabbitmq_client, user, credentials
+        )
 
         # updating metadata in elasticsearch
         if (
