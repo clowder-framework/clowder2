@@ -98,7 +98,9 @@ class MetadataDefinitionBase(MongoModel):
 
     name: str
     description: Optional[str]
-    context: Optional[List[Union[dict, AnyUrl]]]  # https://json-ld.org/spec/latest/json-ld/#the-context
+    context: Optional[
+        List[Union[dict, AnyUrl]]
+    ]  # https://json-ld.org/spec/latest/json-ld/#the-context
     context_url: Optional[str]  # single URL applying to contents
     fields: List[MetadataField]
     # TODO: Space-level requirements?
@@ -180,7 +182,9 @@ class MetadataAgent(MongoModel):
 
 
 class MetadataBase(MongoModel):
-    context: Optional[List[Union[dict, AnyUrl]]]  # https://json-ld.org/spec/latest/json-ld/#the-context
+    context: Optional[
+        List[Union[dict, AnyUrl]]
+    ]  # https://json-ld.org/spec/latest/json-ld/#the-context
     context_url: Optional[str]  # single URL applying to contents
     definition: Optional[str]  # name of a metadata definition
     content: dict
