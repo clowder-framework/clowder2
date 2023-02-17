@@ -7,8 +7,7 @@ from fastapi.routing import APIRouter
 from pymongo.mongo_client import MongoClient
 
 from app import keycloak_auth, dependencies
-from app.keycloak_auth import get_current_user
-from app.models.groups import GroupOut, GroupIn, GroupDB, Member, GroupBase
+from app.models.groups import GroupOut, GroupIn, GroupDB, GroupBase
 from app.models.users import UserOut
 from app.routers.users import get_user
 
