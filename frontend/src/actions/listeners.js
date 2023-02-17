@@ -101,7 +101,7 @@ export const FETCH_JOB_SUMMARY = "FETCH_JOB_SUMMARY";
 export function fetchJobSummary(jobId){
 	return (dispatch) => {
 		return V2.JobsService.getJobSummaryApiV2JobsJobIdSummaryGet(jobId)
-		.then(json => {
+			.then(json => {
 				dispatch({
 					type: FETCH_JOB_SUMMARY,
 					currJobSummary: json,
@@ -119,8 +119,8 @@ export const FETCH_JOB_UPDATES = "FETCH_JOB_UPDATES";
 export function fetchJobUpdates(jobId){
 	return (dispatch) => {
 		return V2.JobsService.getJobUpdatesApiV2JobsJobIdUpdatesGet(jobId)
-		.then(json => {
-                dispatch({
+			.then(json => {
+				dispatch({
 					type: FETCH_JOB_UPDATES,
 					currJobUpdates: json,
 					receivedAt: Date.now(),

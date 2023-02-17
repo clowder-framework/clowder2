@@ -50,12 +50,12 @@ export default function SubmitExtraction(props: SubmitExtractionProps) {
 	const submitDatasetExtraction =
 		(datasetId: string | undefined, extractorName: string | undefined, requestBody: FormData) => dispatch(submitDatasetExtractionAction(datasetId, extractorName, requestBody));
    
-    const jobSummaryFetch = (job_id: string | undefined) => dispatch(fetchJobSummary(job_id));
-    const jobUpdatesFetch = (job_id: string | undefined) => dispatch(fetchJobUpdates(job_id));
+	const jobSummaryFetch = (job_id: string | undefined) => dispatch(fetchJobSummary(job_id));
+	const jobUpdatesFetch = (job_id: string | undefined) => dispatch(fetchJobUpdates(job_id));
     
-    const job_id = useSelector((state: RootState) => state.listener.currJobId);
-    const summary = useSelector((state: RootState) => state.listener.currJobSummary);
-    const updates = useSelector((state: RootState) => state.listener.currJobUpdates);
+	const job_id = useSelector((state: RootState) => state.listener.currJobId);
+	const summary = useSelector((state: RootState) => state.listener.currJobSummary);
+	const updates = useSelector((state: RootState) => state.listener.currJobUpdates);
 
 	const [isFormSubmitted, setIsFormSubmitted] = useState(false);
 
@@ -63,11 +63,11 @@ export default function SubmitExtraction(props: SubmitExtractionProps) {
 		const extractorName = selectedExtractor.name
 		if (fileId === undefined && datasetId !== undefined) {
 			submitDatasetExtraction(datasetId, extractorName, formData);
-            setIsFormSubmitted(true);
+			setIsFormSubmitted(true);
 			handleNext();
 		} else if (fileId !== undefined) {
 			submitFileExtraction(fileId, extractorName, formData);
-            setIsFormSubmitted(true);
+			setIsFormSubmitted(true);
 			handleNext();
 		}
 	}
@@ -87,16 +87,16 @@ export default function SubmitExtraction(props: SubmitExtractionProps) {
 		setActiveStep(0);
 	}
 
-    useEffect(() => {
-        const interval = setInterval(() => {
-            if (isFormSubmitted == true && job_id.length > 0) {
-                jobSummaryFetch(job_id);
-                jobUpdatesFetch(job_id);
-            }
-        }, 2000);
+	useEffect(() => {
+		const interval = setInterval(() => {
+			if (isFormSubmitted == true && job_id.length > 0) {
+				jobSummaryFetch(job_id);
+				jobUpdatesFetch(job_id);
+			}
+		}, 2000);
 
-        return () => clearInterval(interval);
-    });
+		return () => clearInterval(interval);
+	});
 
 
 	return (
@@ -156,11 +156,11 @@ export default function SubmitExtraction(props: SubmitExtractionProps) {
 						<Step key="status">
 							<StepLabel>Extraction Status</StepLabel>
 							<StepContent>
-                                <ExtractorStatus 
-                                    job_id={job_id}
-                                    summary={summary}
-                                    updates={updates}
-                                />
+								<ExtractorStatus 
+									job_id={job_id}
+									summary={summary}
+									updates={updates}
+								/>
 								{/*buttons*/}
 								<Box sx={{mb: 2}}>
 									<Button variant="contained" onClick={handleNext} sx={{mt: 1, mr: 1}}>

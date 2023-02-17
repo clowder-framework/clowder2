@@ -15,7 +15,7 @@ const defaultState: FileState = {
 	extractedMetadata: <ExtractedMetadata>{},
 	metadataJsonld: [],
 	previews: [],
-	fileVersions: []
+	fileVersions: [],
 };
 
 const file = (state=defaultState, action: DataAction) => {

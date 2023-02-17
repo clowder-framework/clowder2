@@ -184,7 +184,6 @@ export interface JobSummary{
 }
 
 export interface RootState {
-    job_id: any;
 	metadata: MetadataState;
 	error: ErrorState;
 	file:FileState;

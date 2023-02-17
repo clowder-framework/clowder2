@@ -12,9 +12,9 @@ const defaultState: ListenerState = {
 	categories: [],
 	labels: [],
 	jobs: [],
-    currJobSummary: [],
-    currJobUpdates: [],
-    currJobId: ""
+	currJobSummary: [],
+	currJobUpdates: [],
+	currJobId: ""
 };
 
 const listeners = (state = defaultState, action: DataAction) => {
@@ -30,17 +30,15 @@ const listeners = (state = defaultState, action: DataAction) => {
 		case RECEIVE_LISTENER_JOBS:
 			return Object.assign({}, state, {jobs: action.jobs});
         case FETCH_JOB_SUMMARY:
-			return Object.assign({}, state, {currJobSummary: action.currJobSummary});
+            return Object.assign({}, state, {currJobSummary: action.currJobSummary});
         case FETCH_JOB_UPDATES:
-			return Object.assign({}, state, {currJobUpdates: action.currJobUpdates});
+            return Object.assign({}, state, {currJobUpdates: action.currJobUpdates});
         case SUBMIT_DATASET_EXTRACTION:
-            console.log(action)
-            return Object.assign({}, state, {currJobId: action.job_id})
-	    case SUBMIT_FILE_EXTRACTION:
-            console.log(action)
-            return Object.assign({}, state, {currJobId: action.job_id})
-		default:
-			return state;
+            return Object.assign({}, state, {currJobId: action.job_id});
+        case SUBMIT_FILE_EXTRACTION:
+            return Object.assign({}, state, {currJobId: action.job_id});
+        default:
+            return state;
 	}
 };
 
