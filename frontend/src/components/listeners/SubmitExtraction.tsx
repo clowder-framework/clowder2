@@ -1,4 +1,4 @@
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import {useDispatch, useSelector} from "react-redux";
 import {
 	Box,
@@ -19,12 +19,12 @@ import {ListenerInfo} from "./ListenerInfo";
 import Form from "@rjsf/material-ui";
 import {FormProps} from "@rjsf/core";
 import {submitFileExtractionAction} from "../../actions/file";
-import {fetchJobSummary, fetchJobUpdates} from "../../actions/listeners";
 import {submitDatasetExtractionAction} from "../../actions/dataset";
 import {Extractor, RootState} from "../../types/data";
 import {ClowderRjsfSelectWidget} from "../styledComponents/ClowderRjsfSelectWidget";
 import {ClowderRjsfTextWidget} from "../styledComponents/ClowderRjsfTextWidget";
 import ExtractorStatus from "./ExtractorStatus";
+import { fetchJobSummary, fetchJobUpdates } from "../../actions/listeners";
 
 
 type SubmitExtractionProps = {
@@ -42,33 +42,41 @@ const widgets = {
 
 export default function SubmitExtraction(props: SubmitExtractionProps) {
 
+    // TODO: remove this
+    let test_job_id = "63d146bc79a3d39c71d0e0b1";
 
 	const {fileId, datasetId, open, handleClose, selectedExtractor} = props;
 	const dispatch = useDispatch();
-
-	const job_id = useSelector((state: RootState) => state.job_id);
 
 	const submitFileExtraction =
 		(fileId: string | undefined, extractorName: string | undefined, requestBody: FormData) => dispatch(submitFileExtractionAction(fileId, extractorName, requestBody));
 	const submitDatasetExtraction =
 		(datasetId: string | undefined, extractorName: string | undefined, requestBody: FormData) => dispatch(submitDatasetExtractionAction(datasetId, extractorName, requestBody));
-	const onSubmit = (formData: FormData) => {
+   
+    const jobSummaryFetch = (job_id: string | undefined) => dispatch(fetchJobSummary(job_id));
+    const jobUpdatesFetch = (job_id: string | undefined) => dispatch(fetchJobUpdates(job_id));
+    
+    const job_id = useSelector((state: RootState) => state.listener.currJobId);
+    const summary = useSelector((state: RootState) => state.listener.currJobSummary);
+    const updates = useSelector((state: RootState) => state.listener.currJobUpdates);
+
+	const [isFormSubmitted, setIsFormSubmitted] = useState(false);
+
+    const onSubmit = (formData: FormData) => {
 		const extractorName = selectedExtractor.name
 		if (fileId === undefined && datasetId !== undefined) {
 			submitDatasetExtraction(datasetId, extractorName, formData);
-            console.log("handling next")
+            setIsFormSubmitted(true);
 			handleNext();
 		} else if (fileId !== undefined) {
 			submitFileExtraction(fileId, extractorName, formData);
+            setIsFormSubmitted(true);
 			handleNext();
 		}
 	}
 
 	const [activeStep, setActiveStep] = useState(0);
 	const handleNext = () => {
-        if (activeStep == 0) {
-            dispatch(fetchJobSummary("63d146bc79a3d39c71d0e0b1"))
-        }
 		setActiveStep((prevActiveStep) => prevActiveStep + 1);
 	};
 	const handleBack = () => {
@@ -81,6 +89,18 @@ export default function SubmitExtraction(props: SubmitExtractionProps) {
 		handleClose();
 		setActiveStep(0);
 	}
+
+    useEffect(() => {
+        const interval = setInterval(() => {
+            if (isFormSubmitted == true) {
+                jobSummaryFetch(test_job_id);
+                jobUpdatesFetch(test_job_id);
+            }
+        }, 2000);
+
+        return () => clearInterval(interval);
+    });
+
 
 	return (
 		// TODO replace this with submit extraction content
@@ -141,6 +161,8 @@ export default function SubmitExtraction(props: SubmitExtractionProps) {
 							<StepContent>
                                 <ExtractorStatus 
                                     job_id={job_id}
+                                    summary={summary}
+                                    updates={updates}
                                 />
 								{/*buttons*/}
 								<Box sx={{mb: 2}}>

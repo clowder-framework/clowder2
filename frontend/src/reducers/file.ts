@@ -4,7 +4,6 @@ import {
 	RECEIVE_FILE_METADATA_JSONLD,
 	RECEIVE_PREVIEWS,
 	RECEIVE_VERSIONS,
-    SUBMIT_FILE_EXTRACTION,
 	DOWNLOAD_FILE
 } from "../actions/file";
 import {DataAction} from "../types/action";
@@ -16,15 +15,13 @@ const defaultState: FileState = {
 	extractedMetadata: <ExtractedMetadata>{},
 	metadataJsonld: [],
 	previews: [],
-	fileVersions: [],
+	fileVersions: []
 };
 
 const file = (state=defaultState, action: DataAction) => {
 	switch(action.type) {
 	case RECEIVE_FILE_SUMMARY:
 		return Object.assign({}, state, {fileSummary: action.fileSummary});
-	case SUBMIT_FILE_EXTRACTION:
-		return Object.assign({}, state, {job_id: action.job_id})
 	case RECEIVE_FILE_EXTRACTED_METADATA:
 		return Object.assign({}, state, {extractedMetadata: action.extractedMetadata});
 	case RECEIVE_FILE_METADATA_JSONLD:

@@ -1,7 +1,9 @@
 import {
 	RECEIVE_LISTENERS, SEARCH_LISTENERS, RECEIVE_LISTENER_CATEGORIES,
-	RECEIVE_LISTENER_LABELS, RECEIVE_LISTENER_JOBS
+	RECEIVE_LISTENER_LABELS, RECEIVE_LISTENER_JOBS, FETCH_JOB_SUMMARY, FETCH_JOB_UPDATES
 } from "../actions/listeners";
+import { SUBMIT_DATASET_EXTRACTION } from "../actions/dataset";
+import { SUBMIT_FILE_EXTRACTION } from "../actions/file";
 import {DataAction} from "../types/action";
 import {ListenerState} from "../types/data";
 
@@ -9,7 +11,10 @@ const defaultState: ListenerState = {
 	listeners: [],
 	categories: [],
 	labels: [],
-	jobs: []
+	jobs: [],
+    currJobSummary: [],
+    currJobUpdates: [],
+    currJobId: ""
 };
 
 const listeners = (state = defaultState, action: DataAction) => {
@@ -24,6 +29,16 @@ const listeners = (state = defaultState, action: DataAction) => {
 			return Object.assign({}, state, {labels: action.labels});
 		case RECEIVE_LISTENER_JOBS:
 			return Object.assign({}, state, {jobs: action.jobs});
+        case FETCH_JOB_SUMMARY:
+			return Object.assign({}, state, {currJobSummary: action.currJobSummary});
+        case FETCH_JOB_UPDATES:
+			return Object.assign({}, state, {currJobUpdates: action.currJobUpdates});
+        case SUBMIT_DATASET_EXTRACTION:
+            console.log(action)
+            return Object.assign({}, state, {currJobId: action.job_id})
+	    case SUBMIT_FILE_EXTRACTION:
+            console.log(action)
+            return Object.assign({}, state, {currJobId: action.job_id})
 		default:
 			return state;
 	}

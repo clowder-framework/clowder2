@@ -104,7 +104,7 @@ export function fetchJobSummary(jobId){
 		.then(json => {
 				dispatch({
 					type: FETCH_JOB_SUMMARY,
-					jobs: json,
+					currJobSummary: json,
 					receivedAt: Date.now(),
 				});
 			})
@@ -120,9 +120,9 @@ export function fetchJobUpdates(jobId){
 	return (dispatch) => {
 		return V2.JobsService.getJobUpdatesApiV2JobsJobIdUpdatesGet(jobId)
 		.then(json => {
-				dispatch({
+                dispatch({
 					type: FETCH_JOB_UPDATES,
-					jobs: json,
+					currJobUpdates: json,
 					receivedAt: Date.now(),
 				});
 			})
