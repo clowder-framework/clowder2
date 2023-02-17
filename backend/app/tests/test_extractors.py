@@ -120,7 +120,8 @@ def test_v1_mime_trigger(client: TestClient, headers: dict):
     # Check if job was automatically created
     file_id = response.json().get("id")
     response = client.get(
-        f"{settings.API_V2_STR}/jobs?listener_id={extractor_info['name']}&file_id={file_id}"
+        f"{settings.API_V2_STR}/jobs?listener_id={extractor_info['name']}&file_id={file_id}",
+        headers=headers
     )
     assert len(response.json()) > 0
     assert response.status_code == 200
