@@ -42,9 +42,6 @@ const widgets = {
 
 export default function SubmitExtraction(props: SubmitExtractionProps) {
 
-    // TODO: remove this
-    let test_job_id = "63d146bc79a3d39c71d0e0b1";
-
 	const {fileId, datasetId, open, handleClose, selectedExtractor} = props;
 	const dispatch = useDispatch();
 
@@ -92,9 +89,9 @@ export default function SubmitExtraction(props: SubmitExtractionProps) {
 
     useEffect(() => {
         const interval = setInterval(() => {
-            if (isFormSubmitted == true) {
-                jobSummaryFetch(test_job_id);
-                jobUpdatesFetch(test_job_id);
+            if (isFormSubmitted == true && job_id.length > 0) {
+                jobSummaryFetch(job_id);
+                jobUpdatesFetch(job_id);
             }
         }, 2000);
 
