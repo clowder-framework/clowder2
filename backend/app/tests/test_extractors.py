@@ -111,6 +111,13 @@ def test_v1_mime_trigger(client: TestClient, headers: dict):
         files=file_data,
     )
     os.remove(dummy_file)
+    assert response.json().get("id") is not None
     assert response.status_code == 200
 
-    # Check if job exists
+    # Check if job was automatically created
+    file_id = response.json().get("id")
+    response = client.get(
+        f"{settings.API_V2_STR}/jobs?file_id={file_id}"
+    )
+    assert len(response.json()) > 0
+    assert response.status_code == 200

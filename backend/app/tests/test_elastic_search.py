@@ -130,7 +130,6 @@ async def test_datasets():
         update_record(es, dummy_dataset_index_name, updated_dummy_dataset_record, 1)
         time.sleep(5)
         result = search_index(es, dummy_dataset_index_name, dataset_query)
-        print(result)
         assert (
             result.body["responses"][0]["hits"]["hits"][0]["_source"]["name"]
             == "test dataset 2"

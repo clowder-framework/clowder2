@@ -1,5 +1,5 @@
 import logging
-
+import json
 from elasticsearch import Elasticsearch
 from elasticsearch import BadRequestError
 
@@ -170,16 +170,18 @@ def check_search_result(es_client, file_out: FileOut, search_obj: SearchObject):
         subquery = {"bool": {"should": match_list}}
 
     # Wrap the normal criteria with restriction of file ID also
+    query_string = '{"preference":"results"}\n'
     query = {
         "query": {
             "bool": {
                 "must": [
                     {"match": {"name": str(file_out.name)}},
-                    #subquery
+                    subquery
                 ]
             }
         }
     }
+    query_string += json.dumps(query)+"\n"
 
-    results = search_index(es_client, search_obj.index_name, query)
+    results = search_index(es_client, search_obj.index_name, query_string)
     return results and len(results) > 0

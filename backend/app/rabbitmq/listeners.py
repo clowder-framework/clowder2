@@ -60,9 +60,9 @@ async def submit_file_job(
     routing_key: str,
     parameters: dict,
     user: UserOut,
-    token: str = Depends(get_token),
-    db: MongoClient = Depends(dependencies.get_db),
-    rabbitmq_client: BlockingChannel = Depends(dependencies.get_rabbitmq),
+    db: MongoClient,
+    rabbitmq_client: BlockingChannel,
+    token: str,
 ):
     # TODO check if extractor is registered
 
@@ -80,7 +80,7 @@ async def submit_file_job(
 
     current_id = file_out.id
     current_datasetId = file_out.dataset_id
-    current_secretKey = token
+    current_secretKey = str(token)
     try:
         msg_body = EventListenerJobMessage(
             filename=file_out.name,

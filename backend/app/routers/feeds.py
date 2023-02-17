@@ -1,10 +1,10 @@
 import pymongo
 from typing import List, Optional
-import os
 from bson import ObjectId
 from fastapi import APIRouter, HTTPException, Depends, Request
 from pymongo import MongoClient
-import datetime
+from pika.adapters.blocking_connection import BlockingChannel
+
 from app.dependencies import get_db
 from app.keycloak_auth import get_user, get_current_user
 from app.models.users import UserOut
@@ -49,6 +49,8 @@ async def check_feed_listeners(
     file_out: FileOut,
     user: UserOut,
     db: MongoClient,
+    rabbitmq_client: BlockingChannel,
+    token: str,
 ):
     """Automatically submit new file to listeners on feeds that fit the search criteria."""
     listeners_found = []
@@ -80,7 +82,7 @@ async def check_feed_listeners(
             queue = listener_info.name
             routing_key = listener_info.name
             parameters = {}
-            await submit_file_job(file_out, queue, routing_key, parameters)
+            await submit_file_job(file_out, queue, routing_key, parameters, user, db, rabbitmq_client, token)
 
     return listeners_found
 
