@@ -99,6 +99,7 @@ mongodb:
   # specify the mongodb uri
   enabled: true
   #uri: mongobd://server:27017/database
+  database: clowder2
 
   # right now no password
   auth:

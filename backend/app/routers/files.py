@@ -61,37 +61,42 @@ async def _resubmit_file_extractors(
         rabbitmq_client: Rabbitmq Client
 
     """
-    query = {"resource.resource_id": ObjectId(file.id)}
+    previous_version = file.version_num - 1
+    query = {
+        "resource_ref.resource_id": ObjectId(file.id),
+        "resource_ref.version": previous_version,
+    }
     listeners_resubmitted = []
     listeners_resubitted_failed = []
-    async for md in db["metadata"].find(query):
-        md_out = MetadataOut.from_mongo(md)
-        if md_out.agent.listener is not None:
-            listener_name = md_out.agent.listener.name
-            # TODO find way  to get the parameters used
-            parameters = {}
+    resubmitted_jobs = []
+    async for job in db["listener_jobs"].find(query):
+        current_job = job
+        job_listener_queue = job["listener_id"]
+        job_parameters = job["parameters"]
+        resubmitted_job = {
+            "listener_id": job_listener_queue,
+            "parameters": job_parameters,
+        }
+        try:
+            routing_key = job_listener_queue
             access_token = credentials.credentials
-            queue = listener_name
-            routing_key = queue
-            if listener_name not in listeners_resubmitted:
-                try:
-                    submit_file_job(
-                        file,
-                        queue,
-                        routing_key,
-                        parameters,
-                        user,
-                        db,
-                        rabbitmq_client,
-                        access_token,
-                    )
-                    listeners_resubmitted.append(listener_name)
-                except Exception as e:
-                    listeners_resubitted_failed.append(listener_name)
-    return {
-        "listeners resubmitted successfully": str(listeners_resubmitted),
-        "listeners resubmitted failed": str(listeners_resubmitted),
-    }
+            await submit_file_job(
+                file,
+                job_listener_queue,
+                routing_key,
+                job_parameters,
+                user,
+                db,
+                rabbitmq_client,
+                access_token,
+            )
+            resubmitted_job["status"] = "success"
+            resubmitted_jobs.append(resubmitted_job)
+        except Exception as e:
+            resubmitted_job["status"] = "error"
+            resubmitted_jobs.append(resubmitted_job)
+
+    return resubmitted_jobs
 
 
 # TODO: Move this to MongoDB middle layer
@@ -149,11 +154,10 @@ async def add_file_entry(
 
     # Add FileVersion entry and update file
     new_version = FileVersion(
-        version_id=version_id,
         file_id=new_file_id,
         creator=user,
+        version_id=version_id,
         bytes=bytes,
-        content_type=content_type_obj,
     )
     await db["file_versions"].insert_one(new_version.to_mongo())
 
@@ -216,6 +220,15 @@ async def update_file(
     if (file_q := await db["files"].find_one({"_id": ObjectId(file_id)})) is not None:
         updated_file = FileOut.from_mongo(file_q)
 
+        if (
+            file.filename != updated_file.name
+            or file.content_type != updated_file.content_type.content_type
+        ):
+            raise HTTPException(
+                status_code=400,
+                detail=f"File name and content type must match existing: {updated_file.name} & {updated_file.content_type}",
+            )
+
         # Update file in Minio and get the new version IDs
         version_id = None
         while content := file.file.read(
@@ -236,17 +249,25 @@ async def update_file(
         updated_file.created = datetime.utcnow()
         updated_file.version_id = version_id
         updated_file.version_num = updated_file.version_num + 1
+
+        # Update byte size
+        updated_file.bytes = len(
+            fs.get_object(settings.MINIO_BUCKET_NAME, str(updated_file.id)).data
+        )
+
         await db["files"].replace_one(
             {"_id": ObjectId(file_id)}, updated_file.to_mongo()
         )
 
         # Put entry in FileVersion collection
         new_version = FileVersion(
-            version_id=updated_file.version_id,
-            version_num=updated_file.version_num,
             file_id=updated_file.id,
             creator=user,
+            version_id=updated_file.version_id,
+            version_num=updated_file.version_num,
+            bytes=updated_file.bytes,
         )
+
         await db["file_versions"].insert_one(new_version.to_mongo())
         # Update entry to the file index
         doc = {
@@ -256,11 +277,12 @@ async def update_file(
                 "created": datetime.utcnow(),
                 "download": updated_file.downloads,
                 "bytes": updated_file.bytes,
-                "content_type": updated_file.content_type,
+                "content_type": updated_file.content_type.content_type,
             }
         }
         update_record(es, "file", doc, updated_file.id)
         await _resubmit_file_extractors(updated_file, db, rabbitmq_client, user, credentials)
+
         # updating metadata in elasticsearch
         if (
             metadata := await db["metadata"].find_one(
@@ -270,7 +292,7 @@ async def update_file(
             doc = {
                 "doc": {
                     "name": updated_file.name,
-                    "content_type": updated_file.content_type,
+                    "content_type": updated_file.content_type.content_type,
                     "resource_created": updated_file.created.utcnow(),
                     "resource_creator": updated_file.creator.email,
                     "bytes": updated_file.bytes,
@@ -285,16 +307,37 @@ async def update_file(
 @router.get("/{file_id}")
 async def download_file(
     file_id: str,
+    version: Optional[int] = None,
     db: MongoClient = Depends(dependencies.get_db),
     fs: Minio = Depends(dependencies.get_fs),
 ):
     # If file exists in MongoDB, download from Minio
     if (file := await db["files"].find_one({"_id": ObjectId(file_id)})) is not None:
+        file_obj = FileOut.from_mongo(file)
+        if version is not None:
+            # Version is specified, so get the minio ID from versions table if possible
+            if (
+                file_vers := await db["file_versions"].find_one(
+                    {"file_id": ObjectId(file_id), "version_num": version}
+                )
+            ) is not None:
+                vers = FileVersion.from_mongo(file_vers)
+                content = fs.get_object(
+                    settings.MINIO_BUCKET_NAME, file_id, version_id=vers.version_id
+                )
+            else:
+                raise HTTPException(
+                    status_code=404,
+                    detail=f"File {file_id} version {version} not found",
+                )
+        else:
+            # If no version specified, get latest version directly
+            content = fs.get_object(settings.MINIO_BUCKET_NAME, file_id)
+
         # Get content type & open file stream
-        content = fs.get_object(settings.MINIO_BUCKET_NAME, file_id)
         response = StreamingResponse(content.stream(settings.MINIO_UPLOAD_CHUNK_SIZE))
         response.headers["Content-Disposition"] = (
-            "attachment; filename=%s" % file["name"]
+            "attachment; filename=%s" % file_obj.name
         )
         # Increment download count
         await db["files"].update_one(
@@ -341,25 +384,6 @@ async def get_file_versions(
     limit: int = 20,
 ):
     if (file := await db["files"].find_one({"_id": ObjectId(file_id)})) is not None:
-        """
-        # DEPRECATED: Get version information from Minio directly (no creator field)
-        file_versions = []
-        minio_versions = fs.list_objects(
-            settings.MINIO_BUCKET_NAME,
-            prefix=file_id,
-            include_version=True,
-        )
-        for version in minio_versions:
-            file_versions.append(
-                {
-                    "version_id": version._version_id,
-                    "latest": version._is_latest,
-                    "modified": version._last_modified,
-                }
-            )
-        return file_versions
-        """
-
         mongo_versions = []
         for ver in (
             await db["file_versions"]
@@ -421,9 +445,9 @@ async def get_file_extract(
 async def resubmit_file_extractions(
     file_id: str,
     credentials: HTTPAuthorizationCredentials = Security(security),
+    user=Depends(get_current_user),
     db: MongoClient = Depends(dependencies.get_db),
     rabbitmq_client: BlockingChannel = Depends(dependencies.get_rabbitmq),
-    user=Depends(get_current_user),
 ):
     """This route will check metadata. We get the extractors run from metadata from extractors.
     Then they are resubmitted. At present parameters are not stored. This will change once Jobs are

@@ -12,6 +12,7 @@ from app.routers.listeners import _process_incoming_v1_extractor_info
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 
 def callback(ch, method, properties, body):

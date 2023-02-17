@@ -1,15 +1,20 @@
 import React from "react";
-import {Box, List, ListItem, ListItemAvatar, ListItemText} from "@mui/material";
+import {Box, Button, List, ListItem, ListItemAvatar, ListItemText} from "@mui/material";
 import {VersionChip} from "./VersionChip";
 import {parseDate} from "../../utils/common";
 import {FileVersion} from "../../openapi/v2";
+import {fileDownloaded} from "../../actions/file";
+import {useDispatch} from "react-redux";
 
 type FileVersionHistoryProps = {
-	fileVersions: FileVersion[]
+	fileVersions: FileVersion[],
+	filename: string,
 }
 
 export function FileVersionHistory(props: FileVersionHistoryProps) {
-	const {fileVersions} = props;
+	const {fileVersions, filename} = props;
+	const dispatch = useDispatch();
+	const downloadFile = (fileId:string|undefined, filename:string|undefined, fileVersion:number|undefined) => dispatch(fileDownloaded(fileId, filename, fileVersion))
 
 	return (
 		<Box className="infoCard">
@@ -28,8 +33,12 @@ export function FileVersionHistory(props: FileVersionHistoryProps) {
 										`${creator.first_name} ${creator.last_name}` : ""}`}
 									secondary={`Uploaded on ${parseDate(created)}`}
 								/>
+								<Button onClick={()=>{
+								   downloadFile(fileVersion.file_id, filename, version_num);
+								}}>
+									Download
+								</Button>
 								{/*TODO implement those actions*/}
-								{/*<Button disabled>Download</Button>*/}
 								{/*<Button disabled>Delete</Button>*/}
 								{/*<Button disabled>Make Current</Button>*/}
 							</ListItem>

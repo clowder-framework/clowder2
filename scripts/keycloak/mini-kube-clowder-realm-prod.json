@@ -1,0 +1,129 @@
+{
+  "realm": "clowder",
+  "accessTokenLifespan": 300,
+  "enabled": true,
+  "registrationAllowed": true,
+  "resetPasswordAllowed": true,
+  "registrationEmailAsUsername": true,
+  "clients": [
+    {
+      "clientId": "clowder2-backend",
+      "rootUrl": "https://clowder2.software-dev.ncsa.cloud",
+      "surrogateAuthRequired": false,
+      "enabled": true,
+      "alwaysDisplayInConsole": false,
+      "clientAuthenticatorType": "client-secret",
+      "redirectUris": [
+        "https://clowder2.software-dev.ncsa.cloud/api/v2/auth"
+      ],
+      "webOrigins": [
+        "https://clowder2.software-dev.ncsa.cloud"
+      ],
+      "notBefore": 0,
+      "bearerOnly": false,
+      "consentRequired": false,
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": true,
+      "serviceAccountsEnabled": false,
+      "publicClient": true,
+      "frontchannelLogout": false,
+      "protocol": "openid-connect",
+      "authenticationFlowBindingOverrides": {},
+      "fullScopeAllowed": true,
+      "nodeReRegistrationTimeout": -1,
+      "defaultClientScopes": [
+        "web-origins",
+        "roles",
+        "profile",
+        "email"
+      ],
+      "optionalClientScopes": [
+        "address",
+        "phone",
+        "offline_access",
+        "microprofile-jwt"
+      ]
+    }
+  ],
+  "smtpServer": {
+    "replyToDisplayName": "",
+    "starttls": "false",
+    "auth": "",
+    "host": "smtp.ncsa.illinois.edu",
+    "replyTo": "",
+    "from": "clowder2-devnull@illinois.edu",
+    "fromDisplayName": "",
+    "envelopeFrom": "",
+    "ssl": "false"
+  },
+  "loginTheme": "clowder-theme",
+  "identityProviders": [
+    {
+      "alias": "cilogon",
+      "displayName": "CILogon",
+      "internalId": "165a05f4-f6d7-44ae-a906-285cba64bae7",
+      "providerId": "oidc",
+      "enabled": true,
+      "updateProfileFirstLoginMode": "on",
+      "trustEmail": false,
+      "storeToken": true,
+      "addReadTokenRoleOnCreate": true,
+      "authenticateByDefault": false,
+      "linkOnly": false,
+      "firstBrokerLoginFlowAlias": "first broker login",
+      "config": {
+        "userInfoUrl": "https://cilogon.org/oauth2/userinfo",
+        "clientId": "cilogon:/client_id/165f54b200b7bc4bf77635fe56237902",
+        "tokenUrl": "https://cilogon.org/oauth2/token",
+        "authorizationUrl": "https://cilogon.org/authorize",
+        "clientAuthMethod": "client_secret_post",
+        "syncMode": "IMPORT",
+        "clientSecret": "**********",
+        "defaultScope": "openid profile org.cilogon.userinfo email",
+        "useJwksUrl": "true"
+      }
+    },
+    {
+      "alias": "globus",
+      "displayName": "Globus",
+      "internalId": "1f4df120-221f-4ed9-ab4a-f40bfeedafbb",
+      "providerId": "oidc",
+      "enabled": true,
+      "updateProfileFirstLoginMode": "on",
+      "trustEmail": false,
+      "storeToken": true,
+      "addReadTokenRoleOnCreate": true,
+      "authenticateByDefault": false,
+      "linkOnly": false,
+      "firstBrokerLoginFlowAlias": "first broker login",
+      "config": {
+        "clientId": "fa3320ff-4730-4395-a4ec-fc7fe23ec8a7",
+        "tokenUrl": "https://auth.globus.org/v2/oauth2/token",
+        "authorizationUrl": "https://auth.globus.org/v2/oauth2/authorize",
+        "clientAuthMethod": "client_secret_post",
+        "syncMode": "IMPORT",
+        "clientSecret": "**********",
+        "defaultScope": "openid profile email",
+        "useJwksUrl": "true"
+      }
+    }
+  ],
+  "resetCredentialsFlow": "reset credentials",
+  "attributes": {
+    "cibaBackchannelTokenDeliveryMode": "poll",
+    "cibaAuthRequestedUserHint": "login_hint",
+    "clientOfflineSessionMaxLifespan": "0",
+    "oauth2DevicePollingInterval": "5",
+    "clientSessionIdleTimeout": "0",
+    "userProfileEnabled": "false",
+    "clientOfflineSessionIdleTimeout": "0",
+    "cibaInterval": "5",
+    "cibaExpiresIn": "120",
+    "oauth2DeviceCodeLifespan": "600",
+    "parRequestUriLifespan": "60",
+    "clientSessionMaxLifespan": "0",
+    "frontendUrl": "https://clowder2.software-dev.ncsa.cloud/keycloak",
+    "acr.loa.map": "[]"
+  }
+}

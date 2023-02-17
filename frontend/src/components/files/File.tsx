@@ -27,6 +27,7 @@ import {Download} from "@mui/icons-material";
 import {FileDetails} from "./FileDetails";
 import {fetchFolderPath} from "../../actions/folder";
 import {Listeners} from "../listeners/Listeners";
+import {ExtractionHistoryTab} from "../listeners/ExtractionHistoryTab";
 
 
 export const File = (): JSX.Element => {
@@ -234,26 +235,12 @@ export const File = (): JSX.Element => {
 						<Tab label="User Metadata" {...a11yProps(1)} disabled={false}/>
 						<Tab label="Extracted Metadata" {...a11yProps(2)} disabled={false}/>
 						<Tab label="Extractors" {...a11yProps(3)} disabled={false}/>
+						<Tab label="Extraction History" {...a11yProps(4)} disabled={false}/>
 					</Tabs>
-					{/*Preview Tab*/}
-					{/*<TabPanel value={selectedTabIndex} index={0}>*/}
-					{/*	{*/}
-					{/*		previews.map((preview) => {*/}
-					{/*			if (preview["previewType"] === "audio") {*/}
-					{/*				return <Audio fileId={preview["fileid"]} audioSrc={preview["resource"]}/>;*/}
-					{/*			} else if (preview["previewType"] === "video") {*/}
-					{/*				return <Video fileId={preview["fileid"]} videoSrc={preview["resource"]}/>;*/}
-					{/*			} else if (preview["previewType"] === "thumbnail") {*/}
-					{/*				return (<Thumbnail fileId={preview["fileid"]} fileType={preview["fileType"]}*/}
-					{/*								   imgSrc={preview["resource"]}/>);*/}
-					{/*			}*/}
-					{/*		})*/}
-					{/*	}*/}
-					{/*</TabPanel>*/}
 					{/*Version History*/}
 					<TabPanel value={selectedTabIndex} index={0}>
 						{fileVersions !== undefined ?
-							<FileVersionHistory fileVersions={fileVersions}/> : <></>}
+							<FileVersionHistory fileVersions={fileVersions} filename={fileSummary.name}/> : <></>}
 					</TabPanel>
 					<TabPanel value={selectedTabIndex} index={1}>
 						{
@@ -297,7 +284,7 @@ export const File = (): JSX.Element => {
 						/>
 					</TabPanel>
 					<TabPanel value={selectedTabIndex} index={4}>
-						Comments
+						<ExtractionHistoryTab fileId={fileId}/>
 					</TabPanel>
 				</Grid>
 				<Grid item xs={2}>

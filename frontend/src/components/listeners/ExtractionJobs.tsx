@@ -155,11 +155,11 @@ export const ExtractionJobs = (props) => {
 															<CancelIcon/> : null
 													}
 												</TableCell>
-												<TableCell align="left">{row.jobId}</TableCell>
-												<TableCell align="left">{row.created}</TableCell>
-												<TableCell align="left">{row.creator}</TableCell>
-												<TableCell align="left">{row.duration/1000} sec </TableCell>
-												<TableCell align="left">{row.resourceId}</TableCell>
+												{
+													Object.keys(row).map((key) => {
+														if (key !== "status") return <TableCell align="left">{row[key]}</TableCell>;
+													})
+												}
 											</TableRow>
 										);
 									})
