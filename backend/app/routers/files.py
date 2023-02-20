@@ -433,9 +433,11 @@ async def get_file_extract(
             routing_key,
             parameters,
             user,
-            access_token,
             db,
+
+
             rabbitmq_client,
+            access_token,
         )
 
         return {"message": "testing", "file_id": file_id}
