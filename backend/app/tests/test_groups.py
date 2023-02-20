@@ -77,7 +77,9 @@ def test_add_and_remove_member(client: TestClient, headers: dict):
 
     # removing member
     new_group = response.json()
-    new_group["userList"].remove(member2)
+    new_group["userList"].pop()
+
+    # TODO add a put endpoint for this
     response = client.post(
         f"{settings.API_V2_STR}/groups", headers=headers, json=new_group
     )

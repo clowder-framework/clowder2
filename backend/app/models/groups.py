@@ -1,15 +1,13 @@
 from datetime import datetime
-from typing import Optional
+from typing import Optional, List
 
-from mongoengine import DynamicDocument
 from pydantic import Field, BaseModel
-from pydantic import Field
 
 from app.models.mongomodel import OID, MongoModel
 from app.models.users import UserOut
 
 
-class Member:
+class Member(BaseModel):
     user: UserOut
     isOwner: bool = False
 
@@ -17,7 +15,7 @@ class Member:
 class GroupBase(BaseModel):
     name: str = "N/A"
     description: str = "N/A"
-    userList = [Member()]
+    userList: List[Member] = []
 
 
 class GroupIn(GroupBase):
