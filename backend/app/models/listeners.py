@@ -14,11 +14,7 @@ class Repository(MongoModel):
 
     repository_type: str = "git"
     repository_url: str = ""
-
-
-class ContextElement(BaseModel):
-    context_element: Union[dict, AnyUrl]
-
+    
 
 class ExtractorInfo(BaseModel):
     """Currently for extractor_info JSON from Clowder v1 extractors for use with to /api/extractors endpoint."""
@@ -30,7 +26,7 @@ class ExtractorInfo(BaseModel):
     maturity: str = "Development"
     name: Optional[str] = ""
     contributors: Optional[List[str]] = []
-    contexts: Optional[List[ContextElement]] = []
+    contexts: Optional[List[Union[dict, AnyUrl]]] = []
     repository: Optional[List[Repository]] = []
     external_services: Optional[List[str]] = []
     libraries: Optional[List[str]] = []
