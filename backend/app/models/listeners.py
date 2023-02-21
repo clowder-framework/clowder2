@@ -14,7 +14,7 @@ class Repository(MongoModel):
 
     repository_type: str = "git"
     repository_url: str = ""
-    
+
 
 class ExtractorInfo(BaseModel):
     """Currently for extractor_info JSON from Clowder v1 extractors for use with to /api/extractors endpoint."""
