@@ -162,7 +162,6 @@ async def test_dataset_patch_metadata_definition(client: TestClient, headers: di
     # body
     metadata_query.append({"query": {"match": {"content.latitude": "24.4"}}})
     result = search_index(es, "metadata", metadata_query)
-    print(result)
     assert (
         result.body["responses"][0]["hits"]["hits"][0]["_source"]["content"]["latitude"]
         == 24.4
@@ -198,7 +197,6 @@ async def test_dataset_create_metadata_context_url(client: TestClient, headers: 
         {"query": {"match": {"content.alternateName": "different name"}}}
     )
     result = search_index(es, "metadata", metadata_query)
-    print(result)
     assert (
         result.body["responses"][0]["hits"]["hits"][0]["_source"]["content"][
             "alternateName"

@@ -8,6 +8,7 @@ from pymongo import MongoClient
 
 from app import dependencies
 from app.models.listeners import EventListenerJob, EventListenerJobUpdate
+from app.keycloak_auth import get_current_user
 
 router = APIRouter()
 
@@ -15,6 +16,7 @@ router = APIRouter()
 @router.get("", response_model=List[EventListenerJob])
 async def get_all_job_summary(
     db: MongoClient = Depends(dependencies.get_db),
+    user=Depends(get_current_user),
     listener_id: Optional[str] = None,
     status: Optional[str] = None,
     user_id: Optional[str] = None,

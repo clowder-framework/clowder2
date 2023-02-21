@@ -45,10 +45,10 @@ security = HTTPBearer()
 
 async def _resubmit_file_extractors(
     file: FileOut,
+    db: MongoClient,
+    rabbitmq_client: BlockingChannel,
     user: UserOut,
     credentials: HTTPAuthorizationCredentials = Security(security),
-    db: MongoClient = Depends(dependencies.get_db),
-    rabbitmq_client: BlockingChannel = Depends(dependencies.get_rabbitmq),
 ):
     """This helper method will check metadata. We get the extractors run from metadata from extractors.
     Then they are resubmitted. At present parameters are not stored. This will change once Jobs are
@@ -86,9 +86,9 @@ async def _resubmit_file_extractors(
                 routing_key,
                 job_parameters,
                 user,
-                access_token,
                 db,
                 rabbitmq_client,
+                access_token,
             )
             resubmitted_job["status"] = "success"
             resubmitted_jobs.append(resubmitted_job)
@@ -105,9 +105,11 @@ async def add_file_entry(
     user: UserOut,
     db: MongoClient,
     fs: Minio,
+    es: Elasticsearch,
+    rabbitmq_client: BlockingChannel,
+    token: str,
     file: Optional[io.BytesIO] = None,
     content_type: Optional[str] = None,
-    es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
 ):
     """Insert FileDB object into MongoDB (makes Clowder ID), then Minio (makes version ID), then update MongoDB with
     the version ID from Minio.
@@ -174,7 +176,7 @@ async def add_file_entry(
     insert_record(es, "file", doc, file_db.id)
 
     # Submit file job to any qualifying feeds
-    await check_feed_listeners(es, file_out, user, db)
+    await check_feed_listeners(es, file_out, user, db, rabbitmq_client, token)
 
 
 # TODO: Move this to MongoDB middle layer
@@ -280,8 +282,9 @@ async def update_file(
         }
         update_record(es, "file", doc, updated_file.id)
         await _resubmit_file_extractors(
-            updated_file, user, credentials, db, rabbitmq_client
+            updated_file, db, rabbitmq_client, user, credentials
         )
+
         # updating metadata in elasticsearch
         if (
             metadata := await db["metadata"].find_one(
@@ -430,9 +433,9 @@ async def get_file_extract(
             routing_key,
             parameters,
             user,
-            access_token,
             db,
             rabbitmq_client,
+            access_token,
         )
 
         return {"message": "testing", "file_id": file_id}
@@ -461,6 +464,6 @@ async def resubmit_file_extractions(
     """
     if (file := await db["files"].find_one({"_id": ObjectId(file_id)})) is not None:
         resubmit_success_fail = _resubmit_file_extractors(
-            file_id, user, credentials, db, rabbitmq_client
+            file_id, db, rabbitmq_client, user, credentials
         )
     return resubmit_success_fail

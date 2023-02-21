@@ -3,16 +3,17 @@ import os
 import re
 import random
 import string
+from packaging import version
 from typing import List, Optional
-
 from bson import ObjectId
 from fastapi import APIRouter, HTTPException, Depends
 from pymongo import MongoClient
 
 from app.dependencies import get_db
 from app.keycloak_auth import get_user, get_current_user
-from app.models.feeds import FeedOut
+from app.models.feeds import FeedDB, FeedOut, FeedListener
 from app.models.config import ConfigEntryDB, ConfigEntryOut
+from app.models.search import SearchCriteria
 from app.models.listeners import (
     ExtractorInfo,
     EventListenerIn,
@@ -26,6 +27,45 @@ router = APIRouter()
 legacy_router = APIRouter()  # for back-compatibilty with v1 extractors
 
 clowder_bucket = os.getenv("MINIO_BUCKET_NAME", "clowder")
+
+
+async def _process_incoming_v1_extractor_info(
+    extractor_name: str,
+    extractor_id: str,
+    process: dict,
+    db: MongoClient,
+):
+    if "file" in process:
+        # Create a MIME-based feed for this v1 extractor
+        criteria_list = []
+        for mime in process["file"]:
+            main_type = mime.split("/")[0] if mime.find("/") > -1 else mime
+            sub_type = mime.split("/")[1] if mime.find("/") > -1 else None
+            if sub_type:
+                if sub_type == "*":
+                    # If a wildcard, just match on main type
+                    criteria_list.append(
+                        SearchCriteria(field="content_type_main", value=main_type)
+                    )
+                else:
+                    # Otherwise match the whole string
+                    criteria_list.append(
+                        SearchCriteria(field="content_type", value=mime)
+                    )
+            else:
+                criteria_list.append(SearchCriteria(field="content_type", value=mime))
+
+        # TODO: Who should the author be for an auto-generated feed? Currently None.
+        new_feed = FeedDB(
+            name=extractor_name,
+            search={
+                "index_name": "file",
+                "criteria": criteria_list,
+                "mode": "or",
+            },
+            listeners=[FeedListener(listener_id=extractor_id, automatic=True)],
+        )
+        db["feeds"].insert_one(new_feed.to_mongo())
 
 
 @router.get("/instance")
@@ -73,41 +113,52 @@ async def save_listener(
 @legacy_router.post("", response_model=EventListenerOut)
 async def save_legacy_listener(
     legacy_in: LegacyEventListenerIn,
-    user=Depends(get_user),
+    user=Depends(get_current_user),
     db: MongoClient = Depends(get_db),
 ):
     """This will take a POST with Clowder v1 extractor_info included, and convert/update to a v2 Listener."""
-    listener_properties = ExtractorInfo(**legacy_in.dict)
+    listener_properties = ExtractorInfo(**legacy_in.dict())
     listener = EventListenerDB(
         name=legacy_in.name,
-        version=int(legacy_in.version),
+        version=legacy_in.version,
         description=legacy_in.description,
         creator=user,
         properties=listener_properties,
     )
-    new_listener = await db["listeners"].insert_one(listener.to_mongo())
-    found = await db["listeners"].find_one({"_id": new_listener.inserted_id})
-    listener_out = EventListenerOut.from_mongo(found)
 
-    # TODO: Automatically match or create a Feed based on listener_in.process rules
-    for process_key in listener_properties.process:
-        if process_key == "file":
-            mimetypes = listener_properties.process[process_key]
-            new_feed = {
-                "name": legacy_in.name + " " + legacy_in.version,
-                "mode": "or",
-                "listeners": [{"listener_id": listener_out.id, "automatic": True}],
-                "criteria": [],
-            }
-            for mimetype in mimetypes:
-                new_feed["criteria"].append(
-                    {"field": "MIMEtype", "operator": "==", "value": mimetype}
-                )
+    # check to see if extractor already exists and update if so
+    existing_extractor = await db["listeners"].find_one({"name": legacy_in.name})
+    if existing_extractor is not None:
+        # Update existing listener
+        extractor_out = EventListenerOut.from_mongo(existing_extractor)
+        existing_version = extractor_out.version
+        new_version = listener.version
+        if version.parse(new_version) > version.parse(existing_version):
+            # if this is a new version, add it to the database
+            new_extractor = await db["listeners"].insert_one(listener.to_mongo())
+            found = await db["listeners"].find_one({"_id": new_extractor.inserted_id})
+            # TODO - for now we are not deleting an older version of the extractor, just adding a new one
+            # removed = db["listeners"].delete_one({"_id": existing_extractor["_id"]})
+            extractor_out = EventListenerOut.from_mongo(found)
+            return extractor_out
+        else:
+            # otherwise return existing version
+            # TODO: Should this fail the POST instead?
+            return extractor_out
+    else:
+        # Register new listener
+        new_listener = await db["listeners"].insert_one(listener.to_mongo())
+        found = await db["listeners"].find_one({"_id": new_listener.inserted_id})
+        listener_out = EventListenerOut.from_mongo(found)
 
-            # Save feed
-            pass
+        # Assign MIME-based listener if needed
+        if listener_out.properties and listener_out.properties.process:
+            process = listener_out.properties.process
+            await _process_incoming_v1_extractor_info(
+                legacy_in.name, listener_out.id, process, db
+            )
 
-    return listener_out
+        return listener_out
 
 
 @router.get("/search", response_model=List[EventListenerOut])
