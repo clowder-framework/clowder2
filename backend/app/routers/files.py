@@ -434,8 +434,6 @@ async def get_file_extract(
             parameters,
             user,
             db,
-
-
             rabbitmq_client,
             access_token,
         )
