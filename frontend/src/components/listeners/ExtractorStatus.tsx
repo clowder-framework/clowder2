@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
 	Box,
 	Collapse,
@@ -13,6 +13,9 @@ import {
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import { parseDate } from "../../utils/common";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "../../types/data";
+import { fetchJobSummary, fetchJobUpdates } from "../../actions/listeners";
 
 function Row (props: { summary: any; updates: any; }) {
 	const { summary, updates } = props;
@@ -69,10 +72,27 @@ function Row (props: { summary: any; updates: any; }) {
 	);
 }
 
-export default function ExtractorStatus(props: { job_id: any; summary: any; updates: any; }) {
+export default function ExtractorStatus(props: { job_id: any; }) {
 	const job_id = props.job_id;
-	const summary = props.summary;
-	const updates = props.updates;
+
+	const dispatch = useDispatch();
+
+	const jobSummaryFetch = (job_id: string | undefined) => dispatch(fetchJobSummary(job_id));
+	const jobUpdatesFetch = (job_id: string | undefined) => dispatch(fetchJobUpdates(job_id));
+
+	const summary = useSelector((state: RootState) => state.listener.currJobSummary);
+	const updates = useSelector((state: RootState) => state.listener.currJobUpdates);
+
+	useEffect(() => {
+		const interval = setInterval(() => {
+			if (job_id.length > 0) {
+				jobSummaryFetch(job_id);
+				jobUpdatesFetch(job_id);
+			}
+		}, 2000);
+
+		return () => clearInterval(interval);
+	}, [job_id]);
 
 	return (
 		<TableContainer>
