@@ -76,17 +76,6 @@ export function parseDate(dateString) {
 	}
 }
 
-export function calculateElapsedTime(date1, date2) {
-    try {
-        let elapsed = new Date(date1) - new Date(date2)
-        return Math.round(Math.abs(elapsed / 1000))
-
-    } catch (error) {
-        console.error(error);
-		return error["message"];
-    }
-}
-
 // get current username
 // export function getCurrUsername(){
 // 	if (process.env.DEPLOY_ENV === "local"){

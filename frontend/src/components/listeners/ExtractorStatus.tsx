@@ -12,7 +12,7 @@ import {
 } from "@mui/material";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
-import { parseDate, calculateElapsedTime } from "../../utils/common";
+import { parseDate } from "../../utils/common";
 
 function Row (props: { summary: any; updates: any; }) {
 	const { summary, updates } = props;
@@ -33,7 +33,7 @@ function Row (props: { summary: any; updates: any; }) {
 				<TableCell style={{ borderBottom: "none" }}>{parseDate(summary.created)}</TableCell>
 				<TableCell style={{ borderBottom: "none" }}>{parseDate(summary.updated)}</TableCell>
 				<TableCell style={{ borderBottom: "none" }}>{summary.latest_message}</TableCell>
-				<TableCell style={{ borderBottom: "none" }}>{calculateElapsedTime(summary.updated, summary.created)} s</TableCell>
+				<TableCell style={{ borderBottom: "none" }}>{summary.duration/1000} sec</TableCell>
 			</TableRow>
 			<TableRow>
 				<TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={1} />
