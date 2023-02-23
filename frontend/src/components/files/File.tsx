@@ -28,7 +28,7 @@ import {FileDetails} from "./FileDetails";
 import {fetchFolderPath} from "../../actions/folder";
 import {Listeners} from "../listeners/Listeners";
 import {ExtractionHistoryTab} from "../listeners/ExtractionHistoryTab";
-
+import { FileActionsMenu } from "./FileActionsMenu";
 
 export const File = (): JSX.Element => {
 
@@ -210,16 +210,15 @@ export const File = (): JSX.Element => {
 						 handleActionCancel={handleErrorCancel}/>
 
 			<Grid container>
-				<Grid item xs={10} sx={{display: 'flex', alignItems: 'center'}}>
+				<Grid item xs={8} sx={{display: "flex", alignItems: "center"}}>
 					<MainBreadcrumbs paths={paths}/>
 				</Grid>
-				<Grid item xs={2}>
-					<Button variant="contained"
-							onClick={() => {
-								downloadFile(fileId, fileSummary.name);
-							}} endIcon={<Download/>}>
-						Download
-					</Button>
+				<Grid item xs={4}>
+					<FileActionsMenu
+						filename={fileSummary.name}
+						fileId={fileId}
+						datasetId={datasetId}
+					/>
 				</Grid>
 			</Grid>
 			<Grid container>
