@@ -1,9 +1,11 @@
 from datetime import datetime
 from enum import Enum
 
+from charset_normalizer.md import List
 from pydantic import BaseModel, EmailStr, Field
 
 from app.models.mongomodel import MongoModel
+from app.models.pyobjectid import PyObjectId
 
 
 class RoleType(str, Enum):
@@ -20,9 +22,10 @@ class RoleType(str, Enum):
 class AuthorizationBase(BaseModel):
     # TODO: This should be PyObjectId = Field(default_factory=PyObjectId). Need to figure out why can't create instance
     #  in `routers.authorization.get_dataset_role()`.
-    dataset_id: str
-    user_id: EmailStr
+    dataset_id: PyObjectId
+    user_ids: List[EmailStr] = []
     role: RoleType
+    group_id: str
 
     class Config:
         # required for Enum to properly work

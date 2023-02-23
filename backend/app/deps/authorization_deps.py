@@ -32,12 +32,19 @@ class Authorization:
         db: MongoClient = Depends(get_db),
         current_user: str = Depends(get_current_username),
     ):
-        authorization = await db["authorization"].find_one(
-            {"dataset_id": dataset_id, "user_id": current_user, "creator": current_user}
+        authorization_q = await db["authorization"].find_one(
+            {"dataset_id": ObjectId(dataset_id), "creator": current_user}
         )
-        role = AuthorizationDB.from_mongo(authorization).role
-        if access(role, self.role):
-            return True
+        authorization = AuthorizationDB.from_mongo(authorization_q)
+        if current_user in authorization.user_ids:
+            role = authorization.role
+            if access(role, self.role):
+                return True
+            else:
+                raise HTTPException(
+                    status_code=403,
+                    detail=f"User `{current_user} does not have `{self.role}` permission on dataset {dataset_id}",
+                )
         else:
             raise HTTPException(
                 status_code=403,
