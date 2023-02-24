@@ -1,5 +1,5 @@
 import React, {useEffect} from "react";
-import {Route, Navigate, Routes, BrowserRouter, useNavigate} from "react-router-dom";
+import {Route, Navigate, Routes, BrowserRouter, useNavigate, useParams, useLocation} from "react-router-dom";
 
 import {CreateMetadataDefinitionPage} from "./components/metadata/CreateMetadataDefinition";
 import {Dataset as DatasetComponent} from "./components/datasets/Dataset";
@@ -23,9 +23,32 @@ const PrivateRoute = (props): JSX.Element => {
 	const {children} = props;
 
 	const history = useNavigate();
+	const location = useLocation();
+
 	const dispatch = useDispatch();
 	const loggedOut = useSelector((state: RootState) => state.error.loggedOut);
 	const dismissLogout = () => dispatch(resetLogout());
+
+	// // check user's authorization on the resource and store it in redux
+	// useEffect(() => {
+	// 	// find which route it's on
+  	// 	console.log(location.pathname);
+	//
+  	// 	if (location.pathname === "/") {
+	// 		console.log(console.log("root"));
+	// 	}
+  	// 	else if (location.pathname === "datasets"){
+	// 		const {datasetId} = useParams<{ datasetId?: string }>();
+	// 		console.log("datasetId", datasetId);
+  	// 	}
+  	// 	else if (location.pathname === "files") {
+	// 		const {fileId} = useParams<{ fileId?: string }>();
+	// 		console.log("fileId", fileId);
+	// 	}
+  	// 	else{
+  	// 		console.log("default");
+	// 	}
+	// }, [])
 
 	// log user out if token expired/unauthorized
 	useEffect(() => {
@@ -35,6 +58,7 @@ const PrivateRoute = (props): JSX.Element => {
 			history("/auth/login");
 		}
 	}, [loggedOut]);
+
 
 	return (
 		<>
