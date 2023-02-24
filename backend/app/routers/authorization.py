@@ -12,7 +12,7 @@ from app.keycloak_auth import get_current_username
 from app.models.authorization import AuthorizationBase, AuthorizationDB
 from bson.objectid import ObjectId
 
-from app.models.groups import GroupOut
+from app.models.groups import GroupOut, GroupDB, GroupBase
 
 router = APIRouter()
 
@@ -32,20 +32,18 @@ async def save_authorization(
 
     # Retrieve users from groups in mongo
     user_ids: List[EmailStr] = []
-    if (
-        group_q := await db["groups"].find_one(
-            {"_id": ObjectId(authorization_in.group_id)}
-        )
-    ) is not None:
-        group = GroupOut.from_mongo(group_q)
-        user_ids = list(map(lambda user: user.user.email, group.userList))
+    group_q_list = db["groups"].find({"_id": {"$in": authorization_in.group_ids}})
+    if group_q_list is not None:
+        async for group_q in group_q_list:
+            group = GroupOut.from_mongo(group_q)
+            user_ids = list(map(lambda user: user.user.email, group.userList))
     else:
         raise HTTPException(
-            status_code=404, detail=f"Group {authorization_in.group_id} not found"
+            status_code=404, detail=f"Group {authorization_in.group_ids} not found"
         )
 
     authorization_dict = authorization_in.dict()
-    authorization_dict["user_ids"] = user_ids
+    authorization_dict["user_ids"] = list(set(user_ids))
     authorization_db = AuthorizationDB(**authorization_dict, creator=user)
     new_authorization = await db["authorization"].insert_one(
         authorization_db.to_mongo()

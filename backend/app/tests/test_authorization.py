@@ -26,7 +26,7 @@ def test_create(client: TestClient, headers: dict):
     assert response.status_code == 200
     group_id = response.json().get("id")
 
-    authorization_data["group_id"] = group_id
+    authorization_data["group_ids"] = [group_id]
     response = client.post(
         f"{settings.API_V2_STR}/authorizations",
         json=authorization_data,

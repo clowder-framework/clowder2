@@ -25,7 +25,7 @@ class AuthorizationBase(BaseModel):
     dataset_id: PyObjectId
     user_ids: List[EmailStr] = []
     role: RoleType
-    group_id: str
+    group_ids: List[PyObjectId] = []
 
     class Config:
         # required for Enum to properly work
