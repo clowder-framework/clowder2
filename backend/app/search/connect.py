@@ -1,5 +1,5 @@
 import logging
-
+import json
 from elasticsearch import Elasticsearch
 from elasticsearch import BadRequestError
 
@@ -157,6 +157,24 @@ def execute_search_obj(es_client, search_obj: SearchObject):
 def check_search_result(es_client, file_out: FileOut, search_obj: SearchObject):
     """Check whether the contents of new_index match the search criteria in search_obj."""
     # TODO: There is an opportunity to do some basic checks here first, without talking to elasticsearch
-    search_obj.criteria.insert(0, SearchCriteria(field="id", value=str(file_out.id)))
-    results = execute_search_obj(es_client, search_obj)
+    match_list = []
+
+    # TODO: This will need to be more complex to support other operators
+    for criteria in search_obj.criteria:
+        crit = {criteria.field: criteria.value}
+        match_list.append({"match": crit})
+
+    if search_obj.mode == "and":
+        subquery = {"bool": {"must": match_list}}
+    if search_obj.mode == "or":
+        subquery = {"bool": {"should": match_list}}
+
+    # Wrap the normal criteria with restriction of file ID also
+    query_string = '{"preference":"results"}\n'
+    query = {
+        "query": {"bool": {"must": [{"match": {"name": str(file_out.name)}}, subquery]}}
+    }
+    query_string += json.dumps(query) + "\n"
+
+    results = search_index(es_client, search_obj.index_name, query_string)
     return results and len(results) > 0

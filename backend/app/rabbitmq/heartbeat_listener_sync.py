@@ -6,8 +6,9 @@ from pymongo import MongoClient
 
 from app.config import settings
 from app.models.search import SearchCriteria
-from app.routers.feeds import FeedIn, FeedListener, FeedOut, FeedDB, associate_listener
 from app.models.listeners import EventListenerDB, EventListenerOut, ExtractorInfo
+from app.routers.feeds import FeedIn, FeedListener, FeedOut, FeedDB, associate_listener
+from app.routers.listeners import _process_incoming_v1_extractor_info
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -30,7 +31,7 @@ def callback(ch, method, properties, body):
     mongo_client = MongoClient(settings.MONGODB_URL)
     db = mongo_client[settings.MONGO_DATABASE]
 
-    # check to see if extractor alredy exists
+    # check to see if extractor alredy exists and update if so
     existing_extractor = db["listeners"].find_one({"name": msg["queue"]})
     if existing_extractor is not None:
         # Update existing listener
@@ -58,43 +59,9 @@ def callback(ch, method, properties, body):
         # Assign MIME-based listener if needed
         if extractor_out.properties and extractor_out.properties.process:
             process = extractor_out.properties.process
-            if "file" in process:
-                # Create a MIME-based feed for this v1 extractor
-                criteria_list = []
-                for mime in process["file"]:
-                    main_type = mime.split("/")[0] if mime.find("/") > -1 else mime
-                    sub_type = mime.split("/")[1] if mime.find("/") > -1 else None
-                    if sub_type:
-                        if sub_type == "*":
-                            # If a wildcard, just match on main type
-                            criteria_list.append(
-                                SearchCriteria(
-                                    field="content_type_main", value=main_type
-                                )
-                            )
-                        else:
-                            # Otherwise match the whole string
-                            criteria_list.append(
-                                SearchCriteria(field="content_type", value=mime)
-                            )
-                    else:
-                        criteria_list.append(
-                            SearchCriteria(field="content_type", value=mime)
-                        )
-
-                # TODO: Who should the author be for an auto-generated feed? Currently None.
-                new_feed = FeedDB(
-                    name=extractor_name,
-                    search={
-                        "index_name": "file",
-                        "criteria": criteria_list,
-                        "mode": "or",
-                    },
-                    listeners=[
-                        FeedListener(listener_id=extractor_out.id, automatic=True)
-                    ],
-                )
-                db["feeds"].insert_one(new_feed.to_mongo())
+            _process_incoming_v1_extractor_info(
+                extractor_name, extractor_out.id, process, db
+            )
 
         return extractor_out
 
