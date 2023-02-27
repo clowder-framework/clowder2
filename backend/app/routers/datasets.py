@@ -230,10 +230,14 @@ async def get_datasets(
     if mine:
         for doc in (
             await db["datasets_view"]
-            .find({"$and":[
-                {"author.email": user_id},
-                {"auth": {"$elemMatch" : {"user_id": { "$eq": user_id }}}}
-            ]})
+            .find(
+                {
+                    "$and": [
+                        {"author.email": user_id},
+                        {"auth": {"$elemMatch": {"user_id": {"$eq": user_id}}}},
+                    ]
+                }
+            )
             .sort([("created", pymongo.DESCENDING)])
             .skip(skip)
             .limit(limit)
@@ -243,7 +247,7 @@ async def get_datasets(
     else:
         for doc in (
             await db["datasets_view"]
-            .find({"auth": {"$elemMatch" : {"user_id": { "$eq": user_id }}}})
+            .find({"auth": {"$elemMatch": {"user_id": {"$eq": user_id}}}})
             .sort([("created", pymongo.DESCENDING)])
             .skip(skip)
             .limit(limit)
@@ -266,6 +270,7 @@ async def get_dataset(dataset_id: str, db: MongoClient = Depends(dependencies.ge
 async def get_dataset_files(
     dataset_id: str,
     folder_id: Optional[str] = None,
+    user_id=Depends(get_user),
     db: MongoClient = Depends(dependencies.get_db),
     skip: int = 0,
     limit: int = 10,
@@ -273,11 +278,16 @@ async def get_dataset_files(
     files = []
     if folder_id is not None:
         for f in (
-            await db["files"]
+            await db["files_views"]
             .find(
                 {
-                    "dataset_id": ObjectId(dataset_id),
-                    "folder_id": ObjectId(folder_id),
+                    "$and": [
+                        {
+                            "dataset_id": ObjectId(dataset_id),
+                            "folder_id": ObjectId(folder_id),
+                        },
+                        {"auth": {"$elemMatch": {"user_id": {"$eq": user_id}}}},
+                    ]
                 }
             )
             .skip(skip)
@@ -287,11 +297,16 @@ async def get_dataset_files(
             files.append(FileOut.from_mongo(f))
     else:
         for f in (
-            await db["files"]
+            await db["files_views"]
             .find(
                 {
-                    "dataset_id": ObjectId(dataset_id),
-                    "folder_id": None,
+                    "$and": [
+                        {
+                            "dataset_id": ObjectId(dataset_id),
+                            "folder_id": None,
+                        },
+                        {"auth": {"$elemMatch": {"user_id": {"$eq": user_id}}}},
+                    ]
                 }
             )
             .skip(skip)
