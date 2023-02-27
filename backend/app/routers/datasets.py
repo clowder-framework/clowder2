@@ -486,6 +486,7 @@ async def add_folder(
 async def get_dataset_folders(
     dataset_id: str,
     parent_folder: Optional[str] = None,
+    user_id=Depends(get_user),
     db: MongoClient = Depends(dependencies.get_db),
 ):
     folders = []
@@ -497,8 +498,13 @@ async def get_dataset_folders(
     else:
         async for f in db["folders"].find(
             {
-                "dataset_id": ObjectId(dataset_id),
-                "parent_folder": ObjectId(parent_folder),
+                "$and": [
+                    {
+                        "dataset_id": ObjectId(dataset_id),
+                        "parent_folder": ObjectId(parent_folder),
+                    },
+                    {"auth": {"$elemMatch": {"user_id": {"$eq": user_id}}}},
+                ]
             }
         ):
             folders.append(FolderDB.from_mongo(f))
