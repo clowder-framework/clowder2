@@ -14,7 +14,7 @@ from app.models.config import ConfigEntryDB, ConfigEntryOut
 from app.models.listeners import (
     EventListenerJob,
     EventListenerJobUpdate,
-    EventListenerJobStatus
+    EventListenerJobStatus,
 )
 
 logging.basicConfig(level=logging.INFO)
@@ -26,41 +26,50 @@ def parse_message_status(msg):
     if msg.startswith("StatusMessage.start: ") or msg.startswith("STARTED: "):
         return {
             "status": EventListenerJobStatus.STARTED,
-            "cleaned_msg": msg.replace("StatusMessage.start: ", "").replace("STARTED: ", "")
+            "cleaned_msg": msg.replace("StatusMessage.start: ", "").replace(
+                "STARTED: ", ""
+            ),
         }
     elif msg.startswith("StatusMessage.done: ") or msg.startswith("SUCCEEDED: "):
         return {
             "status": EventListenerJobStatus.SUCCEEDED,
-            "cleaned_msg": msg.replace("StatusMessage.done: ", "").replace("SUCCEEDED: ", "")
+            "cleaned_msg": msg.replace("StatusMessage.done: ", "").replace(
+                "SUCCEEDED: ", ""
+            ),
         }
     elif msg.startswith("StatusMessage.error: ") or msg.startswith("ERROR: "):
         return {
             "status": EventListenerJobStatus.ERROR,
-            "cleaned_msg": msg.replace("StatusMessage.error: ", "").replace("ERROR: ", "")
+            "cleaned_msg": msg.replace("StatusMessage.error: ", "").replace(
+                "ERROR: ", ""
+            ),
         }
     elif msg.startswith("StatusMessage.retry: ") or msg.startswith("RESUBMITTED: "):
         return {
             "status": EventListenerJobStatus.RESUBMITTED,
-            "cleaned_msg": msg.replace("StatusMessage.retry: ", "").replace("RESUBMITTED: ", "")
+            "cleaned_msg": msg.replace("StatusMessage.retry: ", "").replace(
+                "RESUBMITTED: ", ""
+            ),
         }
     elif msg.startswith("StatusMessage.skip: ") or msg.startswith("SKIPPED: "):
         return {
             "status": EventListenerJobStatus.SKIPPED,
-            "cleaned_msg": msg.replace("StatusMessage.skip: ", "").replace("SKIPPED: ", "")
+            "cleaned_msg": msg.replace("StatusMessage.skip: ", "").replace(
+                "SKIPPED: ", ""
+            ),
         }
     elif msg.startswith("StatusMessage.processing: ") or msg.startswith("PROCESSING: "):
         # If the message is a simple status update, we can keep status as STARTED.
         return {
             "status": EventListenerJobStatus.PROCESSING,
-            "cleaned_msg": msg.replace("StatusMessage.processing: ", "").replace("PROCESSING: ", "")
+            "cleaned_msg": msg.replace("StatusMessage.processing: ", "").replace(
+                "PROCESSING: ", ""
+            ),
         }
     else:
         # TODO: Should we default to something else here?
         return EventListenerJobStatus.PROCESSING
-        return {
-            "status": EventListenerJobStatus.PROCESSING,
-            "cleaned_msg": msg
-        }
+        return {"status": EventListenerJobStatus.PROCESSING, "cleaned_msg": msg}
 
 
 def callback(ch, method, properties, body):
@@ -93,12 +102,17 @@ def callback(ch, method, properties, body):
         update_duration = False
         if status == EventListenerJobStatus.STARTED and updated_job.started is None:
             updated_job.started = timestamp
-        elif status == EventListenerJobStatus.SUCCEEDED \
-                or status == EventListenerJobStatus.ERROR \
-                or status == EventListenerJobStatus.SKIPPED:
+        elif (
+            status == EventListenerJobStatus.SUCCEEDED
+            or status == EventListenerJobStatus.ERROR
+            or status == EventListenerJobStatus.SKIPPED
+        ):
             updated_job.finished = timestamp
             update_duration = True
-        elif status == EventListenerJobStatus.PROCESSING or status == EventListenerJobStatus.RESUBMITTED:
+        elif (
+            status == EventListenerJobStatus.PROCESSING
+            or status == EventListenerJobStatus.RESUBMITTED
+        ):
             updated_job.updated = timestamp
             update_duration = True
         if update_duration and updated_job.started:
