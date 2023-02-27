@@ -278,7 +278,7 @@ async def get_dataset_files(
     files = []
     if folder_id is not None:
         for f in (
-            await db["files_views"]
+            await db["files_view"]
             .find(
                 {
                     "$and": [
@@ -297,7 +297,7 @@ async def get_dataset_files(
             files.append(FileOut.from_mongo(f))
     else:
         for f in (
-            await db["files_views"]
+            await db["files_view"]
             .find(
                 {
                     "$and": [
