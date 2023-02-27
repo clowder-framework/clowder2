@@ -229,8 +229,11 @@ async def get_datasets(
     datasets = []
     if mine:
         for doc in (
-            await db["datasets"]
-            .find({"author.email": user_id})
+            await db["datasets_view"]
+            .find({"$and":[
+                {"author.email": user_id},
+                {"auth": {"$elemMatch" : {"user_id": { "$eq": user_id }}}}
+            ]})
             .sort([("created", pymongo.DESCENDING)])
             .skip(skip)
             .limit(limit)
@@ -239,8 +242,8 @@ async def get_datasets(
             datasets.append(DatasetOut.from_mongo(doc))
     else:
         for doc in (
-            await db["datasets"]
-            .find()
+            await db["datasets_view"]
+            .find({"auth": {"$elemMatch" : {"user_id": { "$eq": user_id }}}})
             .sort([("created", pymongo.DESCENDING)])
             .skip(skip)
             .limit(limit)
