@@ -26,7 +26,7 @@ services:
       - clowder2
     volumes:
       - mongo:/data/db
-      - ./scripts/mongoviews/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+      - ./scripts/mongoviews/mongo-init-dev.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
 
   minio1:
     <<: *minio-common
