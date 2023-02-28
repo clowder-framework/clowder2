@@ -109,7 +109,7 @@ services:
       - clowder2
     volumes:
       - mongo:/data/db
-      - ./docker-entrypoint-initdb.d/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+      - ./scripts/mongoviews/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
 
   #    environment:
 #      MONGO_INITDB_ROOT_USERNAME: root
