@@ -427,7 +427,7 @@ async def get_file_extract(
         if parameters is None:
             parameters = {}
 
-        await submit_file_job(
+        job_id = await submit_file_job(
             file_out,
             queue,
             routing_key,
@@ -438,7 +438,7 @@ async def get_file_extract(
             access_token,
         )
 
-        return {"message": "testing", "file_id": file_id}
+        return job_id
     else:
         raise HTTPException(status_code=404, detail=f"File {file_id} not found")
 
