@@ -1,5 +1,5 @@
 import React, {useState} from "react";
-import {useDispatch} from "react-redux";
+import {useDispatch, useSelector} from "react-redux";
 import {
 	Box,
 	Button,
@@ -20,9 +20,10 @@ import Form from "@rjsf/material-ui";
 import {FormProps} from "@rjsf/core";
 import {submitFileExtractionAction} from "../../actions/file";
 import {submitDatasetExtractionAction} from "../../actions/dataset";
-import {Extractor} from "../../types/data";
+import {Extractor, RootState} from "../../types/data";
 import {ClowderRjsfSelectWidget} from "../styledComponents/ClowderRjsfSelectWidget";
 import {ClowderRjsfTextWidget} from "../styledComponents/ClowderRjsfTextWidget";
+import ExtractorStatus from "./ExtractorStatus";
 
 type SubmitExtractionProps = {
 	fileId: string,
@@ -39,7 +40,6 @@ const widgets = {
 
 export default function SubmitExtraction(props: SubmitExtractionProps) {
 
-
 	const {fileId, datasetId, open, handleClose, selectedExtractor} = props;
 	const dispatch = useDispatch();
 
@@ -47,6 +47,9 @@ export default function SubmitExtraction(props: SubmitExtractionProps) {
 		(fileId: string | undefined, extractorName: string | undefined, requestBody: FormData) => dispatch(submitFileExtractionAction(fileId, extractorName, requestBody));
 	const submitDatasetExtraction =
 		(datasetId: string | undefined, extractorName: string | undefined, requestBody: FormData) => dispatch(submitDatasetExtractionAction(datasetId, extractorName, requestBody));
+   
+	const job_id = useSelector((state: RootState) => state.listener.currJobId);
+
 	const onSubmit = (formData: FormData) => {
 		const extractorName = selectedExtractor.name
 		if (fileId === undefined && datasetId !== undefined) {
@@ -130,6 +133,7 @@ export default function SubmitExtraction(props: SubmitExtractionProps) {
 						<Step key="status">
 							<StepLabel>Extraction Status</StepLabel>
 							<StepContent>
+								<ExtractorStatus job_id={job_id}/>
 								{/*buttons*/}
 								<Box sx={{mb: 2}}>
 									<Button variant="contained" onClick={handleNext} sx={{mt: 1, mr: 1}}>

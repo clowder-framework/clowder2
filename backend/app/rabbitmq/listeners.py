@@ -104,7 +104,7 @@ async def submit_file_job(
             content_type="application/json", delivery_mode=1, reply_to=reply_to
         ),
     )
-    return {"message": "testing", "file_id": file_out.id}
+    return new_job_id
 
 
 async def submit_dataset_job(
@@ -148,4 +148,4 @@ async def submit_dataset_job(
         ),
         # reply_to=reply_to
     )
-    return {"message": "testing", "dataset_id": dataset_out.id}
+    return new_job_id

@@ -220,6 +220,27 @@ interface RECEIVE_LISTENER_JOBS{
 	jobs: []
 }
 
+interface SUBMIT_FILE_EXTRACTION{
+	type: "SUBMIT_FILE_EXTRACTION",
+	job_id: String
+}
+
+interface SUBMIT_DATASET_EXTRACTION{
+	type: "SUBMIT_DATASET_EXTRACTION",
+	job_id: String
+}
+
+
+interface FETCH_JOB_SUMMARY{
+	type: "FETCH_JOB_SUMMARY"
+    currJobSummary: [];
+}
+
+interface FETCH_JOB_UPDATES{
+	type: "FETCH_JOB_UPDATES"
+    currJobUpdates: [];
+}
+
 export type DataAction =
 	| RECEIVE_FILES_IN_DATASET
 	| RECEIVE_FOLDERS_IN_DATASET
@@ -263,4 +284,8 @@ export type DataAction =
 	| RECEIVE_LISTENER_CATEGORIES
 	| RECEIVE_LISTENER_LABELS
 	| RECEIVE_LISTENER_JOBS
+    | SUBMIT_FILE_EXTRACTION
+    | SUBMIT_DATASET_EXTRACTION
+    | FETCH_JOB_SUMMARY
+    | FETCH_JOB_UPDATES
 	;
