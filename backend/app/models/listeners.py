@@ -90,8 +90,10 @@ class EventListenerJobStatus(str, Enum):
 
     CREATED = "CREATED"
     STARTED = "STARTED"
+    PROCESSING = "PROCESSING"
     SUCCEEDED = "SUCCEEDED"
     ERROR = "ERROR"
+    SKIPPED = "SKIPPED"
     RESUBMITTED = "RESUBMITTED"
 
 
@@ -106,7 +108,7 @@ class EventListenerJob(MongoModel):
     started: Optional[datetime] = None
     updated: Optional[datetime] = None
     finished: Optional[datetime] = None
-    duration: Optional[timedelta] = None
+    duration: Optional[float] = None
     latest_message: Optional[str] = None
     status: str = EventListenerJobStatus.CREATED
 
