@@ -45,7 +45,7 @@ function Row (props: { summary: any; updates: any; }) {
 						<Box sx={{ marginTop: 2, marginBottom: 5 }} style={{backgroundColor: "#FFF"}}>
 							{/* Extractor logs component */}
 							<div className="container">
-								{updates.length > 0 ?
+								{updates.length > 0 ? 
 									<Box
 										sx={{
 											margin: "2%",
