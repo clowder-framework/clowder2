@@ -15,7 +15,7 @@ function init(databaseName) {
 	db.createCollection("tokens");
 	db.createCollection("users");
 
-	db.getCollection("datasets").aggregate(
+	db.createView("datasets_view", "datasets",
 		[
 			{
 				$lookup: {
@@ -25,11 +25,10 @@ function init(databaseName) {
 					"as": "auth"
 				}
 			}
-		],
-		{}
+		]
 	);
 
-	db.getCollection("files").aggregate(
+	db.createView("files_view", "files"
 		[
 			{
 				$lookup: {
@@ -40,10 +39,9 @@ function init(databaseName) {
 				}
 			}
 		],
-		{}
 	);
 
-	db.getCollection("folders").aggregate(
+	db.createView("folders_view", "folders",
 		[
 			{
 				$lookup: {
@@ -54,10 +52,9 @@ function init(databaseName) {
 				}
 			}
 		],
-		{}
 	);
 
-	db.getCollection("listener_job_updates").aggregate(
+	db.createView("listener_job_updates_view", "listener_job_updates",
 		[
 			{
 				$lookup: // Equality Match
@@ -133,10 +130,9 @@ function init(databaseName) {
 				}
 			}
 		],
-		{}
 	);
 
-	db.getCollection("listener_jobs").aggregate(
+	db.createView("listener_jobs_view", "listener_jobs",
 		[
 			{
 				$facet: {
@@ -203,10 +199,9 @@ function init(databaseName) {
 				}
 			}
 		],
-		{}
 	);
 
-	db.getCollection("metadata").aggregate(
+	db.createView("metadata_view", "metadata",
 		[
 			{
 				$facet: {
@@ -273,7 +268,6 @@ function init(databaseName) {
 				}
 			}
 		],
-		{}
 	);
 }
 
