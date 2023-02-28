@@ -11,8 +11,8 @@ import CancelIcon from "@mui/icons-material/Cancel";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import PlayCircleOutlineIcon from "@mui/icons-material/PlayCircleOutline";
-import RestartAltIcon from '@mui/icons-material/RestartAlt';
-import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
+import RestartAltIcon from "@mui/icons-material/RestartAlt";
+import SkipNextIcon from "@mui/icons-material/SkipNext";
 import {theme} from "../../theme";
 import {ExtractionJobsToolbar} from "./ExtractionJobsToolbar";
 import {EnhancedTableHead as ExtractionJobsTableHeader} from "./ExtractionJobsTableHeader";
@@ -126,13 +126,22 @@ export const ExtractionJobs = (props) => {
 											<TableRow key={row.jobId}>
 												<TableCell align="right" sx={{color: theme.palette.primary.main}}>
 													{/*v1 vs v2*/}
+													{/* CREATED = "CREATED"
+														STARTED = "STARTED"
+														PROCESSING = "PROCESSING"
+														SUCCEEDED = "SUCCEEDED"
+														ERROR = "ERROR"
+														SKIPPED = "SKIPPED"
+														RESUBMITTED = "RESUBMITTED"
+													*/}
+
 													{
 														row.status.includes("CREATED") ?
 															<PlayCircleOutlineIcon/> : null
 													}
 													{
 														row.status.includes("RESUBMITTED") ?
-															<AddCircleOutlineIcon/> : null
+															<RestartAltIcon/> : null
 													}
 													{
 														row.status.includes("StatusMessage.start") ||
@@ -140,7 +149,8 @@ export const ExtractionJobs = (props) => {
 															<PlayCircleOutlineIcon/> : null
 													}
 													{
-														row.status.includes("StatusMessage.processing") ?
+														row.status.includes("StatusMessage.processing") ||
+															row.status.includes("PROCESSING")?
 															<AccessTimeIcon/> : null
 													}
 													{
@@ -153,6 +163,10 @@ export const ExtractionJobs = (props) => {
 														row.status.includes("StatusMessage.failed") ||
 														row.status.includes("ERROR")?
 															<CancelIcon/> : null
+													}
+													{
+														row.status.includes("SKIPPED")?
+															<SkipNextIcon/> : null
 													}
 												</TableCell>
 												{
