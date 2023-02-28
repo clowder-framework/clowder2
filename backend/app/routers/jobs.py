@@ -8,15 +8,15 @@ from pymongo import MongoClient
 
 from app import dependencies
 from app.models.listeners import EventListenerJob, EventListenerJobUpdate
-from app.keycloak_auth import get_current_user
+from app.keycloak_auth import get_current_user, get_user
 
 router = APIRouter()
 
 
 @router.get("", response_model=List[EventListenerJob])
 async def get_all_job_summary(
+    current_user_id=Depends(get_user),
     db: MongoClient = Depends(dependencies.get_db),
-    user=Depends(get_current_user),
     listener_id: Optional[str] = None,
     status: Optional[str] = None,
     user_id: Optional[str] = None,
@@ -39,7 +39,12 @@ async def get_all_job_summary(
         limit -- restrict number of records to be returned (i.e. for pagination)
     """
     jobs = []
-    filters = []
+    filters = [
+        {"$or": [
+            {"creator.email": current_user_id},
+            {"auth": {"$elemMatch": {"user_id": {"$eq": current_user_id}}}},
+        ]}
+    ]
     if listener_id is not None:
         filters.append({"listener_id": listener_id})
     if status is not None:
@@ -62,13 +67,11 @@ async def get_all_job_summary(
     if dataset_id is not None:
         filters.append({"resource_ref.collection": "dataset"})
         filters.append({"resource_ref.resource_id": ObjectId(dataset_id)})
-    if len(filters) == 0:
-        query = {}
-    else:
-        query = {"$and": filters}
+
+    query = {"$and": filters}
 
     for doc in (
-        await db["listener_jobs"]
+        await db["listener_jobs_view"]
         .find(query)
         .skip(skip)
         .limit(limit)
