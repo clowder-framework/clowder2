@@ -19,7 +19,7 @@ import { fetchJobSummary, fetchJobUpdates } from "../../actions/listeners";
 
 function Row (props: { summary: any; updates: any; }) {
 	const { summary, updates } = props;
-	const [ open, setOpen ] = React.useState(false);
+	const [ open, setOpen ] = React.useState(true);
 
 	return (
 		<React.Fragment>
