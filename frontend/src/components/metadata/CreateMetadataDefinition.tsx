@@ -118,8 +118,6 @@ export const CreateMetadataDefinition = (): JSX.Element => {
             contextJson[item["term"]] = item["iri"]
         })
 
-		console.log([JSON.stringify(contextJson)]);
-
         setFormInput({
 			name: formInput.name,
 			description: formInput.description,
