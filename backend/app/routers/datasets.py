@@ -877,7 +877,7 @@ async def get_dataset_extract(
             parameters = {}
         current_routing_key = current_queue
 
-        submit_dataset_job(
+        job_id = await submit_dataset_job(
             dataset_out,
             current_queue,
             current_routing_key,
@@ -888,6 +888,6 @@ async def get_dataset_extract(
             rabbitmq_client,
         )
 
-        return {"message": "testing", "dataset_id": dataset_id}
+        return job_id
     else:
         raise HTTPException(status_code=404, detail=f"File {dataset_id} not found")
