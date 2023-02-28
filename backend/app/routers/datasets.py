@@ -550,7 +550,7 @@ async def save_file(
     file: UploadFile = File(...),
     es=Depends(dependencies.get_elasticsearchclient),
     rabbitmq_client: BlockingChannel = Depends(dependencies.get_rabbitmq),
-    token: str = Depends(get_token),
+    credentials: HTTPAuthorizationCredentials = Security(security),
 ):
     if (
         dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
@@ -573,6 +573,7 @@ async def save_file(
                     status_code=404, detail=f"Folder {folder_id} not found"
                 )
 
+        access_token = credentials.credentials
         await add_file_entry(
             fileDB,
             user,
@@ -580,7 +581,7 @@ async def save_file(
             fs,
             es,
             rabbitmq_client,
-            token,
+            access_token,
             file.file,
             content_type=file.content_type,
         )
