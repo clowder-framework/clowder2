@@ -4,7 +4,12 @@ from pymongo import MongoClient
 from app import keycloak_auth, dependencies
 from app.deps.authorization_deps import Authorization, get_role, get_role_by_file
 from app.keycloak_auth import get_current_username
-from app.models.authorization import AuthorizationBase, AuthorizationFile, AuthorizationDB, RoleType
+from app.models.authorization import (
+    AuthorizationBase,
+    AuthorizationFile,
+    AuthorizationDB,
+    RoleType,
+)
 from bson.objectid import ObjectId as BsonObjectId
 
 from app.models.pyobjectid import PyObjectId
