@@ -2,9 +2,9 @@ from fastapi import APIRouter, Depends
 from pymongo import MongoClient
 
 from app import keycloak_auth, dependencies
-from app.deps.authorization_deps import Authorization, get_role
+from app.deps.authorization_deps import Authorization, get_role, get_role_by_file
 from app.keycloak_auth import get_current_username
-from app.models.authorization import AuthorizationBase, AuthorizationDB, RoleType
+from app.models.authorization import AuthorizationBase, AuthorizationFile, AuthorizationDB, RoleType
 from bson.objectid import ObjectId as BsonObjectId
 
 from app.models.pyobjectid import PyObjectId
@@ -53,3 +53,13 @@ async def get_dataset_role_owner(
     """Used for testing only. Returns true if user has owner permission on dataset, otherwise throws a 403 Forbidden HTTP exception.
     See `routers/authorization.py` for more info."""
     return {"dataset_id": dataset_id, "allow": allow}
+
+
+@router.get("/files/{file_id}/role", response_model=AuthorizationBase)
+async def get_file_role(
+    file_id: str,
+    current_user=Depends(get_current_username),
+    role: RoleType = Depends(get_role_by_file),
+):
+    """Retrieve role of user for an individual file. Role cannot change between file versions."""
+    return AuthorizationFile(file_id=file_id, user_id=current_user, role=role)

@@ -29,6 +29,18 @@ class AuthorizationBase(BaseModel):
         use_enum_values = True
 
 
+class AuthorizationFile(BaseModel):
+    # TODO: This should be PyObjectId = Field(default_factory=PyObjectId). Need to figure out why can't create instance
+    #  in `routers.authorization.get_dataset_role()`.
+    file_id: str
+    user_id: EmailStr
+    role: RoleType
+
+    class Config:
+        # required for Enum to properly work
+        use_enum_values = True
+
+
 class Provenance(BaseModel):
     """Store user who created model, when and last time it was updated.
     TODO: this generic model should be moved to a global util module in models for all those models that want to
