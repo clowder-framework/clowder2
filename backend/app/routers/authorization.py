@@ -59,6 +59,7 @@ async def get_dataset_role_owner(
     See `routers/authorization.py` for more info."""
     return {"dataset_id": dataset_id, "allow": allow}
 
+
 @router.get("/metadata/{metadata_id}/role", response_model=AuthorizationMetadata)
 async def get_metadata_role(
     metadata_id: str,
@@ -66,4 +67,6 @@ async def get_metadata_role(
     role: RoleType = Depends(get_role_by_metadata),
 ):
     """Retrieve role of user for an individual file. Role cannot change between file versions."""
-    return AuthorizationMetadata(metadata_id=metadata_id, user_id=current_user, role=role)
+    return AuthorizationMetadata(
+        metadata_id=metadata_id, user_id=current_user, role=role
+    )

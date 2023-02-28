@@ -21,17 +21,22 @@ async def get_role(
     role = AuthorizationDB.from_mongo(authorization).role
     return role
 
+
 async def get_role_by_metadata(
     metadata_id: str,
     db: MongoClient = Depends(get_db),
     current_user=Depends(get_current_username),
 ) -> RoleType:
-    if (metadata := await db["metadata"].find_one({"_id": ObjectId(metadata_id)})) is not None:
+    if (
+        metadata := await db["metadata"].find_one({"_id": ObjectId(metadata_id)})
+    ) is not None:
         md_out = MetadataOut.from_mongo(metadata)
         resource_type = md_out.resource.collection
         resource_id = md_out.resource.resource_id
-        if resource_type == 'files':
-            if (file :=await db["files"].find_one({"_id": ObjectId(resource_id)})) is not None:
+        if resource_type == "files":
+            if (
+                file := await db["files"].find_one({"_id": ObjectId(resource_id)})
+            ) is not None:
                 file_out = FileOut.from_mongo(file)
                 authorization = await db["authorization"].find_one(
                     {
@@ -42,8 +47,10 @@ async def get_role_by_metadata(
                 )
                 role = AuthorizationDB.from_mongo(authorization).role
                 return role
-        elif resource_type == 'datasets':
-            if (dataset :=await db["datasets"].find_one({"_id": ObjectId(resource_id)})) is not None:
+        elif resource_type == "datasets":
+            if (
+                dataset := await db["datasets"].find_one({"_id": ObjectId(resource_id)})
+            ) is not None:
                 dataset_out = DatasetOut.from_mongo(dataset)
                 authorization = await db["authorization"].find_one(
                     {
@@ -54,6 +61,7 @@ async def get_role_by_metadata(
                 )
                 role = AuthorizationDB.from_mongo(authorization).role
                 return role
+
 
 class Authorization:
     """We use class dependency so that we can provide the `permission` parameter to the dependency.
