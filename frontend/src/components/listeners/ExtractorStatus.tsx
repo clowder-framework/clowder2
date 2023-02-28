@@ -36,7 +36,7 @@ function Row (props: { summary: any; updates: any; }) {
 				<TableCell style={{ borderBottom: "none" }}>{parseDate(summary.created)}</TableCell>
 				<TableCell style={{ borderBottom: "none" }}>{parseDate(summary.updated)}</TableCell>
 				<TableCell style={{ borderBottom: "none" }}>{summary.latest_message}</TableCell>
-				<TableCell style={{ borderBottom: "none" }}>{summary.duration/1000} sec</TableCell>
+				<TableCell style={{ borderBottom: "none" }}>{summary.duration} sec</TableCell>
 			</TableRow>
 			<TableRow>
 				<TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={1} />
@@ -45,7 +45,7 @@ function Row (props: { summary: any; updates: any; }) {
 						<Box sx={{ marginTop: 2, marginBottom: 5 }} style={{backgroundColor: "#FFF"}}>
 							{/* Extractor logs component */}
 							<div className="container">
-								{updates.length > 0 ? 
+								{updates.length > 0 ?
 									<Box
 										sx={{
 											margin: "2%",
