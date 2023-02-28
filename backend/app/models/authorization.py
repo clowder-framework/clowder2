@@ -28,6 +28,14 @@ class AuthorizationBase(BaseModel):
         # required for Enum to properly work
         use_enum_values = True
 
+class AuthorizationMetadata(BaseModel):
+    metadata_id: str
+    user_id: EmailStr
+    role: RoleType
+
+    class Config:
+        # required for Enum to properly work
+        use_enum_values = True
 
 class Provenance(BaseModel):
     """Store user who created model, when and last time it was updated.
