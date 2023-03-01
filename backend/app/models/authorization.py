@@ -1,5 +1,6 @@
 from datetime import datetime
 from enum import Enum
+from app.models.pyobjectid import PyObjectId
 
 from pydantic import BaseModel, EmailStr, Field
 
@@ -20,7 +21,7 @@ class RoleType(str, Enum):
 class AuthorizationBase(BaseModel):
     # TODO: This should be PyObjectId = Field(default_factory=PyObjectId). Need to figure out why can't create instance
     #  in `routers.authorization.get_dataset_role()`.
-    dataset_id: str
+    dataset_id: PyObjectId
     user_id: EmailStr
     role: RoleType
 
@@ -32,7 +33,7 @@ class AuthorizationBase(BaseModel):
 class AuthorizationFile(BaseModel):
     # TODO: This should be PyObjectId = Field(default_factory=PyObjectId). Need to figure out why can't create instance
     #  in `routers.authorization.get_dataset_role()`.
-    file_id: str
+    file_id: PyObjectId
     user_id: EmailStr
     role: RoleType
 
