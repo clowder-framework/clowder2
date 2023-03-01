@@ -40,10 +40,12 @@ async def get_all_job_summary(
     """
     jobs = []
     filters = [
-        {"$or": [
-            {"creator.email": current_user_id},
-            {"auth": {"$elemMatch": {"user_id": {"$eq": current_user_id}}}},
-        ]}
+        {
+            "$or": [
+                {"creator.email": current_user_id},
+                {"auth": {"$elemMatch": {"user_id": {"$eq": current_user_id}}}},
+            ]
+        }
     ]
     if listener_id is not None:
         filters.append({"listener_id": listener_id})

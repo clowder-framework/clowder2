@@ -247,12 +247,14 @@ async def get_datasets(
     else:
         for doc in (
             await db["datasets_view"]
-            .find({
-                "$or":[
-                    {"author.email": user_id},
-                    {"auth": {"$elemMatch": {"user_id": {"$eq": user_id}}}}
-                ]
-            })
+            .find(
+                {
+                    "$or": [
+                        {"author.email": user_id},
+                        {"auth": {"$elemMatch": {"user_id": {"$eq": user_id}}}},
+                    ]
+                }
+            )
             .sort([("created", pymongo.DESCENDING)])
             .skip(skip)
             .limit(limit)
@@ -291,10 +293,12 @@ async def get_dataset_files(
                             "dataset_id": ObjectId(dataset_id),
                             "folder_id": ObjectId(folder_id),
                         },
-                        {"$or":[
+                        {
+                            "$or": [
                                 {"creator.email": user_id},
                                 {"auth": {"$elemMatch": {"user_id": {"$eq": user_id}}}},
-                        ]}
+                            ]
+                        },
                     ]
                 }
             )
@@ -313,10 +317,12 @@ async def get_dataset_files(
                             "dataset_id": ObjectId(dataset_id),
                             "folder_id": None,
                         },
-                        {"$or": [
-                            {"creator.email": user_id},
-                            {"auth": {"$elemMatch": {"user_id": {"$eq": user_id}}}},
-                        ]}
+                        {
+                            "$or": [
+                                {"creator.email": user_id},
+                                {"auth": {"$elemMatch": {"user_id": {"$eq": user_id}}}},
+                            ]
+                        },
                     ]
                 }
             )
@@ -514,10 +520,12 @@ async def get_dataset_folders(
                         "dataset_id": ObjectId(dataset_id),
                         "parent_folder": ObjectId(parent_folder),
                     },
-                    {"$or": [
-                        {"author.email": user_id},
-                        {"auth": {"$elemMatch": {"user_id": {"$eq": user_id}}}},
-                    ]}
+                    {
+                        "$or": [
+                            {"author.email": user_id},
+                            {"auth": {"$elemMatch": {"user_id": {"$eq": user_id}}}},
+                        ]
+                    },
                 ]
             }
         ):
