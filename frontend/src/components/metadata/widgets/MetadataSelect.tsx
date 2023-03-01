@@ -17,7 +17,7 @@ export const MetadataSelect = (props) => {
 	const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
 		setInputChanged(true);
 		let tempContents: { [key: string]: string; } = {};
-		tempContents[fieldName] = event.target.value;
+		tempContents[fieldName.name] = event.target.value;
 		setMetadata ?
 			metadataId ?
 				setMetadata({
@@ -41,7 +41,7 @@ export const MetadataSelect = (props) => {
 				<Grid item xs={11} sm={11} md={11} lg={11} xl={11}>
 					<FormControl fullWidth>
 						<InputLabel>{widgetName}</InputLabel>
-						<ClowderMetadataSelect value={readOnly && content ? content[fieldName]: localContent[fieldName]}
+						<ClowderMetadataSelect value={readOnly && content ? content[fieldName.name]: localContent[fieldName.name]}
 											   label="Unit" onChange={handleChange}
 											   sx={{background:"#ffffff"}}
 											   disabled={readOnly}
