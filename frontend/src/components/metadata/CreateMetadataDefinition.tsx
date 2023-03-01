@@ -106,7 +106,7 @@ export const CreateMetadataDefinition = (): JSX.Element => {
         } else if (key == 'iri') {
             newContextMap.splice(idx, 1, {"term": currItem.term, "iri": value})
         }
-        
+
         setContextMap(newContextMap)
         constructContextJson(newContextMap)
     }
@@ -121,7 +121,7 @@ export const CreateMetadataDefinition = (): JSX.Element => {
         setFormInput({
 			name: formInput.name,
 			description: formInput.description,
-			context: JSON.stringify(contextJson),
+			context: [JSON.stringify(contextJson)],
 			fields: formInput.fields
 		})
     }
@@ -146,7 +146,7 @@ export const CreateMetadataDefinition = (): JSX.Element => {
 		setFormInput({
 			name: formInput.name,
 			description: formInput.description,
-			context: formInput.context,
+			context: [formInput.context],
 			fields: newfield
 		})
 
@@ -161,7 +161,7 @@ export const CreateMetadataDefinition = (): JSX.Element => {
 		setFormInput({
 			name: formInput.name,
 			description: formInput.description,
-			context: formInput.context,
+			context: [formInput.context],
 			fields: data
 		})
 
@@ -174,7 +174,7 @@ export const CreateMetadataDefinition = (): JSX.Element => {
 
 	const postMetadata = () => {
 		// Parse the context
-		let context = JSON.parse(formInput.context)
+		let context = [JSON.parse(formInput.context)];
 		formInput.context = context
 
 		// Remove the options field if widgetType != enum
@@ -195,7 +195,7 @@ export const CreateMetadataDefinition = (): JSX.Element => {
 		let data = {...formInput}
 
 		// Parse the context JSON
-		data.context = JSON.parse(data.context)
+		data.context = [JSON.parse(data.context)];
 
 		// Remove the options field if widgetType != enum
 		for (let i = 0; i < data.fields.length; i++) {
@@ -331,7 +331,7 @@ export const CreateMetadataDefinition = (): JSX.Element => {
                                                 placeholder="Please enter context term"
                                                 value={item["term"]}
                                                 sx={{ mt: 1, mr: 1, "alignItems": "right", "width": "300px"  }}
-                                                onChange={(event) => { 
+                                                onChange={(event) => {
                                                     updateContext(idx, "term", event.target.value);
                                                 }}
                                             />
@@ -353,14 +353,14 @@ export const CreateMetadataDefinition = (): JSX.Element => {
                                                     onClick={() => addNewContext(idx)}>
                                             <AddBoxIcon/>
                                         </IconButton>
-                                        {idx == 0 ? <></> : 
+                                        {idx == 0 ? <></> :
 													<IconButton color="primary" size="small"
 																onClick={() => removeContext(idx)}>
 														<DeleteOutlineIcon/>
 													</IconButton>}
                                     </Grid>)
                                  })}
-                                    
+
 								<Button variant="contained" onClick={() => validateFormData(activeStep)}>Next</Button>
 							</form>
 						</StepContent>
