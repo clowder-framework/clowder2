@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-from pydantic import Field, BaseModel
+from pydantic import Field, BaseModel, AnyUrl
 from typing import Optional, List, Union
 from enum import Enum
 
@@ -26,7 +26,7 @@ class ExtractorInfo(BaseModel):
     maturity: str = "Development"
     name: Optional[str] = ""
     contributors: Optional[List[str]] = []
-    contexts: Optional[List[dict]] = []
+    contexts: Optional[List[Union[dict, AnyUrl]]] = []
     repository: Optional[List[Repository]] = []
     external_services: Optional[List[str]] = []
     libraries: Optional[List[str]] = []
