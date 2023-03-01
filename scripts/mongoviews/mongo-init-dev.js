@@ -28,7 +28,7 @@ function init(databaseName) {
 		]
 	);
 
-	db.createView("files_view", "files"
+	db.createView("files_view", "files",
 		[
 			{
 				$lookup: {
