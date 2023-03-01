@@ -221,7 +221,7 @@ export function submitFileExtractionAction(fileId, extractorName, requestBody) {
 			.then(json => {
 				dispatch({
 					type: SUBMIT_FILE_EXTRACTION,
-					about: json,
+					job_id: json,
 					receivedAt: Date.now(),
 				});
 			})

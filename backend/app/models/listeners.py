@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-from pydantic import Field, BaseModel
+from pydantic import Field, BaseModel, AnyUrl
 from typing import Optional, List, Union
 from enum import Enum
 
@@ -26,7 +26,7 @@ class ExtractorInfo(BaseModel):
     maturity: str = "Development"
     name: Optional[str] = ""
     contributors: Optional[List[str]] = []
-    contexts: Optional[List[dict]] = []
+    contexts: Optional[List[Union[dict, AnyUrl]]] = []
     repository: Optional[List[Repository]] = []
     external_services: Optional[List[str]] = []
     libraries: Optional[List[str]] = []
@@ -90,8 +90,10 @@ class EventListenerJobStatus(str, Enum):
 
     CREATED = "CREATED"
     STARTED = "STARTED"
+    PROCESSING = "PROCESSING"
     SUCCEEDED = "SUCCEEDED"
     ERROR = "ERROR"
+    SKIPPED = "SKIPPED"
     RESUBMITTED = "RESUBMITTED"
 
 
@@ -106,7 +108,7 @@ class EventListenerJob(MongoModel):
     started: Optional[datetime] = None
     updated: Optional[datetime] = None
     finished: Optional[datetime] = None
-    duration: Optional[timedelta] = None
+    duration: Optional[float] = None
     latest_message: Optional[str] = None
     status: str = EventListenerJobStatus.CREATED
 
