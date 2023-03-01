@@ -4,6 +4,7 @@ from enum import Enum
 from pydantic import BaseModel, EmailStr, Field
 
 from app.models.mongomodel import MongoModel
+from app.models.pyobjectid import PyObjectId
 
 
 class RoleType(str, Enum):
@@ -30,7 +31,7 @@ class AuthorizationBase(BaseModel):
 
 
 class AuthorizationMetadata(BaseModel):
-    metadata_id: str
+    metadata_id: PyObjectId
     user_id: EmailStr
     role: RoleType
 
