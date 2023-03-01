@@ -25,7 +25,6 @@ async def save_authorization(
 ):
     """Save authorization info in Mongo. This is a triple of dataset_id/user_id/role/group_id."""
 
-
     # Retrieve users from groups in mongo
     user_ids: List[EmailStr] = []
     group_q_list = db["groups"].find({"_id": {"$in": authorization_in.group_ids}})
@@ -63,9 +62,11 @@ async def get_dataset_role(
         )
     ) is not None:
         authorization = AuthorizationDB.from_mongo(authorization_q)
-        group_q_list = db["groups"].find({"userList": {"$elemMatch": {"user.email": current_user}}})
+        group_q_list = db["groups"].find(
+            {"userList": {"$elemMatch": {"user.email": current_user}}}
+        )
 
-        auth = False;
+        auth = False
 
         async for group_q in group_q_list:
             group = GroupOut.from_mongo(group_q)
