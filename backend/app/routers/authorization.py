@@ -1,7 +1,7 @@
-from http.client import HTTPException
 from typing import List
 
 from fastapi import APIRouter, Depends
+from fastapi.exceptions import HTTPException
 from pydantic.networks import EmailStr
 from pymongo import MongoClient
 
@@ -25,10 +25,6 @@ async def save_authorization(
 ):
     """Save authorization info in Mongo. This is a triple of dataset_id/user_id/role/group_id."""
 
-    # Check all connection and abort if any one of them is not available
-    if db is None:
-        raise HTTPException(status_code=503, detail="Service not available")
-        return
 
     # Retrieve users from groups in mongo
     user_ids: List[EmailStr] = []
@@ -43,7 +39,7 @@ async def save_authorization(
         )
 
     authorization_dict = authorization_in.dict()
-    authorization_dict["user_ids"] = list(set(user_ids))
+    authorization_dict["user_ids"] = user_ids
     authorization_db = AuthorizationDB(**authorization_dict, creator=user)
     new_authorization = await db["authorization"].insert_one(
         authorization_db.to_mongo()
@@ -67,8 +63,17 @@ async def get_dataset_role(
         )
     ) is not None:
         authorization = AuthorizationDB.from_mongo(authorization_q)
+        group_q_list = db["groups"].find({"userList": {"$elemMatch": {"user.email": current_user}}})
 
-        if current_user in authorization.user_ids:
+        auth = False;
+
+        async for group_q in group_q_list:
+            group = GroupOut.from_mongo(group_q)
+            if ObjectId(group.id) in authorization.group_ids:
+                auth = True
+                break
+
+        if auth is True:
             return authorization
         else:
             raise HTTPException(

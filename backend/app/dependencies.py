@@ -2,6 +2,7 @@ from typing import Generator
 
 import motor.motor_asyncio
 import pika
+from fastapi.exceptions import HTTPException
 from minio import Minio
 from minio.commonconfig import ENABLED
 from minio.versioningconfig import VersioningConfig
@@ -19,6 +20,9 @@ async def get_db() -> Generator:
     mongo_client = motor.motor_asyncio.AsyncIOMotorClient(settings.MONGODB_URL)
     db = mongo_client[settings.MONGO_DATABASE]
     await create_mongo_indexes(db)
+    if db is None:
+        raise HTTPException(status_code=503, detail="Service not available")
+        return
     yield db
 
 
