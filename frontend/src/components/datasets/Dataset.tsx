@@ -126,8 +126,6 @@ export const Dataset = (): JSX.Element => {
 				updateDatasetMetadata(datasetId, metadataRequestForms[key]);
 			} else {
 				// post new metadata if metadata id doesn"t exist
-				console.log('posting dataset metadata');
-				console.log(datasetId, metadataRequestForms[key]);
 				createDatasetMetadata(datasetId, metadataRequestForms[key]);
 			}
 		});

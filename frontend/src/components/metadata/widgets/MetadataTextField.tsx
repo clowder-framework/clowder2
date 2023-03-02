@@ -6,8 +6,6 @@ import {Grid} from "@mui/material";
 export const MetadataTextField = (props) => {
 	const {widgetName, fieldName, content, setMetadata, metadataId, updateMetadata, resourceId, initialReadOnly} = props;
 	const [localContent, setLocalContent] = useState(content && content[fieldName] ? content: {});
-	console.log('content andfilend name');
-	console.log(content,fieldName);
 	const [readOnly, setReadOnly] = useState(initialReadOnly);
 
 	const [inputChanged, setInputChanged] = useState(false);
