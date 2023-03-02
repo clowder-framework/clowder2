@@ -9,16 +9,17 @@ import {Grid} from "@mui/material";
 
 export const MetadataDateTimePicker = (props) => {
 	const {widgetName, fieldName, metadataId, content, setMetadata, initialReadOnly, resourceId, updateMetadata} = props;
-	const [localContent, setLocalContent] = useState(content && content[fieldName.name] ? content: {});
+	const [localContent, setLocalContent] = useState(content && content[fieldName] ? content: {});
 
 	const [readOnly, setReadOnly] = useState(initialReadOnly);
 
 	const [inputChanged, setInputChanged] = useState(false);
+
 	const handleChange = (newValue:Date) => {
 		setInputChanged(true);
 
 		let tempContents: { [key: string]: Date; } = {};
-		tempContents[fieldName.name] = newValue;
+		tempContents[fieldName] = newValue;
 		setMetadata ?
 			metadataId ?
 				setMetadata({
@@ -43,7 +44,7 @@ export const MetadataDateTimePicker = (props) => {
                     <LocalizationProvider dateAdapter={AdapterDayjs}>
 						<DateTimePicker
 							label={widgetName}
-							value={readOnly && content ? content[fieldName.name]: localContent[fieldName.name]}
+							value={readOnly && content ? content[fieldName]: localContent[fieldName]}
 							onChange={handleChange}
 							renderInput={(params) =>
 								<ClowderMetadataTextField {...params} fullWidth
