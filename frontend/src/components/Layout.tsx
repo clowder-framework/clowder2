@@ -28,6 +28,7 @@ import {ReactiveBase} from "@appbaseio/reactivesearch";
 import Cookies from "universal-cookie";
 import config from "../app.config";
 import HistoryIcon from "@mui/icons-material/History";
+import { InputSearchBox } from "./search/InputSearchBox";
 
 const cookies = new Cookies();
 
@@ -155,7 +156,7 @@ export default function PersistentDrawerLeft(props) {
 
 						{/*for searching*/}
 						<SearchDiv hidden={embeddedSearchHidden}>
-							<EmbeddedSearch/>
+							<InputSearchBox />
 						</SearchDiv>
 						<Box sx={{flexGrow: 1}}/>
 						<Box sx={{marginLeft: "auto"}}>
