@@ -229,8 +229,15 @@ async def get_datasets(
     datasets = []
     if mine:
         for doc in (
-            await db["datasets"]
-            .find({"author.email": user_id})
+            await db["datasets_view"]
+            .find(
+                {
+                    "$and": [
+                        {"author.email": user_id},
+                        {"auth": {"$elemMatch": {"user_id": {"$eq": user_id}}}},
+                    ]
+                }
+            )
             .sort([("created", pymongo.DESCENDING)])
             .skip(skip)
             .limit(limit)
@@ -239,8 +246,15 @@ async def get_datasets(
             datasets.append(DatasetOut.from_mongo(doc))
     else:
         for doc in (
-            await db["datasets"]
-            .find()
+            await db["datasets_view"]
+            .find(
+                {
+                    "$or": [
+                        {"author.email": user_id},
+                        {"auth": {"$elemMatch": {"user_id": {"$eq": user_id}}}},
+                    ]
+                }
+            )
             .sort([("created", pymongo.DESCENDING)])
             .skip(skip)
             .limit(limit)
@@ -263,6 +277,7 @@ async def get_dataset(dataset_id: str, db: MongoClient = Depends(dependencies.ge
 async def get_dataset_files(
     dataset_id: str,
     folder_id: Optional[str] = None,
+    user_id=Depends(get_user),
     db: MongoClient = Depends(dependencies.get_db),
     skip: int = 0,
     limit: int = 10,
@@ -270,11 +285,21 @@ async def get_dataset_files(
     files = []
     if folder_id is not None:
         for f in (
-            await db["files"]
+            await db["files_view"]
             .find(
                 {
-                    "dataset_id": ObjectId(dataset_id),
-                    "folder_id": ObjectId(folder_id),
+                    "$and": [
+                        {
+                            "dataset_id": ObjectId(dataset_id),
+                            "folder_id": ObjectId(folder_id),
+                        },
+                        {
+                            "$or": [
+                                {"creator.email": user_id},
+                                {"auth": {"$elemMatch": {"user_id": {"$eq": user_id}}}},
+                            ]
+                        },
+                    ]
                 }
             )
             .skip(skip)
@@ -284,11 +309,21 @@ async def get_dataset_files(
             files.append(FileOut.from_mongo(f))
     else:
         for f in (
-            await db["files"]
+            await db["files_view"]
             .find(
                 {
-                    "dataset_id": ObjectId(dataset_id),
-                    "folder_id": None,
+                    "$and": [
+                        {
+                            "dataset_id": ObjectId(dataset_id),
+                            "folder_id": None,
+                        },
+                        {
+                            "$or": [
+                                {"creator.email": user_id},
+                                {"auth": {"$elemMatch": {"user_id": {"$eq": user_id}}}},
+                            ]
+                        },
+                    ]
                 }
             )
             .skip(skip)
@@ -468,6 +503,7 @@ async def add_folder(
 async def get_dataset_folders(
     dataset_id: str,
     parent_folder: Optional[str] = None,
+    user_id=Depends(get_user),
     db: MongoClient = Depends(dependencies.get_db),
 ):
     folders = []
@@ -479,8 +515,18 @@ async def get_dataset_folders(
     else:
         async for f in db["folders"].find(
             {
-                "dataset_id": ObjectId(dataset_id),
-                "parent_folder": ObjectId(parent_folder),
+                "$and": [
+                    {
+                        "dataset_id": ObjectId(dataset_id),
+                        "parent_folder": ObjectId(parent_folder),
+                    },
+                    {
+                        "$or": [
+                            {"author.email": user_id},
+                            {"auth": {"$elemMatch": {"user_id": {"$eq": user_id}}}},
+                        ]
+                    },
+                ]
             }
         ):
             folders.append(FolderDB.from_mongo(f))
