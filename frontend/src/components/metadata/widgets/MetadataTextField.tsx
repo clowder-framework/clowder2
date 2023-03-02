@@ -6,9 +6,11 @@ import {Grid} from "@mui/material";
 export const MetadataTextField = (props) => {
 	const {widgetName, fieldName, content, setMetadata, metadataId, updateMetadata, resourceId, initialReadOnly} = props;
 	const [localContent, setLocalContent] = useState(content && content[fieldName] ? content: {});
+
 	const [readOnly, setReadOnly] = useState(initialReadOnly);
 
 	const [inputChanged, setInputChanged] = useState(false);
+
 	return (
 		<Grid container spacing={2} sx={{ "alignItems": "center"}}>
 			<Grid item xs={11} sm={11} md={11} lg={11} xl={11}>
@@ -17,7 +19,7 @@ export const MetadataTextField = (props) => {
 										  onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
 											  setInputChanged(true);
 											  let tempContents: { [key: string]: string|number; } = {};
-											  tempContents[fieldName.name] = event.target.value;
+											  tempContents[fieldName] = event.target.value;
 											  setLocalContent(tempContents)
 											  setMetadata ?
 												  metadataId ?

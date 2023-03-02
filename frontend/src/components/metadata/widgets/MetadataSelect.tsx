@@ -17,7 +17,7 @@ export const MetadataSelect = (props) => {
 	const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
 		setInputChanged(true);
 		let tempContents: { [key: string]: string; } = {};
-		tempContents[fieldName.name] = event.target.value;
+		tempContents[fieldName] = event.target.value;
 		setMetadata ?
 			metadataId ?
 				setMetadata({
