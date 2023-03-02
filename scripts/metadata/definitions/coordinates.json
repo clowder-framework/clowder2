@@ -1,9 +1,11 @@
 {
     "name" : "Coordinates",
     "description" : "Any number of Latitude/Longitude coordinates",
-    "context" : {
-        "point": "https://schema.org/point"
-    },
+    "context" : [
+        {
+            "point": "https://schema.org/point"
+        }
+    ],
     "fields" : [
         {
             "name" : "point",

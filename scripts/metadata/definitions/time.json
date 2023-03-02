@@ -1,9 +1,11 @@
 {
     "name" : "Time",
     "description" : "time",
-    "context" : {
-        "doi" : "https://schema.org/Time"
-    },
+    "context" : [
+        {
+            "doi" : "https://schema.org/Time"
+        },
+    ],
     "fields" : [
         {
             "name" : "time",

@@ -1,9 +1,11 @@
 {
     "name" : "Unit",
     "description" : "Unit",
-    "context" : {
-        "doi" : "https://schema.org/QuantitativeValue"
-    },
+    "context" : [
+        {
+            "doi" : "https://schema.org/QuantitativeValue"
+        }
+    ],
     "fields" : [
         {
             "name" : "unit",
