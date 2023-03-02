@@ -41,7 +41,7 @@ export const MetadataSelect = (props) => {
 				<Grid item xs={11} sm={11} md={11} lg={11} xl={11}>
 					<FormControl fullWidth>
 						<InputLabel>{widgetName}</InputLabel>
-						<ClowderMetadataSelect value={readOnly && content ? content[fieldName.name]: localContent[fieldName.name]}
+						<ClowderMetadataSelect value={readOnly && content ? content[fieldName]: localContent[fieldName]}
 											   label="Unit" onChange={handleChange}
 											   sx={{background:"#ffffff"}}
 											   disabled={readOnly}

@@ -72,6 +72,7 @@ export const EditMetadata = (props: MetadataType) => {
 									{
 										// construct metadata using its definition
 										metadataDef.fields.map(field => {
+											console.log('edit  metadata field  is', field);
 											return React.cloneElement(
 												metadataConfig[field.widgetType ?? "NA"] ?? metadataConfig["NA"],
 												{
