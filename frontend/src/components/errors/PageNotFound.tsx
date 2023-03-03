@@ -4,8 +4,6 @@ import Layout from "../Layout";
 
 
 export const PageNotFound = (): JSX.Element => {
-    console.log("hi")
-
     return (
         <Layout>
             <Grid
