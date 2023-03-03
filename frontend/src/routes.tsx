@@ -26,6 +26,7 @@ const PrivateRoute = (props): JSX.Element => {
 	const history = useNavigate();
 	const dispatch = useDispatch();
 	const loggedOut = useSelector((state: RootState) => state.error.loggedOut);
+	const reason = useSelector((state: RootState) => state.error.reason);
 	const dismissLogout = () => dispatch(resetLogout());
 
 	// log user out if token expired/unauthorized
@@ -36,6 +37,12 @@ const PrivateRoute = (props): JSX.Element => {
 			history("/auth/login");
 		}
 	}, [loggedOut]);
+
+    useEffect(() => {
+        if (reason == "Not Found") {
+			history("/not-found");
+        }
+	}, [reason]);
 
 	return (
 		<>

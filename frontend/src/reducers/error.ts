@@ -10,6 +10,8 @@ const error = (state = defaultState, action: DataAction) => {
 	switch (action.type) {
 		case "FAILED":
 			return Object.assign({}, state, {reason: action.reason, stack: action.stack});
+        case "NOT_FOUND":
+            return Object.assign({}, state, {reason: action.reason, stack: action.stack});
 		case "RESET_FAILED":
 			return Object.assign({}, state, {reason: "", stack: ""});
 		case "LOGOUT":
