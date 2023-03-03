@@ -144,6 +144,9 @@ export interface ListenerState{
 	categories: string[];
 	labels: string[];
 	jobs: EventListenerJob[];
+    currJobUpdates: EventListenerJob[];
+    currJobSummary: JobSummary[];
+    currJobId: string;
 }
 export interface MetadataState{
 	metadataDefinitionList: MetadataDefinitionOut[],
@@ -174,6 +177,13 @@ export interface ErrorState{
 export interface FolderState{
 	folders: FolderOut[];
 	folderPath: String[];
+}
+
+export interface JobSummary{
+    id?: string;
+    job_id: string;
+    status: string;
+    timestamp: string;
 }
 
 export interface RootState {

@@ -77,7 +77,7 @@ export const ExtractionHistoryTab = (props): JSX.Element => {
 		if (jobs.length > 0) {
 			jobs.map((job) => {
 				rows.push(createData(job["status"], job["id"], job["listener_id"], parseDate(job["created"]),
-					job["creator"]["email"], `${job["duration"]/1000} sec`));
+					job["creator"]["email"], `${job["duration"]} sec`));
 			});
 		}
 		setExecutionJobsTableRow(rows);

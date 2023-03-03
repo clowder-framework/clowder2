@@ -9,7 +9,7 @@ import Form from "@rjsf/material-ui";
 import fileSchema from "../../schema/fileSchema.json";
 import {FormProps} from "@rjsf/core";
 import {useDispatch} from "react-redux";
-import {fileUpdated} from "../../actions/file";
+import {fetchFileVersions, fileUpdated} from "../../actions/file";
 
 
 type UpdateFileProps ={
@@ -19,7 +19,8 @@ type UpdateFileProps ={
 
 export const UpdateFile: React.FC<UpdateFileProps> = (props: UpdateFileProps) => {
 	const dispatch = useDispatch();
-	const updateFile = (formData: FormData, fileId: string|undefined) => dispatch(fileUpdated(formData, fileId));
+	const updateFile = async (formData: FormData, fileId: string|undefined) => dispatch(fileUpdated(formData, fileId));
+	const listFileVersions = (fileId: string | undefined) => dispatch(fetchFileVersions(fileId));
 
 	const {fileId, setOpen,} = props;
 
@@ -27,9 +28,10 @@ export const UpdateFile: React.FC<UpdateFileProps> = (props: UpdateFileProps) =>
 
 	const onSave = async (formData:FormData) => {
 		setLoading(true);
-		updateFile(formData, fileId);
+		await updateFile(formData, fileId);
 		setLoading(false);
 		setOpen(false);
+		listFileVersions(fileId);
 	};
 
 	// TODO
