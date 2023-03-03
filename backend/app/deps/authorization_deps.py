@@ -54,7 +54,11 @@ class Authorization:
         current_user: str = Depends(get_current_username),
     ):
         authorization = await db["authorization"].find_one(
-            {"dataset_id": ObjectId(dataset_id), "user_id": current_user, "creator": current_user}
+            {
+                "dataset_id": ObjectId(dataset_id),
+                "user_id": current_user,
+                "creator": current_user,
+            }
         )
         role = AuthorizationDB.from_mongo(authorization).role
         if access(role, self.role):

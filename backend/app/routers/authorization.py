@@ -37,7 +37,7 @@ async def get_dataset_role(
     role: RoleType = Depends(get_role),
 ):
     """Retrieve role of user for a specific dataset."""
-    #return AuthorizationBase(dataset_id=ObjectId(dataset_id), current_user=current_user, role=role)
+    # return AuthorizationBase(dataset_id=ObjectId(dataset_id), current_user=current_user, role=role)
     return role
 
 
