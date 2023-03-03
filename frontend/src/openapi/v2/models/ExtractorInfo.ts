@@ -13,7 +13,7 @@ export type ExtractorInfo = {
     maturity?: string;
     name?: string;
     contributors?: Array<string>;
-    contexts?: Array<any>;
+    contexts?: Array<string>;
     repository?: Array<Repository>;
     external_services?: Array<string>;
     libraries?: Array<string>;
