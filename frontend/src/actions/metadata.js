@@ -55,9 +55,9 @@ export function fetchDatasetMetadata(datasetId){
 }
 
 export const RECEIVE_FILE_METADATA = "RECEIVE_FILE_METADATA";
-export function fetchFileMetadata(fileId){
+export function fetchFileMetadata(fileId, version){
 	return (dispatch) => {
-		return V2.MetadataService.getFileMetadataApiV2FilesFileIdMetadataGet(fileId, true)
+		return V2.MetadataService.getFileMetadataApiV2FilesFileIdMetadataGet(fileId, version, false)
 			.then(json => {
 				dispatch({
 					type: RECEIVE_FILE_METADATA,
@@ -66,7 +66,7 @@ export function fetchFileMetadata(fileId){
 				});
 			})
 			.catch(reason => {
-				dispatch(handleErrors(reason, fetchFileMetadata(fileId)));
+				dispatch(handleErrors(reason, fetchFileMetadata(fileId, version)));
 			});
 	};
 }

@@ -275,7 +275,7 @@ export const File = (): JSX.Element => {
 					<TabPanel value={selectedTabIndex} index={2}>
 						<DisplayListenerMetadata updateMetadata={updateFileMetadata}
 													 deleteMetadata={deleteFileMetadata}
-													 resourceType="file" resourceId={fileId}/>
+													 resourceType="file" resourceId={fileId} version={fileSummary.version_num}/>
 					</TabPanel>
 					<TabPanel value={selectedTabIndex} index={3}>
 						<Listeners fileId={fileId}
