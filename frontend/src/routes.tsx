@@ -38,10 +38,10 @@ const PrivateRoute = (props): JSX.Element => {
 		}
 	}, [loggedOut]);
 
-    useEffect(() => {
-        if (reason == "Not Found") {
+	useEffect(() => {
+        	if (reason == "Not Found") {
 			history("/not-found");
-        }
+        	}
 	}, [reason]);
 
 	return (

@@ -59,7 +59,7 @@ export function handleErrors(reason, originalFunc){
 				});
 		};
 	} else if (reason.status === 404) {
-        return (dispatch) => {
+		return (dispatch) => {
 			dispatch({
 				type: NOT_FOUND,
 				reason: reason.message !== undefined? reason.message : "Not Found",
@@ -67,7 +67,7 @@ export function handleErrors(reason, originalFunc){
 				receivedAt: Date.now()
 			});
 		};
-    } else {
+	} else {
 		return (dispatch) => {
 			dispatch({
 				type: FAILED,
