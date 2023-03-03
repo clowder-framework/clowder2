@@ -207,14 +207,12 @@ async def save_dataset(
     dataset_out = DatasetOut.from_mongo(found)
 
     # Create authorization entry
-    await db["authorization"].insert_one(
-        AuthorizationDB(
-            dataset_id=new_dataset.inserted_id,
-            user_id=user.email,
-            role=RoleType.OWNER,
-            creator=user.email,
-        ).to_mongo()
-    )
+    await db["authorization"].insert_one(AuthorizationDB(
+        dataset_id=new_dataset.inserted_id,
+        user_id=user.email,
+        role=RoleType.OWNER,
+        creator=user.email,
+    ).to_mongo())
 
     # Add en entry to the dataset index
     doc = {
@@ -278,10 +276,9 @@ async def get_datasets(
 
 @router.get("/{dataset_id}", response_model=DatasetOut)
 async def get_dataset(
-    dataset_id: str,
-    db: MongoClient = Depends(dependencies.get_db),
-    allow: bool = Depends(Authorization("viewer")),
-):
+        dataset_id: str,
+        db: MongoClient = Depends(dependencies.get_db),
+        allow: bool = Depends(Authorization("viewer"))):
     if (
         dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
     ) is not None:

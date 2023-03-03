@@ -37,7 +37,6 @@ async def get_dataset_role(
     role: RoleType = Depends(get_role),
 ):
     """Retrieve role of user for a specific dataset."""
-    # return AuthorizationBase(dataset_id=ObjectId(dataset_id), current_user=current_user, role=role)
     return role
 
 
@@ -66,4 +65,4 @@ async def get_file_role(
     role: RoleType = Depends(get_role_by_file),
 ):
     """Retrieve role of user for an individual file. Role cannot change between file versions."""
-    return AuthorizationFile(file_id=ObjectId(file_id), user_id=current_user, role=role)
+    return role
