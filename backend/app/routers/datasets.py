@@ -283,12 +283,12 @@ async def get_dataset(
     allow: bool = Depends(Authorization("viewer")),
 ):
     try:
-      if (
-          dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
-      ) is not None:
-        return DatasetOut.from_mongo(dataset)
+        if (
+            dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
+        ) is not None:
+            return DatasetOut.from_mongo(dataset)
     except:
-      raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
+        raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
 
 
 @router.get("/{dataset_id}/files")
