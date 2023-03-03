@@ -17,6 +17,7 @@ import {RootState} from "./types/data";
 import {resetLogout} from "./actions/common";
 import {Explore} from "./components/Explore";
 import {ExtractionHistory} from "./components/listeners/ExtractionHistory";
+import {fetchDatasetRole} from "./actions/authorization";
 
 // https://dev.to/iamandrewluca/private-route-in-react-router-v6-lg5
 const PrivateRoute = (props): JSX.Element => {
@@ -29,26 +30,18 @@ const PrivateRoute = (props): JSX.Element => {
 	const loggedOut = useSelector((state: RootState) => state.error.loggedOut);
 	const dismissLogout = () => dispatch(resetLogout());
 
-	// // check user's authorization on the resource and store it in redux
-	// useEffect(() => {
-	// 	// find which route it's on
-  	// 	console.log(location.pathname);
-	//
-  	// 	if (location.pathname === "/") {
-	// 		console.log(console.log("root"));
-	// 	}
-  	// 	else if (location.pathname === "datasets"){
-	// 		const {datasetId} = useParams<{ datasetId?: string }>();
-	// 		console.log("datasetId", datasetId);
-  	// 	}
-  	// 	else if (location.pathname === "files") {
-	// 		const {fileId} = useParams<{ fileId?: string }>();
-	// 		console.log("fileId", fileId);
-	// 	}
-  	// 	else{
-  	// 		console.log("default");
-	// 	}
-	// }, [])
+	const listDatasetRole = (datasetId: string | undefined) => dispatch(fetchDatasetRole(datasetId));
+	const datasetRole = useSelector((state: RootState) => state.dataset.datasetRole);
+
+	if (location.pathname.includes("/datasets")){
+		const {datasetId} = useParams<{ datasetId?: string }>();
+		listDatasetRole(datasetId);
+	}
+	// if (location.pathname.includes("/files")){
+	// 	const {fileId} = useParams<{ fileId?: string }>()
+	// 	console.log(fileId);
+	// 	// check file privilege
+	// }
 
 	// log user out if token expired/unauthorized
 	useEffect(() => {

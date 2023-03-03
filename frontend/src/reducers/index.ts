@@ -14,7 +14,7 @@ const rootReducer = combineReducers({
 	user: user,
 	error: error,
 	metadata: metadata,
-	listener: listeners
+	listener: listeners,
 });
 
 export default rootReducer;

@@ -9,13 +9,15 @@ import {
 	DOWNLOAD_DATASET
 } from "../actions/dataset";
 import {CREATE_FILE, UPDATE_FILE, DELETE_FILE, RESET_CREATE_FILE} from "../actions/file";
+import {RECEIVE_DATASET_ROLE} from "../actions/authorization";
 import {DataAction} from "../types/action";
 import {Author, Dataset, DatasetState} from "../types/data";
-import {FileOut as File} from "../openapi/v2";
+import {AuthorizationBase, FileOut as File} from "../openapi/v2";
 
 const defaultState: DatasetState = {
 	files: <File[]>[],
 	about: <Dataset>{"author":<Author>{}},
+	datasetRole: <AuthorizationBase>{},
 	datasets: [],
 	newDataset: <Dataset>{},
 	newFile: <File>{}
@@ -46,6 +48,8 @@ const dataset = (state = defaultState, action: DataAction) => {
 		});
 	case RECEIVE_DATASET_ABOUT:
 		return Object.assign({}, state, {about: action.about});
+	case RECEIVE_DATASET_ROLE:
+		return Object.assign({}, state, {datasetRole: action.role});
 	case UPDATE_DATASET:
 		return Object.assign({}, state, {about: action.about});
 	case RECEIVE_DATASETS:
