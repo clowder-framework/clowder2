@@ -17,6 +17,7 @@ import {RootState} from "./types/data";
 import {resetLogout} from "./actions/common";
 import {Explore} from "./components/Explore";
 import {ExtractionHistory} from "./components/listeners/ExtractionHistory";
+import { PageNotFound } from "./components/errors/PageNotFound";
 
 // https://dev.to/iamandrewluca/private-route-in-react-router-v6-lg5
 const PrivateRoute = (props): JSX.Element => {
@@ -61,13 +62,7 @@ export const AppRoutes = (): JSX.Element => {
 				<Route path="/auth" element={<AuthComponent/>} />
 				<Route path="/search" element={<PrivateRoute><Search/></PrivateRoute>} />
 				<Route path="/extractions" element={<PrivateRoute><ExtractionHistory/></PrivateRoute>} />
-				<Route path="*"
-					   element={
-						   <main style={{ padding: "1rem" }}>
-							   <p>Page Not Found!</p>
-						   </main>
-					   }
-				/>
+				<Route path="*" element={<PrivateRoute><PageNotFound/></PrivateRoute>} />
 			</Routes>
 		</BrowserRouter>
 	)
