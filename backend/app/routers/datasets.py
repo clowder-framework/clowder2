@@ -28,7 +28,7 @@ from rocrate.rocrate import ROCrate
 
 from app import dependencies
 from app import keycloak_auth
-
+from app.deps.authorization_deps import Authorization
 from app.config import settings
 from app.keycloak_auth import get_token
 from app.keycloak_auth import get_user, get_current_user
@@ -52,6 +52,7 @@ from app.search.connect import (
     delete_document_by_query,
     update_record,
 )
+from app.models.authorization import AuthorizationDB, RoleType
 
 router = APIRouter()
 security = HTTPBearer()
@@ -205,6 +206,14 @@ async def save_dataset(
     found = await db["datasets"].find_one({"_id": new_dataset.inserted_id})
     dataset_out = DatasetOut.from_mongo(found)
 
+    # Create authorization entry
+    await db["authorization"].insert_one(AuthorizationDB(
+        dataset_id=new_dataset.inserted_id,
+        user_id=user.email,
+        role=RoleType.OWNER,
+        creator=user.email,
+    ).to_mongo())
+
     # Add en entry to the dataset index
     doc = {
         "name": dataset_out.name,
@@ -215,6 +224,7 @@ async def save_dataset(
         "download": dataset_out.downloads,
     }
     insert_record(es, "dataset", doc, dataset_out.id)
+
     return dataset_out
 
 
@@ -265,7 +275,10 @@ async def get_datasets(
 
 
 @router.get("/{dataset_id}", response_model=DatasetOut)
-async def get_dataset(dataset_id: str, db: MongoClient = Depends(dependencies.get_db)):
+async def get_dataset(
+        dataset_id: str,
+        db: MongoClient = Depends(dependencies.get_db),
+        allow: bool = Depends(Authorization("viewer"))):
     if (
         dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
     ) is not None:

@@ -1,6 +1,6 @@
-from bson import ObjectId
 from fastapi import Depends, HTTPException
 from pymongo import MongoClient
+from bson import ObjectId
 
 from app.dependencies import get_db
 from app.keycloak_auth import get_current_username
@@ -14,7 +14,7 @@ async def get_role(
     current_user=Depends(get_current_username),
 ) -> RoleType:
     authorization = await db["authorization"].find_one(
-        {"dataset_id": dataset_id, "user_id": current_user, "creator": current_user}
+        {"dataset_id": ObjectId(dataset_id), "user_id": current_user}
     )
     role = AuthorizationDB.from_mongo(authorization).role
     return role
@@ -29,7 +29,7 @@ async def get_role_by_file(
         file_out = FileOut.from_mongo(file)
         authorization = await db["authorization"].find_one(
             {
-                "dataset_id": file_out.dataset_id,
+                "dataset_id": ObjectId(file_out.dataset_id),
                 "user_id": current_user,
                 "creator": current_user,
             }
@@ -54,7 +54,7 @@ class Authorization:
         current_user: str = Depends(get_current_username),
     ):
         authorization = await db["authorization"].find_one(
-            {"dataset_id": dataset_id, "user_id": current_user, "creator": current_user}
+            {"dataset_id": ObjectId(dataset_id), "user_id": current_user, "creator": current_user}
         )
         role = AuthorizationDB.from_mongo(authorization).role
         if access(role, self.role):

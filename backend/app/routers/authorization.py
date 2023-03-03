@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends
 from pymongo import MongoClient
+from bson import ObjectId
 
 from app import keycloak_auth, dependencies
 from app.deps.authorization_deps import Authorization, get_role, get_role_by_file
@@ -10,9 +11,6 @@ from app.models.authorization import (
     AuthorizationDB,
     RoleType,
 )
-from bson.objectid import ObjectId as BsonObjectId
-
-from app.models.pyobjectid import PyObjectId
 
 router = APIRouter()
 
@@ -32,14 +30,15 @@ async def save_authorization(
     return AuthorizationDB.from_mongo(found)
 
 
-@router.get("/datasets/{dataset_id}/role", response_model=AuthorizationBase)
+@router.get("/datasets/{dataset_id}/role", response_model=str)
 async def get_dataset_role(
     dataset_id: str,
     current_user=Depends(get_current_username),
     role: RoleType = Depends(get_role),
 ):
     """Retrieve role of user for a specific dataset."""
-    return AuthorizationBase(dataset_id=dataset_id, user_id=current_user, role=role)
+    #return AuthorizationBase(dataset_id=ObjectId(dataset_id), current_user=current_user, role=role)
+    return role
 
 
 @router.get("/datasets/{dataset_id}/role/viewer")
@@ -67,4 +66,4 @@ async def get_file_role(
     role: RoleType = Depends(get_role_by_file),
 ):
     """Retrieve role of user for an individual file. Role cannot change between file versions."""
-    return AuthorizationFile(file_id=file_id, user_id=current_user, role=role)
+    return AuthorizationFile(file_id=ObjectId(file_id), user_id=current_user, role=role)
