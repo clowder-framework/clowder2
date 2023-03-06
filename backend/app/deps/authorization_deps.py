@@ -15,12 +15,14 @@ async def get_role(
 ) -> RoleType:
     """Returns the role a specific user has on a dataset. If the user is a creator (owner), they are not listed in
     the user_ids list."""
-    authorization = await db["authorization"].find_one({
-        "$and": [
-            {"dataset_id": ObjectId(dataset_id)},
-            {"$or": [{"creator": current_user}, {"user_ids": current_user}]},
-        ]
-    })
+    authorization = await db["authorization"].find_one(
+        {
+            "$and": [
+                {"dataset_id": ObjectId(dataset_id)},
+                {"$or": [{"creator": current_user}, {"user_ids": current_user}]},
+            ]
+        }
+    )
     role = AuthorizationDB.from_mongo(authorization).role
     return role
 
@@ -32,12 +34,14 @@ async def get_role_by_file(
 ) -> RoleType:
     if (file := await db["files"].find_one({"_id": ObjectId(file_id)})) is not None:
         file_out = FileOut.from_mongo(file)
-        authorization = await db["authorization"].find_one({
-            "$and": [
-                {"dataset_id": ObjectId(file_out.dataset_id)},
-                {"$or": [{"creator": current_user}, {"user_ids": current_user}]},
-            ]
-        })
+        authorization = await db["authorization"].find_one(
+            {
+                "$and": [
+                    {"dataset_id": ObjectId(file_out.dataset_id)},
+                    {"$or": [{"creator": current_user}, {"user_ids": current_user}]},
+                ]
+            }
+        )
         role = AuthorizationDB.from_mongo(authorization).role
         return role
 
@@ -58,14 +62,21 @@ class Authorization:
         current_user: str = Depends(get_current_username),
     ):
         # TODO: Make sure we enforce only one role per user per dataset, or find_one could yield wrong answer here.
-        if (authorization_q := await db["authorization"].find_one(
-            {
-                "$and": [
-                    {"dataset_id": ObjectId(dataset_id)},
-                    {"$or": [{"creator": current_user}, {"user_ids": current_user}]},
-                ]
-            }
-        )) is not None:
+        if (
+            authorization_q := await db["authorization"].find_one(
+                {
+                    "$and": [
+                        {"dataset_id": ObjectId(dataset_id)},
+                        {
+                            "$or": [
+                                {"creator": current_user},
+                                {"user_ids": current_user},
+                            ]
+                        },
+                    ]
+                }
+            )
+        ) is not None:
             authorization = AuthorizationDB.from_mongo(authorization_q)
             if access(authorization.role, self.role):
                 return True
