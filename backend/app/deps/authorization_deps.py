@@ -13,8 +13,15 @@ async def get_role(
     db: MongoClient = Depends(get_db),
     current_user=Depends(get_current_username),
 ) -> RoleType:
+    """Returns the role a specific user has on a dataset. If the user is a creator (owner), they are not listed in
+    the user_ids list."""
     authorization = await db["authorization"].find_one(
-        {"dataset_id": ObjectId(dataset_id), "user_id": current_user}
+        {
+            "$and": [
+                {"dataset_id": ObjectId(dataset_id)},
+                {"$or": [{"creator": current_user}, {"user_ids": current_user}]},
+            ]
+        }
     )
     role = AuthorizationDB.from_mongo(authorization).role
     return role
@@ -29,9 +36,10 @@ async def get_role_by_file(
         file_out = FileOut.from_mongo(file)
         authorization = await db["authorization"].find_one(
             {
-                "dataset_id": ObjectId(file_out.dataset_id),
-                "user_id": current_user,
-                "creator": current_user,
+                "$and": [
+                    {"dataset_id": ObjectId(file_out.dataset_id)},
+                    {"$or": [{"creator": current_user}, {"user_ids": current_user}]},
+                ]
             }
         )
         role = AuthorizationDB.from_mongo(authorization).role
@@ -53,16 +61,30 @@ class Authorization:
         db: MongoClient = Depends(get_db),
         current_user: str = Depends(get_current_username),
     ):
-        authorization = await db["authorization"].find_one(
-            {
-                "dataset_id": ObjectId(dataset_id),
-                "user_id": current_user,
-                "creator": current_user,
-            }
-        )
-        role = AuthorizationDB.from_mongo(authorization).role
-        if access(role, self.role):
-            return True
+        # TODO: Make sure we enforce only one role per user per dataset, or find_one could yield wrong answer here.
+        if (
+            authorization_q := await db["authorization"].find_one(
+                {
+                    "$and": [
+                        {"dataset_id": ObjectId(dataset_id)},
+                        {
+                            "$or": [
+                                {"creator": current_user},
+                                {"user_ids": current_user},
+                            ]
+                        },
+                    ]
+                }
+            )
+        ) is not None:
+            authorization = AuthorizationDB.from_mongo(authorization_q)
+            if access(authorization.role, self.role):
+                return True
+            else:
+                raise HTTPException(
+                    status_code=403,
+                    detail=f"User `{current_user} does not have `{self.role}` permission on dataset {dataset_id}",
+                )
         else:
             raise HTTPException(
                 status_code=403,

@@ -210,7 +210,6 @@ async def save_dataset(
     await db["authorization"].insert_one(
         AuthorizationDB(
             dataset_id=new_dataset.inserted_id,
-            user_id=user.email,
             role=RoleType.OWNER,
             creator=user.email,
         ).to_mongo()
@@ -246,7 +245,7 @@ async def get_datasets(
                 {
                     "$and": [
                         {"author.email": user_id},
-                        {"auth": {"$elemMatch": {"user_id": {"$eq": user_id}}}},
+                        {"auth": {"$elemMatch": {"user_ids": user_id}}},
                     ]
                 }
             )
@@ -263,7 +262,7 @@ async def get_datasets(
                 {
                     "$or": [
                         {"author.email": user_id},
-                        {"auth": {"$elemMatch": {"user_id": {"$eq": user_id}}}},
+                        {"auth": {"$elemMatch": {"user_ids": user_id}}},
                     ]
                 }
             )
@@ -314,7 +313,7 @@ async def get_dataset_files(
                         {
                             "$or": [
                                 {"creator.email": user_id},
-                                {"auth": {"$elemMatch": {"user_id": {"$eq": user_id}}}},
+                                {"auth": {"$elemMatch": {"user_ids": user_id}}},
                             ]
                         },
                     ]
@@ -338,7 +337,7 @@ async def get_dataset_files(
                         {
                             "$or": [
                                 {"creator.email": user_id},
-                                {"auth": {"$elemMatch": {"user_id": {"$eq": user_id}}}},
+                                {"auth": {"$elemMatch": {"user_ids": user_id}}},
                             ]
                         },
                     ]
@@ -541,7 +540,7 @@ async def get_dataset_folders(
                     {
                         "$or": [
                             {"author.email": user_id},
-                            {"auth": {"$elemMatch": {"user_id": {"$eq": user_id}}}},
+                            {"auth": {"$elemMatch": {"user_ids": user_id}}},
                         ]
                     },
                 ]
