@@ -22,7 +22,8 @@ class RoleType(str, Enum):
 
 class AuthorizationBase(BaseModel):
     """Currently, user_ids list is used for primary authorization checks.
-    group_ids are kept for convenience (adding/removing users in batch) but user_ids list MUST be kept current."""
+    group_ids are kept for convenience (adding/removing users in batch) but user_ids list MUST be kept current.
+    """
 
     dataset_id: PyObjectId
     user_ids: List[EmailStr] = []
