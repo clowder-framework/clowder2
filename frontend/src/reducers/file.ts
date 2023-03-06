@@ -8,7 +8,8 @@ import {
 } from "../actions/file";
 import {DataAction} from "../types/action";
 import {FileState, ExtractedMetadata} from "../types/data";
-import {FileOut as FileSummary} from "../openapi/v2";
+import {AuthorizationBase, FileOut as FileSummary} from "../openapi/v2";
+import {RECEIVE_FILE_ROLE} from "../actions/authorization";
 
 const defaultState: FileState = {
 	fileSummary: <FileSummary>{},
@@ -16,12 +17,15 @@ const defaultState: FileState = {
 	metadataJsonld: [],
 	previews: [],
 	fileVersions: [],
+	fileRole: <AuthorizationBase>{},
 };
 
 const file = (state=defaultState, action: DataAction) => {
 	switch(action.type) {
 	case RECEIVE_FILE_SUMMARY:
 		return Object.assign({}, state, {fileSummary: action.fileSummary});
+	case RECEIVE_FILE_ROLE:
+		return Object.assign({}, state, {fileRole: action.role});
 	case RECEIVE_FILE_EXTRACTED_METADATA:
 		return Object.assign({}, state, {extractedMetadata: action.extractedMetadata});
 	case RECEIVE_FILE_METADATA_JSONLD:

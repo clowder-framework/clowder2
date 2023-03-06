@@ -7,6 +7,7 @@ export { OpenAPI } from './core/OpenAPI';
 
 export type { AuthorizationBase } from './models/AuthorizationBase';
 export type { AuthorizationDB } from './models/AuthorizationDB';
+export type { AuthorizationFile } from './models/AuthorizationFile';
 export type { Body_create_dataset_from_zip_api_v2_datasets_createFromZip_post } from './models/Body_create_dataset_from_zip_api_v2_datasets_createFromZip_post';
 export type { Body_get_dataset_metadata_api_v2_datasets__dataset_id__metadata_get } from './models/Body_get_dataset_metadata_api_v2_datasets__dataset_id__metadata_get';
 export type { Body_get_file_metadata_api_v2_files__file_id__metadata_get } from './models/Body_get_file_metadata_api_v2_files__file_id__metadata_get';

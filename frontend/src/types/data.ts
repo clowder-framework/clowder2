@@ -159,6 +159,7 @@ export interface FileState{
 	metadataJsonld: MetadataJsonld[];
 	previews: FilePreview[];
 	fileVersions: FileVersion[];
+	fileRole: AuthorizationBase
 }
 
 export interface UserState{
