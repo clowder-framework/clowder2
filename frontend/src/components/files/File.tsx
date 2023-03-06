@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from "react";
 import config from "../../app.config";
-import {Button, Grid, Tab, Tabs, Typography} from "@mui/material";
+import {Box, Button, Grid, Tab, Tabs, Typography} from "@mui/material";
 import {downloadResource, parseDate} from "../../utils/common";
 import {PreviewConfiguration, RootState} from "../../types/data";
 import {useParams, useSearchParams, useNavigate} from "react-router-dom";
@@ -23,16 +23,15 @@ import {
 import {EditMetadata} from "../metadata/EditMetadata";
 import Layout from "../Layout";
 import {fetchDatasetAbout} from "../../actions/dataset";
-import {Download} from "@mui/icons-material";
 import {FileDetails} from "./FileDetails";
 import {fetchFolderPath} from "../../actions/folder";
 import {Listeners} from "../listeners/Listeners";
 import {ExtractionHistoryTab} from "../listeners/ExtractionHistoryTab";
 import { FileActionsMenu } from "./FileActionsMenu";
+import RoleChip from "../auth/RoleChip";
 
 export const File = (): JSX.Element => {
 
-	const history = useNavigate();
 	// path parameter
 	const {fileId} = useParams<{ fileId?: string }>();
 
@@ -52,7 +51,6 @@ export const File = (): JSX.Element => {
 	const createFileMetadata = (fileId: string | undefined, metadata: object) => dispatch(createFileMetadataAction(fileId, metadata));
 	const updateFileMetadata = (fileId: string | undefined, metadata: object) => dispatch(patchFileMetadataAction(fileId, metadata));
 	const deleteFileMetadata = (fileId: string | undefined, metadata: object) => dispatch(deleteFileMetadataAction(fileId, metadata));
-	const downloadFile = (fileId: string | undefined, filename: string | undefined) => dispatch(fileDownloaded(fileId, filename))
 	const getFolderPath = (folderId: string | null) => dispatch(fetchFolderPath(folderId));
 
 	const fileSummary = useSelector((state: RootState) => state.file.fileSummary);
@@ -60,6 +58,7 @@ export const File = (): JSX.Element => {
 	const fileVersions = useSelector((state: RootState) => state.file.fileVersions);
 	const reason = useSelector((state: RootState) => state.error.reason);
 	const stack = useSelector((state: RootState) => state.error.stack);
+	const fileRole = useSelector((state: RootState) => state.file.fileRole);
 
 	const [selectedTabIndex, setSelectedTabIndex] = useState(0);
 	const [previews, setPreviews] = useState([]);
@@ -223,7 +222,10 @@ export const File = (): JSX.Element => {
 			</Grid>
 			<Grid container>
 				<Grid item xs={10}>
-					<Typography variant="h4" paragraph>{fileSummary.name}</Typography>
+					<Box sx={{display: "inline-flex", justifyContent: "space-between", alignItems: "baseline"}}>
+						<Typography variant="h4" paragraph>{fileSummary.name}</Typography>
+						<RoleChip role={fileRole.role}/>
+					</Box>
 					{Object.keys(fileSummary).length > 0 &&
 						<Typography variant="subtitle2"
 									paragraph>Uploaded {parseDate(fileSummary.created)} by {fileSummary.creator.first_name} {fileSummary.creator.last_name}</Typography>

@@ -33,7 +33,6 @@ const PrivateRoute = (props): JSX.Element => {
 
 	const listDatasetRole = (datasetId: string | undefined) => dispatch(fetchDatasetRole(datasetId));
 	const listFileRole = (fileId: string | undefined) => dispatch(fetchFileRole(fileId));
-	const datasetRole = useSelector((state: RootState) => state.dataset.datasetRole);
 	const fileRole = useSelector((state: RootState) => state.file.fileRole);
 	const {datasetId} = useParams<{ datasetId?: string }>();
 	const {fileId} = useParams<{ fileId?: string }>();
