@@ -29,7 +29,7 @@ legacy_router = APIRouter()  # for back-compatibilty with v1 extractors
 clowder_bucket = os.getenv("MINIO_BUCKET_NAME", "clowder")
 
 
-async def _process_incoming_v1_extractor_info(
+def _process_incoming_v1_extractor_info(
     extractor_name: str,
     extractor_id: str,
     process: dict,
@@ -65,6 +65,7 @@ async def _process_incoming_v1_extractor_info(
             },
             listeners=[FeedListener(listener_id=extractor_id, automatic=True)],
         )
+        return new_feed.to_mongo()
         db["feeds"].insert_one(new_feed.to_mongo())
 
 
@@ -154,9 +155,10 @@ async def save_legacy_listener(
         # Assign MIME-based listener if needed
         if listener_out.properties and listener_out.properties.process:
             process = listener_out.properties.process
-            await _process_incoming_v1_extractor_info(
+            processed_feed = _process_incoming_v1_extractor_info(
                 legacy_in.name, listener_out.id, process, db
             )
+            await db["feeds"].insert_one(processed_feed)
 
         return listener_out
 

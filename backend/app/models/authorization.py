@@ -1,6 +1,8 @@
 from datetime import datetime
 from enum import Enum
+from app.models.pyobjectid import PyObjectId
 
+from charset_normalizer.md import List
 from pydantic import BaseModel, EmailStr, Field
 
 from app.models.mongomodel import MongoModel
@@ -19,11 +21,27 @@ class RoleType(str, Enum):
 
 
 class AuthorizationBase(BaseModel):
+    """Currently, user_ids list is used for primary authorization checks.
+    group_ids are kept for convenience (adding/removing users in batch) but user_ids list MUST be kept current.
+    """
+
+    dataset_id: PyObjectId
+    user_ids: List[EmailStr] = []
+    role: RoleType
+    group_ids: List[PyObjectId] = []
+
+    class Config:
+        # required for Enum to properly work
+        use_enum_values = True
+
+
+class AuthorizationFile(BaseModel):
     # TODO: This should be PyObjectId = Field(default_factory=PyObjectId). Need to figure out why can't create instance
     #  in `routers.authorization.get_dataset_role()`.
-    dataset_id: str
-    user_id: EmailStr
+    file_id: PyObjectId
+    user_ids: List[EmailStr] = []
     role: RoleType
+    group_ids: List[PyObjectId] = []
 
     class Config:
         # required for Enum to properly work
@@ -52,4 +70,6 @@ class Provenance(BaseModel):
 
 
 class AuthorizationDB(MongoModel, AuthorizationBase, Provenance):
+    """The creator of the Authorization object is also the creator of the dataset described."""
+
     pass

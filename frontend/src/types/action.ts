@@ -111,6 +111,12 @@ interface FAILED{
 	reason: string
 }
 
+interface NOT_FOUND {
+	stack: "string";
+	type: "NOT_FOUND",
+	reason: string
+}
+
 interface RESET_FAILED{
 	type: "RESET_FAILED",
 	reason: string
@@ -263,6 +269,7 @@ export type DataAction =
 	| CREATE_FILE
 	| RESET_CREATE_FILE
 	| FAILED
+	| NOT_FOUND
 	| RESET_FAILED
 	| RESET_LOGOUT
 	| FOLDER_ADDED

@@ -111,6 +111,7 @@ export class MetadataService {
      * Get File Metadata
      * Get file metadata.
      * @param fileId
+     * @param version
      * @param allVersions
      * @param formData
      * @returns MetadataOut Successful Response
@@ -118,6 +119,7 @@ export class MetadataService {
      */
     public static getFileMetadataApiV2FilesFileIdMetadataGet(
         fileId: string,
+        version?: number,
         allVersions: boolean = false,
         formData?: Body_get_file_metadata_api_v2_files__file_id__metadata_get,
     ): CancelablePromise<Array<MetadataOut>> {
@@ -125,6 +127,7 @@ export class MetadataService {
             method: 'GET',
             path: `/api/v2/files/${fileId}/metadata`,
             query: {
+                'version': version,
                 'all_versions': allVersions,
             },
             formData: formData,

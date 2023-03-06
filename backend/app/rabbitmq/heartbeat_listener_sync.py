@@ -1,6 +1,7 @@
 import logging
 import pika
 import json
+import asyncio
 from packaging import version
 from pymongo import MongoClient
 
@@ -59,14 +60,15 @@ def callback(ch, method, properties, body):
         # Assign MIME-based listener if needed
         if extractor_out.properties and extractor_out.properties.process:
             process = extractor_out.properties.process
-            _process_incoming_v1_extractor_info(
+            processed_feed = _process_incoming_v1_extractor_info(
                 extractor_name, extractor_out.id, process, db
             )
+            db["feeds"].insert_one(processed_feed)
 
         return extractor_out
 
 
-def listen_for_heartbeats():
+async def listen_for_heartbeats():
     """
 
     this method runs continuously listening for extractor heartbeats send over rabbitmq
@@ -86,10 +88,11 @@ def listen_for_heartbeats():
     queue_name = result.method.queue
     channel.queue_bind(exchange=settings.HEARTBEAT_EXCHANGE, queue=queue_name)
 
+    logger.info(f" [*] Listening to {queue_name}")
     logger.info(" [*] Waiting for heartbeats. To exit press CTRL+C")
     channel.basic_consume(queue=queue_name, on_message_callback=callback, auto_ack=True)
     channel.start_consuming()
 
 
 if __name__ == "__main__":
-    listen_for_heartbeats()
+    asyncio.run(listen_for_heartbeats())

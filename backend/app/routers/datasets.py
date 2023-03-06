@@ -28,7 +28,7 @@ from rocrate.rocrate import ROCrate
 
 from app import dependencies
 from app import keycloak_auth
-
+from app.deps.authorization_deps import Authorization
 from app.config import settings
 from app.keycloak_auth import get_token
 from app.keycloak_auth import get_user, get_current_user
@@ -52,6 +52,7 @@ from app.search.connect import (
     delete_document_by_query,
     update_record,
 )
+from app.models.authorization import AuthorizationDB, RoleType
 
 router = APIRouter()
 security = HTTPBearer()
@@ -205,6 +206,15 @@ async def save_dataset(
     found = await db["datasets"].find_one({"_id": new_dataset.inserted_id})
     dataset_out = DatasetOut.from_mongo(found)
 
+    # Create authorization entry
+    await db["authorization"].insert_one(
+        AuthorizationDB(
+            dataset_id=new_dataset.inserted_id,
+            role=RoleType.OWNER,
+            creator=user.email,
+        ).to_mongo()
+    )
+
     # Add en entry to the dataset index
     doc = {
         "name": dataset_out.name,
@@ -215,6 +225,7 @@ async def save_dataset(
         "download": dataset_out.downloads,
     }
     insert_record(es, "dataset", doc, dataset_out.id)
+
     return dataset_out
 
 
@@ -229,8 +240,15 @@ async def get_datasets(
     datasets = []
     if mine:
         for doc in (
-            await db["datasets"]
-            .find({"author.email": user_id})
+            await db["datasets_view"]
+            .find(
+                {
+                    "$and": [
+                        {"author.email": user_id},
+                        {"auth": {"$elemMatch": {"user_ids": user_id}}},
+                    ]
+                }
+            )
             .sort([("created", pymongo.DESCENDING)])
             .skip(skip)
             .limit(limit)
@@ -239,8 +257,15 @@ async def get_datasets(
             datasets.append(DatasetOut.from_mongo(doc))
     else:
         for doc in (
-            await db["datasets"]
-            .find()
+            await db["datasets_view"]
+            .find(
+                {
+                    "$or": [
+                        {"author.email": user_id},
+                        {"auth": {"$elemMatch": {"user_ids": user_id}}},
+                    ]
+                }
+            )
             .sort([("created", pymongo.DESCENDING)])
             .skip(skip)
             .limit(limit)
@@ -251,18 +276,25 @@ async def get_datasets(
 
 
 @router.get("/{dataset_id}", response_model=DatasetOut)
-async def get_dataset(dataset_id: str, db: MongoClient = Depends(dependencies.get_db)):
-    if (
-        dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
-    ) is not None:
-        return DatasetOut.from_mongo(dataset)
-    raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
+async def get_dataset(
+    dataset_id: str,
+    db: MongoClient = Depends(dependencies.get_db),
+    allow: bool = Depends(Authorization("viewer")),
+):
+    try:
+        if (
+            dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
+        ) is not None:
+            return DatasetOut.from_mongo(dataset)
+    except:
+        raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
 
 
 @router.get("/{dataset_id}/files")
 async def get_dataset_files(
     dataset_id: str,
     folder_id: Optional[str] = None,
+    user_id=Depends(get_user),
     db: MongoClient = Depends(dependencies.get_db),
     skip: int = 0,
     limit: int = 10,
@@ -270,11 +302,21 @@ async def get_dataset_files(
     files = []
     if folder_id is not None:
         for f in (
-            await db["files"]
+            await db["files_view"]
             .find(
                 {
-                    "dataset_id": ObjectId(dataset_id),
-                    "folder_id": ObjectId(folder_id),
+                    "$and": [
+                        {
+                            "dataset_id": ObjectId(dataset_id),
+                            "folder_id": ObjectId(folder_id),
+                        },
+                        {
+                            "$or": [
+                                {"creator.email": user_id},
+                                {"auth": {"$elemMatch": {"user_ids": user_id}}},
+                            ]
+                        },
+                    ]
                 }
             )
             .skip(skip)
@@ -284,11 +326,21 @@ async def get_dataset_files(
             files.append(FileOut.from_mongo(f))
     else:
         for f in (
-            await db["files"]
+            await db["files_view"]
             .find(
                 {
-                    "dataset_id": ObjectId(dataset_id),
-                    "folder_id": None,
+                    "$and": [
+                        {
+                            "dataset_id": ObjectId(dataset_id),
+                            "folder_id": None,
+                        },
+                        {
+                            "$or": [
+                                {"creator.email": user_id},
+                                {"auth": {"$elemMatch": {"user_ids": user_id}}},
+                            ]
+                        },
+                    ]
                 }
             )
             .skip(skip)
@@ -468,6 +520,7 @@ async def add_folder(
 async def get_dataset_folders(
     dataset_id: str,
     parent_folder: Optional[str] = None,
+    user_id=Depends(get_user),
     db: MongoClient = Depends(dependencies.get_db),
 ):
     folders = []
@@ -479,8 +532,18 @@ async def get_dataset_folders(
     else:
         async for f in db["folders"].find(
             {
-                "dataset_id": ObjectId(dataset_id),
-                "parent_folder": ObjectId(parent_folder),
+                "$and": [
+                    {
+                        "dataset_id": ObjectId(dataset_id),
+                        "parent_folder": ObjectId(parent_folder),
+                    },
+                    {
+                        "$or": [
+                            {"author.email": user_id},
+                            {"auth": {"$elemMatch": {"user_ids": user_id}}},
+                        ]
+                    },
+                ]
             }
         ):
             folders.append(FolderDB.from_mongo(f))
@@ -550,7 +613,7 @@ async def save_file(
     file: UploadFile = File(...),
     es=Depends(dependencies.get_elasticsearchclient),
     rabbitmq_client: BlockingChannel = Depends(dependencies.get_rabbitmq),
-    token: str = Depends(get_token),
+    credentials: HTTPAuthorizationCredentials = Security(security),
 ):
     if (
         dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
@@ -573,6 +636,7 @@ async def save_file(
                     status_code=404, detail=f"Folder {folder_id} not found"
                 )
 
+        access_token = credentials.credentials
         await add_file_entry(
             fileDB,
             user,
@@ -580,7 +644,7 @@ async def save_file(
             fs,
             es,
             rabbitmq_client,
-            token,
+            access_token,
             file.file,
             content_type=file.content_type,
         )

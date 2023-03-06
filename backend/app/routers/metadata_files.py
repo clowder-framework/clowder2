@@ -227,7 +227,7 @@ async def replace_file_metadata(
             metadata_out = MetadataOut.from_mongo(found)
 
             # Update entry to the metadata index
-            doc = {"doc": {"contents": found["contents"]}}
+            doc = {"doc": {"content": found["content"]}}
             update_record(es, "metadata", doc, md["_id"])
             return metadata_out
         else:
@@ -266,7 +266,7 @@ async def update_file_metadata(
     if (file := await db["files"].find_one({"_id": ObjectId(file_id)})) is not None:
         query = {"resource.resource_id": ObjectId(file_id)}
         file = FileOut(**file)
-        contents = metadata_in.contents
+        content = metadata_in.content
 
         if metadata_in.metadata_id is not None:
             # If a specific metadata_id is provided, validate the patch against existing context
@@ -275,9 +275,9 @@ async def update_file_metadata(
                     {"_id": ObjectId(metadata_in.metadata_id)}
                 )
             ) is not None:
-                contents = await validate_context(
+                content = await validate_context(
                     db,
-                    metadata_in.contents,
+                    metadata_in.content,
                     existing_md.definition,
                     existing_md.context_url,
                     existing_md.context,
@@ -329,7 +329,7 @@ async def update_file_metadata(
 
         if (md := await db["metadata"].find_one(query)) is not None:
             # TODO: Refactor this with permissions checks etc.
-            result = await patch_metadata(md, contents, db, es)
+            result = await patch_metadata(md, content, db, es)
             return result
         else:
             raise HTTPException(status_code=404, detail=f"No metadata found to update")
@@ -340,7 +340,7 @@ async def update_file_metadata(
 @router.get("/{file_id}/metadata", response_model=List[MetadataOut])
 async def get_file_metadata(
     file_id: str,
-    version: Optional[int] = Form(None),
+    version: Optional[int] = None,
     all_versions: Optional[bool] = False,
     definition: Optional[str] = Form(None),
     extractor_name: Optional[str] = Form(None),
