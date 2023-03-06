@@ -65,9 +65,7 @@ async def get_dataset_role(
         )
     ) is not None:
         authorization = AuthorizationDB.from_mongo(authorization_q)
-        group_q_list = db["groups"].find(
-            {"userList": {"$elemMatch": {"user.email": current_user}}}
-        )
+        group_q_list = await db["groups"].find({"userList.user.email": current_user})
 
         auth = False
 

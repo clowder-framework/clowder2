@@ -210,7 +210,6 @@ async def save_dataset(
     await db["authorization"].insert_one(
         AuthorizationDB(
             dataset_id=new_dataset.inserted_id,
-            user_id=user.email,
             role=RoleType.OWNER,
             creator=user.email,
         ).to_mongo()
