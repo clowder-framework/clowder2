@@ -54,7 +54,13 @@ class Authorization:
         current_user: str = Depends(get_current_username),
     ):
         authorization_q = await db["authorization"].find_one(
-            {"dataset_id": ObjectId(dataset_id), "creator": current_user}
+            {"$and": [
+                {"dataset_id": ObjectId(dataset_id)},
+                {"$or": [
+                    {"creator": current_user},
+                    {"user_ids": current_user}
+                ]}
+            ]}
         )
         authorization = AuthorizationDB.from_mongo(authorization_q)
         if current_user in authorization.user_ids:
