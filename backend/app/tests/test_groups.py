@@ -72,7 +72,6 @@ def test_add_and_remove_member(client: TestClient, headers: dict):
         f"{settings.API_V2_STR}/groups", headers=headers, json=new_group
     )
     assert response.status_code == 200
-    print(response.json())
     assert response.json().get("id") is not None
 
     # removing member

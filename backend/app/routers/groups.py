@@ -75,6 +75,7 @@ async def edit_group(
         user = await db["users"].find_one({"email": user_id})
         group_dict["author"] = UserOut(**user)
         group_dict["modified"] = datetime.datetime.utcnow()
+        group_dict["userList"] = list(set(group_dict["userList"]))
         try:
             group.update(group_dict)
             await db["groups"].replace_one(
