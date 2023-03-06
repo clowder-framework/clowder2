@@ -105,6 +105,7 @@ async def get_file_role(
     """Retrieve role of user for an individual file. Role cannot change between file versions."""
     return role
 
+
 @router.get("/metadata/{metadata_id}/role", response_model=AuthorizationMetadata)
 async def get_metadata_role(
     metadata_id: str,

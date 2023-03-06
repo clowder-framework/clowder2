@@ -49,6 +49,7 @@ async def get_role_by_file(
 
     raise HTTPException(status_code=404, detail=f"File {file_id} not found")
 
+
 async def get_role_by_metadata(
     metadata_id: str,
     db: MongoClient = Depends(get_db),
@@ -69,7 +70,12 @@ async def get_role_by_metadata(
                     {
                         "$and": [
                             {"dataset_id": ObjectId(file_out.dataset_id)},
-                            {"$or": [{"creator": current_user}, {"user_ids": current_user}]},
+                            {
+                                "$or": [
+                                    {"creator": current_user},
+                                    {"user_ids": current_user},
+                                ]
+                            },
                         ]
                     }
                 )
@@ -84,13 +90,17 @@ async def get_role_by_metadata(
                     {
                         "$and": [
                             {"dataset_id": ObjectId(dataset_out.dataset_id)},
-                            {"$or": [{"creator": current_user}, {"user_ids": current_user}]},
+                            {
+                                "$or": [
+                                    {"creator": current_user},
+                                    {"user_ids": current_user},
+                                ]
+                            },
                         ]
                     }
                 )
                 role = AuthorizationDB.from_mongo(authorization).role
                 return role
-
 
 
 class Authorization:
