@@ -25,7 +25,6 @@ const PrivateRoute = (props): JSX.Element => {
 	const {children} = props;
 
 	const history = useNavigate();
-	const location = useLocation();
 
 	const dispatch = useDispatch();
 	const loggedOut = useSelector((state: RootState) => state.error.loggedOut);
