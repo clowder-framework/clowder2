@@ -17,6 +17,7 @@ import {RootState} from "./types/data";
 import {resetLogout} from "./actions/common";
 import {Explore} from "./components/Explore";
 import {ExtractionHistory} from "./components/listeners/ExtractionHistory";
+import { PageNotFound } from "./components/errors/PageNotFound";
 
 // https://dev.to/iamandrewluca/private-route-in-react-router-v6-lg5
 const PrivateRoute = (props): JSX.Element => {
@@ -25,6 +26,7 @@ const PrivateRoute = (props): JSX.Element => {
 	const history = useNavigate();
 	const dispatch = useDispatch();
 	const loggedOut = useSelector((state: RootState) => state.error.loggedOut);
+	const reason = useSelector((state: RootState) => state.error.reason);
 	const dismissLogout = () => dispatch(resetLogout());
 
 	// log user out if token expired/unauthorized
@@ -35,6 +37,12 @@ const PrivateRoute = (props): JSX.Element => {
 			history("/auth/login");
 		}
 	}, [loggedOut]);
+
+	useEffect(() => {
+        	if (reason == "Not Found") {
+			history("/not-found");
+        	}
+	}, [reason]);
 
 	return (
 		<>
@@ -61,13 +69,7 @@ export const AppRoutes = (): JSX.Element => {
 				<Route path="/auth" element={<AuthComponent/>} />
 				<Route path="/search" element={<PrivateRoute><Search/></PrivateRoute>} />
 				<Route path="/extractions" element={<PrivateRoute><ExtractionHistory/></PrivateRoute>} />
-				<Route path="*"
-					   element={
-						   <main style={{ padding: "1rem" }}>
-							   <p>Page Not Found!</p>
-						   </main>
-					   }
-				/>
+				<Route path="*" element={<PrivateRoute><PageNotFound/></PrivateRoute>} />
 			</Routes>
 		</BrowserRouter>
 	)
