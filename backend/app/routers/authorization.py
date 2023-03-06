@@ -60,28 +60,15 @@ async def get_dataset_role(
     """Retrieve role of user for a specific dataset."""
     # Get group id and the associated userList from authorization
     if (
-        authorization_q := await db["authorization"].find_one(
-            {"dataset_id": ObjectId(dataset_id)}
-        )
+        authorization_q := await db["authorization"].find_one({
+            "$and": [
+                {"dataset_id": ObjectId(dataset_id)},
+                {"$or": [{"creator": current_user}, {"user_ids": current_user}]},
+            ]
+        })
     ) is not None:
         authorization = AuthorizationDB.from_mongo(authorization_q)
-        group_q_list = await db["groups"].find({"userList.user.email": current_user})
-
-        auth = False
-
-        async for group_q in group_q_list:
-            group = GroupOut.from_mongo(group_q)
-            if ObjectId(group.id) in authorization.group_ids:
-                auth = True
-                break
-
-        if auth is True:
-            return authorization
-        else:
-            raise HTTPException(
-                status_code=404,
-                detail=f"No authorization found for dataset: {dataset_id} and user_id: {current_user}",
-            )
+        return authorization
     else:
         raise HTTPException(
             status_code=404, detail=f"No authorization found for dataset: {dataset_id}"

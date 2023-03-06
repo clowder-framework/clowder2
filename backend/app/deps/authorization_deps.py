@@ -58,18 +58,16 @@ class Authorization:
         current_user: str = Depends(get_current_username),
     ):
         # TODO: Make sure we enforce only one role per user per dataset, or find_one could yield wrong answer here.
-        authorization_q = await db["authorization"].find_one(
+        if (authorization_q := await db["authorization"].find_one(
             {
                 "$and": [
                     {"dataset_id": ObjectId(dataset_id)},
                     {"$or": [{"creator": current_user}, {"user_ids": current_user}]},
                 ]
             }
-        )
-        authorization = AuthorizationDB.from_mongo(authorization_q)
-        if current_user in authorization.user_ids:
-            role = authorization.role
-            if access(role, self.role):
+        )) is not None:
+            authorization = AuthorizationDB.from_mongo(authorization_q)
+            if access(authorization.role, self.role):
                 return True
             else:
                 raise HTTPException(

@@ -21,8 +21,8 @@ class RoleType(str, Enum):
 
 
 class AuthorizationBase(BaseModel):
-    # TODO: This should be PyObjectId = Field(default_factory=PyObjectId). Need to figure out why can't create instance
-    #  in `routers.authorization.get_dataset_role()`.
+    """Currently, user_ids list is used for primary authorization checks.
+    group_ids are kept for convenience (adding/removing users in batch) but user_ids list MUST be kept current."""
     dataset_id: PyObjectId
     user_ids: List[EmailStr] = []
     role: RoleType
