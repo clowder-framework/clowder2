@@ -4,15 +4,19 @@ from fastapi import APIRouter, Depends
 from fastapi.exceptions import HTTPException
 from pydantic.networks import EmailStr
 from pymongo import MongoClient
+from bson import ObjectId
 
 from app import keycloak_auth, dependencies
 from app.dependencies import get_db
-from app.deps.authorization_deps import Authorization
-from app.keycloak_auth import get_current_username
-from app.models.authorization import AuthorizationBase, AuthorizationDB
-from bson.objectid import ObjectId
-
 from app.models.groups import GroupOut, GroupDB, GroupBase
+from app.deps.authorization_deps import Authorization, get_role, get_role_by_file
+from app.keycloak_auth import get_current_username
+from app.models.authorization import (
+    AuthorizationBase,
+    AuthorizationFile,
+    AuthorizationDB,
+    RoleType,
+)
 
 router = APIRouter()
 
@@ -54,7 +58,6 @@ async def get_dataset_role(
     db: MongoClient = Depends(get_db),
 ):
     """Retrieve role of user for a specific dataset."""
-
     # Get group id and the associated userList from authorization
     if (
         authorization_q := await db["authorization"].find_one(
@@ -103,3 +106,13 @@ async def get_dataset_role_owner(
     """Used for testing only. Returns true if user has owner permission on dataset, otherwise throws a 403 Forbidden HTTP exception.
     See `routers/authorization.py` for more info."""
     return {"dataset_id": dataset_id, "allow": allow}
+
+
+@router.get("/files/{file_id}/role", response_model=AuthorizationFile)
+async def get_file_role(
+    file_id: str,
+    current_user=Depends(get_current_username),
+    role: RoleType = Depends(get_role_by_file),
+):
+    """Retrieve role of user for an individual file. Role cannot change between file versions."""
+    return role
