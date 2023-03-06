@@ -1,10 +1,11 @@
-from bson import ObjectId
 from fastapi import Depends, HTTPException
 from pymongo import MongoClient
+from bson import ObjectId
 
 from app.dependencies import get_db
 from app.keycloak_auth import get_current_username
 from app.models.authorization import RoleType, AuthorizationDB
+from app.models.files import FileOut
 
 
 async def get_role(
@@ -13,10 +14,30 @@ async def get_role(
     current_user=Depends(get_current_username),
 ) -> RoleType:
     authorization = await db["authorization"].find_one(
-        {"dataset_id": dataset_id, "user_id": current_user, "creator": current_user}
+        {"dataset_id": ObjectId(dataset_id), "user_id": current_user}
     )
     role = AuthorizationDB.from_mongo(authorization).role
     return role
+
+
+async def get_role_by_file(
+    file_id: str,
+    db: MongoClient = Depends(get_db),
+    current_user=Depends(get_current_username),
+) -> RoleType:
+    if (file := await db["files"].find_one({"_id": ObjectId(file_id)})) is not None:
+        file_out = FileOut.from_mongo(file)
+        authorization = await db["authorization"].find_one(
+            {
+                "dataset_id": ObjectId(file_out.dataset_id),
+                "user_id": current_user,
+                "creator": current_user,
+            }
+        )
+        role = AuthorizationDB.from_mongo(authorization).role
+        return role
+
+    raise HTTPException(status_code=404, detail=f"File {file_id} not found")
 
 
 class Authorization:
@@ -33,7 +54,11 @@ class Authorization:
         current_user: str = Depends(get_current_username),
     ):
         authorization = await db["authorization"].find_one(
-            {"dataset_id": dataset_id, "user_id": current_user, "creator": current_user}
+            {
+                "dataset_id": ObjectId(dataset_id),
+                "user_id": current_user,
+                "creator": current_user,
+            }
         )
         role = AuthorizationDB.from_mongo(authorization).role
         if access(role, self.role):

@@ -231,17 +231,14 @@ async def update_file(
 
         # Update file in Minio and get the new version IDs
         version_id = None
-        while content := file.file.read(
-            settings.MINIO_UPLOAD_CHUNK_SIZE
-        ):  # async read chunk
-            response = fs.put_object(
-                settings.MINIO_BUCKET_NAME,
-                str(updated_file.id),
-                io.BytesIO(content),
-                length=-1,
-                part_size=settings.MINIO_UPLOAD_CHUNK_SIZE,
-            )  # async write chunk to minio
-            version_id = response.version_id
+        response = fs.put_object(
+            settings.MINIO_BUCKET_NAME,
+            str(updated_file.id),
+            file.file,
+            length=-1,
+            part_size=settings.MINIO_UPLOAD_CHUNK_SIZE,
+        )  # async write chunk to minio
+        version_id = response.version_id
 
         # Update version/creator/created flags
         updated_file.name = file.filename

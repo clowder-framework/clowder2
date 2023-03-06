@@ -15,6 +15,7 @@ type MetadataType = {
 	deleteMetadata: any,
 	resourceType: string | undefined,
 	resourceId: string | undefined,
+	version: number | undefined,
 }
 
 /*
@@ -23,14 +24,14 @@ Uses only the list of metadata
 */
 export const DisplayListenerMetadata = (props: MetadataType) => {
 
-	const {updateMetadata, deleteMetadata, resourceType, resourceId} = props;
+	const {updateMetadata, deleteMetadata, resourceType, resourceId, version} = props;
 
 	const dispatch = useDispatch();
 
 	const getMetadatDefinitions = (name: string | null, skip: number, limit: number) => dispatch(fetchMetadataDefinitions(name, skip, limit));
 	const metadataDefinitionList = useSelector((state: RootState) => state.metadata.metadataDefinitionList);
 	const listDatasetMetadata = (datasetId: string | undefined) => dispatch(fetchDatasetMetadata(datasetId));
-	const listFileMetadata = (fileId: string | undefined) => dispatch(fetchFileMetadata(fileId));
+	const listFileMetadata = (fileId: string | undefined, version: number | undefined) => dispatch(fetchFileMetadata(fileId, version));
 	const datasetMetadataList = useSelector((state: RootState) => state.metadata.datasetMetadataList);
 	const fileMetadataList = useSelector((state: RootState) => state.metadata.fileMetadataList);
 
@@ -43,9 +44,9 @@ export const DisplayListenerMetadata = (props: MetadataType) => {
 		if (resourceType === "dataset") {
 			listDatasetMetadata(resourceId);
 		} else if (resourceType === "file") {
-			listFileMetadata(resourceId);
+			listFileMetadata(resourceId, version);
 		}
-	}, [resourceType, resourceId]);
+	}, [resourceType, resourceId, version]);
 
 	return (
 		<>

@@ -340,7 +340,7 @@ async def update_file_metadata(
 @router.get("/{file_id}/metadata", response_model=List[MetadataOut])
 async def get_file_metadata(
     file_id: str,
-    version: Optional[int] = Form(None),
+    version: Optional[int] = None,
     all_versions: Optional[bool] = False,
     definition: Optional[str] = Form(None),
     extractor_name: Optional[str] = Form(None),
