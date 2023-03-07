@@ -166,18 +166,21 @@ export const Dataset = (): JSX.Element => {
 			<ActionModal actionOpen={errorOpen} actionTitle="Something went wrong..." actionText={reason}
 						 actionBtnName="Report" handleActionBtnClick={handleErrorReport}
 						 handleActionCancel={handleErrorCancel}/>
+			{/*breadcrumb*/}
 			<Grid container>
 				<Grid item xs={10} sx={{display: "flex", alignItems: "center"}}>
 					<MainBreadcrumbs paths={paths}/>
 				</Grid>
 			</Grid>
 			<Grid container>
+				{/*title*/}
 				<Grid item xs={8} sx={{display: "flex", alignItems: "center"}}>
 					<Box sx={{display: "inline-flex", justifyContent: "space-between", alignItems: "baseline"}}>
 						<Typography variant="h3" paragraph>{about["name"]}</Typography>
 						<RoleChip role={datasetRole.role}/>
 					</Box>
 				</Grid>
+				{/*actions*/}
 				<Grid item xs={4} sx={{display: "flex", alignItems: "center"}}>
 					<ActionsMenu datasetId={datasetId} folderId={folderId}/>
 				</Grid>

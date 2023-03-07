@@ -15,6 +15,8 @@ type ActionsMenuProps = {
 export const ActionsMenu = (props: ActionsMenuProps): JSX.Element => {
 	const {datasetId, folderId} = props;
 
+	const datasetRole = useSelector((state: RootState) => state.dataset.datasetRole);
+
 	// redux
 	const dispatch = useDispatch();
 
@@ -34,7 +36,15 @@ export const ActionsMenu = (props: ActionsMenuProps): JSX.Element => {
 					}} endIcon={<Download/>}>
 				Download
 			</Button>
-			<NewMenu datasetId={datasetId} folderId={folderId}/>
-			<OtherMenu datasetId={datasetId} folderId={folderId}/>
+			{/*owner, editor, uploader cannot create new*/}
+			{
+				datasetRole.role === "owner" || datasetRole.role === "editor" || datasetRole.role === "uploader"
+					? <NewMenu datasetId={datasetId} folderId={folderId}/> : <></>
+			}
+			{/*owner, editor can edit*/}
+			{
+				datasetRole.role === "owner" || datasetRole.role === "editor"
+					? <OtherMenu datasetId={datasetId} folderId={folderId}/> :< ></>
+			}
 		</Stack>)
 }
