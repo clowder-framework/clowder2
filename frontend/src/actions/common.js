@@ -28,6 +28,7 @@ export function resetLogout(){
 
 export const FAILED = "FAILED";
 export const NOT_FOUND = "NOT_FOUND";
+export const NOT_AUTHORIZED = "NOT_AUTHORIZED";
 export function handleErrors(reason, originalFunc){
 	// Authorization error we need to automatically logout user
 	if (reason.status === 401){
@@ -57,6 +58,15 @@ export function handleErrors(reason, originalFunc){
 					V2.OpenAPI.TOKEN = undefined;
 					cookies.remove("Authorization", { path: "/" });
 				});
+		};
+	} else if (reason.status === 403) {
+		return (dispatch) => {
+			dispatch({
+				type: NOT_AUTHORIZED,
+				reason: reason.message !== undefined? reason.message : "Not Authorized",
+				stack: reason.stack ? reason.stack : "",
+				receivedAt: Date.now()
+			});
 		};
 	} else if (reason.status === 404) {
 		return (dispatch) => {

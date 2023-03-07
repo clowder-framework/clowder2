@@ -19,6 +19,7 @@ import {Explore} from "./components/Explore";
 import {ExtractionHistory} from "./components/listeners/ExtractionHistory";
 import {fetchDatasetRole, fetchFileRole} from "./actions/authorization";
 import { PageNotFound } from "./components/errors/PageNotFound";
+import {NotAuthorized} from "./components/errors/NotAuthorized";
 
 // https://dev.to/iamandrewluca/private-route-in-react-router-v6-lg5
 const PrivateRoute = (props): JSX.Element => {
@@ -56,8 +57,11 @@ const PrivateRoute = (props): JSX.Element => {
 
 	useEffect(() => {
         	if (reason == "Not Found") {
-			history("/not-found");
+				history("/not-found");
         	}
+        	if (reason == "NotAuthorized"){
+        		history("/not-authorized");
+			}
 	}, [reason]);
 
 	return (
@@ -85,6 +89,7 @@ export const AppRoutes = (): JSX.Element => {
 				<Route path="/auth" element={<AuthComponent/>} />
 				<Route path="/search" element={<PrivateRoute><Search/></PrivateRoute>} />
 				<Route path="/extractions" element={<PrivateRoute><ExtractionHistory/></PrivateRoute>} />
+				<Route path="/not-authorized" element={<PrivateRoute><NotAuthorized/></PrivateRoute>} />
 				<Route path="*" element={<PrivateRoute><PageNotFound/></PrivateRoute>} />
 			</Routes>
 		</BrowserRouter>
