@@ -37,14 +37,6 @@ const PrivateRoute = (props): JSX.Element => {
 	const {datasetId} = useParams<{ datasetId?: string }>();
 	const {fileId} = useParams<{ fileId?: string }>();
 
-	useEffect(() =>{
-		if (datasetId) listDatasetRole(datasetId);
-	}, [datasetId])
-
-	useEffect(() =>{
-		if (fileId) listFileRole(fileId);
-	}, [fileId])
-
 	// log user out if token expired/unauthorized
 	useEffect(() => {
 		if (loggedOut) {
@@ -54,15 +46,24 @@ const PrivateRoute = (props): JSX.Element => {
 		}
 	}, [loggedOut]);
 
-
+	// not found or unauthorized
 	useEffect(() => {
-        	if (reason == "Not Found") {
-				history("/not-found");
-        	}
-        	if (reason == "NotAuthorized"){
+			if (reason == "Not Authorized"){
         		history("/not-authorized");
 			}
+        	else if (reason == "Not Found") {
+				history("/not-found");
+        	}
 	}, [reason]);
+
+	// get roles if authorized
+	useEffect(() =>{
+		if (datasetId && reason === "") listDatasetRole(datasetId);
+	}, [datasetId, reason])
+
+	useEffect(() =>{
+		if (fileId && reason === "") listFileRole(fileId);
+	}, [fileId, reason])
 
 	return (
 		<>

@@ -11,6 +11,7 @@ export function resetFailedReason(){
 		dispatch({
 			type:RESET_FAILED,
 			reason:"",
+			stack:"",
 			receivedAt: Date.now(),
 		});
 	};
@@ -63,7 +64,7 @@ export function handleErrors(reason, originalFunc){
 		return (dispatch) => {
 			dispatch({
 				type: NOT_AUTHORIZED,
-				reason: reason.message !== undefined? reason.message : "Not Authorized",
+				reason: "Not Authorized",
 				stack: reason.stack ? reason.stack : "",
 				receivedAt: Date.now()
 			});
@@ -72,7 +73,7 @@ export function handleErrors(reason, originalFunc){
 		return (dispatch) => {
 			dispatch({
 				type: NOT_FOUND,
-				reason: reason.message !== undefined? reason.message : "Not Found",
+				reason: "Not Found",
 				stack: reason.stack ? reason.stack : "",
 				receivedAt: Date.now()
 			});
