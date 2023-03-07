@@ -5,7 +5,7 @@ from bson import ObjectId
 from app.dependencies import get_db
 from app.keycloak_auth import get_current_username
 from app.models.authorization import RoleType, AuthorizationDB
-from app.models.files import FileOut
+from app.models.datasets import DatasetOut
 
 
 async def get_role(
@@ -90,6 +90,41 @@ class Authorization:
                 status_code=403,
                 detail=f"User `{current_user} does not have `{self.role}` permission on dataset {dataset_id}",
             )
+
+
+class DatasetAuthorization:
+    """We use class dependency so that we can provide the `permission` parameter to the dependency.
+    For more info see https://fastapi.tiangolo.com/advanced/advanced-dependencies/."""
+
+    def __init__(self, role: str):
+        self.role = role
+
+    async def __call__(
+        self,
+        dataset_id: str,
+        db: MongoClient = Depends(get_db),
+        current_user: str = Depends(get_current_username),
+    ):
+        if (dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})) is not None:
+            dataset_out = DatasetOut.from_mongo(dataset)
+            if (authorization_q := await db["authorization"].find_one(
+                {
+                    "$and": [
+                        {"dataset_id": ObjectId(dataset_out.dataset_id)},
+                        {"$or": [{"creator": current_user}, {"user_ids": current_user}]},
+                    ]
+                }
+            )) is not None:
+                authorization = AuthorizationDB.from_mongo(authorization_q)
+                if access(authorization.role, self.role):
+                    return True
+
+            raise HTTPException(
+                status_code=403,
+                detail=f"User `{current_user} does not have `{self.role}` permission on dataset {dataset_id}",
+            )
+        else:
+            raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
 
 
 def access(user_role: RoleType, role_required: RoleType) -> bool:
