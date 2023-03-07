@@ -6,6 +6,7 @@ import {RootState} from "../../types/data";
 import {Download} from "@mui/icons-material";
 import {NewMenu} from "./NewMenu";
 import {OtherMenu} from "./OtherMenu";
+import {EditMenu} from "./EditMenu";
 
 type ActionsMenuProps = {
 	datasetId: string,
@@ -44,6 +45,11 @@ export const ActionsMenu = (props: ActionsMenuProps): JSX.Element => {
 			{/*owner, editor can edit*/}
 			{
 				datasetRole.role === "owner" || datasetRole.role === "editor"
+					? <EditMenu datasetId={datasetId} folderId={folderId}/> :< ></>
+			}
+			{/*owner can delete and perform other tasks*/}
+			{
+				datasetRole.role === "owner"
 					? <OtherMenu datasetId={datasetId} folderId={folderId}/> :< ></>
 			}
 		</Stack>)
