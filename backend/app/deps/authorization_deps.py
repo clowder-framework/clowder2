@@ -107,14 +107,21 @@ class FileAuthorization:
     ):
         if (file := await db["files"].find_one({"_id": ObjectId(file_id)})) is not None:
             file_out = FileOut.from_mongo(file)
-            if (authorization_q := await db["authorization"].find_one(
-                {
-                    "$and": [
-                        {"dataset_id": ObjectId(file_out.dataset_id)},
-                        {"$or": [{"creator": current_user}, {"user_ids": current_user}]},
-                    ]
-                }
-            )) is not None:
+            if (
+                authorization_q := await db["authorization"].find_one(
+                    {
+                        "$and": [
+                            {"dataset_id": ObjectId(file_out.dataset_id)},
+                            {
+                                "$or": [
+                                    {"creator": current_user},
+                                    {"user_ids": current_user},
+                                ]
+                            },
+                        ]
+                    }
+                )
+            ) is not None:
                 authorization = AuthorizationDB.from_mongo(authorization_q)
                 if access(authorization.role, self.role):
                     return True
