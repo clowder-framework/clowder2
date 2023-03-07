@@ -382,8 +382,6 @@ async def get_file_metadata(
         metadata = []
         async for md in db["metadata"].find(query):
             md_out = MetadataOut.from_mongo(md)
-            resource_type = md_out.resource.collection
-            resource_id = md_out.resource.resource_id
             if md_out.definition is not None:
                 if (
                     md_def := await db["metadata.definitions"].find_one(
