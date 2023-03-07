@@ -9,7 +9,12 @@ from bson import ObjectId
 from app import keycloak_auth, dependencies
 from app.dependencies import get_db
 from app.models.groups import GroupOut, GroupDB, GroupBase
-from app.deps.authorization_deps import Authorization, get_role, get_role_by_file, get_role_by_metadata
+from app.deps.authorization_deps import (
+    Authorization,
+    get_role,
+    get_role_by_file,
+    get_role_by_metadata,
+)
 from app.keycloak_auth import get_current_username
 from app.models.authorization import (
     AuthorizationBase,
