@@ -28,7 +28,7 @@ from rocrate.rocrate import ROCrate
 
 from app import dependencies
 from app import keycloak_auth
-from app.deps.authorization_deps import Authorization
+from app.deps.authorization_deps import Authorization, DatasetAuthorization
 from app.config import settings
 from app.keycloak_auth import get_token
 from app.keycloak_auth import get_user, get_current_user
@@ -45,6 +45,7 @@ from app.models.pyobjectid import PyObjectId
 from app.models.users import UserOut
 from app.rabbitmq.listeners import submit_dataset_job
 from app.routers.files import add_file_entry, remove_file_entry
+
 from app.search.connect import (
     connect_elasticsearch,
     insert_record,
@@ -296,6 +297,7 @@ async def get_dataset_files(
     folder_id: Optional[str] = None,
     user_id=Depends(get_user),
     db: MongoClient = Depends(dependencies.get_db),
+    allow: bool = Depends(DatasetAuthorization("viewer")),
     skip: int = 0,
     limit: int = 10,
 ):
