@@ -35,7 +35,7 @@ async def save_authorization(
     if group_q_list is not None:
         async for group_q in group_q_list:
             group = GroupOut.from_mongo(group_q)
-            user_ids = list(map(lambda user: user.user.email, group.userList))
+            user_ids = list(map(lambda user: user.user.email, group.users))
     else:
         raise HTTPException(
             status_code=404, detail=f"Group {authorization_in.group_ids} not found"
@@ -58,7 +58,7 @@ async def get_dataset_role(
     db: MongoClient = Depends(get_db),
 ):
     """Retrieve role of user for a specific dataset."""
-    # Get group id and the associated userList from authorization
+    # Get group id and the associated users from authorization
     if (
         authorization_q := await db["authorization"].find_one(
             {

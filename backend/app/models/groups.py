@@ -5,6 +5,7 @@ from pydantic import Field, BaseModel
 
 from app.models.mongomodel import OID, MongoModel
 from app.models.users import UserOut
+from app.models.authorization import Provenance
 
 
 class Member(BaseModel):
@@ -13,9 +14,9 @@ class Member(BaseModel):
 
 
 class GroupBase(BaseModel):
-    name: str = "N/A"
-    description: str = "N/A"
-    userList: List[Member] = []
+    name: str
+    description: Optional[str]
+    users: List[Member] = []
 
 
 class GroupIn(GroupBase):
@@ -27,10 +28,7 @@ class GroupPatch(BaseModel):
     description: Optional[str]
 
 
-class GroupDB(MongoModel, GroupBase):
-    author: UserOut
-    created: datetime = Field(default_factory=datetime.utcnow)
-    modified: datetime = Field(default_factory=datetime.utcnow)
+class GroupDB(MongoModel, GroupBase, Provenance):
     views: int = 0
 
 

@@ -13,7 +13,7 @@ member = {"user": user, "is_owner": True}
 group_data_in = {
     "name": "first group",
     "description": "a group is a container of several users",
-    "userList": [member],
+    "users": [member],
 }
 
 authorization_data = {"dataset_id": "6373acfad19c970d5dab6473", "role": "editor"}

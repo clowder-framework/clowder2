@@ -13,7 +13,7 @@ member = {"user": user, "is_owner": True}
 group_data_in = {
     "name": "first group",
     "description": "a group is a container of several users",
-    "userList": [member],
+    "users": [member],
 }
 
 user2 = {
@@ -67,7 +67,7 @@ def test_add_and_remove_member(client: TestClient, headers: dict):
 
     # adding new member
     new_group = response.json()
-    new_group["userList"].append(member2)
+    new_group["users"].append(member2)
     response = client.post(
         f"{settings.API_V2_STR}/groups", headers=headers, json=new_group
     )
@@ -76,7 +76,7 @@ def test_add_and_remove_member(client: TestClient, headers: dict):
 
     # removing member
     new_group = response.json()
-    new_group["userList"].pop()
+    new_group["users"].pop()
 
     # TODO add a put endpoint for this
     response = client.post(
