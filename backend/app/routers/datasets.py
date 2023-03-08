@@ -361,8 +361,9 @@ async def edit_dataset(
     user_id=Depends(get_user),
     es=Depends(dependencies.get_elasticsearchclient),
     allow: bool = Depends(Authorization("editor")),
-
 ):
+    if not allow:
+        raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
     # Check all connection and abort if any one of them is not available
     if db is None or es is None:
         raise HTTPException(status_code=503, detail="Service not available")
@@ -421,6 +422,8 @@ async def patch_dataset(
     allow: bool = Depends(Authorization("editor")),
 
 ):
+    if not allow:
+        raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
     # Check all connection and abort if any one of them is not available
     if db is None or es is None:
         raise HTTPException(status_code=503, detail="Service not available")
@@ -477,6 +480,8 @@ async def delete_dataset(
     allow: bool = Depends(Authorization("editor")),
 
 ):
+    if not allow:
+        raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
     # Check all connection and abort if any one of them is not available
     if db is None or fs is None or es is None:
         raise HTTPException(status_code=503, detail="Service not available")
@@ -508,6 +513,8 @@ async def add_folder(
     db: MongoClient = Depends(dependencies.get_db),
     allow: bool = Depends(Authorization("editor")),
 ):
+    if not allow:
+        raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
     folder_dict = folder_in.dict()
     folder_db = FolderDB(
         **folder_in.dict(), author=user, dataset_id=PyObjectId(dataset_id)
@@ -533,6 +540,8 @@ async def get_dataset_folders(
     db: MongoClient = Depends(dependencies.get_db),
     allow: bool = Depends(Authorization("viewer")),
 ):
+    if not allow:
+        raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
     folders = []
     if parent_folder is None:
         async for f in db["folders"].find(
@@ -569,6 +578,8 @@ async def delete_folder(
     es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
     allow: bool = Depends(Authorization("owner")),
 ):
+    if not allow:
+        raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
     if (await db["folders"].find_one({"_id": ObjectId(folder_id)})) is not None:
         # delete current folder and files
         await remove_folder_entry(folder_id, db)
@@ -627,6 +638,8 @@ async def save_file(
     credentials: HTTPAuthorizationCredentials = Security(security),
     allow: bool = Depends(Authorization("editor")),
 ):
+    if not allow:
+        raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
     if (
         dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
     ) is not None:
@@ -756,6 +769,8 @@ async def download_dataset(
     fs: Minio = Depends(dependencies.get_fs),
     allow: bool = Depends(Authorization("viewer")),
 ):
+    if not allow:
+        raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
     if (
         dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
     ) is not None:
@@ -924,6 +939,8 @@ async def get_dataset_extract(
     rabbitmq_client: BlockingChannel = Depends(dependencies.get_rabbitmq),
     allow: bool = Depends(Authorization("editor")),
 ):
+    if not allow:
+        raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
     if (
         dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
     ) is not None:
