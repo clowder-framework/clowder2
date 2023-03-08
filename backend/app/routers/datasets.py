@@ -28,7 +28,7 @@ from rocrate.rocrate import ROCrate
 
 from app import dependencies
 from app import keycloak_auth
-from app.deps.authorization_deps import Authorization, DatasetAuthorization
+from app.deps.authorization_deps import Authorization
 from app.config import settings
 from app.keycloak_auth import get_token
 from app.keycloak_auth import get_user, get_current_user
@@ -297,7 +297,7 @@ async def get_dataset_files(
     folder_id: Optional[str] = None,
     user_id=Depends(get_user),
     db: MongoClient = Depends(dependencies.get_db),
-    allow: bool = Depends(DatasetAuthorization("viewer")),
+    allow: bool = Depends(Authorization("viewer")),
     skip: int = 0,
     limit: int = 10,
 ):
@@ -360,7 +360,7 @@ async def edit_dataset(
     db: MongoClient = Depends(dependencies.get_db),
     user_id=Depends(get_user),
     es=Depends(dependencies.get_elasticsearchclient),
-    allow: bool = Depends(DatasetAuthorization("editor")),
+    allow: bool = Depends(Authorization("editor")),
 
 ):
     # Check all connection and abort if any one of them is not available
@@ -418,7 +418,7 @@ async def patch_dataset(
     user_id=Depends(get_user),
     db: MongoClient = Depends(dependencies.get_db),
     es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
-    allow: bool = Depends(DatasetAuthorization("editor")),
+    allow: bool = Depends(Authorization("editor")),
 
 ):
     # Check all connection and abort if any one of them is not available
@@ -474,7 +474,7 @@ async def delete_dataset(
     db: MongoClient = Depends(dependencies.get_db),
     fs: Minio = Depends(dependencies.get_fs),
     es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
-    allow: bool = Depends(DatasetAuthorization("editor")),
+    allow: bool = Depends(Authorization("editor")),
 
 ):
     # Check all connection and abort if any one of them is not available
@@ -506,7 +506,7 @@ async def add_folder(
     folder_in: FolderIn,
     user=Depends(get_current_user),
     db: MongoClient = Depends(dependencies.get_db),
-    allow: bool = Depends(DatasetAuthorization("editor")),
+    allow: bool = Depends(Authorization("editor")),
 ):
     folder_dict = folder_in.dict()
     folder_db = FolderDB(
@@ -531,7 +531,7 @@ async def get_dataset_folders(
     parent_folder: Optional[str] = None,
     user_id=Depends(get_user),
     db: MongoClient = Depends(dependencies.get_db),
-    allow: bool = Depends(DatasetAuthorization("viewer")),
+    allow: bool = Depends(Authorization("viewer")),
 ):
     folders = []
     if parent_folder is None:
@@ -567,7 +567,7 @@ async def delete_folder(
     db: MongoClient = Depends(dependencies.get_db),
     fs: Minio = Depends(dependencies.get_fs),
     es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
-    allow: bool = Depends(DatasetAuthorization("owner")),
+    allow: bool = Depends(Authorization("owner")),
 ):
     if (await db["folders"].find_one({"_id": ObjectId(folder_id)})) is not None:
         # delete current folder and files
@@ -625,7 +625,7 @@ async def save_file(
     es=Depends(dependencies.get_elasticsearchclient),
     rabbitmq_client: BlockingChannel = Depends(dependencies.get_rabbitmq),
     credentials: HTTPAuthorizationCredentials = Security(security),
-    allow: bool = Depends(DatasetAuthorization("editor")),
+    allow: bool = Depends(Authorization("editor")),
 ):
     if (
         dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
@@ -754,7 +754,7 @@ async def download_dataset(
     user=Depends(get_current_user),
     db: MongoClient = Depends(dependencies.get_db),
     fs: Minio = Depends(dependencies.get_fs),
-    allow: bool = Depends(DatasetAuthorization("viewer")),
+    allow: bool = Depends(Authorization("viewer")),
 ):
     if (
         dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
@@ -922,7 +922,7 @@ async def get_dataset_extract(
     credentials: HTTPAuthorizationCredentials = Security(security),
     db: MongoClient = Depends(dependencies.get_db),
     rabbitmq_client: BlockingChannel = Depends(dependencies.get_rabbitmq),
-    allow: bool = Depends(DatasetAuthorization("editor")),
+    allow: bool = Depends(Authorization("editor")),
 ):
     if (
         dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
