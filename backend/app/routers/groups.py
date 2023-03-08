@@ -21,7 +21,7 @@ async def save_group(
     user=Depends(get_current_user),
     db: MongoClient = Depends(dependencies.get_db),
 ):
-    group_db = GroupDB(**group_in.dict(), creator=user)
+    group_db = GroupDB(**group_in.dict(), creator=user.email)
     user_member = Member(user=user, is_owner=True)
     if user_member not in group_db.users:
         group_db.users.append(user_member)
