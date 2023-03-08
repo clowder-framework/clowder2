@@ -24,6 +24,7 @@ from pika.adapters.blocking_connection import BlockingChannel
 from pymongo import MongoClient
 
 from app import dependencies
+from app.deps.authorization_deps import FileAuthorization
 from app.config import settings
 from app.search.connect import (
     insert_record,
@@ -211,6 +212,7 @@ async def update_file(
     es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
     credentials: HTTPAuthorizationCredentials = Security(security),
     rabbitmq_client: BlockingChannel = Depends(dependencies.get_rabbitmq),
+    allow: bool = Depends(FileAuthorization("uploader")),
 ):
     # Check all connection and abort if any one of them is not available
     if db is None or fs is None or es is None:
@@ -309,6 +311,7 @@ async def download_file(
     version: Optional[int] = None,
     db: MongoClient = Depends(dependencies.get_db),
     fs: Minio = Depends(dependencies.get_fs),
+    allow: bool = Depends(FileAuthorization("viewer")),
 ):
     # If file exists in MongoDB, download from Minio
     if (file := await db["files"].find_one({"_id": ObjectId(file_id)})) is not None:
@@ -353,6 +356,7 @@ async def delete_file(
     db: MongoClient = Depends(dependencies.get_db),
     fs: Minio = Depends(dependencies.get_fs),
     es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
+    allow: bool = Depends(FileAuthorization("editor")),
 ):
     if (file := await db["files"].find_one({"_id": ObjectId(file_id)})) is not None:
         await remove_file_entry(file_id, db, fs, es)
@@ -365,14 +369,15 @@ async def delete_file(
 async def get_file_summary(
     file_id: str,
     db: MongoClient = Depends(dependencies.get_db),
+    allow: bool = Depends(FileAuthorization("viewer")),
 ):
     if (file := await db["files"].find_one({"_id": ObjectId(file_id)})) is not None:
         # TODO: Incrementing too often (3x per page view)
         # file["views"] += 1
         # db["files"].replace_one({"_id": ObjectId(file_id)}, file)
         return FileOut.from_mongo(file)
-
-    raise HTTPException(status_code=404, detail=f"File {file_id} not found")
+    else:
+        raise HTTPException(status_code=404, detail=f"File {file_id} not found")
 
 
 @router.get("/{file_id}/versions", response_model=List[FileVersion])
@@ -381,6 +386,7 @@ async def get_file_versions(
     db: MongoClient = Depends(dependencies.get_db),
     skip: int = 0,
     limit: int = 20,
+    allow: bool = Depends(FileAuthorization("viewer")),
 ):
     if (file := await db["files"].find_one({"_id": ObjectId(file_id)})) is not None:
         mongo_versions = []
@@ -410,6 +416,7 @@ async def get_file_extract(
     credentials: HTTPAuthorizationCredentials = Security(security),
     db: MongoClient = Depends(dependencies.get_db),
     rabbitmq_client: BlockingChannel = Depends(dependencies.get_rabbitmq),
+    allow: bool = Depends(FileAuthorization("uploader")),
 ):
     if extractorName is None:
         raise HTTPException(status_code=400, detail=f"No extractorName specified")
@@ -447,6 +454,7 @@ async def resubmit_file_extractions(
     user=Depends(get_current_user),
     db: MongoClient = Depends(dependencies.get_db),
     rabbitmq_client: BlockingChannel = Depends(dependencies.get_rabbitmq),
+    allow: bool = Depends(FileAuthorization("editor")),
 ):
     """This route will check metadata. We get the extractors run from metadata from extractors.
     Then they are resubmitted. At present parameters are not stored. This will change once Jobs are
