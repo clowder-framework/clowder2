@@ -212,7 +212,7 @@ async def update_file(
     es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
     credentials: HTTPAuthorizationCredentials = Security(security),
     rabbitmq_client: BlockingChannel = Depends(dependencies.get_rabbitmq),
-    allow: bool = Depends(FileAuthorization("editor")),
+    allow: bool = Depends(FileAuthorization("uploader")),
 ):
     # Check all connection and abort if any one of them is not available
     if db is None or fs is None or es is None:
@@ -416,7 +416,7 @@ async def get_file_extract(
     credentials: HTTPAuthorizationCredentials = Security(security),
     db: MongoClient = Depends(dependencies.get_db),
     rabbitmq_client: BlockingChannel = Depends(dependencies.get_rabbitmq),
-    allow: bool = Depends(FileAuthorization("editor")),
+    allow: bool = Depends(FileAuthorization("uploader")),
 ):
     if extractorName is None:
         raise HTTPException(status_code=400, detail=f"No extractorName specified")
