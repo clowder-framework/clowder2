@@ -93,7 +93,10 @@ def test_member_permissions(client: TestClient, headers: dict):
     assert response.status_code == 200
     assert response.json().get("id") is not None
 
-    # Add member & verify role
+    # Verify role
+    response = client.post(
+        f"{settings.API_V2_STR}/authorizations/datasets/{dataset_id}/group_role/{group_id}/viewer", headers=headers
+    )
 
     # Remove member & verify role
 
