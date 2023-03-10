@@ -511,7 +511,7 @@ async def add_folder(
     folder_in: FolderIn,
     user=Depends(get_current_user),
     db: MongoClient = Depends(dependencies.get_db),
-    allow: bool = Depends(Authorization("editor")),
+    allow: bool = Depends(Authorization("uploader")),
 ):
     if not allow:
         raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
@@ -576,7 +576,7 @@ async def delete_folder(
     db: MongoClient = Depends(dependencies.get_db),
     fs: Minio = Depends(dependencies.get_fs),
     es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
-    allow: bool = Depends(Authorization("owner")),
+    allow: bool = Depends(Authorization("editor")),
 ):
     if not allow:
         raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
@@ -636,7 +636,7 @@ async def save_file(
     es=Depends(dependencies.get_elasticsearchclient),
     rabbitmq_client: BlockingChannel = Depends(dependencies.get_rabbitmq),
     credentials: HTTPAuthorizationCredentials = Security(security),
-    allow: bool = Depends(Authorization("editor")),
+    allow: bool = Depends(Authorization("uploader")),
 ):
     if not allow:
         raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
@@ -937,7 +937,7 @@ async def get_dataset_extract(
     credentials: HTTPAuthorizationCredentials = Security(security),
     db: MongoClient = Depends(dependencies.get_db),
     rabbitmq_client: BlockingChannel = Depends(dependencies.get_rabbitmq),
-    allow: bool = Depends(Authorization("editor")),
+    allow: bool = Depends(Authorization("uploader")),
 ):
     if not allow:
         raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
