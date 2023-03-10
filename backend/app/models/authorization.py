@@ -60,6 +60,6 @@ class Provenance(BaseModel):
 
 
 class AuthorizationDB(MongoModel, AuthorizationBase, Provenance):
-    """The creator of the Authorization object is also the creator of the dataset described."""
+    """The creator of the Authorization object should also be the creator of the dataset itself."""
 
     pass

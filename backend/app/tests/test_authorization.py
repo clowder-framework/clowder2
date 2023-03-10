@@ -16,6 +16,7 @@ group_data_in = {
     "users": [member],
 }
 
+# TODO: Dynamically create this dataset in the tests
 authorization_data = {"dataset_id": "6373acfad19c970d5dab6473", "role": "editor"}
 
 
@@ -28,7 +29,7 @@ def test_create(client: TestClient, headers: dict):
 
     authorization_data["group_ids"] = [group_id]
     response = client.post(
-        f"{settings.API_V2_STR}/authorizations",
+        f"{settings.API_V2_STR}/authorizations/datasets/{authorization_data['dataset_id']}",
         json=authorization_data,
         headers=headers,
     )

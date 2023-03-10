@@ -21,24 +21,31 @@ from app.models.authorization import (
 router = APIRouter()
 
 
-@router.post("", response_model=AuthorizationDB)
+@router.post("/datasets/{dataset_id}", response_model=AuthorizationDB)
 async def save_authorization(
+    dataset_id: str,
     authorization_in: AuthorizationBase,
     user=Depends(keycloak_auth.get_current_username),
     db: MongoClient = Depends(dependencies.get_db),
+    allow: bool = Depends(Authorization("editor")),
 ):
     """Save authorization info in Mongo. This is a triple of dataset_id/user_id/role/group_id."""
 
     # Retrieve users from groups in mongo
-    user_ids: List[EmailStr] = []
+    user_ids: List[EmailStr] = authorization_in.user_ids
     group_q_list = db["groups"].find({"_id": {"$in": authorization_in.group_ids}})
-    if group_q_list is not None:
+    if len(group_q_list) == len(authorization_in.group_ids):
+        for group_q in group_q_list:
+            group = GroupOut.from_mongo(group_q)
+            for u in group.users:
+                user_ids.append(u.user.email)
+    else:
+        missing_groups = authorization_in.group_ids
         async for group_q in group_q_list:
             group = GroupOut.from_mongo(group_q)
-            user_ids = list(map(lambda user: user.user.email, group.users))
-    else:
+            missing_groups.pop(group.id)
         raise HTTPException(
-            status_code=404, detail=f"Group {authorization_in.group_ids} not found"
+            status_code=404, detail=f"Groups not found: {missing_groups}"
         )
 
     authorization_dict = authorization_in.dict()

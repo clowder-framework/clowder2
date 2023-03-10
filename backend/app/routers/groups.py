@@ -123,8 +123,11 @@ async def add_member(
                     await db["groups"].replace_one(
                         {"_id": ObjectId(group_id)}, group.to_mongo()
                     )
-                    # TODO: Add user to all affected Authorization entries
-
+                    # Add user to all affected Authorization entries
+                    await db["authorizations"].update_many(
+                        {"group_ids": ObjectId(group_id)},
+                        {"$push": {"user_ids": username}}
+                    )
                 return group
             else:
                 raise HTTPException(status_code=403, detail=f"You do not have permission to modify group {group_id}")
@@ -170,7 +173,27 @@ async def remove_member(
                     permission = True
                     break
         if permission:
-            # TODO: Remove user from all affected Authorization entries
+            # Remove user from all affected Authorization entries
+            await db["authorizations"].update_many(
+                {"group_ids": ObjectId(group_id)},
+                # $pull removes all occurrences, only remove one in case the user is also in other groups
+                {"$set": {
+                    "user_ids": {
+                        "$function": {
+                            "body": """function(user_ids) {
+                                for (var i=0; i<user_ids.length; i++) {
+                                    if (user_ids[i] == "%s") {
+                                        delete user_ids[i];
+                                        break;
+                                    }
+                                }
+                            }""" % username,
+                            "args": ["$user_ids"],
+                            "lang": "js"
+                        }
+                    }
+                }}
+            )
 
             group.users.pop(member)
             await db["groups"].replace_one(
