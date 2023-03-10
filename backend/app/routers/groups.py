@@ -60,6 +60,7 @@ async def edit_group(
         user = await db["users"].find_one({"email": user_id})
         group_dict["author"] = UserOut(**user)
         group_dict["modified"] = datetime.datetime.utcnow()
+        # TODO: Revisit this. Authorization needs to be updated here.
         group_dict["users"] = list(set(group_dict["users"]))
         try:
             group.update(group_dict)
@@ -129,8 +130,7 @@ async def add_member(
                 )
                 # Add user to all affected Authorization entries
                 await db["authorizations"].update_many(
-                    {"group_ids": ObjectId(group_id)},
-                    {"$push": {"user_ids": username}}
+                    {"group_ids": ObjectId(group_id)}, {"$push": {"user_ids": username}}
                 )
             return group
         raise HTTPException(status_code=404, detail=f"Group {group_id} not found")
@@ -146,7 +146,7 @@ async def remove_member(
     allow: bool = Depends(GroupAuthorization("editor")),
 ):
     if (
-            group_q := await db["groups"].find_one({"_id": ObjectId(group_id)})
+        group_q := await db["groups"].find_one({"_id": ObjectId(group_id)})
     ) is not None:
         group = GroupDB.from_mongo(**group_q)
 
@@ -170,27 +170,28 @@ async def remove_member(
         await db["authorizations"].update_many(
             {"group_ids": ObjectId(group_id)},
             # $pull removes all occurrences, only remove one in case the user is also in other groups
-            {"$set": {
-                "user_ids": {
-                    "$function": {
-                        "body": """function(user_ids) {
+            {
+                "$set": {
+                    "user_ids": {
+                        "$function": {
+                            "body": """function(user_ids) {
                             for (var i=0; i<user_ids.length; i++) {
                                 if (user_ids[i] == "%s") {
                                     delete user_ids[i];
                                     break;
                                 }
                             }
-                        }""" % username,
-                        "args": ["$user_ids"],
-                        "lang": "js"
+                        }"""
+                            % username,
+                            "args": ["$user_ids"],
+                            "lang": "js",
+                        }
                     }
                 }
-            }}
+            },
         )
 
         group.users.pop(member)
-        await db["groups"].replace_one(
-            {"_id": ObjectId(group_id)}, group.to_mongo()
-        )
+        await db["groups"].replace_one({"_id": ObjectId(group_id)}, group.to_mongo())
         return group
     raise HTTPException(status_code=404, detail=f"Group {group_id} not found")

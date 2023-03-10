@@ -100,13 +100,13 @@ class GroupAuthorization:
         self.role = role
 
     async def __call__(
-            self,
-            group_id: str,
-            db: MongoClient = Depends(get_db),
-            current_user: str = Depends(get_current_username),
+        self,
+        group_id: str,
+        db: MongoClient = Depends(get_db),
+        current_user: str = Depends(get_current_username),
     ):
         if (
-                group_q := await db["groups"].find_one({"_id": ObjectId(group_id)})
+            group_q := await db["groups"].find_one({"_id": ObjectId(group_id)})
         ) is not None:
             group = GroupOut.from_mongo(group_q)
             if group.creator == current_user:

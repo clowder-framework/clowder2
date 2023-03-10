@@ -5,13 +5,7 @@ from fastapi.testclient import TestClient
 from app.config import settings
 from app.dependencies import get_db
 from app.main import app
-
-user = {
-    "email": "test@test.org",
-    "password": "not_a_password",
-    "first_name": "Foo",
-    "last_name": "Bar",
-}
+from app.tests.utils import user_example
 
 
 async def override_get_db() -> Generator:
@@ -34,11 +28,11 @@ def root_path() -> str:
 
 @pytest.fixture(scope="session")
 def token(client: TestClient) -> str:
-    response = client.post(f"{settings.API_V2_STR}/users", json=user)
+    response = client.post(f"{settings.API_V2_STR}/users", json=user_example)
     assert (
         response.status_code == 200 or response.status_code == 409
     )  # 409 = user already exists
-    response = client.post(f"{settings.API_V2_STR}/login", json=user)
+    response = client.post(f"{settings.API_V2_STR}/login", json=user_example)
     assert response.status_code == 200
     token = response.json().get("token")
     assert token is not None

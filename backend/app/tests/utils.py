@@ -27,6 +27,17 @@ dataset_example = {
 }
 
 
+def create_user(client: TestClient, headers: dict, email: str = user_alt["email"]):
+    """Create additional users e.g. for permissions testing (defaults to test2 user)"""
+    u = dict(user_alt)
+    u["email"] = email
+    response = client.post(f"{settings.API_V2_STR}/users", json=u)
+    assert (
+        response.status_code == 200 or response.status_code == 409
+    )  # 409 = user already exists
+    return response.json()
+
+
 def create_group(client: TestClient, headers: dict):
     """Creates a test group (creator will be auto-added to members) and returns the ID."""
     response = client.post(

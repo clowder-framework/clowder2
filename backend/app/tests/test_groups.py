@@ -1,6 +1,9 @@
 from fastapi.testclient import TestClient
 from app.config import settings
-from app.tests.utils import create_dataset, create_group, user_alt
+from app.tests.utils import create_dataset, create_group, user_alt, create_user
+from app.models.pyobjectid import PyObjectId
+from app.models.authorization import AuthorizationDB
+
 
 member_alt = {"user": user_alt, "editor": False}
 
@@ -28,7 +31,9 @@ def test_edit_group(client: TestClient, headers: dict):
 
 def test_add_and_remove_member(client: TestClient, headers: dict):
     new_group = create_group(client, headers)
+
     # adding new member
+    create_user(client, headers)
     new_group["users"].append(member_alt)
     response = client.post(
         f"{settings.API_V2_STR}/groups", headers=headers, json=new_group
@@ -40,7 +45,6 @@ def test_add_and_remove_member(client: TestClient, headers: dict):
     new_group = response.json()
     new_group["users"].pop()
 
-    # TODO add a put endpoint for this
     response = client.post(
         f"{settings.API_V2_STR}/groups", headers=headers, json=new_group
     )
@@ -65,10 +69,12 @@ def test_search_group(client: TestClient, headers: dict):
     assert response.status_code == 200
 
 
-# TODO: Make group, add 2 users, grant them permission on dataset, add & remove user from group
 def test_member_permissions(client: TestClient, headers: dict):
     new_group = create_group(client, headers)
-    # adding new member
+    group_id = new_group.get("id")
+
+    # adding new group member
+    create_user(client, headers)
     new_group["users"].append(member_alt)
     response = client.post(
         f"{settings.API_V2_STR}/groups", headers=headers, json=new_group
@@ -77,19 +83,24 @@ def test_member_permissions(client: TestClient, headers: dict):
     assert response.json().get("id") is not None
 
     # Create a dataset
-    dataset_id = create_dataset(client, headers).get("id")
+    dataset = create_dataset(client, headers)
+    dataset_id = dataset.get("id")
 
     # Add group authorization to dataset
+    response = client.post(
+        f"{settings.API_V2_STR}/authorizations/datasets/{dataset_id}/group_role/{group_id}/viewer", headers=headers
+    )
+    assert response.status_code == 200
+    assert response.json().get("id") is not None
 
     # Add member & verify role
 
     # Remove member & verify role
 
     # removing member
-    new_group = response.json()
-    new_group["users"].pop()
+    # new_group = response.json()
+    # new_group["users"].pop()
 
-    # TODO add a put endpoint for this
     response = client.post(
         f"{settings.API_V2_STR}/groups", headers=headers, json=new_group
     )

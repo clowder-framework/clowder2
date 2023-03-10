@@ -6,11 +6,13 @@ from pydantic.networks import EmailStr
 from pymongo import MongoClient
 from bson import ObjectId
 
-from app import keycloak_auth, dependencies
+from app import dependencies
+from app.keycloak_auth import get_current_username, get_user
 from app.dependencies import get_db
-from app.models.groups import GroupOut, GroupDB, GroupBase
-from app.deps.authorization_deps import Authorization, get_role, get_role_by_file
-from app.keycloak_auth import get_current_username
+from app.deps.authorization_deps import Authorization, get_role_by_file
+from app.models.pyobjectid import PyObjectId
+from app.models.groups import GroupOut
+from app.models.datasets import DatasetOut
 from app.models.authorization import (
     AuthorizationBase,
     AuthorizationFile,
@@ -25,7 +27,7 @@ router = APIRouter()
 async def save_authorization(
     dataset_id: str,
     authorization_in: AuthorizationBase,
-    user=Depends(keycloak_auth.get_current_username),
+    user=Depends(get_current_username),
     db: MongoClient = Depends(dependencies.get_db),
     allow: bool = Depends(Authorization("editor")),
 ):
@@ -111,3 +113,76 @@ async def get_file_role(
 ):
     """Retrieve role of user for an individual file. Role cannot change between file versions."""
     return role
+
+
+@router.post(
+    "/datasets/{dataset_id}/group_role/{group_id}/{role}",
+    response_model=AuthorizationDB,
+)
+async def set_group_role(
+    dataset_id: str,
+    group_id: str,
+    role: RoleType,
+    db: MongoClient = Depends(get_db),
+    user_id=Depends(get_user),
+    allow: bool = Depends(Authorization("editor")),
+):
+    if (
+        dataset_q := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
+    ) is not None:
+        dataset = DatasetOut.from_mongo(dataset_q)
+        if (
+            group_q := await db["groups"].find_one({"_id": ObjectId(group_id)})
+        ) is not None:
+            group = GroupOut.from_mongo(group_q)
+            if (
+                auth_q := await db["authorization"].find_one(
+                    {"dataset_id": ObjectId(dataset_id), "role": role}
+                )
+            ) is not None:
+                # Update if it already exists
+                auth_db = AuthorizationDB.from_mongo(auth_q)
+                auth_db.group_ids.append(ObjectId(group_id))
+                for u in group.users:
+                    auth_db.user_ids.append(u.user.email)
+                await db["authorization"].replace_one(
+                    {"_id": auth_db.id}, auth_db.to_mongo()
+                )
+                return auth_db
+            else:
+                # Create a new entry
+                auth_db = AuthorizationDB(
+                    creator=user_id,
+                    dataset_id=PyObjectId(dataset_id),
+                    role=role,
+                    group_ids=[PyObjectId(group_id)],
+                )
+                await db["authorization"].insert_one(auth_db.to_mongo())
+                return auth_db
+        else:
+            raise HTTPException(status_code=404, detail=f"Group {group_id} not found")
+    else:
+        raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
+
+
+@router.post(
+    "/datasets/{dataset_id}/user_role/{username}/{role}", response_model=AuthorizationDB
+)
+async def set_user_role(
+    dataset_id: str,
+    username: str,
+    role: RoleType,
+    allow: bool = Depends(Authorization("editor")),
+):
+    if role not in ["editor", "member"]:
+        raise HTTPException(
+            status_code=403, detail="Group role must either be member or owner."
+        )
+    # TODO: Verify dataset, user exist
+    authorization_db = AuthorizationDB(
+        dataset_id=PyObjectId(dataset_id), role=role, user_ids=[username]
+    )
+    # TODO: Update if it already exists
+    new_authorization = await db["authorization"].insert_one(
+        authorization_db.to_mongo()
+    )
