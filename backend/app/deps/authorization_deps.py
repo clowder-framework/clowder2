@@ -106,23 +106,32 @@ class MetadataAuthorization:
         db: MongoClient = Depends(get_db),
         current_user: str = Depends(get_current_username),
     ):
-        if (metadata := await db["metadata"].find_one({"_id": ObjectId(metadata_id)})) is not None:
+        if (
+            metadata := await db["metadata"].find_one({"_id": ObjectId(metadata_id)})
+        ) is not None:
             md_out = MetadataOut.from_mongo(metadata)
             resource_type = md_out.resource.collection
             resource_id = md_out.resource.resource_id
             if resource_type == "files":
                 if (
-                        file := await db["files"].find_one({"_id": ObjectId(resource_id)})
+                    file := await db["files"].find_one({"_id": ObjectId(resource_id)})
                 ) is not None:
                     file_out = FileOut.from_mongo(file)
-                    if (authorization_q := await db["authorization"].find_one(
+                    if (
+                        authorization_q := await db["authorization"].find_one(
                             {
                                 "$and": [
                                     {"dataset_id": ObjectId(file_out.dataset_id)},
-                                    {"$or": [{"creator": current_user}, {"user_ids": current_user}]},
+                                    {
+                                        "$or": [
+                                            {"creator": current_user},
+                                            {"user_ids": current_user},
+                                        ]
+                                    },
                                 ]
                             }
-                    )) is not None:
+                        )
+                    ) is not None:
                         authorization = AuthorizationDB.from_mongo(authorization_q)
                         if access(authorization.role, self.role):
                             return True
@@ -132,19 +141,30 @@ class MetadataAuthorization:
                         detail=f"User `{current_user} does not have `{self.role}` permission on metadata {metadata_id}",
                     )
                 else:
-                    raise HTTPException(status_code=404, detail=f"Metadata {metadata_id} not found")
+                    raise HTTPException(
+                        status_code=404, detail=f"Metadata {metadata_id} not found"
+                    )
             elif resource_type == "datasets":
                 if (
-                        dataset := await db["datasets"].find_one({"_id": ObjectId(resource_id)})
+                    dataset := await db["datasets"].find_one(
+                        {"_id": ObjectId(resource_id)}
+                    )
                 ) is not None:
-                    if (authorization_q := await db["authorization"].find_one(
+                    if (
+                        authorization_q := await db["authorization"].find_one(
                             {
                                 "$and": [
                                     {"dataset_id": ObjectId(dataset.dataset_id)},
-                                    {"$or": [{"creator": current_user}, {"user_ids": current_user}]},
+                                    {
+                                        "$or": [
+                                            {"creator": current_user},
+                                            {"user_ids": current_user},
+                                        ]
+                                    },
                                 ]
                             }
-                    )) is not None:
+                        )
+                    ) is not None:
                         authorization = AuthorizationDB.from_mongo(authorization_q)
                         if access(authorization.role, self.role):
                             return True
@@ -154,7 +174,9 @@ class MetadataAuthorization:
                         detail=f"User `{current_user} does not have `{self.role}` permission on metadata {metadata_id}",
                     )
                 else:
-                    raise HTTPException(status_code=404, detail=f"Metadata {metadata_id} not found")
+                    raise HTTPException(
+                        status_code=404, detail=f"Metadata {metadata_id} not found"
+                    )
 
 
 def access(user_role: RoleType, role_required: RoleType) -> bool:
