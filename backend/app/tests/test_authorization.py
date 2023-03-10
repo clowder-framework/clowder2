@@ -8,7 +8,7 @@ user = {
     "last_name": "Bar",
 }
 
-member = {"user": user, "is_owner": True}
+member = {"user": user, "editor": True}
 
 group_data_in = {
     "name": "first group",

@@ -10,7 +10,7 @@ from app.models.authorization import Provenance
 
 class Member(BaseModel):
     user: UserOut
-    isOwner: bool = False
+    editor: bool = False
 
 
 class GroupBase(BaseModel):
@@ -24,6 +24,7 @@ class GroupIn(GroupBase):
 
 
 class GroupPatch(BaseModel):
+    id: str
     name: Optional[str]
     description: Optional[str]
 

@@ -34,12 +34,13 @@ async def save_authorization(
     # Retrieve users from groups in mongo
     user_ids: List[EmailStr] = authorization_in.user_ids
     group_q_list = db["groups"].find({"_id": {"$in": authorization_in.group_ids}})
-    if len(group_q_list) == len(authorization_in.group_ids):
-        for group_q in group_q_list:
-            group = GroupOut.from_mongo(group_q)
-            for u in group.users:
-                user_ids.append(u.user.email)
-    else:
+    found_groups = 0
+    async for group_q in group_q_list:
+        found_groups += 1
+        group = GroupOut.from_mongo(group_q)
+        for u in group.users:
+            user_ids.append(u.user.email)
+    if found_groups != len(authorization_in.group_ids):
         missing_groups = authorization_in.group_ids
         async for group_q in group_q_list:
             group = GroupOut.from_mongo(group_q)

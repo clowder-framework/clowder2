@@ -7,6 +7,7 @@ from fastapi.routing import APIRouter
 from pymongo.mongo_client import MongoClient
 
 from app import dependencies
+from app.deps.authorization_deps import GroupAuthorization
 from app.keycloak_auth import get_current_user
 from app.models.groups import GroupOut, GroupIn, GroupDB, GroupBase, Member
 from app.models.users import UserOut
@@ -38,12 +39,13 @@ async def get_group(group_id: str, db: MongoClient = Depends(dependencies.get_db
     raise HTTPException(status_code=404, detail=f"Group {group_id} not found")
 
 
-@router.post("/{group_id}", response_model=GroupOut)
+@router.put("", response_model=GroupOut)
 async def edit_group(
     group_id: str,
     group_info: GroupBase,
     user_id=Depends(get_user),
     db: MongoClient = Depends(dependencies.get_db),
+    allow: bool = Depends(GroupAuthorization("editor")),
 ):
     if (group := await db["groups"].find_one({"_id": ObjectId(group_id)})) is not None:
         group_dict = dict(group_info) if group_info is not None else {}
@@ -71,7 +73,11 @@ async def edit_group(
 
 
 @router.delete("/{group_id}")
-async def delete_group(group_id: str, db: MongoClient = Depends(dependencies.get_db)):
+async def delete_group(
+    group_id: str,
+    db: MongoClient = Depends(dependencies.get_db),
+    allow: bool = Depends(GroupAuthorization("owner")),
+):
     if (group := await db["groups"].find_one({"_id": ObjectId(group_id)})) is not None:
         await db["groups"].delete_one({"_id": ObjectId(group_id)})
         return {"deleted": group_id}
@@ -102,6 +108,7 @@ async def add_member(
     username: str,
     user=Depends(get_user),
     db: MongoClient = Depends(dependencies.get_db),
+    allow: bool = Depends(GroupAuthorization("editor")),
 ):
     if (user_q := await db["users"].find_one({"email": username})) is not None:
         new_member = Member(user=UserOut.from_mongo(user_q))
@@ -110,27 +117,22 @@ async def add_member(
         ) is not None:
             group = GroupDB.from_mongo(**group_q)
             found_already = False
-            permission = False
             for u in group.users:
                 if u.user.email == username:
                     found_already = True
-                if u.user.email == user.email and u.isOwner:
-                    # TODO: Add GroupAuthorization dependency instead of checking ownership here
-                    permission = True
-            if permission:
-                if not found_already:
-                    group.users.append(new_member)
-                    await db["groups"].replace_one(
-                        {"_id": ObjectId(group_id)}, group.to_mongo()
-                    )
-                    # Add user to all affected Authorization entries
-                    await db["authorizations"].update_many(
-                        {"group_ids": ObjectId(group_id)},
-                        {"$push": {"user_ids": username}}
-                    )
-                return group
-            else:
-                raise HTTPException(status_code=403, detail=f"You do not have permission to modify group {group_id}")
+                    break
+            if not found_already:
+                # If user is already in the group, skip this part and return as-is
+                group.users.append(new_member)
+                await db["groups"].replace_one(
+                    {"_id": ObjectId(group_id)}, group.to_mongo()
+                )
+                # Add user to all affected Authorization entries
+                await db["authorizations"].update_many(
+                    {"group_ids": ObjectId(group_id)},
+                    {"$push": {"user_ids": username}}
+                )
+            return group
         raise HTTPException(status_code=404, detail=f"Group {group_id} not found")
     raise HTTPException(status_code=404, detail=f"User {username} not found")
 
@@ -141,6 +143,7 @@ async def remove_member(
     username: str,
     user=Depends(get_user),
     db: MongoClient = Depends(dependencies.get_db),
+    allow: bool = Depends(GroupAuthorization("editor")),
 ):
     if (
             group_q := await db["groups"].find_one({"_id": ObjectId(group_id)})
@@ -153,7 +156,7 @@ async def remove_member(
         member = None
         for u in group.users:
             if u.user.email == username:
-                if u.isOwner:
+                if u.editor:
                     found_owner = True
                     member = u
                 else:
@@ -163,43 +166,31 @@ async def remove_member(
             # TODO: Should this throw an error instead? Either way, the user is removed in the end...
             return group
 
-        # Check if we have permission to remove them - creator can remove owners, owners can remove other members
-        permission = False
-        if found_owner and group.creator == user.email:
-            permission = True
-        elif found_member:
-            for u in group.users:
-                if u.user.email == user.email and u.isOwner:
-                    permission = True
-                    break
-        if permission:
-            # Remove user from all affected Authorization entries
-            await db["authorizations"].update_many(
-                {"group_ids": ObjectId(group_id)},
-                # $pull removes all occurrences, only remove one in case the user is also in other groups
-                {"$set": {
-                    "user_ids": {
-                        "$function": {
-                            "body": """function(user_ids) {
-                                for (var i=0; i<user_ids.length; i++) {
-                                    if (user_ids[i] == "%s") {
-                                        delete user_ids[i];
-                                        break;
-                                    }
+        # Remove user from all affected Authorization entries
+        await db["authorizations"].update_many(
+            {"group_ids": ObjectId(group_id)},
+            # $pull removes all occurrences, only remove one in case the user is also in other groups
+            {"$set": {
+                "user_ids": {
+                    "$function": {
+                        "body": """function(user_ids) {
+                            for (var i=0; i<user_ids.length; i++) {
+                                if (user_ids[i] == "%s") {
+                                    delete user_ids[i];
+                                    break;
                                 }
-                            }""" % username,
-                            "args": ["$user_ids"],
-                            "lang": "js"
-                        }
+                            }
+                        }""" % username,
+                        "args": ["$user_ids"],
+                        "lang": "js"
                     }
-                }}
-            )
+                }
+            }}
+        )
 
-            group.users.pop(member)
-            await db["groups"].replace_one(
-                {"_id": ObjectId(group_id)}, group.to_mongo()
-            )
-            return group
-        else:
-            raise HTTPException(status_code=403, detail=f"You do not have permission to modify group {group_id}")
+        group.users.pop(member)
+        await db["groups"].replace_one(
+            {"_id": ObjectId(group_id)}, group.to_mongo()
+        )
+        return group
     raise HTTPException(status_code=404, detail=f"Group {group_id} not found")
