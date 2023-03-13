@@ -38,6 +38,17 @@ def create_user(client: TestClient, headers: dict, email: str = user_alt["email"
     return response.json()
 
 
+def get_user_token(client: TestClient, headers: dict, email: str = user_alt["email"]):
+    """Get a token header for one of the testing users."""
+    u = dict(user_alt)
+    u["email"] = email
+    response = client.post(f"{settings.API_V2_STR}/login", json=u)
+    assert response.status_code == 200
+    token = response.json().get("token")
+    assert token is not None
+    return {"Authorization": "Bearer " + token}
+
+
 def create_group(client: TestClient, headers: dict):
     """Creates a test group (creator will be auto-added to members) and returns the ID."""
     response = client.post(

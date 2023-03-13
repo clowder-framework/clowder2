@@ -103,11 +103,10 @@ async def search_group(
     return groups
 
 
-@router.patch("/{group_id}/add/{username}")
+@router.post("/{group_id}/add/{username}")
 async def add_member(
     group_id: str,
     username: str,
-    user=Depends(get_user),
     db: MongoClient = Depends(dependencies.get_db),
     allow: bool = Depends(GroupAuthorization("editor")),
 ):
@@ -116,7 +115,7 @@ async def add_member(
         if (
             group_q := await db["groups"].find_one({"_id": ObjectId(group_id)})
         ) is not None:
-            group = GroupDB.from_mongo(**group_q)
+            group = GroupDB.from_mongo(group_q)
             found_already = False
             for u in group.users:
                 if u.user.email == username:
@@ -137,11 +136,10 @@ async def add_member(
     raise HTTPException(status_code=404, detail=f"User {username} not found")
 
 
-@router.patch("/{group_id}/remove/{username}")
+@router.post("/{group_id}/remove/{username}")
 async def remove_member(
     group_id: str,
     username: str,
-    user=Depends(get_user),
     db: MongoClient = Depends(dependencies.get_db),
     allow: bool = Depends(GroupAuthorization("editor")),
 ):

@@ -151,11 +151,15 @@ async def set_group_role(
                 return auth_db
             else:
                 # Create a new entry
+                user_ids = []
+                for u in group.users:
+                    user_ids.append(u.user.email)
                 auth_db = AuthorizationDB(
                     creator=user_id,
                     dataset_id=PyObjectId(dataset_id),
                     role=role,
                     group_ids=[PyObjectId(group_id)],
+                    user_ids=user_ids
                 )
                 await db["authorization"].insert_one(auth_db.to_mongo())
                 return auth_db
