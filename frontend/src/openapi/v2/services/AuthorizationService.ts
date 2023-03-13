@@ -4,6 +4,7 @@
 import type { AuthorizationBase } from '../models/AuthorizationBase';
 import type { AuthorizationDB } from '../models/AuthorizationDB';
 import type { AuthorizationFile } from '../models/AuthorizationFile';
+import type { AuthorizationMetadata } from '../models/AuthorizationMetadata';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { request as __request } from '../core/request';
 
@@ -102,6 +103,25 @@ export class AuthorizationService {
         return __request({
             method: 'GET',
             path: `/api/v2/authorizations/files/${fileId}/role`,
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+
+    /**
+     * Get Metadata Role
+     * Retrieve role of user for metadata. Role cannot change between metadata versions.
+     * @param metadataId
+     * @returns AuthorizationMetadata Successful Response
+     * @throws ApiError
+     */
+    public static getMetadataRoleApiV2AuthorizationsMetadataMetadataIdRoleGet(
+        metadataId: string,
+    ): CancelablePromise<AuthorizationMetadata> {
+        return __request({
+            method: 'GET',
+            path: `/api/v2/authorizations/metadata/${metadataId}/role`,
             errors: {
                 422: `Validation Error`,
             },
