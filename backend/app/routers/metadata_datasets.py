@@ -141,7 +141,7 @@ async def replace_dataset_metadata(
     user=Depends(get_current_user),
     db: MongoClient = Depends(dependencies.get_db),
     es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
-    allow: bool = Depends(DatasetAuthorization("editor")),
+    allow: bool = Depends(Authorization("editor")),
 ):
     """Update metadata. Any fields provided in the contents JSON will be added or updated in the metadata. If context or
     agent should be changed, use PUT.
@@ -197,7 +197,7 @@ async def update_dataset_metadata(
     user=Depends(get_current_user),
     db: MongoClient = Depends(dependencies.get_db),
     es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
-    allow: bool = Depends(DatasetAuthorization("editor")),
+    allow: bool = Depends(Authorization("editor")),
 ):
     """Update metadata. Any fields provided in the contents JSON will be added or updated in the metadata. If context or
     agent should be changed, use PUT.
@@ -272,7 +272,7 @@ async def get_dataset_metadata(
     listener_version: Optional[float] = Form(None),
     user=Depends(get_current_user),
     db: MongoClient = Depends(dependencies.get_db),
-    allow: bool = Depends(DatasetAuthorization("viewer")),
+    allow: bool = Depends(Authorization("viewer")),
 ):
     if (
         dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
@@ -308,7 +308,7 @@ async def delete_dataset_metadata(
     user=Depends(get_current_user),
     db: MongoClient = Depends(dependencies.get_db),
     es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
-    allow: bool = Depends(DatasetAuthorization("editor")),
+    allow: bool = Depends(Authorization("editor")),
 ):
     if (
         dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
