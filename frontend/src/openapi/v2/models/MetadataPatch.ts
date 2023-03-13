@@ -8,7 +8,7 @@ import type { LegacyEventListenerIn } from './LegacyEventListenerIn';
 
 export type MetadataPatch = {
     id?: string;
-    context?: any;
+    context?: Array<string>;
     context_url?: string;
     definition?: string;
     content: any;

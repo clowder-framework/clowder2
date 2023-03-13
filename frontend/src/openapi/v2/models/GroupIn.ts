@@ -5,7 +5,7 @@
 import type { Member } from './Member';
 
 export type GroupIn = {
-    name?: string;
+    name: string;
     description?: string;
-    userList?: Array<Member>;
+    users?: Array<Member>;
 }
