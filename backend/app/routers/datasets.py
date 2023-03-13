@@ -297,7 +297,7 @@ async def get_dataset_files(
     folder_id: Optional[str] = None,
     user_id=Depends(get_user),
     db: MongoClient = Depends(dependencies.get_db),
-    allow: bool = Depends(DatasetAuthorization("viewer")),
+    allow: bool = Depends(Authorization("viewer")),
     skip: int = 0,
     limit: int = 10,
 ):
