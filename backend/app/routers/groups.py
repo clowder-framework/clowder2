@@ -121,7 +121,7 @@ async def add_member(
                     found_already = True
                     break
             if not found_already:
-                # If user is already in the group, skip this part and return as-is
+                # If user is already in the group, this part is skipped
                 group.users.append(new_member)
                 await db["groups"].replace_one(
                     {"_id": ObjectId(group_id)}, group.to_mongo()

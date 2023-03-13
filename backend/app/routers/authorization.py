@@ -13,6 +13,7 @@ from app.deps.authorization_deps import Authorization, get_role_by_file
 from app.models.pyobjectid import PyObjectId
 from app.models.groups import GroupOut
 from app.models.datasets import DatasetOut
+from app.models.users import UserOut
 from app.models.authorization import (
     AuthorizationBase,
     AuthorizationFile,
@@ -176,17 +177,46 @@ async def set_user_role(
     dataset_id: str,
     username: str,
     role: RoleType,
+    db: MongoClient = Depends(get_db),
+    user_id=Depends(get_user),
     allow: bool = Depends(Authorization("editor")),
 ):
-    if role not in ["editor", "member"]:
-        raise HTTPException(
-            status_code=403, detail="Group role must either be member or owner."
-        )
-    # TODO: Verify dataset, user exist
-    authorization_db = AuthorizationDB(
-        dataset_id=PyObjectId(dataset_id), role=role, user_ids=[username]
-    )
-    # TODO: Update if it already exists
-    new_authorization = await db["authorization"].insert_one(
-        authorization_db.to_mongo()
-    )
+    if (
+        dataset_q := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
+    ) is not None:
+        dataset = DatasetOut.from_mongo(dataset_q)
+        if (
+            user_q := await db["users"].find_one({"email": username})
+        ) is not None:
+            if role not in ["editor", "member"]:
+                raise HTTPException(
+                    status_code=403, detail="Group role must either be member or owner."
+                )
+
+            if (
+                auth_q := await db["authorization"].find_one(
+                    {"dataset_id": ObjectId(dataset_id), "role": role}
+                )
+            ) is not None:
+                # Update if it already exists
+                auth_db = AuthorizationDB.from_mongo(auth_q)
+                auth_db.user_ids.append(username)
+                await db["authorization"].replace_one(
+                    {"_id": auth_db.id}, auth_db.to_mongo()
+                )
+                return auth_db
+            else:
+                # Create a new entry
+                auth_db = AuthorizationDB(
+                    creator=user_id,
+                    dataset_id=PyObjectId(dataset_id),
+                    role=role,
+                    user_ids=[username]
+                )
+                await db["authorization"].insert_one(auth_db.to_mongo())
+                return auth_db
+
+        else:
+            raise HTTPException(status_code=404, detail=f"User {username} not found")
+    else:
+        raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
