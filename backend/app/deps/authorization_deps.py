@@ -7,6 +7,8 @@ from app.keycloak_auth import get_current_username
 from app.models.authorization import RoleType, AuthorizationDB
 from app.models.files import FileOut
 from app.models.groups import GroupOut
+from app.models.metadata import MetadataOut
+from app.models.datasets import DatasetOut
 
 
 async def get_role(
@@ -47,6 +49,59 @@ async def get_role_by_file(
         return role
 
     raise HTTPException(status_code=404, detail=f"File {file_id} not found")
+
+
+async def get_role_by_metadata(
+    metadata_id: str,
+    db: MongoClient = Depends(get_db),
+    current_user=Depends(get_current_username),
+) -> RoleType:
+    if (
+        metadata := await db["metadata"].find_one({"_id": ObjectId(metadata_id)})
+    ) is not None:
+        md_out = MetadataOut.from_mongo(metadata)
+        resource_type = md_out.resource.collection
+        resource_id = md_out.resource.resource_id
+        if resource_type == "files":
+            if (
+                file := await db["files"].find_one({"_id": ObjectId(resource_id)})
+            ) is not None:
+                file_out = FileOut.from_mongo(file)
+                authorization = await db["authorization"].find_one(
+                    {
+                        "$and": [
+                            {"dataset_id": ObjectId(file_out.dataset_id)},
+                            {
+                                "$or": [
+                                    {"creator": current_user},
+                                    {"user_ids": current_user},
+                                ]
+                            },
+                        ]
+                    }
+                )
+                role = AuthorizationDB.from_mongo(authorization).role
+                return role
+        elif resource_type == "datasets":
+            if (
+                dataset := await db["datasets"].find_one({"_id": ObjectId(resource_id)})
+            ) is not None:
+                dataset_out = DatasetOut.from_mongo(dataset)
+                authorization = await db["authorization"].find_one(
+                    {
+                        "$and": [
+                            {"dataset_id": ObjectId(dataset_out.dataset_id)},
+                            {
+                                "$or": [
+                                    {"creator": current_user},
+                                    {"user_ids": current_user},
+                                ]
+                            },
+                        ]
+                    }
+                )
+                role = AuthorizationDB.from_mongo(authorization).role
+                return role
 
 
 class Authorization:
@@ -91,6 +146,48 @@ class Authorization:
                 status_code=403,
                 detail=f"User `{current_user} does not have `{self.role}` permission on dataset {dataset_id}",
             )
+
+
+class FileAuthorization:
+    """We use class dependency so that we can provide the `permission` parameter to the dependency.
+    For more info see https://fastapi.tiangolo.com/advanced/advanced-dependencies/."""
+
+    def __init__(self, role: str):
+        self.role = role
+
+    async def __call__(
+        self,
+        file_id: str,
+        db: MongoClient = Depends(get_db),
+        current_user: str = Depends(get_current_username),
+    ):
+        if (file := await db["files"].find_one({"_id": ObjectId(file_id)})) is not None:
+            file_out = FileOut.from_mongo(file)
+            if (
+                authorization_q := await db["authorization"].find_one(
+                    {
+                        "$and": [
+                            {"dataset_id": ObjectId(file_out.dataset_id)},
+                            {
+                                "$or": [
+                                    {"creator": current_user},
+                                    {"user_ids": current_user},
+                                ]
+                            },
+                        ]
+                    }
+                )
+            ) is not None:
+                authorization = AuthorizationDB.from_mongo(authorization_q)
+                if access(authorization.role, self.role):
+                    return True
+
+            raise HTTPException(
+                status_code=403,
+                detail=f"User `{current_user} does not have `{self.role}` permission on file {file_id}",
+            )
+        else:
+            raise HTTPException(status_code=404, detail=f"File {file_id} not found")
 
 
 class GroupAuthorization:

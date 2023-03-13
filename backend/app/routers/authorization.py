@@ -9,14 +9,19 @@ from bson import ObjectId
 from app import dependencies
 from app.keycloak_auth import get_current_username, get_user
 from app.dependencies import get_db
-from app.deps.authorization_deps import Authorization, get_role_by_file
 from app.models.pyobjectid import PyObjectId
-from app.models.groups import GroupOut
 from app.models.datasets import DatasetOut
-from app.models.users import UserOut
+from app.models.groups import GroupOut, GroupDB, GroupBase
+from app.deps.authorization_deps import (
+    Authorization,
+    get_role,
+    get_role_by_file,
+    get_role_by_metadata,
+)
 from app.models.authorization import (
     AuthorizationBase,
     AuthorizationFile,
+    AuthorizationMetadata,
     AuthorizationDB,
     RoleType,
 )
@@ -218,3 +223,13 @@ async def set_user_role(
             raise HTTPException(status_code=404, detail=f"User {username} not found")
     else:
         raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
+
+
+@router.get("/metadata/{metadata_id}/role", response_model=AuthorizationMetadata)
+async def get_metadata_role(
+    metadata_id: str,
+    current_user=Depends(get_current_username),
+    role: RoleType = Depends(get_role_by_metadata),
+):
+    """Retrieve role of user for metadata. Role cannot change between metadata versions."""
+    return role

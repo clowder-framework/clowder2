@@ -46,6 +46,16 @@ class AuthorizationFile(BaseModel):
         use_enum_values = True
 
 
+class AuthorizationMetadata(BaseModel):
+    metadata_id: PyObjectId
+    user_id: EmailStr
+    role: RoleType
+
+    class Config:
+        # required for Enum to properly work
+        use_enum_values = True
+
+
 class Provenance(BaseModel):
     """Store user who created model, when and last time it was updated.
     TODO: this generic model should be moved to a global util module in models for all those models that want to
