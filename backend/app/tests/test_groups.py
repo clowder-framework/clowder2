@@ -1,6 +1,12 @@
 from fastapi.testclient import TestClient
 from app.config import settings
-from app.tests.utils import create_dataset, create_group, user_alt, create_user, get_user_token
+from app.tests.utils import (
+    create_dataset,
+    create_group,
+    user_alt,
+    create_user,
+    get_user_token,
+)
 from app.models.pyobjectid import PyObjectId
 from app.models.authorization import AuthorizationDB
 
@@ -44,7 +50,8 @@ def test_member_permissions(client: TestClient, headers: dict):
     create_user(client, headers)
     new_group["users"].append(member_alt)
     response = client.post(
-        f"{settings.API_V2_STR}/groups/{group_id}/add/{member_alt['user']['email']}", headers=headers
+        f"{settings.API_V2_STR}/groups/{group_id}/add/{member_alt['user']['email']}",
+        headers=headers,
     )
     assert response.status_code == 200
     assert response.json().get("id") is not None
@@ -55,7 +62,8 @@ def test_member_permissions(client: TestClient, headers: dict):
 
     # Add group authorization to dataset
     response = client.post(
-        f"{settings.API_V2_STR}/authorizations/datasets/{dataset_id}/group_role/{group_id}/viewer", headers=headers
+        f"{settings.API_V2_STR}/authorizations/datasets/{dataset_id}/group_role/{group_id}/viewer",
+        headers=headers,
     )
     assert response.status_code == 200
     assert response.json().get("id") is not None
@@ -63,7 +71,8 @@ def test_member_permissions(client: TestClient, headers: dict):
     # Verify role
     u_headers = get_user_token(client, headers)
     response = client.get(
-        f"{settings.API_V2_STR}/authorizations/datasets/{dataset_id}/role", headers=u_headers
+        f"{settings.API_V2_STR}/authorizations/datasets/{dataset_id}/role",
+        headers=u_headers,
     )
     assert response.status_code == 200
     assert response.json().get("id") is not None
@@ -71,11 +80,13 @@ def test_member_permissions(client: TestClient, headers: dict):
 
     # Remove group member & verify no more role
     response = client.post(
-        f"{settings.API_V2_STR}/groups/{group_id}/remove/{member_alt['user']['email']}", headers=headers
+        f"{settings.API_V2_STR}/groups/{group_id}/remove/{member_alt['user']['email']}",
+        headers=headers,
     )
     assert response.status_code == 200
     assert response.json().get("id") is not None
     response = client.get(
-        f"{settings.API_V2_STR}/authorizations/datasets/{dataset_id}/role", headers=u_headers
+        f"{settings.API_V2_STR}/authorizations/datasets/{dataset_id}/role",
+        headers=u_headers,
     )
     assert response.status_code == 404

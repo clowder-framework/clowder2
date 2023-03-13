@@ -157,21 +157,15 @@ async def remove_member(
             return group
 
         # Remove user from all affected Authorization entries
-        async for auth_q in db["authorization"].find(
-                {"group_ids": ObjectId(group_id)}
-        ):
+        async for auth_q in db["authorization"].find({"group_ids": ObjectId(group_id)}):
             auth = AuthorizationDB.from_mongo(auth_q)
             auth.user_ids.remove(username)
             auth.group_ids.remove(ObjectId(group_id))
-            await db["authorization"].replace_one(
-                {"_id": auth.id}, auth.to_mongo()
-            )
+            await db["authorization"].replace_one({"_id": auth.id}, auth.to_mongo())
 
         # Update group itself
         group.users.remove(found_user)
-        await db["groups"].replace_one(
-            {"_id": ObjectId(group_id)}, group.to_mongo()
-        )
+        await db["groups"].replace_one({"_id": ObjectId(group_id)}, group.to_mongo())
 
         return group
     raise HTTPException(status_code=404, detail=f"Group {group_id} not found")

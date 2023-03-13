@@ -160,7 +160,7 @@ async def set_group_role(
                     dataset_id=PyObjectId(dataset_id),
                     role=role,
                     group_ids=[PyObjectId(group_id)],
-                    user_ids=user_ids
+                    user_ids=user_ids,
                 )
                 await db["authorization"].insert_one(auth_db.to_mongo())
                 return auth_db
@@ -185,9 +185,7 @@ async def set_user_role(
         dataset_q := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
     ) is not None:
         dataset = DatasetOut.from_mongo(dataset_q)
-        if (
-            user_q := await db["users"].find_one({"email": username})
-        ) is not None:
+        if (user_q := await db["users"].find_one({"email": username})) is not None:
             if role not in ["editor", "member"]:
                 raise HTTPException(
                     status_code=403, detail="Group role must either be member or owner."
@@ -211,7 +209,7 @@ async def set_user_role(
                     creator=user_id,
                     dataset_id=PyObjectId(dataset_id),
                     role=role,
-                    user_ids=[username]
+                    user_ids=[username],
                 )
                 await db["authorization"].insert_one(auth_db.to_mongo())
                 return auth_db
