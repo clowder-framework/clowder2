@@ -1,13 +1,12 @@
 from datetime import datetime
 from http.client import HTTPException
-
 from bson.objectid import ObjectId
 from fastapi.params import Depends
 from fastapi.routing import APIRouter
 from pymongo.mongo_client import MongoClient
 
 from app import dependencies
-from app.deps.authorization_deps import GroupAuthorization
+from app.deps.authorization_deps import AuthorizationDB, GroupAuthorization
 from app.keycloak_auth import get_current_user
 from app.models.groups import GroupOut, GroupIn, GroupDB, GroupBase, Member
 from app.models.users import UserOut
@@ -128,7 +127,7 @@ async def add_member(
                     {"_id": ObjectId(group_id)}, group.to_mongo()
                 )
                 # Add user to all affected Authorization entries
-                await db["authorizations"].update_many(
+                await db["authorization"].update_many(
                     {"group_ids": ObjectId(group_id)}, {"$push": {"user_ids": username}}
                 )
             return group
@@ -146,50 +145,33 @@ async def remove_member(
     if (
         group_q := await db["groups"].find_one({"_id": ObjectId(group_id)})
     ) is not None:
-        group = GroupDB.from_mongo(**group_q)
+        group = GroupDB.from_mongo(group_q)
 
         # Figure out what kind of user we're removing
-        found_owner = False
-        found_member = False
-        member = None
+        found_user = None
         for u in group.users:
             if u.user.email == username:
-                if u.editor:
-                    found_owner = True
-                    member = u
-                else:
-                    found_member = True
-                    member = u
-        if not found_owner and not found_member:
-            # TODO: Should this throw an error instead? Either way, the user is removed in the end...
+                found_user = u
+        if not found_user:
+            # TODO: User wasn't in group, should this throw an error instead? Either way, the user is removed...
             return group
 
         # Remove user from all affected Authorization entries
-        await db["authorizations"].update_many(
-            {"group_ids": ObjectId(group_id)},
-            # $pull removes all occurrences, only remove one in case the user is also in other groups
-            {
-                "$set": {
-                    "user_ids": {
-                        "$function": {
-                            "body": """function(user_ids) {
-                            for (var i=0; i<user_ids.length; i++) {
-                                if (user_ids[i] == "%s") {
-                                    delete user_ids[i];
-                                    break;
-                                }
-                            }
-                        }"""
-                            % username,
-                            "args": ["$user_ids"],
-                            "lang": "js",
-                        }
-                    }
-                }
-            },
+        async for auth_q in db["authorization"].find(
+                {"group_ids": ObjectId(group_id)}
+        ):
+            auth = AuthorizationDB.from_mongo(auth_q)
+            auth.user_ids.remove(username)
+            auth.group_ids.remove(ObjectId(group_id))
+            await db["authorization"].replace_one(
+                {"_id": auth.id}, auth.to_mongo()
+            )
+
+        # Update group itself
+        group.users.remove(found_user)
+        await db["groups"].replace_one(
+            {"_id": ObjectId(group_id)}, group.to_mongo()
         )
 
-        group.users.pop(member)
-        await db["groups"].replace_one({"_id": ObjectId(group_id)}, group.to_mongo())
         return group
     raise HTTPException(status_code=404, detail=f"Group {group_id} not found")

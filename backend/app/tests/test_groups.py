@@ -19,40 +19,6 @@ def test_get_group(client: TestClient, headers: dict):
     assert response.json().get("id") is not None
 
 
-def test_edit_group(client: TestClient, headers: dict):
-    new_group = create_group(client, headers)
-    new_group["name"] = "edited first group"
-    response = client.post(
-        f"{settings.API_V2_STR}/groups", headers=headers, json=new_group
-    )
-    assert response.status_code == 200
-    assert response.json().get("id") is not None
-
-
-def test_add_and_remove_member(client: TestClient, headers: dict):
-    new_group = create_group(client, headers)
-
-    # adding new member
-    create_user(client, headers)
-    new_group["users"].append(member_alt)
-    # TODO: This just creates a new entry with new ID...
-    response = client.post(
-        f"{settings.API_V2_STR}/groups", headers=headers, json=new_group
-    )
-    assert response.status_code == 200
-    assert response.json().get("id") is not None
-
-    # removing member
-    new_group = response.json()
-    new_group["users"].pop()
-
-    response = client.post(
-        f"{settings.API_V2_STR}/groups", headers=headers, json=new_group
-    )
-    assert response.status_code == 200
-    assert response.json().get("id") is not None
-
-
 def test_delete_group(client: TestClient, headers: dict):
     group_id = create_group(client, headers).get("id")
     response = client.delete(
@@ -75,7 +41,7 @@ def test_member_permissions(client: TestClient, headers: dict):
     group_id = new_group.get("id")
 
     # adding new group member
-    new_user = create_user(client, headers)
+    create_user(client, headers)
     new_group["users"].append(member_alt)
     response = client.post(
         f"{settings.API_V2_STR}/groups/{group_id}/add/{member_alt['user']['email']}", headers=headers
@@ -101,15 +67,15 @@ def test_member_permissions(client: TestClient, headers: dict):
     )
     assert response.status_code == 200
     assert response.json().get("id") is not None
+    assert response.json().get("role") == "viewer"
 
-    # Remove member & verify role
-
-    # removing member
-    # new_group = response.json()
-    # new_group["users"].pop()
-
+    # Remove group member & verify no more role
     response = client.post(
-        f"{settings.API_V2_STR}/groups", headers=headers, json=new_group
+        f"{settings.API_V2_STR}/groups/{group_id}/remove/{member_alt['user']['email']}", headers=headers
     )
     assert response.status_code == 200
     assert response.json().get("id") is not None
+    response = client.get(
+        f"{settings.API_V2_STR}/authorizations/datasets/{dataset_id}/role", headers=u_headers
+    )
+    assert response.status_code == 404
