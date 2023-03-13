@@ -28,7 +28,7 @@ from rocrate.rocrate import ROCrate
 
 from app import dependencies
 from app import keycloak_auth
-from app.deps.authorization_deps import Authorization, DatasetAuthorization
+from app.deps.authorization_deps import Authorization
 from app.config import settings
 from app.keycloak_auth import get_token
 from app.keycloak_auth import get_user, get_current_user
