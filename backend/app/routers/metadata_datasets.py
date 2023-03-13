@@ -84,7 +84,7 @@ async def add_dataset_metadata(
     user=Depends(get_current_user),
     db: MongoClient = Depends(dependencies.get_db),
     es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
-    allow: bool = Depends(DatasetAuthorization("editor")),
+    allow: bool = Depends(Authorization("editor")),
 ):
     """Attach new metadata to a dataset. The body must include a contents field with the JSON metadata, and either a
     context JSON-LD object, context_url, or definition (name of a metadata definition) to be valid.
