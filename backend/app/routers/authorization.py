@@ -121,6 +121,16 @@ async def get_file_role(
     return role
 
 
+@router.get("/metadata/{metadata_id}/role", response_model=AuthorizationMetadata)
+async def get_metadata_role(
+    metadata_id: str,
+    current_user=Depends(get_current_username),
+    role: RoleType = Depends(get_role_by_metadata),
+):
+    """Retrieve role of user for metadata. Role cannot change between metadata versions."""
+    return role
+
+
 @router.post(
     "/datasets/{dataset_id}/group_role/{group_id}/{role}",
     response_model=AuthorizationDB,
@@ -225,11 +235,77 @@ async def set_user_role(
         raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
 
 
-@router.get("/metadata/{metadata_id}/role", response_model=AuthorizationMetadata)
-async def get_metadata_role(
-    metadata_id: str,
-    current_user=Depends(get_current_username),
-    role: RoleType = Depends(get_role_by_metadata),
+@router.delete(
+    "/datasets/{dataset_id}/group_role/{group_id}",
+    response_model=AuthorizationDB,
+)
+async def remove_group_role(
+    dataset_id: str,
+    group_id: str,
+    db: MongoClient = Depends(get_db),
+    user_id=Depends(get_user),
+    allow: bool = Depends(Authorization("editor")),
 ):
-    """Retrieve role of user for metadata. Role cannot change between metadata versions."""
-    return role
+    if (
+        dataset_q := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
+    ) is not None:
+        dataset = DatasetOut.from_mongo(dataset_q)
+        if (
+            group_q := await db["groups"].find_one({"_id": ObjectId(group_id)})
+        ) is not None:
+            group = GroupOut.from_mongo(group_q)
+            if (
+                auth_q := await db["authorization"].find_one(
+                    {
+                        "dataset_id": ObjectId(dataset_id),
+                        "group_ids": ObjectId(group_id),
+                    }
+                )
+            ) is not None:
+                # Remove group from affected authorizations
+                auth_db = AuthorizationDB.from_mongo(auth_q)
+                auth_db.group_ids.remove(ObjectId(group_id))
+                for u in group.users:
+                    auth_db.user_ids.remove(u.user.email)
+                await db["authorization"].replace_one(
+                    {"_id": auth_db.id}, auth_db.to_mongo()
+                )
+                return auth_db
+        else:
+            raise HTTPException(status_code=404, detail=f"Group {group_id} not found")
+    else:
+        raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
+
+
+@router.delete(
+    "/datasets/{dataset_id}/user_role/{username}",
+    response_model=AuthorizationDB,
+)
+async def remove_user_role(
+    dataset_id: str,
+    username: str,
+    db: MongoClient = Depends(get_db),
+    user_id=Depends(get_user),
+    allow: bool = Depends(Authorization("editor")),
+):
+    if (
+        dataset_q := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
+    ) is not None:
+        dataset = DatasetOut.from_mongo(dataset_q)
+        if (user_q := await db["users"].find_one({"email": username})) is not None:
+            if (
+                auth_q := await db["authorization"].find_one(
+                    {"dataset_id": ObjectId(dataset_id), "user_ids": username}
+                )
+            ) is not None:
+                # Remove user from affected authorizations
+                auth_db = AuthorizationDB.from_mongo(auth_q)
+                auth_db.user_ids.remove(username)
+                await db["authorization"].replace_one(
+                    {"_id": auth_db.id}, auth_db.to_mongo()
+                )
+                return auth_db
+        else:
+            raise HTTPException(status_code=404, detail=f"User {username} not found")
+    else:
+        raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
