@@ -8,6 +8,8 @@ import { ActionModal } from "../dialog/ActionModal";
 import { UpdateFile } from "./UpdateFile";
 import DeleteIcon from "@mui/icons-material/Delete";
 import {useNavigate} from "react-router-dom";
+import {AuthWrapper} from "../auth/AuthWrapper";
+import {RootState} from "../../types/data";
 
 type FileActionsMenuProps = {
     fileId: string | undefined,
@@ -17,28 +19,31 @@ type FileActionsMenuProps = {
 
 export const FileActionsMenu = (props: FileActionsMenuProps): JSX.Element => {
 	const {fileId, filename, datasetId} = props;
-    
+
 	const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+
+	const fileRole = useSelector((state: RootState) => state.file.fileRole);
+
 	const open = Boolean(anchorEl);
-    
+
 	const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
 		setAnchorEl(event.currentTarget);
 	};
-    
+
 	const handleClose = () => {
 		setAnchorEl(null);
 	};
-    
+
 	// redux
 	const dispatch = useDispatch();
-    
+
 	const deleteFile = (fileId:string|undefined) => dispatch(fileDeleted(fileId));
 	const downloadFile = (fileId: string | undefined, filename: string | undefined) => dispatch(fileDownloaded(fileId, filename));
-    
+
 	const history = useNavigate();
 
 	const [confirmationOpen, setConfirmationOpen] = useState(false);
-    
+
 	const [updateFileOpen, setUpdateFileOpen] = useState(false);
 	const deleteSelectedFile = () => {
 		if (fileId) {
@@ -68,46 +73,49 @@ export const FileActionsMenu = (props: FileActionsMenuProps): JSX.Element => {
 					downloadFile(fileId, filename);
 					handleClose();
 				}} endIcon={<Download/>}>
-        Download
+        		Download
 			</Button>
 			<div>
-				<Button
-					variant="outlined"
-					id="basic-button"
-					aria-controls={open ? "basic-menu" : undefined}
-					aria-haspopup="true"
-					aria-expanded={open ? "true" : undefined}
-					onClick={handleClick}
-					endIcon={<ArrowDropDownIcon/>}>
-					<MoreHoriz />
-				</Button>
-				<Menu
-					id="basic-menu"
-					anchorEl={anchorEl}
-					open={open}
-					onClose={handleClose}
-					MenuListProps={{
-						"aria-labelledby": "basic-button",
-					}}
-				>
-					<MenuItem onClick={()=>{
-						handleClose();
-						setUpdateFileOpen(true);
-					}}> <ListItemIcon>
-							<Upload fontSize="small"/>
-						</ListItemIcon>
-						<ListItemText>Update File</ListItemText></MenuItem>
-					<MenuItem onClick={()=>{
-						handleClose();
-						setConfirmationOpen(true);
-					}}>
-						<ListItemIcon>
-							<DeleteIcon fontSize="small" />
-						</ListItemIcon>
-						<ListItemText>Delete</ListItemText>
-					</MenuItem>
-				</Menu>
+				{/*owner, editor can update file*/}
+				<AuthWrapper currRole={fileRole} allowedRoles={["owner", "editor"]}>
+					<Button
+						variant="outlined"
+						id="basic-button"
+						aria-controls={open ? "basic-menu" : undefined}
+						aria-haspopup="true"
+						aria-expanded={open ? "true" : undefined}
+						onClick={handleClick}
+						endIcon={<ArrowDropDownIcon/>}>
+						<MoreHoriz />
+					</Button>
+					<Menu
+						id="basic-menu"
+						anchorEl={anchorEl}
+						open={open}
+						onClose={handleClose}
+						MenuListProps={{
+							"aria-labelledby": "basic-button",
+						}}
+					>
+						<MenuItem onClick={()=>{
+							handleClose();
+							setUpdateFileOpen(true);
+						}}> <ListItemIcon>
+								<Upload fontSize="small"/>
+							</ListItemIcon>
+							<ListItemText>Update File</ListItemText></MenuItem>
+						<MenuItem onClick={()=>{
+							handleClose();
+							setConfirmationOpen(true);
+						}}>
+							<ListItemIcon>
+								<DeleteIcon fontSize="small" />
+							</ListItemIcon>
+							<ListItemText>Delete</ListItemText>
+						</MenuItem>
+					</Menu>
+				</AuthWrapper>
 			</div>
 		</Stack>);
 };
-    
+
