@@ -170,6 +170,7 @@ services:
     restart: unless-stopped
     networks:
       - clowder2
+    restart: unless-stopped
     depends_on:
       - mongo
       - rabbitmq
