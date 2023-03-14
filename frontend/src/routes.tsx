@@ -1,5 +1,5 @@
 import React, {useEffect} from "react";
-import {Route, Navigate, Routes, BrowserRouter, useNavigate, useParams, useLocation} from "react-router-dom";
+import {Route, Navigate, Routes, BrowserRouter, useNavigate, useParams} from "react-router-dom";
 
 import {CreateMetadataDefinitionPage} from "./components/metadata/CreateMetadataDefinition";
 import {Dataset as DatasetComponent} from "./components/datasets/Dataset";
@@ -19,7 +19,7 @@ import {Explore} from "./components/Explore";
 import {ExtractionHistory} from "./components/listeners/ExtractionHistory";
 import {fetchDatasetRole, fetchFileRole} from "./actions/authorization";
 import { PageNotFound } from "./components/errors/PageNotFound";
-import {NotAuthorized} from "./components/errors/NotAuthorized";
+import {Forbidden} from "./components/errors/Forbidden";
 
 // https://dev.to/iamandrewluca/private-route-in-react-router-v6-lg5
 const PrivateRoute = (props): JSX.Element => {
@@ -48,8 +48,8 @@ const PrivateRoute = (props): JSX.Element => {
 
 	// not found or unauthorized
 	useEffect(() => {
-			if (reason == "Not Authorized"){
-        		history("/not-authorized");
+			if (reason == "Forbidden"){
+        		history("/forbidden");
 			}
         	else if (reason == "Not Found") {
 				history("/not-found");
@@ -90,7 +90,7 @@ export const AppRoutes = (): JSX.Element => {
 				<Route path="/auth" element={<AuthComponent/>} />
 				<Route path="/search" element={<PrivateRoute><Search/></PrivateRoute>} />
 				<Route path="/extractions" element={<PrivateRoute><ExtractionHistory/></PrivateRoute>} />
-				<Route path="/not-authorized" element={<PrivateRoute><NotAuthorized/></PrivateRoute>} />
+				<Route path="/forbidden" element={<PrivateRoute><Forbidden/></PrivateRoute>} />
 				<Route path="*" element={<PrivateRoute><PageNotFound/></PrivateRoute>} />
 			</Routes>
 		</BrowserRouter>

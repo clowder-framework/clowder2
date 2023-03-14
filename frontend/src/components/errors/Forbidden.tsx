@@ -3,7 +3,7 @@ import { Grid, Link, Typography } from "@mui/material";
 import Layout from "../Layout";
 
 
-export const NotAuthorized = (): JSX.Element => {
+export const Forbidden = (): JSX.Element => {
     return (
         <Layout>
             <Grid

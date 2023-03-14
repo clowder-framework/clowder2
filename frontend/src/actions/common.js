@@ -64,7 +64,7 @@ export function handleErrors(reason, originalFunc){
 		return (dispatch) => {
 			dispatch({
 				type: NOT_AUTHORIZED,
-				reason: "Not Authorized",
+				reason: "Forbidden",
 				stack: reason.stack ? reason.stack : "",
 				receivedAt: Date.now()
 			});
@@ -74,6 +74,59 @@ export function handleErrors(reason, originalFunc){
 			dispatch({
 				type: NOT_FOUND,
 				reason: "Not Found",
+				stack: reason.stack ? reason.stack : "",
+				receivedAt: Date.now()
+			});
+		};
+	} else {
+		return (dispatch) => {
+			dispatch({
+				type: FAILED,
+				reason: reason.message !== undefined? reason.message : "Backend Failure. Couldn't fetch!",
+				stack: reason.stack ? reason.stack : "",
+				receivedAt: Date.now()
+			});
+		};
+	}
+}
+
+// Special function to use for authorization endpoint
+// 404 in auth actually means 403
+export function handleErrorsAuthorization(reason, originalFunc){
+	// Authorization error we need to automatically logout user
+	if (reason.status === 401){
+
+		const headers = {"Authorization": cookies.get("Authorization")};
+
+		return (dispatch) => {
+			return fetch(config.KeycloakRefresh, {method: "GET", headers: headers})
+				.then((response) => {
+					if (response.status === 200) return response.json();
+				})
+				.then(json =>{
+					// refresh
+					if (json["access_token"] !== undefined && json["access_token"] !== "none") {
+						cookies.set("Authorization", `Bearer ${json["access_token"]}`);
+						V2.OpenAPI.TOKEN = json["access_token"];
+						dispatch(originalFunc);
+					}
+				})
+				.catch(() => {
+					// logout
+					dispatch({
+						type: LOGOUT,
+						receivedAt: Date.now()
+					});
+					// Delete bad JWT token
+					V2.OpenAPI.TOKEN = undefined;
+					cookies.remove("Authorization", { path: "/" });
+				});
+		};
+	} else if (reason.status === 403 || reason.status === 404) {
+		return (dispatch) => {
+			dispatch({
+				type: NOT_AUTHORIZED,
+				reason: "Forbidden",
 				stack: reason.stack ? reason.stack : "",
 				receivedAt: Date.now()
 			});

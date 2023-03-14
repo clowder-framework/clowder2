@@ -1,5 +1,5 @@
 import {V2} from "../openapi";
-import {handleErrors, resetFailedReason} from "./common";
+import {handleErrorsAuthorization, resetFailedReason} from "./common";
 
 export const RECEIVE_DATASET_ROLE = "RECEIVE_DATASET_ROLE";
 export function fetchDatasetRole(datasetId){
@@ -16,7 +16,7 @@ export function fetchDatasetRole(datasetId){
 				dispatch(resetFailedReason());
 			})
 			.catch(reason => {
-				dispatch(handleErrors(reason, fetchDatasetRole(datasetId)));
+				dispatch(handleErrorsAuthorization(reason, fetchDatasetRole(datasetId)));
 			});
 	};
 }
@@ -36,7 +36,7 @@ export function fetchFileRole(fileId){
 				dispatch(resetFailedReason());
 			})
 			.catch(reason => {
-				dispatch(handleErrors(reason, fetchFileRole(fileId)));
+				dispatch(handleErrorsAuthorization(reason, fetchFileRole(fileId)));
 			});
 	};
 }
