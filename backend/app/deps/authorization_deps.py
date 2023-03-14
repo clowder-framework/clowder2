@@ -44,7 +44,7 @@ async def get_role_by_file(
                 ]
             }
         )
-        role = AuthorizationDB.from_mongo(authorization).role
+        role = AuthorizationDB.from_mongo(authorization)
         return role
 
     raise HTTPException(status_code=404, detail=f"File {file_id} not found")
