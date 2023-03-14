@@ -213,6 +213,9 @@ async def set_user_role(
                     status_code=403, detail="Group role must either be member or owner."
                 )
 
+            # First, remove any existing role the user has on the dataset
+            await remove_user_role(dataset_id, username, db, user_id, allow)
+
             if (
                 auth_q := await db["authorization"].find_one(
                     {"dataset_id": ObjectId(dataset_id), "role": role}
@@ -263,9 +266,6 @@ async def remove_group_role(
             group_q := await db["groups"].find_one({"_id": ObjectId(group_id)})
         ) is not None:
             group = GroupOut.from_mongo(group_q)
-            # First, remove any existing role the user has on the dataset
-            await remove_group_role(dataset_id, group_id, db, user_id, allow)
-
             if (
                 auth_q := await db["authorization"].find_one(
                     {
@@ -307,9 +307,6 @@ async def remove_user_role(
     ) is not None:
         dataset = DatasetOut.from_mongo(dataset_q)
         if (user_q := await db["users"].find_one({"email": username})) is not None:
-            # First, remove any existing role the group has on the dataset
-            await remove_user_role(dataset_id, username, db, user_id, allow)
-
             if (
                 auth_q := await db["authorization"].find_one(
                     {"dataset_id": ObjectId(dataset_id), "user_ids": username}
