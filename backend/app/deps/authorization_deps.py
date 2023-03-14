@@ -246,11 +246,12 @@ class MetadataAuthorization:
                         {"_id": ObjectId(resource_id)}
                     )
                 ) is not None:
+                    dataset_out = DatasetOut.from_mongo(dataset)
                     if (
                         authorization_q := await db["authorization"].find_one(
                             {
                                 "$and": [
-                                    {"dataset_id": ObjectId(dataset.dataset_id)},
+                                    {"dataset_id": ObjectId(dataset_out.id)},
                                     {
                                         "$or": [
                                             {"creator": current_user},
