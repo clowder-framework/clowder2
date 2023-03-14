@@ -109,6 +109,8 @@ async def add_member(
     db: MongoClient = Depends(dependencies.get_db),
     allow: bool = Depends(GroupAuthorization("editor")),
 ):
+    """Add a new user to a group."""
+
     if (user_q := await db["users"].find_one({"email": username})) is not None:
         new_member = Member(user=UserOut.from_mongo(user_q))
         if (
@@ -121,7 +123,7 @@ async def add_member(
                     found_already = True
                     break
             if not found_already:
-                # If user is already in the group, this part is skipped
+                # If user is already in the group, skip directly to returning the group
                 group.users.append(new_member)
                 await db["groups"].replace_one(
                     {"_id": ObjectId(group_id)}, group.to_mongo()
@@ -142,12 +144,14 @@ async def remove_member(
     db: MongoClient = Depends(dependencies.get_db),
     allow: bool = Depends(GroupAuthorization("editor")),
 ):
+    """Remove a user from a group."""
+
     if (
         group_q := await db["groups"].find_one({"_id": ObjectId(group_id)})
     ) is not None:
         group = GroupDB.from_mongo(group_q)
 
-        # Figure out what kind of user we're removing
+        # Is the user actually in the group already?
         found_user = None
         for u in group.users:
             if u.user.email == username:
@@ -160,7 +164,6 @@ async def remove_member(
         async for auth_q in db["authorization"].find({"group_ids": ObjectId(group_id)}):
             auth = AuthorizationDB.from_mongo(auth_q)
             auth.user_ids.remove(username)
-            auth.group_ids.remove(ObjectId(group_id))
             await db["authorization"].replace_one({"_id": auth.id}, auth.to_mongo())
 
         # Update group itself
