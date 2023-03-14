@@ -52,7 +52,7 @@ async def save_authorization(
         missing_groups = authorization_in.group_ids
         async for group_q in group_q_list:
             group = GroupOut.from_mongo(group_q)
-            missing_groups.pop(group.id)
+            missing_groups.remove(group.id)
         raise HTTPException(
             status_code=404, detail=f"Groups not found: {missing_groups}"
         )
