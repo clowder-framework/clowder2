@@ -224,7 +224,7 @@ export const File = (): JSX.Element => {
 				<Grid item xs={10}>
 					<Box sx={{display: "inline-flex", justifyContent: "space-between", alignItems: "baseline"}}>
 						<Typography variant="h4" paragraph>{fileSummary.name}</Typography>
-						<RoleChip role={fileRole.role}/>
+						<RoleChip role={fileRole}/>
 					</Box>
 					{Object.keys(fileSummary).length > 0 &&
 						<Typography variant="subtitle2"
