@@ -38,7 +38,7 @@ async def get_group(group_id: str, db: MongoClient = Depends(dependencies.get_db
     raise HTTPException(status_code=404, detail=f"Group {group_id} not found")
 
 
-@router.put("", response_model=GroupOut)
+@router.put("/{group_id}", response_model=GroupOut)
 async def edit_group(
     group_id: str,
     group_info: GroupBase,
