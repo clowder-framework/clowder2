@@ -11,6 +11,7 @@ from pymongo import MongoClient
 
 from app import keycloak_auth
 from app import dependencies
+from app.deps.authorization_deps import Authorization
 from app.keycloak_auth import get_user, get_current_user, UserOut
 from app.config import settings
 from app.models.datasets import DatasetOut
@@ -83,6 +84,7 @@ async def add_dataset_metadata(
     user=Depends(get_current_user),
     db: MongoClient = Depends(dependencies.get_db),
     es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
+    allow: bool = Depends(Authorization("editor")),
 ):
     """Attach new metadata to a dataset. The body must include a contents field with the JSON metadata, and either a
     context JSON-LD object, context_url, or definition (name of a metadata definition) to be valid.
@@ -139,6 +141,7 @@ async def replace_dataset_metadata(
     user=Depends(get_current_user),
     db: MongoClient = Depends(dependencies.get_db),
     es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
+    allow: bool = Depends(Authorization("editor")),
 ):
     """Update metadata. Any fields provided in the contents JSON will be added or updated in the metadata. If context or
     agent should be changed, use PUT.
@@ -194,6 +197,7 @@ async def update_dataset_metadata(
     user=Depends(get_current_user),
     db: MongoClient = Depends(dependencies.get_db),
     es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
+    allow: bool = Depends(Authorization("editor")),
 ):
     """Update metadata. Any fields provided in the contents JSON will be added or updated in the metadata. If context or
     agent should be changed, use PUT.
@@ -268,6 +272,7 @@ async def get_dataset_metadata(
     listener_version: Optional[float] = Form(None),
     user=Depends(get_current_user),
     db: MongoClient = Depends(dependencies.get_db),
+    allow: bool = Depends(Authorization("viewer")),
 ):
     if (
         dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
@@ -303,6 +308,7 @@ async def delete_dataset_metadata(
     user=Depends(get_current_user),
     db: MongoClient = Depends(dependencies.get_db),
     es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
+    allow: bool = Depends(Authorization("editor")),
 ):
     if (
         dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})

@@ -45,6 +45,7 @@ from app.models.pyobjectid import PyObjectId
 from app.models.users import UserOut
 from app.rabbitmq.listeners import submit_dataset_job
 from app.routers.files import add_file_entry, remove_file_entry
+
 from app.search.connect import (
     connect_elasticsearch,
     insert_record,
@@ -296,6 +297,7 @@ async def get_dataset_files(
     folder_id: Optional[str] = None,
     user_id=Depends(get_user),
     db: MongoClient = Depends(dependencies.get_db),
+    allow: bool = Depends(Authorization("viewer")),
     skip: int = 0,
     limit: int = 10,
 ):
