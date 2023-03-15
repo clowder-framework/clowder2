@@ -4,7 +4,6 @@ from app.config import settings
 from app.tests.utils import create_dataset, upload_file, register_v1_extractor
 
 
-
 def test_register(client: TestClient, headers: dict):
     register_v1_extractor(client, headers)
 
@@ -40,7 +39,9 @@ def test_v1_mime_trigger(client: TestClient, headers: dict):
 
     # Upload a text file and verify a job is created
     dataset_id = create_dataset(client, headers)
-    file_id = upload_file(client, headers, dataset_id, "trigger_test.txt", "1,2,3").get("id")
+    file_id = upload_file(client, headers, dataset_id, "trigger_test.txt", "1,2,3").get(
+        "id"
+    )
 
     # Check if job was automatically created
     response = client.get(

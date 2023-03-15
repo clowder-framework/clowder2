@@ -72,6 +72,7 @@ extractor_info_v1_example = {
 
 """CONVENIENCE FUNCTIONS FOR COMMON ACTIONS REQUIRED BY TESTS."""
 
+
 def create_user(client: TestClient, headers: dict, email: str = user_alt["email"]):
     """Create additional users e.g. for permissions testing (defaults to user_alt) and returns the JSON."""
     u = dict(user_alt)
@@ -114,7 +115,13 @@ def create_dataset(client: TestClient, headers: dict):
     return response.json()
 
 
-def upload_file(client: TestClient, headers: dict, dataset_id: str, filename=filename_example, content=file_content_example):
+def upload_file(
+    client: TestClient,
+    headers: dict,
+    dataset_id: str,
+    filename=filename_example,
+    content=file_content_example,
+):
     """Uploads a dummy file (optionally with custom name/content) to a dataset and returns the JSON."""
     with open(filename, "w") as tempf:
         tempf.write(content)
@@ -130,7 +137,13 @@ def upload_file(client: TestClient, headers: dict, dataset_id: str, filename=fil
     return response.json()
 
 
-def create_folder(client: TestClient, headers: dict, dataset_id: str, name="test folder", parent_folder=None):
+def create_folder(
+    client: TestClient,
+    headers: dict,
+    dataset_id: str,
+    name="test folder",
+    parent_folder=None,
+):
     """Creates a folder (optionally under an existing folder) in a dataset and returns the JSON."""
     folder_data = {"name": name}
     if parent_folder:
@@ -145,7 +158,7 @@ def create_folder(client: TestClient, headers: dict, dataset_id: str, name="test
     return response.json()
 
 
-def register_v1_extractor(client: TestClient, headers: dict, name: str=None):
+def register_v1_extractor(client: TestClient, headers: dict, name: str = None):
     """Registers a new v1 listener (extractor) and returns the JSON."""
     new_extractor = extractor_info_v1_example
     if name:
@@ -158,7 +171,7 @@ def register_v1_extractor(client: TestClient, headers: dict, name: str=None):
     return response.json()
 
 
-def register_v2_listener(client: TestClient, headers: dict, name: str=None):
+def register_v2_listener(client: TestClient, headers: dict, name: str = None):
     """Registers a new v2 listener and returns the JSON. Note that this typically uses RabbitMQ heartbeat."""
     response = client.post(
         f"{settings.API_V2_STR}/listeners", json=listener_v2_example, headers=headers

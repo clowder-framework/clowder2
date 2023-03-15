@@ -1,6 +1,11 @@
 from fastapi.testclient import TestClient
 from app.config import settings
-from app.tests.utils import create_dataset, upload_file, register_v2_listener, feed_example
+from app.tests.utils import (
+    create_dataset,
+    upload_file,
+    register_v2_listener,
+    feed_example,
+)
 
 
 def test_feeds(client: TestClient, headers: dict):
@@ -25,7 +30,9 @@ def test_feeds(client: TestClient, headers: dict):
 
     # Upload file to trigger the feed
     dataset_id = create_dataset(client, headers).get("id")
-    file_id = upload_file(client, headers, dataset_id, "xyz.txt", "This should trigger.").get("id")
+    file_id = upload_file(
+        client, headers, dataset_id, "xyz.txt", "This should trigger."
+    ).get("id")
 
     # Check if job was automatically created
     response = client.get(
