@@ -131,7 +131,7 @@ def upload_file(
         headers=headers,
         files=file_data,
     )
-    os.remove(tempf)
+    os.remove(filename)
     assert response.status_code == 200
     assert response.json().get("id") is not None
     return response.json()
@@ -164,7 +164,7 @@ def register_v1_extractor(client: TestClient, headers: dict, name: str = None):
     if name:
         new_extractor["name"] = name
     response = client.post(
-        f"{settings.API_V2_STR}/listeners", json=new_extractor, headers=headers
+        f"{settings.API_V2_STR}/extractors", json=new_extractor, headers=headers
     )
     assert response.status_code == 200
     assert response.json().get("id") is not None

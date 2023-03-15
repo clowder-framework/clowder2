@@ -38,7 +38,7 @@ def test_v1_mime_trigger(client: TestClient, headers: dict):
     assert len(response.json()) > 0
 
     # Upload a text file and verify a job is created
-    dataset_id = create_dataset(client, headers)
+    dataset_id = create_dataset(client, headers).get("id")
     file_id = upload_file(client, headers, dataset_id, "trigger_test.txt", "1,2,3").get(
         "id"
     )

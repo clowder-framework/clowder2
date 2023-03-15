@@ -7,10 +7,12 @@ def test_create_nested(client: TestClient, headers: dict):
     dataset_id = create_dataset(client, headers).get("id")
 
     # create top level folder
-    folder1_id = create_folder(client, headers, dataset_id, "top folder")
+    folder1_id = create_folder(client, headers, dataset_id, "top folder").get("id")
 
     # create nested folder
-    folder2_id = create_folder(client, headers, dataset_id, "nested folder", folder1_id)
+    folder2_id = create_folder(
+        client, headers, dataset_id, "nested folder", folder1_id
+    ).get("id")
 
     # list top level folders
     response = client.get(
