@@ -1,9 +1,9 @@
 import React, {useEffect, useState} from "react";
-import {Button, Grid, Tab, Tabs, Typography,} from "@mui/material";
+import {Box, Button, Grid, Tab, Tabs, Typography,} from "@mui/material";
 import {useParams, useSearchParams} from "react-router-dom";
 import {RootState} from "../../types/data";
 import {useDispatch, useSelector} from "react-redux";
-import {fetchDatasetAbout, fetchFilesInDataset, fetchFoldersInDataset, updateDataset} from "../../actions/dataset";
+import {fetchDatasetAbout, fetchFilesInDataset, fetchFoldersInDataset} from "../../actions/dataset";
 import {fetchFolderPath} from "../../actions/folder";
 import {resetFailedReason,} from "../../actions/common"
 
@@ -11,7 +11,7 @@ import {a11yProps, TabPanel} from "../tabs/TabComponent";
 import {ActionModal} from "../dialog/ActionModal";
 import FilesTable from "../files/FilesTable";
 import config from "../../app.config";
-import {DatasetIn, MetadataIn} from "../../openapi/v2";
+import {MetadataIn} from "../../openapi/v2";
 import {DisplayMetadata} from "../metadata/DisplayMetadata";
 import {DisplayListenerMetadata} from "../metadata/DisplayListenerMetadata";
 import {EditMetadata} from "../metadata/EditMetadata";
@@ -31,6 +31,7 @@ import AssessmentIcon from "@mui/icons-material/Assessment";
 import HistoryIcon from "@mui/icons-material/History";
 import BuildIcon from "@mui/icons-material/Build";
 import {ExtractionHistoryTab} from "../listeners/ExtractionHistoryTab";
+import RoleChip from "../auth/RoleChip";
 
 const tab = {
 	fontStyle: "normal",
@@ -50,7 +51,6 @@ export const Dataset = (): JSX.Element => {
 
 	// Redux connect equivalent
 	const dispatch = useDispatch();
-	const editDataset = (datasetId: string | undefined, formData: DatasetIn) => dispatch(updateDataset(datasetId, formData));
 	const updateDatasetMetadata = (datasetId: string | undefined, content: object) => dispatch(patchDatasetMetadataAction(datasetId, content));
 	const createDatasetMetadata = (datasetId: string | undefined, metadata: MetadataIn) => dispatch(postDatasetMetadata(datasetId, metadata));
 	const deleteDatasetMetadata = (datasetId: string | undefined, metadata: object) => dispatch(deleteDatasetMetadataAction(datasetId, metadata));
@@ -65,16 +65,12 @@ export const Dataset = (): JSX.Element => {
 	const reason = useSelector((state: RootState) => state.error.reason);
 	const stack = useSelector((state: RootState) => state.error.stack);
 	const about = useSelector((state: RootState) => state.dataset.about);
+	const datasetRole = useSelector((state: RootState) => state.dataset.datasetRole);
 
 	// state
 	const [selectedTabIndex, setSelectedTabIndex] = useState<number>(0);
-
-
-	const [editDescriptionOpen, setEditDescriptionOpen] = React.useState<boolean>(false);
-	const [datasetDescription, setDatasetDescription] = React.useState<string>("");
 	const [enableAddMetadata, setEnableAddMetadata] = React.useState<boolean>(false);
 	const [metadataRequestForms, setMetadataRequestForms] = useState({});
-	const [openPopup, setOpenPopup] = React.useState<boolean>(false)
 
 	// component did mount list all files in dataset
 	useEffect(() => {
@@ -170,16 +166,22 @@ export const Dataset = (): JSX.Element => {
 			<ActionModal actionOpen={errorOpen} actionTitle="Something went wrong..." actionText={reason}
 						 actionBtnName="Report" handleActionBtnClick={handleErrorReport}
 						 handleActionCancel={handleErrorCancel}/>
-		 	<Grid container>
+			{/*breadcrumb*/}
+			<Grid container>
 				<Grid item xs={10} sx={{display: "flex", alignItems: "center"}}>
 					<MainBreadcrumbs paths={paths}/>
 				</Grid>
 			</Grid>
 			<Grid container>
+				{/*title*/}
 				<Grid item xs={8} sx={{display: "flex", alignItems: "center"}}>
-					<Typography variant="h3" paragraph>{about["name"]}</Typography>
+					<Box sx={{display: "inline-flex", justifyContent: "space-between", alignItems: "baseline"}}>
+						<Typography variant="h3" paragraph>{about["name"]}</Typography>
+						<RoleChip role={datasetRole.role}/>
+					</Box>
 				</Grid>
-				<Grid item xs={4}>
+				{/*actions*/}
+				<Grid item xs={4} sx={{display: "flex", alignItems: "center"}}>
 					<ActionsMenu datasetId={datasetId} folderId={folderId}/>
 				</Grid>
 			</Grid>
@@ -190,11 +192,11 @@ export const Dataset = (): JSX.Element => {
 						<Tab icon={<InsertDriveFile/>} iconPosition="start" sx={tab} label="Files" {...a11yProps(0)} />
 						<Tab icon={<FormatListBulleted/>} iconPosition="start" sx={tab}
 							 label="User Metadata" {...a11yProps(1)} disabled={false}/>
-						 <Tab icon={<AssessmentIcon/>} iconPosition="start" sx={tab}
+						<Tab icon={<AssessmentIcon/>} iconPosition="start" sx={tab}
 							 label="Extracted Metadata" {...a11yProps(2)} disabled={false}/>
 						<Tab icon={<BuildIcon/>} iconPosition="start" sx={tab}
 							 label="Extractors" {...a11yProps(3)} disabled={false}/>
-						 <Tab icon={<HistoryIcon/>} iconPosition="start" sx={tab}
+						<Tab icon={<HistoryIcon/>} iconPosition="start" sx={tab}
 							 label="Extraction History" {...a11yProps(4)} disabled={false}/>
 
 					</Tabs>
@@ -235,14 +237,14 @@ export const Dataset = (): JSX.Element => {
 					</TabPanel>
 					<TabPanel value={selectedTabIndex} index={2}>
 						<DisplayListenerMetadata updateMetadata={updateDatasetMetadata}
-													 deleteMetadata={deleteDatasetMetadata}
-													 resourceType="dataset" resourceId={datasetId}/>
+												 deleteMetadata={deleteDatasetMetadata}
+												 resourceType="dataset" resourceId={datasetId}/>
 					</TabPanel>
 					<TabPanel value={selectedTabIndex} index={3}>
 						<Listeners datasetId={datasetId}/>
 					</TabPanel>
 					<TabPanel value={selectedTabIndex} index={4}>
-						<ExtractionHistoryTab datasetId={datasetId} />
+						<ExtractionHistoryTab datasetId={datasetId}/>
 					</TabPanel>
 				</Grid>
 				<Grid item>

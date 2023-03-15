@@ -1,5 +1,5 @@
 import React, {useEffect} from "react";
-import {Route, Navigate, Routes, BrowserRouter, useNavigate} from "react-router-dom";
+import {Route, Navigate, Routes, BrowserRouter, useNavigate, useParams} from "react-router-dom";
 
 import {CreateMetadataDefinitionPage} from "./components/metadata/CreateMetadataDefinition";
 import {Dataset as DatasetComponent} from "./components/datasets/Dataset";
@@ -17,17 +17,25 @@ import {RootState} from "./types/data";
 import {resetLogout} from "./actions/common";
 import {Explore} from "./components/Explore";
 import {ExtractionHistory} from "./components/listeners/ExtractionHistory";
+import {fetchDatasetRole, fetchFileRole} from "./actions/authorization";
 import { PageNotFound } from "./components/errors/PageNotFound";
+import {Forbidden} from "./components/errors/Forbidden";
 
 // https://dev.to/iamandrewluca/private-route-in-react-router-v6-lg5
 const PrivateRoute = (props): JSX.Element => {
 	const {children} = props;
 
 	const history = useNavigate();
+
 	const dispatch = useDispatch();
 	const loggedOut = useSelector((state: RootState) => state.error.loggedOut);
 	const reason = useSelector((state: RootState) => state.error.reason);
 	const dismissLogout = () => dispatch(resetLogout());
+
+	const listDatasetRole = (datasetId: string | undefined) => dispatch(fetchDatasetRole(datasetId));
+	const listFileRole = (fileId: string | undefined) => dispatch(fetchFileRole(fileId));
+	const {datasetId} = useParams<{ datasetId?: string }>();
+	const {fileId} = useParams<{ fileId?: string }>();
 
 	// log user out if token expired/unauthorized
 	useEffect(() => {
@@ -38,11 +46,24 @@ const PrivateRoute = (props): JSX.Element => {
 		}
 	}, [loggedOut]);
 
+	// not found or unauthorized
 	useEffect(() => {
-        	if (reason == "Not Found") {
-			history("/not-found");
+			if (reason == "Forbidden"){
+        		history("/forbidden");
+			}
+        	else if (reason == "Not Found") {
+				history("/not-found");
         	}
 	}, [reason]);
+
+	// get roles if authorized
+	useEffect(() =>{
+		if (datasetId && reason === "") listDatasetRole(datasetId);
+	}, [datasetId, reason])
+
+	useEffect(() =>{
+		if (fileId && reason === "") listFileRole(fileId);
+	}, [fileId, reason])
 
 	return (
 		<>
@@ -69,6 +90,7 @@ export const AppRoutes = (): JSX.Element => {
 				<Route path="/auth" element={<AuthComponent/>} />
 				<Route path="/search" element={<PrivateRoute><Search/></PrivateRoute>} />
 				<Route path="/extractions" element={<PrivateRoute><ExtractionHistory/></PrivateRoute>} />
+				<Route path="/forbidden" element={<PrivateRoute><Forbidden/></PrivateRoute>} />
 				<Route path="*" element={<PrivateRoute><PageNotFound/></PrivateRoute>} />
 			</Routes>
 		</BrowserRouter>

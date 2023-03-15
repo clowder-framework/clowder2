@@ -3,7 +3,6 @@
 /* eslint-disable */
 import type { AuthorizationBase } from '../models/AuthorizationBase';
 import type { AuthorizationDB } from '../models/AuthorizationDB';
-import type { AuthorizationFile } from '../models/AuthorizationFile';
 import type { AuthorizationMetadata } from '../models/AuthorizationMetadata';
 import type { RoleType } from '../models/RoleType';
 import type { CancelablePromise } from '../core/CancelablePromise';
@@ -97,12 +96,12 @@ export class AuthorizationService {
      * Get File Role
      * Retrieve role of user for an individual file. Role cannot change between file versions.
      * @param fileId
-     * @returns AuthorizationFile Successful Response
+     * @returns RoleType Successful Response
      * @throws ApiError
      */
     public static getFileRoleApiV2AuthorizationsFilesFileIdRoleGet(
         fileId: string,
-    ): CancelablePromise<AuthorizationFile> {
+    ): CancelablePromise<RoleType> {
         return __request({
             method: 'GET',
             path: `/api/v2/authorizations/files/${fileId}/role`,
@@ -214,5 +213,4 @@ export class AuthorizationService {
             },
         });
     }
-
 }

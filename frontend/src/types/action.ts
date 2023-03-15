@@ -1,15 +1,6 @@
 import {Dataset, ExtractedMetadata, MetadataJsonld, FilePreview, Folder} from "./data";
-import {MetadataOut as Metadata, FileOut as FileSummary, FileVersion} from "../openapi/v2";
+import {MetadataOut as Metadata, FileOut as FileSummary, FileVersion, AuthorizationBase} from "../openapi/v2";
 import {MetadataDefinitionOut as MetadataDefinition} from "../openapi/v2";
-import {
-	DELETE_DATASET_METADATA,
-	DELETE_FILE_METADATA,
-	POST_DATASET_METADATA,
-	UPDATE_DATASET_METADATA
-} from "../actions/metadata";
-import {RESET_CREATE_FILE} from "../actions/file";
-import {GET_FOLDER_PATH} from "../actions/folder";
-import {RECEIVE_LISTENER_CATEGORIES, RECEIVE_LISTENER_JOBS, SEARCH_LISTENERS} from "../actions/listeners";
 
 interface RECEIVE_FILES_IN_DATASET {
 	type: "RECEIVE_FILES_IN_DATASET";
@@ -25,6 +16,17 @@ interface RECEIVE_DATASET_ABOUT{
 	type: "RECEIVE_DATASET_ABOUT";
 	about: Dataset;
 }
+
+interface RECEIVE_DATASET_ROLE{
+	role: AuthorizationBase;
+	type: "RECEIVE_DATASET_ROLE";
+}
+
+interface RECEIVE_FILE_ROLE{
+	role: AuthorizationBase;
+	type: "RECEIVE_FILE_ROLE";
+}
+
 
 interface RECEIVE_DATASETS{
 	type: "RECEIVE_DATASETS";
@@ -252,9 +254,11 @@ export type DataAction =
 	| RECEIVE_FOLDERS_IN_DATASET
 	| DELETE_FILE
 	| RECEIVE_DATASET_ABOUT
+	| RECEIVE_DATASET_ROLE
 	| RECEIVE_DATASETS
 	| DELETE_DATASET
 	| RECEIVE_FILE_SUMMARY
+	| RECEIVE_FILE_ROLE
 	| RECEIVE_FILE_EXTRACTED_METADATA
 	| RECEIVE_FILE_METADATA_JSONLD
 	| RECEIVE_PREVIEWS

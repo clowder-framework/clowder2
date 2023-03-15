@@ -208,11 +208,6 @@ async def set_user_role(
     ) is not None:
         dataset = DatasetOut.from_mongo(dataset_q)
         if (user_q := await db["users"].find_one({"email": username})) is not None:
-            if role not in ["editor", "member"]:
-                raise HTTPException(
-                    status_code=403, detail="Group role must either be member or owner."
-                )
-
             # First, remove any existing role the user has on the dataset
             await remove_user_role(dataset_id, username, db, user_id, allow)
 

@@ -1,7 +1,9 @@
-import {MetadataDefinitionOut,
+import {
+	MetadataDefinitionOut,
 	MetadataOut as Metadata,
 	FileOut as FileSummary,
-	FileVersion, FolderOut, EventListenerJob} from "../openapi/v2";
+	FileVersion, FolderOut, EventListenerJob, AuthorizationBase
+} from "../openapi/v2";
 
 export interface Dataset {
 	name: string;
@@ -135,6 +137,7 @@ export interface DatasetState{
 	newDataset: Dataset;
 	newFile: FileSummary;
 	about: Dataset;
+	datasetRole: AuthorizationBase
 }
 export interface ListenerState{
 	listeners: Listener[];
@@ -156,6 +159,7 @@ export interface FileState{
 	metadataJsonld: MetadataJsonld[];
 	previews: FilePreview[];
 	fileVersions: FileVersion[];
+	fileRole: AuthorizationBase
 }
 
 export interface UserState{

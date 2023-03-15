@@ -6,6 +6,8 @@ import {RootState} from "../../types/data";
 import {Download} from "@mui/icons-material";
 import {NewMenu} from "./NewMenu";
 import {OtherMenu} from "./OtherMenu";
+import {EditMenu} from "./EditMenu";
+import {AuthWrapper} from "../auth/AuthWrapper";
 
 type ActionsMenuProps = {
 	datasetId: string,
@@ -14,6 +16,8 @@ type ActionsMenuProps = {
 
 export const ActionsMenu = (props: ActionsMenuProps): JSX.Element => {
 	const {datasetId, folderId} = props;
+
+	const datasetRole = useSelector((state: RootState) => state.dataset.datasetRole);
 
 	// redux
 	const dispatch = useDispatch();
@@ -34,7 +38,23 @@ export const ActionsMenu = (props: ActionsMenuProps): JSX.Element => {
 					}} endIcon={<Download/>}>
 				Download
 			</Button>
-			<NewMenu datasetId={datasetId} folderId={folderId}/>
-			<OtherMenu datasetId={datasetId} folderId={folderId}/>
+			{/*owner, editor, uploader cannot create new*/}
+			{
+				<AuthWrapper currRole={datasetRole.role} allowedRoles={["owner", "editor", "uploader"]}>
+					<NewMenu datasetId={datasetId} folderId={folderId}/>
+				</AuthWrapper>
+			}
+			{/*owner, editor can edit*/}
+			{
+				<AuthWrapper currRole={datasetRole.role} allowedRoles={["owner", "editor"]}>
+					<EditMenu datasetId={datasetId} folderId={folderId}/>
+				</AuthWrapper>
+			}
+			{/*owner can delete and perform other tasks*/}
+			{
+				<AuthWrapper currRole={datasetRole.role} allowedRoles={["owner"]}>
+					<OtherMenu datasetId={datasetId} folderId={folderId}/>
+				</AuthWrapper>
+			}
 		</Stack>)
 }

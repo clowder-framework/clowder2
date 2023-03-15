@@ -1,4 +1,6 @@
 import {DataAction} from "../types/action";
+import {FAILED, NOT_FOUND, NOT_AUTHORIZED, RESET_FAILED, RESET_LOGOUT} from "../actions/common";
+import {LOGOUT} from "../actions/user";
 
 const defaultState = {
 	reason: "",
@@ -8,15 +10,17 @@ const defaultState = {
 
 const error = (state = defaultState, action: DataAction) => {
 	switch (action.type) {
-		case "FAILED":
+		case FAILED:
 			return Object.assign({}, state, {reason: action.reason, stack: action.stack});
-		case "NOT_FOUND":
+		case NOT_FOUND:
 			return Object.assign({}, state, {reason: action.reason, stack: action.stack});
-		case "RESET_FAILED":
+		case NOT_AUTHORIZED:
+			return Object.assign({}, state, {reason: action.reason, stack: action.stack});
+		case RESET_FAILED:
 			return Object.assign({}, state, {reason: "", stack: ""});
-		case "LOGOUT":
+		case LOGOUT:
 			return Object.assign({}, state, {loggedOut: true});
-		case "RESET_LOGOUT":
+		case RESET_LOGOUT:
 			return Object.assign({}, state, {loggedOut: false});
 		default:
 			return state;
