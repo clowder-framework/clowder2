@@ -420,7 +420,6 @@ async def patch_dataset(
     db: MongoClient = Depends(dependencies.get_db),
     es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
     allow: bool = Depends(Authorization("editor")),
-
 ):
     if not allow:
         raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
@@ -478,7 +477,6 @@ async def delete_dataset(
     fs: Minio = Depends(dependencies.get_fs),
     es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
     allow: bool = Depends(Authorization("editor")),
-
 ):
     if not allow:
         raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
