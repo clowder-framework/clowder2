@@ -78,6 +78,7 @@ async def get_token(
 
 
 async def get_user(identity: Json = Depends(get_token)):
+    """Retrieve the user email from keycloak token."""
     return identity["preferred_username"]
 
 

@@ -1,60 +1,15 @@
 import os
 from fastapi.testclient import TestClient
 from app.config import settings
-from app.models.pyobjectid import PyObjectId
-from app.tests.test_files import dataset_data
-
-user = {
-    "email": "test@test.org",
-    "password": "not_a_password",
-    "first_name": "Foo",
-    "last_name": "Bar",
-}
-
-extractor_info = {
-    "@context": "http://clowder.ncsa.illinois.edu/contexts/extractors.jsonld",
-    "name": "ncsa.wordcount",
-    "version": "2.0",
-    "description": "WordCount extractor. Counts the number of characters, words and lines in the text file that was uploaded.",
-    "contributors": [],
-    "contexts": [
-        {
-            "lines": "http://clowder.ncsa.illinois.edu/metadata/ncsa.wordcount#lines",
-            "words": "http://clowder.ncsa.illinois.edu/metadata/ncsa.wordcount#words",
-            "characters": "http://clowder.ncsa.illinois.edu/metadata/ncsa.wordcount#characters",
-        }
-    ],
-    "repository": [
-        {
-            "repType": "git",
-            "repUrl": "https://opensource.ncsa.illinois.edu/stash/scm/cats/pyclowder.git",
-        }
-    ],
-    "process": {"file": ["text/*", "application/json"]},
-    "external_services": [],
-    "dependencies": [],
-    "bibtex": [],
-}
-
-# extractor_info_file = os.path.join(os.getcwd(), 'extractor_info.json')
-dummy_file = "trigger_test.txt"
+from app.tests.utils import create_dataset, upload_file, register_v1_extractor
 
 
 def test_register(client: TestClient, headers: dict):
-    response = client.post(
-        f"{settings.API_V2_STR}/listeners", json=extractor_info, headers=headers
-    )
-    assert response.json().get("id") is not None
-    assert response.status_code == 200
+    register_v1_extractor(client, headers)
 
 
 def test_get_one(client: TestClient, headers: dict):
-    response = client.post(
-        f"{settings.API_V2_STR}/listeners", json=extractor_info, headers=headers
-    )
-    assert response.status_code == 200
-    assert response.json().get("id") is not None
-    extractor_id = response.json().get("id")
+    extractor_id = register_v1_extractor(client, headers).get("id")
     response = client.get(
         f"{settings.API_V2_STR}/listeners/{extractor_id}", headers=headers
     )
@@ -63,12 +18,7 @@ def test_get_one(client: TestClient, headers: dict):
 
 
 def test_delete(client: TestClient, headers: dict):
-    response = client.post(
-        f"{settings.API_V2_STR}/listeners", json=extractor_info, headers=headers
-    )
-    assert response.status_code == 200
-    assert response.json().get("id") is not None
-    extractor_id = response.json().get("id")
+    extractor_id = register_v1_extractor(client, headers).get("id")
     response = client.delete(
         f"{settings.API_V2_STR}/listeners/{extractor_id}", headers=headers
     )
@@ -77,51 +27,26 @@ def test_delete(client: TestClient, headers: dict):
 
 def test_v1_mime_trigger(client: TestClient, headers: dict):
     # Need a new listener otherwise this will collide with test_register above
-    extractor_info["name"] = "ncsa.wordcount.test2"
-
-    # Create the listener
-    response = client.post(
-        f"{settings.API_V2_STR}/extractors", json=extractor_info, headers=headers
-    )
-    assert response.status_code == 200
-    assert response.json().get("id") is not None
-    extractor_id = response.json().get("id")
+    ext_name = "ncsa.testextractor.test2"
+    extractor_id = register_v1_extractor(client, headers, ext_name).get("id")
 
     # Verify feeds were created for the process rules
     response = client.get(
-        f"{settings.API_V2_STR}/feeds?name={extractor_info['name']}", headers=headers
+        f"{settings.API_V2_STR}/feeds?name={ext_name}", headers=headers
     )
     assert response.status_code == 200
     assert len(response.json()) > 0
 
     # Upload a text file and verify a job is created
-
-    # Create dataset to hold file
-    response = client.post(
-        f"{settings.API_V2_STR}/datasets", json=dataset_data, headers=headers
+    dataset_id = create_dataset(client, headers).get("id")
+    file_id = upload_file(client, headers, dataset_id, "trigger_test.txt", "1,2,3").get(
+        "id"
     )
-    assert response.json().get("id") is not None
-    assert response.status_code == 200
-
-    # Upload test file to dataset
-    dataset_id = response.json().get("id")
-    with open(dummy_file, "w") as dummy:
-        dummy.write("1,2,3")
-    file_data = {"file": open(dummy_file, "rb")}
-    response = client.post(
-        f"{settings.API_V2_STR}/datasets/{dataset_id}/files",
-        headers=headers,
-        files=file_data,
-    )
-    os.remove(dummy_file)
-    assert response.json().get("id") is not None
-    assert response.status_code == 200
 
     # Check if job was automatically created
-    file_id = response.json().get("id")
     response = client.get(
-        f"{settings.API_V2_STR}/jobs?listener_id={extractor_info['name']}&file_id={file_id}",
+        f"{settings.API_V2_STR}/jobs?listener_id={ext_name}&file_id={file_id}",
         headers=headers,
     )
-    assert len(response.json()) > 0
     assert response.status_code == 200
+    assert len(response.json()) > 0

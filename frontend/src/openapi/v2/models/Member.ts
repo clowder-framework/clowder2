@@ -6,5 +6,5 @@ import type { UserOut } from './UserOut';
 
 export type Member = {
     user: UserOut;
-    isOwner?: boolean;
+    editor?: boolean;
 }

@@ -1,97 +1,32 @@
 from fastapi.testclient import TestClient
 from app.config import settings
+from app.tests.utils import (
+    create_dataset,
+    create_group,
+    user_alt,
+    create_user,
+    get_user_token,
+)
+from app.models.pyobjectid import PyObjectId
+from app.models.authorization import AuthorizationDB
 
-user = {
-    "email": "test@test.org",
-    "password": "not_a_password",
-    "first_name": "Foo",
-    "last_name": "Bar",
-}
 
-member = {"user": user, "is_owner": True}
-
-group_data_in = {
-    "name": "first group",
-    "description": "a group is a container of several users",
-    "userList": [member],
-}
-
-user2 = {
-    "email": "test2@test.org",
-    "password": "not_a_password",
-    "first_name": "test",
-    "last_name": "user",
-}
-
-member2 = {"user": user2, "is_owner": False}
+member_alt = {"user": user_alt, "editor": False}
 
 
 def test_create_group(client: TestClient, headers: dict):
-    response = client.post(
-        f"{settings.API_V2_STR}/groups", json=group_data_in, headers=headers
-    )
-    assert response.json().get("id") is not None
-    assert response.status_code == 200
+    create_group(client, headers)
 
 
 def test_get_group(client: TestClient, headers: dict):
-    response = client.post(
-        f"{settings.API_V2_STR}/groups", json=group_data_in, headers=headers
-    )
-    assert response.json().get("id") is not None
-    group_id = response.json().get("id")
+    group_id = create_group(client, headers).get("id")
     response = client.get(f"{settings.API_V2_STR}/groups/{group_id}", headers=headers)
     assert response.status_code == 200
     assert response.json().get("id") is not None
 
 
-def test_edit_group(client: TestClient, headers: dict):
-    response = client.post(
-        f"{settings.API_V2_STR}/groups", json=group_data_in, headers=headers
-    )
-    assert response.json().get("id") is not None
-    new_group = response.json()
-    new_group["name"] = "edited first group"
-    response = client.post(
-        f"{settings.API_V2_STR}/groups", headers=headers, json=new_group
-    )
-    assert response.status_code == 200
-    assert response.json().get("id") is not None
-
-
-def test_add_and_remove_member(client: TestClient, headers: dict):
-    response = client.post(
-        f"{settings.API_V2_STR}/groups", json=group_data_in, headers=headers
-    )
-    assert response.json().get("id") is not None
-
-    # adding new member
-    new_group = response.json()
-    new_group["userList"].append(member2)
-    response = client.post(
-        f"{settings.API_V2_STR}/groups", headers=headers, json=new_group
-    )
-    assert response.status_code == 200
-    assert response.json().get("id") is not None
-
-    # removing member
-    new_group = response.json()
-    new_group["userList"].pop()
-
-    # TODO add a put endpoint for this
-    response = client.post(
-        f"{settings.API_V2_STR}/groups", headers=headers, json=new_group
-    )
-    assert response.status_code == 200
-    assert response.json().get("id") is not None
-
-
 def test_delete_group(client: TestClient, headers: dict):
-    response = client.post(
-        f"{settings.API_V2_STR}/groups", json=group_data_in, headers=headers
-    )
-    assert response.json().get("id") is not None
-    group_id = response.json().get("id")
+    group_id = create_group(client, headers).get("id")
     response = client.delete(
         f"{settings.API_V2_STR}/groups/{group_id}", headers=headers
     )
@@ -99,13 +34,59 @@ def test_delete_group(client: TestClient, headers: dict):
 
 
 def test_search_group(client: TestClient, headers: dict):
-    response = client.post(
-        f"{settings.API_V2_STR}/groups", json=group_data_in, headers=headers
-    )
-    assert response.json().get("id") is not None
-
+    create_group(client, headers)
     search_term = "group"
     response = client.get(
         f"{settings.API_V2_STR}/groups/search/{search_term}", headers=headers
     )
     assert response.status_code == 200
+
+
+def test_member_permissions(client: TestClient, headers: dict):
+    new_group = create_group(client, headers)
+    group_id = new_group.get("id")
+
+    # adding new group member
+    create_user(client, headers)
+    new_group["users"].append(member_alt)
+    response = client.post(
+        f"{settings.API_V2_STR}/groups/{group_id}/add/{member_alt['user']['email']}",
+        headers=headers,
+    )
+    assert response.status_code == 200
+    assert response.json().get("id") is not None
+
+    # Create a dataset
+    dataset = create_dataset(client, headers)
+    dataset_id = dataset.get("id")
+
+    # Add group authorization to dataset
+    response = client.post(
+        f"{settings.API_V2_STR}/authorizations/datasets/{dataset_id}/group_role/{group_id}/viewer",
+        headers=headers,
+    )
+    assert response.status_code == 200
+    assert response.json().get("id") is not None
+
+    # Verify role
+    u_headers = get_user_token(client, headers)
+    response = client.get(
+        f"{settings.API_V2_STR}/authorizations/datasets/{dataset_id}/role",
+        headers=u_headers,
+    )
+    assert response.status_code == 200
+    assert response.json().get("id") is not None
+    assert response.json().get("role") == "viewer"
+
+    # Remove group member & verify no more role
+    response = client.post(
+        f"{settings.API_V2_STR}/groups/{group_id}/remove/{member_alt['user']['email']}",
+        headers=headers,
+    )
+    assert response.status_code == 200
+    assert response.json().get("id") is not None
+    response = client.get(
+        f"{settings.API_V2_STR}/authorizations/datasets/{dataset_id}/role",
+        headers=u_headers,
+    )
+    assert response.status_code == 404

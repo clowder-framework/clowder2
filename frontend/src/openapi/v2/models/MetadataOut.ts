@@ -7,7 +7,7 @@ import type { MongoDBRef } from './MongoDBRef';
 
 export type MetadataOut = {
     id?: string;
-    context?: any;
+    context?: Array<string>;
     context_url?: string;
     definition?: string;
     content: any;

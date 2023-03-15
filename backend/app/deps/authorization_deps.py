@@ -7,6 +7,7 @@ from app.keycloak_auth import get_current_username
 from app.models.authorization import RoleType, AuthorizationDB
 
 from app.models.files import FileOut
+from app.models.groups import GroupOut
 from app.models.metadata import MetadataOut
 from app.models.datasets import DatasetOut
 
@@ -275,6 +276,38 @@ class MetadataAuthorization:
                     raise HTTPException(
                         status_code=404, detail=f"Metadata {metadata_id} not found"
                     )
+
+
+class GroupAuthorization:
+    """For endpoints where someone is trying to modify a Group."""
+
+    def __init__(self, role: str):
+        self.role = role
+
+    async def __call__(
+        self,
+        group_id: str,
+        db: MongoClient = Depends(get_db),
+        current_user: str = Depends(get_current_username),
+    ):
+        if (
+            group_q := await db["groups"].find_one({"_id": ObjectId(group_id)})
+        ) is not None:
+            group = GroupOut.from_mongo(group_q)
+            if group.creator == current_user:
+                # Creator can do everything
+                return True
+            for u in group.users:
+                if u.user.email == current_user:
+                    if u.editor and self.role == RoleType.EDITOR:
+                        return True
+                    elif self.role == RoleType.VIEWER:
+                        return True
+            raise HTTPException(
+                status_code=403,
+                detail=f"User `{current_user} does not have `{self.role}` permission on group {group_id}",
+            )
+        raise HTTPException(status_code=404, detail=f"Group {group_id} not found")
 
 
 def access(user_role: RoleType, role_required: RoleType) -> bool:
