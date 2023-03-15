@@ -1,7 +1,6 @@
 import io
 from datetime import datetime
 from typing import Optional, List
-
 from elasticsearch import Elasticsearch
 from bson import ObjectId
 from fastapi import (
@@ -13,6 +12,7 @@ from fastapi import (
 from pymongo import MongoClient
 
 from app import dependencies
+from app.deps.authorization_deps import FileAuthorization
 from app.config import settings
 from app.models.files import FileOut
 from app.models.metadata import (
@@ -109,6 +109,7 @@ async def add_file_metadata(
     user=Depends(get_current_user),
     db: MongoClient = Depends(dependencies.get_db),
     es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
+    allow: bool = Depends(FileAuthorization("uploader")),
 ):
     """Attach new metadata to a file. The body must include a contents field with the JSON metadata, and either a
     context JSON-LD object, context_url, or definition (name of a metadata definition) to be valid.
@@ -171,6 +172,7 @@ async def replace_file_metadata(
     user=Depends(get_current_user),
     db: MongoClient = Depends(dependencies.get_db),
     es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
+    allow: bool = Depends(FileAuthorization("editor")),
 ):
     """Replace metadata, including agent and context. If only metadata contents should be updated, use PATCH instead.
 
@@ -243,6 +245,7 @@ async def update_file_metadata(
     user=Depends(get_current_user),
     db: MongoClient = Depends(dependencies.get_db),
     es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
+    allow: bool = Depends(FileAuthorization("editor")),
 ):
     """Update metadata. Any fields provided in the contents JSON will be added or updated in the metadata. If context or
     agent should be changed, use PUT.
@@ -347,6 +350,7 @@ async def get_file_metadata(
     extractor_version: Optional[float] = Form(None),
     user=Depends(get_current_user),
     db: MongoClient = Depends(dependencies.get_db),
+    allow: bool = Depends(FileAuthorization("viewer")),
 ):
     """Get file metadata."""
     if (file := await db["files"].find_one({"_id": ObjectId(file_id)})) is not None:
@@ -404,6 +408,7 @@ async def delete_file_metadata(
     user=Depends(get_current_user),
     db: MongoClient = Depends(dependencies.get_db),
     es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
+    allow: bool = Depends(FileAuthorization("editor")),
 ):
     if (file := await db["files"].find_one({"_id": ObjectId(file_id)})) is not None:
         query = {"resource.resource_id": ObjectId(file_id)}

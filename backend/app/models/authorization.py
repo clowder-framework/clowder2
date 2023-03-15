@@ -1,7 +1,5 @@
 from datetime import datetime
 from enum import Enum
-from app.models.pyobjectid import PyObjectId
-
 from charset_normalizer.md import List
 from pydantic import BaseModel, EmailStr, Field
 
@@ -70,6 +68,6 @@ class Provenance(BaseModel):
 
 
 class AuthorizationDB(MongoModel, AuthorizationBase, Provenance):
-    """The creator of the Authorization object is also the creator of the dataset described."""
+    """The creator of the Authorization object should also be the creator of the dataset itself."""
 
     pass

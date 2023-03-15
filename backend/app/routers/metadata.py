@@ -10,6 +10,7 @@ from fastapi import (
 from pymongo import MongoClient
 
 from app import dependencies
+from app.deps.authorization_deps import Authorization, MetadataAuthorization
 from app.keycloak_auth import get_user, get_current_user
 from app.models.pyobjectid import PyObjectId
 from app.models.metadata import (
@@ -74,6 +75,7 @@ async def update_metadata(
     metadata_id: str,
     user=Depends(get_current_user),
     db: MongoClient = Depends(dependencies.get_db),
+    allow: bool = Depends(MetadataAuthorization("editor")),
 ):
     """Update metadata. Any fields provided in the contents JSON will be added or updated in the metadata. If context or
     agent should be changed, use PUT.
@@ -97,6 +99,7 @@ async def delete_metadata(
     metadata_id: str,
     user=Depends(get_current_user),
     db: MongoClient = Depends(dependencies.get_db),
+    allow: bool = Depends(MetadataAuthorization("editor")),
 ):
     """Delete metadata by specific ID."""
     if (

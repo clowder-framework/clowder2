@@ -13,16 +13,18 @@ export class AuthorizationService {
     /**
      * Save Authorization
      * Save authorization info in Mongo. This is a triple of dataset_id/user_id/role/group_id.
+     * @param datasetId
      * @param requestBody
      * @returns AuthorizationDB Successful Response
      * @throws ApiError
      */
-    public static saveAuthorizationApiV2AuthorizationsPost(
+    public static saveAuthorizationApiV2AuthorizationsDatasetsDatasetIdPost(
+        datasetId: string,
         requestBody: AuthorizationBase,
     ): CancelablePromise<AuthorizationDB> {
         return __request({
             method: 'POST',
-            path: `/api/v2/authorizations`,
+            path: `/api/v2/authorizations/datasets/${datasetId}`,
             body: requestBody,
             mediaType: 'application/json',
             errors: {
@@ -128,4 +130,87 @@ export class AuthorizationService {
         });
     }
 
+    /**
+     * Set Group Role
+     * @param datasetId
+     * @param groupId
+     * @param role
+     * @returns AuthorizationDB Successful Response
+     * @throws ApiError
+     */
+    public static setGroupRoleApiV2AuthorizationsDatasetsDatasetIdGroupRoleGroupIdRolePost(
+        datasetId: string,
+        groupId: string,
+        role: RoleType,
+    ): CancelablePromise<AuthorizationDB> {
+        return __request({
+            method: 'POST',
+            path: `/api/v2/authorizations/datasets/${datasetId}/group_role/${groupId}/${role}`,
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+
+    /**
+     * Set User Role
+     * @param datasetId
+     * @param username
+     * @param role
+     * @returns AuthorizationDB Successful Response
+     * @throws ApiError
+     */
+    public static setUserRoleApiV2AuthorizationsDatasetsDatasetIdUserRoleUsernameRolePost(
+        datasetId: string,
+        username: string,
+        role: RoleType,
+    ): CancelablePromise<AuthorizationDB> {
+        return __request({
+            method: 'POST',
+            path: `/api/v2/authorizations/datasets/${datasetId}/user_role/${username}/${role}`,
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+
+    /**
+     * Remove Group Role
+     * @param datasetId
+     * @param groupId
+     * @returns AuthorizationDB Successful Response
+     * @throws ApiError
+     */
+    public static removeGroupRoleApiV2AuthorizationsDatasetsDatasetIdGroupRoleGroupIdDelete(
+        datasetId: string,
+        groupId: string,
+    ): CancelablePromise<AuthorizationDB> {
+        return __request({
+            method: 'DELETE',
+            path: `/api/v2/authorizations/datasets/${datasetId}/group_role/${groupId}`,
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+
+    /**
+     * Remove User Role
+     * @param datasetId
+     * @param username
+     * @returns AuthorizationDB Successful Response
+     * @throws ApiError
+     */
+    public static removeUserRoleApiV2AuthorizationsDatasetsDatasetIdUserRoleUsernameDelete(
+        datasetId: string,
+        username: string,
+    ): CancelablePromise<AuthorizationDB> {
+        return __request({
+            method: 'DELETE',
+            path: `/api/v2/authorizations/datasets/${datasetId}/user_role/${username}`,
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
 }

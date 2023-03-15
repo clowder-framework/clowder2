@@ -3,15 +3,19 @@
 /* eslint-disable */
 
 import type { Member } from './Member';
-import type { UserOut } from './UserOut';
 
+/**
+ * Store user who created model, when and last time it was updated.
+ * TODO: this generic model should be moved to a global util module in models for all those models that want to
+ * store basic provenance.
+ */
 export type GroupOut = {
-    name?: string;
-    description?: string;
-    userList?: Array<Member>;
-    id?: string;
-    author: UserOut;
+    creator: string;
     created?: string;
     modified?: string;
+    name: string;
+    description?: string;
+    users?: Array<Member>;
+    id?: string;
     views?: number;
 }

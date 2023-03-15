@@ -1,20 +1,11 @@
 import os
 import time
-
 import pytest as pytest
 from fastapi.testclient import TestClient
-import json
 
 from app.config import settings
 from app.search.connect import connect_elasticsearch, search_index
-
-dataset_data = {
-    "name": "test dataset",
-    "description": "a dataset is a container of files and metadata",
-}
-
-# This file will be created & deleted as part of testing
-dummy_file = "test_upload.csv"
+from app.tests.utils import create_dataset, upload_file
 
 metadata_definition = {
     "name": "LatLon",
@@ -72,13 +63,7 @@ metadata_using_context_url = {
 # Dataset tests
 def test_dataset_create_metadata_no_context(client: TestClient, headers: dict):
     # Create dataset and try to add metadata that doesn't have any context
-    response = client.post(
-        f"{settings.API_V2_STR}/datasets", headers=headers, json=dataset_data
-    )
-    assert response.status_code == 200
-    assert response.json().get("id") is not None
-
-    dataset_id = response.json().get("id")
+    dataset_id = create_dataset(client, headers).get("id")
     bad_md = dict(metadata_using_context_url)
     del bad_md["context_url"]
     response = client.post(
@@ -101,13 +86,7 @@ def test_dataset_create_metadata_definition(client: TestClient, headers: dict):
     )  # 409 = definition already exists
 
     # Create dataset and add metadata to it using new definition
-    response = client.post(
-        f"{settings.API_V2_STR}/datasets", headers=headers, json=dataset_data
-    )
-    assert response.status_code == 200
-    assert response.json().get("id") is not None
-
-    dataset_id = response.json().get("id")
+    dataset_id = create_dataset(client, headers).get("id")
     response = client.post(
         f"{settings.API_V2_STR}/datasets/{dataset_id}/metadata",
         headers=headers,
@@ -137,16 +116,10 @@ async def test_dataset_patch_metadata_definition(client: TestClient, headers: di
     )
     assert (
         response.status_code == 200 or response.status_code == 409
-    )  # 409 = user already exists
+    )  # 409 = definition already exists
 
     # Create dataset and add metadata to it using new definition
-    response = client.post(
-        f"{settings.API_V2_STR}/datasets", headers=headers, json=dataset_data
-    )
-    assert response.status_code == 200
-    assert response.json().get("id") is not None
-
-    dataset_id = response.json().get("id")
+    dataset_id = create_dataset(client, headers).get("id")
     response = client.post(
         f"{settings.API_V2_STR}/datasets/{dataset_id}/metadata",
         headers=headers,
@@ -173,13 +146,7 @@ async def test_dataset_patch_metadata_definition(client: TestClient, headers: di
 @pytest.mark.asyncio
 async def test_dataset_create_metadata_context_url(client: TestClient, headers: dict):
     # Create dataset and add metadata to it using context_url
-    response = client.post(
-        f"{settings.API_V2_STR}/datasets", headers=headers, json=dataset_data
-    )
-    assert response.status_code == 200
-    assert response.json().get("id") is not None
-
-    dataset_id = response.json().get("id")
+    dataset_id = create_dataset(client, headers).get("id")
     response = client.post(
         f"{settings.API_V2_STR}/datasets/{dataset_id}/metadata",
         headers=headers,
@@ -209,13 +176,7 @@ async def test_dataset_create_metadata_context_url(client: TestClient, headers: 
 
 def test_dataset_delete_metadata(client: TestClient, headers: dict):
     # Create dataset and add metadata to it using context_url, then delete dataset
-    response = client.post(
-        f"{settings.API_V2_STR}/datasets", headers=headers, json=dataset_data
-    )
-    assert response.status_code == 200
-    assert response.json().get("id") is not None
-
-    dataset_id = response.json().get("id")
+    dataset_id = create_dataset(client, headers).get("id")
     response = client.post(
         f"{settings.API_V2_STR}/datasets/{dataset_id}/metadata",
         headers=headers,
@@ -235,25 +196,8 @@ def test_dataset_delete_metadata(client: TestClient, headers: dict):
 # File tests
 def test_file_create_metadata_no_context(client: TestClient, headers: dict):
     # Create dataset, upload file and try to add metadata that doesn't have any context
-    response = client.post(
-        f"{settings.API_V2_STR}/datasets", headers=headers, json=dataset_data
-    )
-    assert response.status_code == 200
-    assert response.json().get("id") is not None
-
-    dataset_id = response.json().get("id")
-    with open(dummy_file, "w") as dummy:
-        pass
-    file_data = {"file": open(dummy_file, "rb")}
-    response = client.post(
-        f"{settings.API_V2_STR}/datasets/{dataset_id}/files",
-        headers=headers,
-        files=file_data,
-    )
-    os.remove(dummy_file)
-    assert response.status_code == 200
-
-    file_id = response.json().get("id")
+    dataset_id = create_dataset(client, headers).get("id")
+    file_id = upload_file(client, headers, dataset_id).get("id")
     bad_md = dict(metadata_using_context_url)
     del bad_md["context_url"]
     response = client.post(
@@ -276,13 +220,7 @@ def test_file_create_metadata_definition(client: TestClient, headers: dict):
     )  # 409 = definition already exists
 
     # Create dataset and add metadata to it using new definition
-    response = client.post(
-        f"{settings.API_V2_STR}/datasets", headers=headers, json=dataset_data
-    )
-    assert response.status_code == 200
-    assert response.json().get("id") is not None
-
-    dataset_id = response.json().get("id")
+    dataset_id = create_dataset(client, headers).get("id")
     response = client.post(
         f"{settings.API_V2_STR}/datasets/{dataset_id}/metadata",
         headers=headers,
