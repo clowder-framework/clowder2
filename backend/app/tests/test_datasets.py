@@ -61,8 +61,8 @@ def test_edit(client: TestClient, headers: dict):
 
 
 def test_list(client: TestClient, headers: dict):
-    create_dataset(client, headers)
+    dataset_id = create_dataset(client, headers).get("id")
     response = client.get(f"{settings.API_V2_STR}/datasets", headers=headers)
     assert response.status_code == 200
-    # TODO: Need to verify the new dataset actually exists in list
+    # TODO: Verify the new dataset_id is actually in this list
     assert len(response.json()) > 0

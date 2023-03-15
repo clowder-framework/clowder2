@@ -1,42 +1,19 @@
-import os
 from fastapi.testclient import TestClient
 from app.config import settings
-
-dataset_data = {
-    "name": "test dataset",
-    "description": "a dataset is a container of files and metadata",
-}
-listener_data = {
-    "name": "Test Listener",
-    "version": 2,
-    "description": "Created for testing purposes.",
-}
-feed_data = {
-    "name": "XYZ Test Feed",
-    "search": {
-        "index_name": "file",
-        "criteria": [{"field": "name", "operator": "==", "value": "xyz"}],
-    },
-}
+from app.tests.utils import create_dataset, upload_file, register_v2_listener, feed_example
 
 
 def test_feeds(client: TestClient, headers: dict):
-    # Create a listener (extractor)
-    response = client.post(
-        f"{settings.API_V2_STR}/listeners", json=listener_data, headers=headers
-    )
-    assert response.json().get("id") is not None
-    listener_id = response.json().get("id")
-    assert response.status_code == 200
+    listener_name = "Test Listener"
+    listener_id = register_v2_listener(client, headers, listener_name).get("id")
 
-    # Create a new search feed for file foo
-    test_feed_data = feed_data
+    # Create a new search feed for file based on the filename
     response = client.post(
-        f"{settings.API_V2_STR}/feeds", json=test_feed_data, headers=headers
+        f"{settings.API_V2_STR}/feeds", json=feed_example, headers=headers
     )
+    assert response.status_code == 200
     assert response.json().get("id") is not None
     feed_id = response.json().get("id")
-    assert response.status_code == 200
 
     # Assign listener to feed
     response = client.post(
@@ -46,25 +23,14 @@ def test_feeds(client: TestClient, headers: dict):
     )
     assert response.status_code == 200
 
-    # Create dataset to hold file
-    response = client.post(
-        f"{settings.API_V2_STR}/datasets", json=dataset_data, headers=headers
-    )
-    assert response.json().get("id") is not None
-    assert response.status_code == 200
-    dataset_id = response.json().get("id")
+    # Upload file to trigger the feed
+    dataset_id = create_dataset(client, headers).get("id")
+    file_id = upload_file(client, headers, dataset_id, "xyz.txt", "This should trigger.").get("id")
 
-    # Upload file foo
-    dummy_file = "xyz.txt"
-    with open(dummy_file, "w") as dummy:
-        dummy.write("This should trigger.")
-    file_data = {"file": open(dummy_file, "rb")}
-    response = client.post(
-        f"{settings.API_V2_STR}/datasets/{dataset_id}/files",
+    # Check if job was automatically created
+    response = client.get(
+        f"{settings.API_V2_STR}/jobs?listener_id={listener_name}&file_id={file_id}",
         headers=headers,
-        files=file_data,
     )
-    os.remove(dummy_file)
     assert response.status_code == 200
-
-    # TODO: Verify the job was created
+    assert len(response.json()) > 0
