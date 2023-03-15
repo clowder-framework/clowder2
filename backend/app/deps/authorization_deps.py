@@ -198,36 +198,36 @@ class MetadataAuthorization:
         self.role = role
 
     async def __call__(
-            self,
-            metadata_id: str,
-            db: MongoClient = Depends(get_db),
-            current_user: str = Depends(get_current_username),
+        self,
+        metadata_id: str,
+        db: MongoClient = Depends(get_db),
+        current_user: str = Depends(get_current_username),
     ):
         if (
-                metadata := await db["metadata"].find_one({"_id": ObjectId(metadata_id)})
+            metadata := await db["metadata"].find_one({"_id": ObjectId(metadata_id)})
         ) is not None:
             md_out = MetadataOut.from_mongo(metadata)
             resource_type = md_out.resource.collection
             resource_id = md_out.resource.resource_id
             if resource_type == "files":
                 if (
-                        file := await db["files"].find_one({"_id": ObjectId(resource_id)})
+                    file := await db["files"].find_one({"_id": ObjectId(resource_id)})
                 ) is not None:
                     file_out = FileOut.from_mongo(file)
                     if (
-                            authorization_q := await db["authorization"].find_one(
-                                {
-                                    "$and": [
-                                        {"dataset_id": ObjectId(file_out.dataset_id)},
-                                        {
-                                            "$or": [
-                                                {"creator": current_user},
-                                                {"user_ids": current_user},
-                                            ]
-                                        },
-                                    ]
-                                }
-                            )
+                        authorization_q := await db["authorization"].find_one(
+                            {
+                                "$and": [
+                                    {"dataset_id": ObjectId(file_out.dataset_id)},
+                                    {
+                                        "$or": [
+                                            {"creator": current_user},
+                                            {"user_ids": current_user},
+                                        ]
+                                    },
+                                ]
+                            }
+                        )
                     ) is not None:
                         authorization = AuthorizationDB.from_mongo(authorization_q)
                         if access(authorization.role, self.role):
@@ -243,25 +243,25 @@ class MetadataAuthorization:
                     )
             elif resource_type == "datasets":
                 if (
-                        dataset := await db["datasets"].find_one(
-                            {"_id": ObjectId(resource_id)}
-                        )
+                    dataset := await db["datasets"].find_one(
+                        {"_id": ObjectId(resource_id)}
+                    )
                 ) is not None:
                     dataset_out = DatasetOut.from_mongo(dataset)
                     if (
-                            authorization_q := await db["authorization"].find_one(
-                                {
-                                    "$and": [
-                                        {"dataset_id": ObjectId(dataset_out.id)},
-                                        {
-                                            "$or": [
-                                                {"creator": current_user},
-                                                {"user_ids": current_user},
-                                            ]
-                                        },
-                                    ]
-                                }
-                            )
+                        authorization_q := await db["authorization"].find_one(
+                            {
+                                "$and": [
+                                    {"dataset_id": ObjectId(dataset_out.id)},
+                                    {
+                                        "$or": [
+                                            {"creator": current_user},
+                                            {"user_ids": current_user},
+                                        ]
+                                    },
+                                ]
+                            }
+                        )
                     ) is not None:
                         authorization = AuthorizationDB.from_mongo(authorization_q)
                         if access(authorization.role, self.role):
