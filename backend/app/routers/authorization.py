@@ -320,7 +320,7 @@ async def remove_user_role(
     else:
         raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
 
-@router.get("/datasets/{dataset_id}/users_and_roles", response_model=DatasetOut)
+@router.get("/datasets/{dataset_id}/users_and_roles", response_model=List[AuthorizationOut])
 async def get_dataset_users_and_roles(
     dataset_id: str,
     db: MongoClient = Depends(dependencies.get_db),
@@ -331,23 +331,32 @@ async def get_dataset_users_and_roles(
     ) is not None:
         dataset_authorizations = []
         async for auth in db["authorization"].find({"dataset_id": ObjectId(dataset_id)}):
-            dataset_authorizations.append(AuthorizationOut.from_mongo(auth))
+            current_authorization = AuthorizationOut.from_mongo(auth)
+            if len(current_authorization.group_ids) == 0:
+                dataset_authorizations.append(current_authorization)
         return dataset_authorizations
     else:
         raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
 
-@router.get("/datasets/{dataset_id}/groups_and_roles", response_model=DatasetOut)
+@router.get("/datasets/{dataset_id}/groups_and_roles", response_model=List[AuthorizationOut])
 async def get_dataset_users_and_roles(
         dataset_id: str,
         db: MongoClient = Depends(dependencies.get_db),
         allow: bool = Depends(Authorization("editor")),
 ):
     if (
-            dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
+        dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
     ) is not None:
         dataset_group_authorizations = []
         async for auth in db["authorization"].find({"dataset_id": ObjectId(dataset_id)}):
-            dataset_group_authorizations.append(AuthorizationOut.from_mongo(auth))
+            current_authorization = AuthorizationOut.from_mongo(auth)
+            if len(current_authorization.group_ids) > 0:
+                for group_id in current_authorization.group_ids:
+                    if (
+                            current_group := await db["groups"].find_one({"_id": group_id})
+                    ) is not None:
+                        group_out = GroupOut.from_mongo(current_group)
+                        dataset_group_authorizations.append(AuthorizationOut.from_mongo(auth))
         return dataset_group_authorizations
     else:
         raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
