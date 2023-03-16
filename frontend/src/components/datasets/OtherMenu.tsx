@@ -7,13 +7,16 @@ import {useNavigate} from "react-router-dom";
 import {useDispatch} from "react-redux";
 import {MoreHoriz} from "@material-ui/icons";
 import DeleteIcon from "@mui/icons-material/Delete";
+import ShareIcon from '@mui/icons-material/Share';
+import ShareDatasetModal from "./ShareDatasetModal"
 
 type ActionsMenuProps = {
-	datasetId: string
+	datasetId: string,
+	datasetName: string
 }
 
 export const OtherMenu = (props: ActionsMenuProps): JSX.Element => {
-	const {datasetId} = props;
+	const {datasetId, datasetName} = props;
 
 	// use history hook to redirect/navigate between routes
 	const history = useNavigate();
@@ -24,6 +27,7 @@ export const OtherMenu = (props: ActionsMenuProps): JSX.Element => {
 
 	// state
 	const [deleteDatasetConfirmOpen, setDeleteDatasetConfirmOpen] = useState(false);
+	const [sharePaneOpen, setSharePaneOpen] = useState(false);
 
 	// delete dataset
 	const deleteSelectedDataset = () => {
@@ -45,6 +49,10 @@ export const OtherMenu = (props: ActionsMenuProps): JSX.Element => {
 		setAnchorEl(null);
 	};
 
+    const handleShareClose = () => {
+        setSharePaneOpen(false);
+    }
+
 	return (
 		<Box>
 			<ActionModal actionOpen={deleteDatasetConfirmOpen} actionTitle="Are you sure?"
@@ -53,6 +61,9 @@ export const OtherMenu = (props: ActionsMenuProps): JSX.Element => {
 						 handleActionCancel={() => {
 							 setDeleteDatasetConfirmOpen(false);
 						 }}/>
+
+ 		        <ShareDatasetModal open={sharePaneOpen} handleClose={handleShareClose} datasetName={datasetName}/>
+
 			<Button variant="outlined" onClick={handleOptionClick}
 					endIcon={<ArrowDropDownIcon/>}>
 				<MoreHoriz/>
@@ -74,6 +85,17 @@ export const OtherMenu = (props: ActionsMenuProps): JSX.Element => {
 						<DeleteIcon fontSize="small"/>
 					</ListItemIcon>
 					<ListItemText>Delete Dataset</ListItemText></MenuItem>
+                		<MenuItem
+                    			onClick={() => {
+                        			handleOptionClose();
+                        			setSharePaneOpen(true);
+                    			}
+                    		}>
+                    			<ListItemIcon>
+                        			<ShareIcon fontSize="small" />
+                    			</ListItemIcon>
+                    			<ListItemText>Share</ListItemText>
+                		</MenuItem>
 			</Menu>
 		</Box>)
 }
