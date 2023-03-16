@@ -21,7 +21,7 @@ import {Link} from "@mui/material";
 import {Link as RouterLink, useLocation} from "react-router-dom";
 import {useSelector} from "react-redux";
 import {RootState} from "../types/data";
-import {AddBox, Create, Explore} from "@material-ui/icons";
+import {AddBox, Create, Explore, Group} from "@material-ui/icons";
 import {EmbeddedSearch} from "./search/EmbeddedSearch";
 import {searchTheme} from "../theme";
 import {ReactiveBase} from "@appbaseio/reactivesearch";
@@ -225,6 +225,16 @@ export default function PersistentDrawerLeft(props) {
 					</List>
                     <Divider/>
 					<List>
+						<ListItem key={"managegroups"} disablePadding>
+							<ListItemButton component={RouterLink} to="/groups">
+								<ListItemIcon>
+									<Group/>
+								</ListItemIcon>
+								<ListItemText primary={"Groups"}/>
+							</ListItemButton>
+						</ListItem>
+					</List>
+                    <List>
 						<ListItem key={"newmetadata"} disablePadding>
 							<ListItemButton component={RouterLink} to="/new-metadata-definition">
 								<ListItemIcon>

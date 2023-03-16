@@ -1,5 +1,5 @@
 import {Dataset, ExtractedMetadata, MetadataJsonld, FilePreview, Folder} from "./data";
-import {MetadataOut as Metadata, FileOut as FileSummary, FileVersion, AuthorizationBase} from "../openapi/v2";
+import {GroupOut as Group, MetadataOut as Metadata, FileOut as FileSummary, FileVersion, AuthorizationBase} from "../openapi/v2";
 import {MetadataDefinitionOut as MetadataDefinition} from "../openapi/v2";
 
 interface RECEIVE_FILES_IN_DATASET {
@@ -249,6 +249,11 @@ interface FETCH_JOB_UPDATES{
     currJobUpdates: [];
 }
 
+interface RECEIVE_GROUPS{
+	type: "RECEIVE_GROUPS"
+	groups: Group[];
+}
+
 export type DataAction =
 	| RECEIVE_FILES_IN_DATASET
 	| RECEIVE_FOLDERS_IN_DATASET
@@ -299,4 +304,5 @@ export type DataAction =
     | SUBMIT_DATASET_EXTRACTION
     | FETCH_JOB_SUMMARY
     | FETCH_JOB_UPDATES
+	| RECEIVE_GROUPS
 	;

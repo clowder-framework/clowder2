@@ -5,6 +5,7 @@ import {CreateMetadataDefinitionPage} from "./components/metadata/CreateMetadata
 import {Dataset as DatasetComponent} from "./components/datasets/Dataset";
 import {File as FileComponent} from "./components/files/File";
 import {CreateDataset} from "./components/datasets/CreateDataset";
+import {Groups as GroupComponent} from "./components/groups/Group"
 
 import {RedirectRegister as RedirectRegisterComponent} from "./components/auth/RedirectRegister";
 import {Auth as AuthComponent} from "./components/auth/Auth";
@@ -87,6 +88,7 @@ export const AppRoutes = (): JSX.Element => {
 				<Route path="/auth/register" element={<RedirectRegisterComponent/>} />
 				<Route path="/auth/login" element={<RedirectLoginComponent/>} />
 				<Route path="/auth/logout" element={<RedirectLogoutComponent/>} />
+				<Route path="/groups" element={<GroupComponent/>} />
 				<Route path="/auth" element={<AuthComponent/>} />
 				<Route path="/search" element={<PrivateRoute><Search/></PrivateRoute>} />
 				<Route path="/extractions" element={<PrivateRoute><ExtractionHistory/></PrivateRoute>} />
