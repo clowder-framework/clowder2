@@ -31,6 +31,7 @@ import AssessmentIcon from "@mui/icons-material/Assessment";
 import HistoryIcon from "@mui/icons-material/History";
 import BuildIcon from "@mui/icons-material/Build";
 import {ExtractionHistoryTab} from "../listeners/ExtractionHistoryTab";
+import {SharingTab} from "../sharing/SharingTab";
 import RoleChip from "../auth/RoleChip";
 
 const tab = {
@@ -198,6 +199,8 @@ export const Dataset = (): JSX.Element => {
 							 label="Extractors" {...a11yProps(3)} disabled={false}/>
 						<Tab icon={<HistoryIcon/>} iconPosition="start" sx={tab}
 							 label="Extraction History" {...a11yProps(4)} disabled={false}/>
+						<Tab icon={<HistoryIcon/>} iconPosition="start" sx={tab}
+							 label="Sharing" {...a11yProps(5)} disabled={false}/>
 
 					</Tabs>
 					<TabPanel value={selectedTabIndex} index={0}>
@@ -245,6 +248,9 @@ export const Dataset = (): JSX.Element => {
 					</TabPanel>
 					<TabPanel value={selectedTabIndex} index={4}>
 						<ExtractionHistoryTab datasetId={datasetId}/>
+					</TabPanel>
+					<TabPanel value={selectedTabIndex} index={5}>
+						<SharingTab datasetId={datasetId}/>
 					</TabPanel>
 				</Grid>
 				<Grid item>
