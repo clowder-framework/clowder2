@@ -40,3 +40,43 @@ export function fetchFileRole(fileId){
 			});
 	};
 }
+
+export const RECEIVE_DATASET_USERS_AND_ROLES = "RECEIVE_DATASET_USERS_AND_ROLES";
+export function fetchDatasetUsersAndRoles(datasetId){
+	return (dispatch) => {
+		return V2.AuthorizationService.getDatasetUsersAndRolesApiV2AuthorizationsDatasetsDatasetIdUsersAndRolesGet(datasetId)
+			.then(json => {
+				dispatch({
+					type: RECEIVE_DATASET_USERS_AND_ROLES,
+					role: json,
+					receivedAt: Date.now(),
+				});
+			})
+			.then(() => {
+				dispatch(resetFailedReason());
+			})
+			.catch(reason => {
+				dispatch(handleErrorsAuthorization(reason, fetchDatasetUsersAndRoles(datasetId)));
+			});
+	};
+}
+
+export const RECEIVE_DATASET_GROUPS_AND_ROLES = "RECEIVE_DATASET_GROUPS_AND_ROLES";
+export function fetchDatasetGroupsAndRoles(datasetId){
+	return (dispatch) => {
+		return V2.AuthorizationService.getDatasetGroupsAndRolesApiV2AuthorizationsDatasetsDatasetIdGroupsAndRolesGet(datasetId)
+			.then(json => {
+				dispatch({
+					type: RECEIVE_DATASET_GROUPS_AND_ROLES,
+					role: json,
+					receivedAt: Date.now(),
+				});
+			})
+			.then(() => {
+				dispatch(resetFailedReason());
+			})
+			.catch(reason => {
+				dispatch(handleErrorsAuthorization(reason, fetchDatasetGroupsAndRoles(datasetId)));
+			});
+	};
+}

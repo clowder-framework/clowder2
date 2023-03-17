@@ -1,6 +1,7 @@
 import {Dataset, ExtractedMetadata, MetadataJsonld, FilePreview, Folder} from "./data";
 import {MetadataOut as Metadata, FileOut as FileSummary, FileVersion, AuthorizationBase} from "../openapi/v2";
 import {MetadataDefinitionOut as MetadataDefinition} from "../openapi/v2";
+import {GroupAndRole, UserAndRole} from "../openapi/v2";
 
 interface RECEIVE_FILES_IN_DATASET {
 	type: "RECEIVE_FILES_IN_DATASET";
@@ -20,6 +21,16 @@ interface RECEIVE_DATASET_ABOUT{
 interface RECEIVE_DATASET_ROLE{
 	role: AuthorizationBase;
 	type: "RECEIVE_DATASET_ROLE";
+}
+
+interface RECEIVE_DATASET_GROUPS_AND_ROLES{
+	groupsAndRoles : GroupAndRole[];
+	type: "RECEIVE_DATASET_GROUPS_AND_ROLES";
+}
+
+interface RECEIVE_DATASET_USERS_AND_ROLES{
+	usersAndRoles : UserAndRole[];
+	type: "RECEIVE_DATASET_USERS_AND_ROLES";
 }
 
 interface RECEIVE_FILE_ROLE{
@@ -299,4 +310,6 @@ export type DataAction =
     | SUBMIT_DATASET_EXTRACTION
     | FETCH_JOB_SUMMARY
     | FETCH_JOB_UPDATES
+	| RECEIVE_DATASET_GROUPS_AND_ROLES
+	| RECEIVE_DATASET_USERS_AND_ROLES
 	;
