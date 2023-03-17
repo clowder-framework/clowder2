@@ -19,20 +19,17 @@ export const SharingTab = (): JSX.Element => {
 
 	useEffect(() => {
 		getUsersAndRoles(datasetId);
+		console.log('users and roles', datasetUsersAndRolesList);
+
 	}, []);
 
 	useEffect(() => {
 		getGroupsAndRoles(datasetId);
+		console.log('groups and roles', datasetGroupsAndRolesList);
 	}, []);
-
-
-	console.log(datasetUsersAndRolesList);
-	console.log(datasetGroupsAndRolesList);
-	console.log('dataset group and user roles');
 
 
 	return (
 		<p>this</p>
-	)
-	;
+	);
 }
