@@ -254,6 +254,11 @@ interface RECEIVE_GROUPS{
 	groups: Group[];
 }
 
+interface RECEIVE_GROUP_ABOUT{
+	type: "RECEIVE_GROUP_ABOUT"
+	about: Group;
+}
+
 export type DataAction =
 	| RECEIVE_FILES_IN_DATASET
 	| RECEIVE_FOLDERS_IN_DATASET
@@ -305,4 +310,5 @@ export type DataAction =
     | FETCH_JOB_SUMMARY
     | FETCH_JOB_UPDATES
 	| RECEIVE_GROUPS
+	| RECEIVE_GROUP_ABOUT
 	;

@@ -2,9 +2,9 @@ import {
 	RECEIVE_GROUPS
 } from "../actions/group";
 import {DataAction} from "../types/action";
-import {GroupState} from "../types/data";
+import {GroupsState} from "../types/data";
 
-const defaultState: GroupState = {
+const defaultState: GroupsState = {
 	groups: [],
 };
 

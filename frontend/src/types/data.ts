@@ -149,8 +149,11 @@ export interface ListenerState{
     currJobSummary: JobSummary[];
     currJobId: string;
 }
-export interface GroupState{
+export interface GroupsState{
 	groups: GroupOut[];
+}
+export interface GroupState{
+	about: GroupOut;
 }
 export interface MetadataState{
 	metadataDefinitionList: MetadataDefinitionOut[],
@@ -197,6 +200,7 @@ export interface RootState {
 	file:FileState;
 	dataset:DatasetState;
 	listener: ListenerState;
+	groups: GroupsState;
 	group: GroupState;
 	user: UserState;
 	folder: FolderState;
