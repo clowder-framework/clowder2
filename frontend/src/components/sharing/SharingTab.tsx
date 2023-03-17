@@ -11,8 +11,8 @@ export const SharingTab = (): JSX.Element => {
 
 	const dispatch = useDispatch();
 
-	const getUsersAndRoles = (datasetId: string) => dispatch(fetchDatasetUsersAndRoles(datasetId));
-	const getGroupsAndRoles = (datasetId: string) => dispatch(fetchDatasetGroupsAndRoles(datasetId));
+	const getUsersAndRoles = (datasetId: string | undefined) => dispatch(fetchDatasetUsersAndRoles(datasetId));
+	const getGroupsAndRoles = (datasetId: string | undefined) => dispatch(fetchDatasetGroupsAndRoles(datasetId));
 	const datasetUsersAndRolesList = useSelector((state: RootState) => state.dataset.usersAndRoles);
 	const datasetGroupsAndRolesList = useSelector((state: RootState) => state.dataset.groupsAndRoles);
 
