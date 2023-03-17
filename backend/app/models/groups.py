@@ -5,7 +5,7 @@ from pydantic import Field, BaseModel
 
 from app.models.mongomodel import OID, MongoModel
 from app.models.users import UserOut
-from app.models.authorization import Provenance
+from app.models.authorization import Provenance, RoleType
 
 
 class Member(BaseModel):
@@ -35,3 +35,9 @@ class GroupDB(MongoModel, GroupBase, Provenance):
 
 class GroupOut(GroupDB):
     pass
+
+
+class GroupAndRole(BaseModel):
+    group_id: str
+    group_name: str
+    roleType: str
