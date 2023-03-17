@@ -71,9 +71,9 @@ const dataset = (state = defaultState, action: DataAction) => {
 		return Object.assign({}, state, {
 			datasets: state.datasets.filter(dataset => dataset.id !== action.dataset.id),
 		});
-	case DOWNLOAD_DATASET:
-		// TODO do nothing for now; but in the future can utilize to display certain effects
-		return Object.assign({}, state, {});
+	// case DOWNLOAD_DATASET:
+	// 	// TODO do nothing for now; but in the future can utilize to display certain effects
+	// 	return Object.assign({}, state, {});
 	default:
 		return state;
 	}
