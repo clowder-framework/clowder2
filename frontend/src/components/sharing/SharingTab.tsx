@@ -5,6 +5,14 @@ import {useDispatch, useSelector} from "react-redux";
 import {useParams} from "react-router-dom";
 
 
+type GroupAndRole = {
+	updateMetadata: any,
+	deleteMetadata: any,
+	resourceType: string | undefined,
+	resourceId: string | undefined,
+	version: number | undefined,
+}
+
 export const SharingTab = (): JSX.Element => {
 
 	const {datasetId} = useParams<{ datasetId?: string }>();
