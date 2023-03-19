@@ -30,6 +30,17 @@ export const SharingTab = (): JSX.Element => {
 
 
 	return (
-		<p>this</p>
-	);
+		<>
+			{
+				(() => {
+					let groupRoleList = [];
+					groupRoleList = datasetUsersAndRolesList;
+					console.log(groupRoleList, 'groupRoleList');
+
+
+					return <>this</>
+			})()
+			}
+		</>
+	)
 }

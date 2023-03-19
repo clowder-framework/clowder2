@@ -46,9 +46,10 @@ export function fetchDatasetUsersAndRoles(datasetId){
 	return (dispatch) => {
 		return V2.AuthorizationService.getDatasetUsersAndRolesApiV2AuthorizationsDatasetsDatasetIdUsersAndRolesGet(datasetId)
 			.then(json => {
+				console.log('json',json);
 				dispatch({
 					type: RECEIVE_DATASET_USERS_AND_ROLES,
-					role: json,
+					usersAndRoles: json,
 					receivedAt: Date.now(),
 				});
 			})
@@ -66,9 +67,10 @@ export function fetchDatasetGroupsAndRoles(datasetId){
 	return (dispatch) => {
 		return V2.AuthorizationService.getDatasetGroupsAndRolesApiV2AuthorizationsDatasetsDatasetIdGroupsAndRolesGet(datasetId)
 			.then(json => {
+				console.log('json', json);
 				dispatch({
 					type: RECEIVE_DATASET_GROUPS_AND_ROLES,
-					role: json,
+					groupsAndRoles: json,
 					receivedAt: Date.now(),
 				});
 			})
