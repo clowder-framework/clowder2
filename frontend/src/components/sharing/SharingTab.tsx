@@ -75,7 +75,11 @@ export const SharingTab = (): JSX.Element => {
 								sx={{'&:last-child td, &:last-child th': {border: 0}}}
 							>
 								<TableCell
-									align="right">by {user_role.user_id}</TableCell>
+									align="right">{user_role.user_id}</TableCell>
+								<TableCell
+									align="right">{user_role.roleType}</TableCell>
+								<TableCell
+									align="right">{user_role.roleType}</TableCell>
 								<TableCell align="right">&nbsp;</TableCell>
 								<TableCell align="right">&nbsp;</TableCell>
 							</TableRow>))
