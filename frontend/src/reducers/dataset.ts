@@ -6,12 +6,12 @@ import {
 	DELETE_DATASET,
 	CREATE_DATASET,
 	RESET_CREATE_DATASET,
+	RECEIVE_DATASET_USERS_AND_ROLES,
+	RECEIVE_DATASET_GROUPS_AND_ROLES,
 	DOWNLOAD_DATASE
 } from "../actions/dataset";
 import {CREATE_FILE, UPDATE_FILE, DELETE_FILE, RESET_CREATE_FILE} from "../actions/file";
 import {RECEIVE_DATASET_ROLE,
-		RECEIVE_DATASET_USERS_AND_ROLES,
-	    RECEIVE_DATASET_GROUPS_AND_ROLES
 } from "../actions/authorization";
 import {DataAction} from "../types/action";
 import {Author, Dataset, DatasetState} from "../types/data";
@@ -24,8 +24,8 @@ const defaultState: DatasetState = {
 	datasets: [],
 	newDataset: <Dataset>{},
 	newFile: <File>{},
-	groupsAndRoles: [],
-	usersAndRoles: []
+	groupsAndRoles: <GroupAndRole[]>[],
+	usersAndRoles: <UserAndRole[]>[],
 };
 
 const dataset = (state = defaultState, action: DataAction) => {

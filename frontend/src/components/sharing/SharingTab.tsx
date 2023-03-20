@@ -1,8 +1,19 @@
 import React, {useEffect, useState} from "react";
 import {RootState} from "../../types/data";
-import {fetchDatasetGroupsAndRoles, fetchDatasetUsersAndRoles} from "../../actions/authorization";
+import {fetchDatasetGroupsAndRoles, fetchDatasetUsersAndRoles} from "../../actions/dataset";
 import {useDispatch, useSelector} from "react-redux";
 import {useParams} from "react-router-dom";
+import TableContainer from "@mui/material/TableContainer";
+import Paper from "@mui/material/Paper";
+import Table from "@mui/material/Table";
+import TableHead from "@mui/material/TableHead";
+import TableRow from "@mui/material/TableRow";
+import TableCell from "@mui/material/TableCell";
+import TableBody from "@mui/material/TableBody";
+import FolderIcon from "@mui/icons-material/Folder";
+import {Button} from "@mui/material";
+import FolderMenu from "../files/FolderMenu";
+import {FilesTableFileEntry} from "../files/FilesTableFileEntry";
 
 
 export const SharingTab = (): JSX.Element => {
@@ -29,18 +40,49 @@ export const SharingTab = (): JSX.Element => {
 	}, []);
 
 
+
 	return (
-		<>
-			{
-				(() => {
-					let groupRoleList = [];
-					groupRoleList = datasetUsersAndRolesList;
-					console.log(groupRoleList, 'groupRoleList');
-
-
-					return <>this</>
-			})()
-			}
-		</>
+		<TableContainer component={Paper}>
+			<Table sx={{minWidth: 650}} aria-label="simple table">
+				<TableHead>
+					<TableRow>
+						<TableCell>ID</TableCell>
+						<TableCell align="right">Name</TableCell>
+						<TableCell align="right">Role</TableCell>
+					</TableRow>
+				</TableHead>
+				<TableBody>
+					{
+						datasetGroupsAndRolesList.map((group_role) => (
+							<TableRow
+								key={group_role.group_id}
+								sx={{'&:last-child td, &:last-child th': {border: 0}}}
+							>
+								<TableCell
+									align="right">{group_role.group_id}</TableCell>
+								<TableCell
+									align="right">{group_role.group_name}</TableCell>
+								<TableCell
+									align="right">{group_role.roleType}</TableCell>
+								<TableCell align="right">&nbsp;</TableCell>
+								<TableCell align="right">&nbsp;</TableCell>
+							</TableRow>))
+					}
+					{
+						datasetUsersAndRolesList.map((user_role) => (
+							<TableRow
+								key={user_role.user_id}
+								sx={{'&:last-child td, &:last-child th': {border: 0}}}
+							>
+								<TableCell
+									align="right">by {user_role.user_id}</TableCell>
+								<TableCell align="right">&nbsp;</TableCell>
+								<TableCell align="right">&nbsp;</TableCell>
+							</TableRow>))
+					}
+				</TableBody>
+			</Table>
+		</TableContainer>
 	)
+
 }
