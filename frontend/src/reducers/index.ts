@@ -6,7 +6,7 @@ import user from "./user";
 import error from "./error";
 import metadata from "./metadata";
 import listeners from "./listeners";
-import groups from "./groups";
+import group from "./group";
 
 const rootReducer = combineReducers({
 	file: file,
@@ -16,7 +16,7 @@ const rootReducer = combineReducers({
 	error: error,
 	metadata: metadata,
 	listener: listeners,
-	group: groups,
+	group: group,
 });
 
 export default rootReducer;

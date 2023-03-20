@@ -43,7 +43,7 @@ export function Group() {
 					{/*title*/}
 					<Grid item xs={8} sx={{display: "flex", alignItems: "center"}}>
 						<Box sx={{display: "inline-flex", justifyContent: "space-between", alignItems: "baseline"}}>
-							<Typography variant="h3" paragraph>{about}</Typography>
+							<Typography variant="h3" paragraph>{about !== undefined ? about.name : "Not found"}</Typography>
 						</Box>
 					</Grid>
 				</Grid>

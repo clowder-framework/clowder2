@@ -18,9 +18,8 @@ import {Link} from "react-router-dom";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 
-type GroupProps = {}
 
-export function Groups(props: GroupProps) {
+export function Groups() {
 	// Redux connect equivalent
 	const dispatch = useDispatch();
 	const listGroups = (skip: number | undefined, limit: number | undefined) =>
