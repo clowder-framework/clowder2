@@ -224,16 +224,6 @@ export default function PersistentDrawerLeft(props) {
 						</ListItem>
 					</List>
                     <Divider/>
-					<List>
-						<ListItem key={"managegroups"} disablePadding>
-							<ListItemButton component={RouterLink} to="/groups">
-								<ListItemIcon>
-									<Group/>
-								</ListItemIcon>
-								<ListItemText primary={"Groups"}/>
-							</ListItemButton>
-						</ListItem>
-					</List>
                     <List>
 						<ListItem key={"newmetadata"} disablePadding>
 							<ListItemButton component={RouterLink} to="/new-metadata-definition">

@@ -39,14 +39,38 @@ export function Group() {
 	return (
 		<Layout>
 			<Grid container>
-				<Grid container>
-					{/*title*/}
-					<Grid item xs={8} sx={{display: "flex", alignItems: "center"}}>
-						<Box sx={{display: "inline-flex", justifyContent: "space-between", alignItems: "baseline"}}>
-							<Typography variant="h3" paragraph>{about !== undefined ? about.name : "Not found"}</Typography>
-						</Box>
+				{/*title*/}
+				<Grid item xs={8} sx={{display: "flex", alignItems: "center"}}>
+					<Box sx={{display: "inline-flex", justifyContent: "space-between", alignItems: "baseline"}}>
+						<Typography variant="h3" paragraph>{about !== undefined ? about.name : "Not found"}</Typography>
+					</Box>
+				</Grid>
+				<Grid container spacing={2}>
+					<Grid item xs={10}>
+						<Typography variant="body1" paragraph>{about.description}</Typography>
 					</Grid>
 				</Grid>
+			</Grid>
+			<Grid container>
+				<Box sx={{display: "inline-flex", justifyContent: "space-between", alignItems: "baseline"}}>
+						<List>
+							{
+								about !== undefined && about.users !== undefined ?
+									about.users.map((user) => {
+										return (<>
+											<Card key={user.user.id} sx={{height: "100%", display: "flex", flexDirection: "row"}}>
+											<CardContent>
+												<Typography variant="h5">{user.user.first_name}</Typography>
+											</CardContent>
+										</Card>
+										<Divider/>
+										</>)
+									})
+								:
+								<></>
+							}
+						</List>
+					</Box>
 			</Grid>
 		</Layout>
 	);

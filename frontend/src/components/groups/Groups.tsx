@@ -86,7 +86,7 @@ export function Groups() {
 													<CardActionArea component={Link} to={`/groups/${group.id}`} sx={{height: "100%"}}>
 														<Typography variant="h5">{group.name}</Typography>
 														<Typography color="secondary">
-															{group.users !== undefined ? group.users.length : 0} users
+															Size: {group.users !== undefined ? group.users.length : 0}
 														</Typography>
 														<Typography variant="body2" sx={{
 															overflow: 'hidden',

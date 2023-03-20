@@ -50,7 +50,8 @@ async def get_groups(
 
     groups = []
     for doc in (
-        await db["groups"].find(
+        await db["groups"]
+        .find(
             {
                 "$or": [
                     {"creator": user_id},
