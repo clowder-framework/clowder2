@@ -40,6 +40,10 @@ export const SharingTab = (): JSX.Element => {
 	}, []);
 
 
+	const clickButton = () => {
+		// reset error message and close the error window
+		console.log('change role now');
+	}
 
 	return (
 		<TableContainer component={Paper}>
@@ -49,6 +53,7 @@ export const SharingTab = (): JSX.Element => {
 						<TableCell align="right">ID</TableCell>
 						<TableCell align="right">Name</TableCell>
 						<TableCell align="right">Role</TableCell>
+						<TableCell align="right">Change Role</TableCell>
 					</TableRow>
 				</TableHead>
 				<TableBody>
@@ -64,6 +69,10 @@ export const SharingTab = (): JSX.Element => {
 									align="right">{group_role.group_name}</TableCell>
 								<TableCell
 									align="right">{group_role.roleType}</TableCell>
+								<TableCell
+									align="right">click to change</TableCell>
+								<TableCell
+									align="right"><button value={group_role.group_id} onClick={clickButton}>click to change role</button></TableCell>
 							</TableRow>))
 					}
 					{
@@ -78,6 +87,8 @@ export const SharingTab = (): JSX.Element => {
 									align="right">{user_role.roleType}</TableCell>
 								<TableCell
 									align="right">{user_role.roleType}</TableCell>
+								<TableCell
+									align="right"><button value={user_role.user_id} onClick={clickButton}>click to change role</button></TableCell>
 							</TableRow>))
 					}
 				</TableBody>
