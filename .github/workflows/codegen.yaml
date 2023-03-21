@@ -1,9 +1,5 @@
 name: Codegen
 
-#defaults:
-#  run:
-#    working-directory: frontend
-
 on:
   push:
     branches:
@@ -28,16 +24,44 @@ jobs:
         - "12"
         - "14"
 
-    steps:
+  steps:
+    - name: Set up QEMU
+      uses: docker/setup-qemu-action@v2
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2
+
     - name: Checkout
-      uses: actions/checkout@v3
+        uses: actions/checkout@v3
+
+    - name: Docker meta
+      id: meta
+      uses: docker/metadata-action@v4
+      with:
+        images: |
+          clowder/clowder2-backend
+        tags: |
+          type=ref,event=branch
+          type=ref,event=pr
+          type=semver,pattern={{version}}
+          type=semver,pattern={{major}}.{{minor}}
+
+    - name: Build Backend no push
+      uses: docker/build-push-action@v3
+      with:
+        context: ./backend
+        platforms: linux/amd64
+        push: false
+        tags: ${{ steps.meta.outputs.tags }}
 
     - name: Start containers
       run: docker-compose -f "docker-compose.dev.yml" up -d --build
 
-    # start backend
-    - name: Run backend fastAPIs
-
+    # start backend container
+    - name: Run backend container just built
+      runs:
+        using: "docker"
+        image: "clowder/clowder2-backend"
 
     # setup node
     - name: Install node
