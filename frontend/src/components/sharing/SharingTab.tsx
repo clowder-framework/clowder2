@@ -14,6 +14,7 @@ import FolderIcon from "@mui/icons-material/Folder";
 import {Button} from "@mui/material";
 import FolderMenu from "../files/FolderMenu";
 import {FilesTableFileEntry} from "../files/FilesTableFileEntry";
+import {ChangeRoleModal} from "../sharing/ChangeRoleModal";
 
 
 export const SharingTab = (): JSX.Element => {
