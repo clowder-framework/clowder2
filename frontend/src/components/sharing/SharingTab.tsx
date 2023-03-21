@@ -46,7 +46,7 @@ export const SharingTab = (): JSX.Element => {
 			<Table sx={{minWidth: 650}} aria-label="simple table">
 				<TableHead>
 					<TableRow>
-						<TableCell>ID</TableCell>
+						<TableCell align="right">ID</TableCell>
 						<TableCell align="right">Name</TableCell>
 						<TableCell align="right">Role</TableCell>
 					</TableRow>
@@ -64,8 +64,6 @@ export const SharingTab = (): JSX.Element => {
 									align="right">{group_role.group_name}</TableCell>
 								<TableCell
 									align="right">{group_role.roleType}</TableCell>
-								<TableCell align="right">&nbsp;</TableCell>
-								<TableCell align="right">&nbsp;</TableCell>
 							</TableRow>))
 					}
 					{
@@ -80,8 +78,6 @@ export const SharingTab = (): JSX.Element => {
 									align="right">{user_role.roleType}</TableCell>
 								<TableCell
 									align="right">{user_role.roleType}</TableCell>
-								<TableCell align="right">&nbsp;</TableCell>
-								<TableCell align="right">&nbsp;</TableCell>
 							</TableRow>))
 					}
 				</TableBody>
