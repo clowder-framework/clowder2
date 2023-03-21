@@ -1,0 +1,57 @@
+name: Codegen
+
+#defaults:
+#  run:
+#    working-directory: frontend
+
+on:
+  push:
+    branches:
+      - 'main'
+      - 'release/*'
+    tags:
+      - 'v*'
+  pull_request:
+    branches:
+      - 'main'
+      - 'release/*'
+
+jobs:
+  docker:
+    timeout-minutes: 10
+    runs-on: ubuntu-latest
+
+  strategy:
+    fail-fast: false
+    matrix:
+      node:
+        - "12"
+        - "14"
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    - name: Start containers
+      run: docker-compose -f "docker-compose.dev.yml" up -d --build
+
+    # start backend
+    - name: Run backend fastAPIs
+
+
+    # setup node
+    - name: Install node
+      uses: actions/setup-node@v3
+      working-directory: frontend
+      with:
+        node-version: ${{ matrix.node }}
+
+    - name: Install dependencies
+      run: npm install
+
+    - name: Run Codegen
+      run: npm run codegen:v2:dev
+
+    - name: Stop containers
+      if: always()
+      run: docker-compose -f "docker-compose.dev.yml" down
