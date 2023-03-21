@@ -6,11 +6,11 @@ type ChangeRoleModalProps = {
     open: boolean,
     handleClose: any,
 	datasetId: string,
-    datasetName: string
 }
 
 export default function ChangeRoleModal(props: ChangeRoleModalProps) {
-    const { open, handleClose, datasetId, datasetName } = props;
+    const { open, handleClose, datasetId } = props;
+    const datasetName = "noname";
 
     const [email, setEmail] = useState("")
     const [role, setRole] = useState("viewer")

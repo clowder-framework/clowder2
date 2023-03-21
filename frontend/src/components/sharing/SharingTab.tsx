@@ -27,6 +27,12 @@ export const SharingTab = (): JSX.Element => {
 	const getGroupsAndRoles = (datasetId: string | undefined) => dispatch(fetchDatasetGroupsAndRoles(datasetId));
 	const datasetUsersAndRolesList = useSelector((state: RootState) => state.dataset.usersAndRoles);
 	const datasetGroupsAndRolesList = useSelector((state: RootState) => state.dataset.groupsAndRoles);
+	const [sharePaneOpen, setSharePaneOpen] = useState(false);
+
+	const handleShareClose = () => {
+        setSharePaneOpen(false);
+    }
+
 
 
 	useEffect(() => {
@@ -74,6 +80,7 @@ export const SharingTab = (): JSX.Element => {
 									align="right">click to change</TableCell>
 								<TableCell
 									align="right"><button value={group_role.group_id} onClick={clickButton}>click to change role</button></TableCell>
+
 							</TableRow>))
 					}
 					{
@@ -90,6 +97,7 @@ export const SharingTab = (): JSX.Element => {
 									align="right">{user_role.roleType}</TableCell>
 								<TableCell
 									align="right"><button value={user_role.user_id} onClick={clickButton}>click to change role</button></TableCell>
+
 							</TableRow>))
 					}
 				</TableBody>
