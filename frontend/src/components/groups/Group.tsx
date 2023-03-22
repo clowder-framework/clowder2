@@ -18,6 +18,8 @@ import {Link, useParams} from "react-router-dom";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import RoleChip from "../auth/RoleChip";
+import FilesTable from "../files/FilesTable";
+import MembersTable from "./MembersTable";
 
 
 export function Group() {
@@ -52,64 +54,7 @@ export function Group() {
 				</Grid>
 			</Grid>
 			<Grid container>
-				<Typography variant="h5" paragraph>Editors</Typography>
-			</Grid>
-			<Grid container>
-				{/*editors*/}
-				<Box sx={{display: "inline-flex", justifyContent: "space-between", alignItems: "baseline"}}>
-						<List>
-							{
-								about !== undefined && about.users !== undefined ?
-									about.users.map((user) => {
-										if (user.editor) {
-										return (<>
-											<Card key={user.user.id}
-												  sx={{height: "100%", display: "flex", flexDirection: "row"}}>
-												<CardContent>
-													<Typography
-														variant="body1">{user.user.first_name} {user.user.last_name}</Typography>
-													<Typography color="secondary">{user.user.email}</Typography>
-												</CardContent>
-											</Card>
-											<Divider/>
-										</>)
-									}
-									})
-								:
-								<></>
-							}
-						</List>
-					</Box>
-			</Grid>
-			<Grid container>
-				<Typography variant="h5" paragraph>Members</Typography>
-			</Grid>
-			<Grid container>
-				{/*members*/}
-				<Box sx={{display: "inline-flex", justifyContent: "space-between", alignItems: "baseline"}}>
-						<List>
-							{
-								about !== undefined && about.users !== undefined ?
-									about.users.map((user) => {
-										if (!user.editor) {
-											return (<>
-												<Card key={user.user.id}
-													  sx={{height: "100%", display: "flex", flexDirection: "column"}}>
-													<CardContent>
-														<Typography
-															variant="body1">{user.user.first_name} {user.user.last_name}</Typography>
-														<Typography color="secondary">{user.user.email}</Typography>
-													</CardContent>
-												</Card>
-												<Divider/>
-											</>)
-										}
-									})
-								:
-								<></>
-							}
-						</List>
-					</Box>
+				<MembersTable groupId={groupId}/>
 			</Grid>
 		</Layout>
 	);
