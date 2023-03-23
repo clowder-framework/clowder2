@@ -1,0 +1,208 @@
+version: '3.7'
+
+# Settings and configurations that are common for all containers
+x-minio-common: &minio-common
+  image: quay.io/minio/minio:RELEASE.2022-01-25T19-56-04Z
+  command: server --console-address ":9001" http://minio{1...4}/data
+  expose:
+    - "9000"
+    - "9001"
+  environment:
+    MINIO_ROOT_USER: minioadmin
+    MINIO_ROOT_PASSWORD: minioadmin
+  healthcheck:
+    test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+    interval: 30s
+    timeout: 20s
+    retries: 3
+
+services:
+
+  mongo:
+    image: mongo:5.0
+    ports:
+      - "27017:27017"
+    networks:
+      - clowder2
+    volumes:
+      - mongo:/data/db
+      - ./scripts/mongoviews/mongo-init-dev.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+
+  minio1:
+    <<: *minio-common
+    hostname: minio1
+    volumes:
+      - data1:/data
+
+  minio2:
+    <<: *minio-common
+    hostname: minio2
+    volumes:
+      - data2:/data
+
+  minio3:
+    <<: *minio-common
+    hostname: minio3
+    volumes:
+      - data3:/data
+
+  minio4:
+    <<: *minio-common
+    hostname: minio4
+    volumes:
+      - data4:/data
+
+  minio-nginx:
+    image: nginx:1.19.2-alpine
+    hostname: nginx
+    volumes:
+      - ./docker/minio-nginx.conf:/etc/nginx/nginx.conf:ro
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    depends_on:
+      - minio1
+      - minio2
+      - minio3
+      - minio4
+
+  postgres:
+      image: postgres
+      volumes:
+        - postgres_data:/var/lib/postgresql/data
+      environment:
+        POSTGRES_DB: keycloak_dev
+        POSTGRES_USER: keycloak
+        POSTGRES_PASSWORD: password
+
+  keycloak:
+      image: quay.io/keycloak/keycloak:19.0
+      volumes:
+        - ./scripts/keycloak/clowder-realm-dev.json:/opt/keycloak/data/import/realm.json:ro
+        - ./scripts/keycloak/clowder-theme/:/opt/keycloak/themes/clowder-theme/:ro
+      command:
+        - start-dev
+        - --http-relative-path /keycloak
+        - --import-realm
+      environment:
+        KEYCLOAK_ADMIN: admin
+        KEYCLOAK_ADMIN_PASSWORD: admin
+        KC_DB: postgres
+        KC_DB_URL_HOST: postgres
+        KC_DB_URL_DATABASE: keycloak_dev
+        KC_DB_USERNAME: keycloak
+        KC_DB_PASSWORD: password
+      ports:
+        - 8080:8080
+      depends_on:
+        - postgres
+
+  maildev:
+    image: maildev/maildev
+    ports:
+      - "1080:80"
+      - "25:25"
+
+  # message broker
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    environment:
+      - RABBITMQ_SERVER_ADDITIONAL_ERL_ARGS=-rabbitmq_management path_prefix "/rabbitmq"
+      - RABBITMQ_DEFAULT_USER=${RABBITMQ_DEFAULT_USER:-guest}
+      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_DEFAULT_PASS:-guest}
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    networks:
+      - clowder2
+    volumes:
+      - rabbitmq:/var/lib/rabbitmq
+
+  # ELasticsearch
+  elasticsearch:
+#    platform: amd64
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.3.3
+    ports:
+      - 9200:9200
+      - 9300:9300
+    restart: unless-stopped
+    environment:
+      - cluster.name=clowder2
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - xpack.security.http.ssl.enabled=false
+      - http.cors.allow-origin='*'
+      - http.cors.enabled=true
+      - http.cors.allow-headers=X-Requested-With,X-Auth-Token,Content-Type,Content-Length,Authorization
+      - http.cors.allow-credentials=true
+      - http.cors.allow-methods=OPTIONS, HEAD, GET, POST, PUT, DELETE
+      - logger.level=debug
+    volumes:
+      - elasticsearch:/usr/share/elasticsearch/data
+    
+  extractors-heartbeat:
+    image: "clowder/clowder2-heartbeat"
+    build:
+      context: backend
+      dockerfile: heartbeat.Dockerfile
+    environment:
+      - MONGODB_URL=mongodb://mongo:27017
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_USER=${RABBITMQ_USER:-guest}
+      - RABBITMQ_PASS=${RABBITMQ_PASS:-guest}
+    restart: unless-stopped
+    networks:
+      - clowder2
+    depends_on:
+      - mongo
+      - rabbitmq
+
+  extractors-messages:
+    image: "clowder/clowder2-messages"
+    build:
+      context: backend
+      dockerfile: messages.Dockerfile
+    environment:
+      - MONGODB_URL=mongodb://mongo:27017
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_USER=${RABBITMQ_USER:-guest}
+      - RABBITMQ_PASS=${RABBITMQ_PASS:-guest}
+    restart: unless-stopped
+    networks:
+      - clowder2
+    restart: unless-stopped
+    depends_on:
+      - mongo
+      - rabbitmq
+
+  backend:
+    image: 'clowder/clowder2-backend:github-action'
+    restart: unless-stopped
+    build:
+      context: ./backend
+    networks:
+      - clowder2
+    environment:
+      MONGODB_URL: mongodb://mongo:27017
+      MINIO_SERVER_URL: minio-nginx:9000
+      RABBITMQ_HOST: rabbitmq:15672
+      elasticsearch_url: http://elasticsearch:9200
+    depends_on:
+      - mongo
+      - minio-nginx
+      - elasticsearch
+
+networks:
+  clowder2:
+
+## By default this config uses default local driver,
+## For custom volumes replace with volume driver configuration.
+volumes:
+  mongo:
+  data1:
+  data2:
+  data3:
+  data4:
+  postgres_data:
+  rabbitmq:
+  elasticsearch:
