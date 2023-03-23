@@ -56,7 +56,7 @@ jobs:
 
       - name: Run Codegen
         working-directory: frontend
-        run: npm run codegen:v2:dev
+        run: npm run codegen:v2:test
 
       - name: Stop containers
         if: always()
