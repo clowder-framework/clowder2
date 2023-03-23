@@ -52,50 +52,8 @@ export default function MemberMenu(props: MemberMenuProps) {
 				aria-expanded={open ? 'true' : undefined}
 				onClick={handleClick}
 			>
-				<MoreHoriz/>
+				<DeleteIcon/>
 			</Button>
-			<Menu
-				id="basic-menu"
-				anchorEl={anchorEl}
-				open={open}
-				onClose={handleClose}
-				MenuListProps={{
-					'aria-labelledby': 'basic-button',
-				}}
-			>
-				{member.editor ?
-					(<MenuItem onClick={() => {
-						handleClose();
-						setConfirmationOpen(true);
-					}}>
-						<ListItemIcon>
-							<DownloadIcon fontSize="small"/>
-						</ListItemIcon>
-						<ListItemText>Demote</ListItemText>
-					</MenuItem>) : (<MenuItem onClick={() => {
-						handleClose();
-						setConfirmationOpen(true);
-					}}>
-						<ListItemIcon>
-							<UploadIcon fontSize="small"/>
-						</ListItemIcon>
-						<ListItemText>Promote</ListItemText>
-					</MenuItem>)
-				}
-
-				{/*owner can delete file*/}
-				{/*<AuthWrapper currRole={groupRole} allowedRoles={["owner", "editor"]}>*/}
-				<MenuItem onClick={()=>{
-					handleClose();
-					setConfirmationOpen(true);
-				}}>
-					<ListItemIcon>
-						<DeleteIcon fontSize="small" />
-					</ListItemIcon>
-					<ListItemText>Remove</ListItemText>
-				</MenuItem>
-				{/*</AuthWrapper>*/}
-			</Menu>
 		</div>
 	);
 }
