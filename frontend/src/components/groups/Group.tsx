@@ -11,6 +11,7 @@ import Layout from "../Layout";
 import {RootState} from "../../types/data";
 import {useDispatch, useSelector} from "react-redux";
 import {fetchGroupAbout} from "../../actions/group";
+import {fetchGroupRole} from "../../actions/authorization";
 import {ArrowBack, ArrowForward} from "@material-ui/icons";
 import Typography from '@mui/material/Typography';
 import {theme} from "../../theme";
@@ -30,12 +31,15 @@ export function Group() {
 	// Redux connect equivalent
 	const dispatch = useDispatch();
 	const fetchGroupInfo = (groupId: string | undefined) => dispatch(fetchGroupAbout(groupId));
+	const fetchCurrentGroupRole = (groupId: string | undefined) => dispatch(fetchGroupRole(groupId));
 
 	const about = useSelector((state: RootState) => state.group.about);
+	const role = useSelector((state: RootState) => state.group.role);
 
 	// component did mount
 	useEffect(() => {
 		fetchGroupInfo(groupId);
+		fetchCurrentGroupRole(groupId);
 	}, []);
 
 	return (

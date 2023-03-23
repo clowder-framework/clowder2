@@ -5,6 +5,7 @@ import TableCell from "@mui/material/TableCell";
 import PersonIcon from "@mui/icons-material/Person";
 import {Button} from "@mui/material";
 import {Member} from "../../openapi/v2";
+import MemberMenu from "./MemberMenu";
 
 
 type MembersTableUserEntryProps = {
@@ -27,7 +28,7 @@ export function MembersTableUserEntry(props: MembersTableUserEntryProps) {
 			</TableCell>
 			<TableCell align="right">{member.user.email}</TableCell>
 			<TableCell align="right">{member.editor !== undefined && member.editor ? "Editor" : "Member"}</TableCell>
-			<TableCell align="right"></TableCell>
+			<TableCell align="right"><MemberMenu member={member}/></TableCell>
 		</TableRow>
 	)
 }
