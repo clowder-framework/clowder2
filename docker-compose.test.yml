@@ -37,7 +37,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
 
   backend:
-    image: 'clowder/clowder2-backend'
+    image: 'clowder/clowder2-backend:github-action'
     restart: unless-stopped
     build:
       context: ./backend
