@@ -68,6 +68,8 @@ jobs:
         if: contains(steps.verify-changed-files.outputs.changed_files, 'frontend/src/openapi')
         run: |
           echo "Codegen is out of sync"
+          echo "Changed files: ${{ steps.verify-changed-files.outputs.changed_files }}"
+          exit 1
 
       - name: Stop containers
         if: always()
