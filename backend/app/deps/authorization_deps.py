@@ -105,6 +105,29 @@ async def get_role_by_metadata(
                 return role
 
 
+async def get_role_by_group(
+    group_id: str,
+    db: MongoClient = Depends(get_db),
+    current_user=Depends(get_current_username),
+) -> RoleType:
+    if (group := await db["groups"].find_one({"_id": ObjectId(group_id)})) is not None:
+        group_out = GroupOut.from_mongo(group)
+        if group.creator == current_user:
+            # Creator can do everything
+            return RoleType.OWNER
+        for u in group.users:
+            if u.user.email == current_user:
+                if u.editor:
+                    return RoleType.EDITOR
+                else:
+                    return RoleType.VIEWER
+        raise HTTPException(
+            status_code=403,
+            detail=f"User `{current_user} does not have any permissions on group {group_id}",
+        )
+    raise HTTPException(status_code=404, detail=f"Group {group_id} not found")
+
+
 class Authorization:
     """We use class dependency so that we can provide the `permission` parameter to the dependency.
     For more info see https://fastapi.tiangolo.com/advanced/advanced-dependencies/."""

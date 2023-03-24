@@ -17,6 +17,7 @@ from app.deps.authorization_deps import (
     get_role,
     get_role_by_file,
     get_role_by_metadata,
+    get_role_by_group,
 )
 from app.models.authorization import (
     AuthorizationBase,
@@ -127,7 +128,17 @@ async def get_metadata_role(
     current_user=Depends(get_current_username),
     role: RoleType = Depends(get_role_by_metadata),
 ):
-    """Retrieve role of user for metadata. Role cannot change between metadata versions."""
+    """Retrieve role of user for group. Group roles can be OWNER, EDITOR, or VIEWER (for regular Members)."""
+    return role
+
+
+@router.get("/groups/{group_id}/role", response_model=RoleType)
+async def get_group_role(
+    group_id: str,
+    current_user=Depends(get_current_username),
+    role: RoleType = Depends(get_role_by_group),
+):
+    """Retrieve role of user on a particular group (i.e. whether they can change group memberships)."""
     return role
 
 
@@ -135,7 +146,7 @@ async def get_metadata_role(
     "/datasets/{dataset_id}/group_role/{group_id}/{role}",
     response_model=AuthorizationDB,
 )
-async def set_group_role(
+async def set_dataset_group_role(
     dataset_id: str,
     group_id: str,
     role: RoleType,
@@ -154,7 +165,7 @@ async def set_group_role(
         ) is not None:
             group = GroupOut.from_mongo(group_q)
             # First, remove any existing role the group has on the dataset
-            remove_group_role(dataset_id, group_id, db, user_id, allow)
+            remove_dataset_group_role(dataset_id, group_id, db, user_id, allow)
 
             if (
                 auth_q := await db["authorization"].find_one(
@@ -193,7 +204,7 @@ async def set_group_role(
 @router.post(
     "/datasets/{dataset_id}/user_role/{username}/{role}", response_model=AuthorizationDB
 )
-async def set_user_role(
+async def set_dataset_user_role(
     dataset_id: str,
     username: str,
     role: RoleType,
@@ -209,7 +220,7 @@ async def set_user_role(
         dataset = DatasetOut.from_mongo(dataset_q)
         if (user_q := await db["users"].find_one({"email": username})) is not None:
             # First, remove any existing role the user has on the dataset
-            await remove_user_role(dataset_id, username, db, user_id, allow)
+            await remove_dataset_user_role(dataset_id, username, db, user_id, allow)
 
             if (
                 auth_q := await db["authorization"].find_one(
@@ -244,7 +255,7 @@ async def set_user_role(
     "/datasets/{dataset_id}/group_role/{group_id}",
     response_model=AuthorizationDB,
 )
-async def remove_group_role(
+async def remove_dataset_group_role(
     dataset_id: str,
     group_id: str,
     db: MongoClient = Depends(get_db),
@@ -288,7 +299,7 @@ async def remove_group_role(
     "/datasets/{dataset_id}/user_role/{username}",
     response_model=AuthorizationDB,
 )
-async def remove_user_role(
+async def remove_dataset_user_role(
     dataset_id: str,
     username: str,
     db: MongoClient = Depends(get_db),
