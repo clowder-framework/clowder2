@@ -10,6 +10,8 @@ import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import TableCell from "@mui/material/TableCell";
 import TableBody from "@mui/material/TableBody";
+import {GroupAndRoleTable} from "./GroupAndRoleTable";
+import {UserAndRoleTable} from "./UserAndRoleTable";
 
 
 export const SharingTab = (): JSX.Element => {
@@ -48,100 +50,12 @@ export const SharingTab = (): JSX.Element => {
 	}
 
 	return (
-		<div>
-			<Table sx={{minWidth: 650}} aria-label="simple table">
-				<TableHead>
-					<TableRow>
-						<TableCell align="right">ID</TableCell>
-						<TableCell align="right">Name</TableCell>
-						<TableCell align="right">Role</TableCell>
-						<TableCell align="right">Change Role</TableCell>
-					</TableRow>
-				</TableHead>
-				<TableBody>
-
-					{
-						datasetGroupsAndRolesList.map((group_role) => (
-							<TableRow
-								key={group_role.group_id}
-								sx={{'&:last-child td, &:last-child th': {border: 0}}}
-							>
-								<TableCell
-									align="right">{group_role.group_id}</TableCell>
-								<TableCell
-									align="right">{group_role.group_name}</TableCell>
-								<TableCell
-									align="right">{group_role.roleType}</TableCell>
-								<TableCell
-									align="right"><button value={group_role.group_id} onClick={clickButton}>click to change role</button></TableCell>
-							</TableRow>))
-					}
-					{
-						datasetUsersAndRolesList.map((user_role) => (
-							<TableRow
-								key={user_role.user_id}
-								sx={{'&:last-child td, &:last-child th': {border: 0}}}
-							>
-								<TableCell
-									align="right">{user_role.user_id}</TableCell>
-								<TableCell
-									align="right">{user_role.roleType}</TableCell>
-								<TableCell
-									align="right">{user_role.roleType}</TableCell>
-								<TableCell
-									align="right"><button value={user_role.user_id} onClick={clickButton}>click to change role</button></TableCell>
-
-							</TableRow>))
-					}
-				</TableBody>
-			</Table>
-			<Table sx={{minWidth: 650}} aria-label="simple table">
-				<TableHead>
-					<TableRow>
-						<TableCell align="right">ID</TableCell>
-						<TableCell align="right">Name</TableCell>
-						<TableCell align="right">Role</TableCell>
-						<TableCell align="right">Change Role</TableCell>
-					</TableRow>
-				</TableHead>
-				<TableBody>
-
-					{
-						datasetGroupsAndRolesList.map((group_role) => (
-							<TableRow
-								key={group_role.group_id}
-								sx={{'&:last-child td, &:last-child th': {border: 0}}}
-							>
-								<TableCell
-									align="right">{group_role.group_id}</TableCell>
-								<TableCell
-									align="right">{group_role.group_name}</TableCell>
-								<TableCell
-									align="right">{group_role.roleType}</TableCell>
-								<TableCell
-									align="right"><button value={group_role.group_id} onClick={clickButton}>click to change role</button></TableCell>
-							</TableRow>))
-					}
-					{
-						datasetUsersAndRolesList.map((user_role) => (
-							<TableRow
-								key={user_role.user_id}
-								sx={{'&:last-child td, &:last-child th': {border: 0}}}
-							>
-								<TableCell
-									align="right">{user_role.user_id}</TableCell>
-								<TableCell
-									align="right">{user_role.roleType}</TableCell>
-								<TableCell
-									align="right">{user_role.roleType}</TableCell>
-								<TableCell
-									align="right"><button value={user_role.user_id} onClick={clickButton}>click to change role</button></TableCell>
-
-							</TableRow>))
-					}
-				</TableBody>
-			</Table>
-		</div>
+		<>
+			<p>Users and Roles</p>
+			<UserAndRoleTable></UserAndRoleTable>
+			<p>Groups and Roles</p>
+			<GroupAndRoleTable></GroupAndRoleTable>
+		</>
 	)
 
 }
