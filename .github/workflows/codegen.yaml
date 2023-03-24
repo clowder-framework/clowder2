@@ -57,6 +57,9 @@ jobs:
       - name: Run Codegen
         working-directory: frontend
         run: npm run codegen:v2:test
+        
+      - name: check for file change
+        uses: infotroph/tree-is-clean@v1
 
       - name: Stop containers
         if: always()
