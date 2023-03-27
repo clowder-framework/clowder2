@@ -3,6 +3,7 @@ import {useDispatch, useSelector} from "react-redux";
 import { Autocomplete, Button, Container, Dialog, DialogActions, DialogContent, DialogTitle, Divider, FormControl, InputLabel, MenuItem, Select, TextField, Typography } from "@mui/material";
 import {fetchGroups} from "../../actions/group";
 import {RootState} from "../../types/data";
+import {parseDate} from "../../utils/common";
 
 
 type ShareGroupDatasetModalProps = {
@@ -30,6 +31,16 @@ export default function ShareGroupDatasetModal(props: ShareGroupDatasetModalProp
     }
 	console.log('groups are here', groups);
 
+
+	const group_options = [];
+    groups.map((group) => {
+    	let group_option = {value:group.id, label:group.name}
+		group_options.push(group_option);
+    });
+	console.log('group optioins are', group_options);
+	console.log('it is of type', typeof(group_options));
+	const initial_group = group_options.at(0);
+	console.log('initial group is', initial_group);
     return (
         <Container>
             <Dialog open={open} onClose={handleClose} fullWidth={true} maxWidth="md"
@@ -58,19 +69,14 @@ export default function ShareGroupDatasetModal(props: ShareGroupDatasetModalProp
                             renderInput={(params) => <TextField {...params} sx={{ mt: 1, mr: 1, "alignItems": "right", "width": "450px" }} required label="Enter email address" />}
                         /> as
 						<Select
+								options={group_options}
                                 labelId="demo-simple-select-label"
                                 id="demo-simple-select"
-                                value={role}
-                                defaultValue={"viewer"}
                                 label="Status"
                                 onChange={(event, value) => {
                                     setRole(event.target.value)
                                 }}
                             >
-                                <MenuItem value="owner">Owner</MenuItem>
-                                <MenuItem value="editor">Editor</MenuItem>
-                                <MenuItem value="uploader">Uploader</MenuItem>
-                                <MenuItem value="viewer">Viewer</MenuItem>
                             </Select>
                         <FormControl variant="outlined" sx={{ m: 1, minWidth: 120 }}>
                             <InputLabel id="demo-simple-select-label">Status</InputLabel>
