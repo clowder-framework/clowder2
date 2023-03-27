@@ -3,16 +3,15 @@ from http.client import HTTPException
 from bson.objectid import ObjectId
 from fastapi.params import Depends
 from fastapi.routing import APIRouter
+from pymongo import DESCENDING
 from pymongo.mongo_client import MongoClient
 from typing import List
-import pymongo
 
 from app import dependencies
 from app.deps.authorization_deps import AuthorizationDB, GroupAuthorization
-from app.keycloak_auth import get_current_user
+from app.keycloak_auth import get_current_user, get_user
 from app.models.groups import GroupOut, GroupIn, GroupDB, GroupBase, Member
 from app.models.users import UserOut
-from app.routers.users import get_user
 
 router = APIRouter()
 
@@ -33,27 +32,51 @@ async def save_group(
     return group_out
 
 
+@router.get("", response_model=List[GroupOut])
+async def get_groups(
+    user_id=Depends(get_user),
+    db: MongoClient = Depends(dependencies.get_db),
+    skip: int = 0,
+    limit: int = 10,
+):
+    """Get a list of all Groups in the db the user is a member/owner of.
+
+    Arguments:
+        skip -- number of initial records to skip (i.e. for pagination)
+        limit -- restrict number of records to be returned (i.e. for pagination)
+
+
+    """
+
+    groups = []
+    for doc in (
+        await db["groups"]
+        .find(
+            {
+                "$or": [
+                    {"creator": user_id},
+                    {"users.user.email": user_id},
+                ]
+            }
+        )
+        .sort([("created", DESCENDING)])
+        .skip(skip)
+        .limit(limit)
+        .to_list(length=limit)
+    ):
+        groups.append(GroupOut.from_mongo(doc))
+    return groups
+
+
 @router.get("/{group_id}", response_model=GroupOut)
-async def get_group(group_id: str, db: MongoClient = Depends(dependencies.get_db)):
+async def get_group(
+    group_id: str,
+    db: MongoClient = Depends(dependencies.get_db),
+    allow: bool = Depends(GroupAuthorization("viewer")),
+):
     if (group := await db["groups"].find_one({"_id": ObjectId(group_id)})) is not None:
         return GroupOut.from_mongo(group)
     raise HTTPException(status_code=404, detail=f"Group {group_id} not found")
-
-
-@router.get("", response_model=List[GroupOut])
-async def get_groups(db: MongoClient = Depends(dependencies.get_db),
-                    skip: int = 0,
-                    limit: int = 10,
-                    mine: bool = False,
-                     ):
-    groups = []
-    for doc in (
-        await db["groups"].find({}).skip(skip).limit(limit).to_list(length=limit)
-    ):
-        current_group = GroupOut.from_mongo(doc)
-        current_group_users = current_group.users
-        groups.append(current_group)
-    return groups
 
 
 @router.put("/{group_id}", response_model=GroupOut)
