@@ -74,7 +74,7 @@ export default function ShareGroupDatasetModal(props: ShareGroupDatasetModalProp
                                 id="demo-simple-select"
                                 label="Status"
                                 onChange={(event, value) => {
-                                    setRole(event.target.value)
+                                    setGroup(event.target.value)
                                 }}
                             >
                             </Select>
