@@ -1,9 +1,9 @@
 import {Box, Button, ListItemIcon, ListItemText, Menu, MenuItem} from "@mui/material";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import {ActionModal} from "../dialog/ActionModal";
 import {datasetDeleted, fetchFilesInDataset} from "../../actions/dataset";
-import {fetchGroups} from "../../actions/groups";
+import {fetchGroups} from "../../actions/group";
 import {useNavigate} from "react-router-dom";
 import {useDispatch} from "react-redux";
 import {MoreHoriz} from "@material-ui/icons";
@@ -26,13 +26,18 @@ export const OtherMenu = (props: ActionsMenuProps): JSX.Element => {
 	// redux
 	const dispatch = useDispatch();
 	const deleteDataset = (datasetId: string | undefined) => dispatch(datasetDeleted(datasetId));
-	const listGroups = () => dispatch(fe());
+	const listGroups = () => dispatch(fetchGroups(0, 21));
 
+	// component did mount
+	useEffect(() => {
+		listGroups();
+	}, []);
 
 	// state
 	const [deleteDatasetConfirmOpen, setDeleteDatasetConfirmOpen] = useState(false);
 	const [sharePaneOpen, setSharePaneOpen] = useState(false);
 	const [shareGroupPaneOpen, setShareGroupPaneOpen] = useState(false);
+
 
 
 	// delete dataset

@@ -1,5 +1,8 @@
-import React, { useState } from "react";
+import React, {useEffect, useState} from "react";
+import {useDispatch, useSelector} from "react-redux";
 import { Autocomplete, Button, Container, Dialog, DialogActions, DialogContent, DialogTitle, Divider, FormControl, InputLabel, MenuItem, Select, TextField, Typography } from "@mui/material";
+import {fetchGroups} from "../../actions/group";
+import {RootState} from "../../types/data";
 
 
 type ShareGroupDatasetModalProps = {
@@ -11,12 +14,21 @@ type ShareGroupDatasetModalProps = {
 export default function ShareGroupDatasetModal(props: ShareGroupDatasetModalProps) {
     const { open, handleClose, datasetName } = props;
 
-    const [email, setEmail] = useState("")
+    const [group, setGroup] = useState("")
     const [role, setRole] = useState("viewer")
+	const dispatch = useDispatch();
+	const listGroups = () => dispatch(fetchGroups(0, 21));
+	const groups = useSelector((state: RootState) => state.group.groups);
+
+	// component did mount
+	useEffect(() => {
+		listGroups();
+	}, []);
 
     const onShare = () => {
         handleClose();
     }
+	console.log('groups are here', groups);
 
     return (
         <Container>
@@ -38,13 +50,28 @@ export default function ShareGroupDatasetModal(props: ShareGroupDatasetModalProp
                             id="email-auto-complete"
                             freeSolo
                             autoHighlight
-                            inputValue={email}
+                            inputValue={group}
                             onInputChange={(event, value) => {
-                                setEmail(value)
+                                setGroup(value)
                             }}
                             options={["abc@xyz.com"]}
                             renderInput={(params) => <TextField {...params} sx={{ mt: 1, mr: 1, "alignItems": "right", "width": "450px" }} required label="Enter email address" />}
                         /> as
+						<Select
+                                labelId="demo-simple-select-label"
+                                id="demo-simple-select"
+                                value={role}
+                                defaultValue={"viewer"}
+                                label="Status"
+                                onChange={(event, value) => {
+                                    setRole(event.target.value)
+                                }}
+                            >
+                                <MenuItem value="owner">Owner</MenuItem>
+                                <MenuItem value="editor">Editor</MenuItem>
+                                <MenuItem value="uploader">Uploader</MenuItem>
+                                <MenuItem value="viewer">Viewer</MenuItem>
+                            </Select>
                         <FormControl variant="outlined" sx={{ m: 1, minWidth: 120 }}>
                             <InputLabel id="demo-simple-select-label">Status</InputLabel>
                             <Select
@@ -64,7 +91,7 @@ export default function ShareGroupDatasetModal(props: ShareGroupDatasetModalProp
                             </Select>
                         </FormControl>
                     </div>
-                    <Button variant="contained" sx={{ marginTop: 1 }} onClick={onShare} disabled={(email.length > 0) ? false : true}>Share</Button>
+                    <Button variant="contained" sx={{ marginTop: 1 }} onClick={onShare} disabled={(group.length > 0) ? false : true}>Share</Button>
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={handleClose}>Close</Button>
