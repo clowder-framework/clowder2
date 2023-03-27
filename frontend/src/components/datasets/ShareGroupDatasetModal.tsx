@@ -32,14 +32,14 @@ export default function ShareGroupDatasetModal(props: ShareGroupDatasetModalProp
 	console.log('groups are here', groups);
 
 
-	const group_options = [];
+	const options = [];
     groups.map((group) => {
     	let group_option = {value:group.id, label:group.name}
 		group_options.push(group_option);
     });
-	console.log('group optioins are', group_options);
-	console.log('it is of type', typeof(group_options));
-	const initial_group = group_options.at(0);
+	console.log('group optioins are', options);
+	console.log('it is of type', typeof(options));
+	const initial_group = options.at(0);
 	console.log('initial group is', initial_group);
     return (
         <Container>
@@ -69,12 +69,14 @@ export default function ShareGroupDatasetModal(props: ShareGroupDatasetModalProp
                             renderInput={(params) => <TextField {...params} sx={{ mt: 1, mr: 1, "alignItems": "right", "width": "450px" }} required label="Enter email address" />}
                         /> as
 						<Select
-								options={group_options}
+								options={options}
                                 labelId="demo-simple-select-label"
                                 id="demo-simple-select"
-                                label="Status"
+                                label="Group"
+								defaultGroup={initial_group}
+								value={group}
                                 onChange={(event, value) => {
-                                    setGroup(event.target.value)
+                                    setGroup(event.target.value);
                                 }}
                             >
                             </Select>
