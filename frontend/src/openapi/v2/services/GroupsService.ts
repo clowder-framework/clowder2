@@ -10,27 +10,26 @@ import { request as __request } from '../core/request';
 export class GroupsService {
 
     /**
-     * Edit Group
-     * @param groupId
-     * @param userId
-     * @param requestBody
+     * Get Groups
+     * @param skip
+     * @param limit
+     * @param mine
      * @returns GroupOut Successful Response
      * @throws ApiError
      */
-    public static editGroupApiV2GroupsPut(
-        groupId: string,
-        userId: string,
-        requestBody: GroupBase,
-    ): CancelablePromise<GroupOut> {
+    public static getGroupsApiV2GroupsGet(
+        skip?: number,
+        limit: number = 10,
+        mine: boolean = false,
+    ): CancelablePromise<Array<GroupOut>> {
         return __request({
-            method: 'PUT',
+            method: 'GET',
             path: `/api/v2/groups`,
             query: {
-                'group_id': groupId,
-                'user_id': userId,
+                'skip': skip,
+                'limit': limit,
+                'mine': mine,
             },
-            body: requestBody,
-            mediaType: 'application/json',
             errors: {
                 422: `Validation Error`,
             },
@@ -76,6 +75,33 @@ export class GroupsService {
     }
 
     /**
+     * Edit Group
+     * @param groupId
+     * @param userId
+     * @param requestBody
+     * @returns GroupOut Successful Response
+     * @throws ApiError
+     */
+    public static editGroupApiV2GroupsGroupIdPut(
+        groupId: string,
+        userId: string,
+        requestBody: GroupBase,
+    ): CancelablePromise<GroupOut> {
+        return __request({
+            method: 'PUT',
+            path: `/api/v2/groups/${groupId}`,
+            query: {
+                'user_id': userId,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+
+    /**
      * Delete Group
      * @param groupId
      * @returns any Successful Response
@@ -113,6 +139,7 @@ export class GroupsService {
 
     /**
      * Add Member
+     * Add a new user to a group.
      * @param groupId
      * @param username
      * @returns any Successful Response
@@ -133,6 +160,7 @@ export class GroupsService {
 
     /**
      * Remove Member
+     * Remove a user from a group.
      * @param groupId
      * @param username
      * @returns any Successful Response
