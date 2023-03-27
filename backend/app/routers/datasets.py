@@ -7,8 +7,6 @@ import tempfile
 import zipfile
 from collections.abc import Mapping, Iterable
 from typing import List, Optional, Union
-
-import pymongo
 from bson import ObjectId
 from bson import json_util
 from elasticsearch import Elasticsearch
@@ -22,7 +20,7 @@ from fastapi import (
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from minio import Minio
 from pika.adapters.blocking_connection import BlockingChannel
-from pymongo import MongoClient
+from pymongo import MongoClient, DESCENDING
 from rocrate.model.person import Person
 from rocrate.rocrate import ROCrate
 
@@ -250,7 +248,7 @@ async def get_datasets(
                     ]
                 }
             )
-            .sort([("created", pymongo.DESCENDING)])
+            .sort([("created", DESCENDING)])
             .skip(skip)
             .limit(limit)
             .to_list(length=limit)
@@ -267,7 +265,7 @@ async def get_datasets(
                     ]
                 }
             )
-            .sort([("created", pymongo.DESCENDING)])
+            .sort([("created", DESCENDING)])
             .skip(skip)
             .limit(limit)
             .to_list(length=limit)

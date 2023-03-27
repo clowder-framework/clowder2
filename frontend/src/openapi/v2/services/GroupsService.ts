@@ -10,27 +10,28 @@ import { request as __request } from '../core/request';
 export class GroupsService {
 
     /**
-     * Edit Group
-     * @param groupId
-     * @param userId
-     * @param requestBody
+     * Get Groups
+     * Get a list of all Groups in the db the user is a member/owner of.
+     *
+     * Arguments:
+     * skip -- number of initial records to skip (i.e. for pagination)
+     * limit -- restrict number of records to be returned (i.e. for pagination)
+     * @param skip
+     * @param limit
      * @returns GroupOut Successful Response
      * @throws ApiError
      */
-    public static editGroupApiV2GroupsPut(
-        groupId: string,
-        userId: string,
-        requestBody: GroupBase,
-    ): CancelablePromise<GroupOut> {
+    public static getGroupsApiV2GroupsGet(
+        skip?: number,
+        limit: number = 10,
+    ): CancelablePromise<Array<GroupOut>> {
         return __request({
-            method: 'PUT',
+            method: 'GET',
             path: `/api/v2/groups`,
             query: {
-                'group_id': groupId,
-                'user_id': userId,
+                'skip': skip,
+                'limit': limit,
             },
-            body: requestBody,
-            mediaType: 'application/json',
             errors: {
                 422: `Validation Error`,
             },
@@ -76,6 +77,28 @@ export class GroupsService {
     }
 
     /**
+     * Edit Group
+     * @param groupId
+     * @param requestBody
+     * @returns GroupOut Successful Response
+     * @throws ApiError
+     */
+    public static editGroupApiV2GroupsGroupIdPut(
+        groupId: string,
+        requestBody: GroupBase,
+    ): CancelablePromise<GroupOut> {
+        return __request({
+            method: 'PUT',
+            path: `/api/v2/groups/${groupId}`,
+            body: requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+
+    /**
      * Delete Group
      * @param groupId
      * @returns any Successful Response
@@ -113,6 +136,7 @@ export class GroupsService {
 
     /**
      * Add Member
+     * Add a new user to a group.
      * @param groupId
      * @param username
      * @returns any Successful Response
@@ -133,6 +157,7 @@ export class GroupsService {
 
     /**
      * Remove Member
+     * Remove a user from a group.
      * @param groupId
      * @param username
      * @returns any Successful Response
