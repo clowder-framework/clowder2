@@ -328,6 +328,7 @@ async def get_dataset_users_and_roles(
     db: MongoClient = Depends(dependencies.get_db),
     allow: bool = Depends(Authorization("editor")),
 ):
+    """Returns a list of UserAndRole objects. These show what users have what permission on a dataset"""
     if (
         dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
     ) is not None:
@@ -355,6 +356,8 @@ async def get_dataset_groups_and_roles(
     db: MongoClient = Depends(dependencies.get_db),
     allow: bool = Depends(Authorization("editor")),
 ):
+    """Returns a list of Group objects. These show what groups have what permission on a dataset  Group and
+    role has the id, name, and roleType """
     if (
         dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
     ) is not None:
