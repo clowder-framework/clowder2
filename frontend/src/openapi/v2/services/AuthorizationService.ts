@@ -131,4 +131,148 @@ export class AuthorizationService {
             },
         });
     }
+
+    /**
+     * Get Group Role
+     * Retrieve role of user on a particular group (i.e. whether they can change group memberships).
+     * @param groupId
+     * @returns RoleType Successful Response
+     * @throws ApiError
+     */
+    public static getGroupRoleApiV2AuthorizationsGroupsGroupIdRoleGet(
+        groupId: string,
+    ): CancelablePromise<RoleType> {
+        return __request({
+            method: 'GET',
+            path: `/api/v2/authorizations/groups/${groupId}/role`,
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+
+    /**
+     * Set Dataset Group Role
+     * Assign an entire group a specific role for a dataset.
+     * @param datasetId
+     * @param groupId
+     * @param role
+     * @returns AuthorizationDB Successful Response
+     * @throws ApiError
+     */
+    public static setDatasetGroupRoleApiV2AuthorizationsDatasetsDatasetIdGroupRoleGroupIdRolePost(
+        datasetId: string,
+        groupId: string,
+        role: RoleType,
+    ): CancelablePromise<AuthorizationDB> {
+        return __request({
+            method: 'POST',
+            path: `/api/v2/authorizations/datasets/${datasetId}/group_role/${groupId}/${role}`,
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+
+    /**
+     * Set Dataset User Role
+     * Assign a single user a specific role for a dataset.
+     * @param datasetId
+     * @param username
+     * @param role
+     * @returns AuthorizationDB Successful Response
+     * @throws ApiError
+     */
+    public static setDatasetUserRoleApiV2AuthorizationsDatasetsDatasetIdUserRoleUsernameRolePost(
+        datasetId: string,
+        username: string,
+        role: RoleType,
+    ): CancelablePromise<AuthorizationDB> {
+        return __request({
+            method: 'POST',
+            path: `/api/v2/authorizations/datasets/${datasetId}/user_role/${username}/${role}`,
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+
+    /**
+     * Remove Dataset Group Role
+     * Remove any role the group has with a specific dataset.
+     * @param datasetId
+     * @param groupId
+     * @returns AuthorizationDB Successful Response
+     * @throws ApiError
+     */
+    public static removeDatasetGroupRoleApiV2AuthorizationsDatasetsDatasetIdGroupRoleGroupIdDelete(
+        datasetId: string,
+        groupId: string,
+    ): CancelablePromise<AuthorizationDB> {
+        return __request({
+            method: 'DELETE',
+            path: `/api/v2/authorizations/datasets/${datasetId}/group_role/${groupId}`,
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+
+    /**
+     * Remove Dataset User Role
+     * Remove any role the user has with a specific dataset.
+     * @param datasetId
+     * @param username
+     * @returns AuthorizationDB Successful Response
+     * @throws ApiError
+     */
+    public static removeDatasetUserRoleApiV2AuthorizationsDatasetsDatasetIdUserRoleUsernameDelete(
+        datasetId: string,
+        username: string,
+    ): CancelablePromise<AuthorizationDB> {
+        return __request({
+            method: 'DELETE',
+            path: `/api/v2/authorizations/datasets/${datasetId}/user_role/${username}`,
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+
+    /**
+     * Get Dataset Users And Roles
+     * @param datasetId
+     * @returns UserAndRole Successful Response
+     * @throws ApiError
+     */
+    public static getDatasetUsersAndRolesApiV2AuthorizationsDatasetsDatasetIdUsersAndRolesGet(
+        datasetId: string,
+    ): CancelablePromise<Array<UserAndRole>> {
+        return __request({
+            method: 'GET',
+            path: `/api/v2/authorizations/datasets/${datasetId}/users_and_roles`,
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+
+    /**
+     * Get Dataset Groups And Roles
+     * @param datasetId
+     * @returns GroupAndRole Successful Response
+     * @throws ApiError
+     */
+    public static getDatasetGroupsAndRolesApiV2AuthorizationsDatasetsDatasetIdGroupsAndRolesGet(
+        datasetId: string,
+    ): CancelablePromise<Array<GroupAndRole>> {
+        return __request({
+            method: 'GET',
+            path: `/api/v2/authorizations/datasets/${datasetId}/groups_and_roles`,
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+
 }
