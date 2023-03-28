@@ -1,5 +1,12 @@
 import {Dataset, ExtractedMetadata, MetadataJsonld, FilePreview, Folder} from "./data";
-import {MetadataOut as Metadata, FileOut as FileSummary, FileVersion, AuthorizationBase} from "../openapi/v2";
+import {
+	GroupOut as Group,
+	MetadataOut as Metadata,
+	FileOut as FileSummary,
+	FileVersion,
+	AuthorizationBase,
+	RoleType
+} from "../openapi/v2";
 import {MetadataDefinitionOut as MetadataDefinition} from "../openapi/v2";
 import {GroupAndRole, UserAndRole} from "../openapi/v2";
 
@@ -260,6 +267,21 @@ interface FETCH_JOB_UPDATES{
     currJobUpdates: [];
 }
 
+interface RECEIVE_GROUPS{
+	type: "RECEIVE_GROUPS"
+	groups: Group[];
+}
+
+interface RECEIVE_GROUP_ABOUT{
+	type: "RECEIVE_GROUP_ABOUT"
+	about: Group;
+}
+
+interface RECEIVE_GROUP_ROLE{
+	type: "RECEIVE_GROUP_ROLE"
+	role: RoleType;
+}
+
 export type DataAction =
 	| RECEIVE_FILES_IN_DATASET
 	| RECEIVE_FOLDERS_IN_DATASET
@@ -310,6 +332,9 @@ export type DataAction =
     | SUBMIT_DATASET_EXTRACTION
     | FETCH_JOB_SUMMARY
     | FETCH_JOB_UPDATES
+	| RECEIVE_GROUPS
+	| RECEIVE_GROUP_ABOUT
+	| RECEIVE_GROUP_ROLE
 	| RECEIVE_DATASET_GROUPS_AND_ROLES
 	| RECEIVE_DATASET_USERS_AND_ROLES
 	;
