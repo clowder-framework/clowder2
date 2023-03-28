@@ -367,7 +367,7 @@ async def get_dataset_groups_and_roles(
     allow: bool = Depends(Authorization("editor")),
 ):
     """Returns a list of Group objects. These show what groups have what permission on a dataset  Group and
-    role has the id, name, and roleType """
+    role has the id, name, and roleType"""
     if (
         dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
     ) is not None:
