@@ -14,6 +14,8 @@ import config from "../app.config";
 import {ArrowBack, ArrowForward} from "@material-ui/icons";
 import Layout from "./Layout";
 import {Listeners} from "./listeners/Listeners";
+import {Groups} from "./groups/Groups";
+import {fetchGroups} from "../actions/group";
 
 const tab = {
 	fontStyle: "normal",
@@ -28,6 +30,8 @@ export const Explore = (): JSX.Element => {
 	// Redux connect equivalent
 	const dispatch = useDispatch();
 	const listDatasets = (skip: number | undefined, limit: number | undefined, mine: boolean | undefined) => dispatch(fetchDatasets(skip, limit, mine));
+	const listGroups = (skip: number | undefined, limit: number | undefined) =>
+		dispatch(fetchGroups(skip, limit));
 	const dismissError = () => dispatch(resetFailedReason());
 	const datasets = useSelector((state: RootState) => state.dataset.datasets);
 	const reason = useSelector((state: RootState) => state.error.reason);
@@ -130,6 +134,7 @@ export const Explore = (): JSX.Element => {
 								<Tabs value={selectedTabIndex} onChange={handleTabChange} aria-label="dashboard tabs">
 									<Tab sx={tab} label="Datasets" {...a11yProps(0)} />
 									<Tab sx={tab} label="Extractors" {...a11yProps(1)} />
+									<Tab sx={tab} label="Groups" {...a11yProps(2)} />
 								</Tabs>
 							</Box>
 							<TabPanel value={selectedTabIndex} index={0}>
@@ -164,8 +169,11 @@ export const Explore = (): JSX.Element => {
 							<TabPanel value={selectedTabIndex} index={1}>
 								<Listeners/>
 							</TabPanel>
+							<TabPanel value={selectedTabIndex} index={2}>
+								<Groups/>
+							</TabPanel>
 							<TabPanel value={selectedTabIndex} index={4}/>
-							<TabPanel value={selectedTabIndex} index={2}/>
+
 							<TabPanel value={selectedTabIndex} index={3}/>
 
 
