@@ -31,6 +31,7 @@ export default function ShareGroupDatasetModal(props: ShareGroupDatasetModalProp
 
     const onShare = () => {
     	console.log(group, datasetId,role);
+    	setGroupRole(datasetId, group, role);
         handleClose();
     }
 
