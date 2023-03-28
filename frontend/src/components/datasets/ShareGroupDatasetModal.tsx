@@ -1,4 +1,5 @@
 import React, {useEffect, useState} from "react";
+
 import {useDispatch, useSelector} from "react-redux";
 import { Autocomplete, Button, Container, Dialog, DialogActions, DialogContent, DialogTitle, Divider, FormControl, InputLabel, MenuItem, Select, TextField, Typography } from "@mui/material";
 import {fetchGroups} from "../../actions/group";
@@ -15,8 +16,8 @@ type ShareGroupDatasetModalProps = {
 export default function ShareGroupDatasetModal(props: ShareGroupDatasetModalProps) {
     const { open, handleClose, datasetName } = props;
 
-    const [group, setGroup] = useState("")
-    const [role, setRole] = useState("viewer")
+    const [role, setRole] = useState("viewer");
+	const [group, setGroup] = useState("");
 	const dispatch = useDispatch();
 	const listGroups = () => dispatch(fetchGroups(0, 21));
 	const groups = useSelector((state: RootState) => state.group.groups);
@@ -29,19 +30,18 @@ export default function ShareGroupDatasetModal(props: ShareGroupDatasetModalProp
     const onShare = () => {
         handleClose();
     }
-	console.log('groups are here', groups);
 
 
-	const options = [];
+
+	const options = Array();
     groups.map((group) => {
     	let group_option = {value:group.id, label:group.name}
-		group_options.push(group_option);
+		options.push(group_option);
     });
 	console.log('group optioins are', options);
 	console.log('it is of type', typeof(options));
-	const initial_group = options.at(0);
-	console.log('initial group is', initial_group);
-    return (
+
+	return (
         <Container>
             <Dialog open={open} onClose={handleClose} fullWidth={true} maxWidth="md"
                 sx={{
@@ -57,29 +57,31 @@ export default function ShareGroupDatasetModal(props: ShareGroupDatasetModalProp
                         display: 'flex',
                         alignItems: 'center'
                     }}>
-                        <Autocomplete
-                            id="email-auto-complete"
-                            freeSolo
-                            autoHighlight
-                            inputValue={group}
-                            onInputChange={(event, value) => {
-                                setGroup(value)
-                            }}
-                            options={["abc@xyz.com"]}
-                            renderInput={(params) => <TextField {...params} sx={{ mt: 1, mr: 1, "alignItems": "right", "width": "450px" }} required label="Enter email address" />}
-                        /> as
-						<Select
-								options={options}
+						<FormControl variant="outlined" sx={{ m: 1, minWidth: 120 }}>
+							<InputLabel id="demo-simple-select-label">Group</InputLabel>
+							<Select
                                 labelId="demo-simple-select-label"
                                 id="demo-simple-select"
-                                label="Group"
-								defaultGroup={initial_group}
 								value={group}
+								// defaultValue={"641214ebfe6405bc949730c6"}
+								label="Group"
                                 onChange={(event, value) => {
+                                	console.log(event, value);
+                                	console.log('chose a new group');
+                                	console.log(event.target.value);
                                     setGroup(event.target.value);
                                 }}
-                            >
+                            	>
+							{options.map((group) => (
+            					<MenuItem
+								  key={group.label}
+								  value={group.value}
+								>
+								  {group.label}
+            					</MenuItem>
+							))}
                             </Select>
+						</FormControl>
                         <FormControl variant="outlined" sx={{ m: 1, minWidth: 120 }}>
                             <InputLabel id="demo-simple-select-label">Status</InputLabel>
                             <Select
@@ -89,6 +91,7 @@ export default function ShareGroupDatasetModal(props: ShareGroupDatasetModalProp
                                 defaultValue={"viewer"}
                                 label="Status"
                                 onChange={(event, value) => {
+                                	console.log(event, value);
                                     setRole(event.target.value)
                                 }}
                             >
