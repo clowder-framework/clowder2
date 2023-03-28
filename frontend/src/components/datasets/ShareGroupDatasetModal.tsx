@@ -4,8 +4,8 @@ import {useDispatch, useSelector} from "react-redux";
 import { Autocomplete, Button, Container, Dialog, DialogActions, DialogContent, DialogTitle, Divider, FormControl, InputLabel, MenuItem, Select, TextField, Typography } from "@mui/material";
 import {fetchGroups} from "../../actions/group";
 import {RootState} from "../../types/data";
-import {parseDate} from "../../utils/common";
-
+import {setDatasetGroupRole} from "../../actions/dataset";
+import {useParams} from "react-router-dom";
 
 type ShareGroupDatasetModalProps = {
     open: boolean,
@@ -15,12 +15,14 @@ type ShareGroupDatasetModalProps = {
 
 export default function ShareGroupDatasetModal(props: ShareGroupDatasetModalProps) {
     const { open, handleClose, datasetName } = props;
-
+	const {datasetId} = useParams<{ datasetId?: string }>();
     const [role, setRole] = useState("viewer");
 	const [group, setGroup] = useState("");
 	const dispatch = useDispatch();
 	const listGroups = () => dispatch(fetchGroups(0, 21));
 	const groups = useSelector((state: RootState) => state.group.groups);
+	const setGroupRole = (datasetId: string , groupId: string, role: string) => dispatch(setDatasetGroupRole(datasetId, groupId, role));
+
 
 	// component did mount
 	useEffect(() => {
@@ -28,6 +30,7 @@ export default function ShareGroupDatasetModal(props: ShareGroupDatasetModalProp
 	}, []);
 
     const onShare = () => {
+    	console.log(group, datasetId,role);
         handleClose();
     }
 
