@@ -35,3 +35,21 @@ export function fetchGroupAbout(id){
 			});
 	};
 }
+
+
+export const DELETE_GROUP_MEMBER = "DELETE_GROUP_MEMBER";
+export function deleteGroupMember(groupId, username){
+	return (dispatch) => {
+		return V2.GroupsService.removeMemberApiV2GroupsGroupIdRemoveUsernamePost(groupId, username)
+			.then(json => {
+				dispatch({
+					type: DELETE_GROUP_MEMBER,
+					member: json,
+					receivedAt: Date.now(),
+				});
+			})
+			.catch(reason => {
+				dispatch(handleErrors(reason, deleteGroupMember(groupId, username)));
+			});
+	};
+}

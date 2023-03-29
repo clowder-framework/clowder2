@@ -1,6 +1,6 @@
 import {
 	RECEIVE_GROUPS,
-	RECEIVE_GROUP_ABOUT,
+	RECEIVE_GROUP_ABOUT, DELETE_GROUP_MEMBER,
 } from "../actions/group";
 import {
 	RECEIVE_GROUP_ROLE
@@ -23,6 +23,10 @@ const group = (state = defaultState, action: DataAction) => {
 			return Object.assign({}, state, {about: action.about});
 		case RECEIVE_GROUP_ROLE:
 			return Object.assign({}, state, {role: action.role});
+		case DELETE_GROUP_MEMBER:
+			return Object.assign({}, state, {
+				about: state.about.users.filter(member => member.user.id !== action.member.id),
+			});
         default:
             return state;
 	}
