@@ -90,9 +90,9 @@ async def get_token(
             payload = serializer.loads(api_key)
             # Key is valid, check expiration date in database
             if (
-                    key_entry := await db["user_keys"].find_one(
-                        {"user": payload["user"], "key": payload["key"]}
-                    )
+                key_entry := await db["user_keys"].find_one(
+                    {"user": payload["user"], "key": payload["key"]}
+                )
             ) is not None:
                 key = UserAPIKey.from_mongo(key_entry)
                 current_time = datetime.utcnow()
@@ -100,7 +100,7 @@ async def get_token(
 
                 if mins_since > settings.local_auth_expiration:
                     # Expired key, delete it first
-                    db["user_keys"].remove({"_id": ObjectId(key.id)})
+                    db["user_keys"].delete_one({"_id": ObjectId(key.id)})
                     raise HTTPException(
                         status_code=401,
                         detail={"error": "Key is expired."},
@@ -120,7 +120,6 @@ async def get_token(
                 detail={"error": "Key is invalid."},
                 headers={"WWW-Authenticate": "Bearer"},
             )
-
 
 
 async def get_user(identity: Json = Depends(get_token)):
@@ -172,9 +171,9 @@ async def get_current_username(
             payload = serializer.loads(api_key)
             # Key is valid, check expiration date in database
             if (
-                    key_entry := await db["user_keys"].find_one(
-                        {"user": payload["user"], "key": payload["key"]}
-                    )
+                key_entry := await db["user_keys"].find_one(
+                    {"user": payload["user"], "key": payload["key"]}
+                )
             ) is not None:
                 key = UserAPIKey.from_mongo(key_entry)
                 current_time = datetime.utcnow()
@@ -182,7 +181,7 @@ async def get_current_username(
 
                 if mins_since > settings.local_auth_expiration:
                     # Expired key, delete it first
-                    db["user_keys"].remove({"_id": ObjectId(key.id)})
+                    db["user_keys"].delete_one({"_id": ObjectId(key.id)})
                     raise HTTPException(
                         status_code=401,
                         detail={"error": "Key is expired."},
