@@ -42,7 +42,11 @@ export default function MembersTable(props: MembersTableProps) {
 		<>
 			<ActionModal actionOpen={deleteDatasetConfirmOpen} actionTitle="Are you sure?"
 							 actionText="Do you really want to delete this member? This process cannot be undone."
-							 actionBtnName="Delete" handleActionBtnClick={() => groupMemberDeleted(groupId, selectMemberUsername)}
+							 actionBtnName="Delete"
+							 handleActionBtnClick={() => {
+								groupMemberDeleted(groupId, selectMemberUsername);
+								setDeleteDatasetConfirmOpen(false);
+							 }}
 							 handleActionCancel={() => {
 								 setDeleteDatasetConfirmOpen(false);
 							 }}/>
