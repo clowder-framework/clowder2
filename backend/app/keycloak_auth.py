@@ -88,7 +88,32 @@ async def get_token(
         serializer = URLSafeSerializer(settings.local_auth_secret, salt="api_key")
         try:
             payload = serializer.loads(api_key)
-            return {"preferred_username": payload["user"]}
+            # Key is valid, check expiration date in database
+            if (
+                    key_entry := await db["user_keys"].find_one(
+                        {"user": payload["user"], "key": payload["key"]}
+                    )
+            ) is not None:
+                key = UserAPIKey.from_mongo(key_entry)
+                current_time = datetime.utcnow()
+                mins_since = int((current_time - key.created).total_seconds() / 60)
+
+                if mins_since > settings.local_auth_expiration:
+                    # Expired key, delete it first
+                    db["user_keys"].remove({"_id": ObjectId(key.id)})
+                    raise HTTPException(
+                        status_code=401,
+                        detail={"error": "Key is expired."},
+                        headers={"WWW-Authenticate": "Bearer"},
+                    )
+                else:
+                    return {"preferred_username": payload["user"]}
+            else:
+                raise HTTPException(
+                    status_code=401,
+                    detail={"error": "Key is invalid."},
+                    headers={"WWW-Authenticate": "Bearer"},
+                )
         except BadSignature as e:
             raise HTTPException(
                 status_code=401,
