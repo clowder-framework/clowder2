@@ -12,7 +12,6 @@ import {theme} from "../../theme";
 import {MembersTableUserEntry} from "./MembersTableUserEntry";
 import {ActionModal} from "../dialog/ActionModal";
 import {useState} from "react";
-import {datasetDeleted} from "../../actions/dataset";
 import {deleteGroupMember} from "../../actions/group";
 
 type MembersTableProps = {
@@ -25,20 +24,25 @@ const iconStyle = {
 }
 
 export default function MembersTable(props: MembersTableProps) {
-	const dispatch = useDispatch();
+
+	const {groupId} = props;
 
 	// mapStateToProps
 	const about = useSelector((state: RootState) => state.group.about);
 
+	// dispatch
+	const dispatch = useDispatch();
+	const groupMemberDeleted = (groupId: string|undefined, username: string|undefined) => dispatch(deleteGroupMember(groupId, username))
+
 	// use history hook to redirect/navigate between routes
 	const [deleteDatasetConfirmOpen, setDeleteDatasetConfirmOpen] = useState(false);
-	const groupMemberDeleted = (groupId: string, username: string) => dispatch(deleteGroupMember(groupId, username))
+	const [selectMemberUsername, setSelectMemberUsername] = useState();
 
 	return (
 		<>
 			<ActionModal actionOpen={deleteDatasetConfirmOpen} actionTitle="Are you sure?"
-							 actionText="Do you really want to delete this dataset? This process cannot be undone."
-							 actionBtnName="Delete" handleActionBtnClick={groupMemberDeleted}
+							 actionText="Do you really want to delete this member? This process cannot be undone."
+							 actionBtnName="Delete" handleActionBtnClick={() => groupMemberDeleted(groupId, selectMemberUsername)}
 							 handleActionCancel={() => {
 								 setDeleteDatasetConfirmOpen(false);
 							 }}/>
@@ -60,6 +64,8 @@ export default function MembersTable(props: MembersTableProps) {
 										iconStyle={iconStyle}
 										member={member}
 										key={member.user.id}
+										setDeleteDatasetConfirmOpen={setDeleteDatasetConfirmOpen}
+										setSelectMemberUsername={setSelectMemberUsername}
 									/>
 								)))
 								:
