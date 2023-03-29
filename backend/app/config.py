@@ -10,15 +10,9 @@ class Settings(BaseSettings):
     admin_email: str = "devnull@ncsa.illinois.edu"
     frontend_url: str = "http://localhost:3000"
 
-    # openssl rand -hex 32
-    local_auth_secret = (
-        "47358d6ace318031e822d722c15d191ba0d3e2cc7594317514e553424ccf3e39"
-    )
-
-    # openssl rand -hex 32
-    local_auth_secret = (
-        "47358d6ace318031e822d722c15d191ba0d3e2cc7594317514e553424ccf3e39"
-    )
+    # Unique secret for hashing API keys. Generate with `openssl rand -hex 32`
+    local_auth_secret = "clowder_secret_key"
+    local_auth_expiration = 30  # number of minutes before invalidating API key
 
     # exposing default ports for fronted
     CORS_ORIGINS: List[AnyHttpUrl] = [
