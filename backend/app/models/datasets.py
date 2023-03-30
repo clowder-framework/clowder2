@@ -2,6 +2,8 @@ from datetime import datetime
 from enum import Enum, auto
 from typing import Optional
 
+import pymongo
+from beanie import Document, Indexed
 from pydantic import BaseModel
 from pydantic import Field
 
@@ -35,13 +37,22 @@ class DatasetPatch(BaseModel):
     description: Optional[str]
 
 
-class DatasetDB(MongoModel, DatasetBase):
+class DatasetDB(Document, DatasetBase):
     author: UserOut
     created: datetime = Field(default_factory=datetime.utcnow)
     modified: datetime = Field(default_factory=datetime.utcnow)
     status: str = DatasetStatus.PRIVATE.name
     views: int = 0
     downloads: int = 0
+
+    class Settings:
+        name = "datasets_beanie"
+        indexes = [
+            [
+                ("name", pymongo.TEXT),
+                ("description", pymongo.TEXT),
+            ],
+        ]
 
 
 class DatasetOut(DatasetDB):

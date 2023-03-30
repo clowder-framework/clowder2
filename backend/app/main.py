@@ -5,6 +5,8 @@ import time
 from urllib.request import Request
 
 import uvicorn
+from beanie import init_beanie
+from motor.motor_asyncio import AsyncIOMotorClient
 from pydantic import BaseConfig
 from fastapi import FastAPI, APIRouter, Depends
 from fastapi.middleware.cors import CORSMiddleware
@@ -155,6 +157,19 @@ api_router.include_router(
 api_router.include_router(keycloak.router, prefix="/auth", tags=["auth"])
 app.include_router(api_router, prefix=settings.API_V2_STR)
 
+
+def gather_documents():
+    pass
+
+
+@app.on_event("startup")
+async def startup_beanie():
+    """Setup Beanie Object Document Mapper (ODM) to interact with MongoDB."""
+    client = AsyncIOMotorClient(str(settings.MONGODB_URL))
+    await init_beanie(
+        database=getattr(client, settings.MONGO_DATABASE),
+        document_models=["app.models.datasets.DatasetDB"],
+    )
 
 @app.on_event("startup")
 async def startup_elasticsearch():

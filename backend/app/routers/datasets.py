@@ -200,19 +200,26 @@ async def save_dataset(
         raise HTTPException(status_code=503, detail="Service not available")
         return
 
-    dataset_db = DatasetDB(**dataset_in.dict(), author=user)
-    new_dataset = await db["datasets"].insert_one(dataset_db.to_mongo())
-    found = await db["datasets"].find_one({"_id": new_dataset.inserted_id})
-    dataset_out = DatasetOut.from_mongo(found)
+
+    dataset_out = await DatasetDB(**dataset_in.dict(), author=user).insert()
+    # dataset_db = DatasetDB(**dataset_in.dict(), author=user)
+    # new_dataset = await db["datasets"].insert_one(dataset_db.to_mongo())
+    # found = await db["datasets"].find_one({"_id": new_dataset.inserted_id})
+    # dataset_out = DatasetOut.from_mongo(found)
 
     # Create authorization entry
-    await db["authorization"].insert_one(
-        AuthorizationDB(
-            dataset_id=new_dataset.inserted_id,
+    authorization_out = AuthorizationDB(
+            dataset_id=dataset_out.id,
             role=RoleType.OWNER,
             creator=user.email,
-        ).to_mongo()
-    )
+        ).insert()
+    # await db["authorization"].insert_one(
+    #     AuthorizationDB(
+    #         dataset_id=dataset_out.id,
+    #         role=RoleType.OWNER,
+    #         creator=user.email,
+    #     ).to_mongo()
+    # )
 
     # Add en entry to the dataset index
     doc = {
