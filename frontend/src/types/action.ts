@@ -271,6 +271,11 @@ interface RECEIVE_GROUP_ROLE{
 	role: RoleType;
 }
 
+interface DELETE_GROUP_MEMBER{
+	type: "DELETE_GROUP_MEMBER"
+	about: Group
+}
+
 export type DataAction =
 	| RECEIVE_FILES_IN_DATASET
 	| RECEIVE_FOLDERS_IN_DATASET
@@ -324,4 +329,5 @@ export type DataAction =
 	| RECEIVE_GROUPS
 	| RECEIVE_GROUP_ABOUT
 	| RECEIVE_GROUP_ROLE
+	| DELETE_GROUP_MEMBER
 	;
