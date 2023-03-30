@@ -7,12 +7,14 @@ import {
 } from "../actions/authorization";
 import {DataAction} from "../types/action";
 import {GroupState} from "../types/data";
-import {GroupOut, RoleType} from "../openapi/v2";
+import {GroupOut, RoleType, UserOut} from "../openapi/v2";
+import {LIST_USERS} from "../actions/user";
 
 const defaultState: GroupState = {
 	groups: [],
 	about: <GroupOut>{},
-	role: <RoleType>{}
+	role: <RoleType>{},
+	users: <UserOut>[]
 };
 
 const group = (state = defaultState, action: DataAction) => {
@@ -29,6 +31,8 @@ const group = (state = defaultState, action: DataAction) => {
 			});
 		case ADD_GROUP_MEMBER:
 			return Object.assign({}, state, {})
+		case LIST_USERS:
+			return Object.assign({}, state, {users: action.users});
         default:
             return state;
 	}

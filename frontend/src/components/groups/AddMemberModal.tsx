@@ -1,4 +1,4 @@
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import {
 	Autocomplete,
 	Box,
@@ -15,7 +15,11 @@ import {
 	TextField
 } from "@mui/material";
 import {addGroupMember} from "../../actions/group";
-import {useDispatch} from "react-redux";
+import {useDispatch, useSelector} from "react-redux";
+import {fetchAllUsers} from "../../actions/user";
+import {RootState} from "../../types/data";
+import {UserOut} from "../../openapi/v2";
+import GroupsIcon from "@mui/icons-material/Groups";
 
 
 type AddMemberModalProps = {
@@ -28,14 +32,21 @@ export default function AddMemberModal(props: AddMemberModalProps) {
     const { open, handleClose, groupName } = props;
 
     const dispatch = useDispatch();
+    const listAllUsers = (skip:number, limit:number) => dispatch(fetchAllUsers(skip, limit));
     const groupMemberAdded = (groupId:string | undefined, username: string | undefined) => dispatch(addGroupMember(groupId, username));
+    const users = useSelector((state: RootState) => state.group.users);
 
-    const [email, setEmail] = useState("")
-    const [role, setRole] = useState("viewer")
+    const [email, setEmail] = useState("");
+    const [role, setRole] = useState("viewer");
+    const [options, setOptions] = useState([]);
 
-    const onShare = () => {
-        handleClose();
-    }
+	useEffect(() => {
+		listAllUsers(0, 21);
+	}, [])
+
+	useEffect(() =>{
+		setOptions(users.reduce((list:string[], user:UserOut) => { return [...list, user.email];}, []));
+	}, [users])
 
     return (
         <Container>
@@ -45,7 +56,8 @@ export default function AddMemberModal(props: AddMemberModalProps) {
                         padding: "2em",
                     },
                 }}>
-                <DialogTitle>Add People to {groupName}</DialogTitle>
+                <DialogTitle>Add People to <GroupsIcon sx={{verticalAlign: "middle", fontSize: "1.5em",
+					margin: "auto 5px"}}/>{groupName}</DialogTitle>
                 <DialogContent>
                     <Box sx={{display: "flex", justifyContent: "space-between", alignItems: "center"}}>
                         <Autocomplete
@@ -56,10 +68,10 @@ export default function AddMemberModal(props: AddMemberModalProps) {
                             onInputChange={(_, value) => {
                                 setEmail(value)
                             }}
-                            options={["abc@xyz.com"]}
+                            options={options}
                             renderInput={(params) =>
 								<TextField {...params}
-										   sx={{mt: 1, width: 500 }}
+										   sx={{mt: 1, width: 600 }}
 										   required label="Enter email address" />}
                         />
                         AS
@@ -83,7 +95,7 @@ export default function AddMemberModal(props: AddMemberModalProps) {
                         </FormControl>
                     </Box>
                     <Button variant="contained" sx={{ marginTop: 1 }}
-							onClick={onShare}
+							onClick={handleClose}
 							disabled={(email.length > 0) ? false : true}>
 						Add
                     </Button>
