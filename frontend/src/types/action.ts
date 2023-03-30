@@ -273,13 +273,13 @@ interface RECEIVE_GROUP_ROLE{
 }
 
 interface DELETE_GROUP_MEMBER{
+	about: Group;
 	type: "DELETE_GROUP_MEMBER";
-	member: UserOut;
 }
 
 interface ADD_GROUP_MEMBER{
+	about: Group;
 	type: "ADD_GROUP_MEMBER";
-	member: UserOut;
 }
 
 interface LIST_USERS{

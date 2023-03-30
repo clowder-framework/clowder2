@@ -13,7 +13,6 @@ import {LIST_USERS} from "../actions/user";
 const defaultState: GroupState = {
 	groups: [],
 	about: <GroupOut>{},
-	members: [],
 	role: <RoleType>{},
 	users: []
 };
@@ -23,15 +22,13 @@ const group = (state = defaultState, action: DataAction) => {
 		case RECEIVE_GROUPS:
 			return Object.assign({}, state, {groups: action.groups});
 		case RECEIVE_GROUP_ABOUT:
-			return Object.assign({}, state, {about: action.about, members: action.about.users});
+			return Object.assign({}, state, {about: action.about});
 		case RECEIVE_GROUP_ROLE:
 			return Object.assign({}, state, {role: action.role});
 		case DELETE_GROUP_MEMBER:
-			return Object.assign({}, state, {
-				members: state.members.filter(member => member.user.id !== action.member.id),
-			});
+			return Object.assign({}, state, {about: action.about});
 		case ADD_GROUP_MEMBER:
-			return Object.assign({}, state, {members: [...state.members, action.member]});
+			return Object.assign({}, state, {about: action.about});
 		case LIST_USERS:
 			return Object.assign({}, state, {users: action.users});
         default:

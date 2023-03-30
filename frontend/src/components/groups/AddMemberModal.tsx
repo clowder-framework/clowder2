@@ -25,7 +25,8 @@ import GroupsIcon from "@mui/icons-material/Groups";
 type AddMemberModalProps = {
     open: boolean,
     handleClose: any,
-    groupName: string
+    groupName: string,
+	groupId: string,
 }
 
 export default function AddMemberModal(props: AddMemberModalProps) {

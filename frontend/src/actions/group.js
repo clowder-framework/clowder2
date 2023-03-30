@@ -43,7 +43,7 @@ export function deleteGroupMember(groupId, username){
 			.then(json => {
 				dispatch({
 					type: DELETE_GROUP_MEMBER,
-					member: json,
+					about: json,
 					receivedAt: Date.now(),
 				});
 			})
@@ -60,7 +60,7 @@ export function addGroupMember(groupId, username){
 			.then(json => {
 				dispatch({
 					type: ADD_GROUP_MEMBER,
-					member: json,
+					about: json,
 					receivedAt: Date.now(),
 				});
 			})

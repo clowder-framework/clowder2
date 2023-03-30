@@ -23,7 +23,7 @@ export function Group() {
 	const fetchGroupInfo = (groupId: string | undefined) => dispatch(fetchGroupAbout(groupId));
 	const fetchCurrentGroupRole = (groupId: string | undefined) => dispatch(fetchGroupRole(groupId));
 
-	const about = useSelector((state: RootState) => state.group.about);
+	const groupAbout = useSelector((state: RootState) => state.group.about);
 	const role = useSelector((state: RootState) => state.group.role);
 
 	const [addMemberModalOpen,setAddMemberModalOpen] = useState(false);
@@ -37,7 +37,7 @@ export function Group() {
 	return (
 		<Layout>
 			<AddMemberModal open={addMemberModalOpen} handleClose={()=>{setAddMemberModalOpen(false);}}
-							groupName={about.name}/>
+							groupName={groupAbout.name} groupId={groupAbout.id}/>
 			<Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center"}}>
 				<Box sx={{
 					display: "flex",
@@ -45,9 +45,9 @@ export function Group() {
 					p: 1,
 					m: 1
 				}}>
-					<Typography variant="h3" paragraph>{about !== undefined ? about.name : "Not found"}
+					<Typography variant="h3" paragraph>{groupAbout !== undefined ? groupAbout.name : "Not found"}
 					</Typography>
-					<Typography variant="body1" paragraph>{about.description}</Typography>
+					<Typography variant="body1" paragraph>{groupAbout.description}</Typography>
 				</Box>
 				<AuthWrapper currRole={role} allowedRoles={["owner", "editor"]}>
 					<Button variant="contained"

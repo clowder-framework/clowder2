@@ -28,7 +28,7 @@ export default function MembersTable(props: MembersTableProps) {
 	const {groupId} = props;
 
 	// mapStateToProps
-	const members = useSelector((state: RootState) => state.group.members)
+	const groupAbout = useSelector((state: RootState) => state.group.about)
 
 	// dispatch
 	const dispatch = useDispatch();
@@ -63,8 +63,8 @@ export default function MembersTable(props: MembersTableProps) {
 					</TableHead>
 					<TableBody>
 						{
-							members !== undefined?
-								(members.map((member) => (
+							groupAbout !== undefined && groupAbout.users !== undefined?
+								(groupAbout.users.map((member) => (
 									<MembersTableUserEntry
 										iconStyle={iconStyle}
 										member={member}

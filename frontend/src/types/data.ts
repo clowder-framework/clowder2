@@ -151,8 +151,6 @@ export interface GroupState{
 	about: GroupOut;
 	role: RoleType;
 	users: UserOut[];
-	members: UserOut[];
-
 }
 export interface MetadataState{
 	metadataDefinitionList: MetadataDefinitionOut[],
