@@ -49,14 +49,14 @@ export function Group() {
 					</Typography>
 					<Typography variant="body1" paragraph>{about.description}</Typography>
 				</Box>
-				{/*<AuthWrapper currRole={role} allowedRoles={["editor"]}>*/}
-				<Button variant="contained"
-						onClick={() => {
-							setAddMemberModalOpen(true);
-						}} endIcon={<PersonAddAlt1Icon/>}>
-					Add Member
-				</Button>
-				{/*</AuthWrapper>*/}
+				<AuthWrapper currRole={role} allowedRoles={["owner", "editor"]}>
+					<Button variant="contained"
+							onClick={() => {
+								setAddMemberModalOpen(true);
+							}} endIcon={<PersonAddAlt1Icon/>}>
+						Add Member
+					</Button>
+				</AuthWrapper>
 			</Box>
 			<MembersTable groupId={groupId}/>
 		</Layout>

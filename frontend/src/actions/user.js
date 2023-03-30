@@ -93,7 +93,7 @@ export function logout() {
 }
 
 export const LIST_USERS = "LIST_USERS";
-export function fetchAllUsers(skip=0, limit=21){
+export function fetchAllUsers(skip=0, limit=101){
 	return (dispatch) => {
 		return V2.UsersService.getUsersApiV2UsersGet(skip, limit)
 			.then(json => {

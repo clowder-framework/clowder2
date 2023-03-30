@@ -37,7 +37,6 @@ export default function AddMemberModal(props: AddMemberModalProps) {
     const users = useSelector((state: RootState) => state.group.users);
 
     const [email, setEmail] = useState("");
-    const [role, setRole] = useState("viewer");
     const [options, setOptions] = useState([]);
 
 	useEffect(() => {
@@ -50,6 +49,7 @@ export default function AddMemberModal(props: AddMemberModalProps) {
 
 	const handleAddButtonClick = () =>{
 		groupMemberAdded(groupId, email);
+		setEmail("");
 		handleClose();
 	}
     return (
@@ -63,47 +63,22 @@ export default function AddMemberModal(props: AddMemberModalProps) {
                 <DialogTitle>Add People to <GroupsIcon sx={{verticalAlign: "middle", fontSize: "1.5em",
 					margin: "auto 5px"}}/>{groupName}</DialogTitle>
                 <DialogContent>
-                    <Box sx={{display: "flex", justifyContent: "space-between", alignItems: "center"}}>
-                        <Autocomplete
-                            id="email-auto-complete"
-                            freeSolo
-                            autoHighlight
-                            inputValue={email}
-                            onInputChange={(_, value) => {
-                                setEmail(value)
-                            }}
-                            options={options}
-                            renderInput={(params) =>
-								<TextField {...params}
-										   sx={{mt: 1, width: 600 }}
-										   required label="Enter email address" />}
-                        />
-                        AS
-                        <FormControl variant="outlined" sx={{mt:1, minWidth: 150 }}>
-                            <InputLabel id="demo-simple-select-label">Status</InputLabel>
-                            <Select
-                                labelId="demo-simple-select-label"
-                                id="demo-simple-select"
-                                value={role}
-                                defaultValue={"member"}
-                                label="Status"
-                                onChange={(event, _) => {
-                                    setRole(event.target.value)
-                                }}
-                            >
-                                <MenuItem value="member">Member</MenuItem>
-                                <MenuItem value="editor">Editor</MenuItem>
-                            </Select>
-                        </FormControl>
-                    </Box>
-                    <Button variant="contained" sx={{ marginTop: 1 }}
-							onClick={handleAddButtonClick}
-							disabled={(email.length > 0) ? false : true}>
-						Add
-                    </Button>
+					<Autocomplete
+						id="email-auto-complete"
+						freeSolo
+						autoHighlight
+						inputValue={email}
+						onInputChange={(_, value) => {
+							setEmail(value)
+						}}
+						options={options}
+						renderInput={(params) =>
+							<TextField {...params} sx={{mt: 1, width: "100%" }} required label="Enter email address" />}
+					/>
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={handleClose}>Close</Button>
+                    <Button onClick={handleAddButtonClick}>Add</Button>
+                    <Button onClick={handleClose}>Cancel</Button>
                 </DialogActions>
             </Dialog>
         </Container>
