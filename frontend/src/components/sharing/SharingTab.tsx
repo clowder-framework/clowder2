@@ -1,5 +1,6 @@
 import React, {useEffect, useState} from "react";
 import {RootState} from "../../types/data";
+import Card from '@mui/material/Card';
 import {fetchDatasetGroupsAndRoles, fetchDatasetUsersAndRoles} from "../../actions/dataset";
 import {useDispatch, useSelector} from "react-redux";
 import {useParams} from "react-router-dom";
@@ -12,6 +13,7 @@ import TableCell from "@mui/material/TableCell";
 import TableBody from "@mui/material/TableBody";
 import {GroupAndRoleTable} from "./GroupAndRoleTable";
 import {UserAndRoleTable} from "./UserAndRoleTable";
+import {CardContent} from "@mui/material";
 
 
 export const SharingTab = (): JSX.Element => {
@@ -52,9 +54,19 @@ export const SharingTab = (): JSX.Element => {
 	return (
 		<>
 			<p>Users and Roles</p>
-			<UserAndRoleTable></UserAndRoleTable>
+			<Card key={"userandrole"} sx={{height: "100%", display: "flex", flexDirection: "column"}}>
+				<CardContent>
+					<UserAndRoleTable></UserAndRoleTable>
+				</CardContent>
+			</Card>
+
 			<p>Groups and Roles</p>
-			<GroupAndRoleTable></GroupAndRoleTable>
+			<Card key={"groupandrole"} sx={{height: "100%", display: "flex", flexDirection: "column"}}>
+				<CardContent>
+					<GroupAndRoleTable></GroupAndRoleTable>
+				</CardContent>
+			</Card>
+
 		</>
 	)
 
