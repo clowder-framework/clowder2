@@ -36,7 +36,6 @@ export function fetchGroupAbout(id){
 	};
 }
 
-
 export const DELETE_GROUP_MEMBER = "DELETE_GROUP_MEMBER";
 export function deleteGroupMember(groupId, username){
 	return (dispatch) => {
@@ -50,6 +49,23 @@ export function deleteGroupMember(groupId, username){
 			})
 			.catch(reason => {
 				dispatch(handleErrors(reason, deleteGroupMember(groupId, username)));
+			});
+	};
+}
+
+export const ADD_GROUP_MEMBER = "ADD_GROUP_MEMBER";
+export function addGroupMember(groupId, username){
+	return (dispatch) => {
+		return V2.GroupsService.addMemberApiV2GroupsGroupIdAddUsernamePost(groupId, username)
+			.then(json => {
+				dispatch({
+					type: ADD_GROUP_MEMBER,
+					member: json,
+					receivedAt: Date.now(),
+				});
+			})
+			.catch(reason => {
+				dispatch(handleErrors(reason, addGroupMember(groupId, username)));
 			});
 	};
 }
