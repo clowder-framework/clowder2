@@ -49,7 +49,7 @@ export function Group() {
 					</Typography>
 					<Typography variant="body1" paragraph>{about.description}</Typography>
 				</Box>
-				{/*<AuthWrapper currRole={role} allowedRoles={["owner", "editor", "uploader"]}>*/}
+				{/*<AuthWrapper currRole={role} allowedRoles={["editor"]}>*/}
 				<Button variant="contained"
 						onClick={() => {
 							setAddMemberModalOpen(true);

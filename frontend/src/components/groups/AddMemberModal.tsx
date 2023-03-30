@@ -29,7 +29,7 @@ type AddMemberModalProps = {
 }
 
 export default function AddMemberModal(props: AddMemberModalProps) {
-    const { open, handleClose, groupName } = props;
+    const { open, handleClose, groupName, groupId } = props;
 
     const dispatch = useDispatch();
     const listAllUsers = (skip:number, limit:number) => dispatch(fetchAllUsers(skip, limit));
@@ -48,6 +48,10 @@ export default function AddMemberModal(props: AddMemberModalProps) {
 		setOptions(users.reduce((list:string[], user:UserOut) => { return [...list, user.email];}, []));
 	}, [users])
 
+	const handleAddButtonClick = () =>{
+		groupMemberAdded(groupId, email);
+		handleClose();
+	}
     return (
         <Container>
             <Dialog open={open} onClose={handleClose} fullWidth={true} maxWidth="md"
@@ -81,21 +85,19 @@ export default function AddMemberModal(props: AddMemberModalProps) {
                                 labelId="demo-simple-select-label"
                                 id="demo-simple-select"
                                 value={role}
-                                defaultValue={"viewer"}
+                                defaultValue={"member"}
                                 label="Status"
                                 onChange={(event, _) => {
                                     setRole(event.target.value)
                                 }}
                             >
-                                <MenuItem value="owner">Owner</MenuItem>
+                                <MenuItem value="member">Member</MenuItem>
                                 <MenuItem value="editor">Editor</MenuItem>
-                                <MenuItem value="uploader">Uploader</MenuItem>
-                                <MenuItem value="viewer">Viewer</MenuItem>
                             </Select>
                         </FormControl>
                     </Box>
                     <Button variant="contained" sx={{ marginTop: 1 }}
-							onClick={handleClose}
+							onClick={handleAddButtonClick}
 							disabled={(email.length > 0) ? false : true}>
 						Add
                     </Button>

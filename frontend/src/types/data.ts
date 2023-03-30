@@ -3,7 +3,7 @@ import {
 	MetadataOut as Metadata,
 	FileOut as FileSummary,
 	FileVersion, FolderOut, EventListenerJob, AuthorizationBase,
-	GroupOut, RoleType
+	GroupOut, RoleType, UserOut
 } from "../openapi/v2";
 
 export interface Dataset {
@@ -150,6 +150,9 @@ export interface GroupState{
 	groups: GroupOut[];
 	about: GroupOut;
 	role: RoleType;
+	users: UserOut[];
+	members: UserOut[];
+
 }
 export interface MetadataState{
 	metadataDefinitionList: MetadataDefinitionOut[],
