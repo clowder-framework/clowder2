@@ -25,7 +25,7 @@ const group = (state = defaultState, action: DataAction) => {
 			return Object.assign({}, state, {role: action.role});
 		case DELETE_GROUP_MEMBER:
 			return Object.assign({}, state, {
-				about: {state.about.users.filter(member => member.user.id !== action.member.id)},
+				about: state.about.users.filter(member => member.user.id !== action.member.id),
 			});
         default:
             return state;
