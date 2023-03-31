@@ -77,8 +77,8 @@ export const ExtractionJobs = (props) => {
 	const [page, setPage] = React.useState(0);
 	const [rowsPerPage, setRowsPerPage] = React.useState(10);
 	const [openExtractorPane, setOpenExtractorPane] = React.useState(false);
-	const [fileId, setFileId] = React.useState('');
-	const [datasetId, setDatasetId] = React.useState('');
+	const [fileId, setFileId] = React.useState("");
+	const [datasetId, setDatasetId] = React.useState("");
 
 
 	const handleRequestSort = (
@@ -99,13 +99,13 @@ export const ExtractionJobs = (props) => {
 		setPage(0);
 	};
 
-    const handleExtractionSummary = () => {
-        setOpenExtractorPane(true)
-    }
+	const handleExtractionSummary = () => {
+		setOpenExtractorPane(true);
+	};
 
-    const handleSubmitExtractionClose = () => {
-        setOpenExtractorPane(false)
-    }
+	const handleSubmitExtractionClose = () => {
+		setOpenExtractorPane(false);
+	};
 
 	// Avoid a layout jump when reaching the last page with empty rows.
 	const emptyRows =
@@ -114,13 +114,13 @@ export const ExtractionJobs = (props) => {
 	return (
 		<Box sx={{width: "100%"}}>
 			<Paper sx={{width: "100%", mb: 2}}>
-                <SubmitExtraction
-                    fileId={'fileId'}
-                    datasetId={'datasetId'}
-                    open={openExtractorPane}
-                    handleClose={handleSubmitExtractionClose}
-                    selectedExtractor={'selectedExtractor'}
-                />
+				<SubmitExtraction
+					fileId={"fileId"}
+					datasetId={"datasetId"}
+					open={openExtractorPane}
+					handleClose={handleSubmitExtractionClose}
+					selectedExtractor={"selectedExtractor"}
+				/>
 				<TableContainer>
 					<ExtractionJobsToolbar numExecution={rows.length} selectedStatus={selectedStatus}
 										   selectedCreatedTime={selectedCreatedTime}
@@ -192,20 +192,20 @@ export const ExtractionJobs = (props) => {
 													}
 												</TableCell>
 												{
-                                                    Object.keys(row).map((key) => {
-                                                        if (key == "jobId") {
-                                                            return (
-                                                                <TableCell align="left"><Link
-                                                                    component="button"
-                                                                    variant="body2"
-                                                                    onClick={() => {
-                                                                        handleExtractionSummary()
-                                                                    }}
-                                                                >
-                                                                    {row[key]}
-                                                                </Link></TableCell>
-                                                            );
-                                                        }
+													Object.keys(row).map((key) => {
+														if (key == "jobId") {
+															return (
+																<TableCell align="left"><Link
+																	component="button"
+																	variant="body2"
+																	onClick={() => {
+																		handleExtractionSummary();
+																	}}
+																>
+																	{row[key]}
+																</Link></TableCell>
+															);
+														}
 														if (key !== "status") return <TableCell align="left">{row[key]}</TableCell>;
 													})
 												}
@@ -237,4 +237,4 @@ export const ExtractionJobs = (props) => {
 			</Paper>
 		</Box>
 	);
-}
+};
