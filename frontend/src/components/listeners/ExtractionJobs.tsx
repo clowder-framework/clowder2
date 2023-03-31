@@ -13,11 +13,11 @@ import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import PlayCircleOutlineIcon from "@mui/icons-material/PlayCircleOutline";
 import RestartAltIcon from "@mui/icons-material/RestartAlt";
 import SkipNextIcon from "@mui/icons-material/SkipNext";
-import { Link } from "@mui/material";
+import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Link } from "@mui/material";
 import {theme} from "../../theme";
 import {ExtractionJobsToolbar} from "./ExtractionJobsToolbar";
 import {EnhancedTableHead as ExtractionJobsTableHeader} from "./ExtractionJobsTableHeader";
-import SubmitExtraction from "./SubmitExtraction";
+import ExtractorStatus from "./ExtractorStatus";
 
 
 export interface Data {
@@ -77,9 +77,7 @@ export const ExtractionJobs = (props) => {
 	const [page, setPage] = React.useState(0);
 	const [rowsPerPage, setRowsPerPage] = React.useState(10);
 	const [openExtractorPane, setOpenExtractorPane] = React.useState(false);
-	const [fileId, setFileId] = React.useState("");
-	const [datasetId, setDatasetId] = React.useState("");
-
+	const [jobId, setJobId] = React.useState("");
 
 	const handleRequestSort = (
 		event: React.MouseEvent<unknown>,
@@ -114,13 +112,15 @@ export const ExtractionJobs = (props) => {
 	return (
 		<Box sx={{width: "100%"}}>
 			<Paper sx={{width: "100%", mb: 2}}>
-				<SubmitExtraction
-					fileId={"fileId"}
-					datasetId={"datasetId"}
-					open={openExtractorPane}
-					handleClose={handleSubmitExtractionClose}
-					selectedExtractor={"selectedExtractor"}
-				/>
+                <Dialog open={openExtractorPane} onClose={handleSubmitExtractionClose} fullWidth={true}>
+					<DialogTitle>Extractor Logs</DialogTitle>
+					<DialogContent>
+                        <ExtractorStatus job_id={jobId}/>
+					</DialogContent>
+					<DialogActions>
+						<Button onClick={handleSubmitExtractionClose}>Close</Button>
+					</DialogActions>
+				</Dialog>
 				<TableContainer>
 					<ExtractionJobsToolbar numExecution={rows.length} selectedStatus={selectedStatus}
 										   selectedCreatedTime={selectedCreatedTime}
@@ -199,6 +199,7 @@ export const ExtractionJobs = (props) => {
 																	component="button"
 																	variant="body2"
 																	onClick={() => {
+                                                                        setJobId(row[key])
 																		handleExtractionSummary();
 																	}}
 																>
