@@ -1,5 +1,8 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Autocomplete, Button, Container, Dialog, DialogActions, DialogContent, DialogTitle, Divider, FormControl, InputLabel, MenuItem, Select, TextField, Typography } from "@mui/material";
+import {useParams} from "react-router-dom";
+import { setDatasetUserRole } from "../../actions/dataset";
+import { useDispatch } from "react-redux";
 
 
 type ShareDatasetModalProps = {
@@ -9,12 +12,22 @@ type ShareDatasetModalProps = {
 }
 
 export default function ShareDatasetModal(props: ShareDatasetModalProps) {
-    const { open, handleClose, datasetName } = props;
+    const dispatch = useDispatch();
 
+    const { open, handleClose, datasetName } = props;
+	const {datasetId} = useParams<{ datasetId?: string }>();
     const [email, setEmail] = useState("")
     const [role, setRole] = useState("viewer")
 
+	const setUserRole = (datasetId: string, username: string, role: string) => dispatch(setDatasetUserRole(datasetId, username, role));
+
+    // component did mount
+	useEffect(() => {
+		// listUsers();
+	}, []);
+    
     const onShare = () => {
+        setUserRole(datasetId, email, role);
         handleClose();
     }
 

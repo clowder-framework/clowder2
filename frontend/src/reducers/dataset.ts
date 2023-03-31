@@ -7,7 +7,8 @@ import {
 	CREATE_DATASET,
 	RESET_CREATE_DATASET,
 	DOWNLOAD_DATASET,
-	SET_DATASET_GROUP_ROLE
+	SET_DATASET_GROUP_ROLE,
+    SET_DATASET_USER_ROLE
 } from "../actions/dataset";
 import {CREATE_FILE, UPDATE_FILE, DELETE_FILE, RESET_CREATE_FILE} from "../actions/file";
 import {RECEIVE_DATASET_ROLE} from "../actions/authorization";
@@ -45,6 +46,8 @@ const dataset = (state = defaultState, action: DataAction) => {
 		return Object.assign({}, state, {newFile: {}})
 	case SET_DATASET_GROUP_ROLE:
 		return Object.assign({}, state, {})
+    case SET_DATASET_USER_ROLE:
+        return Object.assign({}, state, {})
 	case UPDATE_FILE:
 		return Object.assign({}, state, {
 			files: state.files.map(file => file.id === action.file.id ? action.file: file),
