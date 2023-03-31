@@ -112,10 +112,10 @@ export const ExtractionJobs = (props) => {
 	return (
 		<Box sx={{width: "100%"}}>
 			<Paper sx={{width: "100%", mb: 2}}>
-                <Dialog open={openExtractorPane} onClose={handleSubmitExtractionClose} fullWidth={true}>
+				<Dialog open={openExtractorPane} onClose={handleSubmitExtractionClose} fullWidth={true}>
 					<DialogTitle>Extractor Logs</DialogTitle>
 					<DialogContent>
-                        <ExtractorStatus job_id={jobId}/>
+						<ExtractorStatus job_id={jobId}/>
 					</DialogContent>
 					<DialogActions>
 						<Button onClick={handleSubmitExtractionClose}>Close</Button>
@@ -199,7 +199,7 @@ export const ExtractionJobs = (props) => {
 																	component="button"
 																	variant="body2"
 																	onClick={() => {
-                                                                        setJobId(row[key])
+																		setJobId(row[key]);
 																		handleExtractionSummary();
 																	}}
 																>
