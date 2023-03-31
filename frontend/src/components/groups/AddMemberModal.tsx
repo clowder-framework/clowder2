@@ -55,12 +55,7 @@ export default function AddMemberModal(props: AddMemberModalProps) {
 	}
     return (
         <Container>
-            <Dialog open={open} onClose={handleClose} fullWidth={true} maxWidth="md"
-                sx={{
-                    ".MuiPaper-root": {
-                        padding: "2em",
-                    },
-                }}>
+            <Dialog open={open} onClose={handleClose} fullWidth={true}>
                 <DialogTitle>Add People to <GroupsIcon sx={{verticalAlign: "middle", fontSize: "1.5em",
 					margin: "auto 5px"}}/>{groupName}</DialogTitle>
                 <DialogContent>

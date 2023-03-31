@@ -3,7 +3,7 @@ import {Box, Button} from "@mui/material";
 import Layout from "../Layout";
 import {RootState} from "../../types/data";
 import {useDispatch, useSelector} from "react-redux";
-import {addGroupMember, fetchGroupAbout} from "../../actions/group";
+import {fetchGroupAbout} from "../../actions/group";
 import {fetchGroupRole} from "../../actions/authorization";
 import Typography from "@mui/material/Typography";
 import {useParams} from "react-router-dom";

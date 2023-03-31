@@ -8,7 +8,6 @@ import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 import {useDispatch, useSelector} from "react-redux";
 import {RootState} from "../../types/data";
-import {theme} from "../../theme";
 import {MembersTableUserEntry} from "./MembersTableUserEntry";
 import {ActionModal} from "../dialog/ActionModal";
 import {useState} from "react";
@@ -16,11 +15,6 @@ import {deleteGroupMember} from "../../actions/group";
 
 type MembersTableProps = {
 	groupId: string | undefined,
-}
-
-const iconStyle = {
-	verticalAlign: "middle",
-	color: theme.palette.primary.main
 }
 
 export default function MembersTable(props: MembersTableProps) {
@@ -66,7 +60,6 @@ export default function MembersTable(props: MembersTableProps) {
 							groupAbout !== undefined && groupAbout.users !== undefined?
 								(groupAbout.users.map((member) => (
 									<MembersTableUserEntry
-										iconStyle={iconStyle}
 										member={member}
 										key={member.user.id}
 										setDeleteDatasetConfirmOpen={setDeleteDatasetConfirmOpen}

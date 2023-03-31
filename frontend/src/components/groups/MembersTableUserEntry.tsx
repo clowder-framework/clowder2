@@ -6,6 +6,8 @@ import PersonIcon from "@mui/icons-material/Person";
 import {Button, IconButton} from "@mui/material";
 import {Member} from "../../openapi/v2";
 import DeleteIcon from "@mui/icons-material/Delete";
+import {theme} from "../../theme";
+import Gravatar from "react-gravatar";
 
 
 type MembersTableUserEntryProps = {
@@ -15,9 +17,15 @@ type MembersTableUserEntryProps = {
 	setSelectMemberUsername: any
 }
 
+const iconStyle = {
+	verticalAlign: "middle",
+	color: theme.palette.primary.main,
+}
+
+
 export function MembersTableUserEntry(props: MembersTableUserEntryProps) {
 
-	const {iconStyle, member, setDeleteDatasetConfirmOpen, setSelectMemberUsername} = props;
+	const {member, setDeleteDatasetConfirmOpen, setSelectMemberUsername} = props;
 
 	return (
 		<TableRow
@@ -25,7 +33,13 @@ export function MembersTableUserEntry(props: MembersTableUserEntryProps) {
 			sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
 		>
 			<TableCell component="th" scope="row" key={`${member.user.id}-icon`}>
-				<PersonIcon sx={iconStyle}/>
+				{
+					member && member.user && member.user.email ?
+						<Gravatar email={member.user.email} rating="g"
+							  style={{width: "32px", height: "32px", borderRadius: "50%", verticalAlign: "middle"}}/>
+						:
+						<PersonIcon sx={iconStyle}/>
+				}
 				<Button >{member.user.first_name} {member.user.last_name}</Button>
 			</TableCell>
 			<TableCell align="right">{member.user.email}</TableCell>
@@ -35,7 +49,7 @@ export function MembersTableUserEntry(props: MembersTableUserEntryProps) {
 					setSelectMemberUsername(member.user.email)
 					setDeleteDatasetConfirmOpen(true);
 				}}>
-					<DeleteIcon/>
+					<DeleteIcon sx={iconStyle}/>
 				</IconButton>
 			</TableCell>
 		</TableRow>
