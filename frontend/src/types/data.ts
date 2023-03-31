@@ -2,7 +2,8 @@ import {
 	MetadataDefinitionOut,
 	MetadataOut as Metadata,
 	FileOut as FileSummary,
-	FileVersion, FolderOut, EventListenerJob, AuthorizationBase
+	FileVersion, FolderOut, EventListenerJob, AuthorizationBase,
+	GroupOut, RoleType
 } from "../openapi/v2";
 
 export interface Dataset {
@@ -31,9 +32,6 @@ export interface Listener {
 	id: string;
 	parameters: any;
 }
-
-
-
 
 export interface Author {
 	id: string;
@@ -148,6 +146,11 @@ export interface ListenerState{
     currJobSummary: JobSummary[];
     currJobId: string;
 }
+export interface GroupState{
+	groups: GroupOut[];
+	about: GroupOut;
+	role: RoleType;
+}
 export interface MetadataState{
 	metadataDefinitionList: MetadataDefinitionOut[],
 	datasetMetadataList: Metadata[],
@@ -193,7 +196,7 @@ export interface RootState {
 	file:FileState;
 	dataset:DatasetState;
 	listener: ListenerState;
+	group: GroupState;
 	user: UserState;
 	folder: FolderState;
 }
-

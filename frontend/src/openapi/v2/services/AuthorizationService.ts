@@ -113,7 +113,7 @@ export class AuthorizationService {
 
     /**
      * Get Metadata Role
-     * Retrieve role of user for metadata. Role cannot change between metadata versions.
+     * Retrieve role of user for group. Group roles can be OWNER, EDITOR, or VIEWER (for regular Members).
      * @param metadataId
      * @returns AuthorizationMetadata Successful Response
      * @throws ApiError
@@ -131,7 +131,26 @@ export class AuthorizationService {
     }
 
     /**
-     * Set Group Role
+     * Get Group Role
+     * Retrieve role of user on a particular group (i.e. whether they can change group memberships).
+     * @param groupId
+     * @returns RoleType Successful Response
+     * @throws ApiError
+     */
+    public static getGroupRoleApiV2AuthorizationsGroupsGroupIdRoleGet(
+        groupId: string,
+    ): CancelablePromise<RoleType> {
+        return __request({
+            method: 'GET',
+            path: `/api/v2/authorizations/groups/${groupId}/role`,
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+
+    /**
+     * Set Dataset Group Role
      * Assign an entire group a specific role for a dataset.
      * @param datasetId
      * @param groupId
@@ -139,7 +158,7 @@ export class AuthorizationService {
      * @returns AuthorizationDB Successful Response
      * @throws ApiError
      */
-    public static setGroupRoleApiV2AuthorizationsDatasetsDatasetIdGroupRoleGroupIdRolePost(
+    public static setDatasetGroupRoleApiV2AuthorizationsDatasetsDatasetIdGroupRoleGroupIdRolePost(
         datasetId: string,
         groupId: string,
         role: RoleType,
@@ -154,7 +173,7 @@ export class AuthorizationService {
     }
 
     /**
-     * Set User Role
+     * Set Dataset User Role
      * Assign a single user a specific role for a dataset.
      * @param datasetId
      * @param username
@@ -162,7 +181,7 @@ export class AuthorizationService {
      * @returns AuthorizationDB Successful Response
      * @throws ApiError
      */
-    public static setUserRoleApiV2AuthorizationsDatasetsDatasetIdUserRoleUsernameRolePost(
+    public static setDatasetUserRoleApiV2AuthorizationsDatasetsDatasetIdUserRoleUsernameRolePost(
         datasetId: string,
         username: string,
         role: RoleType,
@@ -177,14 +196,14 @@ export class AuthorizationService {
     }
 
     /**
-     * Remove Group Role
+     * Remove Dataset Group Role
      * Remove any role the group has with a specific dataset.
      * @param datasetId
      * @param groupId
      * @returns AuthorizationDB Successful Response
      * @throws ApiError
      */
-    public static removeGroupRoleApiV2AuthorizationsDatasetsDatasetIdGroupRoleGroupIdDelete(
+    public static removeDatasetGroupRoleApiV2AuthorizationsDatasetsDatasetIdGroupRoleGroupIdDelete(
         datasetId: string,
         groupId: string,
     ): CancelablePromise<AuthorizationDB> {
@@ -198,14 +217,14 @@ export class AuthorizationService {
     }
 
     /**
-     * Remove User Role
+     * Remove Dataset User Role
      * Remove any role the user has with a specific dataset.
      * @param datasetId
      * @param username
      * @returns AuthorizationDB Successful Response
      * @throws ApiError
      */
-    public static removeUserRoleApiV2AuthorizationsDatasetsDatasetIdUserRoleUsernameDelete(
+    public static removeDatasetUserRoleApiV2AuthorizationsDatasetsDatasetIdUserRoleUsernameDelete(
         datasetId: string,
         username: string,
     ): CancelablePromise<AuthorizationDB> {

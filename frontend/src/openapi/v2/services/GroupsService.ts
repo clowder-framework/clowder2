@@ -10,6 +10,35 @@ import { request as __request } from '../core/request';
 export class GroupsService {
 
     /**
+     * Get Groups
+     * Get a list of all Groups in the db the user is a member/owner of.
+     *
+     * Arguments:
+     * skip -- number of initial records to skip (i.e. for pagination)
+     * limit -- restrict number of records to be returned (i.e. for pagination)
+     * @param skip
+     * @param limit
+     * @returns GroupOut Successful Response
+     * @throws ApiError
+     */
+    public static getGroupsApiV2GroupsGet(
+        skip?: number,
+        limit: number = 10,
+    ): CancelablePromise<Array<GroupOut>> {
+        return __request({
+            method: 'GET',
+            path: `/api/v2/groups`,
+            query: {
+                'skip': skip,
+                'limit': limit,
+            },
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+
+    /**
      * Save Group
      * @param requestBody
      * @returns GroupOut Successful Response
@@ -50,22 +79,17 @@ export class GroupsService {
     /**
      * Edit Group
      * @param groupId
-     * @param userId
      * @param requestBody
      * @returns GroupOut Successful Response
      * @throws ApiError
      */
     public static editGroupApiV2GroupsGroupIdPut(
         groupId: string,
-        userId: string,
         requestBody: GroupBase,
     ): CancelablePromise<GroupOut> {
         return __request({
             method: 'PUT',
             path: `/api/v2/groups/${groupId}`,
-            query: {
-                'user_id': userId,
-            },
             body: requestBody,
             mediaType: 'application/json',
             errors: {
