@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { Autocomplete, Button, Container, Dialog, DialogActions, DialogContent, DialogTitle, Divider, FormControl, InputLabel, MenuItem, Select, TextField, Typography } from "@mui/material";
+import { Alert, Autocomplete, Button, Collapse, Container, Dialog, DialogActions, DialogContent, DialogTitle, Divider, FormControl, IconButton, InputLabel, MenuItem, Select, TextField, Typography } from "@mui/material";
 import {useParams} from "react-router-dom";
 import { setDatasetUserRole } from "../../actions/dataset";
 import { useDispatch } from "react-redux";
+import CloseIcon from '@mui/icons-material/Close'
 
 
 type ShareDatasetModalProps = {
@@ -18,6 +19,7 @@ export default function ShareDatasetModal(props: ShareDatasetModalProps) {
 	const {datasetId} = useParams<{ datasetId?: string }>();
     const [email, setEmail] = useState("")
     const [role, setRole] = useState("viewer")
+    const [showSuccessAlert, setShowSuccessAlert] = useState(false)
 
 	const setUserRole = (datasetId: string, username: string, role: string) => dispatch(setDatasetUserRole(datasetId, username, role));
 
@@ -28,7 +30,9 @@ export default function ShareDatasetModal(props: ShareDatasetModalProps) {
     
     const onShare = () => {
         setUserRole(datasetId, email, role);
-        handleClose();
+        setEmail("");
+        setRole("viewer")
+        setShowSuccessAlert(true);
     }
 
     return (
@@ -78,6 +82,27 @@ export default function ShareDatasetModal(props: ShareDatasetModalProps) {
                         </FormControl>
                     </div>
                     <Button variant="contained" sx={{ marginTop: 1 }} onClick={onShare} disabled={(email.length > 0) ? false : true}>Share</Button>
+                    <Collapse in={showSuccessAlert}>
+                        <br/>
+                        <Alert
+                            severity="success"
+                            action={
+                                <IconButton
+                                aria-label="close"
+                                color="inherit"
+                                size="small"
+                                onClick={() => {
+                                    setShowSuccessAlert(false);
+                                }}
+                                >
+                                    <CloseIcon fontSize="inherit" />
+                                </IconButton>
+                            }
+                            sx={{ mb: 2 }}
+                        >
+                        Successfully added role!
+                        </Alert>
+                    </Collapse>
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={handleClose}>Close</Button>
