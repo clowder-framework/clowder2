@@ -11,6 +11,7 @@ import {AuthWrapper} from "../auth/AuthWrapper";
 import PersonAddAlt1Icon from "@mui/icons-material/PersonAddAlt1";
 import MembersTable from "./MembersTable";
 import AddMemberModal from "./AddMemberModal";
+import RoleChip from "../auth/RoleChip";
 
 
 export function Group() {
@@ -39,15 +40,18 @@ export function Group() {
 			<AddMemberModal open={addMemberModalOpen} handleClose={()=>{setAddMemberModalOpen(false);}}
 							groupName={groupAbout.name} groupId={groupAbout.id}/>
 			<Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center"}}>
-				<Box sx={{
-					display: "flex",
-					flexDirection: "column",
-					p: 1,
-					m: 1
-				}}>
-					<Typography variant="h3" paragraph>{groupAbout !== undefined ? groupAbout.name : "Not found"}
-					</Typography>
-					<Typography variant="body1" paragraph>{groupAbout.description}</Typography>
+				<Box sx={{display: "flex", justifyContent:"flex-start", alignItems:"baseline"}}>
+					<Box sx={{
+						display: "flex",
+						flexDirection: "column",
+						p: 1,
+						m: 1
+					}}>
+						<Typography variant="h3" paragraph>{groupAbout !== undefined ? groupAbout.name : "Not found"}
+						</Typography>
+						<Typography variant="body1" paragraph>{groupAbout.description}</Typography>
+					</Box>
+					<RoleChip role={role}/>
 				</Box>
 				<AuthWrapper currRole={role} allowedRoles={["owner", "editor"]}>
 					<Button variant="contained"
