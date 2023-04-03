@@ -8,10 +8,12 @@ import {Member} from "../../openapi/v2";
 import DeleteIcon from "@mui/icons-material/Delete";
 import {theme} from "../../theme";
 import Gravatar from "react-gravatar";
+import {AuthWrapper} from "../auth/AuthWrapper";
+import {useSelector} from "react-redux";
+import {RootState} from "../../types/data";
 
 
 type MembersTableUserEntryProps = {
-	iconStyle: {}
 	member: Member
 	setDeleteDatasetConfirmOpen: any
 	setSelectMemberUsername: any
@@ -26,6 +28,7 @@ const iconStyle = {
 export function MembersTableUserEntry(props: MembersTableUserEntryProps) {
 
 	const {member, setDeleteDatasetConfirmOpen, setSelectMemberUsername} = props;
+	const role = useSelector((state: RootState) => state.group.role);
 
 	return (
 		<TableRow
@@ -45,12 +48,14 @@ export function MembersTableUserEntry(props: MembersTableUserEntryProps) {
 			<TableCell align="right">{member.user.email}</TableCell>
 			<TableCell align="right">{member.editor !== undefined && member.editor ? "Editor" : "Member"}</TableCell>
 			<TableCell align="right">
-				<IconButton type="button" sx={{p: "10px"}} aria-label="delete" onClick={()=>{
-					setSelectMemberUsername(member.user.email)
-					setDeleteDatasetConfirmOpen(true);
-				}}>
-					<DeleteIcon sx={iconStyle}/>
-				</IconButton>
+				<AuthWrapper currRole={role} allowedRoles={["owner", "editor"]}>
+					<IconButton type="button" sx={{p: "10px"}} aria-label="delete" onClick={()=>{
+						setSelectMemberUsername(member.user.email)
+						setDeleteDatasetConfirmOpen(true);
+					}}>
+						<DeleteIcon sx={iconStyle}/>
+					</IconButton>
+				</AuthWrapper>
 			</TableCell>
 		</TableRow>
 	)

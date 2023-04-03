@@ -5,11 +5,12 @@ from fastapi.params import Depends
 from fastapi.routing import APIRouter
 from pymongo import DESCENDING
 from pymongo.mongo_client import MongoClient
-from typing import List
+from typing import List, Optional
 
 from app import dependencies
 from app.deps.authorization_deps import AuthorizationDB, GroupAuthorization
 from app.keycloak_auth import get_current_user, get_user
+from app.models.authorization import RoleType
 from app.models.groups import GroupOut, GroupIn, GroupDB, GroupBase, Member
 from app.models.users import UserOut
 
@@ -147,11 +148,11 @@ async def search_group(
 async def add_member(
     group_id: str,
     username: str,
+    role: Optional[str] = None,
     db: MongoClient = Depends(dependencies.get_db),
     allow: bool = Depends(GroupAuthorization("editor")),
 ):
     """Add a new user to a group."""
-
     if (user_q := await db["users"].find_one({"email": username})) is not None:
         new_member = Member(user=UserOut.from_mongo(user_q))
         if (
@@ -165,6 +166,12 @@ async def add_member(
                     break
             if not found_already:
                 # If user is already in the group, skip directly to returning the group
+                # else add role and attach this member
+
+                if role is not None and role == RoleType.EDITOR:
+                    new_member.editor = True
+                else:
+                    new_member.editor = False
                 group.users.append(new_member)
                 await db["groups"].replace_one(
                     {"_id": ObjectId(group_id)}, group.to_mongo()
@@ -213,3 +220,39 @@ async def remove_member(
 
         return group
     raise HTTPException(status_code=404, detail=f"Group {group_id} not found")
+
+
+@router.put("/{group_id}/update/{username}", response_model=RoleType)
+async def update_member(
+    group_id: str,
+    username: str,
+    role: str = None,
+    db: MongoClient = Depends(dependencies.get_db),
+    allow: bool = Depends(GroupAuthorization("editor")),
+):
+    """Update user role."""
+    if (user_q := await db["users"].find_one({"email": username})) is not None:
+        if (
+            group_q := await db["groups"].find_one({"_id": ObjectId(group_id)})
+        ) is not None:
+            group = GroupDB.from_mongo(group_q)
+            found_user = None
+            for i, u in enumerate(group.users):
+                if u.user.email == username:
+                    found_user = u.user
+                    found_user_index = i
+                    break
+            if found_user and found_user_index:
+                if role == RoleType.EDITOR:
+                    found_user.editor = True
+                else:
+                    found_user.editor = False
+                group.users[found_user_index] = found_user
+                await db["groups"].replace_one(
+                    {"_id": ObjectId(group_id)}, group.to_mongo()
+                )
+            else:
+                raise HTTPException(status_code=404, detail=f"User {username} does not belong to this group!")
+            return group
+        raise HTTPException(status_code=404, detail=f"Group {group_id} not found")
+    raise HTTPException(status_code=404, detail=f"User {username} not found")

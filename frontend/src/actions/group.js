@@ -74,7 +74,7 @@ export function addGroupMember(groupId, username){
 export const ASSIGN_GROUP_MEMBER_ROLE = "ASSIGN_GROUP_MEMBER_ROLE";
 export function assignGroupMemberRole(groupId, username, role){
 	return (dispatch) => {
-		return V2.AuthorizationService.setGroupUserRoleApiV2AuthorizationsGroupsGroupIdUserRoleUsernameRolePost()
+		return V2..()
 			.then(json => {
 				dispatch({
 					type: ADD_GROUP_MEMBER,
