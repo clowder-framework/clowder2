@@ -17,7 +17,7 @@ from app.deps.authorization_deps import (
     get_role,
     get_role_by_file,
     get_role_by_metadata,
-    get_role_by_group, GroupAuthorization,
+    get_role_by_group,
 )
 from app.models.authorization import (
     AuthorizationBase,
@@ -140,53 +140,6 @@ async def get_group_role(
 ):
     """Retrieve role of user on a particular group (i.e. whether they can change group memberships)."""
     return role
-
-
-@router.post(
-    "/groups/{group_id}/user_role/{username}/{role}",
-    response_model=AuthorizationDB,
-)
-async def set_group_user_role(
-    group_id: str,
-    username: str,
-    role: RoleType,
-    user_id=Depends(get_user),
-    db: MongoClient = Depends(get_db),
-    allow: bool = Depends(GroupAuthorization("editor")),
-):
-    """Assign a user role for managing the group. Right now only support Editor and Viewer"""
-    if (
-        group_q := await db["groups"].find_one({"_id": ObjectId(group_id)})
-    ) is not None:
-        if (user_q := await db["users"].find_one({"email": username})) is not None:
-            if (
-                auth_q := await db["authorization"].find_one(
-                    {"group_id": ObjectId(group_id), "role": role}
-                )
-            ) is not None:
-                # Update if it already exists
-                auth_db = AuthorizationDB.from_mongo(auth_q)
-                auth_db.user_ids.append(username)
-                await db["authorization"].replace_one(
-                    {"_id": auth_db.id}, auth_db.to_mongo()
-                )
-                return auth_db
-            else:
-                # Create a new entry
-                auth_db = AuthorizationDB(
-                    creator=user_id,
-                    group_id=PyObjectId(group_id),
-                    role=role,
-                    user_ids=[username],
-                )
-                await db["authorization"].insert_one(auth_db.to_mongo())
-                return auth_db
-
-        else:
-            raise HTTPException(status_code=404, detail=f"User {username} not found")
-    else:
-        raise HTTPException(status_code=404, detail=f"Group {group_id} not found")
-
 
 @router.post(
     "/datasets/{dataset_id}/group_role/{group_id}/{role}",
