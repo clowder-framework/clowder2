@@ -173,6 +173,34 @@ export class AuthorizationService {
     }
 
     /**
+     * Set Group User Role
+     * Assign a user role for managing the group. Right now only support Editor and Viewer
+     * @param groupId
+     * @param username
+     * @param role
+     * @param datasetId
+     * @returns AuthorizationDB Successful Response
+     * @throws ApiError
+     */
+    public static setGroupUserRoleApiV2AuthorizationsGroupsGroupIdUserRoleUsernameRolePost(
+        groupId: string,
+        username: string,
+        role: RoleType,
+        datasetId: string,
+    ): CancelablePromise<AuthorizationDB> {
+        return __request({
+            method: 'POST',
+            path: `/api/v2/authorizations/groups/${groupId}/user_role/${username}/${role}`,
+            query: {
+                'dataset_id': datasetId,
+            },
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+
+    /**
      * Set Dataset User Role
      * Assign a single user a specific role for a dataset.
      * @param datasetId
