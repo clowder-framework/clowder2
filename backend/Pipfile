@@ -25,6 +25,7 @@ install = "*"
 rocrate = "*"
 httpx= "*"
 packaging= "*"
+itsdangerous = "*"
 
 [dev-packages]
 requests = "*"
