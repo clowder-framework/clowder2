@@ -38,10 +38,6 @@ class UserOut(UserBase):
     first_name: str
     last_name: str
 
-async def get_user_out(user_id: str, db: MongoClient) -> UserOut:
-    """Retrieve user from Mongo based on email address."""
-    user_out = await db["users"].find_one({"email": user_id})
-    return UserOut.from_mongo(user_out)
 
 class UserAPIKey(MongoModel):
     """API keys can have a reference name (e.g. 'Uploader script')"""
@@ -54,3 +50,9 @@ class UserAPIKey(MongoModel):
 class UserAndRole(BaseModel):
     user_id: str
     roleType: str
+
+
+async def get_user_out(user_id: str, db: MongoClient) -> UserOut:
+    """Retrieve user from Mongo based on email address."""
+    user_out = await db["users"].find_one({"email": user_id})
+    return UserOut.from_mongo(user_out)
