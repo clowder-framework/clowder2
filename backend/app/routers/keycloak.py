@@ -189,7 +189,7 @@ async def refresh_token(
 
 
 @router.get("/broker/{identity_provider}/token")
-def get_idenity_provider_token(
+def get_identity_provider_token(
     identity_provider: str, access_token: str = Security(oauth2_scheme)
 ) -> Json:
     """Get identity provider JWT token from keyclok. Keycloak must be configured to store external tokens."""
