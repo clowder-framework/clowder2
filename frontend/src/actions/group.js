@@ -54,9 +54,9 @@ export function deleteGroupMember(groupId, username){
 }
 
 export const ADD_GROUP_MEMBER = "ADD_GROUP_MEMBER";
-export function addGroupMember(groupId, username){
+export function addGroupMember(groupId, username, role="viewer"){
 	return (dispatch) => {
-		return V2.GroupsService.addMemberApiV2GroupsGroupIdAddUsernamePost(groupId, username)
+		return V2.GroupsService.addMemberApiV2GroupsGroupIdAddUsernamePost(groupId, username, role)
 			.then(json => {
 				dispatch({
 					type: ADD_GROUP_MEMBER,
@@ -65,25 +65,24 @@ export function addGroupMember(groupId, username){
 				});
 			})
 			.catch(reason => {
-				dispatch(handleErrors(reason, addGroupMember(groupId, username)));
+				dispatch(handleErrors(reason, addGroupMember(groupId, username, role)));
 			});
 	};
 }
 
-
 export const ASSIGN_GROUP_MEMBER_ROLE = "ASSIGN_GROUP_MEMBER_ROLE";
-export function assignGroupMemberRole(groupId, username, role){
+export function assignGroupMemberRole(groupId, username, role="viewer"){
 	return (dispatch) => {
-		return V2..()
+		return V2.GroupsService.updateMemberApiV2GroupsGroupIdUpdateUsernamePut(groupId, username, role)
 			.then(json => {
 				dispatch({
-					type: ADD_GROUP_MEMBER,
+					type: ASSIGN_GROUP_MEMBER_ROLE,
 					about: json,
 					receivedAt: Date.now(),
 				});
 			})
 			.catch(reason => {
-				dispatch(handleErrors(reason, addGroupMember(groupId, username)));
+				dispatch(handleErrors(reason, assignGroupMemberRole(groupId, username, role)));
 			});
 	};
 }

@@ -226,7 +226,7 @@ async def remove_member(
 async def update_member(
     group_id: str,
     username: str,
-    role: str = None,
+    role: str,
     db: MongoClient = Depends(dependencies.get_db),
     allow: bool = Depends(GroupAuthorization("editor")),
 ):

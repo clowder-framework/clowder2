@@ -4,6 +4,7 @@
 import type { GroupBase } from '../models/GroupBase';
 import type { GroupIn } from '../models/GroupIn';
 import type { GroupOut } from '../models/GroupOut';
+import type { RoleType } from '../models/RoleType';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { request as __request } from '../core/request';
 
@@ -139,16 +140,21 @@ export class GroupsService {
      * Add a new user to a group.
      * @param groupId
      * @param username
+     * @param role
      * @returns any Successful Response
      * @throws ApiError
      */
     public static addMemberApiV2GroupsGroupIdAddUsernamePost(
         groupId: string,
         username: string,
+        role?: string,
     ): CancelablePromise<any> {
         return __request({
             method: 'POST',
             path: `/api/v2/groups/${groupId}/add/${username}`,
+            query: {
+                'role': role,
+            },
             errors: {
                 422: `Validation Error`,
             },
@@ -170,6 +176,32 @@ export class GroupsService {
         return __request({
             method: 'POST',
             path: `/api/v2/groups/${groupId}/remove/${username}`,
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+
+    /**
+     * Update Member
+     * Update user role.
+     * @param groupId
+     * @param username
+     * @param role
+     * @returns RoleType Successful Response
+     * @throws ApiError
+     */
+    public static updateMemberApiV2GroupsGroupIdUpdateUsernamePut(
+        groupId: string,
+        username: string,
+        role: string,
+    ): CancelablePromise<RoleType> {
+        return __request({
+            method: 'PUT',
+            path: `/api/v2/groups/${groupId}/update/${username}`,
+            query: {
+                'role': role,
+            },
             errors: {
                 422: `Validation Error`,
             },
