@@ -5,10 +5,11 @@ import {
 	FileOut as FileSummary,
 	FileVersion,
 	AuthorizationBase,
-	RoleType
+	RoleType, UserOut
 } from "../openapi/v2";
 import {MetadataDefinitionOut as MetadataDefinition} from "../openapi/v2";
 import {GroupAndRole, UserAndRole} from "../openapi/v2";
+import {LIST_USERS} from "../actions/user";
 
 interface RECEIVE_FILES_IN_DATASET {
 	type: "RECEIVE_FILES_IN_DATASET";
@@ -282,6 +283,21 @@ interface RECEIVE_GROUP_ROLE{
 	role: RoleType;
 }
 
+interface DELETE_GROUP_MEMBER{
+	about: Group;
+	type: "DELETE_GROUP_MEMBER";
+}
+
+interface ADD_GROUP_MEMBER{
+	about: Group;
+	type: "ADD_GROUP_MEMBER";
+}
+
+interface LIST_USERS{
+	type: "LIST_USERS"
+	users: UserOut[]
+}
+
 export type DataAction =
 	| RECEIVE_FILES_IN_DATASET
 	| RECEIVE_FOLDERS_IN_DATASET
@@ -335,6 +351,9 @@ export type DataAction =
 	| RECEIVE_GROUPS
 	| RECEIVE_GROUP_ABOUT
 	| RECEIVE_GROUP_ROLE
+	| DELETE_GROUP_MEMBER
+	| ADD_GROUP_MEMBER
+	| LIST_USERS
 	| RECEIVE_DATASET_GROUPS_AND_ROLES
 	| RECEIVE_DATASET_USERS_AND_ROLES
 	;

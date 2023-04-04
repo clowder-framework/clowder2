@@ -112,7 +112,7 @@ async def get_role_by_group(
 ) -> RoleType:
     if (group := await db["groups"].find_one({"_id": ObjectId(group_id)})) is not None:
         group_out = GroupOut.from_mongo(group)
-        if group.creator == current_user:
+        if group_out.creator == current_user:
             # Creator can do everything
             return RoleType.OWNER
         for u in group.users:

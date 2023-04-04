@@ -1,6 +1,8 @@
 import {V2} from "../openapi";
 import Cookies from "universal-cookie";
 import config from "../app.config";
+import {handleErrors} from "./common";
+import {ADD_GROUP_MEMBER} from "./group";
 
 const cookies = new Cookies();
 
@@ -87,5 +89,22 @@ export function logout() {
 		return dispatch({
 			type: LOGOUT,
 		});
+	};
+}
+
+export const LIST_USERS = "LIST_USERS";
+export function fetchAllUsers(skip=0, limit=101){
+	return (dispatch) => {
+		return V2.UsersService.getUsersApiV2UsersGet(skip, limit)
+			.then(json => {
+				dispatch({
+					type: LIST_USERS,
+					users: json,
+					receivedAt: Date.now(),
+				});
+			})
+			.catch(reason => {
+				dispatch(fetchAllUsers(skip=0, limit=21));
+			});
 	};
 }
