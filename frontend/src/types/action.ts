@@ -286,6 +286,10 @@ interface LIST_USERS{
 	type: "LIST_USERS"
 	users: UserOut[]
 }
+interface ASSIGN_GROUP_MEMBER_ROLE{
+	type: "ASSIGN_GROUP_MEMBER_ROLE"
+	about: Group
+}
 
 export type DataAction =
 	| RECEIVE_FILES_IN_DATASET
@@ -342,5 +346,6 @@ export type DataAction =
 	| RECEIVE_GROUP_ROLE
 	| DELETE_GROUP_MEMBER
 	| ADD_GROUP_MEMBER
+	| ASSIGN_GROUP_MEMBER_ROLE
 	| LIST_USERS
 	;

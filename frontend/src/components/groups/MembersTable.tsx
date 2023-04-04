@@ -60,6 +60,7 @@ export default function MembersTable(props: MembersTableProps) {
 							groupAbout !== undefined && groupAbout.users !== undefined?
 								(groupAbout.users.map((member) => (
 									<MembersTableUserEntry
+										groupId={groupId}
 										member={member}
 										key={member.user.id}
 										setDeleteDatasetConfirmOpen={setDeleteDatasetConfirmOpen}
