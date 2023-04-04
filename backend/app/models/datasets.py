@@ -1,13 +1,13 @@
 from datetime import datetime
 from enum import Enum, auto
-from typing import Optional
+from typing import Optional, List
 
 import pymongo
-from beanie import Document, Indexed
+from beanie import Document, View, PydanticObjectId
 from pydantic import BaseModel
 from pydantic import Field
 
-from app.models.mongomodel import MongoModel
+from app.models.authorization import AuthorizationDB
 from app.models.users import UserOut
 
 
@@ -38,6 +38,7 @@ class DatasetPatch(BaseModel):
 
 
 class DatasetDB(Document, DatasetBase):
+    # id: PydanticObjectId = Field(None, alias='_id')
     author: UserOut
     created: datetime = Field(default_factory=datetime.utcnow)
     modified: datetime = Field(default_factory=datetime.utcnow)
@@ -52,6 +53,27 @@ class DatasetDB(Document, DatasetBase):
                 ("name", pymongo.TEXT),
                 ("description", pymongo.TEXT),
             ],
+        ]
+
+
+class DatasetDBViewList(View, DatasetBase):
+    # id: PydanticObjectId = Field(None, alias='_id')
+    author: UserOut
+    created: datetime = Field(default_factory=datetime.utcnow)
+    auth: List[AuthorizationDB]
+
+    class Settings:
+        source = DatasetDB
+        name = "datasets_beanie_view"
+        pipeline = [
+            {
+                "$lookup": {
+                    "from": "authorization",
+                    "localField": "_id",
+                    "foreignField": "dataset_id",
+                    "as": "auth"
+                }
+            },
         ]
 
 

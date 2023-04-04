@@ -35,7 +35,7 @@ from app.models.datasets import (
     DatasetIn,
     DatasetDB,
     DatasetOut,
-    DatasetPatch,
+    DatasetPatch, DatasetDBViewList,
 )
 from app.models.files import FileOut, FileDB
 from app.models.folders import FolderOut, FolderIn, FolderDB
@@ -243,42 +243,61 @@ async def get_datasets(
     limit: int = 10,
     mine: bool = False,
 ):
-    datasets = []
     if mine:
-        for doc in (
-            await db["datasets_view"]
-            .find(
+            return await DatasetDBViewList.find(
                 {
                     "$and": [
                         {"author.email": user_id},
                         {"auth": {"$elemMatch": {"user_ids": user_id}}},
                     ]
-                }
-            )
-            .sort([("created", DESCENDING)])
-            .skip(skip)
-            .limit(limit)
-            .to_list(length=limit)
-        ):
-            datasets.append(DatasetOut.from_mongo(doc))
+                },
+            sort=("created", DESCENDING),
+            skip=skip,
+            limit=limit).to_list()
+        # for doc in (
+        #     await db["datasets_view"]
+        #     .find(
+        #         {
+        #             "$and": [
+        #                 {"author.email": user_id},
+        #                 {"auth": {"$elemMatch": {"user_ids": user_id}}},
+        #             ]
+        #         }
+        #     )
+        #     .sort([("created", DESCENDING)])
+        #     .skip(skip)
+        #     .limit(limit)
+        #     .to_list(length=limit)
+        # ):
+        #     datasets.append(DatasetOut.from_mongo(doc))
     else:
-        for doc in (
-            await db["datasets_view"]
-            .find(
-                {
-                    "$or": [
-                        {"author.email": user_id},
-                        {"auth": {"$elemMatch": {"user_ids": user_id}}},
-                    ]
-                }
-            )
-            .sort([("created", DESCENDING)])
-            .skip(skip)
-            .limit(limit)
-            .to_list(length=limit)
-        ):
-            datasets.append(DatasetOut.from_mongo(doc))
-    return datasets
+        return await DatasetDBViewList.find(
+            {
+                "$or": [
+                    {"author.email": user_id},
+                    {"auth": {"$elemMatch": {"user_ids": user_id}}},
+                ]
+            },
+            sort=("created", DESCENDING),
+            skip=skip,
+            limit=limit).to_list()
+    #     for doc in (
+    #         await db["datasets_view"]
+    #         .find(
+    #             {
+    #                 "$or": [
+    #                     {"author.email": user_id},
+    #                     {"auth": {"$elemMatch": {"user_ids": user_id}}},
+    #                 ]
+    #             }
+    #         )
+    #         .sort([("created", DESCENDING)])
+    #         .skip(skip)
+    #         .limit(limit)
+    #         .to_list(length=limit)
+    #     ):
+    #         datasets.append(DatasetOut.from_mongo(doc))
+    # return datasets
 
 
 @router.get("/{dataset_id}", response_model=DatasetOut)
