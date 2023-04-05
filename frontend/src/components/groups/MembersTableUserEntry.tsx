@@ -3,7 +3,7 @@ import React, {useEffect, useState} from "react";
 import TableRow from "@mui/material/TableRow";
 import TableCell from "@mui/material/TableCell";
 import PersonIcon from "@mui/icons-material/Person";
-import {Button, FormControl, IconButton, InputLabel, MenuItem, Select} from "@mui/material";
+import {Button, ButtonGroup, FormControl, IconButton, InputLabel, MenuItem, Select} from "@mui/material";
 import {Member} from "../../openapi/v2";
 import DeleteIcon from "@mui/icons-material/Delete";
 import {theme} from "../../theme";
@@ -11,8 +11,10 @@ import Gravatar from "react-gravatar";
 import {AuthWrapper} from "../auth/AuthWrapper";
 import {useDispatch, useSelector} from "react-redux";
 import {RootState} from "../../types/data";
-import {assignGroupMemberRole, deleteGroupMember} from "../../actions/group";
+import {assignGroupMemberRole} from "../../actions/group";
 import EditIcon from "@mui/icons-material/Edit"
+import CheckIcon from "@mui/icons-material/Check";
+import CloseIcon from "@mui/icons-material/Close";
 
 type MembersTableUserEntryProps = {
 	groupId: string
@@ -77,7 +79,7 @@ export function MembersTableUserEntry(props: MembersTableUserEntryProps) {
 			<TableCell align="right">{member.user.email}</TableCell>
 			<TableCell align="right">
 				{
-					editRoleOn?
+					editRoleOn ?
 						<FormControl fullWidth>
 							  <InputLabel id="demo-simple-select-label">Role</InputLabel>
 							  <Select
@@ -95,11 +97,23 @@ export function MembersTableUserEntry(props: MembersTableUserEntryProps) {
 						member.editor !== undefined && member.editor ?
 							"Editor" : "Member"
 				}
-				<IconButton type="button" sx={{p: "10px"}} aria-label="edit" onClick={()=>{
-						setEditRoleOn(true);
-					}}>
-						<EditIcon sx={iconStyle} />
-				</IconButton>
+				{
+					editRoleOn ?
+						<ButtonGroup variant="text">
+							<IconButton type="button" sx={{p: "10px"}} onClick={handleRoleSave}>
+								<CheckIcon sx={iconStyle}/>
+							</IconButton>
+							<IconButton type="button" sx={{p: "10px"}} onClick={handleRoleCancel}>
+								<CloseIcon sx={iconStyle}/>
+							</IconButton>
+						</ButtonGroup>
+						:
+						<IconButton type="button" sx={{p: "10px"}} aria-label="edit" onClick={()=>{
+							setEditRoleOn(true);
+						}}>
+							<EditIcon sx={iconStyle} />
+						</IconButton>
+				}
 			</TableCell>
 			<TableCell align="right">
 				<AuthWrapper currRole={role} allowedRoles={["owner", "editor"]}>
