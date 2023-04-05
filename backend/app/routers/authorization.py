@@ -165,7 +165,7 @@ async def set_dataset_group_role(
         ) is not None:
             group = GroupOut.from_mongo(group_q)
             # First, remove any existing role the group has on the dataset
-            remove_dataset_group_role(dataset_id, group_id, db, user_id, allow)
+            await remove_dataset_group_role(dataset_id, group_id, db, user_id, allow)
 
             if (
                 auth_q := await db["authorization"].find_one(
@@ -174,12 +174,13 @@ async def set_dataset_group_role(
             ) is not None:
                 # Update existing role entry for this dataset
                 auth_db = AuthorizationDB.from_mongo(auth_q)
-                auth_db.group_ids.append(ObjectId(group_id))
-                for u in group.users:
-                    auth_db.user_ids.append(u.user.email)
-                await db["authorization"].replace_one(
-                    {"_id": auth_db.id}, auth_db.to_mongo()
-                )
+                if group_id not in auth_db.group_ids:
+                    auth_db.group_ids.append(ObjectId(group_id))
+                    for u in group.users:
+                        auth_db.user_ids.append(u.user.email)
+                    await db["authorization"].replace_one(
+                        {"_id": auth_db.id}, auth_db.to_mongo()
+                    )
                 return auth_db
             else:
                 # Create new role entry for this dataset
@@ -229,10 +230,11 @@ async def set_dataset_user_role(
             ) is not None:
                 # Update if it already exists
                 auth_db = AuthorizationDB.from_mongo(auth_q)
-                auth_db.user_ids.append(username)
-                await db["authorization"].replace_one(
-                    {"_id": auth_db.id}, auth_db.to_mongo()
-                )
+                if username not in auth_db.user_ids:
+                    auth_db.user_ids.append(username)
+                    await db["authorization"].replace_one(
+                        {"_id": auth_db.id}, auth_db.to_mongo()
+                    )
                 return auth_db
             else:
                 # Create a new entry
