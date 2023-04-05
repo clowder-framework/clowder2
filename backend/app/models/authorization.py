@@ -33,6 +33,14 @@ class AuthorizationBase(BaseModel):
         use_enum_values = True
 
 
+class AuthorizationDB(MongoModel, AuthorizationBase):
+    pass
+
+
+class AuthorizationOut(AuthorizationDB):
+    pass
+
+
 class AuthorizationFile(BaseModel):
     # TODO: This should be PyObjectId = Field(default_factory=PyObjectId). Need to figure out why can't create instance
     #  in `routers.authorization.get_dataset_role()`.

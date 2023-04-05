@@ -8,13 +8,16 @@ import {
 	RESET_CREATE_DATASET,
 	DOWNLOAD_DATASET,
 	SET_DATASET_GROUP_ROLE,
-    SET_DATASET_USER_ROLE
+    SET_DATASET_USER_ROLE,
+	RECEIVE_DATASET_USERS_AND_ROLES,
+	RECEIVE_DATASET_GROUPS_AND_ROLES,
 } from "../actions/dataset";
 import {CREATE_FILE, UPDATE_FILE, DELETE_FILE, RESET_CREATE_FILE} from "../actions/file";
-import {RECEIVE_DATASET_ROLE} from "../actions/authorization";
+import {RECEIVE_DATASET_ROLE,
+} from "../actions/authorization";
 import {DataAction} from "../types/action";
 import {Author, Dataset, DatasetState} from "../types/data";
-import {AuthorizationBase, FileOut as File} from "../openapi/v2";
+import {AuthorizationBase, GroupAndRole,  UserAndRole, FileOut as File} from "../openapi/v2";
 
 const defaultState: DatasetState = {
 	files: <File[]>[],
@@ -22,7 +25,9 @@ const defaultState: DatasetState = {
 	datasetRole: <AuthorizationBase>{},
 	datasets: [],
 	newDataset: <Dataset>{},
-	newFile: <File>{}
+	newFile: <File>{},
+	groupsAndRoles: <GroupAndRole[]>[],
+	usersAndRoles: <UserAndRole[]>[],
 };
 
 const dataset = (state = defaultState, action: DataAction) => {
@@ -56,6 +61,10 @@ const dataset = (state = defaultState, action: DataAction) => {
 		return Object.assign({}, state, {about: action.about});
 	case RECEIVE_DATASET_ROLE:
 		return Object.assign({}, state, {datasetRole: action.role});
+	case RECEIVE_DATASET_GROUPS_AND_ROLES:
+		return Object.assign({}, state, {groupsAndRoles: action.groupsAndRoles});
+	case RECEIVE_DATASET_USERS_AND_ROLES:
+		return Object.assign({}, state, {usersAndRoles: action.usersAndRoles});
 	case UPDATE_DATASET:
 		return Object.assign({}, state, {about: action.about});
 	case RECEIVE_DATASETS:
@@ -68,9 +77,9 @@ const dataset = (state = defaultState, action: DataAction) => {
 		return Object.assign({}, state, {
 			datasets: state.datasets.filter(dataset => dataset.id !== action.dataset.id),
 		});
-	case DOWNLOAD_DATASET:
-		// TODO do nothing for now; but in the future can utilize to display certain effects
-		return Object.assign({}, state, {});
+	// case DOWNLOAD_DATASET:
+	// 	// TODO do nothing for now; but in the future can utilize to display certain effects
+	// 	return Object.assign({}, state, {});
 	default:
 		return state;
 	}
