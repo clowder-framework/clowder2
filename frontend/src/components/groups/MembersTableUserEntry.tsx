@@ -80,7 +80,7 @@ export function MembersTableUserEntry(props: MembersTableUserEntryProps) {
 			<TableCell align="right">
 				{
 					editRoleOn ?
-						<FormControl fullWidth>
+						<FormControl size="small">
 							  <InputLabel id="demo-simple-select-label">Role</InputLabel>
 							  <Select
 								labelId="role"
