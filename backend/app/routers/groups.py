@@ -1,8 +1,6 @@
 from datetime import datetime
-from http.client import HTTPException
+from fastapi import HTTPException, Depends, APIRouter
 from bson.objectid import ObjectId
-from fastapi.params import Depends
-from fastapi.routing import APIRouter
 from pymongo import DESCENDING
 from pymongo.mongo_client import MongoClient
 from typing import List, Optional
@@ -237,17 +235,18 @@ async def update_member(
         ) is not None:
             group = GroupDB.from_mongo(group_q)
             found_user = None
+            found_user_index = -1
             for i, u in enumerate(group.users):
                 if u.user.email == username:
                     found_user = u.user
                     found_user_index = i
                     break
-            if found_user and found_user_index:
+            if found_user and found_user_index >= 0:
                 if role == RoleType.EDITOR:
-                    found_user.editor = True
+                    updated_member = Member(user=found_user, editor=True)
                 else:
-                    found_user.editor = False
-                group.users[found_user_index] = found_user
+                    updated_member = Member(user=found_user, editor=False)
+                group.users[found_user_index] = updated_member
                 await db["groups"].replace_one(
                     {"_id": ObjectId(group_id)}, group.to_mongo()
                 )
