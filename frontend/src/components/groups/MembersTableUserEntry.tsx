@@ -17,7 +17,7 @@ import CheckIcon from "@mui/icons-material/Check";
 import CloseIcon from "@mui/icons-material/Close";
 
 type MembersTableUserEntryProps = {
-	groupId: string
+	groupId: string|undefined
 	member: Member
 	setDeleteDatasetConfirmOpen: any
 	setSelectMemberUsername: any
@@ -97,25 +97,29 @@ export function MembersTableUserEntry(props: MembersTableUserEntryProps) {
 						member.editor !== undefined && member.editor ?
 							"Editor" : "Member"
 				}
-				{
-					editRoleOn ?
-						<ButtonGroup variant="text">
-							<IconButton type="button" sx={{p: "10px"}} onClick={handleRoleSave}>
-								<CheckIcon sx={iconStyle}/>
+				{/*only owner or editor are allowed to modify roles of the member*/}
+				<AuthWrapper currRole={role} allowedRoles={["owner", "editor"]}>
+					{
+						editRoleOn ?
+							<ButtonGroup variant="text">
+								<IconButton type="button" sx={{p: "10px"}} onClick={handleRoleSave}>
+									<CheckIcon sx={iconStyle}/>
+								</IconButton>
+								<IconButton type="button" sx={{p: "10px"}} onClick={handleRoleCancel}>
+									<CloseIcon sx={iconStyle}/>
+								</IconButton>
+							</ButtonGroup>
+							:
+							<IconButton type="button" sx={{p: "10px"}} aria-label="edit" onClick={()=>{
+								setEditRoleOn(true);
+							}}>
+								<EditIcon sx={iconStyle} />
 							</IconButton>
-							<IconButton type="button" sx={{p: "10px"}} onClick={handleRoleCancel}>
-								<CloseIcon sx={iconStyle}/>
-							</IconButton>
-						</ButtonGroup>
-						:
-						<IconButton type="button" sx={{p: "10px"}} aria-label="edit" onClick={()=>{
-							setEditRoleOn(true);
-						}}>
-							<EditIcon sx={iconStyle} />
-						</IconButton>
-				}
+					}
+				</AuthWrapper>
 			</TableCell>
 			<TableCell align="right">
+				{/*only owner or editor are allowed to delete*/}
 				<AuthWrapper currRole={role} allowedRoles={["owner", "editor"]}>
 					<IconButton type="button" sx={{p: "10px"}} aria-label="delete" onClick={()=>{
 						setSelectMemberUsername(member.user.email)
