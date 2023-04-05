@@ -4,7 +4,9 @@
 import type { AuthorizationBase } from '../models/AuthorizationBase';
 import type { AuthorizationDB } from '../models/AuthorizationDB';
 import type { AuthorizationMetadata } from '../models/AuthorizationMetadata';
+import type { GroupAndRole } from '../models/GroupAndRole';
 import type { RoleType } from '../models/RoleType';
+import type { UserAndRole } from '../models/UserAndRole';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { request as __request } from '../core/request';
 
@@ -231,6 +233,42 @@ export class AuthorizationService {
         return __request({
             method: 'DELETE',
             path: `/api/v2/authorizations/datasets/${datasetId}/user_role/${username}`,
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+
+    /**
+     * Get Dataset Users And Roles
+     * @param datasetId
+     * @returns UserAndRole Successful Response
+     * @throws ApiError
+     */
+    public static getDatasetUsersAndRolesApiV2AuthorizationsDatasetsDatasetIdUsersAndRolesGet(
+        datasetId: string,
+    ): CancelablePromise<Array<UserAndRole>> {
+        return __request({
+            method: 'GET',
+            path: `/api/v2/authorizations/datasets/${datasetId}/users_and_roles`,
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+
+    /**
+     * Get Dataset Groups And Roles
+     * @param datasetId
+     * @returns GroupAndRole Successful Response
+     * @throws ApiError
+     */
+    public static getDatasetGroupsAndRolesApiV2AuthorizationsDatasetsDatasetIdGroupsAndRolesGet(
+        datasetId: string,
+    ): CancelablePromise<Array<GroupAndRole>> {
+        return __request({
+            method: 'GET',
+            path: `/api/v2/authorizations/datasets/${datasetId}/groups_and_roles`,
             errors: {
                 422: `Validation Error`,
             },
