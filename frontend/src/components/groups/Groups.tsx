@@ -1,22 +1,19 @@
 import React, {useEffect, useState} from "react";
-import {
-	Box,
-	Button,
-	ButtonGroup, CardActionArea,
-	Divider,
-	Grid,
-	List,
-} from "@mui/material";
+import {Box, Button, ButtonGroup,} from "@mui/material";
 import Layout from "../Layout";
 import {RootState} from "../../types/data";
 import {useDispatch, useSelector} from "react-redux";
 import {fetchGroups} from "../../actions/group";
 import {ArrowBack, ArrowForward} from "@material-ui/icons";
-import Typography from '@mui/material/Typography';
-import {theme} from "../../theme";
 import {Link} from "react-router-dom";
-import Card from "@mui/material/Card";
-import CardContent from "@mui/material/CardContent";
+import Paper from "@mui/material/Paper";
+import Table from "@mui/material/Table";
+import TableHead from "@mui/material/TableHead";
+import TableRow from "@mui/material/TableRow";
+import TableCell from "@mui/material/TableCell";
+import TableBody from "@mui/material/TableBody";
+import TableContainer from "@mui/material/TableContainer";
+import GroupsIcon from "@mui/icons-material/Groups";
 
 
 export function Groups() {
@@ -70,56 +67,48 @@ export function Groups() {
 
 	return (
 		<Layout>
-			<Grid container>
-				<Grid item xs={9}>
-					<Box sx={{
-						backgroundColor: theme.palette.primary.contrastText,
-						padding: "3em"
-					}}>
-						<List>
-							{
-								groups !== undefined ?
-									groups.map((group) => {
-										return (<>
-											<Card key={group.id} sx={{height: "100%", display: "flex", flexDirection: "row"}}>
-												<CardContent>
-													<CardActionArea component={Link} to={`/groups/${group.id}`} sx={{height: "100%"}}>
-														<Typography variant="h5">{group.name}</Typography>
-														<Typography color="secondary">
-															Size: {group.users !== undefined ? group.users.length : 0}
-														</Typography>
-														<Typography variant="body2" sx={{
-															overflow: 'hidden',
-															textOverflow: 'ellipsis',
-															display: '-webkit-box',
-															WebkitLineClamp: '5',
-															WebkitBoxOrient: 'vertical',
-														}}>
-															{group.description}
-														</Typography>
-													</CardActionArea>
-												</CardContent>
-											</Card>
-											<Divider/>
-										</>);
-									})
-									:
-									<></>
-							}
-						</List>
-						<Box display="flex" justifyContent="center" sx={{m: 1}}>
-							<ButtonGroup variant="contained" aria-label="previous next buttons">
-								<Button aria-label="previous" onClick={previous} disabled={prevDisabled}>
-									<ArrowBack/> Prev
-								</Button>
-								<Button aria-label="next" onClick={next} disabled={nextDisabled}>
-									Next <ArrowForward/>
-								</Button>
-							</ButtonGroup>
-						</Box>
-					</Box>
-				</Grid>
-			</Grid>
+			<TableContainer component={Paper}>
+				<Table sx={{minWidth: 650}} aria-label="simple table">
+					<TableHead>
+						<TableRow>
+							<TableCell>Group Name</TableCell>
+							<TableCell align="right">Description</TableCell>
+							<TableCell align="right"><GroupsIcon/></TableCell>
+						</TableRow>
+					</TableHead>
+					<TableBody>
+						{
+							groups.map((group) => {
+								return (
+									<TableRow key={group.id} sx={{"&:last-child td, &:last-child th": {border: 0}}}>
+										<TableCell component="th" scope="row" key={group.id}>
+											<Button component={Link} to={`/groups/${group.id}`}>
+												{group.name}
+											</Button>
+										</TableCell>
+										<TableCell component="th" scope="row" key={group.id} align="right">
+											{group.description}
+										</TableCell>
+										<TableCell component="th" scope="row" key={group.id} align="right">
+											{group.users !== undefined ? group.users.length : 0}
+										</TableCell>
+									</TableRow>
+								)
+							})
+						}
+					</TableBody>
+				</Table>
+			</TableContainer>
+			<Box display="flex" justifyContent="center" sx={{m: 1}}>
+				<ButtonGroup variant="contained" aria-label="previous next buttons">
+					<Button aria-label="previous" onClick={previous} disabled={prevDisabled}>
+						<ArrowBack/> Prev
+					</Button>
+					<Button aria-label="next" onClick={next} disabled={nextDisabled}>
+						Next <ArrowForward/>
+					</Button>
+				</ButtonGroup>
+			</Box>
 		</Layout>
 	);
 }

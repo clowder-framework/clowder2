@@ -44,7 +44,6 @@ export default function MembersTable(props: MembersTableProps) {
 							 handleActionCancel={() => {
 								 setDeleteDatasetConfirmOpen(false);
 							 }}/>
-
 			<TableContainer component={Paper}>
 				<Table sx={{minWidth: 650}} aria-label="simple table">
 					<TableHead>
