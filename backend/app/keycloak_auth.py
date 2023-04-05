@@ -121,6 +121,12 @@ async def get_token(
                 headers={"WWW-Authenticate": "Bearer"},
             )
 
+    raise HTTPException(
+        status_code=401,
+        detail="Not authenticated.",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+
 
 async def get_user(identity: Json = Depends(get_token)):
     """Retrieve the user email from keycloak token."""
@@ -129,22 +135,68 @@ async def get_user(identity: Json = Depends(get_token)):
 
 async def get_current_user(
     token: str = Security(oauth2_scheme),
+    api_key: str = Security(api_key_header),
     db: MongoClient = Depends(dependencies.get_db),
 ) -> UserOut:
     """Retrieve the user object from Mongo by first getting user id from JWT and then querying Mongo.
     Potentially expensive. Use `get_current_username` if all you need is user name.
     """
 
-    try:
-        userinfo = keycloak_openid.userinfo(token)
-        user_out = await db["users"].find_one({"email": userinfo["email"]})
-        return UserOut.from_mongo(user_out)
-    except KeycloakAuthenticationError as e:
-        raise HTTPException(
-            status_code=e.response_code,
-            detail=json.loads(e.error_message),
-            headers={"WWW-Authenticate": "Bearer"},
-        )
+    if token:
+        try:
+            userinfo = keycloak_openid.userinfo(token)
+            user_out = await db["users"].find_one({"email": userinfo["email"]})
+            return UserOut.from_mongo(user_out)
+        except KeycloakAuthenticationError as e:
+            raise HTTPException(
+                status_code=e.response_code,
+                detail=json.loads(e.error_message),
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+
+    if api_key:
+        serializer = URLSafeSerializer(settings.local_auth_secret, salt="api_key")
+        try:
+            payload = serializer.loads(api_key)
+            # Key is valid, check expiration date in database
+            if (
+                key_entry := await db["user_keys"].find_one(
+                    {"user": payload["user"], "key": payload["key"]}
+                )
+            ) is not None:
+                key = UserAPIKey.from_mongo(key_entry)
+                current_time = datetime.utcnow()
+                mins_since = int((current_time - key.created).total_seconds() / 60)
+
+                if mins_since > settings.local_auth_expiration:
+                    # Expired key, delete it first
+                    db["user_keys"].delete_one({"_id": ObjectId(key.id)})
+                    raise HTTPException(
+                        status_code=401,
+                        detail={"error": "Key is expired."},
+                        headers={"WWW-Authenticate": "Bearer"},
+                    )
+                else:
+                    user_out = await db["users"].find_one({"email": key.user})
+                    return UserOut.from_mongo(user_out)
+            else:
+                raise HTTPException(
+                    status_code=401,
+                    detail={"error": "Key is invalid."},
+                    headers={"WWW-Authenticate": "Bearer"},
+                )
+        except BadSignature as e:
+            raise HTTPException(
+                status_code=401,
+                detail={"error": "Key is invalid."},
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+
+    raise HTTPException(
+        status_code=401,
+        detail="Not authenticated.",  # "token expired",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
 
 
 async def get_current_username(
@@ -201,6 +253,12 @@ async def get_current_username(
                 detail={"error": "Key is invalid."},
                 headers={"WWW-Authenticate": "Bearer"},
             )
+
+    raise HTTPException(
+        status_code=401,
+        detail="Not authenticated.",  # "token expired",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
 
 
 async def get_current_user_id(identity: Json = Depends(get_token)) -> str:

@@ -183,7 +183,7 @@ export const Dataset = (): JSX.Element => {
 				</Grid>
 				{/*actions*/}
 				<Grid item xs={4} sx={{display: "flex", alignItems: "center"}}>
-					<ActionsMenu datasetId={datasetId} folderId={folderId}/>
+					<ActionsMenu datasetId={datasetId} folderId={folderId} datasetName={about["name"]}/>
 				</Grid>
 			</Grid>
 			<Grid container spacing={2}>

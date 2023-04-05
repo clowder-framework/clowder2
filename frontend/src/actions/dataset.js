@@ -3,6 +3,40 @@ import {handleErrors, handleErrorsAuthorization, resetFailedReason} from "./comm
 import config from "../app.config";
 import {getHeader} from "../utils/common";
 
+export const SET_DATASET_GROUP_ROLE = "SET_DATASET_GROUP_ROLE";
+export function setDatasetGroupRole(datasetId, groupId, roleType){
+	return (dispatch) => {
+		return V2.AuthorizationService.setDatasetGroupRoleApiV2AuthorizationsDatasetsDatasetIdGroupRoleGroupIdRolePost(datasetId, groupId, roleType)
+			.then(json => {
+				dispatch({
+					type: SET_DATASET_GROUP_ROLE,
+					files: json,
+					receivedAt: Date.now(),
+				});
+			})
+			.catch(reason => {
+				dispatch(handleErrors(reason, setDatasetGroupRole(datasetId, groupId, roleType)));
+			});
+	};
+}
+
+export const SET_DATASET_USER_ROLE = "SET_DATASET_USER_ROLE";
+export function setDatasetUserRole(datasetId, username, roleType){
+	return (dispatch) => {
+		return V2.AuthorizationService.setDatasetUserRoleApiV2AuthorizationsDatasetsDatasetIdUserRoleUsernameRolePost(datasetId, username, roleType)
+			.then(json => {
+				dispatch({
+					type: SET_DATASET_USER_ROLE,
+					files: json,
+					receivedAt: Date.now(),
+				});
+			})
+			.catch(reason => {
+				dispatch(handleErrors(reason, setDatasetUserRole(datasetId, username, roleType)));
+			});
+	};
+}
+
 export const RECEIVE_FILES_IN_DATASET = "RECEIVE_FILES_IN_DATASET";
 export function fetchFilesInDataset(datasetId, folderId){
 	return (dispatch) => {
