@@ -112,15 +112,15 @@ async def edit_group(
     raise HTTPException(status_code=404, detail=f"Group {group_id} not found")
 
 
-@router.delete("/{group_id}")
+@router.delete("/{group_id}", response_model=GroupOut)
 async def delete_group(
     group_id: str,
     db: MongoClient = Depends(dependencies.get_db),
     allow: bool = Depends(GroupAuthorization("owner")),
 ):
-    if (group := await db["groups"].find_one({"_id": ObjectId(group_id)})) is not None:
+    if (group_q := await db["groups"].find_one({"_id": ObjectId(group_id)})) is not None:
         await db["groups"].delete_one({"_id": ObjectId(group_id)})
-        return {"deleted": group_id}
+        return GroupDB.from_mongo(group_q)
     else:
         raise HTTPException(status_code=404, detail=f"Dataset {group_id} not found")
 

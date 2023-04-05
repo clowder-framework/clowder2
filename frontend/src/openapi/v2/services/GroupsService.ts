@@ -101,12 +101,12 @@ export class GroupsService {
     /**
      * Delete Group
      * @param groupId
-     * @returns any Successful Response
+     * @returns GroupOut Successful Response
      * @throws ApiError
      */
     public static deleteGroupApiV2GroupsGroupIdDelete(
         groupId: string,
-    ): CancelablePromise<any> {
+    ): CancelablePromise<GroupOut> {
         return __request({
             method: 'DELETE',
             path: `/api/v2/groups/${groupId}`,

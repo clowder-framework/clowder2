@@ -19,6 +19,24 @@ export function fetchGroups(skip=0, limit=21){
 	};
 }
 
+export const DELETE_GROUP = "DELETE_GROUP";
+export function deleteGroup(groupId){
+	return (dispatch) => {
+		return V2.GroupsService.deleteGroupApiV2GroupsGroupIdDelete(groupId)
+			.then(json => {
+				dispatch({
+					type: RECEIVE_GROUPS,
+					id: json,
+					receivedAt: Date.now(),
+				});
+			})
+			.catch(reason => {
+				dispatch(handleErrors(reason, deleteGroup(groupId)));
+			});
+
+	};
+}
+
 export const RECEIVE_GROUP_ABOUT = "RECEIVE_GROUP_ABOUT";
 export function fetchGroupAbout(id){
 	return (dispatch) => {
