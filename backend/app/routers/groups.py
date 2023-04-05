@@ -142,7 +142,7 @@ async def search_group(
     return groups
 
 
-@router.post("/{group_id}/add/{username}")
+@router.post("/{group_id}/add/{username}", response_model=GroupOut)
 async def add_member(
     group_id: str,
     username: str,
@@ -220,7 +220,7 @@ async def remove_member(
     raise HTTPException(status_code=404, detail=f"Group {group_id} not found")
 
 
-@router.put("/{group_id}/update/{username}", response_model=RoleType)
+@router.put("/{group_id}/update/{username}", response_model=GroupOut)
 async def update_member(
     group_id: str,
     username: str,
