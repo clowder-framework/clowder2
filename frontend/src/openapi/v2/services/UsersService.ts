@@ -67,4 +67,16 @@ export class UsersService {
         });
     }
 
+    /**
+     * Generate User Api Key
+     * @returns string Successful Response
+     * @throws ApiError
+     */
+    public static generateUserApiKeyApiV2UsersKeysPost(): CancelablePromise<string> {
+        return __request({
+            method: 'POST',
+            path: `/api/v2/users/keys`,
+        });
+    }
+
 }
