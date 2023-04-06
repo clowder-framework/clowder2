@@ -59,6 +59,39 @@ export class GroupsService {
     }
 
     /**
+     * Search Group
+     * Search all groups in the db based on text.
+     *
+     * Arguments:
+     * text -- any text matching name or description
+     * skip -- number of initial records to skip (i.e. for pagination)
+     * limit -- restrict number of records to be returned (i.e. for pagination)
+     * @param searchTerm
+     * @param skip
+     * @param limit
+     * @returns GroupOut Successful Response
+     * @throws ApiError
+     */
+    public static searchGroupApiV2GroupsSearchGet(
+        searchTerm: string = '',
+        skip?: number,
+        limit: number = 2,
+    ): CancelablePromise<Array<GroupOut>> {
+        return __request({
+            method: 'GET',
+            path: `/api/v2/groups/search`,
+            query: {
+                'search_term': searchTerm,
+                'skip': skip,
+                'limit': limit,
+            },
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+
+    /**
      * Get Group
      * @param groupId
      * @returns GroupOut Successful Response
@@ -110,24 +143,6 @@ export class GroupsService {
         return __request({
             method: 'DELETE',
             path: `/api/v2/groups/${groupId}`,
-            errors: {
-                422: `Validation Error`,
-            },
-        });
-    }
-
-    /**
-     * Search Group
-     * @param searchTerm
-     * @returns any Successful Response
-     * @throws ApiError
-     */
-    public static searchGroupApiV2GroupsSearchSearchTermGet(
-        searchTerm: string,
-    ): CancelablePromise<any> {
-        return __request({
-            method: 'GET',
-            path: `/api/v2/groups/search/${searchTerm}`,
             errors: {
                 422: `Validation Error`,
             },

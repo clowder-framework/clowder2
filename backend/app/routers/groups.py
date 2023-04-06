@@ -1,3 +1,4 @@
+import re
 from datetime import datetime
 from fastapi import HTTPException, Depends, APIRouter
 from bson.objectid import ObjectId
@@ -67,6 +68,40 @@ async def get_groups(
     return groups
 
 
+@router.get("/search", response_model=List[GroupOut])
+async def search_group(
+    db: MongoClient =  Depends(dependencies.get_db),
+    search_term: str = "",
+    skip: int = 0,
+    limit: int = 2,
+):
+    """Search all groups in the db based on text.
+
+    Arguments:
+        text -- any text matching name or description
+        skip -- number of initial records to skip (i.e. for pagination)
+        limit -- restrict number of records to be returned (i.e. for pagination)
+    """
+
+    # Check all connection and abort if any one of them is not available
+    if db is None:
+        raise HTTPException(status_code=503, detail="Service not available")
+        return
+
+    groups = []
+    query_regx = re.compile(search_term, re.IGNORECASE)
+    for doc in (
+            # TODO either use regex or index search
+            await db["groups"]
+                    .find({"$or": [{"name": query_regx}, {"description": query_regx}]})
+                    .skip(skip)
+                    .limit(limit)
+                    .to_list(length=limit)
+    ):
+        groups.append(GroupOut.from_mongo(doc))
+    return groups
+
+
 @router.get("/{group_id}", response_model=GroupOut)
 async def get_group(
     group_id: str,
@@ -123,23 +158,6 @@ async def delete_group(
         return GroupDB.from_mongo(group_q)
     else:
         raise HTTPException(status_code=404, detail=f"Dataset {group_id} not found")
-
-
-@router.get("/search/{search_term}")
-async def search_group(
-    search_term: str, db: MongoClient = Depends(dependencies.get_db)
-):
-    # Check all connection and abort if any one of them is not available
-    if db is None:
-        raise HTTPException(status_code=503, detail="Service not available")
-        return
-
-    groups = []
-    pattern = ".*" + search_term + ".*"
-    async for f in db["groups"].find({"name": {"$regex": pattern, "$options": "i"}}):
-        groups.append(GroupDB.from_mongo(f))
-
-    return groups
 
 
 @router.post("/{group_id}/add/{username}", response_model=GroupOut)

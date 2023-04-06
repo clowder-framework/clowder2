@@ -40,7 +40,7 @@ export function deleteGroup(groupId){
 export const SEARCH_GROUPS = "SEARCH_GROUPS";
 export function searchGroups(searchTerm) {
 	return (dispatch) => {
-		return V2.GroupsService.searchGroupApiV2GroupsSearchSearchTermGet(searchTerm)
+		return V2.GroupsService.searchGroupApiV2GroupsSearchGet(searchTerm)
 			.then(json => {
 				dispatch({
 					type: SEARCH_GROUPS,
