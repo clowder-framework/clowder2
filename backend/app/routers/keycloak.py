@@ -188,6 +188,7 @@ async def refresh_token(
         )
 
 
+# FIXME: we need to parse and return a consistent response
 # @router.get("/broker/{identity_provider}/token")
 # def get_idenity_provider_token(
 #     identity_provider: str, access_token: str = Security(oauth2_scheme)
