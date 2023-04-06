@@ -24,7 +24,7 @@ export function Groups() {
 
 	const groups = useSelector((state: RootState) => state.group.groups);
 
-	// TODO add option to determine limit number; default show 5 datasets each time
+	// TODO add option to determine limit number; default show 5 groups each time
 	const [currPageNum, setCurrPageNum] = useState<number>(0);
 	const [limit,] = useState<number>(20);
 	const [skip, setSkip] = useState<number | undefined>();
@@ -36,7 +36,6 @@ export function Groups() {
 		listGroups(skip, limit);
 	}, []);
 
-	// fetch extractors from each individual dataset/id calls
 	useEffect(() => {
 		// disable flipping if reaches the last page
 		if (groups.length < limit) setNextDisabled(true);
@@ -51,7 +50,6 @@ export function Groups() {
 		}
 	}, [skip]);
 
-	// for pagination keep flipping until the return dataset is less than the limit
 	const previous = () => {
 		if (currPageNum - 1 >= 0) {
 			setSkip((currPageNum - 1) * limit);

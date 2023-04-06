@@ -6,7 +6,7 @@ import {useDispatch, useSelector} from "react-redux";
 import {deleteGroup, fetchGroupAbout} from "../../actions/group";
 import {fetchGroupRole} from "../../actions/authorization";
 import Typography from "@mui/material/Typography";
-import {useParams} from "react-router-dom";
+import {useNavigate, useParams} from "react-router-dom";
 import {AuthWrapper} from "../auth/AuthWrapper";
 import PersonAddAlt1Icon from "@mui/icons-material/PersonAddAlt1";
 import MembersTable from "./MembersTable";
@@ -20,6 +20,9 @@ export function Group() {
 
 	// path parameter
 	const {groupId} = useParams<{ groupId?: string }>();
+
+	// use history hook to redirect/navigate between routes
+	const history = useNavigate();
 
 	// Redux connect equivalent
 	const dispatch = useDispatch();
@@ -48,6 +51,8 @@ export function Group() {
 						 handleActionBtnClick={() => {
 							 groupDeleted(groupId);
 							 setDeleteGroupConfirmOpen(false);
+							 // Go to Explore page
+							 history("/");
 						 }}
 						 handleActionCancel={() => {
 							 setDeleteGroupConfirmOpen(false);

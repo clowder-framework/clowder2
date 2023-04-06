@@ -31,7 +31,7 @@ const iconStyle = {
 
 export function MembersTableUserEntry(props: MembersTableUserEntryProps) {
 
-	const {groupId, member, setDeleteDatasetConfirmOpen, setSelectMemberUsername} = props;
+	const {groupId, member, setDeleteMemberConfirmOpen, setSelectMemberUsername} = props;
 
 	const dispatch = useDispatch();
 	const groupMemberRoleAssigned = (groupId: string|undefined, username: string|undefined,
@@ -123,7 +123,7 @@ export function MembersTableUserEntry(props: MembersTableUserEntryProps) {
 				<AuthWrapper currRole={role} allowedRoles={["owner", "editor"]}>
 					<IconButton type="button" sx={{p: "10px"}} aria-label="delete" onClick={()=>{
 						setSelectMemberUsername(member.user.email)
-						setDeleteDatasetConfirmOpen(true);
+						setDeleteMemberConfirmOpen(true);
 					}}>
 						<DeleteIcon sx={iconStyle}/>
 					</IconButton>

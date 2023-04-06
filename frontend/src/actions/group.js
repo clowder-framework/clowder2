@@ -25,7 +25,7 @@ export function deleteGroup(groupId){
 		return V2.GroupsService.deleteGroupApiV2GroupsGroupIdDelete(groupId)
 			.then(json => {
 				dispatch({
-					type: RECEIVE_GROUPS,
+					type: DELETE_GROUP,
 					about: json,
 					receivedAt: Date.now(),
 				});
