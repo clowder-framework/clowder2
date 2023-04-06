@@ -322,7 +322,7 @@ class GroupAuthorization:
                 return True
             for u in group.users:
                 if u.user.email == current_user:
-                    if u.editor or self.role == RoleType.EDITOR:
+                    if u.editor and self.role == RoleType.EDITOR:
                         return True
                     elif self.role == RoleType.VIEWER:
                         return True
