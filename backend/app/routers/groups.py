@@ -71,9 +71,9 @@ async def get_groups(
 @router.get("/search/{search_term}", response_model=List[GroupOut])
 async def search_group(
     search_term: str,
-    db: MongoClient =  Depends(dependencies.get_db),
+    db: MongoClient = Depends(dependencies.get_db),
     skip: int = 0,
-    limit: int = 2,
+    limit: int = 10,
 ):
     """Search all groups in the db based on text.
 

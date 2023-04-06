@@ -20,7 +20,7 @@ export function Groups() {
 	// Redux connect equivalent
 	const dispatch = useDispatch();
 	const listGroups = (skip: number | undefined, limit: number | undefined) => dispatch(fetchGroups(skip, limit));
-	const searchGroups = (searchTerm: string) => dispatch(searchGroupsAction(searchTerm));
+	const searchGroups = (searchTerm: string, skip: number | undefined, limit: number | undefined) => dispatch(searchGroupsAction(searchTerm, skip, limit));
 
 	const groups = useSelector((state: RootState) => state.group.groups);
 
@@ -89,13 +89,13 @@ export function Groups() {
 							if (e.key === "Enter") {
 								e.preventDefault();
 							}
-							searchGroups(searchTerm);
+							searchGroups(searchTerm, skip, limit);
 						}}
 						value={searchTerm}
 					/>
 					<IconButton type="button" sx={{p: "10px"}} aria-label="search"
 								onClick={() => {
-									searchGroups(searchTerm);
+									searchGroups(searchTerm, skip, limit);
 								}}>
 						<SearchOutlined/>
 					</IconButton>

@@ -38,9 +38,9 @@ export function deleteGroup(groupId){
 }
 
 export const SEARCH_GROUPS = "SEARCH_GROUPS";
-export function searchGroups(searchTerm) {
+export function searchGroups(searchTerm, skip=0, limit=21) {
 	return (dispatch) => {
-		return V2.GroupsService.searchGroupApiV2GroupsSearchGet(searchTerm)
+		return V2.GroupsService.searchGroupApiV2GroupsSearchSearchTermGet(searchTerm, skip, limit)
 			.then(json => {
 				dispatch({
 					type: SEARCH_GROUPS,
@@ -49,7 +49,7 @@ export function searchGroups(searchTerm) {
 				});
 			})
 			.catch(reason => {
-				dispatch(handleErrors(reason, searchGroups(searchTerm)));
+				dispatch(handleErrors(reason, searchGroups(searchTerm, skip, limit)));
 			});
 
 	};

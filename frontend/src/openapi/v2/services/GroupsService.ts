@@ -72,16 +72,15 @@ export class GroupsService {
      * @returns GroupOut Successful Response
      * @throws ApiError
      */
-    public static searchGroupApiV2GroupsSearchGet(
-        searchTerm: string = '',
+    public static searchGroupApiV2GroupsSearchSearchTermGet(
+        searchTerm: string,
         skip?: number,
-        limit: number = 2,
+        limit: number = 10,
     ): CancelablePromise<Array<GroupOut>> {
         return __request({
             method: 'GET',
-            path: `/api/v2/groups/search`,
+            path: `/api/v2/groups/search/${searchTerm}`,
             query: {
-                'search_term': searchTerm,
                 'skip': skip,
                 'limit': limit,
             },
