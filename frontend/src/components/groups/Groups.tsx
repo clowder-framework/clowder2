@@ -1,10 +1,9 @@
 import React, {useEffect, useState} from "react";
-import {Box, Button, ButtonGroup,} from "@mui/material";
-import Layout from "../Layout";
+import {Box, Button, ButtonGroup, Grid, IconButton, InputBase,} from "@mui/material";
 import {RootState} from "../../types/data";
 import {useDispatch, useSelector} from "react-redux";
 import {fetchGroups} from "../../actions/group";
-import {ArrowBack, ArrowForward} from "@material-ui/icons";
+import {ArrowBack, ArrowForward, SearchOutlined} from "@material-ui/icons";
 import {Link} from "react-router-dom";
 import Paper from "@mui/material/Paper";
 import Table from "@mui/material/Table";
@@ -14,6 +13,7 @@ import TableCell from "@mui/material/TableCell";
 import TableBody from "@mui/material/TableBody";
 import TableContainer from "@mui/material/TableContainer";
 import GroupsIcon from "@mui/icons-material/Groups";
+import {theme} from "../../theme";
 
 
 export function Groups() {
@@ -64,40 +64,74 @@ export function Groups() {
 	};
 
 	return (
-		<Layout>
-			<TableContainer component={Paper}>
-				<Table sx={{minWidth: 650}} aria-label="simple table">
-					<TableHead>
-						<TableRow>
-							<TableCell>Group Name</TableCell>
-							<TableCell align="right">Description</TableCell>
-							<TableCell align="right"><GroupsIcon/></TableCell>
-						</TableRow>
-					</TableHead>
-					<TableBody>
-						{
-							groups.map((group) => {
-								return (
-									<TableRow key={group.id} sx={{"&:last-child td, &:last-child th": {border: 0}}}>
-										<TableCell component="th" scope="row" key={group.id}>
-											<Button component={Link} to={`/groups/${group.id}`}>
-												{group.name}
-											</Button>
-										</TableCell>
-										<TableCell component="th" scope="row" key={group.id} align="right">
-											{group.description}
-										</TableCell>
-										<TableCell component="th" scope="row" key={group.id} align="right">
-											{group.users !== undefined ? group.users.length : 0}
-										</TableCell>
-									</TableRow>
-								)
-							})
-						}
-					</TableBody>
-				</Table>
-			</TableContainer>
-			<Box display="flex" justifyContent="center" sx={{m: 1}}>
+		<Grid container>
+			<Grid item xs={3}>
+				{/*searchbox*/}
+				<Box
+					component="form"
+					sx={{
+						p: "2px 4px",
+						display: "flex",
+						alignItems: "left",
+						backgroundColor: theme.palette.primary.contrastText,
+						width: "80%"
+					}}
+				>
+					<InputBase
+						sx={{ml: 1, flex: 1}}
+						placeholder="keyword for extractor"
+						inputProps={{"aria-label": "Type in keyword to search for extractor"}}
+						onChange={(e) => {
+							setSearchText(e.target.value);
+						}}
+						onKeyDown={(e) => {
+							if (e.key === "Enter") {
+								e.preventDefault();
+							}
+							handleListenerSearch();
+						}}
+						value={searchText}
+					/>
+					<IconButton type="button" sx={{p: "10px"}} aria-label="search"
+								onClick={handleListenerSearch}>
+						<SearchOutlined/>
+					</IconButton>
+				</Box>
+			</Grid>
+			<Grid item xs={9}>
+				<TableContainer component={Paper}>
+					<Table sx={{minWidth: 650}} aria-label="simple table">
+						<TableHead>
+							<TableRow>
+								<TableCell>Group Name</TableCell>
+								<TableCell align="right">Description</TableCell>
+								<TableCell align="right"><GroupsIcon/></TableCell>
+							</TableRow>
+						</TableHead>
+						<TableBody>
+							{
+								groups.map((group) => {
+									return (
+										<TableRow key={group.id}
+												  sx={{"&:last-child td, &:last-child th": {border: 0}}}>
+											<TableCell component="th" scope="row" key={group.id}>
+												<Button component={Link} to={`/groups/${group.id}`}>
+													{group.name}
+												</Button>
+											</TableCell>
+											<TableCell component="th" scope="row" key={group.id} align="right">
+												{group.description}
+											</TableCell>
+											<TableCell component="th" scope="row" key={group.id} align="right">
+												{group.users !== undefined ? group.users.length : 0}
+											</TableCell>
+										</TableRow>
+									)
+								})
+							}
+						</TableBody>
+					</Table>
+				</TableContainer>
 				<ButtonGroup variant="contained" aria-label="previous next buttons">
 					<Button aria-label="previous" onClick={previous} disabled={prevDisabled}>
 						<ArrowBack/> Prev
@@ -106,7 +140,7 @@ export function Groups() {
 						Next <ArrowForward/>
 					</Button>
 				</ButtonGroup>
-			</Box>
-		</Layout>
+			</Grid>
+		</Grid>
 	);
 }

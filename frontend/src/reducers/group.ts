@@ -1,6 +1,6 @@
 import {
 	RECEIVE_GROUPS,
-	RECEIVE_GROUP_ABOUT, DELETE_GROUP_MEMBER, ADD_GROUP_MEMBER, ASSIGN_GROUP_MEMBER_ROLE, DELETE_GROUP,
+	RECEIVE_GROUP_ABOUT, DELETE_GROUP_MEMBER, ADD_GROUP_MEMBER, ASSIGN_GROUP_MEMBER_ROLE, DELETE_GROUP, SEARCH_GROUP,
 } from "../actions/group";
 import {
 	RECEIVE_GROUP_ROLE
@@ -20,6 +20,8 @@ const defaultState: GroupState = {
 const group = (state = defaultState, action: DataAction) => {
 	switch (action.type) {
 		case RECEIVE_GROUPS:
+			return Object.assign({}, state, {groups: action.groups});
+		case SEARCH_GROUP:
 			return Object.assign({}, state, {groups: action.groups});
 		case RECEIVE_GROUP_ABOUT:
 			return Object.assign({}, state, {about: action.about});

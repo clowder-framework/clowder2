@@ -37,6 +37,24 @@ export function deleteGroup(groupId){
 	};
 }
 
+export const SEARCH_GROUP = "SEARCH_GROUP";
+export function searchGroup(searchTerm) {
+	return (dispatch) => {
+		return V2.GroupsService.searchGroupApiV2GroupsSearchSearchTermGet(searchTerm)
+			.then(json => {
+				dispatch({
+					type: SEARCH_GROUP,
+					groups: json,
+					receivedAt: Date.now(),
+				});
+			})
+			.catch(reason => {
+				dispatch(handleErrors(reason, searchGroup(searchTerm)));
+			});
+
+	};
+}
+
 export const RECEIVE_GROUP_ABOUT = "RECEIVE_GROUP_ABOUT";
 export function fetchGroupAbout(id){
 	return (dispatch) => {
