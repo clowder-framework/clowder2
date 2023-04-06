@@ -43,6 +43,12 @@ export function Groups() {
 		else setNextDisabled(false);
 	}, [groups]);
 
+	// search
+	useEffect(() => {
+		if (searchTerm !=="") searchGroups(searchTerm, skip, limit);
+		else listGroups(skip, limit);
+	}, [searchTerm]);
+
 	useEffect(() => {
 		if (skip !== null && skip !== undefined) {
 			listGroups(skip, limit);
@@ -88,8 +94,8 @@ export function Groups() {
 						onKeyDown={(e) => {
 							if (e.key === "Enter") {
 								e.preventDefault();
+								searchGroups(searchTerm, skip, limit);
 							}
-							searchGroups(searchTerm, skip, limit);
 						}}
 						value={searchTerm}
 					/>
