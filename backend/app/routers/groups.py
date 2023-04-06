@@ -71,6 +71,7 @@ async def get_groups(
 @router.get("/search/{search_term}", response_model=List[GroupOut])
 async def search_group(
     search_term: str,
+    user_id=Depends(get_user),
     db: MongoClient = Depends(dependencies.get_db),
     skip: int = 0,
     limit: int = 10,
@@ -91,9 +92,16 @@ async def search_group(
     groups = []
     query_regx = re.compile(search_term, re.IGNORECASE)
     for doc in (
-        # TODO either use regex or index search
+        # user has to be the creator or member first; then apply search
         await db["groups"]
-        .find({"$or": [{"name": query_regx}, {"description": query_regx}]})
+        .find(
+            {
+                "$and": [
+                    {"$or": [{"creator": user_id}, {"users.user.email": user_id}]},
+                    {"$or": [{"name": query_regx}, {"description": query_regx}]},
+                ]
+            }
+        )
         .skip(skip)
         .limit(limit)
         .to_list(length=limit)

@@ -54,7 +54,7 @@ def test_add_member_with_editor_role(client: TestClient, headers: dict):
     assert response.status_code == 200
     assert response.json().get("id") is not None
     for user in response.json().get("users"):
-        if user.get("user").get("email") == member_alt['user']['email']:
+        if user.get("user").get("email") == member_alt["user"]["email"]:
             assert user.get("editor") is True
 
 
@@ -80,7 +80,7 @@ def test_assign_member_role(client: TestClient, headers: dict):
     assert response.status_code == 200
     assert response.json().get("id") is not None
     for user in response.json().get("users"):
-        if user.get("user").get("email") == member_alt['user']['email']:
+        if user.get("user").get("email") == member_alt["user"]["email"]:
             assert user.get("editor") is True
 
 
