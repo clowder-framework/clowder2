@@ -263,8 +263,8 @@ interface RECEIVE_GROUPS{
 	groups: Group[];
 }
 
-interface SEARCH_GROUP{
-	type: "SEARCH_GROUP"
+interface SEARCH_GROUPS{
+	type: "SEARCH_GROUPS"
 	groups: Group[];
 }
 
@@ -353,7 +353,7 @@ export type DataAction =
     | FETCH_JOB_SUMMARY
     | FETCH_JOB_UPDATES
 	| RECEIVE_GROUPS
-	| SEARCH_GROUP
+	| SEARCH_GROUPS
 	| DELETE_GROUP
 	| RECEIVE_GROUP_ABOUT
 	| RECEIVE_GROUP_ROLE

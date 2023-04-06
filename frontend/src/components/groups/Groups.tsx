@@ -2,7 +2,7 @@ import React, {useEffect, useState} from "react";
 import {Box, Button, ButtonGroup, Grid, IconButton, InputBase,} from "@mui/material";
 import {RootState} from "../../types/data";
 import {useDispatch, useSelector} from "react-redux";
-import {fetchGroups} from "../../actions/group";
+import {fetchGroups, searchGroups as searchGroupsAction} from "../../actions/group";
 import {ArrowBack, ArrowForward, SearchOutlined} from "@material-ui/icons";
 import {Link} from "react-router-dom";
 import Paper from "@mui/material/Paper";
@@ -19,8 +19,8 @@ import {theme} from "../../theme";
 export function Groups() {
 	// Redux connect equivalent
 	const dispatch = useDispatch();
-	const listGroups = (skip: number | undefined, limit: number | undefined) =>
-		dispatch(fetchGroups(skip, limit));
+	const listGroups = (skip: number | undefined, limit: number | undefined) => dispatch(fetchGroups(skip, limit));
+	const searchGroups = (searchTerm: string) => dispatch(searchGroupsAction(searchTerm));
 
 	const groups = useSelector((state: RootState) => state.group.groups);
 
@@ -30,6 +30,7 @@ export function Groups() {
 	const [skip, setSkip] = useState<number | undefined>();
 	const [prevDisabled, setPrevDisabled] = useState<boolean>(true);
 	const [nextDisabled, setNextDisabled] = useState<boolean>(false);
+	const [searchTerm, setSearchTerm] = useState<string>("");
 
 	// component did mount
 	useEffect(() => {
@@ -79,21 +80,23 @@ export function Groups() {
 				>
 					<InputBase
 						sx={{ml: 1, flex: 1}}
-						placeholder="keyword for extractor"
-						inputProps={{"aria-label": "Type in keyword to search for extractor"}}
+						placeholder="keyword for group"
+						inputProps={{"aria-label": "Type in keyword to search for group"}}
 						onChange={(e) => {
-							setSearchText(e.target.value);
+							setSearchTerm(e.target.value);
 						}}
 						onKeyDown={(e) => {
 							if (e.key === "Enter") {
 								e.preventDefault();
 							}
-							handleListenerSearch();
+							searchGroups(searchTerm);
 						}}
-						value={searchText}
+						value={searchTerm}
 					/>
 					<IconButton type="button" sx={{p: "10px"}} aria-label="search"
-								onClick={handleListenerSearch}>
+								onClick={() => {
+									searchGroups(searchTerm);
+								}}>
 						<SearchOutlined/>
 					</IconButton>
 				</Box>
