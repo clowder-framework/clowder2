@@ -19,7 +19,7 @@ import CloseIcon from "@mui/icons-material/Close";
 type MembersTableUserEntryProps = {
 	groupId: string|undefined
 	member: Member
-	setDeleteDatasetConfirmOpen: any
+	setDeleteMemberConfirmOpen: any
 	setSelectMemberUsername: any
 }
 

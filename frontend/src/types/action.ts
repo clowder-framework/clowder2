@@ -9,6 +9,7 @@ import {
 } from "../openapi/v2";
 import {MetadataDefinitionOut as MetadataDefinition} from "../openapi/v2";
 import {LIST_USERS} from "../actions/user";
+import {DELETE_GROUP} from "../actions/group";
 
 interface RECEIVE_FILES_IN_DATASET {
 	type: "RECEIVE_FILES_IN_DATASET";
@@ -262,6 +263,11 @@ interface RECEIVE_GROUPS{
 	groups: Group[];
 }
 
+interface DELETE_GROUP{
+	type: "DELETE_GROUP"
+	about: Group;
+}
+
 interface RECEIVE_GROUP_ABOUT{
 	type: "RECEIVE_GROUP_ABOUT"
 	about: Group;
@@ -342,6 +348,7 @@ export type DataAction =
     | FETCH_JOB_SUMMARY
     | FETCH_JOB_UPDATES
 	| RECEIVE_GROUPS
+	| DELETE_GROUP
 	| RECEIVE_GROUP_ABOUT
 	| RECEIVE_GROUP_ROLE
 	| DELETE_GROUP_MEMBER

@@ -9,7 +9,6 @@ import {DataAction} from "../types/action";
 import {GroupState} from "../types/data";
 import {GroupOut, RoleType} from "../openapi/v2";
 import {LIST_USERS} from "../actions/user";
-import {DELETE_DATASET} from "../actions/dataset";
 
 const defaultState: GroupState = {
 	groups: [],
