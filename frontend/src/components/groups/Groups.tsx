@@ -45,7 +45,7 @@ export function Groups() {
 
 	// search
 	useEffect(() => {
-		if (searchTerm !=="") searchGroups(searchTerm, skip, limit);
+		if (searchTerm !== "") searchGroups(searchTerm, skip, limit);
 		else listGroups(skip, limit);
 	}, [searchTerm]);
 
@@ -140,15 +140,17 @@ export function Groups() {
 							}
 						</TableBody>
 					</Table>
+					<Box display="flex" justifyContent="center" sx={{m: 1}}>
+						<ButtonGroup variant="contained" aria-label="previous next buttons">
+							<Button aria-label="previous" onClick={previous} disabled={prevDisabled}>
+								<ArrowBack/> Prev
+							</Button>
+							<Button aria-label="next" onClick={next} disabled={nextDisabled}>
+								Next <ArrowForward/>
+							</Button>
+						</ButtonGroup>
+					</Box>
 				</TableContainer>
-				<ButtonGroup variant="contained" aria-label="previous next buttons">
-					<Button aria-label="previous" onClick={previous} disabled={prevDisabled}>
-						<ArrowBack/> Prev
-					</Button>
-					<Button aria-label="next" onClick={next} disabled={nextDisabled}>
-						Next <ArrowForward/>
-					</Button>
-				</ButtonGroup>
 			</Grid>
 		</Grid>
 	);
