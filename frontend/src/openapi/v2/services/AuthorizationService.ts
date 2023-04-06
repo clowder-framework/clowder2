@@ -241,6 +241,7 @@ export class AuthorizationService {
 
     /**
      * Get Dataset Users And Roles
+     * Returns a list of UserAndRole objects. These show what users have what permission on a dataset
      * @param datasetId
      * @returns UserAndRole Successful Response
      * @throws ApiError
@@ -259,6 +260,8 @@ export class AuthorizationService {
 
     /**
      * Get Dataset Groups And Roles
+     * Returns a list of Group objects. These show what groups have what permission on a dataset  Group and
+     * role has the id, name, and roleType
      * @param datasetId
      * @returns GroupAndRole Successful Response
      * @throws ApiError
