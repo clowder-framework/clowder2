@@ -27,7 +27,7 @@ export function Groups() {
 	// TODO add option to determine limit number; default show 5 groups each time
 	const [currPageNum, setCurrPageNum] = useState<number>(0);
 	const [limit,] = useState<number>(20);
-	const [skip, setSkip] = useState<number | undefined>();
+	const [skip, setSkip] = useState<number | undefined>(0);
 	const [prevDisabled, setPrevDisabled] = useState<boolean>(true);
 	const [nextDisabled, setNextDisabled] = useState<boolean>(false);
 	const [searchTerm, setSearchTerm] = useState<string>("");
