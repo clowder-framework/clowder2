@@ -68,10 +68,10 @@ async def get_groups(
     return groups
 
 
-@router.get("/search", response_model=List[GroupOut])
+@router.get("/search/{search_term}", response_model=List[GroupOut])
 async def search_group(
+    search_term: str,
     db: MongoClient =  Depends(dependencies.get_db),
-    search_term: str = "",
     skip: int = 0,
     limit: int = 2,
 ):
