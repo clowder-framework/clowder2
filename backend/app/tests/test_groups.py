@@ -7,9 +7,6 @@ from app.tests.utils import (
     create_user,
     get_user_token,
 )
-from app.models.pyobjectid import PyObjectId
-from app.models.authorization import AuthorizationDB
-
 
 member_alt = {"user": user_alt, "editor": False}
 
@@ -40,6 +37,51 @@ def test_search_group(client: TestClient, headers: dict):
         f"{settings.API_V2_STR}/groups/search/{search_term}", headers=headers
     )
     assert response.status_code == 200
+
+
+def test_add_member_with_editor_role(client: TestClient, headers: dict):
+    new_group = create_group(client, headers)
+    group_id = new_group.get("id")
+
+    create_user(client, headers)
+    new_group["users"].append(member_alt)
+
+    response = client.post(
+        f"{settings.API_V2_STR}/groups/{group_id}/add/{member_alt['user']['email']}?role=editor",
+        headers=headers,
+    )
+
+    assert response.status_code == 200
+    assert response.json().get("id") is not None
+    for user in response.json().get("users"):
+        if user.get("user").get("email") == member_alt['user']['email']:
+            assert user.get("editor") is True
+
+
+def test_assign_member_role(client: TestClient, headers: dict):
+    new_group = create_group(client, headers)
+    group_id = new_group.get("id")
+
+    create_user(client, headers)
+    new_group["users"].append(member_alt)
+
+    # create user as viewer
+    client.post(
+        f"{settings.API_V2_STR}/groups/{group_id}/add/{member_alt['user']['email']}",
+        headers=headers,
+    )
+
+    # assign as editor
+    response = client.put(
+        f"{settings.API_V2_STR}/groups/{group_id}/update/{member_alt['user']['email']}?role=editor",
+        headers=headers,
+    )
+
+    assert response.status_code == 200
+    assert response.json().get("id") is not None
+    for user in response.json().get("users"):
+        if user.get("user").get("email") == member_alt['user']['email']:
+            assert user.get("editor") is True
 
 
 def test_member_permissions(client: TestClient, headers: dict):
