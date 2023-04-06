@@ -141,6 +141,7 @@ async def get_group_role(
     """Retrieve role of user on a particular group (i.e. whether they can change group memberships)."""
     return role
 
+
 @router.post(
     "/datasets/{dataset_id}/group_role/{group_id}/{role}",
     response_model=AuthorizationDB,

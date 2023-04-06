@@ -91,12 +91,12 @@ async def search_group(
     groups = []
     query_regx = re.compile(search_term, re.IGNORECASE)
     for doc in (
-            # TODO either use regex or index search
-            await db["groups"]
-                    .find({"$or": [{"name": query_regx}, {"description": query_regx}]})
-                    .skip(skip)
-                    .limit(limit)
-                    .to_list(length=limit)
+        # TODO either use regex or index search
+        await db["groups"]
+        .find({"$or": [{"name": query_regx}, {"description": query_regx}]})
+        .skip(skip)
+        .limit(limit)
+        .to_list(length=limit)
     ):
         groups.append(GroupOut.from_mongo(doc))
     return groups
@@ -153,7 +153,9 @@ async def delete_group(
     db: MongoClient = Depends(dependencies.get_db),
     allow: bool = Depends(GroupAuthorization("owner")),
 ):
-    if (group_q := await db["groups"].find_one({"_id": ObjectId(group_id)})) is not None:
+    if (
+        group_q := await db["groups"].find_one({"_id": ObjectId(group_id)})
+    ) is not None:
         await db["groups"].delete_one({"_id": ObjectId(group_id)})
         return GroupDB.from_mongo(group_q)
     else:
@@ -269,7 +271,10 @@ async def update_member(
                     {"_id": ObjectId(group_id)}, group.to_mongo()
                 )
             else:
-                raise HTTPException(status_code=404, detail=f"User {username} does not belong to this group!")
+                raise HTTPException(
+                    status_code=404,
+                    detail=f"User {username} does not belong to this group!",
+                )
             return group
         raise HTTPException(status_code=404, detail=f"Group {group_id} not found")
     raise HTTPException(status_code=404, detail=f"User {username} not found")
