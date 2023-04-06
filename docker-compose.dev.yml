@@ -167,7 +167,6 @@ services:
       - RABBITMQ_HOST=rabbitmq
       - RABBITMQ_USER=${RABBITMQ_USER:-guest}
       - RABBITMQ_PASS=${RABBITMQ_PASS:-guest}
-    restart: unless-stopped
     networks:
       - clowder2
     restart: unless-stopped

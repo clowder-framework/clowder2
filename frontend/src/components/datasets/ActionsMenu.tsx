@@ -11,11 +11,12 @@ import {AuthWrapper} from "../auth/AuthWrapper";
 
 type ActionsMenuProps = {
 	datasetId: string,
-	folderId: string
+	folderId: string,
+    	datasetName: string
 }
 
 export const ActionsMenu = (props: ActionsMenuProps): JSX.Element => {
-	const {datasetId, folderId} = props;
+	const {datasetId, folderId, datasetName} = props;
 
 	const datasetRole = useSelector((state: RootState) => state.dataset.datasetRole);
 
@@ -53,7 +54,7 @@ export const ActionsMenu = (props: ActionsMenuProps): JSX.Element => {
 			{/*owner can delete and perform other tasks*/}
 			{
 				<AuthWrapper currRole={datasetRole.role} allowedRoles={["owner"]}>
-					<OtherMenu datasetId={datasetId} folderId={folderId}/>
+					<OtherMenu datasetId={datasetId} folderId={folderId} datasetName={datasetName}/>
 				</AuthWrapper>
 			}
 		</Stack>)

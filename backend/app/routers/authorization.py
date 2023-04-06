@@ -11,7 +11,8 @@ from app.keycloak_auth import get_current_username, get_user
 from app.dependencies import get_db
 from app.models.pyobjectid import PyObjectId
 from app.models.datasets import DatasetOut
-from app.models.groups import GroupOut, GroupDB, GroupBase
+from app.models.users import UserAndRole
+from app.models.groups import GroupOut, GroupDB, GroupBase, GroupAndRole
 from app.deps.authorization_deps import (
     Authorization,
     get_role,
@@ -24,6 +25,7 @@ from app.models.authorization import (
     AuthorizationFile,
     AuthorizationMetadata,
     AuthorizationDB,
+    AuthorizationOut,
     RoleType,
 )
 
@@ -165,7 +167,7 @@ async def set_dataset_group_role(
         ) is not None:
             group = GroupOut.from_mongo(group_q)
             # First, remove any existing role the group has on the dataset
-            remove_dataset_group_role(dataset_id, group_id, db, user_id, allow)
+            await remove_dataset_group_role(dataset_id, group_id, db, user_id, allow)
 
             if (
                 auth_q := await db["authorization"].find_one(
@@ -174,12 +176,13 @@ async def set_dataset_group_role(
             ) is not None:
                 # Update existing role entry for this dataset
                 auth_db = AuthorizationDB.from_mongo(auth_q)
-                auth_db.group_ids.append(ObjectId(group_id))
-                for u in group.users:
-                    auth_db.user_ids.append(u.user.email)
-                await db["authorization"].replace_one(
-                    {"_id": auth_db.id}, auth_db.to_mongo()
-                )
+                if group_id not in auth_db.group_ids:
+                    auth_db.group_ids.append(ObjectId(group_id))
+                    for u in group.users:
+                        auth_db.user_ids.append(u.user.email)
+                    await db["authorization"].replace_one(
+                        {"_id": auth_db.id}, auth_db.to_mongo()
+                    )
                 return auth_db
             else:
                 # Create new role entry for this dataset
@@ -229,10 +232,11 @@ async def set_dataset_user_role(
             ) is not None:
                 # Update if it already exists
                 auth_db = AuthorizationDB.from_mongo(auth_q)
-                auth_db.user_ids.append(username)
-                await db["authorization"].replace_one(
-                    {"_id": auth_db.id}, auth_db.to_mongo()
-                )
+                if username not in auth_db.user_ids:
+                    auth_db.user_ids.append(username)
+                    await db["authorization"].replace_one(
+                        {"_id": auth_db.id}, auth_db.to_mongo()
+                    )
                 return auth_db
             else:
                 # Create a new entry
@@ -327,5 +331,69 @@ async def remove_dataset_user_role(
                 return auth_db
         else:
             raise HTTPException(status_code=404, detail=f"User {username} not found")
+    else:
+        raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
+
+
+@router.get("/datasets/{dataset_id}/users_and_roles", response_model=List[UserAndRole])
+async def get_dataset_users_and_roles(
+    dataset_id: str,
+    db: MongoClient = Depends(dependencies.get_db),
+    allow: bool = Depends(Authorization("editor")),
+):
+    """Returns a list of UserAndRole objects. These show what users have what permission on a dataset"""
+    if (
+        dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
+    ) is not None:
+        dataset_authorizations = []
+        async for auth in db["authorization"].find(
+            {"dataset_id": ObjectId(dataset_id)}
+        ):
+            current_authorization = AuthorizationOut.from_mongo(auth)
+            if len(current_authorization.group_ids) == 0:
+                current_users = current_authorization.user_ids
+                for user in current_users:
+                    current_user_role = UserAndRole(user_id=user, roleType=auth["role"])
+                    dataset_authorizations.append(current_user_role)
+        return dataset_authorizations
+    else:
+        raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
+
+
+@router.get(
+    "/datasets/{dataset_id}/groups_and_roles", response_model=List[GroupAndRole]
+)
+async def get_dataset_groups_and_roles(
+    dataset_id: str,
+    db: MongoClient = Depends(dependencies.get_db),
+    allow: bool = Depends(Authorization("editor")),
+):
+    """Returns a list of Group objects. These show what groups have what permission on a dataset  Group and
+    role has the id, name, and roleType"""
+    if (
+        dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
+    ) is not None:
+        dataset_group_authorizations = []
+        async for auth in db["authorization"].find(
+            {"dataset_id": ObjectId(dataset_id)}
+        ):
+            current_authorization = AuthorizationOut.from_mongo(auth)
+            current_role = auth["role"]
+            if len(current_authorization.group_ids) > 0:
+                for group_id in current_authorization.group_ids:
+                    if (
+                        current_group := await db["groups"].find_one({"_id": group_id})
+                    ) is not None:
+                        group_out = GroupOut.from_mongo(current_group)
+                        try:
+                            current_group_role = GroupAndRole(
+                                group_id=str(group_out.id),
+                                group_name=group_out.name,
+                                roleType=current_role,
+                            )
+                            dataset_group_authorizations.append(current_group_role)
+                        except Exception as e:
+                            print(e)
+        return dataset_group_authorizations
     else:
         raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
