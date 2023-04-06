@@ -1,19 +1,24 @@
 import {Box, Button, ListItemIcon, ListItemText, Menu, MenuItem} from "@mui/material";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import {ActionModal} from "../dialog/ActionModal";
-import {datasetDeleted} from "../../actions/dataset";
+import {datasetDeleted, fetchFilesInDataset} from "../../actions/dataset";
+import {fetchGroups} from "../../actions/group";
 import {useNavigate} from "react-router-dom";
 import {useDispatch} from "react-redux";
 import {MoreHoriz} from "@material-ui/icons";
 import DeleteIcon from "@mui/icons-material/Delete";
+import ShareIcon from '@mui/icons-material/Share';
+import ShareDatasetModal from "./ShareDatasetModal"
+import ShareGroupDatasetModal from "./ShareGroupDatasetModal";
 
 type ActionsMenuProps = {
-	datasetId: string
+	datasetId: string,
+	datasetName: string
 }
 
 export const OtherMenu = (props: ActionsMenuProps): JSX.Element => {
-	const {datasetId} = props;
+	const {datasetId, datasetName} = props;
 
 	// use history hook to redirect/navigate between routes
 	const history = useNavigate();
@@ -21,9 +26,19 @@ export const OtherMenu = (props: ActionsMenuProps): JSX.Element => {
 	// redux
 	const dispatch = useDispatch();
 	const deleteDataset = (datasetId: string | undefined) => dispatch(datasetDeleted(datasetId));
+	const listGroups = () => dispatch(fetchGroups(0, 21));
+
+	// component did mount
+	useEffect(() => {
+		listGroups();
+	}, []);
 
 	// state
 	const [deleteDatasetConfirmOpen, setDeleteDatasetConfirmOpen] = useState(false);
+	const [sharePaneOpen, setSharePaneOpen] = useState(false);
+	const [shareGroupPaneOpen, setShareGroupPaneOpen] = useState(false);
+
+
 
 	// delete dataset
 	const deleteSelectedDataset = () => {
@@ -45,6 +60,14 @@ export const OtherMenu = (props: ActionsMenuProps): JSX.Element => {
 		setAnchorEl(null);
 	};
 
+    const handleShareClose = () => {
+        setSharePaneOpen(false);
+    }
+
+      const handleShareGroupClose = () => {
+        setShareGroupPaneOpen(false);
+    }
+
 	return (
 		<Box>
 			<ActionModal actionOpen={deleteDatasetConfirmOpen} actionTitle="Are you sure?"
@@ -53,6 +76,11 @@ export const OtherMenu = (props: ActionsMenuProps): JSX.Element => {
 						 handleActionCancel={() => {
 							 setDeleteDatasetConfirmOpen(false);
 						 }}/>
+
+ 		        <ShareDatasetModal open={sharePaneOpen} handleClose={handleShareClose} datasetName={datasetName}/>
+			 	<ShareGroupDatasetModal open={shareGroupPaneOpen} handleClose={handleShareGroupClose} datasetName={datasetName}/>
+
+
 			<Button variant="outlined" onClick={handleOptionClick}
 					endIcon={<ArrowDropDownIcon/>}>
 				<MoreHoriz/>
@@ -74,6 +102,28 @@ export const OtherMenu = (props: ActionsMenuProps): JSX.Element => {
 						<DeleteIcon fontSize="small"/>
 					</ListItemIcon>
 					<ListItemText>Delete Dataset</ListItemText></MenuItem>
+                		<MenuItem
+                    			onClick={() => {
+                        			handleOptionClose();
+                        			setSharePaneOpen(true);
+                    			}
+                    		}>
+                    			<ListItemIcon>
+                        			<ShareIcon fontSize="small" />
+                    			</ListItemIcon>
+                    			<ListItemText>Share</ListItemText>
+                		</MenuItem>
+						<MenuItem
+                    			onClick={() => {
+                        			handleOptionClose();
+                        			setShareGroupPaneOpen(true);
+                    			}
+                    		}>
+                    			<ListItemIcon>
+                        			<ShareIcon fontSize="small" />
+                    			</ListItemIcon>
+                    			<ListItemText>Share With Group</ListItemText>
+                		</MenuItem>
 			</Menu>
 		</Box>)
 }
