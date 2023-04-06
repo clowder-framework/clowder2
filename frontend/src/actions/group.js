@@ -26,7 +26,7 @@ export function deleteGroup(groupId){
 			.then(json => {
 				dispatch({
 					type: RECEIVE_GROUPS,
-					id: json,
+					about: json,
 					receivedAt: Date.now(),
 				});
 			})

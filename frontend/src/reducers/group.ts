@@ -1,6 +1,6 @@
 import {
 	RECEIVE_GROUPS,
-	RECEIVE_GROUP_ABOUT, DELETE_GROUP_MEMBER, ADD_GROUP_MEMBER, ASSIGN_GROUP_MEMBER_ROLE,
+	RECEIVE_GROUP_ABOUT, DELETE_GROUP_MEMBER, ADD_GROUP_MEMBER, ASSIGN_GROUP_MEMBER_ROLE, DELETE_GROUP,
 } from "../actions/group";
 import {
 	RECEIVE_GROUP_ROLE
@@ -9,6 +9,7 @@ import {DataAction} from "../types/action";
 import {GroupState} from "../types/data";
 import {GroupOut, RoleType} from "../openapi/v2";
 import {LIST_USERS} from "../actions/user";
+import {DELETE_DATASET} from "../actions/dataset";
 
 const defaultState: GroupState = {
 	groups: [],
@@ -33,6 +34,10 @@ const group = (state = defaultState, action: DataAction) => {
 			return Object.assign({}, state, {users: action.users});
 		case ASSIGN_GROUP_MEMBER_ROLE:
 			return Object.assign({}, state, {about: action.about});
+		case DELETE_GROUP:
+			return Object.assign({}, state, {
+				groups: state.groups.filter(group => group.id !== action.about.id),
+			});
         default:
             return state;
 	}
