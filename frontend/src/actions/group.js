@@ -19,6 +19,42 @@ export function fetchGroups(skip=0, limit=21){
 	};
 }
 
+export const DELETE_GROUP = "DELETE_GROUP";
+export function deleteGroup(groupId){
+	return (dispatch) => {
+		return V2.GroupsService.deleteGroupApiV2GroupsGroupIdDelete(groupId)
+			.then(json => {
+				dispatch({
+					type: DELETE_GROUP,
+					about: json,
+					receivedAt: Date.now(),
+				});
+			})
+			.catch(reason => {
+				dispatch(handleErrors(reason, deleteGroup(groupId)));
+			});
+
+	};
+}
+
+export const SEARCH_GROUPS = "SEARCH_GROUPS";
+export function searchGroups(searchTerm, skip=0, limit=21) {
+	return (dispatch) => {
+		return V2.GroupsService.searchGroupApiV2GroupsSearchSearchTermGet(searchTerm, skip, limit)
+			.then(json => {
+				dispatch({
+					type: SEARCH_GROUPS,
+					groups: json,
+					receivedAt: Date.now(),
+				});
+			})
+			.catch(reason => {
+				dispatch(handleErrors(reason, searchGroups(searchTerm, skip, limit)));
+			});
+
+	};
+}
+
 export const RECEIVE_GROUP_ABOUT = "RECEIVE_GROUP_ABOUT";
 export function fetchGroupAbout(id){
 	return (dispatch) => {
@@ -54,9 +90,9 @@ export function deleteGroupMember(groupId, username){
 }
 
 export const ADD_GROUP_MEMBER = "ADD_GROUP_MEMBER";
-export function addGroupMember(groupId, username){
+export function addGroupMember(groupId, username, role="viewer"){
 	return (dispatch) => {
-		return V2.GroupsService.addMemberApiV2GroupsGroupIdAddUsernamePost(groupId, username)
+		return V2.GroupsService.addMemberApiV2GroupsGroupIdAddUsernamePost(groupId, username, role)
 			.then(json => {
 				dispatch({
 					type: ADD_GROUP_MEMBER,
@@ -65,7 +101,24 @@ export function addGroupMember(groupId, username){
 				});
 			})
 			.catch(reason => {
-				dispatch(handleErrors(reason, addGroupMember(groupId, username)));
+				dispatch(handleErrors(reason, addGroupMember(groupId, username, role)));
+			});
+	};
+}
+
+export const ASSIGN_GROUP_MEMBER_ROLE = "ASSIGN_GROUP_MEMBER_ROLE";
+export function assignGroupMemberRole(groupId, username, role="viewer"){
+	return (dispatch) => {
+		return V2.GroupsService.updateMemberApiV2GroupsGroupIdUpdateUsernamePut(groupId, username, role)
+			.then(json => {
+				dispatch({
+					type: ASSIGN_GROUP_MEMBER_ROLE,
+					about: json,
+					receivedAt: Date.now(),
+				});
+			})
+			.catch(reason => {
+				dispatch(handleErrors(reason, assignGroupMemberRole(groupId, username, role)));
 			});
 	};
 }

@@ -26,7 +26,7 @@ type AddMemberModalProps = {
     open: boolean,
     handleClose: any,
     groupName: string,
-	groupId: string,
+	groupId: string|undefined,
 }
 
 export default function AddMemberModal(props: AddMemberModalProps) {

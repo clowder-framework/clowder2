@@ -28,23 +28,21 @@ export default function MembersTable(props: MembersTableProps) {
 	const dispatch = useDispatch();
 	const groupMemberDeleted = (groupId: string|undefined, username: string|undefined) => dispatch(deleteGroupMember(groupId, username))
 
-	// use history hook to redirect/navigate between routes
-	const [deleteDatasetConfirmOpen, setDeleteDatasetConfirmOpen] = useState(false);
+	const [deleteMemberConfirmOpen, setDeleteMemberConfirmOpen] = useState(false);
 	const [selectMemberUsername, setSelectMemberUsername] = useState();
 
 	return (
 		<>
-			<ActionModal actionOpen={deleteDatasetConfirmOpen} actionTitle="Are you sure?"
+			<ActionModal actionOpen={deleteMemberConfirmOpen} actionTitle="Are you sure?"
 							 actionText="Do you really want to delete this member? This process cannot be undone."
 							 actionBtnName="Delete"
 							 handleActionBtnClick={() => {
 								groupMemberDeleted(groupId, selectMemberUsername);
-								setDeleteDatasetConfirmOpen(false);
+								setDeleteMemberConfirmOpen(false);
 							 }}
 							 handleActionCancel={() => {
-								 setDeleteDatasetConfirmOpen(false);
+								 setDeleteMemberConfirmOpen(false);
 							 }}/>
-
 			<TableContainer component={Paper}>
 				<Table sx={{minWidth: 650}} aria-label="simple table">
 					<TableHead>
@@ -60,9 +58,10 @@ export default function MembersTable(props: MembersTableProps) {
 							groupAbout !== undefined && groupAbout.users !== undefined?
 								(groupAbout.users.map((member) => (
 									<MembersTableUserEntry
+										groupId={groupId}
 										member={member}
 										key={member.user.id}
-										setDeleteDatasetConfirmOpen={setDeleteDatasetConfirmOpen}
+										setDeleteMemberConfirmOpen={setDeleteMemberConfirmOpen}
 										setSelectMemberUsername={setSelectMemberUsername}
 									/>
 								)))

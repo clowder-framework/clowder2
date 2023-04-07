@@ -59,6 +59,38 @@ export class GroupsService {
     }
 
     /**
+     * Search Group
+     * Search all groups in the db based on text.
+     *
+     * Arguments:
+     * text -- any text matching name or description
+     * skip -- number of initial records to skip (i.e. for pagination)
+     * limit -- restrict number of records to be returned (i.e. for pagination)
+     * @param searchTerm
+     * @param skip
+     * @param limit
+     * @returns GroupOut Successful Response
+     * @throws ApiError
+     */
+    public static searchGroupApiV2GroupsSearchSearchTermGet(
+        searchTerm: string,
+        skip?: number,
+        limit: number = 10,
+    ): CancelablePromise<Array<GroupOut>> {
+        return __request({
+            method: 'GET',
+            path: `/api/v2/groups/search/${searchTerm}`,
+            query: {
+                'skip': skip,
+                'limit': limit,
+            },
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+
+    /**
      * Get Group
      * @param groupId
      * @returns GroupOut Successful Response
@@ -101,33 +133,15 @@ export class GroupsService {
     /**
      * Delete Group
      * @param groupId
-     * @returns any Successful Response
+     * @returns GroupOut Successful Response
      * @throws ApiError
      */
     public static deleteGroupApiV2GroupsGroupIdDelete(
         groupId: string,
-    ): CancelablePromise<any> {
+    ): CancelablePromise<GroupOut> {
         return __request({
             method: 'DELETE',
             path: `/api/v2/groups/${groupId}`,
-            errors: {
-                422: `Validation Error`,
-            },
-        });
-    }
-
-    /**
-     * Search Group
-     * @param searchTerm
-     * @returns any Successful Response
-     * @throws ApiError
-     */
-    public static searchGroupApiV2GroupsSearchSearchTermGet(
-        searchTerm: string,
-    ): CancelablePromise<any> {
-        return __request({
-            method: 'GET',
-            path: `/api/v2/groups/search/${searchTerm}`,
             errors: {
                 422: `Validation Error`,
             },
@@ -139,16 +153,21 @@ export class GroupsService {
      * Add a new user to a group.
      * @param groupId
      * @param username
-     * @returns any Successful Response
+     * @param role
+     * @returns GroupOut Successful Response
      * @throws ApiError
      */
     public static addMemberApiV2GroupsGroupIdAddUsernamePost(
         groupId: string,
         username: string,
-    ): CancelablePromise<any> {
+        role?: string,
+    ): CancelablePromise<GroupOut> {
         return __request({
             method: 'POST',
             path: `/api/v2/groups/${groupId}/add/${username}`,
+            query: {
+                'role': role,
+            },
             errors: {
                 422: `Validation Error`,
             },
@@ -170,6 +189,32 @@ export class GroupsService {
         return __request({
             method: 'POST',
             path: `/api/v2/groups/${groupId}/remove/${username}`,
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+
+    /**
+     * Update Member
+     * Update user role.
+     * @param groupId
+     * @param username
+     * @param role
+     * @returns GroupOut Successful Response
+     * @throws ApiError
+     */
+    public static updateMemberApiV2GroupsGroupIdUpdateUsernamePut(
+        groupId: string,
+        username: string,
+        role: string,
+    ): CancelablePromise<GroupOut> {
+        return __request({
+            method: 'PUT',
+            path: `/api/v2/groups/${groupId}/update/${username}`,
+            query: {
+                'role': role,
+            },
             errors: {
                 422: `Validation Error`,
             },
