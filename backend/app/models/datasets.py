@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from enum import Enum, auto
 from typing import Optional, List
 
@@ -77,6 +77,10 @@ class DatasetDBViewList(View, DatasetBase):
                 }
             },
         ]
+        # Needs fix to work https://github.com/roman-right/beanie/pull/521
+        # use_cache = True
+        # cache_expiration_time = timedelta(seconds=10)
+        # cache_capacity = 5
 
 
 class DatasetOut(DatasetDB):
