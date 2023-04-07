@@ -57,9 +57,11 @@ class DatasetDB(Document, DatasetBase):
 
 
 class DatasetDBViewList(View, DatasetBase):
-    # id: PydanticObjectId = Field(None, alias='_id')
+    # FIXME This seems to be required to return _id. Otherwise _id is null in the response.
+    id: PydanticObjectId = Field(None, alias='_id')
     author: UserOut
     created: datetime = Field(default_factory=datetime.utcnow)
+    modified: datetime = Field(default_factory=datetime.utcnow)
     auth: List[AuthorizationDB]
 
     class Settings:

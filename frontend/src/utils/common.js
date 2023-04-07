@@ -76,6 +76,23 @@ export function parseDate(dateString) {
 	}
 }
 
+export function renameId(obj) {
+
+	Object.defineProperty(
+		obj,
+		'id',
+		Object.getOwnPropertyDescriptor(obj, '_id')
+	);
+	delete obj['_id'];
+
+	return obj;
+}
+
+export function renameIdArray(arr) {
+	return arr.map(obj => renameId(obj));
+}
+
+
 // get current username
 // export function getCurrUsername(){
 // 	if (process.env.DEPLOY_ENV === "local"){

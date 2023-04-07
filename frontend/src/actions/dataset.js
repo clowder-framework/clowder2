@@ -1,7 +1,7 @@
 import {V2} from "../openapi";
 import {handleErrors} from "./common";
 import config from "../app.config";
-import {getHeader} from "../utils/common";
+import {getHeader, renameIdArray} from "../utils/common";
 
 export const RECEIVE_FILES_IN_DATASET = "RECEIVE_FILES_IN_DATASET";
 export function fetchFilesInDataset(datasetId, folderId){
@@ -95,9 +95,11 @@ export function fetchDatasets(skip=0, limit=21, mine=false){
 		// TODO: Parameters for dates? paging?
 		return V2.DatasetsService.getDatasetsApiV2DatasetsGet(skip, limit, mine)
 			.then(json => {
+				// FIXME temporary workaround to map from `_id` returned by API to `id` expected by javascript
+				const newArray = renameIdArray(json);
 				dispatch({
 					type: RECEIVE_DATASETS,
-					datasets: json,
+					datasets: newArray,
 					receivedAt: Date.now(),
 				});
 			})
