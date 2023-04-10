@@ -53,17 +53,6 @@ export default function ChangeDatasetRoleModal(props: ChangeDatasetRoleProps) {
 						display: "flex",
 						alignItems: "center"
 					}}>
-						{/*<Autocomplete*/}
-						{/*	id="email-auto-complete"*/}
-						{/*	freeSolo*/}
-						{/*	autoHighlight*/}
-						{/*	inputValue={email}*/}
-						{/*	onInputChange={(event, value) => {*/}
-						{/*		setEmail(value);*/}
-						{/*	}}*/}
-						{/*	options={["abc@xyz.com"]}*/}
-						{/*	renderInput={(params) => <TextField {...params} sx={{ mt: 1, mr: 1, "alignItems": "right", "width": "450px" }} required label="Enter email address" />}*/}
-						{/*/> as*/}
 						<FormControl variant="outlined" sx={{ m: 1, minWidth: 120 }}>
 							<InputLabel id="demo-simple-select-label">Status</InputLabel>
 							<Select
