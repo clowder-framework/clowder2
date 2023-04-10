@@ -38,12 +38,11 @@ class DatasetPatch(BaseModel):
 
 
 class DatasetDB(Document, DatasetBase):
-    # id: PydanticObjectId = Field(None, alias='_id')
     author: UserOut
     created: datetime = Field(default_factory=datetime.utcnow)
     modified: datetime = Field(default_factory=datetime.utcnow)
     status: str = DatasetStatus.PRIVATE.name
-    views: int = 0
+    user_views: int = 0
     downloads: int = 0
 
     class Settings:
