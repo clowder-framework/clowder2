@@ -1,12 +1,12 @@
 from datetime import datetime
 from enum import Enum, auto
-from typing import Optional
-
-from pydantic import BaseModel
-from pydantic import Field
+from typing import Optional, List
+from pydantic import BaseModel, Field, EmailStr
 
 from app.models.mongomodel import MongoModel
 from app.models.users import UserOut
+from app.models.groups import GroupOut
+from app.models.authorization import RoleType
 
 
 class AutoName(Enum):
@@ -46,3 +46,20 @@ class DatasetDB(MongoModel, DatasetBase):
 
 class DatasetOut(DatasetDB):
     pass
+
+
+class UserAndRole(BaseModel):
+    user: UserOut
+    role: RoleType
+
+
+class GroupAndRole(BaseModel):
+    group: GroupOut
+    role: RoleType
+
+
+class DatasetRoles(BaseModel):
+    dataset_id: str
+    user_roles: List[UserAndRole] = []
+    group_roles: List[GroupAndRole] = []
+

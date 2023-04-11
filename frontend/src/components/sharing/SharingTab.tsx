@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from "react";
 import {RootState} from "../../types/data";
 import Card from '@mui/material/Card';
-import {fetchDatasetGroupsAndRoles, fetchDatasetUsersAndRoles} from "../../actions/dataset";
+import {fetchDatasetRoles} from "../../actions/dataset";
 import {useDispatch, useSelector} from "react-redux";
 import {useParams} from "react-router-dom";
 import TableContainer from "@mui/material/TableContainer";
@@ -26,10 +26,8 @@ export const SharingTab = (): JSX.Element => {
 
 	const dispatch = useDispatch();
 
-	const getUsersAndRoles = (datasetId: string | undefined) => dispatch(fetchDatasetUsersAndRoles(datasetId));
-	const getGroupsAndRoles = (datasetId: string | undefined) => dispatch(fetchDatasetGroupsAndRoles(datasetId));
-	const datasetUsersAndRolesList = useSelector((state: RootState) => state.dataset.usersAndRoles);
-	const datasetGroupsAndRolesList = useSelector((state: RootState) => state.dataset.groupsAndRoles);
+	const getRoles = (datasetId: string | undefined) => dispatch(fetchDatasetRoles(datasetId));
+	const datasetRolesList = useSelector((state: RootState) => state.dataset.roles);
 	const [sharePaneOpen, setSharePaneOpen] = useState(false);
 
 	const handleShareClose = () => {
@@ -37,13 +35,8 @@ export const SharingTab = (): JSX.Element => {
     }
 
 	useEffect(() => {
-		getUsersAndRoles(datasetId);
-		console.log('users and roles', datasetUsersAndRolesList);
-	}, []);
-
-	useEffect(() => {
-		getGroupsAndRoles(datasetId);
-		console.log('groups and roles', datasetGroupsAndRolesList);
+		getRoles(datasetId);
+		console.log('roles', datasetRolesList);
 	}, []);
 
 

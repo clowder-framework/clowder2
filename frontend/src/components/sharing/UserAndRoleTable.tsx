@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from "react";
 import {RootState} from "../../types/data";
-import {fetchDatasetGroupsAndRoles, fetchDatasetUsersAndRoles} from "../../actions/dataset";
+import {fetchDatasetRoles} from "../../actions/dataset";
 import {useDispatch, useSelector} from "react-redux";
 import {useParams} from "react-router-dom";
 import TableContainer from "@mui/material/TableContainer";
@@ -17,19 +17,17 @@ export const UserAndRoleTable = (): JSX.Element => {
 
 	const dispatch = useDispatch();
 
-	const getUsersAndRoles = (datasetId: string | undefined) => dispatch(fetchDatasetUsersAndRoles(datasetId));
-	const datasetUsersAndRolesList = useSelector((state: RootState) => state.dataset.usersAndRoles);
+	const getRoles = (datasetId: string | undefined) => dispatch(fetchDatasetRoles(datasetId));
+	const datasetRolesList = useSelector((state: RootState) => state.dataset.roles);
 	const [sharePaneOpen, setSharePaneOpen] = useState(false);
 
 	const handleShareClose = () => {
         setSharePaneOpen(false);
     }
 
-
-
 	useEffect(() => {
-		getUsersAndRoles(datasetId);
-		console.log('users and roles', datasetUsersAndRolesList);
+		getRoles(datasetId);
+		console.log('users and roles', datasetRolesList);
 
 	}, []);
 
@@ -52,21 +50,21 @@ export const UserAndRoleTable = (): JSX.Element => {
 				</TableHead>
 				<TableBody>
 					{
-						datasetUsersAndRolesList.map((user_role) => (
+						datasetRolesList ? datasetRolesList.user_roles.map((user_role) => (
 							<TableRow
-								key={user_role.user_id}
+								key={user_role.user.id}
 								sx={{'&:last-child td, &:last-child th': {border: 0}}}
 							>
 								<TableCell
-									align="right">{user_role.user_id}</TableCell>
+									align="right">{user_role.user.id}</TableCell>
 								<TableCell
-									align="right">{user_role.roleType}</TableCell>
+									align="right">{user_role.role}</TableCell>
 								<TableCell
-									align="right">{user_role.roleType}</TableCell>
+									align="right">{user_role.role}</TableCell>
 								<TableCell
-									align="right"><button value={user_role.user_id} onClick={clickButton}>click to change role</button></TableCell>
+									align="right"><button value={user_role.user.id} onClick={clickButton}>click to change role</button></TableCell>
 
-							</TableRow>))
+							</TableRow>)) : <></>
 					}
 				</TableBody>
 			</Table>

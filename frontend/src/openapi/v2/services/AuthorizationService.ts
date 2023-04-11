@@ -4,6 +4,7 @@
 import type { AuthorizationBase } from '../models/AuthorizationBase';
 import type { AuthorizationDB } from '../models/AuthorizationDB';
 import type { AuthorizationMetadata } from '../models/AuthorizationMetadata';
+import type { DatasetRoles } from '../models/DatasetRoles';
 import type { GroupAndRole } from '../models/GroupAndRole';
 import type { RoleType } from '../models/RoleType';
 import type { UserAndRole } from '../models/UserAndRole';
@@ -233,6 +234,25 @@ export class AuthorizationService {
         return __request({
             method: 'DELETE',
             path: `/api/v2/authorizations/datasets/${datasetId}/user_role/${username}`,
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+
+    /**
+     * Get Dataset Roles
+     * Get a list of all users and groups that have assigned roles on this dataset.
+     * @param datasetId
+     * @returns DatasetRoles Successful Response
+     * @throws ApiError
+     */
+    public static getDatasetRolesApiV2AuthorizationsDatasetsDatasetIdRolesGet(
+        datasetId: string,
+    ): CancelablePromise<DatasetRoles> {
+        return __request({
+            method: 'GET',
+            path: `/api/v2/authorizations/datasets/${datasetId}/roles`,
             errors: {
                 422: `Validation Error`,
             },

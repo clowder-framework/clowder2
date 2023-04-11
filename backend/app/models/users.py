@@ -47,11 +47,6 @@ class UserAPIKey(MongoModel):
     created: datetime = Field(default_factory=datetime.utcnow)
 
 
-class UserAndRole(BaseModel):
-    user_id: str
-    roleType: str
-
-
 async def get_user_out(user_id: str, db: MongoClient) -> UserOut:
     """Retrieve user from Mongo based on email address."""
     user_out = await db["users"].find_one({"email": user_id})

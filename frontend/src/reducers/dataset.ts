@@ -9,6 +9,7 @@ import {
 	DOWNLOAD_DATASET,
 	SET_DATASET_GROUP_ROLE,
     SET_DATASET_USER_ROLE,
+	RECEIVE_DATASET_ROLES,
 	RECEIVE_DATASET_USERS_AND_ROLES,
 	RECEIVE_DATASET_GROUPS_AND_ROLES,
 } from "../actions/dataset";
@@ -61,6 +62,9 @@ const dataset = (state = defaultState, action: DataAction) => {
 		return Object.assign({}, state, {about: action.about});
 	case RECEIVE_DATASET_ROLE:
 		return Object.assign({}, state, {datasetRole: action.role});
+		return Object.assign({}, state, {datasetRole: action.role});
+	case RECEIVE_DATASET_ROLES:
+		return Object.assign({}, state, {groupsAndRoles: action.roles});
 	case RECEIVE_DATASET_GROUPS_AND_ROLES:
 		return Object.assign({}, state, {groupsAndRoles: action.groupsAndRoles});
 	case RECEIVE_DATASET_USERS_AND_ROLES:

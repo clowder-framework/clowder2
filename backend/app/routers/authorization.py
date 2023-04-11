@@ -10,9 +10,9 @@ from app import dependencies
 from app.keycloak_auth import get_current_username, get_user
 from app.dependencies import get_db
 from app.models.pyobjectid import PyObjectId
-from app.models.datasets import DatasetOut
-from app.models.users import UserAndRole
-from app.models.groups import GroupOut, GroupDB, GroupBase, GroupAndRole
+from app.models.datasets import DatasetOut, UserAndRole, GroupAndRole, DatasetRoles
+from app.models.users import UserOut
+from app.models.groups import GroupOut
 from app.deps.authorization_deps import (
     Authorization,
     get_role,
@@ -331,6 +331,44 @@ async def remove_dataset_user_role(
                 return auth_db
         else:
             raise HTTPException(status_code=404, detail=f"User {username} not found")
+    else:
+        raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
+
+
+@router.get(
+    "/datasets/{dataset_id}/roles" #, response_model=DatasetRoles
+)
+async def get_dataset_roles(
+    dataset_id: str,
+    db: MongoClient = Depends(dependencies.get_db),
+    allow: bool = Depends(Authorization("editor")),
+):
+    """Get a list of all users and groups that have assigned roles on this dataset."""
+    if (
+        dataset_q := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
+    ) is not None:
+        dataset = DatasetOut.from_mongo(dataset_q)
+        roles = DatasetRoles(dataset_id=str(dataset.id))
+
+        async for auth_q in db["authorization"].find(
+            {"dataset_id": ObjectId(dataset_id)}
+        ):
+            auth = AuthorizationOut.from_mongo(auth_q)
+            async for user_q in db["users"].find({
+                "email": {"$in": auth.user_ids}
+            }):
+                user = UserOut.from_mongo(user_q)
+                user.id = str(user.id)
+                roles.user_roles.append(UserAndRole(user=user, role=auth.role))
+            async for group_q in db["groups"].find({
+                "_id": {"$in": auth.group_ids}
+            }):
+                group = GroupOut.from_mongo(group_q)
+                group.id = str(group.id)
+                for u in group.users:
+                    u.user.id = str(u.user.id)
+                roles.group_roles.append(GroupAndRole(group=group, role=auth.role))
+        return roles
     else:
         raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
 

@@ -3,7 +3,7 @@ import {
 	MetadataOut as Metadata,
 	FileOut as FileSummary,
 	FileVersion, FolderOut, EventListenerJob, AuthorizationBase,
-	GroupOut, RoleType, GroupAndRole, UserAndRole, UserOut
+	GroupOut, RoleType, DatasetRoles, UserOut
 } from "../openapi/v2";
 
 export interface Dataset {
@@ -135,9 +135,8 @@ export interface DatasetState{
 	newDataset: Dataset;
 	newFile: FileSummary;
 	about: Dataset;
-	datasetRole: AuthorizationBase
-	groupsAndRoles: GroupAndRole[];
-	usersAndRoles: UserAndRole[];
+	datasetRole: AuthorizationBase;
+	roles: DatasetRoles;
 }
 export interface ListenerState{
 	listeners: Listener[];
