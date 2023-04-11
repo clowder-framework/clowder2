@@ -234,7 +234,6 @@ export function fetchDatasetRoles(datasetId){
 	return (dispatch) => {
 		return V2.AuthorizationService.getDatasetRolesApiV2AuthorizationsDatasetsDatasetIdRolesGet(datasetId)
 			.then(json => {
-				console.log('json',json);
 				dispatch({
 					type: RECEIVE_DATASET_ROLES,
 					roles: json,

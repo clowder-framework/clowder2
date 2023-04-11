@@ -18,19 +18,12 @@ export const GroupAndRoleTable = (): JSX.Element => {
 
 	const dispatch = useDispatch();
 
-	const getRoles = (datasetId: string | undefined) => dispatch(fetchDatasetRoles(datasetId));
 	const datasetRolesList = useSelector((state: RootState) => state.dataset.roles);
 	const [sharePaneOpen, setSharePaneOpen] = useState(false);
 
 	const handleShareClose = () => {
         setSharePaneOpen(false);
     }
-
-	useEffect(() => {
-		getRoles(datasetId);
-		console.log('groups and roles', datasetRolesList);
-	}, []);
-
 
 	const clickButton = () => {
 		// reset error message and close the error window
@@ -42,29 +35,29 @@ export const GroupAndRoleTable = (): JSX.Element => {
 			<Table sx={{minWidth: 650}} aria-label="simple table">
 				<TableHead>
 					<TableRow>
-						<TableCell align="right">ID</TableCell>
-						<TableCell align="right">Name</TableCell>
+						<TableCell align="right">Group Name</TableCell>
+						<TableCell align="right"></TableCell>
 						<TableCell align="right">Role</TableCell>
 						<TableCell align="right">Change Role</TableCell>
 					</TableRow>
 				</TableHead>
 				<TableBody>
-
 					{
-						datasetRolesList ? datasetRolesList.group_roles.map((group_role) => (
+						datasetRolesList !== undefined && datasetRolesList.group_roles  !== undefined ?
+							(datasetRolesList.group_roles.map((group_role) => (
 							<TableRow
 								key={group_role.group.id}
 								sx={{'&:last-child td, &:last-child th': {border: 0}}}
 							>
 								<TableCell
-									align="right">{group_role.group.id}</TableCell>
-								<TableCell
 									align="right">{group_role.group.name}</TableCell>
+								<TableCell
+									align="right"></TableCell>
 								<TableCell
 									align="right">{group_role.role}</TableCell>
 								<TableCell
 									align="right"><button value={group_role.group.id} onClick={clickButton}>click to change role</button></TableCell>
-							</TableRow>)) : <></>
+							</TableRow>))) : <></>
 					}
 				</TableBody>
 			</Table>

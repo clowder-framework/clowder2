@@ -39,15 +39,11 @@ export default function ShareGroupDatasetModal(props: ShareGroupDatasetModalProp
 		setShowSuccessAlert(true);
 	};
 
-
-
 	const options = Array();
     	groups.map((group) => {
     	const group_option = {value:group.id, label:group.name};
 		options.push(group_option);
     	});
-	console.log("group optioins are", options);
-	console.log("it is of type", typeof(options));
 
 	return (
 		<Container>

@@ -17,20 +17,12 @@ export const UserAndRoleTable = (): JSX.Element => {
 
 	const dispatch = useDispatch();
 
-	const getRoles = (datasetId: string | undefined) => dispatch(fetchDatasetRoles(datasetId));
 	const datasetRolesList = useSelector((state: RootState) => state.dataset.roles);
 	const [sharePaneOpen, setSharePaneOpen] = useState(false);
 
 	const handleShareClose = () => {
         setSharePaneOpen(false);
     }
-
-	useEffect(() => {
-		getRoles(datasetId);
-		console.log('users and roles', datasetRolesList);
-
-	}, []);
-
 
 	const clickButton = () => {
 		// reset error message and close the error window
@@ -42,33 +34,32 @@ export const UserAndRoleTable = (): JSX.Element => {
 			<Table sx={{minWidth: 650}} aria-label="simple table">
 				<TableHead>
 					<TableRow>
-						<TableCell align="right">ID</TableCell>
 						<TableCell align="right">Name</TableCell>
+						<TableCell align="right">Email</TableCell>
 						<TableCell align="right">Role</TableCell>
-						<TableCell align="right">Change Role</TableCell>
+						<TableCell align="right"></TableCell>
 					</TableRow>
 				</TableHead>
 				<TableBody>
 					{
-						datasetRolesList ? datasetRolesList.user_roles.map((user_role) => (
+						datasetRolesList !== undefined && datasetRolesList.user_roles !== undefined ?
+							(datasetRolesList.user_roles.map((user_role) => (
 							<TableRow
 								key={user_role.user.id}
 								sx={{'&:last-child td, &:last-child th': {border: 0}}}
 							>
 								<TableCell
-									align="right">{user_role.user.id}</TableCell>
+									align="right">{user_role.user.first_name} {user_role.user.last_name}</TableCell>
 								<TableCell
-									align="right">{user_role.role}</TableCell>
+									align="right">{user_role.user.email}</TableCell>
 								<TableCell
 									align="right">{user_role.role}</TableCell>
 								<TableCell
 									align="right"><button value={user_role.user.id} onClick={clickButton}>click to change role</button></TableCell>
-
-							</TableRow>)) : <></>
+							</TableRow>))) : <></>
 					}
 				</TableBody>
 			</Table>
 		</TableContainer>
 	)
-
 }

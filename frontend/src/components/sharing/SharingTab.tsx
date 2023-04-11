@@ -36,7 +36,6 @@ export const SharingTab = (): JSX.Element => {
 
 	useEffect(() => {
 		getRoles(datasetId);
-		console.log('roles', datasetRolesList);
 	}, []);
 
 
