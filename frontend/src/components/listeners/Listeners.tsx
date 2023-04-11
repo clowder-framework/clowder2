@@ -71,6 +71,12 @@ export function Listeners(props: ListenerProps) {
 		else setNextDisabled(false);
 	}, [listeners]);
 
+	// search
+	useEffect(() => {
+		if (searchText !== "") handleListenerSearch();
+		else listListeners(skip, limit, selectedCategory, selectedLabel);
+	}, [searchText]);
+
 	useEffect(() => {
 		if (skip !== null && skip !== undefined) {
 			listListeners(skip, limit, null, null);
@@ -142,8 +148,8 @@ export function Listeners(props: ListenerProps) {
 							onKeyDown={(e) => {
 								if (e.key === "Enter") {
 									e.preventDefault();
+									handleListenerSearch();
 								}
-								handleListenerSearch();
 							}}
 							value={searchText}
 						/>
