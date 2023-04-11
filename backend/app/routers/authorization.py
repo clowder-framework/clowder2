@@ -350,7 +350,7 @@ async def get_dataset_users_and_roles(
             {"dataset_id": ObjectId(dataset_id)}
         ):
             current_authorization = AuthorizationOut.from_mongo(auth)
-            if len(current_authorization.group_ids) == 0:
+            if len(current_authorization.user_ids) > 0:
                 current_users = current_authorization.user_ids
                 for user in current_users:
                     current_user_role = UserAndRole(user_id=user, roleType=auth["role"])

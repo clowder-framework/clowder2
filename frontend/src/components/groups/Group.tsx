@@ -44,7 +44,7 @@ export function Group() {
 
 	return (
 		<Layout>
-			{/*Delete group modal*/}
+			{/*Modals*/}
 			<ActionModal actionOpen={deleteGroupConfirmOpen} actionTitle="Are you sure?"
 						 actionText="Do you really want to delete this group? This process cannot be undone."
 						 actionBtnName="Delete"
@@ -59,6 +59,8 @@ export function Group() {
 						 }}/>
 			<AddMemberModal open={addMemberModalOpen} handleClose={() => {setAddMemberModalOpen(false);}}
 							groupName={groupAbout.name} groupId={groupAbout.id}/>
+
+			{/*Header & menus*/}
 			<Box sx={{display: "flex", justifyContent: "space-between", alignItems: "center"}}>
 				<Box sx={{display: "flex", justifyContent: "flex-start", alignItems: "baseline"}}>
 					<Box sx={{ display: "flex", flexDirection: "column"}}>
@@ -70,7 +72,6 @@ export function Group() {
 						</Box>
 						<Typography variant="body1" paragraph>{groupAbout.description}</Typography>
 					</Box>
-
 				</Box>
 
 				{/*Buttons*/}

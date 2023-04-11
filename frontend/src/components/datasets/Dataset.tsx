@@ -29,6 +29,7 @@ import {MainBreadcrumbs} from "../navigation/BreadCrumb";
 import {Listeners} from "../listeners/Listeners";
 import AssessmentIcon from "@mui/icons-material/Assessment";
 import HistoryIcon from "@mui/icons-material/History";
+import ShareIcon from '@mui/icons-material/Share';
 import BuildIcon from "@mui/icons-material/Build";
 import {ExtractionHistoryTab} from "../listeners/ExtractionHistoryTab";
 import {SharingTab} from "../sharing/SharingTab";
@@ -199,7 +200,7 @@ export const Dataset = (): JSX.Element => {
 							 label="Extractors" {...a11yProps(3)} disabled={false}/>
 						<Tab icon={<HistoryIcon/>} iconPosition="start" sx={tab}
 							 label="Extraction History" {...a11yProps(4)} disabled={false}/>
-						<Tab icon={<HistoryIcon/>} iconPosition="start" sx={tab}
+						<Tab icon={<ShareIcon/>} iconPosition="start" sx={tab}
 							 label="Sharing" {...a11yProps(5)} disabled={false}/>
 
 					</Tabs>
