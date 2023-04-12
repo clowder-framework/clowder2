@@ -358,6 +358,7 @@ async def get_dataset_roles(
                 "email": {"$in": auth.user_ids}
             }):
                 user = UserOut.from_mongo(user_q)
+                # TODO: Why is this necessary here but not on root-level ObjectIDs?
                 user.id = str(user.id)
                 roles.user_roles.append(UserAndRole(user=user, role=auth.role))
             async for group_q in db["groups"].find({

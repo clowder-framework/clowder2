@@ -35,8 +35,7 @@ export const GroupAndRoleTable = (): JSX.Element => {
 			<Table sx={{minWidth: 650}} aria-label="simple table">
 				<TableHead>
 					<TableRow>
-						<TableCell align="right">Group Name</TableCell>
-						<TableCell align="right"></TableCell>
+						<TableCell>Group Name</TableCell>
 						<TableCell align="right">Role</TableCell>
 						<TableCell align="right">Change Role</TableCell>
 					</TableRow>
@@ -49,10 +48,7 @@ export const GroupAndRoleTable = (): JSX.Element => {
 								key={group_role.group.id}
 								sx={{'&:last-child td, &:last-child th': {border: 0}}}
 							>
-								<TableCell
-									align="right">{group_role.group.name}</TableCell>
-								<TableCell
-									align="right"></TableCell>
+								<TableCell>{group_role.group.name}</TableCell>
 								<TableCell
 									align="right">{group_role.role}</TableCell>
 								<TableCell
