@@ -10,6 +10,7 @@ import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import TableCell from "@mui/material/TableCell";
 import TableBody from "@mui/material/TableBody";
+//import GroupAndRoleTableEntry from "./GroupAndRoleTableEntry"
 
 
 export const GroupAndRoleTable = (): JSX.Element => {
@@ -18,6 +19,7 @@ export const GroupAndRoleTable = (): JSX.Element => {
 
 	const dispatch = useDispatch();
 
+	const datasetRole = useSelector((state: RootState) => state.dataset.datasetRole);
 	const datasetRolesList = useSelector((state: RootState) => state.dataset.roles);
 	const [sharePaneOpen, setSharePaneOpen] = useState(false);
 
@@ -37,13 +39,16 @@ export const GroupAndRoleTable = (): JSX.Element => {
 					<TableRow>
 						<TableCell>Group Name</TableCell>
 						<TableCell align="right">Role</TableCell>
-						<TableCell align="right">Change Role</TableCell>
+						<TableCell align="right"></TableCell>
 					</TableRow>
 				</TableHead>
 				<TableBody>
 					{
 						datasetRolesList !== undefined && datasetRolesList.group_roles  !== undefined ?
 							(datasetRolesList.group_roles.map((group_role) => (
+								//<GroupAndRoleTableEntry
+								//	group_role={group_role}
+								//	/>
 							<TableRow
 								key={group_role.group.id}
 								sx={{'&:last-child td, &:last-child th': {border: 0}}}
@@ -51,8 +56,7 @@ export const GroupAndRoleTable = (): JSX.Element => {
 								<TableCell>{group_role.group.name}</TableCell>
 								<TableCell
 									align="right">{group_role.role}</TableCell>
-								<TableCell
-									align="right"><button value={group_role.group.id} onClick={clickButton}>click to change role</button></TableCell>
+								<TableCell align="right"></TableCell>
 							</TableRow>))) : <></>
 					}
 				</TableBody>
