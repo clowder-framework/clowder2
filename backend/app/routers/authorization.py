@@ -288,7 +288,8 @@ async def remove_dataset_group_role(
                 auth_db = AuthorizationDB.from_mongo(auth_q)
                 auth_db.group_ids.remove(ObjectId(group_id))
                 for u in group.users:
-                    auth_db.user_ids.remove(u.user.email)
+                    if u.user.email in auth_db.user_ids:
+                        auth_db.user_ids.remove(u.user.email)
                 await db["authorization"].replace_one(
                     {"_id": auth_db.id}, auth_db.to_mongo()
                 )

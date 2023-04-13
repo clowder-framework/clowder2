@@ -18,6 +18,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import {theme} from "../../theme";
+import ChangeDatasetRoleModal from "../datasets/ChangeDatasetRoleModal";
 
 
 const iconStyle = {
@@ -55,9 +56,11 @@ export const UserAndRoleTable = (): JSX.Element => {
         setSharePaneOpen(false);
     }
 
-	const clickButton = () => {
+	function clickButton(currentUserId, currentUserRole) {
 		// reset error message and close the error window
-		console.log('change role now');
+		console.log(currentUserId, currentUserRole);
+		console.log('change role now for user');
+		setSharePaneOpen(true);
 	}
 
 	return (
@@ -133,6 +136,10 @@ export const UserAndRoleTable = (): JSX.Element => {
 									</AuthWrapper>
 								</TableCell>
 								<TableCell align="right"></TableCell>
+								<TableCell
+										align="right"><button value={user_role.user.id} onClick={() => clickButton(user_role.user.id, user_role.role)}>click to change role</button>
+										<ChangeDatasetRoleModal open={sharePaneOpen} handleClose={handleShareClose} datasetName={"datasetName"} currentRole={user_role.role} currentUser={user_role.user.id}/>
+									</TableCell>
 							</TableRow>))) : <></>
 					}
 				</TableBody>

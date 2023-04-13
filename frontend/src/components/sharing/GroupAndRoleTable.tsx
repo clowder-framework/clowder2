@@ -10,6 +10,8 @@ import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import TableCell from "@mui/material/TableCell";
 import TableBody from "@mui/material/TableBody";
+import ChangeGroupDatasetRoleModal from "../datasets/ChangeGroupDatasetRoleModal";
+import ChangeDatasetRoleModal from "../datasets/ChangeDatasetRoleModal";
 //import GroupAndRoleTableEntry from "./GroupAndRoleTableEntry"
 
 
@@ -27,9 +29,9 @@ export const GroupAndRoleTable = (): JSX.Element => {
         setSharePaneOpen(false);
     }
 
-	const clickButton = () => {
+	function clickButton(currentGroupId, currentRole) {
 		// reset error message and close the error window
-		console.log('change role now');
+		setSharePaneOpen(true);
 	}
 
 	return (
@@ -54,9 +56,11 @@ export const GroupAndRoleTable = (): JSX.Element => {
 								sx={{'&:last-child td, &:last-child th': {border: 0}}}
 							>
 								<TableCell>{group_role.group.name}</TableCell>
+								<TableCell align="right">{group_role.role}</TableCell>
 								<TableCell
-									align="right">{group_role.role}</TableCell>
-								<TableCell align="right"></TableCell>
+									align="right"><button value={group_role.group.id} onClick={() => clickButton(group_role.group.id, group_role.role)}>click to change role</button>
+								</TableCell>
+								<ChangeGroupDatasetRoleModal open={sharePaneOpen} handleClose={handleShareClose} datasetName={"name"} currentRole={group_role.role} currentGroupName={group_role.group.name} currentGroupId={group_role.group.id}/>
 							</TableRow>))) : <></>
 					}
 				</TableBody>
