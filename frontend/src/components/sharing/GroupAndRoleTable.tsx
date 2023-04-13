@@ -10,6 +10,8 @@ import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import TableCell from "@mui/material/TableCell";
 import TableBody from "@mui/material/TableBody";
+import ChangeGroupDatasetRoleModal from "../datasets/ChangeGroupDatasetRoleModal";
+import ChangeDatasetRoleModal from "../datasets/ChangeDatasetRoleModal";
 
 
 export const GroupAndRoleTable = (): JSX.Element => {
@@ -32,9 +34,10 @@ export const GroupAndRoleTable = (): JSX.Element => {
 	}, []);
 
 
-	const clickButton = () => {
+	function clickButton(currentGroupId, currentRole) {
 		// reset error message and close the error window
 		console.log('change role now');
+		setSharePaneOpen(true);
 	}
 
 	return (
@@ -63,7 +66,10 @@ export const GroupAndRoleTable = (): JSX.Element => {
 								<TableCell
 									align="right">{group_role.roleType}</TableCell>
 								<TableCell
-									align="right"><button value={group_role.group_id} onClick={clickButton}>click to change role</button></TableCell>
+									align="right"><button value={group_role.group_id} onClick={() => clickButton(group_role.group_id, group_role.roleType)}>click to change role</button>
+								</TableCell>
+								<ChangeGroupDatasetRoleModal open={sharePaneOpen} handleClose={handleShareClose} datasetName={"name"} currentRole={group_role.roleType} currentGroupName={group_role.group_name} currentGroupId={group_role.group_id}/>
+
 							</TableRow>))
 					}
 				</TableBody>
