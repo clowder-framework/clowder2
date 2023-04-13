@@ -288,7 +288,8 @@ async def remove_dataset_group_role(
                 auth_db = AuthorizationDB.from_mongo(auth_q)
                 auth_db.group_ids.remove(ObjectId(group_id))
                 for u in group.users:
-                    auth_db.user_ids.remove(u.user.email)
+                    if u.user.email in auth_db.user_ids:
+                        auth_db.user_ids.remove(u.user.email)
                 await db["authorization"].replace_one(
                     {"_id": auth_db.id}, auth_db.to_mongo()
                 )
@@ -350,7 +351,7 @@ async def get_dataset_users_and_roles(
             {"dataset_id": ObjectId(dataset_id)}
         ):
             current_authorization = AuthorizationOut.from_mongo(auth)
-            if len(current_authorization.group_ids) == 0:
+            if len(current_authorization.user_ids) > 0:
                 current_users = current_authorization.user_ids
                 for user in current_users:
                     current_user_role = UserAndRole(user_id=user, roleType=auth["role"])
