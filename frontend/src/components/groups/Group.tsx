@@ -31,6 +31,7 @@ export function Group() {
 	const groupDeleted = (groupId: string | undefined) => dispatch(deleteGroup(groupId));
 
 	const groupAbout = useSelector((state: RootState) => state.group.about);
+
 	const role = useSelector((state: RootState) => state.group.role);
 
 	const [addMemberModalOpen, setAddMemberModalOpen] = useState(false);
@@ -69,6 +70,7 @@ export function Group() {
 							<RoleChip role={role}/>
 						</Box>
 						<Typography variant="body1" paragraph>{groupAbout.description}</Typography>
+						<Typography variant="body1" paragraph>{groupAbout.creator} is the group creator</Typography>
 					</Box>
 
 				</Box>
