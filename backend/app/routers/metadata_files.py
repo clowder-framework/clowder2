@@ -120,8 +120,10 @@ async def add_file_metadata(
     if (file := await db["files"].find_one({"_id": ObjectId(file_id)})) is not None:
         file = FileOut(**file)
         current_file_version = file.version_num
+        # if metadata does not already specify a file version
         # change metadata_in file version to match the current file version
-        metadata_in.file_version = current_file_version
+        if metadata_in.file_version is None:
+            metadata_in.file_version = current_file_version
         # If dataset already has metadata using this definition, don't allow duplication
         definition = metadata_in.definition
         if definition is not None:
@@ -135,9 +137,11 @@ async def add_file_metadata(
             else:
                 existing_q["agent.creator.id"] = user.id
             if (existing := await db["metadata"].find_one(existing_q)) is not None:
-                raise HTTPException(
-                    409, f"Metadata for {definition} already exists on this file"
-                )
+                # Allow creating duplicate entry only if the file version is different
+                if existing["resource"]["version"] == metadata_in.file_version:
+                    raise HTTPException(
+                        409, f"Metadata for {definition} already exists on this file"
+                    )
 
         md = await _build_metadata_db_obj(db, metadata_in, file, user)
         new_metadata = await db["metadata"].insert_one(md.to_mongo())
