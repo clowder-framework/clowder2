@@ -69,13 +69,26 @@ export class UsersService {
 
     /**
      * Generate User Api Key
+     * Generate an API key that confers the user's privileges.
+     *
+     * Arguments:
+     * mins -- number of minutes before expiration (0 for no expiration)
+     * @param mins
      * @returns string Successful Response
      * @throws ApiError
      */
-    public static generateUserApiKeyApiV2UsersKeysPost(): CancelablePromise<string> {
+    public static generateUserApiKeyApiV2UsersKeysPost(
+        mins: number = 30,
+    ): CancelablePromise<string> {
         return __request({
             method: 'POST',
             path: `/api/v2/users/keys`,
+            query: {
+                'mins': mins,
+            },
+            errors: {
+                422: `Validation Error`,
+            },
         });
     }
 
