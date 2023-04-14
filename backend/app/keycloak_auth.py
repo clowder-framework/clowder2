@@ -96,9 +96,8 @@ async def get_token(
             ) is not None:
                 key = UserAPIKey.from_mongo(key_entry)
                 current_time = datetime.utcnow()
-                mins_since = int((current_time - key.created).total_seconds() / 60)
 
-                if mins_since > settings.local_auth_expiration:
+                if key.expires is not None and current_time >= key.expires:
                     # Expired key, delete it first
                     db["user_keys"].delete_one({"_id": ObjectId(key.id)})
                     raise HTTPException(
@@ -166,9 +165,8 @@ async def get_current_user(
             ) is not None:
                 key = UserAPIKey.from_mongo(key_entry)
                 current_time = datetime.utcnow()
-                mins_since = int((current_time - key.created).total_seconds() / 60)
 
-                if mins_since > settings.local_auth_expiration:
+                if key.expires is not None and current_time >= key.expires:
                     # Expired key, delete it first
                     db["user_keys"].delete_one({"_id": ObjectId(key.id)})
                     raise HTTPException(
@@ -229,9 +227,8 @@ async def get_current_username(
             ) is not None:
                 key = UserAPIKey.from_mongo(key_entry)
                 current_time = datetime.utcnow()
-                mins_since = int((current_time - key.created).total_seconds() / 60)
 
-                if mins_since > settings.local_auth_expiration:
+                if key.expires is not None and current_time >= key.expires:
                     # Expired key, delete it first
                     db["user_keys"].delete_one({"_id": ObjectId(key.id)})
                     raise HTTPException(
