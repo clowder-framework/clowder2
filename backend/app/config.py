@@ -12,7 +12,7 @@ class Settings(BaseSettings):
 
     # Unique secret for hashing API keys. Generate with `openssl rand -hex 32`
     local_auth_secret = "clowder_secret_key"
-    local_auth_expiration = 30  # number of minutes before invalidating API key
+    local_auth_expiration = 30  # default number of minutes before invalidating API key (can be individually overridden)
 
     # exposing default ports for fronted
     CORS_ORIGINS: List[AnyHttpUrl] = [
