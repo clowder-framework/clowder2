@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from "react";
-import {Box, Button} from "@mui/material";
+import {Box, Button, Grid} from "@mui/material";
 import Layout from "../Layout";
 import {RootState} from "../../types/data";
 import {useDispatch, useSelector} from "react-redux";
@@ -14,6 +14,7 @@ import AddMemberModal from "./AddMemberModal";
 import RoleChip from "../auth/RoleChip";
 import DeleteIcon from "@mui/icons-material/Delete";
 import {ActionModal} from "../dialog/ActionModal";
+import { MainBreadcrumbs } from "../navigation/BreadCrumb";
 
 
 export function Group() {
@@ -43,8 +44,30 @@ export function Group() {
 		fetchCurrentGroupRole(groupId);
 	}, []);
 
+ 	// for breadcrumb
+	const paths = [
+		{
+			"name": "Explore",
+			"url": "/",
+		},
+		{
+			"name": "Groups",
+			"url": "/groups"
+		},
+		{
+			"name": groupAbout.name,
+			"url": `/groups/${groupAbout.name}`
+		}
+	];
+
 	return (
 		<Layout>
+ 	           	{/*breadcrumb*/}
+			<Grid container>
+				<Grid item xs={10} sx={{display: "flex", alignItems: "center"}}>
+					<MainBreadcrumbs paths={paths}/>
+				</Grid>
+			</Grid>
 			{/*Delete group modal*/}
 			<ActionModal actionOpen={deleteGroupConfirmOpen} actionTitle="Are you sure?"
 						 actionText="Do you really want to delete this group? This process cannot be undone."
@@ -59,7 +82,7 @@ export function Group() {
 							 setDeleteGroupConfirmOpen(false);
 						 }}/>
 			<AddMemberModal open={addMemberModalOpen} handleClose={() => {setAddMemberModalOpen(false);}}
-							groupName={groupAbout.name} groupId={groupAbout.id}/>
+				groupName={groupAbout.name} groupId={groupAbout.id}/>
 			<Box sx={{display: "flex", justifyContent: "space-between", alignItems: "center"}}>
 				<Box sx={{display: "flex", justifyContent: "flex-start", alignItems: "baseline"}}>
 					<Box sx={{ display: "flex", flexDirection: "column"}}>
@@ -80,19 +103,19 @@ export function Group() {
 					{/*only owner or editor are allowed to edit*/}
 					<AuthWrapper currRole={role} allowedRoles={["owner", "editor"]}>
 						<Button variant="contained"
-								onClick={() => {
-									setAddMemberModalOpen(true);
-								}} endIcon={<PersonAddAlt1Icon/>}>
+							onClick={() => {
+								setAddMemberModalOpen(true);
+							}} endIcon={<PersonAddAlt1Icon/>}>
 							Add Member
 						</Button>
 					</AuthWrapper>
 					{/*only owner are allowed to delete*/}
 					<AuthWrapper currRole={role} allowedRoles={["owner"]}>
 						<Button variant="outlined"
-								onClick={() => {
-									setDeleteGroupConfirmOpen(true);
-								}} endIcon={<DeleteIcon/>}
-								sx={{marginLeft:"0.5em"}}>
+							onClick={() => {
+								setDeleteGroupConfirmOpen(true);
+							}} endIcon={<DeleteIcon/>}
+							sx={{marginLeft:"0.5em"}}>
 							Delete Group
 						</Button>
 					</AuthWrapper>
