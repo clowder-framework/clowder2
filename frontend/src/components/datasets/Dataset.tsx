@@ -29,7 +29,6 @@ import Layout from "../Layout";
 import { ActionsMenu } from "./ActionsMenu";
 import { DatasetDetails } from "./DatasetDetails";
 import { FormatListBulleted, InsertDriveFile } from "@material-ui/icons";
-import { MainBreadcrumbs } from "../navigation/BreadCrumb";
 import { Listeners } from "../listeners/Listeners";
 import AssessmentIcon from "@mui/icons-material/Assessment";
 import HistoryIcon from "@mui/icons-material/History";
@@ -203,12 +202,6 @@ export const Dataset = (): JSX.Element => {
 				handleActionBtnClick={handleErrorReport}
 				handleActionCancel={handleErrorCancel}
 			/>
-			{/*breadcrumb*/}
-			<Grid container>
-				<Grid item xs={10} sx={{ display: "flex", alignItems: "center" }}>
-					<MainBreadcrumbs paths={paths} />
-				</Grid>
-			</Grid>
 			<Grid container>
 				{/*title*/}
 				<Grid item xs={8} sx={{ display: "flex", alignItems: "center" }}>

@@ -203,10 +203,6 @@ export const File = (): JSX.Element => {
 	// for breadcrumb
 	const paths = [
 		{
-			name: "Explore",
-			url: "/",
-		},
-		{
 			name: about["name"],
 			url: `/datasets/${datasetId}`,
 		},
