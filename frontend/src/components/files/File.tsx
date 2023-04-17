@@ -29,6 +29,11 @@ import { Listeners } from "../listeners/Listeners";
 import { ExtractionHistoryTab } from "../listeners/ExtractionHistoryTab";
 import { FileActionsMenu } from "./FileActionsMenu";
 import RoleChip from "../auth/RoleChip";
+import { FormatListBulleted, InsertDriveFile } from "@material-ui/icons";
+import { TabStyle } from "../../styles/Styles";
+import BuildIcon from "@mui/icons-material/Build";
+import AssessmentIcon from "@mui/icons-material/Assessment";
+import HistoryIcon from "@mui/icons-material/History";
 
 export const File = (): JSX.Element => {
 	// path parameter
@@ -275,15 +280,41 @@ export const File = (): JSX.Element => {
 						aria-label="file tabs"
 					>
 						{/*<Tab label="Previews" {...a11yProps(0)} />*/}
-						<Tab label="Version History" {...a11yProps(0)} />
-						<Tab label="User Metadata" {...a11yProps(1)} disabled={false} />
 						<Tab
+							icon={<InsertDriveFile />}
+							iconPosition="start"
+							sx={TabStyle}
+							label="Version History"
+							{...a11yProps(0)}
+						/>
+						<Tab
+							icon={<FormatListBulleted />}
+							iconPosition="start"
+							sx={TabStyle}
+							label="User Metadata"
+							{...a11yProps(1)}
+							disabled={false}
+						/>
+						<Tab
+							icon={<AssessmentIcon />}
+							iconPosition="start"
+							sx={TabStyle}
 							label="Extracted Metadata"
 							{...a11yProps(2)}
 							disabled={false}
 						/>
-						<Tab label="Extractors" {...a11yProps(3)} disabled={false} />
 						<Tab
+							icon={<BuildIcon />}
+							iconPosition="start"
+							sx={TabStyle}
+							label="Extract"
+							{...a11yProps(3)}
+							disabled={false}
+						/>
+						<Tab
+							icon={<HistoryIcon />}
+							iconPosition="start"
+							sx={TabStyle}
 							label="Extraction History"
 							{...a11yProps(4)}
 							disabled={false}

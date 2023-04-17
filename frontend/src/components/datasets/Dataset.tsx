@@ -36,13 +36,7 @@ import BuildIcon from "@mui/icons-material/Build";
 import { ExtractionHistoryTab } from "../listeners/ExtractionHistoryTab";
 import { SharingTab } from "../sharing/SharingTab";
 import RoleChip from "../auth/RoleChip";
-
-const tab = {
-	fontStyle: "normal",
-	fontWeight: "normal",
-	fontSize: "16px",
-	textTransform: "capitalize",
-};
+import { TabStyle } from "../../styles/Styles";
 
 export const Dataset = (): JSX.Element => {
 	// path parameter
@@ -244,14 +238,14 @@ export const Dataset = (): JSX.Element => {
 						<Tab
 							icon={<InsertDriveFile />}
 							iconPosition="start"
-							sx={tab}
+							sx={TabStyle}
 							label="Files"
 							{...a11yProps(0)}
 						/>
 						<Tab
 							icon={<FormatListBulleted />}
 							iconPosition="start"
-							sx={tab}
+							sx={TabStyle}
 							label="User Metadata"
 							{...a11yProps(1)}
 							disabled={false}
@@ -259,7 +253,7 @@ export const Dataset = (): JSX.Element => {
 						<Tab
 							icon={<AssessmentIcon />}
 							iconPosition="start"
-							sx={tab}
+							sx={TabStyle}
 							label="Extracted Metadata"
 							{...a11yProps(2)}
 							disabled={false}
@@ -267,15 +261,15 @@ export const Dataset = (): JSX.Element => {
 						<Tab
 							icon={<BuildIcon />}
 							iconPosition="start"
-							sx={tab}
-							label="Extractors"
+							sx={TabStyle}
+							label="Extract"
 							{...a11yProps(3)}
 							disabled={false}
 						/>
 						<Tab
 							icon={<HistoryIcon />}
 							iconPosition="start"
-							sx={tab}
+							sx={TabStyle}
 							label="Extraction History"
 							{...a11yProps(4)}
 							disabled={false}
@@ -283,7 +277,7 @@ export const Dataset = (): JSX.Element => {
 						<Tab
 							icon={<HistoryIcon />}
 							iconPosition="start"
-							sx={tab}
+							sx={TabStyle}
 							label="Sharing"
 							{...a11yProps(5)}
 							disabled={false}
