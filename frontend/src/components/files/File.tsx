@@ -332,14 +332,17 @@ export const File = (): JSX.Element => {
 									resourceType="file"
 									resourceId={fileId}
 								/>
-								<Button
-									variant="contained"
-									onClick={() => {
-										setEnableAddMetadata(true);
-									}}
-								>
-									Add Metadata
-								</Button>
+								<Box textAlign="center">
+									<Button
+										variant="contained"
+										sx={{ m: 2 }}
+										onClick={() => {
+											setEnableAddMetadata(true);
+										}}
+									>
+										Add Metadata
+									</Button>
+								</Box>
 							</>
 						)}
 					</TabPanel>

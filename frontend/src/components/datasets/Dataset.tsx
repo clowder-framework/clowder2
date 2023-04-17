@@ -324,14 +324,17 @@ export const Dataset = (): JSX.Element => {
 									resourceType="dataset"
 									resourceId={datasetId}
 								/>
-								<Button
-									variant="contained"
-									onClick={() => {
-										setEnableAddMetadata(true);
-									}}
-								>
-									Add Metadata
-								</Button>
+								<Box textAlign="center">
+									<Button
+										variant="contained"
+										sx={{ m: 2 }}
+										onClick={() => {
+											setEnableAddMetadata(true);
+										}}
+									>
+										Add Metadata
+									</Button>
+								</Box>
 							</>
 						)}
 					</TabPanel>
