@@ -2,6 +2,7 @@ import React, {useEffect, useState} from "react";
 import {Box, Button, Grid} from "@mui/material";
 import Layout from "../Layout";
 import {RootState} from "../../types/data";
+import { ListItem } from '@mui/material';
 import {useDispatch, useSelector} from "react-redux";
 import {deleteGroup, fetchGroupAbout} from "../../actions/group";
 import {fetchGroupRole} from "../../actions/authorization";
@@ -35,6 +36,8 @@ export function Group() {
 
 	const role = useSelector((state: RootState) => state.group.role);
 
+	const groupCreatorEmail =  useSelector((state: RootState) => state.group.about.creator);
+	const groupCreatorEmailLink = "mailto:"+groupCreatorEmail;
 	const [addMemberModalOpen, setAddMemberModalOpen] = useState(false);
 	const [deleteGroupConfirmOpen, setDeleteGroupConfirmOpen] = useState(false);
 
@@ -93,7 +96,9 @@ export function Group() {
 							<RoleChip role={role}/>
 						</Box>
 						<Typography variant="body1" paragraph>{groupAbout.description}</Typography>
-						<Typography variant="body1" paragraph>{groupAbout.creator} is the group creator</Typography>
+						<Typography variant="body1" paragraph>Creator:  <ListItem>
+   							<a href={groupCreatorEmailLink} target="_top">{groupCreatorEmail}</a>
+						</ListItem></Typography>
 					</Box>
 
 				</Box>

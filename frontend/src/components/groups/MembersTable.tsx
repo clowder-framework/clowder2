@@ -31,9 +31,6 @@ export default function MembersTable(props: MembersTableProps) {
 	const [deleteMemberConfirmOpen, setDeleteMemberConfirmOpen] = useState(false);
 	const [selectMemberUsername, setSelectMemberUsername] = useState();
 
-	console.log(groupAbout, 'groupAbout');
-	console.log(groupCreatorEmail, 'groupCreator');
-
 
 
 	return (

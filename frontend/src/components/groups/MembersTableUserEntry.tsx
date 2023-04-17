@@ -62,8 +62,6 @@ export function MembersTableUserEntry(props: MembersTableUserEntryProps) {
 		setEditRoleOn(false);
 	};
 
-	console.log(member, 'member')
-
 	if (member.user.email == creatorEmail) {
 		return (
 			<TableRow
