@@ -96,7 +96,7 @@ export function Group() {
 							<RoleChip role={role}/>
 						</Box>
 						<Typography variant="body1" paragraph>{groupAbout.description}</Typography>
-						<Typography variant="body1" paragraph>Creator:  <ListItem>
+						<Typography variant="body1" paragraph><strong>Creator: </strong><ListItem>
    							<a href={groupCreatorEmailLink} target="_top">{groupCreatorEmail}</a>
 						</ListItem></Typography>
 					</Box>
