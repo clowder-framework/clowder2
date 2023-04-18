@@ -5,7 +5,6 @@ from beanie import Document
 from charset_normalizer.md import List
 from pydantic import BaseModel, EmailStr, Field
 
-from app.models.mongomodel import MongoModel
 from app.models.pyobjectid import PyObjectId
 
 
@@ -72,4 +71,5 @@ class Provenance(BaseModel):
 class AuthorizationDB(Document, AuthorizationBase, Provenance):
     """The creator of the Authorization object should also be the creator of the dataset itself."""
 
-    pass
+    class Settings:
+        name = "authorization_beanie"
