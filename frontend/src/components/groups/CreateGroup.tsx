@@ -7,14 +7,20 @@ import { FormProps } from "@rjsf/core";
 import { createGroup as createGroupAction } from "../../actions/group";
 import { ClowderRjsfTextWidget } from "../styledComponents/ClowderRjsfTextWidget";
 import { ClowderRjsfSelectWidget } from "../styledComponents/ClowderRjsfSelectWidget";
-import { groupSchema } from "../../schema/groupSchema.json";
+import groupSchema from "../../schema/groupSchema.json";
 
 const widgets = {
 	TextWidget: ClowderRjsfTextWidget,
 	SelectWidget: ClowderRjsfSelectWidget,
 };
 
-export const CreateGroup = (): JSX.Element => {
+type CreateGroupProps = {
+	setCreateGroupOpen: any;
+};
+
+export const CreateGroup = (props: CreateGroupProps): JSX.Element => {
+	const { setCreateGroupOpen } = props;
+
 	const dispatch = useDispatch();
 
 	const createGroup = (formData: FormData) =>
@@ -28,6 +34,8 @@ export const CreateGroup = (): JSX.Element => {
 				uiSchema={groupSchema["uiSchema"] as FormProps<any>["uiSchema"]}
 				onSubmit={({ formData }) => {
 					createGroup(formData);
+					// close modal
+					setCreateGroupOpen(false);
 				}}
 			>
 				<Box className="inputGroup">

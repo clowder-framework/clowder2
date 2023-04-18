@@ -111,10 +111,10 @@ export function Groups() {
 					setCreateGroupOpen(false);
 				}}
 				fullWidth={true}
-				maxWidth="lg"
+				maxWidth="md"
 				aria-labelledby="form-dialog"
 			>
-				<CreateGroup />
+				<CreateGroup setCreateGroupOpen={setCreateGroupOpen} />
 			</Dialog>
 			{/*breadcrumb*/}
 			<Grid container>

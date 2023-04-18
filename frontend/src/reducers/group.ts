@@ -25,7 +25,7 @@ const group = (state = defaultState, action: DataAction) => {
 	switch (action.type) {
 		case CREATE_GROUP:
 			return Object.assign({}, state, {
-				groups: [...state.groups, action.about],
+				groups: [...[], action.about, ...state.groups],
 			});
 		case RECEIVE_GROUPS:
 			return Object.assign({}, state, { groups: action.groups });
