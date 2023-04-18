@@ -1,10 +1,21 @@
-import React, {useEffect, useState} from "react";
-import {Box, Button, ButtonGroup, Grid, IconButton, InputBase,} from "@mui/material";
-import {RootState} from "../../types/data";
-import {useDispatch, useSelector} from "react-redux";
-import {fetchGroups, searchGroups as searchGroupsAction} from "../../actions/group";
-import {ArrowBack, ArrowForward, SearchOutlined} from "@material-ui/icons";
-import {Link} from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import {
+	Box,
+	Button,
+	ButtonGroup,
+	Dialog,
+	Grid,
+	IconButton,
+	InputBase,
+} from "@mui/material";
+import { RootState } from "../../types/data";
+import { useDispatch, useSelector } from "react-redux";
+import {
+	fetchGroups,
+	searchGroups as searchGroupsAction,
+} from "../../actions/group";
+import { ArrowBack, ArrowForward, SearchOutlined } from "@material-ui/icons";
+import { Link } from "react-router-dom";
 import Paper from "@mui/material/Paper";
 import Table from "@mui/material/Table";
 import TableHead from "@mui/material/TableHead";
@@ -13,37 +24,44 @@ import TableCell from "@mui/material/TableCell";
 import TableBody from "@mui/material/TableBody";
 import TableContainer from "@mui/material/TableContainer";
 import GroupsIcon from "@mui/icons-material/Groups";
-import {theme} from "../../theme";
+import { theme } from "../../theme";
 import Layout from "../Layout";
 import { MainBreadcrumbs } from "../navigation/BreadCrumb";
-
+import GroupAddIcon from "@mui/icons-material/GroupAdd";
+import { CreateGroup } from "./CreateGroup";
 
 export function Groups() {
 	// Redux connect equivalent
 	const dispatch = useDispatch();
-	const listGroups = (skip: number | undefined, limit: number | undefined) => dispatch(fetchGroups(skip, limit));
-	const searchGroups = (searchTerm: string, skip: number | undefined, limit: number | undefined) => dispatch(searchGroupsAction(searchTerm, skip, limit));
+	const listGroups = (skip: number | undefined, limit: number | undefined) =>
+		dispatch(fetchGroups(skip, limit));
+	const searchGroups = (
+		searchTerm: string,
+		skip: number | undefined,
+		limit: number | undefined
+	) => dispatch(searchGroupsAction(searchTerm, skip, limit));
 
 	const groups = useSelector((state: RootState) => state.group.groups);
 
 	// TODO add option to determine limit number; default show 5 groups each time
 	const [currPageNum, setCurrPageNum] = useState<number>(0);
-	const [limit,] = useState<number>(20);
+	const [limit] = useState<number>(20);
 	const [skip, setSkip] = useState<number | undefined>(0);
 	const [prevDisabled, setPrevDisabled] = useState<boolean>(true);
 	const [nextDisabled, setNextDisabled] = useState<boolean>(false);
 	const [searchTerm, setSearchTerm] = useState<string>("");
+	const [createGroupOpen, setCreateGroupOpen] = useState<boolean>(false);
 
 	// for breadcrumb
 	const paths = [
 		{
-			"name": "Explore",
-			"url": "/",
+			name: "Explore",
+			url: "/",
 		},
 		{
-			"name": "Groups",
-			"url": "/groups"
-		}
+			name: "Groups",
+			url: "/groups",
+		},
 	];
 
 	// component did mount
@@ -86,10 +104,33 @@ export function Groups() {
 
 	return (
 		<Layout>
+			{/*create new group*/}
+			<Dialog
+				open={createGroupOpen}
+				onClose={() => {
+					setCreateGroupOpen(false);
+				}}
+				fullWidth={true}
+				maxWidth="lg"
+				aria-labelledby="form-dialog"
+			>
+				<CreateGroup />
+			</Dialog>
 			{/*breadcrumb*/}
 			<Grid container>
-				<Grid item xs={10} sx={{display: "flex", alignItems: "center"}}>
-					<MainBreadcrumbs paths={paths}/>
+				<Grid item xs={8} sx={{ display: "flex", alignItems: "center" }}>
+					<MainBreadcrumbs paths={paths} />
+				</Grid>
+				<Grid item xs={4}>
+					<Button
+						variant="contained"
+						onClick={() => {
+							setCreateGroupOpen(true);
+						}}
+						endIcon={<GroupAddIcon />}
+					>
+						New Group
+					</Button>
 				</Grid>
 			</Grid>
 			<br />
@@ -102,13 +143,15 @@ export function Groups() {
 							display: "flex",
 							alignItems: "left",
 							backgroundColor: theme.palette.primary.contrastText,
-							width: "80%"
+							width: "80%",
 						}}
 					>
 						<InputBase
-							sx={{ml: 1, flex: 1}}
+							sx={{ ml: 1, flex: 1 }}
 							placeholder="keyword for group"
-							inputProps={{"aria-label": "Type in keyword to search for group"}}
+							inputProps={{
+								"aria-label": "Type in keyword to search for group",
+							}}
 							onChange={(e) => {
 								setSearchTerm(e.target.value);
 							}}
@@ -120,54 +163,81 @@ export function Groups() {
 							}}
 							value={searchTerm}
 						/>
-						<IconButton type="button" sx={{p: "10px"}} aria-label="search"
+						<IconButton
+							type="button"
+							sx={{ p: "10px" }}
+							aria-label="search"
 							onClick={() => {
 								searchGroups(searchTerm, skip, limit);
-							}}>
-							<SearchOutlined/>
+							}}
+						>
+							<SearchOutlined />
 						</IconButton>
 					</Box>
 				</Grid>
 				<Grid item xs={9}>
 					<TableContainer component={Paper}>
-						<Table sx={{minWidth: 650}} aria-label="simple table">
+						<Table sx={{ minWidth: 650 }} aria-label="simple table">
 							<TableHead>
 								<TableRow>
 									<TableCell>Group Name</TableCell>
 									<TableCell align="right">Description</TableCell>
-									<TableCell align="right"><GroupsIcon/></TableCell>
+									<TableCell align="right">
+										<GroupsIcon />
+									</TableCell>
 								</TableRow>
 							</TableHead>
 							<TableBody>
-								{
-									groups.map((group) => {
-										return (
-											<TableRow key={group.id}
-												sx={{"&:last-child td, &:last-child th": {border: 0}}}>
-												<TableCell component="th" scope="row" key={group.id}>
-													<Button component={Link} to={`/groups/${group.id}`}>
-														{group.name}
-													</Button>
-												</TableCell>
-												<TableCell component="th" scope="row" key={group.id} align="right">
-													{group.description}
-												</TableCell>
-												<TableCell component="th" scope="row" key={group.id} align="right">
-													{group.users !== undefined ? group.users.length : 0}
-												</TableCell>
-											</TableRow>
-										);
-									})
-								}
+								{groups.map((group) => {
+									return (
+										<TableRow
+											key={group.id}
+											sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
+										>
+											<TableCell component="th" scope="row" key={group.id}>
+												<Button component={Link} to={`/groups/${group.id}`}>
+													{group.name}
+												</Button>
+											</TableCell>
+											<TableCell
+												component="th"
+												scope="row"
+												key={group.id}
+												align="right"
+											>
+												{group.description}
+											</TableCell>
+											<TableCell
+												component="th"
+												scope="row"
+												key={group.id}
+												align="right"
+											>
+												{group.users !== undefined ? group.users.length : 0}
+											</TableCell>
+										</TableRow>
+									);
+								})}
 							</TableBody>
 						</Table>
-						<Box display="flex" justifyContent="center" sx={{m: 1}}>
-							<ButtonGroup variant="contained" aria-label="previous next buttons">
-								<Button aria-label="previous" onClick={previous} disabled={prevDisabled}>
-									<ArrowBack/> Prev
+						<Box display="flex" justifyContent="center" sx={{ m: 1 }}>
+							<ButtonGroup
+								variant="contained"
+								aria-label="previous next buttons"
+							>
+								<Button
+									aria-label="previous"
+									onClick={previous}
+									disabled={prevDisabled}
+								>
+									<ArrowBack /> Prev
 								</Button>
-								<Button aria-label="next" onClick={next} disabled={nextDisabled}>
-                                    Next <ArrowForward/>
+								<Button
+									aria-label="next"
+									onClick={next}
+									disabled={nextDisabled}
+								>
+									Next <ArrowForward />
 								</Button>
 							</ButtonGroup>
 						</Box>
