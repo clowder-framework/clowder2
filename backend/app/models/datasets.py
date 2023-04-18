@@ -62,4 +62,3 @@ class DatasetRoles(BaseModel):
     dataset_id: str
     user_roles: List[UserAndRole] = []
     group_roles: List[GroupAndRole] = []
-
