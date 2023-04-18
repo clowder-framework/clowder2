@@ -45,6 +45,7 @@ class UserAPIKey(MongoModel):
     key: str
     user: EmailStr
     created: datetime = Field(default_factory=datetime.utcnow)
+    expires: Optional[datetime] = None
 
 
 async def get_user_out(user_id: str, db: MongoClient) -> UserOut:

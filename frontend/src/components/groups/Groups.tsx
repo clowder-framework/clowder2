@@ -14,6 +14,8 @@ import TableBody from "@mui/material/TableBody";
 import TableContainer from "@mui/material/TableContainer";
 import GroupsIcon from "@mui/icons-material/Groups";
 import {theme} from "../../theme";
+import Layout from "../Layout";
+import { MainBreadcrumbs } from "../navigation/BreadCrumb";
 
 
 export function Groups() {
@@ -31,6 +33,18 @@ export function Groups() {
 	const [prevDisabled, setPrevDisabled] = useState<boolean>(true);
 	const [nextDisabled, setNextDisabled] = useState<boolean>(false);
 	const [searchTerm, setSearchTerm] = useState<string>("");
+
+	// for breadcrumb
+	const paths = [
+		{
+			"name": "Explore",
+			"url": "/",
+		},
+		{
+			"name": "Groups",
+			"url": "/groups"
+		}
+	];
 
 	// component did mount
 	useEffect(() => {
@@ -71,87 +85,95 @@ export function Groups() {
 	};
 
 	return (
-		<Grid container>
-			<Grid item xs={3}>
-				{/*searchbox*/}
-				<Box
-					component="form"
-					sx={{
-						p: "2px 4px",
-						display: "flex",
-						alignItems: "left",
-						backgroundColor: theme.palette.primary.contrastText,
-						width: "80%"
-					}}
-				>
-					<InputBase
-						sx={{ml: 1, flex: 1}}
-						placeholder="keyword for group"
-						inputProps={{"aria-label": "Type in keyword to search for group"}}
-						onChange={(e) => {
-							setSearchTerm(e.target.value);
+		<Layout>
+			{/*breadcrumb*/}
+			<Grid container>
+				<Grid item xs={10} sx={{display: "flex", alignItems: "center"}}>
+					<MainBreadcrumbs paths={paths}/>
+				</Grid>
+			</Grid>
+			<br />
+			<Grid container>
+				<Grid item xs={3}>
+					<Box
+						component="form"
+						sx={{
+							p: "2px 4px",
+							display: "flex",
+							alignItems: "left",
+							backgroundColor: theme.palette.primary.contrastText,
+							width: "80%"
 						}}
-						onKeyDown={(e) => {
-							if (e.key === "Enter") {
-								e.preventDefault();
-								searchGroups(searchTerm, skip, limit);
-							}
-						}}
-						value={searchTerm}
-					/>
-					<IconButton type="button" sx={{p: "10px"}} aria-label="search"
-								onClick={() => {
+					>
+						<InputBase
+							sx={{ml: 1, flex: 1}}
+							placeholder="keyword for group"
+							inputProps={{"aria-label": "Type in keyword to search for group"}}
+							onChange={(e) => {
+								setSearchTerm(e.target.value);
+							}}
+							onKeyDown={(e) => {
+								if (e.key === "Enter") {
+									e.preventDefault();
 									searchGroups(searchTerm, skip, limit);
-								}}>
-						<SearchOutlined/>
-					</IconButton>
-				</Box>
-			</Grid>
-			<Grid item xs={9}>
-				<TableContainer component={Paper}>
-					<Table sx={{minWidth: 650}} aria-label="simple table">
-						<TableHead>
-							<TableRow>
-								<TableCell>Group Name</TableCell>
-								<TableCell align="right">Description</TableCell>
-								<TableCell align="right"><GroupsIcon/></TableCell>
-							</TableRow>
-						</TableHead>
-						<TableBody>
-							{
-								groups.map((group) => {
-									return (
-										<TableRow key={group.id}
-												  sx={{"&:last-child td, &:last-child th": {border: 0}}}>
-											<TableCell component="th" scope="row" key={group.id}>
-												<Button component={Link} to={`/groups/${group.id}`}>
-													{group.name}
-												</Button>
-											</TableCell>
-											<TableCell component="th" scope="row" key={group.id} align="right">
-												{group.description}
-											</TableCell>
-											<TableCell component="th" scope="row" key={group.id} align="right">
-												{group.users !== undefined ? group.users.length : 0}
-											</TableCell>
-										</TableRow>
-									)
-								})
-							}
-						</TableBody>
-					</Table>
-					<Box display="flex" justifyContent="center" sx={{m: 1}}>
-						<ButtonGroup variant="contained" aria-label="previous next buttons">
-							<Button aria-label="previous" onClick={previous} disabled={prevDisabled}>
-								<ArrowBack/> Prev
-							</Button>
-							<Button aria-label="next" onClick={next} disabled={nextDisabled}>
-								Next <ArrowForward/>
-							</Button>
-						</ButtonGroup>
+								}
+							}}
+							value={searchTerm}
+						/>
+						<IconButton type="button" sx={{p: "10px"}} aria-label="search"
+							onClick={() => {
+								searchGroups(searchTerm, skip, limit);
+							}}>
+							<SearchOutlined/>
+						</IconButton>
 					</Box>
-				</TableContainer>
+				</Grid>
+				<Grid item xs={9}>
+					<TableContainer component={Paper}>
+						<Table sx={{minWidth: 650}} aria-label="simple table">
+							<TableHead>
+								<TableRow>
+									<TableCell>Group Name</TableCell>
+									<TableCell align="right">Description</TableCell>
+									<TableCell align="right"><GroupsIcon/></TableCell>
+								</TableRow>
+							</TableHead>
+							<TableBody>
+								{
+									groups.map((group) => {
+										return (
+											<TableRow key={group.id}
+												sx={{"&:last-child td, &:last-child th": {border: 0}}}>
+												<TableCell component="th" scope="row" key={group.id}>
+													<Button component={Link} to={`/groups/${group.id}`}>
+														{group.name}
+													</Button>
+												</TableCell>
+												<TableCell component="th" scope="row" key={group.id} align="right">
+													{group.description}
+												</TableCell>
+												<TableCell component="th" scope="row" key={group.id} align="right">
+													{group.users !== undefined ? group.users.length : 0}
+												</TableCell>
+											</TableRow>
+										);
+									})
+								}
+							</TableBody>
+						</Table>
+						<Box display="flex" justifyContent="center" sx={{m: 1}}>
+							<ButtonGroup variant="contained" aria-label="previous next buttons">
+								<Button aria-label="previous" onClick={previous} disabled={prevDisabled}>
+									<ArrowBack/> Prev
+								</Button>
+								<Button aria-label="next" onClick={next} disabled={nextDisabled}>
+                                    Next <ArrowForward/>
+								</Button>
+							</ButtonGroup>
+						</Box>
+					</TableContainer>
+				</Grid>
 			</Grid>
-		</Grid>
+		</Layout>
 	);
 }

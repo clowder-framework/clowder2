@@ -29,6 +29,7 @@ import Cookies from "universal-cookie";
 import config from "../app.config";
 import HistoryIcon from "@mui/icons-material/History";
 import { InputSearchBox } from "./search/InputSearchBox";
+import GroupIcon from "@mui/icons-material/Group";
 
 const cookies = new Cookies();
 
@@ -214,6 +215,17 @@ export default function PersistentDrawerLeft(props) {
 					</List>
 					<Divider/>
 					<List>
+						<ListItem key={"groups"} disablePadding>
+							<ListItemButton component={RouterLink} to="/groups">
+								<ListItemIcon>
+									<GroupIcon/>
+								</ListItemIcon>
+								<ListItemText primary={"Groups"}/>
+							</ListItemButton>
+						</ListItem>
+					</List>
+                    			<Divider/>
+					<List>
 						<ListItem key={"newdataset"} disablePadding>
 							<ListItemButton component={RouterLink} to="/create-dataset">
 								<ListItemIcon>
@@ -223,8 +235,8 @@ export default function PersistentDrawerLeft(props) {
 							</ListItemButton>
 						</ListItem>
 					</List>
-                    <Divider/>
-                    <List>
+                    			<Divider/>
+                    			<List>
 						<ListItem key={"newmetadata"} disablePadding>
 							<ListItemButton component={RouterLink} to="/new-metadata-definition">
 								<ListItemIcon>
@@ -234,6 +246,7 @@ export default function PersistentDrawerLeft(props) {
 							</ListItemButton>
 						</ListItem>
 					</List>
+ 			                <Divider/>
 					<List>
 						<ListItem key={"extractions"} disablePadding>
 							<ListItemButton component={RouterLink} to="/extractions">
