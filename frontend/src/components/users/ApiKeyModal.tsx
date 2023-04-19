@@ -15,17 +15,23 @@ import { RootState } from "../../types/data";
 import { ClowderButton } from "../styledComponents/ClowderButton";
 import { ClowderMetadataTextField } from "../styledComponents/ClowderMetadataTextField";
 
-export default function ApiKey() {
+type ApiKeyModalProps = {
+	apiKeyModalOpen: boolean;
+	setApiKeyModalOpen: any;
+};
+
+export const ApiKeyModal = (props: ApiKeyModalProps) => {
+	const { apiKeyModalOpen, setApiKeyModalOpen } = props;
+
 	const dispatch = useDispatch();
 	const generateApiKey = (minutes: number) =>
 		dispatch(generateApiKeyAction(minutes));
 	const apiKey = useSelector((state: RootState) => state.user.apiKey);
 
-	const [open, setOpen] = useState(false);
 	const [minutes, setMinutes] = useState(30);
 
 	const handleClose = () => {
-		setOpen(false);
+		setApiKeyModalOpen(false);
 	};
 
 	const handleGenerate = () => {
@@ -36,7 +42,7 @@ export default function ApiKey() {
 
 	return (
 		<Container>
-			<Dialog open={open} onClose={handleClose} fullWidth={true}>
+			<Dialog open={apiKeyModalOpen} onClose={handleClose} fullWidth={true}>
 				<DialogTitle>Your API Key</DialogTitle>
 				<DialogContent>
 					{apiKey ? (
@@ -78,4 +84,4 @@ export default function ApiKey() {
 			</Dialog>
 		</Container>
 	);
-}
+};
