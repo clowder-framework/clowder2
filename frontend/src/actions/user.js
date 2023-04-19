@@ -148,3 +148,14 @@ export function generateApiKey(minutes = 30) {
 			});
 	};
 }
+
+export const RESET_API_KEY = "RESET_API_KEY";
+
+export function resetApiKey() {
+	return (dispatch) => {
+		dispatch({
+			type: RESET_API_KEY,
+			receivedAt: Date.now(),
+		});
+	};
+}

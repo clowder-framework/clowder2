@@ -119,6 +119,11 @@ interface GENERATE_API_KEY {
 	apiKey: string;
 }
 
+interface RESET_API_KEY {
+	type: "RESET_API_KEY";
+	apiKey: string;
+}
+
 interface CREATE_DATASET {
 	type: "CREATE_DATASET";
 	dataset: Dataset;
@@ -346,6 +351,7 @@ export type DataAction =
 	| REGISTER_ERROR
 	| REGISTER_USER
 	| GENERATE_API_KEY
+	| RESET_API_KEY
 	| CREATE_DATASET
 	| RESET_CREATE_DATASET
 	| CREATE_FILE

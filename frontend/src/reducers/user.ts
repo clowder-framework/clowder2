@@ -3,6 +3,7 @@ import {
 	LOGIN_ERROR,
 	REGISTER_ERROR,
 	REGISTER_USER,
+	RESET_API_KEY,
 	SET_USER,
 } from "../actions/user";
 import { UserState } from "../types/data";
@@ -13,7 +14,7 @@ const defaultState: UserState = {
 	loginError: false,
 	registerSucceeded: false,
 	errorMsg: "",
-	apiKey: "e54b85cd-3e8e-4497-9a8b-4032ada7e632",
+	apiKey: "",
 };
 
 const user = (state = defaultState, action: DataAction) => {
@@ -38,6 +39,8 @@ const user = (state = defaultState, action: DataAction) => {
 			});
 		case GENERATE_API_KEY:
 			return Object.assign({}, state, { apiKey: action.apiKey });
+		case RESET_API_KEY:
+			return Object.assign({}, state, { apiKey: "" });
 		default:
 			return state;
 	}

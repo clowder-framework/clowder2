@@ -10,7 +10,10 @@ import {
 	MenuItem,
 	Select,
 } from "@mui/material";
-import { generateApiKey as generateApiKeyAction } from "../../actions/user";
+import {
+	generateApiKey as generateApiKeyAction,
+	resetApiKey as resetApiKeyAction,
+} from "../../actions/user";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../types/data";
 import { ClowderMetadataTextField } from "../styledComponents/ClowderMetadataTextField";
@@ -28,19 +31,19 @@ export const ApiKeyModal = (props: ApiKeyModalProps) => {
 	const dispatch = useDispatch();
 	const generateApiKey = (minutes: number) =>
 		dispatch(generateApiKeyAction(minutes));
+	const resetApiKey = () => dispatch(resetApiKeyAction());
 	const apiKey = useSelector((state: RootState) => state.user.apiKey);
 
 	const [minutes, setMinutes] = useState(30);
 
 	const handleClose = () => {
+		resetApiKey();
 		setApiKeyModalOpen(false);
 	};
 
 	const handleGenerate = () => {
 		generateApiKey(minutes);
 	};
-
-	const handleCopy = () => {};
 
 	const handleExpirationChange = (e) => {
 		setMinutes(e.target.value);
