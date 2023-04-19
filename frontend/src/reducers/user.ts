@@ -13,7 +13,7 @@ const defaultState: UserState = {
 	loginError: false,
 	registerSucceeded: false,
 	errorMsg: "",
-	apiKey: "",
+	apiKey: "e54b85cd-3e8e-4497-9a8b-4032ada7e632",
 };
 
 const user = (state = defaultState, action: DataAction) => {
