@@ -6,13 +6,14 @@ import {
 	DialogActions,
 	DialogContent,
 	DialogTitle,
+	FormControl,
+	InputLabel,
 	MenuItem,
 	Select,
 } from "@mui/material";
 import { generateApiKey as generateApiKeyAction } from "../../actions/user";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../types/data";
-import { ClowderButton } from "../styledComponents/ClowderButton";
 import { ClowderMetadataTextField } from "../styledComponents/ClowderMetadataTextField";
 
 type ApiKeyModalProps = {
@@ -44,43 +45,54 @@ export const ApiKeyModal = (props: ApiKeyModalProps) => {
 		<Container>
 			<Dialog open={apiKeyModalOpen} onClose={handleClose} fullWidth={true}>
 				<DialogTitle>Your API Key</DialogTitle>
-				<DialogContent>
-					{apiKey ? (
-						<>
+
+				{apiKey ? (
+					<>
+						<DialogContent>
 							<ClowderMetadataTextField disabled={true}>
 								{apiKey}
 							</ClowderMetadataTextField>
-							<ClowderButton onClick={handleGenerate}>
-								Generate API Key
-							</ClowderButton>
-						</>
-					) : (
-						<>
-							<Select
-								labelId="demo-simple-select-label"
-								id="simple-select"
-								value={minutes}
-								defaultValue={30}
-								label="Status"
-								onChange={(e) => {
-									setMinutes(e.target.value);
-								}}
-							>
-								<MenuItem value={30}>30 Minutes</MenuItem>
-								<MenuItem value={60}>60 Minutes</MenuItem>
-								<MenuItem value={1440}>1 Day</MenuItem>
-								<MenuItem value={10080}>7 Days</MenuItem>
-								<MenuItem value={0}>Never</MenuItem>
-							</Select>
-							<ClowderButton onClick={handleGenerate}>
-								Generate API Key
-							</ClowderButton>
-						</>
-					)}
-				</DialogContent>
-				<DialogActions>
-					<Button onClick={handleClose}>Close</Button>
-				</DialogActions>
+						</DialogContent>
+						<DialogActions>
+							<Button variant={"contained"} onClick={handleGenerate}>
+								Copy
+							</Button>
+							<Button onClick={handleClose}>Close</Button>
+						</DialogActions>
+					</>
+				) : (
+					<>
+						<DialogContent>
+							<FormControl fullWidth>
+								<InputLabel variant="standard" id="expiration">
+									Expire after
+								</InputLabel>
+								<Select
+									labelId="expiration"
+									id="expiration"
+									value={minutes}
+									defaultValue={30}
+									label="expiration"
+									onChange={(e) => {
+										setMinutes(e.target.value);
+									}}
+								>
+									<MenuItem value={30}>30 Minutes</MenuItem>
+									<MenuItem value={60}>1 Hour</MenuItem>
+									<MenuItem value={1440}>1 Day</MenuItem>
+									<MenuItem value={10080}>1 Week</MenuItem>
+									<MenuItem value={0}>Never</MenuItem>
+								</Select>
+							</FormControl>
+						</DialogContent>
+						<DialogActions>
+							<Button variant={"contained"} onClick={handleGenerate}>
+								Generate
+							</Button>
+							<Button onClick={handleClose}>Close</Button>
+						</DialogActions>
+					</>
+				)}
 			</Dialog>
 		</Container>
 	);
