@@ -4,6 +4,8 @@ import {
 	Button,
 	ButtonGroup,
 	Dialog,
+	DialogContent,
+	DialogTitle,
 	Grid,
 	IconButton,
 	InputBase,
@@ -114,7 +116,10 @@ export function Groups() {
 				maxWidth="md"
 				aria-labelledby="form-dialog"
 			>
-				<CreateGroup setCreateGroupOpen={setCreateGroupOpen} />
+				<DialogTitle>Create New Group</DialogTitle>
+				<DialogContent>
+					<CreateGroup setCreateGroupOpen={setCreateGroupOpen} />
+				</DialogContent>
 			</Dialog>
 			{/*breadcrumb*/}
 			<Grid container>

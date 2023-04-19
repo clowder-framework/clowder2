@@ -38,13 +38,17 @@ export const CreateGroup = (props: CreateGroupProps): JSX.Element => {
 					setCreateGroupOpen(false);
 				}}
 			>
-				<Box className="inputGroup">
-					<Button
-						variant="contained"
-						type="submit"
-						className="form-button-block"
-					>
+				<Box className="inputGroup" sx={{ float: "right" }}>
+					<Button variant="contained" type="submit">
 						Create
+					</Button>
+					<Button
+						onClick={() => {
+							setCreateGroupOpen(false);
+						}}
+						sx={{ marginLeft: "0.5em" }}
+					>
+						Cancel
 					</Button>
 				</Box>
 			</Form>
