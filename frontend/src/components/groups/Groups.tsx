@@ -47,7 +47,7 @@ export function Groups() {
 
 	// TODO add option to determine limit number; default show 5 groups each time
 	const [currPageNum, setCurrPageNum] = useState<number>(0);
-	const [limit] = useState<number>(20);
+	const [limit] = useState<number>(10);
 	const [skip, setSkip] = useState<number | undefined>(0);
 	const [prevDisabled, setPrevDisabled] = useState<boolean>(true);
 	const [nextDisabled, setNextDisabled] = useState<boolean>(false);
@@ -133,6 +133,7 @@ export function Groups() {
 							setCreateGroupOpen(true);
 						}}
 						endIcon={<GroupAddIcon />}
+						sx={{ float: "right" }}
 					>
 						New Group
 					</Button>
