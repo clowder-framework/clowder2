@@ -19,6 +19,8 @@ class DatasetStatus(AutoName):
     PUBLIC = auto()
     DEFAULT = auto()
     TRIAL = auto()
+    FROZEN = auto()
+    PUBLISHED = auto()
 
 
 class DatasetBase(BaseModel):
