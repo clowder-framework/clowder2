@@ -4,10 +4,7 @@
 import type { AuthorizationBase } from '../models/AuthorizationBase';
 import type { AuthorizationDB } from '../models/AuthorizationDB';
 import type { AuthorizationMetadata } from '../models/AuthorizationMetadata';
-import type { DatasetRoles } from '../models/DatasetRoles';
-import type { GroupAndRole } from '../models/GroupAndRole';
 import type { RoleType } from '../models/RoleType';
-import type { UserAndRole } from '../models/UserAndRole';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { request as __request } from '../core/request';
 
@@ -244,54 +241,15 @@ export class AuthorizationService {
      * Get Dataset Roles
      * Get a list of all users and groups that have assigned roles on this dataset.
      * @param datasetId
-     * @returns DatasetRoles Successful Response
+     * @returns any Successful Response
      * @throws ApiError
      */
     public static getDatasetRolesApiV2AuthorizationsDatasetsDatasetIdRolesGet(
         datasetId: string,
-    ): CancelablePromise<DatasetRoles> {
+    ): CancelablePromise<any> {
         return __request({
             method: 'GET',
             path: `/api/v2/authorizations/datasets/${datasetId}/roles`,
-            errors: {
-                422: `Validation Error`,
-            },
-        });
-    }
-
-    /**
-     * Get Dataset Users And Roles
-     * Returns a list of UserAndRole objects. These show what users have what permission on a dataset
-     * @param datasetId
-     * @returns UserAndRole Successful Response
-     * @throws ApiError
-     */
-    public static getDatasetUsersAndRolesApiV2AuthorizationsDatasetsDatasetIdUsersAndRolesGet(
-        datasetId: string,
-    ): CancelablePromise<Array<UserAndRole>> {
-        return __request({
-            method: 'GET',
-            path: `/api/v2/authorizations/datasets/${datasetId}/users_and_roles`,
-            errors: {
-                422: `Validation Error`,
-            },
-        });
-    }
-
-    /**
-     * Get Dataset Groups And Roles
-     * Returns a list of Group objects. These show what groups have what permission on a dataset  Group and
-     * role has the id, name, and roleType
-     * @param datasetId
-     * @returns GroupAndRole Successful Response
-     * @throws ApiError
-     */
-    public static getDatasetGroupsAndRolesApiV2AuthorizationsDatasetsDatasetIdGroupsAndRolesGet(
-        datasetId: string,
-    ): CancelablePromise<Array<GroupAndRole>> {
-        return __request({
-            method: 'GET',
-            path: `/api/v2/authorizations/datasets/${datasetId}/groups_and_roles`,
             errors: {
                 422: `Validation Error`,
             },
