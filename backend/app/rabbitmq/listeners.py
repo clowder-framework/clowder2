@@ -1,24 +1,25 @@
 import json
-import pika
-import string
 import random
-from fastapi import Request, HTTPException, Depends
-from pymongo import MongoClient
-from pika.adapters.blocking_connection import BlockingChannel
+import string
 
+import pika
+from fastapi import Depends
+from pika.adapters.blocking_connection import BlockingChannel
+from pymongo import MongoClient
+
+from app import dependencies
 from app.config import settings
 from app.keycloak_auth import get_token
-from app import dependencies
-from app.models.mongomodel import MongoDBRef
 from app.models.config import ConfigEntryDB, ConfigEntryOut
-from app.models.files import FileOut
 from app.models.datasets import DatasetOut
-from app.models.users import UserOut
+from app.models.files import FileOut
 from app.models.listeners import (
     EventListenerJob,
     EventListenerJobMessage,
     EventListenerDatasetJobMessage,
 )
+from app.models.mongomodel import MongoDBRef
+from app.models.users import UserOut
 
 
 async def create_reply_queue():
@@ -26,8 +27,8 @@ async def create_reply_queue():
     mongo_client = MongoClient(settings.MONGODB_URL)
     db = mongo_client[settings.MONGO_DATABASE]
 
-    credentials = pika.PlainCredentials("guest", "guest")
-    parameters = pika.ConnectionParameters("localhost", credentials=credentials)
+    credentials = pika.PlainCredentials(settings.RABBITMQ_USER, settings.RABBITMQ_PASS)
+    parameters = pika.ConnectionParameters(settings.RABBITMQ_HOST, credentials=credentials)
     connection = pika.BlockingConnection(parameters)
     channel = connection.channel()
 
@@ -55,14 +56,14 @@ async def create_reply_queue():
 
 
 async def submit_file_job(
-    file_out: FileOut,
-    queue: str,
-    routing_key: str,
-    parameters: dict,
-    user: UserOut,
-    db: MongoClient,
-    rabbitmq_client: BlockingChannel,
-    token: str,
+        file_out: FileOut,
+        queue: str,
+        routing_key: str,
+        parameters: dict,
+        user: UserOut,
+        db: MongoClient,
+        rabbitmq_client: BlockingChannel,
+        token: str,
 ):
     # TODO check if extractor is registered
 
@@ -108,14 +109,14 @@ async def submit_file_job(
 
 
 async def submit_dataset_job(
-    dataset_out: DatasetOut,
-    queue: str,
-    routing_key: str,
-    parameters: dict,
-    user: UserOut,
-    token: str = Depends(get_token),
-    db: MongoClient = Depends(dependencies.get_db),
-    rabbitmq_client: BlockingChannel = Depends(dependencies.get_rabbitmq),
+        dataset_out: DatasetOut,
+        queue: str,
+        routing_key: str,
+        parameters: dict,
+        user: UserOut,
+        token: str = Depends(get_token),
+        db: MongoClient = Depends(dependencies.get_db),
+        rabbitmq_client: BlockingChannel = Depends(dependencies.get_rabbitmq),
 ):
     # TODO check if extractor is registered
 

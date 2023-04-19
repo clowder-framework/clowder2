@@ -11,7 +11,7 @@ x-minio-common: &minio-common
     MINIO_ROOT_USER: minioadmin
     MINIO_ROOT_PASSWORD: minioadmin
   healthcheck:
-    test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+    test: [ "CMD", "curl", "-f", "http://localhost:9000/minio/health/live" ]
     interval: 30s
     timeout: 20s
     retries: 3
@@ -67,35 +67,35 @@ services:
       - minio4
 
   postgres:
-      image: postgres
-      volumes:
-        - postgres_data:/var/lib/postgresql/data
-      environment:
-        POSTGRES_DB: keycloak_dev
-        POSTGRES_USER: keycloak
-        POSTGRES_PASSWORD: password
+    image: postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: keycloak_dev
+      POSTGRES_USER: keycloak
+      POSTGRES_PASSWORD: password
 
   keycloak:
-      image: quay.io/keycloak/keycloak:19.0
-      volumes:
-        - ./scripts/keycloak/clowder-realm-dev.json:/opt/keycloak/data/import/realm.json:ro
-        - ./scripts/keycloak/clowder-theme/:/opt/keycloak/themes/clowder-theme/:ro
-      command:
-        - start-dev
-        - --http-relative-path /keycloak
-        - --import-realm
-      environment:
-        KEYCLOAK_ADMIN: admin
-        KEYCLOAK_ADMIN_PASSWORD: admin
-        KC_DB: postgres
-        KC_DB_URL_HOST: postgres
-        KC_DB_URL_DATABASE: keycloak_dev
-        KC_DB_USERNAME: keycloak
-        KC_DB_PASSWORD: password
-      ports:
-        - 8080:8080
-      depends_on:
-        - postgres
+    image: quay.io/keycloak/keycloak:19.0
+    volumes:
+      - ./scripts/keycloak/clowder-realm-dev.json:/opt/keycloak/data/import/realm.json:ro
+      - ./scripts/keycloak/clowder-theme/:/opt/keycloak/themes/clowder-theme/:ro
+    command:
+      - start-dev
+      - --http-relative-path /keycloak
+      - --import-realm
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+      KC_DB: postgres
+      KC_DB_URL_HOST: postgres
+      KC_DB_URL_DATABASE: keycloak_dev
+      KC_DB_USERNAME: keycloak
+      KC_DB_PASSWORD: password
+    ports:
+      - 8080:8080
+    depends_on:
+      - postgres
 
   maildev:
     image: maildev/maildev
@@ -120,7 +120,7 @@ services:
 
   # ELasticsearch
   elasticsearch:
-#    platform: amd64
+    #    platform: amd64
     image: docker.elastic.co/elasticsearch/elasticsearch:8.3.3
     ports:
       - 9200:9200
@@ -139,7 +139,7 @@ services:
       - logger.level=debug
     volumes:
       - elasticsearch:/usr/share/elasticsearch/data
-    
+
   extractors-heartbeat:
     image: "clowder/clowder2-heartbeat"
     build:
@@ -173,6 +173,18 @@ services:
     depends_on:
       - mongo
       - rabbitmq
+
+  filedigest:
+    image: clowder/extractors-digest:latest
+    restart: unless-stopped
+    networks:
+      - clowder
+    depends_on:
+      - rabbitmq
+      - clowder
+    environment:
+      - RABBITMQ_URI=${RABBITMQ_URI:-amqp://guest:guest@rabbitmq/%2F}
+      - CLOWDER_VERSION=2
 
 networks:
   clowder2:
