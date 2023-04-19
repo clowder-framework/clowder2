@@ -15,7 +15,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../types/data";
 import { ClowderMetadataTextField } from "../styledComponents/ClowderMetadataTextField";
 import { ClowderFootnote } from "../styledComponents/ClowderFootnote";
-// import { CopyToClipboard } from "react-copy-to-clipboard";
+import { CopyToClipboard } from "react-copy-to-clipboard";
 
 type ApiKeyModalProps = {
 	apiKeyModalOpen: boolean;
@@ -63,9 +63,9 @@ export const ApiKeyModal = (props: ApiKeyModalProps) => {
 						/>
 					</DialogContent>
 					<DialogActions>
-						{/*<CopyToClipboard text={}>*/}
-						<Button variant={"contained"}>Copy</Button>
-						{/*</CopyToClipboard>*/}
+						<CopyToClipboard text={apiKey}>
+							<Button variant={"contained"}>Copy</Button>
+						</CopyToClipboard>
 						<Button onClick={handleClose}>Close</Button>
 					</DialogActions>
 				</>
