@@ -111,9 +111,9 @@ export const Dataset = (): JSX.Element => {
 		dismissError();
 		setErrorOpen(false);
 	};
-	const handleErrorReport = (reason: string) => {
+	const handleErrorReport = () => {
 		window.open(
-			`${config.GHIssueBaseURL}+${reason}&body=${encodeURIComponent(stack)}`
+			`${config.GHIssueBaseURL}+${encodeURIComponent(reason)}&body=${encodeURIComponent(stack)}`
 		);
 	};
 

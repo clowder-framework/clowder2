@@ -163,8 +163,10 @@ export const ExtractionHistory = (): JSX.Element => {
 		setErrorOpen(false);
 	}
 	const handleErrorReport = () => {
-		window.open(`${config.GHIssueBaseURL}+${reason}&body=${encodeURIComponent(stack)}`);
-	}
+		window.open(
+			`${config.GHIssueBaseURL}+${encodeURIComponent(reason)}&body=${encodeURIComponent(stack)}`
+		);
+	};
 
 	return (
 		<Layout>
