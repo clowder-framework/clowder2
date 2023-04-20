@@ -262,6 +262,7 @@ async def get_datasets(
                     "$or": [
                         {"author.email": user_id},
                         {"auth": {"$elemMatch": {"user_ids": user_id}}},
+                        {"status": "PUBLIC"}
                     ]
                 }
             )

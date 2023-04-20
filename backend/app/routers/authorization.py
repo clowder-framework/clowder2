@@ -91,6 +91,7 @@ async def get_dataset_role(
         authorization = AuthorizationDB.from_mongo(authorization_q)
         return authorization
     else:
+        print('we check if the dataset is public')
         raise HTTPException(
             status_code=404, detail=f"No authorization found for dataset: {dataset_id}"
         )
