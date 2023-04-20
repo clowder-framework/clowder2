@@ -225,12 +225,18 @@ function catchErrors(options: ApiRequestOptions, result: ApiResult): void {
         ...options.errors,
     }
 
-    const error = errors[result.status];
-    if (error) {
-        throw new ApiError(result, error);
-    }
-
     if (!result.ok) {
+        console.log(result)
+        const message = result.body.detail
+        const error = errors[result.status];
+
+        if (message) {
+            throw new ApiError(result, message);
+        
+        } else if (error) {
+            throw new ApiError(result, error);
+        }
+        
         throw new ApiError(result, 'Generic Error');
     }
 }
