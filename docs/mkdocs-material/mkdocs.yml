@@ -1,0 +1,6 @@
+site_name: Clowder v2
+theme:
+  name: material
+  palette:
+    primary: deep orange
+repo_url: https://github.com/clowder-framework/clowder2
