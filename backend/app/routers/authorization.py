@@ -350,7 +350,7 @@ async def remove_dataset_user_role(
         raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
 
 
-@router.get("/datasets/{dataset_id}/roles")  # , response_model=DatasetRoles
+@router.get("/datasets/{dataset_id}/roles", response_model=DatasetRoles)
 async def get_dataset_roles(
     dataset_id: str,
     db: MongoClient = Depends(dependencies.get_db),
