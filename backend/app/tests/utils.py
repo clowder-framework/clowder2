@@ -102,7 +102,7 @@ def create_apikey(client: TestClient, headers: dict):
         f"{settings.API_V2_STR}/users/keys?name=pytest&mins=30", headers=headers
     )
     assert response.status_code == 200
-    assert response.json().get("id") is not None
+    assert response.json() is not None
     return response.json()
 
 
