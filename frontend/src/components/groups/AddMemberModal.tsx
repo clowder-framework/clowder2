@@ -55,44 +55,44 @@ export default function AddMemberModal(props: AddMemberModalProps) {
 		handleClose();
 	};
 	return (
-		<Dialog open={open} onClose={handleClose} fullWidth={true}>
-			<DialogTitle>
-				Add People to{" "}
-				<GroupsIcon
-					sx={{
-						verticalAlign: "middle",
-						fontSize: "1.5em",
-						margin: "auto 5px",
-					}}
-				/>
-				{groupName}
-			</DialogTitle>
-			<DialogContent>
-				<Autocomplete
-					id="email-auto-complete"
-					freeSolo
-					autoHighlight
-					inputValue={email}
-					onInputChange={(_, value) => {
-						setEmail(value);
-					}}
-					options={options}
-					renderInput={(params) => (
-						<TextField
-							{...params}
-							sx={{ mt: 1, width: "100%" }}
-							required
-							label="Enter email address"
-						/>
-					)}
-				/>
-			</DialogContent>
-			<DialogActions>
-				<Button variant="contained" onClick={handleAddButtonClick}>
-					Add
-				</Button>
-				<Button onClick={handleClose}>Cancel</Button>
-			</DialogActions>
-		</Dialog>
+		<Container>
+			<Dialog open={open} onClose={handleClose} fullWidth={true}>
+				<DialogTitle>
+					Add People to{" "}
+					<GroupsIcon
+						sx={{
+							verticalAlign: "middle",
+							fontSize: "1.5em",
+							margin: "auto 5px",
+						}}
+					/>
+					{groupName}
+				</DialogTitle>
+				<DialogContent>
+					<Autocomplete
+						id="email-auto-complete"
+						freeSolo
+						autoHighlight
+						inputValue={email}
+						onInputChange={(_, value) => {
+							setEmail(value);
+						}}
+						options={options}
+						renderInput={(params) => (
+							<TextField
+								{...params}
+								sx={{ mt: 1, width: "100%" }}
+								required
+								label="Enter email address"
+							/>
+						)}
+					/>
+				</DialogContent>
+				<DialogActions>
+					<Button onClick={handleAddButtonClick}>Add</Button>
+					<Button onClick={handleClose}>Cancel</Button>
+				</DialogActions>
+			</Dialog>
+		</Container>
 	);
 }
