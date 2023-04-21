@@ -1,33 +1,66 @@
 import React, { useEffect, useState } from "react";
-import { Alert, Autocomplete, Button, Collapse, Container, Dialog, DialogActions, DialogContent, DialogTitle, Divider, FormControl, IconButton, InputLabel, MenuItem, Select, TextField, Typography } from "@mui/material";
-import {useParams} from "react-router-dom";
+import {
+	Alert,
+	Autocomplete,
+	Button,
+	Collapse,
+	Container,
+	Dialog,
+	DialogActions,
+	DialogContent,
+	DialogTitle,
+	Divider,
+	FormControl,
+	IconButton,
+	InputLabel,
+	MenuItem,
+	Select,
+	TextField,
+	Typography,
+} from "@mui/material";
+import { useParams } from "react-router-dom";
 import { setDatasetUserRole } from "../../actions/dataset";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import CloseIcon from "@mui/icons-material/Close";
-
+import { fetchAllUsers } from "../../actions/user";
+import { UserOut } from "../../openapi/v2";
+import { RootState } from "../../types/data";
 
 type ShareDatasetModalProps = {
-    open: boolean,
-    handleClose: any,
-    datasetName: string
-}
+	open: boolean;
+	handleClose: any;
+	datasetName: string;
+};
 
 export default function ShareDatasetModal(props: ShareDatasetModalProps) {
 	const dispatch = useDispatch();
 
+	const listAllUsers = (skip: number, limit: number) =>
+		dispatch(fetchAllUsers(skip, limit));
+
 	const { open, handleClose, datasetName } = props;
-	const {datasetId} = useParams<{ datasetId?: string }>();
+	const { datasetId } = useParams<{ datasetId?: string }>();
 	const [email, setEmail] = useState("");
 	const [role, setRole] = useState("viewer");
 	const [showSuccessAlert, setShowSuccessAlert] = useState(false);
+	const [options, setOptions] = useState([]);
+	const users = useSelector((state: RootState) => state.group.users);
 
-	const setUserRole = (datasetId: string, username: string, role: string) => dispatch(setDatasetUserRole(datasetId, username, role));
+	const setUserRole = (datasetId: string, username: string, role: string) =>
+		dispatch(setDatasetUserRole(datasetId, username, role));
 
-	// component did mount
 	useEffect(() => {
-		// listUsers();
+		listAllUsers(0, 21);
 	}, []);
-    
+
+	useEffect(() => {
+		setOptions(
+			users.reduce((list: string[], user: UserOut) => {
+				return [...list, user.email];
+			}, [])
+		);
+	}, [users]);
+
 	const onShare = () => {
 		setUserRole(datasetId, email, role);
 		setEmail("");
@@ -37,20 +70,27 @@ export default function ShareDatasetModal(props: ShareDatasetModalProps) {
 
 	return (
 		<Container>
-			<Dialog open={open} onClose={handleClose} fullWidth={true} maxWidth="md"
+			<Dialog
+				open={open}
+				onClose={handleClose}
+				fullWidth={true}
+				maxWidth="md"
 				sx={{
 					".MuiPaper-root": {
 						padding: "2em",
 					},
-				}}>
+				}}
+			>
 				<DialogTitle>Share dataset &apos;{datasetName}&apos;</DialogTitle>
 				<Divider />
 				<DialogContent>
 					<Typography>Invite people to collaborate</Typography>
-					<div style={{
-						display: "flex",
-						alignItems: "center"
-					}}>
+					<div
+						style={{
+							display: "flex",
+							alignItems: "center",
+						}}
+					>
 						<Autocomplete
 							id="email-auto-complete"
 							freeSolo
@@ -59,9 +99,22 @@ export default function ShareDatasetModal(props: ShareDatasetModalProps) {
 							onInputChange={(event, value) => {
 								setEmail(value);
 							}}
-							options={["abc@xyz.com"]}
-							renderInput={(params) => <TextField {...params} sx={{ mt: 1, mr: 1, "alignItems": "right", "width": "450px" }} required label="Enter email address" />}
-						/> as
+							options={options}
+							renderInput={(params) => (
+								<TextField
+									{...params}
+									sx={{
+										mt: 1,
+										mr: 1,
+										alignItems: "right",
+										width: "450px",
+									}}
+									required
+									label="Enter email address"
+								/>
+							)}
+						/>{" "}
+						as
 						<FormControl variant="outlined" sx={{ m: 1, minWidth: 120 }}>
 							<InputLabel id="demo-simple-select-label">Status</InputLabel>
 							<Select
@@ -81,9 +134,16 @@ export default function ShareDatasetModal(props: ShareDatasetModalProps) {
 							</Select>
 						</FormControl>
 					</div>
-					<Button variant="contained" sx={{ marginTop: 1 }} onClick={onShare} disabled={(email.length > 0) ? false : true}>Share</Button>
+					<Button
+						variant="contained"
+						sx={{ marginTop: 1 }}
+						onClick={onShare}
+						disabled={email.length > 0 ? false : true}
+					>
+						Share
+					</Button>
 					<Collapse in={showSuccessAlert}>
-						<br/>
+						<br />
 						<Alert
 							severity="success"
 							action={
@@ -100,7 +160,7 @@ export default function ShareDatasetModal(props: ShareDatasetModalProps) {
 							}
 							sx={{ mb: 2 }}
 						>
-                        Successfully added role!
+							Successfully added role!
 						</Alert>
 					</Collapse>
 				</DialogContent>
