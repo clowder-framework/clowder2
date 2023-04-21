@@ -64,8 +64,8 @@ class EventListenerDB(EventListenerBase, MongoModel):
     """EventListeners have a name, version, author, description, and optionally properties where extractor_info will be saved."""
 
     creator: Optional[UserOut] = None
-    created: datetime = Field(default_factory=datetime.utcnow)
-    modified: datetime = Field(default_factory=datetime.utcnow)
+    created: datetime = Field(default_factory=datetime.now)
+    modified: datetime = Field(default_factory=datetime.now)
     properties: Optional[ExtractorInfo] = None
 
 
@@ -104,7 +104,7 @@ class EventListenerJob(MongoModel):
     resource_ref: MongoDBRef
     creator: UserOut
     parameters: Optional[dict] = None
-    created: datetime = Field(default_factory=datetime.utcnow)
+    created: datetime = Field(default_factory=datetime.now)
     started: Optional[datetime] = None
     updated: Optional[datetime] = None
     finished: Optional[datetime] = None

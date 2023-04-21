@@ -1,15 +1,15 @@
+import re
 from datetime import datetime
-from http.client import HTTPException
+from fastapi import HTTPException, Depends, APIRouter
 from bson.objectid import ObjectId
-from fastapi.params import Depends
-from fastapi.routing import APIRouter
 from pymongo import DESCENDING
 from pymongo.mongo_client import MongoClient
-from typing import List
+from typing import List, Optional
 
 from app import dependencies
 from app.deps.authorization_deps import AuthorizationDB, GroupAuthorization
 from app.keycloak_auth import get_current_user, get_user
+from app.models.authorization import RoleType
 from app.models.groups import GroupOut, GroupIn, GroupDB, GroupBase, Member
 from app.models.users import UserOut
 
@@ -68,6 +68,48 @@ async def get_groups(
     return groups
 
 
+@router.get("/search/{search_term}", response_model=List[GroupOut])
+async def search_group(
+    search_term: str,
+    user_id=Depends(get_user),
+    db: MongoClient = Depends(dependencies.get_db),
+    skip: int = 0,
+    limit: int = 10,
+):
+    """Search all groups in the db based on text.
+
+    Arguments:
+        text -- any text matching name or description
+        skip -- number of initial records to skip (i.e. for pagination)
+        limit -- restrict number of records to be returned (i.e. for pagination)
+    """
+
+    # Check all connection and abort if any one of them is not available
+    if db is None:
+        raise HTTPException(status_code=503, detail="Service not available")
+        return
+
+    groups = []
+    query_regx = re.compile(search_term, re.IGNORECASE)
+    for doc in (
+        # user has to be the creator or member first; then apply search
+        await db["groups"]
+        .find(
+            {
+                "$and": [
+                    {"$or": [{"creator": user_id}, {"users.user.email": user_id}]},
+                    {"$or": [{"name": query_regx}, {"description": query_regx}]},
+                ]
+            }
+        )
+        .skip(skip)
+        .limit(limit)
+        .to_list(length=limit)
+    ):
+        groups.append(GroupOut.from_mongo(doc))
+    return groups
+
+
 @router.get("/{group_id}", response_model=GroupOut)
 async def get_group(
     group_id: str,
@@ -113,45 +155,30 @@ async def edit_group(
     raise HTTPException(status_code=404, detail=f"Group {group_id} not found")
 
 
-@router.delete("/{group_id}")
+@router.delete("/{group_id}", response_model=GroupOut)
 async def delete_group(
     group_id: str,
     db: MongoClient = Depends(dependencies.get_db),
     allow: bool = Depends(GroupAuthorization("owner")),
 ):
-    if (group := await db["groups"].find_one({"_id": ObjectId(group_id)})) is not None:
+    if (
+        group_q := await db["groups"].find_one({"_id": ObjectId(group_id)})
+    ) is not None:
         await db["groups"].delete_one({"_id": ObjectId(group_id)})
-        return {"deleted": group_id}
+        return GroupDB.from_mongo(group_q)
     else:
         raise HTTPException(status_code=404, detail=f"Dataset {group_id} not found")
 
 
-@router.get("/search/{search_term}")
-async def search_group(
-    search_term: str, db: MongoClient = Depends(dependencies.get_db)
-):
-    # Check all connection and abort if any one of them is not available
-    if db is None:
-        raise HTTPException(status_code=503, detail="Service not available")
-        return
-
-    groups = []
-    pattern = ".*" + search_term + ".*"
-    async for f in db["groups"].find({"name": {"$regex": pattern, "$options": "i"}}):
-        groups.append(GroupDB.from_mongo(f))
-
-    return groups
-
-
-@router.post("/{group_id}/add/{username}")
+@router.post("/{group_id}/add/{username}", response_model=GroupOut)
 async def add_member(
     group_id: str,
     username: str,
+    role: Optional[str] = None,
     db: MongoClient = Depends(dependencies.get_db),
     allow: bool = Depends(GroupAuthorization("editor")),
 ):
     """Add a new user to a group."""
-
     if (user_q := await db["users"].find_one({"email": username})) is not None:
         new_member = Member(user=UserOut.from_mongo(user_q))
         if (
@@ -165,6 +192,12 @@ async def add_member(
                     break
             if not found_already:
                 # If user is already in the group, skip directly to returning the group
+                # else add role and attach this member
+
+                if role is not None and role == RoleType.EDITOR:
+                    new_member.editor = True
+                else:
+                    new_member.editor = False
                 group.users.append(new_member)
                 await db["groups"].replace_one(
                     {"_id": ObjectId(group_id)}, group.to_mongo()
@@ -213,3 +246,43 @@ async def remove_member(
 
         return group
     raise HTTPException(status_code=404, detail=f"Group {group_id} not found")
+
+
+@router.put("/{group_id}/update/{username}", response_model=GroupOut)
+async def update_member(
+    group_id: str,
+    username: str,
+    role: str,
+    db: MongoClient = Depends(dependencies.get_db),
+    allow: bool = Depends(GroupAuthorization("editor")),
+):
+    """Update user role."""
+    if (user_q := await db["users"].find_one({"email": username})) is not None:
+        if (
+            group_q := await db["groups"].find_one({"_id": ObjectId(group_id)})
+        ) is not None:
+            group = GroupDB.from_mongo(group_q)
+            found_user = None
+            found_user_index = -1
+            for i, u in enumerate(group.users):
+                if u.user.email == username:
+                    found_user = u.user
+                    found_user_index = i
+                    break
+            if found_user and found_user_index >= 0:
+                if role == RoleType.EDITOR:
+                    updated_member = Member(user=found_user, editor=True)
+                else:
+                    updated_member = Member(user=found_user, editor=False)
+                group.users[found_user_index] = updated_member
+                await db["groups"].replace_one(
+                    {"_id": ObjectId(group_id)}, group.to_mongo()
+                )
+            else:
+                raise HTTPException(
+                    status_code=404,
+                    detail=f"User {username} does not belong to this group!",
+                )
+            return group
+        raise HTTPException(status_code=404, detail=f"Group {group_id} not found")
+    raise HTTPException(status_code=404, detail=f"User {username} not found")

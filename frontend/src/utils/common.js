@@ -1,17 +1,21 @@
 import Cookies from "universal-cookie";
-import {V2} from "../openapi";
-import {format} from "date-fns";
+import { V2 } from "../openapi";
+import { format } from "date-fns";
+import jwt_decode from "jwt-decode";
 
 const cookies = new Cookies();
-
 
 //NOTE: This is only checking if a cookie is present, but not validating the cookie.
 export const isAuthorized = () => {
 	const authorization = cookies.get("Authorization") || "Bearer none";
 	V2.OpenAPI.TOKEN = authorization.replace("Bearer ", "");
-	return process.env.DEPLOY_ENV === "local" ||
-			(authorization !== undefined && authorization !== "" && authorization !==
-					null && authorization !== "Bearer none");
+	return (
+		process.env.DEPLOY_ENV === "local" ||
+		(authorization !== undefined &&
+			authorization !== "" &&
+			authorization !== null &&
+			authorization !== "Bearer none")
+	);
 };
 
 // construct header
@@ -20,7 +24,7 @@ export function getHeader() {
 	const authorization = cookies.get("Authorization") || "Bearer none";
 	V2.OpenAPI.TOKEN = authorization.replace("Bearer ", "");
 	if (authorization) {
-		return new Headers({ "Authorization": authorization});
+		return new Headers({ Authorization: authorization });
 	} else {
 		return {};
 	}
@@ -57,24 +61,39 @@ export function dataURItoFile(dataURI) {
 	for (let i = 0; i < binary.length; i++) {
 		array.push(binary.charCodeAt(i));
 	}
-	const blob = new Blob([new Uint8Array(array)], {type: mime});
-	return new File([blob], filename, {type: mime, lastModified: new Date()});
+	const blob = new Blob([new Uint8Array(array)], { type: mime });
+	return new File([blob], filename, { type: mime, lastModified: new Date() });
 }
 
 export function parseDate(dateString) {
-	if (dateString){
+	if (dateString) {
 		try {
 			return format(new Date(dateString), "yyyy-MM-dd HH:mm:ss");
-		}
-		catch (error) {
+		} catch (error) {
 			console.error(error);
 			return error["message"];
 		}
-	}
-	else{
+	} else {
 		return "Invalid time value!";
 	}
 }
+
+// Capitalize first letter of a string and lower case the rest
+export const capitalize = (s) =>
+	s.charAt(0).toUpperCase() + s.slice(1).toLowerCase();
+
+// Get Current Email from JWT
+export const getCurrEmail = () => {
+	const authorization = cookies.get("Authorization") || "Bearer none";
+	if (
+		authorization &&
+		authorization !== "" &&
+		authorization.split(" ").length > 0
+	) {
+		let userInfo = jwt_decode(authorization.split(" ")[1]);
+		return userInfo["email"];
+	}
+};
 
 export function renameId(obj) {
 

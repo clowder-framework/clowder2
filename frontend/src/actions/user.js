@@ -1,4 +1,4 @@
-import {V2} from "../openapi";
+import { V2 } from "../openapi";
 import Cookies from "universal-cookie";
 import config from "../app.config";
 
@@ -6,35 +6,52 @@ const cookies = new Cookies();
 
 export const userActions = {
 	login,
-	logout
+	logout,
 };
 
 // TODO need to clean up this file with all the mixed login/logout methods
 
-export async function loginHelper(email, password, first_name=null, last_name=null, register = false) {
-	const data = {"email": email, "password": password};
+export async function loginHelper(
+	email,
+	password,
+	first_name = null,
+	last_name = null,
+	register = false
+) {
+	const data = { email: email, password: password };
 	if (register) {
-		return V2.LoginService.saveUserApiV2UsersPost({...data, "first_name":first_name, "last_name": last_name})
-			.then(user => {return user;})
-			.catch(reason => {
-			// logout();
-				return {"errorMsg": `Failed to register a user! ${reason}`};
+		return V2.LoginService.saveUserApiV2UsersPost({
+			...data,
+			first_name: first_name,
+			last_name: last_name,
+		})
+			.then((user) => {
+				return user;
+			})
+			.catch((reason) => {
+				// logout();
+				return { errorMsg: `Failed to register a user! ${reason}` };
 			});
 	} else {
 		return V2.LoginService.loginApiV2LoginPost(data)
-			.then(user => {return user;})
-			.catch(reason => {
-			// logout();
-				return {"errorMsg": `Failed to login a user! ${reason}`};
+			.then((user) => {
+				return user;
+			})
+			.catch((reason) => {
+				// logout();
+				return { errorMsg: `Failed to login a user! ${reason}` };
 			});
 	}
 }
 
-export async function logoutHelper(){
-	const headers = {"Authorization": cookies.get("Authorization")};
+export async function logoutHelper() {
+	const headers = { Authorization: cookies.get("Authorization") };
 	V2.OpenAPI.TOKEN = undefined;
 	cookies.remove("Authorization", { path: "/" });
-	return await fetch(config.KeycloakLogout, { method: "GET", headers: headers});
+	return await fetch(config.KeycloakLogout, {
+		method: "GET",
+		headers: headers,
+	});
 }
 
 export const LOGIN_ERROR = "LOGIN_ERROR";
@@ -59,7 +76,10 @@ export function login(email, password) {
 		} else {
 			return dispatch({
 				type: LOGIN_ERROR,
-				errorMsg: json["errorMsg"] !== undefined && json["errorMsg"] !== "" ? json["errorMsg"]: "Email/Password incorrect!"
+				errorMsg:
+					json["errorMsg"] !== undefined && json["errorMsg"] !== ""
+						? json["errorMsg"]
+						: "Email/Password incorrect!",
 			});
 		}
 	};
@@ -75,7 +95,10 @@ export function register(email, password, firstname, lastname) {
 		} else {
 			return dispatch({
 				type: REGISTER_ERROR,
-				errorMsg: json["errorMsg"] !== undefined && json["errorMsg"] !== "" ? json["errorMsg"]: "Fail to register!"
+				errorMsg:
+					json["errorMsg"] !== undefined && json["errorMsg"] !== ""
+						? json["errorMsg"]
+						: "Fail to register!",
 			});
 		}
 	};
@@ -86,6 +109,53 @@ export function logout() {
 		logoutHelper();
 		return dispatch({
 			type: LOGOUT,
+		});
+	};
+}
+
+export const LIST_USERS = "LIST_USERS";
+
+export function fetchAllUsers(skip = 0, limit = 101) {
+	return (dispatch) => {
+		return V2.UsersService.getUsersApiV2UsersGet(skip, limit)
+			.then((json) => {
+				dispatch({
+					type: LIST_USERS,
+					users: json,
+					receivedAt: Date.now(),
+				});
+			})
+			.catch((reason) => {
+				dispatch(fetchAllUsers((skip = 0), (limit = 21)));
+			});
+	};
+}
+
+export const GENERATE_API_KEY = "GENERATE_API_KEY";
+
+export function generateApiKey(minutes = 30) {
+	return (dispatch) => {
+		return V2.UsersService.generateUserApiKeyApiV2UsersKeysPost(minutes)
+			.then((json) => {
+				dispatch({
+					type: GENERATE_API_KEY,
+					apiKey: json,
+					receivedAt: Date.now(),
+				});
+			})
+			.catch((reason) => {
+				dispatch(generateApiKey((minutes = 30)));
+			});
+	};
+}
+
+export const RESET_API_KEY = "RESET_API_KEY";
+
+export function resetApiKey() {
+	return (dispatch) => {
+		dispatch({
+			type: RESET_API_KEY,
+			receivedAt: Date.now(),
 		});
 	};
 }
