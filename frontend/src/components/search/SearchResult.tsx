@@ -8,6 +8,19 @@ import {theme} from "../../theme";
 
 import parse from "html-react-parser";
 
+// Function to parse the elastic search parameter
+// If it contains HTML tags like <mark>, it removes them
+// If there is no HTML tags, it returns the original string
+function parseString(str: string) {
+	try {
+		const parsedHtml = parse(str);
+		return parsedHtml;
+
+	} catch (error) {
+		return str;
+	}
+}
+
 export function SearchResult(props) {
 
 	const {data} = props;
@@ -24,28 +37,28 @@ export function SearchResult(props) {
 							item._index === "dataset" ?
 								<MuiLink component={Link} to={`/datasets/${item._id}`}
 										 sx={{fontWeight: "bold", fontSize: "18px"}}>
-									{parse(item.name)}
+									{parseString(item.name)}
 								</MuiLink>
 								:
 								<MuiLink component={Link} to={`/files/${item._id}?dataset=${item.dataset_id}`}
 										 sx={{fontWeight: "bold", fontSize: "18px"}}>
-									{parse(item.name)}
+									{parseString(item.name)}
 								</MuiLink>
 						}
 						<Typography variant="body2" color={theme.palette.secondary.light}>
 							{
 								item._index === "dataset" ?
-									`Created by ${parse(item.author)} at ${parseDate(item.created)}`
+									`Created by ${parseString(item.author)} at ${parseDate(item.created)}`
 									:
-									`Created by ${parse(item.creator)} at ${parseDate(item.created)}`
+									`Created by ${parseString(item.creator)} at ${parseDate(item.created)}`
 							}
 						</Typography>
 						<Typography variant="body2" color={theme.palette.secondary.dark}>
-							{item._index === "dataset" ? parse(item.description) : `${item.content_type.content_type} | ${item.bytes} bytes`}
+							{item._index === "dataset" ? parseString(item.description) : `${item.content_type} | ${item.bytes} bytes`}
 						</Typography>
 					</Box>
 				</ListItem>
-				))}
+			))}
 		</List>
 	);
 
