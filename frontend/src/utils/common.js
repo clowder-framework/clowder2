@@ -1,6 +1,7 @@
 import Cookies from "universal-cookie";
 import { V2 } from "../openapi";
 import { format } from "date-fns";
+import jwt_decode from "jwt-decode";
 
 const cookies = new Cookies();
 
@@ -80,6 +81,19 @@ export function parseDate(dateString) {
 // Capitalize first letter of a string and lower case the rest
 export const capitalize = (s) =>
 	s.charAt(0).toUpperCase() + s.slice(1).toLowerCase();
+
+// Get Current Email from JWT
+export const getCurrEmail = () => {
+	const authorization = cookies.get("Authorization") || "Bearer none";
+	if (
+		authorization &&
+		authorization !== "" &&
+		authorization.split(" ").length > 0
+	) {
+		let userInfo = jwt_decode(authorization.split(" ")[1]);
+		return userInfo["email"];
+	}
+};
 
 // get current username
 // export function getCurrUsername(){
