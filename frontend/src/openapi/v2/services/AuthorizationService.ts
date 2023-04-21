@@ -4,6 +4,7 @@
 import type { AuthorizationBase } from '../models/AuthorizationBase';
 import type { AuthorizationDB } from '../models/AuthorizationDB';
 import type { AuthorizationMetadata } from '../models/AuthorizationMetadata';
+import type { DatasetRoles } from '../models/DatasetRoles';
 import type { RoleType } from '../models/RoleType';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { request as __request } from '../core/request';
@@ -241,12 +242,12 @@ export class AuthorizationService {
      * Get Dataset Roles
      * Get a list of all users and groups that have assigned roles on this dataset.
      * @param datasetId
-     * @returns any Successful Response
+     * @returns DatasetRoles Successful Response
      * @throws ApiError
      */
     public static getDatasetRolesApiV2AuthorizationsDatasetsDatasetIdRolesGet(
         datasetId: string,
-    ): CancelablePromise<any> {
+    ): CancelablePromise<DatasetRoles> {
         return __request({
             method: 'GET',
             path: `/api/v2/authorizations/datasets/${datasetId}/roles`,
