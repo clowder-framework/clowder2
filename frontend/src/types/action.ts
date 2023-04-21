@@ -135,6 +135,16 @@ interface RESET_CREATE_FILE {
 	file: FileSummary;
 }
 
+interface GENERATE_API_KEY {
+	type: "GENERATE_API_KEY";
+	apiKey: string;
+}
+
+interface RESET_API_KEY {
+	type: "RESET_API_KEY";
+	apiKey: string;
+}
+
 interface FAILED {
 	stack: "string";
 	type: "FAILED";
@@ -345,6 +355,8 @@ export type DataAction =
 	| LOGOUT
 	| REGISTER_ERROR
 	| REGISTER_USER
+	| GENERATE_API_KEY
+	| RESET_API_KEY
 	| CREATE_DATASET
 	| RESET_CREATE_DATASET
 	| CREATE_FILE
