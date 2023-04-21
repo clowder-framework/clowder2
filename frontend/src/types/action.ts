@@ -18,7 +18,7 @@ import {
 	UserOut,
 } from "../openapi/v2";
 import { LIST_USERS } from "../actions/user";
-import { DELETE_GROUP } from "../actions/group";
+import { CREATE_GROUP, DELETE_GROUP } from "../actions/group";
 
 interface RECEIVE_FILES_IN_DATASET {
 	type: "RECEIVE_FILES_IN_DATASET";
@@ -114,16 +114,6 @@ interface REGISTER_USER {
 	type: "REGISTER_USER";
 }
 
-interface GENERATE_API_KEY {
-	type: "GENERATE_API_KEY";
-	apiKey: string;
-}
-
-interface RESET_API_KEY {
-	type: "RESET_API_KEY";
-	apiKey: string;
-}
-
 interface CREATE_DATASET {
 	type: "CREATE_DATASET";
 	dataset: Dataset;
@@ -143,6 +133,16 @@ interface RESET_CREATE_FILE {
 	type: "RESET_CREATE_FILE";
 	newFile: File;
 	file: FileSummary;
+}
+
+interface GENERATE_API_KEY {
+	type: "GENERATE_API_KEY";
+	apiKey: string;
+}
+
+interface RESET_API_KEY {
+	type: "RESET_API_KEY";
+	apiKey: string;
 }
 
 interface FAILED {
@@ -286,6 +286,11 @@ interface FETCH_JOB_UPDATES {
 	currJobUpdates: [];
 }
 
+interface CREATE_GROUP {
+	type: "CREATE_GROUP";
+	about: Group;
+}
+
 interface RECEIVE_GROUPS {
 	type: "RECEIVE_GROUPS";
 	groups: Group[];
@@ -383,6 +388,7 @@ export type DataAction =
 	| SUBMIT_DATASET_EXTRACTION
 	| FETCH_JOB_SUMMARY
 	| FETCH_JOB_UPDATES
+	| CREATE_GROUP
 	| RECEIVE_GROUPS
 	| SEARCH_GROUPS
 	| DELETE_GROUP
