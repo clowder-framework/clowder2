@@ -10,38 +10,12 @@ from pymongo import MongoClient, DESCENDING
 from app import dependencies
 from app.config import settings
 from app.keycloak_auth import get_current_username
-from app.models.users import UserOut, UserAPIKey
+from app.models.users import UserOut, UserAPIKey, UserAPIKeyOut
 
 router = APIRouter()
 
 
-@router.get("", response_model=List[UserOut])
-async def get_users(
-        db: MongoClient = Depends(dependencies.get_db), skip: int = 0, limit: int = 2
-):
-    users = []
-    for doc in await db["users"].find().skip(skip).limit(limit).to_list(length=limit):
-        users.append(UserOut(**doc))
-    return users
-
-
-@router.get("/{user_id}", response_model=UserOut)
-async def get_user(user_id: str, db: MongoClient = Depends(dependencies.get_db)):
-    if (user := await db["users"].find_one({"_id": ObjectId(user_id)})) is not None:
-        return UserOut.from_mongo(user)
-    raise HTTPException(status_code=404, detail=f"User {user_id} not found")
-
-
-@router.get("/username/{username}", response_model=UserOut)
-async def get_user_by_name(
-        username: str, db: MongoClient = Depends(dependencies.get_db)
-):
-    if (user := await db["users"].find_one({"email": username})) is not None:
-        return UserOut.from_mongo(user)
-    raise HTTPException(status_code=404, detail=f"User {username} not found")
-
-
-@router.get("/keys", response_model=List[UserAPIKey])
+@router.get("/keys", response_model=List[UserAPIKeyOut])
 async def generate_user_api_key(
         db: MongoClient = Depends(dependencies.get_db),
         current_user=Depends(get_current_username),
@@ -62,7 +36,7 @@ async def generate_user_api_key(
                     .limit(limit)
                     .to_list(length=limit)
     ):
-        apikeys.append(UserAPIKey.from_mongo(doc))
+        apikeys.append(UserAPIKeyOut.from_mongo(doc))
 
     return apikeys
 
@@ -92,7 +66,7 @@ async def generate_user_api_key(
     return hashed_key
 
 
-@router.delete("/keys/{key_id}", response_model=str)
+@router.delete("/keys/{key_id}", response_model=UserAPIKeyOut)
 async def generate_user_api_key(
         key_id: str,
         db: MongoClient = Depends(dependencies.get_db),
@@ -105,7 +79,7 @@ async def generate_user_api_key(
     """
     apikey_doc = (await db["user_keys"].find_one({"_id": ObjectId(key_id)}))
     if apikey_doc is not None:
-        apikey = UserAPIKey.from_mongo(apikey_doc)
+        apikey = UserAPIKeyOut.from_mongo(apikey_doc)
 
         # Only allow user to delete their own key
         if apikey.user == current_user:
@@ -115,3 +89,29 @@ async def generate_user_api_key(
             raise HTTPException(status_code=403, detail=f"API key {key_id} not allowed to be deleted.")
     else:
         raise HTTPException(status_code=404, detail=f"API key {key_id} not found.")
+
+
+@router.get("", response_model=List[UserOut])
+async def get_users(
+        db: MongoClient = Depends(dependencies.get_db), skip: int = 0, limit: int = 2
+):
+    users = []
+    for doc in await db["users"].find().skip(skip).limit(limit).to_list(length=limit):
+        users.append(UserOut(**doc))
+    return users
+
+
+@router.get("/{user_id}", response_model=UserOut)
+async def get_user(user_id: str, db: MongoClient = Depends(dependencies.get_db)):
+    if (user := await db["users"].find_one({"_id": ObjectId(user_id)})) is not None:
+        return UserOut.from_mongo(user)
+    raise HTTPException(status_code=404, detail=f"User {user_id} not found")
+
+
+@router.get("/username/{username}", response_model=UserOut)
+async def get_user_by_name(
+        username: str, db: MongoClient = Depends(dependencies.get_db)
+):
+    if (user := await db["users"].find_one({"email": username})) is not None:
+        return UserOut.from_mongo(user)
+    raise HTTPException(status_code=404, detail=f"User {username} not found")
