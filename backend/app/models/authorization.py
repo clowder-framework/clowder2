@@ -5,6 +5,7 @@ from beanie import Document
 from charset_normalizer.md import List
 from pydantic import BaseModel, EmailStr, Field
 
+from app.models.mongomodel import MongoModel
 from app.models.pyobjectid import PyObjectId
 
 

@@ -25,6 +25,6 @@ export type DatasetOut = {
     created?: string;
     modified?: string;
     status?: string;
-    views?: number;
+    user_views?: number;
     downloads?: number;
 }
