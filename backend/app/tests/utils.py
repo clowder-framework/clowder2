@@ -99,10 +99,7 @@ def get_user_token(client: TestClient, headers: dict, email: str = user_alt["ema
 def create_apikey(client: TestClient, headers: dict):
     """create user generated API key"""
     response = client.post(
-        f"{settings.API_V2_STR}/users/keys", json={
-            "name": "pytest API key",
-            "mins": 30  # 30 minutes
-        }, headers=headers
+        f"{settings.API_V2_STR}/users/keys?name=pytest&mins=30", headers=headers
     )
     assert response.status_code == 200
     assert response.json().get("id") is not None

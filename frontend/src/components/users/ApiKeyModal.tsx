@@ -19,6 +19,8 @@ import { RootState } from "../../types/data";
 import { ClowderMetadataTextField } from "../styledComponents/ClowderMetadataTextField";
 import { ClowderFootnote } from "../styledComponents/ClowderFootnote";
 import { CopyToClipboard } from "react-copy-to-clipboard";
+import { ClowderInputLabel } from "../styledComponents/ClowderInputLabel";
+import { ClowderInput } from "../styledComponents/ClowderInput";
 
 type ApiKeyModalProps = {
 	apiKeyModalOpen: boolean;
@@ -29,11 +31,12 @@ export const ApiKeyModal = (props: ApiKeyModalProps) => {
 	const { apiKeyModalOpen, setApiKeyModalOpen } = props;
 
 	const dispatch = useDispatch();
-	const generateApiKey = (minutes: number) =>
-		dispatch(generateApiKeyAction(minutes));
+	const generateApiKey = (name: string, minutes: number) =>
+		dispatch(generateApiKeyAction(name, minutes));
 	const resetApiKey = () => dispatch(resetApiKeyAction());
 	const apiKey = useSelector((state: RootState) => state.user.apiKey);
 
+	const [name, setName] = useState("");
 	const [minutes, setMinutes] = useState(30);
 
 	const handleClose = () => {
@@ -42,7 +45,7 @@ export const ApiKeyModal = (props: ApiKeyModalProps) => {
 	};
 
 	const handleGenerate = () => {
-		generateApiKey(minutes);
+		generateApiKey(name, minutes);
 	};
 
 	const handleExpirationChange = (e) => {
@@ -77,6 +80,15 @@ export const ApiKeyModal = (props: ApiKeyModalProps) => {
 					<DialogContent>
 						<ClowderFootnote>Your API key will expire</ClowderFootnote>
 						<FormControl fullWidth sx={{ marginTop: "1em" }}>
+							<ClowderInputLabel>Name</ClowderInputLabel>
+							<ClowderInput
+								required={true}
+								id="name"
+								onChange={(event) => {
+									setName(event.target.value);
+								}}
+								defaultValue={name}
+							/>
 							<InputLabel id="demo-simple-select-label">After</InputLabel>
 							<Select
 								labelId="expiration"
