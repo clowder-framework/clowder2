@@ -126,16 +126,16 @@ export function fetchAllUsers(skip = 0, limit = 101) {
 				});
 			})
 			.catch((reason) => {
-				dispatch(fetchAllUsers((skip = 0), (limit = 21)));
+				dispatch(fetchAllUsers(skip, limit));
 			});
 	};
 }
 
 export const GENERATE_API_KEY = "GENERATE_API_KEY";
 
-export function generateApiKey(minutes = 30) {
+export function generateApiKey(name = "", minutes = 30) {
 	return (dispatch) => {
-		return V2.UsersService.generateUserApiKeyApiV2UsersKeysPost(minutes)
+		return V2.UsersService.generateUserApiKeyApiV2UsersKeysPost(name, minutes)
 			.then((json) => {
 				dispatch({
 					type: GENERATE_API_KEY,
@@ -144,7 +144,7 @@ export function generateApiKey(minutes = 30) {
 				});
 			})
 			.catch((reason) => {
-				dispatch(generateApiKey((minutes = 30)));
+				dispatch(generateApiKey(name, minutes));
 			});
 	};
 }
