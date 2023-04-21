@@ -5,7 +5,7 @@ from typing import List
 from bson import ObjectId
 from fastapi import APIRouter, HTTPException, Depends
 from itsdangerous.url_safe import URLSafeSerializer
-from pymongo import MongoClient
+from pymongo import MongoClient, DESCENDING
 
 from app import dependencies
 from app.config import settings
@@ -51,15 +51,25 @@ async def generate_user_api_key(
     """List all api keys that user has created
 
     Arguments:
-        skip -- number of page to skip
-        limit -- number to limit per page
+        skip: number of page to skip
+        limit: number to limit per page
     """
-    # TODO
-    return []
+    apikeys = []
+    for doc in (
+            await db["user_keys"].find({"user": current_user})
+                    .sort([("created", DESCENDING)])
+                    .skip(skip)
+                    .limit(limit)
+                    .to_list(length=limit)
+    ):
+        apikeys.append(UserAPIKey.from_mongo(doc))
+
+    return apikeys
 
 
 @router.post("/keys", response_model=str)
 async def generate_user_api_key(
+        name: str,
         mins: int = settings.local_auth_expiration,
         db: MongoClient = Depends(dependencies.get_db),
         current_user=Depends(get_current_username),
@@ -67,13 +77,14 @@ async def generate_user_api_key(
     """Generate an API key that confers the user's privileges.
 
     Arguments:
-        mins -- number of minutes before expiration (0 for no expiration)
+        name: name of the api key
+        mins: number of minutes before expiration (0 for no expiration)
     """
     serializer = URLSafeSerializer(settings.local_auth_secret, salt="api_key")
     unique_key = token_urlsafe(16)
     hashed_key = serializer.dumps({"user": current_user, "key": unique_key})
 
-    user_key = UserAPIKey(user=current_user, key=unique_key)
+    user_key = UserAPIKey(user=current_user, key=unique_key, name=name)
     if mins > 0:
         user_key.expires = user_key.created + timedelta(minutes=mins)
     db["user_keys"].insert_one(user_key.to_mongo())
@@ -90,8 +101,17 @@ async def generate_user_api_key(
     """Delete API keys given ID
 
     Arguments:
-        id -- number of minutes before expiration (0 for no expiration)
+        key_id: id of the apikey
     """
-    # TODO
+    apikey_doc = (await db["user_keys"].find_one({"_id": ObjectId(key_id)}))
+    if apikey_doc is not None:
+        apikey = UserAPIKey.from_mongo(apikey_doc)
 
-    return
+        # Only allow user to delete their own key
+        if apikey.user == current_user:
+            await db["user_keys"].delete_one({"_id": ObjectId(key_id)})
+            return {"deleted": apikey}
+        else:
+            raise HTTPException(status_code=403, detail=f"API key {key_id} not allowed to be deleted.")
+    else:
+        raise HTTPException(status_code=404, detail=f"API key {key_id} not found.")
