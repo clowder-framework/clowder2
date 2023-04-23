@@ -1,19 +1,19 @@
 import React from "react";
-import {Box, Button, IconButton, Typography} from "@mui/material";
-import MoreVertIcon from "@mui/icons-material/MoreVert";
-import {ExtractorInfo} from "../../openapi/v2";
-import {theme} from "../../theme";
+import { Box, Button, IconButton, Typography } from "@mui/material";
+import { ExtractorInfo } from "../../openapi/v2";
+import { theme } from "../../theme";
+import PlayCircleIcon from "@mui/icons-material/PlayCircle";
 
 type ListenerCardProps = {
-	id: string,
-	fileId: string,
-	datasetId: string,
-	extractorInfo: ExtractorInfo,
-	extractorName: string,
-	extractorDescription: string,
-	setOpenSubmitExtraction: any,
-	setSelectedExtractor: any
-}
+	id: string;
+	fileId: string;
+	datasetId: string;
+	extractorInfo: ExtractorInfo;
+	extractorName: string;
+	extractorDescription: string;
+	setOpenSubmitExtraction: any;
+	setSelectedExtractor: any;
+};
 
 export default function ListenerItem(props: ListenerCardProps) {
 	const {
@@ -24,34 +24,45 @@ export default function ListenerItem(props: ListenerCardProps) {
 		extractorName,
 		extractorDescription,
 		setOpenSubmitExtraction,
-		setSelectedExtractor
+		setSelectedExtractor,
 	} = props;
-
 
 	return (
 		<Box key={id} sx={{ display: "flex" }}>
-			<Box sx={{flexGrow: 1}}>
+			<Box sx={{ flexGrow: 1 }}>
 				<Button
-					disabled={(fileId !== undefined || datasetId !== undefined)
-						?
-						false
-						:
-						true}
+					disabled={
+						fileId !== undefined || datasetId !== undefined ? false : true
+					}
 					onClick={() => {
 						setOpenSubmitExtraction(true);
 						setSelectedExtractor(extractorInfo);
-
 					}}
 				>
 					{extractorName}
 				</Button>
-				<Typography sx={{padding: "0.5em", color:theme.palette.secondary.main, fontSize:"14px"}}>
-					{extractorDescription}</Typography>
+				<Typography
+					sx={{
+						padding: "0.5em",
+						color: theme.palette.secondary.main,
+						fontSize: "14px",
+					}}
+				>
+					{extractorDescription}
+				</Typography>
 			</Box>
-			<IconButton component="label">
-			<MoreVertIcon/>
-		</IconButton>
+			<IconButton
+				color="primary"
+				disabled={
+					fileId !== undefined || datasetId !== undefined ? false : true
+				}
+				onClick={() => {
+					setOpenSubmitExtraction(true);
+					setSelectedExtractor(extractorInfo);
+				}}
+			>
+				<PlayCircleIcon />
+			</IconButton>
 		</Box>
 	);
-
 }
