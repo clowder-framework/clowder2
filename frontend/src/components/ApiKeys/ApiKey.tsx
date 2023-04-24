@@ -1,19 +1,8 @@
 import React, { useEffect, useState } from "react";
-import {
-	Box,
-	Button,
-	ButtonGroup,
-	Grid,
-	IconButton,
-	InputBase,
-} from "@mui/material";
+import { Box, Button, ButtonGroup, Grid, IconButton } from "@mui/material";
 import { RootState } from "../../types/data";
 import { useDispatch, useSelector } from "react-redux";
-import {
-	fetchGroups,
-	searchGroups as searchGroupsAction,
-} from "../../actions/group";
-import { ArrowBack, ArrowForward, SearchOutlined } from "@material-ui/icons";
+import { ArrowBack, ArrowForward } from "@material-ui/icons";
 import { Link } from "react-router-dom";
 import Paper from "@mui/material/Paper";
 import Table from "@mui/material/Table";
@@ -22,23 +11,21 @@ import TableRow from "@mui/material/TableRow";
 import TableCell from "@mui/material/TableCell";
 import TableBody from "@mui/material/TableBody";
 import TableContainer from "@mui/material/TableContainer";
-import GroupsIcon from "@mui/icons-material/Groups";
-import { theme } from "../../theme";
 import Layout from "../Layout";
 import { MainBreadcrumbs } from "../navigation/BreadCrumb";
+
+import { listApiKeys as listApiKeysAction } from "../../actions/user";
+import DeleteIcon from "@mui/icons-material/Delete";
+import { theme } from "../../theme";
 
 export function ApiKeys() {
 	// Redux connect equivalent
 	const dispatch = useDispatch();
-	const listGroups = (skip: number | undefined, limit: number | undefined) =>
-		dispatch(fetchGroups(skip, limit));
-	const searchGroups = (
-		searchTerm: string,
-		skip: number | undefined,
-		limit: number | undefined
-	) => dispatch(searchGroupsAction(searchTerm, skip, limit));
+	const listApiKeys = (skip: number | undefined, limit: number | undefined) =>
+		dispatch(listApiKeysAction(skip, limit));
+	// const deleteApiKey = (keyId: string) => dispatch(deleteApiKeyAction(keyId));
 
-	const groups = useSelector((state: RootState) => state.group.groups);
+	const apikeys = useSelector((state: RootState) => state.user.apikeys);
 
 	// TODO add option to determine limit number; default show 5 groups each time
 	const [currPageNum, setCurrPageNum] = useState<number>(0);
@@ -46,7 +33,8 @@ export function ApiKeys() {
 	const [skip, setSkip] = useState<number | undefined>(0);
 	const [prevDisabled, setPrevDisabled] = useState<boolean>(true);
 	const [nextDisabled, setNextDisabled] = useState<boolean>(false);
-	const [searchTerm, setSearchTerm] = useState<string>("");
+	const [selectedApikey, setSelectApikey] = useState("");
+	const [deleteApikeyConfirmOpen, setDeleteApikeyConfirmOpen] = useState(false);
 
 	// for breadcrumb
 	const paths = [
@@ -54,36 +42,31 @@ export function ApiKeys() {
 			name: "Explore",
 			url: "/",
 		},
-		{
-			name: "Groups",
-			url: "/groups",
-		},
 	];
 
 	// component did mount
 	useEffect(() => {
-		listGroups(skip, limit);
+		listApiKeys(skip, limit);
 	}, []);
 
 	useEffect(() => {
 		// disable flipping if reaches the last page
-		if (groups.length < limit) setNextDisabled(true);
+		if (apikeys.length < limit) setNextDisabled(true);
 		else setNextDisabled(false);
-	}, [groups]);
-
-	// search
-	useEffect(() => {
-		if (searchTerm !== "") searchGroups(searchTerm, skip, limit);
-		else listGroups(skip, limit);
-	}, [searchTerm]);
+	}, [apikeys]);
 
 	useEffect(() => {
 		if (skip !== null && skip !== undefined) {
-			listGroups(skip, limit);
+			listApiKeys(skip, limit);
 			if (skip === 0) setPrevDisabled(true);
 			else setPrevDisabled(false);
 		}
 	}, [skip]);
+
+	// delete
+	// const handleDelete = () => {
+	// 	deleteApiKey();
+	// };
 
 	const previous = () => {
 		if (currPageNum - 1 >= 0) {
@@ -92,7 +75,7 @@ export function ApiKeys() {
 		}
 	};
 	const next = () => {
-		if (groups.length === limit) {
+		if (apikeys.length === limit) {
 			setSkip((currPageNum + 1) * limit);
 			setCurrPageNum(currPageNum + 1);
 		}
@@ -108,114 +91,82 @@ export function ApiKeys() {
 			</Grid>
 			<br />
 			<Grid container>
-				<Grid item xs={3}>
-					<Box
-						component="form"
-						sx={{
-							p: "2px 4px",
-							display: "flex",
-							alignItems: "left",
-							backgroundColor: theme.palette.primary.contrastText,
-							width: "80%",
-						}}
-					>
-						<InputBase
-							sx={{ ml: 1, flex: 1 }}
-							placeholder="keyword for group"
-							inputProps={{
-								"aria-label": "Type in keyword to search for group",
-							}}
-							onChange={(e) => {
-								setSearchTerm(e.target.value);
-							}}
-							onKeyDown={(e) => {
-								if (e.key === "Enter") {
-									e.preventDefault();
-									searchGroups(searchTerm, skip, limit);
-								}
-							}}
-							value={searchTerm}
-						/>
-						<IconButton
-							type="button"
-							sx={{ p: "10px" }}
-							aria-label="search"
-							onClick={() => {
-								searchGroups(searchTerm, skip, limit);
-							}}
-						>
-							<SearchOutlined />
-						</IconButton>
-					</Box>
-				</Grid>
-				<Grid item xs={9}>
-					<TableContainer component={Paper}>
-						<Table sx={{ minWidth: 650 }} aria-label="simple table">
-							<TableHead>
-								<TableRow>
-									<TableCell>Group Name</TableCell>
-									<TableCell align="right">Description</TableCell>
-									<TableCell align="right">
-										<GroupsIcon />
-									</TableCell>
-								</TableRow>
-							</TableHead>
-							<TableBody>
-								{groups.map((group) => {
-									return (
-										<TableRow
-											key={group.id}
-											sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
+				<TableContainer component={Paper}>
+					<Table sx={{ minWidth: 650 }} aria-label="simple table">
+						<TableHead>
+							<TableRow>
+								<TableCell>API Key Name</TableCell>
+								<TableCell align="right">Created at</TableCell>
+								<TableCell align="right">Expired at</TableCell>
+								<TableCell align="right"></TableCell>
+							</TableRow>
+						</TableHead>
+						<TableBody>
+							{apikeys.map((apikey) => {
+								return (
+									<TableRow
+										key={apikey.id}
+										sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
+									>
+										<TableCell component="th" scope="row" key={apikey.id}>
+											<Button component={Link} to={`/groups/${apikey.id}`}>
+												{apikey.name}
+											</Button>
+										</TableCell>
+										<TableCell
+											component="th"
+											scope="row"
+											key={apikey.id}
+											align="right"
 										>
-											<TableCell component="th" scope="row" key={group.id}>
-												<Button component={Link} to={`/groups/${group.id}`}>
-													{group.name}
-												</Button>
-											</TableCell>
-											<TableCell
-												component="th"
-												scope="row"
-												key={group.id}
-												align="right"
+											{apikey.created}
+										</TableCell>
+										<TableCell
+											component="th"
+											scope="row"
+											key={apikey.id}
+											align="right"
+										>
+											{apikey.expires}
+										</TableCell>
+										<TableCell align="right">
+											<IconButton
+												type="button"
+												sx={{ p: "10px" }}
+												aria-label="delete"
+												onClick={() => {
+													setSelectApikey(apikey.id);
+													setDeleteApikeyConfirmOpen(true);
+												}}
 											>
-												{group.description}
-											</TableCell>
-											<TableCell
-												component="th"
-												scope="row"
-												key={group.id}
-												align="right"
-											>
-												{group.users !== undefined ? group.users.length : 0}
-											</TableCell>
-										</TableRow>
-									);
-								})}
-							</TableBody>
-						</Table>
-						<Box display="flex" justifyContent="center" sx={{ m: 1 }}>
-							<ButtonGroup
-								variant="contained"
-								aria-label="previous next buttons"
+												<DeleteIcon
+													sx={{
+														verticalAlign: "middle",
+														color: theme.palette.primary.main,
+													}}
+												/>
+											</IconButton>
+										</TableCell>
+									</TableRow>
+								);
+							})}
+						</TableBody>
+					</Table>
+					<Box display="flex" justifyContent="center" sx={{ m: 1 }}>
+						<ButtonGroup variant="contained" aria-label="previous next buttons">
+							<Button
+								aria-label="previous"
+								onClick={previous}
+								disabled={prevDisabled}
 							>
-								<Button
-									aria-label="previous"
-									onClick={previous}
-									disabled={prevDisabled}
-								>
-									<ArrowBack /> Prev
-								</Button>
-								<Button
-									aria-label="next"
-									onClick={next}
-									disabled={nextDisabled}
-								>
-									Next <ArrowForward />
-								</Button>
-							</ButtonGroup>
-						</Box>
-					</TableContainer>
-				</Grid>
+								<ArrowBack /> Prev
+							</Button>
+							<Button aria-label="next" onClick={next} disabled={nextDisabled}>
+								Next <ArrowForward />
+							</Button>
+						</ButtonGroup>
+					</Box>
+				</TableContainer>
 			</Grid>
 		</Layout>
 	);
