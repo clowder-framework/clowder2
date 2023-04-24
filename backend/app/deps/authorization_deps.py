@@ -9,7 +9,7 @@ from app.models.authorization import RoleType, AuthorizationDB
 from app.models.files import FileOut
 from app.models.groups import GroupOut
 from app.models.metadata import MetadataOut
-from app.models.datasets import DatasetOut
+from app.models.datasets import DatasetOut, DatasetStatus
 
 
 async def get_role(
@@ -166,11 +166,23 @@ class Authorization:
                     detail=f"User `{current_user} does not have `{self.role}` permission on dataset {dataset_id}",
                 )
         else:
-            raise HTTPException(
-                status_code=403,
-                detail=f"User `{current_user} does not have `{self.role}` permission on dataset {dataset_id}",
-            )
-
+            if (
+                    dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
+            ) is not None:
+                current_dataset = DatasetOut.from_mongo(dataset)
+                print(self.role)
+                if current_dataset.status == DatasetStatus.PUBLIC.name and self.role == 'viewer':
+                    return True
+                else:
+                    raise HTTPException(
+                        status_code=403,
+                        detail=f"User `{current_user} does not have `{self.role}` permission on dataset {dataset_id}",
+                    )
+            else:
+                raise HTTPException(
+                    status_code=404,
+                    detail=f"The dataset {dataset_id} is not found",
+                )
 
 class FileAuthorization:
     """We use class dependency so that we can provide the `permission` parameter to the dependency.

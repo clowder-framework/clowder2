@@ -10,7 +10,7 @@ from app import dependencies
 from app.keycloak_auth import get_current_username, get_user
 from app.dependencies import get_db
 from app.models.pyobjectid import PyObjectId
-from app.models.datasets import DatasetOut
+from app.models.datasets import DatasetOut, DatasetStatus
 from app.models.users import UserAndRole
 from app.models.groups import GroupOut, GroupDB, GroupBase, GroupAndRole
 from app.deps.authorization_deps import (
@@ -91,6 +91,18 @@ async def get_dataset_role(
         authorization = AuthorizationDB.from_mongo(authorization_q)
         return authorization
     else:
+        print("you have no authorization, is it publc?")
+        if (
+                dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
+        ) is not None:
+            current_dataset = DatasetOut.from_mongo(dataset)
+            if current_dataset.status == DatasetStatus.PUBLIC.name:
+                # TODO find better solution to this
+                # TODO use method for creating default public auth for dataset and current user
+                public_auth_dict = {'creator': current_dataset.author.email, 'dataset_id': dataset_id,
+                                    'user_ids': [current_user], 'role': RoleType.VIEWER}
+                public_auth = AuthorizationDB(**public_auth_dict)
+                return public_auth
         raise HTTPException(
             status_code=404, detail=f"No authorization found for dataset: {dataset_id}"
         )
