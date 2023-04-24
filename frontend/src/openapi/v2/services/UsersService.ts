@@ -1,7 +1,7 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { UserAPIKey } from '../models/UserAPIKey';
+import type { UserAPIKeyOut } from '../models/UserAPIKeyOut';
 import type { UserOut } from '../models/UserOut';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { request as __request } from '../core/request';
@@ -33,42 +33,6 @@ export class UsersService {
     }
 
     /**
-     * Get User
-     * @param userId
-     * @returns UserOut Successful Response
-     * @throws ApiError
-     */
-    public static getUserApiV2UsersUserIdGet(
-        userId: string,
-    ): CancelablePromise<UserOut> {
-        return __request({
-            method: 'GET',
-            path: `/api/v2/users/${userId}`,
-            errors: {
-                422: `Validation Error`,
-            },
-        });
-    }
-
-    /**
-     * Get User By Name
-     * @param username
-     * @returns UserOut Successful Response
-     * @throws ApiError
-     */
-    public static getUserByNameApiV2UsersUsernameUsernameGet(
-        username: string,
-    ): CancelablePromise<UserOut> {
-        return __request({
-            method: 'GET',
-            path: `/api/v2/users/username/${username}`,
-            errors: {
-                422: `Validation Error`,
-            },
-        });
-    }
-
-    /**
      * Generate User Api Key
      * List all api keys that user has created
      *
@@ -77,13 +41,13 @@ export class UsersService {
      * limit: number to limit per page
      * @param skip
      * @param limit
-     * @returns UserAPIKey Successful Response
+     * @returns UserAPIKeyOut Successful Response
      * @throws ApiError
      */
     public static generateUserApiKeyApiV2UsersKeysGet(
         skip?: number,
         limit: number = 10,
-    ): CancelablePromise<Array<UserAPIKey>> {
+    ): CancelablePromise<Array<UserAPIKeyOut>> {
         return __request({
             method: 'GET',
             path: `/api/v2/users/keys`,
@@ -133,15 +97,51 @@ export class UsersService {
      * Arguments:
      * key_id: id of the apikey
      * @param keyId
-     * @returns string Successful Response
+     * @returns any Successful Response
      * @throws ApiError
      */
     public static generateUserApiKeyApiV2UsersKeysKeyIdDelete(
         keyId: string,
-    ): CancelablePromise<string> {
+    ): CancelablePromise<any> {
         return __request({
             method: 'DELETE',
             path: `/api/v2/users/keys/${keyId}`,
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+
+    /**
+     * Get User
+     * @param userId
+     * @returns UserOut Successful Response
+     * @throws ApiError
+     */
+    public static getUserApiV2UsersUserIdGet(
+        userId: string,
+    ): CancelablePromise<UserOut> {
+        return __request({
+            method: 'GET',
+            path: `/api/v2/users/${userId}`,
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+
+    /**
+     * Get User By Name
+     * @param username
+     * @returns UserOut Successful Response
+     * @throws ApiError
+     */
+    public static getUserByNameApiV2UsersUsernameUsernameGet(
+        username: string,
+    ): CancelablePromise<UserOut> {
+        return __request({
+            method: 'GET',
+            path: `/api/v2/users/username/${username}`,
             errors: {
                 422: `Validation Error`,
             },
