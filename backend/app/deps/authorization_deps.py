@@ -50,11 +50,13 @@ async def get_role_by_file(
             role = AuthorizationDB.from_mongo(authorization).role
             return role
         elif (
-                    dataset := await db["datasets"].find_one({"_id": ObjectId(file_out.dataset_id)})
-            ) is not None:
-                dataset_out = DatasetOut.from_mongo(dataset)
-                if dataset_out.status == DatasetStatus.PUBLIC.name:
-                    role = RoleType.VIEWER
+            dataset := await db["datasets"].find_one(
+                {"_id": ObjectId(file_out.dataset_id)}
+            )
+        ) is not None:
+            dataset_out = DatasetOut.from_mongo(dataset)
+            if dataset_out.status == DatasetStatus.PUBLIC.name:
+                role = RoleType.VIEWER
         else:
             role = None
         return role
@@ -95,7 +97,9 @@ async def get_role_by_metadata(
                     return role
                 else:
                     if (
-                            dataset := await db["datasets"].find_one({"_id": ObjectId(file_out.dataset_id)})
+                        dataset := await db["datasets"].find_one(
+                            {"_id": ObjectId(file_out.dataset_id)}
+                        )
                     ) is not None:
                         dataset_out = DatasetOut.from_mongo(dataset)
                         if dataset_out.status == DatasetStatus.PUBLIC.name:
@@ -190,10 +194,13 @@ class Authorization:
                 )
         else:
             if (
-                    dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
+                dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
             ) is not None:
                 current_dataset = DatasetOut.from_mongo(dataset)
-                if current_dataset.status == DatasetStatus.PUBLIC.name and self.role == 'viewer':
+                if (
+                    current_dataset.status == DatasetStatus.PUBLIC.name
+                    and self.role == "viewer"
+                ):
                     return True
                 else:
                     raise HTTPException(
@@ -205,6 +212,7 @@ class Authorization:
                     status_code=404,
                     detail=f"The dataset {dataset_id} is not found",
                 )
+
 
 class FileAuthorization:
     """We use class dependency so that we can provide the `permission` parameter to the dependency.
@@ -240,10 +248,15 @@ class FileAuthorization:
                 if access(authorization.role, self.role):
                     return True
                 elif (
-                        dataset := await db["datasets"].find_one({"_id": ObjectId(file_out.dataset_id)})
+                    dataset := await db["datasets"].find_one(
+                        {"_id": ObjectId(file_out.dataset_id)}
+                    )
                 ) is not None:
                     current_dataset = DatasetOut.from_mongo(dataset)
-                    if current_dataset.status == DatasetStatus.PUBLIC.name and self.role == 'viewer':
+                    if (
+                        current_dataset.status == DatasetStatus.PUBLIC.name
+                        and self.role == "viewer"
+                    ):
                         return True
                 else:
                     raise HTTPException(

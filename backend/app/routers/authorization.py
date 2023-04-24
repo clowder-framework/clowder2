@@ -92,14 +92,18 @@ async def get_dataset_role(
         return authorization
     else:
         if (
-                dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
+            dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
         ) is not None:
             current_dataset = DatasetOut.from_mongo(dataset)
             if current_dataset.status == DatasetStatus.PUBLIC.name:
                 # TODO find better solution to this
                 # TODO use method for creating default public auth for dataset and current user
-                public_auth_dict = {'creator': current_dataset.author.email, 'dataset_id': dataset_id,
-                                    'user_ids': [current_user], 'role': RoleType.VIEWER}
+                public_auth_dict = {
+                    "creator": current_dataset.author.email,
+                    "dataset_id": dataset_id,
+                    "user_ids": [current_user],
+                    "role": RoleType.VIEWER,
+                }
                 public_auth = AuthorizationDB(**public_auth_dict)
                 return public_auth
         raise HTTPException(
