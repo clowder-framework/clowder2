@@ -66,7 +66,7 @@ async def generate_user_api_key(
     return hashed_key
 
 
-@router.delete("/keys/{key_id}", response_model=UserAPIKeyOut)
+@router.delete("/keys/{key_id}")
 async def generate_user_api_key(
         key_id: str,
         db: MongoClient = Depends(dependencies.get_db),
@@ -84,7 +84,7 @@ async def generate_user_api_key(
         # Only allow user to delete their own key
         if apikey.user == current_user:
             await db["user_keys"].delete_one({"_id": ObjectId(key_id)})
-            return {"deleted": apikey}
+            return {"deleted": key_id}
         else:
             raise HTTPException(status_code=403, detail=f"API key {key_id} not allowed to be deleted.")
     else:
