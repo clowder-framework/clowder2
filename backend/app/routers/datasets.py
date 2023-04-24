@@ -36,6 +36,7 @@ from app.models.datasets import (
     DatasetDB,
     DatasetOut,
     DatasetPatch,
+    DatasetStatus,
 )
 from app.models.files import FileOut, FileDB
 from app.models.folders import FolderOut, FolderIn, FolderDB
@@ -301,54 +302,64 @@ async def get_dataset_files(
     limit: int = 10,
 ):
     files = []
-    if folder_id is not None:
-        for f in (
-            await db["files_view"]
-            .find(
-                {
-                    "$and": [
-                        {
-                            "dataset_id": ObjectId(dataset_id),
-                            "folder_id": ObjectId(folder_id),
-                        },
-                        {
-                            "$or": [
-                                {"creator.email": user_id},
-                                {"auth": {"$elemMatch": {"user_ids": user_id}}},
-                            ]
-                        },
-                    ]
-                }
-            )
-            .skip(skip)
-            .limit(limit)
-            .to_list(length=limit)
-        ):
-            files.append(FileOut.from_mongo(f))
-    else:
-        for f in (
-            await db["files_view"]
-            .find(
-                {
-                    "$and": [
-                        {
-                            "dataset_id": ObjectId(dataset_id),
-                            "folder_id": None,
-                        },
-                        {
-                            "$or": [
-                                {"creator.email": user_id},
-                                {"auth": {"$elemMatch": {"user_ids": user_id}}},
-                            ]
-                        },
-                    ]
-                }
-            )
-            .skip(skip)
-            .limit(limit)
-            .to_list(length=limit)
-        ):
-            files.append(FileOut.from_mongo(f))
+    # TODO if dataset is public return all files
+    if (
+            dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
+    ) is not None:
+        dataset_out = DatasetOut.from_mongo(dataset)
+        if dataset_out.status == DatasetStatus.PUBLIC.name:
+            if folder_id is not None:
+                for f in (
+                        await db["files"]
+                                .find(
+                            {
+                                "dataset_id": ObjectId(dataset_id),
+                                "folder_id": ObjectId(folder_id),
+                            }
+                        )
+                                .skip(skip)
+                                .limit(limit)
+                                .to_list(length=limit)
+                ):
+                    files.append(FileOut.from_mongo(f))
+            else:
+                for f in (
+                        await db["files"]
+                                .find(
+                            {
+                                "dataset_id": ObjectId(dataset_id),
+                                "folder_id": None,
+                            }
+                        )
+                                .skip(skip)
+                                .limit(limit)
+                                .to_list(length=limit)
+                ):
+                    files.append(FileOut.from_mongo(f))
+        else:
+            for f in (
+                await db["files_view"]
+                .find(
+                    {
+                        "$and": [
+                            {
+                                "dataset_id": ObjectId(dataset_id),
+                                "folder_id": None,
+                            },
+                            {
+                                "$or": [
+                                    {"creator.email": user_id},
+                                    {"auth": {"$elemMatch": {"user_ids": user_id}}},
+                                ]
+                            },
+                        ]
+                    }
+                )
+                .skip(skip)
+                .limit(limit)
+                .to_list(length=limit)
+            ):
+                files.append(FileOut.from_mongo(f))
     return files
 
 
