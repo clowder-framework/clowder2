@@ -46,9 +46,18 @@ async def get_role_by_file(
                 ]
             }
         )
-        role = AuthorizationDB.from_mongo(authorization).role
+        if authorization is not None:
+            role = AuthorizationDB.from_mongo(authorization).role
+            return role
+        elif (
+                    dataset := await db["datasets"].find_one({"_id": ObjectId(file_out.dataset_id)})
+            ) is not None:
+                dataset_out = DatasetOut.from_mongo(dataset)
+                if dataset_out.status == DatasetStatus.PUBLIC.name:
+                    role = RoleType.VIEWER
+        else:
+            role = None
         return role
-
     raise HTTPException(status_code=404, detail=f"File {file_id} not found")
 
 
@@ -82,7 +91,15 @@ async def get_role_by_metadata(
                     }
                 )
                 role = AuthorizationDB.from_mongo(authorization).role
-                return role
+                if role is not None:
+                    return role
+                else:
+                    if (
+                            dataset := await db["datasets"].find_one({"_id": ObjectId(file_out.dataset_id)})
+                    ) is not None:
+                        dataset_out = DatasetOut.from_mongo(dataset)
+                        if dataset_out.status == DatasetStatus.PUBLIC.name:
+                            return RoleType.VIEWER
         elif resource_type == "datasets":
             if (
                 dataset := await db["datasets"].find_one({"_id": ObjectId(resource_id)})
@@ -102,7 +119,13 @@ async def get_role_by_metadata(
                     }
                 )
                 role = AuthorizationDB.from_mongo(authorization).role
-                return role
+                if role is not None:
+                    return role
+                else:
+                    if dataset_out.status == DatasetStatus.PUBLIC.name:
+                        return RoleType.VIEWER
+                    else:
+                        return role
 
 
 async def get_role_by_group(
@@ -216,11 +239,17 @@ class FileAuthorization:
                 authorization = AuthorizationDB.from_mongo(authorization_q)
                 if access(authorization.role, self.role):
                     return True
-
-            raise HTTPException(
-                status_code=403,
-                detail=f"User `{current_user} does not have `{self.role}` permission on file {file_id}",
-            )
+                elif (
+                        dataset := await db["datasets"].find_one({"_id": ObjectId(file_out.dataset_id)})
+                ) is not None:
+                    current_dataset = DatasetOut.from_mongo(dataset)
+                    if current_dataset.status == DatasetStatus.PUBLIC.name and self.role == 'viewer':
+                        return True
+                else:
+                    raise HTTPException(
+                        status_code=403,
+                        detail=f"User `{current_user} does not have `{self.role}` permission on file {file_id}",
+                    )
         else:
             raise HTTPException(status_code=404, detail=f"File {file_id} not found")
 
