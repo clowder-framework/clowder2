@@ -17,10 +17,10 @@ router = APIRouter()
 
 @router.get("/keys", response_model=List[UserAPIKeyOut])
 async def generate_user_api_key(
-        db: MongoClient = Depends(dependencies.get_db),
-        current_user=Depends(get_current_username),
-        skip: int = 0,
-        limit: int = 10,
+    db: MongoClient = Depends(dependencies.get_db),
+    current_user=Depends(get_current_username),
+    skip: int = 0,
+    limit: int = 10,
 ):
     """List all api keys that user has created
 
@@ -30,11 +30,12 @@ async def generate_user_api_key(
     """
     apikeys = []
     for doc in (
-            await db["user_keys"].find({"user": current_user})
-                    .sort([("created", DESCENDING)])
-                    .skip(skip)
-                    .limit(limit)
-                    .to_list(length=limit)
+        await db["user_keys"]
+        .find({"user": current_user})
+        .sort([("created", DESCENDING)])
+        .skip(skip)
+        .limit(limit)
+        .to_list(length=limit)
     ):
         apikeys.append(UserAPIKeyOut.from_mongo(doc))
 
@@ -43,10 +44,10 @@ async def generate_user_api_key(
 
 @router.post("/keys", response_model=str)
 async def generate_user_api_key(
-        name: str,
-        mins: int = settings.local_auth_expiration,
-        db: MongoClient = Depends(dependencies.get_db),
-        current_user=Depends(get_current_username),
+    name: str,
+    mins: int = settings.local_auth_expiration,
+    db: MongoClient = Depends(dependencies.get_db),
+    current_user=Depends(get_current_username),
 ):
     """Generate an API key that confers the user's privileges.
 
@@ -68,16 +69,16 @@ async def generate_user_api_key(
 
 @router.delete("/keys/{key_id}", response_model=UserAPIKeyOut)
 async def generate_user_api_key(
-        key_id: str,
-        db: MongoClient = Depends(dependencies.get_db),
-        current_user=Depends(get_current_username),
+    key_id: str,
+    db: MongoClient = Depends(dependencies.get_db),
+    current_user=Depends(get_current_username),
 ):
     """Delete API keys given ID
 
     Arguments:
         key_id: id of the apikey
     """
-    apikey_doc = (await db["user_keys"].find_one({"_id": ObjectId(key_id)}))
+    apikey_doc = await db["user_keys"].find_one({"_id": ObjectId(key_id)})
     if apikey_doc is not None:
         apikey = UserAPIKeyOut.from_mongo(apikey_doc)
 
@@ -86,14 +87,16 @@ async def generate_user_api_key(
             await db["user_keys"].delete_one({"_id": ObjectId(key_id)})
             return apikey
         else:
-            raise HTTPException(status_code=403, detail=f"API key {key_id} not allowed to be deleted.")
+            raise HTTPException(
+                status_code=403, detail=f"API key {key_id} not allowed to be deleted."
+            )
     else:
         raise HTTPException(status_code=404, detail=f"API key {key_id} not found.")
 
 
 @router.get("", response_model=List[UserOut])
 async def get_users(
-        db: MongoClient = Depends(dependencies.get_db), skip: int = 0, limit: int = 2
+    db: MongoClient = Depends(dependencies.get_db), skip: int = 0, limit: int = 2
 ):
     users = []
     for doc in await db["users"].find().skip(skip).limit(limit).to_list(length=limit):
@@ -110,7 +113,7 @@ async def get_user(user_id: str, db: MongoClient = Depends(dependencies.get_db))
 
 @router.get("/username/{username}", response_model=UserOut)
 async def get_user_by_name(
-        username: str, db: MongoClient = Depends(dependencies.get_db)
+    username: str, db: MongoClient = Depends(dependencies.get_db)
 ):
     if (user := await db["users"].find_one({"email": username})) is not None:
         return UserOut.from_mongo(user)

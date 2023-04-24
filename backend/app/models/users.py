@@ -42,6 +42,7 @@ class UserOut(UserBase):
 
 class UserAPIKey(MongoModel):
     """API keys can have a reference name (e.g. 'Uploader script')"""
+
     key: str
     name: str
     user: EmailStr

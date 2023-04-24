@@ -80,7 +80,7 @@ def create_user(client: TestClient, headers: dict, email: str = user_alt["email"
     u["email"] = email
     response = client.post(f"{settings.API_V2_STR}/users", json=u)
     assert (
-            response.status_code == 200 or response.status_code == 409
+        response.status_code == 200 or response.status_code == 409
     )  # 409 = user already exists
     return response.json()
 
@@ -127,11 +127,11 @@ def create_dataset(client: TestClient, headers: dict):
 
 
 def upload_file(
-        client: TestClient,
-        headers: dict,
-        dataset_id: str,
-        filename=filename_example,
-        content=file_content_example,
+    client: TestClient,
+    headers: dict,
+    dataset_id: str,
+    filename=filename_example,
+    content=file_content_example,
 ):
     """Uploads a dummy file (optionally with custom name/content) to a dataset and returns the JSON."""
     with open(filename, "w") as tempf:
@@ -149,11 +149,11 @@ def upload_file(
 
 
 def create_folder(
-        client: TestClient,
-        headers: dict,
-        dataset_id: str,
-        name="test folder",
-        parent_folder=None,
+    client: TestClient,
+    headers: dict,
+    dataset_id: str,
+    name="test folder",
+    parent_folder=None,
 ):
     """Creates a folder (optionally under an existing folder) in a dataset and returns the JSON."""
     folder_data = {"name": name}
