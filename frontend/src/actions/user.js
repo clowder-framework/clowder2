@@ -131,6 +131,24 @@ export function fetchAllUsers(skip = 0, limit = 101) {
 	};
 }
 
+export const LIST_API_KEYS = "LIST_API_KEYS";
+
+export function listApiKeys(skip = 0, limit = 10) {
+	return (dispatch) => {
+		return V2.UsersService.generateUserApiKeyApiV2UsersKeysGet(skip, limit)
+			.then((json) => {
+				dispatch({
+					type: LIST_API_KEYS,
+					apiKeys: json,
+					receivedAt: Date.now(),
+				});
+			})
+			.catch((reason) => {
+				dispatch(listApiKeys(skip, limit));
+			});
+	};
+}
+
 export const GENERATE_API_KEY = "GENERATE_API_KEY";
 
 export function generateApiKey(name = "", minutes = 30) {
@@ -145,6 +163,24 @@ export function generateApiKey(name = "", minutes = 30) {
 			})
 			.catch((reason) => {
 				dispatch(generateApiKey(name, minutes));
+			});
+	};
+}
+
+export const DELETE_API_KEY = "DELETE_API_KEY";
+
+export function deleteApiKey(keyId) {
+	return (dispatch) => {
+		return V2.UsersService.generateUserApiKeyApiV2UsersKeysKeyIdDelete(keyId)
+			.then((json) => {
+				dispatch({
+					type: DELETE_API_KEY,
+					apiKey: json,
+					receivedAt: Date.now(),
+				});
+			})
+			.catch((reason) => {
+				dispatch(deleteApiKey(keyId));
 			});
 	};
 }

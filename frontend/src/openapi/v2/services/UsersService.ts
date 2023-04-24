@@ -97,12 +97,12 @@ export class UsersService {
      * Arguments:
      * key_id: id of the apikey
      * @param keyId
-     * @returns any Successful Response
+     * @returns UserAPIKeyOut Successful Response
      * @throws ApiError
      */
     public static generateUserApiKeyApiV2UsersKeysKeyIdDelete(
         keyId: string,
-    ): CancelablePromise<any> {
+    ): CancelablePromise<UserAPIKeyOut> {
         return __request({
             method: 'DELETE',
             path: `/api/v2/users/keys/${keyId}`,

@@ -27,7 +27,7 @@ type ApiKeyModalProps = {
 	setApiKeyModalOpen: any;
 };
 
-export const ApiKeyModal = (props: ApiKeyModalProps) => {
+export const CreateApiKeyModal = (props: ApiKeyModalProps) => {
 	const { apiKeyModalOpen, setApiKeyModalOpen } = props;
 
 	const dispatch = useDispatch();
