@@ -91,7 +91,6 @@ async def get_dataset_role(
         authorization = AuthorizationDB.from_mongo(authorization_q)
         return authorization
     else:
-        print("you have no authorization, is it publc?")
         if (
                 dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
         ) is not None:

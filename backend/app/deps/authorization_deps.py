@@ -170,7 +170,6 @@ class Authorization:
                     dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
             ) is not None:
                 current_dataset = DatasetOut.from_mongo(dataset)
-                print(self.role)
                 if current_dataset.status == DatasetStatus.PUBLIC.name and self.role == 'viewer':
                     return True
                 else:
