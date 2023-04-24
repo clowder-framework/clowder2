@@ -157,7 +157,7 @@ export function generateApiKey(name = "", minutes = 30) {
 			.then((json) => {
 				dispatch({
 					type: GENERATE_API_KEY,
-					apiKey: json,
+					hashedKey: json,
 					receivedAt: Date.now(),
 				});
 			})

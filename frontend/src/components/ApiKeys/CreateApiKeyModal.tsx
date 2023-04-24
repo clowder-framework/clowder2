@@ -34,7 +34,7 @@ export const CreateApiKeyModal = (props: ApiKeyModalProps) => {
 	const generateApiKey = (name: string, minutes: number) =>
 		dispatch(generateApiKeyAction(name, minutes));
 	const resetApiKey = () => dispatch(resetApiKeyAction());
-	const apiKey = useSelector((state: RootState) => state.user.apiKey);
+	const hashedKey = useSelector((state: RootState) => state.user.hashedKey);
 
 	const [name, setName] = useState("");
 	const [minutes, setMinutes] = useState(30);
@@ -55,7 +55,7 @@ export const CreateApiKeyModal = (props: ApiKeyModalProps) => {
 	return (
 		<Dialog open={apiKeyModalOpen} onClose={handleClose} fullWidth={true}>
 			<DialogTitle>Your API Key</DialogTitle>
-			{apiKey ? (
+			{hashedKey ? (
 				<>
 					<DialogContent>
 						<ClowderFootnote>
@@ -63,7 +63,7 @@ export const CreateApiKeyModal = (props: ApiKeyModalProps) => {
 							this again.
 						</ClowderFootnote>
 						<ClowderMetadataTextField
-							value={apiKey}
+							value={hashedKey}
 							disabled={true}
 							fullWidth
 						/>

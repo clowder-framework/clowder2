@@ -15,6 +15,7 @@ import {
 	MetadataOut as Metadata,
 	RoleType,
 	UserAndRole,
+	UserAPIKeyOut,
 	UserOut,
 } from "../openapi/v2";
 import { LIST_USERS } from "../actions/user";
@@ -114,9 +115,19 @@ interface REGISTER_USER {
 	type: "REGISTER_USER";
 }
 
+interface LIST_API_KEYS {
+	type: "LIST_API_KEYS";
+	apikeys: UserAPIKeyOut[];
+}
+
+interface DELETE_API_KEY {
+	type: "DELETE_API_KEY";
+	apikey: UserAPIKeyOut;
+}
+
 interface GENERATE_API_KEY {
 	type: "GENERATE_API_KEY";
-	apiKey: string;
+	hashedKey: string;
 }
 
 interface RESET_API_KEY {
@@ -350,6 +361,8 @@ export type DataAction =
 	| LOGOUT
 	| REGISTER_ERROR
 	| REGISTER_USER
+	| LIST_API_KEYS
+	| DELETE_API_KEY
 	| GENERATE_API_KEY
 	| RESET_API_KEY
 	| CREATE_DATASET

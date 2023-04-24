@@ -10,6 +10,7 @@ import {
 	MetadataOut as Metadata,
 	RoleType,
 	UserAndRole,
+	UserAPIKeyOut,
 	UserOut,
 } from "../openapi/v2";
 
@@ -185,7 +186,8 @@ export interface UserState {
 	loginError: boolean;
 	registerSucceeded: boolean;
 	errorMsg: string;
-	apiKey: string;
+	hashedKey: string;
+	apikeys: UserAPIKeyOut[];
 }
 
 export interface ErrorState {

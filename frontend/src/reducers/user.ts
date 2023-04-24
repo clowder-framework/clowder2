@@ -1,5 +1,7 @@
 import {
+	DELETE_API_KEY,
 	GENERATE_API_KEY,
+	LIST_API_KEYS,
 	LOGIN_ERROR,
 	REGISTER_ERROR,
 	REGISTER_USER,
@@ -14,7 +16,8 @@ const defaultState: UserState = {
 	loginError: false,
 	registerSucceeded: false,
 	errorMsg: "",
-	apiKey: "",
+	hashedKey: "",
+	apikeys: [],
 };
 
 const user = (state = defaultState, action: DataAction) => {
@@ -37,10 +40,18 @@ const user = (state = defaultState, action: DataAction) => {
 				registerSucceeded: false,
 				errorMsg: action.errorMsg,
 			});
+		case LIST_API_KEYS:
+			return Object.assign({}, state, { apiKeys: action.apikeys });
+		case DELETE_API_KEY:
+			return Object.assign({}, state, {
+				apiKeys: state.apikeys.filter(
+					(apikey) => apikey.id !== action.apikey.id
+				),
+			});
 		case GENERATE_API_KEY:
-			return Object.assign({}, state, { apiKey: action.apiKey });
+			return Object.assign({}, state, { hashedKey: action.hashedKey });
 		case RESET_API_KEY:
-			return Object.assign({}, state, { apiKey: "" });
+			return Object.assign({}, state, { hashedKey: "" });
 		default:
 			return state;
 	}
