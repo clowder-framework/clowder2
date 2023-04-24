@@ -311,29 +311,29 @@ async def get_dataset_files(
             if folder_id is not None:
                 for f in (
                         await db["files"]
-                                .find(
+                        .find(
                             {
                                 "dataset_id": ObjectId(dataset_id),
                                 "folder_id": ObjectId(folder_id),
                             }
                         )
-                                .skip(skip)
-                                .limit(limit)
-                                .to_list(length=limit)
+                        .skip(skip)
+                        .limit(limit)
+                        .to_list(length=limit)
                 ):
                     files.append(FileOut.from_mongo(f))
             else:
                 for f in (
                         await db["files"]
-                                .find(
+                        .find(
                             {
                                 "dataset_id": ObjectId(dataset_id),
                                 "folder_id": None,
                             }
                         )
-                                .skip(skip)
-                                .limit(limit)
-                                .to_list(length=limit)
+                        .skip(skip)
+                        .limit(limit)
+                        .to_list(length=limit)
                 ):
                     files.append(FileOut.from_mongo(f))
         else:
