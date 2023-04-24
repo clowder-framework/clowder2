@@ -1,6 +1,7 @@
 import { V2 } from "../openapi";
 import Cookies from "universal-cookie";
 import config from "../app.config";
+import { handleErrors } from "./common";
 
 const cookies = new Cookies();
 
@@ -144,7 +145,7 @@ export function listApiKeys(skip = 0, limit = 10) {
 				});
 			})
 			.catch((reason) => {
-				dispatch(listApiKeys(skip, limit));
+				dispatch(handleErrors(listApiKeys(skip, limit)));
 			});
 	};
 }
@@ -162,7 +163,7 @@ export function generateApiKey(name = "", minutes = 30) {
 				});
 			})
 			.catch((reason) => {
-				dispatch(generateApiKey(name, minutes));
+				dispatch(handleErrors(generateApiKey(name, minutes)));
 			});
 	};
 }
@@ -180,7 +181,7 @@ export function deleteApiKey(keyId) {
 				});
 			})
 			.catch((reason) => {
-				dispatch(deleteApiKey(keyId));
+				dispatch(handleErrors(deleteApiKey(keyId)));
 			});
 	};
 }

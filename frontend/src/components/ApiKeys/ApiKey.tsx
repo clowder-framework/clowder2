@@ -25,7 +25,7 @@ export function ApiKeys() {
 		dispatch(listApiKeysAction(skip, limit));
 	// const deleteApiKey = (keyId: string) => dispatch(deleteApiKeyAction(keyId));
 
-	const apikeys = useSelector((state: RootState) => state.user.apikeys);
+	const apiKeys = useSelector((state: RootState) => state.user.apiKeys);
 
 	// TODO add option to determine limit number; default show 5 groups each time
 	const [currPageNum, setCurrPageNum] = useState<number>(0);
@@ -51,9 +51,9 @@ export function ApiKeys() {
 
 	useEffect(() => {
 		// disable flipping if reaches the last page
-		if (apikeys.length < limit) setNextDisabled(true);
+		if (apiKeys.length < limit) setNextDisabled(true);
 		else setNextDisabled(false);
-	}, [apikeys]);
+	}, [apiKeys]);
 
 	useEffect(() => {
 		if (skip !== null && skip !== undefined) {
@@ -75,7 +75,7 @@ export function ApiKeys() {
 		}
 	};
 	const next = () => {
-		if (apikeys.length === limit) {
+		if (apiKeys.length === limit) {
 			setSkip((currPageNum + 1) * limit);
 			setCurrPageNum(currPageNum + 1);
 		}
@@ -102,32 +102,32 @@ export function ApiKeys() {
 							</TableRow>
 						</TableHead>
 						<TableBody>
-							{apikeys.map((apikey) => {
+							{apiKeys.map((apiKey) => {
 								return (
 									<TableRow
-										key={apikey.id}
+										key={apiKey.id}
 										sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
 									>
-										<TableCell component="th" scope="row" key={apikey.id}>
-											<Button component={Link} to={`/groups/${apikey.id}`}>
-												{apikey.name}
+										<TableCell component="th" scope="row" key={apiKey.id}>
+											<Button component={Link} to={`/groups/${apiKey.id}`}>
+												{apiKey.name}
 											</Button>
 										</TableCell>
 										<TableCell
 											component="th"
 											scope="row"
-											key={apikey.id}
+											key={apiKey.id}
 											align="right"
 										>
-											{apikey.created}
+											{apiKey.created}
 										</TableCell>
 										<TableCell
 											component="th"
 											scope="row"
-											key={apikey.id}
+											key={apiKey.id}
 											align="right"
 										>
-											{apikey.expires}
+											{apiKey.expires}
 										</TableCell>
 										<TableCell align="right">
 											<IconButton
@@ -135,7 +135,7 @@ export function ApiKeys() {
 												sx={{ p: "10px" }}
 												aria-label="delete"
 												onClick={() => {
-													setSelectApikey(apikey.id);
+													setSelectApikey(apiKey.id);
 													setDeleteApikeyConfirmOpen(true);
 												}}
 											>

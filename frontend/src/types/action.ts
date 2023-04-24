@@ -117,12 +117,12 @@ interface REGISTER_USER {
 
 interface LIST_API_KEYS {
 	type: "LIST_API_KEYS";
-	apikeys: UserAPIKeyOut[];
+	apiKeys: UserAPIKeyOut[];
 }
 
 interface DELETE_API_KEY {
 	type: "DELETE_API_KEY";
-	apikey: UserAPIKeyOut;
+	apiKey: UserAPIKeyOut;
 }
 
 interface GENERATE_API_KEY {

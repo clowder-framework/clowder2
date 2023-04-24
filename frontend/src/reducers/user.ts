@@ -17,7 +17,7 @@ const defaultState: UserState = {
 	registerSucceeded: false,
 	errorMsg: "",
 	hashedKey: "",
-	apikeys: [],
+	apiKeys: [],
 };
 
 const user = (state = defaultState, action: DataAction) => {
@@ -41,11 +41,11 @@ const user = (state = defaultState, action: DataAction) => {
 				errorMsg: action.errorMsg,
 			});
 		case LIST_API_KEYS:
-			return Object.assign({}, state, { apiKeys: action.apikeys });
+			return Object.assign({}, state, { apiKeys: action.apiKeys });
 		case DELETE_API_KEY:
 			return Object.assign({}, state, {
-				apiKeys: state.apikeys.filter(
-					(apikey) => apikey.id !== action.apikey.id
+				apiKeys: state.apiKeys.filter(
+					(apikey) => apikey.id !== action.apiKey.id
 				),
 			});
 		case GENERATE_API_KEY:

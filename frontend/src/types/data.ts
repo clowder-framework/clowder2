@@ -187,7 +187,7 @@ export interface UserState {
 	registerSucceeded: boolean;
 	errorMsg: string;
 	hashedKey: string;
-	apikeys: UserAPIKeyOut[];
+	apiKeys: UserAPIKeyOut[];
 }
 
 export interface ErrorState {
