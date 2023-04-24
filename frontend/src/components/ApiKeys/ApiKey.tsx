@@ -33,9 +33,9 @@ export function ApiKeys() {
 
 	const apiKeys = useSelector((state: RootState) => state.user.apiKeys);
 
-	// TODO add option to determine limit number; default show 5 groups each time
+	// TODO add option to determine limit number; default show 5 tokens each time
 	const [currPageNum, setCurrPageNum] = useState<number>(0);
-	const [limit] = useState<number>(20);
+	const [limit] = useState<number>(5);
 	const [skip, setSkip] = useState<number | undefined>(0);
 	const [prevDisabled, setPrevDisabled] = useState<boolean>(true);
 	const [nextDisabled, setNextDisabled] = useState<boolean>(false);
@@ -121,6 +121,8 @@ export function ApiKeys() {
 				/>
 				{/*create api key modal*/}
 				<CreateApiKeyModal
+					skip={skip}
+					limit={limit}
 					apiKeyModalOpen={createApiKeyModalOpen}
 					setApiKeyModalOpen={setCreateApiKeyModalOpen}
 				/>
@@ -164,7 +166,9 @@ export function ApiKeys() {
 											key={apiKey.id}
 											align="right"
 										>
-											{parseDate(apiKey.expires)}
+											{apiKey.expires === null
+												? "Never"
+												: parseDate(apiKey.expires)}
 										</TableCell>
 										<TableCell align="right">
 											<IconButton

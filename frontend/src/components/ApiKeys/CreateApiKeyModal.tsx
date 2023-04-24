@@ -6,12 +6,12 @@ import {
 	DialogContent,
 	DialogTitle,
 	FormControl,
-	InputLabel,
 	MenuItem,
 	Select,
 } from "@mui/material";
 import {
 	generateApiKey as generateApiKeyAction,
+	listApiKeys as listApiKeysAction,
 	resetApiKey as resetApiKeyAction,
 } from "../../actions/user";
 import { useDispatch, useSelector } from "react-redux";
@@ -23,16 +23,20 @@ import { ClowderInputLabel } from "../styledComponents/ClowderInputLabel";
 import { ClowderInput } from "../styledComponents/ClowderInput";
 
 type ApiKeyModalProps = {
+	skip: number | undefined;
+	limit: number;
 	apiKeyModalOpen: boolean;
 	setApiKeyModalOpen: any;
 };
 
 export const CreateApiKeyModal = (props: ApiKeyModalProps) => {
-	const { apiKeyModalOpen, setApiKeyModalOpen } = props;
+	const { skip, limit, apiKeyModalOpen, setApiKeyModalOpen } = props;
 
 	const dispatch = useDispatch();
 	const generateApiKey = (name: string, minutes: number) =>
 		dispatch(generateApiKeyAction(name, minutes));
+	const listApiKeys = (skip: number | undefined, limit: number | undefined) =>
+		dispatch(listApiKeysAction(skip, limit));
 	const resetApiKey = () => dispatch(resetApiKeyAction());
 	const hashedKey = useSelector((state: RootState) => state.user.hashedKey);
 
@@ -40,8 +44,14 @@ export const CreateApiKeyModal = (props: ApiKeyModalProps) => {
 	const [minutes, setMinutes] = useState(30);
 
 	const handleClose = () => {
-		resetApiKey();
 		setApiKeyModalOpen(false);
+
+		// fetch latest api key list
+		listApiKeys(skip, limit);
+		resetApiKey();
+		// reset
+		setName("");
+		setMinutes(30);
 	};
 
 	const handleGenerate = () => {
@@ -78,7 +88,6 @@ export const CreateApiKeyModal = (props: ApiKeyModalProps) => {
 			) : (
 				<>
 					<DialogContent>
-						<ClowderFootnote>Your API key will expire</ClowderFootnote>
 						<FormControl fullWidth sx={{ marginTop: "1em" }}>
 							<ClowderInputLabel>Name</ClowderInputLabel>
 							<ClowderInput
@@ -89,12 +98,16 @@ export const CreateApiKeyModal = (props: ApiKeyModalProps) => {
 								}}
 								defaultValue={name}
 							/>
-							<InputLabel id="demo-simple-select-label">After</InputLabel>
+						</FormControl>
+						<FormControl fullWidth sx={{ marginTop: "1em" }}>
+							<ClowderInputLabel id="expiration">
+								Expire after
+							</ClowderInputLabel>
 							<Select
 								labelId="expiration"
 								id="expiration"
 								value={minutes}
-								label="Expiration"
+								label="After"
 								onChange={handleExpirationChange}
 							>
 								<MenuItem value={30}>30 Minutes</MenuItem>
