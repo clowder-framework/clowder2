@@ -3,7 +3,6 @@ import { Box, Button, ButtonGroup, Grid, IconButton } from "@mui/material";
 import { RootState } from "../../types/data";
 import { useDispatch, useSelector } from "react-redux";
 import { ArrowBack, ArrowForward } from "@material-ui/icons";
-import { Link } from "react-router-dom";
 import Paper from "@mui/material/Paper";
 import Table from "@mui/material/Table";
 import TableHead from "@mui/material/TableHead";
@@ -14,16 +13,21 @@ import TableContainer from "@mui/material/TableContainer";
 import Layout from "../Layout";
 import { MainBreadcrumbs } from "../navigation/BreadCrumb";
 
-import { listApiKeys as listApiKeysAction } from "../../actions/user";
+import {
+	deleteApiKey as deleteApiKeyAction,
+	listApiKeys as listApiKeysAction,
+} from "../../actions/user";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { theme } from "../../theme";
+import { parseDate } from "../../utils/common";
+import { ActionModal } from "../dialog/ActionModal";
 
 export function ApiKeys() {
 	// Redux connect equivalent
 	const dispatch = useDispatch();
 	const listApiKeys = (skip: number | undefined, limit: number | undefined) =>
 		dispatch(listApiKeysAction(skip, limit));
-	// const deleteApiKey = (keyId: string) => dispatch(deleteApiKeyAction(keyId));
+	const deleteApiKey = (keyId: string) => dispatch(deleteApiKeyAction(keyId));
 
 	const apiKeys = useSelector((state: RootState) => state.user.apiKeys);
 
@@ -63,11 +67,6 @@ export function ApiKeys() {
 		}
 	}, [skip]);
 
-	// delete
-	// const handleDelete = () => {
-	// 	deleteApiKey();
-	// };
-
 	const previous = () => {
 		if (currPageNum - 1 >= 0) {
 			setSkip((currPageNum - 1) * limit);
@@ -91,6 +90,20 @@ export function ApiKeys() {
 			</Grid>
 			<br />
 			<Grid container>
+				{/*action modal*/}
+				<ActionModal
+					actionOpen={deleteApikeyConfirmOpen}
+					actionTitle="Are you sure?"
+					actionText="Do you really want to delete this API Key? This process cannot be undone."
+					actionBtnName="Delete"
+					handleActionBtnClick={() => {
+						deleteApiKey(selectedApikey);
+						setDeleteApikeyConfirmOpen(false);
+					}}
+					handleActionCancel={() => {
+						setDeleteApikeyConfirmOpen(false);
+					}}
+				/>
 				<TableContainer component={Paper}>
 					<Table sx={{ minWidth: 650 }} aria-label="simple table">
 						<TableHead>
@@ -108,10 +121,13 @@ export function ApiKeys() {
 										key={apiKey.id}
 										sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
 									>
-										<TableCell component="th" scope="row" key={apiKey.id}>
-											<Button component={Link} to={`/groups/${apiKey.id}`}>
-												{apiKey.name}
-											</Button>
+										<TableCell
+											component="th"
+											scope="row"
+											key={apiKey.id}
+											sx={{ textTransform: "uppercase" }}
+										>
+											{apiKey.name}
 										</TableCell>
 										<TableCell
 											component="th"
@@ -119,7 +135,7 @@ export function ApiKeys() {
 											key={apiKey.id}
 											align="right"
 										>
-											{apiKey.created}
+											{parseDate(apiKey.created)}
 										</TableCell>
 										<TableCell
 											component="th"
@@ -127,7 +143,7 @@ export function ApiKeys() {
 											key={apiKey.id}
 											align="right"
 										>
-											{apiKey.expires}
+											{parseDate(apiKey.expires)}
 										</TableCell>
 										<TableCell align="right">
 											<IconButton

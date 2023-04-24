@@ -145,7 +145,7 @@ export function listApiKeys(skip = 0, limit = 10) {
 				});
 			})
 			.catch((reason) => {
-				dispatch(handleErrors(listApiKeys(skip, limit)));
+				dispatch(handleErrors(reason, listApiKeys(skip, limit)));
 			});
 	};
 }
@@ -163,7 +163,7 @@ export function generateApiKey(name = "", minutes = 30) {
 				});
 			})
 			.catch((reason) => {
-				dispatch(handleErrors(generateApiKey(name, minutes)));
+				dispatch(handleErrors(reason, generateApiKey(name, minutes)));
 			});
 	};
 }
@@ -181,7 +181,7 @@ export function deleteApiKey(keyId) {
 				});
 			})
 			.catch((reason) => {
-				dispatch(handleErrors(deleteApiKey(keyId)));
+				dispatch(handleErrors(reason, deleteApiKey(keyId)));
 			});
 	};
 }
