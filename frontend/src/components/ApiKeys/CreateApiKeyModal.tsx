@@ -69,7 +69,7 @@ export const CreateApiKeyModal = (props: ApiKeyModalProps) => {
 						/>
 					</DialogContent>
 					<DialogActions>
-						<CopyToClipboard text={apiKey}>
+						<CopyToClipboard text={hashedKey}>
 							<Button variant={"contained"}>Copy</Button>
 						</CopyToClipboard>
 						<Button onClick={handleClose}>Close</Button>

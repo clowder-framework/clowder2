@@ -21,6 +21,8 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import { theme } from "../../theme";
 import { parseDate } from "../../utils/common";
 import { ActionModal } from "../dialog/ActionModal";
+import VpnKeyIcon from "@mui/icons-material/VpnKey";
+import { CreateApiKeyModal } from "./CreateApiKeyModal";
 
 export function ApiKeys() {
 	// Redux connect equivalent
@@ -39,6 +41,7 @@ export function ApiKeys() {
 	const [nextDisabled, setNextDisabled] = useState<boolean>(false);
 	const [selectedApikey, setSelectApikey] = useState("");
 	const [deleteApikeyConfirmOpen, setDeleteApikeyConfirmOpen] = useState(false);
+	const [createApiKeyModalOpen, setCreateApiKeyModalOpen] = useState(false);
 
 	// for breadcrumb
 	const paths = [
@@ -84,8 +87,20 @@ export function ApiKeys() {
 		<Layout>
 			{/*breadcrumb*/}
 			<Grid container>
-				<Grid item xs={10} sx={{ display: "flex", alignItems: "center" }}>
+				<Grid item xs={8} sx={{ display: "flex", alignItems: "center" }}>
 					<MainBreadcrumbs paths={paths} />
+				</Grid>
+				<Grid item xs={4}>
+					<Button
+						variant="contained"
+						onClick={() => {
+							setCreateApiKeyModalOpen(true);
+						}}
+						endIcon={<VpnKeyIcon />}
+						sx={{ float: "right" }}
+					>
+						New API Key
+					</Button>
 				</Grid>
 			</Grid>
 			<br />
@@ -104,6 +119,12 @@ export function ApiKeys() {
 						setDeleteApikeyConfirmOpen(false);
 					}}
 				/>
+				{/*create api key modal*/}
+				<CreateApiKeyModal
+					apiKeyModalOpen={createApiKeyModalOpen}
+					setApiKeyModalOpen={setCreateApiKeyModalOpen}
+				/>
+				{/*api key table*/}
 				<TableContainer component={Paper}>
 					<Table sx={{ minWidth: 650 }} aria-label="simple table">
 						<TableHead>
