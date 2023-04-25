@@ -1,11 +1,11 @@
+from datetime import timedelta
+from secrets import token_urlsafe
 from typing import List
+
 from bson import ObjectId
 from fastapi import APIRouter, HTTPException, Depends
-from pymongo import MongoClient
-from datetime import datetime, timedelta
 from itsdangerous.url_safe import URLSafeSerializer
-from itsdangerous.exc import BadSignature
-from secrets import token_urlsafe
+from pymongo import MongoClient
 
 from app import dependencies
 from app.config import settings
@@ -17,7 +17,7 @@ router = APIRouter()
 
 @router.get("", response_model=List[UserOut])
 async def get_users(
-    db: MongoClient = Depends(dependencies.get_db), skip: int = 0, limit: int = 2
+        db: MongoClient = Depends(dependencies.get_db), skip: int = 0, limit: int = 2
 ):
     users = []
     for doc in await db["users"].find().skip(skip).limit(limit).to_list(length=limit):
@@ -34,7 +34,7 @@ async def get_user(user_id: str, db: MongoClient = Depends(dependencies.get_db))
 
 @router.get("/username/{username}", response_model=UserOut)
 async def get_user_by_name(
-    username: str, db: MongoClient = Depends(dependencies.get_db)
+        username: str, db: MongoClient = Depends(dependencies.get_db)
 ):
     if (user := await db["users"].find_one({"email": username})) is not None:
         return UserOut.from_mongo(user)
@@ -43,9 +43,10 @@ async def get_user_by_name(
 
 @router.post("/keys", response_model=str)
 async def generate_user_api_key(
-    mins: int = settings.local_auth_expiration,
-    db: MongoClient = Depends(dependencies.get_db),
-    current_user=Depends(get_current_username),
+        name: str,
+        mins: int = settings.local_auth_expiration,
+        db: MongoClient = Depends(dependencies.get_db),
+        current_user=Depends(get_current_username),
 ):
     """Generate an API key that confers the user's privileges.
 
@@ -56,9 +57,23 @@ async def generate_user_api_key(
     unique_key = token_urlsafe(16)
     hashed_key = serializer.dumps({"user": current_user, "key": unique_key})
 
-    user_key = UserAPIKey(user=current_user, key=unique_key)
+    user_key = UserAPIKey(name=name, user=current_user, key=unique_key)
     if mins > 0:
         user_key.expires = user_key.created + timedelta(minutes=mins)
     db["user_keys"].insert_one(user_key.to_mongo())
 
     return hashed_key
+
+
+async def get_user_job_key(
+        username: str,
+        db: MongoClient = Depends(dependencies.get_db)):
+    """Return a non-expiring API key to be sent to jobs (i.e. extractors). If it was deleted by the user, a new one
+    will be created, otherwise it will be re-used."""
+    key = "__user_job_key"
+    if (job_key_q := await db["user_keys"].find_one({"user": username, "name": key})) is not None:
+        job_key = UserAPIKey.from_mongo(job_key_q)
+        return job_key.key
+    else:
+        # TODO: enforce permissions here...
+        return generate_user_api_key(name=key, mins=0, db=db, current_user=username)

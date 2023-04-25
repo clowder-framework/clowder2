@@ -1,5 +1,6 @@
-from typing import Optional
 from datetime import datetime
+from typing import Optional
+
 from passlib.context import CryptContext
 from pydantic import Field, EmailStr, BaseModel
 from pymongo import MongoClient
@@ -42,6 +43,7 @@ class UserOut(UserBase):
 class UserAPIKey(MongoModel):
     """API keys can have a reference name (e.g. 'Uploader script')"""
 
+    name: str
     key: str
     user: EmailStr
     created: datetime = Field(default_factory=datetime.utcnow)
