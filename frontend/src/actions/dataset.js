@@ -19,7 +19,6 @@ export function setDatasetGroupRole(datasetId, groupId, roleType) {
 			.then((json) => {
 				dispatch({
 					type: SET_DATASET_GROUP_ROLE,
-					files: json,
 					receivedAt: Date.now(),
 				});
 			})
@@ -46,7 +45,6 @@ export function setDatasetUserRole(datasetId, username, roleType) {
 			.then((json) => {
 				dispatch({
 					type: SET_DATASET_USER_ROLE,
-					files: json,
 					receivedAt: Date.now(),
 				});
 			})
@@ -297,19 +295,17 @@ export function fetchFolderPath(folderId) {
 	};
 }
 
-export const RECEIVE_DATASET_USERS_AND_ROLES =
-	"RECEIVE_DATASET_USERS_AND_ROLES";
+export const RECEIVE_DATASET_ROLES = "RECEIVE_DATASET_ROLES";
 
-export function fetchDatasetUsersAndRoles(datasetId) {
+export function fetchDatasetRoles(datasetId) {
 	return (dispatch) => {
-		return V2.AuthorizationService.getDatasetUsersAndRolesApiV2AuthorizationsDatasetsDatasetIdUsersAndRolesGet(
+		return V2.AuthorizationService.getDatasetRolesApiV2AuthorizationsDatasetsDatasetIdRolesGet(
 			datasetId
 		)
 			.then((json) => {
-				console.log("json", json);
 				dispatch({
-					type: RECEIVE_DATASET_USERS_AND_ROLES,
-					usersAndRoles: json,
+					type: RECEIVE_DATASET_ROLES,
+					roles: json,
 					receivedAt: Date.now(),
 				});
 			})
@@ -318,40 +314,7 @@ export function fetchDatasetUsersAndRoles(datasetId) {
 			})
 			.catch((reason) => {
 				dispatch(
-					handleErrorsAuthorization(
-						reason,
-						fetchDatasetUsersAndRoles(datasetId)
-					)
-				);
-			});
-	};
-}
-
-export const RECEIVE_DATASET_GROUPS_AND_ROLES =
-	"RECEIVE_DATASET_GROUPS_AND_ROLES";
-
-export function fetchDatasetGroupsAndRoles(datasetId) {
-	return (dispatch) => {
-		return V2.AuthorizationService.getDatasetGroupsAndRolesApiV2AuthorizationsDatasetsDatasetIdGroupsAndRolesGet(
-			datasetId
-		)
-			.then((json) => {
-				console.log("json", json);
-				dispatch({
-					type: RECEIVE_DATASET_GROUPS_AND_ROLES,
-					groupsAndRoles: json,
-					receivedAt: Date.now(),
-				});
-			})
-			.then(() => {
-				dispatch(resetFailedReason());
-			})
-			.catch((reason) => {
-				dispatch(
-					handleErrorsAuthorization(
-						reason,
-						fetchDatasetGroupsAndRoles(datasetId)
-					)
+					handleErrorsAuthorization(reason, fetchDatasetRoles(datasetId))
 				);
 			});
 	};
