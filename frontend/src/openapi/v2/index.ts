@@ -53,6 +53,7 @@ export { RoleType } from './models/RoleType';
 export type { SearchCriteria } from './models/SearchCriteria';
 export type { SearchObject } from './models/SearchObject';
 export type { UserAndRole } from './models/UserAndRole';
+export type { UserAPIKeyOut } from './models/UserAPIKeyOut';
 export type { UserIn } from './models/UserIn';
 export type { UserLogin } from './models/UserLogin';
 export type { UserOut } from './models/UserOut';
