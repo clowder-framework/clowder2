@@ -11,6 +11,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import ShareIcon from '@mui/icons-material/Share';
 import ShareDatasetModal from "./ShareDatasetModal"
 import ShareGroupDatasetModal from "./ShareGroupDatasetModal";
+import EditStatusModal from "./EditStatusModal";
 
 type ActionsMenuProps = {
 	datasetId: string,
@@ -37,6 +38,7 @@ export const OtherMenu = (props: ActionsMenuProps): JSX.Element => {
 	const [deleteDatasetConfirmOpen, setDeleteDatasetConfirmOpen] = useState(false);
 	const [sharePaneOpen, setSharePaneOpen] = useState(false);
 	const [shareGroupPaneOpen, setShareGroupPaneOpen] = useState(false);
+	const [editStatusPaneOpen, setEditStatusPaneOpen] = useState(false);
 
 
 
@@ -64,8 +66,12 @@ export const OtherMenu = (props: ActionsMenuProps): JSX.Element => {
         setSharePaneOpen(false);
     }
 
-      const handleShareGroupClose = () => {
+    const handleShareGroupClose = () => {
         setShareGroupPaneOpen(false);
+    }
+
+     const handleEditStatusClose = () => {
+        setEditStatusPaneOpen(false);
     }
 
 	return (
@@ -79,6 +85,7 @@ export const OtherMenu = (props: ActionsMenuProps): JSX.Element => {
 
  		        <ShareDatasetModal open={sharePaneOpen} handleClose={handleShareClose} datasetName={datasetName}/>
 			 	<ShareGroupDatasetModal open={shareGroupPaneOpen} handleClose={handleShareGroupClose} datasetName={datasetName}/>
+				<EditStatusModal open={editStatusPaneOpen} handleClose={handleEditStatusClose} datasetName={datasetName}/>
 
 
 			<Button variant="outlined" onClick={handleOptionClick}
@@ -123,6 +130,17 @@ export const OtherMenu = (props: ActionsMenuProps): JSX.Element => {
                         			<ShareIcon fontSize="small" />
                     			</ListItemIcon>
                     			<ListItemText>Share With Group</ListItemText>
+                		</MenuItem>
+						<MenuItem
+                    			onClick={() => {
+                        			handleOptionClose();
+                        			setShareGroupPaneOpen(true);
+                    			}
+                    		}>
+                    			<ListItemIcon>
+                        			<ShareIcon fontSize="small" />
+                    			</ListItemIcon>
+                    			<ListItemText>Make Public</ListItemText>
                 		</MenuItem>
 			</Menu>
 		</Box>)
