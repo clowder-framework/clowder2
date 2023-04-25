@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import LoadingOverlay from "react-loading-overlay-ts";
 import {
 	Alert,
 	Autocomplete,
@@ -19,11 +20,11 @@ import {
 	Typography,
 } from "@mui/material";
 import { useParams } from "react-router-dom";
-import { setDatasetUserRole } from "../../actions/dataset";
+import { setDatasetUserRole, updateDataset } from "../../actions/dataset";
 import { useDispatch, useSelector } from "react-redux";
 import CloseIcon from "@mui/icons-material/Close";
 import { fetchAllUsers } from "../../actions/user";
-import { UserOut } from "../../openapi/v2";
+import {DatasetIn, UserOut} from "../../openapi/v2";
 import { RootState } from "../../types/data";
 
 type EditStatusModalProps = {
@@ -34,54 +35,28 @@ type EditStatusModalProps = {
 
 export default function EditStatusModal(props: EditStatusModalProps) {
 	const dispatch = useDispatch();
-
-	const listAllUsers = (skip: number, limit: number) =>
-		dispatch(fetchAllUsers(skip, limit));
-
-
-
 	const { open, handleClose, datasetName } = props;
 	const { datasetId } = useParams<{ datasetId?: string }>();
-	const [email, setEmail] = useState("");
 	const [showSuccessAlert, setShowSuccessAlert] = useState(false);
-	const [options, setOptions] = useState([]);
-	const users = useSelector((state: RootState) => state.group.users);
-	const currentDatasetStatus = useSelector((state: RootState) => state.dataset.about.status);
-	const [datasetStatus,setDatasetStatus ] = useState(currentDatasetStatus);
-
-	console.log(datasetStatus, 'is status');
-
-	const setUserRole = (datasetId: string, username: string, role: string) =>
-		dispatch(setDatasetUserRole(datasetId, username, role));
-
-	useEffect(() => {
-		listAllUsers(0, 21);
-	}, []);
-
-	useEffect(() => {
-		setOptions(
-			users.reduce((list: string[], user: UserOut) => {
-				return [...list, user.email];
-			}, [])
-		);
-	}, [users]);
+	const editDataset = (datasetId: string | undefined, formData: DatasetIn) => dispatch(updateDataset(datasetId, formData));
+	const about = useSelector((state: RootState) => state.dataset.about);
+	const [datasetStatus, setDatasetStatus] = useState(about["status"])
+	const [loading, setLoading] = useState(false);
 
 	const onSetStatus = () => {
-		console.log('dataset id is', datasetId);
-		console.log('dataset status is', datasetStatus)
-	};
-
-	const changeStatus = () => {
-		console.log('in change status method');
-		console.log()
-		// setUserRole(datasetId, email, role);
-		// setEmail("");
-		// setRole("viewer");
-		// setShowSuccessAlert(true);
+		setLoading(true);
+		editDataset(datasetId, {"status": datasetStatus});
+		setLoading(false);
+		handleClose(true);
 	};
 
 	return (
 		<Container>
+			<LoadingOverlay
+				active={loading}
+				spinner
+				text="Saving..."
+			>
 			<Dialog
 				open={open}
 				onClose={handleClose}
@@ -103,37 +78,13 @@ export default function EditStatusModal(props: EditStatusModalProps) {
 							alignItems: "center",
 						}}
 					>
-						{/*<Autocomplete*/}
-						{/*	id="email-auto-complete"*/}
-						{/*	freeSolo*/}
-						{/*	autoHighlight*/}
-						{/*	inputValue={email}*/}
-						{/*	onInputChange={(event, value) => {*/}
-						{/*		setEmail(value);*/}
-						{/*	}}*/}
-						{/*	options={options}*/}
-						{/*	renderInput={(params) => (*/}
-						{/*		<TextField*/}
-						{/*			{...params}*/}
-						{/*			sx={{*/}
-						{/*				mt: 1,*/}
-						{/*				mr: 1,*/}
-						{/*				alignItems: "right",*/}
-						{/*				width: "450px",*/}
-						{/*			}}*/}
-						{/*			required*/}
-						{/*			label="Enter email address"*/}
-						{/*		/>*/}
-						{/*	)}*/}
-						{/*/>{" "}*/}
-						as
 						<FormControl variant="outlined" sx={{ m: 1, minWidth: 120 }}>
 							<InputLabel id="demo-simple-select-label">Status</InputLabel>
 							<Select
 								labelId="demo-simple-select-label"
 								id="demo-simple-select"
-								value={datasetStatus}
-								defaultValue={datasetStatus}
+								// value={datasetStatus}
+								defaultValue={about['status']}
 								label="Status"
 								onChange={(event, value) => {
 									setDatasetStatus(event.target.value);
@@ -178,6 +129,7 @@ export default function EditStatusModal(props: EditStatusModalProps) {
 					<Button onClick={handleClose}>Close</Button>
 				</DialogActions>
 			</Dialog>
+			</LoadingOverlay>
 		</Container>
 	);
 }

@@ -146,7 +146,6 @@ export interface DatasetState {
 	datasetRole: AuthorizationBase;
 	groupsAndRoles: GroupAndRole[];
 	usersAndRoles: UserAndRole[];
-	status: string;
 }
 
 export interface ListenerState {
