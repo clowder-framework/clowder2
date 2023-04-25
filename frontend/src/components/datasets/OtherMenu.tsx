@@ -140,7 +140,7 @@ export const OtherMenu = (props: ActionsMenuProps): JSX.Element => {
                     			<ListItemIcon>
                         			<ShareIcon fontSize="small" />
                     			</ListItemIcon>
-                    			<ListItemText>Make Public</ListItemText>
+                    			<ListItemText>Change Status</ListItemText>
                 		</MenuItem>
 			</Menu>
 		</Box>)
