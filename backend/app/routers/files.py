@@ -1,44 +1,38 @@
 import io
-import json
-
-from elasticsearch import Elasticsearch
-import pika
 import mimetypes
 from datetime import datetime
-from typing import Optional, List, BinaryIO
+from typing import Optional, List
+from typing import Union
+
 from bson import ObjectId
+from elasticsearch import Elasticsearch
+from fastapi import APIRouter, HTTPException, Depends, Security
 from fastapi import (
-    APIRouter,
-    HTTPException,
-    Depends,
     File,
-    Form,
     UploadFile,
     Request,
 )
-from fastapi import APIRouter, HTTPException, Depends, Security
-from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from fastapi.responses import StreamingResponse
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from minio import Minio
 from pika.adapters.blocking_connection import BlockingChannel
 from pymongo import MongoClient
 
 from app import dependencies
-from app.deps.authorization_deps import FileAuthorization
 from app.config import settings
+from app.deps.authorization_deps import FileAuthorization
+from app.keycloak_auth import get_current_user, get_token
+from app.models.files import FileOut, FileVersion, FileContentType, FileDB
+from app.models.search import ESFileEntry
+from app.models.users import UserOut
+from app.rabbitmq.listeners import submit_file_job
+from app.routers.feeds import check_feed_listeners
 from app.search.connect import (
     insert_record,
     delete_document_by_id,
     update_record,
     delete_document_by_query,
 )
-from app.models.files import FileIn, FileOut, FileVersion, FileContentType, FileDB
-from app.models.users import UserOut
-from app.routers.feeds import check_feed_listeners
-from app.keycloak_auth import get_user, get_current_user, get_token
-from app.rabbitmq.listeners import submit_file_job, submit_file_job
-from typing import Union
-from app.models.metadata import MetadataOut
 
 router = APIRouter()
 security = HTTPBearer()
@@ -163,17 +157,17 @@ async def add_file_entry(
     await db["file_versions"].insert_one(new_version.to_mongo())
 
     # Add entry to the file index
-    doc = {
-        "name": file_db.name,
-        "creator": file_db.creator.email,
-        "created": file_db.created,
-        "download": file_db.downloads,
-        "dataset_id": str(file_db.dataset_id),
-        "folder_id": str(file_db.folder_id),
-        "bytes": file_db.bytes,
-        "content_type": content_type_obj.content_type,
-        "content_type_main": content_type_obj.main_type,
-    }
+    doc = ESFileEntry(
+        name=file_db.name,
+        creator=file_db.creator.email,
+        created=file_db.created,
+        downloads=file_db.downloads,
+        dataset_id=str(file_db.dataset_id),
+        folder_id=str(file_db.folder_id),
+        bytes=file_db.bytes,
+        content_type=content_type_obj.content_type,
+        content_type_main=content_type_obj.main_type,
+    )
     insert_record(es, "file", doc, file_db.id)
 
     # Submit file job to any qualifying feeds

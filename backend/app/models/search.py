@@ -1,6 +1,7 @@
 from datetime import datetime
-from pydantic import BaseModel
 from typing import Optional, List
+
+from pydantic import BaseModel
 
 
 class SearchCriteria(BaseModel):
@@ -23,3 +24,38 @@ class SearchObject(BaseModel):
     criteria: List[SearchCriteria] = []
     mode: str = "and"  # and / or
     original: Optional[str]  # original un-parsed search string
+
+
+class ElasticsearchEntry(BaseModel):
+    """These Entries are used to generate the JSON for files/datasets/etc. that go into Elasticsearch index."""
+
+    creator: str
+    created: datetime
+    modified: Optional[datetime] = None
+
+
+class ESFileEntry(ElasticsearchEntry):
+    name: str
+    content_type: str
+    content_type_main: str
+    dataset_id: str
+    folder_id: str
+    bytes: int
+    downloads: int
+
+
+class ESDatasetEntry(ElasticsearchEntry):
+    name: str
+    description: str
+    downloads: int
+
+
+class ESMetadataEntry(ElasticsearchEntry):
+    resource_id: str
+    resource_type: str = "file"
+    resource_created: datetime
+    resource_creator: str
+    content: dict
+    context_url: Optional[str] = None
+    context: Optional[List[dict]] = []
+    definition: Optional[str] = None
