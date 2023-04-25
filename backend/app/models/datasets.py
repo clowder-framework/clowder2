@@ -1,13 +1,14 @@
-from datetime import datetime, timedelta
+from datetime import datetime
 from enum import Enum, auto
 from typing import Optional, List
 
 import pymongo
 from beanie import Document, View, PydanticObjectId
-from pydantic import BaseModel
-from pydantic import Field
+from pydantic import BaseModel, Field
 
-from app.models.authorization import AuthorizationDB
+from app.models.authorization import RoleType, AuthorizationDB
+from app.models.groups import GroupOut
+from app.models.mongomodel import MongoModel
 from app.models.users import UserOut
 
 
@@ -84,3 +85,19 @@ class DatasetDBViewList(View, DatasetBase):
 
 class DatasetOut(DatasetDB):
     pass
+
+
+class UserAndRole(BaseModel):
+    user: UserOut
+    role: RoleType
+
+
+class GroupAndRole(BaseModel):
+    group: GroupOut
+    role: RoleType
+
+
+class DatasetRoles(MongoModel):
+    dataset_id: str
+    user_roles: List[UserAndRole] = []
+    group_roles: List[GroupAndRole] = []

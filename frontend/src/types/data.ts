@@ -1,15 +1,14 @@
 import {
 	AuthorizationBase,
+	DatasetRoles,
 	EventListenerJob,
 	FileOut as FileSummary,
 	FileVersion,
 	FolderOut,
-	GroupAndRole,
 	GroupOut,
 	MetadataDefinitionOut,
 	MetadataOut as Metadata,
 	RoleType,
-	UserAndRole,
 	UserAPIKeyOut,
 	UserOut,
 } from "../openapi/v2";
@@ -145,8 +144,7 @@ export interface DatasetState {
 	newFile: FileSummary;
 	about: Dataset;
 	datasetRole: AuthorizationBase;
-	groupsAndRoles: GroupAndRole[];
-	usersAndRoles: UserAndRole[];
+	roles: DatasetRoles;
 }
 
 export interface ListenerState {

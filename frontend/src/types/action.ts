@@ -7,14 +7,13 @@ import {
 } from "./data";
 import {
 	AuthorizationBase,
+	DatasetRoles,
 	FileOut as FileSummary,
 	FileVersion,
-	GroupAndRole,
 	GroupOut as Group,
 	MetadataDefinitionOut as MetadataDefinition,
 	MetadataOut as Metadata,
 	RoleType,
-	UserAndRole,
 	UserAPIKeyOut,
 	UserOut,
 } from "../openapi/v2";
@@ -41,14 +40,9 @@ interface RECEIVE_DATASET_ROLE {
 	type: "RECEIVE_DATASET_ROLE";
 }
 
-interface RECEIVE_DATASET_GROUPS_AND_ROLES {
-	groupsAndRoles: GroupAndRole[];
-	type: "RECEIVE_DATASET_GROUPS_AND_ROLES";
-}
-
-interface RECEIVE_DATASET_USERS_AND_ROLES {
-	usersAndRoles: UserAndRole[];
-	type: "RECEIVE_DATASET_USERS_AND_ROLES";
+interface RECEIVE_DATASET_ROLES {
+	roles: DatasetRoles;
+	type: "RECEIVE_DATASET_ROLES";
 }
 
 interface RECEIVE_FILE_ROLE {
@@ -421,5 +415,4 @@ export type DataAction =
 	| ADD_GROUP_MEMBER
 	| ASSIGN_GROUP_MEMBER_ROLE
 	| LIST_USERS
-	| RECEIVE_DATASET_GROUPS_AND_ROLES
-	| RECEIVE_DATASET_USERS_AND_ROLES;
+	| RECEIVE_DATASET_ROLES;
