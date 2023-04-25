@@ -134,7 +134,7 @@ export const OtherMenu = (props: ActionsMenuProps): JSX.Element => {
 						<MenuItem
                     			onClick={() => {
                         			handleOptionClose();
-                        			setShareGroupPaneOpen(true);
+                        			setEditStatusPaneOpen(true);
                     			}
                     		}>
                     			<ListItemIcon>

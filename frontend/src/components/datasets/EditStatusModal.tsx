@@ -38,13 +38,18 @@ export default function EditStatusModal(props: EditStatusModalProps) {
 	const listAllUsers = (skip: number, limit: number) =>
 		dispatch(fetchAllUsers(skip, limit));
 
+
+
 	const { open, handleClose, datasetName } = props;
 	const { datasetId } = useParams<{ datasetId?: string }>();
 	const [email, setEmail] = useState("");
-	const [role, setRole] = useState("viewer");
 	const [showSuccessAlert, setShowSuccessAlert] = useState(false);
 	const [options, setOptions] = useState([]);
 	const users = useSelector((state: RootState) => state.group.users);
+	const currentDatasetStatus = useSelector((state: RootState) => state.dataset.about.status);
+	const [datasetStatus,setDatasetStatus ] = useState(currentDatasetStatus);
+
+	console.log(datasetStatus, 'is status');
 
 	const setUserRole = (datasetId: string, username: string, role: string) =>
 		dispatch(setDatasetUserRole(datasetId, username, role));
@@ -61,11 +66,18 @@ export default function EditStatusModal(props: EditStatusModalProps) {
 		);
 	}, [users]);
 
-	const onShare = () => {
-		setUserRole(datasetId, email, role);
-		setEmail("");
-		setRole("viewer");
-		setShowSuccessAlert(true);
+	const onSetStatus = () => {
+		console.log('dataset id is', datasetId);
+		console.log('dataset status is', datasetStatus)
+	};
+
+	const changeStatus = () => {
+		console.log('in change status method');
+		console.log()
+		// setUserRole(datasetId, email, role);
+		// setEmail("");
+		// setRole("viewer");
+		// setShowSuccessAlert(true);
 	};
 
 	return (
@@ -81,66 +93,64 @@ export default function EditStatusModal(props: EditStatusModalProps) {
 					},
 				}}
 			>
-				<DialogTitle>Share dataset &apos;{datasetName}&apos;</DialogTitle>
+				<DialogTitle>Change Dataset Status &apos;{datasetName}&apos;</DialogTitle>
 				<Divider />
 				<DialogContent>
-					<Typography>Invite people to collaborate</Typography>
+					<Typography>Change the status of your dataset</Typography>
 					<div
 						style={{
 							display: "flex",
 							alignItems: "center",
 						}}
 					>
-						<Autocomplete
-							id="email-auto-complete"
-							freeSolo
-							autoHighlight
-							inputValue={email}
-							onInputChange={(event, value) => {
-								setEmail(value);
-							}}
-							options={options}
-							renderInput={(params) => (
-								<TextField
-									{...params}
-									sx={{
-										mt: 1,
-										mr: 1,
-										alignItems: "right",
-										width: "450px",
-									}}
-									required
-									label="Enter email address"
-								/>
-							)}
-						/>{" "}
+						{/*<Autocomplete*/}
+						{/*	id="email-auto-complete"*/}
+						{/*	freeSolo*/}
+						{/*	autoHighlight*/}
+						{/*	inputValue={email}*/}
+						{/*	onInputChange={(event, value) => {*/}
+						{/*		setEmail(value);*/}
+						{/*	}}*/}
+						{/*	options={options}*/}
+						{/*	renderInput={(params) => (*/}
+						{/*		<TextField*/}
+						{/*			{...params}*/}
+						{/*			sx={{*/}
+						{/*				mt: 1,*/}
+						{/*				mr: 1,*/}
+						{/*				alignItems: "right",*/}
+						{/*				width: "450px",*/}
+						{/*			}}*/}
+						{/*			required*/}
+						{/*			label="Enter email address"*/}
+						{/*		/>*/}
+						{/*	)}*/}
+						{/*/>{" "}*/}
 						as
 						<FormControl variant="outlined" sx={{ m: 1, minWidth: 120 }}>
 							<InputLabel id="demo-simple-select-label">Status</InputLabel>
 							<Select
 								labelId="demo-simple-select-label"
 								id="demo-simple-select"
-								value={role}
-								defaultValue={"viewer"}
+								value={datasetStatus}
+								defaultValue={datasetStatus}
 								label="Status"
 								onChange={(event, value) => {
-									setRole(event.target.value);
+									setDatasetStatus(event.target.value);
 								}}
 							>
-								<MenuItem value="owner">Owner</MenuItem>
-								<MenuItem value="editor">Editor</MenuItem>
-								<MenuItem value="uploader">Uploader</MenuItem>
-								<MenuItem value="viewer">Viewer</MenuItem>
+								<MenuItem value="PRIVATE">Private</MenuItem>
+								<MenuItem value="PUBLIC">Public</MenuItem>
+								<MenuItem value="PUBLISHED">Published</MenuItem>
 							</Select>
 						</FormControl>
 					</div>
 					<Button
 						variant="contained"
 						sx={{ marginTop: 1 }}
-						onClick={onShare}
-						disabled={email.length > 0 ? false : true}
+						onClick={onSetStatus}
 					>
-						Share
+						Change Status
 					</Button>
 					<Collapse in={showSuccessAlert}>
 						<br />
