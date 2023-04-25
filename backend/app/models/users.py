@@ -45,6 +45,15 @@ class UserAPIKey(MongoModel):
 
     name: str
     key: str
+    name: str
+    user: EmailStr
+    created: datetime = Field(default_factory=datetime.utcnow)
+    expires: Optional[datetime] = None
+
+
+class UserAPIKeyOut(MongoModel):
+    # don't show the raw key
+    name: str
     user: EmailStr
     created: datetime = Field(default_factory=datetime.utcnow)
     expires: Optional[datetime] = None
