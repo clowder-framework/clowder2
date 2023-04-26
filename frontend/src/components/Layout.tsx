@@ -143,6 +143,7 @@ export default function PersistentDrawerLeft(props) {
 	// @ts-ignore
 	return (
 		// Wrap reactive search base on the most outside component
+		// TODO: Is there a better place to put this?
 		<ReactiveBase
 			url={config.searchEndpoint}
 			app="file,dataset,metadata"

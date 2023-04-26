@@ -3,6 +3,7 @@ import {
 	DataSearch,
 	DateRange,
 	MultiDropdownList,
+	ReactiveComponent,
 	ReactiveList,
 	SingleDropdownRange,
 } from "@appbaseio/reactivesearch";
@@ -11,8 +12,11 @@ import Layout from "../Layout";
 import { SearchResult } from "./SearchResult";
 import { SearchErrorBoundary } from "./SearchErrorBoundary";
 import { theme } from "../../theme";
+import { getCurrEmail } from "../../utils/common";
 
 export function Search() {
+	const email = getCurrEmail();
+
 	const [luceneOn, setLuceneOn] = useState(false);
 	// @ts-ignore
 	return (
@@ -48,7 +52,7 @@ export function Search() {
 							<DataSearch
 								title="String Search for Datasets and Files"
 								placeholder="Please use Lucene Syntax string query.
-									E.g.name:water~2 AND download:[0 TO 40} AND author:myersrobert@scott-gutierrez.com"
+									E.g.name:water~2 AND download:[0 TO 40} AND creator:myersrobert@scott-gutierrez.com"
 								componentId="string-searchbox"
 								autosuggest={false}
 								highlight={false}
@@ -88,14 +92,42 @@ export function Search() {
 									dataField={[
 										{ field: "name", weight: 3 },
 										{ field: "description", weight: 2 },
-										{ field: "author.keyword", weight: 1 },
 										{ field: "creator.keyword", weight: 1 },
 									]}
-									// placeholder="Search for Dataset"
 									innerClass={{
 										title: "search-title",
 										input: "search-input",
 									}}
+								/>
+
+								{/*authorization clause - searcher must be creator or have permission to view result*/}
+								<ReactiveComponent
+									componentId="authFilter"
+									customQuery={() => ({
+										query: {
+											bool: {
+												should: [
+													// TODO: Include if dataset is public
+													{
+														term: {
+															// TODO: Remove (model changed)
+															author: email,
+														},
+													},
+													{
+														term: {
+															creator: email,
+														},
+													},
+													{
+														term: {
+															user_ids: email,
+														},
+													},
+												],
+											},
+										},
+									})}
 								/>
 
 								{/*filters*/}
@@ -103,11 +135,11 @@ export function Search() {
 									<Grid item xs={12} sm={4} md={4} lg={4}>
 										<MultiDropdownList
 											componentId="creatorfilter"
-											dataField="author"
+											dataField="creator"
 											size={5}
 											sortBy="count"
 											showCount={true}
-											placeholder="Author: All"
+											placeholder="Creator: All"
 											innerClass={{
 												select: "filter-select",
 											}}
@@ -175,6 +207,7 @@ export function Search() {
 											"creatorfilter",
 											"downloadfilter",
 											"modifyfilter",
+											"authFilter",
 										],
 									}}
 									render={({ data }) => <SearchResult data={data} />}

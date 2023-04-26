@@ -26,7 +26,6 @@ from rocrate.model.person import Person
 from rocrate.rocrate import ROCrate
 
 from app import dependencies
-from app import keycloak_auth
 from app.config import settings
 from app.deps.authorization_deps import Authorization
 from app.keycloak_auth import get_token
@@ -191,7 +190,7 @@ async def remove_folder_entry(
 @router.post("", response_model=DatasetOut)
 async def save_dataset(
     dataset_in: DatasetIn,
-    user=Depends(keycloak_auth.get_current_user),
+    user=Depends(get_current_user),
     db: MongoClient = Depends(dependencies.get_db),
     es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
 ):
@@ -222,6 +221,7 @@ async def save_dataset(
         created=dataset_out.created,
         modified=dataset_out.modified,
         downloads=dataset_out.downloads,
+        user_ids=[user.email],
     )
     insert_record(es, "dataset", doc, dataset_out.id)
 
@@ -496,6 +496,7 @@ async def delete_dataset(
             file = FileOut(**file)
             await remove_file_entry(file.id, db, fs, es)
         await db["folders"].delete_many({"dataset_id": ObjectId(dataset_id)})
+        await db["authorization"].delete_many({"dataset_id": ObjectId(dataset_id)})
         return {"deleted": dataset_id}
     else:
         raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
@@ -511,7 +512,6 @@ async def add_folder(
 ):
     if not allow:
         raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
-    folder_dict = folder_in.dict()
     folder_db = FolderDB(
         **folder_in.dict(), author=user, dataset_id=PyObjectId(dataset_id)
     )
@@ -702,16 +702,15 @@ async def create_dataset_from_zip(
             zip_directory = _describe_zip_contents(zip_contents)
 
         # Create dataset
-        dataset_name = file.filename.rstrip(".zip")
-        dataset_description = "Uploaded as %s" % file.filename
-        ds_dict = {"name": dataset_name, "description": dataset_description}
-        dataset_db = DatasetDB(**ds_dict, author=user)
-        new_dataset = await db["datasets"].insert_one(dataset_db.to_mongo())
-        dataset_id = new_dataset.inserted_id
+        dataset_in = {
+            "name": file.filename.rstrip(".zip"),
+            "description": "Uploaded as %s" % file.filename,
+        }
+        new_dataset = save_dataset(dataset_in, user, db, es)
 
         # Create folders
         folder_lookup = await _create_folder_structure(
-            dataset_id, zip_directory, "", {}, user, db
+            new_dataset.id, zip_directory, "", {}, user, db
         )
 
         # Go back through zipfile, this time uploading files to folders
@@ -731,12 +730,12 @@ async def create_dataset_from_zip(
                         fileDB = FileDB(
                             name=filename,
                             creator=user,
-                            dataset_id=dataset_id,
+                            dataset_id=new_dataset.id,
                             folder_id=folder_id,
                         )
                     else:
                         fileDB = FileDB(
-                            name=filename, creator=user, dataset_id=dataset_id
+                            name=filename, creator=user, dataset_id=new_dataset.id
                         )
                     with open(extracted, "rb") as file_reader:
                         await add_file_entry(
@@ -752,7 +751,7 @@ async def create_dataset_from_zip(
                     if os.path.isfile(extracted):
                         os.remove(extracted)
 
-    found = await db["datasets"].find_one({"_id": new_dataset.inserted_id})
+    found = await db["datasets"].find_one({"_id": new_dataset.id})
     dataset_out = DatasetOut.from_mongo(found)
     return dataset_out
 

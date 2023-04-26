@@ -27,11 +27,13 @@ class SearchObject(BaseModel):
 
 
 class ElasticsearchEntry(BaseModel):
-    """These Entries are used to generate the JSON for files/datasets/etc. that go into Elasticsearch index."""
+    """These Entries are used to generate the JSON for files/datasets/etc. that go into Elasticsearch index.
+    user_ids is a list of email addresses that have permission to view the document."""
 
     creator: str
     created: datetime
     modified: Optional[datetime] = None
+    user_ids: List[str] = []
 
 
 class ESFileEntry(ElasticsearchEntry):

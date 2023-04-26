@@ -22,6 +22,7 @@ from app import dependencies
 from app.config import settings
 from app.deps.authorization_deps import FileAuthorization
 from app.keycloak_auth import get_current_user, get_token
+from app.models.authorization import AuthorizationOut
 from app.models.files import FileOut, FileVersion, FileContentType, FileDB
 from app.models.search import ESFileEntry
 from app.models.users import UserOut
@@ -157,6 +158,12 @@ async def add_file_entry(
     await db["file_versions"].insert_one(new_version.to_mongo())
 
     # Add entry to the file index
+    authorized_user_ids = []
+    async for auth_q in db["authorization"].find(
+        {"dataset_id": ObjectId(file_db.dataset_id)}
+    ):
+        auth = AuthorizationOut.from_mongo(auth_q)
+        authorized_user_ids += auth.user_ids
     doc = ESFileEntry(
         name=file_db.name,
         creator=file_db.creator.email,
@@ -167,6 +174,7 @@ async def add_file_entry(
         bytes=file_db.bytes,
         content_type=content_type_obj.content_type,
         content_type_main=content_type_obj.main_type,
+        user_ids=authorized_user_ids,
     )
     insert_record(es, "file", doc, file_db.id)
 
