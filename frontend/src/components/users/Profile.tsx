@@ -27,7 +27,8 @@ export const Profile = (): JSX.Element => {
 	}, []);
 
 	console.log('profile is', profile);
-	return (
+	if(profile != null) {
+		return (
 			<Layout>
 				<TableContainer component={Paper}>
 					<Table sx={{minWidth: 650}} aria-label="simple table">
@@ -43,14 +44,19 @@ export const Profile = (): JSX.Element => {
 								<TableRow
 									sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
 		>
-									<TableCell>{"name"}</TableCell>
-									<TableCell align="right">{"a@a.com"}</TableCell>
+									<TableCell>{profile.first_name} {profile.last_name}</TableCell>
+									<TableCell align="right">{profile.email}</TableCell>
 									<TableCell align="right">{"false"}</TableCell>
 								</TableRow>
 							</TableBody>
 					</Table>
 				</TableContainer>
 			</Layout>
-	)
+		)
+	} else {
+		return (
+			<p>nothing yet</p>
+		)
+	}
 
 }
