@@ -103,6 +103,13 @@ async def get_users(
         users.append(UserOut(**doc))
     return users
 
+@router.get("/profile", response_model=UserOut)
+async def get_profile(
+    username=Depends(get_current_username), db: MongoClient = Depends(dependencies.get_db)
+):
+    if (user := await db["users"].find_one({"email": username})) is not None:
+        return UserOut.from_mongo(user)
+    raise HTTPException(status_code=404, detail=f"User {username} not found")
 
 @router.get("/{user_id}", response_model=UserOut)
 async def get_user(user_id: str, db: MongoClient = Depends(dependencies.get_db)):
