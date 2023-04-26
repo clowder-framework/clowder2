@@ -61,3 +61,13 @@ class ESMetadataEntry(ElasticsearchEntry):
     context_url: Optional[str] = None
     context: Optional[List[dict]] = []
     definition: Optional[str] = None
+    # File fields (for UI display)
+    name: str
+    content_type: str
+    content_type_main: str
+    dataset_id: str
+    folder_id: str
+    bytes: int
+    downloads: int
+    # Dataset fields (for UI display)
+    description: str
