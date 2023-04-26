@@ -23,7 +23,7 @@ from app.models.authorization import (
     AuthorizationOut,
     RoleType,
 )
-from app.models.datasets import DatasetOut, UserAndRole, GroupAndRole, DatasetRoles
+from app.models.datasets import DatasetOut, UserAndRole, GroupAndRole, DatasetRoles, DatasetStatus
 from app.models.groups import GroupOut
 from app.models.pyobjectid import PyObjectId
 from app.models.users import UserOut
