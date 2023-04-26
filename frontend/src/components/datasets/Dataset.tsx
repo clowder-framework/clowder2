@@ -32,6 +32,7 @@ import { FormatListBulleted, InsertDriveFile } from "@material-ui/icons";
 import { Listeners } from "../listeners/Listeners";
 import AssessmentIcon from "@mui/icons-material/Assessment";
 import HistoryIcon from "@mui/icons-material/History";
+import ShareIcon from "@mui/icons-material/Share";
 import BuildIcon from "@mui/icons-material/Build";
 import { ExtractionHistoryTab } from "../listeners/ExtractionHistoryTab";
 import { SharingTab } from "../sharing/SharingTab";
@@ -275,7 +276,7 @@ export const Dataset = (): JSX.Element => {
 							disabled={false}
 						/>
 						<Tab
-							icon={<HistoryIcon />}
+							icon={<ShareIcon />}
 							iconPosition="start"
 							sx={TabStyle}
 							label="Sharing"

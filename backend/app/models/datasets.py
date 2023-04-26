@@ -1,10 +1,11 @@
 from datetime import datetime
 from enum import Enum, auto
-from typing import Optional
+from typing import Optional, List
 
-from pydantic import BaseModel
-from pydantic import Field
+from pydantic import BaseModel, Field
 
+from app.models.authorization import RoleType
+from app.models.groups import GroupOut
 from app.models.mongomodel import MongoModel
 from app.models.users import UserOut
 
@@ -48,3 +49,19 @@ class DatasetDB(MongoModel, DatasetBase):
 
 class DatasetOut(DatasetDB):
     pass
+
+
+class UserAndRole(BaseModel):
+    user: UserOut
+    role: RoleType
+
+
+class GroupAndRole(BaseModel):
+    group: GroupOut
+    role: RoleType
+
+
+class DatasetRoles(MongoModel):
+    dataset_id: str
+    user_roles: List[UserAndRole] = []
+    group_roles: List[GroupAndRole] = []
