@@ -277,7 +277,7 @@ async def get_dataset(
         raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
 
 
-@router.get("/{dataset_id}/files")
+@router.get("/{dataset_id}/files", response_model=List[FileOut])
 async def get_dataset_files(
         dataset_id: str,
         folder_id: Optional[str] = None,
