@@ -7,6 +7,7 @@ import tempfile
 import zipfile
 from collections.abc import Mapping, Iterable
 from typing import List, Optional, Union
+
 from bson import ObjectId
 from bson import json_util
 from elasticsearch import Elasticsearch
@@ -26,10 +27,11 @@ from rocrate.rocrate import ROCrate
 
 from app import dependencies
 from app import keycloak_auth
-from app.deps.authorization_deps import Authorization
 from app.config import settings
+from app.deps.authorization_deps import Authorization
 from app.keycloak_auth import get_token
 from app.keycloak_auth import get_user, get_current_user
+from app.models.authorization import AuthorizationDB, RoleType
 from app.models.datasets import (
     DatasetBase,
     DatasetIn,
@@ -44,15 +46,12 @@ from app.models.pyobjectid import PyObjectId
 from app.models.users import UserOut
 from app.rabbitmq.listeners import submit_dataset_job
 from app.routers.files import add_file_entry, remove_file_entry
-
 from app.search.connect import (
-    connect_elasticsearch,
     insert_record,
     delete_document_by_id,
     delete_document_by_query,
     update_record,
 )
-from app.models.authorization import AuthorizationDB, RoleType
 
 router = APIRouter()
 security = HTTPBearer()
@@ -291,7 +290,7 @@ async def get_dataset(
         raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
 
 
-@router.get("/{dataset_id}/files")
+@router.get("/{dataset_id}/files", response_model=List[FileOut])
 async def get_dataset_files(
     dataset_id: str,
     folder_id: Optional[str] = None,

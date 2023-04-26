@@ -2,17 +2,18 @@
 import json
 import logging
 from datetime import datetime
+
 from bson import ObjectId
+from fastapi import Security, HTTPException, Depends
 from fastapi.security import OAuth2AuthorizationCodeBearer, APIKeyHeader
-from jose import ExpiredSignatureError, jwt
-from keycloak.keycloak_openid import KeycloakOpenID
+from itsdangerous.exc import BadSignature
+from itsdangerous.url_safe import URLSafeSerializer
+from jose import ExpiredSignatureError
 from keycloak.exceptions import KeycloakAuthenticationError, KeycloakGetError
 from keycloak.keycloak_admin import KeycloakAdmin
-from pymongo import MongoClient
-from fastapi import Security, HTTPException, status, Depends
+from keycloak.keycloak_openid import KeycloakOpenID
 from pydantic import Json
-from itsdangerous.url_safe import URLSafeSerializer
-from itsdangerous.exc import BadSignature
+from pymongo import MongoClient
 
 from . import dependencies
 from .config import settings

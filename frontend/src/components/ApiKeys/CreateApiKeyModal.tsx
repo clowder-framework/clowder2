@@ -6,12 +6,12 @@ import {
 	DialogContent,
 	DialogTitle,
 	FormControl,
-	InputLabel,
 	MenuItem,
 	Select,
 } from "@mui/material";
 import {
 	generateApiKey as generateApiKeyAction,
+	listApiKeys as listApiKeysAction,
 	resetApiKey as resetApiKeyAction,
 } from "../../actions/user";
 import { useDispatch, useSelector } from "react-redux";
@@ -19,30 +19,43 @@ import { RootState } from "../../types/data";
 import { ClowderMetadataTextField } from "../styledComponents/ClowderMetadataTextField";
 import { ClowderFootnote } from "../styledComponents/ClowderFootnote";
 import { CopyToClipboard } from "react-copy-to-clipboard";
+import { ClowderInputLabel } from "../styledComponents/ClowderInputLabel";
+import { ClowderInput } from "../styledComponents/ClowderInput";
 
 type ApiKeyModalProps = {
+	skip: number | undefined;
+	limit: number;
 	apiKeyModalOpen: boolean;
 	setApiKeyModalOpen: any;
 };
 
-export const ApiKeyModal = (props: ApiKeyModalProps) => {
-	const { apiKeyModalOpen, setApiKeyModalOpen } = props;
+export const CreateApiKeyModal = (props: ApiKeyModalProps) => {
+	const { skip, limit, apiKeyModalOpen, setApiKeyModalOpen } = props;
 
 	const dispatch = useDispatch();
-	const generateApiKey = (minutes: number) =>
-		dispatch(generateApiKeyAction(minutes));
+	const generateApiKey = (name: string, minutes: number) =>
+		dispatch(generateApiKeyAction(name, minutes));
+	const listApiKeys = (skip: number | undefined, limit: number | undefined) =>
+		dispatch(listApiKeysAction(skip, limit));
 	const resetApiKey = () => dispatch(resetApiKeyAction());
-	const apiKey = useSelector((state: RootState) => state.user.apiKey);
+	const hashedKey = useSelector((state: RootState) => state.user.hashedKey);
 
+	const [name, setName] = useState("");
 	const [minutes, setMinutes] = useState(30);
 
 	const handleClose = () => {
-		resetApiKey();
 		setApiKeyModalOpen(false);
+
+		// fetch latest api key list
+		listApiKeys(skip, limit);
+		resetApiKey();
+		// reset
+		setName("");
+		setMinutes(30);
 	};
 
 	const handleGenerate = () => {
-		generateApiKey(minutes);
+		generateApiKey(name, minutes);
 	};
 
 	const handleExpirationChange = (e) => {
@@ -52,7 +65,7 @@ export const ApiKeyModal = (props: ApiKeyModalProps) => {
 	return (
 		<Dialog open={apiKeyModalOpen} onClose={handleClose} fullWidth={true}>
 			<DialogTitle>Your API Key</DialogTitle>
-			{apiKey ? (
+			{hashedKey ? (
 				<>
 					<DialogContent>
 						<ClowderFootnote>
@@ -60,13 +73,13 @@ export const ApiKeyModal = (props: ApiKeyModalProps) => {
 							this again.
 						</ClowderFootnote>
 						<ClowderMetadataTextField
-							value={apiKey}
+							value={hashedKey}
 							disabled={true}
 							fullWidth
 						/>
 					</DialogContent>
 					<DialogActions>
-						<CopyToClipboard text={apiKey}>
+						<CopyToClipboard text={hashedKey}>
 							<Button variant={"contained"}>Copy</Button>
 						</CopyToClipboard>
 						<Button onClick={handleClose}>Close</Button>
@@ -75,14 +88,26 @@ export const ApiKeyModal = (props: ApiKeyModalProps) => {
 			) : (
 				<>
 					<DialogContent>
-						<ClowderFootnote>Your API key will expire</ClowderFootnote>
 						<FormControl fullWidth sx={{ marginTop: "1em" }}>
-							<InputLabel id="demo-simple-select-label">After</InputLabel>
+							<ClowderInputLabel>Name</ClowderInputLabel>
+							<ClowderInput
+								required={true}
+								id="name"
+								onChange={(event) => {
+									setName(event.target.value);
+								}}
+								defaultValue={name}
+							/>
+						</FormControl>
+						<FormControl fullWidth sx={{ marginTop: "1em" }}>
+							<ClowderInputLabel id="expiration">
+								Expire after
+							</ClowderInputLabel>
 							<Select
 								labelId="expiration"
 								id="expiration"
 								value={minutes}
-								label="Expiration"
+								label="After"
 								onChange={handleExpirationChange}
 							>
 								<MenuItem value={30}>30 Minutes</MenuItem>
