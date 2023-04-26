@@ -39,11 +39,11 @@ spec:
             - name: WEB_CONCURRENCY
               value: "4"
             - name: MINIO_SERVER_URL
-              value: { { include "clowder2.name" . } }-minio-headless:9000
+              value: "{ { include \"clowder2.name\" . } }-minio-headless:9000"
             - name: MINIO_BUCKET_NAME
-            value: "clowder
+              value: "clowder"
             - name: MINIO_ACCESS_KEY
-              value: {{ .Values.minio.auth.rootUser }}
+              value: { { .Values.minio.auth.rootUser } }
             - name: MINIO_SECRET_KEY
               valueFrom:
                 secretKeyRef:
@@ -87,9 +87,9 @@ spec:
                   name: clowder2-rabbitmq
                   key: rabbitmq-password
             - name: RABBITMQ_HOST
-              value: { { include "clowder2.name" . } }:15672
+              value: "{ { include \"clowder2.name\" . } }:15672"
             - name: HEARTBEAT_EXCHANGE
-            value: "extractors"
+              value: "extractors"
           ports:
             - name: http
               containerPort: 80

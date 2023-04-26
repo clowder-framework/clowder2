@@ -4,7 +4,7 @@ dependencies:
   version: 12.1.31
 - name: minio
   repository: https://charts.bitnami.com/bitnami
-  version: 11.10.3
+  version: 12.4.1
 - name: rabbitmq
   repository: https://charts.bitnami.com/bitnami
   version: 10.3.6
