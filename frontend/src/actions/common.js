@@ -64,7 +64,7 @@ export function handleErrors(reason, originalFunc){
 		return (dispatch) => {
 			dispatch({
 				type: NOT_AUTHORIZED,
-				reason: "Forbidden",
+				reason: reason.body.detail,
 				stack: reason.stack ? reason.stack : "",
 				receivedAt: Date.now()
 			});
@@ -73,7 +73,7 @@ export function handleErrors(reason, originalFunc){
 		return (dispatch) => {
 			dispatch({
 				type: NOT_FOUND,
-				reason: "Not Found",
+				reason: reason.body.detail,
 				stack: reason.stack ? reason.stack : "",
 				receivedAt: Date.now()
 			});
@@ -82,7 +82,7 @@ export function handleErrors(reason, originalFunc){
 		return (dispatch) => {
 			dispatch({
 				type: FAILED,
-				reason: reason.message !== undefined? reason.message : "Backend Failure. Couldn't fetch!",
+				reason: reason.body.detail !== undefined? reason.body.detail : "Backend Failure. Couldn't fetch!",
 				stack: reason.stack ? reason.stack : "",
 				receivedAt: Date.now()
 			});
