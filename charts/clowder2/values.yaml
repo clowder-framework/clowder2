@@ -90,6 +90,8 @@ minio:
 
     # where to store data, can be network storage
     #storageClass: nfs-taiga
+  service:
+    type: ClusterIP
 
 # ----------------------------------------------------------------------
 # MONGODB
