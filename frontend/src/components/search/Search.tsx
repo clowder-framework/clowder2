@@ -86,7 +86,7 @@ export function Search() {
 											"creatorfilter",
 											"downloadfilter",
 											"modifyfilter",
-											"authfilter",
+											"authFilter",
 										],
 									}}
 									// apply react to the filter
@@ -147,7 +147,7 @@ export function Search() {
 									<Grid item xs={12} sm={4} md={4} lg={4}>
 										<SingleDropdownRange
 											componentId="downloadfilter"
-											dataField="download"
+											dataField="downloads"
 											data={[
 												{ start: 0, label: "Download Times: All" },
 												{ start: 10, label: "10 time and up" },

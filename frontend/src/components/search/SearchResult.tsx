@@ -63,7 +63,7 @@ export function SearchResult(props) {
 						)}
 						<Typography variant="body2" color={theme.palette.secondary.light}>
 							{item._index === "dataset"
-								? `Created by ${parseString(item.author)} at ${parseDate(
+								? `Created by ${parseString(item.creator)} at ${parseDate(
 										item.created
 								  )}`
 								: `Created by ${parseString(item.creator)} at ${parseDate(
