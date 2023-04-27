@@ -40,7 +40,7 @@ dependencies:
     repository: https://charts.bitnami.com/bitnami
     condition: mongodb.enabled
   - name: minio
-    version: ~11
+    version: ~12
     repository: https://charts.bitnami.com/bitnami
     condition: minio.enabled
   - name: rabbitmq
