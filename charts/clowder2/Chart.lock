@@ -7,12 +7,12 @@ dependencies:
   version: 12.4.1
 - name: rabbitmq
   repository: https://charts.bitnami.com/bitnami
-  version: 10.3.6
+  version: 10.3.9
 - name: elasticsearch
   repository: https://charts.bitnami.com/bitnami
-  version: 19.4.2
+  version: 19.6.0
 - name: keycloak
   repository: https://charts.bitnami.com/bitnami
-  version: 10.1.2
-digest: sha256:0c0e022885173885dfd6097d9a39dc22082515c41b93cda8cf9756a5d019a84f
-generated: "2022-09-30T15:19:12.308156-05:00"
+  version: 10.1.8
+digest: sha256:d52221818b2233d275b91bda548e754aefe1de44398cd11ae9de0b1e2b4de60a
+generated: "2023-04-26T15:29:42.813087-05:00"
