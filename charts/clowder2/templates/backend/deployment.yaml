@@ -38,7 +38,7 @@ spec:
           env:
             - name: WEB_CONCURRENCY
               value: "1"
-            - name: MINIO_SERVER_U
+            - name: MINIO_SERVER_URL
               value: {{ include "clowder2.name" . }}-minio-headless:9000
             - name: MINIO_BUCKET_NAME
               value: clowder
