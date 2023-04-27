@@ -8,6 +8,10 @@ import PersonIcon from "@mui/icons-material/Person";
 import {
 	Button,
 	ButtonGroup,
+	Dialog,
+	DialogActions,
+	DialogContent,
+	DialogTitle,
 	FormControl,
 	IconButton,
 	InputLabel,
@@ -18,9 +22,10 @@ import { AuthWrapper } from "../auth/AuthWrapper";
 import CheckIcon from "@mui/icons-material/Check";
 import CloseIcon from "@mui/icons-material/Close";
 import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/Delete";
 import { theme } from "../../theme";
 import { UserAndRole } from "../../openapi/v2";
-import { setDatasetUserRole } from "../../actions/dataset";
+import { removeDatasetUserRole, setDatasetUserRole } from "../../actions/dataset";
 import { useParams } from "react-router-dom";
 
 type UserAndRoleTableEntryProps = {
@@ -47,8 +52,14 @@ export function UserAndRoleTableEntry(props: UserAndRoleTableEntryProps) {
 		role: string | undefined
 	) => dispatch(setDatasetUserRole(dataset_id, username, role));
 
+	const removeUserRole = (
+		dataset_id: string | undefined,
+		username: string | undefined,
+	) => dispatch(removeDatasetUserRole(dataset_id, username));
+
 	const [selectedRole, setSelectedRole] = useState(user_role.role);
 	const [editRoleOn, setEditRoleOn] = useState(false);
+	const [deleteRoleConfirmation, setDeleteRoleConfirmation] = useState(false);
 
 	const handleRoleSelection = (e) => {
 		setSelectedRole(e.target.value);
@@ -65,88 +76,117 @@ export function UserAndRoleTableEntry(props: UserAndRoleTableEntryProps) {
 		setEditRoleOn(false);
 	};
 
+	const handleRoleDelete = () => {
+		removeUserRole(datasetId, user_role.user.email);
+		setDeleteRoleConfirmation(false);
+	};
+
 	return (
-		<TableRow
-			key={user_role.user.id}
-			sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
-		>
-			<TableCell component="th" scope="row" key={`${user_role.user.id}-icon`}>
-				{user_role.user && user_role.user.email ? (
-					<Gravatar
-						email={user_role.user.email}
-						rating="g"
-						style={{
-							width: "32px",
-							height: "32px",
-							borderRadius: "50%",
-							verticalAlign: "middle",
-						}}
-					/>
-				) : (
-					<PersonIcon sx={iconStyle} />
-				)}
-				<Button>
-					{user_role.user.first_name} {user_role.user.last_name}
-				</Button>
-			</TableCell>
-			<TableCell align="right">{user_role.user.email}</TableCell>
-			<TableCell align="right">
-				{editRoleOn ? (
-					<FormControl size="small">
-						<InputLabel id="demo-simple-select-label">Role</InputLabel>
-						<Select
-							labelId="role"
-							id="role"
-							value={selectedRole}
-							label="Role"
-							onChange={handleRoleSelection}
-						>
-							<MenuItem value="owner">Owner</MenuItem>
-							<MenuItem value="editor">Editor</MenuItem>
-							<MenuItem value="uploader">Uploader</MenuItem>
-							<MenuItem value="viewer">Viewer</MenuItem>
-						</Select>
-					</FormControl>
-				) : (
-					selectedRole
-				)}
-				{/*only owner or editor are allowed to modify roles of the member*/}
-				<AuthWrapper
-					currRole={datasetRole.role}
-					allowedRoles={["owner", "editor"]}
-				>
-					{editRoleOn ? (
-						<ButtonGroup variant="text">
-							<IconButton
-								type="button"
-								sx={{ p: "10px" }}
-								onClick={handleRoleSave}
-							>
-								<CheckIcon sx={iconStyle} />
-							</IconButton>
-							<IconButton
-								type="button"
-								sx={{ p: "10px" }}
-								onClick={handleRoleCancel}
-							>
-								<CloseIcon sx={iconStyle} />
-							</IconButton>
-						</ButtonGroup>
-					) : (
-						<IconButton
-							type="button"
-							sx={{ p: "10px" }}
-							aria-label="edit"
-							onClick={() => {
-								setEditRoleOn(true);
+		<React.Fragment>
+			<Dialog open={deleteRoleConfirmation} onClose={() => setDeleteRoleConfirmation(false)}>
+				<DialogTitle>Are you sure?</DialogTitle>
+				<DialogContent>
+                        Do you really want to delete this role?
+				</DialogContent>
+				<DialogActions>
+					<Button variant={"contained"} onClick={handleRoleDelete}>Delete</Button>
+					<Button onClick={() => setDeleteRoleConfirmation(false)}>Close</Button>
+				</DialogActions>
+			</Dialog>
+			<TableRow
+				key={user_role.user.id}
+				sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
+			>
+				<TableCell component="th" scope="row" key={`${user_role.user.id}-icon`}>
+					{user_role.user && user_role.user.email ? (
+						<Gravatar
+							email={user_role.user.email}
+							rating="g"
+							style={{
+								width: "32px",
+								height: "32px",
+								borderRadius: "50%",
+								verticalAlign: "middle",
 							}}
-						>
-							<EditIcon sx={iconStyle} />
-						</IconButton>
+						/>
+					) : (
+						<PersonIcon sx={iconStyle} />
 					)}
-				</AuthWrapper>
-			</TableCell>
-			<TableCell align="right" />
-		</TableRow>
+					<Button>
+						{user_role.user.first_name} {user_role.user.last_name}
+					</Button>
+				</TableCell>
+				<TableCell align="right">{user_role.user.email}</TableCell>
+				<TableCell align="right">
+					{editRoleOn ? (
+						<FormControl size="small">
+							<InputLabel id="demo-simple-select-label">Role</InputLabel>
+							<Select
+								labelId="role"
+								id="role"
+								value={selectedRole}
+								label="Role"
+								onChange={handleRoleSelection}
+							>
+								<MenuItem value="owner">Owner</MenuItem>
+								<MenuItem value="editor">Editor</MenuItem>
+								<MenuItem value="uploader">Uploader</MenuItem>
+								<MenuItem value="viewer">Viewer</MenuItem>
+							</Select>
+						</FormControl>
+					) : (
+						selectedRole
+					)}
+					{/*only owner or editor are allowed to modify roles of the member*/}
+					<AuthWrapper
+						currRole={datasetRole.role}
+						allowedRoles={["owner", "editor"]}
+					>
+						{editRoleOn ? (
+							<ButtonGroup variant="text">
+								<IconButton
+									type="button"
+									sx={{ p: "10px" }}
+									onClick={handleRoleSave}
+								>
+									<CheckIcon sx={iconStyle} />
+								</IconButton>
+								<IconButton
+									type="button"
+									sx={{ p: "10px" }}
+									onClick={handleRoleCancel}
+								>
+									<CloseIcon sx={iconStyle} />
+								</IconButton>
+							</ButtonGroup>
+						) : (
+							<>
+								<IconButton
+									type="button"
+									sx={{ p: "10px" }}
+									aria-label="edit"
+									onClick={() => {
+										setEditRoleOn(true);
+									}}
+								>
+									<EditIcon sx={iconStyle} />
+								</IconButton>
+								<IconButton
+									type="button"
+									sx={{ p: "10px" }}
+									aria-label="edit"
+									onClick={() => {
+										setDeleteRoleConfirmation(true);
+									}}
+								>
+									<DeleteIcon sx={iconStyle} />
+								</IconButton>
+							</>
+						)}
+					</AuthWrapper>
+				</TableCell>
+				<TableCell align="right" />
+			</TableRow>
+		</React.Fragment>
 	);
 }
