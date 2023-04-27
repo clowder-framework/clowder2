@@ -82,7 +82,12 @@ export function Search() {
 									fuzziness={0}
 									debounce={100}
 									react={{
-										and: ["creatorfilter", "downloadfilter", "modifyfilter"],
+										and: [
+											"creatorfilter",
+											"downloadfilter",
+											"modifyfilter",
+											"authfilter",
+										],
 									}}
 									// apply react to the filter
 									URLParams={true}
@@ -108,12 +113,6 @@ export function Search() {
 											bool: {
 												should: [
 													// TODO: Include if dataset is public
-													{
-														term: {
-															// TODO: Remove (model changed)
-															author: email,
-														},
-													},
 													{
 														term: {
 															creator: email,

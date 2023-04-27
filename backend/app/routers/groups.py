@@ -1,10 +1,11 @@
 import re
 from datetime import datetime
-from fastapi import HTTPException, Depends, APIRouter
+from typing import List, Optional
+
 from bson.objectid import ObjectId
+from fastapi import HTTPException, Depends, APIRouter
 from pymongo import DESCENDING
 from pymongo.mongo_client import MongoClient
-from typing import List, Optional
 
 from app import dependencies
 from app.deps.authorization_deps import AuthorizationDB, GroupAuthorization
@@ -140,7 +141,7 @@ async def edit_group(
             return
 
         user = await db["users"].find_one({"email": user_id})
-        group_dict["author"] = UserOut(**user)
+        group_dict["creator"] = UserOut(**user)
         group_dict["modified"] = datetime.datetime.utcnow()
         # TODO: Revisit this. Authorization needs to be updated here.
         group_dict["users"] = list(set(group_dict["users"]))

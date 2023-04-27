@@ -16,7 +16,7 @@ class IndexSettings:
         "properties": {
             "name": {"type": "text"},
             "description": {"type": "text"},
-            "author": {"type": "keyword"},
+            "creator": {"type": "keyword"},
             "created": {"type": "date"},
             "modified": {"type": "date"},
             "download": {"type": "long"},
