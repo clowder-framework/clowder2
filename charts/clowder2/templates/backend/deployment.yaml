@@ -37,8 +37,8 @@ spec:
           imagePullPolicy: {{ .Values.backend.image.pullPolicy }}
           env:
             - name: WEB_CONCURRENCY
-              value: "4"
-            - name: MINIO_SERVER_URL
+              value: "1"
+            - name: MINIO_SERVER_U
               value: {{ include "clowder2.name" . }}-minio-headless:9000
             - name: MINIO_BUCKET_NAME
               value: clowder
