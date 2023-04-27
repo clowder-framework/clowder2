@@ -87,7 +87,7 @@ spec:
                   name: clowder2-rabbitmq
                   key: rabbitmq-password
             - name: RABBITMQ_HOST
-              value: http://{{ include "clowder2.name" .  }}-rabbitmq:5672
+              value: {{ include "clowder2.name" .  }}-rabbitmq
             - name: HEARTBEAT_EXCHANGE
               value: "extractors"
           ports:
