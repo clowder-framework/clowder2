@@ -113,6 +113,18 @@ export class UsersService {
     }
 
     /**
+     * Get Profile
+     * @returns UserOut Successful Response
+     * @throws ApiError
+     */
+    public static getProfileApiV2UsersProfileGet(): CancelablePromise<UserOut> {
+        return __request({
+            method: 'GET',
+            path: `/api/v2/users/profile`,
+        });
+    }
+
+    /**
      * Get User
      * @param userId
      * @returns UserOut Successful Response
