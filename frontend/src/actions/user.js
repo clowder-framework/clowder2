@@ -196,3 +196,21 @@ export function resetApiKey() {
 		});
 	};
 }
+
+export const RECEIVE_USER_PROFILE = "RECEIVE_USER_PROFILE";
+
+export function fetchUserProfile() {
+	return (dispatch) => {
+		return V2.UsersService.getProfileApiV2UsersProfileGet()
+			.then((json) => {
+				dispatch({
+					type: RECEIVE_USER_PROFILE,
+					profile: json,
+					receivedAt: Date.now(),
+				});
+			})
+			.catch((reason) => {
+				dispatch(handleErrors(reason, fetchUserProfile()));
+			});
+	};
+}
