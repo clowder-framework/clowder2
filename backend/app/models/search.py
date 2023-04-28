@@ -37,6 +37,8 @@ class ElasticsearchEntry(BaseModel):
 
 
 class ESFileEntry(ElasticsearchEntry):
+    """See file_mappings in search/config.py to change how ES indexes the fields."""
+
     name: str
     content_type: str
     content_type_main: str
@@ -47,12 +49,16 @@ class ESFileEntry(ElasticsearchEntry):
 
 
 class ESDatasetEntry(ElasticsearchEntry):
+    """See dataset_mappings in search/config.py to change how ES indexes the fields."""
+
     name: str
     description: str
     downloads: int
 
 
 class ESMetadataEntry(ElasticsearchEntry):
+    """See metadata_mappings in search/config.py to change how ES indexes the fields."""
+
     resource_id: str
     resource_type: str = "file"
     resource_created: datetime
