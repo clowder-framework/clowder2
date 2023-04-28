@@ -59,6 +59,56 @@ export function setDatasetUserRole(datasetId, username, roleType) {
 	};
 }
 
+export const REMOVE_DATASET_GROUP_ROLE = "REMOVE_DATASET_GROUP_ROLE";
+
+export function removeDatasetGroupRole(datasetId, groupId) {
+	return (dispatch) => {
+		return V2.AuthorizationService.removeDatasetGroupRoleApiV2AuthorizationsDatasetsDatasetIdGroupRoleGroupIdDelete(
+			datasetId,
+			groupId
+		)
+			.then((json) => {
+				dispatch({
+					type: REMOVE_DATASET_GROUP_ROLE,
+					receivedAt: Date.now(),
+				});
+			})
+			.catch((reason) => {
+				dispatch(
+					handleErrors(
+						reason,
+						removeDatasetGroupRole(datasetId, groupId)
+					)
+				);
+			});
+	};
+}
+
+export const REMOVE_DATASET_USER_ROLE = "REMOVE_DATASET_USER_ROLE";
+
+export function removeDatasetUserRole(datasetId, username) {
+	return (dispatch) => {
+		return V2.AuthorizationService.removeDatasetUserRoleApiV2AuthorizationsDatasetsDatasetIdUserRoleUsernameDelete(
+			datasetId,
+			username
+		)
+			.then((json) => {
+				dispatch({
+					type: REMOVE_DATASET_GROUP_ROLE,
+					receivedAt: Date.now(),
+				});
+			})
+			.catch((reason) => {
+				dispatch(
+					handleErrors(
+						reason,
+						removeDatasetUserRole(datasetId, username)
+					)
+				);
+			});
+	};
+}
+
 export const RECEIVE_FILES_IN_DATASET = "RECEIVE_FILES_IN_DATASET";
 
 export function fetchFilesInDataset(datasetId, folderId) {

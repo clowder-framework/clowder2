@@ -8,6 +8,8 @@ import {
 	RESET_CREATE_DATASET,
 	SET_DATASET_GROUP_ROLE,
 	SET_DATASET_USER_ROLE,
+	REMOVE_DATASET_GROUP_ROLE,
+	REMOVE_DATASET_USER_ROLE,
 	UPDATE_DATASET,
 } from "../actions/dataset";
 import {
@@ -58,6 +60,10 @@ const dataset = (state = defaultState, action: DataAction) => {
 			return Object.assign({}, state, {});
 		case SET_DATASET_USER_ROLE:
 			return Object.assign({}, state, {});
+        	case REMOVE_DATASET_GROUP_ROLE:
+            		return Object.assign({}, state, {});
+        	case REMOVE_DATASET_USER_ROLE:
+            		return Object.assign({}, state, {});
 		case UPDATE_FILE:
 			return Object.assign({}, state, {
 				files: state.files.map((file) =>
