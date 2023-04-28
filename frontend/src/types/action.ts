@@ -4,20 +4,21 @@ import {
 	FilePreview,
 	Folder,
 	MetadataJsonld,
+	Profile,
 } from "./data";
 import {
 	AuthorizationBase,
+	DatasetRoles,
 	FileOut as FileSummary,
 	FileVersion,
-	GroupAndRole,
 	GroupOut as Group,
 	MetadataDefinitionOut as MetadataDefinition,
 	MetadataOut as Metadata,
 	RoleType,
-	UserAndRole,
+	UserAPIKeyOut,
 	UserOut,
 } from "../openapi/v2";
-import { LIST_USERS } from "../actions/user";
+import { LIST_USERS, RECEIVE_USER_PROFILE } from "../actions/user";
 import { CREATE_GROUP, DELETE_GROUP } from "../actions/group";
 
 interface RECEIVE_FILES_IN_DATASET {
@@ -40,14 +41,9 @@ interface RECEIVE_DATASET_ROLE {
 	type: "RECEIVE_DATASET_ROLE";
 }
 
-interface RECEIVE_DATASET_GROUPS_AND_ROLES {
-	groupsAndRoles: GroupAndRole[];
-	type: "RECEIVE_DATASET_GROUPS_AND_ROLES";
-}
-
-interface RECEIVE_DATASET_USERS_AND_ROLES {
-	usersAndRoles: UserAndRole[];
-	type: "RECEIVE_DATASET_USERS_AND_ROLES";
+interface RECEIVE_DATASET_ROLES {
+	roles: DatasetRoles;
+	type: "RECEIVE_DATASET_ROLES";
 }
 
 interface RECEIVE_FILE_ROLE {
@@ -112,6 +108,31 @@ interface REGISTER_ERROR {
 
 interface REGISTER_USER {
 	type: "REGISTER_USER";
+}
+
+interface LIST_API_KEYS {
+	type: "LIST_API_KEYS";
+	apiKeys: UserAPIKeyOut[];
+}
+
+interface DELETE_API_KEY {
+	type: "DELETE_API_KEY";
+	apiKey: UserAPIKeyOut;
+}
+
+interface GENERATE_API_KEY {
+	type: "GENERATE_API_KEY";
+	hashedKey: string;
+}
+
+interface RESET_API_KEY {
+	type: "RESET_API_KEY";
+	apiKey: string;
+}
+
+interface RECEIVE_USER_PROFILE {
+	type: "RECEIVE_USER_PROFILE";
+	profile: Profile;
 }
 
 interface CREATE_DATASET {
@@ -355,6 +376,8 @@ export type DataAction =
 	| LOGOUT
 	| REGISTER_ERROR
 	| REGISTER_USER
+	| LIST_API_KEYS
+	| DELETE_API_KEY
 	| GENERATE_API_KEY
 	| RESET_API_KEY
 	| CREATE_DATASET
@@ -398,5 +421,5 @@ export type DataAction =
 	| ADD_GROUP_MEMBER
 	| ASSIGN_GROUP_MEMBER_ROLE
 	| LIST_USERS
-	| RECEIVE_DATASET_GROUPS_AND_ROLES
-	| RECEIVE_DATASET_USERS_AND_ROLES;
+	| RECEIVE_DATASET_ROLES
+	| RECEIVE_USER_PROFILE;

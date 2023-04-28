@@ -1,5 +1,7 @@
 import os
+
 from fastapi.testclient import TestClient
+
 from app.config import settings
 
 """These are standard JSON entries to be used for creating test resources."""
@@ -69,7 +71,6 @@ extractor_info_v1_example = {
     "bibtex": [],
 }
 
-
 """CONVENIENCE FUNCTIONS FOR COMMON ACTIONS REQUIRED BY TESTS."""
 
 
@@ -93,6 +94,16 @@ def get_user_token(client: TestClient, headers: dict, email: str = user_alt["ema
     token = response.json().get("token")
     assert token is not None
     return {"Authorization": "Bearer " + token}
+
+
+def create_apikey(client: TestClient, headers: dict):
+    """create user generated API key"""
+    response = client.post(
+        f"{settings.API_V2_STR}/users/keys?name=pytest&mins=30", headers=headers
+    )
+    assert response.status_code == 200
+    assert response.json() is not None
+    return response.json()
 
 
 def create_group(client: TestClient, headers: dict):
