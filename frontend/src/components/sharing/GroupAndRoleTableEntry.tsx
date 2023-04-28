@@ -5,7 +5,12 @@ import TableCell from "@mui/material/TableCell";
 import Collapse from "@mui/material/Collapse";
 import { GroupAndRole } from "../../openapi/v2";
 import {
+	Button,
 	ButtonGroup,
+	Dialog,
+	DialogActions,
+	DialogContent,
+	DialogTitle,
 	FormControl,
 	IconButton,
 	InputLabel,
@@ -17,9 +22,10 @@ import CheckIcon from "@mui/icons-material/Check";
 import CloseIcon from "@mui/icons-material/Close";
 import ListIcon from "@mui/icons-material/List";
 import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/Delete";
 import { RootState } from "../../types/data";
 import { theme } from "../../theme";
-import { setDatasetGroupRole } from "../../actions/dataset";
+import { removeDatasetGroupRole, setDatasetGroupRole } from "../../actions/dataset";
 import { useParams } from "react-router-dom";
 import { GroupAndRoleSubTable } from "./GroupAndRoleSubTable";
 
@@ -49,8 +55,14 @@ export function GroupAndRoleTableEntry(props: GroupAndRoleTableEntryProps) {
 		role: string | undefined
 	) => dispatch(setDatasetGroupRole(dataset_id, group_id, role));
 
+	const removeGroupRole = (
+		dataset_id: string | undefined,
+		group_id: string | undefined,
+	) => dispatch(removeDatasetGroupRole(dataset_id, group_id));
+
 	const [selectedRole, setSelectedRole] = useState(group_role.role);
 	const [editRoleOn, setEditRoleOn] = useState(false);
+	const [deleteRoleConfirmation, setDeleteRoleConfirmation] = useState(false);
 
 	const handleRoleSelection = (e) => {
 		setSelectedRole(e.target.value);
@@ -67,8 +79,23 @@ export function GroupAndRoleTableEntry(props: GroupAndRoleTableEntryProps) {
 		setEditRoleOn(false);
 	};
 
+	const handleRoleDelete = () => {
+		removeGroupRole(datasetId, group_role.group.id);
+		setDeleteRoleConfirmation(false);
+	};
+
 	return (
 		<React.Fragment>
+			<Dialog open={deleteRoleConfirmation} onClose={() => setDeleteRoleConfirmation(false)}>
+				<DialogTitle>Are you sure?</DialogTitle>
+				<DialogContent>
+                        Do you really want to delete this role?
+				</DialogContent>
+				<DialogActions>
+					<Button variant={"contained"} onClick={handleRoleDelete}>Delete</Button>
+					<Button onClick={() => setDeleteRoleConfirmation(false)}>Close</Button>
+				</DialogActions>
+			</Dialog>
 			<TableRow
 				key={group_role.group.id}
 				sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
@@ -130,16 +157,28 @@ export function GroupAndRoleTableEntry(props: GroupAndRoleTableEntryProps) {
 								</IconButton>
 							</ButtonGroup>
 						) : (
-							<IconButton
-								type="button"
-								sx={{ p: "10px" }}
-								aria-label="edit"
-								onClick={() => {
-									setEditRoleOn(true);
-								}}
-							>
-								<EditIcon sx={iconStyle} />
-							</IconButton>
+							<>
+								<IconButton
+									type="button"
+									sx={{ p: "10px" }}
+									aria-label="edit"
+									onClick={() => {
+										setEditRoleOn(true);
+									}}
+								>
+									<EditIcon sx={iconStyle} />
+								</IconButton>
+								<IconButton
+									type="button"
+									sx={{ p: "10px" }}
+									aria-label="edit"
+									onClick={() => {
+										setDeleteRoleConfirmation(true);
+									}}
+								>
+									<DeleteIcon sx={iconStyle} />
+								</IconButton>
+							</>
 						)}
 					</AuthWrapper>
 				</TableCell>

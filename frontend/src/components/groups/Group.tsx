@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Box, Button, Grid } from "@mui/material";
+import { Box, Button, Grid, Link } from "@mui/material";
 import Layout from "../Layout";
 import { RootState } from "../../types/data";
 import { useDispatch, useSelector } from "react-redux";
@@ -33,8 +33,13 @@ export function Group() {
 		dispatch(deleteGroup(groupId));
 
 	const groupAbout = useSelector((state: RootState) => state.group.about);
+
 	const role = useSelector((state: RootState) => state.group.role);
 
+	const groupCreatorEmail = useSelector(
+		(state: RootState) => state.group.about.creator
+	);
+	const groupCreatorEmailLink = "mailto:" + groupCreatorEmail;
 	const [addMemberModalOpen, setAddMemberModalOpen] = useState(false);
 	const [deleteGroupConfirmOpen, setDeleteGroupConfirmOpen] = useState(false);
 
@@ -123,6 +128,10 @@ export function Group() {
 						</Box>
 						<Typography variant="body1" paragraph>
 							{groupAbout.description}
+						</Typography>
+						<Typography variant="body1" paragraph>
+							<strong>Creator: </strong>
+							<Link href={groupCreatorEmailLink}>{groupCreatorEmail}</Link>
 						</Typography>
 					</Box>
 				</Box>

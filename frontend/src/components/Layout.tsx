@@ -222,6 +222,13 @@ export default function PersistentDrawerLeft(props) {
 					open={isMenuOpen}
 					onClose={handleProfileMenuClose}
 				>
+					<MenuItem component={RouterLink} to="/profile">
+						<ListItemIcon>
+							<PersonIcon fontSize="small" />
+						</ListItemIcon>
+						<ListItemText>User Profile</ListItemText>
+					</MenuItem>
+					<Divider orientation="horizontal" />
 					<MenuItem component={RouterLink} to="/apikeys">
 						<ListItemIcon>
 							<VpnKeyIcon fontSize="small" />
