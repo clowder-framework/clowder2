@@ -155,6 +155,18 @@ async def get_role_by_group(
     raise HTTPException(status_code=404, detail=f"Group {group_id} not found")
 
 
+async def is_public_dataset(
+    dataset_id: str,
+    db: MongoClient = Depends(get_db),
+) -> bool:
+    """Checks if a dataset is public."""
+    if (dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})) is not None:
+        dataset_out = DatasetOut.from_mongo(dataset)
+        if dataset_out.status == DatasetStatus.PUBLIC.name:
+            return True
+    else:
+        return False
+
 class Authorization:
     """We use class dependency so that we can provide the `permission` parameter to the dependency.
     For more info see https://fastapi.tiangolo.com/advanced/advanced-dependencies/."""
@@ -385,6 +397,31 @@ class GroupAuthorization:
             )
         raise HTTPException(status_code=404, detail=f"Group {group_id} not found")
 
+class PublicAuthorization:
+    """We use class dependency so that we can provide the `permission` parameter to the dependency.
+    For more info see https://fastapi.tiangolo.com/advanced/advanced-dependencies/."""
+
+    def __init__(self, role: str):
+        self.role = role
+
+    async def __call__(
+        self,
+        dataset_id: str,
+        db: MongoClient = Depends(get_db),
+    ):
+
+        if (
+                dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
+        ) is not None:
+            current_dataset = DatasetOut.from_mongo(dataset)
+            if (
+                    current_dataset.status == DatasetStatus.PUBLIC.name
+            ):
+                return True
+            else:
+                return False
+        else:
+            return False
 
 def access(user_role: RoleType, role_required: RoleType) -> bool:
     """Enforce implied role hierarchy OWNER > EDITOR > UPLOADER > VIEWER"""

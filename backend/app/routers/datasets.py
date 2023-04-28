@@ -28,7 +28,8 @@ from rocrate.rocrate import ROCrate
 from app import dependencies
 from app import keycloak_auth
 from app.config import settings
-from app.deps.authorization_deps import Authorization
+from app.deps.authorization_deps import Authorization, PublicAuthorization
+from app.deps.authorization_deps import is_public_dataset
 from app.keycloak_auth import get_token
 from app.keycloak_auth import get_user, get_current_user
 from app.models.authorization import AuthorizationDB, RoleType
@@ -279,8 +280,10 @@ async def get_datasets(
 async def get_dataset(
     dataset_id: str,
     db: MongoClient = Depends(dependencies.get_db),
-    allow: bool = Depends(Authorization("viewer")),
+    public: bool = Depends(PublicAuthorization("viewer")),
+    allow: bool = Depends(Authorization("viewer"))
 ):
+
     try:
         if (
             dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
