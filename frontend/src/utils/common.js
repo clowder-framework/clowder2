@@ -111,11 +111,14 @@ export const getCurrEmail = () => {
 	const authorization = cookies.get("Authorization") || "Bearer none";
 	if (
 		authorization &&
+		authorization !== "Bearer none" &&
 		authorization !== "" &&
 		authorization.split(" ").length > 0
 	) {
 		let userInfo = jwt_decode(authorization.split(" ")[1]);
 		return userInfo["email"];
+	} else {
+		return "anonymoususer@anonymoususer.com"
 	}
 };
 

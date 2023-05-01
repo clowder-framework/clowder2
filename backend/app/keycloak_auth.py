@@ -206,7 +206,7 @@ async def get_current_username(
     """Retrieve the user id from the JWT token. Does not query MongoDB."""
     # TODO this is probably not a good solution, but
     if (token == 'none' or token is None) and api_key is None:
-        return "anonymoususer"
+        return "anonymoususer@anonymoususer.com"
     if token:
         try:
             userinfo = keycloak_openid.userinfo(token)
