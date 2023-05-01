@@ -64,7 +64,7 @@ export function handleErrors(reason, originalFunc){
 		return (dispatch) => {
 			dispatch({
 				type: NOT_AUTHORIZED,
-				reason: reason.body.detail !== undefined? reason.body.detail : "Forbidden",
+				reason: reason.body !== undefined && reason.body.detail !== undefined? reason.body.detail : "Forbidden",
 				stack: reason.stack ? reason.stack : "",
 				receivedAt: Date.now()
 			});
@@ -73,7 +73,7 @@ export function handleErrors(reason, originalFunc){
 		return (dispatch) => {
 			dispatch({
 				type: NOT_FOUND,
-				reason: reason.body.detail !== undefined? reason.body.detail : "Not Found",
+				reason: reason.body !== undefined && reason.body.detail !== undefined? reason.body.detail : "Not Found",
 				stack: reason.stack ? reason.stack : "",
 				receivedAt: Date.now()
 			});
