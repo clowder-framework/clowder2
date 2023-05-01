@@ -94,6 +94,7 @@ export function Group() {
 				handleClose={() => {
 					setAddMemberModalOpen(false);
 				}}
+				groupOwner={groupAbout.creator}
 				groupName={groupAbout.name}
 				groupId={groupAbout.id}
 			/>
