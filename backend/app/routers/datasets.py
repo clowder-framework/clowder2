@@ -28,7 +28,7 @@ from rocrate.rocrate import ROCrate
 from app import dependencies
 from app import keycloak_auth
 from app.config import settings
-from app.deps.authorization_deps import Authorization, PublicAuthorization
+from app.deps.authorization_deps import Authorization, CheckStatus
 from app.deps.authorization_deps import is_public_dataset
 from app.keycloak_auth import get_token
 from app.keycloak_auth import get_user, get_current_user
@@ -280,17 +280,20 @@ async def get_datasets(
 async def get_dataset(
     dataset_id: str,
     db: MongoClient = Depends(dependencies.get_db),
-    public: bool = Depends(PublicAuthorization("viewer")),
-    allow: bool = Depends(Authorization("viewer"))
+    public: bool = Depends(CheckStatus("public")),
+    allow: bool = Depends(Authorization("viewer")),
 ):
 
-    try:
-        if (
-            dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
-        ) is not None:
-            return DatasetOut.from_mongo(dataset)
-    except:
-        raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
+    if public or allow:
+        try:
+            if (
+                dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
+            ) is not None:
+                return DatasetOut.from_mongo(dataset)
+        except:
+            raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
+    else:
+        raise HTTPException(status_code=401, detail=f"Dataset {dataset_id} not found")
 
 
 @router.get("/{dataset_id}/files", response_model=List[FileOut])
@@ -299,6 +302,7 @@ async def get_dataset_files(
     folder_id: Optional[str] = None,
     user_id=Depends(get_user),
     db: MongoClient = Depends(dependencies.get_db),
+    public: bool = Depends(CheckStatus("public")),
     allow: bool = Depends(Authorization("viewer")),
     skip: int = 0,
     limit: int = 10,

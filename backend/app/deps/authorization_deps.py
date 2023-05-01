@@ -397,12 +397,12 @@ class GroupAuthorization:
             )
         raise HTTPException(status_code=404, detail=f"Group {group_id} not found")
 
-class PublicAuthorization:
+class CheckStatus:
     """We use class dependency so that we can provide the `permission` parameter to the dependency.
     For more info see https://fastapi.tiangolo.com/advanced/advanced-dependencies/."""
 
-    def __init__(self, role: str):
-        self.role = role
+    def __init__(self, status: str):
+        self.status = status
 
     async def __call__(
         self,
@@ -414,9 +414,7 @@ class PublicAuthorization:
                 dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
         ) is not None:
             current_dataset = DatasetOut.from_mongo(dataset)
-            if (
-                    current_dataset.status == DatasetStatus.PUBLIC.name
-            ):
+            if current_dataset.status == self.status:
                 return True
             else:
                 return False

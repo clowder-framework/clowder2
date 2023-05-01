@@ -76,6 +76,7 @@ const PrivateRoute = (props): JSX.Element => {
 		if (fileId && reason === "") listFileRole(fileId);
 	}, [fileId, reason]);
 
+	// TODO add file id or dataset id to isAuthorized, inside function check if we get 200 without header
 	return <>{isAuthorized() ? children : <Navigate to="/auth/login" />}</>;
 };
 

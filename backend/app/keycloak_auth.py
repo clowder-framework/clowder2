@@ -197,13 +197,6 @@ async def get_current_user(
         headers={"WWW-Authenticate": "Bearer"},
     )
 
-async def get_not_logged_in(
-    token: str = Security(oauth2_scheme),
-    api_key: str = Security(api_key_header),
-    db: MongoClient = Depends(dependencies.get_db),
-) -> str:
-    if not token and not api_key:
-        return True
 
 async def get_current_username(
     token: str = Security(oauth2_scheme),
@@ -211,15 +204,15 @@ async def get_current_username(
     db: MongoClient = Depends(dependencies.get_db),
 ) -> str:
     """Retrieve the user id from the JWT token. Does not query MongoDB."""
-
-    if token == 'none' and api_key is None:
-        return "anonymoususer@anonymoususer.com"
+    # TODO this is probably not a good solution, but
+    if (token == 'none' or token is None) and api_key is None:
+        return "anonymoususer"
     if token:
         try:
             userinfo = keycloak_openid.userinfo(token)
             return userinfo["preferred_username"]
-        # expired token
         except KeycloakAuthenticationError as e:
+        # expired token
             raise HTTPException(
                 status_code=e.response_code,
                 detail=json.loads(e.error_message),

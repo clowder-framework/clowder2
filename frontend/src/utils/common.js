@@ -7,6 +7,7 @@ const cookies = new Cookies();
 
 //NOTE: This is only checking if a cookie is present, but not validating the cookie.
 export const isAuthorized = () => {
+	// TODO pass in dataset id here check public
 	const authorization = cookies.get("Authorization") || "Bearer none";
 	V2.OpenAPI.TOKEN = authorization.replace("Bearer ", "");
 	return (
