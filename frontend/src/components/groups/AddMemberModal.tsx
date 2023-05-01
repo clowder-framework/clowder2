@@ -48,11 +48,9 @@ export default function AddMemberModal(props: AddMemberModalProps) {
 				.reduce((list: string[], user: UserOut) => {
 					return [...list, user.email];
 				}, [])
-				.filter((email) => {
-					email !== groupOwner;
-				})
+				.filter((email) => email !== groupOwner)
 		);
-	}, [users]);
+	}, [users, groupOwner]);
 
 	const handleAddButtonClick = () => {
 		groupMemberAdded(groupId, email);
