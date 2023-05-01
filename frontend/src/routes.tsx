@@ -48,6 +48,8 @@ const PrivateRoute = (props): JSX.Element => {
 		dispatch(fetchFileRole(fileId));
 	const { datasetId } = useParams<{ datasetId?: string }>();
 	const { fileId } = useParams<{ fileId?: string }>();
+	console.log('this is in routes!');
+	console.log(datasetId);
 
 	// log user out if token expired/unauthorized
 	useEffect(() => {
@@ -76,8 +78,7 @@ const PrivateRoute = (props): JSX.Element => {
 		if (fileId && reason === "") listFileRole(fileId);
 	}, [fileId, reason]);
 
-	// TODO add file id or dataset id to isAuthorized, inside function check if we get 200 without header
-	return <>{isAuthorized() ? children : <Navigate to="/auth/login" />}</>;
+	return <>{isAuthorized(datasetId, fileId) ? children : <Navigate to="/auth/login" />}</>;
 };
 
 export const AppRoutes = (): JSX.Element => {

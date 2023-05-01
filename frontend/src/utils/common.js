@@ -2,22 +2,45 @@ import Cookies from "universal-cookie";
 import { V2 } from "../openapi";
 import { format } from "date-fns";
 import jwt_decode from "jwt-decode";
+import {handleErrors} from "../actions/common";
+import {RECEIVE_DATASET_ABOUT} from "../actions/dataset";
+import config from "../app.config";
 
 const cookies = new Cookies();
 
 //NOTE: This is only checking if a cookie is present, but not validating the cookie.
-export const isAuthorized = () => {
-	// TODO pass in dataset id here check public
-	const authorization = cookies.get("Authorization") || "Bearer none";
-	V2.OpenAPI.TOKEN = authorization.replace("Bearer ", "");
-	return (
-		process.env.DEPLOY_ENV === "local" ||
-		(authorization !== undefined &&
-			authorization !== "" &&
-			authorization !== null &&
-			authorization !== "Bearer none")
-	);
-};
+export async function isAuthorized(datasetId = "", fileId = "") {
+
+	if (datasetId !== "") {
+		const datasetURL = `${config.hostname}/api/v2/datasets/${datasetId}`;
+		const response = await fetch(datasetURL, {
+			method: "GET",
+		});
+		if (response.status === 200) {
+			return true
+		} else {
+			const authorization = cookies.get("Authorization") || "Bearer none";
+			V2.OpenAPI.TOKEN = authorization.replace("Bearer ", "");
+			return (
+				process.env.DEPLOY_ENV === "local" ||
+				(authorization !== undefined &&
+					authorization !== "" &&
+					authorization !== null &&
+					authorization !== "Bearer none")
+			);
+		}
+	} else {
+		const authorization = cookies.get("Authorization") || "Bearer none";
+		V2.OpenAPI.TOKEN = authorization.replace("Bearer ", "");
+		return (
+			process.env.DEPLOY_ENV === "local" ||
+			(authorization !== undefined &&
+				authorization !== "" &&
+				authorization !== null &&
+				authorization !== "Bearer none")
+		);
+	}
+}
 
 // construct header
 export function getHeader() {
