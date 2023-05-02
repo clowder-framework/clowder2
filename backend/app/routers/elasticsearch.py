@@ -36,8 +36,5 @@ async def search_metadata(request: Request):
 async def search_file_dataset_and_metadata(request: Request):
     es = await connect_elasticsearch()
     query = await request.body()
-    print("_MSEARCH")
-    print(query)
     r = search_index(es, ["file", "dataset", "metadata"], query)
-    print(r)
     return r
