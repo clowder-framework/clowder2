@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
 	DataSearch,
 	DateRange,
@@ -18,6 +18,11 @@ export function Search() {
 	const email = getCurrEmail();
 
 	const [luceneOn, setLuceneOn] = useState(false);
+
+	useEffect(() => {
+		console.log("Clear search results here.");
+	}, [luceneOn]);
+
 	// @ts-ignore
 	return (
 		<Layout>

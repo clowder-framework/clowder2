@@ -27,6 +27,18 @@ function parseString(str: string) {
 	}
 }
 
+function getRecordType(item) {
+	if (item._index === "dataset") return "dataset";
+	if (item._index === "file") return "file";
+	if (item._index === "metadata") {
+		// TODO: How to handle duplicate search results here?
+		if (item.dataset_id === undefined)
+			// Only files have this field
+			return "file";
+		else return "dataset";
+	}
+}
+
 export function SearchResult(props) {
 	const { data } = props;
 
@@ -41,10 +53,14 @@ export function SearchResult(props) {
 			{data.map((item) => (
 				<ListItem alignItems="flex-start" key={item._id}>
 					<ListItemAvatar sx={{ color: theme.palette.primary.main }}>
-						{item._index === "dataset" ? <DatasetIcon /> : <ArticleIcon />}
+						{getRecordType(item) === "dataset" ? (
+							<DatasetIcon />
+						) : (
+							<ArticleIcon />
+						)}
 					</ListItemAvatar>
 					<Box sx={{ marginTop: "5px" }}>
-						{item._index === "dataset" ? (
+						{getRecordType(item) === "dataset" ? (
 							<MuiLink
 								component={Link}
 								to={`/datasets/${item._id}`}
@@ -62,7 +78,7 @@ export function SearchResult(props) {
 							</MuiLink>
 						)}
 						<Typography variant="body2" color={theme.palette.secondary.light}>
-							{item._index === "dataset"
+							{getRecordType(item) === "dataset"
 								? `Created by ${parseString(item.creator)} at ${parseDate(
 										item.created
 								  )}`
@@ -71,7 +87,7 @@ export function SearchResult(props) {
 								  )}`}
 						</Typography>
 						<Typography variant="body2" color={theme.palette.secondary.dark}>
-							{item._index === "dataset"
+							{getRecordType(item) === "dataset"
 								? parseString(item.description)
 								: `${item.content_type} | ${item.bytes} bytes`}
 						</Typography>
