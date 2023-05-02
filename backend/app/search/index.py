@@ -110,7 +110,7 @@ async def index_dataset_metadata(
 
     # Add an entry to the metadata index
     doc = ESMetadataEntry(
-        resource_id=dataset.id,
+        resource_id=str(dataset.id),
         resource_type="dataset",
         resource_created=dataset.created,
         resource_creator=dataset.author.email,
@@ -154,7 +154,7 @@ async def index_file_metadata(
 
     # Add an entry to the metadata index
     doc = ESMetadataEntry(
-        resource_id=file.id,
+        resource_id=str(file.id),
         resource_type="dataset",
         resource_created=file.created,
         resource_creator=file.creator.email,
