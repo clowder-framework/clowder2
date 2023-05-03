@@ -11,7 +11,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import settings
 from app.search.connect import connect_elasticsearch, create_index
-from app.keycloak_auth import get_token, get_current_username
+from app.keycloak_auth import get_token, get_current_username, get_current_username_or_anonymous_user
 from app.routers import (
     folders,
     groups,
@@ -102,7 +102,7 @@ api_router.include_router(
     datasets.router,
     prefix="/datasets",
     tags=["datasets"],
-    dependencies=[Depends(get_current_username)],
+    dependencies=[Depends(get_current_username_or_anonymous_user)],
 )
 api_router.include_router(
     metadata_datasets.router, prefix="/datasets", tags=["metadata"]

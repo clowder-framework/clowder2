@@ -3,7 +3,7 @@ from pymongo import MongoClient
 from bson import ObjectId
 
 from app.dependencies import get_db
-from app.keycloak_auth import get_current_username
+from app.keycloak_auth import get_current_username, get_current_username_or_anonymous_user
 from app.models.authorization import RoleType, AuthorizationDB
 
 from app.models.files import FileOut
@@ -179,7 +179,7 @@ class Authorization:
         self,
         dataset_id: str,
         db: MongoClient = Depends(get_db),
-        current_user: str = Depends(get_current_username),
+        current_user: str = Depends(get_current_username_or_anonymous_user),
     ):
         # TODO: Make sure we enforce only one role per user per dataset, or find_one could yield wrong answer here.
         if (
