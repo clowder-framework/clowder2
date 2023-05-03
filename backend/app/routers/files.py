@@ -311,7 +311,7 @@ async def download_file(
     version: Optional[int] = None,
     db: MongoClient = Depends(dependencies.get_db),
     fs: Minio = Depends(dependencies.get_fs),
-    public: bool = Depends(CheckFileStatus("public")),
+    public: bool = Depends(CheckFileStatus("PUBLIC")),
     allow: bool = Depends(FileAuthorization("viewer")),
 ):
     # If file exists in MongoDB, download from Minio
@@ -370,7 +370,7 @@ async def delete_file(
 async def get_file_summary(
     file_id: str,
     db: MongoClient = Depends(dependencies.get_db),
-    public: bool = Depends(CheckFileStatus("public")),
+    public: bool = Depends(CheckFileStatus("PUBLIC")),
     allow: bool = Depends(FileAuthorization("viewer")),
 ):
     if (file := await db["files"].find_one({"_id": ObjectId(file_id)})) is not None:
@@ -388,7 +388,7 @@ async def get_file_versions(
     db: MongoClient = Depends(dependencies.get_db),
     skip: int = 0,
     limit: int = 20,
-    public: bool = Depends(CheckFileStatus("public")),
+    public: bool = Depends(CheckFileStatus("PUBLIC")),
     allow: bool = Depends(FileAuthorization("viewer")),
 ):
     if (file := await db["files"].find_one({"_id": ObjectId(file_id)})) is not None:

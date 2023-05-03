@@ -12,7 +12,7 @@ from fastapi import (
 from pymongo import MongoClient
 
 from app import dependencies
-from app.deps.authorization_deps import FileAuthorization
+from app.deps.authorization_deps import FileAuthorization, CheckFileStatus
 from app.config import settings
 from app.models.files import FileOut
 from app.models.metadata import (
@@ -354,6 +354,7 @@ async def get_file_metadata(
     extractor_version: Optional[float] = Form(None),
     user=Depends(get_current_user),
     db: MongoClient = Depends(dependencies.get_db),
+    public: bool = Depends(CheckFileStatus("PUBLIC")),
     allow: bool = Depends(FileAuthorization("viewer")),
 ):
     """Get file metadata."""

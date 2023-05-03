@@ -272,7 +272,7 @@ async def get_dataset_metadata(
     listener_version: Optional[float] = Form(None),
     user=Depends(get_current_user),
     db: MongoClient = Depends(dependencies.get_db),
-    public: bool = Depends(CheckStatus("public")),
+    public: bool = Depends(CheckStatus("PUBLIC")),
     allow: bool = Depends(Authorization("viewer")),
 ):
     if public or allow:
