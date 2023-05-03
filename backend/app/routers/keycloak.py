@@ -7,7 +7,6 @@ from fastapi import APIRouter, HTTPException, Depends, Security
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from jose import jwt, ExpiredSignatureError, JWTError
 from keycloak.exceptions import KeycloakAuthenticationError, KeycloakGetError
-from pydantic.types import Json
 from pymongo import MongoClient
 from starlette.responses import RedirectResponse
 
@@ -185,11 +184,10 @@ async def refresh_token(
         )
 
 
-# FIXME: we need to parse and return a consistent response
 @router.get("/broker/{identity_provider}/token")
 def get_idenity_provider_token(
         identity_provider: str, access_token: str = Security(oauth2_scheme)
-) -> Json:
+):
     """Get identity provider JWT token from keyclok. Keycloak must be configured to store external tokens."""
     if identity_provider in settings.keycloak_ipds:
         idp_url = f"{settings.auth_base}/auth/realms/{settings.auth_realm}/broker/{identity_provider}/token"

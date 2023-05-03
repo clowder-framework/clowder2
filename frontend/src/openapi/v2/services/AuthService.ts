@@ -104,12 +104,12 @@ export class AuthService {
      * Get Idenity Provider Token
      * Get identity provider JWT token from keyclok. Keycloak must be configured to store external tokens.
      * @param identityProvider
-     * @returns string Successful Response
+     * @returns any Successful Response
      * @throws ApiError
      */
     public static getIdenityProviderTokenApiV2AuthBrokerIdentityProviderTokenGet(
         identityProvider: string,
-    ): CancelablePromise<string> {
+    ): CancelablePromise<any> {
         return __request({
             method: 'GET',
             path: `/api/v2/auth/broker/${identityProvider}/token`,
