@@ -11,7 +11,7 @@ from pymongo import MongoClient
 
 from app import keycloak_auth
 from app import dependencies
-from app.deps.authorization_deps import Authorization
+from app.deps.authorization_deps import Authorization, CheckStatus
 from app.keycloak_auth import get_user, get_current_user, UserOut
 from app.config import settings
 from app.models.datasets import DatasetOut
@@ -272,31 +272,35 @@ async def get_dataset_metadata(
     listener_version: Optional[float] = Form(None),
     user=Depends(get_current_user),
     db: MongoClient = Depends(dependencies.get_db),
+    public: bool = Depends(CheckStatus("public")),
     allow: bool = Depends(Authorization("viewer")),
 ):
-    if (
-        dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
-    ) is not None:
-        query = {"resource.resource_id": ObjectId(dataset_id)}
+    if public or allow:
+        if (
+            dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
+        ) is not None:
+            query = {"resource.resource_id": ObjectId(dataset_id)}
 
-        if listener_name is not None:
-            query["agent.listener.name"] = listener_name
-        if listener_version is not None:
-            query["agent.listener.version"] = listener_version
+            if listener_name is not None:
+                query["agent.listener.name"] = listener_name
+            if listener_version is not None:
+                query["agent.listener.version"] = listener_version
 
-        metadata = []
-        async for md in db["metadata"].find(query):
-            md_out = MetadataOut.from_mongo(md)
-            if md_out.definition is not None:
-                if (
-                    md_def := await db["metadata.definitions"].find_one(
-                        {"name": md_out.definition}
-                    )
-                ) is not None:
-                    md_def = MetadataDefinitionOut(**md_def)
-                    md_out.description = md_def.description
-            metadata.append(md_out)
-        return metadata
+            metadata = []
+            async for md in db["metadata"].find(query):
+                md_out = MetadataOut.from_mongo(md)
+                if md_out.definition is not None:
+                    if (
+                        md_def := await db["metadata.definitions"].find_one(
+                            {"name": md_out.definition}
+                        )
+                    ) is not None:
+                        md_def = MetadataDefinitionOut(**md_def)
+                        md_out.description = md_def.description
+                metadata.append(md_out)
+            return metadata
+        else:
+            raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
     else:
         raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
 
