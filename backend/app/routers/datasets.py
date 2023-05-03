@@ -31,7 +31,7 @@ from app.config import settings
 from app.deps.authorization_deps import Authorization, CheckStatus
 from app.deps.authorization_deps import is_public_dataset
 from app.keycloak_auth import get_token
-from app.keycloak_auth import get_user, get_current_user
+from app.keycloak_auth import get_user, get_current_user, get_current_username
 from app.models.authorization import AuthorizationDB, RoleType
 from app.models.datasets import (
     DatasetBase,
@@ -280,7 +280,7 @@ async def get_datasets(
 async def get_dataset(
     dataset_id: str,
     db: MongoClient = Depends(dependencies.get_db),
-    public: bool = Depends(CheckStatus("public")),
+    public: bool = Depends(CheckStatus("PUBLIC")),
     allow: bool = Depends(Authorization("viewer")),
 ):
 
@@ -300,74 +300,101 @@ async def get_dataset(
 async def get_dataset_files(
     dataset_id: str,
     folder_id: Optional[str] = None,
-    user_id=Depends(get_user),
     db: MongoClient = Depends(dependencies.get_db),
-    public: bool = Depends(CheckStatus("public")),
+    public: bool = Depends(CheckStatus("PUBLIC")),
     allow: bool = Depends(Authorization("viewer")),
+    user_id=Depends(get_current_username),
     skip: int = 0,
     limit: int = 10,
 ):
     files = []
-    # TODO if dataset is public return all files
-    if (
-        dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
-    ) is not None:
-        dataset_out = DatasetOut.from_mongo(dataset)
-        if dataset_out.status == DatasetStatus.PUBLIC.name:
-            if folder_id is not None:
-                for f in (
-                    await db["files"]
-                    .find(
+    if public:
+        if folder_id is not None:
+            for f in (
+                    await db["files_view"]
+                            .find(
                         {
-                            "dataset_id": ObjectId(dataset_id),
-                            "folder_id": ObjectId(folder_id),
+                            "$and": [
+                                {
+                                    "dataset_id": ObjectId(dataset_id),
+                                    "folder_id": ObjectId(folder_id),
+                                }
+                            ]
                         }
                     )
-                    .skip(skip)
-                    .limit(limit)
-                    .to_list(length=limit)
-                ):
-                    files.append(FileOut.from_mongo(f))
-            else:
-                for f in (
-                    await db["files"]
-                    .find(
-                        {
-                            "dataset_id": ObjectId(dataset_id),
-                            "folder_id": None,
-                        }
-                    )
-                    .skip(skip)
-                    .limit(limit)
-                    .to_list(length=limit)
-                ):
-                    files.append(FileOut.from_mongo(f))
+                            .skip(skip)
+                            .limit(limit)
+                            .to_list(length=limit)
+            ):
+                files.append(FileOut.from_mongo(f))
         else:
             for f in (
-                await db["files_view"]
-                .find(
-                    {
-                        "$and": [
-                            {
-                                "dataset_id": ObjectId(dataset_id),
-                                "folder_id": None,
-                            },
-                            {
-                                "$or": [
-                                    {"creator.email": user_id},
-                                    {"auth": {"$elemMatch": {"user_ids": user_id}}},
-                                ]
-                            },
-                        ]
-                    }
-                )
-                .skip(skip)
-                .limit(limit)
-                .to_list(length=limit)
+                    await db["files_view"]
+                            .find(
+                        {
+                            "$and": [
+                                {
+                                    "dataset_id": ObjectId(dataset_id),
+                                    "folder_id": None,
+                                }
+                            ]
+                        }
+                    )
+                            .skip(skip)
+                            .limit(limit)
+                            .to_list(length=limit)
+            ):
+                files.append(FileOut.from_mongo(f))
+    elif allow:
+        if folder_id is not None:
+            for f in (
+                    await db["files_view"]
+                            .find(
+                        {
+                            "$and": [
+                                {
+                                    "dataset_id": ObjectId(dataset_id),
+                                    "folder_id": ObjectId(folder_id),
+                                },
+                                {
+                                    "$or": [
+                                        {"creator.email": user_id},
+                                        {"auth": {"$elemMatch": {"user_ids": user_id}}},
+                                    ]
+                                },
+                            ]
+                        }
+                    )
+                            .skip(skip)
+                            .limit(limit)
+                            .to_list(length=limit)
+            ):
+                files.append(FileOut.from_mongo(f))
+        else:
+            for f in (
+                    await db["files_view"]
+                            .find(
+                        {
+                            "$and": [
+                                {
+                                    "dataset_id": ObjectId(dataset_id),
+                                    "folder_id": None,
+                                },
+                                {
+                                    "$or": [
+                                        {"creator.email": user_id},
+                                        {"auth": {"$elemMatch": {"user_ids": user_id}}},
+                                    ]
+                                },
+                            ]
+                        }
+                    )
+                            .skip(skip)
+                            .limit(limit)
+                            .to_list(length=limit)
             ):
                 files.append(FileOut.from_mongo(f))
     return files
-
 
 @router.put("/{dataset_id}", response_model=DatasetOut)
 async def edit_dataset(
