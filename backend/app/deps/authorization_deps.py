@@ -57,9 +57,7 @@ async def get_role_by_file(
             dataset_out = DatasetOut.from_mongo(dataset)
             if dataset_out.status == DatasetStatus.PUBLIC.name:
                 role = RoleType.VIEWER
-        else:
-            role = None
-        return role
+                return role
     raise HTTPException(status_code=404, detail=f"File {file_id} not found")
 
 
@@ -420,6 +418,38 @@ class CheckStatus:
                 return False
         else:
             return False
+
+class CheckFileStatus:
+    """We use class dependency so that we can provide the `permission` parameter to the dependency.
+    For more info see https://fastapi.tiangolo.com/advanced/advanced-dependencies/."""
+
+    def __init__(self, status: str):
+        self.status = status
+
+    async def __call__(
+        self,
+        file_id: str,
+        db: MongoClient = Depends(get_db),
+    ):
+
+        if (
+                file := await db["files"].find_one({"_id": ObjectId(file_id)})
+        ) is not None:
+            file_out = FileOut.from_mongo(file)
+            dataset_id = file_out.dataset_id
+            if (
+                dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
+            ) is not None:
+                current_dataset = DatasetOut.from_mongo(dataset)
+                if current_dataset.status == self.status:
+                    return True
+                else:
+                    return False
+            else:
+                return False
+        else:
+            return False
+
 
 def access(user_role: RoleType, role_required: RoleType) -> bool:
     """Enforce implied role hierarchy OWNER > EDITOR > UPLOADER > VIEWER"""

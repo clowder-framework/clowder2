@@ -24,7 +24,7 @@ from pika.adapters.blocking_connection import BlockingChannel
 from pymongo import MongoClient
 
 from app import dependencies
-from app.deps.authorization_deps import FileAuthorization
+from app.deps.authorization_deps import FileAuthorization, CheckFileStatus
 from app.config import settings
 from app.search.connect import (
     insert_record,
@@ -369,6 +369,7 @@ async def delete_file(
 async def get_file_summary(
     file_id: str,
     db: MongoClient = Depends(dependencies.get_db),
+    public: bool = Depends(CheckFileStatus("public")),
     allow: bool = Depends(FileAuthorization("viewer")),
 ):
     if (file := await db["files"].find_one({"_id": ObjectId(file_id)})) is not None:
