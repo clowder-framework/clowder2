@@ -38,6 +38,7 @@ import { ExtractionHistoryTab } from "../listeners/ExtractionHistoryTab";
 import { SharingTab } from "../sharing/SharingTab";
 import RoleChip from "../auth/RoleChip";
 import { TabStyle } from "../../styles/Styles";
+import { Forbidden } from "../errors/Forbidden";
 
 export const Dataset = (): JSX.Element => {
 	// path parameter
@@ -102,7 +103,7 @@ export const Dataset = (): JSX.Element => {
 	// Error msg dialog
 	const [errorOpen, setErrorOpen] = useState(false);
 	useEffect(() => {
-		if (reason !== "" && reason !== null && reason !== undefined) {
+		if (reason !== "" && reason !== null && reason !== undefined && reason != "Forbidden") {
 			setErrorOpen(true);
 		}
 	}, [reason]);
@@ -188,6 +189,8 @@ export const Dataset = (): JSX.Element => {
 
 	return (
 		<Layout>
+			{reason == "Forbidden" ? <Forbidden /> :
+            <>
 			{/*Error Message dialogue*/}
 			<ActionModal
 				actionOpen={errorOpen}
@@ -355,6 +358,7 @@ export const Dataset = (): JSX.Element => {
 					<DatasetDetails details={about} />
 				</Grid>
 			</Grid>
+            </>}
 		</Layout>
 	);
 };

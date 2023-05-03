@@ -60,9 +60,7 @@ const PrivateRoute = (props): JSX.Element => {
 
 	// not found or unauthorized
 	useEffect(() => {
-		if (reason == "Forbidden") {
-			history("/forbidden");
-		} else if (reason == "Not Found") {
+		if (reason == "Not Found") {
 			history("/not-found");
 		}
 	}, [reason]);
