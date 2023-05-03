@@ -158,12 +158,15 @@ async def is_public_dataset(
     db: MongoClient = Depends(get_db),
 ) -> bool:
     """Checks if a dataset is public."""
-    if (dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})) is not None:
+    if (
+        dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
+    ) is not None:
         dataset_out = DatasetOut.from_mongo(dataset)
         if dataset_out.status == DatasetStatus.PUBLIC.name:
             return True
     else:
         return False
+
 
 class Authorization:
     """We use class dependency so that we can provide the `permission` parameter to the dependency.
@@ -395,6 +398,7 @@ class GroupAuthorization:
             )
         raise HTTPException(status_code=404, detail=f"Group {group_id} not found")
 
+
 class CheckStatus:
     """We use class dependency so that we can provide the `permission` parameter to the dependency.
     For more info see https://fastapi.tiangolo.com/advanced/advanced-dependencies/."""
@@ -407,9 +411,8 @@ class CheckStatus:
         dataset_id: str,
         db: MongoClient = Depends(get_db),
     ):
-
         if (
-                dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
+            dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
         ) is not None:
             current_dataset = DatasetOut.from_mongo(dataset)
             if current_dataset.status == self.status:
@@ -418,6 +421,7 @@ class CheckStatus:
                 return False
         else:
             return False
+
 
 class CheckFileStatus:
     """We use class dependency so that we can provide the `permission` parameter to the dependency.
@@ -431,10 +435,7 @@ class CheckFileStatus:
         file_id: str,
         db: MongoClient = Depends(get_db),
     ):
-
-        if (
-                file := await db["files"].find_one({"_id": ObjectId(file_id)})
-        ) is not None:
+        if (file := await db["files"].find_one({"_id": ObjectId(file_id)})) is not None:
             file_out = FileOut.from_mongo(file)
             dataset_id = file_out.dataset_id
             if (

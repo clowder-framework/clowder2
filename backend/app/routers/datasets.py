@@ -283,7 +283,6 @@ async def get_dataset(
     public: bool = Depends(CheckStatus("PUBLIC")),
     allow: bool = Depends(Authorization("viewer")),
 ):
-
     if public or allow:
         try:
             if (
@@ -291,7 +290,9 @@ async def get_dataset(
             ) is not None:
                 return DatasetOut.from_mongo(dataset)
         except:
-            raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
+            raise HTTPException(
+                status_code=404, detail=f"Dataset {dataset_id} not found"
+            )
     else:
         raise HTTPException(status_code=401, detail=f"Dataset {dataset_id} not found")
 

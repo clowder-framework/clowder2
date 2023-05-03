@@ -300,7 +300,9 @@ async def get_dataset_metadata(
                 metadata.append(md_out)
             return metadata
         else:
-            raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
+            raise HTTPException(
+                status_code=404, detail=f"Dataset {dataset_id} not found"
+            )
     else:
         raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
 

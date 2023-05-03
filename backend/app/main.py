@@ -105,9 +105,7 @@ api_router.include_router(
     dependencies=[Depends(get_current_username)],
 )
 api_router.include_router(
-    metadata_datasets.router,
-    prefix="/datasets",
-    tags=["metadata"]
+    metadata_datasets.router, prefix="/datasets", tags=["metadata"]
 )
 api_router.include_router(
     folders.router,
