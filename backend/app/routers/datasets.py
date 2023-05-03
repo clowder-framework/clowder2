@@ -31,7 +31,11 @@ from app.config import settings
 from app.deps.authorization_deps import Authorization, CheckStatus
 from app.deps.authorization_deps import is_public_dataset
 from app.keycloak_auth import get_token
-from app.keycloak_auth import get_user, get_current_user, get_current_username_or_anonymous_user
+from app.keycloak_auth import (
+    get_user,
+    get_current_user,
+    get_current_username_or_anonymous_user,
+)
 from app.models.authorization import AuthorizationDB, RoleType
 from app.models.datasets import (
     DatasetBase,

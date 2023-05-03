@@ -11,7 +11,11 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import settings
 from app.search.connect import connect_elasticsearch, create_index
-from app.keycloak_auth import get_token, get_current_username, get_current_username_or_anonymous_user
+from app.keycloak_auth import (
+    get_token,
+    get_current_username,
+    get_current_username_or_anonymous_user,
+)
 from app.routers import (
     folders,
     groups,

@@ -3,7 +3,10 @@ from pymongo import MongoClient
 from bson import ObjectId
 
 from app.dependencies import get_db
-from app.keycloak_auth import get_current_username, get_current_username_or_anonymous_user
+from app.keycloak_auth import (
+    get_current_username,
+    get_current_username_or_anonymous_user,
+)
 from app.models.authorization import RoleType, AuthorizationDB
 
 from app.models.files import FileOut

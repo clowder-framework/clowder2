@@ -12,7 +12,12 @@ from pymongo import MongoClient
 from app import keycloak_auth
 from app import dependencies
 from app.deps.authorization_deps import Authorization, CheckStatus
-from app.keycloak_auth import get_user, get_current_user, get_current_username_or_anonymous_user, UserOut
+from app.keycloak_auth import (
+    get_user,
+    get_current_user,
+    get_current_username_or_anonymous_user,
+    UserOut,
+)
 from app.config import settings
 from app.models.datasets import DatasetOut
 from app.models.listeners import LegacyEventListenerIn

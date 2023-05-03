@@ -258,6 +258,7 @@ async def get_current_username(
         headers={"WWW-Authenticate": "Bearer"},
     )
 
+
 async def get_current_username_or_anonymous_user(
     token: str = Security(oauth2_scheme),
     api_key: str = Security(api_key_header),
@@ -313,6 +314,7 @@ async def get_current_username_or_anonymous_user(
                 detail={"error": "Key is invalid."},
                 headers={"WWW-Authenticate": "Bearer"},
             )
+
 
 async def get_current_user_id(identity: Json = Depends(get_token)) -> str:
     """Retrieve internal Keycloak id. Does not query MongoDB."""
