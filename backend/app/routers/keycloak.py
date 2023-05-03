@@ -15,7 +15,8 @@ from app.config import settings
 from app.keycloak_auth import (
     keycloak_openid,
     get_idp_public_key,
-    retreive_refresh_token, oauth2_scheme,
+    retreive_refresh_token,
+    oauth2_scheme,
 )
 from app.models.tokens import TokenDB
 from app.models.users import UserIn, UserDB
@@ -39,8 +40,8 @@ async def login() -> RedirectResponse:
 
 @router.get("/logout")
 async def logout(
-        credentials: HTTPAuthorizationCredentials = Security(security),
-        db: MongoClient = Depends(dependencies.get_db),
+    credentials: HTTPAuthorizationCredentials = Security(security),
+    db: MongoClient = Depends(dependencies.get_db),
 ):
     """Logout of keycloak."""
     # get user info
@@ -48,7 +49,7 @@ async def logout(
     try:
         user_info = keycloak_openid.userinfo(access_token)
         if (
-                token_exist := await db["tokens"].find_one({"email": user_info["email"]})
+            token_exist := await db["tokens"].find_one({"email": user_info["email"]})
         ) is not None:
             # log user out
             try:
@@ -100,7 +101,7 @@ async def login(userIn: UserIn):
 
 @router.get("")
 async def auth(
-        code: str, db: MongoClient = Depends(dependencies.get_db)
+    code: str, db: MongoClient = Depends(dependencies.get_db)
 ) -> RedirectResponse:
     """Redirect endpoint Keycloak redirects to after login."""
     logger.info(f"In /api/v2/auth")
@@ -152,8 +153,8 @@ async def auth(
 
 @router.get("/refresh_token")
 async def refresh_token(
-        credentials: HTTPAuthorizationCredentials = Security(security),
-        db: MongoClient = Depends(dependencies.get_db),
+    credentials: HTTPAuthorizationCredentials = Security(security),
+    db: MongoClient = Depends(dependencies.get_db),
 ):
     access_token = credentials.credentials
 
@@ -186,7 +187,7 @@ async def refresh_token(
 
 @router.get("/broker/{identity_provider}/token")
 def get_idenity_provider_token(
-        identity_provider: str, access_token: str = Security(oauth2_scheme)
+    identity_provider: str, access_token: str = Security(oauth2_scheme)
 ):
     """Get identity provider JWT token from keyclok. Keycloak must be configured to store external tokens."""
     if identity_provider in settings.keycloak_ipds:
@@ -200,10 +201,7 @@ def get_idenity_provider_token(
             itp_token_body = json.loads(idp_token.content)
             return itp_token_body
         else:
-            raise HTTPException(
-                status_code=400,
-                detail=idp_token.text
-            )
+            raise HTTPException(status_code=400, detail=idp_token.text)
     else:
         raise HTTPException(
             status_code=400,
