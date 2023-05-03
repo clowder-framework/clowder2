@@ -12,7 +12,7 @@ from pymongo import MongoClient
 from app import keycloak_auth
 from app import dependencies
 from app.deps.authorization_deps import Authorization, CheckStatus
-from app.keycloak_auth import get_user, get_current_user, UserOut
+from app.keycloak_auth import get_user, get_current_user, get_current_username_or_anonymous_user, UserOut
 from app.config import settings
 from app.models.datasets import DatasetOut
 from app.models.listeners import LegacyEventListenerIn
@@ -270,7 +270,7 @@ async def get_dataset_metadata(
     dataset_id: str,
     listener_name: Optional[str] = Form(None),
     listener_version: Optional[float] = Form(None),
-    user=Depends(get_current_user),
+    user=Depends(get_current_username_or_anonymous_user),
     db: MongoClient = Depends(dependencies.get_db),
     public: bool = Depends(CheckStatus("PUBLIC")),
     allow: bool = Depends(Authorization("viewer")),
