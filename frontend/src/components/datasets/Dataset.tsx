@@ -102,8 +102,11 @@ export const Dataset = (): JSX.Element => {
 
 	// Error msg dialog
 	const [errorOpen, setErrorOpen] = useState(false);
+	const [showForbiddenPage, setShowForbiddenPage] = useState(false);
 	useEffect(() => {
-		if (reason !== "" && reason !== null && reason !== undefined && reason != "Forbidden") {
+        if (reason == "Forbidden") {
+            setShowForbiddenPage(true);
+        } else if (reason !== "" && reason !== null && reason !== undefined) {
 			setErrorOpen(true);
 		}
 	}, [reason]);
@@ -189,7 +192,7 @@ export const Dataset = (): JSX.Element => {
 
 	return (
 		<Layout>
-			{reason == "Forbidden" ? <Forbidden /> :
+			{showForbiddenPage ? <Forbidden /> :
             <>
 			{/*Error Message dialogue*/}
 			<ActionModal
