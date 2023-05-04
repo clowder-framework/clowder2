@@ -10,7 +10,6 @@ import {
 import { FormControlLabel, Grid, Switch, Typography } from "@mui/material";
 import Layout from "../Layout";
 import { SearchResult } from "./SearchResult";
-import { SearchErrorBoundary } from "./SearchErrorBoundary";
 import { theme } from "../../theme";
 import { getCurrEmail } from "../../utils/common";
 
@@ -95,11 +94,8 @@ export function Search() {
 									showFilter={true}
 									showClear={false}
 									renderNoSuggestion="No suggestions found."
-									dataField={[
-										{ field: "name", weight: 3 },
-										{ field: "description", weight: 2 },
-										{ field: "creator.keyword", weight: 1 },
-									]}
+									dataField={["name", "description", "creator.keyword"]}
+									fieldWeights={[3, 2, 1]}
 									innerClass={{
 										title: "search-title",
 										input: "search-input",
@@ -182,38 +178,36 @@ export function Search() {
 								</Grid>
 							</>
 						)}
-						<SearchErrorBoundary>
-							{/*result*/}
-							{luceneOn ? (
-								<ReactiveList
-									componentId="results"
-									dataField="_score"
-									size={20}
-									pagination={true}
-									react={{
-										and: ["string-searchbox"],
-									}}
-									render={({ data }) => <SearchResult data={data} />}
-								/>
-							) : (
-								<ReactiveList
-									componentId="results"
-									dataField="_score"
-									size={20}
-									pagination={true}
-									react={{
-										and: [
-											"searchbox",
-											"creatorfilter",
-											"downloadfilter",
-											"modifyfilter",
-											"authFilter",
-										],
-									}}
-									render={({ data }) => <SearchResult data={data} />}
-								/>
-							)}
-						</SearchErrorBoundary>
+						{/*result*/}
+						{luceneOn ? (
+							<ReactiveList
+								componentId="results"
+								dataField="_score"
+								size={20}
+								pagination={true}
+								react={{
+									and: ["string-searchbox"],
+								}}
+								render={({ data }) => <SearchResult data={data} />}
+							/>
+						) : (
+							<ReactiveList
+								componentId="results"
+								dataField="_score"
+								size={20}
+								pagination={true}
+								react={{
+									and: [
+										"searchbox",
+										"creatorfilter",
+										"downloadfilter",
+										"modifyfilter",
+										"authFilter",
+									],
+								}}
+								render={({ data }) => <SearchResult data={data} />}
+							/>
+						)}
 					</Grid>
 				</Grid>
 			</div>
