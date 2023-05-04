@@ -58,13 +58,6 @@ const PrivateRoute = (props): JSX.Element => {
 		}
 	}, [loggedOut]);
 
-	// not found or unauthorized
-	useEffect(() => {
-		if (reason == "Not Found") {
-			history("/not-found");
-		}
-	}, [reason]);
-
 	// get roles if authorized
 	useEffect(() => {
 		if (datasetId && reason === "") listDatasetRole(datasetId);

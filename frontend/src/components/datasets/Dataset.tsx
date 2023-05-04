@@ -106,14 +106,14 @@ export const Dataset = (): JSX.Element => {
 	const [showForbiddenPage, setShowForbiddenPage] = useState(false);
 	const [showNotFoundPage, setShowNotFoundPage] = useState(false);
 	
-    useEffect(() => {
-        if (reason == "Forbidden") {
-            setShowForbiddenPage(true);
+	useEffect(() => {
+		if (reason == "Forbidden") {
+			setShowForbiddenPage(true);
         
-        } else if (reason == "Not Found") {
-            setShowNotFoundPage(true);
+		} else if (reason == "Not Found") {
+			setShowNotFoundPage(true);
         
-        } else if (reason !== "" && reason !== null && reason !== undefined) {
+		} else if (reason !== "" && reason !== null && reason !== undefined) {
 			setErrorOpen(true);
 		}
 	}, [reason]);
@@ -198,12 +198,12 @@ export const Dataset = (): JSX.Element => {
 	}
 
 
-    if (showForbiddenPage) {
-        return <Forbidden />
+	if (showForbiddenPage) {
+		return <Forbidden />;
     
-    } else if (showNotFoundPage) {
-        return <PageNotFound />
-    }
+	} else if (showNotFoundPage) {
+		return <PageNotFound />;
+	}
 
 	return (
 		<Layout>
