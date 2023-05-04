@@ -77,41 +77,49 @@ async def get_role_by_metadata(
                     file := await db["files"].find_one({"_id": ObjectId(resource_id)})
             ) is not None:
                 file_out = FileOut.from_mongo(file)
-                authorization = await db["authorization"].find_one(
-                    {
-                        "$and": [
-                            {"dataset_id": ObjectId(file_out.dataset_id)},
-                            {
-                                "$or": [
-                                    {"creator": current_user},
-                                    {"user_ids": current_user},
-                                ]
-                            },
-                        ]
-                    }
-                )
-                role = AuthorizationDB.from_mongo(authorization).role
-                return role
+                authorization = await AuthorizationDB.find_one(AuthorizationDB.dataset_id == file_out.dataset_id,
+                                                               Or(AuthorizationDB.creator == current_user,
+                                                                  AuthorizationDB.user_ids == current_user))
+                return authorization.role
+                # authorization = await db["authorization"].find_one(
+                #     {
+                #         "$and": [
+                #             {"dataset_id": ObjectId(file_out.dataset_id)},
+                #             {
+                #                 "$or": [
+                #                     {"creator": current_user},
+                #                     {"user_ids": current_user},
+                #                 ]
+                #             },
+                #         ]
+                #     }
+                # )
+                # role = AuthorizationDB.from_mongo(authorization).role
+                # return role
         elif resource_type == "datasets":
             if (
                     dataset := await db["datasets"].find_one({"_id": ObjectId(resource_id)})
             ) is not None:
                 dataset_out = DatasetOut.from_mongo(dataset)
-                authorization = await db["authorization"].find_one(
-                    {
-                        "$and": [
-                            {"dataset_id": ObjectId(dataset_out.dataset_id)},
-                            {
-                                "$or": [
-                                    {"creator": current_user},
-                                    {"user_ids": current_user},
-                                ]
-                            },
-                        ]
-                    }
-                )
-                role = AuthorizationDB.from_mongo(authorization).role
-                return role
+                authorization = await AuthorizationDB.find_one(AuthorizationDB.dataset_id == dataset_out.dataset_id,
+                                                               Or(AuthorizationDB.creator == current_user,
+                                                                  AuthorizationDB.user_ids == current_user))
+                return authorization.role
+                # authorization = await db["authorization"].find_one(
+                #     {
+                #         "$and": [
+                #             {"dataset_id": ObjectId(dataset_out.dataset_id)},
+                #             {
+                #                 "$or": [
+                #                     {"creator": current_user},
+                #                     {"user_ids": current_user},
+                #                 ]
+                #             },
+                #         ]
+                #     }
+                # )
+                # role = AuthorizationDB.from_mongo(authorization).role
+                # return role
 
 
 async def get_role_by_group(
