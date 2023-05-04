@@ -25,7 +25,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { RootState } from "../../types/data";
 import { theme } from "../../theme";
-import { removeDatasetGroupRole, setDatasetGroupRole } from "../../actions/dataset";
+import { fetchDatasetRoles, removeDatasetGroupRole, setDatasetGroupRole } from "../../actions/dataset";
 import { useParams } from "react-router-dom";
 import { GroupAndRoleSubTable } from "./GroupAndRoleSubTable";
 
@@ -55,7 +55,7 @@ export function GroupAndRoleTableEntry(props: GroupAndRoleTableEntryProps) {
 		role: string | undefined
 	) => dispatch(setDatasetGroupRole(dataset_id, group_id, role));
 
-	const removeGroupRole = (
+	const removeGroupRole = async (
 		dataset_id: string | undefined,
 		group_id: string | undefined,
 	) => dispatch(removeDatasetGroupRole(dataset_id, group_id));
@@ -78,10 +78,15 @@ export function GroupAndRoleTableEntry(props: GroupAndRoleTableEntryProps) {
 		groupRoleAssigned(datasetId, group_role.group.id, selectedRole);
 		setEditRoleOn(false);
 	};
+    
+	const getRoles = (datasetId: string | undefined) =>
+		dispatch(fetchDatasetRoles(datasetId));
 
-	const handleRoleDelete = () => {
-		removeGroupRole(datasetId, group_role.group.id);
+
+	const handleRoleDelete = async () => {
+		await removeGroupRole(datasetId, group_role.group.id);
 		setDeleteRoleConfirmation(false);
+		getRoles(datasetId);
 	};
 
 	return (

@@ -19,7 +19,7 @@ import {
 	Typography,
 } from "@mui/material";
 import { useParams } from "react-router-dom";
-import { setDatasetUserRole } from "../../actions/dataset";
+import { fetchDatasetRoles, setDatasetUserRole } from "../../actions/dataset";
 import { useDispatch, useSelector } from "react-redux";
 import CloseIcon from "@mui/icons-material/Close";
 import { fetchAllUsers } from "../../actions/user";
@@ -46,8 +46,11 @@ export default function ShareDatasetModal(props: ShareDatasetModalProps) {
 	const [options, setOptions] = useState([]);
 	const users = useSelector((state: RootState) => state.group.users);
 
-	const setUserRole = (datasetId: string, username: string, role: string) =>
+	const setUserRole = async (datasetId: string, username: string, role: string) =>
 		dispatch(setDatasetUserRole(datasetId, username, role));
+
+	const getRoles = (datasetId: string | undefined) =>
+		dispatch(fetchDatasetRoles(datasetId));
 
 	useEffect(() => {
 		listAllUsers(0, 21);
@@ -61,11 +64,12 @@ export default function ShareDatasetModal(props: ShareDatasetModalProps) {
 		);
 	}, [users]);
 
-	const onShare = () => {
-		setUserRole(datasetId, email, role);
+	const onShare = async () => {
+		await setUserRole(datasetId, email, role);
 		setEmail("");
 		setRole("viewer");
 		setShowSuccessAlert(true);
+		getRoles(datasetId);
 	};
 
 	return (
