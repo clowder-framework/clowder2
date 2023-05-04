@@ -30,7 +30,7 @@ import { fetchDatasetRole, fetchFileRole } from "./actions/authorization";
 import { PageNotFound } from "./components/errors/PageNotFound";
 import { Forbidden } from "./components/errors/Forbidden";
 import { ApiKeys } from "./components/ApiKeys/ApiKey";
-
+import {Profile}  from "./components/users/Profile";
 // https://dev.to/iamandrewluca/private-route-in-react-router-v6-lg5
 const PrivateRoute = (props): JSX.Element => {
 	const { children } = props;
@@ -88,6 +88,14 @@ export const AppRoutes = (): JSX.Element => {
 					element={
 						<PrivateRoute>
 							<Explore />
+						</PrivateRoute>
+					}
+				/>
+				<Route
+					path="/profile"
+					element={
+						<PrivateRoute>
+							<Profile />
 						</PrivateRoute>
 					}
 				/>
