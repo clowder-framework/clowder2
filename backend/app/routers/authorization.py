@@ -34,11 +34,11 @@ router = APIRouter()
 
 @router.post("/datasets/{dataset_id}", response_model=AuthorizationDB)
 async def save_authorization(
-        dataset_id: str,
-        authorization_in: AuthorizationBase,
-        user=Depends(get_current_username),
-        db: MongoClient = Depends(dependencies.get_db),
-        allow: bool = Depends(Authorization("editor")),
+    dataset_id: str,
+    authorization_in: AuthorizationBase,
+    user=Depends(get_current_username),
+    db: MongoClient = Depends(dependencies.get_db),
+    allow: bool = Depends(Authorization("editor")),
 ):
     """Save authorization info in Mongo. This is a triple of dataset_id/user_id/role/group_id."""
 
@@ -62,7 +62,9 @@ async def save_authorization(
 
     authorization_dict = authorization_in.dict()
     authorization_dict["user_ids"] = user_ids
-    authorization_db = await AuthorizationDB(**authorization_dict, creator=user).insert()
+    authorization_db = await AuthorizationDB(
+        **authorization_dict, creator=user
+    ).insert()
     return authorization_db
     # new_authorization = await db["authorization"].insert_one(
     #     authorization_db.to_mongo()
@@ -73,15 +75,19 @@ async def save_authorization(
 
 @router.get("/datasets/{dataset_id}/role", response_model=AuthorizationDB)
 async def get_dataset_role(
-        dataset_id: str,
-        current_user=Depends(get_current_username),
-        db: MongoClient = Depends(get_db),
+    dataset_id: str,
+    current_user=Depends(get_current_username),
+    db: MongoClient = Depends(get_db),
 ):
     """Retrieve role of user for a specific dataset."""
     # Get group id and the associated users from authorization
-    authorization = await AuthorizationDB.find_one(AuthorizationDB.dataset_id == PyObjectId(dataset_id),
-                                                   Or(AuthorizationDB.creator == current_user,
-                                                      AuthorizationDB.user_ids == current_user))
+    authorization = await AuthorizationDB.find_one(
+        AuthorizationDB.dataset_id == PyObjectId(dataset_id),
+        Or(
+            AuthorizationDB.creator == current_user,
+            AuthorizationDB.user_ids == current_user,
+        ),
+    )
     # if (
     #         authorization_q := await db["authorization"].find_one(
     #             {
@@ -104,7 +110,7 @@ async def get_dataset_role(
 
 @router.get("/datasets/{dataset_id}/role/viewer")
 async def get_dataset_role_viewer(
-        dataset_id: str, allow: bool = Depends(Authorization("viewer"))
+    dataset_id: str, allow: bool = Depends(Authorization("viewer"))
 ):
     """Used for testing only. Returns true if user has viewer permission on dataset, otherwise throws a 403 Forbidden HTTP exception.
     See `routers/authorization.py` for more info."""
@@ -113,7 +119,7 @@ async def get_dataset_role_viewer(
 
 @router.get("/datasets/{dataset_id}/role/owner")
 async def get_dataset_role_owner(
-        dataset_id: str, allow: bool = Depends(Authorization("owner"))
+    dataset_id: str, allow: bool = Depends(Authorization("owner"))
 ):
     """Used for testing only. Returns true if user has owner permission on dataset, otherwise throws a 403 Forbidden HTTP exception.
     See `routers/authorization.py` for more info."""
@@ -122,9 +128,9 @@ async def get_dataset_role_owner(
 
 @router.get("/files/{file_id}/role", response_model=RoleType)
 async def get_file_role(
-        file_id: str,
-        current_user=Depends(get_current_username),
-        role: RoleType = Depends(get_role_by_file),
+    file_id: str,
+    current_user=Depends(get_current_username),
+    role: RoleType = Depends(get_role_by_file),
 ):
     """Retrieve role of user for an individual file. Role cannot change between file versions."""
     return role
@@ -132,9 +138,9 @@ async def get_file_role(
 
 @router.get("/metadata/{metadata_id}/role", response_model=AuthorizationMetadata)
 async def get_metadata_role(
-        metadata_id: str,
-        current_user=Depends(get_current_username),
-        role: RoleType = Depends(get_role_by_metadata),
+    metadata_id: str,
+    current_user=Depends(get_current_username),
+    role: RoleType = Depends(get_role_by_metadata),
 ):
     """Retrieve role of user for group. Group roles can be OWNER, EDITOR, or VIEWER (for regular Members)."""
     return role
@@ -142,9 +148,9 @@ async def get_metadata_role(
 
 @router.get("/groups/{group_id}/role", response_model=RoleType)
 async def get_group_role(
-        group_id: str,
-        current_user=Depends(get_current_username),
-        role: RoleType = Depends(get_role_by_group),
+    group_id: str,
+    current_user=Depends(get_current_username),
+    role: RoleType = Depends(get_role_by_group),
 ):
     """Retrieve role of user on a particular group (i.e. whether they can change group memberships)."""
     return role
@@ -155,26 +161,28 @@ async def get_group_role(
     response_model=AuthorizationDB,
 )
 async def set_dataset_group_role(
-        dataset_id: str,
-        group_id: str,
-        role: RoleType,
-        db: MongoClient = Depends(get_db),
-        user_id=Depends(get_user),
-        allow: bool = Depends(Authorization("editor")),
+    dataset_id: str,
+    group_id: str,
+    role: RoleType,
+    db: MongoClient = Depends(get_db),
+    user_id=Depends(get_user),
+    allow: bool = Depends(Authorization("editor")),
 ):
     """Assign an entire group a specific role for a dataset."""
     if (
-            dataset_q := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
+        dataset_q := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
     ) is not None:
         dataset = DatasetOut.from_mongo(dataset_q)
         if (
-                group_q := await db["groups"].find_one({"_id": ObjectId(group_id)})
+            group_q := await db["groups"].find_one({"_id": ObjectId(group_id)})
         ) is not None:
             group = GroupOut.from_mongo(group_q)
             # First, remove any existing role the group has on the dataset
             await remove_dataset_group_role(dataset_id, group_id, db, user_id, allow)
-            auth_db = await AuthorizationDB.find_one(AuthorizationDB.dataset_id == PyObjectId(dataset_id),
-                                                     AuthorizationDB.role == role)
+            auth_db = await AuthorizationDB.find_one(
+                AuthorizationDB.dataset_id == PyObjectId(dataset_id),
+                AuthorizationDB.role == role,
+            )
             # if (
             #         auth_q := await db["authorization"].find_one(
             #             {"dataset_id": ObjectId(dataset_id), "role": role}
@@ -216,24 +224,26 @@ async def set_dataset_group_role(
     "/datasets/{dataset_id}/user_role/{username}/{role}", response_model=AuthorizationDB
 )
 async def set_dataset_user_role(
-        dataset_id: str,
-        username: str,
-        role: RoleType,
-        db: MongoClient = Depends(get_db),
-        user_id=Depends(get_user),
-        allow: bool = Depends(Authorization("editor")),
+    dataset_id: str,
+    username: str,
+    role: RoleType,
+    db: MongoClient = Depends(get_db),
+    user_id=Depends(get_user),
+    allow: bool = Depends(Authorization("editor")),
 ):
     """Assign a single user a specific role for a dataset."""
 
     if (
-            dataset_q := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
+        dataset_q := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
     ) is not None:
         dataset = DatasetOut.from_mongo(dataset_q)
         if (user_q := await db["users"].find_one({"email": username})) is not None:
             # First, remove any existing role the user has on the dataset
             await remove_dataset_user_role(dataset_id, username, db, user_id, allow)
-            auth_db = await AuthorizationDB.find_one(AuthorizationDB.dataset_id == PyObjectId(dataset_id),
-                                                     AuthorizationDB.role == role)
+            auth_db = await AuthorizationDB.find_one(
+                AuthorizationDB.dataset_id == PyObjectId(dataset_id),
+                AuthorizationDB.role == role,
+            )
             # if (
             #         auth_q := await db["authorization"].find_one(
             #             {"dataset_id": ObjectId(dataset_id), "role": role}
@@ -269,24 +279,26 @@ async def set_dataset_user_role(
     response_model=AuthorizationDB,
 )
 async def remove_dataset_group_role(
-        dataset_id: str,
-        group_id: str,
-        db: MongoClient = Depends(get_db),
-        user_id=Depends(get_user),
-        allow: bool = Depends(Authorization("editor")),
+    dataset_id: str,
+    group_id: str,
+    db: MongoClient = Depends(get_db),
+    user_id=Depends(get_user),
+    allow: bool = Depends(Authorization("editor")),
 ):
     """Remove any role the group has with a specific dataset."""
 
     if (
-            dataset_q := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
+        dataset_q := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
     ) is not None:
         dataset = DatasetOut.from_mongo(dataset_q)
         if (
-                group_q := await db["groups"].find_one({"_id": ObjectId(group_id)})
+            group_q := await db["groups"].find_one({"_id": ObjectId(group_id)})
         ) is not None:
             group = GroupOut.from_mongo(group_q)
-            auth_db = await AuthorizationDB.find_one(AuthorizationDB.dataset_id == PyObjectId(dataset_id),
-                                                     AuthorizationDB.group_ids == group_id)
+            auth_db = await AuthorizationDB.find_one(
+                AuthorizationDB.dataset_id == PyObjectId(dataset_id),
+                AuthorizationDB.group_ids == group_id,
+            )
             # if (
             #         auth_q := await db["authorization"].find_one(
             #             {
@@ -318,21 +330,23 @@ async def remove_dataset_group_role(
     response_model=AuthorizationDB,
 )
 async def remove_dataset_user_role(
-        dataset_id: str,
-        username: str,
-        db: MongoClient = Depends(get_db),
-        user_id=Depends(get_user),
-        allow: bool = Depends(Authorization("editor")),
+    dataset_id: str,
+    username: str,
+    db: MongoClient = Depends(get_db),
+    user_id=Depends(get_user),
+    allow: bool = Depends(Authorization("editor")),
 ):
     """Remove any role the user has with a specific dataset."""
 
     if (
-            dataset_q := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
+        dataset_q := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
     ) is not None:
         dataset = DatasetOut.from_mongo(dataset_q)
         if (user_q := await db["users"].find_one({"email": username})) is not None:
-            auth_db = await AuthorizationDB.find_one(AuthorizationDB.dataset_id == PyObjectId(dataset_id),
-                                                     AuthorizationDB.user_ids == username)
+            auth_db = await AuthorizationDB.find_one(
+                AuthorizationDB.dataset_id == PyObjectId(dataset_id),
+                AuthorizationDB.user_ids == username,
+            )
             # if (
             #         auth_q := await db["authorization"].find_one(
             #             {"dataset_id": ObjectId(dataset_id), "user_ids": username}

@@ -1,25 +1,26 @@
-import pymongo
 from typing import List, Optional
+
+import pymongo
 from bson import ObjectId
-from fastapi import APIRouter, HTTPException, Depends, Request
-from pymongo import MongoClient
+from fastapi import APIRouter, HTTPException, Depends
 from pika.adapters.blocking_connection import BlockingChannel
+from pymongo import MongoClient
 
 from app.dependencies import get_db
-from app.keycloak_auth import get_user, get_current_user
-from app.models.users import UserOut
-from app.models.files import FileOut
-from app.models.listeners import (
-    FeedListener,
-    EventListenerOut,
-)
+from app.keycloak_auth import get_current_user
 from app.models.feeds import (
     FeedIn,
     FeedDB,
     FeedOut,
 )
-from app.search.connect import check_search_result
+from app.models.files import FileOut
+from app.models.listeners import (
+    FeedListener,
+    EventListenerOut,
+)
+from app.models.users import UserOut
 from app.rabbitmq.listeners import submit_file_job
+from app.search.connect import check_search_result
 
 router = APIRouter()
 
@@ -103,7 +104,7 @@ async def save_feed(
     db: MongoClient = Depends(get_db),
 ):
     """Create a new Feed (i.e. saved search) in the database."""
-    feed = FeedDB(**feed_in.dict(), author=user)
+    feed = FeedDB(**feed_in.dict(), creator=user)
     new_feed = await db["feeds"].insert_one(feed.to_mongo())
     found = await db["feeds"].find_one({"_id": new_feed.inserted_id})
     feed_out = FeedOut.from_mongo(found)
