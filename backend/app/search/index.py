@@ -56,7 +56,8 @@ async def index_file(
     update: bool = False,
 ):
     """Create or update an Elasticsearch entry for the file. user_ids is the list of users
-    with permission to at least view the file's dataset, it will be queried if not provided."""
+    with permission to at least view the file's dataset, it will be queried if not provided.
+    """
     if user_ids is None:
         # Get authorized users from db
         authorized_user_ids = []
