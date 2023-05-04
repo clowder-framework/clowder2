@@ -82,7 +82,7 @@ const PrivateRoute = (props): JSX.Element => {
 	useEffect(() => {
 		if (fileId && reason === "") listFileRole(fileId);
 	}, [fileId, reason]);
-
+	// TODO or condition, authorized OR  public
 	return <>{isAuthorized() ? children : <Navigate to="/auth/login" />}</>;
 };
 
