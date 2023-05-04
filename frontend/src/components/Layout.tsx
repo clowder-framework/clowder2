@@ -144,182 +144,21 @@ export default function PersistentDrawerLeft(props) {
 	return (
 		// Wrap reactive search base on the most outside component
 		<ReactiveBase
-		 	url={config.searchEndpoint}
-		 	app="file,dataset,metadata"
-		 	headers={headers}
-		 	theme={searchTheme}
+			url={config.searchEndpoint}
+			app="file,dataset,metadata"
+			headers={headers}
+			theme={searchTheme}
 		>
-		<Box sx={{ display: "flex" }}>
-			<CssBaseline />
-			<AppBar position="fixed" open={open}>
-				<Toolbar>
-					<IconButton
-						color="inherit"
-						aria-label="open drawer"
-						onClick={handleDrawerOpen}
-						edge="start"
-						sx={{ mr: 2, ...(open && { display: "none" }) }}
-					>
-						<MenuIcon />
-					</IconButton>
-					<Link href="/">
-						<Box
-							component="img"
-							src="../../public/clowder-logo-sm.svg"
-							alt="clowder-logo-sm"
-							sx={{ verticalAlign: "middle" }}
-						/>
-					</Link>
-
-					{/*for searching*/}
-					<SearchDiv hidden={embeddedSearchHidden}>
-						<InputSearchBox />
-					</SearchDiv>
-					<Box sx={{ flexGrow: 1 }} />
-					<Box sx={{ marginLeft: "auto" }}>
-						{loggedOut ? (
-							<>
-								<Link href="/auth/register" sx={link}>
-									Register
-								</Link>
-								<Link href="/auth/login" sx={link}>
-									Login
-								</Link>
-							</>
-						) : (
-							<IconButton
-								edge="end"
-								aria-label="account of current user"
-								aria-controls="primary-search-account-menu"
-								aria-haspopup="true"
-								onClick={handleProfileMenuOpen}
-								color="inherit"
-							>
-								{getCurrEmail() !== undefined ? (
-									<Gravatar
-										email={getCurrEmail()}
-										rating="g"
-										style={{
-											width: "32px",
-											height: "32px",
-											borderRadius: "50%",
-											verticalAlign: "middle",
-										}}
-									/>
-								) : (
-									<PersonIcon sx={{ verticalAlign: "middle" }} />
-								)}
-							</IconButton>
-						)}
-					</Box>
-				</Toolbar>
-			</AppBar>
-			{/*Profile menu*/}
-			<MenuList>
-				<Menu
-					anchorEl={anchorEl}
-					anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
-					id={"primary-search-account-menu"}
-					keepMounted
-					transformOrigin={{ vertical: "top", horizontal: "center" }}
-					open={isMenuOpen}
-					onClose={handleProfileMenuClose}
-				>
-					<MenuItem component={RouterLink} to="/profile">
-						<ListItemIcon>
-							<PersonIcon fontSize="small" />
-						</ListItemIcon>
-						<ListItemText>User Profile</ListItemText>
-					</MenuItem>
-					<Divider orientation="horizontal" />
-					<MenuItem component={RouterLink} to="/apikeys">
-						<ListItemIcon>
-							<VpnKeyIcon fontSize="small" />
-						</ListItemIcon>
-						<ListItemText>API Key</ListItemText>
-					</MenuItem>
-					<Divider orientation="horizontal" />
-					<MenuItem component={RouterLink} to="/auth/logout">
-						<ListItemIcon>
-							<LogoutIcon fontSize="small" />
-						</ListItemIcon>
-						<ListItemText>Log Out</ListItemText>
-					</MenuItem>
-				</Menu>
-			</MenuList>
-			{/*side drawer*/}
-			<Drawer
-				sx={{
-					width: drawerWidth,
-					flexShrink: 0,
-					"& .MuiDrawer-paper": {
-						width: drawerWidth,
-						boxSizing: "border-box",
-					},
-				}}
-				variant="persistent"
-				anchor="left"
-				open={open}
-			>
-				<DrawerHeader>
-					<IconButton onClick={handleDrawerClose}>
-						{theme.direction === "ltr" ? (
-							<ChevronLeftIcon />
-						) : (
-							<ChevronRightIcon />
-						)}
-					</IconButton>
-				</DrawerHeader>
-				<Divider />
-				<List>
-					<ListItem key={"explore"} disablePadding>
-						<ListItemButton component={RouterLink} to="/">
-							<ListItemIcon>
-								<Explore />
-							</ListItemIcon>
-							<ListItemText primary={"Explore"} />
-						</ListItemButton>
-					</ListItem>
-				</List>
-				<Divider />
-				<List>
-					<ListItem key={"search"} disablePadding>
-						<ListItemButton component={RouterLink} to="/search">
-							<ListItemIcon>
-								<SearchDatasetIcon />
-							</ListItemIcon>
-							<ListItemText primary={"Search"} />
-						</ListItemButton>
-					</ListItem>
-				</List>
-				<Divider />
-				<List>
-					<ListItem key={"groups"} disablePadding>
-						<ListItemButton component={RouterLink} to="/groups">
-							<ListItemIcon>
-								<GroupIcon />
-							</ListItemIcon>
-							<ListItemText primary={"Groups"} />
-						</ListItemButton>
-					</ListItem>
-				</List>
-				<Divider />
-				<List>
-					<ListItem key={"newdataset"} disablePadding>
-						<ListItemButton component={RouterLink} to="/create-dataset">
-							<ListItemIcon>
-								<AddBox />
-							</ListItemIcon>
-							<ListItemText primary={"New Dataset"} />
-						</ListItemButton>
-					</ListItem>
-				</List>
-				<Divider />
-				<List>
-					<ListItem key={"newmetadata"} disablePadding>
-						<ListItemButton
-							component={RouterLink}
-							to="/new-metadata-definition"
+			<Box sx={{ display: "flex" }}>
+				<CssBaseline />
+				<AppBar position="fixed" open={open}>
+					<Toolbar>
+						<IconButton
+							color="inherit"
+							aria-label="open drawer"
+							onClick={handleDrawerOpen}
+							edge="start"
+							sx={{ mr: 2, ...(open && { display: "none" }) }}
 						>
 							<MenuIcon />
 						</IconButton>
@@ -386,6 +225,13 @@ export default function PersistentDrawerLeft(props) {
 						open={isMenuOpen}
 						onClose={handleProfileMenuClose}
 					>
+						<MenuItem component={RouterLink} to="/profile">
+							<ListItemIcon>
+								<PersonIcon fontSize="small" />
+							</ListItemIcon>
+							<ListItemText>User Profile</ListItemText>
+						</MenuItem>
+						<Divider orientation="horizontal" />
 						<MenuItem component={RouterLink} to="/apikeys">
 							<ListItemIcon>
 								<VpnKeyIcon fontSize="small" />
