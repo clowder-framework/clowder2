@@ -48,6 +48,13 @@ const PrivateRoute = (props): JSX.Element => {
 		dispatch(fetchFileRole(fileId));
 	const { datasetId } = useParams<{ datasetId?: string }>();
 	const { fileId } = useParams<{ fileId?: string }>();
+	const datasetAbout = useSelector((state: RootState) => state.dataset.about);
+	console.log('we have a datasetAbout', datasetAbout);
+	const datasetStatus = datasetAbout["status"];
+
+	if (datasetStatus == 'PUBLIC') {
+
+	}
 
 	// log user out if token expired/unauthorized
 	useEffect(() => {

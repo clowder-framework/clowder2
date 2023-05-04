@@ -235,7 +235,7 @@ async def save_dataset(
 
 @router.get("", response_model=List[DatasetOut])
 async def get_datasets(
-    user_id=Depends(get_user),
+    user_id=Depends(get_current_username_or_anonymous_user),
     db: MongoClient = Depends(dependencies.get_db),
     skip: int = 0,
     limit: int = 10,
@@ -305,10 +305,11 @@ async def get_dataset(
 async def get_dataset_files(
     dataset_id: str,
     folder_id: Optional[str] = None,
-    user_id=Depends(get_current_username_or_anonymous_user),
-    db: MongoClient = Depends(dependencies.get_db),
     public: bool = Depends(CheckStatus("PUBLIC")),
     allow: bool = Depends(Authorization("viewer")),
+    user_id=Depends(get_current_username_or_anonymous_user),
+    db: MongoClient = Depends(dependencies.get_db),
+
     skip: int = 0,
     limit: int = 10,
 ):
