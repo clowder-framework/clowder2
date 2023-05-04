@@ -79,14 +79,14 @@ export function GroupAndRoleTableEntry(props: GroupAndRoleTableEntryProps) {
 		setEditRoleOn(false);
 	};
     
-    const getRoles = (datasetId: string | undefined) =>
-        dispatch(fetchDatasetRoles(datasetId));
+	const getRoles = (datasetId: string | undefined) =>
+		dispatch(fetchDatasetRoles(datasetId));
 
 
 	const handleRoleDelete = async () => {
 		await removeGroupRole(datasetId, group_role.group.id);
 		setDeleteRoleConfirmation(false);
-        getRoles(datasetId)
+		getRoles(datasetId);
 	};
 
 	return (

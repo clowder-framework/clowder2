@@ -57,8 +57,8 @@ export function UserAndRoleTableEntry(props: UserAndRoleTableEntryProps) {
 		username: string | undefined,
 	) => dispatch(removeDatasetUserRole(dataset_id, username));
 
-    const getRoles = (datasetId: string | undefined) =>
-        dispatch(fetchDatasetRoles(datasetId));
+	const getRoles = (datasetId: string | undefined) =>
+		dispatch(fetchDatasetRoles(datasetId));
 
 
 	const [selectedRole, setSelectedRole] = useState(user_role.role);
@@ -83,7 +83,7 @@ export function UserAndRoleTableEntry(props: UserAndRoleTableEntryProps) {
 	const handleRoleDelete = async () => {
 		await removeUserRole(datasetId, user_role.user.email);
 		setDeleteRoleConfirmation(false);
-        getRoles(datasetId)
+		getRoles(datasetId);
 	};
 
 	return (
