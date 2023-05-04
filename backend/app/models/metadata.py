@@ -1,29 +1,23 @@
 import collections.abc
-import traceback
 from datetime import datetime
 from typing import Optional, List, Union
-from enum import Enum
 
+import pymongo
+from beanie import Document, PydanticObjectId
 from elasticsearch import Elasticsearch
-from bson import ObjectId
-from bson.dbref import DBRef
-from fastapi.param_functions import Depends
-from pydantic import Field, validator, BaseModel, create_model, AnyUrl
 from fastapi import HTTPException
+from pydantic import Field, validator, AnyUrl
 from pymongo import MongoClient
 
-from app import dependencies
-from app.models.mongomodel import MongoModel, MongoDBRef
-from app.models.pyobjectid import PyObjectId
-from app.models.users import UserOut
 from app.models.listeners import (
     EventListenerIn,
     LegacyEventListenerIn,
     EventListenerOut,
     ExtractorInfo,
 )
+from app.models.mongomodel import MongoModel, MongoDBRef
+from app.models.users import UserOut
 from app.search.connect import update_record
-
 
 # List of valid types that can be specified for metadata fields
 FIELD_TYPES = {
@@ -117,8 +111,18 @@ class MetadataDefinitionIn(MetadataDefinitionBase):
     pass
 
 
-class MetadataDefinitionDB(MetadataDefinitionBase):
+class MetadataDefinitionDB(Document, MetadataDefinitionBase):
+    id: PydanticObjectId = Field(None, alias='_id')
     creator: UserOut
+
+    class Settings:
+        name = "metadata_definition_beanie"
+        indexes = [
+            [
+                ("name", pymongo.TEXT),
+                ("description", pymongo.TEXT),
+            ],
+        ]
 
 
 class MetadataDefinitionOut(MetadataDefinitionDB):
@@ -244,10 +248,20 @@ class MetadataDelete(MongoModel):
     extractor_info: Optional[ExtractorInfo]
 
 
-class MetadataDB(MetadataBase):
+class MetadataDB(Document, MetadataBase):
+    id: PydanticObjectId = Field(None, alias='_id')
     resource: MongoDBRef
     agent: MetadataAgent
     created: datetime = Field(default_factory=datetime.utcnow)
+
+    class Settings:
+        name = "metadata_beanie"
+        indexes = [
+            [
+                ("name", pymongo.TEXT),
+                ("description", pymongo.TEXT),
+            ],
+        ]
 
     class Config:
         arbitrary_types_allowed = True
@@ -267,11 +281,11 @@ class MetadataOut(MetadataDB):
 
 
 async def validate_context(
-    db: MongoClient,
-    content: dict,
-    definition: Optional[str] = None,
-    context_url: Optional[str] = None,
-    context: Optional[List[Union[dict, AnyUrl]]] = None,
+        db: MongoClient,
+        content: dict,
+        definition: Optional[str] = None,
+        context_url: Optional[str] = None,
+        context: Optional[List[Union[dict, AnyUrl]]] = None,
 ):
     """Convenience function for making sure incoming metadata has valid definitions or resolvable context.
 
@@ -289,7 +303,7 @@ async def validate_context(
         pass
     if definition is not None:
         if (
-            md_def := await db["metadata.definitions"].find_one({"name": definition})
+                md_def := await db["metadata.definitions"].find_one({"name": definition})
         ) is not None:
             md_def = MetadataDefinitionOut(**md_def)
             content = validate_definition(content, md_def)
@@ -312,7 +326,7 @@ def deep_update(orig: dict, new: dict):
 
 
 async def patch_metadata(
-    metadata: dict, new_entries: dict, db: MongoClient, es: Elasticsearch
+        metadata: dict, new_entries: dict, db: MongoClient, es: Elasticsearch
 ):
     """Convenience function for updating original metadata contents with new entries."""
     try:
