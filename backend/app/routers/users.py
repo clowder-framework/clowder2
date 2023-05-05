@@ -10,7 +10,7 @@ from secrets import token_urlsafe
 from app import dependencies
 from app.config import settings
 from app.keycloak_auth import get_current_username
-from app.models.users import UserOut, UserAPIKey
+from app.models.users import UserDB, UserOut, UserAPIKey, UserAPIKeyDB
 
 router = APIRouter()
 
@@ -19,26 +19,19 @@ router = APIRouter()
 async def get_users(
     db: MongoClient = Depends(dependencies.get_db), skip: int = 0, limit: int = 2
 ):
-    users = []
-    for doc in await db["users"].find().skip(skip).limit(limit).to_list(length=limit):
-        users.append(UserOut(**doc))
-    return users
+    return await db["users"].find().skip(skip).limit(limit).to_list(length=limit)
 
 
 @router.get("/{user_id}", response_model=UserOut)
 async def get_user(user_id: str, db: MongoClient = Depends(dependencies.get_db)):
-    if (user := await db["users"].find_one({"_id": ObjectId(user_id)})) is not None:
-        return UserOut.from_mongo(user)
-    raise HTTPException(status_code=404, detail=f"User {user_id} not found")
+    return await UserDB.get(user_id)
 
 
 @router.get("/username/{username}", response_model=UserOut)
 async def get_user_by_name(
     username: str, db: MongoClient = Depends(dependencies.get_db)
 ):
-    if (user := await db["users"].find_one({"email": username})) is not None:
-        return UserOut.from_mongo(user)
-    raise HTTPException(status_code=404, detail=f"User {username} not found")
+    return await UserDB.find({"email": username})
 
 
 @router.post("/keys", response_model=str)
@@ -59,6 +52,5 @@ async def generate_user_api_key(
     user_key = UserAPIKey(user=current_user, key=unique_key)
     if mins > 0:
         user_key.expires = user_key.created + timedelta(minutes=mins)
-    db["user_keys"].insert_one(user_key.to_mongo())
-
+    await UserAPIKey.insert_one(user_key)
     return hashed_key

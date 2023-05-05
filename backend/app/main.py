@@ -13,6 +13,8 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import settings
 from app.models.authorization import AuthorizationDB
+from app.models.users import UserDB, UserAPIKey
+from app.models.groups import GroupDB
 from app.models.datasets import DatasetDB, DatasetDBViewList
 from app.search.connect import connect_elasticsearch, create_index
 from app.keycloak_auth import get_token, get_current_username
@@ -162,7 +164,7 @@ app.include_router(api_router, prefix=settings.API_V2_STR)
 def gather_documents():
     pass
 
-
+# TODO add anything with document in here
 @app.on_event("startup")
 async def startup_beanie():
     """Setup Beanie Object Document Mapper (ODM) to interact with MongoDB."""
@@ -170,7 +172,7 @@ async def startup_beanie():
     await init_beanie(
         database=getattr(client, settings.MONGO_DATABASE),
         # Make sure to include all models. If one depends on another that is not in the list it is not clear which one is missing.
-        document_models=[DatasetDB, DatasetDBViewList, AuthorizationDB],
+        document_models=[DatasetDB, DatasetDBViewList, AuthorizationDB, UserDB, UserAPIKey, GroupDB],
         recreate_views=True,
     )
 

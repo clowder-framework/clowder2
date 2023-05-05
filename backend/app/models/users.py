@@ -3,6 +3,7 @@ from datetime import datetime
 from passlib.context import CryptContext
 from pydantic import Field, EmailStr, BaseModel
 from pymongo import MongoClient
+from beanie import Document, View, PydanticObjectId
 
 from app.models.mongomodel import MongoModel
 
@@ -24,7 +25,7 @@ class UserLogin(BaseModel):
     password: str
 
 
-class UserDB(UserBase):
+class UserDB(Document, UserBase):
     first_name: str
     last_name: str
     hashed_password: str = Field()
@@ -39,7 +40,7 @@ class UserOut(UserBase):
     last_name: str
 
 
-class UserAPIKey(MongoModel):
+class UserAPIKey(Document):
     """API keys can have a reference name (e.g. 'Uploader script')"""
 
     key: str
