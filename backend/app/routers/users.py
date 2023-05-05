@@ -19,19 +19,25 @@ router = APIRouter()
 async def get_users(
     db: MongoClient = Depends(dependencies.get_db), skip: int = 0, limit: int = 2
 ):
-    return await db["users"].find().skip(skip).limit(limit).to_list(length=limit)
+    return await UserDB.find({},
+            skip=skip,
+            limit=limit).to_list()
 
 
 @router.get("/{user_id}", response_model=UserOut)
 async def get_user(user_id: str, db: MongoClient = Depends(dependencies.get_db)):
-    return await UserDB.get(user_id)
+    if (user := await UserDB.get(user_id)) is not None:
+        return UserOut.from_mongo(user)
+    raise HTTPException(status_code=404, detail=f"User {user_id} not found")
 
 
 @router.get("/username/{username}", response_model=UserOut)
 async def get_user_by_name(
     username: str, db: MongoClient = Depends(dependencies.get_db)
 ):
-    return await UserDB.find({"email": username})
+    if (user := await UserDB.find({"email": username})) is not None:
+        return UserOut.from_mongo(user)
+    raise HTTPException(status_code=404, detail=f"User {username} not found")
 
 
 @router.post("/keys", response_model=str)

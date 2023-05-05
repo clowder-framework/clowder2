@@ -11,7 +11,7 @@ from app.deps.authorization_deps import AuthorizationDB, GroupAuthorization
 from app.keycloak_auth import get_current_user, get_user
 from app.models.authorization import RoleType
 from app.models.groups import GroupOut, GroupIn, GroupDB, GroupBase, Member
-from app.models.users import UserOut
+from app.models.users import UserOut, UserDB
 
 router = APIRouter()
 
@@ -26,9 +26,8 @@ async def save_group(
     user_member = Member(user=user, editor=True)
     if user_member not in group_db.users:
         group_db.users.append(user_member)
-    new_group = await db["groups"].insert_one(group_db.to_mongo())
-    found = await db["groups"].find_one({"_id": new_group.inserted_id})
-    group_out = GroupOut.from_mongo(found)
+    new_group = await GroupDB.insert_one(group_db)
+    group_out = GroupOut.from_mongo(new_group)
     return group_out
 
 
@@ -47,25 +46,16 @@ async def get_groups(
 
 
     """
-
-    groups = []
-    for doc in (
-        await db["groups"]
-        .find(
+    return await GroupDB.find(
             {
                 "$or": [
                     {"creator": user_id},
                     {"users.user.email": user_id},
                 ]
-            }
-        )
-        .sort([("created", DESCENDING)])
-        .skip(skip)
-        .limit(limit)
-        .to_list(length=limit)
-    ):
-        groups.append(GroupOut.from_mongo(doc))
-    return groups
+            },
+            sort=("created", DESCENDING),
+            skip=skip,
+            limit=limit).to_list()
 
 
 @router.get("/search/{search_term}", response_model=List[GroupOut])
@@ -91,23 +81,17 @@ async def search_group(
 
     groups = []
     query_regx = re.compile(search_term, re.IGNORECASE)
-    for doc in (
         # user has to be the creator or member first; then apply search
-        await db["groups"]
-        .find(
+    return await GroupDB.find(
             {
                 "$and": [
                     {"$or": [{"creator": user_id}, {"users.user.email": user_id}]},
                     {"$or": [{"name": query_regx}, {"description": query_regx}]},
                 ]
-            }
-        )
-        .skip(skip)
-        .limit(limit)
-        .to_list(length=limit)
-    ):
-        groups.append(GroupOut.from_mongo(doc))
-    return groups
+            },
+            skip=skip,
+            limit=limit
+        ).to_list(length=limit)
 
 
 @router.get("/{group_id}", response_model=GroupOut)
@@ -116,7 +100,9 @@ async def get_group(
     db: MongoClient = Depends(dependencies.get_db),
     allow: bool = Depends(GroupAuthorization("viewer")),
 ):
-    if (group := await db["groups"].find_one({"_id": ObjectId(group_id)})) is not None:
+    if (
+        group := await GroupDB.find_one({"_id": ObjectId(group_id)})
+    ) is not None:
         return GroupOut.from_mongo(group)
     raise HTTPException(status_code=404, detail=f"Group {group_id} not found")
 
@@ -129,7 +115,7 @@ async def edit_group(
     db: MongoClient = Depends(dependencies.get_db),
     allow: bool = Depends(GroupAuthorization("editor")),
 ):
-    if (group := await db["groups"].find_one({"_id": ObjectId(group_id)})) is not None:
+    if (group := await GroupDB.find_one({"_id": ObjectId(group_id)})) is not None:
         group_dict = dict(group_info) if group_info is not None else {}
 
         if len(group_dict.name) == 0 or len(group_dict.users) == 0:
@@ -139,15 +125,15 @@ async def edit_group(
             )
             return
 
-        user = await db["users"].find_one({"email": user_id})
+        user = await UserDB.find_one({"email": user_id})
         group_dict["author"] = UserOut(**user)
         group_dict["modified"] = datetime.datetime.utcnow()
         # TODO: Revisit this. Authorization needs to be updated here.
         group_dict["users"] = list(set(group_dict["users"]))
         try:
             group.update(group_dict)
-            await db["groups"].replace_one(
-                {"_id": ObjectId(group_id)}, GroupDB(**group).to_mongo()
+            await GroupDB.replace_one(
+                {"_id": ObjectId(group_id)}, GroupDB(group)
             )
         except Exception as e:
             raise HTTPException(status_code=500, detail=e.args[0])
@@ -164,7 +150,7 @@ async def delete_group(
     if (
         group_q := await db["groups"].find_one({"_id": ObjectId(group_id)})
     ) is not None:
-        await db["groups"].delete_one({"_id": ObjectId(group_id)})
+        await GroupDB.delete_one({"_id": ObjectId(group_id)})
         return GroupDB.from_mongo(group_q)
     else:
         raise HTTPException(status_code=404, detail=f"Dataset {group_id} not found")
@@ -179,10 +165,10 @@ async def add_member(
     allow: bool = Depends(GroupAuthorization("editor")),
 ):
     """Add a new user to a group."""
-    if (user_q := await db["users"].find_one({"email": username})) is not None:
+    if (user_q := await UserDB.find_one({"email": username})) is not None:
         new_member = Member(user=UserOut.from_mongo(user_q))
         if (
-            group_q := await db["groups"].find_one({"_id": ObjectId(group_id)})
+            group_q := await GroupDB.find_one({"_id": ObjectId(group_id)})
         ) is not None:
             group = GroupDB.from_mongo(group_q)
             found_already = False
@@ -199,11 +185,9 @@ async def add_member(
                 else:
                     new_member.editor = False
                 group.users.append(new_member)
-                await db["groups"].replace_one(
-                    {"_id": ObjectId(group_id)}, group.to_mongo()
-                )
+                await GroupDB.replace_one({"_id": ObjectId(group_id)}, group)
                 # Add user to all affected Authorization entries
-                await db["authorization"].update_many(
+                await AuthorizationDB.update_many(
                     {"group_ids": ObjectId(group_id)}, {"$push": {"user_ids": username}}
                 )
             return group
@@ -221,7 +205,7 @@ async def remove_member(
     """Remove a user from a group."""
 
     if (
-        group_q := await db["groups"].find_one({"_id": ObjectId(group_id)})
+        group_q := await GroupDB.find_one({"_id": ObjectId(group_id)})
     ) is not None:
         group = GroupDB.from_mongo(group_q)
 
@@ -235,14 +219,14 @@ async def remove_member(
             return group
 
         # Remove user from all affected Authorization entries
-        async for auth_q in db["authorization"].find({"group_ids": ObjectId(group_id)}):
-            auth = AuthorizationDB.from_mongo(auth_q)
+        # TODO not sure if this is right
+        async for auth in AuthorizationDB.find({"group_ids": ObjectId(group_id)}):
             auth.user_ids.remove(username)
-            await db["authorization"].replace_one({"_id": auth.id}, auth.to_mongo())
+            await AuthorizationDB.replace_one({"_id": auth.id}, auth)
 
         # Update group itself
         group.users.remove(found_user)
-        await db["groups"].replace_one({"_id": ObjectId(group_id)}, group.to_mongo())
+        await GroupDB.replace_one({"_id": ObjectId(group_id)}, group)
 
         return group
     raise HTTPException(status_code=404, detail=f"Group {group_id} not found")
@@ -257,9 +241,9 @@ async def update_member(
     allow: bool = Depends(GroupAuthorization("editor")),
 ):
     """Update user role."""
-    if (user_q := await db["users"].find_one({"email": username})) is not None:
+    if (user_q := await UserDB.find_one({"email": username})) is not None:
         if (
-            group_q := await db["groups"].find_one({"_id": ObjectId(group_id)})
+            group_q := await GroupDB.find_one({"_id": ObjectId(group_id)})
         ) is not None:
             group = GroupDB.from_mongo(group_q)
             found_user = None
@@ -275,9 +259,7 @@ async def update_member(
                 else:
                     updated_member = Member(user=found_user, editor=False)
                 group.users[found_user_index] = updated_member
-                await db["groups"].replace_one(
-                    {"_id": ObjectId(group_id)}, group.to_mongo()
-                )
+                await GroupDB.replace_one({"_id": ObjectId(group_id)}, group)
             else:
                 raise HTTPException(
                     status_code=404,
