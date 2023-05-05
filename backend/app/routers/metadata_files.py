@@ -1,8 +1,7 @@
-import io
-from datetime import datetime
 from typing import Optional, List
-from elasticsearch import Elasticsearch
+
 from bson import ObjectId
+from elasticsearch import Elasticsearch
 from fastapi import (
     APIRouter,
     HTTPException,
@@ -13,7 +12,7 @@ from pymongo import MongoClient
 
 from app import dependencies
 from app.deps.authorization_deps import FileAuthorization
-from app.config import settings
+from app.keycloak_auth import get_current_user, UserOut
 from app.models.files import FileOut
 from app.models.metadata import (
     MongoDBRef,
@@ -23,12 +22,11 @@ from app.models.metadata import (
     MetadataDB,
     MetadataOut,
     MetadataPatch,
-    validate_definition,
     validate_context,
     patch_metadata,
     MetadataDelete,
+    MetadataDefinitionDB,
 )
-from app.keycloak_auth import get_user, get_current_user, get_token, UserOut
 from app.search.connect import insert_record, update_record, delete_document_by_id
 
 router = APIRouter()
@@ -127,16 +125,22 @@ async def add_file_metadata(
         # If dataset already has metadata using this definition, don't allow duplication
         definition = metadata_in.definition
         if definition is not None:
-            existing_q = {"resource.resource_id": file.id, "definition": definition}
+            existing_q = [
+                MetadataDB.resource.resource_id == file.id,
+                MetadataDB.definition == definition,
+            ]
             # Extracted metadata doesn't care about user
             if metadata_in.extractor_info is not None:
-                existing_q["agent.extractor.name"] = metadata_in.extractor_info.name
-                existing_q[
-                    "agent.extractor.version"
-                ] = metadata_in.extractor_info.version
+                existing_q.append(
+                    MetadataDB.agent.extractor.name == metadata_in.extractor_info.name
+                )
+                existing_q.append(
+                    MetadataDB.agent.extractor.version
+                    == metadata_in.extractor_info.version
+                )
             else:
-                existing_q["agent.creator.id"] = user.id
-            if (existing := await db["metadata"].find_one(existing_q)) is not None:
+                existing_q.append(MetadataDB.agent.creator.id == user.id)
+            if (existing := await MetadataDB(*existing_q).find_one()) is not None:
                 # Allow creating duplicate entry only if the file version is different
                 if existing["resource"]["version"] == metadata_in.file_version:
                     raise HTTPException(
@@ -144,9 +148,9 @@ async def add_file_metadata(
                     )
 
         md = await _build_metadata_db_obj(db, metadata_in, file, user)
-        new_metadata = await db["metadata"].insert_one(md.to_mongo())
-        found = await db["metadata"].find_one({"_id": new_metadata.inserted_id})
-        metadata_out = MetadataOut.from_mongo(found)
+        new_metadata = await MetadataDB(md).insert()
+        found = await MetadataDB(MetadataDB.id == new_metadata.inserted_id).find_one()
+        metadata_out = MetadataOut(**found.dict())
 
         # Add an entry to the metadata index
         doc = {
@@ -185,7 +189,7 @@ async def replace_file_metadata(
     """
     if (file := await db["files"].find_one({"_id": ObjectId(file_id)})) is not None:
         # First, make sure the metadata we are replacing actually exists.
-        query = {"resource.resource_id": ObjectId(file_id)}
+        query = [MetadataDB.resource.resource_id == ObjectId(file_id)]
         file = FileOut(**file)
 
         version = metadata_in.file_version
@@ -213,24 +217,27 @@ async def replace_file_metadata(
             ) is not None:
                 agent = MetadataAgent(creator=user, extractor=extractor)
                 # TODO: How do we handle two different users creating extractor metadata? Currently we ignore user...
-                query["agent.extractor.name"] = agent.extractor.name
-                query["agent.extractor.version"] = agent.extractor.version
+                query.append(MetadataDB.agent.extractor.name == agent.extractor.name)
+                query.append(
+                    MetadataDB.agent.extractor.version == agent.extractor.version
+                )
             else:
                 raise HTTPException(status_code=404, detail=f"Extractor not found")
         else:
             agent = MetadataAgent(creator=user)
-            query["agent.creator.id"] = agent.creator.id
+            query.append(MetadataDB.agent.creator.id == agent.creator.id)
 
-        if (md := await db["metadata"].find_one(query)) is not None:
+        if (md := await MetadataDB(*query).find_one()) is not None:
             # Metadata exists, so prepare the new document we are going to replace it with
             md_obj = await _build_metadata_db_obj(
                 db, metadata_in, file, user, agent=agent, version=target_version
             )
+            # TODO how to write replace one
             new_metadata = await db["metadata"].replace_one(
                 {"_id": md["_id"]}, md_obj.to_mongo()
             )
-            found = await db["metadata"].find_one({"_id": md["_id"]})
-            metadata_out = MetadataOut.from_mongo(found)
+            found = await MetadataDB(MetadataDB.id == md.id).find_one()
+            metadata_out = MetadataOut(**found.dict())
 
             # Update entry to the metadata index
             doc = {"doc": {"content": found["content"]}}
@@ -260,27 +267,25 @@ async def update_file_metadata(
 
     # check if metadata with file version exists, replace metadata if none exists
     if (
-        version_md := await db["metadata"].find_one(
-            {
-                "resource.resource_id": ObjectId(file_id),
-                "resource.version": metadata_in.file_version,
-            }
-        )
+        version_md := await MetadataDB(
+            MetadataDB.resource.resource_id == ObjectId(file_id),
+            MetadataDB.resource.version == metadata_in.file_version,
+        ).find_one()
     ) is None:
         result = await replace_file_metadata(metadata_in, file_id, user, db, es)
         return result
 
     if (file := await db["files"].find_one({"_id": ObjectId(file_id)})) is not None:
-        query = {"resource.resource_id": ObjectId(file_id)}
+        query = [MetadataDB.resource.resource_id == ObjectId(file_id)]
         file = FileOut(**file)
         content = metadata_in.content
 
         if metadata_in.metadata_id is not None:
             # If a specific metadata_id is provided, validate the patch against existing context
             if (
-                existing_md := await db["metadata"].find_one(
-                    {"_id": ObjectId(metadata_in.metadata_id)}
-                )
+                existing_md := await MetadataDB(
+                    MetadataDB.id == ObjectId(metadata_in.metadata_id)
+                ).find_one()
             ) is not None:
                 content = await validate_context(
                     db,
@@ -289,13 +294,13 @@ async def update_file_metadata(
                     existing_md.context_url,
                     existing_md.context,
                 )
-                query["_id"] = metadata_in.metadata_id
+                query.append(MetadataDB.id == metadata_in.metadata_id)
         else:
             # Use provided definition name as filter (don't validate yet, as patched data doesn't require completeness)
             # TODO: Should context_url also be unique to the file version?
             definition = metadata_in.definition
             if definition is not None:
-                query["definition"] = definition
+                query.append(MetadataDB.definition == definition)
 
         version = metadata_in.file_version
         if version is not None:
@@ -311,7 +316,7 @@ async def update_file_metadata(
             target_version = version
         else:
             target_version = file.version_num
-        query["resource.version"] = target_version
+        query.append(MetadataDB.resource.version == target_version)
 
         # Filter by MetadataAgent
         extractor_info = metadata_in.extractor
@@ -323,9 +328,10 @@ async def update_file_metadata(
             ) is not None:
                 agent = MetadataAgent(creator=user, extractor=extractor)
                 # TODO: How do we handle two different users creating extractor metadata? Currently we ignore user
-
-                query["agent.extractor.name"] = agent.extractor.name
-                query["agent.extractor.version"] = agent.extractor.version
+                query.append(MetadataDB.agent.extractor.name == agent.extractor.name)
+                query.append(
+                    MetadataDB.agent.extractor.version == agent.extractor.version
+                )
             else:
                 raise HTTPException(status_code=404, detail=f"Extractor not found")
         else:
@@ -334,8 +340,9 @@ async def update_file_metadata(
             # query["agent.creator.id"] = agent.creator.id
             pass
 
-        if (md := await db["metadata"].find_one(query)) is not None:
+        if (md := MetadataDB(*query).find_one()) is not None:
             # TODO: Refactor this with permissions checks etc.
+            # TODO potential issue passing in md here
             result = await patch_metadata(md, content, db, es)
             return result
         else:
@@ -358,7 +365,7 @@ async def get_file_metadata(
 ):
     """Get file metadata."""
     if (file := await db["files"].find_one({"_id": ObjectId(file_id)})) is not None:
-        query = {"resource.resource_id": ObjectId(file_id)}
+        query = [MetadataDB.resource.resource_id == ObjectId(file_id)]
         file = FileOut.from_mongo(file)
 
         # Validate specified version, or use latest by default
@@ -376,27 +383,27 @@ async def get_file_metadata(
                 target_version = version
             else:
                 target_version = file.version_num
-            query["resource.version"] = target_version
+            query.append(MetadataDB.resource.version == target_version)
 
         if definition is not None:
             # TODO: Check if definition exists in database and raise error if not
-            query["definition"] = definition
+            query.append(MetadataDB.definition == definition)
 
         if extractor_name is not None:
-            query["agent.extractor.name"] = extractor_name
+            query.append(MetadataDB.agent.extractor.name == extractor_name)
         if extractor_version is not None:
-            query["agent.extractor.version"] = extractor_version
+            query.append(MetadataDB.agent.extractor.version == extractor_version)
 
         metadata = []
         async for md in db["metadata"].find(query):
             md_out = MetadataOut.from_mongo(md)
             if md_out.definition is not None:
                 if (
-                    md_def := await db["metadata.definitions"].find_one(
-                        {"name": md_out.definition}
+                    md_def := await MetadataDefinitionDB(
+                        MetadataDefinitionDB.name == md_out.definition
                     )
                 ) is not None:
-                    md_def = MetadataDefinitionOut(**md_def)
+                    md_def = MetadataDefinitionOut(**md_def.dict())
                     md_out.description = md_def.description
             metadata.append(md_out)
         return metadata
@@ -415,7 +422,7 @@ async def delete_file_metadata(
     allow: bool = Depends(FileAuthorization("editor")),
 ):
     if (file := await db["files"].find_one({"_id": ObjectId(file_id)})) is not None:
-        query = {"resource.resource_id": ObjectId(file_id)}
+        query = [MetadataDB.resource.resource_id == ObjectId(file_id)]
         file = FileOut.from_mongo(file)
 
         # # Validate specified version, or use latest by default
@@ -438,17 +445,17 @@ async def delete_file_metadata(
         if metadata_in.metadata_id is not None:
             # If a specific metadata_id is provided, delete the matching entry
             if (
-                existing_md := await db["metadata"].find_one(
-                    {"metadata_id": ObjectId(metadata_in.metadata_id)}
-                )
+                existing_md := await MetadataDB(
+                    MetadataDB.metadata_id == ObjectId(metadata_in.metadata_id)
+                ).find_one()
             ) is not None:
-                query["metadata_id"] = metadata_in.metadata_id
+                query.append(MetadataDB.metadata_id == metadata_in.metadata_id)
         else:
             # Use provided definition name as filter
             # TODO: Should context_url also be unique to the file version?
             definition = metadata_in.definition
             if definition is not None:
-                query["definition"] = definition
+                query.append(MetadataDB.definition == definition)
 
         # if extractor info is provided
         # Filter by MetadataAgent
@@ -461,21 +468,24 @@ async def delete_file_metadata(
             ) is not None:
                 agent = MetadataAgent(creator=user, extractor=extractor)
                 # TODO: How do we handle two different users creating extractor metadata? Currently we ignore user
-                query["agent.extractor.name"] = agent.extractor.name
-                query["agent.extractor.version"] = agent.extractor.version
+                query.append(MetadataDB.agent.extractor.name == agent.extractor.name)
+                query.append(
+                    MetadataDB.agent.extractor.version == agent.extractor.version
+                )
             else:
                 raise HTTPException(status_code=404, detail=f"Extractor not found")
         else:
             agent = MetadataAgent(creator=user)
-            query["agent.creator.id"] = agent.creator.id
+            query.append(MetadataDB.agent.creator.id == agent.creator.id)
 
         # delete from elasticsearch
         delete_document_by_id(es, "metadata", str(metadata_in.id))
 
-        if (md := await db["metadata"].find_one(query)) is not None:
+        if (md := await MetadataDB(*query).find_one()) is not None:
             metadata_deleted = md
-            if await db["metadata"].delete_one({"_id": md["_id"]}) is not None:
-                return MetadataOut.from_mongo(metadata_deleted)
+            # if await db["metadata"].delete_one({"_id": md["_id"]}) is not None:
+            if await MetadataDB(MetadataDB.id == md.id).delete_one() is not None:
+                return MetadataOut(**metadata_deleted.dict())
         else:
             raise HTTPException(
                 status_code=404, detail=f"No metadata found with that criteria"
