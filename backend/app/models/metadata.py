@@ -112,7 +112,7 @@ class MetadataDefinitionIn(MetadataDefinitionBase):
 
 
 class MetadataDefinitionDB(Document, MetadataDefinitionBase):
-    id: PydanticObjectId = Field(None, alias='_id')
+    id: PydanticObjectId = Field(None, alias="_id")
     creator: UserOut
 
     class Settings:
@@ -249,7 +249,7 @@ class MetadataDelete(MongoModel):
 
 
 class MetadataDB(Document, MetadataBase):
-    id: PydanticObjectId = Field(None, alias='_id')
+    id: PydanticObjectId = Field(None, alias="_id")
     resource: MongoDBRef
     agent: MetadataAgent
     created: datetime = Field(default_factory=datetime.utcnow)
@@ -281,11 +281,11 @@ class MetadataOut(MetadataDB):
 
 
 async def validate_context(
-        db: MongoClient,
-        content: dict,
-        definition: Optional[str] = None,
-        context_url: Optional[str] = None,
-        context: Optional[List[Union[dict, AnyUrl]]] = None,
+    db: MongoClient,
+    content: dict,
+    definition: Optional[str] = None,
+    context_url: Optional[str] = None,
+    context: Optional[List[Union[dict, AnyUrl]]] = None,
 ):
     """Convenience function for making sure incoming metadata has valid definitions or resolvable context.
 
@@ -303,7 +303,7 @@ async def validate_context(
         pass
     if definition is not None:
         if (
-                md_def := await db["metadata.definitions"].find_one({"name": definition})
+            md_def := await db["metadata.definitions"].find_one({"name": definition})
         ) is not None:
             md_def = MetadataDefinitionOut(**md_def)
             content = validate_definition(content, md_def)
@@ -326,7 +326,7 @@ def deep_update(orig: dict, new: dict):
 
 
 async def patch_metadata(
-        metadata: dict, new_entries: dict, db: MongoClient, es: Elasticsearch
+    metadata: dict, new_entries: dict, db: MongoClient, es: Elasticsearch
 ):
     """Convenience function for updating original metadata contents with new entries."""
     try:

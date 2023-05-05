@@ -31,6 +31,7 @@ from app.routers import (
     feeds,
     jobs,
 )
+
 # setup loggers
 # logging.config.fileConfig('logging.conf', disable_existing_loggers=False)
 from app.search.config import indexSettings
@@ -166,7 +167,13 @@ async def startup_beanie():
     await init_beanie(
         database=getattr(client, settings.MONGO_DATABASE),
         # Make sure to include all models. If one depends on another that is not in the list it is not clear which one is missing.
-        document_models=[DatasetDB, DatasetDBViewList, AuthorizationDB, MetadataDB, MetadataDefinitionDB],
+        document_models=[
+            DatasetDB,
+            DatasetDBViewList,
+            AuthorizationDB,
+            MetadataDB,
+            MetadataDefinitionDB,
+        ],
         recreate_views=True,
     )
 
