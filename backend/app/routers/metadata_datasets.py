@@ -89,7 +89,7 @@ async def add_dataset_metadata(
         Metadata document that was added to database
     """
     if (
-            dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
+            dataset := await DatasetDB.find_one(DatasetDB.id == dataset_id)
     ) is not None:
         dataset = DatasetOut(**dataset)
         # If dataset already has metadata using this definition, don't allow duplication
@@ -102,14 +102,19 @@ async def add_dataset_metadata(
                 existing_q["agent.listener.version"] = metadata_in.extractor.version
             else:
                 existing_q["agent.creator.id"] = user.id
-            if (existing := await db["metadata"].find_one(existing_q)) is not None:
+
+            if (existing := await MetadataDB.find_one(MetadataDB.resource.resource_id == dataset.id,
+                                                      MetadataDB.definition == definition,
+                                                      MetadataDB.agent.creator.id == user.id
+                                                      )) is not None:
                 raise HTTPException(
                     409, f"Metadata for {definition} already exists on this dataset"
                 )
 
         md = await _build_metadata_db_obj(db, metadata_in, dataset, user)
         new_metadata = await db["metadata"].insert_one(md.to_mongo())
-        found = await db["metadata"].find_one({"_id": new_metadata.inserted_id})
+        # found = await db["metadata"].find_one({"_id": new_metadata.inserted_id})
+        found = await MetadataDB.find_one(MetadataDB.id == new_metadata.inserted_id)
         metadata_out = MetadataOut.from_mongo(found)
 
         # Add an entry to the metadata index

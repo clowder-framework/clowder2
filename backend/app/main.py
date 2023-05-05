@@ -1,21 +1,17 @@
 import logging
-import random
-import string
-import time
-from urllib.request import Request
 
 import uvicorn
 from beanie import init_beanie
-from motor.motor_asyncio import AsyncIOMotorClient
-from pydantic import BaseConfig
 from fastapi import FastAPI, APIRouter, Depends
 from fastapi.middleware.cors import CORSMiddleware
+from motor.motor_asyncio import AsyncIOMotorClient
+from pydantic import BaseConfig
 
 from app.config import settings
+from app.keycloak_auth import get_current_username
 from app.models.authorization import AuthorizationDB
 from app.models.datasets import DatasetDB, DatasetDBViewList
-from app.search.connect import connect_elasticsearch, create_index
-from app.keycloak_auth import get_token, get_current_username
+from app.models.metadata import MetadataDB, MetadataDefinitionDB
 from app.routers import (
     folders,
     groups,
@@ -35,10 +31,10 @@ from app.routers import (
     feeds,
     jobs,
 )
-
 # setup loggers
 # logging.config.fileConfig('logging.conf', disable_existing_loggers=False)
 from app.search.config import indexSettings
+from app.search.connect import connect_elasticsearch, create_index
 
 logger = logging.getLogger(__name__)
 
@@ -170,7 +166,7 @@ async def startup_beanie():
     await init_beanie(
         database=getattr(client, settings.MONGO_DATABASE),
         # Make sure to include all models. If one depends on another that is not in the list it is not clear which one is missing.
-        document_models=[DatasetDB, DatasetDBViewList, AuthorizationDB],
+        document_models=[DatasetDB, DatasetDBViewList, AuthorizationDB, MetadataDB, MetadataDefinitionDB],
         recreate_views=True,
     )
 

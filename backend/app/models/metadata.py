@@ -116,7 +116,7 @@ class MetadataDefinitionDB(Document, MetadataDefinitionBase):
     creator: UserOut
 
     class Settings:
-        name = "metadata_definition_beanie"
+        name = "metadata.definition"
         indexes = [
             [
                 ("name", pymongo.TEXT),
@@ -255,7 +255,7 @@ class MetadataDB(Document, MetadataBase):
     created: datetime = Field(default_factory=datetime.utcnow)
 
     class Settings:
-        name = "metadata_beanie"
+        name = "metadata"
         indexes = [
             [
                 ("name", pymongo.TEXT),
