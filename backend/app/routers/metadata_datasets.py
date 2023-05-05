@@ -100,22 +100,28 @@ async def add_dataset_metadata(
             if metadata_in.extractor is not None:
                 existing_q["agent.listener.name"] = metadata_in.extractor.name
                 existing_q["agent.listener.version"] = metadata_in.extractor.version
+                if (existing := await MetadataDB.find_one(MetadataDB.resource.resource_id == dataset.id,
+                                                          MetadataDB.definition == definition,
+                                                          MetadataDB.agent.listener.name
+                                                          )) is not None:
+                    raise HTTPException(
+                        409, f"Metadata for {definition} already exists on this dataset"
+                    )
             else:
                 existing_q["agent.creator.id"] = user.id
-
-            if (existing := await MetadataDB.find_one(MetadataDB.resource.resource_id == dataset.id,
-                                                      MetadataDB.definition == definition,
-                                                      MetadataDB.agent.creator.id == user.id
-                                                      )) is not None:
-                raise HTTPException(
-                    409, f"Metadata for {definition} already exists on this dataset"
-                )
+                if (existing := await MetadataDB.find_one(MetadataDB.resource.resource_id == dataset.id,
+                                                          MetadataDB.definition == definition,
+                                                          )) is not None:
+                    raise HTTPException(
+                        409, f"Metadata for {definition} already exists on this dataset"
+                    )
 
         md = await _build_metadata_db_obj(db, metadata_in, dataset, user)
         new_metadata = await db["metadata"].insert_one(md.to_mongo())
-        # found = await db["metadata"].find_one({"_id": new_metadata.inserted_id})
         found = await MetadataDB.find_one(MetadataDB.id == new_metadata.inserted_id)
-        metadata_out = MetadataOut.from_mongo(found)
+
+        # TODO try me
+        metadata_out = MetadataOut(**found.dict())
 
         # Add an entry to the metadata index
         doc = {
