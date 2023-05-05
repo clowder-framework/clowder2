@@ -52,10 +52,6 @@ const PrivateRoute = (props): JSX.Element => {
 	console.log('we have a datasetAbout', datasetAbout);
 	const datasetStatus = datasetAbout["status"];
 
-	if (datasetStatus == 'PUBLIC') {
-
-	}
-
 	// log user out if token expired/unauthorized
 	useEffect(() => {
 		if (loggedOut) {
@@ -83,7 +79,7 @@ const PrivateRoute = (props): JSX.Element => {
 		if (fileId && reason === "") listFileRole(fileId);
 	}, [fileId, reason]);
 	// TODO or condition, authorized OR  public
-	return <>{isAuthorized() ? children : <Navigate to="/auth/login" />}</>;
+	return <>{isAuthorized(datasetId)  ? children : <Navigate to="/auth/login" />}</>;
 };
 
 export const AppRoutes = (): JSX.Element => {
