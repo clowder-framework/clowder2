@@ -1,6 +1,7 @@
 import os
 from typing import List, Optional
 
+from beanie import PydanticObjectId
 from bson import ObjectId
 from elasticsearch import Elasticsearch
 from fastapi import APIRouter, HTTPException, Depends
@@ -22,7 +23,7 @@ from app.models.metadata import (
     MetadataPatch,
     validate_context,
     patch_metadata,
-    MetadataDelete,
+    MetadataDelete, MetadataDefinitionDB,
 )
 from app.search.connect import insert_record, update_record, delete_document_by_id
 
@@ -93,31 +94,21 @@ async def add_dataset_metadata(
         # If dataset already has metadata using this definition, don't allow duplication
         definition = metadata_in.definition
         if definition is not None:
+            query = [MetadataDB.resource.resource_id == dataset.id, MetadataDB.definition == definition]
+
             # Extracted metadata doesn't care about user
             if metadata_in.extractor is not None:
-                if (
-                        existing := await MetadataDB.find_one(
-                            MetadataDB.resource.resource_id == dataset.id,
-                            MetadataDB.definition == definition,
-                            MetadataDB.agent.listener.name == metadata_in.extractor.name,
-                            MetadataDB.agent.listener.version == metadata_in.extractor.version
-                        )
-                ) is not None:
-                    raise HTTPException(
-                        409, f"Metadata for {definition} already exists on this dataset"
-                    )
+                query.append(MetadataDB.agent.listener.name == metadata_in.extractor.name)
+                query.append(MetadataDB.agent.listener.version == metadata_in.extractor.version)
             else:
-                if (
-                        existing := await MetadataDB.find_one(
-                            MetadataDB.resource.resource_id == dataset.id,
-                            MetadataDB.definition == definition,
-                            MetadataDB.agent.creator.id == user.id
-                        )
-                ) is not None:
-                    raise HTTPException(
-                        409, f"Metadata for {definition} already exists on this dataset"
-                    )
+                query.append(MetadataDB.agent.creator.id == user.id)
 
+        if (
+                existing := await MetadataDB.find_one(*query)
+        ) is not None:
+            raise HTTPException(
+                409, f"Metadata for {definition} already exists on this dataset"
+            )
         md = await _build_metadata_db_obj(db, metadata_in, dataset, user)
         new_metadata = await db["metadata"].insert_one(md.to_mongo())
         found = await MetadataDB.find_one(MetadataDB.id == new_metadata.inserted_id)
@@ -161,8 +152,7 @@ async def replace_dataset_metadata(
     if (
             dataset := await DatasetDB.find_one(DatasetDB.id == ObjectId(dataset_id))
     ) is not None:
-        query = {"resource.resource_id": ObjectId(dataset_id)}
-
+        query = [MetadataDB.resource.resource_id == ObjectId(dataset_id)]
         # Filter by MetadataAgent
         if metadata_in.extractor is not None:
             if (
@@ -175,13 +165,13 @@ async def replace_dataset_metadata(
             ) is not None:
                 agent = MetadataAgent(creator=user, extractor=extractor)
                 # TODO: How do we handle two different users creating extractor metadata? Currently we ignore user
-                query["agent.listener.name"] = agent.listener.name
-                query["agent.listener.version"] = agent.listener.version
+                query.append(MetadataDB.agent.listener.name == agent.listener.name)
+                query.append(MetadataDB.agent.listener.version == agent.listener.version)
             else:
                 raise HTTPException(status_code=404, detail=f"Listener not found")
         else:
             agent = MetadataAgent(creator=user)
-            query["agent.creator.id"] = agent.creator.id
+            query.append(MetadataDB.agent.creator.id == agent.creator.id)
 
         if (md := await db["metadata"].find_one(query)) is not None:
             # Metadata exists, so prepare the new document we are going to replace it with
@@ -218,8 +208,7 @@ async def update_dataset_metadata(
     if (
             dataset := DatasetDB(DatasetDB.id == ObjectId(dataset_id)).find_one()
     ) is not None:
-        query = []
-        query.append(MetadataDB.resource.resource_id == ObjectId(dataset_id))
+        query = [MetadataDB.resource.resource_id == ObjectId(dataset_id)]
         content = metadata_in.content
 
         if metadata_in.metadata_id is not None:
@@ -283,28 +272,23 @@ async def get_dataset_metadata(
         db: MongoClient = Depends(dependencies.get_db),
         allow: bool = Depends(Authorization("viewer")),
 ):
-    # if (
-    #     dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
-    # ) is not None:
-    dataset = await DatasetDB.get(dataset_id)
+    dataset = await DatasetDB.get(PydanticObjectId(dataset_id))
     if dataset is not None:
-        query = {"resource.resource_id": ObjectId(dataset_id)}
+        query = [MetadataDB.resource.resource_id == ObjectId(dataset_id)]
 
         if listener_name is not None:
-            query["agent.listener.name"] = listener_name
+            query.append(MetadataDB.agent.listener.name == listener_name)
         if listener_version is not None:
-            query["agent.listener.version"] = listener_version
+            query.append(MetadataDB.agent.listener.version == listener_version)
 
         metadata = []
-        async for md in db["metadata"].find(query):
-            md_out = MetadataOut.from_mongo(md)
+        async for md in MetadataDB(*query).find():
+            md_out = MetadataOut(*md.dict())
             if md_out.definition is not None:
                 if (
-                        md_def := await db["metadata.definitions"].find_one(
-                            {"name": md_out.definition}
-                        )
+                        md_df := MetadataDefinitionDB(MetadataDefinitionDB.name == md_out.definition).find_one()
                 ) is not None:
-                    md_def = MetadataDefinitionOut(**md_def)
+                    md_def = MetadataDefinitionOut(md_df)
                     md_out.description = md_def.description
             metadata.append(md_out)
         return metadata
@@ -321,25 +305,22 @@ async def delete_dataset_metadata(
         es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
         allow: bool = Depends(Authorization("editor")),
 ):
-    if (
-            dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
-    ) is not None:
+    dataset = await DatasetDB.get(PydanticObjectId(dataset_id))
+    if dataset is not None:
         # filter by metadata_id or definition
-        query = {"resource.resource_id": ObjectId(dataset_id)}
+        query = [MetadataDB.resource.resource_id == ObjectId(dataset_id)]
         if metadata_in.metadata_id is not None:
             # If a specific metadata_id is provided, delete the matching entry
             if (
-                    existing_md := await db["metadata"].find_one(
-                        {"metadata_id": ObjectId(metadata_in.metadata_id)}
-                    )
+                    existing_md := await MetadataDB(MetadataDB.metadata_id == ObjectId(metadata_in.metadata_id))
             ) is not None:
-                query["metadata_id"] = metadata_in.metadata_id
+                query.append(MetadataDB.metadata_id == metadata_in.metadata_id)
         else:
             # Use provided definition name as filter
             # TODO: Should context_url also be unique to the file version?
             definition = metadata_in.definition
             if definition is not None:
-                query["definition"] = definition
+                query.append(MetadataDB.definition == definition)
 
         # if extractor info is provided
         # Filter by MetadataAgent
@@ -352,14 +333,14 @@ async def delete_dataset_metadata(
             ) is not None:
                 agent = MetadataAgent(creator=user, extractor=extractor)
                 # TODO: How do we handle two different users creating extractor metadata? Currently we ignore user
-                query["agent.listener.name"] = agent.listener.name
-                query["agent.listener.version"] = agent.listener.version
+                query.append(MetadataDB.agent.listener.name == agent.listener.name)
+                query.append(MetadataDB.agent.listener.version == agent.listener.version)
             else:
                 raise HTTPException(status_code=404, detail=f"Extractor not found")
         else:
             agent = MetadataAgent(creator=user)
-            query["agent.creator.id"] = agent.creator.id
-
+            query.append(MetadataDB.agent.creator.id == agent.creator.id)
+            
         # delete from elasticsearch
         delete_document_by_id(es, "metadata", str(metadata_in.id))
 
