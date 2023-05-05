@@ -27,7 +27,7 @@ async def get_users(
 @router.get("/{user_id}", response_model=UserOut)
 async def get_user(user_id: str, db: MongoClient = Depends(dependencies.get_db)):
     if (user := await UserDB.get(user_id)) is not None:
-        return UserOut.from_mongo(user)
+        return UserOut.from_mongo(**user.dict())
     raise HTTPException(status_code=404, detail=f"User {user_id} not found")
 
 
@@ -36,7 +36,7 @@ async def get_user_by_name(
     username: str, db: MongoClient = Depends(dependencies.get_db)
 ):
     if (user := await UserDB.find({"email": username})) is not None:
-        return UserOut.from_mongo(user)
+        return UserOut.from_mongo(**user.dict())
     raise HTTPException(status_code=404, detail=f"User {username} not found")
 
 
