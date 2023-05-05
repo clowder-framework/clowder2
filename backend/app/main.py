@@ -167,6 +167,7 @@ async def startup_beanie():
     await init_beanie(
         database=getattr(client, settings.MONGO_DATABASE),
         # Make sure to include all models. If one depends on another that is not in the list it is not clear which one is missing.
+        # TODO: autogenerate this list if possible
         document_models=[DatasetDB, DatasetDBViewList, AuthorizationDB, FeedDB],
         recreate_views=True,
     )

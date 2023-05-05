@@ -997,12 +997,10 @@ async def get_dataset_extract(
 
         job_id = await submit_dataset_job(
             dataset_out,
-            current_queue,
             current_routing_key,
             parameters,
             user,
             access_token,
-            db,
             rabbitmq_client,
         )
 

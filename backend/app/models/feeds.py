@@ -28,7 +28,7 @@ class FeedIn(JobFeed):
 
 class FeedDB(Document, JobFeed, Provenance):
     class Settings:
-        name = "feeds_beanie"
+        name = "feeds"
         indexes = [
             [
                 ("name", pymongo.TEXT),

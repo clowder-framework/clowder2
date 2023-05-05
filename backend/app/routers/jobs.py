@@ -8,7 +8,7 @@ from pymongo import MongoClient
 
 from app import dependencies
 from app.models.listeners import EventListenerJob, EventListenerJobUpdate
-from app.keycloak_auth import get_current_user, get_user
+from app.keycloak_auth import get_current_user, get_user, get_current_username
 
 router = APIRouter()
 
@@ -86,29 +86,23 @@ async def get_all_job_summary(
 @router.get("/{job_id}/summary", response_model=EventListenerJob)
 async def get_job_summary(
     job_id: str,
-    db: MongoClient = Depends(dependencies.get_db),
+    user=Depends(get_current_username),
 ):
-    if (
-        job := await db["listener_jobs"].find_one({"_id": ObjectId(job_id)})
-    ) is not None:
-        return EventListenerJob.from_mongo(job)
-
+    job = await EventListenerJob.find_one(EventListenerJob.id == ObjectId(job_id))
+    if job:
+        return job
     raise HTTPException(status_code=404, detail=f"Job {job_id} not found")
 
 
 @router.get("/{job_id}/updates")
 async def get_job_updates(
     job_id: str,
-    db: MongoClient = Depends(dependencies.get_db),
+    user=Depends(get_current_username),
 ):
-    if (
-        job := await db["listener_jobs"].find_one({"_id": ObjectId(job_id)})
-    ) is not None:
+    job = await EventListenerJob.find_one(EventListenerJob.id == ObjectId(job_id))
+    if job:
         # TODO: Should this also return the job summary data since we just queried it here?
-        events = []
-        async for update in db["listener_job_updates"].find({"job_id": job_id}):
-            event_json = EventListenerJobUpdate.from_mongo(update)
-            events.append(event_json)
-        return events
-
+        return await EventListenerJobUpdate.find(
+            EventListenerJobUpdate.job_id == job_id
+        )
     raise HTTPException(status_code=404, detail=f"Job {job_id} not found")

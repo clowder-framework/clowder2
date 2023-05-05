@@ -13,6 +13,7 @@ from app.config import settings
 from app.models.config import ConfigEntryDB, ConfigEntryOut
 from app.models.listeners import (
     EventListenerJob,
+    EventListenerDB,
     EventListenerJobUpdate,
     EventListenerJobStatus,
 )
@@ -89,45 +90,43 @@ def callback(ch, method, properties, body):
     # TODO: Updating an event message could go in rabbitmq/listeners
 
     # Check if the job exists, and update if so
-    existing_job = db["listener_jobs"].find_one({"_id": ObjectId(job_id)})
-    if existing_job is not None:
+    job = EventListenerDB.find_one(EventListenerDB.id == ObjectId(job_id))
+    if job:
         # Update existing job with newest info
-        updated_job = EventListenerJob.from_mongo(existing_job)
-        updated_job.updated = timestamp
+        job.updated = timestamp
         parsed = parse_message_status(message_str)
         status = parsed["status"]
         cleaned_msg = parsed["cleaned_msg"]
 
         # Update the job timestamps/duration depending on what status we received
         update_duration = False
-        if status == EventListenerJobStatus.STARTED and updated_job.started is None:
-            updated_job.started = timestamp
+        if status == EventListenerJobStatus.STARTED and job.started is None:
+            job.started = timestamp
         elif (
             status == EventListenerJobStatus.SUCCEEDED
             or status == EventListenerJobStatus.ERROR
             or status == EventListenerJobStatus.SKIPPED
         ):
-            updated_job.finished = timestamp
+            job.finished = timestamp
             update_duration = True
         elif (
             status == EventListenerJobStatus.PROCESSING
             or status == EventListenerJobStatus.RESUBMITTED
         ):
-            updated_job.updated = timestamp
+            job.updated = timestamp
             update_duration = True
-        if update_duration and updated_job.started:
-            updated_job.duration = (timestamp - updated_job.started).total_seconds()
-        updated_job.status = status
-        updated_job.latest_message = cleaned_msg
-        db["listener_jobs"].replace_one(
-            {"_id": ObjectId(job_id)}, updated_job.to_mongo()
-        )
+        if update_duration and job.started:
+            job.duration = (timestamp - job.started).total_seconds()
+        job.status = status
+        job.latest_message = cleaned_msg
+        # TODO: works if synchronous?
+        job.save()
 
         # Add latest message to the job updates
         event_msg = EventListenerJobUpdate(
             job_id=job_id, status=cleaned_msg, timestamp=timestamp
         )
-        db["listener_job_updates"].insert_one(event_msg.to_mongo())
+        event_msg.save()
         return True
     else:
         # We don't know what this job is. Reject the message.

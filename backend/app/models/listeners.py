@@ -1,15 +1,18 @@
-from datetime import datetime, timedelta
-from pydantic import Field, BaseModel, AnyUrl
-from typing import Optional, List, Union
+from datetime import datetime
 from enum import Enum
+from typing import Optional, List, Union
+
+import pymongo
+from beanie import Document
+from pydantic import Field, BaseModel, AnyUrl
 
 from app.config import settings
+from app.models.mongomodel import MongoDBRef
 from app.models.pyobjectid import PyObjectId
-from app.models.mongomodel import MongoModel, MongoDBRef
 from app.models.users import UserOut
 
 
-class Repository(MongoModel):
+class Repository(BaseModel):
     """Reference to a repository associated with Event Listener/Extractor."""
 
     repository_type: str = "git"
@@ -40,7 +43,7 @@ class ExtractorInfo(BaseModel):
 class EventListenerBase(BaseModel):
     """An Event Listener is the expanded version of v1 Extractors."""
 
-    author: str = ""
+    creator: str = ""
     name: str
     version: str = "1.0"
     description: str = ""
@@ -60,13 +63,22 @@ class LegacyEventListenerIn(ExtractorInfo):
     description: str = ""
 
 
-class EventListenerDB(EventListenerBase, MongoModel):
+class EventListenerDB(Document, EventListenerBase):
     """EventListeners have a name, version, author, description, and optionally properties where extractor_info will be saved."""
 
     creator: Optional[UserOut] = None
     created: datetime = Field(default_factory=datetime.now)
     modified: datetime = Field(default_factory=datetime.now)
     properties: Optional[ExtractorInfo] = None
+
+    class Settings:
+        name = "listeners"
+        indexes = [
+            [
+                ("name", pymongo.TEXT),
+                ("description", pymongo.TEXT),
+            ],
+        ]
 
 
 class EventListenerOut(EventListenerDB):
@@ -97,7 +109,7 @@ class EventListenerJobStatus(str, Enum):
     RESUBMITTED = "RESUBMITTED"
 
 
-class EventListenerJob(MongoModel):
+class EventListenerJob(Document):
     """This summarizes a submission to an extractor. All messages from that extraction should include this job's ID."""
 
     listener_id: str
@@ -115,6 +127,16 @@ class EventListenerJob(MongoModel):
     class Config:
         # required for Enum to properly work
         use_enum_values = True
+
+    class Settings:
+        name = "listener_jobs"
+        indexes = [
+            [
+                ("resource_ref.resource_id", PyObjectId),
+                ("listener_id", pymongo.TEXT),
+                ("status", pymongo.TEXT),
+            ],
+        ]
 
 
 class EventListenerJobMessage(BaseModel):
@@ -146,9 +168,18 @@ class EventListenerDatasetJobMessage(BaseModel):
     job_id: str
 
 
-class EventListenerJobUpdate(MongoModel):
+class EventListenerJobUpdate(Document):
     """This is a status update message coming from the extractors back to Clowder."""
 
     job_id: str
     timestamp: datetime = Field(default_factory=datetime.utcnow)
     status: str
+
+    class Settings:
+        name = "listener_job_updates"
+        indexes = [
+            [
+                ("job_id", pymongo.TEXT),
+                ("status", pymongo.TEXT),
+            ],
+        ]

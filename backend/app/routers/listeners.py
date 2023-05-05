@@ -1,19 +1,19 @@
 import datetime
 import os
-import re
 import random
+import re
 import string
-from packaging import version
 from typing import List, Optional
+
 from bson import ObjectId
 from fastapi import APIRouter, HTTPException, Depends
+from packaging import version
 from pymongo import MongoClient
 
 from app.dependencies import get_db
-from app.keycloak_auth import get_user, get_current_user
-from app.models.feeds import FeedDB, FeedOut, FeedListener
+from app.keycloak_auth import get_user, get_current_user, get_current_username
 from app.models.config import ConfigEntryDB, ConfigEntryOut
-from app.models.search import SearchCriteria
+from app.models.feeds import FeedDB, FeedListener
 from app.models.listeners import (
     ExtractorInfo,
     EventListenerIn,
@@ -21,6 +21,7 @@ from app.models.listeners import (
     EventListenerDB,
     EventListenerOut,
 )
+from app.models.search import SearchCriteria
 from app.routers.feeds import disassociate_listener_db
 
 router = APIRouter()
@@ -242,7 +243,6 @@ async def get_listeners(
         category -- filter by category has to be exact match
         label -- filter by label has to be exact match
     """
-    listeners = []
     if category and label:
         query = {
             "$and": [
@@ -257,11 +257,9 @@ async def get_listeners(
     else:
         query = {}
 
-    for doc in (
-        await db["listeners"].find(query).skip(skip).limit(limit).to_list(length=limit)
-    ):
-        listeners.append(EventListenerOut.from_mongo(doc))
-    return listeners
+    return (
+        await EventListenerDB.find(query).skip(skip).limit(limit).to_list(length=limit)
+    )
 
 
 @router.put("/{listener_id}", response_model=EventListenerOut)
@@ -277,38 +275,31 @@ async def edit_listener(
         listener_id -- UUID of the listener to be udpated
         listener_in -- JSON object including updated information
     """
-    if (
-        listener := await db["listeners"].find_one({"_id": ObjectId(listener_id)})
-    ) is not None:
+    listener = EventListenerDB.find_one(EventListenerDB.id == ObjectId(listener_id))
+    if listener:
         # TODO: Refactor this with permissions checks etc.
         listener_update = dict(listener_in) if listener_in is not None else {}
-        user = await db["users"].find_one({"_id": ObjectId(user_id)})
-        listener_update["updated"] = datetime.datetime.utcnow()
+        listener_update["modified"] = datetime.datetime.utcnow()
         try:
             listener.update(listener_update)
-            await db["listeners"].replace_one(
-                {"_id": ObjectId(listener_id)}, EventListenerDB(**listener).to_mongo()
-            )
+            return await EventListenerDB(**listener).save()
         except Exception as e:
             raise HTTPException(status_code=500, detail=e.args[0])
-        return EventListenerOut.from_mongo(listener)
     raise HTTPException(status_code=404, detail=f"listener {listener_id} not found")
 
 
 @router.delete("/{listener_id}")
 async def delete_listener(
     listener_id: str,
-    db: MongoClient = Depends(get_db),
+    user=Depends(get_current_username),
 ):
     """Remove an Event Listener from the database. Will not clear event history for the listener."""
-    if (await db["listeners"].find_one({"_id": ObjectId(listener_id)})) is not None:
+    listener = EventListenerDB.find(EventListenerDB.id == ObjectId(listener_id))
+    if listener:
         # unsubscribe the listener from any feeds
-        async for feed in db["feeds"].find(
-            {"listeners.listener_id": ObjectId(listener_id)}
-        ):
-            feed_out = FeedOut.from_mongo(feed)
-            disassociate_listener_db(feed_out.id, listener_id, db)
-        await db["listeners"].delete_one({"_id": ObjectId(listener_id)})
+        feeds = FeedDB.find(FeedDB.listeners.listener_id == ObjectId(listener_id))
+        for feed in feeds:
+            await disassociate_listener_db(feed.id, listener_id)
+        await listener.delete()
         return {"deleted": listener_id}
-    else:
-        raise HTTPException(status_code=404, detail=f"listener {listener_id} not found")
+    raise HTTPException(status_code=404, detail=f"Listener {listener_id} not found")
