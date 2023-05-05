@@ -1,10 +1,11 @@
-from app.models.mongomodel import MongoModel
+from app.models.mongomodel import MongoModel, BaseModel
+from beanie import Document, View, PydanticObjectId
 
 
-class TokenBase(MongoModel):
+class TokenBase(BaseModel):
     email: str
     refresh_token: str
 
 
-class TokenDB(TokenBase):
+class TokenDB(Document, TokenBase):
     pass

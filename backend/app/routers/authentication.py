@@ -44,8 +44,8 @@ async def save_user(userIn: UserIn, db: MongoClient = Depends(dependencies.get_d
         hashed_password=hashed_password,
         keycloak_id=keycloak_user,
     )
-    res = await db["users"].insert_one(userDB.to_mongo())
-    found = await db["users"].find_one({"_id": res.inserted_id})
+    res = await UserDB.insert_one(userDB)
+    found = await UserDB.find_one({"_id": res.inserted_id})
     return UserOut.from_mongo(found).dict(exclude={"create_at"})
 
 
@@ -71,7 +71,7 @@ async def login(userIn: UserLogin, db: MongoClient = Depends(dependencies.get_db
 
 
 async def authenticate_user(email: str, password: str, db: MongoClient):
-    user = await db["users"].find_one({"email": email})
+    user = await UserDB.find_one({"email": email})
     current_user = UserDB.from_mongo(user)
     if not user:
         return None
