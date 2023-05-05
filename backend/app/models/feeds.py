@@ -1,13 +1,12 @@
-from datetime import datetime
-from typing import Optional, List
+from typing import List
 
 import pymongo
 from beanie import Document
-from pydantic import Field, BaseModel
+from pydantic import BaseModel
 
+from app.models.authorization import Provenance
 from app.models.listeners import FeedListener
 from app.models.search import SearchObject
-from app.models.users import UserOut
 
 
 class JobFeed(BaseModel):
@@ -27,10 +26,7 @@ class FeedIn(JobFeed):
     pass
 
 
-class FeedDB(Document, JobFeed):
-    creator: Optional[UserOut] = None
-    updated: datetime = Field(default_factory=datetime.utcnow)
-
+class FeedDB(Document, JobFeed, Provenance):
     class Settings:
         name = "feeds_beanie"
         indexes = [

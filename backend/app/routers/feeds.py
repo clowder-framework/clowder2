@@ -1,13 +1,12 @@
 from typing import List, Optional
 
-import pymongo
 from bson import ObjectId
 from fastapi import APIRouter, HTTPException, Depends
 from pika.adapters.blocking_connection import BlockingChannel
 from pymongo import MongoClient
 
 from app.dependencies import get_db
-from app.keycloak_auth import get_current_user
+from app.keycloak_auth import get_current_user, get_current_username
 from app.models.feeds import (
     FeedIn,
     FeedDB,
@@ -100,15 +99,13 @@ async def check_feed_listeners(
 @router.post("", response_model=FeedOut)
 async def save_feed(
     feed_in: FeedIn,
-    user=Depends(get_current_user),
+    user=Depends(get_current_username),
     db: MongoClient = Depends(get_db),
 ):
     """Create a new Feed (i.e. saved search) in the database."""
     feed = FeedDB(**feed_in.dict(), creator=user)
-    new_feed = await db["feeds"].insert_one(feed.to_mongo())
-    found = await db["feeds"].find_one({"_id": new_feed.inserted_id})
-    feed_out = FeedOut.from_mongo(found)
-    return feed_out
+    new_feed = await feed.insert()
+    return await FeedDB.find_one(FeedDB.id == new_feed.id)
 
 
 @router.get("", response_model=List[FeedOut])
@@ -122,26 +119,21 @@ async def get_feeds(
     """Fetch all existing Feeds."""
     feeds = []
     if name is not None:
-        docs = (
-            await db["feeds"]
-            .find({"name": name})
-            .sort([("created", pymongo.DESCENDING)])
+        return (
+            await FeedDB.find(FeedDB.name == name)
+            .sort(-FeedDB.created)
             .skip(skip)
             .limit(limit)
             .to_list(length=limit)
         )
     else:
-        docs = (
-            await db["feeds"]
-            .find()
-            .sort([("created", pymongo.DESCENDING)])
+        return (
+            await FeedDB.find()
+            .sort(-FeedDB.created)
             .skip(skip)
             .limit(limit)
             .to_list(length=limit)
         )
-    for doc in docs:
-        feeds.append(FeedOut.from_mongo(doc))
-    return feeds
 
 
 @router.get("/{feed_id}", response_model=FeedOut)
@@ -151,8 +143,8 @@ async def get_feed(
     db: MongoClient = Depends(get_db),
 ):
     """Fetch an existing saved search Feed."""
-    if (feed := await db["feeds"].find_one({"_id": ObjectId(feed_id)})) is not None:
-        return FeedOut.from_mongo(feed)
+    if (feed := await FeedDB.find_one({FeedDB.id == ObjectId(feed_id)})) is not None:
+        return feed
     else:
         raise HTTPException(status_code=404, detail=f"Feed {feed_id} not found")
 
