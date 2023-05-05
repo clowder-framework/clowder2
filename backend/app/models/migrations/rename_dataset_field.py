@@ -18,7 +18,7 @@ class DatasetDBv1(Document, DatasetBase):
     downloads: int = 0
 
     class Settings:
-        name = "datasets_beanie"
+        name = "datasets"
         indexes = [
             [
                 ("name", pymongo.TEXT),
@@ -30,7 +30,7 @@ class DatasetDBv1(Document, DatasetBase):
 class Forward:
     @iterative_migration()
     async def views_to_user_views(
-        self, input_document: DatasetDBv1, output_document: DatasetDB
+            self, input_document: DatasetDBv1, output_document: DatasetDB
     ):
         output_document.user_views = input_document.views
 
@@ -38,6 +38,6 @@ class Forward:
 class Backward:
     @iterative_migration()
     async def user_views_to_views(
-        self, input_document: DatasetDB, output_document: DatasetDBv1
+            self, input_document: DatasetDB, output_document: DatasetDBv1
     ):
         output_document.views = input_document.user_views
