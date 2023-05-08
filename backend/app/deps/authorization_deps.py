@@ -6,10 +6,10 @@ from pymongo import MongoClient
 from app.dependencies import get_db
 from app.keycloak_auth import get_current_username
 from app.models.authorization import RoleType, AuthorizationDB
-from app.models.datasets import DatasetOut
+from app.models.datasets import DatasetDB
 from app.models.files import FileOut
 from app.models.groups import GroupOut
-from app.models.metadata import MetadataOut
+from app.models.metadata import MetadataDB
 from app.models.pyobjectid import PyObjectId
 
 
@@ -74,10 +74,8 @@ async def get_role_by_metadata(
     db: MongoClient = Depends(get_db),
     current_user=Depends(get_current_username),
 ) -> RoleType:
-    if (
-        metadata := await db["metadata"].find_one({"_id": ObjectId(metadata_id)})
-    ) is not None:
-        md_out = MetadataOut.from_mongo(metadata)
+    md_out = await MetadataDB.find_one(MetadataDB.id == ObjectId(metadata_id))
+    if md_out:
         resource_type = md_out.resource.collection
         resource_id = md_out.resource.resource_id
         if resource_type == "files":
@@ -101,10 +99,10 @@ async def get_role_by_metadata(
                 role = AuthorizationDB.from_mongo(authorization).role
                 return role
         elif resource_type == "datasets":
-            if (
-                dataset := await db["datasets"].find_one({"_id": ObjectId(resource_id)})
-            ) is not None:
-                dataset_out = DatasetOut.from_mongo(dataset)
+            dataset_out = await DatasetDB.find_one(
+                DatasetDB.id == ObjectId(resource_id)
+            )
+            if dataset_out:
                 authorization = await db["authorization"].find_one(
                     {
                         "$and": [
@@ -259,10 +257,8 @@ class MetadataAuthorization:
         db: MongoClient = Depends(get_db),
         current_user: str = Depends(get_current_username),
     ):
-        if (
-            metadata := await db["metadata"].find_one({"_id": ObjectId(metadata_id)})
-        ) is not None:
-            md_out = MetadataOut.from_mongo(metadata)
+        md_out = await MetadataDB.find_one(MetadataDB.id == ObjectId(metadata_id))
+        if md_out:
             resource_type = md_out.resource.collection
             resource_id = md_out.resource.resource_id
             if resource_type == "files":
@@ -305,12 +301,10 @@ class MetadataAuthorization:
                             status_code=404, detail=f"Metadata {metadata_id} not found"
                         )
             elif resource_type == "datasets":
-                if (
-                    dataset := await db["datasets"].find_one(
-                        {"_id": ObjectId(resource_id)}
-                    )
-                ) is not None:
-                    dataset_out = DatasetOut.from_mongo(dataset)
+                dataset_out = await DatasetDB.find_one(
+                    DatasetDB.id == ObjectId(resource_id)
+                )
+                if dataset_out:
                     authorization = await AuthorizationDB.find_one(
                         AuthorizationDB.dataset_id == dataset_out.dataset_id,
                         Or(

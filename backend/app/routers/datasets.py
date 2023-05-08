@@ -42,6 +42,7 @@ from app.models.datasets import (
 )
 from app.models.files import FileOut, FileDB
 from app.models.folders import FolderOut, FolderIn, FolderDB
+from app.models.metadata import MetadataDB
 from app.models.pyobjectid import PyObjectId
 from app.models.users import UserOut
 from app.rabbitmq.listeners import submit_dataset_job
@@ -384,57 +385,39 @@ async def edit_dataset(
     dataset_id: str,
     dataset_info: DatasetBase,
     db: MongoClient = Depends(dependencies.get_db),
-    user_id=Depends(get_user),
+    user=Depends(get_current_user),
     es=Depends(dependencies.get_elasticsearchclient),
     allow: bool = Depends(Authorization("editor")),
 ):
-    if not allow:
-        raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
-    # Check all connection and abort if any one of them is not available
-    if db is None or es is None:
-        raise HTTPException(status_code=503, detail="Service not available")
-        return
-
-    if (
-        dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
-    ) is not None:
+    dataset = await DatasetDB.find_one(DatasetDB.id == ObjectId(dataset_id))
+    if dataset:
         # TODO: Refactor this with permissions checks etc.
-        ds = dict(dataset_info) if dataset_info is not None else {}
-        user = await db["users"].find_one({"email": user_id})
-        ds["author"] = UserOut(**user)
-        ds["modified"] = datetime.datetime.utcnow()
-        try:
-            dataset.update(ds)
-            await db["datasets"].replace_one(
-                {"_id": ObjectId(dataset_id)}, DatasetDB(**dataset).to_mongo()
-            )
-            # Update entry to the dataset index
+        dataset.update(dataset_info)
+        dataset.modified = datetime.datetime.utcnow()
+        await dataset.save()
+
+        # Update entry to the dataset index
+        doc = {
+            "doc": {
+                "name": dataset.name,
+                "description": dataset.description,
+                "modified": dataset.modified,
+            }
+        }
+        update_record(es, "dataset", doc, dataset_id)
+        # updating metadata in elasticsearch
+        metadata = await MetadataDB.find_one(
+            MetadataDB.resource.resource_id == ObjectId(dataset_id)
+        )
+        if metadata:
             doc = {
                 "doc": {
-                    "name": dataset["name"],
-                    "description": dataset["description"],
-                    "author": UserOut(**user).email,
-                    "modified": dataset["modified"],
+                    "name": dataset.name,
+                    "description": dataset.description,
                 }
             }
-            update_record(es, "dataset", doc, dataset_id)
-            # updating metadata in elasticsearch
-            if (
-                metadata := await db["metadata"].find_one(
-                    {"resource.resource_id": ObjectId(dataset_id)}
-                )
-            ) is not None:
-                doc = {
-                    "doc": {
-                        "name": dataset["name"],
-                        "description": dataset["description"],
-                        "author": UserOut(**user).email,
-                    }
-                }
-                update_record(es, "metadata", doc, str(metadata["_id"]))
-        except Exception as e:
-            raise HTTPException(status_code=500, detail=e.args[0])
-        return DatasetOut.from_mongo(dataset)
+            update_record(es, "metadata", doc, str(metadata["_id"]))
+        return dataset
     raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
 
 
