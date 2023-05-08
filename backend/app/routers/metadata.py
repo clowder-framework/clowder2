@@ -108,8 +108,7 @@ async def delete_metadata(
             md := await MetadataDB.find_one(MetadataDB.id == PyObjectId(metadata_id))
     ) is not None:
         # TODO: Refactor this with permissions checks etc.
-        await db["metadata"].delete_one({"_id": PyObjectId(metadata_id)})
-        await MetadataDB(id=PyObjectId(metadata_id)).delete()
+        await md.delete()
         return {"deleted": metadata_id}
     else:
         raise HTTPException(status_code=404, detail=f"Metadata {metadata_id} not found")

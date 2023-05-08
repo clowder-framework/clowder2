@@ -2,7 +2,6 @@ import collections.abc
 from datetime import datetime
 from typing import Optional, List, Union
 
-import pymongo
 from beanie import Document, PydanticObjectId
 from elasticsearch import Elasticsearch
 from fastapi import HTTPException
@@ -117,12 +116,6 @@ class MetadataDefinitionDB(Document, MetadataDefinitionBase):
 
     class Settings:
         name = "metadata.definitions"
-        indexes = [
-            [
-                ("name", pymongo.TEXT),
-                ("description", pymongo.TEXT),
-            ],
-        ]
 
 
 class MetadataDefinitionOut(MetadataDefinitionDB):
@@ -328,9 +321,9 @@ async def patch_metadata(
         updated_content = await validate_context(
             db,
             updated_content,
-            metadata.dict().get("definition", None),
-            metadata.dict().get("context_url", None),
-            metadata.dict().get("context", []),
+            metadata.definition,
+            metadata.context_url,
+            metadata.context,
         )
         metadata.content = updated_content
         await metadata.replace()
