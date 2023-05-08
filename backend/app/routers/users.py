@@ -10,7 +10,7 @@ from secrets import token_urlsafe
 from app import dependencies
 from app.config import settings
 from app.keycloak_auth import get_current_username
-from app.models.users import UserDB, UserOut, UserAPIKey, UserAPIKeyDB
+from app.models.users import UserDB, UserOut, UserAPIKey
 
 router = APIRouter()
 
