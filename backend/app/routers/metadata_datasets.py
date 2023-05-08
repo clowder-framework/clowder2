@@ -179,16 +179,17 @@ async def replace_dataset_metadata(
 
         if (md := await MetadataDB.find_one(*query)) is not None:
             # Metadata exists, so prepare the new document we are going to replace it with
-            md_obj = _build_metadata_db_obj(db, metadata_in, DatasetOut(**dataset.dict()), user, agent=agent)
-            # TODO figure out how to do replace
-            new_metadata = await db["metadata"].replace_one(
-                {"_id": md["_id"]}, md_obj
-            )
-            found = await MetadataDB(MetadataDB.id == md["_id"])
-            metadata_out = MetadataOut(**found.dict)
+            new_md = await _build_metadata_db_obj(db, metadata_in, DatasetOut(**dataset.dict()), user, agent=agent)
+            # keep the id but update every other fields
+            tmp_md_id = md.id
+            md = new_md
+            md.id = tmp_md_id
+            new_metadata = await md.replace()
+            metadata_out = MetadataOut(**new_metadata.dict())
+
             # Update entry to the metadata index
-            doc = {"doc": {"content": metadata_out["content"]}}
-            update_record(es, "metadata", doc, metadata_out["_id"])
+            doc = {"doc": {"content": metadata_out.content}}
+            update_record(es, "metadata", doc, metadata_out.id)
             return metadata_out
     else:
         raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
