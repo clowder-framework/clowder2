@@ -31,7 +31,6 @@ import PersonIcon from "@mui/icons-material/Person";
 import { getCurrEmail } from "../utils/common";
 import VpnKeyIcon from "@mui/icons-material/VpnKey";
 import LogoutIcon from "@mui/icons-material/Logout";
-import { ApiKeyModal } from "./users/ApiKeyModal";
 
 const cookies = new Cookies();
 
@@ -108,7 +107,6 @@ export default function PersistentDrawerLeft(props) {
 	const [open, setOpen] = React.useState(false);
 	const [embeddedSearchHidden, setEmbeddedSearchHidden] = React.useState(false);
 	const [anchorEl, setAnchorEl] = React.useState(null);
-	const [apiKeyModalOpen, setApiKeyModalOpen] = React.useState(false);
 	const isMenuOpen = Boolean(anchorEl);
 
 	const handleDrawerOpen = () => {
@@ -224,11 +222,14 @@ export default function PersistentDrawerLeft(props) {
 					open={isMenuOpen}
 					onClose={handleProfileMenuClose}
 				>
-					<MenuItem
-						onClick={() => {
-							setApiKeyModalOpen(true);
-						}}
-					>
+					<MenuItem component={RouterLink} to="/profile">
+						<ListItemIcon>
+							<PersonIcon fontSize="small" />
+						</ListItemIcon>
+						<ListItemText>User Profile</ListItemText>
+					</MenuItem>
+					<Divider orientation="horizontal" />
+					<MenuItem component={RouterLink} to="/apikeys">
 						<ListItemIcon>
 							<VpnKeyIcon fontSize="small" />
 						</ListItemIcon>
@@ -339,12 +340,6 @@ export default function PersistentDrawerLeft(props) {
 			<Main open={open}>
 				<DrawerHeader />
 				{children}
-
-				{/*modals*/}
-				<ApiKeyModal
-					apiKeyModalOpen={apiKeyModalOpen}
-					setApiKeyModalOpen={setApiKeyModalOpen}
-				/>
 			</Main>
 		</Box>
 		// </ReactiveBase>

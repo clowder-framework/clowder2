@@ -1,28 +1,24 @@
 import json
+import logging
 
 import requests
 from bson import ObjectId
 from fastapi import APIRouter, HTTPException, Depends, Security
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
-from jose import jwt, ExpiredSignatureError
+from jose import jwt, ExpiredSignatureError, JWTError
 from keycloak.exceptions import KeycloakAuthenticationError, KeycloakGetError
-from pydantic import Json
 from pymongo import MongoClient
-from starlette import status
 from starlette.responses import RedirectResponse
 
-from app import keycloak_auth, dependencies
+from app import dependencies
 from app.config import settings
 from app.keycloak_auth import (
     keycloak_openid,
-    get_token,
-    oauth2_scheme,
     get_idp_public_key,
     retreive_refresh_token,
 )
-from app.models.users import UserIn, UserDB
 from app.models.tokens import TokenDB
-import logging
+from app.models.users import UserIn, UserDB
 
 router = APIRouter()
 security = HTTPBearer()
@@ -170,7 +166,7 @@ async def refresh_token(
         )
         email = token_json["email"]
         return await retreive_refresh_token(email, db)
-    except ExpiredSignatureError:
+    except (ExpiredSignatureError, JWTError):
         # retreive the refresh token and try refresh
         email = jwt.get_unverified_claims(access_token)["email"]
         return await retreive_refresh_token(email, db)
