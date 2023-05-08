@@ -290,10 +290,11 @@ async def get_dataset_metadata(
         async for md in MetadataDB.find(*query):
             md_out = MetadataOut(**md.dict())
             if md_out.definition is not None:
-                if (
-                        md_df := MetadataDefinitionDB.find_one(MetadataDefinitionDB.name == md_out.definition)
-                ) is not None:
-                    md_def = MetadataDefinitionOut(md_df)
+                md_df = await MetadataDefinitionDB.find_one(
+                    MetadataDefinitionDB.name == md_out.definition
+                )
+                if md_df is not None:
+                    md_def = MetadataDefinitionOut(**md_df.dict())
                     md_out.description = md_def.description
             metadata.append(md_out)
         return metadata
