@@ -30,11 +30,10 @@ legacy_router = APIRouter()  # for back-compatibilty with v1 extractors
 clowder_bucket = os.getenv("MINIO_BUCKET_NAME", "clowder")
 
 
-def _process_incoming_v1_extractor_info(
+async def _process_incoming_v1_extractor_info(
     extractor_name: str,
     extractor_id: str,
     process: dict,
-    db: MongoClient,
 ):
     if "file" in process:
         # Create a MIME-based feed for this v1 extractor
@@ -66,8 +65,8 @@ def _process_incoming_v1_extractor_info(
             },
             listeners=[FeedListener(listener_id=extractor_id, automatic=True)],
         )
-        return new_feed.to_mongo()
-        db["feeds"].insert_one(new_feed.to_mongo())
+        await new_feed.save()
+        return new_feed
 
 
 @router.get("/instance")
@@ -101,22 +100,18 @@ async def get_instance_id(
 async def save_listener(
     listener_in: EventListenerIn,
     user=Depends(get_current_user),
-    db: MongoClient = Depends(get_db),
 ):
     """Register a new Event Listener with the system."""
     listener = EventListenerDB(**listener_in.dict(), creator=user)
     # TODO: Check for duplicates somehow?
-    new_listener = await db["listeners"].insert_one(listener.to_mongo())
-    found = await db["listeners"].find_one({"_id": new_listener.inserted_id})
-    listener_out = EventListenerOut.from_mongo(found)
-    return listener_out
+    await listener.save()
+    return listener
 
 
 @legacy_router.post("", response_model=EventListenerOut)
 async def save_legacy_listener(
     legacy_in: LegacyEventListenerIn,
     user=Depends(get_current_user),
-    db: MongoClient = Depends(get_db),
 ):
     """This will take a POST with Clowder v1 extractor_info included, and convert/update to a v2 Listener."""
     listener_properties = ExtractorInfo(**legacy_in.dict())
@@ -128,48 +123,32 @@ async def save_legacy_listener(
         properties=listener_properties,
     )
 
-    # check to see if extractor already exists and update if so
-    existing_extractor = await db["listeners"].find_one({"name": legacy_in.name})
-    if existing_extractor is not None:
-        # Update existing listener
-        extractor_out = EventListenerOut.from_mongo(existing_extractor)
-        existing_version = extractor_out.version
-        new_version = listener.version
-        if version.parse(new_version) > version.parse(existing_version):
-            # if this is a new version, add it to the database
-            new_extractor = await db["listeners"].insert_one(listener.to_mongo())
-            found = await db["listeners"].find_one({"_id": new_extractor.inserted_id})
-            # TODO - for now we are not deleting an older version of the extractor, just adding a new one
-            # removed = db["listeners"].delete_one({"_id": existing_extractor["_id"]})
-            extractor_out = EventListenerOut.from_mongo(found)
-            return extractor_out
+    # check to see if extractor already exists and update if so, otherwise return existing
+    existing = await EventListenerDB.find_one(EventListenerDB.name == legacy_in.name)
+    if existing:
+        # if this is a new version, add it to the database, otherwise update existing
+        if version.parse(listener.version) > version.parse(existing.version):
+            await listener.save()
+            #  TODO: Should older extractor version entries be deleted?
+            #  await EventListenerDB.delete(EventListenerDB.id == existing.id)
+            return listener
         else:
-            # otherwise return existing version
             # TODO: Should this fail the POST instead?
-            return extractor_out
+            return existing
     else:
         # Register new listener
-        new_listener = await db["listeners"].insert_one(listener.to_mongo())
-        found = await db["listeners"].find_one({"_id": new_listener.inserted_id})
-        listener_out = EventListenerOut.from_mongo(found)
-
-        # Assign MIME-based listener if needed
-        if listener_out.properties and listener_out.properties.process:
-            process = listener_out.properties.process
-            processed_feed = _process_incoming_v1_extractor_info(
-                legacy_in.name, listener_out.id, process, db
+        await listener.save()
+        # Assign a MIME-based listener if necessary
+        if listener.properties and listener.properties.process:
+            await _process_incoming_v1_extractor_info(
+                legacy_in.name, listener.id, listener.properties.process
             )
-            await db["feeds"].insert_one(processed_feed)
-
-        return listener_out
+        return listener
 
 
 @router.get("/search", response_model=List[EventListenerOut])
 async def search_listeners(
-    db: MongoClient = Depends(get_db),
-    text: str = "",
-    skip: int = 0,
-    limit: int = 2,
+    text: str = "", skip: int = 0, limit: int = 2, user=Depends(get_current_username)
 ):
     """Search all Event Listeners in the db based on text.
 
@@ -178,58 +157,42 @@ async def search_listeners(
         skip -- number of initial records to skip (i.e. for pagination)
         limit -- restrict number of records to be returned (i.e. for pagination)
     """
-    listeners = []
-
     query_regx = re.compile(text, re.IGNORECASE)
-
-    for doc in (
-        # TODO either use regex or index search
-        await db["listeners"]
-        .find({"$or": [{"name": query_regx}, {"description": query_regx}]})
+    # TODO either use regex or index search
+    return (
+        await EventListenerDB.find(
+            {"$or": [{"name": query_regx}, {"description": query_regx}]}
+        )
         .skip(skip)
         .limit(limit)
         .to_list(length=limit)
-    ):
-        listeners.append(EventListenerOut.from_mongo(doc))
-    return listeners
+    )
 
 
 @router.get("/categories", response_model=List[str])
-async def list_categories(
-    db: MongoClient = Depends(get_db),
-):
-    """Get all the distinct categories of registered listeners in the db
-
-    Arguments:
-    """
-    return await db["listeners"].distinct("properties.categories")
+async def list_categories(user=Depends(get_current_username)):
+    """Get all the distinct categories of registered listeners in the db"""
+    return await EventListenerDB.distinct(EventListenerDB.properties.categories)
 
 
 @router.get("/defaultLabels", response_model=List[str])
-async def list_default_labels(
-    db: MongoClient = Depends(get_db),
-):
-    """Get all the distinct default labels of registered listeners in the db
-
-    Arguments:
-    """
-    return await db["listeners"].distinct("properties.defaultLabels")
+async def list_default_labels(user=Depends(get_current_username)):
+    """Get all the distinct default labels of registered listeners in the db"""
+    return await EventListenerDB.distinct(EventListenerDB.properties.default_labels)
 
 
 @router.get("/{listener_id}", response_model=EventListenerOut)
-async def get_listener(listener_id: str, db: MongoClient = Depends(get_db)):
+async def get_listener(listener_id: str, user=Depends(get_current_username)):
     """Return JSON information about an Event Listener if it exists."""
-    if (
-        listener := await db["listeners"].find_one({"_id": ObjectId(listener_id)})
-    ) is not None:
-        return EventListenerOut.from_mongo(listener)
+    listener = EventListenerDB.find_one(EventListenerDB.id == ObjectId(listener_id))
+    if listener:
+        return listener
     raise HTTPException(status_code=404, detail=f"listener {listener_id} not found")
 
 
 @router.get("", response_model=List[EventListenerOut])
 async def get_listeners(
-    user_id=Depends(get_user),
-    db: MongoClient = Depends(get_db),
+    user_id=Depends(get_current_username),
     skip: int = 0,
     limit: int = 2,
     category: Optional[str] = None,

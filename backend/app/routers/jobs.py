@@ -7,7 +7,11 @@ from fastapi import APIRouter, HTTPException, Depends
 from pymongo import MongoClient
 
 from app import dependencies
-from app.models.listeners import EventListenerJob, EventListenerJobUpdate
+from app.models.listeners import (
+    EventListenerJob,
+    EventListenerJobUpdate,
+    EventListenerJobViewList,
+)
 from app.keycloak_auth import get_current_user, get_user, get_current_username
 
 router = APIRouter()
@@ -16,7 +20,6 @@ router = APIRouter()
 @router.get("", response_model=List[EventListenerJob])
 async def get_all_job_summary(
     current_user_id=Depends(get_user),
-    db: MongoClient = Depends(dependencies.get_db),
     listener_id: Optional[str] = None,
     status: Optional[str] = None,
     user_id: Optional[str] = None,
@@ -38,7 +41,6 @@ async def get_all_job_summary(
         skip -- number of initial records to skip (i.e. for pagination)
         limit -- restrict number of records to be returned (i.e. for pagination)
     """
-    jobs = []
     filters = [
         {
             "$or": [
@@ -70,17 +72,12 @@ async def get_all_job_summary(
         filters.append({"resource_ref.collection": "dataset"})
         filters.append({"resource_ref.resource_id": ObjectId(dataset_id)})
 
-    query = {"$and": filters}
-
-    for doc in (
-        await db["listener_jobs_view"]
-        .find(query)
+    return (
+        await EventListenerJobViewList.find({"$and": filters})
         .skip(skip)
         .limit(limit)
         .to_list(length=limit)
-    ):
-        jobs.append(EventListenerJob.from_mongo(doc))
-    return jobs
+    )
 
 
 @router.get("/{job_id}/summary", response_model=EventListenerJob)

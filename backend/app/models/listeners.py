@@ -3,12 +3,13 @@ from enum import Enum
 from typing import Optional, List, Union
 
 import pymongo
-from beanie import Document
+from beanie import Document, View, PydanticObjectId
 from pydantic import Field, BaseModel, AnyUrl
 
 from app.config import settings
 from app.models.mongomodel import MongoDBRef
 from app.models.pyobjectid import PyObjectId
+from app.models.authorization import AuthorizationDB
 from app.models.users import UserOut
 
 
@@ -183,3 +184,159 @@ class EventListenerJobUpdate(Document):
                 ("status", pymongo.TEXT),
             ],
         ]
+
+
+class EventListenerJobViewList(View, EventListenerJob):
+    """Get associated resource information for each job"""
+
+    # FIXME This seems to be required to return _id. Otherwise _id is null in the response.
+    id: PydanticObjectId = Field(None, alias="_id")
+    creator: UserOut
+    created: datetime = Field(default_factory=datetime.utcnow)
+    modified: datetime = Field(default_factory=datetime.utcnow)
+    auth: List[AuthorizationDB]
+
+    class Settings:
+        source = EventListenerJob
+        name = "listener_jobs_view"
+        pipeline = [
+            {
+                "$facet": {
+                    "extraction_on_dataset": [
+                        {"$match": {"resource_ref.collection": {"$eq": "dataset"}}},
+                        {
+                            "$lookup": {
+                                "from": "authorization",
+                                "localField": "resource_ref.resource_id",
+                                "foreignField": "dataset_id",
+                                "as": "auth",
+                            }
+                        },
+                    ],
+                    "extraction_on_file": [
+                        {"$match": {"resource_ref.collection": {"$eq": "file"}}},
+                        {
+                            "$lookup": {
+                                "from": "files",
+                                "localField": "resource_ref.resource_id",
+                                "foreignField": "_id",
+                                "as": "file_details",
+                            }
+                        },
+                        {
+                            "$lookup": {
+                                "from": "authorization",
+                                "localField": "file_details.dataset_id",
+                                "foreignField": "dataset_id",
+                                "as": "auth",
+                            }
+                        },
+                    ],
+                }
+            },
+            {
+                "$project": {
+                    "all": {
+                        "$concatArrays": [
+                            "$extraction_on_dataset",
+                            "$extraction_on_file",
+                        ]
+                    }
+                }
+            },
+            {"$unwind": "$all"},
+            {"$replaceRoot": {"newRoot": "$all"}},
+        ]
+        # Needs fix to work https://github.com/roman-right/beanie/pull/521
+        # use_cache = True
+        # cache_expiration_time = timedelta(seconds=10)
+        # cache_capacity = 5
+
+
+class EventListenerJobUpdateViewList(View, EventListenerJob):
+    """Get associated resource information for each job update"""
+
+    # FIXME This seems to be required to return _id. Otherwise _id is null in the response.
+    id: PydanticObjectId = Field(None, alias="_id")
+    creator: UserOut
+    created: datetime = Field(default_factory=datetime.utcnow)
+    modified: datetime = Field(default_factory=datetime.utcnow)
+    auth: List[AuthorizationDB]
+
+    class Settings:
+        source = EventListenerJob
+        name = "listener_jobs_view"
+        pipeline = (
+            [
+                {
+                    "$lookup": {  # Equality Match
+                        "from": "listener_jobs",
+                        "localField": "job_id",
+                        "foreignField": "_id",
+                        "as": "listener_job_details",
+                    }
+                },
+                {
+                    "$facet": {
+                        "extraction_on_dataset": [
+                            {
+                                "$match": {
+                                    "listener_job_details.resource_ref.collection": {
+                                        "$eq": "dataset"
+                                    }
+                                }
+                            },
+                            {
+                                "$lookup": {
+                                    "from": "authorization",
+                                    "localField": "listener_job_details.resource_ref.resource_id",
+                                    "foreignField": "dataset_id",
+                                    "as": "auth",
+                                }
+                            },
+                        ],
+                        "extraction_on_file": [
+                            {
+                                "$match": {
+                                    "listener_job_details.resource_ref.collection": {
+                                        "$eq": "file"
+                                    }
+                                }
+                            },
+                            {
+                                "$lookup": {
+                                    "from": "files",
+                                    "localField": "listener_job_details.resource_ref.resource_id",
+                                    "foreignField": "_id",
+                                    "as": "file_details",
+                                }
+                            },
+                            {
+                                "$lookup": {
+                                    "from": "authorization",
+                                    "localField": "file_details.dataset_id",
+                                    "foreignField": "dataset_id",
+                                    "as": "auth",
+                                }
+                            },
+                        ],
+                    }
+                },
+                {
+                    "$project": {
+                        "all": {
+                            "$concatArrays": [
+                                "$extraction_on_dataset",
+                                "$extraction_on_file",
+                            ]
+                        }
+                    }
+                },
+                {"$unwind": "$all"},
+                {"$replaceRoot": {"newRoot": "$all"}},
+            ],
+        )
+        # Needs fix to work https://github.com/roman-right/beanie/pull/521
+        # use_cache = True
+        # cache_expiration_time = timedelta(seconds=10)
+        # cache_capacity = 5

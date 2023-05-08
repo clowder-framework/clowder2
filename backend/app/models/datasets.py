@@ -46,7 +46,7 @@ class DatasetDB(Document, DatasetBase):
     downloads: int = 0
 
     class Settings:
-        name = "datasets_beanie"
+        name = "datasets"
         indexes = [
             [
                 ("name", pymongo.TEXT),
@@ -58,14 +58,14 @@ class DatasetDB(Document, DatasetBase):
 class DatasetDBViewList(View, DatasetBase):
     # FIXME This seems to be required to return _id. Otherwise _id is null in the response.
     id: PydanticObjectId = Field(None, alias="_id")
-    author: UserOut
+    creator: UserOut
     created: datetime = Field(default_factory=datetime.utcnow)
     modified: datetime = Field(default_factory=datetime.utcnow)
     auth: List[AuthorizationDB]
 
     class Settings:
         source = DatasetDB
-        name = "datasets_beanie_view"
+        name = "datasets_view"
         pipeline = [
             {
                 "$lookup": {
