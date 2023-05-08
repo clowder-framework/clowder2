@@ -53,7 +53,7 @@ class MetadataField(BaseModel):
     required: bool = False  # Whether the definition requires this field
 
 
-class MetadataDefinitionBase(Document):
+class MetadataDefinitionBase(BaseModel):
     """This describes a metadata object with a short name and description, predefined set of fields, and context.
     These provide a shorthand for use by listeners as well as a source for building GUI widgets to add new entries.
 
@@ -106,7 +106,7 @@ class MetadataDefinitionIn(MetadataDefinitionBase):
     pass
 
 
-class MetadataDefinitionDB(MetadataDefinitionBase):
+class MetadataDefinitionDB(Document, MetadataDefinitionBase):
     creator: UserOut
 
 
@@ -170,7 +170,7 @@ class MetadataAgent(BaseModel):
     listener: Optional[EventListenerOut]
 
 
-class MetadataBase(Document):
+class MetadataBase(BaseModel):
     context: Optional[
         List[Union[dict, AnyUrl]]
     ]  # https://json-ld.org/spec/latest/json-ld/#the-context
@@ -220,7 +220,7 @@ class MetadataDelete(BaseModel):
     extractor_info: Optional[ExtractorInfo]
 
 
-class MetadataDB(MetadataBase):
+class MetadataDB(Document, MetadataBase):
     resource: MongoDBRef
     agent: MetadataAgent
     created: datetime = Field(default_factory=datetime.utcnow)
