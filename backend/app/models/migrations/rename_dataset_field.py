@@ -18,7 +18,7 @@ class DatasetDBv1(Document, DatasetBase):
     downloads: int = 0
 
     class Settings:
-        name = "datasets_beanie"
+        name = "datasets"
         indexes = [
             [
                 ("name", pymongo.TEXT),

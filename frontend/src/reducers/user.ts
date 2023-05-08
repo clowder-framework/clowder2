@@ -1,12 +1,14 @@
 import {
+	DELETE_API_KEY,
 	GENERATE_API_KEY,
-	LOGIN_ERROR,
+	LIST_API_KEYS,
+	LOGIN_ERROR, RECEIVE_USER_PROFILE,
 	REGISTER_ERROR,
 	REGISTER_USER,
 	RESET_API_KEY,
 	SET_USER,
 } from "../actions/user";
-import { UserState } from "../types/data";
+import {Author, Dataset, UserState} from "../types/data";
 import { DataAction } from "../types/action";
 
 const defaultState: UserState = {
@@ -14,7 +16,9 @@ const defaultState: UserState = {
 	loginError: false,
 	registerSucceeded: false,
 	errorMsg: "",
-	apiKey: "",
+	hashedKey: "",
+	apiKeys: [],
+	profile: null,
 };
 
 const user = (state = defaultState, action: DataAction) => {
@@ -23,6 +27,11 @@ const user = (state = defaultState, action: DataAction) => {
 			return Object.assign({}, state, {
 				Authorization: action.Authorization,
 				loginError: false,
+			});
+		case RECEIVE_USER_PROFILE:
+			return Object.assign({}, state, {
+				profile: action.profile,
+				loginError:false,
 			});
 		case LOGIN_ERROR:
 			return Object.assign({}, state, {
@@ -37,10 +46,18 @@ const user = (state = defaultState, action: DataAction) => {
 				registerSucceeded: false,
 				errorMsg: action.errorMsg,
 			});
+		case LIST_API_KEYS:
+			return Object.assign({}, state, { apiKeys: action.apiKeys });
+		case DELETE_API_KEY:
+			return Object.assign({}, state, {
+				apiKeys: state.apiKeys.filter(
+					(apikey) => apikey.id !== action.apiKey.id
+				),
+			});
 		case GENERATE_API_KEY:
-			return Object.assign({}, state, { apiKey: action.apiKey });
+			return Object.assign({}, state, { hashedKey: action.hashedKey });
 		case RESET_API_KEY:
-			return Object.assign({}, state, { apiKey: "" });
+			return Object.assign({}, state, { hashedKey: "" });
 		default:
 			return state;
 	}

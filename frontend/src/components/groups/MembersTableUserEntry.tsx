@@ -19,6 +19,7 @@ import CloseIcon from "@mui/icons-material/Close";
 type MembersTableUserEntryProps = {
 	groupId: string|undefined
 	member: Member
+	creatorEmail: string|undefined
 	setDeleteMemberConfirmOpen: any
 	setSelectMemberUsername: any
 }
@@ -31,7 +32,7 @@ const iconStyle = {
 
 export function MembersTableUserEntry(props: MembersTableUserEntryProps) {
 
-	const {groupId, member, setDeleteMemberConfirmOpen, setSelectMemberUsername} = props;
+	const {groupId, member, creatorEmail, setDeleteMemberConfirmOpen, setSelectMemberUsername} = props;
 
 	const dispatch = useDispatch();
 	const groupMemberRoleAssigned = (groupId: string|undefined, username: string|undefined,
@@ -77,7 +78,12 @@ export function MembersTableUserEntry(props: MembersTableUserEntryProps) {
 				<Button >{member.user.first_name} {member.user.last_name}</Button>
 			</TableCell>
 			<TableCell align="right">{member.user.email}</TableCell>
-			<TableCell align="right">
+			{member.user.email == creatorEmail &&
+				<TableCell align="right">{"Owner"}
+				</TableCell>
+			}
+			{member.user.email != creatorEmail &&
+				<TableCell align="right">
 				{
 					editRoleOn ?
 						<FormControl size="small">
@@ -118,7 +124,13 @@ export function MembersTableUserEntry(props: MembersTableUserEntryProps) {
 					}
 				</AuthWrapper>
 			</TableCell>
-			<TableCell align="right">
+			}
+			{member.user.email == creatorEmail &&
+				<TableCell align="right">
+				</TableCell>
+			}
+			{member.user.email != creatorEmail &&
+				<TableCell align="right">
 				{/*only owner or editor are allowed to delete*/}
 				<AuthWrapper currRole={role} allowedRoles={["owner", "editor"]}>
 					<IconButton type="button" sx={{p: "10px"}} aria-label="delete" onClick={()=>{
@@ -129,6 +141,7 @@ export function MembersTableUserEntry(props: MembersTableUserEntryProps) {
 					</IconButton>
 				</AuthWrapper>
 			</TableCell>
+			}
 		</TableRow>
 	)
 }

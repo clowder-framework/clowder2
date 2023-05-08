@@ -12,6 +12,7 @@ export type MetadataIn = {
     context_url?: string;
     definition?: string;
     content: any;
+    description?: string;
     file_version?: number;
     listener?: EventListenerIn;
     extractor?: LegacyEventListenerIn;

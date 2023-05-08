@@ -148,7 +148,7 @@ export class DatasetsService {
      * @param folderId
      * @param skip
      * @param limit
-     * @returns any Successful Response
+     * @returns FileOut Successful Response
      * @throws ApiError
      */
     public static getDatasetFilesApiV2DatasetsDatasetIdFilesGet(
@@ -156,7 +156,7 @@ export class DatasetsService {
         folderId?: string,
         skip?: number,
         limit: number = 10,
-    ): CancelablePromise<any> {
+    ): CancelablePromise<Array<FileOut>> {
         return __request({
             method: 'GET',
             path: `/api/v2/datasets/${datasetId}/files`,
