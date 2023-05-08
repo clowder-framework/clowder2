@@ -74,13 +74,9 @@ async def get_instance_id(
     user=Depends(get_current_user),
     db: MongoClient = Depends(get_db),
 ):
-    # Check all connection and abort if any one of them is not available
-    if db is None:
-        raise HTTPException(status_code=503, detail="Service not available")
-        return
-
-    if (instance_id := await db["config"].find_one({"key": "instance_id"})) is not None:
-        return ConfigEntryOut.from_mongo(instance_id).value
+    instance_id = await ConfigEntryDB.find_one({ConfigEntryDB.key == "instance_id"})
+    if instance_id:
+        return instance_id.value
     else:
         # If no ID has been generated for this instance, generate a 10-digit alphanumeric identifier
         instance_id = "".join(
@@ -90,10 +86,7 @@ async def get_instance_id(
             for _ in range(10)
         )
         config_entry = ConfigEntryDB(key="instance_id", value=instance_id)
-        await db["config"].insert_one(config_entry.to_mongo())
-        found = await db["config"].find_one({"key": "instance_id"})
-        new_entry = ConfigEntryOut.from_mongo(found)
-        return instance_id
+        return await config_entry.save()
 
 
 @router.post("", response_model=EventListenerOut)

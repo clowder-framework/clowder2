@@ -1,7 +1,7 @@
-from app.models.mongomodel import MongoModel
+from beanie import Document
 
 
-class ConfigEntryBase(MongoModel):
+class ConfigEntryBase(Document):
     key: str
     value: str
 
