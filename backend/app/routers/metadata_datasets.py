@@ -354,7 +354,8 @@ async def delete_dataset_metadata(
         # delete from elasticsearch
         delete_document_by_id(es, "metadata", str(metadata_in.id))
 
-        if (md := MetadataDB.find_one(*query)) is not None:
+        md = await MetadataDB.find_one(*query)
+        if md is not None:
             if await md.delete() is not None:
                 return MetadataOut(md)
         else:
