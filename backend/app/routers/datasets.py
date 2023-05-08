@@ -201,25 +201,14 @@ async def save_dataset(
         raise HTTPException(status_code=503, detail="Service not available")
         return
 
-    dataset_out = await DatasetDB(**dataset_in.dict(), author=user).insert()
-    # dataset_db = DatasetDB(**dataset_in.dict(), author=user)
-    # new_dataset = await db["datasets"].insert_one(dataset_db.to_mongo())
-    # found = await db["datasets"].find_one({"_id": new_dataset.inserted_id})
-    # dataset_out = DatasetOut.from_mongo(found)
+    dataset_out = await DatasetDB(**dataset_in.dict(), author=user).save()
 
     # Create authorization entry
     await AuthorizationDB(
         dataset_id=dataset_out.id,
         role=RoleType.OWNER,
         creator=user.email,
-    ).insert()
-    # await db["authorization"].insert_one(
-    #     AuthorizationDB(
-    #         dataset_id=dataset_out.id,
-    #         role=RoleType.OWNER,
-    #         creator=user.email,
-    #     ).to_mongo()
-    # )
+    ).save()
 
     # Add en entry to the dataset index
     doc = {
@@ -433,9 +422,10 @@ async def delete_dataset(
         query = {"match": {"resource_id": dataset_id}}
         delete_document_by_query(es, "metadata", query)
         # delete dataset first to minimize files/folder being uploaded to a delete dataset
-
-        await db["datasets"].delete_one({"_id": ObjectId(dataset_id)})
-        await db.metadata.delete_many({"resource.resource_id": ObjectId(dataset_id)})
+        await dataset.delete()
+        await MetadataDB.delete_all(
+            MetadataDB.resource.resource_id == ObjectId(dataset_id)
+        )
         async for file in db["files"].find({"dataset_id": ObjectId(dataset_id)}):
             file = FileOut(**file)
             await remove_file_entry(file.id, db, fs, es)
@@ -643,12 +633,11 @@ async def create_dataset_from_zip(
         dataset_description = "Uploaded as %s" % file.filename
         ds_dict = {"name": dataset_name, "description": dataset_description}
         dataset_db = DatasetDB(**ds_dict, author=user)
-        new_dataset = await db["datasets"].insert_one(dataset_db.to_mongo())
-        dataset_id = new_dataset.inserted_id
+        dataset_db.save()
 
         # Create folders
         folder_lookup = await _create_folder_structure(
-            dataset_id, zip_directory, "", {}, user, db
+            dataset_db.id, zip_directory, "", {}, user, db
         )
 
         # Go back through zipfile, this time uploading files to folders
@@ -668,12 +657,12 @@ async def create_dataset_from_zip(
                         fileDB = FileDB(
                             name=filename,
                             creator=user,
-                            dataset_id=dataset_id,
+                            dataset_id=dataset_db.id,
                             folder_id=folder_id,
                         )
                     else:
                         fileDB = FileDB(
-                            name=filename, creator=user, dataset_id=dataset_id
+                            name=filename, creator=user, dataset_id=dataset_db.id
                         )
                     with open(extracted, "rb") as file_reader:
                         await add_file_entry(
@@ -689,9 +678,7 @@ async def create_dataset_from_zip(
                     if os.path.isfile(extracted):
                         os.remove(extracted)
 
-    found = await db["datasets"].find_one({"_id": new_dataset.inserted_id})
-    dataset_out = DatasetOut.from_mongo(found)
-    return dataset_out
+    return dataset_db
 
 
 @router.get("/{dataset_id}/download", response_model=DatasetOut)

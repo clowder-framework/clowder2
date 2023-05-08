@@ -23,7 +23,13 @@ from app.models.authorization import (
     AuthorizationOut,
     RoleType,
 )
-from app.models.datasets import DatasetOut, UserAndRole, GroupAndRole, DatasetRoles
+from app.models.datasets import (
+    DatasetOut,
+    UserAndRole,
+    GroupAndRole,
+    DatasetRoles,
+    DatasetDB,
+)
 from app.models.groups import GroupOut
 from app.models.pyobjectid import PyObjectId
 from app.models.users import UserOut
@@ -168,10 +174,8 @@ async def set_dataset_group_role(
     allow: bool = Depends(Authorization("editor")),
 ):
     """Assign an entire group a specific role for a dataset."""
-    if (
-        dataset_q := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
-    ) is not None:
-        dataset = DatasetOut.from_mongo(dataset_q)
+    dataset = await DatasetDB.find_one(DatasetDB.id == ObjectId(dataset_id))
+    if dataset:
         if (
             group_q := await db["groups"].find_one({"_id": ObjectId(group_id)})
         ) is not None:
@@ -232,10 +236,8 @@ async def set_dataset_user_role(
 ):
     """Assign a single user a specific role for a dataset."""
 
-    if (
-        dataset_q := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
-    ) is not None:
-        dataset = DatasetOut.from_mongo(dataset_q)
+    dataset = await DatasetDB.find_one(DatasetDB.id == ObjectId(dataset_id))
+    if dataset:
         if (user_q := await db["users"].find_one({"email": username})) is not None:
             # First, remove any existing role the user has on the dataset
             await remove_dataset_user_role(dataset_id, username, db, user_id, allow)
@@ -294,10 +296,8 @@ async def remove_dataset_group_role(
 ):
     """Remove any role the group has with a specific dataset."""
 
-    if (
-        dataset_q := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
-    ) is not None:
-        dataset = DatasetOut.from_mongo(dataset_q)
+    dataset = await DatasetDB.find_one(DatasetDB.id == ObjectId(dataset_id))
+    if dataset:
         if (
             group_q := await db["groups"].find_one({"_id": ObjectId(group_id)})
         ) is not None:
@@ -345,10 +345,8 @@ async def remove_dataset_user_role(
 ):
     """Remove any role the user has with a specific dataset."""
 
-    if (
-        dataset_q := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
-    ) is not None:
-        dataset = DatasetOut.from_mongo(dataset_q)
+    dataset = await DatasetDB.find_one(DatasetDB.id == ObjectId(dataset_id))
+    if dataset:
         if (user_q := await db["users"].find_one({"email": username})) is not None:
             auth_db = await AuthorizationDB.find_one(
                 AuthorizationDB.dataset_id == PyObjectId(dataset_id),
@@ -380,10 +378,8 @@ async def get_dataset_roles(
     allow: bool = Depends(Authorization("editor")),
 ):
     """Get a list of all users and groups that have assigned roles on this dataset."""
-    if (
-        dataset_q := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
-    ) is not None:
-        dataset = DatasetOut.from_mongo(dataset_q)
+    dataset = await DatasetDB.find_one(DatasetDB.id == ObjectId(dataset_id))
+    if dataset:
         roles = DatasetRoles(dataset_id=str(dataset.id))
 
         async for auth_q in db["authorization"].find(
