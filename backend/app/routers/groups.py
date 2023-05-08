@@ -5,6 +5,7 @@ from bson.objectid import ObjectId
 from pymongo import DESCENDING
 from pymongo.mongo_client import MongoClient
 from typing import List, Optional
+from beanie import Document, View, PydanticObjectId
 
 from app import dependencies
 from app.deps.authorization_deps import AuthorizationDB, GroupAuthorization
@@ -100,9 +101,8 @@ async def get_group(
     db: MongoClient = Depends(dependencies.get_db),
     allow: bool = Depends(GroupAuthorization("viewer")),
 ):
-    if (
-        group := await GroupDB.find_one({"_id": ObjectId(group_id)})
-    ) is not None:
+    group = await GroupDB.find(GroupDB.id == PydanticObjectId(group_id))
+    if group is not None:
         return GroupOut.from_mongo(group)
     raise HTTPException(status_code=404, detail=f"Group {group_id} not found")
 
@@ -115,7 +115,8 @@ async def edit_group(
     db: MongoClient = Depends(dependencies.get_db),
     allow: bool = Depends(GroupAuthorization("editor")),
 ):
-    if (group := await GroupDB.find_one({"_id": ObjectId(group_id)})) is not None:
+    group = await GroupDB.find(GroupDB.id == PydanticObjectId(group_id))
+    if group is not None:
         group_dict = dict(group_info) if group_info is not None else {}
 
         if len(group_dict.name) == 0 or len(group_dict.users) == 0:
@@ -125,7 +126,7 @@ async def edit_group(
             )
             return
 
-        user = await UserDB.find_one({"email": user_id})
+        user = await UserDB.find(UserDB.email == user_id)
         group_dict["author"] = UserOut(**user)
         group_dict["modified"] = datetime.datetime.utcnow()
         # TODO: Revisit this. Authorization needs to be updated here.
@@ -147,9 +148,8 @@ async def delete_group(
     db: MongoClient = Depends(dependencies.get_db),
     allow: bool = Depends(GroupAuthorization("owner")),
 ):
-    if (
-        group_q := await db["groups"].find_one({"_id": ObjectId(group_id)})
-    ) is not None:
+    group_q = await GroupDB.find(GroupDB.id == PydanticObjectId(group_id))
+    if group_q is not None:
         await GroupDB.delete_one({"_id": ObjectId(group_id)})
         return GroupDB.from_mongo(group_q)
     else:
@@ -167,9 +167,8 @@ async def add_member(
     """Add a new user to a group."""
     if (user_q := await UserDB.find_one({"email": username})) is not None:
         new_member = Member(user=UserOut.from_mongo(user_q))
-        if (
-            group_q := await GroupDB.find_one({"_id": ObjectId(group_id)})
-        ) is not None:
+        group_q = await GroupDB.find(GroupDB.id == PydanticObjectId(group_id))
+        if group_q is not None:
             group = GroupDB.from_mongo(group_q)
             found_already = False
             for u in group.users:
@@ -204,9 +203,8 @@ async def remove_member(
 ):
     """Remove a user from a group."""
 
-    if (
-        group_q := await GroupDB.find_one({"_id": ObjectId(group_id)})
-    ) is not None:
+    group_q = await GroupDB.find(GroupDB.id == PydanticObjectId(group_id))
+    if group_q is not None:
         group = GroupDB.from_mongo(group_q)
 
         # Is the user actually in the group already?
@@ -242,9 +240,8 @@ async def update_member(
 ):
     """Update user role."""
     if (user_q := await UserDB.find_one({"email": username})) is not None:
-        if (
-            group_q := await GroupDB.find_one({"_id": ObjectId(group_id)})
-        ) is not None:
+        group_q = await GroupDB.find(GroupDB.id == PydanticObjectId(group_id))
+        if group_q is not None:
             group = GroupDB.from_mongo(group_q)
             found_user = None
             found_user_index = -1

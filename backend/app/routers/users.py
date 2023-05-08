@@ -6,6 +6,7 @@ from datetime import datetime, timedelta
 from itsdangerous.url_safe import URLSafeSerializer
 from itsdangerous.exc import BadSignature
 from secrets import token_urlsafe
+from beanie import Document, View, PydanticObjectId
 
 from app import dependencies
 from app.config import settings
@@ -26,7 +27,8 @@ async def get_users(
 
 @router.get("/{user_id}", response_model=UserOut)
 async def get_user(user_id: str, db: MongoClient = Depends(dependencies.get_db)):
-    if (user := await UserDB.get(user_id)) is not None:
+    user = await UserDB.get(PydanticObjectId(user_id))
+    if user is not None:
         return UserOut.from_mongo(**user.dict())
     raise HTTPException(status_code=404, detail=f"User {user_id} not found")
 
@@ -35,7 +37,8 @@ async def get_user(user_id: str, db: MongoClient = Depends(dependencies.get_db))
 async def get_user_by_name(
     username: str, db: MongoClient = Depends(dependencies.get_db)
 ):
-    if (user := await UserDB.find({"email": username})) is not None:
+    user = UserDB.find(UserDB.email == username)
+    if user is not None:
         return UserOut.from_mongo(**user.dict())
     raise HTTPException(status_code=404, detail=f"User {username} not found")
 
