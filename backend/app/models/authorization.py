@@ -81,4 +81,4 @@ class AuthorizationDB(Document, AuthorizationBase, Provenance):
     """The creator of the Authorization object should also be the creator of the dataset itself."""
 
     class Settings:
-        name = "authorization_beanie"
+        name = "authorization"

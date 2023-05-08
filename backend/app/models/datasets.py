@@ -48,7 +48,7 @@ class DatasetDB(Document, DatasetBase):
     downloads: int = 0
 
     class Settings:
-        name = "datasets_beanie"
+        name = "datasets"
         indexes = [
             [
                 ("name", pymongo.TEXT),
@@ -67,7 +67,7 @@ class DatasetDBViewList(View, DatasetBase):
 
     class Settings:
         source = DatasetDB
-        name = "datasets_beanie_view"
+        name = "datasets_view"
         pipeline = [
             {
                 "$lookup": {
