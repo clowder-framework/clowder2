@@ -18,10 +18,12 @@ class Category(BaseModel):
 
 
 class Product(Document):
-    name: str                          # You can use normal types just like in pydantic
+    name: str  # You can use normal types just like in pydantic
     description: Optional[str] = None
-    price: Indexed(float)              # You can also specify that a field should correspond to an index
-    category: Category                 # You can include pydantic models as well
+    price: Indexed(
+        float
+    )  # You can also specify that a field should correspond to an index
+    category: Category  # You can include pydantic models as well
 
 
 class Bike(Document):
@@ -42,7 +44,7 @@ class Metrics(View):
                 "$group": {
                     "_id": "$type",
                     "number": {"$sum": 1},
-                    "new": {"$sum": {"$cond": ["$is_new", 1, 0]}}
+                    "new": {"$sum": {"$cond": ["$is_new", 1, 0]}},
                 }
             },
         ]
@@ -55,7 +57,11 @@ async def example():
 
     # Initialize beanie with the Product document class
     # await init_beanie(database=client.beanie, document_models=[Product, Bike, Metrics, DatasetDBViewList], recreate_views=True,)
-    await init_beanie(database=client.clowder2, document_models=[DatasetDB, DatasetDBViewList, AuthorizationDB], recreate_views=True,)
+    await init_beanie(
+        database=client.clowder2,
+        document_models=[DatasetDB, DatasetDBViewList, AuthorizationDB],
+        recreate_views=True,
+    )
 
     # chocolate = Category(name="Chocolate", description="A preparation of roasted and ground cacao seeds.")
     # # Beanie documents work just like pydantic models
@@ -78,8 +84,11 @@ async def example():
     # results = await Metrics.find(Metrics.type == "Road").to_list()
     # print(results)
 
-    results = await DatasetDBViewList.find(DatasetDBViewList.author.email == "lmarini@illinois.edu").to_list()
+    results = await DatasetDBViewList.find(
+        DatasetDBViewList.author.email == "lmarini@illinois.edu"
+    ).to_list()
     print(results)
+
 
 if __name__ == "__main__":
     asyncio.run(example())

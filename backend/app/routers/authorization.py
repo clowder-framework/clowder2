@@ -23,7 +23,9 @@ from app.models.authorization import (
     AuthorizationOut,
     RoleType,
 )
-from app.models.datasets import DatasetOut, UserAndRole, GroupAndRole, DatasetRoles
+from app.models.datasets import DatasetOut, DatasetRoles
+from app.models.datasets import GroupAndRole
+from app.models.datasets import UserAndRole
 from app.models.groups import GroupOut
 from app.models.pyobjectid import PyObjectId
 from app.models.users import UserOut
@@ -61,7 +63,9 @@ async def save_authorization(
 
     authorization_dict = authorization_in.dict()
     authorization_dict["user_ids"] = user_ids
-    authorization_db = await AuthorizationDB(**authorization_dict, creator=user).insert()
+    authorization_db = await AuthorizationDB(
+        **authorization_dict, creator=user
+    ).insert()
     return authorization_db
     # new_authorization = await db["authorization"].insert_one(
     #     authorization_db.to_mongo()
@@ -78,9 +82,13 @@ async def get_dataset_role(
 ):
     """Retrieve role of user for a specific dataset."""
     # Get group id and the associated users from authorization
-    authorization = await AuthorizationDB.find_one(AuthorizationDB.dataset_id == PyObjectId(dataset_id),
-                                                   Or(AuthorizationDB.creator == current_user,
-                                                      AuthorizationDB.user_ids == current_user))
+    authorization = await AuthorizationDB.find_one(
+        AuthorizationDB.dataset_id == PyObjectId(dataset_id),
+        Or(
+            AuthorizationDB.creator == current_user,
+            AuthorizationDB.user_ids == current_user,
+        ),
+    )
     # if (
     #         authorization_q := await db["authorization"].find_one(
     #             {
@@ -172,8 +180,10 @@ async def set_dataset_group_role(
             group = GroupOut.from_mongo(group_q)
             # First, remove any existing role the group has on the dataset
             await remove_dataset_group_role(dataset_id, group_id, db, user_id, allow)
-            auth_db = await AuthorizationDB.find_one(AuthorizationDB.dataset_id == PyObjectId(dataset_id),
-                                                     AuthorizationDB.role == role)
+            auth_db = await AuthorizationDB.find_one(
+                AuthorizationDB.dataset_id == PyObjectId(dataset_id),
+                AuthorizationDB.role == role,
+            )
             # if (
             #         auth_q := await db["authorization"].find_one(
             #             {"dataset_id": ObjectId(dataset_id), "role": role}
@@ -231,35 +241,22 @@ async def set_dataset_user_role(
         if (user_q := await db["users"].find_one({"email": username})) is not None:
             # First, remove any existing role the user has on the dataset
             await remove_dataset_user_role(dataset_id, username, db, user_id, allow)
-
-            if (
-                    auth_q := await db["authorization"].find_one(
-                        {"dataset_id": ObjectId(dataset_id), "role": role}
-                    )
-            ) is not None:
-                # Update if it already exists
-                auth_db = AuthorizationDB.from_mongo(auth_q)
-                if username in auth_db.user_ids:
-                    # Only add user entry if all the others occurrences are from associated groups
-                    group_q_list = db["groups"].find(
-                        {"_id": {"$in": auth_db.group_ids}}
-                    )
-                    group_occurrences = 0
-                    async for group_q in group_q_list:
-                        group = GroupOut.from_mongo(group_q)
-                        for u in group.users:
-                            if u.user.email == username:
-                                group_occurrences += 1
-                    if auth_db.user_ids.count(username) == group_occurrences:
-                        auth_db.user_ids.append(username)
-                        await db["authorization"].replace_one(
-                            {"_id": auth_db.id}, auth_db.to_mongo()
-                        )
-                else:
-                    auth_db.user_ids.append(username)
-                    await db["authorization"].replace_one(
-                        {"_id": auth_db.id}, auth_db.to_mongo()
-                    )
+            auth_db = await AuthorizationDB.find_one(
+                AuthorizationDB.dataset_id == PyObjectId(dataset_id),
+                AuthorizationDB.role == role,
+            )
+            # if (
+            #         auth_q := await db["authorization"].find_one(
+            #             {"dataset_id": ObjectId(dataset_id), "role": role}
+            #         )
+            # ) is not None:
+            # Update if it already exists
+            # auth_db = AuthorizationDB.from_mongo(auth_q)
+            if auth_db is not None and username not in auth_db.user_ids:
+                auth_db.user_ids.append(username)
+                await db["authorization"].replace_one(
+                    {"_id": auth_db.id}, auth_db.to_mongo()
+                )
                 return auth_db
             else:
                 # Create a new entry
@@ -299,8 +296,10 @@ async def remove_dataset_group_role(
                 group_q := await db["groups"].find_one({"_id": ObjectId(group_id)})
         ) is not None:
             group = GroupOut.from_mongo(group_q)
-            auth_db = await AuthorizationDB.find_one(AuthorizationDB.dataset_id == PyObjectId(dataset_id),
-                                                     AuthorizationDB.group_ids == group_id)
+            auth_db = await AuthorizationDB.find_one(
+                AuthorizationDB.dataset_id == PyObjectId(dataset_id),
+                AuthorizationDB.group_ids == group_id,
+            )
             # if (
             #         auth_q := await db["authorization"].find_one(
             #             {
@@ -345,8 +344,10 @@ async def remove_dataset_user_role(
     ) is not None:
         dataset = DatasetOut.from_mongo(dataset_q)
         if (user_q := await db["users"].find_one({"email": username})) is not None:
-            auth_db = await AuthorizationDB.find_one(AuthorizationDB.dataset_id == PyObjectId(dataset_id),
-                                                     AuthorizationDB.user_ids == username)
+            auth_db = await AuthorizationDB.find_one(
+                AuthorizationDB.dataset_id == PyObjectId(dataset_id),
+                AuthorizationDB.user_ids == username,
+            )
             # if (
             #         auth_q := await db["authorization"].find_one(
             #             {"dataset_id": ObjectId(dataset_id), "user_ids": username}

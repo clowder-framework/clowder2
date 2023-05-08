@@ -1,29 +1,22 @@
 import collections.abc
-import traceback
 from datetime import datetime
 from typing import Optional, List, Union
-from enum import Enum
 
+from beanie import Document, PydanticObjectId
 from elasticsearch import Elasticsearch
-from bson import ObjectId
-from bson.dbref import DBRef
-from fastapi.param_functions import Depends
-from pydantic import Field, validator, BaseModel, create_model, AnyUrl
 from fastapi import HTTPException
+from pydantic import Field, validator, AnyUrl
 from pymongo import MongoClient
 
-from app import dependencies
-from app.models.mongomodel import MongoModel, MongoDBRef
-from app.models.pyobjectid import PyObjectId
-from app.models.users import UserOut
 from app.models.listeners import (
     EventListenerIn,
     LegacyEventListenerIn,
     EventListenerOut,
     ExtractorInfo,
 )
+from app.models.mongomodel import MongoModel, MongoDBRef
+from app.models.users import UserOut
 from app.search.connect import update_record
-
 
 # List of valid types that can be specified for metadata fields
 FIELD_TYPES = {
@@ -117,8 +110,12 @@ class MetadataDefinitionIn(MetadataDefinitionBase):
     pass
 
 
-class MetadataDefinitionDB(MetadataDefinitionBase):
+class MetadataDefinitionDB(Document, MetadataDefinitionBase):
+    id: PydanticObjectId = Field(None, alias="_id")
     creator: UserOut
+
+    class Settings:
+        name = "metadata.definitions"
 
 
 class MetadataDefinitionOut(MetadataDefinitionDB):
@@ -188,6 +185,7 @@ class MetadataBase(MongoModel):
     context_url: Optional[str]  # single URL applying to contents
     definition: Optional[str]  # name of a metadata definition
     content: dict
+    description: Optional[str]  # This will be fetched from metadata definition if one is provided (shown by GUI)
 
     @validator("context")
     def contexts_are_valid(cls, v):
@@ -244,10 +242,14 @@ class MetadataDelete(MongoModel):
     extractor_info: Optional[ExtractorInfo]
 
 
-class MetadataDB(MetadataBase):
+class MetadataDB(Document, MetadataBase):
+    id: PydanticObjectId = Field(None, alias="_id")
     resource: MongoDBRef
     agent: MetadataAgent
     created: datetime = Field(default_factory=datetime.utcnow)
+
+    class Settings:
+        name = "metadata"
 
     class Config:
         arbitrary_types_allowed = True
@@ -261,17 +263,15 @@ class MetadataDB(MetadataBase):
 
 class MetadataOut(MetadataDB):
     resource: MongoDBRef
-    description: Optional[
-        str
-    ]  # This will be fetched from metadata definition if one is provided (shown by GUI)
+    description: Optional[str]
 
 
 async def validate_context(
-    db: MongoClient,
-    content: dict,
-    definition: Optional[str] = None,
-    context_url: Optional[str] = None,
-    context: Optional[List[Union[dict, AnyUrl]]] = None,
+        db: MongoClient,
+        content: dict,
+        definition: Optional[str] = None,
+        context_url: Optional[str] = None,
+        context: Optional[List[Union[dict, AnyUrl]]] = None,
 ):
     """Convenience function for making sure incoming metadata has valid definitions or resolvable context.
 
@@ -289,7 +289,7 @@ async def validate_context(
         pass
     if definition is not None:
         if (
-            md_def := await db["metadata.definitions"].find_one({"name": definition})
+                md_def := await db["metadata.definitions"].find_one({"name": definition})
         ) is not None:
             md_def = MetadataDefinitionOut(**md_def)
             content = validate_definition(content, md_def)
@@ -312,26 +312,23 @@ def deep_update(orig: dict, new: dict):
 
 
 async def patch_metadata(
-    metadata: dict, new_entries: dict, db: MongoClient, es: Elasticsearch
+        metadata: MetadataDB, new_entries: dict, db: MongoClient, es: Elasticsearch
 ):
     """Convenience function for updating original metadata contents with new entries."""
     try:
         # TODO: For list-type definitions, should we append to list instead?
-        updated_content = deep_update(metadata["content"], new_entries)
+        updated_content = deep_update(metadata.content, new_entries)
         updated_content = await validate_context(
             db,
             updated_content,
-            metadata.get("definition", None),
-            metadata.get("context_url", None),
-            metadata.get("context", []),
+            metadata.definition,
+            metadata.context_url,
+            metadata.context,
         )
-        metadata["content"] = updated_content
-        db["metadata"].replace_one(
-            {"_id": metadata["_id"]}, MetadataDB(**metadata).to_mongo()
-        )
-        # Update entry to the metadata index
-        doc = {"doc": {"content": metadata["content"]}}
-        update_record(es, "metadata", doc, metadata["_id"])
+        metadata.content = updated_content
+        await metadata.replace()
+        doc = {"doc": {"content": metadata.content}}
+        update_record(es, "metadata", doc, metadata.id)
     except Exception as e:
         raise e
-    return MetadataOut.from_mongo(metadata)
+    return MetadataOut(**metadata.dict())

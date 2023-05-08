@@ -25,7 +25,11 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { theme } from "../../theme";
 import { UserAndRole } from "../../openapi/v2";
-import { fetchDatasetRoles, removeDatasetUserRole, setDatasetUserRole } from "../../actions/dataset";
+import {
+	fetchDatasetRoles,
+	removeDatasetUserRole,
+	setDatasetUserRole,
+} from "../../actions/dataset";
 import { useParams } from "react-router-dom";
 
 type UserAndRoleTableEntryProps = {
@@ -52,14 +56,13 @@ export function UserAndRoleTableEntry(props: UserAndRoleTableEntryProps) {
 		role: string | undefined
 	) => dispatch(setDatasetUserRole(dataset_id, username, role));
 
-	const removeUserRole = async (
+	const removeUserRole = (
 		dataset_id: string | undefined,
-		username: string | undefined,
+		username: string | undefined
 	) => dispatch(removeDatasetUserRole(dataset_id, username));
 
 	const getRoles = (datasetId: string | undefined) =>
 		dispatch(fetchDatasetRoles(datasetId));
-
 
 	const [selectedRole, setSelectedRole] = useState(user_role.role);
 	const [editRoleOn, setEditRoleOn] = useState(false);
@@ -88,14 +91,19 @@ export function UserAndRoleTableEntry(props: UserAndRoleTableEntryProps) {
 
 	return (
 		<React.Fragment>
-			<Dialog open={deleteRoleConfirmation} onClose={() => setDeleteRoleConfirmation(false)}>
+			<Dialog
+				open={deleteRoleConfirmation}
+				onClose={() => setDeleteRoleConfirmation(false)}
+			>
 				<DialogTitle>Are you sure?</DialogTitle>
-				<DialogContent>
-                        Do you really want to delete this role?
-				</DialogContent>
+				<DialogContent>Do you really want to delete this role?</DialogContent>
 				<DialogActions>
-					<Button variant={"contained"} onClick={handleRoleDelete}>Delete</Button>
-					<Button onClick={() => setDeleteRoleConfirmation(false)}>Close</Button>
+					<Button variant={"contained"} onClick={handleRoleDelete}>
+						Delete
+					</Button>
+					<Button onClick={() => setDeleteRoleConfirmation(false)}>
+						Close
+					</Button>
 				</DialogActions>
 			</Dialog>
 			<TableRow
