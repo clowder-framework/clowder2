@@ -192,6 +192,7 @@ class MetadataBase(MongoModel):
     context_url: Optional[str]  # single URL applying to contents
     definition: Optional[str]  # name of a metadata definition
     content: dict
+    description: Optional[str]  # This will be fetched from metadata definition if one is provided (shown by GUI)
 
     @validator("context")
     def contexts_are_valid(cls, v):
@@ -256,12 +257,6 @@ class MetadataDB(Document, MetadataBase):
 
     class Settings:
         name = "metadata"
-        indexes = [
-            [
-                ("name", pymongo.TEXT),
-                ("description", pymongo.TEXT),
-            ],
-        ]
 
     class Config:
         arbitrary_types_allowed = True
@@ -275,17 +270,15 @@ class MetadataDB(Document, MetadataBase):
 
 class MetadataOut(MetadataDB):
     resource: MongoDBRef
-    description: Optional[
-        str
-    ]  # This will be fetched from metadata definition if one is provided (shown by GUI)
+    description: Optional[str]
 
 
 async def validate_context(
-    db: MongoClient,
-    content: dict,
-    definition: Optional[str] = None,
-    context_url: Optional[str] = None,
-    context: Optional[List[Union[dict, AnyUrl]]] = None,
+        db: MongoClient,
+        content: dict,
+        definition: Optional[str] = None,
+        context_url: Optional[str] = None,
+        context: Optional[List[Union[dict, AnyUrl]]] = None,
 ):
     """Convenience function for making sure incoming metadata has valid definitions or resolvable context.
 
@@ -303,7 +296,7 @@ async def validate_context(
         pass
     if definition is not None:
         if (
-            md_def := await db["metadata.definitions"].find_one({"name": definition})
+                md_def := await db["metadata.definitions"].find_one({"name": definition})
         ) is not None:
             md_def = MetadataDefinitionOut(**md_def)
             content = validate_definition(content, md_def)
@@ -326,7 +319,7 @@ def deep_update(orig: dict, new: dict):
 
 
 async def patch_metadata(
-    metadata: dict, new_entries: dict, db: MongoClient, es: Elasticsearch
+        metadata: dict, new_entries: dict, db: MongoClient, es: Elasticsearch
 ):
     """Convenience function for updating original metadata contents with new entries."""
     try:
