@@ -319,26 +319,23 @@ def deep_update(orig: dict, new: dict):
 
 
 async def patch_metadata(
-        metadata: dict, new_entries: dict, db: MongoClient, es: Elasticsearch
+        metadata: MetadataDB, new_entries: dict, db: MongoClient, es: Elasticsearch
 ):
     """Convenience function for updating original metadata contents with new entries."""
     try:
         # TODO: For list-type definitions, should we append to list instead?
-        updated_content = deep_update(metadata["content"], new_entries)
+        updated_content = deep_update(metadata.content, new_entries)
         updated_content = await validate_context(
             db,
             updated_content,
-            metadata.get("definition", None),
-            metadata.get("context_url", None),
-            metadata.get("context", []),
+            metadata.dict().get("definition", None),
+            metadata.dict().get("context_url", None),
+            metadata.dict().get("context", []),
         )
-        metadata["content"] = updated_content
-        db["metadata"].replace_one(
-            {"_id": metadata["_id"]}, MetadataDB(**metadata).to_mongo()
-        )
-        # Update entry to the metadata index
-        doc = {"doc": {"content": metadata["content"]}}
-        update_record(es, "metadata", doc, metadata["_id"])
+        metadata.content = updated_content
+        await metadata.replace()
+        doc = {"doc": {"content": metadata.content}}
+        update_record(es, "metadata", doc, metadata.id)
     except Exception as e:
         raise e
-    return MetadataOut.from_mongo(metadata)
+    return MetadataOut(**metadata.dict())

@@ -256,9 +256,10 @@ async def update_dataset_metadata(
             agent = MetadataAgent(creator=user)
             query.append(MetadataDB.agent.creator.id == agent.creator.id)
 
-        if (md := await MetadataDB.find_one(*query)) is not None:
+        md = await MetadataDB.find_one(*query)
+        if md is not None:
             # TODO: Refactor this with permissions checks etc.
-            result = await patch_metadata(md.dict(), content, db, es)
+            result = await patch_metadata(md, content, db, es)
             return result
         else:
             raise HTTPException(
