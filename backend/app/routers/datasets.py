@@ -255,22 +255,6 @@ async def get_datasets(
             skip=skip,
             limit=limit,
         ).to_list()
-    # for doc in (
-    #     await db["datasets_view"]
-    #     .find(
-    #         {
-    #             "$and": [
-    #                 {"author.email": user_id},
-    #                 {"auth": {"$elemMatch": {"user_ids": user_id}}},
-    #             ]
-    #         }
-    #     )
-    #     .sort([("created", DESCENDING)])
-    #     .skip(skip)
-    #     .limit(limit)
-    #     .to_list(length=limit)
-    # ):
-    #     datasets.append(DatasetOut.from_mongo(doc))
     else:
         return await DatasetDBViewList.find(
             {
@@ -283,23 +267,6 @@ async def get_datasets(
             skip=skip,
             limit=limit,
         ).to_list()
-    #     for doc in (
-    #         await db["datasets_view"]
-    #         .find(
-    #             {
-    #                 "$or": [
-    #                     {"author.email": user_id},
-    #                     {"auth": {"$elemMatch": {"user_ids": user_id}}},
-    #                 ]
-    #             }
-    #         )
-    #         .sort([("created", DESCENDING)])
-    #         .skip(skip)
-    #         .limit(limit)
-    #         .to_list(length=limit)
-    #     ):
-    #         datasets.append(DatasetOut.from_mongo(doc))
-    # return datasets
 
 
 @router.get("/{dataset_id}", response_model=DatasetOut)
@@ -309,13 +276,6 @@ async def get_dataset(
     allow: bool = Depends(Authorization("viewer")),
 ):
     return await DatasetDB.get(dataset_id)
-    # try:
-    #     if (
-    #             dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
-    #     ) is not None:
-    #         return DatasetOut.from_mongo(dataset)
-    # except:
-    #     raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
 
 
 @router.get("/{dataset_id}/files", response_model=List[FileOut])
@@ -768,11 +728,9 @@ async def download_dataset(
             f.write("Tag-File-Character-Encoding: UTF-8" + "\n")
 
         # Write dataset metadata if found
-        metadata = []
-        async for md in db["metadata"].find(
-            {"resource.resource_id": ObjectId(dataset_id)}
-        ):
-            metadata.append(md)
+        metadata = await MetadataDB.find(
+            MetadataDB.resource.resource_id == ObjectId(dataset_id)
+        )
         if len(metadata) > 0:
             datasetmetadata_path = os.path.join(
                 current_temp_dir, "_dataset_metadata.json"
@@ -818,11 +776,9 @@ async def download_dataset(
             current_file_size = os.path.getsize(current_file_path)
             bag_size += current_file_size
 
-            metadata = []
-            async for md in db["metadata"].find(
-                {"resource.resource_id": ObjectId(file.id)}
-            ):
-                metadata.append(md)
+            metadata = await MetadataDB.find(
+                MetadataDB.resource.resource_id == ObjectId(dataset_id)
+            )
             if len(metadata) > 0:
                 metadata_filename = file_name + "_metadata.json"
                 metadata_filename_temp_path = os.path.join(

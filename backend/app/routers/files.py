@@ -23,6 +23,7 @@ from app.config import settings
 from app.deps.authorization_deps import FileAuthorization
 from app.keycloak_auth import get_current_user, get_token
 from app.models.files import FileOut, FileVersion, FileContentType, FileDB
+from app.models.metadata import MetadataDB
 from app.models.users import UserOut
 from app.rabbitmq.listeners import submit_file_job, EventListenerJob
 from app.routers.feeds import check_feed_listeners
@@ -266,11 +267,10 @@ async def update_file(
         )
 
         # updating metadata in elasticsearch
-        if (
-            metadata := await db["metadata"].find_one(
-                {"resource.resource_id": ObjectId(updated_file.id)}
-            )
-        ) is not None:
+        metadata = MetadataDB.find_one(
+            MetadataDB.resource.resource_id == ObjectId(updated_file.id)
+        )
+        if metadata:
             doc = {
                 "doc": {
                     "name": updated_file.name,
@@ -280,7 +280,7 @@ async def update_file(
                     "bytes": updated_file.bytes,
                 }
             }
-            update_record(es, "metadata", doc, str(metadata["_id"]))
+            update_record(es, "metadata", doc, str(metadata.id))
         return updated_file
     else:
         raise HTTPException(status_code=404, detail=f"File {file_id} not found")
