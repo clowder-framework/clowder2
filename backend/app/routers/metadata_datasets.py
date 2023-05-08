@@ -357,7 +357,7 @@ async def delete_dataset_metadata(
         md = await MetadataDB.find_one(*query)
         if md is not None:
             if await md.delete() is not None:
-                return MetadataOut(md)
+                return MetadataOut(**md.dict())
         else:
             raise HTTPException(
                 status_code=404, detail=f"No metadata found with that criteria"
