@@ -24,8 +24,8 @@ export type MetadataOut = {
     context_url?: string;
     definition?: string;
     content: any;
+    description?: string;
     resource: MongoDBRef;
     agent: MetadataAgent;
     created?: string;
-    description?: string;
 }

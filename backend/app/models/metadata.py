@@ -116,7 +116,7 @@ class MetadataDefinitionDB(Document, MetadataDefinitionBase):
     creator: UserOut
 
     class Settings:
-        name = "metadata.definition"
+        name = "metadata.definitions"
         indexes = [
             [
                 ("name", pymongo.TEXT),

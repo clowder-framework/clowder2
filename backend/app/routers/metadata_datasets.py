@@ -152,9 +152,8 @@ async def replace_dataset_metadata(
     Returns:
         Metadata document that was updated
     """
-    if (
-            dataset := await DatasetDB.find_one(DatasetDB.id == ObjectId(dataset_id))
-    ) is not None:
+    dataset = await DatasetDB.get(PydanticObjectId(dataset_id))
+    if dataset is not None:
         query = [MetadataDB.resource.resource_id == ObjectId(dataset_id)]
         # Filter by MetadataAgent
         if metadata_in.extractor is not None:
@@ -210,9 +209,8 @@ async def update_dataset_metadata(
     Returns:
         Metadata document that was updated
     """
-    if (
-            dataset := DatasetDB(DatasetDB.id == ObjectId(dataset_id)).find_one()
-    ) is not None:
+    dataset = await DatasetDB.get(PydanticObjectId(dataset_id))
+    if dataset is not None:
         query = [MetadataDB.resource.resource_id == ObjectId(dataset_id)]
         content = metadata_in.content
 
