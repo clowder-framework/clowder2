@@ -5,11 +5,15 @@ import time
 from urllib.request import Request
 
 import uvicorn
+from beanie import init_beanie
+from motor.motor_asyncio import AsyncIOMotorClient
 from pydantic import BaseConfig
 from fastapi import FastAPI, APIRouter, Depends
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import settings
+from app.models.authorization import AuthorizationDB
+from app.models.datasets import DatasetDB, DatasetDBViewList
 from app.search.connect import connect_elasticsearch, create_index
 from app.keycloak_auth import get_token, get_current_username
 from app.routers import (
@@ -42,7 +46,6 @@ app = FastAPI(
     title=settings.APP_NAME, openapi_url=f"{settings.API_V2_STR}/openapi.json"
 )
 BaseConfig.arbitrary_types_allowed = True
-
 
 # @app.middleware("http")
 # async def log_requests(request: Request, call_next):
@@ -154,6 +157,22 @@ api_router.include_router(
 )
 api_router.include_router(keycloak.router, prefix="/auth", tags=["auth"])
 app.include_router(api_router, prefix=settings.API_V2_STR)
+
+
+def gather_documents():
+    pass
+
+
+@app.on_event("startup")
+async def startup_beanie():
+    """Setup Beanie Object Document Mapper (ODM) to interact with MongoDB."""
+    client = AsyncIOMotorClient(str(settings.MONGODB_URL))
+    await init_beanie(
+        database=getattr(client, settings.MONGO_DATABASE),
+        # Make sure to include all models. If one depends on another that is not in the list it is not clear which one is missing.
+        document_models=[DatasetDB, DatasetDBViewList, AuthorizationDB],
+        recreate_views=True,
+    )
 
 
 @app.on_event("startup")

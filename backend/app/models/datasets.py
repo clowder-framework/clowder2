@@ -2,9 +2,12 @@ from datetime import datetime
 from enum import Enum, auto
 from typing import Optional, List
 
-from pydantic import BaseModel, Field
+import pymongo
+from beanie import Document, View, PydanticObjectId
+from pydantic import BaseModel
+from pydantic import Field
 
-from app.models.authorization import RoleType
+from app.models.authorization import AuthorizationDB, RoleType
 from app.models.groups import GroupOut
 from app.models.mongomodel import MongoModel
 from app.models.users import UserOut
@@ -36,13 +39,49 @@ class DatasetPatch(BaseModel):
     description: Optional[str]
 
 
-class DatasetDB(MongoModel, DatasetBase):
+class DatasetDB(Document, DatasetBase):
     author: UserOut
     created: datetime = Field(default_factory=datetime.utcnow)
     modified: datetime = Field(default_factory=datetime.utcnow)
     status: str = DatasetStatus.PRIVATE.name
-    views: int = 0
+    user_views: int = 0
     downloads: int = 0
+
+    class Settings:
+        name = "datasets_beanie"
+        indexes = [
+            [
+                ("name", pymongo.TEXT),
+                ("description", pymongo.TEXT),
+            ],
+        ]
+
+
+class DatasetDBViewList(View, DatasetBase):
+    # FIXME This seems to be required to return _id. Otherwise _id is null in the response.
+    id: PydanticObjectId = Field(None, alias='_id')
+    author: UserOut
+    created: datetime = Field(default_factory=datetime.utcnow)
+    modified: datetime = Field(default_factory=datetime.utcnow)
+    auth: List[AuthorizationDB]
+
+    class Settings:
+        source = DatasetDB
+        name = "datasets_beanie_view"
+        pipeline = [
+            {
+                "$lookup": {
+                    "from": "authorization",
+                    "localField": "_id",
+                    "foreignField": "dataset_id",
+                    "as": "auth"
+                }
+            },
+        ]
+        # Needs fix to work https://github.com/roman-right/beanie/pull/521
+        # use_cache = True
+        # cache_expiration_time = timedelta(seconds=10)
+        # cache_capacity = 5
 
 
 class DatasetOut(DatasetDB):

@@ -16,7 +16,7 @@ import {
 export interface Dataset {
 	name: string;
 	description: string;
-	id: string;
+	_id:string;
 	author: Author;
 	created: string | Date;
 	modified: string | Date;

@@ -1,5 +1,7 @@
 from datetime import datetime
 from enum import Enum
+
+from beanie import Document
 from charset_normalizer.md import List
 from pydantic import BaseModel, EmailStr, Field
 
@@ -75,7 +77,8 @@ class Provenance(BaseModel):
     modified: datetime = Field(default_factory=datetime.utcnow)
 
 
-class AuthorizationDB(MongoModel, AuthorizationBase, Provenance):
+class AuthorizationDB(Document, AuthorizationBase, Provenance):
     """The creator of the Authorization object should also be the creator of the dataset itself."""
 
-    pass
+    class Settings:
+        name = "authorization_beanie"

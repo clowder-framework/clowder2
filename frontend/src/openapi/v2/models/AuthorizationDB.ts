@@ -15,5 +15,5 @@ export type AuthorizationDB = {
     user_ids?: Array<string>;
     role: RoleType;
     group_ids?: Array<string>;
-    id?: string;
+    _id?: string;
 }

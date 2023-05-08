@@ -5,7 +5,7 @@ import {
 	resetFailedReason,
 } from "./common";
 import config from "../app.config";
-import { getHeader } from "../utils/common";
+import { getHeader, renameIdArray } from "../utils/common";
 
 export const SET_DATASET_GROUP_ROLE = "SET_DATASET_GROUP_ROLE";
 
@@ -75,10 +75,7 @@ export function removeDatasetGroupRole(datasetId, groupId) {
 			})
 			.catch((reason) => {
 				dispatch(
-					handleErrors(
-						reason,
-						removeDatasetGroupRole(datasetId, groupId)
-					)
+					handleErrors(reason, removeDatasetGroupRole(datasetId, groupId))
 				);
 			});
 	};
@@ -100,10 +97,7 @@ export function removeDatasetUserRole(datasetId, username) {
 			})
 			.catch((reason) => {
 				dispatch(
-					handleErrors(
-						reason,
-						removeDatasetUserRole(datasetId, username)
-					)
+					handleErrors(reason, removeDatasetUserRole(datasetId, username))
 				);
 			});
 	};
@@ -232,9 +226,11 @@ export function fetchDatasets(skip = 0, limit = 21, mine = false) {
 		// TODO: Parameters for dates? paging?
 		return V2.DatasetsService.getDatasetsApiV2DatasetsGet(skip, limit, mine)
 			.then((json) => {
+				// FIXME temporary workaround to map from `_id` returned by API to `id` expected by javascript
+				const newArray = renameIdArray(json);
 				dispatch({
 					type: RECEIVE_DATASETS,
-					datasets: json,
+					datasets: newArray,
 					receivedAt: Date.now(),
 				});
 			})
