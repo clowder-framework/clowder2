@@ -1,3 +1,4 @@
+from beanie import PydanticObjectId
 from beanie.operators import Or
 from bson import ObjectId
 from fastapi import Depends, HTTPException
@@ -47,16 +48,12 @@ async def get_role_by_file(
     raise HTTPException(status_code=404, detail=f"File {file_id} not found")
 
 
-class PydanticObjectID:
-    pass
-
-
 async def get_role_by_metadata(
     metadata_id: str,
     db: MongoClient = Depends(get_db),
     current_user=Depends(get_current_username),
 ) -> RoleType:
-    if (md_out := await MetadataDB.get(PydanticObjectID(metadata_id))) is not None:
+    if (md_out := await MetadataDB.get(PydanticObjectId(metadata_id))) is not None:
         resource_type = md_out.resource.collection
         resource_id = md_out.resource.resource_id
         if resource_type == "files":
@@ -75,7 +72,7 @@ async def get_role_by_metadata(
         elif resource_type == "datasets":
 
             if (
-                dataset := await DatasetDB.get(PydanticObjectID(resource_id))
+                dataset := await DatasetDB.get(PydanticObjectId(resource_id))
             ) is not None:
                 authorization = await AuthorizationDB.find_one(
                     AuthorizationDB.dataset_id == dataset.id,
@@ -192,7 +189,7 @@ class MetadataAuthorization:
         db: MongoClient = Depends(get_db),
         current_user: str = Depends(get_current_username),
     ):
-        if (md_out := await MetadataDB.get(PydanticObjectID(metadata_id))) is not None:
+        if (md_out := await MetadataDB.get(PydanticObjectId(metadata_id))) is not None:
             resource_type = md_out.resource.collection
             resource_id = md_out.resource.resource_id
             if resource_type == "files":
@@ -220,7 +217,7 @@ class MetadataAuthorization:
                         )
             elif resource_type == "datasets":
                 if (
-                    dataset_out := await DatasetDB.get(PydanticObjectID(resource_id))
+                    dataset_out := await DatasetDB.get(PydanticObjectId(resource_id))
                     is not None
                 ):
                     authorization = await AuthorizationDB.find_one(
