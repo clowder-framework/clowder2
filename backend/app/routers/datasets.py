@@ -546,11 +546,20 @@ async def delete_folder(
                         async for file in db["files"].find(
                             {"folder_id": ObjectId(folder.id)}
                         ):
-                            file = FileOut(**file)
-                            await remove_file_entry(file.id, db, fs, es)
+                            folder = FolderOut(**folder)
+                            parent_folder_id = folder.id
+
+                            # recursively delete child folder and files
+                            await _delete_nested_folders(parent_folder_id)
+
+                            await remove_folder_entry(folder.id, db)
+                            async for file in db["files"].find(
+                                {"folder_id": ObjectId(folder.id)}
+                            ):
+                                file = FileOut(**file)
+                                await remove_file_entry(file.id, db, fs, es)
 
             await _delete_nested_folders(parent_folder_id)
-
             return {"deleted": folder_id}
         else:
             raise HTTPException(status_code=404, detail=f"Folder {folder_id} not found")

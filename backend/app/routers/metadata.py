@@ -18,6 +18,7 @@ from app.models.metadata import (
     MetadataOut,
     MetadataPatch,
     patch_metadata,
+    MetadataDB,
 )
 from app.models.pyobjectid import PyObjectId
 
@@ -39,7 +40,8 @@ async def save_metadata_definition(
         )
     else:
         md_def = MetadataDefinitionDB(**definition_in.dict(), creator=user)
-        return await md_def.save()
+        await md_def.save()
+        return MetadataDefinitionOut(**md_def.dict())
 
 
 @router.get("/definition", response_model=List[MetadataDefinitionOut])
@@ -97,7 +99,7 @@ async def delete_metadata(
     md = await MetadataDB.find_one(MetadataDB.id == PyObjectId(metadata_id))
     if md:
         # TODO: Refactor this with permissions checks etc.
-        await MetadataDB.delete(MetadataDB.id == PyObjectId(metadata_id))
+        await md.delete()
         return {"deleted": metadata_id}
     else:
         raise HTTPException(status_code=404, detail=f"Metadata {metadata_id} not found")

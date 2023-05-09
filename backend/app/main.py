@@ -12,6 +12,7 @@ from app.keycloak_auth import get_current_username
 from app.models.authorization import AuthorizationDB
 from app.models.datasets import DatasetDB, DatasetDBViewList
 from app.models.feeds import FeedDB
+from app.models.metadata import MetadataDB, MetadataDefinitionDB
 from app.routers import (
     folders,
     groups,
@@ -167,8 +168,14 @@ async def startup_beanie():
     await init_beanie(
         database=getattr(client, settings.MONGO_DATABASE),
         # Make sure to include all models. If one depends on another that is not in the list it is not clear which one is missing.
-        # TODO: autogenerate this list if possible
-        document_models=[DatasetDB, DatasetDBViewList, AuthorizationDB, FeedDB],
+        document_models=[
+            DatasetDB,
+            DatasetDBViewList,
+            AuthorizationDB,
+            MetadataDB,
+            MetadataDefinitionDB,
+            FeedDB,
+        ],
         recreate_views=True,
     )
 

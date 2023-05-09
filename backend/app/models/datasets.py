@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime
 from enum import Enum, auto
 from typing import Optional, List
 
@@ -6,8 +6,7 @@ import pymongo
 from beanie import Document, View, PydanticObjectId
 from pydantic import BaseModel, Field
 
-from app.models.authorization import AuthorizationDB
-from app.models.authorization import RoleType
+from app.models.authorization import RoleType, AuthorizationDB
 from app.models.groups import GroupOut
 from app.models.mongomodel import MongoModel
 from app.models.users import UserOut

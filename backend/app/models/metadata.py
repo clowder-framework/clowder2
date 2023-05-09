@@ -2,10 +2,10 @@ import collections.abc
 from datetime import datetime
 from typing import Optional, List, Union
 
-from beanie import Document
+from beanie import Document, PydanticObjectId
 from elasticsearch import Elasticsearch
 from fastapi import HTTPException
-from pydantic import Field, validator, BaseModel, AnyUrl
+from pydantic import Field, validator, AnyUrl
 
 from app.models.listeners import (
     EventListenerIn,
@@ -107,7 +107,11 @@ class MetadataDefinitionIn(MetadataDefinitionBase):
 
 
 class MetadataDefinitionDB(Document, MetadataDefinitionBase):
+    id: PydanticObjectId = Field(None, alias="_id")
     creator: UserOut
+
+    class Settings:
+        name = "metadata.definitions"
 
 
 class MetadataDefinitionOut(MetadataDefinitionDB):
@@ -177,6 +181,9 @@ class MetadataBase(BaseModel):
     context_url: Optional[str]  # single URL applying to contents
     definition: Optional[str]  # name of a metadata definition
     content: dict
+    description: Optional[
+        str
+    ]  # This will be fetched from metadata definition if one is provided (shown by GUI)
 
     @validator("context")
     def contexts_are_valid(cls, v):
@@ -221,9 +228,13 @@ class MetadataDelete(BaseModel):
 
 
 class MetadataDB(Document, MetadataBase):
+    id: PydanticObjectId = Field(None, alias="_id")
     resource: MongoDBRef
     agent: MetadataAgent
     created: datetime = Field(default_factory=datetime.utcnow)
+
+    class Settings:
+        name = "metadata"
 
     class Config:
         arbitrary_types_allowed = True
@@ -237,9 +248,7 @@ class MetadataDB(Document, MetadataBase):
 
 class MetadataOut(MetadataDB):
     resource: MongoDBRef
-    description: Optional[
-        str
-    ]  # This will be fetched from metadata definition if one is provided (shown by GUI)
+    description: Optional[str]
 
 
 async def validate_context(
@@ -286,17 +295,19 @@ def deep_update(orig: dict, new: dict):
 
 async def patch_metadata(metadata: MetadataDB, new_entries: dict, es: Elasticsearch):
     """Convenience function for updating original metadata contents with new entries."""
-    # TODO: For list-type definitions, should we append to list instead?
-    metadata.content = deep_update(metadata.content, new_entries)
-    metadata.content = await validate_context(
-        metadata.content,
-        metadata.definition,
-        metadata.context_url,
-        metadata.context,
-    )
-    await metadata.save()
-
-    # Update entry to the metadata index
-    doc = {"doc": {"content": metadata.content}}
-    update_record(es, "metadata", doc, metadata.id)
-    return metadata
+    try:
+        # TODO: For list-type definitions, should we append to list instead?
+        updated_content = deep_update(metadata.content, new_entries)
+        updated_content = await validate_context(
+            updated_content,
+            metadata.definition,
+            metadata.context_url,
+            metadata.context,
+        )
+        metadata.content = updated_content
+        await metadata.replace()
+        doc = {"doc": {"content": metadata.content}}
+        update_record(es, "metadata", doc, metadata.id)
+    except Exception as e:
+        raise e
+    return MetadataOut(**metadata.dict())
