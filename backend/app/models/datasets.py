@@ -39,6 +39,7 @@ class DatasetPatch(BaseModel):
 
 
 class DatasetDB(Document, DatasetBase):
+    id: PydanticObjectId = Field(None, alias="_id")
     author: UserOut
     created: datetime = Field(default_factory=datetime.utcnow)
     modified: datetime = Field(default_factory=datetime.utcnow)

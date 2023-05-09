@@ -113,6 +113,7 @@ class EventListenerJobStatus(str, Enum):
 class EventListenerJob(Document):
     """This summarizes a submission to an extractor. All messages from that extraction should include this job's ID."""
 
+    id: PydanticObjectId = Field(None, alias="_id")
     listener_id: str
     resource_ref: MongoDBRef
     creator: UserOut
@@ -172,6 +173,7 @@ class EventListenerDatasetJobMessage(BaseModel):
 class EventListenerJobUpdate(Document):
     """This is a status update message coming from the extractors back to Clowder."""
 
+    id: PydanticObjectId = Field(None, alias="_id")
     job_id: str
     timestamp: datetime = Field(default_factory=datetime.utcnow)
     status: str

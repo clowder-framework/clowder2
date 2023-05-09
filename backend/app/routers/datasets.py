@@ -8,6 +8,7 @@ import zipfile
 from collections.abc import Mapping, Iterable
 from typing import List, Optional, Union
 
+from beanie import PydanticObjectId
 from bson import ObjectId
 from bson import json_util
 from elasticsearch import Elasticsearch
@@ -196,11 +197,6 @@ async def save_dataset(
     db: MongoClient = Depends(dependencies.get_db),
     es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
 ):
-    # Check all connection and abort if any one of them is not available
-    if db is None or es is None:
-        raise HTTPException(status_code=503, detail="Service not available")
-        return
-
     dataset_out = await DatasetDB(**dataset_in.dict(), author=user).save()
 
     # Create authorization entry
@@ -232,6 +228,7 @@ async def get_datasets(
     limit: int = 10,
     mine: bool = False,
 ):
+    # TODO: Other endpoints convert DB response to DatasetOut(**response.dict())
     if mine:
         return await DatasetDBViewList.find(
             {
@@ -261,10 +258,11 @@ async def get_datasets(
 @router.get("/{dataset_id}", response_model=DatasetOut)
 async def get_dataset(
     dataset_id: str,
-    # db: MongoClient = Depends(dependencies.get_db),
     allow: bool = Depends(Authorization("viewer")),
 ):
-    return await DatasetDB.get(dataset_id)
+    if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
+        return DatasetOut(**dataset.dict())
+    raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
 
 
 @router.get("/{dataset_id}/files", response_model=List[FileOut])
@@ -338,8 +336,7 @@ async def edit_dataset(
     es=Depends(dependencies.get_elasticsearchclient),
     allow: bool = Depends(Authorization("editor")),
 ):
-    dataset = await DatasetDB.find_one(DatasetDB.id == ObjectId(dataset_id))
-    if dataset:
+    if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
         # TODO: Refactor this with permissions checks etc.
         dataset.update(dataset_info)
         dataset.modified = datetime.datetime.utcnow()
@@ -355,18 +352,19 @@ async def edit_dataset(
         }
         update_record(es, "dataset", doc, dataset_id)
         # updating metadata in elasticsearch
-        metadata = await MetadataDB.find_one(
-            MetadataDB.resource.resource_id == ObjectId(dataset_id)
-        )
-        if metadata:
+        if (
+            metadata := await MetadataDB.find_one(
+                MetadataDB.resource.resource_id == ObjectId(dataset_id)
+            )
+        ) is not None:
             doc = {
                 "doc": {
                     "name": dataset.name,
                     "description": dataset.description,
                 }
             }
-            update_record(es, "metadata", doc, str(metadata["_id"]))
-        return dataset
+            update_record(es, "metadata", doc, str(metadata.id))
+        return DatasetOut(**dataset.dict())
     raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
 
 
@@ -378,8 +376,7 @@ async def patch_dataset(
     es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
     allow: bool = Depends(Authorization("editor")),
 ):
-    dataset = await DatasetDB.find_one(DatasetDB.id == ObjectId(dataset_id))
-    if dataset:
+    if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
         # TODO: Refactor this with permissions checks etc.
         dataset.update(dataset_info)
         dataset.modified = datetime.datetime.utcnow()
@@ -404,7 +401,7 @@ async def patch_dataset(
                 }
             }
             update_record(es, "metadata", doc, str(metadata["_id"]))
-        return dataset
+        return DatasetOut(**dataset.dict())
 
 
 @router.delete("/{dataset_id}")
@@ -415,8 +412,7 @@ async def delete_dataset(
     es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
     allow: bool = Depends(Authorization("editor")),
 ):
-    dataset = await DatasetDB.find_one(DatasetDB.id == ObjectId(dataset_id))
-    if dataset:
+    if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
         # delete from elasticsearch
         delete_document_by_id(es, "dataset", dataset_id)
         query = {"match": {"resource_id": dataset_id}}
@@ -442,8 +438,7 @@ async def add_folder(
     db: MongoClient = Depends(dependencies.get_db),
     allow: bool = Depends(Authorization("uploader")),
 ):
-    dataset = await DatasetDB.find_one(DatasetDB.id == ObjectId(dataset_id))
-    if dataset:
+    if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
         folder_dict = folder_in.dict()
         folder_db = FolderDB(
             **folder_in.dict(), author=user, dataset_id=PyObjectId(dataset_id)
@@ -470,8 +465,7 @@ async def get_dataset_folders(
     db: MongoClient = Depends(dependencies.get_db),
     allow: bool = Depends(Authorization("viewer")),
 ):
-    dataset = await DatasetDB.find_one(DatasetDB.id == ObjectId(dataset_id))
-    if dataset:
+    if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
         folders = []
         if parent_folder is None:
             async for f in db["folders"].find(
@@ -509,8 +503,7 @@ async def delete_folder(
     es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
     allow: bool = Depends(Authorization("editor")),
 ):
-    dataset = await DatasetDB.find_one(DatasetDB.id == ObjectId(dataset_id))
-    if dataset:
+    if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
         if (await db["folders"].find_one({"_id": ObjectId(folder_id)})) is not None:
             # delete current folder and files
             await remove_folder_entry(folder_id, db)
@@ -579,8 +572,7 @@ async def save_file(
     credentials: HTTPAuthorizationCredentials = Security(security),
     allow: bool = Depends(Authorization("uploader")),
 ):
-    dataset = await DatasetDB.find_one(DatasetDB.id == ObjectId(dataset_id))
-    if dataset:
+    if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
         if user is None:
             raise HTTPException(
                 status_code=401, detail=f"User not found. Session might have expired."
@@ -641,12 +633,12 @@ async def create_dataset_from_zip(
         dataset_name = file.filename.rstrip(".zip")
         dataset_description = "Uploaded as %s" % file.filename
         ds_dict = {"name": dataset_name, "description": dataset_description}
-        dataset_db = DatasetDB(**ds_dict, author=user)
-        dataset_db.save()
+        dataset = DatasetDB(**ds_dict, author=user)
+        dataset.save()
 
         # Create folders
         folder_lookup = await _create_folder_structure(
-            dataset_db.id, zip_directory, "", {}, user, db
+            dataset.id, zip_directory, "", {}, user, db
         )
 
         # Go back through zipfile, this time uploading files to folders
@@ -666,12 +658,12 @@ async def create_dataset_from_zip(
                         fileDB = FileDB(
                             name=filename,
                             creator=user,
-                            dataset_id=dataset_db.id,
+                            dataset_id=dataset.id,
                             folder_id=folder_id,
                         )
                     else:
                         fileDB = FileDB(
-                            name=filename, creator=user, dataset_id=dataset_db.id
+                            name=filename, creator=user, dataset_id=dataset.id
                         )
                     with open(extracted, "rb") as file_reader:
                         await add_file_entry(
@@ -687,7 +679,7 @@ async def create_dataset_from_zip(
                     if os.path.isfile(extracted):
                         os.remove(extracted)
 
-    return dataset_db
+    return DatasetOut(**dataset.dict())
 
 
 @router.get("/{dataset_id}/download", response_model=DatasetOut)
@@ -698,8 +690,7 @@ async def download_dataset(
     fs: Minio = Depends(dependencies.get_fs),
     allow: bool = Depends(Authorization("viewer")),
 ):
-    dataset = await DatasetDB.find_one(DatasetDB.id == ObjectId(dataset_id))
-    if dataset:
+    if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
         dataset = DatasetOut(**dataset)
         current_temp_dir = tempfile.mkdtemp(prefix="rocratedownload")
         crate = ROCrate()
@@ -856,13 +847,10 @@ async def get_dataset_extract(
     parameters: dict = None,
     user=Depends(get_current_user),
     credentials: HTTPAuthorizationCredentials = Security(security),
-    db: MongoClient = Depends(dependencies.get_db),
     rabbitmq_client: BlockingChannel = Depends(dependencies.get_rabbitmq),
     allow: bool = Depends(Authorization("uploader")),
 ):
-    dataset = await DatasetDB.find_one(DatasetDB.id == ObjectId(dataset_id))
-    if dataset:
-        dataset_out = DatasetOut.from_mongo(dataset)
+    if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
         access_token = credentials.credentials
         req_headers = request.headers
         raw = req_headers.raw
@@ -890,7 +878,7 @@ async def get_dataset_extract(
         current_routing_key = current_queue
 
         job_id = await submit_dataset_job(
-            dataset_out,
+            DatasetOut(**dataset.dict()),
             current_routing_key,
             parameters,
             user,

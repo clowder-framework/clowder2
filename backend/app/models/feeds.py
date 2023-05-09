@@ -1,8 +1,8 @@
 from typing import List
 
 import pymongo
-from beanie import Document
-from pydantic import BaseModel
+from beanie import Document, PydanticObjectId
+from pydantic import BaseModel, Field
 
 from app.models.authorization import Provenance
 from app.models.listeners import FeedListener
@@ -27,6 +27,8 @@ class FeedIn(JobFeed):
 
 
 class FeedDB(Document, JobFeed, Provenance):
+    id: PydanticObjectId = Field(None, alias="_id")
+
     class Settings:
         name = "feeds"
         indexes = [

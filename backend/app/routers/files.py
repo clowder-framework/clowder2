@@ -159,7 +159,7 @@ async def add_file_entry(
     insert_record(es, "file", doc, file_db.id)
 
     # Submit file job to any qualifying feeds
-    await check_feed_listeners(es, file_out, user, db, rabbitmq_client, token)
+    await check_feed_listeners(es, file_out, user, rabbitmq_client, token)
 
 
 # TODO: Move this to MongoDB middle layer

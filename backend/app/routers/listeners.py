@@ -5,6 +5,7 @@ import re
 import string
 from typing import List, Optional
 
+from beanie import PydanticObjectId
 from bson import ObjectId
 from fastapi import APIRouter, HTTPException, Depends
 from packaging import version
@@ -35,6 +36,7 @@ async def _process_incoming_v1_extractor_info(
     extractor_id: str,
     process: dict,
 ):
+    """Return FeedDB object given v1 extractor info."""
     if "file" in process:
         # Create a MIME-based feed for this v1 extractor
         criteria_list = []
@@ -98,7 +100,7 @@ async def save_listener(
     listener = EventListenerDB(**listener_in.dict(), creator=user)
     # TODO: Check for duplicates somehow?
     await listener.save()
-    return listener
+    return EventListenerOut(**listener.dict())
 
 
 @legacy_router.post("", response_model=EventListenerOut)
@@ -123,11 +125,10 @@ async def save_legacy_listener(
         if version.parse(listener.version) > version.parse(existing.version):
             await listener.save()
             #  TODO: Should older extractor version entries be deleted?
-            #  await EventListenerDB.delete(EventListenerDB.id == existing.id)
-            return listener
+            return EventListenerOut(**listener.dict())
         else:
             # TODO: Should this fail the POST instead?
-            return existing
+            return EventListenerOut(**existing.dict())
     else:
         # Register new listener
         await listener.save()
@@ -136,7 +137,7 @@ async def save_legacy_listener(
             await _process_incoming_v1_extractor_info(
                 legacy_in.name, listener.id, listener.properties.process
             )
-        return listener
+        return EventListenerOut(**listener.dict())
 
 
 @router.get("/search", response_model=List[EventListenerOut])
@@ -177,9 +178,10 @@ async def list_default_labels(user=Depends(get_current_username)):
 @router.get("/{listener_id}", response_model=EventListenerOut)
 async def get_listener(listener_id: str, user=Depends(get_current_username)):
     """Return JSON information about an Event Listener if it exists."""
-    listener = EventListenerDB.find_one(EventListenerDB.id == ObjectId(listener_id))
-    if listener:
-        return listener
+    if (
+        listener := EventListenerDB.find_one(PydanticObjectId(listener_id))
+    ) is not None:
+        return EventListenerOut(**listener.dict())
     raise HTTPException(status_code=404, detail=f"listener {listener_id} not found")
 
 
@@ -199,22 +201,17 @@ async def get_listeners(
         category -- filter by category has to be exact match
         label -- filter by label has to be exact match
     """
-    if category and label:
-        query = {
-            "$and": [
-                {"properties.categories": category},
-                {"properties.defaultLabels": label},
-            ]
-        }
-    elif category:
-        query = {"properties.categories": category}
-    elif label:
-        query = {"properties.defaultLabels": label}
-    else:
-        query = {}
+    query = []
+    if category:
+        query.append(EventListenerDB.properties.categories == category)
+    if label:
+        query.append(EventListenerDB.properties.default_labels == label)
 
     return (
-        await EventListenerDB.find(query).skip(skip).limit(limit).to_list(length=limit)
+        await EventListenerDB.find(**query)
+        .skip(skip)
+        .limit(limit)
+        .to_list(length=limit)
     )
 
 
@@ -222,7 +219,6 @@ async def get_listeners(
 async def edit_listener(
     listener_id: str,
     listener_in: EventListenerIn,
-    db: MongoClient = Depends(get_db),
     user_id=Depends(get_user),
 ):
     """Update the information about an existing Event Listener..
@@ -238,7 +234,8 @@ async def edit_listener(
         listener_update["modified"] = datetime.datetime.utcnow()
         try:
             listener.update(listener_update)
-            return await EventListenerDB(**listener).save()
+            await listener.save()
+            return EventListenerOut(**listener.dict())
         except Exception as e:
             raise HTTPException(status_code=500, detail=e.args[0])
     raise HTTPException(status_code=404, detail=f"listener {listener_id} not found")

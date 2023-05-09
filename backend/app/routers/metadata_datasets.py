@@ -39,6 +39,7 @@ async def _build_metadata_db_obj(
     user: UserOut,
     agent: MetadataAgent = None,
 ):
+    """Convenience function for converting MetadataIn to MetadataDB object."""
     content = await validate_context(
         metadata_in.content,
         metadata_in.definition,
@@ -87,8 +88,8 @@ async def add_dataset_metadata(
     Returns:
         Metadata document that was added to database
     """
-    dataset = DatasetDB.find_one(DatasetDB.id == ObjectId(dataset_id))
-    if dataset:
+
+    if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
         # If dataset already has metadata using this definition, don't allow duplication
         definition = metadata_in.definition
         query = []
@@ -128,6 +129,7 @@ async def add_dataset_metadata(
             "author": dataset.author.email,
             "description": dataset.description,
         }
+
         insert_record(es, "metadata", doc, md.id)
         return MetadataOut(**md.dict())
 
@@ -146,8 +148,7 @@ async def replace_dataset_metadata(
     Returns:
         Metadata document that was updated
     """
-    dataset = DatasetDB.find_one(DatasetDB.id == ObjectId(dataset_id))
-    if dataset:
+    if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
         query = [MetadataDB.resource.resource_id == ObjectId(dataset_id)]
 
         # Filter by MetadataAgent
@@ -203,17 +204,17 @@ async def update_dataset_metadata(
     Returns:
         Metadata document that was updated
     """
-    dataset = DatasetDB.find_one(DatasetDB.id == ObjectId(dataset_id))
-    if dataset:
+    if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
         query = {"resource.resource_id": ObjectId(dataset_id)}
         content = metadata_in.content
 
         if metadata_in.metadata_id is not None:
             # If a specific metadata_id is provided, validate the patch against existing context
-            existing = await MetadataDB.find_one(
-                MetadataDB.id == ObjectId(metadata_in.metadata_id)
-            )
-            if existing:
+            if (
+                existing := await MetadataDB.get(
+                    PydanticObjectId(metadata_in.metadata_id)
+                )
+            ) is not None:
                 content = await validate_context(
                     metadata_in.content,
                     existing.definition,
@@ -266,8 +267,7 @@ async def get_dataset_metadata(
     user=Depends(get_current_user),
     allow: bool = Depends(Authorization("viewer")),
 ):
-    dataset = await DatasetDB.get(PydanticObjectId(dataset_id))
-    if dataset is not None:
+    if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
         query = [MetadataDB.resource.resource_id == ObjectId(dataset_id)]
 
         if listener_name is not None:
@@ -299,8 +299,7 @@ async def delete_dataset_metadata(
     es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
     allow: bool = Depends(Authorization("editor")),
 ):
-    dataset = await DatasetDB.get(PydanticObjectId(dataset_id))
-    if dataset is not None:
+    if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
         # filter by metadata_id or definition
         query = [MetadataDB.resource.resource_id == ObjectId(dataset_id)]
         if metadata_in.metadata_id is not None:
