@@ -5,7 +5,7 @@ from typing import Optional, List, Union
 from beanie import Document, PydanticObjectId
 from elasticsearch import Elasticsearch
 from fastapi import HTTPException
-from pydantic import Field, validator, AnyUrl
+from pydantic import Field, validator, AnyUrl, BaseModel
 
 from app.models.listeners import (
     EventListenerIn,
@@ -272,8 +272,11 @@ async def validate_context(
     if context_url is not None:
         pass
     if definition is not None:
-        md_def = MetadataDefinitionDB.find_one(MetadataDefinitionDB.name == definition)
-        if md_def:
+        if (
+            md_def := await MetadataDefinitionDB.find_one(
+                MetadataDefinitionDB.name == definition
+            )
+        ) is not None:
             content = validate_definition(content, md_def)
         else:
             raise HTTPException(
