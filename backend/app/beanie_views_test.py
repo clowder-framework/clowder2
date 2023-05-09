@@ -85,7 +85,7 @@ async def example():
     # print(results)
 
     results = await DatasetDBViewList.find(
-        DatasetDBViewList.author.email == "lmarini@illinois.edu"
+        DatasetDBViewList.creator.email == "lmarini@illinois.edu"
     ).to_list()
     print(results)
 

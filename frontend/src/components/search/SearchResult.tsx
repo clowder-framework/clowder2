@@ -26,13 +26,13 @@ export function SearchResult(props) {
 	const {data} = props;
 
 	return (
-		<List sx={{width: "100%", padding:"2% 5%", bgcolor: theme.palette.primary.contrastText}}>
+		<List sx={{width: "100%", padding: "2% 5%", bgcolor: theme.palette.primary.contrastText}}>
 			{data.map((item) => (
 				<ListItem alignItems="flex-start" key={item._id}>
 					<ListItemAvatar sx={{color: theme.palette.primary.main}}>
-						{ item._index === "dataset" ? <DatasetIcon/> : <ArticleIcon /> }
+						{item._index === "dataset" ? <DatasetIcon/> : <ArticleIcon/>}
 					</ListItemAvatar>
-					<Box sx={{marginTop:"5px"}}>
+					<Box sx={{marginTop: "5px"}}>
 						{
 							item._index === "dataset" ?
 								<MuiLink component={Link} to={`/datasets/${item._id}`}
@@ -46,12 +46,7 @@ export function SearchResult(props) {
 								</MuiLink>
 						}
 						<Typography variant="body2" color={theme.palette.secondary.light}>
-							{
-								item._index === "dataset" ?
-									`Created by ${parseString(item.author)} at ${parseDate(item.created)}`
-									:
-									`Created by ${parseString(item.creator)} at ${parseDate(item.created)}`
-							}
+							`Created by ${parseString(item.creator)} at ${parseDate(item.created)}`
 						</Typography>
 						<Typography variant="body2" color={theme.palette.secondary.dark}>
 							{item._index === "dataset" ? parseString(item.description) : `${item.content_type} | ${item.bytes} bytes`}

@@ -153,7 +153,7 @@ async def _create_folder_structure(
             "name": k,
             "parent_folder": parent_folder_id,
         }
-        folder_db = FolderDB(**folder_dict, author=user)
+        folder_db = FolderDB(**folder_dict, creator=user)
         new_folder = await db["folders"].insert_one(folder_db.to_mongo())
         new_folder_id = new_folder.inserted_id
 
@@ -197,7 +197,7 @@ async def save_dataset(
     db: MongoClient = Depends(dependencies.get_db),
     es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
 ):
-    dataset_out = await DatasetDB(**dataset_in.dict(), author=user).save()
+    dataset_out = await DatasetDB(**dataset_in.dict(), creator=user).save()
 
     # Create authorization entry
     await AuthorizationDB(
@@ -210,7 +210,7 @@ async def save_dataset(
     doc = {
         "name": dataset_out.name,
         "description": dataset_out.description,
-        "author": dataset_out.author.email,
+        "author": dataset_out.creator.email,
         "created": dataset_out.created,
         "modified": dataset_out.modified,
         "download": dataset_out.downloads,
@@ -441,7 +441,7 @@ async def add_folder(
     if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
         folder_dict = folder_in.dict()
         folder_db = FolderDB(
-            **folder_in.dict(), author=user, dataset_id=PyObjectId(dataset_id)
+            **folder_in.dict(), creator=user, dataset_id=PyObjectId(dataset_id)
         )
         parent_folder = folder_in.parent_folder
         if parent_folder is not None:
@@ -633,7 +633,7 @@ async def create_dataset_from_zip(
         dataset_name = file.filename.rstrip(".zip")
         dataset_description = "Uploaded as %s" % file.filename
         ds_dict = {"name": dataset_name, "description": dataset_description}
-        dataset = DatasetDB(**ds_dict, author=user)
+        dataset = DatasetDB(**ds_dict, creator=user)
         dataset.save()
 
         # Create folders

@@ -126,7 +126,7 @@ async def add_dataset_metadata(
             "context": md.context,
             "name": dataset.name,
             "resource_created": dataset.created,
-            "author": dataset.author.email,
+            "author": dataset.creator.email,
             "description": dataset.description,
         }
 
