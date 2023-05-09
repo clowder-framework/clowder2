@@ -17,9 +17,9 @@ export const MetadataTextField = (props) => {
 										  value={readOnly && content? content[fieldName]: localContent[fieldName]}
 										  onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
 											  setInputChanged(true);
-											  let tempContents: { [key: string]: string|number; } = {};
+											  const tempContents: { [key: string]: string|number; } = {};
 											  tempContents[fieldName] = event.target.value;
-											  setLocalContent(tempContents)
+											  setLocalContent(tempContents);
 											  setMetadata ?
 												  metadataId ?
 													  setMetadata({
@@ -33,7 +33,7 @@ export const MetadataTextField = (props) => {
 														  "content": tempContents
 													  })
 												  :
-												  null
+												  null;
 										  }}
 										  disabled={readOnly}
 										  helperText={inputChanged? "* You have changed this field. Remember to save/ update.": ""}
@@ -41,11 +41,11 @@ export const MetadataTextField = (props) => {
 			</Grid>
 			<Grid item xs={1} sm={1} md={1} lg={1} xl={1}>
 				<MetadataEditButton readOnly={readOnly} setReadOnly={setReadOnly} updateMetadata={updateMetadata}
-									content={localContent} metadataId={metadataId} resourceId={resourceId}
-									widgetName={widgetName} setInputChanged={setInputChanged}
-									setMetadata={setMetadata}
+					content={localContent} metadataId={metadataId} resourceId={resourceId}
+					widgetName={widgetName} setInputChanged={setInputChanged}
+					setMetadata={setMetadata}
 				/>
 			</Grid>
 		</Grid>
-	)
-}
+	);
+};

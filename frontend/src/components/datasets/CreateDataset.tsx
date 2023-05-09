@@ -38,7 +38,7 @@ export const CreateDataset = (): JSX.Element => {
 
 	const [datasetRequestForm, setdatasetRequestForm] = useState({});
 	const [metadataRequestForms, setMetadataRequestForms] = useState({});
-    const [allowSubmit, setAllowSubmit] = React.useState<boolean>(false);
+	const [allowSubmit, setAllowSubmit] = React.useState<boolean>(false);
 
 	const history = useNavigate();
 
@@ -46,44 +46,44 @@ export const CreateDataset = (): JSX.Element => {
 		if (reason !== "" && reason !== null && reason !== undefined) {
 			setErrorOpen(true);
 		}
-	}, [reason])
+	}, [reason]);
 	const handleErrorCancel = () => {
 		// reset error message and close the error window
 		dismissError();
 		setErrorOpen(false);
-	}
+	};
 	const handleErrorReport = () => {
 		window.open(
 			`${config.GHIssueBaseURL}+${encodeURIComponent(reason)}&body=${encodeURIComponent(stack)}`
 		);
 	};
 
-    const checkIfFieldsAreRequired = () => {
-        let required = false;
+	const checkIfFieldsAreRequired = () => {
+		let required = false;
 
-        metadataDefinitionList.forEach((val, idx) => {
-            if (val.fields[0].required) {
-                required = true;
-            }
-        })
+		metadataDefinitionList.forEach((val, idx) => {
+			if (val.fields[0].required) {
+				required = true;
+			}
+		});
 
-        return required;
-    }
+		return required;
+	};
 
 	// step 1
 	const onDatasetSave = (formData:any) =>{
 		setdatasetRequestForm(formData);
         
-        // If no metadata fields are marked as required, allow user to skip directly to submit
-        if (checkIfFieldsAreRequired()) {
-            setAllowSubmit(false)
+		// If no metadata fields are marked as required, allow user to skip directly to submit
+		if (checkIfFieldsAreRequired()) {
+			setAllowSubmit(false);
         
-        } else {
-            setAllowSubmit(true)
-        }
+		} else {
+			setAllowSubmit(true);
+		}
 
 		handleNext();
-	}
+	};
 	// step 2
 	const setMetadata = (metadata:any) =>{
 		// TODO wrap this in to a function
@@ -96,20 +96,20 @@ export const CreateDataset = (): JSX.Element => {
 			return ({...prevState, [metadata.definition]: metadata});
 		});
 
-        metadataDefinitionList.every((val, idx) => {
-            if (val.fields[0].required) {
-                // Condition checks whether the current updated field is a required one
-                if (val.name == metadata.definition || val.name in metadataRequestForms) {
-                    setAllowSubmit(true)
-                    return true;
+		metadataDefinitionList.every((val, idx) => {
+			if (val.fields[0].required) {
+				// Condition checks whether the current updated field is a required one
+				if (val.name == metadata.definition || val.name in metadataRequestForms) {
+					setAllowSubmit(true);
+					return true;
                 
-                } else {
-                    setAllowSubmit(false)
-                    return false;
-                }
-            }
-        })
-	}
+				} else {
+					setAllowSubmit(false);
+					return false;
+				}
+			}
+		});
+	};
 
 	// step
 	const [activeStep, setActiveStep] = useState(0);
@@ -118,13 +118,13 @@ export const CreateDataset = (): JSX.Element => {
 	};
 	const handleBack = () => {
 		setActiveStep((prevActiveStep) => prevActiveStep - 1);
-	}
+	};
 
 	// finish button post dataset; dataset ID triggers metadata posting
 	const handleFinish = () => {
 		// create dataset
 		createDataset(datasetRequestForm);
-	}
+	};
 
 	useEffect(() => {
 		if (newDataset.id) {

@@ -45,10 +45,10 @@ export const CreateMetadata = (props: MetadataType) => {
 											options: field.config.options ?? [],
 											setMetadata: setMetadata,
 											initialReadOnly: false,
-                                            isRequired: field.required,
+											isRequired: field.required,
 											key:idxx
 										}
-									)
+									);
 								})
 							}
 						</Box>
@@ -56,5 +56,5 @@ export const CreateMetadata = (props: MetadataType) => {
 				})
 			}
 		</>
-	)
-}
+	);
+};

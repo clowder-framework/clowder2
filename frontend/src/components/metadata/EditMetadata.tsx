@@ -80,9 +80,9 @@ export const EditMetadata = (props: MetadataType) => {
 													options: field.config.options ?? [],
 													setMetadata: setMetadata,
 													initialReadOnly: false,
-                                                    isRequired: field.required,
+													isRequired: field.required,
 												}
-											)
+											);
 										})
 									}
 								</Box>
@@ -110,21 +110,21 @@ export const EditMetadata = (props: MetadataType) => {
 															resourceId: resourceId,
 															content: metadata.content ?? null,
 															metadataId: metadata.id ?? null,
-                                                            isRequired: field.required,
+															isRequired: field.required,
 															key:idxx
 														}
-													)
+													);
 												})
 											}
 											<Agent created={metadata.created} agent={metadata.agent}/>
 										</Box>
 									);
 								}
-							})
+							});
 						}
-					})
+					});
 				})()
 			}
 		</>
-	)
-}
+	);
+};

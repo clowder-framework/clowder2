@@ -38,7 +38,7 @@ export const UploadFile:React.FC<UploadFileProps> = (props: UploadFileProps) => 
 
 	const [fileRequestForm, setFileRequestForm] = useState({});
 	const [metadataRequestForms, setMetadataRequestForms] = useState({});
-    const [allowSubmit, setAllowSubmit] = React.useState<boolean>(true);
+	const [allowSubmit, setAllowSubmit] = React.useState<boolean>(false);
 
 	const history = useNavigate();
 

@@ -91,7 +91,7 @@ export const Dataset = (): JSX.Element => {
 		React.useState<boolean>(false);
 	const [metadataRequestForms, setMetadataRequestForms] = useState({});
 
-    const [allowSubmit, setAllowSubmit] = React.useState<boolean>(true);
+	const [allowSubmit, setAllowSubmit] = React.useState<boolean>(false);
 
 	// component did mount list all files in dataset
 	useEffect(() => {
