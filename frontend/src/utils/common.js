@@ -8,38 +8,32 @@ import config from "../app.config";
 
 const cookies = new Cookies();
 
-//NOTE: This is only checking if a cookie is present, but not validating the cookie.
-export async function isAuthorized(datasetId=null) {
-	if (datasetId !== null) {
-		const datasetURL = `${config.hostname}/api/v2/datasets/${datasetId}`;
-		const response = await fetch(datasetURL, {
-			method: "GET",
-		});
-		if (response.status === 200) {
-			return true
-		} else {
-			const authorization = cookies.get("Authorization") || "Bearer none";
-			V2.OpenAPI.TOKEN = authorization.replace("Bearer ", "");
-			return (
-				process.env.DEPLOY_ENV === "local" ||
-				(authorization !== undefined &&
-					authorization !== "" &&
-					authorization !== null &&
-					authorization !== "Bearer none")
-			);
-		}
+
+export async function isPublic(datasetId) {
+	const datasetURL = `${config.hostname}/api/v2/datasets/${datasetId}`;
+	const response = await fetch(datasetURL, {
+		method: "GET",
+	});
+	if (response.status === 200) {
+		console.log('this is public, 200')
+		return true
 	} else {
-		const authorization = cookies.get("Authorization") || "Bearer none";
-		V2.OpenAPI.TOKEN = authorization.replace("Bearer ", "");
-		return (
-			process.env.DEPLOY_ENV === "local" ||
-			(authorization !== undefined &&
-				authorization !== "" &&
-				authorization !== null &&
-				authorization !== "Bearer none")
-		);
+		return false
 	}
 }
+
+//NOTE: This is only checking if a cookie is present, but not validating the cookie.
+export const isAuthorized = () => {
+	const authorization = cookies.get("Authorization") || "Bearer none";
+	V2.OpenAPI.TOKEN = authorization.replace("Bearer ", "");
+	return (
+		process.env.DEPLOY_ENV === "local" ||
+		(authorization !== undefined &&
+			authorization !== "" &&
+			authorization !== null &&
+			authorization !== "Bearer none")
+	);
+};
 
 // construct header
 export function getHeader() {
@@ -110,11 +104,13 @@ export const getCurrEmail = () => {
 	const authorization = cookies.get("Authorization") || "Bearer none";
 	if (
 		authorization &&
-		authorization !== "" &&
+		authorization !== "Bearer none" &&
 		authorization.split(" ").length > 0
 	) {
 		let userInfo = jwt_decode(authorization.split(" ")[1]);
 		return userInfo["email"];
+	} else {
+		return "test@test.com"
 	}
 };
 

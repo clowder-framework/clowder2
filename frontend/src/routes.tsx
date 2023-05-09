@@ -21,6 +21,8 @@ import { RedirectLogin as RedirectLoginComponent } from "./components/auth/Redir
 import { RedirectLogout as RedirectLogoutComponent } from "./components/auth/RedirectLogout";
 import { Search } from "./components/search/Search";
 import { isAuthorized } from "./utils/common";
+import {isPublic} from "./utils/common"
+import {checkPublic} from "./utils/common"
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "./types/data";
 import { resetLogout } from "./actions/common";
@@ -79,7 +81,7 @@ const PrivateRoute = (props): JSX.Element => {
 		if (fileId && reason === "") listFileRole(fileId);
 	}, [fileId, reason]);
 	// TODO or condition, authorized OR  public
-	return <>{isAuthorized(datasetId)  ? children : <Navigate to="/auth/login" />}</>;
+	return <>{ isPublic(datasetId) || isAuthorized()  ? children : <Navigate to="/auth/login" />}</>;
 };
 
 export const AppRoutes = (): JSX.Element => {
