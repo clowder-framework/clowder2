@@ -33,6 +33,7 @@ from app.routers import (
     feeds,
     jobs,
 )
+
 # setup loggers
 # logging.config.fileConfig('logging.conf', disable_existing_loggers=False)
 from app.search.config import indexSettings
@@ -175,7 +176,7 @@ async def startup_beanie():
             MetadataDB,
             MetadataDefinitionDB,
             FolderDB,
-            FileDB
+            FileDB,
         ],
         recreate_views=True,
     )
