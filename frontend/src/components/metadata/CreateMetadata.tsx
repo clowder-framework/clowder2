@@ -45,7 +45,6 @@ export const CreateMetadata = (props: MetadataType) => {
 											options: field.config.options ?? [],
 											setMetadata: setMetadata,
 											initialReadOnly: false,
-											isRequired: field.required,
 											key:idxx
 										}
 									)
