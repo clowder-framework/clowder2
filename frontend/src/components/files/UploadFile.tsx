@@ -38,6 +38,7 @@ export const UploadFile:React.FC<UploadFileProps> = (props: UploadFileProps) => 
 
 	const [fileRequestForm, setFileRequestForm] = useState({});
 	const [metadataRequestForms, setMetadataRequestForms] = useState({});
+    const [allowSubmit, setAllowSubmit] = React.useState<boolean>(true);
 
 	const history = useNavigate();
 
@@ -126,7 +127,7 @@ export const UploadFile:React.FC<UploadFileProps> = (props: UploadFileProps) => 
 							{/*buttons*/}
 							<Box sx={{ mb: 2 }}>
 								<>
-									<Button variant="contained" onClick={handleFinish} sx={{ mt: 1, mr: 1 }}>
+									<Button variant="contained" onClick={handleFinish} disabled={!allowSubmit} sx={{ mt: 1, mr: 1 }}>
                                         Finish
 									</Button>
 									<Button onClick={handleBack} sx={{ mt: 1, mr: 1 }}>
