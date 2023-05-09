@@ -80,6 +80,7 @@ export const EditMetadata = (props: MetadataType) => {
 													options: field.config.options ?? [],
 													setMetadata: setMetadata,
 													initialReadOnly: false,
+                                                    isRequired: field.required,
 												}
 											)
 										})
@@ -109,6 +110,7 @@ export const EditMetadata = (props: MetadataType) => {
 															resourceId: resourceId,
 															content: metadata.content ?? null,
 															metadataId: metadata.id ?? null,
+                                                            isRequired: field.required,
 															key:idxx
 														}
 													)

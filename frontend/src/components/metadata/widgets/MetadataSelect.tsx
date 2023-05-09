@@ -7,7 +7,7 @@ import {MetadataEditButton} from "./MetadataEditButton";
 
 export const MetadataSelect = (props) => {
 	const {widgetName, fieldName, metadataId, content, setMetadata, initialReadOnly, options, resourceId,
-		updateMetadata} = props;
+		updateMetadata, isRequired} = props;
 	const [localContent, setLocalContent] = useState(content && content[fieldName] ? content: {});
 
 	const [readOnly, setReadOnly] = useState(initialReadOnly);
@@ -40,7 +40,7 @@ export const MetadataSelect = (props) => {
 			<Grid container spacing={2} sx={{ "alignItems": "center"}}>
 				<Grid item xs={11} sm={11} md={11} lg={11} xl={11}>
 					<FormControl fullWidth>
-						<InputLabel>{widgetName}</InputLabel>
+                        <InputLabel>{isRequired ? fieldName + " *" : fieldName}</InputLabel>
 						<ClowderMetadataSelect value={readOnly && content ? content[fieldName]: localContent[fieldName]}
 											   label="Unit" onChange={handleChange}
 											   sx={{background:"#ffffff"}}
