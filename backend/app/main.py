@@ -11,7 +11,7 @@ from app.config import settings
 from app.keycloak_auth import get_current_username
 from app.models.authorization import AuthorizationDB
 from app.models.datasets import DatasetDB, DatasetDBViewList
-from app.models.files import FileDB
+from app.models.files import FileDB, FileVersionDB
 from app.models.folders import FolderDB
 from app.models.metadata import MetadataDB, MetadataDefinitionDB
 from app.routers import (
@@ -33,7 +33,6 @@ from app.routers import (
     feeds,
     jobs,
 )
-
 # setup loggers
 # logging.config.fileConfig('logging.conf', disable_existing_loggers=False)
 from app.search.config import indexSettings
@@ -177,6 +176,7 @@ async def startup_beanie():
             MetadataDefinitionDB,
             FolderDB,
             FileDB,
+            FileVersionDB
         ],
         recreate_views=True,
     )
