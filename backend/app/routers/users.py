@@ -105,6 +105,7 @@ async def get_profile(
     username=Depends(get_current_username),
     db: MongoClient = Depends(dependencies.get_db),
 ):
+    result = await UserDB.find_one(UserDB.email == username)
     if (user := await db["users"].find_one({"email": username})) is not None:
         return UserOut.from_mongo(user)
     raise HTTPException(status_code=404, detail=f"User {username} not found")
@@ -122,7 +123,7 @@ async def get_user(user_id: str, db: MongoClient = Depends(dependencies.get_db))
 async def get_user_by_name(
     username: str, db: MongoClient = Depends(dependencies.get_db)
 ):
-    user = UserDB.find(UserDB.email == username)
+    user = UserDB.find_one(UserDB.email == username)
     if user is not None:
         return UserOut.from_mongo(**user.dict())
     raise HTTPException(status_code=404, detail=f"User {username} not found")
