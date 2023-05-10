@@ -48,15 +48,16 @@ async def get_groups(
 
     """
     return await GroupDB.find(
-            {
-                "$or": [
-                    {"creator": user_id},
-                    {"users.user.email": user_id},
-                ]
-            },
-            sort=("created", DESCENDING),
-            skip=skip,
-            limit=limit).to_list()
+        {
+            "$or": [
+                {"creator": user_id},
+                {"users.user.email": user_id},
+            ]
+        },
+        sort=("created", DESCENDING),
+        skip=skip,
+        limit=limit,
+    ).to_list()
 
 
 @router.get("/search/{search_term}", response_model=List[GroupOut])
@@ -82,17 +83,17 @@ async def search_group(
 
     groups = []
     query_regx = re.compile(search_term, re.IGNORECASE)
-        # user has to be the creator or member first; then apply search
+    # user has to be the creator or member first; then apply search
     return await GroupDB.find(
-            {
-                "$and": [
-                    {"$or": [{"creator": user_id}, {"users.user.email": user_id}]},
-                    {"$or": [{"name": query_regx}, {"description": query_regx}]},
-                ]
-            },
-            skip=skip,
-            limit=limit
-        ).to_list(length=limit)
+        {
+            "$and": [
+                {"$or": [{"creator": user_id}, {"users.user.email": user_id}]},
+                {"$or": [{"name": query_regx}, {"description": query_regx}]},
+            ]
+        },
+        skip=skip,
+        limit=limit,
+    ).to_list(length=limit)
 
 
 @router.get("/{group_id}", response_model=GroupOut)
@@ -133,9 +134,7 @@ async def edit_group(
         group_dict["users"] = list(set(group_dict["users"]))
         try:
             group.update(group_dict)
-            await GroupDB.replace_one(
-                {"_id": ObjectId(group_id)}, GroupDB(group)
-            )
+            await GroupDB.replace_one({"_id": ObjectId(group_id)}, GroupDB(group))
         except Exception as e:
             raise HTTPException(status_code=500, detail=e.args[0])
         return GroupOut.from_mongo(group)
