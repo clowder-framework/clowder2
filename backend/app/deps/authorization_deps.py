@@ -70,7 +70,6 @@ async def get_role_by_metadata(
                 )
                 return authorization.role
         elif resource_type == "datasets":
-
             if (
                 dataset := await DatasetDB.get(PydanticObjectId(resource_id))
             ) is not None:

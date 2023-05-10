@@ -33,10 +33,10 @@ clowder_bucket = os.getenv("MINIO_BUCKET_NAME", "clowder")
 
 
 async def _build_metadata_db_obj(
-        metadata_in: MetadataIn,
-        dataset: DatasetOut,
-        user: UserOut,
-        agent: MetadataAgent = None,
+    metadata_in: MetadataIn,
+    dataset: DatasetOut,
+    user: UserOut,
+    agent: MetadataAgent = None,
 ):
     """Convenience function for converting MetadataIn to MetadataDB object."""
     content = await validate_context(
@@ -75,11 +75,11 @@ async def _build_metadata_db_obj(
 
 @router.post("/{dataset_id}/metadata", response_model=MetadataOut)
 async def add_dataset_metadata(
-        metadata_in: MetadataIn,
-        dataset_id: str,
-        user=Depends(get_current_user),
-        es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
-        allow: bool = Depends(Authorization("uploader")),
+    metadata_in: MetadataIn,
+    dataset_id: str,
+    user=Depends(get_current_user),
+    es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
+    allow: bool = Depends(Authorization("uploader")),
 ):
     """Attach new metadata to a dataset. The body must include a contents field with the JSON metadata, and either a
     context JSON-LD object, context_url, or definition (name of a metadata definition) to be valid.
@@ -135,11 +135,11 @@ async def add_dataset_metadata(
 
 @router.put("/{dataset_id}/metadata", response_model=MetadataOut)
 async def replace_dataset_metadata(
-        metadata_in: MetadataIn,
-        dataset_id: str,
-        user=Depends(get_current_user),
-        es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
-        allow: bool = Depends(Authorization("editor")),
+    metadata_in: MetadataIn,
+    dataset_id: str,
+    user=Depends(get_current_user),
+    es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
+    allow: bool = Depends(Authorization("editor")),
 ):
     """Update metadata. Any fields provided in the contents JSON will be added or updated in the metadata. If context or
     agent should be changed, use PUT.
@@ -191,11 +191,11 @@ async def replace_dataset_metadata(
 
 @router.patch("/{dataset_id}/metadata", response_model=MetadataOut)
 async def update_dataset_metadata(
-        metadata_in: MetadataPatch,
-        dataset_id: str,
-        user=Depends(get_current_user),
-        es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
-        allow: bool = Depends(Authorization("editor")),
+    metadata_in: MetadataPatch,
+    dataset_id: str,
+    user=Depends(get_current_user),
+    es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
+    allow: bool = Depends(Authorization("editor")),
 ):
     """Update metadata. Any fields provided in the contents JSON will be added or updated in the metadata. If context or
     agent should be changed, use PUT.
@@ -210,9 +210,9 @@ async def update_dataset_metadata(
         if metadata_in.metadata_id is not None:
             # If a specific metadata_id is provided, validate the patch against existing context
             if (
-                    existing := await MetadataDB.get(
-                        PydanticObjectId(metadata_in.metadata_id)
-                    )
+                existing := await MetadataDB.get(
+                    PydanticObjectId(metadata_in.metadata_id)
+                )
             ) is not None:
                 content = await validate_context(
                     metadata_in.content,
@@ -260,11 +260,11 @@ async def update_dataset_metadata(
 
 @router.get("/{dataset_id}/metadata", response_model=List[MetadataOut])
 async def get_dataset_metadata(
-        dataset_id: str,
-        listener_name: Optional[str] = Form(None),
-        listener_version: Optional[float] = Form(None),
-        user=Depends(get_current_user),
-        allow: bool = Depends(Authorization("viewer")),
+    dataset_id: str,
+    listener_name: Optional[str] = Form(None),
+    listener_version: Optional[float] = Form(None),
+    user=Depends(get_current_user),
+    allow: bool = Depends(Authorization("viewer")),
 ):
     if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
         query = [MetadataDB.resource.resource_id == ObjectId(dataset_id)]
@@ -292,11 +292,11 @@ async def get_dataset_metadata(
 
 @router.delete("/{dataset_id}/metadata", response_model=MetadataOut)
 async def delete_dataset_metadata(
-        metadata_in: MetadataDelete,
-        dataset_id: str,
-        user=Depends(get_current_user),
-        es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
-        allow: bool = Depends(Authorization("editor")),
+    metadata_in: MetadataDelete,
+    dataset_id: str,
+    user=Depends(get_current_user),
+    es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
+    allow: bool = Depends(Authorization("editor")),
 ):
     if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
         # filter by metadata_id or definition
@@ -304,9 +304,9 @@ async def delete_dataset_metadata(
         if metadata_in.metadata_id is not None:
             # If a specific metadata_id is provided, delete the matching entry
             if (
-                    existing_md := await MetadataDB.find_one(
-                        MetadataDB.metadata_id == ObjectId(metadata_in.metadata_id)
-                    )
+                existing_md := await MetadataDB.find_one(
+                    MetadataDB.metadata_id == ObjectId(metadata_in.metadata_id)
+                )
             ) is not None:
                 query.append(MetadataDB.metadata_id == metadata_in.metadata_id)
         else:
