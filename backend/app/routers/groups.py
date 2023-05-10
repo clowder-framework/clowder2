@@ -187,7 +187,7 @@ async def add_member(
                 await group.replace()
                 # Add user to all affected Authorization entries
                 # TODO this does not work
-                await AuthorizationDB.update_many(
+                await AuthorizationDB.update_all(
                     {"group_ids": ObjectId(group_id)}, {"$push": {"user_ids": username}}
                 )
             return group
@@ -204,9 +204,9 @@ async def remove_member(
 ):
     """Remove a user from a group."""
 
-    group_q = await GroupDB.find(GroupDB.id == PydanticObjectId(group_id))
+    group_q = await GroupDB.find_one(GroupDB.id == PydanticObjectId(group_id))
     if group_q is not None:
-        group = GroupDB.from_mongo(group_q)
+        group = GroupDB(**group_q.dict())
 
         # Is the user actually in the group already?
         found_user = None
@@ -221,11 +221,11 @@ async def remove_member(
         # TODO not sure if this is right
         async for auth in AuthorizationDB.find({"group_ids": ObjectId(group_id)}):
             auth.user_ids.remove(username)
-            await AuthorizationDB.replace_one({"_id": auth.id}, auth)
+            await AuthorizationDB.replace({"_id": auth.id}, auth)
 
         # Update group itself
         group.users.remove(found_user)
-        await GroupDB.replace_one({"_id": ObjectId(group_id)}, group)
+        await group.replace()
 
         return group
     raise HTTPException(status_code=404, detail=f"Group {group_id} not found")
@@ -257,7 +257,7 @@ async def update_member(
                 else:
                     updated_member = Member(user=found_user, editor=False)
                 group.users[found_user_index] = updated_member
-                await GroupDB.replace_one({"_id": ObjectId(group_id)}, group)
+                await group.replace()
             else:
                 raise HTTPException(
                     status_code=404,
