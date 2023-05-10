@@ -1,9 +1,18 @@
-from app.models.mongomodel import MongoModel
+import pymongo
+from beanie import Document
 
 
-class ConfigEntryBase(MongoModel):
+class ConfigEntryBase(Document):
     key: str
     value: str
+
+    class Settings:
+        name = "config"
+        indexes = [
+            [
+                ("key", pymongo.TEXT),
+            ],
+        ]
 
 
 class ConfigEntryDB(ConfigEntryBase):

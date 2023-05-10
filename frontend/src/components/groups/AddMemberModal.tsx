@@ -19,12 +19,13 @@ import GroupsIcon from "@mui/icons-material/Groups";
 type AddMemberModalProps = {
 	open: boolean;
 	handleClose: any;
+	groupOwner: string;
 	groupName: string;
 	groupId: string | undefined;
 };
 
 export default function AddMemberModal(props: AddMemberModalProps) {
-	const { open, handleClose, groupName, groupId } = props;
+	const { open, handleClose, groupOwner, groupName, groupId } = props;
 
 	const dispatch = useDispatch();
 	const listAllUsers = (skip: number, limit: number) =>
@@ -44,11 +45,13 @@ export default function AddMemberModal(props: AddMemberModalProps) {
 
 	useEffect(() => {
 		setOptions(
-			users.reduce((list: string[], user: UserOut) => {
-				return [...list, user.email];
-			}, [])
+			users
+				.reduce((list: string[], user: UserOut) => {
+					return [...list, user.email];
+				}, [])
+				.filter((email) => email !== groupOwner)
 		);
-	}, [users]);
+	}, [users, groupOwner]);
 
 	const handleAddButtonClick = () => {
 		groupMemberAdded(groupId, email);

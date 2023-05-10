@@ -1,3 +1,4 @@
+from beanie import PydanticObjectId
 from beanie.operators import Or
 from bson import ObjectId
 from fastapi import Depends, HTTPException
@@ -6,16 +7,15 @@ from pymongo import MongoClient
 from app.dependencies import get_db
 from app.keycloak_auth import get_current_username
 from app.models.authorization import RoleType, AuthorizationDB
-from app.models.datasets import DatasetOut
+from app.models.datasets import DatasetDB
 from app.models.files import FileOut
 from app.models.groups import GroupOut
-from app.models.metadata import MetadataOut
+from app.models.metadata import MetadataDB
 from app.models.pyobjectid import PyObjectId
 
 
 async def get_role(
     dataset_id: str,
-    db: MongoClient = Depends(get_db),
     current_user=Depends(get_current_username),
 ) -> RoleType:
     """Returns the role a specific user has on a dataset. If the user is a creator (owner), they are not listed in
@@ -28,16 +28,6 @@ async def get_role(
         ),
     )
     return authorization.role
-    # authorization = await db["authorization"].find_one(
-    #     {
-    #         "$and": [
-    #             {"dataset_id": ObjectId(dataset_id)},
-    #             {"$or": [{"creator": current_user}, {"user_ids": current_user}]},
-    #         ]
-    #     }
-    # )
-    # role = AuthorizationDB.from_mongo(authorization).role
-    # return role
 
 
 async def get_role_by_file(
@@ -55,17 +45,6 @@ async def get_role_by_file(
             ),
         )
         return authorization.role
-        # authorization = await db["authorization"].find_one(
-        #     {
-        #         "$and": [
-        #             {"dataset_id": ObjectId(file_out.dataset_id)},
-        #             {"$or": [{"creator": current_user}, {"user_ids": current_user}]},
-        #         ]
-        #     }
-        # )
-        # role = AuthorizationDB.from_mongo(authorization).role
-        # return role
-
     raise HTTPException(status_code=404, detail=f"File {file_id} not found")
 
 
@@ -74,10 +53,7 @@ async def get_role_by_metadata(
     db: MongoClient = Depends(get_db),
     current_user=Depends(get_current_username),
 ) -> RoleType:
-    if (
-        metadata := await db["metadata"].find_one({"_id": ObjectId(metadata_id)})
-    ) is not None:
-        md_out = MetadataOut.from_mongo(metadata)
+    if (md_out := await MetadataDB.get(PydanticObjectId(metadata_id))) is not None:
         resource_type = md_out.resource.collection
         resource_id = md_out.resource.resource_id
         if resource_type == "files":
@@ -93,49 +69,19 @@ async def get_role_by_metadata(
                     ),
                 )
                 return authorization.role
-                # authorization = await db["authorization"].find_one(
-                #     {
-                #         "$and": [
-                #             {"dataset_id": ObjectId(file_out.dataset_id)},
-                #             {
-                #                 "$or": [
-                #                     {"creator": current_user},
-                #                     {"user_ids": current_user},
-                #                 ]
-                #             },
-                #         ]
-                #     }
-                # )
-                # role = AuthorizationDB.from_mongo(authorization).role
-                # return role
         elif resource_type == "datasets":
+
             if (
-                dataset := await db["datasets"].find_one({"_id": ObjectId(resource_id)})
+                dataset := await DatasetDB.get(PydanticObjectId(resource_id))
             ) is not None:
-                dataset_out = DatasetOut.from_mongo(dataset)
                 authorization = await AuthorizationDB.find_one(
-                    AuthorizationDB.dataset_id == dataset_out.dataset_id,
+                    AuthorizationDB.dataset_id == dataset.id,
                     Or(
                         AuthorizationDB.creator == current_user,
                         AuthorizationDB.user_ids == current_user,
                     ),
                 )
                 return authorization.role
-                # authorization = await db["authorization"].find_one(
-                #     {
-                #         "$and": [
-                #             {"dataset_id": ObjectId(dataset_out.dataset_id)},
-                #             {
-                #                 "$or": [
-                #                     {"creator": current_user},
-                #                     {"user_ids": current_user},
-                #                 ]
-                #             },
-                #         ]
-                #     }
-                # )
-                # role = AuthorizationDB.from_mongo(authorization).role
-                # return role
 
 
 async def get_role_by_group(
@@ -182,22 +128,6 @@ class Authorization:
                 AuthorizationDB.user_ids == current_user,
             ),
         )
-        # if (
-        #         authorization_q := await db["authorization"].find_one(
-        #             {
-        #                 "$and": [
-        #                     {"dataset_id": ObjectId(dataset_id)},
-        #                     {
-        #                         "$or": [
-        #                             {"creator": current_user},
-        #                             {"user_ids": current_user},
-        #                         ]
-        #                     },
-        #                 ]
-        #             }
-        #         )
-        # ) is not None:
-        #     authorization = AuthorizationDB.from_mongo(authorization_q)
         if authorization is not None:
             if access(authorization.role, self.role):
                 return True
@@ -235,22 +165,6 @@ class FileAuthorization:
                     AuthorizationDB.user_ids == current_user,
                 ),
             )
-            # if (
-            #         authorization_q := await db["authorization"].find_one(
-            #             {
-            #                 "$and": [
-            #                     {"dataset_id": ObjectId(file_out.dataset_id)},
-            #                     {
-            #                         "$or": [
-            #                             {"creator": current_user},
-            #                             {"user_ids": current_user},
-            #                         ]
-            #                     },
-            #                 ]
-            #             }
-            #         )
-            # ) is not None:
-            #     authorization = AuthorizationDB.from_mongo(authorization_q)
             if authorization is not None:
                 if access(authorization.role, self.role):
                     return True
@@ -275,10 +189,7 @@ class MetadataAuthorization:
         db: MongoClient = Depends(get_db),
         current_user: str = Depends(get_current_username),
     ):
-        if (
-            metadata := await db["metadata"].find_one({"_id": ObjectId(metadata_id)})
-        ) is not None:
-            md_out = MetadataOut.from_mongo(metadata)
+        if (md_out := await MetadataDB.get(PydanticObjectId(metadata_id))) is not None:
             resource_type = md_out.resource.collection
             resource_id = md_out.resource.resource_id
             if resource_type == "files":
@@ -293,22 +204,6 @@ class MetadataAuthorization:
                             AuthorizationDB.user_ids == current_user,
                         ),
                     )
-                    # if (
-                    #         authorization_q := await db["authorization"].find_one(
-                    #             {
-                    #                 "$and": [
-                    #                     {"dataset_id": ObjectId(file_out.dataset_id)},
-                    #                     {
-                    #                         "$or": [
-                    #                             {"creator": current_user},
-                    #                             {"user_ids": current_user},
-                    #                         ]
-                    #                     },
-                    #                 ]
-                    #             }
-                    #         )
-                    # ) is not None:
-                    #     authorization = AuthorizationDB.from_mongo(authorization_q)
                     if authorization is not None:
                         if access(authorization.role, self.role):
                             return True
@@ -322,11 +217,9 @@ class MetadataAuthorization:
                         )
             elif resource_type == "datasets":
                 if (
-                    dataset := await db["datasets"].find_one(
-                        {"_id": ObjectId(resource_id)}
-                    )
-                ) is not None:
-                    dataset_out = DatasetOut.from_mongo(dataset)
+                    dataset_out := await DatasetDB.get(PydanticObjectId(resource_id))
+                    is not None
+                ):
                     authorization = await AuthorizationDB.find_one(
                         AuthorizationDB.dataset_id == dataset_out.dataset_id,
                         Or(
@@ -334,22 +227,6 @@ class MetadataAuthorization:
                             AuthorizationDB.user_ids == current_user,
                         ),
                     )
-                    # if (
-                    #         authorization_q := await db["authorization"].find_one(
-                    #             {
-                    #                 "$and": [
-                    #                     {"dataset_id": ObjectId(dataset_out.id)},
-                    #                     {
-                    #                         "$or": [
-                    #                             {"creator": current_user},
-                    #                             {"user_ids": current_user},
-                    #                         ]
-                    #                     },
-                    #                 ]
-                    #             }
-                    #         )
-                    # ) is not None:
-                    #     authorization = AuthorizationDB.from_mongo(authorization_q)
                     if authorization is not None:
                         if access(authorization.role, self.role):
                             return True

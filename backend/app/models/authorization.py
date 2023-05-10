@@ -35,8 +35,15 @@ class AuthorizationBase(BaseModel):
         use_enum_values = True
 
 
-class AuthorizationDB(MongoModel, AuthorizationBase):
+class Provenance:
     pass
+
+
+class AuthorizationDB(Document, AuthorizationBase, Provenance):
+    """The creator of the Authorization object should also be the creator of the dataset itself."""
+
+    class Settings:
+        name = "authorization"
 
 
 class AuthorizationOut(AuthorizationDB):
@@ -75,10 +82,3 @@ class Provenance(BaseModel):
     creator: EmailStr
     created: datetime = Field(default_factory=datetime.utcnow)
     modified: datetime = Field(default_factory=datetime.utcnow)
-
-
-class AuthorizationDB(Document, AuthorizationBase, Provenance):
-    """The creator of the Authorization object should also be the creator of the dataset itself."""
-
-    class Settings:
-        name = "authorization"

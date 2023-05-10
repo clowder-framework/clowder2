@@ -39,7 +39,8 @@ class DatasetPatch(BaseModel):
 
 
 class DatasetDB(Document, DatasetBase):
-    author: UserOut
+    id: PydanticObjectId = Field(None, alias="_id")
+    creator: UserOut
     created: datetime = Field(default_factory=datetime.utcnow)
     modified: datetime = Field(default_factory=datetime.utcnow)
     status: str = DatasetStatus.PRIVATE.name
@@ -59,7 +60,7 @@ class DatasetDB(Document, DatasetBase):
 class DatasetDBViewList(View, DatasetBase):
     # FIXME This seems to be required to return _id. Otherwise _id is null in the response.
     id: PydanticObjectId = Field(None, alias="_id")
-    author: UserOut
+    creator: UserOut
     created: datetime = Field(default_factory=datetime.utcnow)
     modified: datetime = Field(default_factory=datetime.utcnow)
     auth: List[AuthorizationDB]

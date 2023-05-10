@@ -22,7 +22,7 @@ import {
 } from "@mui/material";
 import { fetchGroups } from "../../actions/group";
 import { RootState } from "../../types/data";
-import { setDatasetGroupRole } from "../../actions/dataset";
+import { fetchDatasetRoles, setDatasetGroupRole } from "../../actions/dataset";
 import { useParams } from "react-router-dom";
 import CloseIcon from "@mui/icons-material/Close";
 
@@ -44,8 +44,14 @@ export default function ShareGroupDatasetModal(
 	const dispatch = useDispatch();
 	const listGroups = () => dispatch(fetchGroups(0, 21));
 	const groups = useSelector((state: RootState) => state.group.groups);
-	const setGroupRole = (datasetId: string, groupId: string, role: string) =>
-		dispatch(setDatasetGroupRole(datasetId, groupId, role));
+	const setGroupRole = async (
+		datasetId: string,
+		groupId: string,
+		role: string
+	) => dispatch(setDatasetGroupRole(datasetId, groupId, role));
+
+	const getRoles = (datasetId: string | undefined) =>
+		dispatch(fetchDatasetRoles(datasetId));
 
 	// component did mount
 	useEffect(() => {
@@ -60,11 +66,12 @@ export default function ShareGroupDatasetModal(
 		);
 	}, [groups]);
 
-	const onShare = () => {
-		setGroupRole(datasetId, group.id, role);
+	const onShare = async () => {
+		await setGroupRole(datasetId, group.id, role);
 		setGroup({ label: "", id: "" });
 		setRole("viewer");
 		setShowSuccessAlert(true);
+		getRoles(datasetId);
 	};
 
 	return (

@@ -1,15 +1,19 @@
-from datetime import datetime, timedelta
-from pydantic import Field, BaseModel, AnyUrl
-from typing import Optional, List, Union
+from datetime import datetime
 from enum import Enum
+from typing import Optional, List, Union
+
+import pymongo
+from beanie import Document, View, PydanticObjectId
+from pydantic import Field, BaseModel, AnyUrl
 
 from app.config import settings
+from app.models.authorization import AuthorizationDB
+from app.models.mongomodel import MongoDBRef
 from app.models.pyobjectid import PyObjectId
-from app.models.mongomodel import MongoModel, MongoDBRef
 from app.models.users import UserOut
 
 
-class Repository(MongoModel):
+class Repository(BaseModel):
     """Reference to a repository associated with Event Listener/Extractor."""
 
     repository_type: str = "git"
@@ -40,7 +44,7 @@ class ExtractorInfo(BaseModel):
 class EventListenerBase(BaseModel):
     """An Event Listener is the expanded version of v1 Extractors."""
 
-    author: str = ""
+    creator: str = ""
     name: str
     version: str = "1.0"
     description: str = ""
@@ -60,13 +64,23 @@ class LegacyEventListenerIn(ExtractorInfo):
     description: str = ""
 
 
-class EventListenerDB(EventListenerBase, MongoModel):
+class EventListenerDB(Document, EventListenerBase):
     """EventListeners have a name, version, author, description, and optionally properties where extractor_info will be saved."""
 
+    id: PydanticObjectId = Field(None, alias="_id")
     creator: Optional[UserOut] = None
     created: datetime = Field(default_factory=datetime.now)
     modified: datetime = Field(default_factory=datetime.now)
     properties: Optional[ExtractorInfo] = None
+
+    class Settings:
+        name = "listeners"
+        indexes = [
+            [
+                ("name", pymongo.TEXT),
+                ("description", pymongo.TEXT),
+            ],
+        ]
 
 
 class EventListenerOut(EventListenerDB):
@@ -97,9 +111,7 @@ class EventListenerJobStatus(str, Enum):
     RESUBMITTED = "RESUBMITTED"
 
 
-class EventListenerJob(MongoModel):
-    """This summarizes a submission to an extractor. All messages from that extraction should include this job's ID."""
-
+class EventListenerJobBase(BaseModel):
     listener_id: str
     resource_ref: MongoDBRef
     creator: UserOut
@@ -115,6 +127,20 @@ class EventListenerJob(MongoModel):
     class Config:
         # required for Enum to properly work
         use_enum_values = True
+
+
+class EventListenerJobDB(Document, EventListenerJobBase):
+    """This summarizes a submission to an extractor. All messages from that extraction should include this job's ID."""
+
+    id: PydanticObjectId = Field(None, alias="_id")
+
+    class Settings:
+        name = "listener_jobs"
+        indexes = [
+            ("resource_ref.resource_id", pymongo.TEXT),
+            ("listener_id", pymongo.TEXT),
+            ("status", pymongo.TEXT),
+        ]
 
 
 class EventListenerJobMessage(BaseModel):
@@ -146,9 +172,175 @@ class EventListenerDatasetJobMessage(BaseModel):
     job_id: str
 
 
-class EventListenerJobUpdate(MongoModel):
+class EventListenerJobUpdateBase(BaseModel):
     """This is a status update message coming from the extractors back to Clowder."""
 
+    id: PydanticObjectId = Field(None, alias="_id")
     job_id: str
     timestamp: datetime = Field(default_factory=datetime.utcnow)
     status: str
+
+
+class EventListenerJobUpdateDB(Document, EventListenerJobUpdateBase):
+    class Settings:
+        name = "listener_job_updates"
+        indexes = [
+            [
+                ("job_id", pymongo.TEXT),
+                ("status", pymongo.TEXT),
+            ],
+        ]
+
+
+class EventListenerJobViewList(View, EventListenerJobBase):
+    """Get associated resource information for each job"""
+
+    # FIXME This seems to be required to return _id. Otherwise _id is null in the response.
+    id: PydanticObjectId = Field(None, alias="_id")
+    creator: UserOut
+    created: datetime = Field(default_factory=datetime.utcnow)
+    modified: datetime = Field(default_factory=datetime.utcnow)
+    auth: List[AuthorizationDB]
+
+    class Settings:
+        source = EventListenerJobDB
+        name = "listener_jobs_view"
+        pipeline = [
+            {
+                "$facet": {
+                    "extraction_on_dataset": [
+                        {"$match": {"resource_ref.collection": {"$eq": "dataset"}}},
+                        {
+                            "$lookup": {
+                                "from": "authorization",
+                                "localField": "resource_ref.resource_id",
+                                "foreignField": "dataset_id",
+                                "as": "auth",
+                            }
+                        },
+                    ],
+                    "extraction_on_file": [
+                        {"$match": {"resource_ref.collection": {"$eq": "file"}}},
+                        {
+                            "$lookup": {
+                                "from": "files",
+                                "localField": "resource_ref.resource_id",
+                                "foreignField": "_id",
+                                "as": "file_details",
+                            }
+                        },
+                        {
+                            "$lookup": {
+                                "from": "authorization",
+                                "localField": "file_details.dataset_id",
+                                "foreignField": "dataset_id",
+                                "as": "auth",
+                            }
+                        },
+                    ],
+                }
+            },
+            {
+                "$project": {
+                    "all": {
+                        "$concatArrays": [
+                            "$extraction_on_dataset",
+                            "$extraction_on_file",
+                        ]
+                    }
+                }
+            },
+            {"$unwind": "$all"},
+            {"$replaceRoot": {"newRoot": "$all"}},
+        ]
+        # Needs fix to work https://github.com/roman-right/beanie/pull/521
+        # use_cache = True
+        # cache_expiration_time = timedelta(seconds=10)
+        # cache_capacity = 5
+
+
+class EventListenerJobUpdateViewList(View, EventListenerJobUpdateBase):
+    """Get associated resource information for each job update"""
+
+    # FIXME This seems to be required to return _id. Otherwise _id is null in the response.
+    id: PydanticObjectId = Field(None, alias="_id")
+    creator: UserOut
+    created: datetime = Field(default_factory=datetime.utcnow)
+    modified: datetime = Field(default_factory=datetime.utcnow)
+    auth: List[AuthorizationDB]
+
+    class Settings:
+        source = EventListenerJobUpdateDB
+        name = "listener_jobs_view"
+        pipeline = [
+            {
+                "$lookup": {  # Equality Match
+                    "from": "listener_jobs",
+                    "localField": "job_id",
+                    "foreignField": "_id",
+                    "as": "listener_job_details",
+                }
+            },
+            {
+                "$facet": {
+                    "extraction_on_dataset": [
+                        {
+                            "$match": {
+                                "listener_job_details.resource_ref.collection": {
+                                    "$eq": "dataset"
+                                }
+                            }
+                        },
+                        {
+                            "$lookup": {
+                                "from": "authorization",
+                                "localField": "listener_job_details.resource_ref.resource_id",
+                                "foreignField": "dataset_id",
+                                "as": "auth",
+                            }
+                        },
+                    ],
+                    "extraction_on_file": [
+                        {
+                            "$match": {
+                                "listener_job_details.resource_ref.collection": {
+                                    "$eq": "file"
+                                }
+                            }
+                        },
+                        {
+                            "$lookup": {
+                                "from": "files",
+                                "localField": "listener_job_details.resource_ref.resource_id",
+                                "foreignField": "_id",
+                                "as": "file_details",
+                            }
+                        },
+                        {
+                            "$lookup": {
+                                "from": "authorization",
+                                "localField": "file_details.dataset_id",
+                                "foreignField": "dataset_id",
+                                "as": "auth",
+                            }
+                        },
+                    ],
+                }
+            },
+            {
+                "$project": {
+                    "all": {
+                        "$concatArrays": [
+                            "$extraction_on_dataset",
+                            "$extraction_on_file",
+                        ]
+                    }
+                }
+            },
+            {"$unwind": "$all"},
+            {"$replaceRoot": {"newRoot": "$all"}},
+        ]
+        # Needs fix to work https://github.com/roman-right/beanie/pull/521
+        # use_cache = True
+        # cache_expiration_time = timedelta(seconds=10)
+        # cache_capacity = 5

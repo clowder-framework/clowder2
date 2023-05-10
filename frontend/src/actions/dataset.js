@@ -75,10 +75,7 @@ export function removeDatasetGroupRole(datasetId, groupId) {
 			})
 			.catch((reason) => {
 				dispatch(
-					handleErrors(
-						reason,
-						removeDatasetGroupRole(datasetId, groupId)
-					)
+					handleErrors(reason, removeDatasetGroupRole(datasetId, groupId))
 				);
 			});
 	};
@@ -100,10 +97,7 @@ export function removeDatasetUserRole(datasetId, username) {
 			})
 			.catch((reason) => {
 				dispatch(
-					handleErrors(
-						reason,
-						removeDatasetUserRole(datasetId, username)
-					)
+					handleErrors(reason, removeDatasetUserRole(datasetId, username))
 				);
 			});
 	};
