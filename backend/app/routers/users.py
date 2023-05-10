@@ -105,17 +105,17 @@ async def get_profile(
     username=Depends(get_current_username),
     db: MongoClient = Depends(dependencies.get_db),
 ):
-    result = await UserDB.find_one(UserDB.email == username)
-    if (user := await db["users"].find_one({"email": username})) is not None:
-        return UserOut.from_mongo(user)
+    user = await UserDB.find_one(UserDB.email == username)
+    if user is not None:
+        return UserOut(**user.dict())
     raise HTTPException(status_code=404, detail=f"User {username} not found")
 
 
 @router.get("/{user_id}", response_model=UserOut)
 async def get_user(user_id: str, db: MongoClient = Depends(dependencies.get_db)):
-    user = await UserDB.get(PydanticObjectId(user_id))
+    user = await UserDB.get(user_id)
     if user is not None:
-        return UserOut.from_mongo(**user.dict())
+        return UserOut(**user.dict())
     raise HTTPException(status_code=404, detail=f"User {user_id} not found")
 
 
@@ -125,5 +125,5 @@ async def get_user_by_name(
 ):
     user = UserDB.find_one(UserDB.email == username)
     if user is not None:
-        return UserOut.from_mongo(**user.dict())
+        return UserOut(**user.dict())
     raise HTTPException(status_code=404, detail=f"User {username} not found")

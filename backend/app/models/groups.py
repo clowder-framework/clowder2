@@ -32,6 +32,9 @@ class GroupPatch(BaseModel):
 class GroupDB(Document, GroupBase, Provenance):
     views: int = 0
 
+    class Settings:
+        name = "groups"
+
 
 class GroupOut(GroupDB):
     pass

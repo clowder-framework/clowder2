@@ -28,8 +28,7 @@ async def save_group(
     if user_member not in group_db.users:
         group_db.users.append(user_member)
     new_group = await GroupDB.insert_one(group_db)
-    group_out = GroupOut.from_mongo(new_group)
-    return group_out
+    return GroupOut(**new_group.dict())
 
 
 @router.get("", response_model=List[GroupOut])
@@ -102,9 +101,9 @@ async def get_group(
     db: MongoClient = Depends(dependencies.get_db),
     allow: bool = Depends(GroupAuthorization("viewer")),
 ):
-    group = await GroupDB.find(GroupDB.id == PydanticObjectId(group_id))
+    group = await GroupDB.find_one(GroupDB.id == PydanticObjectId(group_id))
     if group is not None:
-        return GroupOut.from_mongo(group)
+        return GroupOut(**group.dict())
     raise HTTPException(status_code=404, detail=f"Group {group_id} not found")
 
 
@@ -137,7 +136,7 @@ async def edit_group(
             await GroupDB.replace_one({"_id": ObjectId(group_id)}, GroupDB(group))
         except Exception as e:
             raise HTTPException(status_code=500, detail=e.args[0])
-        return GroupOut.from_mongo(group)
+        return GroupOut(**group.dict())
     raise HTTPException(status_code=404, detail=f"Group {group_id} not found")
 
 
@@ -149,8 +148,8 @@ async def delete_group(
 ):
     group_q = await GroupDB.find(GroupDB.id == PydanticObjectId(group_id))
     if group_q is not None:
-        await GroupDB.delete_one({"_id": ObjectId(group_id)})
-        return GroupDB.from_mongo(group_q)
+        await GroupDB.delete_one(group_id)
+        return GroupOut(**group_q.dict())
     else:
         raise HTTPException(status_code=404, detail=f"Dataset {group_id} not found")
 
@@ -164,11 +163,13 @@ async def add_member(
     allow: bool = Depends(GroupAuthorization("editor")),
 ):
     """Add a new user to a group."""
-    if (user_q := await UserDB.find_one({"email": username})) is not None:
-        new_member = Member(user=UserOut.from_mongo(user_q))
-        group_q = await GroupDB.find(GroupDB.id == PydanticObjectId(group_id))
+    user_q = await UserDB.find_one(UserDB.email == username)
+    if user_q is not None:
+        user_out = UserOut(**user_q.dict())
+        new_member = Member(user=user_out)
+        group_q = await GroupDB.find_one(GroupDB.id == PydanticObjectId(group_id))
         if group_q is not None:
-            group = GroupDB.from_mongo(group_q)
+            group = GroupDB(**group_q.dict())
             found_already = False
             for u in group.users:
                 if u.user.email == username:
@@ -183,8 +184,9 @@ async def add_member(
                 else:
                     new_member.editor = False
                 group.users.append(new_member)
-                await GroupDB.replace_one({"_id": ObjectId(group_id)}, group)
+                await group.replace()
                 # Add user to all affected Authorization entries
+                # TODO this does not work
                 await AuthorizationDB.update_many(
                     {"group_ids": ObjectId(group_id)}, {"$push": {"user_ids": username}}
                 )
@@ -241,7 +243,7 @@ async def update_member(
     if (user_q := await UserDB.find_one({"email": username})) is not None:
         group_q = await GroupDB.find(GroupDB.id == PydanticObjectId(group_id))
         if group_q is not None:
-            group = GroupDB.from_mongo(group_q)
+            group = GroupDB(**group_q.dict())
             found_user = None
             found_user_index = -1
             for i, u in enumerate(group.users):

@@ -9,7 +9,7 @@ from app.keycloak_auth import get_current_username
 from app.models.authorization import RoleType, AuthorizationDB
 from app.models.datasets import DatasetDB
 from app.models.files import FileOut
-from app.models.groups import GroupOut
+from app.models.groups import GroupOut, GroupDB
 from app.models.metadata import MetadataDB
 from app.models.pyobjectid import PyObjectId
 
@@ -89,8 +89,8 @@ async def get_role_by_group(
     db: MongoClient = Depends(get_db),
     current_user=Depends(get_current_username),
 ) -> RoleType:
-    if (group := await db["groups"].find_one({"_id": ObjectId(group_id)})) is not None:
-        group_out = GroupOut.from_mongo(group)
+    if (group := await GroupDB.get(group_id)) is not None:
+        group_out = GroupOut(**group.dict())
         if group_out.creator == current_user:
             # Creator can do everything
             return RoleType.OWNER
@@ -252,10 +252,9 @@ class GroupAuthorization:
         db: MongoClient = Depends(get_db),
         current_user: str = Depends(get_current_username),
     ):
-        if (
-            group_q := await db["groups"].find_one({"_id": ObjectId(group_id)})
-        ) is not None:
-            group = GroupOut.from_mongo(group_q)
+        group_q = await GroupDB.get(group_id)
+        if group_q is not None:
+            group = GroupOut(**group_q.dict())
             if group.creator == current_user:
                 # Creator can do everything
                 return True

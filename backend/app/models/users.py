@@ -35,6 +35,9 @@ class UserDB(Document, UserBase):
     def verify_password(self, password):
         return pwd_context.verify(password, self.hashed_password)
 
+    class Settings:
+        name = "users"
+
 
 class UserOut(UserBase):
     first_name: str
