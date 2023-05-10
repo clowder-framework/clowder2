@@ -12,6 +12,13 @@ from app.keycloak_auth import get_current_username
 from app.models.authorization import AuthorizationDB
 from app.models.datasets import DatasetDB, DatasetDBViewList
 from app.models.feeds import FeedDB
+from app.models.listeners import (
+    EventListenerDB,
+    EventListenerJobDB,
+    EventListenerJobUpdateDB,
+    EventListenerJobViewList,
+    EventListenerJobUpdateViewList,
+)
 from app.models.metadata import MetadataDB, MetadataDefinitionDB
 from app.routers import (
     folders,
@@ -175,6 +182,11 @@ async def startup_beanie():
             MetadataDB,
             MetadataDefinitionDB,
             FeedDB,
+            EventListenerDB,
+            EventListenerJobDB,
+            EventListenerJobUpdateDB,
+            EventListenerJobViewList,
+            EventListenerJobUpdateViewList,
         ],
         recreate_views=True,
     )

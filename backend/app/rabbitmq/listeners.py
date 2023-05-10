@@ -15,7 +15,7 @@ from app.models.files import FileOut
 from app.models.datasets import DatasetOut
 from app.models.users import UserOut
 from app.models.listeners import (
-    EventListenerJob,
+    EventListenerJobDB,
     EventListenerDB,
     EventListenerJobMessage,
     EventListenerDatasetJobMessage,

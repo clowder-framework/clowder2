@@ -25,7 +25,7 @@ from app.keycloak_auth import get_current_user, get_token
 from app.models.files import FileOut, FileVersion, FileContentType, FileDB
 from app.models.metadata import MetadataDB
 from app.models.users import UserOut
-from app.rabbitmq.listeners import submit_file_job, EventListenerJob
+from app.rabbitmq.listeners import submit_file_job, EventListenerJobDB
 from app.routers.feeds import check_feed_listeners
 from app.search.connect import (
     insert_record,
@@ -57,9 +57,9 @@ async def _resubmit_file_extractors(
 
     """
     resubmitted_jobs = []
-    jobs = await EventListenerJob.find(
-        EventListenerJob.resource_ref.resource_id == ObjectId(file.id),
-        EventListenerJob.resource_ref.version == file.version_num - 1,
+    jobs = await EventListenerJobDB.find(
+        EventListenerJobDB.resource_ref.resource_id == ObjectId(file.id),
+        EventListenerJobDB.resource_ref.version == file.version_num - 1,
     )
     for job in jobs:
         resubmitted_job = {"listener_id": job.listener_id, "parameters": job.parameters}

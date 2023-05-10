@@ -9,6 +9,7 @@ from collections.abc import Mapping, Iterable
 from typing import List, Optional, Union
 
 from beanie import PydanticObjectId
+from beanie.operators import Or
 from bson import ObjectId
 from bson import json_util
 from elasticsearch import Elasticsearch
@@ -243,12 +244,10 @@ async def get_datasets(
         ).to_list()
     else:
         return await DatasetDBViewList.find(
-            {
-                "$or": [
-                    {"author.email": user_id},
-                    {"auth": {"$elemMatch": {"user_ids": user_id}}},
-                ]
-            },
+            Or(
+                DatasetDBViewList.creator.email == user_id,
+                DatasetDBViewList.auth.user_ids == user_id,
+            ),
             sort=("created", DESCENDING),
             skip=skip,
             limit=limit,
@@ -372,7 +371,7 @@ async def edit_dataset(
 async def patch_dataset(
     dataset_id: str,
     dataset_info: DatasetPatch,
-    user=Depends(get_current_user()),
+    user=Depends(get_current_user),
     es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
     allow: bool = Depends(Authorization("editor")),
 ):

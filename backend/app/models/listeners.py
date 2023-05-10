@@ -7,9 +7,9 @@ from beanie import Document, View, PydanticObjectId
 from pydantic import Field, BaseModel, AnyUrl
 
 from app.config import settings
+from app.models.authorization import AuthorizationDB
 from app.models.mongomodel import MongoDBRef
 from app.models.pyobjectid import PyObjectId
-from app.models.authorization import AuthorizationDB
 from app.models.users import UserOut
 
 
@@ -67,6 +67,7 @@ class LegacyEventListenerIn(ExtractorInfo):
 class EventListenerDB(Document, EventListenerBase):
     """EventListeners have a name, version, author, description, and optionally properties where extractor_info will be saved."""
 
+    id: PydanticObjectId = Field(None, alias="_id")
     creator: Optional[UserOut] = None
     created: datetime = Field(default_factory=datetime.now)
     modified: datetime = Field(default_factory=datetime.now)
@@ -110,10 +111,7 @@ class EventListenerJobStatus(str, Enum):
     RESUBMITTED = "RESUBMITTED"
 
 
-class EventListenerJob(Document):
-    """This summarizes a submission to an extractor. All messages from that extraction should include this job's ID."""
-
-    id: PydanticObjectId = Field(None, alias="_id")
+class EventListenerJobBase(BaseModel):
     listener_id: str
     resource_ref: MongoDBRef
     creator: UserOut
@@ -130,14 +128,18 @@ class EventListenerJob(Document):
         # required for Enum to properly work
         use_enum_values = True
 
+
+class EventListenerJobDB(Document, EventListenerJobBase):
+    """This summarizes a submission to an extractor. All messages from that extraction should include this job's ID."""
+
+    id: PydanticObjectId = Field(None, alias="_id")
+
     class Settings:
         name = "listener_jobs"
         indexes = [
-            [
-                ("resource_ref.resource_id", PyObjectId),
-                ("listener_id", pymongo.TEXT),
-                ("status", pymongo.TEXT),
-            ],
+            ("resource_ref.resource_id", pymongo.TEXT),
+            ("listener_id", pymongo.TEXT),
+            ("status", pymongo.TEXT),
         ]
 
 
@@ -170,7 +172,7 @@ class EventListenerDatasetJobMessage(BaseModel):
     job_id: str
 
 
-class EventListenerJobUpdate(Document):
+class EventListenerJobUpdateBase(BaseModel):
     """This is a status update message coming from the extractors back to Clowder."""
 
     id: PydanticObjectId = Field(None, alias="_id")
@@ -178,6 +180,8 @@ class EventListenerJobUpdate(Document):
     timestamp: datetime = Field(default_factory=datetime.utcnow)
     status: str
 
+
+class EventListenerJobUpdateDB(Document, EventListenerJobUpdateBase):
     class Settings:
         name = "listener_job_updates"
         indexes = [
@@ -188,7 +192,7 @@ class EventListenerJobUpdate(Document):
         ]
 
 
-class EventListenerJobViewList(View, EventListenerJob):
+class EventListenerJobViewList(View, EventListenerJobBase):
     """Get associated resource information for each job"""
 
     # FIXME This seems to be required to return _id. Otherwise _id is null in the response.
@@ -199,7 +203,7 @@ class EventListenerJobViewList(View, EventListenerJob):
     auth: List[AuthorizationDB]
 
     class Settings:
-        source = EventListenerJob
+        source = EventListenerJobDB
         name = "listener_jobs_view"
         pipeline = [
             {
@@ -255,7 +259,7 @@ class EventListenerJobViewList(View, EventListenerJob):
         # cache_capacity = 5
 
 
-class EventListenerJobUpdateViewList(View, EventListenerJob):
+class EventListenerJobUpdateViewList(View, EventListenerJobUpdateBase):
     """Get associated resource information for each job update"""
 
     # FIXME This seems to be required to return _id. Otherwise _id is null in the response.
@@ -266,78 +270,76 @@ class EventListenerJobUpdateViewList(View, EventListenerJob):
     auth: List[AuthorizationDB]
 
     class Settings:
-        source = EventListenerJob
+        source = EventListenerJobUpdateDB
         name = "listener_jobs_view"
-        pipeline = (
-            [
-                {
-                    "$lookup": {  # Equality Match
-                        "from": "listener_jobs",
-                        "localField": "job_id",
-                        "foreignField": "_id",
-                        "as": "listener_job_details",
+        pipeline = [
+            {
+                "$lookup": {  # Equality Match
+                    "from": "listener_jobs",
+                    "localField": "job_id",
+                    "foreignField": "_id",
+                    "as": "listener_job_details",
+                }
+            },
+            {
+                "$facet": {
+                    "extraction_on_dataset": [
+                        {
+                            "$match": {
+                                "listener_job_details.resource_ref.collection": {
+                                    "$eq": "dataset"
+                                }
+                            }
+                        },
+                        {
+                            "$lookup": {
+                                "from": "authorization",
+                                "localField": "listener_job_details.resource_ref.resource_id",
+                                "foreignField": "dataset_id",
+                                "as": "auth",
+                            }
+                        },
+                    ],
+                    "extraction_on_file": [
+                        {
+                            "$match": {
+                                "listener_job_details.resource_ref.collection": {
+                                    "$eq": "file"
+                                }
+                            }
+                        },
+                        {
+                            "$lookup": {
+                                "from": "files",
+                                "localField": "listener_job_details.resource_ref.resource_id",
+                                "foreignField": "_id",
+                                "as": "file_details",
+                            }
+                        },
+                        {
+                            "$lookup": {
+                                "from": "authorization",
+                                "localField": "file_details.dataset_id",
+                                "foreignField": "dataset_id",
+                                "as": "auth",
+                            }
+                        },
+                    ],
+                }
+            },
+            {
+                "$project": {
+                    "all": {
+                        "$concatArrays": [
+                            "$extraction_on_dataset",
+                            "$extraction_on_file",
+                        ]
                     }
-                },
-                {
-                    "$facet": {
-                        "extraction_on_dataset": [
-                            {
-                                "$match": {
-                                    "listener_job_details.resource_ref.collection": {
-                                        "$eq": "dataset"
-                                    }
-                                }
-                            },
-                            {
-                                "$lookup": {
-                                    "from": "authorization",
-                                    "localField": "listener_job_details.resource_ref.resource_id",
-                                    "foreignField": "dataset_id",
-                                    "as": "auth",
-                                }
-                            },
-                        ],
-                        "extraction_on_file": [
-                            {
-                                "$match": {
-                                    "listener_job_details.resource_ref.collection": {
-                                        "$eq": "file"
-                                    }
-                                }
-                            },
-                            {
-                                "$lookup": {
-                                    "from": "files",
-                                    "localField": "listener_job_details.resource_ref.resource_id",
-                                    "foreignField": "_id",
-                                    "as": "file_details",
-                                }
-                            },
-                            {
-                                "$lookup": {
-                                    "from": "authorization",
-                                    "localField": "file_details.dataset_id",
-                                    "foreignField": "dataset_id",
-                                    "as": "auth",
-                                }
-                            },
-                        ],
-                    }
-                },
-                {
-                    "$project": {
-                        "all": {
-                            "$concatArrays": [
-                                "$extraction_on_dataset",
-                                "$extraction_on_file",
-                            ]
-                        }
-                    }
-                },
-                {"$unwind": "$all"},
-                {"$replaceRoot": {"newRoot": "$all"}},
-            ],
-        )
+                }
+            },
+            {"$unwind": "$all"},
+            {"$replaceRoot": {"newRoot": "$all"}},
+        ]
         # Needs fix to work https://github.com/roman-right/beanie/pull/521
         # use_cache = True
         # cache_expiration_time = timedelta(seconds=10)

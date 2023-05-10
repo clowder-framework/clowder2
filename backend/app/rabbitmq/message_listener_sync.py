@@ -12,9 +12,9 @@ from bson import ObjectId
 from app.config import settings
 from app.models.config import ConfigEntryDB, ConfigEntryOut
 from app.models.listeners import (
-    EventListenerJob,
+    EventListenerJobDB,
     EventListenerDB,
-    EventListenerJobUpdate,
+    EventListenerJobUpdateDB,
     EventListenerJobStatus,
 )
 
@@ -123,7 +123,7 @@ def callback(ch, method, properties, body):
         job.save()
 
         # Add latest message to the job updates
-        event_msg = EventListenerJobUpdate(
+        event_msg = EventListenerJobUpdateDB(
             job_id=job_id, status=cleaned_msg, timestamp=timestamp
         )
         event_msg.save()
