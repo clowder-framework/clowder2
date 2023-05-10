@@ -11,11 +11,9 @@ from app.config import settings
 from app.keycloak_auth import get_current_username
 from app.models.authorization import AuthorizationDB
 from app.models.datasets import DatasetDB, DatasetDBViewList
-<<<<<<< HEAD
+from app.models.feeds import FeedDB
 from app.models.files import FileDB, FileVersionDB
 from app.models.folders import FolderDB
-=======
-from app.models.feeds import FeedDB
 from app.models.listeners import (
     EventListenerDB,
     EventListenerJobDB,
@@ -23,7 +21,6 @@ from app.models.listeners import (
     EventListenerJobViewList,
     EventListenerJobUpdateViewList,
 )
->>>>>>> beanie
 from app.models.metadata import MetadataDB, MetadataDefinitionDB
 from app.routers import (
     folders,
