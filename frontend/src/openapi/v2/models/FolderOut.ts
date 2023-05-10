@@ -22,7 +22,7 @@ export type FolderOut = {
     name?: string;
     dataset_id: string;
     parent_folder?: string;
-    author: UserOut;
+    creator: UserOut;
     created?: string;
     modified?: string;
 }

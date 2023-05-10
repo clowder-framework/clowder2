@@ -21,7 +21,7 @@ export type DatasetOut = {
     name?: string;
     description?: string;
     _id?: string;
-    author: UserOut;
+    creator: UserOut;
     created?: string;
     modified?: string;
     status?: string;

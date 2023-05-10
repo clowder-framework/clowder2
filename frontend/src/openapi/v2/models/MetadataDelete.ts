@@ -7,7 +7,6 @@ import type { ExtractorInfo } from './ExtractorInfo';
 import type { LegacyEventListenerIn } from './LegacyEventListenerIn';
 
 export type MetadataDelete = {
-    id?: string;
     metadata_id?: string;
     definition?: string;
     listener?: EventListenerIn;
