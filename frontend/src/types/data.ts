@@ -1,7 +1,7 @@
 import {
 	AuthorizationBase,
 	DatasetRoles,
-	EventListenerJob,
+	EventListenerJobDB,
 	FileOut as FileSummary,
 	FileVersion,
 	FolderOut,
@@ -16,7 +16,7 @@ import {
 export interface Dataset {
 	name: string;
 	description: string;
-	_id:string;
+	_id: string;
 	author: Author;
 	created: string | Date;
 	modified: string | Date;
@@ -158,8 +158,8 @@ export interface ListenerState {
 	listeners: Listener[];
 	categories: string[];
 	labels: string[];
-	jobs: EventListenerJob[];
-	currJobUpdates: EventListenerJob[];
+	jobs: EventListenerJobDB[];
+	currJobUpdates: EventListenerJobDB[];
 	currJobSummary: JobSummary[];
 	currJobId: string;
 }

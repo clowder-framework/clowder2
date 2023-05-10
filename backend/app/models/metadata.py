@@ -5,8 +5,7 @@ from typing import Optional, List, Union
 from beanie import Document, PydanticObjectId
 from elasticsearch import Elasticsearch
 from fastapi import HTTPException
-from pydantic import Field, validator, AnyUrl
-from pymongo import MongoClient
+from pydantic import Field, validator, AnyUrl, BaseModel
 
 from app.models.listeners import (
     EventListenerIn,
@@ -14,7 +13,7 @@ from app.models.listeners import (
     EventListenerOut,
     ExtractorInfo,
 )
-from app.models.mongomodel import MongoModel, MongoDBRef
+from app.models.mongomodel import MongoDBRef
 from app.models.users import UserOut
 from app.search.connect import update_record
 
@@ -36,16 +35,16 @@ FIELD_TYPES = {
 }  # JSON schema can handle this for us?
 
 
-class MetadataConfig(MongoModel):
+class MetadataConfig(BaseModel):
     type: str = "str"  # must be one of FIELD_TYPES
 
 
-class MetadataEnumConfig(MongoModel):
+class MetadataEnumConfig(BaseModel):
     type: str = "enum"
     options: List[str]  # a list of options must be provided if type is enum
 
 
-class MetadataField(MongoModel):
+class MetadataField(BaseModel):
     name: str
     list: bool = False  # whether a list[type] is acceptable
     widgetType: str = "TextField"  # match material ui widget name?
@@ -54,7 +53,7 @@ class MetadataField(MongoModel):
     required: bool = False  # Whether the definition requires this field
 
 
-class MetadataDefinitionBase(MongoModel):
+class MetadataDefinitionBase(BaseModel):
     """This describes a metadata object with a short name and description, predefined set of fields, and context.
     These provide a shorthand for use by listeners as well as a source for building GUI widgets to add new entries.
 
@@ -96,14 +95,11 @@ class MetadataDefinitionBase(MongoModel):
     ]  # https://json-ld.org/spec/latest/json-ld/#the-context
     context_url: Optional[str]  # single URL applying to contents
     fields: List[MetadataField]
+
     # TODO: Space-level requirements?
 
-
-class RequiredMetadata(MongoModel):
-    # TODO: Endpoints to get lists of what is required, and update these flags
-    definition_name: str
-    required_on_files: bool
-    required_on_datasets: bool
+    class Settings:
+        name = "metadata_definitions"
 
 
 class MetadataDefinitionIn(MetadataDefinitionBase):
@@ -170,7 +166,7 @@ def validate_definition(content: dict, metadata_def: MetadataDefinitionOut):
     return content
 
 
-class MetadataAgent(MongoModel):
+class MetadataAgent(BaseModel):
     """Describes the user who created a piece of metadata. If listener is provided, user refers to the user who
     triggered the job."""
 
@@ -178,7 +174,7 @@ class MetadataAgent(MongoModel):
     listener: Optional[EventListenerOut]
 
 
-class MetadataBase(MongoModel):
+class MetadataBase(BaseModel):
     context: Optional[
         List[Union[dict, AnyUrl]]
     ]  # https://json-ld.org/spec/latest/json-ld/#the-context
@@ -208,6 +204,9 @@ class MetadataBase(MongoModel):
             raise ValueError("Problem with definition.")
         return v
 
+    class Settings:
+        name = "metadata"
+
 
 class MetadataIn(MetadataBase):
     file_version: Optional[int]
@@ -220,23 +219,7 @@ class MetadataPatch(MetadataIn):
     metadata_id: Optional[str]  # specific metadata ID we are patching
 
 
-# class MetadataRes():
-#     pass
-#
-#
-# class MetadataReqPatch():
-#     pass
-#
-#
-# class MetadataResPatch(MetadataRes):
-#     pass
-#
-#
-# class MetadataResDelete(MetadataRes):
-#     pass
-
-
-class MetadataDelete(MongoModel):
+class MetadataDelete(BaseModel):
     metadata_id: Optional[str]  # specific metadata ID we are deleting
     definition: Optional[str]
     listener: Optional[EventListenerIn]
@@ -269,11 +252,10 @@ class MetadataOut(MetadataDB):
 
 
 async def validate_context(
-    db: MongoClient,
-    content: dict,
-    definition: Optional[str] = None,
-    context_url: Optional[str] = None,
-    context: Optional[List[Union[dict, AnyUrl]]] = None,
+        content: dict,
+        definition: Optional[str] = None,
+        context_url: Optional[str] = None,
+        context: Optional[List[Union[dict, AnyUrl]]] = None,
 ):
     """Convenience function for making sure incoming metadata has valid definitions or resolvable context.
 
@@ -291,9 +273,10 @@ async def validate_context(
         pass
     if definition is not None:
         if (
-            md_def := await db["metadata.definitions"].find_one({"name": definition})
+                md_def := await MetadataDefinitionDB.find_one(
+                    MetadataDefinitionDB.name == definition
+                )
         ) is not None:
-            md_def = MetadataDefinitionOut(**md_def)
             content = validate_definition(content, md_def)
         else:
             raise HTTPException(
@@ -313,15 +296,12 @@ def deep_update(orig: dict, new: dict):
     return orig
 
 
-async def patch_metadata(
-    metadata: MetadataDB, new_entries: dict, db: MongoClient, es: Elasticsearch
-):
+async def patch_metadata(metadata: MetadataDB, new_entries: dict, es: Elasticsearch):
     """Convenience function for updating original metadata contents with new entries."""
     try:
         # TODO: For list-type definitions, should we append to list instead?
         updated_content = deep_update(metadata.content, new_entries)
         updated_content = await validate_context(
-            db,
             updated_content,
             metadata.definition,
             metadata.context_url,

@@ -21,7 +21,7 @@ class FolderDB(Document, FolderBase):
     id: PydanticObjectId = Field(None, alias="_id")
     dataset_id: PyObjectId
     parent_folder: Optional[PyObjectId]
-    author: UserOut
+    creator: UserOut
     created: datetime = Field(default_factory=datetime.utcnow)
     modified: datetime = Field(default_factory=datetime.utcnow)
 

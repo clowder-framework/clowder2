@@ -56,7 +56,7 @@ export function UserAndRoleTableEntry(props: UserAndRoleTableEntryProps) {
 		role: string | undefined
 	) => dispatch(setDatasetUserRole(dataset_id, username, role));
 
-	const removeUserRole = (
+	const removeUserRole = async (
 		dataset_id: string | undefined,
 		username: string | undefined
 	) => dispatch(removeDatasetUserRole(dataset_id, username));

@@ -32,7 +32,7 @@ from app.models.files import (
 )
 from app.models.metadata import MetadataDB
 from app.models.users import UserOut
-from app.rabbitmq.listeners import submit_file_job
+from app.rabbitmq.listeners import submit_file_job, EventListenerJobDB
 from app.routers.feeds import check_feed_listeners
 from app.search.connect import (
     insert_record,
@@ -63,32 +63,21 @@ async def _resubmit_file_extractors(
         rabbitmq_client: Rabbitmq Client
 
     """
-    previous_version = file.version_num - 1
-    query = {
-        "resource_ref.resource_id": ObjectId(file.id),
-        "resource_ref.version": previous_version,
-    }
-    listeners_resubmitted = []
-    listeners_resubitted_failed = []
     resubmitted_jobs = []
-    async for job in db["listener_jobs"].find(query):
-        current_job = job
-        job_listener_queue = job["listener_id"]
-        job_parameters = job["parameters"]
-        resubmitted_job = {
-            "listener_id": job_listener_queue,
-            "parameters": job_parameters,
-        }
+    jobs = await EventListenerJobDB.find(
+        EventListenerJobDB.resource_ref.resource_id == ObjectId(file.id),
+        EventListenerJobDB.resource_ref.version == file.version_num - 1,
+    )
+    for job in jobs:
+        resubmitted_job = {"listener_id": job.listener_id, "parameters": job.parameters}
         try:
-            routing_key = job_listener_queue
+            routing_key = job.listener_id
             access_token = credentials.credentials
             await submit_file_job(
                 file,
-                job_listener_queue,
                 routing_key,
-                job_parameters,
+                job.parameters,
                 user,
-                db,
                 rabbitmq_client,
                 access_token,
             )
@@ -97,7 +86,6 @@ async def _resubmit_file_extractors(
         except Exception as e:
             resubmitted_job["status"] = "error"
             resubmitted_jobs.append(resubmitted_job)
-
     return resubmitted_jobs
 
 
@@ -178,7 +166,7 @@ async def add_file_entry(
     insert_record(es, "file", doc, file_db.id)
 
     # Submit file job to any qualifying feeds
-    await check_feed_listeners(es, file_out, user, db, rabbitmq_client, token)
+    await check_feed_listeners(es, file_out, user, rabbitmq_client, token)
 
 
 # TODO: Move this to MongoDB middle layer
@@ -284,10 +272,10 @@ async def update_file(
         )
 
         # updating metadata in elasticsearch
-        metadata = await MetadataDB.find_one(
+        metadata = MetadataDB.find_one(
             MetadataDB.resource.resource_id == ObjectId(updated_file.id)
         )
-        if metadata is not None:
+        if metadata:
             doc = {
                 "doc": {
                     "name": updated_file.name,
@@ -297,7 +285,7 @@ async def update_file(
                     "bytes": updated_file.bytes,
                 }
             }
-            update_record(es, "metadata", doc, str(metadata["_id"]))
+            update_record(es, "metadata", doc, str(metadata.id))
         return updated_file
     else:
         raise HTTPException(status_code=404, detail=f"File {file_id} not found")
@@ -404,7 +392,6 @@ async def get_file_versions(
 
 
 # submits file to extractor
-# can handle parameters pass in as key/values in info
 @router.post("/{file_id}/extract")
 async def get_file_extract(
         file_id: str,
@@ -428,22 +415,16 @@ async def get_file_extract(
         # backward compatibility? Get extractor info from request (Clowder v1)
         queue = extractorName
         routing_key = queue
-
         if parameters is None:
             parameters = {}
-
-        job_id = await submit_file_job(
+        return await submit_file_job(
             file_out,
-            queue,
             routing_key,
             parameters,
             user,
-            db,
             rabbitmq_client,
             access_token,
         )
-
-        return job_id
     else:
         raise HTTPException(status_code=404, detail=f"File {file_id} not found")
 

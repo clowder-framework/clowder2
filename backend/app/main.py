@@ -11,8 +11,19 @@ from app.config import settings
 from app.keycloak_auth import get_current_username
 from app.models.authorization import AuthorizationDB
 from app.models.datasets import DatasetDB, DatasetDBViewList
+<<<<<<< HEAD
 from app.models.files import FileDB, FileVersionDB
 from app.models.folders import FolderDB
+=======
+from app.models.feeds import FeedDB
+from app.models.listeners import (
+    EventListenerDB,
+    EventListenerJobDB,
+    EventListenerJobUpdateDB,
+    EventListenerJobViewList,
+    EventListenerJobUpdateViewList,
+)
+>>>>>>> beanie
 from app.models.metadata import MetadataDB, MetadataDefinitionDB
 from app.routers import (
     folders,
@@ -176,7 +187,13 @@ async def startup_beanie():
             MetadataDefinitionDB,
             FolderDB,
             FileDB,
-            FileVersionDB
+            FileVersionDB,
+            FeedDB,
+            EventListenerDB,
+            EventListenerJobDB,
+            EventListenerJobUpdateDB,
+            EventListenerJobViewList,
+            EventListenerJobUpdateViewList,
         ],
         recreate_views=True,
     )
