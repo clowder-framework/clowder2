@@ -1,5 +1,6 @@
-from typing import Optional
 from datetime import datetime
+from typing import Optional
+
 from passlib.context import CryptContext
 from pydantic import Field, EmailStr, BaseModel
 from pymongo import MongoClient
@@ -56,10 +57,6 @@ class UserAPIKeyOut(MongoModel):
     user: EmailStr
     created: datetime = Field(default_factory=datetime.utcnow)
     expires: Optional[datetime] = None
-
-class UserAndRole(BaseModel):
-    user_id: str
-    roleType: str
 
 
 async def get_user_out(user_id: str, db: MongoClient) -> UserOut:

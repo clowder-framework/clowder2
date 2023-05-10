@@ -15,7 +15,8 @@ from app.models.files import FileOut
 from app.models.datasets import DatasetOut
 from app.models.users import UserOut
 from app.models.listeners import (
-    EventListenerJob,
+    EventListenerJobDB,
+    EventListenerDB,
     EventListenerJobMessage,
     EventListenerDatasetJobMessage,
 )
@@ -56,18 +57,14 @@ async def create_reply_queue():
 
 async def submit_file_job(
     file_out: FileOut,
-    queue: str,
     routing_key: str,
     parameters: dict,
     user: UserOut,
-    db: MongoClient,
     rabbitmq_client: BlockingChannel,
-    token: str,
+    token: str = Depends(get_token),
 ):
-    # TODO check if extractor is registered
-
     # Create an entry in job history with unique ID
-    job = EventListenerJob(
+    job = EventListenerDB(
         listener_id=routing_key,
         creator=user,
         resource_ref=MongoDBRef(
@@ -75,27 +72,17 @@ async def submit_file_job(
         ),
         parameters=parameters,
     )
-    new_job = await db["listener_jobs"].insert_one(job.to_mongo())
-    new_job_id = str(new_job.inserted_id)
+    new_job = await job.save()
 
-    current_id = file_out.id
-    current_datasetId = file_out.dataset_id
-    current_secretKey = str(token)
-    try:
-        msg_body = EventListenerJobMessage(
-            filename=file_out.name,
-            fileSize=file_out.bytes,
-            id=str(current_id),
-            datasetId=str(current_datasetId),
-            secretKey=current_secretKey,
-            job_id=new_job_id,
-        )
-    except Exception as e:
-        print(e)
-        print(new_job_id)
-
+    msg_body = EventListenerJobMessage(
+        filename=file_out.name,
+        fileSize=file_out.bytes,
+        id=str(file_out.id),
+        datasetId=str(file_out.dataset_id),
+        secretKey=token,
+        job_id=str(new_job.id),
+    )
     reply_to = await create_reply_queue()
-
     rabbitmq_client.basic_publish(
         exchange="",
         routing_key=routing_key,
@@ -104,48 +91,40 @@ async def submit_file_job(
             content_type="application/json", delivery_mode=1, reply_to=reply_to
         ),
     )
-    return new_job_id
+    return str(new_job.id)
 
 
 async def submit_dataset_job(
     dataset_out: DatasetOut,
-    queue: str,
     routing_key: str,
     parameters: dict,
     user: UserOut,
     token: str = Depends(get_token),
-    db: MongoClient = Depends(dependencies.get_db),
     rabbitmq_client: BlockingChannel = Depends(dependencies.get_rabbitmq),
 ):
-    # TODO check if extractor is registered
-
     # Create an entry in job history with unique ID
-    job = EventListenerJob(
+    job = EventListenerDB(
         listener_id=routing_key,
         creator=user,
         resource_ref=MongoDBRef(collection="dataset", resource_id=dataset_out.id),
         parameters=parameters,
     )
-    new_job = await db["listener_jobs"].insert_one(job.to_mongo())
-    new_job_id = str(new_job.inserted_id)
+    new_job = await job.save()
 
     msg_body = EventListenerDatasetJobMessage(
         datasetName=dataset_out.name,
         id=str(dataset_out.id),
         datasetId=str(dataset_out.id),
         secretKey=token,
-        job_id=new_job_id,
+        job_id=str(new_job.id),
     )
-
     reply_to = await create_reply_queue()
-
     rabbitmq_client.basic_publish(
         exchange="",
         routing_key=routing_key,
         body=json.dumps(msg_body.dict(), ensure_ascii=False),
         properties=pika.BasicProperties(
-            content_type="application/json", delivery_mode=1
+            content_type="application/json", delivery_mode=1, reply_to=reply_to
         ),
-        # reply_to=reply_to
     )
-    return new_job_id
+    return str(new_job.id)

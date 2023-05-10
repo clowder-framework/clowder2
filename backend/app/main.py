@@ -1,23 +1,27 @@
 import logging
-import random
-import string
-import time
-from urllib.request import Request
 
 import uvicorn
 from beanie import init_beanie
-from motor.motor_asyncio import AsyncIOMotorClient
-from pydantic import BaseConfig
 from fastapi import FastAPI, APIRouter, Depends
 from fastapi.middleware.cors import CORSMiddleware
+from motor.motor_asyncio import AsyncIOMotorClient
+from pydantic import BaseConfig
 
 from app.config import settings
+from app.keycloak_auth import get_current_username
 from app.models.authorization import AuthorizationDB
 from app.models.users import UserDB, UserAPIKey
 from app.models.groups import GroupDB
 from app.models.datasets import DatasetDB, DatasetDBViewList
-from app.search.connect import connect_elasticsearch, create_index
-from app.keycloak_auth import get_token, get_current_username
+from app.models.feeds import FeedDB
+from app.models.listeners import (
+    EventListenerDB,
+    EventListenerJobDB,
+    EventListenerJobUpdateDB,
+    EventListenerJobViewList,
+    EventListenerJobUpdateViewList,
+)
+from app.models.metadata import MetadataDB, MetadataDefinitionDB
 from app.routers import (
     folders,
     groups,
@@ -41,6 +45,7 @@ from app.routers import (
 # setup loggers
 # logging.config.fileConfig('logging.conf', disable_existing_loggers=False)
 from app.search.config import indexSettings
+from app.search.connect import connect_elasticsearch, create_index
 
 logger = logging.getLogger(__name__)
 
@@ -164,6 +169,7 @@ app.include_router(api_router, prefix=settings.API_V2_STR)
 def gather_documents():
     pass
 
+
 # TODO add anything with document in here
 @app.on_event("startup")
 async def startup_beanie():
@@ -172,7 +178,22 @@ async def startup_beanie():
     await init_beanie(
         database=getattr(client, settings.MONGO_DATABASE),
         # Make sure to include all models. If one depends on another that is not in the list it is not clear which one is missing.
-        document_models=[DatasetDB, DatasetDBViewList, AuthorizationDB, UserDB, UserAPIKey, GroupDB],
+        document_models=[
+            DatasetDB,
+            DatasetDBViewList,
+            AuthorizationDB,
+            MetadataDB,
+            MetadataDefinitionDB,
+            FeedDB,
+            EventListenerDB,
+            EventListenerJobDB,
+            EventListenerJobUpdateDB,
+            EventListenerJobViewList,
+            EventListenerJobUpdateViewList,
+            UserDB,
+            UserAPIKey,
+            GroupDB,
+        ],
         recreate_views=True,
     )
 

@@ -7,16 +7,19 @@ from fastapi import APIRouter, HTTPException, Depends
 from pymongo import MongoClient
 
 from app import dependencies
-from app.models.listeners import EventListenerJob, EventListenerJobUpdate
-from app.keycloak_auth import get_current_user, get_user
+from app.models.listeners import (
+    EventListenerJobDB,
+    EventListenerJobUpdateDB,
+    EventListenerJobViewList,
+)
+from app.keycloak_auth import get_current_user, get_user, get_current_username
 
 router = APIRouter()
 
 
-@router.get("", response_model=List[EventListenerJob])
+@router.get("", response_model=List[EventListenerJobDB])
 async def get_all_job_summary(
     current_user_id=Depends(get_user),
-    db: MongoClient = Depends(dependencies.get_db),
     listener_id: Optional[str] = None,
     status: Optional[str] = None,
     user_id: Optional[str] = None,
@@ -38,7 +41,6 @@ async def get_all_job_summary(
         skip -- number of initial records to skip (i.e. for pagination)
         limit -- restrict number of records to be returned (i.e. for pagination)
     """
-    jobs = []
     filters = [
         {
             "$or": [
@@ -70,45 +72,34 @@ async def get_all_job_summary(
         filters.append({"resource_ref.collection": "dataset"})
         filters.append({"resource_ref.resource_id": ObjectId(dataset_id)})
 
-    query = {"$and": filters}
-
-    for doc in (
-        await db["listener_jobs_view"]
-        .find(query)
+    return (
+        await EventListenerJobViewList.find({"$and": filters})
         .skip(skip)
         .limit(limit)
         .to_list(length=limit)
-    ):
-        jobs.append(EventListenerJob.from_mongo(doc))
-    return jobs
+    )
 
 
-@router.get("/{job_id}/summary", response_model=EventListenerJob)
+@router.get("/{job_id}/summary", response_model=EventListenerJobDB)
 async def get_job_summary(
     job_id: str,
-    db: MongoClient = Depends(dependencies.get_db),
+    user=Depends(get_current_username),
 ):
-    if (
-        job := await db["listener_jobs"].find_one({"_id": ObjectId(job_id)})
-    ) is not None:
-        return EventListenerJob.from_mongo(job)
-
+    job = await EventListenerJobDB.find_one(EventListenerJobDB.id == ObjectId(job_id))
+    if job:
+        return job
     raise HTTPException(status_code=404, detail=f"Job {job_id} not found")
 
 
 @router.get("/{job_id}/updates")
 async def get_job_updates(
     job_id: str,
-    db: MongoClient = Depends(dependencies.get_db),
+    user=Depends(get_current_username),
 ):
-    if (
-        job := await db["listener_jobs"].find_one({"_id": ObjectId(job_id)})
-    ) is not None:
+    job = await EventListenerJobDB.find_one(EventListenerJobDB.id == ObjectId(job_id))
+    if job:
         # TODO: Should this also return the job summary data since we just queried it here?
-        events = []
-        async for update in db["listener_job_updates"].find({"job_id": job_id}):
-            event_json = EventListenerJobUpdate.from_mongo(update)
-            events.append(event_json)
-        return events
-
+        return await EventListenerJobUpdateDB.find(
+            EventListenerJobUpdateDB.job_id == job_id
+        )
     raise HTTPException(status_code=404, detail=f"Job {job_id} not found")

@@ -60,8 +60,8 @@ def callback(ch, method, properties, body):
         # Assign MIME-based listener if needed
         if extractor_out.properties and extractor_out.properties.process:
             process = extractor_out.properties.process
-            processed_feed = _process_incoming_v1_extractor_info(
-                extractor_name, extractor_out.id, process, db
+            processed_feed = await _process_incoming_v1_extractor_info(
+                extractor_name, extractor_out.id, process
             )
             db["feeds"].insert_one(processed_feed)
 

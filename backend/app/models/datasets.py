@@ -1,13 +1,14 @@
-from datetime import datetime, timedelta
+from datetime import datetime
 from enum import Enum, auto
 from typing import Optional, List
 
 import pymongo
 from beanie import Document, View, PydanticObjectId
-from pydantic import BaseModel
-from pydantic import Field
+from pydantic import BaseModel, Field
 
-from app.models.authorization import AuthorizationDB
+from app.models.authorization import RoleType, AuthorizationDB
+from app.models.groups import GroupOut
+from app.models.mongomodel import MongoModel
 from app.models.users import UserOut
 
 
@@ -38,7 +39,8 @@ class DatasetPatch(BaseModel):
 
 
 class DatasetDB(Document, DatasetBase):
-    author: UserOut
+    id: PydanticObjectId = Field(None, alias="_id")
+    creator: UserOut
     created: datetime = Field(default_factory=datetime.utcnow)
     modified: datetime = Field(default_factory=datetime.utcnow)
     status: str = DatasetStatus.PRIVATE.name
@@ -46,7 +48,7 @@ class DatasetDB(Document, DatasetBase):
     downloads: int = 0
 
     class Settings:
-        name = "datasets_beanie"
+        name = "datasets"
         indexes = [
             [
                 ("name", pymongo.TEXT),
@@ -57,22 +59,22 @@ class DatasetDB(Document, DatasetBase):
 
 class DatasetDBViewList(View, DatasetBase):
     # FIXME This seems to be required to return _id. Otherwise _id is null in the response.
-    id: PydanticObjectId = Field(None, alias='_id')
-    author: UserOut
+    id: PydanticObjectId = Field(None, alias="_id")
+    creator: UserOut
     created: datetime = Field(default_factory=datetime.utcnow)
     modified: datetime = Field(default_factory=datetime.utcnow)
     auth: List[AuthorizationDB]
 
     class Settings:
         source = DatasetDB
-        name = "datasets_beanie_view"
+        name = "datasets_view"
         pipeline = [
             {
                 "$lookup": {
                     "from": "authorization",
                     "localField": "_id",
                     "foreignField": "dataset_id",
-                    "as": "auth"
+                    "as": "auth",
                 }
             },
         ]
@@ -84,3 +86,19 @@ class DatasetDBViewList(View, DatasetBase):
 
 class DatasetOut(DatasetDB):
     pass
+
+
+class UserAndRole(BaseModel):
+    user: UserOut
+    role: RoleType
+
+
+class GroupAndRole(BaseModel):
+    group: GroupOut
+    role: RoleType
+
+
+class DatasetRoles(MongoModel):
+    dataset_id: str
+    user_roles: List[UserAndRole] = []
+    group_roles: List[GroupAndRole] = []

@@ -1,6 +1,7 @@
 import { V2 } from "../openapi";
 import Cookies from "universal-cookie";
 import config from "../app.config";
+import { handleErrors } from "./common";
 
 const cookies = new Cookies();
 
@@ -126,25 +127,61 @@ export function fetchAllUsers(skip = 0, limit = 101) {
 				});
 			})
 			.catch((reason) => {
-				dispatch(fetchAllUsers((skip = 0), (limit = 21)));
+				dispatch(fetchAllUsers(skip, limit));
+			});
+	};
+}
+
+export const LIST_API_KEYS = "LIST_API_KEYS";
+
+export function listApiKeys(skip = 0, limit = 10) {
+	return (dispatch) => {
+		return V2.UsersService.generateUserApiKeyApiV2UsersKeysGet(skip, limit)
+			.then((json) => {
+				dispatch({
+					type: LIST_API_KEYS,
+					apiKeys: json,
+					receivedAt: Date.now(),
+				});
+			})
+			.catch((reason) => {
+				dispatch(handleErrors(reason, listApiKeys(skip, limit)));
 			});
 	};
 }
 
 export const GENERATE_API_KEY = "GENERATE_API_KEY";
 
-export function generateApiKey(minutes = 30) {
+export function generateApiKey(name = "", minutes = 30) {
 	return (dispatch) => {
-		return V2.UsersService.generateUserApiKeyApiV2UsersKeysPost(minutes)
+		return V2.UsersService.generateUserApiKeyApiV2UsersKeysPost(name, minutes)
 			.then((json) => {
 				dispatch({
 					type: GENERATE_API_KEY,
+					hashedKey: json,
+					receivedAt: Date.now(),
+				});
+			})
+			.catch((reason) => {
+				dispatch(handleErrors(reason, generateApiKey(name, minutes)));
+			});
+	};
+}
+
+export const DELETE_API_KEY = "DELETE_API_KEY";
+
+export function deleteApiKey(keyId) {
+	return (dispatch) => {
+		return V2.UsersService.generateUserApiKeyApiV2UsersKeysKeyIdDelete(keyId)
+			.then((json) => {
+				dispatch({
+					type: DELETE_API_KEY,
 					apiKey: json,
 					receivedAt: Date.now(),
 				});
 			})
 			.catch((reason) => {
-				dispatch(generateApiKey((minutes = 30)));
+				dispatch(handleErrors(reason, deleteApiKey(keyId)));
 			});
 	};
 }
@@ -157,5 +194,23 @@ export function resetApiKey() {
 			type: RESET_API_KEY,
 			receivedAt: Date.now(),
 		});
+	};
+}
+
+export const RECEIVE_USER_PROFILE = "RECEIVE_USER_PROFILE";
+
+export function fetchUserProfile() {
+	return (dispatch) => {
+		return V2.UsersService.getProfileApiV2UsersProfileGet()
+			.then((json) => {
+				dispatch({
+					type: RECEIVE_USER_PROFILE,
+					profile: json,
+					receivedAt: Date.now(),
+				});
+			})
+			.catch((reason) => {
+				dispatch(handleErrors(reason, fetchUserProfile()));
+			});
 	};
 }

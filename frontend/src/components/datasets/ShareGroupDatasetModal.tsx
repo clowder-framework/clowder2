@@ -22,10 +22,9 @@ import {
 } from "@mui/material";
 import { fetchGroups } from "../../actions/group";
 import { RootState } from "../../types/data";
-import { setDatasetGroupRole } from "../../actions/dataset";
+import { fetchDatasetRoles, setDatasetGroupRole } from "../../actions/dataset";
 import { useParams } from "react-router-dom";
 import CloseIcon from "@mui/icons-material/Close";
-import { GroupOut } from "../../openapi/v2";
 
 type ShareGroupDatasetModalProps = {
 	open: boolean;
@@ -39,14 +38,20 @@ export default function ShareGroupDatasetModal(
 	const { open, handleClose, datasetName } = props;
 	const { datasetId } = useParams<{ datasetId?: string }>();
 	const [role, setRole] = useState("viewer");
-	const [group, setGroup] = useState("");
+	const [group, setGroup] = useState({ label: "", id: "" });
 	const [options, setOptions] = useState([]);
 	const [showSuccessAlert, setShowSuccessAlert] = useState(false);
 	const dispatch = useDispatch();
 	const listGroups = () => dispatch(fetchGroups(0, 21));
 	const groups = useSelector((state: RootState) => state.group.groups);
-	const setGroupRole = (datasetId: string, groupId: string, role: string) =>
-		dispatch(setDatasetGroupRole(datasetId, groupId, role));
+	const setGroupRole = async (
+		datasetId: string,
+		groupId: string,
+		role: string
+	) => dispatch(setDatasetGroupRole(datasetId, groupId, role));
+
+	const getRoles = (datasetId: string | undefined) =>
+		dispatch(fetchDatasetRoles(datasetId));
 
 	// component did mount
 	useEffect(() => {
@@ -55,17 +60,18 @@ export default function ShareGroupDatasetModal(
 
 	useEffect(() => {
 		setOptions(
-			groups.reduce((list: string[], group: GroupOut) => {
-				return [...list, group.name];
-			}, [])
+			groups.map((g) => {
+				return { label: g.name, id: g.id };
+			})
 		);
 	}, [groups]);
 
-	const onShare = () => {
-		setGroupRole(datasetId, group, role);
-		setGroup("");
+	const onShare = async () => {
+		await setGroupRole(datasetId, group.id, role);
+		setGroup({ label: "", id: "" });
 		setRole("viewer");
 		setShowSuccessAlert(true);
+		getRoles(datasetId);
 	};
 
 	return (
@@ -95,8 +101,8 @@ export default function ShareGroupDatasetModal(
 							id="email-auto-complete"
 							freeSolo
 							autoHighlight
-							inputValue={group}
-							onInputChange={(event, value) => {
+							inputValue={group.name}
+							onChange={(event, value) => {
 								setGroup(value);
 							}}
 							options={options}
@@ -138,7 +144,9 @@ export default function ShareGroupDatasetModal(
 						variant="contained"
 						sx={{ marginTop: 1 }}
 						onClick={onShare}
-						disabled={group.length > 0 ? false : true}
+						disabled={
+							group !== undefined && group.label.length > 0 ? false : true
+						}
 					>
 						Share
 					</Button>

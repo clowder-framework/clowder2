@@ -35,9 +35,3 @@ class GroupDB(Document, GroupBase, Provenance):
 
 class GroupOut(GroupDB):
     pass
-
-
-class GroupAndRole(BaseModel):
-    group_id: str
-    group_name: str
-    roleType: str
