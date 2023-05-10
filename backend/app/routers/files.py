@@ -5,6 +5,7 @@ from typing import Optional, List
 from typing import Union
 
 from beanie import PydanticObjectId
+from beanie.odm.operators.update.general import Inc
 from bson import ObjectId
 from elasticsearch import Elasticsearch
 from fastapi import APIRouter, HTTPException, Depends, Security
@@ -47,7 +48,6 @@ security = HTTPBearer()
 
 async def _resubmit_file_extractors(
         file: FileOut,
-        db: MongoClient,
         rabbitmq_client: BlockingChannel,
         user: UserOut,
         credentials: HTTPAuthorizationCredentials = Security(security),
@@ -195,7 +195,6 @@ async def update_file(
         file_id: str,
         token=Depends(get_token),
         user=Depends(get_current_user),
-        db: MongoClient = Depends(dependencies.get_db),
         fs: Minio = Depends(dependencies.get_fs),
         file: UploadFile = File(...),
         es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
@@ -268,7 +267,7 @@ async def update_file(
         }
         update_record(es, "file", doc, updated_file.id)
         await _resubmit_file_extractors(
-            updated_file, db, rabbitmq_client, user, credentials
+            updated_file, rabbitmq_client, user, credentials
         )
 
         # updating metadata in elasticsearch
@@ -327,10 +326,8 @@ async def download_file(
                 "attachment; filename=%s" % file_obj.name
         )
         # Increment download count
-        # TODO figure out how to do $inc
-        await db["files"].update_one(
-            {"_id": ObjectId(file_id)}, {"$inc": {"downloads": 1}}
-        )
+        await file.update(Inc("downloads"))
+        
         return response
     else:
         raise HTTPException(status_code=404, detail=f"File {file_id} not found")
@@ -432,10 +429,8 @@ async def get_file_extract(
 @router.post("/{file_id}/resubmit_extract")
 async def resubmit_file_extractions(
         file_id: str,
-        request: Request,
         user=Depends(get_current_user),
         credentials: HTTPAuthorizationCredentials = Security(security),
-        db: MongoClient = Depends(dependencies.get_db),
         rabbitmq_client: BlockingChannel = Depends(dependencies.get_rabbitmq),
         allow: bool = Depends(FileAuthorization("editor")),
 ):
@@ -453,6 +448,6 @@ async def resubmit_file_extractions(
     file = await FileDB.get(PydanticObjectId(file_id))
     if file is not None:
         resubmit_success_fail = await _resubmit_file_extractors(
-            FileOut(**file.dict()), db, rabbitmq_client, user, credentials
+            FileOut(**file.dict()), rabbitmq_client, user, credentials
         )
     return resubmit_success_fail
