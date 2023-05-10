@@ -24,6 +24,7 @@ export async function isPublic(datasetId) {
 
 //NOTE: This is only checking if a cookie is present, but not validating the cookie.
 export const isAuthorized = () => {
+	console.log('checking is authorized');
 	const authorization = cookies.get("Authorization") || "Bearer none";
 	V2.OpenAPI.TOKEN = authorization.replace("Bearer ", "");
 	return (
