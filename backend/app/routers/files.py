@@ -451,8 +451,9 @@ async def get_file_extract(
 @router.post("/{file_id}/resubmit_extract")
 async def resubmit_file_extractions(
         file_id: str,
-        credentials: HTTPAuthorizationCredentials = Security(security),
+        request: Request,
         user=Depends(get_current_user),
+        credentials: HTTPAuthorizationCredentials = Security(security),
         db: MongoClient = Depends(dependencies.get_db),
         rabbitmq_client: BlockingChannel = Depends(dependencies.get_rabbitmq),
         allow: bool = Depends(FileAuthorization("editor")),
@@ -470,7 +471,7 @@ async def resubmit_file_extractions(
     """
     file = await FileDB.get(PydanticObjectId(file_id))
     if file is not None:
-        resubmit_success_fail = _resubmit_file_extractors(
-            file_id, db, rabbitmq_client, user, credentials
+        resubmit_success_fail = await _resubmit_file_extractors(
+            FileOut(**file.dict()), db, rabbitmq_client, user, credentials
         )
     return resubmit_success_fail
