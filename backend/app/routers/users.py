@@ -76,13 +76,10 @@ async def delete_user_api_key(
     Arguments:
         key_id: id of the apikey
     """
-    apikey_doc = await db["user_keys"].find_one({"_id": ObjectId(key_id)})
-    if apikey_doc is not None:
-        apikey = UserAPIKeyOut.from_mongo(apikey_doc)
-
+    if (apikey := await UserAPIKey.get(ObjectId(key_id))) is not None:
         # Only allow user to delete their own key
         if apikey.user == current_user:
-            await db["user_keys"].delete_one({"_id": ObjectId(key_id)})
+            await apikey.delete()
             return apikey
         else:
             raise HTTPException(

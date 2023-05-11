@@ -17,7 +17,7 @@ from pymongo import MongoClient
 
 from . import dependencies
 from .config import settings
-from .models.users import UserOut, UserAPIKey
+from .models.users import UserOut, UserAPIKey, UserDB
 
 logger = logging.getLogger(__name__)
 
@@ -91,16 +91,15 @@ async def get_token(
             payload = serializer.loads(api_key)
             # Key is valid, check expiration date in database
             if (
-                key_entry := await db["user_keys"].find_one(
+                key := await UserAPIKey.find_one(
                     {"user": payload["user"], "key": payload["key"]}
                 )
             ) is not None:
-                key = UserAPIKey.from_mongo(key_entry)
                 current_time = datetime.utcnow()
 
                 if key.expires is not None and current_time >= key.expires:
                     # Expired key, delete it first
-                    db["user_keys"].delete_one({"_id": ObjectId(key.id)})
+                    key.delete()
                     raise HTTPException(
                         status_code=401,
                         detail={"error": "Key is expired."},
@@ -160,24 +159,22 @@ async def get_current_user(
             payload = serializer.loads(api_key)
             # Key is valid, check expiration date in database
             if (
-                key_entry := await db["user_keys"].find_one(
+                key := await UserAPIKey.find_one(
                     {"user": payload["user"], "key": payload["key"]}
                 )
             ) is not None:
-                key = UserAPIKey.from_mongo(key_entry)
                 current_time = datetime.utcnow()
 
                 if key.expires is not None and current_time >= key.expires:
                     # Expired key, delete it first
-                    db["user_keys"].delete_one({"_id": ObjectId(key.id)})
+                    key.delete()
                     raise HTTPException(
                         status_code=401,
                         detail={"error": "Key is expired."},
                         headers={"WWW-Authenticate": "Bearer"},
                     )
                 else:
-                    user_out = await db["users"].find_one({"email": key.user})
-                    return UserOut.from_mongo(user_out)
+                    return await UserDB.find_one({"email": key.user})
             else:
                 raise HTTPException(
                     status_code=401,
