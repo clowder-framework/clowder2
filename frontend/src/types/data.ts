@@ -17,7 +17,7 @@ export interface Dataset {
 	name: string;
 	description: string;
 	_id: string;
-	author: Author;
+	creator: UserOut;
 	created: string | Date;
 	modified: string | Date;
 	files: string[];
@@ -41,13 +41,6 @@ export interface Listener {
 	parameters: any;
 }
 
-export interface Author {
-	id: string;
-	email: string;
-	first_name: string | null;
-	last_name: string | null;
-}
-
 export interface Profile {
 	id: string;
 	email: string;
@@ -58,7 +51,7 @@ export interface Profile {
 export interface Folder {
 	id: string;
 	name: string;
-	author: Author;
+	creator: UserOut;
 	parent_folder: string | null;
 }
 
@@ -68,7 +61,7 @@ export interface FileMetadata {
 	size: number;
 	created: string | Date;
 	name: string;
-	creator: Author;
+	creator: UserOut;
 	status: string;
 	filedescription: string;
 	thumbnail: string;
@@ -193,7 +186,7 @@ export interface UserState {
 	errorMsg: string;
 	hashedKey: string;
 	apiKeys: UserAPIKeyOut[];
-	profile: UserProfile;
+	profile: UserOut;
 }
 
 export interface ErrorState {
