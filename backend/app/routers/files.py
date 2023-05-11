@@ -328,7 +328,7 @@ async def download_file(
                 "attachment; filename=%s" % file_obj.name
         )
         # Increment download count
-        await file.update(Inc("downloads"))
+        await file.update(Inc({FileDB.downloads: 1}))
 
         return response
     else:
