@@ -47,10 +47,10 @@ security = HTTPBearer()
 
 
 async def _resubmit_file_extractors(
-    file: FileOut,
-    rabbitmq_client: BlockingChannel,
-    user: UserOut,
-    credentials: HTTPAuthorizationCredentials = Security(security),
+        file: FileOut,
+        rabbitmq_client: BlockingChannel,
+        user: UserOut,
+        credentials: HTTPAuthorizationCredentials = Security(security),
 ):
     """This helper method will check metadata. We get the extractors run from metadata from extractors.
     Then they are resubmitted. At present parameters are not stored. This will change once Jobs are
@@ -64,11 +64,11 @@ async def _resubmit_file_extractors(
 
     """
     resubmitted_jobs = []
-    jobs = await EventListenerJobDB.find(
+    jobs = EventListenerJobDB.find(
         EventListenerJobDB.resource_ref.resource_id == ObjectId(file.id),
         EventListenerJobDB.resource_ref.version == file.version_num - 1,
     )
-    for job in jobs:
+    async for job in jobs:
         resubmitted_job = {"listener_id": job.listener_id, "parameters": job.parameters}
         try:
             routing_key = job.listener_id
@@ -91,15 +91,15 @@ async def _resubmit_file_extractors(
 
 # TODO: Move this to MongoDB middle layer
 async def add_file_entry(
-    file_db: FileDB,
-    user: UserOut,
-    db: MongoClient,
-    fs: Minio,
-    es: Elasticsearch,
-    rabbitmq_client: BlockingChannel,
-    token: str,
-    file: Optional[io.BytesIO] = None,
-    content_type: Optional[str] = None,
+        file_db: FileDB,
+        user: UserOut,
+        db: MongoClient,
+        fs: Minio,
+        es: Elasticsearch,
+        rabbitmq_client: BlockingChannel,
+        token: str,
+        file: Optional[io.BytesIO] = None,
+        content_type: Optional[str] = None,
 ):
     """Insert FileDB object into MongoDB (makes Clowder ID), then Minio (makes version ID), then update MongoDB with
     the version ID from Minio.
@@ -171,7 +171,7 @@ async def add_file_entry(
 
 # TODO: Move this to MongoDB middle layer
 async def remove_file_entry(
-    file_id: Union[str, ObjectId], fs: Minio, es: Elasticsearch
+        file_id: Union[str, ObjectId], fs: Minio, es: Elasticsearch
 ):
     """Remove FileDB object into MongoDB, Minio, and associated metadata and version information."""
     # TODO: Deleting individual versions will require updating version_id in mongo, or deleting entire document
@@ -192,15 +192,15 @@ async def remove_file_entry(
 
 @router.put("/{file_id}", response_model=FileOut)
 async def update_file(
-    file_id: str,
-    token=Depends(get_token),
-    user=Depends(get_current_user),
-    fs: Minio = Depends(dependencies.get_fs),
-    file: UploadFile = File(...),
-    es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
-    credentials: HTTPAuthorizationCredentials = Security(security),
-    rabbitmq_client: BlockingChannel = Depends(dependencies.get_rabbitmq),
-    allow: bool = Depends(FileAuthorization("uploader")),
+        file_id: str,
+        token=Depends(get_token),
+        user=Depends(get_current_user),
+        fs: Minio = Depends(dependencies.get_fs),
+        file: UploadFile = File(...),
+        es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
+        credentials: HTTPAuthorizationCredentials = Security(security),
+        rabbitmq_client: BlockingChannel = Depends(dependencies.get_rabbitmq),
+        allow: bool = Depends(FileAuthorization("uploader")),
 ):
     # Check all connection and abort if any one of them is not available
     if fs is None or es is None:
@@ -212,8 +212,8 @@ async def update_file(
         updated_file = FileOut(**file_q.dict())
 
         if (
-            file.filename != updated_file.name
-            or file.content_type != updated_file.content_type.content_type
+                file.filename != updated_file.name
+                or file.content_type != updated_file.content_type.content_type
         ):
             raise HTTPException(
                 status_code=400,
@@ -271,7 +271,7 @@ async def update_file(
         )
 
         # updating metadata in elasticsearch
-        metadata = MetadataDB.find_one(
+        metadata = await MetadataDB.find_one(
             MetadataDB.resource.resource_id == ObjectId(updated_file.id)
         )
         if metadata:
@@ -292,11 +292,11 @@ async def update_file(
 
 @router.get("/{file_id}")
 async def download_file(
-    file_id: str,
-    version: Optional[int] = None,
-    db: MongoClient = Depends(dependencies.get_db),
-    fs: Minio = Depends(dependencies.get_fs),
-    allow: bool = Depends(FileAuthorization("viewer")),
+        file_id: str,
+        version: Optional[int] = None,
+        db: MongoClient = Depends(dependencies.get_db),
+        fs: Minio = Depends(dependencies.get_fs),
+        allow: bool = Depends(FileAuthorization("viewer")),
 ):
     # If file exists in MongoDB, download from Minio
     file = await FileDB.get(PydanticObjectId(file_id))
@@ -325,7 +325,7 @@ async def download_file(
         # Get content type & open file stream
         response = StreamingResponse(content.stream(settings.MINIO_UPLOAD_CHUNK_SIZE))
         response.headers["Content-Disposition"] = (
-            "attachment; filename=%s" % file_obj.name
+                "attachment; filename=%s" % file_obj.name
         )
         # Increment download count
         await file.update(Inc("downloads"))
@@ -337,11 +337,11 @@ async def download_file(
 
 @router.delete("/{file_id}")
 async def delete_file(
-    file_id: str,
-    db: MongoClient = Depends(dependencies.get_db),
-    fs: Minio = Depends(dependencies.get_fs),
-    es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
-    allow: bool = Depends(FileAuthorization("editor")),
+        file_id: str,
+        db: MongoClient = Depends(dependencies.get_db),
+        fs: Minio = Depends(dependencies.get_fs),
+        es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
+        allow: bool = Depends(FileAuthorization("editor")),
 ):
     file = await FileDB.get(PydanticObjectId(file_id))
     if file is not None:
@@ -353,9 +353,9 @@ async def delete_file(
 
 @router.get("/{file_id}/summary")
 async def get_file_summary(
-    file_id: str,
-    db: MongoClient = Depends(dependencies.get_db),
-    allow: bool = Depends(FileAuthorization("viewer")),
+        file_id: str,
+        db: MongoClient = Depends(dependencies.get_db),
+        allow: bool = Depends(FileAuthorization("viewer")),
 ):
     file = await FileDB.get(PydanticObjectId(file_id))
     if file is not None:
@@ -369,20 +369,20 @@ async def get_file_summary(
 
 @router.get("/{file_id}/versions", response_model=List[FileVersion])
 async def get_file_versions(
-    file_id: str,
-    db: MongoClient = Depends(dependencies.get_db),
-    skip: int = 0,
-    limit: int = 20,
-    allow: bool = Depends(FileAuthorization("viewer")),
+        file_id: str,
+        db: MongoClient = Depends(dependencies.get_db),
+        skip: int = 0,
+        limit: int = 20,
+        allow: bool = Depends(FileAuthorization("viewer")),
 ):
     file = await FileDB.get(PydanticObjectId(file_id))
     if file is not None:
         mongo_versions = []
         for ver in (
-            await FileVersionDB.find(FileVersionDB.file_id == ObjectId(file_id))
-            .skip(skip)
-            .limit(limit)
-            .to_list(length=limit)
+                await FileVersionDB.find(FileVersionDB.file_id == ObjectId(file_id))
+                        .skip(skip)
+                        .limit(limit)
+                        .to_list(length=limit)
         ):
             mongo_versions.append(FileVersion(**ver.dict()))
         return mongo_versions
@@ -393,16 +393,16 @@ async def get_file_versions(
 # submits file to extractor
 @router.post("/{file_id}/extract")
 async def get_file_extract(
-    file_id: str,
-    extractorName: str,
-    request: Request,
-    # parameters don't have a fixed model shape
-    parameters: dict = None,
-    user=Depends(get_current_user),
-    credentials: HTTPAuthorizationCredentials = Security(security),
-    db: MongoClient = Depends(dependencies.get_db),
-    rabbitmq_client: BlockingChannel = Depends(dependencies.get_rabbitmq),
-    allow: bool = Depends(FileAuthorization("uploader")),
+        file_id: str,
+        extractorName: str,
+        request: Request,
+        # parameters don't have a fixed model shape
+        parameters: dict = None,
+        user=Depends(get_current_user),
+        credentials: HTTPAuthorizationCredentials = Security(security),
+        db: MongoClient = Depends(dependencies.get_db),
+        rabbitmq_client: BlockingChannel = Depends(dependencies.get_rabbitmq),
+        allow: bool = Depends(FileAuthorization("uploader")),
 ):
     if extractorName is None:
         raise HTTPException(status_code=400, detail=f"No extractorName specified")
@@ -430,11 +430,11 @@ async def get_file_extract(
 
 @router.post("/{file_id}/resubmit_extract")
 async def resubmit_file_extractions(
-    file_id: str,
-    user=Depends(get_current_user),
-    credentials: HTTPAuthorizationCredentials = Security(security),
-    rabbitmq_client: BlockingChannel = Depends(dependencies.get_rabbitmq),
-    allow: bool = Depends(FileAuthorization("editor")),
+        file_id: str,
+        user=Depends(get_current_user),
+        credentials: HTTPAuthorizationCredentials = Security(security),
+        rabbitmq_client: BlockingChannel = Depends(dependencies.get_rabbitmq),
+        allow: bool = Depends(FileAuthorization("editor")),
 ):
     """This route will check metadata. We get the extractors run from metadata from extractors.
     Then they are resubmitted. At present parameters are not stored. This will change once Jobs are
