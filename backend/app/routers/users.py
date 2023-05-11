@@ -5,7 +5,6 @@ from typing import List
 from bson import ObjectId
 from fastapi import APIRouter, HTTPException, Depends
 from itsdangerous.url_safe import URLSafeSerializer
-from beanie import PydanticObjectId
 from pymongo import MongoClient, DESCENDING
 
 from app import dependencies
@@ -62,7 +61,7 @@ async def generate_user_api_key(
     user_key = UserAPIKey(user=current_user, key=unique_key, name=name)
     if mins > 0:
         user_key.expires = user_key.created + timedelta(minutes=mins)
-    await UserAPIKey.insert_one(user_key)
+    await user_key.insert()
     return hashed_key
 
 
@@ -77,13 +76,10 @@ async def delete_user_api_key(
     Arguments:
         key_id: id of the apikey
     """
-    apikey_doc = await db["user_keys"].find_one({"_id": ObjectId(key_id)})
-    if apikey_doc is not None:
-        apikey = UserAPIKeyOut.from_mongo(apikey_doc)
-
+    if (apikey := await UserAPIKey.get(ObjectId(key_id))) is not None:
         # Only allow user to delete their own key
         if apikey.user == current_user:
-            await db["user_keys"].delete_one({"_id": ObjectId(key_id)})
+            await apikey.delete()
             return apikey
         else:
             raise HTTPException(

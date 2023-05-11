@@ -53,6 +53,9 @@ class UserAPIKey(Document):
     created: datetime = Field(default_factory=datetime.utcnow)
     expires: Optional[datetime] = None
 
+    class Settings:
+        name = "user_keys"
+
 
 class UserAPIKeyOut(MongoModel):
     # don't show the raw key
