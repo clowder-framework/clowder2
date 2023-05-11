@@ -15,7 +15,7 @@ export const Forbidden = (): JSX.Element => {
                 style={{ minHeight: '40vh' }}
             >
                 <Grid item xs={4}>
-                    <Typography variant="h4" paragraph>403, Access Denied</Typography>
+                    <Typography variant="h4" paragraph>Access Denied</Typography>
                     <Typography variant="body1" paragraph>You do not have permission to access this resource.</Typography>
                     <Typography variant="body1" paragraph>Go back <Link href="/" variant="body1">home</Link></Typography>
                 </Grid>
