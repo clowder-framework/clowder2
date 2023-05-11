@@ -5,7 +5,6 @@ from typing import List
 from bson import ObjectId
 from fastapi import APIRouter, HTTPException, Depends
 from itsdangerous.url_safe import URLSafeSerializer
-from beanie import PydanticObjectId
 from pymongo import MongoClient, DESCENDING
 
 from app import dependencies
@@ -62,7 +61,7 @@ async def generate_user_api_key(
     user_key = UserAPIKey(user=current_user, key=unique_key, name=name)
     if mins > 0:
         user_key.expires = user_key.created + timedelta(minutes=mins)
-    await UserAPIKey.insert_one(user_key)
+    await user_key.insert()
     return hashed_key
 
 

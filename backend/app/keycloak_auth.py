@@ -222,16 +222,15 @@ async def get_current_username(
             payload = serializer.loads(api_key)
             # Key is valid, check expiration date in database
             if (
-                key_entry := await db["user_keys"].find_one(
+                key := await UserAPIKey.find_one(
                     {"user": payload["user"], "key": payload["key"]}
                 )
             ) is not None:
-                key = UserAPIKey.from_mongo(key_entry)
                 current_time = datetime.utcnow()
 
                 if key.expires is not None and current_time >= key.expires:
                     # Expired key, delete it first
-                    db["user_keys"].delete_one({"_id": ObjectId(key.id)})
+                    key.delete()
                     raise HTTPException(
                         status_code=401,
                         detail={"error": "Key is expired."},
