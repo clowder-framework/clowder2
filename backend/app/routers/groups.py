@@ -133,7 +133,7 @@ async def edit_group(
         group_dict["users"] = list(set(group_dict["users"]))
         try:
             group.update(group_dict)
-            await GroupDB.replace_one({"_id": ObjectId(group_id)}, GroupDB(group))
+            await group.replace()
         except Exception as e:
             raise HTTPException(status_code=500, detail=e.args[0])
         return GroupOut(**group.dict())
@@ -186,7 +186,6 @@ async def add_member(
                 group.users.append(new_member)
                 await group.replace()
                 # Add user to all affected Authorization entries
-                # TODO this does not work
                 await AuthorizationDB.update_all(
                     {"group_ids": ObjectId(group_id)}, {"$push": {"user_ids": username}}
                 )
@@ -221,7 +220,7 @@ async def remove_member(
         # TODO not sure if this is right
         async for auth in AuthorizationDB.find({"group_ids": ObjectId(group_id)}):
             auth.user_ids.remove(username)
-            await AuthorizationDB.replace({"_id": auth.id}, auth)
+            await auth.replace()
 
         # Update group itself
         group.users.remove(found_user)
