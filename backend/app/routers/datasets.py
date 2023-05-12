@@ -423,7 +423,7 @@ async def delete_dataset(
         )
         async for file in db["files"].find({"dataset_id": ObjectId(dataset_id)}):
             file = FileOut(**file)
-            await remove_file_entry(file.id, db, fs, es)
+            await remove_file_entry(file.id, fs, es)
         await db["folders"].delete_many({"dataset_id": ObjectId(dataset_id)})
         return {"deleted": dataset_id}
     raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
@@ -577,7 +577,7 @@ async def save_file(
                 status_code=401, detail=f"User not found. Session might have expired."
             )
 
-        fileDB = FileDB(name=file.filename, creator=user, dataset_id=dataset["_id"])
+        fileDB = FileDB(name=file.filename, creator=user, dataset_id=dataset.id)
 
         if folder_id is not None:
             if (

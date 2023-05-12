@@ -4,6 +4,8 @@ from datetime import datetime
 from typing import Optional, List
 from typing import Union
 
+from beanie import PydanticObjectId
+from beanie.odm.operators.update.general import Inc
 from bson import ObjectId
 from elasticsearch import Elasticsearch
 from fastapi import APIRouter, HTTPException, Depends, Security
@@ -22,7 +24,13 @@ from app import dependencies
 from app.config import settings
 from app.deps.authorization_deps import FileAuthorization
 from app.keycloak_auth import get_current_user, get_token
-from app.models.files import FileOut, FileVersion, FileContentType, FileDB
+from app.models.files import (
+    FileOut,
+    FileVersion,
+    FileContentType,
+    FileDB,
+    FileVersionDB,
+)
 from app.models.metadata import MetadataDB
 from app.models.users import UserOut
 from app.rabbitmq.listeners import submit_file_job, EventListenerJobDB
@@ -40,7 +48,6 @@ security = HTTPBearer()
 
 async def _resubmit_file_extractors(
     file: FileOut,
-    db: MongoClient,
     rabbitmq_client: BlockingChannel,
     user: UserOut,
     credentials: HTTPAuthorizationCredentials = Security(security),
@@ -57,11 +64,11 @@ async def _resubmit_file_extractors(
 
     """
     resubmitted_jobs = []
-    jobs = await EventListenerJobDB.find(
+    jobs = EventListenerJobDB.find(
         EventListenerJobDB.resource_ref.resource_id == ObjectId(file.id),
         EventListenerJobDB.resource_ref.version == file.version_num - 1,
     )
-    for job in jobs:
+    async for job in jobs:
         resubmitted_job = {"listener_id": job.listener_id, "parameters": job.parameters}
         try:
             routing_key = job.listener_id
@@ -103,12 +110,12 @@ async def add_file_entry(
     """
 
     # Check all connection and abort if any one of them is not available
-    if db is None or fs is None or es is None:
+    if fs is None or es is None:
         raise HTTPException(status_code=503, detail="Service not available")
         return
 
-    new_file = await db["files"].insert_one(file_db.to_mongo())
-    new_file_id = new_file.inserted_id
+    new_file = await file_db.insert()
+    new_file_id = new_file.id
     if content_type is None:
         content_type = mimetypes.guess_type(file_db.name)
         content_type = content_type[0] if len(content_type) > 1 else content_type
@@ -132,17 +139,17 @@ async def add_file_entry(
     file_db.version_num = 1
     file_db.bytes = bytes
     file_db.content_type = content_type_obj
-    await db["files"].replace_one({"_id": ObjectId(new_file_id)}, file_db.to_mongo())
+    await file_db.replace()
     file_out = FileOut(**file_db.dict())
 
     # Add FileVersion entry and update file
-    new_version = FileVersion(
+    new_version = FileVersionDB(
         file_id=new_file_id,
         creator=user,
         version_id=version_id,
         bytes=bytes,
     )
-    await db["file_versions"].insert_one(new_version.to_mongo())
+    await new_version.insert()
 
     # Add entry to the file index
     doc = {
@@ -164,13 +171,13 @@ async def add_file_entry(
 
 # TODO: Move this to MongoDB middle layer
 async def remove_file_entry(
-    file_id: Union[str, ObjectId], db: MongoClient, fs: Minio, es: Elasticsearch
+    file_id: Union[str, ObjectId], fs: Minio, es: Elasticsearch
 ):
     """Remove FileDB object into MongoDB, Minio, and associated metadata and version information."""
     # TODO: Deleting individual versions will require updating version_id in mongo, or deleting entire document
 
     # Check all connection and abort if any one of them is not available
-    if db is None or fs is None or es is None:
+    if fs is None or es is None:
         raise HTTPException(status_code=503, detail="Service not available")
         return
     fs.remove_object(settings.MINIO_BUCKET_NAME, str(file_id))
@@ -178,9 +185,9 @@ async def remove_file_entry(
     delete_document_by_id(es, "file", str(file_id))
     query = {"match": {"resource_id": str(file_id)}}
     delete_document_by_query(es, "metadata", query)
-    await db["files"].delete_one({"_id": ObjectId(file_id)})
-    await db.metadata.delete_many({"resource.resource_id": ObjectId(file_id)})
-    await db["file_versions"].delete_many({"file_id": ObjectId(file_id)})
+    await FileDB.find_one(FileDB.id == ObjectId(file_id)).delete_one()
+    await MetadataDB.find(MetadataDB.resource.resource_id == ObjectId(file_id)).delete()
+    await FileVersionDB.find(FileVersionDB.file_id == ObjectId(file_id)).delete()
 
 
 @router.put("/{file_id}", response_model=FileOut)
@@ -188,7 +195,6 @@ async def update_file(
     file_id: str,
     token=Depends(get_token),
     user=Depends(get_current_user),
-    db: MongoClient = Depends(dependencies.get_db),
     fs: Minio = Depends(dependencies.get_fs),
     file: UploadFile = File(...),
     es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
@@ -197,12 +203,13 @@ async def update_file(
     allow: bool = Depends(FileAuthorization("uploader")),
 ):
     # Check all connection and abort if any one of them is not available
-    if db is None or fs is None or es is None:
+    if fs is None or es is None:
         raise HTTPException(status_code=503, detail="Service not available")
         return
 
-    if (file_q := await db["files"].find_one({"_id": ObjectId(file_id)})) is not None:
-        updated_file = FileOut.from_mongo(file_q)
+    file_q = await FileDB.get(PydanticObjectId(file_id))
+    if file_q is not None:
+        updated_file = FileOut(**file_q.dict())
 
         if (
             file.filename != updated_file.name
@@ -235,13 +242,10 @@ async def update_file(
         updated_file.bytes = len(
             fs.get_object(settings.MINIO_BUCKET_NAME, str(updated_file.id)).data
         )
-
-        await db["files"].replace_one(
-            {"_id": ObjectId(file_id)}, updated_file.to_mongo()
-        )
+        await updated_file.replace()
 
         # Put entry in FileVersion collection
-        new_version = FileVersion(
+        new_version = FileVersionDB(
             file_id=updated_file.id,
             creator=user,
             version_id=updated_file.version_id,
@@ -249,7 +253,7 @@ async def update_file(
             bytes=updated_file.bytes,
         )
 
-        await db["file_versions"].insert_one(new_version.to_mongo())
+        await new_version.insert()
         # Update entry to the file index
         doc = {
             "doc": {
@@ -263,11 +267,11 @@ async def update_file(
         }
         update_record(es, "file", doc, updated_file.id)
         await _resubmit_file_extractors(
-            updated_file, db, rabbitmq_client, user, credentials
+            updated_file, rabbitmq_client, user, credentials
         )
 
         # updating metadata in elasticsearch
-        metadata = MetadataDB.find_one(
+        metadata = await MetadataDB.find_one(
             MetadataDB.resource.resource_id == ObjectId(updated_file.id)
         )
         if metadata:
@@ -295,16 +299,17 @@ async def download_file(
     allow: bool = Depends(FileAuthorization("viewer")),
 ):
     # If file exists in MongoDB, download from Minio
-    if (file := await db["files"].find_one({"_id": ObjectId(file_id)})) is not None:
-        file_obj = FileOut.from_mongo(file)
+    file = await FileDB.get(PydanticObjectId(file_id))
+    if file is not None:
+        file_obj = FileOut(**file.dict())
         if version is not None:
             # Version is specified, so get the minio ID from versions table if possible
-            if (
-                file_vers := await db["file_versions"].find_one(
-                    {"file_id": ObjectId(file_id), "version_num": version}
-                )
-            ) is not None:
-                vers = FileVersion.from_mongo(file_vers)
+            file_vers = await FileVersionDB.find_one(
+                FileVersionDB.file_id == ObjectId(file_id),
+                FileVersionDB.version_num == version,
+            )
+            if file_vers is not None:
+                vers = FileVersion(**file_vers.dict())
                 content = fs.get_object(
                     settings.MINIO_BUCKET_NAME, file_id, version_id=vers.version_id
                 )
@@ -323,9 +328,8 @@ async def download_file(
             "attachment; filename=%s" % file_obj.name
         )
         # Increment download count
-        await db["files"].update_one(
-            {"_id": ObjectId(file_id)}, {"$inc": {"downloads": 1}}
-        )
+        await file.update(Inc({FileDB.downloads: 1}))
+
         return response
     else:
         raise HTTPException(status_code=404, detail=f"File {file_id} not found")
@@ -339,8 +343,9 @@ async def delete_file(
     es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
     allow: bool = Depends(FileAuthorization("editor")),
 ):
-    if (file := await db["files"].find_one({"_id": ObjectId(file_id)})) is not None:
-        await remove_file_entry(file_id, db, fs, es)
+    file = await FileDB.get(PydanticObjectId(file_id))
+    if file is not None:
+        await remove_file_entry(file_id, fs, es)
         return {"deleted": file_id}
     else:
         raise HTTPException(status_code=404, detail=f"File {file_id} not found")
@@ -352,11 +357,12 @@ async def get_file_summary(
     db: MongoClient = Depends(dependencies.get_db),
     allow: bool = Depends(FileAuthorization("viewer")),
 ):
-    if (file := await db["files"].find_one({"_id": ObjectId(file_id)})) is not None:
+    file = await FileDB.get(PydanticObjectId(file_id))
+    if file is not None:
         # TODO: Incrementing too often (3x per page view)
         # file["views"] += 1
         # db["files"].replace_one({"_id": ObjectId(file_id)}, file)
-        return FileOut.from_mongo(file)
+        return FileOut(**file.dict())
     else:
         raise HTTPException(status_code=404, detail=f"File {file_id} not found")
 
@@ -364,21 +370,20 @@ async def get_file_summary(
 @router.get("/{file_id}/versions", response_model=List[FileVersion])
 async def get_file_versions(
     file_id: str,
-    db: MongoClient = Depends(dependencies.get_db),
     skip: int = 0,
     limit: int = 20,
     allow: bool = Depends(FileAuthorization("viewer")),
 ):
-    if (file := await db["files"].find_one({"_id": ObjectId(file_id)})) is not None:
+    file = await FileDB.get(PydanticObjectId(file_id))
+    if file is not None:
         mongo_versions = []
         for ver in (
-            await db["file_versions"]
-            .find({"file_id": ObjectId(file_id)})
+            await FileVersionDB.find(FileVersionDB.file_id == ObjectId(file_id))
             .skip(skip)
             .limit(limit)
             .to_list(length=limit)
         ):
-            mongo_versions.append(FileVersion.from_mongo(ver))
+            mongo_versions.append(FileVersion(**ver.dict()))
         return mongo_versions
 
     raise HTTPException(status_code=404, detail=f"File {file_id} not found")
@@ -389,19 +394,16 @@ async def get_file_versions(
 async def get_file_extract(
     file_id: str,
     extractorName: str,
-    request: Request,
     # parameters don't have a fixed model shape
     parameters: dict = None,
     user=Depends(get_current_user),
     credentials: HTTPAuthorizationCredentials = Security(security),
-    db: MongoClient = Depends(dependencies.get_db),
     rabbitmq_client: BlockingChannel = Depends(dependencies.get_rabbitmq),
     allow: bool = Depends(FileAuthorization("uploader")),
 ):
     if extractorName is None:
         raise HTTPException(status_code=400, detail=f"No extractorName specified")
-    if (file := await db["files"].find_one({"_id": ObjectId(file_id)})) is not None:
-        file_out = FileOut.from_mongo(file)
+    if (file := await FileDB.get(PydanticObjectId(file_id))) is not None:
         access_token = credentials.credentials
 
         # backward compatibility? Get extractor info from request (Clowder v1)
@@ -410,7 +412,7 @@ async def get_file_extract(
         if parameters is None:
             parameters = {}
         return await submit_file_job(
-            file_out,
+            FileOut(**file.dict()),
             routing_key,
             parameters,
             user,
@@ -424,9 +426,8 @@ async def get_file_extract(
 @router.post("/{file_id}/resubmit_extract")
 async def resubmit_file_extractions(
     file_id: str,
-    credentials: HTTPAuthorizationCredentials = Security(security),
     user=Depends(get_current_user),
-    db: MongoClient = Depends(dependencies.get_db),
+    credentials: HTTPAuthorizationCredentials = Security(security),
     rabbitmq_client: BlockingChannel = Depends(dependencies.get_rabbitmq),
     allow: bool = Depends(FileAuthorization("editor")),
 ):
@@ -441,8 +442,9 @@ async def resubmit_file_extractions(
         rabbitmq_client: Rabbitmq Client
 
     """
-    if (file := await db["files"].find_one({"_id": ObjectId(file_id)})) is not None:
-        resubmit_success_fail = _resubmit_file_extractors(
-            file_id, db, rabbitmq_client, user, credentials
+    file = await FileDB.get(PydanticObjectId(file_id))
+    if file is not None:
+        resubmit_success_fail = await _resubmit_file_extractors(
+            FileOut(**file.dict()), rabbitmq_client, user, credentials
         )
     return resubmit_success_fail

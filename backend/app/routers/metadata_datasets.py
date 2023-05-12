@@ -15,7 +15,6 @@ from app.models.listeners import LegacyEventListenerIn, EventListenerDB
 from app.models.metadata import (
     MongoDBRef,
     MetadataAgent,
-    MetadataDefinitionDB,
     MetadataIn,
     MetadataDB,
     MetadataOut,

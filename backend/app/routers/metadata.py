@@ -14,7 +14,6 @@ from app.models.metadata import (
     MetadataDefinitionIn,
     MetadataDefinitionDB,
     MetadataDefinitionOut,
-    MetadataDB,
     MetadataOut,
     MetadataPatch,
     patch_metadata,

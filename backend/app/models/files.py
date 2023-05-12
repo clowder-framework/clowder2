@@ -1,6 +1,7 @@
 from datetime import datetime
 from typing import Optional
 
+from beanie import Document, PydanticObjectId
 from pydantic import Field, BaseModel
 
 from app.models.mongomodel import MongoModel
@@ -28,6 +29,13 @@ class FileVersion(MongoModel):
     bytes: int = 0
 
 
+class FileVersionDB(Document, FileVersion):
+    id: PydanticObjectId = Field(None, alias="_id")
+
+    class Settings:
+        name = "file_versions"
+
+
 class FileBase(MongoModel):
     name: str = "N/A"
 
@@ -36,7 +44,8 @@ class FileIn(FileBase):
     pass
 
 
-class FileDB(FileBase):
+class FileDB(Document, FileBase):
+    id: PydanticObjectId = Field(None, alias="_id")
     creator: UserOut
     created: datetime = Field(default_factory=datetime.utcnow)
     version_id: str = "N/A"
@@ -47,6 +56,9 @@ class FileDB(FileBase):
     downloads: int = 0
     bytes: int = 0
     content_type: FileContentType = FileContentType()
+
+    class Settings:
+        name = "files"
 
 
 class FileOut(FileDB):

@@ -1,11 +1,14 @@
 import pymongo
 from beanie import Document
+from pydantic import BaseModel
 
 
-class ConfigEntryBase(Document):
+class ConfigEntryBase(BaseModel):
     key: str
     value: str
 
+
+class ConfigEntryDB(Document, ConfigEntryBase):
     class Settings:
         name = "config"
         indexes = [
@@ -15,9 +18,5 @@ class ConfigEntryBase(Document):
         ]
 
 
-class ConfigEntryDB(ConfigEntryBase):
-    pass
-
-
-class ConfigEntryOut(ConfigEntryBase):
+class ConfigEntryOut(ConfigEntryDB):
     pass

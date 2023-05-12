@@ -1,18 +1,17 @@
-import logging
-import pika
-import json
 import asyncio
+import json
+import logging
 import random
 import string
 from datetime import datetime
-from packaging import version
-from pymongo import MongoClient
+
+import pika
 from bson import ObjectId
+from pymongo import MongoClient
 
 from app.config import settings
 from app.models.config import ConfigEntryDB, ConfigEntryOut
 from app.models.listeners import (
-    EventListenerJobDB,
     EventListenerDB,
     EventListenerJobUpdateDB,
     EventListenerJobStatus,
@@ -144,8 +143,8 @@ async def listen_for_messages():
 
     mongo_client = MongoClient(settings.MONGODB_URL)
     db = mongo_client[settings.MONGO_DATABASE]
-    if (instance_id := db["config"].find_one({"key": "instance_id"})) is not None:
-        instance_id = ConfigEntryOut.from_mongo(instance_id).value
+    if (config_entry := ConfigEntryOut.find_one({"key": "instance_id"})) is not None:
+        instance_id = config_entry.value
     else:
         # If no ID has been generated for this instance, generate a 10-digit alphanumeric identifier
         instance_id = "".join(
@@ -155,7 +154,7 @@ async def listen_for_messages():
             for _ in range(10)
         )
         config_entry = ConfigEntryDB(key="instance_id", value=instance_id)
-        db["config"].insert_one(config_entry.to_mongo())
+        config_entry.insert()
 
     channel.exchange_declare(exchange="clowder", durable=True)
     result = channel.queue_declare(

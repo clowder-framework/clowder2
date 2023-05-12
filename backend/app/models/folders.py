@@ -1,6 +1,7 @@
 from datetime import datetime
 from typing import Optional
 
+from beanie import Document, PydanticObjectId
 from pydantic import Field
 
 from app.models.mongomodel import MongoModel
@@ -16,12 +17,16 @@ class FolderIn(FolderBase):
     parent_folder: Optional[PyObjectId]
 
 
-class FolderDB(FolderBase):
+class FolderDB(Document, FolderBase):
+    id: PydanticObjectId = Field(None, alias="_id")
     dataset_id: PyObjectId
     parent_folder: Optional[PyObjectId]
     creator: UserOut
     created: datetime = Field(default_factory=datetime.utcnow)
     modified: datetime = Field(default_factory=datetime.utcnow)
+
+    class Settings:
+        name = "folders"
 
 
 class FolderOut(FolderDB):

@@ -9,12 +9,11 @@ import type { UserOut } from './UserOut';
  * EventListeners have a name, version, author, description, and optionally properties where extractor_info will be saved.
  */
 export type EventListenerOut = {
-    id?: string;
-    author?: string;
+    creator?: UserOut;
     name: string;
     version?: string;
     description?: string;
-    creator?: UserOut;
+    _id?: string;
     created?: string;
     modified?: string;
     properties?: ExtractorInfo;

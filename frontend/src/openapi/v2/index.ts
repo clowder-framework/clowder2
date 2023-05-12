@@ -19,7 +19,7 @@ export type { DatasetOut } from './models/DatasetOut';
 export type { DatasetPatch } from './models/DatasetPatch';
 export type { DatasetRoles } from './models/DatasetRoles';
 export type { EventListenerIn } from './models/EventListenerIn';
-export type { EventListenerJob } from './models/EventListenerJob';
+export type { EventListenerJobDB } from './models/EventListenerJobDB';
 export type { EventListenerOut } from './models/EventListenerOut';
 export type { ExtractorInfo } from './models/ExtractorInfo';
 export type { FeedIn } from './models/FeedIn';

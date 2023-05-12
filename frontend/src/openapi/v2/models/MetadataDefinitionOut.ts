@@ -19,11 +19,11 @@ import type { UserOut } from './UserOut';
  * - [UpdateMethods](https://roman-right.github.io/beanie/api/interfaces/#aggregatemethods)
  */
 export type MetadataDefinitionOut = {
-    _id?: string;
     name: string;
     description?: string;
     context?: Array<string>;
     context_url?: string;
     fields: Array<MetadataField>;
+    _id?: string;
     creator: UserOut;
 }

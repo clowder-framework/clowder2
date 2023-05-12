@@ -1,5 +1,7 @@
-from app.models.mongomodel import MongoModel, BaseModel
-from beanie import Document, View, PydanticObjectId
+import pymongo
+from beanie import Document
+
+from app.models.mongomodel import BaseModel
 
 
 class TokenBase(BaseModel):
@@ -8,4 +10,10 @@ class TokenBase(BaseModel):
 
 
 class TokenDB(Document, TokenBase):
-    pass
+    class Settings:
+        name = "tokens"
+        indexes = [
+            [
+                ("email", pymongo.TEXT),
+            ],
+        ]

@@ -48,15 +48,15 @@ async def logout(
     try:
         user_info = keycloak_openid.userinfo(access_token)
         if (
-            token_exist := await db["tokens"].find_one({"email": user_info["email"]})
+            token_exist := await TokenDB.find_one({"email": user_info["email"]})
         ) is not None:
             # log user out
             try:
                 keycloak_openid.logout(token_exist["refresh_token"])
 
                 # delete entry in the token database
-                await db["tokens"].delete_one({"_id": ObjectId(token_exist["_id"])})
-                return {"status": f"Successfully log user: {user_info} out!"}
+                await token_exist.delete()
+                return {"status": f"Successfully logged user: {user_info} out!"}
             except:
                 raise HTTPException(
                     status_code=403,
@@ -133,14 +133,12 @@ async def auth(
         await db["users"].insert_one(user.to_mongo())
 
     # store/update refresh token and link to that userid
-    if (token_exist := await db["tokens"].find_one({"email": email})) is not None:
+    if (token_exist := await TokenDB.find_one({"email": email})) is not None:
         token_exist.update({"refresh_token": token_body["refresh_token"]})
-        await db["tokens"].replace_one(
-            {"_id": ObjectId(token_exist["_id"])}, token_exist
-        )
+        await token_exist.save()
     else:
         token_created = TokenDB(email=email, refresh_token=token_body["refresh_token"])
-        await db["tokens"].insert_one(token_created.to_mongo())
+        await token_created.insert()
 
     # redirect to frontend
     auth_url = f"{settings.frontend_url}/auth"

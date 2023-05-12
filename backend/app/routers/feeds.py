@@ -47,7 +47,7 @@ async def check_feed_listeners(
 ):
     """Automatically submit new file to listeners on feeds that fit the search criteria."""
     listener_ids_found = []
-    feeds = await FeedDB.find(NE(FeedDB.listeners, []))
+    feeds = await FeedDB.find(NE(FeedDB.listeners, [])).to_list()
     for feed in feeds:
         # Only proceed if feed actually has auto-triggering listeners
         if any(map(lambda li: li.automatic, feed.listeners)):
