@@ -17,6 +17,7 @@ from pymongo import MongoClient
 
 from . import dependencies
 from .config import settings
+from .models.tokens import TokenDB
 from .models.users import UserOut, UserAPIKey, UserDB
 
 logger = logging.getLogger(__name__)
@@ -296,18 +297,16 @@ async def create_user(email: str, password: str, firstName: str, lastName: str):
 async def retreive_refresh_token(
     email: str, db: MongoClient = Depends(dependencies.get_db)
 ):
-    if (token_exist := await db["tokens"].find_one({"email": email})) is not None:
+    if (token_exist := await TokenDB.find_one({"email": email})) is not None:
         try:
             new_tokens = keycloak_openid.refresh_token(token_exist["refresh_token"])
             # update the refresh token in the database
             token_exist.update({"refresh_token": new_tokens["refresh_token"]})
-            await db["tokens"].replace_one(
-                {"_id": ObjectId(token_exist["_id"])}, token_exist
-            )
+            await token_exist.save()
             return {"access_token": new_tokens["access_token"]}
         except KeycloakGetError as e:
             # refresh token invalid; remove from database
-            await db["tokens"].delete_one({"_id": ObjectId(token_exist["_id"])})
+            await token_exist.delete()
             raise HTTPException(
                 status_code=401,
                 detail=str(e),  # "Invalid authentication credentials",

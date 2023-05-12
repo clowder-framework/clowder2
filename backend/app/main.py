@@ -10,6 +10,7 @@ from pydantic import BaseConfig
 from app.config import settings
 from app.keycloak_auth import get_current_username
 from app.models.authorization import AuthorizationDB
+from app.models.tokens import TokenDB
 from app.models.users import UserDB, UserAPIKey
 from app.models.groups import GroupDB
 from app.models.datasets import DatasetDB, DatasetDBViewList
@@ -198,6 +199,7 @@ async def startup_beanie():
             UserDB,
             UserAPIKey,
             GroupDB,
+            TokenDB,
         ],
         recreate_views=True,
     )
