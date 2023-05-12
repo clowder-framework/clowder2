@@ -18,7 +18,6 @@ class FolderIn(FolderBase):
 
 
 class FolderDB(Document, FolderBase):
-    id: PydanticObjectId = Field(None, alias="_id")
     dataset_id: PyObjectId
     parent_folder: Optional[PyObjectId]
     creator: UserOut

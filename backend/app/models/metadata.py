@@ -107,7 +107,6 @@ class MetadataDefinitionIn(MetadataDefinitionBase):
 
 
 class MetadataDefinitionDB(Document, MetadataDefinitionBase):
-    id: PydanticObjectId = Field(None, alias="_id")
     creator: UserOut
 
     class Settings:
@@ -228,7 +227,6 @@ class MetadataDelete(BaseModel):
 
 
 class MetadataDB(Document, MetadataBase):
-    id: PydanticObjectId = Field(None, alias="_id")
     resource: MongoDBRef
     agent: MetadataAgent
     created: datetime = Field(default_factory=datetime.utcnow)

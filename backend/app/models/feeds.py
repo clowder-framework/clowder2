@@ -27,8 +27,6 @@ class FeedIn(JobFeed):
 
 
 class FeedDB(Document, JobFeed, Provenance):
-    id: PydanticObjectId = Field(None, alias="_id")
-
     class Settings:
         name = "feeds"
         indexes = [

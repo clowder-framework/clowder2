@@ -30,8 +30,6 @@ class FileVersion(MongoModel):
 
 
 class FileVersionDB(Document, FileVersion):
-    id: PydanticObjectId = Field(None, alias="_id")
-
     class Settings:
         name = "file_versions"
 
@@ -45,7 +43,6 @@ class FileIn(FileBase):
 
 
 class FileDB(Document, FileBase):
-    id: PydanticObjectId = Field(None, alias="_id")
     creator: UserOut
     created: datetime = Field(default_factory=datetime.utcnow)
     version_id: str = "N/A"

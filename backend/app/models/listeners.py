@@ -67,7 +67,6 @@ class LegacyEventListenerIn(ExtractorInfo):
 class EventListenerDB(Document, EventListenerBase):
     """EventListeners have a name, version, author, description, and optionally properties where extractor_info will be saved."""
 
-    id: PydanticObjectId = Field(None, alias="_id")
     creator: Optional[UserOut] = None
     created: datetime = Field(default_factory=datetime.now)
     modified: datetime = Field(default_factory=datetime.now)
@@ -132,8 +131,6 @@ class EventListenerJobBase(BaseModel):
 class EventListenerJobDB(Document, EventListenerJobBase):
     """This summarizes a submission to an extractor. All messages from that extraction should include this job's ID."""
 
-    id: PydanticObjectId = Field(None, alias="_id")
-
     class Settings:
         name = "listener_jobs"
         indexes = [
@@ -175,7 +172,6 @@ class EventListenerDatasetJobMessage(BaseModel):
 class EventListenerJobUpdateBase(BaseModel):
     """This is a status update message coming from the extractors back to Clowder."""
 
-    id: PydanticObjectId = Field(None, alias="_id")
     job_id: str
     timestamp: datetime = Field(default_factory=datetime.utcnow)
     status: str
@@ -195,8 +191,6 @@ class EventListenerJobUpdateDB(Document, EventListenerJobUpdateBase):
 class EventListenerJobViewList(View, EventListenerJobBase):
     """Get associated resource information for each job"""
 
-    # FIXME This seems to be required to return _id. Otherwise _id is null in the response.
-    id: PydanticObjectId = Field(None, alias="_id")
     creator: UserOut
     created: datetime = Field(default_factory=datetime.utcnow)
     modified: datetime = Field(default_factory=datetime.utcnow)
@@ -262,8 +256,6 @@ class EventListenerJobViewList(View, EventListenerJobBase):
 class EventListenerJobUpdateViewList(View, EventListenerJobUpdateBase):
     """Get associated resource information for each job update"""
 
-    # FIXME This seems to be required to return _id. Otherwise _id is null in the response.
-    id: PydanticObjectId = Field(None, alias="_id")
     creator: UserOut
     created: datetime = Field(default_factory=datetime.utcnow)
     modified: datetime = Field(default_factory=datetime.utcnow)
