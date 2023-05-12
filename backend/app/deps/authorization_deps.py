@@ -86,15 +86,13 @@ async def get_role_by_metadata(
 
 async def get_role_by_group(
     group_id: str,
-    db: MongoClient = Depends(get_db),
     current_user=Depends(get_current_username),
 ) -> RoleType:
     if (group := await GroupDB.get(group_id)) is not None:
-        group_out = GroupOut(**group.dict())
-        if group_out.creator == current_user:
+        if group.creator == current_user:
             # Creator can do everything
             return RoleType.OWNER
-        for u in group_out.users:
+        for u in group.users:
             if u.user.email == current_user:
                 if u.editor:
                     return RoleType.EDITOR
@@ -252,9 +250,7 @@ class GroupAuthorization:
         db: MongoClient = Depends(get_db),
         current_user: str = Depends(get_current_username),
     ):
-        group_q = await GroupDB.get(group_id)
-        if group_q is not None:
-            group = GroupOut(**group_q.dict())
+        if (group := await GroupDB.get(group_id)) is not None:
             if group.creator == current_user:
                 # Creator can do everything
                 return True
