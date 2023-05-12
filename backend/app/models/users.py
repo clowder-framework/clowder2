@@ -4,6 +4,7 @@ from typing import Optional
 from passlib.context import CryptContext
 from pydantic import Field, EmailStr, BaseModel
 from pymongo import MongoClient
+from beanie import Document, View, PydanticObjectId
 
 from app.models.mongomodel import MongoModel
 
@@ -25,7 +26,7 @@ class UserLogin(BaseModel):
     password: str
 
 
-class UserDB(UserBase):
+class UserDB(Document, UserBase):
     first_name: str
     last_name: str
     hashed_password: str = Field()
@@ -34,13 +35,16 @@ class UserDB(UserBase):
     def verify_password(self, password):
         return pwd_context.verify(password, self.hashed_password)
 
+    class Settings:
+        name = "users"
+
 
 class UserOut(UserBase):
     first_name: str
     last_name: str
 
 
-class UserAPIKey(MongoModel):
+class UserAPIKey(Document):
     """API keys can have a reference name (e.g. 'Uploader script')"""
 
     key: str
@@ -48,6 +52,9 @@ class UserAPIKey(MongoModel):
     user: EmailStr
     created: datetime = Field(default_factory=datetime.utcnow)
     expires: Optional[datetime] = None
+
+    class Settings:
+        name = "user_keys"
 
 
 class UserAPIKeyOut(MongoModel):

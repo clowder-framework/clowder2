@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import Optional, List
 
 from pydantic import Field, BaseModel
-
+from beanie import Document, View, PydanticObjectId
 from app.models.mongomodel import OID, MongoModel
 from app.models.users import UserOut
 from app.models.authorization import Provenance, RoleType
@@ -29,8 +29,11 @@ class GroupPatch(BaseModel):
     description: Optional[str]
 
 
-class GroupDB(MongoModel, GroupBase, Provenance):
+class GroupDB(Document, GroupBase, Provenance):
     views: int = 0
+
+    class Settings:
+        name = "groups"
 
 
 class GroupOut(GroupDB):
