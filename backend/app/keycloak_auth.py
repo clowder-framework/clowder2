@@ -145,8 +145,8 @@ async def get_current_user(
     if token:
         try:
             userinfo = keycloak_openid.userinfo(token)
-            user_out = await db["users"].find_one({"email": userinfo["email"]})
-            return UserOut.from_mongo(user_out)
+            user = await UserDB.find_one({"email": userinfo["email"]})
+            return UserOut(**user.dict())
         except KeycloakAuthenticationError as e:
             raise HTTPException(
                 status_code=e.response_code,

@@ -32,8 +32,10 @@ async def create_reply_queue():
     connection = pika.BlockingConnection(parameters)
     channel = connection.channel()
 
-    if (instance_id := db["config"].find_one({"key": "instance_id"})) is not None:
-        instance_id = ConfigEntryOut.from_mongo(instance_id).value
+    if (
+        config_entry := await ConfigEntryDB.find_one({"key": "instance_id"})
+    ) is not None:
+        instance_id = config_entry.value
     else:
         # If no ID has been generated for this instance, generate a 10-digit alphanumeric identifier
         instance_id = "".join(
@@ -43,7 +45,7 @@ async def create_reply_queue():
             for _ in range(10)
         )
         config_entry = ConfigEntryDB(key="instance_id", value=instance_id)
-        db["config"].insert_one(config_entry.to_mongo())
+        await config_entry.insert()
 
     queue_name = "clowder.%s" % instance_id
     channel.exchange_declare(exchange="clowder", durable=True)
@@ -64,7 +66,7 @@ async def submit_file_job(
     token: str = Depends(get_token),
 ):
     # Create an entry in job history with unique ID
-    job = EventListenerDB(
+    job = EventListenerJobDB(
         listener_id=routing_key,
         creator=user,
         resource_ref=MongoDBRef(

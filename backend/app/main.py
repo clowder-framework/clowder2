@@ -10,13 +10,12 @@ from pydantic import BaseConfig
 from app.config import settings
 from app.keycloak_auth import get_current_username
 from app.models.authorization import AuthorizationDB
-from app.models.tokens import TokenDB
-from app.models.users import UserDB, UserAPIKey
-from app.models.groups import GroupDB
+from app.models.config import ConfigEntryDB
 from app.models.datasets import DatasetDB, DatasetDBViewList
 from app.models.feeds import FeedDB
 from app.models.files import FileDB, FileVersionDB
 from app.models.folders import FolderDB
+from app.models.groups import GroupDB
 from app.models.listeners import (
     EventListenerDB,
     EventListenerJobDB,
@@ -25,6 +24,8 @@ from app.models.listeners import (
     EventListenerJobUpdateViewList,
 )
 from app.models.metadata import MetadataDB, MetadataDefinitionDB
+from app.models.tokens import TokenDB
+from app.models.users import UserDB, UserAPIKey
 from app.routers import (
     folders,
     groups,
@@ -182,6 +183,7 @@ async def startup_beanie():
         database=getattr(client, settings.MONGO_DATABASE),
         # Make sure to include all models. If one depends on another that is not in the list it is not clear which one is missing.
         document_models=[
+            ConfigEntryDB,
             DatasetDB,
             DatasetDBViewList,
             AuthorizationDB,
