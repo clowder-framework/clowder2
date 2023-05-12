@@ -6,12 +6,10 @@ from pydantic import Field, EmailStr, BaseModel
 from pymongo import MongoClient
 from beanie import Document, View, PydanticObjectId
 
-from app.models.mongomodel import MongoModel
-
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
-class UserBase(MongoModel):
+class UserBase(BaseModel):
     email: EmailStr
 
 
@@ -57,7 +55,7 @@ class UserAPIKey(Document):
         name = "user_keys"
 
 
-class UserAPIKeyOut(MongoModel):
+class UserAPIKeyOut(BaseModel):
     # don't show the raw key
     name: str
     user: EmailStr

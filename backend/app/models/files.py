@@ -4,7 +4,6 @@ from typing import Optional
 from beanie import Document, PydanticObjectId
 from pydantic import Field, BaseModel
 
-from app.models.mongomodel import MongoModel
 from app.models.pyobjectid import PyObjectId
 from app.models.users import UserOut
 
@@ -20,7 +19,7 @@ class FileContentType(BaseModel):
     main_type: str = "N/A"
 
 
-class FileVersion(MongoModel):
+class FileVersion(BaseModel):
     file_id: PyObjectId
     creator: UserOut
     created: datetime = Field(default_factory=datetime.utcnow)
@@ -34,7 +33,7 @@ class FileVersionDB(Document, FileVersion):
         name = "file_versions"
 
 
-class FileBase(MongoModel):
+class FileBase(BaseModel):
     name: str = "N/A"
 
 
