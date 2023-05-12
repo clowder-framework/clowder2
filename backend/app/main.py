@@ -10,6 +10,8 @@ from pydantic import BaseConfig
 from app.config import settings
 from app.keycloak_auth import get_current_username
 from app.models.authorization import AuthorizationDB
+from app.models.users import UserDB, UserAPIKey
+from app.models.groups import GroupDB
 from app.models.datasets import DatasetDB, DatasetDBViewList
 from app.models.feeds import FeedDB
 from app.models.files import FileDB, FileVersionDB
@@ -170,6 +172,7 @@ def gather_documents():
     pass
 
 
+# TODO add anything with document in here
 @app.on_event("startup")
 async def startup_beanie():
     """Setup Beanie Object Document Mapper (ODM) to interact with MongoDB."""
@@ -192,6 +195,9 @@ async def startup_beanie():
             EventListenerJobUpdateDB,
             EventListenerJobViewList,
             EventListenerJobUpdateViewList,
+            UserDB,
+            UserAPIKey,
+            GroupDB,
         ],
         recreate_views=True,
     )

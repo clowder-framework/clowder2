@@ -72,7 +72,7 @@ async def submit_file_job(
         ),
         parameters=parameters,
     )
-    new_job = await job.save()
+    await job.save()
 
     msg_body = EventListenerJobMessage(
         filename=file_out.name,
@@ -80,7 +80,7 @@ async def submit_file_job(
         id=str(file_out.id),
         datasetId=str(file_out.dataset_id),
         secretKey=token,
-        job_id=str(new_job.id),
+        job_id=str(job.id),
     )
     reply_to = await create_reply_queue()
     rabbitmq_client.basic_publish(
@@ -91,7 +91,7 @@ async def submit_file_job(
             content_type="application/json", delivery_mode=1, reply_to=reply_to
         ),
     )
-    return str(new_job.id)
+    return str(job.id)
 
 
 async def submit_dataset_job(
@@ -109,14 +109,14 @@ async def submit_dataset_job(
         resource_ref=MongoDBRef(collection="dataset", resource_id=dataset_out.id),
         parameters=parameters,
     )
-    new_job = await job.save()
+    await job.save()
 
     msg_body = EventListenerDatasetJobMessage(
         datasetName=dataset_out.name,
         id=str(dataset_out.id),
         datasetId=str(dataset_out.id),
         secretKey=token,
-        job_id=str(new_job.id),
+        job_id=str(job.id),
     )
     reply_to = await create_reply_queue()
     rabbitmq_client.basic_publish(
@@ -127,4 +127,4 @@ async def submit_dataset_job(
             content_type="application/json", delivery_mode=1, reply_to=reply_to
         ),
     )
-    return str(new_job.id)
+    return str(job.id)
