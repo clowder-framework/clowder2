@@ -3,7 +3,6 @@ from typing import Optional, List
 
 from pydantic import Field, BaseModel
 from beanie import Document, View, PydanticObjectId
-from app.models.mongomodel import OID, MongoModel
 from app.models.users import UserOut
 from app.models.authorization import Provenance, RoleType
 

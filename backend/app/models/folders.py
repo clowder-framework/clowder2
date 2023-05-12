@@ -2,14 +2,13 @@ from datetime import datetime
 from typing import Optional
 
 from beanie import Document, PydanticObjectId
-from pydantic import Field
+from pydantic import Field, BaseModel
 
-from app.models.mongomodel import MongoModel
 from app.models.pyobjectid import PyObjectId
 from app.models.users import UserOut
 
 
-class FolderBase(MongoModel):
+class FolderBase(BaseModel):
     name: str = "N/A"
 
 
