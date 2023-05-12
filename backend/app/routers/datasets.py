@@ -218,7 +218,6 @@ async def save_dataset(
         "download": dataset.downloads,
     }
     insert_record(es, "dataset", doc, dataset.id)
-
     return DatasetOut(**dataset.dict())
 
 

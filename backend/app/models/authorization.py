@@ -20,6 +20,17 @@ class RoleType(str, Enum):
     EDITOR = "editor"
 
 
+class Provenance(BaseModel):
+    """Store user who created model, when and last time it was updated.
+    TODO: this generic model should be moved to a global util module in models for all those models that want to
+     store basic provenance.
+    """
+
+    creator: EmailStr
+    created: datetime = Field(default_factory=datetime.utcnow)
+    modified: datetime = Field(default_factory=datetime.utcnow)
+
+
 class AuthorizationBase(BaseModel):
     """Currently, user_ids list is used for primary authorization checks.
     group_ids are kept for convenience (adding/removing users in batch) but user_ids list MUST be kept current.
@@ -33,10 +44,6 @@ class AuthorizationBase(BaseModel):
     class Config:
         # required for Enum to properly work
         use_enum_values = True
-
-
-class Provenance:
-    pass
 
 
 class AuthorizationDB(Document, AuthorizationBase, Provenance):
@@ -71,14 +78,3 @@ class AuthorizationMetadata(BaseModel):
     class Config:
         # required for Enum to properly work
         use_enum_values = True
-
-
-class Provenance(BaseModel):
-    """Store user who created model, when and last time it was updated.
-    TODO: this generic model should be moved to a global util module in models for all those models that want to
-     store basic provenance.
-    """
-
-    creator: EmailStr
-    created: datetime = Field(default_factory=datetime.utcnow)
-    modified: datetime = Field(default_factory=datetime.utcnow)
