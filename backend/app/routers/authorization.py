@@ -1,5 +1,6 @@
 from typing import List
-from beanie import Document, View, PydanticObjectId
+
+from beanie import PydanticObjectId
 from beanie.operators import Or
 from bson import ObjectId
 from fastapi import APIRouter, Depends
@@ -79,6 +80,7 @@ async def get_dataset_role(
 ):
     """Retrieve role of user for a specific dataset."""
     # Get group id and the associated users from authorization
+
     if (
         auth_db := await AuthorizationDB.find_one(
             AuthorizationDB.dataset_id == PyObjectId(dataset_id),

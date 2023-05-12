@@ -1,11 +1,11 @@
 import datetime
 import os
 import random
-import re
 import string
 from typing import List, Optional
 
 from beanie import PydanticObjectId
+from beanie.operators import Or, RegEx
 from bson import ObjectId
 from fastapi import APIRouter, HTTPException, Depends
 from packaging import version
@@ -74,7 +74,6 @@ async def _process_incoming_v1_extractor_info(
 @router.get("/instance")
 async def get_instance_id(
     user=Depends(get_current_user),
-    db: MongoClient = Depends(get_db),
 ):
     instance_id = await ConfigEntryDB.find_one({ConfigEntryDB.key == "instance_id"})
     if instance_id:
@@ -88,7 +87,8 @@ async def get_instance_id(
             for _ in range(10)
         )
         config_entry = ConfigEntryDB(key="instance_id", value=instance_id)
-        return await config_entry.save()
+        await config_entry.save()
+        return config_entry
 
 
 @router.post("", response_model=EventListenerOut)
@@ -151,11 +151,13 @@ async def search_listeners(
         skip -- number of initial records to skip (i.e. for pagination)
         limit -- restrict number of records to be returned (i.e. for pagination)
     """
-    query_regx = re.compile(text, re.IGNORECASE)
     # TODO either use regex or index search
     return (
         await EventListenerDB.find(
-            {"$or": [{"name": query_regx}, {"description": query_regx}]}
+            Or(
+                RegEx(field=EventListenerDB.name, pattern=text),
+                RegEx(field=EventListenerDB.description, pattern=text),
+            ),
         )
         .skip(skip)
         .limit(limit)

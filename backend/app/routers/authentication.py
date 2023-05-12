@@ -44,9 +44,8 @@ async def save_user(userIn: UserIn, db: MongoClient = Depends(dependencies.get_d
         hashed_password=hashed_password,
         keycloak_id=keycloak_user,
     )
-    res = await UserDB.insert_one(userDB)
-    found = await UserDB.find_one({"_id": res.inserted_id})
-    return UserOut.from_mongo(found).dict(exclude={"create_at"})
+    await userDB.insert()
+    return UserOut(**userDB.dict())
 
 
 @router.post("/login")
@@ -72,9 +71,8 @@ async def login(userIn: UserLogin, db: MongoClient = Depends(dependencies.get_db
 
 async def authenticate_user(email: str, password: str, db: MongoClient):
     user = await UserDB.find_one({"email": email})
-    current_user = UserDB.from_mongo(user)
     if not user:
         return None
-    if not current_user.verify_password(password):
+    if not user.verify_password(password):
         return None
-    return current_user
+    return user

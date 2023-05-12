@@ -198,27 +198,28 @@ async def save_dataset(
     db: MongoClient = Depends(dependencies.get_db),
     es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
 ):
-    dataset_out = await DatasetDB(**dataset_in.dict(), creator=user).save()
+    dataset = DatasetDB(**dataset_in.dict(), creator=user)
+    await dataset.save()
 
     # Create authorization entry
     await AuthorizationDB(
-        dataset_id=dataset_out.id,
+        dataset_id=dataset.id,
         role=RoleType.OWNER,
         creator=user.email,
     ).save()
 
     # Add en entry to the dataset index
     doc = {
-        "name": dataset_out.name,
-        "description": dataset_out.description,
-        "author": dataset_out.creator.email,
-        "created": dataset_out.created,
-        "modified": dataset_out.modified,
-        "download": dataset_out.downloads,
+        "name": dataset.name,
+        "description": dataset.description,
+        "author": dataset.creator.email,
+        "created": dataset.created,
+        "modified": dataset.modified,
+        "download": dataset.downloads,
     }
-    insert_record(es, "dataset", doc, dataset_out.id)
+    insert_record(es, "dataset", doc, dataset.id)
 
-    return dataset_out
+    return DatasetOut(**dataset.dict())
 
 
 @router.get("", response_model=List[DatasetOut])
