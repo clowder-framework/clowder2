@@ -370,7 +370,6 @@ async def get_file_summary(
 @router.get("/{file_id}/versions", response_model=List[FileVersion])
 async def get_file_versions(
     file_id: str,
-    db: MongoClient = Depends(dependencies.get_db),
     skip: int = 0,
     limit: int = 20,
     allow: bool = Depends(FileAuthorization("viewer")),
