@@ -395,20 +395,16 @@ async def get_file_versions(
 async def get_file_extract(
     file_id: str,
     extractorName: str,
-    request: Request,
     # parameters don't have a fixed model shape
     parameters: dict = None,
     user=Depends(get_current_user),
     credentials: HTTPAuthorizationCredentials = Security(security),
-    db: MongoClient = Depends(dependencies.get_db),
     rabbitmq_client: BlockingChannel = Depends(dependencies.get_rabbitmq),
     allow: bool = Depends(FileAuthorization("uploader")),
 ):
     if extractorName is None:
         raise HTTPException(status_code=400, detail=f"No extractorName specified")
-    file = await FileDB.get(PydanticObjectId(file_id))
-    if file is not None:
-        file_out = FileOut(**file.dict())
+    if (file := await FileDB.get(PydanticObjectId(file_id))) is not None:
         access_token = credentials.credentials
 
         # backward compatibility? Get extractor info from request (Clowder v1)
@@ -417,7 +413,7 @@ async def get_file_extract(
         if parameters is None:
             parameters = {}
         return await submit_file_job(
-            file_out,
+            FileOut(**file.dict()),
             routing_key,
             parameters,
             user,
