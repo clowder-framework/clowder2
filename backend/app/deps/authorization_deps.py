@@ -8,7 +8,7 @@ from app.dependencies import get_db
 from app.keycloak_auth import get_current_username
 from app.models.authorization import RoleType, AuthorizationDB
 from app.models.datasets import DatasetDB
-from app.models.files import FileOut
+from app.models.files import FileOut, FileDB
 from app.models.groups import GroupOut, GroupDB
 from app.models.metadata import MetadataDB
 from app.models.pyobjectid import PyObjectId
@@ -153,10 +153,9 @@ class FileAuthorization:
         db: MongoClient = Depends(get_db),
         current_user: str = Depends(get_current_username),
     ):
-        if (file := await db["files"].find_one({"_id": ObjectId(file_id)})) is not None:
-            file_out = FileOut.from_mongo(file)
+        if (file := await FileDB.get(ObjectId(file_id))) is not None:
             authorization = await AuthorizationDB.find_one(
-                AuthorizationDB.dataset_id == file_out.dataset_id,
+                AuthorizationDB.dataset_id == file.dataset_id,
                 Or(
                     AuthorizationDB.creator == current_user,
                     AuthorizationDB.user_ids == current_user,

@@ -3,12 +3,11 @@ from enum import Enum, auto
 from typing import Optional, List
 
 import pymongo
-from beanie import Document, View, PydanticObjectId
+from beanie import Document, View
 from pydantic import BaseModel, Field
 
 from app.models.authorization import RoleType, AuthorizationDB
 from app.models.groups import GroupOut
-from app.models.mongomodel import MongoModel
 from app.models.users import UserOut
 
 
@@ -55,6 +54,9 @@ class DatasetDB(Document, DatasetBase):
             ],
         ]
 
+    class Config:
+        fields = {"id": "id"}
+
 
 class DatasetDBViewList(View, DatasetBase):
     creator: UserOut
@@ -82,7 +84,8 @@ class DatasetDBViewList(View, DatasetBase):
 
 
 class DatasetOut(DatasetDB):
-    pass
+    class Config:
+        fields = {"id": "id"}
 
 
 class UserAndRole(BaseModel):

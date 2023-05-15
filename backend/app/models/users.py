@@ -36,6 +36,9 @@ class UserDB(Document, UserBase):
     class Settings:
         name = "users"
 
+    class Config:
+        fields: {"id": "id"}
+
 
 class UserOut(UserBase):
     first_name: str
@@ -53,6 +56,9 @@ class UserAPIKey(Document):
 
     class Settings:
         name = "user_keys"
+
+    class Config:
+        fields: {"id": "id"}
 
 
 class UserAPIKeyOut(BaseModel):
