@@ -87,16 +87,13 @@ async def get_token(
         try:
             payload = serializer.loads(api_key)
             # Key is valid, check expiration date in database
-            if (
-                    key := await UserAPIKey.find_one(
-                        {"user": payload["user"], "key": payload["key"]}
-                    )
-            ) is not None:
+            key = await UserAPIKey.find_one(UserAPIKey.user == payload["user"], UserAPIKey.key == payload["key"])
+            if key is not None:
                 current_time = datetime.utcnow()
 
                 if key.expires is not None and current_time >= key.expires:
                     # Expired key, delete it first
-                    key.delete()
+                    await key.delete()
                     raise HTTPException(
                         status_code=401,
                         detail={"error": "Key is expired."},
@@ -140,7 +137,7 @@ async def get_current_user(
     if token:
         try:
             userinfo = keycloak_openid.userinfo(token)
-            user = await UserDB.find_one({"email": userinfo["email"]})
+            user = await UserDB.find_one(UserDB.email == userinfo["email"])
             return UserOut(**user.dict())
         except KeycloakAuthenticationError as e:
             raise HTTPException(
@@ -154,23 +151,21 @@ async def get_current_user(
         try:
             payload = serializer.loads(api_key)
             # Key is valid, check expiration date in database
-            if (
-                    key := await UserAPIKey.find_one(
-                        {"user": payload["user"], "key": payload["key"]}
-                    )
-            ) is not None:
+            key = await UserAPIKey.find_one(UserAPIKey.user == payload["user"], UserAPIKey.key == payload["key"])
+            if key is not None:
                 current_time = datetime.utcnow()
 
                 if key.expires is not None and current_time >= key.expires:
                     # Expired key, delete it first
-                    key.delete()
+                    await key.delete()
                     raise HTTPException(
                         status_code=401,
                         detail={"error": "Key is expired."},
                         headers={"WWW-Authenticate": "Bearer"},
                     )
                 else:
-                    return await UserDB.find_one({"email": key.user})
+                    user = await UserDB.find_one(UserDB.email == key.user)
+                    return UserOut(**user.dict())
             else:
                 raise HTTPException(
                     status_code=401,
@@ -213,16 +208,13 @@ async def get_current_username(
         try:
             payload = serializer.loads(api_key)
             # Key is valid, check expiration date in database
-            if (
-                    key := await UserAPIKey.find_one(
-                        {"user": payload["user"], "key": payload["key"]}
-                    )
-            ) is not None:
+            key = await UserAPIKey.find_one(UserAPIKey.user == payload["user"], UserAPIKey.key == payload.key)
+            if key is not None:
                 current_time = datetime.utcnow()
 
                 if key.expires is not None and current_time >= key.expires:
                     # Expired key, delete it first
-                    key.delete()
+                    await key.delete()
                     raise HTTPException(
                         status_code=401,
                         detail={"error": "Key is expired."},
