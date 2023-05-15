@@ -102,15 +102,15 @@ def callback(ch, method, properties, body):
         if status == EventListenerJobStatus.STARTED and job.started is None:
             job.started = timestamp
         elif (
-            status == EventListenerJobStatus.SUCCEEDED
-            or status == EventListenerJobStatus.ERROR
-            or status == EventListenerJobStatus.SKIPPED
+                status == EventListenerJobStatus.SUCCEEDED
+                or status == EventListenerJobStatus.ERROR
+                or status == EventListenerJobStatus.SKIPPED
         ):
             job.finished = timestamp
             update_duration = True
         elif (
-            status == EventListenerJobStatus.PROCESSING
-            or status == EventListenerJobStatus.RESUBMITTED
+                status == EventListenerJobStatus.PROCESSING
+                or status == EventListenerJobStatus.RESUBMITTED
         ):
             job.updated = timestamp
             update_duration = True
@@ -154,7 +154,7 @@ async def listen_for_messages():
             for _ in range(10)
         )
         config_entry = ConfigEntryDB(key="instance_id", value=instance_id)
-        config_entry.insert()
+        await config_entry.insert()
 
     channel.exchange_declare(exchange="clowder", durable=True)
     result = channel.queue_declare(
