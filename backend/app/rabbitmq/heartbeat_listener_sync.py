@@ -1,14 +1,13 @@
-import logging
-import pika
-import json
 import asyncio
+import json
+import logging
+
+import pika
 from packaging import version
 from pymongo import MongoClient
 
 from app.config import settings
-from app.models.search import SearchCriteria
 from app.models.listeners import EventListenerDB, EventListenerOut, ExtractorInfo
-from app.routers.feeds import FeedIn, FeedListener, FeedOut, FeedDB, associate_listener
 from app.routers.listeners import _process_incoming_v1_extractor_info
 
 logging.basicConfig(level=logging.INFO)
@@ -33,18 +32,17 @@ def callback(ch, method, properties, body):
     db = mongo_client[settings.MONGO_DATABASE]
 
     # check to see if extractor alredy exists and update if so
-    existing_extractor = db["listeners"].find_one({"name": msg["queue"]})
+    existing_extractor = await EventListenerDB.find_one(EventListenerDB.name == msg["queue"])
     if existing_extractor is not None:
         # Update existing listener
-        existing_version = existing_extractor["version"]
+        existing_version = existing_extractor.version
         new_version = extractor_db.version
         if version.parse(new_version) > version.parse(existing_version):
             # if this is a new version, add it to the database
-            new_extractor = db["listeners"].insert_one(extractor_db.to_mongo())
-            found = db["listeners"].find_one({"_id": new_extractor.inserted_id})
+            new_extractor = await extractor_db.insert()
             # TODO - for now we are not deleting an older version of the extractor, just adding a new one
             # removed = db["listeners"].delete_one({"_id": existing_extractor["_id"]})
-            extractor_out = EventListenerOut.from_mongo(found)
+            extractor_out = EventListenerOut(**new_extractor.dict())
             logger.info(
                 "%s updated from %s to %s"
                 % (extractor_name, existing_version, new_version)
@@ -52,9 +50,8 @@ def callback(ch, method, properties, body):
             return extractor_out
     else:
         # Register new listener
-        new_extractor = db["listeners"].insert_one(extractor_db.to_mongo())
-        found = db["listeners"].find_one({"_id": new_extractor.inserted_id})
-        extractor_out = EventListenerOut.from_mongo(found)
+        new_extractor = await extractor_db.insert()
+        extractor_out = EventListenerOut(**new_extractor.dict())
         logger.info("New extractor registered: " + extractor_name)
 
         # Assign MIME-based listener if needed
