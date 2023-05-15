@@ -1,12 +1,11 @@
 import logging
 import traceback
-import motor.motor_asyncio
 from typing import Optional, Generator
-from fastapi import Depends
-from pymongo import MongoClient
+
+import motor.motor_asyncio
 
 from app.config import settings
-from app.models.errors import Error
+from app.models.errors import ErrorDB
 from app.models.mongomodel import MongoDBRef
 
 logger = logging.getLogger(__name__)
@@ -20,9 +19,9 @@ async def _get_db() -> Generator:
 
 
 async def log_error(
-    exception: Exception,
-    resource: Optional[MongoDBRef] = None,
-    user: Optional[str] = None,
+        exception: Exception,
+        resource: Optional[MongoDBRef] = None,
+        user: Optional[str] = None,
 ):
     """Insert new Error into the database.
 
@@ -36,5 +35,6 @@ async def log_error(
     trace = traceback.format_exc(exception, limit=4)
 
     logger.error(message)
-    error_log = Error(message=message, trace=trace, resource=resource, user=user)
-    await db["errors"].insert_one(error_log.to_mongo())
+    error_log = ErrorDB(message=message, trace=trace, resource=resource, user=user)
+    await error_log.insert()
+
