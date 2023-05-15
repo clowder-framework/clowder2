@@ -8,7 +8,6 @@ from pydantic import BaseModel, Field
 
 from app.models.authorization import RoleType, AuthorizationDB
 from app.models.groups import GroupOut
-from app.models.mongomodel import MongoModel
 from app.models.users import UserOut
 
 
