@@ -12,9 +12,7 @@ from keycloak.exceptions import KeycloakAuthenticationError, KeycloakGetError
 from keycloak.keycloak_admin import KeycloakAdmin
 from keycloak.keycloak_openid import KeycloakOpenID
 from pydantic import Json
-from pymongo import MongoClient
 
-from . import dependencies
 from .config import settings
 from .models.tokens import TokenDB
 from .models.users import UserOut, UserAPIKey, UserDB
@@ -55,7 +53,6 @@ api_key_header = APIKeyHeader(name="x-api-key", auto_error=False)
 async def get_token(
         token: str = Security(oauth2_scheme),
         api_key: str = Security(api_key_header),
-        db: MongoClient = Depends(dependencies.get_db),
 ) -> Json:
     """Decode token. Use to secure endpoints."""
     if token:
@@ -135,7 +132,6 @@ async def get_user(identity: Json = Depends(get_token)):
 async def get_current_user(
         token: str = Security(oauth2_scheme),
         api_key: str = Security(api_key_header),
-        db: MongoClient = Depends(dependencies.get_db),
 ) -> UserOut:
     """Retrieve the user object from Mongo by first getting user id from JWT and then querying Mongo.
     Potentially expensive. Use `get_current_username` if all you need is user name.
@@ -198,7 +194,6 @@ async def get_current_user(
 async def get_current_username(
         token: str = Security(oauth2_scheme),
         api_key: str = Security(api_key_header),
-        db: MongoClient = Depends(dependencies.get_db),
 ) -> str:
     """Retrieve the user id from the JWT token. Does not query MongoDB."""
     if token:
