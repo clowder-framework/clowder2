@@ -230,7 +230,7 @@ async def get_datasets(
 ):
     # TODO: Other endpoints convert DB response to DatasetOut(**response.dict())
     if mine:
-        return await DatasetDBViewList.find(
+        datasets = await DatasetDBViewList.find(
             {
                 "$and": [
                     {"author.email": user_id},
@@ -242,7 +242,7 @@ async def get_datasets(
             limit=limit,
         ).to_list()
     else:
-        return await DatasetDBViewList.find(
+        datasets = await DatasetDBViewList.find(
             Or(
                 DatasetDBViewList.creator.email == user_id,
                 DatasetDBViewList.auth.user_ids == user_id,
@@ -251,6 +251,8 @@ async def get_datasets(
             skip=skip,
             limit=limit,
         ).to_list()
+
+    return [dataset.dict() for dataset in datasets]
 
 
 @router.get("/{dataset_id}", response_model=DatasetOut)
