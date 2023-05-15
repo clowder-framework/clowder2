@@ -20,7 +20,7 @@ import type { UserOut } from './UserOut';
 export type DatasetOut = {
     name?: string;
     description?: string;
-    _id?: string;
+    id?: string;
     creator: UserOut;
     created?: string;
     modified?: string;

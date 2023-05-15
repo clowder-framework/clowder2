@@ -18,8 +18,8 @@ import type { UserOut } from './UserOut';
  * - [UpdateMethods](https://roman-right.github.io/beanie/api/interfaces/#aggregatemethods)
  */
 export type FolderOut = {
-    _id?: string;
     name?: string;
+    _id?: string;
     dataset_id: string;
     parent_folder?: string;
     creator: UserOut;
