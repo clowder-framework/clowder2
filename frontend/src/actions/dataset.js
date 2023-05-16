@@ -5,7 +5,7 @@ import {
 	resetFailedReason,
 } from "./common";
 import config from "../app.config";
-import { getHeader, renameIdArray } from "../utils/common";
+import { getHeader } from "../utils/common";
 
 export const SET_DATASET_GROUP_ROLE = "SET_DATASET_GROUP_ROLE";
 
@@ -226,11 +226,9 @@ export function fetchDatasets(skip = 0, limit = 21, mine = false) {
 		// TODO: Parameters for dates? paging?
 		return V2.DatasetsService.getDatasetsApiV2DatasetsGet(skip, limit, mine)
 			.then((json) => {
-				// FIXME temporary workaround to map from `_id` returned by API to `id` expected by javascript
-				const newArray = renameIdArray(json);
 				dispatch({
 					type: RECEIVE_DATASETS,
-					datasets: newArray,
+					datasets: json,
 					receivedAt: Date.now(),
 				});
 			})

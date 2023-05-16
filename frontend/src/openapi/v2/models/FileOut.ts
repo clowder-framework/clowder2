@@ -19,8 +19,8 @@ import type { UserOut } from './UserOut';
  * - [UpdateMethods](https://roman-right.github.io/beanie/api/interfaces/#aggregatemethods)
  */
 export type FileOut = {
-    _id?: string;
     name?: string;
+    _id?: string;
     creator: UserOut;
     created?: string;
     version_id?: string;

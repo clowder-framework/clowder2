@@ -1,5 +1,7 @@
 from datetime import datetime
 from typing import Optional
+
+from beanie import Document
 from pydantic import Field, BaseModel
 
 from app.models.mongomodel import MongoDBRef
@@ -22,3 +24,8 @@ class Error(BaseModel):
     resource: Optional[MongoDBRef] = None
     user_id: Optional[str] = None
     timestamp: datetime = Field(default_factory=datetime.utcnow)
+
+
+class ErrorDB(Document, Error):
+    class Settings:
+        name = "errors"
