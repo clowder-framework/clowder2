@@ -58,7 +58,7 @@ def callback(ch, method, properties, body):
             processed_feed = await _process_incoming_v1_extractor_info(
                 extractor_name, extractor_out.id, process
             )
-            processed_feed.insert()
+            await processed_feed.insert()
 
         return extractor_out
 

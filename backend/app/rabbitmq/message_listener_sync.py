@@ -85,7 +85,7 @@ def callback(ch, method, properties, body):
     # TODO: Updating an event message could go in rabbitmq/listeners
 
     # Check if the job exists, and update if so
-    job = EventListenerDB.find_one(EventListenerDB.id == ObjectId(job_id))
+    job = await EventListenerDB.find_one(EventListenerDB.id == ObjectId(job_id))
     if job:
         # Update existing job with newest info
         job.updated = timestamp
@@ -137,7 +137,9 @@ async def listen_for_messages():
     connection = pika.BlockingConnection(parameters)
     channel = connection.channel()
 
-    if (config_entry := ConfigEntryOut.find_one({"key": "instance_id"})) is not None:
+    if (
+        config_entry := await ConfigEntryOut.find_one({"key": "instance_id"})
+    ) is not None:
         instance_id = config_entry.value
     else:
         # If no ID has been generated for this instance, generate a 10-digit alphanumeric identifier

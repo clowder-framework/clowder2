@@ -44,7 +44,7 @@ async def save_authorization(
 
     # Retrieve users from groups in mongo
     user_ids = authorization_in.user_ids
-    group_list = GroupDB.find(In(GroupDB.id, authorization_in.group_ids))
+    group_list = await GroupDB.find(In(GroupDB.id, authorization_in.group_ids))
     found_groups = 0
     async for group in group_list:
         found_groups += 1
@@ -61,8 +61,8 @@ async def save_authorization(
     authorization = await AuthorizationDB(
         **authorization_in.dict(), creator=user, user_ids=user_ids
     )
-    authorization_db = authorization.insert()
-    return authorization_db
+    await authorization.insert()
+    return authorization
 
 
 @router.get("/datasets/{dataset_id}/role", response_model=AuthorizationDB)
@@ -169,13 +169,14 @@ async def set_dataset_group_role(
                 user_ids = []
                 for u in group.users:
                     user_ids.append(u.user.email)
-                auth_db = await AuthorizationDB(
+                auth_db = AuthorizationDB(
                     creator=user_id,
                     dataset_id=PyObjectId(dataset_id),
                     role=role,
                     group_ids=[PyObjectId(group_id)],
                     user_ids=user_ids,
-                ).insert()
+                )
+                await auth_db.insert()
                 return auth_db
         else:
             raise HTTPException(status_code=404, detail=f"Group {group_id} not found")
@@ -208,7 +209,7 @@ async def set_dataset_user_role(
                 await auth_db.save()
                 if username in auth_db.user_ids:
                     # Only add user entry if all the others occurrences are from associated groups
-                    group_list = GroupDB.find(In(GroupDB.id, auth_db.group_ids))
+                    group_list = await GroupDB.find(In(GroupDB.id, auth_db.group_ids))
                     group_occurrences = 0
                     async for group in group_list:
                         for u in group.users:
@@ -223,12 +224,13 @@ async def set_dataset_user_role(
                 return auth_db
             else:
                 # Create a new entry
-                auth_db = await AuthorizationDB(
+                auth_db = AuthorizationDB(
                     creator=user_id,
                     dataset_id=PyObjectId(dataset_id),
                     role=role,
                     user_ids=[username],
-                ).insert()
+                )
+                await auth_db.insert()
                 return auth_db
 
         else:

@@ -153,15 +153,15 @@ async def _create_folder_structure(
             "name": k,
             "parent_folder": parent_folder_id,
         }
-        folder_db = await FolderDB(**folder_dict, creator=user).insert()
-        new_folder_id = folder_db.id
+        folder_db = FolderDB(**folder_dict, creator=user)
+        await folder_db.insert()
 
         # Store ID and call recursively on child folders
         new_folder_path = folder_path + os.path.sep + k
-        folder_lookup[new_folder_path] = new_folder_id
+        folder_lookup[new_folder_path] = folder_db.id
         if isinstance(v, Mapping):
             folder_lookup = await _create_folder_structure(
-                dataset_id, v, new_folder_path, folder_lookup, user, new_folder_id
+                dataset_id, v, new_folder_path, folder_lookup, user, folder_db.id
             )
 
     return folder_lookup
@@ -338,7 +338,7 @@ async def patch_dataset(
         }
         update_record(es, "dataset", doc, dataset_id)
         # updating metadata in elasticsearch
-        metadata = MetadataDB.find_one(
+        metadata = await MetadataDB.find_one(
             MetadataDB.resource.resource_id == ObjectId(dataset_id)
         )
         if metadata:

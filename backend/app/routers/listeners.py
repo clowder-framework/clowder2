@@ -179,7 +179,7 @@ async def list_default_labels(user=Depends(get_current_username)):
 async def get_listener(listener_id: str, user=Depends(get_current_username)):
     """Return JSON information about an Event Listener if it exists."""
     if (
-        listener := EventListenerDB.find_one(PydanticObjectId(listener_id))
+        listener := await EventListenerDB.find_one(PydanticObjectId(listener_id))
     ) is not None:
         return listener.dict()
     raise HTTPException(status_code=404, detail=f"listener {listener_id} not found")
@@ -222,7 +222,9 @@ async def edit_listener(
         listener_id -- UUID of the listener to be udpated
         listener_in -- JSON object including updated information
     """
-    listener = EventListenerDB.find_one(EventListenerDB.id == ObjectId(listener_id))
+    listener = await EventListenerDB.find_one(
+        EventListenerDB.id == ObjectId(listener_id)
+    )
     if listener:
         # TODO: Refactor this with permissions checks etc.
         listener_update = dict(listener_in) if listener_in is not None else {}
@@ -242,10 +244,10 @@ async def delete_listener(
     user=Depends(get_current_username),
 ):
     """Remove an Event Listener from the database. Will not clear event history for the listener."""
-    listener = EventListenerDB.find(EventListenerDB.id == ObjectId(listener_id))
+    listener = await EventListenerDB.find(EventListenerDB.id == ObjectId(listener_id))
     if listener:
         # unsubscribe the listener from any feeds
-        feeds = FeedDB.find(FeedDB.listeners.listener_id == ObjectId(listener_id))
+        feeds = await FeedDB.find(FeedDB.listeners.listener_id == ObjectId(listener_id))
         for feed in feeds:
             await disassociate_listener_db(feed.id, listener_id)
         await listener.delete()

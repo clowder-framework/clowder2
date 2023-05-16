@@ -61,7 +61,7 @@ async def _resubmit_file_extractors(
 
     """
     resubmitted_jobs = []
-    jobs = EventListenerJobDB.find(
+    jobs = await EventListenerJobDB.find(
         EventListenerJobDB.resource_ref.resource_id == ObjectId(file.id),
         EventListenerJobDB.resource_ref.version == file.version_num - 1,
     )

@@ -154,7 +154,7 @@ async def replace_dataset_metadata(
 
         # Filter by MetadataAgent
         if metadata_in.extractor is not None:
-            listener = EventListenerDB.find_one(
+            listener = await EventListenerDB.find_one(
                 EventListenerDB.name == metadata_in.extractor.name,
                 EventListenerDB.version == metadata_in.extractor.version,
             )
@@ -231,7 +231,7 @@ async def update_dataset_metadata(
 
         # Filter by MetadataAgent
         if metadata_in.extractor is not None:
-            listener = EventListenerDB.find_one(
+            listener = await EventListenerDB.find_one(
                 EventListenerDB.name == metadata_in.extractor.name,
                 EventListenerDB.version == metadata_in.extractor.version,
             )
@@ -319,7 +319,7 @@ async def delete_dataset_metadata(
         # Filter by MetadataAgent
         extractor_info = metadata_in.extractor_info
         if extractor_info is not None:
-            listener = EventListenerDB.find_one(
+            listener = await EventListenerDB.find_one(
                 EventListenerDB.name == metadata_in.extractor.name,
                 EventListenerDB.version == metadata_in.extractor.version,
             )
