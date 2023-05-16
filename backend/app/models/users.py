@@ -1,10 +1,10 @@
 from datetime import datetime
 from typing import Optional
 
+from beanie import Document
 from passlib.context import CryptContext
 from pydantic import Field, EmailStr, BaseModel
 from pymongo import MongoClient
-from beanie import Document, View, PydanticObjectId
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -36,13 +36,13 @@ class UserDB(Document, UserBase):
     class Settings:
         name = "users"
 
-    class Config:
-        fields: {"id": "id"}
-
 
 class UserOut(UserBase):
     first_name: str
     last_name: str
+
+    class Config:
+        fields = {"id": "id"}
 
 
 class UserAPIKey(Document):

@@ -2,15 +2,12 @@ import json
 import logging
 
 import requests
-from bson import ObjectId
-from fastapi import APIRouter, HTTPException, Depends, Security
+from fastapi import APIRouter, HTTPException, Security
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from jose import jwt, ExpiredSignatureError, JWTError
 from keycloak.exceptions import KeycloakAuthenticationError, KeycloakGetError
-from pymongo import MongoClient
 from starlette.responses import RedirectResponse
 
-from app import dependencies
 from app.config import settings
 from app.keycloak_auth import (
     keycloak_openid,
@@ -40,7 +37,6 @@ async def login() -> RedirectResponse:
 @router.get("/logout")
 async def logout(
     credentials: HTTPAuthorizationCredentials = Security(security),
-    db: MongoClient = Depends(dependencies.get_db),
 ):
     """Logout of keycloak."""
     # get user info
@@ -99,9 +95,7 @@ async def login(userIn: UserIn):
 
 
 @router.get("")
-async def auth(
-    code: str, db: MongoClient = Depends(dependencies.get_db)
-) -> RedirectResponse:
+async def auth(code: str) -> RedirectResponse:
     """Redirect endpoint Keycloak redirects to after login."""
     logger.info(f"In /api/v2/auth")
     # get token from Keycloak
@@ -129,12 +123,14 @@ async def auth(
         hashed_password="",
         keycloak_id=keycloak_id,
     )
-    if (await db["users"].find_one({"email": email})) is None:
-        await db["users"].insert_one(user.to_mongo())
+    matched_user = await UserDB.find_one(UserDB.email == email)
+    if matched_user is None:
+        await user.insert()
 
     # store/update refresh token and link to that userid
-    if (token_exist := await TokenDB.find_one({"email": email})) is not None:
-        token_exist.update({"refresh_token": token_body["refresh_token"]})
+    token_exist = await TokenDB.find_one(TokenDB.email == email)
+    if token_exist is not None:
+        token_exist.refresh_token = token_body["refresh_token"]
         await token_exist.save()
     else:
         token_created = TokenDB(email=email, refresh_token=token_body["refresh_token"])
@@ -151,7 +147,6 @@ async def auth(
 @router.get("/refresh_token")
 async def refresh_token(
     credentials: HTTPAuthorizationCredentials = Security(security),
-    db: MongoClient = Depends(dependencies.get_db),
 ):
     access_token = credentials.credentials
 
@@ -163,11 +158,11 @@ async def refresh_token(
             options={"verify_aud": False},
         )
         email = token_json["email"]
-        return await retreive_refresh_token(email, db)
+        return await retreive_refresh_token(email)
     except (ExpiredSignatureError, JWTError):
         # retreive the refresh token and try refresh
         email = jwt.get_unverified_claims(access_token)["email"]
-        return await retreive_refresh_token(email, db)
+        return await retreive_refresh_token(email)
     except KeycloakGetError as e:
         raise HTTPException(
             status_code=e.response_code,

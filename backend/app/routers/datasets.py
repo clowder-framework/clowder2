@@ -154,9 +154,8 @@ async def _create_folder_structure(
             "name": k,
             "parent_folder": parent_folder_id,
         }
-        folder_db = FolderDB(**folder_dict, creator=user)
-        new_folder = await db["folders"].insert_one(folder_db.to_mongo())
-        new_folder_id = new_folder.inserted_id
+        folder_db = await FolderDB(**folder_dict, creator=user).insert()
+        new_folder_id = folder_db.id
 
         # Store ID and call recursively on child folders
         new_folder_path = folder_path + os.path.sep + k
@@ -231,7 +230,7 @@ async def get_datasets(
 ):
     # TODO: Other endpoints convert DB response to DatasetOut(**response.dict())
     if mine:
-        return await DatasetDBViewList.find(
+        datasets = await DatasetDBViewList.find(
             {
                 "$and": [
                     {"author.email": user_id},
@@ -243,7 +242,7 @@ async def get_datasets(
             limit=limit,
         ).to_list()
     else:
-        return await DatasetDBViewList.find(
+        datasets = await DatasetDBViewList.find(
             Or(
                 DatasetDBViewList.creator.email == user_id,
                 DatasetDBViewList.auth.user_ids == user_id,
@@ -253,6 +252,8 @@ async def get_datasets(
             limit=limit,
         ).to_list()
 
+    return [dataset.dict() for dataset in datasets]
+
 
 @router.get("/{dataset_id}", response_model=DatasetOut)
 async def get_dataset(
@@ -260,7 +261,7 @@ async def get_dataset(
     allow: bool = Depends(Authorization("viewer")),
 ):
     if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
-        return dataset
+        return dataset.dict()
     raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
 
 
@@ -438,10 +439,6 @@ async def add_folder(
     allow: bool = Depends(Authorization("uploader")),
 ):
     if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
-        folder_dict = folder_in.dict()
-        folder_db = FolderDB(
-            **folder_in.dict(), creator=user, dataset_id=PyObjectId(dataset_id)
-        )
         parent_folder = folder_in.parent_folder
         if parent_folder is not None:
             folder = await db["folders"].find_one({"_id": ObjectId(parent_folder)})
@@ -449,9 +446,10 @@ async def add_folder(
                 raise HTTPException(
                     status_code=400, detail=f"Parent folder {parent_folder} not found"
                 )
-        new_folder = await db["folders"].insert_one(folder_db.to_mongo())
-        found = await db["folders"].find_one({"_id": new_folder.inserted_id})
-        folder_out = FolderOut.from_mongo(found)
+        new_folder = await FolderDB(
+            **folder_in.dict(), creator=user, dataset_id=PyObjectId(dataset_id)
+        ).insert()
+        folder_out = FolderOut(**new_folder.dict())
         return folder_out
     raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
 
@@ -508,7 +506,7 @@ async def delete_folder(
             await remove_folder_entry(folder_id, db)
             async for file in db["files"].find({"folder_id": ObjectId(folder_id)}):
                 file = FileOut(**file)
-                await remove_file_entry(file.id, db, fs, es)
+                await remove_file_entry(file.id, fs, es)
 
             # list all child folders and delete child folders/files
             parent_folder_id = folder_id
@@ -538,7 +536,7 @@ async def delete_folder(
                         async for file in db["files"].find(
                             {"folder_id": ObjectId(folder.id)}
                         ):
-                            folder = FolderOut(**folder)
+                            folder = FolderOut(**folder.dict())
                             parent_folder_id = folder.id
 
                             # recursively delete child folder and files
@@ -549,7 +547,7 @@ async def delete_folder(
                                 {"folder_id": ObjectId(folder.id)}
                             ):
                                 file = FileOut(**file)
-                                await remove_file_entry(file.id, db, fs, es)
+                                await remove_file_entry(file.id, fs, es)
 
             await _delete_nested_folders(parent_folder_id)
             return {"deleted": folder_id}

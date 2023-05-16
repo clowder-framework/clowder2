@@ -12,6 +12,7 @@ from app.keycloak_auth import get_current_username
 from app.models.authorization import AuthorizationDB
 from app.models.config import ConfigEntryDB
 from app.models.datasets import DatasetDB, DatasetDBViewList
+from app.models.errors import ErrorDB
 from app.models.feeds import FeedDB
 from app.models.files import FileDB, FileVersionDB
 from app.models.folders import FolderDB
@@ -202,6 +203,7 @@ async def startup_beanie():
             UserAPIKey,
             GroupDB,
             TokenDB,
+            ErrorDB,
         ],
         recreate_views=True,
     )

@@ -154,7 +154,7 @@ async def listen_for_messages():
             for _ in range(10)
         )
         config_entry = ConfigEntryDB(key="instance_id", value=instance_id)
-        config_entry.insert()
+        await config_entry.insert()
 
     channel.exchange_declare(exchange="clowder", durable=True)
     result = channel.queue_declare(
