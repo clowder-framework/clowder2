@@ -46,6 +46,7 @@ from app.routers import (
     feeds,
     jobs,
 )
+
 # setup loggers
 # logging.config.fileConfig('logging.conf', disable_existing_loggers=False)
 from app.search.config import indexSettings
@@ -202,7 +203,7 @@ async def startup_beanie():
             UserAPIKey,
             GroupDB,
             TokenDB,
-            ErrorDB
+            ErrorDB,
         ],
         recreate_views=True,
     )

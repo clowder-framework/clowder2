@@ -36,7 +36,7 @@ async def login() -> RedirectResponse:
 
 @router.get("/logout")
 async def logout(
-        credentials: HTTPAuthorizationCredentials = Security(security),
+    credentials: HTTPAuthorizationCredentials = Security(security),
 ):
     """Logout of keycloak."""
     # get user info
@@ -44,7 +44,7 @@ async def logout(
     try:
         user_info = keycloak_openid.userinfo(access_token)
         if (
-                token_exist := await TokenDB.find_one({"email": user_info["email"]})
+            token_exist := await TokenDB.find_one({"email": user_info["email"]})
         ) is not None:
             # log user out
             try:
@@ -95,9 +95,7 @@ async def login(userIn: UserIn):
 
 
 @router.get("")
-async def auth(
-        code: str
-) -> RedirectResponse:
+async def auth(code: str) -> RedirectResponse:
     """Redirect endpoint Keycloak redirects to after login."""
     logger.info(f"In /api/v2/auth")
     # get token from Keycloak
@@ -148,7 +146,7 @@ async def auth(
 
 @router.get("/refresh_token")
 async def refresh_token(
-        credentials: HTTPAuthorizationCredentials = Security(security),
+    credentials: HTTPAuthorizationCredentials = Security(security),
 ):
     access_token = credentials.credentials
 
@@ -177,6 +175,7 @@ async def refresh_token(
             detail=str(e),
             headers={"WWW-Authenticate": "Bearer"},
         )
+
 
 # FIXME: we need to parse and return a consistent response
 # @router.get("/broker/{identity_provider}/token")

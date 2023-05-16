@@ -19,9 +19,9 @@ async def _get_db() -> Generator:
 
 
 async def log_error(
-        exception: Exception,
-        resource: Optional[MongoDBRef] = None,
-        user: Optional[str] = None,
+    exception: Exception,
+    resource: Optional[MongoDBRef] = None,
+    user: Optional[str] = None,
 ):
     """Insert new Error into the database.
 
@@ -37,4 +37,3 @@ async def log_error(
     logger.error(message)
     error_log = ErrorDB(message=message, trace=trace, resource=resource, user=user)
     await error_log.insert()
-

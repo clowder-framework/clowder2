@@ -102,15 +102,15 @@ def callback(ch, method, properties, body):
         if status == EventListenerJobStatus.STARTED and job.started is None:
             job.started = timestamp
         elif (
-                status == EventListenerJobStatus.SUCCEEDED
-                or status == EventListenerJobStatus.ERROR
-                or status == EventListenerJobStatus.SKIPPED
+            status == EventListenerJobStatus.SUCCEEDED
+            or status == EventListenerJobStatus.ERROR
+            or status == EventListenerJobStatus.SKIPPED
         ):
             job.finished = timestamp
             update_duration = True
         elif (
-                status == EventListenerJobStatus.PROCESSING
-                or status == EventListenerJobStatus.RESUBMITTED
+            status == EventListenerJobStatus.PROCESSING
+            or status == EventListenerJobStatus.RESUBMITTED
         ):
             job.updated = timestamp
             update_duration = True

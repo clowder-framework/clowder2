@@ -51,8 +51,8 @@ api_key_header = APIKeyHeader(name="x-api-key", auto_error=False)
 
 
 async def get_token(
-        token: str = Security(oauth2_scheme),
-        api_key: str = Security(api_key_header),
+    token: str = Security(oauth2_scheme),
+    api_key: str = Security(api_key_header),
 ) -> Json:
     """Decode token. Use to secure endpoints."""
     if token:
@@ -87,7 +87,9 @@ async def get_token(
         try:
             payload = serializer.loads(api_key)
             # Key is valid, check expiration date in database
-            key = await UserAPIKey.find_one(UserAPIKey.user == payload["user"], UserAPIKey.key == payload["key"])
+            key = await UserAPIKey.find_one(
+                UserAPIKey.user == payload["user"], UserAPIKey.key == payload["key"]
+            )
             if key is not None:
                 current_time = datetime.utcnow()
 
@@ -127,8 +129,8 @@ async def get_user(identity: Json = Depends(get_token)):
 
 
 async def get_current_user(
-        token: str = Security(oauth2_scheme),
-        api_key: str = Security(api_key_header),
+    token: str = Security(oauth2_scheme),
+    api_key: str = Security(api_key_header),
 ) -> UserOut:
     """Retrieve the user object from Mongo by first getting user id from JWT and then querying Mongo.
     Potentially expensive. Use `get_current_username` if all you need is user name.
@@ -151,7 +153,9 @@ async def get_current_user(
         try:
             payload = serializer.loads(api_key)
             # Key is valid, check expiration date in database
-            key = await UserAPIKey.find_one(UserAPIKey.user == payload["user"], UserAPIKey.key == payload["key"])
+            key = await UserAPIKey.find_one(
+                UserAPIKey.user == payload["user"], UserAPIKey.key == payload["key"]
+            )
             if key is not None:
                 current_time = datetime.utcnow()
 
@@ -187,8 +191,8 @@ async def get_current_user(
 
 
 async def get_current_username(
-        token: str = Security(oauth2_scheme),
-        api_key: str = Security(api_key_header),
+    token: str = Security(oauth2_scheme),
+    api_key: str = Security(api_key_header),
 ) -> str:
     """Retrieve the user id from the JWT token. Does not query MongoDB."""
     if token:
@@ -208,7 +212,9 @@ async def get_current_username(
         try:
             payload = serializer.loads(api_key)
             # Key is valid, check expiration date in database
-            key = await UserAPIKey.find_one(UserAPIKey.user == payload["user"], UserAPIKey.key == payload.key)
+            key = await UserAPIKey.find_one(
+                UserAPIKey.user == payload["user"], UserAPIKey.key == payload.key
+            )
             if key is not None:
                 current_time = datetime.utcnow()
 
@@ -280,9 +286,7 @@ async def create_user(email: str, password: str, firstName: str, lastName: str):
     return user
 
 
-async def retreive_refresh_token(
-        email: str
-):
+async def retreive_refresh_token(email: str):
     token_exist = await TokenDB.find_one(TokenDB.email == email)
     if token_exist is not None:
         try:

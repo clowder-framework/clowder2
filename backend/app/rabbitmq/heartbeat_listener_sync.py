@@ -32,7 +32,9 @@ def callback(ch, method, properties, body):
     db = mongo_client[settings.MONGO_DATABASE]
 
     # check to see if extractor alredy exists and update if so
-    existing_extractor = await EventListenerDB.find_one(EventListenerDB.name == msg["queue"])
+    existing_extractor = await EventListenerDB.find_one(
+        EventListenerDB.name == msg["queue"]
+    )
     if existing_extractor is not None:
         # Update existing listener
         existing_version = existing_extractor.version
