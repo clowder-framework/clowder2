@@ -111,7 +111,9 @@ async def add_dataset_metadata(
             raise HTTPException(
                 409, f"Metadata for {definition} already exists on this dataset"
             )
-        md = await _build_metadata_db_obj(metadata_in, dataset, user)
+        md = await _build_metadata_db_obj(
+            metadata_in, DatasetOut(**dataset.dict()), user
+        )
         await md.insert()
 
         # Add an entry to the metadata index
@@ -130,7 +132,7 @@ async def add_dataset_metadata(
         }
 
         insert_record(es, "metadata", doc, md.id)
-        return MetadataOut(**md.dict())
+        return md.dict()
 
 
 @router.put("/{dataset_id}/metadata", response_model=MetadataOut)
@@ -179,12 +181,11 @@ async def replace_dataset_metadata(
             md = new_md
             md.id = tmp_md_id
             new_metadata = await md.replace()
-            metadata_out = MetadataOut(**new_metadata.dict())
 
             # Update entry to the metadata index
-            doc = {"doc": {"content": metadata_out.content}}
-            update_record(es, "metadata", doc, metadata_out.id)
-            return metadata_out
+            doc = {"doc": {"content": new_metadata.content}}
+            update_record(es, "metadata", doc, new_metadata.id)
+            return new_metadata.dict()
     else:
         raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
 
@@ -276,16 +277,15 @@ async def get_dataset_metadata(
 
         metadata = []
         async for md in MetadataDB.find(*query):
-            md_out = MetadataOut(**md.dict())
-            if md_out.definition is not None:
-                md_df = await MetadataDefinitionDB.find_one(
-                    MetadataDefinitionDB.name == md_out.definition
-                )
-                if md_df is not None:
-                    md_def = MetadataDefinitionOut(**md_df.dict())
-                    md_out.description = md_def.description
-            metadata.append(md_out)
-        return metadata
+            if md.definition is not None:
+                if (
+                    md_def := await MetadataDefinitionDB.find_one(
+                        MetadataDefinitionDB.name == md.definition
+                    )
+                ) is not None:
+                    md.description = md_def.description
+            metadata.append(md)
+        return [md.dict() for md in metadata]
     else:
         raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
 
@@ -341,8 +341,8 @@ async def delete_dataset_metadata(
 
         md = await MetadataDB.find_one(*query)
         if md is not None:
-            if await md.delete() is not None:
-                return MetadataOut(**md.dict())
+            await md.delete()
+            return md.dict()  # TODO: Do we need to return what we just deleted?
         else:
             raise HTTPException(
                 status_code=404, detail=f"No metadata found with that criteria"

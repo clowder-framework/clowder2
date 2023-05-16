@@ -98,7 +98,7 @@ async def save_listener(
     listener = EventListenerDB(**listener_in.dict(), creator=user)
     # TODO: Check for duplicates somehow?
     await listener.save()
-    return EventListenerOut(**listener.dict())
+    return listener.dict()
 
 
 @legacy_router.post("", response_model=EventListenerOut)
@@ -123,10 +123,10 @@ async def save_legacy_listener(
         if version.parse(listener.version) > version.parse(existing.version):
             await listener.save()
             #  TODO: Should older extractor version entries be deleted?
-            return EventListenerOut(**listener.dict())
+            return listener.dict()
         else:
             # TODO: Should this fail the POST instead?
-            return EventListenerOut(**existing.dict())
+            return listener.dict()
     else:
         # Register new listener
         await listener.save()
@@ -135,7 +135,7 @@ async def save_legacy_listener(
             await _process_incoming_v1_extractor_info(
                 legacy_in.name, listener.id, listener.properties.process
             )
-        return EventListenerOut(**listener.dict())
+        return listener.dict()
 
 
 @router.get("/search", response_model=List[EventListenerOut])
@@ -181,7 +181,7 @@ async def get_listener(listener_id: str, user=Depends(get_current_username)):
     if (
         listener := EventListenerDB.find_one(PydanticObjectId(listener_id))
     ) is not None:
-        return EventListenerOut(**listener.dict())
+        return listener.dict()
     raise HTTPException(status_code=404, detail=f"listener {listener_id} not found")
 
 
@@ -230,7 +230,7 @@ async def edit_listener(
         try:
             listener.update(listener_update)
             await listener.save()
-            return EventListenerOut(**listener.dict())
+            return listener.dict()
         except Exception as e:
             raise HTTPException(status_code=500, detail=e.args[0])
     raise HTTPException(status_code=404, detail=f"listener {listener_id} not found")

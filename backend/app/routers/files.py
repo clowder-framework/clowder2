@@ -12,7 +12,6 @@ from fastapi import APIRouter, HTTPException, Depends, Security
 from fastapi import (
     File,
     UploadFile,
-    Request,
 )
 from fastapi.responses import StreamingResponse
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
@@ -162,8 +161,9 @@ async def add_file_entry(
     insert_record(es, "file", doc, new_file.id)
 
     # Submit file job to any qualifying feeds
-    file_out = FileOut(**new_file.dict())
-    await check_feed_listeners(es, file_out, user, rabbitmq_client, token)
+    await check_feed_listeners(
+        es, FileOut(**new_file.dict()), user, rabbitmq_client, token
+    )
 
 
 # TODO: Move this to MongoDB middle layer
@@ -204,10 +204,7 @@ async def update_file(
         raise HTTPException(status_code=503, detail="Service not available")
         return
 
-    file_q = await FileDB.get(PydanticObjectId(file_id))
-    if file_q is not None:
-        updated_file = FileOut(**file_q.dict())
-
+    if (updated_file := await FileDB.get(PydanticObjectId(file_id))) is not None:
         if (
             file.filename != updated_file.name
             or file.content_type != updated_file.content_type.content_type
@@ -218,7 +215,6 @@ async def update_file(
             )
 
         # Update file in Minio and get the new version IDs
-        version_id = None
         response = fs.put_object(
             settings.MINIO_BUCKET_NAME,
             str(updated_file.id),
@@ -282,7 +278,7 @@ async def update_file(
                 }
             }
             update_record(es, "metadata", doc, str(metadata.id))
-        return updated_file
+        return updated_file.dict()
     else:
         raise HTTPException(status_code=404, detail=f"File {file_id} not found")
 
@@ -295,9 +291,7 @@ async def download_file(
     allow: bool = Depends(FileAuthorization("viewer")),
 ):
     # If file exists in MongoDB, download from Minio
-    file = await FileDB.get(PydanticObjectId(file_id))
-    if file is not None:
-        file_obj = FileOut(**file.dict())
+    if (file := await FileDB.get(PydanticObjectId(file_id))) is not None:
         if version is not None:
             # Version is specified, so get the minio ID from versions table if possible
             file_vers = await FileVersionDB.find_one(
@@ -320,12 +314,9 @@ async def download_file(
 
         # Get content type & open file stream
         response = StreamingResponse(content.stream(settings.MINIO_UPLOAD_CHUNK_SIZE))
-        response.headers["Content-Disposition"] = (
-            "attachment; filename=%s" % file_obj.name
-        )
+        response.headers["Content-Disposition"] = "attachment; filename=%s" % file.name
         # Increment download count
-        await file.update(Inc({FileDB.downloads: 1}))
-
+        await file.update(Inc({FileDB.downloads, 1}))
         return response
     else:
         raise HTTPException(status_code=404, detail=f"File {file_id} not found")

@@ -145,7 +145,7 @@ async def add_file_metadata(
                         409, f"Metadata for {definition} already exists on this file"
                     )
 
-        md = await _build_metadata_db_obj(metadata_in, file, user)
+        md = await _build_metadata_db_obj(metadata_in, FileOut(**file.dict()), user)
         await md.insert()
 
         # Add an entry to the metadata index
@@ -225,7 +225,11 @@ async def replace_file_metadata(
         if (md := await MetadataDB(*query).find_one()) is not None:
             # Metadata exists, so prepare the new document we are going to replace it with
             md = await _build_metadata_db_obj(
-                metadata_in, file, user, agent=agent, version=target_version
+                metadata_in,
+                FileOut(**file.dict()),
+                user,
+                agent=agent,
+                version=target_version,
             )
             await md.save()
 

@@ -7,7 +7,6 @@ from bson.objectid import ObjectId
 from fastapi import HTTPException, Depends, APIRouter
 from pymongo import DESCENDING
 
-from app import dependencies
 from app.deps.authorization_deps import AuthorizationDB, GroupAuthorization
 from app.keycloak_auth import get_current_user, get_user
 from app.models.authorization import RoleType
@@ -27,7 +26,7 @@ async def save_group(
     if user_member not in group_db.users:
         group_db.users.append(user_member)
     await group_db.insert()
-    return GroupOut(**group_db.dict())
+    return group_db.dict()
 
 
 @router.get("", response_model=List[GroupOut])
@@ -88,7 +87,7 @@ async def get_group(
     allow: bool = Depends(GroupAuthorization("viewer")),
 ):
     if (group := await GroupDB.get(PydanticObjectId(group_id))) is not None:
-        return GroupOut(**group.dict())
+        return group.dict()
     raise HTTPException(status_code=404, detail=f"Group {group_id} not found")
 
 
@@ -119,7 +118,7 @@ async def edit_group(
             await group.replace()
         except Exception as e:
             raise HTTPException(status_code=500, detail=e.args[0])
-        return GroupOut(**group.dict())
+        return group.dict()
     raise HTTPException(status_code=404, detail=f"Group {group_id} not found")
 
 
@@ -130,7 +129,7 @@ async def delete_group(
 ):
     if (group := await GroupDB.get(PydanticObjectId(group_id))) is not None:
         await group.delete()
-        return GroupOut(**group.dict())
+        return group.dict()  # TODO: Do we need to return what we just deleted?
     else:
         raise HTTPException(status_code=404, detail=f"Dataset {group_id} not found")
 
@@ -143,10 +142,8 @@ async def add_member(
     allow: bool = Depends(GroupAuthorization("editor")),
 ):
     """Add a new user to a group."""
-    user_q = await UserDB.find_one(UserDB.email == username)
-    if user_q is not None:
-        user_out = UserOut(**user_q.dict())
-        new_member = Member(user=user_out)
+    if (user := await UserDB.find_one(UserDB.email == username)) is not None:
+        new_member = Member(user=UserOut(**user.dict()))
         if (group := await GroupDB.get(PydanticObjectId(group_id))) is not None:
             found_already = False
             for u in group.users:
@@ -168,7 +165,7 @@ async def add_member(
                     AuthorizationDB.group_ids == ObjectId(group_id),
                     Push({AuthorizationDB.user_ids: username}),
                 )
-            return GroupOut(**group.dict())
+            return group.dict()
         raise HTTPException(status_code=404, detail=f"Group {group_id} not found")
     raise HTTPException(status_code=404, detail=f"User {username} not found")
 
@@ -201,7 +198,7 @@ async def remove_member(
         group.users.remove(found_user)
         await group.replace()
 
-        return GroupOut(**group.dict())
+        return group.dict()
     raise HTTPException(status_code=404, detail=f"Group {group_id} not found")
 
 
@@ -234,6 +231,6 @@ async def update_member(
                     status_code=404,
                     detail=f"User {username} does not belong to this group!",
                 )
-            return GroupOut(**group.dict())
+            return group.dict()
         raise HTTPException(status_code=404, detail=f"Group {group_id} not found")
     raise HTTPException(status_code=404, detail=f"User {username} not found")

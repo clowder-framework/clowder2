@@ -40,7 +40,7 @@ async def save_metadata_definition(
     else:
         md_def = MetadataDefinitionDB(**definition_in.dict(), creator=user)
         await md_def.save()
-        return MetadataDefinitionOut(**md_def.dict())
+        return md_def.dict()
 
 
 @router.get("/definition", response_model=List[MetadataDefinitionOut])

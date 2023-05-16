@@ -205,7 +205,7 @@ async def save_dataset(
         "download": dataset.downloads,
     }
     insert_record(es, "dataset", doc, dataset.id)
-    return DatasetOut(**dataset.dict())
+    return dataset.dict()
 
 
 @router.get("", response_model=List[DatasetOut])
@@ -215,7 +215,6 @@ async def get_datasets(
     limit: int = 10,
     mine: bool = False,
 ):
-    # TODO: Other endpoints convert DB response to DatasetOut(**response.dict())
     if mine:
         datasets = await DatasetDBViewList.find(
             {
@@ -313,7 +312,7 @@ async def edit_dataset(
                 }
             }
             update_record(es, "metadata", doc, str(metadata.id))
-        return DatasetOut(**dataset.dict())
+        return dataset.dict()
     raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
 
 
@@ -350,7 +349,7 @@ async def patch_dataset(
                 }
             }
             update_record(es, "metadata", doc, str(metadata["_id"]))
-        return DatasetOut(**dataset.dict())
+        return dataset.dict()
 
 
 @router.delete("/{dataset_id}")
@@ -577,7 +576,7 @@ async def create_dataset_from_zip(
                     if os.path.isfile(extracted):
                         os.remove(extracted)
 
-    return DatasetOut(**dataset.dict())
+    return dataset.dict()
 
 
 @router.get("/{dataset_id}/download", response_model=DatasetOut)
@@ -588,7 +587,6 @@ async def download_dataset(
     allow: bool = Depends(Authorization("viewer")),
 ):
     if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
-        dataset = DatasetOut(**dataset)
         current_temp_dir = tempfile.mkdtemp(prefix="rocratedownload")
         crate = ROCrate()
         user_full_name = user.first_name + " " + user.last_name

@@ -80,7 +80,7 @@ async def save_feed(
     """Create a new Feed (i.e. saved search) in the database."""
     feed = FeedDB(**feed_in.dict(), creator=user)
     await feed.save()
-    return FeedOut(**feed.dict())
+    return feed.dict()
 
 
 @router.get("", response_model=List[FeedOut])
@@ -116,7 +116,7 @@ async def get_feed(
 ):
     """Fetch an existing saved search Feed."""
     if (feed := await FeedDB.get(PydanticObjectId(feed_id))) is not None:
-        return FeedOut(**feed.dict())
+        return feed.dict()
     else:
         raise HTTPException(status_code=404, detail=f"Feed {feed_id} not found")
 
@@ -147,11 +147,11 @@ async def associate_listener(
     """
     if (feed := await FeedDB.get(PydanticObjectId(feed_id))) is not None:
         if (
-            exists := await EventListenerDB.get(PydanticObjectId(listener.listener_id))
+            await EventListenerDB.get(PydanticObjectId(listener.listener_id))
         ) is not None:
             feed.listeners.append(listener)
             await feed.save()
-            return FeedOut(**feed.dict())
+            return feed.dict()
         raise HTTPException(
             status_code=404, detail=f"listener {listener.listener_id} not found"
         )

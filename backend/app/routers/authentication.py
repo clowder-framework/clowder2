@@ -38,13 +38,13 @@ async def save_user(userIn: UserIn):
 
     # create local user
     hashed_password = bcrypt.hash(userIn.password)
-    userDB = UserDB(
+    user = UserDB(
         **userIn.dict(),
         hashed_password=hashed_password,
         keycloak_id=keycloak_user,
     )
-    await userDB.insert()
-    return UserOut(**userDB.dict())
+    await user.insert()
+    return user.dict()
 
 
 @router.post("/login")
