@@ -54,9 +54,6 @@ class DatasetDB(Document, DatasetBase):
             ],
         ]
 
-    class Config:
-        fields = {"id": "id"}
-
 
 class DatasetDBViewList(View, DatasetBase):
     creator: UserOut

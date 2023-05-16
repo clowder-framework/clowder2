@@ -11,13 +11,6 @@ from app.models.mongomodel import MongoDBRef
 logger = logging.getLogger(__name__)
 
 
-async def _get_db() -> Generator:
-    """Duplicate of app.dependencies.get_db(), but importing that causes circular import."""
-    mongo_client = motor.motor_asyncio.AsyncIOMotorClient(settings.MONGODB_URL)
-    db = mongo_client[settings.MONGO_DATABASE]
-    yield db
-
-
 async def log_error(
     exception: Exception,
     resource: Optional[MongoDBRef] = None,
@@ -30,7 +23,6 @@ async def log_error(
         resource -- if error relates to a specific resource, you can include it
         user --- if error relates to actions performed by a user, you can include them
     """
-    db = _get_db()
     message = str(exception)
     trace = traceback.format_exc(exception, limit=4)
 

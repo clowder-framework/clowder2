@@ -6,7 +6,6 @@ from beanie.operators import Or, Push, RegEx
 from bson.objectid import ObjectId
 from fastapi import HTTPException, Depends, APIRouter
 from pymongo import DESCENDING
-from pymongo.mongo_client import MongoClient
 
 from app import dependencies
 from app.deps.authorization_deps import AuthorizationDB, GroupAuthorization

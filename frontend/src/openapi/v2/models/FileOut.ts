@@ -20,7 +20,7 @@ import type { UserOut } from './UserOut';
  */
 export type FileOut = {
     name?: string;
-    _id?: string;
+    id?: string;
     creator: UserOut;
     created?: string;
     version_id?: string;

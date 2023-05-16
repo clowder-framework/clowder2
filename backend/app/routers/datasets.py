@@ -6,7 +6,7 @@ import shutil
 import tempfile
 import zipfile
 from collections.abc import Mapping, Iterable
-from typing import List, Optional, Union
+from typing import List, Optional
 
 from beanie import PydanticObjectId
 from beanie.operators import Or
@@ -23,7 +23,7 @@ from fastapi import (
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from minio import Minio
 from pika.adapters.blocking_connection import BlockingChannel
-from pymongo import MongoClient, DESCENDING
+from pymongo import DESCENDING
 from rocrate.model.person import Person
 from rocrate.rocrate import ROCrate
 
@@ -42,8 +42,8 @@ from app.models.datasets import (
     DatasetPatch,
     DatasetDBViewList,
 )
-from app.models.files import FileOut, FileDB
-from app.models.folders import FolderOut, FolderIn, FolderDB
+from app.models.files import FileOut, FileDB, FileDBViewList
+from app.models.folders import FolderOut, FolderIn, FolderDB, FolderDBViewList
 from app.models.metadata import MetadataDB
 from app.models.pyobjectid import PyObjectId
 from app.models.users import UserOut
@@ -133,7 +133,6 @@ async def _create_folder_structure(
     folder_path: str,
     folder_lookup: dict,
     user: UserOut,
-    db: MongoClient,
     parent_folder_id: Optional[str] = None,
 ):
     """Recursively create folders encountered in folder_path until the target folder is created.
@@ -162,7 +161,7 @@ async def _create_folder_structure(
         folder_lookup[new_folder_path] = new_folder_id
         if isinstance(v, Mapping):
             folder_lookup = await _create_folder_structure(
-                dataset_id, v, new_folder_path, folder_lookup, user, db, new_folder_id
+                dataset_id, v, new_folder_path, folder_lookup, user, new_folder_id
             )
 
     return folder_lookup
@@ -171,30 +170,19 @@ async def _create_folder_structure(
 async def _get_folder_hierarchy(
     folder_id: str,
     hierarchy: str,
-    db: MongoClient,
 ):
     """Generate a string of nested path to folder for use in zip file creation."""
-    found = await db["folders"].find_one({"_id": ObjectId(folder_id)})
-    folder = FolderOut.from_mongo(found)
+    folder = await FolderDB.get(PydanticObjectId(folder_id))
     hierarchy = folder.name + "/" + hierarchy
     if folder.parent_folder is not None:
-        hierarchy = await _get_folder_hierarchy(folder.parent_folder, hierarchy, db)
+        hierarchy = await _get_folder_hierarchy(folder.parent_folder, hierarchy)
     return hierarchy
-
-
-async def remove_folder_entry(
-    folder_id: Union[str, ObjectId],
-    db: MongoClient,
-):
-    """Remove FolderDB object into MongoDB"""
-    await db["folders"].delete_one({"_id": ObjectId(folder_id)})
 
 
 @router.post("", response_model=DatasetOut)
 async def save_dataset(
     dataset_in: DatasetIn,
     user=Depends(keycloak_auth.get_current_user),
-    db: MongoClient = Depends(dependencies.get_db),
     es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
 ):
     dataset = DatasetDB(**dataset_in.dict(), creator=user)
@@ -223,7 +211,6 @@ async def save_dataset(
 @router.get("", response_model=List[DatasetOut])
 async def get_datasets(
     user_id=Depends(get_user),
-    db: MongoClient = Depends(dependencies.get_db),
     skip: int = 0,
     limit: int = 10,
     mine: bool = False,
@@ -270,68 +257,30 @@ async def get_dataset_files(
     dataset_id: str,
     folder_id: Optional[str] = None,
     user_id=Depends(get_user),
-    db: MongoClient = Depends(dependencies.get_db),
     allow: bool = Depends(Authorization("viewer")),
     skip: int = 0,
     limit: int = 10,
 ):
-    files = []
-    if folder_id is not None:
-        for f in (
-            await db["files_view"]
-            .find(
-                {
-                    "$and": [
-                        {
-                            "dataset_id": ObjectId(dataset_id),
-                            "folder_id": ObjectId(folder_id),
-                        },
-                        {
-                            "$or": [
-                                {"creator.email": user_id},
-                                {"auth": {"$elemMatch": {"user_ids": user_id}}},
-                            ]
-                        },
-                    ]
-                }
-            )
-            .skip(skip)
-            .limit(limit)
-            .to_list(length=limit)
-        ):
-            files.append(FileOut.from_mongo(f))
-    else:
-        for f in (
-            await db["files_view"]
-            .find(
-                {
-                    "$and": [
-                        {
-                            "dataset_id": ObjectId(dataset_id),
-                            "folder_id": None,
-                        },
-                        {
-                            "$or": [
-                                {"creator.email": user_id},
-                                {"auth": {"$elemMatch": {"user_ids": user_id}}},
-                            ]
-                        },
-                    ]
-                }
-            )
-            .skip(skip)
-            .limit(limit)
-            .to_list(length=limit)
-        ):
-            files.append(FileOut.from_mongo(f))
-    return files
+    files = (
+        await FileDBViewList.find(
+            FileDBViewList.dataset_id == ObjectId(dataset_id),
+            FileDBViewList.folder_id == ObjectId(folder_id),
+            Or(
+                FileDBViewList.creator.email == user_id,
+                FileDBViewList.auth.user_ids == user_id,
+            ),
+        )
+        .skip(skip)
+        .limit(limit)
+        .to_list()
+    )
+    return [file.dict() for file in files]
 
 
 @router.put("/{dataset_id}", response_model=DatasetOut)
 async def edit_dataset(
     dataset_id: str,
     dataset_info: DatasetBase,
-    db: MongoClient = Depends(dependencies.get_db),
     user=Depends(get_current_user),
     es=Depends(dependencies.get_elasticsearchclient),
     allow: bool = Depends(Authorization("editor")),
@@ -407,7 +356,6 @@ async def patch_dataset(
 @router.delete("/{dataset_id}")
 async def delete_dataset(
     dataset_id: str,
-    db: MongoClient = Depends(dependencies.get_db),
     fs: Minio = Depends(dependencies.get_fs),
     es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
     allow: bool = Depends(Authorization("editor")),
@@ -422,10 +370,9 @@ async def delete_dataset(
         await MetadataDB.delete_all(
             MetadataDB.resource.resource_id == ObjectId(dataset_id)
         )
-        async for file in db["files"].find({"dataset_id": ObjectId(dataset_id)}):
-            file = FileOut(**file)
+        async for file in FileDB.find(FileDB.dataset_id == ObjectId(dataset_id)):
             await remove_file_entry(file.id, fs, es)
-        await db["folders"].delete_many({"dataset_id": ObjectId(dataset_id)})
+        await FolderDB.delete_all(FolderDB.dataset_id == ObjectId(dataset_id))
         return {"deleted": dataset_id}
     raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
 
@@ -435,59 +382,47 @@ async def add_folder(
     dataset_id: str,
     folder_in: FolderIn,
     user=Depends(get_current_user),
-    db: MongoClient = Depends(dependencies.get_db),
     allow: bool = Depends(Authorization("uploader")),
 ):
     if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
         parent_folder = folder_in.parent_folder
         if parent_folder is not None:
-            folder = await db["folders"].find_one({"_id": ObjectId(parent_folder)})
-            if folder is None:
+            if (await FolderDB.get(PydanticObjectId(parent_folder))) is None:
                 raise HTTPException(
                     status_code=400, detail=f"Parent folder {parent_folder} not found"
                 )
-        new_folder = await FolderDB(
+        new_folder = FolderDB(
             **folder_in.dict(), creator=user, dataset_id=PyObjectId(dataset_id)
-        ).insert()
-        folder_out = FolderOut(**new_folder.dict())
-        return folder_out
+        )
+        await new_folder.insert()
+        return new_folder.dict()
     raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
 
 
-@router.get("/{dataset_id}/folders")
+@router.get("/{dataset_id}/folders", response_model=List[FolderOut])
 async def get_dataset_folders(
     dataset_id: str,
     parent_folder: Optional[str] = None,
     user_id=Depends(get_user),
-    db: MongoClient = Depends(dependencies.get_db),
     allow: bool = Depends(Authorization("viewer")),
+    skip: int = 0,
+    limit: int = 10,
 ):
     if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
-        folders = []
-        if parent_folder is None:
-            async for f in db["folders"].find(
-                {"dataset_id": ObjectId(dataset_id), "parent_folder": None}
-            ):
-                folders.append(FolderDB.from_mongo(f))
-        else:
-            async for f in db["folders"].find(
-                {
-                    "$and": [
-                        {
-                            "dataset_id": ObjectId(dataset_id),
-                            "parent_folder": ObjectId(parent_folder),
-                        },
-                        {
-                            "$or": [
-                                {"author.email": user_id},
-                                {"auth": {"$elemMatch": {"user_ids": user_id}}},
-                            ]
-                        },
-                    ]
-                }
-            ):
-                folders.append(FolderDB.from_mongo(f))
-        return folders
+        folders = (
+            await FolderDBViewList.find(
+                FolderDBViewList.dataset_id == ObjectId(dataset_id),
+                FolderDBViewList.folder_id == ObjectId(parent_folder),
+                Or(
+                    FolderDBViewList.creator.email == user_id,
+                    FolderDBViewList.auth.user_ids == user_id,
+                ),
+            )
+            .skip(skip)
+            .limit(limit)
+            .to_list()
+        )
+        return [folder.dict() for folder in folders]
     raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
 
 
@@ -495,61 +430,35 @@ async def get_dataset_folders(
 async def delete_folder(
     dataset_id: str,
     folder_id: str,
-    db: MongoClient = Depends(dependencies.get_db),
     fs: Minio = Depends(dependencies.get_fs),
     es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
     allow: bool = Depends(Authorization("editor")),
 ):
     if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
-        if (await db["folders"].find_one({"_id": ObjectId(folder_id)})) is not None:
+        if (folder := await FolderDB.get(PydanticObjectId(folder_id))) is not None:
             # delete current folder and files
-            await remove_folder_entry(folder_id, db)
-            async for file in db["files"].find({"folder_id": ObjectId(folder_id)}):
-                file = FileOut(**file)
+            async for file in FileDB.find(FileDB.folder_id == ObjectId(folder_id)):
                 await remove_file_entry(file.id, fs, es)
 
-            # list all child folders and delete child folders/files
-            parent_folder_id = folder_id
-
+            # recursively delete child folder and files
             async def _delete_nested_folders(parent_folder_id):
                 while (
-                    folders := await db["folders"].find_one(
-                        {
-                            "dataset_id": ObjectId(dataset_id),
-                            "parent_folder": ObjectId(parent_folder_id),
-                        }
+                    await FolderDB.find_one(
+                        FolderDB.dataset_id == ObjectId(dataset_id),
+                        FolderDB.parent_folder == ObjectId(parent_folder_id),
                     )
                 ) is not None:
-                    async for folder in db["folders"].find(
-                        {
-                            "dataset_id": ObjectId(dataset_id),
-                            "parent_folder": ObjectId(parent_folder_id),
-                        }
+                    async for subfolder in FolderDB.find(
+                        FolderDB.dataset_id == PydanticObjectId(dataset_id),
+                        FolderDB.parent_folder == PydanticObjectId(parent_folder_id),
                     ):
-                        folder = FolderOut(**folder)
-                        parent_folder_id = folder.id
+                        async for file in FileDB.find(FileDB.folder_id == subfolder.id):
+                            await remove_file_entry(file.id, fs, es)
+                        await _delete_nested_folders(subfolder.id)
+                        await subfolder.delete()
 
-                        # recursively delete child folder and files
-                        await _delete_nested_folders(parent_folder_id)
-
-                        await remove_folder_entry(folder.id, db)
-                        async for file in db["files"].find(
-                            {"folder_id": ObjectId(folder.id)}
-                        ):
-                            folder = FolderOut(**folder.dict())
-                            parent_folder_id = folder.id
-
-                            # recursively delete child folder and files
-                            await _delete_nested_folders(parent_folder_id)
-
-                            await remove_folder_entry(folder.id, db)
-                            async for file in db["files"].find(
-                                {"folder_id": ObjectId(folder.id)}
-                            ):
-                                file = FileOut(**file)
-                                await remove_file_entry(file.id, fs, es)
-
-            await _delete_nested_folders(parent_folder_id)
+            await _delete_nested_folders(folder_id)
+            await folder.delete()
             return {"deleted": folder_id}
         else:
             raise HTTPException(status_code=404, detail=f"Folder {folder_id} not found")
@@ -561,7 +470,6 @@ async def save_file(
     dataset_id: str,
     folder_id: Optional[str] = None,
     user=Depends(get_current_user),
-    db: MongoClient = Depends(dependencies.get_db),
     fs: Minio = Depends(dependencies.get_fs),
     file: UploadFile = File(...),
     es=Depends(dependencies.get_elasticsearchclient),
@@ -575,14 +483,11 @@ async def save_file(
                 status_code=401, detail=f"User not found. Session might have expired."
             )
 
-        fileDB = FileDB(name=file.filename, creator=user, dataset_id=dataset.id)
+        new_file = FileDB(name=file.filename, creator=user, dataset_id=dataset.id)
 
         if folder_id is not None:
-            if (
-                folder := await db["folders"].find_one({"_id": ObjectId(folder_id)})
-            ) is not None:
-                folder = FolderOut.from_mongo(folder)
-                fileDB.folder_id = folder.id
+            if (folder := await FolderDB.get(PydanticObjectId(folder_id))) is not None:
+                new_file.folder_id = folder.id
             else:
                 raise HTTPException(
                     status_code=404, detail=f"Folder {folder_id} not found"
@@ -590,9 +495,8 @@ async def save_file(
 
         access_token = credentials.credentials
         await add_file_entry(
-            fileDB,
+            new_file,
             user,
-            db,
             fs,
             es,
             rabbitmq_client,
@@ -600,15 +504,13 @@ async def save_file(
             file.file,
             content_type=file.content_type,
         )
-
-        return fileDB
+        return new_file
     raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
 
 
 @router.post("/createFromZip", response_model=DatasetOut)
 async def create_dataset_from_zip(
     user=Depends(get_current_user),
-    db: MongoClient = Depends(dependencies.get_db),
     fs: Minio = Depends(dependencies.get_fs),
     file: UploadFile = File(...),
     es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
@@ -635,7 +537,7 @@ async def create_dataset_from_zip(
 
         # Create folders
         folder_lookup = await _create_folder_structure(
-            dataset.id, zip_directory, "", {}, user, db
+            dataset.id, zip_directory, "", {}, user
         )
 
         # Go back through zipfile, this time uploading files to folders
@@ -652,21 +554,20 @@ async def create_dataset_from_zip(
                     extracted = zip_file.extract(entry, path="/tmp")
                     if foldername in folder_lookup:
                         folder_id = folder_lookup[foldername]
-                        fileDB = FileDB(
+                        new_file = FileDB(
                             name=filename,
                             creator=user,
                             dataset_id=dataset.id,
                             folder_id=folder_id,
                         )
                     else:
-                        fileDB = FileDB(
+                        new_file = FileDB(
                             name=filename, creator=user, dataset_id=dataset.id
                         )
                     with open(extracted, "rb") as file_reader:
                         await add_file_entry(
-                            fileDB,
+                            new_file,
                             user,
-                            db,
                             fs,
                             es,
                             rabbitmq_client,
@@ -683,7 +584,6 @@ async def create_dataset_from_zip(
 async def download_dataset(
     dataset_id: str,
     user=Depends(get_current_user),
-    db: MongoClient = Depends(dependencies.get_db),
     fs: Minio = Depends(dependencies.get_fs),
     allow: bool = Depends(Authorization("viewer")),
 ):
@@ -731,12 +631,11 @@ async def download_dataset(
         bag_size = 0  # bytes
         file_count = 0
 
-        async for f in db["files"].find({"dataset_id": ObjectId(dataset_id)}):
+        async for file in FileDB.find(FileDB.dataset_id == ObjectId(dataset_id)):
             file_count += 1
-            file = FileOut.from_mongo(f)
             file_name = file.name
             if file.folder_id is not None:
-                hierarchy = await _get_folder_hierarchy(file.folder_id, "", db)
+                hierarchy = await _get_folder_hierarchy(file.folder_id, "")
                 dest_folder = os.path.join(current_temp_dir, hierarchy.lstrip("/"))
                 if not os.path.isdir(dest_folder):
                     os.mkdir(dest_folder)

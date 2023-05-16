@@ -9,9 +9,7 @@ from beanie.operators import Or, RegEx
 from bson import ObjectId
 from fastapi import APIRouter, HTTPException, Depends
 from packaging import version
-from pymongo import MongoClient
 
-from app.dependencies import get_db
 from app.keycloak_auth import get_user, get_current_user, get_current_username
 from app.models.config import ConfigEntryDB
 from app.models.feeds import FeedDB, FeedListener

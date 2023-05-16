@@ -4,7 +4,6 @@ import logging
 
 import pika
 from packaging import version
-from pymongo import MongoClient
 
 from app.config import settings
 from app.models.listeners import EventListenerDB, EventListenerOut, ExtractorInfo
@@ -28,9 +27,6 @@ def callback(ch, method, properties, body):
         **extractor_info, properties=ExtractorInfo(**extractor_info)
     )
 
-    mongo_client = MongoClient(settings.MONGODB_URL)
-    db = mongo_client[settings.MONGO_DATABASE]
-
     # check to see if extractor alredy exists and update if so
     existing_extractor = await EventListenerDB.find_one(
         EventListenerDB.name == msg["queue"]
@@ -43,7 +39,7 @@ def callback(ch, method, properties, body):
             # if this is a new version, add it to the database
             new_extractor = await extractor_db.insert()
             # TODO - for now we are not deleting an older version of the extractor, just adding a new one
-            # removed = db["listeners"].delete_one({"_id": existing_extractor["_id"]})
+            # await existing_extractor.delete()
             extractor_out = EventListenerOut(**new_extractor.dict())
             logger.info(
                 "%s updated from %s to %s"
@@ -62,7 +58,7 @@ def callback(ch, method, properties, body):
             processed_feed = await _process_incoming_v1_extractor_info(
                 extractor_name, extractor_out.id, process
             )
-            db["feeds"].insert_one(processed_feed)
+            processed_feed.insert()
 
         return extractor_out
 

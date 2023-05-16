@@ -75,12 +75,12 @@ export class FilesService {
     /**
      * Get File Summary
      * @param fileId
-     * @returns any Successful Response
+     * @returns FileOut Successful Response
      * @throws ApiError
      */
     public static getFileSummaryApiV2FilesFileIdSummaryGet(
         fileId: string,
-    ): CancelablePromise<any> {
+    ): CancelablePromise<FileOut> {
         return __request({
             method: 'GET',
             path: `/api/v2/files/${fileId}/summary`,
@@ -152,7 +152,6 @@ export class FilesService {
      * Arguments:
      * file_id: Id of file
      * credentials: credentials of logged in user
-     * db: MongoDB Client
      * rabbitmq_client: Rabbitmq Client
      * @param fileId
      * @returns any Successful Response
