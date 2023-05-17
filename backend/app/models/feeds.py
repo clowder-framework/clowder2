@@ -17,9 +17,6 @@ class JobFeed(BaseModel):
     name: str
     search: SearchObject
     listeners: List[FeedListener] = []
-    creator: Optional[EmailStr]
-    created: datetime = Field(default_factory=datetime.utcnow)
-    modified: datetime = Field(default_factory=datetime.utcnow)
 
 
 class FeedBase(JobFeed):
@@ -31,6 +28,10 @@ class FeedIn(JobFeed):
 
 
 class FeedDB(Document, JobFeed):
+    creator: Optional[EmailStr]
+    created: datetime = Field(default_factory=datetime.utcnow)
+    modified: datetime = Field(default_factory=datetime.utcnow)
+
     class Settings:
         name = "feeds"
         indexes = [
@@ -42,4 +43,5 @@ class FeedDB(Document, JobFeed):
 
 
 class FeedOut(FeedDB):
-    pass
+    class Config:
+        fields = {"id": "id"}

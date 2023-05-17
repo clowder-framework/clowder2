@@ -44,7 +44,6 @@ class ExtractorInfo(BaseModel):
 class EventListenerBase(BaseModel):
     """An Event Listener is the expanded version of v1 Extractors."""
 
-    creator: str = ""
     name: str
     version: str = "1.0"
     description: str = ""

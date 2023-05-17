@@ -169,7 +169,7 @@ async def get_current_user(
                     )
                 else:
                     user = await UserDB.find_one(UserDB.email == key.user)
-                    return UserOut(**user.dict())
+                    return user.dict()
             else:
                 raise HTTPException(
                     status_code=401,
