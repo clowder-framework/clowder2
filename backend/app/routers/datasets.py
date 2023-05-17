@@ -366,12 +366,16 @@ async def delete_dataset(
         delete_document_by_query(es, "metadata", query)
         # delete dataset first to minimize files/folder being uploaded to a delete dataset
         await dataset.delete()
-        await MetadataDB.delete_all(
-            MetadataDB.resource.resource_id == ObjectId(dataset_id)
-        )
-        async for file in FileDB.find(FileDB.dataset_id == ObjectId(dataset_id)):
+        await MetadataDB.find(
+            MetadataDB.resource.resource_id == PydanticObjectId(dataset_id)
+        ).delete()
+        async for file in FileDB.find(
+            FileDB.dataset_id == PydanticObjectId(dataset_id)
+        ):
             await remove_file_entry(file.id, fs, es)
-        await FolderDB.delete_all(FolderDB.dataset_id == ObjectId(dataset_id))
+        await FolderDB.find(
+            FolderDB.dataset_id == PydanticObjectId(dataset_id)
+        ).delete()
         return {"deleted": dataset_id}
     raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
 

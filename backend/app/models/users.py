@@ -44,7 +44,7 @@ class UserOut(UserBase):
         fields = {"id": "id"}
 
 
-class UserAPIKey(Document):
+class UserAPIKeyBase(BaseModel):
     """API keys can have a reference name (e.g. 'Uploader script')"""
 
     key: str
@@ -53,16 +53,12 @@ class UserAPIKey(Document):
     created: datetime = Field(default_factory=datetime.utcnow)
     expires: Optional[datetime] = None
 
+
+class UserAPIKeyDB(Document, UserAPIKeyBase):
     class Settings:
         name = "user_keys"
 
 
-class UserAPIKeyOut(BaseModel):
-    # don't show the raw key
-    name: str
-    user: EmailStr
-    created: datetime = Field(default_factory=datetime.utcnow)
-    expires: Optional[datetime] = None
-
+class UserAPIKeyOut(UserAPIKeyDB):
     class Config:
-        fields: {"id": "id"}
+        fields = {"id": "id"}
