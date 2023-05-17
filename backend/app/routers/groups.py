@@ -78,7 +78,7 @@ async def search_group(
         ),
         skip=skip,
         limit=limit,
-    ).to_list(length=limit)
+    ).to_list()
 
 
 @router.get("/{group_id}", response_model=GroupOut)
@@ -108,7 +108,7 @@ async def edit_group(
             )
             return
 
-        user = await UserDB.find(UserDB.email == user_id)
+        user = await UserDB.find_one(UserDB.email == user_id)
         group_dict["author"] = UserOut(**user)
         group_dict["modified"] = datetime.datetime.utcnow()
         # TODO: Revisit this. Authorization needs to be updated here.

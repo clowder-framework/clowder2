@@ -10,11 +10,11 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 class UserBase(BaseModel):
     email: EmailStr
+    first_name: str
+    last_name: str
 
 
 class UserIn(UserBase):
-    first_name: str
-    last_name: str
     password: str
 
 
@@ -23,23 +23,20 @@ class UserLogin(BaseModel):
     password: str
 
 
-class UserDB(Document, UserBase):
-    first_name: str
-    last_name: str
+class UserDoc(Document, UserBase):
+    class Settings:
+        name = "users"
+
+
+class UserDB(UserDoc):
     hashed_password: str = Field()
     keycloak_id: Optional[str] = None
 
     def verify_password(self, password):
         return pwd_context.verify(password, self.hashed_password)
 
-    class Settings:
-        name = "users"
 
-
-class UserOut(UserBase):
-    first_name: str
-    last_name: str
-
+class UserOut(UserDoc):
     class Config:
         fields = {"id": "id"}
 

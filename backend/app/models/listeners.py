@@ -83,7 +83,8 @@ class EventListenerDB(Document, EventListenerBase):
 
 
 class EventListenerOut(EventListenerDB):
-    pass
+    class Config:
+        fields = {"id": "id"}
 
 
 class EventListenerSubmit(BaseModel):
@@ -140,6 +141,11 @@ class EventListenerJobDB(Document, EventListenerJobBase):
         ]
 
 
+class EventListenerJobOut(EventListenerDB):
+    class Config:
+        fields = {"id": "id"}
+
+
 class EventListenerJobMessage(BaseModel):
     """This describes contents of JSON object that is submitted to RabbitMQ for the Event Listeners/Extractors to consume."""
 
@@ -186,6 +192,11 @@ class EventListenerJobUpdateDB(Document, EventListenerJobUpdateBase):
                 ("status", pymongo.TEXT),
             ],
         ]
+
+
+class EventListenerJobUpdateOut(EventListenerDB):
+    class Config:
+        fields = {"id": "id"}
 
 
 class EventListenerJobViewList(View, EventListenerJobBase):

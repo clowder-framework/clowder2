@@ -44,9 +44,8 @@ async def save_authorization(
 
     # Retrieve users from groups in mongo
     user_ids = authorization_in.user_ids
-    group_list = await GroupDB.find(In(GroupDB.id, authorization_in.group_ids))
     found_groups = 0
-    async for group in group_list:
+    async for group in GroupDB.find(In(GroupDB.id, authorization_in.group_ids)):
         found_groups += 1
         for u in group.users:
             user_ids.append(u.user.email)
@@ -209,9 +208,8 @@ async def set_dataset_user_role(
                 await auth_db.save()
                 if username in auth_db.user_ids:
                     # Only add user entry if all the others occurrences are from associated groups
-                    group_list = await GroupDB.find(In(GroupDB.id, auth_db.group_ids))
                     group_occurrences = 0
-                    async for group in group_list:
+                    async for group in GroupDB.find(In(GroupDB.id, auth_db.group_ids)):
                         for u in group.users:
                             if u.user.email == username:
                                 group_occurrences += 1
@@ -313,9 +311,8 @@ async def get_dataset_roles(
             AuthorizationDB.dataset_id == ObjectId(dataset_id)
         ):
             # First, fetch all groups that have a role on the dataset
-            group_list = GroupDB.find(In(GroupDB.id, auth.group_ids))
             group_user_counts = {}
-            async for group in group_list:
+            async for group in GroupDB.find(In(GroupDB.id, auth.group_ids)):
                 group.id = str(group.id)
                 for u in group.users:
                     u.user.id = str(u.user.id)

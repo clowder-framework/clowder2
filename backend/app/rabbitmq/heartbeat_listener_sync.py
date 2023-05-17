@@ -54,11 +54,9 @@ def callback(ch, method, properties, body):
 
         # Assign MIME-based listener if needed
         if extractor_out.properties and extractor_out.properties.process:
-            process = extractor_out.properties.process
-            processed_feed = await _process_incoming_v1_extractor_info(
-                extractor_name, extractor_out.id, process
+            await _process_incoming_v1_extractor_info(
+                extractor_name, extractor_out.id, extractor_out.properties.process
             )
-            await processed_feed.insert()
 
         return extractor_out
 

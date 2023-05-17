@@ -11,12 +11,14 @@ from app.models.listeners import (
     EventListenerJobDB,
     EventListenerJobUpdateDB,
     EventListenerJobViewList,
+    EventListenerJobOut,
+    EventListenerJobUpdateOut,
 )
 
 router = APIRouter()
 
 
-@router.get("", response_model=List[EventListenerJobDB])
+@router.get("", response_model=List[EventListenerJobOut])
 async def get_all_job_summary(
     current_user_id=Depends(get_user),
     listener_id: Optional[str] = None,
@@ -73,33 +75,34 @@ async def get_all_job_summary(
             EventListenerJobViewList.resource_ref.resource_id == ObjectId(dataset_id)
         )
 
-    return (
+    jobs = (
         await EventListenerJobViewList.find(*filters)
         .skip(skip)
         .limit(limit)
         .to_list(length=limit)
     )
+    return [job.dict() for job in jobs]
 
 
-@router.get("/{job_id}/summary", response_model=EventListenerJobDB)
+@router.get("/{job_id}/summary", response_model=EventListenerJobOut)
 async def get_job_summary(
     job_id: str,
     user=Depends(get_current_username),
 ):
-
     if (job := await EventListenerJobDB.get(PydanticObjectId(job_id))) is not None:
-        return job
+        return job.dict()
     raise HTTPException(status_code=404, detail=f"Job {job_id} not found")
 
 
-@router.get("/{job_id}/updates")
+@router.get("/{job_id}/updates", response_model=List[EventListenerJobUpdateOut])
 async def get_job_updates(
     job_id: str,
     user=Depends(get_current_username),
 ):
     if (job := await EventListenerJobDB.get(PydanticObjectId(job_id))) is not None:
         # TODO: Should this also return the job summary data since we just queried it here?
-        return await EventListenerJobUpdateDB.find(
+        job_updates = await EventListenerJobUpdateDB.find(
             EventListenerJobUpdateDB.job_id == job_id
         )
+        return [job_update.dict() for job_update in job_updates]
     raise HTTPException(status_code=404, detail=f"Job {job_id} not found")

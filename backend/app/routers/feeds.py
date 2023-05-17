@@ -39,16 +39,15 @@ async def disassociate_listener_db(feed_id: str, listener_id: str):
 
 
 async def check_feed_listeners(
-    es_client,
-    file_out: FileOut,
-    user: UserOut,
-    rabbitmq_client: BlockingChannel,
-    token: str,
+        es_client,
+        file_out: FileOut,
+        user: UserOut,
+        rabbitmq_client: BlockingChannel,
+        token: str,
 ):
     """Automatically submit new file to listeners on feeds that fit the search criteria."""
     listener_ids_found = []
-    feeds = await FeedDB.find(NE(FeedDB.listeners, [])).to_list()
-    for feed in feeds:
+    async for feed in FeedDB.find(NE(FeedDB.listeners, [])):
         # Only proceed if feed actually has auto-triggering listeners
         if any(map(lambda li: li.automatic, feed.listeners)):
             # Verify whether resource_id is found when searching the specified criteria
@@ -59,7 +58,7 @@ async def check_feed_listeners(
                         listener_ids_found.append(listener.listener_id)
     for targ_listener in listener_ids_found:
         if (
-            listener_info := await EventListenerDB.get(PydanticObjectId(targ_listener))
+                listener_info := await EventListenerDB.get(PydanticObjectId(targ_listener))
         ) is not None:
             await submit_file_job(
                 file_out,
@@ -74,21 +73,21 @@ async def check_feed_listeners(
 
 @router.post("", response_model=FeedOut)
 async def save_feed(
-    feed_in: FeedIn,
-    user=Depends(get_current_username),
+        feed_in: FeedIn,
+        user=Depends(get_current_username),
 ):
     """Create a new Feed (i.e. saved search) in the database."""
     feed = FeedDB(**feed_in.dict(), creator=user)
-    await feed.save()
+    await feed.insert()
     return feed.dict()
 
 
 @router.get("", response_model=List[FeedOut])
 async def get_feeds(
-    name: Optional[str] = None,
-    user=Depends(get_current_user),
-    skip: int = 0,
-    limit: int = 10,
+        name: Optional[str] = None,
+        user=Depends(get_current_user),
+        skip: int = 0,
+        limit: int = 10,
 ):
     """Fetch all existing Feeds."""
     if name is not None:
@@ -111,8 +110,8 @@ async def get_feeds(
 
 @router.get("/{feed_id}", response_model=FeedOut)
 async def get_feed(
-    feed_id: str,
-    user=Depends(get_current_user),
+        feed_id: str,
+        user=Depends(get_current_user),
 ):
     """Fetch an existing saved search Feed."""
     if (feed := await FeedDB.get(PydanticObjectId(feed_id))) is not None:
@@ -123,8 +122,8 @@ async def get_feed(
 
 @router.delete("/{feed_id}")
 async def delete_feed(
-    feed_id: str,
-    user=Depends(get_current_user),
+        feed_id: str,
+        user=Depends(get_current_user),
 ):
     """Delete an existing saved search Feed."""
     if (feed := await FeedDB.get(PydanticObjectId(feed_id))) is not None:
@@ -135,9 +134,9 @@ async def delete_feed(
 
 @router.post("/{feed_id}/listeners", response_model=FeedOut)
 async def associate_listener(
-    feed_id: str,
-    listener: FeedListener,
-    user=Depends(get_current_user),
+        feed_id: str,
+        listener: FeedListener,
+        user=Depends(get_current_user),
 ):
     """Associate an existing Event Listener with a Feed, e.g. so it will be triggered on new Feed results.
 
@@ -147,7 +146,7 @@ async def associate_listener(
     """
     if (feed := await FeedDB.get(PydanticObjectId(feed_id))) is not None:
         if (
-            await EventListenerDB.get(PydanticObjectId(listener.listener_id))
+                await EventListenerDB.get(PydanticObjectId(listener.listener_id))
         ) is not None:
             feed.listeners.append(listener)
             await feed.save()
@@ -160,9 +159,9 @@ async def associate_listener(
 
 @router.delete("/{feed_id}/listeners/{listener_id}", response_model=FeedOut)
 async def disassociate_listener(
-    feed_id: str,
-    listener_id: str,
-    user=Depends(get_current_user),
+        feed_id: str,
+        listener_id: str,
+        user=Depends(get_current_user),
 ):
     """Disassociate an Event Listener from a Feed.
 

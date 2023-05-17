@@ -411,7 +411,7 @@ async def get_dataset_folders(
     skip: int = 0,
     limit: int = 10,
 ):
-    if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
+    if (await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
         folders = (
             await FolderDBViewList.find(
                 FolderDBViewList.dataset_id == ObjectId(dataset_id),
@@ -507,7 +507,7 @@ async def save_file(
             file.file,
             content_type=file.content_type,
         )
-        return new_file
+        return new_file.dict()
     raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
 
 
@@ -616,7 +616,7 @@ async def download_dataset(
         # Write dataset metadata if found
         metadata = await MetadataDB.find(
             MetadataDB.resource.resource_id == ObjectId(dataset_id)
-        )
+        ).to_list()
         if len(metadata) > 0:
             datasetmetadata_path = os.path.join(
                 current_temp_dir, "_dataset_metadata.json"
@@ -663,7 +663,7 @@ async def download_dataset(
 
             metadata = await MetadataDB.find(
                 MetadataDB.resource.resource_id == ObjectId(dataset_id)
-            )
+            ).to_list()
             if len(metadata) > 0:
                 metadata_filename = file_name + "_metadata.json"
                 metadata_filename_temp_path = os.path.join(
