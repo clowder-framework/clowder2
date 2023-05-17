@@ -9,9 +9,7 @@ from beanie.operators import Or, RegEx
 from bson import ObjectId
 from fastapi import APIRouter, HTTPException, Depends
 from packaging import version
-from pymongo import MongoClient
 
-from app.dependencies import get_db
 from app.keycloak_auth import get_user, get_current_user, get_current_username
 from app.models.config import ConfigEntryDB
 from app.models.feeds import FeedDB, FeedListener
@@ -100,7 +98,7 @@ async def save_listener(
     listener = EventListenerDB(**listener_in.dict(), creator=user)
     # TODO: Check for duplicates somehow?
     await listener.save()
-    return EventListenerOut(**listener.dict())
+    return listener.dict()
 
 
 @legacy_router.post("", response_model=EventListenerOut)
@@ -125,10 +123,10 @@ async def save_legacy_listener(
         if version.parse(listener.version) > version.parse(existing.version):
             await listener.save()
             #  TODO: Should older extractor version entries be deleted?
-            return EventListenerOut(**listener.dict())
+            return listener.dict()
         else:
             # TODO: Should this fail the POST instead?
-            return EventListenerOut(**existing.dict())
+            return listener.dict()
     else:
         # Register new listener
         await listener.save()
@@ -137,7 +135,7 @@ async def save_legacy_listener(
             await _process_incoming_v1_extractor_info(
                 legacy_in.name, listener.id, listener.properties.process
             )
-        return EventListenerOut(**listener.dict())
+        return listener.dict()
 
 
 @router.get("/search", response_model=List[EventListenerOut])
@@ -181,9 +179,9 @@ async def list_default_labels(user=Depends(get_current_username)):
 async def get_listener(listener_id: str, user=Depends(get_current_username)):
     """Return JSON information about an Event Listener if it exists."""
     if (
-        listener := EventListenerDB.find_one(PydanticObjectId(listener_id))
+        listener := await EventListenerDB.find_one(PydanticObjectId(listener_id))
     ) is not None:
-        return EventListenerOut(**listener.dict())
+        return listener.dict()
     raise HTTPException(status_code=404, detail=f"listener {listener_id} not found")
 
 
@@ -224,7 +222,9 @@ async def edit_listener(
         listener_id -- UUID of the listener to be udpated
         listener_in -- JSON object including updated information
     """
-    listener = EventListenerDB.find_one(EventListenerDB.id == ObjectId(listener_id))
+    listener = await EventListenerDB.find_one(
+        EventListenerDB.id == ObjectId(listener_id)
+    )
     if listener:
         # TODO: Refactor this with permissions checks etc.
         listener_update = dict(listener_in) if listener_in is not None else {}
@@ -232,7 +232,7 @@ async def edit_listener(
         try:
             listener.update(listener_update)
             await listener.save()
-            return EventListenerOut(**listener.dict())
+            return listener.dict()
         except Exception as e:
             raise HTTPException(status_code=500, detail=e.args[0])
     raise HTTPException(status_code=404, detail=f"listener {listener_id} not found")
@@ -244,10 +244,10 @@ async def delete_listener(
     user=Depends(get_current_username),
 ):
     """Remove an Event Listener from the database. Will not clear event history for the listener."""
-    listener = EventListenerDB.find(EventListenerDB.id == ObjectId(listener_id))
+    listener = await EventListenerDB.find(EventListenerDB.id == ObjectId(listener_id))
     if listener:
         # unsubscribe the listener from any feeds
-        feeds = FeedDB.find(FeedDB.listeners.listener_id == ObjectId(listener_id))
+        feeds = await FeedDB.find(FeedDB.listeners.listener_id == ObjectId(listener_id))
         for feed in feeds:
             await disassociate_listener_db(feed.id, listener_id)
         await listener.delete()

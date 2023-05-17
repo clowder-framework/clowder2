@@ -15,15 +15,6 @@ from minio.versioningconfig import VersioningConfig
 from app.search.connect import connect_elasticsearch
 
 
-async def get_db() -> Generator:
-    mongo_client = motor.motor_asyncio.AsyncIOMotorClient(settings.MONGODB_URL)
-    db = mongo_client[settings.MONGO_DATABASE]
-    if db is None:
-        raise HTTPException(status_code=503, detail="Service not available")
-        return
-    yield db
-
-
 async def get_fs() -> Generator:
     file_system = Minio(
         settings.MINIO_SERVER_URL,

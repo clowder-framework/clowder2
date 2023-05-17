@@ -4,7 +4,6 @@ from typing import Optional
 from beanie import Document
 from passlib.context import CryptContext
 from pydantic import Field, EmailStr, BaseModel
-from pymongo import MongoClient
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -32,6 +31,9 @@ class UserDB(Document, UserBase):
 
     def verify_password(self, password):
         return pwd_context.verify(password, self.hashed_password)
+
+    class Settings:
+        name = "users"
 
 
 class UserOut(UserBase):
@@ -62,8 +64,5 @@ class UserAPIKeyOut(BaseModel):
     created: datetime = Field(default_factory=datetime.utcnow)
     expires: Optional[datetime] = None
 
-
-async def get_user_out(user_id: str, db: MongoClient) -> UserOut:
-    """Retrieve user from Mongo based on email address."""
-    user_out = await db["users"].find_one({"email": user_id})
-    return UserOut.from_mongo(user_out)
+    class Config:
+        fields: {"id": "id"}

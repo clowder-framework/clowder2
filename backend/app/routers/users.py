@@ -2,10 +2,10 @@ from datetime import timedelta
 from secrets import token_urlsafe
 from typing import List
 
+from beanie import PydanticObjectId
 from bson import ObjectId
 from fastapi import APIRouter, HTTPException, Depends
 from itsdangerous.url_safe import URLSafeSerializer
-from pymongo import MongoClient, DESCENDING
 
 from app import dependencies
 from app.config import settings
@@ -17,7 +17,6 @@ router = APIRouter()
 
 @router.get("/keys", response_model=List[UserAPIKeyOut])
 async def get_user_api_keys(
-    db: MongoClient = Depends(dependencies.get_db),
     current_user=Depends(get_current_username),
     skip: int = 0,
     limit: int = 10,
@@ -29,15 +28,14 @@ async def get_user_api_keys(
         limit: number to limit per page
     """
     apikeys = []
-    for doc in (
-        await db["user_keys"]
-        .find({"user": current_user})
-        .sort([("created", DESCENDING)])
+    for key in (
+        await UserAPIKey.find(UserAPIKey.user == current_user)
+        .sort(-UserAPIKey.created)
         .skip(skip)
         .limit(limit)
         .to_list(length=limit)
     ):
-        apikeys.append(UserAPIKeyOut.from_mongo(doc))
+        apikeys.append(key.dict())
 
     return apikeys
 
@@ -68,7 +66,6 @@ async def generate_user_api_key(
 @router.delete("/keys/{key_id}", response_model=UserAPIKeyOut)
 async def delete_user_api_key(
     key_id: str,
-    db: MongoClient = Depends(dependencies.get_db),
     current_user=Depends(get_current_username),
 ):
     """Delete API keys given ID
@@ -90,36 +87,29 @@ async def delete_user_api_key(
 
 
 @router.get("", response_model=List[UserOut])
-async def get_users(
-    db: MongoClient = Depends(dependencies.get_db), skip: int = 0, limit: int = 2
-):
-    return await UserDB.find({}, skip=skip, limit=limit).to_list()
+async def get_users(skip: int = 0, limit: int = 2):
+    users = await UserDB.find({}, skip=skip, limit=limit).to_list()
+    return [user.dict() for user in users]
 
 
 @router.get("/profile", response_model=UserOut)
 async def get_profile(
     username=Depends(get_current_username),
-    db: MongoClient = Depends(dependencies.get_db),
 ):
-    user = await UserDB.find_one(UserDB.email == username)
-    if user is not None:
-        return UserOut(**user.dict())
+    if (user := await UserDB.find_one(UserDB.email == username)) is not None:
+        return user.dict()
     raise HTTPException(status_code=404, detail=f"User {username} not found")
 
 
 @router.get("/{user_id}", response_model=UserOut)
-async def get_user(user_id: str, db: MongoClient = Depends(dependencies.get_db)):
-    user = await UserDB.get(user_id)
-    if user is not None:
-        return UserOut(**user.dict())
+async def get_user(user_id: str):
+    if (user := await UserDB.get(PydanticObjectId(user_id))) is not None:
+        return user.dict()
     raise HTTPException(status_code=404, detail=f"User {user_id} not found")
 
 
 @router.get("/username/{username}", response_model=UserOut)
-async def get_user_by_name(
-    username: str, db: MongoClient = Depends(dependencies.get_db)
-):
-    user = UserDB.find_one(UserDB.email == username)
-    if user is not None:
-        return UserOut(**user.dict())
+async def get_user_by_name(username: str):
+    if (user := await UserDB.find_one(UserDB.email == username)) is not None:
+        return user.dict()
     raise HTTPException(status_code=404, detail=f"User {username} not found")

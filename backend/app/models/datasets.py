@@ -3,7 +3,7 @@ from enum import Enum, auto
 from typing import Optional, List
 
 import pymongo
-from beanie import Document, View, PydanticObjectId
+from beanie import Document, View
 from pydantic import BaseModel, Field
 
 from app.models.authorization import RoleType, AuthorizationDB
@@ -56,8 +56,6 @@ class DatasetDB(Document, DatasetBase):
 
 
 class DatasetDBViewList(View, DatasetBase):
-    # FIXME This seems to be required to return _id. Otherwise _id is null in the response.
-    id: PydanticObjectId = Field(None, alias="_id")
     creator: UserOut
     created: datetime = Field(default_factory=datetime.utcnow)
     modified: datetime = Field(default_factory=datetime.utcnow)

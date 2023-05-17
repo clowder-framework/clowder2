@@ -1,5 +1,6 @@
 from typing import Optional, List
 
+from beanie import PydanticObjectId
 from bson import ObjectId
 from elasticsearch import Elasticsearch
 from fastapi import (
@@ -8,12 +9,11 @@ from fastapi import (
     Depends,
     Form,
 )
-from pymongo import MongoClient
 
 from app import dependencies
 from app.deps.authorization_deps import FileAuthorization
 from app.keycloak_auth import get_current_user, UserOut
-from app.models.files import FileOut
+from app.models.files import FileOut, FileDB, FileVersionDB
 from app.models.listeners import EventListenerDB
 from app.models.metadata import (
     MongoDBRef,
@@ -34,7 +34,6 @@ router = APIRouter()
 
 
 async def _build_metadata_db_obj(
-    db: MongoClient,
     metadata_in: MetadataIn,
     file: FileOut,
     user: UserOut,
@@ -55,8 +54,9 @@ async def _build_metadata_db_obj(
         file_version = metadata_in.file_version
         if file_version is not None:
             if (
-                await db["file_versions"].find_one(
-                    {"file_id": file.id, "version_num": file_version}
+                await FileVersionDB.find_one(
+                    FileVersionDB.file_id == file.id,
+                    FileVersionDB.version_num == file_version,
                 )
             ) is None:
                 raise HTTPException(
@@ -105,7 +105,6 @@ async def add_file_metadata(
     metadata_in: MetadataIn,
     file_id: str,
     user=Depends(get_current_user),
-    db: MongoClient = Depends(dependencies.get_db),
     es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
     allow: bool = Depends(FileAuthorization("uploader")),
 ):
@@ -115,8 +114,7 @@ async def add_file_metadata(
     Returns:
         Metadata document that was added to database
     """
-    if (file := await db["files"].find_one({"_id": ObjectId(file_id)})) is not None:
-        file = FileOut(**file)
+    if (file := await FileDB.get(PydanticObjectId(file_id))) is not None:
         current_file_version = file.version_num
         # if metadata does not already specify a file version
         # change metadata_in file version to match the current file version
@@ -147,7 +145,7 @@ async def add_file_metadata(
                         409, f"Metadata for {definition} already exists on this file"
                     )
 
-        md = await _build_metadata_db_obj(metadata_in, file, user)
+        md = await _build_metadata_db_obj(metadata_in, FileOut(**file.dict()), user)
         await md.insert()
 
         # Add an entry to the metadata index
@@ -168,7 +166,7 @@ async def add_file_metadata(
             "bytes": file.bytes,
         }
         insert_record(es, "metadata", doc, md.id)
-        return MetadataOut(**md.dict())
+        return md.dict()
 
 
 @router.put("/{file_id}/metadata", response_model=MetadataOut)
@@ -176,7 +174,6 @@ async def replace_file_metadata(
     metadata_in: MetadataPatch,
     file_id: str,
     user=Depends(get_current_user),
-    db: MongoClient = Depends(dependencies.get_db),
     es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
     allow: bool = Depends(FileAuthorization("editor")),
 ):
@@ -185,16 +182,16 @@ async def replace_file_metadata(
     Returns:
         Metadata document that was updated
     """
-    if (file := await db["files"].find_one({"_id": ObjectId(file_id)})) is not None:
+    if (file := await FileDB.get(PydanticObjectId(file_id))) is not None:
         # First, make sure the metadata we are replacing actually exists.
         query = [MetadataDB.resource.resource_id == ObjectId(file_id)]
-        file = FileOut(**file)
 
         version = metadata_in.file_version
         if version is not None:
             if (
-                version_q := await db["file_versions"].find_one(
-                    {"file_id": ObjectId(file_id), "version_num": version}
+                await FileVersionDB.find_one(
+                    FileVersionDB.file_id == ObjectId(file_id),
+                    FileVersionDB.version_num == version,
                 )
             ) is None:
                 raise HTTPException(
@@ -228,14 +225,18 @@ async def replace_file_metadata(
         if (md := await MetadataDB(*query).find_one()) is not None:
             # Metadata exists, so prepare the new document we are going to replace it with
             md = await _build_metadata_db_obj(
-                metadata_in, file, user, agent=agent, version=target_version
+                metadata_in,
+                FileOut(**file.dict()),
+                user,
+                agent=agent,
+                version=target_version,
             )
             await md.save()
 
             # Update entry to the metadata index
             doc = {"doc": {"content": md.content}}
             update_record(es, "metadata", doc, md.id)
-            return MetadataOut(**md.dict())
+            return md.dict()
         else:
             raise HTTPException(status_code=404, detail=f"No metadata found to update")
     else:
@@ -247,7 +248,6 @@ async def update_file_metadata(
     metadata_in: MetadataPatch,
     file_id: str,
     user=Depends(get_current_user),
-    db: MongoClient = Depends(dependencies.get_db),
     es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
     allow: bool = Depends(FileAuthorization("editor")),
 ):
@@ -260,17 +260,16 @@ async def update_file_metadata(
 
     # check if metadata with file version exists, replace metadata if none exists
     if (
-        version_md := await MetadataDB(
+        await MetadataDB(
             MetadataDB.resource.resource_id == ObjectId(file_id),
             MetadataDB.resource.version == metadata_in.file_version,
         ).find_one()
     ) is None:
-        result = await replace_file_metadata(metadata_in, file_id, user, db, es)
+        result = await replace_file_metadata(metadata_in, file_id, user, es)
         return result
 
-    if (file := await db["files"].find_one({"_id": ObjectId(file_id)})) is not None:
+    if (file := await FileDB.get(PydanticObjectId(file_id))) is not None:
         query = [MetadataDB.resource.resource_id == ObjectId(file_id)]
-        file = FileOut(**file)
         content = metadata_in.content
 
         if metadata_in.metadata_id is not None:
@@ -294,18 +293,18 @@ async def update_file_metadata(
             if definition is not None:
                 query.append(MetadataDB.definition == definition)
 
-        version = metadata_in.file_version
-        if version is not None:
+        if metadata_in.file_version is not None:
             if (
-                version_q := await db["file_versions"].find_one(
-                    {"file_id": ObjectId(file_id), "version_num": version}
+                await FileVersionDB.find_one(
+                    FileVersionDB.file_id == ObjectId(file_id),
+                    FileVersionDB.version_num == metadata_in.file_version,
                 )
             ) is None:
                 raise HTTPException(
                     status_code=404,
-                    detail=f"File version {version} does not exist",
+                    detail=f"File version {metadata_in.file_version} does not exist",
                 )
-            target_version = version
+            target_version = metadata_in.file_version
         else:
             target_version = file.version_num
         query.append(MetadataDB.resource.version == target_version)
@@ -351,20 +350,19 @@ async def get_file_metadata(
     extractor_name: Optional[str] = Form(None),
     extractor_version: Optional[float] = Form(None),
     user=Depends(get_current_user),
-    db: MongoClient = Depends(dependencies.get_db),
     allow: bool = Depends(FileAuthorization("viewer")),
 ):
     """Get file metadata."""
-    if (file := await db["files"].find_one({"_id": ObjectId(file_id)})) is not None:
+    if (file := await FileDB.get(PydanticObjectId(file_id))) is not None:
         query = [MetadataDB.resource.resource_id == ObjectId(file_id)]
-        file = FileOut.from_mongo(file)
 
         # Validate specified version, or use latest by default
         if not all_versions:
             if version is not None:
                 if (
-                    version_q := await db["file_versions"].find_one(
-                        {"file_id": ObjectId(file_id), "version_num": version}
+                    await FileVersionDB.find_one(
+                        FileVersionDB.file_id == ObjectId(file_id),
+                        FileVersionDB.version_num == version,
                     )
                 ) is None:
                     raise HTTPException(
@@ -386,17 +384,16 @@ async def get_file_metadata(
             query.append(MetadataDB.agent.extractor.version == extractor_version)
 
         metadata = []
-        async for md in db["metadata"].find(query):
-            md_out = MetadataOut.from_mongo(md)
-            if md_out.definition is not None:
+        async for md in MetadataDB.find(query):
+            if md.definition is not None:
                 if (
                     md_def := await MetadataDefinitionDB(
-                        MetadataDefinitionDB.name == md_out.definition
+                        MetadataDefinitionDB.name == md.definition
                     )
                 ) is not None:
                     md_def = MetadataDefinitionOut(**md_def.dict())
-                    md_out.description = md_def.description
-            metadata.append(md_out)
+                    md.description = md_def.description
+            metadata.append(md.dict())
         return metadata
     else:
         raise HTTPException(status_code=404, detail=f"File {file_id} not found")
@@ -408,19 +405,18 @@ async def delete_file_metadata(
     file_id: str,
     # version: Optional[int] = Form(None),
     user=Depends(get_current_user),
-    db: MongoClient = Depends(dependencies.get_db),
     es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
     allow: bool = Depends(FileAuthorization("editor")),
 ):
-    if (file := await db["files"].find_one({"_id": ObjectId(file_id)})) is not None:
+    if (file := await FileDB.get(PydanticObjectId(file_id))) is not None:
         query = [MetadataDB.resource.resource_id == ObjectId(file_id)]
-        file = FileOut.from_mongo(file)
 
         # # Validate specified version, or use latest by default
         # if version is not None:
         #     if (
-        #         version_q := await db["file_versions"].find_one(
-        #             {"file_id": ObjectId(file_id), "version_num": version}
+        #         version_q := await FileVersionDB.find_one(
+        #             FileVersionDB.file_id == ObjectId(file_id),
+        #             FileVersionDB.version_num == version,
         #         )
         #     ) is None:
         #         raise HTTPException(
@@ -436,7 +432,7 @@ async def delete_file_metadata(
         if metadata_in.metadata_id is not None:
             # If a specific metadata_id is provided, delete the matching entry
             if (
-                existing_md := await MetadataDB(
+                await MetadataDB(
                     MetadataDB.metadata_id == ObjectId(metadata_in.metadata_id)
                 ).find_one()
             ) is not None:
@@ -473,10 +469,8 @@ async def delete_file_metadata(
         delete_document_by_id(es, "metadata", str(metadata_in.id))
 
         if (md := await MetadataDB(*query).find_one()) is not None:
-            metadata_deleted = md
-            # if await db["metadata"].delete_one({"_id": md["_id"]}) is not None:
-            if await MetadataDB(MetadataDB.id == md.id).delete_one() is not None:
-                return MetadataOut(**metadata_deleted.dict())
+            await md.delete()
+            return md.dict()  # TODO: Do we need to return the object we just deleted?
         else:
             raise HTTPException(
                 status_code=404, detail=f"No metadata found with that criteria"

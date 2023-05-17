@@ -3,7 +3,6 @@ import pika
 import string
 import random
 from fastapi import Request, HTTPException, Depends
-from pymongo import MongoClient
 from pika.adapters.blocking_connection import BlockingChannel
 
 from app.config import settings
@@ -23,10 +22,6 @@ from app.models.listeners import (
 
 
 async def create_reply_queue():
-    # TODO: Dependency injection not working here
-    mongo_client = MongoClient(settings.MONGODB_URL)
-    db = mongo_client[settings.MONGO_DATABASE]
-
     credentials = pika.PlainCredentials("guest", "guest")
     parameters = pika.ConnectionParameters("localhost", credentials=credentials)
     connection = pika.BlockingConnection(parameters)

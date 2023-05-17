@@ -2,13 +2,11 @@ from beanie import PydanticObjectId
 from beanie.operators import Or
 from bson import ObjectId
 from fastapi import Depends, HTTPException
-from pymongo import MongoClient
 
-from app.dependencies import get_db
 from app.keycloak_auth import get_current_username
 from app.models.authorization import RoleType, AuthorizationDB
 from app.models.datasets import DatasetDB
-from app.models.files import FileOut
+from app.models.files import FileOut, FileDB
 from app.models.groups import GroupOut, GroupDB
 from app.models.metadata import MetadataDB
 from app.models.pyobjectid import PyObjectId
@@ -32,13 +30,11 @@ async def get_role(
 
 async def get_role_by_file(
     file_id: str,
-    db: MongoClient = Depends(get_db),
     current_user=Depends(get_current_username),
 ) -> RoleType:
-    if (file := await db["files"].find_one({"_id": ObjectId(file_id)})) is not None:
-        file_out = FileOut.from_mongo(file)
+    if (file := await FileDB.get(PydanticObjectId(file_id))) is not None:
         authorization = await AuthorizationDB.find_one(
-            AuthorizationDB.dataset_id == file_out.dataset_id,
+            AuthorizationDB.dataset_id == file.dataset_id,
             Or(
                 AuthorizationDB.creator == current_user,
                 AuthorizationDB.user_ids == current_user,
@@ -50,19 +46,15 @@ async def get_role_by_file(
 
 async def get_role_by_metadata(
     metadata_id: str,
-    db: MongoClient = Depends(get_db),
     current_user=Depends(get_current_username),
 ) -> RoleType:
     if (md_out := await MetadataDB.get(PydanticObjectId(metadata_id))) is not None:
         resource_type = md_out.resource.collection
         resource_id = md_out.resource.resource_id
         if resource_type == "files":
-            if (
-                file := await db["files"].find_one({"_id": ObjectId(resource_id)})
-            ) is not None:
-                file_out = FileOut.from_mongo(file)
+            if (file := await FileDB.get(PydanticObjectId(resource_id))) is not None:
                 authorization = await AuthorizationDB.find_one(
-                    AuthorizationDB.dataset_id == file_out.dataset_id,
+                    AuthorizationDB.dataset_id == file.dataset_id,
                     Or(
                         AuthorizationDB.creator == current_user,
                         AuthorizationDB.user_ids == current_user,
@@ -114,7 +106,6 @@ class Authorization:
     async def __call__(
         self,
         dataset_id: str,
-        db: MongoClient = Depends(get_db),
         current_user: str = Depends(get_current_username),
     ):
         # TODO: Make sure we enforce only one role per user per dataset, or find_one could yield wrong answer here.
@@ -150,13 +141,11 @@ class FileAuthorization:
     async def __call__(
         self,
         file_id: str,
-        db: MongoClient = Depends(get_db),
         current_user: str = Depends(get_current_username),
     ):
-        if (file := await db["files"].find_one({"_id": ObjectId(file_id)})) is not None:
-            file_out = FileOut.from_mongo(file)
+        if (file := await FileDB.get(PydanticObjectId(file_id))) is not None:
             authorization = await AuthorizationDB.find_one(
-                AuthorizationDB.dataset_id == file_out.dataset_id,
+                AuthorizationDB.dataset_id == file.dataset_id,
                 Or(
                     AuthorizationDB.creator == current_user,
                     AuthorizationDB.user_ids == current_user,
@@ -183,7 +172,6 @@ class MetadataAuthorization:
     async def __call__(
         self,
         metadata_id: str,
-        db: MongoClient = Depends(get_db),
         current_user: str = Depends(get_current_username),
     ):
         if (md_out := await MetadataDB.get(PydanticObjectId(metadata_id))) is not None:
@@ -191,11 +179,10 @@ class MetadataAuthorization:
             resource_id = md_out.resource.resource_id
             if resource_type == "files":
                 if (
-                    file := await db["files"].find_one({"_id": ObjectId(resource_id)})
+                    file := await FileDB.get(PydanticObjectId(resource_id))
                 ) is not None:
-                    file_out = FileOut.from_mongo(file)
                     authorization = await AuthorizationDB.find_one(
-                        AuthorizationDB.dataset_id == file_out.dataset_id,
+                        AuthorizationDB.dataset_id == file.dataset_id,
                         Or(
                             AuthorizationDB.creator == current_user,
                             AuthorizationDB.user_ids == current_user,
@@ -246,7 +233,6 @@ class GroupAuthorization:
     async def __call__(
         self,
         group_id: str,
-        db: MongoClient = Depends(get_db),
         current_user: str = Depends(get_current_username),
     ):
         if (group := await GroupDB.get(group_id)) is not None:

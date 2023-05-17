@@ -7,7 +7,6 @@ from datetime import datetime
 
 import pika
 from bson import ObjectId
-from pymongo import MongoClient
 
 from app.config import settings
 from app.models.config import ConfigEntryDB, ConfigEntryOut
@@ -83,13 +82,10 @@ def callback(ch, method, properties, body):
     )  # incoming format: '2023-01-20T08:30:27-05:00'
     timestamp = timestamp.replace(tzinfo=datetime.utcnow().tzinfo)
 
-    mongo_client = MongoClient(settings.MONGODB_URL)
-    db = mongo_client[settings.MONGO_DATABASE]
-
     # TODO: Updating an event message could go in rabbitmq/listeners
 
     # Check if the job exists, and update if so
-    job = EventListenerDB.find_one(EventListenerDB.id == ObjectId(job_id))
+    job = await EventListenerDB.find_one(EventListenerDB.id == ObjectId(job_id))
     if job:
         # Update existing job with newest info
         job.updated = timestamp
@@ -141,9 +137,9 @@ async def listen_for_messages():
     connection = pika.BlockingConnection(parameters)
     channel = connection.channel()
 
-    mongo_client = MongoClient(settings.MONGODB_URL)
-    db = mongo_client[settings.MONGO_DATABASE]
-    if (config_entry := ConfigEntryOut.find_one({"key": "instance_id"})) is not None:
+    if (
+        config_entry := await ConfigEntryOut.find_one({"key": "instance_id"})
+    ) is not None:
         instance_id = config_entry.value
     else:
         # If no ID has been generated for this instance, generate a 10-digit alphanumeric identifier
