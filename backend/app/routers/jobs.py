@@ -45,7 +45,6 @@ async def get_all_job_summary(
     filters = [
         Or(
             EventListenerJobViewList.creator.email == current_user_id,
-            # TODO: make sure ElemMatch & Eq isn't needed here
             EventListenerJobViewList.auth.user_id == current_user_id,
         ),
     ]
@@ -74,12 +73,8 @@ async def get_all_job_summary(
         filters.append(
             EventListenerJobViewList.resource_ref.resource_id == ObjectId(dataset_id)
         )
-
     jobs = (
-        await EventListenerJobViewList.find(*filters)
-        .skip(skip)
-        .limit(limit)
-        .to_list(length=limit)
+        await EventListenerJobViewList.find(*filters).skip(skip).limit(limit).to_list()
     )
     return [job.dict() for job in jobs]
 

@@ -141,7 +141,7 @@ class EventListenerJobDB(Document, EventListenerJobBase):
         ]
 
 
-class EventListenerJobOut(EventListenerDB):
+class EventListenerJobOut(EventListenerJobDB):
     class Config:
         fields = {"id": "id"}
 
@@ -274,7 +274,7 @@ class EventListenerJobUpdateViewList(View, EventListenerJobUpdateBase):
 
     class Settings:
         source = EventListenerJobUpdateDB
-        name = "listener_jobs_view"
+        name = "listener_job_updates_view"
         pipeline = [
             {
                 "$lookup": {  # Equality Match

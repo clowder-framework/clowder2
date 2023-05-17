@@ -69,7 +69,7 @@ async def submit_file_job(
         ),
         parameters=parameters,
     )
-    await job.save()
+    await job.insert()
 
     msg_body = EventListenerJobMessage(
         filename=file_out.name,
