@@ -409,7 +409,7 @@ async def patch_dataset(
                 {"_id": ObjectId(dataset_id)}, DatasetDB(**dataset).to_mongo()
             )
             # Update entry to the dataset index
-            await index_dataset(db, es, dataset, update=True)
+            await index_dataset(db, es, DatasetOut(**dataset), update=True)
         except Exception as e:
             raise HTTPException(status_code=500, detail=e.args[0])
         return DatasetOut.from_mongo(dataset)
