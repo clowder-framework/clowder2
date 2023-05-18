@@ -1,10 +1,10 @@
-from datetime import datetime
 from typing import Optional, List
 
-from pydantic import Field, BaseModel
-from beanie import Document, View, PydanticObjectId
+from beanie import Document
+from pydantic import BaseModel
+
+from app.models.authorization import Provenance
 from app.models.users import UserOut
-from app.models.authorization import Provenance, RoleType
 
 
 class Member(BaseModel):
@@ -36,4 +36,5 @@ class GroupDB(Document, GroupBase, Provenance):
 
 
 class GroupOut(GroupDB):
-    pass
+    class Config:
+        fields = {"id": "id"}

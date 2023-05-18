@@ -52,7 +52,8 @@ class AuthorizationDB(Document, AuthorizationBase, Provenance):
 
 
 class AuthorizationOut(AuthorizationDB):
-    pass
+    class Config:
+        fields = {"id": "id"}
 
 
 class AuthorizationFile(BaseModel):

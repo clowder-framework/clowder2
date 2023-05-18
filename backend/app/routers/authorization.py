@@ -33,7 +33,7 @@ from app.models.users import UserOut, UserDB
 router = APIRouter()
 
 
-@router.post("/datasets/{dataset_id}", response_model=AuthorizationDB)
+@router.post("/datasets/{dataset_id}", response_model=AuthorizationOut)
 async def save_authorization(
     dataset_id: str,
     authorization_in: AuthorizationBase,
@@ -45,7 +45,10 @@ async def save_authorization(
     # Retrieve users from groups in mongo
     user_ids = authorization_in.user_ids
     found_groups = 0
-    async for group in GroupDB.find(In(GroupDB.id, authorization_in.group_ids)):
+    group_list = await GroupDB.find(
+        In(GroupDB.id, authorization_in.group_ids)
+    ).to_list()
+    async for group in group_list:
         found_groups += 1
         for u in group.users:
             user_ids.append(u.user.email)
@@ -61,10 +64,10 @@ async def save_authorization(
         **authorization_in.dict(), creator=user, user_ids=user_ids
     )
     await authorization.insert()
-    return authorization
+    return authorization.dict()
 
 
-@router.get("/datasets/{dataset_id}/role", response_model=AuthorizationDB)
+@router.get("/datasets/{dataset_id}/role", response_model=AuthorizationOut)
 async def get_dataset_role(
     dataset_id: str,
     current_user=Depends(get_current_username),
@@ -84,7 +87,7 @@ async def get_dataset_role(
             status_code=404, detail=f"No authorization found for dataset: {dataset_id}"
         )
     else:
-        return auth_db
+        return auth_db.dict()
 
 
 @router.get("/datasets/{dataset_id}/role/viewer")
@@ -137,7 +140,7 @@ async def get_group_role(
 
 @router.post(
     "/datasets/{dataset_id}/group_role/{group_id}/{role}",
-    response_model=AuthorizationDB,
+    response_model=AuthorizationOut,
 )
 async def set_dataset_group_role(
     dataset_id: str,
@@ -147,7 +150,7 @@ async def set_dataset_group_role(
     allow: bool = Depends(Authorization("editor")),
 ):
     """Assign an entire group a specific role for a dataset."""
-    if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
+    if (await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
         if (group := await GroupDB.get(PydanticObjectId(group_id))) is not None:
             # First, remove any existing role the group has on the dataset
             await remove_dataset_group_role(dataset_id, group_id, user_id, allow)
@@ -162,7 +165,7 @@ async def set_dataset_group_role(
                     for u in group.users:
                         auth_db.user_ids.append(u.user.email)
                     await auth_db.replace()
-                return auth_db
+                return auth_db.dict()
             else:
                 # Create new role entry for this dataset
                 user_ids = []
@@ -176,7 +179,7 @@ async def set_dataset_group_role(
                     user_ids=user_ids,
                 )
                 await auth_db.insert()
-                return auth_db
+                return auth_db.dict()
         else:
             raise HTTPException(status_code=404, detail=f"Group {group_id} not found")
     else:
@@ -184,7 +187,8 @@ async def set_dataset_group_role(
 
 
 @router.post(
-    "/datasets/{dataset_id}/user_role/{username}/{role}", response_model=AuthorizationDB
+    "/datasets/{dataset_id}/user_role/{username}/{role}",
+    response_model=AuthorizationOut,
 )
 async def set_dataset_user_role(
     dataset_id: str,
@@ -219,7 +223,7 @@ async def set_dataset_user_role(
                 else:
                     auth_db.user_ids.append(username)
                     await auth_db.save()
-                return auth_db
+                return auth_db.dict()
             else:
                 # Create a new entry
                 auth_db = AuthorizationDB(
@@ -229,7 +233,7 @@ async def set_dataset_user_role(
                     user_ids=[username],
                 )
                 await auth_db.insert()
-                return auth_db
+                return auth_db.dict()
 
         else:
             raise HTTPException(status_code=404, detail=f"User {username} not found")
@@ -239,7 +243,7 @@ async def set_dataset_user_role(
 
 @router.delete(
     "/datasets/{dataset_id}/group_role/{group_id}",
-    response_model=AuthorizationDB,
+    response_model=AuthorizationOut,
 )
 async def remove_dataset_group_role(
     dataset_id: str,
@@ -249,7 +253,7 @@ async def remove_dataset_group_role(
 ):
     """Remove any role the group has with a specific dataset."""
 
-    if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
+    if (await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
         if (group := await GroupDB.get(PydanticObjectId(group_id))) is not None:
             if (
                 auth_db := await AuthorizationDB.find_one(
@@ -261,8 +265,8 @@ async def remove_dataset_group_role(
                 for u in group.users:
                     if u.user.email in auth_db.user_ids:
                         auth_db.user_ids.remove(u.user.email)
-                await auth_db.replace()
-                return auth_db
+                await auth_db.save()
+                return auth_db.dict()
         else:
             raise HTTPException(status_code=404, detail=f"Group {group_id} not found")
     else:
@@ -271,7 +275,7 @@ async def remove_dataset_group_role(
 
 @router.delete(
     "/datasets/{dataset_id}/user_role/{username}",
-    response_model=AuthorizationDB,
+    response_model=AuthorizationOut,
 )
 async def remove_dataset_user_role(
     dataset_id: str,
@@ -281,8 +285,8 @@ async def remove_dataset_user_role(
 ):
     """Remove any role the user has with a specific dataset."""
 
-    if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
-        if (user := await UserDB.find_one(UserDB.email == username)) is not None:
+    if (await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
+        if (await UserDB.find_one(UserDB.email == username)) is not None:
             if (
                 auth_db := await AuthorizationDB.find_one(
                     AuthorizationDB.dataset_id == PyObjectId(dataset_id),
@@ -290,8 +294,8 @@ async def remove_dataset_user_role(
                 )
             ) is not None:
                 auth_db.user_ids.remove(username)
-                await auth_db.replace()
-                return auth_db
+                await auth_db.save()
+                return auth_db.dict()
         else:
             raise HTTPException(status_code=404, detail=f"User {username} not found")
     else:
