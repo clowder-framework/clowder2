@@ -1,19 +1,15 @@
-import datetime
-import io
 import os
 from typing import List, Optional
 
-from elasticsearch import Elasticsearch
 from bson import ObjectId
+from elasticsearch import Elasticsearch
 from fastapi import APIRouter, HTTPException, Depends
 from fastapi import Form
 from pymongo import MongoClient
 
-from app import keycloak_auth
 from app import dependencies
 from app.deps.authorization_deps import Authorization
-from app.keycloak_auth import get_user, get_current_user, UserOut
-from app.config import settings
+from app.keycloak_auth import get_current_user, UserOut
 from app.models.datasets import DatasetOut
 from app.models.listeners import LegacyEventListenerIn
 from app.models.metadata import (
@@ -28,7 +24,8 @@ from app.models.metadata import (
     patch_metadata,
     MetadataDelete,
 )
-from app.search.connect import insert_record, update_record, delete_document_by_id
+from app.search.connect import delete_document_by_id
+from app.search.index import index_dataset_metadata
 
 router = APIRouter()
 
@@ -117,20 +114,7 @@ async def add_dataset_metadata(
         metadata_out = MetadataOut.from_mongo(found)
 
         # Add an entry to the metadata index
-        doc = {
-            "resource_id": dataset_id,
-            "resource_type": "dataset",
-            "created": metadata_out.created.utcnow(),
-            "creator": user.email,
-            "content": metadata_out.content,
-            "context_url": metadata_out.context_url,
-            "context": metadata_out.context,
-            "name": dataset.name,
-            "resource_created": dataset.created,
-            "author": dataset.author.email,
-            "description": dataset.description,
-        }
-        insert_record(es, "metadata", doc, metadata_out.id)
+        await index_dataset_metadata(db, es, dataset, metadata_out)
         return metadata_out
 
 
@@ -183,8 +167,7 @@ async def replace_dataset_metadata(
             found = await db["metadata"].find_one({"_id": md["_id"]})
             metadata_out = MetadataOut.from_mongo(found)
             # Update entry to the metadata index
-            doc = {"doc": {"content": metadata_out["content"]}}
-            update_record(es, "metadata", doc, metadata_out["_id"])
+            await index_dataset_metadata(db, es, dataset, metadata_out, update=True)
             return metadata_out
     else:
         raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
@@ -255,8 +238,9 @@ async def update_dataset_metadata(
 
         if (md := await db["metadata"].find_one(query)) is not None:
             # TODO: Refactor this with permissions checks etc.
-            result = await patch_metadata(md, content, db, es)
-            return result
+            md_out = await patch_metadata(md, content, db, es)
+            await index_dataset_metadata(db, es, dataset, md_out, update=True)
+            return md_out
         else:
             raise HTTPException(
                 status_code=404, detail=f"Metadata matching the query not found"
