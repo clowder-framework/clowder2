@@ -4,7 +4,7 @@ import { MetadataEditButton } from "./MetadataEditButton";
 import {Grid} from "@mui/material";
 
 export const MetadataTextField = (props) => {
-	const {widgetName, fieldName, content, setMetadata, metadataId, updateMetadata, resourceId, initialReadOnly} = props;
+	const {widgetName, fieldName, content, setMetadata, metadataId, updateMetadata, resourceId, initialReadOnly, isRequired} = props;
 	const [localContent, setLocalContent] = useState(content && content[fieldName] ? content: {});
 	const [readOnly, setReadOnly] = useState(initialReadOnly);
 
@@ -13,13 +13,13 @@ export const MetadataTextField = (props) => {
 	return (
 		<Grid container spacing={2} sx={{ "alignItems": "center"}}>
 			<Grid item xs={11} sm={11} md={11} lg={11} xl={11}>
-				<ClowderMetadataTextField label={widgetName} variant="outlined" margin="normal" fullWidth name={widgetName}
+				<ClowderMetadataTextField label={fieldName} variant="outlined" margin="normal" fullWidth name={widgetName} required={isRequired}
 										  value={readOnly && content? content[fieldName]: localContent[fieldName]}
 										  onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
 											  setInputChanged(true);
-											  let tempContents: { [key: string]: string|number; } = {};
+											  const tempContents: { [key: string]: string|number; } = {};
 											  tempContents[fieldName] = event.target.value;
-											  setLocalContent(tempContents)
+											  setLocalContent(tempContents);
 											  setMetadata ?
 												  metadataId ?
 													  setMetadata({
@@ -33,7 +33,7 @@ export const MetadataTextField = (props) => {
 														  "content": tempContents
 													  })
 												  :
-												  null
+												  null;
 										  }}
 										  disabled={readOnly}
 										  helperText={inputChanged? "* You have changed this field. Remember to save/ update.": ""}
@@ -41,11 +41,11 @@ export const MetadataTextField = (props) => {
 			</Grid>
 			<Grid item xs={1} sm={1} md={1} lg={1} xl={1}>
 				<MetadataEditButton readOnly={readOnly} setReadOnly={setReadOnly} updateMetadata={updateMetadata}
-									content={localContent} metadataId={metadataId} resourceId={resourceId}
-									widgetName={widgetName} setInputChanged={setInputChanged}
-									setMetadata={setMetadata}
+					content={localContent} metadataId={metadataId} resourceId={resourceId}
+					widgetName={widgetName} setInputChanged={setInputChanged}
+					setMetadata={setMetadata}
 				/>
 			</Grid>
 		</Grid>
-	)
-}
+	);
+};

@@ -7,7 +7,7 @@ import {MetadataEditButton} from "./MetadataEditButton";
 
 export const MetadataSelect = (props) => {
 	const {widgetName, fieldName, metadataId, content, setMetadata, initialReadOnly, options, resourceId,
-		updateMetadata} = props;
+		updateMetadata, isRequired} = props;
 	const [localContent, setLocalContent] = useState(content && content[fieldName] ? content: {});
 
 	const [readOnly, setReadOnly] = useState(initialReadOnly);
@@ -16,7 +16,7 @@ export const MetadataSelect = (props) => {
 
 	const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
 		setInputChanged(true);
-		let tempContents: { [key: string]: string; } = {};
+		const tempContents: { [key: string]: string; } = {};
 		tempContents[fieldName] = event.target.value;
 		setMetadata ?
 			metadataId ?
@@ -31,8 +31,8 @@ export const MetadataSelect = (props) => {
 					"content": tempContents
 				})
 			:
-			null
-		setLocalContent(tempContents)
+			null;
+		setLocalContent(tempContents);
 	};
 
 	return (
@@ -40,7 +40,7 @@ export const MetadataSelect = (props) => {
 			<Grid container spacing={2} sx={{ "alignItems": "center"}}>
 				<Grid item xs={11} sm={11} md={11} lg={11} xl={11}>
 					<FormControl fullWidth>
-						<InputLabel>{widgetName}</InputLabel>
+						<InputLabel>{isRequired ? `${fieldName  } *` : fieldName}</InputLabel>
 						<ClowderMetadataSelect value={readOnly && content ? content[fieldName]: localContent[fieldName]}
 											   label="Unit" onChange={handleChange}
 											   sx={{background:"#ffffff"}}
@@ -48,7 +48,7 @@ export const MetadataSelect = (props) => {
 						>
 							{
 								options.map((option) => {
-									return <MenuItem value={option}>{option}</MenuItem>
+									return <MenuItem value={option}>{option}</MenuItem>;
 								})
 							}
 						</ClowderMetadataSelect>
@@ -58,11 +58,11 @@ export const MetadataSelect = (props) => {
 				</Grid>
 				<Grid item xs={1} sm={1} md={1} lg={1} xl={1}>
 					<MetadataEditButton readOnly={readOnly} setReadOnly={setReadOnly} updateMetadata={updateMetadata}
-										content={localContent} metadataId={metadataId} resourceId={resourceId}
-										widgetName={widgetName} setInputChanged={setInputChanged}
-										setMetadata={setMetadata}/>
+						content={localContent} metadataId={metadataId} resourceId={resourceId}
+						widgetName={widgetName} setInputChanged={setInputChanged}
+						setMetadata={setMetadata}/>
 				</Grid>
 			</Grid>
 		</div>
 	);
-}
+};

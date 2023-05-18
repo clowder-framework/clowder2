@@ -81,6 +81,7 @@ export const File = (): JSX.Element => {
 	const [enableAddMetadata, setEnableAddMetadata] =
 		React.useState<boolean>(false);
 	const [metadataRequestForms, setMetadataRequestForms] = useState({});
+	const [allowSubmit, setAllowSubmit] = React.useState<boolean>(false);
 
 	// component did mount
 	useEffect(() => {

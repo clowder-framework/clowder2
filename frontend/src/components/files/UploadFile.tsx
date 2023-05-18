@@ -31,6 +31,7 @@ export const UploadFile:React.FC<UploadFileProps> = (props: UploadFileProps) => 
 	const uploadFile = (selectedDatasetId: string|undefined, selectedFolderId: string|undefined, formData: FormData) => dispatch(fileCreated(selectedDatasetId, selectedFolderId, formData));
 	const newFile = useSelector((state:RootState) => state.dataset.newFile);
 	const folderPath = useSelector((state: RootState) => state.folder.folderPath);
+	const metadataDefinitionList = useSelector((state: RootState) => state.metadata.metadataDefinitionList);
 
 	useEffect(() => {
 		getMetadatDefinitions(null, 0, 100);
@@ -38,12 +39,33 @@ export const UploadFile:React.FC<UploadFileProps> = (props: UploadFileProps) => 
 
 	const [fileRequestForm, setFileRequestForm] = useState({});
 	const [metadataRequestForms, setMetadataRequestForms] = useState({});
+	const [allowSubmit, setAllowSubmit] = React.useState<boolean>(false);
 
 	const history = useNavigate();
+    
+	const checkIfFieldsAreRequired = () => {
+		let required = false;
 
+		metadataDefinitionList.forEach((val, idx) => {
+			if (val.fields[0].required) {
+				required = true;
+			}
+		});
+
+		return required;
+	};
 	// step 1
 	const onFileSave = (formData:any) =>{
 		setFileRequestForm(formData);
+
+		// If no metadata fields are marked as required, allow user to skip directly to submit
+		if (checkIfFieldsAreRequired()) {
+			setAllowSubmit(false);
+
+		} else {
+			setAllowSubmit(true);
+		}
+
 		handleNext();
 	};
 	// step 2
@@ -56,6 +78,20 @@ export const UploadFile:React.FC<UploadFileProps> = (props: UploadFileProps) => 
 				metadata.content = {...prevContent, ...metadata.content};
 			}
 			return ({...prevState, [metadata.definition]: metadata});
+		});
+
+		metadataDefinitionList.every((val, idx) => {
+			if (val.fields[0].required) {
+				// Condition checks whether the current updated field is a required one
+				if (val.name == metadata.definition || val.name in metadataRequestForms) {
+					setAllowSubmit(true);
+					return true;
+
+				} else {
+					setAllowSubmit(false);
+					return false;
+				}
+			}
 		});
 	};
 
@@ -126,7 +162,7 @@ export const UploadFile:React.FC<UploadFileProps> = (props: UploadFileProps) => 
 							{/*buttons*/}
 							<Box sx={{ mb: 2 }}>
 								<>
-									<Button variant="contained" onClick={handleFinish} sx={{ mt: 1, mr: 1 }}>
+									<Button variant="contained" onClick={handleFinish} disabled={!allowSubmit} sx={{ mt: 1, mr: 1 }}>
                                         Finish
 									</Button>
 									<Button onClick={handleBack} sx={{ mt: 1, mr: 1 }}>
