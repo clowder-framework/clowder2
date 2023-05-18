@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Optional, List
 
-from beanie import Document, View
+from beanie import Document, View, PydanticObjectId
 from pydantic import Field, BaseModel
 
 from app.models.authorization import AuthorizationDB
@@ -59,6 +59,11 @@ class FileDB(Document, FileBase):
 
 
 class FileDBViewList(View, FileBase):
+    id: PydanticObjectId = Field(None, alias="_id")  # necessary for Views
+    version_id: str = "N/A"
+    version_num: int = 0
+    dataset_id: PyObjectId
+    folder_id: Optional[PyObjectId]
     creator: UserOut
     created: datetime = Field(default_factory=datetime.utcnow)
     modified: datetime = Field(default_factory=datetime.utcnow)

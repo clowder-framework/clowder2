@@ -3,7 +3,7 @@ from enum import Enum, auto
 from typing import Optional, List
 
 import pymongo
-from beanie import Document, View
+from beanie import Document, View, PydanticObjectId
 from pydantic import BaseModel, Field
 
 from app.models.authorization import RoleType, AuthorizationDB
@@ -56,6 +56,7 @@ class DatasetDB(Document, DatasetBase):
 
 
 class DatasetDBViewList(View, DatasetBase):
+    id: PydanticObjectId = Field(None, alias="_id")  # necessary for Views
     creator: UserOut
     created: datetime = Field(default_factory=datetime.utcnow)
     modified: datetime = Field(default_factory=datetime.utcnow)

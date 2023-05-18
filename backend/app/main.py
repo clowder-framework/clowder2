@@ -14,8 +14,8 @@ from app.models.config import ConfigEntryDB
 from app.models.datasets import DatasetDB, DatasetDBViewList
 from app.models.errors import ErrorDB
 from app.models.feeds import FeedDB
-from app.models.files import FileDB, FileVersionDB
-from app.models.folders import FolderDB
+from app.models.files import FileDB, FileVersionDB, FileDBViewList
+from app.models.folders import FolderDB, FolderDBViewList
 from app.models.groups import GroupDB
 from app.models.listeners import (
     EventListenerDB,
@@ -191,8 +191,10 @@ async def startup_beanie():
             MetadataDB,
             MetadataDefinitionDB,
             FolderDB,
+            FolderDBViewList,
             FileDB,
             FileVersionDB,
+            FileDBViewList,
             FeedDB,
             EventListenerDB,
             EventListenerJobDB,

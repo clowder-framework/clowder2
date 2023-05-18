@@ -201,6 +201,7 @@ class EventListenerJobUpdateOut(EventListenerDB):
 class EventListenerJobViewList(View, EventListenerJobBase):
     """Get associated resource information for each job"""
 
+    id: PydanticObjectId = Field(None, alias="_id")  # necessary for Views
     creator: UserOut
     created: datetime = Field(default_factory=datetime.utcnow)
     modified: datetime = Field(default_factory=datetime.utcnow)
@@ -266,6 +267,7 @@ class EventListenerJobViewList(View, EventListenerJobBase):
 class EventListenerJobUpdateViewList(View, EventListenerJobUpdateBase):
     """Get associated resource information for each job update"""
 
+    id: PydanticObjectId = Field(None, alias="_id")  # necessary for Views
     creator: UserOut
     created: datetime = Field(default_factory=datetime.utcnow)
     modified: datetime = Field(default_factory=datetime.utcnow)

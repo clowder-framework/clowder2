@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Optional, List
 
-from beanie import Document, View
+from beanie import Document, View, PydanticObjectId
 from pydantic import Field, BaseModel
 
 from app.models.authorization import AuthorizationDB
@@ -29,6 +29,9 @@ class FolderDB(Document, FolderBase):
 
 
 class FolderDBViewList(View, FolderBase):
+    id: PydanticObjectId = Field(None, alias="_id")  # necessary for Views
+    dataset_id: PyObjectId
+    parent_folder: Optional[PyObjectId]
     creator: UserOut
     created: datetime = Field(default_factory=datetime.utcnow)
     modified: datetime = Field(default_factory=datetime.utcnow)

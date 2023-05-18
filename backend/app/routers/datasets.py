@@ -260,19 +260,16 @@ async def get_dataset_files(
     skip: int = 0,
     limit: int = 10,
 ):
-    files = (
-        await FileDBViewList.find(
-            FileDBViewList.dataset_id == ObjectId(dataset_id),
-            FileDBViewList.folder_id == ObjectId(folder_id),
-            Or(
-                FileDBViewList.creator.email == user_id,
-                FileDBViewList.auth.user_ids == user_id,
-            ),
-        )
-        .skip(skip)
-        .limit(limit)
-        .to_list()
-    )
+    query = [
+        FileDBViewList.dataset_id == ObjectId(dataset_id),
+        Or(
+            FileDBViewList.creator.email == user_id,
+            FileDBViewList.auth.user_ids == user_id,
+        ),
+    ]
+    if folder_id is not None:
+        query.append(FileDBViewList.folder_id == ObjectId(folder_id))
+    files = await FileDBViewList.find(*query).skip(skip).limit(limit).to_list()
     return [file.dict() for file in files]
 
 
@@ -412,19 +409,18 @@ async def get_dataset_folders(
     limit: int = 10,
 ):
     if (await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
-        folders = (
-            await FolderDBViewList.find(
-                FolderDBViewList.dataset_id == ObjectId(dataset_id),
-                FolderDBViewList.folder_id == ObjectId(parent_folder),
-                Or(
-                    FolderDBViewList.creator.email == user_id,
-                    FolderDBViewList.auth.user_ids == user_id,
-                ),
-            )
-            .skip(skip)
-            .limit(limit)
-            .to_list()
-        )
+        query = [
+            FolderDBViewList.dataset_id == ObjectId(dataset_id),
+            Or(
+                FolderDBViewList.creator.email == user_id,
+                FolderDBViewList.auth.user_ids == user_id,
+            ),
+        ]
+        if parent_folder is not None:
+            query.append(FolderDBViewList.parent_folder == ObjectId(parent_folder))
+        else:
+            query.append(FolderDBViewList.parent_folder == None)
+        folders = await FolderDBViewList.find(*query).skip(skip).limit(limit).to_list()
         return [folder.dict() for folder in folders]
     raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
 
