@@ -41,7 +41,7 @@ async def index_dataset(
         modified=dataset.modified,
         downloads=dataset.downloads,
         user_ids=authorized_user_ids,
-    ).json()
+    ).dict()
     if update:
         update_record(es, "dataset", {"doc": doc}, dataset.id)
     else:
@@ -81,7 +81,7 @@ async def index_file(
         content_type=file.content_type.content_type,
         content_type_main=file.content_type.main_type,
         user_ids=authorized_user_ids,
-    ).json()
+    ).dict()
     if update:
         update_record(es, "file", {"doc": doc}, file.id)
     else:
@@ -125,7 +125,7 @@ async def index_dataset_metadata(
         description=dataset.description,
         downloads=dataset.downloads,
         user_ids=authorized_user_ids,
-    ).json()
+    ).dict()
     if update:
         update_record(es, "metadata", {"doc": doc}, metadata.id)
     else:
@@ -173,7 +173,7 @@ async def index_file_metadata(
         bytes=file.bytes,
         downloads=file.downloads,
         user_ids=authorized_user_ids,
-    ).json()
+    ).dict()
     if update:
         update_record(es, "metadata", {"doc": doc}, metadata.id)
     else:
