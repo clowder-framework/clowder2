@@ -245,8 +245,8 @@ class MetadataDB(Document, MetadataBase):
 
 
 class MetadataOut(MetadataDB):
-    resource: MongoDBRef
-    description: Optional[str]
+    class Config:
+        fields = {"id": "id"}
 
 
 async def validate_context(

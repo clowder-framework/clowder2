@@ -44,7 +44,6 @@ class ExtractorInfo(BaseModel):
 class EventListenerBase(BaseModel):
     """An Event Listener is the expanded version of v1 Extractors."""
 
-    creator: str = ""
     name: str
     version: str = "1.0"
     description: str = ""
@@ -83,7 +82,8 @@ class EventListenerDB(Document, EventListenerBase):
 
 
 class EventListenerOut(EventListenerDB):
-    pass
+    class Config:
+        fields = {"id": "id"}
 
 
 class EventListenerSubmit(BaseModel):
@@ -140,6 +140,11 @@ class EventListenerJobDB(Document, EventListenerJobBase):
         ]
 
 
+class EventListenerJobOut(EventListenerJobDB):
+    class Config:
+        fields = {"id": "id"}
+
+
 class EventListenerJobMessage(BaseModel):
     """This describes contents of JSON object that is submitted to RabbitMQ for the Event Listeners/Extractors to consume."""
 
@@ -188,9 +193,15 @@ class EventListenerJobUpdateDB(Document, EventListenerJobUpdateBase):
         ]
 
 
+class EventListenerJobUpdateOut(EventListenerDB):
+    class Config:
+        fields = {"id": "id"}
+
+
 class EventListenerJobViewList(View, EventListenerJobBase):
     """Get associated resource information for each job"""
 
+    id: PydanticObjectId = Field(None, alias="_id")  # necessary for Views
     creator: UserOut
     created: datetime = Field(default_factory=datetime.utcnow)
     modified: datetime = Field(default_factory=datetime.utcnow)
@@ -256,6 +267,7 @@ class EventListenerJobViewList(View, EventListenerJobBase):
 class EventListenerJobUpdateViewList(View, EventListenerJobUpdateBase):
     """Get associated resource information for each job update"""
 
+    id: PydanticObjectId = Field(None, alias="_id")  # necessary for Views
     creator: UserOut
     created: datetime = Field(default_factory=datetime.utcnow)
     modified: datetime = Field(default_factory=datetime.utcnow)
@@ -263,7 +275,7 @@ class EventListenerJobUpdateViewList(View, EventListenerJobUpdateBase):
 
     class Settings:
         source = EventListenerJobUpdateDB
-        name = "listener_jobs_view"
+        name = "listener_job_updates_view"
         pipeline = [
             {
                 "$lookup": {  # Equality Match

@@ -47,16 +47,13 @@ async def check_feed_listeners(
 ):
     """Automatically submit new file to listeners on feeds that fit the search criteria."""
     listener_ids_found = []
-    feeds = await FeedDB.find(NE(FeedDB.listeners, [])).to_list()
-    for feed in feeds:
-        # Only proceed if feed actually has auto-triggering listeners
-        if any(map(lambda li: li.automatic, feed.listeners)):
-            # Verify whether resource_id is found when searching the specified criteria
-            feed_match = check_search_result(es_client, file_out, feed.search)
-            if feed_match:
-                for listener in feed.listeners:
-                    if listener.automatic:
-                        listener_ids_found.append(listener.listener_id)
+    async for feed in FeedDB.find(FeedDB.listeners.automatic == True):
+        # Verify whether resource_id is found when searching the specified criteria
+        feed_match = check_search_result(es_client, file_out, feed.search)
+        if feed_match:
+            for listener in feed.listeners:
+                if listener.automatic:
+                    listener_ids_found.append(listener.listener_id)
     for targ_listener in listener_ids_found:
         if (
             listener_info := await EventListenerDB.get(PydanticObjectId(targ_listener))
@@ -79,7 +76,7 @@ async def save_feed(
 ):
     """Create a new Feed (i.e. saved search) in the database."""
     feed = FeedDB(**feed_in.dict(), creator=user)
-    await feed.save()
+    await feed.insert()
     return feed.dict()
 
 

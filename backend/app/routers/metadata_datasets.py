@@ -90,11 +90,10 @@ async def add_dataset_metadata(
 
     if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
         # If dataset already has metadata using this definition, don't allow duplication
-        definition = metadata_in.definition
         query = []
-        if definition is not None:
+        if metadata_in.definition is not None:
             query.append(MetadataDB.resource.resource_id == dataset.id)
-            query.append(MetadataDB.definition == definition)
+            query.append(MetadataDB.definition == metadata_in.definition)
 
             # Extracted metadata doesn't care about user
             if metadata_in.extractor is not None:
@@ -107,10 +106,12 @@ async def add_dataset_metadata(
             else:
                 query.append(MetadataDB.agent.creator.id == user.id)
 
-        if (existing := await MetadataDB.find_one(*query)) is not None:
-            raise HTTPException(
-                409, f"Metadata for {definition} already exists on this dataset"
-            )
+            if (await MetadataDB.find_one(*query)) is not None:
+                raise HTTPException(
+                    409,
+                    f"Metadata for {metadata_in.definition} already exists on this dataset",
+                )
+
         md = await _build_metadata_db_obj(
             metadata_in, DatasetOut(**dataset.dict()), user
         )

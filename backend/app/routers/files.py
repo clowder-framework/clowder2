@@ -61,11 +61,10 @@ async def _resubmit_file_extractors(
 
     """
     resubmitted_jobs = []
-    jobs = await EventListenerJobDB.find(
+    async for job in EventListenerJobDB.find(
         EventListenerJobDB.resource_ref.resource_id == ObjectId(file.id),
         EventListenerJobDB.resource_ref.version == file.version_num - 1,
-    )
-    async for job in jobs:
+    ):
         resubmitted_job = {"listener_id": job.listener_id, "parameters": job.parameters}
         try:
             routing_key = job.listener_id
@@ -360,11 +359,11 @@ async def get_file_versions(
     file = await FileDB.get(PydanticObjectId(file_id))
     if file is not None:
         mongo_versions = []
-        for ver in (
-            await FileVersionDB.find(FileVersionDB.file_id == ObjectId(file_id))
+        async for ver in (
+            FileVersionDB.find(FileVersionDB.file_id == ObjectId(file_id))
             .skip(skip)
             .limit(limit)
-            .to_list(length=limit)
+            .to_list()
         ):
             mongo_versions.append(FileVersion(**ver.dict()))
         return mongo_versions

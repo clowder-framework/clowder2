@@ -260,19 +260,16 @@ async def get_dataset_files(
     skip: int = 0,
     limit: int = 10,
 ):
-    files = (
-        await FileDBViewList.find(
-            FileDBViewList.dataset_id == ObjectId(dataset_id),
-            FileDBViewList.folder_id == ObjectId(folder_id),
-            Or(
-                FileDBViewList.creator.email == user_id,
-                FileDBViewList.auth.user_ids == user_id,
-            ),
-        )
-        .skip(skip)
-        .limit(limit)
-        .to_list()
-    )
+    query = [
+        FileDBViewList.dataset_id == ObjectId(dataset_id),
+        Or(
+            FileDBViewList.creator.email == user_id,
+            FileDBViewList.auth.user_ids == user_id,
+        ),
+    ]
+    if folder_id is not None:
+        query.append(FileDBViewList.folder_id == ObjectId(folder_id))
+    files = await FileDBViewList.find(*query).skip(skip).limit(limit).to_list()
     return [file.dict() for file in files]
 
 
@@ -366,12 +363,16 @@ async def delete_dataset(
         delete_document_by_query(es, "metadata", query)
         # delete dataset first to minimize files/folder being uploaded to a delete dataset
         await dataset.delete()
-        await MetadataDB.delete_all(
-            MetadataDB.resource.resource_id == ObjectId(dataset_id)
-        )
-        async for file in FileDB.find(FileDB.dataset_id == ObjectId(dataset_id)):
+        await MetadataDB.find(
+            MetadataDB.resource.resource_id == PydanticObjectId(dataset_id)
+        ).delete()
+        async for file in FileDB.find(
+            FileDB.dataset_id == PydanticObjectId(dataset_id)
+        ):
             await remove_file_entry(file.id, fs, es)
-        await FolderDB.delete_all(FolderDB.dataset_id == ObjectId(dataset_id))
+        await FolderDB.find(
+            FolderDB.dataset_id == PydanticObjectId(dataset_id)
+        ).delete()
         return {"deleted": dataset_id}
     raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
 
@@ -407,20 +408,19 @@ async def get_dataset_folders(
     skip: int = 0,
     limit: int = 10,
 ):
-    if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
-        folders = (
-            await FolderDBViewList.find(
-                FolderDBViewList.dataset_id == ObjectId(dataset_id),
-                FolderDBViewList.folder_id == ObjectId(parent_folder),
-                Or(
-                    FolderDBViewList.creator.email == user_id,
-                    FolderDBViewList.auth.user_ids == user_id,
-                ),
-            )
-            .skip(skip)
-            .limit(limit)
-            .to_list()
-        )
+    if (await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
+        query = [
+            FolderDBViewList.dataset_id == ObjectId(dataset_id),
+            Or(
+                FolderDBViewList.creator.email == user_id,
+                FolderDBViewList.auth.user_ids == user_id,
+            ),
+        ]
+        if parent_folder is not None:
+            query.append(FolderDBViewList.parent_folder == ObjectId(parent_folder))
+        else:
+            query.append(FolderDBViewList.parent_folder == None)
+        folders = await FolderDBViewList.find(*query).skip(skip).limit(limit).to_list()
         return [folder.dict() for folder in folders]
     raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
 
@@ -503,7 +503,7 @@ async def save_file(
             file.file,
             content_type=file.content_type,
         )
-        return new_file
+        return new_file.dict()
     raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
 
 
@@ -612,7 +612,7 @@ async def download_dataset(
         # Write dataset metadata if found
         metadata = await MetadataDB.find(
             MetadataDB.resource.resource_id == ObjectId(dataset_id)
-        )
+        ).to_list()
         if len(metadata) > 0:
             datasetmetadata_path = os.path.join(
                 current_temp_dir, "_dataset_metadata.json"
@@ -659,7 +659,7 @@ async def download_dataset(
 
             metadata = await MetadataDB.find(
                 MetadataDB.resource.resource_id == ObjectId(dataset_id)
-            )
+            ).to_list()
             if len(metadata) > 0:
                 metadata_filename = file_name + "_metadata.json"
                 metadata_filename_temp_path = os.path.join(

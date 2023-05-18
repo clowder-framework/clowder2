@@ -201,11 +201,10 @@ class MetadataAuthorization:
                         )
             elif resource_type == "datasets":
                 if (
-                    dataset_out := await DatasetDB.get(PydanticObjectId(resource_id))
-                    is not None
-                ):
+                    dataset := await DatasetDB.get(PydanticObjectId(resource_id))
+                ) is not None:
                     authorization = await AuthorizationDB.find_one(
-                        AuthorizationDB.dataset_id == dataset_out.dataset_id,
+                        AuthorizationDB.dataset_id == dataset.id,
                         Or(
                             AuthorizationDB.creator == current_user,
                             AuthorizationDB.user_ids == current_user,

@@ -15,7 +15,7 @@ from pydantic import Json
 
 from .config import settings
 from .models.tokens import TokenDB
-from .models.users import UserOut, UserAPIKey, UserDB
+from .models.users import UserOut, UserAPIKeyDB, UserDB
 
 logger = logging.getLogger(__name__)
 
@@ -87,8 +87,8 @@ async def get_token(
         try:
             payload = serializer.loads(api_key)
             # Key is valid, check expiration date in database
-            key = await UserAPIKey.find_one(
-                UserAPIKey.user == payload["user"], UserAPIKey.key == payload["key"]
+            key = await UserAPIKeyDB.find_one(
+                UserAPIKeyDB.user == payload["user"], UserAPIKeyDB.key == payload["key"]
             )
             if key is not None:
                 current_time = datetime.utcnow()
@@ -153,8 +153,8 @@ async def get_current_user(
         try:
             payload = serializer.loads(api_key)
             # Key is valid, check expiration date in database
-            key = await UserAPIKey.find_one(
-                UserAPIKey.user == payload["user"], UserAPIKey.key == payload["key"]
+            key = await UserAPIKeyDB.find_one(
+                UserAPIKeyDB.user == payload["user"], UserAPIKeyDB.key == payload["key"]
             )
             if key is not None:
                 current_time = datetime.utcnow()
@@ -169,7 +169,7 @@ async def get_current_user(
                     )
                 else:
                     user = await UserDB.find_one(UserDB.email == key.user)
-                    return UserOut(**user.dict())
+                    return user.dict()
             else:
                 raise HTTPException(
                     status_code=401,
@@ -212,8 +212,8 @@ async def get_current_username(
         try:
             payload = serializer.loads(api_key)
             # Key is valid, check expiration date in database
-            key = await UserAPIKey.find_one(
-                UserAPIKey.user == payload["user"], UserAPIKey.key == payload.key
+            key = await UserAPIKeyDB.find_one(
+                UserAPIKeyDB.user == payload["user"], UserAPIKeyDB.key == payload.key
             )
             if key is not None:
                 current_time = datetime.utcnow()

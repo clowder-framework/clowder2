@@ -26,6 +26,7 @@ async def save_group(
     if user_member not in group_db.users:
         group_db.users.append(user_member)
     await group_db.insert()
+    print(group_db)
     return group_db.dict()
 
 
@@ -78,7 +79,7 @@ async def search_group(
         ),
         skip=skip,
         limit=limit,
-    ).to_list(length=limit)
+    ).to_list()
 
 
 @router.get("/{group_id}", response_model=GroupOut)
@@ -108,7 +109,7 @@ async def edit_group(
             )
             return
 
-        user = await UserDB.find(UserDB.email == user_id)
+        user = await UserDB.find_one(UserDB.email == user_id)
         group_dict["author"] = UserOut(**user)
         group_dict["modified"] = datetime.datetime.utcnow()
         # TODO: Revisit this. Authorization needs to be updated here.
@@ -161,8 +162,9 @@ async def add_member(
                 group.users.append(new_member)
                 await group.replace()
                 # Add user to all affected Authorization entries
-                await AuthorizationDB.update_all(
+                await AuthorizationDB.find(
                     AuthorizationDB.group_ids == ObjectId(group_id),
+                ).update(
                     Push({AuthorizationDB.user_ids: username}),
                 )
             return group.dict()

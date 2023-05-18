@@ -3,14 +3,12 @@ from secrets import token_urlsafe
 from typing import List
 
 from beanie import PydanticObjectId
-from bson import ObjectId
 from fastapi import APIRouter, HTTPException, Depends
 from itsdangerous.url_safe import URLSafeSerializer
 
-from app import dependencies
 from app.config import settings
 from app.keycloak_auth import get_current_username
-from app.models.users import UserDB, UserOut, UserAPIKey, UserAPIKeyOut
+from app.models.users import UserDB, UserOut, UserAPIKeyDB, UserAPIKeyOut
 
 router = APIRouter()
 
@@ -27,17 +25,14 @@ async def get_user_api_keys(
         skip: number of page to skip
         limit: number to limit per page
     """
-    apikeys = []
-    for key in (
-        await UserAPIKey.find(UserAPIKey.user == current_user)
-        .sort(-UserAPIKey.created)
+    apikeys = (
+        await UserAPIKeyDB.find(UserAPIKeyDB.user == current_user)
+        .sort(-UserAPIKeyDB.created)
         .skip(skip)
         .limit(limit)
-        .to_list(length=limit)
-    ):
-        apikeys.append(key.dict())
-
-    return apikeys
+        .to_list()
+    )
+    return [key.dict() for key in apikeys]
 
 
 @router.post("/keys", response_model=str)
@@ -56,7 +51,7 @@ async def generate_user_api_key(
     unique_key = token_urlsafe(16)
     hashed_key = serializer.dumps({"user": current_user, "key": unique_key})
 
-    user_key = UserAPIKey(user=current_user, key=unique_key, name=name)
+    user_key = UserAPIKeyDB(user=current_user, key=unique_key, name=name)
     if mins > 0:
         user_key.expires = user_key.created + timedelta(minutes=mins)
     await user_key.insert()
@@ -73,7 +68,7 @@ async def delete_user_api_key(
     Arguments:
         key_id: id of the apikey
     """
-    if (apikey := await UserAPIKey.get(ObjectId(key_id))) is not None:
+    if (apikey := await UserAPIKeyDB.get(PydanticObjectId(key_id))) is not None:
         # Only allow user to delete their own key
         if apikey.user == current_user:
             await apikey.delete()

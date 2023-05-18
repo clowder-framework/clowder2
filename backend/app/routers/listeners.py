@@ -21,6 +21,7 @@ from app.models.listeners import (
     EventListenerOut,
 )
 from app.models.search import SearchCriteria
+from app.models.users import UserOut
 from app.routers.feeds import disassociate_listener_db
 
 router = APIRouter()
@@ -33,6 +34,7 @@ async def _process_incoming_v1_extractor_info(
     extractor_name: str,
     extractor_id: str,
     process: dict,
+    creator: Optional[UserOut] = None,
 ):
     """Return FeedDB object given v1 extractor info."""
     if "file" in process:
@@ -64,8 +66,9 @@ async def _process_incoming_v1_extractor_info(
                 "mode": "or",
             },
             listeners=[FeedListener(listener_id=extractor_id, automatic=True)],
+            creator=creator.email,
         )
-        await new_feed.save()
+        await new_feed.insert()
         return new_feed
 
 
@@ -117,23 +120,28 @@ async def save_legacy_listener(
     )
 
     # check to see if extractor already exists and update if so, otherwise return existing
-    existing = await EventListenerDB.find_one(EventListenerDB.name == legacy_in.name)
-    if existing:
+    if (
+        existing := await EventListenerDB.find_one(
+            EventListenerDB.name == legacy_in.name
+        )
+    ) is not None:
         # if this is a new version, add it to the database, otherwise update existing
         if version.parse(listener.version) > version.parse(existing.version):
-            await listener.save()
+            listener.id = existing.id
+            existing = EventListenerDB(*listener.dict())
+            await existing.save()
             #  TODO: Should older extractor version entries be deleted?
-            return listener.dict()
+            return existing.dict()
         else:
             # TODO: Should this fail the POST instead?
-            return listener.dict()
+            return existing.dict()
     else:
         # Register new listener
-        await listener.save()
+        await listener.insert()
         # Assign a MIME-based listener if necessary
         if listener.properties and listener.properties.process:
             await _process_incoming_v1_extractor_info(
-                legacy_in.name, listener.id, listener.properties.process
+                legacy_in.name, listener.id, listener.properties.process, user
             )
         return listener.dict()
 
@@ -150,7 +158,7 @@ async def search_listeners(
         limit -- restrict number of records to be returned (i.e. for pagination)
     """
     # TODO either use regex or index search
-    return (
+    listeners = (
         await EventListenerDB.find(
             Or(
                 RegEx(field=EventListenerDB.name, pattern=text),
@@ -161,6 +169,7 @@ async def search_listeners(
         .limit(limit)
         .to_list(length=limit)
     )
+    return [listener.dict() for listener in listeners]
 
 
 @router.get("/categories", response_model=List[str])
@@ -179,7 +188,7 @@ async def list_default_labels(user=Depends(get_current_username)):
 async def get_listener(listener_id: str, user=Depends(get_current_username)):
     """Return JSON information about an Event Listener if it exists."""
     if (
-        listener := await EventListenerDB.find_one(PydanticObjectId(listener_id))
+        listener := await EventListenerDB.get(PydanticObjectId(listener_id))
     ) is not None:
         return listener.dict()
     raise HTTPException(status_code=404, detail=f"listener {listener_id} not found")
@@ -244,11 +253,14 @@ async def delete_listener(
     user=Depends(get_current_username),
 ):
     """Remove an Event Listener from the database. Will not clear event history for the listener."""
-    listener = await EventListenerDB.find(EventListenerDB.id == ObjectId(listener_id))
+    listener = await EventListenerDB.find_one(
+        EventListenerDB.id == ObjectId(listener_id)
+    )
     if listener:
         # unsubscribe the listener from any feeds
-        feeds = await FeedDB.find(FeedDB.listeners.listener_id == ObjectId(listener_id))
-        for feed in feeds:
+        async for feed in FeedDB.find(
+            FeedDB.listeners.listener_id == ObjectId(listener_id)
+        ):
             await disassociate_listener_db(feed.id, listener_id)
         await listener.delete()
         return {"deleted": listener_id}
