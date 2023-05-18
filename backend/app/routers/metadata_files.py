@@ -1,8 +1,7 @@
-import io
-from datetime import datetime
 from typing import Optional, List
-from elasticsearch import Elasticsearch
+
 from bson import ObjectId
+from elasticsearch import Elasticsearch
 from fastapi import (
     APIRouter,
     HTTPException,
@@ -14,6 +13,8 @@ from pymongo import MongoClient
 from app import dependencies
 from app.deps.authorization_deps import FileAuthorization, CheckFileStatus
 from app.config import settings
+from app.deps.authorization_deps import FileAuthorization
+from app.keycloak_auth import get_current_user, UserOut
 from app.models.files import FileOut
 from app.models.metadata import (
     MongoDBRef,
@@ -23,13 +24,12 @@ from app.models.metadata import (
     MetadataDB,
     MetadataOut,
     MetadataPatch,
-    validate_definition,
     validate_context,
     patch_metadata,
     MetadataDelete,
 )
-from app.keycloak_auth import get_user, get_current_user, get_token, UserOut
-from app.search.connect import insert_record, update_record, delete_document_by_id
+from app.search.connect import delete_document_by_id
+from app.search.index import index_file_metadata
 
 router = APIRouter()
 
@@ -149,23 +149,7 @@ async def add_file_metadata(
         metadata_out = MetadataOut.from_mongo(found)
 
         # Add an entry to the metadata index
-        doc = {
-            "resource_id": file_id,
-            "resource_type": "file",
-            "created": metadata_out.created.utcnow(),
-            "creator": user.email,
-            "content": metadata_out.content,
-            "context_url": metadata_out.context_url,
-            "context": metadata_out.context,
-            "name": file.name,
-            "folder_id": str(file.folder_id),
-            "dataset_id": str(file.dataset_id),
-            "content_type": file.content_type.content_type,
-            "resource_created": file.created.utcnow(),
-            "resource_creator": file.creator.email,
-            "bytes": file.bytes,
-        }
-        insert_record(es, "metadata", doc, metadata_out.id)
+        await index_file_metadata(db, es, file, metadata_out)
         return metadata_out
 
 
@@ -226,15 +210,12 @@ async def replace_file_metadata(
             md_obj = await _build_metadata_db_obj(
                 db, metadata_in, file, user, agent=agent, version=target_version
             )
-            new_metadata = await db["metadata"].replace_one(
-                {"_id": md["_id"]}, md_obj.to_mongo()
-            )
+            await db["metadata"].replace_one({"_id": md["_id"]}, md_obj.to_mongo())
             found = await db["metadata"].find_one({"_id": md["_id"]})
             metadata_out = MetadataOut.from_mongo(found)
 
             # Update entry to the metadata index
-            doc = {"doc": {"content": found["content"]}}
-            update_record(es, "metadata", doc, md["_id"])
+            await index_file_metadata(db, es, file, metadata_out, update=True)
             return metadata_out
         else:
             raise HTTPException(status_code=404, detail=f"No metadata found to update")
@@ -336,8 +317,9 @@ async def update_file_metadata(
 
         if (md := await db["metadata"].find_one(query)) is not None:
             # TODO: Refactor this with permissions checks etc.
-            result = await patch_metadata(md, content, db, es)
-            return result
+            md_out = await patch_metadata(md, content, db, es)
+            await index_file_metadata(db, es, file, md_out, update=True)
+            return md_out
         else:
             raise HTTPException(status_code=404, detail=f"No metadata found to update")
     else:
@@ -354,7 +336,6 @@ async def get_file_metadata(
     extractor_version: Optional[float] = Form(None),
     user=Depends(get_current_user),
     db: MongoClient = Depends(dependencies.get_db),
-    public: bool = Depends(CheckFileStatus("PUBLIC")),
     allow: bool = Depends(FileAuthorization("viewer")),
 ):
     """Get file metadata."""

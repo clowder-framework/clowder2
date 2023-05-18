@@ -1,30 +1,12 @@
 import Cookies from "universal-cookie";
 import { V2 } from "../openapi";
-import { format } from "date-fns";
 import jwt_decode from "jwt-decode";
-import {handleErrors} from "../actions/common";
-import {RECEIVE_DATASET_ABOUT} from "../actions/dataset";
-import config from "../app.config";
+import { formatInTimeZone } from "date-fns-tz";
 
 const cookies = new Cookies();
 
-
-export async function isPublic(datasetId) {
-	const datasetURL = `${config.hostname}/api/v2/datasets/${datasetId}`;
-	const response = await fetch(datasetURL, {
-		method: "GET",
-	});
-	if (response.status === 200) {
-		console.log('this is public, 200')
-		return true
-	} else {
-		return false
-	}
-}
-
 //NOTE: This is only checking if a cookie is present, but not validating the cookie.
 export const isAuthorized = () => {
-	console.log('checking is authorized');
 	const authorization = cookies.get("Authorization") || "Bearer none";
 	V2.OpenAPI.TOKEN = authorization.replace("Bearer ", "");
 	return (
@@ -86,7 +68,13 @@ export function dataURItoFile(dataURI) {
 export function parseDate(dateString) {
 	if (dateString) {
 		try {
-			return format(new Date(dateString), "yyyy-MM-dd HH:mm:ss");
+			const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+			// need to add Zulu (Z) to the end if it's not present
+			if (!dateString.endsWith("Z")) dateString = `${dateString}Z`;
+			const date = new Date(dateString);
+
+			return formatInTimeZone(date, timeZone, "yyyy-MM-dd HH:mm:ss");
 		} catch (error) {
 			console.error(error);
 			return error["message"];
@@ -105,13 +93,11 @@ export const getCurrEmail = () => {
 	const authorization = cookies.get("Authorization") || "Bearer none";
 	if (
 		authorization &&
-		authorization !== "Bearer none" &&
+		authorization !== "" &&
 		authorization.split(" ").length > 0
 	) {
 		let userInfo = jwt_decode(authorization.split(" ")[1]);
 		return userInfo["email"];
-	} else {
-		return "test@test.com"
 	}
 };
 

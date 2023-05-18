@@ -33,6 +33,7 @@ from app.models.datasets import (
 from app.models.groups import GroupOut
 from app.models.pyobjectid import PyObjectId
 from app.models.users import UserOut
+from app.search.index import index_dataset
 
 router = APIRouter()
 
@@ -173,6 +174,7 @@ async def set_dataset_group_role(
     group_id: str,
     role: RoleType,
     db: MongoClient = Depends(get_db),
+    es=Depends(dependencies.get_elasticsearchclient),
     user_id=Depends(get_user),
     allow: bool = Depends(Authorization("editor")),
 ):
@@ -203,6 +205,7 @@ async def set_dataset_group_role(
                     await db["authorization"].replace_one(
                         {"_id": auth_db.id}, auth_db.to_mongo()
                     )
+                await index_dataset(db, es, dataset, auth_db.user_ids)
                 return auth_db
             else:
                 # Create new role entry for this dataset
@@ -217,6 +220,7 @@ async def set_dataset_group_role(
                     user_ids=user_ids,
                 )
                 await db["authorization"].insert_one(auth_db.to_mongo())
+                await index_dataset(db, es, dataset, auth_db.user_ids)
                 return auth_db
         else:
             raise HTTPException(status_code=404, detail=f"Group {group_id} not found")
@@ -232,6 +236,7 @@ async def set_dataset_user_role(
     username: str,
     role: RoleType,
     db: MongoClient = Depends(get_db),
+    es=Depends(dependencies.get_elasticsearchclient),
     user_id=Depends(get_user),
     allow: bool = Depends(Authorization("editor")),
 ):
@@ -273,6 +278,7 @@ async def set_dataset_user_role(
                     await db["authorization"].replace_one(
                         {"_id": auth_db.id}, auth_db.to_mongo()
                     )
+                await index_dataset(db, es, dataset, auth_db.user_ids)
                 return auth_db
             else:
                 # Create a new entry
@@ -283,6 +289,7 @@ async def set_dataset_user_role(
                     user_ids=[username],
                 )
                 await db["authorization"].insert_one(auth_db.to_mongo())
+                await index_dataset(db, es, dataset, [username])
                 return auth_db
 
         else:
@@ -299,6 +306,7 @@ async def remove_dataset_group_role(
     dataset_id: str,
     group_id: str,
     db: MongoClient = Depends(get_db),
+    es=Depends(dependencies.get_elasticsearchclient),
     user_id=Depends(get_user),
     allow: bool = Depends(Authorization("editor")),
 ):
@@ -329,6 +337,8 @@ async def remove_dataset_group_role(
                 await db["authorization"].replace_one(
                     {"_id": auth_db.id}, auth_db.to_mongo()
                 )
+                # Update elasticsearch index with new users
+                await index_dataset(db, es, dataset, auth_db.user_ids)
                 return auth_db
         else:
             raise HTTPException(status_code=404, detail=f"Group {group_id} not found")
@@ -344,6 +354,7 @@ async def remove_dataset_user_role(
     dataset_id: str,
     username: str,
     db: MongoClient = Depends(get_db),
+    es=Depends(dependencies.get_elasticsearchclient),
     user_id=Depends(get_user),
     allow: bool = Depends(Authorization("editor")),
 ):
@@ -365,6 +376,8 @@ async def remove_dataset_user_role(
                 await db["authorization"].replace_one(
                     {"_id": auth_db.id}, auth_db.to_mongo()
                 )
+                # Update elasticsearch index with updated users
+                await index_dataset(db, es, dataset, auth_db.user_ids)
                 return auth_db
         else:
             raise HTTPException(status_code=404, detail=f"User {username} not found")

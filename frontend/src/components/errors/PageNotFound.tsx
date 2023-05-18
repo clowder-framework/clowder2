@@ -15,7 +15,7 @@ export const PageNotFound = (): JSX.Element => {
                 style={{ minHeight: '40vh' }}
             >
                 <Grid item xs={4}>
-                    <Typography variant="h4" paragraph>404, Page Not Found</Typography>
+                    <Typography variant="h4" paragraph>Page Not Found</Typography>
                     <Typography variant="body1" paragraph>The page you are looking for does not exist.</Typography>
                     <Typography variant="body1" paragraph>Go back <Link href="/" variant="body1">home</Link></Typography>
                 </Grid>

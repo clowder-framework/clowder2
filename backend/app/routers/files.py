@@ -1,44 +1,39 @@
 import io
-import json
-
-from elasticsearch import Elasticsearch
-import pika
 import mimetypes
 from datetime import datetime
-from typing import Optional, List, BinaryIO
+from typing import Optional, List
+from typing import Union
+
 from bson import ObjectId
+from elasticsearch import Elasticsearch
+from fastapi import APIRouter, HTTPException, Depends, Security
 from fastapi import (
-    APIRouter,
-    HTTPException,
-    Depends,
     File,
-    Form,
     UploadFile,
     Request,
 )
-from fastapi import APIRouter, HTTPException, Depends, Security
-from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from fastapi.responses import StreamingResponse
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from minio import Minio
 from pika.adapters.blocking_connection import BlockingChannel
 from pymongo import MongoClient
 
 from app import dependencies
+from app.config import settings
+from app.deps.authorization_deps import FileAuthorization
+from app.keycloak_auth import get_current_user, get_token
+from app.models.files import FileOut, FileVersion, FileContentType, FileDB
+from app.models.users import UserOut
+from app.rabbitmq.listeners import submit_file_job
+from app.routers.feeds import check_feed_listeners
 from app.deps.authorization_deps import FileAuthorization, CheckFileStatus
 from app.config import settings
 from app.search.connect import (
-    insert_record,
     delete_document_by_id,
     update_record,
     delete_document_by_query,
 )
-from app.models.files import FileIn, FileOut, FileVersion, FileContentType, FileDB
-from app.models.users import UserOut
-from app.routers.feeds import check_feed_listeners
-from app.keycloak_auth import get_user, get_current_user, get_token
-from app.rabbitmq.listeners import submit_file_job, submit_file_job
-from typing import Union
-from app.models.metadata import MetadataOut
+from app.search.index import index_file
 
 router = APIRouter()
 security = HTTPBearer()
@@ -163,18 +158,7 @@ async def add_file_entry(
     await db["file_versions"].insert_one(new_version.to_mongo())
 
     # Add entry to the file index
-    doc = {
-        "name": file_db.name,
-        "creator": file_db.creator.email,
-        "created": file_db.created,
-        "download": file_db.downloads,
-        "dataset_id": str(file_db.dataset_id),
-        "folder_id": str(file_db.folder_id),
-        "bytes": file_db.bytes,
-        "content_type": content_type_obj.content_type,
-        "content_type_main": content_type_obj.main_type,
-    }
-    insert_record(es, "file", doc, file_db.id)
+    await index_file(db, es, file_db)
 
     # Submit file job to any qualifying feeds
     await check_feed_listeners(es, file_out, user, db, rabbitmq_client, token)
@@ -194,8 +178,8 @@ async def remove_file_entry(
     fs.remove_object(settings.MINIO_BUCKET_NAME, str(file_id))
     # delete from elasticsearch
     delete_document_by_id(es, "file", str(file_id))
-    query = {"match": {"resource_id": str(file_id)}}
-    delete_document_by_query(es, "metadata", query)
+    delete_document_by_query(es, "metadata", {"match": {"resource_id": str(file_id)}})
+
     await db["files"].delete_one({"_id": ObjectId(file_id)})
     await db.metadata.delete_many({"resource.resource_id": ObjectId(file_id)})
     await db["file_versions"].delete_many({"file_id": ObjectId(file_id)})
@@ -280,6 +264,7 @@ async def update_file(
             }
         }
         update_record(es, "file", doc, updated_file.id)
+        await index_file(db, es, updated_file, updated_file)
         await _resubmit_file_extractors(
             updated_file, db, rabbitmq_client, user, credentials
         )
@@ -311,7 +296,6 @@ async def download_file(
     version: Optional[int] = None,
     db: MongoClient = Depends(dependencies.get_db),
     fs: Minio = Depends(dependencies.get_fs),
-    public: bool = Depends(CheckFileStatus("PUBLIC")),
     allow: bool = Depends(FileAuthorization("viewer")),
 ):
     # If file exists in MongoDB, download from Minio
@@ -370,7 +354,6 @@ async def delete_file(
 async def get_file_summary(
     file_id: str,
     db: MongoClient = Depends(dependencies.get_db),
-    public: bool = Depends(CheckFileStatus("PUBLIC")),
     allow: bool = Depends(FileAuthorization("viewer")),
 ):
     if (file := await db["files"].find_one({"_id": ObjectId(file_id)})) is not None:
@@ -388,7 +371,6 @@ async def get_file_versions(
     db: MongoClient = Depends(dependencies.get_db),
     skip: int = 0,
     limit: int = 20,
-    public: bool = Depends(CheckFileStatus("PUBLIC")),
     allow: bool = Depends(FileAuthorization("viewer")),
 ):
     if (file := await db["files"].find_one({"_id": ObjectId(file_id)})) is not None:

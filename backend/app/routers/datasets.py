@@ -26,15 +26,13 @@ from rocrate.model.person import Person
 from rocrate.rocrate import ROCrate
 
 from app import dependencies
-from app import keycloak_auth
 from app.config import settings
-from app.deps.authorization_deps import Authorization, CheckStatus
-from app.deps.authorization_deps import is_public_dataset
-from app.keycloak_auth import get_token
+from app.deps.authorization_deps import Authorization
 from app.keycloak_auth import (
+    get_token,
     get_user,
     get_current_user,
-    get_current_username_or_anonymous_user,
+    get_current_username,
 )
 from app.models.authorization import AuthorizationDB, RoleType
 from app.models.datasets import (
@@ -52,11 +50,10 @@ from app.models.users import UserOut
 from app.rabbitmq.listeners import submit_dataset_job
 from app.routers.files import add_file_entry, remove_file_entry
 from app.search.connect import (
-    insert_record,
     delete_document_by_id,
     delete_document_by_query,
-    update_record,
 )
+from app.search.index import index_dataset
 
 router = APIRouter()
 security = HTTPBearer()
@@ -196,7 +193,7 @@ async def remove_folder_entry(
 @router.post("", response_model=DatasetOut)
 async def save_dataset(
     dataset_in: DatasetIn,
-    user=Depends(keycloak_auth.get_current_user),
+    user=Depends(get_current_user),
     db: MongoClient = Depends(dependencies.get_db),
     es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
 ):
@@ -219,23 +216,15 @@ async def save_dataset(
         ).to_mongo()
     )
 
-    # Add en entry to the dataset index
-    doc = {
-        "name": dataset_out.name,
-        "description": dataset_out.description,
-        "author": dataset_out.author.email,
-        "created": dataset_out.created,
-        "modified": dataset_out.modified,
-        "download": dataset_out.downloads,
-    }
-    insert_record(es, "dataset", doc, dataset_out.id)
+    # Add new entry to elasticsearch
+    await index_dataset(db, es, dataset_out, [user.email])
 
     return dataset_out
 
 
 @router.get("", response_model=List[DatasetOut])
 async def get_datasets(
-    user_id=Depends(get_current_username_or_anonymous_user),
+    user_id=Depends(get_user),
     db: MongoClient = Depends(dependencies.get_db),
     skip: int = 0,
     limit: int = 10,
@@ -379,7 +368,7 @@ async def edit_dataset(
     dataset_id: str,
     dataset_info: DatasetBase,
     db: MongoClient = Depends(dependencies.get_db),
-    user_id=Depends(get_user),
+    user_id=Depends(get_current_username),
     es=Depends(dependencies.get_elasticsearchclient),
     allow: bool = Depends(Authorization("editor")),
 ):
@@ -391,12 +380,10 @@ async def edit_dataset(
         return
 
     if (
-        dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
+        dataset_q := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
     ) is not None:
-        # TODO: Refactor this with permissions checks etc.
+        dataset = DatasetOut.from_mongo(dataset_q)
         ds = dict(dataset_info) if dataset_info is not None else {}
-        user = await db["users"].find_one({"email": user_id})
-        ds["author"] = UserOut(**user)
         ds["modified"] = datetime.datetime.utcnow()
         try:
             dataset.update(ds)
@@ -404,29 +391,7 @@ async def edit_dataset(
                 {"_id": ObjectId(dataset_id)}, DatasetDB(**dataset).to_mongo()
             )
             # Update entry to the dataset index
-            doc = {
-                "doc": {
-                    "name": dataset["name"],
-                    "description": dataset["description"],
-                    "author": UserOut(**user).email,
-                    "modified": dataset["modified"],
-                }
-            }
-            update_record(es, "dataset", doc, dataset_id)
-            # updating metadata in elasticsearch
-            if (
-                metadata := await db["metadata"].find_one(
-                    {"resource.resource_id": ObjectId(dataset_id)}
-                )
-            ) is not None:
-                doc = {
-                    "doc": {
-                        "name": dataset["name"],
-                        "description": dataset["description"],
-                        "author": UserOut(**user).email,
-                    }
-                }
-                update_record(es, "metadata", doc, str(metadata["_id"]))
+            await index_dataset(db, es, dataset, update=True)
         except Exception as e:
             raise HTTPException(status_code=500, detail=e.args[0])
         return DatasetOut.from_mongo(dataset)
@@ -455,7 +420,7 @@ async def patch_dataset(
         # TODO: Refactor this with permissions checks etc.
         ds = dict(dataset_info) if dataset_info is not None else {}
         user = await db["users"].find_one({"email": user_id})
-        ds["author"] = UserOut(**user)
+        ds["creator"] = UserOut(**user)
         ds["modified"] = datetime.datetime.utcnow()
         try:
             dataset.update((k, v) for k, v in ds.items() if v is not None)
@@ -463,29 +428,7 @@ async def patch_dataset(
                 {"_id": ObjectId(dataset_id)}, DatasetDB(**dataset).to_mongo()
             )
             # Update entry to the dataset index
-            doc = {
-                "doc": {
-                    "name": dataset["name"],
-                    "description": dataset["description"],
-                    "author": UserOut(**user).email,
-                    "modified": dataset["modified"],
-                }
-            }
-            update_record(es, "dataset", doc, dataset_id)
-            # updating metadata in elasticsearch
-            if (
-                metadata := await db["metadata"].find_one(
-                    {"resource.resource_id": ObjectId(dataset_id)}
-                )
-            ) is not None:
-                doc = {
-                    "doc": {
-                        "name": dataset["name"],
-                        "description": dataset["description"],
-                        "author": UserOut(**user).email,
-                    }
-                }
-                update_record(es, "metadata", doc, str(metadata["_id"]))
+            await index_dataset(db, es, DatasetOut(**dataset), update=True)
         except Exception as e:
             raise HTTPException(status_code=500, detail=e.args[0])
         return DatasetOut.from_mongo(dataset)
@@ -509,16 +452,16 @@ async def delete_dataset(
     if (await db["datasets"].find_one({"_id": ObjectId(dataset_id)})) is not None:
         # delete from elasticsearch
         delete_document_by_id(es, "dataset", dataset_id)
-        query = {"match": {"resource_id": dataset_id}}
-        delete_document_by_query(es, "metadata", query)
-        # delete dataset first to minimize files/folder being uploaded to a delete dataset
+        delete_document_by_query(es, "metadata", {"match": {"resource_id": dataset_id}})
 
+        # delete dataset first to minimize files/folder being uploaded to a delete dataset
         await db["datasets"].delete_one({"_id": ObjectId(dataset_id)})
         await db.metadata.delete_many({"resource.resource_id": ObjectId(dataset_id)})
         async for file in db["files"].find({"dataset_id": ObjectId(dataset_id)}):
             file = FileOut(**file)
             await remove_file_entry(file.id, db, fs, es)
         await db["folders"].delete_many({"dataset_id": ObjectId(dataset_id)})
+        await db["authorization"].delete_many({"dataset_id": ObjectId(dataset_id)})
         return {"deleted": dataset_id}
     else:
         raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
@@ -534,7 +477,6 @@ async def add_folder(
 ):
     if not allow:
         raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
-    folder_dict = folder_in.dict()
     folder_db = FolderDB(
         **folder_in.dict(), author=user, dataset_id=PyObjectId(dataset_id)
     )
@@ -555,7 +497,7 @@ async def add_folder(
 async def get_dataset_folders(
     dataset_id: str,
     parent_folder: Optional[str] = None,
-    user_id=Depends(get_current_username_or_anonymous_user),
+    user_id=Depends(get_user),
     db: MongoClient = Depends(dependencies.get_db),
     allow: bool = Depends(Authorization("viewer")),
 ):
@@ -725,16 +667,15 @@ async def create_dataset_from_zip(
             zip_directory = _describe_zip_contents(zip_contents)
 
         # Create dataset
-        dataset_name = file.filename.rstrip(".zip")
-        dataset_description = "Uploaded as %s" % file.filename
-        ds_dict = {"name": dataset_name, "description": dataset_description}
-        dataset_db = DatasetDB(**ds_dict, author=user)
-        new_dataset = await db["datasets"].insert_one(dataset_db.to_mongo())
-        dataset_id = new_dataset.inserted_id
+        dataset_in = {
+            "name": file.filename.rstrip(".zip"),
+            "description": "Uploaded as %s" % file.filename,
+        }
+        new_dataset = save_dataset(dataset_in, user, db, es)
 
         # Create folders
         folder_lookup = await _create_folder_structure(
-            dataset_id, zip_directory, "", {}, user, db
+            new_dataset.id, zip_directory, "", {}, user, db
         )
 
         # Go back through zipfile, this time uploading files to folders
@@ -754,12 +695,12 @@ async def create_dataset_from_zip(
                         fileDB = FileDB(
                             name=filename,
                             creator=user,
-                            dataset_id=dataset_id,
+                            dataset_id=new_dataset.id,
                             folder_id=folder_id,
                         )
                     else:
                         fileDB = FileDB(
-                            name=filename, creator=user, dataset_id=dataset_id
+                            name=filename, creator=user, dataset_id=new_dataset.id
                         )
                     with open(extracted, "rb") as file_reader:
                         await add_file_entry(
@@ -775,7 +716,7 @@ async def create_dataset_from_zip(
                     if os.path.isfile(extracted):
                         os.remove(extracted)
 
-    found = await db["datasets"].find_one({"_id": new_dataset.inserted_id})
+    found = await db["datasets"].find_one({"_id": new_dataset.id})
     dataset_out = DatasetOut.from_mongo(found)
     return dataset_out
 
@@ -934,6 +875,9 @@ async def download_dataset(
         except Exception as e:
             print("could not delete file")
             print(e)
+
+        # TODO: Increment dataset download count, update index
+
         return Response(
             stream.getvalue(),
             media_type="application/x-zip-compressed",

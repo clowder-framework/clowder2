@@ -24,7 +24,7 @@ class DatasetStatus(AutoName):
 
 class DatasetBase(BaseModel):
     name: str = "N/A"
-    description: str = "N/A"
+    description: Optional[str] = None
 
 
 class DatasetIn(DatasetBase):
