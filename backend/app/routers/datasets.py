@@ -27,7 +27,7 @@ from rocrate.rocrate import ROCrate
 
 from app import dependencies
 from app.config import settings
-from app.deps.authorization_deps import Authorization
+from app.deps.authorization_deps import Authorization, CheckStatus
 from app.keycloak_auth import (
     get_token,
     get_user,

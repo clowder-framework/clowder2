@@ -62,12 +62,3 @@ async def get_user_out(user_id: str, db: MongoClient) -> UserOut:
     """Retrieve user from Mongo based on email address."""
     user_out = await db["users"].find_one({"email": user_id})
     return UserOut.from_mongo(user_out)
-
-
-def get_anonymous_user() -> UserOut:
-    first_name = "Anonymous"
-    last_name = "User"
-    email = "anonymoususer@anonymoususer.com"
-    anonymous_dict = {"first_name": first_name, "last_name": last_name, "email": email}
-    anonymous_user_out = UserOut.from_mongo(anonymous_dict)
-    return anonymous_user_out
