@@ -34,7 +34,7 @@ async def index_dataset(
     doc = ESDatasetEntry(
         name=dataset.name,
         description=dataset.description,
-        creator=dataset.author.email,
+        creator=dataset.creator.email,
         created=dataset.created,
         modified=dataset.modified,
         downloads=dataset.downloads,
@@ -108,7 +108,7 @@ async def index_dataset_metadata(
         resource_id=str(dataset.id),
         resource_type="dataset",
         resource_created=dataset.created,
-        resource_creator=dataset.author.email,
+        resource_creator=dataset.creator.email,
         created=metadata.created,
         creator=metadata.agent.creator.email,
         content=metadata.content,

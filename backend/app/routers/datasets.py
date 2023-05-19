@@ -308,12 +308,16 @@ async def patch_dataset(
     allow: bool = Depends(Authorization("editor")),
 ):
     if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
-        dataset.update(dataset_info)
+        # TODO: Update method not working properly
+        if dataset_info.name is not None:
+            dataset.name = dataset_info.name
+        if dataset_info.description is not None:
+            dataset.description = dataset_info.description
         dataset.modified = datetime.datetime.utcnow()
         await dataset.save()
 
         # Update entry to the dataset index
-        await index_dataset(es, DatasetOut(**dataset), update=True)
+        await index_dataset(es, DatasetOut(**dataset.dict()), update=True)
         # updating metadata in elasticsearch
         if (
             metadata := await MetadataDB.find_one(
@@ -352,8 +356,9 @@ async def delete_dataset(
         await FolderDB.find(
             FolderDB.dataset_id == PydanticObjectId(dataset_id)
         ).delete()
-        # TODO FIX
-        await db["authorization"].delete_many({"dataset_id": ObjectId(dataset_id)})
+        await AuthorizationDB.find(
+            AuthorizationDB.dataset_id == ObjectId(dataset_id)
+        ).delete()
         return {"deleted": dataset_id}
     raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
 
