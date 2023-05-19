@@ -77,11 +77,13 @@ minio:
     hostname: minio.clowder2.localhost
 
   # enabled distributed mode (or standalone)
-  mode: distributed
+#  mode: distributed
+  mode: standalone
 
   # if you pick distributed, this needs to be >= 4
   statefulset:
-    replicaCount: 4
+#    replicaCount: 4
+    replicaCount: 1
 
   # persistence
   persistence:
@@ -90,6 +92,8 @@ minio:
 
     # where to store data, can be network storage
     #storageClass: nfs-taiga
+  service:
+    type: ClusterIP
 
 # ----------------------------------------------------------------------
 # MONGODB

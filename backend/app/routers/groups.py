@@ -110,7 +110,7 @@ async def edit_group(
             return
 
         user = await UserDB.find_one(UserDB.email == user_id)
-        group_dict["author"] = UserOut(**user)
+        group_dict["creator"] = UserOut(**user)
         group_dict["modified"] = datetime.datetime.utcnow()
         # TODO: Revisit this. Authorization needs to be updated here.
         group_dict["users"] = list(set(group_dict["users"]))

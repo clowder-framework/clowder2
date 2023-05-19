@@ -34,11 +34,11 @@ from app.models.users import UserOut
 from app.rabbitmq.listeners import submit_file_job, EventListenerJobDB
 from app.routers.feeds import check_feed_listeners
 from app.search.connect import (
-    insert_record,
     delete_document_by_id,
     update_record,
     delete_document_by_query,
 )
+from app.search.index import index_file
 
 router = APIRouter()
 security = HTTPBearer()
@@ -146,18 +146,7 @@ async def add_file_entry(
     await new_version.insert()
 
     # Add entry to the file index
-    doc = {
-        "name": new_file.name,
-        "creator": new_file.creator.email,
-        "created": new_file.created,
-        "download": new_file.downloads,
-        "dataset_id": str(new_file.dataset_id),
-        "folder_id": str(new_file.folder_id),
-        "bytes": new_file.bytes,
-        "content_type": content_type_obj.content_type,
-        "content_type_main": content_type_obj.main_type,
-    }
-    insert_record(es, "file", doc, new_file.id)
+    await index_file(es, new_file)
 
     # Submit file job to any qualifying feeds
     await check_feed_listeners(
@@ -179,8 +168,7 @@ async def remove_file_entry(
     fs.remove_object(settings.MINIO_BUCKET_NAME, str(file_id))
     # delete from elasticsearch
     delete_document_by_id(es, "file", str(file_id))
-    query = {"match": {"resource_id": str(file_id)}}
-    delete_document_by_query(es, "metadata", query)
+    delete_document_by_query(es, "metadata", {"match": {"resource_id": str(file_id)}})
     await FileDB.get(PydanticObjectId(file_id)).delete()
     await MetadataDB.find(MetadataDB.resource.resource_id == ObjectId(file_id)).delete()
     await FileVersionDB.find(FileVersionDB.file_id == ObjectId(file_id)).delete()
@@ -258,6 +246,7 @@ async def update_file(
             }
         }
         update_record(es, "file", doc, updated_file.id)
+        await index_file(db, es, updated_file, updated_file)
         await _resubmit_file_extractors(
             updated_file, rabbitmq_client, user, credentials
         )

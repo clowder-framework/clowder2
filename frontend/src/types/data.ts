@@ -48,6 +48,13 @@ export interface Profile {
 	last_name: string | null;
 }
 
+export interface Profile {
+	id: string;
+	email: string;
+	first_name: string | null;
+	last_name: string | null;
+}
+
 export interface Folder {
 	id: string;
 	name: string;

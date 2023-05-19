@@ -1,8 +1,8 @@
 import json
 import time
-import pytest
 from datetime import datetime
 
+import pytest
 from bson import ObjectId
 
 from app.config import settings
@@ -42,7 +42,7 @@ updated_dummy_file_record = {
 dummy_dataset_record = {
     "name": "test dataset",
     "description": "dataset description",
-    "author": "abcd",
+    "creator": "abcd",
     "created": datetime.now(),
     "modified": 0,
     "download": 0,
@@ -51,7 +51,7 @@ updated_dummy_dataset_record = {
     "doc": {
         "name": "test dataset 2",
         "description": "dataset description",
-        "author": "abcd",
+        "creator": "abcd",
         "created": datetime.now(),
         "modified": 1,
         "download": 0,
@@ -116,13 +116,13 @@ async def test_datasets():
         # header
         dummy_dataset_query.append({"index": dummy_dataset_index_name})
         # body
-        dummy_dataset_query.append({"query": {"match": {"author": "abcd"}}})
+        dummy_dataset_query.append({"query": {"match": {"creator": "abcd"}}})
         dataset_query = ""
         for each in dummy_dataset_query:
             dataset_query += "%s \n" % json.dumps(each)
         result = search_index(es, dummy_dataset_index_name, dataset_query)
         assert (
-            result.body["responses"][0]["hits"]["hits"][0]["_source"]["author"]
+            result.body["responses"][0]["hits"]["hits"][0]["_source"]["creator"]
             == "abcd"
         )
 

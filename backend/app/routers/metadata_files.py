@@ -29,6 +29,7 @@ from app.models.metadata import (
     MetadataDefinitionDB,
 )
 from app.search.connect import insert_record, update_record, delete_document_by_id
+from app.search.index import index_file_metadata
 
 router = APIRouter()
 
@@ -149,23 +150,7 @@ async def add_file_metadata(
         await md.insert()
 
         # Add an entry to the metadata index
-        doc = {
-            "resource_id": file_id,
-            "resource_type": "file",
-            "created": md.created.utcnow(),
-            "creator": user.email,
-            "content": md.content,
-            "context_url": md.context_url,
-            "context": md.context,
-            "name": file.name,
-            "folder_id": str(file.folder_id),
-            "dataset_id": str(file.dataset_id),
-            "content_type": file.content_type.content_type,
-            "resource_created": file.created.utcnow(),
-            "resource_creator": file.creator.email,
-            "bytes": file.bytes,
-        }
-        insert_record(es, "metadata", doc, md.id)
+        await index_file_metadata(es, file, md)
         return md.dict()
 
 
@@ -234,8 +219,7 @@ async def replace_file_metadata(
             await md.save()
 
             # Update entry to the metadata index
-            doc = {"doc": {"content": md.content}}
-            update_record(es, "metadata", doc, md.id)
+            await index_file_metadata(es, file, md, update=True)
             return md.dict()
         else:
             raise HTTPException(status_code=404, detail=f"No metadata found to update")
@@ -334,6 +318,7 @@ async def update_file_metadata(
         md = await MetadataDB.find_one(query)
         if md:
             # TODO: Refactor this with permissions checks etc.
+            await index_file_metadata(es, file, md, update=True)
             return await patch_metadata(md, content, es)
         else:
             raise HTTPException(status_code=404, detail=f"No metadata found to update")

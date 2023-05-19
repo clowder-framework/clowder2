@@ -28,11 +28,14 @@ from rocrate.model.person import Person
 from rocrate.rocrate import ROCrate
 
 from app import dependencies
-from app import keycloak_auth
 from app.config import settings
 from app.deps.authorization_deps import Authorization
-from app.keycloak_auth import get_token
-from app.keycloak_auth import get_user, get_current_user
+from app.keycloak_auth import (
+    get_token,
+    get_user,
+    get_current_user,
+    get_current_username,
+)
 from app.models.authorization import AuthorizationDB, RoleType
 from app.models.datasets import (
     DatasetBase,
@@ -44,17 +47,16 @@ from app.models.datasets import (
 )
 from app.models.files import FileOut, FileDB, FileDBViewList
 from app.models.folders import FolderOut, FolderIn, FolderDB, FolderDBViewList
-from app.models.metadata import MetadataDB
+from app.models.metadata import MetadataDB, MetadataOut
 from app.models.pyobjectid import PyObjectId
 from app.models.users import UserOut
 from app.rabbitmq.listeners import submit_dataset_job
 from app.routers.files import add_file_entry, remove_file_entry
 from app.search.connect import (
-    insert_record,
     delete_document_by_id,
     delete_document_by_query,
-    update_record,
 )
+from app.search.index import index_dataset, index_dataset_metadata
 
 router = APIRouter()
 security = HTTPBearer()
@@ -182,7 +184,7 @@ async def _get_folder_hierarchy(
 @router.post("", response_model=DatasetOut)
 async def save_dataset(
     dataset_in: DatasetIn,
-    user=Depends(keycloak_auth.get_current_user),
+    user=Depends(get_current_user),
     es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
 ):
     dataset = DatasetDB(**dataset_in.dict(), creator=user)
@@ -195,16 +197,8 @@ async def save_dataset(
         creator=user.email,
     ).save()
 
-    # Add en entry to the dataset index
-    doc = {
-        "name": dataset.name,
-        "description": dataset.description,
-        "author": dataset.creator.email,
-        "created": dataset.created,
-        "modified": dataset.modified,
-        "download": dataset.downloads,
-    }
-    insert_record(es, "dataset", doc, dataset.id)
+    # Add new entry to elasticsearch
+    await index_dataset(es, dataset, [user.email])
     return dataset.dict()
 
 
@@ -288,27 +282,19 @@ async def edit_dataset(
         await dataset.save()
 
         # Update entry to the dataset index
-        doc = {
-            "doc": {
-                "name": dataset.name,
-                "description": dataset.description,
-                "modified": dataset.modified,
-            }
-        }
-        update_record(es, "dataset", doc, dataset_id)
+        await index_dataset(es, dataset, update=True)
         # updating metadata in elasticsearch
         if (
             metadata := await MetadataDB.find_one(
                 MetadataDB.resource.resource_id == ObjectId(dataset_id)
             )
         ) is not None:
-            doc = {
-                "doc": {
-                    "name": dataset.name,
-                    "description": dataset.description,
-                }
-            }
-            update_record(es, "metadata", doc, str(metadata.id))
+            await index_dataset_metadata(
+                es,
+                DatasetOut(**dataset.dict()),
+                MetadataOut(**metadata.dict()),
+                update=True,
+            )
         return dataset.dict()
     raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
 
@@ -322,30 +308,24 @@ async def patch_dataset(
     allow: bool = Depends(Authorization("editor")),
 ):
     if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
-        # TODO: Refactor this with permissions checks etc.
         dataset.update(dataset_info)
         dataset.modified = datetime.datetime.utcnow()
+        await dataset.save()
+
         # Update entry to the dataset index
-        doc = {
-            "doc": {
-                "name": dataset.name,
-                "description": dataset.description,
-                "modified": dataset.modified,
-            }
-        }
-        update_record(es, "dataset", doc, dataset_id)
+        await index_dataset(es, DatasetOut(**dataset), update=True)
         # updating metadata in elasticsearch
-        metadata = await MetadataDB.find_one(
-            MetadataDB.resource.resource_id == ObjectId(dataset_id)
-        )
-        if metadata:
-            doc = {
-                "doc": {
-                    "name": dataset.name,
-                    "description": dataset.description,
-                }
-            }
-            update_record(es, "metadata", doc, str(metadata["_id"]))
+        if (
+            metadata := await MetadataDB.find_one(
+                MetadataDB.resource.resource_id == ObjectId(dataset_id)
+            )
+        ) is not None:
+            await index_dataset_metadata(
+                es,
+                DatasetOut(**dataset.dict()),
+                MetadataOut(**metadata.dict()),
+                update=True,
+            )
         return dataset.dict()
 
 
@@ -359,8 +339,7 @@ async def delete_dataset(
     if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
         # delete from elasticsearch
         delete_document_by_id(es, "dataset", dataset_id)
-        query = {"match": {"resource_id": dataset_id}}
-        delete_document_by_query(es, "metadata", query)
+        delete_document_by_query(es, "metadata", {"match": {"resource_id": dataset_id}})
         # delete dataset first to minimize files/folder being uploaded to a delete dataset
         await dataset.delete()
         await MetadataDB.find(
@@ -373,6 +352,8 @@ async def delete_dataset(
         await FolderDB.find(
             FolderDB.dataset_id == PydanticObjectId(dataset_id)
         ).delete()
+        # TODO FIX
+        await db["authorization"].delete_many({"dataset_id": ObjectId(dataset_id)})
         return {"deleted": dataset_id}
     raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
 
@@ -528,10 +509,11 @@ async def create_dataset_from_zip(
             zip_directory = _describe_zip_contents(zip_contents)
 
         # Create dataset
-        dataset_name = file.filename.rstrip(".zip")
-        dataset_description = "Uploaded as %s" % file.filename
-        ds_dict = {"name": dataset_name, "description": dataset_description}
-        dataset = DatasetDB(**ds_dict, creator=user)
+        dataset_in = {
+            "name": file.filename.rstrip(".zip"),
+            "description": "Uploaded as %s" % file.filename,
+        }
+        dataset = DatasetDB(**dataset_in, creator=user)
         dataset.save()
 
         # Create folders
@@ -722,6 +704,9 @@ async def download_dataset(
         except Exception as e:
             print("could not delete file")
             print(e)
+
+        # TODO: Increment dataset download count, update index
+
         return Response(
             stream.getvalue(),
             media_type="application/x-zip-compressed",

@@ -3,8 +3,9 @@
 /* eslint-disable */
 
 export type UserAPIKeyOut = {
-    name: string;
-    user: string;
-    created?: string;
-    expires?: string;
-}
+	id?: string;
+	name: string;
+	user: string;
+	created?: string;
+	expires?: string;
+};

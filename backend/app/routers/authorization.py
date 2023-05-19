@@ -6,6 +6,7 @@ from bson import ObjectId
 from fastapi import APIRouter, Depends
 from fastapi.exceptions import HTTPException
 
+from app.dependencies import get_elasticsearchclient
 from app.deps.authorization_deps import (
     Authorization,
     get_role_by_file,
@@ -25,10 +26,12 @@ from app.models.datasets import (
     GroupAndRole,
     DatasetRoles,
     DatasetDB,
+    DatasetOut,
 )
 from app.models.groups import GroupOut, GroupDB
 from app.models.pyobjectid import PyObjectId
 from app.models.users import UserOut, UserDB
+from app.search.index import index_dataset
 
 router = APIRouter()
 
@@ -146,11 +149,12 @@ async def set_dataset_group_role(
     dataset_id: str,
     group_id: str,
     role: RoleType,
+    es=Depends(get_elasticsearchclient),
     user_id=Depends(get_user),
     allow: bool = Depends(Authorization("editor")),
 ):
     """Assign an entire group a specific role for a dataset."""
-    if (await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
+    if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
         if (group := await GroupDB.get(PydanticObjectId(group_id))) is not None:
             # First, remove any existing role the group has on the dataset
             await remove_dataset_group_role(dataset_id, group_id, user_id, allow)
@@ -165,6 +169,7 @@ async def set_dataset_group_role(
                     for u in group.users:
                         auth_db.user_ids.append(u.user.email)
                     await auth_db.replace()
+                await index_dataset(es, DatasetOut(**dataset.dict()), auth_db.user_ids)
                 return auth_db.dict()
             else:
                 # Create new role entry for this dataset
@@ -179,6 +184,7 @@ async def set_dataset_group_role(
                     user_ids=user_ids,
                 )
                 await auth_db.insert()
+                await index_dataset(es, dataset, auth_db.user_ids)
                 return auth_db.dict()
         else:
             raise HTTPException(status_code=404, detail=f"Group {group_id} not found")
@@ -194,6 +200,7 @@ async def set_dataset_user_role(
     dataset_id: str,
     username: str,
     role: RoleType,
+    es=Depends(get_elasticsearchclient),
     user_id=Depends(get_user),
     allow: bool = Depends(Authorization("editor")),
 ):
@@ -223,6 +230,7 @@ async def set_dataset_user_role(
                 else:
                     auth_db.user_ids.append(username)
                     await auth_db.save()
+                await index_dataset(es, dataset, auth_db.user_ids)
                 return auth_db.dict()
             else:
                 # Create a new entry
@@ -233,8 +241,8 @@ async def set_dataset_user_role(
                     user_ids=[username],
                 )
                 await auth_db.insert()
+                await index_dataset(es, dataset, [username])
                 return auth_db.dict()
-
         else:
             raise HTTPException(status_code=404, detail=f"User {username} not found")
     else:
@@ -248,12 +256,13 @@ async def set_dataset_user_role(
 async def remove_dataset_group_role(
     dataset_id: str,
     group_id: str,
+    es=Depends(get_elasticsearchclient),
     user_id=Depends(get_user),
     allow: bool = Depends(Authorization("editor")),
 ):
     """Remove any role the group has with a specific dataset."""
 
-    if (await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
+    if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
         if (group := await GroupDB.get(PydanticObjectId(group_id))) is not None:
             if (
                 auth_db := await AuthorizationDB.find_one(
@@ -266,6 +275,8 @@ async def remove_dataset_group_role(
                     if u.user.email in auth_db.user_ids:
                         auth_db.user_ids.remove(u.user.email)
                 await auth_db.save()
+                # Update elasticsearch index with new users
+                await index_dataset(es, DatasetOut(**dataset.dict()), auth_db.user_ids)
                 return auth_db.dict()
         else:
             raise HTTPException(status_code=404, detail=f"Group {group_id} not found")
@@ -280,12 +291,13 @@ async def remove_dataset_group_role(
 async def remove_dataset_user_role(
     dataset_id: str,
     username: str,
+    es=Depends(get_elasticsearchclient),
     user_id=Depends(get_user),
     allow: bool = Depends(Authorization("editor")),
 ):
     """Remove any role the user has with a specific dataset."""
 
-    if (await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
+    if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
         if (await UserDB.find_one(UserDB.email == username)) is not None:
             if (
                 auth_db := await AuthorizationDB.find_one(
@@ -295,6 +307,8 @@ async def remove_dataset_user_role(
             ) is not None:
                 auth_db.user_ids.remove(username)
                 await auth_db.save()
+                # Update elasticsearch index with updated users
+                await index_dataset(es, DatasetOut(**dataset.dict()), auth_db.user_ids)
                 return auth_db.dict()
         else:
             raise HTTPException(status_code=404, detail=f"User {username} not found")

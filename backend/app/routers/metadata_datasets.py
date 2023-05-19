@@ -25,7 +25,8 @@ from app.models.metadata import (
     MetadataDefinitionDB,
     MetadataDefinitionOut,
 )
-from app.search.connect import insert_record, update_record, delete_document_by_id
+from app.search.connect import delete_document_by_id
+from app.search.index import index_dataset_metadata
 
 router = APIRouter()
 
@@ -118,21 +119,7 @@ async def add_dataset_metadata(
         await md.insert()
 
         # Add an entry to the metadata index
-        doc = {
-            "resource_id": dataset_id,
-            "resource_type": "dataset",
-            "created": md.created.utcnow(),
-            "creator": user.email,
-            "content": md.content,
-            "context_url": md.context_url,
-            "context": md.context,
-            "name": dataset.name,
-            "resource_created": dataset.created,
-            "author": dataset.creator.email,
-            "description": dataset.description,
-        }
-
-        insert_record(es, "metadata", doc, md.id)
+        await index_dataset_metadata(es, dataset, md)
         return md.dict()
 
 
@@ -184,8 +171,7 @@ async def replace_dataset_metadata(
             new_metadata = await md.replace()
 
             # Update entry to the metadata index
-            doc = {"doc": {"content": new_metadata.content}}
-            update_record(es, "metadata", doc, new_metadata.id)
+            await index_dataset_metadata(es, dataset, new_metadata, update=True)
             return new_metadata.dict()
     else:
         raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
@@ -252,6 +238,7 @@ async def update_dataset_metadata(
         md = await MetadataDB.find_one(*query)
         if md is not None:
             # TODO: Refactor this with permissions checks etc.
+            await index_dataset_metadata(es, dataset, md, update=True)
             return await patch_metadata(md, content, es)
         else:
             raise HTTPException(
