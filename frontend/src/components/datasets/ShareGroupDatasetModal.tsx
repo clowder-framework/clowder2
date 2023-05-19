@@ -53,9 +53,6 @@ export default function ShareGroupDatasetModal(
 	const getRoles = (datasetId: string | undefined) =>
 		dispatch(fetchDatasetRoles(datasetId));
 
-	const getRoles = (datasetId: string | undefined) =>
-		dispatch(fetchDatasetRoles(datasetId));
-
 	// component did mount
 	useEffect(() => {
 		listGroups();
