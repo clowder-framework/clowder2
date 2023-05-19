@@ -14,7 +14,6 @@ from app.deps.authorization_deps import Authorization, CheckStatus
 from app.keycloak_auth import (
     get_user,
     get_current_user,
-    get_current_username_or_anonymous_user,
     UserOut,
 )
 from app.config import settings
