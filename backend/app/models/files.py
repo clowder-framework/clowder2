@@ -21,7 +21,7 @@ class FileContentType(BaseModel):
 
 
 class FileVersion(BaseModel):
-    file_id: PyObjectId
+    file_id: PydanticObjectId
     creator: UserOut
     created: datetime = Field(default_factory=datetime.utcnow)
     version_id: str
