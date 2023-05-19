@@ -1,5 +1,3 @@
-from typing import List
-
 from beanie import PydanticObjectId
 from beanie.operators import Or, In
 from bson import ObjectId
@@ -28,9 +26,9 @@ from app.models.datasets import (
     DatasetDB,
     DatasetOut,
 )
-from app.models.groups import GroupOut, GroupDB
+from app.models.groups import GroupDB
 from app.models.pyobjectid import PyObjectId
-from app.models.users import UserOut, UserDB
+from app.models.users import UserDB
 from app.search.index import index_dataset
 
 router = APIRouter()
@@ -146,16 +144,16 @@ async def get_group_role(
     response_model=AuthorizationOut,
 )
 async def set_dataset_group_role(
-    dataset_id: str,
-    group_id: str,
+    dataset_id: PydanticObjectId,
+    group_id: PydanticObjectId,
     role: RoleType,
     es=Depends(get_elasticsearchclient),
     user_id=Depends(get_user),
     allow: bool = Depends(Authorization("editor")),
 ):
     """Assign an entire group a specific role for a dataset."""
-    if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
-        if (group := await GroupDB.get(PydanticObjectId(group_id))) is not None:
+    if (dataset := await DatasetDB.get(dataset_id)) is not None:
+        if (group := await GroupDB.get(group_id)) is not None:
             # First, remove any existing role the group has on the dataset
             await remove_dataset_group_role(dataset_id, group_id, user_id, allow)
             if (
@@ -165,7 +163,7 @@ async def set_dataset_group_role(
                 )
             ) is not None:
                 if group_id not in auth_db.group_ids:
-                    auth_db.group_ids.append(ObjectId(group_id))
+                    auth_db.group_ids.append(Ogroup_id)
                     for u in group.users:
                         auth_db.user_ids.append(u.user.email)
                     await auth_db.replace()
@@ -254,19 +252,19 @@ async def set_dataset_user_role(
     response_model=AuthorizationOut,
 )
 async def remove_dataset_group_role(
-    dataset_id: str,
-    group_id: str,
+    dataset_id: PydanticObjectId,
+    group_id: PydanticObjectId,
     es=Depends(get_elasticsearchclient),
     user_id=Depends(get_user),
     allow: bool = Depends(Authorization("editor")),
 ):
     """Remove any role the group has with a specific dataset."""
 
-    if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
-        if (group := await GroupDB.get(PydanticObjectId(group_id))) is not None:
+    if (dataset := await DatasetDB.get(dataset_id)) is not None:
+        if (group := await GroupDB.get(group_id)) is not None:
             if (
                 auth_db := await AuthorizationDB.find_one(
-                    AuthorizationDB.dataset_id == PyObjectId(dataset_id),
+                    AuthorizationDB.dataset_id == dataset_id,
                     AuthorizationDB.group_ids == group_id,
                 )
             ) is not None:
