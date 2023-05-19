@@ -2,8 +2,8 @@
 /* tslint:disable */
 /* eslint-disable */
 import type { AuthorizationBase } from '../models/AuthorizationBase';
-import type { AuthorizationDB } from '../models/AuthorizationDB';
 import type { AuthorizationMetadata } from '../models/AuthorizationMetadata';
+import type { AuthorizationOut } from '../models/AuthorizationOut';
 import type { DatasetRoles } from '../models/DatasetRoles';
 import type { RoleType } from '../models/RoleType';
 import type { CancelablePromise } from '../core/CancelablePromise';
@@ -16,13 +16,13 @@ export class AuthorizationService {
      * Save authorization info in Mongo. This is a triple of dataset_id/user_id/role/group_id.
      * @param datasetId
      * @param requestBody
-     * @returns AuthorizationDB Successful Response
+     * @returns AuthorizationOut Successful Response
      * @throws ApiError
      */
     public static saveAuthorizationApiV2AuthorizationsDatasetsDatasetIdPost(
         datasetId: string,
         requestBody: AuthorizationBase,
-    ): CancelablePromise<AuthorizationDB> {
+    ): CancelablePromise<AuthorizationOut> {
         return __request({
             method: 'POST',
             path: `/api/v2/authorizations/datasets/${datasetId}`,
@@ -38,12 +38,12 @@ export class AuthorizationService {
      * Get Dataset Role
      * Retrieve role of user for a specific dataset.
      * @param datasetId
-     * @returns AuthorizationDB Successful Response
+     * @returns AuthorizationOut Successful Response
      * @throws ApiError
      */
     public static getDatasetRoleApiV2AuthorizationsDatasetsDatasetIdRoleGet(
         datasetId: string,
-    ): CancelablePromise<AuthorizationDB> {
+    ): CancelablePromise<AuthorizationOut> {
         return __request({
             method: 'GET',
             path: `/api/v2/authorizations/datasets/${datasetId}/role`,
@@ -156,14 +156,14 @@ export class AuthorizationService {
      * @param datasetId
      * @param groupId
      * @param role
-     * @returns AuthorizationDB Successful Response
+     * @returns AuthorizationOut Successful Response
      * @throws ApiError
      */
     public static setDatasetGroupRoleApiV2AuthorizationsDatasetsDatasetIdGroupRoleGroupIdRolePost(
         datasetId: string,
         groupId: string,
         role: RoleType,
-    ): CancelablePromise<AuthorizationDB> {
+    ): CancelablePromise<AuthorizationOut> {
         return __request({
             method: 'POST',
             path: `/api/v2/authorizations/datasets/${datasetId}/group_role/${groupId}/${role}`,
@@ -179,14 +179,14 @@ export class AuthorizationService {
      * @param datasetId
      * @param username
      * @param role
-     * @returns AuthorizationDB Successful Response
+     * @returns AuthorizationOut Successful Response
      * @throws ApiError
      */
     public static setDatasetUserRoleApiV2AuthorizationsDatasetsDatasetIdUserRoleUsernameRolePost(
         datasetId: string,
         username: string,
         role: RoleType,
-    ): CancelablePromise<AuthorizationDB> {
+    ): CancelablePromise<AuthorizationOut> {
         return __request({
             method: 'POST',
             path: `/api/v2/authorizations/datasets/${datasetId}/user_role/${username}/${role}`,
@@ -201,13 +201,13 @@ export class AuthorizationService {
      * Remove any role the group has with a specific dataset.
      * @param datasetId
      * @param groupId
-     * @returns AuthorizationDB Successful Response
+     * @returns AuthorizationOut Successful Response
      * @throws ApiError
      */
     public static removeDatasetGroupRoleApiV2AuthorizationsDatasetsDatasetIdGroupRoleGroupIdDelete(
         datasetId: string,
         groupId: string,
-    ): CancelablePromise<AuthorizationDB> {
+    ): CancelablePromise<AuthorizationOut> {
         return __request({
             method: 'DELETE',
             path: `/api/v2/authorizations/datasets/${datasetId}/group_role/${groupId}`,
@@ -222,13 +222,13 @@ export class AuthorizationService {
      * Remove any role the user has with a specific dataset.
      * @param datasetId
      * @param username
-     * @returns AuthorizationDB Successful Response
+     * @returns AuthorizationOut Successful Response
      * @throws ApiError
      */
     public static removeDatasetUserRoleApiV2AuthorizationsDatasetsDatasetIdUserRoleUsernameDelete(
         datasetId: string,
         username: string,
-    ): CancelablePromise<AuthorizationDB> {
+    ): CancelablePromise<AuthorizationOut> {
         return __request({
             method: 'DELETE',
             path: `/api/v2/authorizations/datasets/${datasetId}/user_role/${username}`,

@@ -24,6 +24,6 @@ export type GroupOut = {
     name: string;
     description?: string;
     users?: Array<Member>;
-    _id?: string;
+    id?: string;
     views?: number;
 }

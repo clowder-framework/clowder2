@@ -19,11 +19,11 @@ import type { SearchObject } from './SearchObject';
  * - [UpdateMethods](https://roman-right.github.io/beanie/api/interfaces/#aggregatemethods)
  */
 export type FeedOut = {
-    creator: string;
-    created?: string;
-    modified?: string;
     name: string;
     search: SearchObject;
     listeners?: Array<FeedListener>;
-    _id?: string;
+    id?: string;
+    creator?: string;
+    created?: string;
+    modified?: string;
 }
