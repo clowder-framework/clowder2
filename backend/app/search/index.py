@@ -4,7 +4,7 @@ from bson import ObjectId
 from elasticsearch import Elasticsearch
 from pymongo import MongoClient
 
-from app.models.authorization import AuthorizationOut
+from app.models.authorization import AuthorizationOut, AuthorizationDB
 from app.models.datasets import DatasetOut
 from app.models.files import FileOut
 from app.models.metadata import MetadataOut
@@ -13,7 +13,6 @@ from app.search.connect import insert_record, update_record
 
 
 async def index_dataset(
-    db: MongoClient,
     es: Elasticsearch,
     dataset: DatasetOut,
     user_ids: Optional[List[str]] = None,
@@ -24,10 +23,9 @@ async def index_dataset(
     if user_ids is None:
         # Get authorized users from db
         authorized_user_ids = []
-        async for auth_q in db["authorization"].find(
-            {"dataset_id": ObjectId(dataset.id)}
+        async for auth in AuthorizationDB.find(
+            AuthorizationDB.dataset_id == ObjectId(dataset.id)
         ):
-            auth = AuthorizationOut.from_mongo(auth_q)
             authorized_user_ids += auth.user_ids
     else:
         authorized_user_ids = user_ids
@@ -49,7 +47,6 @@ async def index_dataset(
 
 
 async def index_file(
-    db: MongoClient,
     es: Elasticsearch,
     file: FileOut,
     user_ids: Optional[List[str]] = None,
@@ -61,10 +58,9 @@ async def index_file(
     if user_ids is None:
         # Get authorized users from db
         authorized_user_ids = []
-        async for auth_q in db["authorization"].find(
-            {"dataset_id": ObjectId(file.dataset_id)}
+        async for auth in AuthorizationDB.find(
+            AuthorizationDB.dataset_id == ObjectId(file.dataset_id)
         ):
-            auth = AuthorizationOut.from_mongo(auth_q)
             authorized_user_ids += auth.user_ids
     else:
         authorized_user_ids = user_ids
@@ -89,7 +85,6 @@ async def index_file(
 
 
 async def index_dataset_metadata(
-    db: MongoClient,
     es: Elasticsearch,
     dataset: DatasetOut,
     metadata: MetadataOut,
@@ -101,10 +96,9 @@ async def index_dataset_metadata(
     if user_ids is None:
         # Get authorized users from db
         authorized_user_ids = []
-        async for auth_q in db["authorization"].find(
-            {"dataset_id": ObjectId(dataset.id)}
+        async for auth in AuthorizationDB.find(
+            AuthorizationDB.dataset_id == ObjectId(dataset.id)
         ):
-            auth = AuthorizationOut.from_mongo(auth_q)
             authorized_user_ids += auth.user_ids
     else:
         authorized_user_ids = user_ids
@@ -133,7 +127,6 @@ async def index_dataset_metadata(
 
 
 async def index_file_metadata(
-    db: MongoClient,
     es: Elasticsearch,
     file: FileOut,
     metadata: MetadataOut,
@@ -145,10 +138,9 @@ async def index_file_metadata(
     if user_ids is None:
         # Get authorized users from db
         authorized_user_ids = []
-        async for auth_q in db["authorization"].find(
-            {"dataset_id": ObjectId(file.dataset_id)}
+        async for auth in AuthorizationDB.find(
+            AuthorizationDB.dataset_id == ObjectId(file.dataset_id)
         ):
-            auth = AuthorizationOut.from_mongo(auth_q)
             authorized_user_ids += auth.user_ids
     else:
         authorized_user_ids = user_ids

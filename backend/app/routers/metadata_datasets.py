@@ -23,7 +23,6 @@ from app.models.metadata import (
     patch_metadata,
     MetadataDelete,
     MetadataDefinitionDB,
-    MetadataDefinitionOut,
 )
 from app.search.connect import delete_document_by_id
 from app.search.index import index_dataset_metadata
@@ -119,7 +118,7 @@ async def add_dataset_metadata(
         await md.insert()
 
         # Add an entry to the metadata index
-        await index_dataset_metadata(es, dataset, md)
+        await index_dataset_metadata(es, dataset, MetadataOut(**md.dict()))
         return md.dict()
 
 
@@ -168,11 +167,13 @@ async def replace_dataset_metadata(
             tmp_md_id = md.id
             md = new_md
             md.id = tmp_md_id
-            new_metadata = await md.replace()
+            await md.replace()
 
             # Update entry to the metadata index
-            await index_dataset_metadata(es, dataset, new_metadata, update=True)
-            return new_metadata.dict()
+            await index_dataset_metadata(
+                es, dataset, MetadataOut(**md.dict()), update=True
+            )
+            return md.dict()
     else:
         raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
 
@@ -237,8 +238,9 @@ async def update_dataset_metadata(
 
         md = await MetadataDB.find_one(*query)
         if md is not None:
-            # TODO: Refactor this with permissions checks etc.
-            await index_dataset_metadata(es, dataset, md, update=True)
+            await index_dataset_metadata(
+                es, dataset, MetadataOut(**md.dict()), update=True
+            )
             return await patch_metadata(md, content, es)
         else:
             raise HTTPException(

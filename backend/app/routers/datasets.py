@@ -198,7 +198,7 @@ async def save_dataset(
     ).save()
 
     # Add new entry to elasticsearch
-    await index_dataset(es, dataset, [user.email])
+    await index_dataset(es, DatasetOut(**dataset.dict()), [user.email])
     return dataset.dict()
 
 
@@ -282,7 +282,7 @@ async def edit_dataset(
         await dataset.save()
 
         # Update entry to the dataset index
-        await index_dataset(es, dataset, update=True)
+        await index_dataset(es, DatasetOut(**dataset.dict()), update=True)
         # updating metadata in elasticsearch
         if (
             metadata := await MetadataDB.find_one(

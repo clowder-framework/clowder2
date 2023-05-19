@@ -184,7 +184,7 @@ async def set_dataset_group_role(
                     user_ids=user_ids,
                 )
                 await auth_db.insert()
-                await index_dataset(es, dataset, auth_db.user_ids)
+                await index_dataset(es, DatasetOut(**dataset.dict()), auth_db.user_ids)
                 return auth_db.dict()
         else:
             raise HTTPException(status_code=404, detail=f"Group {group_id} not found")
@@ -207,7 +207,7 @@ async def set_dataset_user_role(
     """Assign a single user a specific role for a dataset."""
 
     if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
-        if (user := await UserDB.find_one(UserDB.email == username)) is not None:
+        if (await UserDB.find_one(UserDB.email == username)) is not None:
             # First, remove any existing role the user has on the dataset
             await remove_dataset_user_role(dataset_id, username, user_id, allow)
             auth_db = await AuthorizationDB.find_one(
@@ -230,7 +230,7 @@ async def set_dataset_user_role(
                 else:
                     auth_db.user_ids.append(username)
                     await auth_db.save()
-                await index_dataset(es, dataset, auth_db.user_ids)
+                await index_dataset(es, DatasetOut(**dataset.dict()), auth_db.user_ids)
                 return auth_db.dict()
             else:
                 # Create a new entry
@@ -241,7 +241,7 @@ async def set_dataset_user_role(
                     user_ids=[username],
                 )
                 await auth_db.insert()
-                await index_dataset(es, dataset, [username])
+                await index_dataset(es, DatasetOut(**dataset.dict()), [username])
                 return auth_db.dict()
         else:
             raise HTTPException(status_code=404, detail=f"User {username} not found")

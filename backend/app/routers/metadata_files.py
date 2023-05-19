@@ -150,7 +150,7 @@ async def add_file_metadata(
         await md.insert()
 
         # Add an entry to the metadata index
-        await index_file_metadata(es, file, md)
+        await index_file_metadata(es, FileOut(**file.dict()), MetadataOut(**md.dict()))
         return md.dict()
 
 
@@ -219,7 +219,9 @@ async def replace_file_metadata(
             await md.save()
 
             # Update entry to the metadata index
-            await index_file_metadata(es, file, md, update=True)
+            await index_file_metadata(
+                es, FileOut(**file.dict()), MetadataOut(**md.dict()), update=True
+            )
             return md.dict()
         else:
             raise HTTPException(status_code=404, detail=f"No metadata found to update")
@@ -317,8 +319,9 @@ async def update_file_metadata(
 
         md = await MetadataDB.find_one(query)
         if md:
-            # TODO: Refactor this with permissions checks etc.
-            await index_file_metadata(es, file, md, update=True)
+            await index_file_metadata(
+                es, FileOut(**file.dict()), MetadataOut(**md.dict()), update=True
+            )
             return await patch_metadata(md, content, es)
         else:
             raise HTTPException(status_code=404, detail=f"No metadata found to update")

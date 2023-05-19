@@ -146,7 +146,7 @@ async def add_file_entry(
     await new_version.insert()
 
     # Add entry to the file index
-    await index_file(es, new_file)
+    await index_file(es, FileOut(**new_file.dict()))
 
     # Submit file job to any qualifying feeds
     await check_feed_listeners(
@@ -235,18 +235,7 @@ async def update_file(
 
         await new_version.insert()
         # Update entry to the file index
-        doc = {
-            "doc": {
-                "name": updated_file.name,
-                "creator": updated_file.creator.email,
-                "created": datetime.utcnow(),
-                "download": updated_file.downloads,
-                "bytes": updated_file.bytes,
-                "content_type": updated_file.content_type.content_type,
-            }
-        }
-        update_record(es, "file", doc, updated_file.id)
-        await index_file(db, es, updated_file, updated_file)
+        await index_file(es, FileOut(**updated_file.dict()))
         await _resubmit_file_extractors(
             updated_file, rabbitmq_client, user, credentials
         )
