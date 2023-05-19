@@ -44,7 +44,7 @@ async def get_groups(
 
 
     """
-    return await GroupDB.find(
+    groups = await GroupDB.find(
         Or(
             GroupDB.creator == user_id,
             GroupDB.users.user.email == user_id,
@@ -53,6 +53,7 @@ async def get_groups(
         skip=skip,
         limit=limit,
     ).to_list()
+    return [group.dict() for group in groups]
 
 
 @router.get("/search/{search_term}", response_model=List[GroupOut])
