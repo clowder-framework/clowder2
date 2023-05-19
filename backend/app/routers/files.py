@@ -337,12 +337,7 @@ async def get_file_versions(
     file = await FileDB.get(PydanticObjectId(file_id))
     if file is not None:
         mongo_versions = []
-        for ver in (
-            await FileVersionDB.find(FileVersionDB.file_id == ObjectId(file_id))
-            .skip(skip)
-            .limit(limit)
-            .to_list()
-        ):
+        async for ver in FileVersionDB.find(FileVersionDB.file_id == ObjectId(file_id)).skip(skip).limit(limit):
             mongo_versions.append(FileVersion(**ver.dict()))
         return mongo_versions
 
