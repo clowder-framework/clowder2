@@ -21,8 +21,6 @@ import { RedirectLogin as RedirectLoginComponent } from "./components/auth/Redir
 import { RedirectLogout as RedirectLogoutComponent } from "./components/auth/RedirectLogout";
 import { Search } from "./components/search/Search";
 import { isAuthorized } from "./utils/common";
-import {isPublic} from "./utils/common"
-import {checkPublic} from "./utils/common"
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "./types/data";
 import { resetLogout } from "./actions/common";
@@ -50,9 +48,6 @@ const PrivateRoute = (props): JSX.Element => {
 		dispatch(fetchFileRole(fileId));
 	const { datasetId } = useParams<{ datasetId?: string }>();
 	const { fileId } = useParams<{ fileId?: string }>();
-	const datasetAbout = useSelector((state: RootState) => state.dataset.about);
-	console.log('we have a datasetAbout', datasetAbout);
-	const datasetStatus = datasetAbout["status"];
 
 	// log user out if token expired/unauthorized
 	useEffect(() => {
@@ -71,8 +66,8 @@ const PrivateRoute = (props): JSX.Element => {
 	useEffect(() => {
 		if (fileId && reason === "") listFileRole(fileId);
 	}, [fileId, reason]);
-	// TODO or condition, authorized OR  public
-	return <>{ isPublic(datasetId) || isAuthorized()  ? children : <Navigate to="/auth/login" />}</>;
+
+	return <>{isAuthorized() ? children : <Navigate to="/auth/login" />}</>;
 };
 
 export const AppRoutes = (): JSX.Element => {
