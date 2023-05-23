@@ -134,9 +134,11 @@ class EventListenerJobDB(Document, EventListenerJobBase):
     class Settings:
         name = "listener_jobs"
         indexes = [
-            ("resource_ref.resource_id", pymongo.TEXT),
-            ("listener_id", pymongo.TEXT),
-            ("status", pymongo.TEXT),
+            [
+                ("resource_ref.resource_id", pymongo.TEXT),
+                ("listener_id", pymongo.TEXT),
+                ("status", pymongo.TEXT),
+            ]
         ]
 
 

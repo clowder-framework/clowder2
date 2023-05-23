@@ -6,6 +6,7 @@ from aio_pika import connect_robust
 from aio_pika.abc import AbstractIncomingMessage
 from packaging import version
 
+from app.main import startup_beanie
 from app.config import settings
 from app.models.listeners import EventListenerDB, EventListenerOut, ExtractorInfo
 from app.routers.listeners import _process_incoming_v1_extractor_info
@@ -67,6 +68,7 @@ async def listen_for_heartbeats():
     """
     this method runs continuously listening for extractor heartbeats sent over rabbitmq
     """
+    await startup_beanie()
     connection = await connect_robust(
         url=settings.RABBITMQ_URL,
         login=settings.RABBITMQ_USER,
@@ -89,7 +91,11 @@ async def listen_for_heartbeats():
         )
 
         logger.info(" [*] Waiting for heartbeats. To exit press CTRL+C")
-        await asyncio.Future()
+        try:
+            # Wait until terminate
+            await asyncio.Future()
+        finally:
+            await connection.close()
 
 
 if __name__ == "__main__":
