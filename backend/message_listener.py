@@ -9,9 +9,9 @@ from aio_pika import connect_robust
 from aio_pika.abc import AbstractIncomingMessage
 from bson import ObjectId
 
-from app.main import startup_beanie
 from app.config import settings
-from app.models.config import ConfigEntryDB, ConfigEntryOut
+from app.main import startup_beanie
+from app.models.config import ConfigEntryDB
 from app.models.listeners import (
     EventListenerDB,
     EventListenerJobUpdateDB,
@@ -20,6 +20,7 @@ from app.models.listeners import (
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 
 def parse_message_status(msg):
@@ -175,7 +176,7 @@ async def listen_for_messages():
             no_ack=False,
         )
 
-        logger.info(" [*] Waiting for heartbeats. To exit press CTRL+C")
+        logger.info(" [*] Waiting for messages. To exit press CTRL+C")
         try:
             # Wait until terminate
             await asyncio.Future()
