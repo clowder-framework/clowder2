@@ -211,13 +211,8 @@ async def get_datasets(
 ):
     if mine:
         datasets = await DatasetDBViewList.find(
-            {
-                "$and": [
-                    {"author.email": user_id},
-                    {"auth": {"$elemMatch": {"user_ids": user_id}}},
-                ]
-            },
-            sort=("created", DESCENDING),
+            DatasetDBViewList.creator.email == user_id,
+            sort=(-DatasetDBViewList.created),
             skip=skip,
             limit=limit,
         ).to_list()
@@ -227,7 +222,7 @@ async def get_datasets(
                 DatasetDBViewList.creator.email == user_id,
                 DatasetDBViewList.auth.user_ids == user_id,
             ),
-            sort=("created", DESCENDING),
+            sort=(-DatasetDBViewList.created),
             skip=skip,
             limit=limit,
         ).to_list()

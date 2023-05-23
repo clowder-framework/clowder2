@@ -98,6 +98,6 @@ async def get_job_updates(
         # TODO: Should this also return the job summary data since we just queried it here?
         job_updates = await EventListenerJobUpdateDB.find(
             EventListenerJobUpdateDB.job_id == job_id
-        )
+        ).to_list()
         return [job_update.dict() for job_update in job_updates]
     raise HTTPException(status_code=404, detail=f"Job {job_id} not found")

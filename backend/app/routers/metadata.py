@@ -51,19 +51,15 @@ async def get_metadata_definition(
     limit: int = 2,
 ):
     if name is None:
-        return (
-            await MetadataDefinitionDB.find()
-            .skip(skip)
-            .limit(limit)
-            .to_list(length=limit)
-        )
+        defs = await MetadataDefinitionDB.find().skip(skip).limit(limit).to_list()
     else:
-        return (
+        defs = (
             await MetadataDefinitionDB.find(MetadataDefinitionDB.name == name)
             .skip(skip)
             .limit(limit)
-            .to_list(length=limit)
+            .to_list()
         )
+    return [mddef.dict() for mddef in defs]
 
 
 @router.patch("/{metadata_id}", response_model=MetadataOut)

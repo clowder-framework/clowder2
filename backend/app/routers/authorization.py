@@ -45,18 +45,14 @@ async def save_authorization(
 
     # Retrieve users from groups in mongo
     user_ids = authorization_in.user_ids
+    missing_groups = authorization_in.group_ids
     found_groups = 0
-    group_list = await GroupDB.find(
-        In(GroupDB.id, authorization_in.group_ids)
-    ).to_list()
-    async for group in group_list:
+    async for group in GroupDB.find(In(GroupDB.id, authorization_in.group_ids)):
         found_groups += 1
+        missing_groups.remove(group.id)
         for u in group.users:
             user_ids.append(u.user.email)
     if found_groups != len(authorization_in.group_ids):
-        missing_groups = authorization_in.group_ids
-        async for group in group_list:
-            missing_groups.remove(group.id)
         raise HTTPException(
             status_code=404, detail=f"Groups not found: {missing_groups}"
         )

@@ -89,21 +89,19 @@ async def get_feeds(
 ):
     """Fetch all existing Feeds."""
     if name is not None:
-        return (
+        feeds = (
             await FeedDB.find(FeedDB.name == name)
             .sort(-FeedDB.created)
             .skip(skip)
             .limit(limit)
-            .to_list(length=limit)
+            .to_list()
         )
     else:
-        return (
-            await FeedDB.find()
-            .sort(-FeedDB.created)
-            .skip(skip)
-            .limit(limit)
-            .to_list(length=limit)
+        feeds = (
+            await FeedDB.find().sort(-FeedDB.created).skip(skip).limit(limit).to_list()
         )
+
+    return [feed.dict() for feed in feeds]
 
 
 @router.get("/{feed_id}", response_model=FeedOut)

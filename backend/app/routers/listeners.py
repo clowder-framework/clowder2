@@ -167,7 +167,7 @@ async def search_listeners(
         )
         .skip(skip)
         .limit(limit)
-        .to_list(length=limit)
+        .to_list()
     )
     return [listener.dict() for listener in listeners]
 
@@ -216,7 +216,8 @@ async def get_listeners(
     if label:
         query.append(EventListenerDB.properties.default_labels == label)
 
-    return await EventListenerDB.find(*query, skip=skip, limit=limit).to_list()
+    listeners = await EventListenerDB.find(*query, skip=skip, limit=limit).to_list()
+    return [listener.dict() for listener in listeners]
 
 
 @router.put("/{listener_id}", response_model=EventListenerOut)
