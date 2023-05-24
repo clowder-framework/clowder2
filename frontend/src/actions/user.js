@@ -5,13 +5,6 @@ import { handleErrors } from "./common";
 
 const cookies = new Cookies();
 
-export const userActions = {
-	login,
-	logout,
-};
-
-// TODO need to clean up this file with all the mixed login/logout methods
-
 export async function loginHelper(
 	email,
 	password,

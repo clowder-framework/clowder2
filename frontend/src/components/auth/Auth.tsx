@@ -1,18 +1,22 @@
-import React, {useEffect} from "react";
-import {useDispatch} from "react-redux";
-import {SET_USER} from "../../actions/user";
-import {Navigate} from "react-router-dom";
-import {V2} from "../../openapi";
+import React, { useEffect } from "react";
+import { useDispatch } from "react-redux";
+import { SET_USER } from "../../actions/user";
+import { Navigate, useSearchParams } from "react-router-dom";
+import { V2 } from "../../openapi";
 import Cookies from "universal-cookie";
 
 export const Auth = (): JSX.Element => {
 	const dispatch = useDispatch();
 	const cookies = new Cookies();
 
+	// search parameters redirect to origin
+	const [searchParams] = useSearchParams();
+	const origin = searchParams.get("origin");
+
 	useEffect(() => {
 		const header = cookies.get("Authorization");
 		if (header !== undefined && header !== "none") {
-			const token = header.replace("Bearer ", "")
+			const token = header.replace("Bearer ", "");
 			V2.OpenAPI.TOKEN = token;
 			return dispatch({
 				type: SET_USER,
@@ -21,7 +25,5 @@ export const Auth = (): JSX.Element => {
 		}
 	}, []);
 
-	return (
-		<Navigate to={"/"}/>
-	)
-}
+	return <Navigate to={origin ?? "/"} />;
+};

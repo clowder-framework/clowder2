@@ -1,5 +1,6 @@
 import json
 import logging
+from typing import Optional
 
 import requests
 from bson import ObjectId
@@ -8,6 +9,7 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from jose import jwt, ExpiredSignatureError, JWTError
 from keycloak.exceptions import KeycloakAuthenticationError, KeycloakGetError
 from pymongo import MongoClient
+from requests.models import PreparedRequest
 from starlette.responses import RedirectResponse
 
 from app import dependencies
@@ -40,8 +42,8 @@ async def login() -> RedirectResponse:
 
 @router.get("/logout")
 async def logout(
-    credentials: HTTPAuthorizationCredentials = Security(security),
-    db: MongoClient = Depends(dependencies.get_db),
+        credentials: HTTPAuthorizationCredentials = Security(security),
+        db: MongoClient = Depends(dependencies.get_db),
 ):
     """Logout of keycloak."""
     # get user info
@@ -49,7 +51,7 @@ async def logout(
     try:
         user_info = keycloak_openid.userinfo(access_token)
         if (
-            token_exist := await db["tokens"].find_one({"email": user_info["email"]})
+                token_exist := await db["tokens"].find_one({"email": user_info["email"]})
         ) is not None:
             # log user out
             try:
@@ -101,7 +103,9 @@ async def login(userIn: UserIn):
 
 @router.get("")
 async def auth(
-    code: str, db: MongoClient = Depends(dependencies.get_db)
+        code: str,
+        origin: Optional[str] = None,
+        db: MongoClient = Depends(dependencies.get_db)
 ) -> RedirectResponse:
     """Redirect endpoint Keycloak redirects to after login."""
     logger.info(f"In /api/v2/auth")
@@ -145,7 +149,9 @@ async def auth(
 
     # redirect to frontend
     auth_url = f"{settings.frontend_url}/auth"
-    response = RedirectResponse(url=auth_url)
+    req = PreparedRequest()
+    req.prepare_url(auth_url, {"origin": origin})
+    response = RedirectResponse(url=req.url)
     response.set_cookie("Authorization", value=f"Bearer {access_token}")
     logger.info(f"Authenticated by keycloak. Redirecting to {auth_url}")
     return response
@@ -153,8 +159,8 @@ async def auth(
 
 @router.get("/refresh_token")
 async def refresh_token(
-    credentials: HTTPAuthorizationCredentials = Security(security),
-    db: MongoClient = Depends(dependencies.get_db),
+        credentials: HTTPAuthorizationCredentials = Security(security),
+        db: MongoClient = Depends(dependencies.get_db),
 ):
     access_token = credentials.credentials
 
@@ -187,7 +193,7 @@ async def refresh_token(
 
 @router.get("/broker/{identity_provider}/token")
 def get_idenity_provider_token(
-    identity_provider: str, access_token: str = Security(oauth2_scheme)
+        identity_provider: str, access_token: str = Security(oauth2_scheme)
 ):
     """Get identity provider JWT token from keyclok. Keycloak must be configured to store external tokens."""
     if identity_provider in settings.keycloak_ipds:
