@@ -35,9 +35,13 @@ async def register() -> RedirectResponse:
 
 
 @router.get("/login")
-async def login() -> RedirectResponse:
+async def login(
+        origin: Optional[str] = None,
+) -> RedirectResponse:
     """Redirect to keycloak login page."""
-    return RedirectResponse(settings.auth_url)
+    req = PreparedRequest()
+    req.prepare_url(settings.auth_url, {"origin": origin})
+    return RedirectResponse(req.url)
 
 
 @router.get("/logout")
