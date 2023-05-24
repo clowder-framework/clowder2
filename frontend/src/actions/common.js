@@ -5,18 +5,6 @@ import Cookies from "universal-cookie";
 
 const cookies = new Cookies();
 
-export const SET_ORIGIN = "SET_ORIGIN";
-
-export function setOrigin(origin) {
-	return (dispatch) => {
-		dispatch({
-			type: SET_ORIGIN,
-			origin: origin,
-			receivedAt: Date.now(),
-		});
-	};
-}
-
 export const RESET_FAILED = "RESET_FAILED";
 
 export function resetFailedReason() {

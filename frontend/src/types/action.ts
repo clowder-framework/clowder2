@@ -166,11 +166,6 @@ interface RESET_API_KEY {
 	apiKey: string;
 }
 
-interface SET_ORIGIN {
-	origin: string;
-	type: "SET_ORIGIN";
-}
-
 interface FAILED {
 	stack: string;
 	type: "FAILED";
@@ -389,7 +384,6 @@ export type DataAction =
 	| RESET_CREATE_DATASET
 	| CREATE_FILE
 	| RESET_CREATE_FILE
-	| SET_ORIGIN
 	| FAILED
 	| NOT_FOUND
 	| RESET_FAILED

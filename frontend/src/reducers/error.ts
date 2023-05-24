@@ -5,7 +5,6 @@ import {
 	NOT_FOUND,
 	RESET_FAILED,
 	RESET_LOGOUT,
-	SET_ORIGIN,
 } from "../actions/common";
 import { LOGOUT } from "../actions/user";
 
@@ -18,10 +17,6 @@ const defaultState = {
 
 const error = (state = defaultState, action: DataAction) => {
 	switch (action.type) {
-		case SET_ORIGIN:
-			return Object.assign({}, state, {
-				origin: action.origin,
-			});
 		case FAILED:
 			return Object.assign({}, state, {
 				reason: action.reason,
