@@ -61,7 +61,7 @@ export const REGISTER_USER = "REGISTER_USER";
 export const REGISTER_ERROR = "REGISTER_ERROR";
 export const LOGOUT = "LOGOUT";
 
-export function login(email, password) {
+export function _legacy_login(email, password) {
 	return async (dispatch) => {
 		const json = await loginHelper(email, password, false);
 		V2.OpenAPI.TOKEN = undefined;
@@ -86,7 +86,7 @@ export function login(email, password) {
 	};
 }
 
-export function register(email, password, firstname, lastname) {
+export function _legacy_register(email, password, firstname, lastname) {
 	return async (dispatch) => {
 		const json = await loginHelper(email, password, firstname, lastname, true);
 		if (json["email"] !== undefined && json["hashed_password"] !== undefined) {
