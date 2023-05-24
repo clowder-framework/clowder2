@@ -6,7 +6,6 @@ import { Typography } from "@mui/material";
 
 import Cookies from "universal-cookie";
 import { theme } from "../../theme";
-import config from "../../app.config";
 
 const cookies = new Cookies();
 
@@ -21,8 +20,7 @@ export function SearchErrorBoundary(props) {
 						if (error["status"] === 401 || error["status"] === 403) {
 							V2.OpenAPI.TOKEN = undefined;
 							cookies.remove("Authorization", { path: "/" });
-							// directly talk to kecloak auth endpoint with origin query parameter
-							return <Navigate to={`${config.KeycloakLogin}?origin=/search`} />;
+							return <Navigate to="/auth/login?origin=/search" />;
 						} else {
 							return (
 								<>
