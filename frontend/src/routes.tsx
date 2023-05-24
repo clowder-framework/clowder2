@@ -92,7 +92,8 @@ const PrivateRoute = (props): JSX.Element => {
 						V2.OpenAPI.TOKEN = undefined;
 						cookies.remove("Authorization", { path: "/" });
 					});
-			}, 60 * 1000 * 4);
+				// }, 60 * 1000 * 4);
+			}, 1000 * 4);
 			return () => clearInterval(interval);
 		}
 	}, [Authorization]);
