@@ -1,7 +1,7 @@
 import React from "react";
 import { ErrorBoundary } from "@appbaseio/reactivesearch";
 import { V2 } from "../../openapi";
-import { Navigate } from "react-router-dom";
+import { Navigate, useLocation } from "react-router-dom";
 import { Typography } from "@mui/material";
 
 import Cookies from "universal-cookie";
@@ -12,6 +12,10 @@ const cookies = new Cookies();
 export function SearchErrorBoundary(props) {
 	const { children } = props;
 
+	// get current location
+	const location = useLocation();
+	const origin = `${location.pathname}${location.search}`;
+
 	return (
 		<ErrorBoundary
 			renderError={(error) => (
@@ -20,7 +24,7 @@ export function SearchErrorBoundary(props) {
 						if (error["status"] === 401 || error["status"] === 403) {
 							V2.OpenAPI.TOKEN = undefined;
 							cookies.remove("Authorization", { path: "/" });
-							return <Navigate to="/auth/login?origin=/search" />;
+							return <Navigate to={`/auth/login?origin=${origin}`} />;
 						} else {
 							return (
 								<>
