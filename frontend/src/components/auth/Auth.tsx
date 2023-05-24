@@ -9,7 +9,7 @@ export const Auth = (): JSX.Element => {
 	const dispatch = useDispatch();
 	const cookies = new Cookies();
 
-	// get latest origin from redux
+	// get latest origin from cookies
 	const origin = cookies.get("origin");
 
 	useEffect(() => {
@@ -24,5 +24,13 @@ export const Auth = (): JSX.Element => {
 		}
 	}, []);
 
-	return <Navigate to={origin ?? "/"} />;
+	return (
+		<Navigate
+			to={
+				origin !== "" && origin !== "null" && origin !== "undefiend" && origin
+					? origin
+					: "/"
+			}
+		/>
+	);
 };
