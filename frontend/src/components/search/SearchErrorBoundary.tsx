@@ -1,7 +1,7 @@
 import React from "react";
 import { ErrorBoundary } from "@appbaseio/reactivesearch";
 import { V2 } from "../../openapi";
-import { Link } from "react-router-dom";
+import { Navigate } from "react-router-dom";
 import { Typography } from "@mui/material";
 
 import Cookies from "universal-cookie";
@@ -21,13 +21,8 @@ export function SearchErrorBoundary(props) {
 						if (error["status"] === 401 || error["status"] === 403) {
 							V2.OpenAPI.TOKEN = undefined;
 							cookies.remove("Authorization", { path: "/" });
-
-							// directly talk to keycloak login endpoint with origin set as search
-							return (
-								<Link
-									to={{ pathname: config.KeycloakLogin + "?origin=/search" }}
-								/>
-							);
+							// directly talk to kecloak auth endpoint with origin query parameter
+							return <Navigate to={`${config.KeycloakLogin}?origin=/search`} />;
 						} else {
 							return (
 								<>
