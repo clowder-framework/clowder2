@@ -30,16 +30,27 @@ import { fetchDatasetRole, fetchFileRole } from "./actions/authorization";
 import { PageNotFound } from "./components/errors/PageNotFound";
 import { Forbidden } from "./components/errors/Forbidden";
 import { ApiKeys } from "./components/ApiKeys/ApiKey";
-import {Profile}  from "./components/users/Profile";
+import { Profile } from "./components/users/Profile";
+import { LOGOUT, SET_USER } from "./actions/user";
+import config from "./app.config";
+import { V2 } from "./openapi";
+import Cookies from "universal-cookie";
 // https://dev.to/iamandrewluca/private-route-in-react-router-v6-lg5
 const PrivateRoute = (props): JSX.Element => {
 	const { children } = props;
 
+	const cookies = new Cookies();
+	const headers = { Authorization: cookies.get("Authorization") };
+
 	const history = useNavigate();
 
 	const dispatch = useDispatch();
+
 	const loggedOut = useSelector((state: RootState) => state.error.loggedOut);
 	const reason = useSelector((state: RootState) => state.error.reason);
+	const Authorization = useSelector(
+		(state: RootState) => state.user.Authorization
+	);
 	const dismissLogout = () => dispatch(resetLogout());
 
 	const listDatasetRole = (datasetId: string | undefined) =>
@@ -48,6 +59,43 @@ const PrivateRoute = (props): JSX.Element => {
 		dispatch(fetchFileRole(fileId));
 	const { datasetId } = useParams<{ datasetId?: string }>();
 	const { fileId } = useParams<{ fileId?: string }>();
+
+	// periodically call login endpoint once logged in
+	useEffect(() => {
+		if (Authorization) {
+			const interval = setInterval(() => {
+				fetch(config.KeycloakRefresh, { method: "GET", headers: headers })
+					.then((response) => {
+						if (response.status === 200) return response.json();
+					})
+					.then((json) => {
+						// refresh
+						if (
+							json["access_token"] !== undefined &&
+							json["access_token"] !== "none"
+						) {
+							cookies.set("Authorization", `Bearer ${json["access_token"]}`);
+							V2.OpenAPI.TOKEN = json["access_token"];
+							dispatch({
+								type: SET_USER,
+								Authorization: `Bearer ${json["access_token"]}`,
+							});
+						}
+					})
+					.catch(() => {
+						// logout
+						dispatch({
+							type: LOGOUT,
+							receivedAt: Date.now(),
+						});
+						// Delete bad JWT token
+						V2.OpenAPI.TOKEN = undefined;
+						cookies.remove("Authorization", { path: "/" });
+					});
+			}, 60 * 1000 * 4);
+			return () => clearInterval(interval);
+		}
+	}, [Authorization]);
 
 	// log user out if token expired/unauthorized
 	useEffect(() => {
