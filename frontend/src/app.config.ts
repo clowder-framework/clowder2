@@ -42,7 +42,7 @@ config["KeycloakRegister"] = config.KeycloakBaseURL + "/register";
 config["searchEndpoint"] = `${hostname}/api/v2/elasticsearch`;
 
 // refresh toekn time interval
-config["refreshTokenInterval"] = 10 * 1000 * 60; // milliseconds
+config["refreshTokenInterval"] = 1 * 1000 * 60; // milliseconds
 config["extractorInterval"] = 2000; // milliseconds
 
 export default config;
