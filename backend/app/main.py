@@ -175,7 +175,6 @@ def gather_documents():
     pass
 
 
-# TODO add anything with document in here
 @app.on_event("startup")
 async def startup_beanie():
     """Setup Beanie Object Document Mapper (ODM) to interact with MongoDB."""

@@ -24,6 +24,7 @@ class Settings(BaseSettings):
     # Mongo database connection
     MONGODB_URL: str = "mongodb://localhost:27017"
     MONGO_DATABASE: str = "clowder2"
+    TEST_DATABASE: str = "clowder-tests"
 
     # Minio (file storage) information
     MINIO_SERVER_URL: str = "localhost:9000"

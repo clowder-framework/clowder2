@@ -47,7 +47,7 @@ oauth2_scheme = OAuth2AuthorizationCodeBearer(
 )
 
 # Passing in API key via header
-api_key_header = APIKeyHeader(name="x-api-key", auto_error=False)
+api_key_header = APIKeyHeader(name="X-API-KEY", auto_error=False)
 
 
 async def get_token(
