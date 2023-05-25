@@ -26,7 +26,7 @@ import { RootState } from "./types/data";
 import { resetLogout } from "./actions/common";
 import { Explore } from "./components/Explore";
 import { ExtractionHistory } from "./components/listeners/ExtractionHistory";
-import { fetchDatasetRole, fetchFileRole } from "./actions/authorization";
+import { fetchFileRole, refreshTokensetRole } from "./actions/authorization";
 import { PageNotFound } from "./components/errors/PageNotFound";
 import { Forbidden } from "./components/errors/Forbidden";
 import { ApiKeys } from "./components/ApiKeys/ApiKey";
@@ -48,13 +48,10 @@ const PrivateRoute = (props): JSX.Element => {
 
 	const loggedOut = useSelector((state: RootState) => state.error.loggedOut);
 	const reason = useSelector((state: RootState) => state.error.reason);
-	const Authorization = useSelector(
-		(state: RootState) => state.user.Authorization
-	);
 	const dismissLogout = () => dispatch(resetLogout());
 
 	const listDatasetRole = (datasetId: string | undefined) =>
-		dispatch(fetchDatasetRole(datasetId));
+		dispatch(refreshTokensetRole(datasetId));
 	const listFileRole = (fileId: string | undefined) =>
 		dispatch(fetchFileRole(fileId));
 	const { datasetId } = useParams<{ datasetId?: string }>();
@@ -62,41 +59,45 @@ const PrivateRoute = (props): JSX.Element => {
 
 	// periodically call login endpoint once logged in
 	useEffect(() => {
-		if (Authorization) {
-			const interval = setInterval(() => {
-				fetch(config.KeycloakRefresh, { method: "GET", headers: headers })
-					.then((response) => {
-						if (response.status === 200) return response.json();
-					})
-					.then((json) => {
-						// refresh
-						if (
-							json["access_token"] !== undefined &&
-							json["access_token"] !== "none"
-						) {
-							cookies.set("Authorization", `Bearer ${json["access_token"]}`);
-							V2.OpenAPI.TOKEN = json["access_token"];
-							dispatch({
-								type: SET_USER,
-								Authorization: `Bearer ${json["access_token"]}`,
-							});
-						}
-					})
-					.catch(() => {
-						// logout
-						dispatch({
-							type: LOGOUT,
-							receivedAt: Date.now(),
-						});
-						// Delete bad JWT token
-						V2.OpenAPI.TOKEN = undefined;
-						cookies.remove("Authorization", { path: "/" });
+		const refreshToken = async () => {
+			try {
+				const response = await fetch(config.KeycloakRefresh, {
+					method: "GET",
+					headers: headers,
+				});
+				const json = await response.json();
+				if (
+					json["access_token"] !== undefined &&
+					json["access_token"] !== "none"
+				) {
+					cookies.set("Authorization", `Bearer ${json["access_token"]}`);
+					V2.OpenAPI.TOKEN = json["access_token"];
+					dispatch({
+						type: SET_USER,
+						Authorization: `Bearer ${json["access_token"]}`,
 					});
-				// }, 60 * 1000 * 4);
-			}, 1000 * 4);
-			return () => clearInterval(interval);
-		}
-	}, [Authorization]);
+				}
+			} catch (error) {
+				// logout
+				dispatch({
+					type: LOGOUT,
+					receivedAt: Date.now(),
+				});
+				// Delete bad JWT token
+				V2.OpenAPI.TOKEN = undefined;
+				cookies.remove("Authorization", { path: "/" });
+			}
+		};
+
+		// Call the refreshToken function immediately
+		refreshToken();
+
+		// Call the refreshToken function every minute
+		const intervalId = setInterval(refreshToken, 1000 * 60);
+
+		// Clean up the interval when the component is unmounted
+		return () => clearInterval(intervalId);
+	}, []);
 
 	// log user out if token expired/unauthorized
 	useEffect(() => {
