@@ -193,10 +193,11 @@ export interface UserState {
 	errorMsg: string;
 	hashedKey: string;
 	apiKeys: UserAPIKeyOut[];
-	profile: UserProfile;
+	profile: UserOut;
 }
 
 export interface ErrorState {
+	origin: string;
 	stack: string;
 	reason: string;
 	loggedOut: boolean;
