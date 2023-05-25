@@ -66,8 +66,7 @@ export class UsersService {
      * Generate an API key that confers the user's privileges.
      *
      * Arguments:
-     * name: name of the api key
-     * mins: number of minutes before expiration (0 for no expiration)
+     * mins -- number of minutes before expiration (0 for no expiration)
      * @param name
      * @param mins
      * @returns string Successful Response
