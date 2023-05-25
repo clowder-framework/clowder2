@@ -31,6 +31,7 @@ import { PageNotFound } from "./components/errors/PageNotFound";
 import { Forbidden } from "./components/errors/Forbidden";
 import { ApiKeys } from "./components/ApiKeys/ApiKey";
 import { Profile } from "./components/users/Profile";
+import config from "./app.config";
 // https://dev.to/iamandrewluca/private-route-in-react-router-v6-lg5
 const PrivateRoute = (props): JSX.Element => {
 	const { children } = props;
@@ -53,10 +54,10 @@ const PrivateRoute = (props): JSX.Element => {
 	// periodically call login endpoint once logged in
 	useEffect(() => {
 		// Call the refreshToken function immediately
-		refreshToken();
+		refreshToken(dispatch, null);
 
 		// Call the refreshToken function every minute
-		const intervalId = setInterval(refreshToken, 1000 * 60);
+		const intervalId = setInterval(refreshToken, config.refreshTokenInterval);
 
 		// Clean up the interval when the component is unmounted
 		return () => clearInterval(intervalId);

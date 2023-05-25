@@ -29,7 +29,7 @@ export function resetLogout() {
 	};
 }
 
-export const refreshToken = async (dispatch) => {
+export const refreshToken = async (dispatch, originalFunc) => {
 	try {
 		const headers = { Authorization: cookies.get("Authorization") };
 		const response = await fetch(config.KeycloakRefresh, {
@@ -40,10 +40,12 @@ export const refreshToken = async (dispatch) => {
 		if (json["access_token"] !== undefined && json["access_token"] !== "none") {
 			cookies.set("Authorization", `Bearer ${json["access_token"]}`);
 			V2.OpenAPI.TOKEN = json["access_token"];
-			dispatch({
-				type: SET_USER,
-				Authorization: `Bearer ${json["access_token"]}`,
-			});
+			if (originalFunc) dispatch(originalFunc);
+			else
+				dispatch({
+					type: SET_USER,
+					Authorization: `Bearer ${json["access_token"]}`,
+				});
 		}
 	} catch (error) {
 		// logout
@@ -65,7 +67,7 @@ export function handleErrors(reason, originalFunc) {
 	// Authorization error we need to automatically logout user
 	if (reason.status === 401) {
 		return (dispatch) => {
-			return refreshToken(dispatch);
+			return refreshToken(dispatch, originalFunc);
 		};
 	} else if (reason.status === 403) {
 		return (dispatch) => {
