@@ -23,24 +23,17 @@ import { Search } from "./components/search/Search";
 import { isAuthorized } from "./utils/common";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "./types/data";
-import { resetLogout } from "./actions/common";
+import { refreshToken, resetLogout } from "./actions/common";
 import { Explore } from "./components/Explore";
 import { ExtractionHistory } from "./components/listeners/ExtractionHistory";
-import { fetchFileRole, refreshTokensetRole } from "./actions/authorization";
+import { fetchDatasetRole, fetchFileRole } from "./actions/authorization";
 import { PageNotFound } from "./components/errors/PageNotFound";
 import { Forbidden } from "./components/errors/Forbidden";
 import { ApiKeys } from "./components/ApiKeys/ApiKey";
 import { Profile } from "./components/users/Profile";
-import { LOGOUT, SET_USER } from "./actions/user";
-import config from "./app.config";
-import { V2 } from "./openapi";
-import Cookies from "universal-cookie";
 // https://dev.to/iamandrewluca/private-route-in-react-router-v6-lg5
 const PrivateRoute = (props): JSX.Element => {
 	const { children } = props;
-
-	const cookies = new Cookies();
-	const headers = { Authorization: cookies.get("Authorization") };
 
 	const history = useNavigate();
 
@@ -51,7 +44,7 @@ const PrivateRoute = (props): JSX.Element => {
 	const dismissLogout = () => dispatch(resetLogout());
 
 	const listDatasetRole = (datasetId: string | undefined) =>
-		dispatch(refreshTokensetRole(datasetId));
+		dispatch(fetchDatasetRole(datasetId));
 	const listFileRole = (fileId: string | undefined) =>
 		dispatch(fetchFileRole(fileId));
 	const { datasetId } = useParams<{ datasetId?: string }>();
@@ -59,36 +52,6 @@ const PrivateRoute = (props): JSX.Element => {
 
 	// periodically call login endpoint once logged in
 	useEffect(() => {
-		const refreshToken = async () => {
-			try {
-				const response = await fetch(config.KeycloakRefresh, {
-					method: "GET",
-					headers: headers,
-				});
-				const json = await response.json();
-				if (
-					json["access_token"] !== undefined &&
-					json["access_token"] !== "none"
-				) {
-					cookies.set("Authorization", `Bearer ${json["access_token"]}`);
-					V2.OpenAPI.TOKEN = json["access_token"];
-					dispatch({
-						type: SET_USER,
-						Authorization: `Bearer ${json["access_token"]}`,
-					});
-				}
-			} catch (error) {
-				// logout
-				dispatch({
-					type: LOGOUT,
-					receivedAt: Date.now(),
-				});
-				// Delete bad JWT token
-				V2.OpenAPI.TOKEN = undefined;
-				cookies.remove("Authorization", { path: "/" });
-			}
-		};
-
 		// Call the refreshToken function immediately
 		refreshToken();
 
