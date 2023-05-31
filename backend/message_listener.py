@@ -143,7 +143,7 @@ async def listen_for_messages():
     # For some reason, Pydantic Settings environment variable overrides aren't being applied, so get them here.
     RABBITMQ_USER = os.getenv("RABBITMQ_USER", "guest")
     RABBITMQ_PASS = os.getenv("RABBITMQ_PASS", "guest")
-    RABBITMQ_HOST = os.getenv("RABBITMQ_HOST", "localhost")
+    RABBITMQ_HOST = os.getenv("RABBITMQ_HOST", "127.0.0.1")
     RABBITMQ_URL: str = (
         "amqp://" + RABBITMQ_USER + ":" + RABBITMQ_PASS + "@" + RABBITMQ_HOST + "/"
     )
