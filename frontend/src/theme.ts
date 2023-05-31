@@ -8,8 +8,7 @@ export const theme = createTheme({
 	palette: {
 		primary: {
 			light: "#f7941e",
-			// main: "#F7941E",
-			main: "#333333",
+			main: "#f7941e",
 			dark: "#e65100",
 			contrastText: "#FFFFFF",
 		},
@@ -39,7 +38,80 @@ export const theme = createTheme({
 		},
 	},
 });
-
+export const blackTheme = createTheme({
+	typography: {
+		fontFamily: ["Open Sans", "sans-serif"].join(","),
+	},
+	palette: {
+		primary: {
+			light: "#868E96",
+			main: "#6C757D",
+			dark: "#333333",
+			contrastText: "#FFFFFF",
+		},
+		secondary: {
+			light: "#868E96",
+			main: "#6C757D",
+			dark: "#333333",
+		},
+		info: {
+			main: "#0086A1",
+		},
+		background: {
+			default: "#F8F8F8",
+		},
+	},
+	components: {
+		MuiAppBar: {
+			styleOverrides: {
+				colorInherit: {
+					backgroundColor: "#FFFFFF",
+					boxShadow: "none",
+				},
+			},
+			defaultProps: {
+				color: "inherit",
+			},
+		},
+	},
+});
+export const darkTheme = createTheme({
+	typography: {
+		fontFamily: ["Open Sans", "sans-serif"].join(","),
+	},
+	palette: {
+		primary: {
+			light: "#f7941e",
+			main: "#e65100",
+			dark: "#e65100",
+			contrastText: "#FFFFFF",
+		},
+		secondary: {
+			light: "#868E96",
+			main: "#6C757D",
+			dark: "#333333",
+		},
+		info: {
+			main: "#0086A1",
+		},
+		background: {
+			default: "#F8F8F8",
+		},
+	},
+	components: {
+		MuiAppBar: {
+			styleOverrides: {
+				colorInherit: {
+					backgroundColor: "#FFFFFF",
+					boxShadow: "none",
+				},
+			},
+			defaultProps: {
+				color: "inherit",
+			},
+		},
+	},
+});
 export const searchTheme = {
 	typography: {
 		fontFamily: theme.typography.fontFamily,
