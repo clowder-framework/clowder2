@@ -1,29 +1,48 @@
-import React, {useEffect, useState} from "react";
+import React, { useEffect, useState } from "react";
 
-import {Box, Button, Step, StepContent, StepLabel, Stepper, Typography,} from "@mui/material";
-import {useDispatch, useSelector,} from "react-redux";
-import {RootState} from "../../types/data";
+import {
+	Box,
+	Button,
+	Step,
+	StepContent,
+	StepLabel,
+	Stepper,
+	Typography,
+} from "@mui/material";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "../../types/data";
 
-import {CreateDatasetModal} from "./CreateDatasetModal";
-import {CreateMetadata} from "../metadata/CreateMetadata";
-import {ActionModal} from "../dialog/ActionModal";
+import { CreateDatasetModal } from "./CreateDatasetModal";
+import { CreateMetadata } from "../metadata/CreateMetadata";
+import { ActionModal } from "../dialog/ActionModal";
 import config from "../../app.config";
-import {resetFailedReason} from "../../actions/common";
-import {fetchMetadataDefinitions, postDatasetMetadata} from "../../actions/metadata";
-import {MetadataIn} from "../../openapi/v2";
-import {datasetCreated, resetDatsetCreated} from "../../actions/dataset";
-import {useNavigate} from "react-router-dom";
+import { resetFailedReason } from "../../actions/common";
+import {
+	fetchMetadataDefinitions,
+	postDatasetMetadata,
+} from "../../actions/metadata";
+import { MetadataIn } from "../../openapi/v2";
+import { datasetCreated, resetDatsetCreated } from "../../actions/dataset";
+import { useNavigate } from "react-router-dom";
 import Layout from "../Layout";
 
-
 export const CreateDataset = (): JSX.Element => {
-
 	const dispatch = useDispatch();
 	// @ts-ignore
-	const getMetadatDefinitions = (name:string|null, skip:number, limit:number) => dispatch(fetchMetadataDefinitions(name, skip,limit));
-	const createDatasetMetadata = (datasetId: string|undefined, metadata:MetadataIn) => dispatch(postDatasetMetadata(datasetId, metadata));
-	const createDataset = (formData: FormData) => dispatch(datasetCreated(formData));
-	const newDataset = useSelector((state:RootState) => state.dataset.newDataset);
+	const getMetadatDefinitions = (
+		name: string | null,
+		skip: number,
+		limit: number
+	) => dispatch(fetchMetadataDefinitions(name, skip, limit));
+	const createDatasetMetadata = (
+		datasetId: string | undefined,
+		metadata: MetadataIn
+	) => dispatch(postDatasetMetadata(datasetId, metadata));
+	const createDataset = (formData: FormData) =>
+		dispatch(datasetCreated(formData));
+	const newDataset = useSelector(
+		(state: RootState) => state.dataset.newDataset
+	);
 
 	useEffect(() => {
 		getMetadatDefinitions(null, 0, 100);
@@ -32,7 +51,9 @@ export const CreateDataset = (): JSX.Element => {
 	// Error msg dialog
 	const reason = useSelector((state: RootState) => state.error.reason);
 	const stack = useSelector((state: RootState) => state.error.stack);
-	const metadataDefinitionList = useSelector((state: RootState) => state.metadata.metadataDefinitionList);
+	const metadataDefinitionList = useSelector(
+		(state: RootState) => state.metadata.metadataDefinitionList
+	);
 	const dismissError = () => dispatch(resetFailedReason());
 	const [errorOpen, setErrorOpen] = useState(false);
 
@@ -54,7 +75,9 @@ export const CreateDataset = (): JSX.Element => {
 	};
 	const handleErrorReport = () => {
 		window.open(
-			`${config.GHIssueBaseURL}+${encodeURIComponent(reason)}&body=${encodeURIComponent(stack)}`
+			`${config.GHIssueBaseURL}+${encodeURIComponent(
+				reason
+			)}&body=${encodeURIComponent(stack)}`
 		);
 	};
 
@@ -71,13 +94,12 @@ export const CreateDataset = (): JSX.Element => {
 	};
 
 	// step 1
-	const onDatasetSave = (formData:any) =>{
+	const onDatasetSave = (formData: any) => {
 		setdatasetRequestForm(formData);
-        
+
 		// If no metadata fields are marked as required, allow user to skip directly to submit
 		if (checkIfFieldsAreRequired()) {
 			setAllowSubmit(false);
-        
 		} else {
 			setAllowSubmit(true);
 		}
@@ -85,24 +107,26 @@ export const CreateDataset = (): JSX.Element => {
 		handleNext();
 	};
 	// step 2
-	const setMetadata = (metadata:any) =>{
+	const setMetadata = (metadata: any) => {
 		// TODO wrap this in to a function
-		setMetadataRequestForms(prevState => {
+		setMetadataRequestForms((prevState) => {
 			// merge the contents field; e.g. lat lon
-			if (metadata.definition in prevState){
+			if (metadata.definition in prevState) {
 				const prevContent = prevState[metadata.definition].content;
-				metadata.content = {...prevContent, ...metadata.content};
+				metadata.content = { ...prevContent, ...metadata.content };
 			}
-			return ({...prevState, [metadata.definition]: metadata});
+			return { ...prevState, [metadata.definition]: metadata };
 		});
 
 		metadataDefinitionList.every((val, idx) => {
 			if (val.fields[0].required) {
 				// Condition checks whether the current updated field is a required one
-				if (val.name == metadata.definition || val.name in metadataRequestForms) {
+				if (
+					val.name == metadata.definition ||
+					val.name in metadataRequestForms
+				) {
 					setAllowSubmit(true);
 					return true;
-                
 				} else {
 					setAllowSubmit(false);
 					return false;
@@ -129,7 +153,7 @@ export const CreateDataset = (): JSX.Element => {
 	useEffect(() => {
 		if (newDataset.id) {
 			// post new metadata
-			Object.keys(metadataRequestForms).map(key => {
+			Object.keys(metadataRequestForms).map((key) => {
 				createDatasetMetadata(newDataset.id, metadataRequestForms[key]);
 			});
 
@@ -141,43 +165,59 @@ export const CreateDataset = (): JSX.Element => {
 			// zoom into that newly created dataset
 			history(`/datasets/${newDataset.id}`);
 		}
-
-	},[newDataset]);
+	}, [newDataset]);
 
 	return (
 		<Layout>
 			<Box className="outer-container">
 				{/*Error Message dialogue*/}
-				<ActionModal actionOpen={errorOpen} actionTitle="Something went wrong..." actionText={reason}
-							 actionBtnName="Report" handleActionBtnClick={handleErrorReport}
-							 handleActionCancel={handleErrorCancel}/>
+				<ActionModal
+					actionOpen={errorOpen}
+					actionTitle="Something went wrong..."
+					actionText={reason}
+					actionBtnName="Report"
+					handleActionBtnClick={handleErrorReport}
+					handleActionCancel={handleErrorCancel}
+				/>
 				<Box className="inner-container">
 					<Box>
 						<Stepper activeStep={activeStep} orientation="vertical">
-
 							{/*step 1 Dataset*/}
 							<Step key="create-dataset">
-								<StepLabel>Create Dataset</StepLabel>
+								<StepLabel>Basic Information</StepLabel>
 								<StepContent>
-									<Typography>Create a dataset.</Typography>
+									<Typography>
+										A dataset is a container for files, folders and metadata.
+									</Typography>
 									<Box>
-										<CreateDatasetModal onSave={onDatasetSave}/>
+										<CreateDatasetModal onSave={onDatasetSave} />
 									</Box>
 								</StepContent>
 							</Step>
 
 							{/*step 2 Metadata*/}
 							<Step key="fill-in-metadata">
-								<StepLabel>Fill In Metadata</StepLabel>
+								<StepLabel>Required Metadata</StepLabel>
 								<StepContent>
-									<Typography>Provide us your metadata about data.</Typography>
+									{metadataDefinitionList.length > 0 ? (
+										<Typography>
+											This metadata is required when creating a new dataset.
+										</Typography>
+									) : (
+										<Typography>No metadata required.</Typography>
+									)}
 									<Box>
-										<CreateMetadata setMetadata={setMetadata}/>
+										<CreateMetadata setMetadata={setMetadata} />
 									</Box>
 									{/*buttons*/}
 									<Box sx={{ mb: 2 }}>
 										<>
-											<Button variant="contained" onClick={handleFinish} disabled={!allowSubmit} sx={{ mt: 1, mr: 1 }}>
+											<Button
+												variant="contained"
+												onClick={handleFinish}
+												disabled={!allowSubmit}
+												sx={{ mt: 1, mr: 1 }}
+											>
 												Finish
 											</Button>
 											<Button onClick={handleBack} sx={{ mt: 1, mr: 1 }}>
