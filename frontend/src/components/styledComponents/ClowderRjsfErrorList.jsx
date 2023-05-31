@@ -1,11 +1,14 @@
 import React from "react";
+import { Alert } from "@mui/material";
 
 export const ClowderRjsfErrorList = ({ errors }) => {
 	return (
-		<div>
+		<>
 			{errors.map((error, index) => (
-				<div key={index}>{error.stack.replace(".", "")}</div>
+				<Alert severity="error" key={index}>
+					{error.stack.replace(".", "")}
+				</Alert>
 			))}
-		</div>
+		</>
 	);
 };
