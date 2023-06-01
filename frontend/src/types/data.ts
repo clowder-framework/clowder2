@@ -197,6 +197,7 @@ export interface UserState {
 }
 
 export interface ErrorState {
+	origin: string;
 	stack: string;
 	reason: string;
 	loggedOut: boolean;
