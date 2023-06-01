@@ -1,13 +1,24 @@
-import React, {useState} from "react";
-import {DataSearch, DateRange, MultiDropdownList, ReactiveList, SingleDropdownRange} from "@appbaseio/reactivesearch";
-import {FormControlLabel, Grid, Switch, Typography} from "@mui/material";
+import React, { useState } from "react";
+import {
+	DataSearch,
+	DateRange,
+	MultiDropdownList,
+	ReactiveComponent,
+	ReactiveList,
+	SingleDropdownRange,
+} from "@appbaseio/reactivesearch";
+import { FormControlLabel, Grid, Switch, Typography } from "@mui/material";
 import Layout from "../Layout";
-import {SearchResult} from "./SearchResult";
-import {SearchErrorBoundary} from "./SearchErrorBoundary";
-import {theme} from "../../theme";
+import { SearchResult } from "./SearchResult";
+import { theme } from "../../theme";
+import { getCurrEmail } from "../../utils/common";
+import { SearchErrorBoundary } from "./SearchErrorBoundary";
 
 export function Search() {
+	const email = getCurrEmail();
+
 	const [luceneOn, setLuceneOn] = useState(false);
+
 	// @ts-ignore
 	return (
 		<Layout>
@@ -15,28 +26,35 @@ export function Search() {
 				<Grid container spacing={4}>
 					<Grid item xs>
 						<FormControlLabel
-							sx={{float: "right"}}
+							sx={{ float: "right" }}
 							control={
-								<Switch checked={luceneOn} onChange={() => {
-									setLuceneOn(prevState => !prevState)
-								}} name="Query String"/>
+								<Switch
+									checked={luceneOn}
+									onChange={() => {
+										setLuceneOn((prevState) => !prevState);
+									}}
+									name="Query String"
+								/>
 							}
 							label={
-								<Typography variant="body1" sx={{
-									color: theme.palette.primary.main,
-									fontWeight: "bold"
-								}}>
+								<Typography
+									variant="body1"
+									sx={{
+										color: theme.palette.primary.main,
+										fontWeight: "bold",
+									}}
+								>
 									Advanced
 								</Typography>
 							}
 						/>
-						{
-							luceneOn ?
+						<SearchErrorBoundary>
+							{luceneOn ? (
 								// string search
 								<DataSearch
 									title="String Search for Datasets and Files"
 									placeholder="Please use Lucene Syntax string query.
-									E.g.name:water~2 AND download:[0 TO 40} AND author:myersrobert@scott-gutierrez.com"
+									E.g.name:water~2 AND download:[0 TO 40} AND creator:myersrobert@scott-gutierrez.com"
 									componentId="string-searchbox"
 									autosuggest={false}
 									highlight={false}
@@ -52,7 +70,7 @@ export function Search() {
 									}}
 									queryString={true}
 								/>
-								:
+							) : (
 								// facet search
 								<>
 									{/*search*/}
@@ -66,55 +84,77 @@ export function Search() {
 										fuzziness={0}
 										debounce={100}
 										react={{
-											and: ["creatorfilter",
+											and: [
+												"creatorfilter",
 												"downloadfilter",
-												"modifyfilter"]
+												"modifyfilter",
+												"authFilter",
+											],
 										}}
 										// apply react to the filter
 										URLParams={true}
 										showFilter={true}
-										showClear
+										showClear={false}
 										renderNoSuggestion="No suggestions found."
-										dataField={[
-											{field: "name", weight: 3},
-											{field: "description", weight: 2},
-											{field: "author.keyword", weight: 1},
-											{field: "creator.keyword", weight: 1}
-										]}
-										// placeholder="Search for Dataset"
+										dataField={["name", "description", "creator.keyword"]}
+										fieldWeights={[3, 2, 1]}
 										innerClass={{
 											title: "search-title",
 											input: "search-input",
 										}}
 									/>
 
+									{/*authorization clause - searcher must be creator or have permission to view result*/}
+									<ReactiveComponent
+										componentId="authFilter"
+										customQuery={() => ({
+											query: {
+												bool: {
+													should: [
+														// TODO: Include if dataset is public
+														{
+															term: {
+																creator: email,
+															},
+														},
+														{
+															term: {
+																user_ids: email,
+															},
+														},
+													],
+												},
+											},
+										})}
+									/>
+
 									{/*filters*/}
-									<Grid container spacing={2} sx={{marginBottom: "20px"}}>
+									<Grid container spacing={2} sx={{ marginBottom: "20px" }}>
 										<Grid item xs={12} sm={4} md={4} lg={4}>
 											<MultiDropdownList
 												componentId="creatorfilter"
-												dataField="author"
+												dataField="creator"
 												size={5}
 												sortBy="count"
 												showCount={true}
-												placeholder="Author: All"
+												placeholder="Creator: All"
 												innerClass={{
-													select: "filter-select"
+													select: "filter-select",
 												}}
 											/>
 										</Grid>
 										<Grid item xs={12} sm={4} md={4} lg={4}>
 											<SingleDropdownRange
 												componentId="downloadfilter"
-												dataField="download"
+												dataField="downloads"
 												data={[
-													{start: 0, label: "Download Times: All"},
-													{start: 10, label: "10 time and up"},
-													{start: 100, label: "100 times and up"},
-													{start: 1000, label: "1000 times and up"},
+													{ start: 0, label: "Download Times: All" },
+													{ start: 10, label: "10 time and up" },
+													{ start: 100, label: "100 times and up" },
+													{ start: 1000, label: "1000 times and up" },
 												]}
 												innerClass={{
-													select: "filter-select"
+													select: "filter-select",
 												}}
 												defaultValue={"Download Times: All"}
 											/>
@@ -132,31 +172,44 @@ export function Search() {
 												filterLabel="Date"
 												URLParams={false}
 												placeholder={{
-												  start: "From Date",
-												  end: "To Date"
+													start: "From Date",
+													end: "To Date",
 												}}
 											/>
 										</Grid>
 									</Grid>
 								</>
-						}
-						<SearchErrorBoundary>
+							)}
 							{/*result*/}
-							{
-								luceneOn ?
-									<ReactiveList componentId="results" dataField="_score" size={20} pagination={true}
-												  react={{
-													  and: ["string-searchbox"]
-												  }}
-												  render={({data}) => (<SearchResult data={data}/>)}/>
-									:
-									<ReactiveList componentId="results" dataField="_score" size={20} pagination={true}
-												  react={{
-													  and: ["searchbox", "creatorfilter", "downloadfilter", "modifyfilter"]
-												  }}
-												  render={({data}) => (<SearchResult data={data}/>)}/>
-							}
-
+							{luceneOn ? (
+								<ReactiveList
+									componentId="results"
+									dataField="_score"
+									size={20}
+									pagination={true}
+									react={{
+										and: ["string-searchbox"],
+									}}
+									render={({ data }) => <SearchResult data={data} />}
+								/>
+							) : (
+								<ReactiveList
+									componentId="results"
+									dataField="_score"
+									size={20}
+									pagination={true}
+									react={{
+										and: [
+											"searchbox",
+											"creatorfilter",
+											"downloadfilter",
+											"modifyfilter",
+											"authFilter",
+										],
+									}}
+									render={({ data }) => <SearchResult data={data} />}
+								/>
+							)}
 						</SearchErrorBoundary>
 					</Grid>
 				</Grid>

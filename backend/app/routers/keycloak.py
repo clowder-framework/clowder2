@@ -1,28 +1,25 @@
 import json
+import logging
 
 import requests
 from bson import ObjectId
 from fastapi import APIRouter, HTTPException, Depends, Security
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
-from jose import jwt, ExpiredSignatureError
+from jose import jwt, ExpiredSignatureError, JWTError
 from keycloak.exceptions import KeycloakAuthenticationError, KeycloakGetError
-from pydantic import Json
 from pymongo import MongoClient
-from starlette import status
 from starlette.responses import RedirectResponse
 
-from app import keycloak_auth, dependencies
+from app import dependencies
 from app.config import settings
 from app.keycloak_auth import (
     keycloak_openid,
-    get_token,
-    oauth2_scheme,
     get_idp_public_key,
     retreive_refresh_token,
+    oauth2_scheme,
 )
-from app.models.users import UserIn, UserDB
 from app.models.tokens import TokenDB
-import logging
+from app.models.users import UserIn, UserDB
 
 router = APIRouter()
 security = HTTPBearer()
@@ -170,7 +167,7 @@ async def refresh_token(
         )
         email = token_json["email"]
         return await retreive_refresh_token(email, db)
-    except ExpiredSignatureError:
+    except (ExpiredSignatureError, JWTError):
         # retreive the refresh token and try refresh
         email = jwt.get_unverified_claims(access_token)["email"]
         return await retreive_refresh_token(email, db)
@@ -188,28 +185,28 @@ async def refresh_token(
         )
 
 
-# FIXME: we need to parse and return a consistent response
-# @router.get("/broker/{identity_provider}/token")
-# def get_idenity_provider_token(
-#     identity_provider: str, access_token: str = Security(oauth2_scheme)
-# ) -> Json:
-#     """Get identity provider JWT token from keyclok. Keycloak must be configured to store external tokens."""
-#     if identity_provider in settings.keycloak_ipds:
-#         idp_url = f"{settings.auth_base}/auth/realms/{settings.auth_realm}/broker/{identity_provider}/token"
-#         idp_headers = {
-#             "Content-Type": "application/x-www-form-urlencoded",
-#             "Authorization": f"Bearer {access_token}",
-#         }
-#         idp_token = requests.request("GET", idp_url, headers=idp_headers)
-#         # FIXME is there a better way to know if the token as expired and the above call did not go through?
-#         idp_token.raise_for_status()
-#         itp_token_body = json.loads(idp_token.content)
-#         return itp_token_body
-#     else:
-#         raise HTTPException(
-#             status_code=status.HTTP_400_BAD_REQUEST,
-#             detail={
-#                 "error_msg": f"Identy provider [{identity_provider}] not recognized."
-#             },
-#             headers={"WWW-Authenticate": "Bearer"},
-#         )
+@router.get("/broker/{identity_provider}/token")
+def get_idenity_provider_token(
+    identity_provider: str, access_token: str = Security(oauth2_scheme)
+):
+    """Get identity provider JWT token from keyclok. Keycloak must be configured to store external tokens."""
+    if identity_provider in settings.keycloak_ipds:
+        idp_url = f"{settings.auth_base}/auth/realms/{settings.auth_realm}/broker/{identity_provider}/token"
+        idp_headers = {
+            "Content-Type": "application/x-www-form-urlencoded",
+            "Authorization": f"Bearer {access_token}",
+        }
+        idp_token = requests.request("GET", idp_url, headers=idp_headers)
+        if idp_token.status_code == 200:
+            itp_token_body = json.loads(idp_token.content)
+            return itp_token_body
+        else:
+            raise HTTPException(status_code=400, detail=idp_token.text)
+    else:
+        raise HTTPException(
+            status_code=400,
+            detail={
+                "error_msg": f"Identy provider [{identity_provider}] not recognized."
+            },
+            headers={"WWW-Authenticate": "Bearer"},
+        )

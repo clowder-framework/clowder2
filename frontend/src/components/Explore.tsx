@@ -63,8 +63,10 @@ export const Explore = (): JSX.Element => {
 		setErrorOpen(false);
 	}
 	const handleErrorReport = () => {
-		window.open(`${config.GHIssueBaseURL}+${reason}&body=${encodeURIComponent(stack)}`);
-	}
+		window.open(
+			`${config.GHIssueBaseURL}+${encodeURIComponent(reason)}&body=${encodeURIComponent(stack)}`
+		);
+	};
 
 	// fetch thumbnails from each individual dataset/id calls
 	useEffect(() => {

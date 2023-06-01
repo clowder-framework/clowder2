@@ -37,9 +37,10 @@ spec:
           imagePullPolicy: {{ .Values.backend.image.pullPolicy }}
           env:
             - name: WEB_CONCURRENCY
-              value: "4"
+              value: "1"
             - name: MINIO_SERVER_URL
-              value: {{ include "clowder2.name" . }}-minio-headless:9000
+              value: {{ include "clowder2.name" . }}-minio:9000
+#              value: {{ include "clowder2.name" . }}-minio-headless:9000
             - name: MINIO_BUCKET_NAME
               value: clowder
             - name: MINIO_ACCESS_KEY
@@ -87,9 +88,7 @@ spec:
                   name: clowder2-rabbitmq
                   key: rabbitmq-password
             - name: RABBITMQ_HOST
-              value: {{ include "clowder2.name" .  }}
-            - name: RABBITMQ_URL
-              value: amqp://$(RABBITMQ_USER):$(RABBITMQ_PASS)@$(RABBITMQ_HOST)/
+              value: {{ include "clowder2.name" .  }}-rabbitmq
             - name: HEARTBEAT_EXCHANGE
               value: "extractors"
           ports:

@@ -5,13 +5,6 @@ import { handleErrors } from "./common";
 
 const cookies = new Cookies();
 
-export const userActions = {
-	login,
-	logout,
-};
-
-// TODO need to clean up this file with all the mixed login/logout methods
-
 export async function loginHelper(
 	email,
 	password,
@@ -61,7 +54,7 @@ export const REGISTER_USER = "REGISTER_USER";
 export const REGISTER_ERROR = "REGISTER_ERROR";
 export const LOGOUT = "LOGOUT";
 
-export function login(email, password) {
+export function _legacy_login(email, password) {
 	return async (dispatch) => {
 		const json = await loginHelper(email, password, false);
 		V2.OpenAPI.TOKEN = undefined;
@@ -86,7 +79,7 @@ export function login(email, password) {
 	};
 }
 
-export function register(email, password, firstname, lastname) {
+export function _legacy_register(email, password, firstname, lastname) {
 	return async (dispatch) => {
 		const json = await loginHelper(email, password, firstname, lastname, true);
 		if (json["email"] !== undefined && json["hashed_password"] !== undefined) {
@@ -194,5 +187,23 @@ export function resetApiKey() {
 			type: RESET_API_KEY,
 			receivedAt: Date.now(),
 		});
+	};
+}
+
+export const RECEIVE_USER_PROFILE = "RECEIVE_USER_PROFILE";
+
+export function fetchUserProfile() {
+	return (dispatch) => {
+		return V2.UsersService.getProfileApiV2UsersProfileGet()
+			.then((json) => {
+				dispatch({
+					type: RECEIVE_USER_PROFILE,
+					profile: json,
+					receivedAt: Date.now(),
+				});
+			})
+			.catch((reason) => {
+				dispatch(handleErrors(reason, fetchUserProfile()));
+			});
 	};
 }

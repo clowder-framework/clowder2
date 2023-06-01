@@ -17,6 +17,7 @@ export type { DatasetBase } from './models/DatasetBase';
 export type { DatasetIn } from './models/DatasetIn';
 export type { DatasetOut } from './models/DatasetOut';
 export type { DatasetPatch } from './models/DatasetPatch';
+export type { DatasetRoles } from './models/DatasetRoles';
 export type { EventListenerIn } from './models/EventListenerIn';
 export type { EventListenerJob } from './models/EventListenerJob';
 export type { EventListenerOut } from './models/EventListenerOut';

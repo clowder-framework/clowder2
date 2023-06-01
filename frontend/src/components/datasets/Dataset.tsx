@@ -32,11 +32,14 @@ import { FormatListBulleted, InsertDriveFile } from "@material-ui/icons";
 import { Listeners } from "../listeners/Listeners";
 import AssessmentIcon from "@mui/icons-material/Assessment";
 import HistoryIcon from "@mui/icons-material/History";
+import ShareIcon from "@mui/icons-material/Share";
 import BuildIcon from "@mui/icons-material/Build";
 import { ExtractionHistoryTab } from "../listeners/ExtractionHistoryTab";
 import { SharingTab } from "../sharing/SharingTab";
 import RoleChip from "../auth/RoleChip";
 import { TabStyle } from "../../styles/Styles";
+import { Forbidden } from "../errors/Forbidden";
+import { PageNotFound } from "../errors/PageNotFound";
 
 export const Dataset = (): JSX.Element => {
 	// path parameter
@@ -90,6 +93,8 @@ export const Dataset = (): JSX.Element => {
 		React.useState<boolean>(false);
 	const [metadataRequestForms, setMetadataRequestForms] = useState({});
 
+	const [allowSubmit, setAllowSubmit] = React.useState<boolean>(false);
+
 	// component did mount list all files in dataset
 	useEffect(() => {
 		listFilesInDataset(datasetId, folderId);
@@ -100,8 +105,17 @@ export const Dataset = (): JSX.Element => {
 
 	// Error msg dialog
 	const [errorOpen, setErrorOpen] = useState(false);
+	const [showForbiddenPage, setShowForbiddenPage] = useState(false);
+	const [showNotFoundPage, setShowNotFoundPage] = useState(false);
+	
 	useEffect(() => {
-		if (reason !== "" && reason !== null && reason !== undefined) {
+		if (reason == "Forbidden") {
+			setShowForbiddenPage(true);
+        
+		} else if (reason == "Not Found") {
+			setShowNotFoundPage(true);
+        
+		} else if (reason !== "" && reason !== null && reason !== undefined) {
 			setErrorOpen(true);
 		}
 	}, [reason]);
@@ -110,9 +124,9 @@ export const Dataset = (): JSX.Element => {
 		dismissError();
 		setErrorOpen(false);
 	};
-	const handleErrorReport = (reason: string) => {
+	const handleErrorReport = () => {
 		window.open(
-			`${config.GHIssueBaseURL}+${reason}&body=${encodeURIComponent(stack)}`
+			`${config.GHIssueBaseURL}+${encodeURIComponent(reason)}&body=${encodeURIComponent(stack)}`
 		);
 	};
 
@@ -183,6 +197,14 @@ export const Dataset = (): JSX.Element => {
 		}
 	} else {
 		paths.slice(0, 1);
+	}
+
+
+	if (showForbiddenPage) {
+		return <Forbidden />;
+    
+	} else if (showNotFoundPage) {
+		return <PageNotFound />;
 	}
 
 	return (
@@ -275,7 +297,7 @@ export const Dataset = (): JSX.Element => {
 							disabled={false}
 						/>
 						<Tab
-							icon={<HistoryIcon />}
+							icon={<ShareIcon />}
 							iconPosition="start"
 							sx={TabStyle}
 							label="Sharing"

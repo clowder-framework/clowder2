@@ -52,12 +52,14 @@ def test_delete_with_metadata(client: TestClient, headers: dict):
 
 def test_edit(client: TestClient, headers: dict):
     new_dataset = create_dataset(client, headers)
-    new_dataset["name"] = "edited name"
-    response = client.post(
-        f"{settings.API_V2_STR}/datasets", json=new_dataset, headers=headers
+    response = client.patch(
+        f"{settings.API_V2_STR}/datasets/{new_dataset.get('id')}",
+        json={"name": "edited name"},
+        headers=headers,
     )
     assert response.status_code == 200
     assert response.json().get("id") is not None
+    assert response.json().get("name") == "edited name"
 
 
 def test_list(client: TestClient, headers: dict):

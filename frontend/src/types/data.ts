@@ -1,15 +1,14 @@
 import {
 	AuthorizationBase,
+	DatasetRoles,
 	EventListenerJob,
 	FileOut as FileSummary,
 	FileVersion,
 	FolderOut,
-	GroupAndRole,
 	GroupOut,
 	MetadataDefinitionOut,
 	MetadataOut as Metadata,
 	RoleType,
-	UserAndRole,
 	UserAPIKeyOut,
 	UserOut,
 } from "../openapi/v2";
@@ -43,6 +42,13 @@ export interface Listener {
 }
 
 export interface Author {
+	id: string;
+	email: string;
+	first_name: string | null;
+	last_name: string | null;
+}
+
+export interface Profile {
 	id: string;
 	email: string;
 	first_name: string | null;
@@ -145,8 +151,7 @@ export interface DatasetState {
 	newFile: FileSummary;
 	about: Dataset;
 	datasetRole: AuthorizationBase;
-	groupsAndRoles: GroupAndRole[];
-	usersAndRoles: UserAndRole[];
+	roles: DatasetRoles;
 }
 
 export interface ListenerState {
@@ -188,9 +193,11 @@ export interface UserState {
 	errorMsg: string;
 	hashedKey: string;
 	apiKeys: UserAPIKeyOut[];
+	profile: UserOut;
 }
 
 export interface ErrorState {
+	origin: string;
 	stack: string;
 	reason: string;
 	loggedOut: boolean;

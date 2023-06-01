@@ -74,9 +74,10 @@ export const DisplayMetadata = (props: MetadataType) => {
 														resourceId: resourceId,
 														content: metadata.content ?? null,
 														metadataId: metadata.id ?? null,
+														isRequired: field.required,
 														key:idxx
 													}
-												)
+												);
 											})
 										}
 										<Grid container spacing={2}>
@@ -92,11 +93,11 @@ export const DisplayMetadata = (props: MetadataType) => {
 									</Box>
 								);
 							}
-						})
+						});
 
 					});
 				})()
 			}
 		</>
-	)
-}
+	);
+};

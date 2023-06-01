@@ -2,8 +2,10 @@
 /* tslint:disable */
 /* eslint-disable */
 
+import type { GroupOut } from './GroupOut';
+import type { RoleType } from './RoleType';
+
 export type GroupAndRole = {
-    group_id: string;
-    group_name: string;
-    roleType: string;
+    group: GroupOut;
+    role: RoleType;
 }

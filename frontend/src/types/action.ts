@@ -4,21 +4,21 @@ import {
 	FilePreview,
 	Folder,
 	MetadataJsonld,
+	Profile,
 } from "./data";
 import {
 	AuthorizationBase,
+	DatasetRoles,
 	FileOut as FileSummary,
 	FileVersion,
-	GroupAndRole,
 	GroupOut as Group,
 	MetadataDefinitionOut as MetadataDefinition,
 	MetadataOut as Metadata,
 	RoleType,
-	UserAndRole,
 	UserAPIKeyOut,
 	UserOut,
 } from "../openapi/v2";
-import { LIST_USERS } from "../actions/user";
+import { LIST_USERS, RECEIVE_USER_PROFILE } from "../actions/user";
 import { CREATE_GROUP, DELETE_GROUP } from "../actions/group";
 
 interface RECEIVE_FILES_IN_DATASET {
@@ -41,14 +41,9 @@ interface RECEIVE_DATASET_ROLE {
 	type: "RECEIVE_DATASET_ROLE";
 }
 
-interface RECEIVE_DATASET_GROUPS_AND_ROLES {
-	groupsAndRoles: GroupAndRole[];
-	type: "RECEIVE_DATASET_GROUPS_AND_ROLES";
-}
-
-interface RECEIVE_DATASET_USERS_AND_ROLES {
-	usersAndRoles: UserAndRole[];
-	type: "RECEIVE_DATASET_USERS_AND_ROLES";
+interface RECEIVE_DATASET_ROLES {
+	roles: DatasetRoles;
+	type: "RECEIVE_DATASET_ROLES";
 }
 
 interface RECEIVE_FILE_ROLE {
@@ -135,6 +130,11 @@ interface RESET_API_KEY {
 	apiKey: string;
 }
 
+interface RECEIVE_USER_PROFILE {
+	type: "RECEIVE_USER_PROFILE";
+	profile: Profile;
+}
+
 interface CREATE_DATASET {
 	type: "CREATE_DATASET";
 	dataset: Dataset;
@@ -167,13 +167,13 @@ interface RESET_API_KEY {
 }
 
 interface FAILED {
-	stack: "string";
+	stack: string;
 	type: "FAILED";
 	reason: string;
 }
 
 interface NOT_FOUND {
-	stack: "string";
+	stack: string;
 	type: "NOT_FOUND";
 	reason: string;
 }
@@ -421,5 +421,5 @@ export type DataAction =
 	| ADD_GROUP_MEMBER
 	| ASSIGN_GROUP_MEMBER_ROLE
 	| LIST_USERS
-	| RECEIVE_DATASET_GROUPS_AND_ROLES
-	| RECEIVE_DATASET_USERS_AND_ROLES;
+	| RECEIVE_DATASET_ROLES
+	| RECEIVE_USER_PROFILE;

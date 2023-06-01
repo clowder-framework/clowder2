@@ -34,6 +34,8 @@ import { TabStyle } from "../../styles/Styles";
 import BuildIcon from "@mui/icons-material/Build";
 import AssessmentIcon from "@mui/icons-material/Assessment";
 import HistoryIcon from "@mui/icons-material/History";
+import { Forbidden } from "../errors/Forbidden";
+import { PageNotFound } from "../errors/PageNotFound";
 
 export const File = (): JSX.Element => {
 	// path parameter
@@ -79,6 +81,7 @@ export const File = (): JSX.Element => {
 	const [enableAddMetadata, setEnableAddMetadata] =
 		React.useState<boolean>(false);
 	const [metadataRequestForms, setMetadataRequestForms] = useState({});
+	const [allowSubmit, setAllowSubmit] = React.useState<boolean>(false);
 
 	// component did mount
 	useEffect(() => {
@@ -96,8 +99,17 @@ export const File = (): JSX.Element => {
 
 	// Error msg dialog
 	const [errorOpen, setErrorOpen] = useState(false);
+	const [showForbiddenPage, setShowForbiddenPage] = useState(false);
+	const [showNotFoundPage, setShowNotFoundPage] = useState(false);
+
 	useEffect(() => {
-		if (reason !== "" && reason !== null && reason !== undefined) {
+		if (reason == "Forbidden") {
+			setShowForbiddenPage(true);
+        
+		} else if (reason == "Not Found") {
+			setShowNotFoundPage(true);
+        
+		} else if (reason !== "" && reason !== null && reason !== undefined) {
 			setErrorOpen(true);
 		}
 	}, [reason]);
@@ -106,9 +118,9 @@ export const File = (): JSX.Element => {
 		dismissError();
 		setErrorOpen(false);
 	};
-	const handleErrorReport = (reason: string) => {
+	const handleErrorReport = () => {
 		window.open(
-			`${config.GHIssueBaseURL}+${reason}&body=${encodeURIComponent(stack)}`
+			`${config.GHIssueBaseURL}+${encodeURIComponent(reason)}&body=${encodeURIComponent(stack)}`
 		);
 	};
 
@@ -224,6 +236,13 @@ export const File = (): JSX.Element => {
 		}
 	} else {
 		paths.slice(0, 1);
+	}
+
+	if (showForbiddenPage) {
+		return <Forbidden />;
+    
+	} else if (showNotFoundPage) {
+		return <PageNotFound />;
 	}
 
 	return (
