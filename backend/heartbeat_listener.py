@@ -1,13 +1,13 @@
 import asyncio
 import json
 import logging
-
+import os
 from aio_pika import connect_robust
 from aio_pika.abc import AbstractIncomingMessage
 from packaging import version
 
-from app.main import startup_beanie
 from app.config import settings
+from app.main import startup_beanie
 from app.models.listeners import EventListenerDB, EventListenerOut, ExtractorInfo
 from app.routers.listeners import _process_incoming_v1_extractor_info
 
@@ -69,10 +69,19 @@ async def listen_for_heartbeats():
     this method runs continuously listening for extractor heartbeats sent over rabbitmq
     """
     await startup_beanie()
+
+    # For some reason, Pydantic Settings environment variable overrides aren't being applied, so get them here.
+    RABBITMQ_USER = os.getenv("RABBITMQ_USER", "guest")
+    RABBITMQ_PASS = os.getenv("RABBITMQ_PASS", "guest")
+    RABBITMQ_HOST = os.getenv("RABBITMQ_HOST", "127.0.0.1")
+    RABBITMQ_URL: str = (
+        "amqp://" + RABBITMQ_USER + ":" + RABBITMQ_PASS + "@" + RABBITMQ_HOST + "/"
+    )
+
     connection = await connect_robust(
-        url=settings.RABBITMQ_URL,
-        login=settings.RABBITMQ_USER,
-        password=settings.RABBITMQ_PASS,
+        url=RABBITMQ_URL,
+        login=RABBITMQ_USER,
+        password=RABBITMQ_PASS,
     )
 
     async with connection:
