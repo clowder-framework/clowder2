@@ -27,7 +27,8 @@
 			"ui:autofocus": true,
 			"ui:emptyValue": "",
 			"ui:placeholder": "ui:emptyValue causes this field to always be valid despite being required",
-			"ui:description": "Description of a dataset."
+			"ui:description": "Description of a dataset.",
+			"ui:widget": "TextAreaWidget"
 		}
 	}
 }
