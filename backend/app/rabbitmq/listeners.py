@@ -20,6 +20,7 @@ from app.models.listeners import (
 )
 from app.models.mongomodel import MongoDBRef
 from app.models.users import UserOut
+from app.routers.users import get_user_job_key
 
 
 async def create_reply_queue():
@@ -56,14 +57,14 @@ async def create_reply_queue():
 
 
 async def submit_file_job(
-    file_out: FileOut,
-    queue: str,
-    routing_key: str,
-    parameters: dict,
-    user: UserOut,
-    db: MongoClient,
-    rabbitmq_client: BlockingChannel,
-    token: str,
+        file_out: FileOut,
+        queue: str,
+        routing_key: str,
+        parameters: dict,
+        user: UserOut,
+        db: MongoClient,
+        rabbitmq_client: BlockingChannel,
+        token: str,
 ):
     # TODO check if extractor is registered
 
@@ -83,7 +84,7 @@ async def submit_file_job(
     current_datasetId = file_out.dataset_id
     # TODO: Replace this with a per-user non-expiring API key (generate if previous was revoked)
 
-    current_secretKey = str(token)
+    current_secretKey = await get_user_job_key(user.email, db)
     try:
         msg_body = EventListenerJobMessage(
             filename=file_out.name,
@@ -111,14 +112,14 @@ async def submit_file_job(
 
 
 async def submit_dataset_job(
-    dataset_out: DatasetOut,
-    queue: str,
-    routing_key: str,
-    parameters: dict,
-    user: UserOut,
-    token: str = Depends(get_token),
-    db: MongoClient = Depends(dependencies.get_db),
-    rabbitmq_client: BlockingChannel = Depends(dependencies.get_rabbitmq),
+        dataset_out: DatasetOut,
+        queue: str,
+        routing_key: str,
+        parameters: dict,
+        user: UserOut,
+        token: str = Depends(get_token),
+        db: MongoClient = Depends(dependencies.get_db),
+        rabbitmq_client: BlockingChannel = Depends(dependencies.get_rabbitmq),
 ):
     # TODO check if extractor is registered
 
@@ -132,11 +133,12 @@ async def submit_dataset_job(
     new_job = await db["listener_jobs"].insert_one(job.to_mongo())
     new_job_id = str(new_job.inserted_id)
 
+    current_secretKey = await get_user_job_key(user.email, db)
     msg_body = EventListenerDatasetJobMessage(
         datasetName=dataset_out.name,
         id=str(dataset_out.id),
         datasetId=str(dataset_out.id),
-        secretKey=token,
+        secretKey=current_secretKey,
         job_id=new_job_id,
     )
 
@@ -147,8 +149,7 @@ async def submit_dataset_job(
         routing_key=routing_key,
         body=json.dumps(msg_body.dict(), ensure_ascii=False),
         properties=pika.BasicProperties(
-            content_type="application/json", delivery_mode=1
+            content_type="application/json", delivery_mode=1, reply_to=reply_to
         ),
-        # reply_to=reply_to
     )
     return new_job_id

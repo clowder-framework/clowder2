@@ -51,6 +51,12 @@ class UserAPIKey(MongoModel):
     expires: Optional[datetime] = None
 
 
+class ListenerAPIKey(UserAPIKey):
+    """API key per user that will be sent to extractors, stored separately."""
+
+    hash: str
+
+
 class UserAPIKeyOut(MongoModel):
     # don't show the raw key
     name: str
