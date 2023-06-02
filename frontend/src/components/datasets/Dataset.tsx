@@ -1,5 +1,5 @@
 // lazy loading
-import React, { useEffect, useState } from "react";
+import React, { lazy, Suspense, useEffect, useState } from "react";
 import { Box, Button, Grid, Stack, Tab, Tabs, Typography } from "@mui/material";
 import { useParams, useSearchParams } from "react-router-dom";
 import { RootState } from "../../types/data";
@@ -43,7 +43,7 @@ import { TabStyle } from "../../styles/Styles";
 import { Forbidden } from "../errors/Forbidden";
 import { PageNotFound } from "../errors/PageNotFound";
 
-const Demo = React.lazy(() => import("../previewers/Demo"));
+const Demo = lazy(() => import("../previewers/Demo"));
 
 export const Dataset = (): JSX.Element => {
 	// path parameter

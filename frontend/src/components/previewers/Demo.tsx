@@ -1,7 +1,7 @@
 import * as React from "react";
 import { VegaLite } from "react-vega";
 
-export const Demo = () => {
+export default function Demo() {
 	const spec = {
 		width: 400,
 		height: 200,
@@ -27,4 +27,4 @@ export const Demo = () => {
 		],
 	};
 	return <VegaLite spec={spec} data={barData} />;
-};
+}
