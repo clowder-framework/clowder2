@@ -42,6 +42,7 @@ import RoleChip from "../auth/RoleChip";
 import { TabStyle } from "../../styles/Styles";
 import { Forbidden } from "../errors/Forbidden";
 import { PageNotFound } from "../errors/PageNotFound";
+import { LazyLoadErrorBoundary } from "../errors/LazyLoadErrorBoundary";
 
 const Demo = lazy(() => import("../previewers/Demo"));
 
@@ -382,9 +383,11 @@ export const Dataset = (): JSX.Element => {
 						<SharingTab datasetId={datasetId} />
 					</TabPanel>
 					<TabPanel value={selectedTabIndex} index={6}>
-						<Suspense fallback={<div>Loading...</div>}>
-							<Demo />
-						</Suspense>
+						<LazyLoadErrorBoundary fallback={<div>Fail to load...</div>}>
+							<Suspense fallback={<div>Loading...</div>}>
+								<Demo />
+							</Suspense>
+						</LazyLoadErrorBoundary>
 					</TabPanel>
 				</Grid>
 				<Grid item>

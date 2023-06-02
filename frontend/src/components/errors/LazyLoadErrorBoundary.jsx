@@ -1,6 +1,6 @@
 import React from "react";
 
-export class ErrorBoundary extends React.Component {
+export class LazyLoadErrorBoundary extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = { hasError: false };
@@ -17,7 +17,8 @@ export class ErrorBoundary extends React.Component {
 		//   in ErrorBoundary (created by App)
 		//   in div (created by App)
 		//   in App
-		logErrorToMyService(error, info.componentStack);
+		// logErrorToMyService(error, info.componentStack);
+		console.log(info.componentStack);
 	}
 
 	render() {
