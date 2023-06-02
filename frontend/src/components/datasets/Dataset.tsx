@@ -1,3 +1,4 @@
+// lazy loading
 import React, { useEffect, useState } from "react";
 import { Box, Button, Grid, Stack, Tab, Tabs, Typography } from "@mui/material";
 import { useParams, useSearchParams } from "react-router-dom";
@@ -34,12 +35,15 @@ import AssessmentIcon from "@mui/icons-material/Assessment";
 import HistoryIcon from "@mui/icons-material/History";
 import ShareIcon from "@mui/icons-material/Share";
 import BuildIcon from "@mui/icons-material/Build";
+import VisibilityIcon from "@mui/icons-material/Visibility";
 import { ExtractionHistoryTab } from "../listeners/ExtractionHistoryTab";
 import { SharingTab } from "../sharing/SharingTab";
 import RoleChip from "../auth/RoleChip";
 import { TabStyle } from "../../styles/Styles";
 import { Forbidden } from "../errors/Forbidden";
 import { PageNotFound } from "../errors/PageNotFound";
+
+const Demo = React.lazy(() => import("../previewers/Demo"));
 
 export const Dataset = (): JSX.Element => {
 	// path parameter
@@ -107,14 +111,12 @@ export const Dataset = (): JSX.Element => {
 	const [errorOpen, setErrorOpen] = useState(false);
 	const [showForbiddenPage, setShowForbiddenPage] = useState(false);
 	const [showNotFoundPage, setShowNotFoundPage] = useState(false);
-	
+
 	useEffect(() => {
 		if (reason == "Forbidden") {
 			setShowForbiddenPage(true);
-        
 		} else if (reason == "Not Found") {
 			setShowNotFoundPage(true);
-        
 		} else if (reason !== "" && reason !== null && reason !== undefined) {
 			setErrorOpen(true);
 		}
@@ -126,7 +128,9 @@ export const Dataset = (): JSX.Element => {
 	};
 	const handleErrorReport = () => {
 		window.open(
-			`${config.GHIssueBaseURL}+${encodeURIComponent(reason)}&body=${encodeURIComponent(stack)}`
+			`${config.GHIssueBaseURL}+${encodeURIComponent(
+				reason
+			)}&body=${encodeURIComponent(stack)}`
 		);
 	};
 
@@ -199,10 +203,8 @@ export const Dataset = (): JSX.Element => {
 		paths.slice(0, 1);
 	}
 
-
 	if (showForbiddenPage) {
 		return <Forbidden />;
-    
 	} else if (showNotFoundPage) {
 		return <PageNotFound />;
 	}
@@ -304,6 +306,14 @@ export const Dataset = (): JSX.Element => {
 							{...a11yProps(5)}
 							disabled={false}
 						/>
+						<Tab
+							icon={<VisibilityIcon />}
+							iconPosition="start"
+							sx={TabStyle}
+							label="Preview"
+							{...a11yProps(6)}
+							disabled={false}
+						/>
 					</Tabs>
 					<TabPanel value={selectedTabIndex} index={0}>
 						<FilesTable datasetId={datasetId} folderId={folderId} />
@@ -370,6 +380,11 @@ export const Dataset = (): JSX.Element => {
 					</TabPanel>
 					<TabPanel value={selectedTabIndex} index={5}>
 						<SharingTab datasetId={datasetId} />
+					</TabPanel>
+					<TabPanel value={selectedTabIndex} index={6}>
+						<Suspense fallback={<div>Loading...</div>}>
+							<Demo />
+						</Suspense>
 					</TabPanel>
 				</Grid>
 				<Grid item>
