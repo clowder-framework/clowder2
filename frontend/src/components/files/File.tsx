@@ -1,7 +1,11 @@
 import React, { useEffect, useState } from "react";
 import config from "../../app.config";
 import { Box, Button, Grid, Tab, Tabs, Typography } from "@mui/material";
-import { downloadResource, parseDate } from "../../utils/common";
+import {
+	downloadResource,
+	handleErrorReport,
+	parseDate,
+} from "../../utils/common";
 import { PreviewConfiguration, RootState } from "../../types/data";
 import { useParams, useSearchParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
@@ -105,10 +109,8 @@ export const File = (): JSX.Element => {
 	useEffect(() => {
 		if (reason == "Forbidden") {
 			setShowForbiddenPage(true);
-        
 		} else if (reason == "Not Found") {
 			setShowNotFoundPage(true);
-        
 		} else if (reason !== "" && reason !== null && reason !== undefined) {
 			setErrorOpen(true);
 		}
@@ -117,11 +119,6 @@ export const File = (): JSX.Element => {
 		// reset error message and close the error window
 		dismissError();
 		setErrorOpen(false);
-	};
-	const handleErrorReport = () => {
-		window.open(
-			`${config.GHIssueBaseURL}+${encodeURIComponent(reason)}&body=${encodeURIComponent(stack)}`
-		);
 	};
 
 	useEffect(() => {
@@ -240,7 +237,6 @@ export const File = (): JSX.Element => {
 
 	if (showForbiddenPage) {
 		return <Forbidden />;
-    
 	} else if (showNotFoundPage) {
 		return <PageNotFound />;
 	}
@@ -253,7 +249,9 @@ export const File = (): JSX.Element => {
 				actionTitle="Something went wrong..."
 				actionText={reason}
 				actionBtnName="Report"
-				handleActionBtnClick={handleErrorReport}
+				handleActionBtnClick={() => {
+					handleErrorReport(reason, stack);
+				}}
 				handleActionCancel={handleErrorCancel}
 			/>
 

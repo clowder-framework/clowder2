@@ -15,7 +15,6 @@ import { RootState } from "../../types/data";
 import { CreateDatasetModal } from "./CreateDatasetModal";
 import { CreateMetadata } from "../metadata/CreateMetadata";
 import { ActionModal } from "../dialog/ActionModal";
-import config from "../../app.config";
 import { resetFailedReason } from "../../actions/common";
 import {
 	fetchMetadataDefinitions,
@@ -25,6 +24,7 @@ import { MetadataIn } from "../../openapi/v2";
 import { datasetCreated, resetDatsetCreated } from "../../actions/dataset";
 import { useNavigate } from "react-router-dom";
 import Layout from "../Layout";
+import { handleErrorReport } from "../../utils/common";
 
 export const CreateDataset = (): JSX.Element => {
 	const dispatch = useDispatch();
@@ -72,13 +72,6 @@ export const CreateDataset = (): JSX.Element => {
 		// reset error message and close the error window
 		dismissError();
 		setErrorOpen(false);
-	};
-	const handleErrorReport = () => {
-		window.open(
-			`${config.GHIssueBaseURL}+${encodeURIComponent(
-				reason
-			)}&body=${encodeURIComponent(stack)}`
-		);
 	};
 
 	const checkIfFieldsAreRequired = () => {
@@ -176,7 +169,9 @@ export const CreateDataset = (): JSX.Element => {
 					actionTitle="Something went wrong..."
 					actionText={reason}
 					actionBtnName="Report"
-					handleActionBtnClick={handleErrorReport}
+					handleActionBtnClick={() => {
+						handleErrorReport(reason, stack);
+					}}
 					handleActionCancel={handleErrorCancel}
 				/>
 				<Box className="inner-container">

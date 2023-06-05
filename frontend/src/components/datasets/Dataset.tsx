@@ -14,7 +14,6 @@ import { resetFailedReason } from "../../actions/common";
 import { a11yProps, TabPanel } from "../tabs/TabComponent";
 import { ActionModal } from "../dialog/ActionModal";
 import FilesTable from "../files/FilesTable";
-import config from "../../app.config";
 import { MetadataIn } from "../../openapi/v2";
 import { DisplayMetadata } from "../metadata/DisplayMetadata";
 import { DisplayListenerMetadata } from "../metadata/DisplayListenerMetadata";
@@ -40,6 +39,7 @@ import RoleChip from "../auth/RoleChip";
 import { TabStyle } from "../../styles/Styles";
 import { Forbidden } from "../errors/Forbidden";
 import { PageNotFound } from "../errors/PageNotFound";
+import { handleErrorReport } from "../../utils/common";
 
 export const Dataset = (): JSX.Element => {
 	// path parameter
@@ -107,14 +107,12 @@ export const Dataset = (): JSX.Element => {
 	const [errorOpen, setErrorOpen] = useState(false);
 	const [showForbiddenPage, setShowForbiddenPage] = useState(false);
 	const [showNotFoundPage, setShowNotFoundPage] = useState(false);
-	
+
 	useEffect(() => {
 		if (reason == "Forbidden") {
 			setShowForbiddenPage(true);
-        
 		} else if (reason == "Not Found") {
 			setShowNotFoundPage(true);
-        
 		} else if (reason !== "" && reason !== null && reason !== undefined) {
 			setErrorOpen(true);
 		}
@@ -123,11 +121,6 @@ export const Dataset = (): JSX.Element => {
 		// reset error message and close the error window
 		dismissError();
 		setErrorOpen(false);
-	};
-	const handleErrorReport = () => {
-		window.open(
-			`${config.GHIssueBaseURL}+${encodeURIComponent(reason)}&body=${encodeURIComponent(stack)}`
-		);
 	};
 
 	const handleTabChange = (
@@ -199,10 +192,8 @@ export const Dataset = (): JSX.Element => {
 		paths.slice(0, 1);
 	}
 
-
 	if (showForbiddenPage) {
 		return <Forbidden />;
-    
 	} else if (showNotFoundPage) {
 		return <PageNotFound />;
 	}
@@ -215,7 +206,9 @@ export const Dataset = (): JSX.Element => {
 				actionTitle="Something went wrong..."
 				actionText={reason}
 				actionBtnName="Report"
-				handleActionBtnClick={handleErrorReport}
+				handleActionBtnClick={() => {
+					handleErrorReport(reason, stack);
+				}}
 				handleActionCancel={handleErrorCancel}
 			/>
 			<Grid container>

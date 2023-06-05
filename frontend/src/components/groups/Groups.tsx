@@ -33,7 +33,7 @@ import GroupAddIcon from "@mui/icons-material/GroupAdd";
 import { CreateGroup } from "./CreateGroup";
 import { ActionModal } from "../dialog/ActionModal";
 import { resetFailedReason } from "../../actions/common";
-import config from "../../app.config";
+import { handleErrorReport } from "../../utils/common";
 
 export function Groups() {
 	// Redux connect equivalent
@@ -110,13 +110,6 @@ export function Groups() {
 		dismissError();
 		setErrorOpen(false);
 	};
-	const handleErrorReport = () => {
-		window.open(
-			`${config.GHIssueBaseURL}+${encodeURIComponent(
-				reason
-			)}&body=${encodeURIComponent(stack)}`
-		);
-	};
 
 	const previous = () => {
 		if (currPageNum - 1 >= 0) {
@@ -139,7 +132,9 @@ export function Groups() {
 				actionTitle="Something went wrong..."
 				actionText={reason}
 				actionBtnName="Report"
-				handleActionBtnClick={handleErrorReport}
+				handleActionBtnClick={() => {
+					handleErrorReport(reason, stack);
+				}}
 				handleActionCancel={handleErrorCancel}
 			/>
 			{/*create new group*/}
