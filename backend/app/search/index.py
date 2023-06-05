@@ -1,8 +1,9 @@
 from typing import Optional, List
+
 from bson import ObjectId
 from elasticsearch import Elasticsearch, NotFoundError
 
-from app.models.authorization import AuthorizationOut, AuthorizationDB
+from app.models.authorization import AuthorizationDB
 from app.models.datasets import DatasetOut
 from app.models.files import FileOut
 from app.models.metadata import MetadataOut
@@ -39,7 +40,10 @@ async def index_dataset(
         user_ids=authorized_user_ids,
     ).dict()
     if update:
-        update_record(es, "dataset", {"doc": doc}, dataset.id)
+        try:
+            update_record(es, "dataset", {"doc": doc}, dataset.id)
+        except NotFoundError:
+            insert_record(es, "dataset", doc, dataset.id)
     else:
         insert_record(es, "dataset", doc, dataset.id)
 
@@ -77,7 +81,10 @@ async def index_file(
         user_ids=authorized_user_ids,
     ).dict()
     if update:
-        update_record(es, "file", {"doc": doc}, file.id)
+        try:
+            update_record(es, "file", {"doc": doc}, file.id)
+        except NotFoundError:
+            insert_record(es, "file", doc, file.id)
     else:
         insert_record(es, "file", doc, file.id)
 
@@ -119,7 +126,10 @@ async def index_dataset_metadata(
         user_ids=authorized_user_ids,
     ).dict()
     if update:
-        update_record(es, "metadata", {"doc": doc}, metadata.id)
+        try:
+            update_record(es, "metadata", {"doc": doc}, metadata.id)
+        except NotFoundError:
+            insert_record(es, "metadata", doc, metadata.id)
     else:
         insert_record(es, "metadata", doc, metadata.id)
 
