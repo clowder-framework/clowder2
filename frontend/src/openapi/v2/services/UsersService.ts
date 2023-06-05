@@ -33,7 +33,7 @@ export class UsersService {
     }
 
     /**
-     * Generate User Api Key
+     * Get User Api Keys
      * List all api keys that user has created
      *
      * Arguments:
@@ -44,7 +44,7 @@ export class UsersService {
      * @returns UserAPIKeyOut Successful Response
      * @throws ApiError
      */
-    public static generateUserApiKeyApiV2UsersKeysGet(
+    public static getUserApiKeysApiV2UsersKeysGet(
         skip?: number,
         limit: number = 10,
     ): CancelablePromise<Array<UserAPIKeyOut>> {
@@ -66,7 +66,8 @@ export class UsersService {
      * Generate an API key that confers the user's privileges.
      *
      * Arguments:
-     * mins -- number of minutes before expiration (0 for no expiration)
+     * name: name of the api key
+     * mins: number of minutes before expiration (0 for no expiration)
      * @param name
      * @param mins
      * @returns string Successful Response
@@ -90,7 +91,7 @@ export class UsersService {
     }
 
     /**
-     * Generate User Api Key
+     * Delete User Api Key
      * Delete API keys given ID
      *
      * Arguments:
@@ -99,7 +100,7 @@ export class UsersService {
      * @returns UserAPIKeyOut Successful Response
      * @throws ApiError
      */
-    public static generateUserApiKeyApiV2UsersKeysKeyIdDelete(
+    public static deleteUserApiKeyApiV2UsersKeysKeyIdDelete(
         keyId: string,
     ): CancelablePromise<UserAPIKeyOut> {
         return __request({
