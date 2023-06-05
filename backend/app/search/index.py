@@ -169,7 +169,7 @@ async def index_file_metadata(
         content_type=file.content_type.content_type,
         content_type_main=file.content_type.main_type,
         dataset_id=str(file.dataset_id),
-        folder_id=file.folder_id,
+        folder_id=str(file.folder_id),
         bytes=file.bytes,
         downloads=file.downloads,
         user_ids=authorized_user_ids,
