@@ -1,8 +1,6 @@
 from typing import Optional, List
-
 from bson import ObjectId
-from elasticsearch import Elasticsearch
-from pymongo import MongoClient
+from elasticsearch import Elasticsearch, NotFoundError
 
 from app.models.authorization import AuthorizationOut, AuthorizationDB
 from app.models.datasets import DatasetOut
@@ -148,7 +146,7 @@ async def index_file_metadata(
     # Add an entry to the metadata index
     doc = ESMetadataEntry(
         resource_id=str(file.id),
-        resource_type="dataset",
+        resource_type="file",
         resource_created=file.created,
         resource_creator=file.creator.email,
         created=metadata.created,
@@ -160,13 +158,16 @@ async def index_file_metadata(
         name=file.name,
         content_type=file.content_type.content_type,
         content_type_main=file.content_type.main_type,
-        dataset_id=file.dataset_id,
-        folder_id=file.folder_id,
+        dataset_id=str(file.dataset_id),
+        folder_id=str(file.folder_id),
         bytes=file.bytes,
         downloads=file.downloads,
         user_ids=authorized_user_ids,
     ).dict()
     if update:
-        update_record(es, "metadata", {"doc": doc}, metadata.id)
+        try:
+            update_record(es, "metadata", {"doc": doc}, metadata.id)
+        except NotFoundError:
+            insert_record(es, "metadata", doc, metadata.id)
     else:
         insert_record(es, "metadata", doc, metadata.id)

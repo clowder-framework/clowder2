@@ -213,7 +213,7 @@ async def get_current_username(
             payload = serializer.loads(api_key)
             # Key is valid, check expiration date in database
             key = await UserAPIKeyDB.find_one(
-                UserAPIKeyDB.user == payload["user"], UserAPIKeyDB.key == payload.key
+                UserAPIKeyDB.user == payload["user"], UserAPIKeyDB.key == payload["key"]
             )
             if key is not None:
                 current_time = datetime.utcnow()
