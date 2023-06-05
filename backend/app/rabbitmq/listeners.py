@@ -57,14 +57,14 @@ async def create_reply_queue():
 
 
 async def submit_file_job(
-        file_out: FileOut,
-        queue: str,
-        routing_key: str,
-        parameters: dict,
-        user: UserOut,
-        db: MongoClient,
-        rabbitmq_client: BlockingChannel,
-        token: str,
+    file_out: FileOut,
+    queue: str,
+    routing_key: str,
+    parameters: dict,
+    user: UserOut,
+    db: MongoClient,
+    rabbitmq_client: BlockingChannel,
+    token: str,
 ):
     # TODO check if extractor is registered
 
@@ -112,14 +112,14 @@ async def submit_file_job(
 
 
 async def submit_dataset_job(
-        dataset_out: DatasetOut,
-        queue: str,
-        routing_key: str,
-        parameters: dict,
-        user: UserOut,
-        token: str = Depends(get_token),
-        db: MongoClient = Depends(dependencies.get_db),
-        rabbitmq_client: BlockingChannel = Depends(dependencies.get_rabbitmq),
+    dataset_out: DatasetOut,
+    queue: str,
+    routing_key: str,
+    parameters: dict,
+    user: UserOut,
+    token: str = Depends(get_token),
+    db: MongoClient = Depends(dependencies.get_db),
+    rabbitmq_client: BlockingChannel = Depends(dependencies.get_rabbitmq),
 ):
     # TODO check if extractor is registered
 
