@@ -15,6 +15,8 @@ import RoleChip from "../auth/RoleChip";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { ActionModal } from "../dialog/ActionModal";
 import { MainBreadcrumbs } from "../navigation/BreadCrumb";
+import { resetFailedReason } from "../../actions/common";
+import { config } from "../../app.config";
 
 export function Group() {
 	// path parameter
@@ -49,6 +51,30 @@ export function Group() {
 		fetchCurrentGroupRole(groupId);
 	}, []);
 
+	// Error msg dialog
+	const reason = useSelector((state: RootState) => state.error.reason);
+	const stack = useSelector((state: RootState) => state.error.stack);
+	const dismissError = () => dispatch(resetFailedReason());
+
+	const [errorOpen, setErrorOpen] = useState(false);
+	useEffect(() => {
+		if (reason !== "" && reason !== null && reason !== undefined) {
+			setErrorOpen(true);
+		}
+	}, [reason]);
+	const handleErrorCancel = () => {
+		// reset error message and close the error window
+		dismissError();
+		setErrorOpen(false);
+	};
+	const handleErrorReport = () => {
+		window.open(
+			`${config.GHIssueBaseURL}+${encodeURIComponent(
+				reason
+			)}&body=${encodeURIComponent(stack)}`
+		);
+	};
+
 	// for breadcrumb
 	const paths = [
 		{
@@ -67,6 +93,15 @@ export function Group() {
 
 	return (
 		<Layout>
+			{/*Error Message dialogue*/}
+			<ActionModal
+				actionOpen={errorOpen}
+				actionTitle="Something went wrong..."
+				actionText={reason}
+				actionBtnName="Report"
+				handleActionBtnClick={handleErrorReport}
+				handleActionCancel={handleErrorCancel}
+			/>
 			{/*breadcrumb*/}
 			<Grid container>
 				<Grid item xs={10} sx={{ display: "flex", alignItems: "center" }}>
