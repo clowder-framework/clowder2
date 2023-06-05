@@ -1,4 +1,5 @@
 import { V2 } from "./openapi";
+import { EventListenerJobStatus } from "./types/data";
 
 interface Config {
 	hostname: string;
@@ -12,6 +13,7 @@ interface Config {
 	searchEndpoint: string;
 	refreshTokenInterval: number;
 	extractorInterval: number;
+	eventListenerJobStatus: EventListenerJobStatus;
 }
 
 const config: Config = <Config>{};
@@ -42,7 +44,16 @@ config["KeycloakRegister"] = config.KeycloakBaseURL + "/register";
 config["searchEndpoint"] = `${hostname}/api/v2/elasticsearch`;
 
 // refresh toekn time interval
-config["refreshTokenInterval"] = 1 * 1000 * 60; // milliseconds
+config["refreshTokenInterval"] = 1000 * 60; // milliseconds
 config["extractorInterval"] = 2000; // milliseconds
+
+config["eventListenerJobStatus"] = <EventListenerJobStatus>{};
+config["eventListenerJobStatus"]["created"] = "CREATED";
+config["eventListenerJobStatus"]["started"] = "STARTED";
+config["eventListenerJobStatus"]["processing"] = "PROCESSING";
+config["eventListenerJobStatus"]["succeeded"] = "SUCCEEDED";
+config["eventListenerJobStatus"]["error"] = "ERROR";
+config["eventListenerJobStatus"]["skipped"] = "SKIPPED";
+config["eventListenerJobStatus"]["resubmitted"] = "RESUBMITTED";
 
 export default config;
