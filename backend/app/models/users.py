@@ -44,8 +44,8 @@ class UserOut(UserDoc):
 class UserAPIKeyBase(BaseModel):
     """API keys can have a reference name (e.g. 'Uploader script')"""
 
-    key: str
     name: str
+    key: str
     user: EmailStr
     created: datetime = Field(default_factory=datetime.utcnow)
     expires: Optional[datetime] = None
@@ -59,3 +59,14 @@ class UserAPIKeyDB(Document, UserAPIKeyBase):
 class UserAPIKeyOut(UserAPIKeyDB):
     class Config:
         fields = {"id": "id"}
+
+
+class ListenerAPIKeyBase(UserAPIKeyBase):
+    """API key per user that will be sent to extractors, stored separately."""
+
+    hash: str
+
+
+class ListenerAPIKeyDB(Document, ListenerAPIKeyBase):
+    class Settings:
+        name = "listener_keys"

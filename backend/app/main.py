@@ -26,7 +26,7 @@ from app.models.listeners import (
 )
 from app.models.metadata import MetadataDB, MetadataDefinitionDB
 from app.models.tokens import TokenDB
-from app.models.users import UserDB, UserAPIKeyDB
+from app.models.users import UserDB, UserAPIKeyDB, ListenerAPIKeyDB
 from app.routers import (
     folders,
     groups,
@@ -202,6 +202,7 @@ async def startup_beanie():
             EventListenerJobUpdateViewList,
             UserDB,
             UserAPIKeyDB,
+            ListenerAPIKeyDB,
             GroupDB,
             TokenDB,
             ErrorDB,
