@@ -76,7 +76,7 @@ async def index_file(
         created=file.created,
         downloads=file.downloads,
         dataset_id=str(file.dataset_id),
-        folder_id=str(file.folder_id),
+        folder_id=str(file.folder_id) if file.folder_id is not None else None,
         bytes=file.bytes,
         content_type=file.content_type.content_type,
         content_type_main=file.content_type.main_type,
