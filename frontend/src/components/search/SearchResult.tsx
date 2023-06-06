@@ -74,8 +74,8 @@ export function SearchResult(props) {
 							</MuiLink>
 						)}
 						<Typography variant="body2" color={theme.palette.secondary.light}>
-							`Created by ${parseString(item.creator)} at $
-							{parseDate(item.created)}`
+							Created by {parseString(item.creator)} at{" "}
+							{parseDate(item.created)}
 						</Typography>
 						<Typography variant="body2" color={theme.palette.secondary.dark}>
 							{getRecordType(item) === "dataset"

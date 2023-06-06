@@ -1,57 +1,89 @@
-import React, {useEffect, useState} from "react";
+import React, { useState } from "react";
 
-import {useDispatch, useSelector} from "react-redux";
-import { Alert, Autocomplete, Button, Collapse, Container, Dialog, DialogActions, DialogContent, DialogTitle, Divider, FormControl, IconButton, InputLabel, MenuItem, Select, TextField, Typography } from "@mui/material";
-import {fetchGroups} from "../../actions/group";
-import {RootState} from "../../types/data";
-import {setDatasetGroupRole} from "../../actions/dataset";
-import {useParams} from "react-router-dom";
+import { useDispatch } from "react-redux";
+import {
+	Alert,
+	Button,
+	Collapse,
+	Container,
+	Dialog,
+	DialogActions,
+	DialogContent,
+	DialogTitle,
+	Divider,
+	FormControl,
+	IconButton,
+	InputLabel,
+	MenuItem,
+	Select,
+	Typography,
+} from "@mui/material";
+import { setDatasetGroupRole } from "../../actions/dataset";
+import { useParams } from "react-router-dom";
 import CloseIcon from "@mui/icons-material/Close";
 
 type ChangeGroupDatasetRoleModalProps = {
-    open: boolean,
-    handleClose: any,
-    datasetName: string,
-	currentRole: string,
-	currentGroupName: string
-	currentGroupId: string
-}
+	open: boolean;
+	handleClose: any;
+	datasetName: string;
+	currentRole: string;
+	currentGroupName: string;
+	currentGroupId: string;
+};
 
-export default function ChangeGroupDatasetRoleModal(props: ChangeGroupDatasetRoleModalProps) {
-   	const { open, handleClose, datasetName, currentRole, currentGroupName, currentGroupId } = props;
-	const {datasetId} = useParams<{ datasetId?: string }>();
+export default function ChangeGroupDatasetRoleModal(
+	props: ChangeGroupDatasetRoleModalProps
+) {
+	const {
+		open,
+		handleClose,
+		datasetName,
+		currentRole,
+		currentGroupName,
+		currentGroupId,
+	} = props;
+	const { datasetId } = useParams<{ datasetId?: string }>();
 	const [role, setRole] = useState(currentRole);
 	const [group, setGroup] = useState();
 	const [showSuccessAlert, setShowSuccessAlert] = useState(false);
 	const dispatch = useDispatch();
-	const setGroupRole = (datasetId: string , groupId: string, role: string) => dispatch(setDatasetGroupRole(datasetId, groupId, role));
-
-
+	const setGroupRole = (datasetId: string, groupId: string, role: string) =>
+		dispatch(setDatasetGroupRole(datasetId, groupId, role));
 
 	const onShare = () => {
-    	setGroupRole(datasetId, currentGroupId, role);
+		setGroupRole(datasetId, currentGroupId, role);
 		setGroup(group);
 		setRole("viewer");
 		setShowSuccessAlert(true);
 	};
 
-
 	return (
 		<Container>
-			<Dialog open={open} onClose={handleClose} fullWidth={true} maxWidth="md"
+			<Dialog
+				open={open}
+				onClose={handleClose}
+				fullWidth={true}
+				maxWidth="md"
 				sx={{
 					".MuiPaper-root": {
 						padding: "2em",
 					},
-				}}>
-				<DialogTitle>Change dataset role for &apos;{datasetName}&apos;</DialogTitle>
+				}}
+			>
+				<DialogTitle>
+					Change dataset role for &apos;{datasetName}&apos;
+				</DialogTitle>
 				<Divider />
 				<DialogContent>
 					<Typography>Invite groups to collaborate</Typography>
-					<div style={{
-						display: "flex",
-						alignItems: "center"
-					}}> group is {currentGroupName}
+					<div
+						style={{
+							display: "flex",
+							alignItems: "center",
+						}}
+					>
+						{" "}
+						group is {currentGroupName}
 						<FormControl variant="outlined" sx={{ m: 1, minWidth: 120 }}>
 							<InputLabel id="demo-simple-select-label">Status</InputLabel>
 							<Select
@@ -61,7 +93,6 @@ export default function ChangeGroupDatasetRoleModal(props: ChangeGroupDatasetRol
 								defaultValue={"viewer"}
 								label="Status"
 								onChange={(event, value) => {
-                                	console.log(event, value);
 									setRole(event.target.value);
 								}}
 							>
@@ -72,9 +103,11 @@ export default function ChangeGroupDatasetRoleModal(props: ChangeGroupDatasetRol
 							</Select>
 						</FormControl>
 					</div>
-					<Button variant="contained" sx={{ marginTop: 1 }} onClick={onShare}>Share</Button>
+					<Button variant="contained" sx={{ marginTop: 1 }} onClick={onShare}>
+						Share
+					</Button>
 					<Collapse in={showSuccessAlert}>
-						<br/>
+						<br />
 						<Alert
 							severity="success"
 							action={
@@ -91,7 +124,7 @@ export default function ChangeGroupDatasetRoleModal(props: ChangeGroupDatasetRol
 							}
 							sx={{ mb: 2 }}
 						>
-                        Successfully added role!
+							Successfully added role!
 						</Alert>
 					</Collapse>
 				</DialogContent>
