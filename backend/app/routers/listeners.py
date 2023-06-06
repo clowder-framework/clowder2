@@ -101,8 +101,8 @@ async def save_listener(
     """Register a new Event Listener with the system."""
     listener = EventListenerDB(**listener_in.dict(), creator=user)
     # TODO: Check for duplicates somehow?
-    return listener.dict()
     await listener.insert()
+    return listener.dict()
 
 
 @legacy_router.post("", response_model=EventListenerOut)
