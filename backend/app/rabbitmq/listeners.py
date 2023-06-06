@@ -108,7 +108,7 @@ async def submit_dataset_job(
         resource_ref=MongoDBRef(collection="dataset", resource_id=dataset_out.id),
         parameters=parameters,
     )
-    await job.save()
+    await job.insert()
 
     current_secretKey = await get_user_job_key(user.email)
     msg_body = EventListenerDatasetJobMessage(

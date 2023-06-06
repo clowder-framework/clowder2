@@ -3,7 +3,7 @@ from datetime import datetime
 from typing import Optional, List, Union
 
 from beanie import Document, PydanticObjectId
-from elasticsearch import Elasticsearch
+from elasticsearch import Elasticsearch, NotFoundError
 from fastapi import HTTPException
 from pydantic import Field, validator, AnyUrl, BaseModel
 
@@ -15,7 +15,7 @@ from app.models.listeners import (
 )
 from app.models.mongomodel import MongoDBRef
 from app.models.users import UserOut
-from app.search.connect import update_record
+from app.search.connect import insert_record, update_record
 
 # List of valid types that can be specified for metadata fields
 FIELD_TYPES = {
@@ -308,7 +308,11 @@ async def patch_metadata(metadata: MetadataDB, new_entries: dict, es: Elasticsea
         metadata.content = updated_content
         await metadata.replace()
         doc = {"doc": {"content": metadata.content}}
-        update_record(es, "metadata", doc, metadata.id)
+        try:
+            update_record(es, "metadata", {"doc": doc}, metadata.id)
+        except NotFoundError:
+            insert_record(es, "metadata", doc, metadata.id)
+
     except Exception as e:
         raise e
     return MetadataOut(**metadata.dict())

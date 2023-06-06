@@ -39,7 +39,7 @@ async def save_metadata_definition(
         )
     else:
         md_def = MetadataDefinitionDB(**definition_in.dict(), creator=user)
-        await md_def.save()
+        await md_def.insert()
         return md_def.dict()
 
 

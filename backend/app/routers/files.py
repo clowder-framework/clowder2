@@ -7,7 +7,7 @@ from typing import Union
 from beanie import PydanticObjectId
 from beanie.odm.operators.update.general import Inc
 from bson import ObjectId
-from elasticsearch import Elasticsearch
+from elasticsearch import Elasticsearch, NotFoundError
 from fastapi import APIRouter, HTTPException, Depends, Security
 from fastapi import (
     File,
@@ -35,6 +35,7 @@ from app.rabbitmq.listeners import submit_file_job, EventListenerJobDB
 from app.routers.feeds import check_feed_listeners
 from app.search.connect import (
     delete_document_by_id,
+    insert_record,
     update_record,
     delete_document_by_query,
 )
@@ -255,7 +256,10 @@ async def update_file(
                     "bytes": updated_file.bytes,
                 }
             }
-            update_record(es, "metadata", doc, str(metadata.id))
+            try:
+                update_record(es, "metadata", {"doc": doc}, str(metadata.id))
+            except NotFoundError:
+                insert_record(es, "metadata", doc, str(metadata.id))
         return updated_file.dict()
     else:
         raise HTTPException(status_code=404, detail=f"File {file_id} not found")

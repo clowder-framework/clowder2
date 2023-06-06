@@ -28,7 +28,7 @@ from app.models.metadata import (
     MetadataDelete,
     MetadataDefinitionDB,
 )
-from app.search.connect import insert_record, update_record, delete_document_by_id
+from app.search.connect import delete_document_by_id
 from app.search.index import index_file_metadata
 
 router = APIRouter()
@@ -139,7 +139,7 @@ async def add_file_metadata(
                 )
             else:
                 existing_q.append(MetadataDB.agent.creator.id == user.id)
-            if (existing := await MetadataDB().find_one(existing_q)) is not None:
+            if (existing := await MetadataDB.find_one(*existing_q)) is not None:
                 # Allow creating duplicate entry only if the file version is different
                 if existing.resource.version == metadata_in.file_version:
                     raise HTTPException(
@@ -207,7 +207,7 @@ async def replace_file_metadata(
             agent = MetadataAgent(creator=user)
             query.append(MetadataDB.agent.creator.id == agent.creator.id)
 
-        if (md := await MetadataDB(*query).find_one()) is not None:
+        if (orig_md := await MetadataDB.find_one(*query)) is not None:
             # Metadata exists, so prepare the new document we are going to replace it with
             md = await _build_metadata_db_obj(
                 metadata_in,
@@ -216,6 +216,7 @@ async def replace_file_metadata(
                 agent=agent,
                 version=target_version,
             )
+            md.id = orig_md.id
             await md.save()
 
             # Update entry to the metadata index
@@ -246,10 +247,10 @@ async def update_file_metadata(
 
     # check if metadata with file version exists, replace metadata if none exists
     if (
-        await MetadataDB(
+        await MetadataDB.find_one(
             MetadataDB.resource.resource_id == ObjectId(file_id),
             MetadataDB.resource.version == metadata_in.file_version,
-        ).find_one()
+        )
     ) is None:
         result = await replace_file_metadata(metadata_in, file_id, user, es)
         return result
@@ -261,9 +262,9 @@ async def update_file_metadata(
         if metadata_in.metadata_id is not None:
             # If a specific metadata_id is provided, validate the patch against existing context
             if (
-                existing_md := await MetadataDB(
+                existing_md := await MetadataDB.find_one(
                     MetadataDB.id == ObjectId(metadata_in.metadata_id)
-                ).find_one()
+                )
             ) is not None:
                 content = await validate_context(
                     metadata_in.content,
@@ -375,7 +376,7 @@ async def get_file_metadata(
         async for md in MetadataDB.find(*query):
             if md.definition is not None:
                 if (
-                    md_def := await MetadataDefinitionDB(
+                    md_def := await MetadataDefinitionDB.find_one(
                         MetadataDefinitionDB.name == md.definition
                     )
                 ) is not None:
@@ -420,9 +421,9 @@ async def delete_file_metadata(
         if metadata_in.metadata_id is not None:
             # If a specific metadata_id is provided, delete the matching entry
             if (
-                await MetadataDB(
+                await MetadataDB.find_one(
                     MetadataDB.metadata_id == ObjectId(metadata_in.metadata_id)
-                ).find_one()
+                )
             ) is not None:
                 query.append(MetadataDB.metadata_id == metadata_in.metadata_id)
         else:
@@ -454,9 +455,9 @@ async def delete_file_metadata(
             query.append(MetadataDB.agent.creator.id == agent.creator.id)
 
         # delete from elasticsearch
-        delete_document_by_id(es, "metadata", str(metadata_in.id))
+        delete_document_by_id(es, "metadata", str(metadata_in.metadata_id))
 
-        if (md := await MetadataDB(*query).find_one()) is not None:
+        if (md := await MetadataDB.find_one(*query)) is not None:
             await md.delete()
             return md.dict()  # TODO: Do we need to return the object we just deleted?
         else:

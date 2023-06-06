@@ -327,7 +327,7 @@ async def delete_dataset_metadata(
             query.append(MetadataDB.agent.creator.id == agent.creator.id)
 
         # delete from elasticsearch
-        delete_document_by_id(es, "metadata", str(metadata_in.id))
+        delete_document_by_id(es, "metadata", str(metadata_in.metadata_id))
 
         md = await MetadataDB.find_one(*query)
         if md is not None:

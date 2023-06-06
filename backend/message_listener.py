@@ -129,7 +129,7 @@ async def callback(message: AbstractIncomingMessage):
             event_msg = EventListenerJobUpdateDB(
                 job_id=job_id, status=cleaned_msg, timestamp=timestamp
             )
-            event_msg.save()
+            event_msg.insert()
             return True
         else:
             # We don't know what this job is. Reject the message.
