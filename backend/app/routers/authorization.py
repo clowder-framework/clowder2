@@ -57,7 +57,7 @@ async def save_authorization(
             status_code=404, detail=f"Groups not found: {missing_groups}"
         )
 
-    authorization = await AuthorizationDB(
+    authorization = AuthorizationDB(
         **authorization_in.dict(), creator=user, user_ids=user_ids
     )
     await authorization.insert()

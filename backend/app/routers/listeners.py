@@ -89,7 +89,7 @@ async def get_instance_id(
             for _ in range(10)
         )
         config_entry = ConfigEntryDB(key="instance_id", value=instance_id)
-        await config_entry.save()
+        await config_entry.insert()
         return config_entry
 
 
@@ -101,8 +101,8 @@ async def save_listener(
     """Register a new Event Listener with the system."""
     listener = EventListenerDB(**listener_in.dict(), creator=user)
     # TODO: Check for duplicates somehow?
-    await listener.save()
     return listener.dict()
+    await listener.insert()
 
 
 @legacy_router.post("", response_model=EventListenerOut)

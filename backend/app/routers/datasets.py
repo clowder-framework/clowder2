@@ -188,7 +188,7 @@ async def save_dataset(
     es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
 ):
     dataset = DatasetDB(**dataset_in.dict(), creator=user)
-    await dataset.save()
+    await dataset.insert()
 
     # Create authorization entry
     await AuthorizationDB(
