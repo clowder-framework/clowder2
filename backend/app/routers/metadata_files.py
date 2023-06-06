@@ -372,7 +372,7 @@ async def get_file_metadata(
             query.append(MetadataDB.agent.extractor.version == extractor_version)
 
         metadata = []
-        async for md in MetadataDB.find(query):
+        async for md in MetadataDB.find(*query):
             if md.definition is not None:
                 if (
                     md_def := await MetadataDefinitionDB(
