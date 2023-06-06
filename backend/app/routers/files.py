@@ -169,7 +169,8 @@ async def remove_file_entry(
     # delete from elasticsearch
     delete_document_by_id(es, "file", str(file_id))
     delete_document_by_query(es, "metadata", {"match": {"resource_id": str(file_id)}})
-    await FileDB.get(PydanticObjectId(file_id)).delete()
+    if (file := await FileDB.get(PydanticObjectId(file_id))) is not None:
+        await file.delete()
     await MetadataDB.find(MetadataDB.resource.resource_id == ObjectId(file_id)).delete()
     await FileVersionDB.find(FileVersionDB.file_id == ObjectId(file_id)).delete()
 
@@ -293,7 +294,7 @@ async def download_file(
         response = StreamingResponse(content.stream(settings.MINIO_UPLOAD_CHUNK_SIZE))
         response.headers["Content-Disposition"] = "attachment; filename=%s" % file.name
         # Increment download count
-        await file.update(Inc({FileDB.downloads, 1}))
+        await file.update(Inc({FileDB.downloads: 1}))
         return response
     else:
         raise HTTPException(status_code=404, detail=f"File {file_id} not found")
