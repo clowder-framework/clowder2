@@ -1,24 +1,26 @@
 import json
-import pika
-import string
 import random
-from fastapi import Request, HTTPException, Depends
-from pymongo import MongoClient
-from pika.adapters.blocking_connection import BlockingChannel
+import string
 
+import pika
+from fastapi import Depends
+from pika.adapters.blocking_connection import BlockingChannel
+from pymongo import MongoClient
+
+from app import dependencies
 from app.config import settings
 from app.keycloak_auth import get_token
-from app import dependencies
-from app.models.mongomodel import MongoDBRef
 from app.models.config import ConfigEntryDB, ConfigEntryOut
-from app.models.files import FileOut
 from app.models.datasets import DatasetOut
-from app.models.users import UserOut
+from app.models.files import FileOut
 from app.models.listeners import (
     EventListenerJob,
     EventListenerJobMessage,
     EventListenerDatasetJobMessage,
 )
+from app.models.mongomodel import MongoDBRef
+from app.models.users import UserOut
+from app.routers.users import get_user_job_key
 
 
 async def create_reply_queue():
@@ -80,7 +82,9 @@ async def submit_file_job(
 
     current_id = file_out.id
     current_datasetId = file_out.dataset_id
-    current_secretKey = str(token)
+    # TODO: Replace this with a per-user non-expiring API key (generate if previous was revoked)
+
+    current_secretKey = await get_user_job_key(user.email, db)
     try:
         msg_body = EventListenerJobMessage(
             filename=file_out.name,
@@ -129,11 +133,12 @@ async def submit_dataset_job(
     new_job = await db["listener_jobs"].insert_one(job.to_mongo())
     new_job_id = str(new_job.inserted_id)
 
+    current_secretKey = await get_user_job_key(user.email, db)
     msg_body = EventListenerDatasetJobMessage(
         datasetName=dataset_out.name,
         id=str(dataset_out.id),
         datasetId=str(dataset_out.id),
-        secretKey=token,
+        secretKey=current_secretKey,
         job_id=new_job_id,
     )
 
@@ -144,8 +149,7 @@ async def submit_dataset_job(
         routing_key=routing_key,
         body=json.dumps(msg_body.dict(), ensure_ascii=False),
         properties=pika.BasicProperties(
-            content_type="application/json", delivery_mode=1
+            content_type="application/json", delivery_mode=1, reply_to=reply_to
         ),
-        # reply_to=reply_to
     )
     return new_job_id

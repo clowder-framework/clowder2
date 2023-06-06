@@ -43,11 +43,18 @@ class UserOut(UserBase):
 class UserAPIKey(MongoModel):
     """API keys can have a reference name (e.g. 'Uploader script')"""
 
+    name: str
     key: str
     name: str
     user: EmailStr
     created: datetime = Field(default_factory=datetime.utcnow)
     expires: Optional[datetime] = None
+
+
+class ListenerAPIKey(UserAPIKey):
+    """API key per user that will be sent to extractors, stored separately."""
+
+    hash: str
 
 
 class UserAPIKeyOut(MongoModel):
