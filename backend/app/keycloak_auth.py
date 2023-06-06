@@ -15,7 +15,7 @@ from pydantic import Json
 
 from .config import settings
 from .models.tokens import TokenDB
-from .models.users import UserOut, UserAPIKeyDB, UserDB
+from .models.users import UserOut, UserAPIKeyDB, UserDB, ListenerAPIKeyDB
 
 logger = logging.getLogger(__name__)
 
@@ -87,12 +87,20 @@ async def get_token(
         try:
             payload = serializer.loads(api_key)
             # Key is valid, check expiration date in database
-            key = await UserAPIKeyDB.find_one(
-                UserAPIKeyDB.user == payload["user"], UserAPIKeyDB.key == payload["key"]
-            )
-            if key is not None:
+            if (
+                await ListenerAPIKeyDB.find_one(
+                    ListenerAPIKeyDB.user == payload["user"],
+                    ListenerAPIKeyDB.key == payload["key"],
+                )
+            ) is not None:
+                return {"preferred_username": payload["user"]}
+            elif (
+                key := await UserAPIKeyDB.find_one(
+                    UserAPIKeyDB.user == payload["user"],
+                    UserAPIKeyDB.key == payload["key"],
+                )
+            ) is not None:
                 current_time = datetime.utcnow()
-
                 if key.expires is not None and current_time >= key.expires:
                     # Expired key, delete it first
                     await key.delete()
@@ -153,10 +161,20 @@ async def get_current_user(
         try:
             payload = serializer.loads(api_key)
             # Key is valid, check expiration date in database
-            key = await UserAPIKeyDB.find_one(
-                UserAPIKeyDB.user == payload["user"], UserAPIKeyDB.key == payload["key"]
-            )
-            if key is not None:
+            if (
+                key := await ListenerAPIKeyDB.find_one(
+                    ListenerAPIKeyDB.user == payload["user"],
+                    ListenerAPIKeyDB.key == payload["key"],
+                )
+            ) is not None:
+                user_out = await UserDB.find_one(UserDB.email == key.user)
+                return user_out.dict()
+            elif (
+                key := await UserAPIKeyDB.find_one(
+                    UserAPIKeyDB.user == payload["user"],
+                    UserAPIKeyDB.key == payload["key"],
+                )
+            ) is not None:
                 current_time = datetime.utcnow()
 
                 if key.expires is not None and current_time >= key.expires:
@@ -212,10 +230,21 @@ async def get_current_username(
         try:
             payload = serializer.loads(api_key)
             # Key is valid, check expiration date in database
-            key = await UserAPIKeyDB.find_one(
-                UserAPIKeyDB.user == payload["user"], UserAPIKeyDB.key == payload.key
-            )
-            if key is not None:
+            if (
+                key := await ListenerAPIKeyDB.find_one(
+                    ListenerAPIKeyDB.user == payload["user"],
+                    ListenerAPIKeyDB.key == payload["key"],
+                )
+            ) is not None:
+                # Key is coming from a listener job
+                return key.user
+            elif (
+                key := await UserAPIKeyDB.find_one(
+                    UserAPIKeyDB.user == payload["user"],
+                    UserAPIKeyDB.key == payload["key"],
+                )
+            ) is not None:
+                # Key is coming from a user request
                 current_time = datetime.utcnow()
 
                 if key.expires is not None and current_time >= key.expires:

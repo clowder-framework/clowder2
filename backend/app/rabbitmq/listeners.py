@@ -1,24 +1,25 @@
 import json
-import pika
-import string
 import random
-from fastapi import Request, HTTPException, Depends
+import string
+
+import pika
+from fastapi import Depends
 from pika.adapters.blocking_connection import BlockingChannel
 
-from app.config import settings
-from app.keycloak_auth import get_token
 from app import dependencies
-from app.models.mongomodel import MongoDBRef
+from app.keycloak_auth import get_token
 from app.models.config import ConfigEntryDB, ConfigEntryOut
-from app.models.files import FileOut
 from app.models.datasets import DatasetOut
-from app.models.users import UserOut
+from app.models.files import FileOut
 from app.models.listeners import (
     EventListenerJobDB,
     EventListenerDB,
     EventListenerJobMessage,
     EventListenerDatasetJobMessage,
 )
+from app.models.mongomodel import MongoDBRef
+from app.models.users import UserOut
+from app.routers.users import get_user_job_key
 
 
 async def create_reply_queue():
@@ -71,12 +72,13 @@ async def submit_file_job(
     )
     await job.insert()
 
+    current_secretKey = await get_user_job_key(user.email)
     msg_body = EventListenerJobMessage(
         filename=file_out.name,
         fileSize=file_out.bytes,
         id=str(file_out.id),
         datasetId=str(file_out.dataset_id),
-        secretKey=token,
+        secretKey=current_secretKey,
         job_id=str(job.id),
     )
     reply_to = await create_reply_queue()
@@ -108,11 +110,12 @@ async def submit_dataset_job(
     )
     await job.save()
 
+    current_secretKey = await get_user_job_key(user.email)
     msg_body = EventListenerDatasetJobMessage(
         datasetName=dataset_out.name,
         id=str(dataset_out.id),
         datasetId=str(dataset_out.id),
-        secretKey=token,
+        secretKey=current_secretKey,
         job_id=str(job.id),
     )
     reply_to = await create_reply_queue()

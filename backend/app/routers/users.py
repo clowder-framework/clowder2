@@ -8,7 +8,13 @@ from itsdangerous.url_safe import URLSafeSerializer
 
 from app.config import settings
 from app.keycloak_auth import get_current_username
-from app.models.users import UserDB, UserOut, UserAPIKeyDB, UserAPIKeyOut
+from app.models.users import (
+    UserDB,
+    UserOut,
+    UserAPIKeyDB,
+    UserAPIKeyOut,
+    ListenerAPIKeyDB,
+)
 
 router = APIRouter()
 
@@ -50,7 +56,6 @@ async def generate_user_api_key(
     serializer = URLSafeSerializer(settings.local_auth_secret, salt="api_key")
     unique_key = token_urlsafe(16)
     hashed_key = serializer.dumps({"user": current_user, "key": unique_key})
-
     user_key = UserAPIKeyDB(user=current_user, key=unique_key, name=name)
     if mins > 0:
         user_key.expires = user_key.created + timedelta(minutes=mins)
@@ -108,3 +113,25 @@ async def get_user_by_name(username: str):
     if (user := await UserDB.find_one(UserDB.email == username)) is not None:
         return user.dict()
     raise HTTPException(status_code=404, detail=f"User {username} not found")
+
+
+async def get_user_job_key(username: str):
+    """Return a non-expiring API key to be sent to jobs (i.e. extractors). If it was deleted by the user, a new one
+    will be created, otherwise it will be re-used."""
+    key = "__user_job_key"
+    if (
+        job_key := await ListenerAPIKeyDB.find_one(
+            ListenerAPIKeyDB.user == username, ListenerAPIKeyDB.name == key
+        )
+    ) is not None:
+        return job_key.hash
+    else:
+        # TODO: enforce permissions here...
+        serializer = URLSafeSerializer(settings.local_auth_secret, salt="api_key")
+        unique_key = token_urlsafe(16)
+        hashed_key = serializer.dumps({"user": username, "key": unique_key})
+        user_key = ListenerAPIKeyDB(
+            user=username, key=unique_key, hash=hashed_key, name=key
+        )
+        await user_key.insert()
+        return hashed_key
