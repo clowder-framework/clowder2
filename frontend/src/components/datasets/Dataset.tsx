@@ -86,7 +86,9 @@ export const Dataset = (): JSX.Element => {
 	const datasetRole = useSelector(
 		(state: RootState) => state.dataset.datasetRole
 	);
-
+	const datasetStatus = useSelector(
+		(state: RootState) => state.dataset.about.status
+	);
 	// state
 	const [selectedTabIndex, setSelectedTabIndex] = useState<number>(0);
 	const [enableAddMetadata, setEnableAddMetadata] =
@@ -107,14 +109,14 @@ export const Dataset = (): JSX.Element => {
 	const [errorOpen, setErrorOpen] = useState(false);
 	const [showForbiddenPage, setShowForbiddenPage] = useState(false);
 	const [showNotFoundPage, setShowNotFoundPage] = useState(false);
-	
+
 	useEffect(() => {
 		if (reason == "Forbidden") {
 			setShowForbiddenPage(true);
-        
+
 		} else if (reason == "Not Found") {
 			setShowNotFoundPage(true);
-        
+
 		} else if (reason !== "" && reason !== null && reason !== undefined) {
 			setErrorOpen(true);
 		}
@@ -202,7 +204,7 @@ export const Dataset = (): JSX.Element => {
 
 	if (showForbiddenPage) {
 		return <Forbidden />;
-    
+
 	} else if (showNotFoundPage) {
 		return <PageNotFound />;
 	}
@@ -296,14 +298,17 @@ export const Dataset = (): JSX.Element => {
 							{...a11yProps(4)}
 							disabled={false}
 						/>
-						<Tab
-							icon={<ShareIcon />}
-							iconPosition="start"
-							sx={TabStyle}
-							label="Sharing"
-							{...a11yProps(5)}
-							disabled={false}
-						/>
+						{ datasetRole.role !== undefined  && datasetRole.role !== "viewer" ?
+							<Tab
+								icon={<ShareIcon />}
+								iconPosition="start"
+								sx={TabStyle}
+								label="Sharing"
+								{...a11yProps(5)}
+								disabled={false}
+							/> :
+							<></>
+						}
 					</Tabs>
 					<TabPanel value={selectedTabIndex} index={0}>
 						<FilesTable datasetId={datasetId} folderId={folderId} />
