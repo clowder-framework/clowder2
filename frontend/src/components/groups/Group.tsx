@@ -13,11 +13,9 @@ import MembersTable from "./MembersTable";
 import AddMemberModal from "./AddMemberModal";
 import RoleChip from "../auth/RoleChip";
 import DeleteIcon from "@mui/icons-material/Delete";
-import { ActionModal } from "../dialog/ActionModal";
 import { MainBreadcrumbs } from "../navigation/BreadCrumb";
-import { resetFailedReason } from "../../actions/common";
 import { config } from "../../app.config";
-import { handleErrorReport } from "../../utils/common";
+import { ErrorModal } from "../errors/ErrorModal";
 
 export function Group() {
 	// path parameter
@@ -53,21 +51,7 @@ export function Group() {
 	}, []);
 
 	// Error msg dialog
-	const reason = useSelector((state: RootState) => state.error.reason);
-	const stack = useSelector((state: RootState) => state.error.stack);
-	const dismissError = () => dispatch(resetFailedReason());
-
 	const [errorOpen, setErrorOpen] = useState(false);
-	useEffect(() => {
-		if (reason !== "" && reason !== null && reason !== undefined) {
-			setErrorOpen(true);
-		}
-	}, [reason]);
-	const handleErrorCancel = () => {
-		// reset error message and close the error window
-		dismissError();
-		setErrorOpen(false);
-	};
 
 	// for breadcrumb
 	const paths = [
@@ -88,38 +72,13 @@ export function Group() {
 	return (
 		<Layout>
 			{/*Error Message dialogue*/}
-			<ActionModal
-				actionOpen={errorOpen}
-				actionTitle="Something went wrong..."
-				actionText={reason}
-				actionBtnName="Report"
-				handleActionBtnClick={() => {
-					handleErrorReport(reason, stack);
-				}}
-				handleActionCancel={handleErrorCancel}
-			/>
+			<ErrorModal errorOpen={errorOpen} setErrorOpen={setErrorOpen} />
 			{/*breadcrumb*/}
 			<Grid container>
 				<Grid item xs={10} sx={{ display: "flex", alignItems: "center" }}>
 					<MainBreadcrumbs paths={paths} />
 				</Grid>
 			</Grid>
-			{/*Delete group modal*/}
-			<ActionModal
-				actionOpen={deleteGroupConfirmOpen}
-				actionTitle="Are you sure?"
-				actionText="Do you really want to delete this group? This process cannot be undone."
-				actionBtnName="Delete"
-				handleActionBtnClick={() => {
-					groupDeleted(groupId);
-					setDeleteGroupConfirmOpen(false);
-					// Go to Explore page
-					history("/");
-				}}
-				handleActionCancel={() => {
-					setDeleteGroupConfirmOpen(false);
-				}}
-			/>
 			<AddMemberModal
 				open={addMemberModalOpen}
 				handleClose={() => {

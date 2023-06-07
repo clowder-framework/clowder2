@@ -4,7 +4,6 @@ import { Box, Button, ButtonGroup, Grid, Tab, Tabs } from "@mui/material";
 import { RootState } from "../types/data";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchDatasets } from "../actions/dataset";
-import { resetFailedReason } from "../actions/common";
 import { downloadThumbnail } from "../utils/thumbnail";
 
 import { a11yProps, TabPanel } from "./tabs/TabComponent";
@@ -29,7 +28,6 @@ export const Explore = (): JSX.Element => {
 		limit: number | undefined,
 		mine: boolean | undefined
 	) => dispatch(fetchDatasets(skip, limit, mine));
-	const dismissError = () => dispatch(resetFailedReason());
 	const datasets = useSelector((state: RootState) => state.dataset.datasets);
 
 	const [datasetThumbnailList, setDatasetThumbnailList] = useState<any>([]);
@@ -114,11 +112,7 @@ export const Explore = (): JSX.Element => {
 		<Layout>
 			<div className="outer-container">
 				{/*Error Message dialogue*/}
-				<ErrorModal
-					errorOpen={errorOpen}
-					setErrorOpen={setErrorOpen}
-					dismissError={dismissError}
-				/>
+				<ErrorModal errorOpen={errorOpen} setErrorOpen={setErrorOpen} />
 				<div className="inner-container">
 					<Grid container spacing={4}>
 						<Grid item xs>

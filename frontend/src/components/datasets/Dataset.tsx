@@ -9,7 +9,6 @@ import {
 	fetchFoldersInDataset,
 } from "../../actions/dataset";
 import { fetchFolderPath } from "../../actions/folder";
-import { resetFailedReason } from "../../actions/common";
 
 import { a11yProps, TabPanel } from "../tabs/TabComponent";
 import FilesTable from "../files/FilesTable";
@@ -76,7 +75,6 @@ export const Dataset = (): JSX.Element => {
 		dispatch(fetchDatasetAbout(datasetId));
 	const listDatasetMetadata = (datasetId: string | undefined) =>
 		dispatch(fetchDatasetMetadata(datasetId));
-	const dismissError = () => dispatch(resetFailedReason());
 
 	// mapStateToProps
 	const about = useSelector((state: RootState) => state.dataset.about);
@@ -183,11 +181,7 @@ export const Dataset = (): JSX.Element => {
 	return (
 		<Layout>
 			{/*Error Message dialogue*/}
-			<ErrorModal
-				errorOpen={errorOpen}
-				setErrorOpen={setErrorOpen}
-				dismissError={dismissError}
-			/>
+			<ErrorModal errorOpen={errorOpen} setErrorOpen={setErrorOpen} />
 			<Grid container>
 				{/*title*/}
 				<Grid item xs={8} sx={{ display: "flex", alignItems: "center" }}>

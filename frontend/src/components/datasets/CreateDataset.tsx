@@ -14,8 +14,6 @@ import { RootState } from "../../types/data";
 
 import { CreateDatasetModal } from "./CreateDatasetModal";
 import { CreateMetadata } from "../metadata/CreateMetadata";
-import { ActionModal } from "../dialog/ActionModal";
-import { resetFailedReason } from "../../actions/common";
 import {
 	fetchMetadataDefinitions,
 	postDatasetMetadata,
@@ -24,7 +22,7 @@ import { MetadataIn } from "../../openapi/v2";
 import { datasetCreated, resetDatsetCreated } from "../../actions/dataset";
 import { useNavigate } from "react-router-dom";
 import Layout from "../Layout";
-import { handleErrorReport } from "../../utils/common";
+import { ErrorModal } from "../errors/ErrorModal";
 
 export const CreateDataset = (): JSX.Element => {
 	const dispatch = useDispatch();
@@ -48,13 +46,9 @@ export const CreateDataset = (): JSX.Element => {
 		getMetadatDefinitions(null, 0, 100);
 	}, []);
 
-	// Error msg dialog
-	const reason = useSelector((state: RootState) => state.error.reason);
-	const stack = useSelector((state: RootState) => state.error.stack);
 	const metadataDefinitionList = useSelector(
 		(state: RootState) => state.metadata.metadataDefinitionList
 	);
-	const dismissError = () => dispatch(resetFailedReason());
 	const [errorOpen, setErrorOpen] = useState(false);
 
 	const [datasetRequestForm, setdatasetRequestForm] = useState({});
@@ -62,17 +56,6 @@ export const CreateDataset = (): JSX.Element => {
 	const [allowSubmit, setAllowSubmit] = React.useState<boolean>(false);
 
 	const history = useNavigate();
-
-	useEffect(() => {
-		if (reason !== "" && reason !== null && reason !== undefined) {
-			setErrorOpen(true);
-		}
-	}, [reason]);
-	const handleErrorCancel = () => {
-		// reset error message and close the error window
-		dismissError();
-		setErrorOpen(false);
-	};
 
 	const checkIfFieldsAreRequired = () => {
 		let required = false;
@@ -164,16 +147,7 @@ export const CreateDataset = (): JSX.Element => {
 		<Layout>
 			<Box className="outer-container">
 				{/*Error Message dialogue*/}
-				<ActionModal
-					actionOpen={errorOpen}
-					actionTitle="Something went wrong..."
-					actionText={reason}
-					actionBtnName="Report"
-					handleActionBtnClick={() => {
-						handleErrorReport(reason, stack);
-					}}
-					handleActionCancel={handleErrorCancel}
-				/>
+				<ErrorModal errorOpen={errorOpen} setErrorOpen={setErrorOpen} />
 				<Box className="inner-container">
 					<Box>
 						<Stepper activeStep={activeStep} orientation="vertical">

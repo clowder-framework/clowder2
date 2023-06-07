@@ -1,20 +1,14 @@
 import React, { useEffect, useState } from "react";
 import config from "../../app.config";
 import { Box, Button, Grid, Tab, Tabs, Typography } from "@mui/material";
-import {
-	downloadResource,
-	handleErrorReport,
-	parseDate,
-} from "../../utils/common";
+import { downloadResource, parseDate } from "../../utils/common";
 import { PreviewConfiguration, RootState } from "../../types/data";
 import { useParams, useSearchParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { resetFailedReason } from "../../actions/common";
 
 import { a11yProps, TabPanel } from "../tabs/TabComponent";
 import { fetchFileSummary, fetchFileVersions } from "../../actions/file";
 import { MainBreadcrumbs } from "../navigation/BreadCrumb";
-import { ActionModal } from "../dialog/ActionModal";
 import { FileVersionHistory } from "../versions/FileVersionHistory";
 import { DisplayMetadata } from "../metadata/DisplayMetadata";
 import { DisplayListenerMetadata } from "../metadata/DisplayListenerMetadata";
@@ -40,6 +34,7 @@ import AssessmentIcon from "@mui/icons-material/Assessment";
 import HistoryIcon from "@mui/icons-material/History";
 import { Forbidden } from "../errors/Forbidden";
 import { PageNotFound } from "../errors/PageNotFound";
+import { ErrorModal } from "../errors/ErrorModal";
 
 export const File = (): JSX.Element => {
 	// path parameter
@@ -61,7 +56,6 @@ export const File = (): JSX.Element => {
 		dispatch(fetchFileVersions(fileId));
 	const listFileMetadata = (fileId: string | undefined) =>
 		dispatch(fetchFileMetadata(fileId));
-	const dismissError = () => dispatch(resetFailedReason());
 	const createFileMetadata = (fileId: string | undefined, metadata: object) =>
 		dispatch(createFileMetadataAction(fileId, metadata));
 	const updateFileMetadata = (fileId: string | undefined, metadata: object) =>
@@ -76,8 +70,6 @@ export const File = (): JSX.Element => {
 	const fileVersions = useSelector(
 		(state: RootState) => state.file.fileVersions
 	);
-	const reason = useSelector((state: RootState) => state.error.reason);
-	const stack = useSelector((state: RootState) => state.error.stack);
 	const fileRole = useSelector((state: RootState) => state.file.fileRole);
 
 	const [selectedTabIndex, setSelectedTabIndex] = useState(0);
@@ -105,21 +97,6 @@ export const File = (): JSX.Element => {
 	const [errorOpen, setErrorOpen] = useState(false);
 	const [showForbiddenPage, setShowForbiddenPage] = useState(false);
 	const [showNotFoundPage, setShowNotFoundPage] = useState(false);
-
-	useEffect(() => {
-		if (reason == "Forbidden") {
-			setShowForbiddenPage(true);
-		} else if (reason == "Not Found") {
-			setShowNotFoundPage(true);
-		} else if (reason !== "" && reason !== null && reason !== undefined) {
-			setErrorOpen(true);
-		}
-	}, [reason]);
-	const handleErrorCancel = () => {
-		// reset error message and close the error window
-		dismissError();
-		setErrorOpen(false);
-	};
 
 	useEffect(() => {
 		(async () => {
@@ -244,17 +221,7 @@ export const File = (): JSX.Element => {
 	return (
 		<Layout>
 			{/*Error Message dialogue*/}
-			<ActionModal
-				actionOpen={errorOpen}
-				actionTitle="Something went wrong..."
-				actionText={reason}
-				actionBtnName="Report"
-				handleActionBtnClick={() => {
-					handleErrorReport(reason, stack);
-				}}
-				handleActionCancel={handleErrorCancel}
-			/>
-
+			<ErrorModal errorOpen={errorOpen} setErrorOpen={setErrorOpen} />
 			<Grid container>
 				<Grid item xs={8} sx={{ display: "flex", alignItems: "center" }}>
 					<MainBreadcrumbs paths={paths} />

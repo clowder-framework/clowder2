@@ -3,18 +3,19 @@ import React, { useEffect } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "../../types/data";
 import { handleErrorReport } from "../../utils/common";
+import { resetFailedReason } from "../../actions/common";
 
 type ErrorModalProps = {
 	errorOpen: boolean;
 	setErrorOpen: any;
-	dismissError: any;
 };
 
 export const ErrorModal = (props: ErrorModalProps) => {
-	const { errorOpen, setErrorOpen, dismissError } = props;
+	const { errorOpen, setErrorOpen } = props;
 
 	const reason = useSelector((state: RootState) => state.error.reason);
 	const stack = useSelector((state: RootState) => state.error.stack);
+	const dismissError = () => dispatch(resetFailedReason());
 
 	// Error msg dialog
 	useEffect(() => {
@@ -41,3 +42,6 @@ export const ErrorModal = (props: ErrorModalProps) => {
 		/>
 	);
 };
+function dispatch(arg0: (dispatch: any) => void) {
+	throw new Error("Function not implemented.");
+}

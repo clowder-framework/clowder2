@@ -31,9 +31,7 @@ import Layout from "../Layout";
 import { MainBreadcrumbs } from "../navigation/BreadCrumb";
 import GroupAddIcon from "@mui/icons-material/GroupAdd";
 import { CreateGroup } from "./CreateGroup";
-import { ActionModal } from "../dialog/ActionModal";
-import { resetFailedReason } from "../../actions/common";
-import { handleErrorReport } from "../../utils/common";
+import { ErrorModal } from "../errors/ErrorModal";
 
 export function Groups() {
 	// Redux connect equivalent
@@ -95,21 +93,7 @@ export function Groups() {
 	}, [skip]);
 
 	// Error msg dialog
-	const reason = useSelector((state: RootState) => state.error.reason);
-	const stack = useSelector((state: RootState) => state.error.stack);
-	const dismissError = () => dispatch(resetFailedReason());
-
 	const [errorOpen, setErrorOpen] = useState(false);
-	useEffect(() => {
-		if (reason !== "" && reason !== null && reason !== undefined) {
-			setErrorOpen(true);
-		}
-	}, [reason]);
-	const handleErrorCancel = () => {
-		// reset error message and close the error window
-		dismissError();
-		setErrorOpen(false);
-	};
 
 	const previous = () => {
 		if (currPageNum - 1 >= 0) {
@@ -127,16 +111,8 @@ export function Groups() {
 	return (
 		<Layout>
 			{/*Error Message dialogue*/}
-			<ActionModal
-				actionOpen={errorOpen}
-				actionTitle="Something went wrong..."
-				actionText={reason}
-				actionBtnName="Report"
-				handleActionBtnClick={() => {
-					handleErrorReport(reason, stack);
-				}}
-				handleActionCancel={handleErrorCancel}
-			/>
+			<ErrorModal errorOpen={errorOpen} setErrorOpen={setErrorOpen} />
+
 			{/*create new group*/}
 			<Dialog
 				open={createGroupOpen}

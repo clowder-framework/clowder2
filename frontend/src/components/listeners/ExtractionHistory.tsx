@@ -12,9 +12,6 @@ import {
 } from "@mui/material";
 import { useDispatch, useSelector } from "react-redux";
 import { Listener, RootState } from "../../types/data";
-
-import { ActionModal } from "../dialog/ActionModal";
-import { resetFailedReason } from "../../actions/common";
 import Layout from "../Layout";
 import { fetchListenerJobs, fetchListeners } from "../../actions/listeners";
 import { ArrowBack, ArrowForward } from "@material-ui/icons";
@@ -22,7 +19,8 @@ import { ListenerInfo } from "./ListenerInfo";
 import { ExtractionJobs } from "./ExtractionJobs";
 import { ClowderTitle } from "../styledComponents/ClowderTitle";
 import { format } from "date-fns";
-import { handleErrorReport, parseDate } from "../../utils/common";
+import { parseDate } from "../../utils/common";
+import { ErrorModal } from "../errors/ErrorModal";
 
 const createData = (
 	status: string,
@@ -108,10 +106,6 @@ export const ExtractionHistory = (): JSX.Element => {
 	const listeners = useSelector((state: RootState) => state.listener.listeners);
 	const jobs = useSelector((state: RootState) => state.listener.jobs);
 
-	// Error msg dialog
-	const reason = useSelector((state: RootState) => state.error.reason);
-	const stack = useSelector((state: RootState) => state.error.stack);
-	const dismissError = () => dispatch(resetFailedReason());
 	const [errorOpen, setErrorOpen] = useState(false);
 	const [currPageNum, setCurrPageNum] = useState<number>(0);
 	const [limit] = useState<number>(20);
@@ -213,32 +207,12 @@ export const ExtractionHistory = (): JSX.Element => {
 		}
 	};
 
-	useEffect(() => {
-		if (reason !== "" && reason !== null && reason !== undefined) {
-			setErrorOpen(true);
-		}
-	}, [reason]);
-
-	const handleErrorCancel = () => {
-		// reset error message and close the error window
-		dismissError();
-		setErrorOpen(false);
-	};
-
 	return (
 		<Layout>
 			<Box className="outer-container">
 				{/*Error Message dialogue*/}
-				<ActionModal
-					actionOpen={errorOpen}
-					actionTitle="Something went wrong..."
-					actionText={reason}
-					actionBtnName="Report"
-					handleActionBtnClick={() => {
-						handleErrorReport(reason, stack);
-					}}
-					handleActionCancel={handleErrorCancel}
-				/>
+				<ErrorModal errorOpen={errorOpen} setErrorOpen={setErrorOpen} />
+
 				{/*<Box className="inner-container">*/}
 				<Grid container spacing={4}>
 					<Grid item xs={12} sm={3} md={3} lg={3} xl={3} />
