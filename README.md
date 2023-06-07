@@ -20,7 +20,7 @@ store and [Traefik](https://traefik.io/traefik/) as the application proxy.
 
 ## Running in Docker
 
-To run the full stack using [Docker](https://www.docker.com/), please use the following instructions:
+To run the full stack using [Docker](https://www.docker.com/) (recommended), please use the following instructions:
 
 1. Run all Docker services with `docker compose up --scale backend=4 --build`. This will start the services with four
    instances of the backend
@@ -36,7 +36,7 @@ To run the full stack using [Docker](https://www.docker.com/), please use the fo
 ## Developing
 
 When developing, the required services can be run using Docker. You can then run the backend
-and frontend standalone from the command line or in your favorite IDE (to make debugging easier). We recommend
+and frontend modules from the command line or in your favorite IDE (to make debugging easier). We recommend
 using [PyCharm](https://www.jetbrains.com/pycharm/) and have
 made our run configurations available in the `.run` folder. PyCharm should automatically import it, but you will have
 to change the path to the Python virtual environment to point to your path on your host.
