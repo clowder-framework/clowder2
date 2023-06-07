@@ -44,9 +44,9 @@ to change the path to the Python virtual environment to point to your path on yo
 ### Required Services
 
 - `./docker-dev.sh up` brings up the required services in the background.
-- `docker-compose logs -f` shows and follows the logs for all container. To look at the logs of individual containers
-  provide the container's name. For example, for viewing the backend logs `docker-compose logs -f backend`.
-- `./docker-dev.sh down` brings down the stack.
+- `docker-compose logs -f` displays the live logs for all containers. To view the logs of individual containers,
+  provide the container name. For example, for viewing the backend logs, run `docker-compose logs -f backend`.
+- `./docker-dev.sh down` brings down the required services.
 
 ### Backend
 
@@ -54,7 +54,7 @@ After starting up the required services, setup and run the backend.
 
 The backend is developed using [Python](https://www.python.org/), [FastAPI](https://fastapi.tiangolo.com/),
 and [Motor](https://motor.readthedocs.io/en/stable/).
-We recommend using [Python 3.9](https://www.python.org/downloads/release/python-390/)
+We recommend using [Python 3.9](https://www.python.org/downloads/)
 and [Pipenv](https://github.com/pypa/pipenv) for dependency management.
 
 You can run the backend using the PyCharm's run configuration provided under `.run` or from the command line using the
