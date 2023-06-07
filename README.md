@@ -39,7 +39,16 @@ When developing, the required services can be run using Docker. You can then run
 and frontend modules from the command line or in your favorite IDE (to make debugging easier). We recommend
 using [PyCharm](https://www.jetbrains.com/pycharm/) and have
 made our run configurations available in the `.run` folder. PyCharm should automatically import it, but you will have
-to change the path to the Python virtual environment to point to your path on your host.
+to change the path to the Python virtual environment to point to your path on your host (see Initial Dependencies
+section below).
+
+### Initial Dependencies
+
+- Run `python3 -m venv venv` to create a Python Virtual Environment and add it to PyCharm by navigating to 
+ `PyCharm -> Settings... -> Project: clowder2 -> Python Interpreter -> Add Interpreter`.
+- Run `source venv/bin/activate && pip install --upgrade pip` to activate the created Python Virtual Environment and upgrade
+  pip.
+- Run `pip install pipenv` to install Pipenv.
 
 ### Required Services
 
@@ -55,26 +64,28 @@ After starting up the required services, setup and run the backend.
 The backend is developed using [Python](https://www.python.org/), [FastAPI](https://fastapi.tiangolo.com/),
 and [Motor](https://motor.readthedocs.io/en/stable/).
 We recommend using [Python 3.9](https://www.python.org/downloads/)
-and [Pipenv](https://github.com/pypa/pipenv) for dependency management.
+and [Pipenv](https://pipenv.pypa.io/en/latest/) for dependency management.
 
 You can run the backend using the PyCharm's run configuration provided under `.run` or from the command line using the
 following steps.
 
 1. Switch to backend directory `cd backend`.
 2. Install dependencies using `pipenv install --dev`.
-3. Run app from command line (if you set it up in PyCharm you can use its debug functions):
+3. Run the backend module from PyCharm by navigating to `PyCharm -> Run -> Run...` and clicking `uvicorn`. Running
+   directly from PyCharm helps by providing easy access to its debugging features.
+4. Alternatively, you can the run the backend module from the command line:
    ```pipenv run uvicorn app.main:app --reload```
-4. API docs are available at `http://localhost:8000/docs`. Default API is deployed at `http://localhost:8000/api/v2`.
-5. Create a user using `POST /api/v2/users` and getting a JWT token by using `POST /api/v2/login`. Place the token in
+5. API docs are available at `http://localhost:8000/docs`. The API base URL is `http://localhost:8000/api/v2`.
+6. Create a user using `POST /api/v2/users` and getting a JWT token by using `POST /api/v2/login`. Place the token in
    header of requests that require authentications using the `Authorization: Bearer <your token>` HTTP header.
     * You can also run the frontend below and use the Login link available there.
-6. Manually run tests before pushing with `pipenv run pytest -v` or right-clicking on `test` folder and clicking `Run`
+7. Manually run tests before pushing with `pipenv run pytest -v` or right-clicking on `test` folder and clicking `Run`
    in PyCharm.
-7. Linting is done using [Black]((https://black.readthedocs.io/en/stable/)). You can set up PyCharm to automatically
+8. Linting is done using [Black]((https://black.readthedocs.io/en/stable/)). You can set up PyCharm to automatically
    run it when you save a file using
    these [instructions](https://black.readthedocs.io/en/stable/integrations/editors.html).
    The git repository includes an action to run Black on push and pull_request.
-8. Before pushing new code, please make sure all files are properly formatted by running the following command in
+9. Before pushing new code, please make sure all files are properly formatted by running the following command in
    the `/backend` directory:
    ```pipenv run black app```
 
