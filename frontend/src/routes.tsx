@@ -23,14 +23,15 @@ import { Search } from "./components/search/Search";
 import { isAuthorized } from "./utils/common";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "./types/data";
-import { resetLogout } from "./actions/common";
+import { refreshToken, resetLogout } from "./actions/common";
 import { Explore } from "./components/Explore";
 import { ExtractionHistory } from "./components/listeners/ExtractionHistory";
 import { fetchDatasetRole, fetchFileRole } from "./actions/authorization";
 import { PageNotFound } from "./components/errors/PageNotFound";
 import { Forbidden } from "./components/errors/Forbidden";
 import { ApiKeys } from "./components/ApiKeys/ApiKey";
-import {Profile}  from "./components/users/Profile";
+import { Profile } from "./components/users/Profile";
+import config from "./app.config";
 // https://dev.to/iamandrewluca/private-route-in-react-router-v6-lg5
 const PrivateRoute = (props): JSX.Element => {
 	const { children } = props;
@@ -38,6 +39,7 @@ const PrivateRoute = (props): JSX.Element => {
 	const history = useNavigate();
 
 	const dispatch = useDispatch();
+
 	const loggedOut = useSelector((state: RootState) => state.error.loggedOut);
 	const reason = useSelector((state: RootState) => state.error.reason);
 	const dismissLogout = () => dispatch(resetLogout());
@@ -48,6 +50,18 @@ const PrivateRoute = (props): JSX.Element => {
 		dispatch(fetchFileRole(fileId));
 	const { datasetId } = useParams<{ datasetId?: string }>();
 	const { fileId } = useParams<{ fileId?: string }>();
+
+	// periodically call login endpoint once logged in
+	useEffect(() => {
+		// Call the refreshToken function immediately
+		refreshToken(dispatch, null);
+
+		// Call the refreshToken function every minute
+		const intervalId = setInterval(refreshToken, config.refreshTokenInterval);
+
+		// Clean up the interval when the component is unmounted
+		return () => clearInterval(intervalId);
+	}, []);
 
 	// log user out if token expired/unauthorized
 	useEffect(() => {

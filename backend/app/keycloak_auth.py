@@ -17,7 +17,7 @@ from pymongo import MongoClient
 
 from . import dependencies
 from .config import settings
-from .models.users import UserOut, UserAPIKey
+from .models.users import UserOut, UserAPIKey, ListenerAPIKey
 
 logger = logging.getLogger(__name__)
 
@@ -49,7 +49,7 @@ oauth2_scheme = OAuth2AuthorizationCodeBearer(
 )
 
 # Passing in API key via header
-api_key_header = APIKeyHeader(name="x-api-key", auto_error=False)
+api_key_header = APIKeyHeader(name="X-API-KEY", auto_error=False)
 
 
 async def get_token(
@@ -91,6 +91,12 @@ async def get_token(
             payload = serializer.loads(api_key)
             # Key is valid, check expiration date in database
             if (
+                await db["listener_keys"].find_one(
+                    {"user": payload["user"], "key": payload["key"]}
+                )
+            ) is not None:
+                return {"preferred_username": payload["user"]}
+            elif (
                 key_entry := await db["user_keys"].find_one(
                     {"user": payload["user"], "key": payload["key"]}
                 )
@@ -160,6 +166,14 @@ async def get_current_user(
             payload = serializer.loads(api_key)
             # Key is valid, check expiration date in database
             if (
+                key_entry := await db["listener_keys"].find_one(
+                    {"user": payload["user"], "key": payload["key"]}
+                )
+            ) is not None:
+                key = ListenerAPIKey.from_mongo(key_entry)
+                user_out = await db["users"].find_one({"email": key.user})
+                return UserOut.from_mongo(user_out)
+            if (
                 key_entry := await db["user_keys"].find_one(
                     {"user": payload["user"], "key": payload["key"]}
                 )
@@ -222,10 +236,19 @@ async def get_current_username(
             payload = serializer.loads(api_key)
             # Key is valid, check expiration date in database
             if (
+                key_entry := await db["listener_keys"].find_one(
+                    {"user": payload["user"], "key": payload["key"]}
+                )
+            ) is not None:
+                # Key is coming from a listener job
+                key = ListenerAPIKey.from_mongo(key_entry)
+                return key.user
+            elif (
                 key_entry := await db["user_keys"].find_one(
                     {"user": payload["user"], "key": payload["key"]}
                 )
             ) is not None:
+                # Key is coming from a user request
                 key = UserAPIKey.from_mongo(key_entry)
                 current_time = datetime.utcnow()
 

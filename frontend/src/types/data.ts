@@ -193,10 +193,11 @@ export interface UserState {
 	errorMsg: string;
 	hashedKey: string;
 	apiKeys: UserAPIKeyOut[];
-	profile: UserProfile;
+	profile: UserOut;
 }
 
 export interface ErrorState {
+	origin: string;
 	stack: string;
 	reason: string;
 	loggedOut: boolean;
@@ -223,4 +224,14 @@ export interface RootState {
 	group: GroupState;
 	user: UserState;
 	folder: FolderState;
+}
+
+export interface EventListenerJobStatus {
+	created: string;
+	started: string;
+	processing: string;
+	succeeded: string;
+	error: string;
+	skipped: string;
+	resubmitted: string;
 }

@@ -167,13 +167,13 @@ interface RESET_API_KEY {
 }
 
 interface FAILED {
-	stack: "string";
+	stack: string;
 	type: "FAILED";
 	reason: string;
 }
 
 interface NOT_FOUND {
-	stack: "string";
+	stack: string;
 	type: "NOT_FOUND";
 	reason: string;
 }
