@@ -1,19 +1,18 @@
 import React, { useEffect, useState } from "react";
 import { Box, Button, ButtonGroup, Grid, Tab, Tabs } from "@mui/material";
 
-import { Dataset, RootState } from "../types/data";
+import { RootState } from "../types/data";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchDatasets } from "../actions/dataset";
 import { resetFailedReason } from "../actions/common";
 import { downloadThumbnail } from "../utils/thumbnail";
 
 import { a11yProps, TabPanel } from "./tabs/TabComponent";
-import { ActionModal } from "./dialog/ActionModal";
 import DatasetCard from "./datasets/DatasetCard";
 import { ArrowBack, ArrowForward } from "@material-ui/icons";
 import Layout from "./Layout";
 import { Listeners } from "./listeners/Listeners";
-import { handleErrorReport } from "../utils/common";
+import { ErrorModal } from "./errors/ErrorModal";
 
 const tab = {
 	fontStyle: "normal",
@@ -32,8 +31,6 @@ export const Explore = (): JSX.Element => {
 	) => dispatch(fetchDatasets(skip, limit, mine));
 	const dismissError = () => dispatch(resetFailedReason());
 	const datasets = useSelector((state: RootState) => state.dataset.datasets);
-	const reason = useSelector((state: RootState) => state.error.reason);
-	const stack = useSelector((state: RootState) => state.error.stack);
 
 	const [datasetThumbnailList, setDatasetThumbnailList] = useState<any>([]);
 	// TODO add option to determine limit number; default show 5 datasets each time
@@ -45,25 +42,12 @@ export const Explore = (): JSX.Element => {
 	const [prevDisabled, setPrevDisabled] = useState<boolean>(true);
 	const [nextDisabled, setNextDisabled] = useState<boolean>(false);
 	const [selectedTabIndex, setSelectedTabIndex] = useState(0);
-	const [selectedDataset, _] = useState<Dataset>();
+	const [errorOpen, setErrorOpen] = useState(false);
 
 	// component did mount
 	useEffect(() => {
 		listDatasets(0, limit, mine);
 	}, []);
-
-	// Error msg dialog
-	const [errorOpen, setErrorOpen] = useState(false);
-	useEffect(() => {
-		if (reason !== "" && reason !== null && reason !== undefined) {
-			setErrorOpen(true);
-		}
-	}, [reason]);
-	const handleErrorCancel = () => {
-		// reset error message and close the error window
-		dismissError();
-		setErrorOpen(false);
-	};
 
 	// fetch thumbnails from each individual dataset/id calls
 	useEffect(() => {
@@ -130,15 +114,10 @@ export const Explore = (): JSX.Element => {
 		<Layout>
 			<div className="outer-container">
 				{/*Error Message dialogue*/}
-				<ActionModal
-					actionOpen={errorOpen}
-					actionTitle="Something went wrong..."
-					actionText={reason}
-					actionBtnName="Report"
-					handleActionBtnClick={() => {
-						handleErrorReport(reason, stack);
-					}}
-					handleActionCancel={handleErrorCancel}
+				<ErrorModal
+					errorOpen={errorOpen}
+					setErrorOpen={setErrorOpen}
+					dismissError={dismissError}
 				/>
 				<div className="inner-container">
 					<Grid container spacing={4}>
