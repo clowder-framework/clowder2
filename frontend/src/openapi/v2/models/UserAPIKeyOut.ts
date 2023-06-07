@@ -16,8 +16,8 @@
  * - [UpdateMethods](https://roman-right.github.io/beanie/api/interfaces/#aggregatemethods)
  */
 export type UserAPIKeyOut = {
-    key: string;
     name: string;
+    key: string;
     user: string;
     created?: string;
     expires?: string;
