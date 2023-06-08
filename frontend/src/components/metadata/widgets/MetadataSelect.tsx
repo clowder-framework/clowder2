@@ -7,13 +7,13 @@ import {MetadataEditButton} from "./MetadataEditButton";
 
 export const MetadataSelect = (props) => {
 	const {widgetName, fieldName, metadataId, content, setMetadata, initialReadOnly, options, resourceId,
-		updateMetadata, isRequired} = props;
+		updateMetadata, isRequired, datasetRole} = props;
 	const [localContent, setLocalContent] = useState(content && content[fieldName] ? content: {});
 
 	const [readOnly, setReadOnly] = useState(initialReadOnly);
 
 	const [inputChanged, setInputChanged] = useState(false);
-
+	console.log('md select datasetRole', datasetRole);
 	const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
 		setInputChanged(true);
 		const tempContents: { [key: string]: string; } = {};
@@ -57,10 +57,14 @@ export const MetadataSelect = (props) => {
 					</FormControl>
 				</Grid>
 				<Grid item xs={1} sm={1} md={1} lg={1} xl={1}>
-					<MetadataEditButton readOnly={readOnly} setReadOnly={setReadOnly} updateMetadata={updateMetadata}
-						content={localContent} metadataId={metadataId} resourceId={resourceId}
-						widgetName={widgetName} setInputChanged={setInputChanged}
-						setMetadata={setMetadata}/>
+					{datasetRole.role !== undefined && datasetRole.role !== "viewer" ?
+						<MetadataEditButton readOnly={readOnly} setReadOnly={setReadOnly} updateMetadata={updateMetadata}
+							content={localContent} metadataId={metadataId} resourceId={resourceId}
+							widgetName={widgetName} setInputChanged={setInputChanged}
+							setMetadata={setMetadata}/>
+						:
+						<></>
+					}
 				</Grid>
 			</Grid>
 		</div>

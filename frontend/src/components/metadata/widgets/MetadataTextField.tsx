@@ -4,10 +4,11 @@ import { MetadataEditButton } from "./MetadataEditButton";
 import {Grid} from "@mui/material";
 
 export const MetadataTextField = (props) => {
-	const {widgetName, fieldName, content, setMetadata, metadataId, updateMetadata, resourceId, initialReadOnly, isRequired} = props;
+	const {widgetName, fieldName, content, setMetadata, metadataId, updateMetadata, resourceId, initialReadOnly, isRequired, datasetRole} = props;
 	const [localContent, setLocalContent] = useState(content && content[fieldName] ? content: {});
 	const [readOnly, setReadOnly] = useState(initialReadOnly);
 	console.log(updateMetadata, 'updateMetadatatextfield');
+	console.log(datasetRole, 'datasetRole');
 	const [inputChanged, setInputChanged] = useState(false);
 
 	return (
@@ -40,11 +41,14 @@ export const MetadataTextField = (props) => {
 				/>
 			</Grid>
 			<Grid item xs={1} sm={1} md={1} lg={1} xl={1}>
-				<MetadataEditButton readOnly={readOnly} setReadOnly={setReadOnly} updateMetadata={updateMetadata}
-					content={localContent} metadataId={metadataId} resourceId={resourceId}
-					widgetName={widgetName} setInputChanged={setInputChanged}
-					setMetadata={setMetadata}
-				/>
+				{datasetRole.role !== undefined && datasetRole.role !== "viewer" ?
+					<MetadataEditButton readOnly={readOnly} setReadOnly={setReadOnly} updateMetadata={updateMetadata}
+										content={localContent} metadataId={metadataId} resourceId={resourceId}
+										widgetName={widgetName} setInputChanged={setInputChanged}
+										setMetadata={setMetadata}
+					/> :
+					<></>
+				}
 			</Grid>
 		</Grid>
 	);

@@ -78,7 +78,8 @@ export const DisplayMetadata = (props: MetadataType) => {
 														content: metadata.content ?? null,
 														metadataId: metadata.id ?? null,
 														isRequired: field.required,
-														key:idxx
+														key:idxx,
+														datasetRole: datasetRole
 													}
 												);
 											})
