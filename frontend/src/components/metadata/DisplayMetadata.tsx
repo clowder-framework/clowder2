@@ -30,7 +30,10 @@ export const DisplayMetadata = (props: MetadataType) => {
 	const listFileMetadata = (fileId: string | undefined) => dispatch(fetchFileMetadata(fileId));
 	const datasetMetadataList = useSelector((state: RootState) => state.metadata.datasetMetadataList);
 	const fileMetadataList = useSelector((state: RootState) => state.metadata.fileMetadataList);
-
+	const datasetRole = useSelector(
+		(state: RootState) => state.dataset.datasetRole
+	);
+	console.log(updateMetadata, 'updateMetadataDisplay');
 	useEffect(() => {
 		getMetadatDefinitions(null, 0, 100);
 	}, []);
@@ -83,11 +86,14 @@ export const DisplayMetadata = (props: MetadataType) => {
 										<Grid container spacing={2}>
 											<Grid item xs={11} sm={11} md={11} lg={11} xl={11}>
 												<Agent created={metadata.created} agent={metadata.agent} />
-												<MetadataDeleteButton metadataId={metadata.id ?? null}
+												{datasetRole.role !== undefined  && datasetRole.role !== "viewer" ?
+													<MetadataDeleteButton metadataId={metadata.id ?? null}
 																	  deleteMetadata={deleteMetadata}
 																	  resourceId={resourceId}
 																	  widgetName={metadataDef.name}
-												/>
+													/> :
+													<></>
+												}
 											</Grid>
 										</Grid>
 									</Box>

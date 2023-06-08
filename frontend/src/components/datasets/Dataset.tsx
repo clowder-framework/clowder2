@@ -157,13 +157,19 @@ export const Dataset = (): JSX.Element => {
 				"id" in metadataRequestForms[key] &&
 				metadataRequestForms[key]["id"] !== undefined &&
 				metadataRequestForms[key]["id"] !== null &&
-				metadataRequestForms[key]["id"] !== ""
+				metadataRequestForms[key]["id"] !== "" &&
+				datasetRole.role !== undefined &&
+				datasetRole.role !== "viewer"
 			) {
-				// update existing metadata
 				updateDatasetMetadata(datasetId, metadataRequestForms[key]);
 			} else {
-				// post new metadata if metadata id doesn"t exist
-				createDatasetMetadata(datasetId, metadataRequestForms[key]);
+				if (
+					datasetRole.role !== undefined &&
+					datasetRole.role !== "viewer")
+				{
+					// post new metadata if metadata id doesn"t exist
+					createDatasetMetadata(datasetId, metadataRequestForms[key]);
+				}
 			}
 		});
 
@@ -208,7 +214,7 @@ export const Dataset = (): JSX.Element => {
 	} else if (showNotFoundPage) {
 		return <PageNotFound />;
 	}
-
+	console.log(updateDatasetMetadata)
 	return (
 		<Layout>
 			{/*Error Message dialogue*/}
