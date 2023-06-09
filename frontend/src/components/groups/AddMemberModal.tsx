@@ -41,6 +41,16 @@ export default function AddMemberModal(props: AddMemberModalProps) {
 	const [email, setEmail] = useState("");
 	const [options, setOptions] = useState([]);
 	const [alertOpen, setAlertOpen] = useState(false);
+	const [validateEmail, setValidateEmail] = useState(false);
+
+	const handleEmailChange = (event) => {
+		const inputValue = event.target.value;
+		setEmail(inputValue);
+
+		// Check for valid email address using a regular expression
+		const emailRegex = /^\S+@\S+\.\S+$/;
+		setValidateEmail(!emailRegex.test(inputValue));
+	};
 
 	useEffect(() => {
 		prefixSearchAllUsers("", 0, 10);
@@ -65,16 +75,15 @@ export default function AddMemberModal(props: AddMemberModalProps) {
 		groupMemberAdded(groupId, email);
 		setEmail("");
 	};
+
+	const handleDialogClose = () => {
+		handleClose();
+		setValidateEmail(false);
+		dispatch(resetFailedReasonInline());
+	};
+
 	return (
-		<Dialog
-			open={open}
-			onClose={() => {
-				handleClose();
-				setAlertOpen(false);
-				dispatch(resetFailedReasonInline());
-			}}
-			fullWidth={true}
-		>
+		<Dialog open={open} onClose={handleDialogClose} fullWidth={true}>
 			<DialogTitle>
 				Add People to{" "}
 				<GroupsIcon
@@ -102,6 +111,9 @@ export default function AddMemberModal(props: AddMemberModalProps) {
 							sx={{ mt: 1, width: "100%" }}
 							required
 							label="Enter email address"
+							onChange={handleEmailChange}
+							error={validateEmail}
+							helperText={validateEmail ? "Invalid email address" : ""}
 						/>
 					)}
 				/>
@@ -109,7 +121,7 @@ export default function AddMemberModal(props: AddMemberModalProps) {
 			</DialogContent>
 			<DialogActions>
 				<Button onClick={handleAddButtonClick}>Add</Button>
-				<Button onClick={handleClose}>Cancel</Button>
+				<Button onClick={handleDialogClose}>Cancel</Button>
 			</DialogActions>
 		</Dialog>
 	);
