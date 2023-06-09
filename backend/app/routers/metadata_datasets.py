@@ -193,7 +193,7 @@ async def update_dataset_metadata(
         Metadata document that was updated
     """
     if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
-        query = {"resource.resource_id": ObjectId(dataset_id)}
+        query = [MetadataDB.resource.resource_id == ObjectId(dataset_id)]
         content = metadata_in.content
 
         if metadata_in.metadata_id is not None:
