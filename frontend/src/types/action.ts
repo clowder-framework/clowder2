@@ -20,8 +20,8 @@ import {
 } from "../openapi/v2";
 import {
 	LIST_USERS,
+	PREFIX_SEARCH_USERS,
 	RECEIVE_USER_PROFILE,
-	SEARCH_USERS,
 } from "../actions/user";
 import { CREATE_GROUP, DELETE_GROUP } from "../actions/group";
 
@@ -356,8 +356,8 @@ interface LIST_USERS {
 	users: UserOut[];
 }
 
-interface SEARCH_USERS {
-	type: "SEARCH_USERS";
+interface PREFIX_SEARCH_USERS {
+	type: "PREFIX_SEARCH_USERS";
 	users: UserOut[];
 }
 
@@ -430,6 +430,6 @@ export type DataAction =
 	| ADD_GROUP_MEMBER
 	| ASSIGN_GROUP_MEMBER_ROLE
 	| LIST_USERS
-	| SEARCH_USERS
+	| PREFIX_SEARCH_USERS
 	| RECEIVE_DATASET_ROLES
 	| RECEIVE_USER_PROFILE;

@@ -125,9 +125,9 @@ export function fetchAllUsers(skip = 0, limit = 101) {
 	};
 }
 
-export const SEARCH_USERS = "SEARCH_USERS";
+export const PREFIX_SEARCH_USERS = "PREFIX_SEARCH_USERS";
 
-export function searchAllUsers(text = "", skip = 0, limit = 101) {
+export function prefixSearchAllUsers(text = "", skip = 0, limit = 101) {
 	return (dispatch) => {
 		return V2.UsersService.searchUsersApiV2UsersPrefixSearchGet(
 			text,
@@ -136,13 +136,13 @@ export function searchAllUsers(text = "", skip = 0, limit = 101) {
 		)
 			.then((json) => {
 				dispatch({
-					type: SEARCH_USERS,
+					type: PREFIX_SEARCH_USERS,
 					users: json,
 					receivedAt: Date.now(),
 				});
 			})
 			.catch((reason) => {
-				dispatch(searchAllUsers(text, skip, limit));
+				dispatch(prefixSearchAllUsers(text, skip, limit));
 			});
 	};
 }
