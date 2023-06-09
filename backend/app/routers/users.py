@@ -114,7 +114,10 @@ async def search_users(
 ):
     query_regx = re.compile(text, re.IGNORECASE)
     users = []
-    for doc in await db["users"].find({"email": query_regx}).skip(skip).limit(limit).to_list(length=limit):
+    for doc in await db["users"].find({"$or": [{"email": query_regx},
+                                               {"first_name": query_regx},
+                                               {"last_name": query_regx}]}).skip(skip).limit(
+        limit).to_list(length=limit):
         users.append(UserOut(**doc))
     return users
 
