@@ -18,7 +18,11 @@ import {
 	UserAPIKeyOut,
 	UserOut,
 } from "../openapi/v2";
-import { LIST_USERS, RECEIVE_USER_PROFILE } from "../actions/user";
+import {
+	LIST_USERS,
+	RECEIVE_USER_PROFILE,
+	SEARCH_USERS,
+} from "../actions/user";
 import { CREATE_GROUP, DELETE_GROUP } from "../actions/group";
 
 interface RECEIVE_FILES_IN_DATASET {
@@ -352,6 +356,11 @@ interface LIST_USERS {
 	users: UserOut[];
 }
 
+interface SEARCH_USERS {
+	type: "SEARCH_USERS";
+	users: UserOut[];
+}
+
 interface ASSIGN_GROUP_MEMBER_ROLE {
 	type: "ASSIGN_GROUP_MEMBER_ROLE";
 	about: Group;
@@ -421,5 +430,6 @@ export type DataAction =
 	| ADD_GROUP_MEMBER
 	| ASSIGN_GROUP_MEMBER_ROLE
 	| LIST_USERS
+	| SEARCH_USERS
 	| RECEIVE_DATASET_ROLES
 	| RECEIVE_USER_PROFILE;

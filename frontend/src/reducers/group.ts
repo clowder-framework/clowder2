@@ -12,7 +12,7 @@ import { RECEIVE_GROUP_ROLE } from "../actions/authorization";
 import { DataAction } from "../types/action";
 import { GroupState } from "../types/data";
 import { GroupOut, RoleType } from "../openapi/v2";
-import { LIST_USERS } from "../actions/user";
+import { LIST_USERS, SEARCH_USERS } from "../actions/user";
 
 const defaultState: GroupState = {
 	groups: [],
@@ -40,6 +40,8 @@ const group = (state = defaultState, action: DataAction) => {
 		case ADD_GROUP_MEMBER:
 			return Object.assign({}, state, { about: action.about });
 		case LIST_USERS:
+			return Object.assign({}, state, { users: action.users });
+		case SEARCH_USERS:
 			return Object.assign({}, state, { users: action.users });
 		case ASSIGN_GROUP_MEMBER_ROLE:
 			return Object.assign({}, state, { about: action.about });

@@ -125,6 +125,24 @@ export function fetchAllUsers(skip = 0, limit = 101) {
 	};
 }
 
+export const SEARCH_USERS = "SEARCH_USERS";
+
+export function searchAllUsers(text = "", skip = 0, limit = 101) {
+	return (dispatch) => {
+		return V2.UsersService.searchUsersApiV2UsersSearchGet(text, skip, limit)
+			.then((json) => {
+				dispatch({
+					type: SEARCH_USERS,
+					users: json,
+					receivedAt: Date.now(),
+				});
+			})
+			.catch((reason) => {
+				dispatch(searchAllUsers(text, skip, limit));
+			});
+	};
+}
+
 export const LIST_API_KEYS = "LIST_API_KEYS";
 
 export function listApiKeys(skip = 0, limit = 10) {
