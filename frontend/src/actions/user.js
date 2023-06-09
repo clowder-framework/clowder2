@@ -129,7 +129,11 @@ export const SEARCH_USERS = "SEARCH_USERS";
 
 export function searchAllUsers(text = "", skip = 0, limit = 101) {
 	return (dispatch) => {
-		return V2.UsersService.searchUsersApiV2UsersSearchGet(text, skip, limit)
+		return V2.UsersService.searchUsersApiV2UsersPrefixSearchGet(
+			text,
+			skip,
+			limit
+		)
 			.then((json) => {
 				dispatch({
 					type: SEARCH_USERS,

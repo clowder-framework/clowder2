@@ -10,10 +10,7 @@ import {
 } from "@mui/material";
 import { addGroupMember } from "../../actions/group";
 import { useDispatch, useSelector } from "react-redux";
-import {
-	fetchAllUsers,
-	searchAllUsers as searchAllUsersAction,
-} from "../../actions/user";
+import { searchAllUsers as searchAllUsersAction } from "../../actions/user";
 import { RootState } from "../../types/data";
 import { UserOut } from "../../openapi/v2";
 import GroupsIcon from "@mui/icons-material/Groups";
@@ -30,8 +27,6 @@ export default function AddMemberModal(props: AddMemberModalProps) {
 	const { open, handleClose, groupOwner, groupName, groupId } = props;
 
 	const dispatch = useDispatch();
-	const listAllUsers = (skip: number, limit: number) =>
-		dispatch(fetchAllUsers(skip, limit));
 	const searchAllUsers = (text: string, skip: number, limit: number) =>
 		dispatch(searchAllUsersAction(text, skip, limit));
 
@@ -45,7 +40,7 @@ export default function AddMemberModal(props: AddMemberModalProps) {
 	const [options, setOptions] = useState([]);
 
 	useEffect(() => {
-		listAllUsers(0, 10);
+		searchAllUsers("", 0, 10);
 	}, []);
 
 	// dynamically update the options when user search

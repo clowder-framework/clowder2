@@ -140,6 +140,33 @@ export class UsersService {
     }
 
     /**
+     * Search Users
+     * @param prefix
+     * @param skip
+     * @param limit
+     * @returns UserOut Successful Response
+     * @throws ApiError
+     */
+    public static searchUsersApiV2UsersPrefixSearchGet(
+        prefix: string,
+        skip?: number,
+        limit: number = 2,
+    ): CancelablePromise<Array<UserOut>> {
+        return __request({
+            method: 'GET',
+            path: `/api/v2/users/prefixSearch`,
+            query: {
+                'prefix': prefix,
+                'skip': skip,
+                'limit': limit,
+            },
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+
+    /**
      * Get Profile
      * @returns UserOut Successful Response
      * @throws ApiError
