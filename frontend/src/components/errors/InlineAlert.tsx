@@ -5,39 +5,57 @@ import Alert from "@mui/material/Alert";
 import IconButton from "@mui/material/IconButton";
 import Collapse from "@mui/material/Collapse";
 import CloseIcon from "@mui/icons-material/Close";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../types/data";
+import { resetFailedReasonInline } from "../../actions/common";
 
-export const InlineAlert = () => {
-	const [open, setOpen] = React.useState(true);
+type InlineAlertProps = {
+	alertOpen: boolean;
+	setAlertOpen: any;
+};
 
-	const reason = useSelector((state: RootState) => state.error.reason);
+export const InlineAlert = (props: InlineAlertProps) => {
+	const { alertOpen, setAlertOpen } = props;
+
+	const dispatch = useDispatch();
+
+	const reasonInline = useSelector(
+		(state: RootState) => state.error.reasonInline
+	);
+	const dismissAlert = () => dispatch(resetFailedReasonInline());
 
 	useEffect(() => {
-		if (reason !== "" && reason !== null && reason !== undefined) {
-			setOpen(true);
+		if (
+			reasonInline !== "" &&
+			reasonInline !== null &&
+			reasonInline !== undefined
+		) {
+			setAlertOpen(true);
 		}
-	}, [reason]);
+	}, [reasonInline]);
+	const handleAlertCancel = () => {
+		// reset error message and close the error window
+		dismissAlert();
+		setAlertOpen(false);
+	};
 
 	return (
 		<Box sx={{ width: "100%" }}>
-			<Collapse in={open}>
+			<Collapse in={alertOpen}>
 				<Alert
 					action={
 						<IconButton
 							aria-label="close"
 							color="inherit"
 							size="small"
-							onClick={() => {
-								setOpen(false);
-							}}
+							onClick={handleAlertCancel}
 						>
 							<CloseIcon fontSize="inherit" />
 						</IconButton>
 					}
 					sx={{ mb: 2 }}
 				>
-					{reason}
+					{reasonInline}
 				</Alert>
 			</Collapse>
 		</Box>

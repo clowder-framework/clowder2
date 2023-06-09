@@ -14,6 +14,7 @@ import { prefixSearchAllUsers as prefixSearchAllUsersAction } from "../../action
 import { RootState } from "../../types/data";
 import { UserOut } from "../../openapi/v2";
 import GroupsIcon from "@mui/icons-material/Groups";
+import { InlineAlert } from "../errors/InlineAlert";
 
 type AddMemberModalProps = {
 	open: boolean;
@@ -38,6 +39,7 @@ export default function AddMemberModal(props: AddMemberModalProps) {
 
 	const [email, setEmail] = useState("");
 	const [options, setOptions] = useState([]);
+	const [alertOpen, setAlertOpen] = useState(false);
 
 	useEffect(() => {
 		prefixSearchAllUsers("", 0, 10);
@@ -95,6 +97,7 @@ export default function AddMemberModal(props: AddMemberModalProps) {
 						/>
 					)}
 				/>
+				<InlineAlert alertOpen={alertOpen} setAlertOpen={setAlertOpen} />
 			</DialogContent>
 			<DialogActions>
 				<Button onClick={handleAddButtonClick}>Add</Button>

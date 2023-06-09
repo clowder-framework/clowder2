@@ -176,14 +176,31 @@ interface FAILED {
 	reason: string;
 }
 
+interface FAILED_INLINE {
+	stack: string;
+	type: "FAILED_INLINE";
+	reason: string;
+}
+
 interface NOT_FOUND {
 	stack: string;
 	type: "NOT_FOUND";
 	reason: string;
 }
 
+interface NOT_FOUND_INLINE {
+	stack: string;
+	type: "NOT_FOUND_INLINE";
+	reason: string;
+}
+
 interface RESET_FAILED {
 	type: "RESET_FAILED";
+	reason: string;
+}
+
+interface RESET_FAILED_INLINE {
+	type: "RESET_FAILED_INLINE";
 	reason: string;
 }
 
@@ -394,8 +411,11 @@ export type DataAction =
 	| CREATE_FILE
 	| RESET_CREATE_FILE
 	| FAILED
+	| FAILED_INLINE
 	| NOT_FOUND
+	| NOT_FOUND_INLINE
 	| RESET_FAILED
+	| RESET_FAILED_INLINE
 	| RESET_LOGOUT
 	| FOLDER_ADDED
 	| UPDATE_DATASET_METADATA
