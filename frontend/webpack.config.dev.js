@@ -30,7 +30,12 @@ export default {
 		path: path.resolve(__dirname, "dist"),
 		publicPath: "",
 		filename: "[name].bundle.js",
-		chunkFilename: "[name].chunk.bundle.js",
+		// Use a function to dynamically generate meaningful chunk names
+		chunkFilename: (pathData) => {
+			console.log("pathData", pathData);
+			const chunkName = pathData.chunk.id;
+			return `${chunkName}.chunk.bundle.js`;
+		},
 	},
 	plugins: [
 		new webpack.DefinePlugin({

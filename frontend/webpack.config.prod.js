@@ -29,8 +29,13 @@ export default {
 	target: "web", // necessary per https://webpack.github.io/docs/testing.html#compile-and-test
 	output: {
 		filename: "[name].bundle.js",
-		chunkFilename: "[name].chunk.bundle.js",
 		path: path.resolve(__dirname, "dist"),
+		// Use a function to dynamically generate meaningful chunk names
+		chunkFilename: (pathData) => {
+			console.log("pathData", pathData);
+			const chunkName = pathData.chunk.id;
+			return `${chunkName}.chunk.bundle.js`;
+		},
 	},
 	plugins: [
 		// NOTE: `npm run preinstall` currently runs eslint
