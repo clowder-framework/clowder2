@@ -17,7 +17,6 @@ export const ErrorModal = (props: ErrorModalProps) => {
 
 	const reason = useSelector((state: RootState) => state.error.reason);
 	const stack = useSelector((state: RootState) => state.error.stack);
-	const dismissError = () => dispatch(resetFailedReason());
 
 	// Error msg dialog
 	useEffect(() => {
@@ -27,7 +26,7 @@ export const ErrorModal = (props: ErrorModalProps) => {
 	}, [reason]);
 	const handleErrorCancel = () => {
 		// reset error message and close the error window
-		dismissError();
+		dispatch(resetFailedReason());
 		setErrorOpen(false);
 	};
 

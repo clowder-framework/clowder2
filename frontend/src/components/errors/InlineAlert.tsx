@@ -22,7 +22,6 @@ export const InlineAlert = (props: InlineAlertProps) => {
 	const reasonInline = useSelector(
 		(state: RootState) => state.error.reasonInline
 	);
-	const dismissAlert = () => dispatch(resetFailedReasonInline());
 
 	useEffect(() => {
 		if (
@@ -31,11 +30,12 @@ export const InlineAlert = (props: InlineAlertProps) => {
 			reasonInline !== undefined
 		) {
 			setAlertOpen(true);
+		} else {
+			setAlertOpen(false);
 		}
 	}, [reasonInline]);
 	const handleAlertCancel = () => {
-		// reset error message and close the error window
-		dismissAlert();
+		dispatch(resetFailedReasonInline());
 		setAlertOpen(false);
 	};
 
@@ -54,6 +54,7 @@ export const InlineAlert = (props: InlineAlertProps) => {
 						</IconButton>
 					}
 					sx={{ mb: 2 }}
+					severity="error"
 				>
 					{reasonInline}
 				</Alert>

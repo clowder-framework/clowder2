@@ -15,6 +15,7 @@ import { RootState } from "../../types/data";
 import { UserOut } from "../../openapi/v2";
 import GroupsIcon from "@mui/icons-material/Groups";
 import { InlineAlert } from "../errors/InlineAlert";
+import { resetFailedReasonInline } from "../../actions/common";
 
 type AddMemberModalProps = {
 	open: boolean;
@@ -63,10 +64,17 @@ export default function AddMemberModal(props: AddMemberModalProps) {
 	const handleAddButtonClick = () => {
 		groupMemberAdded(groupId, email);
 		setEmail("");
-		handleClose();
 	};
 	return (
-		<Dialog open={open} onClose={handleClose} fullWidth={true}>
+		<Dialog
+			open={open}
+			onClose={() => {
+				handleClose();
+				setAlertOpen(false);
+				dispatch(resetFailedReasonInline());
+			}}
+			fullWidth={true}
+		>
 			<DialogTitle>
 				Add People to{" "}
 				<GroupsIcon

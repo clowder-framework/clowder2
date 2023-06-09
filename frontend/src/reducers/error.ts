@@ -15,7 +15,7 @@ const defaultState = {
 	origin: "/",
 	reason: "",
 	reasonInline: "",
-	stackInine: "",
+	stackInline: "",
 	loggedOut: false,
 };
 
@@ -49,7 +49,7 @@ const error = (state = defaultState, action: DataAction) => {
 		case RESET_FAILED:
 			return Object.assign({}, state, { reason: "", stack: "" });
 		case RESET_FAILED_INLINE:
-			return Object.assign({}, state, { reason: "", stack: "" });
+			return Object.assign({}, state, { reasonInline: "", stackInline: "" });
 		case LOGOUT:
 			return Object.assign({}, state, { loggedOut: true });
 		case RESET_LOGOUT:
