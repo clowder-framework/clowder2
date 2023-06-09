@@ -122,6 +122,21 @@ async def search_users(
     return users
 
 
+@router.get("/prefixSearch", response_model=List[UserOut])
+async def search_users(
+        prefix: str,
+        db: MongoClient = Depends(dependencies.get_db),
+        skip: int = 0,
+        limit: int = 2
+):
+    query_regx = re.compile(f"^{prefix}.*", re.IGNORECASE)
+    users = []
+    for doc in await db["users"].find({"email": query_regx}).sort("email").skip(skip).limit(
+            limit).to_list(length=limit):
+        users.append(UserOut(**doc))
+    return users
+
+
 @router.get("/profile", response_model=UserOut)
 async def get_profile(
         username=Depends(get_current_username),
