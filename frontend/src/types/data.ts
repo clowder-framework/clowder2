@@ -227,3 +227,13 @@ export interface RootState {
 	user: UserState;
 	folder: FolderState;
 }
+
+export interface EventListenerJobStatus {
+	created: string;
+	started: string;
+	processing: string;
+	succeeded: string;
+	error: string;
+	skipped: string;
+	resubmitted: string;
+}
