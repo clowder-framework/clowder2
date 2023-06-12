@@ -17,6 +17,7 @@ from app.models.listeners import (
     EventListenerDB,
     EventListenerJobUpdateDB,
     EventListenerJobStatus,
+    EventListenerJobDB,
 )
 
 logging.basicConfig(level=logging.INFO)
@@ -93,7 +94,9 @@ async def callback(message: AbstractIncomingMessage):
         # TODO: Updating an event message could go in rabbitmq/listeners
 
         # Check if the job exists, and update if so
-        job = await EventListenerDB.find_one(EventListenerDB.id == ObjectId(job_id))
+        job = await EventListenerJobDB.find_one(
+            EventListenerJobDB.id == ObjectId(job_id)
+        )
         if job:
             # Update existing job with newest info
             job.updated = timestamp
@@ -123,13 +126,13 @@ async def callback(message: AbstractIncomingMessage):
             job.status = status
             job.latest_message = cleaned_msg
             # TODO: works if synchronous?
-            job.save()
+            await job.save()
 
             # Add latest message to the job updates
             event_msg = EventListenerJobUpdateDB(
                 job_id=job_id, status=cleaned_msg, timestamp=timestamp
             )
-            event_msg.insert()
+            await event_msg.insert()
             return True
         else:
             # We don't know what this job is. Reject the message.
