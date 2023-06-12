@@ -165,11 +165,11 @@ export default {
 					name: "vendor-corejs",
 					chunks: "all",
 				},
-				// vegaVendor: {
-				// 	test: /[\\/]node_modules[\\/](vega.*)[\\/]/,
-				// 	name: "vendor-vega",
-				// 	chunks: "all",
-				// },
+				vegaVendor: {
+					test: /[\\/]node_modules[\\/](.*vega.*)[\\/]/,
+					name: "vendor-vega",
+					chunks: "all",
+				},
 			},
 		},
 	},
