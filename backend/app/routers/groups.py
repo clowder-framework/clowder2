@@ -26,7 +26,6 @@ async def save_group(
     if user_member not in group_db.users:
         group_db.users.append(user_member)
     await group_db.insert()
-    print(group_db)
     return group_db.dict()
 
 
