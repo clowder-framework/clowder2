@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { lazy, Suspense, useEffect, useState } from "react";
 import config from "../../app.config";
 import { Box, Button, Grid, Tab, Tabs, Typography } from "@mui/material";
 import { downloadResource, parseDate } from "../../utils/common";
@@ -36,6 +36,12 @@ import AssessmentIcon from "@mui/icons-material/Assessment";
 import HistoryIcon from "@mui/icons-material/History";
 import { Forbidden } from "../errors/Forbidden";
 import { PageNotFound } from "../errors/PageNotFound";
+import { LazyLoadErrorBoundary } from "../errors/LazyLoadErrorBoundary";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+
+const Image = lazy(
+	() => import(/* webpackChunkName: "previewers-image" */ "../previewers/Image")
+);
 
 export const File = (): JSX.Element => {
 	// path parameter
@@ -105,10 +111,8 @@ export const File = (): JSX.Element => {
 	useEffect(() => {
 		if (reason == "Forbidden") {
 			setShowForbiddenPage(true);
-        
 		} else if (reason == "Not Found") {
 			setShowNotFoundPage(true);
-        
 		} else if (reason !== "" && reason !== null && reason !== undefined) {
 			setErrorOpen(true);
 		}
@@ -120,7 +124,9 @@ export const File = (): JSX.Element => {
 	};
 	const handleErrorReport = () => {
 		window.open(
-			`${config.GHIssueBaseURL}+${encodeURIComponent(reason)}&body=${encodeURIComponent(stack)}`
+			`${config.GHIssueBaseURL}+${encodeURIComponent(
+				reason
+			)}&body=${encodeURIComponent(stack)}`
 		);
 	};
 
@@ -240,7 +246,6 @@ export const File = (): JSX.Element => {
 
 	if (showForbiddenPage) {
 		return <Forbidden />;
-    
 	} else if (showNotFoundPage) {
 		return <PageNotFound />;
 	}
@@ -339,6 +344,14 @@ export const File = (): JSX.Element => {
 							disabled={false}
 						/>
 					</Tabs>
+					<Tab
+						icon={<VisibilityIcon />}
+						iconPosition="start"
+						sx={TabStyle}
+						label="Preview"
+						{...a11yProps(6)}
+						disabled={false}
+					/>
 					{/*Version History*/}
 					<TabPanel value={selectedTabIndex} index={0}>
 						{fileVersions !== undefined ? (
@@ -410,6 +423,13 @@ export const File = (): JSX.Element => {
 					</TabPanel>
 					<TabPanel value={selectedTabIndex} index={4}>
 						<ExtractionHistoryTab fileId={fileId} />
+					</TabPanel>
+					<TabPanel value={selectedTabIndex} index={6}>
+						<LazyLoadErrorBoundary fallback={<div>Fail to load...</div>}>
+							<Suspense fallback={<div>Loading...</div>}>
+								<Image fileId={fileId} />
+							</Suspense>
+						</LazyLoadErrorBoundary>
 					</TabPanel>
 				</Grid>
 				<Grid item xs={2}>

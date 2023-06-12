@@ -1,5 +1,5 @@
 // lazy loading
-import React, { lazy, Suspense, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Box, Button, Grid, Stack, Tab, Tabs, Typography } from "@mui/material";
 import { useParams, useSearchParams } from "react-router-dom";
 import { RootState } from "../../types/data";
@@ -35,18 +35,12 @@ import AssessmentIcon from "@mui/icons-material/Assessment";
 import HistoryIcon from "@mui/icons-material/History";
 import ShareIcon from "@mui/icons-material/Share";
 import BuildIcon from "@mui/icons-material/Build";
-import VisibilityIcon from "@mui/icons-material/Visibility";
 import { ExtractionHistoryTab } from "../listeners/ExtractionHistoryTab";
 import { SharingTab } from "../sharing/SharingTab";
 import RoleChip from "../auth/RoleChip";
 import { TabStyle } from "../../styles/Styles";
 import { Forbidden } from "../errors/Forbidden";
 import { PageNotFound } from "../errors/PageNotFound";
-import { LazyLoadErrorBoundary } from "../errors/LazyLoadErrorBoundary";
-
-const Demo = lazy(
-	() => import(/* webpackChunkName: "previewers-demo" */ "../previewers/Demo")
-);
 
 export const Dataset = (): JSX.Element => {
 	// path parameter
@@ -309,14 +303,6 @@ export const Dataset = (): JSX.Element => {
 							{...a11yProps(5)}
 							disabled={false}
 						/>
-						<Tab
-							icon={<VisibilityIcon />}
-							iconPosition="start"
-							sx={TabStyle}
-							label="Preview"
-							{...a11yProps(6)}
-							disabled={false}
-						/>
 					</Tabs>
 					<TabPanel value={selectedTabIndex} index={0}>
 						<FilesTable datasetId={datasetId} folderId={folderId} />
@@ -383,13 +369,6 @@ export const Dataset = (): JSX.Element => {
 					</TabPanel>
 					<TabPanel value={selectedTabIndex} index={5}>
 						<SharingTab datasetId={datasetId} />
-					</TabPanel>
-					<TabPanel value={selectedTabIndex} index={6}>
-						<LazyLoadErrorBoundary fallback={<div>Fail to load...</div>}>
-							<Suspense fallback={<div>Loading...</div>}>
-								<Demo />
-							</Suspense>
-						</LazyLoadErrorBoundary>
 					</TabPanel>
 				</Grid>
 				<Grid item>
