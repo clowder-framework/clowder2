@@ -195,7 +195,7 @@ class EventListenerJobUpdateDB(Document, EventListenerJobUpdateBase):
         ]
 
 
-class EventListenerJobUpdateOut(EventListenerDB):
+class EventListenerJobUpdateOut(EventListenerJobUpdateDB):
     class Config:
         fields = {"id": "id"}
 
