@@ -1,3 +1,4 @@
+import re
 from datetime import timedelta
 from secrets import token_urlsafe
 from typing import List
@@ -99,6 +100,55 @@ async def get_users(
 ):
     users = []
     for doc in await db["users"].find().skip(skip).limit(limit).to_list(length=limit):
+        users.append(UserOut(**doc))
+    return users
+
+
+@router.get("/search", response_model=List[UserOut])
+async def search_users(
+    text: str,
+    db: MongoClient = Depends(dependencies.get_db),
+    skip: int = 0,
+    limit: int = 2,
+):
+    query_regx = re.compile(text, re.IGNORECASE)
+    users = []
+    for doc in (
+        await db["users"]
+        .find(
+            {
+                "$or": [
+                    {"email": query_regx},
+                    {"first_name": query_regx},
+                    {"last_name": query_regx},
+                ]
+            }
+        )
+        .skip(skip)
+        .limit(limit)
+        .to_list(length=limit)
+    ):
+        users.append(UserOut(**doc))
+    return users
+
+
+@router.get("/prefixSearch", response_model=List[UserOut])
+async def search_users(
+    prefix: str,
+    db: MongoClient = Depends(dependencies.get_db),
+    skip: int = 0,
+    limit: int = 2,
+):
+    query_regx = re.compile(f"^{prefix}.*", re.IGNORECASE)
+    users = []
+    for doc in (
+        await db["users"]
+        .find({"email": query_regx})
+        .sort("email")
+        .skip(skip)
+        .limit(limit)
+        .to_list(length=limit)
+    ):
         users.append(UserOut(**doc))
     return users
 

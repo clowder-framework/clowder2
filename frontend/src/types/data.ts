@@ -197,6 +197,8 @@ export interface UserState {
 }
 
 export interface ErrorState {
+	reasonInline: string;
+	stacknline: string;
 	origin: string;
 	stack: string;
 	reason: string;

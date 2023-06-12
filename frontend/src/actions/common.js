@@ -18,6 +18,19 @@ export function resetFailedReason() {
 	};
 }
 
+export const RESET_FAILED_INLINE = "RESET_FAILED_INLINE";
+
+export function resetFailedReasonInline() {
+	return (dispatch) => {
+		dispatch({
+			type: RESET_FAILED_INLINE,
+			reason: "",
+			stack: "",
+			receivedAt: Date.now(),
+		});
+	};
+}
+
 export const RESET_LOGOUT = "RESET_LOGOUT";
 
 export function resetLogout() {
@@ -158,6 +171,54 @@ export function handleErrorsAuthorization(reason, originalFunc) {
 				reason:
 					reason.message !== undefined
 						? reason.message
+						: "Backend Failure. Couldn't fetch!",
+				stack: reason.stack ? reason.stack : "",
+				receivedAt: Date.now(),
+			});
+		};
+	}
+}
+
+export const FAILED_INLINE = "FAILED_INLINE";
+export const NOT_FOUND_INLINE = "NOT_FOUND_INLINE";
+
+export function handleErrorsInline(reason, originalFunc) {
+	// Authorization error we need to automatically logout user
+	if (reason.status === 401) {
+		return (dispatch) => {
+			return refreshToken(dispatch, originalFunc);
+		};
+	} else if (reason.status === 403) {
+		return (dispatch) => {
+			dispatch({
+				type: NOT_AUTHORIZED,
+				reason:
+					reason.body !== undefined && reason.body.detail !== undefined
+						? reason.body.detail
+						: "Forbidden",
+				stack: reason.stack ? reason.stack : "",
+				receivedAt: Date.now(),
+			});
+		};
+	} else if (reason.status === 404) {
+		return (dispatch) => {
+			dispatch({
+				type: NOT_FOUND_INLINE,
+				reason:
+					reason.body !== undefined && reason.body.detail !== undefined
+						? reason.body.detail
+						: "Not Found",
+				stack: reason.stack ? reason.stack : "",
+				receivedAt: Date.now(),
+			});
+		};
+	} else {
+		return (dispatch) => {
+			dispatch({
+				type: FAILED_INLINE,
+				reason:
+					reason.body.detail !== undefined
+						? reason.body.detail
 						: "Backend Failure. Couldn't fetch!",
 				stack: reason.stack ? reason.stack : "",
 				receivedAt: Date.now(),

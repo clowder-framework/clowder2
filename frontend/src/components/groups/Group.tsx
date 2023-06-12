@@ -13,8 +13,9 @@ import MembersTable from "./MembersTable";
 import AddMemberModal from "./AddMemberModal";
 import RoleChip from "../auth/RoleChip";
 import DeleteIcon from "@mui/icons-material/Delete";
-import { ActionModal } from "../dialog/ActionModal";
 import { MainBreadcrumbs } from "../navigation/BreadCrumb";
+import { config } from "../../app.config";
+import { ErrorModal } from "../errors/ErrorModal";
 
 export function Group() {
 	// path parameter
@@ -49,6 +50,9 @@ export function Group() {
 		fetchCurrentGroupRole(groupId);
 	}, []);
 
+	// Error msg dialog
+	const [errorOpen, setErrorOpen] = useState(false);
+
 	// for breadcrumb
 	const paths = [
 		{
@@ -67,28 +71,14 @@ export function Group() {
 
 	return (
 		<Layout>
+			{/*Error Message dialogue*/}
+			<ErrorModal errorOpen={errorOpen} setErrorOpen={setErrorOpen} />
 			{/*breadcrumb*/}
 			<Grid container>
 				<Grid item xs={10} sx={{ display: "flex", alignItems: "center" }}>
 					<MainBreadcrumbs paths={paths} />
 				</Grid>
 			</Grid>
-			{/*Delete group modal*/}
-			<ActionModal
-				actionOpen={deleteGroupConfirmOpen}
-				actionTitle="Are you sure?"
-				actionText="Do you really want to delete this group? This process cannot be undone."
-				actionBtnName="Delete"
-				handleActionBtnClick={() => {
-					groupDeleted(groupId);
-					setDeleteGroupConfirmOpen(false);
-					// Go to Explore page
-					history("/");
-				}}
-				handleActionCancel={() => {
-					setDeleteGroupConfirmOpen(false);
-				}}
-			/>
 			<AddMemberModal
 				open={addMemberModalOpen}
 				handleClose={() => {
