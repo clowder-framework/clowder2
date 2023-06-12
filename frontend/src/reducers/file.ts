@@ -19,7 +19,7 @@ const defaultState: FileState = {
 	previews: [],
 	fileVersions: [],
 	fileRole: <AuthorizationBase>{},
-	url: null,
+	url: "",
 };
 
 const file = (state = defaultState, action: DataAction) => {

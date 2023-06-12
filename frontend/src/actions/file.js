@@ -263,7 +263,7 @@ export function submitFileExtractionAction(fileId, extractorName, requestBody) {
 
 export const GENERATE_FILE_URL = "GENERATE_FILE_URL";
 
-export async function generateFileDownloadUrl(
+export function generateFileDownloadUrl(
 	fileId,
 	filename = "",
 	fileVersionNum = 0

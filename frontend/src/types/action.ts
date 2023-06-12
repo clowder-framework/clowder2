@@ -20,6 +20,7 @@ import {
 } from "../openapi/v2";
 import { LIST_USERS, RECEIVE_USER_PROFILE } from "../actions/user";
 import { CREATE_GROUP, DELETE_GROUP } from "../actions/group";
+import { GENERATE_FILE_URL } from "../actions/file";
 
 interface RECEIVE_FILES_IN_DATASET {
 	type: "RECEIVE_FILES_IN_DATASET";
@@ -242,6 +243,11 @@ interface DOWNLOAD_FILE {
 	type: "DOWNLOAD_FILE";
 }
 
+interface GENERATE_FILE_URL {
+	type: "GENERATE_FILE_URL";
+	url: string;
+}
+
 interface DELETE_DATASET_METADATA {
 	type: "DELETE_DATASET_METADATA";
 	metadata: Metadata;
@@ -400,6 +406,7 @@ export type DataAction =
 	| DELETE_DATASET_METADATA
 	| DELETE_FILE_METADATA
 	| DOWNLOAD_FILE
+	| GENERATE_FILE_URL
 	| FOLDER_DELETED
 	| GET_FOLDER_PATH
 	| RECEIVE_LISTENERS

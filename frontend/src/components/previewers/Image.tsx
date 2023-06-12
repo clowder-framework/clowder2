@@ -23,9 +23,7 @@ export default function Image(props: ImageProps) {
 	const url = useSelector((state: RootState) => state.file.url);
 
 	useEffect(() => {
-		(async () => {
-			await generateFileDownloadUrl(fileId);
-		})();
+		generateFileDownloadUrl(fileId);
 	}, [fileId]);
 
 	return (() => {
@@ -36,6 +34,7 @@ export default function Image(props: ImageProps) {
 					src={url}
 					alt="img"
 					id={`rubberbandCanvas-${fileId}`}
+					style={{ maxWidth: "100%", maxHeight: "100%" }}
 				/>
 			);
 		} else {
