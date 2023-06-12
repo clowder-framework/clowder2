@@ -303,20 +303,27 @@ export const File = (): JSX.Element => {
 						onChange={handleTabChange}
 						aria-label="file tabs"
 					>
-						{/*<Tab label="Previews" {...a11yProps(0)} />*/}
+						<Tab
+							icon={<VisibilityIcon />}
+							iconPosition="start"
+							sx={TabStyle}
+							label="Preview"
+							{...a11yProps(0)}
+							disabled={false}
+						/>
 						<Tab
 							icon={<InsertDriveFile />}
 							iconPosition="start"
 							sx={TabStyle}
 							label="Version History"
-							{...a11yProps(0)}
+							{...a11yProps(1)}
 						/>
 						<Tab
 							icon={<FormatListBulleted />}
 							iconPosition="start"
 							sx={TabStyle}
 							label="User Metadata"
-							{...a11yProps(1)}
+							{...a11yProps(2)}
 							disabled={false}
 						/>
 						<Tab
@@ -324,7 +331,7 @@ export const File = (): JSX.Element => {
 							iconPosition="start"
 							sx={TabStyle}
 							label="Extracted Metadata"
-							{...a11yProps(2)}
+							{...a11yProps(3)}
 							disabled={false}
 						/>
 						<Tab
@@ -332,7 +339,7 @@ export const File = (): JSX.Element => {
 							iconPosition="start"
 							sx={TabStyle}
 							label="Extract"
-							{...a11yProps(3)}
+							{...a11yProps(4)}
 							disabled={false}
 						/>
 						<Tab
@@ -340,20 +347,19 @@ export const File = (): JSX.Element => {
 							iconPosition="start"
 							sx={TabStyle}
 							label="Extraction History"
-							{...a11yProps(4)}
+							{...a11yProps(5)}
 							disabled={false}
 						/>
 					</Tabs>
-					<Tab
-						icon={<VisibilityIcon />}
-						iconPosition="start"
-						sx={TabStyle}
-						label="Preview"
-						{...a11yProps(6)}
-						disabled={false}
-					/>
 					{/*Version History*/}
 					<TabPanel value={selectedTabIndex} index={0}>
+						<LazyLoadErrorBoundary fallback={<div>Fail to load...</div>}>
+							<Suspense fallback={<div>Loading...</div>}>
+								<Image fileId={fileId} />
+							</Suspense>
+						</LazyLoadErrorBoundary>
+					</TabPanel>
+					<TabPanel value={selectedTabIndex} index={1}>
 						{fileVersions !== undefined ? (
 							<FileVersionHistory
 								fileVersions={fileVersions}
@@ -363,7 +369,7 @@ export const File = (): JSX.Element => {
 							<></>
 						)}
 					</TabPanel>
-					<TabPanel value={selectedTabIndex} index={1}>
+					<TabPanel value={selectedTabIndex} index={2}>
 						{enableAddMetadata ? (
 							<>
 								<EditMetadata
@@ -409,7 +415,7 @@ export const File = (): JSX.Element => {
 							</>
 						)}
 					</TabPanel>
-					<TabPanel value={selectedTabIndex} index={2}>
+					<TabPanel value={selectedTabIndex} index={3}>
 						<DisplayListenerMetadata
 							updateMetadata={updateFileMetadata}
 							deleteMetadata={deleteFileMetadata}
@@ -418,18 +424,11 @@ export const File = (): JSX.Element => {
 							version={fileSummary.version_num}
 						/>
 					</TabPanel>
-					<TabPanel value={selectedTabIndex} index={3}>
+					<TabPanel value={selectedTabIndex} index={4}>
 						<Listeners fileId={fileId} datasetId={datasetId} />
 					</TabPanel>
 					<TabPanel value={selectedTabIndex} index={4}>
 						<ExtractionHistoryTab fileId={fileId} />
-					</TabPanel>
-					<TabPanel value={selectedTabIndex} index={6}>
-						<LazyLoadErrorBoundary fallback={<div>Fail to load...</div>}>
-							<Suspense fallback={<div>Loading...</div>}>
-								<Image fileId={fileId} />
-							</Suspense>
-						</LazyLoadErrorBoundary>
 					</TabPanel>
 				</Grid>
 				<Grid item xs={2}>

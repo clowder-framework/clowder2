@@ -1,35 +1,45 @@
-import React, { useState } from "react";
+import React, { useEffect } from "react";
 import { Typography } from "@mui/material";
-import { generateFileDownloadUrl } from "../../utils/file";
+import { useDispatch, useSelector } from "react-redux";
+import { generateFileDownloadUrl as generateFileDownloadUrlAction } from "../../actions/file";
+import { RootState } from "../../types/data";
 
 type ImageProps = {
 	fileId: string;
-	imgSrc: string | null;
-	fileType: string | null;
 };
 
 export default function Image(props: ImageProps) {
-	const { fileId, imgSrc, fileType } = props;
+	const { fileId } = props;
 
-	const [src, setSrc] = useState(imgSrc ?? undefined);
+	const dispatch = useDispatch();
 
-	// if imgSrc doesn't exist, stream from raw bytes
-	if (!imgSrc) {
-		setSrc(await generateFileDownloadUrl(fileId));
-	}
+	const generateFileDownloadUrl = (
+		fileId: string | undefined,
+		filename: string,
+		fileVersionNum: number
+	) =>
+		dispatch(generateFileDownloadUrlAction(fileId, filename, fileVersionNum));
+
+	const url = useSelector((state: RootState) => state.file.url);
+
+	useEffect(() => {
+		(async () => {
+			await generateFileDownloadUrl(fileId);
+		})();
+	}, [fileId]);
 
 	return (() => {
-		if (fileType?.toLowerCase().includes("image/")) {
+		if (!url) {
 			return (
 				<img
 					className="rubberbandimage"
-					src={src}
+					src={url}
 					alt="img"
 					id={`rubberbandCanvas-${fileId}`}
 				/>
 			);
 		} else {
-			return <Typography>ERROR: Unrecognised image format.</Typography>;
+			return <Typography>ERROR: Unable to render image.</Typography>;
 		}
 	})();
 }
