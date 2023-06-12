@@ -2,19 +2,22 @@
 /* tslint:disable */
 /* eslint-disable */
 
-import type { ExtractorInfo } from './ExtractorInfo';
-import type { UserOut } from './UserOut';
-
 /**
- * EventListeners have a name, version, author, description, and optionally properties where extractor_info will be saved.
+ * Document Mapping class.
+ *
+ * Fields:
+ *
+ * - `id` - MongoDB document ObjectID "_id" field.
+ * Mapped to the PydanticObjectId class
+ *
+ * Inherited from:
+ *
+ * - Pydantic BaseModel
+ * - [UpdateMethods](https://roman-right.github.io/beanie/api/interfaces/#aggregatemethods)
  */
 export type EventListenerJobUpdateOut = {
-    name: string;
-    version?: string;
-    description?: string;
+    job_id: string;
+    timestamp?: string;
+    status: string;
     id?: string;
-    creator?: UserOut;
-    created?: string;
-    modified?: string;
-    properties?: ExtractorInfo;
 }
