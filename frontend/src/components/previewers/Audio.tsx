@@ -1,10 +1,38 @@
-import React from "react";
+import React, { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "../../types/data";
+import { generateFileDownloadUrl as generateFileDownloadUrlAction } from "../../actions/file";
+import Typography from "@mui/material/Typography";
 
 type AudioProps = {
-	fileId: string,
-	audioSrc: string
-}
-export default function Audio(props:AudioProps) {
-	const {fileId, audioSrc,} = props;
-	return <audio controls><source id={fileId} src={audioSrc} /></audio>;
+	fileId: string;
+};
+
+export default function Audio(props: AudioProps) {
+	const { fileId } = props;
+
+	const dispatch = useDispatch();
+
+	const generateFileDownloadUrl = (
+		fileId: string | undefined,
+		fileVersionNum: number | null
+	) => dispatch(generateFileDownloadUrlAction(fileId, fileVersionNum));
+
+	const url = useSelector((state: RootState) => state.file.url);
+
+	useEffect(() => {
+		generateFileDownloadUrl(fileId, 0);
+	}, [fileId]);
+
+	return (() => {
+		if (url) {
+			return (
+				<audio controls style={{ maxWidth: "100%", maxHeight: "100%" }}>
+					<source id={fileId} src={url} />
+				</audio>
+			);
+		} else {
+			return <Typography>ERROR: Unable to render audio.</Typography>;
+		}
+	})();
 }

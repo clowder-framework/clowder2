@@ -15,15 +15,13 @@ export default function Image(props: ImageProps) {
 
 	const generateFileDownloadUrl = (
 		fileId: string | undefined,
-		filename: string,
-		fileVersionNum: number
-	) =>
-		dispatch(generateFileDownloadUrlAction(fileId, filename, fileVersionNum));
+		fileVersionNum: number | null
+	) => dispatch(generateFileDownloadUrlAction(fileId, fileVersionNum));
 
 	const url = useSelector((state: RootState) => state.file.url);
 
 	useEffect(() => {
-		generateFileDownloadUrl(fileId);
+		generateFileDownloadUrl(fileId, 0);
 	}, [fileId]);
 
 	return (() => {

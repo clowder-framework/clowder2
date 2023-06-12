@@ -38,9 +38,13 @@ import { Forbidden } from "../errors/Forbidden";
 import { PageNotFound } from "../errors/PageNotFound";
 import { LazyLoadErrorBoundary } from "../errors/LazyLoadErrorBoundary";
 import VisibilityIcon from "@mui/icons-material/Visibility";
+import Audio from "../previewers/Audio";
 
 const Image = lazy(
 	() => import(/* webpackChunkName: "previewers-image" */ "../previewers/Image")
+);
+const Audio = lazy(
+	() => import(/* webpackChunkName: "previewers-audio" */ "../previewers/Audio")
 );
 
 export const File = (): JSX.Element => {
@@ -355,7 +359,8 @@ export const File = (): JSX.Element => {
 					<TabPanel value={selectedTabIndex} index={0}>
 						<LazyLoadErrorBoundary fallback={<div>Fail to load...</div>}>
 							<Suspense fallback={<div>Loading...</div>}>
-								<Image fileId={fileId} />
+								{/*<Image fileId={fileId} />*/}
+								<Audio fileId={fileId} />
 							</Suspense>
 						</LazyLoadErrorBoundary>
 					</TabPanel>
