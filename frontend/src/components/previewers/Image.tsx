@@ -29,7 +29,7 @@ export default function Image(props: ImageProps) {
 	}, [fileId]);
 
 	return (() => {
-		if (!url) {
+		if (url) {
 			return (
 				<img
 					className="rubberbandimage"
