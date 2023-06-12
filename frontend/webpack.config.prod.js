@@ -29,13 +29,8 @@ export default {
 	target: "web", // necessary per https://webpack.github.io/docs/testing.html#compile-and-test
 	output: {
 		filename: "[name].bundle.js",
+		chunkFilename: "[name].chunk.bundle.js",
 		path: path.resolve(__dirname, "dist"),
-		// Use a function to dynamically generate meaningful chunk names
-		chunkFilename: (pathData) => {
-			console.log("pathData", pathData);
-			const chunkName = pathData.chunk.id;
-			return `${chunkName}.chunk.bundle.js`;
-		},
 	},
 	plugins: [
 		// NOTE: `npm run preinstall` currently runs eslint
@@ -158,5 +153,24 @@ export default {
 				},
 			}),
 		],
+		splitChunks: {
+			cacheGroups: {
+				reactVendor: {
+					test: /[\\/]node_modules[\\/](react|react-dom|react-router-dom)[\\/]/,
+					name: "vendor-react",
+					chunks: "all",
+				},
+				corejsVendor: {
+					test: /[\\/]node_modules[\\/](core-js)[\\/]/,
+					name: "vendor-corejs",
+					chunks: "all",
+				},
+				// vegaVendor: {
+				// 	test: /[\\/]node_modules[\\/](vega.*)[\\/]/,
+				// 	name: "vendor-vega",
+				// 	chunks: "all",
+				// },
+			},
+		},
 	},
 };

@@ -44,7 +44,9 @@ import { Forbidden } from "../errors/Forbidden";
 import { PageNotFound } from "../errors/PageNotFound";
 import { LazyLoadErrorBoundary } from "../errors/LazyLoadErrorBoundary";
 
-const Demo = lazy(() => import("../previewers/Demo"));
+const Demo = lazy(
+	() => import(/* webpackChunkName: "previewers-demo" */ "../previewers/Demo")
+);
 
 export const Dataset = (): JSX.Element => {
 	// path parameter
