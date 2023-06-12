@@ -31,12 +31,12 @@ async def get_user_api_keys(
     """
     apikeys = []
     for doc in (
-            await db["user_keys"]
-                    .find({"user": current_user})
-                    .sort([("created", DESCENDING)])
-                    .skip(skip)
-                    .limit(limit)
-                    .to_list(length=limit)
+        await db["user_keys"]
+        .find({"user": current_user})
+        .sort([("created", DESCENDING)])
+        .skip(skip)
+        .limit(limit)
+        .to_list(length=limit)
     ):
         apikeys.append(UserAPIKeyOut.from_mongo(doc))
 
@@ -45,10 +45,10 @@ async def get_user_api_keys(
 
 @router.post("/keys", response_model=str)
 async def generate_user_api_key(
-        name: str,
-        mins: int = settings.local_auth_expiration,
-        db: MongoClient = Depends(dependencies.get_db),
-        current_user=Depends(get_current_username),
+    name: str,
+    mins: int = settings.local_auth_expiration,
+    db: MongoClient = Depends(dependencies.get_db),
+    current_user=Depends(get_current_username),
 ):
     """Generate an API key that confers the user's privileges.
 
@@ -96,7 +96,7 @@ async def delete_user_api_key(
 
 @router.get("", response_model=List[UserOut])
 async def get_users(
-        db: MongoClient = Depends(dependencies.get_db), skip: int = 0, limit: int = 2
+    db: MongoClient = Depends(dependencies.get_db), skip: int = 0, limit: int = 2
 ):
     users = []
     for doc in await db["users"].find().skip(skip).limit(limit).to_list(length=limit):
@@ -106,40 +106,57 @@ async def get_users(
 
 @router.get("/search", response_model=List[UserOut])
 async def search_users(
-        text: str,
-        db: MongoClient = Depends(dependencies.get_db),
-        skip: int = 0,
-        limit: int = 2
+    text: str,
+    db: MongoClient = Depends(dependencies.get_db),
+    skip: int = 0,
+    limit: int = 2,
 ):
     query_regx = re.compile(text, re.IGNORECASE)
     users = []
-    for doc in await db["users"].find({"$or": [{"email": query_regx},
-                                               {"first_name": query_regx},
-                                               {"last_name": query_regx}]}).skip(skip).limit(
-        limit).to_list(length=limit):
+    for doc in (
+        await db["users"]
+        .find(
+            {
+                "$or": [
+                    {"email": query_regx},
+                    {"first_name": query_regx},
+                    {"last_name": query_regx},
+                ]
+            }
+        )
+        .skip(skip)
+        .limit(limit)
+        .to_list(length=limit)
+    ):
         users.append(UserOut(**doc))
     return users
 
 
 @router.get("/prefixSearch", response_model=List[UserOut])
 async def search_users(
-        prefix: str,
-        db: MongoClient = Depends(dependencies.get_db),
-        skip: int = 0,
-        limit: int = 2
+    prefix: str,
+    db: MongoClient = Depends(dependencies.get_db),
+    skip: int = 0,
+    limit: int = 2,
 ):
     query_regx = re.compile(f"^{prefix}.*", re.IGNORECASE)
     users = []
-    for doc in await db["users"].find({"email": query_regx}).sort("email").skip(skip).limit(
-            limit).to_list(length=limit):
+    for doc in (
+        await db["users"]
+        .find({"email": query_regx})
+        .sort("email")
+        .skip(skip)
+        .limit(limit)
+        .to_list(length=limit)
+    ):
         users.append(UserOut(**doc))
     return users
 
 
 @router.get("/profile", response_model=UserOut)
 async def get_profile(
-        username=Depends(get_current_username),
-        db: MongoClient = Depends(dependencies.get_db),
+    username=Depends(get_current_username),
+    db: MongoClient = Depends(dependencies.get_db),
 ):
     if (user := await db["users"].find_one({"email": username})) is not None:
         return UserOut.from_mongo(user)
@@ -155,7 +172,7 @@ async def get_user(user_id: str, db: MongoClient = Depends(dependencies.get_db))
 
 @router.get("/username/{username}", response_model=UserOut)
 async def get_user_by_name(
-        username: str, db: MongoClient = Depends(dependencies.get_db)
+    username: str, db: MongoClient = Depends(dependencies.get_db)
 ):
     if (user := await db["users"].find_one({"email": username})) is not None:
         return UserOut.from_mongo(user)
