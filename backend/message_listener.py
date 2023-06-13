@@ -138,7 +138,6 @@ async def callback(message: AbstractIncomingMessage):
 
             # Update the job timestamps/duration depending on what status we received
             if incoming_status == EventListenerJobStatus.STARTED:
-                # job.started = timestamp
                 field_updates[EventListenerJobDB.started] = timestamp
             elif incoming_status in [
                 EventListenerJobStatus.SUCCEEDED,
@@ -149,7 +148,6 @@ async def callback(message: AbstractIncomingMessage):
                 field_updates[EventListenerJobDB.finished] = timestamp
 
             await job.set(field_updates)
-            # await job.save()
 
             # Add latest message to the job updates
             event_msg = EventListenerJobUpdateDB(
