@@ -1,4 +1,4 @@
-import React, { lazy, Suspense, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import config from "../../app.config";
 import { Box, Button, Grid, Tab, Tabs, Typography } from "@mui/material";
 import { downloadResource, parseDate } from "../../utils/common";
@@ -36,27 +36,8 @@ import AssessmentIcon from "@mui/icons-material/Assessment";
 import HistoryIcon from "@mui/icons-material/History";
 import { Forbidden } from "../errors/Forbidden";
 import { PageNotFound } from "../errors/PageNotFound";
-import { LazyLoadErrorBoundary } from "../errors/LazyLoadErrorBoundary";
 import VisibilityIcon from "@mui/icons-material/Visibility";
-
-const Image = lazy(
-	() => import(/* webpackChunkName: "previewers-image" */ "../previewers/Image")
-);
-const Audio = lazy(
-	() => import(/* webpackChunkName: "previewers-audio" */ "../previewers/Audio")
-);
-const Video = lazy(
-	() => import(/* webpackChunkName: "previewers-video" */ "../previewers/Video")
-);
-
-const Iframe = lazy(
-	() =>
-		import(/* webpackChunkName: "previewers-iframe" */ "../previewers/Iframe")
-);
-
-const Text = lazy(
-	() => import(/* webpackChunkName: "previewers-text" */ "../previewers/Text")
-);
+import { Preview } from "../previewers/Preview";
 
 export const File = (): JSX.Element => {
 	// path parameter
@@ -366,18 +347,10 @@ export const File = (): JSX.Element => {
 							disabled={false}
 						/>
 					</Tabs>
-					{/*Version History*/}
 					<TabPanel value={selectedTabIndex} index={0}>
-						<LazyLoadErrorBoundary fallback={<div>Fail to load...</div>}>
-							<Suspense fallback={<div>Loading...</div>}>
-								{/*<Image fileId={fileId} />*/}
-								{/*<Audio fileId={fileId} />*/}
-								{/*<Video fileId={fileId} />*/}
-								{/*<Iframe fileId={fileId} />*/}
-								<Text fileId={fileId} />
-							</Suspense>
-						</LazyLoadErrorBoundary>
+						<Preview fileId={fileId} />
 					</TabPanel>
+					{/*Version History*/}
 					<TabPanel value={selectedTabIndex} index={1}>
 						{fileVersions !== undefined ? (
 							<FileVersionHistory
