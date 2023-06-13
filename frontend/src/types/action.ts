@@ -241,6 +241,7 @@ interface SAVE_METADATA_DEFINITIONS {
 
 interface DOWNLOAD_FILE {
 	type: "DOWNLOAD_FILE";
+	blob: Blob;
 }
 
 interface GENERATE_FILE_URL {

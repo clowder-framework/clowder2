@@ -45,6 +45,18 @@ const Image = lazy(
 const Audio = lazy(
 	() => import(/* webpackChunkName: "previewers-audio" */ "../previewers/Audio")
 );
+const Video = lazy(
+	() => import(/* webpackChunkName: "previewers-video" */ "../previewers/Video")
+);
+
+const Iframe = lazy(
+	() =>
+		import(/* webpackChunkName: "previewers-iframe" */ "../previewers/Iframe")
+);
+
+const Text = lazy(
+	() => import(/* webpackChunkName: "previewers-text" */ "../previewers/Text")
+);
 
 export const File = (): JSX.Element => {
 	// path parameter
@@ -359,7 +371,10 @@ export const File = (): JSX.Element => {
 						<LazyLoadErrorBoundary fallback={<div>Fail to load...</div>}>
 							<Suspense fallback={<div>Loading...</div>}>
 								{/*<Image fileId={fileId} />*/}
-								<Audio fileId={fileId} />
+								{/*<Audio fileId={fileId} />*/}
+								{/*<Video fileId={fileId} />*/}
+								{/*<Iframe fileId={fileId} />*/}
+								<Text fileId={fileId} />
 							</Suspense>
 						</LazyLoadErrorBoundary>
 					</TabPanel>

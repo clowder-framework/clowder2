@@ -101,6 +101,25 @@ export const getCurrEmail = () => {
 	}
 };
 
+// Function to read the text from the downloaded file
+export function readTextFromFile(file) {
+	return new Promise((resolve, reject) => {
+		const reader = new FileReader();
+
+		reader.onload = () => {
+			const text = reader.result;
+			resolve(text);
+		};
+
+		reader.onerror = () => {
+			reader.abort();
+			reject(new Error("Failed to read the file"));
+		};
+
+		reader.readAsText(file);
+	});
+}
+
 // get current username
 // export function getCurrUsername(){
 // 	if (process.env.DEPLOY_ENV === "local"){

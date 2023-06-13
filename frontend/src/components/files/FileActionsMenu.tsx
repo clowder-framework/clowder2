@@ -1,24 +1,36 @@
-import {Button, Dialog, DialogTitle, ListItemIcon, ListItemText, Menu, MenuItem, Stack} from "@mui/material";
+import {
+	Button,
+	Dialog,
+	DialogTitle,
+	ListItemIcon,
+	ListItemText,
+	Menu,
+	MenuItem,
+	Stack,
+} from "@mui/material";
 import React, { useState } from "react";
-import {fileDeleted, fileDownloaded} from "../../actions/file";
-import {useDispatch, useSelector} from "react-redux";
-import {Download, MoreHoriz, Upload} from "@mui/icons-material";
+import {
+	fileDeleted,
+	fileDownloaded as fileDownloadedAction,
+} from "../../actions/file";
+import { useDispatch, useSelector } from "react-redux";
+import { Download, MoreHoriz, Upload } from "@mui/icons-material";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import { ActionModal } from "../dialog/ActionModal";
 import { UpdateFile } from "./UpdateFile";
 import DeleteIcon from "@mui/icons-material/Delete";
-import {useNavigate} from "react-router-dom";
-import {AuthWrapper} from "../auth/AuthWrapper";
-import {RootState} from "../../types/data";
+import { useNavigate } from "react-router-dom";
+import { AuthWrapper } from "../auth/AuthWrapper";
+import { RootState } from "../../types/data";
 
 type FileActionsMenuProps = {
-    fileId: string | undefined,
-    filename: string | undefined,
-    datasetId: string | null
-}
+	fileId: string | undefined;
+	filename: string | undefined;
+	datasetId: string | null;
+};
 
 export const FileActionsMenu = (props: FileActionsMenuProps): JSX.Element => {
-	const {fileId, filename, datasetId} = props;
+	const { fileId, filename, datasetId } = props;
 
 	const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
 
@@ -37,8 +49,15 @@ export const FileActionsMenu = (props: FileActionsMenuProps): JSX.Element => {
 	// redux
 	const dispatch = useDispatch();
 
-	const deleteFile = (fileId:string|undefined) => dispatch(fileDeleted(fileId));
-	const downloadFile = (fileId: string | undefined, filename: string | undefined) => dispatch(fileDownloaded(fileId, filename));
+	const deleteFile = (fileId: string | undefined) =>
+		dispatch(fileDeleted(fileId));
+	const downloadFile = (
+		fileId: string | undefined,
+		filename: string | undefined,
+		fileVersionNum: number | undefined,
+		autoSave: boolean
+	) =>
+		dispatch(fileDownloadedAction(fileId, filename, fileVersionNum, autoSave));
 
 	const history = useNavigate();
 
@@ -56,24 +75,42 @@ export const FileActionsMenu = (props: FileActionsMenuProps): JSX.Element => {
 	};
 
 	return (
-		<Stack direction="row"
+		<Stack
+			direction="row"
 			justifyContent="flex-end"
 			alignItems="center"
-			spacing={0.5}>
-			<ActionModal actionOpen={confirmationOpen} actionTitle="Are you sure?"
-						 actionText="Do you really want to delete? This process cannot be undone."
-						 actionBtnName="Delete" handleActionBtnClick={deleteSelectedFile}
-						 handleActionCancel={() => { setConfirmationOpen(false);}}/>
-			<Dialog open={updateFileOpen} onClose={()=>{setUpdateFileOpen(false);}} fullWidth={true} aria-labelledby="form-dialog">
+			spacing={0.5}
+		>
+			<ActionModal
+				actionOpen={confirmationOpen}
+				actionTitle="Are you sure?"
+				actionText="Do you really want to delete? This process cannot be undone."
+				actionBtnName="Delete"
+				handleActionBtnClick={deleteSelectedFile}
+				handleActionCancel={() => {
+					setConfirmationOpen(false);
+				}}
+			/>
+			<Dialog
+				open={updateFileOpen}
+				onClose={() => {
+					setUpdateFileOpen(false);
+				}}
+				fullWidth={true}
+				aria-labelledby="form-dialog"
+			>
 				<DialogTitle id="form-dialog-title">Update File</DialogTitle>
-				<UpdateFile fileId={fileId} setOpen={setUpdateFileOpen}/>
+				<UpdateFile fileId={fileId} setOpen={setUpdateFileOpen} />
 			</Dialog>
-			<Button variant="contained"
+			<Button
+				variant="contained"
 				onClick={() => {
-					downloadFile(fileId, filename);
+					downloadFile(fileId, filename, 0, true);
 					handleClose();
-				}} endIcon={<Download/>}>
-        		Download
+				}}
+				endIcon={<Download />}
+			>
+				Download
 			</Button>
 			<div>
 				{/*owner, editor can update file*/}
@@ -85,7 +122,8 @@ export const FileActionsMenu = (props: FileActionsMenuProps): JSX.Element => {
 						aria-haspopup="true"
 						aria-expanded={open ? "true" : undefined}
 						onClick={handleClick}
-						endIcon={<ArrowDropDownIcon/>}>
+						endIcon={<ArrowDropDownIcon />}
+					>
 						<MoreHoriz />
 					</Button>
 					<Menu
@@ -97,17 +135,24 @@ export const FileActionsMenu = (props: FileActionsMenuProps): JSX.Element => {
 							"aria-labelledby": "basic-button",
 						}}
 					>
-						<MenuItem onClick={()=>{
-							handleClose();
-							setUpdateFileOpen(true);
-						}}> <ListItemIcon>
-								<Upload fontSize="small"/>
+						<MenuItem
+							onClick={() => {
+								handleClose();
+								setUpdateFileOpen(true);
+							}}
+						>
+							{" "}
+							<ListItemIcon>
+								<Upload fontSize="small" />
 							</ListItemIcon>
-							<ListItemText>Update File</ListItemText></MenuItem>
-						<MenuItem onClick={()=>{
-							handleClose();
-							setConfirmationOpen(true);
-						}}>
+							<ListItemText>Update File</ListItemText>
+						</MenuItem>
+						<MenuItem
+							onClick={() => {
+								handleClose();
+								setConfirmationOpen(true);
+							}}
+						>
 							<ListItemIcon>
 								<DeleteIcon fontSize="small" />
 							</ListItemIcon>
@@ -116,6 +161,6 @@ export const FileActionsMenu = (props: FileActionsMenuProps): JSX.Element => {
 					</Menu>
 				</AuthWrapper>
 			</div>
-		</Stack>);
+		</Stack>
+	);
 };
-

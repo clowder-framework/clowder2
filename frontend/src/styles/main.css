@@ -3,19 +3,19 @@ body {
 	font-weight: 300;
 }
 
-.outer-container{
+.outer-container {
 	padding: 45px;
 }
 
-.inner-container{
+.inner-container {
 	padding: 20px 0;
 }
 
-.fileCard{
+.fileCard {
 	border: 1px solid #DFDFDF;
 	box-sizing: border-box;
 	border-radius: 4px;
-	height:140px;
+	height: 140px;
 	margin: 25px auto;
 }
 
@@ -23,15 +23,15 @@ body {
 	padding: 20px 0;
 }
 
-.infoCard .title{
+.infoCard .title {
 	font-weight: 600;
 	font-size: 16px;
 	margin-bottom: 8px;
 }
 
-.infoCard .content{
+.infoCard .content {
 	font-size: 14px;
-	margin-bottom:2px;
+	margin-bottom: 2px;
 }
 
 .actionCard {
@@ -43,19 +43,18 @@ body {
 }
 
 .actionCard .title,
-.search-title
-{
+.search-title {
 	font-weight: 600;
 	font-size: 20px;
 	margin-bottom: 12px;
 }
 
-.actionCard .content{
+.actionCard .content {
 	font-size: 16px;
-	margin-bottom:12px;
+	margin-bottom: 12px;
 }
 
-.actionCard .link{
+.actionCard .link {
 	font-size: 16px;
 }
 
@@ -64,73 +63,77 @@ body {
 	box-shadow: none;
 }
 
-.tab{
+.tab {
 	font-style: normal;
 	font-weight: normal;
 	font-size: 16px;
 	text-transform: capitalize;
 }
 
-.form-button-block{
+.form-button-block {
 	width: 100%;
 	font-weight: 600;
 }
 
-.inputGroup{
+.inputGroup {
 	margin: 20px auto;
 }
 
-.search-input{
-	background-color: #FFFFFF!important;
-	border: 1px solid #CED4DA!important;
+.search-input {
+	background-color: #FFFFFF !important;
+	border: 1px solid #CED4DA !important;
 	border-radius: 4px;
 }
 
-.embedded-search-input{
-	border: none!important;
-    background: transparent!important;
-    border-bottom: 0.5px solid #868E96!important;
+.embedded-search-input {
+	border: none !important;
+	background: transparent !important;
+	border-bottom: 0.5px solid #868E96 !important;
 }
 
 /*turn off the shadow box on search*/
 /*TODO pass in outer div id*/
-.input-group{
-	box-shadow: none!important;
+.input-group {
+	box-shadow: none !important;
 }
 
-.filter-select{
-	border: none!important;
-    background: transparent!important;
-    border-bottom: 1px solid #868E96!important;
-    font-weight: bold;
-}
-
-.DayPickerInput{
-	border-radius: 0;
-	border-bottom: 1px solid #868E96!important;
-}
-
-.DayPickerInput > input{
+.filter-select {
+	border: none !important;
+	background: transparent !important;
+	border-bottom: 1px solid #868E96 !important;
 	font-weight: bold;
-	background:transparent!important;
+}
+
+.DayPickerInput {
+	border-radius: 0;
+	border-bottom: 1px solid #868E96 !important;
+}
+
+.DayPickerInput > input {
+	font-weight: bold;
+	background: transparent !important;
 }
 
 .DayPickerInput > input::placeholder { /* Chrome, Firefox, Opera, Safari 10.1+ */
-  color: #424242;
-  opacity: 1; /* Firefox */
+	color: #424242;
+	opacity: 1; /* Firefox */
 }
 
-.DayPickerInput-OverlayWrapper{
-	font-size:16px;
+.DayPickerInput-OverlayWrapper {
+	font-size: 16px;
 }
 
-[class*="-DateContainer-DateContainer"] > div:first-of-type > div{
-	border: none!important;
-	background: transparent!important;
+[class*="-DateContainer-DateContainer"] > div:first-of-type > div {
+	border: none !important;
+	background: transparent !important;
 }
 
-mark{
+mark {
 	font-weight: bold;
 	background: inherit;
 	color: inherit;
+}
+
+.show-more-less-clickable {
+	color: #F7941E;
 }

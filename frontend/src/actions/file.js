@@ -199,7 +199,12 @@ export function fetchFileVersions(fileId) {
 
 export const DOWNLOAD_FILE = "DOWNLOAD_FILE";
 
-export function fileDownloaded(fileId, filename = "", fileVersionNum = 0) {
+export function fileDownloaded(
+	fileId,
+	filename = "",
+	fileVersionNum = 0,
+	autoSave = true
+) {
 	return async (dispatch) => {
 		if (filename === "") {
 			filename = `${fileId}.zip`;
@@ -214,22 +219,31 @@ export function fileDownloaded(fileId, filename = "", fileVersionNum = 0) {
 
 		if (response.status === 200) {
 			const blob = await response.blob();
-			if (window.navigator.msSaveOrOpenBlob) {
-				window.navigator.msSaveBlob(blob, filename);
-			} else {
-				const anchor = window.document.createElement("a");
-				anchor.href = window.URL.createObjectURL(blob);
-				anchor.download = filename;
-				document.body.appendChild(anchor);
-				anchor.click();
-				document.body.removeChild(anchor);
+			if (autoSave) {
+				if (window.navigator.msSaveOrOpenBlob) {
+					window.navigator.msSaveBlob(blob, filename);
+				} else {
+					const anchor = window.document.createElement("a");
+					anchor.href = window.URL.createObjectURL(blob);
+					anchor.download = filename;
+					document.body.appendChild(anchor);
+					anchor.click();
+					document.body.removeChild(anchor);
+				}
 			}
+
 			dispatch({
 				type: DOWNLOAD_FILE,
+				blob: blob,
 				receivedAt: Date.now(),
 			});
 		} else {
-			dispatch(handleErrors(response, fileDownloaded(fileId, filename)));
+			dispatch(
+				handleErrors(
+					response,
+					fileDownloaded(fileId, filename, fileVersionNum, autoSave)
+				)
+			);
 		}
 	};
 }
