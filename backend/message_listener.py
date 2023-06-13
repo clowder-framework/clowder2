@@ -10,11 +10,9 @@ from aio_pika import connect_robust
 from aio_pika.abc import AbstractIncomingMessage
 from bson import ObjectId
 
-from app.config import settings
 from app.main import startup_beanie
 from app.models.config import ConfigEntryDB
 from app.models.listeners import (
-    EventListenerDB,
     EventListenerJobUpdateDB,
     EventListenerJobStatus,
     EventListenerJobDB,
@@ -27,14 +25,22 @@ logger.setLevel(logging.INFO)
 
 def parse_message_status(msg):
     """Determine if the message corresponds to start/middle/end of job if possible. See pyclowder.utils.StatusMessage."""
-    if msg.startswith("StatusMessage.start: ") or msg.startswith("STARTED: "):
+    if (
+        msg.startswith("StatusMessage.start: ")
+        or msg.startswith("STARTED: ")
+        or msg.endswith("Started processing.")
+    ):
         return {
             "status": EventListenerJobStatus.STARTED,
             "cleaned_msg": msg.replace("StatusMessage.start: ", "").replace(
                 "STARTED: ", ""
             ),
         }
-    elif msg.startswith("StatusMessage.done: ") or msg.startswith("SUCCEEDED: "):
+    elif (
+        msg.startswith("StatusMessage.done: ")
+        or msg.startswith("SUCCEEDED: ")
+        or msg.endswith("Done processing.")
+    ):
         return {
             "status": EventListenerJobStatus.SUCCEEDED,
             "cleaned_msg": msg.replace("StatusMessage.done: ", "").replace(
@@ -98,35 +104,52 @@ async def callback(message: AbstractIncomingMessage):
             EventListenerJobDB.id == ObjectId(job_id)
         )
         if job:
-            # Update existing job with newest info
+            # Update existing job with new info
             job.updated = timestamp
             parsed = parse_message_status(message_str)
-            status = parsed["status"]
             cleaned_msg = parsed["cleaned_msg"]
+            incoming_status = parsed["status"]
+
+            # Don't override a finished status if a message comes in late
+            if job.status in [
+                EventListenerJobStatus.SUCCEEDED,
+                EventListenerJobStatus.ERROR,
+                EventListenerJobStatus.SKIPPED,
+            ]:
+                cleaned_status = job.status
+            else:
+                cleaned_status = incoming_status
+
+            # Prepare fields to update based on status (don't overwrite whole object to avoid async issues)
+            field_updates = {
+                EventListenerJobDB.status: cleaned_status,
+                EventListenerJobDB.latest_message: cleaned_msg,
+                EventListenerJobDB.updated: timestamp,
+            }
+
+            if job.started is not None:
+                field_updates[EventListenerJobDB.duration] = (
+                    timestamp - job.started
+                ).total_seconds()
+            elif incoming_status == EventListenerJobStatus.STARTED:
+                field_updates[EventListenerJobDB.duration] = 0
+
+            logger.info(f"[{job_id}] {timestamp} {incoming_status.value} {cleaned_msg}")
 
             # Update the job timestamps/duration depending on what status we received
-            update_duration = False
-            if status == EventListenerJobStatus.STARTED and job.started is None:
-                job.started = timestamp
-            elif (
-                status == EventListenerJobStatus.SUCCEEDED
-                or status == EventListenerJobStatus.ERROR
-                or status == EventListenerJobStatus.SKIPPED
-            ):
-                job.finished = timestamp
-                update_duration = True
-            elif (
-                status == EventListenerJobStatus.PROCESSING
-                or status == EventListenerJobStatus.RESUBMITTED
-            ):
-                job.updated = timestamp
-                update_duration = True
-            if update_duration and job.started:
-                job.duration = (timestamp - job.started).total_seconds()
-            job.status = status
-            job.latest_message = cleaned_msg
-            # TODO: works if synchronous?
-            await job.save()
+            if incoming_status == EventListenerJobStatus.STARTED:
+                # job.started = timestamp
+                field_updates[EventListenerJobDB.started] = timestamp
+            elif incoming_status in [
+                EventListenerJobStatus.SUCCEEDED,
+                EventListenerJobStatus.ERROR,
+                EventListenerJobStatus.SKIPPED,
+            ]:
+                # job.finished = timestamp
+                field_updates[EventListenerJobDB.finished] = timestamp
+
+            await job.set(field_updates)
+            # await job.save()
 
             # Add latest message to the job updates
             event_msg = EventListenerJobUpdateDB(
