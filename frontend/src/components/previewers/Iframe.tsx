@@ -1,5 +1,4 @@
 import React, { useEffect } from "react";
-import { Typography } from "@mui/material";
 import { useDispatch, useSelector } from "react-redux";
 import {
 	GENERATE_FILE_URL,
@@ -48,7 +47,7 @@ export default function Iframe(props: IframeProps) {
 				></iframe>
 			);
 		} else {
-			return <Typography>ERROR: Unable to render html.</Typography>;
+			return <></>;
 		}
 	})();
 }

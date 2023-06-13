@@ -1,5 +1,4 @@
 import React, { useEffect } from "react";
-import { Typography } from "@mui/material";
 import { useDispatch, useSelector } from "react-redux";
 import {
 	GENERATE_FILE_URL,
@@ -49,7 +48,7 @@ export default function Image(props: ImageProps) {
 				/>
 			);
 		} else {
-			return <Typography>ERROR: Unable to render image.</Typography>;
+			return <></>;
 		}
 	})();
 }

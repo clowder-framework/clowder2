@@ -53,20 +53,18 @@ export default function Text(props: TextProps) {
 		processBlob();
 	}, [blob]);
 
-	return (() => {
-		return (
-			<ShowMoreText
-				/* Default options */
-				lines={10}
-				more="Show more"
-				less="Show less"
-				className="content-css"
-				anchorClass="show-more-less-clickable"
-				expanded={false}
-				truncatedEndingComponent={"... "}
-			>
-				{text}
-			</ShowMoreText>
-		);
-	})();
+	return (
+		<ShowMoreText
+			/* Default options */
+			lines={10}
+			more="Show more"
+			less="Show less"
+			className="content-css"
+			anchorClass="show-more-less-clickable"
+			expanded={false}
+			truncatedEndingComponent={"... "}
+		>
+			{text}
+		</ShowMoreText>
+	);
 }

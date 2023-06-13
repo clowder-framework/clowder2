@@ -5,7 +5,6 @@ import {
 	GENERATE_FILE_URL,
 	generateFileDownloadUrl as generateFileDownloadUrlAction,
 } from "../../actions/file";
-import Typography from "@mui/material/Typography";
 
 type AudioProps = {
 	fileId: string;
@@ -45,7 +44,7 @@ export default function Audio(props: AudioProps) {
 				</audio>
 			);
 		} else {
-			return <Typography>ERROR: Unable to render audio.</Typography>;
+			return <></>;
 		}
 	})();
 }

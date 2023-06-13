@@ -1,5 +1,4 @@
 import React, { useEffect } from "react";
-import { Typography } from "@mui/material";
 import { useDispatch, useSelector } from "react-redux";
 import {
 	GENERATE_FILE_URL,
@@ -51,7 +50,7 @@ export default function Video(props: VideoProps) {
 				</video>
 			);
 		} else {
-			return <Typography>ERROR: Unable to render video.</Typography>;
+			return <></>;
 		}
 	})();
 }
