@@ -48,7 +48,7 @@ async def get_groups(
             GroupDB.creator == user_id,
             GroupDB.users.user.email == user_id,
         ),
-        sort=("created", DESCENDING),
+        sort=(-GroupDB.created),
         skip=skip,
         limit=limit,
     ).to_list()

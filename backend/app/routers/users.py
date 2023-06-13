@@ -4,6 +4,7 @@ from secrets import token_urlsafe
 from typing import List
 
 from beanie import PydanticObjectId
+from beanie.operators import Or, RegEx
 from fastapi import APIRouter, HTTPException, Depends
 from itsdangerous.url_safe import URLSafeSerializer
 
@@ -96,50 +97,38 @@ async def get_users(skip: int = 0, limit: int = 2):
 @router.get("/search", response_model=List[UserOut])
 async def search_users(
     text: str,
-    db: MongoClient = Depends(dependencies.get_db),
     skip: int = 0,
     limit: int = 2,
 ):
     query_regx = re.compile(text, re.IGNORECASE)
-    users = []
-    for doc in (
-        await db["users"]
-        .find(
-            {
-                "$or": [
-                    {"email": query_regx},
-                    {"first_name": query_regx},
-                    {"last_name": query_regx},
-                ]
-            }
-        )
-        .skip(skip)
-        .limit(limit)
-        .to_list(length=limit)
-    ):
-        users.append(UserOut(**doc))
-    return users
+    users = await UserDB.find(
+        Or(
+            RegEx(field=UserDB.email, pattern=query_regx),
+            RegEx(field=UserDB.first_name, pattern=query_regx),
+            RegEx(field=UserDB.last_name, pattern=query_regx),
+        ),
+        skip=skip,
+        limit=limit,
+    ).to_list()
+
+    return [user.dict() for user in users]
 
 
 @router.get("/prefixSearch", response_model=List[UserOut])
 async def search_users(
     prefix: str,
-    db: MongoClient = Depends(dependencies.get_db),
     skip: int = 0,
     limit: int = 2,
 ):
     query_regx = re.compile(f"^{prefix}.*", re.IGNORECASE)
-    users = []
-    for doc in (
-        await db["users"]
-        .find({"email": query_regx})
-        .sort("email")
-        .skip(skip)
-        .limit(limit)
-        .to_list(length=limit)
-    ):
-        users.append(UserOut(**doc))
-    return users
+    users = await UserDB.find(
+        Or(RegEx(field=UserDB.email, pattern=query_regx)),
+        sort=(+UserDB.email),
+        skip=skip,
+        limit=limit,
+    ).to_list()
+
+    return [user.dict() for user in users]
 
 
 @router.get("/profile", response_model=UserOut)
