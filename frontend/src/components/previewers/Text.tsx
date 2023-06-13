@@ -1,7 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
-import { fileDownloaded as fileDownloadedAction } from "../../actions/file";
+import {
+	DOWNLOAD_FILE,
+	fileDownloaded as fileDownloadedAction,
+} from "../../actions/file";
 import ShowMoreText from "react-show-more-text";
 import { RootState } from "../../types/data";
 import { readTextFromFile } from "../../utils/common";
@@ -29,6 +32,16 @@ export default function Text(props: TextProps) {
 	useEffect(() => {
 		downloadFile(fileId, "text.tmp", 0, false);
 	}, [fileId]);
+
+	useEffect(() => {
+		return () => {
+			dispatch({
+				type: DOWNLOAD_FILE,
+				blob: new Blob([]),
+				receivedAt: Date.now(),
+			});
+		};
+	}, []);
 
 	useEffect(() => {
 		const processBlob = async () => {

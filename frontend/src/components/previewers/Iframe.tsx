@@ -1,7 +1,10 @@
 import React, { useEffect } from "react";
 import { Typography } from "@mui/material";
 import { useDispatch, useSelector } from "react-redux";
-import { generateFileDownloadUrl as generateFileDownloadUrlAction } from "../../actions/file";
+import {
+	GENERATE_FILE_URL,
+	generateFileDownloadUrl as generateFileDownloadUrlAction,
+} from "../../actions/file";
 
 import { RootState } from "../../types/data";
 
@@ -22,11 +25,21 @@ export default function Iframe(props: IframeProps) {
 	const url = useSelector((state: RootState) => state.file.url);
 
 	useEffect(() => {
+		return () => {
+			dispatch({
+				type: GENERATE_FILE_URL,
+				url: "",
+				receivedAt: Date.now(),
+			});
+		};
+	}, []);
+
+	useEffect(() => {
 		generateFileDownloadUrl(fileId, 0);
 	}, [fileId]);
 
 	return (() => {
-		if (url) {
+		if (url && url !== "") {
 			return (
 				<iframe
 					id={fileId}

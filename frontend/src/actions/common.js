@@ -67,7 +67,7 @@ export function handleErrors(reason, originalFunc) {
 	// Authorization error we need to automatically logout user
 	if (reason.status === 401) {
 		return (dispatch) => {
-			return refreshToken(dispatch, originalFunc);
+			refreshToken(dispatch, originalFunc);
 		};
 	} else if (reason.status === 403) {
 		return (dispatch) => {
