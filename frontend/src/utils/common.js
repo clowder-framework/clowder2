@@ -2,6 +2,7 @@ import Cookies from "universal-cookie";
 import { V2 } from "../openapi";
 import jwt_decode from "jwt-decode";
 import { formatInTimeZone } from "date-fns-tz";
+import config from "../app.config";
 
 const cookies = new Cookies();
 
@@ -192,3 +193,11 @@ export function renameIdArray(arr) {
 // export function formatProbToPercent(val, n = 1){
 // 	return formatPercent(val*100, n);
 // }
+
+export const handleErrorReport = (reason, stack) => {
+	window.open(
+		`${config.GHIssueBaseURL}+${encodeURIComponent(
+			reason
+		)}&body=${encodeURIComponent(stack)}`
+	);
+};

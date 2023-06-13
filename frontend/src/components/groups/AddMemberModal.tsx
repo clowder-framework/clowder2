@@ -11,10 +11,12 @@ import {
 } from "@mui/material";
 import { addGroupMember } from "../../actions/group";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchAllUsers } from "../../actions/user";
+import { prefixSearchAllUsers as prefixSearchAllUsersAction } from "../../actions/user";
 import { RootState } from "../../types/data";
 import { UserOut } from "../../openapi/v2";
 import GroupsIcon from "@mui/icons-material/Groups";
+import { InlineAlert } from "../errors/InlineAlert";
+import { resetFailedReasonInline } from "../../actions/common";
 
 type AddMemberModalProps = {
 	open: boolean;
@@ -28,8 +30,9 @@ export default function AddMemberModal(props: AddMemberModalProps) {
 	const { open, handleClose, groupOwner, groupName, groupId } = props;
 
 	const dispatch = useDispatch();
-	const listAllUsers = (skip: number, limit: number) =>
-		dispatch(fetchAllUsers(skip, limit));
+	const prefixSearchAllUsers = (text: string, skip: number, limit: number) =>
+		dispatch(prefixSearchAllUsersAction(text, skip, limit));
+
 	const groupMemberAdded = (
 		groupId: string | undefined,
 		username: string | undefined
@@ -38,10 +41,26 @@ export default function AddMemberModal(props: AddMemberModalProps) {
 
 	const [email, setEmail] = useState("");
 	const [options, setOptions] = useState([]);
+	const [alertOpen, setAlertOpen] = useState(false);
+	const [validateEmail, setValidateEmail] = useState(false);
+
+	const handleEmailChange = (event) => {
+		const inputValue = event.target.value;
+		setEmail(inputValue);
+
+		// Check for valid email address using a regular expression
+		const emailRegex = /^\S+@\S+\.\S+$/;
+		setValidateEmail(!emailRegex.test(inputValue));
+	};
 
 	useEffect(() => {
-		listAllUsers(0, 21);
+		prefixSearchAllUsers("", 0, 10);
 	}, []);
+
+	// dynamically update the options when user search
+	useEffect(() => {
+		prefixSearchAllUsers(email, 0, 10);
+	}, [email]);
 
 	useEffect(() => {
 		setOptions(
@@ -56,10 +75,16 @@ export default function AddMemberModal(props: AddMemberModalProps) {
 	const handleAddButtonClick = () => {
 		groupMemberAdded(groupId, email);
 		setEmail("");
-		handleClose();
 	};
+
+	const handleDialogClose = () => {
+		handleClose();
+		setValidateEmail(false);
+		dispatch(resetFailedReasonInline());
+	};
+
 	return (
-		<Dialog open={open} onClose={handleClose} fullWidth={true}>
+		<Dialog open={open} onClose={handleDialogClose} fullWidth={true}>
 			<DialogTitle>
 				Add People to{" "}
 				<GroupsIcon
@@ -87,13 +112,17 @@ export default function AddMemberModal(props: AddMemberModalProps) {
 							sx={{ mt: 1, width: "100%" }}
 							required
 							label="Enter email address"
+							onChange={handleEmailChange}
+							error={validateEmail}
+							helperText={validateEmail ? "Invalid email address" : ""}
 						/>
 					)}
 				/>
+				<InlineAlert alertOpen={alertOpen} setAlertOpen={setAlertOpen} />
 			</DialogContent>
 			<DialogActions>
 				<Button onClick={handleAddButtonClick}>Add</Button>
-				<Button onClick={handleClose}>Cancel</Button>
+				<Button onClick={handleDialogClose}>Cancel</Button>
 			</DialogActions>
 		</Dialog>
 	);

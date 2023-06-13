@@ -18,7 +18,11 @@ import {
 	UserAPIKeyOut,
 	UserOut,
 } from "../openapi/v2";
-import { LIST_USERS, RECEIVE_USER_PROFILE } from "../actions/user";
+import {
+	LIST_USERS,
+	PREFIX_SEARCH_USERS,
+	RECEIVE_USER_PROFILE,
+} from "../actions/user";
 import { CREATE_GROUP, DELETE_GROUP } from "../actions/group";
 
 interface RECEIVE_FILES_IN_DATASET {
@@ -172,14 +176,31 @@ interface FAILED {
 	reason: string;
 }
 
+interface FAILED_INLINE {
+	stack: string;
+	type: "FAILED_INLINE";
+	reason: string;
+}
+
 interface NOT_FOUND {
 	stack: string;
 	type: "NOT_FOUND";
 	reason: string;
 }
 
+interface NOT_FOUND_INLINE {
+	stack: string;
+	type: "NOT_FOUND_INLINE";
+	reason: string;
+}
+
 interface RESET_FAILED {
 	type: "RESET_FAILED";
+	reason: string;
+}
+
+interface RESET_FAILED_INLINE {
+	type: "RESET_FAILED_INLINE";
 	reason: string;
 }
 
@@ -352,6 +373,11 @@ interface LIST_USERS {
 	users: UserOut[];
 }
 
+interface PREFIX_SEARCH_USERS {
+	type: "PREFIX_SEARCH_USERS";
+	users: UserOut[];
+}
+
 interface ASSIGN_GROUP_MEMBER_ROLE {
 	type: "ASSIGN_GROUP_MEMBER_ROLE";
 	about: Group;
@@ -385,8 +411,11 @@ export type DataAction =
 	| CREATE_FILE
 	| RESET_CREATE_FILE
 	| FAILED
+	| FAILED_INLINE
 	| NOT_FOUND
+	| NOT_FOUND_INLINE
 	| RESET_FAILED
+	| RESET_FAILED_INLINE
 	| RESET_LOGOUT
 	| FOLDER_ADDED
 	| UPDATE_DATASET_METADATA
@@ -421,5 +450,6 @@ export type DataAction =
 	| ADD_GROUP_MEMBER
 	| ASSIGN_GROUP_MEMBER_ROLE
 	| LIST_USERS
+	| PREFIX_SEARCH_USERS
 	| RECEIVE_DATASET_ROLES
 	| RECEIVE_USER_PROFILE;
