@@ -38,7 +38,6 @@ import { Forbidden } from "../errors/Forbidden";
 import { PageNotFound } from "../errors/PageNotFound";
 import { LazyLoadErrorBoundary } from "../errors/LazyLoadErrorBoundary";
 import VisibilityIcon from "@mui/icons-material/Visibility";
-import Audio from "../previewers/Audio";
 
 const Image = lazy(
 	() => import(/* webpackChunkName: "previewers-image" */ "../previewers/Image")
