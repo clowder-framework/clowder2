@@ -68,6 +68,8 @@ class FileDBViewList(View, FileBase):
     created: datetime = Field(default_factory=datetime.utcnow)
     modified: datetime = Field(default_factory=datetime.utcnow)
     auth: List[AuthorizationDB]
+    bytes: int = 0
+    content_type: FileContentType = FileContentType()
 
     class Settings:
         source = FileDB

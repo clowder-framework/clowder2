@@ -100,12 +100,11 @@ async def search_users(
     skip: int = 0,
     limit: int = 2,
 ):
-    query_regx = re.compile(text, re.IGNORECASE)
     users = await UserDB.find(
         Or(
-            RegEx(field=UserDB.email, pattern=query_regx),
-            RegEx(field=UserDB.first_name, pattern=query_regx),
-            RegEx(field=UserDB.last_name, pattern=query_regx),
+            RegEx(field=UserDB.email, pattern=text),
+            RegEx(field=UserDB.first_name, pattern=text),
+            RegEx(field=UserDB.last_name, pattern=text),
         ),
         skip=skip,
         limit=limit,
@@ -120,7 +119,7 @@ async def search_users(
     skip: int = 0,
     limit: int = 2,
 ):
-    query_regx = re.compile(f"^{prefix}.*", re.IGNORECASE)
+    query_regx = f"^{prefix}.*"
     users = await UserDB.find(
         Or(RegEx(field=UserDB.email, pattern=query_regx)),
         sort=(+UserDB.email),
