@@ -143,7 +143,7 @@ export const Explore = (): JSX.Element => {
 													<DatasetCard
 														id={dataset.id}
 														name={dataset.name}
-														author={`${dataset.author.first_name} ${dataset.author.last_name}`}
+														author={`${dataset.creator.first_name} ${dataset.creator.last_name}`}
 														created={dataset.created}
 														description={dataset.description}
 													/>

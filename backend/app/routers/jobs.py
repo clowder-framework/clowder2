@@ -1,22 +1,26 @@
-from typing import List, Optional
-import re
 from datetime import datetime, timedelta
+from typing import List, Optional
 
+from beanie import PydanticObjectId
+from beanie.operators import Or, RegEx, GTE, LT
 from bson import ObjectId
 from fastapi import APIRouter, HTTPException, Depends
-from pymongo import MongoClient
 
-from app import dependencies
-from app.models.listeners import EventListenerJob, EventListenerJobUpdate
-from app.keycloak_auth import get_current_user, get_user
+from app.keycloak_auth import get_user, get_current_username
+from app.models.listeners import (
+    EventListenerJobDB,
+    EventListenerJobUpdateDB,
+    EventListenerJobViewList,
+    EventListenerJobOut,
+    EventListenerJobUpdateOut,
+)
 
 router = APIRouter()
 
 
-@router.get("", response_model=List[EventListenerJob])
+@router.get("", response_model=List[EventListenerJobOut])
 async def get_all_job_summary(
     current_user_id=Depends(get_user),
-    db: MongoClient = Depends(dependencies.get_db),
     listener_id: Optional[str] = None,
     status: Optional[str] = None,
     user_id: Optional[str] = None,
@@ -38,77 +42,62 @@ async def get_all_job_summary(
         skip -- number of initial records to skip (i.e. for pagination)
         limit -- restrict number of records to be returned (i.e. for pagination)
     """
-    jobs = []
     filters = [
-        {
-            "$or": [
-                {"creator.email": current_user_id},
-                {"auth": {"$elemMatch": {"user_id": {"$eq": current_user_id}}}},
-            ]
-        }
+        Or(
+            EventListenerJobViewList.creator.email == current_user_id,
+            EventListenerJobViewList.auth.user_id == current_user_id,
+        ),
     ]
     if listener_id is not None:
-        filters.append({"listener_id": listener_id})
+        filters.append(EventListenerJobViewList.listener_id == listener_id)
     if status is not None:
-        filters.append({"status": re.compile(status, re.IGNORECASE)})
+        filters.append(RegEx(field=EventListenerJobViewList.status, pattern=status))
     if created is not None:
         created_datetime_object = datetime.strptime(created, "%Y-%m-%d")
+        filters.append(GTE(EventListenerJobViewList.created, created_datetime_object))
         filters.append(
-            {
-                "created": {
-                    "$gte": created_datetime_object,
-                    "$lt": created_datetime_object + timedelta(days=1),
-                }
-            }
+            LT(
+                EventListenerJobViewList.created,
+                created_datetime_object + timedelta(days=1),
+            )
         )
     if user_id is not None:
-        filters.append({"creator.email": user_id})
+        filters.append(EventListenerJobViewList.creator.email == user_id)
     if file_id is not None:
-        filters.append({"resource_ref.collection": "file"})
-        filters.append({"resource_ref.resource_id": ObjectId(file_id)})
+        filters.append(EventListenerJobViewList.resource_ref.collection == "file")
+        filters.append(
+            EventListenerJobViewList.resource_ref.resource_id == ObjectId(file_id)
+        )
     if dataset_id is not None:
-        filters.append({"resource_ref.collection": "dataset"})
-        filters.append({"resource_ref.resource_id": ObjectId(dataset_id)})
-
-    query = {"$and": filters}
-
-    for doc in (
-        await db["listener_jobs_view"]
-        .find(query)
-        .skip(skip)
-        .limit(limit)
-        .to_list(length=limit)
-    ):
-        jobs.append(EventListenerJob.from_mongo(doc))
-    return jobs
+        filters.append(EventListenerJobViewList.resource_ref.collection == "dataset")
+        filters.append(
+            EventListenerJobViewList.resource_ref.resource_id == ObjectId(dataset_id)
+        )
+    jobs = (
+        await EventListenerJobViewList.find(*filters).skip(skip).limit(limit).to_list()
+    )
+    return [job.dict() for job in jobs]
 
 
-@router.get("/{job_id}/summary", response_model=EventListenerJob)
+@router.get("/{job_id}/summary", response_model=EventListenerJobOut)
 async def get_job_summary(
     job_id: str,
-    db: MongoClient = Depends(dependencies.get_db),
+    user=Depends(get_current_username),
 ):
-    if (
-        job := await db["listener_jobs"].find_one({"_id": ObjectId(job_id)})
-    ) is not None:
-        return EventListenerJob.from_mongo(job)
-
+    if (job := await EventListenerJobDB.get(PydanticObjectId(job_id))) is not None:
+        return job.dict()
     raise HTTPException(status_code=404, detail=f"Job {job_id} not found")
 
 
-@router.get("/{job_id}/updates")
+@router.get("/{job_id}/updates", response_model=List[EventListenerJobUpdateOut])
 async def get_job_updates(
     job_id: str,
-    db: MongoClient = Depends(dependencies.get_db),
+    user=Depends(get_current_username),
 ):
-    if (
-        job := await db["listener_jobs"].find_one({"_id": ObjectId(job_id)})
-    ) is not None:
+    if (job := await EventListenerJobDB.get(PydanticObjectId(job_id))) is not None:
         # TODO: Should this also return the job summary data since we just queried it here?
-        events = []
-        async for update in db["listener_job_updates"].find({"job_id": job_id}):
-            event_json = EventListenerJobUpdate.from_mongo(update)
-            events.append(event_json)
-        return events
-
+        job_updates = await EventListenerJobUpdateDB.find(
+            EventListenerJobUpdateDB.job_id == job_id
+        ).to_list()
+        return [job_update.dict() for job_update in job_updates]
     raise HTTPException(status_code=404, detail=f"Job {job_id} not found")

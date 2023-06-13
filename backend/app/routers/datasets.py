@@ -6,8 +6,10 @@ import shutil
 import tempfile
 import zipfile
 from collections.abc import Mapping, Iterable
-from typing import List, Optional, Union
+from typing import List, Optional
 
+from beanie import PydanticObjectId
+from beanie.operators import Or
 from bson import ObjectId
 from bson import json_util
 from elasticsearch import Elasticsearch
@@ -21,7 +23,7 @@ from fastapi import (
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from minio import Minio
 from pika.adapters.blocking_connection import BlockingChannel
-from pymongo import MongoClient, DESCENDING
+from pymongo import DESCENDING
 from rocrate.model.person import Person
 from rocrate.rocrate import ROCrate
 
@@ -41,9 +43,11 @@ from app.models.datasets import (
     DatasetDB,
     DatasetOut,
     DatasetPatch,
+    DatasetDBViewList,
 )
-from app.models.files import FileOut, FileDB
-from app.models.folders import FolderOut, FolderIn, FolderDB
+from app.models.files import FileOut, FileDB, FileDBViewList
+from app.models.folders import FolderOut, FolderIn, FolderDB, FolderDBViewList
+from app.models.metadata import MetadataDB, MetadataOut
 from app.models.pyobjectid import PyObjectId
 from app.models.users import UserOut
 from app.rabbitmq.listeners import submit_dataset_job
@@ -52,7 +56,7 @@ from app.search.connect import (
     delete_document_by_id,
     delete_document_by_query,
 )
-from app.search.index import index_dataset
+from app.search.index import index_dataset, index_dataset_metadata
 
 router = APIRouter()
 security = HTTPBearer()
@@ -131,7 +135,6 @@ async def _create_folder_structure(
     folder_path: str,
     folder_lookup: dict,
     user: UserOut,
-    db: MongoClient,
     parent_folder_id: Optional[str] = None,
 ):
     """Recursively create folders encountered in folder_path until the target folder is created.
@@ -152,16 +155,15 @@ async def _create_folder_structure(
             "name": k,
             "parent_folder": parent_folder_id,
         }
-        folder_db = FolderDB(**folder_dict, author=user)
-        new_folder = await db["folders"].insert_one(folder_db.to_mongo())
-        new_folder_id = new_folder.inserted_id
+        folder_db = FolderDB(**folder_dict, creator=user)
+        await folder_db.insert()
 
         # Store ID and call recursively on child folders
         new_folder_path = folder_path + os.path.sep + k
-        folder_lookup[new_folder_path] = new_folder_id
+        folder_lookup[new_folder_path] = folder_db.id
         if isinstance(v, Mapping):
             folder_lookup = await _create_folder_structure(
-                dataset_id, v, new_folder_path, folder_lookup, user, db, new_folder_id
+                dataset_id, v, new_folder_path, folder_lookup, user, folder_db.id
             )
 
     return folder_lookup
@@ -170,116 +172,72 @@ async def _create_folder_structure(
 async def _get_folder_hierarchy(
     folder_id: str,
     hierarchy: str,
-    db: MongoClient,
 ):
     """Generate a string of nested path to folder for use in zip file creation."""
-    found = await db["folders"].find_one({"_id": ObjectId(folder_id)})
-    folder = FolderOut.from_mongo(found)
+    folder = await FolderDB.get(PydanticObjectId(folder_id))
     hierarchy = folder.name + "/" + hierarchy
     if folder.parent_folder is not None:
-        hierarchy = await _get_folder_hierarchy(folder.parent_folder, hierarchy, db)
+        hierarchy = await _get_folder_hierarchy(folder.parent_folder, hierarchy)
     return hierarchy
-
-
-async def remove_folder_entry(
-    folder_id: Union[str, ObjectId],
-    db: MongoClient,
-):
-    """Remove FolderDB object into MongoDB"""
-    await db["folders"].delete_one({"_id": ObjectId(folder_id)})
 
 
 @router.post("", response_model=DatasetOut)
 async def save_dataset(
     dataset_in: DatasetIn,
     user=Depends(get_current_user),
-    db: MongoClient = Depends(dependencies.get_db),
     es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
 ):
-    # Check all connection and abort if any one of them is not available
-    if db is None or es is None:
-        raise HTTPException(status_code=503, detail="Service not available")
-        return
-
-    dataset_db = DatasetDB(**dataset_in.dict(), author=user)
-    new_dataset = await db["datasets"].insert_one(dataset_db.to_mongo())
-    found = await db["datasets"].find_one({"_id": new_dataset.inserted_id})
-    dataset_out = DatasetOut.from_mongo(found)
+    dataset = DatasetDB(**dataset_in.dict(), creator=user)
+    await dataset.insert()
 
     # Create authorization entry
-    await db["authorization"].insert_one(
-        AuthorizationDB(
-            dataset_id=new_dataset.inserted_id,
-            role=RoleType.OWNER,
-            creator=user.email,
-        ).to_mongo()
-    )
+    await AuthorizationDB(
+        dataset_id=dataset.id,
+        role=RoleType.OWNER,
+        creator=user.email,
+    ).save()
 
     # Add new entry to elasticsearch
-    await index_dataset(db, es, dataset_out, [user.email])
-
-    return dataset_out
+    await index_dataset(es, DatasetOut(**dataset.dict()), [user.email])
+    return dataset.dict()
 
 
 @router.get("", response_model=List[DatasetOut])
 async def get_datasets(
     user_id=Depends(get_user),
-    db: MongoClient = Depends(dependencies.get_db),
     skip: int = 0,
     limit: int = 10,
     mine: bool = False,
 ):
-    datasets = []
     if mine:
-        for doc in (
-            await db["datasets_view"]
-            .find(
-                {
-                    "$and": [
-                        {"author.email": user_id},
-                        {"auth": {"$elemMatch": {"user_ids": user_id}}},
-                    ]
-                }
-            )
-            .sort([("created", DESCENDING)])
-            .skip(skip)
-            .limit(limit)
-            .to_list(length=limit)
-        ):
-            datasets.append(DatasetOut.from_mongo(doc))
+        datasets = await DatasetDBViewList.find(
+            DatasetDBViewList.creator.email == user_id,
+            sort=(-DatasetDBViewList.created),
+            skip=skip,
+            limit=limit,
+        ).to_list()
     else:
-        for doc in (
-            await db["datasets_view"]
-            .find(
-                {
-                    "$or": [
-                        {"author.email": user_id},
-                        {"auth": {"$elemMatch": {"user_ids": user_id}}},
-                    ]
-                }
-            )
-            .sort([("created", DESCENDING)])
-            .skip(skip)
-            .limit(limit)
-            .to_list(length=limit)
-        ):
-            datasets.append(DatasetOut.from_mongo(doc))
-    return datasets
+        datasets = await DatasetDBViewList.find(
+            Or(
+                DatasetDBViewList.creator.email == user_id,
+                DatasetDBViewList.auth.user_ids == user_id,
+            ),
+            sort=(-DatasetDBViewList.created),
+            skip=skip,
+            limit=limit,
+        ).to_list()
+
+    return [dataset.dict() for dataset in datasets]
 
 
 @router.get("/{dataset_id}", response_model=DatasetOut)
 async def get_dataset(
     dataset_id: str,
-    db: MongoClient = Depends(dependencies.get_db),
     allow: bool = Depends(Authorization("viewer")),
 ):
-    try:
-        if (
-            dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
-        ) is not None:
-            return DatasetOut.from_mongo(dataset)
-    except:
-        raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
+    if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
+        return dataset.dict()
+    raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
 
 
 @router.get("/{dataset_id}/files", response_model=List[FileOut])
@@ -287,95 +245,52 @@ async def get_dataset_files(
     dataset_id: str,
     folder_id: Optional[str] = None,
     user_id=Depends(get_user),
-    db: MongoClient = Depends(dependencies.get_db),
     allow: bool = Depends(Authorization("viewer")),
     skip: int = 0,
     limit: int = 10,
 ):
-    files = []
+    query = [
+        FileDBViewList.dataset_id == ObjectId(dataset_id),
+        Or(
+            FileDBViewList.creator.email == user_id,
+            FileDBViewList.auth.user_ids == user_id,
+        ),
+    ]
     if folder_id is not None:
-        for f in (
-            await db["files_view"]
-            .find(
-                {
-                    "$and": [
-                        {
-                            "dataset_id": ObjectId(dataset_id),
-                            "folder_id": ObjectId(folder_id),
-                        },
-                        {
-                            "$or": [
-                                {"creator.email": user_id},
-                                {"auth": {"$elemMatch": {"user_ids": user_id}}},
-                            ]
-                        },
-                    ]
-                }
-            )
-            .skip(skip)
-            .limit(limit)
-            .to_list(length=limit)
-        ):
-            files.append(FileOut.from_mongo(f))
-    else:
-        for f in (
-            await db["files_view"]
-            .find(
-                {
-                    "$and": [
-                        {
-                            "dataset_id": ObjectId(dataset_id),
-                            "folder_id": None,
-                        },
-                        {
-                            "$or": [
-                                {"creator.email": user_id},
-                                {"auth": {"$elemMatch": {"user_ids": user_id}}},
-                            ]
-                        },
-                    ]
-                }
-            )
-            .skip(skip)
-            .limit(limit)
-            .to_list(length=limit)
-        ):
-            files.append(FileOut.from_mongo(f))
-    return files
+        query.append(FileDBViewList.folder_id == ObjectId(folder_id))
+    files = await FileDBViewList.find(*query).skip(skip).limit(limit).to_list()
+    return [file.dict() for file in files]
 
 
 @router.put("/{dataset_id}", response_model=DatasetOut)
 async def edit_dataset(
     dataset_id: str,
     dataset_info: DatasetBase,
-    db: MongoClient = Depends(dependencies.get_db),
-    user_id=Depends(get_current_username),
+    user=Depends(get_current_user),
     es=Depends(dependencies.get_elasticsearchclient),
     allow: bool = Depends(Authorization("editor")),
 ):
-    if not allow:
-        raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
-    # Check all connection and abort if any one of them is not available
-    if db is None or es is None:
-        raise HTTPException(status_code=503, detail="Service not available")
-        return
+    if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
+        # TODO: Refactor this with permissions checks etc.
+        dataset.update(dataset_info)
+        dataset.modified = datetime.datetime.utcnow()
+        await dataset.save()
 
-    if (
-        dataset_q := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
-    ) is not None:
-        dataset = DatasetOut.from_mongo(dataset_q)
-        ds = dict(dataset_info) if dataset_info is not None else {}
-        ds["modified"] = datetime.datetime.utcnow()
-        try:
-            dataset.update(ds)
-            await db["datasets"].replace_one(
-                {"_id": ObjectId(dataset_id)}, DatasetDB(**dataset).to_mongo()
+        # Update entry to the dataset index
+        await index_dataset(es, DatasetOut(**dataset.dict()), update=True)
+        # updating metadata in elasticsearch
+        if (
+            metadata := await MetadataDB.find_one(
+                MetadataDB.resource.resource_id == ObjectId(dataset_id)
             )
-            # Update entry to the dataset index
-            await index_dataset(db, es, dataset, update=True)
-        except Exception as e:
-            raise HTTPException(status_code=500, detail=e.args[0])
-        return DatasetOut.from_mongo(dataset)
+        ) is not None:
+            await index_dataset_metadata(
+                es,
+                DatasetOut(**dataset.dict()),
+                MetadataOut(**metadata.dict()),
+                update=True,
+            )
+        return dataset.dict()
     raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
 
 
@@ -383,69 +298,64 @@ async def edit_dataset(
 async def patch_dataset(
     dataset_id: str,
     dataset_info: DatasetPatch,
-    user_id=Depends(get_user),
-    db: MongoClient = Depends(dependencies.get_db),
+    user=Depends(get_current_user),
     es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
     allow: bool = Depends(Authorization("editor")),
 ):
-    if not allow:
-        raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
-    # Check all connection and abort if any one of them is not available
-    if db is None or es is None:
-        raise HTTPException(status_code=503, detail="Service not available")
-        return
+    if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
+        # TODO: Update method not working properly
+        if dataset_info.name is not None:
+            dataset.name = dataset_info.name
+        if dataset_info.description is not None:
+            dataset.description = dataset_info.description
+        dataset.modified = datetime.datetime.utcnow()
+        await dataset.save()
 
-    if (
-        dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
-    ) is not None:
-        # TODO: Refactor this with permissions checks etc.
-        ds = dict(dataset_info) if dataset_info is not None else {}
-        user = await db["users"].find_one({"email": user_id})
-        ds["creator"] = UserOut(**user)
-        ds["modified"] = datetime.datetime.utcnow()
-        try:
-            dataset.update((k, v) for k, v in ds.items() if v is not None)
-            await db["datasets"].replace_one(
-                {"_id": ObjectId(dataset_id)}, DatasetDB(**dataset).to_mongo()
+        # Update entry to the dataset index
+        await index_dataset(es, DatasetOut(**dataset.dict()), update=True)
+        # updating metadata in elasticsearch
+        if (
+            metadata := await MetadataDB.find_one(
+                MetadataDB.resource.resource_id == ObjectId(dataset_id)
             )
-            # Update entry to the dataset index
-            await index_dataset(db, es, DatasetOut(**dataset), update=True)
-        except Exception as e:
-            raise HTTPException(status_code=500, detail=e.args[0])
-        return DatasetOut.from_mongo(dataset)
+        ) is not None:
+            await index_dataset_metadata(
+                es,
+                DatasetOut(**dataset.dict()),
+                MetadataOut(**metadata.dict()),
+                update=True,
+            )
+        return dataset.dict()
 
 
 @router.delete("/{dataset_id}")
 async def delete_dataset(
     dataset_id: str,
-    db: MongoClient = Depends(dependencies.get_db),
     fs: Minio = Depends(dependencies.get_fs),
     es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
     allow: bool = Depends(Authorization("editor")),
 ):
-    if not allow:
-        raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
-    # Check all connection and abort if any one of them is not available
-    if db is None or fs is None or es is None:
-        raise HTTPException(status_code=503, detail="Service not available")
-        return
-
-    if (await db["datasets"].find_one({"_id": ObjectId(dataset_id)})) is not None:
+    if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
         # delete from elasticsearch
         delete_document_by_id(es, "dataset", dataset_id)
         delete_document_by_query(es, "metadata", {"match": {"resource_id": dataset_id}})
-
         # delete dataset first to minimize files/folder being uploaded to a delete dataset
-        await db["datasets"].delete_one({"_id": ObjectId(dataset_id)})
-        await db.metadata.delete_many({"resource.resource_id": ObjectId(dataset_id)})
-        async for file in db["files"].find({"dataset_id": ObjectId(dataset_id)}):
-            file = FileOut(**file)
-            await remove_file_entry(file.id, db, fs, es)
-        await db["folders"].delete_many({"dataset_id": ObjectId(dataset_id)})
-        await db["authorization"].delete_many({"dataset_id": ObjectId(dataset_id)})
+        await dataset.delete()
+        await MetadataDB.find(
+            MetadataDB.resource.resource_id == PydanticObjectId(dataset_id)
+        ).delete()
+        async for file in FileDB.find(
+            FileDB.dataset_id == PydanticObjectId(dataset_id)
+        ):
+            await remove_file_entry(file.id, fs, es)
+        await FolderDB.find(
+            FolderDB.dataset_id == PydanticObjectId(dataset_id)
+        ).delete()
+        await AuthorizationDB.find(
+            AuthorizationDB.dataset_id == ObjectId(dataset_id)
+        ).delete()
         return {"deleted": dataset_id}
-    else:
-        raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
+    raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
 
 
 @router.post("/{dataset_id}/folders", response_model=FolderOut)
@@ -453,118 +363,86 @@ async def add_folder(
     dataset_id: str,
     folder_in: FolderIn,
     user=Depends(get_current_user),
-    db: MongoClient = Depends(dependencies.get_db),
     allow: bool = Depends(Authorization("uploader")),
 ):
-    if not allow:
-        raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
-    folder_db = FolderDB(
-        **folder_in.dict(), author=user, dataset_id=PyObjectId(dataset_id)
-    )
-    parent_folder = folder_in.parent_folder
-    if parent_folder is not None:
-        folder = await db["folders"].find_one({"_id": ObjectId(parent_folder)})
-        if folder is None:
-            raise HTTPException(
-                status_code=400, detail=f"Parent folder {parent_folder} not found"
-            )
-    new_folder = await db["folders"].insert_one(folder_db.to_mongo())
-    found = await db["folders"].find_one({"_id": new_folder.inserted_id})
-    folder_out = FolderOut.from_mongo(found)
-    return folder_out
+    if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
+        parent_folder = folder_in.parent_folder
+        if parent_folder is not None:
+            if (await FolderDB.get(PydanticObjectId(parent_folder))) is None:
+                raise HTTPException(
+                    status_code=400, detail=f"Parent folder {parent_folder} not found"
+                )
+        new_folder = FolderDB(
+            **folder_in.dict(), creator=user, dataset_id=PyObjectId(dataset_id)
+        )
+        await new_folder.insert()
+        return new_folder.dict()
+    raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
 
 
-@router.get("/{dataset_id}/folders")
+@router.get("/{dataset_id}/folders", response_model=List[FolderOut])
 async def get_dataset_folders(
     dataset_id: str,
     parent_folder: Optional[str] = None,
     user_id=Depends(get_user),
-    db: MongoClient = Depends(dependencies.get_db),
     allow: bool = Depends(Authorization("viewer")),
+    skip: int = 0,
+    limit: int = 10,
 ):
-    if not allow:
-        raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
-    folders = []
-    if parent_folder is None:
-        async for f in db["folders"].find(
-            {"dataset_id": ObjectId(dataset_id), "parent_folder": None}
-        ):
-            folders.append(FolderDB.from_mongo(f))
-    else:
-        async for f in db["folders"].find(
-            {
-                "$and": [
-                    {
-                        "dataset_id": ObjectId(dataset_id),
-                        "parent_folder": ObjectId(parent_folder),
-                    },
-                    {
-                        "$or": [
-                            {"author.email": user_id},
-                            {"auth": {"$elemMatch": {"user_ids": user_id}}},
-                        ]
-                    },
-                ]
-            }
-        ):
-            folders.append(FolderDB.from_mongo(f))
-    return folders
+    if (await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
+        query = [
+            FolderDBViewList.dataset_id == ObjectId(dataset_id),
+            Or(
+                FolderDBViewList.creator.email == user_id,
+                FolderDBViewList.auth.user_ids == user_id,
+            ),
+        ]
+        if parent_folder is not None:
+            query.append(FolderDBViewList.parent_folder == ObjectId(parent_folder))
+        else:
+            query.append(FolderDBViewList.parent_folder == None)
+        folders = await FolderDBViewList.find(*query).skip(skip).limit(limit).to_list()
+        return [folder.dict() for folder in folders]
+    raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
 
 
 @router.delete("/{dataset_id}/folders/{folder_id}")
 async def delete_folder(
     dataset_id: str,
     folder_id: str,
-    db: MongoClient = Depends(dependencies.get_db),
     fs: Minio = Depends(dependencies.get_fs),
     es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
     allow: bool = Depends(Authorization("editor")),
 ):
-    if not allow:
-        raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
-    if (await db["folders"].find_one({"_id": ObjectId(folder_id)})) is not None:
-        # delete current folder and files
-        await remove_folder_entry(folder_id, db)
-        async for file in db["files"].find({"folder_id": ObjectId(folder_id)}):
-            file = FileOut(**file)
-            await remove_file_entry(file.id, db, fs, es)
+    if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
+        if (folder := await FolderDB.get(PydanticObjectId(folder_id))) is not None:
+            # delete current folder and files
+            async for file in FileDB.find(FileDB.folder_id == ObjectId(folder_id)):
+                await remove_file_entry(file.id, fs, es)
 
-        # list all child folders and delete child folders/files
-        parent_folder_id = folder_id
-
-        async def _delete_nested_folders(parent_folder_id):
-            while (
-                folders := await db["folders"].find_one(
-                    {
-                        "dataset_id": ObjectId(dataset_id),
-                        "parent_folder": ObjectId(parent_folder_id),
-                    }
-                )
-            ) is not None:
-                async for folder in db["folders"].find(
-                    {
-                        "dataset_id": ObjectId(dataset_id),
-                        "parent_folder": ObjectId(parent_folder_id),
-                    }
-                ):
-                    folder = FolderOut(**folder)
-                    parent_folder_id = folder.id
-
-                    # recursively delete child folder and files
-                    await _delete_nested_folders(parent_folder_id)
-
-                    await remove_folder_entry(folder.id, db)
-                    async for file in db["files"].find(
-                        {"folder_id": ObjectId(folder.id)}
+            # recursively delete child folder and files
+            async def _delete_nested_folders(parent_folder_id):
+                while (
+                    await FolderDB.find_one(
+                        FolderDB.dataset_id == ObjectId(dataset_id),
+                        FolderDB.parent_folder == ObjectId(parent_folder_id),
+                    )
+                ) is not None:
+                    async for subfolder in FolderDB.find(
+                        FolderDB.dataset_id == PydanticObjectId(dataset_id),
+                        FolderDB.parent_folder == PydanticObjectId(parent_folder_id),
                     ):
-                        file = FileOut(**file)
-                        await remove_file_entry(file.id, db, fs, es)
+                        async for file in FileDB.find(FileDB.folder_id == subfolder.id):
+                            await remove_file_entry(file.id, fs, es)
+                        await _delete_nested_folders(subfolder.id)
+                        await subfolder.delete()
 
-        await _delete_nested_folders(parent_folder_id)
-
-        return {"deleted": folder_id}
-    else:
-        raise HTTPException(status_code=404, detail=f"Folder {folder_id} not found")
+            await _delete_nested_folders(folder_id)
+            await folder.delete()
+            return {"deleted": folder_id}
+        else:
+            raise HTTPException(status_code=404, detail=f"Folder {folder_id} not found")
+    raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
 
 
 @router.post("/{dataset_id}/files", response_model=FileOut)
@@ -572,7 +450,6 @@ async def save_file(
     dataset_id: str,
     folder_id: Optional[str] = None,
     user=Depends(get_current_user),
-    db: MongoClient = Depends(dependencies.get_db),
     fs: Minio = Depends(dependencies.get_fs),
     file: UploadFile = File(...),
     es=Depends(dependencies.get_elasticsearchclient),
@@ -580,24 +457,17 @@ async def save_file(
     credentials: HTTPAuthorizationCredentials = Security(security),
     allow: bool = Depends(Authorization("uploader")),
 ):
-    if not allow:
-        raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
-    if (
-        dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
-    ) is not None:
+    if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
         if user is None:
             raise HTTPException(
                 status_code=401, detail=f"User not found. Session might have expired."
             )
 
-        fileDB = FileDB(name=file.filename, creator=user, dataset_id=dataset["_id"])
+        new_file = FileDB(name=file.filename, creator=user, dataset_id=dataset.id)
 
         if folder_id is not None:
-            if (
-                folder := await db["folders"].find_one({"_id": ObjectId(folder_id)})
-            ) is not None:
-                folder = FolderOut.from_mongo(folder)
-                fileDB.folder_id = folder.id
+            if (folder := await FolderDB.get(PydanticObjectId(folder_id))) is not None:
+                new_file.folder_id = folder.id
             else:
                 raise HTTPException(
                     status_code=404, detail=f"Folder {folder_id} not found"
@@ -605,9 +475,8 @@ async def save_file(
 
         access_token = credentials.credentials
         await add_file_entry(
-            fileDB,
+            new_file,
             user,
-            db,
             fs,
             es,
             rabbitmq_client,
@@ -615,27 +484,19 @@ async def save_file(
             file.file,
             content_type=file.content_type,
         )
-
-        return fileDB
-    else:
-        raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
+        return new_file.dict()
+    raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
 
 
 @router.post("/createFromZip", response_model=DatasetOut)
 async def create_dataset_from_zip(
     user=Depends(get_current_user),
-    db: MongoClient = Depends(dependencies.get_db),
     fs: Minio = Depends(dependencies.get_fs),
     file: UploadFile = File(...),
     es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
     rabbitmq_client: BlockingChannel = Depends(dependencies.get_rabbitmq),
     token: str = Depends(get_token),
 ):
-    if user is None:
-        raise HTTPException(
-            status_code=401, detail=f"User not found. Session might have expired."
-        )
-
     if file.filename.endswith(".zip") == False:
         raise HTTPException(status_code=404, detail=f"File is not a zip file")
 
@@ -652,11 +513,12 @@ async def create_dataset_from_zip(
             "name": file.filename.rstrip(".zip"),
             "description": "Uploaded as %s" % file.filename,
         }
-        new_dataset = save_dataset(dataset_in, user, db, es)
+        dataset = DatasetDB(**dataset_in, creator=user)
+        dataset.save()
 
         # Create folders
         folder_lookup = await _create_folder_structure(
-            new_dataset.id, zip_directory, "", {}, user, db
+            dataset.id, zip_directory, "", {}, user
         )
 
         # Go back through zipfile, this time uploading files to folders
@@ -673,21 +535,20 @@ async def create_dataset_from_zip(
                     extracted = zip_file.extract(entry, path="/tmp")
                     if foldername in folder_lookup:
                         folder_id = folder_lookup[foldername]
-                        fileDB = FileDB(
+                        new_file = FileDB(
                             name=filename,
                             creator=user,
-                            dataset_id=new_dataset.id,
+                            dataset_id=dataset.id,
                             folder_id=folder_id,
                         )
                     else:
-                        fileDB = FileDB(
-                            name=filename, creator=user, dataset_id=new_dataset.id
+                        new_file = FileDB(
+                            name=filename, creator=user, dataset_id=dataset.id
                         )
                     with open(extracted, "rb") as file_reader:
                         await add_file_entry(
-                            fileDB,
+                            new_file,
                             user,
-                            db,
                             fs,
                             es,
                             rabbitmq_client,
@@ -697,25 +558,17 @@ async def create_dataset_from_zip(
                     if os.path.isfile(extracted):
                         os.remove(extracted)
 
-    found = await db["datasets"].find_one({"_id": new_dataset.id})
-    dataset_out = DatasetOut.from_mongo(found)
-    return dataset_out
+    return dataset.dict()
 
 
 @router.get("/{dataset_id}/download", response_model=DatasetOut)
 async def download_dataset(
     dataset_id: str,
     user=Depends(get_current_user),
-    db: MongoClient = Depends(dependencies.get_db),
     fs: Minio = Depends(dependencies.get_fs),
     allow: bool = Depends(Authorization("viewer")),
 ):
-    if not allow:
-        raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
-    if (
-        dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
-    ) is not None:
-        dataset = DatasetOut(**dataset)
+    if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
         current_temp_dir = tempfile.mkdtemp(prefix="rocratedownload")
         crate = ROCrate()
         user_full_name = user.first_name + " " + user.last_name
@@ -739,11 +592,9 @@ async def download_dataset(
             f.write("Tag-File-Character-Encoding: UTF-8" + "\n")
 
         # Write dataset metadata if found
-        metadata = []
-        async for md in db["metadata"].find(
-            {"resource.resource_id": ObjectId(dataset_id)}
-        ):
-            metadata.append(md)
+        metadata = await MetadataDB.find(
+            MetadataDB.resource.resource_id == ObjectId(dataset_id)
+        ).to_list()
         if len(metadata) > 0:
             datasetmetadata_path = os.path.join(
                 current_temp_dir, "_dataset_metadata.json"
@@ -760,12 +611,11 @@ async def download_dataset(
         bag_size = 0  # bytes
         file_count = 0
 
-        async for f in db["files"].find({"dataset_id": ObjectId(dataset_id)}):
+        async for file in FileDB.find(FileDB.dataset_id == ObjectId(dataset_id)):
             file_count += 1
-            file = FileOut.from_mongo(f)
             file_name = file.name
             if file.folder_id is not None:
-                hierarchy = await _get_folder_hierarchy(file.folder_id, "", db)
+                hierarchy = await _get_folder_hierarchy(file.folder_id, "")
                 dest_folder = os.path.join(current_temp_dir, hierarchy.lstrip("/"))
                 if not os.path.isdir(dest_folder):
                     os.mkdir(dest_folder)
@@ -789,11 +639,9 @@ async def download_dataset(
             current_file_size = os.path.getsize(current_file_path)
             bag_size += current_file_size
 
-            metadata = []
-            async for md in db["metadata"].find(
-                {"resource.resource_id": ObjectId(file.id)}
-            ):
-                metadata.append(md)
+            metadata = await MetadataDB.find(
+                MetadataDB.resource.resource_id == ObjectId(dataset_id)
+            ).to_list()
             if len(metadata) > 0:
                 metadata_filename = file_name + "_metadata.json"
                 metadata_filename_temp_path = os.path.join(
@@ -864,8 +712,7 @@ async def download_dataset(
             media_type="application/x-zip-compressed",
             headers={"Content-Disposition": f'attachment;filename="{zip_name}"'},
         )
-    else:
-        raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
+    raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
 
 
 # submits file to extractor
@@ -879,16 +726,10 @@ async def get_dataset_extract(
     parameters: dict = None,
     user=Depends(get_current_user),
     credentials: HTTPAuthorizationCredentials = Security(security),
-    db: MongoClient = Depends(dependencies.get_db),
     rabbitmq_client: BlockingChannel = Depends(dependencies.get_rabbitmq),
     allow: bool = Depends(Authorization("uploader")),
 ):
-    if not allow:
-        raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
-    if (
-        dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
-    ) is not None:
-        dataset_out = DatasetOut.from_mongo(dataset)
+    if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
         access_token = credentials.credentials
         req_headers = request.headers
         raw = req_headers.raw
@@ -916,16 +757,13 @@ async def get_dataset_extract(
         current_routing_key = current_queue
 
         job_id = await submit_dataset_job(
-            dataset_out,
-            current_queue,
+            DatasetOut(**dataset.dict()),
             current_routing_key,
             parameters,
             user,
             access_token,
-            db,
             rabbitmq_client,
         )
 
         return job_id
-    else:
-        raise HTTPException(status_code=404, detail=f"File {dataset_id} not found")
+    raise HTTPException(status_code=404, detail=f"File {dataset_id} not found")

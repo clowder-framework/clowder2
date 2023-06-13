@@ -8,8 +8,7 @@ import type { UserOut } from './UserOut';
 /**
  * This summarizes a submission to an extractor. All messages from that extraction should include this job's ID.
  */
-export type EventListenerJob = {
-    id?: string;
+export type EventListenerJobOut = {
     listener_id: string;
     resource_ref: MongoDBRef;
     creator: UserOut;
@@ -21,4 +20,5 @@ export type EventListenerJob = {
     duration?: number;
     latest_message?: string;
     status?: string;
+    id?: string;
 }

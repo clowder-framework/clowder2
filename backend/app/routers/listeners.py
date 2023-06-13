@@ -1,19 +1,18 @@
 import datetime
 import os
-import re
 import random
 import string
-from packaging import version
 from typing import List, Optional
+
+from beanie import PydanticObjectId
+from beanie.operators import Or, RegEx
 from bson import ObjectId
 from fastapi import APIRouter, HTTPException, Depends
-from pymongo import MongoClient
+from packaging import version
 
-from app.dependencies import get_db
-from app.keycloak_auth import get_user, get_current_user
-from app.models.feeds import FeedDB, FeedOut, FeedListener
-from app.models.config import ConfigEntryDB, ConfigEntryOut
-from app.models.search import SearchCriteria
+from app.keycloak_auth import get_user, get_current_user, get_current_username
+from app.models.config import ConfigEntryDB
+from app.models.feeds import FeedDB, FeedListener
 from app.models.listeners import (
     ExtractorInfo,
     EventListenerIn,
@@ -21,6 +20,8 @@ from app.models.listeners import (
     EventListenerDB,
     EventListenerOut,
 )
+from app.models.search import SearchCriteria
+from app.models.users import UserOut
 from app.routers.feeds import disassociate_listener_db
 
 router = APIRouter()
@@ -29,12 +30,13 @@ legacy_router = APIRouter()  # for back-compatibilty with v1 extractors
 clowder_bucket = os.getenv("MINIO_BUCKET_NAME", "clowder")
 
 
-def _process_incoming_v1_extractor_info(
+async def _process_incoming_v1_extractor_info(
     extractor_name: str,
     extractor_id: str,
     process: dict,
-    db: MongoClient,
+    creator: Optional[UserOut] = None,
 ):
+    """Return FeedDB object given v1 extractor info."""
     if "file" in process:
         # Create a MIME-based feed for this v1 extractor
         criteria_list = []
@@ -65,22 +67,19 @@ def _process_incoming_v1_extractor_info(
             },
             listeners=[FeedListener(listener_id=extractor_id, automatic=True)],
         )
-        return new_feed.to_mongo()
-        db["feeds"].insert_one(new_feed.to_mongo())
+        if creator is not None:
+            new_feed.creator = creator.email
+        await new_feed.insert()
+        return new_feed
 
 
 @router.get("/instance")
 async def get_instance_id(
     user=Depends(get_current_user),
-    db: MongoClient = Depends(get_db),
 ):
-    # Check all connection and abort if any one of them is not available
-    if db is None:
-        raise HTTPException(status_code=503, detail="Service not available")
-        return
-
-    if (instance_id := await db["config"].find_one({"key": "instance_id"})) is not None:
-        return ConfigEntryOut.from_mongo(instance_id).value
+    instance_id = await ConfigEntryDB.find_one({ConfigEntryDB.key == "instance_id"})
+    if instance_id:
+        return instance_id.value
     else:
         # If no ID has been generated for this instance, generate a 10-digit alphanumeric identifier
         instance_id = "".join(
@@ -90,32 +89,26 @@ async def get_instance_id(
             for _ in range(10)
         )
         config_entry = ConfigEntryDB(key="instance_id", value=instance_id)
-        await db["config"].insert_one(config_entry.to_mongo())
-        found = await db["config"].find_one({"key": "instance_id"})
-        new_entry = ConfigEntryOut.from_mongo(found)
-        return instance_id
+        await config_entry.insert()
+        return config_entry
 
 
 @router.post("", response_model=EventListenerOut)
 async def save_listener(
     listener_in: EventListenerIn,
     user=Depends(get_current_user),
-    db: MongoClient = Depends(get_db),
 ):
     """Register a new Event Listener with the system."""
     listener = EventListenerDB(**listener_in.dict(), creator=user)
     # TODO: Check for duplicates somehow?
-    new_listener = await db["listeners"].insert_one(listener.to_mongo())
-    found = await db["listeners"].find_one({"_id": new_listener.inserted_id})
-    listener_out = EventListenerOut.from_mongo(found)
-    return listener_out
+    await listener.insert()
+    return listener.dict()
 
 
 @legacy_router.post("", response_model=EventListenerOut)
 async def save_legacy_listener(
     legacy_in: LegacyEventListenerIn,
     user=Depends(get_current_user),
-    db: MongoClient = Depends(get_db),
 ):
     """This will take a POST with Clowder v1 extractor_info included, and convert/update to a v2 Listener."""
     listener_properties = ExtractorInfo(**legacy_in.dict())
@@ -127,48 +120,36 @@ async def save_legacy_listener(
         properties=listener_properties,
     )
 
-    # check to see if extractor already exists and update if so
-    existing_extractor = await db["listeners"].find_one({"name": legacy_in.name})
-    if existing_extractor is not None:
-        # Update existing listener
-        extractor_out = EventListenerOut.from_mongo(existing_extractor)
-        existing_version = extractor_out.version
-        new_version = listener.version
-        if version.parse(new_version) > version.parse(existing_version):
-            # if this is a new version, add it to the database
-            new_extractor = await db["listeners"].insert_one(listener.to_mongo())
-            found = await db["listeners"].find_one({"_id": new_extractor.inserted_id})
-            # TODO - for now we are not deleting an older version of the extractor, just adding a new one
-            # removed = db["listeners"].delete_one({"_id": existing_extractor["_id"]})
-            extractor_out = EventListenerOut.from_mongo(found)
-            return extractor_out
+    # check to see if extractor already exists and update if so, otherwise return existing
+    if (
+        existing := await EventListenerDB.find_one(
+            EventListenerDB.name == legacy_in.name
+        )
+    ) is not None:
+        # if this is a new version, add it to the database, otherwise update existing
+        if version.parse(listener.version) > version.parse(existing.version):
+            listener.id = existing.id
+            existing = EventListenerDB(*listener.dict())
+            await existing.save()
+            #  TODO: Should older extractor version entries be deleted?
+            return existing.dict()
         else:
-            # otherwise return existing version
             # TODO: Should this fail the POST instead?
-            return extractor_out
+            return existing.dict()
     else:
         # Register new listener
-        new_listener = await db["listeners"].insert_one(listener.to_mongo())
-        found = await db["listeners"].find_one({"_id": new_listener.inserted_id})
-        listener_out = EventListenerOut.from_mongo(found)
-
-        # Assign MIME-based listener if needed
-        if listener_out.properties and listener_out.properties.process:
-            process = listener_out.properties.process
-            processed_feed = _process_incoming_v1_extractor_info(
-                legacy_in.name, listener_out.id, process, db
+        await listener.insert()
+        # Assign a MIME-based listener if necessary
+        if listener.properties and listener.properties.process:
+            await _process_incoming_v1_extractor_info(
+                legacy_in.name, listener.id, listener.properties.process, user
             )
-            await db["feeds"].insert_one(processed_feed)
-
-        return listener_out
+        return listener.dict()
 
 
 @router.get("/search", response_model=List[EventListenerOut])
 async def search_listeners(
-    db: MongoClient = Depends(get_db),
-    text: str = "",
-    skip: int = 0,
-    limit: int = 2,
+    text: str = "", skip: int = 0, limit: int = 2, user=Depends(get_current_username)
 ):
     """Search all Event Listeners in the db based on text.
 
@@ -177,58 +158,46 @@ async def search_listeners(
         skip -- number of initial records to skip (i.e. for pagination)
         limit -- restrict number of records to be returned (i.e. for pagination)
     """
-    listeners = []
-
-    query_regx = re.compile(text, re.IGNORECASE)
-
-    for doc in (
-        # TODO either use regex or index search
-        await db["listeners"]
-        .find({"$or": [{"name": query_regx}, {"description": query_regx}]})
+    # TODO either use regex or index search
+    listeners = (
+        await EventListenerDB.find(
+            Or(
+                RegEx(field=EventListenerDB.name, pattern=text),
+                RegEx(field=EventListenerDB.description, pattern=text),
+            ),
+        )
         .skip(skip)
         .limit(limit)
-        .to_list(length=limit)
-    ):
-        listeners.append(EventListenerOut.from_mongo(doc))
-    return listeners
+        .to_list()
+    )
+    return [listener.dict() for listener in listeners]
 
 
 @router.get("/categories", response_model=List[str])
-async def list_categories(
-    db: MongoClient = Depends(get_db),
-):
-    """Get all the distinct categories of registered listeners in the db
-
-    Arguments:
-    """
-    return await db["listeners"].distinct("properties.categories")
+async def list_categories(user=Depends(get_current_username)):
+    """Get all the distinct categories of registered listeners in the db"""
+    return await EventListenerDB.distinct(EventListenerDB.properties.categories)
 
 
 @router.get("/defaultLabels", response_model=List[str])
-async def list_default_labels(
-    db: MongoClient = Depends(get_db),
-):
-    """Get all the distinct default labels of registered listeners in the db
-
-    Arguments:
-    """
-    return await db["listeners"].distinct("properties.defaultLabels")
+async def list_default_labels(user=Depends(get_current_username)):
+    """Get all the distinct default labels of registered listeners in the db"""
+    return await EventListenerDB.distinct(EventListenerDB.properties.default_labels)
 
 
 @router.get("/{listener_id}", response_model=EventListenerOut)
-async def get_listener(listener_id: str, db: MongoClient = Depends(get_db)):
+async def get_listener(listener_id: str, user=Depends(get_current_username)):
     """Return JSON information about an Event Listener if it exists."""
     if (
-        listener := await db["listeners"].find_one({"_id": ObjectId(listener_id)})
+        listener := await EventListenerDB.get(PydanticObjectId(listener_id))
     ) is not None:
-        return EventListenerOut.from_mongo(listener)
+        return listener.dict()
     raise HTTPException(status_code=404, detail=f"listener {listener_id} not found")
 
 
 @router.get("", response_model=List[EventListenerOut])
 async def get_listeners(
-    user_id=Depends(get_user),
-    db: MongoClient = Depends(get_db),
+    user_id=Depends(get_current_username),
     skip: int = 0,
     limit: int = 2,
     category: Optional[str] = None,
@@ -242,33 +211,20 @@ async def get_listeners(
         category -- filter by category has to be exact match
         label -- filter by label has to be exact match
     """
-    listeners = []
-    if category and label:
-        query = {
-            "$and": [
-                {"properties.categories": category},
-                {"properties.defaultLabels": label},
-            ]
-        }
-    elif category:
-        query = {"properties.categories": category}
-    elif label:
-        query = {"properties.defaultLabels": label}
-    else:
-        query = {}
+    query = []
+    if category:
+        query.append(EventListenerDB.properties.categories == category)
+    if label:
+        query.append(EventListenerDB.properties.default_labels == label)
 
-    for doc in (
-        await db["listeners"].find(query).skip(skip).limit(limit).to_list(length=limit)
-    ):
-        listeners.append(EventListenerOut.from_mongo(doc))
-    return listeners
+    listeners = await EventListenerDB.find(*query, skip=skip, limit=limit).to_list()
+    return [listener.dict() for listener in listeners]
 
 
 @router.put("/{listener_id}", response_model=EventListenerOut)
 async def edit_listener(
     listener_id: str,
     listener_in: EventListenerIn,
-    db: MongoClient = Depends(get_db),
     user_id=Depends(get_user),
 ):
     """Update the information about an existing Event Listener..
@@ -277,38 +233,37 @@ async def edit_listener(
         listener_id -- UUID of the listener to be udpated
         listener_in -- JSON object including updated information
     """
-    if (
-        listener := await db["listeners"].find_one({"_id": ObjectId(listener_id)})
-    ) is not None:
+    listener = await EventListenerDB.find_one(
+        EventListenerDB.id == ObjectId(listener_id)
+    )
+    if listener:
         # TODO: Refactor this with permissions checks etc.
         listener_update = dict(listener_in) if listener_in is not None else {}
-        user = await db["users"].find_one({"_id": ObjectId(user_id)})
-        listener_update["updated"] = datetime.datetime.utcnow()
+        listener_update["modified"] = datetime.datetime.utcnow()
         try:
             listener.update(listener_update)
-            await db["listeners"].replace_one(
-                {"_id": ObjectId(listener_id)}, EventListenerDB(**listener).to_mongo()
-            )
+            await listener.save()
+            return listener.dict()
         except Exception as e:
             raise HTTPException(status_code=500, detail=e.args[0])
-        return EventListenerOut.from_mongo(listener)
     raise HTTPException(status_code=404, detail=f"listener {listener_id} not found")
 
 
 @router.delete("/{listener_id}")
 async def delete_listener(
     listener_id: str,
-    db: MongoClient = Depends(get_db),
+    user=Depends(get_current_username),
 ):
     """Remove an Event Listener from the database. Will not clear event history for the listener."""
-    if (await db["listeners"].find_one({"_id": ObjectId(listener_id)})) is not None:
+    listener = await EventListenerDB.find_one(
+        EventListenerDB.id == ObjectId(listener_id)
+    )
+    if listener:
         # unsubscribe the listener from any feeds
-        async for feed in db["feeds"].find(
-            {"listeners.listener_id": ObjectId(listener_id)}
+        async for feed in FeedDB.find(
+            FeedDB.listeners.listener_id == ObjectId(listener_id)
         ):
-            feed_out = FeedOut.from_mongo(feed)
-            disassociate_listener_db(feed_out.id, listener_id, db)
-        await db["listeners"].delete_one({"_id": ObjectId(listener_id)})
+            await disassociate_listener_db(feed.id, listener_id)
+        await listener.delete()
         return {"deleted": listener_id}
-    else:
-        raise HTTPException(status_code=404, detail=f"listener {listener_id} not found")
+    raise HTTPException(status_code=404, detail=f"Listener {listener_id} not found")

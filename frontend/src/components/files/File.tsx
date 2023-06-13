@@ -145,8 +145,6 @@ export const File = (): JSX.Element => {
 
 	const setMetadata = (metadata: any) => {
 		// TODO wrap this in to a function
-		console.log("metadata in file component");
-		console.log(metadata);
 		setMetadataRequestForms((prevState) => {
 			// merge the content field; e.g. lat lon
 			if (metadata.definition in prevState) {
@@ -185,9 +183,6 @@ export const File = (): JSX.Element => {
 
 	// const submitToListener = ()=> {
 	// 	const filename = fileSummary['name']
-	// 	console.log('submit to listener');
-	// 	console.log("the file name is", filename);
-	// 	console.log('the file id is', fileId);
 	// 	history(`/listeners?fileId=${fileId}&fileName=${filename}`);
 	// }
 

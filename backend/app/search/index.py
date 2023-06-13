@@ -1,10 +1,9 @@
 from typing import Optional, List
 
 from bson import ObjectId
-from elasticsearch import Elasticsearch
-from pymongo import MongoClient
+from elasticsearch import Elasticsearch, NotFoundError
 
-from app.models.authorization import AuthorizationOut
+from app.models.authorization import AuthorizationDB
 from app.models.datasets import DatasetOut
 from app.models.files import FileOut
 from app.models.metadata import MetadataOut
@@ -13,7 +12,6 @@ from app.search.connect import insert_record, update_record
 
 
 async def index_dataset(
-    db: MongoClient,
     es: Elasticsearch,
     dataset: DatasetOut,
     user_ids: Optional[List[str]] = None,
@@ -24,10 +22,9 @@ async def index_dataset(
     if user_ids is None:
         # Get authorized users from db
         authorized_user_ids = []
-        async for auth_q in db["authorization"].find(
-            {"dataset_id": ObjectId(dataset.id)}
+        async for auth in AuthorizationDB.find(
+            AuthorizationDB.dataset_id == ObjectId(dataset.id)
         ):
-            auth = AuthorizationOut.from_mongo(auth_q)
             authorized_user_ids += auth.user_ids
     else:
         authorized_user_ids = user_ids
@@ -36,20 +33,22 @@ async def index_dataset(
     doc = ESDatasetEntry(
         name=dataset.name,
         description=dataset.description,
-        creator=dataset.author.email,
+        creator=dataset.creator.email,
         created=dataset.created,
         modified=dataset.modified,
         downloads=dataset.downloads,
         user_ids=authorized_user_ids,
     ).dict()
     if update:
-        update_record(es, "dataset", {"doc": doc}, dataset.id)
+        try:
+            update_record(es, "dataset", {"doc": doc}, dataset.id)
+        except NotFoundError:
+            insert_record(es, "dataset", doc, dataset.id)
     else:
         insert_record(es, "dataset", doc, dataset.id)
 
 
 async def index_file(
-    db: MongoClient,
     es: Elasticsearch,
     file: FileOut,
     user_ids: Optional[List[str]] = None,
@@ -61,10 +60,9 @@ async def index_file(
     if user_ids is None:
         # Get authorized users from db
         authorized_user_ids = []
-        async for auth_q in db["authorization"].find(
-            {"dataset_id": ObjectId(file.dataset_id)}
+        async for auth in AuthorizationDB.find(
+            AuthorizationDB.dataset_id == ObjectId(file.dataset_id)
         ):
-            auth = AuthorizationOut.from_mongo(auth_q)
             authorized_user_ids += auth.user_ids
     else:
         authorized_user_ids = user_ids
@@ -83,13 +81,15 @@ async def index_file(
         user_ids=authorized_user_ids,
     ).dict()
     if update:
-        update_record(es, "file", {"doc": doc}, file.id)
+        try:
+            update_record(es, "file", {"doc": doc}, file.id)
+        except NotFoundError:
+            insert_record(es, "file", doc, file.id)
     else:
         insert_record(es, "file", doc, file.id)
 
 
 async def index_dataset_metadata(
-    db: MongoClient,
     es: Elasticsearch,
     dataset: DatasetOut,
     metadata: MetadataOut,
@@ -101,10 +101,9 @@ async def index_dataset_metadata(
     if user_ids is None:
         # Get authorized users from db
         authorized_user_ids = []
-        async for auth_q in db["authorization"].find(
-            {"dataset_id": ObjectId(dataset.id)}
+        async for auth in AuthorizationDB.find(
+            AuthorizationDB.dataset_id == ObjectId(dataset.id)
         ):
-            auth = AuthorizationOut.from_mongo(auth_q)
             authorized_user_ids += auth.user_ids
     else:
         authorized_user_ids = user_ids
@@ -114,7 +113,7 @@ async def index_dataset_metadata(
         resource_id=str(dataset.id),
         resource_type="dataset",
         resource_created=dataset.created,
-        resource_creator=dataset.author.email,
+        resource_creator=dataset.creator.email,
         created=metadata.created,
         creator=metadata.agent.creator.email,
         content=metadata.content,
@@ -127,13 +126,15 @@ async def index_dataset_metadata(
         user_ids=authorized_user_ids,
     ).dict()
     if update:
-        update_record(es, "metadata", {"doc": doc}, metadata.id)
+        try:
+            update_record(es, "metadata", {"doc": doc}, metadata.id)
+        except NotFoundError:
+            insert_record(es, "metadata", doc, metadata.id)
     else:
         insert_record(es, "metadata", doc, metadata.id)
 
 
 async def index_file_metadata(
-    db: MongoClient,
     es: Elasticsearch,
     file: FileOut,
     metadata: MetadataOut,
@@ -145,10 +146,9 @@ async def index_file_metadata(
     if user_ids is None:
         # Get authorized users from db
         authorized_user_ids = []
-        async for auth_q in db["authorization"].find(
-            {"dataset_id": ObjectId(file.dataset_id)}
+        async for auth in AuthorizationDB.find(
+            AuthorizationDB.dataset_id == ObjectId(file.dataset_id)
         ):
-            auth = AuthorizationOut.from_mongo(auth_q)
             authorized_user_ids += auth.user_ids
     else:
         authorized_user_ids = user_ids
@@ -156,7 +156,7 @@ async def index_file_metadata(
     # Add an entry to the metadata index
     doc = ESMetadataEntry(
         resource_id=str(file.id),
-        resource_type="dataset",
+        resource_type="file",
         resource_created=file.created,
         resource_creator=file.creator.email,
         created=metadata.created,
@@ -175,6 +175,9 @@ async def index_file_metadata(
         user_ids=authorized_user_ids,
     ).dict()
     if update:
-        update_record(es, "metadata", {"doc": doc}, metadata.id)
+        try:
+            update_record(es, "metadata", {"doc": doc}, metadata.id)
+        except NotFoundError:
+            insert_record(es, "metadata", doc, metadata.id)
     else:
         insert_record(es, "metadata", doc, metadata.id)

@@ -1,7 +1,8 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { EventListenerJob } from '../models/EventListenerJob';
+import type { EventListenerJobOut } from '../models/EventListenerJobOut';
+import type { EventListenerJobUpdateOut } from '../models/EventListenerJobUpdateOut';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { request as __request } from '../core/request';
 
@@ -27,7 +28,7 @@ export class JobsService {
      * @param created
      * @param skip
      * @param limit
-     * @returns EventListenerJob Successful Response
+     * @returns EventListenerJobOut Successful Response
      * @throws ApiError
      */
     public static getAllJobSummaryApiV2JobsGet(
@@ -39,7 +40,7 @@ export class JobsService {
         created?: string,
         skip?: number,
         limit: number = 2,
-    ): CancelablePromise<Array<EventListenerJob>> {
+    ): CancelablePromise<Array<EventListenerJobOut>> {
         return __request({
             method: 'GET',
             path: `/api/v2/jobs`,
@@ -62,12 +63,12 @@ export class JobsService {
     /**
      * Get Job Summary
      * @param jobId
-     * @returns EventListenerJob Successful Response
+     * @returns EventListenerJobOut Successful Response
      * @throws ApiError
      */
     public static getJobSummaryApiV2JobsJobIdSummaryGet(
         jobId: string,
-    ): CancelablePromise<EventListenerJob> {
+    ): CancelablePromise<EventListenerJobOut> {
         return __request({
             method: 'GET',
             path: `/api/v2/jobs/${jobId}/summary`,
@@ -80,12 +81,12 @@ export class JobsService {
     /**
      * Get Job Updates
      * @param jobId
-     * @returns any Successful Response
+     * @returns EventListenerJobUpdateOut Successful Response
      * @throws ApiError
      */
     public static getJobUpdatesApiV2JobsJobIdUpdatesGet(
         jobId: string,
-    ): CancelablePromise<any> {
+    ): CancelablePromise<Array<EventListenerJobUpdateOut>> {
         return __request({
             method: 'GET',
             path: `/api/v2/jobs/${jobId}/updates`,

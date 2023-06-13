@@ -1,7 +1,7 @@
 import {
 	AuthorizationBase,
 	DatasetRoles,
-	EventListenerJob,
+	EventListenerJobDB,
 	FileOut as FileSummary,
 	FileVersion,
 	FolderOut,
@@ -16,8 +16,8 @@ import {
 export interface Dataset {
 	name: string;
 	description: string;
-	id: string;
-	author: Author;
+	_id: string;
+	creator: UserOut;
 	created: string | Date;
 	modified: string | Date;
 	files: string[];
@@ -41,7 +41,7 @@ export interface Listener {
 	parameters: any;
 }
 
-export interface Author {
+export interface Profile {
 	id: string;
 	email: string;
 	first_name: string | null;
@@ -58,7 +58,7 @@ export interface Profile {
 export interface Folder {
 	id: string;
 	name: string;
-	author: Author;
+	creator: UserOut;
 	parent_folder: string | null;
 }
 
@@ -68,7 +68,7 @@ export interface FileMetadata {
 	size: number;
 	created: string | Date;
 	name: string;
-	creator: Author;
+	creator: UserOut;
 	status: string;
 	filedescription: string;
 	thumbnail: string;
@@ -158,8 +158,8 @@ export interface ListenerState {
 	listeners: Listener[];
 	categories: string[];
 	labels: string[];
-	jobs: EventListenerJob[];
-	currJobUpdates: EventListenerJob[];
+	jobs: EventListenerJobDB[];
+	currJobUpdates: EventListenerJobDB[];
 	currJobSummary: JobSummary[];
 	currJobId: string;
 }

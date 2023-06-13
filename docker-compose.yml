@@ -11,7 +11,7 @@ x-minio-common: &minio-common
   networks:
     - clowder2
   healthcheck:
-    test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+    test: [ "CMD", "curl", "-f", "http://localhost:9000/minio/health/live" ]
     interval: 30s
     timeout: 20s
     retries: 3
@@ -24,7 +24,7 @@ services:
     command:
       - --api.insecure=true
       - --providers.docker
-#      - --entryPoints.web.address=:80
+    #      - --entryPoints.web.address=:80
     ports:
       # The HTTP port
       - "80:80"
@@ -102,6 +102,23 @@ services:
       - mongo
       - rabbitmq
 
+  extractors-messages:
+    image: "clowder/clowder2-messages"
+    build:
+      context: ./backend
+      dockerfile: messages.Dockerfile
+    environment:
+      - MONGODB_URL=mongodb://mongo:27017
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_USER=${RABBITMQ_USER:-guest}
+      - RABBITMQ_PASS=${RABBITMQ_PASS:-guest}
+    networks:
+      - clowder2
+    restart: unless-stopped
+    depends_on:
+      - mongo
+      - rabbitmq
+
   mongo:
     image: mongo:5.0
     restart: unless-stopped
@@ -112,8 +129,8 @@ services:
       - ./scripts/mongoviews/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
 
   #    environment:
-#      MONGO_INITDB_ROOT_USERNAME: root
-#      MONGO_INITDB_ROOT_PASSWORD: example
+  #      MONGO_INITDB_ROOT_USERNAME: root
+  #      MONGO_INITDB_ROOT_PASSWORD: example
 
   minio1:
     <<: *minio-common
@@ -154,44 +171,44 @@ services:
       - minio4
 
   postgres:
-      image: postgres
-      restart: unless-stopped
-      networks:
-        - clowder2
-      volumes:
-        - postgres_data:/var/lib/postgresql/data
-      environment:
-        POSTGRES_DB: keycloak_prod
-        POSTGRES_USER: keycloak
-        POSTGRES_PASSWORD: password
+    image: postgres
+    restart: unless-stopped
+    networks:
+      - clowder2
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: keycloak_prod
+      POSTGRES_USER: keycloak
+      POSTGRES_PASSWORD: password
 
   keycloak:
-      image: quay.io/keycloak/keycloak:19.0
-      restart: unless-stopped
-      networks:
-        - clowder2
-      volumes:
-        - ./scripts/keycloak/clowder-realm-prod.json:/opt/keycloak/data/import/realm.json:ro
-        - ./scripts/keycloak/clowder-theme/:/opt/keycloak/themes/clowder-theme/:ro
-      command:
-        - start-dev
-        - --http-relative-path /keycloak
-        - --import-realm
-      environment:
-        KEYCLOAK_ADMIN: admin
-        KEYCLOAK_ADMIN_PASSWORD: admin
-        KC_DB: postgres
-        KC_DB_URL_HOST: postgres
-        KC_DB_URL_DATABASE: keycloak_prod
-        KC_DB_USERNAME: keycloak
-        KC_DB_PASSWORD: password
-      depends_on:
-        - postgres
-      labels:
-        - "traefik.enable=true"
-        - "traefik.http.routers.keycloak.rule=PathPrefix(`/keycloak`)"
-        - "traefik.http.services.keycloak.loadbalancer.server.port=8080"
-        - "traefik.http.routers.keycloak.priority=10"
+    image: quay.io/keycloak/keycloak:19.0
+    restart: unless-stopped
+    networks:
+      - clowder2
+    volumes:
+      - ./scripts/keycloak/clowder-realm-prod.json:/opt/keycloak/data/import/realm.json:ro
+      - ./scripts/keycloak/clowder-theme/:/opt/keycloak/themes/clowder-theme/:ro
+    command:
+      - start-dev
+      - --http-relative-path /keycloak
+      - --import-realm
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+      KC_DB: postgres
+      KC_DB_URL_HOST: postgres
+      KC_DB_URL_DATABASE: keycloak_prod
+      KC_DB_USERNAME: keycloak
+      KC_DB_PASSWORD: password
+    depends_on:
+      - postgres
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.keycloak.rule=PathPrefix(`/keycloak`)"
+      - "traefik.http.services.keycloak.loadbalancer.server.port=8080"
+      - "traefik.http.routers.keycloak.priority=10"
 
   # message broker
   rabbitmq:

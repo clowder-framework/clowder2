@@ -1,29 +1,13 @@
 from typing import Generator
 
-import motor.motor_asyncio
 import pika
-from fastapi.exceptions import HTTPException
 from minio import Minio
 from minio.commonconfig import ENABLED
 from minio.versioningconfig import VersioningConfig
 from pika.adapters.blocking_connection import BlockingChannel
-from pika.exchange_type import ExchangeType
 
 from app.config import settings
-from minio.commonconfig import ENABLED
-from minio.versioningconfig import VersioningConfig
-from app.mongo import create_mongo_indexes
 from app.search.connect import connect_elasticsearch
-
-
-async def get_db() -> Generator:
-    mongo_client = motor.motor_asyncio.AsyncIOMotorClient(settings.MONGODB_URL)
-    db = mongo_client[settings.MONGO_DATABASE]
-    await create_mongo_indexes(db)
-    if db is None:
-        raise HTTPException(status_code=503, detail="Service not available")
-        return
-    yield db
 
 
 async def get_fs() -> Generator:

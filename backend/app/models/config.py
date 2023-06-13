@@ -1,14 +1,22 @@
-from app.models.mongomodel import MongoModel
+import pymongo
+from beanie import Document
+from pydantic import BaseModel
 
 
-class ConfigEntryBase(MongoModel):
+class ConfigEntryBase(BaseModel):
     key: str
     value: str
 
 
-class ConfigEntryDB(ConfigEntryBase):
-    pass
+class ConfigEntryDB(Document, ConfigEntryBase):
+    class Settings:
+        name = "config"
+        indexes = [
+            [
+                ("key", pymongo.TEXT),
+            ],
+        ]
 
 
-class ConfigEntryOut(ConfigEntryBase):
+class ConfigEntryOut(ConfigEntryDB):
     pass

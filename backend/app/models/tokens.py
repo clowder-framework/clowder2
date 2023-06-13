@@ -1,10 +1,19 @@
-from app.models.mongomodel import MongoModel
+import pymongo
+from beanie import Document
+
+from app.models.mongomodel import BaseModel
 
 
-class TokenBase(MongoModel):
+class TokenBase(BaseModel):
     email: str
     refresh_token: str
 
 
-class TokenDB(TokenBase):
-    pass
+class TokenDB(Document, TokenBase):
+    class Settings:
+        name = "tokens"
+        indexes = [
+            [
+                ("email", pymongo.TEXT),
+            ],
+        ]

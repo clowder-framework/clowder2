@@ -111,7 +111,7 @@ export function handleErrors(reason, originalFunc) {
 			dispatch({
 				type: FAILED,
 				reason:
-					reason.body.detail !== undefined
+					reason.body !== undefined && reason.body.detail !== undefined
 						? reason.body.detail
 						: "Backend Failure. Couldn't fetch!",
 				stack: reason.stack ? reason.stack : "",

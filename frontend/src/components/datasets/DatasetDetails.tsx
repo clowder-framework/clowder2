@@ -9,11 +9,11 @@ type DatasetAboutProps = {
 };
 
 export function DatasetDetails(props: DatasetAboutProps) {
-	const { id, created, modified, author, status, views, downloads } =
+	const { id, created, modified, creator, status, views, downloads } =
 		props.details;
 
 	const details = new Map<string, string>();
-	details.set("Owner", `${author.first_name} ${author.last_name}`);
+	details.set("Owner", `${creator.first_name} ${creator.last_name}`);
 	details.set("Created on", parseDate(created));
 	details.set("Updated on", parseDate(modified));
 	details.set("Status", status);

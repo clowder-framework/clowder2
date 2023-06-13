@@ -7,7 +7,6 @@ from keycloak.exceptions import (
     KeycloakPostError,
 )
 from passlib.hash import bcrypt
-from pymongo import MongoClient
 
 from app import dependencies
 from app.keycloak_auth import create_user
@@ -18,7 +17,7 @@ router = APIRouter()
 
 
 @router.post("/users", response_model=UserOut)
-async def save_user(userIn: UserIn, db: MongoClient = Depends(dependencies.get_db)):
+async def save_user(userIn: UserIn):
     try:
         keycloak_user = await create_user(
             userIn.email, userIn.password, userIn.first_name, userIn.last_name
@@ -39,18 +38,17 @@ async def save_user(userIn: UserIn, db: MongoClient = Depends(dependencies.get_d
 
     # create local user
     hashed_password = bcrypt.hash(userIn.password)
-    userDB = UserDB(
+    user = UserDB(
         **userIn.dict(),
         hashed_password=hashed_password,
         keycloak_id=keycloak_user,
     )
-    res = await db["users"].insert_one(userDB.to_mongo())
-    found = await db["users"].find_one({"_id": res.inserted_id})
-    return UserOut.from_mongo(found).dict(exclude={"create_at"})
+    await user.insert()
+    return user.dict()
 
 
 @router.post("/login")
-async def login(userIn: UserLogin, db: MongoClient = Depends(dependencies.get_db)):
+async def login(userIn: UserLogin):
     try:
         token = keycloak_openid.token(userIn.email, userIn.password)
         return {"token": token["access_token"]}
@@ -70,11 +68,10 @@ async def login(userIn: UserLogin, db: MongoClient = Depends(dependencies.get_db
         )
 
 
-async def authenticate_user(email: str, password: str, db: MongoClient):
-    user = await db["users"].find_one({"email": email})
-    current_user = UserDB.from_mongo(user)
+async def authenticate_user(email: str, password: str):
+    user = await UserDB.find_one({"email": email})
     if not user:
         return None
-    if not current_user.verify_password(password):
+    if not user.verify_password(password):
         return None
-    return current_user
+    return user

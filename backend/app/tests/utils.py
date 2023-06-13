@@ -111,6 +111,7 @@ def create_group(client: TestClient, headers: dict):
     response = client.post(
         f"{settings.API_V2_STR}/groups", json=group_example, headers=headers
     )
+    print(response)
     assert response.status_code == 200
     assert response.json().get("id") is not None
     return response.json()

@@ -72,7 +72,7 @@ class Settings(BaseSettings):
     # RabbitMQ message bus
     RABBITMQ_USER: str = "guest"
     RABBITMQ_PASS: str = "guest"
-    RABBITMQ_HOST: str = "localhost"
+    RABBITMQ_HOST: str = "127.0.0.1"
     RABBITMQ_URL: str = (
         "amqp://" + RABBITMQ_USER + ":" + RABBITMQ_PASS + "@" + RABBITMQ_HOST + "/"
     )

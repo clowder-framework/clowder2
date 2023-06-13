@@ -10,7 +10,6 @@ import type { UserOut } from './UserOut';
  * triggered the job.
  */
 export type MetadataAgent = {
-    id?: string;
     creator: UserOut;
     listener?: EventListenerOut;
 }
