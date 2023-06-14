@@ -419,7 +419,7 @@ export const File = (): JSX.Element => {
 					<TabPanel value={selectedTabIndex} index={4}>
 						<Listeners fileId={fileId} datasetId={datasetId} />
 					</TabPanel>
-					<TabPanel value={selectedTabIndex} index={4}>
+					<TabPanel value={selectedTabIndex} index={5}>
 						<ExtractionHistoryTab fileId={fileId} />
 					</TabPanel>
 				</Grid>
