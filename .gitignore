@@ -59,3 +59,15 @@ scripts/keycloak/data/*
 # ignore clowder chart deps
 charts/clowder2/charts
 charts/clowder2/*clowder2-software-dev.yaml
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Tests
+backend/app/tests/
