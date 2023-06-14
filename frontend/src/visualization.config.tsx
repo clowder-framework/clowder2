@@ -3,26 +3,26 @@ import React, { lazy } from "react";
 const Image = lazy(
 	() =>
 		import(
-			/* webpackChunkName: "previewers-image" */ "./components/previewers/Image"
+			/* webpackChunkName: "previewers-image" */ "./components/previewers/image/Image"
 		)
 );
 const Audio = lazy(
 	() =>
 		import(
-			/* webpackChunkName: "previewers-audio" */ "./components/previewers/Audio"
+			/* webpackChunkName: "previewers-audio" */ "./components/previewers/audio/Audio"
 		)
 );
 const Video = lazy(
 	() =>
 		import(
-			/* webpackChunkName: "previewers-video" */ "./components/previewers/Video"
+			/* webpackChunkName: "previewers-video" */ "./components/previewers/video/Video"
 		)
 );
 
 const Text = lazy(
 	() =>
 		import(
-			/* webpackChunkName: "previewers-text" */ "./components/previewers/Text"
+			/* webpackChunkName: "previewers-text" */ "./components/previewers/text/Text"
 		)
 );
 
