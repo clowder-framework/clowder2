@@ -1,10 +1,10 @@
 import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "../../types/data";
+import { RootState } from "../../../types/data";
 import {
 	GENERATE_FILE_URL,
 	generateFileDownloadUrl as generateFileDownloadUrlAction,
-} from "../../actions/file";
+} from "../../../actions/file";
 
 type AudioProps = {
 	fileId?: string;

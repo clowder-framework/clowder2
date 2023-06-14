@@ -3,8 +3,8 @@ import { useDispatch, useSelector } from "react-redux";
 import {
 	GENERATE_FILE_URL,
 	generateFileDownloadUrl as generateFileDownloadUrlAction,
-} from "../../actions/file";
-import { RootState } from "../../types/data";
+} from "../../../actions/file";
+import { RootState } from "../../../types/data";
 
 type ImageProps = {
 	fileId?: string;

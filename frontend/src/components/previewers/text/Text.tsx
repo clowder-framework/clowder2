@@ -4,10 +4,10 @@ import { useDispatch, useSelector } from "react-redux";
 import {
 	DOWNLOAD_FILE,
 	fileDownloaded as fileDownloadedAction,
-} from "../../actions/file";
+} from "../../../actions/file";
 import ShowMoreText from "react-show-more-text";
-import { RootState } from "../../types/data";
-import { readTextFromFile } from "../../utils/common";
+import { RootState } from "../../../types/data";
+import { readTextFromFile } from "../../../utils/common";
 
 type TextProps = {
 	fileId?: string;
