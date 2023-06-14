@@ -7,11 +7,11 @@ import {
 
 import { RootState } from "../../types/data";
 
-type VideoProps = {
-	fileId: string;
+type IframeProps = {
+	fileId?: string;
 };
 
-export default function Video(props: VideoProps) {
+export default function Iframe(props: IframeProps) {
 	const { fileId } = props;
 
 	const dispatch = useDispatch();
@@ -40,14 +40,11 @@ export default function Video(props: VideoProps) {
 	return (() => {
 		if (url && url !== "") {
 			return (
-				<video
-					width="100%"
-					id={`video-${fileId}`}
-					controls
-					style={{ maxWidth: "100%", maxHeight: "100%" }}
-				>
-					<source id={fileId} src={url} />
-				</video>
+				<iframe
+					id={fileId}
+					src={url}
+					style={{ width: "100%", height: "50em" }}
+				></iframe>
 			);
 		} else {
 			return <></>;

@@ -10,7 +10,7 @@ import { RootState } from "../../types/data";
 import { readTextFromFile } from "../../utils/common";
 
 type TextProps = {
-	fileId: string;
+	fileId?: string;
 };
 
 export default function Text(props: TextProps) {

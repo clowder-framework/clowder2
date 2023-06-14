@@ -1,17 +1,16 @@
 import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "../../types/data";
 import {
 	GENERATE_FILE_URL,
 	generateFileDownloadUrl as generateFileDownloadUrlAction,
 } from "../../actions/file";
 
-import { RootState } from "../../types/data";
-
-type IframeProps = {
-	fileId: string;
+type AudioProps = {
+	fileId?: string;
 };
 
-export default function Iframe(props: IframeProps) {
+export default function Audio(props: AudioProps) {
 	const { fileId } = props;
 
 	const dispatch = useDispatch();
@@ -40,11 +39,9 @@ export default function Iframe(props: IframeProps) {
 	return (() => {
 		if (url && url !== "") {
 			return (
-				<iframe
-					id={fileId}
-					src={url}
-					style={{ width: "100%", height: "50em" }}
-				></iframe>
+				<audio controls style={{ maxWidth: "100%", maxHeight: "100%" }}>
+					<source id={fileId} src={url} />
+				</audio>
 			);
 		} else {
 			return <></>;

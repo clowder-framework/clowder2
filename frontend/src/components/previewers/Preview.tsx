@@ -6,7 +6,7 @@ import { fetchFileSummary } from "../../actions/file";
 import { vizConfig } from "../../visualization.config";
 
 type previewProps = {
-	fileId: string;
+	fileId?: string;
 };
 export const Preview = (props: previewProps) => {
 	const { fileId } = props;
@@ -26,6 +26,7 @@ export const Preview = (props: previewProps) => {
 			<Suspense fallback={<div>Loading...</div>}>
 				{(() => {
 					return Object.keys(vizConfig).map((type) => {
+						// match main type to instantiate components correspondingly
 						if (
 							fileSummary &&
 							fileSummary.content_type !== undefined &&
@@ -33,7 +34,7 @@ export const Preview = (props: previewProps) => {
 						) {
 							return React.cloneElement(vizConfig[type], { fileId: fileId });
 						}
-						return null; // Handle the case when the content_type doesn't match any vizConfig type
+						return null;
 					});
 				})()}
 			</Suspense>

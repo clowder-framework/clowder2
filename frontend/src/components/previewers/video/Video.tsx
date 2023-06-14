@@ -1,16 +1,17 @@
 import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "../../types/data";
 import {
 	GENERATE_FILE_URL,
 	generateFileDownloadUrl as generateFileDownloadUrlAction,
 } from "../../actions/file";
 
-type AudioProps = {
-	fileId: string;
+import { RootState } from "../../types/data";
+
+type VideoProps = {
+	fileId?: string;
 };
 
-export default function Audio(props: AudioProps) {
+export default function Video(props: VideoProps) {
 	const { fileId } = props;
 
 	const dispatch = useDispatch();
@@ -39,9 +40,14 @@ export default function Audio(props: AudioProps) {
 	return (() => {
 		if (url && url !== "") {
 			return (
-				<audio controls style={{ maxWidth: "100%", maxHeight: "100%" }}>
+				<video
+					width="100%"
+					id={`video-${fileId}`}
+					controls
+					style={{ maxWidth: "100%", maxHeight: "100%" }}
+				>
 					<source id={fileId} src={url} />
-				</audio>
+				</video>
 			);
 		} else {
 			return <></>;

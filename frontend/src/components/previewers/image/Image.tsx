@@ -7,7 +7,7 @@ import {
 import { RootState } from "../../types/data";
 
 type ImageProps = {
-	fileId: string;
+	fileId?: string;
 };
 
 export default function Image(props: ImageProps) {

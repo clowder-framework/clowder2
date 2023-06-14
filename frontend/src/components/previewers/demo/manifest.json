@@ -1,0 +1,22 @@
+{
+	"name": "basic-vega-component",
+	"version": "1.0.0",
+	"description": "A React component for vega demo",
+	"main": "Demo.tsx",
+	"dependencies": {
+		"clowder2-core": "1.0.0",
+		"react-vega": "^7.6.0",
+		"react": "^17.0.2",
+		"react-dom": "^17.0.2"
+	},
+	"vizConfig": {
+		"name": "Demo",
+		"mainType": "text",
+		"mimeType": [
+			"text/csv"
+		],
+		"props": {
+			"fileId": "string"
+		}
+	}
+}

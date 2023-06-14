@@ -1,0 +1,21 @@
+{
+	"name": "basic-audio-component",
+	"version": "1.0.0",
+	"description": "A React component for audio",
+	"main": "Text.tsx",
+	"dependencies": {
+		"clowder2-core": "1.0.0",
+		"react": "^17.0.2",
+		"react-dom": "^17.0.2"
+	},
+	"vizConfig": {
+		"name": "Text",
+		"mainType": "text",
+		"mimeType": [
+			"text/plain"
+		],
+		"props": {
+			"fileId": "string"
+		}
+	}
+}

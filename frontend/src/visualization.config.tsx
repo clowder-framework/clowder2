@@ -1,22 +1,29 @@
 import React, { lazy } from "react";
 
 const Image = lazy(
-	() => import(/* webpackChunkName: "previewers-image" */ "../previewers/Image")
+	() =>
+		import(
+			/* webpackChunkName: "previewers-image" */ "./components/previewers/Image"
+		)
 );
 const Audio = lazy(
-	() => import(/* webpackChunkName: "previewers-audio" */ "../previewers/Audio")
+	() =>
+		import(
+			/* webpackChunkName: "previewers-audio" */ "./components/previewers/Audio"
+		)
 );
 const Video = lazy(
-	() => import(/* webpackChunkName: "previewers-video" */ "../previewers/Video")
-);
-
-const Iframe = lazy(
 	() =>
-		import(/* webpackChunkName: "previewers-iframe" */ "../previewers/Iframe")
+		import(
+			/* webpackChunkName: "previewers-video" */ "./components/previewers/Video"
+		)
 );
 
 const Text = lazy(
-	() => import(/* webpackChunkName: "previewers-text" */ "../previewers/Text")
+	() =>
+		import(
+			/* webpackChunkName: "previewers-text" */ "./components/previewers/Text"
+		)
 );
 
 export const vizConfig = {
