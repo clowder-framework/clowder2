@@ -8,12 +8,13 @@ import {
 import ShowMoreText from "react-show-more-text";
 import { RootState } from "../../../types/data";
 import { readTextFromFile } from "../../../utils/common";
+import { registerDecorator } from "../VizDecorator";
 
 type TextProps = {
 	fileId?: string;
 };
 
-export default function Text(props: TextProps) {
+const Text = (props: TextProps) => {
 	const { fileId } = props;
 
 	const dispatch = useDispatch();
@@ -67,4 +68,6 @@ export default function Text(props: TextProps) {
 			{text}
 		</ShowMoreText>
 	);
-}
+};
+
+export default registerDecorator.register(Text);

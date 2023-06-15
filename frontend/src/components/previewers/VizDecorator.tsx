@@ -14,7 +14,7 @@ import React from "react";
 // 	};
 // }
 
-export interface registerDecorator {}
+interface registerDecorator {}
 
 // add a registry of the type you expect
 export namespace registerDecorator {

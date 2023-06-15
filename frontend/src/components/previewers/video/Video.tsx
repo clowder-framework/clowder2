@@ -6,12 +6,13 @@ import {
 } from "../../../actions/file";
 
 import { RootState } from "../../../types/data";
+import { registerDecorator } from "../VizDecorator";
 
 type VideoProps = {
 	fileId?: string;
 };
 
-export default function Video(props: VideoProps) {
+const Video = (props: VideoProps) => {
 	const { fileId } = props;
 
 	const dispatch = useDispatch();
@@ -53,4 +54,6 @@ export default function Video(props: VideoProps) {
 			return <></>;
 		}
 	})();
-}
+};
+
+export default registerDecorator.register(Video);

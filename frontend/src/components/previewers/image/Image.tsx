@@ -5,12 +5,13 @@ import {
 	generateFileDownloadUrl as generateFileDownloadUrlAction,
 } from "../../../actions/file";
 import { RootState } from "../../../types/data";
+import { registerDecorator } from "../VizDecorator";
 
 type ImageProps = {
 	fileId?: string;
 };
 
-export default function Image(props: ImageProps) {
+const Image = (props: ImageProps) => {
 	const { fileId } = props;
 
 	const dispatch = useDispatch();
@@ -51,4 +52,6 @@ export default function Image(props: ImageProps) {
 			return <></>;
 		}
 	})();
-}
+};
+
+export default registerDecorator.register(Image);
