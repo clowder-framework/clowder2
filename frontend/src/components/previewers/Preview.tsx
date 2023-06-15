@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../types/data";
 import { fetchFileSummary } from "../../actions/file";
 import { vizConfig } from "../../visualization.config";
+import { registerDecorator } from "./VizDecorator";
 
 type previewProps = {
 	fileId?: string;
@@ -17,6 +18,10 @@ export const Preview = (props: previewProps) => {
 	const listFileSummary = (fileId: string | undefined) =>
 		dispatch(fetchFileSummary(fileId));
 	useEffect(() => {
+		// load viz
+		const vizPackageNames = registerDecorator.GetImplementations();
+		console.log(vizPackageNames);
+
 		// load file information
 		listFileSummary(fileId);
 	}, []);
