@@ -13,11 +13,8 @@
 		"mainType": "audio",
 		"mimeType": [
 			"audio/mpeg",
-			"audio/wav",
-			"audio/*"
+			"audio/wav"
 		],
-		"props": {
-			"fileId": "string"
-		}
+		"fields": []
 	}
 }

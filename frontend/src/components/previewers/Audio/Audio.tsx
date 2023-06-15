@@ -1,16 +1,15 @@
-import React, { useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "../../../types/data";
-import {
-	GENERATE_FILE_URL,
-	generateFileDownloadUrl as generateFileDownloadUrlAction,
-} from "../../../actions/file";
+import React, {useEffect} from "react";
+import {useDispatch, useSelector} from "react-redux";
+import {RootState} from "../../../types/data";
+import {GENERATE_FILE_URL, generateFileDownloadUrl as generateFileDownloadUrlAction,} from "../../../actions/file";
+import {registerDecorator} from "../VizDecorator";
 
 type AudioProps = {
 	fileId?: string;
 };
 
-export default function Audio(props: AudioProps) {
+@registerDecorator.register()
+export default function Audio(props: AudioProps){
 	const { fileId } = props;
 
 	const dispatch = useDispatch();
@@ -47,4 +46,4 @@ export default function Audio(props: AudioProps) {
 			return <></>;
 		}
 	})();
-}
+};
