@@ -1,9 +1,8 @@
-import React, { Suspense, useEffect } from "react";
+import React, { lazy, Suspense, useEffect, useState } from "react";
 import { LazyLoadErrorBoundary } from "../errors/LazyLoadErrorBoundary";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../types/data";
 import { fetchFileSummary } from "../../actions/file";
-import { vizConfig } from "../../visualization.config";
 import { registerDecorator } from "./VizDecorator";
 
 type previewProps = {
@@ -11,6 +10,8 @@ type previewProps = {
 };
 export const Preview = (props: previewProps) => {
 	const { fileId } = props;
+
+	const [vizConfig, setVizConfig] = useState({});
 
 	const fileSummary = useSelector((state: RootState) => state.file.fileSummary);
 
@@ -20,8 +21,19 @@ export const Preview = (props: previewProps) => {
 	useEffect(() => {
 		// load viz
 		const vizPackageNames = registerDecorator.GetImplementations();
-		console.log(vizPackageNames);
-
+		vizPackageNames.map((vizPackageName) => {
+			const config = require(`./${vizPackageName}/manifest.json`);
+			const vizPackage = lazy(
+				() =>
+					import(
+						/* webpackChunkName: `previewers-${vizPackage}` */ `./${vizPackageName}/${config.main}`
+					)
+			);
+			setVizConfig((prevVizConfig) => ({
+				...prevVizConfig,
+				[config.vizConfig.mainType]: vizPackage,
+			}));
+		});
 		// load file information
 		listFileSummary(fileId);
 	}, []);
