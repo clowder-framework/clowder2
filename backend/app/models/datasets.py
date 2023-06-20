@@ -62,6 +62,7 @@ class DatasetDBViewList(View, DatasetBase):
     created: datetime = Field(default_factory=datetime.utcnow)
     modified: datetime = Field(default_factory=datetime.utcnow)
     auth: List[AuthorizationDB]
+    status: str
 
     class Settings:
         source = DatasetDB
