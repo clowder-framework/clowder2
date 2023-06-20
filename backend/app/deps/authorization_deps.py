@@ -5,7 +5,7 @@ from fastapi import Depends, HTTPException
 
 from app.keycloak_auth import get_current_username
 from app.models.authorization import RoleType, AuthorizationDB
-from app.models.datasets import DatasetDB
+from app.models.datasets import DatasetDB, DatasetStatus
 from app.models.files import FileOut, FileDB
 from app.models.groups import GroupOut, GroupDB
 from app.models.metadata import MetadataDB
@@ -98,14 +98,10 @@ async def get_role_by_group(
 
 async def is_public_dataset(
     dataset_id: str,
-    db: MongoClient = Depends(get_db),
 ) -> bool:
     """Checks if a dataset is public."""
-    if (
-        dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
-    ) is not None:
-        dataset_out = DatasetOut.from_mongo(dataset)
-        if dataset_out.status == DatasetStatus.PUBLIC.name:
+    if (dataset_out := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
+        if dataset_out.status == DatasetStatus.PUBLIC:
             return True
     else:
         return False
@@ -140,10 +136,7 @@ class Authorization:
                     detail=f"User `{current_user} does not have `{self.role}` permission on dataset {dataset_id}",
                 )
         else:
-            if (
-                dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
-            ) is not None:
-                current_dataset = DatasetOut.from_mongo(dataset)
+            if (current_dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
                 if (
                     current_dataset.status == DatasetStatus.PUBLIC.name
                     and self.role == "viewer"
@@ -291,13 +284,11 @@ class CheckStatus:
     async def __call__(
         self,
         dataset_id: str,
-        db: MongoClient = Depends(get_db),
     ):
         if (
-            dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
+            dataset := await DatasetDB.get(PydanticObjectId(dataset_id))
         ) is not None:
-            current_dataset = DatasetOut.from_mongo(dataset)
-            if current_dataset.status == self.status:
+            if dataset.status == self.status:
                 return True
             else:
                 return False
@@ -315,16 +306,15 @@ class CheckFileStatus:
     async def __call__(
         self,
         file_id: str,
-        db: MongoClient = Depends(get_db),
     ):
-        if (file := await db["files"].find_one({"_id": ObjectId(file_id)})) is not None:
-            file_out = FileOut.from_mongo(file)
+        if (
+            file_out := await FileDB.get(PydanticObjectId(file_id))
+        ) is not None:
             dataset_id = file_out.dataset_id
             if (
-                dataset := await db["datasets"].find_one({"_id": ObjectId(dataset_id)})
+                dataset := await DatasetDB.get(PydanticObjectId(dataset_id))
             ) is not None:
-                current_dataset = DatasetOut.from_mongo(dataset)
-                if current_dataset.status == self.status:
+                if dataset.status == self.status:
                     return True
                 else:
                     return False

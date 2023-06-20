@@ -252,13 +252,18 @@ async def get_dataset_files(
     skip: int = 0,
     limit: int = 10,
 ):
-    query = [
-        FileDBViewList.dataset_id == ObjectId(dataset_id),
-        Or(
-            FileDBViewList.creator.email == user_id,
-            FileDBViewList.auth.user_ids == user_id,
-        ),
-    ]
+    if public:
+        query = [
+            FileDBViewList.dataset_id == ObjectId(dataset_id),
+        ]
+    else:
+        query = [
+            FileDBViewList.dataset_id == ObjectId(dataset_id),
+            Or(
+                FileDBViewList.creator.email == user_id,
+                FileDBViewList.auth.user_ids == user_id,
+            ),
+        ]
     if folder_id is not None:
         query.append(FileDBViewList.folder_id == ObjectId(folder_id))
     files = await FileDBViewList.find(*query).skip(skip).limit(limit).to_list()
@@ -311,6 +316,8 @@ async def patch_dataset(
             dataset.name = dataset_info.name
         if dataset_info.description is not None:
             dataset.description = dataset_info.description
+        if dataset_info.status is not None:
+            dataset.status = dataset_info.status
         dataset.modified = datetime.datetime.utcnow()
         await dataset.save()
 
@@ -389,17 +396,23 @@ async def get_dataset_folders(
     parent_folder: Optional[str] = None,
     user_id=Depends(get_user),
     allow: bool = Depends(Authorization("viewer")),
+    public: bool = Depends(CheckStatus("public")),
     skip: int = 0,
     limit: int = 10,
 ):
     if (await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
-        query = [
-            FolderDBViewList.dataset_id == ObjectId(dataset_id),
-            Or(
-                FolderDBViewList.creator.email == user_id,
-                FolderDBViewList.auth.user_ids == user_id,
-            ),
-        ]
+        if public:
+            query = [
+                FolderDBViewList.dataset_id == ObjectId(dataset_id),
+            ]
+        else:
+            query = [
+                FolderDBViewList.dataset_id == ObjectId(dataset_id),
+                Or(
+                    FolderDBViewList.creator.email == user_id,
+                    FolderDBViewList.auth.user_ids == user_id,
+                ),
+            ]
         if parent_folder is not None:
             query.append(FolderDBViewList.parent_folder == ObjectId(parent_folder))
         else:

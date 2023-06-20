@@ -3,7 +3,6 @@ from beanie.operators import Or, In
 from bson import ObjectId
 from fastapi import APIRouter, Depends
 from fastapi.exceptions import HTTPException
-
 from app.dependencies import get_elasticsearchclient
 from app.deps.authorization_deps import (
     Authorization,
@@ -25,6 +24,7 @@ from app.models.datasets import (
     DatasetRoles,
     DatasetDB,
     DatasetOut,
+    DatasetStatus,
 )
 from app.models.groups import GroupDB
 from app.models.pyobjectid import PyObjectId
@@ -80,9 +80,17 @@ async def get_dataset_role(
             ),
         )
     ) is None:
-        raise HTTPException(
-            status_code=404, detail=f"No authorization found for dataset: {dataset_id}"
-        )
+        if (current_dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
+            if current_dataset.status == DatasetStatus.PUBLIC.name:
+                public_authorization_in = {'dataset_id': PydanticObjectId(dataset_id), 'role': RoleType.VIEWER}
+                authorization = AuthorizationDB(
+                    **public_authorization_in, creator=current_dataset.creator.email
+                )
+                return authorization.dict()
+            else:
+                raise HTTPException(
+                    status_code=404, detail=f"No authorization found for dataset: {dataset_id}"
+                )
     else:
         return auth_db.dict()
 
