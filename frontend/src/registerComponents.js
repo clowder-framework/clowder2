@@ -1,7 +1,6 @@
 const fs = require("fs");
 const glob = require("glob");
-const parser = require("@babel/parser");
-const traverse = require("@babel/traverse").default;
+const ts = require("typescript");
 
 const registerDecoratorPath = "./components/previewers/RegisterDecorator.ts";
 
@@ -12,23 +11,25 @@ function registerComponents() {
 
 	files.forEach((file) => {
 		const content = fs.readFileSync(file, "utf-8");
-		const ast = parser.parse(content, {
-			sourceType: "module",
-			plugins: ["tsx"],
-		});
+		const sourceFile = ts.createSourceFile(
+			file,
+			content,
+			ts.ScriptTarget.Latest,
+			true
+		);
 
-		traverse(ast, {
-			ExportDefaultDeclaration(path) {
-				const { node } = path;
-				if (node.declaration.decorators) {
-					node.declaration.decorators.forEach((decorator) => {
-						const componentName = node.declaration.id.name;
-						const decoratorName = decorator.expression.name;
-						const registerStatement = `${decoratorName}(${componentName})`;
+		ts.forEachChild(sourceFile, (node) => {
+			if (ts.isFunctionDeclaration(node) || ts.isVariableStatement(node)) {
+				const decorators = node.decorators;
+				if (decorators) {
+					decorators.forEach((decorator) => {
+						const decoratorName = decorator.expression.getText();
+						const componentName = node.name.getText();
+						const registerStatement = `registerDecorator.register(${componentName})`;
 						fs.appendFileSync(registerDecoratorPath, registerStatement + "\n");
 					});
 				}
-			},
+			}
 		});
 	});
 

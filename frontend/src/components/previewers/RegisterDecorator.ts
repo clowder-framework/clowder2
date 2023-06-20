@@ -15,7 +15,7 @@
 interface registerDecorator {}
 
 // add a registry of the type you expect
-namespace registerDecorator {
+export namespace registerDecorator {
 	type Constructor<T> = {
 		new (...args: any[]): T;
 		readonly prototype: T;
@@ -30,9 +30,4 @@ namespace registerDecorator {
 		implementations.push(ctor);
 		return ctor;
 	}
-}
-
-export function register(component: any) {
-	// Register the component as desired
-	registerDecorator.register(component);
 }

@@ -3,7 +3,7 @@ import { LazyLoadErrorBoundary } from "../errors/LazyLoadErrorBoundary";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../types/data";
 import { fetchFileSummary } from "../../actions/file";
-import { registerDecorator } from "./VizDecorator";
+import { registerDecorator } from "./RegisterDecorator";
 
 type previewProps = {
 	fileId?: string;
@@ -21,6 +21,7 @@ export const Preview = (props: previewProps) => {
 	useEffect(() => {
 		// load viz
 		const vizPackageNames = registerDecorator.GetImplementations();
+		console.log(vizPackageNames);
 		vizPackageNames.map((vizPackageName) => {
 			const config = require(`./${vizPackageName}/manifest.json`);
 			const vizPackage = lazy(
