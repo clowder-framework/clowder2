@@ -5,9 +5,17 @@
 import type { Member } from './Member';
 
 /**
- * Store user who created model, when and last time it was updated.
- * TODO: this generic model should be moved to a global util module in models for all those models that want to
- * store basic provenance.
+ * Document Mapping class.
+ *
+ * Fields:
+ *
+ * - `id` - MongoDB document ObjectID "_id" field.
+ * Mapped to the PydanticObjectId class
+ *
+ * Inherited from:
+ *
+ * - Pydantic BaseModel
+ * - [UpdateMethods](https://roman-right.github.io/beanie/api/interfaces/#aggregatemethods)
  */
 export type GroupOut = {
     creator: string;

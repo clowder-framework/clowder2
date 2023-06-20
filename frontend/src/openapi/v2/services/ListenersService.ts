@@ -114,8 +114,6 @@ export class ListenersService {
     /**
      * List Categories
      * Get all the distinct categories of registered listeners in the db
-     *
-     * Arguments:
      * @returns string Successful Response
      * @throws ApiError
      */
@@ -129,8 +127,6 @@ export class ListenersService {
     /**
      * List Default Labels
      * Get all the distinct default labels of registered listeners in the db
-     *
-     * Arguments:
      * @returns string Successful Response
      * @throws ApiError
      */

@@ -9,12 +9,9 @@ import {
 	fetchFoldersInDataset,
 } from "../../actions/dataset";
 import { fetchFolderPath } from "../../actions/folder";
-import { resetFailedReason } from "../../actions/common";
 
 import { a11yProps, TabPanel } from "../tabs/TabComponent";
-import { ActionModal } from "../dialog/ActionModal";
 import FilesTable from "../files/FilesTable";
-import config from "../../app.config";
 import { MetadataIn } from "../../openapi/v2";
 import { DisplayMetadata } from "../metadata/DisplayMetadata";
 import { DisplayListenerMetadata } from "../metadata/DisplayListenerMetadata";
@@ -40,6 +37,7 @@ import RoleChip from "../auth/RoleChip";
 import { TabStyle } from "../../styles/Styles";
 import { Forbidden } from "../errors/Forbidden";
 import { PageNotFound } from "../errors/PageNotFound";
+import { ErrorModal } from "../errors/ErrorModal";
 
 export const Dataset = (): JSX.Element => {
 	// path parameter
@@ -77,11 +75,8 @@ export const Dataset = (): JSX.Element => {
 		dispatch(fetchDatasetAbout(datasetId));
 	const listDatasetMetadata = (datasetId: string | undefined) =>
 		dispatch(fetchDatasetMetadata(datasetId));
-	const dismissError = () => dispatch(resetFailedReason());
 
 	// mapStateToProps
-	const reason = useSelector((state: RootState) => state.error.reason);
-	const stack = useSelector((state: RootState) => state.error.stack);
 	const about = useSelector((state: RootState) => state.dataset.about);
 	const datasetRole = useSelector(
 		(state: RootState) => state.dataset.datasetRole
@@ -109,28 +104,6 @@ export const Dataset = (): JSX.Element => {
 	const [errorOpen, setErrorOpen] = useState(false);
 	const [showForbiddenPage, setShowForbiddenPage] = useState(false);
 	const [showNotFoundPage, setShowNotFoundPage] = useState(false);
-
-	useEffect(() => {
-		if (reason == "Forbidden") {
-			setShowForbiddenPage(true);
-
-		} else if (reason == "Not Found") {
-			setShowNotFoundPage(true);
-
-		} else if (reason !== "" && reason !== null && reason !== undefined) {
-			setErrorOpen(true);
-		}
-	}, [reason]);
-	const handleErrorCancel = () => {
-		// reset error message and close the error window
-		dismissError();
-		setErrorOpen(false);
-	};
-	const handleErrorReport = () => {
-		window.open(
-			`${config.GHIssueBaseURL}+${encodeURIComponent(reason)}&body=${encodeURIComponent(stack)}`
-		);
-	};
 
 	const handleTabChange = (
 		_event: React.ChangeEvent<{}>,
@@ -161,6 +134,7 @@ export const Dataset = (): JSX.Element => {
 				datasetRole.role !== undefined &&
 				datasetRole.role !== "viewer"
 			) {
+				// update existing metadata
 				updateDatasetMetadata(datasetId, metadataRequestForms[key]);
 			} else {
 				if (
@@ -207,25 +181,16 @@ export const Dataset = (): JSX.Element => {
 		paths.slice(0, 1);
 	}
 
-
 	if (showForbiddenPage) {
 		return <Forbidden />;
-
 	} else if (showNotFoundPage) {
 		return <PageNotFound />;
 	}
-	console.log(updateDatasetMetadata)
+
 	return (
 		<Layout>
 			{/*Error Message dialogue*/}
-			<ActionModal
-				actionOpen={errorOpen}
-				actionTitle="Something went wrong..."
-				actionText={reason}
-				actionBtnName="Report"
-				handleActionBtnClick={handleErrorReport}
-				handleActionCancel={handleErrorCancel}
-			/>
+			<ErrorModal errorOpen={errorOpen} setErrorOpen={setErrorOpen} />
 			<Grid container>
 				{/*title*/}
 				<Grid item xs={8} sx={{ display: "flex", alignItems: "center" }}>

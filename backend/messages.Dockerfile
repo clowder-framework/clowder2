@@ -22,5 +22,6 @@ ENV PYTHONPATH=/code
 
 # copy app code at end to make it easier to change code and not have to rebuild requirement layers
 COPY ./app /code/app
+COPY ./message_listener.py /code/message_listener.py
 
-CMD ["python", "app/rabbitmq/message_listener_sync.py"]
+CMD ["python", "message_listener.py"]

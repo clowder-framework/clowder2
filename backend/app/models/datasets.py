@@ -2,11 +2,12 @@ from datetime import datetime
 from enum import Enum, auto
 from typing import Optional, List
 
+import pymongo
+from beanie import Document, View, PydanticObjectId
 from pydantic import BaseModel, Field
 
-from app.models.authorization import RoleType
+from app.models.authorization import RoleType, AuthorizationDB
 from app.models.groups import GroupOut
-from app.models.mongomodel import MongoModel
 from app.models.users import UserOut
 
 
@@ -37,17 +38,53 @@ class DatasetPatch(BaseModel):
     status: Optional[str]
 
 
-class DatasetDB(MongoModel, DatasetBase):
-    author: UserOut
+class DatasetDB(Document, DatasetBase):
+    creator: UserOut
     created: datetime = Field(default_factory=datetime.utcnow)
     modified: datetime = Field(default_factory=datetime.utcnow)
     status: str = DatasetStatus.PRIVATE.name
-    views: int = 0
+    user_views: int = 0
     downloads: int = 0
+
+    class Settings:
+        name = "datasets"
+        indexes = [
+            [
+                ("name", pymongo.TEXT),
+                ("description", pymongo.TEXT),
+            ],
+        ]
+
+
+class DatasetDBViewList(View, DatasetBase):
+    id: PydanticObjectId = Field(None, alias="_id")  # necessary for Views
+    creator: UserOut
+    created: datetime = Field(default_factory=datetime.utcnow)
+    modified: datetime = Field(default_factory=datetime.utcnow)
+    auth: List[AuthorizationDB]
+
+    class Settings:
+        source = DatasetDB
+        name = "datasets_view"
+        pipeline = [
+            {
+                "$lookup": {
+                    "from": "authorization",
+                    "localField": "_id",
+                    "foreignField": "dataset_id",
+                    "as": "auth",
+                }
+            },
+        ]
+        # Needs fix to work https://github.com/roman-right/beanie/pull/521
+        # use_cache = True
+        # cache_expiration_time = timedelta(seconds=10)
+        # cache_capacity = 5
 
 
 class DatasetOut(DatasetDB):
-    pass
+    class Config:
+        fields = {"id": "id"}
 
 
 class UserAndRole(BaseModel):
@@ -60,7 +97,7 @@ class GroupAndRole(BaseModel):
     role: RoleType
 
 
-class DatasetRoles(MongoModel):
+class DatasetRoles(BaseModel):
     dataset_id: str
     user_roles: List[UserAndRole] = []
     group_roles: List[GroupAndRole] = []

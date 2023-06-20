@@ -25,7 +25,11 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { RootState } from "../../types/data";
 import { theme } from "../../theme";
-import { fetchDatasetRoles, removeDatasetGroupRole, setDatasetGroupRole } from "../../actions/dataset";
+import {
+	fetchDatasetRoles,
+	removeDatasetGroupRole,
+	setDatasetGroupRole,
+} from "../../actions/dataset";
 import { useParams } from "react-router-dom";
 import { GroupAndRoleSubTable } from "./GroupAndRoleSubTable";
 
@@ -57,7 +61,7 @@ export function GroupAndRoleTableEntry(props: GroupAndRoleTableEntryProps) {
 
 	const removeGroupRole = async (
 		dataset_id: string | undefined,
-		group_id: string | undefined,
+		group_id: string | undefined
 	) => dispatch(removeDatasetGroupRole(dataset_id, group_id));
 
 	const [selectedRole, setSelectedRole] = useState(group_role.role);
@@ -78,10 +82,9 @@ export function GroupAndRoleTableEntry(props: GroupAndRoleTableEntryProps) {
 		groupRoleAssigned(datasetId, group_role.group.id, selectedRole);
 		setEditRoleOn(false);
 	};
-    
+
 	const getRoles = (datasetId: string | undefined) =>
 		dispatch(fetchDatasetRoles(datasetId));
-
 
 	const handleRoleDelete = async () => {
 		await removeGroupRole(datasetId, group_role.group.id);
@@ -91,14 +94,19 @@ export function GroupAndRoleTableEntry(props: GroupAndRoleTableEntryProps) {
 
 	return (
 		<React.Fragment>
-			<Dialog open={deleteRoleConfirmation} onClose={() => setDeleteRoleConfirmation(false)}>
+			<Dialog
+				open={deleteRoleConfirmation}
+				onClose={() => setDeleteRoleConfirmation(false)}
+			>
 				<DialogTitle>Are you sure?</DialogTitle>
-				<DialogContent>
-                        Do you really want to delete this role?
-				</DialogContent>
+				<DialogContent>Do you really want to delete this role?</DialogContent>
 				<DialogActions>
-					<Button variant={"contained"} onClick={handleRoleDelete}>Delete</Button>
-					<Button onClick={() => setDeleteRoleConfirmation(false)}>Close</Button>
+					<Button variant={"contained"} onClick={handleRoleDelete}>
+						Delete
+					</Button>
+					<Button onClick={() => setDeleteRoleConfirmation(false)}>
+						Close
+					</Button>
 				</DialogActions>
 			</Dialog>
 			<TableRow

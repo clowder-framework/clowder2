@@ -53,14 +53,10 @@ export function SearchResult(props) {
 			{data.map((item) => (
 				<ListItem alignItems="flex-start" key={item._id}>
 					<ListItemAvatar sx={{ color: theme.palette.primary.main }}>
-						{getRecordType(item) === "dataset" ? (
-							<DatasetIcon />
-						) : (
-							<ArticleIcon />
-						)}
+						{item._index === "dataset" ? <DatasetIcon /> : <ArticleIcon />}
 					</ListItemAvatar>
 					<Box sx={{ marginTop: "5px" }}>
-						{getRecordType(item) === "dataset" ? (
+						{item._index === "dataset" ? (
 							<MuiLink
 								component={Link}
 								to={`/datasets/${item._id}`}
@@ -78,13 +74,8 @@ export function SearchResult(props) {
 							</MuiLink>
 						)}
 						<Typography variant="body2" color={theme.palette.secondary.light}>
-							{getRecordType(item) === "dataset"
-								? `Created by ${parseString(item.creator)} at ${parseDate(
-										item.created
-								  )}`
-								: `Created by ${parseString(item.creator)} at ${parseDate(
-										item.created
-								  )}`}
+							Created by {parseString(item.creator)} at{" "}
+							{parseDate(item.created)}
 						</Typography>
 						<Typography variant="body2" color={theme.palette.secondary.dark}>
 							{getRecordType(item) === "dataset"

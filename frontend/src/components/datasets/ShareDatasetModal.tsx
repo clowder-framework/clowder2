@@ -22,7 +22,7 @@ import { useParams } from "react-router-dom";
 import { fetchDatasetRoles, setDatasetUserRole } from "../../actions/dataset";
 import { useDispatch, useSelector } from "react-redux";
 import CloseIcon from "@mui/icons-material/Close";
-import { fetchAllUsers } from "../../actions/user";
+import { prefixSearchAllUsers as prefixSearchAllUsersAction } from "../../actions/user";
 import { UserOut } from "../../openapi/v2";
 import { RootState } from "../../types/data";
 
@@ -35,8 +35,8 @@ type ShareDatasetModalProps = {
 export default function ShareDatasetModal(props: ShareDatasetModalProps) {
 	const dispatch = useDispatch();
 
-	const listAllUsers = (skip: number, limit: number) =>
-		dispatch(fetchAllUsers(skip, limit));
+	const prefixSearchAllUsers = (text: string, skip: number, limit: number) =>
+		dispatch(prefixSearchAllUsersAction(text, skip, limit));
 
 	const { open, handleClose, datasetName } = props;
 	const { datasetId } = useParams<{ datasetId?: string }>();
@@ -46,15 +46,23 @@ export default function ShareDatasetModal(props: ShareDatasetModalProps) {
 	const [options, setOptions] = useState([]);
 	const users = useSelector((state: RootState) => state.group.users);
 
-	const setUserRole = async (datasetId: string, username: string, role: string) =>
-		dispatch(setDatasetUserRole(datasetId, username, role));
+	const setUserRole = async (
+		datasetId: string,
+		username: string,
+		role: string
+	) => dispatch(setDatasetUserRole(datasetId, username, role));
 
 	const getRoles = (datasetId: string | undefined) =>
 		dispatch(fetchDatasetRoles(datasetId));
 
 	useEffect(() => {
-		listAllUsers(0, 21);
+		prefixSearchAllUsers("", 0, 10);
 	}, []);
+
+	// dynamically update the options when user search
+	useEffect(() => {
+		prefixSearchAllUsers(email, 0, 10);
+	}, [email]);
 
 	useEffect(() => {
 		setOptions(

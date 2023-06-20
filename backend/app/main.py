@@ -1,20 +1,32 @@
 import logging
-import random
-import string
-import time
-from urllib.request import Request
 
 import uvicorn
-from pydantic import BaseConfig
+from beanie import init_beanie
 from fastapi import FastAPI, APIRouter, Depends
 from fastapi.middleware.cors import CORSMiddleware
+from motor.motor_asyncio import AsyncIOMotorClient
+from pydantic import BaseConfig
 
 from app.config import settings
-from app.search.connect import connect_elasticsearch, create_index
-from app.keycloak_auth import (
-    get_token,
-    get_current_username,
+from app.keycloak_auth import get_current_username
+from app.models.authorization import AuthorizationDB
+from app.models.config import ConfigEntryDB
+from app.models.datasets import DatasetDB, DatasetDBViewList
+from app.models.errors import ErrorDB
+from app.models.feeds import FeedDB
+from app.models.files import FileDB, FileVersionDB, FileDBViewList
+from app.models.folders import FolderDB, FolderDBViewList
+from app.models.groups import GroupDB
+from app.models.listeners import (
+    EventListenerDB,
+    EventListenerJobDB,
+    EventListenerJobUpdateDB,
+    EventListenerJobViewList,
+    EventListenerJobUpdateViewList,
 )
+from app.models.metadata import MetadataDB, MetadataDefinitionDB
+from app.models.tokens import TokenDB
+from app.models.users import UserDB, UserAPIKeyDB, ListenerAPIKeyDB
 from app.routers import (
     folders,
     groups,
@@ -38,6 +50,7 @@ from app.routers import (
 # setup loggers
 # logging.config.fileConfig('logging.conf', disable_existing_loggers=False)
 from app.search.config import indexSettings
+from app.search.connect import connect_elasticsearch, create_index
 
 logger = logging.getLogger(__name__)
 
@@ -45,7 +58,6 @@ app = FastAPI(
     title=settings.APP_NAME, openapi_url=f"{settings.API_V2_STR}/openapi.json"
 )
 BaseConfig.arbitrary_types_allowed = True
-
 
 # @app.middleware("http")
 # async def log_requests(request: Request, call_next):
@@ -154,6 +166,46 @@ api_router.include_router(
 )
 api_router.include_router(keycloak.router, prefix="/auth", tags=["auth"])
 app.include_router(api_router, prefix=settings.API_V2_STR)
+
+
+def gather_documents():
+    pass
+
+
+@app.on_event("startup")
+async def startup_beanie():
+    """Setup Beanie Object Document Mapper (ODM) to interact with MongoDB."""
+    client = AsyncIOMotorClient(str(settings.MONGODB_URL))
+    await init_beanie(
+        database=getattr(client, settings.MONGO_DATABASE),
+        # Make sure to include all models. If one depends on another that is not in the list it is not clear which one is missing.
+        document_models=[
+            ConfigEntryDB,
+            DatasetDB,
+            DatasetDBViewList,
+            AuthorizationDB,
+            MetadataDB,
+            MetadataDefinitionDB,
+            FolderDB,
+            FolderDBViewList,
+            FileDB,
+            FileVersionDB,
+            FileDBViewList,
+            FeedDB,
+            EventListenerDB,
+            EventListenerJobDB,
+            EventListenerJobUpdateDB,
+            EventListenerJobViewList,
+            EventListenerJobUpdateViewList,
+            UserDB,
+            UserAPIKeyDB,
+            ListenerAPIKeyDB,
+            GroupDB,
+            TokenDB,
+            ErrorDB,
+        ],
+        recreate_views=True,
+    )
 
 
 @app.on_event("startup")

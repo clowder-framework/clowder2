@@ -5,12 +5,10 @@ import { downloadResource, parseDate } from "../../utils/common";
 import { PreviewConfiguration, RootState } from "../../types/data";
 import { useParams, useSearchParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { resetFailedReason } from "../../actions/common";
 
 import { a11yProps, TabPanel } from "../tabs/TabComponent";
 import { fetchFileSummary, fetchFileVersions } from "../../actions/file";
 import { MainBreadcrumbs } from "../navigation/BreadCrumb";
-import { ActionModal } from "../dialog/ActionModal";
 import { FileVersionHistory } from "../versions/FileVersionHistory";
 import { DisplayMetadata } from "../metadata/DisplayMetadata";
 import { DisplayListenerMetadata } from "../metadata/DisplayListenerMetadata";
@@ -36,6 +34,7 @@ import AssessmentIcon from "@mui/icons-material/Assessment";
 import HistoryIcon from "@mui/icons-material/History";
 import { Forbidden } from "../errors/Forbidden";
 import { PageNotFound } from "../errors/PageNotFound";
+import { ErrorModal } from "../errors/ErrorModal";
 
 export const File = (): JSX.Element => {
 	// path parameter
@@ -57,7 +56,6 @@ export const File = (): JSX.Element => {
 		dispatch(fetchFileVersions(fileId));
 	const listFileMetadata = (fileId: string | undefined) =>
 		dispatch(fetchFileMetadata(fileId));
-	const dismissError = () => dispatch(resetFailedReason());
 	const createFileMetadata = (fileId: string | undefined, metadata: object) =>
 		dispatch(createFileMetadataAction(fileId, metadata));
 	const updateFileMetadata = (fileId: string | undefined, metadata: object) =>
@@ -72,8 +70,6 @@ export const File = (): JSX.Element => {
 	const fileVersions = useSelector(
 		(state: RootState) => state.file.fileVersions
 	);
-	const reason = useSelector((state: RootState) => state.error.reason);
-	const stack = useSelector((state: RootState) => state.error.stack);
 	const fileRole = useSelector((state: RootState) => state.file.fileRole);
 
 	const [selectedTabIndex, setSelectedTabIndex] = useState(0);
@@ -101,28 +97,6 @@ export const File = (): JSX.Element => {
 	const [errorOpen, setErrorOpen] = useState(false);
 	const [showForbiddenPage, setShowForbiddenPage] = useState(false);
 	const [showNotFoundPage, setShowNotFoundPage] = useState(false);
-
-	useEffect(() => {
-		if (reason == "Forbidden") {
-			setShowForbiddenPage(true);
-        
-		} else if (reason == "Not Found") {
-			setShowNotFoundPage(true);
-        
-		} else if (reason !== "" && reason !== null && reason !== undefined) {
-			setErrorOpen(true);
-		}
-	}, [reason]);
-	const handleErrorCancel = () => {
-		// reset error message and close the error window
-		dismissError();
-		setErrorOpen(false);
-	};
-	const handleErrorReport = () => {
-		window.open(
-			`${config.GHIssueBaseURL}+${encodeURIComponent(reason)}&body=${encodeURIComponent(stack)}`
-		);
-	};
 
 	useEffect(() => {
 		(async () => {
@@ -171,8 +145,6 @@ export const File = (): JSX.Element => {
 
 	const setMetadata = (metadata: any) => {
 		// TODO wrap this in to a function
-		console.log("metadata in file component");
-		console.log(metadata);
 		setMetadataRequestForms((prevState) => {
 			// merge the content field; e.g. lat lon
 			if (metadata.definition in prevState) {
@@ -211,9 +183,6 @@ export const File = (): JSX.Element => {
 
 	// const submitToListener = ()=> {
 	// 	const filename = fileSummary['name']
-	// 	console.log('submit to listener');
-	// 	console.log("the file name is", filename);
-	// 	console.log('the file id is', fileId);
 	// 	history(`/listeners?fileId=${fileId}&fileName=${filename}`);
 	// }
 
@@ -240,7 +209,6 @@ export const File = (): JSX.Element => {
 
 	if (showForbiddenPage) {
 		return <Forbidden />;
-    
 	} else if (showNotFoundPage) {
 		return <PageNotFound />;
 	}
@@ -248,15 +216,7 @@ export const File = (): JSX.Element => {
 	return (
 		<Layout>
 			{/*Error Message dialogue*/}
-			<ActionModal
-				actionOpen={errorOpen}
-				actionTitle="Something went wrong..."
-				actionText={reason}
-				actionBtnName="Report"
-				handleActionBtnClick={handleErrorReport}
-				handleActionCancel={handleErrorCancel}
-			/>
-
+			<ErrorModal errorOpen={errorOpen} setErrorOpen={setErrorOpen} />
 			<Grid container>
 				<Grid item xs={8} sx={{ display: "flex", alignItems: "center" }}>
 					<MainBreadcrumbs paths={paths} />

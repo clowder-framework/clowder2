@@ -5,11 +5,11 @@ import {
 	RECEIVE_DATASET_ROLES,
 	RECEIVE_DATASETS,
 	RECEIVE_FILES_IN_DATASET,
+	REMOVE_DATASET_GROUP_ROLE,
+	REMOVE_DATASET_USER_ROLE,
 	RESET_CREATE_DATASET,
 	SET_DATASET_GROUP_ROLE,
 	SET_DATASET_USER_ROLE,
-	REMOVE_DATASET_GROUP_ROLE,
-	REMOVE_DATASET_USER_ROLE,
 	UPDATE_DATASET,
 } from "../actions/dataset";
 import {
@@ -20,16 +20,17 @@ import {
 } from "../actions/file";
 import { RECEIVE_DATASET_ROLE } from "../actions/authorization";
 import { DataAction } from "../types/action";
-import { Author, Dataset, DatasetState } from "../types/data";
+import { Dataset, DatasetState } from "../types/data";
 import {
 	AuthorizationBase,
 	DatasetRoles,
 	FileOut as File,
+	UserOut,
 } from "../openapi/v2";
 
 const defaultState: DatasetState = {
 	files: <File[]>[],
-	about: <Dataset>{ author: <Author>{} },
+	about: <Dataset>{ creator: <UserOut>{} },
 	datasetRole: <AuthorizationBase>{},
 	datasets: [],
 	newDataset: <Dataset>{},
@@ -60,10 +61,10 @@ const dataset = (state = defaultState, action: DataAction) => {
 			return Object.assign({}, state, {});
 		case SET_DATASET_USER_ROLE:
 			return Object.assign({}, state, {});
-        	case REMOVE_DATASET_GROUP_ROLE:
-            		return Object.assign({}, state, {});
-        	case REMOVE_DATASET_USER_ROLE:
-            		return Object.assign({}, state, {});
+		case REMOVE_DATASET_GROUP_ROLE:
+			return Object.assign({}, state, {});
+		case REMOVE_DATASET_USER_ROLE:
+			return Object.assign({}, state, {});
 		case UPDATE_FILE:
 			return Object.assign({}, state, {
 				files: state.files.map((file) =>

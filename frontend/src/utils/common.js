@@ -2,6 +2,7 @@ import Cookies from "universal-cookie";
 import { V2 } from "../openapi";
 import jwt_decode from "jwt-decode";
 import { formatInTimeZone } from "date-fns-tz";
+import config from "../app.config";
 
 const cookies = new Cookies();
 
@@ -101,6 +102,23 @@ export const getCurrEmail = () => {
 	}
 };
 
+export function renameId(obj) {
+
+	Object.defineProperty(
+		obj,
+		'id',
+		Object.getOwnPropertyDescriptor(obj, '_id')
+	);
+	delete obj['_id'];
+
+	return obj;
+}
+
+export function renameIdArray(arr) {
+	return arr.map(obj => renameId(obj));
+}
+
+
 // get current username
 // export function getCurrUsername(){
 // 	if (process.env.DEPLOY_ENV === "local"){
@@ -175,3 +193,11 @@ export const getCurrEmail = () => {
 // export function formatProbToPercent(val, n = 1){
 // 	return formatPercent(val*100, n);
 // }
+
+export const handleErrorReport = (reason, stack) => {
+	window.open(
+		`${config.GHIssueBaseURL}+${encodeURIComponent(
+			reason
+		)}&body=${encodeURIComponent(stack)}`
+	);
+};
