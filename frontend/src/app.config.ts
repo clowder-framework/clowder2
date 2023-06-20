@@ -58,4 +58,5 @@ config["eventListenerJobStatus"]["skipped"] = "SKIPPED";
 config["eventListenerJobStatus"]["resubmitted"] = "RESUBMITTED";
 
 config["streamingBytes"] = 1024 * 10; // 10 MB?
+
 export default config;

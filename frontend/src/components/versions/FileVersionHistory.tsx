@@ -11,6 +11,7 @@ import { VersionChip } from "./VersionChip";
 import { parseDate } from "../../utils/common";
 import { FileVersion } from "../../openapi/v2";
 import { fileDownloaded as fileDownloadedAction } from "../../actions/file";
+
 import { useDispatch } from "react-redux";
 
 type FileVersionHistoryProps = {
@@ -48,6 +49,7 @@ export function FileVersionHistory(props: FileVersionHistoryProps) {
 											: ""
 									}`}
 									secondary={`Uploaded on ${parseDate(created)}`}
+									sx={{ maxWidth: "38rem" }}
 								/>
 								<Button
 									onClick={() => {
@@ -58,6 +60,7 @@ export function FileVersionHistory(props: FileVersionHistoryProps) {
 											true
 										);
 									}}
+									variant="contained"
 								>
 									Download
 								</Button>

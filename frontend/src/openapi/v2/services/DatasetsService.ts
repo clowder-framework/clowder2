@@ -202,18 +202,24 @@ export class DatasetsService {
      * Get Dataset Folders
      * @param datasetId
      * @param parentFolder
-     * @returns any Successful Response
+     * @param skip
+     * @param limit
+     * @returns FolderOut Successful Response
      * @throws ApiError
      */
     public static getDatasetFoldersApiV2DatasetsDatasetIdFoldersGet(
         datasetId: string,
         parentFolder?: string,
-    ): CancelablePromise<any> {
+        skip?: number,
+        limit: number = 10,
+    ): CancelablePromise<Array<FolderOut>> {
         return __request({
             method: 'GET',
             path: `/api/v2/datasets/${datasetId}/folders`,
             query: {
                 'parent_folder': parentFolder,
+                'skip': skip,
+                'limit': limit,
             },
             errors: {
                 422: `Validation Error`,

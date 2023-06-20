@@ -125,6 +125,28 @@ export function fetchAllUsers(skip = 0, limit = 101) {
 	};
 }
 
+export const PREFIX_SEARCH_USERS = "PREFIX_SEARCH_USERS";
+
+export function prefixSearchAllUsers(text = "", skip = 0, limit = 101) {
+	return (dispatch) => {
+		return V2.UsersService.searchUsersApiV2UsersPrefixSearchGet(
+			text,
+			skip,
+			limit
+		)
+			.then((json) => {
+				dispatch({
+					type: PREFIX_SEARCH_USERS,
+					users: json,
+					receivedAt: Date.now(),
+				});
+			})
+			.catch((reason) => {
+				dispatch(prefixSearchAllUsers(text, skip, limit));
+			});
+	};
+}
+
 export const LIST_API_KEYS = "LIST_API_KEYS";
 
 export function listApiKeys(skip = 0, limit = 10) {

@@ -1,9 +1,10 @@
 from datetime import datetime
-from typing import Optional
+from typing import Optional, List
 
+from beanie import Document, View, PydanticObjectId
 from pydantic import Field, BaseModel
 
-from app.models.mongomodel import MongoModel
+from app.models.authorization import AuthorizationDB
 from app.models.pyobjectid import PyObjectId
 from app.models.users import UserOut
 
@@ -19,8 +20,8 @@ class FileContentType(BaseModel):
     main_type: str = "N/A"
 
 
-class FileVersion(MongoModel):
-    file_id: PyObjectId
+class FileVersion(BaseModel):
+    file_id: PydanticObjectId
     creator: UserOut
     created: datetime = Field(default_factory=datetime.utcnow)
     version_id: str
@@ -28,7 +29,12 @@ class FileVersion(MongoModel):
     bytes: int = 0
 
 
-class FileBase(MongoModel):
+class FileVersionDB(Document, FileVersion):
+    class Settings:
+        name = "file_versions"
+
+
+class FileBase(BaseModel):
     name: str = "N/A"
 
 
@@ -36,7 +42,7 @@ class FileIn(FileBase):
     pass
 
 
-class FileDB(FileBase):
+class FileDB(Document, FileBase):
     creator: UserOut
     created: datetime = Field(default_factory=datetime.utcnow)
     version_id: str = "N/A"
@@ -48,6 +54,42 @@ class FileDB(FileBase):
     bytes: int = 0
     content_type: FileContentType = FileContentType()
 
+    class Settings:
+        name = "files"
+
+
+class FileDBViewList(View, FileBase):
+    id: PydanticObjectId = Field(None, alias="_id")  # necessary for Views
+    version_id: str = "N/A"
+    version_num: int = 0
+    dataset_id: PyObjectId
+    folder_id: Optional[PyObjectId]
+    creator: UserOut
+    created: datetime = Field(default_factory=datetime.utcnow)
+    modified: datetime = Field(default_factory=datetime.utcnow)
+    auth: List[AuthorizationDB]
+    bytes: int = 0
+    content_type: FileContentType = FileContentType()
+
+    class Settings:
+        source = FileDB
+        name = "files_view"
+        pipeline = [
+            {
+                "$lookup": {
+                    "from": "authorization",
+                    "localField": "dataset_id",
+                    "foreignField": "dataset_id",
+                    "as": "auth",
+                }
+            },
+        ]
+        # Needs fix to work https://github.com/roman-right/beanie/pull/521
+        # use_cache = True
+        # cache_expiration_time = timedelta(seconds=10)
+        # cache_capacity = 5
+
 
 class FileOut(FileDB):
-    pass
+    class Config:
+        fields = {"id": "id"}

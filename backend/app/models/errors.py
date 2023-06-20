@@ -1,8 +1,10 @@
 from datetime import datetime
 from typing import Optional
-from pydantic import Field
 
-from app.models.mongomodel import MongoModel, MongoDBRef
+from beanie import Document
+from pydantic import Field, BaseModel
+
+from app.models.mongomodel import MongoDBRef
 
 
 class ServiceUnreachable(Exception):
@@ -16,9 +18,14 @@ class ServiceUnreachable(Exception):
         return f"{self.service} could not be reached."
 
 
-class Error(MongoModel):
+class Error(BaseModel):
     message: str  # Shorthand message of the error
     trace: str  # Full stack trace of the error
     resource: Optional[MongoDBRef] = None
     user_id: Optional[str] = None
     timestamp: datetime = Field(default_factory=datetime.utcnow)
+
+
+class ErrorDB(Document, Error):
+    class Settings:
+        name = "errors"

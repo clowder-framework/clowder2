@@ -1,10 +1,13 @@
+from typing import List, Optional
 from datetime import datetime
-from pydantic import Field, BaseModel
-from typing import Optional, List, Union
-from app.models.mongomodel import MongoModel
-from app.models.users import UserOut
+
+import pymongo
+from beanie import Document, PydanticObjectId
+from pydantic import BaseModel, Field, EmailStr
+
+from app.models.authorization import Provenance
+from app.models.listeners import FeedListener
 from app.models.search import SearchObject
-from app.models.listeners import EventListenerOut, FeedListener
 
 
 class JobFeed(BaseModel):
@@ -24,10 +27,21 @@ class FeedIn(JobFeed):
     pass
 
 
-class FeedDB(JobFeed, MongoModel):
-    author: Optional[UserOut] = None
-    updated: datetime = Field(default_factory=datetime.utcnow)
+class FeedDB(Document, JobFeed):
+    creator: Optional[EmailStr]
+    created: datetime = Field(default_factory=datetime.utcnow)
+    modified: datetime = Field(default_factory=datetime.utcnow)
+
+    class Settings:
+        name = "feeds"
+        indexes = [
+            [
+                ("name", pymongo.TEXT),
+                ("description", pymongo.TEXT),
+            ],
+        ]
 
 
 class FeedOut(FeedDB):
-    pass
+    class Config:
+        fields = {"id": "id"}

@@ -31,6 +31,7 @@ import Layout from "../Layout";
 import { MainBreadcrumbs } from "../navigation/BreadCrumb";
 import GroupAddIcon from "@mui/icons-material/GroupAdd";
 import { CreateGroup } from "./CreateGroup";
+import { ErrorModal } from "../errors/ErrorModal";
 
 export function Groups() {
 	// Redux connect equivalent
@@ -91,6 +92,9 @@ export function Groups() {
 		}
 	}, [skip]);
 
+	// Error msg dialog
+	const [errorOpen, setErrorOpen] = useState(false);
+
 	const previous = () => {
 		if (currPageNum - 1 >= 0) {
 			setSkip((currPageNum - 1) * limit);
@@ -106,6 +110,9 @@ export function Groups() {
 
 	return (
 		<Layout>
+			{/*Error Message dialogue*/}
+			<ErrorModal errorOpen={errorOpen} setErrorOpen={setErrorOpen} />
+
 			{/*create new group*/}
 			<Dialog
 				open={createGroupOpen}

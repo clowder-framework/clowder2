@@ -3,7 +3,6 @@ import json
 import logging
 from datetime import datetime
 
-from bson import ObjectId
 from fastapi import Security, HTTPException, Depends
 from fastapi.security import OAuth2AuthorizationCodeBearer, APIKeyHeader
 from itsdangerous.exc import BadSignature
@@ -13,11 +12,10 @@ from keycloak.exceptions import KeycloakAuthenticationError, KeycloakGetError
 from keycloak.keycloak_admin import KeycloakAdmin
 from keycloak.keycloak_openid import KeycloakOpenID
 from pydantic import Json
-from pymongo import MongoClient
 
-from . import dependencies
 from .config import settings
-from .models.users import UserOut, UserAPIKey, ListenerAPIKey
+from .models.tokens import TokenDB
+from .models.users import UserOut, UserAPIKeyDB, UserDB, ListenerAPIKeyDB
 
 logger = logging.getLogger(__name__)
 
@@ -53,9 +51,8 @@ api_key_header = APIKeyHeader(name="X-API-KEY", auto_error=False)
 
 
 async def get_token(
-    token: str = Security(oauth2_scheme),
-    api_key: str = Security(api_key_header),
-    db: MongoClient = Depends(dependencies.get_db),
+        token: str = Security(oauth2_scheme),
+        api_key: str = Security(api_key_header),
 ) -> Json:
     """Decode token. Use to secure endpoints."""
     if token:
@@ -91,22 +88,23 @@ async def get_token(
             payload = serializer.loads(api_key)
             # Key is valid, check expiration date in database
             if (
-                await db["listener_keys"].find_one(
-                    {"user": payload["user"], "key": payload["key"]}
-                )
+
+                    await ListenerAPIKeyDB.find_one(
+                        ListenerAPIKeyDB.user == payload["user"],
+                        ListenerAPIKeyDB.key == payload["key"],
+                    )
             ) is not None:
                 return {"preferred_username": payload["user"]}
             elif (
-                key_entry := await db["user_keys"].find_one(
-                    {"user": payload["user"], "key": payload["key"]}
-                )
+                    key := await UserAPIKeyDB.find_one(
+                        UserAPIKeyDB.user == payload["user"],
+                        UserAPIKeyDB.key == payload["key"],
+                    )
             ) is not None:
-                key = UserAPIKey.from_mongo(key_entry)
                 current_time = datetime.utcnow()
-
                 if key.expires is not None and current_time >= key.expires:
                     # Expired key, delete it first
-                    db["user_keys"].delete_one({"_id": ObjectId(key.id)})
+                    await key.delete()
                     raise HTTPException(
                         status_code=401,
                         detail={"error": "Key is expired."},
@@ -140,9 +138,8 @@ async def get_user(identity: Json = Depends(get_token)):
 
 
 async def get_current_user(
-    token: str = Security(oauth2_scheme),
-    api_key: str = Security(api_key_header),
-    db: MongoClient = Depends(dependencies.get_db),
+        token: str = Security(oauth2_scheme),
+        api_key: str = Security(api_key_header),
 ) -> UserOut:
     """Retrieve the user object from Mongo by first getting user id from JWT and then querying Mongo.
     Potentially expensive. Use `get_current_username` if all you need is user name.
@@ -151,8 +148,8 @@ async def get_current_user(
     if token:
         try:
             userinfo = keycloak_openid.userinfo(token)
-            user_out = await db["users"].find_one({"email": userinfo["email"]})
-            return UserOut.from_mongo(user_out)
+            user = await UserDB.find_one(UserDB.email == userinfo["email"])
+            return UserOut(**user.dict())
         except KeycloakAuthenticationError as e:
             raise HTTPException(
                 status_code=e.response_code,
@@ -166,32 +163,32 @@ async def get_current_user(
             payload = serializer.loads(api_key)
             # Key is valid, check expiration date in database
             if (
-                key_entry := await db["listener_keys"].find_one(
-                    {"user": payload["user"], "key": payload["key"]}
-                )
+                    key := await ListenerAPIKeyDB.find_one(
+                        ListenerAPIKeyDB.user == payload["user"],
+                        ListenerAPIKeyDB.key == payload["key"],
+                    )
             ) is not None:
-                key = ListenerAPIKey.from_mongo(key_entry)
-                user_out = await db["users"].find_one({"email": key.user})
-                return UserOut.from_mongo(user_out)
-            if (
-                key_entry := await db["user_keys"].find_one(
-                    {"user": payload["user"], "key": payload["key"]}
-                )
+                user_out = await UserDB.find_one(UserDB.email == key.user)
+                return user_out.dict()
+            elif (
+                    key := await UserAPIKeyDB.find_one(
+                        UserAPIKeyDB.user == payload["user"],
+                        UserAPIKeyDB.key == payload["key"],
+                    )
             ) is not None:
-                key = UserAPIKey.from_mongo(key_entry)
                 current_time = datetime.utcnow()
 
                 if key.expires is not None and current_time >= key.expires:
                     # Expired key, delete it first
-                    db["user_keys"].delete_one({"_id": ObjectId(key.id)})
+                    await key.delete()
                     raise HTTPException(
                         status_code=401,
                         detail={"error": "Key is expired."},
                         headers={"WWW-Authenticate": "Bearer"},
                     )
                 else:
-                    user_out = await db["users"].find_one({"email": key.user})
-                    return UserOut.from_mongo(user_out)
+                    user = await UserDB.find_one(UserDB.email == key.user)
+                    return user.dict()
             else:
                 raise HTTPException(
                     status_code=401,
@@ -213,9 +210,8 @@ async def get_current_user(
 
 
 async def get_current_username(
-    token: str = Security(oauth2_scheme),
-    api_key: str = Security(api_key_header),
-    db: MongoClient = Depends(dependencies.get_db),
+        token: str = Security(oauth2_scheme),
+        api_key: str = Security(api_key_header),
 ) -> str:
     """Retrieve the user id from the JWT token. Does not query MongoDB."""
     if token:
@@ -236,25 +232,25 @@ async def get_current_username(
             payload = serializer.loads(api_key)
             # Key is valid, check expiration date in database
             if (
-                key_entry := await db["listener_keys"].find_one(
-                    {"user": payload["user"], "key": payload["key"]}
-                )
+                    key := await ListenerAPIKeyDB.find_one(
+                        ListenerAPIKeyDB.user == payload["user"],
+                        ListenerAPIKeyDB.key == payload["key"],
+                    )
             ) is not None:
                 # Key is coming from a listener job
-                key = ListenerAPIKey.from_mongo(key_entry)
                 return key.user
             elif (
-                key_entry := await db["user_keys"].find_one(
-                    {"user": payload["user"], "key": payload["key"]}
-                )
+                    key := await UserAPIKeyDB.find_one(
+                        UserAPIKeyDB.user == payload["user"],
+                        UserAPIKeyDB.key == payload["key"],
+                    )
             ) is not None:
                 # Key is coming from a user request
-                key = UserAPIKey.from_mongo(key_entry)
                 current_time = datetime.utcnow()
 
                 if key.expires is not None and current_time >= key.expires:
                     # Expired key, delete it first
-                    db["user_keys"].delete_one({"_id": ObjectId(key.id)})
+                    await key.delete()
                     raise HTTPException(
                         status_code=401,
                         detail={"error": "Key is expired."},
@@ -320,21 +316,18 @@ async def create_user(email: str, password: str, firstName: str, lastName: str):
     return user
 
 
-async def retreive_refresh_token(
-    email: str, db: MongoClient = Depends(dependencies.get_db)
-):
-    if (token_exist := await db["tokens"].find_one({"email": email})) is not None:
+async def retreive_refresh_token(email: str):
+    token_exist = await TokenDB.find_one(TokenDB.email == email)
+    if token_exist is not None:
         try:
-            new_tokens = keycloak_openid.refresh_token(token_exist["refresh_token"])
+            new_tokens = keycloak_openid.refresh_token(token_exist.refresh_token)
             # update the refresh token in the database
-            token_exist.update({"refresh_token": new_tokens["refresh_token"]})
-            await db["tokens"].replace_one(
-                {"_id": ObjectId(token_exist["_id"])}, token_exist
-            )
+            token_exist.refresh_token = new_tokens["refresh_token"]
+            await token_exist.save()
             return {"access_token": new_tokens["access_token"]}
         except KeycloakGetError as e:
             # refresh token invalid; remove from database
-            await db["tokens"].delete_one({"_id": ObjectId(token_exist["_id"])})
+            await token_exist.delete()
             raise HTTPException(
                 status_code=401,
                 detail=str(e),  # "Invalid authentication credentials",

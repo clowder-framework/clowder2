@@ -179,13 +179,13 @@ export class GroupsService {
      * Remove a user from a group.
      * @param groupId
      * @param username
-     * @returns any Successful Response
+     * @returns GroupOut Successful Response
      * @throws ApiError
      */
     public static removeMemberApiV2GroupsGroupIdRemoveUsernamePost(
         groupId: string,
         username: string,
-    ): CancelablePromise<any> {
+    ): CancelablePromise<GroupOut> {
         return __request({
             method: 'POST',
             path: `/api/v2/groups/${groupId}/remove/${username}`,

@@ -32,6 +32,7 @@ import { Forbidden } from "./components/errors/Forbidden";
 import { ApiKeys } from "./components/ApiKeys/ApiKey";
 import { Profile } from "./components/users/Profile";
 import config from "./app.config";
+
 // https://dev.to/iamandrewluca/private-route-in-react-router-v6-lg5
 const PrivateRoute = (props): JSX.Element => {
 	const { children } = props;
@@ -71,6 +72,15 @@ const PrivateRoute = (props): JSX.Element => {
 			history("/auth/login");
 		}
 	}, [loggedOut]);
+
+	// not found or unauthorized
+	useEffect(() => {
+		if (reason == "Forbidden") {
+			history("/forbidden");
+		} else if (reason == "Not Found") {
+			history("/not-found");
+		}
+	}, [reason]);
 
 	// get roles if authorized
 	useEffect(() => {

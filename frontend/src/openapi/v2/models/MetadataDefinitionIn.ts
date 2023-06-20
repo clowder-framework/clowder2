@@ -40,7 +40,6 @@ import type { MetadataField } from './MetadataField';
                                  * }
                                  */
                                 export type MetadataDefinitionIn = {
-                                    id?: string;
                                     name: string;
                                     description?: string;
                                     context?: Array<string>;

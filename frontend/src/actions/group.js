@@ -1,5 +1,5 @@
 import { V2 } from "../openapi";
-import { handleErrors } from "./common";
+import { handleErrors, handleErrorsInline } from "./common";
 
 export const CREATE_GROUP = "CREATE_GROUP";
 
@@ -133,7 +133,9 @@ export function addGroupMember(groupId, username, role = "viewer") {
 				});
 			})
 			.catch((reason) => {
-				dispatch(handleErrors(reason, addGroupMember(groupId, username, role)));
+				dispatch(
+					handleErrorsInline(reason, addGroupMember(groupId, username, role))
+				);
 			});
 	};
 }
