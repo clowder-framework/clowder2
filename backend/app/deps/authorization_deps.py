@@ -41,10 +41,16 @@ async def get_role_by_file(
             ),
         )
         if authorization is None:
-            if (dataset := await DatasetDB.get(PydanticObjectId(file.dataset_id))) is not None:
+            if (
+                dataset := await DatasetDB.get(PydanticObjectId(file.dataset_id))
+            ) is not None:
                 if dataset.status == DatasetStatus.PUBLIC.name:
-                    public_auth_dict = {'creator': dataset.author.email, 'dataset_id': file.dataset_id,
-                                        'user_ids': [current_user], 'role': RoleType.VIEWER}
+                    public_auth_dict = {
+                        "creator": dataset.author.email,
+                        "dataset_id": file.dataset_id,
+                        "user_ids": [current_user],
+                        "role": RoleType.VIEWER,
+                    }
                     public_auth = AuthorizationDB(**public_auth_dict)
                     return public_auth
                 else:
@@ -148,7 +154,9 @@ class Authorization:
                     detail=f"User `{current_user} does not have `{self.role}` permission on dataset {dataset_id}",
                 )
         else:
-            if (current_dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
+            if (
+                current_dataset := await DatasetDB.get(PydanticObjectId(dataset_id))
+            ) is not None:
                 if (
                     current_dataset.status == DatasetStatus.PUBLIC.name
                     and self.role == "viewer"
@@ -297,9 +305,7 @@ class CheckStatus:
         self,
         dataset_id: str,
     ):
-        if (
-            dataset := await DatasetDB.get(PydanticObjectId(dataset_id))
-        ) is not None:
+        if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
             if dataset.status == self.status:
                 return True
             else:
@@ -319,9 +325,7 @@ class CheckFileStatus:
         self,
         file_id: str,
     ):
-        if (
-            file_out := await FileDB.get(PydanticObjectId(file_id))
-        ) is not None:
+        if (file_out := await FileDB.get(PydanticObjectId(file_id))) is not None:
             dataset_id = file_out.dataset_id
             if (
                 dataset := await DatasetDB.get(PydanticObjectId(dataset_id))
