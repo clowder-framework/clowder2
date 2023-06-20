@@ -5,13 +5,12 @@ import {
 	GENERATE_FILE_URL,
 	generateFileDownloadUrl as generateFileDownloadUrlAction,
 } from "../../../actions/file";
-import { registerDecorator } from "../VizDecorator";
 
 type AudioProps = {
 	fileId?: string;
 };
 
-const Audio = (props: AudioProps) => {
+export const Audio = (props: AudioProps) => {
 	const { fileId } = props;
 
 	const dispatch = useDispatch();
@@ -50,4 +49,4 @@ const Audio = (props: AudioProps) => {
 	})();
 };
 
-export default registerDecorator.register(Audio);
+// export default registerDecorator.register(Audio);

@@ -1,8 +1,7 @@
 import * as React from "react";
 import { VegaLite } from "react-vega";
-import { registerDecorator } from "../VizDecorator";
 
-const Demo = () => {
+export const Demo = () => {
 	const spec = {
 		width: 400,
 		height: 200,
@@ -30,4 +29,4 @@ const Demo = () => {
 	return <VegaLite spec={spec} data={barData} />;
 };
 
-export default registerDecorator.register(Demo);
+// export default registerDecorator.register(Demo);
