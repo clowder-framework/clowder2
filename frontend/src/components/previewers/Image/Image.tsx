@@ -10,7 +10,7 @@ type ImageProps = {
 	fileId?: string;
 };
 
-export const Image = (props: ImageProps) => {
+export default function Image(props: ImageProps) {
 	const { fileId } = props;
 
 	const dispatch = useDispatch();
@@ -51,6 +51,4 @@ export const Image = (props: ImageProps) => {
 			return <></>;
 		}
 	})();
-};
-
-// export default registerDecorator.register(Image);
+}

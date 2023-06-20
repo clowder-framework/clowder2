@@ -13,7 +13,7 @@ type TextProps = {
 	fileId?: string;
 };
 
-export const Text = (props: TextProps) => {
+export default function Text(props: TextProps) {
 	const { fileId } = props;
 
 	const dispatch = useDispatch();
@@ -67,6 +67,4 @@ export const Text = (props: TextProps) => {
 			{text}
 		</ShowMoreText>
 	);
-};
-
-// export default registerDecorator.register(Text);
+}

@@ -11,7 +11,7 @@ type VideoProps = {
 	fileId?: string;
 };
 
-export const Video = (props: VideoProps) => {
+export default function Video(props: VideoProps) {
 	const { fileId } = props;
 
 	const dispatch = useDispatch();
@@ -53,6 +53,4 @@ export const Video = (props: VideoProps) => {
 			return <></>;
 		}
 	})();
-};
-
-// export default registerDecorator.register(Video);
+}

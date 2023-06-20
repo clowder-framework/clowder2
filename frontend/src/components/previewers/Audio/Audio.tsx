@@ -10,7 +10,7 @@ type AudioProps = {
 	fileId?: string;
 };
 
-export const Audio = (props: AudioProps) => {
+export default function Audio(props: AudioProps) {
 	const { fileId } = props;
 
 	const dispatch = useDispatch();
@@ -47,6 +47,4 @@ export const Audio = (props: AudioProps) => {
 			return <></>;
 		}
 	})();
-};
-
-// export default registerDecorator.register(Audio);
+}
