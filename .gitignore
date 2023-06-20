@@ -59,3 +59,6 @@ scripts/keycloak/data/*
 # ignore clowder chart deps
 charts/clowder2/charts
 charts/clowder2/*clowder2-software-dev.yaml
+
+# ignore changes in vis config
+frontend/src/visualization.config.tsx
