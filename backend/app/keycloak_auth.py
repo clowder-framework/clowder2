@@ -51,8 +51,8 @@ api_key_header = APIKeyHeader(name="X-API-KEY", auto_error=False)
 
 
 async def get_token(
-        token: str = Security(oauth2_scheme),
-        api_key: str = Security(api_key_header),
+    token: str = Security(oauth2_scheme),
+    api_key: str = Security(api_key_header),
 ) -> Json:
     """Decode token. Use to secure endpoints."""
     if token:
@@ -88,18 +88,17 @@ async def get_token(
             payload = serializer.loads(api_key)
             # Key is valid, check expiration date in database
             if (
-
-                    await ListenerAPIKeyDB.find_one(
-                        ListenerAPIKeyDB.user == payload["user"],
-                        ListenerAPIKeyDB.key == payload["key"],
-                    )
+                await ListenerAPIKeyDB.find_one(
+                    ListenerAPIKeyDB.user == payload["user"],
+                    ListenerAPIKeyDB.key == payload["key"],
+                )
             ) is not None:
                 return {"preferred_username": payload["user"]}
             elif (
-                    key := await UserAPIKeyDB.find_one(
-                        UserAPIKeyDB.user == payload["user"],
-                        UserAPIKeyDB.key == payload["key"],
-                    )
+                key := await UserAPIKeyDB.find_one(
+                    UserAPIKeyDB.user == payload["user"],
+                    UserAPIKeyDB.key == payload["key"],
+                )
             ) is not None:
                 current_time = datetime.utcnow()
                 if key.expires is not None and current_time >= key.expires:
@@ -138,8 +137,8 @@ async def get_user(identity: Json = Depends(get_token)):
 
 
 async def get_current_user(
-        token: str = Security(oauth2_scheme),
-        api_key: str = Security(api_key_header),
+    token: str = Security(oauth2_scheme),
+    api_key: str = Security(api_key_header),
 ) -> UserOut:
     """Retrieve the user object from Mongo by first getting user id from JWT and then querying Mongo.
     Potentially expensive. Use `get_current_username` if all you need is user name.
@@ -163,18 +162,18 @@ async def get_current_user(
             payload = serializer.loads(api_key)
             # Key is valid, check expiration date in database
             if (
-                    key := await ListenerAPIKeyDB.find_one(
-                        ListenerAPIKeyDB.user == payload["user"],
-                        ListenerAPIKeyDB.key == payload["key"],
-                    )
+                key := await ListenerAPIKeyDB.find_one(
+                    ListenerAPIKeyDB.user == payload["user"],
+                    ListenerAPIKeyDB.key == payload["key"],
+                )
             ) is not None:
                 user_out = await UserDB.find_one(UserDB.email == key.user)
                 return user_out.dict()
             elif (
-                    key := await UserAPIKeyDB.find_one(
-                        UserAPIKeyDB.user == payload["user"],
-                        UserAPIKeyDB.key == payload["key"],
-                    )
+                key := await UserAPIKeyDB.find_one(
+                    UserAPIKeyDB.user == payload["user"],
+                    UserAPIKeyDB.key == payload["key"],
+                )
             ) is not None:
                 current_time = datetime.utcnow()
 
@@ -210,8 +209,8 @@ async def get_current_user(
 
 
 async def get_current_username(
-        token: str = Security(oauth2_scheme),
-        api_key: str = Security(api_key_header),
+    token: str = Security(oauth2_scheme),
+    api_key: str = Security(api_key_header),
 ) -> str:
     """Retrieve the user id from the JWT token. Does not query MongoDB."""
     if token:
@@ -232,18 +231,18 @@ async def get_current_username(
             payload = serializer.loads(api_key)
             # Key is valid, check expiration date in database
             if (
-                    key := await ListenerAPIKeyDB.find_one(
-                        ListenerAPIKeyDB.user == payload["user"],
-                        ListenerAPIKeyDB.key == payload["key"],
-                    )
+                key := await ListenerAPIKeyDB.find_one(
+                    ListenerAPIKeyDB.user == payload["user"],
+                    ListenerAPIKeyDB.key == payload["key"],
+                )
             ) is not None:
                 # Key is coming from a listener job
                 return key.user
             elif (
-                    key := await UserAPIKeyDB.find_one(
-                        UserAPIKeyDB.user == payload["user"],
-                        UserAPIKeyDB.key == payload["key"],
-                    )
+                key := await UserAPIKeyDB.find_one(
+                    UserAPIKeyDB.user == payload["user"],
+                    UserAPIKeyDB.key == payload["key"],
+                )
             ) is not None:
                 # Key is coming from a user request
                 current_time = datetime.utcnow()
