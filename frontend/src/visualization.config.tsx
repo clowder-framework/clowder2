@@ -11,9 +11,3 @@ function registerComponent(config) {
 			)
 	);
 }
-
-let config;
-config = require("./components/previewers/Audio/manifest.json");
-vizConfig[config.vizConfig.mainType] = React.createElement(
-	registerComponent(config)
-);

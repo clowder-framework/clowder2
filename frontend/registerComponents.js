@@ -10,7 +10,7 @@ function registerComponents() {
 
 	files.forEach((file) => {
 		const relativePath = file.replace("src/", "./");
-		const match = fullPath.match(/\/(\w+)\//);
+		const match = file.match(/\/(\w+)\/manifest\.json$/);
 		const componentName = match ? match[1] : "";
 
 		fs.appendFileSync(
