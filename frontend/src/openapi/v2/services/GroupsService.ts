@@ -4,6 +4,7 @@
 import type { GroupBase } from '../models/GroupBase';
 import type { GroupIn } from '../models/GroupIn';
 import type { GroupOut } from '../models/GroupOut';
+import type { UserOut } from '../models/UserOut';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { request as __request } from '../core/request';
 
@@ -81,6 +82,33 @@ export class GroupsService {
             method: 'GET',
             path: `/api/v2/groups/search/${searchTerm}`,
             query: {
+                'skip': skip,
+                'limit': limit,
+            },
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+
+    /**
+     * Search Users
+     * @param prefix
+     * @param skip
+     * @param limit
+     * @returns UserOut Successful Response
+     * @throws ApiError
+     */
+    public static searchUsersApiV2GroupsPrefixSearchGet(
+        prefix: string,
+        skip?: number,
+        limit: number = 2,
+    ): CancelablePromise<Array<UserOut>> {
+        return __request({
+            method: 'GET',
+            path: `/api/v2/groups/prefixSearch`,
+            query: {
+                'prefix': prefix,
                 'skip': skip,
                 'limit': limit,
             },
