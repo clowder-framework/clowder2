@@ -5,14 +5,16 @@ from beanie import Document, View, PydanticObjectId
 from pydantic import Field, BaseModel
 
 from app.models.authorization import AuthorizationDB
-from app.models.listeners import ExtractorInfo
+from app.models.listeners import ExtractorInfo, EventListenerJobDB
 from app.models.pyobjectid import PyObjectId
 from app.models.users import UserOut
 
 
 class VizConfigBase(BaseModel):
     file_id: PydanticObjectId
-    extractor_info: ExtractorInfo
+    extractor_info: Optional[ExtractorInfo]
+    job: Optional[EventListenerJobDB]
+    client: Optional[str]
     visualization: PydanticObjectId
     vizualization_mimetype: str
 
