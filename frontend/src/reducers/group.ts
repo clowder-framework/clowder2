@@ -4,6 +4,7 @@ import {
 	CREATE_GROUP,
 	DELETE_GROUP,
 	DELETE_GROUP_MEMBER,
+	PREFIX_SEARCH_GROUPS,
 	RECEIVE_GROUP_ABOUT,
 	RECEIVE_GROUPS,
 	SEARCH_GROUPS,
@@ -30,6 +31,8 @@ const group = (state = defaultState, action: DataAction) => {
 		case RECEIVE_GROUPS:
 			return Object.assign({}, state, { groups: action.groups });
 		case SEARCH_GROUPS:
+			return Object.assign({}, state, { groups: action.groups });
+		case PREFIX_SEARCH_GROUPS:
 			return Object.assign({}, state, { groups: action.groups });
 		case RECEIVE_GROUP_ABOUT:
 			return Object.assign({}, state, { about: action.about });
