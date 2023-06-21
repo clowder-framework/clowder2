@@ -69,5 +69,7 @@ ENV/
 env.bak/
 venv.bak/
 
-# Tests
-backend/app/tests/
+# Test folder contect except for test source code and metadata document.
+backend/app/tests/*
+!backend/app/tests/*.py
+!backend/app/tests/extractor_info.json
