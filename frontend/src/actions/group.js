@@ -77,6 +77,28 @@ export function searchGroups(searchTerm, skip = 0, limit = 21) {
 	};
 }
 
+export const PREFIX_SEARCH_GROUPS = "PREFIX_SEARCH_GROUPS";
+
+export function prefixSearchGroups(prefix, skip = 0, limit = 21) {
+	return (dispatch) => {
+		return V2.GroupsService.prefixSearchGroupApiV2GroupsPrefixSearchGet(
+			prefix,
+			skip,
+			limit
+		)
+			.then((json) => {
+				dispatch({
+					type: PREFIX_SEARCH_GROUPS,
+					groups: json,
+					receivedAt: Date.now(),
+				});
+			})
+			.catch((reason) => {
+				dispatch(handleErrors(reason, prefixSearchGroups(prefix, skip, limit)));
+			});
+	};
+}
+
 export const RECEIVE_GROUP_ABOUT = "RECEIVE_GROUP_ABOUT";
 
 export function fetchGroupAbout(id) {

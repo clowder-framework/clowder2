@@ -92,14 +92,14 @@ export class GroupsService {
     }
 
     /**
-     * Search Users
+     * Prefix Search Group
      * @param prefix
      * @param skip
      * @param limit
      * @returns UserOut Successful Response
      * @throws ApiError
      */
-    public static searchUsersApiV2GroupsPrefixSearchGet(
+    public static prefixSearchGroupApiV2GroupsPrefixSearchGet(
         prefix: string,
         skip?: number,
         limit: number = 2,

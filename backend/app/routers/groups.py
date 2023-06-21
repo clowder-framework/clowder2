@@ -84,7 +84,7 @@ async def search_group(
 
 
 @router.get("/prefixSearch", response_model=List[UserOut])
-async def search_users(
+async def prefix_search_group(
     prefix: str,
     skip: int = 0,
     limit: int = 2,
