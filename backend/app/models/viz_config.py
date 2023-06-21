@@ -14,6 +14,7 @@ class VizConfigBase(BaseModel):
     file_id: PydanticObjectId
     extractor_info: ExtractorInfo
     visualization: PydanticObjectId
+    vizualization_mimetype: str
 
 class VizConfigDB(Document, VizConfigBase):
     class Settings:
