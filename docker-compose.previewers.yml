@@ -1,0 +1,39 @@
+version: '3.7'
+
+# Settings and configurations that are common for all containers
+x-minio-common: &minio-common
+  image: quay.io/minio/minio:RELEASE.2022-01-25T19-56-04Z
+  command: server --console-address ":9001" http://minio{1...4}/data
+  expose:
+    - "9000"
+    - "9001"
+  environment:
+    MINIO_ROOT_USER: minioadmin
+    MINIO_ROOT_PASSWORD: minioadmin
+  healthcheck:
+    test: [ "CMD", "curl", "-f", "http://localhost:9000/minio/health/live" ]
+    interval: 30s
+    timeout: 20s
+    retries: 3
+
+services:
+
+  geoserver:
+    image: docker.osgeo.org/geoserver:2.23.0
+    environment:
+      JAVA_OPTS: -Xmx1536M -XX:MaxPermSize=756M
+    ports:
+      - "8085:8080"
+    networks:
+      - clowder2
+    volumes:
+      - geoserver_data:/opt/geoserver_data
+      - geoserver_exts:/opt/additional_libs
+networks:
+  clowder2:
+
+## By default this config uses default local driver,
+## For custom volumes replace with volume driver configuration.
+volumes:
+  geoserver_data:
+  geoserver_exts:

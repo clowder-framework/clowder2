@@ -1,0 +1,20 @@
+import React, { lazy } from "react";
+
+const vizConfig = {};
+
+function registerComponent(config) {
+	return lazy(
+		() =>
+			import(
+				/* webpackChunkName: `previewers-${config.name}` */
+				`./components/previewers/${config.vizConfig.name}/${config.main}`
+			)
+	);
+}
+
+const configGeospatial = require("./components/previewers/Geospatial/manifest.json");
+vizConfig[configGeospatial.vizConfig.mainType] = React.createElement(
+	registerComponent(configGeospatial)
+);
+
+export { vizConfig };

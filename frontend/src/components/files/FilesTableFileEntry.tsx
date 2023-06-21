@@ -19,9 +19,6 @@ type FilesTableFileEntryProps = {
 export function FilesTableFileEntry(props: FilesTableFileEntryProps) {
 	const { iconStyle, selectFile, file } = props;
 
-	console.log("FTFE");
-	console.log(file);
-
 	return (
 		<TableRow
 			key={file.id}
