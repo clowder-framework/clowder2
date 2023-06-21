@@ -31,6 +31,7 @@ from app.models.files import (
 )
 from app.models.metadata import MetadataDB
 from app.models.users import UserOut
+from app.models.viz_config import VizConfigIn, VizConfigDB
 from app.rabbitmq.listeners import submit_file_job, EventListenerJobDB
 from app.routers.feeds import check_feed_listeners
 from app.search.connect import (
@@ -409,3 +410,43 @@ async def resubmit_file_extractions(
             FileOut(**file.dict()), rabbitmq_client, user, credentials
         )
     return resubmit_success_fail
+
+@router.post("/{file_id}/visualization")
+async def save_visualization(
+    file_id: str,
+    vizconfig_in: VizConfigIn,
+    user=Depends(get_current_user),
+    credentials: HTTPAuthorizationCredentials = Security(security),
+    rabbitmq_client: BlockingChannel = Depends(dependencies.get_rabbitmq),
+    allow: bool = Depends(FileAuthorization("editor")),
+
+):
+    file = await FileDB.get(PydanticObjectId(file_id))
+    if file is not None:
+        # Apply any typecast fixes from definition validation
+        vizconfig_in = vizconfig_in.dict()
+        return VizConfigDB(
+            **vizconfig_in,
+        )
+    else:
+        raise HTTPException(status_code=404, detail=f"File {file_id} not found")
+
+
+@router.get("/{file_id}/visualizations")
+async def save_visualization(
+        file_id: str,
+        user=Depends(get_current_user),
+        credentials: HTTPAuthorizationCredentials = Security(security),
+        rabbitmq_client: BlockingChannel = Depends(dependencies.get_rabbitmq),
+        allow: bool = Depends(FileAuthorization("editor")),
+
+):
+    file = await FileDB.get(PydanticObjectId(file_id))
+    if file is not None:
+       query = [VizConfigDB.file_id == ObjectId(file_id)]
+       viz_configs = []
+       async for vizconfig in VizConfigDB.find(*query):
+           viz_configs.append(vizconfig)
+       return [vz.dict() for vz in viz_configs]
+    else:
+        raise HTTPException(status_code=404, detail=f"File {file_id} not found")

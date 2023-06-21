@@ -19,6 +19,10 @@ class VizConfigBase(BaseModel):
     visualization_mimetype: str
 
 
+class VizConfigIn(VizConfigBase):
+    pass
+
+
 class VizConfigDB(Document, VizConfigBase):
     class Settings:
         name = "vizconfig"
