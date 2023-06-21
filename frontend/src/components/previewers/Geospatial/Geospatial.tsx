@@ -55,5 +55,11 @@ export default function Geospatial(props: GeospatialProps) {
 		setSelectedCoord(transormedCoord);
 	};
 
-	return <div ref={mapElement} className="map-container" />;
+	return (
+		<div
+			ref={mapElement}
+			style="height:100px; width:100px;"
+			className="map-container"
+		/>
+	);
 }
