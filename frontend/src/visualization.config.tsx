@@ -11,10 +11,3 @@ function registerComponent(config) {
 			)
 	);
 }
-
-const configGeospatial = require("./components/previewers/Geospatial/manifest.json");
-vizConfig[configGeospatial.vizConfig.mainType] = React.createElement(
-	registerComponent(configGeospatial)
-);
-
-export { vizConfig };
