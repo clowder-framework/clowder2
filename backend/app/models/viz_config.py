@@ -16,12 +16,12 @@ class VizConfigBase(BaseModel):
     job: Optional[EventListenerJobDB]
     client: Optional[str]
     visualization: PydanticObjectId
-    vizualization_mimetype: str
+    visualization_mimetype: str
+
 
 class VizConfigDB(Document, VizConfigBase):
     class Settings:
         name = "vizconfig"
-
 
 
 class VizConfigOut(VizConfigDB):
