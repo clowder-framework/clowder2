@@ -17,7 +17,8 @@ class VizConfigBase(BaseModel):
     extractor_info: Optional[ExtractorInfo]
     job: Optional[EventListenerJobDB]
     client: Optional[str]
-    visualization: PydanticObjectId
+    viz_config_map : dict
+    # TODO add json document or key value pairs, config_variables
     visualization_mimetype: str
 
 
@@ -27,6 +28,7 @@ class VizConfigIn(VizConfigBase):
 
 class VizConfigDB(Document, VizConfigBase):
     resource: MongoDBRef
+
     class Settings:
         name = "vizconfig"
 
