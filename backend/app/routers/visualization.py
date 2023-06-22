@@ -23,15 +23,13 @@ router = APIRouter()
 security = HTTPBearer()
 
 
-@router.post("/{file_id}/visualization_config")
+@router.post("/config", response_model=VizConfigOut)
 async def save_visualization_config(
     resource_id: str,
     resource_type: str,
     vizconfig_in: VizConfigIn,
     user=Depends(get_current_user),
     credentials: HTTPAuthorizationCredentials = Security(security),
-    allow: bool = Depends(FileAuthorization("editor")),
-
 ):
     if resource_type == 'file':
         resource_ref = MongoDBRef(
