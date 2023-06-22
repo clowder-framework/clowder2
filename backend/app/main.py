@@ -45,6 +45,7 @@ from app.routers import (
     listeners,
     feeds,
     jobs,
+    visualization
 )
 
 # setup loggers
@@ -165,6 +166,12 @@ api_router.include_router(
     groups.router,
     prefix="/groups",
     tags=["groups"],
+    dependencies=[Depends(get_current_username)],
+)
+api_router.include_router(
+    visualization.router,
+    prefix="/visualization",
+    tags=["visualization"],
     dependencies=[Depends(get_current_username)],
 )
 api_router.include_router(keycloak.router, prefix="/auth", tags=["auth"])

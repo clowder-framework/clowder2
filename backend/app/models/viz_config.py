@@ -6,12 +6,14 @@ from pydantic import Field, BaseModel
 
 from app.models.authorization import AuthorizationDB
 from app.models.listeners import ExtractorInfo, EventListenerJobDB
+from app.models.metadata import MongoDBRef
 from app.models.pyobjectid import PyObjectId
 from app.models.users import UserOut
 
 
 class VizConfigBase(BaseModel):
-    file_id: PydanticObjectId
+    resource_id: PydanticObjectId
+    resource_type: str
     extractor_info: Optional[ExtractorInfo]
     job: Optional[EventListenerJobDB]
     client: Optional[str]
@@ -24,6 +26,7 @@ class VizConfigIn(VizConfigBase):
 
 
 class VizConfigDB(Document, VizConfigBase):
+    resource: MongoDBRef
     class Settings:
         name = "vizconfig"
 
