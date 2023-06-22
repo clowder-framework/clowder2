@@ -23,16 +23,6 @@ router = APIRouter()
 security = HTTPBearer()
 
 
-@router.post("/test")
-async def test_visualization_config(
-    request: Request,
-    user=Depends(get_current_user),
-    credentials: HTTPAuthorizationCredentials = Security(security),
-):
-    as_json = await request.json()
-    return {"status":"OK"}
-
-
 @router.post("/config", response_model=VizConfigOut)
 async def save_visualization_config(
     vizconfig_in: VizConfigIn,
@@ -68,7 +58,7 @@ async def save_visualization_config(
         else:
             raise HTTPException(status_code=404, detail=f"Dataset {resource_id} not found")
 
-@router.get("/{file_id}/file", response_model=List[VizConfigOut])
+@router.get("/{file_id}/config_file", response_model=List[VizConfigOut])
 async def get_resource_vizconfig(
         file_id: PydanticObjectId,
         user=Depends(get_current_user),
@@ -83,7 +73,7 @@ async def get_resource_vizconfig(
     else:
         raise HTTPException(status_code=404, detail=f"File {file_id} not found")
 
-@router.get("/{dataset_id}/dataset", response_model=List[VizConfigOut])
+@router.get("/{dataset_id}/config_dataset", response_model=List[VizConfigOut])
 async def get_resource_vizconfig(
         dataset_id: PydanticObjectId,
         user=Depends(get_current_user),
@@ -98,7 +88,7 @@ async def get_resource_vizconfig(
     else:
         raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
 
-@router.get("/{config_id}", response_model=VizConfigOut)
+@router.get("/config/{config_id}", response_model=VizConfigOut)
 async def get_vizconfig(
         config_id: PydanticObjectId,
         user=Depends(get_current_user),
@@ -110,7 +100,7 @@ async def get_vizconfig(
         raise HTTPException(status_code=404, detail=f"VizConfig {config_id} not found")
 
 
-@router.patch("/{config_id}/map", response_model=VizConfigOut)
+@router.patch("/config/{config_id}/map", response_model=VizConfigOut)
 async def update_vizconfig_map(
         config_id: PydanticObjectId,
         new_viz_config_map: dict,
@@ -125,7 +115,7 @@ async def update_vizconfig_map(
         raise HTTPException(status_code=404, detail=f"VizConfig {config_id} not found")
 
 
-@router.delete("/{config_id}", response_model=VizConfigOut)
+@router.delete("/cnfig/{config_id}", response_model=VizConfigOut)
 async def delete_vizconfig(
         config_id: PydanticObjectId,
         user=Depends(get_current_user),
