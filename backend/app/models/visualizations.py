@@ -8,21 +8,21 @@ from app.models.files import FileContentType
 from app.models.users import UserOut
 
 
-class VisualizationBase(BaseModel):
+class VisualizationsBase(BaseModel):
     name: str = "N/A"
     description: Optional[str] = None
 
 
-class VisualizationIn(VisualizationBase):
+class VisualizationsIn(VisualizationsBase):
     pass
 
 
-class VisualizationPatch(BaseModel):
+class VisualizationsPatch(BaseModel):
     name: Optional[str]
     description: Optional[str]
 
 
-class VisualizationDB(View, VisualizationBase):
+class VisualizationsDB(View, VisualizationsBase):
     creator: UserOut
     created: datetime = Field(default_factory=datetime.utcnow)
     modified: datetime = Field(default_factory=datetime.utcnow)
@@ -30,10 +30,10 @@ class VisualizationDB(View, VisualizationBase):
     content_type: FileContentType = FileContentType()
 
     class Settings:
-        name = "visualization"
+        name = "Visualizations"
 
 
-class VisualizationList(View, VisualizationBase):
+class VisualizationsList(View, VisualizationsBase):
     id: PydanticObjectId = Field(None, alias="_id")  # necessary for Views
     creator: UserOut
     created: datetime = Field(default_factory=datetime.utcnow)
@@ -41,6 +41,6 @@ class VisualizationList(View, VisualizationBase):
     bytes: int = 0
 
 
-class VisualizationOut(VisualizationDB):
+class VisualizationsOut(VisualizationsDB):
     class Config:
         fields = {"id": "id"}
