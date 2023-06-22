@@ -46,7 +46,7 @@ from app.routers import (
     listeners,
     feeds,
     jobs,
-    visualization
+    visualization,
 )
 
 # setup loggers

@@ -17,7 +17,7 @@ class VizConfigBase(BaseModel):
     extractor_info: Optional[ExtractorInfo]
     job: Optional[EventListenerJobDB]
     client: Optional[str]
-    viz_config_map : dict
+    viz_config_map: dict
     # TODO add json document or key value pairs, config_variables
     visualization_mimetype: str
 
