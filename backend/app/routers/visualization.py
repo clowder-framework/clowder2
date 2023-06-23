@@ -30,6 +30,7 @@ async def save_visualization_config(
     credentials: HTTPAuthorizationCredentials = Security(security),
 ):
     vizconfig_in = vizconfig_in.dict()
+    # TODO why does it not have right type in the db without the lines below?
     resource_id = vizconfig_in["resource"]["resource_id"]
     collection = vizconfig_in["resource"]["collection"]
     resource_ref = MongoDBRef(collection=collection, resource_id=resource_id)

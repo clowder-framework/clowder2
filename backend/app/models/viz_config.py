@@ -18,7 +18,6 @@ class VizConfigBase(BaseModel):
     client: Optional[str]
     viz_config_data: dict = {}
     # TODO add json document or key value pairs, config_variables
-    visualization_mimetype: str
 
 
 class VizConfigIn(VizConfigBase):
