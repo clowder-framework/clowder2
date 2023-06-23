@@ -42,6 +42,13 @@ jobs:
         run: sleep 60s
         shell: bash
 
+      - name: Debug Virtual Environment
+        run: |
+          ls -la ~/.local/share/virtualenvs
+
+      - name: List installed packages
+        run: pipenv run pip list
+
       - name: Run test suite
         run: |
           pipenv run pytest -v
