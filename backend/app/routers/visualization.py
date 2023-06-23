@@ -30,24 +30,23 @@ async def save_visualization_config(
     credentials: HTTPAuthorizationCredentials = Security(security),
 ):
     vizconfig_in = vizconfig_in.dict()
-    resource_id = vizconfig_in["resource_id"]
-    if vizconfig_in["resource_type"] == "file":
+    resource_id = vizconfig_in['resource']['resource_id']
+    collection = vizconfig_in['resource']['collection']
+    resource_ref = MongoDBRef(
+        collection=collection, resource_id=resource_id
+    )
+    del vizconfig_in["resource"]
+    if collection == "files":
         file = await FileDB.get(PydanticObjectId(resource_id))
         if file is not None:
-            resource_ref = MongoDBRef(
-                collection="files", resource_id=vizconfig_in["resource_id"]
-            )
             viz_config = VizConfigDB(**vizconfig_in, resource=resource_ref)
             await viz_config.insert()
             return viz_config.dict()
         else:
             raise HTTPException(status_code=404, detail=f"File {resource_id} not found")
-    elif vizconfig_in["resource_type"] == "dataset":
+    elif collection == "datasets":
         dataset = await DatasetDB.get(PydanticObjectId(resource_id))
         if dataset is not None:
-            resource_ref = MongoDBRef(
-                collection="datasets", resource_id=vizconfig_in["resource_id"]
-            )
             viz_config = VizConfigDB(**vizconfig_in, resource=resource_ref)
             await viz_config.insert()
             return viz_config.dict()

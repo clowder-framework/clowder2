@@ -12,12 +12,11 @@ from app.models.users import UserOut
 
 
 class VizConfigBase(BaseModel):
-    resource_id: PydanticObjectId
-    resource_type: str
+    resource: MongoDBRef
     extractor_info: Optional[ExtractorInfo]
     job: Optional[EventListenerJobDB]
     client: Optional[str]
-    viz_config_data: dict
+    viz_config_data: dict = {}
     # TODO add json document or key value pairs, config_variables
     visualization_mimetype: str
 
@@ -27,7 +26,6 @@ class VizConfigIn(VizConfigBase):
 
 
 class VizConfigDB(Document, VizConfigBase):
-    resource: MongoDBRef
 
     class Settings:
         name = "vizconfig"
