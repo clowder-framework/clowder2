@@ -101,15 +101,15 @@ async def get_vizconfig(
         raise HTTPException(status_code=404, detail=f"VizConfig {config_id} not found")
 
 
-@router.patch("/config/{config_id}/map", response_model=VizConfigOut)
+@router.patch("/config/{config_id}/vizdata", response_model=VizConfigOut)
 async def update_vizconfig_map(
     config_id: PydanticObjectId,
-    new_viz_config_map: dict,
+    new_viz_config_data: dict,
     user=Depends(get_current_user),
     credentials: HTTPAuthorizationCredentials = Security(security),
 ):
     if (viz_config := await VizConfigDB.get(PydanticObjectId(config_id))) is not None:
-        viz_config.viz_config_map = new_viz_config_map
+        viz_config.viz_config_data = new_viz_config_data
         await viz_config.replace()
         return viz_config.dict()
     else:
