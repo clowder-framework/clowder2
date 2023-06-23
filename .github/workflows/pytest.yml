@@ -32,6 +32,7 @@ jobs:
       - name: Install dependencies
 #        if: steps.cache-pipenv.outputs.cache-hit != 'true'
         run: |
+          pipenv --rm
           pipenv install --deploy --dev
 
       - name: Start env
