@@ -7,10 +7,9 @@ import {
 	ReactiveList,
 	SingleDropdownRange,
 } from "@appbaseio/reactivesearch";
-import { FormControlLabel, Grid, Switch, Typography } from "@mui/material";
+import { Grid } from "@mui/material";
 import Layout from "../Layout";
 import { SearchResult } from "./SearchResult";
-import { theme } from "../../theme";
 import { getCurrEmail } from "../../utils/common";
 
 export function Search() {
@@ -24,29 +23,6 @@ export function Search() {
 			<div className="outer-container">
 				<Grid container spacing={4}>
 					<Grid item xs>
-						<FormControlLabel
-							sx={{ float: "right" }}
-							control={
-								<Switch
-									checked={luceneOn}
-									onChange={() => {
-										setLuceneOn((prevState) => !prevState);
-									}}
-									name="Query String"
-								/>
-							}
-							label={
-								<Typography
-									variant="body1"
-									sx={{
-										color: theme.palette.primary.main,
-										fontWeight: "bold",
-									}}
-								>
-									Advanced
-								</Typography>
-							}
-						/>
 						{luceneOn ? (
 							// string search
 							<DataSearch
