@@ -26,7 +26,6 @@ class VizConfigIn(VizConfigBase):
 
 
 class VizConfigDB(Document, VizConfigBase):
-
     class Settings:
         name = "vizconfig"
 
