@@ -17,7 +17,7 @@ from app.models.feeds import FeedDB
 from app.models.files import FileDB, FileVersionDB, FileDBViewList
 from app.models.folders import FolderDB, FolderDBViewList
 from app.models.groups import GroupDB
-from app.models.viz_config import VizConfigDB
+from app.models.viz_config import VizualizationConfigDB
 from app.models.listeners import (
     EventListenerDB,
     EventListenerJobDB,
@@ -214,7 +214,7 @@ async def startup_beanie():
             GroupDB,
             TokenDB,
             ErrorDB,
-            VizConfigDB,
+            VizualizationConfigDB,
         ],
         recreate_views=True,
     )
