@@ -4,7 +4,6 @@
 import type { Body_update_file_api_v2_files__file_id__put } from '../models/Body_update_file_api_v2_files__file_id__put';
 import type { FileOut } from '../models/FileOut';
 import type { FileVersion } from '../models/FileVersion';
-import type { VizConfigIn } from '../models/VizConfigIn';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { request as __request } from '../core/request';
 
@@ -164,46 +163,6 @@ export class FilesService {
         return __request({
             method: 'POST',
             path: `/api/v2/files/${fileId}/resubmit_extract`,
-            errors: {
-                422: `Validation Error`,
-            },
-        });
-    }
-
-    /**
-     * Save Visualization
-     * @param fileId
-     * @param requestBody
-     * @returns any Successful Response
-     * @throws ApiError
-     */
-    public static saveVisualizationApiV2FilesFileIdVisualizationPost(
-        fileId: string,
-        requestBody: VizConfigIn,
-    ): CancelablePromise<any> {
-        return __request({
-            method: 'POST',
-            path: `/api/v2/files/${fileId}/visualization`,
-            body: requestBody,
-            mediaType: 'application/json',
-            errors: {
-                422: `Validation Error`,
-            },
-        });
-    }
-
-    /**
-     * Save Visualization
-     * @param fileId
-     * @returns any Successful Response
-     * @throws ApiError
-     */
-    public static saveVisualizationApiV2FilesFileIdVisualizationsGet(
-        fileId: string,
-    ): CancelablePromise<any> {
-        return __request({
-            method: 'GET',
-            path: `/api/v2/files/${fileId}/visualizations`,
             errors: {
                 422: `Validation Error`,
             },

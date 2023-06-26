@@ -60,8 +60,8 @@ export type { UserIn } from './models/UserIn';
 export type { UserLogin } from './models/UserLogin';
 export type { UserOut } from './models/UserOut';
 export type { ValidationError } from './models/ValidationError';
-export type { VizConfigIn } from './models/VizConfigIn';
-export type { VizConfigOut } from './models/VizConfigOut';
+export type { VisualizationConfigIn } from './models/VisualizationConfigIn';
+export type { VisualizationConfigOut } from './models/VisualizationConfigOut';
 
 export { AuthService } from './services/AuthService';
 export { AuthorizationService } from './services/AuthorizationService';
@@ -78,4 +78,4 @@ export { LoginService } from './services/LoginService';
 export { MetadataService } from './services/MetadataService';
 export { ServiceService } from './services/ServiceService';
 export { UsersService } from './services/UsersService';
-export { VisualizationService } from './services/VisualizationService';
+export { VisualizationsService } from './services/VisualizationsService';
