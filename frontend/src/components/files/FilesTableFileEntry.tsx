@@ -14,37 +14,46 @@ type FilesTableFileEntryProps = {
 	iconStyle: {};
 	selectFile: any;
 	file: FileOut;
+	parentFolderId: any;
 };
 
 export function FilesTableFileEntry(props: FilesTableFileEntryProps) {
-	const { iconStyle, selectFile, file } = props;
+	const { iconStyle, selectFile, file, parentFolderId } = props;
 
 	console.log("FTFE");
 	console.log(file);
-
+	console.log(file, parentFolderId);
 	return (
-		<TableRow
-			key={file.id}
-			sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
-		>
-			<TableCell component="th" scope="row" key={`${file.id}-icon`}>
-				<InsertDriveFileIcon sx={iconStyle} />
-				<Button onClick={() => selectFile(file.id)}>{file.name}</Button>
-				<VersionChip versionNumber={file.version_num} />
-			</TableCell>
-			<TableCell align="right">
-				{parseDate(file.created)} by {file.creator.first_name}{" "}
-				{file.creator.last_name}
-			</TableCell>
-			<TableCell align="right">
-				{file.bytes ? prettyBytes(file.bytes) : "NA"}
-			</TableCell>
-			<TableCell align="right">
-				{file.content_type ? file.content_type.content_type : "NA"}
-			</TableCell>
-			<TableCell align="right">
-				<FileMenu file={file} />
-			</TableCell>
-		</TableRow>
+		<>
+		{
+			file.folder_id === parentFolderId ?
+				(
+					<TableRow
+						key={file.id}
+						sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
+					>
+					<TableCell component="th" scope="row" key={`${file.id}-icon`}>
+						<InsertDriveFileIcon sx={iconStyle} />
+						<Button onClick={() => selectFile(file.id)}>{file.name}</Button>
+						<VersionChip versionNumber={file.version_num} />
+					</TableCell>
+					<TableCell align="right">
+						{parseDate(file.created)} by {file.creator.first_name}{" "}
+						{file.creator.last_name}
+					</TableCell>
+					<TableCell align="right">
+						{file.bytes ? prettyBytes(file.bytes) : "NA"}
+					</TableCell>
+					<TableCell align="right">
+						{file.content_type ? file.content_type.content_type : "NA"}
+					</TableCell>
+					<TableCell align="right">
+						<FileMenu file={file} />
+					</TableCell>
+					</TableRow>
+				) :
+				<></>
+		}
+		</>
 	);
 }
