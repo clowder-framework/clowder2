@@ -16,7 +16,11 @@ from fastapi import APIRouter, HTTPException, Depends, Security
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from app.deps.authorization_deps import FileAuthorization
 
-from app.models.viz_config import VizualizationConfigOut, VizualizationConfigDB, VizualizationConfigIn
+from app.models.visualization_config import (
+    VizualizationConfigOut,
+    VizualizationConfigDB,
+    VizualizationConfigIn,
+)
 from app.models.metadata import MongoDBRef
 
 router = APIRouter()
@@ -74,7 +78,9 @@ async def get_vizconfig(
     user=Depends(get_current_user),
     credentials: HTTPAuthorizationCredentials = Security(security),
 ):
-    if (viz_config := await VizualizationConfigDB.get(PydanticObjectId(config_id))) is not None:
+    if (
+        viz_config := await VizualizationConfigDB.get(PydanticObjectId(config_id))
+    ) is not None:
         return viz_config.dict()
     else:
         raise HTTPException(status_code=404, detail=f"VizConfig {config_id} not found")
@@ -87,7 +93,9 @@ async def update_vizconfig_map(
     user=Depends(get_current_user),
     credentials: HTTPAuthorizationCredentials = Security(security),
 ):
-    if (viz_config := await VizualizationConfigDB.get(PydanticObjectId(config_id))) is not None:
+    if (
+        viz_config := await VizualizationConfigDB.get(PydanticObjectId(config_id))
+    ) is not None:
         viz_config.viz_config_data = new_viz_config_data
         await viz_config.replace()
         return viz_config.dict()
@@ -101,7 +109,9 @@ async def delete_vizconfig(
     user=Depends(get_current_user),
     credentials: HTTPAuthorizationCredentials = Security(security),
 ):
-    if (viz_config := await VizualizationConfigDB.get(PydanticObjectId(config_id))) is not None:
+    if (
+        viz_config := await VizualizationConfigDB.get(PydanticObjectId(config_id))
+    ) is not None:
         await viz_config.delete()
         return viz_config.dict()
     else:

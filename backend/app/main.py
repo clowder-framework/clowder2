@@ -17,7 +17,7 @@ from app.models.feeds import FeedDB
 from app.models.files import FileDB, FileVersionDB, FileDBViewList
 from app.models.folders import FolderDB, FolderDBViewList
 from app.models.groups import GroupDB
-from app.models.viz_config import VizualizationConfigDB
+from app.models.visualization_config import VizualizationConfigDB
 from app.models.listeners import (
     EventListenerDB,
     EventListenerJobDB,
