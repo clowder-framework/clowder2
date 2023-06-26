@@ -86,7 +86,7 @@ async def get_vizconfig(
         raise HTTPException(status_code=404, detail=f"VizConfig {config_id} not found")
 
 
-@router.patch("/config/{config_id}/vizdata", response_model=VizualizationConfigOut)
+@router.patch("/config/{config_id}/vizdata", response_model=VisualizationConfigOut)
 async def update_vizconfig_map(
     config_id: PydanticObjectId,
     new_viz_config_data: dict,
