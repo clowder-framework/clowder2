@@ -60,5 +60,16 @@ scripts/keycloak/data/*
 charts/clowder2/charts
 charts/clowder2/*clowder2-software-dev.yaml
 
-# ignore changes in vis config
-frontend/src/visualization.config.tsx
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Test folder contect except for test source code and metadata document.
+backend/app/tests/*
+!backend/app/tests/*.py
+!backend/app/tests/extractor_info.json
