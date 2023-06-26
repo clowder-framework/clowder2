@@ -41,9 +41,7 @@ export default function FilesTable(props: FilesTableProps) {
 		// Redirect to file route with file Id and dataset id
 		history(`/datasets/${props.datasetId}?folder=${selectedFolderId}`);
 	};
-	console.log('files in dataset', filesInDataset);
-	console.log('folders in dataset', foldersInDataset);
-	console.log('parentFolderId', parentFolderId);
+	
 	return (
 		<TableContainer component={Paper}>
 			<Table sx={{minWidth: 650}} aria-label="simple table">

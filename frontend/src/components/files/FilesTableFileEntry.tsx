@@ -22,7 +22,6 @@ export function FilesTableFileEntry(props: FilesTableFileEntryProps) {
 
 	console.log("FTFE");
 	console.log(file);
-	console.log(file, parentFolderId);
 	return (
 		<>
 		{
