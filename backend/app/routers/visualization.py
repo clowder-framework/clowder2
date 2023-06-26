@@ -17,9 +17,9 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from app.deps.authorization_deps import FileAuthorization
 
 from app.models.visualization_config import (
-    VizualizationConfigOut,
-    VizualizationConfigDB,
-    VizualizationConfigIn,
+    VisualizationConfigOut,
+    VisualizationConfigDB,
+    VisualizationConfigIn,
 )
 from app.models.metadata import MongoDBRef
 
@@ -27,9 +27,9 @@ router = APIRouter()
 security = HTTPBearer()
 
 
-@router.post("/config", response_model=VizualizationConfigOut)
+@router.post("/config", response_model=VisualizationConfigOut)
 async def save_visualization_config(
-    vizconfig_in: VizualizationConfigIn,
+    vizconfig_in: VisualizationConfigIn,
     user=Depends(get_current_user),
     credentials: HTTPAuthorizationCredentials = Security(security),
 ):
@@ -42,7 +42,7 @@ async def save_visualization_config(
     if collection == "files":
         file = await FileDB.get(PydanticObjectId(resource_id))
         if file is not None:
-            viz_config = VizualizationConfigDB(**vizconfig_in, resource=resource_ref)
+            viz_config = VisualizationConfigDB(**vizconfig_in, resource=resource_ref)
             await viz_config.insert()
             return viz_config.dict()
         else:
@@ -50,7 +50,7 @@ async def save_visualization_config(
     elif collection == "datasets":
         dataset = await DatasetDB.get(PydanticObjectId(resource_id))
         if dataset is not None:
-            viz_config = VizualizationConfigDB(**vizconfig_in, resource=resource_ref)
+            viz_config = VisualizationConfigDB(**vizconfig_in, resource=resource_ref)
             await viz_config.insert()
             return viz_config.dict()
         else:
@@ -59,27 +59,27 @@ async def save_visualization_config(
             )
 
 
-@router.get("/{file_id}/config", response_model=List[VizConfigOut])
+@router.get("/{file_id}/config", response_model=List[VisualizationConfigOut])
 async def get_resource_vizconfig(
     file_id: PydanticObjectId,
     user=Depends(get_current_user),
     credentials: HTTPAuthorizationCredentials = Security(security),
 ):
-    query = [VizualizationConfigDB.resource.resource_id == ObjectId(file_id)]
+    query = [VisualizationConfigDB.resource.resource_id == ObjectId(file_id)]
     vizconfigs = []
-    async for vzconfig in VizualizationConfigDB.find(*query):
+    async for vzconfig in VisualizationConfigDB.find(*query):
         vizconfigs.append(vzconfig)
     return [vz.dict() for vz in vizconfigs]
 
 
-@router.get("/config/{config_id}", response_model=VizualizationConfigOut)
+@router.get("/config/{config_id}", response_model=VisualizationConfigOut)
 async def get_vizconfig(
     config_id: PydanticObjectId,
     user=Depends(get_current_user),
     credentials: HTTPAuthorizationCredentials = Security(security),
 ):
     if (
-        viz_config := await VizualizationConfigDB.get(PydanticObjectId(config_id))
+        viz_config := await VisualizationConfigDB.get(PydanticObjectId(config_id))
     ) is not None:
         return viz_config.dict()
     else:
@@ -94,7 +94,7 @@ async def update_vizconfig_map(
     credentials: HTTPAuthorizationCredentials = Security(security),
 ):
     if (
-        viz_config := await VizualizationConfigDB.get(PydanticObjectId(config_id))
+        viz_config := await VisualizationConfigDB.get(PydanticObjectId(config_id))
     ) is not None:
         viz_config.viz_config_data = new_viz_config_data
         await viz_config.replace()
@@ -103,14 +103,14 @@ async def update_vizconfig_map(
         raise HTTPException(status_code=404, detail=f"VizConfig {config_id} not found")
 
 
-@router.delete("/config/{config_id}", response_model=VizualizationConfigOut)
+@router.delete("/config/{config_id}", response_model=VisualizationConfigOut)
 async def delete_vizconfig(
     config_id: PydanticObjectId,
     user=Depends(get_current_user),
     credentials: HTTPAuthorizationCredentials = Security(security),
 ):
     if (
-        viz_config := await VizualizationConfigDB.get(PydanticObjectId(config_id))
+        viz_config := await VisualizationConfigDB.get(PydanticObjectId(config_id))
     ) is not None:
         await viz_config.delete()
         return viz_config.dict()

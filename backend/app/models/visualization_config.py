@@ -11,7 +11,7 @@ from app.models.pyobjectid import PyObjectId
 from app.models.users import UserOut
 
 
-class VizualizationConfigBase(BaseModel):
+class VisualizationConfigBase(BaseModel):
     resource: MongoDBRef
     extractor_info: Optional[ExtractorInfo]
     job: Optional[EventListenerJobDB]
@@ -20,15 +20,15 @@ class VizualizationConfigBase(BaseModel):
     # TODO add json document or key value pairs, config_variables
 
 
-class VizualizationConfigIn(VizualizationConfigBase):
+class VisualizationConfigIn(VisualizationConfigBase):
     pass
 
 
-class VizualizationConfigDB(Document, VizualizationConfigBase):
+class VisualizationConfigDB(Document, VisualizationConfigBase):
     class Settings:
         name = "vizconfig"
 
 
-class VizualizationConfigOut(VizualizationConfigDB):
+class VisualizationConfigOut(VisualizationConfigDB):
     class Config:
         fields = {"id": "id"}

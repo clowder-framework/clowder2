@@ -17,7 +17,7 @@ from app.models.feeds import FeedDB
 from app.models.files import FileDB, FileVersionDB, FileDBViewList
 from app.models.folders import FolderDB, FolderDBViewList
 from app.models.groups import GroupDB
-from app.models.visualization_config import VizualizationConfigDB
+from app.models.visualization_config import VisualizationConfigDB
 from app.models.listeners import (
     EventListenerDB,
     EventListenerJobDB,
@@ -171,8 +171,8 @@ api_router.include_router(
 )
 api_router.include_router(
     visualization.router,
-    prefix="/visualization",
-    tags=["visualization"],
+    prefix="/visualizations",
+    tags=["visualizations"],
     dependencies=[Depends(get_current_username)],
 )
 api_router.include_router(keycloak.router, prefix="/auth", tags=["auth"])
@@ -214,7 +214,7 @@ async def startup_beanie():
             GroupDB,
             TokenDB,
             ErrorDB,
-            VizualizationConfigDB,
+            VisualizationConfigDB,
         ],
         recreate_views=True,
     )
