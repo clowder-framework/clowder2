@@ -9,7 +9,7 @@ from pydantic import BaseConfig
 
 from app.config import settings
 from app.keycloak_auth import get_current_username
-from app.models import visualizations
+from app.models import visualization
 from app.models.authorization import AuthorizationDB
 from app.models.config import ConfigEntryDB
 from app.models.datasets import DatasetDB, DatasetDBViewList
@@ -28,12 +28,8 @@ from app.models.listeners import (
 from app.models.metadata import MetadataDB, MetadataDefinitionDB
 from app.models.tokens import TokenDB
 from app.models.users import UserDB, UserAPIKeyDB, ListenerAPIKeyDB
-from app.models.visualizations import VisualizationsDB
-from app.routers import (
-    folders,
-    groups,
-    visualizations
-)
+from app.models.visualization import VisualizationDB
+from app.routers import folders, groups, visualization
 from app.routers import (
     users,
     authorization,
@@ -171,7 +167,7 @@ api_router.include_router(
     dependencies=[Depends(get_current_username)],
 )
 api_router.include_router(
-    visualizations.router,
+    visualization.router,
     prefix="/visualizations",
     tags=["visualizations"],
     dependencies=[Depends(get_current_username)],
@@ -214,7 +210,8 @@ async def startup_beanie():
             ListenerAPIKeyDB,
             GroupDB,
             TokenDB,
-            ErrorDB
+            ErrorDB,
+            VisualizationDB,
         ],
         recreate_views=True,
     )
