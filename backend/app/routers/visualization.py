@@ -59,13 +59,13 @@ async def save_visualization_config(
             )
 
 
-@router.get("/{file_id}/config", response_model=List[VisualizationConfigOut])
+@router.get("/{resource_id}/config", response_model=List[VisualizationConfigOut])
 async def get_resource_vizconfig(
-    file_id: PydanticObjectId,
+    resource_id: PydanticObjectId,
     user=Depends(get_current_user),
     credentials: HTTPAuthorizationCredentials = Security(security),
 ):
-    query = [VisualizationConfigDB.resource.resource_id == ObjectId(file_id)]
+    query = [VisualizationConfigDB.resource.resource_id == ObjectId(resource_id)]
     vizconfigs = []
     async for vzconfig in VisualizationConfigDB.find(*query):
         vizconfigs.append(vzconfig)
