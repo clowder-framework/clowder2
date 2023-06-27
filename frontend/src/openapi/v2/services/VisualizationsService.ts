@@ -30,16 +30,16 @@ export class VisualizationsService {
 
     /**
      * Get Resource Vizconfig
-     * @param fileId
+     * @param resourceId
      * @returns VisualizationConfigOut Successful Response
      * @throws ApiError
      */
-    public static getResourceVizconfigApiV2VisualizationsFileIdConfigGet(
-        fileId: string,
+    public static getResourceVizconfigApiV2VisualizationsResourceIdConfigGet(
+        resourceId: string,
     ): CancelablePromise<Array<VisualizationConfigOut>> {
         return __request({
             method: 'GET',
-            path: `/api/v2/visualizations/${fileId}/config`,
+            path: `/api/v2/visualizations/${resourceId}/config`,
             errors: {
                 422: `Validation Error`,
             },
