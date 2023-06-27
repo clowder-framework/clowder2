@@ -1,4 +1,3 @@
-import re
 from datetime import timedelta
 from secrets import token_urlsafe
 from typing import List
@@ -23,9 +22,9 @@ router = APIRouter()
 
 @router.get("/keys", response_model=List[UserAPIKeyOut])
 async def get_user_api_keys(
-    current_user=Depends(get_current_username),
-    skip: int = 0,
-    limit: int = 10,
+        current_user=Depends(get_current_username),
+        skip: int = 0,
+        limit: int = 10,
 ):
     """List all api keys that user has created
 
@@ -45,9 +44,9 @@ async def get_user_api_keys(
 
 @router.post("/keys", response_model=str)
 async def generate_user_api_key(
-    name: str,
-    mins: int = settings.local_auth_expiration,
-    current_user=Depends(get_current_username),
+        name: str,
+        mins: int = settings.local_auth_expiration,
+        current_user=Depends(get_current_username),
 ):
     """Generate an API key that confers the user's privileges.
 
@@ -67,8 +66,8 @@ async def generate_user_api_key(
 
 @router.delete("/keys/{key_id}", response_model=UserAPIKeyOut)
 async def delete_user_api_key(
-    key_id: str,
-    current_user=Depends(get_current_username),
+        key_id: str,
+        current_user=Depends(get_current_username),
 ):
     """Delete API keys given ID
 
@@ -79,7 +78,7 @@ async def delete_user_api_key(
         # Only allow user to delete their own key
         if apikey.user == current_user:
             await apikey.delete()
-            return apikey
+            return apikey.dict()
         else:
             raise HTTPException(
                 status_code=403, detail=f"API key {key_id} not allowed to be deleted."
@@ -96,9 +95,9 @@ async def get_users(skip: int = 0, limit: int = 2):
 
 @router.get("/search", response_model=List[UserOut])
 async def search_users(
-    text: str,
-    skip: int = 0,
-    limit: int = 2,
+        text: str,
+        skip: int = 0,
+        limit: int = 2,
 ):
     users = await UserDB.find(
         Or(
@@ -115,9 +114,9 @@ async def search_users(
 
 @router.get("/prefixSearch", response_model=List[UserOut])
 async def search_users(
-    prefix: str,
-    skip: int = 0,
-    limit: int = 2,
+        prefix: str,
+        skip: int = 0,
+        limit: int = 2,
 ):
     query_regx = f"^{prefix}.*"
     users = await UserDB.find(
@@ -132,7 +131,7 @@ async def search_users(
 
 @router.get("/profile", response_model=UserOut)
 async def get_profile(
-    username=Depends(get_current_username),
+        username=Depends(get_current_username),
 ):
     if (user := await UserDB.find_one(UserDB.email == username)) is not None:
         return user.dict()
@@ -158,9 +157,9 @@ async def get_user_job_key(username: str):
     will be created, otherwise it will be re-used."""
     key = "__user_job_key"
     if (
-        job_key := await ListenerAPIKeyDB.find_one(
-            ListenerAPIKeyDB.user == username, ListenerAPIKeyDB.name == key
-        )
+            job_key := await ListenerAPIKeyDB.find_one(
+                ListenerAPIKeyDB.user == username, ListenerAPIKeyDB.name == key
+            )
     ) is not None:
         return job_key.hash
     else:
