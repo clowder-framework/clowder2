@@ -30,6 +30,12 @@ def test_viz_data(client: TestClient, headers: dict):
     assert response.status_code == 200
     assert response.json().get("id") is not None
 
+    response = client.get(
+        f"{settings.API_V2_STR}/visualizations/download/visualization_id={viz_id}",
+        headers=headers,
+    )
+    assert response.status_code == 200
+
     response = client.delete(
         f"{settings.API_V2_STR}/visualizations/{viz_id}", headers=headers
     )

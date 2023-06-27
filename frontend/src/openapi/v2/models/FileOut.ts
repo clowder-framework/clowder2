@@ -2,7 +2,7 @@
 /* tslint:disable */
 /* eslint-disable */
 
-import type { FileContentType } from './FileContentType';
+import type { ContentType } from './ContentType';
 import type { UserOut } from './UserOut';
 
 /**
@@ -30,5 +30,5 @@ export type FileOut = {
     views?: number;
     downloads?: number;
     bytes?: number;
-    content_type?: FileContentType;
+    content_type?: ContentType;
 }

@@ -1,10 +1,9 @@
-import mimetypes
-
 from beanie import PydanticObjectId
 from fastapi import APIRouter, HTTPException, Depends, Security
 from fastapi import File, UploadFile, Response, Request, Form
 
 from minio import Minio
+from starlette.responses import StreamingResponse
 
 from app import dependencies
 from app.config import settings
@@ -83,3 +82,25 @@ async def remove_visualization(
     raise HTTPException(
         status_code=404, detail=f"Visualization {visualization_id} not found"
     )
+
+
+@router.get("/download/visualization_id={visualization_id}")
+async def download_visualization(
+    visualization_id: str, fs: Minio = Depends(dependencies.get_fs)
+):
+    # If visualization exists in MongoDB, download from Minio
+    if (
+        visualization := await VisualizationDB.get(PydanticObjectId(visualization_id))
+    ) is not None:
+        content = fs.get_object(settings.MINIO_BUCKET_NAME, visualization_id)
+
+        # Get content type & open file stream
+        response = StreamingResponse(content.stream(settings.MINIO_UPLOAD_CHUNK_SIZE))
+        response.headers["Content-Disposition"] = (
+            "attachment; filename=%s" % visualization.name
+        )
+        return response
+    else:
+        raise HTTPException(
+            status_code=404, detail=f"Visualization {visualization_id} not found"
+        )
