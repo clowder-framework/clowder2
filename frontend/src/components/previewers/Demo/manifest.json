@@ -12,7 +12,7 @@
 	"vizConfig": {
 		"name": "Demo",
 		"mainType": "text",
-		"mimeType": [
+		"mimeTypes": [
 			"text/csv"
 		],
 		"props": {

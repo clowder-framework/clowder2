@@ -11,7 +11,7 @@
 	"vizConfig": {
 		"name": "Iframe",
 		"mainType": "text",
-		"mimeType": [
+		"mimeTypes": [
 			"text/html"
 		],
 		"props": {

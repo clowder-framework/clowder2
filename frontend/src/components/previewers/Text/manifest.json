@@ -11,7 +11,7 @@
 	"vizConfig": {
 		"name": "Text",
 		"mainType": "text",
-		"mimeType": [
+		"mimeTypes": [
 			"text/plain"
 		],
 		"fields": [

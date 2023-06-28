@@ -11,7 +11,7 @@
 	"vizConfig": {
 		"name": "Audio",
 		"mainType": "audio",
-		"mimeType": [
+		"mimeTypes": [
 			"audio/mpeg",
 			"audio/wav"
 		],

@@ -11,7 +11,7 @@
 	"vizConfig": {
 		"name": "Image",
 		"mainType": "image",
-		"mimeType": [
+		"mimeTypes": [
 			"image/jpeg",
 			"image/png",
 			"image/gif",

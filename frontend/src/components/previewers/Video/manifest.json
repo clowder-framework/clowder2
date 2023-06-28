@@ -11,7 +11,7 @@
 	"vizConfig": {
 		"name": "Video",
 		"mainType": "video",
-		"mimeType": [
+		"mimeTypes": [
 			"video/*"
 		],
 		"props": {
