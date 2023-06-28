@@ -6,11 +6,11 @@ function registerComponent(config) {
 	return lazy(
 		() =>
 			import(
-				/* webpackChunkName: `previewers-${config.name}` */
-				`./components/previewers/${config.vizConfig.name}/${config.main}`
+				/* webpackChunkName: "[request]" */ `./components/previewers/${config.vizConfig.name}/${config.main}`
 			)
 	);
 }
+
 const configAudio = require("./components/previewers/Audio/manifest.json");
 vizConfig[configAudio.vizConfig.mainType] = React.createElement(
 	registerComponent(configAudio)
