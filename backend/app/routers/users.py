@@ -78,7 +78,7 @@ async def delete_user_api_key(
         # Only allow user to delete their own key
         if apikey.user == current_user:
             await apikey.delete()
-            return apikey
+            return apikey.dict()
         else:
             raise HTTPException(
                 status_code=403, detail=f"API key {key_id} not allowed to be deleted."

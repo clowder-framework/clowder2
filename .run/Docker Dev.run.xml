@@ -2,6 +2,7 @@
   <configuration default="false" name="Docker Dev" type="docker-deploy" factoryName="docker-compose.yml" server-name="Docker">
     <deployment type="docker-compose.yml">
       <settings>
+        <option name="composeProjectName" value="clowder2-dev" />
         <option name="envFilePath" value="" />
         <option name="sourceFilePath" value="docker-compose.dev.yml" />
       </settings>

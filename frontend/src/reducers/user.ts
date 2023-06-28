@@ -2,13 +2,14 @@ import {
 	DELETE_API_KEY,
 	GENERATE_API_KEY,
 	LIST_API_KEYS,
-	LOGIN_ERROR, RECEIVE_USER_PROFILE,
+	LOGIN_ERROR,
+	RECEIVE_USER_PROFILE,
 	REGISTER_ERROR,
 	REGISTER_USER,
 	RESET_API_KEY,
 	SET_USER,
 } from "../actions/user";
-import {Author, Dataset, UserState} from "../types/data";
+import { UserState } from "../types/data";
 import { DataAction } from "../types/action";
 
 const defaultState: UserState = {
@@ -31,7 +32,7 @@ const user = (state = defaultState, action: DataAction) => {
 		case RECEIVE_USER_PROFILE:
 			return Object.assign({}, state, {
 				profile: action.profile,
-				loginError:false,
+				loginError: false,
 			});
 		case LOGIN_ERROR:
 			return Object.assign({}, state, {
