@@ -21,6 +21,7 @@ export type { DatasetOut } from './models/DatasetOut';
 export type { DatasetPatch } from './models/DatasetPatch';
 export type { DatasetRoles } from './models/DatasetRoles';
 export type { EventListenerIn } from './models/EventListenerIn';
+export type { EventListenerJobDB } from './models/EventListenerJobDB';
 export type { EventListenerJobOut } from './models/EventListenerJobOut';
 export type { EventListenerJobUpdateOut } from './models/EventListenerJobUpdateOut';
 export type { EventListenerOut } from './models/EventListenerOut';
@@ -60,6 +61,8 @@ export type { UserIn } from './models/UserIn';
 export type { UserLogin } from './models/UserLogin';
 export type { UserOut } from './models/UserOut';
 export type { ValidationError } from './models/ValidationError';
+export type { VisualizationConfigIn } from './models/VisualizationConfigIn';
+export type { VisualizationConfigOut } from './models/VisualizationConfigOut';
 export type { VisualizationOut } from './models/VisualizationOut';
 
 export { AuthService } from './services/AuthService';
