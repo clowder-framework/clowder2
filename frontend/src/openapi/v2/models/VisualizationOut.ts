@@ -18,17 +18,13 @@ import type { UserOut } from './UserOut';
  * - Pydantic BaseModel
  * - [UpdateMethods](https://roman-right.github.io/beanie/api/interfaces/#aggregatemethods)
  */
-export type FileOut = {
+export type VisualizationOut = {
     name?: string;
+    description?: string;
     id?: string;
     creator: UserOut;
     created?: string;
-    version_id?: string;
-    version_num?: number;
-    dataset_id: string;
-    folder_id?: string;
-    views?: number;
-    downloads?: number;
+    modified?: string;
     bytes?: number;
     content_type?: ContentType;
 }
