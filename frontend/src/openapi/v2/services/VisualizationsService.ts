@@ -1,7 +1,7 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { Body_add_Visualization_api_v2_visualizations_name__name__description__description__post } from '../models/Body_add_Visualization_api_v2_visualizations_name__name__description__description__post';
+import type { Body_add_Visualization_api_v2_visualizations_post } from '../models/Body_add_Visualization_api_v2_visualizations_post';
 import type { VisualizationOut } from '../models/VisualizationOut';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { request as __request } from '../core/request';
@@ -22,14 +22,18 @@ export class VisualizationsService {
      * @returns VisualizationOut Successful Response
      * @throws ApiError
      */
-    public static addVisualizationApiV2VisualizationsNameNameDescriptionDescriptionPost(
+    public static addVisualizationApiV2VisualizationsPost(
         name: string,
         description: string,
-        formData: Body_add_Visualization_api_v2_visualizations_name__name__description__description__post,
+        formData: Body_add_Visualization_api_v2_visualizations_post,
     ): CancelablePromise<VisualizationOut> {
         return __request({
             method: 'POST',
-            path: `/api/v2/visualizations/name=${name}&description=${description}`,
+            path: `/api/v2/visualizations`,
+            query: {
+                'name': name,
+                'description': description,
+            },
             formData: formData,
             mediaType: 'multipart/form-data',
             errors: {
@@ -80,12 +84,12 @@ export class VisualizationsService {
      * @returns any Successful Response
      * @throws ApiError
      */
-    public static downloadVisualizationApiV2VisualizationsDownloadVisualizationIdVisualizationIdGet(
+    public static downloadVisualizationApiV2VisualizationsDownloadVisualizationIdGet(
         visualizationId: string,
     ): CancelablePromise<any> {
         return __request({
             method: 'GET',
-            path: `/api/v2/visualizations/download/visualization_id=${visualizationId}`,
+            path: `/api/v2/visualizations/download/${visualizationId}`,
             errors: {
                 422: `Validation Error`,
             },

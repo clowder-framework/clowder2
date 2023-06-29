@@ -8,7 +8,7 @@ export { OpenAPI } from './core/OpenAPI';
 export type { AuthorizationBase } from './models/AuthorizationBase';
 export type { AuthorizationMetadata } from './models/AuthorizationMetadata';
 export type { AuthorizationOut } from './models/AuthorizationOut';
-export type { Body_add_Visualization_api_v2_visualizations_name__name__description__description__post } from './models/Body_add_Visualization_api_v2_visualizations_name__name__description__description__post';
+export type { Body_add_Visualization_api_v2_visualizations_post } from './models/Body_add_Visualization_api_v2_visualizations_post';
 export type { Body_create_dataset_from_zip_api_v2_datasets_createFromZip_post } from './models/Body_create_dataset_from_zip_api_v2_datasets_createFromZip_post';
 export type { Body_get_dataset_metadata_api_v2_datasets__dataset_id__metadata_get } from './models/Body_get_dataset_metadata_api_v2_datasets__dataset_id__metadata_get';
 export type { Body_get_file_metadata_api_v2_files__file_id__metadata_get } from './models/Body_get_file_metadata_api_v2_files__file_id__metadata_get';
