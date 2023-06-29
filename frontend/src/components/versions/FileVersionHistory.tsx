@@ -10,7 +10,8 @@ import {
 import { VersionChip } from "./VersionChip";
 import { parseDate } from "../../utils/common";
 import { FileVersion } from "../../openapi/v2";
-import { fileDownloaded } from "../../actions/file";
+import { fileDownloaded as fileDownloadedAction } from "../../actions/file";
+
 import { useDispatch } from "react-redux";
 
 type FileVersionHistoryProps = {
@@ -24,8 +25,10 @@ export function FileVersionHistory(props: FileVersionHistoryProps) {
 	const downloadFile = (
 		fileId: string | undefined,
 		filename: string | undefined,
-		fileVersion: number | undefined
-	) => dispatch(fileDownloaded(fileId, filename, fileVersion));
+		fileVersionNum: number | undefined,
+		autoSave: boolean
+	) =>
+		dispatch(fileDownloadedAction(fileId, filename, fileVersionNum, autoSave));
 
 	return (
 		<Box className="infoCard">
@@ -49,10 +52,15 @@ export function FileVersionHistory(props: FileVersionHistoryProps) {
 									sx={{ maxWidth: "38rem" }}
 								/>
 								<Button
-									variant="contained"
 									onClick={() => {
-										downloadFile(fileVersion.file_id, filename, version_num);
+										downloadFile(
+											fileVersion.file_id,
+											filename,
+											version_num,
+											true
+										);
 									}}
+									variant="contained"
 								>
 									Download
 								</Button>
