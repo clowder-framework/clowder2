@@ -15,7 +15,7 @@ from app.routers.utils import get_content_type
 router = APIRouter()
 
 
-@router.post("/name={name}&description={description}", response_model=VisualizationOut)
+@router.post("", response_model=VisualizationOut)
 async def add_Visualization(
     name: str,
     description: str,
@@ -84,7 +84,7 @@ async def remove_visualization(
     )
 
 
-@router.get("/download/visualization_id={visualization_id}")
+@router.get("/download/{visualization_id}")
 async def download_visualization(
     visualization_id: str, fs: Minio = Depends(dependencies.get_fs)
 ):

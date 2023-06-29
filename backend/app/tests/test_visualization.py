@@ -15,7 +15,7 @@ def test_viz_data(client: TestClient, headers: dict):
         tempf.write(visualization_content_example)
     viz_file = {"file": open(visualization_example, "rb")}
     response = client.post(
-        f"{settings.API_V2_STR}/visualizations/name={viz_name}&description={viz_description}",
+        f"{settings.API_V2_STR}/visualizations/?name={viz_name}&description={viz_description}",
         headers=headers,
         files=viz_file,
     )
@@ -31,7 +31,7 @@ def test_viz_data(client: TestClient, headers: dict):
     assert response.json().get("id") is not None
 
     response = client.get(
-        f"{settings.API_V2_STR}/visualizations/download/visualization_id={viz_id}",
+        f"{settings.API_V2_STR}/visualizations/download/{viz_id}",
         headers=headers,
     )
     assert response.status_code == 200
