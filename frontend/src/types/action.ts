@@ -24,6 +24,7 @@ import {
 	RECEIVE_USER_PROFILE,
 } from "../actions/user";
 import { CREATE_GROUP, DELETE_GROUP } from "../actions/group";
+import { GENERATE_FILE_URL } from "../actions/file";
 
 interface RECEIVE_FILES_IN_DATASET {
 	type: "RECEIVE_FILES_IN_DATASET";
@@ -261,6 +262,12 @@ interface SAVE_METADATA_DEFINITIONS {
 
 interface DOWNLOAD_FILE {
 	type: "DOWNLOAD_FILE";
+	blob: Blob;
+}
+
+interface GENERATE_FILE_URL {
+	type: "GENERATE_FILE_URL";
+	url: string;
 }
 
 interface DELETE_DATASET_METADATA {
@@ -429,6 +436,7 @@ export type DataAction =
 	| DELETE_DATASET_METADATA
 	| DELETE_FILE_METADATA
 	| DOWNLOAD_FILE
+	| GENERATE_FILE_URL
 	| FOLDER_DELETED
 	| GET_FOLDER_PATH
 	| RECEIVE_LISTENERS

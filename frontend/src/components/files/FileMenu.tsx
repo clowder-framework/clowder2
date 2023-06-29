@@ -1,28 +1,30 @@
-import * as React from 'react';
-import Button from '@mui/material/Button';
-import Menu from '@mui/material/Menu';
-import MenuItem from '@mui/material/MenuItem';
-import MenuIcon from '@mui/icons-material/Menu';
-import {FileOut as File} from "../../openapi/v2";
-import {useState} from "react";
-import {fileDeleted, fileDownloaded} from "../../actions/file";
-import {useDispatch, useSelector} from "react-redux";
-import {ActionModal} from "../dialog/ActionModal";
-import DownloadIcon from '@mui/icons-material/Download';
-import DeleteIcon from '@mui/icons-material/Delete';
-import UploadIcon from '@mui/icons-material/Upload';
-import {Dialog, DialogTitle, ListItemIcon, ListItemText} from "@mui/material";
-import {UpdateFile} from "./UpdateFile";
-import {MoreHoriz} from "@material-ui/icons";
-import {RootState} from "../../types/data";
-import {AuthWrapper} from "../auth/AuthWrapper";
+import * as React from "react";
+import { useState } from "react";
+import Button from "@mui/material/Button";
+import Menu from "@mui/material/Menu";
+import MenuItem from "@mui/material/MenuItem";
+import { FileOut as File } from "../../openapi/v2";
+import {
+	fileDeleted,
+	fileDownloaded as fileDownloadedAction,
+} from "../../actions/file";
+import { useDispatch, useSelector } from "react-redux";
+import { ActionModal } from "../dialog/ActionModal";
+import DownloadIcon from "@mui/icons-material/Download";
+import DeleteIcon from "@mui/icons-material/Delete";
+import UploadIcon from "@mui/icons-material/Upload";
+import { Dialog, DialogTitle, ListItemIcon, ListItemText } from "@mui/material";
+import { UpdateFile } from "./UpdateFile";
+import { MoreHoriz } from "@material-ui/icons";
+import { RootState } from "../../types/data";
+import { AuthWrapper } from "../auth/AuthWrapper";
 
 type FileMenuProps = {
-	file: File
-}
+	file: File;
+};
 
 export default function FileMenu(props: FileMenuProps) {
-	const {file} = props;
+	const { file } = props;
 	const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
 	const open = Boolean(anchorEl);
 	const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -34,10 +36,18 @@ export default function FileMenu(props: FileMenuProps) {
 
 	// confirmation dialog
 	const dispatch = useDispatch();
-	const deleteFile = (fileId:string|undefined) => dispatch(fileDeleted(fileId));
-	const downloadFile = (fileId:string|undefined, filename:string|undefined) => dispatch(fileDownloaded(fileId, filename))
-
-	const datasetRole = useSelector((state: RootState) => state.dataset.datasetRole);
+	const deleteFile = (fileId: string | undefined) =>
+		dispatch(fileDeleted(fileId));
+	const downloadFile = (
+		fileId: string | undefined,
+		filename: string | undefined,
+		fileVersionNum: number | undefined,
+		autoSave: boolean
+	) =>
+		dispatch(fileDownloadedAction(fileId, filename, fileVersionNum, autoSave));
+	const datasetRole = useSelector(
+		(state: RootState) => state.dataset.datasetRole
+	);
 
 	const [confirmationOpen, setConfirmationOpen] = useState(false);
 	const [updateFileOpen, setUpdateFileOpen] = useState(false);
@@ -46,28 +56,41 @@ export default function FileMenu(props: FileMenuProps) {
 			deleteFile(file.id);
 		}
 		setConfirmationOpen(false);
-	}
+	};
 
 	return (
 		<div>
-			<ActionModal actionOpen={confirmationOpen} actionTitle="Are you sure?"
-						 actionText="Do you really want to delete? This process cannot be undone."
-						 actionBtnName="Delete" handleActionBtnClick={deleteSelectedFile}
-						 handleActionCancel={() => { setConfirmationOpen(false);}}/>
-			<Dialog open={updateFileOpen} onClose={()=>{setUpdateFileOpen(false);}} fullWidth={true} aria-labelledby="form-dialog">
+			<ActionModal
+				actionOpen={confirmationOpen}
+				actionTitle="Are you sure?"
+				actionText="Do you really want to delete? This process cannot be undone."
+				actionBtnName="Delete"
+				handleActionBtnClick={deleteSelectedFile}
+				handleActionCancel={() => {
+					setConfirmationOpen(false);
+				}}
+			/>
+			<Dialog
+				open={updateFileOpen}
+				onClose={() => {
+					setUpdateFileOpen(false);
+				}}
+				fullWidth={true}
+				aria-labelledby="form-dialog"
+			>
 				<DialogTitle id="form-dialog-title">Update File</DialogTitle>
-				<UpdateFile fileId={file.id} setOpen={setUpdateFileOpen}/>
+				<UpdateFile fileId={file.id} setOpen={setUpdateFileOpen} />
 			</Dialog>
 			<Button
 				id="basic-button"
 				// variant="outlined"
 				size="small"
-				aria-controls={open ? 'basic-menu' : undefined}
+				aria-controls={open ? "basic-menu" : undefined}
 				aria-haspopup="true"
-				aria-expanded={open ? 'true' : undefined}
+				aria-expanded={open ? "true" : undefined}
 				onClick={handleClick}
 			>
-				<MoreHoriz/>
+				<MoreHoriz />
 			</Button>
 			<Menu
 				id="basic-menu"
@@ -75,15 +98,20 @@ export default function FileMenu(props: FileMenuProps) {
 				open={open}
 				onClose={handleClose}
 				MenuListProps={{
-					'aria-labelledby': 'basic-button',
+					"aria-labelledby": "basic-button",
 				}}
 			>
 				{/*owner, editor can update file*/}
-				<AuthWrapper currRole={datasetRole.role} allowedRoles={["owner", "editor"]}>
-					<MenuItem onClick={()=>{
-						handleClose();
-						setUpdateFileOpen(true);
-					}}>
+				<AuthWrapper
+					currRole={datasetRole.role}
+					allowedRoles={["owner", "editor"]}
+				>
+					<MenuItem
+						onClick={() => {
+							handleClose();
+							setUpdateFileOpen(true);
+						}}
+					>
 						<ListItemIcon>
 							<UploadIcon fontSize="small" />
 						</ListItemIcon>
@@ -92,11 +120,16 @@ export default function FileMenu(props: FileMenuProps) {
 				</AuthWrapper>
 
 				{/*owner, editor, uploader and viewer can download file*/}
-				<AuthWrapper currRole={datasetRole.role} allowedRoles={["owner", "editor", "uploader", "viewer"]}>
-					<MenuItem onClick={()=>{
-						handleClose();
-						downloadFile(file.id, file.name);
-					}}>
+				<AuthWrapper
+					currRole={datasetRole.role}
+					allowedRoles={["owner", "editor", "uploader", "viewer"]}
+				>
+					<MenuItem
+						onClick={() => {
+							handleClose();
+							downloadFile(file.id, file.name, 0, true);
+						}}
+					>
 						<ListItemIcon>
 							<DownloadIcon fontSize="small" />
 						</ListItemIcon>
@@ -106,10 +139,12 @@ export default function FileMenu(props: FileMenuProps) {
 
 				{/*owner can delete file*/}
 				<AuthWrapper currRole={datasetRole.role} allowedRoles={["owner"]}>
-					<MenuItem onClick={()=>{
-						handleClose();
-						setConfirmationOpen(true);
-					}}>
+					<MenuItem
+						onClick={() => {
+							handleClose();
+							setConfirmationOpen(true);
+						}}
+					>
 						<ListItemIcon>
 							<DeleteIcon fontSize="small" />
 						</ListItemIcon>

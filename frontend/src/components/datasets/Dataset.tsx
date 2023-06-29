@@ -1,3 +1,4 @@
+// lazy loading
 import React, { useEffect, useState } from "react";
 import { Box, Button, Grid, Stack, Tab, Tabs, Typography } from "@mui/material";
 import { useParams, useSearchParams } from "react-router-dom";

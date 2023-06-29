@@ -178,6 +178,8 @@ export interface MetadataState {
 }
 
 export interface FileState {
+	url: "";
+	blob: Blob;
 	fileSummary: FileSummary;
 	extractedMetadata: ExtractedMetadata;
 	metadataJsonld: MetadataJsonld[];
