@@ -5,16 +5,22 @@ import {
 	DOWNLOAD_FILE,
 	fileDownloaded as fileDownloadedAction,
 } from "../../../actions/file";
+
+import {
+	DOWNLOAD_VIZ_DATA,
+	downloadVizData as downloadVizDataAction,
+} from "../../../actions/visualization";
 import ShowMoreText from "react-show-more-text";
 import { RootState } from "../../../types/data";
 import { readTextFromFile } from "../../../utils/common";
 
 type TextProps = {
 	fileId?: string;
+	visualizationId?: string;
 };
 
 export default function Text(props: TextProps) {
-	const { fileId } = props;
+	const { fileId, visualizationId } = props;
 
 	const dispatch = useDispatch();
 
@@ -25,13 +31,18 @@ export default function Text(props: TextProps) {
 		autoSave: boolean
 	) =>
 		dispatch(fileDownloadedAction(fileId, filename, fileVersionNum, autoSave));
-	const blob = useSelector((state: RootState) => state.file.blob);
+	const downloadVizData = (
+		visualizationId: string | undefined,
+		filename: string | undefined,
+		autoSave: boolean
+	) => dispatch(downloadVizDataAction(visualizationId, filename, autoSave));
+
+	const rawFileBlob = useSelector((state: RootState) => state.file.blob);
+	const vizFileBlob = useSelector(
+		(state: RootState) => state.visualization.blob
+	);
 
 	const [text, setText] = useState("");
-
-	useEffect(() => {
-		downloadFile(fileId, "text.tmp", 0, false);
-	}, [fileId]);
 
 	useEffect(() => {
 		return () => {
@@ -40,10 +51,24 @@ export default function Text(props: TextProps) {
 				blob: new Blob([]),
 				receivedAt: Date.now(),
 			});
+			dispatch({
+				type: DOWNLOAD_VIZ_DATA,
+				blob: new Blob([]),
+				receivedAt: Date.now(),
+			});
 		};
 	}, []);
 
 	useEffect(() => {
+		if (visualizationId) downloadVizData(visualizationId, "text.tmp", false);
+		else downloadFile(fileId, "text.tmp", 0, false);
+	}, [visualizationId, fileId]);
+
+	useEffect(() => {
+		let blob = new Blob();
+		if (vizFileBlob) blob = vizFileBlob;
+		else blob = rawFileBlob;
+
 		const processBlob = async () => {
 			const file = new File([blob], "text.tmp");
 			const text = await readTextFromFile(file);
@@ -51,7 +76,7 @@ export default function Text(props: TextProps) {
 		};
 
 		processBlob();
-	}, [blob]);
+	}, [vizFileBlob, rawFileBlob]);
 
 	return (
 		<ShowMoreText
