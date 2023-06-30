@@ -32,24 +32,24 @@ export const Visualization = (props: previewProps) => {
 		<LazyLoadErrorBoundary fallback={<div>Fail to load...</div>}>
 			<Suspense fallback={<div>Loading...</div>}>
 				{(() => {
-					if (vizConfig.length > 0) {
-					}
-					// if no vizaulization config exist, use default definition matching with raw bytes
-					else {
-						return Object.keys(vizComponentDefinitions).map((type) => {
-							// match main type to instantiate components correspondingly
-							if (
-								fileSummary &&
-								fileSummary.content_type !== undefined &&
-								type === fileSummary.content_type.main_type
-							) {
-								return React.cloneElement(vizComponentDefinitions[type], {
-									fileId: fileId,
-								});
-							}
-							return null;
-						});
-					}
+					// if (vizConfig.length > 0) {
+					// }
+					// // if no vizaulization config exist, use default definition matching with raw bytes
+					// else {
+					return Object.keys(vizComponentDefinitions).map((type) => {
+						// match main type to instantiate components correspondingly
+						if (
+							fileSummary &&
+							fileSummary.content_type !== undefined &&
+							type === fileSummary.content_type.main_type
+						) {
+							return React.cloneElement(vizComponentDefinitions[type], {
+								fileId: fileId,
+							});
+						}
+						return null;
+					});
+					// }
 				})()}
 			</Suspense>
 		</LazyLoadErrorBoundary>

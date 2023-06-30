@@ -128,7 +128,7 @@ async def save_visualization_config(
     resource_id = vizconfig_in["resource"]["resource_id"]
     collection = vizconfig_in["resource"]["collection"]
     resource_ref = MongoDBRef(collection=collection, resource_id=resource_id)
-    visualization_ref = MongoDBRef(collection="visualization", resource_id=vizconfig_in["visualziation"])
+    visualization_ref = MongoDBRef(collection="visualizations", resource_id=vizconfig_in["visualization"])
     del vizconfig_in["resource"]
     if collection == "files":
         file = await FileDB.get(PydanticObjectId(resource_id))
