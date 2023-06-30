@@ -13,7 +13,7 @@ class VisualizationConfigBase(BaseModel):
     job: Optional[EventListenerJobDB]
     client: Optional[str]
     viz_config_data: dict = {}
-    visualization: MongoDBRef
+    visualization: str
     # TODO add json document or key value pairs, config_variables
 
 

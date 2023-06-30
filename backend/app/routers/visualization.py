@@ -128,12 +128,11 @@ async def save_visualization_config(
     resource_id = vizconfig_in["resource"]["resource_id"]
     collection = vizconfig_in["resource"]["collection"]
     resource_ref = MongoDBRef(collection=collection, resource_id=resource_id)
-    visualization_ref = MongoDBRef(collection="visualizations", resource_id=vizconfig_in["visualization"])
     del vizconfig_in["resource"]
     if collection == "files":
         file = await FileDB.get(PydanticObjectId(resource_id))
         if file is not None:
-            viz_config = VisualizationConfigDB(**vizconfig_in, resource=resource_ref, visualization=visualization_ref)
+            viz_config = VisualizationConfigDB(**vizconfig_in, resource=resource_ref)
             await viz_config.insert()
             return viz_config.dict()
         else:
@@ -141,7 +140,7 @@ async def save_visualization_config(
     elif collection == "datasets":
         dataset = await DatasetDB.get(PydanticObjectId(resource_id))
         if dataset is not None:
-            viz_config = VisualizationConfigDB(**vizconfig_in, resource=resource_ref, visualization=visualization_ref)
+            viz_config = VisualizationConfigDB(**vizconfig_in, resource=resource_ref)
             await viz_config.insert()
             return viz_config.dict()
         else:
