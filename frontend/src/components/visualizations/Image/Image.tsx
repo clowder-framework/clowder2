@@ -1,31 +1,48 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
 	GENERATE_FILE_URL,
 	generateFileDownloadUrl as generateFileDownloadUrlAction,
 } from "../../../actions/file";
 import { RootState } from "../../../types/data";
+import {
+	GENERATE_VIZ_URL,
+	generateVizDataDownloadUrl as generateVizDataDownloadUrlAction,
+} from "../../../actions/visualization";
 
 type ImageProps = {
 	fileId?: string;
+	visualizationId?: string;
 };
 
 export default function Image(props: ImageProps) {
-	const { fileId } = props;
+	const { fileId, visualizationId } = props;
 
 	const dispatch = useDispatch();
 
 	const generateFileDownloadUrl = (
 		fileId: string | undefined,
-		fileVersionNum: number | null
+		fileVersionNum: number | undefined
 	) => dispatch(generateFileDownloadUrlAction(fileId, fileVersionNum));
 
-	const url = useSelector((state: RootState) => state.file.url);
+	const generateVizDataDownloadUrl = (visualizationId: string | undefined) =>
+		dispatch(generateVizDataDownloadUrlAction(visualizationId));
+
+	const rawFileURL = useSelector((state: RootState) => state.file.url);
+	const vizFileURL = useSelector((state: RootState) => state.visualization.url);
+
+	const [url, setUrl] = useState("");
 
 	useEffect(() => {
+		// reset
 		return () => {
 			dispatch({
 				type: GENERATE_FILE_URL,
+				url: "",
+				receivedAt: Date.now(),
+			});
+			dispatch({
+				type: GENERATE_VIZ_URL,
 				url: "",
 				receivedAt: Date.now(),
 			});
@@ -33,8 +50,14 @@ export default function Image(props: ImageProps) {
 	}, []);
 
 	useEffect(() => {
-		generateFileDownloadUrl(fileId, 0);
-	}, [fileId]);
+		if (visualizationId) generateVizDataDownloadUrl(visualizationId);
+		else generateFileDownloadUrl(fileId, 0);
+	}, [visualizationId, fileId]);
+
+	useEffect(() => {
+		if (vizFileURL && vizFileURL !== "") setUrl(vizFileURL);
+		else setUrl(rawFileURL);
+	}, [vizFileURL, rawFileURL]);
 
 	return (() => {
 		if (url && url !== "") {

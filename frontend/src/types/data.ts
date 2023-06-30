@@ -180,7 +180,7 @@ export interface MetadataState {
 }
 
 export interface FileState {
-	url: "";
+	url: string;
 	blob: Blob;
 	fileSummary: FileSummary;
 	extractedMetadata: ExtractedMetadata;
@@ -211,7 +211,7 @@ export interface ErrorState {
 
 export interface FolderState {
 	folders: FolderOut[];
-	folderPath: String[];
+	folderPath: string[];
 }
 
 export interface JobSummary {
@@ -221,21 +221,10 @@ export interface JobSummary {
 	timestamp: string;
 }
 
-export interface RootState {
-	metadata: MetadataState;
-	error: ErrorState;
-	file: FileState;
-	dataset: DatasetState;
-	listener: ListenerState;
-	group: GroupState;
-	user: UserState;
-	folder: FolderState;
-}
-
 export interface VisualizationState {
 	vizData: VisualizationOut;
 	vizConfig: VisualizationConfigOut;
-	url: String;
+	url: string;
 	blob: Blob;
 }
 
@@ -247,4 +236,16 @@ export interface EventListenerJobStatus {
 	error: string;
 	skipped: string;
 	resubmitted: string;
+}
+
+export interface RootState {
+	metadata: MetadataState;
+	error: ErrorState;
+	file: FileState;
+	dataset: DatasetState;
+	listener: ListenerState;
+	group: GroupState;
+	user: UserState;
+	folder: FolderState;
+	visualization: VisualizationState;
 }

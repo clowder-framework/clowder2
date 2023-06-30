@@ -289,7 +289,7 @@ interface FOLDER_DELETED {
 
 interface GET_FOLDER_PATH {
 	type: "GET_FOLDER_PATH";
-	folderPath: String[];
+	folderPath: string[];
 }
 
 interface RECEIVE_LISTENERS {
@@ -319,12 +319,12 @@ interface RECEIVE_LISTENER_JOBS {
 
 interface SUBMIT_FILE_EXTRACTION {
 	type: "SUBMIT_FILE_EXTRACTION";
-	job_id: String;
+	job_id: string;
 }
 
 interface SUBMIT_DATASET_EXTRACTION {
 	type: "SUBMIT_DATASET_EXTRACTION";
-	job_id: String;
+	job_id: string;
 }
 
 interface FETCH_JOB_SUMMARY {
@@ -409,7 +409,7 @@ interface DOWNLOAD_VIZ_DATA {
 
 interface GENERATE_VIZ_URL {
 	type: "GENERATE_VIZ_URL";
-	url: String;
+	url: string;
 }
 
 export type DataAction =
