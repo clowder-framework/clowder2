@@ -11,6 +11,8 @@ import {
 	RoleType,
 	UserAPIKeyOut,
 	UserOut,
+	VisualizationConfigOut,
+	VisualizationOut,
 } from "../openapi/v2";
 
 export interface Dataset {
@@ -228,6 +230,13 @@ export interface RootState {
 	group: GroupState;
 	user: UserState;
 	folder: FolderState;
+}
+
+export interface VisualizationState {
+	vizData: VisualizationOut;
+	vizConfig: VisualizationConfigOut;
+	url: String;
+	blob: Blob;
 }
 
 export interface EventListenerJobStatus {

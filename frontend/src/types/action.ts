@@ -17,6 +17,8 @@ import {
 	RoleType,
 	UserAPIKeyOut,
 	UserOut,
+	VisualizationConfigOut,
+	VisualizationOut,
 } from "../openapi/v2";
 import {
 	LIST_USERS,
@@ -390,6 +392,26 @@ interface ASSIGN_GROUP_MEMBER_ROLE {
 	about: Group;
 }
 
+interface GET_VIZ_DATA {
+	type: "GET_VIZ_DATA";
+	vizData: VisualizationOut;
+}
+
+interface GET_VIZ_CONFIG {
+	type: "GET_VIZ_CONFIG";
+	vizConfig: VisualizationConfigOut;
+}
+
+interface DOWNLOAD_VIZ_DATA {
+	type: "DOWNLOAD_VIZ_DATA";
+	blob: Blob;
+}
+
+interface GENERATE_VIZ_URL {
+	type: "GENERATE_VIZ_URL";
+	url: String;
+}
+
 export type DataAction =
 	| RECEIVE_FILES_IN_DATASET
 	| RECEIVE_FOLDERS_IN_DATASET
@@ -460,4 +482,8 @@ export type DataAction =
 	| LIST_USERS
 	| PREFIX_SEARCH_USERS
 	| RECEIVE_DATASET_ROLES
-	| RECEIVE_USER_PROFILE;
+	| RECEIVE_USER_PROFILE
+	| GET_VIZ_DATA
+	| GET_VIZ_CONFIG
+	| DOWNLOAD_VIZ_DATA
+	| GENERATE_VIZ_URL;
