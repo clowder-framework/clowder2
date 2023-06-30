@@ -43,7 +43,7 @@ export const Visualization = (props: previewProps) => {
 											return React.cloneElement(
 												vizComponentDefinition.component,
 												{
-													visualizaitonId: vizConfigEntry.visualization,
+													visualizationId: vizConfigEntry.visualization,
 												}
 											);
 										}
