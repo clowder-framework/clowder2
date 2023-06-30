@@ -35,7 +35,7 @@ import HistoryIcon from "@mui/icons-material/History";
 import { Forbidden } from "../errors/Forbidden";
 import { PageNotFound } from "../errors/PageNotFound";
 import VisibilityIcon from "@mui/icons-material/Visibility";
-import { Preview } from "../previewers/Preview";
+import { Visualization } from "../visualizations/Visualization";
 import { ErrorModal } from "../errors/ErrorModal";
 
 export const File = (): JSX.Element => {
@@ -264,7 +264,7 @@ export const File = (): JSX.Element => {
 							icon={<VisibilityIcon />}
 							iconPosition="start"
 							sx={TabStyle}
-							label="Preview"
+							label="Visualization"
 							{...a11yProps(0)}
 							disabled={false}
 						/>
@@ -309,7 +309,7 @@ export const File = (): JSX.Element => {
 						/>
 					</Tabs>
 					<TabPanel value={selectedTabIndex} index={0}>
-						<Preview fileId={fileId} />
+						<Visualization fileId={fileId} />
 					</TabPanel>
 					{/*Version History*/}
 					<TabPanel value={selectedTabIndex} index={1}>

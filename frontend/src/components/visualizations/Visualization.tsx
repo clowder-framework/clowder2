@@ -8,7 +8,7 @@ import { vizConfig } from "../../visualization.config";
 type previewProps = {
 	fileId?: string;
 };
-export const Preview = (props: previewProps) => {
+export const Visualization = (props: previewProps) => {
 	const { fileId } = props;
 
 	const fileSummary = useSelector((state: RootState) => state.file.fileSummary);
