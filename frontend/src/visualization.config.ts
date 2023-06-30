@@ -36,13 +36,13 @@ vizComponentDefinitions.push({
 // 	component: React.createElement(registerComponent(configDemo)),
 // });
 
-const configIframe = require("./components/visualizations/Iframe/manifest.json");
-vizComponentDefinitions.push({
-	name: configIframe.name,
-	mainType: configIframe.vizConfig.mainType,
-	mimeTypes: configIframe.vizConfig.mimeTypes,
-	component: React.createElement(registerComponent(configIframe)),
-});
+// const configIframe = require("./components/visualizations/Iframe/manifest.json");
+// vizComponentDefinitions.push({
+// 	name: configIframe.name,
+// 	mainType: configIframe.vizConfig.mainType,
+// 	mimeTypes: configIframe.vizConfig.mimeTypes,
+// 	component: React.createElement(registerComponent(configIframe)),
+// });
 
 const configImage = require("./components/visualizations/Image/manifest.json");
 vizComponentDefinitions.push({

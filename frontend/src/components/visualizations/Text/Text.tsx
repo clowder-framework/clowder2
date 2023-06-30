@@ -65,9 +65,9 @@ export default function Text(props: TextProps) {
 	}, [visualizationId, fileId]);
 
 	useEffect(() => {
-		let blob = new Blob();
-		if (vizFileBlob) blob = vizFileBlob;
-		else blob = rawFileBlob;
+		let blob = new Blob([]);
+		if (vizFileBlob.size > 0) blob = vizFileBlob;
+		else if (rawFileBlob.size > 0) blob = rawFileBlob;
 
 		const processBlob = async () => {
 			const file = new File([blob], "text.tmp");
