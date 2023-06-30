@@ -10,7 +10,7 @@ import {
 
 const defaultState: VisualizationState = {
 	vizData: <VisualizationOut>{},
-	vizConfig: <VisualizationConfigOut>{},
+	vizConfig: <VisualizationConfigOut[]>[],
 	url: "",
 	blob: new Blob([]),
 };

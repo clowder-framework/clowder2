@@ -25,5 +25,6 @@ export type VisualizationConfigOut = {
     job?: EventListenerJobDB;
     client?: string;
     viz_config_data?: any;
+    visualization: MongoDBRef;
     id?: string;
 }

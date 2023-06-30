@@ -1,14 +1,10 @@
-from datetime import datetime
-from typing import Optional, List
+from typing import Optional
 
-from beanie import Document, View, PydanticObjectId
-from pydantic import Field, BaseModel
+from beanie import Document
+from pydantic import BaseModel
 
-from app.models.authorization import AuthorizationDB
 from app.models.listeners import ExtractorInfo, EventListenerJobDB
 from app.models.metadata import MongoDBRef
-from app.models.pyobjectid import PyObjectId
-from app.models.users import UserOut
 
 
 class VisualizationConfigBase(BaseModel):
@@ -17,6 +13,7 @@ class VisualizationConfigBase(BaseModel):
     job: Optional[EventListenerJobDB]
     client: Optional[str]
     viz_config_data: dict = {}
+    visualization: MongoDBRef
     # TODO add json document or key value pairs, config_variables
 
 

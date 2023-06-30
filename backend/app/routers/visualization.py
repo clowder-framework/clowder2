@@ -28,11 +28,11 @@ security = HTTPBearer()
 
 @router.post("", response_model=VisualizationOut)
 async def add_Visualization(
-    name: str,
-    description: str,
-    user=Depends(get_current_user),
-    fs: Minio = Depends(dependencies.get_fs),
-    file: UploadFile = File(...),
+        name: str,
+        description: str,
+        user=Depends(get_current_user),
+        fs: Minio = Depends(dependencies.get_fs),
+        file: UploadFile = File(...),
 ):
     """Insert VisualizationsDataDB object into MongoDB (makes Clowder ID), then Minio.
 
@@ -72,7 +72,7 @@ async def add_Visualization(
 @router.get("/{visualization_id}", response_model=VisualizationOut)
 async def get_visualization(visualization_id: str):
     if (
-        visualization := await VisualizationDB.get(PydanticObjectId(visualization_id))
+            visualization := await VisualizationDB.get(PydanticObjectId(visualization_id))
     ) is not None:
         return visualization.dict()
     raise HTTPException(
@@ -82,10 +82,10 @@ async def get_visualization(visualization_id: str):
 
 @router.delete("/{visualization_id}")
 async def remove_visualization(
-    visualization_id: str, fs: Minio = Depends(dependencies.get_fs)
+        visualization_id: str, fs: Minio = Depends(dependencies.get_fs)
 ):
     if (
-        visualization := await VisualizationDB.get(PydanticObjectId(visualization_id))
+            visualization := await VisualizationDB.get(PydanticObjectId(visualization_id))
     ) is not None:
         fs.remove_object(settings.MINIO_BUCKET_NAME, visualization_id)
         visualization.delete()
@@ -97,18 +97,18 @@ async def remove_visualization(
 
 @router.get("/download/{visualization_id}")
 async def download_visualization(
-    visualization_id: str, fs: Minio = Depends(dependencies.get_fs)
+        visualization_id: str, fs: Minio = Depends(dependencies.get_fs)
 ):
     # If visualization exists in MongoDB, download from Minio
     if (
-        visualization := await VisualizationDB.get(PydanticObjectId(visualization_id))
+            visualization := await VisualizationDB.get(PydanticObjectId(visualization_id))
     ) is not None:
         content = fs.get_object(settings.MINIO_BUCKET_NAME, visualization_id)
 
         # Get content type & open file stream
         response = StreamingResponse(content.stream(settings.MINIO_UPLOAD_CHUNK_SIZE))
         response.headers["Content-Disposition"] = (
-            "attachment; filename=%s" % visualization.name
+                "attachment; filename=%s" % visualization.name
         )
         return response
     else:
@@ -119,20 +119,21 @@ async def download_visualization(
 
 @router.post("/config", response_model=VisualizationConfigOut)
 async def save_visualization_config(
-    vizconfig_in: VisualizationConfigIn,
-    user=Depends(get_current_user),
-    credentials: HTTPAuthorizationCredentials = Security(security),
+        vizconfig_in: VisualizationConfigIn,
+        user=Depends(get_current_user),
+        credentials: HTTPAuthorizationCredentials = Security(security),
 ):
     vizconfig_in = vizconfig_in.dict()
     # TODO why does it not have right type in the db without the lines below?
     resource_id = vizconfig_in["resource"]["resource_id"]
     collection = vizconfig_in["resource"]["collection"]
     resource_ref = MongoDBRef(collection=collection, resource_id=resource_id)
+    visualization_ref = MongoDBRef(collection="visualization", resource_id=vizconfig_in["visualziation"])
     del vizconfig_in["resource"]
     if collection == "files":
         file = await FileDB.get(PydanticObjectId(resource_id))
         if file is not None:
-            viz_config = VisualizationConfigDB(**vizconfig_in, resource=resource_ref)
+            viz_config = VisualizationConfigDB(**vizconfig_in, resource=resource_ref, visualization=visualization_ref)
             await viz_config.insert()
             return viz_config.dict()
         else:
@@ -140,7 +141,7 @@ async def save_visualization_config(
     elif collection == "datasets":
         dataset = await DatasetDB.get(PydanticObjectId(resource_id))
         if dataset is not None:
-            viz_config = VisualizationConfigDB(**vizconfig_in, resource=resource_ref)
+            viz_config = VisualizationConfigDB(**vizconfig_in, resource=resource_ref, visualization=visualization_ref)
             await viz_config.insert()
             return viz_config.dict()
         else:
@@ -151,9 +152,9 @@ async def save_visualization_config(
 
 @router.get("/{resource_id}/config", response_model=List[VisualizationConfigOut])
 async def get_resource_vizconfig(
-    resource_id: PydanticObjectId,
-    user=Depends(get_current_user),
-    credentials: HTTPAuthorizationCredentials = Security(security),
+        resource_id: PydanticObjectId,
+        user=Depends(get_current_user),
+        credentials: HTTPAuthorizationCredentials = Security(security),
 ):
     query = [VisualizationConfigDB.resource.resource_id == ObjectId(resource_id)]
     vizconfigs = []
@@ -164,12 +165,12 @@ async def get_resource_vizconfig(
 
 @router.get("/config/{config_id}", response_model=VisualizationConfigOut)
 async def get_vizconfig(
-    config_id: PydanticObjectId,
-    user=Depends(get_current_user),
-    credentials: HTTPAuthorizationCredentials = Security(security),
+        config_id: PydanticObjectId,
+        user=Depends(get_current_user),
+        credentials: HTTPAuthorizationCredentials = Security(security),
 ):
     if (
-        viz_config := await VisualizationConfigDB.get(PydanticObjectId(config_id))
+            viz_config := await VisualizationConfigDB.get(PydanticObjectId(config_id))
     ) is not None:
         return viz_config.dict()
     else:
@@ -178,13 +179,13 @@ async def get_vizconfig(
 
 @router.patch("/config/{config_id}/vizdata", response_model=VisualizationConfigOut)
 async def update_vizconfig_map(
-    config_id: PydanticObjectId,
-    new_viz_config_data: dict,
-    user=Depends(get_current_user),
-    credentials: HTTPAuthorizationCredentials = Security(security),
+        config_id: PydanticObjectId,
+        new_viz_config_data: dict,
+        user=Depends(get_current_user),
+        credentials: HTTPAuthorizationCredentials = Security(security),
 ):
     if (
-        viz_config := await VisualizationConfigDB.get(PydanticObjectId(config_id))
+            viz_config := await VisualizationConfigDB.get(PydanticObjectId(config_id))
     ) is not None:
         viz_config.viz_config_data = new_viz_config_data
         await viz_config.replace()
@@ -195,12 +196,12 @@ async def update_vizconfig_map(
 
 @router.delete("/config/{config_id}", response_model=VisualizationConfigOut)
 async def delete_vizconfig(
-    config_id: PydanticObjectId,
-    user=Depends(get_current_user),
-    credentials: HTTPAuthorizationCredentials = Security(security),
+        config_id: PydanticObjectId,
+        user=Depends(get_current_user),
+        credentials: HTTPAuthorizationCredentials = Security(security),
 ):
     if (
-        viz_config := await VisualizationConfigDB.get(PydanticObjectId(config_id))
+            viz_config := await VisualizationConfigDB.get(PydanticObjectId(config_id))
     ) is not None:
         await viz_config.delete()
         return viz_config.dict()
