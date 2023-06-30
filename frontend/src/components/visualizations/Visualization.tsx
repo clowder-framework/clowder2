@@ -56,13 +56,13 @@ export const Visualization = (props: previewProps) => {
 									if (
 										fileSummary &&
 										fileSummary.content_type !== undefined &&
-										((fileSummary.content_type.main_type !== undefined &&
-											fileSummary.content_type.main_type ===
-												vizComponentDefinition.mainType) ||
-											(fileSummary.content_type.content_type !== undefined &&
-												vizComponentDefinition.mimeTypes.includes(
-													fileSummary.content_type.content_type
-												)))
+										((fileSummary.content_type.content_type !== undefined &&
+											vizComponentDefinition.mimeTypes.includes(
+												fileSummary.content_type.content_type
+											)) ||
+											(fileSummary.content_type.main_type !== undefined &&
+												fileSummary.content_type.main_type ===
+													vizComponentDefinition.mainType))
 									) {
 										return React.cloneElement(
 											vizComponentDefinition.component,

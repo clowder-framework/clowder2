@@ -11,7 +11,7 @@ type IframeProps = {
 	fileId?: string;
 };
 
-export default function Iframe(props: IframeProps) {
+export default function string(props: IframeProps) {
 	const { fileId } = props;
 
 	const dispatch = useDispatch();

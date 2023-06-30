@@ -28,20 +28,20 @@ vizComponentDefinitions.push({
 	component: React.createElement(registerComponent(configAudio)),
 });
 
-const configDemo = require("./components/visualizations/Demo/manifest.json");
-vizComponentDefinitions.push({
-	name: configDemo.name,
-	mainType: configDemo.vizConfig.mainType,
-	mimeTypes: configDemo.vizConfig.mimeTypes,
-	component: React.createElement(registerComponent(configDemo)),
-});
+// const configDemo = require("./components/visualizations/Demo/manifest.json");
+// vizComponentDefinitions.push({
+// 	name: configDemo.name,
+// 	mainType: configDemo.vizConfig.mainType,
+// 	mimeTypes: configDemo.vizConfig.mimeTypes,
+// 	component: React.createElement(registerComponent(configDemo)),
+// });
 
-const configHtml = require("./components/visualizations/Html/manifest.json");
+const configIframe = require("./components/visualizations/Iframe/manifest.json");
 vizComponentDefinitions.push({
-	name: configHtml.name,
-	mainType: configHtml.vizConfig.mainType,
-	mimeTypes: configHtml.vizConfig.mimeTypes,
-	component: React.createElement(registerComponent(configHtml)),
+	name: configIframe.name,
+	mainType: configIframe.vizConfig.mainType,
+	mimeTypes: configIframe.vizConfig.mimeTypes,
+	component: React.createElement(registerComponent(configIframe)),
 });
 
 const configImage = require("./components/visualizations/Image/manifest.json");
