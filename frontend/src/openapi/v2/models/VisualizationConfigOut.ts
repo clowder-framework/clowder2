@@ -26,5 +26,6 @@ export type VisualizationConfigOut = {
     client?: string;
     viz_config_data?: any;
     visualization: string;
+    component_name: string;
     id?: string;
 }
