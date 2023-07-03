@@ -67,7 +67,7 @@ interface DELETE_DATASET {
 
 interface RECEIVE_FILE_EXTRACTED_METADATA {
 	type: "RECEIVE_FILE_EXTRACTED_METADATA";
-	extractedMetadata: ExtractedMetadata;
+	extractedMetadata: ExtractedMetadata[];
 }
 
 interface RECEIVE_FILE_METADATA_JSONLD {

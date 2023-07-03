@@ -29,6 +29,19 @@ services:
     volumes:
       - geoserver_data:/opt/geoserver_data
       - geoserver_exts:/opt/additional_libs
+
+  geotiff-preview:
+    image: maxzilla2/extractors-geotiff-preview
+    environment:
+      GEOSERVER_URL: http://geoserver:8080/geoserver/
+      GEOSERVER_USERNAME: admin
+      GEOSERVER_PASSWORD: geoserver
+      CLOWDER_VERSION: 2
+      CLOWDER_URL: http://host.docker.internal:8000/
+      RABBITMQ_URI: amqp://guest:guest@rabbitmq:5672/%2F
+    networks:
+      - clowder2
+
 networks:
   clowder2:
 

@@ -102,7 +102,7 @@ async def submit_dataset_job(
     rabbitmq_client: BlockingChannel = Depends(dependencies.get_rabbitmq),
 ):
     # Create an entry in job history with unique ID
-    job = EventListenerDB(
+    job = EventListenerJobDB(
         listener_id=routing_key,
         creator=user,
         resource_ref=MongoDBRef(collection="dataset", resource_id=dataset_out.id),

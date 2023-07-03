@@ -4,31 +4,45 @@ import Map from "ol/Map";
 import View from "ol/View";
 import TileLayer from "ol/layer/Tile";
 import XYZ from "ol/source/XYZ";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../../types/data";
+import { fetchFileExtractedMetadata } from "../../../actions/file";
 
 type GeospatialProps = {
-	features?: string;
+	fileId?: string;
 };
 
 // https://taylor.callsen.me/using-openlayers-with-react-functional-components/
 export default function Geospatial(props: GeospatialProps) {
+	const { fileId } = props;
+
+	const dispatch = useDispatch();
+
 	const [layerWMS, setLayerWMS] = useState("");
 	const [map, setMap] = useState<Map | undefined>(undefined);
 	const mapElement = useRef();
 	const mapRef = useRef<Map>();
 	mapRef.current = map;
 
+	const fetchExtractdMetadata = (fileId: string | undefined) =>
+		dispatch(fetchFileExtractedMetadata(fileId));
+
 	const metadata = useSelector(
 		(state: RootState) => state.file.extractedMetadata
 	);
 
 	useEffect(() => {
-		const url =
-			"https://basemap.nationalmap.gov/arcgis/rest/services/USGSTopo/MapServer/tile/{z}/{y}/{x}";
-		// TODO: Replace with action to get metadata from file and check for WMS URL
-		setLayerWMS(url);
-	}, []);
+		metadata.forEach(function (md) {
+			if (md.content && md.content["WMS Layer URL"]) {
+				const wms_url = String(md.content["WMS Layer URL"]);
+				setLayerWMS(wms_url);
+			}
+		});
+	}, [metadata]);
+
+	useEffect(() => {
+		fetchExtractdMetadata(fileId);
+	}, [fileId]);
 
 	useEffect(() => {
 		const wms_map = new Map({

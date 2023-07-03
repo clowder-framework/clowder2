@@ -110,8 +110,19 @@ export interface Path {
 	type: string;
 }
 
+export interface ResourceReference {
+	collection: string;
+	resource_id: string;
+	version: number;
+}
+
 export interface ExtractedMetadata {
-	filename: string;
+	id: string;
+	context: (Context | string)[];
+	agent: Agent;
+	resource: ResourceReference;
+	content: Record<string, unknown>;
+	created_at: string | Date;
 }
 
 export interface MetadataJsonld {
@@ -119,7 +130,7 @@ export interface MetadataJsonld {
 	"@context": (Context | string)[];
 	agent: Agent;
 	attached_to: AttatchTo;
-	content: any;
+	content: Record<string, unknown>;
 	created_at: string | Date;
 }
 
@@ -179,7 +190,7 @@ export interface MetadataState {
 
 export interface FileState {
 	fileSummary: FileSummary;
-	extractedMetadata: ExtractedMetadata;
+	extractedMetadata: ExtractedMetadata[];
 	metadataJsonld: MetadataJsonld[];
 	previews: FilePreview[];
 	fileVersions: FileVersion[];
