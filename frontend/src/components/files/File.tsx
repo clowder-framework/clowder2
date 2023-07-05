@@ -264,7 +264,7 @@ export const File = (): JSX.Element => {
 							icon={<VisibilityIcon />}
 							iconPosition="start"
 							sx={TabStyle}
-							label="Visualization"
+							label="Visualizations"
 							{...a11yProps(0)}
 							disabled={false}
 						/>
