@@ -16,9 +16,8 @@ class VisualizationConfigBase(BaseModel):
     extractor_info: Optional[ExtractorInfo]
     job: Optional[EventListenerJobDB]
     client: Optional[str]
-    viz_config_data: dict = {}
-    # TODO add json document or key value pairs, config_variables
-
+    parameters: dict = {}
+    visualization_bytes_id: List[PyObjectId]
 
 class VisualizationConfigIn(VisualizationConfigBase):
     pass

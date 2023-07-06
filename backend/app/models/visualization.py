@@ -28,7 +28,7 @@ class VisualizationIn(VisualizationBase):
     pass
 
 
-class VisualizationDB(Document, VisualizationBase):
+class VisualizationDataDB(Document, VisualizationBase):
     creator: UserOut
     created: datetime = Field(default_factory=datetime.utcnow)
     modified: datetime = Field(default_factory=datetime.utcnow)
@@ -36,9 +36,9 @@ class VisualizationDB(Document, VisualizationBase):
     content_type: ContentType = ContentType()
 
     class Settings:
-        name = "visualizations"
+        name = "visualizationData"
 
 
-class VisualizationOut(VisualizationDB):
+class VisualizationOut(VisualizationDataDB):
     class Config:
         fields = {"id": "id"}
