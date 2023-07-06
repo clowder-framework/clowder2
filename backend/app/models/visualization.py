@@ -9,7 +9,7 @@ from app.models.files import ContentType
 from app.models.users import UserOut
 
 
-class VisualizationBase(BaseModel):
+class VisualizationDataBase(BaseModel):
     name: str = "N/A"
     description: Optional[str] = None
 
@@ -24,11 +24,11 @@ class VisualizationBase(BaseModel):
         return value
 
 
-class VisualizationIn(VisualizationBase):
+class VisualizationDataIn(VisualizationDataBase):
     pass
 
 
-class VisualizationDataDB(Document, VisualizationBase):
+class VisualizationDataDB(Document, VisualizationDataBase):
     creator: UserOut
     created: datetime = Field(default_factory=datetime.utcnow)
     modified: datetime = Field(default_factory=datetime.utcnow)
@@ -39,6 +39,6 @@ class VisualizationDataDB(Document, VisualizationBase):
         name = "visualizationData"
 
 
-class VisualizationOut(VisualizationDataDB):
+class VisualizationDataOut(VisualizationDataDB):
     class Config:
         fields = {"id": "id"}

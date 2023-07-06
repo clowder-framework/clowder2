@@ -15,8 +15,8 @@ from app.models.datasets import DatasetDB
 from app.models.files import FileDB
 from app.models.metadata import MongoDBRef
 from app.models.visualization import (
-    VisualizationOut,
-    VisualizationIn,
+    VisualizationDataOut,
+    VisualizationDataIn,
     VisualizationDataDB,
 )
 from app.models.visualization_config import (
@@ -30,7 +30,7 @@ router = APIRouter()
 security = HTTPBearer()
 
 
-@router.post("", response_model=VisualizationOut)
+@router.post("", response_model=VisualizationDataOut)
 async def add_Visualization(
     name: str,
     description: str,
@@ -45,7 +45,7 @@ async def add_Visualization(
         description: description of visualization data
         file: bytes to upload
     """
-    visualization_in = VisualizationIn(name=name, description=description)
+    visualization_in = VisualizationDataIn(name=name, description=description)
 
     # Check all connection and abort if any one of them is not available
     if fs is None:
@@ -73,7 +73,7 @@ async def add_Visualization(
     return visualization_db.dict()
 
 
-@router.get("/{visualization_id}", response_model=VisualizationOut)
+@router.get("/{visualization_id}", response_model=VisualizationDataOut)
 async def get_visualization(visualization_id: str):
     if (
         visualization := await VisualizationDataDB.get(
