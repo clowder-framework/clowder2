@@ -19,6 +19,7 @@ class VisualizationConfigBase(BaseModel):
     parameters: dict = {}
     visualization_bytes_id: List[PyObjectId]
 
+
 class VisualizationConfigIn(VisualizationConfigBase):
     pass
 
