@@ -14,7 +14,11 @@ from app.keycloak_auth import get_current_user
 from app.models.datasets import DatasetDB
 from app.models.files import FileDB
 from app.models.metadata import MongoDBRef
-from app.models.visualization import VisualizationOut, VisualizationIn, VisualizationDataDB
+from app.models.visualization import (
+    VisualizationOut,
+    VisualizationIn,
+    VisualizationDataDB,
+)
 from app.models.visualization_config import (
     VisualizationConfigOut,
     VisualizationConfigDB,
@@ -72,7 +76,9 @@ async def add_Visualization(
 @router.get("/{visualization_id}", response_model=VisualizationOut)
 async def get_visualization(visualization_id: str):
     if (
-        visualization := await VisualizationDataDB.get(PydanticObjectId(visualization_id))
+        visualization := await VisualizationDataDB.get(
+            PydanticObjectId(visualization_id)
+        )
     ) is not None:
         return visualization.dict()
     raise HTTPException(
@@ -85,7 +91,9 @@ async def remove_visualization(
     visualization_id: str, fs: Minio = Depends(dependencies.get_fs)
 ):
     if (
-        visualization := await VisualizationDataDB.get(PydanticObjectId(visualization_id))
+        visualization := await VisualizationDataDB.get(
+            PydanticObjectId(visualization_id)
+        )
     ) is not None:
         fs.remove_object(settings.MINIO_BUCKET_NAME, visualization_id)
         visualization.delete()
@@ -101,7 +109,9 @@ async def download_visualization(
 ):
     # If visualization exists in MongoDB, download from Minio
     if (
-        visualization := await VisualizationDataDB.get(PydanticObjectId(visualization_id))
+        visualization := await VisualizationDataDB.get(
+            PydanticObjectId(visualization_id)
+        )
     ) is not None:
         content = fs.get_object(settings.MINIO_BUCKET_NAME, visualization_id)
 
