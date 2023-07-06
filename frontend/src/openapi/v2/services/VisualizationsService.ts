@@ -4,7 +4,7 @@
 import type { Body_add_Visualization_api_v2_visualizations_post } from '../models/Body_add_Visualization_api_v2_visualizations_post';
 import type { VisualizationConfigIn } from '../models/VisualizationConfigIn';
 import type { VisualizationConfigOut } from '../models/VisualizationConfigOut';
-import type { VisualizationOut } from '../models/VisualizationOut';
+import type { VisualizationDataOut } from '../models/VisualizationDataOut';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { request as __request } from '../core/request';
 
@@ -21,14 +21,14 @@ export class VisualizationsService {
      * @param name
      * @param description
      * @param formData
-     * @returns VisualizationOut Successful Response
+     * @returns VisualizationDataOut Successful Response
      * @throws ApiError
      */
     public static addVisualizationApiV2VisualizationsPost(
         name: string,
         description: string,
         formData: Body_add_Visualization_api_v2_visualizations_post,
-    ): CancelablePromise<VisualizationOut> {
+    ): CancelablePromise<VisualizationDataOut> {
         return __request({
             method: 'POST',
             path: `/api/v2/visualizations`,
@@ -47,12 +47,12 @@ export class VisualizationsService {
     /**
      * Get Visualization
      * @param visualizationId
-     * @returns VisualizationOut Successful Response
+     * @returns VisualizationDataOut Successful Response
      * @throws ApiError
      */
     public static getVisualizationApiV2VisualizationsVisualizationIdGet(
         visualizationId: string,
-    ): CancelablePromise<VisualizationOut> {
+    ): CancelablePromise<VisualizationDataOut> {
         return __request({
             method: 'GET',
             path: `/api/v2/visualizations/${visualizationId}`,

@@ -63,7 +63,7 @@ export type { UserOut } from './models/UserOut';
 export type { ValidationError } from './models/ValidationError';
 export type { VisualizationConfigIn } from './models/VisualizationConfigIn';
 export type { VisualizationConfigOut } from './models/VisualizationConfigOut';
-export type { VisualizationOut } from './models/VisualizationOut';
+export type { VisualizationDataOut } from './models/VisualizationDataOut';
 
 export { AuthService } from './services/AuthService';
 export { AuthorizationService } from './services/AuthorizationService';
