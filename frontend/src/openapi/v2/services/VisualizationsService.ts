@@ -86,12 +86,12 @@ export class VisualizationsService {
      * @returns any Successful Response
      * @throws ApiError
      */
-    public static downloadVisualizationApiV2VisualizationsDownloadVisualizationIdGet(
+    public static downloadVisualizationApiV2VisualizationsDownloadVisualizationIdBytesGet(
         visualizationId: string,
     ): CancelablePromise<any> {
         return __request({
             method: 'GET',
-            path: `/api/v2/visualizations/download/${visualizationId}`,
+            path: `/api/v2/visualizations/download/${visualizationId}/bytes`,
             errors: {
                 422: `Validation Error`,
             },
