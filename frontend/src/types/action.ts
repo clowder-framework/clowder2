@@ -17,6 +17,8 @@ import {
 	RoleType,
 	UserAPIKeyOut,
 	UserOut,
+	VisualizationConfigOut,
+	VisualizationOut,
 } from "../openapi/v2";
 import {
 	LIST_USERS,
@@ -287,7 +289,7 @@ interface FOLDER_DELETED {
 
 interface GET_FOLDER_PATH {
 	type: "GET_FOLDER_PATH";
-	folderPath: String[];
+	folderPath: string[];
 }
 
 interface RECEIVE_LISTENERS {
@@ -317,12 +319,12 @@ interface RECEIVE_LISTENER_JOBS {
 
 interface SUBMIT_FILE_EXTRACTION {
 	type: "SUBMIT_FILE_EXTRACTION";
-	job_id: String;
+	job_id: string;
 }
 
 interface SUBMIT_DATASET_EXTRACTION {
 	type: "SUBMIT_DATASET_EXTRACTION";
-	job_id: String;
+	job_id: string;
 }
 
 interface FETCH_JOB_SUMMARY {
@@ -388,6 +390,26 @@ interface PREFIX_SEARCH_USERS {
 interface ASSIGN_GROUP_MEMBER_ROLE {
 	type: "ASSIGN_GROUP_MEMBER_ROLE";
 	about: Group;
+}
+
+interface GET_VIS_DATA {
+	type: "GET_VIS_DATA";
+	visData: VisualizationOut;
+}
+
+interface GET_VIS_CONFIG {
+	type: "GET_VIS_CONFIG";
+	visConfig: VisualizationConfigOut;
+}
+
+interface DOWNLOAD_VIS_DATA {
+	type: "DOWNLOAD_VIS_DATA";
+	blob: Blob;
+}
+
+interface GENERATE_VIS_URL {
+	type: "GENERATE_VIS_URL";
+	url: string;
 }
 
 export type DataAction =
@@ -460,4 +482,8 @@ export type DataAction =
 	| LIST_USERS
 	| PREFIX_SEARCH_USERS
 	| RECEIVE_DATASET_ROLES
-	| RECEIVE_USER_PROFILE;
+	| RECEIVE_USER_PROFILE
+	| GET_VIS_DATA
+	| GET_VIS_CONFIG
+	| DOWNLOAD_VIS_DATA
+	| GENERATE_VIS_URL;

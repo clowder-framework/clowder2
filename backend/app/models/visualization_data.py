@@ -1,15 +1,15 @@
-from datetime import datetime
-from typing import Optional, List
 import json
+from datetime import datetime
+from typing import Optional
 
-from beanie import Document, PydanticObjectId
+from beanie import Document
 from pydantic import BaseModel, Field
 
 from app.models.files import ContentType
 from app.models.users import UserOut
 
 
-class VisualizationBase(BaseModel):
+class VisualizationDataBase(BaseModel):
     name: str = "N/A"
     description: Optional[str] = None
 
@@ -24,11 +24,11 @@ class VisualizationBase(BaseModel):
         return value
 
 
-class VisualizationIn(VisualizationBase):
+class VisualizationDataIn(VisualizationDataBase):
     pass
 
 
-class VisualizationDB(Document, VisualizationBase):
+class VisualizationDataDB(Document, VisualizationDataBase):
     creator: UserOut
     created: datetime = Field(default_factory=datetime.utcnow)
     modified: datetime = Field(default_factory=datetime.utcnow)
@@ -36,9 +36,9 @@ class VisualizationDB(Document, VisualizationBase):
     content_type: ContentType = ContentType()
 
     class Settings:
-        name = "visualizations"
+        name = "visualizationData"
 
 
-class VisualizationOut(VisualizationDB):
+class VisualizationDataOut(VisualizationDataDB):
     class Config:
         fields = {"id": "id"}

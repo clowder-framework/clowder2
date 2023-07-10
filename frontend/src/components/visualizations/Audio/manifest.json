@@ -2,27 +2,19 @@
 	"name": "basic-audio-component",
 	"version": "1.0.0",
 	"description": "A React component for audio",
-	"main": "Text.tsx",
+	"main": "Audio.tsx",
 	"dependencies": {
 		"clowder2-core": "1.0.0",
 		"react": "^17.0.2",
 		"react-dom": "^17.0.2"
 	},
-	"vizConfig": {
-		"name": "Text",
-		"mainType": "text",
+	"visConfig": {
+		"name": "Audio",
+		"mainType": "audio",
 		"mimeTypes": [
-			"text/plain"
+			"audio/mpeg",
+			"audio/wav"
 		],
-		"fields": [
-			{
-				"name": "lineNum",
-				"list": false,
-				"config": {
-					"type": "number"
-				},
-				"required": true
-			}
-		]
+		"fields": []
 	}
 }
