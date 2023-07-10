@@ -17,7 +17,7 @@ class VisualizationConfigBase(BaseModel):
     job: Optional[EventListenerJobDB]
     client: Optional[str]
     parameters: dict = {}
-    visualization_bytes_id: List[PyObjectId]
+    visualization_bytes_ids: List[PyObjectId]
 
 
 class VisualizationConfigIn(VisualizationConfigBase):
@@ -26,7 +26,7 @@ class VisualizationConfigIn(VisualizationConfigBase):
 
 class VisualizationConfigDB(Document, VisualizationConfigBase):
     class Settings:
-        name = "vizconfig"
+        name = "vizualization_config"
 
 
 class VisualizationConfigOut(VisualizationConfigDB):
