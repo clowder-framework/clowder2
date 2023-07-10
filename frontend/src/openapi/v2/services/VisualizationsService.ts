@@ -119,12 +119,12 @@ export class VisualizationsService {
     }
 
     /**
-     * Get Resource Vizconfig
+     * Get Resource Visconfig
      * @param resourceId
      * @returns VisualizationConfigOut Successful Response
      * @throws ApiError
      */
-    public static getResourceVizconfigApiV2VisualizationsResourceIdConfigGet(
+    public static getResourceVisconfigApiV2VisualizationsResourceIdConfigGet(
         resourceId: string,
     ): CancelablePromise<Array<VisualizationConfigOut>> {
         return __request({
@@ -137,12 +137,12 @@ export class VisualizationsService {
     }
 
     /**
-     * Get Vizconfig
+     * Get Visconfig
      * @param configId
      * @returns VisualizationConfigOut Successful Response
      * @throws ApiError
      */
-    public static getVizconfigApiV2VisualizationsConfigConfigIdGet(
+    public static getVisconfigApiV2VisualizationsConfigConfigIdGet(
         configId: string,
     ): CancelablePromise<VisualizationConfigOut> {
         return __request({
@@ -155,12 +155,12 @@ export class VisualizationsService {
     }
 
     /**
-     * Delete Vizconfig
+     * Delete Visconfig
      * @param configId
      * @returns VisualizationConfigOut Successful Response
      * @throws ApiError
      */
-    public static deleteVizconfigApiV2VisualizationsConfigConfigIdDelete(
+    public static deleteVisconfigApiV2VisualizationsConfigConfigIdDelete(
         configId: string,
     ): CancelablePromise<VisualizationConfigOut> {
         return __request({
@@ -173,19 +173,19 @@ export class VisualizationsService {
     }
 
     /**
-     * Update Vizconfig Map
+     * Update Visconfig Map
      * @param configId
      * @param requestBody
      * @returns VisualizationConfigOut Successful Response
      * @throws ApiError
      */
-    public static updateVizconfigMapApiV2VisualizationsConfigConfigIdVizdataPatch(
+    public static updateVisconfigMapApiV2VisualizationsConfigConfigIdVisdataPatch(
         configId: string,
         requestBody: any,
     ): CancelablePromise<VisualizationConfigOut> {
         return __request({
             method: 'PATCH',
-            path: `/api/v2/visualizations/config/${configId}/vizdata`,
+            path: `/api/v2/visualizations/config/${configId}/visdata`,
             body: requestBody,
             mediaType: 'application/json',
             errors: {
