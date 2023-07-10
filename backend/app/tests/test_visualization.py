@@ -31,7 +31,7 @@ def test_viz_data(client: TestClient, headers: dict):
     assert response.json().get("id") is not None
 
     response = client.get(
-        f"{settings.API_V2_STR}/visualizations/download/{viz_id}/bytes",
+        f"{settings.API_V2_STR}/visualizations/{viz_id}/bytes",
         headers=headers,
     )
     assert response.status_code == 200
