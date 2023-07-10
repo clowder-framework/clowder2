@@ -31,13 +31,17 @@ export const Visualization = (props: previewProps) => {
 
 	return (
 		<>
+			{/* 1. load all the visualization components and its definition available to the frontend */}
 			{visComponentDefinitions.map((visComponentDefinition) => {
 				return (
 					<LazyLoadErrorBoundary fallback={<div>Fail to load...</div>}>
 						<Suspense fallback={<div>Loading...</div>}>
 							{(() => {
+								// 2. looking for visualization configuration registered for this resource
 								if (visConfig.length > 0) {
 									return visConfig.map((visConfigEntry) => {
+										// instantiate the matching visualization component if documented
+										// in configuration
 										const componentName =
 											visConfigEntry.visualization_component_id;
 										if (componentName === visComponentDefinition.name) {
@@ -50,10 +54,12 @@ export const Visualization = (props: previewProps) => {
 										}
 									});
 								}
-								// if no visaulization config exist, guess which widget to use by looking at the mime type of
+								// if no visualization config exist, guess which widget to use by looking at the mime type of
 								// the raw bytes
 								else {
-									// match main type to instantiate components correspondingly
+									// try match mime type first
+									// then fallback to match main type
+									// to instantiate components correspondingly
 									if (
 										fileSummary &&
 										fileSummary.content_type !== undefined &&
