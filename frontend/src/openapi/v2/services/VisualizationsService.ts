@@ -4,7 +4,7 @@
 import type { Body_add_Visualization_api_v2_visualizations_post } from '../models/Body_add_Visualization_api_v2_visualizations_post';
 import type { VisualizationConfigIn } from '../models/VisualizationConfigIn';
 import type { VisualizationConfigOut } from '../models/VisualizationConfigOut';
-import type { VisualizationOut } from '../models/VisualizationOut';
+import type { VisualizationDataOut } from '../models/VisualizationDataOut';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { request as __request } from '../core/request';
 
@@ -21,14 +21,14 @@ export class VisualizationsService {
      * @param name
      * @param description
      * @param formData
-     * @returns VisualizationOut Successful Response
+     * @returns VisualizationDataOut Successful Response
      * @throws ApiError
      */
     public static addVisualizationApiV2VisualizationsPost(
         name: string,
         description: string,
         formData: Body_add_Visualization_api_v2_visualizations_post,
-    ): CancelablePromise<VisualizationOut> {
+    ): CancelablePromise<VisualizationDataOut> {
         return __request({
             method: 'POST',
             path: `/api/v2/visualizations`,
@@ -47,12 +47,12 @@ export class VisualizationsService {
     /**
      * Get Visualization
      * @param visualizationId
-     * @returns VisualizationOut Successful Response
+     * @returns VisualizationDataOut Successful Response
      * @throws ApiError
      */
     public static getVisualizationApiV2VisualizationsVisualizationIdGet(
         visualizationId: string,
-    ): CancelablePromise<VisualizationOut> {
+    ): CancelablePromise<VisualizationDataOut> {
         return __request({
             method: 'GET',
             path: `/api/v2/visualizations/${visualizationId}`,
@@ -119,12 +119,12 @@ export class VisualizationsService {
     }
 
     /**
-     * Get Resource Vizconfig
+     * Get Resource Visconfig
      * @param resourceId
      * @returns VisualizationConfigOut Successful Response
      * @throws ApiError
      */
-    public static getResourceVizconfigApiV2VisualizationsResourceIdConfigGet(
+    public static getResourceVisconfigApiV2VisualizationsResourceIdConfigGet(
         resourceId: string,
     ): CancelablePromise<Array<VisualizationConfigOut>> {
         return __request({
@@ -137,12 +137,12 @@ export class VisualizationsService {
     }
 
     /**
-     * Get Vizconfig
+     * Get Visconfig
      * @param configId
      * @returns VisualizationConfigOut Successful Response
      * @throws ApiError
      */
-    public static getVizconfigApiV2VisualizationsConfigConfigIdGet(
+    public static getVisconfigApiV2VisualizationsConfigConfigIdGet(
         configId: string,
     ): CancelablePromise<VisualizationConfigOut> {
         return __request({
@@ -155,12 +155,12 @@ export class VisualizationsService {
     }
 
     /**
-     * Delete Vizconfig
+     * Delete Visconfig
      * @param configId
      * @returns VisualizationConfigOut Successful Response
      * @throws ApiError
      */
-    public static deleteVizconfigApiV2VisualizationsConfigConfigIdDelete(
+    public static deleteVisconfigApiV2VisualizationsConfigConfigIdDelete(
         configId: string,
     ): CancelablePromise<VisualizationConfigOut> {
         return __request({
@@ -173,19 +173,19 @@ export class VisualizationsService {
     }
 
     /**
-     * Update Vizconfig Map
+     * Update Visconfig Map
      * @param configId
      * @param requestBody
      * @returns VisualizationConfigOut Successful Response
      * @throws ApiError
      */
-    public static updateVizconfigMapApiV2VisualizationsConfigConfigIdVizdataPatch(
+    public static updateVisconfigMapApiV2VisualizationsConfigConfigIdVisdataPatch(
         configId: string,
         requestBody: any,
     ): CancelablePromise<VisualizationConfigOut> {
         return __request({
             method: 'PATCH',
-            path: `/api/v2/visualizations/config/${configId}/vizdata`,
+            path: `/api/v2/visualizations/config/${configId}/visdata`,
             body: requestBody,
             mediaType: 'application/json',
             errors: {

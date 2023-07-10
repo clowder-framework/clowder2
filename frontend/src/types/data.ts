@@ -11,6 +11,8 @@ import {
 	RoleType,
 	UserAPIKeyOut,
 	UserOut,
+	VisualizationConfigOut,
+	VisualizationOut,
 } from "../openapi/v2";
 
 export interface Dataset {
@@ -178,7 +180,7 @@ export interface MetadataState {
 }
 
 export interface FileState {
-	url: "";
+	url: string;
 	blob: Blob;
 	fileSummary: FileSummary;
 	extractedMetadata: ExtractedMetadata;
@@ -209,7 +211,7 @@ export interface ErrorState {
 
 export interface FolderState {
 	folders: FolderOut[];
-	folderPath: String[];
+	folderPath: string[];
 }
 
 export interface JobSummary {
@@ -217,6 +219,23 @@ export interface JobSummary {
 	job_id: string;
 	status: string;
 	timestamp: string;
+}
+
+export interface VisualizationState {
+	visData: VisualizationOut;
+	visConfig: VisualizationConfigOut[];
+	url: string;
+	blob: Blob;
+}
+
+export interface EventListenerJobStatus {
+	created: string;
+	started: string;
+	processing: string;
+	succeeded: string;
+	error: string;
+	skipped: string;
+	resubmitted: string;
 }
 
 export interface RootState {
@@ -228,14 +247,5 @@ export interface RootState {
 	group: GroupState;
 	user: UserState;
 	folder: FolderState;
-}
-
-export interface EventListenerJobStatus {
-	created: string;
-	started: string;
-	processing: string;
-	succeeded: string;
-	error: string;
-	skipped: string;
-	resubmitted: string;
+	visualization: VisualizationState;
 }
