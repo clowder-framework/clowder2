@@ -38,7 +38,8 @@ export const Visualization = (props: previewProps) => {
 							{(() => {
 								if (visConfig.length > 0) {
 									return visConfig.map((visConfigEntry) => {
-										const componentName = visConfigEntry.component_name;
+										const componentName =
+											visConfigEntry.visualization_component_id;
 										if (componentName === visComponentDefinition.name) {
 											return React.cloneElement(
 												visComponentDefinition.component,
