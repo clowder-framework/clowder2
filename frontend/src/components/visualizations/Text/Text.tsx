@@ -7,8 +7,8 @@ import {
 } from "../../../actions/file";
 
 import {
-	DOWNLOAD_VIZ_DATA,
-	downloadVizData as downloadVizDataAction,
+	DOWNLOAD_VIS_DATA,
+	downloadVisData as downloadVisDataAction,
 } from "../../../actions/visualization";
 import ShowMoreText from "react-show-more-text";
 import { RootState } from "../../../types/data";
@@ -31,14 +31,14 @@ export default function Text(props: TextProps) {
 		autoSave: boolean
 	) =>
 		dispatch(fileDownloadedAction(fileId, filename, fileVersionNum, autoSave));
-	const downloadVizData = (
+	const downloadVisData = (
 		visualizationId: string | undefined,
 		filename: string | undefined,
 		autoSave: boolean
-	) => dispatch(downloadVizDataAction(visualizationId, filename, autoSave));
+	) => dispatch(downloadVisDataAction(visualizationId, filename, autoSave));
 
 	const rawFileBlob = useSelector((state: RootState) => state.file.blob);
-	const vizFileBlob = useSelector(
+	const visFileBlob = useSelector(
 		(state: RootState) => state.visualization.blob
 	);
 
@@ -52,7 +52,7 @@ export default function Text(props: TextProps) {
 				receivedAt: Date.now(),
 			});
 			dispatch({
-				type: DOWNLOAD_VIZ_DATA,
+				type: DOWNLOAD_VIS_DATA,
 				blob: new Blob([]),
 				receivedAt: Date.now(),
 			});
@@ -60,13 +60,13 @@ export default function Text(props: TextProps) {
 	}, []);
 
 	useEffect(() => {
-		if (visualizationId) downloadVizData(visualizationId, "text.tmp", false);
+		if (visualizationId) downloadVisData(visualizationId, "text.tmp", false);
 		else downloadFile(fileId, "text.tmp", 0, false);
 	}, [visualizationId, fileId]);
 
 	useEffect(() => {
 		let blob = new Blob([]);
-		if (vizFileBlob.size > 0) blob = vizFileBlob;
+		if (visFileBlob.size > 0) blob = visFileBlob;
 		else if (rawFileBlob.size > 0) blob = rawFileBlob;
 
 		const processBlob = async () => {
@@ -76,7 +76,7 @@ export default function Text(props: TextProps) {
 		};
 
 		processBlob();
-	}, [vizFileBlob, rawFileBlob]);
+	}, [visFileBlob, rawFileBlob]);
 
 	return (
 		<ShowMoreText

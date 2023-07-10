@@ -1,71 +1,71 @@
 import React, { lazy } from "react";
 
-interface VizComponentDefinitions {
+interface VisComponentDefinitions {
 	name: string;
 	mainType: string;
 	mimeTypes: string[];
 	component: JSX.Element;
 }
 
-const vizComponentDefinitions: VizComponentDefinitions[] = <
-	VizComponentDefinitions[]
+const visComponentDefinitions: VisComponentDefinitions[] = <
+	VisComponentDefinitions[]
 >[];
 
 function registerComponent(config) {
 	return lazy(
 		() =>
 			import(
-				/* webpackChunkName: "[request]" */ `./components/visualizations/${config.vizConfig.name}/${config.main}`
+				/* webpackChunkName: "[request]" */ `./components/visualizations/${config.visConfig.name}/${config.main}`
 			)
 	);
 }
 
 const configAudio = require("./components/visualizations/Audio/manifest.json");
-vizComponentDefinitions.push({
+visComponentDefinitions.push({
 	name: configAudio.name,
-	mainType: configAudio.vizConfig.mainType,
-	mimeTypes: configAudio.vizConfig.mimeTypes,
+	mainType: configAudio.visConfig.mainType,
+	mimeTypes: configAudio.visConfig.mimeTypes,
 	component: React.createElement(registerComponent(configAudio)),
 });
 
 // const configDemo = require("./components/visualizations/Demo/manifest.json");
-// vizComponentDefinitions.push({
+// visComponentDefinitions.push({
 // 	name: configDemo.name,
-// 	mainType: configDemo.vizConfig.mainType,
-// 	mimeTypes: configDemo.vizConfig.mimeTypes,
+// 	mainType: configDemo.visConfig.mainType,
+// 	mimeTypes: configDemo.visConfig.mimeTypes,
 // 	component: React.createElement(registerComponent(configDemo)),
 // });
 
 const configIframe = require("./components/visualizations/Iframe/manifest.json");
-vizComponentDefinitions.push({
+visComponentDefinitions.push({
 	name: configIframe.name,
-	mainType: configIframe.vizConfig.mainType,
-	mimeTypes: configIframe.vizConfig.mimeTypes,
+	mainType: configIframe.visConfig.mainType,
+	mimeTypes: configIframe.visConfig.mimeTypes,
 	component: React.createElement(registerComponent(configIframe)),
 });
 
 const configImage = require("./components/visualizations/Image/manifest.json");
-vizComponentDefinitions.push({
+visComponentDefinitions.push({
 	name: configImage.name,
-	mainType: configImage.vizConfig.mainType,
-	mimeTypes: configImage.vizConfig.mimeTypes,
+	mainType: configImage.visConfig.mainType,
+	mimeTypes: configImage.visConfig.mimeTypes,
 	component: React.createElement(registerComponent(configImage)),
 });
 
 const configText = require("./components/visualizations/Text/manifest.json");
-vizComponentDefinitions.push({
+visComponentDefinitions.push({
 	name: configText.name,
-	mainType: configText.vizConfig.mainType,
-	mimeTypes: configText.vizConfig.mimeTypes,
+	mainType: configText.visConfig.mainType,
+	mimeTypes: configText.visConfig.mimeTypes,
 	component: React.createElement(registerComponent(configText)),
 });
 
 const configVideo = require("./components/visualizations/Video/manifest.json");
-vizComponentDefinitions.push({
+visComponentDefinitions.push({
 	name: configVideo.name,
-	mainType: configVideo.vizConfig.mainType,
-	mimeTypes: configVideo.vizConfig.mimeTypes,
+	mainType: configVideo.visConfig.mainType,
+	mimeTypes: configVideo.visConfig.mimeTypes,
 	component: React.createElement(registerComponent(configVideo)),
 });
 
-export { vizComponentDefinitions };
+export { visComponentDefinitions };

@@ -6,8 +6,8 @@ import {
 } from "../../../actions/file";
 import { RootState } from "../../../types/data";
 import {
-	GENERATE_VIZ_URL,
-	generateVizDataDownloadUrl as generateVizDataDownloadUrlAction,
+	GENERATE_VIS_URL,
+	generateVisDataDownloadUrl as generateVisDataDownloadUrlAction,
 } from "../../../actions/visualization";
 
 type ImageProps = {
@@ -25,11 +25,11 @@ export default function Image(props: ImageProps) {
 		fileVersionNum: number | undefined
 	) => dispatch(generateFileDownloadUrlAction(fileId, fileVersionNum));
 
-	const generateVizDataDownloadUrl = (visualizationId: string | undefined) =>
-		dispatch(generateVizDataDownloadUrlAction(visualizationId));
+	const generateVisDataDownloadUrl = (visualizationId: string | undefined) =>
+		dispatch(generateVisDataDownloadUrlAction(visualizationId));
 
 	const rawFileURL = useSelector((state: RootState) => state.file.url);
-	const vizFileURL = useSelector((state: RootState) => state.visualization.url);
+	const visFileURL = useSelector((state: RootState) => state.visualization.url);
 
 	const [url, setUrl] = useState("");
 
@@ -42,7 +42,7 @@ export default function Image(props: ImageProps) {
 				receivedAt: Date.now(),
 			});
 			dispatch({
-				type: GENERATE_VIZ_URL,
+				type: GENERATE_VIS_URL,
 				url: "",
 				receivedAt: Date.now(),
 			});
@@ -50,14 +50,14 @@ export default function Image(props: ImageProps) {
 	}, []);
 
 	useEffect(() => {
-		if (visualizationId) generateVizDataDownloadUrl(visualizationId);
+		if (visualizationId) generateVisDataDownloadUrl(visualizationId);
 		else generateFileDownloadUrl(fileId, 0);
 	}, [visualizationId, fileId]);
 
 	useEffect(() => {
-		if (vizFileURL && vizFileURL !== "") setUrl(vizFileURL);
+		if (visFileURL && visFileURL !== "") setUrl(visFileURL);
 		else setUrl(rawFileURL);
-	}, [vizFileURL, rawFileURL]);
+	}, [visFileURL, rawFileURL]);
 
 	return (() => {
 		if (url && url !== "") {

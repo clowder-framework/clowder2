@@ -222,8 +222,8 @@ export interface JobSummary {
 }
 
 export interface VisualizationState {
-	vizData: VisualizationOut;
-	vizConfig: VisualizationConfigOut[];
+	visData: VisualizationOut;
+	visConfig: VisualizationConfigOut[];
 	url: string;
 	blob: Blob;
 }

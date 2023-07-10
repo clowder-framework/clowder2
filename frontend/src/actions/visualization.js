@@ -3,49 +3,49 @@ import { handleErrors } from "./common";
 import config from "../app.config";
 import { getHeader } from "../utils/common";
 
-export const GET_VIZ_CONFIG = "GET_VIZ_CONFIG";
+export const GET_VIS_CONFIG = "GET_VIS_CONFIG";
 
-export function getVizConfig(resourceId) {
+export function getVisConfig(resourceId) {
 	return (dispatch) => {
-		return V2.VisualizationsService.getResourceVizconfigApiV2VisualizationsResourceIdConfigGet(
+		return V2.VisualizationsService.getResourceVisconfigApiV2VisualizationsResourceIdConfigGet(
 			resourceId
 		)
 			.then((json) => {
 				dispatch({
-					type: GET_VIZ_CONFIG,
+					type: GET_VIS_CONFIG,
 					receivedAt: Date.now(),
-					vizConfig: json,
+					visConfig: json,
 				});
 			})
 			.catch((reason) => {
-				dispatch(handleErrors(reason, getVizConfig(resourceId)));
+				dispatch(handleErrors(reason, getVisConfig(resourceId)));
 			});
 	};
 }
 
-export const GET_VIZ_DATA = "GET_VIZ_DATA";
+export const GET_VIS_DATA = "GET_VIS_DATA";
 
-export function getVizData(visualizationId) {
+export function getVisData(visualizationId) {
 	return (dispatch) => {
 		return V2.VisualizationsService.getVisualizationApiV2VisualizationsVisualizationIdGet(
 			visualizationId
 		)
 			.then((json) => {
 				dispatch({
-					type: GET_VIZ_DATA,
+					type: GET_VIS_DATA,
 					receivedAt: Date.now(),
-					vizData: json,
+					visData: json,
 				});
 			})
 			.catch((reason) => {
-				dispatch(handleErrors(reason, getVizData(visualizationId)));
+				dispatch(handleErrors(reason, getVisData(visualizationId)));
 			});
 	};
 }
 
-export const DOWNLOAD_VIZ_DATA = "DOWNLOAD_VIZ_DATA";
+export const DOWNLOAD_VIS_DATA = "DOWNLOAD_VIS_DATA";
 
-export function downloadVizData(
+export function downloadVisData(
 	visualizationId,
 	filename = "",
 	autoSave = true
@@ -78,7 +78,7 @@ export function downloadVizData(
 			}
 
 			dispatch({
-				type: DOWNLOAD_VIZ_DATA,
+				type: DOWNLOAD_VIS_DATA,
 				blob: blob,
 				receivedAt: Date.now(),
 			});
@@ -86,16 +86,16 @@ export function downloadVizData(
 			dispatch(
 				handleErrors(
 					response,
-					downloadVizData(visualizationId, filename, autoSave)
+					downloadVisData(visualizationId, filename, autoSave)
 				)
 			);
 		}
 	};
 }
 
-export const GENERATE_VIZ_URL = "GENERATE_VIZ_URL";
+export const GENERATE_VIS_URL = "GENERATE_VIS_URL";
 
-export function generateVizDataDownloadUrl(visualizationId) {
+export function generateVisDataDownloadUrl(visualizationId) {
 	return async (dispatch) => {
 		let endpoint = `${config.hostname}/api/v2/visualizations/download/${visualizationId}`;
 		const response = await fetch(endpoint, {
@@ -107,13 +107,13 @@ export function generateVizDataDownloadUrl(visualizationId) {
 		if (response.status === 200) {
 			const blob = await response.blob();
 			dispatch({
-				type: GENERATE_VIZ_URL,
+				type: GENERATE_VIS_URL,
 				url: window.URL.createObjectURL(blob),
 				receivedAt: Date.now(),
 			});
 		} else {
 			dispatch(
-				handleErrors(response, generateVizDataDownloadUrl(visualizationId))
+				handleErrors(response, generateVisDataDownloadUrl(visualizationId))
 			);
 		}
 	};

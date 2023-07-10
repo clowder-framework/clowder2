@@ -14,7 +14,7 @@ class VisualizationConfigBase(BaseModel):
     client: Optional[str]
     viz_config_data: dict = {}
     visualization: str
-    component_name: str
+    visualization_component_id: str
     # TODO add json document or key value pairs, config_variables
 
 

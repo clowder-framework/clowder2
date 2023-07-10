@@ -392,23 +392,23 @@ interface ASSIGN_GROUP_MEMBER_ROLE {
 	about: Group;
 }
 
-interface GET_VIZ_DATA {
-	type: "GET_VIZ_DATA";
-	vizData: VisualizationOut;
+interface GET_VIS_DATA {
+	type: "GET_VIS_DATA";
+	visData: VisualizationOut;
 }
 
-interface GET_VIZ_CONFIG {
-	type: "GET_VIZ_CONFIG";
-	vizConfig: VisualizationConfigOut;
+interface GET_VIS_CONFIG {
+	type: "GET_VIS_CONFIG";
+	visConfig: VisualizationConfigOut;
 }
 
-interface DOWNLOAD_VIZ_DATA {
-	type: "DOWNLOAD_VIZ_DATA";
+interface DOWNLOAD_VIS_DATA {
+	type: "DOWNLOAD_VIS_DATA";
 	blob: Blob;
 }
 
-interface GENERATE_VIZ_URL {
-	type: "GENERATE_VIZ_URL";
+interface GENERATE_VIS_URL {
+	type: "GENERATE_VIS_URL";
 	url: string;
 }
 
@@ -483,7 +483,7 @@ export type DataAction =
 	| PREFIX_SEARCH_USERS
 	| RECEIVE_DATASET_ROLES
 	| RECEIVE_USER_PROFILE
-	| GET_VIZ_DATA
-	| GET_VIZ_CONFIG
-	| DOWNLOAD_VIZ_DATA
-	| GENERATE_VIZ_URL;
+	| GET_VIS_DATA
+	| GET_VIS_CONFIG
+	| DOWNLOAD_VIS_DATA
+	| GENERATE_VIS_URL;

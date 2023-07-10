@@ -3,8 +3,8 @@ import { LazyLoadErrorBoundary } from "../errors/LazyLoadErrorBoundary";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../types/data";
 import { fetchFileSummary } from "../../actions/file";
-import { getVizConfig as getVizConfigAction } from "../../actions/visualization";
-import { vizComponentDefinitions } from "../../visualization.config";
+import { getVisConfig as getVisConfigAction } from "../../actions/visualization";
+import { visComponentDefinitions } from "../../visualization.config";
 
 type previewProps = {
 	fileId?: string;
@@ -13,43 +13,43 @@ export const Visualization = (props: previewProps) => {
 	const { fileId } = props;
 
 	const fileSummary = useSelector((state: RootState) => state.file.fileSummary);
-	const vizConfig = useSelector(
-		(state: RootState) => state.visualization.vizConfig
+	const visConfig = useSelector(
+		(state: RootState) => state.visualization.visConfig
 	);
 
 	const dispatch = useDispatch();
 	const listFileSummary = (fileId: string | undefined) =>
 		dispatch(fetchFileSummary(fileId));
 
-	const getVizConfig = (resourceId: string | undefined) =>
-		dispatch(getVizConfigAction(resourceId));
+	const getVisConfig = (resourceId: string | undefined) =>
+		dispatch(getVisConfigAction(resourceId));
 
 	useEffect(() => {
 		listFileSummary(fileId);
-		getVizConfig(fileId);
+		getVisConfig(fileId);
 	}, []);
 
 	return (
 		<>
-			{vizComponentDefinitions.map((vizComponentDefinition) => {
+			{visComponentDefinitions.map((visComponentDefinition) => {
 				return (
 					<LazyLoadErrorBoundary fallback={<div>Fail to load...</div>}>
 						<Suspense fallback={<div>Loading...</div>}>
 							{(() => {
-								if (vizConfig.length > 0) {
-									return vizConfig.map((vizConfigEntry) => {
-										const componentName = vizConfigEntry.component_name;
-										if (componentName === vizComponentDefinition.name) {
+								if (visConfig.length > 0) {
+									return visConfig.map((visConfigEntry) => {
+										const componentName = visConfigEntry.component_name;
+										if (componentName === visComponentDefinition.name) {
 											return React.cloneElement(
-												vizComponentDefinition.component,
+												visComponentDefinition.component,
 												{
-													visualizationId: vizConfigEntry.visualization,
+													visualizationId: visConfigEntry.visualization,
 												}
 											);
 										}
 									});
 								}
-								// if no vizaulization config exist, guess which widget to use by looking at the mime type of
+								// if no visaulization config exist, guess which widget to use by looking at the mime type of
 								// the raw bytes
 								else {
 									// match main type to instantiate components correspondingly
@@ -57,15 +57,15 @@ export const Visualization = (props: previewProps) => {
 										fileSummary &&
 										fileSummary.content_type !== undefined &&
 										((fileSummary.content_type.content_type !== undefined &&
-											vizComponentDefinition.mimeTypes.includes(
+											visComponentDefinition.mimeTypes.includes(
 												fileSummary.content_type.content_type
 											)) ||
 											(fileSummary.content_type.main_type !== undefined &&
 												fileSummary.content_type.main_type ===
-													vizComponentDefinition.mainType))
+													visComponentDefinition.mainType))
 									) {
 										return React.cloneElement(
-											vizComponentDefinition.component,
+											visComponentDefinition.component,
 											{
 												fileId: fileId,
 											}
