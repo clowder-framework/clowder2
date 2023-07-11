@@ -46,7 +46,7 @@ export default function Geospatial(props: GeospatialProps) {
 	}, [fileId]);
 
 	useEffect(() => {
-		// Determine extent from URL
+		// Determine bounding box extent & center point from URL
 		let bbox = [0, 0, 0, 0];
 		const entries = layerWMS.split("&");
 		entries.forEach((entry) => {
@@ -55,6 +55,7 @@ export default function Geospatial(props: GeospatialProps) {
 				bbox = vals.map((v) => parseFloat(v));
 			}
 		});
+		const center = [(bbox[0] + bbox[2]) / 2, (bbox[1] + bbox[3]) / 2];
 
 		const wms_map = new Map({
 			target: mapElement.current,
@@ -72,11 +73,11 @@ export default function Geospatial(props: GeospatialProps) {
 			],
 			view: new View({
 				projection: "EPSG:3857",
-				center: [0, 0],
-				zoom: 2,
+				center: center,
 			}),
 			controls: [],
 		});
+		wms_map.getView().fit(bbox, wms_map.getSize());
 		setMap(wms_map);
 	}, [layerWMS]);
 
