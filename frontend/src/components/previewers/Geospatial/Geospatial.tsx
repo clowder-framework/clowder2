@@ -2,11 +2,13 @@ import React, { useEffect, useRef, useState } from "react";
 
 import Map from "ol/Map";
 import View from "ol/View";
-import TileLayer from "ol/layer/Tile";
-import XYZ from "ol/source/XYZ";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../../types/data";
 import { fetchFileExtractedMetadata } from "../../../actions/file";
+import { OSM } from "ol/source";
+import TileLayer from "ol/layer/Tile";
+import Static from "ol/source/ImageStatic";
+import ImageLayer from "ol/layer/Image";
 
 type GeospatialProps = {
 	fileId?: string;
@@ -19,6 +21,7 @@ export default function Geospatial(props: GeospatialProps) {
 	const dispatch = useDispatch();
 
 	const [layerWMS, setLayerWMS] = useState("");
+	const [layerName, setLayerName] = useState("");
 	const [map, setMap] = useState<Map | undefined>(undefined);
 	const mapElement = useRef();
 	const mapRef = useRef<Map>();
@@ -34,7 +37,9 @@ export default function Geospatial(props: GeospatialProps) {
 	useEffect(() => {
 		metadata.forEach(function (md) {
 			if (md.content && md.content["WMS Layer URL"]) {
+				const layer_name = String(md.content["WMS Layer Name"]);
 				const wms_url = String(md.content["WMS Layer URL"]);
+				setLayerName(layer_name);
 				setLayerWMS(wms_url);
 			}
 		});
@@ -45,12 +50,27 @@ export default function Geospatial(props: GeospatialProps) {
 	}, [fileId]);
 
 	useEffect(() => {
+		// Determine extent from URL
+		let bbox = [0, 0, 0, 0];
+		const entries = layerWMS.split("&");
+		entries.forEach((entry) => {
+			if (entry.startsWith("bbox=")) {
+				const vals = entry.replace("bbox=", "").split(",");
+				bbox = vals.map((v) => parseFloat(v));
+			}
+		});
+
 		const wms_map = new Map({
 			target: mapElement.current,
 			layers: [
 				new TileLayer({
-					source: new XYZ({
+					source: new OSM(),
+				}),
+				new ImageLayer({
+					source: new Static({
 						url: layerWMS,
+						projection: "EPSG:3857",
+						imageExtent: bbox,
 					}),
 				}),
 			],

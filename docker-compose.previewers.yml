@@ -22,6 +22,10 @@ services:
     image: docker.osgeo.org/geoserver:2.23.0
     environment:
       JAVA_OPTS: -Xmx1536M -XX:MaxPermSize=756M
+      CORS_ENABLED: true
+      CORS_ALLOWED_ORIGINS: "*"
+      CORS_ALLOWED_METHODS: "GET,POST,PUT,DELETE,HEAD,OPTIONS"
+      CORS_ALLOWED_HEADERS: "*"
     ports:
       - "8085:8080"
     networks:
