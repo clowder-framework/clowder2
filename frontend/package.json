@@ -68,6 +68,8 @@
 		"redux": "^4.1.2",
 		"redux-thunk": "^2.4.1",
 		"universal-cookie": "~4.0.4",
+		"vega": "^5.25.0",
+		"vega-lite": "^5.13.0",
 		"whatwg-fetch": "2.0.2"
 	},
 	"devDependencies": {
