@@ -14,14 +14,12 @@ type GeospatialProps = {
 	fileId?: string;
 };
 
-// https://taylor.callsen.me/using-openlayers-with-react-functional-components/
 export default function Geospatial(props: GeospatialProps) {
 	const { fileId } = props;
 
 	const dispatch = useDispatch();
 
 	const [layerWMS, setLayerWMS] = useState("");
-	const [layerName, setLayerName] = useState("");
 	const [map, setMap] = useState<Map | undefined>(undefined);
 	const mapElement = useRef();
 	const mapRef = useRef<Map>();
@@ -37,9 +35,7 @@ export default function Geospatial(props: GeospatialProps) {
 	useEffect(() => {
 		metadata.forEach(function (md) {
 			if (md.content && md.content["WMS Layer URL"]) {
-				const layer_name = String(md.content["WMS Layer Name"]);
 				const wms_url = String(md.content["WMS Layer URL"]);
-				setLayerName(layer_name);
 				setLayerWMS(wms_url);
 			}
 		});
