@@ -56,6 +56,11 @@ section below).
   provide the container name. For example, for viewing the backend module logs, run `docker-compose logs -f backend`.
 - Running `./docker-dev.sh down` brings down the required services.
 
+**Note:** `./docker-dev.sh` sets the project name flag to `-p clowder2-dev`. This is so that the dev containers
+don't get mixed with the production containers if the user is running both on the same machine using `docker-compose.yml`.
+If this is not used, the keycloak container will use the volume created with the other docker compose and it will be
+unable to run as the information stored in the postgres database is different.
+
 ### Backend Module
 
 After starting up the required services, setup and run the backend module.

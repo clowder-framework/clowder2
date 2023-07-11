@@ -199,7 +199,12 @@ export function fetchFileVersions(fileId) {
 
 export const DOWNLOAD_FILE = "DOWNLOAD_FILE";
 
-export function fileDownloaded(fileId, filename = "", fileVersionNum = 0) {
+export function fileDownloaded(
+	fileId,
+	filename = "",
+	fileVersionNum = 0,
+	autoSave = true
+) {
 	return async (dispatch) => {
 		if (filename === "") {
 			filename = `${fileId}.zip`;
@@ -214,22 +219,31 @@ export function fileDownloaded(fileId, filename = "", fileVersionNum = 0) {
 
 		if (response.status === 200) {
 			const blob = await response.blob();
-			if (window.navigator.msSaveOrOpenBlob) {
-				window.navigator.msSaveBlob(blob, filename);
-			} else {
-				const anchor = window.document.createElement("a");
-				anchor.href = window.URL.createObjectURL(blob);
-				anchor.download = filename;
-				document.body.appendChild(anchor);
-				anchor.click();
-				document.body.removeChild(anchor);
+			if (autoSave) {
+				if (window.navigator.msSaveOrOpenBlob) {
+					window.navigator.msSaveBlob(blob, filename);
+				} else {
+					const anchor = window.document.createElement("a");
+					anchor.href = window.URL.createObjectURL(blob);
+					anchor.download = filename;
+					document.body.appendChild(anchor);
+					anchor.click();
+					document.body.removeChild(anchor);
+				}
 			}
+
 			dispatch({
 				type: DOWNLOAD_FILE,
+				blob: blob,
 				receivedAt: Date.now(),
 			});
 		} else {
-			dispatch(handleErrors(response, fileDownloaded(fileId, filename)));
+			dispatch(
+				handleErrors(
+					response,
+					fileDownloaded(fileId, filename, fileVersionNum, autoSave)
+				)
+			);
 		}
 	};
 }
@@ -258,6 +272,34 @@ export function submitFileExtractionAction(fileId, extractorName, requestBody) {
 					)
 				);
 			});
+	};
+}
+
+export const GENERATE_FILE_URL = "GENERATE_FILE_URL";
+
+export function generateFileDownloadUrl(fileId, fileVersionNum = 0) {
+	return async (dispatch) => {
+		let url = `${config.hostname}/api/v2/files/${fileId}`;
+		if (fileVersionNum > 0) url = `${url}?version=${fileVersionNum}`;
+
+		const response = await fetch(url, {
+			method: "GET",
+			mode: "cors",
+			headers: await getHeader(),
+		});
+
+		if (response.status === 200) {
+			const blob = await response.blob();
+			dispatch({
+				type: GENERATE_FILE_URL,
+				url: window.URL.createObjectURL(blob),
+				receivedAt: Date.now(),
+			});
+		} else {
+			dispatch(
+				handleErrors(response, generateFileDownloadUrl(fileId, fileVersionNum))
+			);
+		}
 	};
 }
 

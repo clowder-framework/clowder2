@@ -25,7 +25,6 @@ function registerComponents() {
 	});
 
 	fs.appendFileSync(registerDecoratorPath, "export { vizConfig };" + "\n");
-
 	console.log("Component registration complete.");
 }
 
