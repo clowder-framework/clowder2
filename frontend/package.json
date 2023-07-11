@@ -10,7 +10,7 @@
 	"scripts": {
 		"preinstall": "node tools/nodeVersionCheck.js",
 		"start-message": "babel-node tools/startMessage.js",
-		"prestart": "npm-run-all --parallel start-message && node registerComponents.js",
+		"prestart": "npm-run-all --parallel start-message",
 		"start": "npm-run-all --parallel open:src",
 		"start:dev": "export CLOWDER_REMOTE_HOSTNAME=http://localhost:8000 && npm run start",
 		"open:src": "babel-node tools/srcServer.js",
@@ -18,7 +18,7 @@
 		"lint:watch": "npm run lint --watch",
 		"clean-dist": "npm run remove-dist && mkdir dist",
 		"remove-dist": "npx rimraf ./dist",
-		"prebuild": "npm run clean-dist && npm run lint && node registerComponents.js",
+		"prebuild": "npm run clean-dist && npm run lint",
 		"build": "babel-node tools/build.js",
 		"test:watch": "npm run test -- --watch",
 		"analyze-bundle": "babel-node ./tools/analyzeBundle.js",
