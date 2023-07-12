@@ -13,4 +13,5 @@ export type VisualizationConfigIn = {
     client?: string;
     parameters?: any;
     visualization_bytes_ids: Array<string>;
+    visualization_mimetype: string;
 }
