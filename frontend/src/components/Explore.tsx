@@ -4,7 +4,7 @@ import { Box, Button, ButtonGroup, Grid, Tab, Tabs } from "@mui/material";
 import { RootState } from "../types/data";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchDatasets } from "../actions/dataset";
-import { downloadThumbnail } from "../utils/thumbnail";
+import { downloadThumbnail } from "../utils/visualization";
 
 import { a11yProps, TabPanel } from "./tabs/TabComponent";
 import DatasetCard from "./datasets/DatasetCard";
