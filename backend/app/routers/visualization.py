@@ -103,7 +103,7 @@ async def remove_visualization(
     )
 
 
-@router.get("/download/{visualization_id}")
+@router.get("/{visualization_id}/bytes")
 async def download_visualization(
     visualization_id: str, fs: Minio = Depends(dependencies.get_fs)
 ):
