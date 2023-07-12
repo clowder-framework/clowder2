@@ -1,10 +1,11 @@
-from typing import Optional
+from typing import Optional, List
 
 from beanie import Document
 from pydantic import BaseModel
 
 from app.models.listeners import ExtractorInfo, EventListenerJobDB
 from app.models.metadata import MongoDBRef
+from app.models.pyobjectid import PyObjectId
 
 
 class VisualizationConfigBase(BaseModel):
@@ -12,10 +13,9 @@ class VisualizationConfigBase(BaseModel):
     extractor_info: Optional[ExtractorInfo]
     job: Optional[EventListenerJobDB]
     client: Optional[str]
-    vis_config_data: dict = {}
-    visualization: str
-    visualization_component_id: str
-    # TODO add json document or key value pairs, config_variables
+    parameters: dict = {}
+    visualization_bytes_ids: List[PyObjectId]
+    visualization_mimetype: str
 
 
 class VisualizationConfigIn(VisualizationConfigBase):
@@ -24,7 +24,7 @@ class VisualizationConfigIn(VisualizationConfigBase):
 
 class VisualizationConfigDB(Document, VisualizationConfigBase):
     class Settings:
-        name = "visconfig"
+        name = "vizualization_config"
 
 
 class VisualizationConfigOut(VisualizationConfigDB):

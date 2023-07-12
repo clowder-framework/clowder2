@@ -36,7 +36,7 @@ class VisualizationDataDB(Document, VisualizationDataBase):
     content_type: ContentType = ContentType()
 
     class Settings:
-        name = "visualizationData"
+        name = "visualization_data"
 
 
 class VisualizationDataOut(VisualizationDataDB):
