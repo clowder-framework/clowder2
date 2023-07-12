@@ -7,6 +7,7 @@ import error from "./error";
 import metadata from "./metadata";
 import listeners from "./listeners";
 import group from "./group";
+import visualization from "./visualization";
 
 const rootReducer = combineReducers({
 	file: file,
@@ -17,6 +18,7 @@ const rootReducer = combineReducers({
 	metadata: metadata,
 	listener: listeners,
 	group: group,
+	visualization: visualization,
 });
 
 export default rootReducer;
