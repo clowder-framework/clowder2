@@ -15,7 +15,6 @@ class VisualizationConfigBase(BaseModel):
     client: Optional[str]
     parameters: dict = {}
     visualization_bytes_ids: List[PyObjectId]
-    # TODO add json document or key value pairs, config_variables
 
 
 class VisualizationConfigIn(VisualizationConfigBase):
