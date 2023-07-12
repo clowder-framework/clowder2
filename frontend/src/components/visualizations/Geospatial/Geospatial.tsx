@@ -41,6 +41,7 @@ export default function Geospatial(props: GeospatialProps) {
 		});
 	}, [metadata]);
 
+	// TODO: Clear previous data in didMount
 	useEffect(() => {
 		fetchExtractdMetadata(fileId);
 	}, [fileId]);

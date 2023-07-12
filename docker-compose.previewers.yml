@@ -34,10 +34,15 @@ services:
       - geoserver_data:/opt/geoserver_data
       - geoserver_exts:/opt/additional_libs
 
+  ## This image must be built from:
+  ##   https://github.com/clowder-framework/extractors-geo/blob/master/preview.geotiff/Dockerfile
+  ## docker build -f Dockerfile -t clowder/extractors-geotiff-preview .
+  ## THIS IS INTENDED FOR LOCAL DEVELOPMENT ONLY.
   geotiff-preview:
-    image: maxzilla2/extractors-geotiff-preview
+    image: clowder/extractors-geotiff-preview
     environment:
       GEOSERVER_URL: http://geoserver:8080/geoserver/
+      EXTERNAL_GEOSERVER_URL: http://localhost:8085/geoserver/
       GEOSERVER_USERNAME: admin
       GEOSERVER_PASSWORD: geoserver
       CLOWDER_VERSION: 2
