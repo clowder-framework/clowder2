@@ -24,8 +24,7 @@ export type VisualizationConfigOut = {
     extractor_info?: ExtractorInfo;
     job?: EventListenerJobDB;
     client?: string;
-    vis_config_data?: any;
-    visualization: string;
-    visualization_component_id: string;
+    parameters?: any;
+    visualization_bytes_ids: Array<string>;
     id?: string;
 }
