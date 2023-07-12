@@ -15,6 +15,7 @@ class VisualizationConfigBase(BaseModel):
     client: Optional[str]
     parameters: dict = {}
     visualization_bytes_ids: List[PyObjectId]
+    visualization_mimetype: str
 
 
 class VisualizationConfigIn(VisualizationConfigBase):
