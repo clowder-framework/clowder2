@@ -40,7 +40,7 @@ export default function Image(props: ImageProps) {
 					src={url}
 					alt="img"
 					id={`rubberbandCanvas-${fileId}`}
-					style={{ maxWidth: "100%", maxHeight: "100%" }}
+					style={{ width: "100%" }}
 				/>
 			);
 		} else {

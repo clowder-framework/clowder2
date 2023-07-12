@@ -5,7 +5,7 @@ import { RootState } from "../../types/data";
 import { fetchFileSummary } from "../../actions/file";
 import { getVisConfig as getVisConfigAction } from "../../actions/visualization";
 import { visComponentDefinitions } from "../../visualization.config";
-import { Masonry } from "@mui/lab";
+import { Grid } from "@mui/material";
 
 type previewProps = {
 	fileId?: string;
@@ -31,7 +31,7 @@ export const Visualization = (props: previewProps) => {
 	}, []);
 
 	return (
-		<Masonry columns={3} spacing={2}>
+		<Grid container rowSpacing={1} columnSpacing={{ xs: 1, sm: 2, md: 3 }}>
 			{/* 1. load all the visualization components and its definition available to the frontend */}
 			{visComponentDefinitions.map((visComponentDefinition) => {
 				return (
@@ -46,11 +46,15 @@ export const Visualization = (props: previewProps) => {
 										const componentName =
 											visConfigEntry.visualization_component_id;
 										if (componentName === visComponentDefinition.name) {
-											return React.cloneElement(
-												visComponentDefinition.component,
-												{
-													visualizationId: visConfigEntry.visualization,
-												}
+											return (
+												<Grid item xs={12} sm={4} md={4} lg={4} xl={4}>
+													{React.cloneElement(
+														visComponentDefinition.component,
+														{
+															visualizationId: visConfigEntry.visualization,
+														}
+													)}
+												</Grid>
 											);
 										}
 									});
@@ -72,11 +76,12 @@ export const Visualization = (props: previewProps) => {
 												fileSummary.content_type.main_type ===
 													visComponentDefinition.mainType))
 									) {
-										return React.cloneElement(
-											visComponentDefinition.component,
-											{
-												fileId: fileId,
-											}
+										return (
+											<Grid item xs={12} sm={4} md={4} lg={4} xl={4}>
+												{React.cloneElement(visComponentDefinition.component, {
+													fileId: fileId,
+												})}
+											</Grid>
 										);
 									}
 									return null;
@@ -86,6 +91,6 @@ export const Visualization = (props: previewProps) => {
 					</LazyLoadErrorBoundary>
 				);
 			})}
-		</Masonry>
+		</Grid>
 	);
 };
