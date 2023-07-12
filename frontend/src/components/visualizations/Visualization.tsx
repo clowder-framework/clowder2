@@ -5,6 +5,7 @@ import { RootState } from "../../types/data";
 import { fetchFileSummary } from "../../actions/file";
 import { getVisConfig as getVisConfigAction } from "../../actions/visualization";
 import { visComponentDefinitions } from "../../visualization.config";
+import { Masonry } from "@mui/lab";
 
 type previewProps = {
 	fileId?: string;
@@ -30,7 +31,7 @@ export const Visualization = (props: previewProps) => {
 	}, []);
 
 	return (
-		<>
+		<Masonry columns={3} spacing={2}>
 			{/* 1. load all the visualization components and its definition available to the frontend */}
 			{visComponentDefinitions.map((visComponentDefinition) => {
 				return (
@@ -85,6 +86,6 @@ export const Visualization = (props: previewProps) => {
 					</LazyLoadErrorBoundary>
 				);
 			})}
-		</>
+		</Masonry>
 	);
 };
