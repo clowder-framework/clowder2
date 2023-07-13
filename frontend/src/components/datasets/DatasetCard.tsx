@@ -56,10 +56,7 @@ export default function DatasetCard(props: DatasetCardProps) {
 	const formattedCreated = parseDate(created);
 
 	return (
-		<Card
-			key={id}
-			sx={{ height: "100%", display: "flex", flexDirection: "column" }}
-		>
+		<Card key={id} sx={{ display: "flex", flexDirection: "column" }}>
 			<CardActionArea
 				component={Link}
 				to={`/datasets/${id}`}
@@ -69,7 +66,6 @@ export default function DatasetCard(props: DatasetCardProps) {
 				{thumbnailId ? (
 					<CardMedia
 						component="img"
-						height="194"
 						image={thumbnailUrl}
 						alt={`${name}_thumbnail`}
 					/>
