@@ -162,7 +162,6 @@ async def save_visualization_config(
 async def get_resource_visconfig(
     resource_id: PydanticObjectId,
     user=Depends(get_current_user),
-    credentials: HTTPAuthorizationCredentials = Security(security),
 ):
     query = [VisualizationConfigDB.resource.resource_id == ObjectId(resource_id)]
     visconfigs = []
@@ -175,7 +174,6 @@ async def get_resource_visconfig(
 async def get_visconfig(
     config_id: PydanticObjectId,
     user=Depends(get_current_user),
-    credentials: HTTPAuthorizationCredentials = Security(security),
 ):
     if (
         vis_config := await VisualizationConfigDB.get(PydanticObjectId(config_id))
@@ -190,7 +188,6 @@ async def update_visconfig_map(
     config_id: PydanticObjectId,
     new_vis_config_data: dict,
     user=Depends(get_current_user),
-    credentials: HTTPAuthorizationCredentials = Security(security),
 ):
     if (
         vis_config := await VisualizationConfigDB.get(PydanticObjectId(config_id))
@@ -206,11 +203,13 @@ async def update_visconfig_map(
 async def delete_visconfig(
     config_id: PydanticObjectId,
     user=Depends(get_current_user),
-    credentials: HTTPAuthorizationCredentials = Security(security),
 ):
     if (
         vis_config := await VisualizationConfigDB.get(PydanticObjectId(config_id))
     ) is not None:
+        query = [VisualizationDataDB.visualization_config_id == config_id]
+        async for vis_data in VisualizationDataDB.find(*query):
+            await vis_data.delete()
         await vis_config.delete()
         return vis_config.dict()
     else:

@@ -35,7 +35,7 @@ class VisualizationDataDB(Document, VisualizationDataBase):
     modified: datetime = Field(default_factory=datetime.utcnow)
     bytes: int = 0
     content_type: ContentType = ContentType()
-    visualization_config: PyObjectId
+    visualization_config_id: PyObjectId
 
     class Settings:
         name = "visualization_data"
