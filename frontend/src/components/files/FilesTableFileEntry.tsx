@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 
 import TableRow from "@mui/material/TableRow";
 import TableCell from "@mui/material/TableCell";
@@ -9,6 +9,7 @@ import { parseDate } from "../../utils/common";
 import FileMenu from "./FileMenu";
 import prettyBytes from "pretty-bytes";
 import { FileOut } from "../../openapi/v2";
+import { generateVisDataDownloadUrl } from "../../utils/visualization";
 
 type FilesTableFileEntryProps = {
 	iconStyle: {};
@@ -19,20 +20,43 @@ type FilesTableFileEntryProps = {
 
 export function FilesTableFileEntry(props: FilesTableFileEntryProps) {
 	const { iconStyle, selectFile, file, parentFolderId } = props;
+	const [thumbnailUrl, setThumbnailUrl] = useState("");
 
-	console.log("FTFE");
-	console.log(file);
+	useEffect(() => {
+		const fetchThumbnailUrl = async () => {
+			try {
+				let url = "";
+				if (file.thumbnail_id) {
+					url = await generateVisDataDownloadUrl(file.thumbnail_id);
+				}
+				setThumbnailUrl(url);
+			} catch (error) {
+				console.error("Error fetching data:", error);
+			}
+		};
+
+		fetchThumbnailUrl();
+	}, [file]);
+
 	return (
 		<>
-		{
-			file.folder_id === parentFolderId ?
-				(
-					<TableRow
-						key={file.id}
-						sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
-					>
+			{file.folder_id === parentFolderId ? (
+				<TableRow
+					key={file.id}
+					sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
+				>
 					<TableCell component="th" scope="row" key={`${file.id}-icon`}>
-						<InsertDriveFileIcon sx={iconStyle} />
+						{file.thumbnail_id ? (
+							<img
+								src={thumbnailUrl}
+								alt="thumbnail"
+								width="24"
+								height="24"
+								style={{ verticalAlign: "middle" }}
+							/>
+						) : (
+							<InsertDriveFileIcon sx={iconStyle} />
+						)}
 						<Button onClick={() => selectFile(file.id)}>{file.name}</Button>
 						<VersionChip versionNumber={file.version_num} />
 					</TableCell>
@@ -49,10 +73,10 @@ export function FilesTableFileEntry(props: FilesTableFileEntryProps) {
 					<TableCell align="right">
 						<FileMenu file={file} />
 					</TableCell>
-					</TableRow>
-				) :
+				</TableRow>
+			) : (
 				<></>
-		}
+			)}
 		</>
 	);
 }
