@@ -74,6 +74,7 @@ export default function ShareDatasetModal(props: ShareDatasetModalProps) {
 
 	const onShare = async () => {
 		await setUserRole(datasetId, email, role);
+		console.log('clicked on share',datasetId, email, role);
 		setEmail("");
 		setRole("viewer");
 		setShowSuccessAlert(true);
