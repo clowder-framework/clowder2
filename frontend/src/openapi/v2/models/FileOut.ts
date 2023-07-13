@@ -31,4 +31,5 @@ export type FileOut = {
     downloads?: number;
     bytes?: number;
     content_type?: ContentType;
+    thumbnail_id?: string;
 }

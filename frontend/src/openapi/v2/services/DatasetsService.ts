@@ -199,6 +199,26 @@ export class DatasetsService {
     }
 
     /**
+     * Add Dataset Thumbnail
+     * @param datasetId
+     * @param thumbnailId
+     * @returns DatasetOut Successful Response
+     * @throws ApiError
+     */
+    public static addDatasetThumbnailApiV2DatasetsDatasetIdThumbnailThumbnailIdPost(
+        datasetId: string,
+        thumbnailId: string,
+    ): CancelablePromise<DatasetOut> {
+        return __request({
+            method: 'POST',
+            path: `/api/v2/datasets/${datasetId}/thumbnail/${thumbnailId}`,
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+
+    /**
      * Get Dataset Folders
      * @param datasetId
      * @param parentFolder

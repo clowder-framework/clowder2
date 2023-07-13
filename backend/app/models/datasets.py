@@ -44,6 +44,7 @@ class DatasetDB(Document, DatasetBase):
     status: str = DatasetStatus.PRIVATE.name
     user_views: int = 0
     downloads: int = 0
+    thumbnail_id: Optional[PydanticObjectId] = None
 
     class Settings:
         name = "datasets"

@@ -71,6 +71,7 @@ class FileDBViewList(View, FileBase):
     auth: List[AuthorizationDB]
     bytes: int = 0
     content_type: ContentType = ContentType()
+    thumbnail_id: Optional[PydanticObjectId] = None
 
     class Settings:
         source = FileDB
