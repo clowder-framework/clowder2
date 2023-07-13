@@ -14,7 +14,6 @@ class VisualizationConfigBase(BaseModel):
     job: Optional[EventListenerJobDB]
     client: Optional[str]
     parameters: dict = {}
-    visualization_bytes_ids: List[PyObjectId]
     visualization_mimetype: str
 
 
