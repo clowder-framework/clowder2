@@ -76,7 +76,8 @@ def test_add_thumbnail(client: TestClient, headers: dict):
     dataset_id = resp["id"]
     thumbnail_id = "64ac275727c83a6786dd9fd4"
     resp = client.post(
-        f"{settings.API_V2_STR}/datasets/{dataset_id}/thumbnail/{thumbnail_id}", headers=headers
+        f"{settings.API_V2_STR}/datasets/{dataset_id}/thumbnail/{thumbnail_id}",
+        headers=headers,
     )
     assert resp.status_code == 200
 
