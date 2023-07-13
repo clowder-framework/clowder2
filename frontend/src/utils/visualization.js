@@ -29,7 +29,7 @@ export async function downloadThumbnail(thumbnailId, title = null) {
 }
 
 export async function generateVisDataDownloadUrl(visualizationId) {
-	let endpoint = `${config.hostname}/api/v2/visualizations/download/${visualizationId}`;
+	let endpoint = `${config.hostname}/api/v2/visualizations/${visualizationId}/bytes`;
 	const response = await fetch(endpoint, {
 		method: "GET",
 		mode: "cors",
@@ -63,7 +63,7 @@ export async function generateFileDownloadUrl(fileId, fileVersionNum = 0) {
 }
 
 export async function downloadVisData(visualizationId) {
-	let endpoint = `${config.hostname}/api/v2/visualizations/download/${visualizationId}`;
+	let endpoint = `${config.hostname}/api/v2/visualizations/${visualizationId}/bytes`;
 	const response = await fetch(endpoint, {
 		method: "GET",
 		mode: "cors",

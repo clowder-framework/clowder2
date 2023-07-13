@@ -27,5 +27,6 @@ export type VisualizationConfigOut = {
     parameters?: any;
     visualization_bytes_ids: Array<string>;
     visualization_mimetype: string;
+    visualization_component_id: string;
     id?: string;
 }

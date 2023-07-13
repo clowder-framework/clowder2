@@ -55,7 +55,7 @@ export function downloadVisData(
 			// TODO guess extension
 			filename = `${visualizationId}.tmp`;
 		}
-		let endpoint = `${config.hostname}/api/v2/visualizations/download/${visualizationId}`;
+		let endpoint = `${config.hostname}/api/v2/visualizations/${visualizationId}/bytes`;
 		const response = await fetch(endpoint, {
 			method: "GET",
 			mode: "cors",
@@ -97,7 +97,7 @@ export const GENERATE_VIS_URL = "GENERATE_VIS_URL";
 
 export function generateVisDataDownloadUrl(visualizationId) {
 	return async (dispatch) => {
-		let endpoint = `${config.hostname}/api/v2/visualizations/download/${visualizationId}`;
+		let endpoint = `${config.hostname}/api/v2/visualizations/${visualizationId}/bytes`;
 		const response = await fetch(endpoint, {
 			method: "GET",
 			mode: "cors",
