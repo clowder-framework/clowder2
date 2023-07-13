@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 
 from beanie import PydanticObjectId
 from bson import ObjectId
@@ -14,6 +14,7 @@ from app.keycloak_auth import get_current_user
 from app.models.datasets import DatasetDB
 from app.models.files import FileDB
 from app.models.metadata import MongoDBRef
+from app.models.pyobjectid import PyObjectId
 from app.models.visualization_config import (
     VisualizationConfigOut,
     VisualizationConfigDB,
@@ -34,6 +35,7 @@ security = HTTPBearer()
 async def add_Visualization(
     name: str,
     description: str,
+    config: str,
     user=Depends(get_current_user),
     fs: Minio = Depends(dependencies.get_fs),
     file: UploadFile = File(...),
@@ -52,7 +54,8 @@ async def add_Visualization(
         raise HTTPException(status_code=503, detail="Service not available")
         return
 
-    visualization_db = VisualizationDataDB(**visualization_in.dict(), creator=user)
+    visualization_db = VisualizationDataDB(**visualization_in.dict(), visualization_config_id=PyObjectId(config), creator=user)
+
     await visualization_db.insert()
     visualization_db.content_type = get_content_type(file.content_type, file.file)
     visualization_id = visualization_db.id

@@ -1,7 +1,7 @@
 import os
 
 from fastapi.testclient import TestClient
-
+from app.tests.utils import create_dataset, upload_file
 from app.config import settings
 
 visualization_example = "vis_upload.csv"
@@ -9,13 +9,84 @@ visualization_content_example = "year,location,count\n2024,preview,4"
 vis_name = "test vis data"
 vis_description = "test visualization data"
 
+dummy_visualization_config_id = "64b04faeba08c5da6bd1de84"
+
+test_visualization_config = {
+    "client": "testClient",
+    "parameters":
+        {"url": "testurl.com"},
+    "visualization_mimetype": "testMimeType"
+}
+
+
+def test_vis_config(client: TestClient, headers: dict):
+    # create a dataset and a file
+    temp_name = "testing file.txt"
+    dataset_id = create_dataset(client, headers).get("id")
+    upload_file(client, headers, dataset_id, temp_name)
+
+    # Get file from dataset object
+    response = client.get(
+        f"{settings.API_V2_STR}/datasets/{dataset_id}/files", headers=headers
+    )
+    assert response.status_code == 200
+    result = response.json()[0]
+    file_id = result["id"]
+
+    # create a visualization_config for the file
+    resource = {"resource_id": file_id, "collection": "files"}
+    test_visualization_config["resource"] = resource
+    response = client.post(
+        f"{settings.API_V2_STR}/visualizations/config",
+        json=test_visualization_config,
+        headers=headers
+    )
+    print(response)
+    assert response.json().get("id") is not None
+    visualization_config_id = response.json().get("id")
+    with open(visualization_example, "w") as tempf:
+        tempf.write(visualization_content_example)
+    vis_file = {"file": open(visualization_example, "rb")}
+    print(type(dummy_visualization_config_id), dummy_visualization_config_id)
+    print(type(visualization_config_id), visualization_config_id)
+    response = client.post(
+        f"{settings.API_V2_STR}/visualizations/?name={vis_name}&description={vis_description}&config={visualization_config_id}",
+        headers=headers,
+        files=vis_file,
+    )
+
+    vis_id = response.json().get("id")
+    response = client.get(
+        f"{settings.API_V2_STR}/visualizations/{vis_id}", headers=headers
+    )
+    assert response.status_code == 200
+    assert response.json().get("id") is not None
+
+    response = client.get(
+        f"{settings.API_V2_STR}/visualizations/{vis_id}/bytes",
+        headers=headers,
+    )
+    assert response.status_code == 200
+
+    response = client.delete(
+        f"{settings.API_V2_STR}/visualizations/{vis_id}", headers=headers
+    )
+    assert response.status_code == 200
+    # to do check if the config is deleted?
+    response = client.get(
+        f"{settings.API_V2_STR}/visualizations/{file_id}/config"
+    )
+    print(response)
+    print('here')
+
+
 
 def test_vis_data(client: TestClient, headers: dict):
     with open(visualization_example, "w") as tempf:
         tempf.write(visualization_content_example)
     vis_file = {"file": open(visualization_example, "rb")}
     response = client.post(
-        f"{settings.API_V2_STR}/visualizations/?name={vis_name}&description={vis_description}",
+        f"{settings.API_V2_STR}/visualizations/?name={vis_name}&description={vis_description}&config={dummy_visualization_config_id}",
         headers=headers,
         files=vis_file,
     )
