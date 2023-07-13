@@ -146,6 +146,7 @@ export const Explore = (): JSX.Element => {
 														author={`${dataset.creator.first_name} ${dataset.creator.last_name}`}
 														created={dataset.created}
 														description={dataset.description}
+														thumbnailId={dataset.thumbnail_id}
 													/>
 												</Grid>
 											);
