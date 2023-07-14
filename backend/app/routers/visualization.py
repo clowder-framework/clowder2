@@ -102,6 +102,11 @@ async def remove_visualization(
             PydanticObjectId(visualization_id)
         )
     ) is not None:
+        visualization_config_id = visualization.visualization_config_id
+        if (
+            vis_config := await VisualizationConfigDB.get(visualization_config_id)
+        ) is not None:
+            vis_config.delete()
         fs.remove_object(settings.MINIO_BUCKET_NAME, visualization_id)
         visualization.delete()
         return
