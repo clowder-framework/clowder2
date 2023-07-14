@@ -2,7 +2,7 @@ import json
 from datetime import datetime
 from typing import Optional
 
-from beanie import Document
+from beanie import Document, PydanticObjectId
 from pydantic import BaseModel, Field
 
 from app.models.files import ContentType
@@ -35,7 +35,7 @@ class VisualizationDataDB(Document, VisualizationDataBase):
     modified: datetime = Field(default_factory=datetime.utcnow)
     bytes: int = 0
     content_type: ContentType = ContentType()
-    visualization_config_id: PyObjectId
+    visualization_config_id: PydanticObjectId
 
     class Settings:
         name = "visualization_data"

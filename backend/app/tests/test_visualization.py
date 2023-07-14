@@ -1,7 +1,7 @@
 import os
 
 from fastapi.testclient import TestClient
-from app.tests.utils import create_dataset, upload_file
+from app.tests.utils import create_dataset, upload_file, create_apikey
 from app.config import settings
 
 visualization_example = "vis_upload.csv"
@@ -21,6 +21,7 @@ test_visualization_config = {
 
 def test_vis_config(client: TestClient, headers: dict):
     # create a dataset and a file
+    create_apikey(client, headers)
     temp_name = "testing file.txt"
     dataset_id = create_dataset(client, headers).get("id")
     upload_file(client, headers, dataset_id, temp_name)
@@ -72,12 +73,6 @@ def test_vis_config(client: TestClient, headers: dict):
         f"{settings.API_V2_STR}/visualizations/{vis_id}", headers=headers
     )
     assert response.status_code == 200
-    # to do check if the config is deleted?
-    response = client.get(
-        f"{settings.API_V2_STR}/visualizations/{file_id}/config"
-    )
-    print(response)
-    print('here')
 
 
 
