@@ -45,8 +45,6 @@ def test_visualization(client: TestClient, headers: dict):
     with open(visualization_example, "w") as tempf:
         tempf.write(visualization_content_example)
     vis_file = {"file": open(visualization_example, "rb")}
-    print(type(dummy_visualization_config_id), dummy_visualization_config_id)
-    print(type(visualization_config_id), visualization_config_id)
     response = client.post(
         f"{settings.API_V2_STR}/visualizations/?name={vis_name}&description={vis_description}&config={visualization_config_id}",
         headers=headers,
