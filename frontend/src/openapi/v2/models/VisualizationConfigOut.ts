@@ -25,7 +25,6 @@ export type VisualizationConfigOut = {
     job?: EventListenerJobDB;
     client?: string;
     parameters?: any;
-    visualization_bytes_ids: Array<string>;
     visualization_mimetype: string;
     id?: string;
 }

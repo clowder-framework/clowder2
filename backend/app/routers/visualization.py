@@ -54,7 +54,11 @@ async def add_Visualization(
         raise HTTPException(status_code=503, detail="Service not available")
         return
 
-    visualization_db = VisualizationDataDB(**visualization_in.dict(), visualization_config_id=PydanticObjectId(config), creator=user)
+    visualization_db = VisualizationDataDB(
+        **visualization_in.dict(),
+        visualization_config_id=PydanticObjectId(config),
+        creator=user,
+    )
 
     await visualization_db.insert()
     visualization_db.content_type = get_content_type(file.content_type, file.file)

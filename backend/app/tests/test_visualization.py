@@ -11,9 +11,8 @@ vis_description = "test visualization data"
 
 test_visualization_config = {
     "client": "testClient",
-    "parameters":
-        {"url": "testurl.com"},
-    "visualization_mimetype": "testMimeType"
+    "parameters": {"url": "testurl.com"},
+    "visualization_mimetype": "testMimeType",
 }
 
 
@@ -38,7 +37,7 @@ def test_visualization(client: TestClient, headers: dict):
     response = client.post(
         f"{settings.API_V2_STR}/visualizations/config",
         json=test_visualization_config,
-        headers=headers
+        headers=headers,
     )
     print(response)
     assert response.json().get("id") is not None

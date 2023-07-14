@@ -20,6 +20,7 @@ export class VisualizationsService {
      * file: bytes to upload
      * @param name
      * @param description
+     * @param config
      * @param formData
      * @returns VisualizationDataOut Successful Response
      * @throws ApiError
@@ -27,6 +28,7 @@ export class VisualizationsService {
     public static addVisualizationApiV2VisualizationsPost(
         name: string,
         description: string,
+        config: string,
         formData: Body_add_Visualization_api_v2_visualizations_post,
     ): CancelablePromise<VisualizationDataOut> {
         return __request({
@@ -35,6 +37,7 @@ export class VisualizationsService {
             query: {
                 'name': name,
                 'description': description,
+                'config': config,
             },
             formData: formData,
             mediaType: 'multipart/form-data',
