@@ -64,6 +64,13 @@ def test_visualization(client: TestClient, headers: dict):
     )
     assert response.status_code == 200
 
+    # test that you can get the vis data from the viz config id
+    response = client.get(
+        f"{settings.API_V2_STR}/visualizations/config/{visualization_config_id}/visdata",
+        headers=headers,
+    )
+    assert response.status_code == 200
+
     response = client.delete(
         f"{settings.API_V2_STR}/visualizations/{vis_id}", headers=headers
     )

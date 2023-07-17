@@ -176,6 +176,24 @@ export class VisualizationsService {
     }
 
     /**
+     * Get Visdata From Visconfig
+     * @param configId
+     * @returns VisualizationDataOut Successful Response
+     * @throws ApiError
+     */
+    public static getVisdataFromVisconfigApiV2VisualizationsConfigConfigIdVisdataGet(
+        configId: string,
+    ): CancelablePromise<Array<VisualizationDataOut>> {
+        return __request({
+            method: 'GET',
+            path: `/api/v2/visualizations/config/${configId}/visdata`,
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+
+    /**
      * Update Visconfig Map
      * @param configId
      * @param requestBody

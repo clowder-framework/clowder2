@@ -195,6 +195,23 @@ async def get_visconfig(
         raise HTTPException(status_code=404, detail=f"VisConfig {config_id} not found")
 
 
+@router.get("/config/{config_id}/visdata", response_model=List[VisualizationDataOut])
+async def get_visdata_from_visconfig(
+    config_id: PydanticObjectId,
+    user=Depends(get_current_user),
+):
+    config_visdata = []
+    if (
+        vis_config := await VisualizationConfigDB.get(PydanticObjectId(config_id))
+    ) is not None:
+        query = [VisualizationDataDB.visualization_config_id == config_id]
+        async for vis_data in VisualizationDataDB.find(*query):
+            config_visdata.append(vis_data.dict())
+        return config_visdata
+    else:
+        raise HTTPException(status_code=404, detail=f"VisConfig {config_id} not found")
+
+
 @router.patch("/config/{config_id}/visdata", response_model=VisualizationConfigOut)
 async def update_visconfig_map(
     config_id: PydanticObjectId,
