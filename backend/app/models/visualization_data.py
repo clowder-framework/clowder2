@@ -8,6 +8,7 @@ from pydantic import BaseModel, Field
 from app.models.files import ContentType
 from app.models.users import UserOut
 from app.models.pyobjectid import PyObjectId
+from app.models.visualization_config import VisualizationConfigOut
 
 
 class VisualizationDataBase(BaseModel):
@@ -42,5 +43,6 @@ class VisualizationDataDB(Document, VisualizationDataBase):
 
 
 class VisualizationDataOut(VisualizationDataDB):
+    vis_config: VisualizationConfigOut
     class Config:
         fields = {"id": "id"}
