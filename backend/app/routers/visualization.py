@@ -206,9 +206,7 @@ async def get_visdata_from_visconfig(
     ) is not None:
         query = [VisualizationDataDB.visualization_config_id == config_id]
         async for vis_data in VisualizationDataDB.find(*query):
-            vis_config_map = vis_config.dict()
-            config_visdata_out = VisualizationConfigOut(**vis_data, vis_config=vis_config.dict())
-            config_visdata.append(config_visdata_out.dict())
+            config_visdata.append(vis_data)
         return config_visdata
     else:
         raise HTTPException(status_code=404, detail=f"VisConfig {config_id} not found")

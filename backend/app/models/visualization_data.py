@@ -43,6 +43,5 @@ class VisualizationDataDB(Document, VisualizationDataBase):
 
 
 class VisualizationDataOut(VisualizationDataDB):
-    vis_config: VisualizationConfigOut
     class Config:
         fields = {"id": "id"}
