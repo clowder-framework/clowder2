@@ -103,7 +103,7 @@ async def remove_visualization(
     )
 
 
-@router.get("/download/{visualization_id}")
+@router.get("/{visualization_id}/bytes")
 async def download_visualization(
     visualization_id: str, fs: Minio = Depends(dependencies.get_fs)
 ):
@@ -131,7 +131,6 @@ async def download_visualization(
 async def save_visualization_config(
     visconfig_in: VisualizationConfigIn,
     user=Depends(get_current_user),
-    credentials: HTTPAuthorizationCredentials = Security(security),
 ):
     visconfig_in = visconfig_in.dict()
     # TODO why does it not have right type in the db without the lines below?
