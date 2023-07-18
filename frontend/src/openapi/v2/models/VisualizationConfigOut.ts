@@ -5,6 +5,7 @@
 import type { EventListenerJobDB } from './EventListenerJobDB';
 import type { ExtractorInfo } from './ExtractorInfo';
 import type { MongoDBRef } from './MongoDBRef';
+import type { VisualizationDataOut } from './VisualizationDataOut';
 
 /**
  * Document Mapping class.
@@ -25,8 +26,8 @@ export type VisualizationConfigOut = {
     job?: EventListenerJobDB;
     client?: string;
     parameters?: any;
-    visualization_bytes_ids: Array<string>;
-    visualization_mimetype: string;
     visualization_component_id: string;
+    visualization_mimetype: string;
     id?: string;
+    visualization_data?: Array<VisualizationDataOut>;
 }
