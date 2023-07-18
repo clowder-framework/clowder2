@@ -205,12 +205,12 @@ export class DatasetsService {
      * @returns DatasetOut Successful Response
      * @throws ApiError
      */
-    public static addDatasetThumbnailApiV2DatasetsDatasetIdThumbnailThumbnailIdPost(
+    public static addDatasetThumbnailApiV2DatasetsDatasetIdThumbnailThumbnailIdPatch(
         datasetId: string,
         thumbnailId: string,
     ): CancelablePromise<DatasetOut> {
         return __request({
-            method: 'POST',
+            method: 'PATCH',
             path: `/api/v2/datasets/${datasetId}/thumbnail/${thumbnailId}`,
             errors: {
                 422: `Validation Error`,

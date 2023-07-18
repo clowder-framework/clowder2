@@ -176,12 +176,12 @@ export class FilesService {
      * @returns FileOut Successful Response
      * @throws ApiError
      */
-    public static addDatasetThumbnailApiV2FilesFileIdThumbnailThumbnailIdPost(
+    public static addDatasetThumbnailApiV2FilesFileIdThumbnailThumbnailIdPatch(
         fileId: string,
         thumbnailId: string,
     ): CancelablePromise<FileOut> {
         return __request({
-            method: 'POST',
+            method: 'PATCH',
             path: `/api/v2/files/${fileId}/thumbnail/${thumbnailId}`,
             errors: {
                 422: `Validation Error`,

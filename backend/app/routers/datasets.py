@@ -260,7 +260,7 @@ async def get_dataset_files(
     return [file.dict() for file in files]
 
 
-@router.post("/{dataset_id}/thumbnail/{thumbnail_id}", response_model=DatasetOut)
+@router.patch("/{dataset_id}/thumbnail/{thumbnail_id}", response_model=DatasetOut)
 async def add_dataset_thumbnail(
     dataset_id: str,
     thumbnail_id: str,

@@ -406,7 +406,7 @@ async def resubmit_file_extractions(
     return resubmit_success_fail
 
 
-@router.post("/{file_id}/thumbnail/{thumbnail_id}", response_model=FileOut)
+@router.patch("/{file_id}/thumbnail/{thumbnail_id}", response_model=FileOut)
 async def add_dataset_thumbnail(
     file_id: str,
     thumbnail_id: str,
