@@ -193,26 +193,4 @@ export class VisualizationsService {
         });
     }
 
-    /**
-     * Update Visconfig Map
-     * @param configId
-     * @param requestBody
-     * @returns VisualizationConfigOut Successful Response
-     * @throws ApiError
-     */
-    public static updateVisconfigMapApiV2VisualizationsConfigConfigIdVisdataPatch(
-        configId: string,
-        requestBody: any,
-    ): CancelablePromise<VisualizationConfigOut> {
-        return __request({
-            method: 'PATCH',
-            path: `/api/v2/visualizations/config/${configId}/visdata`,
-            body: requestBody,
-            mediaType: 'application/json',
-            errors: {
-                422: `Validation Error`,
-            },
-        });
-    }
-
 }
