@@ -27,6 +27,7 @@ export type VisualizationConfigOut = {
     client?: string;
     parameters?: any;
     visualization_mimetype: string;
+    visualization_component_id: string;
     id?: string;
     visualization_data?: Array<VisualizationDataOut>;
 }
