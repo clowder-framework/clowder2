@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 
 from beanie import PydanticObjectId
 from bson import ObjectId
@@ -14,6 +14,7 @@ from app.keycloak_auth import get_current_user
 from app.models.datasets import DatasetDB
 from app.models.files import FileDB
 from app.models.metadata import MongoDBRef
+from app.models.pyobjectid import PyObjectId
 from app.models.visualization_config import (
     VisualizationConfigOut,
     VisualizationConfigDB,
@@ -34,6 +35,7 @@ security = HTTPBearer()
 async def add_Visualization(
     name: str,
     description: str,
+    config: str,
     user=Depends(get_current_user),
     fs: Minio = Depends(dependencies.get_fs),
     file: UploadFile = File(...),
@@ -52,7 +54,12 @@ async def add_Visualization(
         raise HTTPException(status_code=503, detail="Service not available")
         return
 
-    visualization_db = VisualizationDataDB(**visualization_in.dict(), creator=user)
+    visualization_db = VisualizationDataDB(
+        **visualization_in.dict(),
+        visualization_config_id=PydanticObjectId(config),
+        creator=user,
+    )
+
     await visualization_db.insert()
     visualization_db.content_type = get_content_type(file.content_type, file.file)
     visualization_id = visualization_db.id
@@ -95,6 +102,11 @@ async def remove_visualization(
             PydanticObjectId(visualization_id)
         )
     ) is not None:
+        visualization_config_id = visualization.visualization_config_id
+        if (
+            vis_config := await VisualizationConfigDB.get(visualization_config_id)
+        ) is not None:
+            vis_config.delete()
         fs.remove_object(settings.MINIO_BUCKET_NAME, visualization_id)
         visualization.delete()
         return
@@ -162,7 +174,6 @@ async def save_visualization_config(
 async def get_resource_visconfig(
     resource_id: PydanticObjectId,
     user=Depends(get_current_user),
-    credentials: HTTPAuthorizationCredentials = Security(security),
 ):
     query = [VisualizationConfigDB.resource.resource_id == ObjectId(resource_id)]
     visconfigs = []
@@ -175,29 +186,35 @@ async def get_resource_visconfig(
 async def get_visconfig(
     config_id: PydanticObjectId,
     user=Depends(get_current_user),
-    credentials: HTTPAuthorizationCredentials = Security(security),
 ):
     if (
         vis_config := await VisualizationConfigDB.get(PydanticObjectId(config_id))
     ) is not None:
-        return vis_config.dict()
+        config_visdata = []
+        query = [VisualizationDataDB.visualization_config_id == config_id]
+        async for vis_data in VisualizationDataDB.find(*query):
+            config_visdata.append(vis_data.dict())
+        # TODO
+        vis_config_out = VisualizationConfigOut(**vis_config.dict())
+        vis_config_out.visualization_data = config_visdata
+        return vis_config_out
     else:
         raise HTTPException(status_code=404, detail=f"VisConfig {config_id} not found")
 
 
-@router.patch("/config/{config_id}/visdata", response_model=VisualizationConfigOut)
-async def update_visconfig_map(
+@router.get("/config/{config_id}/visdata", response_model=List[VisualizationDataOut])
+async def get_visdata_from_visconfig(
     config_id: PydanticObjectId,
-    new_vis_config_data: dict,
     user=Depends(get_current_user),
-    credentials: HTTPAuthorizationCredentials = Security(security),
 ):
+    config_visdata = []
     if (
         vis_config := await VisualizationConfigDB.get(PydanticObjectId(config_id))
     ) is not None:
-        vis_config.vis_config_data = new_vis_config_data
-        await vis_config.replace()
-        return vis_config.dict()
+        query = [VisualizationDataDB.visualization_config_id == config_id]
+        async for vis_data in VisualizationDataDB.find(*query):
+            config_visdata.append(vis_data)
+        return config_visdata
     else:
         raise HTTPException(status_code=404, detail=f"VisConfig {config_id} not found")
 
@@ -206,11 +223,13 @@ async def update_visconfig_map(
 async def delete_visconfig(
     config_id: PydanticObjectId,
     user=Depends(get_current_user),
-    credentials: HTTPAuthorizationCredentials = Security(security),
 ):
     if (
         vis_config := await VisualizationConfigDB.get(PydanticObjectId(config_id))
     ) is not None:
+        query = [VisualizationDataDB.visualization_config_id == config_id]
+        async for vis_data in VisualizationDataDB.find(*query):
+            await vis_data.delete()
         await vis_config.delete()
         return vis_config.dict()
     else:
