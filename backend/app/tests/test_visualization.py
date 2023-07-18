@@ -75,3 +75,5 @@ def test_visualization(client: TestClient, headers: dict):
         f"{settings.API_V2_STR}/visualizations/{vis_id}", headers=headers
     )
     assert response.status_code == 200
+
+    os.remove(visualization_example)
