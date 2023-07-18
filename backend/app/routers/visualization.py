@@ -190,7 +190,14 @@ async def get_visconfig(
     if (
         vis_config := await VisualizationConfigDB.get(PydanticObjectId(config_id))
     ) is not None:
-        return vis_config.dict()
+        config_visdata = []
+        query = [VisualizationDataDB.visualization_config_id == config_id]
+        async for vis_data in VisualizationDataDB.find(*query):
+            config_visdata.append(vis_data.dict())
+        # TODO
+        vis_config_out = VisualizationConfigOut(**vis_config.dict())
+        vis_config_out.visualization_data = config_visdata
+        return vis_config_out
     else:
         raise HTTPException(status_code=404, detail=f"VisConfig {config_id} not found")
 
@@ -208,22 +215,6 @@ async def get_visdata_from_visconfig(
         async for vis_data in VisualizationDataDB.find(*query):
             config_visdata.append(vis_data)
         return config_visdata
-    else:
-        raise HTTPException(status_code=404, detail=f"VisConfig {config_id} not found")
-
-
-@router.patch("/config/{config_id}/visdata", response_model=VisualizationConfigOut)
-async def update_visconfig_map(
-    config_id: PydanticObjectId,
-    new_vis_config_data: dict,
-    user=Depends(get_current_user),
-):
-    if (
-        vis_config := await VisualizationConfigDB.get(PydanticObjectId(config_id))
-    ) is not None:
-        vis_config.vis_config_data = new_vis_config_data
-        await vis_config.replace()
-        return vis_config.dict()
     else:
         raise HTTPException(status_code=404, detail=f"VisConfig {config_id} not found")
 

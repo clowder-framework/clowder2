@@ -6,6 +6,7 @@ from pydantic import BaseModel
 from app.models.listeners import ExtractorInfo, EventListenerJobDB
 from app.models.metadata import MongoDBRef
 from app.models.pyobjectid import PyObjectId
+from app.models.visualization_data import VisualizationDataOut
 
 
 class VisualizationConfigBase(BaseModel):
@@ -27,5 +28,7 @@ class VisualizationConfigDB(Document, VisualizationConfigBase):
 
 
 class VisualizationConfigOut(VisualizationConfigDB):
+    visualization_data: List[VisualizationDataOut] = []
+
     class Config:
         fields = {"id": "id"}
