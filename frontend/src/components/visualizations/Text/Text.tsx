@@ -1,18 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-
-import {
-	DOWNLOAD_FILE,
-	fileDownloaded as fileDownloadedAction,
-} from "../../../actions/file";
-
-import {
-	DOWNLOAD_VIS_DATA,
-	downloadVisData as downloadVisDataAction,
-} from "../../../actions/visualization";
 import ShowMoreText from "react-show-more-text";
-import { RootState } from "../../../types/data";
 import { readTextFromFile } from "../../../utils/common";
+
+import { downloadVisData, fileDownloaded } from "../../../utils/visualization";
 
 type TextProps = {
 	fileId?: string;
@@ -21,62 +11,27 @@ type TextProps = {
 
 export default function Text(props: TextProps) {
 	const { fileId, visualizationId } = props;
-
-	const dispatch = useDispatch();
-
-	const downloadFile = (
-		fileId: string | undefined,
-		filename: string | undefined,
-		fileVersionNum: number | undefined,
-		autoSave: boolean
-	) =>
-		dispatch(fileDownloadedAction(fileId, filename, fileVersionNum, autoSave));
-	const downloadVisData = (
-		visualizationId: string | undefined,
-		filename: string | undefined,
-		autoSave: boolean
-	) => dispatch(downloadVisDataAction(visualizationId, filename, autoSave));
-
-	const rawFileBlob = useSelector((state: RootState) => state.file.blob);
-	const visFileBlob = useSelector(
-		(state: RootState) => state.visualization.blob
-	);
-
 	const [text, setText] = useState("");
 
 	useEffect(() => {
-		return () => {
-			dispatch({
-				type: DOWNLOAD_FILE,
-				blob: new Blob([]),
-				receivedAt: Date.now(),
-			});
-			dispatch({
-				type: DOWNLOAD_VIS_DATA,
-				blob: new Blob([]),
-				receivedAt: Date.now(),
-			});
-		};
-	}, []);
-
-	useEffect(() => {
-		if (visualizationId) downloadVisData(visualizationId, "text.tmp", false);
-		else downloadFile(fileId, "text.tmp", 0, false);
-	}, [visualizationId, fileId]);
-
-	useEffect(() => {
-		let blob = new Blob([]);
-		if (visFileBlob.size > 0) blob = visFileBlob;
-		else if (rawFileBlob.size > 0) blob = rawFileBlob;
-
 		const processBlob = async () => {
-			const file = new File([blob], "text.tmp");
-			const text = await readTextFromFile(file);
-			setText(text);
+			try {
+				let blob;
+				if (visualizationId) {
+					blob = await downloadVisData(visualizationId);
+				} else {
+					blob = await fileDownloaded(fileId, 0);
+				}
+				const file = new File([blob], "text.tmp");
+				const text = await readTextFromFile(file);
+				setText(text);
+			} catch (error) {
+				console.error("Error fetching data:", error);
+			}
 		};
 
 		processBlob();
-	}, [visFileBlob, rawFileBlob]);
+	}, [visualizationId, fileId]);
 
 	return (
 		<ShowMoreText

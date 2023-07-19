@@ -14,6 +14,7 @@ class VisualizationConfigBase(BaseModel):
     job: Optional[EventListenerJobDB]
     client: Optional[str]
     parameters: dict = {}
+    visualization_component_id: str
     visualization_mimetype: str
     visualization_component_id: str
 
