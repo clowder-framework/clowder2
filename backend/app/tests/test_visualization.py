@@ -13,6 +13,7 @@ test_visualization_config = {
     "client": "testClient",
     "parameters": {"url": "testurl.com"},
     "visualization_mimetype": "testMimeType",
+    "visualization_component_id": "basic-image-component",
 }
 
 
