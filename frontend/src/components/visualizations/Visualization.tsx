@@ -46,14 +46,14 @@ export const Visualization = (props: previewProps) => {
 										const componentName =
 											visConfigEntry.visualization_component_id;
 										if (componentName === visComponentDefinition.name) {
-											return visConfigEntry.visualization_bytes_ids.map(
-												(visualizationId) => {
+											return visConfigEntry.visualization_data.map(
+												(visualizationDataItem) => {
 													return (
 														<Grid item xs={12} sm={4} md={4} lg={4} xl={4}>
 															{React.cloneElement(
 																visComponentDefinition.component,
 																{
-																	visualizationId: visualizationId,
+																	visualizationId: visualizationDataItem.id,
 																}
 															)}
 														</Grid>
