@@ -27,4 +27,5 @@ export type DatasetOut = {
     status?: string;
     user_views?: number;
     downloads?: number;
+    thumbnail_id?: string;
 }

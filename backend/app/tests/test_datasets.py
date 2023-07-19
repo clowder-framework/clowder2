@@ -1,4 +1,5 @@
 from fastapi.testclient import TestClient
+
 from app.config import settings
 from app.tests.utils import create_dataset
 
@@ -68,3 +69,17 @@ def test_list(client: TestClient, headers: dict):
     assert response.status_code == 200
     # TODO: Verify the new dataset_id is actually in this list
     assert len(response.json()) > 0
+
+
+def test_add_thumbnail(client: TestClient, headers: dict):
+    resp = create_dataset(client, headers)
+    dataset_id = resp["id"]
+    thumbnail_id = "64ac275727c83a6786dd9fd4"
+    resp = client.patch(
+        f"{settings.API_V2_STR}/datasets/{dataset_id}/thumbnail/{thumbnail_id}",
+        headers=headers,
+    )
+    assert resp.status_code == 200
+
+    result = resp.json()
+    assert result["thumbnail_id"] == thumbnail_id

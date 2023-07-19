@@ -169,4 +169,24 @@ export class FilesService {
         });
     }
 
+    /**
+     * Add Dataset Thumbnail
+     * @param fileId
+     * @param thumbnailId
+     * @returns FileOut Successful Response
+     * @throws ApiError
+     */
+    public static addDatasetThumbnailApiV2FilesFileIdThumbnailThumbnailIdPatch(
+        fileId: string,
+        thumbnailId: string,
+    ): CancelablePromise<FileOut> {
+        return __request({
+            method: 'PATCH',
+            path: `/api/v2/files/${fileId}/thumbnail/${thumbnailId}`,
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+
 }
