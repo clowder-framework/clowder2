@@ -28,7 +28,6 @@ export type VisualizationConfigOut = {
     parameters?: any;
     visualization_component_id: string;
     visualization_mimetype: string;
-    visualization_component_id: string;
     id?: string;
     visualization_data?: Array<VisualizationDataOut>;
 }
