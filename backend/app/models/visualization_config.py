@@ -16,6 +16,7 @@ class VisualizationConfigBase(BaseModel):
     client: Optional[str]
     parameters: dict = {}
     visualization_mimetype: str
+    visualization_component_id: str
 
 
 class VisualizationConfigIn(VisualizationConfigBase):

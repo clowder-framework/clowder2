@@ -13,4 +13,5 @@ export type VisualizationConfigIn = {
     client?: string;
     parameters?: any;
     visualization_mimetype: string;
+    visualization_component_id: string;
 }
