@@ -1,10 +1,10 @@
-from typing import List, Optional
+from typing import List
 
 from beanie import PydanticObjectId
 from bson import ObjectId
-from fastapi import APIRouter, HTTPException, Depends, Security
+from fastapi import APIRouter, HTTPException, Depends
 from fastapi import File, UploadFile
-from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from fastapi.security import HTTPBearer
 from minio import Minio
 from starlette.responses import StreamingResponse
 
@@ -14,7 +14,6 @@ from app.keycloak_auth import get_current_user
 from app.models.datasets import DatasetDB
 from app.models.files import FileDB
 from app.models.metadata import MongoDBRef
-from app.models.pyobjectid import PyObjectId
 from app.models.visualization_config import (
     VisualizationConfigOut,
     VisualizationConfigDB,
@@ -178,7 +177,13 @@ async def get_resource_visconfig(
     query = [VisualizationConfigDB.resource.resource_id == ObjectId(resource_id)]
     visconfigs = []
     async for vzconfig in VisualizationConfigDB.find(*query):
-        visconfigs.append(vzconfig)
+        config_visdata = []
+        visdata_query = [VisualizationDataDB.visualization_config_id == vzconfig.id]
+        async for vis_data in VisualizationDataDB.find(*visdata_query):
+            config_visdata.append(vis_data.dict())
+        visconfig_out = VisualizationConfigOut(**vzconfig.dict())
+        visconfig_out.visualization_data = config_visdata
+        visconfigs.append(visconfig_out)
     return [vz.dict() for vz in visconfigs]
 
 

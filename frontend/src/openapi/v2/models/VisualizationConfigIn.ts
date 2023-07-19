@@ -12,6 +12,6 @@ export type VisualizationConfigIn = {
     job?: EventListenerJobDB;
     client?: string;
     parameters?: any;
-    visualization_mimetype: string;
     visualization_component_id: string;
+    visualization_mimetype: string;
 }
