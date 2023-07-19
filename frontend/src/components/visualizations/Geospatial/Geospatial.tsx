@@ -4,7 +4,6 @@ import Map from "ol/Map";
 import View from "ol/View";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../../types/data";
-import { fetchFileExtractedMetadata } from "../../../actions/file";
 import { OSM } from "ol/source";
 import TileLayer from "ol/layer/Tile";
 import Static from "ol/source/ImageStatic";
@@ -25,26 +24,18 @@ export default function Geospatial(props: GeospatialProps) {
 	const mapRef = useRef<Map>();
 	mapRef.current = map;
 
-	const fetchExtractdMetadata = (fileId: string | undefined) =>
-		dispatch(fetchFileExtractedMetadata(fileId));
-
-	const metadata = useSelector(
-		(state: RootState) => state.file.extractedMetadata
+	const visConfig = useSelector(
+		(state: RootState) => state.visualization.visConfig
 	);
 
 	useEffect(() => {
-		metadata.forEach(function (md) {
-			if (md.content && md.content["WMS Layer URL"]) {
-				const wms_url = String(md.content["WMS Layer URL"]);
+		visConfig.forEach(function (vc) {
+			if (vc.parameters && vc.parameters["WMS Layer URL"]) {
+				const wms_url = String(vc.parameters["WMS Layer URL"]);
 				setLayerWMS(wms_url);
 			}
 		});
-	}, [metadata]);
-
-	// TODO: Clear previous data in didMount
-	useEffect(() => {
-		fetchExtractdMetadata(fileId);
-	}, [fileId]);
+	}, [visConfig]);
 
 	useEffect(() => {
 		// Determine bounding box extent & center point from URL
