@@ -27,4 +27,5 @@ export type VisualizationDataOut = {
     modified?: string;
     bytes?: number;
     content_type?: ContentType;
+    visualization_config_id: string;
 }
