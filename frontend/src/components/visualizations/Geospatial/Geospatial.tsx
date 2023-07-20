@@ -25,8 +25,6 @@ export default function Geospatial(props: GeospatialProps) {
 				if (vc.parameters && vc.parameters["WMS Layer URL"]) {
 					const wms_url = String(vc.parameters["WMS Layer URL"]);
 					setLayerWMS(wms_url);
-					console.log("WMS is set.");
-					console.log(wms_url);
 				}
 			});
 		}
@@ -67,8 +65,6 @@ export default function Geospatial(props: GeospatialProps) {
 			});
 			wms_map.getView().fit(bbox);
 			setMap(wms_map);
-			console.log("map is set.");
-			console.log(wms_map.getLayers());
 		}
 	}, [layerWMS]);
 
