@@ -9,6 +9,8 @@ import {useDispatch} from "react-redux";
 import {MoreHoriz} from "@material-ui/icons";
 import DeleteIcon from "@mui/icons-material/Delete";
 import ShareIcon from '@mui/icons-material/Share';
+import GroupsIcon from "@mui/icons-material/Groups";
+import PersonIcon from "@mui/icons-material/Person";
 import ShareDatasetModal from "./ShareDatasetModal"
 import ShareGroupDatasetModal from "./ShareGroupDatasetModal";
 
@@ -98,7 +100,7 @@ export const ShareMenu = (props: ActionsMenuProps): JSX.Element => {
 							}
 						}>
 							<ListItemIcon>
-								<ShareIcon fontSize="small" />
+								<PersonIcon fontSize="small" />
 							</ListItemIcon>
 							<ListItemText>Share</ListItemText>
 					</MenuItem>
@@ -109,7 +111,7 @@ export const ShareMenu = (props: ActionsMenuProps): JSX.Element => {
 							}
 						}>
 							<ListItemIcon>
-								<ShareIcon fontSize="small" />
+								<GroupsIcon fontSize="small" />
 							</ListItemIcon>
 							<ListItemText>Share With Group</ListItemText>
 					</MenuItem>
