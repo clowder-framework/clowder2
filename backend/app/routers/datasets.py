@@ -23,7 +23,6 @@ from fastapi import (
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from minio import Minio
 from pika.adapters.blocking_connection import BlockingChannel
-from pymongo import DESCENDING
 from rocrate.model.person import Person
 from rocrate.rocrate import ROCrate
 
@@ -34,7 +33,6 @@ from app.keycloak_auth import (
     get_token,
     get_user,
     get_current_user,
-    get_current_username,
 )
 from app.models.authorization import AuthorizationDB, RoleType
 from app.models.datasets import (
@@ -260,6 +258,20 @@ async def get_dataset_files(
         query.append(FileDBViewList.folder_id == ObjectId(folder_id))
     files = await FileDBViewList.find(*query).skip(skip).limit(limit).to_list()
     return [file.dict() for file in files]
+
+
+@router.patch("/{dataset_id}/thumbnail/{thumbnail_id}", response_model=DatasetOut)
+async def add_dataset_thumbnail(
+    dataset_id: str,
+    thumbnail_id: str,
+    allow: bool = Depends(Authorization("editor")),
+):
+    if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
+        dataset.thumbnail_id = thumbnail_id
+        await dataset.save()
+
+        return dataset.dict()
+    raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
 
 
 @router.put("/{dataset_id}", response_model=DatasetOut)

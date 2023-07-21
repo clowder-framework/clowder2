@@ -1,5 +1,4 @@
 import io
-import mimetypes
 from datetime import datetime
 from typing import Optional, List
 from typing import Union
@@ -25,7 +24,6 @@ from app.keycloak_auth import get_current_user, get_token
 from app.models.files import (
     FileOut,
     FileVersion,
-    ContentType,
     FileDB,
     FileVersionDB,
 )
@@ -406,3 +404,17 @@ async def resubmit_file_extractions(
             FileOut(**file.dict()), rabbitmq_client, user, credentials
         )
     return resubmit_success_fail
+
+
+@router.patch("/{file_id}/thumbnail/{thumbnail_id}", response_model=FileOut)
+async def add_dataset_thumbnail(
+    file_id: str,
+    thumbnail_id: str,
+    allow: bool = Depends(FileAuthorization("editor")),
+):
+    if (file := await FileDB.get(PydanticObjectId(file_id))) is not None:
+        file.thumbnail_id = thumbnail_id
+        await file.save()
+
+        return file.dict()
+    raise HTTPException(status_code=404, detail=f"File {file_id} not found")

@@ -1,4 +1,5 @@
 from fastapi.testclient import TestClient
+
 from app.config import settings
 from app.tests.utils import create_dataset, upload_file
 
@@ -33,3 +34,18 @@ def test_get_one(client: TestClient, headers: dict):
     assert result["name"] == temp_name
     assert result["version_num"] == 1
     assert result["dataset_id"] == dataset_id
+
+
+def test_add_thumbnail(client: TestClient, headers: dict):
+    dataset_id = create_dataset(client, headers).get("id")
+    resp = upload_file(client, headers, dataset_id)
+    file_id = resp["id"]
+    thumbnail_id = "64ac275727c83a6786dd9fd4"
+    resp = client.patch(
+        f"{settings.API_V2_STR}/files/{file_id}/thumbnail/{thumbnail_id}",
+        headers=headers,
+    )
+    assert resp.status_code == 200
+
+    result = resp.json()
+    assert result["thumbnail_id"] == thumbnail_id

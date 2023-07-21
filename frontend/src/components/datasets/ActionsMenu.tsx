@@ -6,6 +6,7 @@ import {RootState} from "../../types/data";
 import {Download} from "@mui/icons-material";
 import {NewMenu} from "./NewMenu";
 import {OtherMenu} from "./OtherMenu";
+import {ShareMenu} from "./ShareMenu";
 import {EditMenu} from "./EditMenu";
 import {AuthWrapper} from "../auth/AuthWrapper";
 
@@ -52,6 +53,11 @@ export const ActionsMenu = (props: ActionsMenuProps): JSX.Element => {
 				</AuthWrapper>
 			}
 			{/*owner can delete and perform other tasks*/}
+			{
+				<AuthWrapper currRole={datasetRole.role} allowedRoles={["owner"]}>
+					<ShareMenu datasetId={datasetId} folderId={folderId} datasetName={datasetName}/>
+				</AuthWrapper>
+			}
 			{
 				<AuthWrapper currRole={datasetRole.role} allowedRoles={["owner"]}>
 					<OtherMenu datasetId={datasetId} folderId={folderId} datasetName={datasetName}/>

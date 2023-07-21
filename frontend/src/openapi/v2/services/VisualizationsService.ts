@@ -20,6 +20,7 @@ export class VisualizationsService {
      * file: bytes to upload
      * @param name
      * @param description
+     * @param config
      * @param formData
      * @returns VisualizationDataOut Successful Response
      * @throws ApiError
@@ -27,6 +28,7 @@ export class VisualizationsService {
     public static addVisualizationApiV2VisualizationsPost(
         name: string,
         description: string,
+        config: string,
         formData: Body_add_Visualization_api_v2_visualizations_post,
     ): CancelablePromise<VisualizationDataOut> {
         return __request({
@@ -35,6 +37,7 @@ export class VisualizationsService {
             query: {
                 'name': name,
                 'description': description,
+                'config': config,
             },
             formData: formData,
             mediaType: 'multipart/form-data',
@@ -173,21 +176,17 @@ export class VisualizationsService {
     }
 
     /**
-     * Update Visconfig Map
+     * Get Visdata From Visconfig
      * @param configId
-     * @param requestBody
-     * @returns VisualizationConfigOut Successful Response
+     * @returns VisualizationDataOut Successful Response
      * @throws ApiError
      */
-    public static updateVisconfigMapApiV2VisualizationsConfigConfigIdVisdataPatch(
+    public static getVisdataFromVisconfigApiV2VisualizationsConfigConfigIdVisdataGet(
         configId: string,
-        requestBody: any,
-    ): CancelablePromise<VisualizationConfigOut> {
+    ): CancelablePromise<Array<VisualizationDataOut>> {
         return __request({
-            method: 'PATCH',
+            method: 'GET',
             path: `/api/v2/visualizations/config/${configId}/visdata`,
-            body: requestBody,
-            mediaType: 'application/json',
             errors: {
                 422: `Validation Error`,
             },
