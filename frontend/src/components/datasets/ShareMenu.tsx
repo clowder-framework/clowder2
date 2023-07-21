@@ -9,6 +9,8 @@ import {useDispatch} from "react-redux";
 import {MoreHoriz} from "@material-ui/icons";
 import DeleteIcon from "@mui/icons-material/Delete";
 import ShareIcon from '@mui/icons-material/Share';
+import GroupsIcon from "@mui/icons-material/Groups";
+import PersonIcon from "@mui/icons-material/Person";
 import ShareDatasetModal from "./ShareDatasetModal"
 import ShareGroupDatasetModal from "./ShareGroupDatasetModal";
 
@@ -17,7 +19,7 @@ type ActionsMenuProps = {
 	datasetName: string
 }
 
-export const OtherMenu = (props: ActionsMenuProps): JSX.Element => {
+export const ShareMenu = (props: ActionsMenuProps): JSX.Element => {
 	const {datasetId, datasetName} = props;
 
 	// use history hook to redirect/navigate between routes
@@ -35,6 +37,8 @@ export const OtherMenu = (props: ActionsMenuProps): JSX.Element => {
 
 	// state
 	const [deleteDatasetConfirmOpen, setDeleteDatasetConfirmOpen] = useState(false);
+	const [sharePaneOpen, setSharePaneOpen] = useState(false);
+	const [shareGroupPaneOpen, setShareGroupPaneOpen] = useState(false);
 
 
 
@@ -58,6 +62,14 @@ export const OtherMenu = (props: ActionsMenuProps): JSX.Element => {
 		setAnchorEl(null);
 	};
 
+    const handleShareClose = () => {
+        setSharePaneOpen(false);
+    }
+
+      const handleShareGroupClose = () => {
+        setShareGroupPaneOpen(false);
+    }
+
 	return (
 		<Box>
 			<ActionModal actionOpen={deleteDatasetConfirmOpen} actionTitle="Are you sure?"
@@ -66,9 +78,13 @@ export const OtherMenu = (props: ActionsMenuProps): JSX.Element => {
 						 handleActionCancel={() => {
 							 setDeleteDatasetConfirmOpen(false);
 						 }}/>
+
+ 		        <ShareDatasetModal open={sharePaneOpen} handleClose={handleShareClose} datasetName={datasetName}/>
+			 	<ShareGroupDatasetModal open={shareGroupPaneOpen} handleClose={handleShareGroupClose} datasetName={datasetName}/>
+
 			<Button variant="outlined" onClick={handleOptionClick}
 					endIcon={<ArrowDropDownIcon/>}>
-				<MoreHoriz/>
+				Share
 			</Button>
 			<Menu
 				id="simple-menu"
@@ -77,16 +93,28 @@ export const OtherMenu = (props: ActionsMenuProps): JSX.Element => {
 				open={Boolean(anchorEl)}
 				onClose={handleOptionClose}
 			>
-				<MenuItem
-					onClick={() => {
-						handleOptionClose();
-						setDeleteDatasetConfirmOpen(true);
-					}
-					}>
-					<ListItemIcon>
-						<DeleteIcon fontSize="small"/>
-					</ListItemIcon>
-					<ListItemText>Delete Dataset</ListItemText></MenuItem>
+					<MenuItem
+							onClick={() => {
+								handleOptionClose();
+								setSharePaneOpen(true);
+							}
+						}>
+							<ListItemIcon>
+								<PersonIcon fontSize="small" />
+							</ListItemIcon>
+							<ListItemText>Share</ListItemText>
+					</MenuItem>
+					<MenuItem
+							onClick={() => {
+								handleOptionClose();
+								setShareGroupPaneOpen(true);
+							}
+						}>
+							<ListItemIcon>
+								<GroupsIcon fontSize="small" />
+							</ListItemIcon>
+							<ListItemText>Share With Group</ListItemText>
+					</MenuItem>
 			</Menu>
 		</Box>)
 }
