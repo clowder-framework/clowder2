@@ -49,7 +49,7 @@ async def logout(
         ) is not None:
             # log user out
             try:
-                keycloak_openid.logout(token_exist["refresh_token"])
+                keycloak_openid.logout(token_exist.refresh_token)
 
                 # delete entry in the token database
                 await token_exist.delete()
