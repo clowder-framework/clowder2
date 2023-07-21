@@ -9,9 +9,10 @@ import { Grid } from "@mui/material";
 
 type previewProps = {
 	fileId?: string;
+	datasetId?: string;
 };
 export const Visualization = (props: previewProps) => {
-	const { fileId } = props;
+	const { fileId, datasetId } = props;
 
 	const fileSummary = useSelector((state: RootState) => state.file.fileSummary);
 	const visConfig = useSelector(
@@ -26,9 +27,15 @@ export const Visualization = (props: previewProps) => {
 		dispatch(getVisConfigAction(resourceId));
 
 	useEffect(() => {
-		listFileSummary(fileId);
-		getVisConfig(fileId);
-	}, []);
+		if (fileId !== undefined) {
+			listFileSummary(fileId);
+			getVisConfig(fileId);
+		}
+
+		if (datasetId !== undefined) {
+			getVisConfig(datasetId);
+		}
+	}, [fileId, datasetId]);
 
 	return (
 		<Grid container rowSpacing={1} columnSpacing={{ xs: 1, sm: 3, md: 3 }}>
