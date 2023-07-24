@@ -115,9 +115,26 @@ async def edit_group(
         group_dict["creator"] = user.dict()
         group_dict["modified"] = datetime.utcnow()
         # TODO: Revisit this. Authorization needs to be updated here.
-        group_dict["users"] = list(set(group_dict["users"]))
+        groups_users = group_dict["users"]
+        new_group_users = []
+        for user in groups_users:
+            if user in group.users:
+                new_group_users.append(user)
+                group.users.append(user)
+                await group.replace()
+            else:
+                print('this user was not in')
+                group.users.append(user)
+                # TODO handle authorizations here
+                await group.replace()
+                # Add user to all affected Authorization entries
+                await AuthorizationDB.find(
+                    AuthorizationDB.group_ids == ObjectId(group_id),
+                ).update(
+                    Push({AuthorizationDB.user_ids: user.email}),
+                )
         try:
-            group.update(group_dict)
+            group.name = group_dict["name"]
             await group.replace()
         except Exception as e:
             raise HTTPException(status_code=500, detail=e.args[0])
