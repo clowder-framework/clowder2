@@ -11,6 +11,7 @@ import { AuthWrapper } from "../auth/AuthWrapper";
 import PersonAddAlt1Icon from "@mui/icons-material/PersonAddAlt1";
 import MembersTable from "./MembersTable";
 import AddMemberModal from "./AddMemberModal";
+import EditNameModal from "./EditNameModal";
 import RoleChip from "../auth/RoleChip";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { MainBreadcrumbs } from "../navigation/BreadCrumb";
@@ -42,6 +43,7 @@ export function Group() {
 	);
 	const groupCreatorEmailLink = "mailto:" + groupCreatorEmail;
 	const [addMemberModalOpen, setAddMemberModalOpen] = useState(false);
+	const [editNameModalOpen, setEditNameModalOpen] = useState(false);
 	const [deleteGroupConfirmOpen, setDeleteGroupConfirmOpen] = useState(false);
 
 	// component did mount
@@ -85,6 +87,14 @@ export function Group() {
 					setAddMemberModalOpen(false);
 				}}
 				groupOwner={groupCreatorEmail}
+				groupName={groupAbout.name}
+				groupId={groupAbout.id}
+			/>
+			<EditNameModal
+				open={editNameModalOpen}
+				handleClose={() => {
+					setAddMemberModalOpen(false);
+				}}
 				groupName={groupAbout.name}
 				groupId={groupAbout.id}
 			/>
@@ -145,6 +155,19 @@ export function Group() {
 							endIcon={<PersonAddAlt1Icon />}
 						>
 							Add Member
+						</Button>
+					</AuthWrapper>
+
+					<AuthWrapper currRole={role} allowedRoles={["owner"]}>
+						<Button
+							variant="outlined"
+							onClick={() => {
+								setEditNameModalOpen(true);
+							}}
+							endIcon={<PersonAddAlt1Icon />}
+							sx={{ marginLeft: "0.5em" }}
+						>
+							Edit Name
 						</Button>
 					</AuthWrapper>
 					{/*only owner are allowed to delete*/}
