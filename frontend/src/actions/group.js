@@ -163,3 +163,24 @@ export function assignGroupMemberRole(groupId, username, role = "viewer") {
 			});
 	};
 }
+
+export const UPDATE_GROUP = "UPDATE_GROUP";
+
+export function updateGroup(groupId, formData) {
+	return (dispatch) => {
+		return V2.GroupsService.editGroupApiV2GroupsGroupIdPut(
+			groupId,
+			formData
+		)
+			.then((json) => {
+				dispatch({
+					type: UPDATE_GROUP,
+					about: json,
+					receivedAt: Date.now(),
+				});
+			})
+			.catch((reason) => {
+				dispatch(handleErrors(reason, updateGroup(groupId, formData)));
+			});
+	};
+}

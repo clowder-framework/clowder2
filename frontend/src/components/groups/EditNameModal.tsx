@@ -9,29 +9,28 @@ import {
 	DialogTitle,
 	TextField,
 } from "@mui/material";
-import { addGroupMember } from "../../actions/group";
+import {updateGroup} from "../../actions/group";
 import { useDispatch, useSelector } from "react-redux";
-import { prefixSearchAllUsers as prefixSearchAllUsersAction } from "../../actions/user";
 import { RootState } from "../../types/data";
-import {DatasetIn, UserOut} from "../../openapi/v2";
+import {GroupIn} from "../../openapi/v2";
 import GroupsIcon from "@mui/icons-material/Groups";
 import { InlineAlert } from "../errors/InlineAlert";
 import { resetFailedReasonInline } from "../../actions/common";
-import {updateDataset} from "../../actions/dataset";
 import LoadingOverlay from "react-loading-overlay-ts";
 
 type EditNameModalProps = {
 	open: boolean;
 	handleClose: any;
+	groupOwner: string;
 	groupName: string;
 	groupId: string | undefined;
 };
 
 
 export default function EditNameModal(props: EditNameModalProps) {
-	const {open, handleClose, groupName, groupId} = props;
+	const {open, handleClose, groupOwner, groupName, groupId} = props;
 	const dispatch = useDispatch();
-	const editGroup = (datasetId: string | undefined, formData: DatasetIn) => dispatch(updateDataset(datasetId, formData));
+	const editGroup = (groupId: string | undefined, formData: GroupIn) => dispatch(updateGroup(groupId, formData));
 
 
 	const about = useSelector((state: RootState) => state.dataset.about);
@@ -45,12 +44,16 @@ export default function EditNameModal(props: EditNameModalProps) {
 		setName(event.target.value);
 	};
 
+	const handleDialogClose = () => {
+		handleClose();
+		dispatch(resetFailedReasonInline());
+	};
+
 	const onSave = async () => {
 		setLoading(true);
 		editGroup(groupId, {"name": name});
 		setName("");
 		setLoading(false);
-		handleClose(true);
 	};
 
 	return (
@@ -73,7 +76,7 @@ export default function EditNameModal(props: EditNameModalProps) {
 					</DialogContent>
 					<DialogActions>
 						<Button variant="contained" onClick={onSave} disabled={name == ""}>Save</Button>
-						<Button onClick={handleClose}>Cancel</Button>
+						<Button onClick={handleDialogClose}>Cancel</Button>
 					</DialogActions>
 				</Dialog>
 			</LoadingOverlay>

@@ -92,8 +92,9 @@ export function Group() {
 			/>
 			<EditNameModal
 				open={editNameModalOpen}
+				groupOwner={groupCreatorEmail}
 				handleClose={() => {
-					setAddMemberModalOpen(false);
+					setEditNameModalOpen(false);
 				}}
 				groupName={groupAbout.name}
 				groupId={groupAbout.id}
