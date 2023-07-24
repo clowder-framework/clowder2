@@ -36,7 +36,7 @@ export default function EditNameModal(props: EditNameModalProps) {
 	const about = useSelector((state: RootState) => state.dataset.about);
 
 	const [loading, setLoading] = useState(false);
-	const [name, setName] = useState(about["name"]);
+	const [name, setName] = useState(groupName);
 
 
 
@@ -51,6 +51,7 @@ export default function EditNameModal(props: EditNameModalProps) {
 
 	const onSave = async () => {
 		setLoading(true);
+		console.log(groupId, groupName,"oldname", name,'newname')
 		editGroup(groupId, {"name": name});
 		setName("");
 		setLoading(false);
@@ -70,7 +71,7 @@ export default function EditNameModal(props: EditNameModalProps) {
 								id="outlined-name"
 								variant="standard"
 								fullWidth
-								defaultValue={about["name"]}
+								defaultValue={groupName}
 								onChange={handleChange}
 							/>
 					</DialogContent>

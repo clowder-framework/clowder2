@@ -104,7 +104,7 @@ async def edit_group(
     if (group := await GroupDB.get(PydanticObjectId(group_id))) is not None:
         group_dict = dict(group_info) if group_info is not None else {}
 
-        if len(group_dict.name) == 0 or len(group_dict.users) == 0:
+        if len(group_dict["name"]) == 0 or len(group_dict["users"]) == 0:
             raise HTTPException(
                 status_code=400,
                 detail="Group name can't be null or user list can't be empty",
