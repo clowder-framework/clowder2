@@ -32,7 +32,7 @@ export default function EditNameModal(props: EditNameModalProps) {
 	const dispatch = useDispatch();
 	const editGroup = (groupId: string | undefined, formData: GroupIn) => dispatch(updateGroup(groupId, formData));
 
-
+	const groupAbout = useSelector((state: RootState) => state.group.about);
 	const about = useSelector((state: RootState) => state.dataset.about);
 
 	const [loading, setLoading] = useState(false);
@@ -52,7 +52,7 @@ export default function EditNameModal(props: EditNameModalProps) {
 	const onSave = async () => {
 		setLoading(true);
 		console.log(groupId, groupName,"oldname", name,'newname')
-		editGroup(groupId, {"name": name});
+		editGroup(groupId, {"name": name, "users": groupAbout.users});
 		setName("");
 		setLoading(false);
 	};
