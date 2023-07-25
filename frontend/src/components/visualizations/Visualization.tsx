@@ -53,20 +53,36 @@ export const Visualization = (props: previewProps) => {
 										const componentName =
 											visConfigEntry.visualization_component_id;
 										if (componentName === visComponentDefinition.name) {
-											return visConfigEntry.visualization_data.map(
-												(visualizationDataItem) => {
-													return (
-														<Grid item xs={12} sm={4} md={4} lg={4} xl={4}>
-															{React.cloneElement(
-																visComponentDefinition.component,
-																{
-																	visualizationId: visualizationDataItem.id,
-																}
-															)}
-														</Grid>
-													);
-												}
-											);
+											if (
+												visConfigEntry.visualization_data &&
+												visConfigEntry.visualization_data?.length > 0
+											) {
+												return visConfigEntry.visualization_data.map(
+													(visualizationDataItem) => {
+														return (
+															<Grid item xs={12} sm={4} md={4} lg={4} xl={4}>
+																{React.cloneElement(
+																	visComponentDefinition.component,
+																	{
+																		visualizationId: visualizationDataItem.id,
+																	}
+																)}
+															</Grid>
+														);
+													}
+												);
+											} else {
+												return (
+													<Grid item xs={12} sm={4} md={4} lg={4} xl={4}>
+														{React.cloneElement(
+															visComponentDefinition.component,
+															{
+																visConfig: visConfig,
+															}
+														)}
+													</Grid>
+												);
+											}
 										}
 									});
 								}

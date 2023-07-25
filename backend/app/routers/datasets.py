@@ -741,41 +741,19 @@ async def get_dataset_extract(
     rabbitmq_client: BlockingChannel = Depends(dependencies.get_rabbitmq),
     allow: bool = Depends(Authorization("uploader")),
 ):
+    if extractorName is None:
+        raise HTTPException(status_code=400, detail=f"No extractorName specified")
     if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
         access_token = credentials.credentials
-        req_headers = request.headers
-        raw = req_headers.raw
-        authorization = raw[1]
-        token = authorization[1].decode("utf-8")
-        token = token.lstrip("Bearer")
-        token = token.lstrip(" ")
-        # TODO check of extractor exists
-        msg = {"message": "testing", "dataset_id": dataset_id}
-        body = {}
-        body["secretKey"] = access_token
-        body["token"] = access_token
-        body["host"] = settings.API_HOST
-        body["retry_count"] = 0
-        body["filename"] = dataset["name"]
-        body["id"] = dataset_id
-        body["datasetId"] = dataset_id
-        body["resource_type"] = "dataset"
-        body["flags"] = ""
-        current_queue = extractorName
-        if parameters is not None:
-            body["parameters"] = parameters
-        else:
-            parameters = {}
-        current_routing_key = current_queue
-
-        job_id = await submit_dataset_job(
+        queue = extractorName
+        routing_key = queue
+        return await submit_dataset_job(
             DatasetOut(**dataset.dict()),
-            current_routing_key,
+            routing_key,
             parameters,
             user,
             access_token,
             rabbitmq_client,
         )
-
-        return job_id
-    raise HTTPException(status_code=404, detail=f"File {dataset_id} not found")
+    else:
+        raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")

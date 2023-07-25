@@ -8,13 +8,13 @@ import {
 	RECEIVE_VERSIONS,
 } from "../actions/file";
 import { DataAction } from "../types/action";
-import { ExtractedMetadata, FileState } from "../types/data";
+import { FileState } from "../types/data";
 import { AuthorizationBase, FileOut as FileSummary } from "../openapi/v2";
 import { RECEIVE_FILE_ROLE } from "../actions/authorization";
 
 const defaultState: FileState = {
 	fileSummary: <FileSummary>{},
-	extractedMetadata: <ExtractedMetadata>{},
+	extractedMetadata: [],
 	metadataJsonld: [],
 	previews: [],
 	fileVersions: [],

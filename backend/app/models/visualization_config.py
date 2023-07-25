@@ -25,7 +25,7 @@ class VisualizationConfigIn(VisualizationConfigBase):
 
 class VisualizationConfigDB(Document, VisualizationConfigBase):
     class Settings:
-        name = "vizualization_config"
+        name = "visualization_config"
 
 
 class VisualizationConfigOut(VisualizationConfigDB):

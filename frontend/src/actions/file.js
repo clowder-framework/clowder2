@@ -9,7 +9,7 @@ export const RECEIVE_FILE_EXTRACTED_METADATA =
 	"RECEIVE_FILE_EXTRACTED_METADATA";
 
 export function fetchFileExtractedMetadata(id) {
-	const url = `${config.hostname}/files/${id}/extracted_metadata`;
+	const url = `${config.hostname}/api/v2/files/${id}/metadata`;
 	return (dispatch) => {
 		return fetch(url, { mode: "cors", headers: getHeader() })
 			.then((response) => {
@@ -210,7 +210,7 @@ export function fileDownloaded(
 			filename = `${fileId}.zip`;
 		}
 		let endpoint = `${config.hostname}/api/v2/files/${fileId}`;
-		if (fileVersionNum != 0) endpoint = endpoint + "?version=" + fileVersionNum;
+		if (fileVersionNum != 0) endpoint = `${endpoint}?version=${fileVersionNum}`;
 		const response = await fetch(endpoint, {
 			method: "GET",
 			mode: "cors",
@@ -280,7 +280,7 @@ export const GENERATE_FILE_URL = "GENERATE_FILE_URL";
 export function generateFileDownloadUrl(fileId, fileVersionNum = 0) {
 	return async (dispatch) => {
 		let url = `${config.hostname}/api/v2/files/${fileId}`;
-		if (fileVersionNum > 0) url = url + "?version=" + fileVersionNum;
+		if (fileVersionNum > 0) url = `${url}?version=${fileVersionNum}`;
 
 		const response = await fetch(url, {
 			method: "GET",
