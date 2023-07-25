@@ -5,17 +5,9 @@ import { RootState } from "../../types/data";
 import { fetchFileSummary } from "../../actions/file";
 import { getVisConfig as getVisConfigAction } from "../../actions/visualization";
 import { visComponentDefinitions } from "../../visualization.config";
-import {
-	Card,
-	CardActions,
-	CardContent,
-	Grid,
-	IconButton,
-} from "@mui/material";
-import Collapse from "@mui/material/Collapse";
-import { VisualizationDataDetail } from "./VisualizationDataDetail";
-import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
-import PhotoOutlinedIcon from "@mui/icons-material/PhotoOutlined";
+import { Grid } from "@mui/material";
+import { VisualizationCard } from "./VisualizationCard";
+import { VisualizationRawBytesCard } from "./VisualizationRawBytesCard";
 
 type previewProps = {
 	fileId?: string;
@@ -29,12 +21,6 @@ export const Visualization = (props: previewProps) => {
 	const visConfig = useSelector(
 		(state: RootState) => state.visualization.visConfig
 	);
-
-	const [expanded, setExpanded] = React.useState(false);
-
-	const handleExpandClick = () => {
-		setExpanded(!expanded);
-	};
 
 	const dispatch = useDispatch();
 	const listFileSummary = (fileId: string | undefined) =>
@@ -74,45 +60,10 @@ export const Visualization = (props: previewProps) => {
 												(visualizationDataItem) => {
 													return (
 														<Grid item xs={12} sm={4} md={4} lg={4} xl={4}>
-															<Card>
-																<Collapse
-																	in={!expanded}
-																	timeout="auto"
-																	unmountOnExit
-																>
-																	<CardContent>
-																		{React.cloneElement(
-																			visComponentDefinition.component,
-																			{
-																				visualizationId:
-																					visualizationDataItem.id,
-																			}
-																		)}
-																	</CardContent>
-																</Collapse>
-																<CardActions>
-																	<IconButton onClick={handleExpandClick}>
-																		{!expanded ? (
-																			<InfoOutlinedIcon />
-																		) : (
-																			<PhotoOutlinedIcon />
-																		)}
-																	</IconButton>
-																</CardActions>
-																<Collapse
-																	in={expanded}
-																	timeout="auto"
-																	unmountOnExit
-																>
-																	<CardContent>
-																		<VisualizationDataDetail
-																			visualizationDataItem={
-																				visualizationDataItem
-																			}
-																		/>
-																	</CardContent>
-																</Collapse>
-															</Card>
+															<VisualizationCard
+																visualizationDataItem={visualizationDataItem}
+																visComponentDefinition={visComponentDefinition}
+															/>
 														</Grid>
 													);
 												}
@@ -139,16 +90,10 @@ export const Visualization = (props: previewProps) => {
 									) {
 										return (
 											<Grid item xs={12} sm={4} md={4} lg={4} xl={4}>
-												<Card>
-													<CardContent>
-														{React.cloneElement(
-															visComponentDefinition.component,
-															{
-																fileId: fileId,
-															}
-														)}
-													</CardContent>
-												</Card>
+												<VisualizationRawBytesCard
+													visComponentDefinition={visComponentDefinition}
+													fileId={fileId}
+												/>
 											</Grid>
 										);
 									}

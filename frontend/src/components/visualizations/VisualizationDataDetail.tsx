@@ -3,6 +3,7 @@ import { parseDate } from "../../utils/common";
 import prettyBytes from "pretty-bytes";
 import { StackedList } from "../util/StackedList";
 import { VisualizationDataOut } from "../../openapi/v2";
+import { Typography } from "@mui/material";
 
 type FileAboutProps = {
 	visualizationDataItem: VisualizationDataOut;
@@ -23,11 +24,17 @@ export function VisualizationDataDetail(props: FileAboutProps) {
 	details.set("Uploaded as", visualizationDataItem.name);
 	details.set(
 		"Uploaded by",
-		`${visualizationDataItem.creator.first_name}
-														${visualizationDataItem.creator.last_name}`
+		`${visualizationDataItem.creator.first_name} ${visualizationDataItem.creator.last_name}`
 	);
 	details.set("Visualization id", visualizationDataItem.id);
 	details.set("Descriptions", visualizationDataItem.description);
 
-	return <StackedList keyValues={details} />;
+	return (
+		<>
+			<Typography variant="h5" gutterBottom>
+				Details
+			</Typography>
+			<StackedList keyValues={details} />
+		</>
+	);
 }
