@@ -8,6 +8,7 @@ import { visComponentDefinitions } from "../../visualization.config";
 import { Grid } from "@mui/material";
 import { VisualizationCard } from "./VisualizationCard";
 import { VisualizationRawBytesCard } from "./VisualizationRawBytesCard";
+import { VisualizationSpecCard } from "./VisualizationSpecCard";
 
 type previewProps = {
 	fileId?: string;
@@ -56,18 +57,31 @@ export const Visualization = (props: previewProps) => {
 										const componentName =
 											visConfigEntry.visualization_component_id;
 										if (componentName === visComponentDefinition.name) {
-											return visConfigEntry.visualization_data.map(
-												(visualizationDataItem) => {
-													return (
-														<Grid item xs={12} sm={4} md={4} lg={4} xl={4}>
+											// use visualization data if available
+											if (
+												visConfigEntry.visualization_data &&
+												visConfigEntry.visualization_data?.length > 0
+											) {
+												return visConfigEntry.visualization_data.map(
+													(visualizationDataItem) => {
+														return (
 															<VisualizationCard
 																visualizationDataItem={visualizationDataItem}
 																visComponentDefinition={visComponentDefinition}
 															/>
-														</Grid>
-													);
-												}
-											);
+														);
+													}
+												);
+											}
+											// use visualization paramters if available
+											else {
+												return (
+													<VisualizationSpecCard
+														visComponentDefinition={visComponentDefinition}
+														visConfigEntry={visConfigEntry}
+													/>
+												);
+											}
 										}
 									});
 								}
@@ -89,12 +103,10 @@ export const Visualization = (props: previewProps) => {
 													visComponentDefinition.mainType))
 									) {
 										return (
-											<Grid item xs={12} sm={4} md={4} lg={4} xl={4}>
-												<VisualizationRawBytesCard
-													visComponentDefinition={visComponentDefinition}
-													fileId={fileId}
-												/>
-											</Grid>
+											<VisualizationRawBytesCard
+												visComponentDefinition={visComponentDefinition}
+												fileId={fileId}
+											/>
 										);
 									}
 									return null;

@@ -4,7 +4,7 @@ const glob = require("glob");
 const registerDecoratorPath = "src/visualization.config.tsx";
 
 function registerComponents() {
-	const files = glob.sync("src/components/previewers/*/manifest.json", {
+	const files = glob.sync("src/components/visualizations/*/manifest.json", {
 		ignore: "node_modules/**",
 	});
 
@@ -24,7 +24,7 @@ function registerComponents() {
 		);
 	});
 
-	fs.appendFileSync(registerDecoratorPath, `export { vizConfig };` + "\n");
+	fs.appendFileSync(registerDecoratorPath, "export { vizConfig };" + "\n");
 
 	console.log("Component registration complete.");
 }

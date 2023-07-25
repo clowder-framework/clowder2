@@ -1,17 +1,16 @@
 import React from "react";
 import { Button, Card, CardActions, CardContent, Grid } from "@mui/material";
 import Collapse from "@mui/material/Collapse";
-import { VisualizationDataDetail } from "./VisualizationDataDetail";
-import { VisualizationDataOut } from "../../openapi/v2";
+import { VisualizationConfigOut } from "../../openapi/v2";
 import { VisComponentDefinitions } from "../../visualization.config";
 
 type previewProps = {
 	visComponentDefinition: VisComponentDefinitions;
-	visualizationDataItem: VisualizationDataOut;
+	visConfigEntry: VisualizationConfigOut;
 };
 
-export const VisualizationCard = (props: previewProps) => {
-	const { visComponentDefinition, visualizationDataItem } = props;
+export const VisualizationSpecCard = (props: previewProps) => {
+	const { visComponentDefinition, visConfigEntry } = props;
 	const [expanded, setExpanded] = React.useState(false);
 	const handleExpandClick = () => {
 		setExpanded(!expanded);
@@ -22,7 +21,7 @@ export const VisualizationCard = (props: previewProps) => {
 				<Collapse in={!expanded} timeout="auto" unmountOnExit>
 					<CardContent>
 						{React.cloneElement(visComponentDefinition.component, {
-							visualizationId: visualizationDataItem.id,
+							visConfigEntry: visConfigEntry,
 						})}
 					</CardContent>
 				</Collapse>
@@ -39,9 +38,7 @@ export const VisualizationCard = (props: previewProps) => {
 				</CardActions>
 				<Collapse in={expanded} timeout="auto" unmountOnExit>
 					<CardContent>
-						<VisualizationDataDetail
-							visualizationDataItem={visualizationDataItem}
-						/>
+						<VisualizationConfigDetail visConfigEntry={visConfigEntry} />
 					</CardContent>
 				</Collapse>
 			</Card>

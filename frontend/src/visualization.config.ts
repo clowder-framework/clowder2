@@ -68,4 +68,12 @@ visComponentDefinitions.push({
 	component: React.createElement(registerComponent(configVideo)),
 });
 
+const configGeospatial = require("./components/visualizations/Geospatial/manifest.json");
+visComponentDefinitions.push({
+	name: configGeospatial.name,
+	mainType: configGeospatial.visConfig.mainType,
+	mimeTypes: configGeospatial.visConfig.mimeTypes,
+	component: React.createElement(registerComponent(configGeospatial)),
+});
+
 export { visComponentDefinitions };
