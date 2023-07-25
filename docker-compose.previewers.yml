@@ -30,6 +30,7 @@ services:
       - "8085:8080"
     networks:
       - clowder2
+    restart: unless-stopped
     volumes:
       - geoserver_data:/opt/geoserver_data
       - geoserver_exts:/opt/additional_libs
@@ -50,6 +51,7 @@ services:
       RABBITMQ_URI: amqp://guest:guest@rabbitmq:5672/%2F
     networks:
       - clowder2
+    restart: unless-stopped
 
 networks:
   clowder2:
