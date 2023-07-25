@@ -5,12 +5,41 @@ import { RootState } from "../../types/data";
 import { fetchFileSummary } from "../../actions/file";
 import { getVisConfig as getVisConfigAction } from "../../actions/visualization";
 import { visComponentDefinitions } from "../../visualization.config";
-import { Grid } from "@mui/material";
+import {
+	Card,
+	CardActions,
+	CardContent,
+	Grid,
+	IconButton,
+	IconButtonProps,
+} from "@mui/material";
+import { styled } from "@mui/styles";
+import Collapse from "@mui/material/Collapse";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import { StackedList } from "../util/StackedList";
+import prettyBytes from "pretty-bytes";
+import { parseDate } from "../../utils/common";
 
 type previewProps = {
 	fileId?: string;
 	datasetId?: string;
 };
+
+interface ExpandMoreProps extends IconButtonProps {
+	expand: boolean;
+}
+
+const ExpandMore = styled((props: ExpandMoreProps) => {
+	const { expand, ...other } = props;
+	return <IconButton {...other} />;
+})(({ theme, expand }) => ({
+	transform: !expand ? "rotate(0deg)" : "rotate(180deg)",
+	marginLeft: "auto",
+	transition: theme.transitions.create("transform", {
+		duration: theme.transitions.duration.shortest,
+	}),
+}));
+
 export const Visualization = (props: previewProps) => {
 	const { fileId, datasetId } = props;
 
@@ -18,6 +47,12 @@ export const Visualization = (props: previewProps) => {
 	const visConfig = useSelector(
 		(state: RootState) => state.visualization.visConfig
 	);
+
+	const [expanded, setExpanded] = React.useState(false);
+
+	const handleExpandClick = () => {
+		setExpanded(!expanded);
+	};
 
 	const dispatch = useDispatch();
 	const listFileSummary = (fileId: string | undefined) =>
@@ -55,14 +90,70 @@ export const Visualization = (props: previewProps) => {
 										if (componentName === visComponentDefinition.name) {
 											return visConfigEntry.visualization_data.map(
 												(visualizationDataItem) => {
+													const details = new Map();
+													details.set(
+														"Size",
+														prettyBytes(visualizationDataItem.bytes ?? 0)
+													);
+													details.set(
+														"Content type",
+														visualizationDataItem.content_type
+															? visualizationDataItem.content_type.content_type
+															: "NA"
+													);
+													details.set(
+														"Updated on",
+														parseDate(visualizationDataItem.created)
+													);
+													details.set(
+														"Uploaded as",
+														visualizationDataItem.name
+													);
+													details.set(
+														"Uploaded by",
+														`${visualizationDataItem.creator.first_name}
+														${visualizationDataItem.creator.last_name}`
+													);
+													details.set(
+														"Visualization id",
+														visualizationDataItem.id
+													);
+													details.set(
+														"Descriptions",
+														visualizationDataItem.description
+													);
+
 													return (
 														<Grid item xs={12} sm={4} md={4} lg={4} xl={4}>
-															{React.cloneElement(
-																visComponentDefinition.component,
-																{
-																	visualizationId: visualizationDataItem.id,
-																}
-															)}
+															<Card>
+																<CardContent>
+																	{React.cloneElement(
+																		visComponentDefinition.component,
+																		{
+																			visualizationId: visualizationDataItem.id,
+																		}
+																	)}
+																</CardContent>
+																<CardActions disableSpacing>
+																	<ExpandMore
+																		expand={expanded}
+																		onClick={handleExpandClick}
+																		aria-expanded={expanded}
+																		aria-label="show more"
+																	>
+																		<ExpandMoreIcon />
+																	</ExpandMore>
+																</CardActions>
+																<Collapse
+																	in={expanded}
+																	timeout="auto"
+																	unmountOnExit
+																>
+																	<CardContent>
+																		<StackedList keyValues={details} />
+																	</CardContent>
+																</Collapse>
+															</Card>
 														</Grid>
 													);
 												}
