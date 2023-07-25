@@ -55,6 +55,7 @@ export default function EditNameModal(props: EditNameModalProps) {
 		editGroup(groupId, {"name": name, "users": groupAbout.users});
 		setName("");
 		setLoading(false);
+		handleDialogClose();
 	};
 
 	return (

@@ -17,6 +17,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import { MainBreadcrumbs } from "../navigation/BreadCrumb";
 import { config } from "../../app.config";
 import { ErrorModal } from "../errors/ErrorModal";
+import {DriveFileRenameOutline} from "@mui/icons-material";
 
 export function Group() {
 	// path parameter
@@ -165,7 +166,7 @@ export function Group() {
 							onClick={() => {
 								setEditNameModalOpen(true);
 							}}
-							endIcon={<PersonAddAlt1Icon />}
+							endIcon={<DriveFileRenameOutline fontSize="small"/>}
 							sx={{ marginLeft: "0.5em" }}
 						>
 							Edit Name

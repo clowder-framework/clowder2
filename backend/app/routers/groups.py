@@ -114,18 +114,35 @@ async def edit_group(
         user = await UserDB.find_one(UserDB.email == user_id)
         group_dict["creator"] = user.dict()
         group_dict["modified"] = datetime.utcnow()
-        # TODO: Revisit this. Authorization needs to be updated here.
         groups_users = group_dict["users"]
-        new_group_users = []
-        for user in groups_users:
-            if user in group.users:
-                new_group_users.append(user)
-                group.users.append(user)
+        original_users = group.users
+
+        # remove users that are no longer in this group
+        for original_user in original_users:
+            if original_user not in groups_users:
+                # remove them from auth
+                async for auth in AuthorizationDB.find({"group_ids": ObjectId(group_id)}):
+                    auth.user_ids.remove(original_user.user.email)
+                    await auth.replace()
+                    # Update group itself
+                group.users.remove(original_user)
                 await group.replace()
+        # add new users to the group
+        for i in range(0, len(groups_users)):
+            user = groups_users[i]
+            if user in group.users:
+                for original_user in group.users:
+                    if original_user.user.email == user.user.email:
+                        original_editor = original_user.editor
+                        new_editor = user.editor
+                        # replace the user if editor has changed
+                        if not new_editor == original_editor:
+                            group.users.remove(original_user)
+                            group.users.append(user)
+                            await group.replace()
             else:
-                print('this user was not in')
+                # if user is not in the group add user
                 group.users.append(user)
-                # TODO handle authorizations here
                 await group.replace()
                 # Add user to all affected Authorization entries
                 await AuthorizationDB.find(
