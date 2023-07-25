@@ -3,6 +3,7 @@ import { Button, Card, CardActions, CardContent, Grid } from "@mui/material";
 import Collapse from "@mui/material/Collapse";
 import { VisualizationConfigOut } from "../../openapi/v2";
 import { VisComponentDefinitions } from "../../visualization.config";
+import { VisualizationParamDetail } from "./VisualizationParamDetail";
 
 type previewProps = {
 	visComponentDefinition: VisComponentDefinitions;
@@ -38,7 +39,7 @@ export const VisualizationSpecCard = (props: previewProps) => {
 				</CardActions>
 				<Collapse in={expanded} timeout="auto" unmountOnExit>
 					<CardContent>
-						<VisualizationConfigDetail visConfigEntry={visConfigEntry} />
+						<VisualizationParamDetail visConfigEntry={visConfigEntry} />
 					</CardContent>
 				</Collapse>
 			</Card>
