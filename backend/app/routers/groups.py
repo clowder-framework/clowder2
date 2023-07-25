@@ -121,7 +121,9 @@ async def edit_group(
         for original_user in original_users:
             if original_user not in groups_users:
                 # remove them from auth
-                async for auth in AuthorizationDB.find({"group_ids": ObjectId(group_id)}):
+                async for auth in AuthorizationDB.find(
+                    {"group_ids": ObjectId(group_id)}
+                ):
                     auth.user_ids.remove(original_user.user.email)
                     await auth.replace()
                     # Update group itself
