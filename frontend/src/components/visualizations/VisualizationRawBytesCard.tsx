@@ -1,5 +1,5 @@
 import React from "react";
-import { Card, CardContent } from "@mui/material";
+import { Card, CardContent, Grid } from "@mui/material";
 import { VisComponentDefinitions } from "../../visualization.config";
 
 type previewProps = {
