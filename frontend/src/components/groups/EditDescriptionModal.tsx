@@ -23,7 +23,7 @@ type EditDescriptionModalProps = {
 	open: boolean;
 	handleClose: any;
 	groupOwner: string;
-	groupDescription: string;
+	groupDescription: string | undefined;
 	groupId: string | undefined;
 };
 
@@ -42,7 +42,7 @@ export default function EditNameModal(props: EditDescriptionModalProps) {
 
 
 	const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-		setName(event.target.value);
+		setDescription(event.target.value);
 	};
 
 	const handleDialogClose = () => {
