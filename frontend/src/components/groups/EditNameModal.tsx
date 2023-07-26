@@ -51,7 +51,6 @@ export default function EditNameModal(props: EditNameModalProps) {
 
 	const onSave = async () => {
 		setLoading(true);
-		console.log(groupId, groupName,"oldname", name,'newname')
 		editGroup(groupId, {"name": name, "users": groupAbout.users});
 		setName("");
 		setLoading(false);
