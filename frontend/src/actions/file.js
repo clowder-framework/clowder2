@@ -210,7 +210,7 @@ export function fileDownloaded(
 			filename = `${fileId}.zip`;
 		}
 		let endpoint = `${config.hostname}/api/v2/files/${fileId}`;
-		if (fileVersionNum != 0) endpoint = endpoint + "?version=" + fileVersionNum;
+		if (fileVersionNum != 0) endpoint = `${endpoint}?version=${fileVersionNum}`;
 		const response = await fetch(endpoint, {
 			method: "GET",
 			mode: "cors",
@@ -252,7 +252,7 @@ export const SUBMIT_FILE_EXTRACTION = "SUBMIT_FILE_EXTRACTION";
 
 export function submitFileExtractionAction(fileId, extractorName, requestBody) {
 	return (dispatch) => {
-		return V2.FilesService.getFileExtractApiV2FilesFileIdExtractPost(
+		return V2.FilesService.postFileExtractApiV2FilesFileIdExtractPost(
 			fileId,
 			extractorName,
 			requestBody
@@ -280,7 +280,7 @@ export const GENERATE_FILE_URL = "GENERATE_FILE_URL";
 export function generateFileDownloadUrl(fileId, fileVersionNum = 0) {
 	return async (dispatch) => {
 		let url = `${config.hostname}/api/v2/files/${fileId}`;
-		if (fileVersionNum > 0) url = url + "?version=" + fileVersionNum;
+		if (fileVersionNum > 0) url = `${url}?version=${fileVersionNum}`;
 
 		const response = await fetch(url, {
 			method: "GET",
