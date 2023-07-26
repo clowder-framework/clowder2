@@ -348,7 +348,7 @@ async def get_file_versions(
 
 # submits file to extractor
 @router.post("/{file_id}/extract")
-async def get_file_extract(
+async def post_file_extract(
     file_id: str,
     extractorName: str,
     # parameters don't have a fixed model shape
