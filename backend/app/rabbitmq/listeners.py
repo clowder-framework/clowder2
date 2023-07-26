@@ -59,7 +59,6 @@ async def submit_file_job(
     token: str = Depends(get_token),
 ):
     # Create an entry in job history with unique ID
-    print("IN_submit_file_job")
     job = EventListenerJobDB(
         listener_id=routing_key,
         creator=user,
