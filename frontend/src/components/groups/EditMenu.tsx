@@ -83,9 +83,10 @@ export const EditMenu = (props: ActionsMenuProps): JSX.Element => {
 				<MenuItem
 					onClick={() => {
 						handleOptionClose();
-						setRename(true);
+						setEditNameModalOpen(true);
 					}
-					}> <ListItemIcon>
+					}>
+				<ListItemIcon>
 					<DriveFileRenameOutline fontSize="small"/>
 				</ListItemIcon>
 					<ListItemText>Rename</ListItemText></MenuItem>
