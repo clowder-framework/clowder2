@@ -16,7 +16,7 @@ type ActionsMenuProps = {
 }
 
 export const EditMenu = (props: ActionsMenuProps): JSX.Element => {
-	const {groupOwner, groupname, groupId} = props;
+	const {groupOwner, groupName, groupId} = props;
 
 	const dispatch = useDispatch();
 	const editGroup = (groupId: string | undefined, formData: GroupIn) => dispatch(updateGroup(groupId, formData));
@@ -60,15 +60,15 @@ export const EditMenu = (props: ActionsMenuProps): JSX.Element => {
 				groupName={groupAbout.name}
 				groupId={groupAbout.id}
 			/>
-			<EditDescriptionModal
-				open={editNameModalOpen}
-				groupOwner={groupCreatorEmail}
-				handleClose={() => {
-					setEditNameModalOpen(false);
-				}}
-				groupDescription={groupAbout.description}
-				groupId={groupAbout.id}
-			/>
+			{/*<EditDescriptionModal*/}
+			{/*	open={editNameModalOpen}*/}
+			{/*	groupOwner={groupCreatorEmail}*/}
+			{/*	handleClose={() => {*/}
+			{/*		setEditDescriptionModalOpen(false);*/}
+			{/*	}}*/}
+			{/*	groupDescription={groupAbout.description}*/}
+			{/*	groupId={groupAbout.id}*/}
+			{/*/>*/}
 			<Button variant="outlined" onClick={handleOptionClick}
 					endIcon={<ArrowDropDownIcon/>}>
 				Edit

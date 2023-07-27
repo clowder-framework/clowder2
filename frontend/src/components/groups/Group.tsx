@@ -10,7 +10,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { AuthWrapper } from "../auth/AuthWrapper";
 import PersonAddAlt1Icon from "@mui/icons-material/PersonAddAlt1";
 import MembersTable from "./MembersTable";
-import EditMenu from "./EditMenu";
+import {EditMenu} from "./EditMenu";
 import AddMemberModal from "./AddMemberModal";
 import EditNameModal from "./EditNameModal";
 import RoleChip from "../auth/RoleChip";
@@ -160,6 +160,13 @@ export function Group() {
 							Add Member
 						</Button>
 					</AuthWrapper>
+					<AuthWrapper currRole={role} allowedRoles={["owner", "editor"]}>
+						<EditMenu groupOwner={groupCreatorEmail}
+								  groupName={groupAbout.name}
+								  groupId={groupId}
+						/>
+					</AuthWrapper>
+
 
 					<AuthWrapper currRole={role} allowedRoles={["owner"]}>
 						<Button
