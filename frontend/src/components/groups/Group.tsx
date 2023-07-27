@@ -10,6 +10,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { AuthWrapper } from "../auth/AuthWrapper";
 import PersonAddAlt1Icon from "@mui/icons-material/PersonAddAlt1";
 import MembersTable from "./MembersTable";
+import EditMenu from "./EditMenu";
 import AddMemberModal from "./AddMemberModal";
 import EditNameModal from "./EditNameModal";
 import RoleChip from "../auth/RoleChip";
