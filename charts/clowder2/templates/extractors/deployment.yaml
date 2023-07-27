@@ -1,0 +1,72 @@
+{{- if .Values.extractors }}
+{{- $fullname := include "clowder2.fullname" . }}
+{{- $labels := include "clowder2.labels" . }}
+{{- $rabbitmqURI := include "clowder2.rabbitmquri" . }}
+{{- range $key, $val := .Values.extractors }}
+{{- if or .enabled (not (hasKey . "enabled")) }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $fullname }}-extractors-{{ $key }}
+  labels:
+    clowder/extractor: {{ $key | quote }}
+{{ $labels | indent 4 }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ default 1 .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ $fullname }}-extractors-{{ $key }}
+      app.kubernetes.io/instance: {{ $.Release.Name }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        app.kubernetes.io/name: {{ $fullname }}-extractors-{{ $key }}
+        app.kubernetes.io/instance: {{ $.Release.Name }}
+    spec:
+    {{- with $.Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+      initContainers:
+        - name: check-rabbitmq
+          image: "{{ $.Values.image.checks }}"
+          imagePullPolicy: {{ $.Values.image.pullPolicy }}
+          env:
+            - name: RABBITMQ_URI
+              value: {{ $fullname }}-rabbitmq
+      containers:
+        - name: extractor
+          image: {{ .image | quote }}
+          imagePullPolicy: {{ default $.Values.image.pullPolicy .pullPolicy }}
+          env:
+            - name: RABBITMQ_URI
+              value: {{ $fullname }}-rabbitmq
+{{- if .env }}
+            {{- toYaml .env | nindent 12 }}
+{{- end }}
+{{- if .resources }}
+          resources:
+            {{- toYaml .resources | nindent 12 }}
+{{- end }}
+      {{- with .nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    {{- with .affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+    {{- with .tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+{{- end }}
+{{- end }}
+{{- end }}
