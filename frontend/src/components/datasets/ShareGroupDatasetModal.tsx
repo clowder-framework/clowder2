@@ -20,11 +20,13 @@ import {
 	TextField,
 	Typography,
 } from "@mui/material";
-import { fetchGroups } from "../../actions/group";
+import {fetchGroups, prefixSearchGroups} from "../../actions/group";
 import { RootState } from "../../types/data";
 import { fetchDatasetRoles, setDatasetGroupRole } from "../../actions/dataset";
+import { prefixSearchGroups as prefixSearchGroupsAction } from "../../actions/group";
 import { useParams } from "react-router-dom";
 import CloseIcon from "@mui/icons-material/Close";
+import {GroupOut, UserOut} from "../../openapi/v2";
 
 type ShareGroupDatasetModalProps = {
 	open: boolean;
@@ -38,7 +40,7 @@ export default function ShareGroupDatasetModal(
 	const { open, handleClose, datasetName } = props;
 	const { datasetId } = useParams<{ datasetId?: string }>();
 	const [role, setRole] = useState("viewer");
-	const [group, setGroup] = useState({ label: "", id: "" });
+	const [group, setGroup] = useState({ label: "", id: "", name:"" });
 	const [options, setOptions] = useState([]);
 	const [showSuccessAlert, setShowSuccessAlert] = useState(false);
 	const dispatch = useDispatch();
@@ -54,9 +56,26 @@ export default function ShareGroupDatasetModal(
 		dispatch(fetchDatasetRoles(datasetId));
 
 	// component did mount
-	useEffect(() => {
-		listGroups();
+	// useEffect(() => {
+	// 	listGroups();
+	// }, []);
+
+		useEffect(() => {
+		prefixSearchGroups("", 0, 10);
 	}, []);
+
+	// dynamically update the options when user search
+	useEffect(() => {
+		prefixSearchGroups(group.name, 0, 10);
+	}, [group]);
+
+	useEffect(() => {
+		setOptions(
+			groups.reduce((list: string[], group: GroupOut) => {
+				return [...list, group.name];
+			}, [])
+		);
+	}, [groups]);
 
 	useEffect(() => {
 		setOptions(
