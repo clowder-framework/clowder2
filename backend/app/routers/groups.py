@@ -155,6 +155,9 @@ async def edit_group(
         try:
             group.name = group_dict["name"]
             await group.replace()
+            if "description" in group_dict:
+                group.description = group_dict["description"]
+                await group.replace()
         except Exception as e:
             raise HTTPException(status_code=500, detail=e.args[0])
         return group.dict()
