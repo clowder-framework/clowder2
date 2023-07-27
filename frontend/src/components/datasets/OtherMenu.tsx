@@ -35,8 +35,6 @@ export const OtherMenu = (props: ActionsMenuProps): JSX.Element => {
 
 	// state
 	const [deleteDatasetConfirmOpen, setDeleteDatasetConfirmOpen] = useState(false);
-	const [sharePaneOpen, setSharePaneOpen] = useState(false);
-	const [shareGroupPaneOpen, setShareGroupPaneOpen] = useState(false);
 
 
 
@@ -60,14 +58,6 @@ export const OtherMenu = (props: ActionsMenuProps): JSX.Element => {
 		setAnchorEl(null);
 	};
 
-    const handleShareClose = () => {
-        setSharePaneOpen(false);
-    }
-
-      const handleShareGroupClose = () => {
-        setShareGroupPaneOpen(false);
-    }
-
 	return (
 		<Box>
 			<ActionModal actionOpen={deleteDatasetConfirmOpen} actionTitle="Are you sure?"
@@ -76,11 +66,6 @@ export const OtherMenu = (props: ActionsMenuProps): JSX.Element => {
 						 handleActionCancel={() => {
 							 setDeleteDatasetConfirmOpen(false);
 						 }}/>
-
- 		        <ShareDatasetModal open={sharePaneOpen} handleClose={handleShareClose} datasetName={datasetName}/>
-			 	<ShareGroupDatasetModal open={shareGroupPaneOpen} handleClose={handleShareGroupClose} datasetName={datasetName}/>
-
-
 			<Button variant="outlined" onClick={handleOptionClick}
 					endIcon={<ArrowDropDownIcon/>}>
 				<MoreHoriz/>
@@ -102,28 +87,6 @@ export const OtherMenu = (props: ActionsMenuProps): JSX.Element => {
 						<DeleteIcon fontSize="small"/>
 					</ListItemIcon>
 					<ListItemText>Delete Dataset</ListItemText></MenuItem>
-                		<MenuItem
-                    			onClick={() => {
-                        			handleOptionClose();
-                        			setSharePaneOpen(true);
-                    			}
-                    		}>
-                    			<ListItemIcon>
-                        			<ShareIcon fontSize="small" />
-                    			</ListItemIcon>
-                    			<ListItemText>Share</ListItemText>
-                		</MenuItem>
-						<MenuItem
-                    			onClick={() => {
-                        			handleOptionClose();
-                        			setShareGroupPaneOpen(true);
-                    			}
-                    		}>
-                    			<ListItemIcon>
-                        			<ShareIcon fontSize="small" />
-                    			</ListItemIcon>
-                    			<ListItemText>Share With Group</ListItemText>
-                		</MenuItem>
 			</Menu>
 		</Box>)
 }

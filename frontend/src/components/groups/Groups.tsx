@@ -194,8 +194,8 @@ export function Groups() {
 							<TableHead>
 								<TableRow>
 									<TableCell>Group Name</TableCell>
-									<TableCell align="right">Description</TableCell>
-									<TableCell align="right">
+									<TableCell align="left">Description</TableCell>
+									<TableCell align="left">
 										<GroupsIcon />
 									</TableCell>
 								</TableRow>
@@ -216,7 +216,7 @@ export function Groups() {
 												component="th"
 												scope="row"
 												key={group.id}
-												align="right"
+												align="left"
 											>
 												{group.description}
 											</TableCell>

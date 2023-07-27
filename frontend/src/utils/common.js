@@ -102,22 +102,35 @@ export const getCurrEmail = () => {
 	}
 };
 
-export function renameId(obj) {
+// Function to read the text from the downloaded file
+export function readTextFromFile(file) {
+	return new Promise((resolve, reject) => {
+		const reader = new FileReader();
 
-	Object.defineProperty(
-		obj,
-		'id',
-		Object.getOwnPropertyDescriptor(obj, '_id')
-	);
-	delete obj['_id'];
+		reader.onload = () => {
+			const text = reader.result;
+			resolve(text);
+		};
+
+		reader.onerror = () => {
+			reader.abort();
+			reject(new Error("Failed to read the file"));
+		};
+
+		reader.readAsText(file);
+	});
+}
+
+export function renameId(obj) {
+	Object.defineProperty(obj, "id", Object.getOwnPropertyDescriptor(obj, "_id"));
+	delete obj["_id"];
 
 	return obj;
 }
 
 export function renameIdArray(arr) {
-	return arr.map(obj => renameId(obj));
+	return arr.map((obj) => renameId(obj));
 }
-
 
 // get current username
 // export function getCurrUsername(){

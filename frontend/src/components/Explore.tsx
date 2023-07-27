@@ -4,7 +4,7 @@ import { Box, Button, ButtonGroup, Grid, Tab, Tabs } from "@mui/material";
 import { RootState } from "../types/data";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchDatasets } from "../actions/dataset";
-import { downloadThumbnail } from "../utils/thumbnail";
+import { downloadThumbnail } from "../utils/visualization";
 
 import { a11yProps, TabPanel } from "./tabs/TabComponent";
 import DatasetCard from "./datasets/DatasetCard";
@@ -146,6 +146,7 @@ export const Explore = (): JSX.Element => {
 														author={`${dataset.creator.first_name} ${dataset.creator.last_name}`}
 														created={dataset.created}
 														description={dataset.description}
+														thumbnailId={dataset.thumbnail_id}
 													/>
 												</Grid>
 											);

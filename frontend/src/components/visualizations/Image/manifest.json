@@ -1,0 +1,25 @@
+{
+	"name": "basic-image-component",
+	"version": "1.0.0",
+	"description": "A React component for image",
+	"main": "Image.tsx",
+	"dependencies": {
+		"clowder2-core": "1.0.0",
+		"react": "^17.0.2",
+		"react-dom": "^17.0.2"
+	},
+	"visConfig": {
+		"name": "Image",
+		"mainType": "image",
+		"mimeTypes": [
+			"image/jpeg",
+			"image/png",
+			"image/gif",
+			"image/bmp",
+			"image/webp"
+		],
+		"props": {
+			"fileId": "string"
+		}
+	}
+}

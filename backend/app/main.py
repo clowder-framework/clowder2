@@ -27,10 +27,9 @@ from app.models.listeners import (
 from app.models.metadata import MetadataDB, MetadataDefinitionDB
 from app.models.tokens import TokenDB
 from app.models.users import UserDB, UserAPIKeyDB, ListenerAPIKeyDB
-from app.routers import (
-    folders,
-    groups,
-)
+from app.models.visualization_config import VisualizationConfigDB
+from app.models.visualization_data import VisualizationDataDB
+from app.routers import folders, groups
 from app.routers import (
     users,
     authorization,
@@ -45,6 +44,7 @@ from app.routers import (
     listeners,
     feeds,
     jobs,
+    visualization,
 )
 
 # setup loggers
@@ -167,6 +167,12 @@ api_router.include_router(
     tags=["groups"],
     dependencies=[Depends(get_current_username)],
 )
+api_router.include_router(
+    visualization.router,
+    prefix="/visualizations",
+    tags=["visualizations"],
+    dependencies=[Depends(get_current_username)],
+)
 api_router.include_router(keycloak.router, prefix="/auth", tags=["auth"])
 app.include_router(api_router, prefix=settings.API_V2_STR)
 
@@ -206,6 +212,8 @@ async def startup_beanie():
             GroupDB,
             TokenDB,
             ErrorDB,
+            VisualizationConfigDB,
+            VisualizationDataDB,
         ],
         recreate_views=True,
     )

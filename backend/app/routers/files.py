@@ -1,5 +1,4 @@
 import io
-import mimetypes
 from datetime import datetime
 from typing import Optional, List
 from typing import Union
@@ -25,7 +24,6 @@ from app.keycloak_auth import get_current_user, get_token
 from app.models.files import (
     FileOut,
     FileVersion,
-    FileContentType,
     FileDB,
     FileVersionDB,
 )
@@ -33,6 +31,7 @@ from app.models.metadata import MetadataDB
 from app.models.users import UserOut
 from app.rabbitmq.listeners import submit_file_job, EventListenerJobDB
 from app.routers.feeds import check_feed_listeners
+from app.routers.utils import get_content_type
 from app.search.connect import (
     delete_document_by_id,
     insert_record,
@@ -112,11 +111,7 @@ async def add_file_entry(
 
     await new_file.insert()
     new_file_id = new_file.id
-    if content_type is None:
-        content_type = mimetypes.guess_type(new_file.name)
-        content_type = content_type[0] if len(content_type) > 1 else content_type
-    type_main = content_type.split("/")[0] if type(content_type) is str else "N/A"
-    content_type_obj = FileContentType(content_type=content_type, main_type=type_main)
+    content_type_obj = get_content_type(content_type, file)
 
     # Use unique ID as key for Minio and get initial version ID
     response = fs.put_object(
@@ -409,3 +404,17 @@ async def resubmit_file_extractions(
             FileOut(**file.dict()), rabbitmq_client, user, credentials
         )
     return resubmit_success_fail
+
+
+@router.patch("/{file_id}/thumbnail/{thumbnail_id}", response_model=FileOut)
+async def add_dataset_thumbnail(
+    file_id: str,
+    thumbnail_id: str,
+    allow: bool = Depends(FileAuthorization("editor")),
+):
+    if (file := await FileDB.get(PydanticObjectId(file_id))) is not None:
+        file.thumbnail_id = thumbnail_id
+        await file.save()
+
+        return file.dict()
+    raise HTTPException(status_code=404, detail=f"File {file_id} not found")

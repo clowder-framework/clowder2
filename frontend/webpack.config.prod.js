@@ -8,13 +8,15 @@ import path from "path";
 import TerserPlugin from "terser-webpack-plugin";
 
 // eslint-disable-next-line no-console
-console.log(`the current CLOWDER_REMOTE_HOSTNAME environment variable is ${  process.env.CLOWDER_REMOTE_HOSTNAME}`);
+console.log(
+	`the current CLOWDER_REMOTE_HOSTNAME environment variable is ${process.env.CLOWDER_REMOTE_HOSTNAME}`
+);
 
 export default {
-	mode:"production",
+	mode: "production",
 	resolve: {
-		modules:["node_modules", "src"],
-		extensions: [".js", ".jsx", ".json", ".ts", ".tsx"]
+		modules: ["node_modules", "src"],
+		extensions: [".js", ".jsx", ".json", ".ts", ".tsx"],
 	},
 	devtool: "source-map", // more info:https://webpack.github.io/docs/build-performance.html#sourcemaps and https://webpack.github.io/docs/configuration.html#devtool
 	entry: [
@@ -26,9 +28,9 @@ export default {
 	],
 	target: "web", // necessary per https://webpack.github.io/docs/testing.html#compile-and-test
 	output: {
+		filename: "[name].bundle.js",
+		chunkFilename: "[name].chunk.bundle.js",
 		path: path.resolve(__dirname, "dist"),
-		publicPath: "",
-		filename: "[name].[chunkhash].js"
 	},
 	plugins: [
 		// NOTE: `npm run preinstall` currently runs eslint
@@ -40,17 +42,19 @@ export default {
 		*/
 		new webpack.DefinePlugin({
 			"process.env": {
-				"NODE_ENV": JSON.stringify("production"),
+				NODE_ENV: JSON.stringify("production"),
 				// if left not set, it will default to same host/port as frontend
-				"CLOWDER_REMOTE_HOSTNAME": JSON.stringify(process.env.CLOWDER_REMOTE_HOSTNAME),
-				"APIKEY":JSON.stringify(process.env.APIKEY),
-				"KeycloakBaseURL": JSON.stringify(process.env.KeycloakBaseURL),
+				CLOWDER_REMOTE_HOSTNAME: JSON.stringify(
+					process.env.CLOWDER_REMOTE_HOSTNAME
+				),
+				APIKEY: JSON.stringify(process.env.APIKEY),
+				KeycloakBaseURL: JSON.stringify(process.env.KeycloakBaseURL),
 			},
-			__DEV__: false
+			__DEV__: false,
 		}),
 
 		// Generate an external css file with a hash in the filename
-		new MiniCssExtractPlugin({filename:"[name].[contenthash].css"}),
+		new MiniCssExtractPlugin({ filename: "[name].[contenthash].css" }),
 
 		// Generate HTML file that contains references to generated bundles. See here for how this works: https://github.com/ampedandwired/html-webpack-plugin#basic-usage
 		new HtmlWebpackPlugin({
@@ -66,56 +70,55 @@ export default {
 				keepClosingSlash: true,
 				minifyJS: true,
 				minifyCSS: true,
-				minifyURLs: true
+				minifyURLs: true,
 			},
 			inject: true,
 			// Note that you can add custom options here if you need to handle other custom logic in index.html
 			// To track JavaScript errors via TrackJS, sign up for a free trial at TrackJS.com and enter your token below.
-			trackJSToken: ""
+			trackJSToken: "",
 		}),
 
 		new webpack.LoaderOptionsPlugin({
 			debug: true,
 			options: {
 				sassLoader: {
-					includePaths: [path.resolve(__dirname, "src", "scss")]
+					includePaths: [path.resolve(__dirname, "src", "scss")],
 				},
 				context: "/",
-				postcss: [
-					autoprefixer(),
-				]
-			}
-		})
+				postcss: [autoprefixer()],
+			},
+		}),
 	],
 	module: {
 		rules: [
 			{
 				test: /\.[tj]sx?$/,
 				exclude: /node_modules/,
-				loader: "babel-loader"
+				loader: "babel-loader",
 			},
 			{
 				test: /\.eot(\?v=\d+.\d+.\d+)?$/,
-				type: "asset/inline"
+				type: "asset/inline",
 			},
 			{
 				test: /\.woff(2)?(\?v=[0-9]\.[0-9]\.[0-9])?$/,
-				type: "asset/inline"
+				type: "asset/inline",
 			},
 			{
 				test: /\.[ot]tf(\?v=\d+.\d+.\d+)?$/,
-				type: "asset/inline"
+				type: "asset/inline",
 			},
 			{
 				test: /\.svg(\?v=\d+.\d+.\d+)?$/,
-				type: "asset/inline"
+				type: "asset/inline",
 			},
 			{
 				test: /\.(jpe?g|png|gif)$/i,
-				type: "asset/resource"
+				type: "asset/resource",
 			},
-			{	test: /\.ico$/,
-				type: "asset/resource"
+			{
+				test: /\.ico$/,
+				type: "asset/resource",
 			},
 			{
 				test: /(\.css|\.scss)$/,
@@ -126,27 +129,48 @@ export default {
 						loader: "postcss-loader",
 						options: {
 							postcssOptions: {
-								plugins: ["autoprefixer"]
-							}
-						}
+								plugins: ["autoprefixer"],
+							},
+						},
 					},
-					"sass-loader"
-				]
+					"sass-loader",
+				],
 			},
 			// {
 			// 	test: /\.json$/,
 			// 	loader: "json-loader"
 			// }
-		]
+		],
 	},
-	optimization:{
-		minimizer: [new TerserPlugin({
-			terserOptions: {
-				ecma:8,
-				compress: {
-					warnings: false
-				}
-			}
-		})],
-	}
+	optimization: {
+		minimizer: [
+			new TerserPlugin({
+				terserOptions: {
+					ecma: 8,
+					compress: {
+						warnings: false,
+					},
+				},
+			}),
+		],
+		splitChunks: {
+			cacheGroups: {
+				reactVendor: {
+					test: /[\\/]node_modules[\\/](react|react-dom|react-router-dom)[\\/]/,
+					name: "vendor-react",
+					chunks: "all",
+				},
+				corejsVendor: {
+					test: /[\\/]node_modules[\\/](core-js)[\\/]/,
+					name: "vendor-corejs",
+					chunks: "all",
+				},
+				vegaVendor: {
+					test: /[\\/]node_modules[\\/](.*vega.*)[\\/]/,
+					name: "vendor-vega",
+					chunks: "all",
+				},
+			},
+		},
+	},
 };

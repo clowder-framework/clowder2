@@ -8,7 +8,7 @@ from pika.adapters.blocking_connection import BlockingChannel
 
 from app import dependencies
 from app.keycloak_auth import get_token
-from app.models.config import ConfigEntryDB, ConfigEntryOut
+from app.models.config import ConfigEntryDB
 from app.models.datasets import DatasetOut
 from app.models.files import FileOut
 from app.models.listeners import (
@@ -102,7 +102,7 @@ async def submit_dataset_job(
     rabbitmq_client: BlockingChannel = Depends(dependencies.get_rabbitmq),
 ):
     # Create an entry in job history with unique ID
-    job = EventListenerDB(
+    job = EventListenerJobDB(
         listener_id=routing_key,
         creator=user,
         resource_ref=MongoDBRef(collection="dataset", resource_id=dataset_out.id),

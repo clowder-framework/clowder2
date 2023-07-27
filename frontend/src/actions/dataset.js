@@ -1,7 +1,7 @@
 import { V2 } from "../openapi";
 import {
 	handleErrors,
-	handleErrorsAuthorization,
+	handleErrorsAuthorization, handleErrorsInline,
 	resetFailedReason,
 } from "./common";
 import config from "../app.config";
@@ -50,10 +50,7 @@ export function setDatasetUserRole(datasetId, username, roleType) {
 			})
 			.catch((reason) => {
 				dispatch(
-					handleErrors(
-						reason,
-						setDatasetUserRole(datasetId, username, roleType)
-					)
+					handleErrorsInline(reason, setDatasetUserRole(datasetId, username, roleType))
 				);
 			});
 	};
