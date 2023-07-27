@@ -168,18 +168,18 @@ export function Group() {
 					</AuthWrapper>
 
 
-					<AuthWrapper currRole={role} allowedRoles={["owner"]}>
-						<Button
-							variant="outlined"
-							onClick={() => {
-								setEditNameModalOpen(true);
-							}}
-							endIcon={<DriveFileRenameOutline fontSize="small"/>}
-							sx={{ marginLeft: "0.5em" }}
-						>
-							Edit Name
-						</Button>
-					</AuthWrapper>
+					{/*<AuthWrapper currRole={role} allowedRoles={["owner"]}>*/}
+					{/*	<Button*/}
+					{/*		variant="outlined"*/}
+					{/*		onClick={() => {*/}
+					{/*			setEditNameModalOpen(true);*/}
+					{/*		}}*/}
+					{/*		endIcon={<DriveFileRenameOutline fontSize="small"/>}*/}
+					{/*		sx={{ marginLeft: "0.5em" }}*/}
+					{/*	>*/}
+					{/*		Edit Name*/}
+					{/*	</Button>*/}
+					{/*</AuthWrapper>*/}
 					{/*only owner are allowed to delete*/}
 					<AuthWrapper currRole={role} allowedRoles={["owner"]}>
 						<Button

@@ -60,15 +60,15 @@ export const EditMenu = (props: ActionsMenuProps): JSX.Element => {
 				groupName={groupAbout.name}
 				groupId={groupAbout.id}
 			/>
-			{/*<EditDescriptionModal*/}
-			{/*	open={editNameModalOpen}*/}
-			{/*	groupOwner={groupCreatorEmail}*/}
-			{/*	handleClose={() => {*/}
-			{/*		setEditDescriptionModalOpen(false);*/}
-			{/*	}}*/}
-			{/*	groupDescription={groupAbout.description}*/}
-			{/*	groupId={groupAbout.id}*/}
-			{/*/>*/}
+			<EditDescriptionModal
+				open={editDescriptionModalOpen}
+				groupOwner={groupCreatorEmail}
+				handleClose={() => {
+					setEditDescriptionModalOpen(false);
+				}}
+				groupDescription={groupAbout.description}
+				groupId={groupAbout.id}
+			/>
 			<Button variant="outlined" onClick={handleOptionClick}
 					endIcon={<ArrowDropDownIcon/>}>
 				Edit
@@ -92,7 +92,7 @@ export const EditMenu = (props: ActionsMenuProps): JSX.Element => {
 				<MenuItem
 					onClick={() => {
 						handleOptionClose();
-						setDescription(true);
+						setEditDescriptionModalOpen(true);
 					}
 					}> <ListItemIcon>
 					<DriveFileRenameOutline fontSize="small"/>
