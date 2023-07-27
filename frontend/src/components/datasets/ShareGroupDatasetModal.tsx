@@ -27,6 +27,7 @@ import { prefixSearchGroups as prefixSearchGroupsAction } from "../../actions/gr
 import { useParams } from "react-router-dom";
 import CloseIcon from "@mui/icons-material/Close";
 import {GroupOut, UserOut} from "../../openapi/v2";
+import {prefixSearchAllUsers as prefixSearchAllUsersAction} from "../../actions/user";
 
 type ShareGroupDatasetModalProps = {
 	open: boolean;
@@ -40,7 +41,8 @@ export default function ShareGroupDatasetModal(
 	const { open, handleClose, datasetName } = props;
 	const { datasetId } = useParams<{ datasetId?: string }>();
 	const [role, setRole] = useState("viewer");
-	const [group, setGroup] = useState({ label: "", id: "", name:"" });
+	const [groupName, setGroupName] = useState("");
+	const [group, setGroup] = useState({ label: "", id: ""});
 	const [options, setOptions] = useState([]);
 	const [showSuccessAlert, setShowSuccessAlert] = useState(false);
 	const dispatch = useDispatch();
@@ -55,6 +57,9 @@ export default function ShareGroupDatasetModal(
 	const getRoles = (datasetId: string | undefined) =>
 		dispatch(fetchDatasetRoles(datasetId));
 
+	const prefixSearchGroups = (text: string, skip: number, limit: number) =>
+		dispatch(prefixSearchAllUsersAction(text, skip, limit));
+
 	// component did mount
 	// useEffect(() => {
 	// 	listGroups();
@@ -66,7 +71,7 @@ export default function ShareGroupDatasetModal(
 
 	// dynamically update the options when user search
 	useEffect(() => {
-		prefixSearchGroups(group.name, 0, 10);
+		prefixSearchGroups(group.label, 0, 10);
 	}, [group]);
 
 	useEffect(() => {
@@ -87,7 +92,7 @@ export default function ShareGroupDatasetModal(
 
 	const onShare = async () => {
 		await setGroupRole(datasetId, group.id, role);
-		setGroup({ label: "", id: "" });
+		setGroup({ label: "", id: ""});
 		setRole("viewer");
 		setShowSuccessAlert(true);
 		getRoles(datasetId);
@@ -120,9 +125,9 @@ export default function ShareGroupDatasetModal(
 							id="email-auto-complete"
 							freeSolo
 							autoHighlight
-							inputValue={group.name}
+							inputValue={group.label}
 							onChange={(event, value) => {
-								setGroup(value);
+								setGroupName(value);
 							}}
 							options={options}
 							renderInput={(params) => (
