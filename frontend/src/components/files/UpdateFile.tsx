@@ -27,6 +27,7 @@ export const UpdateFile: React.FC<UpdateFileProps> = (props: UpdateFileProps) =>
 	const listFileMetadata = async (fileId: string | undefined) => dispatch(fetchFileMetadata(fileId));
 	const createFileMetadata = (fileId: string|undefined, metadata:MetadataIn) => dispatch(postFileMetadata(fileId, metadata));
 	const fileMetadataList = useSelector((state: RootState) => state.metadata.fileMetadataList);
+	const files = useSelector((state: RootState) => state.dataset.files);
 
 	const {fileId, setOpen,} = props;
 
@@ -40,8 +41,14 @@ export const UpdateFile: React.FC<UpdateFileProps> = (props: UpdateFileProps) =>
 		setLoading(true);
 		await updateFile(formData, fileId);
 
+		setLoading(false);
+		setOpen(false);
+		listFileVersions(fileId);
+	};
+
+	useEffect(() => {
 		// Update metadata entry for new version of file in db
-		fileMetadataList.forEach((item, idx) => {
+		fileMetadataList.forEach((item) => {
 			if (item.definition !== null) {
 				const metadata: MetadataIn = {
 					context: item.context,
@@ -54,11 +61,7 @@ export const UpdateFile: React.FC<UpdateFileProps> = (props: UpdateFileProps) =>
 				createFileMetadata(fileId, metadata);
 			}
 		});
-
-		setLoading(false);
-		setOpen(false);
-		listFileVersions(fileId);
-	};
+	}, [files]);
 
 	// TODO
 	// @ts-ignore
