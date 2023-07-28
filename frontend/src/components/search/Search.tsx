@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import {
 	DataSearch,
-	DateRange,
+	DatePicker,
 	MultiDropdownList,
 	ReactiveComponent,
 	ReactiveList,
@@ -61,7 +61,8 @@ export function Search() {
 										and: [
 											"creatorfilter",
 											"downloadfilter",
-											"modifyfilter",
+											"fromfilter",
+											"tofilter",
 											"authFilter",
 										],
 									}}
@@ -133,21 +134,39 @@ export function Search() {
 											defaultValue={"Download Times: All"}
 										/>
 									</Grid>
-									<Grid item xs={12} sm={4} md={4} lg={4}>
-										<DateRange
-											componentId="modifyfilter"
+									<Grid item xs={6} sm={2} md={2} lg={2}>
+										<DatePicker
 											dataField="created"
-											focused={false}
-											autoFocusEnd={true}
-											numberOfMonths={1}
-											queryFormat="date_time_no_millis"
-											showClear={true}
-											showFilter={true}
-											filterLabel="Date"
-											URLParams={false}
-											placeholder={{
-												start: "From Date",
-												end: "To Date",
+											componentId="fromfilter"
+											placeholder="Start Date"
+											customQuery={function (value, props) {
+												return {
+													query: {
+														range: {
+															created: {
+																gte: value,
+															},
+														},
+													},
+												};
+											}}
+										/>
+									</Grid>
+									<Grid item xs={6} sm={2} md={2} lg={2}>
+										<DatePicker
+											dataField="created"
+											componentId="tofilter"
+											placeholder="End Date"
+											customQuery={function (value, props) {
+												return {
+													query: {
+														range: {
+															created: {
+																lte: value,
+															},
+														},
+													},
+												};
 											}}
 										/>
 									</Grid>
@@ -177,7 +196,8 @@ export function Search() {
 										"searchbox",
 										"creatorfilter",
 										"downloadfilter",
-										"modifyfilter",
+										"fromfilter",
+										"tofilter",
 										"authFilter",
 									],
 								}}
