@@ -1,7 +1,6 @@
 {{- if .Values.extractors }}
 {{- $fullname := include "clowder2.fullname" . }}
 {{- $labels := include "clowder2.labels" . }}
-{{- $rabbitmqURI := include "clowder2.rabbitmquri" . }}
 {{- range $key, $val := .Values.extractors }}
 {{- if or .enabled (not (hasKey . "enabled")) }}
 ---

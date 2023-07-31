@@ -143,6 +143,32 @@ rabbitmq:
     #storageClass: csi-cinder-sc-retain
 
 # ----------------------------------------------------------------------
+# EXTRACTORS
+# ----------------------------------------------------------------------
+
+## list of extractors to be installed. Each extractor should have the
+## following fields:
+## enabled      : true/false - should the extractor be installed
+## image        : dokeer/image:tag - the extractor docker image
+## replicaCount : number - the number of this extractor to install
+## env          : additional environment variables to pass to extractor.
+extractors:
+  file-digest:
+#    image: clowder/extractors-digest:2.2.4
+    # enabled: true
+    # replicaCount: 1
+    # pullPolicy: Always
+    # imagePullSecrets: regcred
+    # env:
+    #   - name: extractor.bump.sh
+    #     value: "bar"
+  image-wordcount-v2:
+    image: clowder/extractors-wordcount-v2:beta
+    env:
+      - name: CLOWDER_VERSION
+        value: 2
+
+# ----------------------------------------------------------------------
 # ELASTICSEARCH
 # ----------------------------------------------------------------------
 elasticsearch:
