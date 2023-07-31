@@ -37,7 +37,7 @@ spec:
           imagePullPolicy: {{ .Values.extractors.image.pullPolicy }}
           env:
             - name: RABBITMQ_URI
-              value: {{ $fullname }}-rabbitmq
+              value: {{ include "clowder2.name" .  }}-rabbitmq
             - name: CLOWDER_VERSION
               value: 2
           resources:
