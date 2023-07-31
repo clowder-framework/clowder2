@@ -1,24 +1,17 @@
-{{- if .Values.extractors }}
-{{- $fullname := include "clowder2.fullname" . }}
-{{- $labels := include "clowder2.labels" . }}
-{{- range $key, $val := .Values.extractors }}
-{{- if or .enabled (not (hasKey . "enabled")) }}
----
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ $fullname }}-extractors-{{ $key }}
+  name: {{ include "clowder2.fullname" . }}-extractors
   labels:
-    clowder/extractor: {{ $key | quote }}
-{{ $labels | indent 4 }}
+    {{- include "clowder2.labels" . | nindent 4 }}
 spec:
   {{- if not .Values.autoscaling.enabled }}
-  replicas: {{ default 1 .Values.replicaCount }}
+  replicas: {{ .Values.replicaCount }}
   {{- end }}
   selector:
     matchLabels:
-      app.kubernetes.io/name: {{ $fullname }}-extractors-{{ $key }}
-      app.kubernetes.io/instance: {{ $.Release.Name }}
+      app.kubernetes.io/name: {{ include "clowder2.name" . }}-extractors
+      app.kubernetes.io/instance: {{ .Release.Name }}
   template:
     metadata:
       {{- with .Values.podAnnotations }}
@@ -26,78 +19,38 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
-        app.kubernetes.io/name: {{ $fullname }}-extractors-{{ $key }}
-        app.kubernetes.io/instance: {{ $.Release.Name }}
+        app.kubernetes.io/name: {{ include "clowder2.name" . }}-extractors
+        app.kubernetes.io/instance: {{ .Release.Name }}
     spec:
-    {{- with $.Values.imagePullSecrets }}
+      {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
-    {{- end }}
-#      initContainers:
-#        - name: check-rabbitmq
-#          image: "{{ $.Values.image.checks }}"
-#          imagePullPolicy: {{ $.Values.image.pullPolicy }}
-#          env:
-#            - name: RABBITMQ_URI
-#              value: {{ $fullname }}-rabbitmq
+      {{- end }}
+      serviceAccountName: {{ include "clowder2.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
       containers:
-        - name: extractors-heartbeat
-          image: "clowder/clowder2-heartbeat"
-          imagePullPolicy: Always
-          env:
-            - name: MONGODB_URL
-              value: mongodb://{{ include "clowder2.name" . }}-mongodb:27017
-            - name: RABBITMQ_HOST
-              value: {{ include "clowder2.name" . }}-rabbitmq
-            - name: RABBITMQ_USER
-              value: {{ .Values.rabbitmq.auth.username }}
-            - name: RABBITMQ_PASS
-              valueFrom:
-                secretKeyRef:
-                  name: clowder2-rabbitmq
-                  key: rabbitmq-password
-
-        - name: extractors-messages
-          image: "clowder/clowder2-messages"
-          imagePullPolicy: Always
-          env:
-            - name: MONGODB_URL
-              value: mongodb://{{ include "clowder2.name" . }}-mongodb:27017
-            - name: RABBITMQ_HOST
-              value: {{ include "clowder2.name" . }}-rabbitmq
-            - name: RABBITMQ_USER
-              value: {{ .Values.rabbitmq.auth.username }}
-            - name: RABBITMQ_PASS
-              valueFrom:
-                secretKeyRef:
-                  name: clowder2-rabbitmq
-                  key: rabbitmq-password
-
-        - name: extractor
-          image: {{ .image | quote }}
-          imagePullPolicy: {{ default $.Values.image.pullPolicy .pullPolicy }}
+        - name: extractors
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.extractors.image.repository }}:{{ .Values.extractors.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.extractors.image.pullPolicy }}
           env:
             - name: RABBITMQ_URI
               value: {{ $fullname }}-rabbitmq
-{{- if .env }}
-            {{- toYaml .env | nindent 12 }}
-{{- end }}
-{{- if .resources }}
+            - name: CLOWDER_VERSION
+              value: 2
           resources:
-            {{- toYaml .resources | nindent 12 }}
-{{- end }}
-      {{- with .nodeSelector }}
+            {{- toYaml .Values.resources | nindent 12 }}
+      {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-    {{- with .affinity }}
+      {{- with .Values.affinity }}
       affinity:
         {{- toYaml . | nindent 8 }}
-    {{- end }}
-    {{- with .tolerations }}
+      {{- end }}
+      {{- with .Values.tolerations }}
       tolerations:
         {{- toYaml . | nindent 8 }}
-    {{- end }}
-{{- end }}
-{{- end }}
-{{- end }}
+      {{- end }}
