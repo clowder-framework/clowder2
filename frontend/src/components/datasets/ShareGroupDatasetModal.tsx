@@ -41,12 +41,11 @@ export default function ShareGroupDatasetModal(
 	const { open, handleClose, datasetName } = props;
 	const { datasetId } = useParams<{ datasetId?: string }>();
 	const [role, setRole] = useState("viewer");
-	const [groupName, setGroupName] = useState("");
-	const [group, setGroup] = useState({ label: "", id: ""});
+	const [group, setGroup] = useState({ label: "", id: "" });
 	const [options, setOptions] = useState([]);
 	const [showSuccessAlert, setShowSuccessAlert] = useState(false);
 	const dispatch = useDispatch();
-	const listGroups = () => dispatch(fetchGroups(0, 21));
+	// const listGroups = () => dispatch(fetchGroups(0, 21));
 	const groups = useSelector((state: RootState) => state.group.groups);
 	const setGroupRole = async (
 		datasetId: string,
@@ -57,15 +56,8 @@ export default function ShareGroupDatasetModal(
 	const getRoles = (datasetId: string | undefined) =>
 		dispatch(fetchDatasetRoles(datasetId));
 
-	const prefixSearchGroups = (text: string, skip: number, limit: number) =>
-		dispatch(prefixSearchAllUsersAction(text, skip, limit));
-
 	// component did mount
-	// useEffect(() => {
-	// 	listGroups();
-	// }, []);
-
-		useEffect(() => {
+	useEffect(() => {
 		prefixSearchGroups("", 0, 10);
 	}, []);
 
@@ -73,14 +65,6 @@ export default function ShareGroupDatasetModal(
 	useEffect(() => {
 		prefixSearchGroups(group.label, 0, 10);
 	}, [group]);
-
-	useEffect(() => {
-		setOptions(
-			groups.reduce((list: string[], group: GroupOut) => {
-				return [...list, group.name];
-			}, [])
-		);
-	}, [groups]);
 
 	useEffect(() => {
 		setOptions(
@@ -92,7 +76,7 @@ export default function ShareGroupDatasetModal(
 
 	const onShare = async () => {
 		await setGroupRole(datasetId, group.id, role);
-		setGroup({ label: "", id: ""});
+		setGroup({ label: "", id: "" });
 		setRole("viewer");
 		setShowSuccessAlert(true);
 		getRoles(datasetId);
@@ -121,13 +105,14 @@ export default function ShareGroupDatasetModal(
 							alignItems: "center",
 						}}
 					>
+						{/*AUTOCOMPLETE WONT WORK HERE*/}
 						<Autocomplete
-							id="email-auto-complete"
+							id="name-auto-complete"
 							freeSolo
 							autoHighlight
 							inputValue={group.label}
 							onChange={(event, value) => {
-								setGroupName(value);
+								setGroup(value);
 							}}
 							options={options}
 							renderInput={(params) => (
