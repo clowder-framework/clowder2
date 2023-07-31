@@ -162,36 +162,6 @@ extractors:
     # env:
     #   - name: extractor.bump.sh
     #     value: "bar"
-  extractors-heartbeat:
-    image: "clowder/clowder2-heartbeat"
-    env:
-      - name: MONGODB_URL
-        value: mongodb://{{ include "clowder2.name" . }}-mongodb:27017
-      - name: RABBITMQ_HOST
-        value: {{ include "clowder2.name" .  }}-rabbitmq
-      - name: RABBITMQ_USER
-        value: {{ .Values.rabbitmq.auth.username }}
-      - name: RABBITMQ_PASS
-        valueFrom:
-          secretKeyRef:
-            name: clowder2-rabbitmq
-            key: rabbitmq-password
-
-  extractors-messages:
-    image: "clowder/clowder2-messages"
-    env:
-      - name: MONGODB_URL
-        value: mongodb://{{ include "clowder2.name" . }}-mongodb:27017
-      - name: RABBITMQ_HOST
-        value: {{ include "clowder2.name" .  }}-rabbitmq
-      - name: RABBITMQ_USER
-        value: {{ .Values.rabbitmq.auth.username }}
-      - name: RABBITMQ_PASS
-        valueFrom:
-          secretKeyRef:
-            name: clowder2-rabbitmq
-            key: rabbitmq-password
-
   image-wordcount-v2:
     image: cwang138/extractors-wordcount-v2:beta
     env:

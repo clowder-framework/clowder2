@@ -33,14 +33,45 @@ spec:
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
     {{- end }}
-      initContainers:
-        - name: check-rabbitmq
-          image: "{{ $.Values.image.checks }}"
-          imagePullPolicy: {{ $.Values.image.pullPolicy }}
-          env:
-            - name: RABBITMQ_URI
-              value: {{ $fullname }}-rabbitmq
+#      initContainers:
+#        - name: check-rabbitmq
+#          image: "{{ $.Values.image.checks }}"
+#          imagePullPolicy: {{ $.Values.image.pullPolicy }}
+#          env:
+#            - name: RABBITMQ_URI
+#              value: {{ $fullname }}-rabbitmq
       containers:
+        - name: extractors-heartbeat
+          image: "clowder/clowder2-heartbeat"
+          imagePullPolicy: {{ default $.Values.image.pullPolicy .pullPolicy }}
+          env:
+            - name: MONGODB_URL
+              value: mongodb://{{ include "clowder2.name" . }}-mongodb:27017
+            - name: RABBITMQ_HOST
+              value: {{ include "clowder2.name" . }}-rabbitmq
+            - name: RABBITMQ_USER
+              value: {{ .Values.rabbitmq.auth.username }}
+            - name: RABBITMQ_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: clowder2-rabbitmq
+                  key: rabbitmq-password
+
+        - name: extractors-messages
+          image: "clowder/clowder2-messages"
+          env:
+            - name: MONGODB_URL
+              value: mongodb://{{ include "clowder2.name" . }}-mongodb:27017
+            - name: RABBITMQ_HOST
+              value: {{ include "clowder2.name" . }}-rabbitmq
+            - name: RABBITMQ_USER
+              value: {{ .Values.rabbitmq.auth.username }}
+            - name: RABBITMQ_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: clowder2-rabbitmq
+                  key: rabbitmq-password
+
         - name: extractor
           image: {{ .image | quote }}
           imagePullPolicy: {{ default $.Values.image.pullPolicy .pullPolicy }}
