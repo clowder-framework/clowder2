@@ -43,7 +43,7 @@ spec:
       containers:
         - name: extractors-heartbeat
           image: "clowder/clowder2-heartbeat"
-          imagePullPolicy: {{ default $.Values.image.pullPolicy .pullPolicy }}
+          imagePullPolicy: Always
           env:
             - name: MONGODB_URL
               value: mongodb://{{ include "clowder2.name" . }}-mongodb:27017
@@ -59,6 +59,7 @@ spec:
 
         - name: extractors-messages
           image: "clowder/clowder2-messages"
+          imagePullPolicy: Always
           env:
             - name: MONGODB_URL
               value: mongodb://{{ include "clowder2.name" . }}-mongodb:27017
