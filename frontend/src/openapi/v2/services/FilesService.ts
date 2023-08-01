@@ -117,14 +117,14 @@ export class FilesService {
     }
 
     /**
-     * Get File Extract
+     * Post File Extract
      * @param fileId
      * @param extractorName
      * @param requestBody
      * @returns any Successful Response
      * @throws ApiError
      */
-    public static getFileExtractApiV2FilesFileIdExtractPost(
+    public static postFileExtractApiV2FilesFileIdExtractPost(
         fileId: string,
         extractorName: string,
         requestBody?: any,

@@ -4,6 +4,7 @@
       <settings>
         <option name="composeProjectName" value="clowder2-dev" />
         <option name="envFilePath" value="" />
+        <option name="commandLineOptions" value="--build" />
         <option name="sourceFilePath" value="docker-compose.dev.yml" />
       </settings>
     </deployment>

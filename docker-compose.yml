@@ -18,7 +18,7 @@ x-minio-common: &minio-common
 
 services:
 
-  reverse-proxy:
+  traefik:
     image: traefik:v2.5
     restart: unless-stopped
     command:
@@ -46,7 +46,10 @@ services:
     environment:
       MONGODB_URL: mongodb://mongo:27017
       MINIO_SERVER_URL: minio-nginx:9000
-      RABBITMQ_HOST: rabbitmq:15672
+      RABBITMQ_HOST: ${RABBITMQ_HOST:-rabbitmq}
+      RABBITMQ_USER: ${RABBITMQ_USER:-guest}
+      RABBITMQ_PASS: ${RABBITMQ_PASS:-guest}
+      API_HOST: ${API_HOST:-http://localhost}
       elasticsearch_url: http://elasticsearch:9200
       auth_base: http://localhost
       auth_url: http://localhost/keycloak/realms/clowder/protocol/openid-connect/auth?client_id=clowder2-backend&response_type=code
@@ -61,6 +64,7 @@ services:
       - minio-nginx
       - keycloak
       - elasticsearch
+      - rabbitmq
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.backend.rule=PathPrefix(`/api`)"
@@ -88,16 +92,16 @@ services:
   extractors-heartbeat:
     image: "clowder/clowder2-heartbeat"
     build:
-      context: ./backend
+      context: backend
       dockerfile: heartbeat.Dockerfile
     networks:
       - clowder2
     restart: unless-stopped
     environment:
-      - MONGODB_URL=mongodb://mongo:27017
-      - RABBITMQ_HOST=rabbitmq
-      - RABBITMQ_USER=${RABBITMQ_USER:-guest}
-      - RABBITMQ_PASS=${RABBITMQ_PASS:-guest}
+      MONGODB_URL: mongodb://mongo:27017
+      RABBITMQ_HOST: ${RABBITMQ_HOST:-rabbitmq}
+      RABBITMQ_USER: ${RABBITMQ_USER:-guest}
+      RABBITMQ_PASS: ${RABBITMQ_PASS:-guest}
     depends_on:
       - mongo
       - rabbitmq
@@ -105,13 +109,13 @@ services:
   extractors-messages:
     image: "clowder/clowder2-messages"
     build:
-      context: ./backend
+      context: backend
       dockerfile: messages.Dockerfile
     environment:
-      - MONGODB_URL=mongodb://mongo:27017
-      - RABBITMQ_HOST=rabbitmq
-      - RABBITMQ_USER=${RABBITMQ_USER:-guest}
-      - RABBITMQ_PASS=${RABBITMQ_PASS:-guest}
+      MONGODB_URL: mongodb://mongo:27017
+      RABBITMQ_HOST: ${RABBITMQ_HOST:-rabbitmq}
+      RABBITMQ_USER: ${RABBITMQ_USER:-guest}
+      RABBITMQ_PASS: ${RABBITMQ_PASS:-guest}
     networks:
       - clowder2
     restart: unless-stopped
@@ -215,11 +219,20 @@ services:
     image: rabbitmq:3-management-alpine
     environment:
       - RABBITMQ_SERVER_ADDITIONAL_ERL_ARGS=-rabbitmq_management path_prefix "/rabbitmq"
-      - RABBITMQ_DEFAULT_USER=${RABBITMQ_DEFAULT_USER:-guest}
-      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_DEFAULT_PASS:-guest}
+      - RABBITMQ_DEFAULT_USER=${RABBITMQ_USER:-guest}
+      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_PASS:-guest}
+    expose:
+      - 5672
+      - 15672
+    # TODO remove
     ports:
       - "5672:5672"
       - "15672:15672"
+    healthcheck:
+      test: [ "CMD", "nc", "-z", "localhost", "5672" ]
+      interval: 3s
+      timeout: 10s
+      retries: 3
     networks:
       - clowder2
     volumes:

@@ -23,10 +23,7 @@ from app.routers.users import get_user_job_key
 
 
 async def create_reply_queue():
-    credentials = pika.PlainCredentials("guest", "guest")
-    parameters = pika.ConnectionParameters("localhost", credentials=credentials)
-    connection = pika.BlockingConnection(parameters)
-    channel = connection.channel()
+    channel: BlockingChannel = dependencies.get_rabbitmq()
 
     if (
         config_entry := await ConfigEntryDB.find_one({"key": "instance_id"})
@@ -82,6 +79,7 @@ async def submit_file_job(
         job_id=str(job.id),
     )
     reply_to = await create_reply_queue()
+    print("RABBITMQ_CLIENT: " + str(rabbitmq_client))
     rabbitmq_client.basic_publish(
         exchange="",
         routing_key=routing_key,
