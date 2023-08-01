@@ -152,18 +152,18 @@ rabbitmq:
 ## image        : dokeer/image:tag - the extractor docker image
 ## replicaCount : number - the number of this extractor to install
 ## env          : additional environment variables to pass to extractor.
-extractors:
-  file-digest:
-    image: clowder/extractors-digest:2.2.4
-    # enabled: true
-    # replicaCount: 1
-    # pullPolicy: Always
-    # imagePullSecrets: regcred
-    # env:
-    #   - name: extractor.bump.sh
-    #     value: "bar"
-  wordcount-v2:
-    image: clowder/extractors-wordcount-v2
+#extractors:
+#  file-digest:
+#    image: clowder/extractors-digest:2.2.4
+#    # enabled: true
+#    # replicaCount: 1
+#    # pullPolicy: Always
+#    # imagePullSecrets: regcred
+#    # env:
+#    #   - name: extractor.bump.sh
+#    #     value: "bar"
+#  wordcount-v2:
+#    image: clowder/extractors-wordcount-v2
 
 # ----------------------------------------------------------------------
 # ELASTICSEARCH
