@@ -316,6 +316,7 @@ async def delete_file(
 @router.get("/{file_id}/summary", response_model=FileOut)
 async def get_file_summary(
     file_id: str,
+    version: Optional[int] = None,
     allow: bool = Depends(FileAuthorization("viewer")),
 ):
     if (file := await FileDB.get(PydanticObjectId(file_id))) is not None:
