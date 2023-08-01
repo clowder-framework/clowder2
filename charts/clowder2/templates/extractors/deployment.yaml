@@ -29,38 +29,6 @@ spec:
         {{- toYaml . | nindent 8 }}
     {{- end }}
       containers:
-        - name: extractors-heartbeat
-          image: "clowder/clowder2-heartbeat"
-          imagePullPolicy: Always
-          env:
-            - name: MONGODB_URL
-              value: mongodb://mongo:27017
-            - name: RABBITMQ_HOST
-              value: {{ $name }}-rabbitmq
-            - name: RABBITMQ_USER
-              value: {{ $.Values.rabbitmq.auth.username }}
-            - name: RABBITMQ_PASS
-              valueFrom:
-                secretKeyRef:
-                  name: clowder2-rabbitmq
-                  key: rabbitmq-password
-
-        - name: extractors-messages
-          image: "clowder/clowder2-messages"
-          imagePullPolicy: Always
-          env:
-            - name: MONGODB_URL
-              value: mongodb://mongo:27017
-            - name: RABBITMQ_HOST
-              value: {{ $name }}-rabbitmq
-            - name: RABBITMQ_USER
-              value: {{ $.Values.rabbitmq.auth.username }}
-            - name: RABBITMQ_PASS
-              valueFrom:
-                secretKeyRef:
-                  name: clowder2-rabbitmq
-                  key: rabbitmq-password
-
         - name: extractor
           image: {{ .image | quote }}
           imagePullPolicy: Always
@@ -75,7 +43,7 @@ spec:
                   name: clowder2-rabbitmq
                   key: rabbitmq-password
             - name: CLOWDER_VERSION
-              value: 2
+              value: {{2}}
 
 {{- if .env }}
             {{- toYaml .env | nindent 12 }}
