@@ -6,11 +6,15 @@ import { fetchFileSummary } from "../../actions/file";
 import { getVisConfig as getVisConfigAction } from "../../actions/visualization";
 import { visComponentDefinitions } from "../../visualization.config";
 import { Grid } from "@mui/material";
+import { VisualizationCard } from "./VisualizationCard";
+import { VisualizationRawBytesCard } from "./VisualizationRawBytesCard";
+import { VisualizationSpecCard } from "./VisualizationSpecCard";
 
 type previewProps = {
 	fileId?: string;
 	datasetId?: string;
 };
+
 export const Visualization = (props: previewProps) => {
 	const { fileId, datasetId } = props;
 
@@ -53,6 +57,7 @@ export const Visualization = (props: previewProps) => {
 										const componentName =
 											visConfigEntry.visualization_component_id;
 										if (componentName === visComponentDefinition.name) {
+											// use visualization data if available
 											if (
 												visConfigEntry.visualization_data &&
 												visConfigEntry.visualization_data?.length > 0
@@ -60,27 +65,21 @@ export const Visualization = (props: previewProps) => {
 												return visConfigEntry.visualization_data.map(
 													(visualizationDataItem) => {
 														return (
-															<Grid item xs={12} sm={4} md={4} lg={4} xl={4}>
-																{React.cloneElement(
-																	visComponentDefinition.component,
-																	{
-																		visualizationId: visualizationDataItem.id,
-																	}
-																)}
-															</Grid>
+															<VisualizationCard
+																visualizationDataItem={visualizationDataItem}
+																visComponentDefinition={visComponentDefinition}
+															/>
 														);
 													}
 												);
-											} else {
+											}
+											// use visualization paramters if available
+											else {
 												return (
-													<Grid item xs={12} sm={4} md={4} lg={4} xl={4}>
-														{React.cloneElement(
-															visComponentDefinition.component,
-															{
-																visConfig: visConfig,
-															}
-														)}
-													</Grid>
+													<VisualizationSpecCard
+														visComponentDefinition={visComponentDefinition}
+														visConfigEntry={visConfigEntry}
+													/>
 												);
 											}
 										}
@@ -104,11 +103,10 @@ export const Visualization = (props: previewProps) => {
 													visComponentDefinition.mainType))
 									) {
 										return (
-											<Grid item xs={12} sm={4} md={4} lg={4} xl={4}>
-												{React.cloneElement(visComponentDefinition.component, {
-													fileId: fileId,
-												})}
-											</Grid>
+											<VisualizationRawBytesCard
+												visComponentDefinition={visComponentDefinition}
+												fileId={fileId}
+											/>
 										);
 									}
 									return null;

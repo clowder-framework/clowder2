@@ -1,6 +1,6 @@
 import React, { lazy } from "react";
 
-interface VisComponentDefinitions {
+export interface VisComponentDefinitions {
 	name: string;
 	mainType: string;
 	mimeTypes: string[];
