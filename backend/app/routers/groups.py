@@ -104,7 +104,7 @@ async def edit_group(
     if (group := await GroupDB.get(PydanticObjectId(group_id))) is not None:
         group_dict = dict(group_info) if group_info is not None else {}
 
-        if len(group_dict.name) == 0 or len(group_dict.users) == 0:
+        if len(group_dict["name"]) == 0 or len(group_dict["users"]) == 0:
             raise HTTPException(
                 status_code=400,
                 detail="Group name can't be null or user list can't be empty",
@@ -112,13 +112,52 @@ async def edit_group(
             return
 
         user = await UserDB.find_one(UserDB.email == user_id)
-        group_dict["creator"] = UserOut(**user)
-        group_dict["modified"] = datetime.datetime.utcnow()
-        # TODO: Revisit this. Authorization needs to be updated here.
-        group_dict["users"] = list(set(group_dict["users"]))
+        group_dict["creator"] = user.dict()
+        group_dict["modified"] = datetime.utcnow()
+        groups_users = group_dict["users"]
+        original_users = group.users
+
+        # remove users that are no longer in this group
+        for original_user in original_users:
+            if original_user not in groups_users:
+                # remove them from auth
+                async for auth in AuthorizationDB.find(
+                    {"group_ids": ObjectId(group_id)}
+                ):
+                    auth.user_ids.remove(original_user.user.email)
+                    await auth.replace()
+                    # Update group itself
+                group.users.remove(original_user)
+                await group.replace()
+        # add new users to the group
+        for i in range(0, len(groups_users)):
+            user = groups_users[i]
+            if user in group.users:
+                for original_user in group.users:
+                    if original_user.user.email == user.user.email:
+                        original_editor = original_user.editor
+                        new_editor = user.editor
+                        # replace the user if editor has changed
+                        if not new_editor == original_editor:
+                            group.users.remove(original_user)
+                            group.users.append(user)
+                            await group.replace()
+            else:
+                # if user is not in the group add user
+                group.users.append(user)
+                await group.replace()
+                # Add user to all affected Authorization entries
+                await AuthorizationDB.find(
+                    AuthorizationDB.group_ids == ObjectId(group_id),
+                ).update(
+                    Push({AuthorizationDB.user_ids: user.email}),
+                )
         try:
-            group.update(group_dict)
+            group.name = group_dict["name"]
             await group.replace()
+            if "description" in group_dict:
+                group.description = group_dict["description"]
+                await group.replace()
         except Exception as e:
             raise HTTPException(status_code=500, detail=e.args[0])
         return group.dict()
