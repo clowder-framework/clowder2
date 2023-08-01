@@ -30,7 +30,7 @@ spec:
         - name: extractors-heartbeat
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
-          image: "clowder/clowder2-heartbeat"
+          image: "clowder/clowder2-heartbeat:main"
           imagePullPolicy: Always
           env:
             - name: MONGODB_URL
