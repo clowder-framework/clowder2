@@ -91,6 +91,8 @@ spec:
               value: {{ include "clowder2.name" .  }}-rabbitmq
             - name: HEARTBEAT_EXCHANGE
               value: "extractors"
+            - name: API_HOST
+              value: $(CLOWDER2_URL)
           ports:
             - name: http
               containerPort: 80
