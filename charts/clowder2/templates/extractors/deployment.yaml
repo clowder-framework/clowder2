@@ -43,7 +43,7 @@ spec:
                   name: clowder2-rabbitmq
                   key: rabbitmq-password
             - name: CLOWDER_VERSION
-              value: {{2}}
+              value: "2"
             - name: CLOWDER_URL
               value: http://{{ $.Values.hostname }}
             - name: RABBITMQ_URI
