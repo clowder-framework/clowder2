@@ -37,6 +37,7 @@ import { PageNotFound } from "../errors/PageNotFound";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import { Visualization } from "../visualizations/Visualization";
 import { ErrorModal } from "../errors/ErrorModal";
+import {VersionChip} from "../versions/VersionChip";
 
 export const File = (): JSX.Element => {
 	// path parameter
@@ -67,6 +68,8 @@ export const File = (): JSX.Element => {
 	const getFolderPath = (folderId: string | null) =>
 		dispatch(fetchFolderPath(folderId));
 
+	const file = useSelector((state: RootState) => state.file);
+	const version_num = useSelector( (state: RootState) => state.file.fileSummary.version_num);
 	const fileSummary = useSelector((state: RootState) => state.file.fileSummary);
 	const filePreviews = useSelector((state: RootState) => state.file.previews);
 	const fileVersions = useSelector(
@@ -80,7 +83,7 @@ export const File = (): JSX.Element => {
 		React.useState<boolean>(false);
 	const [metadataRequestForms, setMetadataRequestForms] = useState({});
 	const [allowSubmit, setAllowSubmit] = React.useState<boolean>(false);
-
+	console.log('file', file);
 	// component did mount
 	useEffect(() => {
 		// load file information
@@ -242,6 +245,7 @@ export const File = (): JSX.Element => {
 					>
 						<Typography variant="h4" paragraph>
 							{fileSummary.name}
+							<VersionChip versionNumber={version_num} />
 						</Typography>
 					</Box>
 					<Box>

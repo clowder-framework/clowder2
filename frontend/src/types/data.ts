@@ -199,6 +199,7 @@ export interface FileState {
 	previews: FilePreview[];
 	fileVersions: FileVersion[];
 	fileRole: AuthorizationBase;
+	version_num: number;
 }
 
 export interface UserState {

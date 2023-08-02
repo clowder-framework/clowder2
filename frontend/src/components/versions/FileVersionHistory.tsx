@@ -62,6 +62,19 @@ export function FileVersionHistory(props: FileVersionHistoryProps) {
 									}}
 									variant="contained"
 								>
+									Select
+								</Button>
+								<Button
+									onClick={() => {
+										downloadFile(
+											fileVersion.file_id,
+											filename,
+											version_num,
+											true
+										);
+									}}
+									variant="contained"
+								>
 									Download
 								</Button>
 								{/*TODO implement those actions*/}

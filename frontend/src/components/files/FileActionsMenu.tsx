@@ -64,6 +64,8 @@ export const FileActionsMenu = (props: FileActionsMenuProps): JSX.Element => {
 	const [confirmationOpen, setConfirmationOpen] = useState(false);
 
 	const [updateFileOpen, setUpdateFileOpen] = useState(false);
+
+	const [changeVersion, setChangeVersionOpen] = useState(false);
 	const deleteSelectedFile = () => {
 		if (fileId) {
 			deleteFile(fileId);
@@ -146,6 +148,18 @@ export const FileActionsMenu = (props: FileActionsMenuProps): JSX.Element => {
 								<Upload fontSize="small" />
 							</ListItemIcon>
 							<ListItemText>Update File</ListItemText>
+						</MenuItem>
+												<MenuItem
+							onClick={() => {
+								handleClose();
+								setUpdateFileOpen(true);
+							}}
+						>
+							{" "}
+							<ListItemIcon>
+								<Upload fontSize="small" />
+							</ListItemIcon>
+							<ListItemText>Change Version</ListItemText>
 						</MenuItem>
 						<MenuItem
 							onClick={() => {

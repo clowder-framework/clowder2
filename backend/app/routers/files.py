@@ -316,13 +316,30 @@ async def delete_file(
 @router.get("/{file_id}/summary", response_model=FileOut)
 async def get_file_summary(
     file_id: str,
-    version: Optional[int] = None,
     allow: bool = Depends(FileAuthorization("viewer")),
 ):
     if (file := await FileDB.get(PydanticObjectId(file_id))) is not None:
         # TODO: Incrementing too often (3x per page view)
         # file.views += 1
         # await file.replace()
+        return file.dict()
+    else:
+        raise HTTPException(status_code=404, detail=f"File {file_id} not found")
+
+
+@router.get("/{file_id}/version_details", response_model=FileOut)
+async def get_file_version_details(
+    file_id: str,
+    version_num: Optional[int] = 0,
+    allow: bool = Depends(FileAuthorization("viewer")),
+):
+    if (file := await FileDB.get(PydanticObjectId(file_id))) is not None:
+        # TODO: Incrementing too often (3x per page view)
+        file_vers = await FileVersionDB.find_one(
+            FileVersionDB.file_id == ObjectId(file_id),
+            FileVersionDB.version_num == version_num,
+        )
+        file_vers_details = dict()
         return file.dict()
     else:
         raise HTTPException(status_code=404, detail=f"File {file_id} not found")
