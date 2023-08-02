@@ -339,8 +339,12 @@ async def get_file_version_details(
             FileVersionDB.file_id == ObjectId(file_id),
             FileVersionDB.version_num == version_num,
         )
-        file_vers_details = dict()
-        return file.dict()
+        file_vers_dict = file_vers.dict()
+        file_vers_details = file.copy()
+        file_vers_keys = list(file_vers.keys())
+        for file_vers_key in file_vers_keys:
+            file_vers_details[file_vers_key] = file_vers_dict[file_vers_key]
+        return file_vers_details
     else:
         raise HTTPException(status_code=404, detail=f"File {file_id} not found")
 
