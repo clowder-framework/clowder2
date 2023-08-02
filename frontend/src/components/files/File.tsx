@@ -70,6 +70,8 @@ export const File = (): JSX.Element => {
 
 	const file = useSelector((state: RootState) => state.file);
 	const version_num = useSelector( (state: RootState) => state.file.fileSummary.version_num);
+	const selected_version_num = useSelector( (state: RootState) => state.file.fileSummary.version_num);
+
 	const fileSummary = useSelector((state: RootState) => state.file.fileSummary);
 	const filePreviews = useSelector((state: RootState) => state.file.previews);
 	const fileVersions = useSelector(
