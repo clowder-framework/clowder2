@@ -1,3 +1,4 @@
+from datetime import timedelta
 from typing import List, Optional
 
 from beanie import PydanticObjectId
@@ -141,7 +142,7 @@ async def download_visualization(
 @router.get("/{visualization_id}/url/")
 async def download_visualization_url(
         visualization_id: str,
-        expires: Optional[int] = 3600,
+        expires_in_seconds: Optional[int] = 3600,
         fs: Minio = Depends(dependencies.get_fs)
 ):
     # If visualization exists in MongoDB, download from Minio
@@ -150,8 +151,10 @@ async def download_visualization_url(
                 PydanticObjectId(visualization_id)
             )
     ) is not None:
-        if expires is None:
-            expires = settings.MINIO_EXPIRES
+        if expires_in_seconds is None:
+            expires = timedelta(seconds=settings.MINIO_EXPIRES)
+        else:
+            expires = timedelta(seconds=expires_in_seconds)
 
         # Generate a signed URL with expiration time
         presigned_url = fs.presigned_get_object(
