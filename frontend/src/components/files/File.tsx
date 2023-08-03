@@ -247,7 +247,10 @@ export const File = (): JSX.Element => {
 					>
 						<Typography variant="h4" paragraph>
 							{fileSummary.name}
-							<VersionChip versionNumber={version_num} />
+							<VersionChip versionNumber={version_num}
+										 selectedVersionNumber={selected_version_num}
+										 versionNumbers={fileVersions}
+							/>
 						</Typography>
 					</Box>
 					<Box>

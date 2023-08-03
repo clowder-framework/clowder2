@@ -65,7 +65,6 @@ export const FileActionsMenu = (props: FileActionsMenuProps): JSX.Element => {
 
 	const [updateFileOpen, setUpdateFileOpen] = useState(false);
 
-	const [changeVersion, setChangeVersionOpen] = useState(false);
 	const deleteSelectedFile = () => {
 		if (fileId) {
 			deleteFile(fileId);
