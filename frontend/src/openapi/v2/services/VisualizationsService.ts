@@ -102,6 +102,29 @@ export class VisualizationsService {
     }
 
     /**
+     * Download Visualization Url
+     * @param visualizationId
+     * @param expiresInSeconds
+     * @returns any Successful Response
+     * @throws ApiError
+     */
+    public static downloadVisualizationUrlApiV2VisualizationsVisualizationIdUrlGet(
+        visualizationId: string,
+        expiresInSeconds: number = 3600,
+    ): CancelablePromise<any> {
+        return __request({
+            method: 'GET',
+            path: `/api/v2/visualizations/${visualizationId}/url/`,
+            query: {
+                'expires_in_seconds': expiresInSeconds,
+            },
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+
+    /**
      * Save Visualization Config
      * @param requestBody
      * @returns VisualizationConfigOut Successful Response
