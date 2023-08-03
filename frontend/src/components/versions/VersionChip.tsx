@@ -32,7 +32,7 @@ export function VersionChip(props: VersionChipProps) {
 
 	return (
 		<>
-				 <SelectVersionModal open={changeVersionOpen}
+				 <SelectVersionModal open={changeVersion}
 							 handleClose={handleVersionSelectClose}
 							 selected_version={1}
 							 fileVersions={versionNumbers}
