@@ -26,7 +26,7 @@ type SelectVersionModalProps ={
 	open: boolean;
 	handleClose: any;
 	selected_version: number;
-	fileVersions: any;
+	fileVersions: [];
 }
 
 export const SelectVersionModal: React.FC<SelectVersionModalProps> = (props: SelectVersionModalProps) => {
@@ -36,6 +36,7 @@ export const SelectVersionModal: React.FC<SelectVersionModalProps> = (props: Sel
 	const [selectedVersion, setSelectedVersion] = useState(selected_version);
 	const [showSuccessAlert, setShowSuccessAlert] = useState(false);
 
+	console.log('file versions', fileVersions)
 	const changeVersion = () => {
 		console.log('changing version');
 	}

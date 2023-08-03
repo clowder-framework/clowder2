@@ -23,7 +23,7 @@ export function VersionChip(props: VersionChipProps) {
 		console.log(versionNumber, changeVersion);
 		setOpenChangeVersion(true);
 		console.log(changeVersion)
-		setChangeVersionOpen(true);
+		setOpenChangeVersion(true);
 	}
 
 	const handleVersionSelectClose = () => {
