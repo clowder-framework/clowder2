@@ -44,8 +44,6 @@ export async function generateVisDataDownloadUrl(visualizationId) {
 	}
 }
 
-s;
-
 export async function generateFileDownloadUrl(fileId, fileVersionNum = 0) {
 	let url = `${config.hostname}/api/v2/files/${fileId}`;
 	if (fileVersionNum > 0) url = url + "?version=" + fileVersionNum;
