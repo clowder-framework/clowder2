@@ -31,6 +31,7 @@ class Settings(BaseSettings):
     MINIO_ACCESS_KEY: str = "minioadmin"
     MINIO_SECRET_KEY: str = "minioadmin"
     MINIO_UPLOAD_CHUNK_SIZE: int = 10 * 1024 * 1024
+    MINIO_EXPIRES: int = 3600  # seconds
 
     # keycloak server
     auth_base = "http://localhost:8080"
