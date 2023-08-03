@@ -160,7 +160,7 @@ async def download_visualization_url(
             expires=expires
         )
 
-        return {"presigned_url": presigned_url}
+        return {"url": presigned_url}
     else:
         raise HTTPException(
             status_code=404, detail=f"Visualization {visualization_id} not found"
