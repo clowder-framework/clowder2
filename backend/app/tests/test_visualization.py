@@ -71,7 +71,7 @@ def test_visualization(client: TestClient, headers: dict):
         headers=headers,
     )
     assert response.status_code == 200
-    assert response.json().get("url") is not None
+    assert response.json().get("presigned_url") is not None
 
     # test that you can get the vis data from the viz config id
     response = client.get(

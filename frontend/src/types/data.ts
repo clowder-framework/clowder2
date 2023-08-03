@@ -236,6 +236,7 @@ export interface VisualizationState {
 	visData: VisualizationOut;
 	visConfig: VisualizationConfigOut[];
 	url: string;
+	presigned_url: string;
 	blob: Blob;
 }
 
