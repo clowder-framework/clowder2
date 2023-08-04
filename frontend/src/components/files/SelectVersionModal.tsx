@@ -37,6 +37,7 @@ export const SelectVersionModal: React.FC<SelectVersionModalProps> = (props: Sel
 	const version_num = useSelector( (state: RootState) => state.file.fileSummary.version_num);
 	const all_versions = useSelector( (state: RootState) => state.file.fileVersions);
 	const current_selected_version = useSelector((state: RootState) => state.file.selected_version_num);
+
 	console.log('version num frilm file summary', version_num, selected_version);
 	const [selectedVersion, setSelectedVersion] = useState(selected_version);
 	const [showSuccessAlert, setShowSuccessAlert] = useState(false);
@@ -46,8 +47,10 @@ export const SelectVersionModal: React.FC<SelectVersionModalProps> = (props: Sel
 	console.log('file versions', fileVersions)
 	const changeVersion = () => {
 		console.log('changing version');
+		console.log(current_selected_version);
 		console.log(selectedVersion);
-		current_selected_version = selectedVersion;
+		setSelectedVersion(selectedVersion);
+		console.log(current_selected_version);
 	}
 
 	return (
