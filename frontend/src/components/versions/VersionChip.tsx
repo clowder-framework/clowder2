@@ -16,12 +16,9 @@ export function VersionChip(props: VersionChipProps) {
 
 	const [changeVersion, setOpenChangeVersion] = useState(false);
 
-	const [changeVersionOpen, setChangeVersionOpen] = useState(false);
-
 	const clickChip = () => {
 		console.log('clicked the chip')
 		console.log(versionNumber, changeVersion);
-		setOpenChangeVersion(true);
 		console.log(changeVersion)
 		setOpenChangeVersion(true);
 	}

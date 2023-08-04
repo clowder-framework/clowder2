@@ -57,10 +57,9 @@ export const SelectVersionModal: React.FC<SelectVersionModalProps> = (props: Sel
 				<DialogTitle>Change the Version</DialogTitle>
 				<Divider />
 				<DialogContent>
-					<Typography>Invite people to collaborate</Typography>
-						as
+					<Typography>Select Version</Typography>
 						<FormControl variant="outlined" sx={{ m: 1, minWidth: 120 }}>
-							<InputLabel id="demo-simple-select-label">Status</InputLabel>
+							<InputLabel id="demo-simple-select-label">Version</InputLabel>
 							<Select
 								labelId="demo-simple-select-label"
 								id="demo-simple-select"
@@ -82,7 +81,7 @@ export const SelectVersionModal: React.FC<SelectVersionModalProps> = (props: Sel
 						sx={{ marginTop: 1 }}
 						onClick={changeVersion}
 					>
-						Share
+						Change Version
 					</Button>
 					<Collapse in={showSuccessAlert}>
 						<br />
@@ -102,7 +101,7 @@ export const SelectVersionModal: React.FC<SelectVersionModalProps> = (props: Sel
 							}
 							sx={{ mb: 2 }}
 						>
-							Successfully added role!
+							Successfully changed version!
 						</Alert>
 					</Collapse>
 				</DialogContent>
