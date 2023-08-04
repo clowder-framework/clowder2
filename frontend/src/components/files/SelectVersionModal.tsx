@@ -20,13 +20,14 @@ import fileSchema from "../../schema/fileSchema.json";
 import {FormProps} from "@rjsf/core";
 import CloseIcon from "@mui/icons-material/Close";
 import {useDispatch} from "react-redux";
+import {FileVersion} from "../../openapi/v2";
 
 
 type SelectVersionModalProps ={
 	open: boolean;
 	handleClose: any;
 	selected_version: number;
-	fileVersions: [];
+	fileVersions: FileVersion[];
 }
 
 export const SelectVersionModal: React.FC<SelectVersionModalProps> = (props: SelectVersionModalProps) => {
@@ -39,6 +40,7 @@ export const SelectVersionModal: React.FC<SelectVersionModalProps> = (props: Sel
 	console.log('file versions', fileVersions)
 	const changeVersion = () => {
 		console.log('changing version');
+		console.log(selectedVersion);
 	}
 
 	return (
@@ -70,10 +72,13 @@ export const SelectVersionModal: React.FC<SelectVersionModalProps> = (props: Sel
 									setSelectedVersion(event.target.value);
 								}}
 							>
-								<MenuItem value="owner">Owner</MenuItem>
-								<MenuItem value="editor">Editor</MenuItem>
-								<MenuItem value="uploader">Uploader</MenuItem>
-								<MenuItem value="viewer">Viewer</MenuItem>
+								{fileVersions.map((fileVersion,idx) => {
+									return <MenuItem value={fileVersion.version_num}>{fileVersion.version_num}</MenuItem>
+								})}
+								{/*<MenuItem value="owner">Owner</MenuItem>*/}
+								{/*<MenuItem value="editor">Editor</MenuItem>*/}
+								{/*<MenuItem value="uploader">Uploader</MenuItem>*/}
+								{/*<MenuItem value="viewer">Viewer</MenuItem>*/}
 							</Select>
 						</FormControl>
 					<Button
