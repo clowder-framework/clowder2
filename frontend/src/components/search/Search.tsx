@@ -5,7 +5,6 @@ import {
 	MultiDropdownList,
 	ReactiveComponent,
 	ReactiveList,
-	SingleDropdownRange,
 } from "@appbaseio/reactivesearch";
 import { Grid } from "@mui/material";
 import Layout from "../Layout";
@@ -60,7 +59,6 @@ export function Search() {
 									react={{
 										and: [
 											"creatorfilter",
-											"downloadfilter",
 											"fromfilter",
 											"tofilter",
 											"authFilter",
@@ -116,22 +114,6 @@ export function Search() {
 											innerClass={{
 												select: "filter-select",
 											}}
-										/>
-									</Grid>
-									<Grid item xs={12} sm={4} md={4} lg={4}>
-										<SingleDropdownRange
-											componentId="downloadfilter"
-											dataField="downloads"
-											data={[
-												{ start: 0, label: "Download Times: All" },
-												{ start: 10, label: "10 time and up" },
-												{ start: 100, label: "100 times and up" },
-												{ start: 1000, label: "1000 times and up" },
-											]}
-											innerClass={{
-												select: "filter-select",
-											}}
-											defaultValue={"Download Times: All"}
 										/>
 									</Grid>
 									<Grid item xs={6} sm={2} md={2} lg={2}>
@@ -195,7 +177,6 @@ export function Search() {
 									and: [
 										"searchbox",
 										"creatorfilter",
-										"downloadfilter",
 										"fromfilter",
 										"tofilter",
 										"authFilter",

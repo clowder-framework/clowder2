@@ -120,9 +120,9 @@ async def index_dataset_metadata(
         context_url=metadata.context_url,
         context=metadata.context,
         definition=metadata.definition,
-        name=dataset.name,
-        description=dataset.description,
-        downloads=dataset.downloads,
+        resource_name=dataset.name,
+        resource_downloads=dataset.downloads,
+        ds_description=dataset.description,
         user_ids=authorized_user_ids,
     ).dict()
     if update:
@@ -165,13 +165,13 @@ async def index_file_metadata(
         context_url=metadata.context_url,
         context=metadata.context,
         definition=metadata.definition,
-        name=file.name,
-        content_type=file.content_type.content_type,
-        content_type_main=file.content_type.main_type,
-        dataset_id=str(file.dataset_id),
-        folder_id=str(file.folder_id),
-        bytes=file.bytes,
-        downloads=file.downloads,
+        resource_name=file.name,
+        resource_downloads=file.downloads,
+        file_content_type=file.content_type.content_type,
+        file_content_type_main=file.content_type.main_type,
+        file_dataset_id=str(file.dataset_id),
+        file_folder_id=str(file.folder_id),
+        file_bytes=file.bytes,
         user_ids=authorized_user_ids,
     ).dict()
     if update:
