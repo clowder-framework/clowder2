@@ -175,6 +175,20 @@ export function fileUpdated(formData, fileId) {
 	};
 }
 
+// TODO this method will change the selected file version, should get that version first to make sure it exists
+export const CHANGE_SELECTED_VERSION = "CHANGE_SELECTED_VERSION";
+
+export function changeSelectedVersion(fileId, selectedVersion) {
+	return (dispatch) => {
+		dispatch({
+			type: CHANGE_SELECTED_VERSION,
+			reason: "",
+			stack: "",
+			receivedAt: Date.now(),
+		});
+	};
+}
+
 export const RECEIVE_VERSIONS = "RECEIVE_VERSIONS";
 
 export function fetchFileVersions(fileId) {
