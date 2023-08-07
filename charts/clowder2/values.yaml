@@ -66,6 +66,10 @@ minio:
   # enable webui
   disableWebUI: false
 
+  containerPorts:
+    api: 9000
+    console: 9001
+
   # enable ingress for webui
   ingress:
     enabled: true
