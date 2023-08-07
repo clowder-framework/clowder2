@@ -6,6 +6,7 @@ import {
 	RECEIVE_FILE_SUMMARY,
 	RECEIVE_PREVIEWS,
 	RECEIVE_VERSIONS,
+	CHANGE_SELECTED_VERSION,
 } from "../actions/file";
 import { DataAction } from "../types/action";
 import { FileState } from "../types/data";
@@ -20,6 +21,7 @@ const defaultState: FileState = {
 	fileVersions: [],
 	fileRole: <AuthorizationBase>{},
 	url: "",
+	selected_version_num:1,
 	blob: new Blob([]),
 };
 
@@ -39,6 +41,8 @@ const file = (state = defaultState, action: DataAction) => {
 			});
 		case RECEIVE_PREVIEWS:
 			return Object.assign({}, state, { previews: action.previews });
+		case CHANGE_SELECTED_VERSION:
+			return Object.assign({}, state,{selected_version_num:action.selected_version});
 		case RECEIVE_VERSIONS:
 			return Object.assign({}, state, { fileVersions: action.fileVersions });
 		case DOWNLOAD_FILE:

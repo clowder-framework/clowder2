@@ -20,7 +20,8 @@ import fileSchema from "../../schema/fileSchema.json";
 import {FormProps} from "@rjsf/core";
 import CloseIcon from "@mui/icons-material/Close";
 import {useDispatch, useSelector} from "react-redux";
-import {FileVersion} from "../../openapi/v2";
+import {FileVersion, MetadataIn} from "../../openapi/v2";
+import {changeSelectedVersion} from "../../actions/file";
 
 
 type SelectVersionModalProps ={
@@ -37,6 +38,8 @@ export const SelectVersionModal: React.FC<SelectVersionModalProps> = (props: Sel
 	const version_num = useSelector( (state: RootState) => state.file.fileSummary.version_num);
 	const all_versions = useSelector( (state: RootState) => state.file.fileVersions);
 	const current_selected_version = useSelector((state: RootState) => state.file.selected_version_num);
+	const changeFileVersion = (fileId: string, version:number) => dispatch(changeSelectedVersion(fileId, version));
+
 
 	console.log('version num frilm file summary', version_num, selected_version);
 	const [selectedVersion, setSelectedVersion] = useState(selected_version);
