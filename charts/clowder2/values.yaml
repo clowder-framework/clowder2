@@ -74,7 +74,7 @@ minio:
   # enable ingress for api
   apiIngress:
     enabled: true
-    hostname: minio.clowder2.localhost
+    hostname: minio-api.clowder2.localhost
 
   # enabled distributed mode (or standalone)
 #  mode: distributed
