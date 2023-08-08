@@ -12,9 +12,7 @@ on:
     tags:
       - 'v*'
   pull_request:
-    branches:
-      - 'main'
-      - 'release/*'
+
 
 jobs:
   docker:
