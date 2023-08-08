@@ -395,7 +395,7 @@ export const File = (): JSX.Element => {
 							deleteMetadata={deleteFileMetadata}
 							resourceType="file"
 							resourceId={fileId}
-							version={fileSummary.version_num}
+							version={selectedVersion}
 						/>
 					</TabPanel>
 					<TabPanel value={selectedTabIndex} index={4}>
