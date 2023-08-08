@@ -30,8 +30,15 @@ jobs:
         name: Checkout
         uses: actions/checkout@v2
       -
-        name: Docker meta
-        id: meta
+        name: Login to DockerHub
+#        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_PASSWORD }}
+      -
+        name: Docker meta backend
+        id: backendMeta
         uses: docker/metadata-action@v4
         with:
           images: |
@@ -42,38 +49,53 @@ jobs:
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
       -
-        name: Login to DockerHub
-        if: github.event_name != 'pull_request'
-        uses: docker/login-action@v2
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_PASSWORD }}
-      -
         name: Build and push
         uses: docker/build-push-action@v3
         with:
           context: ./backend
           platforms: linux/amd64,linux/arm64
-          push: ${{ github.event_name != 'pull_request' }}
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
+#          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.backendMeta.outputs.tags }}
+          labels: ${{ steps.backendMeta.outputs.labels }}
 
+      - name: Docker meta heartbeat
+        id: heartbeatMeta
+        uses: docker/metadata-action@v4
+        with:
+          images: |
+            clowder/clowder2-backend
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
       - name: Build and push
         uses: docker/build-push-action@v3
         with:
           context: ./backend
           platforms: linux/amd64,linux/arm64
-          push: ${{ github.event_name != 'pull_request' }}
-          tags: ${{ steps.meta.outputs.tags }}
+#          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.heartbeatMeta.outputs.tags }}
           file: ./backend/heartbeat.Dockerfile
-          labels: ${{ steps.meta.outputs.labels }}
+          labels: ${{ steps.heartbeatMeta.outputs.labels }}
 
+      - name: Docker meta messages
+        id: messagesMeta
+        uses: docker/metadata-action@v4
+        with:
+          images: |
+            clowder/clowder2-backend
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
       - name: Build and push
         uses: docker/build-push-action@v3
         with:
           context: ./backend
           platforms: linux/amd64,linux/arm64
-          push: ${{ github.event_name != 'pull_request' }}
-          tags: ${{ steps.meta.outputs.tags }}
+#          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.messagesMeta.outputs.tags }}
           file: ./backend/messages.Dockerfile
-          labels: ${{ steps.meta.outputs.labels }}
+          labels: ${{ steps.messagesMeta.outputs.labels }}
