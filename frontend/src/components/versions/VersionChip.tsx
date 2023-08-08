@@ -11,20 +11,20 @@ type VersionChipProps = {
 	selectedVersion: number|undefined,
 	setSelectedVersion: any| undefined;
 	versionNumbers: any| undefined;
+	isClickable:boolean|undefined;
 }
 
 export function VersionChip(props: VersionChipProps) {
 
-	const { versionNumber, selectedVersion, setSelectedVersion, versionNumbers } = props;
+	const { versionNumber, selectedVersion, setSelectedVersion, versionNumbers, isClickable } = props;
 
 	const [changeVersion, setOpenChangeVersion] = useState(false);
 	const selectedVersionNumberFromState = useSelector((state: RootState) => state.file.selected_version_num);
 
 	const clickChip = () => {
-		console.log('clicked chip', selectedVersionNumberFromState, 'from state');
-		console.log(versionNumber, changeVersion);
-		console.log(changeVersion)
-		setOpenChangeVersion(true);
+		if (isClickable) {
+			setOpenChangeVersion(true);
+		}
 	}
 
 	const handleVersionSelectClose = () => {
@@ -40,12 +40,10 @@ export function VersionChip(props: VersionChipProps) {
 				 fileVersions={versionNumbers}
 		 	/>
 			<Chip label={`V${selectedVersion ?? ""}`}
-			  clickable={true}
+			  clickable={isClickable}
 			  onClick={clickChip}
 			/>
 		</>
-
-		// TODO can make this a clickable item
-		// <Chip label={`V${versionNumber}`} component="a" href="/" clickable/> : <></>
+		
 	);
 }

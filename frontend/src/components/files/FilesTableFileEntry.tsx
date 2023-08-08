@@ -62,6 +62,7 @@ export function FilesTableFileEntry(props: FilesTableFileEntryProps) {
 									 selectedVersion={file.version_num}
 									 setSelectedVersion={null}
 									 versionNumbers={null}
+									 isClickable={false}
 						/>
 					</TableCell>
 					<TableCell align="right">

@@ -260,6 +260,7 @@ export const File = (): JSX.Element => {
 										 selectedVersion={selectedVersion}
 										 setSelectedVersion={setSelectedVersion}
 										 versionNumbers={fileVersions}
+										 isClickable={true}
 							/>
 						</Typography>
 					</Box>
