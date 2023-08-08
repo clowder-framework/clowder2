@@ -42,8 +42,7 @@ import {VersionChip} from "../versions/VersionChip";
 export const File = (): JSX.Element => {
 	// path parameter
 	const { fileId } = useParams<{ fileId?: string }>();
-	const {verNum} = useParams<{verNum?:string}>();
-	console.log(verNum,'verNum');
+
 
 	// search parameters
 	const [searchParams] = useSearchParams();
@@ -72,7 +71,8 @@ export const File = (): JSX.Element => {
 
 	const file = useSelector((state: RootState) => state.file);
 	const version_num = useSelector( (state: RootState) => state.file.fileSummary.version_num);
-	const selected_version_num = useSelector( (state: RootState) => state.file.selected_version_num);
+	const [selectedVersion, setSelectedVersion] = useState(version_num);
+
 	const fileSummary = useSelector((state: RootState) => state.file.fileSummary);
 	const filePreviews = useSelector((state: RootState) => state.file.previews);
 	const fileVersions = useSelector(
@@ -99,6 +99,15 @@ export const File = (): JSX.Element => {
 			getFolderPath(folderId); // get folder path
 		}
 	}, []);
+
+
+	useEffect( () =>
+		{
+			if (version_num !== undefined && version_num !== null){
+				setSelectedVersion(version_num)
+			}
+		}, [version_num]
+	)
 
 	// Error msg dialog
 	const [errorOpen, setErrorOpen] = useState(false);
@@ -248,7 +257,8 @@ export const File = (): JSX.Element => {
 						<Typography variant="h4" paragraph>
 							{fileSummary.name}
 							<VersionChip versionNumber={version_num}
-										 selectedVersionNumber={selected_version_num}
+										 selectedVersion={selectedVersion}
+										 setSelectedVersion={setSelectedVersion}
 										 versionNumbers={fileVersions}
 							/>
 						</Typography>

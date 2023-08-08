@@ -8,13 +8,14 @@ import {RootState} from "../../types/data";
 
 type VersionChipProps = {
 	versionNumber: number|undefined,
-	selectedVersionNumber: number|undefined,
+	selectedVersion: number|undefined,
+	setSelectedVersion: any;
 	versionNumbers: any;
 }
 
 export function VersionChip(props: VersionChipProps) {
 
-	const { versionNumber, selectedVersionNumber, versionNumbers } = props;
+	const { versionNumber, selectedVersion, setSelectedVersion, versionNumbers } = props;
 
 	const [changeVersion, setOpenChangeVersion] = useState(false);
 	const selectedVersionNumberFromState = useSelector((state: RootState) => state.file.selected_version_num);
@@ -34,10 +35,11 @@ export function VersionChip(props: VersionChipProps) {
 		<>
 			<SelectVersionModal open={changeVersion}
 				 handleClose={handleVersionSelectClose}
-				 selected_version={selectedVersionNumberFromState}
+				 selectedVersion={selectedVersion}
+				 setSelectedVersion={setSelectedVersion}
 				 fileVersions={versionNumbers}
 		 	/>
-			<Chip label={`V${versionNumber ?? ""}`}
+			<Chip label={`V${selectedVersion ?? ""}`}
 			  clickable={true}
 			  onClick={clickChip}
 			/>

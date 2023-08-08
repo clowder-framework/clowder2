@@ -28,36 +28,25 @@ import {useParams} from "react-router-dom";
 type SelectVersionModalProps ={
 	open: boolean;
 	handleClose: any;
-	selected_version: number|undefined;
+	selectedVersion: number|undefined;
+	setSelectedVersion: any;
 	fileVersions: FileVersion[];
 }
 
 export const SelectVersionModal: React.FC<SelectVersionModalProps> = (props: SelectVersionModalProps) => {
 
-	const {open, handleClose, selected_version, fileVersions, options} = props;
+	const {open, handleClose, selectedVersion, setSelectedVersion,fileVersions} = props;
 	const dispatch = useDispatch();
 	const { fileId } = useParams<{ fileId?: string }>();
 
 	const version_num = useSelector( (state: RootState) => state.file.fileSummary.version_num);
 	const all_versions = useSelector( (state: RootState) => state.file.fileVersions);
-	const current_selected_version = useSelector((state: RootState) => state.file.selected_version_num);
-	const changeFileVersion = (fileId: string, version:number) => dispatch(changeSelectedVersion(fileId, version));
+	// const current_selected_version = useSelector((state: RootState) => state.file.selected_version_num);
 
 
-	console.log('version num frilm file summary', version_num, selected_version);
-	const [selectedVersion, setSelectedVersion] = useState(selected_version);
 	const [showSuccessAlert, setShowSuccessAlert] = useState(false);
-	if (current_selected_version === undefined) {
-		console.log('current selected version is undefined');
-	}
-	console.log('file versions', fileVersions)
 	const changeVersion = () => {
-		console.log('changing version');
-		console.log(current_selected_version);
-		console.log(selectedVersion);
 		setSelectedVersion(selectedVersion);
-		console.log(current_selected_version);
-		changeSelectedVersion(fileId, selectedVersion)
 	}
 
 	return (
