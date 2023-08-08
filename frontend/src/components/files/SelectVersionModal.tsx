@@ -22,12 +22,13 @@ import CloseIcon from "@mui/icons-material/Close";
 import {useDispatch, useSelector} from "react-redux";
 import {FileVersion, MetadataIn} from "../../openapi/v2";
 import {changeSelectedVersion} from "../../actions/file";
+import {useParams} from "react-router-dom";
 
 
 type SelectVersionModalProps ={
 	open: boolean;
 	handleClose: any;
-	selected_version: number;
+	selected_version: number|undefined;
 	fileVersions: FileVersion[];
 }
 
@@ -35,6 +36,8 @@ export const SelectVersionModal: React.FC<SelectVersionModalProps> = (props: Sel
 
 	const {open, handleClose, selected_version, fileVersions, options} = props;
 	const dispatch = useDispatch();
+	const { fileId } = useParams<{ fileId?: string }>();
+
 	const version_num = useSelector( (state: RootState) => state.file.fileSummary.version_num);
 	const all_versions = useSelector( (state: RootState) => state.file.fileVersions);
 	const current_selected_version = useSelector((state: RootState) => state.file.selected_version_num);
@@ -54,6 +57,7 @@ export const SelectVersionModal: React.FC<SelectVersionModalProps> = (props: Sel
 		console.log(selectedVersion);
 		setSelectedVersion(selectedVersion);
 		console.log(current_selected_version);
+		changeSelectedVersion(fileId, selectedVersion)
 	}
 
 	return (

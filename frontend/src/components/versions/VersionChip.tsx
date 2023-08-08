@@ -2,6 +2,8 @@ import React, {useState} from "react";
 import {Chip} from "@mui/material";
 import {SelectVersionModal} from "../files/SelectVersionModal";
 import ShareDatasetModal from "../datasets/ShareDatasetModal";
+import {useSelector} from "react-redux";
+import {RootState} from "../../types/data";
 
 
 type VersionChipProps = {
@@ -15,9 +17,10 @@ export function VersionChip(props: VersionChipProps) {
 	const { versionNumber, selectedVersionNumber, versionNumbers } = props;
 
 	const [changeVersion, setOpenChangeVersion] = useState(false);
+	const selectedVersionNumberFromState = useSelector((state: RootState) => state.file.selected_version_num);
 
 	const clickChip = () => {
-		console.log('clicked the chip')
+		console.log('clicked chip', selectedVersionNumberFromState, 'from state');
 		console.log(versionNumber, changeVersion);
 		console.log(changeVersion)
 		setOpenChangeVersion(true);
@@ -29,10 +32,10 @@ export function VersionChip(props: VersionChipProps) {
 
 	return (
 		<>
-				 <SelectVersionModal open={changeVersion}
-							 handleClose={handleVersionSelectClose}
-							 selected_version={1}
-							 fileVersions={versionNumbers}
+			<SelectVersionModal open={changeVersion}
+				 handleClose={handleVersionSelectClose}
+				 selected_version={selectedVersionNumberFromState}
+				 fileVersions={versionNumbers}
 		 	/>
 			<Chip label={`V${versionNumber ?? ""}`}
 			  clickable={true}

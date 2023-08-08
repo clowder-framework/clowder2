@@ -42,6 +42,8 @@ import {VersionChip} from "../versions/VersionChip";
 export const File = (): JSX.Element => {
 	// path parameter
 	const { fileId } = useParams<{ fileId?: string }>();
+	const {verNum} = useParams<{verNum?:string}>();
+	console.log(verNum,'verNum');
 
 	// search parameters
 	const [searchParams] = useSearchParams();
