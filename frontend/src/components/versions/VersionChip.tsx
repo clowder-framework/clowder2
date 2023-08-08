@@ -44,6 +44,6 @@ export function VersionChip(props: VersionChipProps) {
 			  onClick={clickChip}
 			/>
 		</>
-		
+
 	);
 }
