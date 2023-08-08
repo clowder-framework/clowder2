@@ -9,8 +9,8 @@ import {RootState} from "../../types/data";
 type VersionChipProps = {
 	versionNumber: number|undefined,
 	selectedVersion: number|undefined,
-	setSelectedVersion: any;
-	versionNumbers: any;
+	setSelectedVersion: any| undefined;
+	versionNumbers: any| undefined;
 }
 
 export function VersionChip(props: VersionChipProps) {

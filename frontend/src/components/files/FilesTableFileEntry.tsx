@@ -58,7 +58,11 @@ export function FilesTableFileEntry(props: FilesTableFileEntryProps) {
 							<InsertDriveFileIcon sx={iconStyle} />
 						)}
 						<Button onClick={() => selectFile(file.id)}>{file.name}</Button>
-						<VersionChip versionNumber={file.version_num} />
+						<VersionChip versionNumber={file.version_num}
+									 selectedVersion={file.version_num}
+									 setSelectedVersion={null}
+									 versionNumbers={null}
+						/>
 					</TableCell>
 					<TableCell align="right">
 						{parseDate(file.created)} by {file.creator.first_name}{" "}
