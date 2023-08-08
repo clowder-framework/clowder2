@@ -27,6 +27,7 @@ class Settings(BaseSettings):
 
     # Minio (file storage) information
     MINIO_SERVER_URL: str = "localhost:9000"
+    MINIO_EXTERNAL_SERVER_URL: str = "localhost:9000"
     MINIO_BUCKET_NAME: str = "clowder"
     MINIO_ACCESS_KEY: str = "minioadmin"
     MINIO_SECRET_KEY: str = "minioadmin"
