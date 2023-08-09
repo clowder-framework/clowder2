@@ -38,36 +38,29 @@ export function FileHistory(props: FileHistoryAboutProps) {
 		fileVersions,
 	} = props;
 
-	fileVersions.map((fileVersion, idx) => {
-		if (fileVersion.version_num == current_version){
-			console.log('we have the current version num');
-			console.log(fileVersion);
-			// TODO set everything in here
-		}
-	});
+
 
 	const details = new Map<string, string>();
+	console.log('current verison is', current_version)
 	const file = useSelector((state: RootState) => state.file);
-	console.log('in fileHistory the file is', file);
-	if (bytes !== undefined) {
-			details.set("Size", prettyBytes(bytes));
-
-	}
-	if (fileSummary !== undefined){
-		details.set("Content type", `${content_type.content_type}`);
-	}
-	details.set("Updated on", parseDate(created));
-	if (name !== undefined) {
-		details.set("Uploaded as", name);
-	}
-	details.set("Uploaded by", `${creator.first_name} ${creator.last_name}`);
-	if (id !== undefined) {
-		details.set("File id", id);
-
-	}
-	if (downloads !== undefined) {
-		details.set("Downloads", `${downloads}`);
-	}
+		fileVersions.map((fileVersion, idx) => {
+		console.log(fileVersion.version_num, 'this version');
+		if (fileVersion.version_num == current_version){
+			console.log("matching vesion num")
+			if (fileVersion.bytes !== undefined){
+				details.set("Size", prettyBytes(fileVersion.bytes));
+			}
+			if (content_type.content_type != null) {
+				details.set("Content type", content_type.content_type);
+			}
+			details.set("Updated on", parseDate(fileVersion.created));
+			details.set("Uploaded as", name);
+			details.set("Uploaded by", `${fileVersion.creator.first_name} ${fileVersion.creator.last_name}`);
+			details.set("File id", id);
+			// TODO this should be previous downloads
+			details.set("Downloads", `${downloads}`);
+		}
+	});
 
 	return (
 		<Box sx={{ mt: 5 }}>

@@ -79,6 +79,8 @@ export const File = (): JSX.Element => {
 	const fileVersions = useSelector(
 		(state: RootState) => state.file.fileVersions
 	);
+	console.log(fileVersions, 'fileVersions');
+	const [selectedFileVersionDetails, setSelectedFileVersionDetails] = useState(fileVersions[0]);
 	const fileRole = useSelector((state: RootState) => state.file.fileRole);
 
 	const [selectedTabIndex, setSelectedTabIndex] = useState(0);
@@ -109,6 +111,8 @@ export const File = (): JSX.Element => {
 			}
 		}, [version_num]
 	)
+
+	// TODO change the selected file version here with a useEffect
 
 	// Error msg dialog
 	const [errorOpen, setErrorOpen] = useState(false);
