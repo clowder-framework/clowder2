@@ -87,7 +87,7 @@ jobs:
         with:
           context: ./backend
           platforms: linux/amd64,linux/arm64
-#          push: ${{ github.event_name != 'pull_request' }}
+          push: ${{ true }}
           tags: ${{ steps.backendMeta.outputs.tags }}
           labels: ${{ steps.backendMeta.outputs.labels }}
 
@@ -97,7 +97,7 @@ jobs:
         with:
           context: ./backend
           platforms: linux/amd64,linux/arm64
-#          push: ${{ github.event_name != 'pull_request' }}
+          push: ${{ true }}
           tags: ${{ steps.heartbeatMeta.outputs.tags }}
           file: ./backend/heartbeat.Dockerfile
           labels: ${{ steps.heartbeatMeta.outputs.labels }}
@@ -108,7 +108,7 @@ jobs:
         with:
           context: ./backend
           platforms: linux/amd64,linux/arm64
-#          push: ${{ github.event_name != 'pull_request' }}
+          push: ${{ true }}
           tags: ${{ steps.messagesMeta.outputs.tags }}
           file: ./backend/messages.Dockerfile
           labels: ${{ steps.messagesMeta.outputs.labels }}
