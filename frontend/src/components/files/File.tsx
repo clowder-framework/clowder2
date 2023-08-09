@@ -113,15 +113,16 @@ export const File = (): JSX.Element => {
 
 	useEffect( () =>
 		{
-			if (version_num !== undefined && version_num !== null){
+			if (version_num !== undefined && version_num !== null
+				&& fileVersions !== undefined && fileVersions !== null
+			&& fileVersions.length > 0) {
 				fileVersions.map((fileVersion, idx) => {
 					if (fileVersion.version_num == version_num){
-						console.log('setting selected version details', fileVersion);
 						setSelectedFileVersionDetails(fileVersion);
 					}
 				})
 			}
-		}, [selectedFileVersionDetails]
+		}, [version_num]
 	)
 
 	// Error msg dialog
