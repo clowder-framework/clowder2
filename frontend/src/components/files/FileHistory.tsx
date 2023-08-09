@@ -1,7 +1,7 @@
 import React from "react";
 import { Box, Typography } from "@mui/material";
 import { parseDate } from "../../utils/common";
-import {ContentType, FileOut, UserOut} from "../../openapi/v2";
+import {ContentType, FileOut, FileVersion, UserOut} from "../../openapi/v2";
 import prettyBytes from "pretty-bytes";
 import { StackedList } from "../util/StackedList";
 import {useSelector} from "react-redux";
@@ -19,6 +19,7 @@ type FileHistoryAboutProps = {
 	downloads:number;
 	current_version:number|undefined;
 	fileSummary:FileOut;
+	fileVersions:FileVersion[]
 };
 
 export function FileHistory(props: FileHistoryAboutProps) {
@@ -34,7 +35,16 @@ export function FileHistory(props: FileHistoryAboutProps) {
 		downloads,
 		current_version,
 		fileSummary,
+		fileVersions,
 	} = props;
+
+	fileVersions.map((fileVersion, idx) => {
+		if (fileVersion.version_num == current_version){
+			console.log('we have the current version num');
+			console.log(fileVersion);
+			// TODO set everything in here
+		}
+	});
 
 	const details = new Map<string, string>();
 	const file = useSelector((state: RootState) => state.file);
@@ -56,7 +66,7 @@ export function FileHistory(props: FileHistoryAboutProps) {
 
 	}
 	if (downloads !== undefined) {
-		details.set("Downloads", "downloads goes here");
+		details.set("Downloads", `${downloads}`);
 	}
 
 	return (

@@ -425,6 +425,7 @@ export const File = (): JSX.Element => {
 								downloads={file.fileSummary.downloads}
 								current_version={version_num}
 								fileSummary={file.fileSummary}
+								fileVersions={fileVersions}
 							/>
 						)}
 					</Grid>
