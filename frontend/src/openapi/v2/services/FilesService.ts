@@ -75,19 +75,37 @@ export class FilesService {
     /**
      * Get File Summary
      * @param fileId
-     * @param version
      * @returns FileOut Successful Response
      * @throws ApiError
      */
     public static getFileSummaryApiV2FilesFileIdSummaryGet(
         fileId: string,
-        version?: number,
     ): CancelablePromise<FileOut> {
         return __request({
             method: 'GET',
             path: `/api/v2/files/${fileId}/summary`,
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+
+    /**
+     * Get File Version Details
+     * @param fileId
+     * @param versionNum
+     * @returns FileOut Successful Response
+     * @throws ApiError
+     */
+    public static getFileVersionDetailsApiV2FilesFileIdVersionDetailsGet(
+        fileId: string,
+        versionNum?: number,
+    ): CancelablePromise<FileOut> {
+        return __request({
+            method: 'GET',
+            path: `/api/v2/files/${fileId}/version_details`,
             query: {
-                'version': version,
+                'version_num': versionNum,
             },
             errors: {
                 422: `Validation Error`,
