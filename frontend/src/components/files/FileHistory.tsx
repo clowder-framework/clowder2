@@ -58,13 +58,11 @@ export function FileHistory(props: FileHistoryAboutProps) {
 
 	const details = new Map<string, string>();
 	if (currentSelectedFileVersion !== null && currentSelectedFileVersion !== undefined) {
-		console.log('verison num is', current_version);
-		console.log('it is finally defined', currentSelectedFileVersion);
 		details.set("Size", prettyBytes(currentSelectedFileVersion.bytes));
-		details.set("Content type", content_type.content_type);
-		details.set("Updated on", parseDate(created));
+		details.set("Content type", currentSelectedFileVersion.content_type);
+		details.set("Updated on", parseDate(currentSelectedFileVersion.created));
 		details.set("Uploaded as", name);
-		details.set("Uploaded by", `${creator.first_name} ${creator.last_name}`);
+		details.set("Uploaded by", `${currentSelectedFileVersion.creator.first_name} ${currentSelectedFileVersion.creator.last_name}`);
 		details.set("File id", id);
 		details.set("Downloads", downloads);
 	}
