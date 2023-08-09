@@ -19,7 +19,6 @@ type FileHistoryAboutProps = {
 	downloads:number;
 	current_version:number|undefined;
 	fileSummary:FileOut;
-	selectedFileVersion:FileVersion
 };
 
 export function FileHistory(props: FileHistoryAboutProps) {
@@ -35,14 +34,33 @@ export function FileHistory(props: FileHistoryAboutProps) {
 		downloads,
 		current_version,
 		fileSummary,
-		selectedFileVersion,
 	} = props;
 
-	console.log('the selected file version is', selectedFileVersion);
+	const fileVersions = useSelector(
+		(state: RootState) => state.file.fileVersions
+	);
+	const [currentSelectedFileVersion, setCurrentSelectedFileVersion] = useState(fileVersions[0]);
+
+	useEffect( () =>
+		{
+			if (current_version !== undefined && current_version !== null
+				&& fileVersions !== undefined && fileVersions !== null
+			&& fileVersions.length > 0) {
+				fileVersions.map((fileVersion: FileVersion, idx: number) => {
+					if (fileVersion.version_num == current_version){
+						setCurrentSelectedFileVersion(fileVersion);
+					}
+				})
+			}
+		}, [current_version]
+	)
+
+
 	const details = new Map<string, string>();
-	if (selectedFileVersion !== null && selectedFileVersion !== undefined) {
-		console.log('it is finally defined');
-		details.set("Size", prettyBytes(selectedFileVersion.bytes));
+	if (currentSelectedFileVersion !== null && currentSelectedFileVersion !== undefined) {
+		console.log('verison num is', current_version);
+		console.log('it is finally defined', currentSelectedFileVersion);
+		details.set("Size", prettyBytes(currentSelectedFileVersion.bytes));
 		details.set("Content type", content_type.content_type);
 		details.set("Updated on", parseDate(created));
 		details.set("Uploaded as", name);

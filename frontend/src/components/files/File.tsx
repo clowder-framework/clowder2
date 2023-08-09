@@ -438,9 +438,8 @@ export const File = (): JSX.Element => {
 								content_type={file.fileSummary.content_type}
 								views={file.fileSummary.views}
 								downloads={file.fileSummary.downloads}
-								current_version={version_num}
+								current_version={selectedVersion}
 								fileSummary={file.fileSummary}
-								selectedFileVersion={selectedFileVersionDetails}
 							/>
 						)}
 					</Grid>
