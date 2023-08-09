@@ -413,7 +413,19 @@ export const File = (): JSX.Element => {
 					</Grid>
         		: 	<Grid item xs={2}>
 					{Object.keys(fileSummary).length > 0 && (
-							<FileHistory fileSummary={fileSummary} />
+							<FileHistory
+								id={fileId}
+								created={file.fileSummary.created}
+								name={file.fileSummary.name}
+								creator={file.fileSummary.creator}
+								version_id={file.fileSummary.version_id}
+								bytes={file.fileSummary.bytes}
+								content_type={file.fileSummary.content_type}
+								views={file.fileSummary.views}
+								downloads={file.fileSummary.downloads}
+								current_version={version_num}
+								fileSummary={file.fileSummary}
+							/>
 						)}
 					</Grid>
       			}

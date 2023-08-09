@@ -1,12 +1,24 @@
 import React from "react";
 import { Box, Typography } from "@mui/material";
 import { parseDate } from "../../utils/common";
-import { FileOut } from "../../openapi/v2";
+import {ContentType, FileOut, UserOut} from "../../openapi/v2";
 import prettyBytes from "pretty-bytes";
 import { StackedList } from "../util/StackedList";
+import {useSelector} from "react-redux";
+import {RootState} from "../../types/data";
 
 type FileHistoryAboutProps = {
-	fileSummary: FileOut;
+	id: string;
+	created:any;
+	name:string;
+	creator:UserOut;
+	version_id:string;
+	bytes:number;
+	content_type:ContentType;
+	views:number;
+	downloads:number;
+	current_version:number|undefined;
+	fileSummary:FileOut;
 };
 
 export function FileHistory(props: FileHistoryAboutProps) {
@@ -20,16 +32,32 @@ export function FileHistory(props: FileHistoryAboutProps) {
 		content_type,
 		views,
 		downloads,
-	} = props.fileSummary;
+		current_version,
+		fileSummary,
+	} = props;
 
 	const details = new Map<string, string>();
-	details.set("Size", prettyBytes(bytes));
-	details.set("Content type", content_type.content_type);
+	const file = useSelector((state: RootState) => state.file);
+	console.log('in fileHistory the file is', file);
+	if (bytes !== undefined) {
+			details.set("Size", prettyBytes(bytes));
+
+	}
+	if (fileSummary !== undefined){
+		details.set("Content type", `${content_type.content_type}`);
+	}
 	details.set("Updated on", parseDate(created));
-	details.set("Uploaded as", name);
+	if (name !== undefined) {
+		details.set("Uploaded as", name);
+	}
 	details.set("Uploaded by", `${creator.first_name} ${creator.last_name}`);
-	details.set("File id", id);
-	details.set("Downloads", downloads);
+	if (id !== undefined) {
+		details.set("File id", id);
+
+	}
+	if (downloads !== undefined) {
+		details.set("Downloads", "downloads goes here");
+	}
 
 	return (
 		<Box sx={{ mt: 5 }}>
