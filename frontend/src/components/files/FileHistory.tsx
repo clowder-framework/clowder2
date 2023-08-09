@@ -39,15 +39,18 @@ export function FileHistory(props: FileHistoryAboutProps) {
 	} = props;
 
 	console.log('the selected file version is', selectedFileVersion);
-
 	const details = new Map<string, string>();
-	details.set("Size", prettyBytes(bytes));
-	details.set("Content type", content_type.content_type);
-	details.set("Updated on", parseDate(created));
-	details.set("Uploaded as", name);
-	details.set("Uploaded by", `${creator.first_name} ${creator.last_name}`);
-	details.set("File id", id);
-	details.set("Downloads", downloads);
+	if (selectedFileVersion !== null && selectedFileVersion !== undefined) {
+		console.log('it is finally defined');
+		details.set("Size", prettyBytes(selectedFileVersion.bytes));
+		details.set("Content type", content_type.content_type);
+		details.set("Updated on", parseDate(created));
+		details.set("Uploaded as", name);
+		details.set("Uploaded by", `${creator.first_name} ${creator.last_name}`);
+		details.set("File id", id);
+		details.set("Downloads", downloads);
+	}
+
 
 	return (
 		<Box sx={{ mt: 5 }}>
