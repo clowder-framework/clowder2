@@ -73,13 +73,12 @@ export const File = (): JSX.Element => {
 	const file = useSelector((state: RootState) => state.file);
 	const version_num = useSelector( (state: RootState) => state.file.fileSummary.version_num);
 	const [selectedVersion, setSelectedVersion] = useState(version_num);
-
 	const fileSummary = useSelector((state: RootState) => state.file.fileSummary);
 	const filePreviews = useSelector((state: RootState) => state.file.previews);
 	const fileVersions = useSelector(
 		(state: RootState) => state.file.fileVersions
 	);
-	console.log(fileVersions, 'fileVersions');
+	console.log(fileVersions[0], 'the fisrt');
 	const [selectedFileVersionDetails, setSelectedFileVersionDetails] = useState(fileVersions[0]);
 	const fileRole = useSelector((state: RootState) => state.file.fileRole);
 
@@ -112,7 +111,18 @@ export const File = (): JSX.Element => {
 		}, [version_num]
 	)
 
-	// TODO change the selected file version here with a useEffect
+	useEffect( () =>
+		{
+			if (version_num !== undefined && version_num !== null){
+				fileVersions.map((fileVersion, idx) => {
+					if (fileVersion.version_num == version_num){
+						console.log('setting selected version details', fileVersion);
+						setSelectedFileVersionDetails(fileVersion);
+					}
+				})
+			}
+		}, [selectedFileVersionDetails]
+	)
 
 	// Error msg dialog
 	const [errorOpen, setErrorOpen] = useState(false);
@@ -429,7 +439,7 @@ export const File = (): JSX.Element => {
 								downloads={file.fileSummary.downloads}
 								current_version={version_num}
 								fileSummary={file.fileSummary}
-								fileVersions={fileVersions}
+								selectedFileVersion={selectedFileVersionDetails}
 							/>
 						)}
 					</Grid>

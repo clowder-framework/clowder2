@@ -1,4 +1,4 @@
-import React from "react";
+import React, {useEffect, useState} from "react";
 import { Box, Typography } from "@mui/material";
 import { parseDate } from "../../utils/common";
 import {ContentType, FileOut, FileVersion, UserOut} from "../../openapi/v2";
@@ -19,7 +19,7 @@ type FileHistoryAboutProps = {
 	downloads:number;
 	current_version:number|undefined;
 	fileSummary:FileOut;
-	fileVersions:FileVersion[]
+	selectedFileVersion:FileVersion
 };
 
 export function FileHistory(props: FileHistoryAboutProps) {
@@ -35,32 +35,19 @@ export function FileHistory(props: FileHistoryAboutProps) {
 		downloads,
 		current_version,
 		fileSummary,
-		fileVersions,
+		selectedFileVersion,
 	} = props;
 
-
+	console.log('the selected file version is', selectedFileVersion);
 
 	const details = new Map<string, string>();
-	console.log('current verison is', current_version)
-	const file = useSelector((state: RootState) => state.file);
-		fileVersions.map((fileVersion, idx) => {
-		console.log(fileVersion.version_num, 'this version');
-		if (fileVersion.version_num == current_version){
-			console.log("matching vesion num")
-			if (fileVersion.bytes !== undefined){
-				details.set("Size", prettyBytes(fileVersion.bytes));
-			}
-			if (content_type.content_type != null) {
-				details.set("Content type", content_type.content_type);
-			}
-			details.set("Updated on", parseDate(fileVersion.created));
-			details.set("Uploaded as", name);
-			details.set("Uploaded by", `${fileVersion.creator.first_name} ${fileVersion.creator.last_name}`);
-			details.set("File id", id);
-			// TODO this should be previous downloads
-			details.set("Downloads", `${downloads}`);
-		}
-	});
+	details.set("Size", prettyBytes(bytes));
+	details.set("Content type", content_type.content_type);
+	details.set("Updated on", parseDate(created));
+	details.set("Uploaded as", name);
+	details.set("Uploaded by", `${creator.first_name} ${creator.last_name}`);
+	details.set("File id", id);
+	details.set("Downloads", downloads);
 
 	return (
 		<Box sx={{ mt: 5 }}>
