@@ -168,15 +168,16 @@ extractors:
 #    # env:
 #    #   - name: extractor.bump.sh
 #    #     value: "bar"
-
-  wordcount-v2:
-    image: cwang138/extractors-wordcount-v2:beta
-
-  image-preview-v2:
-    image: cwang138/image-preview-v2:beta
-    env:
-      - name: IMAGE_BINARY
-        value: /usr/bin/convert
+  wordcount:
+    image: ghcr.io/clowder-framework/extractors-wordcount:pr-78
+  image-preview:
+    image: ghcr.io/clowder-framework/extractors-image-preview:pr-35
+  image-metadata:
+    image: ghcr.io/clowder-framework/extractors-image-metadata:pr-35
+  audio-preview:
+    image: ghcr.io/clowder-framework/extractors-audio-preview:pr-35
+  file-digest:
+    image: ghcr.io/clowder-framework/extractors-digest:PR-35
 
 #  geotiff-preview-v2:
 #    image: maxzilla2/extractors-geotiff-preview:latest
