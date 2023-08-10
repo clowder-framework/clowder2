@@ -190,10 +190,10 @@ export const Dataset = (): JSX.Element => {
 				{/*title*/}
 				<Grid item xs={8} sx={{ display: "flex", alignItems: "center" }}>
 					<Stack>
-						<Box>
-							<MainBreadcrumbs paths={paths}>
-							</MainBreadcrumbs>
-						</Box>
+						{/*<Box>*/}
+						{/*	<MainBreadcrumbs paths={paths}>*/}
+						{/*	</MainBreadcrumbs>*/}
+						{/*</Box>*/}
 						<Box
 							sx={{
 								display: "inline-flex",
