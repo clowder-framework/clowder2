@@ -209,6 +209,8 @@ export const File = (): JSX.Element => {
 		paths.slice(0, 1);
 	}
 
+	// add file name to breadcrumb
+
 	if (showForbiddenPage) {
 		return <Forbidden />;
 	} else if (showNotFoundPage) {

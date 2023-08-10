@@ -17,6 +17,7 @@ import { MetadataIn } from "../../openapi/v2";
 import { DisplayMetadata } from "../metadata/DisplayMetadata";
 import { DisplayListenerMetadata } from "../metadata/DisplayListenerMetadata";
 import { EditMetadata } from "../metadata/EditMetadata";
+import {MainBreadcrumbs} from "../navigation/BreadCrumb";
 import {
 	deleteDatasetMetadata as deleteDatasetMetadataAction,
 	fetchDatasetMetadata,
@@ -189,6 +190,10 @@ export const Dataset = (): JSX.Element => {
 				{/*title*/}
 				<Grid item xs={8} sx={{ display: "flex", alignItems: "center" }}>
 					<Stack>
+						<Box>
+							<MainBreadcrumbs paths={paths}>
+							</MainBreadcrumbs>
+						</Box>
 						<Box
 							sx={{
 								display: "inline-flex",
