@@ -40,7 +40,11 @@ export function FileVersionHistory(props: FileVersionHistoryProps) {
 						return (
 							<ListItem key={version_num}>
 								<ListItemAvatar>
-									<VersionChip versionNumber={version_num} />
+									<VersionChip versionNumber={version_num}
+												 selectedVersion={version_num}
+												 setSelectedVersion={""}
+												 versionNumbers={fileVersions}
+												 isClickable={false}/>
 								</ListItemAvatar>
 								<ListItemText
 									primary={`Uploaded by ${
