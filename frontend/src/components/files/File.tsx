@@ -222,9 +222,6 @@ export const File = (): JSX.Element => {
 			{/*Error Message dialogue*/}
 			<ErrorModal errorOpen={errorOpen} setErrorOpen={setErrorOpen} />
 			<Grid container>
-				<Grid item xs={8} sx={{ display: "flex", alignItems: "center" }}>
-					<MainBreadcrumbs paths={paths} />
-				</Grid>
 				<Grid item xs={4}>
 					<FileActionsMenu
 						filename={fileSummary.name}
@@ -310,6 +307,7 @@ export const File = (): JSX.Element => {
 							disabled={false}
 						/>
 					</Tabs>
+					<MainBreadcrumbs paths={paths} />
 					<TabPanel value={selectedTabIndex} index={0}>
 						<Visualization fileId={fileId} />
 					</TabPanel>
