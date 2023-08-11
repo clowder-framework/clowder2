@@ -90,7 +90,7 @@ export const SelectVersionModal: React.FC<SelectVersionModalProps> = (props: Sel
 					<Button
 						variant="contained"
 						sx={{ marginTop: 1 }}
-						onClick={changeVersion}
+						onClick={handleClose}
 					>
 						Change Version
 					</Button>
@@ -116,9 +116,9 @@ export const SelectVersionModal: React.FC<SelectVersionModalProps> = (props: Sel
 						</Alert>
 					</Collapse>
 				</DialogContent>
-				<DialogActions>
-					<Button onClick={handleClose}>Close</Button>
-				</DialogActions>
+				{/*<DialogActions>*/}
+				{/*	<Button onClick={handleClose}>Close</Button>*/}
+				{/*</DialogActions>*/}
 			</Dialog>
 		</Container>
 	);
