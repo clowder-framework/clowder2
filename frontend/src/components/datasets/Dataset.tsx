@@ -50,7 +50,7 @@ export const Dataset = (): JSX.Element => {
 	// search parameters
 	const [searchParams] = useSearchParams();
 	const folderId = searchParams.get("folder");
-
+	console.log('folder id is', folderId);
 	// Redux connect equivalent
 	const dispatch = useDispatch();
 	const updateDatasetMetadata = (
@@ -190,10 +190,6 @@ export const Dataset = (): JSX.Element => {
 				{/*title*/}
 				<Grid item xs={8} sx={{ display: "flex", alignItems: "center" }}>
 					<Stack>
-						{/*<Box>*/}
-						{/*	<MainBreadcrumbs paths={paths}>*/}
-						{/*	</MainBreadcrumbs>*/}
-						{/*</Box>*/}
 						<Box
 							sx={{
 								display: "inline-flex",
@@ -285,6 +281,13 @@ export const Dataset = (): JSX.Element => {
 							disabled={false}
 						/>
 					</Tabs>
+					{folderId !== null ?
+							<Box>
+								<MainBreadcrumbs paths={paths}>
+								</MainBreadcrumbs>
+							</Box> :
+							<></>
+					}
 					<TabPanel value={selectedTabIndex} index={0}>
 						<FilesTable datasetId={datasetId} folderId={folderId} />
 					</TabPanel>
