@@ -39,9 +39,11 @@ export function VersionChip(props: VersionChipProps) {
 				 setSelectedVersion={setSelectedVersion}
 				 fileVersions={versionNumbers}
 		 	/>
-			<Chip label={`V${selectedVersion ?? ""}`}
-			  clickable={isClickable}
-			  onClick={clickChip}
+			<Chip 
+				title={"Change Version"}
+				label={`V${selectedVersion ?? ""}`}
+			  	clickable={isClickable}
+			  	onClick={clickChip}
 			/>
 		</>
 
