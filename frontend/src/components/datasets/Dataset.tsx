@@ -50,7 +50,6 @@ export const Dataset = (): JSX.Element => {
 	// search parameters
 	const [searchParams] = useSearchParams();
 	const folderId = searchParams.get("folder");
-	console.log('folder id is', folderId);
 	// Redux connect equivalent
 	const dispatch = useDispatch();
 	const updateDatasetMetadata = (
@@ -282,7 +281,7 @@ export const Dataset = (): JSX.Element => {
 						/>
 					</Tabs>
 					{folderId !== null ?
-							<Box>
+							<Box style={{padding: "24px 24px 0 24px"}}>
 								<MainBreadcrumbs paths={paths}>
 								</MainBreadcrumbs>
 							</Box> :
