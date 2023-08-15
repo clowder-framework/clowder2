@@ -45,7 +45,8 @@ spec:
             - name: CLOWDER_VERSION
               value: "2"
             - name: CLOWDER_URL
-              value: http://{{ $.Values.hostname }}
+#              value: http://{{ $.Values.hostname }}
+              value: {{ $fullname }}-backend:{{ $.Values.backend.service.port }}
             - name: RABBITMQ_URI
               value: amqp://$(RABBITMQ_USER):$(RABBITMQ_PASS)@$(RABBITMQ_HOST):5672/%2F
 
