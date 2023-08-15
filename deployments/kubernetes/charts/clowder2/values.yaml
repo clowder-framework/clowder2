@@ -169,15 +169,15 @@ extractors:
 #    #   - name: extractor.bump.sh
 #    #     value: "bar"
   wordcount:
-    image: ghcr.io/clowder-framework/extractors-wordcount:pr-78
+    image: clowder/extractors-wordcount:latest
   image-preview:
-    image: ghcr.io/clowder-framework/extractors-image-preview:pr-35
+    image: clowder/extractors-image-preview:latest
   image-metadata:
-    image: ghcr.io/clowder-framework/extractors-image-metadata:pr-35
+    image: clowder/extractors-image-metadata:latest
   audio-preview:
-    image: ghcr.io/clowder-framework/extractors-audio-preview:pr-35
+    image: clowder/extractors-audio-preview:latest
   file-digest:
-    image: ghcr.io/clowder-framework/extractors-digest:PR-35
+    image: clowder/extractors-digest:latest
 
 #  geotiff-preview-v2:
 #    image: maxzilla2/extractors-geotiff-preview:latest
