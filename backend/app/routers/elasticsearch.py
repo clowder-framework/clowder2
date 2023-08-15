@@ -28,8 +28,9 @@ def _add_permissions_clause(query, user: UserOut):
 
 
 @router.put("/search", response_model=str)
-async def search(index_name: str, query: str):
+async def search(index_name: str, query: str, user=Depends(get_current_user)):
     es = await connect_elasticsearch()
+    query = _add_permissions_clause(query, user)
     return search_index(es, index_name, query)
 
 
