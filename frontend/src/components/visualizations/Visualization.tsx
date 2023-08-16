@@ -98,7 +98,7 @@ export const Visualization = (props: previewProps) => {
 											visComponentDefinition.mimeTypes.includes(
 												fileSummary.content_type.content_type
 											)) ||
-											(fileSummary.content_type.main_type !== undefined &&
+											(fileSummary.content_type.content_type === undefined) && (fileSummary.content_type.main_type !== undefined &&
 												fileSummary.content_type.main_type ===
 													visComponentDefinition.mainType))
 									) {
