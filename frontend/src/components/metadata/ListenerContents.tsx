@@ -7,7 +7,14 @@ type ListenerContentEntry = {
 
 export const ListenerContents = (props: ListenerContentEntry) => {
 	const { content } = props;
-
-	// return <div><pre>{JSON.stringify(content, null, 2)}</pre></div>
-	return <ReactJson src={content} />;
+	// @ts-ignore
+	return (
+		<ReactJson
+			src={content}
+			theme="summerfruit:inverted"
+			displayObjectSize={false}
+			displayDataTypes={false}
+			name={false}
+		/>
+	);
 };
