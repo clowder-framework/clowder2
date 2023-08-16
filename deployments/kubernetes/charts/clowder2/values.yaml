@@ -29,8 +29,7 @@ serviceAccount:
 # ----------------------------------------------------------------------
 frontend:
   image:
-#    repository: clowder/clowder2-frontend
-    repository: cwang138/clowder2-frontend
+    repository: clowder/clowder2-frontend
     pullPolicy: IfNotPresent
     # Overrides the image tag whose default is the chart appVersion.
     tag: ""
@@ -44,8 +43,7 @@ frontend:
 # ----------------------------------------------------------------------
 backend:
   image:
-#    repository: clowder/clowder2-backend
-    repository: cwang138/clowder2-backend
+    repository: clowder/clowder2-backend
     pullPolicy: IfNotPresent
     # Overrides the image tag whose default is the chart appVersion.
     tag: ""
