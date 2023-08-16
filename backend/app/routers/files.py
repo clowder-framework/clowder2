@@ -92,7 +92,6 @@ async def add_file_entry(
     fs: Minio,
     es: Elasticsearch,
     rabbitmq_client: BlockingChannel,
-    token: str,
     file: Optional[io.BytesIO] = None,
     content_type: Optional[str] = None,
 ):
@@ -146,7 +145,7 @@ async def add_file_entry(
 
     # Submit file job to any qualifying feeds
     await check_feed_listeners(
-        es, FileOut(**new_file.dict()), user, rabbitmq_client, token
+        es, FileOut(**new_file.dict()), user, rabbitmq_client,
     )
 
 
