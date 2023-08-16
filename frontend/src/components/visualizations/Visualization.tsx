@@ -72,15 +72,21 @@ export const Visualization = (props: previewProps) => {
 														);
 													}
 												);
-											}
-											// use visualization paramters if available
-											else {
-												return (
-													<VisualizationSpecCard
-														visComponentDefinition={visComponentDefinition}
-														visConfigEntry={visConfigEntry}
-													/>
-												);
+											} else {
+												// use visualization parameters if available
+												if (Object.keys(visConfigEntry.parameters).length > 0) {
+													return (
+														<VisualizationSpecCard
+															visComponentDefinition={visComponentDefinition}
+															visConfigEntry={visConfigEntry}
+														/>
+													);
+												} else {
+													console.log(
+														"No visualization data or parameters available. " +
+															"Incomplete visualization configuration."
+													);
+												}
 											}
 										}
 									});
