@@ -307,7 +307,9 @@ export const File = (): JSX.Element => {
 							disabled={false}
 						/>
 					</Tabs>
-					<MainBreadcrumbs paths={paths} />
+					<Box style={{ padding: "24px 24px 0 24px" }}>
+						<MainBreadcrumbs paths={paths} />
+					</Box>
 					<TabPanel value={selectedTabIndex} index={0}>
 						<Visualization fileId={fileId} />
 					</TabPanel>

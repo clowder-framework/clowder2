@@ -73,3 +73,6 @@ venv.bak/
 backend/app/tests/*
 !backend/app/tests/*.py
 !backend/app/tests/extractor_info.json
+
+*.tgz
+*clowder2-software-dev.yaml
