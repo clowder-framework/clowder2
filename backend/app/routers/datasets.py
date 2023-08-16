@@ -461,7 +461,7 @@ async def delete_folder(
 async def save_file(
     dataset_id: str,
     folder_id: Optional[str] = None,
-    user=Depends(get_user),
+    user=Depends(get_current_user),
     fs: Minio = Depends(dependencies.get_fs),
     file: UploadFile = File(...),
     es=Depends(dependencies.get_elasticsearchclient),
