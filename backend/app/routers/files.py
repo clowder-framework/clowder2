@@ -36,7 +36,6 @@ from app.search.connect import (
     delete_document_by_id,
     insert_record,
     update_record,
-    delete_document_by_query,
 )
 from app.search.index import index_file
 
@@ -163,8 +162,7 @@ async def remove_file_entry(
         return
     fs.remove_object(settings.MINIO_BUCKET_NAME, str(file_id))
     # delete from elasticsearch
-    delete_document_by_id(es, "file", str(file_id))
-    delete_document_by_query(es, "metadata", {"match": {"resource_id": str(file_id)}})
+    delete_document_by_id(es, "clowder", str(file_id))
     if (file := await FileDB.get(PydanticObjectId(file_id))) is not None:
         await file.delete()
     await MetadataDB.find(MetadataDB.resource.resource_id == ObjectId(file_id)).delete()

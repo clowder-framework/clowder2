@@ -105,7 +105,7 @@ function buildMetadataResult(item) {
 					}
 					sx={{ fontWeight: "bold", fontSize: "18px" }}
 				>
-					{parseString(item.resource_name)}
+					{parseString(item.resource_name)} (metadata)
 				</MuiLink>
 				<Typography variant="body2" color={theme.palette.secondary.light}>
 					Created by {parseString(item.creator)} at {parseDate(item.created)}
@@ -133,11 +133,9 @@ export function SearchResult(props) {
 		>
 			{data.map((item) => (
 				<ListItem alignItems="flex-start" key={item._id}>
-					{item._index === "dataset"
+					{item.resource_type === "dataset"
 						? buildDatasetResult(item)
-						: item._index === "file"
-						? buildFileResult(item)
-						: buildMetadataResult(item)}
+						: buildFileResult(item)}
 				</ListItem>
 			))}
 		</List>

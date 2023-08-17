@@ -30,49 +30,19 @@ class ElasticsearchEntry(BaseModel):
     """These Entries are used to generate the JSON for files/datasets/etc. that go into Elasticsearch index.
     user_ids is a list of email addresses that have permission to view the document."""
 
+    resource_type: str
     creator: str
     created: datetime
     modified: Optional[datetime] = None
     user_ids: List[str] = []
-
-
-class ESFileEntry(ElasticsearchEntry):
-    """See file_mappings in search/config.py to change how ES indexes the fields."""
-
     name: str
-    content_type: str
-    content_type_main: str
-    dataset_id: str
-    folder_id: str
-    bytes: int
+    description: Optional[str]
     downloads: int
-
-
-class ESDatasetEntry(ElasticsearchEntry):
-    """See dataset_mappings in search/config.py to change how ES indexes the fields."""
-
-    name: str
-    description: str
-    downloads: int
-
-
-class ESMetadataEntry(ElasticsearchEntry):
-    """See metadata_mappings in search/config.py to change how ES indexes the fields."""
-
-    resource_id: str
-    resource_type: str = "file"
-    resource_created: datetime
-    resource_creator: str
-    content: dict
-    context_url: Optional[str] = None
-    context: Optional[List[dict]] = []
-    definition: Optional[str] = None
-    # Display fields (for rendering in UI, but NOT intended to be searched to avoid duplicate results)
-    resource_name: Optional[str] = None
-    resource_downloads: Optional[int] = None
-    file_content_type: Optional[str] = None
-    file_content_type_main: Optional[str] = None
-    file_dataset_id: Optional[str] = None
-    file_folder_id: Optional[str] = None
-    file_bytes: Optional[int] = None
-    ds_description: Optional[str] = None
+    # file-specific fields
+    content_type: Optional[str]
+    content_type_main: Optional[str]
+    dataset_id: Optional[str]
+    folder_id: Optional[str]
+    bytes: Optional[int]
+    # metadata fields
+    metadata: Optional[List[dict]] = []

@@ -49,13 +49,13 @@ export function Search() {
 						{luceneOn ? (
 							// string search
 							<DataSearch
-								title="String Search for Datasets and Files"
+								title="String Search for Datasets, Files and Metadata"
 								placeholder="Please use Lucene Syntax string query.
 									E.g.name:water~2 AND download:[0 TO 40} AND creator:myersrobert@scott-gutierrez.com"
 								componentId="string-searchbox"
 								autosuggest={false}
-								highlight={false}
-								queryFormat="or"
+								highlight={true}
+								queryFormat="and"
 								fuzziness={0}
 								debounce={100}
 								showFilter={false}
@@ -77,7 +77,7 @@ export function Search() {
 									componentId="searchbox"
 									autosuggest={true}
 									highlight={true}
-									queryFormat="or"
+									queryFormat="and"
 									fuzziness={0}
 									debounce={100}
 									react={{

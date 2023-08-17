@@ -25,7 +25,7 @@ from app.models.metadata import (
     MetadataDefinitionDB,
 )
 from app.search.connect import delete_document_by_id
-from app.search.index import index_dataset_metadata
+from app.search.index import index_dataset
 
 router = APIRouter()
 
@@ -118,7 +118,7 @@ async def add_dataset_metadata(
         await md.insert()
 
         # Add an entry to the metadata index
-        await index_dataset_metadata(es, dataset, MetadataOut(**md.dict()))
+        await index_dataset(es, dataset)
         return md.dict()
 
 
@@ -170,9 +170,7 @@ async def replace_dataset_metadata(
             await md.replace()
 
             # Update entry to the metadata index
-            await index_dataset_metadata(
-                es, dataset, MetadataOut(**md.dict()), update=True
-            )
+            await index_dataset(es, dataset, update=True)
             return md.dict()
     else:
         raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
@@ -238,9 +236,7 @@ async def update_dataset_metadata(
 
         md = await MetadataDB.find_one(*query)
         if md is not None:
-            await index_dataset_metadata(
-                es, dataset, MetadataOut(**md.dict()), update=True
-            )
+            await index_dataset(es, dataset, update=True)
             return await patch_metadata(md, content, es)
         else:
             raise HTTPException(
@@ -327,7 +323,7 @@ async def delete_dataset_metadata(
             query.append(MetadataDB.agent.creator.id == agent.creator.id)
 
         # delete from elasticsearch
-        delete_document_by_id(es, "metadata", str(metadata_in.metadata_id))
+        delete_document_by_id(es, "clowder", str(metadata_in.metadata_id))
 
         md = await MetadataDB.find_one(*query)
         if md is not None:
