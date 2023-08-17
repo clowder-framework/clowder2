@@ -145,7 +145,10 @@ async def add_file_entry(
 
     # Submit file job to any qualifying feeds
     await check_feed_listeners(
-        es, FileOut(**new_file.dict()), user, rabbitmq_client,
+        es,
+        FileOut(**new_file.dict()),
+        user,
+        rabbitmq_client,
     )
 
 
