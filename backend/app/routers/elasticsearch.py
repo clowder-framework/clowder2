@@ -11,6 +11,7 @@ router = APIRouter()
 
 def _add_permissions_clause(query, username: str):
     """Append filter to Elasticsearch object that restricts permissions based on the requesting user."""
+    # TODO: Add public filter once added
     user_clause = {
         "bool": {
             "should": [

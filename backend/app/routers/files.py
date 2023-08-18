@@ -103,11 +103,6 @@ async def add_file_entry(
         file: bytes to upload
     """
 
-    # Check all connection and abort if any one of them is not available
-    if fs is None or es is None:
-        raise HTTPException(status_code=503, detail="Service not available")
-        return
-
     await new_file.insert()
     new_file_id = new_file.id
     content_type_obj = get_content_type(content_type, file)
@@ -119,6 +114,7 @@ async def add_file_entry(
         file,
         length=-1,
         part_size=settings.MINIO_UPLOAD_CHUNK_SIZE,
+        content_type=new_file.content_type.content_type,
     )  # async write chunk to minio
     version_id = response.version_id
     bytes = len(fs.get_object(settings.MINIO_BUCKET_NAME, str(new_file_id)).data)
@@ -203,6 +199,7 @@ async def update_file(
             file.file,
             length=-1,
             part_size=settings.MINIO_UPLOAD_CHUNK_SIZE,
+            content_type=updated_file.content_type.content_type,
         )  # async write chunk to minio
         version_id = response.version_id
 
@@ -405,7 +402,7 @@ async def resubmit_file_extractions(
 
 
 @router.patch("/{file_id}/thumbnail/{thumbnail_id}", response_model=FileOut)
-async def add_dataset_thumbnail(
+async def add_file_thumbnail(
     file_id: str,
     thumbnail_id: str,
     allow: bool = Depends(FileAuthorization("editor")),
