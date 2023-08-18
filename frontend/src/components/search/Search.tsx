@@ -10,11 +10,8 @@ import { FormControlLabel, Grid, Switch, Typography } from "@mui/material";
 import Layout from "../Layout";
 import { SearchResult } from "./SearchResult";
 import { theme } from "../../theme";
-import { getCurrEmail } from "../../utils/common";
 
 export function Search() {
-	const email = getCurrEmail();
-
 	const [luceneOn, setLuceneOn] = useState(false);
 
 	// @ts-ignore
@@ -91,7 +88,7 @@ export function Search() {
 									// apply react to the filter
 									URLParams={true}
 									showFilter={true}
-									showClear={false}
+									showClear={true}
 									renderNoSuggestion="No suggestions found."
 									dataField={["name", "description", "creator.keyword"]}
 									fieldWeights={[3, 2, 1]}
@@ -198,7 +195,9 @@ export function Search() {
 										"tofilter",
 									],
 								}}
-								render={({ data }) => <SearchResult data={data} />}
+								render={({ data }) => {
+									return <SearchResult data={data} />;
+								}}
 							/>
 						)}
 					</Grid>

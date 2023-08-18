@@ -3,7 +3,7 @@ import json
 from fastapi import Depends
 from fastapi.routing import APIRouter, Request
 
-from app.keycloak_auth import get_optional_username
+from app.keycloak_auth import get_current_username
 from app.search.connect import connect_elasticsearch, search_index
 
 router = APIRouter()
@@ -11,8 +11,6 @@ router = APIRouter()
 
 def _add_permissions_clause(query, username: str):
     """Append filter to Elasticsearch object that restricts permissions based on the requesting user."""
-    query_param = json.loads(query.decode().split("\n")[0])
-    json_query = json.loads(query.decode().split("\n")[1])["query"]
     user_clause = {
         "bool": {
             "should": [
@@ -21,32 +19,35 @@ def _add_permissions_clause(query, username: str):
             ]
         }
     }
-    if json_query == {"match_all": {}}:
-        # Disallow a blank search, return no results if no query given.
-        json_query = {"match_none": {}}
-    json_query = {"query": {"bool": {"must": [user_clause, json_query]}}}
-    query = f"{json.dumps(query_param)}\n{json.dumps(json_query)}\n".encode()
-    return query
+
+    updated_query = ""
+    for content in query.decode().split("\n"):
+        # Query can have multiple clauses separated by \n for things like aggregates, reactivesearch GUI queries
+        if len(content) == 0:
+            continue  # last line
+        json_content = json.loads(content)
+        if "query" in json_content:
+            json_content["query"] = {
+                "bool": {"must": [user_clause, json_content["query"]]}
+            }
+        updated_query += json.dumps(json_content) + "\n"
+    return updated_query.encode()
 
 
 @router.put("/search", response_model=str)
-async def search(index_name: str, query: str, username=Depends(get_optional_username)):
+async def search(index_name: str, query: str, username=Depends(get_current_username)):
     es = await connect_elasticsearch()
-    if username:
-        query = _add_permissions_clause(query, username)
+    query = _add_permissions_clause(query, username)
     return search_index(es, index_name, query)
 
 
 @router.post("/all/_msearch")
 async def msearch(
     request: Request,
-    username=Depends(get_optional_username),
+    username=Depends(get_current_username),
 ):
     es = await connect_elasticsearch()
     query = await request.body()
-    if username:
-        query = _add_permissions_clause(query, username)
-        r = search_index(es, ["clowder"], query)
-        return r
-    else:
-        return {}
+    query = _add_permissions_clause(query, username)
+    r = search_index(es, ["clowder"], query)
+    return r

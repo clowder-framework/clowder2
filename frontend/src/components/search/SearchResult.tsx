@@ -89,55 +89,28 @@ function buildFileResult(item) {
 	);
 }
 
-function buildMetadataResult(item) {
-	return (
-		<>
-			<ListItemAvatar sx={{ color: theme.palette.primary.main }}>
-				<ArticleIcon />
-			</ListItemAvatar>
-			<Box sx={{ marginTop: "5px" }}>
-				<MuiLink
-					component={Link}
-					to={
-						item.resource_type === "dataset"
-							? `/datasets/${item.resource_id}`
-							: `/files/${item.resource_id}?dataset=${item.file_dataset_id}`
-					}
-					sx={{ fontWeight: "bold", fontSize: "18px" }}
-				>
-					{parseString(item.resource_name)} (metadata)
-				</MuiLink>
-				<Typography variant="body2" color={theme.palette.secondary.light}>
-					Created by {parseString(item.creator)} at {parseDate(item.created)}
-				</Typography>
-				<Typography variant="body2" color={theme.palette.secondary.dark}>
-					{item.resource_type === "dataset"
-						? parseString(item.ds_description)
-						: `${item.file_content_type} | ${item.file_bytes} bytes`}
-				</Typography>
-			</Box>
-		</>
-	);
-}
-
 export function SearchResult(props) {
 	const { data } = props;
 
-	return (
-		<List
-			sx={{
-				width: "100%",
-				padding: "2% 5%",
-				bgcolor: theme.palette.primary.contrastText,
-			}}
-		>
-			{data.map((item) => (
-				<ListItem alignItems="flex-start" key={item._id}>
-					{item.resource_type === "dataset"
-						? buildDatasetResult(item)
-						: buildFileResult(item)}
-				</ListItem>
-			))}
-		</List>
-	);
+	if (data.length > 0) {
+		return (
+			<List
+				sx={{
+					width: "100%",
+					padding: "2% 5%",
+					bgcolor: theme.palette.primary.contrastText,
+				}}
+			>
+				{data.map((item) => (
+					<ListItem alignItems="flex-start" key={item._id}>
+						{item.resource_type === "dataset"
+							? buildDatasetResult(item)
+							: buildFileResult(item)}
+					</ListItem>
+				))}
+			</List>
+		);
+	} else {
+		return <></>;
+	}
 }
