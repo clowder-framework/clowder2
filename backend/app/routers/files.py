@@ -110,7 +110,7 @@ async def add_file_entry(
 
     await new_file.insert()
     new_file_id = new_file.id
-    content_type_obj = get_content_type(content_type, file)
+    content_type_obj = get_content_type(new_file.name, content_type)
 
     # Use unique ID as key for Minio and get initial version ID
     response = fs.put_object(
