@@ -23,7 +23,7 @@ type EditNameModalProps = {
 	handleClose: any;
 	groupOwner: string;
 	groupName: string;
-	groupDescription: string;
+	groupDescription: string | undefined;
 	groupId: string | undefined;
 };
 
