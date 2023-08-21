@@ -371,7 +371,6 @@ async def post_file_extract(
             parameters,
             user,
             rabbitmq_client,
-            access_token,
         )
     else:
         raise HTTPException(status_code=404, detail=f"File {file_id} not found")
