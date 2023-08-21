@@ -6,6 +6,7 @@ import {
 	GET_VIS_CONFIG,
 	GET_VIS_DATA,
 	GET_VIS_DATA_PRESIGNED_URL,
+	RESET_VIS_DATA_PRESIGNED_URL,
 } from "../actions/visualization";
 
 const defaultState: VisualizationState = {
@@ -25,6 +26,8 @@ const visualization = (state = defaultState, action: DataAction) => {
 			return Object.assign({}, state, { blob: action.blob });
 		case GET_VIS_DATA_PRESIGNED_URL:
 			return Object.assign({}, state, { presignedUrl: action.presignedUrl });
+		case RESET_VIS_DATA_PRESIGNED_URL:
+			return Object.assign({}, state, { presignedUrl: "" });
 		default:
 			return state;
 	}

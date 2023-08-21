@@ -273,6 +273,11 @@ interface RECEIVE_FILE_PRESIGNED_URL {
 	presignedUrl: string;
 }
 
+interface RESET_FILE_PRESIGNED_URL {
+	type: "RESET_FILE_PRESIGNED_URL";
+	preSignedUrl: string;
+}
+
 interface DELETE_DATASET_METADATA {
 	type: "DELETE_DATASET_METADATA";
 	metadata: Metadata;
@@ -413,6 +418,11 @@ interface GET_VIS_DATA_PRESIGNED_URL {
 	presignedUrl: string;
 }
 
+interface RESET_VIS_DATA_PRESIGNED_URL {
+	type: "RESET_VIS_DATA_PRESIGNED_URL";
+	preSignedUrl: string;
+}
+
 export type DataAction =
 	| RECEIVE_FILES_IN_DATASET
 	| RECEIVE_FOLDERS_IN_DATASET
@@ -460,6 +470,7 @@ export type DataAction =
 	| DELETE_FILE_METADATA
 	| DOWNLOAD_FILE
 	| RECEIVE_FILE_PRESIGNED_URL
+	| RESET_FILE_PRESIGNED_URL
 	| FOLDER_DELETED
 	| GET_FOLDER_PATH
 	| RECEIVE_LISTENERS
@@ -487,4 +498,5 @@ export type DataAction =
 	| GET_VIS_DATA
 	| GET_VIS_CONFIG
 	| DOWNLOAD_VIS_DATA
-	| GET_VIS_DATA_PRESIGNED_URL;
+	| GET_VIS_DATA_PRESIGNED_URL
+	| RESET_VIS_DATA_PRESIGNED_URL;

@@ -15,6 +15,7 @@ type PresignedUrlShareProps = {
 	presignedUrl: string;
 	presignedUrlShareModalOpen: boolean;
 	setPresignedUrlShareModalOpen: any;
+	setPresignedUrlShareModalClose: any;
 };
 
 export const PresignedUrlShareModal = (props: PresignedUrlShareProps) => {
@@ -22,6 +23,7 @@ export const PresignedUrlShareModal = (props: PresignedUrlShareProps) => {
 		presignedUrl,
 		presignedUrlShareModalOpen,
 		setPresignedUrlShareModalOpen,
+		setPresignedUrlShareModalClose,
 	} = props;
 
 	return (
@@ -46,9 +48,7 @@ export const PresignedUrlShareModal = (props: PresignedUrlShareProps) => {
 				<CopyToClipboard text={presignedUrl}>
 					<Button variant={"contained"}>Copy</Button>
 				</CopyToClipboard>
-				<Button onClick={() => setPresignedUrlShareModalOpen(false)}>
-					Close
-				</Button>
+				<Button onClick={setPresignedUrlShareModalClose}>Close</Button>
 			</DialogActions>
 		</Dialog>
 	);

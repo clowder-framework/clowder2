@@ -94,6 +94,7 @@ export function downloadVisData(
 }
 
 export const GET_VIS_DATA_PRESIGNED_URL = "GET_VIS_DATA_PRESIGNED_URL";
+export const RESET_VIS_DATA_PRESIGNED_URL = "RESET_VIS_DATA_PRESIGNED_URL";
 
 export function generateVisPresignedUrl(
 	visualizationId,

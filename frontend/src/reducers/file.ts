@@ -6,6 +6,7 @@ import {
 	RECEIVE_FILE_SUMMARY,
 	RECEIVE_PREVIEWS,
 	RECEIVE_VERSIONS,
+	RESET_FILE_PRESIGNED_URL,
 } from "../actions/file";
 import { DataAction } from "../types/action";
 import { FileState } from "../types/data";
@@ -46,6 +47,8 @@ const file = (state = defaultState, action: DataAction) => {
 			return Object.assign({}, state, { blob: action.blob });
 		case RECEIVE_FILE_PRESIGNED_URL:
 			return Object.assign({}, state, { presignedUrl: action.presignedUrl });
+		case RESET_FILE_PRESIGNED_URL:
+			return Object.assign({}, state, { presignedUrl: "" });
 		default:
 			return state;
 	}

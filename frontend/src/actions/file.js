@@ -249,6 +249,7 @@ export function fileDownloaded(
 }
 
 export const RECEIVE_FILE_PRESIGNED_URL = "RECEIVE_FILE_PRESIGNED_URL";
+export const RESET_FILE_PRESIGNED_URL = "RESET_FILE_PRESIGNED_URL";
 
 export function generateFilePresignedUrl(
 	fileId,

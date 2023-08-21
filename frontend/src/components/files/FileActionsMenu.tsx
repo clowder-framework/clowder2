@@ -8,11 +8,12 @@ import {
 	MenuItem,
 	Stack,
 } from "@mui/material";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import {
 	fileDeleted,
 	fileDownloaded as fileDownloadedAction,
 	generateFilePresignedUrl as generateFilePresignedUrlAction,
+	RESET_FILE_PRESIGNED_URL,
 } from "../../actions/file";
 import { useDispatch, useSelector } from "react-redux";
 import { Download, MoreHoriz, Upload } from "@mui/icons-material";
@@ -65,12 +66,6 @@ export const FileActionsMenu = (props: FileActionsMenuProps): JSX.Element => {
 		(state: RootState) => state.file.presignedUrl
 	);
 
-	useEffect(() => {
-		if (fileShareModalOpen) {
-			generateFilePresignedUrl(fileId, null, 3600);
-		}
-	}, [fileShareModalOpen]);
-
 	const deleteFile = (fileId: string | undefined) =>
 		dispatch(fileDeleted(fileId));
 	const downloadFile = (
@@ -94,6 +89,14 @@ export const FileActionsMenu = (props: FileActionsMenuProps): JSX.Element => {
 
 		// Redirect back to main dataset page
 		history(`/datasets/${datasetId}`);
+	};
+	const handleShareLinkClick = () => {
+		generateFilePresignedUrl(fileId, null, 3600);
+		setFileShareModalOpen(true);
+	};
+	const setFileShareModalClose = () => {
+		setFileShareModalOpen(false);
+		dispatch({ type: RESET_FILE_PRESIGNED_URL });
 	};
 
 	return (
@@ -128,6 +131,7 @@ export const FileActionsMenu = (props: FileActionsMenuProps): JSX.Element => {
 				presignedUrl={presignedUrl}
 				presignedUrlShareModalOpen={fileShareModalOpen}
 				setPresignedUrlShareModalOpen={setFileShareModalOpen}
+				setPresignedUrlShareModalClose={setFileShareModalClose}
 			/>
 			<Button
 				variant="contained"
@@ -141,9 +145,7 @@ export const FileActionsMenu = (props: FileActionsMenuProps): JSX.Element => {
 			</Button>
 			<Button
 				variant="outlined"
-				onClick={() => {
-					setFileShareModalOpen(true);
-				}}
+				onClick={handleShareLinkClick}
 				endIcon={<SendIcon />}
 			>
 				Link

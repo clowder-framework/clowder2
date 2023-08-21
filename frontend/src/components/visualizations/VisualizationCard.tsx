@@ -6,7 +6,10 @@ import { VisualizationDataOut } from "../../openapi/v2";
 import { VisComponentDefinitions } from "../../visualization.config";
 import { PresignedUrlShareModal } from "../sharing/PresignedUrlShareModal";
 import { useDispatch, useSelector } from "react-redux";
-import { generateVisPresignedUrl as generateVisPresignedUrlAction } from "../../actions/visualization";
+import {
+	generateVisPresignedUrl as generateVisPresignedUrlAction,
+	RESET_VIS_DATA_PRESIGNED_URL,
+} from "../../actions/visualization";
 import { RootState } from "../../types/data";
 
 type previewProps = {
@@ -36,6 +39,15 @@ export const VisualizationCard = (props: previewProps) => {
 		setExpanded(!expanded);
 	};
 
+	const handleShareLinkClick = () => {
+		generateVisPresignedUrl(visualizationDataItem.id);
+		setVisShareModalOpen(true);
+	};
+	const setVisShareModalClose = () => {
+		setVisShareModalOpen(false);
+		dispatch({ type: RESET_VIS_DATA_PRESIGNED_URL });
+	};
+
 	return (
 		<Grid item xs={12} sm={4} md={4} lg={4} xl={4}>
 			<Card>
@@ -43,6 +55,7 @@ export const VisualizationCard = (props: previewProps) => {
 					presignedUrl={presignedUrl}
 					presignedUrlShareModalOpen={visShareModalOpen}
 					setPresignedUrlShareModalOpen={setVisShareModalOpen}
+					setPresignedUrlShareModalClose={setVisShareModalClose}
 				/>
 				<Collapse in={!expanded} timeout="auto" unmountOnExit>
 					<CardContent>
@@ -61,11 +74,8 @@ export const VisualizationCard = (props: previewProps) => {
 							View
 						</Button>
 					)}
-					<Button
-						onClick={() => setVisShareModalOpen(true)}
-						sx={{ marginLeft: "auto" }}
-					>
-						Share
+					<Button onClick={handleShareLinkClick} sx={{ marginLeft: "auto" }}>
+						Share Link
 					</Button>
 				</CardActions>
 				<Collapse in={expanded} timeout="auto" unmountOnExit>
