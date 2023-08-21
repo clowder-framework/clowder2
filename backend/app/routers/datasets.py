@@ -458,7 +458,6 @@ async def save_file(
                     status_code=404, detail=f"Folder {folder_id} not found"
                 )
 
-        # access_token = credentials.credentials
         await add_file_entry(
             new_file,
             user,
@@ -709,14 +708,12 @@ async def get_dataset_extract(
     # parameters don't have a fixed model shape
     parameters: dict = None,
     user=Depends(get_current_user),
-    credentials: HTTPAuthorizationCredentials = Security(security),
     rabbitmq_client: BlockingChannel = Depends(dependencies.get_rabbitmq),
     allow: bool = Depends(Authorization("uploader")),
 ):
     if extractorName is None:
         raise HTTPException(status_code=400, detail=f"No extractorName specified")
     if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
-        access_token = credentials.credentials
         queue = extractorName
         routing_key = queue
         return await submit_dataset_job(
@@ -724,7 +721,6 @@ async def get_dataset_extract(
             routing_key,
             parameters,
             user,
-            access_token,
             rabbitmq_client,
         )
     else:
