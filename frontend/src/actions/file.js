@@ -252,8 +252,8 @@ export const RECEIVE_FILE_PRESIGNED_URL = "RECEIVE_FILE_PRESIGNED_URL";
 
 export function generateFilePresignedUrl(
 	fileId,
-	fileVersionNum = 0,
-	expiresInSeconds = 3600
+	fileVersionNum = null,
+	expiresInSeconds = null
 ) {
 	return async (dispatch) => {
 		return V2.FilesService.downloadFileUrlApiV2FilesFileIdUrlGet(

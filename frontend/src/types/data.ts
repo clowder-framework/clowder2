@@ -235,7 +235,7 @@ export interface JobSummary {
 export interface VisualizationState {
 	visData: VisualizationDataOut;
 	visConfig: VisualizationConfigOut[];
-	presigned_url: string;
+	presignedUrl: string;
 	blob: Blob;
 }
 

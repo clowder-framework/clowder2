@@ -11,19 +11,23 @@ import { CopyToClipboard } from "react-copy-to-clipboard";
 
 import React from "react";
 
-type VisualizationShareProps = {
+type PresignedUrlShareProps = {
 	presignedUrl: string;
-	visShareModalOpen: boolean;
-	setVisShareModalOpen: any;
+	presignedUrlShareModalOpen: boolean;
+	setPresignedUrlShareModalOpen: any;
 };
 
-export const VisualizationShareModal = (props: VisualizationShareProps) => {
-	const { presignedUrl, visShareModalOpen, setVisShareModalOpen } = props;
+export const PresignedUrlShareModal = (props: PresignedUrlShareProps) => {
+	const {
+		presignedUrl,
+		presignedUrlShareModalOpen,
+		setPresignedUrlShareModalOpen,
+	} = props;
 
 	return (
 		<Dialog
-			open={visShareModalOpen}
-			onClose={() => setVisShareModalOpen(false)}
+			open={presignedUrlShareModalOpen}
+			onClose={() => setPresignedUrlShareModalOpen(false)}
 			fullWidth={true}
 		>
 			<DialogTitle>Share Visualization</DialogTitle>
@@ -42,7 +46,9 @@ export const VisualizationShareModal = (props: VisualizationShareProps) => {
 				<CopyToClipboard text={presignedUrl}>
 					<Button variant={"contained"}>Copy</Button>
 				</CopyToClipboard>
-				<Button onClick={() => setVisShareModalOpen(false)}>Close</Button>
+				<Button onClick={() => setPresignedUrlShareModalOpen(false)}>
+					Close
+				</Button>
 			</DialogActions>
 		</Dialog>
 	);

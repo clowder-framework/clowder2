@@ -11,7 +11,7 @@ import {
 const defaultState: VisualizationState = {
 	visData: <VisualizationDataOut>{},
 	visConfig: <VisualizationConfigOut[]>[],
-	presigned_url: "",
+	presignedUrl: "",
 	blob: new Blob([]),
 };
 
@@ -24,7 +24,7 @@ const visualization = (state = defaultState, action: DataAction) => {
 		case DOWNLOAD_VIS_DATA:
 			return Object.assign({}, state, { blob: action.blob });
 		case GET_VIS_DATA_PRESIGNED_URL:
-			return Object.assign({}, state, { presigned_url: action.presigned_url });
+			return Object.assign({}, state, { presignedUrl: action.presignedUrl });
 		default:
 			return state;
 	}

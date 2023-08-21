@@ -410,7 +410,7 @@ interface DOWNLOAD_VIS_DATA {
 
 interface GET_VIS_DATA_PRESIGNED_URL {
 	type: "GET_VIS_DATA_PRESIGNED_URL";
-	presigned_url: string;
+	presignedUrl: string;
 }
 
 export type DataAction =

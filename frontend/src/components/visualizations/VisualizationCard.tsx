@@ -4,7 +4,7 @@ import Collapse from "@mui/material/Collapse";
 import { VisualizationDataDetail } from "./VisualizationDataDetail";
 import { VisualizationDataOut } from "../../openapi/v2";
 import { VisComponentDefinitions } from "../../visualization.config";
-import { VisualizationShareModal } from "./VisualizationShareModal";
+import { PresignedUrlShareModal } from "../sharing/PresignedUrlShareModal";
 import { useDispatch, useSelector } from "react-redux";
 import { generateVisPresignedUrl as generateVisPresignedUrlAction } from "../../actions/visualization";
 import { RootState } from "../../types/data";
@@ -24,7 +24,7 @@ export const VisualizationCard = (props: previewProps) => {
 	const generateVisPresignedUrl = (visualizationId: string | undefined) =>
 		dispatch(generateVisPresignedUrlAction(visualizationId));
 	const presignedUrl = useSelector(
-		(state: RootState) => state.visualization.presigned_url
+		(state: RootState) => state.visualization.presignedUrl
 	);
 	useEffect(() => {
 		if (visShareModalOpen) {
@@ -39,15 +39,11 @@ export const VisualizationCard = (props: previewProps) => {
 	return (
 		<Grid item xs={12} sm={4} md={4} lg={4} xl={4}>
 			<Card>
-				{visShareModalOpen ? (
-					<VisualizationShareModal
-						presignedUrl={presignedUrl}
-						visShareModalOpen={visShareModalOpen}
-						setVisShareModalOpen={setVisShareModalOpen}
-					/>
-				) : (
-					<></>
-				)}
+				<PresignedUrlShareModal
+					presignedUrl={presignedUrl}
+					presignedUrlShareModalOpen={visShareModalOpen}
+					setPresignedUrlShareModalOpen={setVisShareModalOpen}
+				/>
 				<Collapse in={!expanded} timeout="auto" unmountOnExit>
 					<CardContent>
 						{React.cloneElement(visComponentDefinition.component, {

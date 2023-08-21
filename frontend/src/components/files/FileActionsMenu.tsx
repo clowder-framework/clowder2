@@ -8,10 +8,11 @@ import {
 	MenuItem,
 	Stack,
 } from "@mui/material";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
 	fileDeleted,
 	fileDownloaded as fileDownloadedAction,
+	generateFilePresignedUrl as generateFilePresignedUrlAction,
 } from "../../actions/file";
 import { useDispatch, useSelector } from "react-redux";
 import { Download, MoreHoriz, Upload } from "@mui/icons-material";
@@ -22,17 +23,19 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import { useNavigate } from "react-router-dom";
 import { AuthWrapper } from "../auth/AuthWrapper";
 import { RootState } from "../../types/data";
+import { PresignedUrlShareModal } from "../sharing/PresignedUrlShareModal";
 
 type FileActionsMenuProps = {
-	fileId: string | undefined;
-	filename: string | undefined;
-	datasetId: string | null;
+	fileId?: string;
+	filename?: string;
+	datasetId?: string;
 };
 
 export const FileActionsMenu = (props: FileActionsMenuProps): JSX.Element => {
 	const { fileId, filename, datasetId } = props;
 
 	const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+	const [fileShareModalOpen, setFileShareModalOpen] = useState(false);
 
 	const fileRole = useSelector((state: RootState) => state.file.fileRole);
 
@@ -48,6 +51,24 @@ export const FileActionsMenu = (props: FileActionsMenuProps): JSX.Element => {
 
 	// redux
 	const dispatch = useDispatch();
+
+	const generateFilePresignedUrl = (
+		fileId: string | undefined,
+		fileVersionNum: number | undefined | null,
+		expiresInSeconds: number | undefined | null
+	) =>
+		dispatch(
+			generateFilePresignedUrlAction(fileId, fileVersionNum, expiresInSeconds)
+		);
+	const presignedUrl = useSelector(
+		(state: RootState) => state.file.presignedUrl
+	);
+
+	useEffect(() => {
+		if (fileShareModalOpen) {
+			generateFilePresignedUrl(fileId, null, 3600);
+		}
+	}, [fileShareModalOpen]);
 
 	const deleteFile = (fileId: string | undefined) =>
 		dispatch(fileDeleted(fileId));
@@ -102,6 +123,11 @@ export const FileActionsMenu = (props: FileActionsMenuProps): JSX.Element => {
 				<DialogTitle id="form-dialog-title">Update File</DialogTitle>
 				<UpdateFile fileId={fileId} setOpen={setUpdateFileOpen} />
 			</Dialog>
+			<PresignedUrlShareModal
+				presignedUrl={presignedUrl}
+				presignedUrlShareModalOpen={fileShareModalOpen}
+				setPresignedUrlShareModalOpen={setFileShareModalOpen}
+			/>
 			<Button
 				variant="contained"
 				onClick={() => {
@@ -111,6 +137,14 @@ export const FileActionsMenu = (props: FileActionsMenuProps): JSX.Element => {
 				endIcon={<Download />}
 			>
 				Download
+			</Button>
+			<Button
+				onClick={() => {
+					setFileShareModalOpen(true);
+				}}
+				endIcon={<Download />}
+			>
+				Share
 			</Button>
 			<div>
 				{/*owner, editor can update file*/}

@@ -95,21 +95,28 @@ export function downloadVisData(
 
 export const GET_VIS_DATA_PRESIGNED_URL = "GET_VIS_DATA_PRESIGNED_URL";
 
-export function generateVisPresignedUrl(visualizationId) {
+export function generateVisPresignedUrl(
+	visualizationId,
+	expiresInSeconds = null
+) {
 	return async (dispatch) => {
 		return V2.VisualizationsService.downloadVisualizationUrlApiV2VisualizationsVisualizationIdUrlGet(
-			visualizationId
+			visualizationId,
+			expiresInSeconds
 		)
 			.then((json) => {
 				dispatch({
 					type: GET_VIS_DATA_PRESIGNED_URL,
 					receivedAt: Date.now(),
-					presigned_url: json["presigned_url"],
+					presignedUrl: json["presigned_url"],
 				});
 			})
 			.catch((reason) => {
 				dispatch(
-					handleErrors(reason, generateVisPresignedUrl(visualizationId))
+					handleErrors(
+						reason,
+						generateVisPresignedUrl(visualizationId, expiresInSeconds)
+					)
 				);
 			});
 	};
