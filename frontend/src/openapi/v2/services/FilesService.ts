@@ -170,13 +170,13 @@ export class FilesService {
     }
 
     /**
-     * Add Dataset Thumbnail
+     * Add File Thumbnail
      * @param fileId
      * @param thumbnailId
      * @returns FileOut Successful Response
      * @throws ApiError
      */
-    public static addDatasetThumbnailApiV2FilesFileIdThumbnailThumbnailIdPatch(
+    public static addFileThumbnailApiV2FilesFileIdThumbnailThumbnailIdPatch(
         fileId: string,
         thumbnailId: string,
     ): CancelablePromise<FileOut> {
