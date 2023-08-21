@@ -30,7 +30,7 @@ export const PresignedUrlShareModal = (props: PresignedUrlShareProps) => {
 			onClose={() => setPresignedUrlShareModalOpen(false)}
 			fullWidth={true}
 		>
-			<DialogTitle>Share Visualization</DialogTitle>
+			<DialogTitle>Share Link</DialogTitle>
 			<DialogContent>
 				<ClowderFootnote>
 					Copy and share the link below. Please note that the link will expire
