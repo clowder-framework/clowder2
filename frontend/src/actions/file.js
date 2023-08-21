@@ -248,6 +248,37 @@ export function fileDownloaded(
 	};
 }
 
+export const RECEIVE_FILE_PRESIGNED_URL = "RECEIVE_FILE_PRESIGNED_URL";
+
+export function generateFilePresignedUrl(
+	fileId,
+	fileVersionNum = 0,
+	expiresInSeconds = 3600
+) {
+	return async (dispatch) => {
+		return V2.FilesService.downloadFileUrlApiV2FilesFileIdUrlGet(
+			fileId,
+			fileVersionNum,
+			expiresInSeconds
+		)
+			.then((json) => {
+				dispatch({
+					type: RECEIVE_FILE_PRESIGNED_URL,
+					receivedAt: Date.now(),
+					presignedUrl: json["presigned_url"],
+				});
+			})
+			.catch((reason) => {
+				dispatch(
+					handleErrors(
+						reason,
+						generateFilePresignedUrl(fileId, fileVersionNum, expiresInSeconds)
+					)
+				);
+			});
+	};
+}
+
 export const SUBMIT_FILE_EXTRACTION = "SUBMIT_FILE_EXTRACTION";
 
 export function submitFileExtractionAction(fileId, extractorName, requestBody) {
@@ -272,34 +303,6 @@ export function submitFileExtractionAction(fileId, extractorName, requestBody) {
 					)
 				);
 			});
-	};
-}
-
-export const GENERATE_FILE_URL = "GENERATE_FILE_URL";
-
-export function generateFileDownloadUrl(fileId, fileVersionNum = 0) {
-	return async (dispatch) => {
-		let url = `${config.hostname}/api/v2/files/${fileId}`;
-		if (fileVersionNum > 0) url = `${url}?version=${fileVersionNum}`;
-
-		const response = await fetch(url, {
-			method: "GET",
-			mode: "cors",
-			headers: await getHeader(),
-		});
-
-		if (response.status === 200) {
-			const blob = await response.blob();
-			dispatch({
-				type: GENERATE_FILE_URL,
-				url: window.URL.createObjectURL(blob),
-				receivedAt: Date.now(),
-			});
-		} else {
-			dispatch(
-				handleErrors(response, generateFileDownloadUrl(fileId, fileVersionNum))
-			);
-		}
 	};
 }
 

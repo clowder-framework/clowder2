@@ -91,30 +91,3 @@ export function downloadVisData(
 			);
 		}
 	};
-}
-
-export const GENERATE_VIS_URL = "GENERATE_VIS_URL";
-
-export function generateVisDataDownloadUrl(visualizationId) {
-	return async (dispatch) => {
-		let endpoint = `${config.hostname}/api/v2/visualizations/${visualizationId}/bytes`;
-		const response = await fetch(endpoint, {
-			method: "GET",
-			mode: "cors",
-			headers: await getHeader(),
-		});
-
-		if (response.status === 200) {
-			const blob = await response.blob();
-			dispatch({
-				type: GENERATE_VIS_URL,
-				url: window.URL.createObjectURL(blob),
-				receivedAt: Date.now(),
-			});
-		} else {
-			dispatch(
-				handleErrors(response, generateVisDataDownloadUrl(visualizationId))
-			);
-		}
-	};
-}

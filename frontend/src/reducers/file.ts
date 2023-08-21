@@ -1,8 +1,8 @@
 import {
 	DOWNLOAD_FILE,
-	GENERATE_FILE_URL,
 	RECEIVE_FILE_EXTRACTED_METADATA,
 	RECEIVE_FILE_METADATA_JSONLD,
+	RECEIVE_FILE_PRESIGNED_URL,
 	RECEIVE_FILE_SUMMARY,
 	RECEIVE_PREVIEWS,
 	RECEIVE_VERSIONS,
@@ -19,8 +19,8 @@ const defaultState: FileState = {
 	previews: [],
 	fileVersions: [],
 	fileRole: <AuthorizationBase>{},
-	url: "",
 	blob: new Blob([]),
+	presignedUrl: "",
 };
 
 const file = (state = defaultState, action: DataAction) => {
@@ -44,8 +44,8 @@ const file = (state = defaultState, action: DataAction) => {
 		case DOWNLOAD_FILE:
 			// TODO do nothing for now; but in the future can utilize to display certain effects
 			return Object.assign({}, state, { blob: action.blob });
-		case GENERATE_FILE_URL:
-			return Object.assign({}, state, { url: action.url });
+		case RECEIVE_FILE_PRESIGNED_URL:
+			return Object.assign({}, state, { presignedUrl: action.presignedUrl });
 		default:
 			return state;
 	}

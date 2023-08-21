@@ -191,7 +191,6 @@ export interface MetadataState {
 }
 
 export interface FileState {
-	url: string;
 	blob: Blob;
 	fileSummary: FileSummary;
 	extractedMetadata: ExtractedMetadata[];
@@ -199,6 +198,7 @@ export interface FileState {
 	previews: FilePreview[];
 	fileVersions: FileVersion[];
 	fileRole: AuthorizationBase;
+	presignedUrl: string;
 }
 
 export interface UserState {
@@ -235,7 +235,6 @@ export interface JobSummary {
 export interface VisualizationState {
 	visData: VisualizationOut;
 	visConfig: VisualizationConfigOut[];
-	url: string;
 	blob: Blob;
 }
 
