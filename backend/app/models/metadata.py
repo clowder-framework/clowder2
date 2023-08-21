@@ -211,7 +211,6 @@ class MetadataIn(MetadataBase):
     file_version: Optional[int]
     listener: Optional[EventListenerIn]
     extractor: Optional[LegacyEventListenerIn]
-    extractor_info: Optional[ExtractorInfo]
 
 
 class MetadataPatch(MetadataIn):
@@ -223,8 +222,6 @@ class MetadataDelete(BaseModel):
     definition: Optional[str]
     listener: Optional[EventListenerIn]
     extractor: Optional[LegacyEventListenerIn]
-    extractor_info: Optional[ExtractorInfo]
-
 
 class MetadataDB(Document, MetadataBase):
     resource: MongoDBRef
