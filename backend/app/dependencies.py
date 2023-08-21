@@ -30,7 +30,7 @@ async def get_external_fs() -> Generator:
         settings.MINIO_EXTERNAL_SERVER_URL,
         access_key=settings.MINIO_ACCESS_KEY,
         secret_key=settings.MINIO_SECRET_KEY,
-        secure=settings.MINIO_SECURE,
+        secure=settings.MINIO_SECURE.lower() == 'true',
     )
     clowder_bucket = settings.MINIO_BUCKET_NAME
     if not file_system.bucket_exists(clowder_bucket):
