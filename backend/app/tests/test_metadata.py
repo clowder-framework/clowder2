@@ -1,5 +1,5 @@
-import os
 import time
+
 import pytest as pytest
 from fastapi.testclient import TestClient
 
@@ -133,12 +133,14 @@ async def test_dataset_patch_metadata_definition(client: TestClient, headers: di
     es = await connect_elasticsearch()
     metadata_query = []
     # header
-    metadata_query.append({"index": "metadata"})
+    metadata_query.append({"index": "clowder"})
     # body
-    metadata_query.append({"query": {"match": {"content.latitude": "24.4"}}})
-    result = search_index(es, "metadata", metadata_query)
+    metadata_query.append({"query": {"match": {"metadata.latitude": "24.4"}}})
+    result = search_index(es, "clowder", metadata_query)
     assert (
-        result.body["responses"][0]["hits"]["hits"][0]["_source"]["content"]["latitude"]
+        result.body["responses"][0]["hits"]["hits"][0]["_source"]["metadata"][0][
+            "latitude"
+        ]
         == 24.4
     )
 
@@ -160,14 +162,14 @@ async def test_dataset_create_metadata_context_url(client: TestClient, headers: 
     es = await connect_elasticsearch()
     metadata_query = []
     # header
-    metadata_query.append({"index": "metadata"})
+    metadata_query.append({"index": "clowder"})
     # body
     metadata_query.append(
-        {"query": {"match": {"content.alternateName": "different name"}}}
+        {"query": {"match": {"metadata.alternateName": "different name"}}}
     )
-    result = search_index(es, "metadata", metadata_query)
+    result = search_index(es, "clowder", metadata_query)
     assert (
-        result.body["responses"][0]["hits"]["hits"][0]["_source"]["content"][
+        result.body["responses"][0]["hits"]["hits"][0]["_source"]["metadata"][0][
             "alternateName"
         ]
         == "different name"

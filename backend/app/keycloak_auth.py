@@ -3,6 +3,7 @@ import json
 import logging
 from datetime import datetime
 
+from typing import Optional
 from fastapi import Security, HTTPException, Depends
 from fastapi.security import OAuth2AuthorizationCodeBearer, APIKeyHeader
 from itsdangerous.exc import BadSignature

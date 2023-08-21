@@ -71,6 +71,7 @@ async def add_Visualization(
         file.file,
         length=-1,
         part_size=settings.MINIO_UPLOAD_CHUNK_SIZE,
+        content_type=visualization_db.content_type.content_type,
     )  # async write chunk to minio
     visualization_db.bytes = len(
         fs.get_object(settings.MINIO_BUCKET_NAME, str(visualization_id)).data

@@ -67,7 +67,7 @@ async def test_files():
             es,
             dummy_file_index_name,
             settings.elasticsearch_setting,
-            indexSettings.file_mappings,
+            indexSettings.es_mappings,
         )
         insert_record(es, dummy_file_index_name, dummy_file_record, 1)
         time.sleep(5)
@@ -95,7 +95,6 @@ async def test_files():
             == "test file 2"
         )
         query = {"match": {"name": "test file 2"}}
-        # delete_document_by_id(es, dummy_file_index_name, 1)
         delete_document_by_query(es, dummy_file_index_name, query)
         delete_index(es, dummy_file_index_name)
 
@@ -108,7 +107,7 @@ async def test_datasets():
             es,
             dummy_dataset_index_name,
             settings.elasticsearch_setting,
-            indexSettings.dataset_mappings,
+            indexSettings.es_mappings,
         )
         insert_record(es, dummy_dataset_index_name, dummy_dataset_record, 1)
         time.sleep(5)

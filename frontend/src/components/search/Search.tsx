@@ -3,18 +3,15 @@ import {
 	DataSearch,
 	DatePicker,
 	MultiDropdownList,
-	ReactiveComponent,
 	ReactiveList,
 	SingleDropdownRange,
 } from "@appbaseio/reactivesearch";
-import { Grid } from "@mui/material";
+import { FormControlLabel, Grid, Switch, Typography } from "@mui/material";
 import Layout from "../Layout";
 import { SearchResult } from "./SearchResult";
-import { getCurrEmail } from "../../utils/common";
+import { theme } from "../../theme";
 
 export function Search() {
-	const email = getCurrEmail();
-
 	const [luceneOn, setLuceneOn] = useState(false);
 
 	// @ts-ignore
@@ -23,16 +20,39 @@ export function Search() {
 			<div className="outer-container">
 				<Grid container spacing={4}>
 					<Grid item xs>
+						<FormControlLabel
+							sx={{ float: "right" }}
+							control={
+								<Switch
+									checked={luceneOn}
+									onChange={() => {
+										setLuceneOn((prevState) => !prevState);
+									}}
+									name="Query String"
+								/>
+							}
+							label={
+								<Typography
+									variant="body1"
+									sx={{
+										color: theme.palette.primary.main,
+										fontWeight: "bold",
+									}}
+								>
+									Advanced
+								</Typography>
+							}
+						/>
 						{luceneOn ? (
 							// string search
 							<DataSearch
-								title="String Search for Datasets and Files"
+								title="String Search for Datasets, Files and Metadata"
 								placeholder="Please use Lucene Syntax string query.
 									E.g.name:water~2 AND download:[0 TO 40} AND creator:myersrobert@scott-gutierrez.com"
 								componentId="string-searchbox"
 								autosuggest={false}
-								highlight={false}
-								queryFormat="or"
+								highlight={true}
+								queryFormat="and"
 								fuzziness={0}
 								debounce={100}
 								showFilter={false}
@@ -54,7 +74,7 @@ export function Search() {
 									componentId="searchbox"
 									autosuggest={true}
 									highlight={true}
-									queryFormat="or"
+									queryFormat="and"
 									fuzziness={0}
 									debounce={100}
 									react={{
@@ -63,13 +83,12 @@ export function Search() {
 											"downloadfilter",
 											"fromfilter",
 											"tofilter",
-											"authFilter",
 										],
 									}}
 									// apply react to the filter
 									URLParams={true}
 									showFilter={true}
-									showClear={false}
+									showClear={true}
 									renderNoSuggestion="No suggestions found."
 									dataField={["name", "description", "creator.keyword"]}
 									fieldWeights={[3, 2, 1]}
@@ -77,30 +96,6 @@ export function Search() {
 										title: "search-title",
 										input: "search-input",
 									}}
-								/>
-
-								{/*authorization clause - searcher must be creator or have permission to view result*/}
-								<ReactiveComponent
-									componentId="authFilter"
-									customQuery={() => ({
-										query: {
-											bool: {
-												should: [
-													// TODO: Include if dataset is public
-													{
-														term: {
-															creator: email,
-														},
-													},
-													{
-														term: {
-															user_ids: email,
-														},
-													},
-												],
-											},
-										},
-									})}
 								/>
 
 								{/*filters*/}
@@ -198,10 +193,11 @@ export function Search() {
 										"downloadfilter",
 										"fromfilter",
 										"tofilter",
-										"authFilter",
 									],
 								}}
-								render={({ data }) => <SearchResult data={data} />}
+								render={({ data }) => {
+									return <SearchResult data={data} />;
+								}}
 							/>
 						)}
 					</Grid>
