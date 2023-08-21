@@ -78,7 +78,6 @@ export const File = (): JSX.Element => {
 	const fileVersions = useSelector(
 		(state: RootState) => state.file.fileVersions
 	);
-	console.log(fileVersions[0], 'the fisrt');
 	const [selectedFileVersionDetails, setSelectedFileVersionDetails] = useState(fileVersions[0]);
 	const fileRole = useSelector((state: RootState) => state.file.fileRole);
 

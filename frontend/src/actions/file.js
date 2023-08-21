@@ -179,9 +179,7 @@ export function fileUpdated(formData, fileId) {
 export const CHANGE_SELECTED_VERSION = "CHANGE_SELECTED_VERSION";
 
 export function changeSelectedVersion(fileId, selectedVersion) {
-	console.log('change selected version in actions', fileId, selectedVersion);
 	return (dispatch) => {
-		console.log('changing version in actions', fileId, selectedVersion);
 		dispatch({
 			type: CHANGE_SELECTED_VERSION,
 			version: selectedVersion,

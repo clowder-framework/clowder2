@@ -20,15 +20,6 @@ class ContentType(BaseModel):
     main_type: str = "N/A"
 
 
-class FileVersionDetails(BaseModel):
-    file_id: PydanticObjectId
-    creator: UserOut
-    created: datetime
-    version_id: str
-    version_num: int = 1
-    bytes: int = 0
-
-
 class FileVersion(BaseModel):
     file_id: PydanticObjectId
     creator: UserOut
