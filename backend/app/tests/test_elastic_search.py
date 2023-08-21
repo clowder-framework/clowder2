@@ -67,7 +67,7 @@ async def test_files():
             es,
             dummy_file_index_name,
             settings.elasticsearch_setting,
-            indexSettings.file_mappings,
+            indexSettings.es_mappings,
         )
         insert_record(es, dummy_file_index_name, dummy_file_record, 1)
         time.sleep(5)
@@ -107,7 +107,7 @@ async def test_datasets():
             es,
             dummy_dataset_index_name,
             settings.elasticsearch_setting,
-            indexSettings.dataset_mappings,
+            indexSettings.es_mappings,
         )
         insert_record(es, dummy_dataset_index_name, dummy_dataset_record, 1)
         time.sleep(5)

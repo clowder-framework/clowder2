@@ -32,12 +32,12 @@ export class ElasticsearchService {
 
     /**
      * Msearch
-     * @returns string Successful Response
+     * @returns any Successful Response
      * @throws ApiError
      */
-    public static msearchApiV2ElasticsearchAllMsearchPut(): CancelablePromise<string> {
+    public static msearchApiV2ElasticsearchAllMsearchPost(): CancelablePromise<any> {
         return __request({
-            method: 'PUT',
+            method: 'POST',
             path: `/api/v2/elasticsearch/all/_msearch`,
         });
     }
