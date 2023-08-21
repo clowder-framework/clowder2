@@ -27,6 +27,7 @@ import {
 } from "../actions/user";
 import { CREATE_GROUP, DELETE_GROUP } from "../actions/group";
 import { RECEIVE_FILE_PRESIGNED_URL } from "../actions/file";
+import { GET_VIS_DATA_PRESIGNED_URL } from "../actions/visualization";
 
 interface RECEIVE_FILES_IN_DATASET {
 	type: "RECEIVE_FILES_IN_DATASET";
@@ -407,6 +408,11 @@ interface DOWNLOAD_VIS_DATA {
 	blob: Blob;
 }
 
+interface GET_VIS_DATA_PRESIGNED_URL {
+	type: "GET_VIS_DATA_PRESIGNED_URL";
+	presigned_url: string;
+}
+
 export type DataAction =
 	| RECEIVE_FILES_IN_DATASET
 	| RECEIVE_FOLDERS_IN_DATASET
@@ -480,4 +486,5 @@ export type DataAction =
 	| RECEIVE_USER_PROFILE
 	| GET_VIS_DATA
 	| GET_VIS_CONFIG
-	| DOWNLOAD_VIS_DATA;
+	| DOWNLOAD_VIS_DATA
+	| GET_VIS_DATA_PRESIGNED_URL;

@@ -12,7 +12,7 @@ import {
 	UserAPIKeyOut,
 	UserOut,
 	VisualizationConfigOut,
-	VisualizationOut,
+	VisualizationDataOut,
 } from "../openapi/v2";
 
 export interface Dataset {
@@ -233,8 +233,9 @@ export interface JobSummary {
 }
 
 export interface VisualizationState {
-	visData: VisualizationOut;
+	visData: VisualizationDataOut;
 	visConfig: VisualizationConfigOut[];
+	presigned_url: string;
 	blob: Blob;
 }
 
