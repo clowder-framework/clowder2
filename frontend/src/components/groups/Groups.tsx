@@ -58,10 +58,6 @@ export function Groups() {
 	// for breadcrumb
 	const paths = [
 		{
-			name: "Explore",
-			url: "/",
-		},
-		{
 			name: "Groups",
 			url: "/groups",
 		},

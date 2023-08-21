@@ -10,7 +10,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { AuthWrapper } from "../auth/AuthWrapper";
 import PersonAddAlt1Icon from "@mui/icons-material/PersonAddAlt1";
 import MembersTable from "./MembersTable";
-import {EditMenu} from "./EditMenu";
+import { EditMenu } from "./EditMenu";
 import AddMemberModal from "./AddMemberModal";
 import EditNameModal from "./EditNameModal";
 import RoleChip from "../auth/RoleChip";
@@ -18,7 +18,6 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import { MainBreadcrumbs } from "../navigation/BreadCrumb";
 import { config } from "../../app.config";
 import { ErrorModal } from "../errors/ErrorModal";
-import {DriveFileRenameOutline} from "@mui/icons-material";
 
 export function Group() {
 	// path parameter
@@ -59,10 +58,6 @@ export function Group() {
 
 	// for breadcrumb
 	const paths = [
-		{
-			name: "Explore",
-			url: "/",
-		},
 		{
 			name: "Groups",
 			url: "/groups",
@@ -161,12 +156,12 @@ export function Group() {
 						</Button>
 					</AuthWrapper>
 					<AuthWrapper currRole={role} allowedRoles={["owner", "editor"]}>
-						<EditMenu groupOwner={groupCreatorEmail}
-								  groupName={groupAbout.name}
-								  groupId={groupId}
+						<EditMenu
+							groupOwner={groupCreatorEmail}
+							groupName={groupAbout.name}
+							groupId={groupId}
 						/>
 					</AuthWrapper>
-
 
 					{/*<AuthWrapper currRole={role} allowedRoles={["owner"]}>*/}
 					{/*	<Button*/}
