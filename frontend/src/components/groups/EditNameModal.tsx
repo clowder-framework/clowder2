@@ -23,12 +23,13 @@ type EditNameModalProps = {
 	handleClose: any;
 	groupOwner: string;
 	groupName: string;
+	groupDescription: string | undefined;
 	groupId: string | undefined;
 };
 
 
 export default function EditNameModal(props: EditNameModalProps) {
-	const {open, handleClose, groupOwner, groupName, groupId} = props;
+	const {open, handleClose, groupOwner, groupName, groupDescription, groupId} = props;
 	const dispatch = useDispatch();
 	const editGroup = (groupId: string | undefined, formData: GroupIn) => dispatch(updateGroup(groupId, formData));
 
@@ -51,7 +52,7 @@ export default function EditNameModal(props: EditNameModalProps) {
 
 	const onSave = async () => {
 		setLoading(true);
-		editGroup(groupId, {"name": name, "users": groupAbout.users});
+		editGroup(groupId, {"name": name, "users": groupAbout.users, "description": groupDescription});
 		setName("");
 		setLoading(false);
 		handleDialogClose();
