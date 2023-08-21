@@ -223,6 +223,7 @@ class MetadataDelete(BaseModel):
     listener: Optional[EventListenerIn]
     extractor: Optional[LegacyEventListenerIn]
 
+
 class MetadataDB(Document, MetadataBase):
     resource: MongoDBRef
     agent: MetadataAgent

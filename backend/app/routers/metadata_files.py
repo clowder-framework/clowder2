@@ -133,8 +133,7 @@ async def add_file_metadata(
                     MetadataDB.agent.listener.name == metadata_in.listener.name
                 )
                 existing_q.append(
-                    MetadataDB.agent.listener.version
-                    == metadata_in.listener.version
+                    MetadataDB.agent.listener.version == metadata_in.listener.version
                 )
             else:
                 existing_q.append(MetadataDB.agent.creator.id == user.id)
