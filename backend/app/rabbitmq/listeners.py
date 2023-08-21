@@ -68,7 +68,7 @@ async def submit_file_job(
     )
     await job.insert()
 
-    current_secretKey = await get_user_job_key(user['email'])
+    current_secretKey = await get_user_job_key(user["email"])
     msg_body = EventListenerJobMessage(
         filename=file_out.name,
         fileSize=file_out.bytes,
