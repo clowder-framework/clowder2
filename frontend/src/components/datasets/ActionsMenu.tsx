@@ -1,7 +1,6 @@
 import { Button, Stack } from "@mui/material";
 import React from "react";
-import { datasetDownloaded } from "../../actions/dataset";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import { RootState } from "../../types/data";
 import { Download } from "@mui/icons-material";
 import { NewMenu } from "./NewMenu";
@@ -24,17 +23,6 @@ export const ActionsMenu = (props: ActionsMenuProps): JSX.Element => {
 		(state: RootState) => state.dataset.datasetRole
 	);
 
-	// redux
-	const dispatch = useDispatch();
-
-	const downloadDataset = (
-		datasetId: string | undefined,
-		filename: string | undefined
-	) => dispatch(datasetDownloaded(datasetId, filename));
-
-	// state
-	const about = useSelector((state: RootState) => state.dataset.about);
-
 	return (
 		<Stack
 			direction="row"
@@ -42,12 +30,6 @@ export const ActionsMenu = (props: ActionsMenuProps): JSX.Element => {
 			alignItems="center"
 			spacing={0.5}
 		>
-			{/*<Button variant="contained"*/}
-			{/*		onClick={() => {*/}
-			{/*			downloadDataset(datasetId, about["name"]);*/}
-			{/*		}} endIcon={<Download/>}>*/}
-			{/*	Download*/}
-			{/*</Button>*/}
 			<Button
 				variant="contained"
 				href={`${config.hostname}/api/v2/datasets/${datasetId}/download`}

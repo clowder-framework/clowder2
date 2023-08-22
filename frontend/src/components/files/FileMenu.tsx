@@ -4,10 +4,7 @@ import Button from "@mui/material/Button";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
 import { FileOut as File } from "../../openapi/v2";
-import {
-	fileDeleted,
-	fileDownloaded as fileDownloadedAction,
-} from "../../actions/file";
+import { fileDeleted } from "../../actions/file";
 import { useDispatch, useSelector } from "react-redux";
 import { ActionModal } from "../dialog/ActionModal";
 import DownloadIcon from "@mui/icons-material/Download";
@@ -39,13 +36,6 @@ export default function FileMenu(props: FileMenuProps) {
 	const dispatch = useDispatch();
 	const deleteFile = (fileId: string | undefined) =>
 		dispatch(fileDeleted(fileId));
-	const downloadFile = (
-		fileId: string | undefined,
-		filename: string | undefined,
-		fileVersionNum: number | undefined,
-		autoSave: boolean
-	) =>
-		dispatch(fileDownloadedAction(fileId, filename, fileVersionNum, autoSave));
 	const datasetRole = useSelector(
 		(state: RootState) => state.dataset.datasetRole
 	);
@@ -126,13 +116,7 @@ export default function FileMenu(props: FileMenuProps) {
 					allowedRoles={["owner", "editor", "uploader", "viewer"]}
 				>
 					{/*TODO this href doesn't work*/}
-					<MenuItem
-						// onClick={() => {
-						// 	handleClose();
-						// 	downloadFile(file.id, file.name, 0, true);
-						// }}
-						href={`${config.hostname}/api/v2/files/${file.id}`}
-					>
+					<MenuItem href={`${config.hostname}/api/v2/files/${file.id}`}>
 						<ListItemIcon>
 							<DownloadIcon fontSize="small" />
 						</ListItemIcon>
