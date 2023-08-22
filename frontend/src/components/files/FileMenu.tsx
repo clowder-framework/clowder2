@@ -18,6 +18,7 @@ import { UpdateFile } from "./UpdateFile";
 import { MoreHoriz } from "@material-ui/icons";
 import { RootState } from "../../types/data";
 import { AuthWrapper } from "../auth/AuthWrapper";
+import config from "../../app.config";
 
 type FileMenuProps = {
 	file: File;
@@ -124,11 +125,13 @@ export default function FileMenu(props: FileMenuProps) {
 					currRole={datasetRole.role}
 					allowedRoles={["owner", "editor", "uploader", "viewer"]}
 				>
+					{/*TODO this href doesn't work*/}
 					<MenuItem
-						onClick={() => {
-							handleClose();
-							downloadFile(file.id, file.name, 0, true);
-						}}
+						// onClick={() => {
+						// 	handleClose();
+						// 	downloadFile(file.id, file.name, 0, true);
+						// }}
+						href={`${config.hostname}/api/v2/files/${file.id}`}
 					>
 						<ListItemIcon>
 							<DownloadIcon fontSize="small" />

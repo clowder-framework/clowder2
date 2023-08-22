@@ -22,6 +22,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import { useNavigate } from "react-router-dom";
 import { AuthWrapper } from "../auth/AuthWrapper";
 import { RootState } from "../../types/data";
+import config from "../../app.config";
 
 type FileActionsMenuProps = {
 	fileId: string | undefined;
@@ -104,10 +105,11 @@ export const FileActionsMenu = (props: FileActionsMenuProps): JSX.Element => {
 			</Dialog>
 			<Button
 				variant="contained"
-				onClick={() => {
-					downloadFile(fileId, filename, 0, true);
-					handleClose();
-				}}
+				href={`${config.hostname}/api/v2/files/${fileId}`}
+				// onClick={() => {
+				// 	downloadFile(fileId, filename, 0, true);
+				// 	handleClose();
+				// }}
 				endIcon={<Download />}
 			>
 				Download

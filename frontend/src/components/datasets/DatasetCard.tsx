@@ -16,6 +16,7 @@ import {
 } from "@mui/material";
 import { Download } from "@mui/icons-material";
 import { generateVisDataDownloadUrl } from "../../utils/visualization";
+import config from "../../app.config";
 // import {Favorite, Share} from "@material-ui/icons";
 
 type DatasetCardProps = {
@@ -89,7 +90,8 @@ export default function DatasetCard(props: DatasetCardProps) {
 			<CardActions sx={{ marginTop: "auto" }}>
 				<Tooltip title="Download">
 					<IconButton
-						onClick={() => downloadDataset(id, name)}
+						// onClick={() => downloadDataset(id, name)}
+						href={`${config.hostname}/api/v2/datasets/${id}/download`}
 						color="primary"
 						aria-label="download"
 						sx={{ mr: 3 }}
