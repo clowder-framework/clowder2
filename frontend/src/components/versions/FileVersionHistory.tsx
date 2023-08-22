@@ -14,7 +14,6 @@ import config from "../../app.config";
 
 type FileVersionHistoryProps = {
 	fileVersions: FileVersion[];
-	filename: string;
 };
 
 export function FileVersionHistory(props: FileVersionHistoryProps) {

@@ -116,7 +116,12 @@ export default function FileMenu(props: FileMenuProps) {
 					allowedRoles={["owner", "editor", "uploader", "viewer"]}
 				>
 					{/*TODO this href doesn't work*/}
-					<MenuItem href={`${config.hostname}/api/v2/files/${file.id}`}>
+					<MenuItem
+						onClick={() => {
+							handleClose();
+							window.location.href = `${config.hostname}/api/v2/files/${file.id}`;
+						}}
+					>
 						<ListItemIcon>
 							<DownloadIcon fontSize="small" />
 						</ListItemIcon>
