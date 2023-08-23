@@ -45,8 +45,8 @@ export async function generateVisDataDownloadUrl(visualizationId) {
 }
 
 export async function generateFileDownloadUrl(fileId, fileVersionNum = 0) {
-	let url = `${config.hostname}/api/v2/files/${fileId}`;
-	if (fileVersionNum > 0) url = url + "?version=" + fileVersionNum;
+	let url = `${config.hostname}/api/v2/files/${fileId}?increment=false`;
+	if (fileVersionNum > 0) url = `${url}&version=${fileVersionNum}`;
 
 	const response = await fetch(url, {
 		method: "GET",
