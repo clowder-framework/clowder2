@@ -20,7 +20,10 @@ import {
 } from "../../actions/metadata";
 import { MetadataIn } from "../../openapi/v2";
 import { useNavigate } from "react-router-dom";
-import { fileCreated, resetFileCreated } from "../../actions/file";
+import {
+	createFile as createFileAction,
+	resetFileCreated,
+} from "../../actions/file";
 
 import LoadingOverlay from "react-loading-overlay-ts";
 
@@ -51,8 +54,11 @@ export const UploadFile: React.FC<UploadFileProps> = (
 	const uploadFile = (
 		selectedDatasetId: string | undefined,
 		selectedFolderId: string | undefined,
-		file: File
-	) => dispatch(fileCreated(selectedDatasetId, selectedFolderId, file));
+		selectedFile: File
+	) =>
+		dispatch(
+			createFileAction(selectedDatasetId, selectedFolderId, selectedFile)
+		);
 	const newFile = useSelector((state: RootState) => state.dataset.newFile);
 	const metadataDefinitionList = useSelector(
 		(state: RootState) => state.metadata.metadataDefinitionList
@@ -62,7 +68,7 @@ export const UploadFile: React.FC<UploadFileProps> = (
 		getMetadatDefinitions(null, 0, 100);
 	}, []);
 
-	const [file, setFile] = useState<File | null>(null);
+	const [selectedFile, setSelectedFile] = useState<File | null>(null);
 	const [metadataRequestForms, setMetadataRequestForms] = useState({});
 	const [allowSubmit, setAllowSubmit] = React.useState<boolean>(false);
 
@@ -80,8 +86,8 @@ export const UploadFile: React.FC<UploadFileProps> = (
 		return required;
 	};
 	// step 1
-	const onFileSave = (file: File) => {
-		setFile(file);
+	const onFileSave = (selectedFile: File) => {
+		setSelectedFile(selectedFile);
 
 		// If no metadata fields are marked as required, allow user to skip directly to submit
 		if (checkIfFieldsAreRequired()) {
@@ -136,7 +142,7 @@ export const UploadFile: React.FC<UploadFileProps> = (
 		setLoading(true);
 
 		// create dataset
-		uploadFile(selectedDatasetId, folderId, file);
+		uploadFile(selectedDatasetId, folderId, selectedFile);
 	};
 
 	useEffect(() => {
@@ -153,7 +159,7 @@ export const UploadFile: React.FC<UploadFileProps> = (
 			// reset newFile so next upload can be done
 			dispatch(resetFileCreated());
 			setMetadataRequestForms({});
-			setFile(null);
+			setSelectedFile(null);
 
 			// Redirect to file route with file Id and dataset id
 			history(

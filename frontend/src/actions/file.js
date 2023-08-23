@@ -119,10 +119,10 @@ export function fileDeleted(fileId) {
 
 export const CREATE_FILE = "CREATE_FILE";
 
-export function fileCreated(selectedDatasetId, folderId, file) {
+export function createFile(selectedDatasetId, folderId, selectedFile) {
 	return (dispatch) => {
 		const formData = new FormData();
-		formData.append("file", file);
+		formData["file"] = selectedFile;
 		return V2.DatasetsService.saveFileApiV2DatasetsDatasetIdFilesPost(
 			selectedDatasetId,
 			formData,
@@ -139,7 +139,7 @@ export function fileCreated(selectedDatasetId, folderId, file) {
 				dispatch(
 					handleErrors(
 						reason,
-						fileCreated(selectedDatasetId, formData, folderId)
+						createFile(selectedDatasetId, folderId, selectedFile)
 					)
 				);
 			});
