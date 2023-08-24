@@ -57,8 +57,8 @@ dist
 scripts/keycloak/data/*
 
 # ignore clowder chart deps
-charts/clowder2/charts
-charts/clowder2/*clowder2-software-dev.yaml
+deployments/kubernetes/charts/clowder2/charts
+deployments/kubernetes/charts/clowder2/*clowder2-software-dev.yaml
 
 # Environments
 .env
@@ -73,3 +73,6 @@ venv.bak/
 backend/app/tests/*
 !backend/app/tests/*.py
 !backend/app/tests/extractor_info.json
+
+*.tgz
+*clowder2-software-dev.yaml

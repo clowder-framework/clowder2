@@ -140,14 +140,14 @@ export class FilesService {
     }
 
     /**
-     * Get File Extract
+     * Post File Extract
      * @param fileId
      * @param extractorName
      * @param requestBody
      * @returns any Successful Response
      * @throws ApiError
      */
-    public static getFileExtractApiV2FilesFileIdExtractPost(
+    public static postFileExtractApiV2FilesFileIdExtractPost(
         fileId: string,
         extractorName: string,
         requestBody?: any,
@@ -193,13 +193,13 @@ export class FilesService {
     }
 
     /**
-     * Add Dataset Thumbnail
+     * Add File Thumbnail
      * @param fileId
      * @param thumbnailId
      * @returns FileOut Successful Response
      * @throws ApiError
      */
-    public static addDatasetThumbnailApiV2FilesFileIdThumbnailThumbnailIdPatch(
+    public static addFileThumbnailApiV2FilesFileIdThumbnailThumbnailIdPatch(
         fileId: string,
         thumbnailId: string,
     ): CancelablePromise<FileOut> {

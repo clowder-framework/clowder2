@@ -36,7 +36,6 @@ from app.search.connect import (
     delete_document_by_id,
     insert_record,
     update_record,
-    delete_document_by_query,
 )
 from app.search.index import index_file
 
@@ -92,7 +91,6 @@ async def add_file_entry(
     fs: Minio,
     es: Elasticsearch,
     rabbitmq_client: BlockingChannel,
-    token: str,
     file: Optional[io.BytesIO] = None,
     content_type: Optional[str] = None,
 ):
@@ -104,14 +102,9 @@ async def add_file_entry(
         file: bytes to upload
     """
 
-    # Check all connection and abort if any one of them is not available
-    if fs is None or es is None:
-        raise HTTPException(status_code=503, detail="Service not available")
-        return
-
     await new_file.insert()
     new_file_id = new_file.id
-    content_type_obj = get_content_type(content_type, file)
+    content_type_obj = get_content_type(new_file.name, content_type)
 
     # Use unique ID as key for Minio and get initial version ID
     response = fs.put_object(
@@ -120,6 +113,7 @@ async def add_file_entry(
         file,
         length=-1,
         part_size=settings.MINIO_UPLOAD_CHUNK_SIZE,
+        content_type=new_file.content_type.content_type,
     )  # async write chunk to minio
     version_id = response.version_id
     bytes = len(fs.get_object(settings.MINIO_BUCKET_NAME, str(new_file_id)).data)
@@ -146,7 +140,10 @@ async def add_file_entry(
 
     # Submit file job to any qualifying feeds
     await check_feed_listeners(
-        es, FileOut(**new_file.dict()), user, rabbitmq_client, token
+        es,
+        FileOut(**new_file.dict()),
+        user,
+        rabbitmq_client,
     )
 
 
@@ -163,8 +160,7 @@ async def remove_file_entry(
         return
     fs.remove_object(settings.MINIO_BUCKET_NAME, str(file_id))
     # delete from elasticsearch
-    delete_document_by_id(es, "file", str(file_id))
-    delete_document_by_query(es, "metadata", {"match": {"resource_id": str(file_id)}})
+    delete_document_by_id(es, "clowder", str(file_id))
     if (file := await FileDB.get(PydanticObjectId(file_id))) is not None:
         await file.delete()
     await MetadataDB.find(MetadataDB.resource.resource_id == ObjectId(file_id)).delete()
@@ -205,6 +201,7 @@ async def update_file(
             file.file,
             length=-1,
             part_size=settings.MINIO_UPLOAD_CHUNK_SIZE,
+            content_type=updated_file.content_type.content_type,
         )  # async write chunk to minio
         version_id = response.version_id
 
@@ -370,7 +367,7 @@ async def get_file_versions(
 
 # submits file to extractor
 @router.post("/{file_id}/extract")
-async def get_file_extract(
+async def post_file_extract(
     file_id: str,
     extractorName: str,
     # parameters don't have a fixed model shape
@@ -429,7 +426,7 @@ async def resubmit_file_extractions(
 
 
 @router.patch("/{file_id}/thumbnail/{thumbnail_id}", response_model=FileOut)
-async def add_dataset_thumbnail(
+async def add_file_thumbnail(
     file_id: str,
     thumbnail_id: str,
     allow: bool = Depends(FileAuthorization("editor")),

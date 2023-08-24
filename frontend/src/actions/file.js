@@ -265,7 +265,7 @@ export const SUBMIT_FILE_EXTRACTION = "SUBMIT_FILE_EXTRACTION";
 
 export function submitFileExtractionAction(fileId, extractorName, requestBody) {
 	return (dispatch) => {
-		return V2.FilesService.getFileExtractApiV2FilesFileIdExtractPost(
+		return V2.FilesService.postFileExtractApiV2FilesFileIdExtractPost(
 			fileId,
 			extractorName,
 			requestBody

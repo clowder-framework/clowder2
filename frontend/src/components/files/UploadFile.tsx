@@ -42,7 +42,7 @@ export const UploadFile:React.FC<UploadFileProps> = (props: UploadFileProps) => 
 	const [allowSubmit, setAllowSubmit] = React.useState<boolean>(false);
 
 	const history = useNavigate();
-    
+
 	const checkIfFieldsAreRequired = () => {
 		let required = false;
 
@@ -80,7 +80,7 @@ export const UploadFile:React.FC<UploadFileProps> = (props: UploadFileProps) => 
 			return ({...prevState, [metadata.definition]: metadata});
 		});
 
-		metadataDefinitionList.every((val, idx) => {
+		metadataDefinitionList.map((val, idx) => {
 			if (val.fields[0].required) {
 				// Condition checks whether the current updated field is a required one
 				if (val.name == metadata.definition || val.name in metadataRequestForms) {
