@@ -38,6 +38,7 @@ import VisibilityIcon from "@mui/icons-material/Visibility";
 import { Visualization } from "../visualizations/Visualization";
 import { ErrorModal } from "../errors/ErrorModal";
 import {VersionChip} from "../versions/VersionChip";
+import {FileHistory} from "./FileHistory";
 
 export const File = (): JSX.Element => {
 	// path parameter
@@ -422,11 +423,30 @@ export const File = (): JSX.Element => {
 						<ExtractionHistoryTab fileId={fileId} />
 					</TabPanel>
 				</Grid>
+				{version_num == selectedVersion ?
+					<Grid item xs={2}>
+						{Object.keys(fileSummary).length > 0 && (
+							<FileDetails fileSummary={fileSummary} />
+						)}
+					</Grid> :
 				<Grid item xs={2}>
-					{Object.keys(fileSummary).length > 0 && (
-						<FileDetails fileSummary={fileSummary} />
-					)}
+				{Object.keys(fileSummary).length > 0 && (
+							<FileHistory
+								id={fileId}
+								created={file.fileSummary.created}
+								name={file.fileSummary.name}
+								creator={file.fileSummary.creator}
+								version_id={file.fileSummary.version_id}
+								bytes={file.fileSummary.bytes}
+								content_type={file.fileSummary.content_type}
+								views={file.fileSummary.views}
+								downloads={file.fileSummary.downloads}
+								current_version={selectedVersion}
+								fileSummary={file.fileSummary}
+							/>
+						)}
 				</Grid>
+				}
 			</Grid>
 		</Layout>
 	);
