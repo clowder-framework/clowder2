@@ -58,6 +58,8 @@ export function FilesTableFileEntry(props: FilesTableFileEntryProps) {
 							<InsertDriveFileIcon sx={iconStyle} />
 						)}
 						<Button onClick={() => selectFile(file.id)}>{file.name}</Button>
+					</TableCell>
+					<TableCell>
 						<VersionChip selectedVersion={file.version_num}
 									 setSelectedVersion={null}
 									 versionNumbers={null}

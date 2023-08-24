@@ -48,6 +48,7 @@ export default function FilesTable(props: FilesTableProps) {
 				<TableHead>
 					<TableRow>
 						<TableCell>Name</TableCell>
+						<TableCell>Version</TableCell>
 						<TableCell align="right">Updated</TableCell>
 						<TableCell align="right">Size</TableCell>
 						<TableCell align="right">Type</TableCell>
