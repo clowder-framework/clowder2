@@ -40,7 +40,7 @@ export function FileVersionHistory(props: FileVersionHistoryProps) {
 						return (
 							<ListItem key={version_num}>
 								<ListItemAvatar>
-									<VersionChip versionNumber={version_num}
+									<VersionChip
 												 selectedVersion={version_num}
 												 setSelectedVersion={""}
 												 versionNumbers={fileVersions}

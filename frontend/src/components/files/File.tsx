@@ -38,7 +38,6 @@ import VisibilityIcon from "@mui/icons-material/Visibility";
 import { Visualization } from "../visualizations/Visualization";
 import { ErrorModal } from "../errors/ErrorModal";
 import {VersionChip} from "../versions/VersionChip";
-import {FileHistory} from "./FileHistory";
 
 export const File = (): JSX.Element => {
 	// path parameter
