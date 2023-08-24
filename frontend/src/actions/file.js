@@ -1,5 +1,5 @@
 import config from "../app.config";
-import { dataURItoFile, getHeader } from "../utils/common";
+import { getHeader } from "../utils/common";
 import { V2 } from "../openapi";
 import { handleErrors } from "./common";
 
@@ -159,9 +159,10 @@ export function resetFileCreated() {
 
 export const UPDATE_FILE = "UPDATE_FILE";
 
-export function fileUpdated(formData, fileId) {
+export function updateFile(selectedFile, fileId) {
 	return (dispatch) => {
-		formData["file"] = dataURItoFile(formData["file"]);
+		const formData = new FormData();
+		formData["file"] = selectedFile;
 		return V2.FilesService.updateFileApiV2FilesFileIdPut(fileId, formData)
 			.then((file) => {
 				dispatch({
@@ -171,7 +172,7 @@ export function fileUpdated(formData, fileId) {
 				});
 			})
 			.catch((reason) => {
-				dispatch(handleErrors(reason, fileUpdated(formData, fileId)));
+				dispatch(handleErrors(reason, updateFile(selectedFile, fileId)));
 			});
 	};
 }
