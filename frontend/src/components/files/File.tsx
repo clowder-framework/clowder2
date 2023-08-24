@@ -263,6 +263,12 @@ export const File = (): JSX.Element => {
 							<Typography variant="h4" paragraph>
 								{fileSummary.name}
 							</Typography>
+							<VersionChip
+								 selectedVersion={selectedVersion}
+								 setSelectedVersion={setSelectedVersion}
+								 versionNumbers={fileVersions}
+								 isClickable={true}
+							/>
 						</Box>
 						<Box>
 							<RoleChip role={fileRole} />
