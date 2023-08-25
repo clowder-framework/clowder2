@@ -181,13 +181,6 @@ export const Dataset = (): JSX.Element => {
 		<Layout>
 			{/*Error Message dialogue*/}
 			<ErrorModal errorOpen={errorOpen} setErrorOpen={setErrorOpen} />
-			{folderId !== null ? (
-				<Box style={{ padding: "24px 24px 0 24px" }}>
-					<MainBreadcrumbs paths={paths}></MainBreadcrumbs>
-				</Box>
-			) : (
-				<></>
-			)}
 			<Grid container>
 				{/*title*/}
 				<Grid item xs={8} sx={{ display: "flex", alignItems: "center" }}>
@@ -283,6 +276,13 @@ export const Dataset = (): JSX.Element => {
 							disabled={false}
 						/>
 					</Tabs>
+					{folderId !== null ? (
+						<Box style={{ padding: "24px 24px 0 24px" }}>
+							<MainBreadcrumbs paths={paths}></MainBreadcrumbs>
+						</Box>
+					) : (
+						<></>
+					)}
 					<TabPanel value={selectedTabIndex} index={0}>
 						<FilesTable datasetId={datasetId} folderId={folderId} />
 					</TabPanel>
