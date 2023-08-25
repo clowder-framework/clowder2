@@ -3,5 +3,5 @@ kind: ConfigMap
 metadata:
   name: clowder2-realm
 data:
-  realm.json: |
-    {{ .Files.Get "files/realm.json" }}
+  realm.json: |-
+    {{- $.Files.Get (printf "files/realm.json") | nindent 4 }}

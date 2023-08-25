@@ -265,9 +265,6 @@ keycloak:
     - name: clowder2-realm
       configMap:
         name: clowder2-realm
-        items:
-          - key: "realm.json"
-            path: "realm.json"
 
 # ----------------------------------------------------------------------
 # OTHERS
