@@ -9,7 +9,7 @@ import {
 	Stack,
 } from "@mui/material";
 import React, { useState } from "react";
-import { fileDeleted } from "../../actions/file";
+import { fetchFileSummary, fileDeleted } from "../../actions/file";
 import { useDispatch, useSelector } from "react-redux";
 import { Download, MoreHoriz, Upload } from "@mui/icons-material";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
@@ -49,6 +49,8 @@ export const FileActionsMenu = (props: FileActionsMenuProps): JSX.Element => {
 
 	const deleteFile = (fileId: string | undefined) =>
 		dispatch(fileDeleted(fileId));
+	const listFileSummary = (fileId: string | undefined) =>
+		dispatch(fetchFileSummary(fileId));
 	const history = useNavigate();
 
 	const [confirmationOpen, setConfirmationOpen] = useState(false);
@@ -94,7 +96,10 @@ export const FileActionsMenu = (props: FileActionsMenuProps): JSX.Element => {
 			</Dialog>
 			<Button
 				variant="contained"
-				href={`${config.hostname}/api/v2/files/${fileId}`}
+				onClick={() => {
+					listFileSummary(fileId);
+					window.location.href = `${config.hostname}/api/v2/files/${fileId}`;
+				}}
 				endIcon={<Download />}
 			>
 				Download
