@@ -245,9 +245,17 @@ keycloak:
       - mountPath: /theme
         name: clowder2-theme
 
+  extraEnvVars:
+    - name: KEYCLOAK_EXTRA_ARGS
+      value: "-Dkeycloak.import=/config/realm.json"
+
   extraVolumeMounts:
     - name: keycloak-theme
       mountPath: /opt/bitnami/keycloak/themes
+    - name: clowder2-realm
+      mountPath: /config
+      readOnly: true
+
   extraVolumes:
     - name: keycloak-theme
       emptyDir: {}
@@ -257,6 +265,9 @@ keycloak:
     - name: clowder2-realm
       configMap:
         name: clowder2-realm
+        items:
+          - key: "realm.json"
+            path: "realm.json"
 
 # ----------------------------------------------------------------------
 # OTHERS
