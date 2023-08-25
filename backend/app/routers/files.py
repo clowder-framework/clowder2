@@ -261,6 +261,7 @@ async def update_file(
 async def download_file(
     file_id: str,
     version: Optional[int] = None,
+    increment: Optional[bool] = True,
     fs: Minio = Depends(dependencies.get_fs),
     allow: bool = Depends(FileAuthorization("viewer")),
 ):
@@ -289,8 +290,9 @@ async def download_file(
         # Get content type & open file stream
         response = StreamingResponse(content.stream(settings.MINIO_UPLOAD_CHUNK_SIZE))
         response.headers["Content-Disposition"] = "attachment; filename=%s" % file.name
-        # Increment download count
-        await file.update(Inc({FileDB.downloads: 1}))
+        if increment:
+            # Increment download count
+            await file.update(Inc({FileDB.downloads: 1}))
         return response
     else:
         raise HTTPException(status_code=404, detail=f"File {file_id} not found")
