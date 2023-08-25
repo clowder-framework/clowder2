@@ -10,6 +10,7 @@ from typing import List, Optional
 
 from beanie import PydanticObjectId
 from beanie.operators import Or
+from beanie.odm.operators.update.general import Inc
 from bson import ObjectId
 from bson import json_util
 from elasticsearch import Elasticsearch
@@ -17,9 +18,9 @@ from fastapi import APIRouter, HTTPException, Depends, Security
 from fastapi import (
     File,
     UploadFile,
-    Response,
     Request,
 )
+from fastapi.responses import StreamingResponse
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from minio import Minio
 from pika.adapters.blocking_connection import BlockingChannel
@@ -555,8 +556,8 @@ async def download_dataset(
     if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
         current_temp_dir = tempfile.mkdtemp(prefix="rocratedownload")
         crate = ROCrate()
-        user_full_name = user["first_name"] + " " + user["last_name"]
-        user_crate_id = str(user["id"])
+        user_full_name = f"{user.first_name} {user.last_name}"
+        user_crate_id = str(user.id)
         crate.add(Person(crate, user_crate_id, properties={"name": user_full_name}))
 
         manifest_path = os.path.join(current_temp_dir, "manifest-md5.txt")
@@ -648,7 +649,7 @@ async def download_dataset(
             f.write("Internal-Sender-Identifier: " + dataset_id + "\n")
             f.write("Internal-Sender-Description: " + dataset.description + "\n")
             f.write("Contact-Name: " + user_full_name + "\n")
-            f.write("Contact-Email: " + user["email"] + "\n")
+            f.write("Contact-Email: " + user.email + "\n")
         crate.add_file(
             bagit_path, dest_path="bagit.txt", properties={"name": "bagit.txt"}
         )
@@ -689,13 +690,15 @@ async def download_dataset(
             print("could not delete file")
             print(e)
 
-        # TODO: Increment dataset download count, update index
-
-        return Response(
-            stream.getvalue(),
+        # Get content type & open file stream
+        response = StreamingResponse(
+            stream,
             media_type="application/x-zip-compressed",
-            headers={"Content-Disposition": f'attachment;filename="{zip_name}"'},
         )
+        response.headers["Content-Disposition"] = "attachment; filename=%s" % zip_name
+        # Increment download count
+        await dataset.update(Inc({DatasetDB.downloads: 1}))
+        return response
     raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
 
 
