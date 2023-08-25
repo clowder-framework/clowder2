@@ -440,7 +440,6 @@ async def save_file(
     file: UploadFile = File(...),
     es=Depends(dependencies.get_elasticsearchclient),
     rabbitmq_client: BlockingChannel = Depends(dependencies.get_rabbitmq),
-    credentials: HTTPAuthorizationCredentials = Security(security),
     allow: bool = Depends(Authorization("uploader")),
 ):
     if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
@@ -459,14 +458,13 @@ async def save_file(
                     status_code=404, detail=f"Folder {folder_id} not found"
                 )
 
-        access_token = credentials.credentials
+        # access_token = credentials.credentials
         await add_file_entry(
             new_file,
             user,
             fs,
             es,
             rabbitmq_client,
-            access_token,
             file.file,
             content_type=file.content_type,
         )
@@ -557,8 +555,8 @@ async def download_dataset(
     if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
         current_temp_dir = tempfile.mkdtemp(prefix="rocratedownload")
         crate = ROCrate()
-        user_full_name = user.first_name + " " + user.last_name
-        user_crate_id = str(user.id)
+        user_full_name = user["first_name"] + " " + user["last_name"]
+        user_crate_id = str(user["id"])
         crate.add(Person(crate, user_crate_id, properties={"name": user_full_name}))
 
         manifest_path = os.path.join(current_temp_dir, "manifest-md5.txt")
@@ -650,7 +648,7 @@ async def download_dataset(
             f.write("Internal-Sender-Identifier: " + dataset_id + "\n")
             f.write("Internal-Sender-Description: " + dataset.description + "\n")
             f.write("Contact-Name: " + user_full_name + "\n")
-            f.write("Contact-Email: " + user.email + "\n")
+            f.write("Contact-Email: " + user["email"] + "\n")
         crate.add_file(
             bagit_path, dest_path="bagit.txt", properties={"name": "bagit.txt"}
         )
