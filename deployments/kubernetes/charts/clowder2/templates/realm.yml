@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: clowder2-realm
+binaryData:
+  realm.json: |
+    {{ .Files.Get "files/realm.json" }}

@@ -254,6 +254,9 @@ keycloak:
     - name: clowder2-theme
       configMap:
         name: clowder2-theme
+    - name: clowder2-realm
+      configMap:
+        name: clowder2-realm
 
 # ----------------------------------------------------------------------
 # OTHERS
