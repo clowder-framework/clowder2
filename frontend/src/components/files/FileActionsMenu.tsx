@@ -9,10 +9,7 @@ import {
 	Stack,
 } from "@mui/material";
 import React, { useState } from "react";
-import {
-	fileDeleted,
-	fileDownloaded as fileDownloadedAction,
-} from "../../actions/file";
+import { fileDeleted } from "../../actions/file";
 import { useDispatch, useSelector } from "react-redux";
 import { Download, MoreHoriz, Upload } from "@mui/icons-material";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
@@ -22,6 +19,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import { useNavigate } from "react-router-dom";
 import { AuthWrapper } from "../auth/AuthWrapper";
 import { RootState } from "../../types/data";
+import config from "../../app.config";
 
 type FileActionsMenuProps = {
 	fileId: string | undefined;
@@ -51,14 +49,6 @@ export const FileActionsMenu = (props: FileActionsMenuProps): JSX.Element => {
 
 	const deleteFile = (fileId: string | undefined) =>
 		dispatch(fileDeleted(fileId));
-	const downloadFile = (
-		fileId: string | undefined,
-		filename: string | undefined,
-		fileVersionNum: number | undefined,
-		autoSave: boolean
-	) =>
-		dispatch(fileDownloadedAction(fileId, filename, fileVersionNum, autoSave));
-
 	const history = useNavigate();
 
 	const [confirmationOpen, setConfirmationOpen] = useState(false);
@@ -104,10 +94,7 @@ export const FileActionsMenu = (props: FileActionsMenuProps): JSX.Element => {
 			</Dialog>
 			<Button
 				variant="contained"
-				onClick={() => {
-					downloadFile(fileId, filename, 0, true);
-					handleClose();
-				}}
+				href={`${config.hostname}/api/v2/files/${fileId}`}
 				endIcon={<Download />}
 			>
 				Download
