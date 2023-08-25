@@ -8,12 +8,9 @@ def test_create_and_delete(client: TestClient, headers: dict):
     dataset_id = create_dataset(client, headers).get("id")
     response = upload_file(client, headers, dataset_id)
     file = response
-    file_id = response['id']
+    file_id = response["id"]
     # DELETE FILE
-    response = client.delete(
-        f"{settings.API_V2_STR}/files/{file_id}",
-        headers=headers
-    )
+    response = client.delete(f"{settings.API_V2_STR}/files/{file_id}", headers=headers)
     assert response.status_code == 200
 
 
