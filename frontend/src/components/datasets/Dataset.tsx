@@ -277,7 +277,7 @@ export const Dataset = (): JSX.Element => {
 						/>
 					</Tabs>
 					{folderId !== null ? (
-						<Box style={{ padding: "24px 24px 0 24px" }}>
+						<Box>
 							<MainBreadcrumbs paths={paths}></MainBreadcrumbs>
 						</Box>
 					) : (
