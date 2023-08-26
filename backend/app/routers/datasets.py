@@ -45,16 +45,15 @@ from app.models.datasets import (
 )
 from app.models.files import FileOut, FileDB, FileDBViewList
 from app.models.folders import FolderOut, FolderIn, FolderDB, FolderDBViewList
-from app.models.metadata import MetadataDB, MetadataOut
+from app.models.metadata import MetadataDB
 from app.models.pyobjectid import PyObjectId
 from app.models.users import UserOut
 from app.rabbitmq.listeners import submit_dataset_job
 from app.routers.files import add_file_entry, remove_file_entry
 from app.search.connect import (
     delete_document_by_id,
-    delete_document_by_query,
 )
-from app.search.index import index_dataset, index_dataset_metadata
+from app.search.index import index_dataset
 
 router = APIRouter()
 security = HTTPBearer()
@@ -290,18 +289,6 @@ async def edit_dataset(
 
         # Update entry to the dataset index
         await index_dataset(es, DatasetOut(**dataset.dict()), update=True)
-        # updating metadata in elasticsearch
-        if (
-            metadata := await MetadataDB.find_one(
-                MetadataDB.resource.resource_id == ObjectId(dataset_id)
-            )
-        ) is not None:
-            await index_dataset_metadata(
-                es,
-                DatasetOut(**dataset.dict()),
-                MetadataOut(**metadata.dict()),
-                update=True,
-            )
         return dataset.dict()
     raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
 
@@ -325,18 +312,6 @@ async def patch_dataset(
 
         # Update entry to the dataset index
         await index_dataset(es, DatasetOut(**dataset.dict()), update=True)
-        # updating metadata in elasticsearch
-        if (
-            metadata := await MetadataDB.find_one(
-                MetadataDB.resource.resource_id == ObjectId(dataset_id)
-            )
-        ) is not None:
-            await index_dataset_metadata(
-                es,
-                DatasetOut(**dataset.dict()),
-                MetadataOut(**metadata.dict()),
-                update=True,
-            )
         return dataset.dict()
 
 
@@ -349,8 +324,7 @@ async def delete_dataset(
 ):
     if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
         # delete from elasticsearch
-        delete_document_by_id(es, "dataset", dataset_id)
-        delete_document_by_query(es, "metadata", {"match": {"resource_id": dataset_id}})
+        delete_document_by_id(es, "clowder", dataset_id)
         # delete dataset first to minimize files/folder being uploaded to a delete dataset
         await dataset.delete()
         await MetadataDB.find(
@@ -466,7 +440,6 @@ async def save_file(
     file: UploadFile = File(...),
     es=Depends(dependencies.get_elasticsearchclient),
     rabbitmq_client: BlockingChannel = Depends(dependencies.get_rabbitmq),
-    credentials: HTTPAuthorizationCredentials = Security(security),
     allow: bool = Depends(Authorization("uploader")),
 ):
     if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
@@ -485,14 +458,13 @@ async def save_file(
                     status_code=404, detail=f"Folder {folder_id} not found"
                 )
 
-        access_token = credentials.credentials
+        # access_token = credentials.credentials
         await add_file_entry(
             new_file,
             user,
             fs,
             es,
             rabbitmq_client,
-            access_token,
             file.file,
             content_type=file.content_type,
         )
@@ -583,8 +555,8 @@ async def download_dataset(
     if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
         current_temp_dir = tempfile.mkdtemp(prefix="rocratedownload")
         crate = ROCrate()
-        user_full_name = user.first_name + " " + user.last_name
-        user_crate_id = str(user.id)
+        user_full_name = user["first_name"] + " " + user["last_name"]
+        user_crate_id = str(user["id"])
         crate.add(Person(crate, user_crate_id, properties={"name": user_full_name}))
 
         manifest_path = os.path.join(current_temp_dir, "manifest-md5.txt")
@@ -676,7 +648,7 @@ async def download_dataset(
             f.write("Internal-Sender-Identifier: " + dataset_id + "\n")
             f.write("Internal-Sender-Description: " + dataset.description + "\n")
             f.write("Contact-Name: " + user_full_name + "\n")
-            f.write("Contact-Email: " + user.email + "\n")
+            f.write("Contact-Email: " + user["email"] + "\n")
         crate.add_file(
             bagit_path, dest_path="bagit.txt", properties={"name": "bagit.txt"}
         )

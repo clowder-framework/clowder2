@@ -224,13 +224,7 @@ async def startup_elasticsearch():
     # create elasticsearch indices
     es = await connect_elasticsearch()
     create_index(
-        es, "file", settings.elasticsearch_setting, indexSettings.file_mappings
-    )
-    create_index(
-        es, "dataset", settings.elasticsearch_setting, indexSettings.dataset_mappings
-    )
-    create_index(
-        es, "metadata", settings.elasticsearch_setting, indexSettings.metadata_mappings
+        es, "clowder", settings.elasticsearch_setting, indexSettings.es_mappings
     )
 
 

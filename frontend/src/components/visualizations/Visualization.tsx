@@ -6,11 +6,16 @@ import { fetchFileSummary } from "../../actions/file";
 import { getVisConfig as getVisConfigAction } from "../../actions/visualization";
 import { visComponentDefinitions } from "../../visualization.config";
 import { Grid } from "@mui/material";
+import { VisualizationCard } from "./VisualizationCard";
+import { VisualizationRawBytesCard } from "./VisualizationRawBytesCard";
+import { VisualizationSpecCard } from "./VisualizationSpecCard";
+import config from "../../app.config";
 
 type previewProps = {
 	fileId?: string;
 	datasetId?: string;
 };
+
 export const Visualization = (props: previewProps) => {
 	const { fileId, datasetId } = props;
 
@@ -53,6 +58,7 @@ export const Visualization = (props: previewProps) => {
 										const componentName =
 											visConfigEntry.visualization_component_id;
 										if (componentName === visComponentDefinition.name) {
+											// use visualization data if available
 											if (
 												visConfigEntry.visualization_data &&
 												visConfigEntry.visualization_data?.length > 0
@@ -60,28 +66,28 @@ export const Visualization = (props: previewProps) => {
 												return visConfigEntry.visualization_data.map(
 													(visualizationDataItem) => {
 														return (
-															<Grid item xs={12} sm={4} md={4} lg={4} xl={4}>
-																{React.cloneElement(
-																	visComponentDefinition.component,
-																	{
-																		visualizationId: visualizationDataItem.id,
-																	}
-																)}
-															</Grid>
+															<VisualizationCard
+																visualizationDataItem={visualizationDataItem}
+																visComponentDefinition={visComponentDefinition}
+															/>
 														);
 													}
 												);
 											} else {
-												return (
-													<Grid item xs={12} sm={4} md={4} lg={4} xl={4}>
-														{React.cloneElement(
-															visComponentDefinition.component,
-															{
-																visConfig: visConfig,
-															}
-														)}
-													</Grid>
-												);
+												// use visualization parameters if available
+												if (Object.keys(visConfigEntry.parameters).length > 0) {
+													return (
+														<VisualizationSpecCard
+															visComponentDefinition={visComponentDefinition}
+															visConfigEntry={visConfigEntry}
+														/>
+													);
+												} else {
+													console.log(
+														"No visualization data or parameters available. " +
+															"Incomplete visualization configuration."
+													);
+												}
 											}
 										}
 									});
@@ -89,26 +95,29 @@ export const Visualization = (props: previewProps) => {
 								// if no visualization config exist, guess which widget to use by looking at the mime type of
 								// the raw bytes
 								else {
+									//check if file size is greater than threshold, if it is, then show no visualization
+									if (fileSummary && fileSummary.bytes && fileSummary.bytes >= config["rawDataVisualizationThreshold"]) {
+										console.log("File is greater than threshold");
+									}
 									// try match mime type first
 									// then fallback to match main type
 									// to instantiate components correspondingly
-									if (
+									else if (
 										fileSummary &&
 										fileSummary.content_type !== undefined &&
 										((fileSummary.content_type.content_type !== undefined &&
 											visComponentDefinition.mimeTypes.includes(
 												fileSummary.content_type.content_type
 											)) ||
-											(fileSummary.content_type.main_type !== undefined &&
+											(fileSummary.content_type.content_type === undefined) && (fileSummary.content_type.main_type !== undefined &&
 												fileSummary.content_type.main_type ===
 													visComponentDefinition.mainType))
 									) {
 										return (
-											<Grid item xs={12} sm={4} md={4} lg={4} xl={4}>
-												{React.cloneElement(visComponentDefinition.component, {
-													fileId: fileId,
-												})}
-											</Grid>
+											<VisualizationRawBytesCard
+												visComponentDefinition={visComponentDefinition}
+												fileId={fileId}
+											/>
 										);
 									}
 									return null;

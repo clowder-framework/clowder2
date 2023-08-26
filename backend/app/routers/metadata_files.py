@@ -29,7 +29,7 @@ from app.models.metadata import (
     MetadataDefinitionDB,
 )
 from app.search.connect import delete_document_by_id
-from app.search.index import index_file_metadata
+from app.search.index import index_file
 
 router = APIRouter()
 
@@ -150,7 +150,7 @@ async def add_file_metadata(
         await md.insert()
 
         # Add an entry to the metadata index
-        await index_file_metadata(es, FileOut(**file.dict()), MetadataOut(**md.dict()))
+        await index_file(es, FileOut(**file.dict()))
         return md.dict()
 
 
@@ -220,9 +220,7 @@ async def replace_file_metadata(
             await md.save()
 
             # Update entry to the metadata index
-            await index_file_metadata(
-                es, FileOut(**file.dict()), MetadataOut(**md.dict()), update=True
-            )
+            await index_file(es, FileOut(**file.dict()), update=True)
             return md.dict()
         else:
             raise HTTPException(status_code=404, detail=f"No metadata found to update")
@@ -320,9 +318,7 @@ async def update_file_metadata(
 
         md = await MetadataDB.find_one(query)
         if md:
-            await index_file_metadata(
-                es, FileOut(**file.dict()), MetadataOut(**md.dict()), update=True
-            )
+            await index_file(es, FileOut(**file.dict()), update=True)
             return await patch_metadata(md, content, es)
         else:
             raise HTTPException(status_code=404, detail=f"No metadata found to update")
@@ -455,7 +451,7 @@ async def delete_file_metadata(
             query.append(MetadataDB.agent.creator.id == agent.creator.id)
 
         # delete from elasticsearch
-        delete_document_by_id(es, "metadata", str(metadata_in.metadata_id))
+        delete_document_by_id(es, "clowder", str(metadata_in.metadata_id))
 
         if (md := await MetadataDB.find_one(*query)) is not None:
             await md.delete()

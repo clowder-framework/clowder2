@@ -15,6 +15,7 @@ interface Config {
 	extractorInterval: number;
 	eventListenerJobStatus: EventListenerJobStatus;
 	streamingBytes: number;
+	rawDataVisualizationThreshold: number;
 }
 
 const config: Config = <Config>{};
@@ -58,5 +59,6 @@ config["eventListenerJobStatus"]["skipped"] = "SKIPPED";
 config["eventListenerJobStatus"]["resubmitted"] = "RESUBMITTED";
 
 config["streamingBytes"] = 1024 * 10; // 10 MB?
+config["rawDataVisualizationThreshold"] = 1024 * 1024 * 10; // 10 MB
 
 export default config;

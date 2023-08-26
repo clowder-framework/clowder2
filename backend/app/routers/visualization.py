@@ -60,7 +60,7 @@ async def add_Visualization(
     )
 
     await visualization_db.insert()
-    visualization_db.content_type = get_content_type(file.content_type, file.file)
+    visualization_db.content_type = get_content_type(file.filename, file.content_type)
     visualization_id = visualization_db.id
 
     # Use unique ID as key for Minio
@@ -70,6 +70,7 @@ async def add_Visualization(
         file.file,
         length=-1,
         part_size=settings.MINIO_UPLOAD_CHUNK_SIZE,
+        content_type=visualization_db.content_type.content_type,
     )  # async write chunk to minio
     visualization_db.bytes = len(
         fs.get_object(settings.MINIO_BUCKET_NAME, str(visualization_id)).data

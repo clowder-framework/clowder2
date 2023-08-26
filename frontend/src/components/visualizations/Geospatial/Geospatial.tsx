@@ -9,26 +9,27 @@ import ImageLayer from "ol/layer/Image";
 import { VisualizationConfigOut } from "../../../openapi/v2";
 
 type GeospatialProps = {
-	visConfig?: VisualizationConfigOut[];
+	visConfigEntry?: VisualizationConfigOut;
 };
 
 export default function Geospatial(props: GeospatialProps) {
-	const { visConfig } = props;
+	const { visConfigEntry } = props;
 
 	const [layerWMS, setLayerWMS] = useState<string | undefined>(undefined);
 	const [map, setMap] = useState<Map | undefined>(undefined);
 	const mapElement = useRef();
 
 	useEffect(() => {
-		if (visConfig !== undefined) {
-			visConfig.forEach(function (vc) {
-				if (vc.parameters && vc.parameters["WMS Layer URL"]) {
-					const wms_url = String(vc.parameters["WMS Layer URL"]);
-					setLayerWMS(wms_url);
-				}
-			});
+		if (visConfigEntry !== undefined) {
+			if (
+				visConfigEntry.parameters &&
+				visConfigEntry.parameters["WMS Layer URL"]
+			) {
+				const wms_url = String(visConfigEntry.parameters["WMS Layer URL"]);
+				setLayerWMS(wms_url);
+			}
 		}
-	}, [visConfig]);
+	}, [visConfigEntry]);
 
 	useEffect(() => {
 		if (layerWMS !== undefined) {

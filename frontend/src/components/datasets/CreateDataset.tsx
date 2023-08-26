@@ -94,7 +94,7 @@ export const CreateDataset = (): JSX.Element => {
 			return { ...prevState, [metadata.definition]: metadata };
 		});
 
-		metadataDefinitionList.every((val, idx) => {
+		metadataDefinitionList.map((val, idx) => {
 			if (val.fields[0].required) {
 				// Condition checks whether the current updated field is a required one
 				if (

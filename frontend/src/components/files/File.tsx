@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import config from "../../app.config";
-import { Box, Button, Grid, Tab, Tabs, Typography } from "@mui/material";
+import { Box, Button, Grid, Stack, Tab, Tabs, Typography } from "@mui/material";
 import { downloadResource, parseDate } from "../../utils/common";
 import { PreviewConfiguration, RootState } from "../../types/data";
 import { useParams, useSearchParams } from "react-router-dom";
@@ -209,6 +209,8 @@ export const File = (): JSX.Element => {
 		paths.slice(0, 1);
 	}
 
+	// add file name to breadcrumb
+
 	if (showForbiddenPage) {
 		return <Forbidden />;
 	} else if (showNotFoundPage) {
@@ -220,10 +222,25 @@ export const File = (): JSX.Element => {
 			{/*Error Message dialogue*/}
 			<ErrorModal errorOpen={errorOpen} setErrorOpen={setErrorOpen} />
 			<Grid container>
-				<Grid item xs={8} sx={{ display: "flex", alignItems: "center" }}>
-					<MainBreadcrumbs paths={paths} />
+				<Grid item xs={10} sx={{ display: "flex", alignItems: "center" }}>
+					<Stack>
+						<Box
+							sx={{
+								display: "inline-flex",
+								justifyContent: "space-between",
+								alignItems: "baseline",
+							}}
+						>
+							<Typography variant="h4" paragraph>
+								{fileSummary.name}
+							</Typography>
+						</Box>
+						<Box>
+							<RoleChip role={fileRole} />
+						</Box>
+					</Stack>
 				</Grid>
-				<Grid item xs={4}>
+				<Grid item xs={2} sx={{ display: "flex-top", alignItems: "center" }}>
 					<FileActionsMenu
 						filename={fileSummary.name}
 						fileId={fileId}
@@ -231,30 +248,14 @@ export const File = (): JSX.Element => {
 					/>
 				</Grid>
 			</Grid>
-			<Grid container>
+			<Grid container spacing={2} sx={{ mt: 2 }}>
 				<Grid item xs={10}>
-					<Box
-						sx={{
-							display: "inline-flex",
-							justifyContent: "space-between",
-							alignItems: "baseline",
-						}}
-					>
-						<Typography variant="h4" paragraph>
-							{fileSummary.name}
+					{Object.keys(fileSummary).length > 0 && (
+						<Typography variant="subtitle2" paragraph>
+							Uploaded {parseDate(fileSummary.created)} by{" "}
+							{fileSummary.creator.first_name} {fileSummary.creator.last_name}
 						</Typography>
-					</Box>
-					<Box>
-						<RoleChip role={fileRole} />
-					</Box>
-					<Box sx={{ mt: 2 }}>
-						{Object.keys(fileSummary).length > 0 && (
-							<Typography variant="subtitle2" paragraph>
-								Uploaded {parseDate(fileSummary.created)} by{" "}
-								{fileSummary.creator.first_name} {fileSummary.creator.last_name}
-							</Typography>
-						)}
-					</Box>
+					)}
 					<Tabs
 						value={selectedTabIndex}
 						onChange={handleTabChange}
@@ -308,6 +309,9 @@ export const File = (): JSX.Element => {
 							disabled={false}
 						/>
 					</Tabs>
+					<Box style={{ padding: "24px 24px 0 24px" }}>
+						<MainBreadcrumbs paths={paths} />
+					</Box>
 					<TabPanel value={selectedTabIndex} index={0}>
 						<Visualization fileId={fileId} />
 					</TabPanel>
