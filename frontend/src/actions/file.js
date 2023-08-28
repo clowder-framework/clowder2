@@ -1,5 +1,5 @@
 import config from "../app.config";
-import { dataURItoFile, getHeader } from "../utils/common";
+import { getHeader } from "../utils/common";
 import { V2 } from "../openapi";
 import { handleErrors } from "./common";
 
@@ -119,9 +119,10 @@ export function fileDeleted(fileId) {
 
 export const CREATE_FILE = "CREATE_FILE";
 
-export function fileCreated(selectedDatasetId, folderId, formData) {
+export function createFile(selectedDatasetId, folderId, selectedFile) {
 	return (dispatch) => {
-		formData["file"] = dataURItoFile(formData["file"]);
+		const formData = new FormData();
+		formData["file"] = selectedFile;
 		return V2.DatasetsService.saveFileApiV2DatasetsDatasetIdFilesPost(
 			selectedDatasetId,
 			formData,
@@ -138,7 +139,7 @@ export function fileCreated(selectedDatasetId, folderId, formData) {
 				dispatch(
 					handleErrors(
 						reason,
-						fileCreated(selectedDatasetId, formData, folderId)
+						createFile(selectedDatasetId, folderId, selectedFile)
 					)
 				);
 			});
@@ -158,9 +159,10 @@ export function resetFileCreated() {
 
 export const UPDATE_FILE = "UPDATE_FILE";
 
-export function fileUpdated(formData, fileId) {
+export function updateFile(selectedFile, fileId) {
 	return (dispatch) => {
-		formData["file"] = dataURItoFile(formData["file"]);
+		const formData = new FormData();
+		formData["file"] = selectedFile;
 		return V2.FilesService.updateFileApiV2FilesFileIdPut(fileId, formData)
 			.then((file) => {
 				dispatch({
@@ -170,7 +172,7 @@ export function fileUpdated(formData, fileId) {
 				});
 			})
 			.catch((reason) => {
-				dispatch(handleErrors(reason, fileUpdated(formData, fileId)));
+				dispatch(handleErrors(reason, updateFile(selectedFile, fileId)));
 			});
 	};
 }
@@ -261,6 +263,38 @@ export function fileDownloaded(
 	};
 }
 
+export const RECEIVE_FILE_PRESIGNED_URL = "RECEIVE_FILE_PRESIGNED_URL";
+export const RESET_FILE_PRESIGNED_URL = "RESET_FILE_PRESIGNED_URL";
+
+export function generateFilePresignedUrl(
+	fileId,
+	fileVersionNum = null,
+	expiresInSeconds = 7 * 24 * 3600
+) {
+	return async (dispatch) => {
+		return V2.FilesService.downloadFileUrlApiV2FilesFileIdUrlGet(
+			fileId,
+			fileVersionNum,
+			expiresInSeconds
+		)
+			.then((json) => {
+				dispatch({
+					type: RECEIVE_FILE_PRESIGNED_URL,
+					receivedAt: Date.now(),
+					presignedUrl: json["presigned_url"],
+				});
+			})
+			.catch((reason) => {
+				dispatch(
+					handleErrors(
+						reason,
+						generateFilePresignedUrl(fileId, fileVersionNum, expiresInSeconds)
+					)
+				);
+			});
+	};
+}
+
 export const SUBMIT_FILE_EXTRACTION = "SUBMIT_FILE_EXTRACTION";
 
 export function submitFileExtractionAction(fileId, extractorName, requestBody) {
@@ -285,34 +319,6 @@ export function submitFileExtractionAction(fileId, extractorName, requestBody) {
 					)
 				);
 			});
-	};
-}
-
-export const GENERATE_FILE_URL = "GENERATE_FILE_URL";
-
-export function generateFileDownloadUrl(fileId, fileVersionNum = 0) {
-	return async (dispatch) => {
-		let url = `${config.hostname}/api/v2/files/${fileId}`;
-		if (fileVersionNum > 0) url = `${url}?version=${fileVersionNum}`;
-
-		const response = await fetch(url, {
-			method: "GET",
-			mode: "cors",
-			headers: await getHeader(),
-		});
-
-		if (response.status === 200) {
-			const blob = await response.blob();
-			dispatch({
-				type: GENERATE_FILE_URL,
-				url: window.URL.createObjectURL(blob),
-				receivedAt: Date.now(),
-			});
-		} else {
-			dispatch(
-				handleErrors(response, generateFileDownloadUrl(fileId, fileVersionNum))
-			);
-		}
 	};
 }
 

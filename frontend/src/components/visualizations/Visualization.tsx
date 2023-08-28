@@ -9,6 +9,7 @@ import { Grid } from "@mui/material";
 import { VisualizationCard } from "./VisualizationCard";
 import { VisualizationRawBytesCard } from "./VisualizationRawBytesCard";
 import { VisualizationSpecCard } from "./VisualizationSpecCard";
+import config from "../../app.config";
 
 type previewProps = {
 	fileId?: string;
@@ -94,10 +95,14 @@ export const Visualization = (props: previewProps) => {
 								// if no visualization config exist, guess which widget to use by looking at the mime type of
 								// the raw bytes
 								else {
+									//check if file size is greater than threshold, if it is, then show no visualization
+									if (fileSummary && fileSummary.bytes && fileSummary.bytes >= config["rawDataVisualizationThreshold"]) {
+										console.log("File is greater than threshold");
+									}
 									// try match mime type first
 									// then fallback to match main type
 									// to instantiate components correspondingly
-									if (
+									else if (
 										fileSummary &&
 										fileSummary.content_type !== undefined &&
 										((fileSummary.content_type.content_type !== undefined &&

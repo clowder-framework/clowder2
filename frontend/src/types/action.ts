@@ -19,7 +19,7 @@ import {
 	UserAPIKeyOut,
 	UserOut,
 	VisualizationConfigOut,
-	VisualizationOut,
+	VisualizationDataOut,
 } from "../openapi/v2";
 import {
 	LIST_USERS,
@@ -27,7 +27,8 @@ import {
 	RECEIVE_USER_PROFILE,
 } from "../actions/user";
 import { CREATE_GROUP, DELETE_GROUP } from "../actions/group";
-import { GENERATE_FILE_URL } from "../actions/file";
+import { RECEIVE_FILE_PRESIGNED_URL } from "../actions/file";
+import { GET_VIS_DATA_PRESIGNED_URL } from "../actions/visualization";
 
 interface RECEIVE_FILES_IN_DATASET {
 	type: "RECEIVE_FILES_IN_DATASET";
@@ -273,9 +274,14 @@ interface DOWNLOAD_FILE {
 	blob: Blob;
 }
 
-interface GENERATE_FILE_URL {
-	type: "GENERATE_FILE_URL";
-	url: string;
+interface RECEIVE_FILE_PRESIGNED_URL {
+	type: "RECEIVE_FILE_PRESIGNED_URL";
+	presignedUrl: string;
+}
+
+interface RESET_FILE_PRESIGNED_URL {
+	type: "RESET_FILE_PRESIGNED_URL";
+	preSignedUrl: string;
 }
 
 interface DELETE_DATASET_METADATA {
@@ -400,7 +406,7 @@ interface ASSIGN_GROUP_MEMBER_ROLE {
 
 interface GET_VIS_DATA {
 	type: "GET_VIS_DATA";
-	visData: VisualizationOut;
+	visData: VisualizationDataOut;
 }
 
 interface GET_VIS_CONFIG {
@@ -413,9 +419,14 @@ interface DOWNLOAD_VIS_DATA {
 	blob: Blob;
 }
 
-interface GENERATE_VIS_URL {
-	type: "GENERATE_VIS_URL";
-	url: string;
+interface GET_VIS_DATA_PRESIGNED_URL {
+	type: "GET_VIS_DATA_PRESIGNED_URL";
+	presignedUrl: string;
+}
+
+interface RESET_VIS_DATA_PRESIGNED_URL {
+	type: "RESET_VIS_DATA_PRESIGNED_URL";
+	preSignedUrl: string;
 }
 
 export type DataAction =
@@ -465,7 +476,8 @@ export type DataAction =
 	| DELETE_DATASET_METADATA
 	| DELETE_FILE_METADATA
 	| DOWNLOAD_FILE
-	| GENERATE_FILE_URL
+	| RECEIVE_FILE_PRESIGNED_URL
+	| RESET_FILE_PRESIGNED_URL
 	| FOLDER_DELETED
 	| GET_FOLDER_PATH
 	| RECEIVE_LISTENERS
@@ -493,4 +505,5 @@ export type DataAction =
 	| GET_VIS_DATA
 	| GET_VIS_CONFIG
 	| DOWNLOAD_VIS_DATA
-	| GENERATE_VIS_URL;
+	| GET_VIS_DATA_PRESIGNED_URL
+	| RESET_VIS_DATA_PRESIGNED_URL;

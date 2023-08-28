@@ -1,8 +1,9 @@
 import os
 
 from fastapi.testclient import TestClient
-from app.tests.utils import create_dataset, upload_file, create_apikey
+
 from app.config import settings
+from app.tests.utils import create_dataset, upload_file, create_apikey
 
 visualization_example = "vis_upload.csv"
 visualization_content_example = "year,location,count\n2024,preview,4"
@@ -64,6 +65,13 @@ def test_visualization(client: TestClient, headers: dict):
         headers=headers,
     )
     assert response.status_code == 200
+
+    response = client.get(
+        f"{settings.API_V2_STR}/visualizations/{vis_id}/url",
+        headers=headers,
+    )
+    assert response.status_code == 200
+    assert response.json().get("presigned_url") is not None
 
     # test that you can get the vis data from the viz config id
     response = client.get(
