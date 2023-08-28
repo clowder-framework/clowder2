@@ -276,14 +276,15 @@ export const Dataset = (): JSX.Element => {
 							disabled={false}
 						/>
 					</Tabs>
-					{folderId !== null ? (
-						<Box>
-							<MainBreadcrumbs paths={paths}></MainBreadcrumbs>
-						</Box>
-					) : (
-						<></>
-					)}
 					<TabPanel value={selectedTabIndex} index={0}>
+						{folderId !== null ? (
+							<Box>
+								<MainBreadcrumbs paths={paths}></MainBreadcrumbs>
+							</Box>
+						) : (
+							<></>
+						)
+						}
 						<FilesTable datasetId={datasetId} folderId={folderId} />
 					</TabPanel>
 					<TabPanel value={selectedTabIndex} index={1}>

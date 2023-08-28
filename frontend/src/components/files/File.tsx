@@ -221,9 +221,7 @@ export const File = (): JSX.Element => {
 		<Layout>
 			{/*Error Message dialogue*/}
 			<ErrorModal errorOpen={errorOpen} setErrorOpen={setErrorOpen} />
-			<Box>
-				<MainBreadcrumbs paths={paths} />
-			</Box>
+			<MainBreadcrumbs paths={paths} />
 			<Grid container>
 				<Grid item xs={10} sx={{ display: "flex", alignItems: "center" }}>
 					<Stack>
