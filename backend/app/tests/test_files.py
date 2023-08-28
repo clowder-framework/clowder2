@@ -4,9 +4,14 @@ from app.config import settings
 from app.tests.utils import create_dataset, upload_file
 
 
-def test_create(client: TestClient, headers: dict):
+def test_create_and_delete(client: TestClient, headers: dict):
     dataset_id = create_dataset(client, headers).get("id")
-    upload_file(client, headers, dataset_id)
+    response = upload_file(client, headers, dataset_id)
+    file = response
+    file_id = response["id"]
+    # DELETE FILE
+    response = client.delete(f"{settings.API_V2_STR}/files/{file_id}", headers=headers)
+    assert response.status_code == 200
 
 
 def test_get_one(client: TestClient, headers: dict):
