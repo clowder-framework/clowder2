@@ -14,7 +14,7 @@ export const MainBreadcrumbs: React.FC<BreadCrumbProps> = (props:BreadCrumbProps
 						 el="breadcrumb">
 				{
 					paths.map((path:any, index:number) => {
-							return (<Link component="button" key={index} onClick={() => history(path["url"])}>{path["name"]}
+							return (<Link component="button" style={{ textDecoration: "none"}} key={index} onClick={() => history(path["url"])}>{path["name"]}
 							</Link>);
 					})
 				}
