@@ -25,11 +25,11 @@ from app.models.listeners import (
     EventListenerJobUpdateViewList,
 )
 from app.models.metadata import MetadataDB, MetadataDefinitionDB
+from app.models.thumbnails import ThumbnailDB
 from app.models.tokens import TokenDB
 from app.models.users import UserDB, UserAPIKeyDB, ListenerAPIKeyDB
 from app.models.visualization_config import VisualizationConfigDB
 from app.models.visualization_data import VisualizationDataDB
-from app.models.thumbnails import ThumbnailDB
 from app.routers import folders, groups
 from app.routers import (
     users,
@@ -46,8 +46,8 @@ from app.routers import (
     feeds,
     jobs,
     visualization,
+    thumbnails,
 )
-
 # setup loggers
 # logging.config.fileConfig('logging.conf', disable_existing_loggers=False)
 from app.search.config import indexSettings
@@ -172,6 +172,12 @@ api_router.include_router(
     visualization.router,
     prefix="/visualizations",
     tags=["visualizations"],
+    dependencies=[Depends(get_current_username)],
+)
+api_router.include_router(
+    thumbnails.router,
+    prefix="/thumbnails",
+    tags=["thumbnails"],
     dependencies=[Depends(get_current_username)],
 )
 api_router.include_router(keycloak.router, prefix="/auth", tags=["auth"])

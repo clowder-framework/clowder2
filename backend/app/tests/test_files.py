@@ -1,7 +1,9 @@
+import os
+
 from fastapi.testclient import TestClient
 
 from app.config import settings
-from app.tests.utils import create_dataset, upload_file
+from app.tests.utils import create_dataset, upload_file, generate_png
 
 
 def test_create(client: TestClient, headers: dict):
@@ -41,13 +43,15 @@ def test_add_thumbnail(client: TestClient, headers: dict):
     resp = upload_file(client, headers, dataset_id)
     file_id = resp["id"]
 
+    generate_png("test.png")
     file_data = {"file": open("test.png", "rb")}
-    resp = client.post(
+    response = client.post(
         f"{settings.API_V2_STR}/thumbnails",
         headers=headers,
         files=file_data,
     )
-    thumbnail_id = resp["id"]
+    thumbnail_id = response.json()["id"]
+    os.remove("test.png")
 
     resp = client.patch(
         f"{settings.API_V2_STR}/files/{file_id}/thumbnail/{thumbnail_id}",
