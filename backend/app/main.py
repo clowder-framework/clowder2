@@ -48,6 +48,7 @@ from app.routers import (
     visualization,
     thumbnails,
 )
+
 # setup loggers
 # logging.config.fileConfig('logging.conf', disable_existing_loggers=False)
 from app.search.config import indexSettings
