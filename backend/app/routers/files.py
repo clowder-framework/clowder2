@@ -1,5 +1,5 @@
 import io
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Optional, List
 from typing import Union
 
@@ -294,6 +294,58 @@ async def download_file(
             # Increment download count
             await file.update(Inc({FileDB.downloads: 1}))
         return response
+    else:
+        raise HTTPException(status_code=404, detail=f"File {file_id} not found")
+
+
+@router.get("/{file_id}/url/")
+async def download_file_url(
+    file_id: str,
+    version: Optional[int] = None,
+    expires_in_seconds: Optional[int] = 3600,
+    external_fs: Minio = Depends(dependencies.get_external_fs),
+    allow: bool = Depends(FileAuthorization("viewer")),
+):
+    # If file exists in MongoDB, download from Minio
+    if (file := await FileDB.get(PydanticObjectId(file_id))) is not None:
+        if expires_in_seconds is None:
+            expires = timedelta(seconds=settings.MINIO_EXPIRES)
+        else:
+            expires = timedelta(seconds=expires_in_seconds)
+
+        if version is not None:
+            # Version is specified, so get the minio ID from versions table if possible
+            file_vers = await FileVersionDB.find_one(
+                FileVersionDB.file_id == ObjectId(file_id),
+                FileVersionDB.version_num == version,
+            )
+            if file_vers is not None:
+                vers = FileVersion(**file_vers.dict())
+                # If no version specified, get latest version directly
+                presigned_url = external_fs.presigned_get_object(
+                    bucket_name=settings.MINIO_BUCKET_NAME,
+                    object_name=file_id,
+                    version_id=vers.version_id,
+                    expires=expires,
+                )
+            else:
+                raise HTTPException(
+                    status_code=404,
+                    detail=f"File {file_id} version {version} not found",
+                )
+        else:
+            # If no version specified, get latest version directly
+            presigned_url = external_fs.presigned_get_object(
+                bucket_name=settings.MINIO_BUCKET_NAME,
+                object_name=file_id,
+                expires=expires,
+            )
+
+        # Increment download count
+        await file.update(Inc({FileDB.downloads: 1}))
+
+        # return presigned url
+        return {"presigned_url": presigned_url}
     else:
         raise HTTPException(status_code=404, detail=f"File {file_id} not found")
 

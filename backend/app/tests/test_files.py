@@ -54,3 +54,20 @@ def test_add_thumbnail(client: TestClient, headers: dict):
 
     result = resp.json()
     assert result["thumbnail_id"] == thumbnail_id
+
+
+def test_download_file_url(client: TestClient, headers: dict):
+    dataset_id = create_dataset(client, headers).get("id")
+    file_resp = upload_file(client, headers, dataset_id)
+    response = client.get(
+        f"{settings.API_V2_STR}/files/{file_resp['id']}/url",
+        headers=headers,
+    )
+    assert response.status_code == 200
+    assert response.json().get("presigned_url") is not None
+
+    # clean after test
+    response = client.delete(
+        f"{settings.API_V2_STR}/datasets/{dataset_id}", headers=headers
+    )
+    assert response.status_code == 200

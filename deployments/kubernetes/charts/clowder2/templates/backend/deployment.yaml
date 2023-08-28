@@ -43,6 +43,8 @@ spec:
 #              value: {{ include "clowder2.name" . }}-minio-headless:9000
             - name: MINIO_EXTERNAL_SERVER_URL
               value: minio-api.{{ .Values.hostname }}
+            - name: MINIO_SECURE
+              value: "true"
             - name: MINIO_BUCKET_NAME
               value: clowder
             - name: MINIO_ACCESS_KEY
