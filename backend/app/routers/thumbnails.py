@@ -19,7 +19,7 @@ security = HTTPBearer()
 
 
 @router.post("/files/{file_id}", response_model=ThumbnailOut)
-async def add_thumbnail(
+async def add_thumbnail_to_file(
     file_id: str,
     tooltip: Optional[str] = None,
     user=Depends(get_current_user),
@@ -32,13 +32,11 @@ async def add_thumbnail(
         tooltip: hover text to show over the thumbnail
     """
     thumb_in = ThumbnailIn(tooltip=tooltip)
-
     thumb_db = ThumbnailDB(
         **thumb_in.dict(),
         creator=user,
         resource=MongoDBRef(collection="files", resource_id=PydanticObjectId(file_id)),
     )
-
     await thumb_db.insert()
     thumb_db.content_type = get_content_type(file.filename, file.content_type)
 
@@ -55,7 +53,46 @@ async def add_thumbnail(
         fs.get_object(settings.MINIO_BUCKET_NAME, str(thumb_db.id)).data
     )
     await thumb_db.replace()
+    return thumb_db.dict()
 
+
+@router.post("/files/{dataset_id}", response_model=ThumbnailOut)
+async def add_thumbnail_to_dataset(
+    dataset_id: str,
+    tooltip: Optional[str] = None,
+    user=Depends(get_current_user),
+    fs: Minio = Depends(dependencies.get_fs),
+    file: UploadFile = File(...),
+):
+    """Insert Thumbnail object into MongoDB (makes Clowder ID), then Minio.
+
+    Arguments:
+        tooltip: hover text to show over the thumbnail
+    """
+    thumb_in = ThumbnailIn(tooltip=tooltip)
+    thumb_db = ThumbnailDB(
+        **thumb_in.dict(),
+        creator=user,
+        resource=MongoDBRef(
+            collection="datasets", resource_id=PydanticObjectId(dataset_id)
+        ),
+    )
+    await thumb_db.insert()
+    thumb_db.content_type = get_content_type(file.filename, file.content_type)
+
+    # Use unique ID as key for Minio
+    response = fs.put_object(
+        settings.MINIO_BUCKET_NAME,
+        str(thumb_db.id),
+        file.file,
+        length=-1,
+        part_size=settings.MINIO_UPLOAD_CHUNK_SIZE,
+        content_type=thumb_db.content_type.content_type,
+    )  # async write chunk to minio
+    thumb_db.bytes = len(
+        fs.get_object(settings.MINIO_BUCKET_NAME, str(thumb_db.id)).data
+    )
+    await thumb_db.replace()
     return thumb_db.dict()
 
 
@@ -68,7 +105,7 @@ async def remove_thumbnail(thumb_id: str, fs: Minio = Depends(dependencies.get_f
     raise HTTPException(status_code=404, detail=f"Thumbnail {thumb_id} not found")
 
 
-@router.get("/{thumbnail_id}/bytes")
+@router.get("/{thumbnail_id}")
 async def download_thumbnail(
     thumbnail_id: str, fs: Minio = Depends(dependencies.get_fs)
 ):
