@@ -29,6 +29,7 @@ from app.models.tokens import TokenDB
 from app.models.users import UserDB, UserAPIKeyDB, ListenerAPIKeyDB
 from app.models.visualization_config import VisualizationConfigDB
 from app.models.visualization_data import VisualizationDataDB
+from app.models.thumbnails import ThumbnailDB
 from app.routers import folders, groups
 from app.routers import (
     users,
@@ -214,6 +215,7 @@ async def startup_beanie():
             ErrorDB,
             VisualizationConfigDB,
             VisualizationDataDB,
+            ThumbnailDB,
         ],
         recreate_views=True,
     )

@@ -40,7 +40,15 @@ def test_add_thumbnail(client: TestClient, headers: dict):
     dataset_id = create_dataset(client, headers).get("id")
     resp = upload_file(client, headers, dataset_id)
     file_id = resp["id"]
-    thumbnail_id = "64ac275727c83a6786dd9fd4"
+
+    file_data = {"file": open("test.png", "rb")}
+    resp = client.post(
+        f"{settings.API_V2_STR}/thumbnails",
+        headers=headers,
+        files=file_data,
+    )
+    thumbnail_id = resp["id"]
+
     resp = client.patch(
         f"{settings.API_V2_STR}/files/{file_id}/thumbnail/{thumbnail_id}",
         headers=headers,
