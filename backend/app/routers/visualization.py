@@ -1,4 +1,5 @@
-from typing import List
+from datetime import timedelta
+from typing import List, Optional
 
 from beanie import PydanticObjectId
 from bson import ObjectId
@@ -133,6 +134,37 @@ async def download_visualization(
             "attachment; filename=%s" % visualization.name
         )
         return response
+    else:
+        raise HTTPException(
+            status_code=404, detail=f"Visualization {visualization_id} not found"
+        )
+
+
+@router.get("/{visualization_id}/url/")
+async def download_visualization_url(
+    visualization_id: str,
+    expires_in_seconds: Optional[int] = 3600,
+    external_fs: Minio = Depends(dependencies.get_external_fs),
+):
+    # If visualization exists in MongoDB, download from Minio
+    if (
+        visualization := await VisualizationDataDB.get(
+            PydanticObjectId(visualization_id)
+        )
+    ) is not None:
+        if expires_in_seconds is None:
+            expires = timedelta(seconds=settings.MINIO_EXPIRES)
+        else:
+            expires = timedelta(seconds=expires_in_seconds)
+
+        # Generate a signed URL with expiration time
+        presigned_url = external_fs.presigned_get_object(
+            bucket_name=settings.MINIO_BUCKET_NAME,
+            object_name=visualization_id,
+            expires=expires,
+        )
+
+        return {"presigned_url": presigned_url}
     else:
         raise HTTPException(
             status_code=404, detail=f"Visualization {visualization_id} not found"

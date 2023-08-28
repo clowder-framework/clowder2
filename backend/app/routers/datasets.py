@@ -10,6 +10,7 @@ from typing import List, Optional
 
 from beanie import PydanticObjectId
 from beanie.operators import Or
+from beanie.odm.operators.update.general import Inc
 from bson import ObjectId
 from bson import json_util
 from elasticsearch import Elasticsearch
@@ -17,9 +18,9 @@ from fastapi import APIRouter, HTTPException, Depends, Security
 from fastapi import (
     File,
     UploadFile,
-    Response,
     Request,
 )
+from fastapi.responses import StreamingResponse
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from minio import Minio
 from pika.adapters.blocking_connection import BlockingChannel
@@ -688,13 +689,15 @@ async def download_dataset(
             print("could not delete file")
             print(e)
 
-        # TODO: Increment dataset download count, update index
-
-        return Response(
-            stream.getvalue(),
+        # Get content type & open file stream
+        response = StreamingResponse(
+            stream,
             media_type="application/x-zip-compressed",
-            headers={"Content-Disposition": f'attachment;filename="{zip_name}"'},
         )
+        response.headers["Content-Disposition"] = "attachment; filename=%s" % zip_name
+        # Increment download count
+        await dataset.update(Inc({DatasetDB.downloads: 1}))
+        return response
     raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
 
 

@@ -13,18 +13,21 @@ export class FilesService {
      * Download File
      * @param fileId
      * @param version
+     * @param increment
      * @returns any Successful Response
      * @throws ApiError
      */
     public static downloadFileApiV2FilesFileIdGet(
         fileId: string,
         version?: number,
+        increment: boolean = true,
     ): CancelablePromise<any> {
         return __request({
             method: 'GET',
             path: `/api/v2/files/${fileId}`,
             query: {
                 'version': version,
+                'increment': increment,
             },
             errors: {
                 422: `Validation Error`,
@@ -66,6 +69,32 @@ export class FilesService {
         return __request({
             method: 'DELETE',
             path: `/api/v2/files/${fileId}`,
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+
+    /**
+     * Download File Url
+     * @param fileId
+     * @param version
+     * @param expiresInSeconds
+     * @returns any Successful Response
+     * @throws ApiError
+     */
+    public static downloadFileUrlApiV2FilesFileIdUrlGet(
+        fileId: string,
+        version?: number,
+        expiresInSeconds: number = 3600,
+    ): CancelablePromise<any> {
+        return __request({
+            method: 'GET',
+            path: `/api/v2/files/${fileId}/url/`,
+            query: {
+                'version': version,
+                'expires_in_seconds': expiresInSeconds,
+            },
             errors: {
                 422: `Validation Error`,
             },

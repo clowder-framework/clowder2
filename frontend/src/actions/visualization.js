@@ -93,28 +93,32 @@ export function downloadVisData(
 	};
 }
 
-export const GENERATE_VIS_URL = "GENERATE_VIS_URL";
+export const GET_VIS_DATA_PRESIGNED_URL = "GET_VIS_DATA_PRESIGNED_URL";
+export const RESET_VIS_DATA_PRESIGNED_URL = "RESET_VIS_DATA_PRESIGNED_URL";
 
-export function generateVisDataDownloadUrl(visualizationId) {
+export function generateVisPresignedUrl(
+	visualizationId,
+	expiresInSeconds = 7 * 24 * 3600
+) {
 	return async (dispatch) => {
-		let endpoint = `${config.hostname}/api/v2/visualizations/${visualizationId}/bytes`;
-		const response = await fetch(endpoint, {
-			method: "GET",
-			mode: "cors",
-			headers: await getHeader(),
-		});
-
-		if (response.status === 200) {
-			const blob = await response.blob();
-			dispatch({
-				type: GENERATE_VIS_URL,
-				url: window.URL.createObjectURL(blob),
-				receivedAt: Date.now(),
+		return V2.VisualizationsService.downloadVisualizationUrlApiV2VisualizationsVisualizationIdUrlGet(
+			visualizationId,
+			expiresInSeconds
+		)
+			.then((json) => {
+				dispatch({
+					type: GET_VIS_DATA_PRESIGNED_URL,
+					receivedAt: Date.now(),
+					presignedUrl: json["presigned_url"],
+				});
+			})
+			.catch((reason) => {
+				dispatch(
+					handleErrors(
+						reason,
+						generateVisPresignedUrl(visualizationId, expiresInSeconds)
+					)
+				);
 			});
-		} else {
-			dispatch(
-				handleErrors(response, generateVisDataDownloadUrl(visualizationId))
-			);
-		}
 	};
 }
