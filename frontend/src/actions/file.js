@@ -1,5 +1,5 @@
 import config from "../app.config";
-import { dataURItoFile, getHeader } from "../utils/common";
+import { getHeader } from "../utils/common";
 import { V2 } from "../openapi";
 import { handleErrors } from "./common";
 
@@ -119,9 +119,10 @@ export function fileDeleted(fileId) {
 
 export const CREATE_FILE = "CREATE_FILE";
 
-export function fileCreated(selectedDatasetId, folderId, formData) {
+export function createFile(selectedDatasetId, folderId, selectedFile) {
 	return (dispatch) => {
-		formData["file"] = dataURItoFile(formData["file"]);
+		const formData = new FormData();
+		formData["file"] = selectedFile;
 		return V2.DatasetsService.saveFileApiV2DatasetsDatasetIdFilesPost(
 			selectedDatasetId,
 			formData,
@@ -138,7 +139,7 @@ export function fileCreated(selectedDatasetId, folderId, formData) {
 				dispatch(
 					handleErrors(
 						reason,
-						fileCreated(selectedDatasetId, formData, folderId)
+						createFile(selectedDatasetId, folderId, selectedFile)
 					)
 				);
 			});
@@ -158,9 +159,10 @@ export function resetFileCreated() {
 
 export const UPDATE_FILE = "UPDATE_FILE";
 
-export function fileUpdated(formData, fileId) {
+export function updateFile(selectedFile, fileId) {
 	return (dispatch) => {
-		formData["file"] = dataURItoFile(formData["file"]);
+		const formData = new FormData();
+		formData["file"] = selectedFile;
 		return V2.FilesService.updateFileApiV2FilesFileIdPut(fileId, formData)
 			.then((file) => {
 				dispatch({
@@ -170,7 +172,7 @@ export function fileUpdated(formData, fileId) {
 				});
 			})
 			.catch((reason) => {
-				dispatch(handleErrors(reason, fileUpdated(formData, fileId)));
+				dispatch(handleErrors(reason, updateFile(selectedFile, fileId)));
 			});
 	};
 }

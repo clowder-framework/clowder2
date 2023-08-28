@@ -56,7 +56,6 @@ async def submit_file_job(
     parameters: dict,
     user: UserOut,
     rabbitmq_client: BlockingChannel,
-    token: str = Depends(get_token),
 ):
     # Create an entry in job history with unique ID
     job = EventListenerJobDB(

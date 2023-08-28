@@ -43,7 +43,6 @@ async def check_feed_listeners(
     file_out: FileOut,
     user: UserOut,
     rabbitmq_client: BlockingChannel,
-    token: str,
 ):
     """Automatically submit new file to listeners on feeds that fit the search criteria."""
     listener_ids_found = []
@@ -64,7 +63,6 @@ async def check_feed_listeners(
                 {},  # parameters
                 user,
                 rabbitmq_client,
-                token,
             )
     return listener_ids_found
 

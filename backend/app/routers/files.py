@@ -91,7 +91,6 @@ async def add_file_entry(
     fs: Minio,
     es: Elasticsearch,
     rabbitmq_client: BlockingChannel,
-    token: str,
     file: Optional[io.BytesIO] = None,
     content_type: Optional[str] = None,
 ):
@@ -105,7 +104,7 @@ async def add_file_entry(
 
     await new_file.insert()
     new_file_id = new_file.id
-    content_type_obj = get_content_type(content_type, file)
+    content_type_obj = get_content_type(new_file.name, content_type)
 
     # Use unique ID as key for Minio and get initial version ID
     response = fs.put_object(
@@ -141,7 +140,10 @@ async def add_file_entry(
 
     # Submit file job to any qualifying feeds
     await check_feed_listeners(
-        es, FileOut(**new_file.dict()), user, rabbitmq_client, token
+        es,
+        FileOut(**new_file.dict()),
+        user,
+        rabbitmq_client,
     )
 
 
@@ -259,6 +261,7 @@ async def update_file(
 async def download_file(
     file_id: str,
     version: Optional[int] = None,
+    increment: Optional[bool] = True,
     fs: Minio = Depends(dependencies.get_fs),
     allow: bool = Depends(FileAuthorization("viewer")),
 ):
@@ -287,8 +290,9 @@ async def download_file(
         # Get content type & open file stream
         response = StreamingResponse(content.stream(settings.MINIO_UPLOAD_CHUNK_SIZE))
         response.headers["Content-Disposition"] = "attachment; filename=%s" % file.name
-        # Increment download count
-        await file.update(Inc({FileDB.downloads: 1}))
+        if increment:
+            # Increment download count
+            await file.update(Inc({FileDB.downloads: 1}))
         return response
     else:
         raise HTTPException(status_code=404, detail=f"File {file_id} not found")
@@ -421,7 +425,6 @@ async def post_file_extract(
             parameters,
             user,
             rabbitmq_client,
-            access_token,
         )
     else:
         raise HTTPException(status_code=404, detail=f"File {file_id} not found")

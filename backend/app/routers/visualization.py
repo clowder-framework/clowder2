@@ -61,7 +61,7 @@ async def add_Visualization(
     )
 
     await visualization_db.insert()
-    visualization_db.content_type = get_content_type(file.content_type, file.file)
+    visualization_db.content_type = get_content_type(file.filename, file.content_type)
     visualization_id = visualization_db.id
 
     # Use unique ID as key for Minio
