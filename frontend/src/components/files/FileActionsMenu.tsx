@@ -35,7 +35,7 @@ type FileActionsMenuProps = {
 };
 
 export const FileActionsMenu = (props: FileActionsMenuProps): JSX.Element => {
-	const { fileId, filename, datasetId } = props;
+	const { fileId, datasetId } = props;
 
 	const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
 	const [fileShareModalOpen, setFileShareModalOpen] = useState(false);
