@@ -10,7 +10,7 @@ from app.models.users import UserOut
 
 
 class ThumbnailBase(BaseModel):
-    tooltip: Optional[str] = None
+    pass
 
 
 class ThumbnailIn(ThumbnailBase):
@@ -21,7 +21,6 @@ class ThumbnailDB(Document, ThumbnailBase):
     creator: UserOut
     created: datetime = Field(default_factory=datetime.utcnow)
     modified: datetime = Field(default_factory=datetime.utcnow)
-    resource: MongoDBRef
     bytes: int = 0
     content_type: ContentType = ContentType()
 

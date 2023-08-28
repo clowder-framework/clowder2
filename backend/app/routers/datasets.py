@@ -13,13 +13,17 @@ from beanie.operators import Or
 from bson import ObjectId
 from bson import json_util
 from elasticsearch import Elasticsearch
-from fastapi import APIRouter, HTTPException, Depends, Security
 from fastapi import (
+    APIRouter,
+    HTTPException,
+    Depends,
+    Security,
     File,
     UploadFile,
     Response,
     Request,
 )
+from fastapi.responses import StreamingResponse
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from minio import Minio
 from pika.adapters.blocking_connection import BlockingChannel
@@ -48,6 +52,7 @@ from app.models.folders import FolderOut, FolderIn, FolderDB, FolderDBViewList
 from app.models.metadata import MetadataDB
 from app.models.pyobjectid import PyObjectId
 from app.models.users import UserOut
+from app.models.thumbnails import ThumbnailDB
 from app.rabbitmq.listeners import submit_dataset_job
 from app.routers.files import add_file_entry, remove_file_entry
 from app.search.connect import (
@@ -257,20 +262,6 @@ async def get_dataset_files(
         query.append(FileDBViewList.folder_id == ObjectId(folder_id))
     files = await FileDBViewList.find(*query).skip(skip).limit(limit).to_list()
     return [file.dict() for file in files]
-
-
-@router.patch("/{dataset_id}/thumbnail/{thumbnail_id}", response_model=DatasetOut)
-async def add_dataset_thumbnail(
-    dataset_id: str,
-    thumbnail_id: str,
-    allow: bool = Depends(Authorization("editor")),
-):
-    if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
-        dataset.thumbnail_id = thumbnail_id
-        await dataset.save()
-
-        return dataset.dict()
-    raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
 
 
 @router.put("/{dataset_id}", response_model=DatasetOut)
@@ -729,3 +720,51 @@ async def get_dataset_extract(
         )
     else:
         raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
+
+
+@router.get("/{dataset_id}/thumbnail")
+async def download_dataset_thumbnail(
+    dataset_id: str,
+    fs: Minio = Depends(dependencies.get_fs),
+    allow: bool = Depends(Authorization("viewer")),
+):
+    # If dataset exists in MongoDB, download from Minio
+    if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
+        if dataset.thumbnail_id is not None:
+            content = fs.get_object(
+                settings.MINIO_BUCKET_NAME, str(dataset.thumbnail_id)
+            )
+        else:
+            raise HTTPException(
+                status_code=404,
+                detail=f"Dataset {dataset_id} has no associated thumbnail",
+            )
+
+        # Get content type & open file stream
+        response = StreamingResponse(content.stream(settings.MINIO_UPLOAD_CHUNK_SIZE))
+        # TODO: How should filenames be handled for thumbnails?
+        response.headers["Content-Disposition"] = "attachment; filename=%s" % "thumb"
+        return response
+    else:
+        raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
+
+
+@router.patch("/{dataset_id}/thumbnail/{thumbnail_id}", response_model=DatasetOut)
+async def add_dataset_thumbnail(
+    dataset_id: str,
+    thumbnail_id: str,
+    allow: bool = Depends(Authorization("editor")),
+):
+    if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
+        if (
+            thumbnail := await ThumbnailDB.get(PydanticObjectId(thumbnail_id))
+        ) is not None:
+            # TODO: Should we garbage collect existing thumbnail if nothing else points to it?
+            dataset.thumbnail_id = thumbnail_id
+            await dataset.save()
+            return dataset.dict()
+        else:
+            raise HTTPException(
+                status_code=404, detail=f"Thumbnail {thumbnail_id} not found"
+            )
+    raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
