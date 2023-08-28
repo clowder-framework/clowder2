@@ -25,9 +25,6 @@ async def add_thumbnail(
     fs: Minio = Depends(dependencies.get_fs),
     file: UploadFile = File(...),
 ):
-    Arguments:
-        tooltip: hover text to show over the thumbnail
-    """
     """Insert Thumbnail object into MongoDB (makes Clowder ID), then Minio"""
     thumb_in = ThumbnailIn()
     thumb_db = ThumbnailDB(
