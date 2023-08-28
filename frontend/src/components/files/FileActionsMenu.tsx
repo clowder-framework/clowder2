@@ -86,7 +86,7 @@ export const FileActionsMenu = (props: FileActionsMenuProps): JSX.Element => {
 		history(`/datasets/${datasetId}`);
 	};
 	const handleShareLinkClick = () => {
-		generateFilePresignedUrl(fileId, null, 3600);
+		generateFilePresignedUrl(fileId, null, 7 * 24 * 3600);
 		setFileShareModalOpen(true);
 	};
 	const setFileShareModalClose = () => {

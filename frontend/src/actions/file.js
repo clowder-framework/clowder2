@@ -256,7 +256,7 @@ export const RESET_FILE_PRESIGNED_URL = "RESET_FILE_PRESIGNED_URL";
 export function generateFilePresignedUrl(
 	fileId,
 	fileVersionNum = null,
-	expiresInSeconds = null
+	expiresInSeconds = 7 * 24 * 3600
 ) {
 	return async (dispatch) => {
 		return V2.FilesService.downloadFileUrlApiV2FilesFileIdUrlGet(

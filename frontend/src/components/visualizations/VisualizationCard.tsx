@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { Button, Card, CardActions, CardContent, Grid } from "@mui/material";
 import Collapse from "@mui/material/Collapse";
 import { VisualizationDataDetail } from "./VisualizationDataDetail";
@@ -24,23 +24,21 @@ export const VisualizationCard = (props: previewProps) => {
 
 	// share visualization
 	const dispatch = useDispatch();
-	const generateVisPresignedUrl = (visualizationId: string | undefined) =>
-		dispatch(generateVisPresignedUrlAction(visualizationId));
+	const generateVisPresignedUrl = (
+		visualizationId: string | undefined,
+		expiresInSeconds: number | undefined
+	) =>
+		dispatch(generateVisPresignedUrlAction(visualizationId, expiresInSeconds));
 	const presignedUrl = useSelector(
 		(state: RootState) => state.visualization.presignedUrl
 	);
-	useEffect(() => {
-		if (visShareModalOpen) {
-			generateVisPresignedUrl(visualizationDataItem.id);
-		}
-	}, [visShareModalOpen]);
 
 	const handleExpandClick = () => {
 		setExpanded(!expanded);
 	};
 
 	const handleShareLinkClick = () => {
-		generateVisPresignedUrl(visualizationDataItem.id);
+		generateVisPresignedUrl(visualizationDataItem.id, 7 * 24 * 3600);
 		setVisShareModalOpen(true);
 	};
 	const setVisShareModalClose = () => {

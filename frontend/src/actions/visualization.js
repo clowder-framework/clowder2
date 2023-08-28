@@ -98,7 +98,7 @@ export const RESET_VIS_DATA_PRESIGNED_URL = "RESET_VIS_DATA_PRESIGNED_URL";
 
 export function generateVisPresignedUrl(
 	visualizationId,
-	expiresInSeconds = null
+	expiresInSeconds = 7 * 24 * 3600
 ) {
 	return async (dispatch) => {
 		return V2.VisualizationsService.downloadVisualizationUrlApiV2VisualizationsVisualizationIdUrlGet(
