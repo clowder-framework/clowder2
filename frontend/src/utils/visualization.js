@@ -4,14 +4,12 @@ import config from "../app.config";
 export async function downloadThumbnail(thumbnailId, title = null) {
 	const url = `${config.hostname}/api/v2/thumbnails/${thumbnailId}`;
 
-	console.log(url);
 	const authHeader = getHeader();
 	const response = await fetch(url, {
 		method: "GET",
 		mode: "cors",
 		headers: authHeader,
 	});
-	console.log(response);
 	if (response.status === 200) {
 		const blob = await response.blob();
 		if (window.navigator.msSaveOrOpenBlob) {
