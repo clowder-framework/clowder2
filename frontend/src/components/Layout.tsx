@@ -23,13 +23,13 @@ import { useSelector } from "react-redux";
 import { RootState } from "../types/data";
 import { AddBox, Create, Explore } from "@material-ui/icons";
 import HistoryIcon from "@mui/icons-material/History";
-import { InputSearchBox } from "./search/InputSearchBox";
 import GroupIcon from "@mui/icons-material/Group";
 import Gravatar from "react-gravatar";
 import PersonIcon from "@mui/icons-material/Person";
 import { getCurrEmail } from "../utils/common";
 import VpnKeyIcon from "@mui/icons-material/VpnKey";
 import LogoutIcon from "@mui/icons-material/Logout";
+import { EmbeddedSearch } from "./search/EmbeddedSearch";
 
 const drawerWidth = 240;
 
@@ -158,7 +158,8 @@ export default function PersistentDrawerLeft(props) {
 
 					{/*for searching*/}
 					<SearchDiv hidden={embeddedSearchHidden}>
-						<InputSearchBox />
+						{/*	<InputSearchBox />*/}
+						<EmbeddedSearch />
 					</SearchDiv>
 					<Box sx={{ flexGrow: 1 }} />
 					<Box sx={{ marginLeft: "auto" }}>
