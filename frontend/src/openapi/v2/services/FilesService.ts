@@ -76,6 +76,32 @@ export class FilesService {
     }
 
     /**
+     * Download File Url
+     * @param fileId
+     * @param version
+     * @param expiresInSeconds
+     * @returns any Successful Response
+     * @throws ApiError
+     */
+    public static downloadFileUrlApiV2FilesFileIdUrlGet(
+        fileId: string,
+        version?: number,
+        expiresInSeconds: number = 3600,
+    ): CancelablePromise<any> {
+        return __request({
+            method: 'GET',
+            path: `/api/v2/files/${fileId}/url/`,
+            query: {
+                'version': version,
+                'expires_in_seconds': expiresInSeconds,
+            },
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+
+    /**
      * Get File Summary
      * @param fileId
      * @returns FileOut Successful Response

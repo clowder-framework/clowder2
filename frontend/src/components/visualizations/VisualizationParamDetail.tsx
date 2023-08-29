@@ -19,7 +19,7 @@ export function VisualizationParamDetail(props: FileAboutProps) {
 	return (
 		<>
 			<Typography variant="h5" gutterBottom>
-				Details
+				Visualization Information
 			</Typography>
 			<StackedList keyValues={details} />
 		</>
