@@ -16,7 +16,7 @@ To programatically add a thumbnail to a file or dataset:
 1. POST an image to the `api/v2/thumbnails` endpoint to upload it to the system. The response will include
    a `thumbnail_id`.
 2. Associate the thumbnail with one or more resources by issuing a PATCH request
-   to `api/v2/files/:file_id/thumbnails/:thumbnail_id` or `api/v2/datasets/:dataset_id/thumbnails/:thumbnail_id`.
+   to `api/v2/files/:file_id/thumbnail/:thumbnail_id` or `api/v2/datasets/:dataset_id/thumbnail/:thumbnail_id`.
 3. Retrieve the thumbnail (e.g. to render on a frontend GUI) by issuing a GET request
    to `api/v2/files/:file_id/thumbnail`.
 
