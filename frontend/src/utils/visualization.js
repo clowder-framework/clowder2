@@ -2,14 +2,16 @@ import { getHeader } from "./common";
 import config from "../app.config";
 
 export async function downloadThumbnail(thumbnailId, title = null) {
-	const url = `${config.hostname}/thumbnails/${thumbnailId}/blob?superAdmin=true`;
+	const url = `${config.hostname}/api/v2/thumbnails/${thumbnailId}`;
+
+	console.log(url);
 	const authHeader = getHeader();
 	const response = await fetch(url, {
 		method: "GET",
 		mode: "cors",
 		headers: authHeader,
 	});
-
+	console.log(response);
 	if (response.status === 200) {
 		const blob = await response.blob();
 		if (window.navigator.msSaveOrOpenBlob) {
@@ -29,7 +31,7 @@ export async function downloadThumbnail(thumbnailId, title = null) {
 }
 
 export async function generateVisDataDownloadUrl(visualizationId) {
-	let endpoint = `${config.hostname}/api/v2/visualizations/${visualizationId}/bytes`;
+	const endpoint = `${config.hostname}/api/v2/visualizations/${visualizationId}/bytes`;
 	const response = await fetch(endpoint, {
 		method: "GET",
 		mode: "cors",
@@ -63,7 +65,7 @@ export async function generateFileDownloadUrl(fileId, fileVersionNum = 0) {
 }
 
 export async function downloadVisData(visualizationId) {
-	let endpoint = `${config.hostname}/api/v2/visualizations/${visualizationId}/bytes`;
+	const endpoint = `${config.hostname}/api/v2/visualizations/${visualizationId}/bytes`;
 	const response = await fetch(endpoint, {
 		method: "GET",
 		mode: "cors",
@@ -79,7 +81,7 @@ export async function downloadVisData(visualizationId) {
 
 export async function fileDownloaded(fileId, fileVersionNum = 0) {
 	let endpoint = `${config.hostname}/api/v2/files/${fileId}`;
-	if (fileVersionNum !== 0) endpoint = endpoint + "?version=" + fileVersionNum;
+	if (fileVersionNum !== 0) endpoint = `${endpoint}?version=${fileVersionNum}`;
 	const response = await fetch(endpoint, {
 		method: "GET",
 		mode: "cors",
