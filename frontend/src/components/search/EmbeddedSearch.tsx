@@ -1,23 +1,28 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { DataSearch, ReactiveBase } from "@appbaseio/reactivesearch";
 
 import { useNavigate } from "react-router-dom";
 import config from "../../app.config";
 import { searchTheme } from "../../theme";
-import { useSelector } from "react-redux";
-import { RootState } from "../../types/data";
+import Cookies from "universal-cookie";
 
 export function EmbeddedSearch() {
 	const history = useNavigate();
-	const Authorization = useSelector(
-		(state: RootState) => state.user.Authorization
-	);
+	const [searchValue, setSearchValue] = useState("");
+	const [authorizationHeader, setAuthorizationHeader] = useState({});
+
+	// Update the header when userAuthorization changes
+	useEffect(() => {
+		const cookies = new Cookies();
+		setAuthorizationHeader({ Authorization: cookies.get("Authorization") });
+	}, [searchValue]);
+
 	// @ts-ignore
 	return (
 		<ReactiveBase
 			url={config.searchEndpoint}
 			app="all"
-			headers={{ Authorization: Authorization }}
+			headers={authorizationHeader}
 			theme={searchTheme}
 		>
 			<DataSearch
@@ -47,6 +52,8 @@ export function EmbeddedSearch() {
 						history(`/search?searchbox="${value}"`);
 					}
 				}}
+				value={searchValue}
+				onChange={(value) => setSearchValue(value)}
 			/>
 		</ReactiveBase>
 	);

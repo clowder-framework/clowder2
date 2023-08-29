@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
 	DataSearch,
 	DatePicker,
@@ -12,15 +12,19 @@ import Layout from "../Layout";
 import { SearchResult } from "./SearchResult";
 import { searchTheme, theme } from "../../theme";
 import config from "../../app.config";
-import { useSelector } from "react-redux";
-import { RootState } from "../../types/data";
+import Cookies from "universal-cookie";
 
 export function Search() {
 	const [luceneOn, setLuceneOn] = useState(false);
 
-	const Authorization = useSelector(
-		(state: RootState) => state.user.Authorization
-	);
+	const [searchValue, setSearchValue] = useState("");
+	const [authorizationHeader, setAuthorizationHeader] = useState({});
+
+	// Update the header when userAuthorization changes
+	useEffect(() => {
+		const cookies = new Cookies();
+		setAuthorizationHeader({ Authorization: cookies.get("Authorization") });
+	}, [searchValue]);
 
 	// @ts-ignore
 	return (
@@ -54,7 +58,7 @@ export function Search() {
 						<ReactiveBase
 							url={config.searchEndpoint}
 							app="all"
-							headers={{ Authorization: Authorization }}
+							headers={authorizationHeader}
 							theme={searchTheme}
 						>
 							{luceneOn ? (
@@ -77,6 +81,8 @@ export function Search() {
 										input: "search-input",
 									}}
 									queryString={true}
+									value={searchValue}
+									onChange={(value) => setSearchValue(value)}
 								/>
 							) : (
 								// facet search
@@ -110,6 +116,8 @@ export function Search() {
 											title: "search-title",
 											input: "search-input",
 										}}
+										value={searchValue}
+										onChange={(value) => setSearchValue(value)}
 									/>
 
 									{/*filters*/}
