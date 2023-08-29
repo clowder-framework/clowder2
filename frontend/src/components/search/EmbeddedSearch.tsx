@@ -8,14 +8,23 @@ import Cookies from "universal-cookie";
 
 export function EmbeddedSearch() {
 	const history = useNavigate();
-	const [searchValue, setSearchValue] = useState("");
-	const [authorizationHeader, setAuthorizationHeader] = useState({});
-
-	// Update the header when userAuthorization changes
-	useEffect(() => {
+	const cookies = new Cookies();
+	const [authorizationHeader, setAuthorizationHeader] = useState({
+		Authorization: cookies.get("Authorization"),
+	});
+	const getUpdatedCookie = () => {
 		const cookies = new Cookies();
 		setAuthorizationHeader({ Authorization: cookies.get("Authorization") });
-	}, [searchValue]);
+	};
+
+	// Pulling latest cookie
+	useEffect(() => {
+		const intervalId = setInterval(
+			getUpdatedCookie,
+			config.refreshTokenInterval
+		);
+		return () => clearInterval(intervalId);
+	}, []);
 
 	// @ts-ignore
 	return (
@@ -52,8 +61,6 @@ export function EmbeddedSearch() {
 						history(`/search?searchbox="${value}"`);
 					}
 				}}
-				value={searchValue}
-				onChange={(value) => setSearchValue(value)}
 			/>
 		</ReactiveBase>
 	);

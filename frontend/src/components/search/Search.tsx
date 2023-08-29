@@ -16,15 +16,23 @@ import Cookies from "universal-cookie";
 
 export function Search() {
 	const [luceneOn, setLuceneOn] = useState(false);
-
-	const [searchValue, setSearchValue] = useState("");
-	const [authorizationHeader, setAuthorizationHeader] = useState({});
-
-	// Update the header when userAuthorization changes
-	useEffect(() => {
+	const cookies = new Cookies();
+	const [authorizationHeader, setAuthorizationHeader] = useState({
+		Authorization: cookies.get("Authorization"),
+	});
+	const getUpdatedCookie = () => {
 		const cookies = new Cookies();
 		setAuthorizationHeader({ Authorization: cookies.get("Authorization") });
-	}, [searchValue]);
+	};
+
+	// Pulling latest cookie
+	useEffect(() => {
+		const intervalId = setInterval(
+			getUpdatedCookie,
+			config.refreshTokenInterval
+		);
+		return () => clearInterval(intervalId);
+	}, []);
 
 	// @ts-ignore
 	return (
@@ -81,8 +89,6 @@ export function Search() {
 										input: "search-input",
 									}}
 									queryString={true}
-									value={searchValue}
-									onChange={(value) => setSearchValue(value)}
 								/>
 							) : (
 								// facet search
@@ -116,8 +122,6 @@ export function Search() {
 											title: "search-title",
 											input: "search-input",
 										}}
-										value={searchValue}
-										onChange={(value) => setSearchValue(value)}
 									/>
 
 									{/*filters*/}
