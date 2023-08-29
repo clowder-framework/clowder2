@@ -64,12 +64,12 @@ async def get_all_job_summary(
     if user_id is not None:
         filters.append(EventListenerJobViewList.creator.email == user_id)
     if file_id is not None:
-        filters.append(EventListenerJobViewList.resource_ref.collection == "file")
+        filters.append(EventListenerJobViewList.resource_ref.collection == "files")
         filters.append(
             EventListenerJobViewList.resource_ref.resource_id == ObjectId(file_id)
         )
     if dataset_id is not None:
-        filters.append(EventListenerJobViewList.resource_ref.collection == "dataset")
+        filters.append(EventListenerJobViewList.resource_ref.collection == "datasets")
         filters.append(
             EventListenerJobViewList.resource_ref.resource_id == ObjectId(dataset_id)
         )
