@@ -4,19 +4,20 @@ import { DataSearch, ReactiveBase } from "@appbaseio/reactivesearch";
 import { useNavigate } from "react-router-dom";
 import config from "../../app.config";
 import { searchTheme } from "../../theme";
-import Cookies from "universal-cookie";
+import { useSelector } from "react-redux";
+import { RootState } from "../../types/data";
 
 export function EmbeddedSearch() {
 	const history = useNavigate();
-	const cookies = new Cookies();
-	const headers = { Authorization: cookies.get("Authorization") };
-
+	const Authorization = useSelector(
+		(state: RootState) => state.user.Authorization
+	);
 	// @ts-ignore
 	return (
 		<ReactiveBase
 			url={config.searchEndpoint}
 			app="all"
-			headers={headers}
+			headers={{ Authorization: Authorization }}
 			theme={searchTheme}
 		>
 			<DataSearch

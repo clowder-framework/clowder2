@@ -12,12 +12,15 @@ import Layout from "../Layout";
 import { SearchResult } from "./SearchResult";
 import { searchTheme, theme } from "../../theme";
 import config from "../../app.config";
-import Cookies from "universal-cookie";
+import { useSelector } from "react-redux";
+import { RootState } from "../../types/data";
 
 export function Search() {
 	const [luceneOn, setLuceneOn] = useState(false);
-	const cookies = new Cookies();
-	const headers = { Authorization: cookies.get("Authorization") };
+
+	const Authorization = useSelector(
+		(state: RootState) => state.user.Authorization
+	);
 
 	// @ts-ignore
 	return (
@@ -51,7 +54,7 @@ export function Search() {
 						<ReactiveBase
 							url={config.searchEndpoint}
 							app="all"
-							headers={headers}
+							headers={{ Authorization: Authorization }}
 							theme={searchTheme}
 						>
 							{luceneOn ? (
