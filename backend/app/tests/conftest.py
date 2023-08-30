@@ -9,14 +9,6 @@ from app.tests.utils import user_example, delete_test_users
 
 settings.MONGO_DATABASE = "clowder-tests"
 
-mongo_client = MongoClient(settings.MONGODB_URL)
-all_dbs = mongo_client.list_database_names()
-print(all_dbs)
-
-print('here')
-# mongo_client.drop_database("clowder-tests")
-# need to delete the keycloak for the test user
-
 @pytest.fixture(scope="session")
 def client() -> Generator:
     with TestClient(app) as c:
