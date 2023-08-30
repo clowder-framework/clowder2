@@ -26,7 +26,7 @@ spec:
       containers:
         - name: geoserver
           image: "{{ .Values.geoserver.image.repository }}:{{ .Values.geoserver.image.tag }}"
-          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          imagePullPolicy: {{ .Values.geoserver.image.pullPolicy }}
           env:
             - name: GEOSERVER_ADMIN_USER
               valueFrom:

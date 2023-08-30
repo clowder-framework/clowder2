@@ -8,8 +8,10 @@ metadata:
   name: {{ $fullName }}-geoserver
   labels:
     {{- include "clowder2.labels" . | nindent 4 }}
+  {{- with .Values.ingress.annotations }}
   annotations:
-    {{- include "clowder2.authIngressAnnotation" . | nindent 4 }}
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
 spec:
   {{- if .Values.ingress.tls }}
   tls:
@@ -22,7 +24,6 @@ spec:
     {{- end }}
   {{- end }}
   rules:
-    {{- range .Values.ingress.hosts }}
     - host: {{ .host | quote }}
       http:
         paths:
@@ -33,6 +34,5 @@ spec:
                 name: {{ $fullName }}-geoserver
                 port:
                   number: {{ $svcPort }}
-    {{- end }}
   {{- end }}
 {{- end}}
