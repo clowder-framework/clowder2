@@ -34,9 +34,31 @@ def upload_file(
     return response.json()
 
 
+def upload_image(
+        api: str,
+        headers: dict,
+        dataset_id: str,
+        filename: str,
+        content: bytes,
+):
+    """Uploads a dummy file (optionally with custom name/content) to a dataset and returns the JSON."""
+    with open(filename, "wb") as tempf:
+        tempf.write(content)
+    file_data = {"file": open(filename, "rb")}
+    response = requests.post(
+        f"{api}/datasets/{dataset_id}/files",
+        headers=headers,
+        files=file_data,
+    )
+    os.remove(filename)
+    assert response.status_code == 200
+    assert response.json().get("id") is not None
+    return response.json()
+
+
 def create_users(api: str):
     users = []
-    for x in range(10):
+    for _ in range(5):
         user = {
             "email": fake.ascii_email(),
             "password": fake.password(20),
@@ -59,8 +81,8 @@ if __name__ == '__main__':
     fake = Faker()
     users = create_users(api)
 
-    for x in range(0, 100):
-        n = random.randint(0, 9)
+    for _ in range(0, 100):
+        n = random.randint(0, 5)
         user = users[n]
         response = requests.post(f"{api}/login", json=user)
         token = response.json().get("token")
@@ -88,8 +110,20 @@ if __name__ == '__main__':
         print(
             f"Added first user as owner of dataset {dataset_id}. User email: {first_user_email} User password: {first_user_password}")
 
-        for x in range(0, 10):
+        for _ in range(0, 1):
             filename = fake.file_name(extension="csv")
             filebytes = fake.csv()
+            upload_file(api, headers, dataset_id, filename, filebytes)
+            print(f"Uploaded file {filename} to dataset {dataset_id}")
+
+        for _ in range(0, 1):
+            filename = fake.file_name(extension="png")
+            filebytes = fake.image()
+            upload_image(api, headers, dataset_id, filename, filebytes)
+            print(f"Uploaded file {filename} to dataset {dataset_id}")
+
+        for _ in range(0, 1):
+            filename = fake.file_name(extension="json")
+            filebytes = fake.json()
             upload_file(api, headers, dataset_id, filename, filebytes)
             print(f"Uploaded file {filename} to dataset {dataset_id}")
