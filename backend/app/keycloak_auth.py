@@ -314,6 +314,7 @@ async def create_user(email: str, password: str, firstName: str, lastName: str):
     )
     return user
 
+
 def delete_user(email: str):
     """Create a user in Keycloak."""
     keycloak_admin = KeycloakAdmin(

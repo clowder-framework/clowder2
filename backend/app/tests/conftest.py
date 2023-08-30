@@ -8,11 +8,13 @@ from app.tests.utils import user_example, delete_test_data
 
 settings.MONGO_DATABASE = "clowder-tests"
 
+
 @pytest.fixture(scope="session")
 def client() -> Generator:
     delete_test_data()
     with TestClient(app) as c:
         yield c
+
 
 @pytest.fixture(scope="session")
 def root_path() -> str:
@@ -21,7 +23,7 @@ def root_path() -> str:
 
 @pytest.fixture(scope="session")
 def token(client: TestClient) -> str:
-    print('do this first')
+    print("do this first")
     response = client.post(f"{settings.API_V2_STR}/users", json=user_example)
     assert (
         response.status_code == 200 or response.status_code == 409
