@@ -216,7 +216,7 @@ class EventListenerJobViewList(View, EventListenerJobBase):
             {
                 "$facet": {
                     "extraction_on_dataset": [
-                        {"$match": {"resource_ref.collection": {"$eq": "dataset"}}},
+                        {"$match": {"resource_ref.collection": {"$eq": "datasets"}}},
                         {
                             "$lookup": {
                                 "from": "authorization",
@@ -227,7 +227,7 @@ class EventListenerJobViewList(View, EventListenerJobBase):
                         },
                     ],
                     "extraction_on_file": [
-                        {"$match": {"resource_ref.collection": {"$eq": "file"}}},
+                        {"$match": {"resource_ref.collection": {"$eq": "files"}}},
                         {
                             "$lookup": {
                                 "from": "files",
@@ -293,7 +293,7 @@ class EventListenerJobUpdateViewList(View, EventListenerJobUpdateBase):
                         {
                             "$match": {
                                 "listener_job_details.resource_ref.collection": {
-                                    "$eq": "dataset"
+                                    "$eq": "datasets"
                                 }
                             }
                         },
@@ -310,7 +310,7 @@ class EventListenerJobUpdateViewList(View, EventListenerJobUpdateBase):
                         {
                             "$match": {
                                 "listener_job_details.resource_ref.collection": {
-                                    "$eq": "file"
+                                    "$eq": "files"
                                 }
                             }
                         },

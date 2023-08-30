@@ -7,8 +7,11 @@ from beanie import PydanticObjectId
 from beanie.odm.operators.update.general import Inc
 from bson import ObjectId
 from elasticsearch import Elasticsearch, NotFoundError
-from fastapi import APIRouter, HTTPException, Depends, Security
 from fastapi import (
+    APIRouter,
+    HTTPException,
+    Depends,
+    Security,
     File,
     UploadFile,
 )
@@ -29,6 +32,7 @@ from app.models.files import (
 )
 from app.models.metadata import MetadataDB
 from app.models.users import UserOut
+from app.models.thumbnails import ThumbnailDB
 from app.rabbitmq.listeners import submit_file_job, EventListenerJobDB
 from app.routers.feeds import check_feed_listeners
 from app.routers.utils import get_content_type
@@ -456,6 +460,30 @@ async def resubmit_file_extractions(
     return resubmit_success_fail
 
 
+@router.get("/{file_id}/thumbnail")
+async def download_file_thumbnail(
+    file_id: str,
+    fs: Minio = Depends(dependencies.get_fs),
+    allow: bool = Depends(FileAuthorization("viewer")),
+):
+    # If file exists in MongoDB, download from Minio
+    if (file := await FileDB.get(PydanticObjectId(file_id))) is not None:
+        if file.thumbnail_id is not None:
+            content = fs.get_object(settings.MINIO_BUCKET_NAME, str(file.thumbnail_id))
+        else:
+            raise HTTPException(
+                status_code=404, detail=f"File {file_id} has no associated thumbnail"
+            )
+
+        # Get content type & open file stream
+        response = StreamingResponse(content.stream(settings.MINIO_UPLOAD_CHUNK_SIZE))
+        # TODO: How should filenames be handled for thumbnails?
+        response.headers["Content-Disposition"] = "attachment; filename=%s" % "thumb"
+        return response
+    else:
+        raise HTTPException(status_code=404, detail=f"File {file_id} not found")
+
+
 @router.patch("/{file_id}/thumbnail/{thumbnail_id}", response_model=FileOut)
 async def add_file_thumbnail(
     file_id: str,
@@ -463,8 +491,15 @@ async def add_file_thumbnail(
     allow: bool = Depends(FileAuthorization("editor")),
 ):
     if (file := await FileDB.get(PydanticObjectId(file_id))) is not None:
-        file.thumbnail_id = thumbnail_id
-        await file.save()
-
-        return file.dict()
+        if (
+            thumbnail := await ThumbnailDB.get(PydanticObjectId(thumbnail_id))
+        ) is not None:
+            # TODO: Should we garbage collect existing thumbnail if nothing else points to it?
+            file.thumbnail_id = thumbnail_id
+            await file.save()
+            return file.dict()
+        else:
+            raise HTTPException(
+                status_code=404, detail=f"Thumbnail {thumbnail_id} not found"
+            )
     raise HTTPException(status_code=404, detail=f"File {file_id} not found")
