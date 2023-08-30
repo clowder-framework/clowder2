@@ -1,0 +1,19 @@
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: clowder2-geoserver-pv
+  labels:
+    name: clowder2-geoserver
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 5Ti
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  nfs:
+    path: /radiant/projects/bbdk/clowder2/geoserver
+    server: radiant-nfs.ncsa.illinois.edu
+    readOnly: false
+---
