@@ -2,20 +2,17 @@ from typing import Generator
 
 import pytest
 from fastapi.testclient import TestClient
-from pymongo import MongoClient
 from app.config import settings
 from app.main import app
-from app.tests.utils import user_example, delete_test_users
+from app.tests.utils import user_example, delete_test_data
 
 settings.MONGO_DATABASE = "clowder-tests"
 
 @pytest.fixture(scope="session")
 def client() -> Generator:
+    delete_test_data()
     with TestClient(app) as c:
         yield c
-        delete_test_users()
-        mongo_client = MongoClient(settings.MONGODB_URL)
-        mongo_client.drop_database("clowder-tests")
 
 @pytest.fixture(scope="session")
 def root_path() -> str:

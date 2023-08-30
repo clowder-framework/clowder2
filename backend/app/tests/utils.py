@@ -2,10 +2,9 @@ import os
 
 from fastapi.testclient import TestClient
 from app.keycloak_auth import delete_user
+from pymongo import MongoClient
 from app.config import settings
-from app.models.users import (
-    UserDB,
-)
+
 
 """These are standard JSON entries to be used for creating test resources."""
 user_example = {
@@ -87,15 +86,12 @@ def create_user(client: TestClient, headers: dict, email: str = user_alt["email"
     )  # 409 = user already exists
     return response.json()
 
-def delete_test_users():
-    """Delete the Test Users Here."""
+
+def delete_test_data():
     delete_user(user_example["email"])
     delete_user(user_alt["email"])
-    return True
-
-
-
-
+    mongo_client = MongoClient(settings.MONGODB_URL)
+    mongo_client.drop_database("clowder-tests")
 
 
 def get_user_token(client: TestClient, headers: dict, email: str = user_alt["email"]):
