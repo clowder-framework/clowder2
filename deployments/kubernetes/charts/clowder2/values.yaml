@@ -53,6 +53,25 @@ backend:
     port: 80
 
 # ----------------------------------------------------------------------
+# GEOSERVER
+# ----------------------------------------------------------------------
+geoserver:
+  enabled : true
+  username: admin
+  password: admin
+  workspace: clowder2
+  url: http://clowder2-geoserver:8001/geoserver/
+  replicas: 1
+  image:
+    repository: kartoza/geoserver
+    tag: 2.17.2
+  service:
+    type: ClusterIP
+    port: 8001
+  persistence:
+    size: 8Gi
+
+# ----------------------------------------------------------------------
 # MINIO
 # ----------------------------------------------------------------------
 minio:

@@ -13,7 +13,7 @@ spec:
     - ReadWriteMany
   persistentVolumeReclaimPolicy: Retain
   nfs:
-    path: /radiant/projects/bbdk/clowder2/geoserver
+    path: /radiant/projects/bbfa/clowder2/geoserver
     server: radiant-nfs.ncsa.illinois.edu
     readOnly: false
 ---
