@@ -87,14 +87,10 @@ def create_user(client: TestClient, headers: dict, email: str = user_alt["email"
     )  # 409 = user already exists
     return response.json()
 
-async def delete_test_users():
+def delete_test_users():
     """Delete the Test Users Here."""
-    if (user := await UserDB.find_one(UserDB.email == user_example["email"])) is not None:
-        await user.delete()
-        await delete_user(user_example["email"])
-    if (user := await UserDB.find_one(UserDB.email == user_alt["email"])) is not None:
-        await user.delete()
-        await delete_user(user_alt["email"])
+    delete_user(user_example["email"])
+    delete_user(user_alt["email"])
     return True
 
 

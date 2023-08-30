@@ -18,26 +18,12 @@ print('here')
 # need to delete the keycloak for the test user
 
 @pytest.fixture(scope="session")
-def test():
-    print("is this testing?")
-    print('did it test?')
-
-@pytest.fixture(scope="session")
-async def client() -> Generator:
+def client() -> Generator:
     with TestClient(app) as c:
-        await delete_test_users()
         yield c
-
-@pytest.fixture(scope="session")
-def cleanup_data(client: TestClient) -> str:
-    print('doing this')
-    # TODO delete test users
-    delete_test_users()
-    # TODO delete the entire db
-    mongo_client = MongoClient(settings.MONGODB_URL)
-    all_dbs = mongo_client.list_database_names()
-    delete_response = mongo_client.drop_database("clowder-tests")
-    return "response"
+        delete_test_users()
+        mongo_client = MongoClient(settings.MONGODB_URL)
+        mongo_client.drop_database("clowder-tests")
 
 @pytest.fixture(scope="session")
 def root_path() -> str:
@@ -46,6 +32,7 @@ def root_path() -> str:
 
 @pytest.fixture(scope="session")
 def token(client: TestClient) -> str:
+    print('do this first')
     response = client.post(f"{settings.API_V2_STR}/users", json=user_example)
     assert (
         response.status_code == 200 or response.status_code == 409

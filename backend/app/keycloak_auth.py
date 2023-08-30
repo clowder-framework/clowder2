@@ -314,7 +314,7 @@ async def create_user(email: str, password: str, firstName: str, lastName: str):
     )
     return user
 
-async def delete_user(email: str):
+def delete_user(email: str):
     """Create a user in Keycloak."""
     keycloak_admin = KeycloakAdmin(
         server_url=settings.auth_server_url,
@@ -327,13 +327,10 @@ async def delete_user(email: str):
         verify=True,
     )
     # Add user and set password
-    user = keycloak_admin.delete_user(
-        {
-            "username": email,
-        },
-        exist_ok=False,
-    )
-    return user
+    user_id = keycloak_admin.get_user_id(username=email)
+    if user_id:
+        delete_response = keycloak_admin.delete_user(user_id)
+        return delete_response
 
 
 async def retreive_refresh_token(email: str):
