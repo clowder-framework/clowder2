@@ -1,32 +1,40 @@
 import React from "react";
 
-import {Box, Button, Container} from "@mui/material";
-import Form from "@rjsf/material-ui";
+import { Box, Button, Container, Input } from "@mui/material";
 
-import fileSchema from "../../schema/fileSchema.json";
-import {FormProps} from "@rjsf/core";
+type UploadFileModalProps = {
+	onSave: any;
+};
 
+export const UploadFileModal: React.FC<UploadFileModalProps> = (
+	props: UploadFileModalProps
+) => {
+	const { onSave } = props;
+	const [selectedFile, setSelectedFile] = React.useState<File | null>(null);
 
-type UploadFileModalProps ={
-	onSave: any
-}
+	const handleFileChange = (event) => {
+		setSelectedFile(event.target.files[0]);
+	};
 
-export const UploadFileModal: React.FC<UploadFileModalProps> = (props: UploadFileModalProps) => {
-
-	const {onSave} = props;
-
-	// TODO
-	// @ts-ignore
 	return (
-		<Container>
-			<Form schema={fileSchema["schema"] as FormProps<any>["schema"]}
-				  uiSchema={fileSchema["uiSchema"] as FormProps<any>["uiSchema"]}
-				  onSubmit={({formData}) => {onSave(formData);}}>
-				<Box className="inputGroup">
-					<Button variant="contained" type="submit" className="form-button-block">Upload</Button>
-				</Box>
-			</Form>
+		<Container sx={{ width: "100%", padding: "1em" }}>
+			<Input
+				id="file-input"
+				type="file"
+				onChange={handleFileChange}
+				sx={{ width: "100%" }}
+			/>
+			<Box className="inputGroup">
+				<Button
+					variant="contained"
+					onClick={() => {
+						onSave(selectedFile);
+					}}
+					disabled={!selectedFile}
+				>
+					Upload
+				</Button>
+			</Box>
 		</Container>
 	);
-
 };

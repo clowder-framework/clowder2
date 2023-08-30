@@ -39,52 +39,78 @@ function getRecordType(item) {
 	}
 }
 
+function buildDatasetResult(item) {
+	return (
+		<>
+			<ListItemAvatar sx={{ color: theme.palette.primary.main }}>
+				<DatasetIcon />
+			</ListItemAvatar>
+			<Box sx={{ marginTop: "5px" }}>
+				<MuiLink
+					component={Link}
+					to={`/datasets/${item._id}`}
+					sx={{ fontWeight: "bold", fontSize: "18px" }}
+				>
+					{parseString(item.name)}
+				</MuiLink>
+				<Typography variant="body2" color={theme.palette.secondary.light}>
+					Created by {parseString(item.creator)} at {parseDate(item.created)}
+				</Typography>
+				<Typography variant="body2" color={theme.palette.secondary.dark}>
+					{parseString(item.description)}
+				</Typography>
+			</Box>
+		</>
+	);
+}
+
+function buildFileResult(item) {
+	return (
+		<>
+			<ListItemAvatar sx={{ color: theme.palette.primary.main }}>
+				<ArticleIcon />
+			</ListItemAvatar>
+			<Box sx={{ marginTop: "5px" }}>
+				<MuiLink
+					component={Link}
+					to={`/files/${item._id}?dataset=${item.dataset_id}`}
+					sx={{ fontWeight: "bold", fontSize: "18px" }}
+				>
+					{parseString(item.name)}
+				</MuiLink>
+				<Typography variant="body2" color={theme.palette.secondary.light}>
+					Created by {parseString(item.creator)} at {parseDate(item.created)}
+				</Typography>
+				<Typography variant="body2" color={theme.palette.secondary.dark}>
+					{`${item.content_type} | ${item.bytes} bytes`}
+				</Typography>
+			</Box>
+		</>
+	);
+}
+
 export function SearchResult(props) {
 	const { data } = props;
 
-	return (
-		<List
-			sx={{
-				width: "100%",
-				padding: "2% 5%",
-				bgcolor: theme.palette.primary.contrastText,
-			}}
-		>
-			{data.map((item) => (
-				<ListItem alignItems="flex-start" key={item._id}>
-					<ListItemAvatar sx={{ color: theme.palette.primary.main }}>
-						{item._index === "dataset" ? <DatasetIcon /> : <ArticleIcon />}
-					</ListItemAvatar>
-					<Box sx={{ marginTop: "5px" }}>
-						{item._index === "dataset" ? (
-							<MuiLink
-								component={Link}
-								to={`/datasets/${item._id}`}
-								sx={{ fontWeight: "bold", fontSize: "18px" }}
-							>
-								{parseString(item.name)}
-							</MuiLink>
-						) : (
-							<MuiLink
-								component={Link}
-								to={`/files/${item._id}?dataset=${item.dataset_id}`}
-								sx={{ fontWeight: "bold", fontSize: "18px" }}
-							>
-								{parseString(item.name)}
-							</MuiLink>
-						)}
-						<Typography variant="body2" color={theme.palette.secondary.light}>
-							Created by {parseString(item.creator)} at{" "}
-							{parseDate(item.created)}
-						</Typography>
-						<Typography variant="body2" color={theme.palette.secondary.dark}>
-							{getRecordType(item) === "dataset"
-								? parseString(item.description)
-								: `${item.content_type} | ${item.bytes} bytes`}
-						</Typography>
-					</Box>
-				</ListItem>
-			))}
-		</List>
-	);
+	if (data.length > 0) {
+		return (
+			<List
+				sx={{
+					width: "100%",
+					padding: "2% 5%",
+					bgcolor: theme.palette.primary.contrastText,
+				}}
+			>
+				{data.map((item) => (
+					<ListItem alignItems="flex-start" key={item._id}>
+						{item.resource_type === "dataset"
+							? buildDatasetResult(item)
+							: buildFileResult(item)}
+					</ListItem>
+				))}
+			</List>
+		);
+	} else {
+		return <></>;
+	}
 }

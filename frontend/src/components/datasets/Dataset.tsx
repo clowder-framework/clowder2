@@ -17,6 +17,7 @@ import { MetadataIn } from "../../openapi/v2";
 import { DisplayMetadata } from "../metadata/DisplayMetadata";
 import { DisplayListenerMetadata } from "../metadata/DisplayListenerMetadata";
 import { EditMetadata } from "../metadata/EditMetadata";
+import { MainBreadcrumbs } from "../navigation/BreadCrumb";
 import {
 	deleteDatasetMetadata as deleteDatasetMetadataAction,
 	fetchDatasetMetadata,
@@ -49,7 +50,6 @@ export const Dataset = (): JSX.Element => {
 	// search parameters
 	const [searchParams] = useSearchParams();
 	const folderId = searchParams.get("folder");
-
 	// Redux connect equivalent
 	const dispatch = useDispatch();
 	const updateDatasetMetadata = (
@@ -153,10 +153,6 @@ export const Dataset = (): JSX.Element => {
 
 	// for breadcrumb
 	const paths = [
-		{
-			name: "Explore",
-			url: "/",
-		},
 		{
 			name: about["name"],
 			url: `/datasets/${datasetId}`,
@@ -280,6 +276,13 @@ export const Dataset = (): JSX.Element => {
 							disabled={false}
 						/>
 					</Tabs>
+					{folderId !== null ? (
+						<Box style={{ padding: "24px 24px 0 24px" }}>
+							<MainBreadcrumbs paths={paths}></MainBreadcrumbs>
+						</Box>
+					) : (
+						<></>
+					)}
 					<TabPanel value={selectedTabIndex} index={0}>
 						<FilesTable datasetId={datasetId} folderId={folderId} />
 					</TabPanel>

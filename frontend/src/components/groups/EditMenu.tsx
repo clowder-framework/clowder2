@@ -58,6 +58,7 @@ export const EditMenu = (props: ActionsMenuProps): JSX.Element => {
 					setEditNameModalOpen(false);
 				}}
 				groupName={groupAbout.name}
+				groupDescription={groupAbout.description}
 				groupId={groupAbout.id}
 			/>
 			<EditDescriptionModal

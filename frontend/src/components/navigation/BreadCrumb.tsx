@@ -9,7 +9,6 @@ type BreadCrumbProps = {
 export const MainBreadcrumbs: React.FC<BreadCrumbProps> = (props:BreadCrumbProps) => {
 	const { paths } = props;
 	const history = useNavigate();
-
 	return (
 			<Breadcrumbs aria-label="breadcrumb">
 				{

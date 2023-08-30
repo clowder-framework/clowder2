@@ -66,6 +66,10 @@ minio:
   # enable webui
   disableWebUI: false
 
+  containerPorts:
+    api: 9000
+    console: 9001
+
   # enable ingress for webui
   ingress:
     enabled: true
@@ -74,7 +78,7 @@ minio:
   # enable ingress for api
   apiIngress:
     enabled: true
-    hostname: minio.clowder2.localhost
+    hostname: minio-api.clowder2.localhost
 
   # enabled distributed mode (or standalone)
 #  mode: distributed
@@ -143,6 +147,49 @@ rabbitmq:
     #storageClass: csi-cinder-sc-retain
 
 # ----------------------------------------------------------------------
+# EXTRACTORS
+# ----------------------------------------------------------------------
+
+## list of extractors to be installed. Each extractor should have the
+## following fields:
+## enabled      : true/false - should the extractor be installed
+## image        : dokeer/image:tag - the extractor docker image
+## replicaCount : number - the number of this extractor to install
+## env          : additional environment variables to pass to extractor.
+extractors:
+#  file-digest:
+#    image: clowder/extractors-digest:2.2.4
+#    # enabled: true
+#    # replicaCount: 1
+#    # pullPolicy: Always
+#    # imagePullSecrets: regcred
+#    # env:
+#    #   - name: extractor.bump.sh
+#    #     value: "bar"
+  wordcount:
+    image: clowder/extractors-wordcount:latest
+  image-preview:
+    image: clowder/extractors-image-preview:latest
+  image-metadata:
+    image: clowder/extractors-image-metadata:latest
+  audio-preview:
+    image: clowder/extractors-audio-preview:latest
+  file-digest:
+    image: clowder/extractors-digest:latest
+
+#  geotiff-preview-v2:
+#    image: maxzilla2/extractors-geotiff-preview:latest
+#    env:
+#      - name: GEOSERVER_URL
+#        value: http://geoserver:8080/geoserver/
+#      - name: EXTERNAL_GEOSERVER_URL
+#        value: http://localhost:8085/geoserver/
+#      - name: GEOSERVER_USERNAME
+#        value: admin
+#      - name: GEOSERVER_PASSWORD
+#        value: geoserver
+
+# ----------------------------------------------------------------------
 # ELASTICSEARCH
 # ----------------------------------------------------------------------
 elasticsearch:
@@ -179,6 +226,7 @@ keycloak:
     auth:
       username: keycloak
       password: password
+      postgresPassword: password
       database: keycloak
 
     primary:
