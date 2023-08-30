@@ -316,10 +316,7 @@ export const File = (): JSX.Element => {
 					{/*Version History*/}
 					<TabPanel value={selectedTabIndex} index={1}>
 						{fileVersions !== undefined ? (
-							<FileVersionHistory
-								fileVersions={fileVersions}
-								filename={fileSummary.name}
-							/>
+							<FileVersionHistory fileVersions={fileVersions} />
 						) : (
 							<></>
 						)}

@@ -1,5 +1,5 @@
 import io
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Optional, List
 from typing import Union
 
@@ -7,8 +7,11 @@ from beanie import PydanticObjectId
 from beanie.odm.operators.update.general import Inc
 from bson import ObjectId
 from elasticsearch import Elasticsearch, NotFoundError
-from fastapi import APIRouter, HTTPException, Depends, Security
 from fastapi import (
+    APIRouter,
+    HTTPException,
+    Depends,
+    Security,
     File,
     UploadFile,
 )
@@ -29,6 +32,7 @@ from app.models.files import (
 )
 from app.models.metadata import MetadataDB
 from app.models.users import UserOut
+from app.models.thumbnails import ThumbnailDB
 from app.rabbitmq.listeners import submit_file_job, EventListenerJobDB
 from app.routers.feeds import check_feed_listeners
 from app.routers.utils import get_content_type
@@ -298,6 +302,58 @@ async def download_file(
         raise HTTPException(status_code=404, detail=f"File {file_id} not found")
 
 
+@router.get("/{file_id}/url/")
+async def download_file_url(
+    file_id: str,
+    version: Optional[int] = None,
+    expires_in_seconds: Optional[int] = 3600,
+    external_fs: Minio = Depends(dependencies.get_external_fs),
+    allow: bool = Depends(FileAuthorization("viewer")),
+):
+    # If file exists in MongoDB, download from Minio
+    if (file := await FileDB.get(PydanticObjectId(file_id))) is not None:
+        if expires_in_seconds is None:
+            expires = timedelta(seconds=settings.MINIO_EXPIRES)
+        else:
+            expires = timedelta(seconds=expires_in_seconds)
+
+        if version is not None:
+            # Version is specified, so get the minio ID from versions table if possible
+            file_vers = await FileVersionDB.find_one(
+                FileVersionDB.file_id == ObjectId(file_id),
+                FileVersionDB.version_num == version,
+            )
+            if file_vers is not None:
+                vers = FileVersion(**file_vers.dict())
+                # If no version specified, get latest version directly
+                presigned_url = external_fs.presigned_get_object(
+                    bucket_name=settings.MINIO_BUCKET_NAME,
+                    object_name=file_id,
+                    version_id=vers.version_id,
+                    expires=expires,
+                )
+            else:
+                raise HTTPException(
+                    status_code=404,
+                    detail=f"File {file_id} version {version} not found",
+                )
+        else:
+            # If no version specified, get latest version directly
+            presigned_url = external_fs.presigned_get_object(
+                bucket_name=settings.MINIO_BUCKET_NAME,
+                object_name=file_id,
+                expires=expires,
+            )
+
+        # Increment download count
+        await file.update(Inc({FileDB.downloads: 1}))
+
+        # return presigned url
+        return {"presigned_url": presigned_url}
+    else:
+        raise HTTPException(status_code=404, detail=f"File {file_id} not found")
+
+
 @router.delete("/{file_id}")
 async def delete_file(
     file_id: str,
@@ -373,7 +429,6 @@ async def post_file_extract(
             parameters,
             user,
             rabbitmq_client,
-            access_token,
         )
     else:
         raise HTTPException(status_code=404, detail=f"File {file_id} not found")
@@ -405,6 +460,30 @@ async def resubmit_file_extractions(
     return resubmit_success_fail
 
 
+@router.get("/{file_id}/thumbnail")
+async def download_file_thumbnail(
+    file_id: str,
+    fs: Minio = Depends(dependencies.get_fs),
+    allow: bool = Depends(FileAuthorization("viewer")),
+):
+    # If file exists in MongoDB, download from Minio
+    if (file := await FileDB.get(PydanticObjectId(file_id))) is not None:
+        if file.thumbnail_id is not None:
+            content = fs.get_object(settings.MINIO_BUCKET_NAME, str(file.thumbnail_id))
+        else:
+            raise HTTPException(
+                status_code=404, detail=f"File {file_id} has no associated thumbnail"
+            )
+
+        # Get content type & open file stream
+        response = StreamingResponse(content.stream(settings.MINIO_UPLOAD_CHUNK_SIZE))
+        # TODO: How should filenames be handled for thumbnails?
+        response.headers["Content-Disposition"] = "attachment; filename=%s" % "thumb"
+        return response
+    else:
+        raise HTTPException(status_code=404, detail=f"File {file_id} not found")
+
+
 @router.patch("/{file_id}/thumbnail/{thumbnail_id}", response_model=FileOut)
 async def add_file_thumbnail(
     file_id: str,
@@ -412,8 +491,15 @@ async def add_file_thumbnail(
     allow: bool = Depends(FileAuthorization("editor")),
 ):
     if (file := await FileDB.get(PydanticObjectId(file_id))) is not None:
-        file.thumbnail_id = thumbnail_id
-        await file.save()
-
-        return file.dict()
+        if (
+            thumbnail := await ThumbnailDB.get(PydanticObjectId(thumbnail_id))
+        ) is not None:
+            # TODO: Should we garbage collect existing thumbnail if nothing else points to it?
+            file.thumbnail_id = thumbnail_id
+            await file.save()
+            return file.dict()
+        else:
+            raise HTTPException(
+                status_code=404, detail=f"Thumbnail {thumbnail_id} not found"
+            )
     raise HTTPException(status_code=404, detail=f"File {file_id} not found")

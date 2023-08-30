@@ -3,9 +3,8 @@ import json
 import logging
 from datetime import datetime
 
-from typing import Optional
 from fastapi import Security, HTTPException, Depends
-from fastapi.security import OAuth2AuthorizationCodeBearer, APIKeyHeader
+from fastapi.security import OAuth2AuthorizationCodeBearer, APIKeyHeader, APIKeyCookie
 from itsdangerous.exc import BadSignature
 from itsdangerous.url_safe import URLSafeSerializer
 from jose import ExpiredSignatureError
@@ -47,8 +46,11 @@ oauth2_scheme = OAuth2AuthorizationCodeBearer(
     auto_error=False,
 )
 
-# Passing in API key via header
+# Passing in API key via header. `auto_error=False` makes it so `get_current_user()` runs even if it doesn't find it
 api_key_header = APIKeyHeader(name="X-API-KEY", auto_error=False)
+
+# Passing in JWT token via cookie. `auto_error=False` makes it so `get_current_user()` runs even if it doesn't find it.
+jwt_header = APIKeyCookie(name="Authorization", auto_error=False)
 
 
 async def get_token(
@@ -140,6 +142,7 @@ async def get_user(identity: Json = Depends(get_token)):
 async def get_current_user(
     token: str = Security(oauth2_scheme),
     api_key: str = Security(api_key_header),
+    token_cookie: str = Security(jwt_header),
 ) -> UserOut:
     """Retrieve the user object from Mongo by first getting user id from JWT and then querying Mongo.
     Potentially expensive. Use `get_current_username` if all you need is user name.
@@ -150,6 +153,18 @@ async def get_current_user(
             userinfo = keycloak_openid.userinfo(token)
             user = await UserDB.find_one(UserDB.email == userinfo["email"])
             return UserOut(**user.dict())
+        except KeycloakAuthenticationError as e:
+            raise HTTPException(
+                status_code=e.response_code,
+                detail=json.loads(e.error_message),
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+    if token_cookie:
+        try:
+            userinfo = keycloak_openid.userinfo(token_cookie.removeprefix("Bearer%20"))
+            user = await UserDB.find_one(UserDB.email == userinfo["email"])
+            return UserOut(**user.dict())
+        # expired token
         except KeycloakAuthenticationError as e:
             raise HTTPException(
                 status_code=e.response_code,
@@ -212,11 +227,24 @@ async def get_current_user(
 async def get_current_username(
     token: str = Security(oauth2_scheme),
     api_key: str = Security(api_key_header),
+    token_cookie: str = Security(jwt_header),
 ) -> str:
     """Retrieve the user id from the JWT token. Does not query MongoDB."""
     if token:
         try:
             userinfo = keycloak_openid.userinfo(token)
+            return userinfo["preferred_username"]
+        # expired token
+        except KeycloakAuthenticationError as e:
+            raise HTTPException(
+                status_code=e.response_code,
+                detail=json.loads(e.error_message),
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+
+    if token_cookie:
+        try:
+            userinfo = keycloak_openid.userinfo(token_cookie.removeprefix("Bearer%20"))
             return userinfo["preferred_username"]
         # expired token
         except KeycloakAuthenticationError as e:
