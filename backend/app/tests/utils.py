@@ -1,8 +1,11 @@
 import os
 
 from fastapi.testclient import TestClient
-
+from app.keycloak_auth import delete_user
 from app.config import settings
+from app.models.users import (
+    UserDB,
+)
 
 """These are standard JSON entries to be used for creating test resources."""
 user_example = {
@@ -83,6 +86,20 @@ def create_user(client: TestClient, headers: dict, email: str = user_alt["email"
         response.status_code == 200 or response.status_code == 409
     )  # 409 = user already exists
     return response.json()
+
+async def delete_test_users():
+    """Delete the Test Users Here."""
+    if (user := await UserDB.find_one(UserDB.email == user_example["email"])) is not None:
+        await user.delete()
+        await delete_user(user_example["email"])
+    if (user := await UserDB.find_one(UserDB.email == user_alt["email"])) is not None:
+        await user.delete()
+        await delete_user(user_alt["email"])
+    return True
+
+
+
+
 
 
 def get_user_token(client: TestClient, headers: dict, email: str = user_alt["email"]):
