@@ -2,13 +2,17 @@ from typing import Generator
 
 import pytest
 from fastapi.testclient import TestClient
-
+from pymongo import MongoClient
 from app.config import settings
 from app.main import app
 from app.tests.utils import user_example
 
 settings.MONGO_DATABASE = "clowder-tests"
 
+mongo_client = MongoClient(settings.MONGODB_URL)
+all_dbs = mongo_client.list_databases()
+# mongo_client.drop_database("clowder-tests")
+# need to delete the keycloak for the test user
 
 @pytest.fixture(scope="session")
 def client() -> Generator:

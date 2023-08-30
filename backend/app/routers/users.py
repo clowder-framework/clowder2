@@ -144,6 +144,12 @@ async def get_user(user_id: str):
         return user.dict()
     raise HTTPException(status_code=404, detail=f"User {user_id} not found")
 
+@router.delete("/{user_id}", response_model=UserOut)
+async def delete_user(user_id: str):
+    if (user := await UserDB.get(PydanticObjectId(user_id))) is not None:
+        return user.dict()
+    raise HTTPException(status_code=404, detail=f"User {user_id} not found")
+
 
 @router.get("/username/{username}", response_model=UserOut)
 async def get_user_by_name(username: str):
