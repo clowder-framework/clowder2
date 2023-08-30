@@ -29,9 +29,8 @@ def upload_file(
         files=file_data,
     )
     os.remove(filename)
-    assert response.status_code == 200
-    assert response.json().get("id") is not None
-    return response.json()
+    response.raise_for_status()
+    return response.json().get("id")
 
 
 def upload_image(
@@ -51,9 +50,7 @@ def upload_image(
         files=file_data,
     )
     os.remove(filename)
-    assert response.status_code == 200
-    assert response.json().get("id") is not None
-    return response.json()
+    return response.json().get("id")
 
 
 def create_users(api: str):
@@ -73,6 +70,134 @@ def create_users(api: str):
     return users
 
 
+def upload_metadata_definition(api):
+    metadata_definition = {
+        "name": "LatLon",
+        "description": "A set of Latitude/Longitude coordinates",
+        "context": [
+            {
+                "longitude": "https://schema.org/longitude",
+                "latitude": "https://schema.org/latitude",
+            }
+        ],
+        "fields": [
+            {
+                "name": "longitude",
+                "list": False,
+                "widgetType": "TextField",
+                "config": {"type": "float"},
+                "required": True,
+            },
+            {
+                "name": "latitude",
+                "list": False,
+                "widgetType": "TextField",
+                "config": {"type": "float"},
+                "required": True,
+            },
+        ],
+    }
+    response = requests.post(
+        f"{api}/metadata/definition",
+        json=metadata_definition,
+        headers=headers,
+    )
+
+
+def upload_metadata_dataset(fake, api, dataset_id):
+    metadata_definition = {
+        "name": "LatLon",
+        "description": "A set of Latitude/Longitude coordinates",
+        "context": [
+            {
+                "longitude": "https://schema.org/longitude",
+                "latitude": "https://schema.org/latitude",
+            }
+        ],
+        "fields": [
+            {
+                "name": "longitude",
+                "list": False,
+                "widgetType": "TextField",
+                "config": {"type": "float"},
+                "required": True,
+            },
+            {
+                "name": "latitude",
+                "list": False,
+                "widgetType": "TextField",
+                "config": {"type": "float"},
+                "required": True,
+            },
+        ],
+    }
+    response = requests.post(
+        f"{api}/metadata/definition",
+        json=metadata_definition,
+        headers=headers,
+    )
+
+    # upload metadata
+    metadata_using_definition = {
+        "content": {"latitude": str(fake.latitude()), "longitude": str(fake.longitude())},
+        "definition": "LatLon",
+    }
+    response = requests.post(
+        f"{api}/datasets/{dataset_id}/metadata",
+        headers=headers,
+        json=metadata_using_definition,
+    )
+    code = str(response.status_code)
+    print(f"Metadata uploaded: {metadata_using_definition} | {code}")
+
+
+def upload_metadata_file(fake, api, file_id):
+    metadata_definition = {
+        "name": "LatLon",
+        "description": "A set of Latitude/Longitude coordinates",
+        "context": [
+            {
+                "longitude": "https://schema.org/longitude",
+                "latitude": "https://schema.org/latitude",
+            }
+        ],
+        "fields": [
+            {
+                "name": "longitude",
+                "list": False,
+                "widgetType": "TextField",
+                "config": {"type": "float"},
+                "required": True,
+            },
+            {
+                "name": "latitude",
+                "list": False,
+                "widgetType": "TextField",
+                "config": {"type": "float"},
+                "required": True,
+            },
+        ],
+    }
+    response = requests.post(
+        f"{api}/metadata/definition",
+        json=metadata_definition,
+        headers=headers,
+    )
+
+    # upload metadata
+    metadata_using_definition = {
+        "content": {"latitude": str(fake.latitude()), "longitude": str(fake.longitude())},
+        "definition": "LatLon",
+    }
+    response = requests.post(
+        f"{api}/files/{file_id}/metadata",
+        headers=headers,
+        json=metadata_using_definition,
+    )
+    code = str(response.status_code)
+    print(f"Metadata uploaded: {metadata_using_definition} | {code}")
+
+
 if __name__ == '__main__':
     # command line args
     args = sys.argv[1:]
@@ -82,7 +207,7 @@ if __name__ == '__main__':
     users = create_users(api)
 
     for _ in range(0, 100):
-        n = random.randint(0, 5)
+        n = random.randint(0, 4)
         user = users[n]
         response = requests.post(f"{api}/login", json=user)
         token = response.json().get("token")
@@ -113,17 +238,23 @@ if __name__ == '__main__':
         for _ in range(0, 1):
             filename = fake.file_name(extension="csv")
             filebytes = fake.csv()
-            upload_file(api, headers, dataset_id, filename, filebytes)
+            file_id = upload_file(api, headers, dataset_id, filename, filebytes)
             print(f"Uploaded file {filename} to dataset {dataset_id}")
+            upload_metadata_file(fake, api, file_id)
 
         for _ in range(0, 1):
             filename = fake.file_name(extension="png")
             filebytes = fake.image()
-            upload_image(api, headers, dataset_id, filename, filebytes)
+            file_id = upload_image(api, headers, dataset_id, filename, filebytes)
             print(f"Uploaded file {filename} to dataset {dataset_id}")
+            upload_metadata_file(fake, api, file_id)
 
         for _ in range(0, 1):
             filename = fake.file_name(extension="json")
             filebytes = fake.json()
-            upload_file(api, headers, dataset_id, filename, filebytes)
+            file_id = upload_file(api, headers, dataset_id, filename, filebytes)
             print(f"Uploaded file {filename} to dataset {dataset_id}")
+            upload_metadata_file(fake, api, file_id)
+
+        upload_metadata_definition(api)
+        upload_metadata_dataset(fake, api, dataset_id)
