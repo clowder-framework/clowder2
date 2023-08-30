@@ -25,6 +25,7 @@ from app.models.listeners import (
     EventListenerJobUpdateViewList,
 )
 from app.models.metadata import MetadataDB, MetadataDefinitionDB
+from app.models.thumbnails import ThumbnailDB
 from app.models.tokens import TokenDB
 from app.models.users import UserDB, UserAPIKeyDB, ListenerAPIKeyDB
 from app.models.visualization_config import VisualizationConfigDB
@@ -45,6 +46,7 @@ from app.routers import (
     feeds,
     jobs,
     visualization,
+    thumbnails,
 )
 
 # setup loggers
@@ -173,6 +175,12 @@ api_router.include_router(
     tags=["visualizations"],
     dependencies=[Depends(get_current_username)],
 )
+api_router.include_router(
+    thumbnails.router,
+    prefix="/thumbnails",
+    tags=["thumbnails"],
+    dependencies=[Depends(get_current_username)],
+)
 api_router.include_router(keycloak.router, prefix="/auth", tags=["auth"])
 app.include_router(api_router, prefix=settings.API_V2_STR)
 
@@ -214,6 +222,7 @@ async def startup_beanie():
             ErrorDB,
             VisualizationConfigDB,
             VisualizationDataDB,
+            ThumbnailDB,
         ],
         recreate_views=True,
     )

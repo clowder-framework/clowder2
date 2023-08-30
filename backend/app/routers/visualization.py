@@ -107,9 +107,9 @@ async def remove_visualization(
         if (
             vis_config := await VisualizationConfigDB.get(visualization_config_id)
         ) is not None:
-            vis_config.delete()
+            await vis_config.delete()
         fs.remove_object(settings.MINIO_BUCKET_NAME, visualization_id)
-        visualization.delete()
+        await visualization.delete()
         return
     raise HTTPException(
         status_code=404, detail=f"Visualization {visualization_id} not found"

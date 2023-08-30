@@ -222,6 +222,24 @@ export class FilesService {
     }
 
     /**
+     * Download File Thumbnail
+     * @param fileId
+     * @returns any Successful Response
+     * @throws ApiError
+     */
+    public static downloadFileThumbnailApiV2FilesFileIdThumbnailGet(
+        fileId: string,
+    ): CancelablePromise<any> {
+        return __request({
+            method: 'GET',
+            path: `/api/v2/files/${fileId}/thumbnail`,
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+
+    /**
      * Add File Thumbnail
      * @param fileId
      * @param thumbnailId
