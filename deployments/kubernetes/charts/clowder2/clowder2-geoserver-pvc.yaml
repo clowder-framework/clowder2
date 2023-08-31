@@ -17,3 +17,18 @@ spec:
     server: radiant-nfs.ncsa.illinois.edu
     readOnly: false
 ---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: geoserver-pvc
+spec:
+  storageClassName: manual
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 5Ti
+  selector:
+    matchLabels:
+      name: clowder2-geoserver
+---
