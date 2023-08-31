@@ -252,7 +252,7 @@ export const File = (): JSX.Element => {
 			<ErrorModal errorOpen={errorOpen} setErrorOpen={setErrorOpen} />
 			<Grid container>
 				<MainBreadcrumbs paths={paths} />
-				<Typography variant="h4" paragraph>
+				<Typography variant="h6">
 								{"/" + fileSummary.name}
 							</Typography>
 			</Grid>
