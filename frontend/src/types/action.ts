@@ -5,6 +5,7 @@ import {
 	Folder,
 	MetadataJsonld,
 	Profile,
+	FileState,
 } from "./data";
 import {
 	AuthorizationBase,
@@ -87,6 +88,11 @@ interface RECEIVE_PREVIEWS {
 interface RECEIVE_VERSIONS {
 	type: "RECEIVE_VERSIONS";
 	fileVersions: FileVersion[];
+}
+
+interface CHANGE_SELECTED_VERSION {
+	type: "CHANGE_SELECTED_VERSION";
+	selected_version:number;
 }
 
 interface SET_USER {
@@ -437,6 +443,7 @@ export type DataAction =
 	| RECEIVE_FILE_METADATA_JSONLD
 	| RECEIVE_PREVIEWS
 	| RECEIVE_VERSIONS
+	| CHANGE_SELECTED_VERSION
 	| SET_USER
 	| LOGIN_ERROR
 	| LOGOUT
