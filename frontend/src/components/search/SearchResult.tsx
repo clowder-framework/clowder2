@@ -9,7 +9,7 @@ import {
 } from "@mui/material";
 import { Link } from "react-router-dom";
 import DatasetIcon from "@mui/icons-material/Dataset";
-import ArticleIcon from "@mui/icons-material/Article";
+import InsertDriveFileIcon from "@mui/icons-material/InsertDriveFile";
 import { parseDate } from "../../utils/common";
 import { theme } from "../../theme";
 
@@ -68,7 +68,7 @@ function buildFileResult(item) {
 	return (
 		<>
 			<ListItemAvatar sx={{ color: theme.palette.primary.main }}>
-				<ArticleIcon />
+				<InsertDriveFileIcon />
 			</ListItemAvatar>
 			<Box sx={{ marginTop: "5px" }}>
 				<MuiLink

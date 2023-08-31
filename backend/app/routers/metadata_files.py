@@ -74,11 +74,10 @@ async def _build_metadata_db_obj(
 
     if agent is None:
         # Build MetadataAgent depending on whether extractor info is present/valid
-        extractor_info = metadata_in.extractor_info
-        if extractor_info is not None:
+        if metadata_in.listener is not None:
             listener = await EventListenerDB.find_one(
-                EventListenerDB.name == extractor_info.name,
-                EventListenerDB.version == extractor_info.version,
+                EventListenerDB.name == metadata_in.listener.name,
+                EventListenerDB.version == metadata_in.listener.version,
             )
             if listener:
                 agent = MetadataAgent(creator=user, listener=listener)
@@ -129,13 +128,12 @@ async def add_file_metadata(
                 MetadataDB.definition == definition,
             ]
             # Extracted metadata doesn't care about user
-            if metadata_in.extractor_info is not None:
+            if metadata_in.listener is not None:
                 existing_q.append(
-                    MetadataDB.agent.extractor.name == metadata_in.extractor_info.name
+                    MetadataDB.agent.listener.name == metadata_in.listener.name
                 )
                 existing_q.append(
-                    MetadataDB.agent.extractor.version
-                    == metadata_in.extractor_info.version
+                    MetadataDB.agent.listener.version == metadata_in.listener.version
                 )
             else:
                 existing_q.append(MetadataDB.agent.creator.id == user.id)
@@ -188,18 +186,17 @@ async def replace_file_metadata(
             target_version = file.version_num
 
         # Filter by MetadataAgent
-        extractor_info = metadata_in.extractor
-        if extractor_info is not None:
+        if metadata_in.listener is not None:
             listener = await EventListenerDB.find_one(
-                EventListenerDB.name == extractor_info.name,
-                EventListenerDB.version == extractor_info.version,
+                EventListenerDB.name == metadata_in.listener.name,
+                EventListenerDB.version == metadata_in.listener.version,
             )
             if listener:
                 agent = MetadataAgent(creator=user, listener=listener)
                 # TODO: How do we handle two different users creating extractor metadata? Currently we ignore user...
-                query.append(MetadataDB.agent.extractor.name == agent.extractor.name)
+                query.append(MetadataDB.agent.listener.name == agent.listener.name)
                 query.append(
-                    MetadataDB.agent.extractor.version == agent.extractor.version
+                    MetadataDB.agent.listener.version == agent.listener.version
                 )
             else:
                 raise HTTPException(status_code=404, detail=f"Extractor not found")
@@ -295,18 +292,17 @@ async def update_file_metadata(
         query.append(MetadataDB.resource.version == target_version)
 
         # Filter by MetadataAgent
-        extractor_info = metadata_in.extractor
-        if extractor_info is not None:
+        if metadata_in.listener is not None:
             listener = await EventListenerDB.find_one(
-                EventListenerDB.name == extractor_info.name,
-                EventListenerDB.version == extractor_info.version,
+                EventListenerDB.name == metadata_in.listener.name,
+                EventListenerDB.version == metadata_in.listener.version,
             )
             if listener:
                 agent = MetadataAgent(creator=user, listener=listener)
                 # TODO: How do we handle two different users creating extractor metadata? Currently we ignore user
-                query.append(MetadataDB.agent.extractor.name == agent.extractor.name)
+                query.append(MetadataDB.agent.listener.name == agent.listener.name)
                 query.append(
-                    MetadataDB.agent.extractor.version == agent.extractor.version
+                    MetadataDB.agent.listener.version == agent.listener.version
                 )
             else:
                 raise HTTPException(status_code=404, detail=f"Extractor not found")
@@ -332,8 +328,8 @@ async def get_file_metadata(
     version: Optional[int] = None,
     all_versions: Optional[bool] = False,
     definition: Optional[str] = Form(None),
-    extractor_name: Optional[str] = Form(None),
-    extractor_version: Optional[float] = Form(None),
+    listener_name: Optional[str] = Form(None),
+    listener_version: Optional[float] = Form(None),
     user=Depends(get_current_user),
     allow: bool = Depends(FileAuthorization("viewer")),
 ):
@@ -363,10 +359,10 @@ async def get_file_metadata(
             # TODO: Check if definition exists in database and raise error if not
             query.append(MetadataDB.definition == definition)
 
-        if extractor_name is not None:
-            query.append(MetadataDB.agent.extractor.name == extractor_name)
-        if extractor_version is not None:
-            query.append(MetadataDB.agent.extractor.version == extractor_version)
+        if listener_name is not None:
+            query.append(MetadataDB.agent.extractor.name == listener_name)
+        if listener_version is not None:
+            query.append(MetadataDB.agent.extractor.version == listener_version)
 
         metadata = []
         async for md in MetadataDB.find(*query):
@@ -431,18 +427,17 @@ async def delete_file_metadata(
 
         # if extractor info is provided
         # Filter by MetadataAgent
-        extractor_info = metadata_in.extractor
-        if extractor_info is not None:
+        if metadata_in.listener is not None:
             listener = await EventListenerDB.find_one(
-                EventListenerDB.name == extractor_info.name,
-                EventListenerDB.version == extractor_info.version,
+                EventListenerDB.name == metadata_in.listener.name,
+                EventListenerDB.version == metadata_in.listener.version,
             )
             if listener:
                 agent = MetadataAgent(creator=user, listener=listener)
                 # TODO: How do we handle two different users creating extractor metadata? Currently we ignore user
-                query.append(MetadataDB.agent.extractor.name == agent.extractor.name)
+                query.append(MetadataDB.agent.listener.name == agent.listener.name)
                 query.append(
-                    MetadataDB.agent.extractor.version == agent.extractor.version
+                    MetadataDB.agent.listener.version == agent.listener.version
                 )
             else:
                 raise HTTPException(status_code=404, detail=f"Extractor not found")

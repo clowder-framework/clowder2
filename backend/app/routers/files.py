@@ -382,6 +382,28 @@ async def get_file_summary(
         raise HTTPException(status_code=404, detail=f"File {file_id} not found")
 
 
+@router.get("/{file_id}/version_details", response_model=FileOut)
+async def get_file_version_details(
+    file_id: str,
+    version_num: Optional[int] = 0,
+    allow: bool = Depends(FileAuthorization("viewer")),
+):
+    if (file := await FileDB.get(PydanticObjectId(file_id))) is not None:
+        # TODO: Incrementing too often (3x per page view)
+        file_vers = await FileVersionDB.find_one(
+            FileVersionDB.file_id == ObjectId(file_id),
+            FileVersionDB.version_num == version_num,
+        )
+        file_vers_dict = file_vers.dict()
+        file_vers_details = file.copy()
+        file_vers_keys = list(file_vers.keys())
+        for file_vers_key in file_vers_keys:
+            file_vers_details[file_vers_key] = file_vers_dict[file_vers_key]
+        return file_vers_details
+    else:
+        raise HTTPException(status_code=404, detail=f"File {file_id} not found")
+
+
 @router.get("/{file_id}/versions", response_model=List[FileVersion])
 async def get_file_versions(
     file_id: str,
