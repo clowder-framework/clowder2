@@ -250,7 +250,12 @@ export const File = (): JSX.Element => {
 		<Layout>
 			{/*Error Message dialogue*/}
 			<ErrorModal errorOpen={errorOpen} setErrorOpen={setErrorOpen} />
-			<MainBreadcrumbs paths={paths} />
+			<Grid container>
+				<MainBreadcrumbs paths={paths} />
+				<Typography variant="h4" paragraph>
+								{"/" + fileSummary.name}
+							</Typography>
+			</Grid>
 			<Grid container>
 				<Grid item xs={10} sx={{ display: "flex", alignItems: "center" }}>
 					<Stack>
