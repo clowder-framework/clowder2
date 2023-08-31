@@ -24,7 +24,7 @@ spec:
     {{- end }}
   {{- end }}
   rules:
-    - host: {{ .host | quote }}
+    - host: {{ .Values.hostname }}
       http:
         paths:
           - path: /geoserver/
