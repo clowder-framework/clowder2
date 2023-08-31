@@ -48,16 +48,9 @@ async def _build_metadata_db_obj(
 
     if agent is None:
         # Build MetadataAgent depending on whether extractor info is present
-        if metadata_in.extractor is not None:
-            extractor_in = LegacyEventListenerIn(**metadata_in.extractor.dict())
-            listener = await EventListenerDB.find_one(
-                EventListenerDB.id == extractor_in.id,
-                EventListenerDB.version == extractor_in.version,
-            )
-            if listener:
-                agent = MetadataAgent(creator=user, listener=listener)
-            else:
-                raise HTTPException(status_code=404, detail=f"Listener not found")
+        listener = metadata_in.listener
+        if listener:
+            agent = MetadataAgent(creator=user, listener=listener)
         else:
             agent = MetadataAgent(creator=user)
 
@@ -96,12 +89,12 @@ async def add_dataset_metadata(
             query.append(MetadataDB.definition == metadata_in.definition)
 
             # Extracted metadata doesn't care about user
-            if metadata_in.extractor is not None:
+            if metadata_in.listener is not None:
                 query.append(
-                    MetadataDB.agent.listener.name == metadata_in.extractor.name
+                    MetadataDB.agent.listener.name == metadata_in.listener.name
                 )
                 query.append(
-                    MetadataDB.agent.listener.version == metadata_in.extractor.version
+                    MetadataDB.agent.listener.version == metadata_in.listener.version
                 )
             else:
                 query.append(MetadataDB.agent.creator.id == user.id)
@@ -140,10 +133,10 @@ async def replace_dataset_metadata(
         query = [MetadataDB.resource.resource_id == ObjectId(dataset_id)]
 
         # Filter by MetadataAgent
-        if metadata_in.extractor is not None:
+        if metadata_in.listener is not None:
             listener = await EventListenerDB.find_one(
-                EventListenerDB.name == metadata_in.extractor.name,
-                EventListenerDB.version == metadata_in.extractor.version,
+                EventListenerDB.name == metadata_in.listener.name,
+                EventListenerDB.version == metadata_in.listener.version,
             )
             if listener:
                 agent = MetadataAgent(creator=user, listener=listener)
@@ -216,10 +209,10 @@ async def update_dataset_metadata(
                 query.append(MetadataDB.definition == definition)
 
         # Filter by MetadataAgent
-        if metadata_in.extractor is not None:
+        if metadata_in.listener is not None:
             listener = await EventListenerDB.find_one(
-                EventListenerDB.name == metadata_in.extractor.name,
-                EventListenerDB.version == metadata_in.extractor.version,
+                EventListenerDB.name == metadata_in.listener.name,
+                EventListenerDB.version == metadata_in.listener.version,
             )
             if listener:
                 agent = MetadataAgent(creator=user, listener=listener)
@@ -303,11 +296,10 @@ async def delete_dataset_metadata(
                 query.append(MetadataDB.definition == definition)
 
         # Filter by MetadataAgent
-        extractor_info = metadata_in.extractor_info
-        if extractor_info is not None:
+        if metadata_in.listener is not None:
             listener = await EventListenerDB.find_one(
-                EventListenerDB.name == metadata_in.extractor.name,
-                EventListenerDB.version == metadata_in.extractor.version,
+                EventListenerDB.name == metadata_in.listener.name,
+                EventListenerDB.version == metadata_in.listener.version,
             )
             if listener:
                 agent = MetadataAgent(creator=user, listener=listener)
