@@ -9,7 +9,7 @@ import { parseDate } from "../../utils/common";
 import FileMenu from "./FileMenu";
 import prettyBytes from "pretty-bytes";
 import { FileOut } from "../../openapi/v2";
-import { generateVisDataDownloadUrl } from "../../utils/visualization";
+import { downloadThumbnail } from "../../utils/visualization";
 
 type FilesTableFileEntryProps = {
 	iconStyle: {};
@@ -27,7 +27,7 @@ export function FilesTableFileEntry(props: FilesTableFileEntryProps) {
 			try {
 				let url = "";
 				if (file.thumbnail_id) {
-					url = await generateVisDataDownloadUrl(file.thumbnail_id);
+					url = await downloadThumbnail(file.thumbnail_id);
 				}
 				setThumbnailUrl(url);
 			} catch (error) {
