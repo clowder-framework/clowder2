@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: clowder2-realm
+data:
+  realm.json: |-
+    {{- $.Files.Get (printf "files/realm.json") | nindent 4 }}
