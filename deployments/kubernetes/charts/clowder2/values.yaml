@@ -60,7 +60,7 @@ geoserver:
   username: admin
   password: admin
   workspace: clowder2
-  url: http://clowder2-geoserver:8001/geoserver/
+  url: http://clowder2-geoserver:8085/geoserver/
   replicas: 1
   image:
     repository: kartoza/geoserver
@@ -68,7 +68,7 @@ geoserver:
     pullPolicy: IfNotPresent
   service:
     type: ClusterIP
-    port: 8001
+    port: 8085
   persistence:
     size: 8Gi
 

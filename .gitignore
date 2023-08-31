@@ -76,3 +76,4 @@ backend/app/tests/*
 
 *.tgz
 *clowder2-software-dev.yaml
+secrets.yaml
