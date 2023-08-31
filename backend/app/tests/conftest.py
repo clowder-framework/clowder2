@@ -23,7 +23,6 @@ def root_path() -> str:
 
 @pytest.fixture(scope="session")
 def token(client: TestClient) -> str:
-    print("do this first")
     response = client.post(f"{settings.API_V2_STR}/users", json=user_example)
     assert (
         response.status_code == 200 or response.status_code == 409
