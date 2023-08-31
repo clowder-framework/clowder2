@@ -120,6 +120,29 @@ export class FilesService {
     }
 
     /**
+     * Get File Version Details
+     * @param fileId
+     * @param versionNum
+     * @returns FileOut Successful Response
+     * @throws ApiError
+     */
+    public static getFileVersionDetailsApiV2FilesFileIdVersionDetailsGet(
+        fileId: string,
+        versionNum?: number,
+    ): CancelablePromise<FileOut> {
+        return __request({
+            method: 'GET',
+            path: `/api/v2/files/${fileId}/version_details`,
+            query: {
+                'version_num': versionNum,
+            },
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+
+    /**
      * Get File Versions
      * @param fileId
      * @param skip

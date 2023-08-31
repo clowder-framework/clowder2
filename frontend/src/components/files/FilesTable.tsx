@@ -35,7 +35,7 @@ export default function FilesTable(props: FilesTableProps) {
 	const parentFolderId = props.folderId;
 	const selectFile = (selectedFileId: string | undefined) => {
 		// Redirect to file route with file Id and dataset id and folderId
-		history(`/files/${selectedFileId}?dataset=${props.datasetId}&folder=${parentFolderId}`);
+		history(`/files/${selectedFileId}?dataset=${props.datasetId}&folder=${parentFolderId}&verNum=${selectedFileId}`);
 	};
 	const selectFolder = (selectedFolderId: string | undefined) => {
 		// Redirect to file route with file Id and dataset id
@@ -48,6 +48,7 @@ export default function FilesTable(props: FilesTableProps) {
 				<TableHead>
 					<TableRow>
 						<TableCell>Name</TableCell>
+						<TableCell>Version</TableCell>
 						<TableCell align="right">Updated</TableCell>
 						<TableCell align="right">Size</TableCell>
 						<TableCell align="right">Type</TableCell>

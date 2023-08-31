@@ -191,6 +191,7 @@ export interface MetadataState {
 }
 
 export interface FileState {
+	url: string;
 	blob: Blob;
 	fileSummary: FileSummary;
 	extractedMetadata: ExtractedMetadata[];
@@ -199,6 +200,7 @@ export interface FileState {
 	fileVersions: FileVersion[];
 	fileRole: AuthorizationBase;
 	presignedUrl: string;
+	selected_version_num: number;
 }
 
 export interface UserState {
