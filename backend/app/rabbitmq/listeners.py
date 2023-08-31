@@ -95,7 +95,6 @@ async def submit_dataset_job(
     routing_key: str,
     parameters: dict,
     user: UserOut,
-    token: str = Depends(get_token),
     rabbitmq_client: BlockingChannel = Depends(dependencies.get_rabbitmq),
 ):
     # Create an entry in job history with unique ID
