@@ -52,7 +52,7 @@ export default function DatasetCard(props: DatasetCardProps) {
 	return (
 		<Card
 			key={id}
-			sx={{ display: "flex", flexDirection: "column" }}
+			sx={{ display: "flex", flexDirection: "column", height: "100%" }}
 			variant="outlined"
 		>
 			<CardActionArea
