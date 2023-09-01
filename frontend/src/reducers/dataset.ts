@@ -92,9 +92,6 @@ const dataset = (state = defaultState, action: DataAction) => {
 					(dataset) => dataset.id !== action.dataset.id
 				),
 			});
-		// case DOWNLOAD_DATASET:
-		// 	// TODO do nothing for now; but in the future can utilize to display certain effects
-		// 	return Object.assign({}, state, {});
 		default:
 			return state;
 	}
