@@ -66,6 +66,7 @@ export function dataURItoFile(dataURI) {
 	return new File([blob], filename, { type: mime, lastModified: new Date() });
 }
 
+// For format options see https://date-fns.org/v2.30.0/docs/format
 export function parseDate(dateString, formatString = "yyyy-MM-dd HH:mm:ss") {
 	if (dateString) {
 		try {

@@ -46,8 +46,8 @@ export default function DatasetCard(props: DatasetCardProps) {
 		fetchThumbnailUrl();
 	}, [thumbnailId]);
 
-	const formattedCreated = parseDate(created, "yyyy-MM-dd");
-	const subheader = `${formattedCreated} | ${author}`;
+	const formattedCreated = parseDate(created, "PP");
+	const subheader = `${formattedCreated} \u00B7 ${author}`;
 
 	return (
 		<Card
