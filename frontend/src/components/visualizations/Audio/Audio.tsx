@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import { useDispatch } from "react-redux";
 import {
 	generateFileDownloadUrl,
 	generateVisDataDownloadUrl,
@@ -13,26 +12,16 @@ type AudioProps = {
 export default function Audio(props: AudioProps) {
 	const { fileId, visualizationId } = props;
 
-	const dispatch = useDispatch();
-
 	const [url, setUrl] = useState("");
 
 	useEffect(() => {
-		const fetchUrl = async () => {
-			try {
-				let downloadUrl;
-				if (visualizationId) {
-					downloadUrl = await generateVisDataDownloadUrl(visualizationId);
-				} else {
-					downloadUrl = await generateFileDownloadUrl(fileId, 0);
-				}
-				setUrl(downloadUrl);
-			} catch (error) {
-				console.error("Error fetching data:", error);
-			}
-		};
-
-		fetchUrl();
+		let downloadUrl;
+		if (visualizationId) {
+			downloadUrl = generateVisDataDownloadUrl(visualizationId);
+		} else {
+			downloadUrl = generateFileDownloadUrl(fileId, 0);
+		}
+		setUrl(downloadUrl);
 	}, [visualizationId, fileId]);
 
 	return (() => {
