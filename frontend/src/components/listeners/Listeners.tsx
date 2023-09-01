@@ -30,8 +30,8 @@ import SubmitExtraction from "./SubmitExtraction";
 import { capitalize } from "../../utils/common";
 
 type ListenerProps = {
-	fileId: string;
-	datasetId: string;
+	fileId?: string;
+	datasetId?: string;
 };
 
 export function Listeners(props: ListenerProps) {

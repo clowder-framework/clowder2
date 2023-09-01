@@ -20,9 +20,10 @@ import {
 } from "../actions/file";
 import { RECEIVE_DATASET_ROLE } from "../actions/authorization";
 import { DataAction } from "../types/action";
-import { Dataset, DatasetState } from "../types/data";
+import { DatasetState } from "../types/data";
 import {
 	AuthorizationBase,
+	DatasetOut as Dataset,
 	DatasetRoles,
 	FileOut as File,
 	UserOut,

@@ -1,7 +1,7 @@
 import { getHeader } from "./common";
 import config from "../app.config";
 
-export function downloadThumbnail(thumbnailId) {
+export function generateThumbnailUrl(thumbnailId) {
 	return `${config.hostname}/api/v2/thumbnails/${thumbnailId}`;
 }
 

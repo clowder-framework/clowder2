@@ -13,17 +13,17 @@ import {
 	Tooltip,
 } from "@mui/material";
 import { Download } from "@mui/icons-material";
-import { generateVisDataDownloadUrl } from "../../utils/visualization";
+import { generateThumbnailUrl } from "../../utils/visualization";
 import config from "../../app.config";
 // import {Favorite, Share} from "@material-ui/icons";
 
 type DatasetCardProps = {
-	id: string;
-	name: string;
-	author: string;
-	created: string | Date;
-	description: string;
-	thumbnail_id?: string;
+	id?: string;
+	name?: string;
+	author?: string;
+	created?: string | Date;
+	description?: string;
+	thumbnailId?: string;
 };
 
 export default function DatasetCard(props: DatasetCardProps) {
@@ -31,19 +31,11 @@ export default function DatasetCard(props: DatasetCardProps) {
 	const [thumbnailUrl, setThumbnailUrl] = useState("");
 
 	useEffect(() => {
-		const fetchThumbnailUrl = async () => {
-			try {
-				let url = "";
-				if (thumbnailId) {
-					url = await generateVisDataDownloadUrl(thumbnailId);
-				}
-				setThumbnailUrl(url);
-			} catch (error) {
-				console.error("Error fetching data:", error);
-			}
-		};
-
-		fetchThumbnailUrl();
+		let url = "";
+		if (thumbnailId) {
+			url = generateThumbnailUrl(thumbnailId);
+		}
+		setThumbnailUrl(url);
 	}, [thumbnailId]);
 
 	const formattedCreated = parseDate(created);
