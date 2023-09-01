@@ -46,16 +46,21 @@ export default function DatasetCard(props: DatasetCardProps) {
 		fetchThumbnailUrl();
 	}, [thumbnailId]);
 
-	const formattedCreated = parseDate(created);
+	const formattedCreated = parseDate(created, "yyyy-MM-dd");
+	const subheader = `${formattedCreated} | ${author}`;
 
 	return (
-		<Card key={id} sx={{ display: "flex", flexDirection: "column" }}>
+		<Card
+			key={id}
+			sx={{ display: "flex", flexDirection: "column" }}
+			variant="outlined"
+		>
 			<CardActionArea
 				component={Link}
 				to={`/datasets/${id}`}
 				sx={{ height: "100%" }}
 			>
-				<CardHeader title={name} subheader={formattedCreated} />
+				<CardHeader title={name} subheader={subheader} />
 				{thumbnailId ? (
 					<CardMedia
 						component="img"
@@ -63,8 +68,7 @@ export default function DatasetCard(props: DatasetCardProps) {
 						alt={`${name}_thumbnail`}
 					/>
 				) : null}
-				<CardContent>
-					<Typography color="secondary">{author}</Typography>
+				<CardContent sx={{ py: 0 }}>
 					<Typography
 						variant="body2"
 						sx={{
@@ -79,7 +83,7 @@ export default function DatasetCard(props: DatasetCardProps) {
 					</Typography>
 				</CardContent>
 			</CardActionArea>
-			<CardActions sx={{ marginTop: "auto" }}>
+			<CardActions sx={{ pb: 0 }}>
 				<Tooltip title="Download">
 					<IconButton
 						href={`${config.hostname}/api/v2/datasets/${id}/download`}
