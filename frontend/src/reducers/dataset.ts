@@ -20,9 +20,10 @@ import {
 } from "../actions/file";
 import { RECEIVE_DATASET_ROLE } from "../actions/authorization";
 import { DataAction } from "../types/action";
-import { Dataset, DatasetState } from "../types/data";
+import { DatasetState } from "../types/data";
 import {
 	AuthorizationBase,
+	DatasetOut as Dataset,
 	DatasetRoles,
 	FileOut as File,
 	UserOut,
@@ -92,9 +93,6 @@ const dataset = (state = defaultState, action: DataAction) => {
 					(dataset) => dataset.id !== action.dataset.id
 				),
 			});
-		// case DOWNLOAD_DATASET:
-		// 	// TODO do nothing for now; but in the future can utilize to display certain effects
-		// 	return Object.assign({}, state, {});
 		default:
 			return state;
 	}

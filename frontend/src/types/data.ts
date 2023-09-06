@@ -1,5 +1,6 @@
 import {
 	AuthorizationBase,
+	DatasetOut as Dataset,
 	DatasetRoles,
 	EventListenerJobDB,
 	FileOut as FileSummary,
@@ -14,20 +15,6 @@ import {
 	VisualizationConfigOut,
 	VisualizationDataOut,
 } from "../openapi/v2";
-
-export interface Dataset {
-	name: string;
-	description: string;
-	_id: string;
-	creator: UserOut;
-	created: string | Date;
-	modified: string | Date;
-	files: string[];
-	status: string;
-	views: string;
-	downloads: string;
-	thumbnail: string;
-}
 
 export interface Extractor {
 	name: string;
