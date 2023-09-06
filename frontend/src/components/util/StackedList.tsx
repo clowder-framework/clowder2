@@ -14,7 +14,7 @@ export function StackedList(props: StackedListProps) {
 		entries.push(
 			<Box>
 				<Typography sx={{ wordBreak: "break-all" }}>{value}</Typography>
-				<Typography variant="caption" sx={{ color: "text.secondary" }}>
+				<Typography variant="caption" sx={{ color: "text.primary.light" }}>
 					{key}
 				</Typography>
 			</Box>
