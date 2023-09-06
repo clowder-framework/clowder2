@@ -273,14 +273,16 @@ export const File = (): JSX.Element => {
 						<Box>
 							<RoleChip role={fileRole} />
 						</Box>
+						<Box>
+							<FileActionsMenu
+								filename={fileSummary.name}
+								fileId={fileId}
+								datasetId={datasetId}
+							/>
+						</Box>
 					</Stack>
 				</Grid>
 				<Grid item xs={2} sx={{ display: "flex-top", alignItems: "center" }}>
-					<FileActionsMenu
-						filename={fileSummary.name}
-						fileId={fileId}
-						datasetId={datasetId}
-					/>
 				</Grid>
 			</Grid>
 			<Grid container spacing={2} sx={{ mt: 2 }}>
