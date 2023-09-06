@@ -3,7 +3,6 @@
 /* eslint-disable */
 
 import type { EventListenerIn } from './EventListenerIn';
-import type { ExtractorInfo } from './ExtractorInfo';
 import type { LegacyEventListenerIn } from './LegacyEventListenerIn';
 
 export type MetadataIn = {
@@ -15,5 +14,4 @@ export type MetadataIn = {
     file_version?: number;
     listener?: EventListenerIn;
     extractor?: LegacyEventListenerIn;
-    extractor_info?: ExtractorInfo;
 }

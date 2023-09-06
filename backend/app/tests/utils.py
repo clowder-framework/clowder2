@@ -1,8 +1,11 @@
 import os
+import struct
 
 from fastapi.testclient import TestClient
-
+from app.keycloak_auth import delete_user
+from pymongo import MongoClient
 from app.config import settings
+
 
 """These are standard JSON entries to be used for creating test resources."""
 user_example = {
@@ -41,7 +44,7 @@ listener_v2_example = {
 feed_example = {
     "name": "XYZ Test Feed",
     "search": {
-        "index_name": "file",
+        "index_name": "files",
         "criteria": [{"field": "name", "operator": "==", "value": "xyz"}],
     },
 }
@@ -83,6 +86,13 @@ def create_user(client: TestClient, headers: dict, email: str = user_alt["email"
         response.status_code == 200 or response.status_code == 409
     )  # 409 = user already exists
     return response.json()
+
+
+def delete_test_data():
+    delete_user(user_example["email"])
+    delete_user(user_alt["email"])
+    mongo_client = MongoClient(settings.MONGODB_URL)
+    mongo_client.drop_database("clowder-tests")
 
 
 def get_user_token(client: TestClient, headers: dict, email: str = user_alt["email"]):
@@ -191,3 +201,30 @@ def register_v2_listener(client: TestClient, headers: dict, name: str = None):
     assert response.status_code == 200
     assert response.json().get("id") is not None
     return response.json()
+
+
+def generate_png(file_path):
+    """Generate a small 16x16 black PNG file for tests that need images. Written like this to avoid dependency on something like Pillow."""
+    # PNG signature
+    signature = b"\x89PNG\r\n\x1a\n"
+
+    # IHDR chunk (image header)
+    ihdr_data = struct.pack("!I4sIIBB", 13, b"IHDR", 16, 16, 8, 0)
+    ihdr_crc = struct.pack("!I", 0xDEADBEEF)  # Placeholder CRC value
+
+    # IDAT chunk (image data)
+    idat_data = struct.pack("!I4s", 0, b"IDAT")
+    idat_crc = struct.pack("!I", 0xDEADBEEF)  # Placeholder CRC value
+
+    # IEND chunk (image trailer)
+    iend_data = struct.pack("!I4s", 0, b"IEND")
+    iend_crc = struct.pack("!I", 0xAE426082)  # CRC value for IEND
+
+    with open(file_path, "wb") as png_file:
+        png_file.write(signature)
+        png_file.write(ihdr_data)
+        png_file.write(ihdr_crc)
+        png_file.write(idat_data)
+        png_file.write(idat_crc)
+        png_file.write(iend_data)
+        png_file.write(iend_crc)

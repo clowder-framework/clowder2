@@ -1,11 +1,10 @@
 import { V2 } from "../openapi";
 import {
 	handleErrors,
-	handleErrorsAuthorization, handleErrorsInline,
+	handleErrorsAuthorization,
+	handleErrorsInline,
 	resetFailedReason,
 } from "./common";
-import config from "../app.config";
-import { getHeader } from "../utils/common";
 
 export const SET_DATASET_GROUP_ROLE = "SET_DATASET_GROUP_ROLE";
 
@@ -50,7 +49,10 @@ export function setDatasetUserRole(datasetId, username, roleType) {
 			})
 			.catch((reason) => {
 				dispatch(
-					handleErrorsInline(reason, setDatasetUserRole(datasetId, username, roleType))
+					handleErrorsInline(
+						reason,
+						setDatasetUserRole(datasetId, username, roleType)
+					)
 				);
 			});
 	};
@@ -358,44 +360,5 @@ export function fetchDatasetRoles(datasetId) {
 					handleErrorsAuthorization(reason, fetchDatasetRoles(datasetId))
 				);
 			});
-	};
-}
-
-export const DOWNLOAD_DATASET = "DOWNLOAD_DATASET";
-
-export function datasetDownloaded(datasetId, filename = "") {
-	return async (dispatch) => {
-		if (filename !== "") {
-			filename = filename.replace(/\s+/g, "_");
-			filename = `${filename}.zip`;
-		} else {
-			filename = `${datasetId}.zip`;
-		}
-		const endpoint = `${config.hostname}/api/v2/datasets/${datasetId}/download`;
-		const response = await fetch(endpoint, {
-			method: "GET",
-			mode: "cors",
-			headers: await getHeader(),
-		});
-
-		if (response.status === 200) {
-			const blob = await response.blob();
-			if (window.navigator.msSaveOrOpenBlob) {
-				window.navigator.msSaveBlob(blob, filename);
-			} else {
-				const anchor = window.document.createElement("a");
-				anchor.href = window.URL.createObjectURL(blob);
-				anchor.download = filename;
-				document.body.appendChild(anchor);
-				anchor.click();
-				document.body.removeChild(anchor);
-			}
-			dispatch({
-				type: DOWNLOAD_DATASET,
-				receivedAt: Date.now(),
-			});
-		} else {
-			dispatch(handleErrors(response, datasetDownloaded(datasetId, filename)));
-		}
 	};
 }

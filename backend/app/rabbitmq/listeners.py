@@ -62,7 +62,7 @@ async def submit_file_job(
         listener_id=routing_key,
         creator=user,
         resource_ref=MongoDBRef(
-            collection="file", resource_id=file_out.id, version=file_out.version_num
+            collection="files", resource_id=file_out.id, version=file_out.version_num
         ),
         parameters=parameters,
     )
@@ -95,14 +95,13 @@ async def submit_dataset_job(
     routing_key: str,
     parameters: dict,
     user: UserOut,
-    token: str = Depends(get_token),
     rabbitmq_client: BlockingChannel = Depends(dependencies.get_rabbitmq),
 ):
     # Create an entry in job history with unique ID
     job = EventListenerJobDB(
         listener_id=routing_key,
         creator=user,
-        resource_ref=MongoDBRef(collection="dataset", resource_id=dataset_out.id),
+        resource_ref=MongoDBRef(collection="datasets", resource_id=dataset_out.id),
         parameters=parameters,
     )
     await job.insert()

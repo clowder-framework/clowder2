@@ -5,8 +5,6 @@ import CardContent from "@mui/material/CardContent";
 import Typography from "@mui/material/Typography";
 import { Link } from "react-router-dom";
 import { parseDate } from "../../utils/common";
-import { datasetDownloaded } from "../../actions/dataset";
-import { useDispatch } from "react-redux";
 import {
 	CardActionArea,
 	CardHeader,
@@ -15,42 +13,29 @@ import {
 	Tooltip,
 } from "@mui/material";
 import { Download } from "@mui/icons-material";
-import { generateVisDataDownloadUrl } from "../../utils/visualization";
+import { generateThumbnailUrl } from "../../utils/visualization";
+import config from "../../app.config";
 // import {Favorite, Share} from "@material-ui/icons";
 
 type DatasetCardProps = {
-	id: string;
-	name: string;
-	author: string;
-	created: string | Date;
-	description: string;
-	thumbnail_id?: string;
+	id?: string;
+	name?: string;
+	author?: string;
+	created?: string | Date;
+	description?: string;
+	thumbnailId?: string;
 };
 
 export default function DatasetCard(props: DatasetCardProps) {
 	const { id, name, author, created, description, thumbnailId } = props;
 	const [thumbnailUrl, setThumbnailUrl] = useState("");
 
-	const dispatch = useDispatch();
-	const downloadDataset = (
-		datasetId: string | undefined,
-		filename: string | undefined
-	) => dispatch(datasetDownloaded(datasetId, filename));
-
 	useEffect(() => {
-		const fetchThumbnailUrl = async () => {
-			try {
-				let url = "";
-				if (thumbnailId) {
-					url = await generateVisDataDownloadUrl(thumbnailId);
-				}
-				setThumbnailUrl(url);
-			} catch (error) {
-				console.error("Error fetching data:", error);
-			}
-		};
-
-		fetchThumbnailUrl();
+		let url = "";
+		if (thumbnailId) {
+			url = generateThumbnailUrl(thumbnailId);
+		}
+		setThumbnailUrl(url);
 	}, [thumbnailId]);
 
 	const formattedCreated = parseDate(created);
@@ -89,7 +74,7 @@ export default function DatasetCard(props: DatasetCardProps) {
 			<CardActions sx={{ marginTop: "auto" }}>
 				<Tooltip title="Download">
 					<IconButton
-						onClick={() => downloadDataset(id, name)}
+						href={`${config.hostname}/api/v2/datasets/${id}/download`}
 						color="primary"
 						aria-label="download"
 						sx={{ mr: 3 }}

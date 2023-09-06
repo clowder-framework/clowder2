@@ -10,16 +10,20 @@ from typing import List, Optional
 
 from beanie import PydanticObjectId
 from beanie.operators import Or
+from beanie.odm.operators.update.general import Inc
 from bson import ObjectId
 from bson import json_util
 from elasticsearch import Elasticsearch
-from fastapi import APIRouter, HTTPException, Depends, Security
 from fastapi import (
+    APIRouter,
+    HTTPException,
+    Depends,
+    Security,
     File,
     UploadFile,
-    Response,
     Request,
 )
+from fastapi.responses import StreamingResponse
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from minio import Minio
 from pika.adapters.blocking_connection import BlockingChannel
@@ -48,6 +52,7 @@ from app.models.folders import FolderOut, FolderIn, FolderDB, FolderDBViewList
 from app.models.metadata import MetadataDB
 from app.models.pyobjectid import PyObjectId
 from app.models.users import UserOut
+from app.models.thumbnails import ThumbnailDB
 from app.rabbitmq.listeners import submit_dataset_job
 from app.routers.files import add_file_entry, remove_file_entry
 from app.search.connect import (
@@ -259,20 +264,6 @@ async def get_dataset_files(
     return [file.dict() for file in files]
 
 
-@router.patch("/{dataset_id}/thumbnail/{thumbnail_id}", response_model=DatasetOut)
-async def add_dataset_thumbnail(
-    dataset_id: str,
-    thumbnail_id: str,
-    allow: bool = Depends(Authorization("editor")),
-):
-    if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
-        dataset.thumbnail_id = thumbnail_id
-        await dataset.save()
-
-        return dataset.dict()
-    raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
-
-
 @router.put("/{dataset_id}", response_model=DatasetOut)
 async def edit_dataset(
     dataset_id: str,
@@ -458,7 +449,6 @@ async def save_file(
                     status_code=404, detail=f"Folder {folder_id} not found"
                 )
 
-        # access_token = credentials.credentials
         await add_file_entry(
             new_file,
             user,
@@ -689,13 +679,15 @@ async def download_dataset(
             print("could not delete file")
             print(e)
 
-        # TODO: Increment dataset download count, update index
-
-        return Response(
-            stream.getvalue(),
+        # Get content type & open file stream
+        response = StreamingResponse(
+            stream,
             media_type="application/x-zip-compressed",
-            headers={"Content-Disposition": f'attachment;filename="{zip_name}"'},
         )
+        response.headers["Content-Disposition"] = "attachment; filename=%s" % zip_name
+        # Increment download count
+        await dataset.update(Inc({DatasetDB.downloads: 1}))
+        return response
     raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
 
 
@@ -709,14 +701,12 @@ async def get_dataset_extract(
     # parameters don't have a fixed model shape
     parameters: dict = None,
     user=Depends(get_current_user),
-    credentials: HTTPAuthorizationCredentials = Security(security),
     rabbitmq_client: BlockingChannel = Depends(dependencies.get_rabbitmq),
     allow: bool = Depends(Authorization("uploader")),
 ):
     if extractorName is None:
         raise HTTPException(status_code=400, detail=f"No extractorName specified")
     if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
-        access_token = credentials.credentials
         queue = extractorName
         routing_key = queue
         return await submit_dataset_job(
@@ -724,8 +714,55 @@ async def get_dataset_extract(
             routing_key,
             parameters,
             user,
-            access_token,
             rabbitmq_client,
         )
     else:
         raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
+
+
+@router.get("/{dataset_id}/thumbnail")
+async def download_dataset_thumbnail(
+    dataset_id: str,
+    fs: Minio = Depends(dependencies.get_fs),
+    allow: bool = Depends(Authorization("viewer")),
+):
+    # If dataset exists in MongoDB, download from Minio
+    if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
+        if dataset.thumbnail_id is not None:
+            content = fs.get_object(
+                settings.MINIO_BUCKET_NAME, str(dataset.thumbnail_id)
+            )
+        else:
+            raise HTTPException(
+                status_code=404,
+                detail=f"Dataset {dataset_id} has no associated thumbnail",
+            )
+
+        # Get content type & open file stream
+        response = StreamingResponse(content.stream(settings.MINIO_UPLOAD_CHUNK_SIZE))
+        # TODO: How should filenames be handled for thumbnails?
+        response.headers["Content-Disposition"] = "attachment; filename=%s" % "thumb"
+        return response
+    else:
+        raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
+
+
+@router.patch("/{dataset_id}/thumbnail/{thumbnail_id}", response_model=DatasetOut)
+async def add_dataset_thumbnail(
+    dataset_id: str,
+    thumbnail_id: str,
+    allow: bool = Depends(Authorization("editor")),
+):
+    if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
+        if (
+            thumbnail := await ThumbnailDB.get(PydanticObjectId(thumbnail_id))
+        ) is not None:
+            # TODO: Should we garbage collect existing thumbnail if nothing else points to it?
+            dataset.thumbnail_id = thumbnail_id
+            await dataset.save()
+            return dataset.dict()
+        else:
+            raise HTTPException(
+                status_code=404, detail=f"Thumbnail {thumbnail_id} not found"
+            )
+    raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")

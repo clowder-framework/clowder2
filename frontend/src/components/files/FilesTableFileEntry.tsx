@@ -9,7 +9,7 @@ import { parseDate } from "../../utils/common";
 import FileMenu from "./FileMenu";
 import prettyBytes from "pretty-bytes";
 import { FileOut } from "../../openapi/v2";
-import { generateVisDataDownloadUrl } from "../../utils/visualization";
+import { generateThumbnailUrl } from "../../utils/visualization";
 
 type FilesTableFileEntryProps = {
 	iconStyle: {};
@@ -23,19 +23,11 @@ export function FilesTableFileEntry(props: FilesTableFileEntryProps) {
 	const [thumbnailUrl, setThumbnailUrl] = useState("");
 
 	useEffect(() => {
-		const fetchThumbnailUrl = async () => {
-			try {
-				let url = "";
-				if (file.thumbnail_id) {
-					url = await generateVisDataDownloadUrl(file.thumbnail_id);
-				}
-				setThumbnailUrl(url);
-			} catch (error) {
-				console.error("Error fetching data:", error);
-			}
-		};
-
-		fetchThumbnailUrl();
+		let url = "";
+		if (file.thumbnail_id) {
+			url = generateThumbnailUrl(file.thumbnail_id);
+		}
+		setThumbnailUrl(url);
 	}, [file]);
 
 	return (
@@ -58,7 +50,14 @@ export function FilesTableFileEntry(props: FilesTableFileEntryProps) {
 							<InsertDriveFileIcon sx={iconStyle} />
 						)}
 						<Button onClick={() => selectFile(file.id)}>{file.name}</Button>
-						<VersionChip versionNumber={file.version_num} />
+					</TableCell>
+					<TableCell>
+						<VersionChip
+							selectedVersion={file.version_num}
+							setSelectedVersion={null}
+							versionNumbers={null}
+							isClickable={false}
+						/>
 					</TableCell>
 					<TableCell align="right">
 						{parseDate(file.created)} by {file.creator.first_name}{" "}

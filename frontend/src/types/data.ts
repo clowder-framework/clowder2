@@ -1,5 +1,6 @@
 import {
 	AuthorizationBase,
+	DatasetOut as Dataset,
 	DatasetRoles,
 	EventListenerJobDB,
 	FileOut as FileSummary,
@@ -12,22 +13,8 @@ import {
 	UserAPIKeyOut,
 	UserOut,
 	VisualizationConfigOut,
-	VisualizationOut,
+	VisualizationDataOut,
 } from "../openapi/v2";
-
-export interface Dataset {
-	name: string;
-	description: string;
-	_id: string;
-	creator: UserOut;
-	created: string | Date;
-	modified: string | Date;
-	files: string[];
-	status: string;
-	views: string;
-	downloads: string;
-	thumbnail: string;
-}
 
 export interface Extractor {
 	name: string;
@@ -199,6 +186,8 @@ export interface FileState {
 	previews: FilePreview[];
 	fileVersions: FileVersion[];
 	fileRole: AuthorizationBase;
+	presignedUrl: string;
+	selected_version_num: number;
 }
 
 export interface UserState {
@@ -233,9 +222,9 @@ export interface JobSummary {
 }
 
 export interface VisualizationState {
-	visData: VisualizationOut;
+	visData: VisualizationDataOut;
 	visConfig: VisualizationConfigOut[];
-	url: string;
+	presignedUrl: string;
 	blob: Blob;
 }
 

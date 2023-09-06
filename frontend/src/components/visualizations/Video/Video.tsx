@@ -15,21 +15,13 @@ export default function Video(props: VideoProps) {
 	const [url, setUrl] = useState("");
 
 	useEffect(() => {
-		const fetchUrl = async () => {
-			try {
-				let downloadUrl;
-				if (visualizationId) {
-					downloadUrl = await generateVisDataDownloadUrl(visualizationId);
-				} else {
-					downloadUrl = await generateFileDownloadUrl(fileId, 0);
-				}
-				setUrl(downloadUrl);
-			} catch (error) {
-				console.error("Error fetching data:", error);
-			}
-		};
-
-		fetchUrl();
+		let downloadUrl;
+		if (visualizationId) {
+			downloadUrl = generateVisDataDownloadUrl(visualizationId);
+		} else {
+			downloadUrl = generateFileDownloadUrl(fileId, 0);
+		}
+		setUrl(downloadUrl);
 	}, [visualizationId, fileId]);
 
 	return (() => {
