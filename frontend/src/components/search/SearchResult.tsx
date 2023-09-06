@@ -27,18 +27,6 @@ function parseString(str: string) {
 	}
 }
 
-function getRecordType(item) {
-	if (item._index === "dataset") return "dataset";
-	if (item._index === "file") return "file";
-	if (item._index === "metadata") {
-		// TODO: How to handle duplicate search results here?
-		if (item.dataset_id === undefined)
-			// Only files have this field
-			return "file";
-		else return "dataset";
-	}
-}
-
 function buildDatasetResult(item) {
 	return (
 		<>
@@ -53,10 +41,10 @@ function buildDatasetResult(item) {
 				>
 					{parseString(item.name)}
 				</MuiLink>
-				<Typography variant="body2" color={theme.palette.primary.light}>
+				<Typography variant="body2" color={theme.palette.info.main}>
 					Created by {parseString(item.creator)} at {parseDate(item.created)}
 				</Typography>
-				<Typography variant="body2" color={theme.palette.primary.light}>
+				<Typography variant="body2" color={theme.palette.info.main}>
 					{parseString(item.description)}
 				</Typography>
 			</Box>
@@ -78,10 +66,10 @@ function buildFileResult(item) {
 				>
 					{parseString(item.name)}
 				</MuiLink>
-				<Typography variant="body2" color={theme.palette.primary.light}>
+				<Typography variant="body2" color={theme.palette.info.main}>
 					Created by {parseString(item.creator)} at {parseDate(item.created)}
 				</Typography>
-				<Typography variant="body2" color={theme.palette.primary.light}>
+				<Typography variant="body2" color={theme.palette.info.main}>
 					{`${item.content_type} | ${item.bytes} bytes`}
 				</Typography>
 			</Box>
