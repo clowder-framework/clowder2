@@ -197,17 +197,20 @@ export const Dataset = (): JSX.Element => {
 							</Typography>
 						</Box>
 						<Box>
-							<RoleChip role={datasetRole.role} />
+						<RoleChip role={datasetRole.role} />
+						<Box>
+							<ActionsMenu
+								datasetId={datasetId}
+								folderId={folderId}
+								datasetName={about["name"]}
+							/>
 						</Box>
+					</Box>
 					</Stack>
 				</Grid>
 				{/*actions*/}
 				<Grid item xs={4} sx={{ display: "flex-top", alignItems: "center" }}>
-					<ActionsMenu
-						datasetId={datasetId}
-						folderId={folderId}
-						datasetName={about["name"]}
-					/>
+
 				</Grid>
 			</Grid>
 			<Grid container spacing={2} sx={{ mt: 2 }}>
