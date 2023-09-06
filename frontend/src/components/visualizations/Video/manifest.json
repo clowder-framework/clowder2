@@ -12,7 +12,8 @@
 		"name": "Video",
 		"mainType": "video",
 		"mimeTypes": [
-			"video/*"
+			"video/mp4",
+			"video/ogg"
 		],
 		"props": {
 			"fileId": "string"

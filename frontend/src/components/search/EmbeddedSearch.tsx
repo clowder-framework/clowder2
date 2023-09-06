@@ -1,48 +1,67 @@
-import React from "react";
-import {DataSearch} from "@appbaseio/reactivesearch";
+import React, { useEffect, useState } from "react";
+import { DataSearch, ReactiveBase } from "@appbaseio/reactivesearch";
 
-import {useNavigate} from "react-router-dom";
-import {SearchErrorBoundary} from "./SearchErrorBoundary";
-
+import { useNavigate } from "react-router-dom";
+import config from "../../app.config";
+import { searchTheme } from "../../theme";
+import Cookies from "universal-cookie";
 
 export function EmbeddedSearch() {
-	// TODO pass down a props to determine which index to search
-
 	const history = useNavigate();
+	const cookies = new Cookies();
+	const [authorizationHeader, setAuthorizationHeader] = useState({
+		Authorization: cookies.get("Authorization"),
+	});
+	const getUpdatedCookie = () => {
+		const cookies = new Cookies();
+		setAuthorizationHeader({ Authorization: cookies.get("Authorization") });
+	};
+
+	// Pulling latest cookie
+	useEffect(() => {
+		const intervalId = setInterval(
+			getUpdatedCookie,
+			config.refreshTokenInterval
+		);
+		return () => clearInterval(intervalId);
+	}, []);
 
 	// @ts-ignore
 	return (
-		<>
-			<SearchErrorBoundary>
-				<DataSearch componentId="searchbox" autosuggest={true}
-							highlight={true} queryFormat="or" fuzziness={0}
-							debounce={100}
-					// apply react to the filter
-							URLParams={true}
-							showFilter={true}
-							showClear
-							renderNoSuggestion="No suggestions found."
-							dataField={[
-								{field: "name", weight: 3},
-								{field: "description", weight: 2},
-								{field: "author.keyword", weight: 2},
-							]}
-					// placeholder="Search for Dataset"
-							innerClass={{
-								title: "search-title",
-								input: "embedded-search-input",
-							}}
-							onValueSelected={
-								function (value, cause, _) {
-									if (cause === "SUGGESTION_SELECT" ||
-										cause === "ENTER_PRESS" ||
-										cause === "SEARCH_ICON_CLICK") {
-										history(`/search?searchbox="${value}"`);
-									}
-								}
-							}
-				/>
-			</SearchErrorBoundary>
-		</>
+		<ReactiveBase
+			url={config.searchEndpoint}
+			app="all"
+			headers={authorizationHeader}
+			theme={searchTheme}
+		>
+			<DataSearch
+				componentId="searchbox"
+				autosuggest={true}
+				highlight={true}
+				queryFormat="or"
+				fuzziness={0}
+				debounce={100}
+				// apply react to the filter
+				URLParams={true}
+				showFilter={true}
+				showClear
+				renderNoSuggestion="No suggestions found."
+				dataField={["name", "description", "creator.keyword"]}
+				// placeholder="Search for Dataset"
+				innerClass={{
+					title: "search-title",
+					input: "embedded-search-input",
+				}}
+				onValueSelected={function (value, cause, _) {
+					if (
+						cause === "SUGGESTION_SELECT" ||
+						cause === "ENTER_PRESS" ||
+						cause === "SEARCH_ICON_CLICK"
+					) {
+						history(`/search?searchbox="${value}"`);
+					}
+				}}
+			/>
+		</ReactiveBase>
 	);
 }

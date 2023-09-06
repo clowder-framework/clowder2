@@ -4,7 +4,6 @@ import { Box, Button, ButtonGroup, Grid, Tab, Tabs } from "@mui/material";
 import { RootState } from "../types/data";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchDatasets } from "../actions/dataset";
-import { downloadThumbnail } from "../utils/visualization";
 
 import { a11yProps, TabPanel } from "./tabs/TabComponent";
 import DatasetCard from "./datasets/DatasetCard";
@@ -30,7 +29,6 @@ export const Explore = (): JSX.Element => {
 	) => dispatch(fetchDatasets(skip, limit, mine));
 	const datasets = useSelector((state: RootState) => state.dataset.datasets);
 
-	const [datasetThumbnailList, setDatasetThumbnailList] = useState<any>([]);
 	// TODO add option to determine limit number; default show 5 datasets each time
 	const [currPageNum, setCurrPageNum] = useState<number>(0);
 	const [limit] = useState<number>(20);
@@ -49,31 +47,6 @@ export const Explore = (): JSX.Element => {
 
 	// fetch thumbnails from each individual dataset/id calls
 	useEffect(() => {
-		(async () => {
-			if (datasets !== undefined && datasets.length > 0) {
-				// TODO change the type any to something else
-				const datasetThumbnailListTemp: any = [];
-				await Promise.all(
-					datasets.map(async (dataset) => {
-						// add thumbnails
-						if (
-							dataset["thumbnail"] !== null &&
-							dataset["thumbnail"] !== undefined
-						) {
-							const thumbnailURL = await downloadThumbnail(
-								dataset["thumbnail"]
-							);
-							datasetThumbnailListTemp.push({
-								id: dataset["id"],
-								thumbnail: thumbnailURL,
-							});
-						}
-					})
-				);
-				setDatasetThumbnailList(datasetThumbnailListTemp);
-			}
-		})();
-
 		// disable flipping if reaches the last page
 		if (datasets.length < limit) setNextDisabled(true);
 		else setNextDisabled(false);
@@ -127,7 +100,7 @@ export const Explore = (): JSX.Element => {
 					</Box>
 					<TabPanel value={selectedTabIndex} index={0}>
 						<Grid container spacing={2}>
-							{datasets !== undefined && datasetThumbnailList !== undefined ? (
+							{datasets !== undefined ? (
 								datasets.map((dataset) => {
 									return (
 										<Grid item key={dataset.id} xs={12} sm={6} md={4} lg={3}>

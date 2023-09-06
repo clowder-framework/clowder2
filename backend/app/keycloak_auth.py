@@ -344,6 +344,25 @@ async def create_user(email: str, password: str, firstName: str, lastName: str):
     return user
 
 
+def delete_user(email: str):
+    """Create a user in Keycloak."""
+    keycloak_admin = KeycloakAdmin(
+        server_url=settings.auth_server_url,
+        username=settings.keycloak_username,
+        password=settings.keycloak_password,
+        realm_name=settings.keycloak_realm_name,
+        user_realm_name=settings.keycloak_user_realm_name,
+        # client_secret_key=settings.auth_client_secret,
+        # client_id=settings.keycloak_client_id,
+        verify=True,
+    )
+    # Add user and set password
+    user_id = keycloak_admin.get_user_id(username=email)
+    if user_id:
+        delete_response = keycloak_admin.delete_user(user_id)
+        return delete_response
+
+
 async def retreive_refresh_token(email: str):
     token_exist = await TokenDB.find_one(TokenDB.email == email)
     if token_exist is not None:
