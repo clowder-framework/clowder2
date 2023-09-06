@@ -9,7 +9,7 @@ import { parseDate } from "../../utils/common";
 import FileMenu from "./FileMenu";
 import prettyBytes from "pretty-bytes";
 import { FileOut } from "../../openapi/v2";
-import { downloadThumbnail } from "../../utils/visualization";
+import { generateThumbnailUrl } from "../../utils/visualization";
 
 type FilesTableFileEntryProps = {
 	iconStyle: {};
@@ -23,19 +23,11 @@ export function FilesTableFileEntry(props: FilesTableFileEntryProps) {
 	const [thumbnailUrl, setThumbnailUrl] = useState("");
 
 	useEffect(() => {
-		const fetchThumbnailUrl = async () => {
-			try {
-				let url = "";
-				if (file.thumbnail_id) {
-					url = await downloadThumbnail(file.thumbnail_id);
-				}
-				setThumbnailUrl(url);
-			} catch (error) {
-				console.error("Error fetching data:", error);
-			}
-		};
-
-		fetchThumbnailUrl();
+		let url = "";
+		if (file.thumbnail_id) {
+			url = generateThumbnailUrl(file.thumbnail_id);
+		}
+		setThumbnailUrl(url);
 	}, [file]);
 
 	return (
@@ -60,10 +52,11 @@ export function FilesTableFileEntry(props: FilesTableFileEntryProps) {
 						<Button onClick={() => selectFile(file.id)}>{file.name}</Button>
 					</TableCell>
 					<TableCell>
-						<VersionChip selectedVersion={file.version_num}
-									 setSelectedVersion={null}
-									 versionNumbers={null}
-									 isClickable={false}
+						<VersionChip
+							selectedVersion={file.version_num}
+							setSelectedVersion={null}
+							versionNumbers={null}
+							isClickable={false}
 						/>
 					</TableCell>
 					<TableCell align="right">
