@@ -11,6 +11,7 @@ import { ArrowBack, ArrowForward } from "@material-ui/icons";
 import Layout from "./Layout";
 import { Listeners } from "./listeners/Listeners";
 import { ErrorModal } from "./errors/ErrorModal";
+import Masonry from "@mui/lab/Masonry";
 
 const tab = {
 	fontStyle: "normal",
@@ -100,33 +101,24 @@ export const Explore = (): JSX.Element => {
 								</Tabs>
 							</Box>
 							<TabPanel value={selectedTabIndex} index={0}>
-								<Grid container spacing={2}>
+								<Masonry columns={4} spacing={2}>
 									{datasets !== undefined ? (
 										datasets.map((dataset) => {
 											return (
-												<Grid
-													item
-													key={dataset.id}
-													xs={12}
-													sm={6}
-													md={4}
-													lg={3}
-												>
-													<DatasetCard
-														id={dataset.id}
-														name={dataset.name}
-														author={`${dataset.creator.first_name} ${dataset.creator.last_name}`}
-														created={dataset.created}
-														description={dataset.description}
-														thumbnailId={dataset.thumbnail_id}
-													/>
-												</Grid>
+												<DatasetCard
+													id={dataset.id}
+													name={dataset.name}
+													author={`${dataset.creator.first_name} ${dataset.creator.last_name}`}
+													created={dataset.created}
+													description={dataset.description}
+													thumbnailId={dataset.thumbnail_id}
+												/>
 											);
 										})
 									) : (
 										<></>
 									)}
-								</Grid>
+								</Masonry>
 								<Box display="flex" justifyContent="center" sx={{ m: 1 }}>
 									<ButtonGroup
 										variant="contained"
