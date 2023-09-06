@@ -13,11 +13,11 @@ from faker import Faker
 
 
 def upload_file(
-        api: str,
-        headers: dict,
-        dataset_id: str,
-        filename: str,
-        content: str,
+    api: str,
+    headers: dict,
+    dataset_id: str,
+    filename: str,
+    content: str,
 ):
     """Uploads a dummy file (optionally with custom name/content) to a dataset and returns the JSON."""
     with open(filename, "w") as tempf:
@@ -34,11 +34,11 @@ def upload_file(
 
 
 def upload_image(
-        api: str,
-        headers: dict,
-        dataset_id: str,
-        filename: str,
-        content: bytes,
+    api: str,
+    headers: dict,
+    dataset_id: str,
+    filename: str,
+    content: bytes,
 ):
     """Uploads a dummy file (optionally with custom name/content) to a dataset and returns the JSON."""
     with open(filename, "wb") as tempf:
@@ -139,7 +139,10 @@ def upload_metadata_dataset(fake, api, dataset_id):
 
     # upload metadata
     metadata_using_definition = {
-        "content": {"latitude": str(fake.latitude()), "longitude": str(fake.longitude())},
+        "content": {
+            "latitude": str(fake.latitude()),
+            "longitude": str(fake.longitude()),
+        },
         "definition": "LatLon",
     }
     response = requests.post(
@@ -186,7 +189,10 @@ def upload_metadata_file(fake, api, file_id):
 
     # upload metadata
     metadata_using_definition = {
-        "content": {"latitude": str(fake.latitude()), "longitude": str(fake.longitude())},
+        "content": {
+            "latitude": str(fake.latitude()),
+            "longitude": str(fake.longitude()),
+        },
         "definition": "LatLon",
     }
     response = requests.post(
@@ -198,10 +204,12 @@ def upload_metadata_file(fake, api, file_id):
     print(f"Metadata uploaded: {metadata_using_definition} | {code}")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # command line args
     args = sys.argv[1:]
-    api: str = args[0]  # dev: http://localhost:8000/api/v2 prod: http://localhost/api/v2
+    api: str = args[
+        0
+    ]  # dev: http://localhost:8000/api/v2 prod: http://localhost/api/v2
 
     fake = Faker()
     users = create_users(api)
@@ -216,9 +224,7 @@ if __name__ == '__main__':
             "name": fake.sentence(),
             "description": fake.paragraph(),
         }
-        response = requests.post(
-            f"{api}/datasets", json=dataset_data, headers=headers
-        )
+        response = requests.post(f"{api}/datasets", json=dataset_data, headers=headers)
         if response.status_code != 200:
             raise ValueError(response.json())
         dataset_id = response.json().get("id")
@@ -228,12 +234,14 @@ if __name__ == '__main__':
         first_user_email = users[0].get("email")
         first_user_password = users[0].get("password")
         response = requests.post(
-            f"{api}/authorizations/datasets/{dataset_id}/user_role/{first_user_email}/owner", json=dataset_data,
-            headers=headers
+            f"{api}/authorizations/datasets/{dataset_id}/user_role/{first_user_email}/owner",
+            json=dataset_data,
+            headers=headers,
         )
         response.raise_for_status()
         print(
-            f"Added first user as owner of dataset {dataset_id}. User email: {first_user_email} User password: {first_user_password}")
+            f"Added first user as owner of dataset {dataset_id}. User email: {first_user_email} User password: {first_user_password}"
+        )
 
         for _ in range(0, 1):
             filename = fake.file_name(extension="csv")
