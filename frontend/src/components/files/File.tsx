@@ -37,8 +37,8 @@ import { PageNotFound } from "../errors/PageNotFound";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import { Visualization } from "../visualizations/Visualization";
 import { ErrorModal } from "../errors/ErrorModal";
-import { VersionChip } from "../versions/VersionChip";
-import { FileHistory } from "./FileHistory";
+import {VersionChip} from "../versions/VersionChip";
+import {FileHistory} from "./FileHistory";
 
 export const File = (): JSX.Element => {
 	// path parameter
@@ -70,15 +70,14 @@ export const File = (): JSX.Element => {
 		dispatch(fetchFolderPath(folderId));
 
 	const file = useSelector((state: RootState) => state.file);
-	const version_num = useSelector(
-		(state: RootState) => state.file.fileSummary.version_num
-	);
+	const version_num = useSelector( (state: RootState) => state.file.fileSummary.version_num);
 	const [selectedVersion, setSelectedVersion] = useState(version_num);
 	const fileSummary = useSelector((state: RootState) => state.file.fileSummary);
 	const filePreviews = useSelector((state: RootState) => state.file.previews);
 	const fileVersions = useSelector(
 		(state: RootState) => state.file.fileVersions
 	);
+	const folderPath = useSelector((state: RootState) => state.folder.folderPath);
 	const [selectedFileVersionDetails, setSelectedFileVersionDetails] = useState(
 		fileVersions[0]
 	);
@@ -90,6 +89,7 @@ export const File = (): JSX.Element => {
 		React.useState<boolean>(false);
 	const [metadataRequestForms, setMetadataRequestForms] = useState({});
 	const [allowSubmit, setAllowSubmit] = React.useState<boolean>(false);
+	const [paths, setPaths] = useState([]);
 
 	// component did mount
 	useEffect(() => {
@@ -105,27 +105,54 @@ export const File = (): JSX.Element => {
 		}
 	}, []);
 
+	// for breadcrumb
+	useEffect(() => {
+		let tmpPaths = [
+			{
+				name: about["name"],
+				url: `/datasets/${datasetId}`,
+			},
+		];
+
+		if (folderPath != null) {
+			for (const folderBread of folderPath) {
+				tmpPaths.push({
+					name: folderBread["folder_name"],
+					url: `/datasets/${datasetId}?folder=${folderBread["folder_id"]}`,
+				});
+			}
+		} else {
+			tmpPaths.slice(0, 1);
+		}
+
+		// add file name to breadcrumb
+		tmpPaths.push({
+			name: fileSummary.name,
+			url: "",
+		});
+
+		setPaths(tmpPaths);
+	}, [about, fileSummary, folderPath]);
+
 	useEffect(() => {
 		if (version_num !== undefined && version_num !== null) {
 			setSelectedVersion(version_num);
 		}
 	}, [version_num]);
 
-	useEffect(() => {
-		if (
-			version_num !== undefined &&
-			version_num !== null &&
-			fileVersions !== undefined &&
-			fileVersions !== null &&
-			fileVersions.length > 0
-		) {
-			fileVersions.map((fileVersion, idx) => {
-				if (fileVersion.version_num == version_num) {
-					setSelectedFileVersionDetails(fileVersion);
-				}
-			});
-		}
-	}, [version_num]);
+	useEffect( () =>
+		{
+			if (version_num !== undefined && version_num !== null
+				&& fileVersions !== undefined && fileVersions !== null
+			&& fileVersions.length > 0) {
+				fileVersions.map((fileVersion, idx) => {
+					if (fileVersion.version_num == version_num){
+						setSelectedFileVersionDetails(fileVersion);
+					}
+				})
+			}
+		}, [version_num]
+	)
 
 	// Error msg dialog
 	const [errorOpen, setErrorOpen] = useState(false);
@@ -220,29 +247,6 @@ export const File = (): JSX.Element => {
 	// 	history(`/listeners?fileId=${fileId}&fileName=${filename}`);
 	// }
 
-	// for breadcrumb
-	const paths = [
-		{
-			name: about["name"],
-			url: `/datasets/${datasetId}`,
-		},
-	];
-
-	// add folder path to breadcrumbs
-	const folderPath = useSelector((state: RootState) => state.folder.folderPath);
-	if (folderPath != null) {
-		for (const folderBread of folderPath) {
-			paths.push({
-				name: folderBread["folder_name"],
-				url: `/datasets/${datasetId}?folder=${folderBread["folder_id"]}`,
-			});
-		}
-	} else {
-		paths.slice(0, 1);
-	}
-
-	// add file name to breadcrumb
-
 	if (showForbiddenPage) {
 		return <Forbidden />;
 	} else if (showNotFoundPage) {
@@ -255,9 +259,6 @@ export const File = (): JSX.Element => {
 			<ErrorModal errorOpen={errorOpen} setErrorOpen={setErrorOpen} />
 			<Grid container>
 				<MainBreadcrumbs paths={paths} />
-				<Typography variant="h6">
-								{"/" + fileSummary.name}
-							</Typography>
 			</Grid>
 			<Grid container>
 				<Grid item xs={10} sx={{ display: "flex", alignItems: "center" }}>
@@ -266,15 +267,17 @@ export const File = (): JSX.Element => {
 							sx={{
 								display: "inline-flex",
 								justifyContent: "space-between",
-								alignItems: "center",
+								alignItems: "baseline",
 							}}
 						>
-							<Typography variant="h4">{fileSummary.name}</Typography>
+							<Typography variant="h4" paragraph>
+								{fileSummary.name}
+							</Typography>
 							<VersionChip
-								selectedVersion={selectedVersion}
-								setSelectedVersion={setSelectedVersion}
-								versionNumbers={fileVersions}
-								isClickable={true}
+								 selectedVersion={selectedVersion}
+								 setSelectedVersion={setSelectedVersion}
+								 versionNumbers={fileVersions}
+								 isClickable={true}
 							/>
 						</Box>
 						<Box>
@@ -424,15 +427,14 @@ export const File = (): JSX.Element => {
 						<ExtractionHistoryTab fileId={fileId} />
 					</TabPanel>
 				</Grid>
-				{version_num == selectedVersion ? (
+				{version_num == selectedVersion ?
 					<Grid item xs={2}>
 						{Object.keys(fileSummary).length > 0 && (
 							<FileDetails fileSummary={fileSummary} />
 						)}
-					</Grid>
-				) : (
-					<Grid item xs={2}>
-						{Object.keys(fileSummary).length > 0 && (
+					</Grid> :
+				<Grid item xs={2}>
+				{Object.keys(fileSummary).length > 0 && (
 							<FileHistory
 								id={fileId}
 								created={file.fileSummary.created}
@@ -447,8 +449,8 @@ export const File = (): JSX.Element => {
 								fileSummary={file.fileSummary}
 							/>
 						)}
-					</Grid>
-				)}
+				</Grid>
+				}
 			</Grid>
 		</Layout>
 	);
