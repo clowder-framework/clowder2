@@ -251,7 +251,7 @@ export const File = (): JSX.Element => {
 			{/*Error Message dialogue*/}
 			<ErrorModal errorOpen={errorOpen} setErrorOpen={setErrorOpen} />
 			<Grid container>
-				<Grid item xs={10} sx={{ display: "flex", alignItems: "center" }}>
+				<Grid item xs={8} sx={{ display: "flex", alignItems: "center" }}>
 					<Stack>
 						<Box
 							sx={{
@@ -260,7 +260,7 @@ export const File = (): JSX.Element => {
 								alignItems: "baseline",
 							}}
 						>
-							<Typography variant="h4" paragraph>
+							<Typography variant="h3" paragraph>
 								{fileSummary.name}
 							</Typography>
 							<VersionChip
@@ -282,8 +282,8 @@ export const File = (): JSX.Element => {
 						</Box>
 					</Stack>
 				</Grid>
-				<Grid item xs={2} sx={{ display: "flex-top", alignItems: "center" }}>
-				</Grid>
+				{/*<Grid item xs={2} sx={{ display: "flex-top", alignItems: "center" }}>*/}
+				{/*</Grid>*/}
 			</Grid>
 			<Grid container spacing={2} sx={{ mt: 2 }}>
 				<Grid item xs={10}>
