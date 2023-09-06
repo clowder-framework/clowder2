@@ -221,7 +221,7 @@ if __name__ == "__main__":
         token = response.json().get("token")
         headers = {"Authorization": "Bearer " + token}
         dataset_data = {
-            "name": fake.sentence(),
+            "name": fake.sentence(nb_words=10).rstrip("."),
             "description": fake.paragraph(),
         }
         response = requests.post(f"{api}/datasets", json=dataset_data, headers=headers)
