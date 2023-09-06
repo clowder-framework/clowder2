@@ -53,10 +53,10 @@ function buildDatasetResult(item) {
 				>
 					{parseString(item.name)}
 				</MuiLink>
-				<Typography variant="body2" color={theme.palette.secondary.light}>
+				<Typography variant="body2" color={theme.palette.primary.light}>
 					Created by {parseString(item.creator)} at {parseDate(item.created)}
 				</Typography>
-				<Typography variant="body2" color={theme.palette.secondary.dark}>
+				<Typography variant="body2" color={theme.palette.primary.light}>
 					{parseString(item.description)}
 				</Typography>
 			</Box>
@@ -78,10 +78,10 @@ function buildFileResult(item) {
 				>
 					{parseString(item.name)}
 				</MuiLink>
-				<Typography variant="body2" color={theme.palette.secondary.light}>
+				<Typography variant="body2" color={theme.palette.primary.light}>
 					Created by {parseString(item.creator)} at {parseDate(item.created)}
 				</Typography>
-				<Typography variant="body2" color={theme.palette.secondary.dark}>
+				<Typography variant="body2" color={theme.palette.primary.light}>
 					{`${item.content_type} | ${item.bytes} bytes`}
 				</Typography>
 			</Box>

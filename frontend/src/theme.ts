@@ -1,4 +1,4 @@
-import { createTheme } from "@mui/material/styles";
+import {createTheme} from "@mui/material/styles";
 
 // A custom theme for this app
 export const theme = createTheme({
@@ -46,10 +46,10 @@ export const searchTheme = {
 		fontSize: "16px",
 	},
 	colors: {
-		textColor: theme.palette.secondary.dark,
+		textColor: theme.palette.primary.light,
 		primaryTextColor: theme.palette.primary.contrastText,
 		primaryColor: theme.palette.primary.main,
-		titleColor: theme.palette.secondary.dark,
+		titleColor: theme.palette.primary.light,
 		alertColor: theme.palette.primary.dark,
 	},
 };
