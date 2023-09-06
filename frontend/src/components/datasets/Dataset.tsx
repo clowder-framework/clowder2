@@ -209,9 +209,6 @@ export const Dataset = (): JSX.Element => {
 					</Stack>
 				</Grid>
 				{/*actions*/}
-				<Grid item xs={4} sx={{ display: "flex-top", alignItems: "center" }}>
-					<DatasetDetails details={about} />
-				</Grid>
 			</Grid>
 			<Grid container spacing={2} sx={{ mt: 2 }}>
 				<Grid item xs={10}>
@@ -355,6 +352,9 @@ export const Dataset = (): JSX.Element => {
 					<TabPanel value={selectedTabIndex} index={6}>
 						<SharingTab datasetId={datasetId} />
 					</TabPanel>
+				</Grid>
+				<Grid item>
+					<DatasetDetails details={about} />
 				</Grid>
 			</Grid>
 		</Layout>
