@@ -197,7 +197,8 @@ export const Dataset = (): JSX.Element => {
 							</Typography>
 						</Box>
 						<Box>
-						<RoleChip role={datasetRole.role} />
+							<RoleChip role={datasetRole.role} />
+						</Box>
 						<Box>
 							<ActionsMenu
 								datasetId={datasetId}
@@ -205,7 +206,6 @@ export const Dataset = (): JSX.Element => {
 								datasetName={about["name"]}
 							/>
 						</Box>
-					</Box>
 					</Stack>
 				</Grid>
 				{/*actions*/}
