@@ -103,9 +103,6 @@ export const SelectVersionModal: React.FC<SelectVersionModalProps> = (
 					</Alert>
 				</Collapse>
 			</DialogContent>
-			{/*<DialogActions>*/}
-			{/*	<Button onClick={handleClose}>Close</Button>*/}
-			{/*</DialogActions>*/}
 		</Dialog>
 	);
 };
