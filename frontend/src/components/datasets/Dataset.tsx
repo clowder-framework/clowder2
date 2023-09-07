@@ -183,7 +183,7 @@ export const Dataset = (): JSX.Element => {
 			<ErrorModal errorOpen={errorOpen} setErrorOpen={setErrorOpen} />
 			<Grid container>
 				{/*title*/}
-				<Grid item xs={8} sx={{ display: "flex", alignItems: "center" }}>
+				<Grid item xs={6} sx={{ display: "flex", alignItems: "center" }}>
 					<Stack>
 						<Box
 							sx={{
@@ -199,14 +199,15 @@ export const Dataset = (): JSX.Element => {
 						<Box>
 							<RoleChip role={datasetRole.role} />
 						</Box>
-						<Box>
-							<ActionsMenu
-								datasetId={datasetId}
-								folderId={folderId}
-								datasetName={about["name"]}
-							/>
-						</Box>
 					</Stack>
+				</Grid>
+				{/*actions*/}
+				<Grid item xs={6} sx={{ display: "flex-top", alignItems: "center" }}>
+					<ActionsMenu
+						datasetId={datasetId}
+						folderId={folderId}
+						datasetName={about["name"]}
+					/>
 				</Grid>
 				{/*actions*/}
 			</Grid>
