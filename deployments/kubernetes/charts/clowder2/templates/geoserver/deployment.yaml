@@ -1,0 +1,83 @@
+{{- if .Values.geoserver.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "clowder2.fullname" . }}-geoserver
+  labels:
+    {{- include "clowder2.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.geoserver.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "clowder2.name" . }}-geoserver
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  strategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "clowder2.name" . }}-geoserver
+        app.kubernetes.io/instance: {{ .Release.Name }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: geoserver
+          image: "{{ .Values.geoserver.image.repository }}:{{ .Values.geoserver.image.tag }}"
+          imagePullPolicy: {{ .Values.geoserver.image.pullPolicy }}
+          env:
+            - name: GEOSERVER_ADMIN_USER
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "clowder2.fullname" . }}-services
+                  key: GEOSERVER_USER
+            - name: GEOSERVER_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "clowder2.fullname" . }}-services
+                  key: GEOSERVER_PW
+          ports:
+            - containerPort: 8080
+              name: geoserver
+          volumeMounts:
+            - name: {{ include "clowder2.name" . }}-geoserver
+              mountPath: /opt/geoserver/data_dir
+          startupProbe:
+            httpGet:
+              path: /geoserver/index.html
+              port: geoserver
+            failureThreshold: 240
+            periodSeconds: 30
+          livenessProbe:
+            httpGet:
+              path: /geoserver/index.html
+              port: geoserver
+          readinessProbe:
+            httpGet:
+              path: /geoserver/index.html
+              port: geoserver
+          resources:
+            {{- toYaml .Values.geoserver.resources | nindent 12 }}
+      volumes:
+        - name: {{ include "clowder2.name" . }}-geoserver
+          persistentVolumeClaim:
+            {{- if .Values.geoserver.persistence.existingClaim }}
+            claimName: {{ .Values.geoserver.persistence.existingClaim }}
+            {{- else }}
+            claimName: {{ include "clowder2.name" . }}-geoserver
+            {{- end }}
+      {{- with .Values.geoserver.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.geoserver.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.geoserver.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+{{- end }}

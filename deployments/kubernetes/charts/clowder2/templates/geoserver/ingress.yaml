@@ -1,0 +1,38 @@
+{{- if .Values.geoserver.enabled }}
+{{- if .Values.ingress.enabled -}}
+{{- $fullName := include "clowder2.fullname" . -}}
+{{- $svcPort := .Values.geoserver.service.port -}}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ $fullName }}-geoserver
+  labels:
+    {{- include "clowder2.labels" . | nindent 4 }}
+  {{- with .Values.ingress.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  {{- if .Values.ingress.tls }}
+  tls:
+    {{- range .Values.ingress.tls }}
+    - hosts:
+        {{- range .hosts }}
+        - {{ . | quote }}
+        {{- end }}
+      secretName: {{ .secretName }}
+    {{- end }}
+  {{- end }}
+  rules:
+    - host: {{ .Values.hostname }}
+      http:
+        paths:
+          - path: /geoserver/
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: {{ $fullName }}-geoserver
+                port:
+                  number: {{ $svcPort }}
+  {{- end }}
+{{- end}}
