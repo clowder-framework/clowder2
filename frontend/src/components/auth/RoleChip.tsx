@@ -12,22 +12,42 @@ export default function RoleChip(props: RoleProps) {
 	return (
 		<>
 			{role === "owner" ? (
-				<Chip size="small" icon={<VisibilityIcon />} label={capitalize(role)} />
+				<Chip
+					size="small"
+					icon={<VisibilityIcon />}
+					label={capitalize(role)}
+					sx={{ ml: 2 }}
+				/>
 			) : (
 				<></>
 			)}
 			{role === "viewer" ? (
-				<Chip size="small" icon={<VisibilityIcon />} label={capitalize(role)} />
+				<Chip
+					size="small"
+					icon={<VisibilityIcon />}
+					label={capitalize(role)}
+					sx={{ ml: 2 }}
+				/>
 			) : (
 				<></>
 			)}
 			{role === "uploader" ? (
-				<Chip size="small" icon={<VisibilityIcon />} label={capitalize(role)} />
+				<Chip
+					size="small"
+					icon={<VisibilityIcon />}
+					label={capitalize(role)}
+					sx={{ ml: 2 }}
+				/>
 			) : (
 				<></>
 			)}
 			{role === "editor" ? (
-				<Chip size="small" icon={<VisibilityIcon />} label={capitalize(role)} />
+				<Chip
+					size="small"
+					icon={<VisibilityIcon />}
+					label={capitalize(role)}
+					sx={{ ml: 2 }}
+				/>
 			) : (
 				<></>
 			)}
