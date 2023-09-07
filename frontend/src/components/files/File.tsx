@@ -37,8 +37,8 @@ import { PageNotFound } from "../errors/PageNotFound";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import { Visualization } from "../visualizations/Visualization";
 import { ErrorModal } from "../errors/ErrorModal";
-import {VersionChip} from "../versions/VersionChip";
-import {FileHistory} from "./FileHistory";
+import { VersionChip } from "../versions/VersionChip";
+import { FileHistory } from "./FileHistory";
 
 export const File = (): JSX.Element => {
 	// path parameter
@@ -70,14 +70,18 @@ export const File = (): JSX.Element => {
 		dispatch(fetchFolderPath(folderId));
 
 	const file = useSelector((state: RootState) => state.file);
-	const version_num = useSelector( (state: RootState) => state.file.fileSummary.version_num);
+	const version_num = useSelector(
+		(state: RootState) => state.file.fileSummary.version_num
+	);
 	const [selectedVersion, setSelectedVersion] = useState(version_num);
 	const fileSummary = useSelector((state: RootState) => state.file.fileSummary);
 	const filePreviews = useSelector((state: RootState) => state.file.previews);
 	const fileVersions = useSelector(
 		(state: RootState) => state.file.fileVersions
 	);
-	const [selectedFileVersionDetails, setSelectedFileVersionDetails] = useState(fileVersions[0]);
+	const [selectedFileVersionDetails, setSelectedFileVersionDetails] = useState(
+		fileVersions[0]
+	);
 	const fileRole = useSelector((state: RootState) => state.file.fileRole);
 
 	const [selectedTabIndex, setSelectedTabIndex] = useState(0);
@@ -101,28 +105,27 @@ export const File = (): JSX.Element => {
 		}
 	}, []);
 
+	useEffect(() => {
+		if (version_num !== undefined && version_num !== null) {
+			setSelectedVersion(version_num);
+		}
+	}, [version_num]);
 
-	useEffect( () =>
-		{
-			if (version_num !== undefined && version_num !== null){
-				setSelectedVersion(version_num)
-			}
-		}, [version_num]
-	)
-
-	useEffect( () =>
-		{
-			if (version_num !== undefined && version_num !== null
-				&& fileVersions !== undefined && fileVersions !== null
-			&& fileVersions.length > 0) {
-				fileVersions.map((fileVersion, idx) => {
-					if (fileVersion.version_num == version_num){
-						setSelectedFileVersionDetails(fileVersion);
-					}
-				})
-			}
-		}, [version_num]
-	)
+	useEffect(() => {
+		if (
+			version_num !== undefined &&
+			version_num !== null &&
+			fileVersions !== undefined &&
+			fileVersions !== null &&
+			fileVersions.length > 0
+		) {
+			fileVersions.map((fileVersion, idx) => {
+				if (fileVersion.version_num == version_num) {
+					setSelectedFileVersionDetails(fileVersion);
+				}
+			});
+		}
+	}, [version_num]);
 
 	// Error msg dialog
 	const [errorOpen, setErrorOpen] = useState(false);
@@ -251,39 +254,35 @@ export const File = (): JSX.Element => {
 			{/*Error Message dialogue*/}
 			<ErrorModal errorOpen={errorOpen} setErrorOpen={setErrorOpen} />
 			<Grid container>
-				<Grid item xs={8} sx={{ display: "flex", alignItems: "center" }}>
+				<Grid item xs={10} sx={{ display: "flex", alignItems: "center" }}>
 					<Stack>
 						<Box
 							sx={{
 								display: "inline-flex",
 								justifyContent: "space-between",
-								alignItems: "baseline",
+								alignItems: "center",
 							}}
 						>
-							<Typography variant="h3" paragraph>
-								{fileSummary.name}
-							</Typography>
+							<Typography variant="h4">{fileSummary.name}</Typography>
 							<VersionChip
-								 selectedVersion={selectedVersion}
-								 setSelectedVersion={setSelectedVersion}
-								 versionNumbers={fileVersions}
-								 isClickable={true}
+								selectedVersion={selectedVersion}
+								setSelectedVersion={setSelectedVersion}
+								versionNumbers={fileVersions}
+								isClickable={true}
 							/>
 						</Box>
 						<Box>
 							<RoleChip role={fileRole} />
 						</Box>
-						<Box>
-							<FileActionsMenu
-								filename={fileSummary.name}
-								fileId={fileId}
-								datasetId={datasetId}
-							/>
-						</Box>
 					</Stack>
 				</Grid>
-				{/*<Grid item xs={2} sx={{ display: "flex-top", alignItems: "center" }}>*/}
-				{/*</Grid>*/}
+				<Grid item xs={2} sx={{ display: "flex-top", alignItems: "center" }}>
+					<FileActionsMenu
+						filename={fileSummary.name}
+						fileId={fileId}
+						datasetId={datasetId}
+					/>
+				</Grid>
 			</Grid>
 			<Grid container spacing={2} sx={{ mt: 2 }}>
 				<Grid item xs={10}>
@@ -422,14 +421,15 @@ export const File = (): JSX.Element => {
 						<ExtractionHistoryTab fileId={fileId} />
 					</TabPanel>
 				</Grid>
-				{version_num == selectedVersion ?
+				{version_num == selectedVersion ? (
 					<Grid item xs={2}>
 						{Object.keys(fileSummary).length > 0 && (
 							<FileDetails fileSummary={fileSummary} />
 						)}
-					</Grid> :
-				<Grid item xs={2}>
-				{Object.keys(fileSummary).length > 0 && (
+					</Grid>
+				) : (
+					<Grid item xs={2}>
+						{Object.keys(fileSummary).length > 0 && (
 							<FileHistory
 								id={fileId}
 								created={file.fileSummary.created}
@@ -444,8 +444,8 @@ export const File = (): JSX.Element => {
 								fileSummary={file.fileSummary}
 							/>
 						)}
-				</Grid>
-				}
+					</Grid>
+				)}
 			</Grid>
 		</Layout>
 	);
