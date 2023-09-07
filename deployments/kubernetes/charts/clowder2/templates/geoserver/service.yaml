@@ -1,0 +1,18 @@
+{{- if .Values.geoserver.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "clowder2.fullname" . }}-geoserver
+  labels:
+    {{- include "clowder2.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.geoserver.service.type }}
+  ports:
+    - port: {{ .Values.geoserver.service.port }}
+      name: geoserver
+      targetPort: geoserver
+      protocol: TCP
+  selector:
+    app.kubernetes.io/name: {{ include "clowder2.name" . }}-geoserver
+    app.kubernetes.io/instance: {{ .Release.Name }}
+{{- end }}
