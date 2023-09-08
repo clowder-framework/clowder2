@@ -84,6 +84,7 @@ export const Dataset = (): JSX.Element => {
 	const datasetRole = useSelector(
 		(state: RootState) => state.dataset.datasetRole
 	);
+	const folderPath = useSelector((state: RootState) => state.folder.folderPath);
 
 	// state
 	const [selectedTabIndex, setSelectedTabIndex] = useState<number>(0);
@@ -92,6 +93,12 @@ export const Dataset = (): JSX.Element => {
 	const [metadataRequestForms, setMetadataRequestForms] = useState({});
 
 	const [allowSubmit, setAllowSubmit] = React.useState<boolean>(false);
+	// Error msg dialog
+	const [errorOpen, setErrorOpen] = useState(false);
+	const [showForbiddenPage, setShowForbiddenPage] = useState(false);
+	const [showNotFoundPage, setShowNotFoundPage] = useState(false);
+
+	const [paths, setPaths] = useState([]);
 
 	// component did mount list all files in dataset
 	useEffect(() => {
@@ -101,10 +108,29 @@ export const Dataset = (): JSX.Element => {
 		getFolderPath(folderId);
 	}, [searchParams]);
 
-	// Error msg dialog
-	const [errorOpen, setErrorOpen] = useState(false);
-	const [showForbiddenPage, setShowForbiddenPage] = useState(false);
-	const [showNotFoundPage, setShowNotFoundPage] = useState(false);
+	// for breadcrumb
+	useEffect(() => {
+		// for breadcrumb
+		let tmpPaths = [
+			{
+				name: about["name"],
+				url: `/datasets/${datasetId}`,
+			},
+		];
+
+		if (folderPath != null) {
+			for (const folderBread of folderPath) {
+				tmpPaths.push({
+					name: folderBread["folder_name"],
+					url: `/datasets/${datasetId}?folder=${folderBread["folder_id"]}`,
+				});
+			}
+		} else {
+			tmpPaths.slice(0, 1);
+		}
+
+		setPaths(tmpPaths);
+	}, [about, folderPath]);
 
 	const handleTabChange = (
 		_event: React.ChangeEvent<{}>,
@@ -150,26 +176,6 @@ export const Dataset = (): JSX.Element => {
 		// switch to display mode
 		setEnableAddMetadata(false);
 	};
-
-	// for breadcrumb
-	const paths = [
-		{
-			name: about["name"],
-			url: `/datasets/${datasetId}`,
-		},
-	];
-	// add folder path to breadcrumbs
-	const folderPath = useSelector((state: RootState) => state.folder.folderPath);
-	if (folderPath != null) {
-		for (const folderBread of folderPath) {
-			paths.push({
-				name: folderBread["folder_name"],
-				url: `/datasets/${datasetId}?folder=${folderBread["folder_id"]}`,
-			});
-		}
-	} else {
-		paths.slice(0, 1);
-	}
 
 	if (showForbiddenPage) {
 		return <Forbidden />;
@@ -276,14 +282,14 @@ export const Dataset = (): JSX.Element => {
 							disabled={false}
 						/>
 					</Tabs>
-					{folderId !== null ? (
-						<Box style={{ padding: "24px 24px 0 24px" }}>
-							<MainBreadcrumbs paths={paths}></MainBreadcrumbs>
-						</Box>
-					) : (
-						<></>
-					)}
 					<TabPanel value={selectedTabIndex} index={0}>
+						{folderId !== null ? (
+							<Box>
+								<MainBreadcrumbs paths={paths}></MainBreadcrumbs>
+							</Box>
+						) : (
+							<></>
+						)}
 						<FilesTable datasetId={datasetId} folderId={folderId} />
 					</TabPanel>
 					<TabPanel value={selectedTabIndex} index={1}>
