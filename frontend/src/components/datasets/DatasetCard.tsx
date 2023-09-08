@@ -56,7 +56,7 @@ export default function DatasetCard(props: DatasetCardProps) {
 					/>
 				) : null}
 				<CardContent>
-					<Typography color="secondary">{author}</Typography>
+					<Typography color="info.main">{author}</Typography>
 					<Typography
 						variant="body2"
 						sx={{
