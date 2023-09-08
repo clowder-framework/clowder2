@@ -215,6 +215,7 @@ export const Dataset = (): JSX.Element => {
 						datasetName={about["name"]}
 					/>
 				</Grid>
+				{/*actions*/}
 			</Grid>
 			<Grid container spacing={2} sx={{ mt: 2 }}>
 				<Grid item xs={10}>
@@ -284,8 +285,8 @@ export const Dataset = (): JSX.Element => {
 					</Tabs>
 					<TabPanel value={selectedTabIndex} index={0}>
 						{folderId !== null ? (
-							<Box>
-								<MainBreadcrumbs paths={paths}></MainBreadcrumbs>
+							<Box style={{ padding: "24px 24px 0 24px" }}>
+								<MainBreadcrumbs paths={paths} />
 							</Box>
 						) : (
 							<></>
