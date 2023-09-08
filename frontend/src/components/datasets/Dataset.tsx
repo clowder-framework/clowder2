@@ -183,7 +183,7 @@ export const Dataset = (): JSX.Element => {
 			<ErrorModal errorOpen={errorOpen} setErrorOpen={setErrorOpen} />
 			<Grid container>
 				{/*title*/}
-				<Grid item xs={6} sx={{ display: "flex", alignItems: "center" }}>
+				<Grid item xs={8} sx={{ display: "flex", alignItems: "center" }}>
 					<Stack>
 						<Box
 							sx={{
@@ -202,7 +202,7 @@ export const Dataset = (): JSX.Element => {
 					</Stack>
 				</Grid>
 				{/*actions*/}
-				<Grid item xs={6} sx={{ display: "flex-top", alignItems: "center" }}>
+				<Grid item xs={4} sx={{ display: "flex-top", alignItems: "center" }}>
 					<ActionsMenu
 						datasetId={datasetId}
 						folderId={folderId}
@@ -279,7 +279,7 @@ export const Dataset = (): JSX.Element => {
 					</Tabs>
 					{folderId !== null ? (
 						<Box style={{ padding: "24px 24px 0 24px" }}>
-							<MainBreadcrumbs paths={paths}></MainBreadcrumbs>
+							<MainBreadcrumbs paths={paths} />
 						</Box>
 					) : (
 						<></>
