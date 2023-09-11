@@ -111,7 +111,7 @@ export const Dataset = (): JSX.Element => {
 	// for breadcrumb
 	useEffect(() => {
 		// for breadcrumb
-		let tmpPaths = [
+		const tmpPaths = [
 			{
 				name: about["name"],
 				url: `/datasets/${datasetId}`,
@@ -285,7 +285,7 @@ export const Dataset = (): JSX.Element => {
 					</Tabs>
 					<TabPanel value={selectedTabIndex} index={0}>
 						{folderId !== null ? (
-							<Box style={{ padding: "24px 24px 0 24px" }}>
+							<Box>
 								<MainBreadcrumbs paths={paths} />
 							</Box>
 						) : (
