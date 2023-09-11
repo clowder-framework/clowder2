@@ -31,6 +31,7 @@ export const ActionsMenu = (props: ActionsMenuProps): JSX.Element => {
 			spacing={0.5}
 		>
 			<Button
+				sx={{minWidth:"auto"}}
 				variant="contained"
 				href={`${config.hostname}/api/v2/datasets/${datasetId}/download`}
 				endIcon={<Download />}

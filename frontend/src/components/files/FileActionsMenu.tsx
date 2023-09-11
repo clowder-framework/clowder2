@@ -129,6 +129,7 @@ export const FileActionsMenu = (props: FileActionsMenuProps): JSX.Element => {
 				setPresignedUrlShareModalClose={setFileShareModalClose}
 			/>
 			<Button
+				sx={{minWidth:"auto"}}
 				variant="contained"
 				onClick={() => {
 					listFileSummary(fileId);

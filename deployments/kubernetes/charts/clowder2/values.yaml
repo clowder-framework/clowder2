@@ -53,6 +53,27 @@ backend:
     port: 80
 
 # ----------------------------------------------------------------------
+# GEOSERVER
+# ----------------------------------------------------------------------
+geoserver:
+  enabled : true
+  username: admin
+  password: admin
+  workspace: clowder2
+  url: http://clowder2-geoserver:8080/geoserver/
+  replicas: 1
+  image:
+    repository: kartoza/geoserver
+    tag: 2.17.2
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 8080
+  persistence:
+    storageClass: nfs-taiga
+    size: 8Gi
+
+# ----------------------------------------------------------------------
 # MINIO
 # ----------------------------------------------------------------------
 minio:
@@ -176,18 +197,8 @@ extractors:
     image: clowder/extractors-audio-preview:latest
   file-digest:
     image: clowder/extractors-digest:latest
-
-#  geotiff-preview-v2:
-#    image: maxzilla2/extractors-geotiff-preview:latest
-#    env:
-#      - name: GEOSERVER_URL
-#        value: http://geoserver:8080/geoserver/
-#      - name: EXTERNAL_GEOSERVER_URL
-#        value: http://localhost:8085/geoserver/
-#      - name: GEOSERVER_USERNAME
-#        value: admin
-#      - name: GEOSERVER_PASSWORD
-#        value: geoserver
+  geotiff-preview:
+    image: clowder/extractors-geotiff-preview:latest
 
 # ----------------------------------------------------------------------
 # ELASTICSEARCH

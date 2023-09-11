@@ -1,0 +1,19 @@
+{{- if .Values.geoserver.enabled }}
+{{- if not .Values.geoserver.persistence.existingClaim }}
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: {{ include "clowder2.name" . }}-geoserver
+  labels:
+    {{- include "clowder2.labels" . | nindent 4 }}
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: {{ .Values.geoserver.persistence.size | quote }}
+  {{- if .Values.geoserver.persistence.storageClass }}
+  storageClassName: {{ .Values.geoserver.persistence.storageClass }}
+  {{- end }}
+{{- end }}
+{{- end }}

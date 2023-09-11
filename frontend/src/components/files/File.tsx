@@ -262,6 +262,9 @@ export const File = (): JSX.Element => {
 			{/*Error Message dialogue*/}
 			<ErrorModal errorOpen={errorOpen} setErrorOpen={setErrorOpen} />
 			<Grid container>
+				<MainBreadcrumbs paths={paths} />
+			</Grid>
+			<Grid container>
 				<Grid item xs={10} sx={{ display: "flex", alignItems: "center" }}>
 					<MainBreadcrumbs paths={paths} />
 					<Grid item>

@@ -66,7 +66,8 @@ export function dataURItoFile(dataURI) {
 	return new File([blob], filename, { type: mime, lastModified: new Date() });
 }
 
-export function parseDate(dateString) {
+// For format options see https://date-fns.org/v2.30.0/docs/format
+export function parseDate(dateString, formatString = "yyyy-MM-dd HH:mm:ss") {
 	if (dateString) {
 		try {
 			const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -75,7 +76,7 @@ export function parseDate(dateString) {
 			if (!dateString.endsWith("Z")) dateString = `${dateString}Z`;
 			const date = new Date(dateString);
 
-			return formatInTimeZone(date, timeZone, "yyyy-MM-dd HH:mm:ss");
+			return formatInTimeZone(date, timeZone, formatString);
 		} catch (error) {
 			console.error(error);
 			return error["message"];
@@ -97,7 +98,7 @@ export const getCurrEmail = () => {
 		authorization !== "" &&
 		authorization.split(" ").length > 0
 	) {
-		let userInfo = jwt_decode(authorization.split(" ")[1]);
+		const userInfo = jwt_decode(authorization.split(" ")[1]);
 		return userInfo["email"];
 	}
 };
