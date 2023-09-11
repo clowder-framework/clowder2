@@ -77,7 +77,10 @@ export const File = (): JSX.Element => {
 	const fileVersions = useSelector(
 		(state: RootState) => state.file.fileVersions
 	);
-	const [selectedFileVersionDetails, setSelectedFileVersionDetails] = useState(fileVersions[0]);
+	const folderPath = useSelector((state: RootState) => state.folder.folderPath);
+	const [selectedFileVersionDetails, setSelectedFileVersionDetails] = useState(
+		fileVersions[0]
+	);
 	const fileRole = useSelector((state: RootState) => state.file.fileRole);
 
 	const [selectedTabIndex, setSelectedTabIndex] = useState(0);
@@ -86,6 +89,7 @@ export const File = (): JSX.Element => {
 		React.useState<boolean>(false);
 	const [metadataRequestForms, setMetadataRequestForms] = useState({});
 	const [allowSubmit, setAllowSubmit] = React.useState<boolean>(false);
+	const [paths, setPaths] = useState([]);
 
 	// component did mount
 	useEffect(() => {
@@ -101,14 +105,40 @@ export const File = (): JSX.Element => {
 		}
 	}, []);
 
+	// for breadcrumb
+	useEffect(() => {
+		let tmpPaths = [
+			{
+				name: about["name"],
+				url: `/datasets/${datasetId}`,
+			},
+		];
 
-	useEffect( () =>
-		{
-			if (version_num !== undefined && version_num !== null){
-				setSelectedVersion(version_num)
+		if (folderPath != null) {
+			for (const folderBread of folderPath) {
+				tmpPaths.push({
+					name: folderBread["folder_name"],
+					url: `/datasets/${datasetId}?folder=${folderBread["folder_id"]}`,
+				});
 			}
-		}, [version_num]
-	)
+		} else {
+			tmpPaths.slice(0, 1);
+		}
+
+		// add file name to breadcrumb
+		tmpPaths.push({
+			name: fileSummary.name,
+			url: "",
+		});
+
+		setPaths(tmpPaths);
+	}, [about, fileSummary, folderPath]);
+
+	useEffect(() => {
+		if (version_num !== undefined && version_num !== null) {
+			setSelectedVersion(version_num);
+		}
+	}, [version_num]);
 
 	useEffect( () =>
 		{
@@ -217,29 +247,6 @@ export const File = (): JSX.Element => {
 	// 	history(`/listeners?fileId=${fileId}&fileName=${filename}`);
 	// }
 
-	// for breadcrumb
-	const paths = [
-		{
-			name: about["name"],
-			url: `/datasets/${datasetId}`,
-		},
-	];
-
-	// add folder path to breadcrumbs
-	const folderPath = useSelector((state: RootState) => state.folder.folderPath);
-	if (folderPath != null) {
-		for (const folderBread of folderPath) {
-			paths.push({
-				name: folderBread["folder_name"],
-				url: `/datasets/${datasetId}?folder=${folderBread["folder_id"]}`,
-			});
-		}
-	} else {
-		paths.slice(0, 1);
-	}
-
-	// add file name to breadcrumb
-
 	if (showForbiddenPage) {
 		return <Forbidden />;
 	} else if (showNotFoundPage) {
@@ -250,6 +257,9 @@ export const File = (): JSX.Element => {
 		<Layout>
 			{/*Error Message dialogue*/}
 			<ErrorModal errorOpen={errorOpen} setErrorOpen={setErrorOpen} />
+			<Grid container>
+				<MainBreadcrumbs paths={paths} />
+			</Grid>
 			<Grid container>
 				<Grid item xs={10} sx={{ display: "flex", alignItems: "center" }}>
 					<Stack>
@@ -344,9 +354,6 @@ export const File = (): JSX.Element => {
 							disabled={false}
 						/>
 					</Tabs>
-					<Box style={{ padding: "24px 24px 0 24px" }}>
-						<MainBreadcrumbs paths={paths} />
-					</Box>
 					<TabPanel value={selectedTabIndex} index={0}>
 						<Visualization fileId={fileId} />
 					</TabPanel>
