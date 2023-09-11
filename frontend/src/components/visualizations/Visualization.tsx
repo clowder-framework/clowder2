@@ -9,6 +9,7 @@ import { Grid } from "@mui/material";
 import { VisualizationCard } from "./VisualizationCard";
 import { VisualizationRawBytesCard } from "./VisualizationRawBytesCard";
 import { VisualizationSpecCard } from "./VisualizationSpecCard";
+import { NoVisualizationCard } from "./NoVisualizationCard";
 import config from "../../app.config";
 
 type previewProps = {
@@ -87,6 +88,9 @@ export const Visualization = (props: previewProps) => {
 														"No visualization data or parameters available. " +
 															"Incomplete visualization configuration."
 													);
+													return (
+											<NoVisualizationCard msg = "No visualization data or parameters available. Incomplete visualization configuration."></NoVisualizationCard>
+										);
 												}
 											}
 										}
@@ -98,6 +102,9 @@ export const Visualization = (props: previewProps) => {
 									//check if file size is greater than threshold, if it is, then show no visualization
 									if (fileSummary && fileSummary.bytes && fileSummary.bytes >= config["rawDataVisualizationThreshold"]) {
 										console.log("File is greater than threshold");
+										return (
+											<NoVisualizationCard msg = "File is greater than threshold"></NoVisualizationCard>
+										);
 									}
 									// try match mime type first
 									// then fallback to match main type
