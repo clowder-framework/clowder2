@@ -59,10 +59,7 @@ export function FilesTableFileEntry(props: FilesTableFileEntryProps) {
 							isClickable={false}
 						/>
 					</TableCell>
-					<TableCell align="right">
-						{parseDate(file.created)} by {file.creator.first_name}{" "}
-						{file.creator.last_name}
-					</TableCell>
+					<TableCell align="right">{parseDate(file.created)}</TableCell>
 					<TableCell align="right">
 						{file.bytes ? prettyBytes(file.bytes) : "NA"}
 					</TableCell>
