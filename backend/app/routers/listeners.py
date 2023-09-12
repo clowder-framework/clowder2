@@ -61,7 +61,7 @@ async def _process_incoming_v1_extractor_info(
         new_feed = FeedDB(
             name=extractor_name,
             search={
-                "index_name": "file",
+                "index_name": "clowder",
                 "criteria": criteria_list,
                 "mode": "or",
             },
