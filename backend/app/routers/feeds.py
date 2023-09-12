@@ -50,13 +50,10 @@ async def check_feed_listeners(
         # Verify whether resource_id is found when searching the specified criteria
         feed_match = check_search_result(es_client, file_out, feed.search)
         if feed_match:
-            feed_criteria = feed.search.criteria
-            for criterea in feed_criteria:
-                if criterea.field == 'content_type_main' and criterea.value == file_out.content_type.main_type:
-                    for listener in feed.listeners:
-                        # TODO not sure if this check is still needed
-                        if listener.automatic:
-                            listener_ids_found.append(listener.listener_id)
+            for listener in feed.listeners:
+                # TODO is this necessary?
+                if listener.automatic:
+                    listener_ids_found.append(listener.listener_id)
     for targ_listener in listener_ids_found:
         if (
             listener_info := await EventListenerDB.get(PydanticObjectId(targ_listener))

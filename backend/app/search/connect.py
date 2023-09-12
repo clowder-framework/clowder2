@@ -175,4 +175,6 @@ def check_search_result(es_client, file_out: FileOut, search_obj: SearchObject):
     query_string += json.dumps(query) + "\n"
 
     results = search_index(es_client, search_obj.index_name, query_string)
-    return results and len(results) > 0
+    body = results.body
+    responses = body['responses'][0]
+    return responses['hits']['total']['value'] > 0
