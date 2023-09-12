@@ -20,6 +20,7 @@ import {
 import { AuthWrapper } from "../auth/AuthWrapper";
 import CheckIcon from "@mui/icons-material/Check";
 import CloseIcon from "@mui/icons-material/Close";
+import GroupIcon from "@mui/icons-material/Group";
 import ListIcon from "@mui/icons-material/List";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -113,9 +114,12 @@ export function GroupAndRoleTableEntry(props: GroupAndRoleTableEntryProps) {
 				key={group_role.group.id}
 				sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
 			>
-				<TableCell>{group_role.group.name}</TableCell>
+				<TableCell>
+					<GroupIcon sx={iconStyle} />
+					<Button>{group_role.group.name}</Button>
+				</TableCell>
 				<TableCell align="right">
-					{group_role.group.users ? group_role.group.users.length : 0}
+					{group_role.group.users ? group_role.group.users.length : 0} members
 					<IconButton
 						type="button"
 						sx={{ p: "10px" }}
@@ -181,21 +185,27 @@ export function GroupAndRoleTableEntry(props: GroupAndRoleTableEntryProps) {
 								>
 									<EditIcon sx={iconStyle} />
 								</IconButton>
-								<IconButton
-									type="button"
-									sx={{ p: "10px" }}
-									aria-label="edit"
-									onClick={() => {
-										setDeleteRoleConfirmation(true);
-									}}
-								>
-									<DeleteIcon sx={iconStyle} />
-								</IconButton>
 							</>
 						)}
 					</AuthWrapper>
 				</TableCell>
-				<TableCell align="right" />
+				<TableCell align="right">
+					<AuthWrapper
+						currRole={datasetRole.role}
+						allowedRoles={["owner", "editor"]}
+					>
+						<IconButton
+							type="button"
+							sx={{ p: "10px" }}
+							aria-label="edit"
+							onClick={() => {
+								setDeleteRoleConfirmation(true);
+							}}
+						>
+							<DeleteIcon sx={iconStyle} />
+						</IconButton>
+					</AuthWrapper>
+				</TableCell>
 			</TableRow>
 			<TableRow>
 				<TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>

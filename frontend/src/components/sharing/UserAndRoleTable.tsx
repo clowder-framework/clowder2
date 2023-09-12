@@ -10,6 +10,7 @@ import TableCell from "@mui/material/TableCell";
 import TableBody from "@mui/material/TableBody";
 import { theme } from "../../theme";
 import { UserAndRoleTableEntry } from "./UserAndRoleTableEntry";
+import { GroupAndRoleTableEntry } from "./GroupAndRoleTableEntry";
 
 const iconStyle = {
 	verticalAlign: "middle",
@@ -31,16 +32,25 @@ export const UserAndRoleTable = (): JSX.Element => {
 				<TableHead>
 					<TableRow>
 						<TableCell>Name</TableCell>
-						<TableCell align="right">Email</TableCell>
+						<TableCell align="right">Details</TableCell>
 						<TableCell align="right">Role</TableCell>
 						<TableCell align="right" />
 					</TableRow>
 				</TableHead>
 				<TableBody>
 					{datasetRolesList !== undefined &&
+					datasetRolesList.group_roles !== undefined ? (
+						datasetRolesList.group_roles.map((group_role) => (
+							<GroupAndRoleTableEntry group_role={group_role} />
+						))
+					) : (
+						<></>
+					)}
+				</TableBody>
+				<TableBody>
+					{datasetRolesList !== undefined &&
 					datasetRolesList.user_roles !== undefined ? (
 						datasetRolesList.user_roles.map((user_role) => (
-							// If user is in a group, omit from this table
 							<UserAndRoleTableEntry user_role={user_role} />
 						))
 					) : (

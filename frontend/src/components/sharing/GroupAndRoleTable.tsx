@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { RootState } from "../../types/data";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
@@ -15,22 +15,9 @@ export const GroupAndRoleTable = (): JSX.Element => {
 
 	const dispatch = useDispatch();
 
-	const datasetRole = useSelector(
-		(state: RootState) => state.dataset.datasetRole
-	);
 	const datasetRolesList = useSelector(
 		(state: RootState) => state.dataset.roles
 	);
-	const [sharePaneOpen, setSharePaneOpen] = useState(false);
-
-	const handleShareClose = () => {
-		setSharePaneOpen(false);
-	};
-
-	function clickButton(currentGroupId, currentRole) {
-		// reset error message and close the error window
-		setSharePaneOpen(true);
-	}
 
 	return (
 		<TableContainer>

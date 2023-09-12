@@ -184,21 +184,27 @@ export function UserAndRoleTableEntry(props: UserAndRoleTableEntryProps) {
 								>
 									<EditIcon sx={iconStyle} />
 								</IconButton>
-								<IconButton
-									type="button"
-									sx={{ p: "10px" }}
-									aria-label="edit"
-									onClick={() => {
-										setDeleteRoleConfirmation(true);
-									}}
-								>
-									<DeleteIcon sx={iconStyle} />
-								</IconButton>
 							</>
 						)}
 					</AuthWrapper>
 				</TableCell>
-				<TableCell align="right" />
+				<TableCell align="right">
+					<AuthWrapper
+						currRole={datasetRole.role}
+						allowedRoles={["owner", "editor"]}
+					>
+						<IconButton
+							type="button"
+							sx={{ p: "10px" }}
+							aria-label="edit"
+							onClick={() => {
+								setDeleteRoleConfirmation(true);
+							}}
+						>
+							<DeleteIcon sx={iconStyle} />
+						</IconButton>
+					</AuthWrapper>
+				</TableCell>
 			</TableRow>
 		</React.Fragment>
 	);
