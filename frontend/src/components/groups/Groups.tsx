@@ -220,7 +220,7 @@ export function Groups() {
 												component="th"
 												scope="row"
 												key={group.id}
-												align="right"
+												align="left"
 											>
 												{group.users !== undefined ? group.users.length : 0}
 											</TableCell>
