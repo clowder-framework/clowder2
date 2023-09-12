@@ -151,6 +151,7 @@ export function Group() {
 								setAddMemberModalOpen(true);
 							}}
 							endIcon={<PersonAddAlt1Icon />}
+							sx={{ marginRight: "0.5em" }}
 						>
 							Add Member
 						</Button>
