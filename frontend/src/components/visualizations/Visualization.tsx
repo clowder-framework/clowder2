@@ -118,9 +118,9 @@ export const Visualization = (props: previewProps) => {
 								// if no visualization config exist, guess which widget to use by looking at the mime type of
 								// the raw bytes
 								else {
-									//check if file size is greater than threshold, if it is, then show no visualization
+									//to make sure file size is less than threshold
 									if (
-										fileSummary &&
+										fileSummary && fileSummary.bytes && fileSummary.bytes < config["rawDataVisualizationThreshold"] &&
 										fileSummary.content_type !== undefined &&
 										((fileSummary.content_type.content_type !== undefined &&
 											visComponentDefinition.mimeTypes.includes(
