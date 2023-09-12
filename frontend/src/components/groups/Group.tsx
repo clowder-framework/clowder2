@@ -12,7 +12,6 @@ import PersonAddAlt1Icon from "@mui/icons-material/PersonAddAlt1";
 import MembersTable from "./MembersTable";
 import { EditMenu } from "./EditMenu";
 import AddMemberModal from "./AddMemberModal";
-import EditNameModal from "./EditNameModal";
 import RoleChip from "../auth/RoleChip";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { MainBreadcrumbs } from "../navigation/BreadCrumb";
@@ -87,16 +86,6 @@ export function Group() {
 				groupName={groupAbout.name}
 				groupId={groupAbout.id}
 			/>
-			<EditNameModal
-				open={editNameModalOpen}
-				groupOwner={groupCreatorEmail}
-				handleClose={() => {
-					setEditNameModalOpen(false);
-				}}
-				groupName={groupAbout.name}
-				groupId={groupAbout.id}
-			/>
-
 			{/*Header & menus*/}
 			<Box
 				sx={{
@@ -163,20 +152,6 @@ export function Group() {
 							groupId={groupId}
 						/>
 					</AuthWrapper>
-
-					{/*<AuthWrapper currRole={role} allowedRoles={["owner"]}>*/}
-					{/*	<Button*/}
-					{/*		variant="outlined"*/}
-					{/*		onClick={() => {*/}
-					{/*			setEditNameModalOpen(true);*/}
-					{/*		}}*/}
-					{/*		endIcon={<DriveFileRenameOutline fontSize="small"/>}*/}
-					{/*		sx={{ marginLeft: "0.5em" }}*/}
-					{/*	>*/}
-					{/*		Edit Name*/}
-					{/*	</Button>*/}
-					{/*</AuthWrapper>*/}
-					{/*only owner are allowed to delete*/}
 					<AuthWrapper currRole={role} allowedRoles={["owner"]}>
 						<Button
 							variant="outlined"
