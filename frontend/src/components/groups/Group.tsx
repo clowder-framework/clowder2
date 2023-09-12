@@ -86,14 +86,13 @@ export function Group() {
 				groupId={groupAbout.id}
 			/>
 			{/*Header & menus*/}
-			<Box
-				sx={{
-					display: "flex",
-					justifyContent: "space-between",
-					alignItems: "center",
-				}}
-			>
-				<Box
+			<Grid container>
+				<Grid
+					item
+					xs={12}
+					sm={12}
+					md={8}
+					lg={9}
 					sx={{
 						display: "flex",
 						justifyContent: "flex-start",
@@ -121,14 +120,20 @@ export function Group() {
 							<Link href={groupCreatorEmailLink}>{groupCreatorEmail}</Link>
 						</Typography>
 					</Box>
-				</Box>
+				</Grid>
 
 				{/*Buttons*/}
-				<Box
+				<Grid
+					item
+					xs={12}
+					sm={12}
+					md={4}
+					lg={3}
 					sx={{
 						display: "flex",
 						justifyContent: "flex-start",
 						alignItems: "baseline",
+						flexDirection: "row",
 					}}
 				>
 					{/*only owner or editor are allowed to edit*/}
@@ -139,7 +144,7 @@ export function Group() {
 								setAddMemberModalOpen(true);
 							}}
 							endIcon={<PersonAddAlt1Icon />}
-							sx={{ marginRight: "0.5em" }}
+							sx={{ marginRight: "0.5em", width: "auto" }}
 						>
 							Add Member
 						</Button>
@@ -154,13 +159,13 @@ export function Group() {
 								setDeleteGroupConfirmOpen(true);
 							}}
 							endIcon={<DeleteIcon />}
-							sx={{ marginLeft: "0.5em" }}
+							sx={{ marginLeft: "0.5em", width: "auto" }}
 						>
 							Delete Group
 						</Button>
 					</AuthWrapper>
-				</Box>
-			</Box>
+				</Grid>
+			</Grid>
 			<MembersTable groupId={groupId} />
 		</Layout>
 	);
