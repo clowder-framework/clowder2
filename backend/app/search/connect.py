@@ -176,5 +176,5 @@ def check_search_result(es_client, file_out: FileOut, search_obj: SearchObject):
 
     results = search_index(es_client, search_obj.index_name, query_string)
     body = results.body
-    responses = body['responses'][0]
-    return responses['hits']['total']['value'] > 0
+    responses = body["responses"][0]
+    return responses["hits"]["total"]["value"] > 0
