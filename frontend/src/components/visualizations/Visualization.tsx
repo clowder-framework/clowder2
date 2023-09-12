@@ -1,4 +1,4 @@
-import React, {Suspense, useEffect, useState} from "react";
+import React, { Suspense, useEffect, useState } from "react";
 import { LazyLoadErrorBoundary } from "../errors/LazyLoadErrorBoundary";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../types/data";
@@ -21,7 +21,8 @@ export const Visualization = (props: previewProps) => {
 	const { fileId, datasetId } = props;
 	//const flag = false;
 	const [isEmptyVisData, setIsEmptyVisData] = useState(false);
-	const [isVisDataGreaterThanMaxSize, setIsVisDataGreaterThanMaxSize] = useState(false);
+	const [isVisDataGreaterThanMaxSize, setIsVisDataGreaterThanMaxSize] =
+		useState(false);
 
 	const fileSummary = useSelector((state: RootState) => state.file.fileSummary);
 	const visConfig = useSelector(
@@ -46,10 +47,31 @@ export const Visualization = (props: previewProps) => {
 		}
 	}, [fileId, datasetId]);
 
+	// Check for conditions and set state only once
+	useEffect(() => {
+		if (fileSummary && fileSummary.bytes) {
+			if (fileSummary.bytes >= config["rawDataVisualizationThreshold"]) {
+				setIsVisDataGreaterThanMaxSize(true);
+				setIsEmptyVisData(false); // Reset the other state
+			} else {
+				setIsVisDataGreaterThanMaxSize(false); // Reset the state
+				setIsEmptyVisData(visConfig.length === 0);
+			}
+		}
+	}, [fileSummary, visConfig]);
+
 	return (
 		<Grid container rowSpacing={1} columnSpacing={{ xs: 1, sm: 3, md: 3 }}>
-			{isEmptyVisData ?<NoVisualizationCard msg = "No visualization data or parameters available. Incomplete visualization configuration."></NoVisualizationCard> : <></>}
-			{isVisDataGreaterThanMaxSize ?<NoVisualizationCard msg = "File is greater than threshold"></NoVisualizationCard> : <></>}
+			{isEmptyVisData ? (
+				<NoVisualizationCard msg="No visualization data or parameters available. Incomplete visualization configuration."></NoVisualizationCard>
+			) : (
+				<></>
+			)}
+			{isVisDataGreaterThanMaxSize ? (
+				<NoVisualizationCard msg="File is greater than threshold"></NoVisualizationCard>
+			) : (
+				<></>
+			)}
 			{/* 1. load all the visualization components and its definition available to the frontend */}
 			{visComponentDefinitions.map((visComponentDefinition) => {
 				return (
@@ -88,15 +110,6 @@ export const Visualization = (props: previewProps) => {
 															visConfigEntry={visConfigEntry}
 														/>
 													);
-												} else {
-													console.log(
-														"No visualization data or parameters available. " +
-															"Incomplete visualization configuration."
-													);
-													setIsEmptyVisData(!isEmptyVisData);
-										// 			return (
-										// 	<NoVisualizationCard msg = "No visualization data or parameters available. Incomplete visualization configuration."></NoVisualizationCard>
-										// );
 												}
 											}
 										}
@@ -106,25 +119,15 @@ export const Visualization = (props: previewProps) => {
 								// the raw bytes
 								else {
 									//check if file size is greater than threshold, if it is, then show no visualization
-									if (fileSummary && fileSummary.bytes && fileSummary.bytes >= config["rawDataVisualizationThreshold"]) {
-										console.log("File is greater than threshold");
-										// return (
-										// 	<NoVisualizationCard msg = "File is greater than threshold"></NoVisualizationCard>
-										// );
-										setIsVisDataGreaterThanMaxSize(!isVisDataGreaterThanMaxSize);
-										//flag = true;
-									}
-									// try match mime type first
-									// then fallback to match main type
-									// to instantiate components correspondingly
-									else if (
+									if (
 										fileSummary &&
 										fileSummary.content_type !== undefined &&
 										((fileSummary.content_type.content_type !== undefined &&
 											visComponentDefinition.mimeTypes.includes(
 												fileSummary.content_type.content_type
 											)) ||
-											(fileSummary.content_type.content_type === undefined) && (fileSummary.content_type.main_type !== undefined &&
+											(fileSummary.content_type.content_type === undefined &&
+												fileSummary.content_type.main_type !== undefined &&
 												fileSummary.content_type.main_type ===
 													visComponentDefinition.mainType))
 									) {
@@ -134,11 +137,11 @@ export const Visualization = (props: previewProps) => {
 												fileId={fileId}
 											/>
 										);
+									} else {
+										return null;
 									}
-									return null;
 								}
 							})()}
-
 						</Suspense>
 					</LazyLoadErrorBoundary>
 				);
