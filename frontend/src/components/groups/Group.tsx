@@ -3,10 +3,10 @@ import { Box, Button, Grid, Link } from "@mui/material";
 import Layout from "../Layout";
 import { RootState } from "../../types/data";
 import { useDispatch, useSelector } from "react-redux";
-import { deleteGroup, fetchGroupAbout } from "../../actions/group";
+import { fetchGroupAbout } from "../../actions/group";
 import { fetchGroupRole } from "../../actions/authorization";
 import Typography from "@mui/material/Typography";
-import { useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { AuthWrapper } from "../auth/AuthWrapper";
 import PersonAddAlt1Icon from "@mui/icons-material/PersonAddAlt1";
 import MembersTable from "./MembersTable";
@@ -15,15 +15,12 @@ import AddMemberModal from "./AddMemberModal";
 import RoleChip from "../auth/RoleChip";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { MainBreadcrumbs } from "../navigation/BreadCrumb";
-import { config } from "../../app.config";
 import { ErrorModal } from "../errors/ErrorModal";
+import DeleteGroupModal from "./DeleteGroupModal";
 
 export function Group() {
 	// path parameter
 	const { groupId } = useParams<{ groupId?: string }>();
-
-	// use history hook to redirect/navigate between routes
-	const history = useNavigate();
 
 	// Redux connect equivalent
 	const dispatch = useDispatch();
@@ -31,8 +28,6 @@ export function Group() {
 		dispatch(fetchGroupAbout(groupId));
 	const fetchCurrentGroupRole = (groupId: string | undefined) =>
 		dispatch(fetchGroupRole(groupId));
-	const groupDeleted = (groupId: string | undefined) =>
-		dispatch(deleteGroup(groupId));
 
 	const groupAbout = useSelector((state: RootState) => state.group.about);
 
@@ -43,7 +38,6 @@ export function Group() {
 	);
 	const groupCreatorEmailLink = "mailto:" + groupCreatorEmail;
 	const [addMemberModalOpen, setAddMemberModalOpen] = useState(false);
-	const [editNameModalOpen, setEditNameModalOpen] = useState(false);
 	const [deleteGroupConfirmOpen, setDeleteGroupConfirmOpen] = useState(false);
 
 	// component did mount
@@ -84,6 +78,11 @@ export function Group() {
 				}}
 				groupOwner={groupCreatorEmail}
 				groupName={groupAbout.name}
+				groupId={groupAbout.id}
+			/>
+			<DeleteGroupModal
+				deleteGroupConfirmOpen={deleteGroupConfirmOpen}
+				setDeleteGroupConfirmOpen={setDeleteGroupConfirmOpen}
 				groupId={groupAbout.id}
 			/>
 			{/*Header & menus*/}
@@ -146,11 +145,7 @@ export function Group() {
 						</Button>
 					</AuthWrapper>
 					<AuthWrapper currRole={role} allowedRoles={["owner", "editor"]}>
-						<EditMenu
-							groupOwner={groupCreatorEmail}
-							groupName={groupAbout.name}
-							groupId={groupId}
-						/>
+						<EditMenu />
 					</AuthWrapper>
 					<AuthWrapper currRole={role} allowedRoles={["owner"]}>
 						<Button
