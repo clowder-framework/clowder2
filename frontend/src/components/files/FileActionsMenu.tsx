@@ -32,10 +32,11 @@ type FileActionsMenuProps = {
 	fileId?: string;
 	filename?: string;
 	datasetId?: string;
+	setSelectedVersion: any;
 };
 
 export const FileActionsMenu = (props: FileActionsMenuProps): JSX.Element => {
-	const { fileId, datasetId } = props;
+	const { fileId, datasetId, setSelectedVersion } = props;
 
 	const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
 	const [fileShareModalOpen, setFileShareModalOpen] = useState(false);
@@ -120,7 +121,11 @@ export const FileActionsMenu = (props: FileActionsMenuProps): JSX.Element => {
 				aria-labelledby="form-dialog"
 			>
 				<DialogTitle id="form-dialog-title">Update File</DialogTitle>
-				<UpdateFile fileId={fileId} setOpen={setUpdateFileOpen} />
+				<UpdateFile
+					fileId={fileId}
+					setOpen={setUpdateFileOpen}
+					setSelectedVersion={setSelectedVersion}
+				/>
 			</Dialog>
 			<PresignedUrlShareModal
 				presignedUrl={presignedUrl}

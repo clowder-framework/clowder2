@@ -279,6 +279,7 @@ export const File = (): JSX.Element => {
 						filename={fileSummary.name}
 						fileId={fileId}
 						datasetId={datasetId}
+						setSelectedVersion={setSelectedVersion}
 					/>
 				</Grid>
 			</Grid>
