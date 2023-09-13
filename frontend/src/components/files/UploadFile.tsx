@@ -86,6 +86,25 @@ export const UploadFile: React.FC<UploadFileProps> = (
 		return required;
 	};
 
+	const checkIfFieldsAreFilled = (metadata: { definition: string }) => {
+		let filled = false;
+
+		metadataDefinitionList.map((val, _) => {
+			if (val.fields[0].required) {
+				// Condition checks whether the current updated field is a required one
+				if (
+					val.name == metadata.definition ||
+					val.name in metadataRequestForms
+				) {
+					filled = true;
+				} else {
+					filled = false;
+				}
+			}
+		});
+		return filled;
+	};
+
 	// step 1
 	const setMetadata = (metadata: any) => {
 		// TODO wrap this in to a function
@@ -97,35 +116,17 @@ export const UploadFile: React.FC<UploadFileProps> = (
 			}
 			return { ...prevState, [metadata.definition]: metadata };
 		});
-
-		metadataDefinitionList.map((val, idx) => {
-			if (val.fields[0].required) {
-				// Condition checks whether the current updated field is a required one
-				if (
-					val.name == metadata.definition ||
-					val.name in metadataRequestForms
-				) {
-					setAllowSubmit(true);
-					return true;
-				} else {
-					setAllowSubmit(false);
-					return false;
-				}
-			}
-		});
+		setAllowSubmit(checkIfFieldsAreFilled(metadata));
 	};
 
 	// step
 	const [activeStep, setActiveStep] = useState(0);
 	const handleNext = () => {
-		if (checkIfFieldsAreRequired()) {
-			setAllowSubmit(false);
-		} else {
-			setAllowSubmit(true);
-		}
 		setActiveStep((prevActiveStep) => prevActiveStep + 1);
 	};
 	const handleBack = () => {
+		// since return from previous step which already filled the required fields, always allow submit
+		setAllowSubmit(true);
 		setActiveStep((prevActiveStep) => prevActiveStep - 1);
 	};
 
@@ -179,7 +180,7 @@ export const UploadFile: React.FC<UploadFileProps> = (
 									<Button
 										variant="contained"
 										onClick={handleNext}
-										disabled={!allowSubmit}
+										disabled={!(!checkIfFieldsAreRequired() || allowSubmit)}
 										sx={{ mt: 1, mr: 1 }}
 									>
 										Next
