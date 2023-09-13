@@ -88,17 +88,12 @@ export const UploadFile: React.FC<UploadFileProps> = (
 
 	const checkIfFieldsAreFilled = () => {
 		return metadataDefinitionList.every((val) => {
-			if (val.fields[0].required) {
-				return val.fields.every((field) => {
-					return (
-						metadataRequestForms[val.name] &&
-						metadataRequestForms[val.name].content[field.name] !== ""
-					);
-				});
-			} else {
-				// Non-required fields are considered as filled
-				return true;
-			}
+			return val.fields.every((field) => {
+				return field.required
+					? metadataRequestForms[val.name] &&
+							metadataRequestForms[val.name].content[field.name] !== ""
+					: true;
+			});
 		});
 	};
 
