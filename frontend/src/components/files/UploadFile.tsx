@@ -77,7 +77,7 @@ export const UploadFile: React.FC<UploadFileProps> = (
 	const checkIfFieldsAreRequired = () => {
 		let required = false;
 
-		metadataDefinitionList.forEach((val, idx) => {
+		metadataDefinitionList.forEach((val, _) => {
 			if (val.fields[0].required) {
 				required = true;
 			}
@@ -118,7 +118,6 @@ export const UploadFile: React.FC<UploadFileProps> = (
 	// step
 	const [activeStep, setActiveStep] = useState(0);
 	const handleNext = () => {
-		// If no metadata fields are marked as required, allow user to skip directly to submit
 		if (checkIfFieldsAreRequired()) {
 			setAllowSubmit(false);
 		} else {
@@ -132,6 +131,7 @@ export const UploadFile: React.FC<UploadFileProps> = (
 
 	// finish button post dataset; dataset ID triggers metadata posting
 	const handleFinish = () => {
+		// check file
 		// Triggers spinner
 		setLoading(true);
 

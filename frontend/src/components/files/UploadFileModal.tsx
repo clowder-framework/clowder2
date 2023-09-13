@@ -1,6 +1,6 @@
 import React from "react";
 
-import { Container, Input } from "@mui/material";
+import { Box, Input } from "@mui/material";
 
 type UploadFileModalProps = {
 	setSelectedFile: any;
@@ -16,13 +16,13 @@ export const UploadFileModal: React.FC<UploadFileModalProps> = (
 	};
 
 	return (
-		<Container sx={{ width: "100%", padding: "1em" }}>
+		<Box sx={{ width: "100%", padding: "1em 0em" }}>
 			<Input
 				id="file-input"
 				type="file"
 				onChange={handleFileChange}
 				sx={{ width: "100%" }}
 			/>
-		</Container>
+		</Box>
 	);
 };
