@@ -12,7 +12,7 @@ import {
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../types/data";
 
-import { UploadFileModal } from "./UploadFileModal";
+import { UploadFileInput } from "./UploadFileInput";
 import { CreateMetadata } from "../metadata/CreateMetadata";
 import {
 	fetchMetadataDefinitions,
@@ -131,7 +131,6 @@ export const UploadFile: React.FC<UploadFileProps> = (
 
 	// finish button post dataset; dataset ID triggers metadata posting
 	const handleFinish = () => {
-		// check file
 		// Triggers spinner
 		setLoading(true);
 
@@ -169,7 +168,7 @@ export const UploadFile: React.FC<UploadFileProps> = (
 					{/*step 1 Metadata*/}
 					<Step key="fill-in-metadata">
 						<StepLabel>Fill In Metadata</StepLabel>
-						<StepContent>
+						<StepContent TransitionProps={{ unmountOnExit: false }}>
 							<Typography>Provide us the metadata about your file.</Typography>
 							<Box>
 								<CreateMetadata setMetadata={setMetadata} />
@@ -192,10 +191,10 @@ export const UploadFile: React.FC<UploadFileProps> = (
 					{/* step 2 attach files */}
 					<Step key="attach-files">
 						<StepLabel>Attach Files</StepLabel>
-						<StepContent>
+						<StepContent TransitionProps={{ unmountOnExit: false }}>
 							<Typography>Upload files to the dataset.</Typography>
 							<Box>
-								<UploadFileModal setSelectedFile={setSelectedFile} />
+								<UploadFileInput setSelectedFile={setSelectedFile} />
 								<Box className="inputGroup">
 									<Button
 										variant="contained"
