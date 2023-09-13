@@ -160,7 +160,8 @@ def check_search_result(es_client, file_out: FileOut, search_obj: SearchObject):
     # TODO: This will need to be more complex to support other operators
     for criteria in search_obj.criteria:
         crit = {criteria.field: criteria.value}
-        match_list.append({"match": crit})
+        if criteria.field != 'name':
+            match_list.append({"match": crit})
 
     if search_obj.mode == "and":
         subquery = {"bool": {"must": match_list}}
@@ -177,4 +178,7 @@ def check_search_result(es_client, file_out: FileOut, search_obj: SearchObject):
     results = search_index(es_client, search_obj.index_name, query_string)
     body = results.body
     responses = body["responses"][0]
-    return responses["hits"]["total"]["value"] > 0
+    try:
+        return responses["hits"]["total"]["value"] > 0
+    except Exception as e:
+        return False

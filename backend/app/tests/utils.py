@@ -44,7 +44,7 @@ listener_v2_example = {
 feed_example = {
     "name": "XYZ Test Feed",
     "search": {
-        "index_name": "files",
+        "index_name": "clowder",
         "criteria": [{"field": "name", "operator": "==", "value": "xyz"}],
     },
 }
