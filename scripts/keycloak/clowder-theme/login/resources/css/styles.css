@@ -73,7 +73,7 @@ div#kc-header {
 div#kc-header::after {
     width: 100%;
     background-color: #ffffff;
-    content: url(../img/clowder-logo-sm.svg);
+    content: url(../img/blue-clowder-logo-sm.svg);
 }
 
 /*Sign in to your account*/
@@ -83,7 +83,7 @@ header {
 }
 
 header::after {
-    content: url("../img/clowder-logo-md.png");
+    content: url("../img/blue-clowder-logo-md.svg");
 }
 
 h1 {
