@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import {
 	Box,
 	Button,
+	Grid,
 	Step,
 	StepContent,
 	StepLabel,
@@ -175,18 +176,19 @@ export const UploadFile: React.FC<UploadFileProps> = (
 								<CreateMetadata setMetadata={setMetadata} />
 							</Box>
 							{/*buttons*/}
-							<Box sx={{ mb: 2 }}>
-								<>
+							<Grid container>
+								<Grid xs={11}>
 									<Button
 										variant="contained"
 										onClick={handleNext}
 										disabled={!checkIfFieldsAreRequired() ? false : !allFilled}
-										sx={{ mt: 1, mr: 1 }}
+										sx={{ display: "block", marginLeft: "auto" }}
 									>
 										Next
 									</Button>
-								</>
-							</Box>
+								</Grid>
+								<Grid xs={1}></Grid>
+							</Grid>
 						</StepContent>
 					</Step>
 					{/* step 2 attach files */}
@@ -197,15 +199,16 @@ export const UploadFile: React.FC<UploadFileProps> = (
 							<Box>
 								<UploadFileInput setSelectedFile={setSelectedFile} />
 								<Box className="inputGroup">
+									<Button onClick={handleBack} sx={{ float: "right" }}>
+										Back
+									</Button>
 									<Button
 										variant="contained"
 										onClick={handleFinish}
 										disabled={!selectedFile}
+										sx={{ float: "right" }}
 									>
 										Finish
-									</Button>
-									<Button onClick={handleBack} sx={{ mt: 1, mr: 1 }}>
-										Back
 									</Button>
 								</Box>
 							</Box>
