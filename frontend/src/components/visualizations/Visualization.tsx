@@ -9,7 +9,6 @@ import { Grid } from "@mui/material";
 import { VisualizationCard } from "./VisualizationCard";
 import { VisualizationRawBytesCard } from "./VisualizationRawBytesCard";
 import { VisualizationSpecCard } from "./VisualizationSpecCard";
-import { NoVisualizationCard } from "./NoVisualizationCard";
 import config from "../../app.config";
 
 type previewProps = {
@@ -63,12 +62,12 @@ export const Visualization = (props: previewProps) => {
 	return (
 		<Grid container rowSpacing={1} columnSpacing={{ xs: 1, sm: 3, md: 3 }}>
 			{isEmptyVisData ? (
-				<NoVisualizationCard msg="No visualization data or parameters available. Incomplete visualization configuration."></NoVisualizationCard>
+				<div>No visualization data or parameters available. Incomplete visualization configuration.</div>
 			) : (
 				<></>
 			)}
 			{isVisDataGreaterThanMaxSize ? (
-				<NoVisualizationCard msg="File is greater than threshold"></NoVisualizationCard>
+				<div>File is greater than threshold</div>
 			) : (
 				<></>
 			)}
