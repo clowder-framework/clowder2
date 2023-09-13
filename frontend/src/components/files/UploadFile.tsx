@@ -86,23 +86,20 @@ export const UploadFile: React.FC<UploadFileProps> = (
 		return required;
 	};
 
-	const checkIfFieldsAreFilled = (metadata: { definition: string }) => {
-		let filled = false;
-
-		metadataDefinitionList.map((val, _) => {
+	const checkIfFieldsAreFilled = () => {
+		return metadataDefinitionList.every((val) => {
 			if (val.fields[0].required) {
-				// Condition checks whether the current updated field is a required one
-				if (
-					val.name == metadata.definition ||
-					val.name in metadataRequestForms
-				) {
-					filled = true;
-				} else {
-					filled = false;
-				}
+				return val.fields.every((field) => {
+					return (
+						metadataRequestForms[val.name] &&
+						metadataRequestForms[val.name].content[field.name] !== ""
+					);
+				});
+			} else {
+				// Non-required fields are considered as filled
+				return true;
 			}
 		});
-		return filled;
 	};
 
 	// step 1
@@ -120,11 +117,7 @@ export const UploadFile: React.FC<UploadFileProps> = (
 
 	useEffect(() => {
 		if (Object.keys(metadataRequestForms).length > 0) {
-			setAllFilled(
-				Object.keys(metadataRequestForms).every((key) => {
-					return checkIfFieldsAreFilled(metadataRequestForms[key]);
-				})
-			);
+			setAllFilled(checkIfFieldsAreFilled(metadataRequestForms));
 		} else {
 			setAllFilled(false);
 		}
@@ -136,8 +129,6 @@ export const UploadFile: React.FC<UploadFileProps> = (
 		setActiveStep((prevActiveStep) => prevActiveStep + 1);
 	};
 	const handleBack = () => {
-		// since return from previous step which already filled the required fields
-		setAllFilled(true);
 		setActiveStep((prevActiveStep) => prevActiveStep - 1);
 	};
 
@@ -177,6 +168,7 @@ export const UploadFile: React.FC<UploadFileProps> = (
 		<LoadingOverlay active={loading} spinner text="Uploading file...">
 			<Box sx={{ padding: "5%" }}>
 				<Stepper activeStep={activeStep} orientation="vertical">
+					{/*<Stepper activeStep={activeStep}>*/}
 					{/*step 1 Metadata*/}
 					<Step key="fill-in-metadata">
 						<StepLabel>Fill In Metadata</StepLabel>
