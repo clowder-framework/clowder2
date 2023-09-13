@@ -161,6 +161,7 @@ def check_search_result(es_client, file_out: FileOut, search_obj: SearchObject):
     for criteria in search_obj.criteria:
         crit = {criteria.field: criteria.value}
         if criteria.field != 'name':
+            # exclude name as it will be added below
             match_list.append({"match": crit})
 
     if search_obj.mode == "and":
