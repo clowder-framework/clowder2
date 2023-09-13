@@ -31,6 +31,7 @@ export const UserAndRoleTable = (): JSX.Element => {
 			<Table sx={{ minWidth: 650 }} aria-label="simple table">
 				<TableHead>
 					<TableRow>
+						<TableCell sx={{ width: 20 }} align="right" />
 						<TableCell>Name</TableCell>
 						<TableCell align="right">Details</TableCell>
 						<TableCell align="right">Role</TableCell>

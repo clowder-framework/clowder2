@@ -21,8 +21,9 @@ import { AuthWrapper } from "../auth/AuthWrapper";
 import CheckIcon from "@mui/icons-material/Check";
 import CloseIcon from "@mui/icons-material/Close";
 import GroupIcon from "@mui/icons-material/Group";
-import ListIcon from "@mui/icons-material/List";
 import EditIcon from "@mui/icons-material/Edit";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { RootState } from "../../types/data";
 import { theme } from "../../theme";
@@ -114,22 +115,28 @@ export function GroupAndRoleTableEntry(props: GroupAndRoleTableEntryProps) {
 				key={group_role.group.id}
 				sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
 			>
+				<TableCell align="right">
+					<IconButton
+						type="button"
+						sx={{ p: "6px" }}
+						aria-label="edit"
+						onClick={() => {
+							setExpand(!expand);
+						}}
+					>
+						{expand ? (
+							<ExpandLessIcon sx={iconStyle} />
+						) : (
+							<ExpandMoreIcon sx={iconStyle} />
+						)}
+					</IconButton>
+				</TableCell>
 				<TableCell>
 					<GroupIcon sx={iconStyle} />
 					<Button>{group_role.group.name}</Button>
 				</TableCell>
 				<TableCell align="right">
 					{group_role.group.users ? group_role.group.users.length : 0} members
-					<IconButton
-						type="button"
-						sx={{ p: "10px" }}
-						aria-label="edit"
-						onClick={() => {
-							setExpand(!expand);
-						}}
-					>
-						<ListIcon sx={iconStyle} />
-					</IconButton>
 				</TableCell>
 				<TableCell align="right">
 					{editRoleOn ? (

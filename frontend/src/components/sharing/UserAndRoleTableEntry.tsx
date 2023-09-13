@@ -110,6 +110,7 @@ export function UserAndRoleTableEntry(props: UserAndRoleTableEntryProps) {
 				key={user_role.user.id}
 				sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
 			>
+				<TableCell align="right" />
 				<TableCell component="th" scope="row" key={`${user_role.user.id}-icon`}>
 					{user_role.user && user_role.user.email ? (
 						<Gravatar
