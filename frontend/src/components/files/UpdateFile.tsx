@@ -36,7 +36,6 @@ export const UpdateFile: React.FC<UpdateFileProps> = (
 	const fileMetadataList = useSelector(
 		(state: RootState) => state.metadata.fileMetadataList
 	);
-	const files = useSelector((state: RootState) => state.dataset.files);
 	const fileVersions = useSelector(
 		(state: RootState) => state.file.fileVersions
 	);
@@ -56,22 +55,8 @@ export const UpdateFile: React.FC<UpdateFileProps> = (
 
 	const onSave = async (file: File) => {
 		setLoading(true);
+		// TODO: if this fails, the metadata update will also fail
 		await updateFile(file, fileId);
-
-		// Update metadata entry for new version of file in db
-		fileMetadataList.forEach((item) => {
-			if (item.definition !== null) {
-				const metadata: MetadataIn = {
-					context: item.context,
-					context_url: item.context_url,
-					content: item.content,
-					definition: item.definition,
-					file_version: item.resource.version + 1,
-				};
-
-				createFileMetadata(fileId, metadata);
-			}
-		});
 
 		setLoading(false);
 		setOpen(false);
@@ -79,7 +64,26 @@ export const UpdateFile: React.FC<UpdateFileProps> = (
 	};
 
 	useEffect(() => {
-		setSelectedVersion(fileVersions[0]["version_num"]);
+		if (fileVersions.length > 0) {
+			const latest = fileVersions[0]["version_num"];
+
+			// Update metadata entry for new version of file in db
+			fileMetadataList.forEach((item) => {
+				if (item.definition !== null && item.resource.version < latest) {
+					const metadata: MetadataIn = {
+						context: item.context,
+						context_url: item.context_url,
+						content: item.content,
+						definition: item.definition,
+						file_version: item.resource.version + 1,
+					};
+
+					createFileMetadata(fileId, metadata);
+				}
+			});
+
+			setSelectedVersion(latest);
+		}
 	}, [fileVersions]);
 
 	// @ts-ignore

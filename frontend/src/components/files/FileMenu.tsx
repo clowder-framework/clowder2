@@ -19,10 +19,11 @@ import config from "../../app.config";
 
 type FileMenuProps = {
 	file: File;
+	setSelectedVersion: any;
 };
 
 export default function FileMenu(props: FileMenuProps) {
-	const { file } = props;
+	const { file, setSelectedVersion } = props;
 	const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
 	const open = Boolean(anchorEl);
 	const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -70,7 +71,11 @@ export default function FileMenu(props: FileMenuProps) {
 				aria-labelledby="form-dialog"
 			>
 				<DialogTitle id="form-dialog-title">Update File</DialogTitle>
-				<UpdateFile fileId={file.id} setOpen={setUpdateFileOpen} />
+				<UpdateFile
+					fileId={file.id}
+					setOpen={setUpdateFileOpen}
+					setSelectedVersion={setSelectedVersion}
+				/>
 			</Dialog>
 			<Button
 				id="basic-button"
