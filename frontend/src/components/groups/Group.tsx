@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Box, Button, Grid, Link } from "@mui/material";
+import { Box, Button, Grid, Link, Stack } from "@mui/material";
 import Layout from "../Layout";
 import { RootState } from "../../types/data";
 import { useDispatch, useSelector } from "react-redux";
@@ -12,9 +12,7 @@ import PersonAddAlt1Icon from "@mui/icons-material/PersonAddAlt1";
 import MembersTable from "./MembersTable";
 import { EditMenu } from "./EditMenu";
 import AddMemberModal from "./AddMemberModal";
-import EditNameModal from "./EditNameModal";
 import RoleChip from "../auth/RoleChip";
-import DeleteIcon from "@mui/icons-material/Delete";
 import { MainBreadcrumbs } from "../navigation/BreadCrumb";
 import { config } from "../../app.config";
 import { ErrorModal } from "../errors/ErrorModal";
@@ -42,10 +40,8 @@ export function Group() {
 	const groupCreatorEmail = useSelector(
 		(state: RootState) => state.group.about.creator
 	);
-	const groupCreatorEmailLink = "mailto:" + groupCreatorEmail;
+	const groupCreatorEmailLink = `mailto:${groupCreatorEmail}`;
 	const [addMemberModalOpen, setAddMemberModalOpen] = useState(false);
-	const [editNameModalOpen, setEditNameModalOpen] = useState(false);
-	const [deleteGroupConfirmOpen, setDeleteGroupConfirmOpen] = useState(false);
 
 	// component did mount
 	useEffect(() => {
@@ -84,15 +80,6 @@ export function Group() {
 					setAddMemberModalOpen(false);
 				}}
 				groupOwner={groupCreatorEmail}
-				groupName={groupAbout.name}
-				groupId={groupAbout.id}
-			/>
-			<EditNameModal
-				open={editNameModalOpen}
-				groupOwner={groupCreatorEmail}
-				handleClose={() => {
-					setEditNameModalOpen(false);
-				}}
 				groupName={groupAbout.name}
 				groupId={groupAbout.id}
 			/>
@@ -136,12 +123,11 @@ export function Group() {
 				</Box>
 
 				{/*Buttons*/}
-				<Box
-					sx={{
-						display: "flex",
-						justifyContent: "flex-start",
-						alignItems: "baseline",
-					}}
+				<Stack
+					direction="row"
+					justifyContent="flex-end"
+					alignItems="center"
+					spacing={0.5}
 				>
 					{/*only owner or editor are allowed to edit*/}
 					<AuthWrapper currRole={role} allowedRoles={["owner", "editor"]}>
@@ -162,33 +148,7 @@ export function Group() {
 							groupId={groupId}
 						/>
 					</AuthWrapper>
-
-					{/*<AuthWrapper currRole={role} allowedRoles={["owner"]}>*/}
-					{/*	<Button*/}
-					{/*		variant="outlined"*/}
-					{/*		onClick={() => {*/}
-					{/*			setEditNameModalOpen(true);*/}
-					{/*		}}*/}
-					{/*		endIcon={<DriveFileRenameOutline fontSize="small"/>}*/}
-					{/*		sx={{ marginLeft: "0.5em" }}*/}
-					{/*	>*/}
-					{/*		Edit Name*/}
-					{/*	</Button>*/}
-					{/*</AuthWrapper>*/}
-					{/*only owner are allowed to delete*/}
-					<AuthWrapper currRole={role} allowedRoles={["owner"]}>
-						<Button
-							variant="outlined"
-							onClick={() => {
-								setDeleteGroupConfirmOpen(true);
-							}}
-							endIcon={<DeleteIcon />}
-							sx={{ marginLeft: "0.5em" }}
-						>
-							Delete Group
-						</Button>
-					</AuthWrapper>
-				</Box>
+				</Stack>
 			</Box>
 			<MembersTable groupId={groupId} />
 		</Layout>
