@@ -115,7 +115,6 @@ export default function FileMenu(props: FileMenuProps) {
 					currRole={datasetRole.role}
 					allowedRoles={["owner", "editor", "uploader", "viewer"]}
 				>
-					{/*TODO this href doesn't work*/}
 					<MenuItem
 						onClick={() => {
 							handleClose();
