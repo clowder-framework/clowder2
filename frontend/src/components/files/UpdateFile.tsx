@@ -15,12 +15,14 @@ import { MetadataIn } from "../../openapi/v2";
 type UpdateFileProps = {
 	fileId: string | undefined;
 	setOpen: (open: boolean) => void;
+	setSelectedVersion: any;
 };
 
 export const UpdateFile: React.FC<UpdateFileProps> = (
 	props: UpdateFileProps
 ) => {
 	const dispatch = useDispatch();
+
 	const updateFile = async (file: File, fileId: string | undefined) =>
 		dispatch(updateFileAction(file, fileId));
 	const listFileVersions = (fileId: string | undefined) =>
@@ -35,8 +37,11 @@ export const UpdateFile: React.FC<UpdateFileProps> = (
 		(state: RootState) => state.metadata.fileMetadataList
 	);
 	const files = useSelector((state: RootState) => state.dataset.files);
+	const fileVersions = useSelector(
+		(state: RootState) => state.file.fileVersions
+	);
 
-	const { fileId, setOpen } = props;
+	const { fileId, setOpen, setSelectedVersion } = props;
 
 	const [loading, setLoading] = useState<boolean>(false);
 	const [selectedFile, setSelectedFile] = React.useState<File | null>(null);
@@ -53,12 +58,6 @@ export const UpdateFile: React.FC<UpdateFileProps> = (
 		setLoading(true);
 		await updateFile(file, fileId);
 
-		setLoading(false);
-		setOpen(false);
-		listFileVersions(fileId);
-	};
-
-	useEffect(() => {
 		// Update metadata entry for new version of file in db
 		fileMetadataList.forEach((item) => {
 			if (item.definition !== null) {
@@ -73,7 +72,15 @@ export const UpdateFile: React.FC<UpdateFileProps> = (
 				createFileMetadata(fileId, metadata);
 			}
 		});
-	}, [files]);
+
+		setLoading(false);
+		setOpen(false);
+		listFileVersions(fileId);
+	};
+
+	useEffect(() => {
+		setSelectedVersion(fileVersions[0]["version_num"]);
+	}, [fileVersions]);
 
 	// @ts-ignore
 	return (

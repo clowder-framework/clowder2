@@ -37,9 +37,6 @@ export const SelectVersionModal: React.FC<SelectVersionModalProps> = (
 	);
 
 	const [showSuccessAlert, setShowSuccessAlert] = useState(false);
-	const changeVersion = () => {
-		setSelectedVersion(selectedVersion);
-	};
 
 	return (
 		<Dialog
