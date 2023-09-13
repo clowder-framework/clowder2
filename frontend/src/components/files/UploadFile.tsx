@@ -90,7 +90,9 @@ export const UploadFile: React.FC<UploadFileProps> = (
 		return metadataDefinitionList.every((val) => {
 			return val.fields.every((field) => {
 				return field.required
-					? metadataRequestForms[val.name] &&
+					? metadataRequestForms[val.name] !== undefined &&
+							metadataRequestForms[val.name].content[field.name] !==
+								undefined &&
 							metadataRequestForms[val.name].content[field.name] !== ""
 					: true;
 			});
