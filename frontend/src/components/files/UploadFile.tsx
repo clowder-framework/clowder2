@@ -70,7 +70,7 @@ export const UploadFile: React.FC<UploadFileProps> = (
 
 	const [selectedFile, setSelectedFile] = useState<File | null>(null);
 	const [metadataRequestForms, setMetadataRequestForms] = useState({});
-	const [allowSubmit, setAllowSubmit] = React.useState<boolean>(false);
+	const [allFilled, setAllFilled] = React.useState<boolean>(false);
 
 	const history = useNavigate();
 
@@ -116,8 +116,19 @@ export const UploadFile: React.FC<UploadFileProps> = (
 			}
 			return { ...prevState, [metadata.definition]: metadata };
 		});
-		setAllowSubmit(checkIfFieldsAreFilled(metadata));
 	};
+
+	useEffect(() => {
+		if (Object.keys(metadataRequestForms).length > 0) {
+			setAllFilled(
+				Object.keys(metadataRequestForms).every((key) => {
+					return checkIfFieldsAreFilled(metadataRequestForms[key]);
+				})
+			);
+		} else {
+			setAllFilled(false);
+		}
+	}, [metadataRequestForms]);
 
 	// step
 	const [activeStep, setActiveStep] = useState(0);
@@ -125,8 +136,8 @@ export const UploadFile: React.FC<UploadFileProps> = (
 		setActiveStep((prevActiveStep) => prevActiveStep + 1);
 	};
 	const handleBack = () => {
-		// since return from previous step which already filled the required fields, always allow submit
-		setAllowSubmit(true);
+		// since return from previous step which already filled the required fields
+		setAllFilled(true);
 		setActiveStep((prevActiveStep) => prevActiveStep - 1);
 	};
 
@@ -180,7 +191,7 @@ export const UploadFile: React.FC<UploadFileProps> = (
 									<Button
 										variant="contained"
 										onClick={handleNext}
-										disabled={!(!checkIfFieldsAreRequired() || allowSubmit)}
+										disabled={!checkIfFieldsAreRequired() ? false : !allFilled}
 										sx={{ mt: 1, mr: 1 }}
 									>
 										Next
