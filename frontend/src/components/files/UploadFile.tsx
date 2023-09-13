@@ -85,20 +85,8 @@ export const UploadFile: React.FC<UploadFileProps> = (
 
 		return required;
 	};
+
 	// step 1
-	const onFileSave = (selectedFile: File) => {
-		setSelectedFile(selectedFile);
-
-		// If no metadata fields are marked as required, allow user to skip directly to submit
-		if (checkIfFieldsAreRequired()) {
-			setAllowSubmit(false);
-		} else {
-			setAllowSubmit(true);
-		}
-
-		handleNext();
-	};
-	// step 2
 	const setMetadata = (metadata: any) => {
 		// TODO wrap this in to a function
 		setMetadataRequestForms((prevState) => {
@@ -130,6 +118,12 @@ export const UploadFile: React.FC<UploadFileProps> = (
 	// step
 	const [activeStep, setActiveStep] = useState(0);
 	const handleNext = () => {
+		// If no metadata fields are marked as required, allow user to skip directly to submit
+		if (checkIfFieldsAreRequired()) {
+			setAllowSubmit(false);
+		} else {
+			setAllowSubmit(true);
+		}
 		setActiveStep((prevActiveStep) => prevActiveStep + 1);
 	};
 	const handleBack = () => {
@@ -172,22 +166,11 @@ export const UploadFile: React.FC<UploadFileProps> = (
 		<LoadingOverlay active={loading} spinner text="Uploading file...">
 			<Box sx={{ padding: "5%" }}>
 				<Stepper activeStep={activeStep} orientation="vertical">
-					{/* step 1 attach files */}
-					<Step key="attach-files">
-						<StepLabel>Attach Files</StepLabel>
-						<StepContent>
-							<Typography>Upload files to the dataset.</Typography>
-							<Box>
-								<UploadFileModal onSave={onFileSave} />
-							</Box>
-						</StepContent>
-					</Step>
-
-					{/*step 2 Metadata*/}
+					{/*step 1 Metadata*/}
 					<Step key="fill-in-metadata">
 						<StepLabel>Fill In Metadata</StepLabel>
 						<StepContent>
-							<Typography>Provide us your metadata about file.</Typography>
+							<Typography>Provide us the metadata about your file.</Typography>
 							<Box>
 								<CreateMetadata setMetadata={setMetadata} />
 							</Box>
@@ -196,16 +179,35 @@ export const UploadFile: React.FC<UploadFileProps> = (
 								<>
 									<Button
 										variant="contained"
-										onClick={handleFinish}
+										onClick={handleNext}
 										disabled={!allowSubmit}
 										sx={{ mt: 1, mr: 1 }}
+									>
+										Next
+									</Button>
+								</>
+							</Box>
+						</StepContent>
+					</Step>
+					{/* step 2 attach files */}
+					<Step key="attach-files">
+						<StepLabel>Attach Files</StepLabel>
+						<StepContent>
+							<Typography>Upload files to the dataset.</Typography>
+							<Box>
+								<UploadFileModal setSelectedFile={setSelectedFile} />
+								<Box className="inputGroup">
+									<Button
+										variant="contained"
+										onClick={handleFinish}
+										disabled={!selectedFile}
 									>
 										Finish
 									</Button>
 									<Button onClick={handleBack} sx={{ mt: 1, mr: 1 }}>
 										Back
 									</Button>
-								</>
+								</Box>
 							</Box>
 						</StepContent>
 					</Step>

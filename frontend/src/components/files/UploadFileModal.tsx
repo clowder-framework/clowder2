@@ -1,16 +1,15 @@
 import React from "react";
 
-import { Box, Button, Container, Input } from "@mui/material";
+import { Container, Input } from "@mui/material";
 
 type UploadFileModalProps = {
-	onSave: any;
+	setSelectedFile: any;
 };
 
 export const UploadFileModal: React.FC<UploadFileModalProps> = (
 	props: UploadFileModalProps
 ) => {
-	const { onSave } = props;
-	const [selectedFile, setSelectedFile] = React.useState<File | null>(null);
+	const { setSelectedFile } = props;
 
 	const handleFileChange = (event) => {
 		setSelectedFile(event.target.files[0]);
@@ -24,17 +23,6 @@ export const UploadFileModal: React.FC<UploadFileModalProps> = (
 				onChange={handleFileChange}
 				sx={{ width: "100%" }}
 			/>
-			<Box className="inputGroup">
-				<Button
-					variant="contained"
-					onClick={() => {
-						onSave(selectedFile);
-					}}
-					disabled={!selectedFile}
-				>
-					Upload
-				</Button>
-			</Box>
 		</Container>
 	);
 };
