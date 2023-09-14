@@ -22,6 +22,7 @@ export const UploadFileInput: React.FC<UploadFileModalProps> = (
 				type="file"
 				onChange={handleFileChange}
 				sx={{ width: "100%" }}
+				disableUnderline={true}
 			/>
 		</Box>
 	);
