@@ -189,9 +189,27 @@ export function Groups() {
 						<Table sx={{ minWidth: 650 }} aria-label="simple table">
 							<TableHead>
 								<TableRow>
-									<TableCell>Group Name</TableCell>
-									<TableCell align="left">Description</TableCell>
-									<TableCell align="left">
+									<TableCell
+										sx={{
+											fontWeight: 600,
+										}}
+									>
+										Group Name
+									</TableCell>
+									<TableCell
+										sx={{
+											fontWeight: 600,
+										}}
+										align="left"
+									>
+										Description
+									</TableCell>
+									<TableCell
+										sx={{
+											fontWeight: 600,
+										}}
+										align="left"
+									>
 										<GroupsIcon />
 									</TableCell>
 								</TableRow>
@@ -203,25 +221,15 @@ export function Groups() {
 											key={group.id}
 											sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
 										>
-											<TableCell component="th" scope="row" key={group.id}>
+											<TableCell scope="row" key={group.id}>
 												<Button component={Link} to={`/groups/${group.id}`}>
 													{group.name}
 												</Button>
 											</TableCell>
-											<TableCell
-												component="th"
-												scope="row"
-												key={group.id}
-												align="left"
-											>
+											<TableCell scope="row" key={group.id} align="left">
 												{group.description}
 											</TableCell>
-											<TableCell
-												component="th"
-												scope="row"
-												key={group.id}
-												align="right"
-											>
+											<TableCell scope="row" key={group.id} align="left">
 												{group.users !== undefined ? group.users.length : 0}
 											</TableCell>
 										</TableRow>
