@@ -416,7 +416,7 @@ async def get_file_versions(
         mongo_versions = []
         async for ver in FileVersionDB.find(
             FileVersionDB.file_id == ObjectId(file_id)
-        ).skip(skip).limit(limit):
+        ).sort(-FileVersionDB.created).skip(skip).limit(limit):
             mongo_versions.append(FileVersion(**ver.dict()))
         return mongo_versions
 
