@@ -1,87 +1,37 @@
-import React, { useEffect, useState } from "react";
-import {
-	Autocomplete,
-	Button,
-	Container,
-	Dialog,
-	DialogActions,
-	DialogContent,
-	DialogTitle,
-	TextField,
-} from "@mui/material";
-import {updateGroup} from "../../actions/group";
-import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "../../types/data";
-import {GroupIn} from "../../openapi/v2";
-import GroupsIcon from "@mui/icons-material/Groups";
-import { InlineAlert } from "../errors/InlineAlert";
-import { resetFailedReasonInline } from "../../actions/common";
-import LoadingOverlay from "react-loading-overlay-ts";
+import React from "react";
 
-type EditNameModalProps = {
-	open: boolean;
-	handleClose: any;
-	groupOwner: string;
-	groupName: string;
-	groupDescription: string | undefined;
+import { ActionModal } from "../dialog/ActionModal";
+import { deleteGroup } from "../../actions/group";
+import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+
+type DeleteGroupModalProps = {
+	deleteGroupConfirmOpen: any;
+	setDeleteGroupConfirmOpen: any;
 	groupId: string | undefined;
 };
 
-
-export default function EditNameModal(props: EditNameModalProps) {
-	const {open, handleClose, groupOwner, groupName, groupDescription, groupId} = props;
+export default function DeleteGroupModal(props: DeleteGroupModalProps) {
+	const { deleteGroupConfirmOpen, setDeleteGroupConfirmOpen, groupId } = props;
+	const history = useNavigate();
 	const dispatch = useDispatch();
-	const editGroup = (groupId: string | undefined, formData: GroupIn) => dispatch(updateGroup(groupId, formData));
-
-	const groupAbout = useSelector((state: RootState) => state.group.about);
-	const about = useSelector((state: RootState) => state.dataset.about);
-
-	const [loading, setLoading] = useState(false);
-	const [name, setName] = useState(groupName);
-
-
-
-	const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-		setName(event.target.value);
-	};
-
-	const handleDialogClose = () => {
-		handleClose();
-		dispatch(resetFailedReasonInline());
-	};
-
-	const onSave = async () => {
-		setLoading(true);
-		editGroup(groupId, {"name": name, "users": groupAbout.users, "description": groupDescription});
-		setName("");
-		setLoading(false);
-		handleDialogClose();
-	};
-
+	const groupDeleted = (groupId: string | undefined) =>
+		dispatch(deleteGroup(groupId));
 	return (
-		<Container>
-			<LoadingOverlay
-				active={loading}
-				spinner
-				text="Saving..."
-			>
-				<Dialog open={open} onClose={handleClose} fullWidth={true}>
-					<DialogTitle>Rename Group</DialogTitle>
-					<DialogContent>
-							<TextField
-								id="outlined-name"
-								variant="standard"
-								fullWidth
-								defaultValue={groupName}
-								onChange={handleChange}
-							/>
-					</DialogContent>
-					<DialogActions>
-						<Button variant="contained" onClick={onSave} disabled={name == ""}>Save</Button>
-						<Button onClick={handleDialogClose}>Cancel</Button>
-					</DialogActions>
-				</Dialog>
-			</LoadingOverlay>
-		</Container>
+		<ActionModal
+			actionOpen={deleteGroupConfirmOpen}
+			actionTitle="Are you sure?"
+			actionText="Do you really want to delete this group? This process cannot be undone."
+			actionBtnName="Delete"
+			handleActionBtnClick={() => {
+				groupDeleted(groupId);
+				setDeleteGroupConfirmOpen(false);
+				// Go to all groups page
+				history("/groups");
+			}}
+			handleActionCancel={() => {
+				setDeleteGroupConfirmOpen(false);
+			}}
+		/>
 	);
 }
