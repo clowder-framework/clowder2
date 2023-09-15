@@ -1,20 +1,20 @@
 body {
-    background:#F8F8F8;
+    background: #F8F8F8;
     color: #868E96;
-    font-family: "Open Sans",sans-serif;
+    font-family: "Open Sans", sans-serif;
     margin: 0;
 }
 
 /*links*/
 a {
-    color: #F7941E;
+    color: #1c427d;
     text-decoration: none;
     font-size: 16px;
 }
 
 /*text inputs*/
 input[type=text],
-input[type=password]{
+input[type=password] {
     color: #333333;
     font-size: 16px;
     margin: 10px 0 25px 0;
@@ -33,14 +33,12 @@ input[type=text]:active,
 input[type=password]:hover,
 input[type=password]:focus,
 input[type=password]:focus-visible,
-input[type=password]:active
-{
-    border: 1px solid #F7941E;
+input[type=password]:active {
+    border: 1px solid #1c427d;
 }
 
 /*Submit buttons*/
-input[type=submit]
-{
+input[type=submit] {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -52,7 +50,7 @@ input[type=submit]
     padding: 12px;
     font-size: 16px;
     color: #ffffff;
-    background-color: #F7941E;
+    background-color: #1c427d;
     box-shadow: 0px 3px 1px -2px rgb(0 0 0 / 20%), 0px 2px 2px 0px rgb(0 0 0 / 14%), 0px 1px 5px 0px rgb(0 0 0 / 12%);
     width: 100%;
 }
@@ -60,9 +58,8 @@ input[type=submit]
 input[type=submit]:hover,
 input[type=submit]:focus,
 input[type=submit]:focus-visible,
-input[type=submit]:active
-{
-    background-color: #e65100;
+input[type=submit]:active {
+    background-color: rgb(19, 46, 87);
 }
 
 /* Change content to change the title of the page*/
@@ -72,21 +69,24 @@ div#kc-header {
     display: flex;
     padding: 13px 45px;
 }
+
 div#kc-header::after {
     width: 100%;
     background-color: #ffffff;
-    content: url(../img/clowder-logo-sm.svg);
+    content: url(../img/blue-clowder-logo-sm.svg);
 }
 
 /*Sign in to your account*/
-header{
+header {
     margin-top: 5%;
     text-align: center;
 }
-header::after{
-    content:url("../img/clowder-logo-md.png");
+
+header::after {
+    content: url("../img/blue-clowder-logo-md.svg");
 }
-h1{
+
+h1 {
     display: none;
 }
 
@@ -97,7 +97,7 @@ div#kc-content {
 }
 
 div#kc-content-wrapper {
-    background:#ffffff;
+    background: #ffffff;
     padding: 10%;
     transition: box-shadow 300ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
     border-radius: 4px;
@@ -113,10 +113,11 @@ div#kc-form label {
 }
 
 div#kc-form a,
-div#kc-form-options a{
+div#kc-form-options a {
     display: block;
     margin-bottom: 5px;
 }
+
 /**/
 div#kc-form-login {
     text-align: center;
@@ -133,7 +134,7 @@ div#kc-form-options div label {
 }
 
 div#kc-feedback {
-    box-shadow: 0px 0px 6px rgba(0,0,0,0.5);
+    box-shadow: 0px 0px 6px rgba(0, 0, 0, 0.5);
     position: fixed;
     top: 0;
     left: 0;
@@ -146,15 +147,15 @@ div#kc-feedback-wrapper {
 }
 
 div.feedback-success {
-    color:#F7941E;
+    color: #1c427d;
 }
 
 div.feedback-warning {
-    color:#CED4DA;
+    color: #CED4DA;
 }
 
 div.feedback-error {
-   color:#e65100;
+    color: rgb(19, 46, 87);
 }
 
 div#kc-header-wrapper {
@@ -193,7 +194,7 @@ div#kc-social-providers ul {
 /*    width: 100px;*/
 /*}*/
 
-div#kc-social-providers a{
+div#kc-social-providers a {
     display: block;
     margin: 15px auto;
     text-align: center;

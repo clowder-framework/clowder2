@@ -150,7 +150,7 @@ export default function PersistentDrawerLeft(props) {
 					<Link href="/">
 						<Box
 							component="img"
-							src="../../public/clowder-logo-sm.svg"
+							src="../../public/blue-clowder-logo-sm.svg"
 							alt="clowder-logo-sm"
 							sx={{ verticalAlign: "middle" }}
 						/>
