@@ -2,10 +2,10 @@ import os
 import struct
 
 from fastapi.testclient import TestClient
-from app.keycloak_auth import delete_user
 from pymongo import MongoClient
-from app.config import settings
 
+from app.config import settings
+from app.keycloak_auth import delete_user
 
 """These are standard JSON entries to be used for creating test resources."""
 user_example = {
@@ -45,7 +45,7 @@ feed_example = {
     "name": "XYZ Test Feed",
     "search": {
         "index_name": "clowder",
-        "criteria": [{"field": "name", "operator": "==", "value": "xyz"}],
+        "criteria": [{"field": "name", "operator": "==", "value": "xyz.txt"}],
     },
 }
 

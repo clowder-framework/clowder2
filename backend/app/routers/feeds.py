@@ -51,7 +51,6 @@ async def check_feed_listeners(
         feed_match = check_search_result(es_client, file_out, feed.search)
         if feed_match:
             for listener in feed.listeners:
-                # TODO is this necessary?
                 if listener.automatic:
                     listener_ids_found.append(listener.listener_id)
     for targ_listener in listener_ids_found:
