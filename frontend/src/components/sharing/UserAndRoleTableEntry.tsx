@@ -110,6 +110,7 @@ export function UserAndRoleTableEntry(props: UserAndRoleTableEntryProps) {
 				key={user_role.user.id}
 				sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
 			>
+				<TableCell align="right" />
 				<TableCell component="th" scope="row" key={`${user_role.user.id}-icon`}>
 					{user_role.user && user_role.user.email ? (
 						<Gravatar
@@ -184,21 +185,27 @@ export function UserAndRoleTableEntry(props: UserAndRoleTableEntryProps) {
 								>
 									<EditIcon sx={iconStyle} />
 								</IconButton>
-								<IconButton
-									type="button"
-									sx={{ p: "10px" }}
-									aria-label="edit"
-									onClick={() => {
-										setDeleteRoleConfirmation(true);
-									}}
-								>
-									<DeleteIcon sx={iconStyle} />
-								</IconButton>
 							</>
 						)}
 					</AuthWrapper>
 				</TableCell>
-				<TableCell align="right" />
+				<TableCell align="right">
+					<AuthWrapper
+						currRole={datasetRole.role}
+						allowedRoles={["owner", "editor"]}
+					>
+						<IconButton
+							type="button"
+							sx={{ p: "10px" }}
+							aria-label="edit"
+							onClick={() => {
+								setDeleteRoleConfirmation(true);
+							}}
+						>
+							<DeleteIcon sx={iconStyle} />
+						</IconButton>
+					</AuthWrapper>
+				</TableCell>
 			</TableRow>
 		</React.Fragment>
 	);

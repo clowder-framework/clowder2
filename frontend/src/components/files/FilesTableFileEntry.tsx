@@ -21,6 +21,7 @@ type FilesTableFileEntryProps = {
 export function FilesTableFileEntry(props: FilesTableFileEntryProps) {
 	const { iconStyle, selectFile, file, parentFolderId } = props;
 	const [thumbnailUrl, setThumbnailUrl] = useState("");
+	const [selectedVersion, setSelectedVersion] = useState(file.version_num);
 
 	useEffect(() => {
 		let url = "";
@@ -53,16 +54,13 @@ export function FilesTableFileEntry(props: FilesTableFileEntryProps) {
 					</TableCell>
 					<TableCell>
 						<VersionChip
-							selectedVersion={file.version_num}
+							selectedVersion={selectedVersion}
 							setSelectedVersion={null}
 							versionNumbers={null}
 							isClickable={false}
 						/>
 					</TableCell>
-					<TableCell align="right">
-						{parseDate(file.created)} by {file.creator.first_name}{" "}
-						{file.creator.last_name}
-					</TableCell>
+					<TableCell align="right">{parseDate(file.created)}</TableCell>
 					<TableCell align="right">
 						{file.bytes ? prettyBytes(file.bytes) : "NA"}
 					</TableCell>
@@ -70,7 +68,7 @@ export function FilesTableFileEntry(props: FilesTableFileEntryProps) {
 						{file.content_type ? file.content_type.content_type : "NA"}
 					</TableCell>
 					<TableCell align="right">
-						<FileMenu file={file} />
+						<FileMenu file={file} setSelectedVersion={setSelectedVersion} />
 					</TableCell>
 				</TableRow>
 			) : (

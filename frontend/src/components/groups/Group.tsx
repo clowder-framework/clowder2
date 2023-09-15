@@ -13,7 +13,6 @@ import MembersTable from "./MembersTable";
 import { EditMenu } from "./EditMenu";
 import AddMemberModal from "./AddMemberModal";
 import RoleChip from "../auth/RoleChip";
-import DeleteIcon from "@mui/icons-material/Delete";
 import { MainBreadcrumbs } from "../navigation/BreadCrumb";
 import { ErrorModal } from "../errors/ErrorModal";
 import DeleteGroupModal from "./DeleteGroupModal";
@@ -36,7 +35,7 @@ export function Group() {
 	const groupCreatorEmail = useSelector(
 		(state: RootState) => state.group.about.creator
 	);
-	const groupCreatorEmailLink = "mailto:" + groupCreatorEmail;
+	const groupCreatorEmailLink = `mailto:${groupCreatorEmail}`;
 	const [addMemberModalOpen, setAddMemberModalOpen] = useState(false);
 	const [deleteGroupConfirmOpen, setDeleteGroupConfirmOpen] = useState(false);
 
@@ -150,19 +149,7 @@ export function Group() {
 						</Button>
 					</AuthWrapper>
 					<AuthWrapper currRole={role} allowedRoles={["owner", "editor"]}>
-						<EditMenu />
-					</AuthWrapper>
-					<AuthWrapper currRole={role} allowedRoles={["owner"]}>
-						<Button
-							variant="outlined"
-							onClick={() => {
-								setDeleteGroupConfirmOpen(true);
-							}}
-							endIcon={<DeleteIcon />}
-							sx={{ marginLeft: "0.5em", width: "auto" }}
-						>
-							Delete Group
-						</Button>
+						<EditMenu setDeleteGroupConfirmOpen={setDeleteGroupConfirmOpen} />
 					</AuthWrapper>
 				</Grid>
 			</Grid>

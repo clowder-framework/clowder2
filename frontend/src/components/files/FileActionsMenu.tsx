@@ -145,11 +145,12 @@ export const FileActionsMenu = (props: FileActionsMenuProps): JSX.Element => {
 				Download
 			</Button>
 			<Button
+				sx={{ minWidth: "auto" }}
 				variant="outlined"
 				onClick={handleShareLinkClick}
 				endIcon={<SendIcon />}
 			>
-				Link
+				Share
 			</Button>
 			{/*owner, editor can update file*/}
 			<AuthWrapper currRole={fileRole} allowedRoles={["owner", "editor"]}>

@@ -12,6 +12,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@mui/material";
 import FolderIcon from "@mui/icons-material/Folder";
 import { theme } from "../../theme";
+import { parseDate } from "../../utils/common";
 import { FilesTableFileEntry } from "./FilesTableFileEntry";
 import FolderMenu from "./FolderMenu";
 
@@ -53,10 +54,10 @@ export default function FilesTable(props: FilesTableProps) {
 					<TableRow>
 						<TableCell>Name</TableCell>
 						<TableCell>Version</TableCell>
-						<TableCell align="right">Updated</TableCell>
+						<TableCell align="right">Created</TableCell>
 						<TableCell align="right">Size</TableCell>
 						<TableCell align="right">Type</TableCell>
-						<TableCell align="right"></TableCell>
+						<TableCell align="right" />
 					</TableRow>
 				</TableHead>
 				<TableBody>
@@ -72,9 +73,7 @@ export default function FilesTable(props: FilesTableProps) {
 								</Button>
 							</TableCell>
 							<TableCell align="right">&nbsp;</TableCell>
-							<TableCell align="right">
-								by {folder.creator.first_name} {folder.creator.last_name}
-							</TableCell>
+							<TableCell align="right">{parseDate(folder.created)}</TableCell>
 							<TableCell align="right">&nbsp;</TableCell>
 							<TableCell align="right">&nbsp;</TableCell>
 							<TableCell align="right">

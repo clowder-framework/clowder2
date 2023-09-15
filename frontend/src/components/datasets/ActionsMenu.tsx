@@ -6,7 +6,6 @@ import { Download } from "@mui/icons-material";
 import { NewMenu } from "./NewMenu";
 import { OtherMenu } from "./OtherMenu";
 import { ShareMenu } from "./ShareMenu";
-import { EditMenu } from "./EditMenu";
 import { AuthWrapper } from "../auth/AuthWrapper";
 import config from "../../app.config";
 
@@ -31,7 +30,7 @@ export const ActionsMenu = (props: ActionsMenuProps): JSX.Element => {
 			spacing={0.5}
 		>
 			<Button
-				sx={{minWidth:"auto"}}
+				sx={{ minWidth: "auto" }}
 				variant="contained"
 				href={`${config.hostname}/api/v2/datasets/${datasetId}/download`}
 				endIcon={<Download />}
@@ -47,15 +46,6 @@ export const ActionsMenu = (props: ActionsMenuProps): JSX.Element => {
 					<NewMenu datasetId={datasetId} folderId={folderId} />
 				</AuthWrapper>
 			}
-			{/*owner, editor can edit*/}
-			{
-				<AuthWrapper
-					currRole={datasetRole.role}
-					allowedRoles={["owner", "editor"]}
-				>
-					<EditMenu datasetId={datasetId} folderId={folderId} />
-				</AuthWrapper>
-			}
 			{/*owner can delete and perform other tasks*/}
 			{
 				<AuthWrapper currRole={datasetRole.role} allowedRoles={["owner"]}>
@@ -67,7 +57,10 @@ export const ActionsMenu = (props: ActionsMenuProps): JSX.Element => {
 				</AuthWrapper>
 			}
 			{
-				<AuthWrapper currRole={datasetRole.role} allowedRoles={["owner"]}>
+				<AuthWrapper
+					currRole={datasetRole.role}
+					allowedRoles={["owner", "editor"]}
+				>
 					<OtherMenu
 						datasetId={datasetId}
 						folderId={folderId}
