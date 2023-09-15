@@ -149,7 +149,7 @@ def execute_search_obj(es_client, search_obj: SearchObject):
     if search_obj.mode == "or":
         query = {"bool": {"should": match_list}}
 
-    return search_index(es_client, "clowder", query)
+    return search_index(es_client, settings.elasticsearch_index, query)
 
 
 def check_search_result(es_client, file_out: FileOut, search_obj: SearchObject):
@@ -173,7 +173,7 @@ def check_search_result(es_client, file_out: FileOut, search_obj: SearchObject):
     }
     query_string += json.dumps(query) + "\n"
 
-    results = search_index(es_client, "clowder", query_string)
+    results = search_index(es_client, settings.elasticsearch_index, query_string)
     try:
         responses = results.body["responses"][0]
         return responses["hits"]["total"]["value"] > 0

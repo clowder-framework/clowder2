@@ -3,6 +3,7 @@ import json
 from fastapi import Depends
 from fastapi.routing import APIRouter, Request
 
+from app.config import settings
 from app.keycloak_auth import get_current_username
 from app.search.connect import connect_elasticsearch, search_index
 
@@ -50,5 +51,5 @@ async def msearch(
     es = await connect_elasticsearch()
     query = await request.body()
     query = _add_permissions_clause(query, username)
-    r = search_index(es, ["clowder"], query)
+    r = search_index(es, [settings.elasticsearch_index], query)
     return r

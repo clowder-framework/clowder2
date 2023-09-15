@@ -3,6 +3,7 @@ from typing import Optional, List
 from bson import ObjectId
 from elasticsearch import Elasticsearch, NotFoundError
 
+from app.config import settings
 from app.models.authorization import AuthorizationDB
 from app.models.datasets import DatasetOut
 from app.models.files import FileOut
@@ -52,11 +53,11 @@ async def index_dataset(
 
     if update:
         try:
-            update_record(es, "clowder", {"doc": doc}, dataset.id)
+            update_record(es, settings.elasticsearch_index, {"doc": doc}, dataset.id)
         except NotFoundError:
-            insert_record(es, "clowder", doc, dataset.id)
+            insert_record(es, settings.elasticsearch_index, doc, dataset.id)
     else:
-        insert_record(es, "clowder", doc, dataset.id)
+        insert_record(es, settings.elasticsearch_index, doc, dataset.id)
 
 
 async def index_file(
@@ -101,8 +102,8 @@ async def index_file(
     ).dict()
     if update:
         try:
-            update_record(es, "clowder", {"doc": doc}, file.id)
+            update_record(es, settings.elasticsearch_index, {"doc": doc}, file.id)
         except NotFoundError:
-            insert_record(es, "clowder", doc, file.id)
+            insert_record(es, settings.elasticsearch_index, doc, file.id)
     else:
-        insert_record(es, "clowder", doc, file.id)
+        insert_record(es, settings.elasticsearch_index, doc, file.id)

@@ -164,7 +164,7 @@ async def remove_file_entry(
         return
     fs.remove_object(settings.MINIO_BUCKET_NAME, str(file_id))
     # delete from elasticsearch
-    delete_document_by_id(es, "clowder", str(file_id))
+    delete_document_by_id(es, settings.elasticsearch_index, str(file_id))
     if (file := await FileDB.get(PydanticObjectId(file_id))) is not None:
         await file.delete()
     await MetadataDB.find(MetadataDB.resource.resource_id == ObjectId(file_id)).delete()

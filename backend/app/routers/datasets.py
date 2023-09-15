@@ -315,7 +315,7 @@ async def delete_dataset(
 ):
     if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
         # delete from elasticsearch
-        delete_document_by_id(es, "clowder", dataset_id)
+        delete_document_by_id(es, settings.elasticsearch_index, dataset_id)
         # delete dataset first to minimize files/folder being uploaded to a delete dataset
         await dataset.delete()
         await MetadataDB.find(

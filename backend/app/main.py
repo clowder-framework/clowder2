@@ -233,7 +233,10 @@ async def startup_elasticsearch():
     # create elasticsearch indices
     es = await connect_elasticsearch()
     create_index(
-        es, "clowder", settings.elasticsearch_setting, indexSettings.es_mappings
+        es,
+        settings.elasticsearch_index,
+        settings.elasticsearch_setting,
+        indexSettings.es_mappings,
     )
 
 

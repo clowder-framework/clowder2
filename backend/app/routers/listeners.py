@@ -10,6 +10,7 @@ from bson import ObjectId
 from fastapi import APIRouter, HTTPException, Depends
 from packaging import version
 
+from app.config import settings
 from app.keycloak_auth import get_user, get_current_user, get_current_username
 from app.models.config import ConfigEntryDB
 from app.models.feeds import FeedDB, FeedListener
@@ -61,7 +62,7 @@ async def _process_incoming_v1_extractor_info(
         new_feed = FeedDB(
             name=extractor_name,
             search={
-                "index_name": "clowder",
+                "index_name": settings.elasticsearch_index,
                 "criteria": criteria_list,
                 "mode": "or",
             },
