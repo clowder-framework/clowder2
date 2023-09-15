@@ -159,7 +159,7 @@ async def set_dataset_group_role(
                 )
             ) is not None:
                 if group_id not in auth_db.group_ids:
-                    auth_db.group_ids.append(Ogroup_id)
+                    auth_db.group_ids.append(group_id)
                     for u in group.users:
                         auth_db.user_ids.append(u.user.email)
                     await auth_db.replace()
