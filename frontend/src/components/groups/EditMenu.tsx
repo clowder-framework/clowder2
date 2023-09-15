@@ -13,9 +13,17 @@ import EditDescriptionModal from "./EditDescriptionModal";
 import { DriveFileRenameOutline } from "@mui/icons-material";
 import { useSelector } from "react-redux";
 import { RootState } from "../../types/data";
+import DeleteIcon from "@mui/icons-material/Delete";
+import { AuthWrapper } from "../auth/AuthWrapper";
+import { MoreHoriz } from "@material-ui/icons";
 
-export const EditMenu = (): JSX.Element => {
+type EditMenuProps = {
+	setDeleteGroupConfirmOpen: any;
+};
+export const EditMenu = (props: EditMenuProps): JSX.Element => {
+	const { setDeleteGroupConfirmOpen } = props;
 	const groupAbout = useSelector((state: RootState) => state.group.about);
+	const role = useSelector((state: RootState) => state.group.role);
 
 	// state
 	const [editNameModalOpen, setEditNameModalOpen] = useState(false);
@@ -57,7 +65,7 @@ export const EditMenu = (): JSX.Element => {
 				onClick={handleOptionClick}
 				endIcon={<ArrowDropDownIcon />}
 			>
-				Edit
+				<MoreHoriz />
 			</Button>
 			<Menu
 				id="simple-menu"
@@ -89,6 +97,19 @@ export const EditMenu = (): JSX.Element => {
 					</ListItemIcon>
 					<ListItemText>Update Description</ListItemText>
 				</MenuItem>
+				<AuthWrapper currRole={role} allowedRoles={["owner"]}>
+					<MenuItem
+						onClick={() => {
+							handleOptionClose();
+							setDeleteGroupConfirmOpen(true);
+						}}
+					>
+						<ListItemIcon>
+							<DeleteIcon fontSize="small" />
+						</ListItemIcon>
+						<ListItemText>Delete</ListItemText>
+					</MenuItem>
+				</AuthWrapper>
 			</Menu>
 		</Box>
 	);
