@@ -163,7 +163,7 @@ async def set_dataset_group_role(
                     for u in group.users:
                         auth_db.user_ids.append(u.user.email)
                     await auth_db.replace()
-                await index_dataset(es, DatasetOut(**dataset.dict()), auth_db.user_ids)
+                await index_dataset(es, DatasetOut(**dataset.dict()), auth_db.user_ids, True)
                 return auth_db.dict()
             else:
                 # Create new role entry for this dataset
@@ -178,7 +178,7 @@ async def set_dataset_group_role(
                     user_ids=user_ids,
                 )
                 await auth_db.insert()
-                await index_dataset(es, DatasetOut(**dataset.dict()), auth_db.user_ids)
+                await index_dataset(es, DatasetOut(**dataset.dict()), auth_db.user_ids, True)
                 return auth_db.dict()
         else:
             raise HTTPException(status_code=404, detail=f"Group {group_id} not found")
@@ -270,7 +270,7 @@ async def remove_dataset_group_role(
                         auth_db.user_ids.remove(u.user.email)
                 await auth_db.save()
                 # Update elasticsearch index with new users
-                await index_dataset(es, DatasetOut(**dataset.dict()), auth_db.user_ids)
+                await index_dataset(es, DatasetOut(**dataset.dict()), auth_db.user_ids, True)
                 return auth_db.dict()
         else:
             raise HTTPException(status_code=404, detail=f"Group {group_id} not found")
