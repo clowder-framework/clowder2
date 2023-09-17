@@ -151,7 +151,7 @@ async def set_dataset_group_role(
     if (dataset := await DatasetDB.get(dataset_id)) is not None:
         if (group := await GroupDB.get(group_id)) is not None:
             # First, remove any existing role the group has on the dataset
-            await remove_dataset_group_role(dataset_id, group_id, user_id, allow)
+            await remove_dataset_group_role(dataset_id, group_id, user_id)
             if (
                 auth_db := await AuthorizationDB.find_one(
                     AuthorizationDB.dataset_id == PyObjectId(dataset_id),
@@ -163,7 +163,7 @@ async def set_dataset_group_role(
                     for u in group.users:
                         auth_db.user_ids.append(u.user.email)
                     await auth_db.replace()
-                await index_dataset(es, DatasetOut(**dataset.dict()), auth_db.user_ids, True)
+                await index_dataset(es, DatasetOut(**dataset.dict()), auth_db.user_ids)
                 return auth_db.dict()
             else:
                 # Create new role entry for this dataset
@@ -178,7 +178,7 @@ async def set_dataset_group_role(
                     user_ids=user_ids,
                 )
                 await auth_db.insert()
-                await index_dataset(es, DatasetOut(**dataset.dict()), auth_db.user_ids, True)
+                await index_dataset(es, DatasetOut(**dataset.dict()), auth_db.user_ids)
                 return auth_db.dict()
         else:
             raise HTTPException(status_code=404, detail=f"Group {group_id} not found")
@@ -270,7 +270,7 @@ async def remove_dataset_group_role(
                         auth_db.user_ids.remove(u.user.email)
                 await auth_db.save()
                 # Update elasticsearch index with new users
-                await index_dataset(es, DatasetOut(**dataset.dict()), auth_db.user_ids, True)
+                await index_dataset(es, DatasetOut(**dataset.dict()), auth_db.user_ids)
                 return auth_db.dict()
         else:
             raise HTTPException(status_code=404, detail=f"Group {group_id} not found")

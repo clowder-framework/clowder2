@@ -62,6 +62,7 @@ def insert_record(es_client, index_name, doc, id):
         id -- unique key by which you can identify the document when needed
     """
     try:
+        current_doc = str(doc)
         es_client.index(index=index_name, document=doc, id=id)
     except BadRequestError as ex:
         logger.error(str(ex))
