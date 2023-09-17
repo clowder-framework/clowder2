@@ -151,7 +151,7 @@ async def set_dataset_group_role(
     if (dataset := await DatasetDB.get(dataset_id)) is not None:
         if (group := await GroupDB.get(group_id)) is not None:
             # First, remove any existing role the group has on the dataset
-            await remove_dataset_group_role(dataset_id, group_id, user_id)
+            await remove_dataset_group_role(dataset_id, group_id, es, user_id)
             if (
                 auth_db := await AuthorizationDB.find_one(
                     AuthorizationDB.dataset_id == PyObjectId(dataset_id),
