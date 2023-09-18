@@ -2,22 +2,34 @@ import React, { useEffect, useState } from "react";
 import { VegaLite } from "react-vega";
 import { downloadVisData, fileDownloaded } from "../../../utils/visualization";
 import { parseTextToJson, readTextFromFile } from "../../../utils/common";
+import { Box, MenuItem, Select } from "@mui/material";
+import { ClowderInputLabel } from "../../styledComponents/ClowderInputLabel";
 
 type TextProps = {
 	fileId?: string;
 	visualizationId?: string;
 };
 
+const allowedType = [
+	"quantitative",
+	"temporal",
+	"ordinal",
+	"nominal",
+	"geojson",
+];
+
 export default function CSV(props: TextProps) {
 	const { fileId, visualizationId } = props;
-	const [text, setText] = useState("");
-	const [width, setWidth] = useState(900);
-	const [height, setHeight] = useState(900);
-	const [startAtZero, setStartAtZero] = useState(false);
-	// const [startDate, setStartDate] = useState<Date | undefined>(undefined);
-	// const [endDate, setEndDate] = useState<Date | undefined>(undefined);
-	const [yLabel, setYLabel] = useState("");
-	const [regressionLine, setRegressionLine] = useState(false);
+	const [mark, setMark] = useState("bar");
+	// TODO default to the first two columns
+	const [availableColumns, setAvailableColumns] = useState<string[]>([]);
+	const [xColumn, setXColumn] = useState("a");
+	const [yColumn, setYColumn] = useState("b");
+	const [xColumnType, setXColumnType] = useState(allowedType[0]);
+	const [yColumnType, setYColumnType] = useState(allowedType[0]);
+
+	// const [width, setWidth] = useState(900);
+	// const [height, setHeight] = useState(900);
 	const [data, setData] = useState<any[]>([]);
 
 	useEffect(() => {
@@ -40,16 +52,114 @@ export default function CSV(props: TextProps) {
 		processBlob();
 	}, [visualizationId, fileId]);
 
+	useEffect(() => {
+		if (data && data.table && data.table.length > 0) {
+			// Assuming the first row of the table contains column headers
+			const firstRow = data.table[0];
+
+			// Extract column names from the first row
+			setAvailableColumns(Object.keys(firstRow));
+		}
+	}, [data]);
+
 	const spec = {
-		width: 400,
-		height: 200,
-		mark: "bar",
+		// width: width,
+		// height: height,
+		mark: mark,
 		encoding: {
-			x: { field: "a", type: "ordinal" },
-			y: { field: "b", type: "quantitative" },
+			x: { field: xColumn, type: xColumnType },
+			y: { field: yColumn, type: yColumnType },
 		},
 		data: { name: "table" },
 	};
 
-	return <VegaLite spec={spec} data={data} />;
+	return (
+		<>
+			<Box>
+				<ClowderInputLabel id="plotType">Plot Type</ClowderInputLabel>
+				<Select
+					labelId="role"
+					id="role"
+					value={mark}
+					label="Role"
+					onChange={(e) => {
+						setMark(e.target.value);
+					}}
+				>
+					<MenuItem value={"bar"}>Bar Chart</MenuItem>
+					<MenuItem value={"scatter"}>Scatter Plot</MenuItem>
+					<MenuItem value={"line"}>Line Chart</MenuItem>
+				</Select>
+			</Box>
+			<Box>
+				<ClowderInputLabel id="plotType">Select X Axis</ClowderInputLabel>
+				<Select
+					labelId="role"
+					id="role"
+					value={xColumn}
+					label="Role"
+					onChange={(e) => {
+						setXColumn(e.target.value);
+					}}
+				>
+					{availableColumns.map((column) => {
+						return <MenuItem value={column}>{column}</MenuItem>;
+					})}
+				</Select>
+			</Box>
+			<Box>
+				<ClowderInputLabel id="plotType">
+					Select X Axis Data Type
+				</ClowderInputLabel>
+				<Select
+					labelId="role"
+					id="role"
+					value={xColumnType}
+					label="Role"
+					onChange={(e) => {
+						setXColumnType(e.target.value);
+					}}
+				>
+					{allowedType.map((type) => {
+						return <MenuItem value={type}>{type}</MenuItem>;
+					})}
+				</Select>
+			</Box>
+			<Box>
+				<ClowderInputLabel id="plotType">Select Y Axis</ClowderInputLabel>
+				<Select
+					labelId="role"
+					id="role"
+					value={yColumn}
+					label="Role"
+					onChange={(e) => {
+						setYColumn(e.target.value);
+					}}
+				>
+					{availableColumns.map((column) => {
+						return <MenuItem value={column}>{column}</MenuItem>;
+					})}
+				</Select>
+			</Box>
+			<Box>
+				<ClowderInputLabel id="plotType">
+					Select Y Axis Data Type
+				</ClowderInputLabel>
+				<Select
+					labelId="role"
+					id="role"
+					value={yColumnType}
+					label="Role"
+					onChange={(e) => {
+						setYColumnType(e.target.value);
+					}}
+				>
+					{allowedType.map((type) => {
+						return <MenuItem value={type}>{type}</MenuItem>;
+					})}
+				</Select>
+			</Box>
+			<VegaLite spec={spec} data={data} />
+		</>
+	);
 }
