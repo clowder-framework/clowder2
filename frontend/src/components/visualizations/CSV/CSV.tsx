@@ -23,8 +23,8 @@ export default function CSV(props: TextProps) {
 	const [mark, setMark] = useState("bar");
 	// TODO default to the first two columns
 	const [availableColumns, setAvailableColumns] = useState<string[]>([]);
-	const [xColumn, setXColumn] = useState("a");
-	const [yColumn, setYColumn] = useState("b");
+	const [xColumn, setXColumn] = useState("");
+	const [yColumn, setYColumn] = useState("");
 	const [xColumnType, setXColumnType] = useState(allowedType[0]);
 	const [yColumnType, setYColumnType] = useState(allowedType[0]);
 
@@ -62,6 +62,13 @@ export default function CSV(props: TextProps) {
 		}
 	}, [data]);
 
+	useEffect(() => {
+		if (availableColumns.length > 0) {
+			setXColumn(availableColumns[0]);
+			setYColumn(availableColumns[0]);
+		}
+	}, [availableColumns]);
+
 	const spec = {
 		// width: width,
 		// height: height,
@@ -75,7 +82,7 @@ export default function CSV(props: TextProps) {
 
 	return (
 		<>
-			<Box>
+			<Box className="inputGroup">
 				<ClowderInputLabel id="plotType">Plot Type</ClowderInputLabel>
 				<Select
 					labelId="role"
@@ -85,79 +92,92 @@ export default function CSV(props: TextProps) {
 					onChange={(e) => {
 						setMark(e.target.value);
 					}}
+					sx={{ width: "100%" }}
 				>
 					<MenuItem value={"bar"}>Bar Chart</MenuItem>
 					<MenuItem value={"scatter"}>Scatter Plot</MenuItem>
 					<MenuItem value={"line"}>Line Chart</MenuItem>
 				</Select>
 			</Box>
-			<Box>
-				<ClowderInputLabel id="plotType">Select X Axis</ClowderInputLabel>
-				<Select
-					labelId="role"
-					id="role"
-					value={xColumn}
-					label="Role"
-					onChange={(e) => {
-						setXColumn(e.target.value);
-					}}
-				>
-					{availableColumns.map((column) => {
-						return <MenuItem value={column}>{column}</MenuItem>;
-					})}
-				</Select>
+			<Box
+				sx={{
+					display: "flex",
+					justifyContent: "flex-start",
+				}}
+				className="inputGroup"
+			>
+				<Box sx={{ marginRight: "1em" }}>
+					<ClowderInputLabel id="plotType">X Axis</ClowderInputLabel>
+					<Select
+						labelId="role"
+						id="role"
+						value={xColumn}
+						label="Role"
+						onChange={(e) => {
+							setXColumn(e.target.value);
+						}}
+					>
+						{availableColumns.map((column) => {
+							return <MenuItem value={column}>{column}</MenuItem>;
+						})}
+					</Select>
+				</Box>
+				<Box>
+					<ClowderInputLabel id="plotType">X Axis Type</ClowderInputLabel>
+					<Select
+						labelId="role"
+						id="role"
+						value={xColumnType}
+						label="Role"
+						onChange={(e) => {
+							setXColumnType(e.target.value);
+						}}
+					>
+						{allowedType.map((type) => {
+							return <MenuItem value={type}>{type}</MenuItem>;
+						})}
+					</Select>
+				</Box>
 			</Box>
-			<Box>
-				<ClowderInputLabel id="plotType">
-					Select X Axis Data Type
-				</ClowderInputLabel>
-				<Select
-					labelId="role"
-					id="role"
-					value={xColumnType}
-					label="Role"
-					onChange={(e) => {
-						setXColumnType(e.target.value);
-					}}
-				>
-					{allowedType.map((type) => {
-						return <MenuItem value={type}>{type}</MenuItem>;
-					})}
-				</Select>
-			</Box>
-			<Box>
-				<ClowderInputLabel id="plotType">Select Y Axis</ClowderInputLabel>
-				<Select
-					labelId="role"
-					id="role"
-					value={yColumn}
-					label="Role"
-					onChange={(e) => {
-						setYColumn(e.target.value);
-					}}
-				>
-					{availableColumns.map((column) => {
-						return <MenuItem value={column}>{column}</MenuItem>;
-					})}
-				</Select>
-			</Box>
-			<Box>
-				<ClowderInputLabel id="plotType">
-					Select Y Axis Data Type
-				</ClowderInputLabel>
-				<Select
-					labelId="role"
-					id="role"
-					value={yColumnType}
-					label="Role"
-					onChange={(e) => {
-						setYColumnType(e.target.value);
-					}}
-				>
-					{allowedType.map((type) => {
-						return <MenuItem value={type}>{type}</MenuItem>;
-					})}
-				</Select>
+			<Box
+				sx={{
+					display: "flex",
+					justifyContent: "flex-start",
+				}}
+				className="inputGroup"
+			>
+				<Box sx={{ marginRight: "1em" }}>
+					<ClowderInputLabel id="plotType">Y Axis</ClowderInputLabel>
+					<Select
+						labelId="role"
+						id="role"
+						value={yColumn}
+						label="Role"
+						onChange={(e) => {
+							setYColumn(e.target.value);
+						}}
+					>
+						{availableColumns.map((column) => {
+							return <MenuItem value={column}>{column}</MenuItem>;
+						})}
+					</Select>
+				</Box>
+				<Box>
+					<ClowderInputLabel id="plotType">Y Axis Type</ClowderInputLabel>
+					<Select
+						labelId="role"
+						id="role"
+						value={yColumnType}
+						label="Role"
+						onChange={(e) => {
+							setYColumnType(e.target.value);
+						}}
+					>
+						{allowedType.map((type) => {
+							return <MenuItem value={type}>{type}</MenuItem>;
+						})}
+					</Select>
+				</Box>
 			</Box>
 			<VegaLite spec={spec} data={data} />
 		</>
