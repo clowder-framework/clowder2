@@ -48,21 +48,41 @@ export const Visualization = (props: previewProps) => {
 
 	// Check for conditions and set state only once
 	useEffect(() => {
-		if (fileSummary && fileSummary.bytes) {
+		const supportedMimeType = visComponentDefinitions.reduce(
+			(acc, visComponentDefinition) => {
+				if (!acc.includes(visComponentDefinition.mainType)) {
+					acc.push(visComponentDefinition.mainType);
+				}
+				return acc;
+			},
+			[]
+		);
+		// if raw type supported
+		if (
+			fileSummary &&
+			fileSummary.bytes &&
+			((fileSummary.content_type.content_type !== undefined &&
+				supportedMimeType.includes(fileSummary.content_type.content_type)) ||
+				(fileSummary.content_type.main_type !== undefined &&
+					supportedMimeType.includes(fileSummary.content_type.main_type)))
+		) {
 			if (fileSummary.bytes >= config["rawDataVisualizationThreshold"]) {
 				setIsVisDataGreaterThanMaxSize(true);
 				setIsEmptyVisData(false); // Reset the other state
-			} else {
-				setIsVisDataGreaterThanMaxSize(false); // Reset the state
-				setIsEmptyVisData(visConfig.length === 0);
 			}
+		} else {
+			setIsVisDataGreaterThanMaxSize(false); // Reset the state
+			setIsEmptyVisData(visConfig.length === 0);
 		}
 	}, [fileSummary, visConfig]);
 
 	return (
 		<Grid container rowSpacing={1} columnSpacing={{ xs: 1, sm: 3, md: 3 }}>
 			{isEmptyVisData ? (
-				<div>No visualization data or parameters available. Incomplete visualization configuration.</div>
+				<div>
+					No visualization data or parameters available. Incomplete
+					visualization configuration.
+				</div>
 			) : (
 				<></>
 			)}
@@ -119,7 +139,10 @@ export const Visualization = (props: previewProps) => {
 								else {
 									//to make sure file size is less than threshold
 									if (
-										fileSummary && fileSummary.bytes && fileSummary.bytes < config["rawDataVisualizationThreshold"] &&
+										fileSummary &&
+										fileSummary.bytes &&
+										fileSummary.bytes <
+											config["rawDataVisualizationThreshold"] &&
 										fileSummary.content_type !== undefined &&
 										((fileSummary.content_type.content_type !== undefined &&
 											visComponentDefinition.mimeTypes.includes(
