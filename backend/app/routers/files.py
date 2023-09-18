@@ -1,4 +1,5 @@
 import io
+import time
 from datetime import datetime, timedelta
 from typing import Optional, List
 from typing import Union
@@ -141,6 +142,9 @@ async def add_file_entry(
 
     # Add entry to the file index
     await index_file(es, FileOut(**new_file.dict()))
+
+    # TODO - timing issue here, check_feed_listeners needs to happen asynchronously.
+    time.sleep(1)
 
     # Submit file job to any qualifying feeds
     await check_feed_listeners(

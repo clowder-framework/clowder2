@@ -1,3 +1,5 @@
+import time
+
 from fastapi.testclient import TestClient
 
 from app.config import settings
@@ -34,6 +36,8 @@ def test_feeds(client: TestClient, headers: dict):
     file_id = upload_file(
         client, headers, dataset_id, "xyz.txt", "This should trigger."
     ).get("id")
+
+    time.sleep(1)
 
     # Check if job was automatically created
     response = client.get(
