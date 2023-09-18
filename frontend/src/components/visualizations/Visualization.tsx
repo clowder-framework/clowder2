@@ -22,6 +22,7 @@ export const Visualization = (props: previewProps) => {
 	const [isEmptyVisData, setIsEmptyVisData] = useState(false);
 	const [isVisDataGreaterThanMaxSize, setIsVisDataGreaterThanMaxSize] =
 		useState(false);
+	const [isRawDataSupported, setIsRawDataSupported] = useState(false);
 
 	const fileSummary = useSelector((state: RootState) => state.file.fileSummary);
 	const visConfig = useSelector(
@@ -50,7 +51,9 @@ export const Visualization = (props: previewProps) => {
 	useEffect(() => {
 		const supportedMimeType = visComponentDefinitions.reduce(
 			(acc, visComponentDefinition) => {
+				// @ts-ignore
 				if (!acc.includes(visComponentDefinition.mainType)) {
+					// @ts-ignore
 					acc.push(visComponentDefinition.mainType);
 				}
 				return acc;
@@ -60,25 +63,31 @@ export const Visualization = (props: previewProps) => {
 		// if raw type supported
 		if (
 			fileSummary &&
-			fileSummary.bytes &&
-			((fileSummary.content_type.content_type !== undefined &&
+			((fileSummary.content_type && fileSummary.content_type.content_type !== undefined &&
+						// @ts-ignore
 				supportedMimeType.includes(fileSummary.content_type.content_type)) ||
-				(fileSummary.content_type.main_type !== undefined &&
+				(fileSummary.content_type && fileSummary.content_type.main_type !== undefined &&
+							// @ts-ignore
 					supportedMimeType.includes(fileSummary.content_type.main_type)))
 		) {
-			if (fileSummary.bytes >= config["rawDataVisualizationThreshold"]) {
-				setIsVisDataGreaterThanMaxSize(true);
-				setIsEmptyVisData(false); // Reset the other state
-			}
+			setIsRawDataSupported(true);
 		} else {
-			setIsVisDataGreaterThanMaxSize(false); // Reset the state
-			setIsEmptyVisData(visConfig.length === 0);
+			setIsRawDataSupported(false);
 		}
+
+		if (fileSummary &&
+			fileSummary.bytes && fileSummary.bytes >= config["rawDataVisualizationThreshold"]) {
+				setIsVisDataGreaterThanMaxSize(true);
+		} else {
+			setIsVisDataGreaterThanMaxSize(false);
+		}
+
+		setIsEmptyVisData(visConfig.length === 0);
 	}, [fileSummary, visConfig]);
 
 	return (
 		<Grid container rowSpacing={1} columnSpacing={{ xs: 1, sm: 3, md: 3 }}>
-			{isEmptyVisData ? (
+			{isEmptyVisData && !isRawDataSupported? (
 				<div>
 					No visualization data or parameters available. Incomplete
 					visualization configuration.
@@ -86,7 +95,7 @@ export const Visualization = (props: previewProps) => {
 			) : (
 				<></>
 			)}
-			{isVisDataGreaterThanMaxSize ? (
+			{isEmptyVisData && isRawDataSupported && isVisDataGreaterThanMaxSize ? (
 				<div>File is greater than threshold</div>
 			) : (
 				<></>
