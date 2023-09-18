@@ -81,8 +81,17 @@ export default function CSV(props: TextProps) {
 		// height: height,
 		mark: mark,
 		encoding: {
-			x: { field: xColumn, type: xColumnType },
-			y: { field: yColumn, type: yColumnType },
+			x: {
+				field: xColumn,
+				type: xColumnType,
+			},
+			y: {
+				field: yColumn,
+				type: yColumnType,
+				axis: {
+					labelLimit: 50,
+				},
+			},
 		},
 		data: { name: "table" },
 		color: { value: theme.palette.primary.main },
@@ -187,7 +196,7 @@ export default function CSV(props: TextProps) {
 					</Select>
 				</Box>
 			</Box>
-			<Container>
+			<Container sx={{ marginTop: "2em" }}>
 				<VegaLite spec={spec} data={data} />
 			</Container>
 		</>
