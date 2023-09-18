@@ -44,7 +44,7 @@ listener_v2_example = {
 feed_example = {
     "name": "XYZ Test Feed",
     "search": {
-        "index_name": "clowder-tests",
+        "index_name": settings.elasticsearch_index,
         "criteria": [{"field": "name", "operator": "==", "value": "xyz.txt"}],
     },
 }
