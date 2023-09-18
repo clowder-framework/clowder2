@@ -3,6 +3,7 @@ import { V2 } from "../openapi";
 import jwt_decode from "jwt-decode";
 import { formatInTimeZone } from "date-fns-tz";
 import config from "../app.config";
+import { csv } from "csvtojson";
 
 const cookies = new Cookies();
 
@@ -120,6 +121,14 @@ export function readTextFromFile(file) {
 
 		reader.readAsText(file);
 	});
+}
+
+export function parseTextToJson(text) {
+	return csv()
+		.fromString(text)
+		.then((jsonObj) => {
+			return jsonObj;
+		});
 }
 
 export function renameId(obj) {
