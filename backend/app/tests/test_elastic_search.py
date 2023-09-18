@@ -58,6 +58,7 @@ updated_dummy_dataset_record = {
 
 @pytest.mark.asyncio
 async def test_files():
+    # TODO: Replace this with actual file upload and search, not directly inserting record to ES
     es = await connect_elasticsearch()
     if es is not None:
         create_index(
@@ -98,6 +99,7 @@ async def test_files():
 
 @pytest.mark.asyncio
 async def test_datasets():
+    # TODO: Replace this with actual file upload and search, not directly inserting record to ES
     es = await connect_elasticsearch()
     if es is not None:
         create_index(

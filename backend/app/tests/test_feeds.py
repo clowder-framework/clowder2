@@ -1,4 +1,5 @@
 from fastapi.testclient import TestClient
+
 from app.config import settings
 from app.tests.utils import (
     create_dataset,
@@ -9,7 +10,7 @@ from app.tests.utils import (
 
 
 def test_feeds(client: TestClient, headers: dict):
-    listener_name = "Test Listener"
+    listener_name = "test.test_feeds"
     listener_id = register_v2_listener(client, headers, listener_name).get("id")
 
     # Create a new search feed for file based on the filename
