@@ -1,9 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { VegaLite } from "react-vega";
 import { downloadVisData, fileDownloaded } from "../../../utils/visualization";
-import { parseTextToJson, readTextFromFile } from "../../../utils/common";
-import { Box, MenuItem, Select } from "@mui/material";
+import {
+	guessDataType,
+	parseTextToJson,
+	readTextFromFile,
+} from "../../../utils/common";
+import { Box, Container, MenuItem, Select } from "@mui/material";
 import { ClowderInputLabel } from "../../styledComponents/ClowderInputLabel";
+import { theme } from "../../../theme";
 
 type TextProps = {
 	fileId?: string;
@@ -65,7 +70,9 @@ export default function CSV(props: TextProps) {
 	useEffect(() => {
 		if (availableColumns.length > 0) {
 			setXColumn(availableColumns[0]);
+			setXColumnType(guessDataType(data.table[0][availableColumns[0]]));
 			setYColumn(availableColumns[0]);
+			setYColumnType(guessDataType(data.table[0][availableColumns[0]]));
 		}
 	}, [availableColumns]);
 
@@ -78,6 +85,7 @@ export default function CSV(props: TextProps) {
 			y: { field: yColumn, type: yColumnType },
 		},
 		data: { name: "table" },
+		color: { value: theme.palette.primary.main },
 	};
 
 	return (
@@ -95,7 +103,7 @@ export default function CSV(props: TextProps) {
 					sx={{ width: "100%" }}
 				>
 					<MenuItem value={"bar"}>Bar Chart</MenuItem>
-					<MenuItem value={"scatter"}>Scatter Plot</MenuItem>
+					<MenuItem value={"point"}>Scatter Plot</MenuItem>
 					<MenuItem value={"line"}>Line Chart</MenuItem>
 				</Select>
 			</Box>
@@ -179,7 +187,9 @@ export default function CSV(props: TextProps) {
 					</Select>
 				</Box>
 			</Box>
-			<VegaLite spec={spec} data={data} />
+			<Container>
+				<VegaLite spec={spec} data={data} />
+			</Container>
 		</>
 	);
 }

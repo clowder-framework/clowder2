@@ -131,6 +131,34 @@ export function parseTextToJson(text) {
 		});
 }
 
+export function guessDataType(inputString) {
+	// TODO write better patterns
+	// Define regular expressions for common patterns
+	const quantitativePattern = /^[-+]?\d+(\.\d+)?$/;
+	const temporalPattern =
+		/^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}:\d{2}(\.\d{3})?Z?)?$/;
+	const ordinalPattern = /[a-zA-Z]/;
+	const nominalPattern = /[a-zA-Z]/;
+	const geojsonPattern =
+		/^(\{"type": "Feature".*?\}|{"type": "FeatureCollection".*?})$/;
+
+	// Test the input string against each pattern
+	if (quantitativePattern.test(inputString)) {
+		return "quantitative";
+	} else if (temporalPattern.test(inputString)) {
+		return "temporal";
+	} else if (ordinalPattern.test(inputString)) {
+		return "ordinal";
+	} else if (nominalPattern.test(inputString)) {
+		return "nominal";
+	} else if (geojsonPattern.test(inputString)) {
+		return "geojson";
+	} else {
+		// If none of the patterns match, it's hard to determine the data type
+		return "unknown";
+	}
+}
+
 export function renameId(obj) {
 	Object.defineProperty(obj, "id", Object.getOwnPropertyDescriptor(obj, "_id"));
 	delete obj["_id"];
