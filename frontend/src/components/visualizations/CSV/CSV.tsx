@@ -79,7 +79,7 @@ export default function CSV(props: TextProps) {
 	const spec = {
 		// width: width,
 		// height: height,
-		mark: mark,
+		mark: { type: mark, color: theme.palette.primary.main },
 		encoding: {
 			x: {
 				field: xColumn,
@@ -94,7 +94,6 @@ export default function CSV(props: TextProps) {
 			},
 		},
 		data: { name: "table" },
-		color: { value: theme.palette.primary.main },
 	};
 
 	return (
