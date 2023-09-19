@@ -6,7 +6,7 @@ import {
 	parseTextToJson,
 	readTextFromFile,
 } from "../../../utils/common";
-import { Box, Container, MenuItem, Select } from "@mui/material";
+import { Box, Container, Grid, MenuItem, Select } from "@mui/material";
 import { ClowderInputLabel } from "../../styledComponents/ClowderInputLabel";
 import { theme } from "../../../theme";
 
@@ -115,14 +115,8 @@ export default function CSV(props: TextProps) {
 					<MenuItem value={"line"}>Line Chart</MenuItem>
 				</Select>
 			</Box>
-			<Box
-				sx={{
-					display: "flex",
-					justifyContent: "flex-start",
-				}}
-				className="inputGroup"
-			>
-				<Box sx={{ marginRight: "1em" }}>
+			<Grid container className="inputGroup">
+				<Grid item xs={6}>
 					<ClowderInputLabel id="plotType">X Axis</ClowderInputLabel>
 					<Select
 						labelId="role"
@@ -132,13 +126,14 @@ export default function CSV(props: TextProps) {
 						onChange={(e) => {
 							setXColumn(e.target.value);
 						}}
+						sx={{ width: "90%" }}
 					>
 						{availableColumns.map((column) => {
 							return <MenuItem value={column}>{column}</MenuItem>;
 						})}
 					</Select>
-				</Box>
-				<Box>
+				</Grid>
+				<Grid item xs={6}>
 					<ClowderInputLabel id="plotType">X Axis Type</ClowderInputLabel>
 					<Select
 						labelId="role"
@@ -148,21 +143,16 @@ export default function CSV(props: TextProps) {
 						onChange={(e) => {
 							setXColumnType(e.target.value);
 						}}
+						sx={{ width: "90%" }}
 					>
 						{allowedType.map((type) => {
 							return <MenuItem value={type}>{type}</MenuItem>;
 						})}
 					</Select>
-				</Box>
-			</Box>
-			<Box
-				sx={{
-					display: "flex",
-					justifyContent: "flex-start",
-				}}
-				className="inputGroup"
-			>
-				<Box sx={{ marginRight: "1em" }}>
+				</Grid>
+			</Grid>
+			<Grid container className="inputGroup">
+				<Grid item xs={6}>
 					<ClowderInputLabel id="plotType">Y Axis</ClowderInputLabel>
 					<Select
 						labelId="role"
@@ -172,13 +162,14 @@ export default function CSV(props: TextProps) {
 						onChange={(e) => {
 							setYColumn(e.target.value);
 						}}
+						sx={{ width: "90%" }}
 					>
 						{availableColumns.map((column) => {
 							return <MenuItem value={column}>{column}</MenuItem>;
 						})}
 					</Select>
-				</Box>
-				<Box>
+				</Grid>
+				<Grid item xs={6}>
 					<ClowderInputLabel id="plotType">Y Axis Type</ClowderInputLabel>
 					<Select
 						labelId="role"
@@ -188,13 +179,14 @@ export default function CSV(props: TextProps) {
 						onChange={(e) => {
 							setYColumnType(e.target.value);
 						}}
+						sx={{ width: "90%" }}
 					>
 						{allowedType.map((type) => {
 							return <MenuItem value={type}>{type}</MenuItem>;
 						})}
 					</Select>
-				</Box>
-			</Box>
+				</Grid>
+			</Grid>
 			<Container sx={{ marginTop: "2em" }}>
 				<VegaLite spec={spec} data={data} />
 			</Container>
