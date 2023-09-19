@@ -283,6 +283,9 @@ export const File = (): JSX.Element => {
 					/>
 				</Grid>
 			</Grid>
+			<Grid container>
+				<p>put new version select here</p>
+			</Grid>
 			<Grid container spacing={2}>
 				<Grid item xs={10}>
 					<Tabs
