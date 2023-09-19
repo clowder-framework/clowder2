@@ -3,7 +3,13 @@ import os
 from fastapi.testclient import TestClient
 
 from app.config import settings
-from app.tests.utils import create_dataset, generate_png
+from app.tests.utils import (
+    create_dataset,
+    create_user,
+    generate_png,
+    user_example,
+    user_alt,
+)
 
 
 def test_create(client: TestClient, headers: dict):
@@ -95,3 +101,31 @@ def test_add_thumbnail(client: TestClient, headers: dict):
 
     result = resp.json()
     assert result["thumbnail_id"] == thumbnail_id
+
+
+def test_share_dataset(client: TestClient, headers: dict):
+    dataset_id = create_dataset(client, headers).get("id")
+    response = client.get(
+        f"{settings.API_V2_STR}/datasets/{dataset_id}", headers=headers
+    )
+    assert response.status_code == 200
+    dataset_id = response.json().get("id")
+
+    # add a user with a role
+    user_alt_email = user_alt["email"]
+    # create user if not exists
+    response = client.post(f"{settings.API_V2_STR}/users", json=user_alt)
+    assert response.status_code == 200 or response.status_code == 409  # 409 = u
+    # share the dataset with the user
+    resp = client.post(
+        f"{settings.API_V2_STR}/authorizations/datasets/{dataset_id}/user_role/{user_alt_email}/viewer",
+        headers=headers,
+    )
+    assert resp.status_code == 200
+
+    # change the role
+    resp = client.post(
+        f"{settings.API_V2_STR}/authorizations/datasets/{dataset_id}/user_role/{user_alt_email}/uploader",
+        headers=headers,
+    )
+    assert resp.status_code == 200

@@ -132,3 +132,11 @@ def test_member_permissions(client: TestClient, headers: dict):
         headers=u_headers,
     )
     assert response.status_code == 404
+
+    # Change the group role
+    response = client.post(
+        f"{settings.API_V2_STR}/authorizations/datasets/{dataset_id}/group_role/{group_id}/uploader",
+        headers=headers,
+    )
+    assert response.status_code == 200
+    assert response.json().get("id") is not None

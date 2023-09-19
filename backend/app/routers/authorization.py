@@ -151,7 +151,7 @@ async def set_dataset_group_role(
     if (dataset := await DatasetDB.get(dataset_id)) is not None:
         if (group := await GroupDB.get(group_id)) is not None:
             # First, remove any existing role the group has on the dataset
-            await remove_dataset_group_role(dataset_id, group_id, user_id, allow)
+            await remove_dataset_group_role(dataset_id, group_id, es, user_id, allow)
             if (
                 auth_db := await AuthorizationDB.find_one(
                     AuthorizationDB.dataset_id == PyObjectId(dataset_id),
@@ -159,7 +159,7 @@ async def set_dataset_group_role(
                 )
             ) is not None:
                 if group_id not in auth_db.group_ids:
-                    auth_db.group_ids.append(Ogroup_id)
+                    auth_db.group_ids.append(group_id)
                     for u in group.users:
                         auth_db.user_ids.append(u.user.email)
                     await auth_db.replace()
@@ -203,7 +203,7 @@ async def set_dataset_user_role(
     if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
         if (await UserDB.find_one(UserDB.email == username)) is not None:
             # First, remove any existing role the user has on the dataset
-            await remove_dataset_user_role(dataset_id, username, user_id, allow)
+            await remove_dataset_user_role(dataset_id, username, es, user_id, allow)
             auth_db = await AuthorizationDB.find_one(
                 AuthorizationDB.dataset_id == PyObjectId(dataset_id),
                 AuthorizationDB.role == role,
