@@ -1,4 +1,4 @@
-import React, { Suspense, useEffect } from "react";
+import React, { Suspense, useEffect, useState } from "react";
 import { LazyLoadErrorBoundary } from "../errors/LazyLoadErrorBoundary";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../types/data";
@@ -18,6 +18,11 @@ type previewProps = {
 
 export const Visualization = (props: previewProps) => {
 	const { fileId, datasetId } = props;
+	//const flag = false;
+	const [isEmptyVisData, setIsEmptyVisData] = useState(false);
+	const [isVisDataGreaterThanMaxSize, setIsVisDataGreaterThanMaxSize] =
+		useState(false);
+	const [isRawDataSupported, setIsRawDataSupported] = useState(false);
 
 	const fileSummary = useSelector((state: RootState) => state.file.fileSummary);
 	const visConfig = useSelector(
@@ -42,8 +47,59 @@ export const Visualization = (props: previewProps) => {
 		}
 	}, [fileId, datasetId]);
 
+	// Check for conditions and set state only once
+	useEffect(() => {
+		const supportedMimeType = visComponentDefinitions.reduce(
+			(acc, visComponentDefinition) => {
+				// @ts-ignore
+				if (!acc.includes(visComponentDefinition.mainType)) {
+					// @ts-ignore
+					acc.push(visComponentDefinition.mainType);
+				}
+				return acc;
+			},
+			[]
+		);
+		// if raw type supported
+		if (
+			fileSummary &&
+			((fileSummary.content_type && fileSummary.content_type.content_type !== undefined &&
+						// @ts-ignore
+				supportedMimeType.includes(fileSummary.content_type.content_type)) ||
+				(fileSummary.content_type && fileSummary.content_type.main_type !== undefined &&
+							// @ts-ignore
+					supportedMimeType.includes(fileSummary.content_type.main_type)))
+		) {
+			setIsRawDataSupported(true);
+		} else {
+			setIsRawDataSupported(false);
+		}
+
+		if (fileSummary &&
+			fileSummary.bytes && fileSummary.bytes >= config["rawDataVisualizationThreshold"]) {
+				setIsVisDataGreaterThanMaxSize(true);
+		} else {
+			setIsVisDataGreaterThanMaxSize(false);
+		}
+
+		setIsEmptyVisData(visConfig.length === 0);
+	}, [fileSummary, visConfig]);
+
 	return (
 		<Grid container rowSpacing={1} columnSpacing={{ xs: 1, sm: 3, md: 3 }}>
+			{isEmptyVisData && !isRawDataSupported? (
+				<div>
+					No visualization data or parameters available. Incomplete
+					visualization configuration.
+				</div>
+			) : (
+				<></>
+			)}
+			{isEmptyVisData && isRawDataSupported && isVisDataGreaterThanMaxSize ? (
+				<div>File is greater than threshold</div>
+			) : (
+				<></>
+			)}
 			{/* 1. load all the visualization components and its definition available to the frontend */}
 			{visComponentDefinitions.map((visComponentDefinition) => {
 				return (
@@ -82,11 +138,6 @@ export const Visualization = (props: previewProps) => {
 															visConfigEntry={visConfigEntry}
 														/>
 													);
-												} else {
-													console.log(
-														"No visualization data or parameters available. " +
-															"Incomplete visualization configuration."
-													);
 												}
 											}
 										}
@@ -95,21 +146,19 @@ export const Visualization = (props: previewProps) => {
 								// if no visualization config exist, guess which widget to use by looking at the mime type of
 								// the raw bytes
 								else {
-									//check if file size is greater than threshold, if it is, then show no visualization
-									if (fileSummary && fileSummary.bytes && fileSummary.bytes >= config["rawDataVisualizationThreshold"]) {
-										console.log("File is greater than threshold");
-									}
-									// try match mime type first
-									// then fallback to match main type
-									// to instantiate components correspondingly
-									else if (
+									//to make sure file size is less than threshold
+									if (
 										fileSummary &&
+										fileSummary.bytes &&
+										fileSummary.bytes <
+											config["rawDataVisualizationThreshold"] &&
 										fileSummary.content_type !== undefined &&
 										((fileSummary.content_type.content_type !== undefined &&
 											visComponentDefinition.mimeTypes.includes(
 												fileSummary.content_type.content_type
 											)) ||
-											(fileSummary.content_type.content_type === undefined) && (fileSummary.content_type.main_type !== undefined &&
+											(fileSummary.content_type.content_type === undefined &&
+												fileSummary.content_type.main_type !== undefined &&
 												fileSummary.content_type.main_type ===
 													visComponentDefinition.mainType))
 									) {
@@ -119,8 +168,9 @@ export const Visualization = (props: previewProps) => {
 												fileId={fileId}
 											/>
 										);
+									} else {
+										return null;
 									}
-									return null;
 								}
 							})()}
 						</Suspense>
