@@ -11,6 +11,7 @@ from fastapi import (
 )
 
 from app import dependencies
+from app.config import settings
 from app.deps.authorization_deps import FileAuthorization
 from app.keycloak_auth import get_current_user, UserOut
 from app.models.files import FileOut, FileDB, FileVersionDB
@@ -446,7 +447,9 @@ async def delete_file_metadata(
             query.append(MetadataDB.agent.creator.id == agent.creator.id)
 
         # delete from elasticsearch
-        delete_document_by_id(es, "clowder", str(metadata_in.metadata_id))
+        delete_document_by_id(
+            es, settings.elasticsearch_index, str(metadata_in.metadata_id)
+        )
 
         if (md := await MetadataDB.find_one(*query)) is not None:
             await md.delete()

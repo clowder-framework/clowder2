@@ -71,6 +71,7 @@ class Settings(BaseSettings):
         "number_of_shards": elasticsearch_no_of_shards,
         "number_of_replicas": elasticsearch_no_of_replicas,
     }
+    elasticsearch_index = "clowder"
 
     # RabbitMQ message bus
     RABBITMQ_USER: str = "guest"

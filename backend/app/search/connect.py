@@ -1,14 +1,14 @@
-import logging
 import json
-from elasticsearch import Elasticsearch
+import logging
+
 from elasticsearch import BadRequestError
+from elasticsearch import Elasticsearch
 
 from app.config import settings
-from app.models.files import FileOut
-from app.models.search import SearchCriteria
-from app.models.feeds import SearchObject
-from app.models.errors import ServiceUnreachable
 from app.database.errors import log_error
+from app.models.errors import ServiceUnreachable
+from app.models.feeds import SearchObject
+from app.models.files import FileOut
 
 logger = logging.getLogger(__name__)
 no_of_shards = settings.elasticsearch_no_of_shards
@@ -149,19 +149,18 @@ def execute_search_obj(es_client, search_obj: SearchObject):
     if search_obj.mode == "or":
         query = {"bool": {"should": match_list}}
 
-    return search_index(es_client, search_obj.index_name, query)
+    return search_index(es_client, settings.elasticsearch_index, query)
 
 
 def check_search_result(es_client, file_out: FileOut, search_obj: SearchObject):
     """Check whether the contents of new_index match the search criteria in search_obj."""
     # TODO: There is an opportunity to do some basic checks here first, without talking to elasticsearch
     match_list = []
-
-    # TODO: This will need to be more complex to support other operators
     for criteria in search_obj.criteria:
         crit = {criteria.field: criteria.value}
         match_list.append({"match": crit})
 
+    # TODO: This will need to be more complex to support other operators
     if search_obj.mode == "and":
         subquery = {"bool": {"must": match_list}}
     if search_obj.mode == "or":
@@ -174,5 +173,9 @@ def check_search_result(es_client, file_out: FileOut, search_obj: SearchObject):
     }
     query_string += json.dumps(query) + "\n"
 
-    results = search_index(es_client, search_obj.index_name, query_string)
-    return results and len(results) > 0
+    results = search_index(es_client, settings.elasticsearch_index, query_string)
+    try:
+        responses = results.body["responses"][0]
+        return responses["hits"]["total"]["value"] > 0
+    except Exception as e:
+        return False

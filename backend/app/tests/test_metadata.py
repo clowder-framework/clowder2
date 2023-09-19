@@ -133,10 +133,10 @@ async def test_dataset_patch_metadata_definition(client: TestClient, headers: di
     es = await connect_elasticsearch()
     metadata_query = []
     # header
-    metadata_query.append({"index": "clowder"})
+    metadata_query.append({"index": settings.elasticsearch_index})
     # body
     metadata_query.append({"query": {"match": {"metadata.latitude": "24.4"}}})
-    result = search_index(es, "clowder", metadata_query)
+    result = search_index(es, settings.elasticsearch_index, metadata_query)
     assert (
         result.body["responses"][0]["hits"]["hits"][0]["_source"]["metadata"][0][
             "latitude"
@@ -162,12 +162,12 @@ async def test_dataset_create_metadata_context_url(client: TestClient, headers: 
     es = await connect_elasticsearch()
     metadata_query = []
     # header
-    metadata_query.append({"index": "clowder"})
+    metadata_query.append({"index": settings.elasticsearch_index})
     # body
     metadata_query.append(
         {"query": {"match": {"metadata.alternateName": "different name"}}}
     )
-    result = search_index(es, "clowder", metadata_query)
+    result = search_index(es, settings.elasticsearch_index, metadata_query)
     assert (
         result.body["responses"][0]["hits"]["hits"][0]["_source"]["metadata"][0][
             "alternateName"

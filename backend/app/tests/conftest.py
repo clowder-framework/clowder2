@@ -7,6 +7,7 @@ from app.main import app
 from app.tests.utils import user_example, delete_test_data
 
 settings.MONGO_DATABASE = "clowder-tests"
+settings.elasticsearch_index = "clowder-tests"
 
 
 @pytest.fixture(scope="session")

@@ -8,6 +8,7 @@ from fastapi import APIRouter, HTTPException, Depends
 from fastapi import Form
 
 from app import dependencies
+from app.config import settings
 from app.deps.authorization_deps import Authorization
 from app.keycloak_auth import get_current_user, UserOut
 from app.models.datasets import DatasetOut, DatasetDB
@@ -315,7 +316,9 @@ async def delete_dataset_metadata(
             query.append(MetadataDB.agent.creator.id == agent.creator.id)
 
         # delete from elasticsearch
-        delete_document_by_id(es, "clowder", str(metadata_in.metadata_id))
+        delete_document_by_id(
+            es, settings.elasticsearch_index, str(metadata_in.metadata_id)
+        )
 
         md = await MetadataDB.find_one(*query)
         if md is not None:
