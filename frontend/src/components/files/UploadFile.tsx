@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import {
 	Box,
 	Button,
+	Grid,
 	Step,
 	StepContent,
 	StepLabel,
@@ -12,7 +13,7 @@ import {
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../types/data";
 
-import { UploadFileModal } from "./UploadFileModal";
+import { UploadFileInput } from "./UploadFileInput";
 import { CreateMetadata } from "../metadata/CreateMetadata";
 import {
 	fetchMetadataDefinitions,
@@ -70,14 +71,14 @@ export const UploadFile: React.FC<UploadFileProps> = (
 
 	const [selectedFile, setSelectedFile] = useState<File | null>(null);
 	const [metadataRequestForms, setMetadataRequestForms] = useState({});
-	const [allowSubmit, setAllowSubmit] = React.useState<boolean>(false);
+	const [allFilled, setAllFilled] = React.useState<boolean>(false);
 
 	const history = useNavigate();
 
 	const checkIfFieldsAreRequired = () => {
 		let required = false;
 
-		metadataDefinitionList.forEach((val, idx) => {
+		metadataDefinitionList.forEach((val, _) => {
 			if (val.fields[0].required) {
 				required = true;
 			}
@@ -85,20 +86,21 @@ export const UploadFile: React.FC<UploadFileProps> = (
 
 		return required;
 	};
-	// step 1
-	const onFileSave = (selectedFile: File) => {
-		setSelectedFile(selectedFile);
 
-		// If no metadata fields are marked as required, allow user to skip directly to submit
-		if (checkIfFieldsAreRequired()) {
-			setAllowSubmit(false);
-		} else {
-			setAllowSubmit(true);
-		}
-
-		handleNext();
+	const checkIfFieldsAreFilled = () => {
+		return metadataDefinitionList.every((val) => {
+			return val.fields.every((field) => {
+				return field.required
+					? metadataRequestForms[val.name] !== undefined &&
+							metadataRequestForms[val.name].content[field.name] !==
+								undefined &&
+							metadataRequestForms[val.name].content[field.name] !== ""
+					: true;
+			});
+		});
 	};
-	// step 2
+
+	// step 1
 	const setMetadata = (metadata: any) => {
 		// TODO wrap this in to a function
 		setMetadataRequestForms((prevState) => {
@@ -109,23 +111,15 @@ export const UploadFile: React.FC<UploadFileProps> = (
 			}
 			return { ...prevState, [metadata.definition]: metadata };
 		});
-
-		metadataDefinitionList.map((val, idx) => {
-			if (val.fields[0].required) {
-				// Condition checks whether the current updated field is a required one
-				if (
-					val.name == metadata.definition ||
-					val.name in metadataRequestForms
-				) {
-					setAllowSubmit(true);
-					return true;
-				} else {
-					setAllowSubmit(false);
-					return false;
-				}
-			}
-		});
 	};
+
+	useEffect(() => {
+		if (Object.keys(metadataRequestForms).length > 0) {
+			setAllFilled(checkIfFieldsAreFilled(metadataRequestForms));
+		} else {
+			setAllFilled(false);
+		}
+	}, [metadataRequestForms]);
 
 	// step
 	const [activeStep, setActiveStep] = useState(0);
@@ -172,40 +166,51 @@ export const UploadFile: React.FC<UploadFileProps> = (
 		<LoadingOverlay active={loading} spinner text="Uploading file...">
 			<Box sx={{ padding: "5%" }}>
 				<Stepper activeStep={activeStep} orientation="vertical">
-					{/* step 1 attach files */}
-					<Step key="attach-files">
-						<StepLabel>Attach Files</StepLabel>
-						<StepContent>
-							<Typography>Upload files to the dataset.</Typography>
-							<Box>
-								<UploadFileModal onSave={onFileSave} />
-							</Box>
-						</StepContent>
-					</Step>
-
-					{/*step 2 Metadata*/}
+					{/*<Stepper activeStep={activeStep}>*/}
+					{/*step 1 Metadata*/}
 					<Step key="fill-in-metadata">
 						<StepLabel>Fill In Metadata</StepLabel>
-						<StepContent>
-							<Typography>Provide us your metadata about file.</Typography>
+						<StepContent TransitionProps={{ unmountOnExit: false }}>
+							<Typography>Provide us the metadata about your file.</Typography>
 							<Box>
 								<CreateMetadata setMetadata={setMetadata} />
 							</Box>
 							{/*buttons*/}
-							<Box sx={{ mb: 2 }}>
-								<>
+							<Grid container>
+								<Grid xs={11}>
+									<Button
+										variant="contained"
+										onClick={handleNext}
+										disabled={!checkIfFieldsAreRequired() ? false : !allFilled}
+										sx={{ display: "block", marginLeft: "auto" }}
+									>
+										Next
+									</Button>
+								</Grid>
+								<Grid xs={1}></Grid>
+							</Grid>
+						</StepContent>
+					</Step>
+					{/* step 2 attach files */}
+					<Step key="attach-files">
+						<StepLabel>Attach Files</StepLabel>
+						<StepContent TransitionProps={{ unmountOnExit: false }}>
+							<Typography>Upload files to the dataset.</Typography>
+							<Box>
+								<UploadFileInput setSelectedFile={setSelectedFile} />
+								<Box className="inputGroup">
+									<Button onClick={handleBack} sx={{ float: "right" }}>
+										Back
+									</Button>
 									<Button
 										variant="contained"
 										onClick={handleFinish}
-										disabled={!allowSubmit}
-										sx={{ mt: 1, mr: 1 }}
+										disabled={!selectedFile}
+										sx={{ float: "right" }}
 									>
 										Finish
 									</Button>
-									<Button onClick={handleBack} sx={{ mt: 1, mr: 1 }}>
-										Back
-									</Button>
-								</>
+								</Box>
 							</Box>
 						</StepContent>
 					</Step>
