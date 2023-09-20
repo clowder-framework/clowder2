@@ -51,7 +51,9 @@ export const refreshToken = async (dispatch, originalFunc) => {
 		});
 		const json = await response.json();
 		if (json["access_token"] !== undefined && json["access_token"] !== "none") {
-			cookies.set("Authorization", `Bearer ${json["access_token"]}`);
+			cookies.set("Authorization", `Bearer ${json["access_token"]}`, {
+				path: "/",
+			});
 			V2.OpenAPI.TOKEN = json["access_token"];
 			if (originalFunc) dispatch(originalFunc);
 			else
@@ -139,7 +141,9 @@ export function handleErrorsAuthorization(reason, originalFunc) {
 						json["access_token"] !== undefined &&
 						json["access_token"] !== "none"
 					) {
-						cookies.set("Authorization", `Bearer ${json["access_token"]}`);
+						cookies.set("Authorization", `Bearer ${json["access_token"]}`, {
+							path: "/",
+						});
 						V2.OpenAPI.TOKEN = json["access_token"];
 						dispatch(originalFunc);
 					}

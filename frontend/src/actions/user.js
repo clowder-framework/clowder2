@@ -61,7 +61,9 @@ export function _legacy_login(email, password) {
 		cookies.remove("Authorization", { path: "/" });
 
 		if (json["token"] !== undefined && json["token"] !== "none") {
-			cookies.set("Authorization", `Bearer ${json["token"]}`);
+			cookies.set("Authorization", `Bearer ${json["access_token"]}`, {
+				path: "/",
+			});
 			V2.OpenAPI.TOKEN = json["token"];
 			return dispatch({
 				type: SET_USER,
