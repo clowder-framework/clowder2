@@ -75,5 +75,6 @@ backend/app/tests/*
 !backend/app/tests/extractor_info.json
 
 *.tgz
+!clowder-theme.tgz
 *clowder2-software-dev.yaml
 secrets.yaml
