@@ -13,8 +13,7 @@ export const isAuthorized = () => {
 	V2.OpenAPI.TOKEN = authorization.replace("Bearer ", "");
 	return (
 		process.env.DEPLOY_ENV === "local" ||
-		(authorization !== undefined &&
-			authorization !== "" &&
+		(authorization !== "" &&
 			authorization !== null &&
 			authorization !== "Bearer none")
 	);
