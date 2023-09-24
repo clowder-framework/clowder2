@@ -1,6 +1,18 @@
 import React, { useEffect, useState } from "react";
 import config from "../../app.config";
-import { Box, Button, Grid, Tab, Tabs, NativeSelect, InputLabel } from "@mui/material";
+import {
+	Box,
+	Button,
+	Grid,
+	Tab,
+	Tabs,
+	NativeSelect,
+	InputLabel,
+	Typography,
+	FormControl,
+	Select,
+	MenuItem
+} from "@mui/material";
 import { downloadResource } from "../../utils/common";
 import { PreviewConfiguration, RootState } from "../../types/data";
 import { useParams, useSearchParams } from "react-router-dom";
@@ -289,20 +301,27 @@ export const File = (): JSX.Element => {
 				</Grid>
 			</Grid>
 			<Grid container>
-				<InputLabel variant="standard" htmlFor="uncontrolled-native">
-          			Version
-        		</InputLabel>
-				<NativeSelect
-					defaultValue={30}
-					inputProps={{
-					  name: 'age',
-					  id: 'uncontrolled-native',
-					}}
-				>
-					<option value={10}>Ten</option>
-					<option value={20}>Twenty</option>
-					<option value={30}>Thirty</option>
-				</NativeSelect>
+				<FormControl variant="outlined" sx={{ m: 1, minWidth: 120 }}>
+					<InputLabel id="demo-simple-select-label">Version</InputLabel>
+					<Select
+						labelId="demo-simple-select-label"
+						id="demo-simple-select"
+						value={selectedVersion}
+						defaultValue={"viewer"}
+						label="Status"
+						onChange={(event) => {
+							setSelectedVersion(event.target.value);
+						}}
+					>
+						{fileVersions.map((fileVersion) => {
+							return (
+								<MenuItem value={fileVersion.version_num}>
+									{fileVersion.version_num}
+								</MenuItem>
+							);
+						})}
+					</Select>
+				</FormControl>
 			</Grid>
 			<Grid container spacing={2}>
 				<Grid item xs={10}>
