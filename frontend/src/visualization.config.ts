@@ -76,4 +76,12 @@ visComponentDefinitions.push({
 	component: React.createElement(registerComponent(configGeospatial)),
 });
 
+const configVega = require("./components/visualizations/CSV/manifest.json");
+visComponentDefinitions.push({
+	name: configVega.name,
+	mainType: configVega.visConfig.mainType,
+	mimeTypes: configVega.visConfig.mimeTypes,
+	component: React.createElement(registerComponent(configVega)),
+});
+
 export { visComponentDefinitions };

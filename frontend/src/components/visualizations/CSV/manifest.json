@@ -1,0 +1,21 @@
+{
+	"name": "basic-vega-component",
+	"version": "1.0.0",
+	"description": "A React component for csv using Vega",
+	"main": "CSV.tsx",
+	"dependencies": {
+		"clowder2-core": "1.0.0",
+		"react": "^17.0.2",
+		"react-dom": "^17.0.2",
+		"vega": "^5.20.2"
+	},
+	"visConfig": {
+		"name": "CSV",
+		"mainType": "text",
+		"mimeTypes": [
+			"text/csv"
+		],
+		"fields": [
+		]
+	}
+}
