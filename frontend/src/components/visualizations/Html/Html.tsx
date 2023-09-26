@@ -8,11 +8,11 @@ type htmlProps = {
 };
 
 export default function Html(props: htmlProps) {
-	const { fileId, visualizationId } = props;
+	const {fileId, visualizationId} = props;
 	const divRef = useRef(null);
 	const isFirstRender = useRef(true);
 
-	const [html, setHtml] = useState("");
+	const [html, setHtml] = useState();
 
 	useEffect(() => {
 		const processBlob = async () => {
@@ -35,14 +35,15 @@ export default function Html(props: htmlProps) {
 	}, [visualizationId, fileId]);
 
 	useEffect(() => {
-	if (!html || !divRef.current) throw new Error("html prop can't be null");
-	if (!isFirstRender.current) return;
-	isFirstRender.current = false;
+		if (html && divRef.current) {
+			const slotHtml = document.createRange().createContextualFragment(html);
+			divRef.current.innerHTML = ""; // Clear the container
+			divRef.current.appendChild(slotHtml); // Append the new content
+		}
 
-	const slotHtml = document.createRange().createContextualFragment(html);
-	divRef.current.innerHTML = ""; // Clear the container
-	divRef.current.appendChild(slotHtml); // Append the new content
+		if (!isFirstRender.current) return;
+		isFirstRender.current = false;
 	}, [html, divRef])
 
-  return(<div ref={divRef} style={{ width: "100%", height: "50em", overflow: "auto" }}/>);
+	return (<div ref={divRef} style={{width: "auto", maxHeight: "100vh", overflow: "auto"}}/>);
 }
