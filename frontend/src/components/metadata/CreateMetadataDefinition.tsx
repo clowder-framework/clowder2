@@ -14,12 +14,11 @@ import {
 	StepContent,
 	StepLabel,
 	Stepper,
-	TextField,
 } from "@mui/material";
 import { useDispatch } from "react-redux";
 import AddBoxIcon from "@mui/icons-material/AddBox";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
-
+import { ClowderInput } from "../styledComponents/ClowderInput";
 import { postMetadataDefinitions } from "../../actions/metadata";
 import Layout from "../Layout";
 
@@ -307,29 +306,24 @@ export const CreateMetadataDefinition = (): JSX.Element => {
 						</StepButton>
 						<StepContent>
 							<form onSubmit={handleNext}>
-								<TextField
-									variant="outlined"
+								<ClowderInput
 									margin="normal"
 									required
 									fullWidth
-									autoFocus
 									id="name"
 									label="Metadata Name"
-									InputLabelProps={{ shrink: true }}
 									placeholder="Please enter metadata name"
 									value={formInput["name"]}
 									onChange={(event) => {
 										handleInputChange(-1, "name", event.target.value);
 									}}
 								/>
-								<TextField
-									variant="outlined"
+								<ClowderInput
 									margin="normal"
 									required
 									fullWidth
 									id="metadata-description"
 									label="Metadata Description"
-									InputLabelProps={{ shrink: true }}
 									placeholder="Please enter metadata description"
 									value={formInput.description}
 									onChange={(event) => {
@@ -340,14 +334,12 @@ export const CreateMetadataDefinition = (): JSX.Element => {
 									return (
 										<Grid container>
 											<Grid item>
-												<TextField
-													variant="outlined"
+												<ClowderInput
 													margin="normal"
 													fullWidth
 													required
 													id="metadata-context"
 													label="Term"
-													InputLabelProps={{ shrink: true }}
 													placeholder="Please enter context term"
 													value={item["term"]}
 													sx={{
@@ -374,18 +366,19 @@ export const CreateMetadataDefinition = (): JSX.Element => {
 														updateContext(idx, "iri", value);
 													}}
 													renderInput={(params) => (
-														<TextField
+														<ClowderInput
 															{...params}
-															sx={{
-																mt: 1,
-																mr: 1,
-																alignItems: "right",
-																width: "450px",
-															}}
 															required
 															label="IRI"
+															fullWidth
 														/>
 													)}
+													sx={{
+														mt: 1,
+														ml: 2,
+														alignItems: "right",
+														minWidth: "20em",
+													}}
 												/>
 											</Grid>
 											<IconButton
@@ -519,22 +512,19 @@ export const CreateMetadataDefinition = (): JSX.Element => {
 											</FormGroup>
 										</Grid>
 									</Grid>
-									<TextField
-										variant="outlined"
+									<ClowderInput
 										margin="normal"
 										required
 										fullWidth
 										id="field-name"
 										label="Field Name"
 										placeholder="Please enter field name"
-										InputLabelProps={{ shrink: true }}
 										value={input.name}
 										onChange={(event) => {
 											handleInputChange(idx, "name", event.target.value);
 										}}
 									/>
-									<TextField
-										variant="outlined"
+									<ClowderInput
 										margin="normal"
 										required
 										fullWidth
@@ -549,7 +539,6 @@ export const CreateMetadataDefinition = (): JSX.Element => {
 												[idx]: widgetTypes[event.target.value]["input_types"],
 											}));
 										}}
-										InputLabelProps={{ shrink: true }}
 										helperText="Please select metadata widget type"
 										select
 									>
@@ -563,9 +552,8 @@ export const CreateMetadataDefinition = (): JSX.Element => {
 												</MenuItem>
 											);
 										})}
-									</TextField>
-									<TextField
-										variant="outlined"
+									</ClowderInput>
+									<ClowderInput
 										margin="normal"
 										required
 										fullWidth
@@ -575,7 +563,6 @@ export const CreateMetadataDefinition = (): JSX.Element => {
 										onChange={(event) => {
 											handleInputChange(idx, "type", event.target.value);
 										}}
-										InputLabelProps={{ shrink: true }}
 										helperText="Please select metadata field data type"
 										select
 									>
@@ -592,21 +579,19 @@ export const CreateMetadataDefinition = (): JSX.Element => {
 													);
 											  })
 											: null}
-									</TextField>
+									</ClowderInput>
 									{/*
 									 * TODO: Expand to support different config data type actions
 									 * https://github.com/clowder-framework/clowder2/issues/169
 									 */}
 									{input.config.type == "enum" ? (
 										<>
-											<TextField
-												variant="outlined"
+											<ClowderInput
 												margin="normal"
 												required
 												fullWidth
 												id="options"
 												label="Supported List Values"
-												InputLabelProps={{ shrink: true }}
 												placeholder="Please enter list options delimited by comma"
 												value={input.config.options}
 												onChange={(event) => {
@@ -636,7 +621,7 @@ export const CreateMetadataDefinition = (): JSX.Element => {
 					<Step key="submit">
 						<StepLabel>Submit</StepLabel>
 						<StepContent>
-							<TextField disabled value={parsedInput} multiline fullWidth />
+							<ClowderInput disabled value={parsedInput} multiline fullWidth />
 							<br />
 							<Button
 								variant="contained"
