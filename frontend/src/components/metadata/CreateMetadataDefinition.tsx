@@ -23,7 +23,7 @@ import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import { postMetadataDefinitions } from "../../actions/metadata";
 import Layout from "../Layout";
 
-import { contextUrlMap, widgetTypes } from "../../metadata.config";
+import { contextUrlMap, InputType, widgetTypes } from "../../metadata.config";
 
 export const CreateMetadataDefinitionPage = (): JSX.Element => {
 	return (
@@ -32,6 +32,10 @@ export const CreateMetadataDefinitionPage = (): JSX.Element => {
 		</Layout>
 	);
 };
+
+interface SupportedInputs {
+	[key: number]: Array<InputType>; // Define the type for SupportedInputs
+}
 
 export const CreateMetadataDefinition = (): JSX.Element => {
 	const dispatch = useDispatch();
@@ -59,9 +63,9 @@ export const CreateMetadataDefinition = (): JSX.Element => {
 			},
 		],
 	});
-	const [supportedInputTypes, setSupportedInputTypes] = React.useState({
-		0: [],
-	});
+	const [supportedInputs, setSupportedInputs] = React.useState<SupportedInputs>(
+		{ 0: [] }
+	);
 
 	const handleInputChange = (idx: number, key: string, value: string) => {
 		let data = { ...formInput };
@@ -540,7 +544,7 @@ export const CreateMetadataDefinition = (): JSX.Element => {
 										value={input.widgetType}
 										onChange={(event) => {
 											handleInputChange(idx, "widgetType", event.target.value);
-											setSupportedInputTypes((prevState) => ({
+											setSupportedInputs((prevState) => ({
 												...prevState,
 												[idx]: widgetTypes[event.target.value]["input_types"],
 											}));
@@ -576,14 +580,14 @@ export const CreateMetadataDefinition = (): JSX.Element => {
 										select
 									>
 										{/*read the current selected widget idx and its supported types*/}
-										{idx in supportedInputTypes
-											? supportedInputTypes[idx].map((supportedInputType) => {
+										{idx in supportedInputs
+											? supportedInputs[idx].map((supportedInput) => {
 													return (
 														<MenuItem
-															value={supportedInputType["name"]}
-															key={supportedInputType["name"]}
+															value={supportedInput["name"]}
+															key={supportedInput["name"]}
 														>
-															{supportedInputType["description"]}
+															{supportedInput["description"]}
 														</MenuItem>
 													);
 											  })

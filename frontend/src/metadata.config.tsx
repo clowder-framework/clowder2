@@ -11,7 +11,21 @@ export const metadataConfig = {
 	NA: <MetadataTextField />,
 };
 
-export const widgetTypes = {
+export interface InputType {
+	name: string;
+	description: string;
+}
+
+interface WidgetType {
+	name: string;
+	description: string;
+	input_types: Array<InputType>;
+}
+
+interface WidgetTypes {
+	[key: string]: WidgetType;
+}
+export const widgetTypes: WidgetTypes = {
 	TextField: {
 		name: "TextField",
 		description: "Text Input",
