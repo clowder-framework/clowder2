@@ -10,7 +10,7 @@ from app.tests.utils import create_dataset, upload_file
 metadata_definition = {
     "name": "LatLon",
     "description": "A set of Latitude/Longitude coordinates",
-    "context": [
+    "@context": [
         {
             "longitude": "https://schema.org/longitude",
             "latitude": "https://schema.org/latitude",
@@ -37,7 +37,7 @@ metadata_definition = {
 metadata_definition2 = {
     "name": "AlternativeTitle",
     "description": "Alternative title",
-    "context": [{"title": "https://schema.org/alternateName"}],
+    "@context": [{"title": "https://schema.org/alternateName"}],
     "fields": [
         {
             "name": "alternateName",
