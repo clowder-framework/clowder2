@@ -85,6 +85,9 @@ def test_dataset_create_metadata_definition(client: TestClient, headers: dict):
         response.status_code == 200 or response.status_code == 409
     )  # 409 = definition already exists
 
+    # check if @context is injected correctly
+    assert response.json().get("@context") is not None
+
     # Create dataset and add metadata to it using new definition
     dataset_id = create_dataset(client, headers).get("id")
     response = client.post(
