@@ -575,16 +575,19 @@ export const CreateMetadataDefinition = (): JSX.Element => {
 										helperText="Please select metadata field data type"
 										select
 									>
-										{supportedInputTypes[idx].map((supportedInputType) => {
-											return (
-												<MenuItem
-													value={supportedInputType["name"]}
-													key={supportedInputType["name"]}
-												>
-													{supportedInputType["description"]}
-												</MenuItem>
-											);
-										})}
+										{/*read the current selected widget idx and its supported types*/}
+										{idx in supportedInputTypes
+											? supportedInputTypes[idx].map((supportedInputType) => {
+													return (
+														<MenuItem
+															value={supportedInputType["name"]}
+															key={supportedInputType["name"]}
+														>
+															{supportedInputType["description"]}
+														</MenuItem>
+													);
+											  })
+											: null}
 									</TextField>
 									{/*
 									 * TODO: Expand to support different config data type actions
