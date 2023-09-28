@@ -300,29 +300,29 @@ export const File = (): JSX.Element => {
 					/>
 				</Grid>
 			</Grid>
-			<Grid container>
-				<FormControl variant="outlined" sx={{ m: 1, minWidth: 120 }}>
-					<InputLabel id="demo-simple-select-label">Version</InputLabel>
-					<Select
-						labelId="demo-simple-select-label"
-						id="demo-simple-select"
-						value={selectedVersion}
-						defaultValue={"viewer"}
-						label="Status"
-						onChange={(event) => {
-							setSelectedVersion(event.target.value);
-						}}
-					>
-						{fileVersions.map((fileVersion) => {
-							return (
-								<MenuItem value={fileVersion.version_num}>
-									{fileVersion.version_num}
-								</MenuItem>
-							);
-						})}
-					</Select>
-				</FormControl>
-			</Grid>
+			{/*<Grid container>*/}
+			{/*	<FormControl variant="outlined" sx={{ m: 1, minWidth: 120 }}>*/}
+			{/*		<InputLabel id="demo-simple-select-label">Version</InputLabel>*/}
+			{/*		<Select*/}
+			{/*			labelId="demo-simple-select-label"*/}
+			{/*			id="demo-simple-select"*/}
+			{/*			value={selectedVersion}*/}
+			{/*			defaultValue={"viewer"}*/}
+			{/*			label="Status"*/}
+			{/*			onChange={(event) => {*/}
+			{/*				setSelectedVersion(event.target.value);*/}
+			{/*			}}*/}
+			{/*		>*/}
+			{/*			{fileVersions.map((fileVersion) => {*/}
+			{/*				return (*/}
+			{/*					<MenuItem value={fileVersion.version_num}>*/}
+			{/*						{fileVersion.version_num}*/}
+			{/*					</MenuItem>*/}
+			{/*				);*/}
+			{/*			})}*/}
+			{/*		</Select>*/}
+			{/*	</FormControl>*/}
+			{/*</Grid>*/}
 			<Grid container spacing={2}>
 				<Grid item xs={10}>
 					<Tabs
@@ -451,31 +451,56 @@ export const File = (): JSX.Element => {
 						<ExtractionHistoryTab fileId={fileId} />
 					</TabPanel>
 				</Grid>
-				{version_num == selectedVersion ? (
+				<Grid>
 					<Grid item xs={2}>
-						{Object.keys(fileSummary).length > 0 && (
-							<FileDetails fileSummary={fileSummary} />
-						)}
+						<FormControl variant="outlined" sx={{ m: 1, minWidth: 120 }}>
+							<InputLabel id="demo-simple-select-label">Version</InputLabel>
+							<Select
+								labelId="demo-simple-select-label"
+								id="demo-simple-select"
+								value={selectedVersion}
+								defaultValue={"viewer"}
+								label="Status"
+								onChange={(event) => {
+									setSelectedVersion(event.target.value);
+								}}
+							>
+								{fileVersions.map((fileVersion) => {
+									return (
+										<MenuItem value={fileVersion.version_num}>
+											{fileVersion.version_num}
+										</MenuItem>
+									);
+								})}
+							</Select>
+						</FormControl>
 					</Grid>
-				) : (
-					<Grid item xs={2}>
-						{Object.keys(fileSummary).length > 0 && (
-							<FileHistory
-								id={fileId}
-								created={file.fileSummary.created}
-								name={file.fileSummary.name}
-								creator={file.fileSummary.creator}
-								version_id={file.fileSummary.version_id}
-								bytes={file.fileSummary.bytes}
-								content_type={file.fileSummary.content_type}
-								views={file.fileSummary.views}
-								downloads={file.fileSummary.downloads}
-								current_version={selectedVersion}
-								fileSummary={file.fileSummary}
-							/>
-						)}
-					</Grid>
-				)}
+					{version_num == selectedVersion ? (
+						<Grid item xs={2}>
+							{Object.keys(fileSummary).length > 0 && (
+								<FileDetails fileSummary={fileSummary} />
+							)}
+						</Grid>
+					) : (
+						<Grid item xs={2}>
+							{Object.keys(fileSummary).length > 0 && (
+								<FileHistory
+									id={fileId}
+									created={file.fileSummary.created}
+									name={file.fileSummary.name}
+									creator={file.fileSummary.creator}
+									version_id={file.fileSummary.version_id}
+									bytes={file.fileSummary.bytes}
+									content_type={file.fileSummary.content_type}
+									views={file.fileSummary.views}
+									downloads={file.fileSummary.downloads}
+									current_version={selectedVersion}
+									fileSummary={file.fileSummary}
+								/>
+							)}
+						</Grid>
+					)}
+				</Grid>
 			</Grid>
 		</Layout>
 	);
