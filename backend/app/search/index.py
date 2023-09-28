@@ -109,6 +109,7 @@ async def index_file(
     else:
         insert_record(es, settings.elasticsearch_index, doc, file.id)
 
+
 async def index_thumbnail(
     es: Elasticsearch,
     thumbnail_id: str,
@@ -153,7 +154,9 @@ async def index_thumbnail(
             ).dict()
             if update:
                 try:
-                    update_record(es, settings.elasticsearch_index, {"doc": doc}, file.id)
+                    update_record(
+                        es, settings.elasticsearch_index, {"doc": doc}, file.id
+                    )
                 except NotFoundError:
                     insert_record(es, settings.elasticsearch_index, doc, file.id)
             else:

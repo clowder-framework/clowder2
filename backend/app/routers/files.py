@@ -143,7 +143,6 @@ async def add_file_entry(
     # Add entry to the file index
     await index_file(es, FileOut(**new_file.dict()))
 
-
     # TODO - timing issue here, check_feed_listeners needs to happen asynchronously.
     time.sleep(1)
 
@@ -525,7 +524,9 @@ async def add_file_thumbnail(
             # TODO: Should we garbage collect existing thumbnail if nothing else points to it?
             file.thumbnail_id = thumbnail_id
             await file.save()
-            await index_thumbnail(es, thumbnail_id, str(file.id), str(file.dataset_id) ,False)
+            await index_thumbnail(
+                es, thumbnail_id, str(file.id), str(file.dataset_id), False
+            )
             return file.dict()
         else:
             raise HTTPException(

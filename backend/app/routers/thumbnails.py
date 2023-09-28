@@ -73,7 +73,8 @@ async def remove_thumbnail(thumb_id: str, fs: Minio = Depends(dependencies.get_f
 
 @router.get("/{thumbnail_id}")
 async def download_thumbnail(
-    thumbnail_id: str, fs: Minio = Depends(dependencies.get_fs),
+    thumbnail_id: str,
+    fs: Minio = Depends(dependencies.get_fs),
     increment: Optional[bool] = False,
 ):
     # If thumbnail exists in MongoDB, download from Minio
