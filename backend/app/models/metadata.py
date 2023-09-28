@@ -222,12 +222,6 @@ class MetadataBase(BaseModel):
     class Settings:
         name = "metadata"
 
-    class Config:
-        # Serialization Config Options
-        # Specify JSON key names
-        # This will rename the field `context` to `@context` in the JSON output
-        fields = {"context": "@context"}
-
 
 class MetadataIn(MetadataBase):
     file_version: Optional[int]
