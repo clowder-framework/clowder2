@@ -77,8 +77,13 @@ export const CreateMetadataDefinition = (): JSX.Element => {
 				data["fields"][idx][key] = !data["fields"][idx][key];
 			} else if (key == "type" || key == "options") {
 				data["fields"][idx].config[key] = value;
-			} else if (key == "name" || key == "widgetType") {
+			} else if (key == "name") {
 				data["fields"][idx][key] = value;
+			} else if (key == "widgetType") {
+				data["fields"][idx][key] = value;
+				// need reset type and list options
+				data["fields"][idx].config["type"] = "";
+				data["fields"][idx].config["options"] = "";
 			}
 		}
 
