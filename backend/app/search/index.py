@@ -138,17 +138,18 @@ async def index_thumbnail(
             # Add en entry to the file index
             doc = ElasticsearchEntry(
                 resource_type="thumbnail",
-                name=thumbnail.name,
+                name=file.name,
                 creator=thumbnail.creator.email,
                 created=thumbnail.created,
-                downloads=thumbnail.downloads,
                 user_ids=authorized_user_ids,
                 content_type=thumbnail.content_type.content_type,
                 content_type_main=thumbnail.content_type.main_type,
+                file_id=str(file.id),
                 dataset_id=str(file.dataset_id),
                 folder_id=str(file.folder_id),
                 bytes=thumbnail.bytes,
                 metadata=metadata,
+                downloads=file.downloads,
             ).dict()
             if update:
                 try:
