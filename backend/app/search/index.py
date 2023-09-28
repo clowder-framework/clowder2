@@ -149,7 +149,7 @@ async def index_thumbnail(
                 folder_id=str(file.folder_id),
                 bytes=thumbnail.bytes,
                 metadata=metadata,
-                downloads=file.downloads,
+                downloads=thumbnail.downloads,
             ).dict()
             if update:
                 try:
