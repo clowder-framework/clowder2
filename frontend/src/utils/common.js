@@ -82,7 +82,7 @@ export function parseDate(dateString, formatString = "yyyy-MM-dd HH:mm:ss") {
 			return error["message"];
 		}
 	} else {
-		return "Pending";
+		return "Pending...";
 	}
 }
 
