@@ -106,7 +106,7 @@ async def delete_metadata_definition(
         if len(metadata_using_definition) > 0:
             raise HTTPException(
                 status_code=400,
-                detail=f"Metadata definition {metadata_definition_id} in use. "
+                detail=f"Metadata definition: {mdd.name} ({metadata_definition_id}) in use. "
                        f"You cannot delete it until all metadata records using it are deleted.",
             )
 

@@ -48,8 +48,8 @@ const metadata = (state = defaultState, action: DataAction) => {
 		case SAVE_METADATA_DEFINITIONS:
 			return Object.assign({}, state, {
 				metadataDefinitionList: [
-					...state.metadataDefinitionList,
 					action.metadataDefinitionList,
+					...state.metadataDefinitionList,
 				],
 			});
 		case RECEIVE_DATASET_METADATA:
