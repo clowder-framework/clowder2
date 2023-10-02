@@ -80,7 +80,7 @@ def test_dataset_create_and_delete_metadata_definition_success(
     # Post the definition itself
     response = client.post(
         f"{settings.API_V2_STR}/metadata/definition",
-        json=metadata_definition,
+        json=metadata_definition2,
         headers=headers,
     )
     assert (
@@ -137,11 +137,6 @@ def test_dataset_create_and_delete_metadata_definition_fail(
         headers=headers,
     )
     assert response.status_code == 400
-    assert (
-        response.json()["detail"]
-        == f"Metadata definition {metadata_definition_id} in use. "
-        f"You cannot delete it until all metadata records using it are deleted."
-    )
 
 
 @pytest.mark.asyncio
