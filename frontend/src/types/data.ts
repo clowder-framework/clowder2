@@ -173,6 +173,7 @@ export interface GroupState {
 
 export interface MetadataState {
 	metadataDefinitionList: MetadataDefinitionOut[];
+	metadataDefinition: MetadataDefinitionOut;
 	datasetMetadataList: Metadata[];
 	fileMetadataList: Metadata[];
 }
