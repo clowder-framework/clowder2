@@ -32,6 +32,8 @@ import Layout from "../Layout";
 import { MainBreadcrumbs } from "../navigation/BreadCrumb";
 import { ErrorModal } from "../errors/ErrorModal";
 import { CreateMetadataDefinition } from "./CreateMetadataDefinition";
+import DeleteIcon from "@mui/icons-material/Delete";
+import DeleteMetadataDefinitionModal from "./DeleteMetadataDefinitionModal";
 
 export function MetadataDefinitions() {
 	// Redux connect equivalent
@@ -61,6 +63,12 @@ export function MetadataDefinitions() {
 	const [searchTerm, setSearchTerm] = useState<string>("");
 	const [createMetadataDefinitionOpen, setCreateMetadataDefinitionOpen] =
 		useState<boolean>(false);
+	const [
+		deleteMetadataDefinitionConfirmOpen,
+		setDeleteMetadataDefinitionConfirmOpen,
+	] = useState<boolean>(false);
+	const [selectedMetadataDefinition, setSelectedMetadataDefinition] =
+		useState();
 
 	// for breadcrumb
 	const paths = [
@@ -115,6 +123,17 @@ export function MetadataDefinitions() {
 		<Layout>
 			{/*Error Message dialogue*/}
 			<ErrorModal errorOpen={errorOpen} setErrorOpen={setErrorOpen} />
+
+			{/*Delete metadata definition modal*/}
+			<DeleteMetadataDefinitionModal
+				deleteMetadataDefinitionConfirmOpen={
+					deleteMetadataDefinitionConfirmOpen
+				}
+				setDeleteMetadataDefinitionConfirmOpen={
+					setDeleteMetadataDefinitionConfirmOpen
+				}
+				metdataDefinitionId={selectedMetadataDefinition}
+			/>
 
 			{/*create new metadata definition*/}
 			<Dialog
@@ -224,7 +243,7 @@ export function MetadataDefinitions() {
 											key={mdd.id}
 											sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
 										>
-											<TableCell scope="row" key={mdd.id}>
+											<TableCell scope="row" key={`${mdd.id}-name`}>
 												<Button
 													component={Link}
 													to={`/metadata-definitions/${mdd.id}`}
@@ -232,11 +251,28 @@ export function MetadataDefinitions() {
 													{mdd.name}
 												</Button>
 											</TableCell>
-											<TableCell scope="row" key={mdd.id} align="left">
+											<TableCell
+												scope="row"
+												key={`${mdd.id}-description`}
+												align="left"
+											>
 												{mdd.description}
 											</TableCell>
-											<TableCell scope="row" key={mdd.id} align="left">
-												0
+											<TableCell
+												scope="row"
+												key={`${mdd.id}-delete`}
+												align="left"
+											>
+												<IconButton
+													aria-label="delete"
+													size="small"
+													onClick={() => {
+														setSelectedMetadataDefinition(mdd.id);
+														setDeleteMetadataDefinitionConfirmOpen(true);
+													}}
+												>
+													<DeleteIcon fontSize="small" />
+												</IconButton>
 											</TableCell>
 										</TableRow>
 									);
