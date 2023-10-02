@@ -3,7 +3,7 @@ import { V2 } from "../openapi";
 
 export const RECEIVE_METADATA_DEFINITIONS = "RECEIVE_METADATA_DEFINITIONS";
 
-export function fetchMetadataDefinitions(name = null, skip = 0, limit = 10) {
+export function fetchMetadataDefinitions(name, skip, limit) {
 	return (dispatch) => {
 		return V2.MetadataService.getMetadataDefinitionListApiV2MetadataDefinitionGet(
 			name,
@@ -95,7 +95,7 @@ export const SEARCH_METADATA_DEFINITIONS = "SEARCH_METADATA_DEFINITIONS";
 
 export function searchMetadataDefinitions(searchTerm, skip, limit) {
 	return (dispatch) => {
-		return V2.MetadataService.searchMetadataDefinitionApiV2MetadataSearchSearchTermGet(
+		return V2.MetadataService.searchMetadataDefinitionApiV2MetadataDefinitionSearchSearchTermGet(
 			searchTerm,
 			skip,
 			limit
