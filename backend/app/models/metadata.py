@@ -2,7 +2,7 @@ import collections.abc
 from datetime import datetime
 from typing import Optional, List, Union
 
-from beanie import Document, PydanticObjectId
+from beanie import Document
 from elasticsearch import Elasticsearch, NotFoundError
 from fastapi import HTTPException
 from pydantic import Field, validator, AnyUrl, BaseModel
@@ -11,7 +11,6 @@ from app.models.listeners import (
     EventListenerIn,
     LegacyEventListenerIn,
     EventListenerOut,
-    ExtractorInfo,
 )
 from app.models.mongomodel import MongoDBRef
 from app.models.users import UserOut
@@ -106,7 +105,7 @@ class MetadataDefinitionBase(BaseModel):
         # Specify JSON key names
         # This will rename the field `context` to `@context` in the JSON output
         fields = {"context": {"alias": "@context"}}
-        # This will allow input by filed name 'context' too along with '@context'
+        # This will allow input by field name 'context' too along with '@context'
         allow_population_by_field_name = True
 
 
@@ -197,7 +196,7 @@ class MetadataBase(BaseModel):
         # Specify JSON key names
         # This will rename the field `context` to `@context` in the JSON output
         fields = {"context": {"alias": "@context"}}
-        # This will allow input by filed name 'context' too along with '@context'
+        # This will allow input by field name 'context' too along with '@context'
         allow_population_by_field_name = True
 
     @validator("context")
