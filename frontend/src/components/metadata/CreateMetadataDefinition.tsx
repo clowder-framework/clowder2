@@ -14,7 +14,9 @@ import {
 	StepContent,
 	StepLabel,
 	Stepper,
+	Snackbar,
 } from "@mui/material";
+import CloseIcon from '@mui/icons-material/Close';
 import { useDispatch } from "react-redux";
 import AddBoxIcon from "@mui/icons-material/AddBox";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
@@ -44,6 +46,7 @@ export const CreateMetadataDefinition = (): JSX.Element => {
 
 	const [activeStep, setActiveStep] = React.useState(0);
 	const [parsedInput, setParsedInput] = React.useState("");
+	const [open, setOpen] = React.useState(false);
 	const [contextMap, setContextMap] = React.useState([{ term: "", iri: "" }]);
 	const [formInput, setFormInput] = React.useState({
 		name: "",
@@ -192,6 +195,7 @@ export const CreateMetadataDefinition = (): JSX.Element => {
 				delete formInput.fields[i].config.options;
 			}
 		}
+		setOpen(true);
 
 		// Invoke post request
 		saveMetadataDefinitions(formInput);
@@ -295,6 +299,30 @@ export const CreateMetadataDefinition = (): JSX.Element => {
 	const handleBack = () => {
 		setActiveStep((prevActiveStep) => prevActiveStep - 1);
 	};
+
+	 const handleClose = (event: React.SyntheticEvent | Event, reason?: string) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+
+    setOpen(false);
+  };
+
+	const action = (
+		<React.Fragment>
+		  <Button color="secondary" size="small" onClick={handleClose}>
+			New Metadata Definition Created!
+		  </Button>
+			  <IconButton
+				size="small"
+				aria-label="close"
+				color="inherit"
+				onClick={handleClose}
+			  >
+				<CloseIcon fontSize="small" />
+		  </IconButton>
+		</React.Fragment>
+  )	;
 
 	return (
 		<div className="outer-container">
@@ -644,6 +672,15 @@ export const CreateMetadataDefinition = (): JSX.Element => {
 						</StepContent>
 					</Step>
 				</Stepper>
+				<div>
+					<Snackbar
+						open={open}
+						autoHideDuration={6000}
+						onClose={handleClose}
+						message=""
+						action={action}
+					/>
+				</div>
 			</div>
 		</div>
 	);
