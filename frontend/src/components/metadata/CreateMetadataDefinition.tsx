@@ -14,15 +14,18 @@ import {
 	StepContent,
 	StepLabel,
 	Stepper,
-	TextField,
 } from "@mui/material";
 import { useDispatch } from "react-redux";
 import AddBoxIcon from "@mui/icons-material/AddBox";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
-
+import { ClowderInput } from "../styledComponents/ClowderInput";
 import { postMetadataDefinitions } from "../../actions/metadata";
 
-import { contextUrlMap, inputTypes, widgetTypes } from "../../metadata.config";
+import { contextUrlMap, InputType, widgetTypes } from "../../metadata.config";
+
+interface SupportedInputs {
+	[key: number]: Array<InputType>; // Define the type for SupportedInputs
+}
 
 type CreateMetadataDefinitionProps = {
 	setCreateMetadataDefinitionOpen: any;
@@ -30,7 +33,7 @@ type CreateMetadataDefinitionProps = {
 
 export const CreateMetadataDefinition = (
 	props: CreateMetadataDefinitionProps
-): JSX.Element => {
+) => {
 	const { setCreateMetadataDefinitionOpen } = props;
 
 	const dispatch = useDispatch();
@@ -58,6 +61,9 @@ export const CreateMetadataDefinition = (
 			},
 		],
 	});
+	const [supportedInputs, setSupportedInputs] = React.useState<SupportedInputs>(
+		{ 0: [] }
+	);
 
 	const handleInputChange = (idx: number, key: string, value: string) => {
 		let data = { ...formInput };
@@ -70,8 +76,13 @@ export const CreateMetadataDefinition = (
 				data["fields"][idx][key] = !data["fields"][idx][key];
 			} else if (key == "type" || key == "options") {
 				data["fields"][idx].config[key] = value;
-			} else if (key == "name" || key == "widgetType") {
+			} else if (key == "name") {
 				data["fields"][idx][key] = value;
+			} else if (key == "widgetType") {
+				data["fields"][idx][key] = value;
+				// need reset type and list options
+				data["fields"][idx].config["type"] = "";
+				data["fields"][idx].config["options"] = "";
 			}
 		}
 
@@ -187,7 +198,7 @@ export const CreateMetadataDefinition = (
 		// Reset form
 		clearForm();
 
-		// close modal
+		// Close modal
 		setCreateMetadataDefinitionOpen(false);
 	};
 
@@ -302,29 +313,24 @@ export const CreateMetadataDefinition = (
 						</StepButton>
 						<StepContent>
 							<form onSubmit={handleNext}>
-								<TextField
-									variant="outlined"
+								<ClowderInput
 									margin="normal"
 									required
 									fullWidth
-									autoFocus
 									id="name"
 									label="Metadata Name"
-									InputLabelProps={{ shrink: true }}
 									placeholder="Please enter metadata name"
 									value={formInput["name"]}
 									onChange={(event) => {
 										handleInputChange(-1, "name", event.target.value);
 									}}
 								/>
-								<TextField
-									variant="outlined"
+								<ClowderInput
 									margin="normal"
 									required
 									fullWidth
 									id="metadata-description"
 									label="Metadata Description"
-									InputLabelProps={{ shrink: true }}
 									placeholder="Please enter metadata description"
 									value={formInput.description}
 									onChange={(event) => {
@@ -335,14 +341,12 @@ export const CreateMetadataDefinition = (
 									return (
 										<Grid container>
 											<Grid item>
-												<TextField
-													variant="outlined"
+												<ClowderInput
 													margin="normal"
 													fullWidth
 													required
 													id="metadata-context"
 													label="Term"
-													InputLabelProps={{ shrink: true }}
 													placeholder="Please enter context term"
 													value={item["term"]}
 													sx={{
@@ -369,18 +373,19 @@ export const CreateMetadataDefinition = (
 														updateContext(idx, "iri", value);
 													}}
 													renderInput={(params) => (
-														<TextField
+														<ClowderInput
 															{...params}
-															sx={{
-																mt: 1,
-																mr: 1,
-																alignItems: "right",
-																width: "450px",
-															}}
 															required
 															label="IRI"
+															fullWidth
 														/>
 													)}
+													sx={{
+														mt: 1,
+														ml: 2,
+														alignItems: "right",
+														minWidth: "20em",
+													}}
 												/>
 											</Grid>
 											<IconButton
@@ -514,22 +519,19 @@ export const CreateMetadataDefinition = (
 											</FormGroup>
 										</Grid>
 									</Grid>
-									<TextField
-										variant="outlined"
+									<ClowderInput
 										margin="normal"
 										required
 										fullWidth
 										id="field-name"
 										label="Field Name"
 										placeholder="Please enter field name"
-										InputLabelProps={{ shrink: true }}
 										value={input.name}
 										onChange={(event) => {
 											handleInputChange(idx, "name", event.target.value);
 										}}
 									/>
-									<TextField
-										variant="outlined"
+									<ClowderInput
 										margin="normal"
 										required
 										fullWidth
@@ -539,21 +541,26 @@ export const CreateMetadataDefinition = (
 										value={input.widgetType}
 										onChange={(event) => {
 											handleInputChange(idx, "widgetType", event.target.value);
+											setSupportedInputs((prevState) => ({
+												...prevState,
+												[idx]: widgetTypes[event.target.value]["input_types"],
+											}));
 										}}
-										InputLabelProps={{ shrink: true }}
 										helperText="Please select metadata widget type"
 										select
 									>
 										{Object.keys(widgetTypes).map((key) => {
 											return (
-												<MenuItem value={key} key={key}>
-													{widgetTypes[key]}
+												<MenuItem
+													value={widgetTypes[key]["name"]}
+													key={widgetTypes[key]["name"]}
+												>
+													{widgetTypes[key]["description"]}
 												</MenuItem>
 											);
 										})}
-									</TextField>
-									<TextField
-										variant="outlined"
+									</ClowderInput>
+									<ClowderInput
 										margin="normal"
 										required
 										fullWidth
@@ -563,32 +570,35 @@ export const CreateMetadataDefinition = (
 										onChange={(event) => {
 											handleInputChange(idx, "type", event.target.value);
 										}}
-										InputLabelProps={{ shrink: true }}
 										helperText="Please select metadata field data type"
 										select
 									>
-										{Object.keys(inputTypes).map((key) => {
-											return (
-												<MenuItem value={key} key={key}>
-													{inputTypes[key]}
-												</MenuItem>
-											);
-										})}
-									</TextField>
+										{/*read the current selected widget idx and its supported types*/}
+										{idx in supportedInputs
+											? supportedInputs[idx].map((supportedInput) => {
+													return (
+														<MenuItem
+															value={supportedInput["name"]}
+															key={supportedInput["name"]}
+														>
+															{supportedInput["description"]}
+														</MenuItem>
+													);
+											  })
+											: null}
+									</ClowderInput>
 									{/*
 									 * TODO: Expand to support different config data type actions
 									 * https://github.com/clowder-framework/clowder2/issues/169
 									 */}
 									{input.config.type == "enum" ? (
 										<>
-											<TextField
-												variant="outlined"
+											<ClowderInput
 												margin="normal"
 												required
 												fullWidth
 												id="options"
 												label="Supported List Values"
-												InputLabelProps={{ shrink: true }}
 												placeholder="Please enter list options delimited by comma"
 												value={input.config.options}
 												onChange={(event) => {
@@ -618,7 +628,7 @@ export const CreateMetadataDefinition = (
 					<Step key="submit">
 						<StepLabel>Submit</StepLabel>
 						<StepContent>
-							<TextField disabled value={parsedInput} multiline fullWidth />
+							<ClowderInput disabled value={parsedInput} multiline fullWidth />
 							<br />
 							<Button
 								variant="contained"
