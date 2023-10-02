@@ -24,6 +24,6 @@ export type MetadataDefinitionOut = {
     context?: Array<string>;
     context_url?: string;
     fields: Array<MetadataField>;
-    _id?: string;
+    id?: string;
     creator: UserOut;
 }

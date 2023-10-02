@@ -74,7 +74,9 @@ def test_dataset_create_metadata_no_context(client: TestClient, headers: dict):
     assert response.status_code == 400
 
 
-def test_dataset_create_and_delete_metadata_definition_success(client: TestClient, headers: dict):
+def test_dataset_create_and_delete_metadata_definition_success(
+    client: TestClient, headers: dict
+):
     # Post the definition itself
     response = client.post(
         f"{settings.API_V2_STR}/metadata/definition",
@@ -82,17 +84,22 @@ def test_dataset_create_and_delete_metadata_definition_success(client: TestClien
         headers=headers,
     )
     assert (
-            response.status_code == 200 or response.status_code == 409
+        response.status_code == 200 or response.status_code == 409
     )  # 409 = definition already exists
     metadata_definition_id = response.json().get("id")
 
     # Delete metadata definition
-    response = client.delete(f"{settings.API_V2_STR}/metadata/definition/{metadata_definition_id}", headers=headers)
+    response = client.delete(
+        f"{settings.API_V2_STR}/metadata/definition/{metadata_definition_id}",
+        headers=headers,
+    )
     assert response.status_code == 200
     assert response.json().get("id") == metadata_definition_id
 
 
-def test_dataset_create_and_delete_metadata_definition_fail(client: TestClient, headers: dict):
+def test_dataset_create_and_delete_metadata_definition_fail(
+    client: TestClient, headers: dict
+):
     # Post the definition itself
     response = client.post(
         f"{settings.API_V2_STR}/metadata/definition",
@@ -100,7 +107,7 @@ def test_dataset_create_and_delete_metadata_definition_fail(client: TestClient, 
         headers=headers,
     )
     assert (
-            response.status_code == 200 or response.status_code == 409
+        response.status_code == 200 or response.status_code == 409
     )  # 409 = definition already exists
     metadata_definition_id = response.json().get("id")
 
@@ -125,10 +132,16 @@ def test_dataset_create_and_delete_metadata_definition_fail(client: TestClient, 
     assert response.status_code == 409
 
     # Delete metadata definition
-    response = client.delete(f"{settings.API_V2_STR}/metadata/definition/{metadata_definition_id}", headers=headers)
+    response = client.delete(
+        f"{settings.API_V2_STR}/metadata/definition/{metadata_definition_id}",
+        headers=headers,
+    )
     assert response.status_code == 400
-    assert response.json()["detail"] == f"Metadata definition {metadata_definition_id} in use. " \
-                                        f"You cannot delete it until all metadata records using it are deleted."
+    assert (
+        response.json()["detail"]
+        == f"Metadata definition {metadata_definition_id} in use. "
+        f"You cannot delete it until all metadata records using it are deleted."
+    )
 
 
 @pytest.mark.asyncio
@@ -140,7 +153,7 @@ async def test_dataset_patch_metadata_definition(client: TestClient, headers: di
         headers=headers,
     )
     assert (
-            response.status_code == 200 or response.status_code == 409
+        response.status_code == 200 or response.status_code == 409
     )  # 409 = definition already exists
 
     # Create dataset and add metadata to it using new definition
@@ -163,10 +176,10 @@ async def test_dataset_patch_metadata_definition(client: TestClient, headers: di
     metadata_query.append({"query": {"match": {"metadata.latitude": "24.4"}}})
     result = search_index(es, settings.elasticsearch_index, metadata_query)
     assert (
-            result.body["responses"][0]["hits"]["hits"][0]["_source"]["metadata"][0][
-                "latitude"
-            ]
-            == 24.4
+        result.body["responses"][0]["hits"]["hits"][0]["_source"]["metadata"][0][
+            "latitude"
+        ]
+        == 24.4
     )
 
 
@@ -194,10 +207,10 @@ async def test_dataset_create_metadata_context_url(client: TestClient, headers: 
     )
     result = search_index(es, settings.elasticsearch_index, metadata_query)
     assert (
-            result.body["responses"][0]["hits"]["hits"][0]["_source"]["metadata"][0][
-                "alternateName"
-            ]
-            == "different name"
+        result.body["responses"][0]["hits"]["hits"][0]["_source"]["metadata"][0][
+            "alternateName"
+        ]
+        == "different name"
     )
 
 
@@ -243,7 +256,7 @@ def test_file_create_metadata_definition(client: TestClient, headers: dict):
         headers=headers,
     )
     assert (
-            response.status_code == 200 or response.status_code == 409
+        response.status_code == 200 or response.status_code == 409
     )  # 409 = definition already exists
 
     # Create dataset and add metadata to it using new definition

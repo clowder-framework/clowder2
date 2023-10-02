@@ -62,6 +62,25 @@ export class MetadataService {
     }
 
     /**
+     * Delete Metadata Definition
+     * Delete metadata definition by specific ID.
+     * @param metadataDefinitionId
+     * @returns MetadataDefinitionOut Successful Response
+     * @throws ApiError
+     */
+    public static deleteMetadataDefinitionApiV2MetadataDefinitionMetadataDefinitionIdDelete(
+        metadataDefinitionId: string,
+    ): CancelablePromise<MetadataDefinitionOut> {
+        return __request({
+            method: 'DELETE',
+            path: `/api/v2/metadata/definition/${metadataDefinitionId}`,
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+
+    /**
      * Delete Metadata
      * Delete metadata by specific ID.
      * @param metadataId
