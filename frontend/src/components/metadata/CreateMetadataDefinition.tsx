@@ -25,6 +25,7 @@ import { postMetadataDefinitions } from "../../actions/metadata";
 import Layout from "../Layout";
 
 import { contextUrlMap, InputType, widgetTypes } from "../../metadata.config";
+import {theme} from "../../theme";
 
 export const CreateMetadataDefinitionPage = (): JSX.Element => {
 	return (
@@ -301,22 +302,21 @@ export const CreateMetadataDefinition = (): JSX.Element => {
 	};
 
 	 const handleClose = (event: React.SyntheticEvent | Event, reason?: string) => {
-    if (reason === 'clickaway') {
-      return;
-    }
-
-    setOpen(false);
-  };
+		if (reason === 'clickaway') {
+		  return;
+		}
+		setOpen(false);
+	 };
 
 	const action = (
 		<React.Fragment>
-		  <Button color="secondary" size="small" onClick={handleClose}>
+		  <Button color="secondary" onClick={handleClose}>
 			New Metadata Definition Created!
 		  </Button>
 			  <IconButton
 				size="small"
 				aria-label="close"
-				color="inherit"
+				color="primary"
 				onClick={handleClose}
 			  >
 				<CloseIcon fontSize="small" />
