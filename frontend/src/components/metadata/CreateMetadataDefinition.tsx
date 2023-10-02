@@ -14,9 +14,8 @@ import {
 	StepContent,
 	StepLabel,
 	Stepper,
-	Snackbar,
 } from "@mui/material";
-import CloseIcon from '@mui/icons-material/Close';
+import CloseIcon from "@mui/icons-material/Close";
 import { useDispatch } from "react-redux";
 import AddBoxIcon from "@mui/icons-material/AddBox";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
@@ -25,7 +24,7 @@ import { postMetadataDefinitions } from "../../actions/metadata";
 import Layout from "../Layout";
 
 import { contextUrlMap, InputType, widgetTypes } from "../../metadata.config";
-import {theme} from "../../theme";
+import { ClowderSnackBar } from "../styledComponents/ClowderSnackBar";
 
 export const CreateMetadataDefinitionPage = (): JSX.Element => {
 	return (
@@ -301,28 +300,28 @@ export const CreateMetadataDefinition = (): JSX.Element => {
 		setActiveStep((prevActiveStep) => prevActiveStep - 1);
 	};
 
-	 const handleClose = (event: React.SyntheticEvent | Event, reason?: string) => {
-		if (reason === 'clickaway') {
-		  return;
+	const handleClose = (
+		event: React.SyntheticEvent | Event,
+		reason?: string
+	) => {
+		if (reason === "clickaway") {
+			return;
 		}
 		setOpen(false);
-	 };
+	};
 
 	const action = (
 		<React.Fragment>
-		  <Button color="secondary" onClick={handleClose}>
-			New Metadata Definition Created!
-		  </Button>
-			  <IconButton
+			<IconButton
 				size="small"
 				aria-label="close"
 				color="primary"
 				onClick={handleClose}
-			  >
+			>
 				<CloseIcon fontSize="small" />
-		  </IconButton>
+			</IconButton>
 		</React.Fragment>
-  )	;
+	);
 
 	return (
 		<div className="outer-container">
@@ -672,15 +671,13 @@ export const CreateMetadataDefinition = (): JSX.Element => {
 						</StepContent>
 					</Step>
 				</Stepper>
-				<div>
-					<Snackbar
-						open={open}
-						autoHideDuration={6000}
-						onClose={handleClose}
-						message=""
-						action={action}
-					/>
-				</div>
+				<ClowderSnackBar
+					open={open}
+					autoHideDuration={6000}
+					onClose={handleClose}
+					message="New Metadata Definition Created!"
+					action={action}
+				/>
 			</div>
 		</div>
 	);
