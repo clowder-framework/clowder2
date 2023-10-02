@@ -13,12 +13,10 @@ import {
 import { RootState } from "../../types/data";
 import { useDispatch, useSelector } from "react-redux";
 import {
-	deleteMetadataDefinition as deleteMetadataDefinitionAction,
 	fetchMetadataDefinitions as fetchMetadataDefinitionsAction,
 	searchMetadataDefinitions as searchMetadataDefinitionsAction,
 } from "../../actions/metadata";
 import { ArrowBack, ArrowForward, SearchOutlined } from "@material-ui/icons";
-import { Link } from "react-router-dom";
 import Paper from "@mui/material/Paper";
 import Table from "@mui/material/Table";
 import TableHead from "@mui/material/TableHead";
@@ -48,8 +46,6 @@ export function MetadataDefinitions() {
 		skip: number | undefined,
 		limit: number | undefined
 	) => dispatch(searchMetadataDefinitionsAction(searchTerm, skip, limit));
-	const deleteMetadataDefinition = (id: string) =>
-		dispatch(deleteMetadataDefinitionAction(id));
 	const metadataDefinitions = useSelector(
 		(state: RootState) => state.metadata.metadataDefinitionList
 	);
@@ -244,12 +240,14 @@ export function MetadataDefinitions() {
 											sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
 										>
 											<TableCell scope="row" key={`${mdd.id}-name`}>
-												<Button
-													component={Link}
-													to={`/metadata-definitions/${mdd.id}`}
-												>
-													{mdd.name}
-												</Button>
+												{/*TODO write individual metadata definition page*/}
+												{/*<Button*/}
+												{/*	component={Link}*/}
+												{/*	to={`/metadata-definitions/${mdd.id}`}*/}
+												{/*>*/}
+												{/*	{mdd.name}*/}
+												{/*</Button>*/}
+												{mdd.name}
 											</TableCell>
 											<TableCell
 												scope="row"

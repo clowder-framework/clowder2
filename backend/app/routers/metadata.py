@@ -54,14 +54,18 @@ async def get_metadata_definition_list(
         limit: int = 2,
 ):
     if name is None:
-        defs = await MetadataDefinitionDB.find().skip(skip).limit(limit).to_list()
+        defs = await MetadataDefinitionDB.find(
+            sort=(-MetadataDefinitionDB.created),
+            skip=skip,
+            limit=limit
+        ).to_list()
     else:
-        defs = (
-            await MetadataDefinitionDB.find(MetadataDefinitionDB.name == name)
-            .skip(skip)
-            .limit(limit)
-            .to_list()
-        )
+        defs = await MetadataDefinitionDB.find(
+            MetadataDefinitionDB.name == name,
+            sort=(-MetadataDefinitionDB.created),
+            skip=skip,
+            limit=limit,
+        ).to_list()
     return [mddef.dict() for mddef in defs]
 
 
@@ -139,6 +143,7 @@ async def search_metadata_definition(
             RegEx(field=MetadataDefinitionDB.description, pattern=search_term),
             RegEx(field=MetadataDefinitionDB.context, pattern=search_term),
         ),
+        sort=(-MetadataDefinitionDB.created),
         skip=skip,
         limit=limit,
     ).to_list()

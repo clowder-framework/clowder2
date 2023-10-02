@@ -89,6 +89,7 @@ class MetadataDefinitionBase(BaseModel):
 
     name: str
     description: Optional[str]
+    created: datetime = Field(default_factory=datetime.utcnow)
     context: Optional[
         List[Union[dict, AnyUrl]]
     ]  # https://json-ld.org/spec/latest/json-ld/#the-context
@@ -248,10 +249,10 @@ class MetadataOut(MetadataDB):
 
 
 async def validate_context(
-    content: dict,
-    definition: Optional[str] = None,
-    context_url: Optional[str] = None,
-    context: Optional[List[Union[dict, AnyUrl]]] = None,
+        content: dict,
+        definition: Optional[str] = None,
+        context_url: Optional[str] = None,
+        context: Optional[List[Union[dict, AnyUrl]]] = None,
 ):
     """Convenience function for making sure incoming metadata has valid definitions or resolvable context.
 
@@ -269,9 +270,9 @@ async def validate_context(
         pass
     if definition is not None:
         if (
-            md_def := await MetadataDefinitionDB.find_one(
-                MetadataDefinitionDB.name == definition
-            )
+                md_def := await MetadataDefinitionDB.find_one(
+                    MetadataDefinitionDB.name == definition
+                )
         ) is not None:
             content = validate_definition(content, md_def)
         else:
