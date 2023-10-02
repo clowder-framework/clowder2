@@ -48,23 +48,23 @@ export function postMetadataDefinitions(metadataDefinition) {
 	};
 }
 
-export const DELETE_METADATA_DEFINITIONS = "DELETE_METADATA_DEFINITIONS";
+export const DELETE_METADATA_DEFINITION = "DELETE_METADATA_DEFINITION";
 
-export function deleteMetadataDefinitions(metadataDefinition) {
+export function deleteMetadataDefinition(metadataDefinitionId) {
 	return (dispatch) => {
-		return V2.MetadataService.(
-			metadataDefinition
+		return V2.MetadataService.deleteMetadataDefinitionApiV2MetadataDefinitionMetadataDefinitionIdDelete(
+			metadataDefinitionId
 		)
 			.then((json) => {
 				dispatch({
-					type: DELETE_METADATA_DEFINITIONS,
-					metadataDefinitionList: json,
+					type: DELETE_METADATA_DEFINITION,
+					metadataDefinition: json,
 					receivedAt: Date.now(),
 				});
 			})
 			.catch((reason) => {
 				dispatch(
-					handleErrors(reason, deleteMetadataDefinitions(metadataDefinition))
+					handleErrors(reason, deleteMetadataDefinition(metadataDefinitionId))
 				);
 			});
 	};
