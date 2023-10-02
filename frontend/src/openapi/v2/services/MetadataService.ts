@@ -15,14 +15,14 @@ import { request as __request } from '../core/request';
 export class MetadataService {
 
     /**
-     * Get Metadata Definition
+     * Get Metadata Definition List
      * @param name
      * @param skip
      * @param limit
      * @returns MetadataDefinitionOut Successful Response
      * @throws ApiError
      */
-    public static getMetadataDefinitionApiV2MetadataDefinitionGet(
+    public static getMetadataDefinitionListApiV2MetadataDefinitionGet(
         name?: string,
         skip?: number,
         limit: number = 2,
@@ -62,6 +62,24 @@ export class MetadataService {
     }
 
     /**
+     * Get Metadata Definition
+     * @param metadataDefinitionId
+     * @returns MetadataDefinitionOut Successful Response
+     * @throws ApiError
+     */
+    public static getMetadataDefinitionApiV2MetadataDefinitionMetadataDefinitionIdGet(
+        metadataDefinitionId: string,
+    ): CancelablePromise<MetadataDefinitionOut> {
+        return __request({
+            method: 'GET',
+            path: `/api/v2/metadata/definition/${metadataDefinitionId}`,
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+
+    /**
      * Delete Metadata Definition
      * Delete metadata definition by specific ID.
      * @param metadataDefinitionId
@@ -94,36 +112,18 @@ export class MetadataService {
      * @returns MetadataDefinitionOut Successful Response
      * @throws ApiError
      */
-    public static searchMetadataDefinitionApiV2MetadataSearchSearchTermGet(
+    public static searchMetadataDefinitionApiV2MetadataDefinitionSearchSearchTermGet(
         searchTerm: string,
         skip?: number,
         limit: number = 10,
     ): CancelablePromise<Array<MetadataDefinitionOut>> {
         return __request({
             method: 'GET',
-            path: `/api/v2/metadata/search/${searchTerm}`,
+            path: `/api/v2/metadata/definition/search/${searchTerm}`,
             query: {
                 'skip': skip,
                 'limit': limit,
             },
-            errors: {
-                422: `Validation Error`,
-            },
-        });
-    }
-
-    /**
-     * Get Metadata Definition
-     * @param metadataDefinitionId
-     * @returns MetadataDefinitionOut Successful Response
-     * @throws ApiError
-     */
-    public static getMetadataDefinitionApiV2MetadataMetadataDefinitionIdGet(
-        metadataDefinitionId: string,
-    ): CancelablePromise<MetadataDefinitionOut> {
-        return __request({
-            method: 'GET',
-            path: `/api/v2/metadata/${metadataDefinitionId}`,
             errors: {
                 422: `Validation Error`,
             },

@@ -5,8 +5,7 @@ export const RECEIVE_METADATA_DEFINITIONS = "RECEIVE_METADATA_DEFINITIONS";
 
 export function fetchMetadataDefinitions(name = null, skip = 0, limit = 10) {
 	return (dispatch) => {
-		// TODO need to think pagination
-		return V2.MetadataService.getMetadataDefinitionApiV2MetadataDefinitionGet(
+		return V2.MetadataService.getMetadataDefinitionListApiV2MetadataDefinitionGet(
 			name,
 			skip,
 			limit
@@ -21,6 +20,28 @@ export function fetchMetadataDefinitions(name = null, skip = 0, limit = 10) {
 			.catch((reason) => {
 				dispatch(
 					handleErrors(reason, fetchMetadataDefinitions(name, skip, limit))
+				);
+			});
+	};
+}
+
+export const RECEIVE_METADATA_DEFINITION = "RECEIVE_METADATA_DEFINITION";
+
+export function fetchMetadataDefinition(metadataDefinitionId) {
+	return (dispatch) => {
+		return V2.MetadataService.getMetadataDefinitionApiV2MetadataDefinitionMetadataDefinitionIdGet(
+			metadataDefinitionId
+		)
+			.then((json) => {
+				dispatch({
+					type: RECEIVE_METADATA_DEFINITION,
+					metadataDefinition: json,
+					receivedAt: Date.now(),
+				});
+			})
+			.catch((reason) => {
+				dispatch(
+					handleErrors(reason, fetchMetadataDefinition(metadataDefinitionId))
 				);
 			});
 	};
@@ -65,6 +86,33 @@ export function deleteMetadataDefinition(metadataDefinitionId) {
 			.catch((reason) => {
 				dispatch(
 					handleErrors(reason, deleteMetadataDefinition(metadataDefinitionId))
+				);
+			});
+	};
+}
+
+export const SEARCH_METADATA_DEFINITIONS = "SEARCH_METADATA_DEFINITIONS";
+
+export function searchMetadataDefinitions(searchTerm, skip, limit) {
+	return (dispatch) => {
+		return V2.MetadataService.searchMetadataDefinitionApiV2MetadataSearchSearchTermGet(
+			searchTerm,
+			skip,
+			limit
+		)
+			.then((json) => {
+				dispatch({
+					type: SEARCH_METADATA_DEFINITIONS,
+					metadataDefinitionList: json,
+					receivedAt: Date.now(),
+				});
+			})
+			.catch((reason) => {
+				dispatch(
+					handleErrors(
+						reason,
+						searchMetadataDefinitions(searchTerm, skip, limit)
+					)
 				);
 			});
 	};
