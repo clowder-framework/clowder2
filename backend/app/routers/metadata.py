@@ -26,8 +26,8 @@ router = APIRouter()
 
 @router.post("/definition", response_model=MetadataDefinitionOut)
 async def save_metadata_definition(
-    definition_in: MetadataDefinitionIn,
-    user=Depends(get_current_user),
+        definition_in: MetadataDefinitionIn,
+        user=Depends(get_current_user),
 ):
     existing = await MetadataDefinitionDB.find_one(
         MetadataDefinitionDB.name == definition_in.name
@@ -45,10 +45,10 @@ async def save_metadata_definition(
 
 @router.get("/definition", response_model=List[MetadataDefinitionOut])
 async def get_metadata_definition(
-    name: Optional[str] = None,
-    user=Depends(get_current_user),
-    skip: int = 0,
-    limit: int = 2,
+        name: Optional[str] = None,
+        user=Depends(get_current_user),
+        skip: int = 0,
+        limit: int = 2,
 ):
     if name is None:
         defs = await MetadataDefinitionDB.find().skip(skip).limit(limit).to_list()
@@ -62,13 +62,40 @@ async def get_metadata_definition(
     return [mddef.dict() for mddef in defs]
 
 
+@router.delete("/definition/{metadata_definition_id}", response_model=MetadataDefinitionOut)
+async def delete_metadata_definition(
+        metadata_definition_id: str,
+        user=Depends(get_current_user),
+):
+    """Delete metadata definition by specific ID."""
+    mdd = await MetadataDefinitionDB.find_one(MetadataDefinitionDB.id == PyObjectId(metadata_definition_id))
+    if mdd:
+        # Check if metadata using this definition exists
+        metadata_using_definition = await MetadataDB.find(
+            MetadataDB.definition == mdd.name
+        ).to_list()
+
+        if len(metadata_using_definition) > 0:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Metadata definition {metadata_definition_id} in use. "
+                       f"You cannot delete it until all metadata records using it are deleted.",
+            )
+
+        # TODO: Refactor this with permissions checks etc.
+        await mdd.delete()
+        return mdd.dict()
+    else:
+        raise HTTPException(status_code=404, detail=f"Metadata definition {metadata_definition_id} not found")
+
+
 @router.patch("/{metadata_id}", response_model=MetadataOut)
 async def update_metadata(
-    metadata_in: MetadataPatch,
-    metadata_id: str,
-    es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
-    user=Depends(get_current_user),
-    allow: bool = Depends(MetadataAuthorization("editor")),
+        metadata_in: MetadataPatch,
+        metadata_id: str,
+        es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
+        user=Depends(get_current_user),
+        allow: bool = Depends(MetadataAuthorization("editor")),
 ):
     """Update metadata. Any fields provided in the contents JSON will be added or updated in the metadata. If context or
     agent should be changed, use PUT.
@@ -86,9 +113,9 @@ async def update_metadata(
 
 @router.delete("/{metadata_id}")
 async def delete_metadata(
-    metadata_id: str,
-    user=Depends(get_current_user),
-    allow: bool = Depends(MetadataAuthorization("editor")),
+        metadata_id: str,
+        user=Depends(get_current_user),
+        allow: bool = Depends(MetadataAuthorization("editor")),
 ):
     """Delete metadata by specific ID."""
     md = await MetadataDB.find_one(MetadataDB.id == PyObjectId(metadata_id))

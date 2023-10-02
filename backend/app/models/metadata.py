@@ -2,7 +2,7 @@ import collections.abc
 from datetime import datetime
 from typing import Optional, List, Union
 
-from beanie import Document, PydanticObjectId
+from beanie import Document
 from elasticsearch import Elasticsearch, NotFoundError
 from fastapi import HTTPException
 from pydantic import Field, validator, AnyUrl, BaseModel
@@ -11,7 +11,6 @@ from app.models.listeners import (
     EventListenerIn,
     LegacyEventListenerIn,
     EventListenerOut,
-    ExtractorInfo,
 )
 from app.models.mongomodel import MongoDBRef
 from app.models.users import UserOut
@@ -114,7 +113,8 @@ class MetadataDefinitionDB(Document, MetadataDefinitionBase):
 
 
 class MetadataDefinitionOut(MetadataDefinitionDB):
-    pass
+    class Config:
+        fields = {"id": "id"}
 
 
 def validate_definition(content: dict, metadata_def: MetadataDefinitionOut):
@@ -248,10 +248,10 @@ class MetadataOut(MetadataDB):
 
 
 async def validate_context(
-    content: dict,
-    definition: Optional[str] = None,
-    context_url: Optional[str] = None,
-    context: Optional[List[Union[dict, AnyUrl]]] = None,
+        content: dict,
+        definition: Optional[str] = None,
+        context_url: Optional[str] = None,
+        context: Optional[List[Union[dict, AnyUrl]]] = None,
 ):
     """Convenience function for making sure incoming metadata has valid definitions or resolvable context.
 
@@ -269,9 +269,9 @@ async def validate_context(
         pass
     if definition is not None:
         if (
-            md_def := await MetadataDefinitionDB.find_one(
-                MetadataDefinitionDB.name == definition
-            )
+                md_def := await MetadataDefinitionDB.find_one(
+                    MetadataDefinitionDB.name == definition
+                )
         ) is not None:
             content = validate_definition(content, md_def)
         else:
