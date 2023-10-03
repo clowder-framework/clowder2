@@ -24,7 +24,7 @@ async def create_reply_queue():
     channel: BlockingChannel = dependencies.get_rabbitmq()
 
     if (
-            config_entry := await ConfigEntryDB.find_one({"key": "instance_id"})
+        config_entry := await ConfigEntryDB.find_one({"key": "instance_id"})
     ) is not None:
         instance_id = config_entry.value
     else:
@@ -49,11 +49,11 @@ async def create_reply_queue():
 
 
 async def submit_file_job(
-        file_out: FileOut,
-        routing_key: str,
-        parameters: dict,
-        user: UserOut,
-        rabbitmq_client: BlockingChannel,
+    file_out: FileOut,
+    routing_key: str,
+    parameters: dict,
+    user: UserOut,
+    rabbitmq_client: BlockingChannel,
 ):
     # Create an entry in job history with unique ID
     job = EventListenerJobDB(
@@ -74,7 +74,7 @@ async def submit_file_job(
         datasetId=str(file_out.dataset_id),
         secretKey=current_secretKey,
         job_id=str(job.id),
-        parameters=parameters
+        parameters=parameters,
     )
     reply_to = await create_reply_queue()
     print("RABBITMQ_CLIENT: " + str(rabbitmq_client))
@@ -90,11 +90,11 @@ async def submit_file_job(
 
 
 async def submit_dataset_job(
-        dataset_out: DatasetOut,
-        routing_key: str,
-        parameters: dict,
-        user: UserOut,
-        rabbitmq_client: BlockingChannel = Depends(dependencies.get_rabbitmq),
+    dataset_out: DatasetOut,
+    routing_key: str,
+    parameters: dict,
+    user: UserOut,
+    rabbitmq_client: BlockingChannel = Depends(dependencies.get_rabbitmq),
 ):
     # Create an entry in job history with unique ID
     job = EventListenerJobDB(
