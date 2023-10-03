@@ -9,6 +9,7 @@ import { a11yProps, TabPanel } from "./tabs/TabComponent";
 import DatasetCard from "./datasets/DatasetCard";
 import { ArrowBack, ArrowForward } from "@material-ui/icons";
 import Layout from "./Layout";
+import { Link as RouterLink, useLocation } from "react-router-dom";
 import { Listeners } from "./listeners/Listeners";
 import { ErrorModal } from "./errors/ErrorModal";
 
@@ -100,7 +101,7 @@ export const Explore = (): JSX.Element => {
 					</Box>
 					<TabPanel value={selectedTabIndex} index={0}>
 						<Grid container spacing={2}>
-							{datasets !== undefined ? (
+							{datasets !== undefined ?  (
 								datasets.map((dataset) => {
 									return (
 										<Grid item key={dataset.id} xs={12} sm={6} md={4} lg={3}>
@@ -115,6 +116,19 @@ export const Explore = (): JSX.Element => {
 										</Grid>
 									);
 								})
+							) : (
+								<></>
+							)}
+							{datasets.length === 0 ? (
+								<Box textAlign="center">
+									<p>This instance has no datasets uploaded</p>
+									<Button component={RouterLink} to="/create-dataset"
+										variant="contained"
+										sx={{ m: 2 }}
+									>
+										Create Dataset
+									</Button>
+								</Box>
 							) : (
 								<></>
 							)}
