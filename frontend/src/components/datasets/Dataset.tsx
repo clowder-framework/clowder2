@@ -20,7 +20,7 @@ import { EditMetadata } from "../metadata/EditMetadata";
 import { MainBreadcrumbs } from "../navigation/BreadCrumb";
 import {
 	deleteDatasetMetadata as deleteDatasetMetadataAction,
-	fetchDatasetMetadata,
+	fetchDatasetMetadata, fetchMetadataDefinitions,
 	patchDatasetMetadata as patchDatasetMetadataAction,
 	postDatasetMetadata,
 } from "../../actions/metadata";
@@ -78,6 +78,8 @@ export const Dataset = (): JSX.Element => {
 		dispatch(fetchDatasetAbout(datasetId));
 	const listDatasetMetadata = (datasetId: string | undefined) =>
 		dispatch(fetchDatasetMetadata(datasetId));
+	const getMetadatDefinitions = (name:string|null, skip:number, limit:number) => dispatch(fetchMetadataDefinitions(name, skip,limit));
+
 
 	// mapStateToProps
 	const about = useSelector((state: RootState) => state.dataset.about);
@@ -100,6 +102,9 @@ export const Dataset = (): JSX.Element => {
 
 	const [paths, setPaths] = useState([]);
 
+
+	const metadataDefinitionList = useSelector((state: RootState) => state.metadata.metadataDefinitionList);
+
 	// component did mount list all files in dataset
 	useEffect(() => {
 		listFilesInDataset(datasetId, folderId);
@@ -107,6 +112,10 @@ export const Dataset = (): JSX.Element => {
 		listDatasetAbout(datasetId);
 		getFolderPath(folderId);
 	}, [searchParams]);
+
+	useEffect(() => {
+		getMetadatDefinitions(null, 0, 100);
+	}, []);
 
 	// for breadcrumb
 	useEffect(() => {
@@ -328,17 +337,23 @@ export const Dataset = (): JSX.Element => {
 									resourceType="dataset"
 									resourceId={datasetId}
 								/>
-								<Box textAlign="center">
-									<Button
-										variant="contained"
-										sx={{ m: 2 }}
-										onClick={() => {
-											setEnableAddMetadata(true);
-										}}
-									>
-										Add Metadata
-									</Button>
-								</Box>
+								{metadataDefinitionList.length > 0 ? (
+									<Box textAlign="center">
+										<Button
+											variant="contained"
+											sx={{ m: 2 }}
+											onClick={() => {
+												setEnableAddMetadata(true);
+											}}
+										>
+											Add Metadata
+										</Button>
+									</Box>
+								) : (
+									<Box textAlign="center">
+										No Metadata Definitions Added
+									</Box>
+								)}
 							</>
 						)}
 					</TabPanel>
