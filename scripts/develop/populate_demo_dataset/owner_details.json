@@ -1,0 +1,74 @@
+{
+    "name" : "Owner details",
+    "description" : "Dataset owner details",
+    "context" : [
+        {
+            "github_link": "https://github.com/thepanacealab/covid19_twitter"
+        }
+    ],
+    "fields" : [
+        {
+            "name" : "Author",
+            "list" : true,
+            "widgetType": "TextField",
+            "config": {
+                "type" : "str"
+            },
+            "required" : false
+        },
+        {
+            "name" : "Created date",
+            "list" : false,
+            "widgetType": "DateTimePicker",
+            "config": {
+                "type" : "time"
+            },
+            "required" : false
+        },
+        {
+            "name": "Publisher",
+            "list": false,
+            "widgetType": "TextField",
+            "config": {
+                "type": "str"
+            },
+            "required": false
+        },
+        {
+            "name" : "Version",
+            "list" : false,
+            "widgetType": "TextField",
+            "config": {
+                "type" : "str"
+            },
+            "required" : false
+        },
+        {
+            "name" : "doi",
+            "list" : false,
+            "widgetType": "TextField",
+            "config": {
+                "type" : "str"
+            },
+            "required" : false
+        },
+        {
+            "name" : "url",
+            "list" : false,
+            "widgetType": "TextField",
+            "config": {
+                "type" : "str"
+            },
+            "required" : false
+        },
+        {
+            "name" : "Note",
+            "list" : false,
+            "widgetType": "TextField",
+            "config": {
+                "type" : "str"
+            },
+            "required" : false
+        }
+    ]
+}
