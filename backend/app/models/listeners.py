@@ -160,6 +160,7 @@ class EventListenerJobMessage(BaseModel):
     id: str
     datasetId: str
     job_id: str
+    parameters: Optional[dict] = None
 
 
 class EventListenerDatasetJobMessage(BaseModel):
