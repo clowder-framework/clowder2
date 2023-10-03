@@ -17,19 +17,15 @@ if __name__ == "__main__":
         0
     ]  # dev: http://localhost:8000/api/v2 prod: http://localhost/api/v2
     # api key
-    token: str = args[
-        1
-    ]
+    token: str = args[1]
     # directory with json metadata definitions
-    dir: str = args[
-        2
-    ]
+    dir: str = args[2]
     # header for POST request
     headers = {"X-API-KEY": token}
     # read definitions from local directory
     dir_list = os.listdir(dir)
     for file in dir_list:
-        with open(os.path.join(dir,file)) as metadata_definition:
+        with open(os.path.join(dir, file)) as metadata_definition:
             json_definition = json.load(metadata_definition)
             response = requests.post(
                 f"{api}/metadata/definition",
