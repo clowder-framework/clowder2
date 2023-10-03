@@ -6,7 +6,7 @@ import type { EventListenerIn } from './EventListenerIn';
 import type { LegacyEventListenerIn } from './LegacyEventListenerIn';
 
 export type MetadataIn = {
-    context?: Array<string>;
+    '@context'?: Array<string>;
     context_url?: string;
     definition?: string;
     content: any;
