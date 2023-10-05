@@ -5,8 +5,8 @@ from app.models.files import ContentType
 
 
 def get_content_type(
-        filename: str,
-        content_type: Optional[str] = None,
+    filename: str,
+    content_type: Optional[str] = None,
 ):
     """Returns ContentType object given a content_tyoe, also guessed the content_type if none is provided
 
