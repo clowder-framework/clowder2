@@ -1,0 +1,73 @@
+version: '3.7'
+
+# Settings and configurations that are common for all containers
+x-minio-common: &minio-common
+  image: quay.io/minio/minio:RELEASE.2022-01-25T19-56-04Z
+  command: server --console-address ":9001" http://minio{1...4}/data
+  expose:
+    - "9000"
+    - "9001"
+  environment:
+    MINIO_ROOT_USER: minioadmin
+    MINIO_ROOT_PASSWORD: minioadmin
+  healthcheck:
+    test: [ "CMD", "curl", "-f", "http://localhost:9000/minio/health/live" ]
+    interval: 30s
+    timeout: 20s
+    retries: 3
+
+services:
+  name-entity-recognition:
+    image: socialmediamacroscope/name_entity_recognition_extractor:0.1.1
+    environment:
+      CLOWDER_VERSION: 2
+      RABBITMQ_URI: amqp://guest:guest@rabbitmq:5672/%2F
+    networks:
+      - clowder2
+    restart: unless-stopped
+
+  network-analysis:
+    image: socialmediamacroscope/network_analysis_extractor:0.1.1
+    environment:
+      CLOWDER_VERSION: 2
+      RABBITMQ_URI: amqp://guest:guest@rabbitmq:5672/%2F
+    networks:
+      - clowder2
+    restart: unless-stopped
+
+  topic-modeling:
+    image: socialmediamacroscope/topic_modeling_extractor:0.1.1
+    environment:
+      CLOWDER_VERSION: 2
+      RABBITMQ_URI: amqp://guest:guest@rabbitmq:5672/%2F
+    networks:
+      - clowder2
+    restart: unless-stopped
+
+  natural-language-preprocessing:
+    image: socialmediamacroscope/preprocessing_extractor:0.1.1
+    environment:
+      CLOWDER_VERSION: 2
+      RABBITMQ_URI: amqp://guest:guest@rabbitmq:5672/%2F
+    networks:
+      - clowder2
+    restart: unless-stopped
+
+  sentiment-analysis:
+    image: socialmediamacroscope/sentiment_analysis_extractor:0.1.1
+    environment:
+      CLOWDER_VERSION: 2
+      RABBITMQ_URI: amqp://guest:guest@rabbitmq:5672/%2F
+    networks:
+      - clowder2
+    restart: unless-stopped
+
+
+networks:
+  clowder2:
+
+## By default this config uses default local driver,
+## For custom volumes replace with volume driver configuration.
+volumes:
+  geoserver_data:
+  geoserver_exts:
