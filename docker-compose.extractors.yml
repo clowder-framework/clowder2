@@ -3,7 +3,7 @@ version: '3.7'
 
 services:
   name-entity-recognition:
-    image: socialmediamacroscope/name_entity_recognition_extractor:0.1.1
+    image: socialmediamacroscope/name_entity_recognition_extractor:latest
     environment:
       CLOWDER_VERSION: 2
       RABBITMQ_URI: amqp://guest:guest@rabbitmq:5672/%2F
@@ -12,7 +12,7 @@ services:
     restart: unless-stopped
 
   network-analysis:
-    image: socialmediamacroscope/network_analysis_extractor:0.1.1
+    image: socialmediamacroscope/network_analysis_extractor:latest
     environment:
       CLOWDER_VERSION: 2
       RABBITMQ_URI: amqp://guest:guest@rabbitmq:5672/%2F
@@ -21,7 +21,7 @@ services:
     restart: unless-stopped
 
   topic-modeling:
-    image: socialmediamacroscope/topic_modeling_extractor:0.1.1
+    image: socialmediamacroscope/topic_modeling_extractor:latest
     environment:
       CLOWDER_VERSION: 2
       RABBITMQ_URI: amqp://guest:guest@rabbitmq:5672/%2F
@@ -30,7 +30,7 @@ services:
     restart: unless-stopped
 
   natural-language-preprocessing:
-    image: socialmediamacroscope/preprocessing_extractor:0.1.1
+    image: socialmediamacroscope/preprocessing_extractor:latest
     environment:
       CLOWDER_VERSION: 2
       RABBITMQ_URI: amqp://guest:guest@rabbitmq:5672/%2F
@@ -39,7 +39,7 @@ services:
     restart: unless-stopped
 
   sentiment-analysis:
-    image: socialmediamacroscope/sentiment_analysis_extractor:0.1.1
+    image: socialmediamacroscope/sentiment_analysis_extractor:latest
     environment:
       CLOWDER_VERSION: 2
       RABBITMQ_URI: amqp://guest:guest@rabbitmq:5672/%2F
