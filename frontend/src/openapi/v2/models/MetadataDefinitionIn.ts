@@ -42,6 +42,7 @@ import type { MetadataField } from './MetadataField';
                                 export type MetadataDefinitionIn = {
                                     name: string;
                                     description?: string;
+                                    created?: string;
                                     context?: Array<string>;
                                     context_url?: string;
                                     fields: Array<MetadataField>;
