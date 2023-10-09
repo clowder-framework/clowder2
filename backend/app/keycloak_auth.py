@@ -183,8 +183,8 @@ async def get_current_user(
                     ListenerAPIKeyDB.key == payload["key"],
                 )
             ) is not None:
-                user_out = await UserDB.find_one(UserDB.email == key.user)
-                return user_out.dict()
+                user = await UserDB.find_one(UserDB.email == key.user)
+                return UserOut(**user.dict())
             elif (
                 key := await UserAPIKeyDB.find_one(
                     UserAPIKeyDB.user == payload["user"],
@@ -203,7 +203,7 @@ async def get_current_user(
                     )
                 else:
                     user = await UserDB.find_one(UserDB.email == key.user)
-                    return user.dict()
+                    return UserOut(**user.dict())
             else:
                 raise HTTPException(
                     status_code=401,
