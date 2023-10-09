@@ -32,15 +32,20 @@ export class ThumbnailsService {
     /**
      * Download Thumbnail
      * @param thumbnailId
+     * @param increment
      * @returns any Successful Response
      * @throws ApiError
      */
     public static downloadThumbnailApiV2ThumbnailsThumbnailIdGet(
         thumbnailId: string,
+        increment: boolean = false,
     ): CancelablePromise<any> {
         return __request({
             method: 'GET',
             path: `/api/v2/thumbnails/${thumbnailId}`,
+            query: {
+                'increment': increment,
+            },
             errors: {
                 422: `Validation Error`,
             },
