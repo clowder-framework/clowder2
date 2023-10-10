@@ -25,4 +25,5 @@ export type ThumbnailOut = {
     modified?: string;
     bytes?: number;
     content_type?: ContentType;
+    downloads?: number;
 }

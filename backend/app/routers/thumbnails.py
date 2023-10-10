@@ -1,6 +1,7 @@
 from typing import List, Optional
 
 from beanie import PydanticObjectId
+from beanie.odm.operators.update.general import Inc
 from fastapi import APIRouter, HTTPException, Depends
 from fastapi import File, UploadFile
 from fastapi.security import HTTPBearer
@@ -72,7 +73,9 @@ async def remove_thumbnail(thumb_id: str, fs: Minio = Depends(dependencies.get_f
 
 @router.get("/{thumbnail_id}")
 async def download_thumbnail(
-    thumbnail_id: str, fs: Minio = Depends(dependencies.get_fs)
+    thumbnail_id: str,
+    fs: Minio = Depends(dependencies.get_fs),
+    increment: Optional[bool] = False,
 ):
     # If thumbnail exists in MongoDB, download from Minio
     if (thumbnail := await ThumbnailDB.get(PydanticObjectId(thumbnail_id))) is not None:
@@ -81,6 +84,9 @@ async def download_thumbnail(
         # Get content type & open file stream
         response = StreamingResponse(content.stream(settings.MINIO_UPLOAD_CHUNK_SIZE))
         response.headers["Content-Disposition"] = "attachment; filename=%s" % "thumb"
+        if increment:
+            # Increment download count
+            await thumbnail.update(Inc({ThumbnailDB.downloads: 1}))
         return response
     else:
         raise HTTPException(
