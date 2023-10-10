@@ -120,40 +120,46 @@ export const Explore = (): JSX.Element => {
 								<></>
 							)}
 							{datasets.length === 0 ? (
-								<Box textAlign="center">
-									<p>Nobody has created any datasets on this instance. Click below to create a dataset!</p>
-									<Button component={RouterLink} to="/create-dataset"
-										variant="contained"
-										sx={{ m: 2 }}
-									>
+								<Grid container justifyContent="center">
+									<Box textAlign="center">
+										<p>Nobody has created any datasets on this instance. Click below to create a dataset!</p>
+										<Button component={RouterLink} to="/create-dataset"
+											variant="contained"
+											sx={{ m: 2 }}
+										>
 										Create Dataset
-									</Button>
-								</Box>
+										</Button>
+									</Box>
+								</Grid>
 							) : (
 								<></>
 							)}
 						</Grid>
-						<Box display="flex" justifyContent="center" sx={{ m: 1 }}>
-							<ButtonGroup
-								variant="contained"
-								aria-label="previous next buttons"
-							>
-								<Button
-									aria-label="previous"
-									onClick={previous}
-									disabled={prevDisabled}
+						{datasets.length !== 0 ? (
+							<Box display="flex" justifyContent="center" sx={{ m: 1 }}>
+								<ButtonGroup
+									variant="contained"
+									aria-label="previous next buttons"
 								>
-									<ArrowBack /> Prev
-								</Button>
-								<Button
-									aria-label="next"
-									onClick={next}
-									disabled={nextDisabled}
-								>
-									Next <ArrowForward />
-								</Button>
-							</ButtonGroup>
-						</Box>
+									<Button
+										aria-label="previous"
+										onClick={previous}
+										disabled={prevDisabled}
+									>
+										<ArrowBack /> Prev
+									</Button>
+									<Button
+										aria-label="next"
+										onClick={next}
+										disabled={nextDisabled}
+									>
+										Next <ArrowForward />
+									</Button>
+								</ButtonGroup>
+							</Box>
+						): (
+							<></>
+						)}
 					</TabPanel>
 					<TabPanel value={selectedTabIndex} index={1}>
 						<Listeners />
