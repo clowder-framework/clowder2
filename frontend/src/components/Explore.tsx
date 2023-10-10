@@ -121,7 +121,7 @@ export const Explore = (): JSX.Element => {
 							)}
 							{datasets.length === 0 ? (
 								<Box textAlign="center">
-									<p>This instance has no datasets uploaded</p>
+									<p>Nobody has created any datasets on this instance. Click below to create a dataset!</p>
 									<Button component={RouterLink} to="/create-dataset"
 										variant="contained"
 										sx={{ m: 2 }}
