@@ -7,8 +7,6 @@ export const MetadataTextField = (props) => {
 	const {widgetName, fieldName, content, setMetadata, metadataId, updateMetadata, resourceId, initialReadOnly, isRequired, datasetRole} = props;
 	const [localContent, setLocalContent] = useState(content && content[fieldName] ? content: {});
 	const [readOnly, setReadOnly] = useState(initialReadOnly);
-	console.log(updateMetadata, 'updateMetadatatextfield');
-	console.log(datasetRole, 'datasetRole');
 	const [inputChanged, setInputChanged] = useState(false);
 
 	return (
