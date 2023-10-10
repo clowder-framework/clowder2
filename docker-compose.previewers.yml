@@ -1,0 +1,63 @@
+version: '3.7'
+
+# Settings and configurations that are common for all containers
+x-minio-common: &minio-common
+  image: quay.io/minio/minio:RELEASE.2022-01-25T19-56-04Z
+  command: server --console-address ":9001" http://minio{1...4}/data
+  expose:
+    - "9000"
+    - "9001"
+  environment:
+    MINIO_ROOT_USER: minioadmin
+    MINIO_ROOT_PASSWORD: minioadmin
+  healthcheck:
+    test: [ "CMD", "curl", "-f", "http://localhost:9000/minio/health/live" ]
+    interval: 30s
+    timeout: 20s
+    retries: 3
+
+services:
+
+  geoserver:
+    image: docker.osgeo.org/geoserver:2.23.0
+    environment:
+      JAVA_OPTS: -Xmx1536M -XX:MaxPermSize=756M
+      CORS_ENABLED: true
+      CORS_ALLOWED_ORIGINS: "*"
+      CORS_ALLOWED_METHODS: "GET,POST,PUT,DELETE,HEAD,OPTIONS"
+      CORS_ALLOWED_HEADERS: "*"
+    ports:
+      - "8085:8080"
+    networks:
+      - clowder2
+    restart: unless-stopped
+    volumes:
+      - geoserver_data:/opt/geoserver_data
+      - geoserver_exts:/opt/additional_libs
+
+  ## This image must be built from:
+  ##   https://github.com/clowder-framework/extractors-geo/blob/master/preview.geotiff/Dockerfile
+  ## docker build -f Dockerfile -t clowder/extractors-geotiff-preview .
+  ## THIS IS INTENDED FOR LOCAL DEVELOPMENT ONLY.
+  geotiff-preview:
+    image: clowder/extractors-geotiff-preview
+    environment:
+      GEOSERVER_URL: http://geoserver:8080/geoserver/
+      EXTERNAL_GEOSERVER_URL: http://localhost:8085/geoserver/
+      GEOSERVER_USERNAME: admin
+      GEOSERVER_PASSWORD: geoserver
+      CLOWDER_VERSION: 2
+      CLOWDER_URL: http://host.docker.internal:8000/
+      RABBITMQ_URI: amqp://guest:guest@rabbitmq:5672/%2F
+    networks:
+      - clowder2
+    restart: unless-stopped
+
+networks:
+  clowder2:
+
+## By default this config uses default local driver,
+## For custom volumes replace with volume driver configuration.
+volumes:
+  geoserver_data:
+  geoserver_exts:

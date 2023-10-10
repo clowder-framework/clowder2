@@ -4,7 +4,6 @@ import { Box, Button, ButtonGroup, Grid, Tab, Tabs } from "@mui/material";
 import { RootState } from "../types/data";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchDatasets } from "../actions/dataset";
-import { downloadThumbnail } from "../utils/thumbnail";
 
 import { a11yProps, TabPanel } from "./tabs/TabComponent";
 import DatasetCard from "./datasets/DatasetCard";
@@ -30,7 +29,6 @@ export const Explore = (): JSX.Element => {
 	) => dispatch(fetchDatasets(skip, limit, mine));
 	const datasets = useSelector((state: RootState) => state.dataset.datasets);
 
-	const [datasetThumbnailList, setDatasetThumbnailList] = useState<any>([]);
 	// TODO add option to determine limit number; default show 5 datasets each time
 	const [currPageNum, setCurrPageNum] = useState<number>(0);
 	const [limit] = useState<number>(20);
@@ -49,31 +47,6 @@ export const Explore = (): JSX.Element => {
 
 	// fetch thumbnails from each individual dataset/id calls
 	useEffect(() => {
-		(async () => {
-			if (datasets !== undefined && datasets.length > 0) {
-				// TODO change the type any to something else
-				const datasetThumbnailListTemp: any = [];
-				await Promise.all(
-					datasets.map(async (dataset) => {
-						// add thumbnails
-						if (
-							dataset["thumbnail"] !== null &&
-							dataset["thumbnail"] !== undefined
-						) {
-							const thumbnailURL = await downloadThumbnail(
-								dataset["thumbnail"]
-							);
-							datasetThumbnailListTemp.push({
-								id: dataset["id"],
-								thumbnail: thumbnailURL,
-							});
-						}
-					})
-				);
-				setDatasetThumbnailList(datasetThumbnailListTemp);
-			}
-		})();
-
 		// disable flipping if reaches the last page
 		if (datasets.length < limit) setNextDisabled(true);
 		else setNextDisabled(false);
@@ -110,82 +83,72 @@ export const Explore = (): JSX.Element => {
 
 	return (
 		<Layout>
-			<div className="outer-container">
-				{/*Error Message dialogue*/}
-				<ErrorModal errorOpen={errorOpen} setErrorOpen={setErrorOpen} />
-				<div className="inner-container">
-					<Grid container spacing={4}>
-						<Grid item xs>
-							<Box sx={{ borderBottom: 1, borderColor: "divider" }}>
-								<Tabs
-									value={selectedTabIndex}
-									onChange={handleTabChange}
-									aria-label="dashboard tabs"
-								>
-									<Tab sx={tab} label="Datasets" {...a11yProps(0)} />
-									<Tab sx={tab} label="Extractors" {...a11yProps(1)} />
-								</Tabs>
-							</Box>
-							<TabPanel value={selectedTabIndex} index={0}>
-								<Grid container spacing={2}>
-									{datasets !== undefined &&
-									datasetThumbnailList !== undefined ? (
-										datasets.map((dataset) => {
-											return (
-												<Grid
-													item
-													key={dataset.id}
-													xs={12}
-													sm={6}
-													md={4}
-													lg={3}
-												>
-													<DatasetCard
-														id={dataset.id}
-														name={dataset.name}
-														author={`${dataset.creator.first_name} ${dataset.creator.last_name}`}
-														created={dataset.created}
-														description={dataset.description}
-													/>
-												</Grid>
-											);
-										})
-									) : (
-										<></>
-									)}
-								</Grid>
-								<Box display="flex" justifyContent="center" sx={{ m: 1 }}>
-									<ButtonGroup
-										variant="contained"
-										aria-label="previous next buttons"
-									>
-										<Button
-											aria-label="previous"
-											onClick={previous}
-											disabled={prevDisabled}
-										>
-											<ArrowBack /> Prev
-										</Button>
-										<Button
-											aria-label="next"
-											onClick={next}
-											disabled={nextDisabled}
-										>
-											Next <ArrowForward />
-										</Button>
-									</ButtonGroup>
-								</Box>
-							</TabPanel>
-							<TabPanel value={selectedTabIndex} index={1}>
-								<Listeners />
-							</TabPanel>
-							<TabPanel value={selectedTabIndex} index={4} />
-							<TabPanel value={selectedTabIndex} index={2} />
-							<TabPanel value={selectedTabIndex} index={3} />
+			{/*Error Message dialogue*/}
+			<ErrorModal errorOpen={errorOpen} setErrorOpen={setErrorOpen} />
+
+			<Grid container spacing={4}>
+				<Grid item xs>
+					<Box sx={{ borderBottom: 1, borderColor: "divider" }}>
+						<Tabs
+							value={selectedTabIndex}
+							onChange={handleTabChange}
+							aria-label="dashboard tabs"
+						>
+							<Tab sx={tab} label="Datasets" {...a11yProps(0)} />
+							<Tab sx={tab} label="Extractors" {...a11yProps(1)} />
+						</Tabs>
+					</Box>
+					<TabPanel value={selectedTabIndex} index={0}>
+						<Grid container spacing={2}>
+							{datasets !== undefined ? (
+								datasets.map((dataset) => {
+									return (
+										<Grid item key={dataset.id} xs={12} sm={6} md={4} lg={3}>
+											<DatasetCard
+												id={dataset.id}
+												name={dataset.name}
+												author={`${dataset.creator.first_name} ${dataset.creator.last_name}`}
+												created={dataset.created}
+												description={dataset.description}
+												thumbnailId={dataset.thumbnail_id}
+											/>
+										</Grid>
+									);
+								})
+							) : (
+								<></>
+							)}
 						</Grid>
-					</Grid>
-				</div>
-			</div>
+						<Box display="flex" justifyContent="center" sx={{ m: 1 }}>
+							<ButtonGroup
+								variant="contained"
+								aria-label="previous next buttons"
+							>
+								<Button
+									aria-label="previous"
+									onClick={previous}
+									disabled={prevDisabled}
+								>
+									<ArrowBack /> Prev
+								</Button>
+								<Button
+									aria-label="next"
+									onClick={next}
+									disabled={nextDisabled}
+								>
+									Next <ArrowForward />
+								</Button>
+							</ButtonGroup>
+						</Box>
+					</TabPanel>
+					<TabPanel value={selectedTabIndex} index={1}>
+						<Listeners />
+					</TabPanel>
+					<TabPanel value={selectedTabIndex} index={4} />
+					<TabPanel value={selectedTabIndex} index={2} />
+					<TabPanel value={selectedTabIndex} index={3} />
+				</Grid>
+			</Grid>
 		</Layout>
 	);
 };

@@ -27,10 +27,13 @@ class Settings(BaseSettings):
 
     # Minio (file storage) information
     MINIO_SERVER_URL: str = "localhost:9000"
+    MINIO_EXTERNAL_SERVER_URL: str = "localhost:9000"
     MINIO_BUCKET_NAME: str = "clowder"
     MINIO_ACCESS_KEY: str = "minioadmin"
     MINIO_SECRET_KEY: str = "minioadmin"
     MINIO_UPLOAD_CHUNK_SIZE: int = 10 * 1024 * 1024
+    MINIO_EXPIRES: int = 3600  # seconds
+    MINIO_SECURE: str = "False"  # http vs https
 
     # keycloak server
     auth_base = "http://localhost:8080"
@@ -68,14 +71,12 @@ class Settings(BaseSettings):
         "number_of_shards": elasticsearch_no_of_shards,
         "number_of_replicas": elasticsearch_no_of_replicas,
     }
+    elasticsearch_index = "clowder"
 
     # RabbitMQ message bus
     RABBITMQ_USER: str = "guest"
     RABBITMQ_PASS: str = "guest"
     RABBITMQ_HOST: str = "127.0.0.1"
-    RABBITMQ_URL: str = (
-        "amqp://" + RABBITMQ_USER + ":" + RABBITMQ_PASS + "@" + RABBITMQ_HOST + "/"
-    )
     HEARTBEAT_EXCHANGE: str = "extractors"
 
 

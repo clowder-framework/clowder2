@@ -1,5 +1,6 @@
 import {
 	AuthorizationBase,
+	DatasetOut as Dataset,
 	DatasetRoles,
 	EventListenerJobDB,
 	FileOut as FileSummary,
@@ -11,21 +12,9 @@ import {
 	RoleType,
 	UserAPIKeyOut,
 	UserOut,
+	VisualizationConfigOut,
+	VisualizationDataOut,
 } from "../openapi/v2";
-
-export interface Dataset {
-	name: string;
-	description: string;
-	_id: string;
-	creator: UserOut;
-	created: string | Date;
-	modified: string | Date;
-	files: string[];
-	status: string;
-	views: string;
-	downloads: string;
-	thumbnail: string;
-}
 
 export interface Extractor {
 	name: string;
@@ -110,8 +99,19 @@ export interface Path {
 	type: string;
 }
 
+export interface ResourceReference {
+	collection: string;
+	resource_id: string;
+	version: number;
+}
+
 export interface ExtractedMetadata {
-	filename: string;
+	id: string;
+	context: (Context | string)[];
+	agent: Agent;
+	resource: ResourceReference;
+	content: Record<string, unknown>;
+	created_at: string | Date;
 }
 
 export interface MetadataJsonld {
@@ -119,7 +119,7 @@ export interface MetadataJsonld {
 	"@context": (Context | string)[];
 	agent: Agent;
 	attached_to: AttatchTo;
-	content: any;
+	content: Record<string, unknown>;
 	created_at: string | Date;
 }
 
@@ -178,12 +178,16 @@ export interface MetadataState {
 }
 
 export interface FileState {
+	url: string;
+	blob: Blob;
 	fileSummary: FileSummary;
-	extractedMetadata: ExtractedMetadata;
+	extractedMetadata: ExtractedMetadata[];
 	metadataJsonld: MetadataJsonld[];
 	previews: FilePreview[];
 	fileVersions: FileVersion[];
 	fileRole: AuthorizationBase;
+	presignedUrl: string;
+	selected_version_num: number;
 }
 
 export interface UserState {
@@ -207,7 +211,7 @@ export interface ErrorState {
 
 export interface FolderState {
 	folders: FolderOut[];
-	folderPath: String[];
+	folderPath: string[];
 }
 
 export interface JobSummary {
@@ -215,6 +219,23 @@ export interface JobSummary {
 	job_id: string;
 	status: string;
 	timestamp: string;
+}
+
+export interface VisualizationState {
+	visData: VisualizationDataOut;
+	visConfig: VisualizationConfigOut[];
+	presignedUrl: string;
+	blob: Blob;
+}
+
+export interface EventListenerJobStatus {
+	created: string;
+	started: string;
+	processing: string;
+	succeeded: string;
+	error: string;
+	skipped: string;
+	resubmitted: string;
 }
 
 export interface RootState {
@@ -226,14 +247,5 @@ export interface RootState {
 	group: GroupState;
 	user: UserState;
 	folder: FolderState;
-}
-
-export interface EventListenerJobStatus {
-	created: string;
-	started: string;
-	processing: string;
-	succeeded: string;
-	error: string;
-	skipped: string;
-	resubmitted: string;
+	visualization: VisualizationState;
 }

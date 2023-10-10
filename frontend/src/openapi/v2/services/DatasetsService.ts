@@ -334,4 +334,42 @@ export class DatasetsService {
         });
     }
 
+    /**
+     * Download Dataset Thumbnail
+     * @param datasetId
+     * @returns any Successful Response
+     * @throws ApiError
+     */
+    public static downloadDatasetThumbnailApiV2DatasetsDatasetIdThumbnailGet(
+        datasetId: string,
+    ): CancelablePromise<any> {
+        return __request({
+            method: 'GET',
+            path: `/api/v2/datasets/${datasetId}/thumbnail`,
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+
+    /**
+     * Add Dataset Thumbnail
+     * @param datasetId
+     * @param thumbnailId
+     * @returns DatasetOut Successful Response
+     * @throws ApiError
+     */
+    public static addDatasetThumbnailApiV2DatasetsDatasetIdThumbnailThumbnailIdPatch(
+        datasetId: string,
+        thumbnailId: string,
+    ): CancelablePromise<DatasetOut> {
+        return __request({
+            method: 'PATCH',
+            path: `/api/v2/datasets/${datasetId}/thumbnail/${thumbnailId}`,
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+
 }

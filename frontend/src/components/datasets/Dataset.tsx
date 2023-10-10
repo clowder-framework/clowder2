@@ -1,3 +1,4 @@
+// lazy loading
 import React, { useEffect, useState } from "react";
 import { Box, Button, Grid, Stack, Tab, Tabs, Typography } from "@mui/material";
 import { useParams, useSearchParams } from "react-router-dom";
@@ -16,6 +17,7 @@ import { MetadataIn } from "../../openapi/v2";
 import { DisplayMetadata } from "../metadata/DisplayMetadata";
 import { DisplayListenerMetadata } from "../metadata/DisplayListenerMetadata";
 import { EditMetadata } from "../metadata/EditMetadata";
+import { MainBreadcrumbs } from "../navigation/BreadCrumb";
 import {
 	deleteDatasetMetadata as deleteDatasetMetadataAction,
 	fetchDatasetMetadata,
@@ -38,6 +40,8 @@ import { TabStyle } from "../../styles/Styles";
 import { Forbidden } from "../errors/Forbidden";
 import { PageNotFound } from "../errors/PageNotFound";
 import { ErrorModal } from "../errors/ErrorModal";
+import { Visualization } from "../visualizations/Visualization";
+import VisibilityIcon from "@mui/icons-material/Visibility";
 
 export const Dataset = (): JSX.Element => {
 	// path parameter
@@ -46,7 +50,6 @@ export const Dataset = (): JSX.Element => {
 	// search parameters
 	const [searchParams] = useSearchParams();
 	const folderId = searchParams.get("folder");
-
 	// Redux connect equivalent
 	const dispatch = useDispatch();
 	const updateDatasetMetadata = (
@@ -81,9 +84,8 @@ export const Dataset = (): JSX.Element => {
 	const datasetRole = useSelector(
 		(state: RootState) => state.dataset.datasetRole
 	);
-	const datasetStatus = useSelector(
-		(state: RootState) => state.dataset.about.status
-	);
+	const folderPath = useSelector((state: RootState) => state.folder.folderPath);
+
 	// state
 	const [selectedTabIndex, setSelectedTabIndex] = useState<number>(0);
 	const [enableAddMetadata, setEnableAddMetadata] =
@@ -91,6 +93,12 @@ export const Dataset = (): JSX.Element => {
 	const [metadataRequestForms, setMetadataRequestForms] = useState({});
 
 	const [allowSubmit, setAllowSubmit] = React.useState<boolean>(false);
+	// Error msg dialog
+	const [errorOpen, setErrorOpen] = useState(false);
+	const [showForbiddenPage, setShowForbiddenPage] = useState(false);
+	const [showNotFoundPage, setShowNotFoundPage] = useState(false);
+
+	const [paths, setPaths] = useState([]);
 
 	// component did mount list all files in dataset
 	useEffect(() => {
@@ -100,10 +108,29 @@ export const Dataset = (): JSX.Element => {
 		getFolderPath(folderId);
 	}, [searchParams]);
 
-	// Error msg dialog
-	const [errorOpen, setErrorOpen] = useState(false);
-	const [showForbiddenPage, setShowForbiddenPage] = useState(false);
-	const [showNotFoundPage, setShowNotFoundPage] = useState(false);
+	// for breadcrumb
+	useEffect(() => {
+		// for breadcrumb
+		const tmpPaths = [
+			{
+				name: about["name"],
+				url: `/datasets/${datasetId}`,
+			},
+		];
+
+		if (folderPath != null) {
+			for (const folderBread of folderPath) {
+				tmpPaths.push({
+					name: folderBread["folder_name"],
+					url: `/datasets/${datasetId}?folder=${folderBread["folder_id"]}`,
+				});
+			}
+		} else {
+			tmpPaths.slice(0, 1);
+		}
+
+		setPaths(tmpPaths);
+	}, [about, folderPath]);
 
 	const handleTabChange = (
 		_event: React.ChangeEvent<{}>,
@@ -130,20 +157,13 @@ export const Dataset = (): JSX.Element => {
 				"id" in metadataRequestForms[key] &&
 				metadataRequestForms[key]["id"] !== undefined &&
 				metadataRequestForms[key]["id"] !== null &&
-				metadataRequestForms[key]["id"] !== "" &&
-				datasetRole.role !== undefined &&
-				datasetRole.role !== "viewer"
+				metadataRequestForms[key]["id"] !== ""
 			) {
 				// update existing metadata
 				updateDatasetMetadata(datasetId, metadataRequestForms[key]);
 			} else {
-				if (
-					datasetRole.role !== undefined &&
-					datasetRole.role !== "viewer")
-				{
-					// post new metadata if metadata id doesn"t exist
-					createDatasetMetadata(datasetId, metadataRequestForms[key]);
-				}
+				// post new metadata if metadata id doesn"t exist
+				createDatasetMetadata(datasetId, metadataRequestForms[key]);
 			}
 		});
 
@@ -156,30 +176,6 @@ export const Dataset = (): JSX.Element => {
 		// switch to display mode
 		setEnableAddMetadata(false);
 	};
-
-	// for breadcrumb
-	const paths = [
-		{
-			name: "Explore",
-			url: "/",
-		},
-		{
-			name: about["name"],
-			url: `/datasets/${datasetId}`,
-		},
-	];
-	// add folder path to breadcrumbs
-	const folderPath = useSelector((state: RootState) => state.folder.folderPath);
-	if (folderPath != null) {
-		for (const folderBread of folderPath) {
-			paths.push({
-				name: folderBread["folder_name"],
-				url: `/datasets/${datasetId}?folder=${folderBread["folder_id"]}`,
-			});
-		}
-	} else {
-		paths.slice(0, 1);
-	}
 
 	if (showForbiddenPage) {
 		return <Forbidden />;
@@ -219,6 +215,7 @@ export const Dataset = (): JSX.Element => {
 						datasetName={about["name"]}
 					/>
 				</Grid>
+				{/*actions*/}
 			</Grid>
 			<Grid container spacing={2} sx={{ mt: 2 }}>
 				<Grid item xs={10}>
@@ -238,11 +235,19 @@ export const Dataset = (): JSX.Element => {
 							{...a11yProps(0)}
 						/>
 						<Tab
+							icon={<VisibilityIcon />}
+							iconPosition="start"
+							sx={TabStyle}
+							label="Visualizations"
+							{...a11yProps(1)}
+							disabled={false}
+						/>
+						<Tab
 							icon={<FormatListBulleted />}
 							iconPosition="start"
 							sx={TabStyle}
 							label="User Metadata"
-							{...a11yProps(1)}
+							{...a11yProps(2)}
 							disabled={false}
 						/>
 						<Tab
@@ -250,7 +255,7 @@ export const Dataset = (): JSX.Element => {
 							iconPosition="start"
 							sx={TabStyle}
 							label="Extracted Metadata"
-							{...a11yProps(2)}
+							{...a11yProps(3)}
 							disabled={false}
 						/>
 						<Tab
@@ -258,7 +263,7 @@ export const Dataset = (): JSX.Element => {
 							iconPosition="start"
 							sx={TabStyle}
 							label="Extract"
-							{...a11yProps(3)}
+							{...a11yProps(4)}
 							disabled={false}
 						/>
 						<Tab
@@ -266,25 +271,32 @@ export const Dataset = (): JSX.Element => {
 							iconPosition="start"
 							sx={TabStyle}
 							label="Extraction History"
-							{...a11yProps(4)}
+							{...a11yProps(5)}
 							disabled={false}
 						/>
-						{ datasetRole.role !== undefined  && datasetRole.role !== "viewer" ?
-							<Tab
-								icon={<ShareIcon />}
-								iconPosition="start"
-								sx={TabStyle}
-								label="Sharing"
-								{...a11yProps(5)}
-								disabled={false}
-							/> :
-							<></>
-						}
+						<Tab
+							icon={<ShareIcon />}
+							iconPosition="start"
+							sx={TabStyle}
+							label="Sharing"
+							{...a11yProps(6)}
+							disabled={false}
+						/>
 					</Tabs>
 					<TabPanel value={selectedTabIndex} index={0}>
+						{folderId !== null ? (
+							<Box>
+								<MainBreadcrumbs paths={paths} />
+							</Box>
+						) : (
+							<></>
+						)}
 						<FilesTable datasetId={datasetId} folderId={folderId} />
 					</TabPanel>
 					<TabPanel value={selectedTabIndex} index={1}>
+						<Visualization datasetId={datasetId} />
+					</TabPanel>
+					<TabPanel value={selectedTabIndex} index={2}>
 						{enableAddMetadata ? (
 							<>
 								<EditMetadata
@@ -316,24 +328,21 @@ export const Dataset = (): JSX.Element => {
 									resourceType="dataset"
 									resourceId={datasetId}
 								/>
-								{datasetRole.role !== undefined && datasetRole.role !== "viewer" ?
-									<Box textAlign="center">
-										<Button
-											variant="contained"
-											sx={{ m: 2 }}
-											onClick={() => {
-												setEnableAddMetadata(true);
-											}}
-										>
-											Add Metadata
-										</Button>`
-									</Box> :
-									<></>
-								}
+								<Box textAlign="center">
+									<Button
+										variant="contained"
+										sx={{ m: 2 }}
+										onClick={() => {
+											setEnableAddMetadata(true);
+										}}
+									>
+										Add Metadata
+									</Button>
+								</Box>
 							</>
 						)}
 					</TabPanel>
-					<TabPanel value={selectedTabIndex} index={2}>
+					<TabPanel value={selectedTabIndex} index={3}>
 						<DisplayListenerMetadata
 							updateMetadata={updateDatasetMetadata}
 							deleteMetadata={deleteDatasetMetadata}
@@ -341,13 +350,13 @@ export const Dataset = (): JSX.Element => {
 							resourceId={datasetId}
 						/>
 					</TabPanel>
-					<TabPanel value={selectedTabIndex} index={3}>
+					<TabPanel value={selectedTabIndex} index={4}>
 						<Listeners datasetId={datasetId} />
 					</TabPanel>
-					<TabPanel value={selectedTabIndex} index={4}>
+					<TabPanel value={selectedTabIndex} index={5}>
 						<ExtractionHistoryTab datasetId={datasetId} />
 					</TabPanel>
-					<TabPanel value={selectedTabIndex} index={5}>
+					<TabPanel value={selectedTabIndex} index={6}>
 						<SharingTab datasetId={datasetId} />
 					</TabPanel>
 				</Grid>

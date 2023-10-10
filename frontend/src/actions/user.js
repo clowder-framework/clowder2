@@ -61,7 +61,9 @@ export function _legacy_login(email, password) {
 		cookies.remove("Authorization", { path: "/" });
 
 		if (json["token"] !== undefined && json["token"] !== "none") {
-			cookies.set("Authorization", `Bearer ${json["token"]}`);
+			cookies.set("Authorization", `Bearer ${json["token"]}`, {
+				path: "/",
+			});
 			V2.OpenAPI.TOKEN = json["token"];
 			return dispatch({
 				type: SET_USER,
@@ -151,7 +153,7 @@ export const LIST_API_KEYS = "LIST_API_KEYS";
 
 export function listApiKeys(skip = 0, limit = 10) {
 	return (dispatch) => {
-		return V2.UsersService.generateUserApiKeyApiV2UsersKeysGet(skip, limit)
+		return V2.UsersService.getUserApiKeysApiV2UsersKeysGet(skip, limit)
 			.then((json) => {
 				dispatch({
 					type: LIST_API_KEYS,
@@ -187,7 +189,7 @@ export const DELETE_API_KEY = "DELETE_API_KEY";
 
 export function deleteApiKey(keyId) {
 	return (dispatch) => {
-		return V2.UsersService.generateUserApiKeyApiV2UsersKeysKeyIdDelete(keyId)
+		return V2.UsersService.deleteUserApiKeyApiV2UsersKeysKeyIdDelete(keyId)
 			.then((json) => {
 				dispatch({
 					type: DELETE_API_KEY,

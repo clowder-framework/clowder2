@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import config from "../../app.config";
-import { Box, Button, Grid, Tab, Tabs, Typography } from "@mui/material";
-import { downloadResource, parseDate } from "../../utils/common";
+import { Box, Button, Grid, Tab, Tabs } from "@mui/material";
+import { downloadResource } from "../../utils/common";
 import { PreviewConfiguration, RootState } from "../../types/data";
 import { useParams, useSearchParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
@@ -26,7 +26,6 @@ import { fetchFolderPath } from "../../actions/folder";
 import { Listeners } from "../listeners/Listeners";
 import { ExtractionHistoryTab } from "../listeners/ExtractionHistoryTab";
 import { FileActionsMenu } from "./FileActionsMenu";
-import RoleChip from "../auth/RoleChip";
 import { FormatListBulleted, InsertDriveFile } from "@material-ui/icons";
 import { TabStyle } from "../../styles/Styles";
 import BuildIcon from "@mui/icons-material/Build";
@@ -34,7 +33,12 @@ import AssessmentIcon from "@mui/icons-material/Assessment";
 import HistoryIcon from "@mui/icons-material/History";
 import { Forbidden } from "../errors/Forbidden";
 import { PageNotFound } from "../errors/PageNotFound";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import { Visualization } from "../visualizations/Visualization";
 import { ErrorModal } from "../errors/ErrorModal";
+import { FileHistory } from "./FileHistory";
+import { VersionChip } from "../versions/VersionChip";
+import RoleChip from "../auth/RoleChip";
 
 export const File = (): JSX.Element => {
 	// path parameter
@@ -65,10 +69,19 @@ export const File = (): JSX.Element => {
 	const getFolderPath = (folderId: string | null) =>
 		dispatch(fetchFolderPath(folderId));
 
+	const file = useSelector((state: RootState) => state.file);
+	const version_num = useSelector(
+		(state: RootState) => state.file.fileSummary.version_num
+	);
+	const [selectedVersion, setSelectedVersion] = useState(version_num);
 	const fileSummary = useSelector((state: RootState) => state.file.fileSummary);
 	const filePreviews = useSelector((state: RootState) => state.file.previews);
 	const fileVersions = useSelector(
 		(state: RootState) => state.file.fileVersions
+	);
+	const folderPath = useSelector((state: RootState) => state.folder.folderPath);
+	const [selectedFileVersionDetails, setSelectedFileVersionDetails] = useState(
+		fileVersions[0]
 	);
 	const fileRole = useSelector((state: RootState) => state.file.fileRole);
 
@@ -78,6 +91,7 @@ export const File = (): JSX.Element => {
 		React.useState<boolean>(false);
 	const [metadataRequestForms, setMetadataRequestForms] = useState({});
 	const [allowSubmit, setAllowSubmit] = React.useState<boolean>(false);
+	const [paths, setPaths] = useState([]);
 
 	// component did mount
 	useEffect(() => {
@@ -92,6 +106,57 @@ export const File = (): JSX.Element => {
 			getFolderPath(folderId); // get folder path
 		}
 	}, []);
+
+	// for breadcrumb
+	useEffect(() => {
+		const tmpPaths = [
+			{
+				name: about["name"],
+				url: `/datasets/${datasetId}`,
+			},
+		];
+
+		if (folderPath != null) {
+			for (const folderBread of folderPath) {
+				tmpPaths.push({
+					name: folderBread["folder_name"],
+					url: `/datasets/${datasetId}?folder=${folderBread["folder_id"]}`,
+				});
+			}
+		} else {
+			tmpPaths.slice(0, 1);
+		}
+
+		// add file name to breadcrumb
+		tmpPaths.push({
+			name: fileSummary.name,
+			url: "",
+		});
+
+		setPaths(tmpPaths);
+	}, [about, fileSummary, folderPath]);
+
+	useEffect(() => {
+		if (version_num !== undefined && version_num !== null) {
+			setSelectedVersion(version_num);
+		}
+	}, [version_num]);
+
+	useEffect(() => {
+		if (
+			version_num !== undefined &&
+			version_num !== null &&
+			fileVersions !== undefined &&
+			fileVersions !== null &&
+			fileVersions.length > 0
+		) {
+			fileVersions.map((fileVersion, idx) => {
+				if (fileVersion.version_num == version_num) {
+					setSelectedFileVersionDetails(fileVersion);
+				}
+			});
+		}
+	}, [version_num]);
 
 	// Error msg dialog
 	const [errorOpen, setErrorOpen] = useState(false);
@@ -186,27 +251,6 @@ export const File = (): JSX.Element => {
 	// 	history(`/listeners?fileId=${fileId}&fileName=${filename}`);
 	// }
 
-	// for breadcrumb
-	const paths = [
-		{
-			name: about["name"],
-			url: `/datasets/${datasetId}`,
-		},
-	];
-
-	// add folder path to breadcrumbs
-	const folderPath = useSelector((state: RootState) => state.folder.folderPath);
-	if (folderPath != null) {
-		for (const folderBread of folderPath) {
-			paths.push({
-				name: folderBread["folder_name"],
-				url: `/datasets/${datasetId}?folder=${folderBread["folder_id"]}`,
-			});
-		}
-	} else {
-		paths.slice(0, 1);
-	}
-
 	if (showForbiddenPage) {
 		return <Forbidden />;
 	} else if (showNotFoundPage) {
@@ -218,60 +262,55 @@ export const File = (): JSX.Element => {
 			{/*Error Message dialogue*/}
 			<ErrorModal errorOpen={errorOpen} setErrorOpen={setErrorOpen} />
 			<Grid container>
-				<Grid item xs={8} sx={{ display: "flex", alignItems: "center" }}>
+				<Grid item xs={10} sx={{ display: "flex", alignItems: "center" }}>
 					<MainBreadcrumbs paths={paths} />
+					<Grid item>
+						<VersionChip
+							selectedVersion={selectedVersion}
+							setSelectedVersion={setSelectedVersion}
+							versionNumbers={fileVersions}
+							isClickable={true}
+						/>
+						<RoleChip role={fileRole} />
+					</Grid>
 				</Grid>
-				<Grid item xs={4}>
+				<Grid item xs={2} sx={{ display: "flex-top", alignItems: "center" }}>
 					<FileActionsMenu
 						filename={fileSummary.name}
 						fileId={fileId}
 						datasetId={datasetId}
+						setSelectedVersion={setSelectedVersion}
 					/>
 				</Grid>
 			</Grid>
-			<Grid container>
+			<Grid container spacing={2}>
 				<Grid item xs={10}>
-					<Box
-						sx={{
-							display: "inline-flex",
-							justifyContent: "space-between",
-							alignItems: "baseline",
-						}}
-					>
-						<Typography variant="h4" paragraph>
-							{fileSummary.name}
-						</Typography>
-					</Box>
-					<Box>
-						<RoleChip role={fileRole} />
-					</Box>
-					<Box sx={{ mt: 2 }}>
-						{Object.keys(fileSummary).length > 0 && (
-							<Typography variant="subtitle2" paragraph>
-								Uploaded {parseDate(fileSummary.created)} by{" "}
-								{fileSummary.creator.first_name} {fileSummary.creator.last_name}
-							</Typography>
-						)}
-					</Box>
 					<Tabs
 						value={selectedTabIndex}
 						onChange={handleTabChange}
 						aria-label="file tabs"
 					>
-						{/*<Tab label="Previews" {...a11yProps(0)} />*/}
+						<Tab
+							icon={<VisibilityIcon />}
+							iconPosition="start"
+							sx={TabStyle}
+							label="Visualizations"
+							{...a11yProps(0)}
+							disabled={false}
+						/>
 						<Tab
 							icon={<InsertDriveFile />}
 							iconPosition="start"
 							sx={TabStyle}
 							label="Version History"
-							{...a11yProps(0)}
+							{...a11yProps(1)}
 						/>
 						<Tab
 							icon={<FormatListBulleted />}
 							iconPosition="start"
 							sx={TabStyle}
 							label="User Metadata"
-							{...a11yProps(1)}
+							{...a11yProps(2)}
 							disabled={false}
 						/>
 						<Tab
@@ -279,7 +318,7 @@ export const File = (): JSX.Element => {
 							iconPosition="start"
 							sx={TabStyle}
 							label="Extracted Metadata"
-							{...a11yProps(2)}
+							{...a11yProps(3)}
 							disabled={false}
 						/>
 						<Tab
@@ -287,7 +326,7 @@ export const File = (): JSX.Element => {
 							iconPosition="start"
 							sx={TabStyle}
 							label="Extract"
-							{...a11yProps(3)}
+							{...a11yProps(4)}
 							disabled={false}
 						/>
 						<Tab
@@ -295,22 +334,22 @@ export const File = (): JSX.Element => {
 							iconPosition="start"
 							sx={TabStyle}
 							label="Extraction History"
-							{...a11yProps(4)}
+							{...a11yProps(5)}
 							disabled={false}
 						/>
 					</Tabs>
-					{/*Version History*/}
 					<TabPanel value={selectedTabIndex} index={0}>
+						<Visualization fileId={fileId} />
+					</TabPanel>
+					{/*Version History*/}
+					<TabPanel value={selectedTabIndex} index={1}>
 						{fileVersions !== undefined ? (
-							<FileVersionHistory
-								fileVersions={fileVersions}
-								filename={fileSummary.name}
-							/>
+							<FileVersionHistory fileVersions={fileVersions} />
 						) : (
 							<></>
 						)}
 					</TabPanel>
-					<TabPanel value={selectedTabIndex} index={1}>
+					<TabPanel value={selectedTabIndex} index={2}>
 						{enableAddMetadata ? (
 							<>
 								<EditMetadata
@@ -356,7 +395,7 @@ export const File = (): JSX.Element => {
 							</>
 						)}
 					</TabPanel>
-					<TabPanel value={selectedTabIndex} index={2}>
+					<TabPanel value={selectedTabIndex} index={3}>
 						<DisplayListenerMetadata
 							updateMetadata={updateFileMetadata}
 							deleteMetadata={deleteFileMetadata}
@@ -365,18 +404,38 @@ export const File = (): JSX.Element => {
 							version={fileSummary.version_num}
 						/>
 					</TabPanel>
-					<TabPanel value={selectedTabIndex} index={3}>
+					<TabPanel value={selectedTabIndex} index={4}>
 						<Listeners fileId={fileId} datasetId={datasetId} />
 					</TabPanel>
-					<TabPanel value={selectedTabIndex} index={4}>
+					<TabPanel value={selectedTabIndex} index={5}>
 						<ExtractionHistoryTab fileId={fileId} />
 					</TabPanel>
 				</Grid>
-				<Grid item xs={2}>
-					{Object.keys(fileSummary).length > 0 && (
-						<FileDetails fileSummary={fileSummary} />
-					)}
-				</Grid>
+				{version_num == selectedVersion ? (
+					<Grid item xs={2}>
+						{Object.keys(fileSummary).length > 0 && (
+							<FileDetails fileSummary={fileSummary} />
+						)}
+					</Grid>
+				) : (
+					<Grid item xs={2}>
+						{Object.keys(fileSummary).length > 0 && (
+							<FileHistory
+								id={fileId}
+								created={file.fileSummary.created}
+								name={file.fileSummary.name}
+								creator={file.fileSummary.creator}
+								version_id={file.fileSummary.version_id}
+								bytes={file.fileSummary.bytes}
+								content_type={file.fileSummary.content_type}
+								views={file.fileSummary.views}
+								downloads={file.fileSummary.downloads}
+								current_version={selectedVersion}
+								fileSummary={file.fileSummary}
+							/>
+						)}
+					</Grid>
+				)}
 			</Grid>
 		</Layout>
 	);

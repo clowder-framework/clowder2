@@ -22,20 +22,14 @@ import { Link as RouterLink, useLocation } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { RootState } from "../types/data";
 import { AddBox, Create, Explore } from "@material-ui/icons";
-import Cookies from "universal-cookie";
 import HistoryIcon from "@mui/icons-material/History";
-import { InputSearchBox } from "./search/InputSearchBox";
 import GroupIcon from "@mui/icons-material/Group";
 import Gravatar from "react-gravatar";
 import PersonIcon from "@mui/icons-material/Person";
 import { getCurrEmail } from "../utils/common";
 import VpnKeyIcon from "@mui/icons-material/VpnKey";
 import LogoutIcon from "@mui/icons-material/Logout";
-import { searchTheme } from "../theme";
-import { ReactiveBase } from "@appbaseio/reactivesearch";
-import config from "../app.config";
-
-const cookies = new Cookies();
+import { EmbeddedSearch } from "./search/EmbeddedSearch";
 
 const drawerWidth = 240;
 
@@ -102,8 +96,6 @@ const link = {
 	m: 2,
 };
 
-const headers = { Authorization: cookies.get("Authorization") };
-
 export default function PersistentDrawerLeft(props) {
 	const { children } = props;
 	const theme = useTheme();
@@ -142,209 +134,202 @@ export default function PersistentDrawerLeft(props) {
 
 	// @ts-ignore
 	return (
-		// Wrap reactive search base on the most outside component
-		<ReactiveBase
-			url={config.searchEndpoint}
-			app="file,dataset,metadata"
-			headers={headers}
-			theme={searchTheme}
-		>
-			<Box sx={{ display: "flex" }}>
-				<CssBaseline />
-				<AppBar position="fixed" open={open}>
-					<Toolbar>
-						<IconButton
-							color="inherit"
-							aria-label="open drawer"
-							onClick={handleDrawerOpen}
-							edge="start"
-							sx={{ mr: 2, ...(open && { display: "none" }) }}
-						>
-							<MenuIcon />
-						</IconButton>
-						<Link href="/">
-							<Box
-								component="img"
-								src="../../public/clowder-logo-sm.svg"
-								alt="clowder-logo-sm"
-								sx={{ verticalAlign: "middle" }}
-							/>
-						</Link>
-
-						{/*for searching*/}
-						<SearchDiv hidden={embeddedSearchHidden}>
-							<InputSearchBox />
-						</SearchDiv>
-						<Box sx={{ flexGrow: 1 }} />
-						<Box sx={{ marginLeft: "auto" }}>
-							{loggedOut ? (
-								<>
-									<Link href="/auth/register" sx={link}>
-										Register
-									</Link>
-									<Link href="/auth/login" sx={link}>
-										Login
-									</Link>
-								</>
-							) : (
-								<IconButton
-									edge="end"
-									aria-label="account of current user"
-									aria-controls="primary-search-account-menu"
-									aria-haspopup="true"
-									onClick={handleProfileMenuOpen}
-									color="inherit"
-								>
-									{getCurrEmail() !== undefined ? (
-										<Gravatar
-											email={getCurrEmail()}
-											rating="g"
-											style={{
-												width: "32px",
-												height: "32px",
-												borderRadius: "50%",
-												verticalAlign: "middle",
-											}}
-										/>
-									) : (
-										<PersonIcon sx={{ verticalAlign: "middle" }} />
-									)}
-								</IconButton>
-							)}
-						</Box>
-					</Toolbar>
-				</AppBar>
-				{/*Profile menu*/}
-				<MenuList>
-					<Menu
-						anchorEl={anchorEl}
-						anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
-						id={"primary-search-account-menu"}
-						keepMounted
-						transformOrigin={{ vertical: "top", horizontal: "center" }}
-						open={isMenuOpen}
-						onClose={handleProfileMenuClose}
+		<Box sx={{ display: "flex" }}>
+			<CssBaseline />
+			<AppBar position="fixed" open={open}>
+				<Toolbar>
+					<IconButton
+						color="inherit"
+						aria-label="open drawer"
+						onClick={handleDrawerOpen}
+						edge="start"
+						sx={{ mr: 2, ...(open && { display: "none" }) }}
 					>
-						<MenuItem component={RouterLink} to="/profile">
-							<ListItemIcon>
-								<PersonIcon fontSize="small" />
-							</ListItemIcon>
-							<ListItemText>User Profile</ListItemText>
-						</MenuItem>
-						<Divider orientation="horizontal" />
-						<MenuItem component={RouterLink} to="/apikeys">
-							<ListItemIcon>
-								<VpnKeyIcon fontSize="small" />
-							</ListItemIcon>
-							<ListItemText>API Key</ListItemText>
-						</MenuItem>
-						<Divider orientation="horizontal" />
-						<MenuItem component={RouterLink} to="/auth/logout">
-							<ListItemIcon>
-								<LogoutIcon fontSize="small" />
-							</ListItemIcon>
-							<ListItemText>Log Out</ListItemText>
-						</MenuItem>
-					</Menu>
-				</MenuList>
-				{/*side drawer*/}
-				<Drawer
-					sx={{
-						width: drawerWidth,
-						flexShrink: 0,
-						"& .MuiDrawer-paper": {
-							width: drawerWidth,
-							boxSizing: "border-box",
-						},
-					}}
-					variant="persistent"
-					anchor="left"
-					open={open}
-				>
-					<DrawerHeader>
-						<IconButton onClick={handleDrawerClose}>
-							{theme.direction === "ltr" ? (
-								<ChevronLeftIcon />
-							) : (
-								<ChevronRightIcon />
-							)}
-						</IconButton>
-					</DrawerHeader>
-					<Divider />
-					<List>
-						<ListItem key={"explore"} disablePadding>
-							<ListItemButton component={RouterLink} to="/">
-								<ListItemIcon>
-									<Explore />
-								</ListItemIcon>
-								<ListItemText primary={"Explore"} />
-							</ListItemButton>
-						</ListItem>
-					</List>
-					<Divider />
-					<List>
-						<ListItem key={"search"} disablePadding>
-							<ListItemButton component={RouterLink} to="/search">
-								<ListItemIcon>
-									<SearchDatasetIcon />
-								</ListItemIcon>
-								<ListItemText primary={"Search"} />
-							</ListItemButton>
-						</ListItem>
-					</List>
-					<Divider />
-					<List>
-						<ListItem key={"groups"} disablePadding>
-							<ListItemButton component={RouterLink} to="/groups">
-								<ListItemIcon>
-									<GroupIcon />
-								</ListItemIcon>
-								<ListItemText primary={"Groups"} />
-							</ListItemButton>
-						</ListItem>
-					</List>
-					<Divider />
-					<List>
-						<ListItem key={"newdataset"} disablePadding>
-							<ListItemButton component={RouterLink} to="/create-dataset">
-								<ListItemIcon>
-									<AddBox />
-								</ListItemIcon>
-								<ListItemText primary={"New Dataset"} />
-							</ListItemButton>
-						</ListItem>
-					</List>
-					<Divider />
-					<List>
-						<ListItem key={"newmetadata"} disablePadding>
-							<ListItemButton
-								component={RouterLink}
-								to="/new-metadata-definition"
+						<MenuIcon />
+					</IconButton>
+					<Link href="/">
+						<Box
+							component="img"
+							src="../../public/blue-clowder-logo-sm.svg"
+							alt="clowder-logo-sm"
+							sx={{ verticalAlign: "middle" }}
+						/>
+					</Link>
+
+					{/*for searching*/}
+					<SearchDiv hidden={embeddedSearchHidden}>
+						{/*	<InputSearchBox />*/}
+						<EmbeddedSearch />
+					</SearchDiv>
+					<Box sx={{ flexGrow: 1 }} />
+					<Box sx={{ marginLeft: "auto" }}>
+						{loggedOut ? (
+							<>
+								<Link href="/auth/register" sx={link}>
+									Register
+								</Link>
+								<Link href="/auth/login" sx={link}>
+									Login
+								</Link>
+							</>
+						) : (
+							<IconButton
+								edge="end"
+								aria-label="account of current user"
+								aria-controls="primary-search-account-menu"
+								aria-haspopup="true"
+								onClick={handleProfileMenuOpen}
+								color="inherit"
 							>
-								<ListItemIcon>
-									<Create />
-								</ListItemIcon>
-								<ListItemText primary={"Metadata Definitions"} />
-							</ListItemButton>
-						</ListItem>
-					</List>
-					<Divider />
-					<List>
-						<ListItem key={"extractions"} disablePadding>
-							<ListItemButton component={RouterLink} to="/extractions">
-								<ListItemIcon>
-									<HistoryIcon />
-								</ListItemIcon>
-								<ListItemText primary={"Extraction History"} />
-							</ListItemButton>
-						</ListItem>
-					</List>
-				</Drawer>
-				<Main open={open}>
-					<DrawerHeader />
-					{children}
-				</Main>
-			</Box>
-		</ReactiveBase>
+								{getCurrEmail() !== undefined ? (
+									<Gravatar
+										email={getCurrEmail()}
+										rating="g"
+										style={{
+											width: "32px",
+											height: "32px",
+											borderRadius: "50%",
+											verticalAlign: "middle",
+										}}
+									/>
+								) : (
+									<PersonIcon sx={{ verticalAlign: "middle" }} />
+								)}
+							</IconButton>
+						)}
+					</Box>
+				</Toolbar>
+			</AppBar>
+			{/*Profile menu*/}
+			<MenuList>
+				<Menu
+					anchorEl={anchorEl}
+					anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
+					id={"primary-search-account-menu"}
+					keepMounted
+					transformOrigin={{ vertical: "top", horizontal: "center" }}
+					open={isMenuOpen}
+					onClose={handleProfileMenuClose}
+				>
+					<MenuItem component={RouterLink} to="/profile">
+						<ListItemIcon>
+							<PersonIcon fontSize="small" />
+						</ListItemIcon>
+						<ListItemText>User Profile</ListItemText>
+					</MenuItem>
+					<Divider orientation="horizontal" />
+					<MenuItem component={RouterLink} to="/apikeys">
+						<ListItemIcon>
+							<VpnKeyIcon fontSize="small" />
+						</ListItemIcon>
+						<ListItemText>API Key</ListItemText>
+					</MenuItem>
+					<Divider orientation="horizontal" />
+					<MenuItem component={RouterLink} to="/auth/logout">
+						<ListItemIcon>
+							<LogoutIcon fontSize="small" />
+						</ListItemIcon>
+						<ListItemText>Log Out</ListItemText>
+					</MenuItem>
+				</Menu>
+			</MenuList>
+			{/*side drawer*/}
+			<Drawer
+				sx={{
+					width: drawerWidth,
+					flexShrink: 0,
+					"& .MuiDrawer-paper": {
+						width: drawerWidth,
+						boxSizing: "border-box",
+					},
+				}}
+				variant="persistent"
+				anchor="left"
+				open={open}
+			>
+				<DrawerHeader>
+					<IconButton onClick={handleDrawerClose}>
+						{theme.direction === "ltr" ? (
+							<ChevronLeftIcon />
+						) : (
+							<ChevronRightIcon />
+						)}
+					</IconButton>
+				</DrawerHeader>
+				<Divider />
+				<List>
+					<ListItem key={"explore"} disablePadding>
+						<ListItemButton component={RouterLink} to="/">
+							<ListItemIcon>
+								<Explore />
+							</ListItemIcon>
+							<ListItemText primary={"Explore"} />
+						</ListItemButton>
+					</ListItem>
+				</List>
+				<Divider />
+				<List>
+					<ListItem key={"search"} disablePadding>
+						<ListItemButton component={RouterLink} to="/search">
+							<ListItemIcon>
+								<SearchDatasetIcon />
+							</ListItemIcon>
+							<ListItemText primary={"Search"} />
+						</ListItemButton>
+					</ListItem>
+				</List>
+				<Divider />
+				<List>
+					<ListItem key={"groups"} disablePadding>
+						<ListItemButton component={RouterLink} to="/groups">
+							<ListItemIcon>
+								<GroupIcon />
+							</ListItemIcon>
+							<ListItemText primary={"Groups"} />
+						</ListItemButton>
+					</ListItem>
+				</List>
+				<Divider />
+				<List>
+					<ListItem key={"newdataset"} disablePadding>
+						<ListItemButton component={RouterLink} to="/create-dataset">
+							<ListItemIcon>
+								<AddBox />
+							</ListItemIcon>
+							<ListItemText primary={"New Dataset"} />
+						</ListItemButton>
+					</ListItem>
+				</List>
+				<Divider />
+				<List>
+					<ListItem key={"newmetadata"} disablePadding>
+						<ListItemButton
+							component={RouterLink}
+							to="/new-metadata-definition"
+						>
+							<ListItemIcon>
+								<Create />
+							</ListItemIcon>
+							<ListItemText primary={"Metadata Definitions"} />
+						</ListItemButton>
+					</ListItem>
+				</List>
+				<Divider />
+				<List>
+					<ListItem key={"extractions"} disablePadding>
+						<ListItemButton component={RouterLink} to="/extractions">
+							<ListItemIcon>
+								<HistoryIcon />
+							</ListItemIcon>
+							<ListItemText primary={"Extraction History"} />
+						</ListItemButton>
+					</ListItem>
+				</List>
+			</Drawer>
+			<Main open={open}>
+				<DrawerHeader />
+				{children}
+			</Main>
+		</Box>
 	);
 }

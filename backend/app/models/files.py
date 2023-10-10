@@ -9,8 +9,8 @@ from app.models.pyobjectid import PyObjectId
 from app.models.users import UserOut
 
 
-class FileContentType(BaseModel):
-    """This model describes the content type of a file uploaded to Clowder. A typical example is "text/plain" for .txt.
+class ContentType(BaseModel):
+    """This model describes the content type of any type of file(File or Visualization data) uploaded to Clowder. A typical example is "text/plain" for .txt.
     In Clowder v1 extractors, "text/*" syntax is acceptable for wildcard matches. To support this, the content type is
     split into main ("text") and secondary ("plain") parts so the dynamic matching with * can still be done.
 
@@ -52,7 +52,8 @@ class FileDB(Document, FileBase):
     views: int = 0
     downloads: int = 0
     bytes: int = 0
-    content_type: FileContentType = FileContentType()
+    content_type: ContentType = ContentType()
+    thumbnail_id: Optional[PydanticObjectId] = None
 
     class Settings:
         name = "files"
@@ -69,7 +70,8 @@ class FileDBViewList(View, FileBase):
     modified: datetime = Field(default_factory=datetime.utcnow)
     auth: List[AuthorizationDB]
     bytes: int = 0
-    content_type: FileContentType = FileContentType()
+    content_type: ContentType = ContentType()
+    thumbnail_id: Optional[PydanticObjectId] = None
 
     class Settings:
         source = FileDB

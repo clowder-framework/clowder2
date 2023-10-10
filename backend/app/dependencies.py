@@ -24,6 +24,21 @@ async def get_fs() -> Generator:
     yield file_system
 
 
+# This will be needed for generating presigned URL for sharing
+async def get_external_fs() -> Generator:
+    file_system = Minio(
+        settings.MINIO_EXTERNAL_SERVER_URL,
+        access_key=settings.MINIO_ACCESS_KEY,
+        secret_key=settings.MINIO_SECRET_KEY,
+        secure=settings.MINIO_SECURE.lower() == "true",
+    )
+    clowder_bucket = settings.MINIO_BUCKET_NAME
+    if not file_system.bucket_exists(clowder_bucket):
+        file_system.make_bucket(clowder_bucket)
+    file_system.set_bucket_versioning(clowder_bucket, VersioningConfig(ENABLED))
+    yield file_system
+
+
 def get_rabbitmq() -> BlockingChannel:
     """Client to connect to RabbitMQ for listeners/extractors interactions."""
     credentials = pika.PlainCredentials(settings.RABBITMQ_USER, settings.RABBITMQ_PASS)

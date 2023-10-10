@@ -3,7 +3,6 @@
 /* eslint-disable */
 
 import type { EventListenerIn } from './EventListenerIn';
-import type { ExtractorInfo } from './ExtractorInfo';
 import type { LegacyEventListenerIn } from './LegacyEventListenerIn';
 
 export type MetadataDelete = {
@@ -11,5 +10,4 @@ export type MetadataDelete = {
     definition?: string;
     listener?: EventListenerIn;
     extractor?: LegacyEventListenerIn;
-    extractor_info?: ExtractorInfo;
 }

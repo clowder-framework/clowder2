@@ -13,18 +13,21 @@ export class FilesService {
      * Download File
      * @param fileId
      * @param version
+     * @param increment
      * @returns any Successful Response
      * @throws ApiError
      */
     public static downloadFileApiV2FilesFileIdGet(
         fileId: string,
         version?: number,
+        increment: boolean = true,
     ): CancelablePromise<any> {
         return __request({
             method: 'GET',
             path: `/api/v2/files/${fileId}`,
             query: {
                 'version': version,
+                'increment': increment,
             },
             errors: {
                 422: `Validation Error`,
@@ -73,6 +76,32 @@ export class FilesService {
     }
 
     /**
+     * Download File Url
+     * @param fileId
+     * @param version
+     * @param expiresInSeconds
+     * @returns any Successful Response
+     * @throws ApiError
+     */
+    public static downloadFileUrlApiV2FilesFileIdUrlGet(
+        fileId: string,
+        version?: number,
+        expiresInSeconds: number = 3600,
+    ): CancelablePromise<any> {
+        return __request({
+            method: 'GET',
+            path: `/api/v2/files/${fileId}/url/`,
+            query: {
+                'version': version,
+                'expires_in_seconds': expiresInSeconds,
+            },
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+
+    /**
      * Get File Summary
      * @param fileId
      * @returns FileOut Successful Response
@@ -84,6 +113,29 @@ export class FilesService {
         return __request({
             method: 'GET',
             path: `/api/v2/files/${fileId}/summary`,
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+
+    /**
+     * Get File Version Details
+     * @param fileId
+     * @param versionNum
+     * @returns FileOut Successful Response
+     * @throws ApiError
+     */
+    public static getFileVersionDetailsApiV2FilesFileIdVersionDetailsGet(
+        fileId: string,
+        versionNum?: number,
+    ): CancelablePromise<FileOut> {
+        return __request({
+            method: 'GET',
+            path: `/api/v2/files/${fileId}/version_details`,
+            query: {
+                'version_num': versionNum,
+            },
             errors: {
                 422: `Validation Error`,
             },
@@ -117,14 +169,14 @@ export class FilesService {
     }
 
     /**
-     * Get File Extract
+     * Post File Extract
      * @param fileId
      * @param extractorName
      * @param requestBody
      * @returns any Successful Response
      * @throws ApiError
      */
-    public static getFileExtractApiV2FilesFileIdExtractPost(
+    public static postFileExtractApiV2FilesFileIdExtractPost(
         fileId: string,
         extractorName: string,
         requestBody?: any,
@@ -163,6 +215,44 @@ export class FilesService {
         return __request({
             method: 'POST',
             path: `/api/v2/files/${fileId}/resubmit_extract`,
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+
+    /**
+     * Download File Thumbnail
+     * @param fileId
+     * @returns any Successful Response
+     * @throws ApiError
+     */
+    public static downloadFileThumbnailApiV2FilesFileIdThumbnailGet(
+        fileId: string,
+    ): CancelablePromise<any> {
+        return __request({
+            method: 'GET',
+            path: `/api/v2/files/${fileId}/thumbnail`,
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+
+    /**
+     * Add File Thumbnail
+     * @param fileId
+     * @param thumbnailId
+     * @returns FileOut Successful Response
+     * @throws ApiError
+     */
+    public static addFileThumbnailApiV2FilesFileIdThumbnailThumbnailIdPatch(
+        fileId: string,
+        thumbnailId: string,
+    ): CancelablePromise<FileOut> {
+        return __request({
+            method: 'PATCH',
+            path: `/api/v2/files/${fileId}/thumbnail/${thumbnailId}`,
             errors: {
                 422: `Validation Error`,
             },

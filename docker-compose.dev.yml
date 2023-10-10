@@ -56,7 +56,7 @@ services:
     image: nginx:1.19.2-alpine
     hostname: nginx
     volumes:
-      - ./docker/minio-nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./deployments/docker/minio-nginx.conf:/etc/nginx/nginx.conf:ro
     ports:
       - "9000:9000"
       - "9001:9001"
@@ -125,7 +125,6 @@ services:
     ports:
       - 9200:9200
       - 9300:9300
-    restart: unless-stopped
     environment:
       - cluster.name=clowder2
       - discovery.type=single-node
@@ -150,7 +149,6 @@ services:
       - RABBITMQ_HOST=rabbitmq
       - RABBITMQ_USER=${RABBITMQ_USER:-guest}
       - RABBITMQ_PASS=${RABBITMQ_PASS:-guest}
-    restart: unless-stopped
     networks:
       - clowder2
     depends_on:
@@ -169,7 +167,6 @@ services:
       - RABBITMQ_PASS=${RABBITMQ_PASS:-guest}
     networks:
       - clowder2
-    restart: unless-stopped
     depends_on:
       - mongo
       - rabbitmq

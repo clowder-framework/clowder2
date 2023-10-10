@@ -5,6 +5,7 @@ import {
 	Folder,
 	MetadataJsonld,
 	Profile,
+	FileState,
 } from "./data";
 import {
 	AuthorizationBase,
@@ -17,6 +18,8 @@ import {
 	RoleType,
 	UserAPIKeyOut,
 	UserOut,
+	VisualizationConfigOut,
+	VisualizationDataOut,
 } from "../openapi/v2";
 import {
 	LIST_USERS,
@@ -24,6 +27,8 @@ import {
 	RECEIVE_USER_PROFILE,
 } from "../actions/user";
 import { CREATE_GROUP, DELETE_GROUP } from "../actions/group";
+import { RECEIVE_FILE_PRESIGNED_URL } from "../actions/file";
+import { GET_VIS_DATA_PRESIGNED_URL } from "../actions/visualization";
 
 interface RECEIVE_FILES_IN_DATASET {
 	type: "RECEIVE_FILES_IN_DATASET";
@@ -67,7 +72,7 @@ interface DELETE_DATASET {
 
 interface RECEIVE_FILE_EXTRACTED_METADATA {
 	type: "RECEIVE_FILE_EXTRACTED_METADATA";
-	extractedMetadata: ExtractedMetadata;
+	extractedMetadata: ExtractedMetadata[];
 }
 
 interface RECEIVE_FILE_METADATA_JSONLD {
@@ -83,6 +88,11 @@ interface RECEIVE_PREVIEWS {
 interface RECEIVE_VERSIONS {
 	type: "RECEIVE_VERSIONS";
 	fileVersions: FileVersion[];
+}
+
+interface CHANGE_SELECTED_VERSION {
+	type: "CHANGE_SELECTED_VERSION";
+	selected_version:number;
 }
 
 interface SET_USER {
@@ -261,6 +271,17 @@ interface SAVE_METADATA_DEFINITIONS {
 
 interface DOWNLOAD_FILE {
 	type: "DOWNLOAD_FILE";
+	blob: Blob;
+}
+
+interface RECEIVE_FILE_PRESIGNED_URL {
+	type: "RECEIVE_FILE_PRESIGNED_URL";
+	presignedUrl: string;
+}
+
+interface RESET_FILE_PRESIGNED_URL {
+	type: "RESET_FILE_PRESIGNED_URL";
+	preSignedUrl: string;
 }
 
 interface DELETE_DATASET_METADATA {
@@ -280,7 +301,7 @@ interface FOLDER_DELETED {
 
 interface GET_FOLDER_PATH {
 	type: "GET_FOLDER_PATH";
-	folderPath: String[];
+	folderPath: string[];
 }
 
 interface RECEIVE_LISTENERS {
@@ -310,12 +331,12 @@ interface RECEIVE_LISTENER_JOBS {
 
 interface SUBMIT_FILE_EXTRACTION {
 	type: "SUBMIT_FILE_EXTRACTION";
-	job_id: String;
+	job_id: string;
 }
 
 interface SUBMIT_DATASET_EXTRACTION {
 	type: "SUBMIT_DATASET_EXTRACTION";
-	job_id: String;
+	job_id: string;
 }
 
 interface FETCH_JOB_SUMMARY {
@@ -383,6 +404,31 @@ interface ASSIGN_GROUP_MEMBER_ROLE {
 	about: Group;
 }
 
+interface GET_VIS_DATA {
+	type: "GET_VIS_DATA";
+	visData: VisualizationDataOut;
+}
+
+interface GET_VIS_CONFIG {
+	type: "GET_VIS_CONFIG";
+	visConfig: VisualizationConfigOut;
+}
+
+interface DOWNLOAD_VIS_DATA {
+	type: "DOWNLOAD_VIS_DATA";
+	blob: Blob;
+}
+
+interface GET_VIS_DATA_PRESIGNED_URL {
+	type: "GET_VIS_DATA_PRESIGNED_URL";
+	presignedUrl: string;
+}
+
+interface RESET_VIS_DATA_PRESIGNED_URL {
+	type: "RESET_VIS_DATA_PRESIGNED_URL";
+	preSignedUrl: string;
+}
+
 export type DataAction =
 	| RECEIVE_FILES_IN_DATASET
 	| RECEIVE_FOLDERS_IN_DATASET
@@ -397,6 +443,7 @@ export type DataAction =
 	| RECEIVE_FILE_METADATA_JSONLD
 	| RECEIVE_PREVIEWS
 	| RECEIVE_VERSIONS
+	| CHANGE_SELECTED_VERSION
 	| SET_USER
 	| LOGIN_ERROR
 	| LOGOUT
@@ -429,6 +476,8 @@ export type DataAction =
 	| DELETE_DATASET_METADATA
 	| DELETE_FILE_METADATA
 	| DOWNLOAD_FILE
+	| RECEIVE_FILE_PRESIGNED_URL
+	| RESET_FILE_PRESIGNED_URL
 	| FOLDER_DELETED
 	| GET_FOLDER_PATH
 	| RECEIVE_LISTENERS
@@ -452,4 +501,9 @@ export type DataAction =
 	| LIST_USERS
 	| PREFIX_SEARCH_USERS
 	| RECEIVE_DATASET_ROLES
-	| RECEIVE_USER_PROFILE;
+	| RECEIVE_USER_PROFILE
+	| GET_VIS_DATA
+	| GET_VIS_CONFIG
+	| DOWNLOAD_VIS_DATA
+	| GET_VIS_DATA_PRESIGNED_URL
+	| RESET_VIS_DATA_PRESIGNED_URL;

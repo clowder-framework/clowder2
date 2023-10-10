@@ -11,7 +11,6 @@ import TableCell from "@mui/material/TableCell";
 import TableBody from "@mui/material/TableBody";
 import TableContainer from "@mui/material/TableContainer";
 import Layout from "../Layout";
-import { MainBreadcrumbs } from "../navigation/BreadCrumb";
 
 import {
 	deleteApiKey as deleteApiKeyAction,
@@ -87,9 +86,7 @@ export function ApiKeys() {
 		<Layout>
 			{/*breadcrumb*/}
 			<Grid container>
-				<Grid item xs={8} sx={{ display: "flex", alignItems: "center" }}>
-					<MainBreadcrumbs paths={paths} />
-				</Grid>
+				<Grid item xs={8} sx={{ display: "flex", alignItems: "center" }}></Grid>
 				<Grid item xs={4}>
 					<Button
 						variant="contained"

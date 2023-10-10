@@ -7,13 +7,11 @@ from fastapi import Depends
 from pika.adapters.blocking_connection import BlockingChannel
 
 from app import dependencies
-from app.keycloak_auth import get_token
-from app.models.config import ConfigEntryDB, ConfigEntryOut
+from app.models.config import ConfigEntryDB
 from app.models.datasets import DatasetOut
 from app.models.files import FileOut
 from app.models.listeners import (
     EventListenerJobDB,
-    EventListenerDB,
     EventListenerJobMessage,
     EventListenerDatasetJobMessage,
 )
@@ -23,10 +21,7 @@ from app.routers.users import get_user_job_key
 
 
 async def create_reply_queue():
-    credentials = pika.PlainCredentials("guest", "guest")
-    parameters = pika.ConnectionParameters("localhost", credentials=credentials)
-    connection = pika.BlockingConnection(parameters)
-    channel = connection.channel()
+    channel: BlockingChannel = dependencies.get_rabbitmq()
 
     if (
         config_entry := await ConfigEntryDB.find_one({"key": "instance_id"})
@@ -59,14 +54,13 @@ async def submit_file_job(
     parameters: dict,
     user: UserOut,
     rabbitmq_client: BlockingChannel,
-    token: str = Depends(get_token),
 ):
     # Create an entry in job history with unique ID
     job = EventListenerJobDB(
         listener_id=routing_key,
         creator=user,
         resource_ref=MongoDBRef(
-            collection="file", resource_id=file_out.id, version=file_out.version_num
+            collection="files", resource_id=file_out.id, version=file_out.version_num
         ),
         parameters=parameters,
     )
@@ -80,8 +74,10 @@ async def submit_file_job(
         datasetId=str(file_out.dataset_id),
         secretKey=current_secretKey,
         job_id=str(job.id),
+        parameters=parameters,
     )
     reply_to = await create_reply_queue()
+    print("RABBITMQ_CLIENT: " + str(rabbitmq_client))
     rabbitmq_client.basic_publish(
         exchange="",
         routing_key=routing_key,
@@ -98,14 +94,13 @@ async def submit_dataset_job(
     routing_key: str,
     parameters: dict,
     user: UserOut,
-    token: str = Depends(get_token),
     rabbitmq_client: BlockingChannel = Depends(dependencies.get_rabbitmq),
 ):
     # Create an entry in job history with unique ID
-    job = EventListenerDB(
+    job = EventListenerJobDB(
         listener_id=routing_key,
         creator=user,
-        resource_ref=MongoDBRef(collection="dataset", resource_id=dataset_out.id),
+        resource_ref=MongoDBRef(collection="datasets", resource_id=dataset_out.id),
         parameters=parameters,
     )
     await job.insert()

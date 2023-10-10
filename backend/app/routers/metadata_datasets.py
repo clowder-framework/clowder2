@@ -8,6 +8,7 @@ from fastapi import APIRouter, HTTPException, Depends
 from fastapi import Form
 
 from app import dependencies
+from app.config import settings
 from app.deps.authorization_deps import Authorization
 from app.keycloak_auth import get_current_user, UserOut
 from app.models.datasets import DatasetOut, DatasetDB
@@ -25,7 +26,7 @@ from app.models.metadata import (
     MetadataDefinitionDB,
 )
 from app.search.connect import delete_document_by_id
-from app.search.index import index_dataset_metadata
+from app.search.index import index_dataset
 
 router = APIRouter()
 
@@ -48,16 +49,9 @@ async def _build_metadata_db_obj(
 
     if agent is None:
         # Build MetadataAgent depending on whether extractor info is present
-        if metadata_in.extractor is not None:
-            extractor_in = LegacyEventListenerIn(**metadata_in.extractor.dict())
-            listener = await EventListenerDB.find_one(
-                EventListenerDB.id == extractor_in.id,
-                EventListenerDB.version == extractor_in.version,
-            )
-            if listener:
-                agent = MetadataAgent(creator=user, listener=listener)
-            else:
-                raise HTTPException(status_code=404, detail=f"Listener not found")
+        listener = metadata_in.listener
+        if listener:
+            agent = MetadataAgent(creator=user, listener=listener)
         else:
             agent = MetadataAgent(creator=user)
 
@@ -96,12 +90,12 @@ async def add_dataset_metadata(
             query.append(MetadataDB.definition == metadata_in.definition)
 
             # Extracted metadata doesn't care about user
-            if metadata_in.extractor is not None:
+            if metadata_in.listener is not None:
                 query.append(
-                    MetadataDB.agent.listener.name == metadata_in.extractor.name
+                    MetadataDB.agent.listener.name == metadata_in.listener.name
                 )
                 query.append(
-                    MetadataDB.agent.listener.version == metadata_in.extractor.version
+                    MetadataDB.agent.listener.version == metadata_in.listener.version
                 )
             else:
                 query.append(MetadataDB.agent.creator.id == user.id)
@@ -118,7 +112,7 @@ async def add_dataset_metadata(
         await md.insert()
 
         # Add an entry to the metadata index
-        await index_dataset_metadata(es, dataset, MetadataOut(**md.dict()))
+        await index_dataset(es, dataset)
         return md.dict()
 
 
@@ -140,10 +134,10 @@ async def replace_dataset_metadata(
         query = [MetadataDB.resource.resource_id == ObjectId(dataset_id)]
 
         # Filter by MetadataAgent
-        if metadata_in.extractor is not None:
+        if metadata_in.listener is not None:
             listener = await EventListenerDB.find_one(
-                EventListenerDB.name == metadata_in.extractor.name,
-                EventListenerDB.version == metadata_in.extractor.version,
+                EventListenerDB.name == metadata_in.listener.name,
+                EventListenerDB.version == metadata_in.listener.version,
             )
             if listener:
                 agent = MetadataAgent(creator=user, listener=listener)
@@ -170,9 +164,7 @@ async def replace_dataset_metadata(
             await md.replace()
 
             # Update entry to the metadata index
-            await index_dataset_metadata(
-                es, dataset, MetadataOut(**md.dict()), update=True
-            )
+            await index_dataset(es, dataset, update=True)
             return md.dict()
     else:
         raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
@@ -218,10 +210,10 @@ async def update_dataset_metadata(
                 query.append(MetadataDB.definition == definition)
 
         # Filter by MetadataAgent
-        if metadata_in.extractor is not None:
+        if metadata_in.listener is not None:
             listener = await EventListenerDB.find_one(
-                EventListenerDB.name == metadata_in.extractor.name,
-                EventListenerDB.version == metadata_in.extractor.version,
+                EventListenerDB.name == metadata_in.listener.name,
+                EventListenerDB.version == metadata_in.listener.version,
             )
             if listener:
                 agent = MetadataAgent(creator=user, listener=listener)
@@ -238,9 +230,7 @@ async def update_dataset_metadata(
 
         md = await MetadataDB.find_one(*query)
         if md is not None:
-            await index_dataset_metadata(
-                es, dataset, MetadataOut(**md.dict()), update=True
-            )
+            await index_dataset(es, dataset, update=True)
             return await patch_metadata(md, content, es)
         else:
             raise HTTPException(
@@ -307,11 +297,10 @@ async def delete_dataset_metadata(
                 query.append(MetadataDB.definition == definition)
 
         # Filter by MetadataAgent
-        extractor_info = metadata_in.extractor_info
-        if extractor_info is not None:
+        if metadata_in.listener is not None:
             listener = await EventListenerDB.find_one(
-                EventListenerDB.name == metadata_in.extractor.name,
-                EventListenerDB.version == metadata_in.extractor.version,
+                EventListenerDB.name == metadata_in.listener.name,
+                EventListenerDB.version == metadata_in.listener.version,
             )
             if listener:
                 agent = MetadataAgent(creator=user, listener=listener)
@@ -327,7 +316,9 @@ async def delete_dataset_metadata(
             query.append(MetadataDB.agent.creator.id == agent.creator.id)
 
         # delete from elasticsearch
-        delete_document_by_id(es, "metadata", str(metadata_in.metadata_id))
+        delete_document_by_id(
+            es, settings.elasticsearch_index, str(metadata_in.metadata_id)
+        )
 
         md = await MetadataDB.find_one(*query)
         if md is not None:

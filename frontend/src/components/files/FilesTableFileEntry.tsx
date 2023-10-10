@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 
 import TableRow from "@mui/material/TableRow";
 import TableCell from "@mui/material/TableCell";
@@ -9,42 +9,71 @@ import { parseDate } from "../../utils/common";
 import FileMenu from "./FileMenu";
 import prettyBytes from "pretty-bytes";
 import { FileOut } from "../../openapi/v2";
+import { generateThumbnailUrl } from "../../utils/visualization";
 
 type FilesTableFileEntryProps = {
 	iconStyle: {};
 	selectFile: any;
 	file: FileOut;
+	parentFolderId: any;
 };
 
 export function FilesTableFileEntry(props: FilesTableFileEntryProps) {
-	const { iconStyle, selectFile, file } = props;
+	const { iconStyle, selectFile, file, parentFolderId } = props;
+	const [thumbnailUrl, setThumbnailUrl] = useState("");
+	const [selectedVersion, setSelectedVersion] = useState(file.version_num);
 
-	console.log("FTFE");
-	console.log(file);
+	useEffect(() => {
+		let url = "";
+		if (file.thumbnail_id) {
+			url = generateThumbnailUrl(file.thumbnail_id);
+		}
+		setThumbnailUrl(url);
+	}, [file]);
 
 	return (
-		<TableRow
-			key={file.id}
-			sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
-		>
-			<TableCell component="th" scope="row" key={`${file.id}-icon`}>
-				<InsertDriveFileIcon sx={iconStyle} />
-				<Button onClick={() => selectFile(file.id)}>{file.name}</Button>
-				<VersionChip versionNumber={file.version_num} />
-			</TableCell>
-			<TableCell align="right">
-				{parseDate(file.created)} by {file.creator.first_name}{" "}
-				{file.creator.last_name}
-			</TableCell>
-			<TableCell align="right">
-				{file.bytes ? prettyBytes(file.bytes) : "NA"}
-			</TableCell>
-			<TableCell align="right">
-				{file.content_type ? file.content_type.content_type : "NA"}
-			</TableCell>
-			<TableCell align="right">
-				<FileMenu file={file} />
-			</TableCell>
-		</TableRow>
+		<>
+			{file.folder_id === parentFolderId ? (
+				<TableRow
+					key={file.id}
+					sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
+				>
+					<TableCell component="th" scope="row" key={`${file.id}-icon`}>
+						{file.thumbnail_id ? (
+							<img
+								src={thumbnailUrl}
+								alt="thumbnail"
+								width="24"
+								height="24"
+								style={{ verticalAlign: "middle" }}
+							/>
+						) : (
+							<InsertDriveFileIcon sx={iconStyle} />
+						)}
+						<Button onClick={() => selectFile(file.id)}>{file.name}</Button>
+					</TableCell>
+					<TableCell>
+						<VersionChip
+							selectedVersion={selectedVersion}
+							setSelectedVersion={null}
+							versionNumbers={null}
+							isClickable={false}
+						/>
+					</TableCell>
+					<TableCell align="right">{parseDate(file.created)}</TableCell>
+					<TableCell align="right">
+						{file.bytes ? prettyBytes(file.bytes) : "NA"}
+					</TableCell>
+					<TableCell align="right">
+						{file.content_type ? file.content_type.content_type : "NA"}
+					</TableCell>
+					<TableCell align="right">
+						<FileMenu file={file} setSelectedVersion={setSelectedVersion} />
+					</TableCell>
+				</TableRow>
+			) : (
+				<></>
+			)}
+		</>
 	);
 }

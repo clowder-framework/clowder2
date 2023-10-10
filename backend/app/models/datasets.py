@@ -35,7 +35,6 @@ class DatasetIn(DatasetBase):
 class DatasetPatch(BaseModel):
     name: Optional[str]
     description: Optional[str]
-    status: Optional[str]
 
 
 class DatasetDB(Document, DatasetBase):
@@ -45,6 +44,7 @@ class DatasetDB(Document, DatasetBase):
     status: str = DatasetStatus.PRIVATE.name
     user_views: int = 0
     downloads: int = 0
+    thumbnail_id: Optional[PydanticObjectId] = None
 
     class Settings:
         name = "datasets"
@@ -62,7 +62,7 @@ class DatasetDBViewList(View, DatasetBase):
     created: datetime = Field(default_factory=datetime.utcnow)
     modified: datetime = Field(default_factory=datetime.utcnow)
     auth: List[AuthorizationDB]
-    status: str
+    thumbnail_id: Optional[PydanticObjectId] = None
 
     class Settings:
         source = DatasetDB

@@ -3,6 +3,7 @@ import { V2 } from "../openapi";
 import jwt_decode from "jwt-decode";
 import { formatInTimeZone } from "date-fns-tz";
 import config from "../app.config";
+import { csv } from "csvtojson";
 
 const cookies = new Cookies();
 
@@ -12,8 +13,7 @@ export const isAuthorized = () => {
 	V2.OpenAPI.TOKEN = authorization.replace("Bearer ", "");
 	return (
 		process.env.DEPLOY_ENV === "local" ||
-		(authorization !== undefined &&
-			authorization !== "" &&
+		(authorization !== "" &&
 			authorization !== null &&
 			authorization !== "Bearer none")
 	);
@@ -66,7 +66,8 @@ export function dataURItoFile(dataURI) {
 	return new File([blob], filename, { type: mime, lastModified: new Date() });
 }
 
-export function parseDate(dateString) {
+// For format options see https://date-fns.org/v2.30.0/docs/format
+export function parseDate(dateString, formatString = "yyyy-MM-dd HH:mm:ss") {
 	if (dateString) {
 		try {
 			const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -75,13 +76,13 @@ export function parseDate(dateString) {
 			if (!dateString.endsWith("Z")) dateString = `${dateString}Z`;
 			const date = new Date(dateString);
 
-			return formatInTimeZone(date, timeZone, "yyyy-MM-dd HH:mm:ss");
+			return formatInTimeZone(date, timeZone, formatString);
 		} catch (error) {
 			console.error(error);
 			return error["message"];
 		}
 	} else {
-		return "Invalid time value!";
+		return "Pending...";
 	}
 }
 
@@ -97,27 +98,76 @@ export const getCurrEmail = () => {
 		authorization !== "" &&
 		authorization.split(" ").length > 0
 	) {
-		let userInfo = jwt_decode(authorization.split(" ")[1]);
+		const userInfo = jwt_decode(authorization.split(" ")[1]);
 		return userInfo["email"];
 	}
 };
 
-export function renameId(obj) {
+// Function to read the text from the downloaded file
+export function readTextFromFile(file) {
+	return new Promise((resolve, reject) => {
+		const reader = new FileReader();
 
-	Object.defineProperty(
-		obj,
-		'id',
-		Object.getOwnPropertyDescriptor(obj, '_id')
-	);
-	delete obj['_id'];
+		reader.onload = () => {
+			const text = reader.result;
+			resolve(text);
+		};
+
+		reader.onerror = () => {
+			reader.abort();
+			reject(new Error("Failed to read the file"));
+		};
+
+		reader.readAsText(file);
+	});
+}
+
+export function parseTextToJson(text) {
+	return csv()
+		.fromString(text)
+		.then((jsonObj) => {
+			return jsonObj;
+		});
+}
+
+export function guessDataType(inputString) {
+	// TODO write better patterns
+	// Define regular expressions for common patterns
+	const quantitativePattern = /^[-+]?\d+(\.\d+)?$/;
+	const temporalPattern =
+		/^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}:\d{2}(\.\d{3})?Z?)?$/;
+	const ordinalPattern = /[a-zA-Z]/;
+	const nominalPattern = /[a-zA-Z]/;
+	const geojsonPattern =
+		/^(\{"type": "Feature".*?\}|{"type": "FeatureCollection".*?})$/;
+
+	// Test the input string against each pattern
+	if (quantitativePattern.test(inputString)) {
+		return "quantitative";
+	} else if (temporalPattern.test(inputString)) {
+		return "temporal";
+	} else if (ordinalPattern.test(inputString)) {
+		return "ordinal";
+	} else if (nominalPattern.test(inputString)) {
+		return "nominal";
+	} else if (geojsonPattern.test(inputString)) {
+		return "geojson";
+	} else {
+		// If none of the patterns match, it's hard to determine the data type
+		return "unknown";
+	}
+}
+
+export function renameId(obj) {
+	Object.defineProperty(obj, "id", Object.getOwnPropertyDescriptor(obj, "_id"));
+	delete obj["_id"];
 
 	return obj;
 }
 
 export function renameIdArray(arr) {
-	return arr.map(obj => renameId(obj));
+	return arr.map((obj) => renameId(obj));
 }
-
 
 // get current username
 // export function getCurrUsername(){

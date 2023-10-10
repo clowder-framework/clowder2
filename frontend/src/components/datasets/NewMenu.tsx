@@ -1,20 +1,28 @@
-import {Box, Button, Dialog, ListItemIcon, ListItemText, Menu, MenuItem} from "@mui/material";
+import {
+	Box,
+	Button,
+	Dialog,
+	ListItemIcon,
+	ListItemText,
+	Menu,
+	MenuItem,
+} from "@mui/material";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
-import {CreateFolder} from "../folders/CreateFolder";
+import { CreateFolder } from "../folders/CreateFolder";
 import React from "react";
-import {useSelector} from "react-redux";
-import {RootState} from "../../types/data";
-import {UploadFile} from "../files/UploadFile";
+import { useSelector } from "react-redux";
+import { RootState } from "../../types/data";
+import { UploadFile } from "../files/UploadFile";
 import UploadIcon from "@mui/icons-material/Upload";
-import {Folder} from "@material-ui/icons";
+import { Folder } from "@material-ui/icons";
 
 type ActionsMenuProps = {
-	datasetId: string,
-	folderId: string
-}
+	datasetId: string;
+	folderId: string;
+};
 
 export const NewMenu = (props: ActionsMenuProps): JSX.Element => {
-	const {datasetId, folderId} = props;
+	const { datasetId, folderId } = props;
 
 	// state
 	const about = useSelector((state: RootState) => state.dataset.about);
@@ -25,7 +33,7 @@ export const NewMenu = (props: ActionsMenuProps): JSX.Element => {
 
 	const handleCloseNewFolder = () => {
 		setNewFolder(false);
-	}
+	};
 	const handleOptionClick = (event: React.MouseEvent<any>) => {
 		setAnchorEl(event.currentTarget);
 	};
@@ -35,17 +43,35 @@ export const NewMenu = (props: ActionsMenuProps): JSX.Element => {
 	};
 	return (
 		<Box>
-			<Dialog open={createFileOpen} onClose={() => {
-				setCreateFileOpen(false);
-			}} fullWidth={true} maxWidth="lg" aria-labelledby="form-dialog">
-				<UploadFile selectedDatasetId={datasetId} selectedDatasetName={about.name} folderId={folderId}/>
+			<Dialog
+				open={createFileOpen}
+				onClose={() => {
+					setCreateFileOpen(false);
+				}}
+				fullWidth={true}
+				maxWidth="lg"
+				aria-labelledby="form-dialog"
+			>
+				<UploadFile
+					selectedDatasetId={datasetId}
+					selectedDatasetName={about.name}
+					folderId={folderId}
+				/>
 			</Dialog>
 
-			<CreateFolder datasetId={datasetId} parentFolder={folderId} open={newFolder}
-						  handleClose={handleCloseNewFolder}/>
+			<CreateFolder
+				datasetId={datasetId}
+				parentFolder={folderId}
+				open={newFolder}
+				handleClose={handleCloseNewFolder}
+			/>
 
-			<Button variant="outlined" sx={{m: 1}} aria-haspopup="true" onClick={handleOptionClick}
-					endIcon={<ArrowDropDownIcon/>}>
+			<Button
+				variant="outlined"
+				aria-haspopup="true"
+				onClick={handleOptionClick}
+				endIcon={<ArrowDropDownIcon />}
+			>
 				New
 			</Button>
 			<Menu
@@ -59,7 +85,8 @@ export const NewMenu = (props: ActionsMenuProps): JSX.Element => {
 					onClick={() => {
 						setCreateFileOpen(true);
 						handleOptionClose();
-					}}>
+					}}
+				>
 					<ListItemIcon>
 						<UploadIcon fontSize="small" />
 					</ListItemIcon>
@@ -69,13 +96,14 @@ export const NewMenu = (props: ActionsMenuProps): JSX.Element => {
 					onClick={() => {
 						setNewFolder(true);
 						handleOptionClose();
-					}
-					}>
+					}}
+				>
 					<ListItemIcon>
 						<Folder fontSize="small" />
 					</ListItemIcon>
 					<ListItemText>New Folder</ListItemText>
 				</MenuItem>
 			</Menu>
-		</Box>)
-}
+		</Box>
+	);
+};

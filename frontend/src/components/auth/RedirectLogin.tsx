@@ -12,7 +12,7 @@ export const RedirectLogin = (): JSX.Element => {
 
 	useEffect(() => {
 		// restore the origin in cookies
-		cookies.set("origin", origin);
+		cookies.set("origin", origin, { path: "/" });
 		window.location.href = url;
 	}, []);
 

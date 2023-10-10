@@ -5,7 +5,8 @@ from app.tests.utils import create_dataset, upload_file, register_v1_extractor
 
 
 def test_register(client: TestClient, headers: dict):
-    register_v1_extractor(client, headers)
+    ext_name = "test.test_register"
+    register_v1_extractor(client, headers, ext_name)
 
 
 def test_get_one(client: TestClient, headers: dict):
@@ -18,7 +19,8 @@ def test_get_one(client: TestClient, headers: dict):
 
 
 def test_delete(client: TestClient, headers: dict):
-    extractor_id = register_v1_extractor(client, headers).get("id")
+    ext_name = "test.test_delete"
+    extractor_id = register_v1_extractor(client, headers, ext_name).get("id")
     response = client.delete(
         f"{settings.API_V2_STR}/listeners/{extractor_id}", headers=headers
     )
@@ -27,7 +29,7 @@ def test_delete(client: TestClient, headers: dict):
 
 def test_v1_mime_trigger(client: TestClient, headers: dict):
     # Need a new listener otherwise this will collide with test_register above
-    ext_name = "ncsa.testextractor.test2"
+    ext_name = "test.test_v1_mime_trigger"
     extractor_id = register_v1_extractor(client, headers, ext_name).get("id")
 
     # Verify feeds were created for the process rules

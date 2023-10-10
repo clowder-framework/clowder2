@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "clowder2.fullname" . }}-messages
+  labels:
+    {{- include "clowder2.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "clowder2.name" . }}-messages
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        app.kubernetes.io/name: {{ include "clowder2.name" . }}-messages
+        app.kubernetes.io/instance: {{ .Release.Name }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: extractors-messages
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "clowder/clowder2-messages:main"
+          imagePullPolicy: Always
+          env:
+            - name: MONGODB_URL
+              value: mongodb://{{ include "clowder2.name" . }}-mongodb:27017
+            - name: RABBITMQ_USER
+              value: {{ .Values.rabbitmq.auth.username }}
+            - name: RABBITMQ_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: clowder2-rabbitmq
+                  key: rabbitmq-password
+            - name: RABBITMQ_HOST
+              value: {{ include "clowder2.name" .  }}-rabbitmq
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

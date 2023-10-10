@@ -10,22 +10,14 @@ import {
 import { VersionChip } from "./VersionChip";
 import { parseDate } from "../../utils/common";
 import { FileVersion } from "../../openapi/v2";
-import { fileDownloaded } from "../../actions/file";
-import { useDispatch } from "react-redux";
+import config from "../../app.config";
 
 type FileVersionHistoryProps = {
 	fileVersions: FileVersion[];
-	filename: string;
 };
 
 export function FileVersionHistory(props: FileVersionHistoryProps) {
-	const { fileVersions, filename } = props;
-	const dispatch = useDispatch();
-	const downloadFile = (
-		fileId: string | undefined,
-		filename: string | undefined,
-		fileVersion: number | undefined
-	) => dispatch(fileDownloaded(fileId, filename, fileVersion));
+	const { fileVersions } = props;
 
 	return (
 		<Box className="infoCard">
@@ -37,7 +29,11 @@ export function FileVersionHistory(props: FileVersionHistoryProps) {
 						return (
 							<ListItem key={version_num}>
 								<ListItemAvatar>
-									<VersionChip versionNumber={version_num} />
+									<VersionChip
+												 selectedVersion={version_num}
+												 setSelectedVersion={""}
+												 versionNumbers={fileVersions}
+												 isClickable={false}/>
 								</ListItemAvatar>
 								<ListItemText
 									primary={`Uploaded by ${
@@ -49,10 +45,8 @@ export function FileVersionHistory(props: FileVersionHistoryProps) {
 									sx={{ maxWidth: "38rem" }}
 								/>
 								<Button
+									href={`${config.hostname}/api/v2/files/${fileVersion.file_id}?version=${version_num}`}
 									variant="contained"
-									onClick={() => {
-										downloadFile(fileVersion.file_id, filename, version_num);
-									}}
 								>
 									Download
 								</Button>

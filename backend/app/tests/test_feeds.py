@@ -1,4 +1,7 @@
+import time
+
 from fastapi.testclient import TestClient
+
 from app.config import settings
 from app.tests.utils import (
     create_dataset,
@@ -9,7 +12,7 @@ from app.tests.utils import (
 
 
 def test_feeds(client: TestClient, headers: dict):
-    listener_name = "Test Listener"
+    listener_name = "test.test_feeds"
     listener_id = register_v2_listener(client, headers, listener_name).get("id")
 
     # Create a new search feed for file based on the filename
@@ -33,6 +36,8 @@ def test_feeds(client: TestClient, headers: dict):
     file_id = upload_file(
         client, headers, dataset_id, "xyz.txt", "This should trigger."
     ).get("id")
+
+    time.sleep(1)
 
     # Check if job was automatically created
     response = client.get(

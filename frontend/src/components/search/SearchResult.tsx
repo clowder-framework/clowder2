@@ -9,7 +9,7 @@ import {
 } from "@mui/material";
 import { Link } from "react-router-dom";
 import DatasetIcon from "@mui/icons-material/Dataset";
-import ArticleIcon from "@mui/icons-material/Article";
+import InsertDriveFileIcon from "@mui/icons-material/InsertDriveFile";
 import { parseDate } from "../../utils/common";
 import { theme } from "../../theme";
 
@@ -27,64 +27,78 @@ function parseString(str: string) {
 	}
 }
 
-function getRecordType(item) {
-	if (item._index === "dataset") return "dataset";
-	if (item._index === "file") return "file";
-	if (item._index === "metadata") {
-		// TODO: How to handle duplicate search results here?
-		if (item.dataset_id === undefined)
-			// Only files have this field
-			return "file";
-		else return "dataset";
-	}
+function buildDatasetResult(item) {
+	return (
+		<>
+			<ListItemAvatar sx={{ color: theme.palette.primary.main }}>
+				<DatasetIcon />
+			</ListItemAvatar>
+			<Box sx={{ marginTop: "5px" }}>
+				<MuiLink
+					component={Link}
+					to={`/datasets/${item._id}`}
+					sx={{ fontWeight: "bold", fontSize: "18px" }}
+				>
+					{parseString(item.name)}
+				</MuiLink>
+				<Typography variant="body2" color={theme.palette.info.main}>
+					Created by {parseString(item.creator)} at {parseDate(item.created)}
+				</Typography>
+				<Typography variant="body2" color={theme.palette.info.main}>
+					{parseString(item.description)}
+				</Typography>
+			</Box>
+		</>
+	);
+}
+
+function buildFileResult(item) {
+	return (
+		<>
+			<ListItemAvatar sx={{ color: theme.palette.primary.main }}>
+				<InsertDriveFileIcon />
+			</ListItemAvatar>
+			<Box sx={{ marginTop: "5px" }}>
+				<MuiLink
+					component={Link}
+					to={`/files/${item._id}?dataset=${item.dataset_id}`}
+					sx={{ fontWeight: "bold", fontSize: "18px" }}
+				>
+					{parseString(item.name)}
+				</MuiLink>
+				<Typography variant="body2" color={theme.palette.info.main}>
+					Created by {parseString(item.creator)} at {parseDate(item.created)}
+				</Typography>
+				<Typography variant="body2" color={theme.palette.info.main}>
+					{`${item.content_type} | ${item.bytes} bytes`}
+				</Typography>
+			</Box>
+		</>
+	);
 }
 
 export function SearchResult(props) {
 	const { data } = props;
 
-	return (
-		<List
-			sx={{
-				width: "100%",
-				padding: "2% 5%",
-				bgcolor: theme.palette.primary.contrastText,
-			}}
-		>
-			{data.map((item) => (
-				<ListItem alignItems="flex-start" key={item._id}>
-					<ListItemAvatar sx={{ color: theme.palette.primary.main }}>
-						{item._index === "dataset" ? <DatasetIcon /> : <ArticleIcon />}
-					</ListItemAvatar>
-					<Box sx={{ marginTop: "5px" }}>
-						{item._index === "dataset" ? (
-							<MuiLink
-								component={Link}
-								to={`/datasets/${item._id}`}
-								sx={{ fontWeight: "bold", fontSize: "18px" }}
-							>
-								{parseString(item.name)}
-							</MuiLink>
-						) : (
-							<MuiLink
-								component={Link}
-								to={`/files/${item._id}?dataset=${item.dataset_id}`}
-								sx={{ fontWeight: "bold", fontSize: "18px" }}
-							>
-								{parseString(item.name)}
-							</MuiLink>
-						)}
-						<Typography variant="body2" color={theme.palette.secondary.light}>
-							Created by {parseString(item.creator)} at{" "}
-							{parseDate(item.created)}
-						</Typography>
-						<Typography variant="body2" color={theme.palette.secondary.dark}>
-							{getRecordType(item) === "dataset"
-								? parseString(item.description)
-								: `${item.content_type} | ${item.bytes} bytes`}
-						</Typography>
-					</Box>
-				</ListItem>
-			))}
-		</List>
-	);
+	if (data.length > 0) {
+		return (
+			<List
+				sx={{
+					width: "100%",
+					padding: "2% 5%",
+					bgcolor: theme.palette.primary.contrastText,
+				}}
+			>
+				{data.map((item) => (
+					<ListItem alignItems="flex-start" key={item._id}>
+						{item.resource_type === "dataset"
+							? buildDatasetResult(item)
+							: buildFileResult(item)}
+					</ListItem>
+				))}
+			</List>
+		);
+	} else {
+		return <></>;
+	}
 }

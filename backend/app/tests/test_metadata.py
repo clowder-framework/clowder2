@@ -1,5 +1,5 @@
-import os
 import time
+
 import pytest as pytest
 from fastapi.testclient import TestClient
 
@@ -10,7 +10,7 @@ from app.tests.utils import create_dataset, upload_file
 metadata_definition = {
     "name": "LatLon",
     "description": "A set of Latitude/Longitude coordinates",
-    "context": [
+    "@context": [
         {
             "longitude": "https://schema.org/longitude",
             "latitude": "https://schema.org/latitude",
@@ -37,7 +37,7 @@ metadata_definition = {
 metadata_definition2 = {
     "name": "AlternativeTitle",
     "description": "Alternative title",
-    "context": [{"title": "https://schema.org/alternateName"}],
+    "@context": [{"title": "https://schema.org/alternateName"}],
     "fields": [
         {
             "name": "alternateName",
@@ -84,6 +84,9 @@ def test_dataset_create_metadata_definition(client: TestClient, headers: dict):
     assert (
         response.status_code == 200 or response.status_code == 409
     )  # 409 = definition already exists
+
+    # check if @context is injected correctly
+    assert response.json().get("@context") is not None
 
     # Create dataset and add metadata to it using new definition
     dataset_id = create_dataset(client, headers).get("id")
@@ -133,12 +136,14 @@ async def test_dataset_patch_metadata_definition(client: TestClient, headers: di
     es = await connect_elasticsearch()
     metadata_query = []
     # header
-    metadata_query.append({"index": "metadata"})
+    metadata_query.append({"index": settings.elasticsearch_index})
     # body
-    metadata_query.append({"query": {"match": {"content.latitude": "24.4"}}})
-    result = search_index(es, "metadata", metadata_query)
+    metadata_query.append({"query": {"match": {"metadata.latitude": "24.4"}}})
+    result = search_index(es, settings.elasticsearch_index, metadata_query)
     assert (
-        result.body["responses"][0]["hits"]["hits"][0]["_source"]["content"]["latitude"]
+        result.body["responses"][0]["hits"]["hits"][0]["_source"]["metadata"][0][
+            "latitude"
+        ]
         == 24.4
     )
 
@@ -160,14 +165,14 @@ async def test_dataset_create_metadata_context_url(client: TestClient, headers: 
     es = await connect_elasticsearch()
     metadata_query = []
     # header
-    metadata_query.append({"index": "metadata"})
+    metadata_query.append({"index": settings.elasticsearch_index})
     # body
     metadata_query.append(
-        {"query": {"match": {"content.alternateName": "different name"}}}
+        {"query": {"match": {"metadata.alternateName": "different name"}}}
     )
-    result = search_index(es, "metadata", metadata_query)
+    result = search_index(es, settings.elasticsearch_index, metadata_query)
     assert (
-        result.body["responses"][0]["hits"]["hits"][0]["_source"]["content"][
+        result.body["responses"][0]["hits"]["hits"][0]["_source"]["metadata"][0][
             "alternateName"
         ]
         == "different name"
