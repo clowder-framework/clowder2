@@ -52,6 +52,7 @@ export default function ListenerItem(props: ListenerCardProps) {
 				</Typography>
 			</Box>
 			<IconButton
+				disableRipple
 				color="primary"
 				disabled={
 					fileId !== undefined || datasetId !== undefined ? false : true
