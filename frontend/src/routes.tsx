@@ -12,6 +12,7 @@ import { CreateMetadataDefinitionPage } from "./components/metadata/CreateMetada
 import { Dataset as DatasetComponent } from "./components/datasets/Dataset";
 import { File as FileComponent } from "./components/files/File";
 import { CreateDataset } from "./components/datasets/CreateDataset";
+import { CreateListener } from "./components/listeners/CreateListener";
 import { Groups as GroupListComponent } from "./components/groups/Groups";
 import { Group as GroupComponent } from "./components/groups/Group";
 
@@ -187,6 +188,14 @@ export const AppRoutes = (): JSX.Element => {
 					element={
 						<PrivateRoute>
 							<ExtractionHistory />
+						</PrivateRoute>
+					}
+				/>
+				<Route
+					path="/new-extractor"
+					element={
+						<PrivateRoute>
+							<CreateListener />
 						</PrivateRoute>
 					}
 				/>

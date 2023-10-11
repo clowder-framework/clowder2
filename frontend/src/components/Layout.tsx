@@ -10,6 +10,7 @@ import List from "@mui/material/List";
 import Divider from "@mui/material/Divider";
 import IconButton from "@mui/material/IconButton";
 import MenuIcon from "@mui/icons-material/Menu";
+import BuildIcon from '@mui/icons-material/Build';
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import SearchDatasetIcon from "@mui/icons-material/Search";
@@ -297,6 +298,17 @@ export default function PersistentDrawerLeft(props) {
 								<AddBox />
 							</ListItemIcon>
 							<ListItemText primary={"New Dataset"} />
+						</ListItemButton>
+					</ListItem>
+				</List>
+				<Divider />
+				<List>
+					<ListItem key={"newextractor"} disablePadding>
+						<ListItemButton component={RouterLink} to="/new-extractor">
+							<ListItemIcon>
+								<BuildIcon />
+							</ListItemIcon>
+							<ListItemText primary={"New Extractor"} />
 						</ListItemButton>
 					</ListItem>
 				</List>
