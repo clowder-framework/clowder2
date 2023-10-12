@@ -1,8 +1,8 @@
 {
-	"name": "word-cloud",
+	"name": "vega-spec",
 	"version": "1.0.0",
-	"description": "A simple word-cloud from csv data.",
-	"main": "WordCloud.tsx",
+	"description": "A simple visualization using vegalite and the spec in json from vis data.",
+	"main": "VegaSpec.tsx",
 	"dependencies": {
 		"clowder2-core": "1.0.0",
 		"react": "^17.0.2",
@@ -10,7 +10,7 @@
 		"vega": "^5.20.2"
 	},
 	"visConfig": {
-		"name": "WordCloud",
+		"name": "VegaSpec",
 		"mainType": "application",
 		"mimeTypes": [
 			"application/json"

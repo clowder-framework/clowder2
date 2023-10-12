@@ -23,7 +23,7 @@ const allowedType = [
 	"geojson",
 ];
 
-export default function WordCloud(props: TextProps) {
+export default function VegaSpec(props: TextProps) {
 	let { fileId, visualizationId } = props;
 	const [data, setData] = useState();
 

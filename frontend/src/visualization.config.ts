@@ -84,7 +84,7 @@ visComponentDefinitions.push({
 	component: React.createElement(registerComponent(configVega)),
 });
 
-const configWordCloudSpec = require("./components/visualizations/WordCloud/manifest.json");
+const configWordCloudSpec = require("./components/visualizations/VegaSpec/manifest.json");
 visComponentDefinitions.push({
 	name: configWordCloudSpec.name,
 	mainType: configWordCloudSpec.visConfig.mainType,
