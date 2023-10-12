@@ -9,6 +9,8 @@ import {
 	AuthorizationBase,
 	DatasetOut as Dataset,
 	DatasetRoles,
+	EventListenerJobOut,
+	EventListenerJobUpdateOut,
 	FileOut as FileSummary,
 	FileVersion,
 	GroupOut as Group,
@@ -340,7 +342,7 @@ interface RECEIVE_LISTENER_LABELS {
 
 interface RECEIVE_LISTENER_JOBS {
 	type: "RECEIVE_LISTENER_JOBS";
-	jobs: [];
+	jobs: EventListenerJobUpdateOut[];
 }
 
 interface SUBMIT_FILE_EXTRACTION {
@@ -355,12 +357,22 @@ interface SUBMIT_DATASET_EXTRACTION {
 
 interface FETCH_JOB_SUMMARY {
 	type: "FETCH_JOB_SUMMARY";
-	currJobSummary: [];
+	currJobSummary: EventListenerJobOut;
+}
+
+interface RESET_JOB_SUMMARY {
+	type: "RESET_JOB_SUMMARY";
+	currJobSummary: EventListenerJobOut;
 }
 
 interface FETCH_JOB_UPDATES {
 	type: "FETCH_JOB_UPDATES";
-	currJobUpdates: [];
+	currJobUpdates: EventListenerJobUpdateOut[];
+}
+
+interface RESET_JOB_UPDATES {
+	type: "RESET_JOB_UPDATES";
+	currJobUpdates: EventListenerJobUpdateOut[];
 }
 
 interface CREATE_GROUP {
@@ -505,7 +517,9 @@ export type DataAction =
 	| SUBMIT_FILE_EXTRACTION
 	| SUBMIT_DATASET_EXTRACTION
 	| FETCH_JOB_SUMMARY
+	| RESET_JOB_SUMMARY
 	| FETCH_JOB_UPDATES
+	| RESET_JOB_UPDATES
 	| CREATE_GROUP
 	| RECEIVE_GROUPS
 	| SEARCH_GROUPS

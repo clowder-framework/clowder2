@@ -15,7 +15,12 @@ import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import { parseDate } from "../../utils/common";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../types/data";
-import { fetchJobSummary, fetchJobUpdates } from "../../actions/listeners";
+import {
+	fetchJobSummary,
+	fetchJobUpdates,
+	resetJobSummary,
+	resetJobUpdates,
+} from "../../actions/listeners";
 import config from "../../app.config";
 
 function Row(props: { summary: any; updates: any }) {
@@ -97,6 +102,8 @@ export default function ExtractorStatus(props: { job_id: any }) {
 		dispatch(fetchJobSummary(job_id));
 	const jobUpdatesFetch = (job_id: string | undefined) =>
 		dispatch(fetchJobUpdates(job_id));
+	const jobSummaryReset = () => dispatch(resetJobSummary());
+	const jobUpdatesReset = () => dispatch(resetJobUpdates());
 
 	const summary = useSelector(
 		(state: RootState) => state.listener.currJobSummary
@@ -106,12 +113,22 @@ export default function ExtractorStatus(props: { job_id: any }) {
 	);
 
 	useEffect(() => {
-		jobSummaryFetch(job_id);
-		jobUpdatesFetch(job_id);
+		// clear previous job's log
+		jobSummaryReset();
+		jobUpdatesReset();
 
-		const interval = setInterval(() => {
+		// immediate fetch
+		if (job_id.length > 0) {
 			jobSummaryFetch(job_id);
 			jobUpdatesFetch(job_id);
+		}
+
+		// set the interval to fetch the job's log
+		const interval = setInterval(() => {
+			if (job_id.length > 0) {
+				jobSummaryFetch(job_id);
+				jobUpdatesFetch(job_id);
+			}
 		}, config.extractorInterval);
 
 		return () => clearInterval(interval);
