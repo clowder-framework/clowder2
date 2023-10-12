@@ -101,6 +101,14 @@ class MetadataDefinitionBase(BaseModel):
     class Settings:
         name = "metadata_definitions"
 
+    class Config:
+        # Serialization Config Options
+        # Specify JSON key names
+        # This will rename the field `context` to `@context` in the JSON output
+        fields = {"context": {"alias": "@context"}}
+        # This will allow input by field name 'context' too along with '@context'
+        allow_population_by_field_name = True
+
 
 class MetadataDefinitionIn(MetadataDefinitionBase):
     pass
@@ -184,6 +192,14 @@ class MetadataBase(BaseModel):
     description: Optional[
         str
     ]  # This will be fetched from metadata definition if one is provided (shown by GUI)
+
+    class Config:
+        # Serialization Config Options
+        # Specify JSON key names
+        # This will rename the field `context` to `@context` in the JSON output
+        fields = {"context": {"alias": "@context"}}
+        # This will allow input by field name 'context' too along with '@context'
+        allow_population_by_field_name = True
 
     @validator("context")
     def contexts_are_valid(cls, v):

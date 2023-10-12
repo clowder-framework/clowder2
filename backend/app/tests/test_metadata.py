@@ -10,7 +10,7 @@ from app.tests.utils import create_dataset, upload_file
 metadata_definition = {
     "name": "LatLon",
     "description": "A set of Latitude/Longitude coordinates",
-    "context": [
+    "@context": [
         {
             "longitude": "https://schema.org/longitude",
             "latitude": "https://schema.org/latitude",
@@ -37,7 +37,7 @@ metadata_definition = {
 metadata_definition2 = {
     "name": "AlternativeTitle",
     "description": "Alternative title",
-    "context": [{"title": "https://schema.org/alternateName"}],
+    "@context": [{"title": "https://schema.org/alternateName"}],
     "fields": [
         {
             "name": "alternateName",
@@ -110,6 +110,9 @@ def test_dataset_create_and_delete_metadata_definition_fail(
         response.status_code == 200 or response.status_code == 409
     )  # 409 = definition already exists
     metadata_definition_id = response.json().get("id")
+
+    # check if @context is injected correctly
+    assert response.json().get("@context") is not None
 
     # Create dataset and add metadata to it using new definition
     dataset_id = create_dataset(client, headers).get("id")

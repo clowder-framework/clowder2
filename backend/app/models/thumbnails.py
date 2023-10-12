@@ -23,6 +23,7 @@ class ThumbnailDB(Document, ThumbnailBase):
     modified: datetime = Field(default_factory=datetime.utcnow)
     bytes: int = 0
     content_type: ContentType = ContentType()
+    downloads: int = 0
 
     class Settings:
         name = "thumbnails"
