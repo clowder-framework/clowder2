@@ -40,9 +40,8 @@ async def callback(message: AbstractIncomingMessage):
             new_version = extractor_db.version
             if version.parse(new_version) > version.parse(existing_version):
                 # if this is a new version, add it to the database
-                new_extractor = await extractor_db.insert()
-                # TODO - for now we are not deleting an older version of the extractor, just adding a new one
-                # await existing_extractor.delete()
+                extractor_db.id = existing_extractor.id
+                new_extractor = await extractor_db.replace()
                 extractor_out = EventListenerOut(**new_extractor.dict())
                 logger.info(
                     "%s updated from %s to %s"
