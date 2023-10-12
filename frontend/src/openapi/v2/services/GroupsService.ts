@@ -14,7 +14,7 @@ export class GroupsService {
      * Get a list of all Groups in the db the user is a member/owner of.
      *
      * Arguments:
-     * skip -- number of initial records to skip (i.e. for pagination)
+     * skip -- number of initial recoto_list()rds to skip (i.e. for pagination)
      * limit -- restrict number of records to be returned (i.e. for pagination)
      * @param skip
      * @param limit
