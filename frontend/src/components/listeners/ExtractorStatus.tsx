@@ -106,11 +106,12 @@ export default function ExtractorStatus(props: { job_id: any }) {
 	);
 
 	useEffect(() => {
+		jobSummaryFetch(job_id);
+		jobUpdatesFetch(job_id);
+
 		const interval = setInterval(() => {
-			if (job_id.length > 0) {
-				jobSummaryFetch(job_id);
-				jobUpdatesFetch(job_id);
-			}
+			jobSummaryFetch(job_id);
+			jobUpdatesFetch(job_id);
 		}, config.extractorInterval);
 
 		return () => clearInterval(interval);
