@@ -51,19 +51,27 @@ export default function ListenerItem(props: ListenerCardProps) {
 					{extractorDescription}
 				</Typography>
 			</Box>
-			<IconButton
-				disableRipple
-				color="primary"
-				disabled={
-					fileId !== undefined || datasetId !== undefined ? false : true
-				}
-				onClick={() => {
-					setOpenSubmitExtraction(true);
-					setSelectedExtractor(extractorInfo);
+			<Box
+				sx={{
+					flexGrow: 1,
+					display: "flex",
+					justifyContent: "end",
+					margin: "auto",
 				}}
 			>
-				<PlayCircleIcon />
-			</IconButton>
+				<IconButton
+					color="primary"
+					disabled={
+						fileId !== undefined || datasetId !== undefined ? false : true
+					}
+					onClick={() => {
+						setOpenSubmitExtraction(true);
+						setSelectedExtractor(extractorInfo);
+					}}
+				>
+					<PlayCircleIcon />
+				</IconButton>
+			</Box>
 		</Box>
 	);
 }
