@@ -1,14 +1,13 @@
 import {
-	Dataset,
 	ExtractedMetadata,
 	FilePreview,
 	Folder,
 	MetadataJsonld,
 	Profile,
-	FileState,
 } from "./data";
 import {
 	AuthorizationBase,
+	DatasetOut as Dataset,
 	DatasetRoles,
 	FileOut as FileSummary,
 	FileVersion,
@@ -92,7 +91,7 @@ interface RECEIVE_VERSIONS {
 
 interface CHANGE_SELECTED_VERSION {
 	type: "CHANGE_SELECTED_VERSION";
-	selected_version:number;
+	selected_version: number;
 }
 
 interface SET_USER {
@@ -262,6 +261,21 @@ interface POST_FILE_METADATA {
 interface RECEIVE_METADATA_DEFINITIONS {
 	type: "RECEIVE_METADATA_DEFINITIONS";
 	metadataDefinitionList: MetadataDefinition[];
+}
+
+interface RECEIVE_METADATA_DEFINITION {
+	type: "RECEIVE_METADATA_DEFINITION";
+	metadataDefinition: MetadataDefinition;
+}
+
+interface SEARCH_METADATA_DEFINITIONS {
+	type: "SEARCH_METADATA_DEFINITIONS";
+	metadataDefinitionList: MetadataDefinition[];
+}
+
+interface DELETE_METADATA_DEFINITION {
+	type: "DELETE_METADATA_DEFINITION";
+	metadataDefinition: MetadataDefinition;
 }
 
 interface SAVE_METADATA_DEFINITIONS {
@@ -470,6 +484,9 @@ export type DataAction =
 	| POST_DATASET_METADATA
 	| POST_FILE_METADATA
 	| RECEIVE_METADATA_DEFINITIONS
+	| RECEIVE_METADATA_DEFINITION
+	| SEARCH_METADATA_DEFINITIONS
+	| DELETE_METADATA_DEFINITION
 	| SAVE_METADATA_DEFINITIONS
 	| RECEIVE_DATASET_METADATA
 	| RECEIVE_FILE_METADATA

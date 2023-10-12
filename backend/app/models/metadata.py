@@ -89,6 +89,7 @@ class MetadataDefinitionBase(BaseModel):
 
     name: str
     description: Optional[str]
+    created: datetime = Field(default_factory=datetime.utcnow)
     context: Optional[
         List[Union[dict, AnyUrl]]
     ]  # https://json-ld.org/spec/latest/json-ld/#the-context
@@ -121,7 +122,8 @@ class MetadataDefinitionDB(Document, MetadataDefinitionBase):
 
 
 class MetadataDefinitionOut(MetadataDefinitionDB):
-    pass
+    class Config:
+        fields = {"id": "id"}
 
 
 def validate_definition(content: dict, metadata_def: MetadataDefinitionOut):
