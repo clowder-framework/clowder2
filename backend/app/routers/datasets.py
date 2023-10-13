@@ -6,7 +6,7 @@ import shutil
 import tempfile
 import zipfile
 from collections.abc import Mapping, Iterable
-from typing import List, Optional
+from typing import List, Optional, Annotated
 
 from beanie import PydanticObjectId
 from beanie.operators import Or
@@ -459,6 +459,46 @@ async def save_file(
             content_type=file.content_type,
         )
         return new_file.dict()
+    raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
+
+@router.post("/{dataset_id}/filesMultiple", response_model=List[FileOut])
+async def save_files(
+    dataset_id: str,
+    files: List[UploadFile],
+    folder_id: Optional[str] = None,
+    user=Depends(get_current_user),
+    fs: Minio = Depends(dependencies.get_fs),
+    es=Depends(dependencies.get_elasticsearchclient),
+    rabbitmq_client: BlockingChannel = Depends(dependencies.get_rabbitmq),
+    allow: bool = Depends(Authorization("uploader")),
+):
+    file = files[0]
+    if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
+        if user is None:
+            raise HTTPException(
+                status_code=401, detail=f"User not found. Session might have expired."
+            )
+
+        new_file = FileDB(name=file.filename, creator=user, dataset_id=dataset.id)
+
+        if folder_id is not None:
+            if (folder := await FolderDB.get(PydanticObjectId(folder_id))) is not None:
+                new_file.folder_id = folder.id
+            else:
+                raise HTTPException(
+                    status_code=404, detail=f"Folder {folder_id} not found"
+                )
+
+        await add_file_entry(
+            new_file,
+            user,
+            fs,
+            es,
+            rabbitmq_client,
+            file.file,
+            content_type=file.content_type,
+        )
+        return [new_file.dict()]
     raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
 
 
