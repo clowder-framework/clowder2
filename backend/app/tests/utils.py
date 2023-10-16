@@ -186,6 +186,7 @@ def upload_files(
     for f in upload_files:
         os.remove(f)
     assert response.status_code == 200
+    json_response = response.json()
     assert response.json().get("id") is not None
     return response.json()
 
