@@ -47,6 +47,15 @@ services:
       - clowder2
     restart: unless-stopped
 
+  autophrase:
+    image: socialmediamacroscope/autophrase_extractor:latest
+    environment:
+      CLOWDER_VERSION: 2
+      RABBITMQ_URI: amqp://guest:guest@rabbitmq:5672/%2F
+    networks:
+      - clowder2
+    restart: unless-stopped
+
 
 networks:
   clowder2:
