@@ -102,7 +102,7 @@ export const ShareMenu = (props: ActionsMenuProps): JSX.Element => {
 							<ListItemIcon>
 								<PersonIcon fontSize="small" />
 							</ListItemIcon>
-							<ListItemText>Share</ListItemText>
+							<ListItemText>Share with user</ListItemText>
 					</MenuItem>
 					<MenuItem
 							onClick={() => {
@@ -113,7 +113,7 @@ export const ShareMenu = (props: ActionsMenuProps): JSX.Element => {
 							<ListItemIcon>
 								<GroupsIcon fontSize="small" />
 							</ListItemIcon>
-							<ListItemText>Share With Group</ListItemText>
+							<ListItemText>Share With group</ListItemText>
 					</MenuItem>
 			</Menu>
 		</Box>)
