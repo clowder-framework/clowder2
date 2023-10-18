@@ -1,11 +1,14 @@
 import React, { useEffect, useState } from "react";
-import { Box, Grid } from "@mui/material";
+import { Box, Grid, Link } from "@mui/material";
 import Layout from "../Layout";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import Typography from "@mui/material/Typography";
 import { useParams } from "react-router-dom";
 import { MainBreadcrumbs } from "../navigation/BreadCrumb";
 import { ErrorModal } from "../errors/ErrorModal";
+import ReactJson from "react-json-view";
+import { fetchMetadataDefinition as fetchMetadataDefinitionAction } from "../../actions/metadata";
+import { RootState } from "../../types/data";
 
 export function MetadataDefinitionEntry() {
 	// path parameter
@@ -15,26 +18,17 @@ export function MetadataDefinitionEntry() {
 
 	// Redux connect equivalent
 	const dispatch = useDispatch();
-	// const fetchGroupInfo = (groupId: string | undefined) =>
-	// 	dispatch(fetch(groupId));
-	// const fetchCurrentGroupRole = (groupId: string | undefined) =>
-	// 	dispatch(fetchGroupRole(groupId));
-	//
-	// const groupAbout = useSelector((state: RootState) => state.group.about);
-	//
-	// const role = useSelector((state: RootState) => state.group.role);
-	//
-	// const groupCreatorEmail = useSelector(
-	// 	(state: RootState) => state.group.about.creator
-	// );
-	// const groupCreatorEmailLink = `mailto:${groupCreatorEmail}`;
-	// const [addMemberModalOpen, setAddMemberModalOpen] = useState(false);
+	const fetchMetadataDefinition = (metadataDefinitionId: string | undefined) =>
+		dispatch(fetchMetadataDefinitionAction(metadataDefinitionId));
+	const metadataDefinition = useSelector(
+		(state: RootState) => state.metadata.metadataDefinition
+	);
+
 	// const [deleteGroupConfirmOpen, setDeleteGroupConfirmOpen] = useState(false);
 
 	// component did mount
 	useEffect(() => {
-		// fetchGroupInfo(groupId);
-		// fetchCurrentGroupRole(groupId);
+		fetchMetadataDefinition(metadataDefinitionId);
 	}, []);
 
 	// Error msg dialog
@@ -46,10 +40,10 @@ export function MetadataDefinitionEntry() {
 			name: "Metadata Definitions",
 			url: "/metadata-definitions",
 		},
-		// {
-		// 	name: groupAbout.name,
-		// 	url: `/groups/${groupAbout.name}`,
-		// },
+		{
+			name: metadataDefinition.name,
+			url: `/metadata-definitions/${metadataDefinition.id}`,
+		},
 	];
 
 	return (
@@ -90,15 +84,27 @@ export function MetadataDefinitionEntry() {
 							}}
 						>
 							<Typography variant="h3" paragraph>
-								{/*{groupAbout !== undefined ? groupAbout.name : "Not found"}*/}
+								{metadataDefinition !== undefined
+									? metadataDefinition.name
+									: "Not found"}
 							</Typography>
 						</Box>
 						<Typography variant="body1" paragraph>
-							{/*{groupAbout.description}*/}
+							{metadataDefinition !== undefined
+								? metadataDefinition.description
+								: ""}
 						</Typography>
 						<Typography variant="body1" paragraph>
-							{/*<strong>Creator: </strong>*/}
-							{/*<Link href={groupCreatorEmailLink}>{groupCreatorEmail}</Link>*/}
+							<strong>Creator: </strong>
+							{metadataDefinition !== undefined &&
+							metadataDefinition.creator !== undefined &&
+							metadataDefinition.creator.email !== undefined ? (
+								<Link href={`mailto:${metadataDefinition.creator.email}`}>
+									{metadataDefinition.creator.email}
+								</Link>
+							) : (
+								<></>
+							)}
 						</Typography>
 					</Box>
 				</Grid>
@@ -122,6 +128,13 @@ export function MetadataDefinitionEntry() {
 					{/*</AuthWrapper>*/}
 				</Grid>
 			</Grid>
+			<ReactJson
+				src={metadataDefinition}
+				theme="summerfruit:inverted"
+				displayObjectSize={false}
+				displayDataTypes={false}
+				name={false}
+			/>
 		</Layout>
 	);
 }
