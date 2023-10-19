@@ -146,6 +146,7 @@ export const UploadFileMultiple: React.FC<UploadFileMultipleProps> = (
 	}
 
 	useEffect(() => {
+		console.log("we have a new file", newFile)
 		if (newFile.id) {
 			// Stop spinner
 			setLoading(false);
@@ -211,7 +212,7 @@ export const UploadFileMultiple: React.FC<UploadFileMultipleProps> = (
 									<Button
 										variant="contained"
 										onClick={handleFinishMultiple}
-										disabled={!selectedFile}
+										disabled={!selectedFiles}
 										sx={{ float: "right" }}
 									>
 										Finish

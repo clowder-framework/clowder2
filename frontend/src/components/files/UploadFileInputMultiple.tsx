@@ -14,6 +14,7 @@ export const UploadFileInputMultiple: React.FC<UploadFileMultipleModalProps> = (
 
 	const handleMultipleFileChange = (event) => {
 		console.log(event.target.files);
+		setSelectedFiles(event.target.files);
 	};
 
 	return (
