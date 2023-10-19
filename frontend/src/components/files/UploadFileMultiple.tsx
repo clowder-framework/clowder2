@@ -23,6 +23,7 @@ import { MetadataIn } from "../../openapi/v2";
 import { useNavigate } from "react-router-dom";
 import {
 	createFile as createFileAction,
+	createFiles as createFilesAction,
 	resetFileCreated,
 } from "../../actions/file";
 
@@ -60,6 +61,15 @@ export const UploadFileMultiple: React.FC<UploadFileMultipleProps> = (
 	) =>
 		dispatch(
 			createFileAction(selectedDatasetId, selectedFolderId, selectedFile)
+		);
+
+	const uploadFiles = (
+		selectedDatasetId: string | undefined,
+		selectedFolderId: string | undefined,
+		selectedFile: FileList
+	) =>
+		dispatch(
+			createFilesAction(selectedDatasetId, selectedFolderId, selectedFile)
 		);
 	const newFile = useSelector((state: RootState) => state.dataset.newFile);
 	const metadataDefinitionList = useSelector(
@@ -138,13 +148,15 @@ export const UploadFileMultiple: React.FC<UploadFileMultipleProps> = (
 		setLoading(true);
 
 		// create dataset
-		uploadFile(selectedDatasetId, folderId, selectedFile);
+		uploadFiles(selectedDatasetId, folderId, selectedFiles);
 	};
 
 	const handleFinishMultiple = () => {
 		console.log("Clicked Handle Finish Multiple");
 		console.log(selectedFiles);
-	}
+		setLoading(true);
+		uploadFiles(selectedDatasetId, folderId, selectedFiles);
+	};
 
 	useEffect(() => {
 		console.log("we have a new file", newFile)
