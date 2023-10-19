@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Box, Grid, Link } from "@mui/material";
+import { Box, Button, Grid, Link } from "@mui/material";
 import Layout from "../Layout";
 import { useDispatch, useSelector } from "react-redux";
 import Typography from "@mui/material/Typography";
@@ -9,6 +9,8 @@ import { ErrorModal } from "../errors/ErrorModal";
 import ReactJson from "react-json-view";
 import { fetchMetadataDefinition as fetchMetadataDefinitionAction } from "../../actions/metadata";
 import { RootState } from "../../types/data";
+import DeleteMetadataDefinitionModal from "./DeleteMetadataDefinitionModal";
+import DeleteIcon from "@mui/icons-material/Delete";
 
 export function MetadataDefinitionEntry() {
 	// path parameter
@@ -24,7 +26,10 @@ export function MetadataDefinitionEntry() {
 		(state: RootState) => state.metadata.metadataDefinition
 	);
 
-	// const [deleteGroupConfirmOpen, setDeleteGroupConfirmOpen] = useState(false);
+	const [
+		deleteMetadataDefinitionConfirmOpen,
+		setDeleteMetadataDefinitionConfirmOpen,
+	] = useState(false);
 
 	// component did mount
 	useEffect(() => {
@@ -56,11 +61,15 @@ export function MetadataDefinitionEntry() {
 					<MainBreadcrumbs paths={paths} />
 				</Grid>
 			</Grid>
-			{/*<DeleteGroupModal*/}
-			{/*	deleteGroupConfirmOpen={deleteGroupConfirmOpen}*/}
-			{/*	setDeleteGroupConfirmOpen={setDeleteGroupConfirmOpen}*/}
-			{/*	groupId={groupAbout.id}*/}
-			{/*/>*/}
+			<DeleteMetadataDefinitionModal
+				deleteMetadataDefinitionConfirmOpen={
+					deleteMetadataDefinitionConfirmOpen
+				}
+				setDeleteMetadataDefinitionConfirmOpen={
+					setDeleteMetadataDefinitionConfirmOpen
+				}
+				metdataDefinitionId={metadataDefinition.id}
+			/>
 			{/*Header & menus*/}
 			<Grid container>
 				<Grid
@@ -84,20 +93,19 @@ export function MetadataDefinitionEntry() {
 							}}
 						>
 							<Typography variant="h3" paragraph>
-								{metadataDefinition !== undefined
+								{metadataDefinition.name !== undefined
 									? metadataDefinition.name
 									: "Not found"}
 							</Typography>
 						</Box>
 						<Typography variant="body1" paragraph>
-							{metadataDefinition !== undefined
+							{metadataDefinition.description !== undefined
 								? metadataDefinition.description
 								: ""}
 						</Typography>
 						<Typography variant="body1" paragraph>
 							<strong>Creator: </strong>
-							{metadataDefinition !== undefined &&
-							metadataDefinition.creator !== undefined &&
+							{metadataDefinition.creator !== undefined &&
 							metadataDefinition.creator.email !== undefined ? (
 								<Link href={`mailto:${metadataDefinition.creator.email}`}>
 									{metadataDefinition.creator.email}
@@ -118,14 +126,22 @@ export function MetadataDefinitionEntry() {
 					lg={3}
 					sx={{
 						display: "flex",
-						justifyContent: "flex-start",
+						justifyContent: "flex-end",
 						alignItems: "baseline",
 						flexDirection: "row",
 					}}
 				>
-					{/*<AuthWrapper currRole={role} allowedRoles={["owner", "editor"]}>*/}
-					{/*	<EditMenu setDeleteGroupConfirmOpen={setDeleteGroupConfirmOpen} />*/}
-					{/*</AuthWrapper>*/}
+					<Button
+						variant="contained"
+						aria-label="delete"
+						onClick={() => {
+							setDeleteMetadataDefinitionConfirmOpen(true);
+						}}
+						endIcon={<DeleteIcon />}
+						sx={{ float: "right" }}
+					>
+						Delete
+					</Button>
 				</Grid>
 			</Grid>
 			<ReactJson
