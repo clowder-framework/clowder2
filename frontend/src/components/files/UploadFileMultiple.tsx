@@ -143,6 +143,7 @@ export const UploadFileMultiple: React.FC<UploadFileMultipleProps> = (
 
 	const handleFinishMultiple = () => {
 		console.log("Clicked Handle Finish Multiple");
+		console.log(selectedFiles);
 	}
 
 	useEffect(() => {
