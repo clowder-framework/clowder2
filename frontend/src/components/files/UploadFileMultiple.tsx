@@ -27,6 +27,7 @@ import {
 } from "../../actions/file";
 
 import LoadingOverlay from "react-loading-overlay-ts";
+import {UploadFileInputMultiple} from "./UploadFileInputMultiple";
 
 type UploadFileMultipleProps = {
 	selectedDatasetId: string | undefined;
@@ -70,6 +71,7 @@ export const UploadFileMultiple: React.FC<UploadFileMultipleProps> = (
 	}, []);
 
 	const [selectedFile, setSelectedFile] = useState<File | null>(null);
+	const [selectedFiles, setSelectedFiles] = useState<FileList| null>(null);
 	const [metadataRequestForms, setMetadataRequestForms] = useState({});
 	const [allFilled, setAllFilled] = React.useState<boolean>(false);
 
@@ -139,6 +141,10 @@ export const UploadFileMultiple: React.FC<UploadFileMultipleProps> = (
 		uploadFile(selectedDatasetId, folderId, selectedFile);
 	};
 
+	const handleFinishMultiple = () => {
+		console.log("Clicked Handle Finish Multiple");
+	}
+
 	useEffect(() => {
 		if (newFile.id) {
 			// Stop spinner
@@ -197,14 +203,14 @@ export const UploadFileMultiple: React.FC<UploadFileMultipleProps> = (
 						<StepContent TransitionProps={{ unmountOnExit: false }}>
 							<Typography>Upload files to the dataset.</Typography>
 							<Box>
-								<UploadFileInput setSelectedFile={setSelectedFile} />
+								<UploadFileInputMultiple setSelectedFiles={setSelectedFiles} />
 								<Box className="inputGroup">
 									<Button onClick={handleBack} sx={{ float: "right" }}>
 										Back
 									</Button>
 									<Button
 										variant="contained"
-										onClick={handleFinish}
+										onClick={handleFinishMultiple}
 										disabled={!selectedFile}
 										sx={{ float: "right" }}
 									>
