@@ -7,8 +7,6 @@ import {
 	useNavigate,
 	useParams,
 } from "react-router-dom";
-
-import { CreateMetadataDefinitionPage } from "./components/metadata/CreateMetadataDefinition";
 import { Dataset as DatasetComponent } from "./components/datasets/Dataset";
 import { File as FileComponent } from "./components/files/File";
 import { CreateDataset } from "./components/datasets/CreateDataset";
@@ -32,6 +30,7 @@ import { Forbidden } from "./components/errors/Forbidden";
 import { ApiKeys } from "./components/ApiKeys/ApiKey";
 import { Profile } from "./components/users/Profile";
 import config from "./app.config";
+import { MetadataDefinitions } from "./components/metadata/MetadataDefinitions";
 
 // https://dev.to/iamandrewluca/private-route-in-react-router-v6-lg5
 const PrivateRoute = (props): JSX.Element => {
@@ -123,13 +122,21 @@ export const AppRoutes = (): JSX.Element => {
 					}
 				/>
 				<Route
-					path="/new-metadata-definition"
+					path="/metadata-definitions"
 					element={
 						<PrivateRoute>
-							<CreateMetadataDefinitionPage />
+							<MetadataDefinitions />
 						</PrivateRoute>
 					}
 				/>
+				{/*<Route*/}
+				{/*	path="/metadata-definitions/:metadataDefinitionId"*/}
+				{/*	element={*/}
+				{/*		<PrivateRoute>*/}
+				{/*			<MetadataDefinitionPage />*/}
+				{/*		</PrivateRoute>*/}
+				{/*	}*/}
+				{/*/>*/}
 				<Route
 					path="/create-dataset/"
 					element={

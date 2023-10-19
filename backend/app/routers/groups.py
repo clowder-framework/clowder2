@@ -5,7 +5,6 @@ from beanie import PydanticObjectId
 from beanie.operators import Or, Push, RegEx
 from bson.objectid import ObjectId
 from fastapi import HTTPException, Depends, APIRouter
-from pymongo import DESCENDING
 
 from app.deps.authorization_deps import AuthorizationDB, GroupAuthorization
 from app.keycloak_auth import get_current_user, get_user
@@ -38,7 +37,7 @@ async def get_groups(
     """Get a list of all Groups in the db the user is a member/owner of.
 
     Arguments:
-        skip -- number of initial records to skip (i.e. for pagination)
+        skip -- number of initial recoto_list()rds to skip (i.e. for pagination)
         limit -- restrict number of records to be returned (i.e. for pagination)
 
 

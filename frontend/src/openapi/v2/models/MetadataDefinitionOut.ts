@@ -21,9 +21,10 @@ import type { UserOut } from './UserOut';
 export type MetadataDefinitionOut = {
     name: string;
     description?: string;
+    created?: string;
     '@context'?: Array<string>;
     context_url?: string;
     fields: Array<MetadataField>;
-    _id?: string;
+    id?: string;
     creator: UserOut;
 }

@@ -20,23 +20,22 @@ import AddBoxIcon from "@mui/icons-material/AddBox";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import { ClowderInput } from "../styledComponents/ClowderInput";
 import { postMetadataDefinitions } from "../../actions/metadata";
-import Layout from "../Layout";
 
 import { contextUrlMap, InputType, widgetTypes } from "../../metadata.config";
-
-export const CreateMetadataDefinitionPage = (): JSX.Element => {
-	return (
-		<Layout>
-			<CreateMetadataDefinition />
-		</Layout>
-	);
-};
 
 interface SupportedInputs {
 	[key: number]: Array<InputType>; // Define the type for SupportedInputs
 }
 
-export const CreateMetadataDefinition = (): JSX.Element => {
+type CreateMetadataDefinitionProps = {
+	setCreateMetadataDefinitionOpen: any;
+};
+
+export const CreateMetadataDefinition = (
+	props: CreateMetadataDefinitionProps
+) => {
+	const { setCreateMetadataDefinitionOpen } = props;
+
 	const dispatch = useDispatch();
 	// @ts-ignore
 	const saveMetadataDefinitions = (metadata: object) =>
@@ -198,6 +197,9 @@ export const CreateMetadataDefinition = (): JSX.Element => {
 
 		// Reset form
 		clearForm();
+
+		// Close modal
+		setCreateMetadataDefinitionOpen(false);
 	};
 
 	const parseInput = () => {
