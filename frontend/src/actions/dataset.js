@@ -104,11 +104,13 @@ export function removeDatasetUserRole(datasetId, username) {
 
 export const RECEIVE_FILES_IN_DATASET = "RECEIVE_FILES_IN_DATASET";
 
-export function fetchFilesInDataset(datasetId, folderId) {
+export function fetchFilesInDataset(datasetId, folderId, skip, limit) {
 	return (dispatch) => {
 		return V2.DatasetsService.getDatasetFilesApiV2DatasetsDatasetIdFilesGet(
 			datasetId,
-			folderId
+			folderId,
+			skip,
+			limit
 		)
 			.then((json) => {
 				dispatch({
@@ -119,7 +121,7 @@ export function fetchFilesInDataset(datasetId, folderId) {
 			})
 			.catch((reason) => {
 				dispatch(
-					handleErrors(reason, fetchFilesInDataset(datasetId, folderId))
+					handleErrors(reason, fetchFilesInDataset(datasetId, folderId, skip, limit))
 				);
 			});
 	};
@@ -127,11 +129,13 @@ export function fetchFilesInDataset(datasetId, folderId) {
 
 export const RECEIVE_FOLDERS_IN_DATASET = "RECEIVE_FOLDERS_IN_DATASET";
 
-export function fetchFoldersInDataset(datasetId, parentFolder) {
+export function fetchFoldersInDataset(datasetId, parentFolder, skip, limit) {
 	return (dispatch) => {
 		return V2.DatasetsService.getDatasetFoldersApiV2DatasetsDatasetIdFoldersGet(
 			datasetId,
-			parentFolder
+			parentFolder,
+			skip,
+			limit
 		)
 			.then((json) => {
 				dispatch({
@@ -142,7 +146,7 @@ export function fetchFoldersInDataset(datasetId, parentFolder) {
 			})
 			.catch((reason) => {
 				dispatch(
-					handleErrors(reason, fetchFoldersInDataset(datasetId, parentFolder))
+					handleErrors(reason, fetchFoldersInDataset(datasetId, parentFolder, skip, limit))
 				);
 			});
 	};
