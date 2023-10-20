@@ -1,15 +1,16 @@
 import {
-	Dataset,
 	ExtractedMetadata,
 	FilePreview,
 	Folder,
 	MetadataJsonld,
 	Profile,
-	FileState,
 } from "./data";
 import {
 	AuthorizationBase,
+	DatasetOut as Dataset,
 	DatasetRoles,
+	EventListenerJobOut,
+	EventListenerJobUpdateOut,
 	FileOut as FileSummary,
 	FileVersion,
 	GroupOut as Group,
@@ -92,7 +93,7 @@ interface RECEIVE_VERSIONS {
 
 interface CHANGE_SELECTED_VERSION {
 	type: "CHANGE_SELECTED_VERSION";
-	selected_version:number;
+	selected_version: number;
 }
 
 interface SET_USER {
@@ -264,6 +265,21 @@ interface RECEIVE_METADATA_DEFINITIONS {
 	metadataDefinitionList: MetadataDefinition[];
 }
 
+interface RECEIVE_METADATA_DEFINITION {
+	type: "RECEIVE_METADATA_DEFINITION";
+	metadataDefinition: MetadataDefinition;
+}
+
+interface SEARCH_METADATA_DEFINITIONS {
+	type: "SEARCH_METADATA_DEFINITIONS";
+	metadataDefinitionList: MetadataDefinition[];
+}
+
+interface DELETE_METADATA_DEFINITION {
+	type: "DELETE_METADATA_DEFINITION";
+	metadataDefinition: MetadataDefinition;
+}
+
 interface SAVE_METADATA_DEFINITIONS {
 	type: "SAVE_METADATA_DEFINITIONS";
 	metadataDefinitionList: MetadataDefinition[];
@@ -326,7 +342,7 @@ interface RECEIVE_LISTENER_LABELS {
 
 interface RECEIVE_LISTENER_JOBS {
 	type: "RECEIVE_LISTENER_JOBS";
-	jobs: [];
+	jobs: EventListenerJobUpdateOut[];
 }
 
 interface SUBMIT_FILE_EXTRACTION {
@@ -341,12 +357,22 @@ interface SUBMIT_DATASET_EXTRACTION {
 
 interface FETCH_JOB_SUMMARY {
 	type: "FETCH_JOB_SUMMARY";
-	currJobSummary: [];
+	currJobSummary: EventListenerJobOut;
+}
+
+interface RESET_JOB_SUMMARY {
+	type: "RESET_JOB_SUMMARY";
+	currJobSummary: EventListenerJobOut;
 }
 
 interface FETCH_JOB_UPDATES {
 	type: "FETCH_JOB_UPDATES";
-	currJobUpdates: [];
+	currJobUpdates: EventListenerJobUpdateOut[];
+}
+
+interface RESET_JOB_UPDATES {
+	type: "RESET_JOB_UPDATES";
+	currJobUpdates: EventListenerJobUpdateOut[];
 }
 
 interface CREATE_GROUP {
@@ -470,6 +496,9 @@ export type DataAction =
 	| POST_DATASET_METADATA
 	| POST_FILE_METADATA
 	| RECEIVE_METADATA_DEFINITIONS
+	| RECEIVE_METADATA_DEFINITION
+	| SEARCH_METADATA_DEFINITIONS
+	| DELETE_METADATA_DEFINITION
 	| SAVE_METADATA_DEFINITIONS
 	| RECEIVE_DATASET_METADATA
 	| RECEIVE_FILE_METADATA
@@ -488,7 +517,9 @@ export type DataAction =
 	| SUBMIT_FILE_EXTRACTION
 	| SUBMIT_DATASET_EXTRACTION
 	| FETCH_JOB_SUMMARY
+	| RESET_JOB_SUMMARY
 	| FETCH_JOB_UPDATES
+	| RESET_JOB_UPDATES
 	| CREATE_GROUP
 	| RECEIVE_GROUPS
 	| SEARCH_GROUPS

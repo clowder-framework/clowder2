@@ -2,11 +2,12 @@ from typing import Optional, List
 
 from bson import ObjectId
 from elasticsearch import Elasticsearch, NotFoundError
-
+from beanie import PydanticObjectId
 from app.config import settings
 from app.models.authorization import AuthorizationDB
-from app.models.datasets import DatasetOut
-from app.models.files import FileOut
+from app.models.datasets import DatasetOut, DatasetDB
+from app.models.files import FileOut, FileDB
+from app.models.thumbnails import ThumbnailOut, ThumbnailDB
 from app.models.metadata import MetadataDB
 from app.models.search import (
     ElasticsearchEntry,
@@ -107,3 +108,56 @@ async def index_file(
             insert_record(es, settings.elasticsearch_index, doc, file.id)
     else:
         insert_record(es, settings.elasticsearch_index, doc, file.id)
+
+
+async def index_thumbnail(
+    es: Elasticsearch,
+    thumbnail_id: str,
+    file_id: str,
+    dataset_id: str,
+    update: bool = False,
+):
+    """Create or update an Elasticsearch entry for the file. user_ids is the list of users
+    with permission to at least view the file's dataset, it will be queried if not provided.
+    """
+    if (file := await FileDB.get(PydanticObjectId(file_id))) is not None:
+        if (
+            thumbnail := await ThumbnailDB.get(PydanticObjectId(thumbnail_id))
+        ) is not None:
+            # Get authorized users from db
+            authorized_user_ids = []
+            async for auth in AuthorizationDB.find(
+                AuthorizationDB.dataset_id == ObjectId(dataset_id)
+            ):
+                authorized_user_ids += auth.user_ids
+            # Get full metadata from db (granular updates possible but complicated)
+            metadata = []
+            async for md in MetadataDB.find(
+                MetadataDB.resource.resource_id == ObjectId(file.id)
+            ):
+                metadata.append(md.content)
+            # Add en entry to the file index
+            doc = ElasticsearchEntry(
+                resource_type="thumbnail",
+                name=file.name,
+                creator=thumbnail.creator.email,
+                created=thumbnail.created,
+                user_ids=authorized_user_ids,
+                content_type=thumbnail.content_type.content_type,
+                content_type_main=thumbnail.content_type.main_type,
+                file_id=str(file.id),
+                dataset_id=str(file.dataset_id),
+                folder_id=str(file.folder_id),
+                bytes=thumbnail.bytes,
+                metadata=metadata,
+                downloads=thumbnail.downloads,
+            ).dict()
+            if update:
+                try:
+                    update_record(
+                        es, settings.elasticsearch_index, {"doc": doc}, file.id
+                    )
+                except NotFoundError:
+                    insert_record(es, settings.elasticsearch_index, doc, file.id)
+            else:
+                insert_record(es, settings.elasticsearch_index, doc, file.id)
