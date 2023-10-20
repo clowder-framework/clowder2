@@ -9,6 +9,7 @@ import { a11yProps, TabPanel } from "./tabs/TabComponent";
 import DatasetCard from "./datasets/DatasetCard";
 import { ArrowBack, ArrowForward } from "@material-ui/icons";
 import Layout from "./Layout";
+import { Link as RouterLink, useLocation } from "react-router-dom";
 import { Listeners } from "./listeners/Listeners";
 import { ErrorModal } from "./errors/ErrorModal";
 
@@ -100,7 +101,7 @@ export const Explore = (): JSX.Element => {
 					</Box>
 					<TabPanel value={selectedTabIndex} index={0}>
 						<Grid container spacing={2}>
-							{datasets !== undefined ? (
+							{datasets !== undefined ?  (
 								datasets.map((dataset) => {
 									return (
 										<Grid item key={dataset.id} xs={12} sm={6} md={4} lg={3}>
@@ -118,28 +119,47 @@ export const Explore = (): JSX.Element => {
 							) : (
 								<></>
 							)}
+							{datasets.length === 0 ? (
+								<Grid container justifyContent="center">
+									<Box textAlign="center">
+										<p>Nobody has created any datasets on this instance. Click below to create a dataset!</p>
+										<Button component={RouterLink} to="/create-dataset"
+											variant="contained"
+											sx={{ m: 2 }}
+										>
+										Create Dataset
+										</Button>
+									</Box>
+								</Grid>
+							) : (
+								<></>
+							)}
 						</Grid>
-						<Box display="flex" justifyContent="center" sx={{ m: 1 }}>
-							<ButtonGroup
-								variant="contained"
-								aria-label="previous next buttons"
-							>
-								<Button
-									aria-label="previous"
-									onClick={previous}
-									disabled={prevDisabled}
+						{datasets.length !== 0 ? (
+							<Box display="flex" justifyContent="center" sx={{ m: 1 }}>
+								<ButtonGroup
+									variant="contained"
+									aria-label="previous next buttons"
 								>
-									<ArrowBack /> Prev
-								</Button>
-								<Button
-									aria-label="next"
-									onClick={next}
-									disabled={nextDisabled}
-								>
-									Next <ArrowForward />
-								</Button>
-							</ButtonGroup>
-						</Box>
+									<Button
+										aria-label="previous"
+										onClick={previous}
+										disabled={prevDisabled}
+									>
+										<ArrowBack /> Prev
+									</Button>
+									<Button
+										aria-label="next"
+										onClick={next}
+										disabled={nextDisabled}
+									>
+										Next <ArrowForward />
+									</Button>
+								</ButtonGroup>
+							</Box>
+						): (
+							<></>
+						)}
 					</TabPanel>
 					<TabPanel value={selectedTabIndex} index={1}>
 						<Listeners />
