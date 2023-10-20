@@ -7,13 +7,11 @@ from fastapi import Depends
 from pika.adapters.blocking_connection import BlockingChannel
 
 from app import dependencies
-from app.keycloak_auth import get_token
 from app.models.config import ConfigEntryDB
 from app.models.datasets import DatasetOut
 from app.models.files import FileOut
 from app.models.listeners import (
     EventListenerJobDB,
-    EventListenerDB,
     EventListenerJobMessage,
     EventListenerDatasetJobMessage,
 )
@@ -76,6 +74,7 @@ async def submit_file_job(
         datasetId=str(file_out.dataset_id),
         secretKey=current_secretKey,
         job_id=str(job.id),
+        parameters=parameters,
     )
     reply_to = await create_reply_queue()
     print("RABBITMQ_CLIENT: " + str(rabbitmq_client))

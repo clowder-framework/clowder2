@@ -19,7 +19,7 @@ import type { MongoDBRef } from './MongoDBRef';
  * - [UpdateMethods](https://roman-right.github.io/beanie/api/interfaces/#aggregatemethods)
  */
 export type MetadataOut = {
-    context?: Array<string>;
+    '@context'?: Array<string>;
     context_url?: string;
     definition?: string;
     content: any;

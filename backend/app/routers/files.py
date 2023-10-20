@@ -42,7 +42,7 @@ from app.search.connect import (
     insert_record,
     update_record,
 )
-from app.search.index import index_file
+from app.search.index import index_file, index_thumbnail
 
 router = APIRouter()
 security = HTTPBearer()
@@ -515,6 +515,7 @@ async def add_file_thumbnail(
     file_id: str,
     thumbnail_id: str,
     allow: bool = Depends(FileAuthorization("editor")),
+    es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
 ):
     if (file := await FileDB.get(PydanticObjectId(file_id))) is not None:
         if (
@@ -523,6 +524,9 @@ async def add_file_thumbnail(
             # TODO: Should we garbage collect existing thumbnail if nothing else points to it?
             file.thumbnail_id = thumbnail_id
             await file.save()
+            await index_thumbnail(
+                es, thumbnail_id, str(file.id), str(file.dataset_id), False
+            )
             return file.dict()
         else:
             raise HTTPException(
