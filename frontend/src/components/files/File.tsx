@@ -429,7 +429,7 @@ export const File = (): JSX.Element => {
 					)}
 					<>
 						<Typography sx={{ wordBreak: "break-all" }}>Version</Typography>
-						<FormControl fullWidth>
+						<FormControl sx={{ width: "50%" }}>
 							<ClowderSelect
 								value={String(selectedVersionNum)}
 								defaultValue={"viewer"}
