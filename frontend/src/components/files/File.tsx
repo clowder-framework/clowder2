@@ -82,8 +82,9 @@ export const File = (): JSX.Element => {
 	const latestVersionNum = useSelector(
 		(state: RootState) => state.file.fileSummary.version_num
 	);
-	const [selectedVersionNum, setSelectedVersionNum] =
-		useState(latestVersionNum);
+	const [selectedVersionNum, setSelectedVersionNum] = useState(
+		latestVersionNum ?? 1
+	);
 	const fileSummary = useSelector((state: RootState) => state.file.fileSummary);
 	const filePreviews = useSelector((state: RootState) => state.file.previews);
 	const fileVersions = useSelector(
@@ -393,9 +394,7 @@ export const File = (): JSX.Element => {
 				<Grid item xs={2}>
 					<InputLabel id="demo-simple-select-label">Version</InputLabel>
 					<Select
-						labelId="demo-simple-select-label"
-						id="demo-simple-select"
-						value={selectedVersionNum}
+						value={String(selectedVersionNum)}
 						defaultValue={"viewer"}
 						label="Status"
 						onChange={(event) => {
