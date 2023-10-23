@@ -53,12 +53,7 @@ export function FilesTableFileEntry(props: FilesTableFileEntryProps) {
 						<Button onClick={() => selectFile(file.id)}>{file.name}</Button>
 					</TableCell>
 					<TableCell>
-						<VersionChip
-							selectedVersion={selectedVersion}
-							setSelectedVersion={null}
-							versionNumbers={null}
-							isClickable={false}
-						/>
+						<VersionChip selectedVersion={selectedVersion} />
 					</TableCell>
 					<TableCell align="right">{parseDate(file.created)}</TableCell>
 					<TableCell align="right">
