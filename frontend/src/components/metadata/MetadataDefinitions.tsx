@@ -32,6 +32,7 @@ import { ErrorModal } from "../errors/ErrorModal";
 import { CreateMetadataDefinition } from "./CreateMetadataDefinition";
 import DeleteIcon from "@mui/icons-material/Delete";
 import DeleteMetadataDefinitionModal from "./DeleteMetadataDefinitionModal";
+import { Link } from "react-router-dom";
 
 export function MetadataDefinitions() {
 	// Redux connect equivalent
@@ -240,14 +241,12 @@ export function MetadataDefinitions() {
 											sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
 										>
 											<TableCell scope="row" key={`${mdd.id}-name`}>
-												{/*TODO write individual metadata definition page*/}
-												{/*<Button*/}
-												{/*	component={Link}*/}
-												{/*	to={`/metadata-definitions/${mdd.id}`}*/}
-												{/*>*/}
-												{/*	{mdd.name}*/}
-												{/*</Button>*/}
-												{mdd.name}
+												<Button
+													component={Link}
+													to={`/metadata-definitions/${mdd.id}`}
+												>
+													{mdd.name}
+												</Button>
 											</TableCell>
 											<TableCell
 												scope="row"
