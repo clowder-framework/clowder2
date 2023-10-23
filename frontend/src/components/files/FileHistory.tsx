@@ -63,7 +63,7 @@ export function FileHistory(props: FileHistoryAboutProps) {
 	return (
 		<Box sx={{ mt: 5, mb: 2 }}>
 			<Typography variant="h5" gutterBottom>
-				History
+				Details
 			</Typography>
 			<StackedList keyValues={details} />
 		</Box>
