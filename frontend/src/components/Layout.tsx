@@ -3,7 +3,6 @@ import { useEffect } from "react";
 import { styled, useTheme } from "@mui/material/styles";
 import Box from "@mui/material/Box";
 import Drawer from "@mui/material/Drawer";
-import CssBaseline from "@mui/material/CssBaseline";
 import MuiAppBar, { AppBarProps as MuiAppBarProps } from "@mui/material/AppBar";
 import Toolbar from "@mui/material/Toolbar";
 import List from "@mui/material/List";
@@ -17,7 +16,7 @@ import ListItem from "@mui/material/ListItem";
 import ListItemButton from "@mui/material/ListItemButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
-import { Link, Menu, MenuItem, MenuList } from "@mui/material";
+import { Link, Menu, MenuItem, MenuList, Typography } from "@mui/material";
 import { Link as RouterLink, useLocation } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { RootState } from "../types/data";
@@ -136,7 +135,6 @@ export default function PersistentDrawerLeft(props) {
 	// @ts-ignore
 	return (
 		<Box sx={{ display: "flex" }}>
-			<CssBaseline />
 			<AppBar position="fixed" open={open}>
 				<Toolbar>
 					<IconButton
@@ -327,6 +325,16 @@ export default function PersistentDrawerLeft(props) {
 			<Main open={open}>
 				<DrawerHeader />
 				{children}
+				<Box
+					sx={{
+						position: "fixed",
+						bottom: "0px",
+						minHeight: "30px",
+						width: "100%",
+					}}
+				>
+					<Typography variant="body2">v2.0.0-beta.1</Typography>
+				</Box>
 			</Main>
 		</Box>
 	);

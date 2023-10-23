@@ -48,7 +48,6 @@ from app.routers import (
     visualization,
     thumbnails,
 )
-
 # setup loggers
 # logging.config.fileConfig('logging.conf', disable_existing_loggers=False)
 from app.search.config import indexSettings
@@ -57,7 +56,16 @@ from app.search.connect import connect_elasticsearch, create_index
 logger = logging.getLogger(__name__)
 
 app = FastAPI(
-    title=settings.APP_NAME, openapi_url=f"{settings.API_V2_STR}/openapi.json"
+    title=settings.APP_NAME, openapi_url=f"{settings.API_V2_STR}/openapi.json",
+    description="A cloud native data management framework to support any research domain. Clowder was "
+                "developed to help researchers and scientists in data intensive domains manage raw data, complex "
+                "metadata, and automatic data pipelines. ",
+    version="2.0.0-beta.1",
+    contact={"name": "Clowder", "url": "https://clowderframework.org/"},
+    license_info={
+        "name": "Apache 2.0",
+        "url": "https://www.apache.org/licenses/LICENSE-2.0.html",
+    },
 )
 BaseConfig.arbitrary_types_allowed = True
 
