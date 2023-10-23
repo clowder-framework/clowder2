@@ -7,7 +7,7 @@ spec:
   entryPoints:
     - web
   routes:
-    - match: Host(`traefik.clowder2.ncsa.cloud`) && (PathPrefix(`/dashboard`) || PathPrefix(`/api`)) || PathPrefix(`/docs`)
+    - match: Host(`traefik.clowder2.ncsa.cloud`) && (PathPrefix(`/dashboard`) || PathPrefix(`/api`))
       kind: Rule
       services:
         - name: api@internal
