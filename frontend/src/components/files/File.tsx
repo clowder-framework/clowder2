@@ -6,6 +6,7 @@ import {
 	FormControl,
 	Grid,
 	MenuItem,
+	Snackbar,
 	Tab,
 	Tabs,
 } from "@mui/material";
@@ -101,6 +102,15 @@ export const File = (): JSX.Element => {
 	const [metadataRequestForms, setMetadataRequestForms] = useState({});
 	const [paths, setPaths] = useState([]);
 
+	// Error msg dialog
+	const [errorOpen, setErrorOpen] = useState(false);
+	const [showForbiddenPage, setShowForbiddenPage] = useState(false);
+	const [showNotFoundPage, setShowNotFoundPage] = useState(false);
+
+	// snack bar
+	const [snackBarOpen, setSnackBarOpen] = useState(false);
+	const [snackBarMessage, setSnackBarMessage] = useState("");
+
 	// component did mount
 	useEffect(() => {
 		// load file information
@@ -149,11 +159,6 @@ export const File = (): JSX.Element => {
 			setSelectedVersionNum(latestVersionNum);
 		}
 	}, [latestVersionNum]);
-
-	// Error msg dialog
-	const [errorOpen, setErrorOpen] = useState(false);
-	const [showForbiddenPage, setShowForbiddenPage] = useState(false);
-	const [showNotFoundPage, setShowNotFoundPage] = useState(false);
 
 	useEffect(() => {
 		(async () => {
@@ -248,6 +253,16 @@ export const File = (): JSX.Element => {
 		<Layout>
 			{/*Error Message dialogue*/}
 			<ErrorModal errorOpen={errorOpen} setErrorOpen={setErrorOpen} />
+			{/*snackbar*/}
+			<Snackbar
+				open={snackBarOpen}
+				autoHideDuration={6000}
+				onClose={() => {
+					setSnackBarOpen(false);
+					setSnackBarMessage("");
+				}}
+				message={snackBarMessage}
+			/>
 			<Grid container>
 				<Grid item xs={10} sx={{ display: "flex", alignItems: "center" }}>
 					<MainBreadcrumbs paths={paths} />
@@ -413,15 +428,15 @@ export const File = (): JSX.Element => {
 						</>
 					)}
 					<>
-						<Typography sx={{ wordBreak: "break-all" }}>
-							Version History
-						</Typography>
+						<Typography sx={{ wordBreak: "break-all" }}>Version</Typography>
 						<FormControl fullWidth>
 							<ClowderSelect
 								value={String(selectedVersionNum)}
 								defaultValue={"viewer"}
 								onChange={(event) => {
 									setSelectedVersionNum(event.target.value);
+									setSnackBarMessage("Viewing version " + event.target.value);
+									setSnackBarOpen(true);
 								}}
 							>
 								{fileVersions.map((fileVersion) => {
