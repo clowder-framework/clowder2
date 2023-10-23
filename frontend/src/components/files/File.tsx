@@ -3,10 +3,9 @@ import config from "../../app.config";
 import {
 	Box,
 	Button,
+	FormControl,
 	Grid,
-	InputLabel,
 	MenuItem,
-	Select,
 	Tab,
 	Tabs,
 } from "@mui/material";
@@ -48,6 +47,8 @@ import { ErrorModal } from "../errors/ErrorModal";
 import { FileHistory } from "./FileHistory";
 import { VersionChip } from "../versions/VersionChip";
 import RoleChip from "../auth/RoleChip";
+import Typography from "@mui/material/Typography";
+import { ClowderSelect } from "../styledComponents/ClowderSelect";
 
 export const File = (): JSX.Element => {
 	// path parameter
@@ -392,23 +393,6 @@ export const File = (): JSX.Element => {
 					</TabPanel>
 				</Grid>
 				<Grid item xs={2}>
-					<InputLabel id="demo-simple-select-label">Version</InputLabel>
-					<Select
-						value={String(selectedVersionNum)}
-						defaultValue={"viewer"}
-						label="Status"
-						onChange={(event) => {
-							setSelectedVersionNum(event.target.value);
-						}}
-					>
-						{fileVersions.map((fileVersion) => {
-							return (
-								<MenuItem value={fileVersion.version_num}>
-									{fileVersion.version_num}
-								</MenuItem>
-							);
-						})}
-					</Select>
 					{latestVersionNum == selectedVersionNum ? (
 						// latest version
 						<>
@@ -428,6 +412,28 @@ export const File = (): JSX.Element => {
 							)}
 						</>
 					)}
+					<>
+						<Typography sx={{ wordBreak: "break-all" }}>
+							Version History
+						</Typography>
+						<FormControl fullWidth>
+							<ClowderSelect
+								value={String(selectedVersionNum)}
+								defaultValue={"viewer"}
+								onChange={(event) => {
+									setSelectedVersionNum(event.target.value);
+								}}
+							>
+								{fileVersions.map((fileVersion) => {
+									return (
+										<MenuItem value={fileVersion.version_num}>
+											{fileVersion.version_num}
+										</MenuItem>
+									);
+								})}
+							</ClowderSelect>
+						</FormControl>
+					</>
 				</Grid>
 			</Grid>
 		</Layout>
