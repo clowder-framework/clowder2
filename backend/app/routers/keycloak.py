@@ -117,13 +117,31 @@ async def auth(code: str) -> RedirectResponse:
     given_name = userinfo.get("given_name", " ")
     family_name = userinfo.get("family_name", " ")
     email = userinfo["email"]
-    user = UserDB(
-        email=email,
-        first_name=given_name,
-        last_name=family_name,
-        hashed_password="",
-        keycloak_id=keycloak_id,
-    )
+
+    # check if this is the 1st user, make it admin
+    all_records = UserDB.find_all()
+    count = 0
+
+    async for record in all_records:
+        count += 1
+
+    if count == 0:
+        user = UserDB(
+            email=email,
+            first_name=given_name,
+            last_name=family_name,
+            hashed_password="",
+            keycloak_id=keycloak_id,
+            admin=True
+        )
+    else:
+        user = UserDB(
+            email=email,
+            first_name=given_name,
+            last_name=family_name,
+            hashed_password="",
+            keycloak_id=keycloak_id,
+        )
     matched_user = await UserDB.find_one(UserDB.email == email)
     if matched_user is None:
         await user.insert()

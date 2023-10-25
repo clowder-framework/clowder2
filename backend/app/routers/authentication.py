@@ -8,8 +8,7 @@ from keycloak.exceptions import (
 )
 from passlib.hash import bcrypt
 
-from app import dependencies
-from app.keycloak_auth import create_user
+from app.keycloak_auth import create_user, get_current_user
 from app.keycloak_auth import keycloak_openid
 from app.models.users import UserDB, UserIn, UserOut, UserLogin
 
@@ -38,11 +37,28 @@ async def save_user(userIn: UserIn):
 
     # create local user
     hashed_password = bcrypt.hash(userIn.password)
-    user = UserDB(
-        **userIn.dict(),
-        hashed_password=hashed_password,
-        keycloak_id=keycloak_user,
-    )
+
+    # check if this is the 1st user, make it admin
+    all_records = UserDB.find_all()
+    count = 0
+
+    async for record in all_records:
+        count += 1
+
+    if count == 0:
+        user = UserDB(
+            **userIn.dict(),
+            admin=True,
+            hashed_password=hashed_password,
+            keycloak_id=keycloak_user,
+        )
+    else:
+        user = UserDB(
+            **userIn.dict(),
+            hashed_password=hashed_password,
+            keycloak_id=keycloak_user,
+        )
+
     await user.insert()
     return user.dict()
 
@@ -75,3 +91,20 @@ async def authenticate_user(email: str, password: str):
     if not user.verify_password(password):
         return None
     return user
+
+
+@router.post("/users/set_admin/{useremail}", response_model=UserOut)
+async def set_admin(useremail: str, current_username=Depends(get_current_user)):
+    print("hello")
+    if (current_user := await UserDB.find_one(UserDB.email == current_username.email)) is not None:
+        if current_user.admin == True:
+            if (user := await UserDB.find_one(UserDB.email == useremail)) is not None:
+                user.admin = True
+                await user.replace()
+                return user.dict()
+            else:
+                raise HTTPException(status_code=404, detail=f"User {useremail} not found")
+        else:
+            raise HTTPException(status_code=403, detail=f"User {current_username.email} is not an admin. Only admin can make others admin.")
+    else:
+        raise HTTPException(status_code=404, detail=f"User {current_username.email} not found")
