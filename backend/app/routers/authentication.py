@@ -96,15 +96,24 @@ async def authenticate_user(email: str, password: str):
 @router.post("/users/set_admin/{useremail}", response_model=UserOut)
 async def set_admin(useremail: str, current_username=Depends(get_current_user)):
     print("hello")
-    if (current_user := await UserDB.find_one(UserDB.email == current_username.email)) is not None:
+    if (
+        current_user := await UserDB.find_one(UserDB.email == current_username.email)
+    ) is not None:
         if current_user.admin == True:
             if (user := await UserDB.find_one(UserDB.email == useremail)) is not None:
                 user.admin = True
                 await user.replace()
                 return user.dict()
             else:
-                raise HTTPException(status_code=404, detail=f"User {useremail} not found")
+                raise HTTPException(
+                    status_code=404, detail=f"User {useremail} not found"
+                )
         else:
-            raise HTTPException(status_code=403, detail=f"User {current_username.email} is not an admin. Only admin can make others admin.")
+            raise HTTPException(
+                status_code=403,
+                detail=f"User {current_username.email} is not an admin. Only admin can make others admin.",
+            )
     else:
-        raise HTTPException(status_code=404, detail=f"User {current_username.email} not found")
+        raise HTTPException(
+            status_code=404, detail=f"User {current_username.email} not found"
+        )

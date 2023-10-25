@@ -132,7 +132,7 @@ async def auth(code: str) -> RedirectResponse:
             last_name=family_name,
             hashed_password="",
             keycloak_id=keycloak_id,
-            admin=True
+            admin=True,
         )
     else:
         user = UserDB(
