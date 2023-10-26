@@ -95,11 +95,10 @@ async def authenticate_user(email: str, password: str):
 
 @router.post("/users/set_admin/{useremail}", response_model=UserOut)
 async def set_admin(useremail: str, current_username=Depends(get_current_user)):
-    print("hello")
     if (
         current_user := await UserDB.find_one(UserDB.email == current_username.email)
     ) is not None:
-        if current_user.admin == True:
+        if current_user.admin:
             if (user := await UserDB.find_one(UserDB.email == useremail)) is not None:
                 user.admin = True
                 await user.replace()
