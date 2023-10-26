@@ -19,5 +19,6 @@ export type UserOut = {
     email: string;
     first_name: string;
     last_name: string;
+    admin?: boolean;
     id?: string;
 }

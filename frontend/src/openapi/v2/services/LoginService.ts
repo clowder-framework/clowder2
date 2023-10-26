@@ -49,4 +49,22 @@ export class LoginService {
         });
     }
 
+    /**
+     * Set Admin
+     * @param useremail
+     * @returns UserOut Successful Response
+     * @throws ApiError
+     */
+    public static setAdminApiV2UsersSetAdminUseremailPost(
+        useremail: string,
+    ): CancelablePromise<UserOut> {
+        return __request({
+            method: 'POST',
+            path: `/api/v2/users/set_admin/${useremail}`,
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+
 }
