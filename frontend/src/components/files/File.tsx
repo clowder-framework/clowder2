@@ -1,6 +1,15 @@
 import React, { useEffect, useState } from "react";
 import config from "../../app.config";
-import { Box, Button, Grid, Tab, Tabs } from "@mui/material";
+import {
+	Box,
+	Button,
+	FormControl,
+	Grid,
+	MenuItem,
+	Snackbar,
+	Tab,
+	Tabs,
+} from "@mui/material";
 import { downloadResource } from "../../utils/common";
 import { PreviewConfiguration, RootState } from "../../types/data";
 import { useParams, useSearchParams } from "react-router-dom";
@@ -39,6 +48,8 @@ import { ErrorModal } from "../errors/ErrorModal";
 import { FileHistory } from "./FileHistory";
 import { VersionChip } from "../versions/VersionChip";
 import RoleChip from "../auth/RoleChip";
+import Typography from "@mui/material/Typography";
+import { ClowderSelect } from "../styledComponents/ClowderSelect";
 
 export const File = (): JSX.Element => {
 	// path parameter
@@ -70,19 +81,18 @@ export const File = (): JSX.Element => {
 		dispatch(fetchFolderPath(folderId));
 
 	const file = useSelector((state: RootState) => state.file);
-	const version_num = useSelector(
+	const latestVersionNum = useSelector(
 		(state: RootState) => state.file.fileSummary.version_num
 	);
-	const [selectedVersion, setSelectedVersion] = useState(version_num);
+	const [selectedVersionNum, setSelectedVersionNum] = useState(
+		latestVersionNum ?? 1
+	);
 	const fileSummary = useSelector((state: RootState) => state.file.fileSummary);
 	const filePreviews = useSelector((state: RootState) => state.file.previews);
 	const fileVersions = useSelector(
 		(state: RootState) => state.file.fileVersions
 	);
 	const folderPath = useSelector((state: RootState) => state.folder.folderPath);
-	const [selectedFileVersionDetails, setSelectedFileVersionDetails] = useState(
-		fileVersions[0]
-	);
 	const fileRole = useSelector((state: RootState) => state.file.fileRole);
 
 	const [selectedTabIndex, setSelectedTabIndex] = useState(0);
@@ -90,8 +100,16 @@ export const File = (): JSX.Element => {
 	const [enableAddMetadata, setEnableAddMetadata] =
 		React.useState<boolean>(false);
 	const [metadataRequestForms, setMetadataRequestForms] = useState({});
-	const [allowSubmit, setAllowSubmit] = React.useState<boolean>(false);
 	const [paths, setPaths] = useState([]);
+
+	// Error msg dialog
+	const [errorOpen, setErrorOpen] = useState(false);
+	const [showForbiddenPage, setShowForbiddenPage] = useState(false);
+	const [showNotFoundPage, setShowNotFoundPage] = useState(false);
+
+	// snack bar
+	const [snackBarOpen, setSnackBarOpen] = useState(false);
+	const [snackBarMessage, setSnackBarMessage] = useState("");
 
 	// component did mount
 	useEffect(() => {
@@ -137,31 +155,10 @@ export const File = (): JSX.Element => {
 	}, [about, fileSummary, folderPath]);
 
 	useEffect(() => {
-		if (version_num !== undefined && version_num !== null) {
-			setSelectedVersion(version_num);
+		if (latestVersionNum !== undefined && latestVersionNum !== null) {
+			setSelectedVersionNum(latestVersionNum);
 		}
-	}, [version_num]);
-
-	useEffect(() => {
-		if (
-			version_num !== undefined &&
-			version_num !== null &&
-			fileVersions !== undefined &&
-			fileVersions !== null &&
-			fileVersions.length > 0
-		) {
-			fileVersions.map((fileVersion, idx) => {
-				if (fileVersion.version_num == version_num) {
-					setSelectedFileVersionDetails(fileVersion);
-				}
-			});
-		}
-	}, [version_num]);
-
-	// Error msg dialog
-	const [errorOpen, setErrorOpen] = useState(false);
-	const [showForbiddenPage, setShowForbiddenPage] = useState(false);
-	const [showNotFoundPage, setShowNotFoundPage] = useState(false);
+	}, [latestVersionNum]);
 
 	useEffect(() => {
 		(async () => {
@@ -246,11 +243,6 @@ export const File = (): JSX.Element => {
 		setEnableAddMetadata(false);
 	};
 
-	// const submitToListener = ()=> {
-	// 	const filename = fileSummary['name']
-	// 	history(`/listeners?fileId=${fileId}&fileName=${filename}`);
-	// }
-
 	if (showForbiddenPage) {
 		return <Forbidden />;
 	} else if (showNotFoundPage) {
@@ -261,25 +253,29 @@ export const File = (): JSX.Element => {
 		<Layout>
 			{/*Error Message dialogue*/}
 			<ErrorModal errorOpen={errorOpen} setErrorOpen={setErrorOpen} />
+			{/*snackbar*/}
+			<Snackbar
+				open={snackBarOpen}
+				autoHideDuration={6000}
+				onClose={() => {
+					setSnackBarOpen(false);
+					setSnackBarMessage("");
+				}}
+				message={snackBarMessage}
+			/>
 			<Grid container>
 				<Grid item xs={10} sx={{ display: "flex", alignItems: "center" }}>
 					<MainBreadcrumbs paths={paths} />
 					<Grid item>
-						<VersionChip
-							selectedVersion={selectedVersion}
-							setSelectedVersion={setSelectedVersion}
-							versionNumbers={fileVersions}
-							isClickable={true}
-						/>
+						<VersionChip selectedVersion={selectedVersionNum} />
 						<RoleChip role={fileRole} />
 					</Grid>
 				</Grid>
 				<Grid item xs={2} sx={{ display: "flex-top", alignItems: "center" }}>
 					<FileActionsMenu
-						filename={fileSummary.name}
 						fileId={fileId}
 						datasetId={datasetId}
-						setSelectedVersion={setSelectedVersion}
+						setSelectedVersion={setSelectedVersionNum}
 					/>
 				</Grid>
 			</Grid>
@@ -411,31 +407,49 @@ export const File = (): JSX.Element => {
 						<ExtractionHistoryTab fileId={fileId} />
 					</TabPanel>
 				</Grid>
-				{version_num == selectedVersion ? (
-					<Grid item xs={2}>
-						{Object.keys(fileSummary).length > 0 && (
-							<FileDetails fileSummary={fileSummary} />
-						)}
-					</Grid>
-				) : (
-					<Grid item xs={2}>
-						{Object.keys(fileSummary).length > 0 && (
-							<FileHistory
-								id={fileId}
-								created={file.fileSummary.created}
-								name={file.fileSummary.name}
-								creator={file.fileSummary.creator}
-								version_id={file.fileSummary.version_id}
-								bytes={file.fileSummary.bytes}
-								content_type={file.fileSummary.content_type}
-								views={file.fileSummary.views}
-								downloads={file.fileSummary.downloads}
-								current_version={selectedVersion}
-								fileSummary={file.fileSummary}
-							/>
-						)}
-					</Grid>
-				)}
+				<Grid item xs={2}>
+					{latestVersionNum == selectedVersionNum ? (
+						// latest version
+						<>
+							{Object.keys(fileSummary).length > 0 && (
+								<FileDetails fileSummary={fileSummary} />
+							)}
+						</>
+					) : (
+						// history version
+						<>
+							{Object.keys(fileSummary).length > 0 && (
+								<FileHistory
+									name={file.fileSummary.name}
+									contentType={file.fileSummary.content_type?.content_type}
+									selectedVersionNum={selectedVersionNum}
+								/>
+							)}
+						</>
+					)}
+					<>
+						<Typography sx={{ wordBreak: "break-all" }}>Version</Typography>
+						<FormControl>
+							<ClowderSelect
+								value={String(selectedVersionNum)}
+								defaultValue={"viewer"}
+								onChange={(event) => {
+									setSelectedVersionNum(event.target.value);
+									setSnackBarMessage("Viewing version " + event.target.value);
+									setSnackBarOpen(true);
+								}}
+							>
+								{fileVersions.map((fileVersion) => {
+									return (
+										<MenuItem value={fileVersion.version_num}>
+											{fileVersion.version_num}
+										</MenuItem>
+									);
+								})}
+							</ClowderSelect>
+						</FormControl>
+					</>
+				</Grid>
 			</Grid>
 		</Layout>
 	);
