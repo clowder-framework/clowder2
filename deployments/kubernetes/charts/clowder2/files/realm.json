@@ -285,16 +285,16 @@
     {
       "id": "54c87ecc-a8ef-45a1-9ec3-b4a42ddb8b7a",
       "clientId": "clowder2-backend",
-      "rootUrl": "https://clowder2.software-dev.ncsa.cloud",
+      "rootUrl": "https://clowder2.software-dev.nsca.illinois.edu",
       "surrogateAuthRequired": false,
       "enabled": true,
       "alwaysDisplayInConsole": false,
       "clientAuthenticatorType": "client-secret",
       "redirectUris": [
-        "https://clowder2.software-dev.ncsa.cloud/api/v2/auth"
+        "https://clowder2.software-dev.nsca.illinois.edu/api/v2/auth"
       ],
       "webOrigins": [
-        "https://clowder2.software-dev.ncsa.cloud"
+        "https://clowder2.software-dev.nsca.illinois.edu"
       ],
       "notBefore": 0,
       "bearerOnly": false,
@@ -1900,7 +1900,7 @@
     "oauth2DeviceCodeLifespan": "600",
     "parRequestUriLifespan": "60",
     "clientSessionMaxLifespan": "0",
-    "frontendUrl": "https://clowder2.software-dev.ncsa.cloud/keycloak",
+    "frontendUrl": "https://clowder2.software-dev.nsca.illinois.edu/keycloak",
     "acr.loa.map": "[]"
   },
   "keycloakVersion": "19.0.3",
