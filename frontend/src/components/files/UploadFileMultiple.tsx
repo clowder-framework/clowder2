@@ -154,6 +154,10 @@ export const UploadFileMultiple: React.FC<UploadFileMultipleProps> = (
 
 	const handleFinishMultiple = () => {
 		setLoading(true);
+		for (let pair of multipleFilesFormData.entries()) {
+			console.log(pair[0]+ ', ' + pair[1]);
+			console.log("these were the formdata being sent to uploadFiles");
+		}
 		uploadFiles(selectedDatasetId, folderId, selectedFiles, multipleFilesFormData);
 	};
 
