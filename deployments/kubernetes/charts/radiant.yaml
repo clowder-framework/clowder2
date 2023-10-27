@@ -1,6 +1,6 @@
 # helm upgrade --install --namespace clowder2 --create-namespace --values radiant.yaml clowder2 clowder2
 
-hostname: clowder2.software-dev.nsca.illinois.edu
+hostname: clowder2.software-dev.ncsa.illinois.edu
 
 minio:
   auth:
@@ -10,13 +10,13 @@ minio:
     storageClass: nfs-taiga
     size: 20Gi
   ingress:
-    hostname: minio.clowder2.software-dev.nsca.illinois.edu
+    hostname: minio.clowder2.software-dev.ncsa.illinois.edu
   apiIngress:
-    hostname: minio.clowder2.software-dev.nsca.illinois.edu
+    hostname: minio.clowder2.software-dev.ncsa.illinois.edu
 
 rabbitmq:
   ingress:
-    hostname: rabbitmq.clowder2.software-dev.nsca.illinois.edu
+    hostname: rabbitmq.clowder2.software-dev.ncsa.illinois.edu
   persistence:
     storageClass: csi-cinder-sc-retain
     size: 8Gi
@@ -38,7 +38,7 @@ elasticsearch:
 
 keycloak:
   ingress:
-    hostname: clowder2.software-dev.nsca.illinois.edu
+    hostname: clowder2.software-dev.ncsa.illinois.edu
   postgresql:
     primary:
       persistence:
