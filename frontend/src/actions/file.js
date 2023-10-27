@@ -148,19 +148,17 @@ export function createFile(selectedDatasetId, folderId, selectedFile) {
 
 export const CREATE_FILES = "CREATE_FILES";
 
-export function createFiles(selectedDatasetId, folderId, selectedFiles) {
+export function createFiles(selectedDatasetId, folderId, selectedFiles, multipleFilesFormData) {
 	return (dispatch) => {
-		const formData = new FormData();
-		formData["files"] = selectedFiles;
 		return V2.DatasetsService.saveFilesApiV2DatasetsDatasetIdFilesMultiplePost(
 			selectedDatasetId,
-			formData,
+			multipleFilesFormData,
 			folderId
 		)
-			.then((file) => {
+			.then((files) => {
 				dispatch({
 					type: CREATE_FILES,
-					files: selectedFiles,
+					formData: multipleFilesFormData,
 					receivedAt: Date.now(),
 				});
 			})
@@ -168,7 +166,7 @@ export function createFiles(selectedDatasetId, folderId, selectedFiles) {
 				dispatch(
 					handleErrors(
 						reason,
-						createFiles(selectedDatasetId, folderId, selectedFiles)
+						createFiles(selectedDatasetId, folderId, multipleFilesFormData)
 					)
 				);
 			});

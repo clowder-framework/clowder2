@@ -34,6 +34,7 @@ type UploadFileMultipleProps = {
 	selectedDatasetId: string | undefined;
 	folderId: string | undefined;
 	selectedDatasetName: string | undefined;
+	multipleFilesFormData: FormData | undefined;
 };
 
 export const UploadFileMultiple: React.FC<UploadFileMultipleProps> = (
@@ -66,10 +67,11 @@ export const UploadFileMultiple: React.FC<UploadFileMultipleProps> = (
 	const uploadFiles = (
 		selectedDatasetId: string | undefined,
 		selectedFolderId: string | undefined,
-		selectedFile: FileList
+		selectedFiles: FileList | undefined,
+		multipleFilesFormData: FormData | undefined,
 	) =>
 		dispatch(
-			createFilesAction(selectedDatasetId, selectedFolderId, selectedFile)
+			createFilesAction(selectedDatasetId, selectedFolderId, selectedFiles, multipleFilesFormData)
 		);
 	const newFile = useSelector((state: RootState) => state.dataset.newFile);
 	const metadataDefinitionList = useSelector(
@@ -84,9 +86,8 @@ export const UploadFileMultiple: React.FC<UploadFileMultipleProps> = (
 	const [selectedFiles, setSelectedFiles] = useState<FileList| null>(null);
 	const [metadataRequestForms, setMetadataRequestForms] = useState({});
 	const [allFilled, setAllFilled] = React.useState<boolean>(false);
-
+	const [multipleFilesFormData, setMultipleFilesFormData] = React.useState(new FormData());
 	const history = useNavigate();
-
 	const checkIfFieldsAreRequired = () => {
 		let required = false;
 
@@ -152,10 +153,8 @@ export const UploadFileMultiple: React.FC<UploadFileMultipleProps> = (
 	};
 
 	const handleFinishMultiple = () => {
-		console.log("Clicked Handle Finish Multiple");
-		console.log(selectedFiles);
 		setLoading(true);
-		uploadFiles(selectedDatasetId, folderId, selectedFiles);
+		uploadFiles(selectedDatasetId, folderId, selectedFiles, multipleFilesFormData);
 	};
 
 	useEffect(() => {
@@ -217,7 +216,10 @@ export const UploadFileMultiple: React.FC<UploadFileMultipleProps> = (
 						<StepContent TransitionProps={{ unmountOnExit: false }}>
 							<Typography>Upload files to the dataset.</Typography>
 							<Box>
-								<UploadFileInputMultiple setSelectedFiles={setSelectedFiles} />
+								<UploadFileInputMultiple
+									setSelectedFiles={setSelectedFiles}
+									multipleFilesFormData={multipleFilesFormData}
+								/>
 								<Box className="inputGroup">
 									<Button onClick={handleBack} sx={{ float: "right" }}>
 										Back

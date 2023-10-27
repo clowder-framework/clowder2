@@ -4,17 +4,20 @@ import { Box, Input } from "@mui/material";
 
 type UploadFileMultipleModalProps = {
 	setSelectedFiles: any;
+	multipleFilesFormData: FormData;
 };
 
 // https://stackoverflow.com/questions/68213700/react-js-upload-multiple-files
 export const UploadFileInputMultiple: React.FC<UploadFileMultipleModalProps> = (
 	props: UploadFileMultipleModalProps
 ) => {
-	const { setSelectedFiles } = props;
+	const { setSelectedFiles, multipleFilesFormData } = props;
 
 	const handleMultipleFileChange = (event) => {
-		console.log(event.target.files);
 		setSelectedFiles(event.target.files);
+		for (let i = 0; i < event.target.files.length; i++) {
+			multipleFilesFormData.append("files", event.target.files[i]);
+		}
 	};
 
 	return (
