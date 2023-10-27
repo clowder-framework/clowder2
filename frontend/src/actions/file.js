@@ -150,6 +150,7 @@ export const CREATE_FILES = "CREATE_FILES";
 
 export function createFiles(selectedDatasetId, folderId, selectedFiles, multipleFilesFormData) {
 	return (dispatch) => {
+		const newFormData = new FormData();
 		return V2.DatasetsService.saveFilesApiV2DatasetsDatasetIdFilesMultiplePost(
 			selectedDatasetId,
 			multipleFilesFormData,
