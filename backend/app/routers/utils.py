@@ -9,7 +9,7 @@ def get_content_type(
     filename: str,
     content_type: Optional[str] = None,
 ):
-    """Returns ContentType object given a content_tyoe, also guessed the content_type if none is provided
+    """Returns ContentType object given a content_type, also guessed the content_type if none is provided
 
     Arguments:
         content_type: content_type of a file to be uploaded
