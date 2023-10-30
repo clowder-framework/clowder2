@@ -141,6 +141,7 @@ async def auth(code: str) -> RedirectResponse:
             last_name=family_name,
             hashed_password="",
             keycloak_id=keycloak_id,
+            admin=False,
         )
     matched_user = await UserDB.find_one(UserDB.email == email)
     if matched_user is None:
