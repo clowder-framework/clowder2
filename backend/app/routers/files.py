@@ -25,12 +25,7 @@ from app import dependencies
 from app.config import settings
 from app.deps.authorization_deps import FileAuthorization
 from app.keycloak_auth import get_current_user, get_token
-from app.models.files import (
-    FileOut,
-    FileVersion,
-    FileDB,
-    FileVersionDB,
-)
+from app.models.files import FileOut, FileVersion, FileDB, FileVersionDB, S
 from app.models.metadata import MetadataDB
 from app.models.users import UserOut
 from app.models.thumbnails import ThumbnailDB
@@ -139,6 +134,40 @@ async def add_file_entry(
         bytes=bytes,
     )
     await new_version.insert()
+
+    # Add entry to the file index
+    await index_file(es, FileOut(**new_file.dict()))
+
+    # TODO - timing issue here, check_feed_listeners needs to happen asynchronously.
+    time.sleep(1)
+
+    # Submit file job to any qualifying feeds
+    await check_feed_listeners(
+        es,
+        FileOut(**new_file.dict()),
+        user,
+        rabbitmq_client,
+    )
+
+
+async def add_local_file_entry(
+    new_file: FileDB,
+    user: UserOut,
+    es: Elasticsearch,
+    rabbitmq_client: BlockingChannel,
+    content_type: Optional[str] = None,
+):
+    """Insert FileDB object into MongoDB (makes Clowder ID), then Minio (makes version ID), then update MongoDB with
+    the version ID from Minio.
+
+    Arguments:
+        file_db: FileDB object controlling dataset and folder destination
+        file: bytes to upload
+    """
+
+    content_type_obj = get_content_type(new_file.name, content_type)
+    new_file.content_type = content_type_obj
+    await new_file.insert()
 
     # Add entry to the file index
     await index_file(es, FileOut(**new_file.dict()))

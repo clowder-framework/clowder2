@@ -7,7 +7,7 @@ additional options to store or reference files elsewhere. Note that file version
 
 ### Storing on Local Filesystem
 
-For all local options,file versioning is not supported. Clowder will not recognize if the underlying file changes, and
+For all local options, file versioning is not supported. Clowder will not recognize if the underlying file changes, and
 uploading duplicate filenames will simply overwrite the existing file and update the size and date.
 
 #### Adding existing local files

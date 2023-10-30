@@ -35,7 +35,15 @@ class Settings(BaseSettings):
     MINIO_EXPIRES: int = 3600  # seconds
     MINIO_SECURE: str = "False"  # http vs https
 
-    # keycloak server
+    # Local file storage information
+    # Uploaded files will be written to a local folder instead of Minio.
+    LOCAL_STORAGE_ENABLED: bool = False
+    LOCAL_STORAGE_DIR: str = "/data"
+
+    # Files in the listed directories can be added to Clowder without copying them elsewhere
+    LOCAL_WHITELIST: List[str] = []
+
+    # Keycloak server
     auth_base = "http://localhost:8080"
     auth_realm = "clowder"
     auth_client_id = "clowder2-backend"
