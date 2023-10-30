@@ -10,7 +10,8 @@ Currently deployed at https://clowder2.readthedocs.io.
 make html
 
 # view
-python3 -m http.server --directory build/html
+python3 -m http.server 7000 --directory build/html
+open http://localhost:7000/
 
 # check links
 make linkcheck

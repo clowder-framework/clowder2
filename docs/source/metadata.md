@@ -1,4 +1,4 @@
-# Metadata in Clowder
+# Metadata
 
 In Clowder 2 we decide to continue supporting both user-defined and machine-defined metadata in a flexible 
 representation based on JSON-LD. We enforce that, to register a new metadata, either the definition

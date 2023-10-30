@@ -1,4 +1,4 @@
-# Visualizations in Clowder
+# Visualizations
 
 When browsing Clowder, there are two primary ways users can see aspects of a file or dataset without downloading it:
 
@@ -20,7 +20,7 @@ To programatically add a thumbnail to a file or dataset:
 3. Retrieve the thumbnail (e.g. to render on a frontend GUI) by issuing a GET request
    to `api/v2/files/:file_id/thumbnail`.
 
-The `ncsa.image.preview` extractor found in https://github.com/clowder-framework/extractors-core will create file
+The `ncsa.image.preview` extractor found in the [core extractors](https://github.com/clowder-framework/extractors-core) will create file
 thumbnails automatically.
 
 ## Visualizations

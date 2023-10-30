@@ -15,7 +15,7 @@
                  "type" : "enum",
                  "options": ["Ampere", "Kelvin", "Second"]
             },
-            "required" : true
+            "required" : false
         }
     ]
 }
