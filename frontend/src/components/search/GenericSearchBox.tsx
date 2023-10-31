@@ -28,7 +28,6 @@ export function GenericSearchBox(props: GenericSearchBoxProps) {
 		<>
 			<Typography
 				sx={{
-					mb: 1,
 					fontSize: "1rem",
 					color: theme.palette.primary.light,
 					fontWeight: 600,
