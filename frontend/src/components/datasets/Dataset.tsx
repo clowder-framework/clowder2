@@ -20,7 +20,7 @@ import { EditMetadata } from "../metadata/EditMetadata";
 import { MainBreadcrumbs } from "../navigation/BreadCrumb";
 import {
 	deleteDatasetMetadata as deleteDatasetMetadataAction,
-	fetchDatasetMetadata,
+	fetchDatasetMetadata, fetchMetadataDefinitions,
 	patchDatasetMetadata as patchDatasetMetadataAction,
 	postDatasetMetadata,
 } from "../../actions/metadata";
@@ -79,6 +79,8 @@ export const Dataset = (): JSX.Element => {
 		dispatch(fetchDatasetAbout(datasetId));
 	const listDatasetMetadata = (datasetId: string | undefined) =>
 		dispatch(fetchDatasetMetadata(datasetId));
+	const getMetadatDefinitions = (name:string|null, skip:number, limit:number) => dispatch(fetchMetadataDefinitions(name, skip,limit));
+
 
 	// mapStateToProps
 	const about = useSelector((state: RootState) => state.dataset.about);
@@ -110,6 +112,9 @@ export const Dataset = (): JSX.Element => {
 	const filesInDataset = useSelector((state: RootState) => state.dataset.files);
 	const foldersInDataset = useSelector((state: RootState) => state.folder.folders);
 
+
+	const metadataDefinitionList = useSelector((state: RootState) => state.metadata.metadataDefinitionList);
+
 	// component did mount list all files in dataset
 	useEffect(() => {
 		listFilesInDataset(datasetId, folderId, skip, limit);
@@ -117,6 +122,10 @@ export const Dataset = (): JSX.Element => {
 		listDatasetAbout(datasetId);
 		getFolderPath(folderId);
 	}, [searchParams]);
+
+	useEffect(() => {
+		getMetadatDefinitions(null, 0, 100);
+	}, []);
 
 	useEffect(() => {
 		// disable flipping if reaches the last page
