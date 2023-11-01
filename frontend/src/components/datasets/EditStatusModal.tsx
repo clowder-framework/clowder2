@@ -92,7 +92,7 @@ export default function EditStatusModal(props: EditStatusModalProps) {
 							>
 								<MenuItem value="PRIVATE">Private</MenuItem>
 								<MenuItem value="PUBLIC">Public</MenuItem>
-								<MenuItem value="PUBLISHED">Published</MenuItem>
+								{/*<MenuItem value="PUBLISHED">Published</MenuItem>*/}
 							</Select>
 						</FormControl>
 					</div>
