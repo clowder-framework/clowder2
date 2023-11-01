@@ -10,6 +10,7 @@ from app.models.files import FileOut, FileDB
 from app.models.groups import GroupOut, GroupDB
 from app.models.metadata import MetadataDB
 from app.models.pyobjectid import PyObjectId
+from app.routers.authentication import get_admin
 
 
 async def get_role(
@@ -107,8 +108,15 @@ class Authorization:
         self,
         dataset_id: str,
         current_user: str = Depends(get_current_username),
+        admin: bool = Depends(get_admin),
     ):
         # TODO: Make sure we enforce only one role per user per dataset, or find_one could yield wrong answer here.
+
+        # If the current user is admin, user has access irrespective of any role assigned
+        if admin:
+            return True
+
+        # Else check role assigned to the user
         authorization = await AuthorizationDB.find_one(
             AuthorizationDB.dataset_id == PyObjectId(dataset_id),
             Or(
@@ -142,7 +150,13 @@ class FileAuthorization:
         self,
         file_id: str,
         current_user: str = Depends(get_current_username),
+        admin: bool = Depends(get_admin),
     ):
+        # If the current user is admin, user has access irrespective of any role assigned
+        if admin:
+            return True
+
+        # Else check role assigned to the user
         if (file := await FileDB.get(PydanticObjectId(file_id))) is not None:
             authorization = await AuthorizationDB.find_one(
                 AuthorizationDB.dataset_id == file.dataset_id,
@@ -173,7 +187,13 @@ class MetadataAuthorization:
         self,
         metadata_id: str,
         current_user: str = Depends(get_current_username),
+        admin: bool = Depends(get_admin),
     ):
+        # If the current user is admin, user has access irrespective of any role assigned
+        if admin:
+            return True
+
+        # Else check role assigned to the user
         if (md_out := await MetadataDB.get(PydanticObjectId(metadata_id))) is not None:
             resource_type = md_out.resource.collection
             resource_id = md_out.resource.resource_id
@@ -233,7 +253,13 @@ class GroupAuthorization:
         self,
         group_id: str,
         current_user: str = Depends(get_current_username),
+        admin: bool = Depends(get_admin),
     ):
+        # If the current user is admin, user has access irrespective of any role assigned
+        if admin:
+            return True
+
+        # Else check role assigned to the user
         if (group := await GroupDB.get(group_id)) is not None:
             if group.creator == current_user:
                 # Creator can do everything
