@@ -1,4 +1,4 @@
-import React from "react";
+import React, {useState} from "react";
 
 import {
 	Autocomplete,
@@ -14,8 +14,8 @@ import {
 	StepContent,
 	StepLabel,
 	Stepper,
+	Snackbar,
 } from "@mui/material";
-import CloseIcon from "@mui/icons-material/Close";
 import { useDispatch } from "react-redux";
 import AddBoxIcon from "@mui/icons-material/AddBox";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
@@ -23,7 +23,6 @@ import { ClowderInput } from "../styledComponents/ClowderInput";
 import { postMetadataDefinitions } from "../../actions/metadata";
 
 import { contextUrlMap, InputType, widgetTypes } from "../../metadata.config";
-import { ClowderSnackBar } from "../styledComponents/ClowderSnackBar";
 
 interface SupportedInputs {
 	[key: number]: Array<InputType>; // Define the type for SupportedInputs
@@ -43,9 +42,12 @@ export const CreateMetadataDefinition = (
 	const saveMetadataDefinitions = (metadata: object) =>
 		dispatch(postMetadataDefinitions(metadata));
 
+	// snack bar
+	const [snackBarOpen, setSnackBarOpen] = useState(false);
+	const [snackBarMessage, setSnackBarMessage] = useState("");
+
 	const [activeStep, setActiveStep] = React.useState(0);
 	const [parsedInput, setParsedInput] = React.useState("");
-	const [open, setOpen] = React.useState(false);
 	const [contextMap, setContextMap] = React.useState([{ term: "", iri: "" }]);
 	const [formInput, setFormInput] = React.useState({
 		name: "",
@@ -194,7 +196,6 @@ export const CreateMetadataDefinition = (
 				delete formInput.fields[i].config.options;
 			}
 		}
-		setOpen(true);
 
 		// Invoke post request
 		saveMetadataDefinitions(formInput);
@@ -292,6 +293,9 @@ export const CreateMetadataDefinition = (
 		});
 
 		setContextMap([{ term: "", iri: "" }]);
+		// TODO add snackbar here
+		setSnackBarMessage("Successfully added metadata definition");
+		setSnackBarOpen(true);
 	};
 
 	const handleNext = () => {
@@ -302,31 +306,17 @@ export const CreateMetadataDefinition = (
 		setActiveStep((prevActiveStep) => prevActiveStep - 1);
 	};
 
-	const handleClose = (
-		event: React.SyntheticEvent | Event,
-		reason?: string
-	) => {
-		if (reason === "clickaway") {
-			return;
-		}
-		setOpen(false);
-	};
-
-	const action = (
-		<React.Fragment>
-			<IconButton
-				size="small"
-				aria-label="close"
-				color="primary"
-				onClick={handleClose}
-			>
-				<CloseIcon fontSize="small" />
-			</IconButton>
-		</React.Fragment>
-	);
-
 	return (
 		<div className="outer-container">
+			<Snackbar
+				open={snackBarOpen}
+				autoHideDuration={6000}
+				onClose={() => {
+					setSnackBarOpen(false);
+					setSnackBarMessage("");
+				}}
+				message={snackBarMessage}
+			/>
 			<div className="inner-container">
 				<Stepper activeStep={activeStep} orientation="vertical">
 					<Step key="create-metadata">
@@ -673,13 +663,6 @@ export const CreateMetadataDefinition = (
 						</StepContent>
 					</Step>
 				</Stepper>
-				<ClowderSnackBar
-					open={open}
-					autoHideDuration={6000}
-					onClose={handleClose}
-					message="New Metadata Definition Created!"
-					action={action}
-				/>
 			</div>
 		</div>
 	);
