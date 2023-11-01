@@ -31,6 +31,7 @@ import { ApiKeys } from "./components/ApiKeys/ApiKey";
 import { Profile } from "./components/users/Profile";
 import config from "./app.config";
 import { MetadataDefinitions } from "./components/metadata/MetadataDefinitions";
+import { MetadataDefinitionEntry } from "./components/metadata/MetadataDefinitionEntry";
 
 // https://dev.to/iamandrewluca/private-route-in-react-router-v6-lg5
 const PrivateRoute = (props): JSX.Element => {
@@ -129,14 +130,14 @@ export const AppRoutes = (): JSX.Element => {
 						</PrivateRoute>
 					}
 				/>
-				{/*<Route*/}
-				{/*	path="/metadata-definitions/:metadataDefinitionId"*/}
-				{/*	element={*/}
-				{/*		<PrivateRoute>*/}
-				{/*			<MetadataDefinitionPage />*/}
-				{/*		</PrivateRoute>*/}
-				{/*	}*/}
-				{/*/>*/}
+				<Route
+					path="/metadata-definitions/:metadataDefinitionId"
+					element={
+						<PrivateRoute>
+							<MetadataDefinitionEntry />
+						</PrivateRoute>
+					}
+				/>
 				<Route
 					path="/create-dataset/"
 					element={
