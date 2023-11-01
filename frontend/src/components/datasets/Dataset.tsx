@@ -308,14 +308,17 @@ export const Dataset = (): JSX.Element => {
 							{...a11yProps(3)}
 							disabled={false}
 						/>
-						<Tab
-							icon={<BuildIcon />}
-							iconPosition="start"
-							sx={TabStyle}
-							label="Extract"
-							{...a11yProps(4)}
-							disabled={false}
-						/>
+						{datasetRole.role !== undefined && datasetRole.role !== "viewer" ?
+							<Tab
+								icon={<BuildIcon />}
+								iconPosition="start"
+								sx={TabStyle}
+								label="Extract"
+								{...a11yProps(4)}
+								disabled={false}
+							/> :
+							<></>
+						}
 						<Tab
 							icon={<HistoryIcon />}
 							iconPosition="start"
@@ -324,14 +327,17 @@ export const Dataset = (): JSX.Element => {
 							{...a11yProps(5)}
 							disabled={false}
 						/>
-						<Tab
-							icon={<ShareIcon />}
-							iconPosition="start"
-							sx={TabStyle}
-							label="Sharing"
-							{...a11yProps(6)}
-							disabled={false}
-						/>
+						{datasetRole.role !== undefined && datasetRole.role !== "viewer" ?
+							<Tab
+								icon={<ShareIcon />}
+								iconPosition="start"
+								sx={TabStyle}
+								label="Sharing"
+								{...a11yProps(6)}
+								disabled={false}
+							/> :
+							<></>
+						}
 					</Tabs>
 					<TabPanel value={selectedTabIndex} index={0}>
 						{folderId !== null ? (
@@ -403,15 +409,21 @@ export const Dataset = (): JSX.Element => {
 							resourceId={datasetId}
 						/>
 					</TabPanel>
-					<TabPanel value={selectedTabIndex} index={4}>
-						<Listeners datasetId={datasetId} />
-					</TabPanel>
+					{datasetRole.role !== undefined && datasetRole.role !== "viewer" ?
+						<TabPanel value={selectedTabIndex} index={4}>
+							<Listeners datasetId={datasetId} />
+						</TabPanel> :
+						<></>
+					}
 					<TabPanel value={selectedTabIndex} index={5}>
 						<ExtractionHistoryTab datasetId={datasetId} />
 					</TabPanel>
-					<TabPanel value={selectedTabIndex} index={6}>
-						<SharingTab datasetId={datasetId} />
-					</TabPanel>
+					{datasetRole.role !== undefined && datasetRole.role !== "viewer" ?
+						<TabPanel value={selectedTabIndex} index={6}>
+							<SharingTab datasetId={datasetId} />
+						</TabPanel>
+						: <></>
+					}
 					<Box display="flex" justifyContent="center" sx={{ m: 1 }}>
 						<ButtonGroup
 								variant="contained"
