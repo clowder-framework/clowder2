@@ -30,7 +30,6 @@ import config from "../../app.config";
 
 type FileActionsMenuProps = {
 	fileId?: string;
-	filename?: string;
 	datasetId?: string;
 	setSelectedVersion: any;
 };
