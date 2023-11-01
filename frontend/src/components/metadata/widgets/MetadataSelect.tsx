@@ -17,6 +17,7 @@ export const MetadataSelect = (props) => {
 		resourceId,
 		updateMetadata,
 		isRequired,
+		datasetRole,
 	} = props;
 	const [localContent, setLocalContent] = useState(
 		content && content[fieldName] ? content : {}
@@ -76,16 +77,16 @@ export const MetadataSelect = (props) => {
 				<Grid item xs={1} sm={1} md={1} lg={1} xl={1}>
 					{datasetRole.role !== undefined && datasetRole.role !== "viewer" ?
 						<MetadataEditButton
-						readOnly={readOnly}
-						setReadOnly={setReadOnly}
-						updateMetadata={updateMetadata}
-						content={localContent}
-						metadataId={metadataId}
-						resourceId={resourceId}
-						widgetName={widgetName}
-						setInputChanged={setInputChanged}
-						setMetadata={setMetadata}
-					/> :
+							readOnly={readOnly}
+							setReadOnly={setReadOnly}
+							updateMetadata={updateMetadata}
+							content={localContent}
+							metadataId={metadataId}
+							resourceId={resourceId}
+							widgetName={widgetName}
+							setInputChanged={setInputChanged}
+							setMetadata={setMetadata}
+						/> :
 						<></>
 					}
 				</Grid>
