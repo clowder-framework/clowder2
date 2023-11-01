@@ -120,7 +120,7 @@ export function MetadataDefinitions() {
 		<Layout>
 			{/*Error Message dialogue*/}
 			<ErrorModal errorOpen={errorOpen} setErrorOpen={setErrorOpen} />
-
+			{/*TODO PUT SNACKBAR HERE FROM OTHER COMPONENT*/}
 			{/*Delete metadata definition modal*/}
 			<DeleteMetadataDefinitionModal
 				deleteMetadataDefinitionConfirmOpen={

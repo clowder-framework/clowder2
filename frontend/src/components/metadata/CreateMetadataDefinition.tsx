@@ -310,7 +310,7 @@ export const CreateMetadataDefinition = (
 		<div className="outer-container">
 			<Snackbar
 				open={snackBarOpen}
-				autoHideDuration={6000}
+				autoHideDuration={60000}
 				onClose={() => {
 					setSnackBarOpen(false);
 					setSnackBarMessage("");
