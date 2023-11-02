@@ -29,6 +29,7 @@ from app.models.datasets import (
 from app.models.groups import GroupDB
 from app.models.pyobjectid import PyObjectId
 from app.models.users import UserDB
+from app.routers.authentication import get_admin
 from app.search.index import index_dataset
 
 router = APIRouter()
@@ -68,18 +69,26 @@ async def save_authorization(
 async def get_dataset_role(
     dataset_id: str,
     current_user=Depends(get_current_username),
+    admin=Depends(get_admin),
 ):
     """Retrieve role of user for a specific dataset."""
+    # # admin is a superuser and has all the privileges
+    # if admin:
+    #     return True
     # Get group id and the associated users from authorization
-    if (
-        auth_db := await AuthorizationDB.find_one(
+    if admin:
+        auth_db = await AuthorizationDB.find_one(
+            AuthorizationDB.dataset_id == PyObjectId(dataset_id)
+        )
+    else:
+        auth_db = await AuthorizationDB.find_one(
             AuthorizationDB.dataset_id == PyObjectId(dataset_id),
             Or(
                 AuthorizationDB.creator == current_user,
                 AuthorizationDB.user_ids == current_user,
             ),
         )
-    ) is None:
+    if auth_db is None:
         raise HTTPException(
             status_code=404, detail=f"No authorization found for dataset: {dataset_id}"
         )
@@ -110,7 +119,11 @@ async def get_file_role(
     file_id: str,
     current_user=Depends(get_current_username),
     role: RoleType = Depends(get_role_by_file),
+    admin=Depends(get_admin),
 ):
+    # admin is a superuser and has all the privileges
+    if admin:
+        return RoleType.OWNER
     """Retrieve role of user for an individual file. Role cannot change between file versions."""
     return role
 
@@ -120,7 +133,11 @@ async def get_metadata_role(
     metadata_id: str,
     current_user=Depends(get_current_username),
     role: RoleType = Depends(get_role_by_metadata),
+    admin=Depends(get_admin),
 ):
+    # admin is a superuser and has all the privileges
+    if admin:
+        return RoleType.OWNER
     """Retrieve role of user for group. Group roles can be OWNER, EDITOR, or VIEWER (for regular Members)."""
     return role
 
@@ -130,7 +147,11 @@ async def get_group_role(
     group_id: str,
     current_user=Depends(get_current_username),
     role: RoleType = Depends(get_role_by_group),
+    admin=Depends(get_admin),
 ):
+    # admin is a superuser and has all the privileges
+    if admin:
+        return RoleType.OWNER
     """Retrieve role of user on a particular group (i.e. whether they can change group memberships)."""
     return role
 
