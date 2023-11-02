@@ -465,7 +465,7 @@ async def save_file(
     raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
 
 
-@router.post("/{dataset_id}/files", response_model=FileOut)
+@router.post("/{dataset_id}/local_files", response_model=FileOut)
 async def save_local_file(
     localfile_in: LocalFileIn,
     dataset_id: str,
