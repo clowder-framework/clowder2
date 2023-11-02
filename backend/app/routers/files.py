@@ -474,7 +474,7 @@ async def get_file_versions(
     limit: int = 20,
     allow: bool = Depends(FileAuthorization("viewer")),
 ):
-    if file := await FileDB.get(PydanticObjectId(file_id)) is not None:
+    if (file := await FileDB.get(PydanticObjectId(file_id))) is not None:
         mongo_versions = []
         if file.storage_type == StorageType.MINIO:
             async for ver in FileVersionDB.find(
