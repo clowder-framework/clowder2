@@ -53,7 +53,7 @@ class FileIn(FileBase):
     pass
 
 
-class LocalFileIn:
+class LocalFileIn(BaseModel):
     """Used when adding a file from a local disk."""
 
     path: str
