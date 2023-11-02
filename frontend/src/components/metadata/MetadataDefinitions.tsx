@@ -8,7 +8,7 @@ import {
 	DialogTitle,
 	Grid,
 	IconButton,
-	InputBase,
+	InputBase, Snackbar,
 } from "@mui/material";
 import { RootState } from "../../types/data";
 import { useDispatch, useSelector } from "react-redux";
@@ -67,6 +67,10 @@ export function MetadataDefinitions() {
 	const [selectedMetadataDefinition, setSelectedMetadataDefinition] =
 		useState();
 
+		// snack bar
+	const [snackBarOpen, setSnackBarOpen] = useState(false);
+	const [snackBarMessage, setSnackBarMessage] = useState("");
+
 	// for breadcrumb
 	const paths = [
 		{
@@ -121,6 +125,15 @@ export function MetadataDefinitions() {
 			{/*Error Message dialogue*/}
 			<ErrorModal errorOpen={errorOpen} setErrorOpen={setErrorOpen} />
 			{/*TODO PUT SNACKBAR HERE FROM OTHER COMPONENT*/}
+			<Snackbar
+				open={snackBarOpen}
+				autoHideDuration={6000}
+				onClose={() => {
+					setSnackBarOpen(false);
+					setSnackBarMessage("");
+				}}
+				message={snackBarMessage}
+			/>
 			{/*Delete metadata definition modal*/}
 			<DeleteMetadataDefinitionModal
 				deleteMetadataDefinitionConfirmOpen={
@@ -146,6 +159,8 @@ export function MetadataDefinitions() {
 				<DialogContent>
 					<CreateMetadataDefinition
 						setCreateMetadataDefinitionOpen={setCreateMetadataDefinitionOpen}
+						setSnackBarOpen={setSnackBarOpen}
+						setSnackBarMessage={setSnackBarMessage}
 					/>
 				</DialogContent>
 			</Dialog>

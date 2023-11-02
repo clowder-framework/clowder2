@@ -30,21 +30,20 @@ interface SupportedInputs {
 
 type CreateMetadataDefinitionProps = {
 	setCreateMetadataDefinitionOpen: any;
+	setSnackBarOpen: any;
+	setSnackBarMessage: any;
 };
 
 export const CreateMetadataDefinition = (
 	props: CreateMetadataDefinitionProps
 ) => {
-	const { setCreateMetadataDefinitionOpen } = props;
+	const { setCreateMetadataDefinitionOpen, setSnackBarOpen, setSnackBarMessage } = props;
 
 	const dispatch = useDispatch();
 	// @ts-ignore
 	const saveMetadataDefinitions = (metadata: object) =>
 		dispatch(postMetadataDefinitions(metadata));
 
-	// snack bar
-	const [snackBarOpen, setSnackBarOpen] = useState(false);
-	const [snackBarMessage, setSnackBarMessage] = useState("");
 
 	const [activeStep, setActiveStep] = React.useState(0);
 	const [parsedInput, setParsedInput] = React.useState("");
@@ -308,15 +307,6 @@ export const CreateMetadataDefinition = (
 
 	return (
 		<div className="outer-container">
-			<Snackbar
-				open={snackBarOpen}
-				autoHideDuration={60000}
-				onClose={() => {
-					setSnackBarOpen(false);
-					setSnackBarMessage("");
-				}}
-				message={snackBarMessage}
-			/>
 			<div className="inner-container">
 				<Stepper activeStep={activeStep} orientation="vertical">
 					<Step key="create-metadata">
