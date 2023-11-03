@@ -173,11 +173,10 @@ def upload_files(
 ):
     """Uploads a dummy file (optionally with custom name/content) to a dataset and returns the JSON."""
     upload_files = []
-    uploads = []
     for i in range(0, len(filenames)):
         with open(filenames[i], "w") as tempf:
             tempf.write(file_contents[i])
-            uploads.append(open(filenames[i], "rb"))
+            upload_files.append(filenames[i])
     files = [
         ("files", open(filename_example_1, "rb")),
         ("files", open(filename_example_2, "rb")),
