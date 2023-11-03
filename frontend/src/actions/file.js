@@ -150,12 +150,14 @@ export const CREATE_FILES = "CREATE_FILES";
 
 export function createFiles(selectedDatasetId, selectedFiles, folderId) {
 	return (dispatch) => {
-		const formData = new FormData();
+		let formData = new FormData();
+		let tmp = [];
 		if (selectedFiles.length > 0) {
 			for (let i = 0; i < selectedFiles.length; i++) {
-				formData.append("files", selectedFiles[i]);
+				tmp.push(selectedFiles[i]);
 			}
 		}
+		formData["files"] = tmp;
 
 		return V2.DatasetsService.saveFilesApiV2DatasetsDatasetIdFilesMultiplePost(
 			selectedDatasetId,
@@ -165,7 +167,7 @@ export function createFiles(selectedDatasetId, selectedFiles, folderId) {
 			.then((files) => {
 				dispatch({
 					type: CREATE_FILES,
-					formData: files,
+					files: files,
 					receivedAt: Date.now(),
 				});
 			})
@@ -186,6 +188,17 @@ export function resetFileCreated() {
 	return (dispatch) => {
 		dispatch({
 			type: RESET_CREATE_FILE,
+			receivedAt: Date.now(),
+		});
+	};
+}
+
+export const RESET_CREATE_FILES = "RESET_CREATE_FILES";
+
+export function resetFilesCreated() {
+	return (dispatch) => {
+		dispatch({
+			type: RESET_CREATE_FILES,
 			receivedAt: Date.now(),
 		});
 	};

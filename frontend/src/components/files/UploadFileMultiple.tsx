@@ -20,9 +20,8 @@ import {
 import { MetadataIn } from "../../openapi/v2";
 import { useNavigate } from "react-router-dom";
 import {
-	createFile as createFileAction,
 	createFiles as createFilesAction,
-	resetFileCreated,
+	resetFilesCreated,
 } from "../../actions/file";
 
 import LoadingOverlay from "react-loading-overlay-ts";
@@ -55,14 +54,6 @@ export const UploadFileMultiple: React.FC<UploadFileMultipleProps> = (
 		fileId: string | undefined,
 		metadata: MetadataIn
 	) => dispatch(postFileMetadata(fileId, metadata));
-	const uploadFile = (
-		selectedDatasetId: string | undefined,
-		selectedFolderId: string | undefined,
-		selectedFile: File
-	) =>
-		dispatch(
-			createFileAction(selectedDatasetId, selectedFolderId, selectedFile)
-		);
 
 	const uploadFiles = (
 		selectedDatasetId: string | undefined,
@@ -72,7 +63,7 @@ export const UploadFileMultiple: React.FC<UploadFileMultipleProps> = (
 		dispatch(
 			createFilesAction(selectedDatasetId, selectedFiles, selectedFolderId)
 		);
-	const newFile = useSelector((state: RootState) => state.dataset.newFile);
+	const newFiles = useSelector((state: RootState) => state.dataset.newFiles);
 	const metadataDefinitionList = useSelector(
 		(state: RootState) => state.metadata.metadataDefinitionList
 	);
@@ -152,26 +143,25 @@ export const UploadFileMultiple: React.FC<UploadFileMultipleProps> = (
 	};
 
 	useEffect(() => {
-		if (newFile.id) {
-			// Stop spinner
-			setLoading(false);
-
-			// post new metadata
-			const file = newFile;
-			Object.keys(metadataRequestForms).map((key) => {
-				createFileMetadata(file.id, metadataRequestForms[key]);
+		if (newFiles.length > 0) {
+			newFiles.map((file) => {
+				// post new metadata
+				Object.keys(metadataRequestForms).map((key) => {
+					createFileMetadata(file.id, metadataRequestForms[key]);
+				});
 			});
 
 			// reset newFile so next upload can be done
-			dispatch(resetFileCreated());
+			dispatch(resetFilesCreated());
 			setMetadataRequestForms({});
 
-			// Redirect to file route with file Id and dataset id
-			history(
-				`/files/${file.id}?dataset=${selectedDatasetId}&folder=${folderId}`
-			);
+			// Stop spinner
+			setLoading(false);
+
+			// Redirect dataset page
+			history(`/datasets/${selectedDatasetId}?folder=${folderId}`);
 		}
-	}, [newFile]);
+	}, [newFiles]);
 
 	return (
 		<LoadingOverlay active={loading} spinner text="Uploading file...">
