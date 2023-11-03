@@ -280,7 +280,7 @@ export class DatasetsService {
      */
     public static saveFilesApiV2DatasetsDatasetIdFilesMultiplePost(
         datasetId: string,
-        formData: FormData,
+        formData: Body_save_files_api_v2_datasets__dataset_id__filesMultiple_post,
         folderId?: string,
     ): CancelablePromise<Array<FileOut>> {
         return __request({

@@ -32,13 +32,15 @@ type UploadFileMultipleProps = {
 	selectedDatasetId: string | undefined;
 	folderId: string | undefined;
 	selectedDatasetName: string | undefined;
-	multipleFilesFormData: FormData | undefined;
 };
 
 export const UploadFileMultiple: React.FC<UploadFileMultipleProps> = (
 	props: UploadFileMultipleProps
 ) => {
 	const { selectedDatasetId, folderId } = props;
+	const [selectedFiles, setSelectedFiles] = useState<File[] | null>(null);
+	const [metadataRequestForms, setMetadataRequestForms] = useState({});
+	const [allFilled, setAllFilled] = React.useState<boolean>(false);
 
 	const [loading, setLoading] = useState(false);
 
@@ -64,15 +66,11 @@ export const UploadFileMultiple: React.FC<UploadFileMultipleProps> = (
 
 	const uploadFiles = (
 		selectedDatasetId: string | undefined,
-		multipleFilesFormData: FormData | undefined,
+		selectedFiles: File[] | undefined,
 		selectedFolderId: string | undefined
 	) =>
 		dispatch(
-			createFilesAction(
-				selectedDatasetId,
-				multipleFilesFormData,
-				selectedFolderId
-			)
+			createFilesAction(selectedDatasetId, selectedFiles, selectedFolderId)
 		);
 	const newFile = useSelector((state: RootState) => state.dataset.newFile);
 	const metadataDefinitionList = useSelector(
@@ -83,11 +81,6 @@ export const UploadFileMultiple: React.FC<UploadFileMultipleProps> = (
 		getMetadatDefinitions(null, 0, 100);
 	}, []);
 
-	const [metadataRequestForms, setMetadataRequestForms] = useState({});
-	const [allFilled, setAllFilled] = React.useState<boolean>(false);
-	const [multipleFilesFormData, setMultipleFilesFormData] = React.useState(
-		new FormData()
-	);
 	const history = useNavigate();
 	const checkIfFieldsAreRequired = () => {
 		let required = false;
@@ -150,12 +143,12 @@ export const UploadFileMultiple: React.FC<UploadFileMultipleProps> = (
 		setLoading(true);
 
 		// create dataset
-		uploadFiles(selectedDatasetId, multipleFilesFormData, folderId);
+		uploadFiles(selectedDatasetId, selectedFiles, folderId);
 	};
 
 	const handleFinishMultiple = () => {
 		setLoading(true);
-		uploadFiles(selectedDatasetId, multipleFilesFormData, folderId);
+		uploadFiles(selectedDatasetId, selectedFiles, folderId);
 	};
 
 	useEffect(() => {
@@ -215,9 +208,7 @@ export const UploadFileMultiple: React.FC<UploadFileMultipleProps> = (
 						<StepContent TransitionProps={{ unmountOnExit: false }}>
 							<Typography>Upload files to the dataset.</Typography>
 							<Box>
-								<UploadFileInputMultiple
-									setMultipleFilesFormData={setMultipleFilesFormData}
-								/>
+								<UploadFileInputMultiple setSelectedFiles={setSelectedFiles} />
 								<Box className="inputGroup">
 									<Button onClick={handleBack} sx={{ float: "right" }}>
 										Back
@@ -225,7 +216,7 @@ export const UploadFileMultiple: React.FC<UploadFileMultipleProps> = (
 									<Button
 										variant="contained"
 										onClick={handleFinishMultiple}
-										disabled={!multipleFilesFormData}
+										disabled={!selectedFiles}
 										sx={{ float: "right" }}
 									>
 										Finish
