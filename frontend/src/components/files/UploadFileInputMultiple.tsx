@@ -3,8 +3,6 @@ import React from "react";
 import { Box, Input } from "@mui/material";
 
 type UploadFileMultipleModalProps = {
-	setSelectedFiles: any;
-	// multipleFilesFormData: FormData;
 	setMultipleFilesFormData: any;
 };
 
@@ -12,14 +10,12 @@ type UploadFileMultipleModalProps = {
 export const UploadFileInputMultiple: React.FC<UploadFileMultipleModalProps> = (
 	props: UploadFileMultipleModalProps
 ) => {
-	const { setSelectedFiles, setMultipleFilesFormData } = props;
+	const { setMultipleFilesFormData } = props;
 
 	const handleMultipleFileChange = (event) => {
-		setSelectedFiles(event.target.files);
 		let tempFormData = new FormData();
 		for (let i = 0; i < event.target.files.length; i++) {
 			tempFormData.append("files", event.target.files[i]);
-			// setMultipleFilesFormData.append("files", (event.target.files[i]));
 		}
 		setMultipleFilesFormData(tempFormData);
 	};
