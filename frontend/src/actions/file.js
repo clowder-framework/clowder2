@@ -151,7 +151,12 @@ export const CREATE_FILES = "CREATE_FILES";
 export function createFiles(selectedDatasetId, selectedFiles, folderId) {
 	return (dispatch) => {
 		const formData = new FormData();
-		formData["files"] = selectedFiles;
+		if (selectedFiles.length > 0) {
+			for (let i = 0; i < selectedFiles.length; i++) {
+				formData.append("files", selectedFiles[i]);
+			}
+		}
+
 		return V2.DatasetsService.saveFilesApiV2DatasetsDatasetIdFilesMultiplePost(
 			selectedDatasetId,
 			formData,
