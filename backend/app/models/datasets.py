@@ -35,6 +35,7 @@ class DatasetIn(DatasetBase):
 class DatasetPatch(BaseModel):
     name: Optional[str]
     description: Optional[str]
+    status: Optional[str]
 
 
 class DatasetDB(Document, DatasetBase):

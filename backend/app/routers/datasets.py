@@ -46,6 +46,7 @@ from app.models.datasets import (
     DatasetOut,
     DatasetPatch,
     DatasetDBViewList,
+    DatasetStatus,
 )
 from app.models.files import FileOut, FileDB, FileDBViewList
 from app.models.folders import FolderOut, FolderIn, FolderDB, FolderDBViewList
@@ -298,6 +299,8 @@ async def patch_dataset(
             dataset.name = dataset_info.name
         if dataset_info.description is not None:
             dataset.description = dataset_info.description
+        if dataset_info.status is not None:
+            dataset.status = dataset_info.status
         dataset.modified = datetime.datetime.utcnow()
         await dataset.save()
 
