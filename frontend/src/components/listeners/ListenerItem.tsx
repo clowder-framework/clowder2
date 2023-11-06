@@ -3,6 +3,7 @@ import { Box, Button, IconButton, Typography } from "@mui/material";
 import { ExtractorInfo } from "../../openapi/v2";
 import { theme } from "../../theme";
 import PlayCircleIcon from "@mui/icons-material/PlayCircle";
+import Chip from "@mui/material/Chip";
 
 type ListenerCardProps = {
 	id: string;
@@ -41,6 +42,11 @@ export default function ListenerItem(props: ListenerCardProps) {
 				>
 					{extractorName}
 				</Button>
+				{extractorInfo["version"] ? (
+					<Chip label={`v${extractorInfo["version"]}`} size="small" />
+				) : (
+					<></>
+				)}
 				<Typography
 					sx={{
 						padding: "0.5em",
