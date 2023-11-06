@@ -277,12 +277,16 @@ export const File = (): JSX.Element => {
 				<Grid item xs={10} sx={{ display: "flex", alignItems: "center" }}>
 					<MainBreadcrumbs paths={paths} />
 					<Grid item>
-						<VersionChip
-							selectedVersion={selectedVersion}
-							setSelectedVersion={setSelectedVersion}
-							versionNumbers={fileVersions}
-							isClickable={true}
-						/>
+						{versionEnabled ? (
+							<VersionChip
+								selectedVersion={selectedVersion}
+								setSelectedVersion={setSelectedVersion}
+								versionNumbers={fileVersions}
+								isClickable={true}
+							/>
+						) : (
+							<></>
+						)}
 						<RoleChip role={fileRole} />
 					</Grid>
 				</Grid>

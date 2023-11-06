@@ -20,6 +20,8 @@ export function FileDetails(props: FileAboutProps) {
 		content_type,
 		views,
 		downloads,
+		storage_type,
+		storage_path,
 	} = props.fileSummary;
 
 	const details = new Map<string, string>();
@@ -28,6 +30,24 @@ export function FileDetails(props: FileAboutProps) {
 	details.set("Updated on", parseDate(created));
 	details.set("Uploaded as", name);
 	details.set("Uploaded by", `${creator.first_name} ${creator.last_name}`);
+	switch (storage_type) {
+		case "minio": {
+			details.set("Storage location", "Database");
+			break;
+		}
+		case "local": {
+			details.set("Storage location", "Local file system");
+			break;
+		}
+		case "remote": {
+			details.set("Storage location", "Remote URL");
+			break;
+		}
+		default: {
+			details.set("Storage location", `${storage_type}`);
+			break;
+		}
+	}
 	details.set("File id", id);
 	details.set("Downloads", downloads);
 
