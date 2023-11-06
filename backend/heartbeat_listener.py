@@ -2,6 +2,8 @@ import asyncio
 import json
 import logging
 import os
+from datetime import datetime
+
 from aio_pika import connect_robust
 from aio_pika.abc import AbstractIncomingMessage
 from packaging import version
@@ -30,12 +32,12 @@ async def callback(message: AbstractIncomingMessage):
             **extractor_info, properties=ExtractorInfo(**extractor_info)
         )
 
-        # check to see if extractor alredy exists and update if so
+        # check to see if extractor already exists and update if so
         existing_extractor = await EventListenerDB.find_one(
             EventListenerDB.name == msg["queue"]
         )
         if existing_extractor is not None:
-            # Update existing listener
+            # Update existing listener version
             existing_version = existing_extractor.version
             new_version = extractor_db.version
             if version.parse(new_version) > version.parse(existing_version):
@@ -49,6 +51,15 @@ async def callback(message: AbstractIncomingMessage):
                     % (extractor_name, existing_version, new_version)
                 )
                 return extractor_out
+
+            new_extractor = await extractor_db.replace()
+            extractor_out = EventListenerOut(**new_extractor.dict())
+            logger.info(
+                "%s updated alive at %"
+                % (extractor_name, datetime.now())
+            )
+            return extractor_out
+
         else:
             # Register new listener
             new_extractor = await extractor_db.insert()
@@ -75,7 +86,7 @@ async def listen_for_heartbeats():
     RABBITMQ_PASS = os.getenv("RABBITMQ_PASS", "guest")
     RABBITMQ_HOST = os.getenv("RABBITMQ_HOST", "127.0.0.1")
     RABBITMQ_URL: str = (
-        "amqp://" + RABBITMQ_USER + ":" + RABBITMQ_PASS + "@" + RABBITMQ_HOST + "/"
+            "amqp://" + RABBITMQ_USER + ":" + RABBITMQ_PASS + "@" + RABBITMQ_HOST + "/"
     )
 
     connection = await connect_robust(
