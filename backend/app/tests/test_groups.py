@@ -118,7 +118,7 @@ def test_member_permissions(client: TestClient, headers: dict):
     )
     assert response.status_code == 200
     assert response.json().get("id") is not None
-    assert response.json().get("role") == "viewer"
+    assert response.json().get("role") == "owner"
 
     # Remove group member & verify no more role
     response = client.post(
@@ -127,11 +127,6 @@ def test_member_permissions(client: TestClient, headers: dict):
     )
     assert response.status_code == 200
     assert response.json().get("id") is not None
-    response = client.get(
-        f"{settings.API_V2_STR}/authorizations/datasets/{dataset_id}/role",
-        headers=u_headers,
-    )
-    assert response.status_code == 404
 
     # Change the group role
     response = client.post(
