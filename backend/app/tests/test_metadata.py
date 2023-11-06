@@ -10,7 +10,7 @@ from app.tests.utils import create_dataset, upload_file
 metadata_definition = {
     "name": "LatLon",
     "description": "A set of Latitude/Longitude coordinates",
-    "context": [
+    "@context": [
         {
             "longitude": "https://schema.org/longitude",
             "latitude": "https://schema.org/latitude",
@@ -37,7 +37,7 @@ metadata_definition = {
 metadata_definition2 = {
     "name": "AlternativeTitle",
     "description": "Alternative title",
-    "context": [{"title": "https://schema.org/alternateName"}],
+    "@context": [{"title": "https://schema.org/alternateName"}],
     "fields": [
         {
             "name": "alternateName",
@@ -74,7 +74,32 @@ def test_dataset_create_metadata_no_context(client: TestClient, headers: dict):
     assert response.status_code == 400
 
 
-def test_dataset_create_metadata_definition(client: TestClient, headers: dict):
+def test_dataset_create_and_delete_metadata_definition_success(
+    client: TestClient, headers: dict
+):
+    # Post the definition itself
+    response = client.post(
+        f"{settings.API_V2_STR}/metadata/definition",
+        json=metadata_definition2,
+        headers=headers,
+    )
+    assert (
+        response.status_code == 200 or response.status_code == 409
+    )  # 409 = definition already exists
+    metadata_definition_id = response.json().get("id")
+
+    # Delete metadata definition
+    response = client.delete(
+        f"{settings.API_V2_STR}/metadata/definition/{metadata_definition_id}",
+        headers=headers,
+    )
+    assert response.status_code == 200
+    assert response.json().get("id") == metadata_definition_id
+
+
+def test_dataset_create_and_delete_metadata_definition_fail(
+    client: TestClient, headers: dict
+):
     # Post the definition itself
     response = client.post(
         f"{settings.API_V2_STR}/metadata/definition",
@@ -84,6 +109,10 @@ def test_dataset_create_metadata_definition(client: TestClient, headers: dict):
     assert (
         response.status_code == 200 or response.status_code == 409
     )  # 409 = definition already exists
+    metadata_definition_id = response.json().get("id")
+
+    # check if @context is injected correctly
+    assert response.json().get("@context") is not None
 
     # Create dataset and add metadata to it using new definition
     dataset_id = create_dataset(client, headers).get("id")
@@ -104,6 +133,13 @@ def test_dataset_create_metadata_definition(client: TestClient, headers: dict):
         json=bad_md,
     )
     assert response.status_code == 409
+
+    # Delete metadata definition
+    response = client.delete(
+        f"{settings.API_V2_STR}/metadata/definition/{metadata_definition_id}",
+        headers=headers,
+    )
+    assert response.status_code == 400
 
 
 @pytest.mark.asyncio

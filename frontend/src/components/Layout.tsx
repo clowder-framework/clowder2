@@ -21,11 +21,12 @@ import { Link, Menu, MenuItem, MenuList } from "@mui/material";
 import { Link as RouterLink, useLocation } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { RootState } from "../types/data";
-import { AddBox, Create, Explore } from "@material-ui/icons";
+import { AddBox, Explore } from "@material-ui/icons";
 import HistoryIcon from "@mui/icons-material/History";
 import GroupIcon from "@mui/icons-material/Group";
 import Gravatar from "react-gravatar";
 import PersonIcon from "@mui/icons-material/Person";
+import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import { getCurrEmail } from "../utils/common";
 import VpnKeyIcon from "@mui/icons-material/VpnKey";
 import LogoutIcon from "@mui/icons-material/Logout";
@@ -302,13 +303,10 @@ export default function PersistentDrawerLeft(props) {
 				</List>
 				<Divider />
 				<List>
-					<ListItem key={"newmetadata"} disablePadding>
-						<ListItemButton
-							component={RouterLink}
-							to="/new-metadata-definition"
-						>
+					<ListItem key={"metadataDefinition"} disablePadding>
+						<ListItemButton component={RouterLink} to="/metadata-definitions">
 							<ListItemIcon>
-								<Create />
+								<InfoOutlinedIcon />
 							</ListItemIcon>
 							<ListItemText primary={"Metadata Definitions"} />
 						</ListItemButton>

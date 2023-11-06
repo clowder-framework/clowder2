@@ -1,4 +1,4 @@
-import React, { lazy } from "react";
+import React, {lazy} from "react";
 
 export interface VisComponentDefinitions {
 	name: string;
@@ -9,14 +9,14 @@ export interface VisComponentDefinitions {
 
 const visComponentDefinitions: VisComponentDefinitions[] = <
 	VisComponentDefinitions[]
->[];
+	>[];
 
 function registerComponent(config) {
 	return lazy(
 		() =>
 			import(
 				/* webpackChunkName: "[request]" */ `./components/visualizations/${config.visConfig.name}/${config.main}`
-			)
+				)
 	);
 }
 
@@ -36,12 +36,12 @@ visComponentDefinitions.push({
 // 	component: React.createElement(registerComponent(configDemo)),
 // });
 
-const configIframe = require("./components/visualizations/Iframe/manifest.json");
+const configHtml = require("./components/visualizations/Html/manifest.json");
 visComponentDefinitions.push({
-	name: configIframe.name,
-	mainType: configIframe.visConfig.mainType,
-	mimeTypes: configIframe.visConfig.mimeTypes,
-	component: React.createElement(registerComponent(configIframe)),
+	name: configHtml.name,
+	mainType: configHtml.visConfig.mainType,
+	mimeTypes: configHtml.visConfig.mimeTypes,
+	component: React.createElement(registerComponent(configHtml)),
 });
 
 const configImage = require("./components/visualizations/Image/manifest.json");
@@ -82,6 +82,14 @@ visComponentDefinitions.push({
 	mainType: configVega.visConfig.mainType,
 	mimeTypes: configVega.visConfig.mimeTypes,
 	component: React.createElement(registerComponent(configVega)),
+});
+
+const configWordCloudSpec = require("./components/visualizations/VegaSpec/manifest.json");
+visComponentDefinitions.push({
+	name: configWordCloudSpec.name,
+	mainType: configWordCloudSpec.visConfig.mainType,
+	mimeTypes: configWordCloudSpec.visConfig.mimeTypes,
+	component: React.createElement(registerComponent(configWordCloudSpec)),
 });
 
 export { visComponentDefinitions };

@@ -52,7 +52,7 @@ export function FileDetails(props: FileAboutProps) {
 	details.set("Downloads", downloads);
 
 	return (
-		<Box sx={{ mt: 5 }}>
+		<Box sx={{ mt: 5, mb: 2 }}>
 			<Typography variant="h5" gutterBottom>
 				Details
 			</Typography>

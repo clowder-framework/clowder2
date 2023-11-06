@@ -40,4 +40,11 @@ spec:
                 name: {{ include "clowder2.fullname" . }}-backend
                 port:
                   number: {{ .Values.backend.service.port }}
+          - path: /docs
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: {{ include "clowder2.fullname" . }}-backend
+                port:
+                  number: {{ .Values.backend.service.port }}
 {{- end }}

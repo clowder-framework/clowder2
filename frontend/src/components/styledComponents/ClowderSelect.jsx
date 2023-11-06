@@ -3,7 +3,7 @@ import { styled } from "@mui/styles";
 import { Select } from "@mui/material";
 import { theme } from "../../theme";
 
-export const ClowderMetadataSelect = styled(Select)({
+export const ClowderSelect = styled(Select)({
 	background: "#ffffff",
 	"& .Mui-disabled": {
 		color: theme.palette.primary.light,
