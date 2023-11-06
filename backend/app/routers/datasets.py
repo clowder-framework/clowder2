@@ -224,7 +224,7 @@ async def get_datasets(
             Or(
                 DatasetDBViewList.creator.email == user_id,
                 DatasetDBViewList.auth.user_ids == user_id,
-                DatasetDBViewList.status == DatasetStatus.PUBLIC.name,
+                DatasetDBViewList.status == DatasetStatus.AUTHENTICATED.name,
             ),
             sort=(-DatasetDBViewList.created),
             skip=skip,
@@ -237,7 +237,7 @@ async def get_datasets(
 @router.get("/{dataset_id}", response_model=DatasetOut)
 async def get_dataset(
     dataset_id: str,
-    public: bool = Depends(CheckStatus("PUBLIC")),
+    authenticated: bool = Depends(CheckStatus("AUTHENTICATED")),
     allow: bool = Depends(Authorization("viewer")),
 ):
     if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
@@ -249,13 +249,13 @@ async def get_dataset(
 async def get_dataset_files(
     dataset_id: str,
     folder_id: Optional[str] = None,
-    public: bool = Depends(CheckStatus("PUBLIC")),
+    authenticated: bool = Depends(CheckStatus("AUTHENTICATED")),
     allow: bool = Depends(Authorization("viewer")),
     user_id=Depends(get_user),
     skip: int = 0,
     limit: int = 10,
 ):
-    if public:
+    if authenticated:
         query = [
             FileDBViewList.dataset_id == ObjectId(dataset_id),
         ]
@@ -374,12 +374,12 @@ async def get_dataset_folders(
     parent_folder: Optional[str] = None,
     user_id=Depends(get_user),
     allow: bool = Depends(Authorization("viewer")),
-    public: bool = Depends(CheckStatus("public")),
+    authenticated: bool = Depends(CheckStatus("authenticated")),
     skip: int = 0,
     limit: int = 10,
 ):
     if (await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
-        if public:
+        if authenticated:
             query = [
                 FolderDBViewList.dataset_id == ObjectId(dataset_id),
             ]

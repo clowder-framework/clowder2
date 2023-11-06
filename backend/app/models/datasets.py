@@ -19,6 +19,7 @@ class AutoName(Enum):
 class DatasetStatus(AutoName):
     PRIVATE = auto()
     PUBLIC = auto()
+    AUTHENTICATED = auto()
     DEFAULT = auto()
     TRIAL = auto()
 

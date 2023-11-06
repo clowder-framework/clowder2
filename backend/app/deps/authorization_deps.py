@@ -44,15 +44,15 @@ async def get_role_by_file(
             if (
                 dataset := await DatasetDB.get(PydanticObjectId(file.dataset_id))
             ) is not None:
-                if dataset.status == DatasetStatus.PUBLIC.name:
+                if dataset.status == DatasetStatus.AUTHENTICATED.name:
                     public_auth_dict = {
                         "creator": dataset.author.email,
                         "dataset_id": file.dataset_id,
                         "user_ids": [current_user],
                         "role": RoleType.VIEWER,
                     }
-                    public_auth = AuthorizationDB(**public_auth_dict)
-                    return public_auth
+                    authenticated_auth = AuthorizationDB(**public_auth_dict)
+                    return authenticated_auth
                 else:
                     raise HTTPException(
                         status_code=403,
@@ -124,6 +124,16 @@ async def is_public_dataset(
     else:
         return False
 
+async def is_authenticated_dataset(
+    dataset_id: str,
+) -> bool:
+    """Checks if a dataset is authenticated."""
+    if (dataset_out := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
+        if dataset_out.status == DatasetStatus.AUTHENTICATED:
+            return True
+    else:
+        return False
+
 
 class Authorization:
     """We use class dependency so that we can provide the `permission` parameter to the dependency.
@@ -158,7 +168,7 @@ class Authorization:
                 current_dataset := await DatasetDB.get(PydanticObjectId(dataset_id))
             ) is not None:
                 if (
-                    current_dataset.status == DatasetStatus.PUBLIC.name
+                    current_dataset.status == DatasetStatus.AUTHENTICATED.name
                     and self.role == "viewer"
                 ):
                     return True
