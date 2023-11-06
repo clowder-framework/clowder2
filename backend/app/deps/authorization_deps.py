@@ -124,6 +124,7 @@ async def is_public_dataset(
     else:
         return False
 
+
 async def is_authenticated_dataset(
     dataset_id: str,
 ) -> bool:
