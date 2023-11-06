@@ -17,9 +17,11 @@ import { MoreHoriz } from "@material-ui/icons";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditNameModal from "./EditNameModal";
 import EditDescriptionModal from "./EditDescriptionModal";
+import EditStatusModal from "./EditStatusModal";
 import { DriveFileRenameOutline } from "@mui/icons-material";
 import { AuthWrapper } from "../auth/AuthWrapper";
 import { RootState } from "../../types/data";
+import ShareIcon from "@mui/icons-material/Share";
 
 type ActionsMenuProps = {
 	datasetId: string;
@@ -52,12 +54,17 @@ export const OtherMenu = (props: ActionsMenuProps): JSX.Element => {
 	const [description, setDescription] = React.useState<boolean>(false);
 	const [deleteDatasetConfirmOpen, setDeleteDatasetConfirmOpen] =
 		useState(false);
+	const [editStatusPaneOpen, setEditStatusPaneOpen] = useState(false);
 
 	const handleSetRename = () => {
 		setRename(false);
 	};
 	const handleSetDescription = () => {
 		setDescription(false);
+	};
+
+	const handleEditStatusClose = () => {
+		setEditStatusPaneOpen(false);
 	};
 
 	// delete dataset
@@ -92,6 +99,10 @@ export const OtherMenu = (props: ActionsMenuProps): JSX.Element => {
 				handleClose={handleSetDescription}
 				open={description}
 			/>
+			<EditStatusModal
+				open={editStatusPaneOpen}
+				handleClose={handleEditStatusClose}
+				datasetName={datasetName}/>
 			<ActionModal
 				actionOpen={deleteDatasetConfirmOpen}
 				actionTitle="Are you sure?"
@@ -139,6 +150,17 @@ export const OtherMenu = (props: ActionsMenuProps): JSX.Element => {
 						<DriveFileRenameOutline fontSize="small" />
 					</ListItemIcon>
 					<ListItemText>Update Description</ListItemText>
+				</MenuItem>
+				<MenuItem
+					onClick={() => {
+						handleOptionClose();
+						setEditStatusPaneOpen(true);
+					}
+					}>
+					<ListItemIcon>
+						<ShareIcon fontSize="small" />
+					</ListItemIcon>
+					<ListItemText>Change Status</ListItemText>
 				</MenuItem>
 				<AuthWrapper
 					currRole={datasetRole.role}
