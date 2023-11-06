@@ -49,11 +49,11 @@ export const File = (): JSX.Element => {
 	const folderId = searchParams.get("folder");
 	const datasetId = searchParams.get("dataset");
 
+	const dispatch = useDispatch();
+
 	const listDatasetAbout = (datasetId: string | undefined) =>
 		dispatch(fetchDatasetAbout(datasetId));
 	const about = useSelector((state: RootState) => state.dataset.about);
-
-	const dispatch = useDispatch();
 	const listFileSummary = (fileId: string | undefined) =>
 		dispatch(fetchFileSummary(fileId));
 	const listFileVersions = (fileId: string | undefined) =>
@@ -74,6 +74,7 @@ export const File = (): JSX.Element => {
 		(state: RootState) => state.file.fileSummary.version_num
 	);
 	const [selectedVersion, setSelectedVersion] = useState(version_num);
+	const [versionEnabled, setVersionEnabled] = useState(false);
 	const fileSummary = useSelector((state: RootState) => state.file.fileSummary);
 	const filePreviews = useSelector((state: RootState) => state.file.previews);
 	const fileVersions = useSelector(
@@ -84,6 +85,9 @@ export const File = (): JSX.Element => {
 		fileVersions[0]
 	);
 	const fileRole = useSelector((state: RootState) => state.file.fileRole);
+	const storageType = useSelector(
+		(state: RootState) => state.file.fileSummary.storage_type
+	);
 
 	const [selectedTabIndex, setSelectedTabIndex] = useState(0);
 	const [previews, setPreviews] = useState([]);
@@ -141,6 +145,14 @@ export const File = (): JSX.Element => {
 			setSelectedVersion(version_num);
 		}
 	}, [version_num]);
+
+	useEffect(() => {
+		if (storageType === "minio") {
+			setVersionEnabled(true);
+		} else {
+			setVersionEnabled(false);
+		}
+	}, [storageType]);
 
 	useEffect(() => {
 		if (
@@ -298,13 +310,17 @@ export const File = (): JSX.Element => {
 							{...a11yProps(0)}
 							disabled={false}
 						/>
-						<Tab
-							icon={<InsertDriveFile />}
-							iconPosition="start"
-							sx={TabStyle}
-							label="Version History"
-							{...a11yProps(1)}
-						/>
+						{versionEnabled ? (
+							<Tab
+								icon={<InsertDriveFile />}
+								iconPosition="start"
+								sx={TabStyle}
+								label="Version History"
+								{...a11yProps(1)}
+							/>
+						) : (
+							<></>
+						)}
 						<Tab
 							icon={<FormatListBulleted />}
 							iconPosition="start"
