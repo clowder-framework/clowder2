@@ -42,11 +42,7 @@ async def save_user(userIn: UserIn):
     hashed_password = bcrypt.hash(userIn.password)
 
     # check if this is the 1st user, make it admin
-    all_records = UserDB.find_all()
-    count = 0
-
-    async for record in all_records:
-        count += 1
+    count = await UserDB.count()
 
     if count == 0:
         user = UserDB(
