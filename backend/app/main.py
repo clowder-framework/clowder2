@@ -36,8 +36,10 @@ from app.routers import (
     authorization,
     metadata,
     files,
+    public_files,
     metadata_files,
     datasets,
+    public_datasets,
     metadata_datasets,
     authentication,
     keycloak,
@@ -110,6 +112,11 @@ api_router.include_router(
     dependencies=[Depends(get_current_username)],
 )
 api_router.include_router(
+    public_files.router,
+    prefix="/public/files",
+    tags=["public_files"],
+)
+api_router.include_router(
     metadata_files.router,
     prefix="/files",
     tags=["metadata"],
@@ -120,6 +127,11 @@ api_router.include_router(
     prefix="/datasets",
     tags=["datasets"],
     dependencies=[Depends(get_current_username)],
+)
+api_router.include_router(
+    public_datasets.router,
+    prefix="/public/datasets",
+    tags=["public_datasets"],
 )
 api_router.include_router(
     metadata_datasets.router,
