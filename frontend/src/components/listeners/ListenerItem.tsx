@@ -4,7 +4,6 @@ import { EventListenerOut } from "../../openapi/v2";
 import { theme } from "../../theme";
 import PlayCircleIcon from "@mui/icons-material/PlayCircle";
 import FiberManualRecordIcon from "@mui/icons-material/FiberManualRecord";
-import CloseIcon from "@mui/icons-material/Close";
 
 type ListenerCardProps = {
 	id: string;
@@ -32,22 +31,10 @@ export default function ListenerItem(props: ListenerCardProps) {
 	return (
 		<Box key={id} sx={{ display: "flex" }}>
 			<Box>
-				<Button
-					disabled={
-						!(fileId !== undefined || datasetId !== undefined) ||
-						!extractor["alive"]
-					}
-					onClick={() => {
-						setOpenSubmitExtraction(true);
-						setSelectedExtractor(extractor);
-					}}
-				>
-					{extractorName}
-				</Button>
 				{!(fileId !== undefined || datasetId !== undefined) ||
 				!extractor["alive"] ? (
 					<Tooltip title="Extractor Offline">
-						<CloseIcon
+						<FiberManualRecordIcon
 							color="error"
 							fontSize="small"
 							sx={{ verticalAlign: "middle" }}
@@ -62,6 +49,18 @@ export default function ListenerItem(props: ListenerCardProps) {
 						/>
 					</Tooltip>
 				)}
+				<Button
+					disabled={
+						!(fileId !== undefined || datasetId !== undefined) ||
+						!extractor["alive"]
+					}
+					onClick={() => {
+						setOpenSubmitExtraction(true);
+						setSelectedExtractor(extractor);
+					}}
+				>
+					{extractorName}
+				</Button>
 				{!(fileId !== undefined || datasetId !== undefined) ||
 				!extractor["alive"] ? (
 					<Typography
