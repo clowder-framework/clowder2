@@ -46,7 +46,7 @@ export default function ListenerItem(props: ListenerCardProps) {
 				</Button>
 				{!(fileId !== undefined || datasetId !== undefined) ||
 				!extractor["alive"] ? (
-					<Tooltip title="Extractor offline">
+					<Tooltip title="Extractor Offline">
 						<CloseIcon
 							color="error"
 							fontSize="small"
