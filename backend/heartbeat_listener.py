@@ -51,7 +51,7 @@ async def callback(message: AbstractIncomingMessage):
 
             extractor_db.lastAlive = datetime.now()
             logger.info(
-                "%s is alive at %"
+                "%s is alive at %s"
                 % (extractor_name, str(datetime.now()))
             )
             # Update existing listeners alive status
@@ -64,7 +64,7 @@ async def callback(message: AbstractIncomingMessage):
             # Register new listener
             extractor_db.lastAlive = datetime.now()
             logger.info(
-                "%s is alive at %"
+                "%s is alive at %s"
                 % (extractor_name, str(datetime.now()))
             )
             new_extractor = await extractor_db.insert()
