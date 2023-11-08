@@ -31,6 +31,7 @@ export class ListenersService {
      * label -- filter by label has to be exact match
      * @param skip
      * @param limit
+     * @param heartbeatInterval
      * @param category
      * @param label
      * @returns EventListenerOut Successful Response
@@ -39,6 +40,7 @@ export class ListenersService {
     public static getListenersApiV2ListenersGet(
         skip?: number,
         limit: number = 2,
+        heartbeatInterval: number = 18000,
         category?: string,
         label?: string,
     ): CancelablePromise<Array<EventListenerOut>> {
@@ -48,6 +50,7 @@ export class ListenersService {
             query: {
                 'skip': skip,
                 'limit': limit,
+                'heartbeat_interval': heartbeatInterval,
                 'category': category,
                 'label': label,
             },
@@ -196,6 +199,30 @@ export class ListenersService {
         return __request({
             method: 'DELETE',
             path: `/api/v2/listeners/${listenerId}`,
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+
+    /**
+     * Check Listener Livelihood
+     * Return JSON information about an Event Listener if it exists.
+     * @param listenerId
+     * @param heartbeatInterval
+     * @returns boolean Successful Response
+     * @throws ApiError
+     */
+    public static checkListenerLivelihoodApiV2ListenersListenerIdStatusGet(
+        listenerId: string,
+        heartbeatInterval: number = 18000,
+    ): CancelablePromise<boolean> {
+        return __request({
+            method: 'GET',
+            path: `/api/v2/listeners/${listenerId}/status`,
+            query: {
+                'heartbeat_interval': heartbeatInterval,
+            },
             errors: {
                 422: `Validation Error`,
             },
