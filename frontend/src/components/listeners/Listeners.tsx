@@ -259,7 +259,7 @@ export function Listeners(props: ListenerProps) {
 												id={listener.id}
 												fileId={fileId}
 												datasetId={datasetId}
-												extractorInfo={listener}
+												extractor={listener}
 												extractorName={listener.name}
 												extractorDescription={listener.description}
 												setOpenSubmitExtraction={setOpenSubmitExtraction}

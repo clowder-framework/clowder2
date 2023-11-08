@@ -1,6 +1,6 @@
 import React from "react";
 import { Box, Button, IconButton, Typography } from "@mui/material";
-import { ExtractorInfo } from "../../openapi/v2";
+import { EventListenerOut } from "../../openapi/v2";
 import { theme } from "../../theme";
 import PlayCircleIcon from "@mui/icons-material/PlayCircle";
 import Chip from "@mui/material/Chip";
@@ -9,7 +9,7 @@ type ListenerCardProps = {
 	id: string;
 	fileId: string;
 	datasetId: string;
-	extractorInfo: ExtractorInfo;
+	extractor: EventListenerOut;
 	extractorName: string;
 	extractorDescription: string;
 	setOpenSubmitExtraction: any;
@@ -21,7 +21,7 @@ export default function ListenerItem(props: ListenerCardProps) {
 		id,
 		fileId,
 		datasetId,
-		extractorInfo,
+		extractor,
 		extractorName,
 		extractorDescription,
 		setOpenSubmitExtraction,
@@ -33,17 +33,18 @@ export default function ListenerItem(props: ListenerCardProps) {
 			<Box sx={{ flexGrow: 1 }}>
 				<Button
 					disabled={
-						fileId !== undefined || datasetId !== undefined ? false : true
+						!(fileId !== undefined || datasetId !== undefined) ||
+						!extractor["alive"]
 					}
 					onClick={() => {
 						setOpenSubmitExtraction(true);
-						setSelectedExtractor(extractorInfo);
+						setSelectedExtractor(extractor);
 					}}
 				>
 					{extractorName}
 				</Button>
-				{extractorInfo["version"] ? (
-					<Chip label={`v${extractorInfo["version"]}`} size="small" />
+				{extractor["version"] ? (
+					<Chip label={`v${extractor["version"]}`} size="small" />
 				) : (
 					<></>
 				)}
@@ -68,11 +69,12 @@ export default function ListenerItem(props: ListenerCardProps) {
 				<IconButton
 					color="primary"
 					disabled={
-						fileId !== undefined || datasetId !== undefined ? false : true
+						!(fileId !== undefined || datasetId !== undefined) ||
+						!extractor["alive"]
 					}
 					onClick={() => {
 						setOpenSubmitExtraction(true);
-						setSelectedExtractor(extractorInfo);
+						setSelectedExtractor(extractor);
 					}}
 				>
 					<PlayCircleIcon />
