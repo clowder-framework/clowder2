@@ -6,6 +6,7 @@ from app.models.status import Status
 router = APIRouter()
 security = HTTPBearer()
 
+
 @router.get("", response_model=Status)
 async def add_thumbnail():
     return Status()
