@@ -30,7 +30,7 @@ from app.models.tokens import TokenDB
 from app.models.users import UserDB, UserAPIKeyDB, ListenerAPIKeyDB
 from app.models.visualization_config import VisualizationConfigDB
 from app.models.visualization_data import VisualizationDataDB
-from app.routers import folders, groups
+from app.routers import folders, groups, status
 from app.routers import (
     users,
     authorization,
@@ -188,6 +188,11 @@ api_router.include_router(
     prefix="/thumbnails",
     tags=["thumbnails"],
     dependencies=[Depends(get_current_username)],
+)
+api_router.include_router(
+    status.router,
+    prefix="/status",
+    tags=["status"]
 )
 api_router.include_router(keycloak.router, prefix="/auth", tags=["auth"])
 app.include_router(api_router, prefix=settings.API_V2_STR)
