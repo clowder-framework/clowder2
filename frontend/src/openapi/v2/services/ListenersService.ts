@@ -40,7 +40,7 @@ export class ListenersService {
     public static getListenersApiV2ListenersGet(
         skip?: number,
         limit: number = 2,
-        heartbeatInterval: number = 18000,
+        heartbeatInterval?: number,
         category?: string,
         label?: string,
     ): CancelablePromise<Array<EventListenerOut>> {
@@ -215,7 +215,7 @@ export class ListenersService {
      */
     public static checkListenerLivelihoodApiV2ListenersListenerIdStatusGet(
         listenerId: string,
-        heartbeatInterval: number = 18000,
+        heartbeatInterval?: number,
     ): CancelablePromise<boolean> {
         return __request({
             method: 'GET',

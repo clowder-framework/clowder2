@@ -211,7 +211,7 @@ async def get_listener(listener_id: str, user=Depends(get_current_username)):
 @router.get("/{listener_id}/status", response_model=bool)
 async def check_listener_livelihood(
     listener_id: str,
-    heartbeat_interval: Optional[int] = 5 * 3600,
+    heartbeat_interval: Optional[int] = None,
     user=Depends(get_current_username),
 ):
     """Return JSON information about an Event Listener if it exists."""
@@ -227,7 +227,7 @@ async def get_listeners(
     user_id=Depends(get_current_username),
     skip: int = 0,
     limit: int = 2,
-    heartbeat_interval: Optional[int] = 5 * 3600,
+    heartbeat_interval: Optional[int] = None,
     category: Optional[str] = None,
     label: Optional[str] = None,
 ):
