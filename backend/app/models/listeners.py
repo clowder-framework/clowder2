@@ -69,7 +69,7 @@ class EventListenerDB(Document, EventListenerBase):
     creator: Optional[UserOut] = None
     created: datetime = Field(default_factory=datetime.now)
     modified: datetime = Field(default_factory=datetime.now)
-    lastAlive: datetime = Field(default_factory=datetime.now)
+    lastAlive: datetime = None
     properties: Optional[ExtractorInfo] = None
 
     class Settings:

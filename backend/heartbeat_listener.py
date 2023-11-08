@@ -37,31 +37,36 @@ async def callback(message: AbstractIncomingMessage):
             EventListenerDB.name == msg["queue"]
         )
         if existing_extractor is not None:
+            extractor_db.id = existing_extractor.id
+            extractor_db.created = existing_extractor.created
+
             # Update existing listener version
             existing_version = existing_extractor.version
             new_version = extractor_db.version
             if version.parse(new_version) > version.parse(existing_version):
-                # if this is a new version, add it to the database
-                extractor_db.id = existing_extractor.id
-                extractor_db.created = existing_extractor.created
-                new_extractor = await extractor_db.replace()
-                extractor_out = EventListenerOut(**new_extractor.dict())
                 logger.info(
                     "%s updated from %s to %s"
                     % (extractor_name, existing_version, new_version)
                 )
-                return extractor_out
 
+            extractor_db.lastAlive = datetime.now()
+            logger.info(
+                "%s is alive at %"
+                % (extractor_name, str(datetime.now()))
+            )
+            # Update existing listeners alive status
             new_extractor = await extractor_db.replace()
             extractor_out = EventListenerOut(**new_extractor.dict())
-            logger.info(
-                "%s updated alive at %"
-                % (extractor_name, datetime.now())
-            )
+
             return extractor_out
 
         else:
             # Register new listener
+            extractor_db.lastAlive = datetime.now()
+            logger.info(
+                "%s is alive at %"
+                % (extractor_name, str(datetime.now()))
+            )
             new_extractor = await extractor_db.insert()
             extractor_out = EventListenerOut(**new_extractor.dict())
             logger.info("New extractor registered: " + extractor_name)
