@@ -79,5 +79,8 @@ class Settings(BaseSettings):
     RABBITMQ_HOST: str = "127.0.0.1"
     HEARTBEAT_EXCHANGE: str = "extractors"
 
+    # defautl listener heartbeat time interval in seconds
+    listener_heartbeat_interval = 5 * 3600
+
 
 settings = Settings()

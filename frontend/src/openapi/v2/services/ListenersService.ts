@@ -40,7 +40,7 @@ export class ListenersService {
     public static getListenersApiV2ListenersGet(
         skip?: number,
         limit: number = 2,
-        heartbeatInterval?: number,
+        heartbeatInterval: number = 18000,
         category?: string,
         label?: string,
     ): CancelablePromise<Array<EventListenerOut>> {
@@ -92,6 +92,7 @@ export class ListenersService {
      * @param text
      * @param skip
      * @param limit
+     * @param heartbeatInterval
      * @returns EventListenerOut Successful Response
      * @throws ApiError
      */
@@ -99,6 +100,7 @@ export class ListenersService {
         text: string = '',
         skip?: number,
         limit: number = 2,
+        heartbeatInterval: number = 18000,
     ): CancelablePromise<Array<EventListenerOut>> {
         return __request({
             method: 'GET',
@@ -107,6 +109,7 @@ export class ListenersService {
                 'text': text,
                 'skip': skip,
                 'limit': limit,
+                'heartbeat_interval': heartbeatInterval,
             },
             errors: {
                 422: `Validation Error`,
@@ -215,7 +218,7 @@ export class ListenersService {
      */
     public static checkListenerLivelihoodApiV2ListenersListenerIdStatusGet(
         listenerId: string,
-        heartbeatInterval?: number,
+        heartbeatInterval: number = 18000,
     ): CancelablePromise<boolean> {
         return __request({
             method: 'GET',

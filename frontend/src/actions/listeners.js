@@ -6,6 +6,7 @@ export const RECEIVE_LISTENERS = "RECEIVE_LISTENERS";
 export function fetchListeners(
 	skip = 0,
 	limit = 21,
+	heartbeatInterval = 0,
 	category = null,
 	label = null
 ) {
@@ -14,6 +15,7 @@ export function fetchListeners(
 		return V2.ListenersService.getListenersApiV2ListenersGet(
 			skip,
 			limit,
+			heartbeatInterval,
 			category,
 			label
 		)
@@ -26,7 +28,10 @@ export function fetchListeners(
 			})
 			.catch((reason) => {
 				dispatch(
-					handleErrors(reason, fetchListeners(skip, limit, category, label))
+					handleErrors(
+						reason,
+						fetchListeners(skip, limit, heartbeatInterval, category, label)
+					)
 				);
 			});
 	};
@@ -34,13 +39,19 @@ export function fetchListeners(
 
 export const SEARCH_LISTENERS = "SEARCH_LISTENERS";
 
-export function queryListeners(text, skip = 0, limit = 21) {
+export function queryListeners(
+	text,
+	skip = 0,
+	limit = 21,
+	heartbeatInterval = 0
+) {
 	return (dispatch) => {
 		// TODO: Parameters for dates? paging?
 		return V2.ListenersService.searchListenersApiV2ListenersSearchGet(
 			text,
 			skip,
-			limit
+			limit,
+			heartbeatInterval
 		)
 			.then((json) => {
 				dispatch({
@@ -50,7 +61,12 @@ export function queryListeners(text, skip = 0, limit = 21) {
 				});
 			})
 			.catch((reason) => {
-				dispatch(handleErrors(reason, queryListeners(text, skip, limit)));
+				dispatch(
+					handleErrors(
+						reason,
+						queryListeners(text, skip, limit, heartbeatInterval)
+					)
+				);
 			});
 	};
 }

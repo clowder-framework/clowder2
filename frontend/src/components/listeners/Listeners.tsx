@@ -41,14 +41,25 @@ export function Listeners(props: ListenerProps) {
 	const listListeners = (
 		skip: number | undefined,
 		limit: number | undefined,
+		heartbeatInterval: number | undefined,
 		selectedCategory: string | null,
 		selectedLabel: string | null
-	) => dispatch(fetchListeners(skip, limit, selectedCategory, selectedLabel));
+	) =>
+		dispatch(
+			fetchListeners(
+				skip,
+				limit,
+				heartbeatInterval,
+				selectedCategory,
+				selectedLabel
+			)
+		);
 	const searchListeners = (
 		text: string,
 		skip: number | undefined,
-		limit: number | undefined
-	) => dispatch(queryListeners(text, skip, limit));
+		limit: number | undefined,
+		heartbeatInterval: number | undefined
+	) => dispatch(queryListeners(text, skip, limit, heartbeatInterval));
 	const listAvailableCategories = () => dispatch(fetchListenerCategories());
 	const listAvailableLabels = () => dispatch(fetchListenerLabels());
 
@@ -73,7 +84,7 @@ export function Listeners(props: ListenerProps) {
 
 	// component did mount
 	useEffect(() => {
-		listListeners(skip, limit, null, null);
+		listListeners(skip, limit, 0, null, null);
 		listAvailableCategories();
 		listAvailableLabels();
 	}, []);
@@ -88,12 +99,12 @@ export function Listeners(props: ListenerProps) {
 	// search
 	useEffect(() => {
 		if (searchText !== "") handleListenerSearch();
-		else listListeners(skip, limit, selectedCategory, selectedLabel);
+		else listListeners(skip, limit, 0, selectedCategory, selectedLabel);
 	}, [searchText]);
 
 	useEffect(() => {
 		if (skip !== null && skip !== undefined) {
-			listListeners(skip, limit, null, null);
+			listListeners(skip, limit, 0, null, null);
 			if (skip === 0) setPrevDisabled(true);
 			else setPrevDisabled(false);
 		}
@@ -115,21 +126,21 @@ export function Listeners(props: ListenerProps) {
 
 	const handleListenerSearch = () => {
 		setSelectedCategory("");
-		searchListeners(searchText, skip, limit);
+		searchListeners(searchText, skip, limit, 0);
 	};
 
 	const handleCategoryChange = (event: React.ChangeEvent<HTMLInputElement>) => {
 		const selectedCategoryValue = (event.target as HTMLInputElement).value;
 		setSelectedCategory(selectedCategoryValue);
 		setSearchText("");
-		listListeners(skip, limit, selectedCategoryValue, selectedLabel);
+		listListeners(skip, limit, 0, selectedCategoryValue, selectedLabel);
 	};
 
 	const handleLabelChange = (event: React.ChangeEvent<HTMLInputElement>) => {
 		const selectedLabelValue = (event.target as HTMLInputElement).value;
 		setSelectedLabel(selectedLabelValue);
 		setSearchText("");
-		listListeners(skip, limit, selectedCategory, selectedLabelValue);
+		listListeners(skip, limit, 0, selectedCategory, selectedLabelValue);
 	};
 
 	const handleSubmitExtractionClose = () => {
