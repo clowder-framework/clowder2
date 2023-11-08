@@ -45,13 +45,13 @@ async def get_role_by_file(
                 dataset := await DatasetDB.get(PydanticObjectId(file.dataset_id))
             ) is not None:
                 if dataset.status == DatasetStatus.AUTHENTICATED.name:
-                    public_auth_dict = {
+                    auth_dict = {
                         "creator": dataset.author.email,
                         "dataset_id": file.dataset_id,
                         "user_ids": [current_user],
                         "role": RoleType.VIEWER,
                     }
-                    authenticated_auth = AuthorizationDB(**public_auth_dict)
+                    authenticated_auth = AuthorizationDB(**auth_dict)
                     return authenticated_auth
                 else:
                     raise HTTPException(
