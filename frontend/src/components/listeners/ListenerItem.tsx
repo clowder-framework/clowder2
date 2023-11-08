@@ -1,9 +1,10 @@
 import React from "react";
-import { Box, Button, IconButton, Typography } from "@mui/material";
+import { Box, Button, IconButton, Tooltip, Typography } from "@mui/material";
 import { EventListenerOut } from "../../openapi/v2";
 import { theme } from "../../theme";
 import PlayCircleIcon from "@mui/icons-material/PlayCircle";
-import Chip from "@mui/material/Chip";
+import FiberManualRecordIcon from "@mui/icons-material/FiberManualRecord";
+import CloseIcon from "@mui/icons-material/Close";
 
 type ListenerCardProps = {
 	id: string;
@@ -30,7 +31,7 @@ export default function ListenerItem(props: ListenerCardProps) {
 
 	return (
 		<Box key={id} sx={{ display: "flex" }}>
-			<Box sx={{ flexGrow: 1 }}>
+			<Box>
 				<Button
 					disabled={
 						!(fileId !== undefined || datasetId !== undefined) ||
@@ -43,10 +44,23 @@ export default function ListenerItem(props: ListenerCardProps) {
 				>
 					{extractorName}
 				</Button>
-				{extractor["version"] ? (
-					<Chip label={`v${extractor["version"]}`} size="small" />
+				{!(fileId !== undefined || datasetId !== undefined) ||
+				!extractor["alive"] ? (
+					<Tooltip title="Extractor offline">
+						<CloseIcon
+							color="error"
+							fontSize="small"
+							sx={{ verticalAlign: "middle" }}
+						/>
+					</Tooltip>
 				) : (
-					<></>
+					<Tooltip title="Extractor Alive">
+						<FiberManualRecordIcon
+							color="success"
+							fontSize="small"
+							sx={{ verticalAlign: "middle" }}
+						/>
+					</Tooltip>
 				)}
 				{!(fileId !== undefined || datasetId !== undefined) ||
 				!extractor["alive"] ? (
