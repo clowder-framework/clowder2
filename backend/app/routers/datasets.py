@@ -9,8 +9,8 @@ from collections.abc import Mapping, Iterable
 from typing import List, Optional
 
 from beanie import PydanticObjectId
-from beanie.operators import Or
 from beanie.odm.operators.update.general import Inc
+from beanie.operators import Or
 from bson import ObjectId
 from bson import json_util
 from elasticsearch import Elasticsearch
@@ -18,13 +18,12 @@ from fastapi import (
     APIRouter,
     HTTPException,
     Depends,
-    Security,
     File,
     UploadFile,
     Request,
 )
 from fastapi.responses import StreamingResponse
-from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from fastapi.security import HTTPBearer
 from minio import Minio
 from pika.adapters.blocking_connection import BlockingChannel
 from rocrate.model.person import Person
@@ -51,8 +50,8 @@ from app.models.files import FileOut, FileDB, FileDBViewList
 from app.models.folders import FolderOut, FolderIn, FolderDB, FolderDBViewList
 from app.models.metadata import MetadataDB
 from app.models.pyobjectid import PyObjectId
-from app.models.users import UserOut
 from app.models.thumbnails import ThumbnailDB
+from app.models.users import UserOut
 from app.rabbitmq.listeners import submit_dataset_job
 from app.routers.authentication import get_admin
 from app.routers.files import add_file_entry, remove_file_entry
@@ -468,6 +467,54 @@ async def save_file(
         )
         return new_file.dict()
     raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
+
+
+@router.post("/{dataset_id}/filesMultiple", response_model=List[FileOut])
+async def save_files(
+    dataset_id: str,
+    files: List[UploadFile],
+    folder_id: Optional[str] = None,
+    user=Depends(get_current_user),
+    fs: Minio = Depends(dependencies.get_fs),
+    es=Depends(dependencies.get_elasticsearchclient),
+    rabbitmq_client: BlockingChannel = Depends(dependencies.get_rabbitmq),
+    allow: bool = Depends(Authorization("uploader")),
+):
+    if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
+        files_added = []
+        for file in files:
+            if user is None:
+                raise HTTPException(
+                    status_code=401,
+                    detail=f"User not found. Session might have expired.",
+                )
+
+            new_file = FileDB(name=file.filename, creator=user, dataset_id=dataset.id)
+
+            if folder_id is not None:
+                if (
+                    folder := await FolderDB.get(PydanticObjectId(folder_id))
+                ) is not None:
+                    new_file.folder_id = folder.id
+                else:
+                    raise HTTPException(
+                        status_code=404, detail=f"Folder {folder_id} not found"
+                    )
+
+            await add_file_entry(
+                new_file,
+                user,
+                fs,
+                es,
+                rabbitmq_client,
+                file.file,
+                content_type=file.content_type,
+            )
+            files_added.append(new_file.dict())
+        return files_added
+
+    else:
+        raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
 
 
 @router.post("/createFromZip", response_model=DatasetOut)

@@ -119,11 +119,7 @@ async def auth(code: str) -> RedirectResponse:
     email = userinfo["email"]
 
     # check if this is the 1st user, make it admin
-    all_records = UserDB.find_all()
-    count = 0
-
-    async for record in all_records:
-        count += 1
+    count = await UserDB.count()
 
     if count == 0:
         user = UserDB(

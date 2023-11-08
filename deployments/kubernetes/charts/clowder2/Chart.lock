@@ -4,15 +4,15 @@ dependencies:
   version: 12.1.31
 - name: minio
   repository: https://charts.bitnami.com/bitnami
-  version: 12.4.1
+  version: 12.8.15
 - name: rabbitmq
   repository: https://charts.bitnami.com/bitnami
   version: 10.3.9
 - name: elasticsearch
   repository: https://charts.bitnami.com/bitnami
-  version: 19.6.0
+  version: 19.13.5
 - name: keycloak
   repository: https://charts.bitnami.com/bitnami
   version: 10.1.8
-digest: sha256:d52221818b2233d275b91bda548e754aefe1de44398cd11ae9de0b1e2b4de60a
-generated: "2023-04-27T12:21:59.835914-05:00"
+digest: sha256:67aee2c725642343853f48b2ccd6f850d7a053185b45a92589060a927fcfd680
+generated: "2023-10-23T14:15:41.378436-05:00"

@@ -146,12 +146,59 @@ export function createFile(selectedDatasetId, folderId, selectedFile) {
 	};
 }
 
+export const CREATE_FILES = "CREATE_FILES";
+
+export function createFiles(selectedDatasetId, selectedFiles, folderId) {
+	return (dispatch) => {
+		let formData = new FormData();
+		let tmp = [];
+		if (selectedFiles.length > 0) {
+			for (let i = 0; i < selectedFiles.length; i++) {
+				tmp.push(selectedFiles[i]);
+			}
+		}
+		formData["files"] = tmp;
+
+		return V2.DatasetsService.saveFilesApiV2DatasetsDatasetIdFilesMultiplePost(
+			selectedDatasetId,
+			formData,
+			folderId
+		)
+			.then((files) => {
+				dispatch({
+					type: CREATE_FILES,
+					files: files,
+					receivedAt: Date.now(),
+				});
+			})
+			.catch((reason) => {
+				dispatch(
+					handleErrors(
+						reason,
+						createFiles(selectedDatasetId, selectedFiles, folderId)
+					)
+				);
+			});
+	};
+}
+
 export const RESET_CREATE_FILE = "RESET_CREATE_FILE";
 
 export function resetFileCreated() {
 	return (dispatch) => {
 		dispatch({
 			type: RESET_CREATE_FILE,
+			receivedAt: Date.now(),
+		});
+	};
+}
+
+export const RESET_CREATE_FILES = "RESET_CREATE_FILES";
+
+export function resetFilesCreated() {
+	return (dispatch) => {
+		dispatch({
+			type: RESET_CREATE_FILES,
 			receivedAt: Date.now(),
 		});
 	};
