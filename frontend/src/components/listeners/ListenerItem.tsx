@@ -48,15 +48,28 @@ export default function ListenerItem(props: ListenerCardProps) {
 				) : (
 					<></>
 				)}
-				<Typography
-					sx={{
-						padding: "0.5em",
-						color: theme.palette.primary.light,
-						fontSize: "14px",
-					}}
-				>
-					{extractorDescription}
-				</Typography>
+				{!(fileId !== undefined || datasetId !== undefined) ||
+				!extractor["alive"] ? (
+					<Typography
+						sx={{
+							padding: "0.5em",
+							color: "rgba(0, 0, 0, 0.26)",
+							fontSize: "14px",
+						}}
+					>
+						{extractorDescription}
+					</Typography>
+				) : (
+					<Typography
+						sx={{
+							padding: "0.5em",
+							color: theme.palette.primary.light,
+							fontSize: "14px",
+						}}
+					>
+						{extractorDescription}
+					</Typography>
+				)}
 			</Box>
 			<Box
 				sx={{
