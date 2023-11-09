@@ -333,7 +333,9 @@ export default function PersistentDrawerLeft(props) {
 						width: "100%",
 					}}
 				>
-					<Typography variant="body2">v2.0.0-beta.1</Typography>
+					<Typography variant="body2" color="primary.light">
+						v2.0.0-beta.1
+					</Typography>
 				</Box>
 			</Main>
 		</Box>
