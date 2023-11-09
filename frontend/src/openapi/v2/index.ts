@@ -80,6 +80,8 @@ export { JobsService } from './services/JobsService';
 export { ListenersService } from './services/ListenersService';
 export { LoginService } from './services/LoginService';
 export { MetadataService } from './services/MetadataService';
+export { PublicDatasetsService } from './services/PublicDatasetsService';
+export { PublicFilesService } from './services/PublicFilesService';
 export { ServiceService } from './services/ServiceService';
 export { ThumbnailsService } from './services/ThumbnailsService';
 export { UsersService } from './services/UsersService';
