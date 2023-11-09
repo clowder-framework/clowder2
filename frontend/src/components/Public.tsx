@@ -116,6 +116,7 @@ export const Public = (): JSX.Element => {
 												created={dataset.created}
 												description={dataset.description}
 												thumbnailId={dataset.thumbnail_id}
+												publicView={true}
 											/>
 										</Grid>
 									);
