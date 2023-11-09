@@ -66,6 +66,11 @@ interface RECEIVE_DATASETS {
 	datasets: Dataset[];
 }
 
+interface RECEIVE_PUBLIC_DATASETS {
+	type: "RECEIVE_DATASETS";
+	publicDatasets: Dataset[];
+}
+
 interface DELETE_DATASET {
 	type: "DELETE_DATASET";
 	dataset: Dataset;
@@ -462,6 +467,7 @@ export type DataAction =
 	| RECEIVE_DATASET_ABOUT
 	| RECEIVE_DATASET_ROLE
 	| RECEIVE_DATASETS
+	| RECEIVE_PUBLIC_DATASETS
 	| DELETE_DATASET
 	| RECEIVE_FILE_SUMMARY
 	| RECEIVE_FILE_ROLE

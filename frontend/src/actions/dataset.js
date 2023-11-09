@@ -231,7 +231,7 @@ export function fetchPublicDatasets(skip = 0, limit = 21) {
 			.then((json) => {
 				dispatch({
 					type: RECEIVE_PUBLIC_DATASETS,
-					datasets: json,
+					publicDatasets: json,
 					receivedAt: Date.now(),
 				});
 			})

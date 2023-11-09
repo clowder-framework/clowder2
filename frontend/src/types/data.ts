@@ -147,6 +147,7 @@ export interface Thumbnail {
 export interface DatasetState {
 	files: FileSummary[];
 	datasets: Dataset[];
+	publicDatasets: Dataset[];
 	newDataset: Dataset;
 	newFile: FileSummary;
 	about: Dataset;

@@ -38,6 +38,7 @@ const defaultState: DatasetState = {
 	newDataset: <Dataset>{},
 	newFile: <File>{},
 	roles: <DatasetRoles>{},
+	publicDatasets: <Dataset>[],
 };
 
 const dataset = (state = defaultState, action: DataAction) => {
@@ -85,7 +86,7 @@ const dataset = (state = defaultState, action: DataAction) => {
 		case RECEIVE_DATASETS:
 			return Object.assign({}, state, { datasets: action.datasets });
 		case RECEIVE_PUBLIC_DATASETS:
-			return Object.assign({}, state, { datasets: action.datasets });
+			return Object.assign({}, state, { datasets: action.publicDatasets });
 		case CREATE_DATASET:
 			return Object.assign({}, state, { newDataset: action.dataset });
 		case RESET_CREATE_DATASET:
