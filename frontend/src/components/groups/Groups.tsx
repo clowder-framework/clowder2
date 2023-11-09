@@ -7,8 +7,6 @@ import {
 	DialogContent,
 	DialogTitle,
 	Grid,
-	IconButton,
-	InputBase,
 } from "@mui/material";
 import { RootState } from "../../types/data";
 import { useDispatch, useSelector } from "react-redux";
@@ -16,7 +14,7 @@ import {
 	fetchGroups,
 	searchGroups as searchGroupsAction,
 } from "../../actions/group";
-import { ArrowBack, ArrowForward, SearchOutlined } from "@material-ui/icons";
+import { ArrowBack, ArrowForward } from "@material-ui/icons";
 import { Link } from "react-router-dom";
 import Paper from "@mui/material/Paper";
 import Table from "@mui/material/Table";
@@ -26,12 +24,11 @@ import TableCell from "@mui/material/TableCell";
 import TableBody from "@mui/material/TableBody";
 import TableContainer from "@mui/material/TableContainer";
 import GroupsIcon from "@mui/icons-material/Groups";
-import { theme } from "../../theme";
 import Layout from "../Layout";
-import { MainBreadcrumbs } from "../navigation/BreadCrumb";
 import GroupAddIcon from "@mui/icons-material/GroupAdd";
 import { CreateGroup } from "./CreateGroup";
 import { ErrorModal } from "../errors/ErrorModal";
+import { GenericSearchBox } from "../search/GenericSearchBox";
 
 export function Groups() {
 	// Redux connect equivalent
@@ -54,14 +51,6 @@ export function Groups() {
 	const [nextDisabled, setNextDisabled] = useState<boolean>(false);
 	const [searchTerm, setSearchTerm] = useState<string>("");
 	const [createGroupOpen, setCreateGroupOpen] = useState<boolean>(false);
-
-	// for breadcrumb
-	const paths = [
-		{
-			name: "Groups",
-			url: "/groups",
-		},
-	];
 
 	// component did mount
 	useEffect(() => {
@@ -124,11 +113,8 @@ export function Groups() {
 					<CreateGroup setCreateGroupOpen={setCreateGroupOpen} />
 				</DialogContent>
 			</Dialog>
-			{/*breadcrumb*/}
 			<Grid container>
-				<Grid item xs={8} sx={{ display: "flex", alignItems: "center" }}>
-					<MainBreadcrumbs paths={paths} />
-				</Grid>
+				<Grid item xs={8}></Grid>
 				<Grid item xs={4}>
 					<Button
 						variant="contained"
@@ -142,49 +128,19 @@ export function Groups() {
 					</Button>
 				</Grid>
 			</Grid>
-			<br />
-			<Grid container>
-				<Grid item xs={3}>
-					<Box
-						component="form"
-						sx={{
-							p: "2px 4px",
-							display: "flex",
-							alignItems: "left",
-							backgroundColor: theme.palette.primary.contrastText,
-							width: "80%",
-						}}
-					>
-						<InputBase
-							sx={{ ml: 1, flex: 1 }}
-							placeholder="keyword for group"
-							inputProps={{
-								"aria-label": "Type in keyword to search for group",
-							}}
-							onChange={(e) => {
-								setSearchTerm(e.target.value);
-							}}
-							onKeyDown={(e) => {
-								if (e.key === "Enter") {
-									e.preventDefault();
-									searchGroups(searchTerm, skip, limit);
-								}
-							}}
-							value={searchTerm}
-						/>
-						<IconButton
-							type="button"
-							sx={{ p: "10px" }}
-							aria-label="search"
-							onClick={() => {
-								searchGroups(searchTerm, skip, limit);
-							}}
-						>
-							<SearchOutlined />
-						</IconButton>
-					</Box>
+			<Grid container spacing={2}>
+				<Grid item xs={12}>
+					<GenericSearchBox
+						title="Search for Groups"
+						searchPrompt="keyword for group"
+						setSearchTerm={setSearchTerm}
+						searchTerm={searchTerm}
+						searchFunction={searchGroups}
+						skip={skip}
+						limit={limit}
+					/>
 				</Grid>
-				<Grid item xs={9}>
+				<Grid item xs={12}>
 					<TableContainer component={Paper}>
 						<Table sx={{ minWidth: 650 }} aria-label="simple table">
 							<TableHead>
@@ -219,7 +175,9 @@ export function Groups() {
 									return (
 										<TableRow
 											key={group.id}
-											sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
+											sx={{
+												"&:last-child td, &:last-child th": { border: 0 },
+											}}
 										>
 											<TableCell scope="row" key={group.id}>
 												<Button component={Link} to={`/groups/${group.id}`}>
