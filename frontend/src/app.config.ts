@@ -12,7 +12,8 @@ interface Config {
 	KeycloakRegister: string;
 	searchEndpoint: string;
 	refreshTokenInterval: number;
-	extractorInterval: number;
+	extractorStatusInterval: number;
+	extractorLivelihoodInterval: number;
 	eventListenerJobStatus: EventListenerJobStatus;
 	streamingBytes: number;
 	rawDataVisualizationThreshold: number;
@@ -47,7 +48,8 @@ config["searchEndpoint"] = `${hostname}/api/v2/elasticsearch`;
 
 // refresh toekn time interval
 config["refreshTokenInterval"] = 1000 * 60; // milliseconds
-config["extractorInterval"] = 2000; // milliseconds
+config["extractorStatusInterval"] = 1000 * 2; // milliseconds
+config["extractorLivelihoodInterval"] = 1000 * 60; // milliseconds
 
 config["eventListenerJobStatus"] = <EventListenerJobStatus>{};
 config["eventListenerJobStatus"]["created"] = "CREATED";

@@ -28,6 +28,7 @@ import ListenerItem from "./ListenerItem";
 import { theme } from "../../theme";
 import SubmitExtraction from "./SubmitExtraction";
 import { capitalize } from "../../utils/common";
+import config from "../../app.config";
 
 type ListenerProps = {
 	fileId?: string;
@@ -98,8 +99,11 @@ export function Listeners(props: ListenerProps) {
 
 	// search
 	useEffect(() => {
-		if (searchText !== "") handleListenerSearch();
-		else listListeners(skip, limit, 0, selectedCategory, selectedLabel);
+		if (searchText !== "") {
+			handleListenerSearch();
+		} else {
+			listListeners(skip, limit, 0, selectedCategory, selectedLabel);
+		}
 	}, [searchText]);
 
 	useEffect(() => {
@@ -109,6 +113,22 @@ export function Listeners(props: ListenerProps) {
 			else setPrevDisabled(false);
 		}
 	}, [skip]);
+
+	// any of the change triggers timer to fetch the extractor status
+	useEffect(() => {
+		if (searchText !== "") {
+			const interval = setInterval(() => {
+				handleListenerSearch();
+			}, config.extractorLivelihoodInterval);
+			return () => clearInterval(interval);
+		} else {
+			// set the interval to fetch the job's log
+			const interval = setInterval(() => {
+				listListeners(skip, limit, 0, selectedCategory, selectedLabel);
+			}, config.extractorLivelihoodInterval);
+			return () => clearInterval(interval);
+		}
+	}, [searchText, listeners, skip, selectedCategory, selectedLabel]);
 
 	// for pagination keep flipping until the return dataset is less than the limit
 	const previous = () => {
