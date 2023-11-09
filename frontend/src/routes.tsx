@@ -23,6 +23,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "./types/data";
 import { refreshToken, resetLogout } from "./actions/common";
 import { Explore } from "./components/Explore";
+import {Public} from "./components/Public";
 import { ExtractionHistory } from "./components/listeners/ExtractionHistory";
 import { fetchDatasetRole, fetchFileRole } from "./actions/authorization";
 import { PageNotFound } from "./components/errors/PageNotFound";
@@ -98,6 +99,12 @@ export const AppRoutes = (): JSX.Element => {
 	return (
 		<BrowserRouter>
 			<Routes>
+				<Route
+					path="/public"
+					element={
+						<Public />
+					}
+				/>
 				<Route
 					path="/"
 					element={

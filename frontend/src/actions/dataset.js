@@ -222,6 +222,25 @@ export function fetchDatasetAbout(id) {
 	};
 }
 
+export const RECEIVE_PUBLIC_DATASETS = "RECEIVE_PUBLIC_DATASETS";
+
+export function fetchPublicDatasets(skip = 0, limit = 21) {
+	return (dispatch) => {
+		// TODO: Parameters for dates? paging?
+		return V2.PublicDatasetsService.getDatasetsApiV2PublicDatasetsGet(skip, limit)
+			.then((json) => {
+				dispatch({
+					type: RECEIVE_PUBLIC_DATASETS,
+					datasets: json,
+					receivedAt: Date.now(),
+				});
+			})
+			.catch((reason) => {
+				dispatch(handleErrors(reason, fetchPublicDatasets(skip, limit)));
+			});
+	};
+}
+
 export const RECEIVE_DATASETS = "RECEIVE_DATASETS";
 
 export function fetchDatasets(skip = 0, limit = 21, mine = false) {
