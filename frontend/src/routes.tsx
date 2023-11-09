@@ -8,6 +8,7 @@ import {
 	useParams,
 } from "react-router-dom";
 import { Dataset as DatasetComponent } from "./components/datasets/Dataset";
+import {PublicDataset as PublicDatasetComponent} from "./components/datasets/public/PublicDataset";
 import { File as FileComponent } from "./components/files/File";
 import { CreateDataset } from "./components/datasets/CreateDataset";
 import { Groups as GroupListComponent } from "./components/groups/Groups";
@@ -102,7 +103,7 @@ export const AppRoutes = (): JSX.Element => {
 				<Route
 					path="/public"
 					element={
-							<Public />
+						<Public />
 					}
 				/>
 				<Route
@@ -159,6 +160,12 @@ export const AppRoutes = (): JSX.Element => {
 						<PrivateRoute>
 							<DatasetComponent />
 						</PrivateRoute>
+					}
+				/>
+				<Route
+					path="/public/datasets/:datasetId"
+					element={
+						<PublicDatasetComponent />
 					}
 				/>
 				<Route
