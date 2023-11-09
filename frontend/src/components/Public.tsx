@@ -3,16 +3,15 @@ import { Box, Button, ButtonGroup, Grid, Tab, Tabs } from "@mui/material";
 
 import { RootState } from "../types/data";
 import { useDispatch, useSelector } from "react-redux";
-import {fetchPublicDatasets} from "../actions/dataset";
+import { fetchPublicDatasets } from "../actions/dataset";
 
 import { a11yProps, TabPanel } from "./tabs/TabComponent";
 import DatasetCard from "./datasets/DatasetCard";
 import { ArrowBack, ArrowForward } from "@material-ui/icons";
 import Layout from "./Layout";
-import { Link as RouterLink, useLocation } from "react-router-dom";
+import { Link as RouterLink } from "react-router-dom";
 import { Listeners } from "./listeners/Listeners";
 import { ErrorModal } from "./errors/ErrorModal";
-import Typography from "@mui/material/Typography";
 
 const tab = {
 	fontStyle: "normal",
@@ -28,7 +27,9 @@ export const Public = (): JSX.Element => {
 		skip: number | undefined,
 		limit: number | undefined
 	) => dispatch(fetchPublicDatasets(skip, limit));
-	const publicDatasets = useSelector((state: RootState) => state.dataset.publicDatasets);
+	const publicDatasets = useSelector(
+		(state: RootState) => state.dataset.publicDatasets
+	);
 
 	// TODO add option to determine limit number; default show 5 datasets each time
 	const [currPageNum, setCurrPageNum] = useState<number>(0);
@@ -43,16 +44,17 @@ export const Public = (): JSX.Element => {
 
 	// component did mount
 	useEffect(() => {
-		console.log('trying to get public datasets');
+		console.log("trying to get public datasets");
 		listPublicDatasets(0, limit);
 	}, []);
 
 	// fetch thumbnails from each individual dataset/id calls
 	useEffect(() => {
 		// disable flipping if reaches the last page
-		if (publicDatasets !== undefined && publicDatasets.length < limit) setNextDisabled(true);
+		if (publicDatasets !== undefined && publicDatasets.length < limit)
+			setNextDisabled(true);
 		else setNextDisabled(false);
-		console.log('public datasets', publicDatasets);
+		console.log("public datasets", publicDatasets);
 	}, [publicDatasets]);
 
 	// switch tabs
@@ -84,7 +86,7 @@ export const Public = (): JSX.Element => {
 		}
 	}, [skip]);
 
-return (
+	return (
 		<Layout>
 			{/*Error Message dialogue*/}
 			<ErrorModal errorOpen={errorOpen} setErrorOpen={setErrorOpen} />
@@ -103,13 +105,18 @@ return (
 					</Box>
 					<TabPanel value={selectedTabIndex} index={0}>
 						<Grid container spacing={2}>
-							{publicDatasets !== undefined ?  (
+							{publicDatasets !== undefined ? (
 								publicDatasets.map((dataset) => {
 									return (
 										<Grid item key={dataset.id} xs={12} sm={6} md={4} lg={3}>
-											<Typography>
-												{dataset.name}
-											</Typography>
+											<DatasetCard
+												id={dataset.id}
+												name={dataset.name}
+												author={`${dataset.creator.first_name} ${dataset.creator.last_name}`}
+												created={dataset.created}
+												description={dataset.description}
+												thumbnailId={dataset.thumbnail_id}
+											/>
 										</Grid>
 									);
 								})
@@ -119,12 +126,17 @@ return (
 							{publicDatasets !== undefined && publicDatasets.length === 0 ? (
 								<Grid container justifyContent="center">
 									<Box textAlign="center">
-										<p>Nobody has created any datasets on this instance. Click below to create a dataset!</p>
-										<Button component={RouterLink} to="/create-dataset"
+										<p>
+											Nobody has created any datasets on this instance. Click
+											below to create a dataset!
+										</p>
+										<Button
+											component={RouterLink}
+											to="/create-dataset"
 											variant="contained"
 											sx={{ m: 2 }}
 										>
-										Create Dataset
+											Create Dataset
 										</Button>
 									</Box>
 								</Grid>
@@ -154,7 +166,7 @@ return (
 									</Button>
 								</ButtonGroup>
 							</Box>
-						): (
+						) : (
 							<></>
 						)}
 					</TabPanel>
