@@ -52,6 +52,7 @@ export const Public = (): JSX.Element => {
 		// disable flipping if reaches the last page
 		if (publicDatasets !== undefined && publicDatasets.length < limit) setNextDisabled(true);
 		else setNextDisabled(false);
+		console.log('public datasets', publicDatasets);
 	}, [publicDatasets]);
 
 	// switch tabs

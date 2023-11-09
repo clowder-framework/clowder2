@@ -75,6 +75,7 @@ async def get_datasets(
         DatasetDB.status == DatasetStatus.PUBLIC
     ]
     datasets = await DatasetDB.find(*query).skip(skip).limit(limit).to_list()
+    print(str(datasets))
     return [dataset.dict() for dataset in datasets]
 
 @router.get("/{dataset_id}", response_model=DatasetOut)

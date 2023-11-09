@@ -67,7 +67,7 @@ interface RECEIVE_DATASETS {
 }
 
 interface RECEIVE_PUBLIC_DATASETS {
-	type: "RECEIVE_DATASETS";
+	type: "RECEIVE_PUBLIC_DATASETS";
 	publicDatasets: Dataset[];
 }
 

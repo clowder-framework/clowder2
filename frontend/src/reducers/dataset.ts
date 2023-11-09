@@ -38,7 +38,7 @@ const defaultState: DatasetState = {
 	newDataset: <Dataset>{},
 	newFile: <File>{},
 	roles: <DatasetRoles>{},
-	publicDatasets: <Dataset>[],
+	publicDatasets: [],
 };
 
 const dataset = (state = defaultState, action: DataAction) => {
