@@ -14,6 +14,7 @@ export type { Body_create_dataset_from_zip_api_v2_datasets_createFromZip_post } 
 export type { Body_get_dataset_metadata_api_v2_datasets__dataset_id__metadata_get } from './models/Body_get_dataset_metadata_api_v2_datasets__dataset_id__metadata_get';
 export type { Body_get_file_metadata_api_v2_files__file_id__metadata_get } from './models/Body_get_file_metadata_api_v2_files__file_id__metadata_get';
 export type { Body_save_file_api_v2_datasets__dataset_id__files_post } from './models/Body_save_file_api_v2_datasets__dataset_id__files_post';
+export type { Body_save_files_api_v2_datasets__dataset_id__filesMultiple_post } from './models/Body_save_files_api_v2_datasets__dataset_id__filesMultiple_post';
 export type { Body_update_file_api_v2_files__file_id__put } from './models/Body_update_file_api_v2_files__file_id__put';
 export type { ContentType } from './models/ContentType';
 export type { DatasetBase } from './models/DatasetBase';
