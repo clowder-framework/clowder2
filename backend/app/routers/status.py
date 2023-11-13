@@ -8,5 +8,5 @@ security = HTTPBearer()
 
 
 @router.get("", response_model=Status)
-async def add_thumbnail():
+async def get_status():
     return Status()
