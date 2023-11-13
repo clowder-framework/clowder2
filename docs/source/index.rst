@@ -25,18 +25,11 @@ We are always looking for new collaborators, contributors, and ideas in the spac
 are interested in contributing to Clowder v2 please come say hi in `Slack <https://join.slack.com/t/clowder-software/shared_invite/enQtMzQzOTg0Nzk3OTUzLTYwZDlkZDI0NGI4YmI0ZjE5MTZiYmZhZTIyNWE1YzM0NWMwMzIxODNhZTA1Y2E3MTQzOTg1YThiNzkwOWQwYWE>`_. If you are ready to dive into the code, take
 a look at `first time issues <https://github.com/clowder-framework/clowder2/issues?q=is%3Aopen+is%3Aissue+label%3A%22good+first+issue%22>`_ in v2.
 
-
-.. toctree::
-   :maxdepth: 1
-   :caption: Users
-
-   metadata.md
-   visualizations.md
-
 .. toctree::
    :maxdepth: 1
    :caption: Developers
 
+   dev-get-started.md
    architecture.md
    mongo-fastapi.md
    pycharm.md
@@ -45,3 +38,9 @@ a look at `first time issues <https://github.com/clowder-framework/clowder2/issu
    listeners.md
    mongo-fastapi.md
 
+.. toctree::
+   :maxdepth: 1
+   :caption: Users
+
+   metadata.md
+   visualizations.md

@@ -1,6 +1,6 @@
-# Clowder 2
+# Clowder v2 Helm Charts
 
-This depends on some subcharts, make sure to have them installed if you plan on modifying the helm chart:
+Helm charts depend on some subcharts, make sure to have them installed if you plan on modifying the helm chart:
 
 ```bash
 helm repo add bitnami https://charts.bitnami.com/bitnami
@@ -26,11 +26,9 @@ Now you can install (or upgrade) clowder using:
 helm upgrade --install --namespace clowder2 --create-namespace --values local.yaml clowder2 .
 ```
 
+## Ingress Controller
 
-
-# Docker Desktop
-
-You will need an ingress controller, I like Traefik as my ingress controller. You install this with:
+You will need an ingress controller. Traefik works well as ingress controller. You can install it with:
 
 ```bash
 helm install --namespace traefik --create-namespace traefik traefik/traefik
