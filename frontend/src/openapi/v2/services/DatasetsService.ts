@@ -3,6 +3,7 @@
 /* eslint-disable */
 import type { Body_create_dataset_from_zip_api_v2_datasets_createFromZip_post } from '../models/Body_create_dataset_from_zip_api_v2_datasets_createFromZip_post';
 import type { Body_save_file_api_v2_datasets__dataset_id__files_post } from '../models/Body_save_file_api_v2_datasets__dataset_id__files_post';
+import type { Body_save_files_api_v2_datasets__dataset_id__filesMultiple_post } from '../models/Body_save_files_api_v2_datasets__dataset_id__filesMultiple_post';
 import type { DatasetBase } from '../models/DatasetBase';
 import type { DatasetIn } from '../models/DatasetIn';
 import type { DatasetOut } from '../models/DatasetOut';
@@ -263,6 +264,33 @@ export class DatasetsService {
         return __request({
             method: 'DELETE',
             path: `/api/v2/datasets/${datasetId}/folders/${folderId}`,
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+
+    /**
+     * Save Files
+     * @param datasetId
+     * @param formData
+     * @param folderId
+     * @returns FileOut Successful Response
+     * @throws ApiError
+     */
+    public static saveFilesApiV2DatasetsDatasetIdFilesMultiplePost(
+        datasetId: string,
+        formData: Body_save_files_api_v2_datasets__dataset_id__filesMultiple_post,
+        folderId?: string,
+    ): CancelablePromise<Array<FileOut>> {
+        return __request({
+            method: 'POST',
+            path: `/api/v2/datasets/${datasetId}/filesMultiple`,
+            query: {
+                'folder_id': folderId,
+            },
+            formData: formData,
+            mediaType: 'multipart/form-data',
             errors: {
                 422: `Validation Error`,
             },

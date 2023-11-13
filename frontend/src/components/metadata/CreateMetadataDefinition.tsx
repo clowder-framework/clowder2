@@ -1,4 +1,4 @@
-import React from "react";
+import React, {useState} from "react";
 
 import {
 	Autocomplete,
@@ -14,6 +14,7 @@ import {
 	StepContent,
 	StepLabel,
 	Stepper,
+	Snackbar,
 } from "@mui/material";
 import { useDispatch } from "react-redux";
 import AddBoxIcon from "@mui/icons-material/AddBox";
@@ -29,17 +30,20 @@ interface SupportedInputs {
 
 type CreateMetadataDefinitionProps = {
 	setCreateMetadataDefinitionOpen: any;
+	setSnackBarOpen: any;
+	setSnackBarMessage: any;
 };
 
 export const CreateMetadataDefinition = (
 	props: CreateMetadataDefinitionProps
 ) => {
-	const { setCreateMetadataDefinitionOpen } = props;
+	const { setCreateMetadataDefinitionOpen, setSnackBarOpen, setSnackBarMessage } = props;
 
 	const dispatch = useDispatch();
 	// @ts-ignore
 	const saveMetadataDefinitions = (metadata: object) =>
 		dispatch(postMetadataDefinitions(metadata));
+
 
 	const [activeStep, setActiveStep] = React.useState(0);
 	const [parsedInput, setParsedInput] = React.useState("");
@@ -288,6 +292,9 @@ export const CreateMetadataDefinition = (
 		});
 
 		setContextMap([{ term: "", iri: "" }]);
+		// TODO add snackbar here
+		setSnackBarMessage("Successfully added metadata definition");
+		setSnackBarOpen(true);
 	};
 
 	const handleNext = () => {

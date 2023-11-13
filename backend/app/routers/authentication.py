@@ -8,9 +8,11 @@ from keycloak.exceptions import (
 )
 from passlib.hash import bcrypt
 
-from app import dependencies
-from app.keycloak_auth import create_user
+from beanie import PydanticObjectId
+
+from app.keycloak_auth import create_user, get_current_user
 from app.keycloak_auth import keycloak_openid
+from app.models.datasets import DatasetDB
 from app.models.users import UserDB, UserIn, UserOut, UserLogin
 
 router = APIRouter()
@@ -38,11 +40,25 @@ async def save_user(userIn: UserIn):
 
     # create local user
     hashed_password = bcrypt.hash(userIn.password)
-    user = UserDB(
-        **userIn.dict(),
-        hashed_password=hashed_password,
-        keycloak_id=keycloak_user,
-    )
+
+    # check if this is the 1st user, make it admin
+    count = await UserDB.count()
+
+    if count == 0:
+        user = UserDB(
+            **userIn.dict(),
+            admin=True,
+            hashed_password=hashed_password,
+            keycloak_id=keycloak_user,
+        )
+    else:
+        user = UserDB(
+            **userIn.dict(),
+            admin=False,
+            hashed_password=hashed_password,
+            keycloak_id=keycloak_user,
+        )
+
     await user.insert()
     return user.dict()
 
@@ -75,3 +91,41 @@ async def authenticate_user(email: str, password: str):
     if not user.verify_password(password):
         return None
     return user
+
+
+async def get_admin(dataset_id: str = None, current_username=Depends(get_current_user)):
+    if (
+        dataset_id
+        and (dataset_db := await DatasetDB.get(PydanticObjectId(dataset_id)))
+        is not None
+    ):
+        return DatasetDB.creator.email == current_username.email
+    else:
+        if (
+            current_user := await UserDB.find_one(
+                UserDB.email == current_username.email
+            )
+        ) is not None:
+            return current_user.admin
+        else:
+            raise HTTPException(
+                status_code=404, detail=f"User {current_username.email} not found"
+            )
+
+
+@router.post("/users/set_admin/{useremail}", response_model=UserOut)
+async def set_admin(
+    useremail: str, current_username=Depends(get_current_user), admin=Depends(get_admin)
+):
+    if admin:
+        if (user := await UserDB.find_one(UserDB.email == useremail)) is not None:
+            user.admin = True
+            await user.replace()
+            return user.dict()
+        else:
+            raise HTTPException(status_code=404, detail=f"User {useremail} not found")
+    else:
+        raise HTTPException(
+            status_code=403,
+            detail=f"User {current_username.email} is not an admin. Only admin can make others admin.",
+        )
