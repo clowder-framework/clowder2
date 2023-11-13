@@ -72,9 +72,6 @@ async def get_dataset_role(
     admin=Depends(get_admin),
 ):
     """Retrieve role of user for a specific dataset."""
-    # # admin is a superuser and has all the privileges
-    # if admin:
-    #     return True
     # Get group id and the associated users from authorization
     if admin:
         auth_db = await AuthorizationDB.find_one(
