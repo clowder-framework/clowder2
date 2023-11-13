@@ -50,10 +50,7 @@ async def callback(message: AbstractIncomingMessage):
                 )
 
             extractor_db.lastAlive = datetime.utcnow()
-            logger.info(
-                "%s is alive at %s"
-                % (extractor_name, str(datetime.utcnow()))
-            )
+            logger.info("%s is alive at %s" % (extractor_name, str(datetime.utcnow())))
             # Update existing listeners alive status
             new_extractor = await extractor_db.replace()
             extractor_out = EventListenerOut(**new_extractor.dict())
@@ -63,10 +60,7 @@ async def callback(message: AbstractIncomingMessage):
         else:
             # Register new listener
             extractor_db.lastAlive = datetime.utcnow()
-            logger.info(
-                "%s is alive at %s"
-                % (extractor_name, str(datetime.utcnow()))
-            )
+            logger.info("%s is alive at %s" % (extractor_name, str(datetime.utcnow())))
             new_extractor = await extractor_db.insert()
             extractor_out = EventListenerOut(**new_extractor.dict())
             logger.info("New extractor registered: " + extractor_name)
@@ -91,7 +85,7 @@ async def listen_for_heartbeats():
     RABBITMQ_PASS = os.getenv("RABBITMQ_PASS", "guest")
     RABBITMQ_HOST = os.getenv("RABBITMQ_HOST", "127.0.0.1")
     RABBITMQ_URL: str = (
-            "amqp://" + RABBITMQ_USER + ":" + RABBITMQ_PASS + "@" + RABBITMQ_HOST + "/"
+        "amqp://" + RABBITMQ_USER + ":" + RABBITMQ_PASS + "@" + RABBITMQ_HOST + "/"
     )
 
     connection = await connect_robust(
