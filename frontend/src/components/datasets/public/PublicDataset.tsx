@@ -11,7 +11,7 @@ import {
 	fetchFoldersInDataset, fetchFoldersInPublicDataset,
 } from "../../../actions/dataset";
 import { fetchFolderPath } from "../../../actions/folder";
-
+import {fetchPublicFolderPath} from "../../../actions/folder";
 import { a11yProps, TabPanel } from "../../tabs/TabComponent";
 import FilesTable from "../../files/FilesTable";
 import { MetadataIn } from "../../../openapi/v2";
@@ -66,7 +66,7 @@ export const PublicDataset = (): JSX.Element => {
 		metadata: object
 	) => dispatch(deleteDatasetMetadataAction(datasetId, metadata));
 	const getFolderPath = (folderId: string | null) =>
-		dispatch(fetchFolderPath(folderId));
+		dispatch(fetchPublicFolderPath(folderId));
 	const listFilesInDataset = (
 		datasetId: string | undefined,
 		folderId: string | null
@@ -75,7 +75,7 @@ export const PublicDataset = (): JSX.Element => {
 		datasetId: string | undefined,
 		parentFolder: string | null,
 		skip: number | undefined, limit: number | undefined
-	) => dispatch(fetchFoldersInDataset(datasetId, parentFolder, skip, limit));
+	) => dispatch(fetchFoldersInPublicDataset(datasetId, parentFolder, skip, limit));
 	const listDatasetAbout = (datasetId: string | undefined) =>
 		dispatch(fetchDatasetAbout(datasetId));
 	const listDatasetMetadata = (datasetId: string | undefined) =>

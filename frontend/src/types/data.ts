@@ -214,6 +214,8 @@ export interface ErrorState {
 export interface FolderState {
 	folders: FolderOut[];
 	folderPath: string[];
+	publicFolders: FolderOut[];
+	publicFolderPath: string[];
 }
 
 export interface JobSummary {
