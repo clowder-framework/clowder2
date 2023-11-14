@@ -6,8 +6,9 @@ import { RootState } from "../../../types/data";
 import { useDispatch, useSelector } from "react-redux";
 import {
 	fetchDatasetAbout,
+	fetchPublicDatasetAbout,
 	fetchFilesInPublicDataset,
-	fetchFoldersInDataset,
+	fetchFoldersInDataset, fetchFoldersInPublicDataset,
 } from "../../../actions/dataset";
 import { fetchFolderPath } from "../../../actions/folder";
 
@@ -41,6 +42,7 @@ import { PageNotFound } from "../../errors/PageNotFound";
 import { ErrorModal } from "../../errors/ErrorModal";
 import { Visualization } from "../../visualizations/Visualization";
 import VisibilityIcon from "@mui/icons-material/Visibility";
+import {EditMetadata} from "../../metadata/EditMetadata";
 
 export const PublicDataset = (): JSX.Element => {
 	// path parameter

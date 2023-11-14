@@ -196,7 +196,7 @@ export function fetchFoldersInPublicDataset(datasetId, parentFolder, skip, limit
 			})
 			.catch((reason) => {
 				dispatch(
-					handleErrors(reason, fetchFilesInPublicDataset(datasetId, parentFolder, skip, limit))
+					handleErrors(reason, fetchFoldersInPublicDataset(datasetId, parentFolder, skip, limit))
 				);
 			});
 	};
@@ -276,16 +276,16 @@ export const RECEIVE_PUBLIC_DATASET_ABOUT = "RECEIVE_PUBLIC_DATASET_ABOUT";
 
 export function fetchPublicDatasetAbout(id) {
 	return (dispatch) => {
-		return V2.DatasetsService.getDatasetApiV2DatasetsDatasetIdGet(id)
+		return V2.PublicDatasetsService.getDatasetsApiV2PublicDatasetsGet(id)
 			.then((json) => {
 				dispatch({
-					type: RECEIVE_DATASET_ABOUT,
+					type: RECEIVE_PUBLIC_DATASET_ABOUT,
 					about: json,
 					receivedAt: Date.now(),
 				});
 			})
 			.catch((reason) => {
-				dispatch(handleErrors(reason, fetchDatasetAbout(id)));
+				dispatch(handleErrors(reason, fetchPublicDatasetAbout(id)));
 			});
 	};
 }
