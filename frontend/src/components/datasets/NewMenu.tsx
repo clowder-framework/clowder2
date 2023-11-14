@@ -13,6 +13,7 @@ import React from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "../../types/data";
 import { UploadFile } from "../files/UploadFile";
+import { UploadFileMultiple } from "../files/UploadFileMultiple";
 import UploadIcon from "@mui/icons-material/Upload";
 import { Folder } from "@material-ui/icons";
 
@@ -29,6 +30,8 @@ export const NewMenu = (props: ActionsMenuProps): JSX.Element => {
 
 	const [anchorEl, setAnchorEl] = React.useState<Element | null>(null);
 	const [createFileOpen, setCreateFileOpen] = React.useState<boolean>(false);
+	const [createMultipleFileOpen, setCreateMultipleFileOpen] =
+		React.useState<boolean>(false);
 	const [newFolder, setNewFolder] = React.useState<boolean>(false);
 
 	const handleCloseNewFolder = () => {
@@ -55,6 +58,22 @@ export const NewMenu = (props: ActionsMenuProps): JSX.Element => {
 				<UploadFile
 					selectedDatasetId={datasetId}
 					selectedDatasetName={about.name}
+					folderId={folderId}
+				/>
+			</Dialog>
+			<Dialog
+				open={createMultipleFileOpen}
+				onClose={() => {
+					setCreateMultipleFileOpen(false);
+				}}
+				fullWidth={true}
+				maxWidth="lg"
+				aria-labelledby="form-dialog"
+			>
+				<UploadFileMultiple
+					selectedDatasetId={datasetId}
+					selectedDatasetName={about.name}
+					setCreateMultipleFileOpen={setCreateMultipleFileOpen}
 					folderId={folderId}
 				/>
 			</Dialog>
@@ -91,6 +110,17 @@ export const NewMenu = (props: ActionsMenuProps): JSX.Element => {
 						<UploadIcon fontSize="small" />
 					</ListItemIcon>
 					<ListItemText>Upload File</ListItemText>
+				</MenuItem>
+				<MenuItem
+					onClick={() => {
+						setCreateMultipleFileOpen(true);
+						handleOptionClose();
+					}}
+				>
+					<ListItemIcon>
+						<UploadIcon fontSize="small" />
+					</ListItemIcon>
+					<ListItemText>Upload Multiple Files</ListItemText>
 				</MenuItem>
 				<MenuItem
 					onClick={() => {

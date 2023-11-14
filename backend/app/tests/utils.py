@@ -33,8 +33,11 @@ dataset_example = {
     "description": "a dataset is a container of files and metadata",
 }
 
-filename_example = "test_upload.csv"
-file_content_example = "year,location,count\n2023,Atlanta,4"
+filename_example_1 = "test_upload1.csv"
+file_content_example_1 = "year,location,count\n2023,Atlanta,4"
+
+filename_example_2 = "test_upload2.csv"
+file_content_example_2 = "year,location,count\n2022,Seattle,2"
 
 listener_v2_example = {
     "name": "test.listener_v2_example",
@@ -143,8 +146,8 @@ def upload_file(
     client: TestClient,
     headers: dict,
     dataset_id: str,
-    filename=filename_example,
-    content=file_content_example,
+    filename=filename_example_1,
+    content=file_content_example_1,
 ):
     """Uploads a dummy file (optionally with custom name/content) to a dataset and returns the JSON."""
     with open(filename, "w") as tempf:
@@ -158,6 +161,36 @@ def upload_file(
     os.remove(filename)
     assert response.status_code == 200
     assert response.json().get("id") is not None
+    return response.json()
+
+
+def upload_files(
+    client: TestClient,
+    headers: dict,
+    dataset_id: str,
+    filenames=[filename_example_1, filename_example_2],
+    file_contents=[file_content_example_1, file_content_example_2],
+):
+    """Uploads a dummy file (optionally with custom name/content) to a dataset and returns the JSON."""
+    upload_files = []
+    for i in range(0, len(filenames)):
+        with open(filenames[i], "w") as tempf:
+            tempf.write(file_contents[i])
+            upload_files.append(filenames[i])
+    files = [
+        ("files", open(filename_example_1, "rb")),
+        ("files", open(filename_example_2, "rb")),
+    ]
+    response = client.post(
+        f"{settings.API_V2_STR}/datasets/{dataset_id}/filesMultiple",
+        headers=headers,
+        files=files,
+    )
+    for f in upload_files:
+        os.remove(f)
+    assert response.status_code == 200
+    json_response = response.json()
+    assert len(json_response) == 2
     return response.json()
 
 

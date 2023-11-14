@@ -49,4 +49,27 @@ export class LoginService {
         });
     }
 
+    /**
+     * Set Admin
+     * @param useremail
+     * @param datasetId
+     * @returns UserOut Successful Response
+     * @throws ApiError
+     */
+    public static setAdminApiV2UsersSetAdminUseremailPost(
+        useremail: string,
+        datasetId?: string,
+    ): CancelablePromise<UserOut> {
+        return __request({
+            method: 'POST',
+            path: `/api/v2/users/set_admin/${useremail}`,
+            query: {
+                'dataset_id': datasetId,
+            },
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+
 }
