@@ -2,50 +2,50 @@
 import React, { useEffect, useState } from "react";
 import {Box, Button, ButtonGroup, Grid, Stack, Tab, Tabs, Typography} from "@mui/material";
 import { useParams, useSearchParams } from "react-router-dom";
-import { RootState } from "../../../types/data";
+import { RootState } from "../../types/data";
 import { useDispatch, useSelector } from "react-redux";
 import {
 	fetchDatasetAbout,
-	fetchPublicDatasetAbout,
-	fetchFilesInPublicDataset,
-	fetchFoldersInDataset, fetchFoldersInPublicDataset,
-} from "../../../actions/dataset";
-import { fetchFolderPath } from "../../../actions/folder";
-import {fetchPublicFolderPath} from "../../../actions/folder";
-import { a11yProps, TabPanel } from "../../tabs/TabComponent";
-import FilesTable from "../../files/FilesTable";
-import { MetadataIn } from "../../../openapi/v2";
-import { DisplayMetadata } from "../../metadata/DisplayMetadata";
-import { DisplayListenerMetadata } from "../../metadata/DisplayListenerMetadata";
-import { MainBreadcrumbs } from "../../navigation/BreadCrumb";
+	fetchFilesInDataset,
+	fetchFoldersInDataset,
+} from "../../actions/dataset";
+import { fetchFolderPath } from "../../actions/folder";
+
+import { a11yProps, TabPanel } from "../tabs/TabComponent";
+import FilesTable from "../files/FilesTable";
+import { MetadataIn } from "../../openapi/v2";
+import { DisplayMetadata } from "../metadata/DisplayMetadata";
+import { DisplayListenerMetadata } from "../metadata/DisplayListenerMetadata";
+import { EditMetadata } from "../metadata/EditMetadata";
+import { MainBreadcrumbs } from "../navigation/BreadCrumb";
 import {
 	deleteDatasetMetadata as deleteDatasetMetadataAction,
 	fetchDatasetMetadata, fetchMetadataDefinitions,
 	patchDatasetMetadata as patchDatasetMetadataAction,
 	postDatasetMetadata,
-} from "../../../actions/metadata";
-import Layout from "../../Layout";
-import { ActionsMenu } from "../ActionsMenu";
-import { DatasetDetails } from "../DatasetDetails";
+} from "../../actions/metadata";
+import Layout from "../Layout";
+import { ActionsMenu } from "./ActionsMenu";
+import { DatasetDetails } from "./DatasetDetails";
 import {ArrowBack, ArrowForward, FormatListBulleted, InsertDriveFile} from "@material-ui/icons";
-import { Listeners } from "../../listeners/Listeners";
+import { Listeners } from "../listeners/Listeners";
 import AssessmentIcon from "@mui/icons-material/Assessment";
 import HistoryIcon from "@mui/icons-material/History";
 import ShareIcon from "@mui/icons-material/Share";
 import BuildIcon from "@mui/icons-material/Build";
-import { ExtractionHistoryTab } from "../../listeners/ExtractionHistoryTab";
-import { SharingTab } from "../../sharing/SharingTab";
-import RoleChip from "../../auth/RoleChip";
-import { TabStyle } from "../../../styles/Styles";
-import { Forbidden } from "../../errors/Forbidden";
-import { PageNotFound } from "../../errors/PageNotFound";
-import { ErrorModal } from "../../errors/ErrorModal";
-import { Visualization } from "../../visualizations/Visualization";
+import { ExtractionHistoryTab } from "../listeners/ExtractionHistoryTab";
+import { SharingTab } from "../sharing/SharingTab";
+import RoleChip from "../auth/RoleChip";
+import { TabStyle } from "../../styles/Styles";
+import { Forbidden } from "../errors/Forbidden";
+import { PageNotFound } from "../errors/PageNotFound";
+import { ErrorModal } from "../errors/ErrorModal";
+import { Visualization } from "../visualizations/Visualization";
 import VisibilityIcon from "@mui/icons-material/Visibility";
-import {EditMetadata} from "../../metadata/EditMetadata";
 
-export const PublicDataset = (): JSX.Element => {
-	// path parameter
+
+export function DatasetLayout() {
+
 	const { datasetId } = useParams<{ datasetId?: string }>();
 
 	// search parameters
@@ -66,16 +66,16 @@ export const PublicDataset = (): JSX.Element => {
 		metadata: object
 	) => dispatch(deleteDatasetMetadataAction(datasetId, metadata));
 	const getFolderPath = (folderId: string | null) =>
-		dispatch(fetchPublicFolderPath(folderId));
+		dispatch(fetchFolderPath(folderId));
 	const listFilesInDataset = (
 		datasetId: string | undefined,
 		folderId: string | null
-		, skip: number | undefined, limit: number | undefined) => dispatch(fetchFilesInPublicDataset(datasetId, folderId, skip, limit));
+		, skip: number | undefined, limit: number | undefined) => dispatch(fetchFilesInDataset(datasetId, folderId, skip, limit));
 	const listFoldersInDataset = (
 		datasetId: string | undefined,
 		parentFolder: string | null,
 		skip: number | undefined, limit: number | undefined
-	) => dispatch(fetchFoldersInPublicDataset(datasetId, parentFolder, skip, limit));
+	) => dispatch(fetchFoldersInDataset(datasetId, parentFolder, skip, limit));
 	const listDatasetAbout = (datasetId: string | undefined) =>
 		dispatch(fetchDatasetAbout(datasetId));
 	const listDatasetMetadata = (datasetId: string | undefined) =>
@@ -140,7 +140,6 @@ export const PublicDataset = (): JSX.Element => {
 		if (skip !== null && skip !== undefined) {
 			listFilesInDataset(datasetId, folderId, skip, limit);
 			listFoldersInDataset(datasetId, folderId, skip, limit);
-			console.log(foldersInDataset,'folders in dataste');
 			if (skip === 0) setPrevDisabled(true);
 			else setPrevDisabled(false);
 		}
@@ -170,7 +169,7 @@ export const PublicDataset = (): JSX.Element => {
 		setPaths(tmpPaths);
 	}, [about, folderPath]);
 
-	// for pagination keep flipping until the return dataset is less than the limit
+		// for pagination keep flipping until the return dataset is less than the limit
 	const previous = () => {
 		if (currPageNum - 1 >= 0) {
 			setSkip((currPageNum - 1) * limit);
@@ -428,23 +427,23 @@ export const PublicDataset = (): JSX.Element => {
 					}
 					<Box display="flex" justifyContent="center" sx={{ m: 1 }}>
 						<ButtonGroup
-							variant="contained"
-							aria-label="previous next buttons"
-						>
-							<Button
-								aria-label="previous"
-								onClick={previous}
-								disabled={prevDisabled}
+								variant="contained"
+								aria-label="previous next buttons"
 							>
-								<ArrowBack /> Prev
-							</Button>
-							<Button
-								aria-label="next"
-								onClick={next}
-								disabled={nextDisabled}
-							>
+								<Button
+									aria-label="previous"
+									onClick={previous}
+									disabled={prevDisabled}
+								>
+									<ArrowBack /> Prev
+								</Button>
+								<Button
+									aria-label="next"
+									onClick={next}
+									disabled={nextDisabled}
+								>
 									Next <ArrowForward />
-							</Button>
+								</Button>
 						</ButtonGroup>
 					</Box>
 				</Grid>
@@ -454,4 +453,4 @@ export const PublicDataset = (): JSX.Element => {
 			</Grid>
 		</Layout>
 	);
-};
+}
