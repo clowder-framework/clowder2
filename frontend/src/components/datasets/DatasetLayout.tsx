@@ -43,9 +43,12 @@ import { ErrorModal } from "../errors/ErrorModal";
 import { Visualization } from "../visualizations/Visualization";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 
+type DatasetLayoutProps = {
+	publicView: boolean | false;
+};
 
-export function DatasetLayout() {
-
+export function DatasetLayout(props: DatasetLayoutProps) {
+	const {publicView} = props;
 	const { datasetId } = useParams<{ datasetId?: string }>();
 
 	// search parameters
@@ -118,6 +121,9 @@ export function DatasetLayout() {
 
 	// component did mount list all files in dataset
 	useEffect(() => {
+		if (publicView) {
+			console.log("We are looking at this from the public view");
+		}
 		listFilesInDataset(datasetId, folderId, skip, limit);
 		listFoldersInDataset(datasetId, folderId, skip, limit);
 		listDatasetAbout(datasetId);
