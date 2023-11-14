@@ -6,7 +6,7 @@ import { RootState } from "../../../types/data";
 import { useDispatch, useSelector } from "react-redux";
 import {
 	fetchDatasetAbout,
-	fetchFilesInDataset,
+	fetchFilesInPublicDataset,
 	fetchFoldersInDataset,
 } from "../../../actions/dataset";
 import { fetchFolderPath } from "../../../actions/folder";
@@ -68,7 +68,7 @@ export const PublicDataset = (): JSX.Element => {
 	const listFilesInDataset = (
 		datasetId: string | undefined,
 		folderId: string | null
-		, skip: number | undefined, limit: number | undefined) => dispatch(fetchFilesInDataset(datasetId, folderId, skip, limit));
+		, skip: number | undefined, limit: number | undefined) => dispatch(fetchFilesInPublicDataset(datasetId, folderId, skip, limit));
 	const listFoldersInDataset = (
 		datasetId: string | undefined,
 		parentFolder: string | null,

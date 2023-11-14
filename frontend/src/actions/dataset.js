@@ -127,6 +127,31 @@ export function fetchFilesInDataset(datasetId, folderId, skip, limit) {
 	};
 }
 
+export const RECEIVE_FILES_IN_PUBLIC_DATASET = "RECEIVE_FILES_IN_PUBLIC_DATASET";
+
+export function fetchFilesInPublicDataset(datasetId, folderId, skip, limit) {
+	return (dispatch) => {
+		return V2.PublicDatasetsService.getDatasetFilesApiV2PublicDatasetsDatasetIdFilesGet(
+			datasetId,
+			folderId,
+			skip,
+			limit
+		)
+			.then((json) => {
+				dispatch({
+					type: RECEIVE_FILES_IN_PUBLIC_DATASET,
+					files: json,
+					receivedAt: Date.now(),
+				});
+			})
+			.catch((reason) => {
+				dispatch(
+					handleErrors(reason, fetchFilesInPublicDataset(datasetId, folderId, skip, limit))
+				);
+			});
+	};
+}
+
 export const RECEIVE_FOLDERS_IN_DATASET = "RECEIVE_FOLDERS_IN_DATASET";
 
 export function fetchFoldersInDataset(datasetId, parentFolder, skip, limit) {
@@ -147,6 +172,31 @@ export function fetchFoldersInDataset(datasetId, parentFolder, skip, limit) {
 			.catch((reason) => {
 				dispatch(
 					handleErrors(reason, fetchFoldersInDataset(datasetId, parentFolder, skip, limit))
+				);
+			});
+	};
+}
+
+export const RECEIVE_FOLDERS_IN_PUBLIC_DATASET = "RECEIVE_FOLDERS_IN_PUBLIC_DATASET";
+
+export function fetchFoldersInPublicDataset(datasetId, parentFolder, skip, limit) {
+	return (dispatch) => {
+		return V2.PublicDatasetsService.getDatasetFoldersApiV2PublicDatasetsDatasetIdFoldersGet(
+			datasetId,
+			parentFolder,
+			skip,
+			limit
+		)
+			.then((json) => {
+				dispatch({
+					type: RECEIVE_FILES_IN_PUBLIC_DATASET,
+					folders: json,
+					receivedAt: Date.now(),
+				});
+			})
+			.catch((reason) => {
+				dispatch(
+					handleErrors(reason, fetchFilesInPublicDataset(datasetId, parentFolder, skip, limit))
 				);
 			});
 	};
@@ -207,6 +257,24 @@ export function updateDataset(datasetId, formData) {
 export const RECEIVE_DATASET_ABOUT = "RECEIVE_DATASET_ABOUT";
 
 export function fetchDatasetAbout(id) {
+	return (dispatch) => {
+		return V2.DatasetsService.getDatasetApiV2DatasetsDatasetIdGet(id)
+			.then((json) => {
+				dispatch({
+					type: RECEIVE_DATASET_ABOUT,
+					about: json,
+					receivedAt: Date.now(),
+				});
+			})
+			.catch((reason) => {
+				dispatch(handleErrors(reason, fetchDatasetAbout(id)));
+			});
+	};
+}
+
+export const RECEIVE_PUBLIC_DATASET_ABOUT = "RECEIVE_PUBLIC_DATASET_ABOUT";
+
+export function fetchPublicDatasetAbout(id) {
 	return (dispatch) => {
 		return V2.DatasetsService.getDatasetApiV2DatasetsDatasetIdGet(id)
 			.then((json) => {

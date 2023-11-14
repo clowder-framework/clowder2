@@ -83,6 +83,7 @@ export { LoginService } from './services/LoginService';
 export { MetadataService } from './services/MetadataService';
 export { PublicDatasetsService } from './services/PublicDatasetsService';
 export { PublicFilesService } from './services/PublicFilesService';
+export { PublicFoldersService } from './services/PublicFoldersService';
 export { ServiceService } from './services/ServiceService';
 export { ThumbnailsService } from './services/ThumbnailsService';
 export { UsersService } from './services/UsersService';

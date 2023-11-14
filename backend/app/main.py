@@ -30,7 +30,7 @@ from app.models.tokens import TokenDB
 from app.models.users import UserDB, UserAPIKeyDB, ListenerAPIKeyDB
 from app.models.visualization_config import VisualizationConfigDB
 from app.models.visualization_data import VisualizationDataDB
-from app.routers import folders, groups
+from app.routers import folders, groups, public_folders
 from app.routers import (
     users,
     authorization,
@@ -144,6 +144,11 @@ api_router.include_router(
     prefix="/folders",
     tags=["folders"],
     dependencies=[Depends(get_current_username)],
+)
+api_router.include_router(
+    public_folders.router,
+    prefix="/public_folders",
+    tags=["public_folders"],
 )
 api_router.include_router(
     listeners.router,
