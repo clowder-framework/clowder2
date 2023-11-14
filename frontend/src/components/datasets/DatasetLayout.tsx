@@ -50,7 +50,7 @@ type DatasetLayoutProps = {
 export function DatasetLayout(props: DatasetLayoutProps) {
 	const {publicView} = props;
 	const { datasetId } = useParams<{ datasetId?: string }>();
-
+	console.log("Is public visible here?", publicView);
 	// search parameters
 	const [searchParams] = useSearchParams();
 	const folderId = searchParams.get("folder");
@@ -70,7 +70,7 @@ export function DatasetLayout(props: DatasetLayoutProps) {
 	) => dispatch(deleteDatasetMetadataAction(datasetId, metadata));
 	const getFolderPath = (folderId: string | null) =>
 		dispatch(fetchFolderPath(folderId));
-	const listFilesInDataset = (
+	const listFilesInDataset =  (
 		datasetId: string | undefined,
 		folderId: string | null
 		, skip: number | undefined, limit: number | undefined) => dispatch(fetchFilesInDataset(datasetId, folderId, skip, limit));
