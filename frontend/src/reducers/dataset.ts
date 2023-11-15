@@ -5,8 +5,6 @@ import {
 	RECEIVE_DATASET_ROLES,
 	RECEIVE_DATASETS,
 	RECEIVE_FILES_IN_DATASET,
-	RECEIVE_FILES_IN_PUBLIC_DATASET,
-	RECEIVE_PUBLIC_DATASETS,
 	REMOVE_DATASET_GROUP_ROLE,
 	REMOVE_DATASET_USER_ROLE,
 	RESET_CREATE_DATASET,
@@ -42,14 +40,11 @@ const defaultState: DatasetState = {
 	newFile: <File>{},
 	newFiles: <File[]>[],
 	roles: <DatasetRoles>{},
-	publicDatasets: <Dataset>[],
 };
 
 const dataset = (state = defaultState, action: DataAction) => {
 	switch (action.type) {
 		case RECEIVE_FILES_IN_DATASET:
-			return Object.assign({}, state, { files: action.files });
-		case RECEIVE_FILES_IN_PUBLIC_DATASET:
 			return Object.assign({}, state, { files: action.files });
 		case DELETE_FILE:
 			return Object.assign({}, state, {
@@ -92,10 +87,6 @@ const dataset = (state = defaultState, action: DataAction) => {
 			return Object.assign({}, state, { about: action.about });
 		case RECEIVE_DATASETS:
 			return Object.assign({}, state, { datasets: action.datasets });
-		case RECEIVE_PUBLIC_DATASETS:
-			return Object.assign({}, state, {
-				publicDatasets: action.publicDatasets,
-			});
 		case CREATE_DATASET:
 			return Object.assign({}, state, { newDataset: action.dataset });
 		case RESET_CREATE_DATASET:

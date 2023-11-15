@@ -147,12 +147,21 @@ export interface Thumbnail {
 export interface DatasetState {
 	files: FileSummary[];
 	datasets: Dataset[];
-	publicDatasets: Dataset[];
 	newDataset: Dataset;
 	newFile: FileSummary;
 	about: Dataset;
 	datasetRole: AuthorizationBase;
 	roles: DatasetRoles;
+}
+
+export interface PublicDatasetState {
+	public_files: FileSummary[];
+	public_datasets: Dataset[];
+	public_newDataset: Dataset;
+	public_newFile: FileSummary;
+	public_about: Dataset;
+	public_datasetRole: AuthorizationBase;
+	public_roles: DatasetRoles;
 }
 
 export interface ListenerState {
@@ -180,6 +189,19 @@ export interface MetadataState {
 }
 
 export interface FileState {
+	url: string;
+	blob: Blob;
+	fileSummary: FileSummary;
+	extractedMetadata: ExtractedMetadata[];
+	metadataJsonld: MetadataJsonld[];
+	previews: FilePreview[];
+	fileVersions: FileVersion[];
+	fileRole: AuthorizationBase;
+	presignedUrl: string;
+	selected_version_num: number;
+}
+
+export interface PublicFileState {
 	url: string;
 	blob: Blob;
 	fileSummary: FileSummary;
@@ -246,7 +268,9 @@ export interface RootState {
 	metadata: MetadataState;
 	error: ErrorState;
 	file: FileState;
+	publicFile: PublicFileState;
 	dataset: DatasetState;
+	publicDataset: PublicDatasetState;
 	listener: ListenerState;
 	group: GroupState;
 	user: UserState;

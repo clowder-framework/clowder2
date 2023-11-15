@@ -127,31 +127,6 @@ export function fetchFilesInDataset(datasetId, folderId, skip, limit) {
 	};
 }
 
-export const RECEIVE_FILES_IN_PUBLIC_DATASET = "RECEIVE_FILES_IN_PUBLIC_DATASET";
-
-export function fetchFilesInPublicDataset(datasetId, folderId, skip, limit) {
-	return (dispatch) => {
-		return V2.PublicDatasetsService.getDatasetFilesApiV2PublicDatasetsDatasetIdFilesGet(
-			datasetId,
-			folderId,
-			skip,
-			limit
-		)
-			.then((json) => {
-				dispatch({
-					type: RECEIVE_FILES_IN_PUBLIC_DATASET,
-					files: json,
-					receivedAt: Date.now(),
-				});
-			})
-			.catch((reason) => {
-				dispatch(
-					handleErrors(reason, fetchFilesInPublicDataset(datasetId, folderId, skip, limit))
-				);
-			});
-	};
-}
-
 export const RECEIVE_FOLDERS_IN_DATASET = "RECEIVE_FOLDERS_IN_DATASET";
 
 export function fetchFoldersInDataset(datasetId, parentFolder, skip, limit) {
@@ -172,31 +147,6 @@ export function fetchFoldersInDataset(datasetId, parentFolder, skip, limit) {
 			.catch((reason) => {
 				dispatch(
 					handleErrors(reason, fetchFoldersInDataset(datasetId, parentFolder, skip, limit))
-				);
-			});
-	};
-}
-
-export const RECEIVE_FOLDERS_IN_PUBLIC_DATASET = "RECEIVE_FOLDERS_IN_PUBLIC_DATASET";
-
-export function fetchFoldersInPublicDataset(datasetId, parentFolder, skip, limit) {
-	return (dispatch) => {
-		return V2.PublicDatasetsService.getDatasetFoldersApiV2PublicDatasetsDatasetIdFoldersGet(
-			datasetId,
-			parentFolder,
-			skip,
-			limit
-		)
-			.then((json) => {
-				dispatch({
-					type: RECEIVE_FOLDERS_IN_PUBLIC_DATASET,
-					folders: json,
-					receivedAt: Date.now(),
-				});
-			})
-			.catch((reason) => {
-				dispatch(
-					handleErrors(reason, fetchFoldersInPublicDataset(datasetId, parentFolder, skip, limit))
 				);
 			});
 	};
@@ -272,42 +222,6 @@ export function fetchDatasetAbout(id) {
 	};
 }
 
-export const RECEIVE_PUBLIC_DATASET_ABOUT = "RECEIVE_PUBLIC_DATASET_ABOUT";
-
-export function fetchPublicDatasetAbout(id) {
-	return (dispatch) => {
-		return V2.PublicDatasetsService.getDatasetsApiV2PublicDatasetsGet(id)
-			.then((json) => {
-				dispatch({
-					type: RECEIVE_PUBLIC_DATASET_ABOUT,
-					about: json,
-					receivedAt: Date.now(),
-				});
-			})
-			.catch((reason) => {
-				dispatch(handleErrors(reason, fetchPublicDatasetAbout(id)));
-			});
-	};
-}
-
-export const RECEIVE_PUBLIC_DATASETS = "RECEIVE_PUBLIC_DATASETS";
-
-export function fetchPublicDatasets(skip = 0, limit = 21) {
-	return (dispatch) => {
-		// TODO: Parameters for dates? paging?
-		return V2.PublicDatasetsService.getDatasetsApiV2PublicDatasetsGet(skip, limit)
-			.then((json) => {
-				dispatch({
-					type: RECEIVE_PUBLIC_DATASETS,
-					publicDatasets: json,
-					receivedAt: Date.now(),
-				});
-			})
-			.catch((reason) => {
-				dispatch(handleErrors(reason, fetchPublicDatasets(skip, limit)));
-			});
-	};
-}
 
 export const RECEIVE_DATASETS = "RECEIVE_DATASETS";
 
@@ -431,31 +345,6 @@ export function fetchFolderPath(folderId) {
 
 export const GET_PUBLIC_FOLDER_PATH = "GET_PUBLIC_FOLDER_PATH";
 
-export function fetchPublicFolderPath(folderId) {
-	return (dispatch) => {
-		if (folderId != null) {
-			return V2.PublicFoldersService.downloadFolderApiV2PublicFoldersFolderIdPathGet(
-				folderId
-			)
-				.then((json) => {
-					dispatch({
-						type: GET_PUBLIC_FOLDER_PATH,
-						folderPath: json,
-						receivedAt: Date.now(),
-					});
-				})
-				.catch((reason) => {
-					dispatch(handleErrors(reason, fetchPublicFolderPath(folderId)));
-				});
-		} else {
-			dispatch({
-				type: GET_PUBLIC_FOLDER_PATH,
-				folderPath: [],
-				receivedAt: Date.now(),
-			});
-		}
-	};
-}
 
 export const RECEIVE_DATASET_ROLES = "RECEIVE_DATASET_ROLES";
 
