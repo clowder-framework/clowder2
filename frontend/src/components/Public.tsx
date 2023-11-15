@@ -40,16 +40,17 @@ export const Public = (): JSX.Element => {
 	const datasets = useSelector((state: RootState) => state.dataset.datasets);
 
 
-	const public_datasets = useSelector((state: RootState) => state.publicDataset.public_datasets);
+	//const public_datasets = useSelector((state: RootState) => state.publicDataset.public_datasets);
 
 	useEffect(() => {
-		listPublicDatasets(0, limit);
+		console.log('we got here')
+		listPublicDatasets(0, 21);
 		listDatasets(0, limit, mine);
 	}, []);
 
 
 
 	return (
-		<>Nothing yet</>
+		<>NOthing yet</>
 	);
 };

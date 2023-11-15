@@ -222,7 +222,6 @@ export function fetchDatasetAbout(id) {
 	};
 }
 
-
 export const RECEIVE_DATASETS = "RECEIVE_DATASETS";
 
 export function fetchDatasets(skip = 0, limit = 21, mine = false) {
@@ -342,8 +341,6 @@ export function fetchFolderPath(folderId) {
 		}
 	};
 }
-
-export const GET_PUBLIC_FOLDER_PATH = "GET_PUBLIC_FOLDER_PATH";
 
 
 export const RECEIVE_DATASET_ROLES = "RECEIVE_DATASET_ROLES";

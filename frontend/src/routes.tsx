@@ -103,7 +103,9 @@ export const AppRoutes = (): JSX.Element => {
 				<Route
 					path="/public"
 					element={
-						<Public />
+						<PrivateRoute>
+							<Public />
+						</PrivateRoute>
 					}
 				/>
 				<Route

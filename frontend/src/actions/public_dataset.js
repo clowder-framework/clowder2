@@ -76,6 +76,7 @@ export function fetchPublicDatasetAbout(id) {
 export const RECEIVE_PUBLIC_DATASETS = "RECEIVE_PUBLIC_DATASETS";
 
 export function fetchPublicDatasets(skip = 0, limit = 21) {
+	console.log("we are here");
 	return (dispatch) => {
 		// TODO: Parameters for dates? paging?
 		return V2.PublicDatasetsService.getDatasetsApiV2PublicDatasetsGet(skip, limit)
