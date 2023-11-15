@@ -1,7 +1,7 @@
 import { combineReducers } from "redux";
 import file from "./file";
 import dataset from "./dataset";
-import public_dataset from "./public_dataset";
+import publicDataset from "./public_dataset";
 import folder from "./folder";
 import user from "./user";
 import error from "./error";
@@ -13,7 +13,7 @@ import visualization from "./visualization";
 const rootReducer = combineReducers({
 	file: file,
 	dataset: dataset,
-	public_dataset: public_dataset,
+	publicDataset: publicDataset,
 	folder: folder,
 	user: user,
 	error: error,

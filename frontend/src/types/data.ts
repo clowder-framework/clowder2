@@ -268,7 +268,6 @@ export interface RootState {
 	metadata: MetadataState;
 	error: ErrorState;
 	file: FileState;
-	publicFile: PublicFileState;
 	dataset: DatasetState;
 	publicDataset: PublicDatasetState;
 	listener: ListenerState;

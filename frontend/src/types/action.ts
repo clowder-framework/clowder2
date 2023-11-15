@@ -3,7 +3,7 @@ import {
 	FilePreview,
 	Folder,
 	MetadataJsonld,
-	Profile,
+	Profile
 } from "./data";
 import {
 	AuthorizationBase,

@@ -25,7 +25,7 @@ const defaultState: PublicDatasetState = {
 	public_roles: <DatasetRoles>{},
 };
 
-const public_dataset = (state = defaultState, action: DataAction) => {
+const publicDataset = (state = defaultState, action: DataAction) => {
 	switch (action.type) {
 		case RECEIVE_FILES_IN_PUBLIC_DATASET:
 			return Object.assign({}, state, { public_files: action.public_files });
@@ -38,4 +38,4 @@ const public_dataset = (state = defaultState, action: DataAction) => {
 	}
 };
 
-export default public_dataset;
+export default publicDataset;

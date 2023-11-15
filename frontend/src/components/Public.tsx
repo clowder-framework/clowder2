@@ -37,16 +37,21 @@ export const Public = (): JSX.Element => {
 		limit: number | undefined,
 		mine: boolean | undefined
 	) => dispatch(fetchDatasets(skip, limit, mine));
+	const datasetState = useSelector((state: RootState) => state.dataset);
 	const datasets = useSelector((state: RootState) => state.dataset.datasets);
 
 
-	//const public_datasets = useSelector((state: RootState) => state.publicDataset.public_datasets);
+	const currrentPublicDatasetState = useSelector((state: RootState) => state.publicDataset);
+	const currrentPublicDatasets = useSelector((state: RootState) => state.publicDataset.public_datasets);
 
 	useEffect(() => {
 		console.log('we got here')
-		listPublicDatasets(0, limit);
 		listDatasets(0, limit, mine);
 	}, []);
+
+	useEffect( () => {
+		listPublicDatasets(0, limit);
+	}, [currrentPublicDatasets]);
 
 
 
