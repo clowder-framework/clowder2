@@ -24,7 +24,7 @@ const tab = {
 export const Public = (): JSX.Element => {
 	// Redux connect equivalent
 	const dispatch = useDispatch();
-	const [limit] = useState<number>(20);
+	const [limit] = useState<number>(21);
 	// TODO add switch to turn on and off "mine" dataset
 	const [mine] = useState<boolean>(false);
 	const listPublicDatasets = (
@@ -44,7 +44,7 @@ export const Public = (): JSX.Element => {
 
 	useEffect(() => {
 		console.log('we got here')
-		listPublicDatasets(0, 21);
+		listPublicDatasets(0, limit);
 		listDatasets(0, limit, mine);
 	}, []);
 
