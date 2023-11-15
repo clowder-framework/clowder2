@@ -12,6 +12,7 @@ import Layout from "./Layout";
 import { Link as RouterLink } from "react-router-dom";
 import { Listeners } from "./listeners/Listeners";
 import { ErrorModal } from "./errors/ErrorModal";
+import {fetchDatasets} from "../actions/dataset";
 
 const tab = {
 	fontStyle: "normal",
@@ -23,33 +24,29 @@ const tab = {
 export const Public = (): JSX.Element => {
 	// Redux connect equivalent
 	const dispatch = useDispatch();
+	const [limit] = useState<number>(20);
+	// TODO add switch to turn on and off "mine" dataset
+	const [mine] = useState<boolean>(false);
 	const listPublicDatasets = (
 		skip: number | undefined,
 		limit: number | undefined
 	) => dispatch(fetchPublicDatasets(skip, limit));
-	const publicDatasetState = useSelector(
-		(state: RootState) => state.publicDataset
-	);
+
+	const listDatasets = (
+		skip: number | undefined,
+		limit: number | undefined,
+		mine: boolean | undefined
+	) => dispatch(fetchDatasets(skip, limit, mine));
+	const datasets = useSelector((state: RootState) => state.dataset.datasets);
+
 
 	const public_datasets = useSelector((state: RootState) => state.publicDataset.public_datasets);
 
-	// TODO add option to determine limit number; default show 5 datasets each time
-	const [currPageNum, setCurrPageNum] = useState<number>(0);
-	const [limit] = useState<number>(20);
-	const [skip, setSkip] = useState<number | undefined>();
-	// TODO add switch to turn on and off "mine" dataset
-	const [mine] = useState<boolean>(false);
-	const [prevDisabled, setPrevDisabled] = useState<boolean>(true);
-	const [nextDisabled, setNextDisabled] = useState<boolean>(false);
-	const [selectedTabIndex, setSelectedTabIndex] = useState(0);
-	const [errorOpen, setErrorOpen] = useState(false);
-
-	// component did mount
 	useEffect(() => {
-		console.log("trying to get public datasets");
 		listPublicDatasets(0, limit);
-		console.log(publicDatasetState);
+		listDatasets(0, limit, mine);
 	}, []);
+
 
 
 	return (
