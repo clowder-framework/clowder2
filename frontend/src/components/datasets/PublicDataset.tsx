@@ -33,7 +33,7 @@ import {
 	postDatasetMetadata,
 } from "../../actions/metadata";
 import Layout from "../Layout";
-import { ActionsMenu } from "./ActionsMenu";
+import { PublicActionsMenu } from "./PublicActionsMenu";
 import { DatasetDetails } from "./DatasetDetails";
 import {ArrowBack, ArrowForward, FormatListBulleted, InsertDriveFile} from "@material-ui/icons";
 import { Listeners } from "../listeners/Listeners";
@@ -75,10 +75,6 @@ export const PublicDataset = (): JSX.Element => {
 	const getFolderPath = (folderId: string | null) =>
 		dispatch(fetchFolderPath(folderId));
 	const listFilesInDataset = (
-		datasetId: string | undefined,
-		folderId: string | null
-		, skip: number | undefined, limit: number | undefined) => dispatch(fetchFilesInPublicDataset(datasetId, folderId, skip, limit));
-	const listFilesInPublicDataset = (
 		datasetId: string | undefined,
 		folderId: string | null
 		, skip: number | undefined, limit: number | undefined) => dispatch(fetchFilesInPublicDataset(datasetId, folderId, skip, limit));
@@ -132,7 +128,6 @@ export const PublicDataset = (): JSX.Element => {
 	useEffect(() => {
 		listFilesInDataset(datasetId, folderId, skip, limit);
 		listFoldersInDataset(datasetId, folderId, skip, limit);
-		listFilesInPublicDataset(datasetId, folderId, skip, limit);
 		listDatasetAbout(datasetId);
 		getFolderPath(folderId);
 	}, [searchParams]);
@@ -164,7 +159,7 @@ export const PublicDataset = (): JSX.Element => {
 		const tmpPaths = [
 			{
 				name: about["name"],
-				url: `/datasets/${datasetId}`,
+				url: `/public/datasets/${datasetId}`,
 			},
 		];
 
@@ -172,7 +167,7 @@ export const PublicDataset = (): JSX.Element => {
 			for (const folderBread of folderPath) {
 				tmpPaths.push({
 					name: folderBread["folder_name"],
-					url: `/datasets/${datasetId}?folder=${folderBread["folder_id"]}`,
+					url: `/public/datasets/${datasetId}?folder=${folderBread["folder_id"]}`,
 				});
 			}
 		} else {
@@ -273,7 +268,7 @@ export const PublicDataset = (): JSX.Element => {
 				</Grid>
 				{/*actions*/}
 				<Grid item xs={4} sx={{ display: "flex-top", alignItems: "center" }}>
-					<ActionsMenu
+					<PublicActionsMenu
 						datasetId={datasetId}
 						folderId={folderId}
 						datasetName={about["name"]}
@@ -322,14 +317,14 @@ export const PublicDataset = (): JSX.Element => {
 							{...a11yProps(3)}
 							disabled={false}
 						/>
-						<Tab
-							icon={<BuildIcon />}
-							iconPosition="start"
-							sx={TabStyle}
-							label="Extract"
-							{...a11yProps(4)}
-							disabled={false}
-						/>
+						{/*<Tab*/}
+						{/*	icon={<BuildIcon />}*/}
+						{/*	iconPosition="start"*/}
+						{/*	sx={TabStyle}*/}
+						{/*	label="Extract"*/}
+						{/*	{...a11yProps(4)}*/}
+						{/*	disabled={false}*/}
+						{/*/>*/}
 						<Tab
 							icon={<HistoryIcon />}
 							iconPosition="start"
@@ -338,14 +333,14 @@ export const PublicDataset = (): JSX.Element => {
 							{...a11yProps(5)}
 							disabled={false}
 						/>
-						<Tab
-							icon={<ShareIcon />}
-							iconPosition="start"
-							sx={TabStyle}
-							label="Sharing"
-							{...a11yProps(6)}
-							disabled={false}
-						/>
+						{/*<Tab*/}
+						{/*	icon={<ShareIcon />}*/}
+						{/*	iconPosition="start"*/}
+						{/*	sx={TabStyle}*/}
+						{/*	label="Sharing"*/}
+						{/*	{...a11yProps(6)}*/}
+						{/*	disabled={false}*/}
+						{/*/>*/}
 					</Tabs>
 					<TabPanel value={selectedTabIndex} index={0}>
 						{folderId !== null ? (
