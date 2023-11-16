@@ -43,7 +43,7 @@ import { ErrorModal } from "../errors/ErrorModal";
 import { Visualization } from "../visualizations/Visualization";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 
-export const Dataset = (): JSX.Element => {
+export const PublicDataset = (): JSX.Element => {
 	// path parameter
 	const { datasetId } = useParams<{ datasetId?: string }>();
 
