@@ -77,7 +77,11 @@ export const PublicDataset = (): JSX.Element => {
 	const listFilesInDataset = (
 		datasetId: string | undefined,
 		folderId: string | null
-		, skip: number | undefined, limit: number | undefined) => dispatch(fetchFilesInDataset(datasetId, folderId, skip, limit));
+		, skip: number | undefined, limit: number | undefined) => dispatch(fetchFilesInPublicDataset(datasetId, folderId, skip, limit));
+	const listFilesInPublicDataset = (
+		datasetId: string | undefined,
+		folderId: string | null
+		, skip: number | undefined, limit: number | undefined) => dispatch(fetchFilesInPublicDataset(datasetId, folderId, skip, limit));
 	const listFoldersInDataset = (
 		datasetId: string | undefined,
 		parentFolder: string | null,
@@ -117,9 +121,10 @@ export const PublicDataset = (): JSX.Element => {
 	const [skip, setSkip] = useState<number | undefined>(0);
 	const [prevDisabled, setPrevDisabled] = useState<boolean>(true);
 	const [nextDisabled, setNextDisabled] = useState<boolean>(false);
-	const filesInDataset = useSelector((state: RootState) => state.dataset.files);
-	const foldersInDataset = useSelector((state: RootState) => state.folder.folders);
+	// we use the public files here
+	const filesInDataset = useSelector((state: RootState) => state.publicDataset.public_files);
 
+	const foldersInDataset = useSelector((state: RootState) => state.folder.folders);
 
 	const metadataDefinitionList = useSelector((state: RootState) => state.metadata.metadataDefinitionList);
 
@@ -127,6 +132,7 @@ export const PublicDataset = (): JSX.Element => {
 	useEffect(() => {
 		listFilesInDataset(datasetId, folderId, skip, limit);
 		listFoldersInDataset(datasetId, folderId, skip, limit);
+		listFilesInPublicDataset(datasetId, folderId, skip, limit);
 		listDatasetAbout(datasetId);
 		getFolderPath(folderId);
 	}, [searchParams]);
@@ -349,7 +355,7 @@ export const PublicDataset = (): JSX.Element => {
 						) : (
 							<></>
 						)}
-						<FilesTable datasetId={datasetId} folderId={folderId} />
+						<FilesTable datasetId={datasetId} folderId={folderId} publicView={true} />
 					</TabPanel>
 					<TabPanel value={selectedTabIndex} index={1}>
 						<Visualization datasetId={datasetId} />
