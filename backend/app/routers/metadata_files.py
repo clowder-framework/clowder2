@@ -340,7 +340,7 @@ async def get_file_metadata(
 
         # Validate specified version, or use latest by default
         if not all_versions:
-            if version is not None:
+            if version is not None and version > 0:
                 if (
                     await FileVersionDB.find_one(
                         FileVersionDB.file_id == ObjectId(file_id),
