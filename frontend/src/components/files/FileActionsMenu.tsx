@@ -82,10 +82,8 @@ export const FileActionsMenu = (props: FileActionsMenuProps): JSX.Element => {
 
 	useEffect(() => {
 		if (storageType === "minio") {
-			console.log("share OK");
 			setShareEnabled(true);
 		} else {
-			console.log("share False");
 			setShareEnabled(false);
 		}
 	}, [storageType]);
