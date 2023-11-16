@@ -51,6 +51,7 @@ import { ErrorModal } from "../errors/ErrorModal";
 import { Visualization } from "../visualizations/Visualization";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import {UserMetadataTabPanel} from "../metadata/UserMetadataTabPanel";
+import {EditMetadataTabPanel} from "../metadata/EditMetadataTabPanel";
 
 export const PublicDataset = (): JSX.Element => {
 	// path parameter
@@ -357,50 +358,12 @@ export const PublicDataset = (): JSX.Element => {
 						<Visualization datasetId={datasetId} />
 					</TabPanel>
 					<TabPanel value={selectedTabIndex} index={2}>
-						{enableAddMetadata ? (
-							<>
-								<EditMetadata
-									resourceType="dataset"
-									resourceId={datasetId}
-									setMetadata={setMetadata}
-								/>
-								<Button
-									variant="contained"
-									onClick={handleMetadataUpdateFinish}
-									sx={{ mt: 1, mr: 1 }}
-								>
-									Update
-								</Button>
-								<Button
-									onClick={() => {
-										setEnableAddMetadata(false);
-									}}
-									sx={{ mt: 1, mr: 1 }}
-								>
-									Cancel
-								</Button>
-							</>
-						) : (
-							<>
-								<DisplayMetadata
-									updateMetadata={updateDatasetMetadata}
-									deleteMetadata={deleteDatasetMetadata}
-									resourceType="dataset"
-									resourceId={datasetId}
-								/>
-								<Box textAlign="center">
-									<Button
-										variant="contained"
-										sx={{ m: 2 }}
-										onClick={() => {
-											setEnableAddMetadata(true);
-										}}
-									>
-										Add Metadata
-									</Button>
-								</Box>
-							</>
-						)}
+						<DisplayMetadata
+							updateMetadata={updateDatasetMetadata}
+							deleteMetadata={deleteDatasetMetadata}
+							resourceType="dataset"
+							resourceId={datasetId}
+						/>
 					</TabPanel>
 					<TabPanel value={selectedTabIndex} index={3}>
 						<DisplayListenerMetadata
@@ -416,9 +379,9 @@ export const PublicDataset = (): JSX.Element => {
 					<TabPanel value={selectedTabIndex} index={5}>
 						<ExtractionHistoryTab datasetId={datasetId} />
 					</TabPanel>
-					<TabPanel value={selectedTabIndex} index={6}>
-						<SharingTab datasetId={datasetId} />
-					</TabPanel>
+					{/*<TabPanel value={selectedTabIndex} index={6}>*/}
+					{/*	<SharingTab datasetId={datasetId} />*/}
+					{/*</TabPanel>*/}
 					<Box display="flex" justifyContent="center" sx={{ m: 1 }}>
 						<ButtonGroup
 								variant="contained"
