@@ -8,7 +8,7 @@ import {
 	useParams,
 } from "react-router-dom";
 import { Dataset as DatasetComponent } from "./components/datasets/Dataset";
-import {PublicDataset as PublicDatasetComponent} from "./components/datasets/public/PublicDataset";
+import {PublicDataset as PublicDatasetComponent} from "./components/datasets/PublicDataset";
 import { File as FileComponent } from "./components/files/File";
 import { CreateDataset } from "./components/datasets/CreateDataset";
 import { Groups as GroupListComponent } from "./components/groups/Groups";

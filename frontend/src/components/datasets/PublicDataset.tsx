@@ -11,6 +11,14 @@ import {
 } from "../../actions/dataset";
 import { fetchFolderPath } from "../../actions/folder";
 
+import {
+	fetchPublicDatasetAbout,
+	fetchFilesInPublicDataset,
+	fetchFoldersInPublicDataset,
+} from "../../actions/public_dataset";
+
+import { fetchPublicFolderPath } from "../../actions/folder";
+
 import { a11yProps, TabPanel } from "../tabs/TabComponent";
 import FilesTable from "../files/FilesTable";
 import { MetadataIn } from "../../openapi/v2";
