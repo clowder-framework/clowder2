@@ -50,6 +50,7 @@ import { PageNotFound } from "../errors/PageNotFound";
 import { ErrorModal } from "../errors/ErrorModal";
 import { Visualization } from "../visualizations/Visualization";
 import VisibilityIcon from "@mui/icons-material/Visibility";
+import {UserMetadataTabPanel} from "../metadata/UserMetadataTabPanel";
 
 export const PublicDataset = (): JSX.Element => {
 	// path parameter
@@ -317,14 +318,14 @@ export const PublicDataset = (): JSX.Element => {
 							{...a11yProps(3)}
 							disabled={false}
 						/>
-						{/*<Tab*/}
-						{/*	icon={<BuildIcon />}*/}
-						{/*	iconPosition="start"*/}
-						{/*	sx={TabStyle}*/}
-						{/*	label="Extract"*/}
-						{/*	{...a11yProps(4)}*/}
-						{/*	disabled={false}*/}
-						{/*/>*/}
+						<Tab
+							icon={<BuildIcon />}
+							iconPosition="start"
+							sx={TabStyle}
+							label="Extract"
+							{...a11yProps(4)}
+							disabled={false}
+						/>
 						<Tab
 							icon={<HistoryIcon />}
 							iconPosition="start"
@@ -333,14 +334,14 @@ export const PublicDataset = (): JSX.Element => {
 							{...a11yProps(5)}
 							disabled={false}
 						/>
-						{/*<Tab*/}
-						{/*	icon={<ShareIcon />}*/}
-						{/*	iconPosition="start"*/}
-						{/*	sx={TabStyle}*/}
-						{/*	label="Sharing"*/}
-						{/*	{...a11yProps(6)}*/}
-						{/*	disabled={false}*/}
-						{/*/>*/}
+						<Tab
+							icon={<ShareIcon />}
+							iconPosition="start"
+							sx={TabStyle}
+							label="Sharing"
+							{...a11yProps(6)}
+							disabled={false}
+						/>
 					</Tabs>
 					<TabPanel value={selectedTabIndex} index={0}>
 						{folderId !== null ? (
