@@ -31,7 +31,7 @@ from rocrate.rocrate import ROCrate
 
 from app import dependencies
 from app.config import settings
-from app.deps.authorization_deps import Authorization
+from app.deps.authorization_deps import Authorization, CheckStatus
 from app.keycloak_auth import (
     get_token,
     get_user,
@@ -45,6 +45,7 @@ from app.models.datasets import (
     DatasetOut,
     DatasetPatch,
     DatasetDBViewList,
+    DatasetStatus,
 )
 from app.models.files import FileOut, FileDB, FileDBViewList
 from app.models.folders import FolderOut, FolderIn, FolderDB, FolderDBViewList
@@ -222,6 +223,7 @@ async def get_datasets(
             Or(
                 DatasetDBViewList.creator.email == user_id,
                 DatasetDBViewList.auth.user_ids == user_id,
+                DatasetDBViewList.status == DatasetStatus.AUTHENTICATED.name,
             ),
             sort=(-DatasetDBViewList.created),
             skip=skip,
@@ -234,6 +236,7 @@ async def get_datasets(
 @router.get("/{dataset_id}", response_model=DatasetOut)
 async def get_dataset(
     dataset_id: str,
+    authenticated: bool = Depends(CheckStatus("AUTHENTICATED")),
     allow: bool = Depends(Authorization("viewer")),
 ):
     if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
@@ -245,18 +248,24 @@ async def get_dataset(
 async def get_dataset_files(
     dataset_id: str,
     folder_id: Optional[str] = None,
-    user_id=Depends(get_user),
+    authenticated: bool = Depends(CheckStatus("AUTHENTICATED")),
     allow: bool = Depends(Authorization("viewer")),
+    user_id=Depends(get_user),
     skip: int = 0,
     limit: int = 10,
 ):
-    query = [
-        FileDBViewList.dataset_id == ObjectId(dataset_id),
-        Or(
-            FileDBViewList.creator.email == user_id,
-            FileDBViewList.auth.user_ids == user_id,
-        ),
-    ]
+    if authenticated:
+        query = [
+            FileDBViewList.dataset_id == ObjectId(dataset_id),
+        ]
+    else:
+        query = [
+            FileDBViewList.dataset_id == ObjectId(dataset_id),
+            Or(
+                FileDBViewList.creator.email == user_id,
+                FileDBViewList.auth.user_ids == user_id,
+            ),
+        ]
     if folder_id is not None:
         query.append(FileDBViewList.folder_id == ObjectId(folder_id))
     files = await FileDBViewList.find(*query).skip(skip).limit(limit).to_list()
@@ -297,6 +306,8 @@ async def patch_dataset(
             dataset.name = dataset_info.name
         if dataset_info.description is not None:
             dataset.description = dataset_info.description
+        if dataset_info.status is not None:
+            dataset.status = dataset_info.status
         dataset.modified = datetime.datetime.utcnow()
         await dataset.save()
 
@@ -362,17 +373,23 @@ async def get_dataset_folders(
     parent_folder: Optional[str] = None,
     user_id=Depends(get_user),
     allow: bool = Depends(Authorization("viewer")),
+    authenticated: bool = Depends(CheckStatus("authenticated")),
     skip: int = 0,
     limit: int = 10,
 ):
     if (await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
-        query = [
-            FolderDBViewList.dataset_id == ObjectId(dataset_id),
-            Or(
-                FolderDBViewList.creator.email == user_id,
-                FolderDBViewList.auth.user_ids == user_id,
-            ),
-        ]
+        if authenticated:
+            query = [
+                FolderDBViewList.dataset_id == ObjectId(dataset_id),
+            ]
+        else:
+            query = [
+                FolderDBViewList.dataset_id == ObjectId(dataset_id),
+                Or(
+                    FolderDBViewList.creator.email == user_id,
+                    FolderDBViewList.auth.user_ids == user_id,
+                ),
+            ]
         if parent_folder is not None:
             query.append(FolderDBViewList.parent_folder == ObjectId(parent_folder))
         else:
