@@ -1,14 +1,15 @@
 import React from "react";
-import { Box, Button, IconButton, Typography } from "@mui/material";
-import { ExtractorInfo } from "../../openapi/v2";
+import { Box, Button, IconButton, Tooltip, Typography } from "@mui/material";
+import { EventListenerOut } from "../../openapi/v2";
 import { theme } from "../../theme";
 import PlayCircleIcon from "@mui/icons-material/PlayCircle";
+import FiberManualRecordIcon from "@mui/icons-material/FiberManualRecord";
 
 type ListenerCardProps = {
 	id: string;
 	fileId: string;
 	datasetId: string;
-	extractorInfo: ExtractorInfo;
+	extractor: EventListenerOut;
 	extractorName: string;
 	extractorDescription: string;
 	setOpenSubmitExtraction: any;
@@ -20,7 +21,7 @@ export default function ListenerItem(props: ListenerCardProps) {
 		id,
 		fileId,
 		datasetId,
-		extractorInfo,
+		extractor,
 		extractorName,
 		extractorDescription,
 		setOpenSubmitExtraction,
@@ -29,27 +30,59 @@ export default function ListenerItem(props: ListenerCardProps) {
 
 	return (
 		<Box key={id} sx={{ display: "flex" }}>
-			<Box sx={{ flexGrow: 1 }}>
+			<Box>
+				{!(fileId !== undefined || datasetId !== undefined) ||
+				!extractor["alive"] ? (
+					<Tooltip title="Extractor Offline">
+						<FiberManualRecordIcon
+							color="error"
+							fontSize="small"
+							sx={{ verticalAlign: "middle" }}
+						/>
+					</Tooltip>
+				) : (
+					<Tooltip title="Extractor Alive">
+						<FiberManualRecordIcon
+							color="success"
+							fontSize="small"
+							sx={{ verticalAlign: "middle" }}
+						/>
+					</Tooltip>
+				)}
 				<Button
 					disabled={
-						fileId !== undefined || datasetId !== undefined ? false : true
+						!(fileId !== undefined || datasetId !== undefined) ||
+						!extractor["alive"]
 					}
 					onClick={() => {
 						setOpenSubmitExtraction(true);
-						setSelectedExtractor(extractorInfo);
+						setSelectedExtractor(extractor);
 					}}
 				>
 					{extractorName}
 				</Button>
-				<Typography
-					sx={{
-						padding: "0.5em",
-						color: theme.palette.primary.light,
-						fontSize: "14px",
-					}}
-				>
-					{extractorDescription}
-				</Typography>
+				{!(fileId !== undefined || datasetId !== undefined) ||
+				!extractor["alive"] ? (
+					<Typography
+						sx={{
+							padding: "0.5em",
+							color: "rgba(0, 0, 0, 0.26)",
+							fontSize: "14px",
+						}}
+					>
+						{extractorDescription}
+					</Typography>
+				) : (
+					<Typography
+						sx={{
+							padding: "0.5em",
+							color: theme.palette.primary.light,
+							fontSize: "14px",
+						}}
+					>
+						{extractorDescription}
+					</Typography>
+				)}
 			</Box>
 			<Box
 				sx={{
@@ -62,11 +95,12 @@ export default function ListenerItem(props: ListenerCardProps) {
 				<IconButton
 					color="primary"
 					disabled={
-						fileId !== undefined || datasetId !== undefined ? false : true
+						!(fileId !== undefined || datasetId !== undefined) ||
+						!extractor["alive"]
 					}
 					onClick={() => {
 						setOpenSubmitExtraction(true);
-						setSelectedExtractor(extractorInfo);
+						setSelectedExtractor(extractor);
 					}}
 				>
 					<PlayCircleIcon />

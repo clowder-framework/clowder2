@@ -74,6 +74,23 @@ async def _process_incoming_v1_extractor_info(
         return new_feed
 
 
+async def _check_livelihood(
+    listener: EventListenerDB, heartbeat_interval=settings.listener_heartbeat_interval
+):
+    if heartbeat_interval == 0:
+        heartbeat_interval = settings.listener_heartbeat_interval
+
+    if listener.lastAlive is None:
+        return False
+
+    now = datetime.datetime.utcnow()
+    elapsed = now - listener.lastAlive
+    if elapsed.total_seconds() > heartbeat_interval:
+        return False
+    else:
+        return True
+
+
 @router.get("/instance")
 async def get_instance_id(
     user=Depends(get_current_user),
@@ -150,7 +167,11 @@ async def save_legacy_listener(
 
 @router.get("/search", response_model=List[EventListenerOut])
 async def search_listeners(
-    text: str = "", skip: int = 0, limit: int = 2, user=Depends(get_current_username)
+    text: str = "",
+    skip: int = 0,
+    limit: int = 2,
+    heartbeat_interval: Optional[int] = settings.listener_heartbeat_interval,
+    user=Depends(get_current_username),
 ):
     """Search all Event Listeners in the db based on text.
 
@@ -171,7 +192,14 @@ async def search_listeners(
         .limit(limit)
         .to_list()
     )
-    return [listener.dict() for listener in listeners]
+
+    # batch return listener statuses for easy consumption
+    listenerResponse = []
+    for listener in listeners:
+        listener.alive = await _check_livelihood(listener, heartbeat_interval)
+        listenerResponse.append(listener.dict())
+
+    return listenerResponse
 
 
 @router.get("/categories", response_model=List[str])
@@ -196,11 +224,26 @@ async def get_listener(listener_id: str, user=Depends(get_current_username)):
     raise HTTPException(status_code=404, detail=f"listener {listener_id} not found")
 
 
+@router.get("/{listener_id}/status", response_model=bool)
+async def check_listener_livelihood(
+    listener_id: str,
+    heartbeat_interval: Optional[int] = settings.listener_heartbeat_interval,
+    user=Depends(get_current_username),
+):
+    """Return JSON information about an Event Listener if it exists."""
+    if (
+        listener := await EventListenerDB.get(PydanticObjectId(listener_id))
+    ) is not None:
+        return await _check_livelihood(listener, heartbeat_interval)
+    raise HTTPException(status_code=404, detail=f"listener {listener_id} not found")
+
+
 @router.get("", response_model=List[EventListenerOut])
 async def get_listeners(
     user_id=Depends(get_current_username),
     skip: int = 0,
     limit: int = 2,
+    heartbeat_interval: Optional[int] = settings.listener_heartbeat_interval,
     category: Optional[str] = None,
     label: Optional[str] = None,
 ):
@@ -219,7 +262,14 @@ async def get_listeners(
         query.append(EventListenerDB.properties.default_labels == label)
 
     listeners = await EventListenerDB.find(*query, skip=skip, limit=limit).to_list()
-    return [listener.dict() for listener in listeners]
+
+    # batch return listener statuses for easy consumption
+    listenerResponse = []
+    for listener in listeners:
+        listener.alive = await _check_livelihood(listener, heartbeat_interval)
+        listenerResponse.append(listener.dict())
+
+    return listenerResponse
 
 
 @router.put("/{listener_id}", response_model=EventListenerOut)

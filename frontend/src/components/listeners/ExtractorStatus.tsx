@@ -129,7 +129,7 @@ export default function ExtractorStatus(props: { job_id: any }) {
 				jobSummaryFetch(job_id);
 				jobUpdatesFetch(job_id);
 			}
-		}, config.extractorInterval);
+		}, config.extractorStatusInterval);
 
 		return () => clearInterval(interval);
 	}, [job_id]);
