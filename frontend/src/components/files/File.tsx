@@ -60,23 +60,25 @@ export const File = (): JSX.Element => {
 	const folderId = searchParams.get("folder");
 	const datasetId = searchParams.get("dataset");
 
+	const adminMode = useSelector((state: RootState) => state.user.adminMode)
+
 	const listDatasetAbout = (datasetId: string | undefined) =>
-		dispatch(fetchDatasetAbout(datasetId));
+		dispatch(fetchDatasetAbout(datasetId, adminMode));
 	const about = useSelector((state: RootState) => state.dataset.about);
 
 	const dispatch = useDispatch();
 	const listFileSummary = (fileId: string | undefined) =>
-		dispatch(fetchFileSummary(fileId));
+		dispatch(fetchFileSummary(fileId, adminMode));
 	const listFileVersions = (fileId: string | undefined) =>
-		dispatch(fetchFileVersions(fileId));
+		dispatch(fetchFileVersions(fileId, adminMode));
 	const listFileMetadata = (fileId: string | undefined) =>
-		dispatch(fetchFileMetadata(fileId));
+		dispatch(fetchFileMetadata(fileId, adminMode));
 	const createFileMetadata = (fileId: string | undefined, metadata: object) =>
 		dispatch(createFileMetadataAction(fileId, metadata));
 	const updateFileMetadata = (fileId: string | undefined, metadata: object) =>
 		dispatch(patchFileMetadataAction(fileId, metadata));
 	const deleteFileMetadata = (fileId: string | undefined, metadata: object) =>
-		dispatch(deleteFileMetadataAction(fileId, metadata));
+		dispatch(deleteFileMetadataAction(fileId, adminMode, metadata));
 	const getFolderPath = (folderId: string | null) =>
 		dispatch(fetchFolderPath(folderId));
 

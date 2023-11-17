@@ -206,13 +206,14 @@ async def save_dataset(
 
 @router.get("", response_model=List[DatasetOut])
 async def get_datasets(
+    admin_mode: bool = False,
     user_id=Depends(get_user),
     skip: int = 0,
     limit: int = 10,
     mine: bool = False,
     admin=Depends(get_admin),
 ):
-    if admin:
+    if admin_mode and admin:
         datasets = await DatasetDBViewList.find(
             sort=(-DatasetDBViewList.created),
             skip=skip,
@@ -242,6 +243,7 @@ async def get_datasets(
 @router.get("/{dataset_id}", response_model=DatasetOut)
 async def get_dataset(
     dataset_id: str,
+    admin_mode: bool = False,
     allow: bool = Depends(Authorization("viewer")),
 ):
     if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
@@ -252,11 +254,12 @@ async def get_dataset(
 @router.get("/{dataset_id}/files", response_model=List[FileOut])
 async def get_dataset_files(
     dataset_id: str,
+    admin_mode: bool = False,
     folder_id: Optional[str] = None,
     user_id=Depends(get_user),
-    allow: bool = Depends(Authorization("viewer")),
     skip: int = 0,
     limit: int = 10,
+    allow: bool = Depends(Authorization("viewer")),
 ):
     query = [
         FileDBViewList.dataset_id == ObjectId(dataset_id),
@@ -275,6 +278,7 @@ async def get_dataset_files(
 async def edit_dataset(
     dataset_id: str,
     dataset_info: DatasetBase,
+    admin_mode: bool = False,
     user=Depends(get_current_user),
     es=Depends(dependencies.get_elasticsearchclient),
     allow: bool = Depends(Authorization("editor")),
@@ -295,6 +299,7 @@ async def edit_dataset(
 async def patch_dataset(
     dataset_id: str,
     dataset_info: DatasetPatch,
+    admin_mode: bool = False,
     user=Depends(get_current_user),
     es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
     allow: bool = Depends(Authorization("editor")),
@@ -316,6 +321,7 @@ async def patch_dataset(
 @router.delete("/{dataset_id}")
 async def delete_dataset(
     dataset_id: str,
+    admin_mode: bool = False,
     fs: Minio = Depends(dependencies.get_fs),
     es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
     allow: bool = Depends(Authorization("editor")),
@@ -346,6 +352,7 @@ async def delete_dataset(
 async def add_folder(
     dataset_id: str,
     folder_in: FolderIn,
+    admin_mode: bool = False,
     user=Depends(get_current_user),
     allow: bool = Depends(Authorization("uploader")),
 ):
@@ -367,11 +374,12 @@ async def add_folder(
 @router.get("/{dataset_id}/folders", response_model=List[FolderOut])
 async def get_dataset_folders(
     dataset_id: str,
+    admin_mode: bool = False,
     parent_folder: Optional[str] = None,
     user_id=Depends(get_user),
-    allow: bool = Depends(Authorization("viewer")),
     skip: int = 0,
     limit: int = 10,
+    allow: bool = Depends(Authorization("viewer")),
 ):
     if (await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
         query = [
@@ -394,6 +402,7 @@ async def get_dataset_folders(
 async def delete_folder(
     dataset_id: str,
     folder_id: str,
+    admin_mode: bool = False,
     fs: Minio = Depends(dependencies.get_fs),
     es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
     allow: bool = Depends(Authorization("editor")),
@@ -436,6 +445,7 @@ async def save_file(
     user=Depends(get_current_user),
     fs: Minio = Depends(dependencies.get_fs),
     file: UploadFile = File(...),
+    admin_mode: bool = False,
     es=Depends(dependencies.get_elasticsearchclient),
     rabbitmq_client: BlockingChannel = Depends(dependencies.get_rabbitmq),
     allow: bool = Depends(Authorization("uploader")),
@@ -473,6 +483,7 @@ async def save_file(
 async def save_files(
     dataset_id: str,
     files: List[UploadFile],
+    admin_mode: bool = False,
     folder_id: Optional[str] = None,
     user=Depends(get_current_user),
     fs: Minio = Depends(dependencies.get_fs),
@@ -593,6 +604,7 @@ async def create_dataset_from_zip(
 @router.get("/{dataset_id}/download", response_model=DatasetOut)
 async def download_dataset(
     dataset_id: str,
+    admin_mode: bool = False,
     user=Depends(get_current_user),
     fs: Minio = Depends(dependencies.get_fs),
     allow: bool = Depends(Authorization("viewer")),
@@ -753,6 +765,7 @@ async def get_dataset_extract(
     dataset_id: str,
     extractorName: str,
     request: Request,
+    admin_mode: bool = False,
     # parameters don't have a fixed model shape
     parameters: dict = None,
     user=Depends(get_current_user),
@@ -778,6 +791,7 @@ async def get_dataset_extract(
 @router.get("/{dataset_id}/thumbnail")
 async def download_dataset_thumbnail(
     dataset_id: str,
+    admin_mode: bool = False,
     fs: Minio = Depends(dependencies.get_fs),
     allow: bool = Depends(Authorization("viewer")),
 ):
@@ -806,6 +820,7 @@ async def download_dataset_thumbnail(
 async def add_dataset_thumbnail(
     dataset_id: str,
     thumbnail_id: str,
+    admin_mode: bool = False,
     allow: bool = Depends(Authorization("editor")),
 ):
     if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:

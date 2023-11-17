@@ -44,14 +44,17 @@ export default function ShareGroupDatasetModal(
 	const dispatch = useDispatch();
 	const listGroups = () => dispatch(fetchGroups(0, 21));
 	const groups = useSelector((state: RootState) => state.group.groups);
+	const adminMode = useSelector(
+		(state: RootState) => state.user.adminMode
+	);
 	const setGroupRole = async (
 		datasetId: string,
 		groupId: string,
 		role: string
-	) => dispatch(setDatasetGroupRole(datasetId, groupId, role));
+	) => dispatch(setDatasetGroupRole(datasetId, groupId, role, adminMode));
 
 	const getRoles = (datasetId: string | undefined) =>
-		dispatch(fetchDatasetRoles(datasetId));
+		dispatch(fetchDatasetRoles(datasetId, adminMode));
 
 	// component did mount
 	useEffect(() => {

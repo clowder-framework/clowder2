@@ -42,12 +42,13 @@ export default function SubmitExtraction(props: SubmitExtractionProps) {
 
 	const {fileId, datasetId, open, handleClose, selectedExtractor} = props;
 	const dispatch = useDispatch();
+	const adminMode = useSelector((state: RootState) => state.user.adminMode);
 
 	const submitFileExtraction =
-		(fileId: string | undefined, extractorName: string | undefined, requestBody: FormData) => dispatch(submitFileExtractionAction(fileId, extractorName, requestBody));
+		(fileId: string | undefined, extractorName: string | undefined, requestBody: FormData) => dispatch(submitFileExtractionAction(fileId, extractorName, adminMode, requestBody));
 	const submitDatasetExtraction =
 		(datasetId: string | undefined, extractorName: string | undefined, requestBody: FormData) => dispatch(submitDatasetExtractionAction(datasetId, extractorName, requestBody));
-   
+
 	const job_id = useSelector((state: RootState) => state.listener.currJobId);
 
 	const onSubmit = (formData: FormData) => {

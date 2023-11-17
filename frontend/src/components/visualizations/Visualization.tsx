@@ -28,10 +28,13 @@ export const Visualization = (props: previewProps) => {
 	const visConfig = useSelector(
 		(state: RootState) => state.visualization.visConfig
 	);
+	const adminMode = useSelector(
+		(state: RootState) => state.user.adminMode
+	);
 
 	const dispatch = useDispatch();
 	const listFileSummary = (fileId: string | undefined) =>
-		dispatch(fetchFileSummary(fileId));
+		dispatch(fetchFileSummary(fileId, adminMode));
 
 	const getVisConfig = (resourceId: string | undefined) =>
 		dispatch(getVisConfigAction(resourceId));

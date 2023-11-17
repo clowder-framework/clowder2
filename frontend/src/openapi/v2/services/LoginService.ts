@@ -50,6 +50,27 @@ export class LoginService {
     }
 
     /**
+     * Get Admin
+     * @param datasetId
+     * @returns any Successful Response
+     * @throws ApiError
+     */
+    public static getAdminApiV2AdminGet(
+        datasetId?: string,
+    ): CancelablePromise<any> {
+        return __request({
+            method: 'GET',
+            path: `/api/v2/admin`,
+            query: {
+                'dataset_id': datasetId,
+            },
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+
+    /**
      * Set Admin
      * @param useremail
      * @param datasetId

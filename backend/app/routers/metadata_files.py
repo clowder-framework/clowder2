@@ -105,6 +105,7 @@ async def _build_metadata_db_obj(
 async def add_file_metadata(
     metadata_in: MetadataIn,
     file_id: str,
+    admin_mode: bool = False,
     user=Depends(get_current_user),
     es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
     allow: bool = Depends(FileAuthorization("uploader")),
@@ -157,6 +158,7 @@ async def add_file_metadata(
 async def replace_file_metadata(
     metadata_in: MetadataPatch,
     file_id: str,
+    admin_mode: bool = False,
     user=Depends(get_current_user),
     es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
     allow: bool = Depends(FileAuthorization("editor")),
@@ -230,6 +232,7 @@ async def replace_file_metadata(
 async def update_file_metadata(
     metadata_in: MetadataPatch,
     file_id: str,
+    admin_mode: bool = False,
     user=Depends(get_current_user),
     es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
     allow: bool = Depends(FileAuthorization("editor")),
@@ -326,6 +329,7 @@ async def update_file_metadata(
 @router.get("/{file_id}/metadata", response_model=List[MetadataOut])
 async def get_file_metadata(
     file_id: str,
+    admin_mode: bool = False,
     version: Optional[int] = None,
     all_versions: Optional[bool] = False,
     definition: Optional[str] = Form(None),
@@ -385,6 +389,7 @@ async def get_file_metadata(
 async def delete_file_metadata(
     metadata_in: MetadataDelete,
     file_id: str,
+    admin_mode: bool = False,
     # version: Optional[int] = Form(None),
     user=Depends(get_current_user),
     es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),

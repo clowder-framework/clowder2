@@ -93,18 +93,21 @@ export class GroupsService {
     /**
      * Get Group
      * @param groupId
+     * @param adminMode
      * @param datasetId
      * @returns GroupOut Successful Response
      * @throws ApiError
      */
     public static getGroupApiV2GroupsGroupIdGet(
         groupId: string,
+        adminMode: boolean = false,
         datasetId?: string,
     ): CancelablePromise<GroupOut> {
         return __request({
             method: 'GET',
             path: `/api/v2/groups/${groupId}`,
             query: {
+                'admin_mode': adminMode,
                 'dataset_id': datasetId,
             },
             errors: {
@@ -117,6 +120,7 @@ export class GroupsService {
      * Edit Group
      * @param groupId
      * @param requestBody
+     * @param adminMode
      * @param datasetId
      * @returns GroupOut Successful Response
      * @throws ApiError
@@ -124,12 +128,14 @@ export class GroupsService {
     public static editGroupApiV2GroupsGroupIdPut(
         groupId: string,
         requestBody: GroupBase,
+        adminMode: boolean = false,
         datasetId?: string,
     ): CancelablePromise<GroupOut> {
         return __request({
             method: 'PUT',
             path: `/api/v2/groups/${groupId}`,
             query: {
+                'admin_mode': adminMode,
                 'dataset_id': datasetId,
             },
             body: requestBody,
@@ -143,18 +149,21 @@ export class GroupsService {
     /**
      * Delete Group
      * @param groupId
+     * @param adminMode
      * @param datasetId
      * @returns GroupOut Successful Response
      * @throws ApiError
      */
     public static deleteGroupApiV2GroupsGroupIdDelete(
         groupId: string,
+        adminMode: boolean = false,
         datasetId?: string,
     ): CancelablePromise<GroupOut> {
         return __request({
             method: 'DELETE',
             path: `/api/v2/groups/${groupId}`,
             query: {
+                'admin_mode': adminMode,
                 'dataset_id': datasetId,
             },
             errors: {
@@ -168,6 +177,7 @@ export class GroupsService {
      * Add a new user to a group.
      * @param groupId
      * @param username
+     * @param adminMode
      * @param role
      * @param datasetId
      * @returns GroupOut Successful Response
@@ -176,6 +186,7 @@ export class GroupsService {
     public static addMemberApiV2GroupsGroupIdAddUsernamePost(
         groupId: string,
         username: string,
+        adminMode: boolean = false,
         role?: string,
         datasetId?: string,
     ): CancelablePromise<GroupOut> {
@@ -183,6 +194,7 @@ export class GroupsService {
             method: 'POST',
             path: `/api/v2/groups/${groupId}/add/${username}`,
             query: {
+                'admin_mode': adminMode,
                 'role': role,
                 'dataset_id': datasetId,
             },
@@ -197,6 +209,7 @@ export class GroupsService {
      * Remove a user from a group.
      * @param groupId
      * @param username
+     * @param adminMode
      * @param datasetId
      * @returns GroupOut Successful Response
      * @throws ApiError
@@ -204,12 +217,14 @@ export class GroupsService {
     public static removeMemberApiV2GroupsGroupIdRemoveUsernamePost(
         groupId: string,
         username: string,
+        adminMode: boolean = false,
         datasetId?: string,
     ): CancelablePromise<GroupOut> {
         return __request({
             method: 'POST',
             path: `/api/v2/groups/${groupId}/remove/${username}`,
             query: {
+                'admin_mode': adminMode,
                 'dataset_id': datasetId,
             },
             errors: {
@@ -224,6 +239,7 @@ export class GroupsService {
      * @param groupId
      * @param username
      * @param role
+     * @param adminMode
      * @param datasetId
      * @returns GroupOut Successful Response
      * @throws ApiError
@@ -232,6 +248,7 @@ export class GroupsService {
         groupId: string,
         username: string,
         role: string,
+        adminMode: boolean = false,
         datasetId?: string,
     ): CancelablePromise<GroupOut> {
         return __request({
@@ -239,6 +256,7 @@ export class GroupsService {
             path: `/api/v2/groups/${groupId}/update/${username}`,
             query: {
                 'role': role,
+                'admin_mode': adminMode,
                 'dataset_id': datasetId,
             },
             errors: {

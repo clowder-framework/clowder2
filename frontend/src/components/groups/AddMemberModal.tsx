@@ -33,10 +33,12 @@ export default function AddMemberModal(props: AddMemberModalProps) {
 	const prefixSearchAllUsers = (text: string, skip: number, limit: number) =>
 		dispatch(prefixSearchAllUsersAction(text, skip, limit));
 
+	const adminMode = useSelector((state : RootState) => state.user.adminMode);
+
 	const groupMemberAdded = (
 		groupId: string | undefined,
 		username: string | undefined
-	) => dispatch(addGroupMember(groupId, username));
+	) => dispatch(addGroupMember(groupId, username, adminMode));
 	const users = useSelector((state: RootState) => state.group.users);
 
 	const [email, setEmail] = useState("");

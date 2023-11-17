@@ -12,6 +12,7 @@ export class FilesService {
     /**
      * Download File
      * @param fileId
+     * @param adminMode
      * @param version
      * @param increment
      * @param datasetId
@@ -20,6 +21,7 @@ export class FilesService {
      */
     public static downloadFileApiV2FilesFileIdGet(
         fileId: string,
+        adminMode: boolean = false,
         version?: number,
         increment: boolean = true,
         datasetId?: string,
@@ -28,6 +30,7 @@ export class FilesService {
             method: 'GET',
             path: `/api/v2/files/${fileId}`,
             query: {
+                'admin_mode': adminMode,
                 'version': version,
                 'increment': increment,
                 'dataset_id': datasetId,
@@ -42,6 +45,7 @@ export class FilesService {
      * Update File
      * @param fileId
      * @param formData
+     * @param adminMode
      * @param datasetId
      * @returns FileOut Successful Response
      * @throws ApiError
@@ -49,12 +53,14 @@ export class FilesService {
     public static updateFileApiV2FilesFileIdPut(
         fileId: string,
         formData: Body_update_file_api_v2_files__file_id__put,
+        adminMode: boolean = false,
         datasetId?: string,
     ): CancelablePromise<FileOut> {
         return __request({
             method: 'PUT',
             path: `/api/v2/files/${fileId}`,
             query: {
+                'admin_mode': adminMode,
                 'dataset_id': datasetId,
             },
             formData: formData,
@@ -68,18 +74,21 @@ export class FilesService {
     /**
      * Delete File
      * @param fileId
+     * @param adminMode
      * @param datasetId
      * @returns any Successful Response
      * @throws ApiError
      */
     public static deleteFileApiV2FilesFileIdDelete(
         fileId: string,
+        adminMode: boolean = false,
         datasetId?: string,
     ): CancelablePromise<any> {
         return __request({
             method: 'DELETE',
             path: `/api/v2/files/${fileId}`,
             query: {
+                'admin_mode': adminMode,
                 'dataset_id': datasetId,
             },
             errors: {
@@ -91,6 +100,7 @@ export class FilesService {
     /**
      * Download File Url
      * @param fileId
+     * @param adminMode
      * @param version
      * @param expiresInSeconds
      * @param datasetId
@@ -99,6 +109,7 @@ export class FilesService {
      */
     public static downloadFileUrlApiV2FilesFileIdUrlGet(
         fileId: string,
+        adminMode: boolean = false,
         version?: number,
         expiresInSeconds: number = 3600,
         datasetId?: string,
@@ -107,6 +118,7 @@ export class FilesService {
             method: 'GET',
             path: `/api/v2/files/${fileId}/url/`,
             query: {
+                'admin_mode': adminMode,
                 'version': version,
                 'expires_in_seconds': expiresInSeconds,
                 'dataset_id': datasetId,
@@ -120,18 +132,21 @@ export class FilesService {
     /**
      * Get File Summary
      * @param fileId
+     * @param adminMode
      * @param datasetId
      * @returns FileOut Successful Response
      * @throws ApiError
      */
     public static getFileSummaryApiV2FilesFileIdSummaryGet(
         fileId: string,
+        adminMode: boolean = false,
         datasetId?: string,
     ): CancelablePromise<FileOut> {
         return __request({
             method: 'GET',
             path: `/api/v2/files/${fileId}/summary`,
             query: {
+                'admin_mode': adminMode,
                 'dataset_id': datasetId,
             },
             errors: {
@@ -143,6 +158,7 @@ export class FilesService {
     /**
      * Get File Version Details
      * @param fileId
+     * @param adminMode
      * @param versionNum
      * @param datasetId
      * @returns FileOut Successful Response
@@ -150,6 +166,7 @@ export class FilesService {
      */
     public static getFileVersionDetailsApiV2FilesFileIdVersionDetailsGet(
         fileId: string,
+        adminMode: boolean = false,
         versionNum?: number,
         datasetId?: string,
     ): CancelablePromise<FileOut> {
@@ -157,6 +174,7 @@ export class FilesService {
             method: 'GET',
             path: `/api/v2/files/${fileId}/version_details`,
             query: {
+                'admin_mode': adminMode,
                 'version_num': versionNum,
                 'dataset_id': datasetId,
             },
@@ -169,6 +187,7 @@ export class FilesService {
     /**
      * Get File Versions
      * @param fileId
+     * @param adminMode
      * @param skip
      * @param limit
      * @param datasetId
@@ -177,6 +196,7 @@ export class FilesService {
      */
     public static getFileVersionsApiV2FilesFileIdVersionsGet(
         fileId: string,
+        adminMode: boolean = false,
         skip?: number,
         limit: number = 20,
         datasetId?: string,
@@ -185,6 +205,7 @@ export class FilesService {
             method: 'GET',
             path: `/api/v2/files/${fileId}/versions`,
             query: {
+                'admin_mode': adminMode,
                 'skip': skip,
                 'limit': limit,
                 'dataset_id': datasetId,
@@ -199,6 +220,7 @@ export class FilesService {
      * Post File Extract
      * @param fileId
      * @param extractorName
+     * @param adminMode
      * @param datasetId
      * @param requestBody
      * @returns any Successful Response
@@ -207,6 +229,7 @@ export class FilesService {
     public static postFileExtractApiV2FilesFileIdExtractPost(
         fileId: string,
         extractorName: string,
+        adminMode: boolean = false,
         datasetId?: string,
         requestBody?: any,
     ): CancelablePromise<any> {
@@ -215,6 +238,7 @@ export class FilesService {
             path: `/api/v2/files/${fileId}/extract`,
             query: {
                 'extractorName': extractorName,
+                'admin_mode': adminMode,
                 'dataset_id': datasetId,
             },
             body: requestBody,
@@ -236,18 +260,21 @@ export class FilesService {
      * credentials: credentials of logged in user
      * rabbitmq_client: Rabbitmq Client
      * @param fileId
+     * @param adminMode
      * @param datasetId
      * @returns any Successful Response
      * @throws ApiError
      */
     public static resubmitFileExtractionsApiV2FilesFileIdResubmitExtractPost(
         fileId: string,
+        adminMode: boolean = false,
         datasetId?: string,
     ): CancelablePromise<any> {
         return __request({
             method: 'POST',
             path: `/api/v2/files/${fileId}/resubmit_extract`,
             query: {
+                'admin_mode': adminMode,
                 'dataset_id': datasetId,
             },
             errors: {
@@ -259,18 +286,21 @@ export class FilesService {
     /**
      * Download File Thumbnail
      * @param fileId
+     * @param adminMode
      * @param datasetId
      * @returns any Successful Response
      * @throws ApiError
      */
     public static downloadFileThumbnailApiV2FilesFileIdThumbnailGet(
         fileId: string,
+        adminMode: boolean = false,
         datasetId?: string,
     ): CancelablePromise<any> {
         return __request({
             method: 'GET',
             path: `/api/v2/files/${fileId}/thumbnail`,
             query: {
+                'admin_mode': adminMode,
                 'dataset_id': datasetId,
             },
             errors: {
@@ -283,6 +313,7 @@ export class FilesService {
      * Add File Thumbnail
      * @param fileId
      * @param thumbnailId
+     * @param adminMode
      * @param datasetId
      * @returns FileOut Successful Response
      * @throws ApiError
@@ -290,12 +321,14 @@ export class FilesService {
     public static addFileThumbnailApiV2FilesFileIdThumbnailThumbnailIdPatch(
         fileId: string,
         thumbnailId: string,
+        adminMode: boolean = false,
         datasetId?: string,
     ): CancelablePromise<FileOut> {
         return __request({
             method: 'PATCH',
             path: `/api/v2/files/${fileId}/thumbnail/${thumbnailId}`,
             query: {
+                'admin_mode': adminMode,
                 'dataset_id': datasetId,
             },
             errors: {

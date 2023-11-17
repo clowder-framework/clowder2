@@ -35,8 +35,9 @@ export function MembersTableUserEntry(props: MembersTableUserEntryProps) {
 	const {groupId, member, creatorEmail, setDeleteMemberConfirmOpen, setSelectMemberUsername} = props;
 
 	const dispatch = useDispatch();
+	const adminMode = useSelector((state : RootState) => state.user.adminMode);
 	const groupMemberRoleAssigned = (groupId: string|undefined, username: string|undefined,
-									 role: string|undefined) => dispatch(assignGroupMemberRole(groupId, username, role));
+									 role: string|undefined) => dispatch(assignGroupMemberRole(groupId, username, role, adminMode));
 	const role = useSelector((state: RootState) => state.group.role);
 
 	const [selectedRole, setSelectedRole] = useState(member.editor ? "editor": "member");

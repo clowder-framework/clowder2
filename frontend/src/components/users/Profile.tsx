@@ -42,7 +42,7 @@ export const Profile = (): JSX.Element => {
 									{profile.first_name} {profile.last_name}
 								</TableCell>
 								<TableCell align="right">{profile.email}</TableCell>
-								<TableCell align="right">{"false"}</TableCell>
+								{user.admin? <TableCell align="right">Admin</TableCell>: <TableCell align="right">Not admin</TableCell>}
 							</TableRow>
 						</TableBody>
 					</Table>

@@ -1,4 +1,5 @@
 import {
+	ADMIN, ADMIN_MODE,
 	DELETE_API_KEY,
 	GENERATE_API_KEY,
 	LIST_API_KEYS,
@@ -15,6 +16,8 @@ import { DataAction } from "../types/action";
 const defaultState: UserState = {
 	Authorization: null,
 	loginError: false,
+	admin: false,
+	adminMode: false,
 	registerSucceeded: false,
 	errorMsg: "",
 	hashedKey: "",
@@ -24,6 +27,15 @@ const defaultState: UserState = {
 
 const user = (state = defaultState, action: DataAction) => {
 	switch (action.type) {
+		case ADMIN_MODE:
+			console.log("the action is called: ", action.adminMode)
+;			return Object.assign({}, state, {
+				adminMode: action.adminMode
+			});
+		case ADMIN:
+			return Object.assign({}, state, {
+				admin: action.admin
+			});
 		case SET_USER:
 			return Object.assign({}, state, {
 				Authorization: action.Authorization,

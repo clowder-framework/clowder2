@@ -11,7 +11,9 @@ from app.search.connect import connect_elasticsearch, search_index
 router = APIRouter()
 
 
-def _add_permissions_clause(query, username: str, admin: bool = Depends(get_admin)):
+def _add_permissions_clause(
+    query, username: str, admin_mode: bool = False, admin: bool = Depends(get_admin)
+):
     """Append filter to Elasticsearch object that restricts permissions based on the requesting user."""
     # TODO: Add public filter once added
 
@@ -31,7 +33,7 @@ def _add_permissions_clause(query, username: str, admin: bool = Depends(get_admi
             continue  # last line
         json_content = json.loads(content)
         if "query" in json_content:
-            if admin:
+            if admin_mode and admin:
                 json_content["query"] = {"bool": {"must": [json_content["query"]]}}
             else:
                 json_content["query"] = {

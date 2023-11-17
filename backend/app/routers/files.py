@@ -178,6 +178,7 @@ async def remove_file_entry(
 @router.put("/{file_id}", response_model=FileOut)
 async def update_file(
     file_id: str,
+    admin_mode: bool = False,
     token=Depends(get_token),
     user=Depends(get_current_user),
     fs: Minio = Depends(dependencies.get_fs),
@@ -268,6 +269,7 @@ async def update_file(
 @router.get("/{file_id}")
 async def download_file(
     file_id: str,
+    admin_mode: bool = False,
     version: Optional[int] = None,
     increment: Optional[bool] = True,
     fs: Minio = Depends(dependencies.get_fs),
@@ -309,6 +311,7 @@ async def download_file(
 @router.get("/{file_id}/url/")
 async def download_file_url(
     file_id: str,
+    admin_mode: bool = False,
     version: Optional[int] = None,
     expires_in_seconds: Optional[int] = 3600,
     external_fs: Minio = Depends(dependencies.get_external_fs),
@@ -361,6 +364,7 @@ async def download_file_url(
 @router.delete("/{file_id}")
 async def delete_file(
     file_id: str,
+    admin_mode: bool = False,
     fs: Minio = Depends(dependencies.get_fs),
     es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
     allow: bool = Depends(FileAuthorization("editor")),
@@ -375,6 +379,7 @@ async def delete_file(
 @router.get("/{file_id}/summary", response_model=FileOut)
 async def get_file_summary(
     file_id: str,
+    admin_mode: bool = False,
     allow: bool = Depends(FileAuthorization("viewer")),
 ):
     if (file := await FileDB.get(PydanticObjectId(file_id))) is not None:
@@ -389,6 +394,7 @@ async def get_file_summary(
 @router.get("/{file_id}/version_details", response_model=FileOut)
 async def get_file_version_details(
     file_id: str,
+    admin_mode: bool = False,
     version_num: Optional[int] = 0,
     allow: bool = Depends(FileAuthorization("viewer")),
 ):
@@ -411,6 +417,7 @@ async def get_file_version_details(
 @router.get("/{file_id}/versions", response_model=List[FileVersion])
 async def get_file_versions(
     file_id: str,
+    admin_mode: bool = False,
     skip: int = 0,
     limit: int = 20,
     allow: bool = Depends(FileAuthorization("viewer")),
@@ -432,6 +439,7 @@ async def get_file_versions(
 async def post_file_extract(
     file_id: str,
     extractorName: str,
+    admin_mode: bool = False,
     # parameters don't have a fixed model shape
     parameters: dict = None,
     user=Depends(get_current_user),
@@ -463,6 +471,7 @@ async def post_file_extract(
 @router.post("/{file_id}/resubmit_extract")
 async def resubmit_file_extractions(
     file_id: str,
+    admin_mode: bool = False,
     user=Depends(get_current_user),
     credentials: HTTPAuthorizationCredentials = Security(security),
     rabbitmq_client: BlockingChannel = Depends(dependencies.get_rabbitmq),
@@ -489,6 +498,7 @@ async def resubmit_file_extractions(
 @router.get("/{file_id}/thumbnail")
 async def download_file_thumbnail(
     file_id: str,
+    admin_mode: bool = False,
     fs: Minio = Depends(dependencies.get_fs),
     allow: bool = Depends(FileAuthorization("viewer")),
 ):
@@ -514,6 +524,7 @@ async def download_file_thumbnail(
 async def add_file_thumbnail(
     file_id: str,
     thumbnail_id: str,
+    admin_mode: bool = False,
     allow: bool = Depends(FileAuthorization("editor")),
     es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
 ):

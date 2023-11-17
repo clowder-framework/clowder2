@@ -120,10 +120,11 @@ export function searchMetadataDefinitions(searchTerm, skip, limit) {
 
 export const RECEIVE_DATASET_METADATA = "RECEIVE_DATASET_METADATA";
 
-export function fetchDatasetMetadata(datasetId) {
+export function fetchDatasetMetadata(datasetId, adminMode) {
 	return (dispatch) => {
 		return V2.MetadataService.getDatasetMetadataApiV2DatasetsDatasetIdMetadataGet(
-			datasetId
+			datasetId,
+			adminMode
 		)
 			.then((json) => {
 				dispatch({
@@ -133,17 +134,18 @@ export function fetchDatasetMetadata(datasetId) {
 				});
 			})
 			.catch((reason) => {
-				dispatch(handleErrors(reason, fetchDatasetMetadata(datasetId)));
+				dispatch(handleErrors(reason, fetchDatasetMetadata(datasetId, adminMode)));
 			});
 	};
 }
 
 export const RECEIVE_FILE_METADATA = "RECEIVE_FILE_METADATA";
 
-export function fetchFileMetadata(fileId, version) {
+export function fetchFileMetadata(fileId, adminMode, version) {
 	return (dispatch) => {
 		return V2.MetadataService.getFileMetadataApiV2FilesFileIdMetadataGet(
 			fileId,
+			adminMode,
 			version,
 			false
 		)
@@ -155,17 +157,18 @@ export function fetchFileMetadata(fileId, version) {
 				});
 			})
 			.catch((reason) => {
-				dispatch(handleErrors(reason, fetchFileMetadata(fileId, version)));
+				dispatch(handleErrors(reason, fetchFileMetadata(fileId, adminMode, version)));
 			});
 	};
 }
 
 export const POST_DATASET_METADATA = "POST_DATASET_METADATA";
 
-export function postDatasetMetadata(datasetId, metadata) {
+export function postDatasetMetadata(datasetId, adminMode, metadata) {
 	return (dispatch) => {
 		return V2.MetadataService.addDatasetMetadataApiV2DatasetsDatasetIdMetadataPost(
 			datasetId,
+			adminMode,
 			metadata
 		)
 			.then((json) => {
@@ -177,7 +180,7 @@ export function postDatasetMetadata(datasetId, metadata) {
 			})
 			.catch((reason) => {
 				dispatch(
-					handleErrors(reason, postDatasetMetadata(datasetId, metadata))
+					handleErrors(reason, postDatasetMetadata(datasetId, adminMode, metadata))
 				);
 			});
 	};
@@ -185,10 +188,11 @@ export function postDatasetMetadata(datasetId, metadata) {
 
 export const POST_FILE_METADATA = "POST_FILE_METADATA";
 
-export function postFileMetadata(fileId, metadata) {
+export function postFileMetadata(fileId, adminMode, metadata) {
 	return (dispatch) => {
 		return V2.MetadataService.addFileMetadataApiV2FilesFileIdMetadataPost(
 			fileId,
+			adminMode,
 			metadata
 		)
 			.then((json) => {
@@ -199,17 +203,18 @@ export function postFileMetadata(fileId, metadata) {
 				});
 			})
 			.catch((reason) => {
-				dispatch(handleErrors(reason, postFileMetadata(fileId, metadata)));
+				dispatch(handleErrors(reason, postFileMetadata(fileId, adminMode, metadata)));
 			});
 	};
 }
 
 export const DELETE_DATASET_METADATA = "DELETE_DATASET_METADATA";
 
-export function deleteDatasetMetadata(datasetId, metadata) {
+export function deleteDatasetMetadata(datasetId, adminMode, metadata) {
 	return (dispatch) => {
 		return V2.MetadataService.deleteDatasetMetadataApiV2DatasetsDatasetIdMetadataDelete(
 			datasetId,
+			adminMode,
 			metadata
 		)
 			.then((json) => {
@@ -221,7 +226,7 @@ export function deleteDatasetMetadata(datasetId, metadata) {
 			})
 			.catch((reason) => {
 				dispatch(
-					handleErrors(reason, deleteDatasetMetadata(datasetId, metadata))
+					handleErrors(reason, deleteDatasetMetadata(datasetId, adminMode, metadata))
 				);
 			});
 	};
@@ -229,10 +234,11 @@ export function deleteDatasetMetadata(datasetId, metadata) {
 
 export const DELETE_FILE_METADATA = "DELETE_FILE_METADATA";
 
-export function deleteFileMetadata(fileId, metadata) {
+export function deleteFileMetadata(fileId, adminMode, metadata) {
 	return (dispatch) => {
 		return V2.MetadataService.deleteFileMetadataApiV2FilesFileIdMetadataDelete(
 			fileId,
+			adminMode,
 			metadata
 		)
 			.then((json) => {
@@ -243,17 +249,18 @@ export function deleteFileMetadata(fileId, metadata) {
 				});
 			})
 			.catch((reason) => {
-				dispatch(handleErrors(reason, deleteFileMetadata(fileId, metadata)));
+				dispatch(handleErrors(reason, deleteFileMetadata(fileId, adminMode, metadata)));
 			});
 	};
 }
 
 export const UPDATE_DATASET_METADATA = "UPDATE_DATASET_METADATA";
 
-export function patchDatasetMetadata(datasetId, metadata) {
+export function patchDatasetMetadata(datasetId, adminMode, metadata) {
 	return (dispatch) => {
 		return V2.MetadataService.updateDatasetMetadataApiV2DatasetsDatasetIdMetadataPatch(
 			datasetId,
+			adminMode,
 			metadata
 		)
 			.then((json) => {
@@ -265,7 +272,7 @@ export function patchDatasetMetadata(datasetId, metadata) {
 			})
 			.catch((reason) => {
 				dispatch(
-					handleErrors(reason, patchDatasetMetadata(datasetId, metadata))
+					handleErrors(reason, patchDatasetMetadata(datasetId, adminMode, metadata))
 				);
 			});
 	};
@@ -273,10 +280,11 @@ export function patchDatasetMetadata(datasetId, metadata) {
 
 export const UPDATE_FILE_METADATA = "UPDATE_FILE_METADATA";
 
-export function patchFileMetadata(fileId, metadata) {
+export function patchFileMetadata(fileId, adminMode, metadata) {
 	return (dispatch) => {
 		return V2.MetadataService.updateFileMetadataApiV2FilesFileIdMetadataPatch(
 			fileId,
+			adminMode,
 			metadata
 		)
 			.then((json) => {
@@ -287,7 +295,7 @@ export function patchFileMetadata(fileId, metadata) {
 				});
 			})
 			.catch((reason) => {
-				dispatch(handleErrors(reason, patchFileMetadata(fileId, metadata)));
+				dispatch(handleErrors(reason, patchFileMetadata(fileId, adminMode, metadata)));
 			});
 	};
 }

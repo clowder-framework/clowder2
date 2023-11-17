@@ -9,7 +9,7 @@ import { a11yProps, TabPanel } from "./tabs/TabComponent";
 import DatasetCard from "./datasets/DatasetCard";
 import { ArrowBack, ArrowForward } from "@material-ui/icons";
 import Layout from "./Layout";
-import { Link as RouterLink, useLocation } from "react-router-dom";
+import {Link as RouterLink, useLocation, useParams} from "react-router-dom";
 import { Listeners } from "./listeners/Listeners";
 import { ErrorModal } from "./errors/ErrorModal";
 
@@ -23,11 +23,15 @@ const tab = {
 export const Explore = (): JSX.Element => {
 	// Redux connect equivalent
 	const dispatch = useDispatch();
+	const adminMode = useSelector(
+		(state: RootState) => state.user.adminMode
+	);
 	const listDatasets = (
 		skip: number | undefined,
 		limit: number | undefined,
-		mine: boolean | undefined
-	) => dispatch(fetchDatasets(skip, limit, mine));
+		mine: boolean | undefined,
+		adminMode: boolean| undefined
+	) => dispatch(fetchDatasets(skip, limit, mine, adminMode));
 	const datasets = useSelector((state: RootState) => state.dataset.datasets);
 
 	// TODO add option to determine limit number; default show 5 datasets each time
@@ -35,14 +39,16 @@ export const Explore = (): JSX.Element => {
 	const [limit] = useState<number>(20);
 	const [skip, setSkip] = useState<number | undefined>();
 	// TODO add switch to turn on and off "mine" dataset
-	const [mine] = useState<boolean>(false);
+	const [mine] = useState<boolean>(true);
 	const [prevDisabled, setPrevDisabled] = useState<boolean>(true);
 	const [nextDisabled, setNextDisabled] = useState<boolean>(false);
 	const [selectedTabIndex, setSelectedTabIndex] = useState(0);
 	const [errorOpen, setErrorOpen] = useState(false);
 
+
 	// component did mount
 	useEffect(() => {
+		console.log("Rendered: ", adminMode);
 		listDatasets(0, limit, mine);
 	}, []);
 
@@ -60,6 +66,7 @@ export const Explore = (): JSX.Element => {
 	) => {
 		setSelectedTabIndex(newTabIndex);
 	};
+
 
 	// for pagination keep flipping until the return dataset is less than the limit
 	const previous = () => {

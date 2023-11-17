@@ -30,8 +30,9 @@ export const DisplayListenerMetadata = (props: MetadataType) => {
 
 	const getMetadatDefinitions = (name: string | null, skip: number, limit: number) => dispatch(fetchMetadataDefinitions(name, skip, limit));
 	const metadataDefinitionList = useSelector((state: RootState) => state.metadata.metadataDefinitionList);
-	const listDatasetMetadata = (datasetId: string | undefined) => dispatch(fetchDatasetMetadata(datasetId));
-	const listFileMetadata = (fileId: string | undefined, version: number | undefined) => dispatch(fetchFileMetadata(fileId, version));
+	const adminMode = useSelector((state : RootState) => state.user.adminMode);
+	const listDatasetMetadata = (datasetId: string | undefined) => dispatch(fetchDatasetMetadata(datasetId, adminMode));
+	const listFileMetadata = (fileId: string | undefined, version: number | undefined) => dispatch(fetchFileMetadata(fileId, adminMode, version));
 	const datasetMetadataList = useSelector((state: RootState) => state.metadata.datasetMetadataList);
 	const fileMetadataList = useSelector((state: RootState) => state.metadata.fileMetadataList);
 

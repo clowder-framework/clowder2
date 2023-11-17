@@ -8,12 +8,13 @@ import {
 
 export const SET_DATASET_GROUP_ROLE = "SET_DATASET_GROUP_ROLE";
 
-export function setDatasetGroupRole(datasetId, groupId, roleType) {
+export function setDatasetGroupRole(datasetId, groupId, roleType, adminMode) {
 	return (dispatch) => {
 		return V2.AuthorizationService.setDatasetGroupRoleApiV2AuthorizationsDatasetsDatasetIdGroupRoleGroupIdRolePost(
 			datasetId,
 			groupId,
-			roleType
+			roleType,
+			adminMode
 		)
 			.then((json) => {
 				dispatch({
@@ -25,7 +26,7 @@ export function setDatasetGroupRole(datasetId, groupId, roleType) {
 				dispatch(
 					handleErrors(
 						reason,
-						setDatasetGroupRole(datasetId, groupId, roleType)
+						setDatasetGroupRole(datasetId, groupId, roleType, adminMode)
 					)
 				);
 			});
@@ -34,12 +35,13 @@ export function setDatasetGroupRole(datasetId, groupId, roleType) {
 
 export const SET_DATASET_USER_ROLE = "SET_DATASET_USER_ROLE";
 
-export function setDatasetUserRole(datasetId, username, roleType) {
+export function setDatasetUserRole(datasetId, username, roleType, adminMode) {
 	return (dispatch) => {
 		return V2.AuthorizationService.setDatasetUserRoleApiV2AuthorizationsDatasetsDatasetIdUserRoleUsernameRolePost(
 			datasetId,
 			username,
-			roleType
+			roleType,
+			adminMode
 		)
 			.then((json) => {
 				dispatch({
@@ -51,7 +53,7 @@ export function setDatasetUserRole(datasetId, username, roleType) {
 				dispatch(
 					handleErrorsInline(
 						reason,
-						setDatasetUserRole(datasetId, username, roleType)
+						setDatasetUserRole(datasetId, username, roleType, adminMode)
 					)
 				);
 			});
@@ -60,11 +62,12 @@ export function setDatasetUserRole(datasetId, username, roleType) {
 
 export const REMOVE_DATASET_GROUP_ROLE = "REMOVE_DATASET_GROUP_ROLE";
 
-export function removeDatasetGroupRole(datasetId, groupId) {
+export function removeDatasetGroupRole(datasetId, groupId, adminMode) {
 	return (dispatch) => {
 		return V2.AuthorizationService.removeDatasetGroupRoleApiV2AuthorizationsDatasetsDatasetIdGroupRoleGroupIdDelete(
 			datasetId,
-			groupId
+			groupId,
+			adminMode
 		)
 			.then((json) => {
 				dispatch({
@@ -74,7 +77,7 @@ export function removeDatasetGroupRole(datasetId, groupId) {
 			})
 			.catch((reason) => {
 				dispatch(
-					handleErrors(reason, removeDatasetGroupRole(datasetId, groupId))
+					handleErrors(reason, removeDatasetGroupRole(datasetId, groupId, adminMode))
 				);
 			});
 	};
@@ -82,11 +85,12 @@ export function removeDatasetGroupRole(datasetId, groupId) {
 
 export const REMOVE_DATASET_USER_ROLE = "REMOVE_DATASET_USER_ROLE";
 
-export function removeDatasetUserRole(datasetId, username) {
+export function removeDatasetUserRole(datasetId, username, adminMode) {
 	return (dispatch) => {
 		return V2.AuthorizationService.removeDatasetUserRoleApiV2AuthorizationsDatasetsDatasetIdUserRoleUsernameDelete(
 			datasetId,
-			username
+			username,
+			adminMode
 		)
 			.then((json) => {
 				dispatch({
@@ -96,7 +100,7 @@ export function removeDatasetUserRole(datasetId, username) {
 			})
 			.catch((reason) => {
 				dispatch(
-					handleErrors(reason, removeDatasetUserRole(datasetId, username))
+					handleErrors(reason, removeDatasetUserRole(datasetId, username, adminMode))
 				);
 			});
 	};
@@ -104,14 +108,14 @@ export function removeDatasetUserRole(datasetId, username) {
 
 export const RECEIVE_FILES_IN_DATASET = "RECEIVE_FILES_IN_DATASET";
 
-export function fetchFilesInDataset(datasetId, folderId, skip, limit) {
+export function fetchFilesInDataset(datasetId, folderId, skip, limit, adminMode) {
 	return (dispatch) => {
 		return V2.DatasetsService.getDatasetFilesApiV2DatasetsDatasetIdFilesGet(
 			datasetId,
+			adminMode,
 			folderId,
 			skip,
-			limit
-		)
+			limit)
 			.then((json) => {
 				dispatch({
 					type: RECEIVE_FILES_IN_DATASET,
@@ -121,7 +125,7 @@ export function fetchFilesInDataset(datasetId, folderId, skip, limit) {
 			})
 			.catch((reason) => {
 				dispatch(
-					handleErrors(reason, fetchFilesInDataset(datasetId, folderId, skip, limit))
+					handleErrors(reason, fetchFilesInDataset(datasetId, adminMode, folderId, skip, limit, adminMode))
 				);
 			});
 	};
@@ -129,10 +133,11 @@ export function fetchFilesInDataset(datasetId, folderId, skip, limit) {
 
 export const RECEIVE_FOLDERS_IN_DATASET = "RECEIVE_FOLDERS_IN_DATASET";
 
-export function fetchFoldersInDataset(datasetId, parentFolder, skip, limit) {
+export function fetchFoldersInDataset(datasetId, parentFolder, skip, limit, adminMode) {
 	return (dispatch) => {
 		return V2.DatasetsService.getDatasetFoldersApiV2DatasetsDatasetIdFoldersGet(
 			datasetId,
+			adminMode,
 			parentFolder,
 			skip,
 			limit
@@ -146,7 +151,7 @@ export function fetchFoldersInDataset(datasetId, parentFolder, skip, limit) {
 			})
 			.catch((reason) => {
 				dispatch(
-					handleErrors(reason, fetchFoldersInDataset(datasetId, parentFolder, skip, limit))
+					handleErrors(reason, fetchFoldersInDataset(datasetId, parentFolder, skip, limit, adminMode))
 				);
 			});
 	};
@@ -157,12 +162,14 @@ export const SUBMIT_DATASET_EXTRACTION = "SUBMIT_DATASET_EXTRACTION";
 export function submitDatasetExtractionAction(
 	datasetId,
 	extractorName,
+	adminMode,
 	requestBody
 ) {
 	return (dispatch) => {
 		return V2.DatasetsService.getDatasetExtractApiV2DatasetsDatasetIdExtractPost(
 			datasetId,
 			extractorName,
+			adminMode,
 			requestBody
 		)
 			.then((json) => {
@@ -176,7 +183,7 @@ export function submitDatasetExtractionAction(
 				dispatch(
 					handleErrors(
 						reason,
-						submitDatasetExtractionAction(datasetId, extractorName, requestBody)
+						submitDatasetExtractionAction(datasetId, extractorName,adminMode, requestBody)
 					)
 				);
 			});
@@ -185,11 +192,12 @@ export function submitDatasetExtractionAction(
 
 export const UPDATE_DATASET = "UPDATE_DATASET";
 
-export function updateDataset(datasetId, formData) {
+export function updateDataset(datasetId, formData, adminMode) {
 	return (dispatch) => {
 		return V2.DatasetsService.patchDatasetApiV2DatasetsDatasetIdPatch(
 			datasetId,
-			formData
+			formData,
+			adminMode
 		)
 			.then((json) => {
 				dispatch({
@@ -199,16 +207,16 @@ export function updateDataset(datasetId, formData) {
 				});
 			})
 			.catch((reason) => {
-				dispatch(handleErrors(reason, updateDataset(datasetId, formData)));
+				dispatch(handleErrors(reason, updateDataset(datasetId, formData, adminMode)));
 			});
 	};
 }
 
 export const RECEIVE_DATASET_ABOUT = "RECEIVE_DATASET_ABOUT";
 
-export function fetchDatasetAbout(id) {
+export function fetchDatasetAbout(id, adminMode) {
 	return (dispatch) => {
-		return V2.DatasetsService.getDatasetApiV2DatasetsDatasetIdGet(id)
+		return V2.DatasetsService.getDatasetApiV2DatasetsDatasetIdGet(id, adminMode)
 			.then((json) => {
 				dispatch({
 					type: RECEIVE_DATASET_ABOUT,
@@ -217,17 +225,17 @@ export function fetchDatasetAbout(id) {
 				});
 			})
 			.catch((reason) => {
-				dispatch(handleErrors(reason, fetchDatasetAbout(id)));
+				dispatch(handleErrors(reason, fetchDatasetAbout(id, adminMode)));
 			});
 	};
 }
 
 export const RECEIVE_DATASETS = "RECEIVE_DATASETS";
 
-export function fetchDatasets(skip = 0, limit = 21, mine = false) {
+export function fetchDatasets(skip = 0, limit = 21, mine = false, adminMode = false) {
 	return (dispatch) => {
 		// TODO: Parameters for dates? paging?
-		return V2.DatasetsService.getDatasetsApiV2DatasetsGet(skip, limit, mine)
+		return V2.DatasetsService.getDatasetsApiV2DatasetsGet(adminMode, skip, limit, mine)
 			.then((json) => {
 				dispatch({
 					type: RECEIVE_DATASETS,
@@ -236,7 +244,7 @@ export function fetchDatasets(skip = 0, limit = 21, mine = false) {
 				});
 			})
 			.catch((reason) => {
-				dispatch(handleErrors(reason, fetchDatasets(skip, limit, mine)));
+				dispatch(handleErrors(reason, fetchDatasets(skip, limit, mine, adminMode)));
 			});
 	};
 }
@@ -272,10 +280,11 @@ export function resetDatsetCreated() {
 
 export const DELETE_DATASET = "DELETE_DATASET";
 
-export function datasetDeleted(datasetId) {
+export function datasetDeleted(datasetId, adminMode) {
 	return (dispatch) => {
 		return V2.DatasetsService.deleteDatasetApiV2DatasetsDatasetIdDelete(
-			datasetId
+			datasetId,
+			adminMode
 		)
 			.then((json) => {
 				dispatch({
@@ -285,18 +294,19 @@ export function datasetDeleted(datasetId) {
 				});
 			})
 			.catch((reason) => {
-				dispatch(handleErrors(reason, datasetDeleted(datasetId)));
+				dispatch(handleErrors(reason, datasetDeleted(datasetId, adminMode)));
 			});
 	};
 }
 
 export const FOLDER_ADDED = "FOLDER_ADDED";
 
-export function folderAdded(datasetId, folderName, parentFolder = null) {
+export function folderAdded(datasetId, adminMode, folderName, parentFolder = null) {
 	return (dispatch) => {
 		const folder = { name: folderName, parent_folder: parentFolder };
 		return V2.DatasetsService.addFolderApiV2DatasetsDatasetIdFoldersPost(
 			datasetId,
+			adminMode,
 			folder
 		)
 			.then((json) => {
@@ -308,7 +318,7 @@ export function folderAdded(datasetId, folderName, parentFolder = null) {
 			})
 			.catch((reason) => {
 				dispatch(
-					handleErrors(reason, folderAdded(datasetId, folderName, parentFolder))
+					handleErrors(reason, folderAdded(datasetId, adminMode, folderName, parentFolder))
 				);
 			});
 	};
@@ -316,11 +326,12 @@ export function folderAdded(datasetId, folderName, parentFolder = null) {
 
 export const GET_FOLDER_PATH = "GET_FOLDER_PATH";
 
-export function fetchFolderPath(folderId) {
+export function fetchFolderPath(folderId, adminMode) {
 	return (dispatch) => {
 		if (folderId != null) {
 			return V2.FoldersService.downloadFolderApiV2FoldersFolderIdPathGet(
-				folderId
+				folderId,
+				adminMode
 			)
 				.then((json) => {
 					dispatch({
@@ -330,7 +341,7 @@ export function fetchFolderPath(folderId) {
 					});
 				})
 				.catch((reason) => {
-					dispatch(handleErrors(reason, fetchFolderPath(folderId)));
+					dispatch(handleErrors(reason, fetchFolderPath(folderId, adminMode)));
 				});
 		} else {
 			dispatch({
@@ -344,10 +355,12 @@ export function fetchFolderPath(folderId) {
 
 export const RECEIVE_DATASET_ROLES = "RECEIVE_DATASET_ROLES";
 
-export function fetchDatasetRoles(datasetId) {
+export function fetchDatasetRoles(datasetId, adminMode) {
 	return (dispatch) => {
+		console.log("adminMode: ", adminMode);
 		return V2.AuthorizationService.getDatasetRolesApiV2AuthorizationsDatasetsDatasetIdRolesGet(
-			datasetId
+			datasetId,
+			adminMode
 		)
 			.then((json) => {
 				dispatch({
@@ -361,7 +374,7 @@ export function fetchDatasetRoles(datasetId) {
 			})
 			.catch((reason) => {
 				dispatch(
-					handleErrorsAuthorization(reason, fetchDatasetRoles(datasetId))
+					handleErrorsAuthorization(reason, fetchDatasetRoles(datasetId, adminMode))
 				);
 			});
 	};

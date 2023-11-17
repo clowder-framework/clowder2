@@ -107,13 +107,14 @@ class Authorization:
     async def __call__(
         self,
         dataset_id: str,
+        admin_mode: bool = False,
         current_user: str = Depends(get_current_username),
         admin: bool = Depends(get_admin),
     ):
         # TODO: Make sure we enforce only one role per user per dataset, or find_one could yield wrong answer here.
 
-        # If the current user is admin, user has access irrespective of any role assigned
-        if admin:
+        # If the current user is admin and has turned on admin_mode, user has access irrespective of any role assigned
+        if admin and admin_mode:
             return True
 
         # Else check role assigned to the user
@@ -149,11 +150,12 @@ class FileAuthorization:
     async def __call__(
         self,
         file_id: str,
+        admin_mode: bool = False,
         current_user: str = Depends(get_current_username),
         admin: bool = Depends(get_admin),
     ):
-        # If the current user is admin, user has access irrespective of any role assigned
-        if admin:
+        # If the current user is admin and has turned on admin_mode, user has access irrespective of any role assigned
+        if admin and admin_mode:
             return True
 
         # Else check role assigned to the user
@@ -186,11 +188,12 @@ class MetadataAuthorization:
     async def __call__(
         self,
         metadata_id: str,
+        admin_mode: bool = False,
         current_user: str = Depends(get_current_username),
         admin: bool = Depends(get_admin),
     ):
-        # If the current user is admin, user has access irrespective of any role assigned
-        if admin:
+        # If the current user is admin and has turned on admin_mode, user has access irrespective of any role assigned
+        if admin and admin_mode:
             return True
 
         # Else check role assigned to the user
@@ -252,11 +255,12 @@ class GroupAuthorization:
     async def __call__(
         self,
         group_id: str,
+        admin_mode: bool = False,
         current_user: str = Depends(get_current_username),
         admin: bool = Depends(get_admin),
     ):
-        # If the current user is admin, user has access irrespective of any role assigned
-        if admin:
+        # If the current user is admin and has turned on admin_mode, user has access irrespective of any role assigned
+        if admin and admin_mode:
             return True
 
         # Else check role assigned to the user

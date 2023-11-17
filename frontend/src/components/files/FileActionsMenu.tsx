@@ -41,6 +41,7 @@ export const FileActionsMenu = (props: FileActionsMenuProps): JSX.Element => {
 	const [fileShareModalOpen, setFileShareModalOpen] = useState(false);
 
 	const fileRole = useSelector((state: RootState) => state.file.fileRole);
+	const adminMode = useSelector((state: RootState) => state.user.adminMode);
 
 	const open = Boolean(anchorEl);
 
@@ -57,6 +58,7 @@ export const FileActionsMenu = (props: FileActionsMenuProps): JSX.Element => {
 
 	const generateFilePresignedUrl = (
 		fileId: string | undefined,
+		adminMode: boolean | undefined,
 		fileVersionNum: number | undefined | null,
 		expiresInSeconds: number | undefined | null
 	) =>
@@ -68,9 +70,9 @@ export const FileActionsMenu = (props: FileActionsMenuProps): JSX.Element => {
 	);
 
 	const deleteFile = (fileId: string | undefined) =>
-		dispatch(fileDeleted(fileId));
+		dispatch(fileDeleted(fileId, adminMode));
 	const listFileSummary = (fileId: string | undefined) =>
-		dispatch(fetchFileSummary(fileId));
+		dispatch(fetchFileSummary(fileId, adminMode));
 	const history = useNavigate();
 
 	const [confirmationOpen, setConfirmationOpen] = useState(false);
@@ -86,7 +88,7 @@ export const FileActionsMenu = (props: FileActionsMenuProps): JSX.Element => {
 		history(`/datasets/${datasetId}`);
 	};
 	const handleShareLinkClick = () => {
-		generateFilePresignedUrl(fileId, null, 7 * 24 * 3600);
+		generateFilePresignedUrl(fileId, adminMode, null, 7 * 24 * 3600);
 		setFileShareModalOpen(true);
 	};
 	const setFileShareModalClose = () => {

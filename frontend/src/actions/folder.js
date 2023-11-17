@@ -2,10 +2,10 @@ import {V2} from "../openapi";
 import {handleErrors} from "./common";
 
 export const FOLDER_ADDED = "FOLDER_ADDED";
-export function folderAdded(datasetId, folderName, parentFolder = null){
+export function folderAdded(datasetId, adminMode, folderName, parentFolder = null){
 	return (dispatch) => {
 		const folder = {"name": folderName, "parent_folder": parentFolder}
-		return V2.DatasetsService.addFolderApiV2DatasetsDatasetIdFoldersPost(datasetId, folder)
+		return V2.DatasetsService.addFolderApiV2DatasetsDatasetIdFoldersPost(datasetId, folder, adminMode)
 			.then(json => {
 				dispatch({
 					type: FOLDER_ADDED,
@@ -14,7 +14,7 @@ export function folderAdded(datasetId, folderName, parentFolder = null){
 				});
 			})
 			.catch(reason => {
-				dispatch(handleErrors(reason, folderAdded(datasetId, folderName, parentFolder)));
+				dispatch(handleErrors(reason, folderAdded(datasetId, adminMode, folderName, parentFolder)));
 			});
 	};
 }
