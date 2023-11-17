@@ -124,14 +124,6 @@ export const AppRoutes = (): JSX.Element => {
 					}
 				/>
 				<Route
-					path="/admin/:admin"
-					element={
-						<PrivateRoute>
-							<Explore />
-						</PrivateRoute>
-					}
-				/>
-				<Route
 					path="/metadata-definitions"
 					element={
 						<PrivateRoute>

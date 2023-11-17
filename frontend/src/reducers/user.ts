@@ -28,8 +28,7 @@ const defaultState: UserState = {
 const user = (state = defaultState, action: DataAction) => {
 	switch (action.type) {
 		case ADMIN_MODE:
-			console.log("the action is called: ", action.adminMode)
-;			return Object.assign({}, state, {
+			return Object.assign({}, state, {
 				adminMode: action.adminMode
 			});
 		case ADMIN:

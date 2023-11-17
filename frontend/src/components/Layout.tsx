@@ -21,7 +21,7 @@ import { Link, Menu, MenuItem, MenuList } from "@mui/material";
 import { Link as RouterLink, useLocation } from "react-router-dom";
 import {useDispatch, useSelector} from "react-redux";
 import { RootState } from "../types/data";
-import {AddBox, Explore, SupervisorAccount} from "@material-ui/icons";
+import {AddBox, Explore} from "@material-ui/icons";
 import HistoryIcon from "@mui/icons-material/History";
 import GroupIcon from "@mui/icons-material/Group";
 import Gravatar from "react-gravatar";
@@ -32,6 +32,7 @@ import VpnKeyIcon from "@mui/icons-material/VpnKey";
 import LogoutIcon from "@mui/icons-material/Logout";
 import { EmbeddedSearch } from "./search/EmbeddedSearch";
 import {setAdmin, toggleAdminMode} from "../actions/user";
+import {AdminPanelSettings} from "@mui/icons-material";
 
 const drawerWidth = 240;
 
@@ -238,7 +239,7 @@ export default function PersistentDrawerLeft(props) {
 						<Divider orientation="horizontal" />
 						<MenuItem onClick={handleAdminMode}>
 						<ListItemIcon>
-							<SupervisorAccount fontSize="small" />
+							<AdminPanelSettings fontSize="small" />
 						</ListItemIcon>
 						<ListItemText>Admin Mode</ListItemText>
 					</MenuItem></div>: <></>}
@@ -246,9 +247,9 @@ export default function PersistentDrawerLeft(props) {
 						<Divider orientation="horizontal" />
 						<MenuItem onClick={handleAdminMode}>
 						<ListItemIcon>
-							<PersonIcon fontSize="small" />
+							<AdminPanelSettings fontSize="small" />
 						</ListItemIcon>
-						<ListItemText>Normal Mode</ListItemText>
+						<ListItemText>Drop Admin Mode</ListItemText>
 					</MenuItem></div>: <></>}
 					<Divider orientation="horizontal" />
 					<MenuItem component={RouterLink} to="/apikeys">

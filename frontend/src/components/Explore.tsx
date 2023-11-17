@@ -39,7 +39,7 @@ export const Explore = (): JSX.Element => {
 	const [limit] = useState<number>(20);
 	const [skip, setSkip] = useState<number | undefined>();
 	// TODO add switch to turn on and off "mine" dataset
-	const [mine] = useState<boolean>(true);
+	const [mine] = useState<boolean>(false);
 	const [prevDisabled, setPrevDisabled] = useState<boolean>(true);
 	const [nextDisabled, setNextDisabled] = useState<boolean>(false);
 	const [selectedTabIndex, setSelectedTabIndex] = useState(0);
@@ -48,8 +48,7 @@ export const Explore = (): JSX.Element => {
 
 	// component did mount
 	useEffect(() => {
-		console.log("Rendered: ", adminMode);
-		listDatasets(0, limit, mine);
+		listDatasets(0, limit, mine, adminMode);
 	}, []);
 
 	// fetch thumbnails from each individual dataset/id calls
@@ -83,7 +82,7 @@ export const Explore = (): JSX.Element => {
 	};
 	useEffect(() => {
 		if (skip !== null && skip !== undefined) {
-			listDatasets(skip, limit, mine);
+			listDatasets(skip, limit, mine, adminMode);
 			if (skip === 0) setPrevDisabled(true);
 			else setPrevDisabled(false);
 		}

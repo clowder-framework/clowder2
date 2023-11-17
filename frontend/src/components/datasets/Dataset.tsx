@@ -123,7 +123,7 @@ export const Dataset = (): JSX.Element => {
 		listFoldersInDataset(datasetId, folderId, skip, limit);
 		listDatasetAbout(datasetId);
 		getFolderPath(folderId);
-	}, [searchParams]);
+	}, [searchParams, adminMode]);
 
 	useEffect(() => {
 		getMetadatDefinitions(null, 0, 100);
