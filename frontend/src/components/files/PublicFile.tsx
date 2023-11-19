@@ -30,6 +30,7 @@ import {
 import { EditMetadata } from "../metadata/EditMetadata";
 import Layout from "../Layout";
 import { fetchDatasetAbout } from "../../actions/dataset";
+import { fetchPublicDatasetAbout} from "../../actions/public_dataset";
 import { FileDetails } from "./FileDetails";
 import { fetchFolderPath } from "../../actions/folder";
 import { Listeners } from "../listeners/Listeners";
@@ -61,8 +62,8 @@ export const PublicFile = (): JSX.Element => {
 	const datasetId = searchParams.get("dataset");
 
 	const listDatasetAbout = (datasetId: string | undefined) =>
-		dispatch(fetchDatasetAbout(datasetId));
-	const about = useSelector((state: RootState) => state.dataset.about);
+		dispatch(fetchPublicDatasetAbout(datasetId));
+	const about = useSelector((state: RootState) => state.publicDataset.public_about);
 
 	const dispatch = useDispatch();
 	const listFileSummary = (fileId: string | undefined) =>

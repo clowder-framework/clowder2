@@ -10,6 +10,7 @@ import {
 import { Dataset as DatasetComponent } from "./components/datasets/Dataset";
 import {PublicDataset as PublicDatasetComponent} from "./components/datasets/PublicDataset";
 import { File as FileComponent } from "./components/files/File";
+import {PublicFile as PublicFileComponent} from "./components/files/PublicFile";
 import { CreateDataset } from "./components/datasets/CreateDataset";
 import { Groups as GroupListComponent } from "./components/groups/Groups";
 import { Group as GroupComponent } from "./components/groups/Group";
@@ -175,6 +176,14 @@ export const AppRoutes = (): JSX.Element => {
 					element={
 						<PrivateRoute>
 							<FileComponent />
+						</PrivateRoute>
+					}
+				/>
+				<Route
+					path="/public/files/:fileId"
+					element={
+						<PrivateRoute>
+							<PublicFileComponent />
 						</PrivateRoute>
 					}
 				/>

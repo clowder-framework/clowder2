@@ -35,6 +35,9 @@ export default function FilesTable(props: FilesTableProps) {
 	const foldersInDataset = useSelector(
 		(state: RootState) => state.folder.folders
 	);
+	const publicFoldersIndataset =  useSelector(
+		(state: RootState) => state.folder.publicFolders
+	);
 	// use history hook to redirect/navigate between routes
 	const history = useNavigate();
 	// get existing folder
@@ -45,9 +48,20 @@ export default function FilesTable(props: FilesTableProps) {
 			`/files/${selectedFileId}?dataset=${props.datasetId}&folder=${parentFolderId}&verNum=${selectedFileId}`
 		);
 	};
+	const selectPublicFile = (selectedFileId: string | undefined) => {
+		// Redirect to file route with file Id and dataset id and folderId
+		history(
+			`/public/files/${selectedFileId}?dataset=${props.datasetId}&folder=${parentFolderId}&verNum=${selectedFileId}`
+		);
+	};
 	const selectFolder = (selectedFolderId: string | undefined) => {
 		// Redirect to file route with file Id and dataset id
 		history(`/datasets/${props.datasetId}?folder=${selectedFolderId}`);
+	};
+
+	const selectPublicFolder = (selectedFolderId: string | undefined) => {
+		// Redirect to file route with file Id and dataset id
+		history(`/public/datasets/${props.datasetId}?folder=${selectedFolderId}`);
 	};
 
 	return (
@@ -66,7 +80,7 @@ export default function FilesTable(props: FilesTableProps) {
 							</TableRow>
 						</TableHead>
 						<TableBody>
-							{foldersInDataset.map((folder) => (
+							{publicFoldersIndataset.map((folder) => (
 								<TableRow
 									key={folder.id}
 									sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
@@ -89,10 +103,11 @@ export default function FilesTable(props: FilesTableProps) {
 							{publicFilesInDataset.map((file) => (
 								<FilesTableFileEntry
 									iconStyle={iconStyle}
-									selectFile={selectFile}
+									selectFile={selectPublicFile}
 									file={file}
 									key={file.id}
 									parentFolderId={parentFolderId}
+									publicView={publicView}
 								/>
 							))}
 						</TableBody>
@@ -137,6 +152,7 @@ export default function FilesTable(props: FilesTableProps) {
 								file={file}
 								key={file.id}
 								parentFolderId={parentFolderId}
+								publicView={false}
 							/>
 						))}
 					</TableBody>

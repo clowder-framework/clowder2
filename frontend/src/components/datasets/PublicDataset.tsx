@@ -85,6 +85,11 @@ export const PublicDataset = (): JSX.Element => {
 		parentFolder: string | null,
 		skip: number | undefined, limit: number | undefined
 	) => dispatch(fetchFoldersInDataset(datasetId, parentFolder, skip, limit));
+	const listFoldersInPublicDataset = (
+		datasetId: string | undefined,
+		parentFolder: string | null,
+		skip: number | undefined, limit: number | undefined
+	) => dispatch(fetchFoldersInPublicDataset(datasetId, parentFolder, skip, limit));
 	const listDatasetAbout = (datasetId: string | undefined) =>
 		dispatch(fetchDatasetAbout(datasetId));
 	const listDatasetMetadata = (datasetId: string | undefined) =>
@@ -123,13 +128,14 @@ export const PublicDataset = (): JSX.Element => {
 	const filesInDataset = useSelector((state: RootState) => state.publicDataset.public_files);
 
 	const foldersInDataset = useSelector((state: RootState) => state.folder.folders);
-
+	const publicFoldersInDataset = useSelector((state: RootState) => state.folder.publicFolders);
 	const metadataDefinitionList = useSelector((state: RootState) => state.metadata.metadataDefinitionList);
 
 	// component did mount list all files in dataset
 	useEffect(() => {
 		listFilesInDataset(datasetId, folderId, skip, limit);
 		listFoldersInDataset(datasetId, folderId, skip, limit);
+		listFoldersInPublicDataset(datasetId, folderId, skip, limit);
 		listDatasetAbout(datasetId);
 		getFolderPath(folderId);
 	}, [searchParams]);
@@ -150,6 +156,7 @@ export const PublicDataset = (): JSX.Element => {
 		if (skip !== null && skip !== undefined) {
 			listFilesInDataset(datasetId, folderId, skip, limit);
 			listFoldersInDataset(datasetId, folderId, skip, limit);
+			listFoldersInPublicDataset(datasetId, folderId, skip, limit);
 			if (skip === 0) setPrevDisabled(true);
 			else setPrevDisabled(false);
 		}
