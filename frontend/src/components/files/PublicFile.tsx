@@ -346,50 +346,12 @@ export const PublicFile = (): JSX.Element => {
 						)}
 					</TabPanel>
 					<TabPanel value={selectedTabIndex} index={2}>
-						{enableAddMetadata ? (
-							<>
-								<EditMetadata
-									resourceType="file"
-									resourceId={fileId}
-									setMetadata={setMetadata}
-								/>
-								<Button
-									variant="contained"
-									onClick={handleMetadataUpdateFinish}
-									sx={{ mt: 1, mr: 1 }}
-								>
-									Update
-								</Button>
-								<Button
-									onClick={() => {
-										setEnableAddMetadata(false);
-									}}
-									sx={{ mt: 1, mr: 1 }}
-								>
-									Cancel
-								</Button>
-							</>
-						) : (
-							<>
-								<DisplayMetadata
-									updateMetadata={updateFileMetadata}
-									deleteMetadata={deleteFileMetadata}
-									resourceType="file"
-									resourceId={fileId}
-								/>
-								<Box textAlign="center">
-									<Button
-										variant="contained"
-										sx={{ m: 2 }}
-										onClick={() => {
-											setEnableAddMetadata(true);
-										}}
-									>
-										Add Metadata
-									</Button>
-								</Box>
-							</>
-						)}
+						<DisplayMetadata
+							updateMetadata={updateFileMetadata}
+							deleteMetadata={deleteFileMetadata}
+							resourceType="file"
+							resourceId={fileId}
+						/>
 					</TabPanel>
 					<TabPanel value={selectedTabIndex} index={3}>
 						<DisplayListenerMetadata
