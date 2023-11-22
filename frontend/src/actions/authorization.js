@@ -56,7 +56,7 @@ export const RECEIVE_GROUP_ROLE = "RECEIVE_GROUP_ROLE";
 
 export function fetchGroupRole(groupId, adminMode) {
 	return (dispatch) => {
-		return V2.AuthorizationService.getGroupRoleApiV2AuthorizationsGroupsGroupIdRoleAdminModeAdminModeGet(
+		return V2.AuthorizationService.getGroupRoleApiV2AuthorizationsGroupsGroupIdRoleGet(
 			groupId,
 			adminMode
 		)
