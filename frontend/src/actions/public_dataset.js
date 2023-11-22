@@ -59,7 +59,7 @@ export const RECEIVE_PUBLIC_DATASET_ABOUT = "RECEIVE_PUBLIC_DATASET_ABOUT";
 
 export function fetchPublicDatasetAbout(id) {
 	return (dispatch) => {
-		return V2.PublicDatasetsService.getDatasetsApiV2PublicDatasetsGet(id)
+		return V2.PublicDatasetsService.getDatasetApiV2PublicDatasetsDatasetIdGet(id)
 			.then((json) => {
 				dispatch({
 					type: RECEIVE_PUBLIC_DATASET_ABOUT,

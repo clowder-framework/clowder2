@@ -29,7 +29,6 @@ import {
 } from "../../actions/metadata";
 import { EditMetadata } from "../metadata/EditMetadata";
 import Layout from "../Layout";
-import { fetchDatasetAbout } from "../../actions/dataset";
 import { fetchPublicDatasetAbout} from "../../actions/public_dataset";
 import { FileDetails } from "./FileDetails";
 import { fetchFolderPath } from "../../actions/folder";
@@ -131,7 +130,7 @@ export const PublicFile = (): JSX.Element => {
 		const tmpPaths = [
 			{
 				name: about["name"],
-				url: `/datasets/${datasetId}`,
+				url: `/public/datasets/${datasetId}`,
 			},
 		];
 
@@ -139,7 +138,7 @@ export const PublicFile = (): JSX.Element => {
 			for (const folderBread of folderPath) {
 				tmpPaths.push({
 					name: folderBread["folder_name"],
-					url: `/datasets/${datasetId}?folder=${folderBread["folder_id"]}`,
+					url: `/public/datasets/${datasetId}?folder=${folderBread["folder_id"]}`,
 				});
 			}
 		} else {
@@ -272,13 +271,13 @@ export const PublicFile = (): JSX.Element => {
 						<RoleChip role={fileRole} />
 					</Grid>
 				</Grid>
-				<Grid item xs={2} sx={{ display: "flex-top", alignItems: "center" }}>
-					<FileActionsMenu
-						fileId={fileId}
-						datasetId={datasetId}
-						setSelectedVersion={setSelectedVersionNum}
-					/>
-				</Grid>
+				{/*<Grid item xs={2} sx={{ display: "flex-top", alignItems: "center" }}>*/}
+				{/*	<FileActionsMenu*/}
+				{/*		fileId={fileId}*/}
+				{/*		datasetId={datasetId}*/}
+				{/*		setSelectedVersion={setSelectedVersionNum}*/}
+				{/*	/>*/}
+				{/*</Grid>*/}
 			</Grid>
 			<Grid container spacing={2}>
 				<Grid item xs={10}>
@@ -318,14 +317,14 @@ export const PublicFile = (): JSX.Element => {
 							{...a11yProps(3)}
 							disabled={false}
 						/>
-						<Tab
-							icon={<BuildIcon />}
-							iconPosition="start"
-							sx={TabStyle}
-							label="Extract"
-							{...a11yProps(4)}
-							disabled={false}
-						/>
+						{/*<Tab*/}
+						{/*	icon={<BuildIcon />}*/}
+						{/*	iconPosition="start"*/}
+						{/*	sx={TabStyle}*/}
+						{/*	label="Extract"*/}
+						{/*	{...a11yProps(4)}*/}
+						{/*	disabled={false}*/}
+						{/*/>*/}
 						<Tab
 							icon={<HistoryIcon />}
 							iconPosition="start"
@@ -401,9 +400,9 @@ export const PublicFile = (): JSX.Element => {
 							version={fileSummary.version_num}
 						/>
 					</TabPanel>
-					<TabPanel value={selectedTabIndex} index={4}>
-						<Listeners fileId={fileId} datasetId={datasetId} />
-					</TabPanel>
+					{/*<TabPanel value={selectedTabIndex} index={4}>*/}
+					{/*	<Listeners fileId={fileId} datasetId={datasetId} />*/}
+					{/*</TabPanel>*/}
 					<TabPanel value={selectedTabIndex} index={5}>
 						<ExtractionHistoryTab fileId={fileId} />
 					</TabPanel>
