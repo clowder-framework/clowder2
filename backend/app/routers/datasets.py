@@ -58,7 +58,7 @@ from app.routers.files import add_file_entry, remove_file_entry
 from app.search.connect import (
     delete_document_by_id,
 )
-from app.search.index import index_dataset
+from app.search.index import index_dataset, index_file
 
 router = APIRouter()
 security = HTTPBearer()
@@ -301,10 +301,30 @@ async def patch_dataset(
         if dataset_info.status is not None:
             dataset.status = dataset_info.status
         dataset.modified = datetime.datetime.utcnow()
+
+        public = False
+        authenticated = False
+        if dataset.status == 'PUBLIC':
+            public = True
+        if dataset.status == 'AUTHENTICATED':
+            authenticated = True
+
         await dataset.save()
 
         # Update entry to the dataset index
         await index_dataset(es, DatasetOut(**dataset.dict()), update=True)
+        query = [
+            FileDBViewList.dataset_id == ObjectId(dataset_id),
+        ]
+        files = await FileDBViewList.find(*query).to_list()
+        for file in files:
+            await index_file(es,
+                       file=FileOut(**file.dict()),
+                       user_ids = None,
+                       update=True,
+                       public=public,
+                       authenticated=authenticated
+                    )
         return dataset.dict()
 
 
@@ -450,7 +470,12 @@ async def save_file(
                 raise HTTPException(
                     status_code=404, detail=f"Folder {folder_id} not found"
                 )
-
+        public = False
+        authenticated = False
+        if dataset.status == 'PUBLIC':
+            public = True
+        if dataset.status == 'AUTHENTICATED':
+            authenticated = True
         await add_file_entry(
             new_file,
             user,
@@ -459,6 +484,8 @@ async def save_file(
             rabbitmq_client,
             file.file,
             content_type=file.content_type,
+            public=public,
+            authenticated=authenticated
         )
         return new_file.dict()
     raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
@@ -496,6 +523,12 @@ async def save_files(
                         status_code=404, detail=f"Folder {folder_id} not found"
                     )
 
+            public = False
+            authenticated = False
+            if dataset.status == 'PUBLIC':
+                public = True
+            if dataset.status == 'AUTHENTICATED':
+                authenticated = True
             await add_file_entry(
                 new_file,
                 user,
@@ -504,6 +537,8 @@ async def save_files(
                 rabbitmq_client,
                 file.file,
                 content_type=file.content_type,
+                public=public,
+                authenticated=authenticated
             )
             files_added.append(new_file.dict())
         return files_added
