@@ -60,7 +60,7 @@ export const Public = (): JSX.Element => {
 		listPublicDatasets(0, limit);
 	}, []);
 
-		// fetch thumbnails from each individual dataset/id calls
+	// fetch thumbnails from each individual dataset/id calls
 	useEffect(() => {
 		// disable flipping if reaches the last page
 		if (public_datasets.length < limit) setNextDisabled(true);
