@@ -175,6 +175,11 @@ api_router.include_router(
     dependencies=[Depends(get_current_username)],
 )
 api_router.include_router(
+    elasticsearch.router,
+    prefix="/public/elasticsearch",
+    tags=["public_elasticsearch"],
+)
+api_router.include_router(
     feeds.router,
     prefix="/feeds",
     tags=["feeds"],
