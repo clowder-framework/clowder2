@@ -46,5 +46,4 @@ class ElasticsearchEntry(BaseModel):
     bytes: Optional[int]
     # metadata fields
     metadata: Optional[List[dict]] = []
-    public: bool = False
-    authenticated: bool = False
+    status: Optional[str]

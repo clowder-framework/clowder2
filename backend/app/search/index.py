@@ -41,12 +41,6 @@ async def index_dataset(
         metadata.append(md.content)
     dataset_status = dataset.status
     # Add en entry to the dataset index
-    public = False
-    authenticated = False
-    if dataset_status == 'PUBLIC':
-        public = True
-    if dataset_status == 'AUTHENTICATED':
-        authenticated = True
     doc = ElasticsearchEntry(
         resource_type="dataset",
         name=dataset.name,
@@ -57,8 +51,7 @@ async def index_dataset(
         downloads=dataset.downloads,
         user_ids=authorized_user_ids,
         metadata=metadata,
-        public=public,
-        authenticated=authenticated
+        status=dataset_status
     ).dict()
 
     if update:
@@ -97,6 +90,13 @@ async def index_file(
         MetadataDB.resource.resource_id == ObjectId(file.id)
     ):
         metadata.append(md.content)
+
+    status = None
+    if authenticated:
+        status = "AUTHENTICATED"
+    if public:
+        status = "PUBLIC"
+
     # Add en entry to the file index
     doc = ElasticsearchEntry(
         resource_type="file",
@@ -111,6 +111,7 @@ async def index_file(
         folder_id=str(file.folder_id),
         bytes=file.bytes,
         metadata=metadata,
+        status=status,
     ).dict()
     if update:
         try:
