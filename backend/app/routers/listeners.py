@@ -261,7 +261,8 @@ async def get_listeners(
     if label:
         query.append(EventListenerDB.properties.default_labels == label)
 
-    listeners = await EventListenerDB.find(*query, skip=skip, limit=limit).to_list()
+    # sort by name alphabetically
+    listeners = await EventListenerDB.find(*query, skip=skip, limit=limit, sort=EventListenerDB.name).to_list()
 
     # batch return listener statuses for easy consumption
     listener_response = []
@@ -269,8 +270,8 @@ async def get_listeners(
         listener.alive = await _check_livelihood(listener, heartbeat_interval)
         listener_response.append(listener.dict())
 
-    # sort by name and alive status
-    sorted_listener_response = sorted(listener_response, key=lambda x: (not x.alive, x.name))
+    # sort the current page with alive listeners first
+    sorted_listener_response = sorted(listener_response, key=lambda x: (not x['alive']))
 
     return sorted_listener_response
 
