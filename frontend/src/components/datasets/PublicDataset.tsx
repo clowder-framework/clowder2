@@ -76,7 +76,7 @@ export const PublicDataset = (): JSX.Element => {
 	) => dispatch(deleteDatasetMetadataAction(datasetId, metadata));
 	const getFolderPath = (folderId: string | null) =>
 		dispatch(fetchFolderPath(folderId));
-	const listFilesInDataset = (
+	const listFilesPublicInDataset = (
 		datasetId: string | undefined,
 		folderId: string | null
 		, skip: number | undefined, limit: number | undefined) => dispatch(fetchFilesInPublicDataset(datasetId, folderId, skip, limit));
@@ -92,6 +92,8 @@ export const PublicDataset = (): JSX.Element => {
 	) => dispatch(fetchFoldersInPublicDataset(datasetId, parentFolder, skip, limit));
 	const listDatasetAbout = (datasetId: string | undefined) =>
 		dispatch(fetchDatasetAbout(datasetId));
+	const listPublicDatasetAbout = (datasetId: string | undefined) =>
+		dispatch(fetchPublicDatasetAbout(datasetId));
 	const listDatasetMetadata = (datasetId: string | undefined) =>
 		dispatch(fetchDatasetMetadata(datasetId));
 	const getMetadatDefinitions = (name:string|null, skip:number, limit:number) => dispatch(fetchMetadataDefinitions(name, skip,limit));
@@ -133,10 +135,11 @@ export const PublicDataset = (): JSX.Element => {
 
 	// component did mount list all files in dataset
 	useEffect(() => {
-		listFilesInDataset(datasetId, folderId, skip, limit);
-		listFoldersInDataset(datasetId, folderId, skip, limit);
+		listFilesPublicInDataset(datasetId, folderId, skip, limit);
+		// listFoldersInDataset(datasetId, folderId, skip, limit);
 		listFoldersInPublicDataset(datasetId, folderId, skip, limit);
-		listDatasetAbout(datasetId);
+		// listDatasetAbout(datasetId);
+		listPublicDatasetAbout(datasetId);
 		getFolderPath(folderId);
 	}, [searchParams]);
 
@@ -154,8 +157,8 @@ export const PublicDataset = (): JSX.Element => {
 
 	useEffect(() => {
 		if (skip !== null && skip !== undefined) {
-			listFilesInDataset(datasetId, folderId, skip, limit);
-			listFoldersInDataset(datasetId, folderId, skip, limit);
+			listFilesPublicInDataset(datasetId, folderId, skip, limit);
+			// listFoldersInDataset(datasetId, folderId, skip, limit);
 			listFoldersInPublicDataset(datasetId, folderId, skip, limit);
 			if (skip === 0) setPrevDisabled(true);
 			else setPrevDisabled(false);

@@ -8,7 +8,9 @@ import {fetchPublicDatasets} from "../actions/public_dataset";
 import { a11yProps, TabPanel } from "./tabs/TabComponent";
 import DatasetCard from "./datasets/DatasetCard";
 import { ArrowBack, ArrowForward } from "@material-ui/icons";
+import PublicLayout from "./PublicLayout";
 import Layout from "./Layout";
+
 import { Link as RouterLink } from "react-router-dom";
 import { Listeners } from "./listeners/Listeners";
 import { ErrorModal } from "./errors/ErrorModal";
