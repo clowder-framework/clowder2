@@ -1,4 +1,4 @@
-# Developers Getting Started
+# Getting Started
 
 The core app is divided into two modules: backend and frontend. The frontend module is a standalone [React](https://react.dev/) 
 application and the backend, a  standalone [FastAPI](https://fastapi.tiangolo.com/lo/) web API. We leverage [MongoDB](https://www.mongodb.com/), [RabbitMQ](https://www.rabbitmq.com/),
