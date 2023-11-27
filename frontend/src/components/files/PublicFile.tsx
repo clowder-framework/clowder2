@@ -17,6 +17,7 @@ import { useDispatch, useSelector } from "react-redux";
 
 import { a11yProps, TabPanel } from "../tabs/TabComponent";
 import { fetchFileSummary, fetchFileVersions } from "../../actions/file";
+import {fetchPublicFileSummary, fetchPublicFileVersions} from "../../actions/public_file.js";
 import { MainBreadcrumbs } from "../navigation/BreadCrumb";
 import { FileVersionHistory } from "../versions/FileVersionHistory";
 import { DisplayMetadata } from "../metadata/DisplayMetadata";
@@ -65,7 +66,7 @@ export const PublicFile = (): JSX.Element => {
 	const about = useSelector((state: RootState) => state.publicDataset.public_about);
 
 	const dispatch = useDispatch();
-	const listFileSummary = (fileId: string | undefined) =>
+	const listPublicFileSummary = (fileId: string | undefined) =>
 		dispatch(fetchFileSummary(fileId));
 	const listFileVersions = (fileId: string | undefined) =>
 		dispatch(fetchFileVersions(fileId));
