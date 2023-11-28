@@ -330,27 +330,11 @@ export const PublicDataset = (): JSX.Element => {
 							disabled={false}
 						/>
 						<Tab
-							icon={<BuildIcon />}
-							iconPosition="start"
-							sx={TabStyle}
-							label="Extract"
-							{...a11yProps(4)}
-							disabled={false}
-						/>
-						<Tab
 							icon={<HistoryIcon />}
 							iconPosition="start"
 							sx={TabStyle}
 							label="Extraction History"
 							{...a11yProps(5)}
-							disabled={false}
-						/>
-						<Tab
-							icon={<ShareIcon />}
-							iconPosition="start"
-							sx={TabStyle}
-							label="Sharing"
-							{...a11yProps(6)}
 							disabled={false}
 						/>
 					</Tabs>

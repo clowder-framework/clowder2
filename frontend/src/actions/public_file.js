@@ -3,30 +3,29 @@ import { getHeader } from "../utils/common";
 import { V2 } from "../openapi";
 import { handleErrors } from "./common";
 
-export const FAILED = "FAILED";
 
-export const RECEIVE_FILE_EXTRACTED_METADATA =
-	"RECEIVE_FILE_EXTRACTED_METADATA";
+export const RECEIVE_PUBLIC_FILE_EXTRACTED_METADATA =
+	"RECEIVE_PUBLIC_FILE_EXTRACTED_METADATA";
 
-export function fetchFileExtractedMetadata(id) {
-	const url = `${config.hostname}/api/v2/files/${id}/metadata`;
+export function fetchPublicFileExtractedMetadata(id) {
+	const url = `${config.hostname}/api/v2/public/files/${id}/metadata`;
 	return (dispatch) => {
 		return fetch(url, { mode: "cors", headers: getHeader() })
 			.then((response) => {
 				if (response.status === 200) {
 					response.json().then((json) => {
 						dispatch({
-							type: RECEIVE_FILE_EXTRACTED_METADATA,
-							extractedMetadata: json,
+							type: RECEIVE_PUBLIC_FILE_EXTRACTED_METADATA,
+							publicExtractedMetadata: json,
 							receivedAt: Date.now(),
 						});
 					});
 				} else {
-					dispatch(handleErrors(response, fetchFileExtractedMetadata(id)));
+					dispatch(handleErrors(response, fetchPublicFileExtractedMetadata(id)));
 				}
 			})
 			.catch((reason) => {
-				dispatch(handleErrors(reason, fetchFileExtractedMetadata(id)));
+				dispatch(handleErrors(reason, fetchPublicFileExtractedMetadata(id)));
 			});
 	};
 }
@@ -39,7 +38,7 @@ export function fetchPublicFileSummary(id) {
 			.then((json) => {
 				dispatch({
 					type: RECEIVE_PUBLIC_FILE_SUMMARY,
-					fileSummary: json,
+					publicFileSummary: json,
 					receivedAt: Date.now(),
 				});
 			})
@@ -60,7 +59,7 @@ export function fetchPublicFileMetadataJsonld(id) {
 					response.json().then((json) => {
 						dispatch({
 							type: RECEIVE_PUBLIC_FILE_METADATA_JSONLD,
-							metadataJsonld: json,
+							publicMetadataJsonld: json,
 							receivedAt: Date.now(),
 						});
 					});
@@ -85,7 +84,7 @@ export function fetchPublicFilePreviews(id) {
 					response.json().then((json) => {
 						dispatch({
 							type: RECEIVE_PUBLIC_PREVIEWS,
-							previews: json,
+							publicPreviews: json,
 							receivedAt: Date.now(),
 						});
 					});
@@ -111,7 +110,7 @@ export function changePublicSelectedVersion(fileId, selectedVersion) {
 	return (dispatch) => {
 		dispatch({
 			type: CHANGE_PUBLIC_SELECTED_VERSION,
-			version: selectedVersion,
+			publicVersion: selectedVersion,
 			receivedAt: Date.now(),
 		});
 	};
@@ -129,7 +128,7 @@ export function fetchPublicFileVersions(fileId) {
 				);
 				dispatch({
 					type: RECEIVE_PUBLIC_VERSIONS,
-					fileVersions: version,
+					publicFileVersions: version,
 					receivedAt: Date.now(),
 				});
 			})
@@ -176,7 +175,7 @@ export function filePublicDownloaded(
 
 			dispatch({
 				type: DOWNLOAD_PUBLIC_FILE,
-				blob: blob,
+				publicBlob: blob,
 				receivedAt: Date.now(),
 			});
 		} else {

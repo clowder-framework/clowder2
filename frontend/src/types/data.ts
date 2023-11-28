@@ -202,16 +202,15 @@ export interface FileState {
 }
 
 export interface PublicFileState {
-	url: string;
-	blob: Blob;
-	fileSummary: FileSummary;
-	extractedMetadata: ExtractedMetadata[];
-	metadataJsonld: MetadataJsonld[];
-	previews: FilePreview[];
-	fileVersions: FileVersion[];
-	fileRole: AuthorizationBase;
-	presignedUrl: string;
-	selected_version_num: number;
+	publicUrl: string;
+	publicBlob: Blob;
+	publicFileSummary: FileSummary;
+	publicExtractedMetadata: ExtractedMetadata[];
+	publicMetadataJsonld: MetadataJsonld[];
+	publicPreviews: FilePreview[];
+	publicFileVersions: FileVersion[];
+	publicPresignedUrl: string;
+	publicSelected_version_num: number;
 }
 
 export interface UserState {

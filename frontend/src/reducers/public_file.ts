@@ -1,61 +1,50 @@
 import {
-	DOWNLOAD_FILE,
-	RECEIVE_FILE_EXTRACTED_METADATA,
-	RECEIVE_FILE_METADATA_JSONLD,
-	RECEIVE_FILE_PRESIGNED_URL,
-	RECEIVE_FILE_SUMMARY,
-	RECEIVE_PREVIEWS,
-	RECEIVE_VERSIONS,
-	RESET_FILE_PRESIGNED_URL,
-	CHANGE_SELECTED_VERSION,
-} from "../actions/file";
+    DOWNLOAD_PUBLIC_FILE,
+    RECEIVE_PUBLIC_FILE_EXTRACTED_METADATA,
+    RECEIVE_PUBLIC_FILE_METADATA_JSONLD,
+    RECEIVE_PUBLIC_FILE_SUMMARY,
+    RECEIVE_PUBLIC_PREVIEWS,
+    RECEIVE_PUBLIC_VERSIONS,
+    CHANGE_PUBLIC_SELECTED_VERSION, RECEIVE_PUBLIC_FILE_METADATA_JSONLD,
+} from "../actions/public_file";
 import { DataAction } from "../types/action";
-import { FileState } from "../types/data";
-import { AuthorizationBase, FileOut as FileSummary } from "../openapi/v2";
-import { RECEIVE_FILE_ROLE } from "../actions/authorization";
+import {FileOut as FileSummary } from "../openapi/v2";
+import { PublicFileState } from "../types/data";
 
-const defaultState: FileState = {
-	fileSummary: <FileSummary>{},
-	extractedMetadata: [],
-	metadataJsonld: [],
-	previews: [],
-	fileVersions: [],
-	fileRole: <AuthorizationBase>{},
-	blob: new Blob([]),
-	presignedUrl: "",
-	selected_version_num:1,
+const defaultState: PublicFileState = {
+	publicFileSummary: <FileSummary>{},
+	publicExtractedMetadata: [],
+	publicMetadataJsonld: [],
+	publicPreviews: [],
+	publicFileVersions: [],
+	publicBlob: new Blob([]),
+	publicSelected_version_num:1,
 };
 
-const file = (state = defaultState, action: DataAction) => {
+const publicFile = (state = defaultState, action: DataAction) => {
 	switch (action.type) {
-		case RECEIVE_FILE_SUMMARY:
-			return Object.assign({}, state, { fileSummary: action.fileSummary });
-		case RECEIVE_FILE_ROLE:
-			return Object.assign({}, state, { fileRole: action.role });
-		case RECEIVE_FILE_EXTRACTED_METADATA:
+		case RECEIVE_PUBLIC_FILE_SUMMARY:
+			return Object.assign({}, state, { fileSummary: action.publicFileSummary });
+		case RECEIVE_PUBLIC_FILE_EXTRACTED_METADATA:
 			return Object.assign({}, state, {
-				extractedMetadata: action.extractedMetadata,
+				publicExtractedMetadata: action.publicExtractedMetadata,
 			});
-		case RECEIVE_FILE_METADATA_JSONLD:
+		case RECEIVE_PUBLIC_FILE_METADATA_JSONLD:
 			return Object.assign({}, state, {
-				metadataJsonld: action.metadataJsonld,
+				publicMetadataJsonld: action.publicMetadataJsonld,
 			});
-		case RECEIVE_PREVIEWS:
-			return Object.assign({}, state, { previews: action.previews });
-		case CHANGE_SELECTED_VERSION:
-			return Object.assign({}, state,{selected_version_num:action.selected_version});
-		case RECEIVE_VERSIONS:
-			return Object.assign({}, state, { fileVersions: action.fileVersions });
-		case DOWNLOAD_FILE:
+		case RECEIVE_PUBLIC_PREVIEWS:
+			return Object.assign({}, state, { publicPreviews: action.publicPreviews });
+		case CHANGE_PUBLIC_SELECTED_VERSION:
+			return Object.assign({}, state,{publicSelected_version_num:action.publicSelected_version});
+		case RECEIVE_PUBLIC_VERSIONS:
+			return Object.assign({}, state, { publicFileVersions: action.publicFileVersions });
+		case DOWNLOAD_PUBLIC_FILE:
 			// TODO do nothing for now; but in the future can utilize to display certain effects
-			return Object.assign({}, state, { blob: action.blob });
-		case RECEIVE_FILE_PRESIGNED_URL:
-			return Object.assign({}, state, { presignedUrl: action.presignedUrl });
-		case RESET_FILE_PRESIGNED_URL:
-			return Object.assign({}, state, { presignedUrl: "" });
+			return Object.assign({}, state, { publicBlob: action.publicBlob });
 		default:
 			return state;
 	}
 };
 
-export default file;
+export default publicFile;
