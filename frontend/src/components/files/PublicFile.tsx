@@ -28,11 +28,11 @@ import {
 	patchFileMetadata as patchFileMetadataAction,
 	postFileMetadata as createFileMetadataAction,
 } from "../../actions/metadata";
-import { EditMetadata } from "../metadata/EditMetadata";
 import Layout from "../Layout";
 import { fetchPublicDatasetAbout} from "../../actions/public_dataset";
 import { FileDetails } from "./FileDetails";
 import { fetchFolderPath } from "../../actions/folder";
+import {fetchPublicFolderPath } from "../../actions/folder";
 import { Listeners } from "../listeners/Listeners";
 import { ExtractionHistoryTab } from "../listeners/ExtractionHistoryTab";
 import { FileActionsMenu } from "./FileActionsMenu";
@@ -67,19 +67,13 @@ export const PublicFile = (): JSX.Element => {
 
 	const dispatch = useDispatch();
 	const listPublicFileSummary = (fileId: string | undefined) =>
-		dispatch(fetchFileSummary(fileId));
-	const listFileVersions = (fileId: string | undefined) =>
-		dispatch(fetchFileVersions(fileId));
+		dispatch(fetchPublicFileSummary(fileId));
+	const listPublicFileVersions = (fileId: string | undefined) =>
+		dispatch(fetchPublicFileVersions(fileId));
 	const listFileMetadata = (fileId: string | undefined) =>
 		dispatch(fetchFileMetadata(fileId));
-	const createFileMetadata = (fileId: string | undefined, metadata: object) =>
-		dispatch(createFileMetadataAction(fileId, metadata));
-	const updateFileMetadata = (fileId: string | undefined, metadata: object) =>
-		dispatch(patchFileMetadataAction(fileId, metadata));
-	const deleteFileMetadata = (fileId: string | undefined, metadata: object) =>
-		dispatch(deleteFileMetadataAction(fileId, metadata));
-	const getFolderPath = (folderId: string | null) =>
-		dispatch(fetchFolderPath(folderId));
+	const getPublicFolderPath = (folderId: string | null) =>
+		dispatch(fetchPublicFolderPath(folderId));
 
 	const file = useSelector((state: RootState) => state.file);
 	const latestVersionNum = useSelector(

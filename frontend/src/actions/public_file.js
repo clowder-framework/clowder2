@@ -101,9 +101,6 @@ export function fetchPublicFilePreviews(id) {
 
 
 
-export const CREATE_FILE = "CREATE_FILE";
-
-
 
 
 

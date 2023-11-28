@@ -104,7 +104,7 @@ export const PublicDataset = (): JSX.Element => {
 	const datasetRole = useSelector(
 		(state: RootState) => state.dataset.datasetRole
 	);
-	const folderPath = useSelector((state: RootState) => state.folder.folderPath);
+	const folderPath = useSelector((state: RootState) => state.folder.publicFolderPath);
 
 	// state
 	const [selectedTabIndex, setSelectedTabIndex] = useState<number>(0);
