@@ -16,7 +16,6 @@ import { useParams, useSearchParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 
 import { a11yProps, TabPanel } from "../tabs/TabComponent";
-import { fetchFileSummary, fetchFileVersions } from "../../actions/file";
 import {fetchPublicFileSummary, fetchPublicFileVersions} from "../../actions/public_file.js";
 import { MainBreadcrumbs } from "../navigation/BreadCrumb";
 import { FileVersionHistory } from "../versions/FileVersionHistory";
@@ -65,8 +64,10 @@ export const PublicFile = (): JSX.Element => {
 	const dispatch = useDispatch();
 	const listPublicFileSummary = (fileId: string | undefined) =>
 		dispatch(fetchPublicFileSummary(fileId));
-	const listPublicFileVersions = (fileId: string | undefined) =>
-		dispatch(fetchPublicFileVersions(fileId));
+	const listPublicFileVersions = (fileId: string | undefined,
+		skip: number | undefined,
+		limit: number | undefined) =>
+		dispatch(fetchPublicFileVersions(fileId, skip, limit));
 	const listFileMetadata = (fileId: string | undefined) =>
 		dispatch(fetchFileMetadata(fileId));
 	const getPublicFolderPath = (folderId: string | null) =>
@@ -108,7 +109,7 @@ export const PublicFile = (): JSX.Element => {
 	useEffect(() => {
 		// load file information
 		listPublicFileSummary(fileId);
-		listPublicFileVersions(fileId);
+		listPublicFileVersions(fileId, 0, 20);
 		// FIXME replace checks for null with logic to load this info from redux instead of the page parameters
 		if (datasetId != "null" && datasetId != "undefined") {
 			listDatasetAbout(datasetId); // get dataset name
@@ -198,11 +199,11 @@ export const PublicFile = (): JSX.Element => {
 		setSelectedTabIndex(newTabIndex);
 	};
 
-	if (showForbiddenPage) {
-		return <Forbidden />;
-	} else if (showNotFoundPage) {
-		return <PageNotFound />;
-	}
+	// if (showForbiddenPage) {
+	// 	return <Forbidden />;
+	// } else if (showNotFoundPage) {
+	// 	return <PageNotFound />;
+	// }
 
 	return (
 		<Layout>
@@ -225,13 +226,13 @@ export const PublicFile = (): JSX.Element => {
 						<VersionChip selectedVersion={selectedVersionNum} />
 					</Grid>
 				</Grid>
-				{/*<Grid item xs={2} sx={{ display: "flex-top", alignItems: "center" }}>*/}
-				{/*	<FileActionsMenu*/}
-				{/*		fileId={fileId}*/}
-				{/*		datasetId={datasetId}*/}
-				{/*		setSelectedVersion={setSelectedVersionNum}*/}
-				{/*	/>*/}
-				{/*</Grid>*/}
+				<Grid item xs={2} sx={{ display: "flex-top", alignItems: "center" }}>
+					<FileActionsMenu
+						fileId={fileId}
+						datasetId={datasetId}
+						setSelectedVersion={setSelectedVersionNum}
+					/>
+				</Grid>
 			</Grid>
 			<Grid container spacing={2}>
 				<Grid item xs={10}>
@@ -327,20 +328,20 @@ export const PublicFile = (): JSX.Element => {
 					{latestVersionNum == selectedVersionNum ? (
 						// latest version
 						<>
-							{Object.keys(fileSummary).length > 0 && (
-								<FileDetails fileSummary={fileSummary} />
-							)}
+							{/*{Object.keys(fileSummary).length > 0 && (*/}
+							{/*	<FileDetails fileSummary={fileSummary} />*/}
+							{/*)}*/}
 						</>
 					) : (
 						// history version
 						<>
-							{Object.keys(fileSummary).length > 0 && (
-								<FileHistory
-									name={file.publicFileSummary.name}
-									contentType={file.publicFileSummary.content_type?.content_type}
-									selectedVersionNum={selectedVersionNum}
-								/>
-							)}
+							{/*{Object.keys(fileSummary).length > 0 && (*/}
+							{/*	<FileHistory*/}
+							{/*		name={file.publicFileSummary.name}*/}
+							{/*		contentType={file.publicFileSummary.content_type?.content_type}*/}
+							{/*		selectedVersionNum={selectedVersionNum}*/}
+							{/*	/>*/}
+							{/*)}*/}
 						</>
 					)}
 					<>

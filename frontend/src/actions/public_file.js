@@ -118,9 +118,9 @@ export function changePublicSelectedVersion(fileId, selectedVersion) {
 
 export const RECEIVE_PUBLIC_VERSIONS = "RECEIVE_PUBLIC_VERSIONS";
 
-export function fetchPublicFileVersions(fileId) {
+export function fetchPublicFileVersions(fileId, skip, limit) {
 	return (dispatch) => {
-		return V2.PublicFilesService.getFileVersionsApiV2PublicFilesFileIdVersionsGet(fileId)
+		return V2.PublicFilesService.getFileVersionsApiV2PublicFilesFileIdVersionsGet(fileId, skip, limit)
 			.then((json) => {
 				// sort by decending order
 				const version = json.sort(
