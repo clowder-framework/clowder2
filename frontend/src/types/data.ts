@@ -209,7 +209,6 @@ export interface PublicFileState {
 	publicMetadataJsonld: MetadataJsonld[];
 	publicPreviews: FilePreview[];
 	publicFileVersions: FileVersion[];
-	publicPresignedUrl: string;
 	publicSelected_version_num: number;
 }
 

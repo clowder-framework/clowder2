@@ -101,14 +101,29 @@ interface RECEIVE_PREVIEWS {
 	previews: FilePreview[];
 }
 
+interface RECEIVE_PUBLIC_PREVIEWS {
+	type: "RECEIVE_PUBLIC_PREVIEWS";
+	publicPreviews: FilePreview[];
+}
+
 interface RECEIVE_VERSIONS {
 	type: "RECEIVE_VERSIONS";
 	fileVersions: FileVersion[];
 }
 
+interface RECEIVE_PUBLIC_VERSIONS {
+	type: "RECEIVE_PUBLIC_VERSIONS";
+	publicFileVersions: FileVersion[];
+}
+
 interface CHANGE_SELECTED_VERSION {
 	type: "CHANGE_SELECTED_VERSION";
 	selected_version: number;
+}
+
+interface CHANGE_PUBLIC_SELECTED_VERSION {
+	type: "CHANGE_PUBLICSELECTED_VERSION";
+	pubilcSelected_version: number;
 }
 
 interface SET_USER {
@@ -499,6 +514,13 @@ export type DataAction =
 	| RECEIVE_PREVIEWS
 	| RECEIVE_VERSIONS
 	| CHANGE_SELECTED_VERSION
+	| RECEIVE_PUBLIC_FILE_SUMMARY
+	| RECEIVE_PUBLIC_FILE_ROLE
+	| RECEIVE_PUBLIC_FILE_EXTRACTED_METADATA
+	| RECEIVE_PUBLIC_FILE_METADATA_JSONLD
+	| RECEIVE_PUBLIC_PREVIEWS
+	| RECEIVE_PUBLIC_VERSIONS
+	| CHANGE_PUBLIC_SELECTED_VERSION
 	| SET_USER
 	| LOGIN_ERROR
 	| LOGOUT

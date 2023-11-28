@@ -23,10 +23,7 @@ import { FileVersionHistory } from "../versions/FileVersionHistory";
 import { DisplayMetadata } from "../metadata/DisplayMetadata";
 import { DisplayListenerMetadata } from "../metadata/DisplayListenerMetadata";
 import {
-	deleteFileMetadata as deleteFileMetadataAction,
 	fetchFileMetadata,
-	patchFileMetadata as patchFileMetadataAction,
-	postFileMetadata as createFileMetadataAction,
 } from "../../actions/metadata";
 import Layout from "../Layout";
 import { fetchPublicDatasetAbout} from "../../actions/public_dataset";
@@ -75,20 +72,20 @@ export const PublicFile = (): JSX.Element => {
 	const getPublicFolderPath = (folderId: string | null) =>
 		dispatch(fetchPublicFolderPath(folderId));
 
-	const file = useSelector((state: RootState) => state.file);
-	const latestVersionNum = useSelector(
-		(state: RootState) => state.file.fileSummary.version_num
+	const file = useSelector((state: RootState) => state.publicFile);
+	console.log("public file is:", file);
+	const fileSummary = useSelector((state: RootState) => state.publicFile.publicFileSummary);
+	const filePreviews = useSelector((state: RootState) => state.publicFile.publicPreviews);
+	const fileVersions = useSelector(
+		(state: RootState) => state.publicFile.publicFileVersions
+	);
+		const latestVersionNum = useSelector(
+		(state: RootState) => state.publicFile.publicFileSummary.version_num
 	);
 	const [selectedVersionNum, setSelectedVersionNum] = useState(
 		latestVersionNum ?? 1
 	);
-	const fileSummary = useSelector((state: RootState) => state.file.fileSummary);
-	const filePreviews = useSelector((state: RootState) => state.file.previews);
-	const fileVersions = useSelector(
-		(state: RootState) => state.file.fileVersions
-	);
-	const folderPath = useSelector((state: RootState) => state.folder.folderPath);
-	const fileRole = useSelector((state: RootState) => state.file.fileRole);
+	const folderPath = useSelector((state: RootState) => state.folder.publicFolderPath);
 
 	const [selectedTabIndex, setSelectedTabIndex] = useState(0);
 	const [previews, setPreviews] = useState([]);
@@ -109,14 +106,14 @@ export const PublicFile = (): JSX.Element => {
 	// component did mount
 	useEffect(() => {
 		// load file information
-		listFileSummary(fileId);
-		listFileVersions(fileId);
+		listPublicFileSummary(fileId);
+		listPublicFileVersions(fileId);
 		// FIXME replace checks for null with logic to load this info from redux instead of the page parameters
 		if (datasetId != "null" && datasetId != "undefined") {
 			listDatasetAbout(datasetId); // get dataset name
 		}
 		if (folderId != "null" && folderId != "undefined") {
-			getFolderPath(folderId); // get folder path
+			getPublicFolderPath(folderId); // get folder path
 		}
 	}, []);
 
@@ -200,44 +197,6 @@ export const PublicFile = (): JSX.Element => {
 		setSelectedTabIndex(newTabIndex);
 	};
 
-	const setMetadata = (metadata: any) => {
-		// TODO wrap this in to a function
-		setMetadataRequestForms((prevState) => {
-			// merge the content field; e.g. lat lon
-			if (metadata.definition in prevState) {
-				const prevContent = prevState[metadata.definition].content;
-				metadata.content = { ...prevContent, ...metadata.content };
-			}
-			return { ...prevState, [metadata.definition]: metadata };
-		});
-	};
-
-	const handleMetadataUpdateFinish = () => {
-		Object.keys(metadataRequestForms).map((key) => {
-			if (
-				"id" in metadataRequestForms[key] &&
-				metadataRequestForms[key]["id"] !== undefined &&
-				metadataRequestForms[key]["id"] !== null &&
-				metadataRequestForms[key]["id"] !== ""
-			) {
-				// update existing metadata
-				updateFileMetadata(fileId, metadataRequestForms[key]);
-			} else {
-				// post new metadata if metadata id doesn't exist
-				createFileMetadata(fileId, metadataRequestForms[key]);
-			}
-		});
-
-		// reset the form
-		setMetadataRequestForms({});
-
-		// pulling lastest from the API endpoint
-		listFileMetadata(fileId);
-
-		// switch to display mode
-		setEnableAddMetadata(false);
-	};
-
 	if (showForbiddenPage) {
 		return <Forbidden />;
 	} else if (showNotFoundPage) {
@@ -263,7 +222,6 @@ export const PublicFile = (): JSX.Element => {
 					<MainBreadcrumbs paths={paths} />
 					<Grid item>
 						<VersionChip selectedVersion={selectedVersionNum} />
-						<RoleChip role={fileRole} />
 					</Grid>
 				</Grid>
 				{/*<Grid item xs={2} sx={{ display: "flex-top", alignItems: "center" }}>*/}
@@ -342,16 +300,16 @@ export const PublicFile = (): JSX.Element => {
 					</TabPanel>
 					<TabPanel value={selectedTabIndex} index={2}>
 						<DisplayMetadata
-							updateMetadata={updateFileMetadata}
-							deleteMetadata={deleteFileMetadata}
+							updateMetadata={""}
+							deleteMetadata={""}
 							resourceType="file"
 							resourceId={fileId}
 						/>
 					</TabPanel>
 					<TabPanel value={selectedTabIndex} index={3}>
 						<DisplayListenerMetadata
-							updateMetadata={updateFileMetadata}
-							deleteMetadata={deleteFileMetadata}
+							updateMetadata={""}
+							deleteMetadata={""}
 							resourceType="file"
 							resourceId={fileId}
 							version={fileSummary.version_num}
@@ -377,8 +335,8 @@ export const PublicFile = (): JSX.Element => {
 						<>
 							{Object.keys(fileSummary).length > 0 && (
 								<FileHistory
-									name={file.fileSummary.name}
-									contentType={file.fileSummary.content_type?.content_type}
+									name={file.publicFileSummary.name}
+									contentType={file.publicFileSummary.content_type?.content_type}
 									selectedVersionNum={selectedVersionNum}
 								/>
 							)}

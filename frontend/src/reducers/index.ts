@@ -2,6 +2,7 @@ import { combineReducers } from "redux";
 import file from "./file";
 import dataset from "./dataset";
 import publicDataset from "./public_dataset";
+import publicFile from "./public_file";
 import folder from "./folder";
 import user from "./user";
 import error from "./error";
@@ -14,6 +15,7 @@ const rootReducer = combineReducers({
 	file: file,
 	dataset: dataset,
 	publicDataset: publicDataset,
+	publicFile: publicFile,
 	folder: folder,
 	user: user,
 	error: error,
