@@ -69,7 +69,6 @@ async def get_file_summary(
 async def get_file_version_details(
     file_id: str,
     version_num: Optional[int] = 0,
-    allow: bool = Depends(FileAuthorization("viewer")),
 ):
     if (file := await FileDB.get(PydanticObjectId(file_id))) is not None:
         # TODO: Incrementing too often (3x per page view)
@@ -94,7 +93,6 @@ async def get_file_versions(
     file_id: str,
     skip: int = 0,
     limit: int = 20,
-    allow: bool = Depends(FileAuthorization("viewer")),
 ):
     file = await FileDB.get(PydanticObjectId(file_id))
     if file is not None:
