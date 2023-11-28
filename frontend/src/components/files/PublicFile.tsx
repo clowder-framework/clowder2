@@ -79,7 +79,8 @@ export const PublicFile = (): JSX.Element => {
 	const fileVersions = useSelector(
 		(state: RootState) => state.publicFile.publicFileVersions
 	);
-		const latestVersionNum = useSelector(
+	console.log('file previews and versions', filePreviews, fileVersions);
+	const latestVersionNum = useSelector(
 		(state: RootState) => state.publicFile.publicFileSummary.version_num
 	);
 	const [selectedVersionNum, setSelectedVersionNum] = useState(
