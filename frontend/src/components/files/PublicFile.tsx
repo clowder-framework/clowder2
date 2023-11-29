@@ -27,25 +27,19 @@ import {
 import Layout from "../Layout";
 import { fetchPublicDatasetAbout} from "../../actions/public_dataset";
 import { FileDetails } from "./FileDetails";
-import { fetchFolderPath } from "../../actions/folder";
 import {fetchPublicFolderPath } from "../../actions/folder";
-import { Listeners } from "../listeners/Listeners";
 import { ExtractionHistoryTab } from "../listeners/ExtractionHistoryTab";
-import { FileActionsMenu } from "./FileActionsMenu";
+import { PublicFileActionsMenu } from "./PublicFileActionsMenu";
 import { FormatListBulleted, InsertDriveFile } from "@material-ui/icons";
 import { TabStyle } from "../../styles/Styles";
 import BuildIcon from "@mui/icons-material/Build";
 import AssessmentIcon from "@mui/icons-material/Assessment";
 import HistoryIcon from "@mui/icons-material/History";
-import { Forbidden } from "../errors/Forbidden";
-import { PageNotFound } from "../errors/PageNotFound";
 import VisibilityIcon from "@mui/icons-material/Visibility";
-import { Visualization } from "../visualizations/Visualization";
 import { PublicVisualization } from "../visualizations/PublicVisualization";
 import { ErrorModal } from "../errors/ErrorModal";
 import { FileHistory } from "./FileHistory";
 import { VersionChip } from "../versions/VersionChip";
-import RoleChip from "../auth/RoleChip";
 import Typography from "@mui/material/Typography";
 import { ClowderSelect } from "../styledComponents/ClowderSelect";
 
@@ -228,7 +222,7 @@ export const PublicFile = (): JSX.Element => {
 					</Grid>
 				</Grid>
 				<Grid item xs={2} sx={{ display: "flex-top", alignItems: "center" }}>
-					<FileActionsMenu
+					<PublicFileActionsMenu
 						fileId={fileId}
 						datasetId={datasetId}
 						setSelectedVersion={setSelectedVersionNum}
