@@ -48,6 +48,7 @@ from app.routers import (
     feeds,
     jobs,
     visualization,
+    public_visualization,
     thumbnails,
 )
 
@@ -196,6 +197,11 @@ api_router.include_router(
     prefix="/visualizations",
     tags=["visualizations"],
     dependencies=[Depends(get_current_username)],
+)
+api_router.include_router(
+    visualization.router,
+    prefix="/public_visualizations",
+    tags=["public_visualizations"],
 )
 api_router.include_router(
     thumbnails.router,
