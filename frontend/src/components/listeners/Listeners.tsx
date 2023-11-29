@@ -78,6 +78,7 @@ export function Listeners(props: ListenerProps) {
 	const [nextDisabled, setNextDisabled] = useState<boolean>(false);
 	const [openSubmitExtraction, setOpenSubmitExtraction] =
 		useState<boolean>(false);
+	const [infoOnly, setInfoOnly] = useState<boolean>(false);
 	const [selectedExtractor, setSelectedExtractor] = useState();
 	const [searchText, setSearchText] = useState<string>("");
 	const [selectedCategory, setSelectedCategory] = useState("");
@@ -282,6 +283,7 @@ export function Listeners(props: ListenerProps) {
 												extractor={listener}
 												extractorName={listener.name}
 												extractorDescription={listener.description}
+												setInfoOnly={setInfoOnly}
 												setOpenSubmitExtraction={setOpenSubmitExtraction}
 												setSelectedExtractor={setSelectedExtractor}
 											/>
@@ -321,6 +323,7 @@ export function Listeners(props: ListenerProps) {
 				fileId={fileId}
 				datasetId={datasetId}
 				open={openSubmitExtraction}
+				infoOnly={infoOnly}
 				handleClose={handleSubmitExtractionClose}
 				selectedExtractor={selectedExtractor}
 			/>

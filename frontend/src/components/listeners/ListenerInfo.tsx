@@ -10,10 +10,11 @@ import { theme } from "../../theme";
 
 type ListenerInfoProps = {
 	selectedExtractor: Listener | undefined;
+	defaultExpanded?: boolean;
 };
 
 export const ListenerInfo = (props: ListenerInfoProps) => {
-	const { selectedExtractor } = props;
+	const { selectedExtractor, defaultExpanded } = props;
 
 	return (
 		<Box>
@@ -45,7 +46,10 @@ export const ListenerInfo = (props: ListenerInfoProps) => {
 				</ClowderFootnote>
 			) : null}
 			{selectedExtractor ? (
-				<ListenerInfoDetails listener={selectedExtractor} />
+				<ListenerInfoDetails
+					listener={selectedExtractor}
+					defaultExpanded={defaultExpanded}
+				/>
 			) : null}
 		</Box>
 	);
