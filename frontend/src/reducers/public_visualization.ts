@@ -19,13 +19,13 @@ const defaultState: PublicVisualizationState = {
 const publicVisualization = (state = defaultState, action: DataAction) => {
 	switch (action.type) {
 		case GET_PUBLIC_VIS_DATA:
-			return Object.assign({}, state, { publicVisData: action.visData });
+			return Object.assign({}, state, { publicVisData: action.publicVisData });
 		case GET_PUBLIC_VIS_CONFIG:
-			return Object.assign({}, state, { publicVisConfig: action.visConfig });
+			return Object.assign({}, state, { publicVisConfig: action.publicVisConfig });
 		case DOWNLOAD_PUBLIC_VIS_DATA:
-			return Object.assign({}, state, { publicBlob: action.blob });
+			return Object.assign({}, state, { publicBlob: action.publicBlob });
 		case GET_PUBLIC_VIS_DATA_PRESIGNED_URL:
-			return Object.assign({}, state, { publicPresignedUrl: action.presignedUrl });
+			return Object.assign({}, state, { publicPresignedUrl: action.publicPresignedUrl });
 		case RESET_PUBLIC_VIS_DATA_PRESIGNED_URL:
 			return Object.assign({}, state, { publicPresignedUrl: "" });
 		default:

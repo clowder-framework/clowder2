@@ -10,6 +10,7 @@ import metadata from "./metadata";
 import listeners from "./listeners";
 import group from "./group";
 import visualization from "./visualization";
+import publicVisualization from "./public_visualization";
 
 const rootReducer = combineReducers({
 	file: file,
@@ -23,6 +24,7 @@ const rootReducer = combineReducers({
 	listener: listeners,
 	group: group,
 	visualization: visualization,
+	publicVisualization: publicVisualization,
 });
 
 export default rootReducer;

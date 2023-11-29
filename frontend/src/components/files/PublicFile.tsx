@@ -292,7 +292,7 @@ export const PublicFile = (): JSX.Element => {
 						/>
 					</Tabs>
 					<TabPanel value={selectedTabIndex} index={0}>
-						<Visualization fileId={fileId} />
+						<PublicVisualization fileId={fileId} />
 					</TabPanel>
 					{/*Version History*/}
 					<TabPanel value={selectedTabIndex} index={1}>
