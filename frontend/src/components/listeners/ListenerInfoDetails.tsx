@@ -1,22 +1,15 @@
 import React, { useState } from "react";
-import { Button } from "@mui/material";
+import { Box, Button } from "@mui/material";
 import { parseDate } from "../../utils/common";
 import { StackedList } from "../util/StackedList";
 import { EventListenerOut as Listener } from "../../openapi/v2";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 
 type ListenerAboutProps = {
 	listener: Listener;
 };
 
-const accordionStyle = {
-	accordion: {
-		boxShadow: "none",
-		border: "none",
-	},
-	accordionSummary: {
-		backgroundColor: "transparent",
-	},
-};
 export function ListenerInfoDetails(props: ListenerAboutProps) {
 	const { listener } = props;
 	const [expanded, setExpanded] = useState(false);
@@ -119,15 +112,32 @@ export function ListenerInfoDetails(props: ListenerAboutProps) {
 	}
 
 	return (
-		<>
-			<Button
-				onClick={() => {
-					setExpanded(true);
-				}}
-			>
-				More Details...
-			</Button>
+		<Box mt={2} mb={2}>
+			{!expanded ? (
+				<Button
+					onClick={() => {
+						setExpanded(true);
+					}}
+					sx={{ padding: 0, float: "right" }}
+					endIcon={<ExpandMoreIcon />}
+				>
+					Read More
+				</Button>
+			) : null}
+
 			{expanded ? <StackedList keyValues={details} /> : null}
-		</>
+
+			{expanded ? (
+				<Button
+					onClick={() => {
+						setExpanded(false);
+					}}
+					sx={{ padding: 0, float: "right" }}
+					endIcon={<ExpandLessIcon />}
+				>
+					Read Less
+				</Button>
+			) : null}
+		</Box>
 	);
 }
