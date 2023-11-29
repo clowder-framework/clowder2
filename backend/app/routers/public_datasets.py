@@ -14,6 +14,7 @@ from beanie.odm.operators.update.general import Inc
 from bson import ObjectId
 from bson import json_util
 from elasticsearch import Elasticsearch
+from fastapi import Form
 from fastapi import (
     APIRouter,
     HTTPException,
@@ -22,6 +23,18 @@ from fastapi import (
     File,
     UploadFile,
     Request,
+)
+from app.models.metadata import (
+    MongoDBRef,
+    MetadataAgent,
+    MetadataIn,
+    MetadataDB,
+    MetadataOut,
+    MetadataPatch,
+    validate_context,
+    patch_metadata,
+    MetadataDelete,
+    MetadataDefinitionDB,
 )
 from fastapi.responses import StreamingResponse
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
@@ -124,3 +137,35 @@ async def get_dataset_folders(
             folders = await FolderDBViewList.find(*query).skip(skip).limit(limit).to_list()
             return [folder.dict() for folder in folders]
     raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
+
+
+@router.get("/{dataset_id}/metadata", response_model=List[MetadataOut])
+async def get_dataset_metadata(
+    dataset_id: str,
+    listener_name: Optional[str] = Form(None),
+    listener_version: Optional[float] = Form(None),
+):
+    if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
+        if dataset.status == DatasetStatus.PUBLIC.name:
+            query = [MetadataDB.resource.resource_id == ObjectId(dataset_id)]
+    
+            if listener_name is not None:
+                query.append(MetadataDB.agent.listener.name == listener_name)
+            if listener_version is not None:
+                query.append(MetadataDB.agent.listener.version == listener_version)
+    
+            metadata = []
+            async for md in MetadataDB.find(*query):
+                if md.definition is not None:
+                    if (
+                        md_def := await MetadataDefinitionDB.find_one(
+                            MetadataDefinitionDB.name == md.definition
+                        )
+                    ) is not None:
+                        md.description = md_def.description
+                metadata.append(md)
+            return [md.dict() for md in metadata]
+        else:
+            raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
+    else:
+        raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
