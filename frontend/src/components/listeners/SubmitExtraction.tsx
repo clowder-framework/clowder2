@@ -98,6 +98,7 @@ export default function SubmitExtraction(props: SubmitExtractionProps) {
 				sx={{
 					".MuiPaper-root": {
 						padding: "2em",
+						height: "auto",
 					},
 				}}
 			>
@@ -110,7 +111,7 @@ export default function SubmitExtraction(props: SubmitExtractionProps) {
 				{!infoOnly ? (
 					<>
 						<Divider />
-						<DialogContent>
+						<DialogContent sx={{ overflowY: "visible" }}>
 							<Stepper activeStep={activeStep} orientation="vertical">
 								{/*step 1 fill in parameters and submit extractions*/}
 								<Step key="submit">
