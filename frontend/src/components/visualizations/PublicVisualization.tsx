@@ -11,6 +11,7 @@ import { VisualizationCard } from "./VisualizationCard";
 import { VisualizationRawBytesCard } from "./VisualizationRawBytesCard";
 import { VisualizationSpecCard } from "./VisualizationSpecCard";
 import config from "../../app.config";
+import {fetchPublicFileSummary} from "../../actions/public_file";
 
 type previewProps = {
 	fileId?: string;
@@ -25,14 +26,14 @@ export const PublicVisualization = (props: previewProps) => {
 		useState(false);
 	const [isRawDataSupported, setIsRawDataSupported] = useState(false);
 
-	const publicFileSummary = useSelector((state: RootState) => state.publicFile.publicFileSummary);
-	const publicVisConfig = useSelector(
+	const fileSummary = useSelector((state: RootState) => state.publicFile.publicFileSummary);
+	const visConfig = useSelector(
 		(state: RootState) => state.publicVisualization.publicVisConfig
 	);
 
 	const dispatch = useDispatch();
 	const listPublicFileSummary = (fileId: string | undefined) =>
-		dispatch(fetchFileSummary(fileId));
+		dispatch(fetchPublicFileSummary(fileId));
 
 	const getPublicVisConfig = (resourceId: string | undefined) =>
 		dispatch(getPublicVisConfigAction(resourceId));
@@ -63,11 +64,11 @@ export const PublicVisualization = (props: previewProps) => {
 		);
 		// if raw type supported
 		if (
-			publicFileSummary&&
-			((publicFileSummary.content_type && publicFileSummary.content_type.content_type !== undefined &&
+			fileSummary&&
+			((fileSummary.content_type && fileSummary.content_type.content_type !== undefined &&
 						// @ts-ignore
 				supportedMimeType.includes(fileSummary.content_type.content_type)) ||
-				(publicFileSummary.content_type && publicFileSummary.content_type.main_type !== undefined &&
+				(fileSummary.content_type && fileSummary.content_type.main_type !== undefined &&
 							// @ts-ignore
 					supportedMimeType.includes(publicFileSummary.content_type.main_type)))
 		) {
@@ -76,15 +77,15 @@ export const PublicVisualization = (props: previewProps) => {
 			setIsRawDataSupported(false);
 		}
 
-		if (publicFileSummary &&
-			publicFileSummary.bytes && publicFileSummary.bytes >= config["rawDataVisualizationThreshold"]) {
+		if (fileSummary &&
+			fileSummary.bytes && pfileSummary.bytes >= config["rawDataVisualizationThreshold"]) {
 				setIsVisDataGreaterThanMaxSize(true);
 		} else {
 			setIsVisDataGreaterThanMaxSize(false);
 		}
 
-		setIsEmptyVisData(publicVisConfig.length === 0);
-	}, [publicFileSummary, publicVisConfig]);
+		setIsEmptyVisData(visConfig.length === 0);
+	}, [fileSummary, visConfig]);
 
 	return (
 		<Grid container rowSpacing={1} columnSpacing={{ xs: 1, sm: 3, md: 3 }}>
@@ -108,8 +109,8 @@ export const PublicVisualization = (props: previewProps) => {
 						<Suspense fallback={<div>Loading...</div>}>
 							{(() => {
 								// 2. looking for visualization configuration registered for this resource
-								if (publicVisConfig.length > 0) {
-									return publicVisConfig.map((visConfigEntry) => {
+								if (visConfig.length > 0) {
+									return visConfig.map((visConfigEntry) => {
 										// instantiate the matching visualization component if documented
 										// in configuration
 										const componentName =

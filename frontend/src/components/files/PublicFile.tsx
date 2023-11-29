@@ -232,7 +232,6 @@ export const PublicFile = (): JSX.Element => {
 						fileId={fileId}
 						datasetId={datasetId}
 						setSelectedVersion={setSelectedVersionNum}
-						publicView={false}
 					/>
 				</Grid>
 			</Grid>

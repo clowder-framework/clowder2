@@ -32,7 +32,6 @@ type FileActionsMenuProps = {
 	fileId?: string;
 	datasetId?: string;
 	setSelectedVersion: any;
-	publicView: boolean | false;
 };
 
 export const FileActionsMenu = (props: FileActionsMenuProps): JSX.Element => {
