@@ -1,5 +1,5 @@
-import React from "react";
-import { Box } from "@mui/material";
+import React, { useState } from "react";
+import { Button } from "@mui/material";
 import { parseDate } from "../../utils/common";
 import { StackedList } from "../util/StackedList";
 import { EventListenerOut as Listener } from "../../openapi/v2";
@@ -8,8 +8,23 @@ type ListenerAboutProps = {
 	listener: Listener;
 };
 
+const accordionStyle = {
+	accordion: {
+		boxShadow: "none",
+		border: "none",
+	},
+	accordionSummary: {
+		backgroundColor: "transparent",
+	},
+};
 export function ListenerInfoDetails(props: ListenerAboutProps) {
 	const { listener } = props;
+	const [expanded, setExpanded] = useState(false);
+
+	const handleChange =
+		(panel: string) => (event: React.SyntheticEvent, isExpanded: boolean) => {
+			setExpanded(isExpanded ? panel : false);
+		};
 
 	const details = new Map<string, string>();
 	details.set("Last Alive", parseDate(listener.lastAlive ?? ""));
@@ -43,7 +58,12 @@ export function ListenerInfoDetails(props: ListenerAboutProps) {
 		}
 
 		if (listener.properties.bibtex && listener.properties.bibtex.length > 0) {
-			details.set("Bibtex", listener.properties.bibtex.join(", "));
+			details.set(
+				"Bibtex",
+				listener.properties.bibtex.join(", ") !== ""
+					? listener.properties.bibtex.join(", ")
+					: "Not Available"
+			);
 		}
 
 		if (
@@ -99,8 +119,15 @@ export function ListenerInfoDetails(props: ListenerAboutProps) {
 	}
 
 	return (
-		<Box sx={{ mt: 2, mb: 2 }}>
-			<StackedList keyValues={details} />
-		</Box>
+		<>
+			<Button
+				onClick={() => {
+					setExpanded(true);
+				}}
+			>
+				More Details...
+			</Button>
+			{expanded ? <StackedList keyValues={details} /> : null}
+		</>
 	);
 }
