@@ -1,9 +1,11 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { Body_get_dataset_metadata_api_v2_public_datasets__dataset_id__metadata_get } from '../models/Body_get_dataset_metadata_api_v2_public_datasets__dataset_id__metadata_get';
 import type { DatasetOut } from '../models/DatasetOut';
 import type { FileOut } from '../models/FileOut';
 import type { FolderOut } from '../models/FolderOut';
+import type { MetadataOut } from '../models/MetadataOut';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { request as __request } from '../core/request';
 
@@ -103,6 +105,28 @@ export class PublicDatasetsService {
                 'skip': skip,
                 'limit': limit,
             },
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+
+    /**
+     * Get Dataset Metadata
+     * @param datasetId
+     * @param formData
+     * @returns MetadataOut Successful Response
+     * @throws ApiError
+     */
+    public static getDatasetMetadataApiV2PublicDatasetsDatasetIdMetadataGet(
+        datasetId: string,
+        formData?: Body_get_dataset_metadata_api_v2_public_datasets__dataset_id__metadata_get,
+    ): CancelablePromise<Array<MetadataOut>> {
+        return __request({
+            method: 'GET',
+            path: `/api/v2/public/datasets/${datasetId}/metadata`,
+            formData: formData,
+            mediaType: 'application/x-www-form-urlencoded',
             errors: {
                 422: `Validation Error`,
             },

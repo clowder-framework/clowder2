@@ -1,8 +1,10 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { Body_get_file_metadata_api_v2_public_files__file_id__metadata_get } from '../models/Body_get_file_metadata_api_v2_public_files__file_id__metadata_get';
 import type { FileOut } from '../models/FileOut';
 import type { FileVersion } from '../models/FileVersion';
+import type { MetadataOut } from '../models/MetadataOut';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { request as __request } from '../core/request';
 
@@ -113,6 +115,37 @@ export class PublicFilesService {
         return __request({
             method: 'GET',
             path: `/api/v2/public/files/${fileId}/thumbnail`,
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+
+    /**
+     * Get File Metadata
+     * Get file metadata.
+     * @param fileId
+     * @param version
+     * @param allVersions
+     * @param formData
+     * @returns MetadataOut Successful Response
+     * @throws ApiError
+     */
+    public static getFileMetadataApiV2PublicFilesFileIdMetadataGet(
+        fileId: string,
+        version?: number,
+        allVersions: boolean = false,
+        formData?: Body_get_file_metadata_api_v2_public_files__file_id__metadata_get,
+    ): CancelablePromise<Array<MetadataOut>> {
+        return __request({
+            method: 'GET',
+            path: `/api/v2/public/files/${fileId}/metadata`,
+            query: {
+                'version': version,
+                'all_versions': allVersions,
+            },
+            formData: formData,
+            mediaType: 'application/x-www-form-urlencoded',
             errors: {
                 422: `Validation Error`,
             },
