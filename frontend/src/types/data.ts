@@ -252,6 +252,13 @@ export interface VisualizationState {
 	blob: Blob;
 }
 
+export interface PublicVisualizationState {
+	publicVisData: VisualizationDataOut;
+	publicVisConfig: VisualizationConfigOut[];
+	publicPresignedUrl: string;
+	publicBlob: Blob;
+}
+
 export interface EventListenerJobStatus {
 	created: string;
 	started: string;
@@ -274,4 +281,5 @@ export interface RootState {
 	user: UserState;
 	folder: FolderState;
 	visualization: VisualizationState;
+	publicVisualization: PublicVisualizationState;
 }

@@ -30,6 +30,7 @@ import {
 import { CREATE_GROUP, DELETE_GROUP } from "../actions/group";
 import { RECEIVE_FILE_PRESIGNED_URL } from "../actions/file";
 import { GET_VIS_DATA_PRESIGNED_URL } from "../actions/visualization";
+import { GET_PUBLIC_VIS_DATA_PRESIGNED_URL } from "../actions/public_visualization";
 
 interface RECEIVE_FILES_IN_DATASET {
 	type: "RECEIVE_FILES_IN_DATASET";
@@ -91,9 +92,19 @@ interface RECEIVE_FILE_EXTRACTED_METADATA {
 	extractedMetadata: ExtractedMetadata[];
 }
 
+interface RECEIVE_PUBLIC_FILE_EXTRACTED_METADATA {
+	type: "RECEIVE_PUBLIC_FILE_EXTRACTED_METADATA";
+	publicExtractedMetadata: ExtractedMetadata[];
+}
+
 interface RECEIVE_FILE_METADATA_JSONLD {
 	type: "RECEIVE_FILE_METADATA_JSONLD";
 	metadataJsonld: MetadataJsonld[];
+}
+
+interface RECEIVE_PUBLIC_FILE_METADATA_JSONLD {
+	type: "RECEIVE_PUBLIC_FILE_METADATA_JSONLD";
+	publicMetadataJsonld: MetadataJsonld[];
 }
 
 interface RECEIVE_PREVIEWS {
@@ -122,7 +133,7 @@ interface CHANGE_SELECTED_VERSION {
 }
 
 interface CHANGE_PUBLIC_SELECTED_VERSION {
-	type: "CHANGE_PUBLICSELECTED_VERSION";
+	type: "CHANGE_PUBLIC_SELECTED_VERSION";
 	pubilcSelected_version: number;
 }
 
@@ -253,6 +264,11 @@ interface FOLDER_ADDED {
 interface RECEIVE_FILE_SUMMARY {
 	type: "RECEIVE_FILE_SUMMARY";
 	fileSummary: FileSummary;
+}
+
+interface RECEIVE_PUBLIC_FILE_SUMMARY {
+	type: "RECEIVE_PUBLIC_FILE_SUMMARY";
+	publicFileSummary: FileSummary;
 }
 
 interface RECEIVE_DATASET_METADATA {
@@ -480,6 +496,7 @@ interface GET_VIS_CONFIG {
 	visConfig: VisualizationConfigOut;
 }
 
+
 interface DOWNLOAD_VIS_DATA {
 	type: "DOWNLOAD_VIS_DATA";
 	blob: Blob;
@@ -493,6 +510,31 @@ interface GET_VIS_DATA_PRESIGNED_URL {
 interface RESET_VIS_DATA_PRESIGNED_URL {
 	type: "RESET_VIS_DATA_PRESIGNED_URL";
 	preSignedUrl: string;
+}
+
+interface GET_PUBLIC_VIS_DATA {
+	type: "GET_PUBLIC_VIS_DATA";
+	publicVisData: VisualizationDataOut;
+}
+
+interface GET_PUBLIC_VIS_CONFIG {
+	type: "GET_PUBLIC_VIS_CONFIG";
+	publicVisConfig: VisualizationConfigOut;
+}
+
+interface DOWNLOAD_PUBLIC_VIS_DATA {
+	type: "DOWNLOAD_PUBLIC_VIS_DATA";
+	publicBlob: Blob;
+}
+
+interface GET_PUBLIC_VIS_DATA_PRESIGNED_URL {
+	type: "GET_VIS_DATA_PRESIGNED_URL";
+	publicPresignedUrl: string;
+}
+
+interface RESET_PUBLIC_VIS_DATA_PRESIGNED_URL {
+	type: "RESET_VIS_DATA_PRESIGNED_URL";
+	publicPreSignedUrl: string;
 }
 
 export type DataAction =
@@ -515,7 +557,6 @@ export type DataAction =
 	| RECEIVE_VERSIONS
 	| CHANGE_SELECTED_VERSION
 	| RECEIVE_PUBLIC_FILE_SUMMARY
-	| RECEIVE_PUBLIC_FILE_ROLE
 	| RECEIVE_PUBLIC_FILE_EXTRACTED_METADATA
 	| RECEIVE_PUBLIC_FILE_METADATA_JSONLD
 	| RECEIVE_PUBLIC_PREVIEWS
@@ -589,4 +630,9 @@ export type DataAction =
 	| GET_VIS_CONFIG
 	| DOWNLOAD_VIS_DATA
 	| GET_VIS_DATA_PRESIGNED_URL
-	| RESET_VIS_DATA_PRESIGNED_URL;
+	| RESET_VIS_DATA_PRESIGNED_URL
+	| GET_PUBLIC_VIS_DATA
+	| GET_PUBLIC_VIS_CONFIG
+	| DOWNLOAD_PUBLIC_VIS_DATA
+	| GET_PUBLIC_VIS_DATA_PRESIGNED_URL
+	| RESET_PUBLIC_VIS_DATA_PRESIGNED_URL
