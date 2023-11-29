@@ -6,6 +6,7 @@ import { parseDate } from "../../utils/common";
 import { EventListenerOut as Listener } from "../../openapi/v2";
 import Chip from "@mui/material/Chip";
 import { ListenerInfoDetails } from "./ListenerInfoDetails";
+import { theme } from "../../theme";
 
 type ListenerInfoProps = {
 	selectedExtractor: Listener | undefined;
@@ -37,7 +38,7 @@ export const ListenerInfo = (props: ListenerInfoProps) => {
 			selectedExtractor["created"] &&
 			selectedExtractor["properties"] &&
 			selectedExtractor["properties"]["author"] ? (
-				<ClowderFootnote>
+				<ClowderFootnote style={{ color: theme.palette.info.main }}>
 					{`Created by ${
 						selectedExtractor["properties"]["author"]
 					} at ${parseDate(selectedExtractor["created"])}`}

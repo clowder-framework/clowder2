@@ -8,11 +8,14 @@ import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 
 type ListenerAboutProps = {
 	listener: Listener;
+	defaultExpanded?: boolean;
 };
 
 export function ListenerInfoDetails(props: ListenerAboutProps) {
-	const { listener } = props;
-	const [expanded, setExpanded] = useState(false);
+	const { listener, defaultExpanded } = props;
+	const [expanded, setExpanded] = useState(
+		defaultExpanded ? defaultExpanded : false
+	);
 
 	const handleChange =
 		(panel: string) => (event: React.SyntheticEvent, isExpanded: boolean) => {
