@@ -11,14 +11,15 @@ import {
 	RESET_VIS_DATA_PRESIGNED_URL,
 } from "../../actions/visualization";
 import { RootState } from "../../types/data";
+import {RESET_PUBLIC_VIS_DATA_PRESIGNED_URL} from "../../actions/public_visualization";
 
 type previewProps = {
-	visComponentDefinition: VisComponentDefinitions;
-	visualizationDataItem: VisualizationDataOut;
+	publicVisComponentDefinition: VisComponentDefinitions;
+	publicVisualizationDataItem: VisualizationDataOut;
 };
 
-export const VisualizationCard = (props: previewProps) => {
-	const { visComponentDefinition, visualizationDataItem } = props;
+export const PublicVisualizationCard = (props: previewProps) => {
+	const { publicVisComponentDefinition, publicVisualizationDataItem } = props;
 	const [expanded, setExpanded] = React.useState(false);
 	const [visShareModalOpen, setVisShareModalOpen] = useState(false);
 
@@ -30,7 +31,7 @@ export const VisualizationCard = (props: previewProps) => {
 	) =>
 		dispatch(generateVisPresignedUrlAction(visualizationId, expiresInSeconds));
 	const presignedUrl = useSelector(
-		(state: RootState) => state.visualization.presignedUrl
+		(state: RootState) => state.publicVisualization.publicPresignedUrl
 	);
 
 	const handleExpandClick = () => {
@@ -38,12 +39,12 @@ export const VisualizationCard = (props: previewProps) => {
 	};
 
 	const handleShareLinkClick = () => {
-		generateVisPresignedUrl(visualizationDataItem.id, 7 * 24 * 3600);
+		generateVisPresignedUrl(publicVisualizationDataItem.id, 7 * 24 * 3600);
 		setVisShareModalOpen(true);
 	};
 	const setVisShareModalClose = () => {
 		setVisShareModalOpen(false);
-		dispatch({ type: RESET_VIS_DATA_PRESIGNED_URL });
+		dispatch({ type: RESET_PUBLIC_VIS_DATA_PRESIGNED_URL });
 	};
 
 	return (
@@ -57,8 +58,8 @@ export const VisualizationCard = (props: previewProps) => {
 				/>
 				<Collapse in={!expanded} timeout="auto" unmountOnExit>
 					<CardContent>
-						{React.cloneElement(visComponentDefinition.component, {
-							visualizationId: visualizationDataItem.id,
+						{React.cloneElement(publicVisComponentDefinition.component, {
+							visualizationId: publicVisualizationDataItem.id,
 						})}
 					</CardContent>
 				</Collapse>
@@ -79,7 +80,7 @@ export const VisualizationCard = (props: previewProps) => {
 				<Collapse in={expanded} timeout="auto" unmountOnExit>
 					<CardContent>
 						<VisualizationDataDetail
-							visualizationDataItem={visualizationDataItem}
+							visualizationDataItem={publicVisualizationDataItem}
 						/>
 					</CardContent>
 				</Collapse>

@@ -10,13 +10,13 @@ import {
 	Tab,
 	Tabs,
 } from "@mui/material";
-import { downloadResource } from "../../utils/common";
+import {downloadPublicResource} from "../../utils/common";
 import { PreviewConfiguration, RootState } from "../../types/data";
 import { useParams, useSearchParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 
 import { a11yProps, TabPanel } from "../tabs/TabComponent";
-import {fetchPublicFileSummary, fetchPublicFileVersions} from "../../actions/public_file.js";
+import {fetchPublicFileSummary, fetchPublicFileVersions, fetchPublicFileMetadata} from "../../actions/public_file.js";
 import { MainBreadcrumbs } from "../navigation/BreadCrumb";
 import { FileVersionHistory } from "../versions/FileVersionHistory";
 import { DisplayMetadata } from "../metadata/DisplayMetadata";
@@ -64,26 +64,25 @@ export const PublicFile = (): JSX.Element => {
 		limit: number | undefined) =>
 		dispatch(fetchPublicFileVersions(fileId, skip, limit));
 	const listFileMetadata = (fileId: string | undefined) =>
-		dispatch(fetchFileMetadata(fileId));
+		dispatch(fetchPublicFileMetadata(fileId));
 	const getPublicFolderPath = (folderId: string | null) =>
 		dispatch(fetchPublicFolderPath(folderId));
 
 	const file = useSelector((state: RootState) => state.publicFile);
-	console.log("public file is:", file);
 	const fileSummary = useSelector((state: RootState) => state.publicFile.publicFileSummary);
 	const filePreviews = useSelector((state: RootState) => state.publicFile.publicPreviews);
 	const fileVersions = useSelector(
 		(state: RootState) => state.publicFile.publicFileVersions
 	);
-	console.log('file previews and versions', filePreviews, fileVersions);
 	const latestVersionNum = useSelector(
 		(state: RootState) => state.publicFile.publicFileSummary.version_num
 	);
 	const [selectedVersionNum, setSelectedVersionNum] = useState(
 		latestVersionNum ?? 1
 	);
+	console.log("we got here");
 	const folderPath = useSelector((state: RootState) => state.folder.publicFolderPath);
-
+	console.log("after folder path");
 	const [selectedTabIndex, setSelectedTabIndex] = useState(0);
 	const [previews, setPreviews] = useState([]);
 	const [enableAddMetadata, setEnableAddMetadata] =
@@ -143,6 +142,8 @@ export const PublicFile = (): JSX.Element => {
 		setPaths(tmpPaths);
 	}, [about, fileSummary, folderPath]);
 
+	console.log('about, filesummary and folderpath', about, fileSummary, folderPath)
+
 	useEffect(() => {
 		if (latestVersionNum !== undefined && latestVersionNum !== null) {
 			setSelectedVersionNum(latestVersionNum);
@@ -171,14 +172,14 @@ export const PublicFile = (): JSX.Element => {
 						Configuration.previewType = filePreview["p_id"]
 							.replace(" ", "-")
 							.toLowerCase();
-						Configuration.url = `${config.hostname}${filePreview["pv_route"]}?superAdmin=true`;
+						Configuration.url = `/public/${config.hostname}${filePreview["pv_route"]}?superAdmin=true`;
 						Configuration.fileid = filePreview["pv_id"];
-						Configuration.previewer = `/public${filePreview["p_path"]}/`;
+						Configuration.previewer = `/public/${filePreview["p_path"]}/`;
 						Configuration.fileType = filePreview["pv_contenttype"];
 
-						const resourceURL = `${config.hostname}${filePreview["pv_route"]}?superAdmin=true`;
-						Configuration.resource = await downloadResource(resourceURL);
-
+						const resourceURL = `/public/${config.hostname}${filePreview["pv_route"]}?superAdmin=true`;
+						console.log("resourceURL", resourceURL);
+						Configuration.resource = await downloadPublicResource(resourceURL);
 						previewsTemp.push(Configuration);
 					})
 				);
@@ -186,6 +187,7 @@ export const PublicFile = (): JSX.Element => {
 			}
 		})();
 	}, [filePreviews]);
+	console.log("after await download resource", filePreviews);
 
 	const handleTabChange = (
 		_event: React.ChangeEvent<{}>,
@@ -364,5 +366,171 @@ export const PublicFile = (): JSX.Element => {
 				</Grid>
 			</Grid>
 		</Layout>
-	);
+	)
+
+	// return (
+	// 	<Layout>
+	// 		{/*Error Message dialogue*/}
+	// 		<ErrorModal errorOpen={errorOpen} setErrorOpen={setErrorOpen} />
+	// 		{/*snackbar*/}
+	// 		<Snackbar
+	// 			open={snackBarOpen}
+	// 			autoHideDuration={6000}
+	// 			onClose={() => {
+	// 				setSnackBarOpen(false);
+	// 				setSnackBarMessage("");
+	// 			}}
+	// 			message={snackBarMessage}
+	// 		/>
+	// 		<Grid container>
+	// 			<Grid item xs={10} sx={{ display: "flex", alignItems: "center" }}>
+	// 				<MainBreadcrumbs paths={paths} />
+	// 				<Grid item>
+	// 					<VersionChip selectedVersion={selectedVersionNum} />
+	// 				</Grid>
+	// 			</Grid>
+	// 			<Grid item xs={2} sx={{ display: "flex-top", alignItems: "center" }}>
+	// 				<PublicFileActionsMenu
+	// 					fileId={fileId}
+	// 					datasetId={datasetId}
+	// 					setSelectedVersion={setSelectedVersionNum}
+	// 				/>
+	// 			</Grid>
+	// 		</Grid>
+	// 		<Grid container spacing={2}>
+	// 			<Grid item xs={10}>
+	// 				<Tabs
+	// 					value={selectedTabIndex}
+	// 					onChange={handleTabChange}
+	// 					aria-label="file tabs"
+	// 				>
+	// 					<Tab
+	// 						icon={<VisibilityIcon />}
+	// 						iconPosition="start"
+	// 						sx={TabStyle}
+	// 						label="Visualizations"
+	// 						{...a11yProps(0)}
+	// 						disabled={false}
+	// 					/>
+	// 					<Tab
+	// 						icon={<InsertDriveFile />}
+	// 						iconPosition="start"
+	// 						sx={TabStyle}
+	// 						label="Version History"
+	// 						{...a11yProps(1)}
+	// 					/>
+	// 					<Tab
+	// 						icon={<FormatListBulleted />}
+	// 						iconPosition="start"
+	// 						sx={TabStyle}
+	// 						label="User Metadata"
+	// 						{...a11yProps(2)}
+	// 						disabled={false}
+	// 					/>
+	// 					<Tab
+	// 						icon={<AssessmentIcon />}
+	// 						iconPosition="start"
+	// 						sx={TabStyle}
+	// 						label="Extracted Metadata"
+	// 						{...a11yProps(3)}
+	// 						disabled={false}
+	// 					/>
+	// 					{/*<Tab*/}
+	// 					{/*	icon={<BuildIcon />}*/}
+	// 					{/*	iconPosition="start"*/}
+	// 					{/*	sx={TabStyle}*/}
+	// 					{/*	label="Extract"*/}
+	// 					{/*	{...a11yProps(4)}*/}
+	// 					{/*	disabled={false}*/}
+	// 					{/*/>*/}
+	// 					<Tab
+	// 						icon={<HistoryIcon />}
+	// 						iconPosition="start"
+	// 						sx={TabStyle}
+	// 						label="Extraction History"
+	// 						{...a11yProps(5)}
+	// 						disabled={false}
+	// 					/>
+	// 				</Tabs>
+	// 				<TabPanel value={selectedTabIndex} index={0}>
+	// 					<PublicVisualization fileId={fileId} />
+	// 				</TabPanel>
+	// 				{/*Version History*/}
+	// 				<TabPanel value={selectedTabIndex} index={1}>
+	// 					{fileVersions !== undefined ? (
+	// 						<FileVersionHistory fileVersions={fileVersions} />
+	// 					) : (
+	// 						<></>
+	// 					)}
+	// 				</TabPanel>
+	// 				<TabPanel value={selectedTabIndex} index={2}>
+	// 					<DisplayMetadata
+	// 						updateMetadata={""}
+	// 						deleteMetadata={""}
+	// 						resourceType="file"
+	// 						resourceId={fileId}
+	// 					/>
+	// 				</TabPanel>
+	// 				<TabPanel value={selectedTabIndex} index={3}>
+	// 					<DisplayListenerMetadata
+	// 						updateMetadata={""}
+	// 						deleteMetadata={""}
+	// 						resourceType="file"
+	// 						resourceId={fileId}
+	// 						version={fileSummary.version_num}
+	// 					/>
+	// 				</TabPanel>
+	// 				{/*<TabPanel value={selectedTabIndex} index={4}>*/}
+	// 				{/*	<Listeners fileId={fileId} datasetId={datasetId} />*/}
+	// 				{/*</TabPanel>*/}
+	// 				<TabPanel value={selectedTabIndex} index={5}>
+	// 					<ExtractionHistoryTab fileId={fileId} />
+	// 				</TabPanel>
+	// 			</Grid>
+	// 			<Grid item xs={2}>
+	// 				{latestVersionNum == selectedVersionNum ? (
+	// 					// latest version
+	// 					<>
+	// 						{/*{Object.keys(fileSummary).length > 0 && (*/}
+	// 						{/*	<FileDetails fileSummary={fileSummary} />*/}
+	// 						{/*)}*/}
+	// 					</>
+	// 				) : (
+	// 					// history version
+	// 					<>
+	// 						{/*{Object.keys(fileSummary).length > 0 && (*/}
+	// 						{/*	<FileHistory*/}
+	// 						{/*		name={file.publicFileSummary.name}*/}
+	// 						{/*		contentType={file.publicFileSummary.content_type?.content_type}*/}
+	// 						{/*		selectedVersionNum={selectedVersionNum}*/}
+	// 						{/*	/>*/}
+	// 						{/*)}*/}
+	// 					</>
+	// 				)}
+	// 				<>
+	// 					<Typography sx={{ wordBreak: "break-all" }}>Version</Typography>
+	// 					<FormControl>
+	// 						<ClowderSelect
+	// 							value={String(selectedVersionNum)}
+	// 							defaultValue={"viewer"}
+	// 							onChange={(event) => {
+	// 								setSelectedVersionNum(event.target.value);
+	// 								setSnackBarMessage("Viewing version " + event.target.value);
+	// 								setSnackBarOpen(true);
+	// 							}}
+	// 						>
+	// 							{fileVersions.map((fileVersion) => {
+	// 								return (
+	// 									<MenuItem value={fileVersion.version_num}>
+	// 										{fileVersion.version_num}
+	// 									</MenuItem>
+	// 								);
+	// 							})}
+	// 						</ClowderSelect>
+	// 					</FormControl>
+	// 				</>
+	// 			</Grid>
+	// 		</Grid>
+	// 	</Layout>
+	// );
 };

@@ -192,8 +192,6 @@ async def get_file_metadata(
     definition: Optional[str] = Form(None),
     listener_name: Optional[str] = Form(None),
     listener_version: Optional[float] = Form(None),
-    user=Depends(get_current_user),
-    allow: bool = Depends(FileAuthorization("viewer")),
 ):
     """Get file metadata."""
     if (file := await FileDB.get(PydanticObjectId(file_id))) is not None:

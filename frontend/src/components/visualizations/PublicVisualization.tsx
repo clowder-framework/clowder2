@@ -7,11 +7,11 @@ import { getVisConfig as getVisConfigAction } from "../../actions/visualization"
 import {getPublicVisConfig, getPublicVisConfig as getPublicVisConfigAction} from "../../actions/public_visualization";
 import { visComponentDefinitions } from "../../visualization.config";
 import { Grid } from "@mui/material";
-import { VisualizationCard } from "./VisualizationCard";
 import { VisualizationRawBytesCard } from "./VisualizationRawBytesCard";
 import { VisualizationSpecCard } from "./VisualizationSpecCard";
 import config from "../../app.config";
 import {fetchPublicFileSummary} from "../../actions/public_file";
+import {PublicVisualizationCard} from "./PublicVisualizationCard";
 
 type previewProps = {
 	fileId?: string;
@@ -78,7 +78,7 @@ export const PublicVisualization = (props: previewProps) => {
 		}
 
 		if (fileSummary &&
-			fileSummary.bytes && pfileSummary.bytes >= config["rawDataVisualizationThreshold"]) {
+			fileSummary.bytes && fileSummary.bytes >= config["rawDataVisualizationThreshold"]) {
 				setIsVisDataGreaterThanMaxSize(true);
 		} else {
 			setIsVisDataGreaterThanMaxSize(false);
@@ -124,7 +124,7 @@ export const PublicVisualization = (props: previewProps) => {
 												return visConfigEntry.visualization_data.map(
 													(visualizationDataItem) => {
 														return (
-															<VisualizationCard
+															<PublicVisualizationCard
 																visualizationDataItem={visualizationDataItem}
 																visComponentDefinition={visComponentDefinition}
 															/>

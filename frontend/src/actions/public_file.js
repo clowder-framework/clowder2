@@ -1,8 +1,28 @@
 import config from "../app.config";
-import { getHeader } from "../utils/common";
 import { V2 } from "../openapi";
 import { handleErrors } from "./common";
 
+export const RECEIVE_PUBLIC_FILE_METADATA = "RECEIVE_PUBLIC_FILE_METADATA";
+
+export function fetchPublicFileMetadata(fileId, version) {
+	return (dispatch) => {
+		return V2.PublicFilesService.getFileMetadataApiV2PublicFilesFileIdMetadataGet(
+			fileId,
+			version,
+			false
+		)
+			.then((json) => {
+				dispatch({
+					type: RECEIVE_PUBLIC_FILE_METADATA,
+					publicFileMetadataList: json,
+					receivedAt: Date.now(),
+				});
+			})
+			.catch((reason) => {
+				dispatch(handleErrors(reason, fetchPublicFileMetadata(fileId, version)));
+			});
+	};
+}
 
 export const RECEIVE_PUBLIC_FILE_EXTRACTED_METADATA =
 	"RECEIVE_PUBLIC_FILE_EXTRACTED_METADATA";
@@ -10,7 +30,7 @@ export const RECEIVE_PUBLIC_FILE_EXTRACTED_METADATA =
 export function fetchPublicFileExtractedMetadata(id) {
 	const url = `${config.hostname}/api/v2/public/files/${id}/metadata`;
 	return (dispatch) => {
-		return fetch(url, { mode: "cors", headers: getHeader() })
+		return fetch(url, { mode: "cors"})
 			.then((response) => {
 				if (response.status === 200) {
 					response.json().then((json) => {
@@ -53,7 +73,7 @@ export const RECEIVE_PUBLIC_FILE_METADATA_JSONLD = "RECEIVE_PUBLIC_FILE_METADATA
 export function fetchPublicFileMetadataJsonld(id) {
 	const url = `${config.hostname}/public/files/${id}/metadata.jsonld`;
 	return (dispatch) => {
-		return fetch(url, { mode: "cors", headers: getHeader() })
+		return fetch(url, { mode: "cors"})
 			.then((response) => {
 				if (response.status === 200) {
 					response.json().then((json) => {
@@ -78,7 +98,7 @@ export const RECEIVE_PUBLIC_PREVIEWS = "RECEIVE_PUBLIC_PREVIEWS";
 export function fetchPublicFilePreviews(id) {
 	const url = `${config.hostname}/public/files/${id}/getPreviews`;
 	return (dispatch) => {
-		return fetch(url, { mode: "cors", headers: getHeader() })
+		return fetch(url, { mode: "cors"})
 			.then((response) => {
 				if (response.status === 200) {
 					response.json().then((json) => {
@@ -155,7 +175,6 @@ export function filePublicDownloaded(
 		const response = await fetch(endpoint, {
 			method: "GET",
 			mode: "cors",
-			headers: await getHeader(),
 		});
 
 		if (response.status === 200) {

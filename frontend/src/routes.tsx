@@ -180,9 +180,7 @@ export const AppRoutes = (): JSX.Element => {
 				<Route
 					path="/public/files/:fileId"
 					element={
-						<PrivateRoute>
-							<PublicFileComponent />
-						</PrivateRoute>
+						<PublicFileComponent />
 					}
 				/>
 				<Route path="/auth/register" element={<RedirectRegisterComponent />} />

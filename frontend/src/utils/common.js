@@ -52,6 +52,25 @@ export async function downloadResource(url) {
 	}
 }
 
+export async function downloadPublicResource(url) {
+	const response = await fetch(url, {
+		method: "GET",
+		mode: "cors",
+	});
+
+	if (response.status === 200) {
+		const blob = await response.blob();
+		return window.URL.createObjectURL(blob);
+	} else if (response.status === 401) {
+		// TODO handle error
+		// logout();
+		return null;
+	} else {
+		// TODO handle error
+		return null;
+	}
+}
+
 export function dataURItoFile(dataURI) {
 	const metadata = dataURI.split(",")[0];
 	const mime = metadata.match(/:(.*?);/)[1];
