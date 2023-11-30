@@ -5,7 +5,9 @@ import {
 	POST_DATASET_METADATA,
 	POST_FILE_METADATA,
 	RECEIVE_DATASET_METADATA,
+	RECEIVE_PUBLIC_DATASET_METADATA,
 	RECEIVE_FILE_METADATA,
+	RECEIVE_PUBLIC_FILE_METADATA,
 	RECEIVE_METADATA_DEFINITION,
 	RECEIVE_METADATA_DEFINITIONS,
 	SAVE_METADATA_DEFINITIONS,
@@ -19,7 +21,9 @@ import { MetadataDefinitionOut } from "../openapi/v2/";
 
 const defaultState: MetadataState = {
 	datasetMetadataList: [],
+	publicDatasetMetadataList: [],
 	fileMetadataList: [],
+	publicFileMetadataList: [],
 	metadataDefinitionList: [],
 	metadataDefinition: <MetadataDefinitionOut>{},
 };
@@ -56,9 +60,17 @@ const metadata = (state = defaultState, action: DataAction) => {
 			return Object.assign({}, state, {
 				datasetMetadataList: action.metadataList,
 			});
+		case RECEIVE_PUBLIC_DATASET_METADATA:
+			return Object.assign({}, state, {
+				publicDatasetMetadataList: action.publicDatasetMetadataList,
+			});
 		case RECEIVE_FILE_METADATA:
 			return Object.assign({}, state, {
 				fileMetadataList: action.metadataList,
+			});
+		case RECEIVE_PUBLIC_FILE_METADATA:
+			return Object.assign({}, state, {
+				publicFileMetadataList: action.publicFileMetadataList,
 			});
 		case UPDATE_DATASET_METADATA:
 			return Object.assign({}, state, {
