@@ -14,8 +14,10 @@ import {
 } from "../actions/dataset";
 import {
 	CREATE_FILE,
+	CREATE_FILES,
 	DELETE_FILE,
 	RESET_CREATE_FILE,
+	RESET_CREATE_FILES,
 	UPDATE_FILE,
 } from "../actions/file";
 import { RECEIVE_DATASET_ROLE } from "../actions/authorization";
@@ -36,6 +38,7 @@ const defaultState: DatasetState = {
 	datasets: [],
 	newDataset: <Dataset>{},
 	newFile: <File>{},
+	newFiles: <File[]>[],
 	roles: <DatasetRoles>{},
 };
 
@@ -47,17 +50,18 @@ const dataset = (state = defaultState, action: DataAction) => {
 			return Object.assign({}, state, {
 				files: state.files.filter((file) => file.id !== action.file.id),
 			});
-		// TODO rethink the pattern for file creation
-		// case CREATE_FILE:
-		// 	return Object.assign({}, state, {
-		// 		files: [...state.files, action.file]
-		// 	});
 		case CREATE_FILE:
 			return Object.assign({}, state, {
 				newFile: action.file,
 			});
+		case CREATE_FILES:
+			return Object.assign({}, state, {
+				newFiles: action.files,
+			});
 		case RESET_CREATE_FILE:
 			return Object.assign({}, state, { newFile: {} });
+		case RESET_CREATE_FILES:
+			return Object.assign({}, state, { newFiles: [] });
 		case SET_DATASET_GROUP_ROLE:
 			return Object.assign({}, state, {});
 		case SET_DATASET_USER_ROLE:

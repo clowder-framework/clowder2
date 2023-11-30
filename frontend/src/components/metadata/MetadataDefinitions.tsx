@@ -8,7 +8,7 @@ import {
 	DialogTitle,
 	Grid,
 	IconButton,
-	InputBase,
+	InputBase, Snackbar,
 } from "@mui/material";
 import { RootState } from "../../types/data";
 import { useDispatch, useSelector } from "react-redux";
@@ -16,7 +16,7 @@ import {
 	fetchMetadataDefinitions as fetchMetadataDefinitionsAction,
 	searchMetadataDefinitions as searchMetadataDefinitionsAction,
 } from "../../actions/metadata";
-import { ArrowBack, ArrowForward, SearchOutlined } from "@material-ui/icons";
+import { ArrowBack, ArrowForward } from "@material-ui/icons";
 import Paper from "@mui/material/Paper";
 import Table from "@mui/material/Table";
 import TableHead from "@mui/material/TableHead";
@@ -25,14 +25,13 @@ import TableCell from "@mui/material/TableCell";
 import TableBody from "@mui/material/TableBody";
 import TableContainer from "@mui/material/TableContainer";
 import InfoIcon from "@mui/icons-material/Info";
-import { theme } from "../../theme";
 import Layout from "../Layout";
-import { MainBreadcrumbs } from "../navigation/BreadCrumb";
 import { ErrorModal } from "../errors/ErrorModal";
 import { CreateMetadataDefinition } from "./CreateMetadataDefinition";
 import DeleteIcon from "@mui/icons-material/Delete";
 import DeleteMetadataDefinitionModal from "./DeleteMetadataDefinitionModal";
 import { Link } from "react-router-dom";
+import { GenericSearchBox } from "../search/GenericSearchBox";
 
 export function MetadataDefinitions() {
 	// Redux connect equivalent
@@ -66,6 +65,10 @@ export function MetadataDefinitions() {
 	] = useState<boolean>(false);
 	const [selectedMetadataDefinition, setSelectedMetadataDefinition] =
 		useState();
+
+		// snack bar
+	const [snackBarOpen, setSnackBarOpen] = useState(false);
+	const [snackBarMessage, setSnackBarMessage] = useState("");
 
 	// for breadcrumb
 	const paths = [
@@ -120,7 +123,16 @@ export function MetadataDefinitions() {
 		<Layout>
 			{/*Error Message dialogue*/}
 			<ErrorModal errorOpen={errorOpen} setErrorOpen={setErrorOpen} />
-
+			{/*TODO PUT SNACKBAR HERE FROM OTHER COMPONENT*/}
+			<Snackbar
+				open={snackBarOpen}
+				autoHideDuration={6000}
+				onClose={() => {
+					setSnackBarOpen(false);
+					setSnackBarMessage("");
+				}}
+				message={snackBarMessage}
+			/>
 			{/*Delete metadata definition modal*/}
 			<DeleteMetadataDefinitionModal
 				deleteMetadataDefinitionConfirmOpen={
@@ -146,14 +158,13 @@ export function MetadataDefinitions() {
 				<DialogContent>
 					<CreateMetadataDefinition
 						setCreateMetadataDefinitionOpen={setCreateMetadataDefinitionOpen}
+						setSnackBarOpen={setSnackBarOpen}
+						setSnackBarMessage={setSnackBarMessage}
 					/>
 				</DialogContent>
 			</Dialog>
-			{/*breadcrumb*/}
 			<Grid container>
-				<Grid item xs={8} sx={{ display: "flex", alignItems: "center" }}>
-					<MainBreadcrumbs paths={paths} />
-				</Grid>
+				<Grid item xs={8}></Grid>
 				<Grid item xs={4}>
 					<Button
 						variant="contained"
@@ -168,49 +179,19 @@ export function MetadataDefinitions() {
 				</Grid>
 			</Grid>
 			<br />
-			<Grid container>
-				<Grid item xs={3}>
-					<Box
-						component="form"
-						sx={{
-							p: "2px 4px",
-							display: "flex",
-							alignItems: "left",
-							backgroundColor: theme.palette.primary.contrastText,
-							width: "80%",
-						}}
-					>
-						<InputBase
-							sx={{ ml: 1, flex: 1 }}
-							placeholder="keyword for metadat definition"
-							inputProps={{
-								"aria-label":
-									"Type in keyword to search for metadat definition",
-							}}
-							onChange={(e) => {
-								setSearchTerm(e.target.value);
-							}}
-							onKeyDown={(e) => {
-								if (e.key === "Enter") {
-									e.preventDefault();
-									searchMetadataDefinitions(searchTerm, skip, limit);
-								}
-							}}
-							value={searchTerm}
-						/>
-						<IconButton
-							type="button"
-							sx={{ p: "10px" }}
-							aria-label="search"
-							onClick={() => {
-								searchMetadataDefinitions(searchTerm, skip, limit);
-							}}
-						>
-							<SearchOutlined />
-						</IconButton>
-					</Box>
+			<Grid container spacing={2}>
+				<Grid item xs={12}>
+					<GenericSearchBox
+						title="Search for Metadata Definitions"
+						searchPrompt="keyword for metadata definition"
+						setSearchTerm={setSearchTerm}
+						searchTerm={searchTerm}
+						searchFunction={searchMetadataDefinitions}
+						skip={skip}
+						limit={limit}
+					/>
 				</Grid>
-				<Grid item xs={9}>
+				<Grid item xs={12}>
 					<TableContainer component={Paper}>
 						<Table sx={{ minWidth: 650 }} aria-label="simple table">
 							<TableHead>

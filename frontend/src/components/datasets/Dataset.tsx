@@ -20,7 +20,7 @@ import { EditMetadata } from "../metadata/EditMetadata";
 import { MainBreadcrumbs } from "../navigation/BreadCrumb";
 import {
 	deleteDatasetMetadata as deleteDatasetMetadataAction,
-	fetchDatasetMetadata,
+	fetchDatasetMetadata, fetchMetadataDefinitions,
 	patchDatasetMetadata as patchDatasetMetadataAction,
 	postDatasetMetadata,
 } from "../../actions/metadata";
@@ -79,6 +79,8 @@ export const Dataset = (): JSX.Element => {
 		dispatch(fetchDatasetAbout(datasetId));
 	const listDatasetMetadata = (datasetId: string | undefined) =>
 		dispatch(fetchDatasetMetadata(datasetId));
+	const getMetadatDefinitions = (name:string|null, skip:number, limit:number) => dispatch(fetchMetadataDefinitions(name, skip,limit));
+
 
 	// mapStateToProps
 	const about = useSelector((state: RootState) => state.dataset.about);
@@ -110,6 +112,9 @@ export const Dataset = (): JSX.Element => {
 	const filesInDataset = useSelector((state: RootState) => state.dataset.files);
 	const foldersInDataset = useSelector((state: RootState) => state.folder.folders);
 
+
+	const metadataDefinitionList = useSelector((state: RootState) => state.metadata.metadataDefinitionList);
+
 	// component did mount list all files in dataset
 	useEffect(() => {
 		listFilesInDataset(datasetId, folderId, skip, limit);
@@ -117,6 +122,10 @@ export const Dataset = (): JSX.Element => {
 		listDatasetAbout(datasetId);
 		getFolderPath(folderId);
 	}, [searchParams]);
+
+	useEffect(() => {
+		getMetadatDefinitions(null, 0, 100);
+	}, []);
 
 	useEffect(() => {
 		// disable flipping if reaches the last page
@@ -299,14 +308,17 @@ export const Dataset = (): JSX.Element => {
 							{...a11yProps(3)}
 							disabled={false}
 						/>
-						<Tab
-							icon={<BuildIcon />}
-							iconPosition="start"
-							sx={TabStyle}
-							label="Extract"
-							{...a11yProps(4)}
-							disabled={false}
-						/>
+						{datasetRole.role !== undefined && datasetRole.role !== "viewer" ?
+							<Tab
+								icon={<BuildIcon />}
+								iconPosition="start"
+								sx={TabStyle}
+								label="Extract"
+								{...a11yProps(4)}
+								disabled={false}
+							/> :
+							<></>
+						}
 						<Tab
 							icon={<HistoryIcon />}
 							iconPosition="start"
@@ -315,14 +327,17 @@ export const Dataset = (): JSX.Element => {
 							{...a11yProps(5)}
 							disabled={false}
 						/>
-						<Tab
-							icon={<ShareIcon />}
-							iconPosition="start"
-							sx={TabStyle}
-							label="Sharing"
-							{...a11yProps(6)}
-							disabled={false}
-						/>
+						{datasetRole.role !== undefined && datasetRole.role !== "viewer" ?
+							<Tab
+								icon={<ShareIcon />}
+								iconPosition="start"
+								sx={TabStyle}
+								label="Sharing"
+								{...a11yProps(6)}
+								disabled={false}
+							/> :
+							<></>
+						}
 					</Tabs>
 					<TabPanel value={selectedTabIndex} index={0}>
 						{folderId !== null ? (
@@ -338,7 +353,7 @@ export const Dataset = (): JSX.Element => {
 						<Visualization datasetId={datasetId} />
 					</TabPanel>
 					<TabPanel value={selectedTabIndex} index={2}>
-						{enableAddMetadata ? (
+						{enableAddMetadata && datasetRole.role !== undefined && datasetRole.role !== "viewer" ? (
 							<>
 								<EditMetadata
 									resourceType="dataset"
@@ -370,15 +385,18 @@ export const Dataset = (): JSX.Element => {
 									resourceId={datasetId}
 								/>
 								<Box textAlign="center">
-									<Button
-										variant="contained"
-										sx={{ m: 2 }}
-										onClick={() => {
-											setEnableAddMetadata(true);
-										}}
-									>
+									{enableAddMetadata && datasetRole.role !== undefined && datasetRole.role !== "viewer" ?
+										<Button
+											variant="contained"
+											sx={{ m: 2 }}
+											onClick={() => {
+												setEnableAddMetadata(true);
+											}}
+										>
 										Add Metadata
-									</Button>
+										</Button> :
+										<></>
+									}
 								</Box>
 							</>
 						)}
@@ -391,15 +409,21 @@ export const Dataset = (): JSX.Element => {
 							resourceId={datasetId}
 						/>
 					</TabPanel>
-					<TabPanel value={selectedTabIndex} index={4}>
-						<Listeners datasetId={datasetId} />
-					</TabPanel>
+					{datasetRole.role !== undefined && datasetRole.role !== "viewer" ?
+						<TabPanel value={selectedTabIndex} index={4}>
+							<Listeners datasetId={datasetId} />
+						</TabPanel> :
+						<></>
+					}
 					<TabPanel value={selectedTabIndex} index={5}>
 						<ExtractionHistoryTab datasetId={datasetId} />
 					</TabPanel>
-					<TabPanel value={selectedTabIndex} index={6}>
-						<SharingTab datasetId={datasetId} />
-					</TabPanel>
+					{datasetRole.role !== undefined && datasetRole.role !== "viewer" ?
+						<TabPanel value={selectedTabIndex} index={6}>
+							<SharingTab datasetId={datasetId} />
+						</TabPanel>
+						: <></>
+					}
 					<Box display="flex" justifyContent="center" sx={{ m: 1 }}>
 						<ButtonGroup
 								variant="contained"

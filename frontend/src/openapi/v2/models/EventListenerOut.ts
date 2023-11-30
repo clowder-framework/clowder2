@@ -16,5 +16,7 @@ export type EventListenerOut = {
     creator?: UserOut;
     created?: string;
     modified?: string;
+    lastAlive?: string;
+    alive?: boolean;
     properties?: ExtractorInfo;
 }
