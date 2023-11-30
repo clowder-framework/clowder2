@@ -6,12 +6,6 @@
 
 [//]: # ([![Documentation Status]&#40;https://readthedocs.org/projects/clowder2/badge/?version=latest&#41;]&#40;https://clowder2.readthedocs.io/en/latest/?badge=latest&#41;)
 
-<!-- BADGIE TIME -->
-
-
-
-<!-- END BADGIE TIME -->
-
 *For the previous version of Clowder, please see [Clowder v1](https://github.com/clowder-framework/clowder).*
 
 Clowder v2 is a reimagining of the [Clowder research data management system](https://clowderframework.org/)
