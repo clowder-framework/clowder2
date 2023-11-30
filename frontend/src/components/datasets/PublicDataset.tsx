@@ -100,10 +100,10 @@ export const PublicDataset = (): JSX.Element => {
 
 
 	// mapStateToProps
-	const about = useSelector((state: RootState) => state.dataset.about);
-	const datasetRole = useSelector(
-		(state: RootState) => state.dataset.datasetRole
-	);
+	const about = useSelector((state: RootState) => state.publicDataset.public_about);
+	// const datasetRole = useSelector(
+	// 	(state: RootState) => state.dataset.datasetRole
+	// );
 	const folderPath = useSelector((state: RootState) => state.folder.publicFolderPath);
 
 	// state
@@ -274,7 +274,7 @@ export const PublicDataset = (): JSX.Element => {
 							</Typography>
 						</Box>
 						<Box>
-							<RoleChip role={datasetRole.role} />
+							{/*<RoleChip role={datasetRole.role} />*/}
 						</Box>
 					</Stack>
 				</Grid>
