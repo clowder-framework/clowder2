@@ -22,7 +22,7 @@ research data in Clowder and deliver a better solution to common problems resear
 Clowder v2 provides:
 
 - a better user experience and user interface
-- an easier code base to pick up and modify written in Python and React
+- an easier code base to pick up and modify written in Python/FastAPI and Typescript/React
 - new features based on our experience working with researchers
 
 ## Documentation
