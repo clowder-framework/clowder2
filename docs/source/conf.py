@@ -45,44 +45,39 @@ exclude_patterns = []
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = 'sphinx_material'
+html_theme = "sphinx_material"
 
 # Set link name generated in the top bar.
-html_title = 'Clowder v2'
+html_title = "Clowder v2"
 
 # Material theme options (see theme.conf for more information)
 html_sidebars = {
     "**": ["logo-text.html", "globaltoc.html", "localtoc.html", "searchbox.html"]
 }
 html_theme_options = {
-
     # Set the name of the project to appear in the navigation.
-    'nav_title': 'Clowder v2',
-
+    "nav_title": "Clowder v2",
     # Set you GA account ID to enable tracking
-    'google_analytics_account': 'UA-XXXXX',
-
+    "google_analytics_account": "UA-XXXXX",
     # Specify a base_url used to generate sitemap.xml. If not
     # specified, then no sitemap will be built.
-    'base_url': 'https://clowder2.readthedocs.io/',
-
+    "base_url": "https://clowder2.readthedocs.io/",
     # Set the color and the accent color
-    'color_primary': 'blue',
-    'color_accent': 'light-blue',
-
+    "color_primary": "blue",
+    "color_accent": "light-blue",
     # Set the repo location to get a badge with stats
-    'repo_url': 'https://github.com/clowder-framework/clowder2',
-    'repo_name': 'Clowder2',
-
+    "repo_url": "https://github.com/clowder-framework/clowder2",
+    "repo_name": "Clowder2",
     # Visible levels of the global TOC; -1 means unlimited
-    'globaltoc_depth': 2,
+    "globaltoc_depth": 2,
     # If False, expand all TOC entries
-    'globaltoc_collapse': True,
+    "globaltoc_collapse": True,
     # If True, show hidden TOC entries
-    'globaltoc_includehidden': False,
+    "globaltoc_includehidden": False,
 }
 
 import os
+
 FORCE_CLASSIC = os.environ.get("SPHINX_MATERIAL_FORCE_CLASSIC", False)
 FORCE_CLASSIC = FORCE_CLASSIC in ("1", "true")
 if FORCE_CLASSIC:
