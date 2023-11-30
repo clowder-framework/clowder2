@@ -5,14 +5,13 @@ import {
 	ButtonGroup,
 	Divider,
 	FormControl,
-	FormControlLabel,
-	FormLabel,
 	Grid,
 	IconButton,
 	InputBase,
+	InputLabel,
 	List,
-	Radio,
-	RadioGroup,
+	MenuItem,
+	Select,
 } from "@mui/material";
 
 import { RootState } from "../../types/data";
@@ -171,8 +170,8 @@ export function Listeners(props: ListenerProps) {
 
 	return (
 		<>
-			<Grid container>
-				<Grid item xs={3}>
+			<Grid container sx={{ marginBottom: "1em" }}>
+				<Grid item xs={6}>
 					{/*searchbox*/}
 					<Box
 						component="form"
@@ -181,7 +180,7 @@ export function Listeners(props: ListenerProps) {
 							display: "flex",
 							alignItems: "left",
 							backgroundColor: theme.palette.primary.contrastText,
-							width: "80%",
+							width: "95%",
 						}}
 					>
 						<InputBase
@@ -210,60 +209,49 @@ export function Listeners(props: ListenerProps) {
 							<SearchOutlined />
 						</IconButton>
 					</Box>
-					<Box sx={{ margin: "2em auto", padding: "0.5em" }}>
-						{/*categories*/}
-						<FormControl>
-							<FormLabel id="radio-buttons-group-label-categories">
-								Filter by category
-							</FormLabel>
-							<RadioGroup
-								aria-labelledby="radio-buttons-group-label-categories"
-								defaultValue="all"
-								name="radio-buttons-group"
-								value={selectedCategory}
-								onChange={handleCategoryChange}
-							>
-								<FormControlLabel value="" control={<Radio />} label="All" />
-								{categories.map((category: string) => {
-									return (
-										<FormControlLabel
-											value={category}
-											control={<Radio />}
-											label={capitalize(category)}
-										/>
-									);
-								})}
-							</RadioGroup>
-						</FormControl>
-					</Box>
-					<Box sx={{ margin: "2em auto", padding: "0.5em" }}>
-						{/*labels*/}
-						<FormControl>
-							<FormLabel id="radio-buttons-group-label-labels">
-								Filter by labels
-							</FormLabel>
-							<RadioGroup
-								aria-labelledby="radio-buttons-group-label-labels"
-								defaultValue="all"
-								name="radio-buttons-group"
-								value={selectedLabel}
-								onChange={handleLabelChange}
-							>
-								<FormControlLabel value="" control={<Radio />} label="All" />
-								{labels.map((label: string) => {
-									return (
-										<FormControlLabel
-											value={label}
-											control={<Radio />}
-											label={capitalize(label)}
-										/>
-									);
-								})}
-							</RadioGroup>
-						</FormControl>
-					</Box>
 				</Grid>
-				<Grid item xs={9}>
+				{/*categories*/}
+				<Grid item xs={3}>
+					<FormControl variant="standard" sx={{ minWidth: "95%" }}>
+						<InputLabel id="label-categories">Filter by category</InputLabel>
+						<Select
+							defaultValue=""
+							labelId="label-categories"
+							id="label-categories"
+							value={selectedCategory}
+							onChange={handleCategoryChange}
+							label="Categories"
+						>
+							<MenuItem value="">All</MenuItem>
+							{categories.map((category: string) => {
+								return (
+									<MenuItem value={category}>{capitalize(category)}</MenuItem>
+								);
+							})}
+						</Select>
+					</FormControl>
+				</Grid>
+				<Grid item xs={3}>
+					<FormControl variant="standard" sx={{ minWidth: "95%" }}>
+						<InputLabel id="label-categories">Filter by labels</InputLabel>
+						<Select
+							defaultValue=""
+							labelId="label-labels"
+							id="label-labels"
+							value={selectedLabel}
+							onChange={handleLabelChange}
+							label="Labels"
+						>
+							<MenuItem value="">All</MenuItem>
+							{labels.map((label: string) => {
+								return <MenuItem value={label}>{capitalize(label)}</MenuItem>;
+							})}
+						</Select>
+					</FormControl>
+				</Grid>
+			</Grid>
+			<Grid container>
+				<Grid item xs={12}>
 					<Box
 						sx={{
 							backgroundColor: theme.palette.primary.contrastText,
