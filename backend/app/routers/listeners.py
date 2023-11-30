@@ -32,10 +32,10 @@ clowder_bucket = os.getenv("MINIO_BUCKET_NAME", "clowder")
 
 
 async def _process_incoming_v1_extractor_info(
-        extractor_name: str,
-        extractor_id: str,
-        process: dict,
-        creator: Optional[UserOut] = None,
+    extractor_name: str,
+    extractor_id: str,
+    process: dict,
+    creator: Optional[UserOut] = None,
 ):
     """Return FeedDB object given v1 extractor info."""
     if "file" in process:
@@ -75,7 +75,7 @@ async def _process_incoming_v1_extractor_info(
 
 
 async def _check_livelihood(
-        listener: EventListenerDB, heartbeat_interval=settings.listener_heartbeat_interval
+    listener: EventListenerDB, heartbeat_interval=settings.listener_heartbeat_interval
 ):
     if heartbeat_interval == 0:
         heartbeat_interval = settings.listener_heartbeat_interval
@@ -93,7 +93,7 @@ async def _check_livelihood(
 
 @router.get("/instance")
 async def get_instance_id(
-        user=Depends(get_current_user),
+    user=Depends(get_current_user),
 ):
     instance_id = await ConfigEntryDB.find_one({ConfigEntryDB.key == "instance_id"})
     if instance_id:
@@ -113,8 +113,8 @@ async def get_instance_id(
 
 @router.post("", response_model=EventListenerOut)
 async def save_listener(
-        listener_in: EventListenerIn,
-        user=Depends(get_current_user),
+    listener_in: EventListenerIn,
+    user=Depends(get_current_user),
 ):
     """Register a new Event Listener with the system."""
     listener = EventListenerDB(**listener_in.dict(), creator=user)
@@ -125,8 +125,8 @@ async def save_listener(
 
 @legacy_router.post("", response_model=EventListenerOut)
 async def save_legacy_listener(
-        legacy_in: LegacyEventListenerIn,
-        user=Depends(get_current_user),
+    legacy_in: LegacyEventListenerIn,
+    user=Depends(get_current_user),
 ):
     """This will take a POST with Clowder v1 extractor_info included, and convert/update to a v2 Listener."""
     listener_properties = ExtractorInfo(**legacy_in.dict())
@@ -140,9 +140,9 @@ async def save_legacy_listener(
 
     # check to see if extractor already exists and update if so, otherwise return existing
     if (
-            existing := await EventListenerDB.find_one(
-                EventListenerDB.name == legacy_in.name
-            )
+        existing := await EventListenerDB.find_one(
+            EventListenerDB.name == legacy_in.name
+        )
     ) is not None:
         # if this is a new version, add it to the database, otherwise update existing
         if version.parse(listener.version) > version.parse(existing.version):
@@ -167,11 +167,11 @@ async def save_legacy_listener(
 
 @router.get("/search", response_model=List[EventListenerOut])
 async def search_listeners(
-        text: str = "",
-        skip: int = 0,
-        limit: int = 2,
-        heartbeat_interval: Optional[int] = settings.listener_heartbeat_interval,
-        user=Depends(get_current_username),
+    text: str = "",
+    skip: int = 0,
+    limit: int = 2,
+    heartbeat_interval: Optional[int] = settings.listener_heartbeat_interval,
+    user=Depends(get_current_username),
 ):
     """Search all Event Listeners in the db based on text.
 
@@ -218,7 +218,7 @@ async def list_default_labels(user=Depends(get_current_username)):
 async def get_listener(listener_id: str, user=Depends(get_current_username)):
     """Return JSON information about an Event Listener if it exists."""
     if (
-            listener := await EventListenerDB.get(PydanticObjectId(listener_id))
+        listener := await EventListenerDB.get(PydanticObjectId(listener_id))
     ) is not None:
         return listener.dict()
     raise HTTPException(status_code=404, detail=f"listener {listener_id} not found")
@@ -226,13 +226,13 @@ async def get_listener(listener_id: str, user=Depends(get_current_username)):
 
 @router.get("/{listener_id}/status", response_model=bool)
 async def check_listener_livelihood(
-        listener_id: str,
-        heartbeat_interval: Optional[int] = settings.listener_heartbeat_interval,
-        user=Depends(get_current_username),
+    listener_id: str,
+    heartbeat_interval: Optional[int] = settings.listener_heartbeat_interval,
+    user=Depends(get_current_username),
 ):
     """Return JSON information about an Event Listener if it exists."""
     if (
-            listener := await EventListenerDB.get(PydanticObjectId(listener_id))
+        listener := await EventListenerDB.get(PydanticObjectId(listener_id))
     ) is not None:
         return await _check_livelihood(listener, heartbeat_interval)
     raise HTTPException(status_code=404, detail=f"listener {listener_id} not found")
@@ -240,12 +240,12 @@ async def check_listener_livelihood(
 
 @router.get("", response_model=List[EventListenerOut])
 async def get_listeners(
-        user_id=Depends(get_current_username),
-        skip: int = 0,
-        limit: int = 2,
-        heartbeat_interval: Optional[int] = settings.listener_heartbeat_interval,
-        category: Optional[str] = None,
-        label: Optional[str] = None,
+    user_id=Depends(get_current_username),
+    skip: int = 0,
+    limit: int = 2,
+    heartbeat_interval: Optional[int] = settings.listener_heartbeat_interval,
+    category: Optional[str] = None,
+    label: Optional[str] = None,
 ):
     """Get a list of all Event Listeners in the db.
 
@@ -277,9 +277,9 @@ async def get_listeners(
 
 @router.put("/{listener_id}", response_model=EventListenerOut)
 async def edit_listener(
-        listener_id: str,
-        listener_in: EventListenerIn,
-        user_id=Depends(get_user),
+    listener_id: str,
+    listener_in: EventListenerIn,
+    user_id=Depends(get_user),
 ):
     """Update the information about an existing Event Listener..
 
@@ -305,8 +305,8 @@ async def edit_listener(
 
 @router.delete("/{listener_id}")
 async def delete_listener(
-        listener_id: str,
-        user=Depends(get_current_username),
+    listener_id: str,
+    user=Depends(get_current_username),
 ):
     """Remove an Event Listener from the database. Will not clear event history for the listener."""
     listener = await EventListenerDB.find_one(
@@ -315,7 +315,7 @@ async def delete_listener(
     if listener:
         # unsubscribe the listener from any feeds
         async for feed in FeedDB.find(
-                FeedDB.listeners.listener_id == ObjectId(listener_id)
+            FeedDB.listeners.listener_id == ObjectId(listener_id)
         ):
             await disassociate_listener_db(feed.id, listener_id)
         await listener.delete()
