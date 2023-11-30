@@ -1,4 +1,4 @@
-# Clowder V2 (In Development - Alpha Release)
+# Clowder V2 (In Active Development)
 
 *For the previous version of Clowder, please see [Clowder V1](https://github.com/clowder-framework/clowder).*
 

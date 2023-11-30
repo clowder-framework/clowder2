@@ -30,7 +30,7 @@ from app.models.tokens import TokenDB
 from app.models.users import UserDB, UserAPIKeyDB, ListenerAPIKeyDB
 from app.models.visualization_config import VisualizationConfigDB
 from app.models.visualization_data import VisualizationDataDB
-from app.routers import folders, groups
+from app.routers import folders, groups, status
 from app.routers import (
     users,
     authorization,
@@ -57,7 +57,17 @@ from app.search.connect import connect_elasticsearch, create_index
 logger = logging.getLogger(__name__)
 
 app = FastAPI(
-    title=settings.APP_NAME, openapi_url=f"{settings.API_V2_STR}/openapi.json"
+    title=settings.APP_NAME,
+    openapi_url=f"{settings.API_V2_STR}/openapi.json",
+    description="A cloud native data management framework to support any research domain. Clowder was "
+    "developed to help researchers and scientists in data intensive domains manage raw data, complex "
+    "metadata, and automatic data pipelines. ",
+    version="2.0.0-beta.1",
+    contact={"name": "Clowder", "url": "https://clowderframework.org/"},
+    license_info={
+        "name": "Apache 2.0",
+        "url": "https://www.apache.org/licenses/LICENSE-2.0.html",
+    },
 )
 BaseConfig.arbitrary_types_allowed = True
 
@@ -178,6 +188,7 @@ api_router.include_router(
     tags=["thumbnails"],
     dependencies=[Depends(get_current_username)],
 )
+api_router.include_router(status.router, prefix="/status", tags=["status"])
 api_router.include_router(keycloak.router, prefix="/auth", tags=["auth"])
 app.include_router(api_router, prefix=settings.API_V2_STR)
 
