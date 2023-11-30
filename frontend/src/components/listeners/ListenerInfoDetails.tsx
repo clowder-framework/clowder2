@@ -116,7 +116,7 @@ export function ListenerInfoDetails(props: ListenerAboutProps) {
 
 	return (
 		<Box mt={2} mb={2}>
-			{!expanded ? (
+			{!expanded && !defaultExpanded ? (
 				<Button
 					onClick={() => {
 						setExpanded(true);
@@ -130,7 +130,7 @@ export function ListenerInfoDetails(props: ListenerAboutProps) {
 
 			{expanded ? <StackedList keyValues={details} /> : null}
 
-			{expanded ? (
+			{expanded && !defaultExpanded ? (
 				<Button
 					onClick={() => {
 						setExpanded(false);
