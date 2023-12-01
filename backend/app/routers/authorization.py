@@ -86,10 +86,6 @@ async def get_dataset_role(
             ),
         )
     if auth_db is None:
-        raise HTTPException(
-            status_code=404, detail=f"No authorization found for dataset: {dataset_id}"
-        )
-    ) is None:
         if (
             current_dataset := await DatasetDB.get(PydanticObjectId(dataset_id))
         ) is not None:
