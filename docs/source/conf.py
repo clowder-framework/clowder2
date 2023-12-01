@@ -17,12 +17,12 @@
 
 # -- Project information -----------------------------------------------------
 
-project = "Clowder v2"
-copyright = "2022, Luigi Marini"
-author = "Luigi Marini"
+project = "Clowder2"
+copyright = "2022, Clowder Devs"
+author = "Clowder Devs"
 
 # The full version, including alpha/beta/rc tags
-release = "0.1"
+release = "2.0.0-beta.1"
 
 
 # -- General configuration ---------------------------------------------------
@@ -40,13 +40,51 @@ templates_path = ["_templates"]
 # This pattern also affects html_static_path and html_extra_path.
 exclude_patterns = []
 
-
 # -- Options for HTML output -------------------------------------------------
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = "alabaster"
+html_theme = "sphinx_material"
+
+# Set link name generated in the top bar.
+html_title = "Clowder v2"
+
+# Material theme options (see theme.conf for more information)
+html_sidebars = {
+    "**": ["logo-text.html", "globaltoc.html", "localtoc.html", "searchbox.html"]
+}
+html_theme_options = {
+    # Set the name of the project to appear in the navigation.
+    "nav_title": "Clowder v2",
+    # Set you GA account ID to enable tracking
+    "google_analytics_account": "UA-XXXXX",
+    # Specify a base_url used to generate sitemap.xml. If not
+    # specified, then no sitemap will be built.
+    "base_url": "https://clowder2.readthedocs.io/",
+    # Set the color and the accent color
+    "color_primary": "blue",
+    "color_accent": "light-blue",
+    # Set the repo location to get a badge with stats
+    "repo_url": "https://github.com/clowder-framework/clowder2",
+    "repo_name": "Clowder2",
+    # Visible levels of the global TOC; -1 means unlimited
+    "globaltoc_depth": 2,
+    # If False, expand all TOC entries
+    "globaltoc_collapse": True,
+    # If True, show hidden TOC entries
+    "globaltoc_includehidden": False,
+}
+
+import os
+
+FORCE_CLASSIC = os.environ.get("SPHINX_MATERIAL_FORCE_CLASSIC", False)
+FORCE_CLASSIC = FORCE_CLASSIC in ("1", "true")
+if FORCE_CLASSIC:
+    print("!!!!!!!!! Forcing classic !!!!!!!!!!!")
+    html_theme = "classic"
+    html_theme_options = {}
+    html_sidebars = {"**": ["globaltoc.html", "localtoc.html", "searchbox.html"]}
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
