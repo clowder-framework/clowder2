@@ -1,5 +1,5 @@
-import os
 from fastapi.testclient import TestClient
+
 from app.config import settings
 from app.tests.utils import create_dataset, upload_file, register_v1_extractor
 
@@ -16,6 +16,15 @@ def test_get_one(client: TestClient, headers: dict):
     )
     assert response.status_code == 200
     assert response.json().get("id") is not None
+
+
+def test_get_status(client: TestClient, headers: dict):
+    extractor_id = register_v1_extractor(client, headers).get("id")
+    response = client.get(
+        f"{settings.API_V2_STR}/listeners/{extractor_id}/status", headers=headers
+    )
+    assert response.status_code == 200
+    assert response.json() is False
 
 
 def test_delete(client: TestClient, headers: dict):

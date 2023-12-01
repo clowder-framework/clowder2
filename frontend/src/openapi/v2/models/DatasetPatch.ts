@@ -5,4 +5,5 @@
 export type DatasetPatch = {
     name?: string;
     description?: string;
+    status?: string;
 }

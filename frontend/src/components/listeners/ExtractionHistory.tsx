@@ -77,9 +77,19 @@ export const ExtractionHistory = (): JSX.Element => {
 	const listListeners = (
 		skip: number | undefined,
 		limit: number | undefined,
+		heartbeatInterval: number | undefined,
 		selectedCategory: string | null,
 		selectedLabel: string | null
-	) => dispatch(fetchListeners(skip, limit, selectedCategory, selectedLabel));
+	) =>
+		dispatch(
+			fetchListeners(
+				skip,
+				limit,
+				heartbeatInterval,
+				selectedCategory,
+				selectedLabel
+			)
+		);
 	const listListenerJobs = (
 		listenerId: string | null,
 		status: string | null,
@@ -118,7 +128,7 @@ export const ExtractionHistory = (): JSX.Element => {
 	const [selectedCreatedTime, setSelectedCreatedTime] = useState(null);
 
 	useEffect(() => {
-		listListeners(skip, limit, null, null);
+		listListeners(skip, limit, 0, null, null);
 		listListenerJobs(null, null, null, null, null, null, 0, 100);
 	}, []);
 
@@ -180,7 +190,7 @@ export const ExtractionHistory = (): JSX.Element => {
 
 	useEffect(() => {
 		if (skip !== null && skip !== undefined) {
-			listListeners(skip, limit, null, null);
+			listListeners(skip, limit, 0, null, null);
 			if (skip === 0) setPrevDisabled(true);
 			else setPrevDisabled(false);
 		}

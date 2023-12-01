@@ -9,8 +9,7 @@ import { a11yProps, TabPanel } from "./tabs/TabComponent";
 import DatasetCard from "./datasets/DatasetCard";
 import { ArrowBack, ArrowForward } from "@material-ui/icons";
 import Layout from "./Layout";
-import { Link as RouterLink, useLocation } from "react-router-dom";
-import { Listeners } from "./listeners/Listeners";
+import { Link as RouterLink } from "react-router-dom";
 import { ErrorModal } from "./errors/ErrorModal";
 
 const tab = {
@@ -96,12 +95,11 @@ export const Explore = (): JSX.Element => {
 							aria-label="dashboard tabs"
 						>
 							<Tab sx={tab} label="Datasets" {...a11yProps(0)} />
-							<Tab sx={tab} label="Extractors" {...a11yProps(1)} />
 						</Tabs>
 					</Box>
 					<TabPanel value={selectedTabIndex} index={0}>
 						<Grid container spacing={2}>
-							{datasets !== undefined ?  (
+							{datasets !== undefined ? (
 								datasets.map((dataset) => {
 									return (
 										<Grid item key={dataset.id} xs={12} sm={6} md={4} lg={3}>
@@ -122,12 +120,17 @@ export const Explore = (): JSX.Element => {
 							{datasets.length === 0 ? (
 								<Grid container justifyContent="center">
 									<Box textAlign="center">
-										<p>Nobody has created any datasets on this instance. Click below to create a dataset!</p>
-										<Button component={RouterLink} to="/create-dataset"
+										<p>
+											Nobody has created any datasets on this instance. Click
+											below to create a dataset!
+										</p>
+										<Button
+											component={RouterLink}
+											to="/create-dataset"
 											variant="contained"
 											sx={{ m: 2 }}
 										>
-										Create Dataset
+											Create Dataset
 										</Button>
 									</Box>
 								</Grid>
@@ -157,12 +160,9 @@ export const Explore = (): JSX.Element => {
 									</Button>
 								</ButtonGroup>
 							</Box>
-						): (
+						) : (
 							<></>
 						)}
-					</TabPanel>
-					<TabPanel value={selectedTabIndex} index={1}>
-						<Listeners />
 					</TabPanel>
 					<TabPanel value={selectedTabIndex} index={4} />
 					<TabPanel value={selectedTabIndex} index={2} />
