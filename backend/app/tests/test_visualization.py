@@ -3,7 +3,7 @@ import os
 from fastapi.testclient import TestClient
 
 from app.config import settings
-from app.tests.utils import create_dataset, upload_file, create_apikey
+from app.tests.utils import create_apikey, create_dataset, upload_file
 
 visualization_example = "vis_upload.csv"
 visualization_content_example = "year,location,count\n2024,preview,4"

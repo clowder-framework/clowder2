@@ -4,19 +4,15 @@ import logging
 import requests
 from fastapi import APIRouter, HTTPException, Security
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
-from jose import jwt, ExpiredSignatureError, JWTError
+from jose import ExpiredSignatureError, JWTError, jwt
 from keycloak.exceptions import KeycloakAuthenticationError, KeycloakGetError
 from starlette.responses import RedirectResponse
 
 from app.config import settings
-from app.keycloak_auth import (
-    keycloak_openid,
-    get_idp_public_key,
-    retreive_refresh_token,
-    oauth2_scheme,
-)
+from app.keycloak_auth import (get_idp_public_key, keycloak_openid,
+                               oauth2_scheme, retreive_refresh_token)
 from app.models.tokens import TokenDB
-from app.models.users import UserIn, UserDB
+from app.models.users import UserDB, UserIn
 
 router = APIRouter()
 security = HTTPBearer()

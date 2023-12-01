@@ -4,18 +4,13 @@ from typing import List
 
 from beanie import PydanticObjectId
 from beanie.operators import Or, RegEx
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from itsdangerous.url_safe import URLSafeSerializer
 
 from app.config import settings
 from app.keycloak_auth import get_current_username
-from app.models.users import (
-    UserDB,
-    UserOut,
-    UserAPIKeyDB,
-    UserAPIKeyOut,
-    ListenerAPIKeyDB,
-)
+from app.models.users import (ListenerAPIKeyDB, UserAPIKeyDB, UserAPIKeyOut,
+                              UserDB, UserOut)
 
 router = APIRouter()
 

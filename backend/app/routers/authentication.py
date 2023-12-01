@@ -1,19 +1,14 @@
 import json
 
-from fastapi import APIRouter, HTTPException, Depends
-from keycloak.exceptions import (
-    KeycloakAuthenticationError,
-    KeycloakGetError,
-    KeycloakPostError,
-)
+from beanie import PydanticObjectId
+from fastapi import APIRouter, Depends, HTTPException
+from keycloak.exceptions import (KeycloakAuthenticationError, KeycloakGetError,
+                                 KeycloakPostError)
 from passlib.hash import bcrypt
 
-from beanie import PydanticObjectId
-
-from app.keycloak_auth import create_user, get_current_user
-from app.keycloak_auth import keycloak_openid
+from app.keycloak_auth import create_user, get_current_user, keycloak_openid
 from app.models.datasets import DatasetDB
-from app.models.users import UserDB, UserIn, UserOut, UserLogin
+from app.models.users import UserDB, UserIn, UserLogin, UserOut
 
 router = APIRouter()
 

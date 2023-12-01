@@ -1,13 +1,15 @@
-import logging
-import pika
 import json
+import logging
+
+import pika
 from packaging import version
 from pymongo import MongoClient
 
 from app.config import settings
+from app.models.listeners import (EventListenerDB, EventListenerOut,
+                                  ExtractorInfo)
 from app.models.search import SearchCriteria
-from app.routers.feeds import FeedListener, FeedDB
-from app.models.listeners import EventListenerDB, EventListenerOut, ExtractorInfo
+from app.routers.feeds import FeedDB, FeedListener
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)

@@ -1,34 +1,21 @@
-from typing import Optional, List
+from typing import List, Optional
 
 from beanie import PydanticObjectId
 from bson import ObjectId
 from elasticsearch import Elasticsearch
-from fastapi import (
-    APIRouter,
-    HTTPException,
-    Depends,
-    Form,
-)
+from fastapi import APIRouter, Depends, Form, HTTPException
 
 from app import dependencies
 from app.config import settings
 from app.deps.authorization_deps import FileAuthorization
-from app.keycloak_auth import get_current_user, UserOut
-from app.models.files import FileOut, FileDB, FileVersionDB
+from app.keycloak_auth import UserOut, get_current_user
+from app.models.files import FileDB, FileOut, FileVersionDB
 from app.models.listeners import EventListenerDB
-from app.models.metadata import (
-    MongoDBRef,
-    MetadataAgent,
-    MetadataDefinitionOut,
-    MetadataIn,
-    MetadataDB,
-    MetadataOut,
-    MetadataPatch,
-    validate_context,
-    patch_metadata,
-    MetadataDelete,
-    MetadataDefinitionDB,
-)
+from app.models.metadata import (MetadataAgent, MetadataDB,
+                                 MetadataDefinitionDB, MetadataDefinitionOut,
+                                 MetadataDelete, MetadataIn, MetadataOut,
+                                 MetadataPatch, MongoDBRef, patch_metadata,
+                                 validate_context)
 from app.search.connect import delete_document_by_id
 from app.search.index import index_file
 

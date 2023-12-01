@@ -2,7 +2,7 @@ import logging
 
 import uvicorn
 from beanie import init_beanie
-from fastapi import FastAPI, APIRouter, Depends
+from fastapi import APIRouter, Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
 from pydantic import BaseConfig
@@ -14,41 +14,24 @@ from app.models.config import ConfigEntryDB
 from app.models.datasets import DatasetDB, DatasetDBViewList
 from app.models.errors import ErrorDB
 from app.models.feeds import FeedDB
-from app.models.files import FileDB, FileVersionDB, FileDBViewList
+from app.models.files import FileDB, FileDBViewList, FileVersionDB
 from app.models.folders import FolderDB, FolderDBViewList
 from app.models.groups import GroupDB
-from app.models.listeners import (
-    EventListenerDB,
-    EventListenerJobDB,
-    EventListenerJobUpdateDB,
-    EventListenerJobViewList,
-    EventListenerJobUpdateViewList,
-)
+from app.models.listeners import (EventListenerDB, EventListenerJobDB,
+                                  EventListenerJobUpdateDB,
+                                  EventListenerJobUpdateViewList,
+                                  EventListenerJobViewList)
 from app.models.metadata import MetadataDB, MetadataDefinitionDB
 from app.models.thumbnails import ThumbnailDB
 from app.models.tokens import TokenDB
-from app.models.users import UserDB, UserAPIKeyDB, ListenerAPIKeyDB
+from app.models.users import ListenerAPIKeyDB, UserAPIKeyDB, UserDB
 from app.models.visualization_config import VisualizationConfigDB
 from app.models.visualization_data import VisualizationDataDB
-from app.routers import folders, groups, status
-from app.routers import (
-    users,
-    authorization,
-    metadata,
-    files,
-    metadata_files,
-    datasets,
-    metadata_datasets,
-    authentication,
-    keycloak,
-    elasticsearch,
-    listeners,
-    feeds,
-    jobs,
-    visualization,
-    thumbnails,
-)
-
+from app.routers import (authentication, authorization, datasets,
+                         elasticsearch, feeds, files, folders, groups, jobs,
+                         keycloak, listeners, metadata, metadata_datasets,
+                         metadata_files, status, thumbnails, users,
+                         visualization)
 # setup loggers
 # logging.config.fileConfig('logging.conf', disable_existing_loggers=False)
 from app.search.config import indexSettings

@@ -1,8 +1,7 @@
 import json
 import logging
 
-from elasticsearch import BadRequestError
-from elasticsearch import Elasticsearch
+from elasticsearch import BadRequestError, Elasticsearch
 
 from app.config import settings
 from app.database.errors import log_error

@@ -2,18 +2,15 @@ from datetime import datetime, timedelta
 from typing import List, Optional
 
 from beanie import PydanticObjectId
-from beanie.operators import Or, RegEx, GTE, LT
+from beanie.operators import GTE, LT, Or, RegEx
 from bson import ObjectId
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, Depends, HTTPException
 
-from app.keycloak_auth import get_user, get_current_username
-from app.models.listeners import (
-    EventListenerJobDB,
-    EventListenerJobUpdateDB,
-    EventListenerJobViewList,
-    EventListenerJobOut,
-    EventListenerJobUpdateOut,
-)
+from app.keycloak_auth import get_current_username, get_user
+from app.models.listeners import (EventListenerJobDB, EventListenerJobOut,
+                                  EventListenerJobUpdateDB,
+                                  EventListenerJobUpdateOut,
+                                  EventListenerJobViewList)
 
 router = APIRouter()
 

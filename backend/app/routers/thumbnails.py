@@ -2,8 +2,7 @@ from typing import Optional
 
 from beanie import PydanticObjectId
 from beanie.odm.operators.update.general import Inc
-from fastapi import APIRouter, HTTPException, Depends
-from fastapi import File, UploadFile
+from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
 from fastapi.security import HTTPBearer
 from minio import Minio
 from starlette.responses import StreamingResponse
@@ -11,9 +10,9 @@ from starlette.responses import StreamingResponse
 from app import dependencies
 from app.config import settings
 from app.keycloak_auth import get_current_user
-from app.models.files import FileDB
 from app.models.datasets import DatasetDB
-from app.models.thumbnails import ThumbnailIn, ThumbnailDB, ThumbnailOut
+from app.models.files import FileDB
+from app.models.thumbnails import ThumbnailDB, ThumbnailIn, ThumbnailOut
 from app.routers.utils import get_content_type
 
 router = APIRouter()

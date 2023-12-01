@@ -12,11 +12,8 @@ from bson import ObjectId
 
 from app.main import startup_beanie
 from app.models.config import ConfigEntryDB
-from app.models.listeners import (
-    EventListenerJobUpdateDB,
-    EventListenerJobStatus,
-    EventListenerJobDB,
-)
+from app.models.listeners import (EventListenerJobDB, EventListenerJobStatus,
+                                  EventListenerJobUpdateDB)
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)

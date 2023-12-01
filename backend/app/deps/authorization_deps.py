@@ -3,7 +3,7 @@ from beanie.operators import Or
 from fastapi import Depends, HTTPException
 
 from app.keycloak_auth import get_current_username
-from app.models.authorization import RoleType, AuthorizationDB
+from app.models.authorization import AuthorizationDB, RoleType
 from app.models.datasets import DatasetDB, DatasetStatus
 from app.models.files import FileDB
 from app.models.groups import GroupDB

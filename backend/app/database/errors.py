@@ -2,7 +2,6 @@ import logging
 import traceback
 from typing import Optional
 
-
 from app.models.errors import ErrorDB
 from app.models.mongomodel import MongoDBRef
 

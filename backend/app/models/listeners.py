@@ -1,10 +1,10 @@
 from datetime import datetime
 from enum import Enum
-from typing import Optional, List, Union
+from typing import List, Optional, Union
 
 import pymongo
-from beanie import Document, View, PydanticObjectId
-from pydantic import Field, BaseModel, AnyUrl
+from beanie import Document, PydanticObjectId, View
+from pydantic import AnyUrl, BaseModel, Field
 
 from app.config import settings
 from app.models.authorization import AuthorizationDB

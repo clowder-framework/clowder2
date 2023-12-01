@@ -1,21 +1,14 @@
 import io
 import time
 from datetime import datetime, timedelta
-from typing import Optional, List
-from typing import Union
+from typing import List, Optional, Union
 
 from beanie import PydanticObjectId
 from beanie.odm.operators.update.general import Inc
 from bson import ObjectId
 from elasticsearch import Elasticsearch, NotFoundError
-from fastapi import (
-    APIRouter,
-    HTTPException,
-    Depends,
-    Security,
-    File,
-    UploadFile,
-)
+from fastapi import (APIRouter, Depends, File, HTTPException, Security,
+                     UploadFile)
 from fastapi.responses import StreamingResponse
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from minio import Minio
@@ -25,23 +18,15 @@ from app import dependencies
 from app.config import settings
 from app.deps.authorization_deps import FileAuthorization
 from app.keycloak_auth import get_current_user, get_token
-from app.models.files import (
-    FileOut,
-    FileVersion,
-    FileDB,
-    FileVersionDB,
-)
+from app.models.files import FileDB, FileOut, FileVersion, FileVersionDB
 from app.models.metadata import MetadataDB
-from app.models.users import UserOut
 from app.models.thumbnails import ThumbnailDB
-from app.rabbitmq.listeners import submit_file_job, EventListenerJobDB
+from app.models.users import UserOut
+from app.rabbitmq.listeners import EventListenerJobDB, submit_file_job
 from app.routers.feeds import check_feed_listeners
 from app.routers.utils import get_content_type
-from app.search.connect import (
-    delete_document_by_id,
-    insert_record,
-    update_record,
-)
+from app.search.connect import (delete_document_by_id, insert_record,
+                                update_record)
 from app.search.index import index_file, index_thumbnail
 
 router = APIRouter()

@@ -1,12 +1,8 @@
 from fastapi.testclient import TestClient
+
 from app.config import settings
-from app.tests.utils import (
-    create_dataset,
-    create_group,
-    user_alt,
-    create_user,
-    get_user_token,
-)
+from app.tests.utils import (create_dataset, create_group, create_user,
+                             get_user_token, user_alt)
 
 member_alt = {"user": user_alt, "editor": False}
 

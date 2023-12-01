@@ -3,11 +3,7 @@ import os
 from fastapi.testclient import TestClient
 
 from app.config import settings
-from app.tests.utils import (
-    create_dataset,
-    generate_png,
-    user_alt,
-)
+from app.tests.utils import create_dataset, generate_png, user_alt
 
 
 def test_create(client: TestClient, headers: dict):

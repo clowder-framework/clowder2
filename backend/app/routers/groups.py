@@ -4,13 +4,13 @@ from typing import List, Optional
 from beanie import PydanticObjectId
 from beanie.operators import Or, Push, RegEx
 from bson.objectid import ObjectId
-from fastapi import HTTPException, Depends, APIRouter
+from fastapi import APIRouter, Depends, HTTPException
 
 from app.deps.authorization_deps import AuthorizationDB, GroupAuthorization
 from app.keycloak_auth import get_current_user, get_user
 from app.models.authorization import RoleType
-from app.models.groups import GroupOut, GroupIn, GroupDB, GroupBase, Member
-from app.models.users import UserOut, UserDB
+from app.models.groups import GroupBase, GroupDB, GroupIn, GroupOut, Member
+from app.models.users import UserDB, UserOut
 
 router = APIRouter()
 

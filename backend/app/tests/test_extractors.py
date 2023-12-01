@@ -1,7 +1,7 @@
 from fastapi.testclient import TestClient
 
 from app.config import settings
-from app.tests.utils import create_dataset, upload_file, register_v1_extractor
+from app.tests.utils import create_dataset, register_v1_extractor, upload_file
 
 
 def test_register(client: TestClient, headers: dict):

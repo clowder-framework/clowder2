@@ -2,9 +2,10 @@ from typing import Generator
 
 import pytest
 from fastapi.testclient import TestClient
+
 from app.config import settings
 from app.main import app
-from app.tests.utils import user_example, delete_test_data
+from app.tests.utils import delete_test_data, user_example
 
 settings.MONGO_DATABASE = "clowder-tests"
 settings.elasticsearch_index = "clowder-tests"

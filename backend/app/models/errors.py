@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import Optional
 
 from beanie import Document
-from pydantic import Field, BaseModel
+from pydantic import BaseModel, Field
 
 from app.models.mongomodel import MongoDBRef
 

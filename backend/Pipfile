@@ -29,6 +29,7 @@ itsdangerous = "2.1.2"
 flake8 = "*"
 pyflakes = "*"
 autoflake = "*"
+isort = "*"
 
 [dev-packages]
 requests = "2.28.2"

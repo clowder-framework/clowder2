@@ -5,23 +5,16 @@ import os
 import shutil
 import tempfile
 import zipfile
-from collections.abc import Mapping, Iterable
+from collections.abc import Iterable, Mapping
 from typing import List, Optional
 
 from beanie import PydanticObjectId
 from beanie.odm.operators.update.general import Inc
 from beanie.operators import Or
-from bson import ObjectId
-from bson import json_util
+from bson import ObjectId, json_util
 from elasticsearch import Elasticsearch
-from fastapi import (
-    APIRouter,
-    HTTPException,
-    Depends,
-    File,
-    UploadFile,
-    Request,
-)
+from fastapi import (APIRouter, Depends, File, HTTPException, Request,
+                     UploadFile)
 from fastapi.responses import StreamingResponse
 from fastapi.security import HTTPBearer
 from minio import Minio
@@ -32,32 +25,20 @@ from rocrate.rocrate import ROCrate
 from app import dependencies
 from app.config import settings
 from app.deps.authorization_deps import Authorization, CheckStatus
-from app.keycloak_auth import (
-    get_token,
-    get_user,
-    get_current_user,
-)
+from app.keycloak_auth import get_current_user, get_token, get_user
 from app.models.authorization import AuthorizationDB, RoleType
-from app.models.datasets import (
-    DatasetBase,
-    DatasetIn,
-    DatasetDB,
-    DatasetOut,
-    DatasetPatch,
-    DatasetDBViewList,
-    DatasetStatus,
-)
-from app.models.files import FileOut, FileDB, FileDBViewList
-from app.models.folders import FolderOut, FolderIn, FolderDB, FolderDBViewList
+from app.models.datasets import (DatasetBase, DatasetDB, DatasetDBViewList,
+                                 DatasetIn, DatasetOut, DatasetPatch,
+                                 DatasetStatus)
+from app.models.files import FileDB, FileDBViewList, FileOut
+from app.models.folders import FolderDB, FolderDBViewList, FolderIn, FolderOut
 from app.models.metadata import MetadataDB
 from app.models.pyobjectid import PyObjectId
 from app.models.thumbnails import ThumbnailDB
 from app.models.users import UserOut
 from app.rabbitmq.listeners import submit_dataset_job
 from app.routers.files import add_file_entry, remove_file_entry
-from app.search.connect import (
-    delete_document_by_id,
-)
+from app.search.connect import delete_document_by_id
 from app.search.index import index_dataset
 
 router = APIRouter()

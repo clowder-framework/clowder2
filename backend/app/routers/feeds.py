@@ -1,20 +1,13 @@
 from typing import List, Optional
 
 from beanie import PydanticObjectId
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from pika.adapters.blocking_connection import BlockingChannel
 
 from app.keycloak_auth import get_current_user, get_current_username
-from app.models.feeds import (
-    FeedIn,
-    FeedDB,
-    FeedOut,
-)
+from app.models.feeds import FeedDB, FeedIn, FeedOut
 from app.models.files import FileOut
-from app.models.listeners import (
-    FeedListener,
-    EventListenerDB,
-)
+from app.models.listeners import EventListenerDB, FeedListener
 from app.models.users import UserOut
 from app.rabbitmq.listeners import submit_file_job
 from app.search.connect import check_search_result

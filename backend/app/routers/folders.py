@@ -1,9 +1,6 @@
 from beanie import PydanticObjectId
 from bson import ObjectId
-from fastapi import (
-    APIRouter,
-    HTTPException,
-)
+from fastapi import APIRouter, HTTPException
 
 from app.models.folders import FolderDB
 
