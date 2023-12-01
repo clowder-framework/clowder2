@@ -2,10 +2,9 @@ from typing import List, Optional
 from datetime import datetime
 
 import pymongo
-from beanie import Document, PydanticObjectId
+from beanie import Document
 from pydantic import BaseModel, Field, EmailStr
 
-from app.models.authorization import Provenance
 from app.models.listeners import FeedListener
 from app.models.search import SearchObject
 

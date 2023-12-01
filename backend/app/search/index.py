@@ -5,9 +5,9 @@ from elasticsearch import Elasticsearch, NotFoundError
 from beanie import PydanticObjectId
 from app.config import settings
 from app.models.authorization import AuthorizationDB
-from app.models.datasets import DatasetOut, DatasetDB
+from app.models.datasets import DatasetOut
 from app.models.files import FileOut, FileDB
-from app.models.thumbnails import ThumbnailOut, ThumbnailDB
+from app.models.thumbnails import ThumbnailDB
 from app.models.metadata import MetadataDB
 from app.models.search import (
     ElasticsearchEntry,

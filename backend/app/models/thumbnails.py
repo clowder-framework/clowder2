@@ -1,11 +1,9 @@
 from datetime import datetime
-from typing import Optional
 
 from beanie import Document
 from pydantic import BaseModel, Field
 
 from app.models.files import ContentType
-from app.models.metadata import MongoDBRef
 from app.models.users import UserOut
 
 

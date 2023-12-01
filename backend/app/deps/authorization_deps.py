@@ -1,13 +1,12 @@
 from beanie import PydanticObjectId
 from beanie.operators import Or
-from bson import ObjectId
 from fastapi import Depends, HTTPException
 
 from app.keycloak_auth import get_current_username
 from app.models.authorization import RoleType, AuthorizationDB
 from app.models.datasets import DatasetDB, DatasetStatus
-from app.models.files import FileOut, FileDB
-from app.models.groups import GroupOut, GroupDB
+from app.models.files import FileDB
+from app.models.groups import GroupDB
 from app.models.metadata import MetadataDB
 from app.models.pyobjectid import PyObjectId
 

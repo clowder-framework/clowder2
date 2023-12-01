@@ -5,9 +5,7 @@ from fastapi.testclient import TestClient
 from app.config import settings
 from app.tests.utils import (
     create_dataset,
-    create_user,
     generate_png,
-    user_example,
     user_alt,
 )
 

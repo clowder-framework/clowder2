@@ -6,7 +6,7 @@ from pymongo import MongoClient
 
 from app.config import settings
 from app.models.search import SearchCriteria
-from app.routers.feeds import FeedIn, FeedListener, FeedOut, FeedDB, associate_listener
+from app.routers.feeds import FeedListener, FeedDB
 from app.models.listeners import EventListenerDB, EventListenerOut, ExtractorInfo
 
 logging.basicConfig(level=logging.INFO)

@@ -1,10 +1,8 @@
 import logging
 import traceback
-from typing import Optional, Generator
+from typing import Optional
 
-import motor.motor_asyncio
 
-from app.config import settings
 from app.models.errors import ErrorDB
 from app.models.mongomodel import MongoDBRef
 

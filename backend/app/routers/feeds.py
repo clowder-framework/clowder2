@@ -1,7 +1,6 @@
 from typing import List, Optional
 
 from beanie import PydanticObjectId
-from beanie.operators import NE
 from fastapi import APIRouter, HTTPException, Depends
 from pika.adapters.blocking_connection import BlockingChannel
 

@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import Optional
 
 from beanie import PydanticObjectId
 from beanie.odm.operators.update.general import Inc
