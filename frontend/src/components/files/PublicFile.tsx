@@ -303,6 +303,7 @@ export const PublicFile = (): JSX.Element => {
 							deleteMetadata={""}
 							resourceType="file"
 							resourceId={fileId}
+							publicView={true}
 						/>
 					</TabPanel>
 					<TabPanel value={selectedTabIndex} index={3}>
