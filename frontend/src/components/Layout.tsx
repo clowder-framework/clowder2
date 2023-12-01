@@ -18,7 +18,7 @@ import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
 import { Link, Menu, MenuItem, MenuList, Typography } from "@mui/material";
 import { Link as RouterLink, useLocation } from "react-router-dom";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../types/data";
 import { AddBox, Explore } from "@material-ui/icons";
 import HistoryIcon from "@mui/icons-material/History";
@@ -30,6 +30,8 @@ import { getCurrEmail } from "../utils/common";
 import VpnKeyIcon from "@mui/icons-material/VpnKey";
 import LogoutIcon from "@mui/icons-material/Logout";
 import { EmbeddedSearch } from "./search/EmbeddedSearch";
+import ManageAccountsIcon from "@mui/icons-material/ManageAccounts";
+import { fetchUserProfile } from "../actions/user";
 
 const drawerWidth = 240;
 
@@ -103,6 +105,10 @@ export default function PersistentDrawerLeft(props) {
 	const [embeddedSearchHidden, setEmbeddedSearchHidden] = React.useState(false);
 	const [anchorEl, setAnchorEl] = React.useState(null);
 	const isMenuOpen = Boolean(anchorEl);
+	const user = useSelector((state: RootState) => state.user);
+	const profile = user["profile"];
+	const dispatch = useDispatch();
+	const fetchProfile = () => dispatch(fetchUserProfile());
 
 	const handleDrawerOpen = () => {
 		setOpen(true);
@@ -128,6 +134,7 @@ export default function PersistentDrawerLeft(props) {
 		} else {
 			setEmbeddedSearchHidden(false);
 		}
+		fetchProfile();
 	}, [location]);
 
 	const loggedOut = useSelector((state: RootState) => state.error.loggedOut);
@@ -217,6 +224,17 @@ export default function PersistentDrawerLeft(props) {
 						<ListItemText>User Profile</ListItemText>
 					</MenuItem>
 					<Divider orientation="horizontal" />
+					{profile.admin ? (
+						<>
+							<MenuItem component={RouterLink} to="/manage-users">
+								<ListItemIcon>
+									<ManageAccountsIcon fontSize="small" />
+								</ListItemIcon>
+								<ListItemText>Manage Users</ListItemText>
+							</MenuItem>
+							<Divider orientation="horizontal" />
+						</>
+					) : null}
 					<MenuItem component={RouterLink} to="/apikeys">
 						<ListItemIcon>
 							<VpnKeyIcon fontSize="small" />

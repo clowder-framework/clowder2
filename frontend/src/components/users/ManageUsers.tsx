@@ -11,7 +11,7 @@ import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
 import { fetchUserProfile } from "../../actions/user";
 
-export const Profile = (): JSX.Element => {
+export const ManageUsers = (): JSX.Element => {
 	const dispatch = useDispatch();
 	const user = useSelector((state: RootState) => state.user);
 	const profile = user["profile"];

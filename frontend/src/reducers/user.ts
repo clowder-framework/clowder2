@@ -11,6 +11,7 @@ import {
 } from "../actions/user";
 import { UserState } from "../types/data";
 import { DataAction } from "../types/action";
+import { UserOut } from "../openapi/v2";
 
 const defaultState: UserState = {
 	Authorization: null,
@@ -19,7 +20,7 @@ const defaultState: UserState = {
 	errorMsg: "",
 	hashedKey: "",
 	apiKeys: [],
-	profile: null,
+	profile: <UserOut>{},
 };
 
 const user = (state = defaultState, action: DataAction) => {
