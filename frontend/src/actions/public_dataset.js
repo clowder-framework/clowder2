@@ -5,6 +5,28 @@ import {
 	handleErrorsInline,
 	resetFailedReason,
 } from "./common";
+
+export const RECEIVE_PUBLIC_DATASET_METADATA = "RECEIVE_PUBLIC_DATASET_METADATA";
+
+export function fetchPublicDatasetMetadata(datasetId, version) {
+	return (dispatch) => {
+		return V2.PublicDatasetsService.getDatasetMetadataApiV2PublicDatasetsDatasetIdMetadataGet(
+			datasetId,
+			version,
+			false
+		)
+			.then((json) => {
+				dispatch({
+					type: RECEIVE_PUBLIC_DATASET_METADATA,
+					publicDatasetMetadataList: json,
+					receivedAt: Date.now(),
+				});
+			})
+			.catch((reason) => {
+				dispatch(handleErrors(reason, fetchPublicDatasetMetadata(datasetId, version)));
+			});
+	};
+}
 export const RECEIVE_FILES_IN_PUBLIC_DATASET = "RECEIVE_FILES_IN_PUBLIC_DATASET";
 
 export function fetchFilesInPublicDataset(datasetId, folderId, skip, limit) {

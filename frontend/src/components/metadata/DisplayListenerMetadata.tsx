@@ -4,6 +4,8 @@ import {metadataConfig} from "../../metadata.config";
 import {useSelector, useDispatch} from "react-redux";
 import {RootState} from "../../types/data";
 import {fetchDatasetMetadata, fetchFileMetadata, fetchMetadataDefinitions} from "../../actions/metadata";
+import {fetchPublicFileMetadata} from "../../actions/public_file";
+import {fetchPublicDatasetMetadata} from "../../actions/public_dataset";
 import {Agent} from "./Agent";
 import {MetadataDeleteButton} from "./widgets/MetadataDeleteButton";
 import {ListenerMetadataEntry} from "../metadata/ListenerMetadataEntry";
@@ -16,6 +18,7 @@ type MetadataType = {
 	resourceType: string | undefined,
 	resourceId: string | undefined,
 	version: number | undefined,
+	publicView: boolean | false,
 }
 
 /*
@@ -24,7 +27,7 @@ Uses only the list of metadata
 */
 export const DisplayListenerMetadata = (props: MetadataType) => {
 
-	const {updateMetadata, deleteMetadata, resourceType, resourceId, version} = props;
+	const {updateMetadata, deleteMetadata, resourceType, resourceId, version, publicView} = props;
 
 	const dispatch = useDispatch();
 
@@ -32,8 +35,14 @@ export const DisplayListenerMetadata = (props: MetadataType) => {
 	const metadataDefinitionList = useSelector((state: RootState) => state.metadata.metadataDefinitionList);
 	const listDatasetMetadata = (datasetId: string | undefined) => dispatch(fetchDatasetMetadata(datasetId));
 	const listFileMetadata = (fileId: string | undefined, version: number | undefined) => dispatch(fetchFileMetadata(fileId, version));
+	const listPublicDatasetMetadata = (datasetId: string | undefined) => dispatch(fetchPublicDatasetMetadata(datasetId));
+	const listPublicFileMetadata = (fileId: string | undefined, version: number | undefined) => dispatch(fetchPublicFileMetadata(fileId, version));
 	const datasetMetadataList = useSelector((state: RootState) => state.metadata.datasetMetadataList);
 	const fileMetadataList = useSelector((state: RootState) => state.metadata.fileMetadataList);
+	const publicDatasetMetadataList = useSelector((state: RootState) => state.metadata.publicDatasetMetadataList);
+	const publicFileMetadataList = useSelector((state: RootState) => state.metadata.publicFileMetadataList);
+
+
 
 	useEffect(() => {
 		getMetadatDefinitions(null, 0, 100);
@@ -42,9 +51,18 @@ export const DisplayListenerMetadata = (props: MetadataType) => {
 	// complete metadata list with both definition and values
 	useEffect(() => {
 		if (resourceType === "dataset") {
-			listDatasetMetadata(resourceId);
+			if (publicView) {
+				listPublicDatasetMetadata(resourceId);
+			} else {
+				listDatasetMetadata(resourceId);
+			}
 		} else if (resourceType === "file") {
-			listFileMetadata(resourceId, version);
+			if (publicView){
+				listPublicFileMetadata(resourceId, version);
+			} else {
+				listFileMetadata(resourceId, version);
+
+			}
 		}
 	}, [resourceType, resourceId, version]);
 
@@ -53,8 +71,10 @@ export const DisplayListenerMetadata = (props: MetadataType) => {
 			{
 				(() => {
 					let metadataList = [];
-					if (resourceType === "dataset") metadataList = datasetMetadataList;
-					else if (resourceType === "file") metadataList = fileMetadataList;
+					if (resourceType === "dataset" && !publicView) metadataList = datasetMetadataList;
+					else if (resourceType === "file" && !publicView) metadataList = fileMetadataList;
+					else if (resourceType === "file" && publicView) metadataList = publicFileMetadataList;
+					else if (resourceType === "dataset" && publicView) metadataList = publicDatasetMetadataList;
 					let listenerMetadataList = [];
 					let listenerMetadataContent = [];
 
