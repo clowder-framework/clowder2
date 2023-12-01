@@ -13,8 +13,7 @@ from beanie.odm.operators.update.general import Inc
 from beanie.operators import Or
 from bson import ObjectId, json_util
 from elasticsearch import Elasticsearch
-from fastapi import (APIRouter, Depends, File, HTTPException, Request,
-                     UploadFile)
+from fastapi import APIRouter, Depends, File, HTTPException, Request, UploadFile
 from fastapi.responses import StreamingResponse
 from fastapi.security import HTTPBearer
 from minio import Minio
@@ -27,9 +26,15 @@ from app.config import settings
 from app.deps.authorization_deps import Authorization, CheckStatus
 from app.keycloak_auth import get_current_user, get_token, get_user
 from app.models.authorization import AuthorizationDB, RoleType
-from app.models.datasets import (DatasetBase, DatasetDB, DatasetDBViewList,
-                                 DatasetIn, DatasetOut, DatasetPatch,
-                                 DatasetStatus)
+from app.models.datasets import (
+    DatasetBase,
+    DatasetDB,
+    DatasetDBViewList,
+    DatasetIn,
+    DatasetOut,
+    DatasetPatch,
+    DatasetStatus,
+)
 from app.models.files import FileDB, FileDBViewList, FileOut
 from app.models.folders import FolderDB, FolderDBViewList, FolderIn, FolderOut
 from app.models.metadata import MetadataDB

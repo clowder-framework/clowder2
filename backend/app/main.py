@@ -17,21 +17,40 @@ from app.models.feeds import FeedDB
 from app.models.files import FileDB, FileDBViewList, FileVersionDB
 from app.models.folders import FolderDB, FolderDBViewList
 from app.models.groups import GroupDB
-from app.models.listeners import (EventListenerDB, EventListenerJobDB,
-                                  EventListenerJobUpdateDB,
-                                  EventListenerJobUpdateViewList,
-                                  EventListenerJobViewList)
+from app.models.listeners import (
+    EventListenerDB,
+    EventListenerJobDB,
+    EventListenerJobUpdateDB,
+    EventListenerJobUpdateViewList,
+    EventListenerJobViewList,
+)
 from app.models.metadata import MetadataDB, MetadataDefinitionDB
 from app.models.thumbnails import ThumbnailDB
 from app.models.tokens import TokenDB
 from app.models.users import ListenerAPIKeyDB, UserAPIKeyDB, UserDB
 from app.models.visualization_config import VisualizationConfigDB
 from app.models.visualization_data import VisualizationDataDB
-from app.routers import (authentication, authorization, datasets,
-                         elasticsearch, feeds, files, folders, groups, jobs,
-                         keycloak, listeners, metadata, metadata_datasets,
-                         metadata_files, status, thumbnails, users,
-                         visualization)
+from app.routers import (
+    authentication,
+    authorization,
+    datasets,
+    elasticsearch,
+    feeds,
+    files,
+    folders,
+    groups,
+    jobs,
+    keycloak,
+    listeners,
+    metadata,
+    metadata_datasets,
+    metadata_files,
+    status,
+    thumbnails,
+    users,
+    visualization,
+)
+
 # setup loggers
 # logging.config.fileConfig('logging.conf', disable_existing_loggers=False)
 from app.search.config import indexSettings

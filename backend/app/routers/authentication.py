@@ -2,8 +2,11 @@ import json
 
 from beanie import PydanticObjectId
 from fastapi import APIRouter, Depends, HTTPException
-from keycloak.exceptions import (KeycloakAuthenticationError, KeycloakGetError,
-                                 KeycloakPostError)
+from keycloak.exceptions import (
+    KeycloakAuthenticationError,
+    KeycloakGetError,
+    KeycloakPostError,
+)
 from passlib.hash import bcrypt
 
 from app.keycloak_auth import create_user, get_current_user, keycloak_openid

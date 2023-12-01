@@ -4,8 +4,7 @@ import logging
 from datetime import datetime
 
 from fastapi import Depends, HTTPException, Security
-from fastapi.security import (APIKeyCookie, APIKeyHeader,
-                              OAuth2AuthorizationCodeBearer)
+from fastapi.security import APIKeyCookie, APIKeyHeader, OAuth2AuthorizationCodeBearer
 from itsdangerous.exc import BadSignature
 from itsdangerous.url_safe import URLSafeSerializer
 from jose import ExpiredSignatureError

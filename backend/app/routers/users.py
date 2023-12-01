@@ -9,8 +9,13 @@ from itsdangerous.url_safe import URLSafeSerializer
 
 from app.config import settings
 from app.keycloak_auth import get_current_username
-from app.models.users import (ListenerAPIKeyDB, UserAPIKeyDB, UserAPIKeyOut,
-                              UserDB, UserOut)
+from app.models.users import (
+    ListenerAPIKeyDB,
+    UserAPIKeyDB,
+    UserAPIKeyOut,
+    UserDB,
+    UserOut,
+)
 
 router = APIRouter()
 

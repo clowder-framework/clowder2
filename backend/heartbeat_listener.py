@@ -10,8 +10,7 @@ from packaging import version
 
 from app.config import settings
 from app.main import startup_beanie
-from app.models.listeners import (EventListenerDB, EventListenerOut,
-                                  ExtractorInfo)
+from app.models.listeners import EventListenerDB, EventListenerOut, ExtractorInfo
 from app.routers.listeners import _process_incoming_v1_extractor_info
 
 logging.basicConfig(level=logging.INFO)

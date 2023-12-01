@@ -5,15 +5,28 @@ from fastapi import APIRouter, Depends
 from fastapi.exceptions import HTTPException
 
 from app.dependencies import get_elasticsearchclient
-from app.deps.authorization_deps import (Authorization, get_role_by_file,
-                                         get_role_by_group,
-                                         get_role_by_metadata)
+from app.deps.authorization_deps import (
+    Authorization,
+    get_role_by_file,
+    get_role_by_group,
+    get_role_by_metadata,
+)
 from app.keycloak_auth import get_current_username, get_user
-from app.models.authorization import (AuthorizationBase, AuthorizationDB,
-                                      AuthorizationMetadata, AuthorizationOut,
-                                      RoleType)
-from app.models.datasets import (DatasetDB, DatasetOut, DatasetRoles,
-                                 DatasetStatus, GroupAndRole, UserAndRole)
+from app.models.authorization import (
+    AuthorizationBase,
+    AuthorizationDB,
+    AuthorizationMetadata,
+    AuthorizationOut,
+    RoleType,
+)
+from app.models.datasets import (
+    DatasetDB,
+    DatasetOut,
+    DatasetRoles,
+    DatasetStatus,
+    GroupAndRole,
+    UserAndRole,
+)
 from app.models.groups import GroupDB
 from app.models.pyobjectid import PyObjectId
 from app.models.users import UserDB

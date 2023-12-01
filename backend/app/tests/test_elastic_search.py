@@ -7,10 +7,16 @@ from bson import ObjectId
 
 from app.config import settings
 from app.search.config import indexSettings
-from app.search.connect import (connect_elasticsearch, create_index,
-                                delete_document_by_id,
-                                delete_document_by_query, delete_index,
-                                insert_record, search_index, update_record)
+from app.search.connect import (
+    connect_elasticsearch,
+    create_index,
+    delete_document_by_id,
+    delete_document_by_query,
+    delete_index,
+    insert_record,
+    search_index,
+    update_record,
+)
 
 dummy_file_record = {
     "name": "test file",

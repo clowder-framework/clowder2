@@ -9,9 +9,15 @@ from fastapi import APIRouter, Depends, HTTPException
 from app import dependencies
 from app.deps.authorization_deps import MetadataAuthorization
 from app.keycloak_auth import get_current_user
-from app.models.metadata import (MetadataDB, MetadataDefinitionDB,
-                                 MetadataDefinitionIn, MetadataDefinitionOut,
-                                 MetadataOut, MetadataPatch, patch_metadata)
+from app.models.metadata import (
+    MetadataDB,
+    MetadataDefinitionDB,
+    MetadataDefinitionIn,
+    MetadataDefinitionOut,
+    MetadataOut,
+    MetadataPatch,
+    patch_metadata,
+)
 from app.models.pyobjectid import PyObjectId
 
 router = APIRouter()

@@ -3,8 +3,12 @@ import time
 from fastapi.testclient import TestClient
 
 from app.config import settings
-from app.tests.utils import (create_dataset, feed_example,
-                             register_v2_listener, upload_file)
+from app.tests.utils import (
+    create_dataset,
+    feed_example,
+    register_v2_listener,
+    upload_file,
+)
 
 
 def test_feeds(client: TestClient, headers: dict):

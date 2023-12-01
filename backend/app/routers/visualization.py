@@ -14,12 +14,16 @@ from app.keycloak_auth import get_current_user
 from app.models.datasets import DatasetDB
 from app.models.files import FileDB
 from app.models.metadata import MongoDBRef
-from app.models.visualization_config import (VisualizationConfigDB,
-                                             VisualizationConfigIn,
-                                             VisualizationConfigOut)
-from app.models.visualization_data import (VisualizationDataDB,
-                                           VisualizationDataIn,
-                                           VisualizationDataOut)
+from app.models.visualization_config import (
+    VisualizationConfigDB,
+    VisualizationConfigIn,
+    VisualizationConfigOut,
+)
+from app.models.visualization_data import (
+    VisualizationDataDB,
+    VisualizationDataIn,
+    VisualizationDataOut,
+)
 from app.routers.utils import get_content_type
 
 router = APIRouter()

@@ -7,8 +7,11 @@ from elasticsearch import Elasticsearch, NotFoundError
 from fastapi import HTTPException
 from pydantic import AnyUrl, BaseModel, Field, validator
 
-from app.models.listeners import (EventListenerIn, EventListenerOut,
-                                  LegacyEventListenerIn)
+from app.models.listeners import (
+    EventListenerIn,
+    EventListenerOut,
+    LegacyEventListenerIn,
+)
 from app.models.mongomodel import MongoDBRef
 from app.models.users import UserOut
 from app.search.connect import insert_record, update_record

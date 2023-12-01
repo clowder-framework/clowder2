@@ -7,10 +7,13 @@ from bson import ObjectId
 from fastapi import APIRouter, Depends, HTTPException
 
 from app.keycloak_auth import get_current_username, get_user
-from app.models.listeners import (EventListenerJobDB, EventListenerJobOut,
-                                  EventListenerJobUpdateDB,
-                                  EventListenerJobUpdateOut,
-                                  EventListenerJobViewList)
+from app.models.listeners import (
+    EventListenerJobDB,
+    EventListenerJobOut,
+    EventListenerJobUpdateDB,
+    EventListenerJobUpdateOut,
+    EventListenerJobViewList,
+)
 
 router = APIRouter()
 

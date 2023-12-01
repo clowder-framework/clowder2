@@ -14,9 +14,13 @@ from app.config import settings
 from app.keycloak_auth import get_current_user, get_current_username, get_user
 from app.models.config import ConfigEntryDB
 from app.models.feeds import FeedDB, FeedListener
-from app.models.listeners import (EventListenerDB, EventListenerIn,
-                                  EventListenerOut, ExtractorInfo,
-                                  LegacyEventListenerIn)
+from app.models.listeners import (
+    EventListenerDB,
+    EventListenerIn,
+    EventListenerOut,
+    ExtractorInfo,
+    LegacyEventListenerIn,
+)
 from app.models.search import SearchCriteria
 from app.models.users import UserOut
 from app.routers.feeds import disassociate_listener_db

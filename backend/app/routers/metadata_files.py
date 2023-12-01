@@ -11,11 +11,19 @@ from app.deps.authorization_deps import FileAuthorization
 from app.keycloak_auth import UserOut, get_current_user
 from app.models.files import FileDB, FileOut, FileVersionDB
 from app.models.listeners import EventListenerDB
-from app.models.metadata import (MetadataAgent, MetadataDB,
-                                 MetadataDefinitionDB, MetadataDefinitionOut,
-                                 MetadataDelete, MetadataIn, MetadataOut,
-                                 MetadataPatch, MongoDBRef, patch_metadata,
-                                 validate_context)
+from app.models.metadata import (
+    MetadataAgent,
+    MetadataDB,
+    MetadataDefinitionDB,
+    MetadataDefinitionOut,
+    MetadataDelete,
+    MetadataIn,
+    MetadataOut,
+    MetadataPatch,
+    MongoDBRef,
+    patch_metadata,
+    validate_context,
+)
 from app.search.connect import delete_document_by_id
 from app.search.index import index_file
 
