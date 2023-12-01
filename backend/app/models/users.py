@@ -12,7 +12,6 @@ class UserBase(BaseModel):
     email: EmailStr
     first_name: str
     last_name: str
-    admin: bool
 
 
 class UserIn(UserBase):
@@ -25,6 +24,8 @@ class UserLogin(BaseModel):
 
 
 class UserDoc(Document, UserBase):
+    admin: bool
+
     class Settings:
         name = "users"
 
