@@ -54,6 +54,7 @@ from app.models.pyobjectid import PyObjectId
 from app.models.thumbnails import ThumbnailDB
 from app.models.users import UserOut
 from app.rabbitmq.listeners import submit_dataset_job
+from app.routers.authentication import get_admin
 from app.routers.files import add_file_entry, remove_file_entry
 from app.search.connect import (
     delete_document_by_id,
@@ -210,8 +211,15 @@ async def get_datasets(
     skip: int = 0,
     limit: int = 10,
     mine: bool = False,
+    admin=Depends(get_admin),
 ):
-    if mine:
+    if admin:
+        datasets = await DatasetDBViewList.find(
+            sort=(-DatasetDBViewList.created),
+            skip=skip,
+            limit=limit,
+        ).to_list()
+    elif mine:
         datasets = await DatasetDBViewList.find(
             DatasetDBViewList.creator.email == user_id,
             sort=(-DatasetDBViewList.created),
