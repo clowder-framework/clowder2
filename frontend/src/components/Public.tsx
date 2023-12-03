@@ -100,7 +100,7 @@ export const Public = (): JSX.Element => {
 
 
 	return (
-		<Layout>
+		<PublicLayout>
 			{/*Error Message dialogue*/}
 			<ErrorModal errorOpen={errorOpen} setErrorOpen={setErrorOpen} />
 
@@ -172,6 +172,6 @@ export const Public = (): JSX.Element => {
 					<TabPanel value={selectedTabIndex} index={3} />
 				</Grid>
 			</Grid>
-		</Layout>
+		</PublicLayout>
 	);
 };

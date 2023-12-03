@@ -174,43 +174,65 @@ export default function PersistentDrawerLeft(props) {
 								</Link>
 							</>
 						) : (
-							<></>
+							<IconButton
+								edge="end"
+								aria-label="account of current user"
+								aria-controls="primary-search-account-menu"
+								aria-haspopup="true"
+								onClick={handleProfileMenuOpen}
+								color="inherit"
+							>
+								{getCurrEmail() !== undefined ? (
+									<Gravatar
+										email={getCurrEmail()}
+										rating="g"
+										style={{
+											width: "32px",
+											height: "32px",
+											borderRadius: "50%",
+											verticalAlign: "middle",
+										}}
+									/>
+								) : (
+									<PersonIcon sx={{ verticalAlign: "middle" }} />
+								)}
+							</IconButton>
 						)}
 					</Box>
 				</Toolbar>
 			</AppBar>
 			{/*Profile menu*/}
 			<MenuList>
-				{/*<Menu*/}
-				{/*	anchorEl={anchorEl}*/}
-				{/*	anchorOrigin={{ vertical: "bottom", horizontal: "left" }}*/}
-				{/*	id={"primary-search-account-menu"}*/}
-				{/*	keepMounted*/}
-				{/*	transformOrigin={{ vertical: "top", horizontal: "center" }}*/}
-				{/*	open={isMenuOpen}*/}
-				{/*	onClose={handleProfileMenuClose}*/}
-				{/*>*/}
-				{/*	<MenuItem component={RouterLink} to="/profile">*/}
-				{/*		<ListItemIcon>*/}
-				{/*			<PersonIcon fontSize="small" />*/}
-				{/*		</ListItemIcon>*/}
-				{/*		<ListItemText>User Profile</ListItemText>*/}
-				{/*	</MenuItem>*/}
-				{/*	<Divider orientation="horizontal" />*/}
-				{/*	<MenuItem component={RouterLink} to="/apikeys">*/}
-				{/*		<ListItemIcon>*/}
-				{/*			<VpnKeyIcon fontSize="small" />*/}
-				{/*		</ListItemIcon>*/}
-				{/*		<ListItemText>API Key</ListItemText>*/}
-				{/*	</MenuItem>*/}
-				{/*	<Divider orientation="horizontal" />*/}
-				{/*	<MenuItem component={RouterLink} to="/auth/logout">*/}
-				{/*		<ListItemIcon>*/}
-				{/*			<LogoutIcon fontSize="small" />*/}
-				{/*		</ListItemIcon>*/}
-				{/*		<ListItemText>Log Out</ListItemText>*/}
-				{/*	</MenuItem>*/}
-				{/*</Menu>*/}
+				<Menu
+					anchorEl={anchorEl}
+					anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
+					id={"primary-search-account-menu"}
+					keepMounted
+					transformOrigin={{ vertical: "top", horizontal: "center" }}
+					open={isMenuOpen}
+					onClose={handleProfileMenuClose}
+				>
+					<MenuItem component={RouterLink} to="/profile">
+						<ListItemIcon>
+							<PersonIcon fontSize="small" />
+						</ListItemIcon>
+						<ListItemText>User Profile</ListItemText>
+					</MenuItem>
+					<Divider orientation="horizontal" />
+					<MenuItem component={RouterLink} to="/apikeys">
+						<ListItemIcon>
+							<VpnKeyIcon fontSize="small" />
+						</ListItemIcon>
+						<ListItemText>API Key</ListItemText>
+					</MenuItem>
+					<Divider orientation="horizontal" />
+					<MenuItem component={RouterLink} to="/auth/logout">
+						<ListItemIcon>
+							<LogoutIcon fontSize="small" />
+						</ListItemIcon>
+						<ListItemText>Log Out</ListItemText>
+					</MenuItem>
+				</Menu>
 			</MenuList>
 			{/*side drawer*/}
 			<Drawer
@@ -242,14 +264,14 @@ export default function PersistentDrawerLeft(props) {
 							<ListItemIcon>
 								<Explore />
 							</ListItemIcon>
-							<ListItemText primary={"Public"} />
+							<ListItemText primary={"Explore"} />
 						</ListItemButton>
 					</ListItem>
 				</List>
 				<Divider />
 				<List>
 					<ListItem key={"search"} disablePadding>
-						<ListItemButton component={RouterLink} to="/public/search">
+						<ListItemButton component={RouterLink} to="/search">
 							<ListItemIcon>
 								<SearchDatasetIcon />
 							</ListItemIcon>
@@ -258,49 +280,6 @@ export default function PersistentDrawerLeft(props) {
 					</ListItem>
 				</List>
 				<Divider />
-				<List>
-					<ListItem key={"groups"} disablePadding>
-						<ListItemButton component={RouterLink} to="/groups">
-							<ListItemIcon>
-								<GroupIcon />
-							</ListItemIcon>
-							<ListItemText primary={"Groups"} />
-						</ListItemButton>
-					</ListItem>
-				</List>
-				<Divider />
-				<List>
-					<ListItem key={"newdataset"} disablePadding>
-						<ListItemButton component={RouterLink} to="/create-dataset">
-							<ListItemIcon>
-								<AddBox />
-							</ListItemIcon>
-							<ListItemText primary={"New Dataset"} />
-						</ListItemButton>
-					</ListItem>
-				</List>
-				<Divider />
-				<List>
-					<ListItem key={"metadataDefinition"} disablePadding>
-						<ListItemButton component={RouterLink} to="/metadata-definitions">
-							<ListItemIcon>
-								<InfoOutlinedIcon />
-							</ListItemIcon>
-							<ListItemText primary={"Metadata Definitions"} />
-						</ListItemButton>
-					</ListItem>
-				</List>
-				<Divider />
-				<List>
-					<ListItem key={"extractions"} disablePadding>
-						<ListItemButton component={RouterLink} to="/extractions">
-							<ListItemIcon>
-								<HistoryIcon />
-							</ListItemIcon>
-							<ListItemText primary={"Extraction History"} />
-						</ListItemButton>
-					</ListItem>
-				</List>
 			</Drawer>
 			<Main open={open}>
 				<DrawerHeader />
