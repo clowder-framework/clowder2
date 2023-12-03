@@ -259,12 +259,12 @@ export default function PersistentDrawerLeft(props) {
 				</DrawerHeader>
 				<Divider />
 				<List>
-					<ListItem key={"explore"} disablePadding>
-						<ListItemButton component={RouterLink} to="/">
+					<ListItem key={"public"} disablePadding>
+						<ListItemButton component={RouterLink} to="/public">
 							<ListItemIcon>
 								<Explore />
 							</ListItemIcon>
-							<ListItemText primary={"Explore"} />
+							<ListItemText primary={"Public"} />
 						</ListItemButton>
 					</ListItem>
 				</List>
