@@ -33,6 +33,7 @@ import {
 	postDatasetMetadata,
 } from "../../actions/metadata";
 import Layout from "../Layout";
+import PublicLayout from "../PublicLayout";
 import { PublicActionsMenu } from "./PublicActionsMenu";
 import { DatasetDetails } from "./DatasetDetails";
 import {ArrowBack, ArrowForward, FormatListBulleted, InsertDriveFile} from "@material-ui/icons";
@@ -255,7 +256,7 @@ export const PublicDataset = (): JSX.Element => {
 	}
 
 	return (
-		<Layout>
+		<PublicLayout>
 			{/*Error Message dialogue*/}
 			<ErrorModal errorOpen={errorOpen} setErrorOpen={setErrorOpen} />
 			<Grid container>
@@ -357,6 +358,7 @@ export const PublicDataset = (): JSX.Element => {
 							deleteMetadata={deleteDatasetMetadata}
 							resourceType="dataset"
 							resourceId={datasetId}
+							publicView={true}
 						/>
 					</TabPanel>
 					<TabPanel value={selectedTabIndex} index={3}>
@@ -365,6 +367,7 @@ export const PublicDataset = (): JSX.Element => {
 							deleteMetadata={deleteDatasetMetadata}
 							resourceType="dataset"
 							resourceId={datasetId}
+							publicView={true}
 						/>
 					</TabPanel>
 					<TabPanel value={selectedTabIndex} index={4}>
@@ -402,6 +405,6 @@ export const PublicDataset = (): JSX.Element => {
 					<DatasetDetails details={about} />
 				</Grid>
 			</Grid>
-		</Layout>
+		</PublicLayout>
 	);
 };
