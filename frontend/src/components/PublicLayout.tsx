@@ -164,40 +164,12 @@ export default function PersistentDrawerLeft(props) {
 					</SearchDiv>
 					<Box sx={{ flexGrow: 1 }} />
 					<Box sx={{ marginLeft: "auto" }}>
-						{loggedOut ? (
-							<>
-								<Link href="/auth/register" sx={link}>
-									Register
-								</Link>
-								<Link href="/auth/login" sx={link}>
-									Login
-								</Link>
-							</>
-						) : (
-							<IconButton
-								edge="end"
-								aria-label="account of current user"
-								aria-controls="primary-search-account-menu"
-								aria-haspopup="true"
-								onClick={handleProfileMenuOpen}
-								color="inherit"
-							>
-								{getCurrEmail() !== undefined ? (
-									<Gravatar
-										email={getCurrEmail()}
-										rating="g"
-										style={{
-											width: "32px",
-											height: "32px",
-											borderRadius: "50%",
-											verticalAlign: "middle",
-										}}
-									/>
-								) : (
-									<PersonIcon sx={{ verticalAlign: "middle" }} />
-								)}
-							</IconButton>
-						)}
+						<Link href="/auth/register" sx={link}>
+							Register
+						</Link>
+						<Link href="/auth/login" sx={link}>
+							Login
+						</Link>
 					</Box>
 				</Toolbar>
 			</AppBar>
