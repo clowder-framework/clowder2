@@ -20,6 +20,8 @@ import { Box, Button, ButtonGroup, Grid } from "@mui/material";
 import { ArrowBack, ArrowForward } from "@material-ui/icons";
 import { ErrorModal } from "../errors/ErrorModal";
 import { GenericSearchBox } from "../search/GenericSearchBox";
+import Gravatar from "react-gravatar";
+import PersonIcon from "@mui/icons-material/Person";
 
 export const ManageUsers = (): JSX.Element => {
 	const [currPageNum, setCurrPageNum] = useState<number>(0);
@@ -124,6 +126,26 @@ export const ManageUsers = (): JSX.Element => {
 												}}
 											>
 												<TableCell>
+													{profile.email !== undefined ? (
+														<Gravatar
+															email={profile.email}
+															rating="g"
+															style={{
+																width: "32px",
+																height: "32px",
+																borderRadius: "50%",
+																verticalAlign: "middle",
+																marginRight: "1em",
+															}}
+														/>
+													) : (
+														<PersonIcon
+															sx={{
+																verticalAlign: "middle",
+																marginRight: "1em",
+															}}
+														/>
+													)}
 													{profile.first_name} {profile.last_name}
 												</TableCell>
 												<TableCell align="right">{profile.email}</TableCell>
