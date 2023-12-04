@@ -261,15 +261,18 @@ async def get_listeners(
     if label:
         query.append(EventListenerDB.properties.default_labels == label)
 
-    listeners = await EventListenerDB.find(*query, skip=skip, limit=limit).to_list()
+    # sort by name alphabetically
+    listeners = await EventListenerDB.find(
+        *query, skip=skip, limit=limit, sort=EventListenerDB.name
+    ).to_list()
 
     # batch return listener statuses for easy consumption
-    listenerResponse = []
+    listener_response = []
     for listener in listeners:
         listener.alive = await _check_livelihood(listener, heartbeat_interval)
-        listenerResponse.append(listener.dict())
+        listener_response.append(listener.dict())
 
-    return listenerResponse
+    return listener_response
 
 
 @router.put("/{listener_id}", response_model=EventListenerOut)
