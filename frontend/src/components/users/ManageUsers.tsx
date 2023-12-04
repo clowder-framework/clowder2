@@ -12,12 +12,14 @@ import Paper from "@mui/material/Paper";
 import {
 	fetchAllUsers as fetchAllUsersAction,
 	fetchUserProfile,
+	prefixSearchAllUsers as prefixSearchAllUsersAction,
 	revokeAdmin as revokeAdminAction,
 	setAdmin as setAdminAction,
 } from "../../actions/user";
-import { Box, Button, ButtonGroup } from "@mui/material";
+import { Box, Button, ButtonGroup, Grid } from "@mui/material";
 import { ArrowBack, ArrowForward } from "@material-ui/icons";
 import { ErrorModal } from "../errors/ErrorModal";
+import { GenericSearchBox } from "../search/GenericSearchBox";
 
 export const ManageUsers = (): JSX.Element => {
 	const [currPageNum, setCurrPageNum] = useState<number>(0);
@@ -35,6 +37,8 @@ export const ManageUsers = (): JSX.Element => {
 	const fetchAllUsers = (skip: number, limit: number) =>
 		dispatch(fetchAllUsersAction(skip, limit));
 	const fetchCurrentUser = () => dispatch(fetchUserProfile());
+	const prefixSearchAllUsers = (text: string, skip: number, limit: number) =>
+		dispatch(prefixSearchAllUsersAction(text, skip, limit));
 
 	const setAdmin = (email: string) => dispatch(setAdminAction(email));
 	const revokeAdmin = (email: string) => dispatch(revokeAdminAction(email));
@@ -72,78 +76,111 @@ export const ManageUsers = (): JSX.Element => {
 		}
 	};
 
+	const searchUsers = (searchTerm: string) => {
+		prefixSearchAllUsers(searchTerm, skip, limit);
+		setSearchTerm(searchTerm);
+	};
+
+	// search while typing
+	useEffect(() => {
+		if (searchTerm !== "") prefixSearchAllUsers(searchTerm, skip, limit);
+		else fetchAllUsers(skip, limit);
+	}, [searchTerm]);
+
 	return (
 		<Layout>
 			{/*Error Message dialogue*/}
 			<ErrorModal errorOpen={errorOpen} setErrorOpen={setErrorOpen} />
-			<TableContainer component={Paper}>
-				<Table sx={{ minWidth: 650 }} aria-label="simple table">
-					<TableHead>
-						<TableRow>
-							<TableCell>Name</TableCell>
-							<TableCell align="right">Email</TableCell>
-							<TableCell align="right">Admin</TableCell>
-							<TableCell align="right" />
-						</TableRow>
-					</TableHead>
-					<TableBody>
-						{users.map((profile) => {
-							return (
-								<TableRow
-									sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
-								>
-									<TableCell>
-										{profile.first_name} {profile.last_name}
-									</TableCell>
-									<TableCell align="right">{profile.email}</TableCell>
-									<TableCell align="right">
-										{profile.admin !== undefined && profile.admin
-											? "True"
-											: "False"}
-									</TableCell>
-									<TableCell align="left">
-										{profile.admin ? (
-											<Button
-												color="primary"
-												onClick={() => {
-													revokeAdmin(profile.email);
-												}}
-												disabled={profile.email === currentUser.email}
-											>
-												Revoke
-											</Button>
-										) : (
-											<Button
-												color="primary"
-												onClick={() => {
-													setAdmin(profile.email);
-												}}
-												disabled={profile.email === currentUser.email}
-											>
-												Set Admin
-											</Button>
-										)}
-									</TableCell>
+			<Grid container spacing={2}>
+				<Grid item xs={12}>
+					<GenericSearchBox
+						title="Search for Users"
+						searchPrompt="search by email"
+						setSearchTerm={setSearchTerm}
+						searchTerm={searchTerm}
+						searchFunction={searchUsers}
+						skip={skip}
+						limit={limit}
+					/>
+				</Grid>
+				<Grid item xs={12}>
+					<TableContainer component={Paper}>
+						<Table sx={{ minWidth: 650 }} aria-label="simple table">
+							<TableHead>
+								<TableRow>
+									<TableCell>Name</TableCell>
+									<TableCell align="right">Email</TableCell>
+									<TableCell align="right">Admin</TableCell>
+									<TableCell align="right" />
 								</TableRow>
-							);
-						})}
-					</TableBody>
-				</Table>
-				<Box display="flex" justifyContent="center" sx={{ m: 1 }}>
-					<ButtonGroup variant="contained" aria-label="previous next buttons">
-						<Button
-							aria-label="previous"
-							onClick={previous}
-							disabled={prevDisabled}
-						>
-							<ArrowBack /> Prev
-						</Button>
-						<Button aria-label="next" onClick={next} disabled={nextDisabled}>
-							Next <ArrowForward />
-						</Button>
-					</ButtonGroup>
-				</Box>
-			</TableContainer>
+							</TableHead>
+							<TableBody>
+								{users.map((profile) => {
+									return (
+										<TableRow
+											sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
+										>
+											<TableCell>
+												{profile.first_name} {profile.last_name}
+											</TableCell>
+											<TableCell align="right">{profile.email}</TableCell>
+											<TableCell align="right">
+												{profile.admin !== undefined && profile.admin
+													? "True"
+													: "False"}
+											</TableCell>
+											<TableCell align="left">
+												{profile.admin ? (
+													<Button
+														color="primary"
+														onClick={() => {
+															revokeAdmin(profile.email);
+														}}
+														disabled={profile.email === currentUser.email}
+													>
+														Revoke
+													</Button>
+												) : (
+													<Button
+														color="primary"
+														onClick={() => {
+															setAdmin(profile.email);
+														}}
+														disabled={profile.email === currentUser.email}
+													>
+														Set Admin
+													</Button>
+												)}
+											</TableCell>
+										</TableRow>
+									);
+								})}
+							</TableBody>
+						</Table>
+						<Box display="flex" justifyContent="center" sx={{ m: 1 }}>
+							<ButtonGroup
+								variant="contained"
+								aria-label="previous next buttons"
+							>
+								<Button
+									aria-label="previous"
+									onClick={previous}
+									disabled={prevDisabled}
+								>
+									<ArrowBack /> Prev
+								</Button>
+								<Button
+									aria-label="next"
+									onClick={next}
+									disabled={nextDisabled}
+								>
+									Next <ArrowForward />
+								</Button>
+							</ButtonGroup>
+						</Box>
+					</TableContainer>
+				</Grid>
+			</Grid>
 		</Layout>
 	);
 };
