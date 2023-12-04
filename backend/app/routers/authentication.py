@@ -1,5 +1,8 @@
 import json
 
+from app.keycloak_auth import create_user, get_current_user, keycloak_openid
+from app.models.datasets import DatasetDB
+from app.models.users import UserDB, UserIn, UserLogin, UserOut
 from beanie import PydanticObjectId
 from fastapi import APIRouter, Depends, HTTPException
 from keycloak.exceptions import (
@@ -8,10 +11,6 @@ from keycloak.exceptions import (
     KeycloakPostError,
 )
 from passlib.hash import bcrypt
-
-from app.keycloak_auth import create_user, get_current_user, keycloak_openid
-from app.models.datasets import DatasetDB
-from app.models.users import UserDB, UserIn, UserLogin, UserOut
 
 router = APIRouter()
 
@@ -92,11 +91,7 @@ async def authenticate_user(email: str, password: str):
 
 
 async def get_admin(dataset_id: str = None, current_username=Depends(get_current_user)):
-    if (
-        dataset_id
-        and (dataset_db := await DatasetDB.get(PydanticObjectId(dataset_id)))
-        is not None
-    ):
+    if dataset_id and (await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
         return DatasetDB.creator.email == current_username.email
     else:
         if (

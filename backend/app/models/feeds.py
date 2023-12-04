@@ -2,11 +2,10 @@ from datetime import datetime
 from typing import List, Optional
 
 import pymongo
-from beanie import Document
-from pydantic import BaseModel, EmailStr, Field
-
 from app.models.listeners import FeedListener
 from app.models.search import SearchObject
+from beanie import Document
+from pydantic import BaseModel, EmailStr, Field
 
 
 class JobFeed(BaseModel):

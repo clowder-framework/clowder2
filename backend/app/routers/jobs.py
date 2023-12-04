@@ -1,11 +1,6 @@
 from datetime import datetime, timedelta
 from typing import List, Optional
 
-from beanie import PydanticObjectId
-from beanie.operators import GTE, LT, Or, RegEx
-from bson import ObjectId
-from fastapi import APIRouter, Depends, HTTPException
-
 from app.keycloak_auth import get_current_username, get_user
 from app.models.listeners import (
     EventListenerJobDB,
@@ -14,6 +9,10 @@ from app.models.listeners import (
     EventListenerJobUpdateOut,
     EventListenerJobViewList,
 )
+from beanie import PydanticObjectId
+from beanie.operators import GTE, LT, Or, RegEx
+from bson import ObjectId
+from fastapi import APIRouter, Depends, HTTPException
 
 router = APIRouter()
 
@@ -94,7 +93,7 @@ async def get_job_updates(
     job_id: str,
     user=Depends(get_current_username),
 ):
-    if (job := await EventListenerJobDB.get(PydanticObjectId(job_id))) is not None:
+    if (await EventListenerJobDB.get(PydanticObjectId(job_id))) is not None:
         # TODO: Should this also return the job summary data since we just queried it here?
         job_updates = await EventListenerJobUpdateDB.find(
             EventListenerJobUpdateDB.job_id == job_id

@@ -1,10 +1,9 @@
 from typing import List, Optional
 
-from beanie import Document
-from pydantic import BaseModel
-
 from app.models.authorization import Provenance
 from app.models.users import UserOut
+from beanie import Document
+from pydantic import BaseModel
 
 
 class Member(BaseModel):

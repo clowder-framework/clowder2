@@ -1,16 +1,15 @@
 from datetime import datetime
 from typing import List, Optional
 
-from beanie import PydanticObjectId
-from beanie.operators import Or, Push, RegEx
-from bson.objectid import ObjectId
-from fastapi import APIRouter, Depends, HTTPException
-
 from app.deps.authorization_deps import AuthorizationDB, GroupAuthorization
 from app.keycloak_auth import get_current_user, get_user
 from app.models.authorization import RoleType
 from app.models.groups import GroupBase, GroupDB, GroupIn, GroupOut, Member
 from app.models.users import UserDB, UserOut
+from beanie import PydanticObjectId
+from beanie.operators import Or, Push, RegEx
+from bson.objectid import ObjectId
+from fastapi import APIRouter, Depends, HTTPException
 
 router = APIRouter()
 
@@ -252,7 +251,7 @@ async def update_member(
     allow: bool = Depends(GroupAuthorization("editor")),
 ):
     """Update user role."""
-    if (user := await UserDB.find_one({"email": username})) is not None:
+    if (await UserDB.find_one({"email": username})) is not None:
         if (group := await GroupDB.get(PydanticObjectId(group_id))) is not None:
             found_user = None
             found_user_index = -1

@@ -3,16 +3,6 @@ import time
 from datetime import datetime, timedelta
 from typing import List, Optional, Union
 
-from beanie import PydanticObjectId
-from beanie.odm.operators.update.general import Inc
-from bson import ObjectId
-from elasticsearch import Elasticsearch, NotFoundError
-from fastapi import APIRouter, Depends, File, HTTPException, Security, UploadFile
-from fastapi.responses import StreamingResponse
-from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
-from minio import Minio
-from pika.adapters.blocking_connection import BlockingChannel
-
 from app import dependencies
 from app.config import settings
 from app.deps.authorization_deps import FileAuthorization
@@ -26,6 +16,15 @@ from app.routers.feeds import check_feed_listeners
 from app.routers.utils import get_content_type
 from app.search.connect import delete_document_by_id, insert_record, update_record
 from app.search.index import index_file, index_thumbnail
+from beanie import PydanticObjectId
+from beanie.odm.operators.update.general import Inc
+from bson import ObjectId
+from elasticsearch import Elasticsearch, NotFoundError
+from fastapi import APIRouter, Depends, File, HTTPException, Security, UploadFile
+from fastapi.responses import StreamingResponse
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from minio import Minio
+from pika.adapters.blocking_connection import BlockingChannel
 
 router = APIRouter()
 security = HTTPBearer()
@@ -66,7 +65,7 @@ async def _resubmit_file_extractors(
             )
             resubmitted_job["status"] = "success"
             resubmitted_jobs.append(resubmitted_job)
-        except Exception as e:
+        except Exception:
             resubmitted_job["status"] = "error"
             resubmitted_jobs.append(resubmitted_job)
     return resubmitted_jobs
@@ -423,10 +422,8 @@ async def post_file_extract(
     allow: bool = Depends(FileAuthorization("uploader")),
 ):
     if extractorName is None:
-        raise HTTPException(status_code=400, detail=f"No extractorName specified")
+        raise HTTPException(status_code=400, detail="No extractorName specified")
     if (file := await FileDB.get(PydanticObjectId(file_id))) is not None:
-        access_token = credentials.credentials
-
         # backward compatibility? Get extractor info from request (Clowder v1)
         queue = extractorName
         routing_key = queue
@@ -501,9 +498,7 @@ async def add_file_thumbnail(
     es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
 ):
     if (file := await FileDB.get(PydanticObjectId(file_id))) is not None:
-        if (
-            thumbnail := await ThumbnailDB.get(PydanticObjectId(thumbnail_id))
-        ) is not None:
+        if (await ThumbnailDB.get(PydanticObjectId(thumbnail_id))) is not None:
             # TODO: Should we garbage collect existing thumbnail if nothing else points to it?
             file.thumbnail_id = thumbnail_id
             await file.save()

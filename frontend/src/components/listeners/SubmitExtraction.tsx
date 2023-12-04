@@ -47,7 +47,7 @@ export default function SubmitExtraction(props: SubmitExtractionProps) {
 		(fileId: string | undefined, extractorName: string | undefined, requestBody: FormData) => dispatch(submitFileExtractionAction(fileId, extractorName, requestBody));
 	const submitDatasetExtraction =
 		(datasetId: string | undefined, extractorName: string | undefined, requestBody: FormData) => dispatch(submitDatasetExtractionAction(datasetId, extractorName, requestBody));
-   
+
 	const job_id = useSelector((state: RootState) => state.listener.currJobId);
 
 	const onSubmit = (formData: FormData) => {

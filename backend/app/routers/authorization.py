@@ -1,9 +1,3 @@
-from beanie import PydanticObjectId
-from beanie.operators import In, Or
-from bson import ObjectId
-from fastapi import APIRouter, Depends
-from fastapi.exceptions import HTTPException
-
 from app.dependencies import get_elasticsearchclient
 from app.deps.authorization_deps import (
     Authorization,
@@ -31,6 +25,11 @@ from app.models.groups import GroupDB
 from app.models.pyobjectid import PyObjectId
 from app.models.users import UserDB
 from app.search.index import index_dataset
+from beanie import PydanticObjectId
+from beanie.operators import In, Or
+from bson import ObjectId
+from fastapi import APIRouter, Depends
+from fastapi.exceptions import HTTPException
 
 router = APIRouter()
 

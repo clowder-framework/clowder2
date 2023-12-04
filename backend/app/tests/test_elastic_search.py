@@ -3,8 +3,6 @@ import time
 from datetime import datetime
 
 import pytest
-from bson import ObjectId
-
 from app.config import settings
 from app.search.config import indexSettings
 from app.search.connect import (
@@ -17,6 +15,7 @@ from app.search.connect import (
     search_index,
     update_record,
 )
+from bson import ObjectId
 
 dummy_file_record = {
     "name": "test file",

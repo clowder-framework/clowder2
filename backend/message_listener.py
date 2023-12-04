@@ -8,8 +8,6 @@ from datetime import datetime
 
 from aio_pika import connect_robust
 from aio_pika.abc import AbstractIncomingMessage
-from bson import ObjectId
-
 from app.main import startup_beanie
 from app.models.config import ConfigEntryDB
 from app.models.listeners import (
@@ -17,6 +15,7 @@ from app.models.listeners import (
     EventListenerJobStatus,
     EventListenerJobUpdateDB,
 )
+from bson import ObjectId
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)

@@ -1,13 +1,6 @@
 from datetime import timedelta
 from typing import List, Optional
 
-from beanie import PydanticObjectId
-from bson import ObjectId
-from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
-from fastapi.security import HTTPBearer
-from minio import Minio
-from starlette.responses import StreamingResponse
-
 from app import dependencies
 from app.config import settings
 from app.keycloak_auth import get_current_user
@@ -25,6 +18,12 @@ from app.models.visualization_data import (
     VisualizationDataOut,
 )
 from app.routers.utils import get_content_type
+from beanie import PydanticObjectId
+from bson import ObjectId
+from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
+from fastapi.security import HTTPBearer
+from minio import Minio
+from starlette.responses import StreamingResponse
 
 router = APIRouter()
 security = HTTPBearer()
@@ -64,7 +63,7 @@ async def add_Visualization(
     visualization_id = visualization_db.id
 
     # Use unique ID as key for Minio
-    response = fs.put_object(
+    fs.put_object(
         settings.MINIO_BUCKET_NAME,
         str(visualization_id),
         file.file,
@@ -146,11 +145,7 @@ async def download_visualization_url(
     external_fs: Minio = Depends(dependencies.get_external_fs),
 ):
     # If visualization exists in MongoDB, download from Minio
-    if (
-        visualization := await VisualizationDataDB.get(
-            PydanticObjectId(visualization_id)
-        )
-    ) is not None:
+    if (await VisualizationDataDB.get(PydanticObjectId(visualization_id))) is not None:
         if expires_in_seconds is None:
             expires = timedelta(seconds=settings.MINIO_EXPIRES)
         else:
@@ -245,9 +240,7 @@ async def get_visdata_from_visconfig(
     user=Depends(get_current_user),
 ):
     config_visdata = []
-    if (
-        vis_config := await VisualizationConfigDB.get(PydanticObjectId(config_id))
-    ) is not None:
+    if (await VisualizationConfigDB.get(PydanticObjectId(config_id))) is not None:
         query = [VisualizationDataDB.visualization_config_id == config_id]
         async for vis_data in VisualizationDataDB.find(*query):
             config_visdata.append(vis_data)

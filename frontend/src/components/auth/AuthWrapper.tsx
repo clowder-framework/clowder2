@@ -8,5 +8,3 @@ export const AuthWrapper = (props): JSX.Element => {
 		</>
 	);
 }
-
-

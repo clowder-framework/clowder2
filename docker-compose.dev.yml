@@ -137,7 +137,7 @@ services:
       - logger.level=debug
     volumes:
       - elasticsearch:/usr/share/elasticsearch/data
-    
+
   extractors-heartbeat:
     image: "clowder/clowder2-heartbeat"
     build:

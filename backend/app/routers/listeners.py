@@ -4,12 +4,6 @@ import random
 import string
 from typing import List, Optional
 
-from beanie import PydanticObjectId
-from beanie.operators import Or, RegEx
-from bson import ObjectId
-from fastapi import APIRouter, Depends, HTTPException
-from packaging import version
-
 from app.config import settings
 from app.keycloak_auth import get_current_user, get_current_username, get_user
 from app.models.config import ConfigEntryDB
@@ -24,6 +18,11 @@ from app.models.listeners import (
 from app.models.search import SearchCriteria
 from app.models.users import UserOut
 from app.routers.feeds import disassociate_listener_db
+from beanie import PydanticObjectId
+from beanie.operators import Or, RegEx
+from bson import ObjectId
+from fastapi import APIRouter, Depends, HTTPException
+from packaging import version
 
 router = APIRouter()
 legacy_router = APIRouter()  # for back-compatibilty with v1 extractors

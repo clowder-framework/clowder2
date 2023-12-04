@@ -3,9 +3,6 @@ import random
 import string
 
 import pika
-from fastapi import Depends
-from pika.adapters.blocking_connection import BlockingChannel
-
 from app import dependencies
 from app.models.config import ConfigEntryDB
 from app.models.datasets import DatasetOut
@@ -18,6 +15,8 @@ from app.models.listeners import (
 from app.models.mongomodel import MongoDBRef
 from app.models.users import UserOut
 from app.routers.users import get_user_job_key
+from fastapi import Depends
+from pika.adapters.blocking_connection import BlockingChannel
 
 
 async def create_reply_queue():

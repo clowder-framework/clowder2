@@ -1,11 +1,10 @@
 from datetime import datetime
 from enum import Enum
 
+from app.models.pyobjectid import PyObjectId
 from beanie import Document
 from charset_normalizer.md import List
 from pydantic import BaseModel, EmailStr, Field
-
-from app.models.pyobjectid import PyObjectId
 
 
 class RoleType(str, Enum):

@@ -120,7 +120,7 @@ async def get_token(
                     detail={"error": "Key is invalid."},
                     headers={"WWW-Authenticate": "Bearer"},
                 )
-        except BadSignature as e:
+        except BadSignature:
             raise HTTPException(
                 status_code=401,
                 detail={"error": "Key is invalid."},
@@ -210,7 +210,7 @@ async def get_current_user(
                     detail={"error": "Key is invalid."},
                     headers={"WWW-Authenticate": "Bearer"},
                 )
-        except BadSignature as e:
+        except BadSignature:
             raise HTTPException(
                 status_code=401,
                 detail={"error": "Key is invalid."},
@@ -292,7 +292,7 @@ async def get_current_username(
                     detail={"error": "Key is invalid."},
                     headers={"WWW-Authenticate": "Bearer"},
                 )
-        except BadSignature as e:
+        except BadSignature:
             raise HTTPException(
                 status_code=401,
                 detail={"error": "Key is invalid."},

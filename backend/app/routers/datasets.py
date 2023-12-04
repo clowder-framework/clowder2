@@ -8,19 +8,6 @@ import zipfile
 from collections.abc import Iterable, Mapping
 from typing import List, Optional
 
-from beanie import PydanticObjectId
-from beanie.odm.operators.update.general import Inc
-from beanie.operators import Or
-from bson import ObjectId, json_util
-from elasticsearch import Elasticsearch
-from fastapi import APIRouter, Depends, File, HTTPException, Request, UploadFile
-from fastapi.responses import StreamingResponse
-from fastapi.security import HTTPBearer
-from minio import Minio
-from pika.adapters.blocking_connection import BlockingChannel
-from rocrate.model.person import Person
-from rocrate.rocrate import ROCrate
-
 from app import dependencies
 from app.config import settings
 from app.deps.authorization_deps import Authorization, CheckStatus
@@ -45,6 +32,18 @@ from app.rabbitmq.listeners import submit_dataset_job
 from app.routers.files import add_file_entry, remove_file_entry
 from app.search.connect import delete_document_by_id
 from app.search.index import index_dataset
+from beanie import PydanticObjectId
+from beanie.odm.operators.update.general import Inc
+from beanie.operators import Or
+from bson import ObjectId, json_util
+from elasticsearch import Elasticsearch
+from fastapi import APIRouter, Depends, File, HTTPException, Request, UploadFile
+from fastapi.responses import StreamingResponse
+from fastapi.security import HTTPBearer
+from minio import Minio
+from pika.adapters.blocking_connection import BlockingChannel
+from rocrate.model.person import Person
+from rocrate.rocrate import ROCrate
 
 router = APIRouter()
 security = HTTPBearer()
@@ -338,7 +337,7 @@ async def add_folder(
     user=Depends(get_current_user),
     allow: bool = Depends(Authorization("uploader")),
 ):
-    if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
+    if (await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
         parent_folder = folder_in.parent_folder
         if parent_folder is not None:
             if (await FolderDB.get(PydanticObjectId(parent_folder))) is None:
@@ -379,7 +378,7 @@ async def get_dataset_folders(
         if parent_folder is not None:
             query.append(FolderDBViewList.parent_folder == ObjectId(parent_folder))
         else:
-            query.append(FolderDBViewList.parent_folder == None)
+            query.append(FolderDBViewList.parent_folder is None)
         folders = await FolderDBViewList.find(*query).skip(skip).limit(limit).to_list()
         return [folder.dict() for folder in folders]
     raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
@@ -393,7 +392,7 @@ async def delete_folder(
     es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
     allow: bool = Depends(Authorization("editor")),
 ):
-    if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
+    if (await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
         if (folder := await FolderDB.get(PydanticObjectId(folder_id))) is not None:
             # delete current folder and files
             async for file in FileDB.find(FileDB.folder_id == ObjectId(folder_id)):
@@ -438,7 +437,7 @@ async def save_file(
     if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
         if user is None:
             raise HTTPException(
-                status_code=401, detail=f"User not found. Session might have expired."
+                status_code=401, detail="User not found. Session might have expired."
             )
 
         new_file = FileDB(name=file.filename, creator=user, dataset_id=dataset.id)
@@ -481,7 +480,7 @@ async def save_files(
             if user is None:
                 raise HTTPException(
                     status_code=401,
-                    detail=f"User not found. Session might have expired.",
+                    detail="User not found. Session might have expired.",
                 )
 
             new_file = FileDB(name=file.filename, creator=user, dataset_id=dataset.id)
@@ -521,8 +520,8 @@ async def create_dataset_from_zip(
     rabbitmq_client: BlockingChannel = Depends(dependencies.get_rabbitmq),
     token: str = Depends(get_token),
 ):
-    if file.filename.endswith(".zip") == False:
-        raise HTTPException(status_code=404, detail=f"File is not a zip file")
+    if file.filename.endswith(".zip") is False:
+        raise HTTPException(status_code=404, detail="File is not a zip file")
 
     # Read contents of zip file into temporary location
     with tempfile.TemporaryFile() as tmp_zip:
@@ -755,7 +754,7 @@ async def get_dataset_extract(
     allow: bool = Depends(Authorization("uploader")),
 ):
     if extractorName is None:
-        raise HTTPException(status_code=400, detail=f"No extractorName specified")
+        raise HTTPException(status_code=400, detail="No extractorName specified")
     if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
         queue = extractorName
         routing_key = queue
@@ -804,9 +803,7 @@ async def add_dataset_thumbnail(
     allow: bool = Depends(Authorization("editor")),
 ):
     if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
-        if (
-            thumbnail := await ThumbnailDB.get(PydanticObjectId(thumbnail_id))
-        ) is not None:
+        if (await ThumbnailDB.get(PydanticObjectId(thumbnail_id))) is not None:
             # TODO: Should we garbage collect existing thumbnail if nothing else points to it?
             dataset.thumbnail_id = thumbnail_id
             await dataset.save()

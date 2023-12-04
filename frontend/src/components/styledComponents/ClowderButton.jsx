@@ -10,5 +10,3 @@ export const ClowderButton = styled(Button)({
 	textTransform: "capitalize",
 	backgroundColor: "#ffffff",
 });
-
-

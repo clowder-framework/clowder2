@@ -1,11 +1,6 @@
 import os
 from typing import List, Optional
 
-from beanie import PydanticObjectId
-from bson import ObjectId
-from elasticsearch import Elasticsearch
-from fastapi import APIRouter, Depends, Form, HTTPException
-
 from app import dependencies
 from app.config import settings
 from app.deps.authorization_deps import Authorization
@@ -26,6 +21,10 @@ from app.models.metadata import (
 )
 from app.search.connect import delete_document_by_id
 from app.search.index import index_dataset
+from beanie import PydanticObjectId
+from bson import ObjectId
+from elasticsearch import Elasticsearch
+from fastapi import APIRouter, Depends, Form, HTTPException
 
 router = APIRouter()
 
@@ -146,7 +145,7 @@ async def replace_dataset_metadata(
                     MetadataDB.agent.listener.version == agent.listener.version
                 )
             else:
-                raise HTTPException(status_code=404, detail=f"Listener not found")
+                raise HTTPException(status_code=404, detail="Listener not found")
         else:
             agent = MetadataAgent(creator=user)
             query.append(MetadataDB.agent.creator.id == agent.creator.id)
@@ -222,7 +221,7 @@ async def update_dataset_metadata(
                     MetadataDB.agent.listener.version == agent.listener.version
                 )
             else:
-                raise HTTPException(status_code=404, detail=f"Extractor not found")
+                raise HTTPException(status_code=404, detail="Extractor not found")
         else:
             agent = MetadataAgent(creator=user)
             query.append(MetadataDB.agent.creator.id == agent.creator.id)
@@ -233,7 +232,7 @@ async def update_dataset_metadata(
             return await patch_metadata(md, content, es)
         else:
             raise HTTPException(
-                status_code=404, detail=f"Metadata matching the query not found"
+                status_code=404, detail="Metadata matching the query not found"
             )
     raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
 
@@ -246,7 +245,7 @@ async def get_dataset_metadata(
     user=Depends(get_current_user),
     allow: bool = Depends(Authorization("viewer")),
 ):
-    if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
+    if (await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
         query = [MetadataDB.resource.resource_id == ObjectId(dataset_id)]
 
         if listener_name is not None:
@@ -277,13 +276,13 @@ async def delete_dataset_metadata(
     es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
     allow: bool = Depends(Authorization("editor")),
 ):
-    if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
+    if (await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
         # filter by metadata_id or definition
         query = [MetadataDB.resource.resource_id == ObjectId(dataset_id)]
         if metadata_in.metadata_id is not None:
             # If a specific metadata_id is provided, delete the matching entry
             if (
-                existing_md := await MetadataDB.find_one(
+                await MetadataDB.find_one(
                     MetadataDB.metadata_id == ObjectId(metadata_in.metadata_id)
                 )
             ) is not None:
@@ -309,7 +308,7 @@ async def delete_dataset_metadata(
                     MetadataDB.agent.listener.version == agent.listener.version
                 )
             else:
-                raise HTTPException(status_code=404, detail=f"Extractor not found")
+                raise HTTPException(status_code=404, detail="Extractor not found")
         else:
             agent = MetadataAgent(creator=user)
             query.append(MetadataDB.agent.creator.id == agent.creator.id)
@@ -325,7 +324,7 @@ async def delete_dataset_metadata(
             return md.dict()  # TODO: Do we need to return what we just deleted?
         else:
             raise HTTPException(
-                status_code=404, detail=f"No metadata found with that criteria"
+                status_code=404, detail="No metadata found with that criteria"
             )
     else:
         raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")

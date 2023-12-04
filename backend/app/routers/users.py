@@ -2,11 +2,6 @@ from datetime import timedelta
 from secrets import token_urlsafe
 from typing import List
 
-from beanie import PydanticObjectId
-from beanie.operators import Or, RegEx
-from fastapi import APIRouter, Depends, HTTPException
-from itsdangerous.url_safe import URLSafeSerializer
-
 from app.config import settings
 from app.keycloak_auth import get_current_username
 from app.models.users import (
@@ -16,6 +11,10 @@ from app.models.users import (
     UserDB,
     UserOut,
 )
+from beanie import PydanticObjectId
+from beanie.operators import Or, RegEx
+from fastapi import APIRouter, Depends, HTTPException
+from itsdangerous.url_safe import URLSafeSerializer
 
 router = APIRouter()
 
@@ -113,7 +112,7 @@ async def search_users(
 
 
 @router.get("/prefixSearch", response_model=List[UserOut])
-async def search_users(
+async def search_users_prefix(
     prefix: str,
     skip: int = 0,
     limit: int = 2,

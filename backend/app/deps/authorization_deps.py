@@ -1,7 +1,3 @@
-from beanie import PydanticObjectId
-from beanie.operators import Or
-from fastapi import Depends, HTTPException
-
 from app.keycloak_auth import get_current_username
 from app.models.authorization import AuthorizationDB, RoleType
 from app.models.datasets import DatasetDB, DatasetStatus
@@ -9,6 +5,9 @@ from app.models.files import FileDB
 from app.models.groups import GroupDB
 from app.models.metadata import MetadataDB
 from app.models.pyobjectid import PyObjectId
+from beanie import PydanticObjectId
+from beanie.operators import Or
+from fastapi import Depends, HTTPException
 
 
 async def get_role(

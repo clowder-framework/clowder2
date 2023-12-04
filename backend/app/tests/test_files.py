@@ -1,9 +1,8 @@
 import os
 
-from fastapi.testclient import TestClient
-
 from app.config import settings
 from app.tests.utils import create_dataset, generate_png, upload_file, upload_files
+from fastapi.testclient import TestClient
 
 
 def test_create_and_delete(client: TestClient, headers: dict):

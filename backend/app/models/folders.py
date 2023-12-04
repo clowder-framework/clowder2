@@ -1,12 +1,11 @@
 from datetime import datetime
 from typing import List, Optional
 
-from beanie import Document, PydanticObjectId, View
-from pydantic import BaseModel, Field
-
 from app.models.authorization import AuthorizationDB
 from app.models.pyobjectid import PyObjectId
 from app.models.users import UserOut
+from beanie import Document, PydanticObjectId, View
+from pydantic import BaseModel, Field
 
 
 class FolderBase(BaseModel):

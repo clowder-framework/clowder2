@@ -1,10 +1,9 @@
 from typing import Optional
 
+from app.models.pyobjectid import PyObjectId
 from bson import ObjectId
 from bson.errors import InvalidId
 from pydantic import BaseModel
-
-from app.models.pyobjectid import PyObjectId
 
 
 class OID(str):

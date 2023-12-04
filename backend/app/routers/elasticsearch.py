@@ -1,11 +1,10 @@
 import json
 
-from fastapi import Depends
-from fastapi.routing import APIRouter, Request
-
 from app.config import settings
 from app.keycloak_auth import get_current_username
 from app.search.connect import connect_elasticsearch, search_index
+from fastapi import Depends
+from fastapi.routing import APIRouter, Request
 
 router = APIRouter()
 

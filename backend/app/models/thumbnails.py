@@ -1,10 +1,9 @@
 from datetime import datetime
 
-from beanie import Document
-from pydantic import BaseModel, Field
-
 from app.models.files import ContentType
 from app.models.users import UserOut
+from beanie import Document
+from pydantic import BaseModel, Field
 
 
 class ThumbnailBase(BaseModel):

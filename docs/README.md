@@ -15,7 +15,7 @@ python3 -m http.server --directory build/html
 # check links
 make linkcheck
 
-# spell checking 
+# spell checking
 
 # install enchant once, on mac
 brew install enchant
