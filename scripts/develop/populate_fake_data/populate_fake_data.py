@@ -13,11 +13,11 @@ from faker import Faker
 
 
 def upload_file(
-        api: str,
-        headers: dict,
-        dataset_id: str,
-        filename: str,
-        content: str,
+    api: str,
+    headers: dict,
+    dataset_id: str,
+    filename: str,
+    content: str,
 ):
     """Uploads a dummy file (optionally with custom name/content) to a dataset and returns the JSON."""
     with open(filename, "w") as tempf:
@@ -34,11 +34,11 @@ def upload_file(
 
 
 def upload_image(
-        api: str,
-        headers: dict,
-        dataset_id: str,
-        filename: str,
-        content: bytes,
+    api: str,
+    headers: dict,
+    dataset_id: str,
+    filename: str,
+    content: bytes,
 ):
     """Uploads a dummy file (optionally with custom name/content) to a dataset and returns the JSON."""
     with open(filename, "wb") as tempf:
