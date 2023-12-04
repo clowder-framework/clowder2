@@ -11,6 +11,7 @@ import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
 import {
 	fetchAllUsers as fetchAllUsersAction,
+	fetchUserProfile,
 	revokeAdmin as revokeAdminAction,
 	setAdmin as setAdminAction,
 } from "../../actions/user";
@@ -29,8 +30,11 @@ export const ManageUsers = (): JSX.Element => {
 
 	const dispatch = useDispatch();
 	const users = useSelector((state: RootState) => state.group.users);
+	const currentUser = useSelector((state: RootState) => state.user.profile);
+
 	const fetchAllUsers = (skip: number, limit: number) =>
 		dispatch(fetchAllUsersAction(skip, limit));
+	const fetchCurrentUser = () => dispatch(fetchUserProfile());
 
 	const setAdmin = (email: string) => dispatch(setAdminAction(email));
 	const revokeAdmin = (email: string) => dispatch(revokeAdminAction(email));
@@ -38,6 +42,7 @@ export const ManageUsers = (): JSX.Element => {
 	// component did mount
 	useEffect(() => {
 		fetchAllUsers(skip, limit);
+		fetchCurrentUser();
 	}, []);
 
 	useEffect(() => {
@@ -103,6 +108,7 @@ export const ManageUsers = (): JSX.Element => {
 												onClick={() => {
 													revokeAdmin(profile.email);
 												}}
+												disabled={profile.email === currentUser.email}
 											>
 												Revoke
 											</Button>
@@ -112,6 +118,7 @@ export const ManageUsers = (): JSX.Element => {
 												onClick={() => {
 													setAdmin(profile.email);
 												}}
+												disabled={profile.email === currentUser.email}
 											>
 												Set Admin
 											</Button>
