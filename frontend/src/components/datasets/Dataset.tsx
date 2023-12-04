@@ -285,19 +285,11 @@ export const Dataset = (): JSX.Element => {
 							{...a11yProps(0)}
 						/>
 						<Tab
-							icon={<VisibilityIcon />}
-							iconPosition="start"
-							sx={TabStyle}
-							label="Visualizations"
-							{...a11yProps(1)}
-							disabled={false}
-						/>
-						<Tab
 							icon={<FormatListBulleted />}
 							iconPosition="start"
 							sx={TabStyle}
 							label="User Metadata"
-							{...a11yProps(2)}
+							{...a11yProps(1)}
 							disabled={false}
 						/>
 						<Tab
@@ -305,7 +297,7 @@ export const Dataset = (): JSX.Element => {
 							iconPosition="start"
 							sx={TabStyle}
 							label="Extracted Metadata"
-							{...a11yProps(3)}
+							{...a11yProps(2)}
 							disabled={false}
 						/>
 						{datasetRole.role !== undefined && datasetRole.role !== "viewer" ?
@@ -314,7 +306,7 @@ export const Dataset = (): JSX.Element => {
 								iconPosition="start"
 								sx={TabStyle}
 								label="Extract"
-								{...a11yProps(4)}
+								{...a11yProps(3)}
 								disabled={false}
 							/> :
 							<></>
@@ -324,6 +316,14 @@ export const Dataset = (): JSX.Element => {
 							iconPosition="start"
 							sx={TabStyle}
 							label="Extraction History"
+							{...a11yProps(4)}
+							disabled={false}
+						/>
+						<Tab
+							icon={<VisibilityIcon />}
+							iconPosition="start"
+							sx={TabStyle}
+							label="Visualizations"
 							{...a11yProps(5)}
 							disabled={false}
 						/>
@@ -350,9 +350,6 @@ export const Dataset = (): JSX.Element => {
 						<FilesTable datasetId={datasetId} folderId={folderId} />
 					</TabPanel>
 					<TabPanel value={selectedTabIndex} index={1}>
-						<Visualization datasetId={datasetId} />
-					</TabPanel>
-					<TabPanel value={selectedTabIndex} index={2}>
 						{enableAddMetadata && datasetRole.role !== undefined && datasetRole.role !== "viewer" ? (
 							<>
 								<EditMetadata
@@ -401,7 +398,7 @@ export const Dataset = (): JSX.Element => {
 							</>
 						)}
 					</TabPanel>
-					<TabPanel value={selectedTabIndex} index={3}>
+					<TabPanel value={selectedTabIndex} index={2}>
 						<DisplayListenerMetadata
 							updateMetadata={updateDatasetMetadata}
 							deleteMetadata={deleteDatasetMetadata}
@@ -410,13 +407,16 @@ export const Dataset = (): JSX.Element => {
 						/>
 					</TabPanel>
 					{datasetRole.role !== undefined && datasetRole.role !== "viewer" ?
-						<TabPanel value={selectedTabIndex} index={4}>
+						<TabPanel value={selectedTabIndex} index={3}>
 							<Listeners datasetId={datasetId} />
 						</TabPanel> :
 						<></>
 					}
-					<TabPanel value={selectedTabIndex} index={5}>
+					<TabPanel value={selectedTabIndex} index={4}>
 						<ExtractionHistoryTab datasetId={datasetId} />
+					</TabPanel>
+					<TabPanel value={selectedTabIndex} index={5}>
+						<Visualization datasetId={datasetId} />
 					</TabPanel>
 					{datasetRole.role !== undefined && datasetRole.role !== "viewer" ?
 						<TabPanel value={selectedTabIndex} index={6}>
