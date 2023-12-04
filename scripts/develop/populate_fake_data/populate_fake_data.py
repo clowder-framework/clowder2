@@ -216,14 +216,22 @@ if __name__ == "__main__":
 
     for _ in range(0, 100):
         n = random.randint(0, 4)
+        s = random.randint(0,1)
         user = users[n]
         response = requests.post(f"{api}/login", json=user)
         token = response.json().get("token")
         headers = {"Authorization": "Bearer " + token}
-        dataset_data = {
-            "name": fake.sentence(nb_words=10).rstrip("."),
-            "description": fake.paragraph(),
-        }
+        if s == 0:
+            dataset_data = {
+                "name": fake.sentence(nb_words=10).rstrip("."),
+                "description": fake.paragraph(),
+                "status": "PUBLIC"
+            }
+        else:
+            dataset_data = {
+                "name": fake.sentence(nb_words=10).rstrip("."),
+                "description": fake.paragraph(),
+            }
         response = requests.post(f"{api}/datasets", json=dataset_data, headers=headers)
         if response.status_code != 200:
             raise ValueError(response.json())
