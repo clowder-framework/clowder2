@@ -117,6 +117,9 @@ export const getCurrEmail = () => {
 		authorization !== "" &&
 		authorization.split(" ").length > 0
 	) {
+		if (authorization === "Bearer none") {
+			return "public@clowder.org";
+		}
 		const userInfo = jwt_decode(authorization.split(" ")[1]);
 		return userInfo["email"];
 	}
