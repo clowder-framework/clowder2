@@ -16,6 +16,7 @@ import {
 } from "../../actions/user";
 import { Box, Button, ButtonGroup } from "@mui/material";
 import { ArrowBack, ArrowForward } from "@material-ui/icons";
+import { ErrorModal } from "../errors/ErrorModal";
 
 export const ManageUsers = (): JSX.Element => {
 	const [currPageNum, setCurrPageNum] = useState<number>(0);
@@ -23,6 +24,7 @@ export const ManageUsers = (): JSX.Element => {
 	const [skip, setSkip] = useState<number>(0);
 	const [prevDisabled, setPrevDisabled] = useState<boolean>(true);
 	const [nextDisabled, setNextDisabled] = useState<boolean>(false);
+	const [errorOpen, setErrorOpen] = useState(false);
 	const [searchTerm, setSearchTerm] = useState<string>("");
 
 	const dispatch = useDispatch();
@@ -67,6 +69,8 @@ export const ManageUsers = (): JSX.Element => {
 
 	return (
 		<Layout>
+			{/*Error Message dialogue*/}
+			<ErrorModal errorOpen={errorOpen} setErrorOpen={setErrorOpen} />
 			<TableContainer component={Paper}>
 				<Table sx={{ minWidth: 650 }} aria-label="simple table">
 					<TableHead>
