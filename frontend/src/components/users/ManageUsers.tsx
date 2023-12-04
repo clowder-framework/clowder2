@@ -9,7 +9,11 @@ import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
-import { fetchAllUsers as fetchAllUsersAction } from "../../actions/user";
+import {
+	fetchAllUsers as fetchAllUsersAction,
+	revokeAdmin as revokeAdminAction,
+	setAdmin as setAdminAction,
+} from "../../actions/user";
 import { Box, Button, ButtonGroup } from "@mui/material";
 import { ArrowBack, ArrowForward } from "@material-ui/icons";
 
@@ -25,6 +29,9 @@ export const ManageUsers = (): JSX.Element => {
 	const users = useSelector((state: RootState) => state.group.users);
 	const fetchAllUsers = (skip: number, limit: number) =>
 		dispatch(fetchAllUsersAction(skip, limit));
+
+	const setAdmin = (email: string) => dispatch(setAdminAction(email));
+	const revokeAdmin = (email: string) => dispatch(revokeAdminAction(email));
 
 	// component did mount
 	useEffect(() => {
@@ -67,6 +74,7 @@ export const ManageUsers = (): JSX.Element => {
 							<TableCell>Name</TableCell>
 							<TableCell align="right">Email</TableCell>
 							<TableCell align="right">Admin</TableCell>
+							<TableCell align="right" />
 						</TableRow>
 					</TableHead>
 					<TableBody>
@@ -80,7 +88,30 @@ export const ManageUsers = (): JSX.Element => {
 									</TableCell>
 									<TableCell align="right">{profile.email}</TableCell>
 									<TableCell align="right">
-										{profile.admin ? "True" : "False"}
+										{profile.admin !== undefined && profile.admin
+											? "True"
+											: "False"}
+									</TableCell>
+									<TableCell align="left">
+										{profile.admin ? (
+											<Button
+												color="primary"
+												onClick={() => {
+													revokeAdmin(profile.email);
+												}}
+											>
+												Revoke
+											</Button>
+										) : (
+											<Button
+												color="primary"
+												onClick={() => {
+													setAdmin(profile.email);
+												}}
+											>
+												Set Admin
+											</Button>
+										)}
 									</TableCell>
 								</TableRow>
 							);

@@ -1,5 +1,6 @@
 import json
 
+from beanie import PydanticObjectId
 from fastapi import APIRouter, HTTPException, Depends
 from keycloak.exceptions import (
     KeycloakAuthenticationError,
@@ -7,8 +8,6 @@ from keycloak.exceptions import (
     KeycloakPostError,
 )
 from passlib.hash import bcrypt
-
-from beanie import PydanticObjectId
 
 from app.keycloak_auth import create_user, get_current_user
 from app.keycloak_auth import keycloak_openid
@@ -95,14 +94,14 @@ async def authenticate_user(email: str, password: str):
 
 async def get_admin(dataset_id: str = None, current_username=Depends(get_current_user)):
     if (
-        current_user := await UserDB.find_one(UserDB.email == current_username.email)
+            current_user := await UserDB.find_one(UserDB.email == current_username.email)
     ) is not None:
         if current_user.admin:
             return current_user.admin
     elif (
-        dataset_id
-        and (dataset_db := await DatasetDB.get(PydanticObjectId(dataset_id)))
-        is not None
+            dataset_id
+            and (dataset_db := await DatasetDB.get(PydanticObjectId(dataset_id)))
+            is not None
     ):
         return dataset_db.creator.email == current_username.email
     else:
@@ -111,7 +110,7 @@ async def get_admin(dataset_id: str = None, current_username=Depends(get_current
 
 @router.post("/users/set_admin/{useremail}", response_model=UserOut)
 async def set_admin(
-    useremail: str, current_username=Depends(get_current_user), admin=Depends(get_admin)
+        useremail: str, current_username=Depends(get_current_user), admin=Depends(get_admin)
 ):
     if admin:
         if (user := await UserDB.find_one(UserDB.email == useremail)) is not None:
@@ -124,4 +123,22 @@ async def set_admin(
         raise HTTPException(
             status_code=403,
             detail=f"User {current_username.email} is not an admin. Only admin can make others admin.",
+        )
+
+
+@router.post("/users/revoke_admin/{useremail}", response_model=UserOut)
+async def revoke_admin(
+        useremail: str, current_username=Depends(get_current_user), admin=Depends(get_admin)
+):
+    if admin:
+        if (user := await UserDB.find_one(UserDB.email == useremail)) is not None:
+            user.admin = False
+            await user.replace()
+            return user.dict()
+        else:
+            raise HTTPException(status_code=404, detail=f"User {useremail} not found")
+    else:
+        raise HTTPException(
+            status_code=403,
+            detail=f"User {current_username.email} is not an admin. Only admin can revoke admin access.",
         )
