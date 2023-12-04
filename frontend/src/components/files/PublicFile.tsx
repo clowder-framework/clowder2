@@ -313,6 +313,7 @@ export const PublicFile = (): JSX.Element => {
 							resourceType="file"
 							resourceId={fileId}
 							version={fileSummary.version_num}
+							publicView={true}
 						/>
 					</TabPanel>
 					{/*<TabPanel value={selectedTabIndex} index={4}>*/}

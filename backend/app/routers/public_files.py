@@ -15,6 +15,7 @@ from app.models.metadata import (
     patch_metadata,
     MetadataDelete,
     MetadataDefinitionDB,
+    MetadataDefinitionOut,
 )
 from beanie import PydanticObjectId
 from beanie.odm.operators.update.general import Inc
