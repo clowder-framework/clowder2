@@ -79,6 +79,17 @@ security = HTTPBearer()
 
 clowder_bucket = os.getenv("MINIO_BUCKET_NAME", "clowder")
 
+async def _get_folder_hierarchy(
+    folder_id: str,
+    hierarchy: str,
+):
+    """Generate a string of nested path to folder for use in zip file creation."""
+    folder = await FolderDB.get(PydanticObjectId(folder_id))
+    hierarchy = folder.name + "/" + hierarchy
+    if folder.parent_folder is not None:
+        hierarchy = await _get_folder_hierarchy(folder.parent_folder, hierarchy)
+    return hierarchy
+
 @router.get("", response_model=List[DatasetOut])
 async def get_datasets(
     skip: int = 0,
@@ -169,3 +180,155 @@ async def get_dataset_metadata(
             raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
     else:
         raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
+
+@router.get("/{dataset_id}/download", response_model=DatasetOut)
+async def download_dataset(
+    dataset_id: str,
+    fs: Minio = Depends(dependencies.get_fs),
+):
+    if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
+        if dataset.status == DatasetStatus.PUBLIC.name:
+            current_temp_dir = tempfile.mkdtemp(prefix="rocratedownload")
+            crate = ROCrate()
+
+            manifest_path = os.path.join(current_temp_dir, "manifest-md5.txt")
+            bagit_path = os.path.join(current_temp_dir, "bagit.txt")
+            bag_info_path = os.path.join(current_temp_dir, "bag-info.txt")
+            tagmanifest_path = os.path.join(current_temp_dir, "tagmanifest-md5.txt")
+
+            with open(manifest_path, "w") as f:
+                pass  # Create empty file so no errors later if the dataset is empty
+
+            with open(bagit_path, "w") as f:
+                f.write("Bag-Software-Agent: clowder.ncsa.illinois.edu" + "\n")
+                f.write("Bagging-Date: " + str(datetime.datetime.now()) + "\n")
+
+            with open(bag_info_path, "w") as f:
+                f.write("BagIt-Version: 0.97" + "\n")
+                f.write("Tag-File-Character-Encoding: UTF-8" + "\n")
+
+            # Write dataset metadata if found
+            metadata = await MetadataDB.find(
+                MetadataDB.resource.resource_id == ObjectId(dataset_id)
+            ).to_list()
+            if len(metadata) > 0:
+                datasetmetadata_path = os.path.join(
+                    current_temp_dir, "_dataset_metadata.json"
+                )
+                metadata_content = json_util.dumps(metadata)
+                with open(datasetmetadata_path, "w") as f:
+                    f.write(metadata_content)
+                crate.add_file(
+                    datasetmetadata_path,
+                    dest_path="metadata/_dataset_metadata.json",
+                    properties={"name": "_dataset_metadata.json"},
+                )
+
+            bag_size = 0  # bytes
+            file_count = 0
+
+            async for file in FileDB.find(FileDB.dataset_id == ObjectId(dataset_id)):
+                file_count += 1
+                file_name = file.name
+                if file.folder_id is not None:
+                    hierarchy = await _get_folder_hierarchy(file.folder_id, "")
+                    dest_folder = os.path.join(current_temp_dir, hierarchy.lstrip("/"))
+                    if not os.path.isdir(dest_folder):
+                        os.mkdir(dest_folder)
+                    file_name = hierarchy + file_name
+                current_file_path = os.path.join(current_temp_dir, file_name.lstrip("/"))
+
+                content = fs.get_object(settings.MINIO_BUCKET_NAME, str(file.id))
+                file_md5_hash = hashlib.md5(content.data).hexdigest()
+                with open(current_file_path, "wb") as f1:
+                    f1.write(content.data)
+                with open(manifest_path, "a") as mpf:
+                    mpf.write(file_md5_hash + " " + file_name + "\n")
+                crate.add_file(
+                    current_file_path,
+                    dest_path="data/" + file_name,
+                    properties={"name": file_name},
+                )
+                content.close()
+                content.release_conn()
+
+                current_file_size = os.path.getsize(current_file_path)
+                bag_size += current_file_size
+
+                metadata = await MetadataDB.find(
+                    MetadataDB.resource.resource_id == ObjectId(dataset_id)
+                ).to_list()
+                if len(metadata) > 0:
+                    metadata_filename = file_name + "_metadata.json"
+                    metadata_filename_temp_path = os.path.join(
+                        current_temp_dir, metadata_filename
+                    )
+                    metadata_content = json_util.dumps(metadata)
+                    with open(metadata_filename_temp_path, "w") as f:
+                        f.write(metadata_content)
+                    crate.add_file(
+                        metadata_filename_temp_path,
+                        dest_path="metadata/" + metadata_filename,
+                        properties={"name": metadata_filename},
+                    )
+
+            bag_size_kb = bag_size / 1024
+
+            with open(bagit_path, "a") as f:
+                f.write("Bag-Size: " + str(bag_size_kb) + " kB" + "\n")
+                f.write("Payload-Oxum: " + str(bag_size) + "." + str(file_count) + "\n")
+                f.write("Internal-Sender-Identifier: " + dataset_id + "\n")
+                f.write("Internal-Sender-Description: " + dataset.description + "\n")
+            crate.add_file(
+                bagit_path, dest_path="bagit.txt", properties={"name": "bagit.txt"}
+            )
+            crate.add_file(
+                manifest_path,
+                dest_path="manifest-md5.txt",
+                properties={"name": "manifest-md5.txt"},
+            )
+            crate.add_file(
+                bag_info_path, dest_path="bag-info.txt", properties={"name": "bag-info.txt"}
+            )
+
+            # Generate tag manifest file
+            manifest_md5_hash = hashlib.md5(open(manifest_path, "rb").read()).hexdigest()
+            bagit_md5_hash = hashlib.md5(open(bagit_path, "rb").read()).hexdigest()
+            bag_info_md5_hash = hashlib.md5(open(bag_info_path, "rb").read()).hexdigest()
+
+            with open(tagmanifest_path, "w") as f:
+                f.write(bagit_md5_hash + " " + "bagit.txt" + "\n")
+                f.write(manifest_md5_hash + " " + "manifest-md5.txt" + "\n")
+                f.write(bag_info_md5_hash + " " + "bag-info.txt" + "\n")
+            crate.add_file(
+                tagmanifest_path,
+                dest_path="tagmanifest-md5.txt",
+                properties={"name": "tagmanifest-md5.txt"},
+            )
+
+            zip_name = dataset.name + ".zip"
+            path_to_zip = os.path.join(current_temp_dir, zip_name)
+            crate.write_zip(path_to_zip)
+            f = open(path_to_zip, "rb", buffering=0)
+            zip_bytes = f.read()
+            stream = io.BytesIO(zip_bytes)
+            f.close()
+            try:
+                shutil.rmtree(current_temp_dir)
+            except Exception as e:
+                print("could not delete file")
+                print(e)
+
+            # Get content type & open file stream
+            response = StreamingResponse(
+                stream,
+                media_type="application/x-zip-compressed",
+            )
+            response.headers["Content-Disposition"] = "attachment; filename=%s" % zip_name
+            # Increment download count
+            await dataset.update(Inc({DatasetDB.downloads: 1}))
+            return response
+        else:
+            raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
+    raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
+
