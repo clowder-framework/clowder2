@@ -24,7 +24,7 @@ import { DisplayListenerMetadata } from "../metadata/DisplayListenerMetadata";
 import {
 	fetchFileMetadata,
 } from "../../actions/metadata";
-import Layout from "../Layout";
+import PublicLayout from "../PublicLayout";
 import { fetchPublicDatasetAbout} from "../../actions/public_dataset";
 import { FileDetails } from "./FileDetails";
 import {fetchPublicFolderPath } from "../../actions/folder";
@@ -203,7 +203,7 @@ export const PublicFile = (): JSX.Element => {
 	// }
 
 	return (
-		<Layout>
+		<PublicLayout>
 			{/*Error Message dialogue*/}
 			<ErrorModal errorOpen={errorOpen} setErrorOpen={setErrorOpen} />
 			{/*snackbar*/}
@@ -367,7 +367,7 @@ export const PublicFile = (): JSX.Element => {
 					</>
 				</Grid>
 			</Grid>
-		</Layout>
+		</PublicLayout>
 	)
 
 	// return (
