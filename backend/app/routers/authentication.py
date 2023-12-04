@@ -112,7 +112,7 @@ async def get_admin(dataset_id: str = None, current_username=Depends(get_current
 async def set_admin(
         useremail: str, current_username=Depends(get_current_user), admin=Depends(get_admin)
 ):
-    if admin and current_username.admin
+    if admin and current_username.admin:
         if (user := await UserDB.find_one(UserDB.email == useremail)) is not None:
             user.admin = True
             await user.replace()
@@ -130,12 +130,11 @@ async def set_admin(
 async def revoke_admin(
         useremail: str, current_username=Depends(get_current_user), admin=Depends(get_admin)
 ):
-
     if admin:
         if current_username.email == useremail:
             raise HTTPException(
                 status_code=403,
-                detail=f"You are currently and admin. Admin cannot revoke their own admin access.",
+                detail=f"You are currently an admin. Admin cannot revoke their own admin access.",
             )
         else:
             if (user := await UserDB.find_one(UserDB.email == useremail)) is not None:
