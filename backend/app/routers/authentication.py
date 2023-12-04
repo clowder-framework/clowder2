@@ -94,14 +94,14 @@ async def authenticate_user(email: str, password: str):
 
 async def get_admin(dataset_id: str = None, current_username=Depends(get_current_user)):
     if (
-            current_user := await UserDB.find_one(UserDB.email == current_username.email)
+        current_user := await UserDB.find_one(UserDB.email == current_username.email)
     ) is not None:
         if current_user.admin:
             return current_user.admin
     elif (
-            dataset_id
-            and (dataset_db := await DatasetDB.get(PydanticObjectId(dataset_id)))
-            is not None
+        dataset_id
+        and (dataset_db := await DatasetDB.get(PydanticObjectId(dataset_id)))
+        is not None
     ):
         return dataset_db.creator.email == current_username.email
     else:
@@ -110,7 +110,7 @@ async def get_admin(dataset_id: str = None, current_username=Depends(get_current
 
 @router.post("/users/set_admin/{useremail}", response_model=UserOut)
 async def set_admin(
-        useremail: str, current_username=Depends(get_current_user), admin=Depends(get_admin)
+    useremail: str, current_username=Depends(get_current_user), admin=Depends(get_admin)
 ):
     if admin and current_username.admin:
         if (user := await UserDB.find_one(UserDB.email == useremail)) is not None:
@@ -128,7 +128,7 @@ async def set_admin(
 
 @router.post("/users/revoke_admin/{useremail}", response_model=UserOut)
 async def revoke_admin(
-        useremail: str, current_username=Depends(get_current_user), admin=Depends(get_admin)
+    useremail: str, current_username=Depends(get_current_user), admin=Depends(get_admin)
 ):
     if admin:
         if current_username.email == useremail:
@@ -142,7 +142,9 @@ async def revoke_admin(
                 await user.replace()
                 return user.dict()
             else:
-                raise HTTPException(status_code=404, detail=f"User {useremail} not found")
+                raise HTTPException(
+                    status_code=404, detail=f"User {useremail} not found"
+                )
     else:
         raise HTTPException(
             status_code=403,
