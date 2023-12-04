@@ -91,96 +91,100 @@ export const ManageUsers = (): JSX.Element => {
 		<Layout>
 			{/*Error Message dialogue*/}
 			<ErrorModal errorOpen={errorOpen} setErrorOpen={setErrorOpen} />
-			<Grid container spacing={2}>
-				<Grid item xs={12}>
-					<GenericSearchBox
-						title="Search for Users"
-						searchPrompt="search by email"
-						setSearchTerm={setSearchTerm}
-						searchTerm={searchTerm}
-						searchFunction={searchUsers}
-						skip={skip}
-						limit={limit}
-					/>
-				</Grid>
-				<Grid item xs={12}>
-					<TableContainer component={Paper}>
-						<Table sx={{ minWidth: 650 }} aria-label="simple table">
-							<TableHead>
-								<TableRow>
-									<TableCell>Name</TableCell>
-									<TableCell align="right">Email</TableCell>
-									<TableCell align="right">Admin</TableCell>
-									<TableCell align="right" />
-								</TableRow>
-							</TableHead>
-							<TableBody>
-								{users.map((profile) => {
-									return (
-										<TableRow
-											sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
-										>
-											<TableCell>
-												{profile.first_name} {profile.last_name}
-											</TableCell>
-											<TableCell align="right">{profile.email}</TableCell>
-											<TableCell align="right">
-												{profile.admin !== undefined && profile.admin
-													? "True"
-													: "False"}
-											</TableCell>
-											<TableCell align="left">
-												{profile.admin ? (
-													<Button
-														color="primary"
-														onClick={() => {
-															revokeAdmin(profile.email);
-														}}
-														disabled={profile.email === currentUser.email}
-													>
-														Revoke
-													</Button>
-												) : (
-													<Button
-														color="primary"
-														onClick={() => {
-															setAdmin(profile.email);
-														}}
-														disabled={profile.email === currentUser.email}
-													>
-														Set Admin
-													</Button>
-												)}
-											</TableCell>
-										</TableRow>
-									);
-								})}
-							</TableBody>
-						</Table>
-						<Box display="flex" justifyContent="center" sx={{ m: 1 }}>
-							<ButtonGroup
-								variant="contained"
-								aria-label="previous next buttons"
-							>
-								<Button
-									aria-label="previous"
-									onClick={previous}
-									disabled={prevDisabled}
+			<div className="outer-container">
+				<Grid container spacing={2}>
+					<Grid item xs={12}>
+						<GenericSearchBox
+							title="Search for Users"
+							searchPrompt="search by email"
+							setSearchTerm={setSearchTerm}
+							searchTerm={searchTerm}
+							searchFunction={searchUsers}
+							skip={skip}
+							limit={limit}
+						/>
+					</Grid>
+					<Grid item xs={12}>
+						<TableContainer component={Paper}>
+							<Table sx={{ minWidth: 650 }} aria-label="simple table">
+								<TableHead>
+									<TableRow>
+										<TableCell>Name</TableCell>
+										<TableCell align="right">Email</TableCell>
+										<TableCell align="right">Admin</TableCell>
+										<TableCell align="right" />
+									</TableRow>
+								</TableHead>
+								<TableBody>
+									{users.map((profile) => {
+										return (
+											<TableRow
+												sx={{
+													"&:last-child td, &:last-child th": { border: 0 },
+												}}
+											>
+												<TableCell>
+													{profile.first_name} {profile.last_name}
+												</TableCell>
+												<TableCell align="right">{profile.email}</TableCell>
+												<TableCell align="right">
+													{profile.admin !== undefined && profile.admin
+														? "True"
+														: "False"}
+												</TableCell>
+												<TableCell align="left">
+													{profile.admin ? (
+														<Button
+															color="primary"
+															onClick={() => {
+																revokeAdmin(profile.email);
+															}}
+															disabled={profile.email === currentUser.email}
+														>
+															Revoke
+														</Button>
+													) : (
+														<Button
+															color="primary"
+															onClick={() => {
+																setAdmin(profile.email);
+															}}
+															disabled={profile.email === currentUser.email}
+														>
+															Set Admin
+														</Button>
+													)}
+												</TableCell>
+											</TableRow>
+										);
+									})}
+								</TableBody>
+							</Table>
+							<Box display="flex" justifyContent="center" sx={{ m: 1 }}>
+								<ButtonGroup
+									variant="contained"
+									aria-label="previous next buttons"
 								>
-									<ArrowBack /> Prev
-								</Button>
-								<Button
-									aria-label="next"
-									onClick={next}
-									disabled={nextDisabled}
-								>
-									Next <ArrowForward />
-								</Button>
-							</ButtonGroup>
-						</Box>
-					</TableContainer>
+									<Button
+										aria-label="previous"
+										onClick={previous}
+										disabled={prevDisabled}
+									>
+										<ArrowBack /> Prev
+									</Button>
+									<Button
+										aria-label="next"
+										onClick={next}
+										disabled={nextDisabled}
+									>
+										Next <ArrowForward />
+									</Button>
+								</ButtonGroup>
+							</Box>
+						</TableContainer>
+					</Grid>
 				</Grid>
-			</Grid>
+			</div>
 		</Layout>
 	);
 };
