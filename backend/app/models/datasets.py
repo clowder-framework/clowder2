@@ -66,6 +66,7 @@ class DatasetDBViewList(View, DatasetBase):
     modified: datetime = Field(default_factory=datetime.utcnow)
     auth: List[AuthorizationDB]
     thumbnail_id: Optional[PydanticObjectId] = None
+    status: str = DatasetStatus.PRIVATE.name
 
     class Settings:
         source = DatasetDB

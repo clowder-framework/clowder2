@@ -223,6 +223,8 @@ async def get_datasets(
             Or(
                 DatasetDBViewList.creator.email == user_id,
                 DatasetDBViewList.auth.user_ids == user_id,
+                DatasetDBViewList.status == DatasetStatus.PUBLIC.name,
+                DatasetDBViewList.status == DatasetStatus.AUTHENTICATED.name,
             ),
             sort=(-DatasetDBViewList.created),
             skip=skip,
