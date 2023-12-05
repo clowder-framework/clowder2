@@ -1,3 +1,5 @@
+import datetime
+
 from beanie import PydanticObjectId
 from beanie.operators import Or, In
 from bson import ObjectId
@@ -25,6 +27,7 @@ from app.models.datasets import (
     DatasetRoles,
     DatasetDB,
     DatasetOut,
+    DatasetStatus,
 )
 from app.models.groups import GroupDB
 from app.models.pyobjectid import PyObjectId
@@ -80,8 +83,17 @@ async def get_dataset_role(
             ),
         )
     ) is None:
-        raise HTTPException(
-            status_code=404, detail=f"No authorization found for dataset: {dataset_id}"
+        if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
+            if dataset.status == DatasetStatus.PUBLIC.name or dataset.status == DatasetStatus.AUTHENTICATED.name:
+                temporary_public_auth = {"created":datetime.datetime.now(),
+                                        "creator": dataset.creator.email,
+                                        "dataset_id": ObjectId(dataset_id),
+                                        "role": "viewer"}
+                public_auth = AuthorizationDB(**temporary_public_auth)
+                return public_auth.dict()
+            else:
+                raise HTTPException(
+                status_code=404, detail=f"No authorization found for dataset: {dataset_id}"
         )
     else:
         return auth_db.dict()

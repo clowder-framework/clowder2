@@ -5,7 +5,7 @@ from fastapi import Depends, HTTPException
 
 from app.keycloak_auth import get_current_username
 from app.models.authorization import RoleType, AuthorizationDB
-from app.models.datasets import DatasetDB
+from app.models.datasets import DatasetDB, DatasetStatus
 from app.models.files import FileOut, FileDB
 from app.models.groups import GroupOut, GroupDB
 from app.models.metadata import MetadataDB
@@ -125,6 +125,10 @@ class Authorization:
                     detail=f"User `{current_user} does not have `{self.role}` permission on dataset {dataset_id}",
                 )
         else:
+            if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
+                if dataset.status == DatasetStatus.PUBLIC.name or dataset.status == DatasetStatus.AUTHENTICATED.name:
+                    if self.role == 'viewer':
+                        return True
             raise HTTPException(
                 status_code=403,
                 detail=f"User `{current_user} does not have `{self.role}` permission on dataset {dataset_id}",
