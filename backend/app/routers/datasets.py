@@ -253,13 +253,19 @@ async def get_dataset_files(
     skip: int = 0,
     limit: int = 10,
 ):
-    query = [
-        FileDBViewList.dataset_id == ObjectId(dataset_id),
-        Or(
-            FileDBViewList.creator.email == user_id,
-            FileDBViewList.auth.user_ids == user_id,
-        ),
-    ]
+    if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
+        if dataset.status == DatasetStatus.PRIVATE.name or dataset.status == DatasetStatus.AUTHENTICATED.name:
+            query = [
+                FileDBViewList.dataset_id == ObjectId(dataset_id),
+            ]
+        else:
+            query = [
+                FileDBViewList.dataset_id == ObjectId(dataset_id),
+                Or(
+                    FileDBViewList.creator.email == user_id,
+                    FileDBViewList.auth.user_ids == user_id,
+                ),
+            ]
     if folder_id is not None:
         query.append(FileDBViewList.folder_id == ObjectId(folder_id))
     files = await FileDBViewList.find(*query).skip(skip).limit(limit).to_list()
