@@ -33,14 +33,22 @@ async def get_role_by_file(
     current_user=Depends(get_current_username),
 ) -> RoleType:
     if (file := await FileDB.get(PydanticObjectId(file_id))) is not None:
-        authorization = await AuthorizationDB.find_one(
+        if (authorization := await AuthorizationDB.find_one(
             AuthorizationDB.dataset_id == file.dataset_id,
             Or(
                 AuthorizationDB.creator == current_user,
                 AuthorizationDB.user_ids == current_user,
             ),
-        )
-        return authorization.role
+        )) is not None:
+            return authorization.role
+        else:
+            if (dataset := await DatasetDB.get(PydanticObjectId(file.dataset_id))) is not None:
+                if dataset.status == DatasetStatus.PUBLIC.name or dataset.status == DatasetStatus.AUTHENTICATED.name:
+                    return RoleType.VIEWER
+                else:
+                    raise HTTPException(status_code=404, detail=f"File {file_id} not found")
+            else:
+                raise HTTPException(status_code=404, detail=f"File {file_id} not found")
     raise HTTPException(status_code=404, detail=f"File {file_id} not found")
 
 

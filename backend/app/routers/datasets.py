@@ -254,7 +254,7 @@ async def get_dataset_files(
     limit: int = 10,
 ):
     if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
-        if dataset.status == DatasetStatus.PRIVATE.name or dataset.status == DatasetStatus.AUTHENTICATED.name:
+        if dataset.status == DatasetStatus.PUBLIC.name or dataset.status == DatasetStatus.AUTHENTICATED.name:
             query = [
                 FileDBViewList.dataset_id == ObjectId(dataset_id),
             ]
