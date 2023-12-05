@@ -276,6 +276,7 @@ export const Dataset = (): JSX.Element => {
 						value={selectedTabIndex}
 						onChange={handleTabChange}
 						aria-label="dataset tabs"
+						sx={{".MuiTabs-flexContainer": {overflow:"auto"}}}
 					>
 						<Tab
 							icon={<InsertDriveFile />}
@@ -296,7 +297,7 @@ export const Dataset = (): JSX.Element => {
 							icon={<AssessmentIcon />}
 							iconPosition="start"
 							sx={TabStyle}
-							label="Extracted Metadata"
+							label="Machine Metadata"
 							{...a11yProps(2)}
 							disabled={false}
 						/>
@@ -305,7 +306,7 @@ export const Dataset = (): JSX.Element => {
 								icon={<BuildIcon />}
 								iconPosition="start"
 								sx={TabStyle}
-								label="Extract"
+								label="Analysis"
 								{...a11yProps(3)}
 								disabled={false}
 							/> :
