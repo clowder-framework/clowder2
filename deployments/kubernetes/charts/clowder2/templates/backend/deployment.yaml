@@ -65,15 +65,15 @@ spec:
             - name: auth_base
               value: https://{{ .Values.keycloak.hostname }}
             - name: auth_url
-              value: https://{{ .Values.keycloak.hostname }}/keycloak/realms/{{ .Values.keycloak.realm }}/protocol/openid-connect/auth?client_id=clowder2-backend&response_type=code
+              value: https://{{ .Values.keycloak.hostname }}/auth/realms/{{ .Values.keycloak.realm }}/protocol/openid-connect/auth?client_id=clowder2-backend&response_type=code
             - name: oauth2_scheme_auth_url
-              value: https://{{ .Values.keycloak.hostname }}/keycloak/realms/{{ .Values.keycloak.realm }}/protocol/openid-connect/auth?client_id=clowder2-backend&response_type=code
+              value: https://{{ .Values.keycloak.hostname }}/auth/realms/{{ .Values.keycloak.realm }}/protocol/openid-connect/auth?client_id=clowder2-backend&response_type=code
             - name: auth_register_url
-              value: https://{{ .Values.keycloak.hostname }}/keycloak/realms/{{ .Values.keycloak.realm }}/protocol/openid-connect/registrations?client_id=clowder2-backend&response_type=code
+              value: https://{{ .Values.keycloak.hostname }}/auth/realms/{{ .Values.keycloak.realm }}/protocol/openid-connect/registrations?client_id=clowder2-backend&response_type=code
             - name: auth_token_url
-              value: https://{{ .Values.keycloak.hostname }}/keycloak/realms/{{ .Values.keycloak.realm }}/protocol/openid-connect/token
+              value: https://{{ .Values.keycloak.hostname }}/auth/realms/{{ .Values.keycloak.realm }}/protocol/openid-connect/token
             - name: auth_server_url
-              value: https://{{ .Values.keycloak.hostname }}/keycloak/
+              value: https://{{ .Values.keycloak.hostname }}/auth/
             - name: keycloak_base
               value: https://{{ .Values.keycloak.hostname }}/api
             - name: frontend_url
