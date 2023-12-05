@@ -333,6 +333,7 @@ async def patch_dataset(
                        public=public,
                        authenticated=authenticated
                     )
+        # change status of files here
         return dataset.dict()
 
 
