@@ -217,7 +217,7 @@ elasticsearch:
 # ----------------------------------------------------------------------
 keycloak:
   hostname: keycloak.icecube.wisc.edu
-  realm: IceCube-Test
+  realm: IceCube
 
 # ----------------------------------------------------------------------
 # OTHERS

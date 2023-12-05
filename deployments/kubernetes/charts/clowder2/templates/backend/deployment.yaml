@@ -67,11 +67,11 @@ spec:
             - name: auth_url
               value: {{ .Values.keycloak.hostname }}/keycloak/realms/{{ .Values.keycloak.realm }}/protocol/openid-connect/auth?client_id=clowder2-backend&response_type=code
             - name: oauth2_scheme_auth_url
-              value: http://{{ .Values.keycloak.hostname }}/keycloak/realms/clowder/protocol/openid-connect/auth?client_id=clowder2-backend&response_type=code
+              value: http://{{ .Values.keycloak.hostname }}/keycloak/realms/{{ .Values.keycloak.realm }}/protocol/openid-connect/auth?client_id=clowder2-backend&response_type=code
             - name: auth_register_url
-              value: {{ .Values.keycloak.hostname }}/keycloak/realms/clowder/protocol/openid-connect/registrations?client_id=clowder2-backend&response_type=code
+              value: {{ .Values.keycloak.hostname }}/keycloak/realms/{{ .Values.keycloak.realm }}/protocol/openid-connect/registrations?client_id=clowder2-backend&response_type=code
             - name: auth_token_url
-              value: http://{{ .Values.keycloak.hostname }}/keycloak/realms/clowder/protocol/openid-connect/token
+              value: http://{{ .Values.keycloak.hostname }}/keycloak/realms/{{ .Values.keycloak.realm }}/protocol/openid-connect/token
             - name: auth_server_url
               value: {{ .Values.keycloak.hostname }}/keycloak/
             - name: keycloak_base
@@ -96,7 +96,6 @@ spec:
             - name: HEARTBEAT_EXCHANGE
               value: "extractors"
             - name: API_HOST
-#              value: $(CLOWDER2_URL)
               value: http://{{ include "clowder2.name" . }}-backend:{{ .Values.backend.service.port }}
           ports:
             - name: http
