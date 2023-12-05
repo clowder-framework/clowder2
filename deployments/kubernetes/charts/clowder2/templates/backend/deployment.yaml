@@ -63,19 +63,19 @@ spec:
             - name: CLOWDER2_URL
               value: http://{{ .Values.hostname }}
             - name: auth_base
-              value: $(CLOWDER2_URL)
+              value: {{ .Values.keycloak.hostname }}
             - name: auth_url
-              value: $(CLOWDER2_URL)/keycloak/realms/clowder/protocol/openid-connect/auth?client_id=clowder2-backend&response_type=code
+              value: {{ .Values.keycloak.hostname }}/keycloak/realms/{{ .Values.keycloak.realm }}/protocol/openid-connect/auth?client_id=clowder2-backend&response_type=code
             - name: oauth2_scheme_auth_url
-              value: http://{{ include "clowder2.name" .}}-keycloak-headless:8080/keycloak/realms/clowder/protocol/openid-connect/auth?client_id=clowder2-backend&response_type=code
+              value: http://{{ .Values.keycloak.hostname }}/keycloak/realms/clowder/protocol/openid-connect/auth?client_id=clowder2-backend&response_type=code
             - name: auth_register_url
-              value: $(CLOWDER2_URL)/keycloak/realms/clowder/protocol/openid-connect/registrations?client_id=clowder2-backend&response_type=code
+              value: {{ .Values.keycloak.hostname }}/keycloak/realms/clowder/protocol/openid-connect/registrations?client_id=clowder2-backend&response_type=code
             - name: auth_token_url
-              value: http://{{ include "clowder2.name" .}}-keycloak-headless:8080/keycloak/realms/clowder/protocol/openid-connect/token
+              value: http://{{ .Values.keycloak.hostname }}/keycloak/realms/clowder/protocol/openid-connect/token
             - name: auth_server_url
-              value: http://{{ include "clowder2.name" .}}-keycloak-headless:8080/keycloak/
+              value: {{ .Values.keycloak.hostname }}/keycloak/
             - name: keycloak_base
-              value: $(CLOWDER2_URL)/api
+              value: {{ .Values.keycloak.hostname }}/api
             - name: frontend_url
               value: $(CLOWDER2_URL)
             - name: elasticsearch_url

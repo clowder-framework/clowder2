@@ -1,4 +1,4 @@
-hostname: clowder2.localhost
+hostname: clowder2-test.icecube.aq
 
 imagePullSecrets: []
 nameOverride: ""
@@ -6,14 +6,13 @@ fullnameOverride: ""
 
 ingress:
   enabled: true
-  className: ""
-  annotations: {}
-    # kubernetes.io/ingress.class: nginx
-    # kubernetes.io/tls-acme: "true"
-  tls: []
-  #  - secretName: chart-example-tls
-  #    hosts:
-  #      - chart-example.local
+  className: clowder2-test
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt-dns01-prod"
+  tls:
+    - secretName: clowder2-test-tls
+      hosts:
+        - clowder2-test.icecube.aq
 
 serviceAccount:
   # Specifies whether a service account should be created
@@ -114,9 +113,7 @@ minio:
   persistence:
     # storage size for the data
     size: 20Gi
-
-    # where to store data, can be network storage
-    #storageClass: nfs-taiga
+    storageClass: csi-cephfs-sc
   service:
     type: ClusterIP
 
@@ -137,10 +134,10 @@ mongodb:
   # storage
   persistence:
     # storage size for database
-    #size: 8Gi
+    size: 8Gi
     
     # pick fast non network storage
-    #storageClass: csi-cinder-sc-retain
+    storageClass: csi-cephfs-sc
 
 # ----------------------------------------------------------------------
 # RABBITMQ
@@ -165,7 +162,7 @@ rabbitmq:
 
   persistence:
     # pick fast storage
-    #storageClass: csi-cinder-sc-retain
+    storageClass: csi-cephfs-sc
 
 # ----------------------------------------------------------------------
 # EXTRACTORS
@@ -208,74 +205,19 @@ elasticsearch:
 
   master:
     persistence:
-      # storageClass: csi-cinder-sc-retain
-      # size: 8Gi
+      storageClass: csi-cephfs-sc
+      size: 8Gi
   data:
     persistence:
-      # storageClass: csi-cinder-sc-retain
-      # size: 8Gi
+      storageClass: csi-cephfs-sc
+      size: 8Gi
 
 # ----------------------------------------------------------------------
 # KEYCLOAK
 # ----------------------------------------------------------------------
 keycloak:
-  httpRelativePath: /keycloak/
-
-  auth:
-    adminUser: admin
-    adminPassword: admin
-
-  ingress:
-    enabled: true
-    hostname: clowder2.localhost
-    path: /keycloak
-
-  service:
-    type: ClusterIP
-
-  postgresql:
-    auth:
-      username: keycloak
-      password: password
-      postgresPassword: password
-      database: keycloak
-
-    primary:
-      persistence:
-        # storageClass: csi-cinder-sc-retain
-        # size: 8Gi
-
-  # Mount configmap with theme and untar
-  initContainers:
-    - name: init-customtheme
-      image: busybox:1.28
-      command: ['sh', '-c', 'cd /keycloak && tar zxf /theme/custom_theme.tgz']
-      volumeMounts:
-      - mountPath: /keycloak
-        name: keycloak-theme
-      - mountPath: /theme
-        name: clowder2-theme
-
-  extraEnvVars:
-    - name: KEYCLOAK_EXTRA_ARGS
-      value: "-Dkeycloak.import=/config/realm.json"
-
-  extraVolumeMounts:
-    - name: keycloak-theme
-      mountPath: /opt/bitnami/keycloak/themes
-    - name: clowder2-realm
-      mountPath: /config
-      readOnly: true
-
-  extraVolumes:
-    - name: keycloak-theme
-      emptyDir: {}
-    - name: clowder2-theme
-      configMap:
-        name: clowder2-theme
-    - name: clowder2-realm
-      configMap:
-        name: clowder2-realm
+  hostname: keycloak.icecube.wisc.edu
+  realm: IceCube-Test
 
 # ----------------------------------------------------------------------
 # OTHERS

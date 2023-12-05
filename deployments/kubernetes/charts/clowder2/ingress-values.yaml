@@ -1,0 +1,16 @@
+ingress-nginx:
+  controller:
+    ingressClass: clowder2-test
+    ingressClassByName: true
+    electionID: clowder2-test-ingress-leader
+    ingressClassResource:
+      name: clowder2-test
+      enabled: true
+      default: false
+      controllerValue: "k8s.io/clowder2-test-ingress-nginx"
+    podLabels:
+      ingressClass: clowder2-test
+    service:
+      externalTrafficPolicy: Local
+      annotations:
+        external-dns.alpha.kubernetes.io/hostname: clowder2-test.icecube.aq
