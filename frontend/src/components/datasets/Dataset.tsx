@@ -276,7 +276,8 @@ export const Dataset = (): JSX.Element => {
 						value={selectedTabIndex}
 						onChange={handleTabChange}
 						aria-label="dataset tabs"
-						sx={{".MuiTabs-flexContainer": {overflow:"auto"}}}
+						variant="scrollable"
+						scrollButtons="auto"
 					>
 						<Tab
 							icon={<InsertDriveFile />}

@@ -285,7 +285,8 @@ export const File = (): JSX.Element => {
 						value={selectedTabIndex}
 						onChange={handleTabChange}
 						aria-label="file tabs"
-						sx={{".MuiTabs-flexContainer": {overflow:"auto"}}}
+						variant="scrollable"
+						scrollButtons="auto"
 					>
 						<Tab
 							icon={<VisibilityIcon />}
