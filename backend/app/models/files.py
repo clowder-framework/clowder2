@@ -1,6 +1,6 @@
 from datetime import datetime
 from typing import Optional, List
-
+from enum import Enum, auto
 from beanie import Document, View, PydanticObjectId
 from pydantic import Field, BaseModel
 
@@ -8,6 +8,16 @@ from app.models.authorization import AuthorizationDB
 from app.models.pyobjectid import PyObjectId
 from app.models.users import UserOut
 
+class AutoName(Enum):
+    def _generate_next_value_(name, start, count, last_values):
+        return name
+
+class FileStatus(AutoName):
+    PRIVATE = auto()
+    PUBLIC = auto()
+    AUTHENTICATED = auto()
+    DEFAULT = auto()
+    TRIAL = auto()
 
 class ContentType(BaseModel):
     """This model describes the content type of any type of file(File or Visualization data) uploaded to Clowder. A typical example is "text/plain" for .txt.
@@ -36,6 +46,7 @@ class FileVersionDB(Document, FileVersion):
 
 class FileBase(BaseModel):
     name: str = "N/A"
+    status: str = FileStatus.PRIVATE.name
 
 
 class FileIn(FileBase):
@@ -72,6 +83,7 @@ class FileDBViewList(View, FileBase):
     bytes: int = 0
     content_type: ContentType = ContentType()
     thumbnail_id: Optional[PydanticObjectId] = None
+    status: str = FileStatus.PRIVATE.name
 
     class Settings:
         source = FileDB
