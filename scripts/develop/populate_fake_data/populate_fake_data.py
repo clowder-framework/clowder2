@@ -216,12 +216,18 @@ if __name__ == "__main__":
 
     for _ in range(0, 100):
         n = random.randint(0, 4)
-        s = random.randint(0,1)
+        s = random.randint(0,3)
         user = users[n]
         response = requests.post(f"{api}/login", json=user)
         token = response.json().get("token")
         headers = {"Authorization": "Bearer " + token}
         if s == 0:
+            dataset_data = {
+                "name": fake.sentence(nb_words=10).rstrip("."),
+                "description": fake.paragraph(),
+                "status": "PUBLIC"
+            }
+        elif s == 1:
             dataset_data = {
                 "name": fake.sentence(nb_words=10).rstrip("."),
                 "description": fake.paragraph(),
