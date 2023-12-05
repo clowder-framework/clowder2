@@ -218,6 +218,7 @@ elasticsearch:
 keycloak:
   hostname: keycloak.icecube.wisc.edu
   realm: IceCube
+  clientid: clowder2-backend
 
 # ----------------------------------------------------------------------
 # OTHERS
