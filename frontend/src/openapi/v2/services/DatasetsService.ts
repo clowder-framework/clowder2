@@ -22,6 +22,7 @@ export class DatasetsService {
      * @param skip
      * @param limit
      * @param mine
+     * @param datasetId
      * @returns DatasetOut Successful Response
      * @throws ApiError
      */
@@ -29,6 +30,7 @@ export class DatasetsService {
         skip?: number,
         limit: number = 10,
         mine: boolean = false,
+        datasetId?: string,
     ): CancelablePromise<Array<DatasetOut>> {
         return __request({
             method: 'GET',
@@ -37,6 +39,7 @@ export class DatasetsService {
                 'skip': skip,
                 'limit': limit,
                 'mine': mine,
+                'dataset_id': datasetId,
             },
             errors: {
                 422: `Validation Error`,

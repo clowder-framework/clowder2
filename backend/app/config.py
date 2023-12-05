@@ -9,6 +9,7 @@ class Settings(BaseSettings):
     API_V2_STR: str = "/api/v2"
     admin_email: str = "devnull@ncsa.illinois.edu"
     frontend_url: str = "http://localhost:3000"
+    version: str = "2.0.0-beta.1"
 
     # Unique secret for hashing API keys. Generate with `openssl rand -hex 32`
     local_auth_secret = "clowder_secret_key"
@@ -86,6 +87,9 @@ class Settings(BaseSettings):
     RABBITMQ_PASS: str = "guest"
     RABBITMQ_HOST: str = "127.0.0.1"
     HEARTBEAT_EXCHANGE: str = "extractors"
+
+    # defautl listener heartbeat time interval in seconds 5 minutes
+    listener_heartbeat_interval = 5 * 60
 
 
 settings = Settings()

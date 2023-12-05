@@ -14,7 +14,7 @@
             "config": {
                 "type" : "str"
             },
-            "required" : true
+            "required" : false
         }
     ]
 }

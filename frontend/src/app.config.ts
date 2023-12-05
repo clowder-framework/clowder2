@@ -12,7 +12,8 @@ interface Config {
 	KeycloakRegister: string;
 	searchEndpoint: string;
 	refreshTokenInterval: number;
-	extractorInterval: number;
+	extractorStatusInterval: number;
+	extractorLivelihoodInterval: number;
 	eventListenerJobStatus: EventListenerJobStatus;
 	streamingBytes: number;
 	rawDataVisualizationThreshold: number;
@@ -36,18 +37,21 @@ config["GHIssueBaseURL"] =
 
 // Backend Keycloak login url
 config["KeycloakBaseURL"] =
-	process.env.KeycloakBaseURL || config.hostname + "/api/v2/auth";
-config["KeycloakLogin"] = config.KeycloakBaseURL + "/login";
-config["KeycloakLogout"] = config.KeycloakBaseURL + "/logout";
-config["KeycloakRefresh"] = config.KeycloakBaseURL + "/refresh_token";
-config["KeycloakRegister"] = config.KeycloakBaseURL + "/register";
+	process.env.KeycloakBaseURL || `${config.hostname}/api/v2/auth`;
+config["KeycloakLogin"] = `${config.KeycloakBaseURL}/login`;
+config["KeycloakLogout"] = `${config.KeycloakBaseURL}/logout`;
+config["KeycloakRefresh"] = `${config.KeycloakBaseURL}/refresh_token`;
+config["KeycloakRegister"] = `${config.KeycloakBaseURL}/register`;
 
 // elasticsearch
 config["searchEndpoint"] = `${hostname}/api/v2/elasticsearch`;
 
-// refresh toekn time interval
-config["refreshTokenInterval"] = 1000 * 60; // milliseconds
-config["extractorInterval"] = 2000; // milliseconds
+// refresh token time interval
+config["refreshTokenInterval"] = 1000 * 60; // 1 minute
+// updated extractor logs
+config["extractorStatusInterval"] = 1000 * 10; // 10 seconds
+// update extractor stutus (offline/online)
+config["extractorLivelihoodInterval"] = 1000 * 120; // 2 minutes
 
 config["eventListenerJobStatus"] = <EventListenerJobStatus>{};
 config["eventListenerJobStatus"]["created"] = "CREATED";
