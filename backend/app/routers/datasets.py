@@ -561,7 +561,7 @@ async def save_local_file(
                 cleared = True
         if not cleared:
             raise HTTPException(
-                status_code=401,
+                status_code=500,
                 detail=f"File is not located in a whitelisted directory.",
             )
 

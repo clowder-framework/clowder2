@@ -157,13 +157,8 @@ async def add_local_file_entry(
     rabbitmq_client: BlockingChannel,
     content_type: Optional[str] = None,
 ):
-    """Insert FileDB object into MongoDB (makes Clowder ID), then Minio (makes version ID), then update MongoDB with
-    the version ID from Minio.
-
-    Arguments:
-        file_db: FileDB object controlling dataset and folder destination
-        file: bytes to upload
-    """
+    """Insert FileDB object into MongoDB (makes Clowder ID). Bytes are not stored in DB and versioning not supported
+    for local files."""
 
     content_type_obj = get_content_type(new_file.name, content_type)
     new_file.content_type = content_type_obj
