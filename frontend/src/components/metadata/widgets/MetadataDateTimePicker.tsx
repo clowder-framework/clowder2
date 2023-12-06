@@ -8,13 +8,14 @@ import {Grid} from "@mui/material";
 
 
 export const MetadataDateTimePicker = (props) => {
-	const {widgetName, fieldName, metadataId, content, setMetadata, initialReadOnly, resourceId, updateMetadata} = props;
+	const {widgetName, fieldName, metadataId, content, setMetadata, initialReadOnly, resourceId, updateMetadata, datasetRole} = props;
 	const [localContent, setLocalContent] = useState(content && content[fieldName] ? content: {});
 
 	const [readOnly, setReadOnly] = useState(initialReadOnly);
 
 	const [inputChanged, setInputChanged] = useState(false);
-
+	console.log(updateMetadata, 'datetime');
+	console.log(datasetRole, 'datasetRole');
 	const handleChange = (newValue:Date) => {
 		setInputChanged(true);
 
@@ -55,10 +56,14 @@ export const MetadataDateTimePicker = (props) => {
 					</LocalizationProvider>
 				</Grid>
 				<Grid item xs={1} sm={1} md={1} lg={1} xl={1}>
-					<MetadataEditButton readOnly={readOnly} setReadOnly={setReadOnly} updateMetadata={updateMetadata}
+					{datasetRole.role !== undefined  && datasetRole.role !== "viewer" ?
+						<MetadataEditButton readOnly={readOnly} setReadOnly={setReadOnly} updateMetadata={updateMetadata}
 										content={localContent} metadataId={metadataId} resourceId={resourceId}
 										widgetName={widgetName} setInputChanged={setInputChanged}
 										setMetadata={setMetadata}/>
+						:
+						<></>
+					}
 				</Grid>
 			</Grid>
 		</div>

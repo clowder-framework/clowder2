@@ -95,22 +95,18 @@ async def authenticate_user(email: str, password: str):
 
 async def get_admin(dataset_id: str = None, current_username=Depends(get_current_user)):
     if (
+        current_user := await UserDB.find_one(UserDB.email == current_username.email)
+    ) is not None:
+        if current_user.admin:
+            return current_user.admin
+    elif (
         dataset_id
         and (dataset_db := await DatasetDB.get(PydanticObjectId(dataset_id)))
         is not None
     ):
-        return DatasetDB.creator.email == current_username.email
+        return dataset_db.creator.email == current_username.email
     else:
-        if (
-            current_user := await UserDB.find_one(
-                UserDB.email == current_username.email
-            )
-        ) is not None:
-            return current_user.admin
-        else:
-            raise HTTPException(
-                status_code=404, detail=f"User {current_username.email} not found"
-            )
+        return False
 
 
 @router.post("/users/set_admin/{useremail}", response_model=UserOut)

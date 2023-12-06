@@ -27,6 +27,10 @@ export const EditMetadata = (props: MetadataType) => {
 	const listFileMetadata = (fileId: string | undefined) => dispatch(fetchFileMetadata(fileId));
 	const datasetMetadataList = useSelector((state: RootState) => state.metadata.datasetMetadataList);
 	const fileMetadataList = useSelector((state: RootState) => state.metadata.fileMetadataList);
+	const datasetRole = useSelector(
+		(state: RootState) => state.dataset.datasetRole
+	);
+
 
 	useEffect(() => {
 		getMetadatDefinitions(null, 0, 100);
@@ -81,6 +85,7 @@ export const EditMetadata = (props: MetadataType) => {
 													setMetadata: setMetadata,
 													initialReadOnly: false,
 													isRequired: field.required,
+													datasetRole: datasetRole
 												}
 											);
 										})

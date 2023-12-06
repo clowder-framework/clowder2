@@ -2,6 +2,8 @@ import asyncio
 import json
 import logging
 import os
+from datetime import datetime
+
 from aio_pika import connect_robust
 from aio_pika.abc import AbstractIncomingMessage
 from packaging import version
@@ -30,27 +32,35 @@ async def callback(message: AbstractIncomingMessage):
             **extractor_info, properties=ExtractorInfo(**extractor_info)
         )
 
-        # check to see if extractor alredy exists and update if so
+        # check to see if extractor already exists and update if so
         existing_extractor = await EventListenerDB.find_one(
             EventListenerDB.name == msg["queue"]
         )
         if existing_extractor is not None:
-            # Update existing listener
+            extractor_db.id = existing_extractor.id
+            extractor_db.created = existing_extractor.created
+
+            # Update existing listener version
             existing_version = existing_extractor.version
             new_version = extractor_db.version
             if version.parse(new_version) > version.parse(existing_version):
-                # if this is a new version, add it to the database
-                extractor_db.id = existing_extractor.id
-                extractor_db.created = existing_extractor.created
-                new_extractor = await extractor_db.replace()
-                extractor_out = EventListenerOut(**new_extractor.dict())
                 logger.info(
                     "%s updated from %s to %s"
                     % (extractor_name, existing_version, new_version)
                 )
-                return extractor_out
+
+            extractor_db.lastAlive = datetime.utcnow()
+            logger.info("%s is alive at %s" % (extractor_name, str(datetime.utcnow())))
+            # Update existing listeners alive status
+            new_extractor = await extractor_db.replace()
+            extractor_out = EventListenerOut(**new_extractor.dict())
+
+            return extractor_out
+
         else:
             # Register new listener
+            extractor_db.lastAlive = datetime.utcnow()
+            logger.info("%s is alive at %s" % (extractor_name, str(datetime.utcnow())))
             new_extractor = await extractor_db.insert()
             extractor_out = EventListenerOut(**new_extractor.dict())
             logger.info("New extractor registered: " + extractor_name)

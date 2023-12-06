@@ -31,7 +31,7 @@ from rocrate.rocrate import ROCrate
 
 from app import dependencies
 from app.config import settings
-from app.deps.authorization_deps import Authorization
+from app.deps.authorization_deps import Authorization, CheckStatus
 from app.keycloak_auth import (
     get_token,
     get_user,
@@ -45,7 +45,6 @@ from app.models.datasets import (
     DatasetOut,
     DatasetPatch,
     DatasetDBViewList,
-    DatasetStatus,
 )
 from app.models.files import FileOut, FileDB, FileDBViewList, FileStatus
 from app.models.folders import FolderOut, FolderIn, FolderDB, FolderDBViewList
@@ -54,6 +53,7 @@ from app.models.pyobjectid import PyObjectId
 from app.models.thumbnails import ThumbnailDB
 from app.models.users import UserOut
 from app.rabbitmq.listeners import submit_dataset_job
+from app.routers.authentication import get_admin
 from app.routers.files import add_file_entry, remove_file_entry
 from app.search.connect import (
     delete_document_by_id,
@@ -210,8 +210,15 @@ async def get_datasets(
     skip: int = 0,
     limit: int = 10,
     mine: bool = False,
+    admin=Depends(get_admin),
 ):
-    if mine:
+    if admin:
+        datasets = await DatasetDBViewList.find(
+            sort=(-DatasetDBViewList.created),
+            skip=skip,
+            limit=limit,
+        ).to_list()
+    elif mine:
         datasets = await DatasetDBViewList.find(
             DatasetDBViewList.creator.email == user_id,
             sort=(-DatasetDBViewList.created),
@@ -237,6 +244,7 @@ async def get_datasets(
 @router.get("/{dataset_id}", response_model=DatasetOut)
 async def get_dataset(
     dataset_id: str,
+    authenticated: bool = Depends(CheckStatus("AUTHENTICATED")),
     allow: bool = Depends(Authorization("viewer")),
 ):
     if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
@@ -248,28 +256,24 @@ async def get_dataset(
 async def get_dataset_files(
     dataset_id: str,
     folder_id: Optional[str] = None,
-    user_id=Depends(get_user),
+    authenticated: bool = Depends(CheckStatus("AUTHENTICATED")),
     allow: bool = Depends(Authorization("viewer")),
+    user_id=Depends(get_user),
     skip: int = 0,
     limit: int = 10,
 ):
-    if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
-        if dataset.status == DatasetStatus.PUBLIC.name or dataset.status == DatasetStatus.AUTHENTICATED.name:
-            query = [
-                FileDBViewList.dataset_id == ObjectId(dataset_id),
-                Or(
-                    FileDBViewList.status == FileStatus.PUBLIC.name,
-                    FileDBViewList.status == FileStatus.AUTHENTICATED.name,
-                ),
-            ]
-        else:
-            query = [
-                FileDBViewList.dataset_id == ObjectId(dataset_id),
-                Or(
-                    FileDBViewList.creator.email == user_id,
-                    FileDBViewList.auth.user_ids == user_id,
-                ),
-            ]
+    if authenticated:
+        query = [
+            FileDBViewList.dataset_id == ObjectId(dataset_id),
+        ]
+    else:
+        query = [
+            FileDBViewList.dataset_id == ObjectId(dataset_id),
+            Or(
+                FileDBViewList.creator.email == user_id,
+                FileDBViewList.auth.user_ids == user_id,
+            ),
+        ]
     if folder_id is not None:
         query.append(FileDBViewList.folder_id == ObjectId(folder_id))
     files = await FileDBViewList.find(*query).skip(skip).limit(limit).to_list()
@@ -310,37 +314,11 @@ async def patch_dataset(
             dataset.name = dataset_info.name
         if dataset_info.description is not None:
             dataset.description = dataset_info.description
-        if dataset_info.status is not None:
-            dataset.status = dataset_info.status
         dataset.modified = datetime.datetime.utcnow()
-
-        public = False
-        authenticated = False
-        if dataset.status == 'PUBLIC':
-            public = True
-        if dataset.status == 'AUTHENTICATED':
-            authenticated = True
-
         await dataset.save()
 
         # Update entry to the dataset index
         await index_dataset(es, DatasetOut(**dataset.dict()), update=True)
-        query = [
-            FileDBViewList.dataset_id == ObjectId(dataset_id),
-        ]
-        files = await FileDBViewList.find(*query).to_list()
-        for file in files:
-            if (file_db := await FileDB.get(PydanticObjectId(file.id))) is not None:
-                file_db.status = dataset.status
-                await file_db.save()
-            await index_file(es,
-                       file=FileOut(**file.dict()),
-                       user_ids = None,
-                       update=True,
-                       public=public,
-                       authenticated=authenticated
-                    )
-        # change status of files here
         return dataset.dict()
 
 
@@ -401,17 +379,23 @@ async def get_dataset_folders(
     parent_folder: Optional[str] = None,
     user_id=Depends(get_user),
     allow: bool = Depends(Authorization("viewer")),
+    authenticated: bool = Depends(CheckStatus("authenticated")),
     skip: int = 0,
     limit: int = 10,
 ):
     if (await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
-        query = [
-            FolderDBViewList.dataset_id == ObjectId(dataset_id),
-            Or(
-                FolderDBViewList.creator.email == user_id,
-                FolderDBViewList.auth.user_ids == user_id,
-            ),
-        ]
+        if authenticated:
+            query = [
+                FolderDBViewList.dataset_id == ObjectId(dataset_id),
+            ]
+        else:
+            query = [
+                FolderDBViewList.dataset_id == ObjectId(dataset_id),
+                Or(
+                    FolderDBViewList.creator.email == user_id,
+                    FolderDBViewList.auth.user_ids == user_id,
+                ),
+            ]
         if parent_folder is not None:
             query.append(FolderDBViewList.parent_folder == ObjectId(parent_folder))
         else:
@@ -486,12 +470,7 @@ async def save_file(
                 raise HTTPException(
                     status_code=404, detail=f"Folder {folder_id} not found"
                 )
-        public = False
-        authenticated = False
-        if dataset.status == 'PUBLIC':
-            public = True
-        if dataset.status == 'AUTHENTICATED':
-            authenticated = True
+
         await add_file_entry(
             new_file,
             user,
@@ -500,8 +479,6 @@ async def save_file(
             rabbitmq_client,
             file.file,
             content_type=file.content_type,
-            public=public,
-            authenticated=authenticated
         )
         return new_file.dict()
     raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")

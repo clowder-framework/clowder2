@@ -69,6 +69,8 @@ class EventListenerDB(Document, EventListenerBase):
     creator: Optional[UserOut] = None
     created: datetime = Field(default_factory=datetime.now)
     modified: datetime = Field(default_factory=datetime.now)
+    lastAlive: datetime = None
+    alive: Optional[bool] = None  # made up field to indicate if extractor is alive
     properties: Optional[ExtractorInfo] = None
 
     class Settings:

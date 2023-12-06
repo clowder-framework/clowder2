@@ -10,6 +10,7 @@ from app.models.files import FileOut, FileDB, FileStatus
 from app.models.groups import GroupOut, GroupDB
 from app.models.metadata import MetadataDB
 from app.models.pyobjectid import PyObjectId
+from app.routers.authentication import get_admin
 
 async def check_public_access(resource_id: str,
                               resource_type: str,
@@ -55,24 +56,6 @@ async def get_role_by_file(
                 AuthorizationDB.user_ids == current_user,
             ),
         )
-        if authorization is None:
-            if (
-                dataset := await DatasetDB.get(PydanticObjectId(file.dataset_id))
-            ) is not None:
-                if dataset.status == DatasetStatus.AUTHENTICATED.name:
-                    auth_dict = {
-                        "creator": dataset.author.email,
-                        "dataset_id": file.dataset_id,
-                        "user_ids": [current_user],
-                        "role": RoleType.VIEWER,
-                    }
-                    authenticated_auth = AuthorizationDB(**auth_dict)
-                    return authenticated_auth
-                else:
-                    raise HTTPException(
-                        status_code=403,
-                        detail=f"User `{current_user} does not have role on file {file_id}",
-                    )
         return authorization.role
     raise HTTPException(status_code=404, detail=f"File {file_id} not found")
 
@@ -129,6 +112,28 @@ async def get_role_by_group(
     raise HTTPException(status_code=404, detail=f"Group {group_id} not found")
 
 
+async def is_public_dataset(
+    dataset_id: str,
+) -> bool:
+    """Checks if a dataset is public."""
+    if (dataset_out := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
+        if dataset_out.status == DatasetStatus.PUBLIC:
+            return True
+    else:
+        return False
+
+
+async def is_authenticated_dataset(
+    dataset_id: str,
+) -> bool:
+    """Checks if a dataset is authenticated."""
+    if (dataset_out := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
+        if dataset_out.status == DatasetStatus.AUTHENTICATED:
+            return True
+    else:
+        return False
+
+
 class Authorization:
     """We use class dependency so that we can provide the `permission` parameter to the dependency.
     For more info see https://fastapi.tiangolo.com/advanced/advanced-dependencies/."""
@@ -140,8 +145,15 @@ class Authorization:
         self,
         dataset_id: str,
         current_user: str = Depends(get_current_username),
+        admin: bool = Depends(get_admin),
     ):
         # TODO: Make sure we enforce only one role per user per dataset, or find_one could yield wrong answer here.
+
+        # If the current user is admin, user has access irrespective of any role assigned
+        if admin:
+            return True
+
+        # Else check role assigned to the user
         authorization = await AuthorizationDB.find_one(
             AuthorizationDB.dataset_id == PyObjectId(dataset_id),
             Or(
@@ -158,11 +170,24 @@ class Authorization:
                     detail=f"User `{current_user} does not have `{self.role}` permission on dataset {dataset_id}",
                 )
         else:
-            public_access =
-            raise HTTPException(
-                status_code=403,
-                detail=f"User `{current_user} does not have `{self.role}` permission on dataset {dataset_id}",
-            )
+            if (
+                current_dataset := await DatasetDB.get(PydanticObjectId(dataset_id))
+            ) is not None:
+                if (
+                    current_dataset.status == DatasetStatus.AUTHENTICATED.name
+                    and self.role == "viewer"
+                ):
+                    return True
+                else:
+                    raise HTTPException(
+                        status_code=403,
+                        detail=f"User `{current_user} does not have `{self.role}` permission on dataset {dataset_id}",
+                    )
+            else:
+                raise HTTPException(
+                    status_code=404,
+                    detail=f"The dataset {dataset_id} is not found",
+                )
 
 
 class FileAuthorization:
@@ -176,7 +201,13 @@ class FileAuthorization:
         self,
         file_id: str,
         current_user: str = Depends(get_current_username),
+        admin: bool = Depends(get_admin),
     ):
+        # If the current user is admin, user has access irrespective of any role assigned
+        if admin:
+            return True
+
+        # Else check role assigned to the user
         if (file := await FileDB.get(PydanticObjectId(file_id))) is not None:
             authorization = await AuthorizationDB.find_one(
                 AuthorizationDB.dataset_id == file.dataset_id,
@@ -193,13 +224,7 @@ class FileAuthorization:
                     detail=f"User `{current_user} does not have `{self.role}` permission on file {file_id}",
                 )
             else:
-                if file.status == FileStatus.PUBLIC.name or file.status == FileStatus.AUTHENTICATED.name:
-                    if self.role == 'viewer':
-                        return True
-                    else:
-                        raise HTTPException(status_code=404, detail=f"File {file_id} not found")
-                else:
-                    raise HTTPException(status_code=404, detail=f"File {file_id} not found")
+                raise HTTPException(status_code=404, detail=f"File {file_id} not found")
 
 
 class MetadataAuthorization:
@@ -213,7 +238,13 @@ class MetadataAuthorization:
         self,
         metadata_id: str,
         current_user: str = Depends(get_current_username),
+        admin: bool = Depends(get_admin),
     ):
+        # If the current user is admin, user has access irrespective of any role assigned
+        if admin:
+            return True
+
+        # Else check role assigned to the user
         if (md_out := await MetadataDB.get(PydanticObjectId(metadata_id))) is not None:
             resource_type = md_out.resource.collection
             resource_id = md_out.resource.resource_id
@@ -273,7 +304,13 @@ class GroupAuthorization:
         self,
         group_id: str,
         current_user: str = Depends(get_current_username),
+        admin: bool = Depends(get_admin),
     ):
+        # If the current user is admin, user has access irrespective of any role assigned
+        if admin:
+            return True
+
+        # Else check role assigned to the user
         if (group := await GroupDB.get(group_id)) is not None:
             if group.creator == current_user:
                 # Creator can do everything
@@ -289,6 +326,52 @@ class GroupAuthorization:
                 detail=f"User `{current_user} does not have `{self.role}` permission on group {group_id}",
             )
         raise HTTPException(status_code=404, detail=f"Group {group_id} not found")
+
+
+class CheckStatus:
+    """We use class dependency so that we can provide the `permission` parameter to the dependency.
+    For more info see https://fastapi.tiangolo.com/advanced/advanced-dependencies/."""
+
+    def __init__(self, status: str):
+        self.status = status
+
+    async def __call__(
+        self,
+        dataset_id: str,
+    ):
+        if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
+            if dataset.status == self.status:
+                return True
+            else:
+                return False
+        else:
+            return False
+
+
+class CheckFileStatus:
+    """We use class dependency so that we can provide the `permission` parameter to the dependency.
+    For more info see https://fastapi.tiangolo.com/advanced/advanced-dependencies/."""
+
+    def __init__(self, status: str):
+        self.status = status
+
+    async def __call__(
+        self,
+        file_id: str,
+    ):
+        if (file_out := await FileDB.get(PydanticObjectId(file_id))) is not None:
+            dataset_id = file_out.dataset_id
+            if (
+                dataset := await DatasetDB.get(PydanticObjectId(dataset_id))
+            ) is not None:
+                if dataset.status == self.status:
+                    return True
+                else:
+                    return False
+            else:
+                return False
+        else:
+            return False
 
 
 def access(user_role: RoleType, role_required: RoleType) -> bool:

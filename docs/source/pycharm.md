@@ -1,4 +1,4 @@
-### How to setup pycharm to work with Clowder V2
+# Pycharm Setup
 
 From the main menu select Run -> Edit Configurations...
 

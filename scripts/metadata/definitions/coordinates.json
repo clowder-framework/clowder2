@@ -14,7 +14,7 @@
             "config": {
                 "type" : "tuple"
             },
-            "required" : true
+            "required" : false
         }
     ]
 }

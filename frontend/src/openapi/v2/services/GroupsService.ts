@@ -93,15 +93,20 @@ export class GroupsService {
     /**
      * Get Group
      * @param groupId
+     * @param datasetId
      * @returns GroupOut Successful Response
      * @throws ApiError
      */
     public static getGroupApiV2GroupsGroupIdGet(
         groupId: string,
+        datasetId?: string,
     ): CancelablePromise<GroupOut> {
         return __request({
             method: 'GET',
             path: `/api/v2/groups/${groupId}`,
+            query: {
+                'dataset_id': datasetId,
+            },
             errors: {
                 422: `Validation Error`,
             },
@@ -112,16 +117,21 @@ export class GroupsService {
      * Edit Group
      * @param groupId
      * @param requestBody
+     * @param datasetId
      * @returns GroupOut Successful Response
      * @throws ApiError
      */
     public static editGroupApiV2GroupsGroupIdPut(
         groupId: string,
         requestBody: GroupBase,
+        datasetId?: string,
     ): CancelablePromise<GroupOut> {
         return __request({
             method: 'PUT',
             path: `/api/v2/groups/${groupId}`,
+            query: {
+                'dataset_id': datasetId,
+            },
             body: requestBody,
             mediaType: 'application/json',
             errors: {
@@ -133,15 +143,20 @@ export class GroupsService {
     /**
      * Delete Group
      * @param groupId
+     * @param datasetId
      * @returns GroupOut Successful Response
      * @throws ApiError
      */
     public static deleteGroupApiV2GroupsGroupIdDelete(
         groupId: string,
+        datasetId?: string,
     ): CancelablePromise<GroupOut> {
         return __request({
             method: 'DELETE',
             path: `/api/v2/groups/${groupId}`,
+            query: {
+                'dataset_id': datasetId,
+            },
             errors: {
                 422: `Validation Error`,
             },
@@ -154,6 +169,7 @@ export class GroupsService {
      * @param groupId
      * @param username
      * @param role
+     * @param datasetId
      * @returns GroupOut Successful Response
      * @throws ApiError
      */
@@ -161,12 +177,14 @@ export class GroupsService {
         groupId: string,
         username: string,
         role?: string,
+        datasetId?: string,
     ): CancelablePromise<GroupOut> {
         return __request({
             method: 'POST',
             path: `/api/v2/groups/${groupId}/add/${username}`,
             query: {
                 'role': role,
+                'dataset_id': datasetId,
             },
             errors: {
                 422: `Validation Error`,
@@ -179,16 +197,21 @@ export class GroupsService {
      * Remove a user from a group.
      * @param groupId
      * @param username
+     * @param datasetId
      * @returns GroupOut Successful Response
      * @throws ApiError
      */
     public static removeMemberApiV2GroupsGroupIdRemoveUsernamePost(
         groupId: string,
         username: string,
+        datasetId?: string,
     ): CancelablePromise<GroupOut> {
         return __request({
             method: 'POST',
             path: `/api/v2/groups/${groupId}/remove/${username}`,
+            query: {
+                'dataset_id': datasetId,
+            },
             errors: {
                 422: `Validation Error`,
             },
@@ -201,6 +224,7 @@ export class GroupsService {
      * @param groupId
      * @param username
      * @param role
+     * @param datasetId
      * @returns GroupOut Successful Response
      * @throws ApiError
      */
@@ -208,12 +232,14 @@ export class GroupsService {
         groupId: string,
         username: string,
         role: string,
+        datasetId?: string,
     ): CancelablePromise<GroupOut> {
         return __request({
             method: 'PUT',
             path: `/api/v2/groups/${groupId}/update/${username}`,
             query: {
                 'role': role,
+                'dataset_id': datasetId,
             },
             errors: {
                 422: `Validation Error`,

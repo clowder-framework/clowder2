@@ -25,6 +25,9 @@ export const CreateMetadata = (props: MetadataType) => {
 	const metadataDefinitionList = useSelector(
 		(state: RootState) => state.metadata.metadataDefinitionList
 	);
+	const datasetRole = useSelector(
+		(state: RootState) => state.dataset.datasetRole
+	);
 
 	useEffect(() => {
 		getMetadatDefinitions(null, 0, 100);
@@ -54,6 +57,7 @@ export const CreateMetadata = (props: MetadataType) => {
 									setMetadata: setMetadata,
 									initialReadOnly: false,
 									isRequired: field.required,
+									datasetRole: datasetRole,
 									key: idxx,
 								}
 							);

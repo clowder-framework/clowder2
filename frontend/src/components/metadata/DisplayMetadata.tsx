@@ -39,6 +39,10 @@ export const DisplayMetadata = (props: MetadataType) => {
 	const publicFileMetadataList = useSelector((state: RootState) => state.metadata.publicFileMetadataList);
 
 
+	const datasetRole = useSelector(
+		(state: RootState) => state.dataset.datasetRole
+	);
+	console.log(updateMetadata, 'updateMetadataDisplay');
 	useEffect(() => {
 		getMetadatDefinitions(null, 0, 100);
 	}, []);
