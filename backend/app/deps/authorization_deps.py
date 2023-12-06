@@ -13,14 +13,15 @@ from app.models.pyobjectid import PyObjectId
 
 async def check_public_access(resource_id: str,
                               resource_type: str,
+                              role: RoleType,
                               current_user=Depends(get_current_username),
                               ) -> bool:
     has_public_access = False
-    if resource_type == 'dataset':
+    if resource_type == 'dataset' and role.VIEWER:
         if (dataset := await DatasetDB.get(PydanticObjectId(resource_id))) is not None:
             if dataset.status == DatasetStatus.PUBLIC.name or dataset.status == DatasetStatus.AUTHENTICATED.name:
                 has_public_access = True
-    elif resource_type == 'file':
+    elif resource_type == 'file' and role.VIEWER:
         if (file := await FileDB.get(PydanticObjectId(resource_id))) is not None:
             if file.status == FileStatus.PUBLIC.name or file.status == FileStatus.AUTHENTICATED.name:
                 has_public_access = True
@@ -157,20 +158,7 @@ class Authorization:
                     detail=f"User `{current_user} does not have `{self.role}` permission on dataset {dataset_id}",
                 )
         else:
-            if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
-                if dataset.status == DatasetStatus.PUBLIC.name or dataset.status == DatasetStatus.AUTHENTICATED.name:
-                    if self.role == 'viewer':
-                        return True
-                    else:
-                        raise HTTPException(
-                            status_code=403,
-                            detail=f"User `{current_user} does not have `{self.role}` permission on dataset {dataset_id}",
-                        )
-                else:
-                    raise HTTPException(
-                        status_code=403,
-                        detail=f"User `{current_user} does not have `{self.role}` permission on dataset {dataset_id}",
-                    )
+            public_access =
             raise HTTPException(
                 status_code=403,
                 detail=f"User `{current_user} does not have `{self.role}` permission on dataset {dataset_id}",
