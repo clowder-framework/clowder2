@@ -6,11 +6,25 @@ from fastapi import Depends, HTTPException
 from app.keycloak_auth import get_current_username
 from app.models.authorization import RoleType, AuthorizationDB
 from app.models.datasets import DatasetDB, DatasetStatus
-from app.models.files import FileOut, FileDB
+from app.models.files import FileOut, FileDB, FileStatus
 from app.models.groups import GroupOut, GroupDB
 from app.models.metadata import MetadataDB
 from app.models.pyobjectid import PyObjectId
 
+async def check_public_access(resource_id: str,
+                              resource_type: str,
+                              current_user=Depends(get_current_username),
+                              ) -> bool:
+    has_public_access = False
+    if resource_type == 'dataset':
+        if (dataset := await DatasetDB.get(PydanticObjectId(resource_id))) is not None:
+            if dataset.status == DatasetStatus.PUBLIC.name or dataset.status == DatasetStatus.AUTHENTICATED.name:
+                has_public_access = True
+    elif resource_type == 'file':
+        if (file := await FileDB.get(PydanticObjectId(resource_id))) is not None:
+            if file.status == FileStatus.PUBLIC.name or file.status == FileStatus.AUTHENTICATED.name:
+                has_public_access = True
+    return has_public_access
 
 async def get_role(
     dataset_id: str,
@@ -33,22 +47,32 @@ async def get_role_by_file(
     current_user=Depends(get_current_username),
 ) -> RoleType:
     if (file := await FileDB.get(PydanticObjectId(file_id))) is not None:
-        if (authorization := await AuthorizationDB.find_one(
+        authorization = await AuthorizationDB.find_one(
             AuthorizationDB.dataset_id == file.dataset_id,
             Or(
                 AuthorizationDB.creator == current_user,
                 AuthorizationDB.user_ids == current_user,
             ),
-        )) is not None:
-            return authorization.role
-        else:
-            if (dataset := await DatasetDB.get(PydanticObjectId(file.dataset_id))) is not None:
-                if dataset.status == DatasetStatus.PUBLIC.name or dataset.status == DatasetStatus.AUTHENTICATED.name:
-                    return RoleType.VIEWER
+        )
+        if authorization is None:
+            if (
+                dataset := await DatasetDB.get(PydanticObjectId(file.dataset_id))
+            ) is not None:
+                if dataset.status == DatasetStatus.AUTHENTICATED.name:
+                    auth_dict = {
+                        "creator": dataset.author.email,
+                        "dataset_id": file.dataset_id,
+                        "user_ids": [current_user],
+                        "role": RoleType.VIEWER,
+                    }
+                    authenticated_auth = AuthorizationDB(**auth_dict)
+                    return authenticated_auth
                 else:
-                    raise HTTPException(status_code=404, detail=f"File {file_id} not found")
-            else:
-                raise HTTPException(status_code=404, detail=f"File {file_id} not found")
+                    raise HTTPException(
+                        status_code=403,
+                        detail=f"User `{current_user} does not have role on file {file_id}",
+                    )
+        return authorization.role
     raise HTTPException(status_code=404, detail=f"File {file_id} not found")
 
 
@@ -137,6 +161,16 @@ class Authorization:
                 if dataset.status == DatasetStatus.PUBLIC.name or dataset.status == DatasetStatus.AUTHENTICATED.name:
                     if self.role == 'viewer':
                         return True
+                    else:
+                        raise HTTPException(
+                            status_code=403,
+                            detail=f"User `{current_user} does not have `{self.role}` permission on dataset {dataset_id}",
+                        )
+                else:
+                    raise HTTPException(
+                        status_code=403,
+                        detail=f"User `{current_user} does not have `{self.role}` permission on dataset {dataset_id}",
+                    )
             raise HTTPException(
                 status_code=403,
                 detail=f"User `{current_user} does not have `{self.role}` permission on dataset {dataset_id}",
@@ -171,7 +205,13 @@ class FileAuthorization:
                     detail=f"User `{current_user} does not have `{self.role}` permission on file {file_id}",
                 )
             else:
-                raise HTTPException(status_code=404, detail=f"File {file_id} not found")
+                if file.status == FileStatus.PUBLIC.name or file.status == FileStatus.AUTHENTICATED.name:
+                    if self.role == 'viewer':
+                        return True
+                    else:
+                        raise HTTPException(status_code=404, detail=f"File {file_id} not found")
+                else:
+                    raise HTTPException(status_code=404, detail=f"File {file_id} not found")
 
 
 class MetadataAuthorization:

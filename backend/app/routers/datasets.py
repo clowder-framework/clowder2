@@ -47,7 +47,7 @@ from app.models.datasets import (
     DatasetDBViewList,
     DatasetStatus,
 )
-from app.models.files import FileOut, FileDB, FileDBViewList
+from app.models.files import FileOut, FileDB, FileDBViewList, FileStatus
 from app.models.folders import FolderOut, FolderIn, FolderDB, FolderDBViewList
 from app.models.metadata import MetadataDB
 from app.models.pyobjectid import PyObjectId
@@ -257,6 +257,10 @@ async def get_dataset_files(
         if dataset.status == DatasetStatus.PUBLIC.name or dataset.status == DatasetStatus.AUTHENTICATED.name:
             query = [
                 FileDBViewList.dataset_id == ObjectId(dataset_id),
+                Or(
+                    FileDBViewList.status == FileStatus.PUBLIC.name,
+                    FileDBViewList.status == FileStatus.AUTHENTICATED.name,
+                ),
             ]
         else:
             query = [
@@ -326,6 +330,9 @@ async def patch_dataset(
         ]
         files = await FileDBViewList.find(*query).to_list()
         for file in files:
+            if (file_db := await FileDB.get(PydanticObjectId(file.id))) is not None:
+                file_db.status = dataset.status
+                await file_db.save()
             await index_file(es,
                        file=FileOut(**file.dict()),
                        user_ids = None,
