@@ -174,7 +174,7 @@ class Authorization:
                 current_dataset := await DatasetDB.get(PydanticObjectId(dataset_id))
             ) is not None:
                 if (
-                    current_dataset.status == DatasetStatus.AUTHENTICATED.name
+                    current_dataset.status == DatasetStatus.AUTHENTICATED.name or current_dataset.status == DatasetStatus.PUBLIC.name
                     and self.role == "viewer"
                 ):
                     return True
@@ -340,7 +340,7 @@ class CheckStatus:
         dataset_id: str,
     ):
         if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
-            if dataset.status == self.status:
+            if dataset.status == self.status or dataset.status == DatasetStatus.PUBLIC.name:
                 return True
             else:
                 return False
@@ -364,7 +364,7 @@ class CheckFileStatus:
             if (
                 dataset := await DatasetDB.get(PydanticObjectId(dataset_id))
             ) is not None:
-                if dataset.status == self.status:
+                if dataset.status == self.status or dataset.status == DatasetStatus.PUBLIC.name:
                     return True
                 else:
                     return False
