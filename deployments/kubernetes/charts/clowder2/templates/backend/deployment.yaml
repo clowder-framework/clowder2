@@ -74,7 +74,7 @@ spec:
                   name: clowder2-client-secret
                   key: client-secret
             - name: auth_url
-              value: https://{{ .Values.keycloak.hostname }}/auth/realms/{{ .Values.keycloak.realm }}/protocol/openid-connect/auth?client_id={{ .Values.keycloak.clientid }}&response_type=code
+              value: https://{{ .Values.hostname }}/api/v2/auth
             - name: oauth2_scheme_auth_url
               value: https://{{ .Values.keycloak.hostname }}/auth/realms/{{ .Values.keycloak.realm }}/protocol/openid-connect/auth?client_id={{ .Values.keycloak.clientid }}&response_type=code
             - name: auth_register_url
