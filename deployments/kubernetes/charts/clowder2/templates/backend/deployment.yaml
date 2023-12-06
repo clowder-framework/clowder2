@@ -65,9 +65,9 @@ spec:
             - name: auth_base
               value: https://{{ .Values.keycloak.hostname }}
             - name: auth_realm
-              value: https://{{ .Values.keycloak.realm }}
+              value: {{ .Values.keycloak.realm }}
             - name: auth_client_id
-              value: https://{{ .Values.keycloak.clientid }}
+              value: {{ .Values.keycloak.clientid }}
             - name: auth_client_secret
               valueFrom:
                 secretKeyRef:
