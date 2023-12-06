@@ -18,14 +18,15 @@ async def check_public_access(resource_id: str,
                               current_user=Depends(get_current_username),
                               ) -> bool:
     has_public_access = False
-    if resource_type == 'dataset' and role.VIEWER:
-        if (dataset := await DatasetDB.get(PydanticObjectId(resource_id))) is not None:
-            if dataset.status == DatasetStatus.PUBLIC.name or dataset.status == DatasetStatus.AUTHENTICATED.name:
-                has_public_access = True
-    elif resource_type == 'file' and role.VIEWER:
-        if (file := await FileDB.get(PydanticObjectId(resource_id))) is not None:
-            if file.status == FileStatus.PUBLIC.name or file.status == FileStatus.AUTHENTICATED.name:
-                has_public_access = True
+    if role == RoleType.VIEWER:
+        if resource_type == 'dataset':
+            if (dataset := await DatasetDB.get(PydanticObjectId(resource_id))) is not None:
+                if dataset.status == DatasetStatus.PUBLIC.name or dataset.status == DatasetStatus.AUTHENTICATED.name:
+                    has_public_access = True
+        elif resource_type == 'file':
+            if (file := await FileDB.get(PydanticObjectId(resource_id))) is not None:
+                if file.status == FileStatus.PUBLIC.name or file.status == FileStatus.AUTHENTICATED.name:
+                    has_public_access = True
     return has_public_access
 
 async def get_role(
@@ -235,7 +236,11 @@ class FileAuthorization:
                     detail=f"User `{current_user} does not have `{self.role}` permission on file {file_id}",
                 )
             else:
-                raise HTTPException(status_code=404, detail=f"File {file_id} not found")
+                public_access = await check_public_access(file_id, 'file', self.role, current_user)
+                if public_access:
+                    return True
+                else:
+                    raise HTTPException(status_code=404, detail=f"File {file_id} not found")
 
 
 class MetadataAuthorization:
