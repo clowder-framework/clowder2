@@ -45,6 +45,7 @@ from app.models.datasets import (
     DatasetOut,
     DatasetPatch,
     DatasetDBViewList,
+    DatasetStatus,
 )
 from app.models.files import FileOut, FileDB, FileDBViewList, FileStatus
 from app.models.folders import FolderOut, FolderIn, FolderDB, FolderDBViewList

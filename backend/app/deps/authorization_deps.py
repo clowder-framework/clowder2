@@ -41,6 +41,9 @@ async def get_role(
             AuthorizationDB.user_ids == current_user,
         ),
     )
+    public_access = await check_public_access(dataset_id, "dataset", RoleType.VIEWER, current_user)
+    if authorization is None and public_access:
+        return RoleType.VIEWER
     return authorization.role
 
 
@@ -56,6 +59,9 @@ async def get_role_by_file(
                 AuthorizationDB.user_ids == current_user,
             ),
         )
+        public_access = await check_public_access(file_id, "file", RoleType.VIEWER, current_user)
+        if authorization is None and public_access:
+            return RoleType.VIEWER
         return authorization.role
     raise HTTPException(status_code=404, detail=f"File {file_id} not found")
 
@@ -67,6 +73,7 @@ async def get_role_by_metadata(
     if (md_out := await MetadataDB.get(PydanticObjectId(metadata_id))) is not None:
         resource_type = md_out.resource.collection
         resource_id = md_out.resource.resource_id
+        public_access = await check_public_access(str(resource_id), resource_type, RoleType.VIEWER, current_user)
         if resource_type == "files":
             if (file := await FileDB.get(PydanticObjectId(resource_id))) is not None:
                 authorization = await AuthorizationDB.find_one(
@@ -76,6 +83,8 @@ async def get_role_by_metadata(
                         AuthorizationDB.user_ids == current_user,
                     ),
                 )
+                if authorization is None and public_access:
+                    return RoleType.VIEWER
                 return authorization.role
         elif resource_type == "datasets":
             if (
@@ -88,6 +97,8 @@ async def get_role_by_metadata(
                         AuthorizationDB.user_ids == current_user,
                     ),
                 )
+                if authorization is None and public_access:
+                    return RoleType.VIEWER
                 return authorization.role
 
 
