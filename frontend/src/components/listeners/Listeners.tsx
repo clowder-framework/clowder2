@@ -6,11 +6,10 @@ import {
 	Divider,
 	FormControl,
 	Grid,
-	IconButton,
-	InputBase,
 	InputLabel,
 	List,
 	MenuItem,
+	Paper,
 	Select,
 } from "@mui/material";
 
@@ -22,12 +21,12 @@ import {
 	fetchListeners,
 	queryListeners,
 } from "../../actions/listeners";
-import { ArrowBack, ArrowForward, SearchOutlined } from "@material-ui/icons";
+import { ArrowBack, ArrowForward } from "@material-ui/icons";
 import ListenerItem from "./ListenerItem";
-import { theme } from "../../theme";
 import SubmitExtraction from "./SubmitExtraction";
 import { capitalize } from "../../utils/common";
 import config from "../../app.config";
+import { GenericSearchBox } from "../search/GenericSearchBox";
 
 type ListenerProps = {
 	fileId?: string;
@@ -170,49 +169,28 @@ export function Listeners(props: ListenerProps) {
 
 	return (
 		<>
-			<Grid container sx={{ marginBottom: "1em" }}>
-				<Grid item xs={6}>
+			<Grid container>
+				<Grid item xs={12}>
 					{/*searchbox*/}
-					<Box
-						component="form"
-						sx={{
-							p: "2px 4px",
-							display: "flex",
-							alignItems: "left",
-							backgroundColor: theme.palette.primary.contrastText,
-							width: "95%",
-						}}
-					>
-						<InputBase
-							sx={{ ml: 1, flex: 1 }}
-							placeholder="Keyword for extractor"
-							inputProps={{
-								"aria-label": "Type in keyword to search for extractor",
-							}}
-							onChange={(e) => {
-								setSearchText(e.target.value);
-							}}
-							onKeyDown={(e) => {
-								if (e.key === "Enter") {
-									e.preventDefault();
-									handleListenerSearch();
-								}
-							}}
-							value={searchText}
-						/>
-						<IconButton
-							type="button"
-							sx={{ p: "10px" }}
-							aria-label="search"
-							onClick={handleListenerSearch}
-						>
-							<SearchOutlined />
-						</IconButton>
-					</Box>
+					<GenericSearchBox
+						title="Search for Extractors"
+						searchPrompt="Keyword for extractor"
+						setSearchTerm={setSearchText}
+						searchTerm={searchText}
+						searchFunction={handleListenerSearch}
+						skip={skip}
+						limit={limit}
+					/>
 				</Grid>
+			</Grid>
+			<Grid
+				container
+				sx={{ padding: "0 0 1em 0", justifyContent: "space-between" }}
+				spacing={3}
+			>
 				{/*categories*/}
-				<Grid item xs={3}>
-					<FormControl variant="standard" sx={{ minWidth: "95%" }}>
+				<Grid item xs={6}>
+					<FormControl variant="standard" sx={{ width: "100%" }}>
 						<InputLabel id="label-categories">Filter by category</InputLabel>
 						<Select
 							defaultValue=""
@@ -231,8 +209,8 @@ export function Listeners(props: ListenerProps) {
 						</Select>
 					</FormControl>
 				</Grid>
-				<Grid item xs={3}>
-					<FormControl variant="standard" sx={{ minWidth: "95%" }}>
+				<Grid item xs={6}>
+					<FormControl variant="standard" sx={{ width: "100%" }}>
 						<InputLabel id="label-categories">Filter by labels</InputLabel>
 						<Select
 							defaultValue=""
@@ -252,12 +230,7 @@ export function Listeners(props: ListenerProps) {
 			</Grid>
 			<Grid container>
 				<Grid item xs={12}>
-					<Box
-						sx={{
-							backgroundColor: theme.palette.primary.contrastText,
-							padding: "3em",
-						}}
-					>
+					<Paper sx={{ width: "100%", mb: 2, padding: "3em" }}>
 						<List>
 							{listeners !== undefined ? (
 								listeners.map((listener) => {
@@ -304,7 +277,7 @@ export function Listeners(props: ListenerProps) {
 								</Button>
 							</ButtonGroup>
 						</Box>
-					</Box>
+					</Paper>
 				</Grid>
 			</Grid>
 			<SubmitExtraction
