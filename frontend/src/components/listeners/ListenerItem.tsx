@@ -52,10 +52,6 @@ export default function ListenerItem(props: ListenerCardProps) {
 					</Tooltip>
 				)}
 				<Button
-					disabled={
-						!(fileId !== undefined || datasetId !== undefined) ||
-						!extractor["alive"]
-					}
 					onClick={() => {
 						setOpenSubmitExtraction(true);
 						setSelectedExtractor(extractor);
