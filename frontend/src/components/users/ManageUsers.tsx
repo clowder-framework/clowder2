@@ -16,7 +16,7 @@ import {
 	revokeAdmin as revokeAdminAction,
 	setAdmin as setAdminAction,
 } from "../../actions/user";
-import { Box, Button, ButtonGroup, Grid } from "@mui/material";
+import { Box, Button, ButtonGroup, Grid, Switch } from "@mui/material";
 import { ArrowBack, ArrowForward } from "@material-ui/icons";
 import { ErrorModal } from "../errors/ErrorModal";
 import { GenericSearchBox } from "../search/GenericSearchBox";
@@ -113,8 +113,7 @@ export const ManageUsers = (): JSX.Element => {
 									<TableRow>
 										<TableCell>Name</TableCell>
 										<TableCell align="right">Email</TableCell>
-										<TableCell align="right">Admin</TableCell>
-										<TableCell align="right" />
+										<TableCell align="left">Admin</TableCell>
 									</TableRow>
 								</TableHead>
 								<TableBody>
@@ -149,33 +148,19 @@ export const ManageUsers = (): JSX.Element => {
 													{profile.first_name} {profile.last_name}
 												</TableCell>
 												<TableCell align="right">{profile.email}</TableCell>
-												<TableCell align="right">
-													{profile.admin !== undefined && profile.admin
-														? "True"
-														: "False"}
-												</TableCell>
 												<TableCell align="left">
-													{profile.admin ? (
-														<Button
-															color="primary"
-															onClick={() => {
+													<Switch
+														color="primary"
+														checked={profile.admin}
+														onChange={() => {
+															if (profile.admin) {
 																revokeAdmin(profile.email);
-															}}
-															disabled={profile.email === currentUser.email}
-														>
-															Revoke
-														</Button>
-													) : (
-														<Button
-															color="primary"
-															onClick={() => {
+															} else {
 																setAdmin(profile.email);
-															}}
-															disabled={profile.email === currentUser.email}
-														>
-															Set Admin
-														</Button>
-													)}
+															}
+														}}
+														disabled={profile.email === currentUser.email}
+													/>
 												</TableCell>
 											</TableRow>
 										);
