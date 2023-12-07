@@ -54,7 +54,7 @@ async def _build_metadata_db_obj(
     if version is None:
         # Validate specified version, or use latest by default
         file_version = metadata_in.file_version
-        if file_version is not None:
+        if file_version is not None and file_version > 0:
             if (
                 await FileVersionDB.find_one(
                     FileVersionDB.file_id == file.id,
@@ -117,10 +117,10 @@ async def add_file_metadata(
     """
     if (file := await FileDB.get(PydanticObjectId(file_id))) is not None:
         current_file_version = file.version_num
-        # if metadata does not already specify a file version
-        # change metadata_in file version to match the current file version
+        # if metadata does not already specify a version, change metadata_in version to match current file version
         if metadata_in.file_version is None:
             metadata_in.file_version = current_file_version
+
         # If dataset already has metadata using this definition, don't allow duplication
         definition = metadata_in.definition
         if definition is not None:
@@ -340,7 +340,7 @@ async def get_file_metadata(
 
         # Validate specified version, or use latest by default
         if not all_versions:
-            if version is not None:
+            if version is not None and version > 0:
                 if (
                     await FileVersionDB.find_one(
                         FileVersionDB.file_id == ObjectId(file_id),
