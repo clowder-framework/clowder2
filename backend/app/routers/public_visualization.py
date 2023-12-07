@@ -31,8 +31,6 @@ router = APIRouter()
 security = HTTPBearer()
 
 
-
-
 @router.get("/{visualization_id}", response_model=VisualizationDataOut)
 async def get_visualization(visualization_id: str):
     if (
@@ -44,8 +42,6 @@ async def get_visualization(visualization_id: str):
     raise HTTPException(
         status_code=404, detail=f"Visualization {visualization_id} not found"
     )
-
-
 
 
 @router.get("/{visualization_id}/bytes")

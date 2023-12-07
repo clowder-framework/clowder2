@@ -178,6 +178,7 @@ async def test_datasets():
         delete_document_by_id(es, settings.elasticsearch_index, 1)
         delete_index(es, settings.elasticsearch_index)
 
+
 @pytest.mark.asyncio
 async def test_public_files():
     # TODO: Replace this with actual file upload and search, not directly inserting record to ES
@@ -217,7 +218,9 @@ async def test_public_files():
         )
 
         # check for update to the record
-        update_record(es, settings.elasticsearch_index, updated_dummy_public_file_record, 1)
+        update_record(
+            es, settings.elasticsearch_index, updated_dummy_public_file_record, 1
+        )
         time.sleep(1)
         result = search_index(es, settings.elasticsearch_index, file_query)
         assert (
@@ -265,7 +268,9 @@ async def test_public_datasets():
         )
 
         # check for update to the record
-        update_record(es, settings.elasticsearch_index, updated_dummy_public_dataset_record, 1)
+        update_record(
+            es, settings.elasticsearch_index, updated_dummy_public_dataset_record, 1
+        )
         time.sleep(1)
         result = search_index(es, settings.elasticsearch_index, dataset_query)
         assert (

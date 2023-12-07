@@ -64,6 +64,7 @@ from app.search.index import index_file, index_thumbnail
 router = APIRouter()
 security = HTTPBearer()
 
+
 @router.get("/{file_id}/summary", response_model=FileOut)
 async def get_file_summary(
     file_id: str,
@@ -72,11 +73,14 @@ async def get_file_summary(
         # TODO: Incrementing too often (3x per page view)
         # file.views += 1
         # await file.replace()
-        if (dataset := await DatasetDB.get(PydanticObjectId(file.dataset_id))) is not None:
+        if (
+            dataset := await DatasetDB.get(PydanticObjectId(file.dataset_id))
+        ) is not None:
             if dataset.status == DatasetStatus.PUBLIC.name:
                 return file.dict()
     else:
         raise HTTPException(status_code=404, detail=f"File {file_id} not found")
+
 
 @router.get("/{file_id}/version_details", response_model=FileOut)
 async def get_file_version_details(
@@ -85,7 +89,9 @@ async def get_file_version_details(
 ):
     if (file := await FileDB.get(PydanticObjectId(file_id))) is not None:
         # TODO: Incrementing too often (3x per page view)
-        if (dataset := await DatasetDB.get(PydanticObjectId(file.dataset_id))) is not None:
+        if (
+            dataset := await DatasetDB.get(PydanticObjectId(file.dataset_id))
+        ) is not None:
             if dataset.status == DatasetStatus.PUBLIC.name:
                 file_vers = await FileVersionDB.find_one(
                     FileVersionDB.file_id == ObjectId(file_id),
@@ -109,7 +115,9 @@ async def get_file_versions(
 ):
     file = await FileDB.get(PydanticObjectId(file_id))
     if file is not None:
-        if (dataset := await DatasetDB.get(PydanticObjectId(file.dataset_id))) is not None:
+        if (
+            dataset := await DatasetDB.get(PydanticObjectId(file.dataset_id))
+        ) is not None:
             if dataset.status == DatasetStatus.PUBLIC.name:
                 mongo_versions = []
                 async for ver in FileVersionDB.find(
@@ -118,6 +126,7 @@ async def get_file_versions(
                     mongo_versions.append(FileVersion(**ver.dict()))
                 return mongo_versions
     raise HTTPException(status_code=404, detail=f"File {file_id} not found")
+
 
 @router.get("/{file_id}")
 async def download_file(
@@ -128,7 +137,9 @@ async def download_file(
 ):
     # If file exists in MongoDB, download from Minio
     if (file := await FileDB.get(PydanticObjectId(file_id))) is not None:
-        if (dataset := await DatasetDB.get(PydanticObjectId(file.dataset_id))) is not None:
+        if (
+            dataset := await DatasetDB.get(PydanticObjectId(file.dataset_id))
+        ) is not None:
             if dataset.status == DatasetStatus.PUBLIC.name:
                 if version is not None:
                     # Version is specified, so get the minio ID from versions table if possible
@@ -139,7 +150,9 @@ async def download_file(
                     if file_vers is not None:
                         vers = FileVersion(**file_vers.dict())
                         content = fs.get_object(
-                            settings.MINIO_BUCKET_NAME, file_id, version_id=vers.version_id
+                            settings.MINIO_BUCKET_NAME,
+                            file_id,
+                            version_id=vers.version_id,
                         )
                     else:
                         raise HTTPException(
@@ -151,14 +164,19 @@ async def download_file(
                     content = fs.get_object(settings.MINIO_BUCKET_NAME, file_id)
 
                 # Get content type & open file stream
-                response = StreamingResponse(content.stream(settings.MINIO_UPLOAD_CHUNK_SIZE))
-                response.headers["Content-Disposition"] = "attachment; filename=%s" % file.name
+                response = StreamingResponse(
+                    content.stream(settings.MINIO_UPLOAD_CHUNK_SIZE)
+                )
+                response.headers["Content-Disposition"] = (
+                    "attachment; filename=%s" % file.name
+                )
                 if increment:
                     # Increment download count
                     await file.update(Inc({FileDB.downloads: 1}))
                 return response
     else:
         raise HTTPException(status_code=404, detail=f"File {file_id} not found")
+
 
 @router.get("/{file_id}/thumbnail")
 async def download_file_thumbnail(
@@ -167,23 +185,32 @@ async def download_file_thumbnail(
 ):
     # If file exists in MongoDB, download from Minio
     if (file := await FileDB.get(PydanticObjectId(file_id))) is not None:
-        if (dataset := await DatasetDB.get(PydanticObjectId(file.dataset_id))) is not None:
+        if (
+            dataset := await DatasetDB.get(PydanticObjectId(file.dataset_id))
+        ) is not None:
             if dataset.status == DatasetStatus.PUBLIC.name:
                 if file.thumbnail_id is not None:
-                    content = fs.get_object(settings.MINIO_BUCKET_NAME, str(file.thumbnail_id))
+                    content = fs.get_object(
+                        settings.MINIO_BUCKET_NAME, str(file.thumbnail_id)
+                    )
                 else:
                     raise HTTPException(
-                        status_code=404, detail=f"File {file_id} has no associated thumbnail"
+                        status_code=404,
+                        detail=f"File {file_id} has no associated thumbnail",
                     )
 
                 # Get content type & open file stream
-                response = StreamingResponse(content.stream(settings.MINIO_UPLOAD_CHUNK_SIZE))
+                response = StreamingResponse(
+                    content.stream(settings.MINIO_UPLOAD_CHUNK_SIZE)
+                )
                 # TODO: How should filenames be handled for thumbnails?
-                response.headers["Content-Disposition"] = "attachment; filename=%s" % "thumb"
+                response.headers["Content-Disposition"] = (
+                    "attachment; filename=%s" % "thumb"
+                )
                 return response
     else:
         raise HTTPException(status_code=404, detail=f"File {file_id} not found")
-    
+
 
 @router.get("/{file_id}/metadata", response_model=List[MetadataOut])
 async def get_file_metadata(
@@ -196,10 +223,12 @@ async def get_file_metadata(
 ):
     """Get file metadata."""
     if (file := await FileDB.get(PydanticObjectId(file_id))) is not None:
-        if (dataset := await DatasetDB.get(PydanticObjectId(file.dataset_id))) is not None:
+        if (
+            dataset := await DatasetDB.get(PydanticObjectId(file.dataset_id))
+        ) is not None:
             if dataset.status == DatasetStatus.PUBLIC.name:
                 query = [MetadataDB.resource.resource_id == ObjectId(file_id)]
-        
+
                 # Validate specified version, or use latest by default
                 if not all_versions:
                     if version is not None:
@@ -217,16 +246,16 @@ async def get_file_metadata(
                     else:
                         target_version = file.version_num
                     query.append(MetadataDB.resource.version == target_version)
-        
+
                 if definition is not None:
                     # TODO: Check if definition exists in database and raise error if not
                     query.append(MetadataDB.definition == definition)
-        
+
                 if listener_name is not None:
                     query.append(MetadataDB.agent.extractor.name == listener_name)
                 if listener_version is not None:
                     query.append(MetadataDB.agent.extractor.version == listener_version)
-        
+
                 metadata = []
                 async for md in MetadataDB.find(*query):
                     if md.definition is not None:

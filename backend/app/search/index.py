@@ -51,7 +51,7 @@ async def index_dataset(
         downloads=dataset.downloads,
         user_ids=authorized_user_ids,
         metadata=metadata,
-        status=dataset_status
+        status=dataset_status,
     ).dict()
 
     if update:

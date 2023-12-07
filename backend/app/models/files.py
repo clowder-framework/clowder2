@@ -8,9 +8,11 @@ from app.models.authorization import AuthorizationDB
 from app.models.pyobjectid import PyObjectId
 from app.models.users import UserOut
 
+
 class AutoName(Enum):
     def _generate_next_value_(name, start, count, last_values):
         return name
+
 
 class FileStatus(AutoName):
     PRIVATE = auto()
@@ -18,6 +20,7 @@ class FileStatus(AutoName):
     AUTHENTICATED = auto()
     DEFAULT = auto()
     TRIAL = auto()
+
 
 class ContentType(BaseModel):
     """This model describes the content type of any type of file(File or Visualization data) uploaded to Clowder. A typical example is "text/plain" for .txt.

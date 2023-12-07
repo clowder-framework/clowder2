@@ -519,9 +519,9 @@ async def save_files(
 
             public = False
             authenticated = False
-            if dataset.status == 'PUBLIC':
+            if dataset.status == "PUBLIC":
                 public = True
-            if dataset.status == 'AUTHENTICATED':
+            if dataset.status == "AUTHENTICATED":
                 authenticated = True
             await add_file_entry(
                 new_file,
@@ -532,7 +532,7 @@ async def save_files(
                 file.file,
                 content_type=file.content_type,
                 public=public,
-                authenticated=authenticated
+                authenticated=authenticated,
             )
             files_added.append(new_file.dict())
         return files_added

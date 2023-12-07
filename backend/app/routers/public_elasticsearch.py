@@ -10,13 +10,7 @@ router = APIRouter()
 def _add_public_clause(query):
     """Append filter to Elasticsearch object that restricts permissions based on the requesting user."""
     # TODO: Add public filter once added
-    public_clause = {
-        "bool": {
-            "should": [
-                {"term": {"public": True}}
-            ]
-        }
-    }
+    public_clause = {"bool": {"should": [{"term": {"public": True}}]}}
 
     updated_query = ""
     for content in query.decode().split("\n"):
@@ -40,9 +34,7 @@ async def search(index_name: str, query: str):
 
 
 @router.post("/all/_msearch")
-async def msearch(
-    request: Request
-):
+async def msearch(request: Request):
     es = await connect_elasticsearch()
     query = await request.body()
     query = _add_public_clause(query)

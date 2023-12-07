@@ -79,6 +79,7 @@ security = HTTPBearer()
 
 clowder_bucket = os.getenv("MINIO_BUCKET_NAME", "clowder")
 
+
 async def _get_folder_hierarchy(
     folder_id: str,
     hierarchy: str,
@@ -90,17 +91,17 @@ async def _get_folder_hierarchy(
         hierarchy = await _get_folder_hierarchy(folder.parent_folder, hierarchy)
     return hierarchy
 
+
 @router.get("", response_model=List[DatasetOut])
 async def get_datasets(
     skip: int = 0,
     limit: int = 10,
 ):
-    query = [
-        DatasetDB.status == DatasetStatus.PUBLIC
-    ]
+    query = [DatasetDB.status == DatasetStatus.PUBLIC]
     datasets = await DatasetDB.find(*query).skip(skip).limit(limit).to_list()
     print(str(datasets))
     return [dataset.dict() for dataset in datasets]
+
 
 @router.get("/{dataset_id}", response_model=DatasetOut)
 async def get_dataset(
@@ -110,6 +111,7 @@ async def get_dataset(
         if dataset.status == DatasetStatus.PUBLIC.name:
             return dataset.dict()
     raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
+
 
 @router.get("/{dataset_id}/files", response_model=List[FileOut])
 async def get_dataset_files(
@@ -129,6 +131,7 @@ async def get_dataset_files(
             return [file.dict() for file in files]
     raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
 
+
 @router.get("/{dataset_id}/folders", response_model=List[FolderOut])
 async def get_dataset_folders(
     dataset_id: str,
@@ -145,7 +148,9 @@ async def get_dataset_folders(
                 query.append(FolderDBViewList.parent_folder == ObjectId(parent_folder))
             else:
                 query.append(FolderDBViewList.parent_folder == None)
-            folders = await FolderDBViewList.find(*query).skip(skip).limit(limit).to_list()
+            folders = (
+                await FolderDBViewList.find(*query).skip(skip).limit(limit).to_list()
+            )
             return [folder.dict() for folder in folders]
     raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
 
@@ -159,12 +164,12 @@ async def get_dataset_metadata(
     if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
         if dataset.status == DatasetStatus.PUBLIC.name:
             query = [MetadataDB.resource.resource_id == ObjectId(dataset_id)]
-    
+
             if listener_name is not None:
                 query.append(MetadataDB.agent.listener.name == listener_name)
             if listener_version is not None:
                 query.append(MetadataDB.agent.listener.version == listener_version)
-    
+
             metadata = []
             async for md in MetadataDB.find(*query):
                 if md.definition is not None:
@@ -177,9 +182,12 @@ async def get_dataset_metadata(
                 metadata.append(md)
             return [md.dict() for md in metadata]
         else:
-            raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
+            raise HTTPException(
+                status_code=404, detail=f"Dataset {dataset_id} not found"
+            )
     else:
         raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
+
 
 @router.get("/{dataset_id}/download", response_model=DatasetOut)
 async def download_dataset(
@@ -236,7 +244,9 @@ async def download_dataset(
                     if not os.path.isdir(dest_folder):
                         os.mkdir(dest_folder)
                     file_name = hierarchy + file_name
-                current_file_path = os.path.join(current_temp_dir, file_name.lstrip("/"))
+                current_file_path = os.path.join(
+                    current_temp_dir, file_name.lstrip("/")
+                )
 
                 content = fs.get_object(settings.MINIO_BUCKET_NAME, str(file.id))
                 file_md5_hash = hashlib.md5(content.data).hexdigest()
@@ -288,13 +298,19 @@ async def download_dataset(
                 properties={"name": "manifest-md5.txt"},
             )
             crate.add_file(
-                bag_info_path, dest_path="bag-info.txt", properties={"name": "bag-info.txt"}
+                bag_info_path,
+                dest_path="bag-info.txt",
+                properties={"name": "bag-info.txt"},
             )
 
             # Generate tag manifest file
-            manifest_md5_hash = hashlib.md5(open(manifest_path, "rb").read()).hexdigest()
+            manifest_md5_hash = hashlib.md5(
+                open(manifest_path, "rb").read()
+            ).hexdigest()
             bagit_md5_hash = hashlib.md5(open(bagit_path, "rb").read()).hexdigest()
-            bag_info_md5_hash = hashlib.md5(open(bag_info_path, "rb").read()).hexdigest()
+            bag_info_md5_hash = hashlib.md5(
+                open(bag_info_path, "rb").read()
+            ).hexdigest()
 
             with open(tagmanifest_path, "w") as f:
                 f.write(bagit_md5_hash + " " + "bagit.txt" + "\n")
@@ -324,11 +340,14 @@ async def download_dataset(
                 stream,
                 media_type="application/x-zip-compressed",
             )
-            response.headers["Content-Disposition"] = "attachment; filename=%s" % zip_name
+            response.headers["Content-Disposition"] = (
+                "attachment; filename=%s" % zip_name
+            )
             # Increment download count
             await dataset.update(Inc({DatasetDB.downloads: 1}))
             return response
         else:
-            raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
+            raise HTTPException(
+                status_code=404, detail=f"Dataset {dataset_id} not found"
+            )
     raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
-

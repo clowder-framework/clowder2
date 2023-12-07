@@ -21,7 +21,7 @@ def _add_permissions_clause(query, username: str, admin: bool = Depends(get_admi
                 {"term": {"creator": username}},
                 {"term": {"user_ids": username}},
                 {"term": {"status": "AUTHENTICATED"}},
-                {"term": {"status": "PUBLIC"}}
+                {"term": {"status": "PUBLIC"}},
             ]
         }
     }
