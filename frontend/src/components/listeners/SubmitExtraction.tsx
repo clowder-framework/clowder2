@@ -9,6 +9,7 @@ import {
 	DialogContent,
 	DialogTitle,
 	Divider,
+	IconButton,
 	Step,
 	StepContent,
 	StepLabel,
@@ -25,6 +26,7 @@ import { EventListenerOut as Extractor } from "../../openapi/v2";
 import { ClowderRjsfSelectWidget } from "../styledComponents/ClowderRjsfSelectWidget";
 import { ClowderRjsfTextWidget } from "../styledComponents/ClowderRjsfTextWidget";
 import ExtractorStatus from "./ExtractorStatus";
+import CloseIcon from "@mui/icons-material/Close";
 
 type SubmitExtractionProps = {
 	fileId: string;
@@ -102,6 +104,12 @@ export default function SubmitExtraction(props: SubmitExtractionProps) {
 					},
 				}}
 			>
+				<IconButton
+					onClick={onClose}
+					sx={{ width: "fit-content", margin: "auto 0 auto auto" }}
+				>
+					<CloseIcon />
+				</IconButton>
 				<DialogTitle>
 					<ListenerInfo
 						selectedExtractor={selectedExtractor}
