@@ -27,6 +27,10 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       serviceAccountName: {{ include "clowder2.serviceAccountName" . }}
+      volumes:
+        - name: logging-config
+          configMap:
+            name: logging-config
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       containers:
@@ -35,6 +39,10 @@ spec:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.backend.image.repository }}:{{ .Values.backend.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.backend.image.pullPolicy }}
+          volumesMounts:
+            - mountPath: /code/app/logging.conf
+              name: logging-config
+              subPath: logging.conf
           env:
             - name: WEB_CONCURRENCY
               value: "1"
