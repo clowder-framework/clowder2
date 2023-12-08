@@ -74,9 +74,9 @@ spec:
                   name: clowder2-client-secret
                   key: client-secret
             - name: auth_url
-              value: https://{{ .Values.keycloak.hostname }}/auth/realms/{{ .Values.keycloak.realm }}/protocol/openid-connect/auth?client_id={{ .Values.keycloak.clientid }}&redirect_uri=https://clowder2-test.icecube.aq/api/v2/auth&response_type=code&scope=profile email groups
+              value: https://{{ .Values.keycloak.hostname }}/auth/realms/{{ .Values.keycloak.realm }}/protocol/openid-connect/auth?client_id={{ .Values.keycloak.clientid }}&redirect_uri=https://clowder2-test.icecube.aq/api/v2/auth&response_type=code&scope=profile%20email%20groups
             - name: oauth2_scheme_auth_url
-              value: https://{{ .Values.keycloak.hostname }}/auth/realms/{{ .Values.keycloak.realm }}/protocol/openid-connect/auth?client_id={{ .Values.keycloak.clientid }}&redirect_uri=https://clowder2-test.icecube.aq/api/v2/auth&response_type=code&scope=profile email groups
+              value: https://{{ .Values.keycloak.hostname }}/auth/realms/{{ .Values.keycloak.realm }}/protocol/openid-connect/auth?client_id={{ .Values.keycloak.clientid }}&redirect_uri=https://clowder2-test.icecube.aq/api/v2/auth&response_type=code&scope=profile%20email%20groups
             - name: auth_register_url
               value: https://{{ .Values.keycloak.hostname }}/auth/realms/{{ .Values.keycloak.realm }}/protocol/openid-connect/registrations?client_id={{ .Values.keycloak.clientid }}
             - name: auth_token_url
