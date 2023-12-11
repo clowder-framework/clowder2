@@ -42,7 +42,7 @@ frontend:
 # ----------------------------------------------------------------------
 backend:
   image:
-    repository: clowder/clowder2-backend
+    repository: i3registry.icecube.aq/clowder2-backend-local:0.1
     pullPolicy: IfNotPresent
     # Overrides the image tag whose default is the chart appVersion.
     tag: ""

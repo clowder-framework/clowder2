@@ -32,6 +32,7 @@ async def register() -> RedirectResponse:
 @router.get("/login")
 async def login() -> RedirectResponse:
     """Redirect to keycloak login page."""
+    logger.debug(f'{settings.auth_url}')
     return RedirectResponse(settings.auth_url)
 
 
@@ -109,6 +110,7 @@ async def auth(code: str) -> RedirectResponse:
         "POST", settings.auth_token_url, data=payload, headers=headers
     )
     token_body = json.loads(token_response.content)
+    logger.debug(f'{token_body}')
     access_token = token_body["access_token"]
 
     # create user in db if it doesn't already exist; get the user_id

@@ -50,7 +50,7 @@ from app.routers import (
 )
 
 # setup loggers
-# logging.config.fileConfig('logging.conf', disable_existing_loggers=False)
+logging.config.fileConfig('logging.conf', disable_existing_loggers=False)
 from app.search.config import indexSettings
 from app.search.connect import connect_elasticsearch, create_index
 
