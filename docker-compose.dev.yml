@@ -139,7 +139,7 @@ services:
       - elasticsearch:/usr/share/elasticsearch/data
     
   extractors-heartbeat:
-    image: "clowder/clowder2-heartbeat"
+    image: "clowder/clowder2-heartbeat:main"
     build:
       context: backend
       dockerfile: heartbeat.Dockerfile
