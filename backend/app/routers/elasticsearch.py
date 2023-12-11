@@ -12,9 +12,10 @@ router = APIRouter()
 
 
 def _add_permissions_clause(
-        query, username: str,
-        admin_mode: bool = Depends(get_admin_mode),
-        admin: bool = Depends(get_admin)
+    query,
+    username: str,
+    admin_mode: bool = Depends(get_admin_mode),
+    admin: bool = Depends(get_admin),
 ):
     """Append filter to Elasticsearch object that restricts permissions based on the requesting user."""
     # TODO: Add public filter once added
@@ -54,8 +55,8 @@ async def search(index_name: str, query: str, username=Depends(get_current_usern
 
 @router.post("/all/_msearch")
 async def msearch(
-        request: Request,
-        username=Depends(get_current_username),
+    request: Request,
+    username=Depends(get_current_username),
 ):
     es = await connect_elasticsearch()
     query = await request.body()
