@@ -94,16 +94,21 @@ export class GroupsService {
      * Get Group
      * @param groupId
      * @param datasetId
+     * @param xAdminMode
      * @returns GroupOut Successful Response
      * @throws ApiError
      */
     public static getGroupApiV2GroupsGroupIdGet(
         groupId: string,
         datasetId?: string,
+        xAdminMode?: string,
     ): CancelablePromise<GroupOut> {
         return __request({
             method: 'GET',
             path: `/api/v2/groups/${groupId}`,
+            headers: {
+                'x_admin_mode': xAdminMode,
+            },
             query: {
                 'dataset_id': datasetId,
             },
@@ -118,6 +123,7 @@ export class GroupsService {
      * @param groupId
      * @param requestBody
      * @param datasetId
+     * @param xAdminMode
      * @returns GroupOut Successful Response
      * @throws ApiError
      */
@@ -125,10 +131,14 @@ export class GroupsService {
         groupId: string,
         requestBody: GroupBase,
         datasetId?: string,
+        xAdminMode?: string,
     ): CancelablePromise<GroupOut> {
         return __request({
             method: 'PUT',
             path: `/api/v2/groups/${groupId}`,
+            headers: {
+                'x_admin_mode': xAdminMode,
+            },
             query: {
                 'dataset_id': datasetId,
             },
@@ -144,16 +154,21 @@ export class GroupsService {
      * Delete Group
      * @param groupId
      * @param datasetId
+     * @param xAdminMode
      * @returns GroupOut Successful Response
      * @throws ApiError
      */
     public static deleteGroupApiV2GroupsGroupIdDelete(
         groupId: string,
         datasetId?: string,
+        xAdminMode?: string,
     ): CancelablePromise<GroupOut> {
         return __request({
             method: 'DELETE',
             path: `/api/v2/groups/${groupId}`,
+            headers: {
+                'x_admin_mode': xAdminMode,
+            },
             query: {
                 'dataset_id': datasetId,
             },
@@ -170,6 +185,7 @@ export class GroupsService {
      * @param username
      * @param role
      * @param datasetId
+     * @param xAdminMode
      * @returns GroupOut Successful Response
      * @throws ApiError
      */
@@ -178,10 +194,14 @@ export class GroupsService {
         username: string,
         role?: string,
         datasetId?: string,
+        xAdminMode?: string,
     ): CancelablePromise<GroupOut> {
         return __request({
             method: 'POST',
             path: `/api/v2/groups/${groupId}/add/${username}`,
+            headers: {
+                'x_admin_mode': xAdminMode,
+            },
             query: {
                 'role': role,
                 'dataset_id': datasetId,
@@ -198,6 +218,7 @@ export class GroupsService {
      * @param groupId
      * @param username
      * @param datasetId
+     * @param xAdminMode
      * @returns GroupOut Successful Response
      * @throws ApiError
      */
@@ -205,10 +226,14 @@ export class GroupsService {
         groupId: string,
         username: string,
         datasetId?: string,
+        xAdminMode?: string,
     ): CancelablePromise<GroupOut> {
         return __request({
             method: 'POST',
             path: `/api/v2/groups/${groupId}/remove/${username}`,
+            headers: {
+                'x_admin_mode': xAdminMode,
+            },
             query: {
                 'dataset_id': datasetId,
             },
@@ -225,6 +250,7 @@ export class GroupsService {
      * @param username
      * @param role
      * @param datasetId
+     * @param xAdminMode
      * @returns GroupOut Successful Response
      * @throws ApiError
      */
@@ -233,10 +259,14 @@ export class GroupsService {
         username: string,
         role: string,
         datasetId?: string,
+        xAdminMode?: string,
     ): CancelablePromise<GroupOut> {
         return __request({
             method: 'PUT',
             path: `/api/v2/groups/${groupId}/update/${username}`,
+            headers: {
+                'x_admin_mode': xAdminMode,
+            },
             query: {
                 'role': role,
                 'dataset_id': datasetId,

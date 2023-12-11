@@ -3,7 +3,7 @@ import json
 import logging
 from datetime import datetime
 
-from fastapi import Security, HTTPException, Depends
+from fastapi import Security, HTTPException, Depends, Header
 from fastapi.security import OAuth2AuthorizationCodeBearer, APIKeyHeader, APIKeyCookie
 from itsdangerous.exc import BadSignature
 from itsdangerous.url_safe import URLSafeSerializer
@@ -48,9 +48,6 @@ oauth2_scheme = OAuth2AuthorizationCodeBearer(
 
 # Passing in API key via header. `auto_error=False` makes it so `get_current_user()` runs even if it doesn't find it
 api_key_header = APIKeyHeader(name="X-API-KEY", auto_error=False)
-
-# Passing in admin mode via header.
-admin_mode_header = APIKeyHeader(name="X-ADMIN-MODE", auto_error=False)
 
 # Passing in JWT token via cookie. `auto_error=False` makes it so `get_current_user()` runs even if it doesn't find it.
 jwt_header = APIKeyCookie(name="Authorization", auto_error=False)
@@ -227,8 +224,17 @@ async def get_current_user(
     )
 
 
+async def admin_mode_header(
+    x_admin_mode: str = Header(default=None, convert_underscores=False)
+) -> bool:
+    """Dependency to read X-ADMIN-MODE header."""
+    if x_admin_mode is not None:
+        return x_admin_mode.lower() == "true"
+    return False
+
+
 async def get_admin_mode(
-    admin_mode: bool = Security(admin_mode_header),
+    admin_mode: bool = Depends(admin_mode_header),
 ) -> bool:
     """Get Admin mode from Header."""
     return admin_mode

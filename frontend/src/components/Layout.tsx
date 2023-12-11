@@ -30,7 +30,7 @@ import { getCurrEmail } from "../utils/common";
 import VpnKeyIcon from "@mui/icons-material/VpnKey";
 import LogoutIcon from "@mui/icons-material/Logout";
 import { EmbeddedSearch } from "./search/EmbeddedSearch";
-import { setAdmin, toggleAdminMode } from "../actions/user";
+import { toggleAdminMode } from "../actions/user";
 import { AdminPanelSettings } from "@mui/icons-material";
 
 const drawerWidth = 240;
@@ -106,10 +106,8 @@ export default function PersistentDrawerLeft(props) {
 	const [embeddedSearchHidden, setEmbeddedSearchHidden] = React.useState(false);
 	const [anchorEl, setAnchorEl] = React.useState(null);
 	const isMenuOpen = Boolean(anchorEl);
-	const admin = useSelector((state: RootState) => state.user.admin);
-	useEffect(() => {
-		dispatch(setAdmin());
-	}, [dispatch]);
+	const currUserProfile = useSelector((state: RootState) => state.user.profile);
+	const adminMode = useSelector((state: RootState) => state.user.adminMode);
 
 	const handleAdminMode = () => {
 		dispatch(toggleAdminMode(adminMode));
@@ -227,7 +225,7 @@ export default function PersistentDrawerLeft(props) {
 						</ListItemIcon>
 						<ListItemText>User Profile</ListItemText>
 					</MenuItem>
-					{admin && !adminMode ? (
+					{currUserProfile.admin && !adminMode ? (
 						<div>
 							<Divider orientation="horizontal" />
 							<MenuItem onClick={handleAdminMode}>
@@ -240,7 +238,7 @@ export default function PersistentDrawerLeft(props) {
 					) : (
 						<></>
 					)}
-					{admin && adminMode ? (
+					{currUserProfile.admin && adminMode ? (
 						<div>
 							<Divider orientation="horizontal" />
 							<MenuItem onClick={handleAdminMode}>
