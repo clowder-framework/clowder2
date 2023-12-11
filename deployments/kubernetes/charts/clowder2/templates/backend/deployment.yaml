@@ -76,6 +76,8 @@ spec:
               value: {{ .Values.keycloak.realm }}
             - name: auth_client_id
               value: {{ .Values.keycloak.clientid }}
+            - name: auth_redirect_uri
+              value: http://{{ .Values.hostname }}/api/v2/auth
             #- name: auth_client_secret
             #  valueFrom:
             #    secretKeyRef:
