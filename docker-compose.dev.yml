@@ -155,7 +155,7 @@ services:
       - rabbitmq
 
   extractors-messages:
-    image: "clowder/clowder2-messages"
+    image: "clowder/clowder2-messages:main"
     build:
       context: backend
       dockerfile: messages.Dockerfile
