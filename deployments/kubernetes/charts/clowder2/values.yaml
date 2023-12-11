@@ -46,7 +46,7 @@ backend:
     repository: i3registry.icecube.aq/clowder2-backend-local
     pullPolicy: IfNotPresent
     # Overrides the image tag whose default is the chart appVersion.
-    tag: 0.1
+    tag: "0.1"
 
   service:
     type: ClusterIP
