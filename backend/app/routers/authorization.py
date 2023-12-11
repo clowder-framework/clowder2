@@ -11,7 +11,7 @@ from app.deps.authorization_deps import (
     get_role_by_metadata,
     get_role_by_group,
 )
-from app.keycloak_auth import get_current_username, get_user
+from app.keycloak_auth import get_current_username, get_user, get_admin_mode
 from app.models.authorization import (
     AuthorizationBase,
     AuthorizationMetadata,
@@ -40,7 +40,7 @@ router = APIRouter()
 async def save_authorization(
         dataset_id: str,
         authorization_in: AuthorizationBase,
-        admin_mode: bool = False,
+        admin_mode: bool = Depends(get_admin_mode),
         user=Depends(get_current_username),
         allow: bool = Depends(Authorization("editor")),
 ):
@@ -70,7 +70,7 @@ async def save_authorization(
 @router.get("/datasets/{dataset_id}/role", response_model=AuthorizationOut)
 async def get_dataset_role(
         dataset_id: str,
-        admin_mode: bool = False,
+        admin_mode: bool = Depends(get_admin_mode),
         current_user=Depends(get_current_username),
         admin=Depends(get_admin),
 ):
@@ -113,7 +113,7 @@ async def get_dataset_role(
 @router.get("/datasets/{dataset_id}/role/viewer}")
 async def get_dataset_role_viewer(
         dataset_id: str,
-        admin_mode: bool = False,
+        admin_mode: bool = Depends(get_admin_mode),
         allow: bool = Depends(Authorization("viewer")),
 ):
     """Used for testing only. Returns true if user has viewer permission on dataset, otherwise throws a 403 Forbidden HTTP exception.
@@ -124,7 +124,7 @@ async def get_dataset_role_viewer(
 @router.get("/datasets/{dataset_id}/role/owner}")
 async def get_dataset_role_owner(
         dataset_id: str,
-        admin_mode: bool = False,
+        admin_mode: bool = Depends(get_admin_mode),
         allow: bool = Depends(Authorization("owner")),
 ):
     """Used for testing only. Returns true if user has owner permission on dataset, otherwise throws a 403 Forbidden HTTP exception.
@@ -135,7 +135,7 @@ async def get_dataset_role_owner(
 @router.get("/files/{file_id}/role}", response_model=RoleType)
 async def get_file_role(
         file_id: str,
-        admin_mode: bool = False,
+        admin_mode: bool = Depends(get_admin_mode),
         current_user=Depends(get_current_username),
         role: RoleType = Depends(get_role_by_file),
         admin=Depends(get_admin),
@@ -150,7 +150,7 @@ async def get_file_role(
 @router.get("/metadata/{metadata_id}/role}", response_model=AuthorizationMetadata)
 async def get_metadata_role(
         metadata_id: str,
-        admin_mode: bool = False,
+        admin_mode: bool = Depends(get_admin_mode),
         current_user=Depends(get_current_username),
         role: RoleType = Depends(get_role_by_metadata),
         admin=Depends(get_admin),
@@ -165,7 +165,7 @@ async def get_metadata_role(
 @router.get("/groups/{group_id}/role}", response_model=RoleType)
 async def get_group_role(
         group_id: str,
-        admin_mode: bool = False,
+        admin_mode: bool = Depends(get_admin_mode),
         current_user=Depends(get_current_username),
         role: RoleType = Depends(get_role_by_group),
         admin=Depends(get_admin),
@@ -185,7 +185,7 @@ async def set_dataset_group_role(
         dataset_id: PydanticObjectId,
         group_id: PydanticObjectId,
         role: RoleType,
-        admin_mode: bool = False,
+        admin_mode: bool = Depends(get_admin_mode),
         es=Depends(get_elasticsearchclient),
         user_id=Depends(get_user),
         allow: bool = Depends(Authorization("editor")),
@@ -239,7 +239,7 @@ async def set_dataset_user_role(
         dataset_id: str,
         username: str,
         role: RoleType,
-        admin_mode: bool = False,
+        admin_mode: bool = Depends(get_admin_mode),
         es=Depends(get_elasticsearchclient),
         user_id=Depends(get_user),
         allow: bool = Depends(Authorization("editor")),
@@ -298,7 +298,7 @@ async def set_dataset_user_role(
 async def remove_dataset_group_role(
         dataset_id: PydanticObjectId,
         group_id: PydanticObjectId,
-        admin_mode: bool = False,
+        admin_mode: bool = Depends(get_admin_mode),
         es=Depends(get_elasticsearchclient),
         user_id=Depends(get_user),
         allow: bool = Depends(Authorization("editor")),
@@ -334,7 +334,7 @@ async def remove_dataset_group_role(
 async def remove_dataset_user_role(
         dataset_id: str,
         username: str,
-        admin_mode: bool = False,
+        admin_mode: bool = Depends(get_admin_mode),
         es=Depends(get_elasticsearchclient),
         user_id=Depends(get_user),
         allow: bool = Depends(Authorization("editor")),
@@ -363,7 +363,7 @@ async def remove_dataset_user_role(
 @router.get("/datasets/{dataset_id}/roles}", response_model=DatasetRoles)
 async def get_dataset_roles(
         dataset_id: str,
-        admin_mode: bool = False,
+        admin_mode: bool = Depends(get_admin_mode),
         allow: bool = Depends(Authorization("editor")),
 ):
     """Get a list of all users and groups that have assigned roles on this dataset."""

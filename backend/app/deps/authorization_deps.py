@@ -2,7 +2,7 @@ from beanie import PydanticObjectId
 from beanie.operators import Or
 from fastapi import Depends, HTTPException
 
-from app.keycloak_auth import get_current_username
+from app.keycloak_auth import get_current_username, get_admin_mode
 from app.models.authorization import RoleType, AuthorizationDB
 from app.models.datasets import DatasetDB, DatasetStatus
 from app.models.files import FileDB
@@ -146,7 +146,7 @@ class Authorization:
     async def __call__(
             self,
             dataset_id: str,
-            admin_mode: bool = False,
+            admin_mode: bool = Depends(get_admin_mode),
             current_user: str = Depends(get_current_username),
             admin: bool = Depends(get_admin),
     ):
@@ -203,7 +203,7 @@ class FileAuthorization:
     async def __call__(
             self,
             file_id: str,
-            admin_mode: bool = False,
+            admin_mode: bool = Depends(get_admin_mode),
             current_user: str = Depends(get_current_username),
             admin: bool = Depends(get_admin),
     ):
@@ -241,7 +241,7 @@ class MetadataAuthorization:
     async def __call__(
             self,
             metadata_id: str,
-            admin_mode: bool = False,
+            admin_mode: bool = Depends(get_admin_mode),
             current_user: str = Depends(get_current_username),
             admin: bool = Depends(get_admin),
     ):
@@ -308,7 +308,7 @@ class GroupAuthorization:
     async def __call__(
             self,
             group_id: str,
-            admin_mode: bool = False,
+            admin_mode: bool = Depends(get_admin_mode),
             current_user: str = Depends(get_current_username),
             admin: bool = Depends(get_admin),
     ):

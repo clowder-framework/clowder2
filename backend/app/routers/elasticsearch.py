@@ -4,7 +4,7 @@ from fastapi import Depends
 from fastapi.routing import APIRouter, Request
 
 from app.config import settings
-from app.keycloak_auth import get_current_username
+from app.keycloak_auth import get_current_username, get_admin_mode
 from app.routers.authentication import get_admin
 from app.search.connect import connect_elasticsearch, search_index
 
@@ -12,7 +12,9 @@ router = APIRouter()
 
 
 def _add_permissions_clause(
-        query, username: str, admin_mode: bool = False, admin: bool = Depends(get_admin)
+        query, username: str,
+        admin_mode: bool = Depends(get_admin_mode),
+        admin: bool = Depends(get_admin)
 ):
     """Append filter to Elasticsearch object that restricts permissions based on the requesting user."""
     # TODO: Add public filter once added
