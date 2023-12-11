@@ -21,7 +21,8 @@ class FileStatus(AutoName):
     AUTHENTICATED = auto()
     DEFAULT = auto()
     TRIAL = auto()
-    
+
+
 class StorageType(str, Enum):
     """Depending on the StorageType,the file may need different properties such as local path or URL.
     Also, some StorageTypes do not support versioning or anonymous sharing."""
