@@ -133,4 +133,22 @@ export class PublicDatasetsService {
         });
     }
 
+    /**
+     * Download Dataset
+     * @param datasetId
+     * @returns DatasetOut Successful Response
+     * @throws ApiError
+     */
+    public static downloadDatasetApiV2PublicDatasetsDatasetIdDownloadGet(
+        datasetId: string,
+    ): CancelablePromise<DatasetOut> {
+        return __request({
+            method: 'GET',
+            path: `/api/v2/public/datasets/${datasetId}/download`,
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+
 }
