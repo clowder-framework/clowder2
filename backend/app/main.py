@@ -50,7 +50,9 @@ from app.routers import (
 )
 
 # setup loggers
-logging.config.fileConfig('logging.conf', disable_existing_loggers=False)
+from os import path
+log_file_path = path.join(path.dirname(path.abspath(__file__)),'logging.conf')
+logging.config.fileConfig(log_file_path, disable_existing_loggers=False)
 from app.search.config import indexSettings
 from app.search.connect import connect_elasticsearch, create_index
 
@@ -71,19 +73,16 @@ app = FastAPI(
 )
 BaseConfig.arbitrary_types_allowed = True
 
-# @app.middleware("http")
-# async def log_requests(request: Request, call_next):
-#     idem = ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
-#     logger.info(f"rid={idem} start request path={request.url.path}")
-#     start_time = time.time()
-#
-#     response = await call_next(request)
-#
-#     process_time = (time.time() - start_time) * 1000
-#     formatted_process_time = '{0:.2f}'.format(process_time)
-#     logger.info(f"rid={idem} completed_in={formatted_process_time}ms status_code={response.status_code}")
-#
-#     return response
+#@app.middleware("http")
+#async def log_requests(request: Request, call_next):
+#    idem = ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
+#    logger.info(f"rid={idem} start request path={request.url.path}")
+#    start_time = time.time()
+#    response = await call_next(request)
+#    process_time = (time.time() - start_time) * 1000
+#    formatted_process_time = '{0:.2f}'.format(process_time)
+#    logger.info(f"rid={idem} completed_in={formatted_process_time}ms status_code={response.status_code}")
+#    return response
 
 app.add_middleware(
     CORSMiddleware,
