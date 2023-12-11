@@ -11,7 +11,7 @@ export const RECEIVE_FILE_EXTRACTED_METADATA =
 export function fetchFileExtractedMetadata(id) {
 	const url = `${config.hostname}/api/v2/files/${id}/metadata`;
 	return (dispatch) => {
-		return fetch(url, { mode: "cors", headers: getHeader()})
+		return fetch(url, { mode: "cors", headers: getHeader() })
 			.then((response) => {
 				if (response.status === 200) {
 					response.json().then((json) => {
@@ -33,9 +33,9 @@ export function fetchFileExtractedMetadata(id) {
 
 export const RECEIVE_FILE_SUMMARY = "RECEIVE_FILE_SUMMARY";
 
-export function fetchFileSummary(id, admin_mode) {
+export function fetchFileSummary(id) {
 	return (dispatch) => {
-		return V2.FilesService.getFileSummaryApiV2FilesFileIdSummaryGet(id, admin_mode)
+		return V2.FilesService.getFileSummaryApiV2FilesFileIdSummaryGet(id)
 			.then((json) => {
 				dispatch({
 					type: RECEIVE_FILE_SUMMARY,
@@ -44,7 +44,7 @@ export function fetchFileSummary(id, admin_mode) {
 				});
 			})
 			.catch((reason) => {
-				dispatch(handleErrors(reason, fetchFileSummary(id, admin_mode)));
+				dispatch(handleErrors(reason, fetchFileSummary(id)));
 			});
 	};
 }
@@ -101,9 +101,9 @@ export function fetchFilePreviews(id) {
 
 export const DELETE_FILE = "DELETE_FILE";
 
-export function fileDeleted(fileId, adminMode) {
+export function fileDeleted(fileId) {
 	return (dispatch) => {
-		return V2.FilesService.deleteFileApiV2FilesFileIdDelete(fileId, adminMode)
+		return V2.FilesService.deleteFileApiV2FilesFileIdDelete(fileId)
 			.then((json) => {
 				dispatch({
 					type: DELETE_FILE,
@@ -112,22 +112,21 @@ export function fileDeleted(fileId, adminMode) {
 				});
 			})
 			.catch((reason) => {
-				dispatch(handleErrors(reason, fileDeleted(fileId, adminMode)));
+				dispatch(handleErrors(reason, fileDeleted(fileId)));
 			});
 	};
 }
 
 export const CREATE_FILE = "CREATE_FILE";
 
-export function createFile(selectedDatasetId, selectedFile, folderId, adminMode) {
+export function createFile(selectedDatasetId, selectedFile, folderId) {
 	return (dispatch) => {
 		const formData = new FormData();
 		formData["file"] = selectedFile;
 		return V2.DatasetsService.saveFileApiV2DatasetsDatasetIdFilesPost(
 			selectedDatasetId,
 			formData,
-			folderId,
-			adminMode
+			folderId
 		)
 			.then((file) => {
 				dispatch({
@@ -140,7 +139,7 @@ export function createFile(selectedDatasetId, selectedFile, folderId, adminMode)
 				dispatch(
 					handleErrors(
 						reason,
-						createFile(selectedDatasetId, selectedFile, folderId, adminMode)
+						createFile(selectedDatasetId, selectedFile, folderId)
 					)
 				);
 			});
@@ -149,7 +148,7 @@ export function createFile(selectedDatasetId, selectedFile, folderId, adminMode)
 
 export const CREATE_FILES = "CREATE_FILES";
 
-export function createFiles(selectedDatasetId, adminMode, selectedFiles, folderId) {
+export function createFiles(selectedDatasetId, selectedFiles, folderId) {
 	return (dispatch) => {
 		let formData = new FormData();
 		let tmp = [];
@@ -163,7 +162,6 @@ export function createFiles(selectedDatasetId, adminMode, selectedFiles, folderI
 		return V2.DatasetsService.saveFilesApiV2DatasetsDatasetIdFilesMultiplePost(
 			selectedDatasetId,
 			formData,
-			adminMode,
 			folderId
 		)
 			.then((files) => {
@@ -177,7 +175,7 @@ export function createFiles(selectedDatasetId, adminMode, selectedFiles, folderI
 				dispatch(
 					handleErrors(
 						reason,
-						createFiles(selectedDatasetId, adminMode, selectedFiles, folderId)
+						createFiles(selectedDatasetId, selectedFiles, folderId)
 					)
 				);
 			});
@@ -208,11 +206,11 @@ export function resetFilesCreated() {
 
 export const UPDATE_FILE = "UPDATE_FILE";
 
-export function updateFile(selectedFile, fileId, adminMode) {
+export function updateFile(selectedFile, fileId) {
 	return (dispatch) => {
 		const formData = new FormData();
 		formData["file"] = selectedFile;
-		return V2.FilesService.updateFileApiV2FilesFileIdPut(fileId, adminMode, formData)
+		return V2.FilesService.updateFileApiV2FilesFileIdPut(fileId, formData)
 			.then((file) => {
 				dispatch({
 					type: UPDATE_FILE,
@@ -221,7 +219,7 @@ export function updateFile(selectedFile, fileId, adminMode) {
 				});
 			})
 			.catch((reason) => {
-				dispatch(handleErrors(reason, updateFile(selectedFile, fileId, adminMode)));
+				dispatch(handleErrors(reason, updateFile(selectedFile, fileId)));
 			});
 	};
 }
@@ -241,9 +239,9 @@ export function changeSelectedVersion(fileId, selectedVersion) {
 
 export const RECEIVE_VERSIONS = "RECEIVE_VERSIONS";
 
-export function fetchFileVersions(fileId, adminMode) {
+export function fetchFileVersions(fileId) {
 	return (dispatch) => {
-		return V2.FilesService.getFileVersionsApiV2FilesFileIdVersionsGet(fileId, adminMode)
+		return V2.FilesService.getFileVersionsApiV2FilesFileIdVersionsGet(fileId)
 			.then((json) => {
 				// sort by decending order
 				const version = json.sort(
@@ -256,7 +254,7 @@ export function fetchFileVersions(fileId, adminMode) {
 				});
 			})
 			.catch((reason) => {
-				dispatch(handleErrors(reason, fetchFileVersions(fileId, adminMode)));
+				dispatch(handleErrors(reason, fetchFileVersions(fileId)));
 			});
 	};
 }
@@ -317,14 +315,12 @@ export const RESET_FILE_PRESIGNED_URL = "RESET_FILE_PRESIGNED_URL";
 
 export function generateFilePresignedUrl(
 	fileId,
-	adminMode,
 	fileVersionNum = null,
 	expiresInSeconds = 7 * 24 * 3600
 ) {
 	return async (dispatch) => {
 		return V2.FilesService.downloadFileUrlApiV2FilesFileIdUrlGet(
 			fileId,
-			adminMode,
 			fileVersionNum,
 			expiresInSeconds
 		)
@@ -339,7 +335,7 @@ export function generateFilePresignedUrl(
 				dispatch(
 					handleErrors(
 						reason,
-						generateFilePresignedUrl(fileId, adminMode, fileVersionNum, expiresInSeconds)
+						generateFilePresignedUrl(fileId, fileVersionNum, expiresInSeconds)
 					)
 				);
 			});
@@ -348,12 +344,11 @@ export function generateFilePresignedUrl(
 
 export const SUBMIT_FILE_EXTRACTION = "SUBMIT_FILE_EXTRACTION";
 
-export function submitFileExtractionAction(fileId, extractorName, adminMode, requestBody) {
+export function submitFileExtractionAction(fileId, extractorName, requestBody) {
 	return (dispatch) => {
 		return V2.FilesService.postFileExtractApiV2FilesFileIdExtractPost(
 			fileId,
 			extractorName,
-			adminMode,
 			requestBody
 		)
 			.then((json) => {
@@ -367,7 +362,7 @@ export function submitFileExtractionAction(fileId, extractorName, adminMode, req
 				dispatch(
 					handleErrors(
 						reason,
-						submitFileExtractionAction(fileId, extractorName, adminMode, requestBody)
+						submitFileExtractionAction(fileId, extractorName, requestBody)
 					)
 				);
 			});

@@ -39,9 +39,9 @@ export function fetchGroups(skip = 0, limit = 21) {
 
 export const DELETE_GROUP = "DELETE_GROUP";
 
-export function deleteGroup(groupId, adminMode) {
+export function deleteGroup(groupId) {
 	return (dispatch) => {
-		return V2.GroupsService.deleteGroupApiV2GroupsGroupIdDelete(groupId, adminMode)
+		return V2.GroupsService.deleteGroupApiV2GroupsGroupIdDelete(groupId)
 			.then((json) => {
 				dispatch({
 					type: DELETE_GROUP,
@@ -50,7 +50,7 @@ export function deleteGroup(groupId, adminMode) {
 				});
 			})
 			.catch((reason) => {
-				dispatch(handleErrors(reason, deleteGroup(groupId, adminMode)));
+				dispatch(handleErrors(reason, deleteGroup(groupId)));
 			});
 	};
 }
@@ -79,9 +79,9 @@ export function searchGroups(searchTerm, skip = 0, limit = 21) {
 
 export const RECEIVE_GROUP_ABOUT = "RECEIVE_GROUP_ABOUT";
 
-export function fetchGroupAbout(id, adminMode) {
+export function fetchGroupAbout(id) {
 	return (dispatch) => {
-		return V2.GroupsService.getGroupApiV2GroupsGroupIdGet(id, adminMode)
+		return V2.GroupsService.getGroupApiV2GroupsGroupIdGet(id)
 			.then((json) => {
 				dispatch({
 					type: RECEIVE_GROUP_ABOUT,
@@ -90,19 +90,18 @@ export function fetchGroupAbout(id, adminMode) {
 				});
 			})
 			.catch((reason) => {
-				dispatch(handleErrors(reason, fetchGroupAbout(id, adminMode)));
+				dispatch(handleErrors(reason, fetchGroupAbout(id)));
 			});
 	};
 }
 
 export const DELETE_GROUP_MEMBER = "DELETE_GROUP_MEMBER";
 
-export function deleteGroupMember(groupId, username, adminMode) {
+export function deleteGroupMember(groupId, username) {
 	return (dispatch) => {
 		return V2.GroupsService.removeMemberApiV2GroupsGroupIdRemoveUsernamePost(
 			groupId,
-			username,
-			adminMode
+			username
 		)
 			.then((json) => {
 				dispatch({
@@ -112,19 +111,18 @@ export function deleteGroupMember(groupId, username, adminMode) {
 				});
 			})
 			.catch((reason) => {
-				dispatch(handleErrors(reason, deleteGroupMember(groupId, username, adminMode)));
+				dispatch(handleErrors(reason, deleteGroupMember(groupId, username)));
 			});
 	};
 }
 
 export const ADD_GROUP_MEMBER = "ADD_GROUP_MEMBER";
 
-export function addGroupMember(groupId, username, adminMode, role = "viewer") {
+export function addGroupMember(groupId, username, role = "viewer") {
 	return (dispatch) => {
 		return V2.GroupsService.addMemberApiV2GroupsGroupIdAddUsernamePost(
 			groupId,
 			username,
-			adminMode,
 			role
 		)
 			.then((json) => {
@@ -136,7 +134,7 @@ export function addGroupMember(groupId, username, adminMode, role = "viewer") {
 			})
 			.catch((reason) => {
 				dispatch(
-					handleErrorsInline(reason, addGroupMember(groupId, username, adminMode, role))
+					handleErrorsInline(reason, addGroupMember(groupId, username, role))
 				);
 			});
 	};
@@ -144,13 +142,12 @@ export function addGroupMember(groupId, username, adminMode, role = "viewer") {
 
 export const ASSIGN_GROUP_MEMBER_ROLE = "ASSIGN_GROUP_MEMBER_ROLE";
 
-export function assignGroupMemberRole(groupId, username, role = "viewer", adminMode) {
+export function assignGroupMemberRole(groupId, username, role = "viewer") {
 	return (dispatch) => {
 		return V2.GroupsService.updateMemberApiV2GroupsGroupIdUpdateUsernamePut(
 			groupId,
 			username,
-			role,
-			adminMode
+			role
 		)
 			.then((json) => {
 				dispatch({
@@ -161,7 +158,7 @@ export function assignGroupMemberRole(groupId, username, role = "viewer", adminM
 			})
 			.catch((reason) => {
 				dispatch(
-					handleErrors(reason, assignGroupMemberRole(groupId, username, role, adminMode))
+					handleErrors(reason, assignGroupMemberRole(groupId, username, role))
 				);
 			});
 	};
@@ -169,13 +166,9 @@ export function assignGroupMemberRole(groupId, username, role = "viewer", adminM
 
 export const UPDATE_GROUP = "UPDATE_GROUP";
 
-export function updateGroup(groupId, adminMode, formData) {
+export function updateGroup(groupId, formData) {
 	return (dispatch) => {
-		return V2.GroupsService.editGroupApiV2GroupsGroupIdPut(
-			groupId,
-			adminMode,
-			formData
-		)
+		return V2.GroupsService.editGroupApiV2GroupsGroupIdPut(groupId, formData)
 			.then((json) => {
 				dispatch({
 					type: UPDATE_GROUP,
@@ -184,7 +177,7 @@ export function updateGroup(groupId, adminMode, formData) {
 				});
 			})
 			.catch((reason) => {
-				dispatch(handleErrors(reason, updateGroup(groupId, adminMode, formData)));
+				dispatch(handleErrors(reason, updateGroup(groupId, formData)));
 			});
 	};
 }

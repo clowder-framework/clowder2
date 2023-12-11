@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 
-import {useDispatch, useSelector} from "react-redux";
+import { useDispatch } from "react-redux";
 import {
 	Alert,
 	Button,
@@ -21,7 +21,6 @@ import {
 import { setDatasetGroupRole } from "../../actions/dataset";
 import { useParams } from "react-router-dom";
 import CloseIcon from "@mui/icons-material/Close";
-import {RootState} from "../../types/data";
 
 type ChangeGroupDatasetRoleModalProps = {
 	open: boolean;
@@ -48,11 +47,8 @@ export default function ChangeGroupDatasetRoleModal(
 	const [group, setGroup] = useState();
 	const [showSuccessAlert, setShowSuccessAlert] = useState(false);
 	const dispatch = useDispatch();
-	const adminMode = useSelector(
-		(state: RootState) => state.user.adminMode
-	);
 	const setGroupRole = (datasetId: string, groupId: string, role: string) =>
-		dispatch(setDatasetGroupRole(datasetId, groupId, role, adminMode));
+		dispatch(setDatasetGroupRole(datasetId, groupId, role));
 
 	const onShare = () => {
 		setGroupRole(datasetId, currentGroupId, role);

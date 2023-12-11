@@ -1,6 +1,15 @@
 // lazy loading
 import React, { useEffect, useState } from "react";
-import {Box, Button, ButtonGroup, Grid, Stack, Tab, Tabs, Typography} from "@mui/material";
+import {
+	Box,
+	Button,
+	ButtonGroup,
+	Grid,
+	Stack,
+	Tab,
+	Tabs,
+	Typography,
+} from "@mui/material";
 import { useParams, useSearchParams } from "react-router-dom";
 import { RootState } from "../../types/data";
 import { useDispatch, useSelector } from "react-redux";
@@ -20,14 +29,20 @@ import { EditMetadata } from "../metadata/EditMetadata";
 import { MainBreadcrumbs } from "../navigation/BreadCrumb";
 import {
 	deleteDatasetMetadata as deleteDatasetMetadataAction,
-	fetchDatasetMetadata, fetchMetadataDefinitions,
+	fetchDatasetMetadata,
+	fetchMetadataDefinitions,
 	patchDatasetMetadata as patchDatasetMetadataAction,
 	postDatasetMetadata,
 } from "../../actions/metadata";
 import Layout from "../Layout";
 import { ActionsMenu } from "./ActionsMenu";
 import { DatasetDetails } from "./DatasetDetails";
-import {ArrowBack, ArrowForward, FormatListBulleted, InsertDriveFile} from "@material-ui/icons";
+import {
+	ArrowBack,
+	ArrowForward,
+	FormatListBulleted,
+	InsertDriveFile,
+} from "@material-ui/icons";
 import { Listeners } from "../listeners/Listeners";
 import AssessmentIcon from "@mui/icons-material/Assessment";
 import HistoryIcon from "@mui/icons-material/History";
@@ -51,7 +66,6 @@ export const Dataset = (): JSX.Element => {
 	const [searchParams] = useSearchParams();
 	const folderId = searchParams.get("folder");
 
-	const adminMode = useSelector((state:RootState) => state.user.adminMode);
 	// Redux connect equivalent
 	const dispatch = useDispatch();
 	const updateDatasetMetadata = (
@@ -61,28 +75,34 @@ export const Dataset = (): JSX.Element => {
 	const createDatasetMetadata = (
 		datasetId: string | undefined,
 		metadata: MetadataIn
-	) => dispatch(postDatasetMetadata(datasetId, adminMode, metadata));
+	) => dispatch(postDatasetMetadata(datasetId, metadata));
 	const deleteDatasetMetadata = (
 		datasetId: string | undefined,
 		metadata: object
-	) => dispatch(deleteDatasetMetadataAction(datasetId, adminMode, metadata));
+	) => dispatch(deleteDatasetMetadataAction(datasetId, metadata));
 	const getFolderPath = (folderId: string | null) =>
 		dispatch(fetchFolderPath(folderId));
 	const listFilesInDataset = (
 		datasetId: string | undefined,
-		folderId: string | null
-		, skip: number | undefined, limit: number | undefined) => dispatch(fetchFilesInDataset(datasetId, folderId, skip, limit, adminMode));
+		folderId: string | null,
+		skip: number | undefined,
+		limit: number | undefined
+	) => dispatch(fetchFilesInDataset(datasetId, folderId, skip, limit));
 	const listFoldersInDataset = (
 		datasetId: string | undefined,
 		parentFolder: string | null,
-		skip: number | undefined, limit: number | undefined
-	) => dispatch(fetchFoldersInDataset(datasetId, parentFolder, skip, limit, adminMode));
+		skip: number | undefined,
+		limit: number | undefined
+	) => dispatch(fetchFoldersInDataset(datasetId, parentFolder, skip, limit));
 	const listDatasetAbout = (datasetId: string | undefined) =>
-		dispatch(fetchDatasetAbout(datasetId, adminMode));
+		dispatch(fetchDatasetAbout(datasetId));
 	const listDatasetMetadata = (datasetId: string | undefined) =>
-		dispatch(fetchDatasetMetadata(datasetId, adminMode));
-	const getMetadatDefinitions = (name:string|null, skip:number, limit:number) => dispatch(fetchMetadataDefinitions(name, skip,limit));
-
+		dispatch(fetchDatasetMetadata(datasetId));
+	const getMetadatDefinitions = (
+		name: string | null,
+		skip: number,
+		limit: number
+	) => dispatch(fetchMetadataDefinitions(name, skip, limit));
 
 	// mapStateToProps
 	const about = useSelector((state: RootState) => state.dataset.about);
@@ -112,10 +132,13 @@ export const Dataset = (): JSX.Element => {
 	const [prevDisabled, setPrevDisabled] = useState<boolean>(true);
 	const [nextDisabled, setNextDisabled] = useState<boolean>(false);
 	const filesInDataset = useSelector((state: RootState) => state.dataset.files);
-	const foldersInDataset = useSelector((state: RootState) => state.folder.folders);
+	const foldersInDataset = useSelector(
+		(state: RootState) => state.folder.folders
+	);
 
-
-	const metadataDefinitionList = useSelector((state: RootState) => state.metadata.metadataDefinitionList);
+	const metadataDefinitionList = useSelector(
+		(state: RootState) => state.metadata.metadataDefinitionList
+	);
 
 	// component did mount list all files in dataset
 	useEffect(() => {
@@ -123,7 +146,7 @@ export const Dataset = (): JSX.Element => {
 		listFoldersInDataset(datasetId, folderId, skip, limit);
 		listDatasetAbout(datasetId);
 		getFolderPath(folderId);
-	}, [searchParams, adminMode]);
+	}, [searchParams]);
 
 	useEffect(() => {
 		getMetadatDefinitions(null, 0, 100);
@@ -133,8 +156,7 @@ export const Dataset = (): JSX.Element => {
 		// disable flipping if reaches the last page
 		if (filesInDataset.length < limit && foldersInDataset.length < limit)
 			setNextDisabled(true);
-		else
-			setNextDisabled(false);
+		else setNextDisabled(false);
 	}, [filesInDataset]);
 
 	useEffect(() => {
@@ -170,7 +192,7 @@ export const Dataset = (): JSX.Element => {
 		setPaths(tmpPaths);
 	}, [about, folderPath]);
 
-		// for pagination keep flipping until the return dataset is less than the limit
+	// for pagination keep flipping until the return dataset is less than the limit
 	const previous = () => {
 		if (currPageNum - 1 >= 0) {
 			setSkip((currPageNum - 1) * limit);
@@ -310,7 +332,7 @@ export const Dataset = (): JSX.Element => {
 							{...a11yProps(3)}
 							disabled={false}
 						/>
-						{datasetRole.role !== undefined && datasetRole.role !== "viewer" ?
+						{datasetRole.role !== undefined && datasetRole.role !== "viewer" ? (
 							<Tab
 								icon={<BuildIcon />}
 								iconPosition="start"
@@ -318,9 +340,10 @@ export const Dataset = (): JSX.Element => {
 								label="Extract"
 								{...a11yProps(4)}
 								disabled={false}
-							/> :
+							/>
+						) : (
 							<></>
-						}
+						)}
 						<Tab
 							icon={<HistoryIcon />}
 							iconPosition="start"
@@ -329,7 +352,7 @@ export const Dataset = (): JSX.Element => {
 							{...a11yProps(5)}
 							disabled={false}
 						/>
-						{datasetRole.role !== undefined && datasetRole.role !== "viewer" ?
+						{datasetRole.role !== undefined && datasetRole.role !== "viewer" ? (
 							<Tab
 								icon={<ShareIcon />}
 								iconPosition="start"
@@ -337,9 +360,10 @@ export const Dataset = (): JSX.Element => {
 								label="Sharing"
 								{...a11yProps(6)}
 								disabled={false}
-							/> :
+							/>
+						) : (
 							<></>
-						}
+						)}
 					</Tabs>
 					<TabPanel value={selectedTabIndex} index={0}>
 						{folderId !== null ? (
@@ -355,7 +379,9 @@ export const Dataset = (): JSX.Element => {
 						<Visualization datasetId={datasetId} />
 					</TabPanel>
 					<TabPanel value={selectedTabIndex} index={2}>
-						{enableAddMetadata && datasetRole.role !== undefined && datasetRole.role !== "viewer" ? (
+						{enableAddMetadata &&
+						datasetRole.role !== undefined &&
+						datasetRole.role !== "viewer" ? (
 							<>
 								<EditMetadata
 									resourceType="dataset"
@@ -387,7 +413,9 @@ export const Dataset = (): JSX.Element => {
 									resourceId={datasetId}
 								/>
 								<Box textAlign="center">
-									{enableAddMetadata && datasetRole.role !== undefined && datasetRole.role !== "viewer" ?
+									{enableAddMetadata &&
+									datasetRole.role !== undefined &&
+									datasetRole.role !== "viewer" ? (
 										<Button
 											variant="contained"
 											sx={{ m: 2 }}
@@ -395,10 +423,11 @@ export const Dataset = (): JSX.Element => {
 												setEnableAddMetadata(true);
 											}}
 										>
-										Add Metadata
-										</Button> :
+											Add Metadata
+										</Button>
+									) : (
 										<></>
-									}
+									)}
 								</Box>
 							</>
 						)}
@@ -411,40 +440,35 @@ export const Dataset = (): JSX.Element => {
 							resourceId={datasetId}
 						/>
 					</TabPanel>
-					{datasetRole.role !== undefined && datasetRole.role !== "viewer" ?
+					{datasetRole.role !== undefined && datasetRole.role !== "viewer" ? (
 						<TabPanel value={selectedTabIndex} index={4}>
 							<Listeners datasetId={datasetId} />
-						</TabPanel> :
+						</TabPanel>
+					) : (
 						<></>
-					}
+					)}
 					<TabPanel value={selectedTabIndex} index={5}>
 						<ExtractionHistoryTab datasetId={datasetId} />
 					</TabPanel>
-					{datasetRole.role !== undefined && datasetRole.role !== "viewer" ?
+					{datasetRole.role !== undefined && datasetRole.role !== "viewer" ? (
 						<TabPanel value={selectedTabIndex} index={6}>
 							<SharingTab datasetId={datasetId} />
 						</TabPanel>
-						: <></>
-					}
+					) : (
+						<></>
+					)}
 					<Box display="flex" justifyContent="center" sx={{ m: 1 }}>
-						<ButtonGroup
-								variant="contained"
-								aria-label="previous next buttons"
+						<ButtonGroup variant="contained" aria-label="previous next buttons">
+							<Button
+								aria-label="previous"
+								onClick={previous}
+								disabled={prevDisabled}
 							>
-								<Button
-									aria-label="previous"
-									onClick={previous}
-									disabled={prevDisabled}
-								>
-									<ArrowBack /> Prev
-								</Button>
-								<Button
-									aria-label="next"
-									onClick={next}
-									disabled={nextDisabled}
-								>
-									Next <ArrowForward />
-								</Button>
+								<ArrowBack /> Prev
+							</Button>
+							<Button aria-label="next" onClick={next} disabled={nextDisabled}>
+								Next <ArrowForward />
+							</Button>
 						</ButtonGroup>
 					</Box>
 				</Grid>

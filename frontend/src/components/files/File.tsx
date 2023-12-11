@@ -60,27 +60,23 @@ export const File = (): JSX.Element => {
 	const folderId = searchParams.get("folder");
 	const datasetId = searchParams.get("dataset");
 
-<<<<<<< HEAD
 	const dispatch = useDispatch();
-=======
-	const adminMode = useSelector((state: RootState) => state.user.adminMode)
->>>>>>> 830-create-superadmin-mode
 
 	const listDatasetAbout = (datasetId: string | undefined) =>
-		dispatch(fetchDatasetAbout(datasetId, adminMode));
+		dispatch(fetchDatasetAbout(datasetId));
 	const about = useSelector((state: RootState) => state.dataset.about);
 	const listFileSummary = (fileId: string | undefined) =>
-		dispatch(fetchFileSummary(fileId, adminMode));
+		dispatch(fetchFileSummary(fileId));
 	const listFileVersions = (fileId: string | undefined) =>
-		dispatch(fetchFileVersions(fileId, adminMode));
+		dispatch(fetchFileVersions(fileId));
 	const listFileMetadata = (fileId: string | undefined) =>
-		dispatch(fetchFileMetadata(fileId, adminMode));
+		dispatch(fetchFileMetadata(fileId));
 	const createFileMetadata = (fileId: string | undefined, metadata: object) =>
 		dispatch(createFileMetadataAction(fileId, metadata));
 	const updateFileMetadata = (fileId: string | undefined, metadata: object) =>
 		dispatch(patchFileMetadataAction(fileId, metadata));
 	const deleteFileMetadata = (fileId: string | undefined, metadata: object) =>
-		dispatch(deleteFileMetadataAction(fileId, adminMode, metadata));
+		dispatch(deleteFileMetadataAction(fileId, metadata));
 	const getFolderPath = (folderId: string | null) =>
 		dispatch(fetchFolderPath(folderId));
 

@@ -49,23 +49,20 @@ export function UserAndRoleTableEntry(props: UserAndRoleTableEntryProps) {
 	const datasetRole = useSelector(
 		(state: RootState) => state.dataset.datasetRole
 	);
-	const adminMode = useSelector(
-		(state: RootState) => state.user.adminMode
-	);
 
 	const userRoleAssigned = (
 		dataset_id: string | undefined,
 		username: string | undefined,
 		role: string | undefined
-	) => dispatch(setDatasetUserRole(dataset_id, username, role, adminMode));
+	) => dispatch(setDatasetUserRole(dataset_id, username, role));
 
 	const removeUserRole = async (
 		dataset_id: string | undefined,
 		username: string | undefined
-	) => dispatch(removeDatasetUserRole(dataset_id, username, adminMode));
+	) => dispatch(removeDatasetUserRole(dataset_id, username));
 
 	const getRoles = (datasetId: string | undefined) =>
-		dispatch(fetchDatasetRoles(datasetId, adminMode));
+		dispatch(fetchDatasetRoles(datasetId));
 
 	const [selectedRole, setSelectedRole] = useState(user_role.role);
 	const [editRoleOn, setEditRoleOn] = useState(false);

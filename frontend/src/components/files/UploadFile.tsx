@@ -42,7 +42,6 @@ export const UploadFile: React.FC<UploadFileProps> = (
 	const [loading, setLoading] = useState(false);
 
 	const dispatch = useDispatch();
-	const adminMode = useSelector((state : RootState) => state.user.adminMode);
 	// @ts-ignore
 	const getMetadatDefinitions = (
 		name: string | null,
@@ -51,16 +50,15 @@ export const UploadFile: React.FC<UploadFileProps> = (
 	) => dispatch(fetchMetadataDefinitions(name, skip, limit));
 	const createFileMetadata = (
 		fileId: string | undefined,
-		adminMode: boolean,
 		metadata: MetadataIn
-	) => dispatch(postFileMetadata(fileId, adminMode, metadata));
+	) => dispatch(postFileMetadata(fileId, metadata));
 	const uploadFile = (
 		selectedDatasetId: string | undefined,
 		selectedFolderId: string | undefined,
 		selectedFile: File
 	) =>
 		dispatch(
-			createFileAction(selectedDatasetId, selectedFile, selectedFolderId, adminMode)
+			createFileAction(selectedDatasetId, selectedFile, selectedFolderId)
 		);
 	const newFile = useSelector((state: RootState) => state.dataset.newFile);
 	const metadataDefinitionList = useSelector(

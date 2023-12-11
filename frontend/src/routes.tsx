@@ -43,11 +43,10 @@ const PrivateRoute = (props): JSX.Element => {
 
 	const loggedOut = useSelector((state: RootState) => state.error.loggedOut);
 	const reason = useSelector((state: RootState) => state.error.reason);
-	const adminMode = useSelector((state: RootState) => state.user.adminMode);
 	const dismissLogout = () => dispatch(resetLogout());
 
 	const listDatasetRole = (datasetId: string | undefined) =>
-		dispatch(fetchDatasetRole(datasetId, adminMode));
+		dispatch(fetchDatasetRole(datasetId));
 	const listFileRole = (fileId: string | undefined) =>
 		dispatch(fetchFileRole(fileId));
 	const { datasetId } = useParams<{ datasetId?: string }>();

@@ -9,12 +9,7 @@ import { a11yProps, TabPanel } from "./tabs/TabComponent";
 import DatasetCard from "./datasets/DatasetCard";
 import { ArrowBack, ArrowForward } from "@material-ui/icons";
 import Layout from "./Layout";
-<<<<<<< HEAD
 import { Link as RouterLink } from "react-router-dom";
-=======
-import {Link as RouterLink, useLocation, useParams} from "react-router-dom";
-import { Listeners } from "./listeners/Listeners";
->>>>>>> 830-create-superadmin-mode
 import { ErrorModal } from "./errors/ErrorModal";
 
 const tab = {
@@ -27,15 +22,11 @@ const tab = {
 export const Explore = (): JSX.Element => {
 	// Redux connect equivalent
 	const dispatch = useDispatch();
-	const adminMode = useSelector(
-		(state: RootState) => state.user.adminMode
-	);
 	const listDatasets = (
 		skip: number | undefined,
 		limit: number | undefined,
-		mine: boolean | undefined,
-		adminMode: boolean| undefined
-	) => dispatch(fetchDatasets(skip, limit, mine, adminMode));
+		mine: boolean | undefined
+	) => dispatch(fetchDatasets(skip, limit, mine));
 	const datasets = useSelector((state: RootState) => state.dataset.datasets);
 
 	// TODO add option to determine limit number; default show 5 datasets each time
@@ -49,10 +40,9 @@ export const Explore = (): JSX.Element => {
 	const [selectedTabIndex, setSelectedTabIndex] = useState(0);
 	const [errorOpen, setErrorOpen] = useState(false);
 
-
 	// component did mount
 	useEffect(() => {
-		listDatasets(0, limit, mine, adminMode);
+		listDatasets(0, limit, mine);
 	}, []);
 
 	// fetch thumbnails from each individual dataset/id calls
@@ -70,7 +60,6 @@ export const Explore = (): JSX.Element => {
 		setSelectedTabIndex(newTabIndex);
 	};
 
-
 	// for pagination keep flipping until the return dataset is less than the limit
 	const previous = () => {
 		if (currPageNum - 1 >= 0) {
@@ -86,7 +75,7 @@ export const Explore = (): JSX.Element => {
 	};
 	useEffect(() => {
 		if (skip !== null && skip !== undefined) {
-			listDatasets(skip, limit, mine, adminMode);
+			listDatasets(skip, limit, mine);
 			if (skip === 0) setPrevDisabled(true);
 			else setPrevDisabled(false);
 		}

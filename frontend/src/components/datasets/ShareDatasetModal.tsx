@@ -45,7 +45,6 @@ export default function ShareDatasetModal(props: ShareDatasetModalProps) {
 	const [showSuccessAlert, setShowSuccessAlert] = useState(false);
 	const [options, setOptions] = useState([]);
 	const users = useSelector((state: RootState) => state.group.users);
-	const adminMode = useSelector((state: RootState) => state.user.adminMode);
 
 	const setUserRole = async (
 		datasetId: string,
@@ -54,7 +53,7 @@ export default function ShareDatasetModal(props: ShareDatasetModalProps) {
 	) => dispatch(setDatasetUserRole(datasetId, username, role));
 
 	const getRoles = (datasetId: string | undefined) =>
-		dispatch(fetchDatasetRoles(datasetId, adminMode));
+		dispatch(fetchDatasetRoles(datasetId));
 
 	useEffect(() => {
 		prefixSearchAllUsers("", 0, 10);

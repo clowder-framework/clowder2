@@ -3,8 +3,7 @@ import React from "react";
 import { ActionModal } from "../dialog/ActionModal";
 import { deleteGroup } from "../../actions/group";
 import { useNavigate } from "react-router-dom";
-import {useDispatch, useSelector} from "react-redux";
-import {RootState} from "../../types/data";
+import { useDispatch } from "react-redux";
 
 type DeleteGroupModalProps = {
 	deleteGroupConfirmOpen: any;
@@ -17,9 +16,8 @@ export default function DeleteGroupModal(props: DeleteGroupModalProps) {
 	const history = useNavigate();
 	const dispatch = useDispatch();
 
-	const adminMode = useSelector((state: RootState) => state.user.adminMode);
 	const groupDeleted = (groupId: string | undefined) =>
-		dispatch(deleteGroup(groupId, adminMode));
+		dispatch(deleteGroup(groupId));
 	return (
 		<ActionModal
 			actionOpen={deleteGroupConfirmOpen}

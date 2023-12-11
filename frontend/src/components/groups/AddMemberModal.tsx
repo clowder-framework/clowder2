@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import {
 	Autocomplete,
 	Button,
-	Container,
 	Dialog,
 	DialogActions,
 	DialogContent,
@@ -33,12 +32,10 @@ export default function AddMemberModal(props: AddMemberModalProps) {
 	const prefixSearchAllUsers = (text: string, skip: number, limit: number) =>
 		dispatch(prefixSearchAllUsersAction(text, skip, limit));
 
-	const adminMode = useSelector((state : RootState) => state.user.adminMode);
-
 	const groupMemberAdded = (
 		groupId: string | undefined,
 		username: string | undefined
-	) => dispatch(addGroupMember(groupId, username, adminMode));
+	) => dispatch(addGroupMember(groupId, username));
 	const users = useSelector((state: RootState) => state.group.users);
 
 	const [email, setEmail] = useState("");

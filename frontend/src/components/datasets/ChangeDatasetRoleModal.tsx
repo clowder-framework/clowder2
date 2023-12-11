@@ -1,33 +1,45 @@
 import React, { useEffect, useState } from "react";
-import { Alert, Autocomplete, Button, Collapse, Container, Dialog, DialogActions, DialogContent, DialogTitle, Divider, FormControl, IconButton, InputLabel, MenuItem, Select, TextField, Typography } from "@mui/material";
-import {useParams} from "react-router-dom";
+import {
+	Alert,
+	Button,
+	Collapse,
+	Container,
+	Dialog,
+	DialogActions,
+	DialogContent,
+	DialogTitle,
+	Divider,
+	FormControl,
+	IconButton,
+	InputLabel,
+	MenuItem,
+	Select,
+	Typography,
+} from "@mui/material";
+import { useParams } from "react-router-dom";
 import { setDatasetUserRole } from "../../actions/dataset";
-import {useDispatch, useSelector} from "react-redux";
+import { useDispatch } from "react-redux";
 import CloseIcon from "@mui/icons-material/Close";
-import {RootState} from "../../types/data";
-
 
 type ChangeDatasetRoleProps = {
-    open: boolean,
-    handleClose: any,
-    datasetName: string,
-	currentRole: string,
+	open: boolean;
+	handleClose: any;
+	datasetName: string;
+	currentRole: string;
 	currentUser: string;
-}
+};
 
 export default function ChangeDatasetRoleModal(props: ChangeDatasetRoleProps) {
 	const dispatch = useDispatch();
 
-	const { open, handleClose, datasetName, currentRole , currentUser} = props;
-	const {datasetId} = useParams<{ datasetId?: string }>();
+	const { open, handleClose, datasetName, currentRole, currentUser } = props;
+	const { datasetId } = useParams<{ datasetId?: string }>();
 	const [email, setEmail] = useState(currentUser);
 	const [role, setRole] = useState(currentRole);
 	const [showSuccessAlert, setShowSuccessAlert] = useState(false);
-	const adminMode = useSelector(
-		(state: RootState) => state.user.adminMode
-	);
 
-	const setUserRole = (datasetId: string, username: string, role: string) => dispatch(setDatasetUserRole(datasetId, username, role, adminMode));
+	const setUserRole = (datasetId: string, username: string, role: string) =>
+		dispatch(setDatasetUserRole(datasetId, username, role));
 
 	// component did mount
 	useEffect(() => {
@@ -43,20 +55,27 @@ export default function ChangeDatasetRoleModal(props: ChangeDatasetRoleProps) {
 
 	return (
 		<Container>
-			<Dialog open={open} onClose={handleClose} fullWidth={true} maxWidth="md"
+			<Dialog
+				open={open}
+				onClose={handleClose}
+				fullWidth={true}
+				maxWidth="md"
 				sx={{
 					".MuiPaper-root": {
 						padding: "2em",
 					},
-				}}>
+				}}
+			>
 				<DialogTitle>Share dataset &apos;{datasetName}&apos;</DialogTitle>
 				<Divider />
 				<DialogContent>
 					<Typography>Change role for user {currentUser}</Typography>
-					<div style={{
-						display: "flex",
-						alignItems: "center"
-					}}>
+					<div
+						style={{
+							display: "flex",
+							alignItems: "center",
+						}}
+					>
 						<FormControl variant="outlined" sx={{ m: 1, minWidth: 120 }}>
 							<InputLabel id="demo-simple-select-label">Status</InputLabel>
 							<Select
@@ -76,9 +95,16 @@ export default function ChangeDatasetRoleModal(props: ChangeDatasetRoleProps) {
 							</Select>
 						</FormControl>
 					</div>
-					<Button variant="contained" sx={{ marginTop: 1 }} onClick={onShare} disabled={(email.length > 0) ? false : true}>Share</Button>
+					<Button
+						variant="contained"
+						sx={{ marginTop: 1 }}
+						onClick={onShare}
+						disabled={email.length > 0 ? false : true}
+					>
+						Share
+					</Button>
 					<Collapse in={showSuccessAlert}>
-						<br/>
+						<br />
 						<Alert
 							severity="success"
 							action={
@@ -95,7 +121,7 @@ export default function ChangeDatasetRoleModal(props: ChangeDatasetRoleProps) {
 							}
 							sx={{ mb: 2 }}
 						>
-                        Successfully added role!
+							Successfully added role!
 						</Alert>
 					</Collapse>
 				</DialogContent>

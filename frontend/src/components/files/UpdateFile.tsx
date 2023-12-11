@@ -22,18 +22,16 @@ export const UpdateFile: React.FC<UpdateFileProps> = (
 	props: UpdateFileProps
 ) => {
 	const dispatch = useDispatch();
-	const adminMode = useSelector((state : RootState) => state.user.adminMode);
-
 	const updateFile = async (file: File, fileId: string | undefined) =>
 		dispatch(updateFileAction(file, fileId));
 	const listFileVersions = (fileId: string | undefined) =>
-		dispatch(fetchFileVersions(fileId, adminMode));
+		dispatch(fetchFileVersions(fileId));
 	const listFileMetadata = async (fileId: string | undefined) =>
-		dispatch(fetchFileMetadata(fileId, adminMode));
+		dispatch(fetchFileMetadata(fileId));
 	const createFileMetadata = (
 		fileId: string | undefined,
 		metadata: MetadataIn
-	) => dispatch(postFileMetadata(fileId, adminMode, metadata));
+	) => dispatch(postFileMetadata(fileId, metadata));
 	const fileMetadataList = useSelector(
 		(state: RootState) => state.metadata.fileMetadataList
 	);
@@ -57,7 +55,7 @@ export const UpdateFile: React.FC<UpdateFileProps> = (
 	const onSave = async (file: File) => {
 		setLoading(true);
 		// TODO: if this fails, the metadata update will also fail
-		await updateFile(file, fileId, adminMode);
+		await updateFile(file, fileId);
 
 		setLoading(false);
 		setOpen(false);
