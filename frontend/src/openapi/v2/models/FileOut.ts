@@ -3,6 +3,7 @@
 /* eslint-disable */
 
 import type { ContentType } from './ContentType';
+import type { StorageType } from './StorageType';
 import type { UserOut } from './UserOut';
 
 /**
@@ -33,4 +34,6 @@ export type FileOut = {
     bytes?: number;
     content_type?: ContentType;
     thumbnail_id?: string;
+    storage_type?: StorageType;
+    storage_path?: string;
 }

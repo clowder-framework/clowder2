@@ -1,4 +1,5 @@
 from datetime import datetime
+from enum import Enum
 from typing import Optional, List
 from enum import Enum, auto
 from beanie import Document, View, PydanticObjectId
@@ -20,6 +21,15 @@ class FileStatus(AutoName):
     AUTHENTICATED = auto()
     DEFAULT = auto()
     TRIAL = auto()
+    
+class StorageType(str, Enum):
+    """Depending on the StorageType,the file may need different properties such as local path or URL.
+    Also, some StorageTypes do not support versioning or anonymous sharing."""
+
+    MINIO = "minio"
+    LOCAL = "local"
+    REMOTE = "remote"
+    AWS = "aws"
 
 
 class ContentType(BaseModel):
@@ -56,6 +66,12 @@ class FileIn(FileBase):
     pass
 
 
+class LocalFileIn(BaseModel):
+    """Used when adding a file from a local disk."""
+
+    path: str
+
+
 class FileDB(Document, FileBase):
     creator: UserOut
     created: datetime = Field(default_factory=datetime.utcnow)
@@ -68,9 +84,15 @@ class FileDB(Document, FileBase):
     bytes: int = 0
     content_type: ContentType = ContentType()
     thumbnail_id: Optional[PydanticObjectId] = None
+    storage_type: StorageType = StorageType.MINIO
+    storage_path: Optional[str]  # store URL or file path depending on storage_type
 
     class Settings:
         name = "files"
+
+    class Config:
+        # required for Enum to properly work
+        use_enum_values = True
 
 
 class FileDBViewList(View, FileBase):
