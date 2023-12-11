@@ -216,7 +216,7 @@ if __name__ == "__main__":
 
     for _ in range(0, 100):
         n = random.randint(0, 4)
-        s = random.randint(0,3)
+        s = random.randint(0, 3)
         user = users[n]
         response = requests.post(f"{api}/login", json=user)
         token = response.json().get("token")
@@ -225,13 +225,13 @@ if __name__ == "__main__":
             dataset_data = {
                 "name": fake.sentence(nb_words=10).rstrip("."),
                 "description": fake.paragraph(),
-                "status": "PUBLIC"
+                "status": "PUBLIC",
             }
         elif s == 1:
             dataset_data = {
                 "name": fake.sentence(nb_words=10).rstrip("."),
                 "description": fake.paragraph(),
-                "status": "PUBLIC"
+                "status": "PUBLIC",
             }
         else:
             dataset_data = {
