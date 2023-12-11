@@ -23,8 +23,10 @@ export function Group() {
 
 	// Redux connect equivalent
 	const dispatch = useDispatch();
+
+	const adminMode = useSelector((state : RootState) => state.user.adminMode);
 	const fetchGroupInfo = (groupId: string | undefined) =>
-		dispatch(fetchGroupAbout(groupId));
+		dispatch(fetchGroupAbout(groupId, adminMode));
 	const fetchCurrentGroupRole = (groupId: string | undefined) =>
 		dispatch(fetchGroupRole(groupId));
 

@@ -50,6 +50,8 @@ export const Dataset = (): JSX.Element => {
 	// search parameters
 	const [searchParams] = useSearchParams();
 	const folderId = searchParams.get("folder");
+
+	const adminMode = useSelector((state:RootState) => state.user.adminMode);
 	// Redux connect equivalent
 	const dispatch = useDispatch();
 	const updateDatasetMetadata = (
@@ -59,26 +61,26 @@ export const Dataset = (): JSX.Element => {
 	const createDatasetMetadata = (
 		datasetId: string | undefined,
 		metadata: MetadataIn
-	) => dispatch(postDatasetMetadata(datasetId, metadata));
+	) => dispatch(postDatasetMetadata(datasetId, adminMode, metadata));
 	const deleteDatasetMetadata = (
 		datasetId: string | undefined,
 		metadata: object
-	) => dispatch(deleteDatasetMetadataAction(datasetId, metadata));
+	) => dispatch(deleteDatasetMetadataAction(datasetId, adminMode, metadata));
 	const getFolderPath = (folderId: string | null) =>
 		dispatch(fetchFolderPath(folderId));
 	const listFilesInDataset = (
 		datasetId: string | undefined,
 		folderId: string | null
-		, skip: number | undefined, limit: number | undefined) => dispatch(fetchFilesInDataset(datasetId, folderId, skip, limit));
+		, skip: number | undefined, limit: number | undefined) => dispatch(fetchFilesInDataset(datasetId, folderId, skip, limit, adminMode));
 	const listFoldersInDataset = (
 		datasetId: string | undefined,
 		parentFolder: string | null,
 		skip: number | undefined, limit: number | undefined
-	) => dispatch(fetchFoldersInDataset(datasetId, parentFolder, skip, limit));
+	) => dispatch(fetchFoldersInDataset(datasetId, parentFolder, skip, limit, adminMode));
 	const listDatasetAbout = (datasetId: string | undefined) =>
-		dispatch(fetchDatasetAbout(datasetId));
+		dispatch(fetchDatasetAbout(datasetId, adminMode));
 	const listDatasetMetadata = (datasetId: string | undefined) =>
-		dispatch(fetchDatasetMetadata(datasetId));
+		dispatch(fetchDatasetMetadata(datasetId, adminMode));
 	const getMetadatDefinitions = (name:string|null, skip:number, limit:number) => dispatch(fetchMetadataDefinitions(name, skip,limit));
 
 
@@ -121,7 +123,7 @@ export const Dataset = (): JSX.Element => {
 		listFoldersInDataset(datasetId, folderId, skip, limit);
 		listDatasetAbout(datasetId);
 		getFolderPath(folderId);
-	}, [searchParams]);
+	}, [searchParams, adminMode]);
 
 	useEffect(() => {
 		getMetadatDefinitions(null, 0, 100);

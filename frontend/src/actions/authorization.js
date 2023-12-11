@@ -1,12 +1,14 @@
 import { V2 } from "../openapi";
 import { handleErrorsAuthorization, resetFailedReason } from "./common";
+import {fetchDatasets} from "./dataset";
 
 export const RECEIVE_DATASET_ROLE = "RECEIVE_DATASET_ROLE";
 
-export function fetchDatasetRole(datasetId) {
+export function fetchDatasetRole(datasetId, adminMode) {
 	return (dispatch) => {
 		return V2.AuthorizationService.getDatasetRoleApiV2AuthorizationsDatasetsDatasetIdRoleGet(
-			datasetId
+			datasetId,
+			adminMode
 		)
 			.then((json) => {
 				dispatch({
@@ -20,7 +22,7 @@ export function fetchDatasetRole(datasetId) {
 			})
 			.catch((reason) => {
 				dispatch(
-					handleErrorsAuthorization(reason, fetchDatasetRole(datasetId))
+					handleErrorsAuthorization(reason, fetchDatasetRole(datasetId, adminMode))
 				);
 			});
 	};
@@ -28,10 +30,11 @@ export function fetchDatasetRole(datasetId) {
 
 export const RECEIVE_FILE_ROLE = "RECEIVE_FILE_ROLE";
 
-export function fetchFileRole(fileId) {
+export function fetchFileRole(fileId, adminMode) {
 	return (dispatch) => {
 		return V2.AuthorizationService.getFileRoleApiV2AuthorizationsFilesFileIdRoleGet(
-			fileId
+			fileId,
+			adminMode
 		)
 			.then((json) => {
 				dispatch({
@@ -44,17 +47,18 @@ export function fetchFileRole(fileId) {
 				dispatch(resetFailedReason());
 			})
 			.catch((reason) => {
-				dispatch(handleErrorsAuthorization(reason, fetchFileRole(fileId)));
+				dispatch(handleErrorsAuthorization(reason, fetchFileRole(fileId, adminMode)));
 			});
 	};
 }
 
 export const RECEIVE_GROUP_ROLE = "RECEIVE_GROUP_ROLE";
 
-export function fetchGroupRole(groupId) {
+export function fetchGroupRole(groupId, adminMode) {
 	return (dispatch) => {
 		return V2.AuthorizationService.getGroupRoleApiV2AuthorizationsGroupsGroupIdRoleGet(
-			groupId
+			groupId,
+			adminMode
 		)
 			.then((json) => {
 				dispatch({
@@ -67,7 +71,7 @@ export function fetchGroupRole(groupId) {
 				dispatch(resetFailedReason());
 			})
 			.catch((reason) => {
-				dispatch(handleErrorsAuthorization(reason, fetchGroupRole(groupId)));
+				dispatch(handleErrorsAuthorization(reason, fetchGroupRole(groupId, adminMode)));
 			});
 	};
 }

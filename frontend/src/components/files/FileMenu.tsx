@@ -33,10 +33,12 @@ export default function FileMenu(props: FileMenuProps) {
 		setAnchorEl(null);
 	};
 
+	const adminMode = useSelector((state: RootState) => state.user.adminMode);
+
 	// confirmation dialog
 	const dispatch = useDispatch();
 	const deleteFile = (fileId: string | undefined) =>
-		dispatch(fileDeleted(fileId));
+		dispatch(fileDeleted(fileId, adminMode));
 	const datasetRole = useSelector(
 		(state: RootState) => state.dataset.datasetRole
 	);

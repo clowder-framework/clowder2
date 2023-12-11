@@ -2,6 +2,8 @@ import { V2 } from "../openapi";
 import Cookies from "universal-cookie";
 import config from "../app.config";
 import { handleErrors } from "./common";
+import {fetchAdmin} from "./authorization";
+import {fetchDatasets} from "./dataset";
 
 const cookies = new Cookies();
 
@@ -53,6 +55,8 @@ export const SET_USER = "SET_USER";
 export const REGISTER_USER = "REGISTER_USER";
 export const REGISTER_ERROR = "REGISTER_ERROR";
 export const LOGOUT = "LOGOUT";
+export const ADMIN = "ADMIN"
+export const ADMIN_MODE = "ADMIN_MODE"
 
 export function _legacy_login(email, password) {
 	return async (dispatch) => {
@@ -124,6 +128,23 @@ export function fetchAllUsers(skip = 0, limit = 101) {
 			.catch((reason) => {
 				dispatch(fetchAllUsers(skip, limit));
 			});
+	};
+}
+
+export const setAdmin = () => {
+  return async (dispatch) => {
+	  try {
+		  dispatch({type: ADMIN, admin: await V2.LoginService.getAdminApiV2AdminGet()});
+	  } catch (error) {
+		  dispatch({type: ADMIN, admin: false});
+	  }
+  };
+};
+
+export function toggleAdminMode(currentAdminMode) {
+	return (dispatch) => {
+		dispatch({type: ADMIN_MODE, adminMode: !currentAdminMode});
+		dispatch(fetchDatasets(0, 21, false, !currentAdminMode));
 	};
 }
 

@@ -86,6 +86,7 @@ async def search_group(
 @router.get("/{group_id}", response_model=GroupOut)
 async def get_group(
     group_id: str,
+    admin_mode: bool = False,
     allow: bool = Depends(GroupAuthorization("viewer")),
 ):
     if (group := await GroupDB.get(PydanticObjectId(group_id))) is not None:
@@ -97,6 +98,7 @@ async def get_group(
 async def edit_group(
     group_id: str,
     group_info: GroupBase,
+    admin_mode: bool = False,
     user_id=Depends(get_user),
     allow: bool = Depends(GroupAuthorization("editor")),
 ):
@@ -166,6 +168,7 @@ async def edit_group(
 @router.delete("/{group_id}", response_model=GroupOut)
 async def delete_group(
     group_id: str,
+    admin_mode: bool = False,
     allow: bool = Depends(GroupAuthorization("owner")),
 ):
     if (group := await GroupDB.get(PydanticObjectId(group_id))) is not None:
@@ -179,6 +182,7 @@ async def delete_group(
 async def add_member(
     group_id: str,
     username: str,
+    admin_mode: bool = False,
     role: Optional[str] = None,
     allow: bool = Depends(GroupAuthorization("editor")),
 ):
@@ -216,6 +220,7 @@ async def add_member(
 async def remove_member(
     group_id: str,
     username: str,
+    admin_mode: bool = False,
     allow: bool = Depends(GroupAuthorization("editor")),
 ):
     """Remove a user from a group."""
@@ -249,6 +254,7 @@ async def update_member(
     group_id: str,
     username: str,
     role: str,
+    admin_mode: bool = False,
     allow: bool = Depends(GroupAuthorization("editor")),
 ):
     """Update user role."""

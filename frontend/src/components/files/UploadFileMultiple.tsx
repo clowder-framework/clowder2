@@ -48,6 +48,7 @@ export const UploadFileMultiple: React.FC<UploadFileMultipleProps> = (
 	const [allFilled, setAllFilled] = React.useState<boolean>(false);
 
 	const [loading, setLoading] = useState(false);
+	const adminMode = useSelector((state:RootState) => state.user.adminMode);
 
 	const dispatch = useDispatch();
 	// @ts-ignore
@@ -59,7 +60,7 @@ export const UploadFileMultiple: React.FC<UploadFileMultipleProps> = (
 	const createFileMetadata = (
 		fileId: string | undefined,
 		metadata: MetadataIn
-	) => dispatch(postFileMetadata(fileId, metadata));
+	) => dispatch(postFileMetadata(fileId, adminMode, metadata));
 
 	const uploadFiles = (
 		selectedDatasetId: string | undefined,
@@ -67,7 +68,7 @@ export const UploadFileMultiple: React.FC<UploadFileMultipleProps> = (
 		selectedFolderId: string | undefined
 	) =>
 		dispatch(
-			createFilesAction(selectedDatasetId, selectedFiles, selectedFolderId)
+			createFilesAction(selectedDatasetId, adminMode, selectedFiles, selectedFolderId)
 		);
 
 	const getFolderPath = (folderId: string | null) =>
@@ -77,15 +78,15 @@ export const UploadFileMultiple: React.FC<UploadFileMultipleProps> = (
 		folderId: string | null,
 		skip: number | undefined,
 		limit: number | undefined
-	) => dispatch(fetchFilesInDataset(datasetId, folderId, skip, limit));
+	) => dispatch(fetchFilesInDataset(datasetId, folderId, skip, limit, adminMode));
 	const listFoldersInDataset = (
 		datasetId: string | undefined,
 		parentFolder: string | null,
 		skip: number | undefined,
 		limit: number | undefined
-	) => dispatch(fetchFoldersInDataset(datasetId, parentFolder, skip, limit));
+	) => dispatch(fetchFoldersInDataset(datasetId, parentFolder, skip, limit, adminMode));
 	const listDatasetAbout = (datasetId: string | undefined) =>
-		dispatch(fetchDatasetAbout(datasetId));
+		dispatch(fetchDatasetAbout(datasetId, adminMode));
 
 	const newFiles = useSelector((state: RootState) => state.dataset.newFiles);
 	const metadataDefinitionList = useSelector(

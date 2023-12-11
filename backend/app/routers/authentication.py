@@ -93,6 +93,7 @@ async def authenticate_user(email: str, password: str):
     return user
 
 
+@router.get("/admin")
 async def get_admin(dataset_id: str = None, current_username=Depends(get_current_user)):
     if (
         current_user := await UserDB.find_one(UserDB.email == current_username.email)

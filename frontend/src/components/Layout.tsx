@@ -18,9 +18,9 @@ import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
 import { Link, Menu, MenuItem, MenuList, Typography } from "@mui/material";
 import { Link as RouterLink, useLocation } from "react-router-dom";
-import { useSelector } from "react-redux";
+import {useDispatch, useSelector} from "react-redux";
 import { RootState } from "../types/data";
-import { AddBox, Explore } from "@material-ui/icons";
+import {AddBox, Explore} from "@material-ui/icons";
 import HistoryIcon from "@mui/icons-material/History";
 import GroupIcon from "@mui/icons-material/Group";
 import Gravatar from "react-gravatar";
@@ -30,6 +30,8 @@ import { getCurrEmail } from "../utils/common";
 import VpnKeyIcon from "@mui/icons-material/VpnKey";
 import LogoutIcon from "@mui/icons-material/Logout";
 import { EmbeddedSearch } from "./search/EmbeddedSearch";
+import {setAdmin, toggleAdminMode} from "../actions/user";
+import {AdminPanelSettings} from "@mui/icons-material";
 
 const drawerWidth = 240;
 
@@ -97,12 +99,27 @@ const link = {
 };
 
 export default function PersistentDrawerLeft(props) {
+	const dispatch = useDispatch();
 	const { children } = props;
 	const theme = useTheme();
 	const [open, setOpen] = React.useState(false);
 	const [embeddedSearchHidden, setEmbeddedSearchHidden] = React.useState(false);
 	const [anchorEl, setAnchorEl] = React.useState(null);
 	const isMenuOpen = Boolean(anchorEl);
+	const admin = useSelector(
+		(state: RootState) => state.user.admin
+	);
+	const adminMode = useSelector(
+		(state: RootState) => state.user.adminMode
+	);
+
+	useEffect(() => {
+		dispatch(setAdmin());
+	  }, [dispatch]);
+
+	const handleAdminMode = () => {
+		dispatch(toggleAdminMode(adminMode));
+	};
 
 	const handleDrawerOpen = () => {
 		setOpen(true);
@@ -216,6 +233,22 @@ export default function PersistentDrawerLeft(props) {
 						</ListItemIcon>
 						<ListItemText>User Profile</ListItemText>
 					</MenuItem>
+					{admin && !adminMode?<div>
+						<Divider orientation="horizontal" />
+						<MenuItem onClick={handleAdminMode}>
+						<ListItemIcon>
+							<AdminPanelSettings fontSize="small" />
+						</ListItemIcon>
+						<ListItemText>Admin Mode</ListItemText>
+					</MenuItem></div>: <></>}
+					{admin && adminMode?<div>
+						<Divider orientation="horizontal" />
+						<MenuItem onClick={handleAdminMode}>
+						<ListItemIcon>
+							<AdminPanelSettings fontSize="small" />
+						</ListItemIcon>
+						<ListItemText>Drop Admin Mode</ListItemText>
+					</MenuItem></div>: <></>}
 					<Divider orientation="horizontal" />
 					<MenuItem component={RouterLink} to="/apikeys">
 						<ListItemIcon>

@@ -23,8 +23,9 @@ export const EditMetadata = (props: MetadataType) => {
 	const dispatch = useDispatch();
 	const getMetadatDefinitions = (name:string|null, skip:number, limit:number) => dispatch(fetchMetadataDefinitions(name, skip,limit));
 	const metadataDefinitionList = useSelector((state: RootState) => state.metadata.metadataDefinitionList);
-	const listDatasetMetadata = (datasetId: string | undefined) => dispatch(fetchDatasetMetadata(datasetId));
-	const listFileMetadata = (fileId: string | undefined) => dispatch(fetchFileMetadata(fileId));
+	const adminMode = useSelector((state : RootState) => state.user.adminMode);
+	const listDatasetMetadata = (datasetId: string | undefined) => dispatch(fetchDatasetMetadata(datasetId, adminMode));
+	const listFileMetadata = (fileId: string | undefined) => dispatch(fetchFileMetadata(fileId, adminMode));
 	const datasetMetadataList = useSelector((state: RootState) => state.metadata.datasetMetadataList);
 	const fileMetadataList = useSelector((state: RootState) => state.metadata.fileMetadataList);
 	const datasetRole = useSelector(

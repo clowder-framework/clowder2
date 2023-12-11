@@ -10,8 +10,9 @@ import {
 
 import LoadingOverlay from "react-loading-overlay-ts";
 
-import {useDispatch,} from "react-redux";
+import {useDispatch, useSelector,} from "react-redux";
 import {folderAdded} from "../../actions/folder";
+import {RootState} from "../../types/data";
 
 
 type CreateFolderProps = {
@@ -23,7 +24,9 @@ type CreateFolderProps = {
 
 export const CreateFolder: React.FC<CreateFolderProps> = (props: CreateFolderProps) => {
 	const dispatch = useDispatch();
-	const addFolder = (datasetId:string|undefined, folderName:string, parentFolder:string|null) => dispatch(folderAdded(datasetId, folderName, parentFolder));
+
+	const adminMode = useSelector((state: RootState) => state.user.adminMode);
+	const addFolder = (datasetId:string|undefined, folderName:string, parentFolder:string|null) => dispatch(folderAdded(datasetId, adminMode, folderName, parentFolder));
 	const {datasetId, parentFolder, open, handleClose} = props;
 
 	const [loading, setLoading] = useState(false);

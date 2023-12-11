@@ -54,12 +54,15 @@ export function GroupAndRoleTableEntry(props: GroupAndRoleTableEntryProps) {
 	);
 
 	const [expand, setExpand] = React.useState(false);
+	const adminMode = useSelector(
+		(state: RootState) => state.user.adminMode
+	);
 
 	const groupRoleAssigned = (
 		dataset_id: string | undefined,
 		group_id: string | undefined,
 		role: string | undefined
-	) => dispatch(setDatasetGroupRole(dataset_id, group_id, role));
+	) => dispatch(setDatasetGroupRole(dataset_id, group_id, role, adminMode));
 
 	const removeGroupRole = async (
 		dataset_id: string | undefined,
@@ -86,7 +89,7 @@ export function GroupAndRoleTableEntry(props: GroupAndRoleTableEntryProps) {
 	};
 
 	const getRoles = (datasetId: string | undefined) =>
-		dispatch(fetchDatasetRoles(datasetId));
+		dispatch(fetchDatasetRoles(datasetId, adminMode));
 
 	const handleRoleDelete = async () => {
 		await removeGroupRole(datasetId, group_role.group.id);

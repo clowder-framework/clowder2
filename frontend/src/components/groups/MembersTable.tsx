@@ -26,7 +26,9 @@ export default function MembersTable(props: MembersTableProps) {
 	const groupCreatorEmail = useSelector((state: RootState) => state.group.about.creator)
 	// dispatch
 	const dispatch = useDispatch();
-	const groupMemberDeleted = (groupId: string|undefined, username: string|undefined) => dispatch(deleteGroupMember(groupId, username))
+
+	const adminMode = useSelector((state : RootState) => state.user.adminMode);
+	const groupMemberDeleted = (groupId: string|undefined, username: string|undefined) => dispatch(deleteGroupMember(groupId, username, adminMode))
 
 	const [deleteMemberConfirmOpen, setDeleteMemberConfirmOpen] = useState(false);
 	const [selectMemberUsername, setSelectMemberUsername] = useState();

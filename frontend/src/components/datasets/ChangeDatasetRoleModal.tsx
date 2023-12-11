@@ -2,8 +2,9 @@ import React, { useEffect, useState } from "react";
 import { Alert, Autocomplete, Button, Collapse, Container, Dialog, DialogActions, DialogContent, DialogTitle, Divider, FormControl, IconButton, InputLabel, MenuItem, Select, TextField, Typography } from "@mui/material";
 import {useParams} from "react-router-dom";
 import { setDatasetUserRole } from "../../actions/dataset";
-import { useDispatch } from "react-redux";
+import {useDispatch, useSelector} from "react-redux";
 import CloseIcon from "@mui/icons-material/Close";
+import {RootState} from "../../types/data";
 
 
 type ChangeDatasetRoleProps = {
@@ -22,8 +23,11 @@ export default function ChangeDatasetRoleModal(props: ChangeDatasetRoleProps) {
 	const [email, setEmail] = useState(currentUser);
 	const [role, setRole] = useState(currentRole);
 	const [showSuccessAlert, setShowSuccessAlert] = useState(false);
+	const adminMode = useSelector(
+		(state: RootState) => state.user.adminMode
+	);
 
-	const setUserRole = (datasetId: string, username: string, role: string) => dispatch(setDatasetUserRole(datasetId, username, role));
+	const setUserRole = (datasetId: string, username: string, role: string) => dispatch(setDatasetUserRole(datasetId, username, role, adminMode));
 
 	// component did mount
 	useEffect(() => {

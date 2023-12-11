@@ -26,8 +26,9 @@ type EditDescriptionModalProps = {
 export default function EditNameModal(props: EditDescriptionModalProps) {
 	const { open, handleClose, groupName, groupDescription, groupId } = props;
 	const dispatch = useDispatch();
+	const adminMode = useSelector((state : RootState) => state.user.adminMode);
 	const editGroup = (groupId: string | undefined, formData: GroupIn) =>
-		dispatch(updateGroup(groupId, formData));
+		dispatch(updateGroup(groupId, formData, adminMode));
 
 	const groupAbout = useSelector((state: RootState) => state.group.about);
 	const about = useSelector((state: RootState) => state.dataset.about);

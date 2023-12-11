@@ -26,6 +26,7 @@ import { ErrorModal } from "../errors/ErrorModal";
 
 export const CreateDataset = (): JSX.Element => {
 	const dispatch = useDispatch();
+	const adminMode = useSelector((state : RootState) => state.user.adminMode);
 	// @ts-ignore
 	const getMetadatDefinitions = (
 		name: string | null,
@@ -35,7 +36,7 @@ export const CreateDataset = (): JSX.Element => {
 	const createDatasetMetadata = (
 		datasetId: string | undefined,
 		metadata: MetadataIn
-	) => dispatch(postDatasetMetadata(datasetId, metadata));
+	) => dispatch(postDatasetMetadata(datasetId, adminMode, metadata));
 	const createDataset = (formData: FormData) =>
 		dispatch(datasetCreated(formData));
 	const newDataset = useSelector(
