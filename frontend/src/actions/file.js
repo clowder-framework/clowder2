@@ -119,7 +119,7 @@ export function fileDeleted(fileId) {
 
 export const CREATE_FILE = "CREATE_FILE";
 
-export function createFile(selectedDatasetId, selectedFile, folderId) {
+export function createFile(selectedDatasetId, folderId, selectedFile) {
 	return (dispatch) => {
 		const formData = new FormData();
 		formData["file"] = selectedFile;
@@ -139,7 +139,7 @@ export function createFile(selectedDatasetId, selectedFile, folderId) {
 				dispatch(
 					handleErrors(
 						reason,
-						createFile(selectedDatasetId, selectedFile, folderId)
+						createFile(selectedDatasetId, folderId, selectedFile)
 					)
 				);
 			});
