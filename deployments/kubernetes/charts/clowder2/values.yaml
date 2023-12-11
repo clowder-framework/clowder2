@@ -1,7 +1,7 @@
 hostname: clowder2-test.icecube.aq
 
 imagePullSecrets: 
-  - regcred-aq
+  - name: regcred-aq
 nameOverride: ""
 fullnameOverride: ""
 
