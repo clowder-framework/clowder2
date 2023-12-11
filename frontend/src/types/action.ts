@@ -101,11 +101,6 @@ interface SET_USER {
 	Authorization: string;
 }
 
-interface ADMIN {
-	type: "ADMIN";
-	admin: boolean;
-}
-
 interface ADMIN_MODE {
 	type: "ADMIN_MODE";
 	adminMode: boolean;
@@ -466,7 +461,6 @@ interface RESET_VIS_DATA_PRESIGNED_URL {
 }
 
 export type DataAction =
-	| ADMIN
 	| ADMIN_MODE
 	| RECEIVE_FILES_IN_DATASET
 	| RECEIVE_FOLDERS_IN_DATASET

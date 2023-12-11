@@ -54,7 +54,6 @@ export const SET_USER = "SET_USER";
 export const REGISTER_USER = "REGISTER_USER";
 export const REGISTER_ERROR = "REGISTER_ERROR";
 export const LOGOUT = "LOGOUT";
-export const ADMIN = "ADMIN";
 export const ADMIN_MODE = "ADMIN_MODE";
 
 export function _legacy_login(email, password) {

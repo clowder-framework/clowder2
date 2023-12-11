@@ -30,7 +30,7 @@ import { getCurrEmail } from "../utils/common";
 import VpnKeyIcon from "@mui/icons-material/VpnKey";
 import LogoutIcon from "@mui/icons-material/Logout";
 import { EmbeddedSearch } from "./search/EmbeddedSearch";
-import { toggleAdminMode } from "../actions/user";
+import { fetchUserProfile, toggleAdminMode } from "../actions/user";
 import { AdminPanelSettings } from "@mui/icons-material";
 
 const drawerWidth = 240;
@@ -108,6 +108,12 @@ export default function PersistentDrawerLeft(props) {
 	const isMenuOpen = Boolean(anchorEl);
 	const currUserProfile = useSelector((state: RootState) => state.user.profile);
 	const adminMode = useSelector((state: RootState) => state.user.adminMode);
+
+	const fetchCurrUserProfile = () => dispatch(fetchUserProfile());
+
+	useEffect(() => {
+		fetchCurrUserProfile();
+	}, []);
 
 	const handleAdminMode = () => {
 		dispatch(toggleAdminMode(adminMode));
@@ -225,33 +231,33 @@ export default function PersistentDrawerLeft(props) {
 						</ListItemIcon>
 						<ListItemText>User Profile</ListItemText>
 					</MenuItem>
-					{currUserProfile.admin && !adminMode ? (
-						<div>
-							<Divider orientation="horizontal" />
-							<MenuItem onClick={handleAdminMode}>
-								<ListItemIcon>
-									<AdminPanelSettings fontSize="small" />
-								</ListItemIcon>
-								<ListItemText>Admin Mode</ListItemText>
-							</MenuItem>
-						</div>
-					) : (
-						<></>
-					)}
-					{currUserProfile.admin && adminMode ? (
-						<div>
-							<Divider orientation="horizontal" />
-							<MenuItem onClick={handleAdminMode}>
-								<ListItemIcon>
-									<AdminPanelSettings fontSize="small" />
-								</ListItemIcon>
-								<ListItemText>Drop Admin Mode</ListItemText>
-							</MenuItem>
-						</div>
-					) : (
-						<></>
-					)}
 					<Divider orientation="horizontal" />
+					{currUserProfile.admin ? (
+						<>
+							<MenuItem onClick={handleAdminMode}>
+								{adminMode ? (
+									<>
+										<ListItemIcon>
+											<AdminPanelSettings fontSize="small" />
+										</ListItemIcon>
+										<ListItemText>Enable Admin Mode</ListItemText>
+									</>
+								) : (
+									<>
+										<ListItemIcon>
+											<AdminPanelSettings fontSize="small" />
+										</ListItemIcon>
+										<ListItemText>Drop Admin Mode</ListItemText>
+									</>
+								)}
+							</MenuItem>
+
+							<Divider orientation="horizontal" />
+						</>
+					) : (
+						<></>
+					)}
+
 					<MenuItem component={RouterLink} to="/apikeys">
 						<ListItemIcon>
 							<VpnKeyIcon fontSize="small" />

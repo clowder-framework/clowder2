@@ -13,8 +13,7 @@ import { fetchUserProfile } from "../../actions/user";
 
 export const Profile = (): JSX.Element => {
 	const dispatch = useDispatch();
-	const user = useSelector((state: RootState) => state.user);
-	const profile = user["profile"];
+	const profile = useSelector((state: RootState) => state.user.profile);
 	const fetchProfile = () => dispatch(fetchUserProfile());
 	// component did mount
 	useEffect(() => {
@@ -42,7 +41,11 @@ export const Profile = (): JSX.Element => {
 									{profile.first_name} {profile.last_name}
 								</TableCell>
 								<TableCell align="right">{profile.email}</TableCell>
-								{user.admin? <TableCell align="right">Admin</TableCell>: <TableCell align="right">Not admin</TableCell>}
+								{profile.admin ? (
+									<TableCell align="right">Admin</TableCell>
+								) : (
+									<TableCell align="right">Not admin</TableCell>
+								)}
 							</TableRow>
 						</TableBody>
 					</Table>
