@@ -1,6 +1,7 @@
 hostname: clowder2-test.icecube.aq
 
-imagePullSecrets: []
+imagePullSecrets: 
+  - regcred-aq
 nameOverride: ""
 fullnameOverride: ""
 
@@ -42,10 +43,10 @@ frontend:
 # ----------------------------------------------------------------------
 backend:
   image:
-    repository: i3registry.icecube.aq/clowder2-backend-local:0.1
+    repository: i3registry.icecube.aq/clowder2-backend-local
     pullPolicy: IfNotPresent
     # Overrides the image tag whose default is the chart appVersion.
-    tag: ""
+    tag: 0.1
 
   service:
     type: ClusterIP
