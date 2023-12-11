@@ -1,5 +1,4 @@
 import {
-	ADMIN_MODE,
 	DELETE_API_KEY,
 	GENERATE_API_KEY,
 	LIST_API_KEYS,
@@ -9,6 +8,7 @@ import {
 	REGISTER_USER,
 	RESET_API_KEY,
 	SET_USER,
+	TOGGLE_ADMIN_MODE,
 } from "../actions/user";
 import { UserState } from "../types/data";
 import { DataAction } from "../types/action";
@@ -27,9 +27,9 @@ const defaultState: UserState = {
 
 const user = (state = defaultState, action: DataAction) => {
 	switch (action.type) {
-		case ADMIN_MODE:
+		case TOGGLE_ADMIN_MODE:
 			return Object.assign({}, state, {
-				adminMode: action.adminMode,
+				adminMode: !state.adminMode,
 			});
 		case SET_USER:
 			return Object.assign({}, state, {

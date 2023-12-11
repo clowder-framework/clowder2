@@ -2,7 +2,6 @@ import { V2 } from "../openapi";
 import Cookies from "universal-cookie";
 import config from "../app.config";
 import { handleErrors } from "./common";
-import { fetchDatasets } from "./dataset";
 
 const cookies = new Cookies();
 
@@ -54,7 +53,7 @@ export const SET_USER = "SET_USER";
 export const REGISTER_USER = "REGISTER_USER";
 export const REGISTER_ERROR = "REGISTER_ERROR";
 export const LOGOUT = "LOGOUT";
-export const ADMIN_MODE = "ADMIN_MODE";
+export const TOGGLE_ADMIN_MODE = "TOGGLE_ADMIN_MODE";
 
 export function _legacy_login(email, password) {
 	return async (dispatch) => {
@@ -129,10 +128,9 @@ export function fetchAllUsers(skip = 0, limit = 101) {
 	};
 }
 
-export function toggleAdminMode(currentAdminMode) {
+export function toggleAdminMode() {
 	return (dispatch) => {
-		dispatch({ type: ADMIN_MODE, adminMode: !currentAdminMode });
-		dispatch(fetchDatasets(0, 21, false, !currentAdminMode));
+		dispatch({ type: TOGGLE_ADMIN_MODE, receivedAt: Date.now() });
 	};
 }
 

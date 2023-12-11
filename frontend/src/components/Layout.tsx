@@ -30,7 +30,10 @@ import { getCurrEmail } from "../utils/common";
 import VpnKeyIcon from "@mui/icons-material/VpnKey";
 import LogoutIcon from "@mui/icons-material/Logout";
 import { EmbeddedSearch } from "./search/EmbeddedSearch";
-import { fetchUserProfile, toggleAdminMode } from "../actions/user";
+import {
+	fetchUserProfile,
+	toggleAdminMode as toggleAdminModeAction,
+} from "../actions/user";
 import { AdminPanelSettings } from "@mui/icons-material";
 
 const drawerWidth = 240;
@@ -110,14 +113,11 @@ export default function PersistentDrawerLeft(props) {
 	const adminMode = useSelector((state: RootState) => state.user.adminMode);
 
 	const fetchCurrUserProfile = () => dispatch(fetchUserProfile());
+	const toggleAdminMode = () => dispatch(toggleAdminModeAction());
 
 	useEffect(() => {
 		fetchCurrUserProfile();
 	}, []);
-
-	const handleAdminMode = () => {
-		dispatch(toggleAdminMode(adminMode));
-	};
 
 	const handleDrawerOpen = () => {
 		setOpen(true);
@@ -234,20 +234,20 @@ export default function PersistentDrawerLeft(props) {
 					<Divider orientation="horizontal" />
 					{currUserProfile.admin ? (
 						<>
-							<MenuItem onClick={handleAdminMode}>
+							<MenuItem onClick={toggleAdminMode}>
 								{adminMode ? (
 									<>
 										<ListItemIcon>
 											<AdminPanelSettings fontSize="small" />
 										</ListItemIcon>
-										<ListItemText>Enable Admin Mode</ListItemText>
+										<ListItemText>Drop Admin Mode</ListItemText>
 									</>
 								) : (
 									<>
 										<ListItemIcon>
 											<AdminPanelSettings fontSize="small" />
 										</ListItemIcon>
-										<ListItemText>Drop Admin Mode</ListItemText>
+										<ListItemText>Enable Admin Mode</ListItemText>
 									</>
 								)}
 							</MenuItem>

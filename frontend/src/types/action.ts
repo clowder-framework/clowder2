@@ -26,6 +26,7 @@ import {
 	LIST_USERS,
 	PREFIX_SEARCH_USERS,
 	RECEIVE_USER_PROFILE,
+	TOGGLE_ADMIN_MODE,
 } from "../actions/user";
 import { CREATE_GROUP, DELETE_GROUP } from "../actions/group";
 import { RECEIVE_FILE_PRESIGNED_URL } from "../actions/file";
@@ -101,9 +102,8 @@ interface SET_USER {
 	Authorization: string;
 }
 
-interface ADMIN_MODE {
-	type: "ADMIN_MODE";
-	adminMode: boolean;
+interface TOGGLE_ADMIN_MODE {
+	type: "TOGGLE_ADMIN_MODE";
 }
 
 interface LOGIN_ERROR {
@@ -461,7 +461,7 @@ interface RESET_VIS_DATA_PRESIGNED_URL {
 }
 
 export type DataAction =
-	| ADMIN_MODE
+	| TOGGLE_ADMIN_MODE
 	| RECEIVE_FILES_IN_DATASET
 	| RECEIVE_FOLDERS_IN_DATASET
 	| DELETE_FILE
