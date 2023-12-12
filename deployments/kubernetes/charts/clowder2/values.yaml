@@ -69,7 +69,7 @@ geoserver:
     type: ClusterIP
     port: 8080
   persistence:
-    storageClass: nfs-taiga
+    storageClass: csi-cephfs-sc
     size: 8Gi
 
 # ----------------------------------------------------------------------
@@ -202,6 +202,9 @@ extractors:
 # ----------------------------------------------------------------------
 elasticsearch:
   clusterName: clowder2
+
+  extraEnvs:
+    - 
 
   master:
     persistence:
