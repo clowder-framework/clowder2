@@ -31,12 +31,12 @@ spec:
             - name: GEOSERVER_ADMIN_USER
               valueFrom:
                 secretKeyRef:
-                  name: {{ include "clowder2.fullname" . }}-services
+                  name: {{ .Values.geoserver.username }}
                   key: GEOSERVER_USER
             - name: GEOSERVER_ADMIN_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ include "clowder2.fullname" . }}-services
+                  name: {{ .Values.geoserver.password }}
                   key: GEOSERVER_PW
           ports:
             - containerPort: 8080

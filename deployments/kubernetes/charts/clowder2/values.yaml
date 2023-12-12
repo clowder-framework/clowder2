@@ -203,9 +203,6 @@ extractors:
 elasticsearch:
   clusterName: clowder2
 
-  extraEnvs:
-    - 
-
   master:
     persistence:
       storageClass: csi-cephfs-sc
