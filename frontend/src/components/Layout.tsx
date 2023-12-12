@@ -235,7 +235,7 @@ export default function PersistentDrawerLeft(props) {
 					<Divider orientation="horizontal" />
 					{currUserProfile.admin ? (
 						<>
-							<MenuItem onClick={(adminMode) => toggleAdminMode(!adminMode)}>
+							<MenuItem onClick={() => toggleAdminMode(!adminMode)}>
 								{adminMode ? (
 									<>
 										<ListItemIcon>
