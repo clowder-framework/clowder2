@@ -92,7 +92,7 @@ spec:
             - name: auth_token_url
               value: https://{{ .Values.keycloak.hostname }}/auth/realms/{{ .Values.keycloak.realm }}/protocol/openid-connect/token
             - name: auth_server_url
-              value: https://{{ .Values.keycloak.hostname }}/auth
+              value: https://{{ .Values.keycloak.hostname }}/auth/
             - name: keycloak_base
               value: https://{{ .Values.hostname }}/api
             - name: frontend_url
