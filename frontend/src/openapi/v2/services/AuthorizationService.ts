@@ -152,7 +152,7 @@ export class AuthorizationService {
     ): CancelablePromise<RoleType> {
         return __request({
             method: 'GET',
-            path: `/api/v2/authorizations/groups/${groupId}/role}`,
+            path: `/api/v2/authorizations/groups/${groupId}/role`,
             query: {
                 'dataset_id': datasetId,
             },
