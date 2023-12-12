@@ -28,7 +28,6 @@ export const Explore = (): JSX.Element => {
 		mine: boolean | undefined
 	) => dispatch(fetchDatasets(skip, limit, mine));
 	const datasets = useSelector((state: RootState) => state.dataset.datasets);
-	// const adminMode = useSelector((state: RootState) => state.user.adminMode);
 	const adminMode = useSelector((state: RootState) => state.user.adminMode);
 
 	// TODO add option to determine limit number; default show 5 datasets each time
