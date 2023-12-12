@@ -1,7 +1,7 @@
-# Metadata in Clowder
+# Metadata
 
 In Clowder 2 we decide to continue supporting both user-defined and machine-defined metadata in a flexible
-representation based on JSON-LD. We enforce that, to register a new metadata, either the definition
+representation based on [JSON-LD](https://json-ld.org/). We enforce that, to register a new metadata, either the definition
 or a context URL that contains the schema of given vocabulary needs to be provided. Leveraging the
 React Component, we would like to explore dynamic rendering as well as the reusability of the metadata user interface.
 Our metadata definition are designed to facilitate that process.

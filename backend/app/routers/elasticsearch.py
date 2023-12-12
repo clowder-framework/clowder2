@@ -2,6 +2,7 @@ import json
 
 from app.config import settings
 from app.keycloak_auth import get_current_username
+from app.routers.authentication import get_admin
 from app.search.connect import connect_elasticsearch, search_index
 from fastapi import Depends
 from fastapi.routing import APIRouter, Request
@@ -9,9 +10,10 @@ from fastapi.routing import APIRouter, Request
 router = APIRouter()
 
 
-def _add_permissions_clause(query, username: str):
+def _add_permissions_clause(query, username: str, admin: bool = Depends(get_admin)):
     """Append filter to Elasticsearch object that restricts permissions based on the requesting user."""
     # TODO: Add public filter once added
+
     user_clause = {
         "bool": {
             "should": [
@@ -28,9 +30,12 @@ def _add_permissions_clause(query, username: str):
             continue  # last line
         json_content = json.loads(content)
         if "query" in json_content:
-            json_content["query"] = {
-                "bool": {"must": [user_clause, json_content["query"]]}
-            }
+            if admin:
+                json_content["query"] = {"bool": {"must": [json_content["query"]]}}
+            else:
+                json_content["query"] = {
+                    "bool": {"must": [user_clause, json_content["query"]]}
+                }
         updated_query += json.dumps(json_content) + "\n"
     return updated_query.encode()
 

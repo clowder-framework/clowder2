@@ -7,7 +7,7 @@ from app import dependencies
 from app.config import settings
 from app.deps.authorization_deps import FileAuthorization
 from app.keycloak_auth import get_current_user, get_token
-from app.models.files import FileDB, FileOut, FileVersion, FileVersionDB
+from app.models.files import FileDB, FileOut, FileVersion, FileVersionDB, StorageType
 from app.models.metadata import MetadataDB
 from app.models.thumbnails import ThumbnailDB
 from app.models.users import UserOut
@@ -21,7 +21,7 @@ from beanie.odm.operators.update.general import Inc
 from bson import ObjectId
 from elasticsearch import Elasticsearch, NotFoundError
 from fastapi import APIRouter, Depends, File, HTTPException, Security, UploadFile
-from fastapi.responses import StreamingResponse
+from fastapi.responses import FileResponse, StreamingResponse
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from minio import Minio
 from pika.adapters.blocking_connection import BlockingChannel
@@ -137,17 +137,41 @@ async def add_file_entry(
     )
 
 
+async def add_local_file_entry(
+    new_file: FileDB,
+    user: UserOut,
+    es: Elasticsearch,
+    rabbitmq_client: BlockingChannel,
+    content_type: Optional[str] = None,
+):
+    """Insert FileDB object into MongoDB (makes Clowder ID). Bytes are not stored in DB and versioning not supported
+    for local files."""
+
+    content_type_obj = get_content_type(new_file.name, content_type)
+    new_file.content_type = content_type_obj
+    await new_file.insert()
+
+    # Add entry to the file index
+    await index_file(es, FileOut(**new_file.dict()))
+
+    # TODO - timing issue here, check_feed_listeners needs to happen asynchronously.
+    time.sleep(1)
+
+    # Submit file job to any qualifying feeds
+    await check_feed_listeners(
+        es,
+        FileOut(**new_file.dict()),
+        user,
+        rabbitmq_client,
+    )
+
+
 # TODO: Move this to MongoDB middle layer
 async def remove_file_entry(
     file_id: Union[str, ObjectId], fs: Minio, es: Elasticsearch
 ):
     """Remove FileDB object into MongoDB, Minio, and associated metadata and version information."""
     # TODO: Deleting individual versions will require updating version_id in mongo, or deleting entire document
-
-    # Check all connection and abort if any one of them is not available
-    if fs is None or es is None:
-        raise HTTPException(status_code=503, detail="Service not available")
-        return
     fs.remove_object(settings.MINIO_BUCKET_NAME, str(file_id))
     # delete from elasticsearch
     delete_document_by_id(es, settings.elasticsearch_index, str(file_id))
@@ -155,6 +179,18 @@ async def remove_file_entry(
         await file.delete()
     await MetadataDB.find(MetadataDB.resource.resource_id == ObjectId(file_id)).delete()
     await FileVersionDB.find(FileVersionDB.file_id == ObjectId(file_id)).delete()
+
+
+async def remove_local_file_entry(file_id: Union[str, ObjectId], es: Elasticsearch):
+    """Remove FileDB object into MongoDB, Minio, and associated metadata and version information."""
+    # TODO: Deleting individual versions will require updating version_id in mongo, or deleting entire document
+    # delete from elasticsearch
+    delete_document_by_id(es, settings.elasticsearch_index, str(file_id))
+    if (file := await FileDB.get(PydanticObjectId(file_id))) is not None:
+        # TODO: delete from disk - should this be allowed if Clowder didn't originally write the file?
+        # os.path.remove(file.storage_path)
+        await file.delete()
+    await MetadataDB.find(MetadataDB.resource.resource_id == ObjectId(file_id)).delete()
 
 
 @router.put("/{file_id}", response_model=FileOut)
@@ -257,33 +293,53 @@ async def download_file(
 ):
     # If file exists in MongoDB, download from Minio
     if (file := await FileDB.get(PydanticObjectId(file_id))) is not None:
-        if version is not None:
-            # Version is specified, so get the minio ID from versions table if possible
-            file_vers = await FileVersionDB.find_one(
-                FileVersionDB.file_id == ObjectId(file_id),
-                FileVersionDB.version_num == version,
-            )
-            if file_vers is not None:
-                vers = FileVersion(**file_vers.dict())
-                content = fs.get_object(
-                    settings.MINIO_BUCKET_NAME, file_id, version_id=vers.version_id
+        if file.storage_type == StorageType.MINIO:
+            if version is not None:
+                # Version is specified, so get the minio ID from versions table if possible
+                file_vers = await FileVersionDB.find_one(
+                    FileVersionDB.file_id == ObjectId(file_id),
+                    FileVersionDB.version_num == version,
                 )
+                if file_vers is not None:
+                    vers = FileVersion(**file_vers.dict())
+                    content = fs.get_object(
+                        settings.MINIO_BUCKET_NAME, file_id, version_id=vers.version_id
+                    )
+                else:
+                    raise HTTPException(
+                        status_code=404,
+                        detail=f"File {file_id} version {version} not found",
+                    )
             else:
-                raise HTTPException(
-                    status_code=404,
-                    detail=f"File {file_id} version {version} not found",
-                )
-        else:
-            # If no version specified, get latest version directly
-            content = fs.get_object(settings.MINIO_BUCKET_NAME, file_id)
+                # If no version specified, get latest version directly
+                content = fs.get_object(settings.MINIO_BUCKET_NAME, file_id)
 
-        # Get content type & open file stream
-        response = StreamingResponse(content.stream(settings.MINIO_UPLOAD_CHUNK_SIZE))
-        response.headers["Content-Disposition"] = "attachment; filename=%s" % file.name
-        if increment:
-            # Increment download count
-            await file.update(Inc({FileDB.downloads: 1}))
-        return response
+            # Get content type & open file stream
+            response = StreamingResponse(
+                content.stream(settings.MINIO_UPLOAD_CHUNK_SIZE)
+            )
+            response.headers["Content-Disposition"] = (
+                "attachment; filename=%s" % file.name
+            )
+
+        elif file.storage_type == StorageType.LOCAL:
+            response = FileResponse(
+                path=file.storage_path,
+                filename=file.name,
+                media_type=file.content_type.content_type,
+            )
+
+        else:
+            raise HTTPException(
+                status_code=400, detail=f"Unable to download {file_id}."
+            )
+
+        if response:
+            if increment:
+                # Increment download count
+                await file.update(Inc({FileDB.downloads: 1}))
+            return response
+
     else:
         raise HTTPException(status_code=404, detail=f"File {file_id} not found")
 
@@ -347,8 +403,11 @@ async def delete_file(
     es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
     allow: bool = Depends(FileAuthorization("editor")),
 ):
-    if (await FileDB.get(PydanticObjectId(file_id))) is not None:
-        await remove_file_entry(file_id, fs, es)
+    if (file := await FileDB.get(PydanticObjectId(file_id))) is not None:
+        if file.storage_type == StorageType.LOCAL:
+            await remove_local_file_entry(file_id, es)
+        else:
+            await remove_file_entry(file_id, fs, es)
         return {"deleted": file_id}
     else:
         raise HTTPException(status_code=404, detail=f"File {file_id} not found")
@@ -397,13 +456,13 @@ async def get_file_versions(
     limit: int = 20,
     allow: bool = Depends(FileAuthorization("viewer")),
 ):
-    file = await FileDB.get(PydanticObjectId(file_id))
-    if file is not None:
+    if (file := await FileDB.get(PydanticObjectId(file_id))) is not None:
         mongo_versions = []
-        async for ver in FileVersionDB.find(
-            FileVersionDB.file_id == ObjectId(file_id)
-        ).sort(-FileVersionDB.created).skip(skip).limit(limit):
-            mongo_versions.append(FileVersion(**ver.dict()))
+        if file.storage_type == StorageType.MINIO:
+            async for ver in FileVersionDB.find(
+                FileVersionDB.file_id == ObjectId(file_id)
+            ).sort(-FileVersionDB.created).skip(skip).limit(limit):
+                mongo_versions.append(FileVersion(**ver.dict()))
         return mongo_versions
 
     raise HTTPException(status_code=404, detail=f"File {file_id} not found")

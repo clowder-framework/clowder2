@@ -12,6 +12,7 @@ repos:
   rev: v4.5.0
   hooks:
     - id: check-yaml
+      exclude: deployments/kubernetes/charts
     - id: end-of-file-fixer
     - id: trailing-whitespace
 - repo: https://github.com/shellcheck-py/shellcheck-py

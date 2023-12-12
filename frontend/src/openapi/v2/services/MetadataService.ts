@@ -134,15 +134,20 @@ export class MetadataService {
      * Delete Metadata
      * Delete metadata by specific ID.
      * @param metadataId
+     * @param datasetId
      * @returns any Successful Response
      * @throws ApiError
      */
     public static deleteMetadataApiV2MetadataMetadataIdDelete(
         metadataId: string,
+        datasetId?: string,
     ): CancelablePromise<any> {
         return __request({
             method: 'DELETE',
             path: `/api/v2/metadata/${metadataId}`,
+            query: {
+                'dataset_id': datasetId,
+            },
             errors: {
                 422: `Validation Error`,
             },
@@ -158,16 +163,21 @@ export class MetadataService {
      * Metadata document that was updated
      * @param metadataId
      * @param requestBody
+     * @param datasetId
      * @returns MetadataOut Successful Response
      * @throws ApiError
      */
     public static updateMetadataApiV2MetadataMetadataIdPatch(
         metadataId: string,
         requestBody: MetadataPatch,
+        datasetId?: string,
     ): CancelablePromise<MetadataOut> {
         return __request({
             method: 'PATCH',
             path: `/api/v2/metadata/${metadataId}`,
+            query: {
+                'dataset_id': datasetId,
+            },
             body: requestBody,
             mediaType: 'application/json',
             errors: {
@@ -182,6 +192,7 @@ export class MetadataService {
      * @param fileId
      * @param version
      * @param allVersions
+     * @param datasetId
      * @param formData
      * @returns MetadataOut Successful Response
      * @throws ApiError
@@ -190,6 +201,7 @@ export class MetadataService {
         fileId: string,
         version?: number,
         allVersions: boolean = false,
+        datasetId?: string,
         formData?: Body_get_file_metadata_api_v2_files__file_id__metadata_get,
     ): CancelablePromise<Array<MetadataOut>> {
         return __request({
@@ -198,6 +210,7 @@ export class MetadataService {
             query: {
                 'version': version,
                 'all_versions': allVersions,
+                'dataset_id': datasetId,
             },
             formData: formData,
             mediaType: 'application/x-www-form-urlencoded',
@@ -215,16 +228,21 @@ export class MetadataService {
      * Metadata document that was updated
      * @param fileId
      * @param requestBody
+     * @param datasetId
      * @returns MetadataOut Successful Response
      * @throws ApiError
      */
     public static replaceFileMetadataApiV2FilesFileIdMetadataPut(
         fileId: string,
         requestBody: MetadataPatch,
+        datasetId?: string,
     ): CancelablePromise<MetadataOut> {
         return __request({
             method: 'PUT',
             path: `/api/v2/files/${fileId}/metadata`,
+            query: {
+                'dataset_id': datasetId,
+            },
             body: requestBody,
             mediaType: 'application/json',
             errors: {
@@ -242,16 +260,21 @@ export class MetadataService {
      * Metadata document that was added to database
      * @param fileId
      * @param requestBody
+     * @param datasetId
      * @returns MetadataOut Successful Response
      * @throws ApiError
      */
     public static addFileMetadataApiV2FilesFileIdMetadataPost(
         fileId: string,
         requestBody: MetadataIn,
+        datasetId?: string,
     ): CancelablePromise<MetadataOut> {
         return __request({
             method: 'POST',
             path: `/api/v2/files/${fileId}/metadata`,
+            query: {
+                'dataset_id': datasetId,
+            },
             body: requestBody,
             mediaType: 'application/json',
             errors: {
@@ -264,16 +287,21 @@ export class MetadataService {
      * Delete File Metadata
      * @param fileId
      * @param requestBody
+     * @param datasetId
      * @returns MetadataOut Successful Response
      * @throws ApiError
      */
     public static deleteFileMetadataApiV2FilesFileIdMetadataDelete(
         fileId: string,
         requestBody: MetadataDelete,
+        datasetId?: string,
     ): CancelablePromise<MetadataOut> {
         return __request({
             method: 'DELETE',
             path: `/api/v2/files/${fileId}/metadata`,
+            query: {
+                'dataset_id': datasetId,
+            },
             body: requestBody,
             mediaType: 'application/json',
             errors: {
@@ -291,16 +319,21 @@ export class MetadataService {
      * Metadata document that was updated
      * @param fileId
      * @param requestBody
+     * @param datasetId
      * @returns MetadataOut Successful Response
      * @throws ApiError
      */
     public static updateFileMetadataApiV2FilesFileIdMetadataPatch(
         fileId: string,
         requestBody: MetadataPatch,
+        datasetId?: string,
     ): CancelablePromise<MetadataOut> {
         return __request({
             method: 'PATCH',
             path: `/api/v2/files/${fileId}/metadata`,
+            query: {
+                'dataset_id': datasetId,
+            },
             body: requestBody,
             mediaType: 'application/json',
             errors: {

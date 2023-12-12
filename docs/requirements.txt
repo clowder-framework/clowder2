@@ -18,6 +18,7 @@ recommonmark==0.7.1
 requests==2.27.1
 snowballstemmer==2.2.0
 Sphinx==4.4.0
+sphinx-autobuild==2021.3.14
 sphinxcontrib-applehelp==1.0.2
 sphinxcontrib-devhelp==1.0.2
 sphinxcontrib-htmlhelp==2.0.0
@@ -25,5 +26,6 @@ sphinxcontrib-jsmath==1.0.1
 sphinxcontrib-qthelp==1.0.3
 sphinxcontrib-serializinghtml==1.1.5
 sphinxcontrib-spelling==7.3.2
+sphinx-material
 urllib3==1.26.8
 zipp==3.7.0

@@ -95,17 +95,21 @@ export class AuthorizationService {
 
     /**
      * Get File Role
-     * Retrieve role of user for an individual file. Role cannot change between file versions.
      * @param fileId
+     * @param datasetId
      * @returns RoleType Successful Response
      * @throws ApiError
      */
     public static getFileRoleApiV2AuthorizationsFilesFileIdRoleGet(
         fileId: string,
+        datasetId?: string,
     ): CancelablePromise<RoleType> {
         return __request({
             method: 'GET',
             path: `/api/v2/authorizations/files/${fileId}/role`,
+            query: {
+                'dataset_id': datasetId,
+            },
             errors: {
                 422: `Validation Error`,
             },
@@ -114,17 +118,21 @@ export class AuthorizationService {
 
     /**
      * Get Metadata Role
-     * Retrieve role of user for group. Group roles can be OWNER, EDITOR, or VIEWER (for regular Members).
      * @param metadataId
+     * @param datasetId
      * @returns AuthorizationMetadata Successful Response
      * @throws ApiError
      */
     public static getMetadataRoleApiV2AuthorizationsMetadataMetadataIdRoleGet(
         metadataId: string,
+        datasetId?: string,
     ): CancelablePromise<AuthorizationMetadata> {
         return __request({
             method: 'GET',
             path: `/api/v2/authorizations/metadata/${metadataId}/role`,
+            query: {
+                'dataset_id': datasetId,
+            },
             errors: {
                 422: `Validation Error`,
             },
@@ -133,17 +141,21 @@ export class AuthorizationService {
 
     /**
      * Get Group Role
-     * Retrieve role of user on a particular group (i.e. whether they can change group memberships).
      * @param groupId
+     * @param datasetId
      * @returns RoleType Successful Response
      * @throws ApiError
      */
     public static getGroupRoleApiV2AuthorizationsGroupsGroupIdRoleGet(
         groupId: string,
+        datasetId?: string,
     ): CancelablePromise<RoleType> {
         return __request({
             method: 'GET',
             path: `/api/v2/authorizations/groups/${groupId}/role`,
+            query: {
+                'dataset_id': datasetId,
+            },
             errors: {
                 422: `Validation Error`,
             },

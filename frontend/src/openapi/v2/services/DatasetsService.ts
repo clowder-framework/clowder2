@@ -11,6 +11,7 @@ import type { DatasetPatch } from '../models/DatasetPatch';
 import type { FileOut } from '../models/FileOut';
 import type { FolderIn } from '../models/FolderIn';
 import type { FolderOut } from '../models/FolderOut';
+import type { LocalFileIn } from '../models/LocalFileIn';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { request as __request } from '../core/request';
 
@@ -21,6 +22,7 @@ export class DatasetsService {
      * @param skip
      * @param limit
      * @param mine
+     * @param datasetId
      * @returns DatasetOut Successful Response
      * @throws ApiError
      */
@@ -28,6 +30,7 @@ export class DatasetsService {
         skip?: number,
         limit: number = 10,
         mine: boolean = false,
+        datasetId?: string,
     ): CancelablePromise<Array<DatasetOut>> {
         return __request({
             method: 'GET',
@@ -36,6 +39,7 @@ export class DatasetsService {
                 'skip': skip,
                 'limit': limit,
                 'mine': mine,
+                'dataset_id': datasetId,
             },
             errors: {
                 422: `Validation Error`,
@@ -291,6 +295,33 @@ export class DatasetsService {
             },
             formData: formData,
             mediaType: 'multipart/form-data',
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+
+    /**
+     * Save Local File
+     * @param datasetId
+     * @param requestBody
+     * @param folderId
+     * @returns FileOut Successful Response
+     * @throws ApiError
+     */
+    public static saveLocalFileApiV2DatasetsDatasetIdLocalFilesPost(
+        datasetId: string,
+        requestBody: LocalFileIn,
+        folderId?: string,
+    ): CancelablePromise<FileOut> {
+        return __request({
+            method: 'POST',
+            path: `/api/v2/datasets/${datasetId}/local_files`,
+            query: {
+                'folder_id': folderId,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
             errors: {
                 422: `Validation Error`,
             },

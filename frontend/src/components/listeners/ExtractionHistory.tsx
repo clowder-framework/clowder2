@@ -11,7 +11,8 @@ import {
 	ListSubheader,
 } from "@mui/material";
 import { useDispatch, useSelector } from "react-redux";
-import { Listener, RootState } from "../../types/data";
+import { RootState } from "../../types/data";
+import { EventListenerOut as Listener } from "../../openapi/v2";
 import Layout from "../Layout";
 import { fetchListenerJobs, fetchListeners } from "../../actions/listeners";
 import { ArrowBack, ArrowForward } from "@material-ui/icons";

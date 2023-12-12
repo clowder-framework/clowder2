@@ -22,14 +22,15 @@ from app.models.datasets import (
     DatasetPatch,
     DatasetStatus,
 )
-from app.models.files import FileDB, FileDBViewList, FileOut
+from app.models.files import FileDB, FileDBViewList, FileOut, LocalFileIn, StorageType
 from app.models.folders import FolderDB, FolderDBViewList, FolderIn, FolderOut
 from app.models.metadata import MetadataDB
 from app.models.pyobjectid import PyObjectId
 from app.models.thumbnails import ThumbnailDB
 from app.models.users import UserOut
 from app.rabbitmq.listeners import submit_dataset_job
-from app.routers.files import add_file_entry, remove_file_entry
+from app.routers.authentication import get_admin
+from app.routers.files import add_file_entry, add_local_file_entry, remove_file_entry
 from app.search.connect import delete_document_by_id
 from app.search.index import index_dataset
 from beanie import PydanticObjectId
@@ -195,8 +196,15 @@ async def get_datasets(
     skip: int = 0,
     limit: int = 10,
     mine: bool = False,
+    admin=Depends(get_admin),
 ):
-    if mine:
+    if admin:
+        datasets = await DatasetDBViewList.find(
+            sort=(-DatasetDBViewList.created),
+            skip=skip,
+            limit=limit,
+        ).to_list()
+    elif mine:
         datasets = await DatasetDBViewList.find(
             DatasetDBViewList.creator.email == user_id,
             sort=(-DatasetDBViewList.created),
@@ -423,6 +431,10 @@ async def delete_folder(
     raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
 
 
+# new endpoint for /{dataset_id}/local_files
+# new endpoint for /{dataset_id}/remote_files
+
+
 @router.post("/{dataset_id}/files", response_model=FileOut)
 async def save_file(
     dataset_id: str,
@@ -509,6 +521,61 @@ async def save_files(
 
     else:
         raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
+
+
+@router.post("/{dataset_id}/local_files", response_model=FileOut)
+async def save_local_file(
+    localfile_in: LocalFileIn,
+    dataset_id: str,
+    folder_id: Optional[str] = None,
+    user=Depends(get_current_user),
+    es=Depends(dependencies.get_elasticsearchclient),
+    rabbitmq_client: BlockingChannel = Depends(dependencies.get_rabbitmq),
+    allow: bool = Depends(Authorization("uploader")),
+):
+    if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
+        if user is None:
+            raise HTTPException(
+                status_code=401, detail="User not found. Session might have expired."
+            )
+
+        # Check to make sure file is cleared to proceed
+        cleared = False
+        for wpath in settings.LOCAL_WHITELIST:
+            if localfile_in.path.startswith(wpath):
+                cleared = True
+        if not cleared:
+            raise HTTPException(
+                status_code=500,
+                detail="File is not located in a whitelisted directory.",
+            )
+
+        (dirname, filename) = os.path.split(localfile_in.path)
+        new_file = FileDB(
+            name=filename,
+            creator=user,
+            dataset_id=dataset.id,
+            storage_type=StorageType.LOCAL,
+            storage_path=localfile_in.path,
+            bytes=os.path.getsize(localfile_in.path),
+        )
+
+        if folder_id is not None:
+            if (folder := await FolderDB.get(PydanticObjectId(folder_id))) is not None:
+                new_file.folder_id = folder.id
+            else:
+                raise HTTPException(
+                    status_code=404, detail=f"Folder {folder_id} not found"
+                )
+
+        await add_local_file_entry(
+            new_file,
+            user,
+            es,
+            rabbitmq_client,
+        )
+        return new_file.dict()
+    raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
 
 
 @router.post("/createFromZip", response_model=DatasetOut)
