@@ -127,6 +127,34 @@ async def get_admin_mode(current_username=Depends(get_current_user)) -> bool:
         )
 
 
+@router.post("/admin_mode", response_model=UserOut)
+async def set_admin_mode(
+        admin_mode_on: bool,
+        admin=Depends(get_admin),
+        current_username=Depends(get_current_user)):
+    """Set Admin mode from User Object."""
+    if (
+            current_user := await UserDB.find_one(UserDB.email == current_username.email)
+    ) is not None:
+        # only admin can set admin mode
+        if admin:
+            current_user.admin_mode = True
+            await current_user.replace()
+            return current_user.dict()
+        else:
+            raise HTTPException(
+                status_code=403,
+                detail="You are not admin yet. Only admin can set admin mode.",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+    else:
+        raise HTTPException(
+            status_code=404,
+            detail="User doesn't exist.",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+
 @router.post("/users/set_admin/{useremail}", response_model=UserOut)
 async def set_admin(
         useremail: str, current_username=Depends(get_current_user), admin=Depends(get_admin)
