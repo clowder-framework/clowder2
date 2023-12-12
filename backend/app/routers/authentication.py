@@ -138,7 +138,7 @@ async def set_admin_mode(
     ) is not None:
         # only admin can set admin mode
         if admin:
-            current_user.admin_mode = True
+            current_user.admin_mode = admin_mode_on
             await current_user.replace()
             return current_user.dict()
         else:
