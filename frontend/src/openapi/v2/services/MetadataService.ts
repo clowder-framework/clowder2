@@ -135,21 +135,16 @@ export class MetadataService {
      * Delete metadata by specific ID.
      * @param metadataId
      * @param datasetId
-     * @param xAdminMode
      * @returns any Successful Response
      * @throws ApiError
      */
     public static deleteMetadataApiV2MetadataMetadataIdDelete(
         metadataId: string,
         datasetId?: string,
-        xAdminMode?: string,
     ): CancelablePromise<any> {
         return __request({
             method: 'DELETE',
             path: `/api/v2/metadata/${metadataId}`,
-            headers: {
-                'x_admin_mode': xAdminMode,
-            },
             query: {
                 'dataset_id': datasetId,
             },
@@ -169,7 +164,6 @@ export class MetadataService {
      * @param metadataId
      * @param requestBody
      * @param datasetId
-     * @param xAdminMode
      * @returns MetadataOut Successful Response
      * @throws ApiError
      */
@@ -177,14 +171,10 @@ export class MetadataService {
         metadataId: string,
         requestBody: MetadataPatch,
         datasetId?: string,
-        xAdminMode?: string,
     ): CancelablePromise<MetadataOut> {
         return __request({
             method: 'PATCH',
             path: `/api/v2/metadata/${metadataId}`,
-            headers: {
-                'x_admin_mode': xAdminMode,
-            },
             query: {
                 'dataset_id': datasetId,
             },
@@ -203,7 +193,6 @@ export class MetadataService {
      * @param version
      * @param allVersions
      * @param datasetId
-     * @param xAdminMode
      * @param formData
      * @returns MetadataOut Successful Response
      * @throws ApiError
@@ -213,15 +202,11 @@ export class MetadataService {
         version?: number,
         allVersions: boolean = false,
         datasetId?: string,
-        xAdminMode?: string,
         formData?: Body_get_file_metadata_api_v2_files__file_id__metadata_get,
     ): CancelablePromise<Array<MetadataOut>> {
         return __request({
             method: 'GET',
             path: `/api/v2/files/${fileId}/metadata`,
-            headers: {
-                'x_admin_mode': xAdminMode,
-            },
             query: {
                 'version': version,
                 'all_versions': allVersions,
@@ -244,7 +229,6 @@ export class MetadataService {
      * @param fileId
      * @param requestBody
      * @param datasetId
-     * @param xAdminMode
      * @returns MetadataOut Successful Response
      * @throws ApiError
      */
@@ -252,14 +236,10 @@ export class MetadataService {
         fileId: string,
         requestBody: MetadataPatch,
         datasetId?: string,
-        xAdminMode?: string,
     ): CancelablePromise<MetadataOut> {
         return __request({
             method: 'PUT',
             path: `/api/v2/files/${fileId}/metadata`,
-            headers: {
-                'x_admin_mode': xAdminMode,
-            },
             query: {
                 'dataset_id': datasetId,
             },
@@ -281,7 +261,6 @@ export class MetadataService {
      * @param fileId
      * @param requestBody
      * @param datasetId
-     * @param xAdminMode
      * @returns MetadataOut Successful Response
      * @throws ApiError
      */
@@ -289,14 +268,10 @@ export class MetadataService {
         fileId: string,
         requestBody: MetadataIn,
         datasetId?: string,
-        xAdminMode?: string,
     ): CancelablePromise<MetadataOut> {
         return __request({
             method: 'POST',
             path: `/api/v2/files/${fileId}/metadata`,
-            headers: {
-                'x_admin_mode': xAdminMode,
-            },
             query: {
                 'dataset_id': datasetId,
             },
@@ -313,7 +288,6 @@ export class MetadataService {
      * @param fileId
      * @param requestBody
      * @param datasetId
-     * @param xAdminMode
      * @returns MetadataOut Successful Response
      * @throws ApiError
      */
@@ -321,14 +295,10 @@ export class MetadataService {
         fileId: string,
         requestBody: MetadataDelete,
         datasetId?: string,
-        xAdminMode?: string,
     ): CancelablePromise<MetadataOut> {
         return __request({
             method: 'DELETE',
             path: `/api/v2/files/${fileId}/metadata`,
-            headers: {
-                'x_admin_mode': xAdminMode,
-            },
             query: {
                 'dataset_id': datasetId,
             },
@@ -350,7 +320,6 @@ export class MetadataService {
      * @param fileId
      * @param requestBody
      * @param datasetId
-     * @param xAdminMode
      * @returns MetadataOut Successful Response
      * @throws ApiError
      */
@@ -358,14 +327,10 @@ export class MetadataService {
         fileId: string,
         requestBody: MetadataPatch,
         datasetId?: string,
-        xAdminMode?: string,
     ): CancelablePromise<MetadataOut> {
         return __request({
             method: 'PATCH',
             path: `/api/v2/files/${fileId}/metadata`,
-            headers: {
-                'x_admin_mode': xAdminMode,
-            },
             query: {
                 'dataset_id': datasetId,
             },
@@ -380,22 +345,17 @@ export class MetadataService {
     /**
      * Get Dataset Metadata
      * @param datasetId
-     * @param xAdminMode
      * @param formData
      * @returns MetadataOut Successful Response
      * @throws ApiError
      */
     public static getDatasetMetadataApiV2DatasetsDatasetIdMetadataGet(
         datasetId: string,
-        xAdminMode?: string,
         formData?: Body_get_dataset_metadata_api_v2_datasets__dataset_id__metadata_get,
     ): CancelablePromise<Array<MetadataOut>> {
         return __request({
             method: 'GET',
             path: `/api/v2/datasets/${datasetId}/metadata`,
-            headers: {
-                'x_admin_mode': xAdminMode,
-            },
             formData: formData,
             mediaType: 'application/x-www-form-urlencoded',
             errors: {
@@ -413,21 +373,16 @@ export class MetadataService {
      * Metadata document that was updated
      * @param datasetId
      * @param requestBody
-     * @param xAdminMode
      * @returns MetadataOut Successful Response
      * @throws ApiError
      */
     public static replaceDatasetMetadataApiV2DatasetsDatasetIdMetadataPut(
         datasetId: string,
         requestBody: MetadataIn,
-        xAdminMode?: string,
     ): CancelablePromise<MetadataOut> {
         return __request({
             method: 'PUT',
             path: `/api/v2/datasets/${datasetId}/metadata`,
-            headers: {
-                'x_admin_mode': xAdminMode,
-            },
             body: requestBody,
             mediaType: 'application/json',
             errors: {
@@ -445,21 +400,16 @@ export class MetadataService {
      * Metadata document that was added to database
      * @param datasetId
      * @param requestBody
-     * @param xAdminMode
      * @returns MetadataOut Successful Response
      * @throws ApiError
      */
     public static addDatasetMetadataApiV2DatasetsDatasetIdMetadataPost(
         datasetId: string,
         requestBody: MetadataIn,
-        xAdminMode?: string,
     ): CancelablePromise<MetadataOut> {
         return __request({
             method: 'POST',
             path: `/api/v2/datasets/${datasetId}/metadata`,
-            headers: {
-                'x_admin_mode': xAdminMode,
-            },
             body: requestBody,
             mediaType: 'application/json',
             errors: {
@@ -472,21 +422,16 @@ export class MetadataService {
      * Delete Dataset Metadata
      * @param datasetId
      * @param requestBody
-     * @param xAdminMode
      * @returns MetadataOut Successful Response
      * @throws ApiError
      */
     public static deleteDatasetMetadataApiV2DatasetsDatasetIdMetadataDelete(
         datasetId: string,
         requestBody: MetadataDelete,
-        xAdminMode?: string,
     ): CancelablePromise<MetadataOut> {
         return __request({
             method: 'DELETE',
             path: `/api/v2/datasets/${datasetId}/metadata`,
-            headers: {
-                'x_admin_mode': xAdminMode,
-            },
             body: requestBody,
             mediaType: 'application/json',
             errors: {
@@ -504,21 +449,16 @@ export class MetadataService {
      * Metadata document that was updated
      * @param datasetId
      * @param requestBody
-     * @param xAdminMode
      * @returns MetadataOut Successful Response
      * @throws ApiError
      */
     public static updateDatasetMetadataApiV2DatasetsDatasetIdMetadataPatch(
         datasetId: string,
         requestBody: MetadataPatch,
-        xAdminMode?: string,
     ): CancelablePromise<MetadataOut> {
         return __request({
             method: 'PATCH',
             path: `/api/v2/datasets/${datasetId}/metadata`,
-            headers: {
-                'x_admin_mode': xAdminMode,
-            },
             body: requestBody,
             mediaType: 'application/json',
             errors: {

@@ -23,7 +23,6 @@ export class DatasetsService {
      * @param limit
      * @param mine
      * @param datasetId
-     * @param xAdminMode
      * @returns DatasetOut Successful Response
      * @throws ApiError
      */
@@ -32,14 +31,10 @@ export class DatasetsService {
         limit: number = 10,
         mine: boolean = false,
         datasetId?: string,
-        xAdminMode?: string,
     ): CancelablePromise<Array<DatasetOut>> {
         return __request({
             method: 'GET',
             path: `/api/v2/datasets`,
-            headers: {
-                'x_admin_mode': xAdminMode,
-            },
             query: {
                 'skip': skip,
                 'limit': limit,
@@ -75,20 +70,15 @@ export class DatasetsService {
     /**
      * Get Dataset
      * @param datasetId
-     * @param xAdminMode
      * @returns DatasetOut Successful Response
      * @throws ApiError
      */
     public static getDatasetApiV2DatasetsDatasetIdGet(
         datasetId: string,
-        xAdminMode?: string,
     ): CancelablePromise<DatasetOut> {
         return __request({
             method: 'GET',
             path: `/api/v2/datasets/${datasetId}`,
-            headers: {
-                'x_admin_mode': xAdminMode,
-            },
             errors: {
                 422: `Validation Error`,
             },
@@ -99,21 +89,16 @@ export class DatasetsService {
      * Edit Dataset
      * @param datasetId
      * @param requestBody
-     * @param xAdminMode
      * @returns DatasetOut Successful Response
      * @throws ApiError
      */
     public static editDatasetApiV2DatasetsDatasetIdPut(
         datasetId: string,
         requestBody: DatasetBase,
-        xAdminMode?: string,
     ): CancelablePromise<DatasetOut> {
         return __request({
             method: 'PUT',
             path: `/api/v2/datasets/${datasetId}`,
-            headers: {
-                'x_admin_mode': xAdminMode,
-            },
             body: requestBody,
             mediaType: 'application/json',
             errors: {
@@ -125,20 +110,15 @@ export class DatasetsService {
     /**
      * Delete Dataset
      * @param datasetId
-     * @param xAdminMode
      * @returns any Successful Response
      * @throws ApiError
      */
     public static deleteDatasetApiV2DatasetsDatasetIdDelete(
         datasetId: string,
-        xAdminMode?: string,
     ): CancelablePromise<any> {
         return __request({
             method: 'DELETE',
             path: `/api/v2/datasets/${datasetId}`,
-            headers: {
-                'x_admin_mode': xAdminMode,
-            },
             errors: {
                 422: `Validation Error`,
             },
@@ -149,21 +129,16 @@ export class DatasetsService {
      * Patch Dataset
      * @param datasetId
      * @param requestBody
-     * @param xAdminMode
      * @returns DatasetOut Successful Response
      * @throws ApiError
      */
     public static patchDatasetApiV2DatasetsDatasetIdPatch(
         datasetId: string,
         requestBody: DatasetPatch,
-        xAdminMode?: string,
     ): CancelablePromise<DatasetOut> {
         return __request({
             method: 'PATCH',
             path: `/api/v2/datasets/${datasetId}`,
-            headers: {
-                'x_admin_mode': xAdminMode,
-            },
             body: requestBody,
             mediaType: 'application/json',
             errors: {
@@ -178,7 +153,6 @@ export class DatasetsService {
      * @param folderId
      * @param skip
      * @param limit
-     * @param xAdminMode
      * @returns FileOut Successful Response
      * @throws ApiError
      */
@@ -187,14 +161,10 @@ export class DatasetsService {
         folderId?: string,
         skip?: number,
         limit: number = 10,
-        xAdminMode?: string,
     ): CancelablePromise<Array<FileOut>> {
         return __request({
             method: 'GET',
             path: `/api/v2/datasets/${datasetId}/files`,
-            headers: {
-                'x_admin_mode': xAdminMode,
-            },
             query: {
                 'folder_id': folderId,
                 'skip': skip,
@@ -211,7 +181,6 @@ export class DatasetsService {
      * @param datasetId
      * @param formData
      * @param folderId
-     * @param xAdminMode
      * @returns FileOut Successful Response
      * @throws ApiError
      */
@@ -219,14 +188,10 @@ export class DatasetsService {
         datasetId: string,
         formData: Body_save_file_api_v2_datasets__dataset_id__files_post,
         folderId?: string,
-        xAdminMode?: string,
     ): CancelablePromise<FileOut> {
         return __request({
             method: 'POST',
             path: `/api/v2/datasets/${datasetId}/files`,
-            headers: {
-                'x_admin_mode': xAdminMode,
-            },
             query: {
                 'folder_id': folderId,
             },
@@ -244,7 +209,6 @@ export class DatasetsService {
      * @param parentFolder
      * @param skip
      * @param limit
-     * @param xAdminMode
      * @returns FolderOut Successful Response
      * @throws ApiError
      */
@@ -253,14 +217,10 @@ export class DatasetsService {
         parentFolder?: string,
         skip?: number,
         limit: number = 10,
-        xAdminMode?: string,
     ): CancelablePromise<Array<FolderOut>> {
         return __request({
             method: 'GET',
             path: `/api/v2/datasets/${datasetId}/folders`,
-            headers: {
-                'x_admin_mode': xAdminMode,
-            },
             query: {
                 'parent_folder': parentFolder,
                 'skip': skip,
@@ -276,21 +236,16 @@ export class DatasetsService {
      * Add Folder
      * @param datasetId
      * @param requestBody
-     * @param xAdminMode
      * @returns FolderOut Successful Response
      * @throws ApiError
      */
     public static addFolderApiV2DatasetsDatasetIdFoldersPost(
         datasetId: string,
         requestBody: FolderIn,
-        xAdminMode?: string,
     ): CancelablePromise<FolderOut> {
         return __request({
             method: 'POST',
             path: `/api/v2/datasets/${datasetId}/folders`,
-            headers: {
-                'x_admin_mode': xAdminMode,
-            },
             body: requestBody,
             mediaType: 'application/json',
             errors: {
@@ -303,21 +258,16 @@ export class DatasetsService {
      * Delete Folder
      * @param datasetId
      * @param folderId
-     * @param xAdminMode
      * @returns any Successful Response
      * @throws ApiError
      */
     public static deleteFolderApiV2DatasetsDatasetIdFoldersFolderIdDelete(
         datasetId: string,
         folderId: string,
-        xAdminMode?: string,
     ): CancelablePromise<any> {
         return __request({
             method: 'DELETE',
             path: `/api/v2/datasets/${datasetId}/folders/${folderId}`,
-            headers: {
-                'x_admin_mode': xAdminMode,
-            },
             errors: {
                 422: `Validation Error`,
             },
@@ -329,7 +279,6 @@ export class DatasetsService {
      * @param datasetId
      * @param formData
      * @param folderId
-     * @param xAdminMode
      * @returns FileOut Successful Response
      * @throws ApiError
      */
@@ -337,14 +286,10 @@ export class DatasetsService {
         datasetId: string,
         formData: Body_save_files_api_v2_datasets__dataset_id__filesMultiple_post,
         folderId?: string,
-        xAdminMode?: string,
     ): CancelablePromise<Array<FileOut>> {
         return __request({
             method: 'POST',
             path: `/api/v2/datasets/${datasetId}/filesMultiple`,
-            headers: {
-                'x_admin_mode': xAdminMode,
-            },
             query: {
                 'folder_id': folderId,
             },
@@ -361,7 +306,6 @@ export class DatasetsService {
      * @param datasetId
      * @param requestBody
      * @param folderId
-     * @param xAdminMode
      * @returns FileOut Successful Response
      * @throws ApiError
      */
@@ -369,14 +313,10 @@ export class DatasetsService {
         datasetId: string,
         requestBody: LocalFileIn,
         folderId?: string,
-        xAdminMode?: string,
     ): CancelablePromise<FileOut> {
         return __request({
             method: 'POST',
             path: `/api/v2/datasets/${datasetId}/local_files`,
-            headers: {
-                'x_admin_mode': xAdminMode,
-            },
             query: {
                 'folder_id': folderId,
             },
@@ -411,20 +351,15 @@ export class DatasetsService {
     /**
      * Download Dataset
      * @param datasetId
-     * @param xAdminMode
      * @returns DatasetOut Successful Response
      * @throws ApiError
      */
     public static downloadDatasetApiV2DatasetsDatasetIdDownloadGet(
         datasetId: string,
-        xAdminMode?: string,
     ): CancelablePromise<DatasetOut> {
         return __request({
             method: 'GET',
             path: `/api/v2/datasets/${datasetId}/download`,
-            headers: {
-                'x_admin_mode': xAdminMode,
-            },
             errors: {
                 422: `Validation Error`,
             },
@@ -435,7 +370,6 @@ export class DatasetsService {
      * Get Dataset Extract
      * @param datasetId
      * @param extractorName
-     * @param xAdminMode
      * @param requestBody
      * @returns any Successful Response
      * @throws ApiError
@@ -443,15 +377,11 @@ export class DatasetsService {
     public static getDatasetExtractApiV2DatasetsDatasetIdExtractPost(
         datasetId: string,
         extractorName: string,
-        xAdminMode?: string,
         requestBody?: any,
     ): CancelablePromise<any> {
         return __request({
             method: 'POST',
             path: `/api/v2/datasets/${datasetId}/extract`,
-            headers: {
-                'x_admin_mode': xAdminMode,
-            },
             query: {
                 'extractorName': extractorName,
             },
@@ -466,20 +396,15 @@ export class DatasetsService {
     /**
      * Download Dataset Thumbnail
      * @param datasetId
-     * @param xAdminMode
      * @returns any Successful Response
      * @throws ApiError
      */
     public static downloadDatasetThumbnailApiV2DatasetsDatasetIdThumbnailGet(
         datasetId: string,
-        xAdminMode?: string,
     ): CancelablePromise<any> {
         return __request({
             method: 'GET',
             path: `/api/v2/datasets/${datasetId}/thumbnail`,
-            headers: {
-                'x_admin_mode': xAdminMode,
-            },
             errors: {
                 422: `Validation Error`,
             },
@@ -490,21 +415,16 @@ export class DatasetsService {
      * Add Dataset Thumbnail
      * @param datasetId
      * @param thumbnailId
-     * @param xAdminMode
      * @returns DatasetOut Successful Response
      * @throws ApiError
      */
     public static addDatasetThumbnailApiV2DatasetsDatasetIdThumbnailThumbnailIdPatch(
         datasetId: string,
         thumbnailId: string,
-        xAdminMode?: string,
     ): CancelablePromise<DatasetOut> {
         return __request({
             method: 'PATCH',
             path: `/api/v2/datasets/${datasetId}/thumbnail/${thumbnailId}`,
-            headers: {
-                'x_admin_mode': xAdminMode,
-            },
             errors: {
                 422: `Validation Error`,
             },

@@ -16,21 +16,16 @@ export class AuthorizationService {
      * Save authorization info in Mongo. This is a triple of dataset_id/user_id/role/group_id.
      * @param datasetId
      * @param requestBody
-     * @param xAdminMode
      * @returns AuthorizationOut Successful Response
      * @throws ApiError
      */
     public static saveAuthorizationApiV2AuthorizationsDatasetsDatasetIdPost(
         datasetId: string,
         requestBody: AuthorizationBase,
-        xAdminMode?: string,
     ): CancelablePromise<AuthorizationOut> {
         return __request({
             method: 'POST',
             path: `/api/v2/authorizations/datasets/${datasetId}`,
-            headers: {
-                'x_admin_mode': xAdminMode,
-            },
             body: requestBody,
             mediaType: 'application/json',
             errors: {
@@ -43,20 +38,15 @@ export class AuthorizationService {
      * Get Dataset Role
      * Retrieve role of user for a specific dataset.
      * @param datasetId
-     * @param xAdminMode
      * @returns AuthorizationOut Successful Response
      * @throws ApiError
      */
     public static getDatasetRoleApiV2AuthorizationsDatasetsDatasetIdRoleGet(
         datasetId: string,
-        xAdminMode?: string,
     ): CancelablePromise<AuthorizationOut> {
         return __request({
             method: 'GET',
             path: `/api/v2/authorizations/datasets/${datasetId}/role`,
-            headers: {
-                'x_admin_mode': xAdminMode,
-            },
             errors: {
                 422: `Validation Error`,
             },
@@ -68,20 +58,15 @@ export class AuthorizationService {
      * Used for testing only. Returns true if user has viewer permission on dataset, otherwise throws a 403 Forbidden HTTP exception.
      * See `routers/authorization.py` for more info.
      * @param datasetId
-     * @param xAdminMode
      * @returns any Successful Response
      * @throws ApiError
      */
     public static getDatasetRoleViewerApiV2AuthorizationsDatasetsDatasetIdRoleViewerGet(
         datasetId: string,
-        xAdminMode?: string,
     ): CancelablePromise<any> {
         return __request({
             method: 'GET',
             path: `/api/v2/authorizations/datasets/${datasetId}/role/viewer}`,
-            headers: {
-                'x_admin_mode': xAdminMode,
-            },
             errors: {
                 422: `Validation Error`,
             },
@@ -93,20 +78,15 @@ export class AuthorizationService {
      * Used for testing only. Returns true if user has owner permission on dataset, otherwise throws a 403 Forbidden HTTP exception.
      * See `routers/authorization.py` for more info.
      * @param datasetId
-     * @param xAdminMode
      * @returns any Successful Response
      * @throws ApiError
      */
     public static getDatasetRoleOwnerApiV2AuthorizationsDatasetsDatasetIdRoleOwnerGet(
         datasetId: string,
-        xAdminMode?: string,
     ): CancelablePromise<any> {
         return __request({
             method: 'GET',
             path: `/api/v2/authorizations/datasets/${datasetId}/role/owner}`,
-            headers: {
-                'x_admin_mode': xAdminMode,
-            },
             errors: {
                 422: `Validation Error`,
             },
@@ -117,21 +97,16 @@ export class AuthorizationService {
      * Get File Role
      * @param fileId
      * @param datasetId
-     * @param xAdminMode
      * @returns RoleType Successful Response
      * @throws ApiError
      */
     public static getFileRoleApiV2AuthorizationsFilesFileIdRoleGet(
         fileId: string,
         datasetId?: string,
-        xAdminMode?: string,
     ): CancelablePromise<RoleType> {
         return __request({
             method: 'GET',
             path: `/api/v2/authorizations/files/${fileId}/role}`,
-            headers: {
-                'x_admin_mode': xAdminMode,
-            },
             query: {
                 'dataset_id': datasetId,
             },
@@ -145,21 +120,16 @@ export class AuthorizationService {
      * Get Metadata Role
      * @param metadataId
      * @param datasetId
-     * @param xAdminMode
      * @returns AuthorizationMetadata Successful Response
      * @throws ApiError
      */
     public static getMetadataRoleApiV2AuthorizationsMetadataMetadataIdRoleGet(
         metadataId: string,
         datasetId?: string,
-        xAdminMode?: string,
     ): CancelablePromise<AuthorizationMetadata> {
         return __request({
             method: 'GET',
             path: `/api/v2/authorizations/metadata/${metadataId}/role}`,
-            headers: {
-                'x_admin_mode': xAdminMode,
-            },
             query: {
                 'dataset_id': datasetId,
             },
@@ -173,21 +143,16 @@ export class AuthorizationService {
      * Get Group Role
      * @param groupId
      * @param datasetId
-     * @param xAdminMode
      * @returns RoleType Successful Response
      * @throws ApiError
      */
     public static getGroupRoleApiV2AuthorizationsGroupsGroupIdRoleGet(
         groupId: string,
         datasetId?: string,
-        xAdminMode?: string,
     ): CancelablePromise<RoleType> {
         return __request({
             method: 'GET',
             path: `/api/v2/authorizations/groups/${groupId}/role}`,
-            headers: {
-                'x_admin_mode': xAdminMode,
-            },
             query: {
                 'dataset_id': datasetId,
             },
@@ -203,7 +168,6 @@ export class AuthorizationService {
      * @param datasetId
      * @param groupId
      * @param role
-     * @param xAdminMode
      * @returns AuthorizationOut Successful Response
      * @throws ApiError
      */
@@ -211,14 +175,10 @@ export class AuthorizationService {
         datasetId: string,
         groupId: string,
         role: RoleType,
-        xAdminMode?: string,
     ): CancelablePromise<AuthorizationOut> {
         return __request({
             method: 'POST',
             path: `/api/v2/authorizations/datasets/${datasetId}/group_role/${groupId}/${role}`,
-            headers: {
-                'x_admin_mode': xAdminMode,
-            },
             errors: {
                 422: `Validation Error`,
             },
@@ -231,7 +191,6 @@ export class AuthorizationService {
      * @param datasetId
      * @param username
      * @param role
-     * @param xAdminMode
      * @returns AuthorizationOut Successful Response
      * @throws ApiError
      */
@@ -239,14 +198,10 @@ export class AuthorizationService {
         datasetId: string,
         username: string,
         role: RoleType,
-        xAdminMode?: string,
     ): CancelablePromise<AuthorizationOut> {
         return __request({
             method: 'POST',
             path: `/api/v2/authorizations/datasets/${datasetId}/user_role/${username}/${role}`,
-            headers: {
-                'x_admin_mode': xAdminMode,
-            },
             errors: {
                 422: `Validation Error`,
             },
@@ -258,21 +213,16 @@ export class AuthorizationService {
      * Remove any role the group has with a specific dataset.
      * @param datasetId
      * @param groupId
-     * @param xAdminMode
      * @returns AuthorizationOut Successful Response
      * @throws ApiError
      */
     public static removeDatasetGroupRoleApiV2AuthorizationsDatasetsDatasetIdGroupRoleGroupIdDelete(
         datasetId: string,
         groupId: string,
-        xAdminMode?: string,
     ): CancelablePromise<AuthorizationOut> {
         return __request({
             method: 'DELETE',
             path: `/api/v2/authorizations/datasets/${datasetId}/group_role/${groupId}`,
-            headers: {
-                'x_admin_mode': xAdminMode,
-            },
             errors: {
                 422: `Validation Error`,
             },
@@ -284,21 +234,16 @@ export class AuthorizationService {
      * Remove any role the user has with a specific dataset.
      * @param datasetId
      * @param username
-     * @param xAdminMode
      * @returns AuthorizationOut Successful Response
      * @throws ApiError
      */
     public static removeDatasetUserRoleApiV2AuthorizationsDatasetsDatasetIdUserRoleUsernameDelete(
         datasetId: string,
         username: string,
-        xAdminMode?: string,
     ): CancelablePromise<AuthorizationOut> {
         return __request({
             method: 'DELETE',
             path: `/api/v2/authorizations/datasets/${datasetId}/user_role/${username}`,
-            headers: {
-                'x_admin_mode': xAdminMode,
-            },
             errors: {
                 422: `Validation Error`,
             },
@@ -309,20 +254,15 @@ export class AuthorizationService {
      * Get Dataset Roles
      * Get a list of all users and groups that have assigned roles on this dataset.
      * @param datasetId
-     * @param xAdminMode
      * @returns DatasetRoles Successful Response
      * @throws ApiError
      */
     public static getDatasetRolesApiV2AuthorizationsDatasetsDatasetIdRolesGet(
         datasetId: string,
-        xAdminMode?: string,
     ): CancelablePromise<DatasetRoles> {
         return __request({
             method: 'GET',
             path: `/api/v2/authorizations/datasets/${datasetId}/roles}`,
-            headers: {
-                'x_admin_mode': xAdminMode,
-            },
             errors: {
                 422: `Validation Error`,
             },

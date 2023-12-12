@@ -71,6 +71,19 @@ export class LoginService {
     }
 
     /**
+     * Get Admin Mode
+     * Get Admin mode from User Object.
+     * @returns boolean Successful Response
+     * @throws ApiError
+     */
+    public static getAdminModeApiV2AdminModeGet(): CancelablePromise<boolean> {
+        return __request({
+            method: 'GET',
+            path: `/api/v2/admin_mode`,
+        });
+    }
+
+    /**
      * Set Admin
      * @param useremail
      * @param datasetId

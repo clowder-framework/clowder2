@@ -15,7 +15,6 @@ export class FilesService {
      * @param version
      * @param increment
      * @param datasetId
-     * @param xAdminMode
      * @returns any Successful Response
      * @throws ApiError
      */
@@ -24,14 +23,10 @@ export class FilesService {
         version?: number,
         increment: boolean = true,
         datasetId?: string,
-        xAdminMode?: string,
     ): CancelablePromise<any> {
         return __request({
             method: 'GET',
             path: `/api/v2/files/${fileId}`,
-            headers: {
-                'x_admin_mode': xAdminMode,
-            },
             query: {
                 'version': version,
                 'increment': increment,
@@ -48,7 +43,6 @@ export class FilesService {
      * @param fileId
      * @param formData
      * @param datasetId
-     * @param xAdminMode
      * @returns FileOut Successful Response
      * @throws ApiError
      */
@@ -56,14 +50,10 @@ export class FilesService {
         fileId: string,
         formData: Body_update_file_api_v2_files__file_id__put,
         datasetId?: string,
-        xAdminMode?: string,
     ): CancelablePromise<FileOut> {
         return __request({
             method: 'PUT',
             path: `/api/v2/files/${fileId}`,
-            headers: {
-                'x_admin_mode': xAdminMode,
-            },
             query: {
                 'dataset_id': datasetId,
             },
@@ -79,21 +69,16 @@ export class FilesService {
      * Delete File
      * @param fileId
      * @param datasetId
-     * @param xAdminMode
      * @returns any Successful Response
      * @throws ApiError
      */
     public static deleteFileApiV2FilesFileIdDelete(
         fileId: string,
         datasetId?: string,
-        xAdminMode?: string,
     ): CancelablePromise<any> {
         return __request({
             method: 'DELETE',
             path: `/api/v2/files/${fileId}`,
-            headers: {
-                'x_admin_mode': xAdminMode,
-            },
             query: {
                 'dataset_id': datasetId,
             },
@@ -109,7 +94,6 @@ export class FilesService {
      * @param version
      * @param expiresInSeconds
      * @param datasetId
-     * @param xAdminMode
      * @returns any Successful Response
      * @throws ApiError
      */
@@ -118,14 +102,10 @@ export class FilesService {
         version?: number,
         expiresInSeconds: number = 3600,
         datasetId?: string,
-        xAdminMode?: string,
     ): CancelablePromise<any> {
         return __request({
             method: 'GET',
             path: `/api/v2/files/${fileId}/url/`,
-            headers: {
-                'x_admin_mode': xAdminMode,
-            },
             query: {
                 'version': version,
                 'expires_in_seconds': expiresInSeconds,
@@ -141,21 +121,16 @@ export class FilesService {
      * Get File Summary
      * @param fileId
      * @param datasetId
-     * @param xAdminMode
      * @returns FileOut Successful Response
      * @throws ApiError
      */
     public static getFileSummaryApiV2FilesFileIdSummaryGet(
         fileId: string,
         datasetId?: string,
-        xAdminMode?: string,
     ): CancelablePromise<FileOut> {
         return __request({
             method: 'GET',
             path: `/api/v2/files/${fileId}/summary`,
-            headers: {
-                'x_admin_mode': xAdminMode,
-            },
             query: {
                 'dataset_id': datasetId,
             },
@@ -170,7 +145,6 @@ export class FilesService {
      * @param fileId
      * @param versionNum
      * @param datasetId
-     * @param xAdminMode
      * @returns FileOut Successful Response
      * @throws ApiError
      */
@@ -178,14 +152,10 @@ export class FilesService {
         fileId: string,
         versionNum?: number,
         datasetId?: string,
-        xAdminMode?: string,
     ): CancelablePromise<FileOut> {
         return __request({
             method: 'GET',
             path: `/api/v2/files/${fileId}/version_details`,
-            headers: {
-                'x_admin_mode': xAdminMode,
-            },
             query: {
                 'version_num': versionNum,
                 'dataset_id': datasetId,
@@ -202,7 +172,6 @@ export class FilesService {
      * @param skip
      * @param limit
      * @param datasetId
-     * @param xAdminMode
      * @returns FileVersion Successful Response
      * @throws ApiError
      */
@@ -211,14 +180,10 @@ export class FilesService {
         skip?: number,
         limit: number = 20,
         datasetId?: string,
-        xAdminMode?: string,
     ): CancelablePromise<Array<FileVersion>> {
         return __request({
             method: 'GET',
             path: `/api/v2/files/${fileId}/versions`,
-            headers: {
-                'x_admin_mode': xAdminMode,
-            },
             query: {
                 'skip': skip,
                 'limit': limit,
@@ -235,7 +200,6 @@ export class FilesService {
      * @param fileId
      * @param extractorName
      * @param datasetId
-     * @param xAdminMode
      * @param requestBody
      * @returns any Successful Response
      * @throws ApiError
@@ -244,15 +208,11 @@ export class FilesService {
         fileId: string,
         extractorName: string,
         datasetId?: string,
-        xAdminMode?: string,
         requestBody?: any,
     ): CancelablePromise<any> {
         return __request({
             method: 'POST',
             path: `/api/v2/files/${fileId}/extract`,
-            headers: {
-                'x_admin_mode': xAdminMode,
-            },
             query: {
                 'extractorName': extractorName,
                 'dataset_id': datasetId,
@@ -277,21 +237,16 @@ export class FilesService {
      * rabbitmq_client: Rabbitmq Client
      * @param fileId
      * @param datasetId
-     * @param xAdminMode
      * @returns any Successful Response
      * @throws ApiError
      */
     public static resubmitFileExtractionsApiV2FilesFileIdResubmitExtractPost(
         fileId: string,
         datasetId?: string,
-        xAdminMode?: string,
     ): CancelablePromise<any> {
         return __request({
             method: 'POST',
             path: `/api/v2/files/${fileId}/resubmit_extract`,
-            headers: {
-                'x_admin_mode': xAdminMode,
-            },
             query: {
                 'dataset_id': datasetId,
             },
@@ -305,21 +260,16 @@ export class FilesService {
      * Download File Thumbnail
      * @param fileId
      * @param datasetId
-     * @param xAdminMode
      * @returns any Successful Response
      * @throws ApiError
      */
     public static downloadFileThumbnailApiV2FilesFileIdThumbnailGet(
         fileId: string,
         datasetId?: string,
-        xAdminMode?: string,
     ): CancelablePromise<any> {
         return __request({
             method: 'GET',
             path: `/api/v2/files/${fileId}/thumbnail`,
-            headers: {
-                'x_admin_mode': xAdminMode,
-            },
             query: {
                 'dataset_id': datasetId,
             },
@@ -334,7 +284,6 @@ export class FilesService {
      * @param fileId
      * @param thumbnailId
      * @param datasetId
-     * @param xAdminMode
      * @returns FileOut Successful Response
      * @throws ApiError
      */
@@ -342,14 +291,10 @@ export class FilesService {
         fileId: string,
         thumbnailId: string,
         datasetId?: string,
-        xAdminMode?: string,
     ): CancelablePromise<FileOut> {
         return __request({
             method: 'PATCH',
             path: `/api/v2/files/${fileId}/thumbnail/${thumbnailId}`,
-            headers: {
-                'x_admin_mode': xAdminMode,
-            },
             query: {
                 'dataset_id': datasetId,
             },
