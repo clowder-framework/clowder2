@@ -52,15 +52,15 @@ export class LoginService {
     /**
      * Get Admin
      * @param datasetId
-     * @returns any Successful Response
+     * @returns boolean Successful Response
      * @throws ApiError
      */
-    public static getAdminApiV2AdminGet(
+    public static getAdminApiV2UsersMeIsAdminGet(
         datasetId?: string,
-    ): CancelablePromise<any> {
+    ): CancelablePromise<boolean> {
         return __request({
             method: 'GET',
-            path: `/api/v2/admin`,
+            path: `/api/v2/users/me/is_admin`,
             query: {
                 'dataset_id': datasetId,
             },
@@ -76,10 +76,35 @@ export class LoginService {
      * @returns boolean Successful Response
      * @throws ApiError
      */
-    public static getAdminModeApiV2AdminModeGet(): CancelablePromise<boolean> {
+    public static getAdminModeApiV2UsersMeAdminModeGet(): CancelablePromise<boolean> {
         return __request({
             method: 'GET',
-            path: `/api/v2/admin_mode`,
+            path: `/api/v2/users/me/admin_mode`,
+        });
+    }
+
+    /**
+     * Set Admin Mode
+     * Set Admin mode from User Object.
+     * @param adminModeOn
+     * @param datasetId
+     * @returns boolean Successful Response
+     * @throws ApiError
+     */
+    public static setAdminModeApiV2UsersMeAdminModePost(
+        adminModeOn: boolean,
+        datasetId?: string,
+    ): CancelablePromise<boolean> {
+        return __request({
+            method: 'POST',
+            path: `/api/v2/users/me/admin_mode`,
+            query: {
+                'admin_mode_on': adminModeOn,
+                'dataset_id': datasetId,
+            },
+            errors: {
+                422: `Validation Error`,
+            },
         });
     }
 
