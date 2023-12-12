@@ -139,7 +139,7 @@ services:
       - elasticsearch:/usr/share/elasticsearch/data
     
   extractors-heartbeat:
-    image: "clowder/clowder2-heartbeat:main"
+    image: "clowder/clowder2-heartbeat:latest"
     build:
       context: backend
       dockerfile: heartbeat.Dockerfile
@@ -155,7 +155,7 @@ services:
       - rabbitmq
 
   extractors-messages:
-    image: "clowder/clowder2-messages:main"
+    image: "clowder/clowder2-messages:latest"
     build:
       context: backend
       dockerfile: messages.Dockerfile
