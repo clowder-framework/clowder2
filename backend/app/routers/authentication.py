@@ -1,5 +1,6 @@
 import json
 
+from beanie import PydanticObjectId
 from fastapi import APIRouter, HTTPException, Depends
 from keycloak.exceptions import (
     KeycloakAuthenticationError,
@@ -7,8 +8,6 @@ from keycloak.exceptions import (
     KeycloakPostError,
 )
 from passlib.hash import bcrypt
-
-from beanie import PydanticObjectId
 
 from app.keycloak_auth import create_user, get_current_user
 from app.keycloak_auth import keycloak_openid
@@ -96,23 +95,41 @@ async def authenticate_user(email: str, password: str):
 @router.get("/admin")
 async def get_admin(dataset_id: str = None, current_username=Depends(get_current_user)):
     if (
-        current_user := await UserDB.find_one(UserDB.email == current_username.email)
+            current_user := await UserDB.find_one(UserDB.email == current_username.email)
     ) is not None:
         if current_user.admin:
             return current_user.admin
     elif (
-        dataset_id
-        and (dataset_db := await DatasetDB.get(PydanticObjectId(dataset_id)))
-        is not None
+            dataset_id
+            and (dataset_db := await DatasetDB.get(PydanticObjectId(dataset_id)))
+            is not None
     ):
         return dataset_db.creator.email == current_username.email
     else:
         return False
 
 
+@router.get("/admin_mode")
+async def get_admin_mode(current_username=Depends(get_current_user)) -> bool:
+    """Get Admin mode from User Object."""
+    if (
+            current_user := await UserDB.find_one(UserDB.email == current_username.email)
+    ) is not None:
+        if current_user.admin_mode is not None:
+            return current_user.admin_mode
+        else:
+            return False
+    else:
+        raise HTTPException(
+            status_code=404,
+            detail="User doesn't exist.",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+
 @router.post("/users/set_admin/{useremail}", response_model=UserOut)
 async def set_admin(
-    useremail: str, current_username=Depends(get_current_user), admin=Depends(get_admin)
+        useremail: str, current_username=Depends(get_current_user), admin=Depends(get_admin)
 ):
     if admin:
         if (user := await UserDB.find_one(UserDB.email == useremail)) is not None:
