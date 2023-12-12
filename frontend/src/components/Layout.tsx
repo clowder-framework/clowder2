@@ -32,6 +32,7 @@ import LogoutIcon from "@mui/icons-material/Logout";
 import { EmbeddedSearch } from "./search/EmbeddedSearch";
 import {
 	fetchUserProfile,
+	getAdminModeStatus as getAdminModeStatusAction,
 	toggleAdminMode as toggleAdminModeAction,
 } from "../actions/user";
 import { AdminPanelSettings } from "@mui/icons-material";
@@ -115,9 +116,11 @@ export default function PersistentDrawerLeft(props) {
 	const fetchCurrUserProfile = () => dispatch(fetchUserProfile());
 	const toggleAdminMode = (adminModeOn: boolean) =>
 		dispatch(toggleAdminModeAction(adminModeOn));
+	const getAdminModeStatus = () => dispatch(getAdminModeStatusAction());
 
 	useEffect(() => {
 		fetchCurrUserProfile();
+		getAdminModeStatus();
 	}, []);
 
 	const handleDrawerOpen = () => {

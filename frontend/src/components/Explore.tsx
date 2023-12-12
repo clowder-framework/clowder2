@@ -28,6 +28,8 @@ export const Explore = (): JSX.Element => {
 		mine: boolean | undefined
 	) => dispatch(fetchDatasets(skip, limit, mine));
 	const datasets = useSelector((state: RootState) => state.dataset.datasets);
+	// const adminMode = useSelector((state: RootState) => state.user.adminMode);
+	const adminMode = useSelector((state: RootState) => state.user.adminMode);
 
 	// TODO add option to determine limit number; default show 5 datasets each time
 	const [currPageNum, setCurrPageNum] = useState<number>(0);
@@ -44,6 +46,11 @@ export const Explore = (): JSX.Element => {
 	useEffect(() => {
 		listDatasets(0, limit, mine);
 	}, []);
+
+	// Admin mode will fetch all datasets
+	useEffect(() => {
+		listDatasets(0, limit, mine);
+	}, [adminMode]);
 
 	// fetch thumbnails from each individual dataset/id calls
 	useEffect(() => {
@@ -85,7 +92,6 @@ export const Explore = (): JSX.Element => {
 		<Layout>
 			{/*Error Message dialogue*/}
 			<ErrorModal errorOpen={errorOpen} setErrorOpen={setErrorOpen} />
-
 			<Grid container spacing={4}>
 				<Grid item xs>
 					<Box sx={{ borderBottom: 1, borderColor: "divider" }}>

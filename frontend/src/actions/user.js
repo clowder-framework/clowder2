@@ -145,6 +145,24 @@ export function toggleAdminMode(adminModeOn) {
 	};
 }
 
+export const GET_ADMIN_MODE_STATUS = "GET_ADMIN_MODE_STATUS";
+
+export function getAdminModeStatus() {
+	return (dispatch) => {
+		return V2.LoginService.getAdminModeApiV2UsersMeAdminModeGet()
+			.then((json) => {
+				dispatch({
+					type: GET_ADMIN_MODE_STATUS,
+					adminMode: json,
+					receivedAt: Date.now(),
+				});
+			})
+			.catch((reason) => {
+				dispatch(getAdminModeStatus());
+			});
+	};
+}
+
 export const PREFIX_SEARCH_USERS = "PREFIX_SEARCH_USERS";
 
 export function prefixSearchAllUsers(text = "", skip = 0, limit = 101) {
