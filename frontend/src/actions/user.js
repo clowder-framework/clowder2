@@ -53,7 +53,6 @@ export const SET_USER = "SET_USER";
 export const REGISTER_USER = "REGISTER_USER";
 export const REGISTER_ERROR = "REGISTER_ERROR";
 export const LOGOUT = "LOGOUT";
-export const TOGGLE_ADMIN_MODE = "TOGGLE_ADMIN_MODE";
 
 export function _legacy_login(email, password) {
 	return async (dispatch) => {
@@ -128,9 +127,21 @@ export function fetchAllUsers(skip = 0, limit = 101) {
 	};
 }
 
-export function toggleAdminMode() {
+export const TOGGLE_ADMIN_MODE = "TOGGLE_ADMIN_MODE";
+
+export function toggleAdminMode(adminModeOn) {
 	return (dispatch) => {
-		dispatch({ type: TOGGLE_ADMIN_MODE, receivedAt: Date.now() });
+		return V2.LoginService.setAdminModeApiV2UsersMeAdminModePost(adminModeOn)
+			.then((json) => {
+				dispatch({
+					type: TOGGLE_ADMIN_MODE,
+					adminMode: json,
+					receivedAt: Date.now(),
+				});
+			})
+			.catch((reason) => {
+				dispatch(toggleAdminMode(adminModeOn));
+			});
 	};
 }
 

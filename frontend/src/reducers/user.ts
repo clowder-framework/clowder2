@@ -29,7 +29,7 @@ const user = (state = defaultState, action: DataAction) => {
 	switch (action.type) {
 		case TOGGLE_ADMIN_MODE:
 			return Object.assign({}, state, {
-				adminMode: !state.adminMode,
+				adminMode: action.adminMode,
 			});
 		case SET_USER:
 			return Object.assign({}, state, {

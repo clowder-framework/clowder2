@@ -113,7 +113,8 @@ export default function PersistentDrawerLeft(props) {
 	const adminMode = useSelector((state: RootState) => state.user.adminMode);
 
 	const fetchCurrUserProfile = () => dispatch(fetchUserProfile());
-	const toggleAdminMode = () => dispatch(toggleAdminModeAction());
+	const toggleAdminMode = (adminModeOn: boolean) =>
+		dispatch(toggleAdminModeAction(adminModeOn));
 
 	useEffect(() => {
 		fetchCurrUserProfile();
@@ -234,7 +235,7 @@ export default function PersistentDrawerLeft(props) {
 					<Divider orientation="horizontal" />
 					{currUserProfile.admin ? (
 						<>
-							<MenuItem onClick={toggleAdminMode}>
+							<MenuItem onClick={(adminMode) => toggleAdminMode(!adminMode)}>
 								{adminMode ? (
 									<>
 										<ListItemIcon>
