@@ -23,7 +23,6 @@ from app.models.metadata import (
     MetadataDB,
 )
 from app.models.pyobjectid import PyObjectId
-from app.routers.authentication import get_admin_mode
 
 router = APIRouter()
 
@@ -154,7 +153,6 @@ async def search_metadata_definition(
 async def update_metadata(
     metadata_in: MetadataPatch,
     metadata_id: str,
-    admin_mode: bool = Depends(get_admin_mode),
     es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
     user=Depends(get_current_user),
     allow: bool = Depends(MetadataAuthorization("editor")),
@@ -176,7 +174,6 @@ async def update_metadata(
 @router.delete("/{metadata_id}")
 async def delete_metadata(
     metadata_id: str,
-    admin_mode: bool = Depends(get_admin_mode),
     user=Depends(get_current_user),
     allow: bool = Depends(MetadataAuthorization("editor")),
 ):

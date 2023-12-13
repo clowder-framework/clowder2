@@ -25,7 +25,6 @@ from app.models.metadata import (
     MetadataDelete,
     MetadataDefinitionDB,
 )
-from app.routers.authentication import get_admin_mode
 from app.search.connect import delete_document_by_id
 from app.search.index import index_dataset
 
@@ -74,7 +73,6 @@ async def add_dataset_metadata(
     dataset_id: str,
     user=Depends(get_current_user),
     es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
-    admin_mode: bool = Depends(get_admin_mode),
     allow: bool = Depends(Authorization("uploader")),
 ):
     """Attach new metadata to a dataset. The body must include a contents field with the JSON metadata, and either a
@@ -124,7 +122,6 @@ async def replace_dataset_metadata(
     dataset_id: str,
     user=Depends(get_current_user),
     es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
-    admin_mode: bool = Depends(get_admin_mode),
     allow: bool = Depends(Authorization("editor")),
 ):
     """Update metadata. Any fields provided in the contents JSON will be added or updated in the metadata. If context or
@@ -179,7 +176,6 @@ async def update_dataset_metadata(
     dataset_id: str,
     user=Depends(get_current_user),
     es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
-    admin_mode: bool = Depends(get_admin_mode),
     allow: bool = Depends(Authorization("editor")),
 ):
     """Update metadata. Any fields provided in the contents JSON will be added or updated in the metadata. If context or
@@ -249,7 +245,6 @@ async def get_dataset_metadata(
     listener_name: Optional[str] = Form(None),
     listener_version: Optional[float] = Form(None),
     user=Depends(get_current_user),
-    admin_mode: bool = Depends(get_admin_mode),
     allow: bool = Depends(Authorization("viewer")),
 ):
     if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
@@ -281,7 +276,6 @@ async def delete_dataset_metadata(
     dataset_id: str,
     user=Depends(get_current_user),
     es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
-    admin_mode: bool = Depends(get_admin_mode),
     allow: bool = Depends(Authorization("editor")),
 ):
     if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
