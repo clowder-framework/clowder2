@@ -30,12 +30,12 @@ export function Group() {
 		dispatch(fetchGroupRole(groupId));
 
 	const groupAbout = useSelector((state: RootState) => state.group.about);
-
 	const role = useSelector((state: RootState) => state.group.role);
-
 	const groupCreatorEmail = useSelector(
 		(state: RootState) => state.group.about.creator
 	);
+	const adminMode = useSelector((state: RootState) => state.user.adminMode);
+
 	const groupCreatorEmailLink = `mailto:${groupCreatorEmail}`;
 	const [addMemberModalOpen, setAddMemberModalOpen] = useState(false);
 	const [deleteGroupConfirmOpen, setDeleteGroupConfirmOpen] = useState(false);
@@ -45,6 +45,11 @@ export function Group() {
 		fetchGroupInfo(groupId);
 		fetchCurrentGroupRole(groupId);
 	}, []);
+
+	useEffect(() => {
+		fetchGroupInfo(groupId);
+		fetchCurrentGroupRole(groupId);
+	}, [adminMode]);
 
 	// Error msg dialog
 	const [errorOpen, setErrorOpen] = useState(false);

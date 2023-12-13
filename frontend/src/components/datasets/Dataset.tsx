@@ -110,6 +110,7 @@ export const Dataset = (): JSX.Element => {
 		(state: RootState) => state.dataset.datasetRole
 	);
 	const folderPath = useSelector((state: RootState) => state.folder.folderPath);
+	const adminMode = useSelector((state: RootState) => state.user.adminMode);
 
 	// state
 	const [selectedTabIndex, setSelectedTabIndex] = useState<number>(0);
@@ -117,7 +118,6 @@ export const Dataset = (): JSX.Element => {
 		React.useState<boolean>(false);
 	const [metadataRequestForms, setMetadataRequestForms] = useState({});
 
-	const [allowSubmit, setAllowSubmit] = React.useState<boolean>(false);
 	// Error msg dialog
 	const [errorOpen, setErrorOpen] = useState(false);
 	const [showForbiddenPage, setShowForbiddenPage] = useState(false);
@@ -136,11 +136,11 @@ export const Dataset = (): JSX.Element => {
 		(state: RootState) => state.folder.folders
 	);
 
-	const metadataDefinitionList = useSelector(
-		(state: RootState) => state.metadata.metadataDefinitionList
-	);
-
 	// component did mount list all files in dataset
+	useEffect(() => {
+		getMetadatDefinitions(null, 0, 100);
+	}, []);
+
 	useEffect(() => {
 		listFilesInDataset(datasetId, folderId, skip, limit);
 		listFoldersInDataset(datasetId, folderId, skip, limit);
@@ -149,8 +149,11 @@ export const Dataset = (): JSX.Element => {
 	}, [searchParams]);
 
 	useEffect(() => {
-		getMetadatDefinitions(null, 0, 100);
-	}, []);
+		listFilesInDataset(datasetId, folderId, skip, limit);
+		listFoldersInDataset(datasetId, folderId, skip, limit);
+		listDatasetAbout(datasetId);
+		getFolderPath(folderId);
+	}, [adminMode]);
 
 	useEffect(() => {
 		// disable flipping if reaches the last page

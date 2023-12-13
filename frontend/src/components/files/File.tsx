@@ -98,6 +98,7 @@ export const File = (): JSX.Element => {
 	const storageType = useSelector(
 		(state: RootState) => state.file.fileSummary.storage_type
 	);
+	const adminMode = useSelector((state: RootState) => state.user.adminMode);
 
 	const [selectedTabIndex, setSelectedTabIndex] = useState(0);
 	const [previews, setPreviews] = useState([]);
@@ -128,6 +129,20 @@ export const File = (): JSX.Element => {
 			getFolderPath(folderId); // get folder path
 		}
 	}, []);
+
+	// component did mount
+	useEffect(() => {
+		// load file information
+		listFileSummary(fileId);
+		listFileVersions(fileId);
+		// FIXME replace checks for null with logic to load this info from redux instead of the page parameters
+		if (datasetId != "null" && datasetId != "undefined") {
+			listDatasetAbout(datasetId); // get dataset name
+		}
+		if (folderId != "null" && folderId != "undefined") {
+			getFolderPath(folderId); // get folder path
+		}
+	}, [adminMode]);
 
 	// for breadcrumb
 	useEffect(() => {
