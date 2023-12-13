@@ -40,7 +40,6 @@ router = APIRouter()
 async def save_authorization(
         dataset_id: str,
         authorization_in: AuthorizationBase,
-        admin_mode: bool = Depends(get_admin_mode),
         user=Depends(get_current_username),
         allow: bool = Depends(Authorization("editor")),
 ):
@@ -70,24 +69,23 @@ async def save_authorization(
 @router.get("/datasets/{dataset_id}/role", response_model=AuthorizationOut)
 async def get_dataset_role(
         dataset_id: str,
-        admin_mode: bool = Depends(get_admin_mode),
         current_user=Depends(get_current_username),
+        admin_mode: bool = Depends(get_admin_mode),
         admin=Depends(get_admin),
 ):
     """Retrieve role of user for a specific dataset."""
     # Get group id and the associated users from authorization
-    if admin and admin_mode:
-        auth_db = await AuthorizationDB.find_one(
-            AuthorizationDB.dataset_id == PyObjectId(dataset_id)
-        )
-    else:
-        auth_db = await AuthorizationDB.find_one(
-            AuthorizationDB.dataset_id == PyObjectId(dataset_id),
-            Or(
-                AuthorizationDB.creator == current_user,
-                AuthorizationDB.user_ids == current_user,
-            ),
-        )
+    criteria = []
+    if not admin or not admin_mode:
+        criteria.append(Or(
+            AuthorizationDB.creator == current_user,
+            AuthorizationDB.user_ids == current_user,
+        ))
+
+    auth_db = await AuthorizationDB.find_one(
+        AuthorizationDB.dataset_id == PyObjectId(dataset_id),
+        *criteria,
+    )
     if auth_db is None:
         if (
                 current_dataset := await DatasetDB.get(PydanticObjectId(dataset_id))
@@ -113,7 +111,6 @@ async def get_dataset_role(
 @router.get("/datasets/{dataset_id}/role/viewer}")
 async def get_dataset_role_viewer(
         dataset_id: str,
-        admin_mode: bool = Depends(get_admin_mode),
         allow: bool = Depends(Authorization("viewer")),
 ):
     """Used for testing only. Returns true if user has viewer permission on dataset, otherwise throws a 403 Forbidden HTTP exception.
@@ -124,7 +121,6 @@ async def get_dataset_role_viewer(
 @router.get("/datasets/{dataset_id}/role/owner}")
 async def get_dataset_role_owner(
         dataset_id: str,
-        admin_mode: bool = Depends(get_admin_mode),
         allow: bool = Depends(Authorization("owner")),
 ):
     """Used for testing only. Returns true if user has owner permission on dataset, otherwise throws a 403 Forbidden HTTP exception.
@@ -135,14 +131,9 @@ async def get_dataset_role_owner(
 @router.get("/files/{file_id}/role}", response_model=RoleType)
 async def get_file_role(
         file_id: str,
-        admin_mode: bool = Depends(get_admin_mode),
         current_user=Depends(get_current_username),
         role: RoleType = Depends(get_role_by_file),
-        admin=Depends(get_admin),
 ):
-    # admin is a superuser and has all the privileges, only show if the user has turned on the admin mode
-    if admin and admin_mode:
-        return RoleType.OWNER
     """Retrieve role of user for an individual file. Role cannot change between file versions."""
     return role
 
@@ -150,14 +141,9 @@ async def get_file_role(
 @router.get("/metadata/{metadata_id}/role}", response_model=AuthorizationMetadata)
 async def get_metadata_role(
         metadata_id: str,
-        admin_mode: bool = Depends(get_admin_mode),
         current_user=Depends(get_current_username),
         role: RoleType = Depends(get_role_by_metadata),
-        admin=Depends(get_admin),
 ):
-    # admin is a superuser and has all the privileges, only show if the user has turned on the admin mode
-    if admin and admin_mode:
-        return RoleType.OWNER
     """Retrieve role of user for group. Group roles can be OWNER, EDITOR, or VIEWER (for regular Members)."""
     return role
 
@@ -165,14 +151,9 @@ async def get_metadata_role(
 @router.get("/groups/{group_id}/role", response_model=RoleType)
 async def get_group_role(
         group_id: str,
-        admin_mode: bool = Depends(get_admin_mode),
         current_user=Depends(get_current_username),
         role: RoleType = Depends(get_role_by_group),
-        admin=Depends(get_admin),
 ):
-    # admin is a superuser and has all the privileges, only show if the user has turned on the admin mode
-    if admin and admin_mode:
-        return RoleType.OWNER
     """Retrieve role of user on a particular group (i.e. whether they can change group memberships)."""
     return role
 
@@ -185,7 +166,6 @@ async def set_dataset_group_role(
         dataset_id: PydanticObjectId,
         group_id: PydanticObjectId,
         role: RoleType,
-        admin_mode: bool = Depends(get_admin_mode),
         es=Depends(get_elasticsearchclient),
         user_id=Depends(get_user),
         allow: bool = Depends(Authorization("editor")),
@@ -195,7 +175,7 @@ async def set_dataset_group_role(
         if (group := await GroupDB.get(group_id)) is not None:
             # First, remove any existing role the group has on the dataset
             await remove_dataset_group_role(
-                dataset_id, group_id, admin_mode, es, user_id, allow
+                dataset_id, group_id, es, user_id, allow
             )
             if (
                     auth_db := await AuthorizationDB.find_one(
@@ -239,7 +219,6 @@ async def set_dataset_user_role(
         dataset_id: str,
         username: str,
         role: RoleType,
-        admin_mode: bool = Depends(get_admin_mode),
         es=Depends(get_elasticsearchclient),
         user_id=Depends(get_user),
         allow: bool = Depends(Authorization("editor")),
@@ -250,7 +229,7 @@ async def set_dataset_user_role(
         if (await UserDB.find_one(UserDB.email == username)) is not None:
             # First, remove any existing role the user has on the dataset
             await remove_dataset_user_role(
-                dataset_id, username, admin_mode, es, user_id, allow
+                dataset_id, username, es, user_id, allow
             )
             auth_db = await AuthorizationDB.find_one(
                 AuthorizationDB.dataset_id == PyObjectId(dataset_id),
@@ -298,7 +277,6 @@ async def set_dataset_user_role(
 async def remove_dataset_group_role(
         dataset_id: PydanticObjectId,
         group_id: PydanticObjectId,
-        admin_mode: bool = Depends(get_admin_mode),
         es=Depends(get_elasticsearchclient),
         user_id=Depends(get_user),
         allow: bool = Depends(Authorization("editor")),
@@ -334,7 +312,6 @@ async def remove_dataset_group_role(
 async def remove_dataset_user_role(
         dataset_id: str,
         username: str,
-        admin_mode: bool = Depends(get_admin_mode),
         es=Depends(get_elasticsearchclient),
         user_id=Depends(get_user),
         allow: bool = Depends(Authorization("editor")),
@@ -363,7 +340,6 @@ async def remove_dataset_user_role(
 @router.get("/datasets/{dataset_id}/roles}", response_model=DatasetRoles)
 async def get_dataset_roles(
         dataset_id: str,
-        admin_mode: bool = Depends(get_admin_mode),
         allow: bool = Depends(Authorization("editor")),
 ):
     """Get a list of all users and groups that have assigned roles on this dataset."""
