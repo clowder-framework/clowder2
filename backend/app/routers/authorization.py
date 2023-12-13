@@ -130,7 +130,7 @@ async def get_dataset_role_owner(
     return {"dataset_id": dataset_id, "allow": allow}
 
 
-@router.get("/files/{file_id}/role}", response_model=RoleType)
+@router.get("/files/{file_id}/role", response_model=RoleType)
 async def get_file_role(
     file_id: str,
     current_user=Depends(get_current_username),

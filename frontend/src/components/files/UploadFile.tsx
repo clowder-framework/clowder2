@@ -58,7 +58,7 @@ export const UploadFile: React.FC<UploadFileProps> = (
 		selectedFile: File
 	) =>
 		dispatch(
-			createFileAction(selectedDatasetId, selectedFile, selectedFolderId)
+			createFileAction(selectedDatasetId, selectedFolderId, selectedFile)
 		);
 	const newFile = useSelector((state: RootState) => state.dataset.newFile);
 	const metadataDefinitionList = useSelector(
