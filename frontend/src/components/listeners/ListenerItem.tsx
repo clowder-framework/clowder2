@@ -13,6 +13,7 @@ type ListenerCardProps = {
 	extractorName: string;
 	extractorDescription: string;
 	setOpenSubmitExtraction: any;
+	setInfoOnly: any;
 	setSelectedExtractor: any;
 };
 
@@ -25,6 +26,7 @@ export default function ListenerItem(props: ListenerCardProps) {
 		extractorName,
 		extractorDescription,
 		setOpenSubmitExtraction,
+		setInfoOnly,
 		setSelectedExtractor,
 	} = props;
 
@@ -50,13 +52,10 @@ export default function ListenerItem(props: ListenerCardProps) {
 					</Tooltip>
 				)}
 				<Button
-					disabled={
-						!(fileId !== undefined || datasetId !== undefined) ||
-						!extractor["alive"]
-					}
 					onClick={() => {
 						setOpenSubmitExtraction(true);
 						setSelectedExtractor(extractor);
+						setInfoOnly(true);
 					}}
 				>
 					{extractorName}
@@ -101,6 +100,7 @@ export default function ListenerItem(props: ListenerCardProps) {
 					onClick={() => {
 						setOpenSubmitExtraction(true);
 						setSelectedExtractor(extractor);
+						setInfoOnly(false);
 					}}
 				>
 					<PlayCircleIcon />

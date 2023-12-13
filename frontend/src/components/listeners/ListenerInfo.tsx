@@ -3,15 +3,18 @@ import { Box, Typography } from "@mui/material";
 import { ClowderTitle } from "../styledComponents/ClowderTitle";
 import { ClowderFootnote } from "../styledComponents/ClowderFootnote";
 import { parseDate } from "../../utils/common";
-import { Listener } from "../../types/data";
+import { EventListenerOut as Listener } from "../../openapi/v2";
 import Chip from "@mui/material/Chip";
+import { ListenerInfoDetails } from "./ListenerInfoDetails";
+import { theme } from "../../theme";
 
 type ListenerInfoProps = {
 	selectedExtractor: Listener | undefined;
+	defaultExpanded?: boolean;
 };
 
 export const ListenerInfo = (props: ListenerInfoProps) => {
-	const { selectedExtractor } = props;
+	const { selectedExtractor, defaultExpanded } = props;
 
 	return (
 		<Box>
@@ -34,12 +37,19 @@ export const ListenerInfo = (props: ListenerInfoProps) => {
 			) : null}
 			{selectedExtractor &&
 			selectedExtractor["created"] &&
-			selectedExtractor["author"] ? (
-				<ClowderFootnote>
-					{`Created by ${selectedExtractor["author"]} at ${parseDate(
-						selectedExtractor["created"]
-					)}`}
+			selectedExtractor["properties"] &&
+			selectedExtractor["properties"]["author"] ? (
+				<ClowderFootnote style={{ color: theme.palette.info.main }}>
+					{`Created by ${
+						selectedExtractor["properties"]["author"]
+					} at ${parseDate(selectedExtractor["created"])}`}
 				</ClowderFootnote>
+			) : null}
+			{selectedExtractor ? (
+				<ListenerInfoDetails
+					listener={selectedExtractor}
+					defaultExpanded={defaultExpanded}
+				/>
 			) : null}
 		</Box>
 	);

@@ -9,6 +9,7 @@ import {
 	DialogContent,
 	DialogTitle,
 	Divider,
+	IconButton,
 	Step,
 	StepContent,
 	StepLabel,
@@ -20,15 +21,18 @@ import Form from "@rjsf/material-ui";
 import { FormProps } from "@rjsf/core";
 import { submitFileExtractionAction } from "../../actions/file";
 import { submitDatasetExtractionAction } from "../../actions/dataset";
-import { Extractor, RootState } from "../../types/data";
+import { RootState } from "../../types/data";
+import { EventListenerOut as Extractor } from "../../openapi/v2";
 import { ClowderRjsfSelectWidget } from "../styledComponents/ClowderRjsfSelectWidget";
 import { ClowderRjsfTextWidget } from "../styledComponents/ClowderRjsfTextWidget";
 import ExtractorStatus from "./ExtractorStatus";
+import CloseIcon from "@mui/icons-material/Close";
 
 type SubmitExtractionProps = {
 	fileId: string;
 	datasetId: string;
 	open: boolean;
+	infoOnly: boolean;
 	handleClose: any;
 	selectedExtractor: Extractor;
 };
@@ -39,7 +43,8 @@ const widgets = {
 };
 
 export default function SubmitExtraction(props: SubmitExtractionProps) {
-	const { fileId, datasetId, open, handleClose, selectedExtractor } = props;
+	const { fileId, datasetId, open, infoOnly, handleClose, selectedExtractor } =
+		props;
 	const dispatch = useDispatch();
 
 	const submitFileExtraction = (
@@ -95,111 +100,125 @@ export default function SubmitExtraction(props: SubmitExtractionProps) {
 				sx={{
 					".MuiPaper-root": {
 						padding: "2em",
+						height: "auto",
 					},
 				}}
 			>
+				<IconButton
+					onClick={onClose}
+					sx={{ width: "fit-content", margin: "auto 0 auto auto" }}
+				>
+					<CloseIcon />
+				</IconButton>
 				<DialogTitle>
-					<ListenerInfo selectedExtractor={selectedExtractor} />
+					<ListenerInfo
+						selectedExtractor={selectedExtractor}
+						defaultExpanded={infoOnly}
+					/>
 				</DialogTitle>
-				<Divider />
-				<DialogContent>
-					<Stepper activeStep={activeStep} orientation="vertical">
-						{/*step 1 fill in parameters and submit extractions*/}
-						<Step key="submit">
-							<StepLabel>Submit Extractions</StepLabel>
-							<StepContent>
-								{selectedExtractor &&
-								selectedExtractor["properties"] &&
-								selectedExtractor["properties"]["parameters"] &&
-								selectedExtractor["properties"]["parameters"]["schema"] ? (
-									<Container>
-										<Form
-											widgets={widgets}
-											schema={{
-												properties: selectedExtractor["properties"][
-													"parameters"
-												]["schema"] as FormProps<any>["schema"],
-											}}
-											onSubmit={({ formData }) => {
-												onSubmit(formData);
-											}}
-										>
-											<Box className="inputGroup">
+				{!infoOnly ? (
+					<>
+						<Divider />
+						<DialogContent sx={{ overflowY: "visible" }}>
+							<Stepper activeStep={activeStep} orientation="vertical">
+								{/*step 1 fill in parameters and submit extractions*/}
+								<Step key="submit">
+									<StepLabel>Submit Extractions</StepLabel>
+									<StepContent>
+										{selectedExtractor &&
+										selectedExtractor["properties"] &&
+										selectedExtractor["properties"]["parameters"] &&
+										selectedExtractor["properties"]["parameters"]["schema"] ? (
+											<Container>
+												<Form
+													widgets={widgets}
+													schema={{
+														properties: selectedExtractor["properties"][
+															"parameters"
+														]["schema"] as FormProps<any>["schema"],
+													}}
+													onSubmit={({ formData }) => {
+														onSubmit(formData);
+													}}
+												>
+													<Box className="inputGroup">
+														<Button
+															variant="contained"
+															type="submit"
+															className="form-button-block"
+														>
+															Submit
+														</Button>
+													</Box>
+												</Form>
+											</Container>
+										) : (
+											<Container>
+												<Form
+													schema={{ properties: {} }}
+													onSubmit={({ formData }) => {
+														onSubmit(formData);
+													}}
+												>
+													<Box className="inputGroup">
+														<Button
+															variant="contained"
+															type="submit"
+															className="form-button-block"
+														>
+															Submit
+														</Button>
+													</Box>
+												</Form>
+											</Container>
+										)}
+									</StepContent>
+								</Step>
+								{/*step 2 status*/}
+								<Step key="status">
+									<StepLabel>Extraction Status</StepLabel>
+									<StepContent>
+										<ExtractorStatus job_id={job_id} />
+										{/*buttons*/}
+										<Box sx={{ mb: 2 }}>
+											<Button
+												variant="contained"
+												onClick={handleNext}
+												sx={{ mt: 1, mr: 1 }}
+											>
+												Next
+											</Button>
+										</Box>
+									</StepContent>
+								</Step>
+								{/*step 2 results*/}
+								<Step key="results">
+									<StepLabel>Extracted Results</StepLabel>
+									<StepContent>
+										{/*buttons*/}
+										<Box sx={{ mb: 2 }}>
+											<>
 												<Button
 													variant="contained"
-													type="submit"
-													className="form-button-block"
+													onClick={handleFinish}
+													sx={{ mt: 1, mr: 1 }}
 												>
-													Submit
+													Restart
 												</Button>
-											</Box>
-										</Form>
-									</Container>
-								) : (
-									<Container>
-										<Form
-											schema={{ properties: {} }}
-											onSubmit={({ formData }) => {
-												onSubmit(formData);
-											}}
-										>
-											<Box className="inputGroup">
-												<Button
-													variant="contained"
-													type="submit"
-													className="form-button-block"
-												>
-													Submit
+												<Button onClick={handleBack} sx={{ mt: 1, mr: 1 }}>
+													Back
 												</Button>
-											</Box>
-										</Form>
-									</Container>
-								)}
-							</StepContent>
-						</Step>
-						{/*step 2 status*/}
-						<Step key="status">
-							<StepLabel>Extraction Status</StepLabel>
-							<StepContent>
-								<ExtractorStatus job_id={job_id} />
-								{/*buttons*/}
-								<Box sx={{ mb: 2 }}>
-									<Button
-										variant="contained"
-										onClick={handleNext}
-										sx={{ mt: 1, mr: 1 }}
-									>
-										Next
-									</Button>
-								</Box>
-							</StepContent>
-						</Step>
-						{/*step 2 results*/}
-						<Step key="results">
-							<StepLabel>Extracted Results</StepLabel>
-							<StepContent>
-								{/*buttons*/}
-								<Box sx={{ mb: 2 }}>
-									<>
-										<Button
-											variant="contained"
-											onClick={handleFinish}
-											sx={{ mt: 1, mr: 1 }}
-										>
-											Restart
-										</Button>
-										<Button onClick={handleBack} sx={{ mt: 1, mr: 1 }}>
-											Back
-										</Button>
-									</>
-								</Box>
-							</StepContent>
-						</Step>
-					</Stepper>
-				</DialogContent>
-				<DialogActions>
-					<Button onClick={onClose}>Close</Button>
-				</DialogActions>
+											</>
+										</Box>
+									</StepContent>
+								</Step>
+							</Stepper>
+						</DialogContent>
+						<DialogActions>
+							<Button onClick={onClose}>Close</Button>
+						</DialogActions>
+					</>
+				) : null}
 			</Dialog>
 		</Container>
 	);
