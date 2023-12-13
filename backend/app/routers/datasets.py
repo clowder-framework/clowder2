@@ -215,24 +215,30 @@ async def get_datasets(
     admin=Depends(get_admin),
     admin_mode: bool = Depends(get_admin_mode),
 ):
-    criteria = []
-    if not admin_mode or not admin:
-        if mine:
-            criteria.append(Or(DatasetDB.creator.email == user_id))
-        else:
-            criteria.append(
-                Or(
-                    DatasetDB.auth.user_ids == user_id,
-                    DatasetDB.status == DatasetStatus.AUTHENTICATED.name,
-                )
-            )
-
-    datasets = await DatasetDBViewList.find(
-        *criteria,
-        sort=(-DatasetDBViewList.created),
-        skip=skip,
-        limit=limit,
-    ).to_list()
+    if admin and admin_mode:
+        datasets = await DatasetDBViewList.find(
+            sort=(-DatasetDBViewList.created),
+            skip=skip,
+            limit=limit,
+        ).to_list()
+    elif mine:
+        datasets = await DatasetDBViewList.find(
+            DatasetDBViewList.creator.email == user_id,
+            sort=(-DatasetDBViewList.created),
+            skip=skip,
+            limit=limit,
+        ).to_list()
+    else:
+        datasets = await DatasetDBViewList.find(
+            Or(
+                DatasetDBViewList.creator.email == user_id,
+                DatasetDBViewList.auth.user_ids == user_id,
+                DatasetDBViewList.status == DatasetStatus.AUTHENTICATED.name,
+            ),
+            sort=(-DatasetDBViewList.created),
+            skip=skip,
+            limit=limit,
+        ).to_list()
 
     return [dataset.dict() for dataset in datasets]
 
