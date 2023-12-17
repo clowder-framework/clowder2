@@ -330,14 +330,6 @@ export const PublicDataset = (): JSX.Element => {
 							{...a11yProps(3)}
 							disabled={false}
 						/>
-						<Tab
-							icon={<HistoryIcon />}
-							iconPosition="start"
-							sx={TabStyle}
-							label="Extraction History"
-							{...a11yProps(5)}
-							disabled={false}
-						/>
 					</Tabs>
 					<TabPanel value={selectedTabIndex} index={0}>
 						{folderId !== null ? (
@@ -372,9 +364,6 @@ export const PublicDataset = (): JSX.Element => {
 					</TabPanel>
 					<TabPanel value={selectedTabIndex} index={4}>
 						<Listeners datasetId={datasetId} />
-					</TabPanel>
-					<TabPanel value={selectedTabIndex} index={5}>
-						<ExtractionHistoryTab datasetId={datasetId} />
 					</TabPanel>
 					{/*<TabPanel value={selectedTabIndex} index={6}>*/}
 					{/*	<SharingTab datasetId={datasetId} />*/}

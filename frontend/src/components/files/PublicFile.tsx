@@ -277,14 +277,6 @@ export const PublicFile = (): JSX.Element => {
 						{/*	{...a11yProps(4)}*/}
 						{/*	disabled={false}*/}
 						{/*/>*/}
-						<Tab
-							icon={<HistoryIcon />}
-							iconPosition="start"
-							sx={TabStyle}
-							label="Extraction History"
-							{...a11yProps(5)}
-							disabled={false}
-						/>
 					</Tabs>
 					<TabPanel value={selectedTabIndex} index={0}>
 						<PublicVisualization fileId={fileId} />
@@ -323,9 +315,6 @@ export const PublicFile = (): JSX.Element => {
 					{/*<TabPanel value={selectedTabIndex} index={4}>*/}
 					{/*	<Listeners fileId={fileId} datasetId={datasetId} />*/}
 					{/*</TabPanel>*/}
-					<TabPanel value={selectedTabIndex} index={5}>
-						<ExtractionHistoryTab fileId={fileId} />
-					</TabPanel>
 				</Grid>
 				<Grid item xs={2}>
 					{latestVersionNum == selectedVersionNum ? (

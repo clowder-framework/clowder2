@@ -322,6 +322,8 @@ async def patch_dataset(
             dataset.name = dataset_info.name
         if dataset_info.description is not None:
             dataset.description = dataset_info.description
+        if dataset_info.status is not None:
+            dataset.status = dataset_info.status
         dataset.modified = datetime.datetime.utcnow()
         await dataset.save()
 
