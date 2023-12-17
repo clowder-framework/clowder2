@@ -24,7 +24,7 @@ const defaultState: PublicFileState = {
 const publicFile = (state = defaultState, action: DataAction) => {
 	switch (action.type) {
 		case RECEIVE_PUBLIC_FILE_SUMMARY:
-			return Object.assign({}, state, { fileSummary: action.publicFileSummary });
+			return Object.assign({}, state, { publicFileSummary: action.publicFileSummary });
 		case RECEIVE_PUBLIC_FILE_EXTRACTED_METADATA:
 			return Object.assign({}, state, {
 				publicExtractedMetadata: action.publicExtractedMetadata,
@@ -36,7 +36,7 @@ const publicFile = (state = defaultState, action: DataAction) => {
 		case RECEIVE_PUBLIC_PREVIEWS:
 			return Object.assign({}, state, { publicPreviews: action.publicPreviews });
 		case CHANGE_PUBLIC_SELECTED_VERSION:
-			return Object.assign({}, state,{publicSelected_version_num:action.publicSelected_version});
+			return Object.assign({}, state,{publicSelected_version_num:action.publicSelected_version_num});
 		case RECEIVE_PUBLIC_VERSIONS:
 			return Object.assign({}, state, { publicFileVersions: action.publicFileVersions });
 		case DOWNLOAD_PUBLIC_FILE:

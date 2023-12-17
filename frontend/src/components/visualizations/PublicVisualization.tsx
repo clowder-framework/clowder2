@@ -70,7 +70,7 @@ export const PublicVisualization = (props: previewProps) => {
 				supportedMimeType.includes(fileSummary.content_type.content_type)) ||
 				(fileSummary.content_type && fileSummary.content_type.main_type !== undefined &&
 							// @ts-ignore
-					supportedMimeType.includes(publicFileSummary.content_type.main_type)))
+					supportedMimeType.includes(fileSummary.content_type.main_type)))
 		) {
 			setIsRawDataSupported(true);
 		} else {

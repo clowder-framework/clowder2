@@ -80,9 +80,7 @@ export const PublicFile = (): JSX.Element => {
 	const [selectedVersionNum, setSelectedVersionNum] = useState(
 		latestVersionNum ?? 1
 	);
-	console.log("we got here");
 	const folderPath = useSelector((state: RootState) => state.folder.publicFolderPath);
-	console.log("after folder path");
 	const [selectedTabIndex, setSelectedTabIndex] = useState(0);
 	const [previews, setPreviews] = useState([]);
 	const [enableAddMetadata, setEnableAddMetadata] =
@@ -142,8 +140,6 @@ export const PublicFile = (): JSX.Element => {
 		setPaths(tmpPaths);
 	}, [about, fileSummary, folderPath]);
 
-	console.log('about, filesummary and folderpath', about, fileSummary, folderPath)
-
 	useEffect(() => {
 		if (latestVersionNum !== undefined && latestVersionNum !== null) {
 			setSelectedVersionNum(latestVersionNum);
@@ -178,7 +174,6 @@ export const PublicFile = (): JSX.Element => {
 						Configuration.fileType = filePreview["pv_contenttype"];
 
 						const resourceURL = `/public/${config.hostname}${filePreview["pv_route"]}?superAdmin=true`;
-						console.log("resourceURL", resourceURL);
 						Configuration.resource = await downloadPublicResource(resourceURL);
 						previewsTemp.push(Configuration);
 					})
@@ -187,7 +182,6 @@ export const PublicFile = (): JSX.Element => {
 			}
 		})();
 	}, [filePreviews]);
-	console.log("after await download resource", filePreviews);
 
 	const handleTabChange = (
 		_event: React.ChangeEvent<{}>,
@@ -320,20 +314,20 @@ export const PublicFile = (): JSX.Element => {
 					{latestVersionNum == selectedVersionNum ? (
 						// latest version
 						<>
-							{/*{Object.keys(fileSummary).length > 0 && (*/}
-							{/*	<FileDetails fileSummary={fileSummary} />*/}
-							{/*)}*/}
+							{Object.keys(fileSummary).length > 0 && (
+								<FileDetails fileSummary={fileSummary} />
+							)}
 						</>
 					) : (
 						// history version
 						<>
-							{/*{Object.keys(fileSummary).length > 0 && (*/}
-							{/*	<FileHistory*/}
-							{/*		name={file.publicFileSummary.name}*/}
-							{/*		contentType={file.publicFileSummary.content_type?.content_type}*/}
-							{/*		selectedVersionNum={selectedVersionNum}*/}
-							{/*	/>*/}
-							{/*)}*/}
+							{Object.keys(fileSummary).length > 0 && (
+								<FileHistory
+									name={file.publicFileSummary.name}
+									contentType={file.publicFileSummary.content_type?.content_type}
+									selectedVersionNum={selectedVersionNum}
+								/>
+							)}
 						</>
 					)}
 					<>

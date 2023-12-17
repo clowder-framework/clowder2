@@ -134,7 +134,7 @@ interface CHANGE_SELECTED_VERSION {
 
 interface CHANGE_PUBLIC_SELECTED_VERSION {
 	type: "CHANGE_PUBLIC_SELECTED_VERSION";
-	pubilcSelected_version: number;
+	publicSelected_version_num: number;
 }
 
 interface SET_USER {
