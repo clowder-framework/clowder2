@@ -5,14 +5,12 @@ import {
 	ButtonGroup,
 	Divider,
 	FormControl,
-	FormControlLabel,
-	FormLabel,
 	Grid,
-	IconButton,
-	InputBase,
+	InputLabel,
 	List,
-	Radio,
-	RadioGroup,
+	MenuItem,
+	Paper,
+	Select,
 } from "@mui/material";
 
 import { RootState } from "../../types/data";
@@ -23,12 +21,12 @@ import {
 	fetchListeners,
 	queryListeners,
 } from "../../actions/listeners";
-import { ArrowBack, ArrowForward, SearchOutlined } from "@material-ui/icons";
+import { ArrowBack, ArrowForward } from "@material-ui/icons";
 import ListenerItem from "./ListenerItem";
-import { theme } from "../../theme";
 import SubmitExtraction from "./SubmitExtraction";
 import { capitalize } from "../../utils/common";
 import config from "../../app.config";
+import { GenericSearchBox } from "../search/GenericSearchBox";
 
 type ListenerProps = {
 	fileId?: string;
@@ -78,6 +76,7 @@ export function Listeners(props: ListenerProps) {
 	const [nextDisabled, setNextDisabled] = useState<boolean>(false);
 	const [openSubmitExtraction, setOpenSubmitExtraction] =
 		useState<boolean>(false);
+	const [infoOnly, setInfoOnly] = useState<boolean>(false);
 	const [selectedExtractor, setSelectedExtractor] = useState();
 	const [searchText, setSearchText] = useState<string>("");
 	const [selectedCategory, setSelectedCategory] = useState("");
@@ -171,104 +170,67 @@ export function Listeners(props: ListenerProps) {
 	return (
 		<>
 			<Grid container>
-				<Grid item xs={3}>
+				<Grid item xs={12}>
 					{/*searchbox*/}
-					<Box
-						component="form"
-						sx={{
-							p: "2px 4px",
-							display: "flex",
-							alignItems: "left",
-							backgroundColor: theme.palette.primary.contrastText,
-							width: "80%",
-						}}
-					>
-						<InputBase
-							sx={{ ml: 1, flex: 1 }}
-							placeholder="Keyword for extractor"
-							inputProps={{
-								"aria-label": "Type in keyword to search for extractor",
-							}}
-							onChange={(e) => {
-								setSearchText(e.target.value);
-							}}
-							onKeyDown={(e) => {
-								if (e.key === "Enter") {
-									e.preventDefault();
-									handleListenerSearch();
-								}
-							}}
-							value={searchText}
-						/>
-						<IconButton
-							type="button"
-							sx={{ p: "10px" }}
-							aria-label="search"
-							onClick={handleListenerSearch}
-						>
-							<SearchOutlined />
-						</IconButton>
-					</Box>
-					<Box sx={{ margin: "2em auto", padding: "0.5em" }}>
-						{/*categories*/}
-						<FormControl>
-							<FormLabel id="radio-buttons-group-label-categories">
-								Filter by category
-							</FormLabel>
-							<RadioGroup
-								aria-labelledby="radio-buttons-group-label-categories"
-								defaultValue="all"
-								name="radio-buttons-group"
-								value={selectedCategory}
-								onChange={handleCategoryChange}
-							>
-								<FormControlLabel value="" control={<Radio />} label="All" />
-								{categories.map((category: string) => {
-									return (
-										<FormControlLabel
-											value={category}
-											control={<Radio />}
-											label={capitalize(category)}
-										/>
-									);
-								})}
-							</RadioGroup>
-						</FormControl>
-					</Box>
-					<Box sx={{ margin: "2em auto", padding: "0.5em" }}>
-						{/*labels*/}
-						<FormControl>
-							<FormLabel id="radio-buttons-group-label-labels">
-								Filter by labels
-							</FormLabel>
-							<RadioGroup
-								aria-labelledby="radio-buttons-group-label-labels"
-								defaultValue="all"
-								name="radio-buttons-group"
-								value={selectedLabel}
-								onChange={handleLabelChange}
-							>
-								<FormControlLabel value="" control={<Radio />} label="All" />
-								{labels.map((label: string) => {
-									return (
-										<FormControlLabel
-											value={label}
-											control={<Radio />}
-											label={capitalize(label)}
-										/>
-									);
-								})}
-							</RadioGroup>
-						</FormControl>
-					</Box>
+					<GenericSearchBox
+						title="Search for Extractors"
+						searchPrompt="Keyword for extractor"
+						setSearchTerm={setSearchText}
+						searchTerm={searchText}
+						searchFunction={handleListenerSearch}
+						skip={skip}
+						limit={limit}
+					/>
 				</Grid>
-				<Grid item xs={9}>
-					<Box
-						sx={{
-							backgroundColor: theme.palette.primary.contrastText,
-							padding: "3em",
-						}}
-					>
+			</Grid>
+			<Grid
+				container
+				sx={{ padding: "0 0 1em 0", justifyContent: "space-between" }}
+				spacing={3}
+			>
+				{/*categories*/}
+				<Grid item xs={6}>
+					<FormControl variant="standard" sx={{ width: "100%" }}>
+						<InputLabel id="label-categories">Filter by category</InputLabel>
+						<Select
+							defaultValue=""
+							labelId="label-categories"
+							id="label-categories"
+							value={selectedCategory}
+							onChange={handleCategoryChange}
+							label="Categories"
+						>
+							<MenuItem value="">All</MenuItem>
+							{categories.map((category: string) => {
+								return (
+									<MenuItem value={category}>{capitalize(category)}</MenuItem>
+								);
+							})}
+						</Select>
+					</FormControl>
+				</Grid>
+				<Grid item xs={6}>
+					<FormControl variant="standard" sx={{ width: "100%" }}>
+						<InputLabel id="label-categories">Filter by labels</InputLabel>
+						<Select
+							defaultValue=""
+							labelId="label-labels"
+							id="label-labels"
+							value={selectedLabel}
+							onChange={handleLabelChange}
+							label="Labels"
+						>
+							<MenuItem value="">All</MenuItem>
+							{labels.map((label: string) => {
+								return <MenuItem value={label}>{capitalize(label)}</MenuItem>;
+							})}
+						</Select>
+					</FormControl>
+				</Grid>
+			</Grid>
+			<Grid container>
+				<Grid item xs={12}>
+					<Paper sx={{ width: "100%", mb: 2, padding: "3em" }}>
 						<List>
 							{listeners !== undefined ? (
 								listeners.map((listener) => {
@@ -282,6 +244,7 @@ export function Listeners(props: ListenerProps) {
 												extractor={listener}
 												extractorName={listener.name}
 												extractorDescription={listener.description}
+												setInfoOnly={setInfoOnly}
 												setOpenSubmitExtraction={setOpenSubmitExtraction}
 												setSelectedExtractor={setSelectedExtractor}
 											/>
@@ -314,13 +277,14 @@ export function Listeners(props: ListenerProps) {
 								</Button>
 							</ButtonGroup>
 						</Box>
-					</Box>
+					</Paper>
 				</Grid>
 			</Grid>
 			<SubmitExtraction
 				fileId={fileId}
 				datasetId={datasetId}
 				open={openSubmitExtraction}
+				infoOnly={infoOnly}
 				handleClose={handleSubmitExtractionClose}
 				selectedExtractor={selectedExtractor}
 			/>
