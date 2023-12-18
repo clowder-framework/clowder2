@@ -320,17 +320,6 @@ export const File = (): JSX.Element => {
 							{...a11yProps(1)}
 							disabled={false}
 						/>
-						{versionEnabled ? (
-							<Tab
-								icon={<InsertDriveFile />}
-								iconPosition="start"
-								sx={TabStyle}
-								label="Version History"
-								{...a11yProps(1)}
-							/>
-						) : (
-							<></>
-						)}
 						<Tab
 							icon={<AssessmentIcon />}
 							iconPosition="start"
@@ -355,13 +344,17 @@ export const File = (): JSX.Element => {
 							{...a11yProps(4)}
 							disabled={false}
 						/>
-						<Tab
-							icon={<InsertDriveFile />}
-							iconPosition="start"
-							sx={TabStyle}
-							label="Version History"
-							{...a11yProps(5)}
-						/>
+						{versionEnabled ? (
+							<Tab
+								icon={<InsertDriveFile />}
+								iconPosition="start"
+								sx={TabStyle}
+								label="Version History"
+								{...a11yProps(5)}
+							/>
+						) : (
+							<></>
+						)}
 					</Tabs>
 					<TabPanel value={selectedTabIndex} index={0}>
 						<Visualization fileId={fileId} />
