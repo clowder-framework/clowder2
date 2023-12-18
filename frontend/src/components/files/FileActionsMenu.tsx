@@ -8,7 +8,7 @@ import {
 	MenuItem,
 	Stack,
 } from "@mui/material";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
 	fetchFileSummary,
 	fileDeleted,
@@ -41,6 +41,9 @@ export const FileActionsMenu = (props: FileActionsMenuProps): JSX.Element => {
 	const [fileShareModalOpen, setFileShareModalOpen] = useState(false);
 
 	const fileRole = useSelector((state: RootState) => state.file.fileRole);
+	const storageType = useSelector(
+		(state: RootState) => state.file.fileSummary.storage_type
+	);
 
 	const open = Boolean(anchorEl);
 
@@ -74,8 +77,17 @@ export const FileActionsMenu = (props: FileActionsMenuProps): JSX.Element => {
 	const history = useNavigate();
 
 	const [confirmationOpen, setConfirmationOpen] = useState(false);
-
 	const [updateFileOpen, setUpdateFileOpen] = useState(false);
+	const [shareEnabled, setShareEnabled] = useState(false);
+
+	useEffect(() => {
+		if (storageType === "minio") {
+			setShareEnabled(true);
+		} else {
+			setShareEnabled(false);
+		}
+	}, [storageType]);
+
 	const deleteSelectedFile = () => {
 		if (fileId) {
 			deleteFile(fileId);
@@ -85,10 +97,12 @@ export const FileActionsMenu = (props: FileActionsMenuProps): JSX.Element => {
 		// Redirect back to main dataset page
 		history(`/datasets/${datasetId}`);
 	};
+
 	const handleShareLinkClick = () => {
 		generateFilePresignedUrl(fileId, null, 7 * 24 * 3600);
 		setFileShareModalOpen(true);
 	};
+
 	const setFileShareModalClose = () => {
 		setFileShareModalOpen(false);
 		dispatch({ type: RESET_FILE_PRESIGNED_URL });
@@ -143,14 +157,18 @@ export const FileActionsMenu = (props: FileActionsMenuProps): JSX.Element => {
 			>
 				Download
 			</Button>
-			<Button
-				sx={{ minWidth: "auto" }}
-				variant="outlined"
-				onClick={handleShareLinkClick}
-				endIcon={<SendIcon />}
-			>
-				Share
-			</Button>
+			{shareEnabled === true ? (
+				<Button
+					sx={{ minWidth: "auto" }}
+					variant="outlined"
+					onClick={handleShareLinkClick}
+					endIcon={<SendIcon />}
+				>
+					Share
+				</Button>
+			) : (
+				<></>
+			)}
 			{/*owner, editor can update file*/}
 			<AuthWrapper currRole={fileRole} allowedRoles={["owner", "editor"]}>
 				<Button

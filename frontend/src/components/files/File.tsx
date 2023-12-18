@@ -87,6 +87,7 @@ export const File = (): JSX.Element => {
 	const [selectedVersionNum, setSelectedVersionNum] = useState(
 		latestVersionNum ?? 1
 	);
+	const [versionEnabled, setVersionEnabled] = useState(false);
 	const fileSummary = useSelector((state: RootState) => state.file.fileSummary);
 	const filePreviews = useSelector((state: RootState) => state.file.previews);
 	const fileVersions = useSelector(
@@ -94,6 +95,9 @@ export const File = (): JSX.Element => {
 	);
 	const folderPath = useSelector((state: RootState) => state.folder.folderPath);
 	const fileRole = useSelector((state: RootState) => state.file.fileRole);
+	const storageType = useSelector(
+		(state: RootState) => state.file.fileSummary.storage_type
+	);
 
 	const [selectedTabIndex, setSelectedTabIndex] = useState(0);
 	const [previews, setPreviews] = useState([]);
@@ -159,6 +163,14 @@ export const File = (): JSX.Element => {
 			setSelectedVersionNum(latestVersionNum);
 		}
 	}, [latestVersionNum]);
+
+	useEffect(() => {
+		if (storageType === "minio") {
+			setVersionEnabled(true);
+		} else {
+			setVersionEnabled(false);
+		}
+	}, [storageType]);
 
 	useEffect(() => {
 		(async () => {
@@ -267,7 +279,11 @@ export const File = (): JSX.Element => {
 				<Grid item xs={10} sx={{ display: "flex", alignItems: "center" }}>
 					<MainBreadcrumbs paths={paths} />
 					<Grid item>
-						<VersionChip selectedVersion={selectedVersionNum} />
+						{versionEnabled ? (
+							<VersionChip selectedVersion={selectedVersionNum} />
+						) : (
+							<></>
+						)}
 						<RoleChip role={fileRole} />
 					</Grid>
 				</Grid>
@@ -304,6 +320,17 @@ export const File = (): JSX.Element => {
 							{...a11yProps(1)}
 							disabled={false}
 						/>
+						{versionEnabled ? (
+							<Tab
+								icon={<InsertDriveFile />}
+								iconPosition="start"
+								sx={TabStyle}
+								label="Version History"
+								{...a11yProps(1)}
+							/>
+						) : (
+							<></>
+						)}
 						<Tab
 							icon={<AssessmentIcon />}
 							iconPosition="start"
@@ -429,28 +456,33 @@ export const File = (): JSX.Element => {
 							)}
 						</>
 					)}
-					<>
-						<Typography sx={{ wordBreak: "break-all" }}>Version</Typography>
-						<FormControl>
-							<ClowderSelect
-								value={String(selectedVersionNum)}
-								defaultValue={"viewer"}
-								onChange={(event) => {
-									setSelectedVersionNum(event.target.value);
-									setSnackBarMessage("Viewing version " + event.target.value);
-									setSnackBarOpen(true);
-								}}
-							>
-								{fileVersions.map((fileVersion) => {
-									return (
-										<MenuItem value={fileVersion.version_num}>
-											{fileVersion.version_num}
-										</MenuItem>
-									);
-								})}
-							</ClowderSelect>
-						</FormControl>
-					</>
+
+					{versionEnabled ? (
+						<>
+							<Typography sx={{ wordBreak: "break-all" }}>Version</Typography>
+							<FormControl>
+								<ClowderSelect
+									value={String(selectedVersionNum)}
+									defaultValue={"viewer"}
+									onChange={(event) => {
+										setSelectedVersionNum(event.target.value);
+										setSnackBarMessage(`Viewing version ${event.target.value}`);
+										setSnackBarOpen(true);
+									}}
+								>
+									{fileVersions.map((fileVersion) => {
+										return (
+											<MenuItem value={fileVersion.version_num}>
+												{fileVersion.version_num}
+											</MenuItem>
+										);
+									})}
+								</ClowderSelect>
+							</FormControl>
+						</>
+					) : (
+						<></>
+					)}
 				</Grid>
 			</Grid>
 		</Layout>

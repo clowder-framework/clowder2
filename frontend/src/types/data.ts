@@ -3,6 +3,7 @@ import {
 	DatasetOut as Dataset,
 	DatasetRoles,
 	EventListenerJobDB,
+	EventListenerOut as Listener,
 	FileOut as FileSummary,
 	FileVersion,
 	FolderOut,
@@ -15,20 +16,6 @@ import {
 	VisualizationConfigOut,
 	VisualizationDataOut,
 } from "../openapi/v2";
-
-export interface Extractor {
-	name: string;
-	description: string;
-	id: string;
-	parameters: any;
-}
-
-export interface Listener {
-	name: string;
-	description: string;
-	id: string;
-	parameters: any;
-}
 
 export interface Profile {
 	id: string;
