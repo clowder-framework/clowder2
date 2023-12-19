@@ -13,4 +13,4 @@ ingress-nginx:
     service:
       externalTrafficPolicy: Local
       annotations:
-        external-dns.alpha.kubernetes.io/hostname: clowder2-test.icecube.aq
+        external-dns.alpha.kubernetes.io/hostname: clowder2-test.icecube.aq,clowder2-minio.icecube.aq

@@ -1,6 +1,6 @@
 hostname: clowder2-test.icecube.aq
 
-imagePullSecrets: []
+imagePullSecrets: [name: regcred-aq]
 nameOverride: ""
 fullnameOverride: ""
 
@@ -42,10 +42,10 @@ frontend:
 # ----------------------------------------------------------------------
 backend:
   image:
-    repository: clowder/clowder2-backend
+    repository: i3registry.icecube.aq/clowder2-backend-local
     pullPolicy: IfNotPresent
     # Overrides the image tag whose default is the chart appVersion.
-    tag: ""
+    tag: "0.1"
 
   service:
     type: ClusterIP
@@ -59,7 +59,7 @@ geoserver:
   username: admin
   password: admin
   workspace: clowder2
-  url: http://clowder2-geoserver:8080/geoserver/
+  url: http://clowder2-test.icecube.aq/geoserver/
   replicas: 1
   image:
     repository: kartoza/geoserver
@@ -69,7 +69,7 @@ geoserver:
     type: ClusterIP
     port: 8080
   persistence:
-    storageClass: nfs-taiga
+    storageClass: csi-cephfs-sc
     size: 8Gi
 
 # ----------------------------------------------------------------------
@@ -92,13 +92,21 @@ minio:
 
   # enable ingress for webui
   ingress:
-    enabled: true
-    hostname: minio.clowder2.localhost
+    enabled: false
+    hostname: clowder2-minio.icecube.aq
+    ingressClassName: clowder2-test
+    annotations:
+      cert-manager.io/cluster-issuer: "letsencrypt-dns01-prod"
+    tls: true
+    
 
   # enable ingress for api
   apiIngress:
-    enabled: true
-    hostname: minio-api.clowder2.localhost
+    enabled: false
+    hostname: clowder2-minioapi.icecube.aq
+    ingressClassName: clowder2-test
+    annotations:
+      cert-manager.io/cluster-issuer: "letsencrypt-dns01-prod"
 
   # enabled distributed mode (or standalone)
 #  mode: distributed
@@ -157,7 +165,7 @@ rabbitmq:
 
   # enable webfrontend
   ingress:
-    enabled: true
+    enabled: false
     hostname: rabbitmq.clowder2.localhost
 
   persistence:
@@ -186,16 +194,27 @@ extractors:
 #    #     value: "bar"
   wordcount:
     image: clowder/extractors-wordcount:latest
+    enabled: false
+    replicaCount: 0
   image-preview:
     image: clowder/extractors-image-preview:latest
+    enabled: false
+    replicaCount: 0
   image-metadata:
     image: clowder/extractors-image-metadata:latest
+    enabled: false
+    replicaCount: 0
   audio-preview:
     image: clowder/extractors-audio-preview:latest
+    enabled: false
+    replicaCount: 0
   file-digest:
-    image: clowder/extractors-digest:latest
+    image: i3registry.icecube.aq/extractors-digest-local:0.1
+    imagePullSecrets: regcred-aq
   geotiff-preview:
     image: clowder/extractors-geotiff-preview:latest
+    enabled: false
+    replicaCount: 0
 
 # ----------------------------------------------------------------------
 # ELASTICSEARCH
@@ -204,21 +223,56 @@ elasticsearch:
   clusterName: clowder2
 
   master:
+    heapSize: 512m
+    resource:
+      requests:
+        memory: 1Gi
     persistence:
       storageClass: csi-cephfs-sc
       size: 8Gi
+    initScripts: |
+      #!/bin/sh
+      echo "-XX:MaxDirectMemorySize=2g" > /opt/bitnami/elasticsearch/config/jvm.options.d/directmemory.options
   data:
+    heapSize: 512m
+    resource:
+      requests:
+        memory: 1Gi
     persistence:
       storageClass: csi-cephfs-sc
       size: 8Gi
+    initScripts: |
+      #!/bin/sh
+      echo "-XX:MaxDirectMemorySize=2g" > /opt/bitnami/elasticsearch/config/jvm.options.d/directmemory.options
+  coordinating:
+    heapSize: 256m
+    resource:
+      requests:
+        memory: 512Mi
+    initScripts: |
+      #!/bin/sh
+      echo "-XX:MaxDirectMemorySize=1g" > /opt/bitnami/elasticsearch/config/jvm.options.d/directmemory.options
+  ingest:
+    heapSize: 256m
+    resource:
+      requests:
+        memory: 512Mi
+    initScripts: |
+      #!/bin/sh
+      echo "-XX:MaxDirectMemorySize=1g" > /opt/bitnami/elasticsearch/config/jvm.options.d/directmemory.options
+
 
 # ----------------------------------------------------------------------
 # KEYCLOAK
 # ----------------------------------------------------------------------
 keycloak:
-  hostname: keycloak.icecube.wisc.edu
+  hostname: keycloak.icecube.wisc.edu/auth/
   realm: IceCube
   clientid: clowder2-backend
+  redirect_uri: https://clowder2-test.icecube.aq/api/v2/auth
+  auth_url: https://keycloak.icecube.wisc.edu/auth/realms/IceCube/protocol/openid-connect/auth
+  token_url: https://keycloak.icecube.wisc.edu/auth/realms/IceCube/protocol/openid-connect/token
+  userinfo_url: https://keycloak.icecube.wisc.edu/auth/realms/IceCube/protocol/openid-connect/userino
 
 # ----------------------------------------------------------------------
 # OTHERS

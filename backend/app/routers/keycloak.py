@@ -32,6 +32,7 @@ async def register() -> RedirectResponse:
 @router.get("/login")
 async def login() -> RedirectResponse:
     """Redirect to keycloak login page."""
+    logger.debug(f'{settings.auth_url}')
     return RedirectResponse(settings.auth_url)
 
 
@@ -100,15 +101,18 @@ async def auth(code: str) -> RedirectResponse:
     """Redirect endpoint Keycloak redirects to after login."""
     logger.info(f"In /api/v2/auth")
     # get token from Keycloak
-    payload = (
-        f"grant_type=authorization_code&code={code}"
-        f"&redirect_uri={settings.auth_url}&client_id={settings.auth_client_id}"
-    )
+    payload = {
+        'grant_type': 'authorization_code',
+        'code': {code},
+        'redirect_uri': {settings.auth_redirect_uri},
+        'client_id': {settings.auth_client_id}
+    }
     headers = {"Content-Type": "application/x-www-form-urlencoded"}
     token_response = requests.request(
         "POST", settings.auth_token_url, data=payload, headers=headers
     )
     token_body = json.loads(token_response.content)
+    logger.debug(f'{token_body}')
     access_token = token_body["access_token"]
 
     # create user in db if it doesn't already exist; get the user_id

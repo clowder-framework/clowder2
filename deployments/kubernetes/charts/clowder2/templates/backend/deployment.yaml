@@ -27,6 +27,10 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       serviceAccountName: {{ include "clowder2.serviceAccountName" . }}
+      volumes:
+        - name: logging-config
+          configMap:
+            name: logging-config
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       containers:
@@ -35,6 +39,10 @@ spec:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.backend.image.repository }}:{{ .Values.backend.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.backend.image.pullPolicy }}
+          volumeMounts:
+            - mountPath: /code/app/logging.conf
+              name: logging-config
+              subPath: logging.conf
           env:
             - name: WEB_CONCURRENCY
               value: "1"
@@ -68,21 +76,18 @@ spec:
               value: {{ .Values.keycloak.realm }}
             - name: auth_client_id
               value: {{ .Values.keycloak.clientid }}
-            - name: auth_client_secret
-              valueFrom:
-                secretKeyRef:
-                  name: clowder2-client-secret
-                  key: client-secret
+            - name: auth_redirect_uri
+              value: {{ .Values.keycloak.redirect_uri}}
             - name: auth_url
-              value: https://{{ .Values.keycloak.hostname }}/auth/realms/{{ .Values.keycloak.realm }}/protocol/openid-connect/auth?client_id={{ .Values.keycloak.clientid }}&response_type=code
+              value: {{ .Values.keycloak.auth_url }}?client_id={{ .Values.keycloak.clientid }}&redirect_uri=$(auth_redirect_uri)&response_type=code&scope=openid%20email
             - name: oauth2_scheme_auth_url
-              value: https://{{ .Values.keycloak.hostname }}/auth/realms/{{ .Values.keycloak.realm }}/protocol/openid-connect/auth?client_id={{ .Values.keycloak.clientid }}&response_type=code
+              value: {{ .Values.keycloak.auth_url }}?client_id={{ .Values.keycloak.clientid }}&redirect_uri=$(auth_redirect_uri)&response_type=code&scope=openid%20email
             - name: auth_register_url
-              value: https://{{ .Values.keycloak.hostname }}/auth/realms/{{ .Values.keycloak.realm }}/protocol/openid-connect/registrations?client_id={{ .Values.keycloak.clientid }}&response_type=code
+              value: https://{{ .Values.keycloak.hostname }}/auth/realms/{{ .Values.keycloak.realm }}/protocol/openid-connect/registrations?client_id={{ .Values.keycloak.clientid }}
             - name: auth_token_url
-              value: https://{{ .Values.keycloak.hostname }}/auth/realms/{{ .Values.keycloak.realm }}/protocol/openid-connect/token
+              value: {{ .Values.keycloak.token_url }}
             - name: auth_server_url
-              value: https://{{ .Values.keycloak.hostname }}
+              value: https://{{ .Values.keycloak.hostname }}/
             - name: keycloak_base
               value: https://{{ .Values.hostname }}/api
             - name: frontend_url
