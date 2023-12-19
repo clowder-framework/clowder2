@@ -40,7 +40,6 @@ export function GenericSearchBox(props: GenericSearchBoxProps) {
 				sx={{
 					border: "1px solid #ced4da",
 					borderRadius: "6px",
-					mb: 2,
 					p: "2px 4px",
 					display: "flex",
 					alignItems: "left",

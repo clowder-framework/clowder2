@@ -18,7 +18,7 @@ import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
 import { Link, Menu, MenuItem, MenuList, Typography } from "@mui/material";
 import { Link as RouterLink, useLocation } from "react-router-dom";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../types/data";
 import { AddBox, Explore } from "@material-ui/icons";
 import HistoryIcon from "@mui/icons-material/History";
@@ -30,6 +30,8 @@ import { getCurrEmail } from "../utils/common";
 import VpnKeyIcon from "@mui/icons-material/VpnKey";
 import LogoutIcon from "@mui/icons-material/Logout";
 import { EmbeddedSearch } from "./search/EmbeddedSearch";
+import { fetchUserProfile } from "../actions/user";
+import ManageAccountsIcon from "@mui/icons-material/ManageAccounts";
 
 const drawerWidth = 240;
 
@@ -103,6 +105,9 @@ export default function PersistentDrawerLeft(props) {
 	const [embeddedSearchHidden, setEmbeddedSearchHidden] = React.useState(false);
 	const [anchorEl, setAnchorEl] = React.useState(null);
 	const isMenuOpen = Boolean(anchorEl);
+	const profile = useSelector((state: RootState) => state.user.profile);
+	const dispatch = useDispatch();
+	const fetchProfile = () => dispatch(fetchUserProfile());
 
 	const handleDrawerOpen = () => {
 		setOpen(true);
@@ -128,6 +133,7 @@ export default function PersistentDrawerLeft(props) {
 		} else {
 			setEmbeddedSearchHidden(false);
 		}
+		fetchProfile();
 	}, [location]);
 
 	const loggedOut = useSelector((state: RootState) => state.error.loggedOut);
@@ -278,6 +284,21 @@ export default function PersistentDrawerLeft(props) {
 					</ListItem>
 				</List>
 				<Divider />
+				{profile.admin ? (
+					<>
+						<List>
+							<ListItem key={"manage-user"} disablePadding>
+								<ListItemButton component={RouterLink} to="/manage-users">
+									<ListItemIcon>
+										<ManageAccountsIcon />
+									</ListItemIcon>
+									<ListItemText primary={"Manage Users"} />
+								</ListItemButton>
+							</ListItem>
+						</List>
+						<Divider />
+					</>
+				) : null}
 				<List>
 					<ListItem key={"groups"} disablePadding>
 						<ListItemButton component={RouterLink} to="/groups">
