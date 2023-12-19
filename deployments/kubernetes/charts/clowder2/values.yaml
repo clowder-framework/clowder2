@@ -173,13 +173,13 @@ rabbitmq:
 message:
   image:
     repository: clowder/clowder2-messages
-    tag: main
+#    tag: main
     pullPolicy: Always
 
 heartbeat:
   image:
     repository: clowder/clowder2-heartbeat
-    tag: main
+#    tag: main
     pullPolicy: Always
 
 
