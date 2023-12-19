@@ -30,8 +30,8 @@ spec:
         - name: extractors-messages
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
-          image: "clowder/clowder2-messages:main"
-          imagePullPolicy: Always
+          image: "{{ .Values.message.image.repository }}:{{ .Values.message.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.message.image.pullPolicy }}
           env:
             - name: MONGODB_URL
               value: mongodb://{{ include "clowder2.name" . }}-mongodb:27017
