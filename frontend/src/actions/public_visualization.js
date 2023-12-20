@@ -59,7 +59,6 @@ export function downloadPublicVisData(
 		const response = await fetch(endpoint, {
 			method: "GET",
 			mode: "cors",
-			headers: await getHeader(),
 		});
 
 		if (response.status === 200) {

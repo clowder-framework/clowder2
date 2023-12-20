@@ -31,6 +31,25 @@ export function getHeader() {
 	}
 }
 
+export async function downloadPublicResource(url) {
+	const authHeader = getHeader();
+	const response = await fetch(url, {
+		method: "GET",
+		mode: "cors",
+	});
+
+	if (response.status === 200) {
+		const blob = await response.blob();
+		return window.URL.createObjectURL(blob);
+	} else if (response.status === 401) {
+		// TODO handle error
+		// logout();
+		return null;
+	} else {
+		// TODO handle error
+		return null;
+	}
+}
 export async function downloadResource(url) {
 	const authHeader = getHeader();
 	const response = await fetch(url, {
