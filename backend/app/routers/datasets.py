@@ -386,7 +386,7 @@ async def get_dataset_folders(
         if parent_folder is not None:
             query.append(FolderDBViewList.parent_folder == ObjectId(parent_folder))
         else:
-            query.append(FolderDBViewList.parent_folder is None)
+            query.append(FolderDBViewList.parent_folder == None)  # noqa: E711
         folders = await FolderDBViewList.find(*query).skip(skip).limit(limit).to_list()
         return [folder.dict() for folder in folders]
     raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
