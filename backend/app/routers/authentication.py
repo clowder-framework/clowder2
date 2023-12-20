@@ -163,7 +163,7 @@ async def set_admin_mode(
 async def set_admin(
     useremail: str, current_username=Depends(get_current_user), admin=Depends(get_admin)
 ):
-    if admin:
+    if admin and current_username.admin:
         if (user := await UserDB.find_one(UserDB.email == useremail)) is not None:
             user.admin = True
             await user.replace()
@@ -174,4 +174,30 @@ async def set_admin(
         raise HTTPException(
             status_code=403,
             detail=f"User {current_username.email} is not an admin. Only admin can make others admin.",
+        )
+
+
+@router.post("/users/revoke_admin/{useremail}", response_model=UserOut)
+async def revoke_admin(
+    useremail: str, current_username=Depends(get_current_user), admin=Depends(get_admin)
+):
+    if admin:
+        if current_username.email == useremail:
+            raise HTTPException(
+                status_code=403,
+                detail=f"You are currently an admin. Admin cannot revoke their own admin access.",
+            )
+        else:
+            if (user := await UserDB.find_one(UserDB.email == useremail)) is not None:
+                user.admin = False
+                await user.replace()
+                return user.dict()
+            else:
+                raise HTTPException(
+                    status_code=404, detail=f"User {useremail} not found"
+                )
+    else:
+        raise HTTPException(
+            status_code=403,
+            detail=f"User {current_username.email} is not an admin. Only admin can revoke admin access.",
         )

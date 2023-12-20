@@ -267,3 +267,39 @@ export function fetchUserProfile() {
 			});
 	};
 }
+
+export const SET_ADMIN = "SET_ADMIN";
+
+export function setAdmin(email) {
+	return (dispatch) => {
+		return V2.LoginService.setAdminApiV2UsersSetAdminUseremailPost(email)
+			.then((json) => {
+				dispatch({
+					type: SET_ADMIN,
+					profile: json,
+					receivedAt: Date.now(),
+				});
+			})
+			.catch((reason) => {
+				dispatch(handleErrors(reason, setAdmin(email)));
+			});
+	};
+}
+
+export const REVOKE_ADMIN = "REVOKE_ADMIN";
+
+export function revokeAdmin(email) {
+	return (dispatch) => {
+		return V2.LoginService.revokeAdminApiV2UsersRevokeAdminUseremailPost(email)
+			.then((json) => {
+				dispatch({
+					type: REVOKE_ADMIN,
+					profile: json,
+					receivedAt: Date.now(),
+				});
+			})
+			.catch((reason) => {
+				dispatch(handleErrors(reason, revokeAdmin(email)));
+			});
+	};
+}

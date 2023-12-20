@@ -131,4 +131,27 @@ export class LoginService {
         });
     }
 
+    /**
+     * Revoke Admin
+     * @param useremail
+     * @param datasetId
+     * @returns UserOut Successful Response
+     * @throws ApiError
+     */
+    public static revokeAdminApiV2UsersRevokeAdminUseremailPost(
+        useremail: string,
+        datasetId?: string,
+    ): CancelablePromise<UserOut> {
+        return __request({
+            method: 'POST',
+            path: `/api/v2/users/revoke_admin/${useremail}`,
+            query: {
+                'dataset_id': datasetId,
+            },
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+
 }

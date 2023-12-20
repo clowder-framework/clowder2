@@ -20,39 +20,32 @@ export const Profile = (): JSX.Element => {
 		fetchProfile();
 	}, []);
 
-	if (profile != null) {
-		return (
-			<Layout>
-				<TableContainer component={Paper}>
-					<Table sx={{ minWidth: 650 }} aria-label="simple table">
-						<TableHead>
-							<TableRow>
-								<TableCell>Name</TableCell>
-								<TableCell align="right">Email</TableCell>
-								<TableCell align="right">Admin</TableCell>
-								<TableCell align="right" />
-							</TableRow>
-						</TableHead>
-						<TableBody>
-							<TableRow
-								sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
-							>
-								<TableCell>
-									{profile.first_name} {profile.last_name}
-								</TableCell>
-								<TableCell align="right">{profile.email}</TableCell>
-								{profile.admin ? (
-									<TableCell align="right">Admin</TableCell>
-								) : (
-									<TableCell align="right">Not admin</TableCell>
-								)}
-							</TableRow>
-						</TableBody>
-					</Table>
-				</TableContainer>
-			</Layout>
-		);
-	} else {
-		return <p>nothing yet</p>;
-	}
+	return (
+		<Layout>
+			<TableContainer component={Paper}>
+				<Table sx={{ minWidth: 650 }} aria-label="simple table">
+					<TableHead>
+						<TableRow>
+							<TableCell>Name</TableCell>
+							<TableCell align="right">Email</TableCell>
+							<TableCell align="right">Admin</TableCell>
+						</TableRow>
+					</TableHead>
+					<TableBody>
+						<TableRow
+							sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
+						>
+							<TableCell>
+								{profile.first_name} {profile.last_name}
+							</TableCell>
+							<TableCell align="right">{profile.email}</TableCell>
+							<TableCell align="right">
+								{profile.admin ? "True" : "False"}
+							</TableCell>
+						</TableRow>
+					</TableBody>
+				</Table>
+			</TableContainer>
+		</Layout>
+	);
 };

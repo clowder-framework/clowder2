@@ -36,6 +36,7 @@ import {
 	toggleAdminMode as toggleAdminModeAction,
 } from "../actions/user";
 import { AdminPanelSettings } from "@mui/icons-material";
+import ManageAccountsIcon from "@mui/icons-material/ManageAccounts";
 
 const drawerWidth = 240;
 
@@ -147,6 +148,7 @@ export default function PersistentDrawerLeft(props) {
 		} else {
 			setEmbeddedSearchHidden(false);
 		}
+		fetchCurrUserProfile();
 	}, [location]);
 
 	const loggedOut = useSelector((state: RootState) => state.error.loggedOut);
@@ -323,6 +325,21 @@ export default function PersistentDrawerLeft(props) {
 					</ListItem>
 				</List>
 				<Divider />
+				{currUserProfile.admin ? (
+					<>
+						<List>
+							<ListItem key={"manage-user"} disablePadding>
+								<ListItemButton component={RouterLink} to="/manage-users">
+									<ListItemIcon>
+										<ManageAccountsIcon />
+									</ListItemIcon>
+									<ListItemText primary={"Manage Users"} />
+								</ListItemButton>
+							</ListItem>
+						</List>
+						<Divider />
+					</>
+				) : null}
 				<List>
 					<ListItem key={"groups"} disablePadding>
 						<ListItemButton component={RouterLink} to="/groups">
