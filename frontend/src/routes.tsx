@@ -94,7 +94,7 @@ const PrivateRoute = (props): JSX.Element => {
 		if (fileId && reason === "") listFileRole(fileId);
 	}, [fileId, reason]);
 
-	return <>{isAuthorized() ? children : <Navigate to="/auth/login" />}</>;
+	return <>{isAuthorized() ? children : <Navigate to="/public" />}</>;
 };
 
 export const AppRoutes = (): JSX.Element => {
