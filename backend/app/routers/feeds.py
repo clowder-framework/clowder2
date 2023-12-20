@@ -37,7 +37,7 @@ async def check_feed_listeners(
 ):
     """Automatically submit new file to listeners on feeds that fit the search criteria."""
     listener_ids_found = []
-    async for feed in FeedDB.find(FeedDB.listeners.automatic is True):
+    async for feed in FeedDB.find(FeedDB.listeners.automatic == True):  # noqa: E712
         # Verify whether resource_id is found when searching the specified criteria
         feed_match = check_search_result(es_client, file_out, feed.search)
         if feed_match:
