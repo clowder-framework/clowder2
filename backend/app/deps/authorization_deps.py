@@ -258,7 +258,7 @@ class FileAuthorization:
                     file_id, "file", self.role, current_user
                 )
                 if public_access:
-                    return True
+                    return public_access
                 else:
                     raise HTTPException(
                         status_code=404, detail=f"File {file_id} not found"
