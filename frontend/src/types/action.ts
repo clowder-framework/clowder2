@@ -538,12 +538,12 @@ interface DOWNLOAD_PUBLIC_VIS_DATA {
 }
 
 interface GET_PUBLIC_VIS_DATA_PRESIGNED_URL {
-	type: "GET_VIS_DATA_PRESIGNED_URL";
+	type: "GET_PUBLIC_VIS_DATA_PRESIGNED_URL";
 	publicPresignedUrl: string;
 }
 
 interface RESET_PUBLIC_VIS_DATA_PRESIGNED_URL {
-	type: "RESET_VIS_DATA_PRESIGNED_URL";
+	type: "RESET_PUBLIC_VIS_DATA_PRESIGNED_URL";
 	publicPreSignedUrl: string;
 }
 

@@ -174,7 +174,7 @@ export const PublicFile = (): JSX.Element => {
 						Configuration.fileType = filePreview["pv_contenttype"];
 
 						const resourceURL = `/public/${config.hostname}${filePreview["pv_route"]}?superAdmin=true`;
-						Configuration.resource = await downloadResource(resourceURL);
+						Configuration.resource = await downloadPublicResource(resourceURL);
 						previewsTemp.push(Configuration);
 					})
 				);
