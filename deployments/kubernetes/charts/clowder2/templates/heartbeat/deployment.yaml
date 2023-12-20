@@ -30,8 +30,8 @@ spec:
         - name: extractors-heartbeat
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
-          image: "clowder/clowder2-heartbeat:main"
-          imagePullPolicy: Always
+          image: "{{ .Values.heartbeat.image.repository }}:{{ .Values.heartbeat.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.heartbeat.image.pullPolicy }}
           env:
             - name: MONGODB_URL
               value: mongodb://{{ include "clowder2.name" . }}-mongodb:27017
