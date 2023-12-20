@@ -109,7 +109,6 @@ class FileDBViewList(View, FileBase):
     bytes: int = 0
     content_type: ContentType = ContentType()
     thumbnail_id: Optional[PydanticObjectId] = None
-    status: str = FileStatus.PRIVATE.name
 
     class Settings:
         source = FileDB
