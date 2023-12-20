@@ -333,11 +333,12 @@ async def patch_dataset(
             ]
             files_views = await FileDBViewList.find(*query).to_list()
             for file_view in files_views:
-                if (file := await FileDB.get(PydanticObjectId(file_view.id))) is not None:
+                if (
+                    file := await FileDB.get(PydanticObjectId(file_view.id))
+                ) is not None:
                     file.status = dataset_info.status
                     await file.save()
                     await index_file(es, FileOut(**file.dict()), update=True)
-
 
         # Update entry to the dataset index
         await index_dataset(es, DatasetOut(**dataset.dict()), update=True)
