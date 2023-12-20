@@ -112,7 +112,8 @@ async def get_resource_visconfig(
             config_visdata.append(vis_data.dict())
         visconfig_out = VisualizationConfigOut(**vzconfig.dict())
         visconfig_out.visualization_data = config_visdata
-        visconfigs.append(visconfig_out)
+        if visconfig_out is not None:
+            visconfigs.append(visconfig_out)
     return [vz.dict() for vz in visconfigs]
 
 

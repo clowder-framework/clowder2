@@ -209,7 +209,7 @@ api_router.include_router(
     dependencies=[Depends(get_current_username)],
 )
 api_router.include_router(
-    visualization.router,
+    public_visualization.router,
     prefix="/public_visualizations",
     tags=["public_visualizations"],
 )
