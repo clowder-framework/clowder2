@@ -33,13 +33,13 @@ export class AuthService {
     }
 
     /**
-     * Login
+     * Login Post
      * Client can use this to login when redirect is not available.
      * @param requestBody
      * @returns any Successful Response
      * @throws ApiError
      */
-    public static loginApiV2AuthLoginPost(
+    public static loginPostApiV2AuthLoginPost(
         requestBody: UserIn,
     ): CancelablePromise<any> {
         return __request({

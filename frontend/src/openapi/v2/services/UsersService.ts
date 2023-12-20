@@ -140,14 +140,14 @@ export class UsersService {
     }
 
     /**
-     * Search Users
+     * Search Users Prefix
      * @param prefix
      * @param skip
      * @param limit
      * @returns UserOut Successful Response
      * @throws ApiError
      */
-    public static searchUsersApiV2UsersPrefixSearchGet(
+    public static searchUsersPrefixApiV2UsersPrefixSearchGet(
         prefix: string,
         skip?: number,
         limit: number = 2,
