@@ -13,16 +13,16 @@ import {
 import { RootState } from "../../types/data";
 import {RESET_PUBLIC_VIS_DATA_PRESIGNED_URL} from "../../actions/public_visualization";
 
-type previewProps = {
+type publicPreviewProps = {
 	publicVisComponentDefinition: VisComponentDefinitions;
 	publicVisualizationDataItem: VisualizationDataOut;
 };
 
-export const PublicVisualizationCard = (props: previewProps) => {
+export const PublicVisualizationCard = (props: publicPreviewProps) => {
 	const { publicVisComponentDefinition, publicVisualizationDataItem } = props;
 	const [expanded, setExpanded] = React.useState(false);
 	const [visShareModalOpen, setVisShareModalOpen] = useState(false);
-
+	console.log("public visualization card");
 	// share visualization
 	const dispatch = useDispatch();
 	const generateVisPresignedUrl = (

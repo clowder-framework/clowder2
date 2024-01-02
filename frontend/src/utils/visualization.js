@@ -9,8 +9,19 @@ export function generateVisDataDownloadUrl(visualizationId) {
 	return `${config.hostname}/api/v2/visualizations/${visualizationId}/bytes`;
 }
 
+export function generatePublicVisDataDownloadUrl(visualizationId) {
+	return `${config.hostname}/api/v2/public/visualizations/${visualizationId}/bytes`;
+}
+
 export function generateFileDownloadUrl(fileId, fileVersionNum = 0) {
 	let url = `${config.hostname}/api/v2/files/${fileId}?increment=false`;
+	if (fileVersionNum > 0) url = `${url}&version=${fileVersionNum}`;
+
+	return url;
+}
+
+export function generatePublicFileDownloadUrl(fileId, fileVersionNum = 0) {
+	let url = `${config.hostname}/api/v2/public/files/${fileId}?increment=false`;
 	if (fileVersionNum > 0) url = `${url}&version=${fileVersionNum}`;
 
 	return url;

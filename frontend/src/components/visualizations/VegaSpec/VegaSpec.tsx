@@ -1,7 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { VegaLite } from "react-vega";
 import { downloadVisData, fileDownloaded } from "../../../utils/visualization";
-import {
+import {downloadPublicVisData} from "../../../actions/public_visualization";
+import {filePublicDownloaded} from "../../../actions/public_file";
+
+	import {
 	guessDataType,
 	parseTextToJson,
 	readTextFromFile,
@@ -13,6 +16,7 @@ import { theme } from "../../../theme";
 type TextProps = {
 	fileId?: string;
 	visualizationId?: string;
+	publicView?: boolean | false;
 };
 
 const allowedType = [
@@ -24,7 +28,7 @@ const allowedType = [
 ];
 
 export default function VegaSpec(props: TextProps) {
-	let { fileId, visualizationId } = props;
+	let { fileId, visualizationId, publicView } = props;
 	const [data, setData] = useState();
 
 	useEffect(() => {
@@ -32,9 +36,17 @@ export default function VegaSpec(props: TextProps) {
 			try {
 				let blob;
 				if (visualizationId) {
-					blob = await downloadVisData(visualizationId);
+					if (publicView){
+						blob = await downloadPublicVisData(visualizationId);
+					} else {
+						blob = await downloadVisData(visualizationId);
+					}
 				} else {
-					blob = await fileDownloaded(fileId, 0);
+					if (publicView){
+						blob = await filePublicDownloaded(fileId);
+					} else {
+						blob = await fileDownloaded(fileId, 0);
+					}
 				}
 				const file = new File([blob], "text.tmp");
 				const reader = new FileReader();

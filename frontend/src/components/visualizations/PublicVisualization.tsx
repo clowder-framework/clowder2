@@ -4,11 +4,11 @@ import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../types/data";
 import { fetchFileSummary } from "../../actions/file";
 import { getVisConfig as getVisConfigAction } from "../../actions/visualization";
-import {getPublicVisConfig, getPublicVisConfig as getPublicVisConfigAction} from "../../actions/public_visualization";
+import {getPublicVisConfig as getPublicVisConfigAction} from "../../actions/public_visualization";
 import { visComponentDefinitions } from "../../visualization.config";
 import { Grid } from "@mui/material";
-import { VisualizationRawBytesCard } from "./VisualizationRawBytesCard";
-import { VisualizationSpecCard } from "./VisualizationSpecCard";
+import { PublicVisualizationRawBytesCard } from "./PublicVisualizationRawBytesCard";
+import { PublicVisualizationSpecCard } from "./PublicVisualizationSpecCard";
 import config from "../../app.config";
 import {fetchPublicFileSummary} from "../../actions/public_file";
 import {PublicVisualizationCard} from "./PublicVisualizationCard";
@@ -48,7 +48,7 @@ export const PublicVisualization = (props: previewProps) => {
 			getPublicVisConfig(datasetId);
 		}
 	}, [fileId, datasetId]);
-
+	console.log("file summary is", fileSummary);
 	// Check for conditions and set state only once
 	useEffect(() => {
 		const supportedMimeType = visComponentDefinitions.reduce(
@@ -125,8 +125,8 @@ export const PublicVisualization = (props: previewProps) => {
 													(visualizationDataItem) => {
 														return (
 															<PublicVisualizationCard
-																visualizationDataItem={visualizationDataItem}
-																visComponentDefinition={visComponentDefinition}
+																publicVisualizationDataItem={visualizationDataItem}
+																publicVisComponentDefinition={visComponentDefinition}
 															/>
 														);
 													}
@@ -135,7 +135,7 @@ export const PublicVisualization = (props: previewProps) => {
 												// use visualization parameters if available
 												if (Object.keys(visConfigEntry.parameters).length > 0) {
 													return (
-														<VisualizationSpecCard
+														<PublicVisualizationSpecCard
 															visComponentDefinition={visComponentDefinition}
 															visConfigEntry={visConfigEntry}
 														/>
@@ -165,7 +165,7 @@ export const PublicVisualization = (props: previewProps) => {
 													visComponentDefinition.mainType))
 									) {
 										return (
-											<VisualizationRawBytesCard
+											<PublicVisualizationRawBytesCard
 												visComponentDefinition={visComponentDefinition}
 												fileId={fileId}
 											/>
