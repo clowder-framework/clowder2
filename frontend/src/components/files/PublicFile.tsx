@@ -10,7 +10,7 @@ import {
 	Tab,
 	Tabs,
 } from "@mui/material";
-import {downloadPublicResource, downloadResource} from "../../utils/common";
+import {downloadPublicResource} from "../../utils/common";
 import { PreviewConfiguration, RootState } from "../../types/data";
 import { useParams, useSearchParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
@@ -175,6 +175,7 @@ export const PublicFile = (): JSX.Element => {
 
 						const resourceURL = `/public/${config.hostname}${filePreview["pv_route"]}?superAdmin=true`;
 						Configuration.resource = await downloadPublicResource(resourceURL);
+						console.log('we downloaded public resource');
 						previewsTemp.push(Configuration);
 					})
 				);
