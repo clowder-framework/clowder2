@@ -23,8 +23,9 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
-timeout = 5*60 # five minute timeout
+timeout = 5 * 60  # five minute timeout
 time_ran = 0
+
 
 def parse_message_status(msg):
     """Determine if the message corresponds to start/middle/end of job if possible. See pyclowder.utils.StatusMessage."""
