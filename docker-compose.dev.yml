@@ -119,6 +119,10 @@ services:
 
   # ELasticsearch
   elasticsearch:
+    deploy:
+      resources:
+        limits:
+          memory: 2G
 #    platform: amd64
     image: docker.elastic.co/elasticsearch/elasticsearch:8.3.3
     ports:
