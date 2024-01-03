@@ -3,6 +3,7 @@ import json
 import logging
 import os
 from datetime import datetime
+import time
 
 from aio_pika import connect_robust
 from aio_pika.abc import AbstractIncomingMessage
@@ -17,6 +18,8 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
+timeout = 5*60 # five minute timeout
+time_ran = 0
 
 async def callback(message: AbstractIncomingMessage):
     """This method receives messages from RabbitMQ and processes them.
@@ -118,4 +121,14 @@ async def listen_for_heartbeats():
 
 
 if __name__ == "__main__":
-    asyncio.run(listen_for_heartbeats())
+    start = datetime.now()
+    while time_ran < timeout:
+        try:
+            asyncio.run(listen_for_heartbeats())
+        except Exception as e:
+            logger.info(f" Hearbeat failed, retry in 10 seconds...")
+            time.sleep(10)
+            current_time = datetime.now()
+            current_seconds = (current_time - start).total_seconds()
+            time_ran += current_seconds
+    logger.info(f" Heartbeat could not connect to rabbitmq...")
