@@ -20,4 +20,5 @@ export type UserOut = {
     first_name: string;
     last_name: string;
     id?: string;
+    admin: boolean;
 }
