@@ -1,25 +1,34 @@
 repos:
-- repo: https://github.com/psf/black
-  rev:  23.11.0
-  hooks:
-    - id: black
-- repo: https://github.com/PyCQA/isort
-  rev:  5.12.0
-  hooks:
-    - id: isort
-      args: ["--profile=black"]
-- repo: https://github.com/pre-commit/pre-commit-hooks
-  rev: v4.5.0
-  hooks:
-    - id: check-yaml
-      exclude: deployments/kubernetes/charts
-    - id: end-of-file-fixer
-    - id: trailing-whitespace
-- repo: https://github.com/shellcheck-py/shellcheck-py
-  rev: v0.9.0.6
-  hooks:
-  - id: shellcheck
-- repo: https://github.com/PyCQA/flake8
-  rev:  6.1.0
-  hooks:
-    - id: flake8
+  - repo: local
+    hooks:
+      - id: extract-openapi
+        name: extract-openapi
+        entry: pipenv run extract-openapi
+        language: system
+        pass_filenames: false
+  - repo: https://github.com/psf/black
+    rev: 23.11.0
+    hooks:
+      - id: black
+  - repo: https://github.com/PyCQA/isort
+    rev: 5.12.0
+    hooks:
+      - id: isort
+        args: [ "--profile=black" ]
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      - id: check-yaml
+        exclude: deployments/kubernetes/charts
+      - id: end-of-file-fixer
+        exclude: openapi.json
+      - id: trailing-whitespace
+        exclude: openapi.json
+  - repo: https://github.com/shellcheck-py/shellcheck-py
+    rev: v0.9.0.6
+    hooks:
+      - id: shellcheck
+  - repo: https://github.com/PyCQA/flake8
+    rev: 6.1.0
+    hooks:
+      - id: flake8
