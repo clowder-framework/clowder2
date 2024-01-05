@@ -228,9 +228,9 @@ if __name__ == "__main__":
         try:
             asyncio.run(listen_for_messages())
         except Exception as e:
-            logger.info(f" Hearbeat failed, retry in 10 seconds...")
+            logger.info(f" Message listener failed, retry in 10 seconds...")
             time.sleep(10)
             current_time = datetime.now()
             current_seconds = (current_time - start).total_seconds()
             time_ran += current_seconds
-    logger.info(f" Heartbeat could not connect to rabbitmq...")
+    logger.info(f"Message listener could not connect to rabbitmq. Timeout.")
