@@ -2,13 +2,13 @@
 /* tslint:disable */
 /* eslint-disable */
 
-import type { UserOut } from "./UserOut";
+import type { UserOut } from './UserOut';
 
 export type FileVersion = {
-	file_id: string;
-	creator: UserOut;
-	created?: string;
-	version_id: string;
-	version_num?: number;
-	bytes?: number;
-};
+    file_id: string;
+    creator: UserOut;
+    created?: string;
+    version_id: string;
+    version_num?: number;
+    bytes?: number;
+}

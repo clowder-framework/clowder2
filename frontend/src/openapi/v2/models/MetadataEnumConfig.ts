@@ -3,6 +3,6 @@
 /* eslint-disable */
 
 export type MetadataEnumConfig = {
-	type?: string;
-	options: Array<string>;
-};
+    type?: string;
+    options: Array<string>;
+}

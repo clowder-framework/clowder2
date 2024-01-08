@@ -2,8 +2,8 @@
 /* tslint:disable */
 /* eslint-disable */
 
-import type { ContentType } from "./ContentType";
-import type { UserOut } from "./UserOut";
+import type { ContentType } from './ContentType';
+import type { UserOut } from './UserOut';
 
 /**
  * Document Mapping class.
@@ -19,11 +19,11 @@ import type { UserOut } from "./UserOut";
  * - [UpdateMethods](https://roman-right.github.io/beanie/api/interfaces/#aggregatemethods)
  */
 export type ThumbnailOut = {
-	id?: string;
-	creator: UserOut;
-	created?: string;
-	modified?: string;
-	bytes?: number;
-	content_type?: ContentType;
-	downloads?: number;
-};
+    id?: string;
+    creator: UserOut;
+    created?: string;
+    modified?: string;
+    bytes?: number;
+    content_type?: ContentType;
+    downloads?: number;
+}

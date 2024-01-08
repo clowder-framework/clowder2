@@ -16,8 +16,8 @@
  * - [UpdateMethods](https://roman-right.github.io/beanie/api/interfaces/#aggregatemethods)
  */
 export type EventListenerJobUpdateOut = {
-	job_id: string;
-	timestamp?: string;
-	status: string;
-	id?: string;
-};
+    job_id: string;
+    timestamp?: string;
+    status: string;
+    id?: string;
+}

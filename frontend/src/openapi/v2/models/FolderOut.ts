@@ -2,7 +2,7 @@
 /* tslint:disable */
 /* eslint-disable */
 
-import type { UserOut } from "./UserOut";
+import type { UserOut } from './UserOut';
 
 /**
  * Document Mapping class.
@@ -18,11 +18,11 @@ import type { UserOut } from "./UserOut";
  * - [UpdateMethods](https://roman-right.github.io/beanie/api/interfaces/#aggregatemethods)
  */
 export type FolderOut = {
-	name?: string;
-	id?: string;
-	dataset_id: string;
-	parent_folder?: string;
-	creator: UserOut;
-	created?: string;
-	modified?: string;
-};
+    name?: string;
+    id?: string;
+    dataset_id: string;
+    parent_folder?: string;
+    creator: UserOut;
+    created?: string;
+    modified?: string;
+}

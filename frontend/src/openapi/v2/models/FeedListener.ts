@@ -7,6 +7,6 @@
  * whether the Feed will automatically send new matches to the Event Listener.
  */
 export type FeedListener = {
-	listener_id: string;
-	automatic: boolean;
-};
+    listener_id: string;
+    automatic: boolean;
+}

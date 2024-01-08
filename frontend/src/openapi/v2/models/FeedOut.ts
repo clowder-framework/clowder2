@@ -2,8 +2,8 @@
 /* tslint:disable */
 /* eslint-disable */
 
-import type { FeedListener } from "./FeedListener";
-import type { SearchObject } from "./SearchObject";
+import type { FeedListener } from './FeedListener';
+import type { SearchObject } from './SearchObject';
 
 /**
  * Document Mapping class.
@@ -19,11 +19,11 @@ import type { SearchObject } from "./SearchObject";
  * - [UpdateMethods](https://roman-right.github.io/beanie/api/interfaces/#aggregatemethods)
  */
 export type FeedOut = {
-	name: string;
-	search: SearchObject;
-	listeners?: Array<FeedListener>;
-	id?: string;
-	creator?: string;
-	created?: string;
-	modified?: string;
-};
+    name: string;
+    search: SearchObject;
+    listeners?: Array<FeedListener>;
+    id?: string;
+    creator?: string;
+    created?: string;
+    modified?: string;
+}

@@ -2,8 +2,8 @@
 /* tslint:disable */
 /* eslint-disable */
 
-import type { MetadataField } from "./MetadataField";
-import type { UserOut } from "./UserOut";
+import type { MetadataField } from './MetadataField';
+import type { UserOut } from './UserOut';
 
 /**
  * Document Mapping class.
@@ -19,12 +19,12 @@ import type { UserOut } from "./UserOut";
  * - [UpdateMethods](https://roman-right.github.io/beanie/api/interfaces/#aggregatemethods)
  */
 export type MetadataDefinitionOut = {
-	name: string;
-	description?: string;
-	created?: string;
-	"@context"?: Array<string>;
-	context_url?: string;
-	fields: Array<MetadataField>;
-	id?: string;
-	creator: UserOut;
-};
+    name: string;
+    description?: string;
+    created?: string;
+    '@context'?: Array<string>;
+    context_url?: string;
+    fields: Array<MetadataField>;
+    id?: string;
+    creator: UserOut;
+}

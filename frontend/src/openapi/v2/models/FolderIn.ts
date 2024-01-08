@@ -3,6 +3,6 @@
 /* eslint-disable */
 
 export type FolderIn = {
-	name?: string;
-	parent_folder?: string;
-};
+    name?: string;
+    parent_folder?: string;
+}

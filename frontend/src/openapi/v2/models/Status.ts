@@ -3,5 +3,5 @@
 /* eslint-disable */
 
 export type Status = {
-	version?: string;
-};
+    version?: string;
+}

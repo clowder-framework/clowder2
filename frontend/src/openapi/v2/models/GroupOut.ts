@@ -2,7 +2,7 @@
 /* tslint:disable */
 /* eslint-disable */
 
-import type { Member } from "./Member";
+import type { Member } from './Member';
 
 /**
  * Document Mapping class.
@@ -18,12 +18,12 @@ import type { Member } from "./Member";
  * - [UpdateMethods](https://roman-right.github.io/beanie/api/interfaces/#aggregatemethods)
  */
 export type GroupOut = {
-	creator: string;
-	created?: string;
-	modified?: string;
-	name: string;
-	description?: string;
-	users?: Array<Member>;
-	id?: string;
-	views?: number;
-};
+    creator: string;
+    created?: string;
+    modified?: string;
+    name: string;
+    description?: string;
+    users?: Array<Member>;
+    id?: string;
+    views?: number;
+}
