@@ -12,6 +12,7 @@ class UserBase(BaseModel):
     email: EmailStr
     first_name: str
     last_name: str
+    preferred_username: EmailStr
 
 
 class UserIn(UserBase):
@@ -20,6 +21,7 @@ class UserIn(UserBase):
 
 class UserLogin(BaseModel):
     email: EmailStr
+    preferred_username: EmailStr
     password: str
 
 
