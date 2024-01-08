@@ -30,7 +30,7 @@ export const MetadataDateTimePicker = (props) => {
 	const handleChange = (newValue: Date) => {
 		setInputChanged(true);
 
-		let tempContents: { [key: string]: Date } = {};
+		const tempContents: { [key: string]: Date } = {};
 		tempContents[fieldName] = newValue;
 		setMetadata
 			? metadataId

@@ -187,7 +187,7 @@ export const UploadFile: React.FC<UploadFileProps> = (
 										Next
 									</Button>
 								</Grid>
-								<Grid xs={1}></Grid>
+								<Grid xs={1} />
 							</Grid>
 						</StepContent>
 					</Step>

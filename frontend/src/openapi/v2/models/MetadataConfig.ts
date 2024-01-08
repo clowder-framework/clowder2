@@ -3,5 +3,5 @@
 /* eslint-disable */
 
 export type MetadataConfig = {
-    type?: string;
-}
+	type?: string;
+};

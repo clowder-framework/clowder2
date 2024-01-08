@@ -2,8 +2,8 @@
 /* tslint:disable */
 /* eslint-disable */
 
-import type { MetadataAgent } from './MetadataAgent';
-import type { MongoDBRef } from './MongoDBRef';
+import type { MetadataAgent } from "./MetadataAgent";
+import type { MongoDBRef } from "./MongoDBRef";
 
 /**
  * Document Mapping class.
@@ -19,13 +19,13 @@ import type { MongoDBRef } from './MongoDBRef';
  * - [UpdateMethods](https://roman-right.github.io/beanie/api/interfaces/#aggregatemethods)
  */
 export type MetadataOut = {
-    '@context'?: Array<string>;
-    context_url?: string;
-    definition?: string;
-    content: any;
-    description?: string;
-    id?: string;
-    resource: MongoDBRef;
-    agent: MetadataAgent;
-    created?: string;
-}
+	"@context"?: Array<string>;
+	context_url?: string;
+	definition?: string;
+	content: any;
+	description?: string;
+	id?: string;
+	resource: MongoDBRef;
+	agent: MetadataAgent;
+	created?: string;
+};

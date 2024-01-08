@@ -7,8 +7,8 @@
  * Also, some StorageTypes do not support versioning or anonymous sharing.
  */
 export enum StorageType {
-    MINIO = 'minio',
-    LOCAL = 'local',
-    REMOTE = 'remote',
-    AWS = 'aws',
+	MINIO = "minio",
+	LOCAL = "local",
+	REMOTE = "remote",
+	AWS = "aws",
 }

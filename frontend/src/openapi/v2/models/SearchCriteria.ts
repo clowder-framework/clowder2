@@ -3,7 +3,7 @@
 /* eslint-disable */
 
 export type SearchCriteria = {
-    field: string;
-    operator?: string;
-    value: string;
-}
+	field: string;
+	operator?: string;
+	value: string;
+};

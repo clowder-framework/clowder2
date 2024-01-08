@@ -24,7 +24,7 @@ const allowedType = [
 ];
 
 export default function VegaSpec(props: TextProps) {
-	let { fileId, visualizationId } = props;
+	const { fileId, visualizationId } = props;
 	const [data, setData] = useState();
 
 	useEffect(() => {

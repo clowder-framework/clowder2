@@ -2,21 +2,21 @@
 /* tslint:disable */
 /* eslint-disable */
 
-import type { ExtractorInfo } from './ExtractorInfo';
-import type { UserOut } from './UserOut';
+import type { ExtractorInfo } from "./ExtractorInfo";
+import type { UserOut } from "./UserOut";
 
 /**
  * EventListeners have a name, version, author, description, and optionally properties where extractor_info will be saved.
  */
 export type EventListenerOut = {
-    name: string;
-    version?: string;
-    description?: string;
-    id?: string;
-    creator?: UserOut;
-    created?: string;
-    modified?: string;
-    lastAlive?: string;
-    alive?: boolean;
-    properties?: ExtractorInfo;
-}
+	name: string;
+	version?: string;
+	description?: string;
+	id?: string;
+	creator?: UserOut;
+	created?: string;
+	modified?: string;
+	lastAlive?: string;
+	alive?: boolean;
+	properties?: ExtractorInfo;
+};

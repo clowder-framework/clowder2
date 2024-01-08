@@ -72,8 +72,8 @@ export const DisplayListenerMetadata = (props: MetadataType) => {
 				let metadataList = [];
 				if (resourceType === "dataset") metadataList = datasetMetadataList;
 				else if (resourceType === "file") metadataList = fileMetadataList;
-				let listenerMetadataList = [];
-				let listenerMetadataContent = [];
+				const listenerMetadataList = [];
+				const listenerMetadataContent = [];
 
 				return (
 					<Grid container spacing={2}>

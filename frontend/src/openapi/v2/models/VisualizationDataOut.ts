@@ -2,8 +2,8 @@
 /* tslint:disable */
 /* eslint-disable */
 
-import type { ContentType } from './ContentType';
-import type { UserOut } from './UserOut';
+import type { ContentType } from "./ContentType";
+import type { UserOut } from "./UserOut";
 
 /**
  * Document Mapping class.
@@ -19,13 +19,13 @@ import type { UserOut } from './UserOut';
  * - [UpdateMethods](https://roman-right.github.io/beanie/api/interfaces/#aggregatemethods)
  */
 export type VisualizationDataOut = {
-    name?: string;
-    description?: string;
-    id?: string;
-    creator: UserOut;
-    created?: string;
-    modified?: string;
-    bytes?: number;
-    content_type?: ContentType;
-    visualization_config_id: string;
-}
+	name?: string;
+	description?: string;
+	id?: string;
+	creator: UserOut;
+	created?: string;
+	modified?: string;
+	bytes?: number;
+	content_type?: ContentType;
+	visualization_config_id: string;
+};

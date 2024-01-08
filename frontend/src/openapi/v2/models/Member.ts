@@ -2,9 +2,9 @@
 /* tslint:disable */
 /* eslint-disable */
 
-import type { UserOut } from './UserOut';
+import type { UserOut } from "./UserOut";
 
 export type Member = {
-    user: UserOut;
-    editor?: boolean;
-}
+	user: UserOut;
+	editor?: boolean;
+};

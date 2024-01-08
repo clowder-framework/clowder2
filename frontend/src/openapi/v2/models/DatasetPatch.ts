@@ -3,7 +3,7 @@
 /* eslint-disable */
 
 export type DatasetPatch = {
-    name?: string;
-    description?: string;
-    status?: string;
-}
+	name?: string;
+	description?: string;
+	status?: string;
+};

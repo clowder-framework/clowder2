@@ -8,6 +8,6 @@
  * split into main ("text") and secondary ("plain") parts so the dynamic matching with * can still be done.
  */
 export type ContentType = {
-    content_type?: string;
-    main_type?: string;
-}
+	content_type?: string;
+	main_type?: string;
+};

@@ -116,7 +116,7 @@ export const ExtractionHistoryTab = (props): JSX.Element => {
 	}, [selectedStatus, selectedCreatedTime]);
 
 	useEffect(() => {
-		let rows = [];
+		const rows = [];
 		if (jobs.length > 0) {
 			jobs.map((job) => {
 				rows.push(

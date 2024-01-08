@@ -165,7 +165,7 @@ export function MetadataDefinitions() {
 			</Dialog>
 			<div className="outer-container">
 				<Grid container>
-					<Grid item xs={8}></Grid>
+					<Grid item xs={8} />
 					<Grid item xs={4}>
 						<Button
 							variant="contained"
@@ -212,7 +212,7 @@ export function MetadataDefinitions() {
 										>
 											Description
 										</TableCell>
-										<TableCell align="left"></TableCell>
+										<TableCell align="left" />
 									</TableRow>
 								</TableHead>
 								<TableBody>

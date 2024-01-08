@@ -86,7 +86,7 @@ export function ApiKeys() {
 		<Layout>
 			{/*breadcrumb*/}
 			<Grid container>
-				<Grid item xs={8} sx={{ display: "flex", alignItems: "center" }}></Grid>
+				<Grid item xs={8} sx={{ display: "flex", alignItems: "center" }} />
 				<Grid item xs={4}>
 					<Button
 						variant="contained"
@@ -131,7 +131,7 @@ export function ApiKeys() {
 								<TableCell>API Key Name</TableCell>
 								<TableCell align="right">Created at</TableCell>
 								<TableCell align="right">Expired at</TableCell>
-								<TableCell align="right"></TableCell>
+								<TableCell align="right" />
 							</TableRow>
 						</TableHead>
 						<TableBody>

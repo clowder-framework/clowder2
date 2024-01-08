@@ -8,8 +8,8 @@
  * requires VIEWER any of the roles can access that resource.
  */
 export enum RoleType {
-    OWNER = 'owner',
-    VIEWER = 'viewer',
-    UPLOADER = 'uploader',
-    EDITOR = 'editor',
+	OWNER = "owner",
+	VIEWER = "viewer",
+	UPLOADER = "uploader",
+	EDITOR = "editor",
 }

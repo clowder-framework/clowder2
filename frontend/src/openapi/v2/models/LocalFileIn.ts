@@ -6,5 +6,5 @@
  * Used when adding a file from a local disk.
  */
 export type LocalFileIn = {
-    path: string;
-}
+	path: string;
+};

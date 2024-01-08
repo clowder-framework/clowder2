@@ -16,9 +16,9 @@
  * - [UpdateMethods](https://roman-right.github.io/beanie/api/interfaces/#aggregatemethods)
  */
 export type UserOut = {
-    email: string;
-    first_name: string;
-    last_name: string;
-    id?: string;
-    admin: boolean;
-}
+	email: string;
+	first_name: string;
+	last_name: string;
+	id?: string;
+	admin: boolean;
+};

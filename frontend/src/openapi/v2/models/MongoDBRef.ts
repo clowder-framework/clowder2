@@ -3,7 +3,7 @@
 /* eslint-disable */
 
 export type MongoDBRef = {
-    collection: string;
-    resource_id: string;
-    version?: number;
-}
+	collection: string;
+	resource_id: string;
+	version?: number;
+};

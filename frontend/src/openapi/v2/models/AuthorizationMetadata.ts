@@ -2,10 +2,10 @@
 /* tslint:disable */
 /* eslint-disable */
 
-import type { RoleType } from './RoleType';
+import type { RoleType } from "./RoleType";
 
 export type AuthorizationMetadata = {
-    metadata_id: string;
-    user_id: string;
-    role: RoleType;
-}
+	metadata_id: string;
+	user_id: string;
+	role: RoleType;
+};

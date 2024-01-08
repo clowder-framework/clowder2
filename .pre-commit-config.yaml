@@ -6,13 +6,27 @@ repos:
         entry: pipenv run extract-openapi
         language: system
         pass_filenames: false
+#  - repo: local
+#    hooks:
+#      - id: generate-frontend-api-client
+#        name: generate-frontend-api-client
+#        entry: bash -c 'cd frontend && npm run codegen:v2:file'
+#        language: system
+#        pass_filenames: false
   - repo: local
     hooks:
-      - id: generate-frontend-api-client
-        name: generate-frontend-api-client
-        entry: bash -c 'cd frontend && npm run codegen:v2:file'
-        language: system
-        pass_filenames: false
+      - id: eslint
+        name: eslint
+        entry: bash -c "cd frontend && npx eslint --fix src"
+        language: node
+        exclude: 'openapi.json|frontend/src/openapi/v2/.*'
+  - repo: local
+    hooks:
+      - id: prettier
+        name: prettier
+        entry: bash -c "cd frontend && npx prettier src --write"
+        language: node
+        exclude: 'openapi.json|frontend/src/openapi/v2/.*'
   - repo: https://github.com/psf/black
     rev: 23.11.0
     hooks:
