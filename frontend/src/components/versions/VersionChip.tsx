@@ -6,8 +6,7 @@ type VersionChipProps = {
 };
 
 export function VersionChip(props: VersionChipProps) {
-	const { selectedVersion } =
-		props;
+	const { selectedVersion } = props;
 
 	return (
 		<>

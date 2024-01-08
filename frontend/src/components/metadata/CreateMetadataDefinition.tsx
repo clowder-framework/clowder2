@@ -1,4 +1,4 @@
-import React, {useState} from "react";
+import React, { useState } from "react";
 
 import {
 	Autocomplete,
@@ -37,13 +37,16 @@ type CreateMetadataDefinitionProps = {
 export const CreateMetadataDefinition = (
 	props: CreateMetadataDefinitionProps
 ) => {
-	const { setCreateMetadataDefinitionOpen, setSnackBarOpen, setSnackBarMessage } = props;
+	const {
+		setCreateMetadataDefinitionOpen,
+		setSnackBarOpen,
+		setSnackBarMessage,
+	} = props;
 
 	const dispatch = useDispatch();
 	// @ts-ignore
 	const saveMetadataDefinitions = (metadata: object) =>
 		dispatch(postMetadataDefinitions(metadata));
-
 
 	const [activeStep, setActiveStep] = React.useState(0);
 	const [parsedInput, setParsedInput] = React.useState("");

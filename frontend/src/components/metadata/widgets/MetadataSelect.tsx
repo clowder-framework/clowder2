@@ -75,7 +75,7 @@ export const MetadataSelect = (props) => {
 					</FormControl>
 				</Grid>
 				<Grid item xs={1} sm={1} md={1} lg={1} xl={1}>
-					{datasetRole.role !== undefined && datasetRole.role !== "viewer" ?
+					{datasetRole.role !== undefined && datasetRole.role !== "viewer" ? (
 						<MetadataEditButton
 							readOnly={readOnly}
 							setReadOnly={setReadOnly}
@@ -86,9 +86,10 @@ export const MetadataSelect = (props) => {
 							widgetName={widgetName}
 							setInputChanged={setInputChanged}
 							setMetadata={setMetadata}
-						/> :
+						/>
+					) : (
 						<></>
-					}
+					)}
 				</Grid>
 			</Grid>
 		</div>

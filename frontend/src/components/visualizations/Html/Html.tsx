@@ -1,6 +1,6 @@
-import React, {useEffect, useRef, useState} from "react";
-import {downloadVisData, fileDownloaded,} from "../../../utils/visualization";
-import {readTextFromFile} from "../../../utils/common";
+import React, { useEffect, useRef, useState } from "react";
+import { downloadVisData, fileDownloaded } from "../../../utils/visualization";
+import { readTextFromFile } from "../../../utils/common";
 
 type htmlProps = {
 	fileId?: string;
@@ -8,7 +8,7 @@ type htmlProps = {
 };
 
 export default function Html(props: htmlProps) {
-	const {fileId, visualizationId} = props;
+	const { fileId, visualizationId } = props;
 	const divRef = useRef(null);
 	const isFirstRender = useRef(true);
 
@@ -43,7 +43,12 @@ export default function Html(props: htmlProps) {
 
 		if (!isFirstRender.current) return;
 		isFirstRender.current = false;
-	}, [html, divRef])
+	}, [html, divRef]);
 
-	return (<div ref={divRef} style={{width: "auto", maxHeight: "100vh", overflow: "auto"}}/>);
+	return (
+		<div
+			ref={divRef}
+			style={{ width: "auto", maxHeight: "100vh", overflow: "auto" }}
+		/>
+	);
 }

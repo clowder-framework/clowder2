@@ -39,13 +39,13 @@ export default function VegaSpec(props: TextProps) {
 				const file = new File([blob], "text.tmp");
 				const reader = new FileReader();
 				reader.onload = function (e) {
-				  try {
-					const jsonData = JSON.parse(e.target.result);
-					setData(jsonData);
-					console.debug('JSON data from file:', jsonData);
-				  } catch (error) {
-					console.error('Error parsing JSON:', error);
-				  }
+					try {
+						const jsonData = JSON.parse(e.target.result);
+						setData(jsonData);
+						console.debug("JSON data from file:", jsonData);
+					} catch (error) {
+						console.error("Error parsing JSON:", error);
+					}
 				};
 				const text = await reader.readAsText(file);
 				console.debug(text);
@@ -57,10 +57,9 @@ export default function VegaSpec(props: TextProps) {
 		processBlob();
 	}, [visualizationId, fileId]);
 
-
 	return (
-			<Container sx={{ marginTop: "2em"}}>
-				{data && <VegaLite spec={data} />}
-			</Container>
+		<Container sx={{ marginTop: "2em" }}>
+			{data && <VegaLite spec={data} />}
+		</Container>
 	);
 }
