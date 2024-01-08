@@ -168,7 +168,7 @@ export const Dataset = (): JSX.Element => {
 		setPaths(tmpPaths);
 	}, [about, folderPath]);
 
-		// for pagination keep flipping until the return dataset is less than the limit
+	// for pagination keep flipping until the return dataset is less than the limit
 	const previous = () => {
 		if (currPageNum - 1 >= 0) {
 			setSkip((currPageNum - 1) * limit);
@@ -425,25 +425,31 @@ export const Dataset = (): JSX.Element => {
 						: <></>
 					}
 					<Box display="flex" justifyContent="center" sx={{ m: 1 }}>
-						<ButtonGroup
-								variant="contained"
-								aria-label="previous next buttons"
-							>
-								<Button
-									aria-label="previous"
-									onClick={previous}
-									disabled={prevDisabled}
+						{ selectedTabIndex === 0 ?
+							(
+								<ButtonGroup
+									variant="contained"
+									aria-label="previous next buttons"
 								>
-									<ArrowBack /> Prev
-								</Button>
-								<Button
-									aria-label="next"
-									onClick={next}
-									disabled={nextDisabled}
-								>
+									<Button
+										aria-label="previous"
+										onClick={previous}
+										disabled={prevDisabled}
+									>
+										<ArrowBack /> Prev
+									</Button>
+									<Button
+										aria-label="next"
+										onClick={next}
+										disabled={nextDisabled}
+									>
 									Next <ArrowForward />
-								</Button>
-						</ButtonGroup>
+									</Button>
+								</ButtonGroup>
+							) :
+							<></>
+
+						}
 					</Box>
 				</Grid>
 				<Grid item>
