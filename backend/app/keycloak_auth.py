@@ -329,6 +329,7 @@ async def create_user(email: str, password: str, firstName: str, lastName: str):
         {
             "email": email,
             "username": email,
+            "preferred_username": email,
             "enabled": True,
             "firstName": firstName,
             "lastName": lastName,
