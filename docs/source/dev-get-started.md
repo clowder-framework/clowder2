@@ -127,3 +127,28 @@ You can run the frontend module using either of the below options:
   Keycloak realm setting file `/scripts/keycloak/mini-kube-clowder-realm-prod.json`
 
 For more details on how to set up Keycloak, please refer to this [Documentation](docs/source/configure-keycloak-realm.md)
+
+### Pre-commit Hooks and Linting
+
+We use [pre-commit](https://pre-commit.com/) to run linting and formatting checks before committing code. To install
+pre-commit, run `pip install pre-commit` and then `pre-commit install` in the root directory of the repository. This
+will install the pre-commit hooks and run them on every commit. If any of the hooks fail, the commit will be aborted.
+Once ran, the hooks will be in place for all future commits and branches since they are stored in the `.git/hooks`.
+To run the hooks manually, run `pre-commit run --all-files`. To skip the hooks, run `git commit --no-verify` (or click
+on cog in PyCharm and uncheck `Run Git hooks`).
+
+See .pre-commit-config.yaml for the list of hooks that are run. The hooks are run in the order they are listed in the
+file. The hooks are run on all files that are staged for commit. To run the hooks on all files, run `pre-commit run
+--all-files`.
+
+Hooks include:
+
+- Python style checks and formatting using black, isort and flake8.
+- Custom script to create openapi.json file from the backend FastAPI app.
+- Eslint and prettier for frontend code.
+
+
+#### Eslint and Prettier
+
+Use `npx eslint-config-prettier src/index.tsx` to check for conflicts between eslint and prettier. To run eslint use
+`npx eslint src`.
