@@ -11,6 +11,7 @@ import {
 	MenuItem,
 	Paper,
 	Select,
+	Switch,
 } from "@mui/material";
 
 import { RootState } from "../../types/data";
@@ -42,7 +43,8 @@ export function Listeners(props: ListenerProps) {
 		limit: number | undefined,
 		heartbeatInterval: number | undefined,
 		selectedCategory: string | null,
-		selectedLabel: string | null
+		selectedLabel: string | null,
+		aliveOnly: boolean | undefined
 	) =>
 		dispatch(
 			fetchListeners(
@@ -50,7 +52,8 @@ export function Listeners(props: ListenerProps) {
 				limit,
 				heartbeatInterval,
 				selectedCategory,
-				selectedLabel
+				selectedLabel,
+				aliveOnly
 			)
 		);
 	const searchListeners = (
@@ -81,10 +84,11 @@ export function Listeners(props: ListenerProps) {
 	const [searchText, setSearchText] = useState<string>("");
 	const [selectedCategory, setSelectedCategory] = useState("");
 	const [selectedLabel, setSelectedLabel] = useState("");
+	const [aliveOnly, setAliveOnly] = useState<boolean>(false);
 
 	// component did mount
 	useEffect(() => {
-		listListeners(skip, limit, 0, null, null);
+		listListeners(skip, limit, 0, null, null, aliveOnly);
 		listAvailableCategories();
 		listAvailableLabels();
 	}, []);
@@ -101,17 +105,22 @@ export function Listeners(props: ListenerProps) {
 		if (searchText !== "") {
 			handleListenerSearch();
 		} else {
-			listListeners(skip, limit, 0, selectedCategory, selectedLabel);
+			listListeners(skip, limit, 0, selectedCategory, selectedLabel, aliveOnly);
 		}
 	}, [searchText]);
 
 	useEffect(() => {
 		if (skip !== null && skip !== undefined) {
-			listListeners(skip, limit, 0, null, null);
+			listListeners(skip, limit, 0, null, null, aliveOnly);
 			if (skip === 0) setPrevDisabled(true);
 			else setPrevDisabled(false);
 		}
 	}, [skip]);
+
+	useEffect(() => {
+		setSearchText("");
+		listListeners(skip, limit, 0, selectedCategory, selectedLabel, aliveOnly);
+	}, [aliveOnly]);
 
 	// any of the change triggers timer to fetch the extractor status
 	useEffect(() => {
@@ -123,11 +132,18 @@ export function Listeners(props: ListenerProps) {
 		} else {
 			// set the interval to fetch the job's log
 			const interval = setInterval(() => {
-				listListeners(skip, limit, 0, selectedCategory, selectedLabel);
+				listListeners(
+					skip,
+					limit,
+					0,
+					selectedCategory,
+					selectedLabel,
+					aliveOnly
+				);
 			}, config.extractorLivelihoodInterval);
 			return () => clearInterval(interval);
 		}
-	}, [searchText, listeners, skip, selectedCategory, selectedLabel]);
+	}, [searchText, listeners, skip, selectedCategory, selectedLabel, aliveOnly]);
 
 	// for pagination keep flipping until the return dataset is less than the limit
 	const previous = () => {
@@ -152,14 +168,28 @@ export function Listeners(props: ListenerProps) {
 		const selectedCategoryValue = (event.target as HTMLInputElement).value;
 		setSelectedCategory(selectedCategoryValue);
 		setSearchText("");
-		listListeners(skip, limit, 0, selectedCategoryValue, selectedLabel);
+		listListeners(
+			skip,
+			limit,
+			0,
+			selectedCategoryValue,
+			selectedLabel,
+			aliveOnly
+		);
 	};
 
 	const handleLabelChange = (event: React.ChangeEvent<HTMLInputElement>) => {
 		const selectedLabelValue = (event.target as HTMLInputElement).value;
 		setSelectedLabel(selectedLabelValue);
 		setSearchText("");
-		listListeners(skip, limit, 0, selectedCategory, selectedLabelValue);
+		listListeners(
+			skip,
+			limit,
+			0,
+			selectedCategory,
+			selectedLabelValue,
+			aliveOnly
+		);
 	};
 
 	const handleSubmitExtractionClose = () => {
@@ -189,7 +219,7 @@ export function Listeners(props: ListenerProps) {
 				spacing={3}
 			>
 				{/*categories*/}
-				<Grid item xs={6}>
+				<Grid item xs={4}>
 					<FormControl variant="standard" sx={{ width: "100%" }}>
 						<InputLabel id="label-categories">Filter by category</InputLabel>
 						<Select
@@ -209,7 +239,7 @@ export function Listeners(props: ListenerProps) {
 						</Select>
 					</FormControl>
 				</Grid>
-				<Grid item xs={6}>
+				<Grid item xs={4}>
 					<FormControl variant="standard" sx={{ width: "100%" }}>
 						<InputLabel id="label-categories">Filter by labels</InputLabel>
 						<Select
@@ -226,6 +256,15 @@ export function Listeners(props: ListenerProps) {
 							})}
 						</Select>
 					</FormControl>
+				</Grid>
+				<Grid item xs={4}>
+					<Switch
+						color="primary"
+						checked={aliveOnly}
+						onChange={() => {
+							setAliveOnly(!aliveOnly);
+						}}
+					/>
 				</Grid>
 			</Grid>
 			<Grid container>

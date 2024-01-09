@@ -92,12 +92,15 @@ async def _check_livelihood(
 
 
 def _check_livelihood_query(heartbeat_interval=settings.listener_heartbeat_interval):
+    if heartbeat_interval == 0:
+        heartbeat_interval = settings.listener_heartbeat_interval
+
     aggregated_query = {
         "$addFields": {
             "alive": {
                 "$lt": [
                     {"$subtract": [datetime.datetime.utcnow(), "$lastAlive"]},
-                    heartbeat_interval * 1000  # Convert seconds to milliseconds
+                    heartbeat_interval * 1000,  # convert to milliseconds
                 ]
             }
         }
@@ -273,14 +276,15 @@ async def get_listeners(
         label -- filter by label has to be exact match
         alive_only -- filter by alive status
     """
-    aggregation_pipeline = [_check_livelihood_query(heartbeat_interval)]
+    aggregation_pipeline = [_check_livelihood_query(heartbeat_interval=heartbeat_interval)]
 
     if category:
         aggregation_pipeline.append(EventListenerDB.properties.categories == category)
     if label:
         aggregation_pipeline.append(EventListenerDB.properties.default_labels == label)
     if alive_only:
-        aggregation_pipeline.append(EventListenerDB.alive == True)
+        aggregation_pipeline.append({"$match": {"alive": True}}),
+        # aggregation_pipeline.append(EventListenerDB.alive == True)
 
     # sort by name alphabetically and pagination
     aggregation_pipeline.append({"$sort": {"name": 1}})
