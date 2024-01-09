@@ -120,7 +120,9 @@ export function Listeners(props: ListenerProps) {
 
 	useEffect(() => {
 		setSearchText("");
-		listListeners(skip, limit, 0, selectedCategory, selectedLabel, aliveOnly);
+		// flip to first page
+		setSkip(0);
+		listListeners(0, limit, 0, selectedCategory, selectedLabel, aliveOnly);
 	}, [aliveOnly]);
 
 	// any of the change triggers timer to fetch the extractor status
