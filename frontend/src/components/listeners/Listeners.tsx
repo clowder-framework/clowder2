@@ -111,19 +111,19 @@ export function Listeners(props: ListenerProps) {
 	}, [searchText]);
 
 	useEffect(() => {
+		setSearchText("");
+		// flip to first page
+		setSkip(0);
+		listListeners(0, limit, 0, selectedCategory, selectedLabel, aliveOnly);
+	}, [aliveOnly]);
+
+	useEffect(() => {
 		if (skip !== null && skip !== undefined) {
 			listListeners(skip, limit, 0, null, null, aliveOnly);
 			if (skip === 0) setPrevDisabled(true);
 			else setPrevDisabled(false);
 		}
 	}, [skip]);
-
-	useEffect(() => {
-		setSearchText("");
-		// flip to first page
-		setSkip(0);
-		listListeners(0, limit, 0, selectedCategory, selectedLabel, aliveOnly);
-	}, [aliveOnly]);
 
 	// any of the change triggers timer to fetch the extractor status
 	useEffect(() => {
