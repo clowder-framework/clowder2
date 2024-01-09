@@ -5,6 +5,7 @@ import {
 	ButtonGroup,
 	Divider,
 	FormControl,
+	FormControlLabel,
 	Grid,
 	InputLabel,
 	List,
@@ -219,7 +220,7 @@ export function Listeners(props: ListenerProps) {
 				spacing={3}
 			>
 				{/*categories*/}
-				<Grid item xs={4}>
+				<Grid item xs={5}>
 					<FormControl variant="standard" sx={{ width: "100%" }}>
 						<InputLabel id="label-categories">Filter by category</InputLabel>
 						<Select
@@ -239,7 +240,7 @@ export function Listeners(props: ListenerProps) {
 						</Select>
 					</FormControl>
 				</Grid>
-				<Grid item xs={4}>
+				<Grid item xs={5}>
 					<FormControl variant="standard" sx={{ width: "100%" }}>
 						<InputLabel id="label-categories">Filter by labels</InputLabel>
 						<Select
@@ -257,13 +258,19 @@ export function Listeners(props: ListenerProps) {
 						</Select>
 					</FormControl>
 				</Grid>
-				<Grid item xs={4}>
-					<Switch
-						color="primary"
-						checked={aliveOnly}
-						onChange={() => {
-							setAliveOnly(!aliveOnly);
-						}}
+				<Grid item xs={2}>
+					<FormControlLabel
+						sx={{ margin: "auto auto -2.5em auto" }}
+						control={
+							<Switch
+								color="primary"
+								checked={aliveOnly}
+								onChange={() => {
+									setAliveOnly(!aliveOnly);
+								}}
+							/>
+						}
+						label="Alive Extractors"
 					/>
 				</Grid>
 			</Grid>
