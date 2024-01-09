@@ -281,12 +281,11 @@ async def get_listeners(
     ]
 
     if category:
-        aggregation_pipeline.append(EventListenerDB.properties.categories == category)
+        aggregation_pipeline.append({"$match": {"properties.categories": category}})
     if label:
-        aggregation_pipeline.append(EventListenerDB.properties.default_labels == label)
+        aggregation_pipeline.append({"$match": {"properties.default_labels": label}})
     if alive_only:
         aggregation_pipeline.append({"$match": {"alive": True}}),
-        # aggregation_pipeline.append(EventListenerDB.alive == True)
 
     # sort by name alphabetically and pagination
     aggregation_pipeline.append({"$sort": {"name": 1}})
