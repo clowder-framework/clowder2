@@ -348,6 +348,27 @@ export const Dataset = (): JSX.Element => {
 							<></>
 						)}
 						<FilesTable datasetId={datasetId} folderId={folderId} />
+						<Box display="flex" justifyContent="center" sx={{ m: 1 }}>
+							<ButtonGroup
+								variant="contained"
+								aria-label="previous next buttons"
+							>
+								<Button
+									aria-label="previous"
+									onClick={previous}
+									disabled={prevDisabled}
+								>
+									<ArrowBack /> Prev
+								</Button>
+								<Button
+									aria-label="next"
+									onClick={next}
+									disabled={nextDisabled}
+								>
+									Next <ArrowForward />
+								</Button>
+							</ButtonGroup>
+						</Box>
 					</TabPanel>
 					<TabPanel value={selectedTabIndex} index={1}>
 						<Visualization datasetId={datasetId} />
@@ -424,33 +445,6 @@ export const Dataset = (): JSX.Element => {
 						</TabPanel>
 						: <></>
 					}
-					<Box display="flex" justifyContent="center" sx={{ m: 1 }}>
-						{ selectedTabIndex === 0 ?
-							(
-								<ButtonGroup
-									variant="contained"
-									aria-label="previous next buttons"
-								>
-									<Button
-										aria-label="previous"
-										onClick={previous}
-										disabled={prevDisabled}
-									>
-										<ArrowBack /> Prev
-									</Button>
-									<Button
-										aria-label="next"
-										onClick={next}
-										disabled={nextDisabled}
-									>
-									Next <ArrowForward />
-									</Button>
-								</ButtonGroup>
-							) :
-							<></>
-
-						}
-					</Box>
 				</Grid>
 				<Grid item>
 					<DatasetDetails details={about} />
