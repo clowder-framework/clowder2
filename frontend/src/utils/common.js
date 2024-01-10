@@ -33,7 +33,6 @@ export function getHeader() {
 
 export async function downloadPublicResource(url) {
 	const authHeader = getHeader();
-	console.log('downloading public resource', url);
 	const response = await fetch(url, {
 		method: "GET",
 		mode: "cors",
