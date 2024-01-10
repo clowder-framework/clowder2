@@ -32,7 +32,6 @@ export default function Image(props: ImageProps) {
 				downloadUrl = generateFileDownloadUrl(fileId, 0);
 			}
 		}
-		console.log('download URL is', downloadUrl);
 		setUrl(downloadUrl);
 	}, [visualizationId, fileId]);
 
