@@ -22,7 +22,6 @@ export const PublicVisualizationCard = (props: publicPreviewProps) => {
 	const { publicVisComponentDefinition, publicVisualizationDataItem } = props;
 	const [expanded, setExpanded] = React.useState(false);
 	const [visShareModalOpen, setVisShareModalOpen] = useState(false);
-	console.log("public visualization card");
 	// share visualization
 	const dispatch = useDispatch();
 	const generateVisPresignedUrl = (

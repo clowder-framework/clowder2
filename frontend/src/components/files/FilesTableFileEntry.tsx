@@ -23,7 +23,6 @@ export function FilesTableFileEntry(props: FilesTableFileEntryProps) {
 	const { iconStyle, selectFile, file, parentFolderId, publicView } = props;
 	const [thumbnailUrl, setThumbnailUrl] = useState("");
 	const [selectedVersion, setSelectedVersion] = useState(file.version_num);
-	console.log('the public view is', publicView);
 	useEffect(() => {
 		let url = "";
 		if (file.thumbnail_id) {

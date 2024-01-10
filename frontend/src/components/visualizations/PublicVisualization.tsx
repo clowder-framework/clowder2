@@ -48,7 +48,6 @@ export const PublicVisualization = (props: previewProps) => {
 			getPublicVisConfig(datasetId);
 		}
 	}, [fileId, datasetId]);
-	console.log("file summary is", fileSummary);
 	// Check for conditions and set state only once
 	useEffect(() => {
 		const supportedMimeType = visComponentDefinitions.reduce(
