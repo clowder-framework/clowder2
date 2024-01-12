@@ -50,7 +50,7 @@ from app.models.datasets import (
 from app.models.files import FileOut, FileDB, FileDBViewList, LocalFileIn, StorageType
 from app.models.folders import FolderOut, FolderIn, FolderDB, FolderDBViewList
 from app.models.metadata import MetadataDB
-from app.models.pages import Paged
+from app.models.pages import Paged, PageMetadata
 from app.models.pyobjectid import PyObjectId
 from app.models.thumbnails import ThumbnailDB
 from app.models.users import UserOut
@@ -234,7 +234,7 @@ async def get_datasets(
             DatasetDBViewList.creator.email == user_id,
             DatasetDBViewList.auth.user_ids == user_id,
             DatasetDBViewList.status == DatasetStatus.AUTHENTICATED.name,
-        )).aggregate(
+        ), sort=(-DatasetDBViewList.created)).aggregate(
             [
                 {"$facet":
                     {
@@ -246,11 +246,11 @@ async def get_datasets(
             # projection_model=Page
         ).to_list()
         page = Paged(
-            metadata=datasets_and_count[0]['metadata'][0],
+            metadata=PageMetadata(**datasets_and_count[0]['metadata'][0], skip=skip, limit=limit),
             data=[DatasetOut(**item) for item in datasets_and_count[0]['data']]
         )
 
-    return page
+    return page.dict()
 
 
 @router.get("/{dataset_id}", response_model=DatasetOut)
