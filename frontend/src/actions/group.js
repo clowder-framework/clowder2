@@ -168,10 +168,7 @@ export const UPDATE_GROUP = "UPDATE_GROUP";
 
 export function updateGroup(groupId, formData) {
 	return (dispatch) => {
-		return V2.GroupsService.editGroupApiV2GroupsGroupIdPut(
-			groupId,
-			formData
-		)
+		return V2.GroupsService.editGroupApiV2GroupsGroupIdPut(groupId, formData)
 			.then((json) => {
 				dispatch({
 					type: UPDATE_GROUP,

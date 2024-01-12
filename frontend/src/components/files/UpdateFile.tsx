@@ -22,7 +22,6 @@ export const UpdateFile: React.FC<UpdateFileProps> = (
 	props: UpdateFileProps
 ) => {
 	const dispatch = useDispatch();
-
 	const updateFile = async (file: File, fileId: string | undefined) =>
 		dispatch(updateFileAction(file, fileId));
 	const listFileVersions = (fileId: string | undefined) =>

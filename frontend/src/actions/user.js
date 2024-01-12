@@ -127,6 +127,42 @@ export function fetchAllUsers(skip = 0, limit = 101) {
 	};
 }
 
+export const TOGGLE_ADMIN_MODE = "TOGGLE_ADMIN_MODE";
+
+export function toggleAdminMode(adminModeOn) {
+	return (dispatch) => {
+		return V2.LoginService.setAdminModeApiV2UsersMeAdminModePost(adminModeOn)
+			.then((json) => {
+				dispatch({
+					type: TOGGLE_ADMIN_MODE,
+					adminMode: json,
+					receivedAt: Date.now(),
+				});
+			})
+			.catch((reason) => {
+				dispatch(toggleAdminMode(adminModeOn));
+			});
+	};
+}
+
+export const GET_ADMIN_MODE_STATUS = "GET_ADMIN_MODE_STATUS";
+
+export function getAdminModeStatus() {
+	return (dispatch) => {
+		return V2.LoginService.getAdminModeApiV2UsersMeAdminModeGet()
+			.then((json) => {
+				dispatch({
+					type: GET_ADMIN_MODE_STATUS,
+					adminMode: json,
+					receivedAt: Date.now(),
+				});
+			})
+			.catch((reason) => {
+				dispatch(getAdminModeStatus());
+			});
+	};
+}
+
 export const PREFIX_SEARCH_USERS = "PREFIX_SEARCH_USERS";
 
 export function prefixSearchAllUsers(text = "", skip = 0, limit = 101) {

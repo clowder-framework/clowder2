@@ -25,6 +25,7 @@ class UserLogin(BaseModel):
 
 class UserDoc(Document, UserBase):
     admin: bool
+    admin_mode: bool = False
 
     class Settings:
         name = "users"

@@ -11,6 +11,7 @@ from app.keycloak_auth import get_current_user, get_user
 from app.models.authorization import RoleType
 from app.models.groups import GroupOut, GroupIn, GroupDB, GroupBase, Member
 from app.models.users import UserOut, UserDB
+from app.routers.authentication import get_admin_mode, get_admin
 
 router = APIRouter()
 
@@ -33,6 +34,8 @@ async def get_groups(
     user_id=Depends(get_user),
     skip: int = 0,
     limit: int = 10,
+    admin_mode: bool = Depends(get_admin_mode),
+    admin=Depends(get_admin),
 ):
     """Get a list of all Groups in the db the user is a member/owner of.
 
@@ -42,11 +45,17 @@ async def get_groups(
 
 
     """
+    criteria_list = []
+    if not admin or not admin_mode:
+        criteria_list.append(
+            Or(
+                GroupDB.creator == user_id,
+                GroupDB.users.user.email == user_id,
+            )
+        )
+
     groups = await GroupDB.find(
-        Or(
-            GroupDB.creator == user_id,
-            GroupDB.users.user.email == user_id,
-        ),
+        *criteria_list,
         sort=(-GroupDB.created),
         skip=skip,
         limit=limit,
@@ -60,6 +69,8 @@ async def search_group(
     user_id=Depends(get_user),
     skip: int = 0,
     limit: int = 10,
+    admin_mode: bool = Depends(get_admin_mode),
+    admin=Depends(get_admin),
 ):
     """Search all groups in the db based on text.
 
@@ -69,13 +80,20 @@ async def search_group(
         limit -- restrict number of records to be returned (i.e. for pagination)
     """
 
-    # user has to be the creator or member first; then apply search
-    groups = await GroupDB.find(
-        Or(GroupDB.creator == user_id, GroupDB.users.user.email == user_id),
+    criteria_list = [
         Or(
             RegEx(field=GroupDB.name, pattern=search_term),
             RegEx(field=GroupDB.description, pattern=search_term),
         ),
+    ]
+    if not admin or not admin_mode:
+        criteria_list.append(
+            Or(GroupDB.creator == user_id, GroupDB.users.user.email == user_id)
+        )
+
+    # user has to be the creator or member first; then apply search
+    groups = await GroupDB.find(
+        *criteria_list,
         skip=skip,
         limit=limit,
     ).to_list()
