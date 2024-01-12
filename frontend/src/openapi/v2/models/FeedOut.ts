@@ -12,16 +12,14 @@ import type { SearchObject } from './SearchObject';
  *
  * - `id` - MongoDB document ObjectID "_id" field.
  * Mapped to the PydanticObjectId class
- *
- * Inherited from:
- *
- * - Pydantic BaseModel
- * - [UpdateMethods](https://roman-right.github.io/beanie/api/interfaces/#aggregatemethods)
  */
 export type FeedOut = {
     name: string;
     search: SearchObject;
     listeners?: Array<FeedListener>;
+    /**
+     * MongoDB document ObjectID
+     */
     id?: string;
     creator?: string;
     created?: string;

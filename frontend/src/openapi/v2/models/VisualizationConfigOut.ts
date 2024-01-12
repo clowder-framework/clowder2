@@ -14,11 +14,6 @@ import type { VisualizationDataOut } from './VisualizationDataOut';
  *
  * - `id` - MongoDB document ObjectID "_id" field.
  * Mapped to the PydanticObjectId class
- *
- * Inherited from:
- *
- * - Pydantic BaseModel
- * - [UpdateMethods](https://roman-right.github.io/beanie/api/interfaces/#aggregatemethods)
  */
 export type VisualizationConfigOut = {
     resource: MongoDBRef;
@@ -28,6 +23,9 @@ export type VisualizationConfigOut = {
     parameters?: any;
     visualization_component_id: string;
     visualization_mimetype: string;
+    /**
+     * MongoDB document ObjectID
+     */
     id?: string;
     visualization_data?: Array<VisualizationDataOut>;
 }

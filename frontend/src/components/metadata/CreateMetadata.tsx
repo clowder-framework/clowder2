@@ -14,7 +14,7 @@ This is the interface when create new dataset and new files
 Uses only registered metadata definition to populate the form
  */
 export const CreateMetadata = (props: MetadataType) => {
-	const { setMetadata } = props;
+	const { setMetadata, sourceItem } = props;
 
 	const dispatch = useDispatch();
 	const getMetadatDefinitions = (
@@ -38,11 +38,20 @@ export const CreateMetadata = (props: MetadataType) => {
 			{metadataDefinitionList.map((metadata, idx) => {
 				return (
 					<Box className="inputGroup" key={idx}>
+						{sourceItem === "datasets" && metadata.required_for_items.datasets ? (
+						  <Typography>
+							This metadata is required for creating new datasets.
+						  </Typography>
+						) : sourceItem === "files" && metadata.required_for_items.files ? (
+						  <Typography>
+							This metadata is required for creating new files.
+						  </Typography>
+						) : (
+						  <Typography>This metadata is optional for creating new {sourceItem}.</Typography>
+						)}
 						<Typography variant="h6">
 							{metadata.name}{" "}
-							{metadata.fields.some((field) => field.required) && (
-								<span>*</span>
-							)}
+							{metadata.fields.some((field) => field.required && ((sourceItem == "datasets" && metadata.required_for_items.datasets) || (sourceItem == "files" && metadata.required_for_items.files)) && (<span>*</span>))}
 						</Typography>
 						<Typography variant="subtitle2">{metadata.description}</Typography>
 						{metadata.fields.map((field, idxx) => {
@@ -58,7 +67,7 @@ export const CreateMetadata = (props: MetadataType) => {
 									initialReadOnly: false,
 									isRequired: field.required,
 									datasetRole: datasetRole,
-									key: idxx,
+									key: idxx
 								}
 							);
 						})}

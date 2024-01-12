@@ -33,6 +33,9 @@ FIELD_TYPES = {
     "tuple": tuple,
 }  # JSON schema can handle this for us?
 
+class MetadataRequiredForItems(BaseModel):
+    datasets: bool = False
+    files: bool = False
 
 class MetadataConfig(BaseModel):
     type: str = "str"  # must be one of FIELD_TYPES
@@ -89,6 +92,7 @@ class MetadataDefinitionBase(BaseModel):
 
     name: str
     description: Optional[str]
+    required_for_items: MetadataRequiredForItems
     created: datetime = Field(default_factory=datetime.utcnow)
     context: Optional[
         List[Union[dict, AnyUrl]]

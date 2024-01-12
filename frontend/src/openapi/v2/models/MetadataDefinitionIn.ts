@@ -3,6 +3,7 @@
 /* eslint-disable */
 
 import type { MetadataField } from './MetadataField';
+import type { MetadataRequiredForItems } from './MetadataRequiredForItems';
 
 /**
  * This describes a metadata object with a short name and description, predefined set of fields, and context.
@@ -42,6 +43,7 @@ import type { MetadataField } from './MetadataField';
                                 export type MetadataDefinitionIn = {
                                     name: string;
                                     description?: string;
+                                    required_for_items: MetadataRequiredForItems;
                                     created?: string;
                                     '@context'?: Array<string>;
                                     context_url?: string;
