@@ -10,3 +10,12 @@ class PageMetadata(BaseModel):
 class Paged(BaseModel):
     metadata: PageMetadata
     data: list
+
+
+def _get_page_query(skip, limit):
+    return {"$facet":
+        {
+            "metadata": [{"$count": "total_count"}],
+            "data": [{"$skip": skip}, {"$limit": limit}],
+        },
+    }

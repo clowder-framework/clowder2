@@ -50,7 +50,7 @@ from app.models.datasets import (
 from app.models.files import FileOut, FileDB, FileDBViewList, LocalFileIn, StorageType
 from app.models.folders import FolderOut, FolderIn, FolderDB, FolderDBViewList
 from app.models.metadata import MetadataDB
-from app.models.pages import Paged, PageMetadata
+from app.models.pages import Paged, PageMetadata, _get_page_query
 from app.models.pyobjectid import PyObjectId
 from app.models.thumbnails import ThumbnailDB
 from app.models.users import UserOut
@@ -217,17 +217,21 @@ async def get_datasets(
         admin_mode: bool = Depends(get_admin_mode),
 ):
     if admin and admin_mode:
-        datasets = await DatasetDBViewList.find(
+        datasets_and_count = await DatasetDBViewList.find(
             sort=(-DatasetDBViewList.created),
-            skip=skip,
-            limit=limit,
+        ).aggregate(
+            [
+                _get_page_query(skip, limit)
+            ],
         ).to_list()
     elif mine:
-        datasets = await DatasetDBViewList.find(
+        datasets_and_count = await DatasetDBViewList.find(
             DatasetDBViewList.creator.email == user_id,
             sort=(-DatasetDBViewList.created),
-            skip=skip,
-            limit=limit,
+        ).aggregate(
+            [
+                _get_page_query(skip, limit)
+            ],
         ).to_list()
     else:
         datasets_and_count = await DatasetDBViewList.find(Or(
@@ -236,19 +240,14 @@ async def get_datasets(
             DatasetDBViewList.status == DatasetStatus.AUTHENTICATED.name,
         ), sort=(-DatasetDBViewList.created)).aggregate(
             [
-                {"$facet":
-                    {
-                        "metadata": [{"$count": "total_count"}],
-                        "data": [{"$skip": skip}, {"$limit": limit}],
-                    },
-                }
+                _get_page_query(skip, limit)
             ],
-            # projection_model=Page
         ).to_list()
-        page = Paged(
-            metadata=PageMetadata(**datasets_and_count[0]['metadata'][0], skip=skip, limit=limit),
-            data=[DatasetOut(**item) for item in datasets_and_count[0]['data']]
-        )
+
+    page = Paged(
+        metadata=PageMetadata(**datasets_and_count[0]['metadata'][0], skip=skip, limit=limit),
+        data=[DatasetOut(**item) for item in datasets_and_count[0]['data']]
+    )
 
     return page.dict()
 
