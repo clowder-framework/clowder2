@@ -12,6 +12,7 @@ import type { FileOut } from '../models/FileOut';
 import type { FolderIn } from '../models/FolderIn';
 import type { FolderOut } from '../models/FolderOut';
 import type { LocalFileIn } from '../models/LocalFileIn';
+import type { Paged } from '../models/Paged';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { request as __request } from '../core/request';
 
@@ -23,7 +24,7 @@ export class DatasetsService {
      * @param limit
      * @param mine
      * @param datasetId
-     * @returns DatasetOut Successful Response
+     * @returns Paged Successful Response
      * @throws ApiError
      */
     public static getDatasetsApiV2DatasetsGet(
@@ -31,7 +32,7 @@ export class DatasetsService {
         limit: number = 10,
         mine: boolean = false,
         datasetId?: string,
-    ): CancelablePromise<Array<DatasetOut>> {
+    ): CancelablePromise<Paged> {
         return __request({
             method: 'GET',
             path: `/api/v2/datasets`,

@@ -54,6 +54,8 @@ export type { MetadataIn } from './models/MetadataIn';
 export type { MetadataOut } from './models/MetadataOut';
 export type { MetadataPatch } from './models/MetadataPatch';
 export type { MongoDBRef } from './models/MongoDBRef';
+export type { Paged } from './models/Paged';
+export type { PageMetadata } from './models/PageMetadata';
 export type { Repository } from './models/Repository';
 export { RoleType } from './models/RoleType';
 export type { SearchCriteria } from './models/SearchCriteria';

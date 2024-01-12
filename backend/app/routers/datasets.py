@@ -207,7 +207,7 @@ async def save_dataset(
     return dataset.dict()
 
 
-@router.get("")
+@router.get("", response_model=Paged)
 async def get_datasets(
         user_id=Depends(get_user),
         skip: int = 0,
