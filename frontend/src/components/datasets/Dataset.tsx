@@ -365,7 +365,7 @@ export const Dataset = (): JSX.Element => {
 									onClick={next}
 									disabled={nextDisabled}
 								>
-									Next <ArrowForward />
+										Next <ArrowForward />
 								</Button>
 							</ButtonGroup>
 						</Box>
