@@ -60,11 +60,11 @@ export const File = (): JSX.Element => {
 	const folderId = searchParams.get("folder");
 	const datasetId = searchParams.get("dataset");
 
-	const dispatch = useDispatch();
-
 	const listDatasetAbout = (datasetId: string | undefined) =>
 		dispatch(fetchDatasetAbout(datasetId));
 	const about = useSelector((state: RootState) => state.dataset.about);
+
+	const dispatch = useDispatch();
 	const listFileSummary = (fileId: string | undefined) =>
 		dispatch(fetchFileSummary(fileId));
 	const listFileVersions = (fileId: string | undefined) =>
@@ -316,6 +316,8 @@ export const File = (): JSX.Element => {
 						value={selectedTabIndex}
 						onChange={handleTabChange}
 						aria-label="file tabs"
+						variant="scrollable"
+						scrollButtons="auto"
 					>
 						<Tab
 							icon={<VisibilityIcon />}
@@ -325,62 +327,55 @@ export const File = (): JSX.Element => {
 							{...a11yProps(0)}
 							disabled={false}
 						/>
-						{versionEnabled ? (
-							<Tab
-								icon={<InsertDriveFile />}
-								iconPosition="start"
-								sx={TabStyle}
-								label="Version History"
-								{...a11yProps(1)}
-							/>
-						) : (
-							<></>
-						)}
 						<Tab
 							icon={<FormatListBulleted />}
 							iconPosition="start"
 							sx={TabStyle}
 							label="User Metadata"
-							{...a11yProps(2)}
+							{...a11yProps(1)}
 							disabled={false}
 						/>
 						<Tab
 							icon={<AssessmentIcon />}
 							iconPosition="start"
 							sx={TabStyle}
-							label="Extracted Metadata"
-							{...a11yProps(3)}
+							label="Machine Metadata"
+							{...a11yProps(2)}
 							disabled={false}
 						/>
 						<Tab
 							icon={<BuildIcon />}
 							iconPosition="start"
 							sx={TabStyle}
-							label="Extract"
-							{...a11yProps(4)}
+							label="Analysis"
+							{...a11yProps(3)}
 							disabled={false}
 						/>
 						<Tab
 							icon={<HistoryIcon />}
 							iconPosition="start"
 							sx={TabStyle}
-							label="Extraction History"
-							{...a11yProps(5)}
+							label="Analysis History"
+							{...a11yProps(4)}
 							disabled={false}
 						/>
+						{versionEnabled ? (
+							<Tab
+								icon={<InsertDriveFile />}
+								iconPosition="start"
+								sx={TabStyle}
+								label="Version History"
+								{...a11yProps(5)}
+							/>
+						) : (
+							<></>
+						)}
 					</Tabs>
 					<TabPanel value={selectedTabIndex} index={0}>
 						<Visualization fileId={fileId} />
 					</TabPanel>
 					{/*Version History*/}
 					<TabPanel value={selectedTabIndex} index={1}>
-						{fileVersions !== undefined ? (
-							<FileVersionHistory fileVersions={fileVersions} />
-						) : (
-							<></>
-						)}
-					</TabPanel>
-					<TabPanel value={selectedTabIndex} index={2}>
 						{enableAddMetadata ? (
 							<>
 								<EditMetadata
@@ -426,7 +421,7 @@ export const File = (): JSX.Element => {
 							</>
 						)}
 					</TabPanel>
-					<TabPanel value={selectedTabIndex} index={3}>
+					<TabPanel value={selectedTabIndex} index={2}>
 						<DisplayListenerMetadata
 							updateMetadata={updateFileMetadata}
 							deleteMetadata={deleteFileMetadata}
@@ -435,11 +430,18 @@ export const File = (): JSX.Element => {
 							version={fileSummary.version_num}
 						/>
 					</TabPanel>
-					<TabPanel value={selectedTabIndex} index={4}>
+					<TabPanel value={selectedTabIndex} index={3}>
 						<Listeners fileId={fileId} datasetId={datasetId} />
 					</TabPanel>
-					<TabPanel value={selectedTabIndex} index={5}>
+					<TabPanel value={selectedTabIndex} index={4}>
 						<ExtractionHistoryTab fileId={fileId} />
+					</TabPanel>
+					<TabPanel value={selectedTabIndex} index={5}>
+						{fileVersions !== undefined ? (
+							<FileVersionHistory fileVersions={fileVersions} />
+						) : (
+							<></>
+						)}
 					</TabPanel>
 				</Grid>
 				<Grid item xs={2}>
