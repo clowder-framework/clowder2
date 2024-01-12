@@ -50,6 +50,7 @@ from app.models.datasets import (
 from app.models.files import FileOut, FileDB, FileDBViewList, LocalFileIn, StorageType
 from app.models.folders import FolderOut, FolderIn, FolderDB, FolderDBViewList
 from app.models.metadata import MetadataDB
+from app.models.pages import Paged
 from app.models.pyobjectid import PyObjectId
 from app.models.thumbnails import ThumbnailDB
 from app.models.users import UserOut
@@ -237,16 +238,19 @@ async def get_datasets(
             [
                 {"$facet":
                     {
-                        "metadata": [{"$count": "totalCount"}],
+                        "metadata": [{"$count": "total_count"}],
                         "data": [{"$skip": skip}, {"$limit": limit}],
                     },
                 }
             ],
-            # projection_model=OutputItem
+            # projection_model=Page
         ).to_list()
-        datasets = datasets_and_count[0]["data"]
+        page = Paged(
+            metadata=datasets_and_count[0]['metadata'][0],
+            data=[DatasetOut(**item) for item in datasets_and_count[0]['data']]
+        )
 
-    return [dataset.dict() for dataset in datasets]
+    return page
 
 
 @router.get("/{dataset_id}", response_model=DatasetOut)
