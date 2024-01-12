@@ -15,6 +15,7 @@ export default function DeleteGroupModal(props: DeleteGroupModalProps) {
 	const { deleteGroupConfirmOpen, setDeleteGroupConfirmOpen, groupId } = props;
 	const history = useNavigate();
 	const dispatch = useDispatch();
+
 	const groupDeleted = (groupId: string | undefined) =>
 		dispatch(deleteGroup(groupId));
 	return (

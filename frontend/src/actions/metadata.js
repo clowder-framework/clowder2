@@ -94,11 +94,11 @@ export function deleteMetadataDefinition(metadataDefinitionId) {
 export const SEARCH_METADATA_DEFINITIONS = "SEARCH_METADATA_DEFINITIONS";
 
 export function searchMetadataDefinitions(searchTerm, skip, limit) {
-	if (searchTerm.trim() === '') {
-      // Search term is empty.
-      console.log('Please enter a search term');
-      return;
-    }
+	if (searchTerm.trim() === "") {
+		// Search term is empty.
+		console.log("Please enter a search term");
+		return;
+	}
 	return (dispatch) => {
 		return V2.MetadataService.searchMetadataDefinitionApiV2MetadataDefinitionSearchSearchTermGet(
 			searchTerm,

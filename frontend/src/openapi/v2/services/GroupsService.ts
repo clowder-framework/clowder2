@@ -18,12 +18,14 @@ export class GroupsService {
      * limit -- restrict number of records to be returned (i.e. for pagination)
      * @param skip
      * @param limit
+     * @param datasetId
      * @returns GroupOut Successful Response
      * @throws ApiError
      */
     public static getGroupsApiV2GroupsGet(
         skip?: number,
         limit: number = 10,
+        datasetId?: string,
     ): CancelablePromise<Array<GroupOut>> {
         return __request({
             method: 'GET',
@@ -31,6 +33,7 @@ export class GroupsService {
             query: {
                 'skip': skip,
                 'limit': limit,
+                'dataset_id': datasetId,
             },
             errors: {
                 422: `Validation Error`,
@@ -69,6 +72,7 @@ export class GroupsService {
      * @param searchTerm
      * @param skip
      * @param limit
+     * @param datasetId
      * @returns GroupOut Successful Response
      * @throws ApiError
      */
@@ -76,6 +80,7 @@ export class GroupsService {
         searchTerm: string,
         skip?: number,
         limit: number = 10,
+        datasetId?: string,
     ): CancelablePromise<Array<GroupOut>> {
         return __request({
             method: 'GET',
@@ -83,6 +88,7 @@ export class GroupsService {
             query: {
                 'skip': skip,
                 'limit': limit,
+                'dataset_id': datasetId,
             },
             errors: {
                 422: `Validation Error`,

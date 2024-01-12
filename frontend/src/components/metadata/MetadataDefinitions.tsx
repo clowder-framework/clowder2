@@ -49,6 +49,7 @@ export function MetadataDefinitions() {
 	const metadataDefinitions = useSelector(
 		(state: RootState) => state.metadata.metadataDefinitionList
 	);
+	const adminMode = useSelector((state: RootState) => state.user.adminMode);
 
 	// TODO add option to determine limit number; default show 5 metadata definitions each time
 	const [currPageNum, setCurrPageNum] = useState<number>(0);
@@ -82,6 +83,11 @@ export function MetadataDefinitions() {
 	useEffect(() => {
 		listMetadataDefinitions(null, skip, limit);
 	}, []);
+
+	// Admin mode will fetch all datasets
+	useEffect(() => {
+		listMetadataDefinitions(null, skip, limit);
+	}, [adminMode]);
 
 	useEffect(() => {
 		// disable flipping if reaches the last page

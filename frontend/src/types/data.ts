@@ -186,6 +186,7 @@ export interface UserState {
 	hashedKey: string;
 	apiKeys: UserAPIKeyOut[];
 	profile: UserOut;
+	adminMode: boolean;
 }
 
 export interface ErrorState {

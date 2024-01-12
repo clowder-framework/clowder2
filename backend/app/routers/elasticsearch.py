@@ -6,15 +6,20 @@ from fastapi.routing import APIRouter, Request
 from app.config import settings
 from app.keycloak_auth import get_current_username
 from app.routers.authentication import get_admin
+from app.routers.authentication import get_admin_mode
 from app.search.connect import connect_elasticsearch, search_index
 
 router = APIRouter()
 
 
-def _add_permissions_clause(query, username: str, admin: bool = Depends(get_admin)):
+def _add_permissions_clause(
+    query,
+    username: str,
+    admin_mode: bool,
+    admin: bool,
+):
     """Append filter to Elasticsearch object that restricts permissions based on the requesting user."""
     # TODO: Add public filter once added
-
     user_clause = {
         "bool": {
             "should": [
@@ -31,7 +36,7 @@ def _add_permissions_clause(query, username: str, admin: bool = Depends(get_admi
             continue  # last line
         json_content = json.loads(content)
         if "query" in json_content:
-            if admin:
+            if admin_mode and admin:
                 json_content["query"] = {"bool": {"must": [json_content["query"]]}}
             else:
                 json_content["query"] = {
@@ -42,9 +47,15 @@ def _add_permissions_clause(query, username: str, admin: bool = Depends(get_admi
 
 
 @router.put("/search", response_model=str)
-async def search(index_name: str, query: str, username=Depends(get_current_username)):
+async def search(
+    index_name: str,
+    query: str,
+    username=Depends(get_current_username),
+    admin=Depends(get_admin),
+    admin_mode: bool = Depends(get_admin_mode),
+):
     es = await connect_elasticsearch()
-    query = _add_permissions_clause(query, username)
+    query = _add_permissions_clause(query, username, admin, admin_mode)
     return search_index(es, index_name, query)
 
 
@@ -52,9 +63,11 @@ async def search(index_name: str, query: str, username=Depends(get_current_usern
 async def msearch(
     request: Request,
     username=Depends(get_current_username),
+    admin=Depends(get_admin),
+    admin_mode: bool = Depends(get_admin_mode),
 ):
     es = await connect_elasticsearch()
     query = await request.body()
-    query = _add_permissions_clause(query, username)
+    query = _add_permissions_clause(query, username, admin, admin_mode)
     r = search_index(es, [settings.elasticsearch_index], query)
     return r

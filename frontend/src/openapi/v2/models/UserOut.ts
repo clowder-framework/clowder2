@@ -21,4 +21,5 @@ export type UserOut = {
     last_name: string;
     id?: string;
     admin: boolean;
+    admin_mode?: boolean;
 }
