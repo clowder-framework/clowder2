@@ -25,6 +25,7 @@ def _add_permissions_clause(
             "should": [
                 {"term": {"creator": username}},
                 {"term": {"user_ids": username}},
+                {"term": {"status": "PUBLIC"}},
             ]
         }
     }
@@ -70,4 +71,8 @@ async def msearch(
     query = await request.body()
     query = _add_permissions_clause(query, username, admin, admin_mode)
     r = search_index(es, [settings.elasticsearch_index], query)
+    body = r.body
+    responses = body['responses']
+    response_zero = responses[0]
+    hits = response_zero['hits']
     return r
