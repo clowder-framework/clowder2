@@ -101,6 +101,23 @@ async def search_group(
     return [group.dict() for group in groups]
 
 
+@router.get("/prefixSearch", response_model=List[UserOut])
+async def prefix_search_group(
+    prefix: str,
+    skip: int = 0,
+    limit: int = 2,
+):
+    query_regx = f"^{prefix}.*"
+    groups = await UserDB.find(
+        Or(RegEx(field=GroupDB.name, pattern=query_regx)),
+        sort=(+GroupDB.name),
+        skip=skip,
+        limit=limit,
+    ).to_list()
+
+    return [group.dict() for group in groups]
+
+
 @router.get("/{group_id}", response_model=GroupOut)
 async def get_group(
     group_id: str,

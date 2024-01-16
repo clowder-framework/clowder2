@@ -392,6 +392,11 @@ interface SEARCH_GROUPS {
 	groups: Group[];
 }
 
+interface PREFIX_SEARCH_GROUPS {
+	type: "PREFIX_SEARCH_GROUPS";
+	groups: Group[];
+}
+
 interface DELETE_GROUP {
 	type: "DELETE_GROUP";
 	about: Group;
@@ -527,6 +532,7 @@ export type DataAction =
 	| CREATE_GROUP
 	| RECEIVE_GROUPS
 	| SEARCH_GROUPS
+	| PREFIX_SEARCH_GROUPS
 	| DELETE_GROUP
 	| RECEIVE_GROUP_ABOUT
 	| RECEIVE_GROUP_ROLE

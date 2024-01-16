@@ -20,11 +20,14 @@ import {
 	TextField,
 	Typography,
 } from "@mui/material";
-import { fetchGroups } from "../../actions/group";
+import {fetchGroups, prefixSearchGroups} from "../../actions/group";
 import { RootState } from "../../types/data";
 import { fetchDatasetRoles, setDatasetGroupRole } from "../../actions/dataset";
+import { prefixSearchGroups as prefixSearchGroupsAction } from "../../actions/group";
 import { useParams } from "react-router-dom";
 import CloseIcon from "@mui/icons-material/Close";
+import {GroupOut, UserOut} from "../../openapi/v2";
+import {prefixSearchAllUsers as prefixSearchAllUsersAction} from "../../actions/user";
 
 type ShareGroupDatasetModalProps = {
 	open: boolean;
@@ -42,7 +45,7 @@ export default function ShareGroupDatasetModal(
 	const [options, setOptions] = useState([]);
 	const [showSuccessAlert, setShowSuccessAlert] = useState(false);
 	const dispatch = useDispatch();
-	const listGroups = () => dispatch(fetchGroups(0, 21));
+	// const listGroups = () => dispatch(fetchGroups(0, 21));
 	const groups = useSelector((state: RootState) => state.group.groups);
 	const setGroupRole = async (
 		datasetId: string,
@@ -55,8 +58,13 @@ export default function ShareGroupDatasetModal(
 
 	// component did mount
 	useEffect(() => {
-		listGroups();
+		prefixSearchGroups("", 0, 10);
 	}, []);
+
+	// dynamically update the options when user search
+	useEffect(() => {
+		prefixSearchGroups(group.label, 0, 10);
+	}, [group]);
 
 	useEffect(() => {
 		setOptions(
@@ -97,11 +105,12 @@ export default function ShareGroupDatasetModal(
 							alignItems: "center",
 						}}
 					>
+						{/*AUTOCOMPLETE WONT WORK HERE*/}
 						<Autocomplete
-							id="email-auto-complete"
+							id="name-auto-complete"
 							freeSolo
 							autoHighlight
-							inputValue={group.name}
+							inputValue={group.label}
 							onChange={(event, value) => {
 								setGroup(value);
 							}}
