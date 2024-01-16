@@ -63,11 +63,13 @@ export const Visualization = (props: previewProps) => {
 		// if raw type supported
 		if (
 			fileSummary &&
-			((fileSummary.content_type && fileSummary.content_type.content_type !== undefined &&
-						// @ts-ignore
+			((fileSummary.content_type &&
+				fileSummary.content_type.content_type !== undefined &&
+				// @ts-ignore
 				supportedMimeType.includes(fileSummary.content_type.content_type)) ||
-				(fileSummary.content_type && fileSummary.content_type.main_type !== undefined &&
-							// @ts-ignore
+				(fileSummary.content_type &&
+					fileSummary.content_type.main_type !== undefined &&
+					// @ts-ignore
 					supportedMimeType.includes(fileSummary.content_type.main_type)))
 		) {
 			setIsRawDataSupported(true);
@@ -75,9 +77,12 @@ export const Visualization = (props: previewProps) => {
 			setIsRawDataSupported(false);
 		}
 
-		if (fileSummary &&
-			fileSummary.bytes && fileSummary.bytes >= config["rawDataVisualizationThreshold"]) {
-				setIsVisDataGreaterThanMaxSize(true);
+		if (
+			fileSummary &&
+			fileSummary.bytes &&
+			fileSummary.bytes >= config["rawDataVisualizationThreshold"]
+		) {
+			setIsVisDataGreaterThanMaxSize(true);
 		} else {
 			setIsVisDataGreaterThanMaxSize(false);
 		}
@@ -87,7 +92,7 @@ export const Visualization = (props: previewProps) => {
 
 	return (
 		<Grid container rowSpacing={1} columnSpacing={{ xs: 1, sm: 3, md: 3 }}>
-			{isEmptyVisData && !isRawDataSupported? (
+			{isEmptyVisData && !isRawDataSupported ? (
 				<div>
 					No visualization data or parameters available. Incomplete
 					visualization configuration.

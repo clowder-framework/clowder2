@@ -121,7 +121,10 @@ export function fetchFilesInDataset(datasetId, folderId, skip, limit) {
 			})
 			.catch((reason) => {
 				dispatch(
-					handleErrors(reason, fetchFilesInDataset(datasetId, folderId, skip, limit))
+					handleErrors(
+						reason,
+						fetchFilesInDataset(datasetId, folderId, skip, limit)
+					)
 				);
 			});
 	};
@@ -146,7 +149,10 @@ export function fetchFoldersInDataset(datasetId, parentFolder, skip, limit) {
 			})
 			.catch((reason) => {
 				dispatch(
-					handleErrors(reason, fetchFoldersInDataset(datasetId, parentFolder, skip, limit))
+					handleErrors(
+						reason,
+						fetchFoldersInDataset(datasetId, parentFolder, skip, limit)
+					)
 				);
 			});
 	};

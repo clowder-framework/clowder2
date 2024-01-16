@@ -12,7 +12,7 @@ from app.config import settings
 from app.deps.authorization_deps import Authorization
 from app.keycloak_auth import get_current_user, UserOut
 from app.models.datasets import DatasetOut, DatasetDB
-from app.models.listeners import LegacyEventListenerIn, EventListenerDB
+from app.models.listeners import EventListenerDB
 from app.models.metadata import (
     MongoDBRef,
     MetadataAgent,

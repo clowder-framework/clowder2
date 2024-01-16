@@ -42,6 +42,7 @@ export function Groups() {
 	) => dispatch(searchGroupsAction(searchTerm, skip, limit));
 
 	const groups = useSelector((state: RootState) => state.group.groups);
+	const adminMode = useSelector((state: RootState) => state.user.adminMode);
 
 	// TODO add option to determine limit number; default show 5 groups each time
 	const [currPageNum, setCurrPageNum] = useState<number>(0);
@@ -56,6 +57,10 @@ export function Groups() {
 	useEffect(() => {
 		listGroups(skip, limit);
 	}, []);
+
+	useEffect(() => {
+		listGroups(skip, limit);
+	}, [adminMode]);
 
 	useEffect(() => {
 		// disable flipping if reaches the last page
