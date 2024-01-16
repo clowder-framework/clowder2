@@ -61,9 +61,15 @@ spec:
             - name: MONGO_DATABASE
               value: {{ .Values.mongodb.database }}
             - name: CLOWDER2_URL
-              value: http://{{ .Values.hostname }}
+              value: {{ .Values.hostname }}
             - name: auth_base
               value: $(CLOWDER2_URL)
+            - name: auth_realm
+              value: {{ .Values.auth.realm }}
+            - name: auth_client_id
+              value: {{ .Values.auth.clientID }}
+            - name: auth_redirect_uri
+              value: {{ .Values.auth.redirectURI }}
             - name: auth_url
               value: $(CLOWDER2_URL)/keycloak/realms/clowder/protocol/openid-connect/auth?client_id=clowder2-backend&response_type=code
             - name: oauth2_scheme_auth_url
@@ -73,7 +79,7 @@ spec:
             - name: auth_token_url
               value: http://{{ include "clowder2.name" .}}-keycloak-headless:8080/keycloak/realms/clowder/protocol/openid-connect/token
             - name: auth_server_url
-              value: http://{{ include "clowder2.name" .}}-keycloak-headless:8080/keycloak/
+              value: {{ .Values.auth.server  }}
             - name: keycloak_base
               value: $(CLOWDER2_URL)/api
             - name: frontend_url
