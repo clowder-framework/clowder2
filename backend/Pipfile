@@ -26,6 +26,7 @@ rocrate = "0.7.0"
 httpx = "0.24.0"
 packaging = "23.1"
 itsdangerous = "2.1.2"
+pydantic = "==1.10.13"
 
 [dev-packages]
 requests = "2.28.2"
