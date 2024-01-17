@@ -80,7 +80,6 @@ const dataset = (state = defaultState, action: DataAction) => {
 			return Object.assign({}, state, { about: action.about });
 		case RECEIVE_DATASET_ROLE:
 			return Object.assign({}, state, { datasetRole: action.role });
-			return Object.assign({}, state, { datasetRole: action.role });
 		case RECEIVE_DATASET_ROLES:
 			return Object.assign({}, state, { roles: action.roles });
 		case UPDATE_DATASET:
