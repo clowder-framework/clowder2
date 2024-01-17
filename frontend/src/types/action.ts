@@ -22,14 +22,6 @@ import {
 	VisualizationConfigOut,
 	VisualizationDataOut,
 } from "../openapi/v2";
-import {
-	LIST_USERS,
-	PREFIX_SEARCH_USERS,
-	RECEIVE_USER_PROFILE,
-} from "../actions/user";
-import { CREATE_GROUP, DELETE_GROUP } from "../actions/group";
-import { RECEIVE_FILE_PRESIGNED_URL } from "../actions/file";
-import { GET_VIS_DATA_PRESIGNED_URL } from "../actions/visualization";
 
 interface RECEIVE_FILES_IN_DATASET {
 	type: "RECEIVE_FILES_IN_DATASET";
@@ -99,6 +91,16 @@ interface CHANGE_SELECTED_VERSION {
 interface SET_USER {
 	type: "SET_USER";
 	Authorization: string;
+}
+
+interface TOGGLE_ADMIN_MODE {
+	adminMode: boolean;
+	type: "TOGGLE_ADMIN_MODE";
+}
+
+interface GET_ADMIN_MODE_STATUS {
+	adminMode: boolean;
+	type: "GET_ADMIN_MODE_STATUS";
 }
 
 interface LOGIN_ERROR {
@@ -456,6 +458,8 @@ interface RESET_VIS_DATA_PRESIGNED_URL {
 }
 
 export type DataAction =
+	| GET_ADMIN_MODE_STATUS
+	| TOGGLE_ADMIN_MODE
 	| RECEIVE_FILES_IN_DATASET
 	| RECEIVE_FOLDERS_IN_DATASET
 	| DELETE_FILE

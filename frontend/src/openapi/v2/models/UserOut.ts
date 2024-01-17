@@ -19,4 +19,5 @@ export type UserOut = {
      */
     id?: string;
     admin: boolean;
+    admin_mode?: boolean;
 }

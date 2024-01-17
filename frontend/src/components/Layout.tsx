@@ -30,7 +30,12 @@ import { getCurrEmail } from "../utils/common";
 import VpnKeyIcon from "@mui/icons-material/VpnKey";
 import LogoutIcon from "@mui/icons-material/Logout";
 import { EmbeddedSearch } from "./search/EmbeddedSearch";
-import { fetchUserProfile } from "../actions/user";
+import {
+	fetchUserProfile,
+	getAdminModeStatus as getAdminModeStatusAction,
+	toggleAdminMode as toggleAdminModeAction,
+} from "../actions/user";
+import { AdminPanelSettings } from "@mui/icons-material";
 import ManageAccountsIcon from "@mui/icons-material/ManageAccounts";
 
 const drawerWidth = 240;
@@ -99,15 +104,25 @@ const link = {
 };
 
 export default function PersistentDrawerLeft(props) {
+	const dispatch = useDispatch();
 	const { children } = props;
 	const theme = useTheme();
 	const [open, setOpen] = React.useState(false);
 	const [embeddedSearchHidden, setEmbeddedSearchHidden] = React.useState(false);
 	const [anchorEl, setAnchorEl] = React.useState(null);
 	const isMenuOpen = Boolean(anchorEl);
-	const profile = useSelector((state: RootState) => state.user.profile);
-	const dispatch = useDispatch();
-	const fetchProfile = () => dispatch(fetchUserProfile());
+	const currUserProfile = useSelector((state: RootState) => state.user.profile);
+	const adminMode = useSelector((state: RootState) => state.user.adminMode);
+
+	const fetchCurrUserProfile = () => dispatch(fetchUserProfile());
+	const toggleAdminMode = (adminModeOn: boolean) =>
+		dispatch(toggleAdminModeAction(adminModeOn));
+	const getAdminModeStatus = () => dispatch(getAdminModeStatusAction());
+
+	useEffect(() => {
+		fetchCurrUserProfile();
+		getAdminModeStatus();
+	}, []);
 
 	const handleDrawerOpen = () => {
 		setOpen(true);
@@ -133,7 +148,7 @@ export default function PersistentDrawerLeft(props) {
 		} else {
 			setEmbeddedSearchHidden(false);
 		}
-		fetchProfile();
+		fetchCurrUserProfile();
 	}, [location]);
 
 	const loggedOut = useSelector((state: RootState) => state.error.loggedOut);
@@ -223,6 +238,32 @@ export default function PersistentDrawerLeft(props) {
 						<ListItemText>User Profile</ListItemText>
 					</MenuItem>
 					<Divider orientation="horizontal" />
+					{currUserProfile.admin ? (
+						<>
+							<MenuItem onClick={() => toggleAdminMode(!adminMode)}>
+								{adminMode ? (
+									<>
+										<ListItemIcon>
+											<AdminPanelSettings fontSize="small" />
+										</ListItemIcon>
+										<ListItemText>Drop Admin Mode</ListItemText>
+									</>
+								) : (
+									<>
+										<ListItemIcon>
+											<AdminPanelSettings fontSize="small" />
+										</ListItemIcon>
+										<ListItemText>Enable Admin Mode</ListItemText>
+									</>
+								)}
+							</MenuItem>
+
+							<Divider orientation="horizontal" />
+						</>
+					) : (
+						<></>
+					)}
+
 					<MenuItem component={RouterLink} to="/apikeys">
 						<ListItemIcon>
 							<VpnKeyIcon fontSize="small" />
@@ -284,7 +325,7 @@ export default function PersistentDrawerLeft(props) {
 					</ListItem>
 				</List>
 				<Divider />
-				{profile.admin ? (
+				{currUserProfile.admin ? (
 					<>
 						<List>
 							<ListItem key={"manage-user"} disablePadding>

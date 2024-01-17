@@ -13,9 +13,12 @@ import { SearchResult } from "./SearchResult";
 import { searchTheme, theme } from "../../theme";
 import config from "../../app.config";
 import Cookies from "universal-cookie";
+import { useSelector } from "react-redux";
+import { RootState } from "../../types/data";
 
 export function Search() {
 	const [luceneOn, setLuceneOn] = useState(false);
+
 	const cookies = new Cookies();
 	const [authorizationHeader, setAuthorizationHeader] = useState({
 		Authorization: cookies.get("Authorization"),
@@ -33,6 +36,9 @@ export function Search() {
 		);
 		return () => clearInterval(intervalId);
 	}, []);
+
+	// toggle super admin
+	const adminMode = useSelector((state: RootState) => state.user.adminMode);
 
 	// @ts-ignore
 	return (
