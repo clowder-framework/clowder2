@@ -33,9 +33,11 @@ FIELD_TYPES = {
     "tuple": tuple,
 }  # JSON schema can handle this for us?
 
+
 class MetadataRequiredForItems(BaseModel):
     datasets: bool = False
     files: bool = False
+
 
 class MetadataConfig(BaseModel):
     type: str = "str"  # must be one of FIELD_TYPES

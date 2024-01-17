@@ -303,7 +303,9 @@ class EventListenerJobUpdateViewList(View, EventListenerJobUpdateBase):
                         {
                             "$lookup": {
                                 "from": "authorization",
-                                "localField": "listener_job_details.resource_ref.resource_id",
+                                "localField": (
+                                    "listener_job_details.resource_ref.resource_id"
+                                ),
                                 "foreignField": "dataset_id",
                                 "as": "auth",
                             }
@@ -320,7 +322,9 @@ class EventListenerJobUpdateViewList(View, EventListenerJobUpdateBase):
                         {
                             "$lookup": {
                                 "from": "files",
-                                "localField": "listener_job_details.resource_ref.resource_id",
+                                "localField": (
+                                    "listener_job_details.resource_ref.resource_id"
+                                ),
                                 "foreignField": "_id",
                                 "as": "file_details",
                             }
