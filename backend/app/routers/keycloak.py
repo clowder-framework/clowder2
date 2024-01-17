@@ -33,14 +33,13 @@ async def register() -> RedirectResponse:
 @router.get("/login")
 async def login() -> RedirectResponse:
     """Redirect to keycloak login page."""
-    kc_auth_url = keycloak_openid.auth_url(
-            redirect_uri=settings.auth_redirect_uri,
-            scope="openid email",
-            state=token_urlsafe(30*3//4)
+    return RedirectResponse(
+            keycloak_openid.auth_url(
+                redirect_uri=settings.auth_redirect_uri,
+                scope="openid email",
+                state=token_urlsafe(32) 
+            )
         )
-    
-    print(kc_auth_url)
-    return RedirectResponse(kc_auth_url)
 
 
 @router.get("/logout")
@@ -113,7 +112,7 @@ async def auth(code: str) -> RedirectResponse:
         code=code,
         redirect_uri=settings.auth_redirect_uri,
     )
-    print(token_body)
+
     access_token = token_body["access_token"]
 
     # create user in db if it doesn't already exist; get the user_id
@@ -159,12 +158,12 @@ async def auth(code: str) -> RedirectResponse:
 
     # redirect to frontend
     auth_url = f"{settings.frontend_url}/auth"
-    print(auth_url)
+
     response = RedirectResponse(url=auth_url)
-    print(response)
+
     response.set_cookie("Authorization", value=f"Bearer {access_token}")
     logger.info(f"Authenticated by keycloak. Redirecting to {auth_url}")
-    print('here')
+
     return response
 
 
