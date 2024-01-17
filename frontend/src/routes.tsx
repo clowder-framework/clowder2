@@ -23,7 +23,12 @@ import { Search } from "./components/search/Search";
 import { isAuthorized } from "./utils/common";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "./types/data";
-import { refreshToken, resetLogout } from "./actions/common";
+import {
+	refreshToken,
+	resetFailedReason,
+	resetFailedReasonInline,
+	resetLogout,
+} from "./actions/common";
 import { Explore } from "./components/Explore";
 import {Public} from "./components/Public";
 import { ExtractionHistory } from "./components/listeners/ExtractionHistory";
@@ -32,6 +37,7 @@ import { PageNotFound } from "./components/errors/PageNotFound";
 import { Forbidden } from "./components/errors/Forbidden";
 import { ApiKeys } from "./components/ApiKeys/ApiKey";
 import { Profile } from "./components/users/Profile";
+import { ManageUsers } from "./components/users/ManageUsers";
 import config from "./app.config";
 import { MetadataDefinitions } from "./components/metadata/MetadataDefinitions";
 import { MetadataDefinitionEntry } from "./components/metadata/MetadataDefinitionEntry";
@@ -76,11 +82,17 @@ const PrivateRoute = (props): JSX.Element => {
 		}
 	}, [loggedOut]);
 
-	// not found or unauthorized
+	// not found or unauthorized redirect
 	useEffect(() => {
 		if (reason == "Forbidden") {
+			// if redirect to new page, reset error so the error modal/message doesn't stuck in "Forbidden" state
+			dispatch(resetFailedReason());
+			dispatch(resetFailedReasonInline());
 			history("/forbidden");
 		} else if (reason == "Not Found") {
+			// if redirect to new page, reset error so the error modal/message doesn't stuck in "Forbidden" state
+			dispatch(resetFailedReason());
+			dispatch(resetFailedReasonInline());
 			history("/not-found");
 		}
 	}, [reason]);
@@ -130,6 +142,14 @@ export const AppRoutes = (): JSX.Element => {
 					element={
 						<PrivateRoute>
 							<Profile />
+						</PrivateRoute>
+					}
+				/>
+				<Route
+					path="/manage-users"
+					element={
+						<PrivateRoute>
+							<ManageUsers />
 						</PrivateRoute>
 					}
 				/>

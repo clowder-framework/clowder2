@@ -1,6 +1,5 @@
 from beanie import PydanticObjectId
 from beanie.operators import Or
-from bson import ObjectId
 from fastapi import Depends, HTTPException
 
 from app.keycloak_auth import get_current_username
@@ -11,6 +10,7 @@ from app.models.groups import GroupOut, GroupDB
 from app.models.metadata import MetadataDB
 from app.models.pyobjectid import PyObjectId
 from app.routers.authentication import get_admin
+from app.routers.authentication import get_admin_mode
 
 
 async def check_public_access(
@@ -43,9 +43,14 @@ async def check_public_access(
 async def get_role(
     dataset_id: str,
     current_user=Depends(get_current_username),
+    admin_mode: bool = Depends(get_admin_mode),
+    admin=Depends(get_admin),
 ) -> RoleType:
     """Returns the role a specific user has on a dataset. If the user is a creator (owner), they are not listed in
     the user_ids list."""
+    if admin and admin_mode:
+        return RoleType.OWNER
+
     authorization = await AuthorizationDB.find_one(
         AuthorizationDB.dataset_id == PyObjectId(dataset_id),
         Or(
@@ -59,7 +64,12 @@ async def get_role(
 async def get_role_by_file(
     file_id: str,
     current_user=Depends(get_current_username),
+    admin_mode: bool = Depends(get_admin_mode),
+    admin=Depends(get_admin),
 ) -> RoleType:
+    if admin and admin_mode:
+        return RoleType.OWNER
+
     if (file := await FileDB.get(PydanticObjectId(file_id))) is not None:
         authorization = await AuthorizationDB.find_one(
             AuthorizationDB.dataset_id == file.dataset_id,
@@ -68,25 +78,37 @@ async def get_role_by_file(
                 AuthorizationDB.user_ids == current_user,
             ),
         )
-        public_access = await check_public_access(
-            file_id, "file", RoleType.VIEWER, current_user
-        )
-        if authorization is None and public_access:
-            return RoleType.VIEWER
-        elif authorization is not None:
-            return authorization.role
-        else:
-            raise HTTPException(
-                status_code=403,
-                detail=f"User `{current_user} does not have role on file {file_id}",
-            )
+        if authorization is None:
+            if (
+                dataset := await DatasetDB.get(PydanticObjectId(file.dataset_id))
+            ) is not None:
+                if dataset.status == DatasetStatus.AUTHENTICATED.name:
+                    auth_dict = {
+                        "creator": dataset.author.email,
+                        "dataset_id": file.dataset_id,
+                        "user_ids": [current_user],
+                        "role": RoleType.VIEWER,
+                    }
+                    authenticated_auth = AuthorizationDB(**auth_dict)
+                    return authenticated_auth
+                else:
+                    raise HTTPException(
+                        status_code=403,
+                        detail=f"User `{current_user} does not have role on file {file_id}",
+                    )
+        return authorization.role
     raise HTTPException(status_code=404, detail=f"File {file_id} not found")
 
 
 async def get_role_by_metadata(
     metadata_id: str,
     current_user=Depends(get_current_username),
+    admin_mode: bool = Depends(get_admin_mode),
+    admin=Depends(get_admin),
 ) -> RoleType:
+    if admin and admin_mode:
+        return RoleType.OWNER
+
     if (md_out := await MetadataDB.get(PydanticObjectId(metadata_id))) is not None:
         resource_type = md_out.resource.collection
         resource_id = md_out.resource.resource_id
@@ -117,7 +139,12 @@ async def get_role_by_metadata(
 async def get_role_by_group(
     group_id: str,
     current_user=Depends(get_current_username),
+    admin_mode: bool = Depends(get_admin_mode),
+    admin=Depends(get_admin),
 ) -> RoleType:
+    if admin and admin_mode:
+        return RoleType.OWNER
+
     if (group := await GroupDB.get(group_id)) is not None:
         if group.creator == current_user:
             # Creator can do everything
@@ -168,12 +195,13 @@ class Authorization:
         self,
         dataset_id: str,
         current_user: str = Depends(get_current_username),
+        admin_mode: bool = Depends(get_admin_mode),
         admin: bool = Depends(get_admin),
     ):
         # TODO: Make sure we enforce only one role per user per dataset, or find_one could yield wrong answer here.
 
-        # If the current user is admin, user has access irrespective of any role assigned
-        if admin:
+        # If the current user is admin and has turned on admin_mode, user has access irrespective of any role assigned
+        if admin and admin_mode:
             return True
 
         # Else check role assigned to the user
@@ -225,10 +253,11 @@ class FileAuthorization:
         self,
         file_id: str,
         current_user: str = Depends(get_current_username),
+        admin_mode: bool = Depends(get_admin_mode),
         admin: bool = Depends(get_admin),
     ):
-        # If the current user is admin, user has access irrespective of any role assigned
-        if admin:
+        # If the current user is admin and has turned on admin_mode, user has access irrespective of any role assigned
+        if admin and admin_mode:
             return True
 
         # Else check role assigned to the user
@@ -248,15 +277,7 @@ class FileAuthorization:
                     detail=f"User `{current_user} does not have `{self.role}` permission on file {file_id}",
                 )
             else:
-                public_access = await check_public_access(
-                    file_id, "file", self.role, current_user
-                )
-                if public_access:
-                    return public_access
-                else:
-                    raise HTTPException(
-                        status_code=404, detail=f"File {file_id} not found"
-                    )
+                raise HTTPException(status_code=404, detail=f"File {file_id} not found")
 
 
 class MetadataAuthorization:
@@ -270,10 +291,11 @@ class MetadataAuthorization:
         self,
         metadata_id: str,
         current_user: str = Depends(get_current_username),
+        admin_mode: bool = Depends(get_admin_mode),
         admin: bool = Depends(get_admin),
     ):
-        # If the current user is admin, user has access irrespective of any role assigned
-        if admin:
+        # If the current user is admin and has turned on admin_mode, user has access irrespective of any role assigned
+        if admin and admin_mode:
             return True
 
         # Else check role assigned to the user
@@ -336,10 +358,11 @@ class GroupAuthorization:
         self,
         group_id: str,
         current_user: str = Depends(get_current_username),
+        admin_mode: bool = Depends(get_admin_mode),
         admin: bool = Depends(get_admin),
     ):
-        # If the current user is admin, user has access irrespective of any role assigned
-        if admin:
+        # If the current user is admin and has turned on admin_mode, user has access irrespective of any role assigned
+        if admin and admin_mode:
             return True
 
         # Else check role assigned to the user
@@ -372,10 +395,7 @@ class CheckStatus:
         dataset_id: str,
     ):
         if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
-            if (
-                dataset.status == self.status
-                or dataset.status == DatasetStatus.PUBLIC.name
-            ):
+            if dataset.status == self.status:
                 return True
             else:
                 return False
@@ -399,10 +419,7 @@ class CheckFileStatus:
             if (
                 dataset := await DatasetDB.get(PydanticObjectId(dataset_id))
             ) is not None:
-                if (
-                    dataset.status == self.status
-                    or dataset.status == DatasetStatus.PUBLIC.name
-                ):
+                if dataset.status == self.status:
                     return True
                 else:
                     return False
@@ -412,9 +429,14 @@ class CheckFileStatus:
             return False
 
 
-def access(user_role: RoleType, role_required: RoleType) -> bool:
-    """Enforce implied role hierarchy OWNER > EDITOR > UPLOADER > VIEWER"""
-    if user_role == RoleType.OWNER:
+def access(
+    user_role: RoleType,
+    role_required: RoleType,
+    admin_mode: bool = Depends(get_admin_mode),
+    admin: bool = Depends(get_admin),
+) -> bool:
+    """Enforce implied role hierarchy ADMIN = OWNER > EDITOR > UPLOADER > VIEWER"""
+    if user_role == RoleType.OWNER or (admin and admin_mode):
         return True
     elif user_role == RoleType.EDITOR and role_required in [
         RoleType.EDITOR,

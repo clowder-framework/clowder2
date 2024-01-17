@@ -8,6 +8,18 @@ import {fetchPublicFileMetadata} from "../../actions/public_file";
 import {fetchPublicDatasetMetadata} from "../../actions/public_dataset";
 import {Agent} from "./Agent";
 import {MetadataDeleteButton} from "./widgets/MetadataDeleteButton";
+import React, { useEffect } from "react";
+import { Box, Grid, Typography } from "@mui/material";
+import { metadataConfig } from "../../metadata.config";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "../../types/data";
+import {
+	fetchDatasetMetadata,
+	fetchFileMetadata,
+	fetchMetadataDefinitions,
+} from "../../actions/metadata";
+import { Agent } from "./Agent";
+import { MetadataDeleteButton } from "./widgets/MetadataDeleteButton";
 
 type MetadataType = {
 	updateMetadata: any,
@@ -27,6 +39,24 @@ export const DisplayMetadata = (props: MetadataType) => {
 
 	const dispatch = useDispatch();
 
+	const getMetadatDefinitions = (
+		name: string | null,
+		skip: number,
+		limit: number
+	) => dispatch(fetchMetadataDefinitions(name, skip, limit));
+	const metadataDefinitionList = useSelector(
+		(state: RootState) => state.metadata.metadataDefinitionList
+	);
+	const listDatasetMetadata = (datasetId: string | undefined) =>
+		dispatch(fetchDatasetMetadata(datasetId));
+	const listFileMetadata = (fileId: string | undefined) =>
+		dispatch(fetchFileMetadata(fileId));
+	const datasetMetadataList = useSelector(
+		(state: RootState) => state.metadata.datasetMetadataList
+	);
+	const fileMetadataList = useSelector(
+		(state: RootState) => state.metadata.fileMetadataList
+	);
 	const getMetadatDefinitions = (name:string|null, skip:number, limit:number) => dispatch(fetchMetadataDefinitions(name, skip,limit));
 	const metadataDefinitionList = useSelector((state: RootState) => state.metadata.metadataDefinitionList);
 	const listDatasetMetadata = (datasetId: string | undefined) => dispatch(fetchDatasetMetadata(datasetId));
@@ -42,7 +72,7 @@ export const DisplayMetadata = (props: MetadataType) => {
 	const datasetRole = useSelector(
 		(state: RootState) => state.dataset.datasetRole
 	);
-	console.log(updateMetadata, 'updateMetadataDisplay');
+	console.log(updateMetadata, "updateMetadataDisplay");
 	useEffect(() => {
 		getMetadatDefinitions(null, 0, 100);
 	}, []);
@@ -67,63 +97,67 @@ export const DisplayMetadata = (props: MetadataType) => {
 
 	return (
 		<>
-			{
-				(() => {
-					let metadataList = [];
-					if (resourceType === "dataset" && !publicView) metadataList = datasetMetadataList;
-					else if (resourceType === "file" && !publicView) metadataList = fileMetadataList;
-					else if (resourceType === "file" && publicView) metadataList = publicFileMetadataList;
-					else if (resourceType === "dataset" && publicView) metadataList = publicDatasetMetadataList;
-					return metadataDefinitionList.map((metadataDef) => {
-						return metadataList.map((metadata,idx) => {
-							if (metadataDef.name === metadata.definition) {
-								return (
-									<Box className="inputGroup" key={idx}>
-										<Typography variant="h6">{metadata.definition}</Typography>
-										<Typography variant="subtitle2">{metadata.description}</Typography>
-										{
-											// construct metadata using its definition
-											metadataDef.fields.map((field,idxx) => {
-												return React.cloneElement(
-													metadataConfig[field.widgetType ?? "NA"] ?? metadataConfig["NA"],
-													{
-														widgetName: metadataDef.name,
-														fieldName: field.name,
-														options: field.config.options ?? [],
-														updateMetadata: updateMetadata,
-														initialReadOnly: true,
-														resourceId: resourceId,
-														content: metadata.content ?? null,
-														metadataId: metadata.id ?? null,
-														isRequired: field.required,
-														key:idxx
-													}
-												);
-											})
-										}
-										<Grid container spacing={2}>
-											{publicView?
-												(
-													<></>
-												) :
-												<Grid item xs={11} sm={11} md={11} lg={11} xl={11}>
-													<Agent created={metadata.created} agent={metadata.agent} />
-													<MetadataDeleteButton metadataId={metadata.id ?? null}
-																	  deleteMetadata={deleteMetadata}
-																	  resourceId={resourceId}
-																	  widgetName={metadataDef.name}
-													/>
-												</Grid>
-											}
-										</Grid>
-									</Box>
-								);
-							}
-						});
+			{(() => {
+				let metadataList = [];
+				if (resourceType === "dataset") metadataList = datasetMetadataList;
+				else if (resourceType === "file") metadataList = fileMetadataList;
 
+				return metadataDefinitionList.map((metadataDef) => {
+					return metadataList.map((metadata, idx) => {
+						if (metadataDef.name === metadata.definition) {
+							return (
+								<Box className="inputGroup" key={idx}>
+									<Typography variant="h6">{metadata.definition}</Typography>
+									<Typography variant="subtitle2">
+										{metadata.description}
+									</Typography>
+									{
+										// construct metadata using its definition
+										metadataDef.fields.map((field, idxx) => {
+											return React.cloneElement(
+												metadataConfig[field.widgetType ?? "NA"] ??
+													metadataConfig["NA"],
+												{
+													widgetName: metadataDef.name,
+													fieldName: field.name,
+													options: field.config.options ?? [],
+													updateMetadata: updateMetadata,
+													initialReadOnly: true,
+													resourceId: resourceId,
+													content: metadata.content ?? null,
+													metadataId: metadata.id ?? null,
+													isRequired: field.required,
+													key: idxx,
+													datasetRole: datasetRole,
+												}
+											);
+										})
+									}
+									<Grid container spacing={2}>
+										<Grid item xs={11} sm={11} md={11} lg={11} xl={11}>
+											<Agent
+												created={metadata.created}
+												agent={metadata.agent}
+											/>
+											{datasetRole.role !== undefined &&
+											datasetRole.role !== "viewer" ? (
+												<MetadataDeleteButton
+													metadataId={metadata.id ?? null}
+													deleteMetadata={deleteMetadata}
+													resourceId={resourceId}
+													widgetName={metadataDef.name}
+												/>
+											) : (
+												<></>
+											)}
+										</Grid>
+									</Grid>
+								</Box>
+							);
+						}
 					});
-				})()
-			}
+				});
+			})()}
 		</>
 	);
 };

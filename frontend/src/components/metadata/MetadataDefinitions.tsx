@@ -8,7 +8,7 @@ import {
 	DialogTitle,
 	Grid,
 	IconButton,
-	InputBase, Snackbar,
+	Snackbar,
 } from "@mui/material";
 import { RootState } from "../../types/data";
 import { useDispatch, useSelector } from "react-redux";
@@ -49,6 +49,7 @@ export function MetadataDefinitions() {
 	const metadataDefinitions = useSelector(
 		(state: RootState) => state.metadata.metadataDefinitionList
 	);
+	const adminMode = useSelector((state: RootState) => state.user.adminMode);
 
 	// TODO add option to determine limit number; default show 5 metadata definitions each time
 	const [currPageNum, setCurrPageNum] = useState<number>(0);
@@ -66,7 +67,7 @@ export function MetadataDefinitions() {
 	const [selectedMetadataDefinition, setSelectedMetadataDefinition] =
 		useState();
 
-		// snack bar
+	// snack bar
 	const [snackBarOpen, setSnackBarOpen] = useState(false);
 	const [snackBarMessage, setSnackBarMessage] = useState("");
 
@@ -82,6 +83,11 @@ export function MetadataDefinitions() {
 	useEffect(() => {
 		listMetadataDefinitions(null, skip, limit);
 	}, []);
+
+	// Admin mode will fetch all datasets
+	useEffect(() => {
+		listMetadataDefinitions(null, skip, limit);
+	}, [adminMode]);
 
 	useEffect(() => {
 		// disable flipping if reaches the last page
@@ -163,124 +169,128 @@ export function MetadataDefinitions() {
 					/>
 				</DialogContent>
 			</Dialog>
-			<Grid container>
-				<Grid item xs={8}></Grid>
-				<Grid item xs={4}>
-					<Button
-						variant="contained"
-						onClick={() => {
-							setCreateMetadataDefinitionOpen(true);
-						}}
-						endIcon={<InfoIcon />}
-						sx={{ float: "right" }}
-					>
-						New Metadata Definition
-					</Button>
+			<div className="outer-container">
+				<Grid container>
+					<Grid item xs={8}></Grid>
+					<Grid item xs={4}>
+						<Button
+							variant="contained"
+							onClick={() => {
+								setCreateMetadataDefinitionOpen(true);
+							}}
+							endIcon={<InfoIcon />}
+							sx={{ float: "right" }}
+						>
+							New Metadata Definition
+						</Button>
+					</Grid>
 				</Grid>
-			</Grid>
-			<br />
-			<Grid container spacing={2}>
-				<Grid item xs={12}>
-					<GenericSearchBox
-						title="Search for Metadata Definitions"
-						searchPrompt="keyword for metadata definition"
-						setSearchTerm={setSearchTerm}
-						searchTerm={searchTerm}
-						searchFunction={searchMetadataDefinitions}
-						skip={skip}
-						limit={limit}
-					/>
-				</Grid>
-				<Grid item xs={12}>
-					<TableContainer component={Paper}>
-						<Table sx={{ minWidth: 650 }} aria-label="simple table">
-							<TableHead>
-								<TableRow>
-									<TableCell
-										sx={{
-											fontWeight: 600,
-										}}
-									>
-										Metadata Definition
-									</TableCell>
-									<TableCell
-										sx={{
-											fontWeight: 600,
-										}}
-										align="left"
-									>
-										Description
-									</TableCell>
-									<TableCell align="left"></TableCell>
-								</TableRow>
-							</TableHead>
-							<TableBody>
-								{metadataDefinitions.map((mdd) => {
-									return (
-										<TableRow
-											key={mdd.id}
-											sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
+				<br />
+				<Grid container spacing={2}>
+					<Grid item xs={12}>
+						<GenericSearchBox
+							title="Search for Metadata Definitions"
+							searchPrompt="keyword for metadata definition"
+							setSearchTerm={setSearchTerm}
+							searchTerm={searchTerm}
+							searchFunction={searchMetadataDefinitions}
+							skip={skip}
+							limit={limit}
+						/>
+					</Grid>
+					<Grid item xs={12}>
+						<TableContainer component={Paper}>
+							<Table sx={{ minWidth: 650 }} aria-label="simple table">
+								<TableHead>
+									<TableRow>
+										<TableCell
+											sx={{
+												fontWeight: 600,
+											}}
 										>
-											<TableCell scope="row" key={`${mdd.id}-name`}>
-												<Button
-													component={Link}
-													to={`/metadata-definitions/${mdd.id}`}
-												>
-													{mdd.name}
-												</Button>
-											</TableCell>
-											<TableCell
-												scope="row"
-												key={`${mdd.id}-description`}
-												align="left"
+											Metadata Definition
+										</TableCell>
+										<TableCell
+											sx={{
+												fontWeight: 600,
+											}}
+											align="left"
+										>
+											Description
+										</TableCell>
+										<TableCell align="left"></TableCell>
+									</TableRow>
+								</TableHead>
+								<TableBody>
+									{metadataDefinitions.map((mdd) => {
+										return (
+											<TableRow
+												key={mdd.id}
+												sx={{
+													"&:last-child td, &:last-child th": { border: 0 },
+												}}
 											>
-												{mdd.description}
-											</TableCell>
-											<TableCell
-												scope="row"
-												key={`${mdd.id}-delete`}
-												align="left"
-											>
-												<IconButton
-													aria-label="delete"
-													size="small"
-													onClick={() => {
-														setSelectedMetadataDefinition(mdd.id);
-														setDeleteMetadataDefinitionConfirmOpen(true);
-													}}
+												<TableCell scope="row" key={`${mdd.id}-name`}>
+													<Button
+														component={Link}
+														to={`/metadata-definitions/${mdd.id}`}
+													>
+														{mdd.name}
+													</Button>
+												</TableCell>
+												<TableCell
+													scope="row"
+													key={`${mdd.id}-description`}
+													align="left"
 												>
-													<DeleteIcon fontSize="small" />
-												</IconButton>
-											</TableCell>
-										</TableRow>
-									);
-								})}
-							</TableBody>
-						</Table>
-						<Box display="flex" justifyContent="center" sx={{ m: 1 }}>
-							<ButtonGroup
-								variant="contained"
-								aria-label="previous next buttons"
-							>
-								<Button
-									aria-label="previous"
-									onClick={previous}
-									disabled={prevDisabled}
+													{mdd.description}
+												</TableCell>
+												<TableCell
+													scope="row"
+													key={`${mdd.id}-delete`}
+													align="left"
+												>
+													<IconButton
+														aria-label="delete"
+														size="small"
+														onClick={() => {
+															setSelectedMetadataDefinition(mdd.id);
+															setDeleteMetadataDefinitionConfirmOpen(true);
+														}}
+													>
+														<DeleteIcon fontSize="small" />
+													</IconButton>
+												</TableCell>
+											</TableRow>
+										);
+									})}
+								</TableBody>
+							</Table>
+							<Box display="flex" justifyContent="center" sx={{ m: 1 }}>
+								<ButtonGroup
+									variant="contained"
+									aria-label="previous next buttons"
 								>
-									<ArrowBack /> Prev
-								</Button>
-								<Button
-									aria-label="next"
-									onClick={next}
-									disabled={nextDisabled}
-								>
-									Next <ArrowForward />
-								</Button>
-							</ButtonGroup>
-						</Box>
-					</TableContainer>
+									<Button
+										aria-label="previous"
+										onClick={previous}
+										disabled={prevDisabled}
+									>
+										<ArrowBack /> Prev
+									</Button>
+									<Button
+										aria-label="next"
+										onClick={next}
+										disabled={nextDisabled}
+									>
+										Next <ArrowForward />
+									</Button>
+								</ButtonGroup>
+							</Box>
+						</TableContainer>
+					</Grid>
 				</Grid>
-			</Grid>
+			</div>
 		</Layout>
 	);
 }

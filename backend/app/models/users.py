@@ -24,6 +24,9 @@ class UserLogin(BaseModel):
 
 
 class UserDoc(Document, UserBase):
+    admin: bool
+    admin_mode: bool = False
+
     class Settings:
         name = "users"
 
@@ -31,7 +34,6 @@ class UserDoc(Document, UserBase):
 class UserDB(UserDoc):
     hashed_password: str = Field()
     keycloak_id: Optional[str] = None
-    admin: bool
 
     def verify_password(self, password):
         return pwd_context.verify(password, self.hashed_password)

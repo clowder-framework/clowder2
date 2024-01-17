@@ -62,7 +62,8 @@ from app.models.thumbnails import ThumbnailDB
 from app.models.users import UserOut
 from app.rabbitmq.listeners import submit_dataset_job
 from app.routers.authentication import get_admin
-from app.routers.files import add_file_entry, add_local_file_entry, remove_file_entry
+from app.routers.authentication import get_admin_mode
+from app.routers.files import add_file_entry, remove_file_entry, add_local_file_entry
 from app.search.connect import (
     delete_document_by_id,
 )
@@ -219,8 +220,9 @@ async def get_datasets(
     limit: int = 10,
     mine: bool = False,
     admin=Depends(get_admin),
+    admin_mode: bool = Depends(get_admin_mode),
 ):
-    if admin:
+    if admin and admin_mode:
         datasets = await DatasetDBViewList.find(
             sort=(-DatasetDBViewList.created),
             skip=skip,
@@ -265,10 +267,10 @@ async def get_dataset_files(
     dataset_id: str,
     folder_id: Optional[str] = None,
     authenticated: bool = Depends(CheckStatus("AUTHENTICATED")),
-    allow: bool = Depends(Authorization("viewer")),
     user_id=Depends(get_user),
     skip: int = 0,
     limit: int = 10,
+    allow: bool = Depends(Authorization("viewer")),
 ):
     if authenticated:
         query = [
@@ -401,10 +403,10 @@ async def get_dataset_folders(
     dataset_id: str,
     parent_folder: Optional[str] = None,
     user_id=Depends(get_user),
-    allow: bool = Depends(Authorization("viewer")),
     authenticated: bool = Depends(CheckStatus("authenticated")),
     skip: int = 0,
     limit: int = 10,
+    allow: bool = Depends(Authorization("viewer")),
 ):
     if (await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
         if authenticated:

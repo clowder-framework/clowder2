@@ -1,5 +1,6 @@
 import json
 
+from beanie import PydanticObjectId
 from fastapi import APIRouter, HTTPException, Depends
 from keycloak.exceptions import (
     KeycloakAuthenticationError,
@@ -7,8 +8,6 @@ from keycloak.exceptions import (
     KeycloakPostError,
 )
 from passlib.hash import bcrypt
-
-from beanie import PydanticObjectId
 
 from app.keycloak_auth import create_user, get_current_user
 from app.keycloak_auth import keycloak_openid
@@ -93,7 +92,10 @@ async def authenticate_user(email: str, password: str):
     return user
 
 
-async def get_admin(dataset_id: str = None, current_username=Depends(get_current_user)):
+@router.get("/users/me/is_admin", response_model=bool)
+async def get_admin(
+    dataset_id: str = None, current_username=Depends(get_current_user)
+) -> bool:
     if (
         current_user := await UserDB.find_one(UserDB.email == current_username.email)
     ) is not None:
@@ -104,16 +106,64 @@ async def get_admin(dataset_id: str = None, current_username=Depends(get_current
         and (dataset_db := await DatasetDB.get(PydanticObjectId(dataset_id)))
         is not None
     ):
+        # TODO: question regarding resource creator is considered as admin of the resource?
         return dataset_db.creator.email == current_username.email
     else:
         return False
+
+
+@router.get("/users/me/admin_mode")
+async def get_admin_mode(current_username=Depends(get_current_user)) -> bool:
+    """Get Admin mode from User Object."""
+    if (
+        current_user := await UserDB.find_one(UserDB.email == current_username.email)
+    ) is not None:
+        if current_user.admin_mode is not None:
+            return current_user.admin_mode
+        else:
+            return False
+    else:
+        raise HTTPException(
+            status_code=404,
+            detail="User doesn't exist.",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+
+@router.post("/users/me/admin_mode", response_model=bool)
+async def set_admin_mode(
+    admin_mode_on: bool,
+    admin=Depends(get_admin),
+    current_username=Depends(get_current_user),
+) -> bool:
+    """Set Admin mode from User Object."""
+    if (
+        current_user := await UserDB.find_one(UserDB.email == current_username.email)
+    ) is not None:
+        # only admin can set admin mode
+        if admin:
+            current_user.admin_mode = admin_mode_on
+            await current_user.replace()
+            return current_user.admin_mode
+        else:
+            raise HTTPException(
+                status_code=403,
+                detail="You are not admin yet. Only admin can set admin mode.",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+    else:
+        raise HTTPException(
+            status_code=404,
+            detail="User doesn't exist.",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
 
 
 @router.post("/users/set_admin/{useremail}", response_model=UserOut)
 async def set_admin(
     useremail: str, current_username=Depends(get_current_user), admin=Depends(get_admin)
 ):
-    if admin:
+    if admin and current_username.admin:
         if (user := await UserDB.find_one(UserDB.email == useremail)) is not None:
             user.admin = True
             await user.replace()
@@ -124,4 +174,30 @@ async def set_admin(
         raise HTTPException(
             status_code=403,
             detail=f"User {current_username.email} is not an admin. Only admin can make others admin.",
+        )
+
+
+@router.post("/users/revoke_admin/{useremail}", response_model=UserOut)
+async def revoke_admin(
+    useremail: str, current_username=Depends(get_current_user), admin=Depends(get_admin)
+):
+    if admin:
+        if current_username.email == useremail:
+            raise HTTPException(
+                status_code=403,
+                detail=f"You are currently an admin. Admin cannot revoke their own admin access.",
+            )
+        else:
+            if (user := await UserDB.find_one(UserDB.email == useremail)) is not None:
+                user.admin = False
+                await user.replace()
+                return user.dict()
+            else:
+                raise HTTPException(
+                    status_code=404, detail=f"User {useremail} not found"
+                )
+    else:
+        raise HTTPException(
+            status_code=403,
+            detail=f"User {current_username.email} is not an admin. Only admin can revoke admin access.",
         )

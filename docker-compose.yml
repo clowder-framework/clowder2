@@ -92,7 +92,7 @@ services:
       - "traefik.http.routers.frontend.priority=1"
 
   extractors-heartbeat:
-    image: "clowder/clowder2-heartbeat"
+    image: "clowder/clowder2-heartbeat:main"
     build:
       context: backend
       dockerfile: heartbeat.Dockerfile
@@ -109,7 +109,7 @@ services:
       - rabbitmq
 
   extractors-messages:
-    image: "clowder/clowder2-messages"
+    image: "clowder/clowder2-messages:main"
     build:
       context: backend
       dockerfile: messages.Dockerfile

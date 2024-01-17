@@ -9,6 +9,16 @@ import {fetchPublicDatasetMetadata} from "../../actions/public_dataset";
 import {Agent} from "./Agent";
 import {MetadataDeleteButton} from "./widgets/MetadataDeleteButton";
 import {ListenerMetadataEntry} from "../metadata/ListenerMetadataEntry";
+import React, { useEffect } from "react";
+import { Grid } from "@mui/material";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "../../types/data";
+import {
+	fetchDatasetMetadata,
+	fetchFileMetadata,
+	fetchMetadataDefinitions,
+} from "../../actions/metadata";
+import { ListenerMetadataEntry } from "../metadata/ListenerMetadataEntry";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 
@@ -31,6 +41,26 @@ export const DisplayListenerMetadata = (props: MetadataType) => {
 
 	const dispatch = useDispatch();
 
+	const getMetadatDefinitions = (
+		name: string | null,
+		skip: number,
+		limit: number
+	) => dispatch(fetchMetadataDefinitions(name, skip, limit));
+	const metadataDefinitionList = useSelector(
+		(state: RootState) => state.metadata.metadataDefinitionList
+	);
+	const listDatasetMetadata = (datasetId: string | undefined) =>
+		dispatch(fetchDatasetMetadata(datasetId));
+	const listFileMetadata = (
+		fileId: string | undefined,
+		version: number | undefined
+	) => dispatch(fetchFileMetadata(fileId, version));
+	const datasetMetadataList = useSelector(
+		(state: RootState) => state.metadata.datasetMetadataList
+	);
+	const fileMetadataList = useSelector(
+		(state: RootState) => state.metadata.fileMetadataList
+	);
 	const getMetadatDefinitions = (name: string | null, skip: number, limit: number) => dispatch(fetchMetadataDefinitions(name, skip, limit));
 	const metadataDefinitionList = useSelector((state: RootState) => state.metadata.metadataDefinitionList);
 	const listDatasetMetadata = (datasetId: string | undefined) => dispatch(fetchDatasetMetadata(datasetId));
@@ -78,24 +108,30 @@ export const DisplayListenerMetadata = (props: MetadataType) => {
 					let listenerMetadataList = [];
 					let listenerMetadataContent = [];
 
-					return (<Grid container spacing={2}>
+				return (
+					<Grid container spacing={2}>
 						{metadataList.map((metadata, idx) => {
-						if (metadata.agent.listener !== null) {
-							return (<Grid item xs={12}><Card key={idx}>
-								<CardContent>
-									<ListenerMetadataEntry agent={metadata.agent}
-														   content={metadata.content}
-														   context={metadata.context}
-														   context_url={metadata.context_url}
-														   created={metadata.created}
-									/>
-								</CardContent>
-							</Card></Grid>);
-						}
+							if (metadata.agent.listener !== null) {
+								return (
+									<Grid item xs={12}>
+										<Card key={idx}>
+											<CardContent>
+												<ListenerMetadataEntry
+													agent={metadata.agent}
+													content={metadata.content}
+													context={metadata.context}
+													context_url={metadata.context_url}
+													created={metadata.created}
+												/>
+											</CardContent>
+										</Card>
+									</Grid>
+								);
+							}
 						})}
-					</Grid>);
-			})()
-			}
+					</Grid>
+				);
+			})()}
 		</>
-	)
-}
+	);
+};

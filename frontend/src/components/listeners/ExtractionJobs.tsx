@@ -136,6 +136,7 @@ export const ExtractionJobs = (props) => {
 					open={openExtractorPane}
 					onClose={handleSubmitExtractionClose}
 					fullWidth={true}
+					maxWidth="md"
 				>
 					<DialogTitle>Extractor Logs</DialogTitle>
 					<DialogContent>

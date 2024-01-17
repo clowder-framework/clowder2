@@ -3,7 +3,7 @@ import {
 	FilePreview,
 	Folder,
 	MetadataJsonld,
-	Profile
+	Profile,
 } from "./data";
 import {
 	AuthorizationBase,
@@ -140,6 +140,16 @@ interface CHANGE_PUBLIC_SELECTED_VERSION {
 interface SET_USER {
 	type: "SET_USER";
 	Authorization: string;
+}
+
+interface TOGGLE_ADMIN_MODE {
+	adminMode: boolean;
+	type: "TOGGLE_ADMIN_MODE";
+}
+
+interface GET_ADMIN_MODE_STATUS {
+	adminMode: boolean;
+	type: "GET_ADMIN_MODE_STATUS";
 }
 
 interface LOGIN_ERROR {
@@ -284,11 +294,6 @@ interface RECEIVE_PUBLIC_DATASET_METADATA {
 interface RECEIVE_FILE_METADATA {
 	type: "RECEIVE_FILE_METADATA";
 	metadataList: Metadata[];
-}
-
-interface RECEIVE_PUBLIC_FILE_METADATA {
-	type: "RECEIVE_PUBLIC_FILE_METADATA";
-	publicFileMetadataList: Metadata[];
 }
 
 interface RECEIVE_FOLDERS_IN_DATASET {
@@ -506,7 +511,6 @@ interface GET_VIS_CONFIG {
 	visConfig: VisualizationConfigOut;
 }
 
-
 interface DOWNLOAD_VIS_DATA {
 	type: "DOWNLOAD_VIS_DATA";
 	blob: Blob;
@@ -548,6 +552,8 @@ interface RESET_PUBLIC_VIS_DATA_PRESIGNED_URL {
 }
 
 export type DataAction =
+	| GET_ADMIN_MODE_STATUS
+	| TOGGLE_ADMIN_MODE
 	| RECEIVE_FILES_IN_DATASET
 	| RECEIVE_FOLDERS_IN_DATASET
 	| RECEIVE_FOLDERS_IN_PUBLIC_DATASET

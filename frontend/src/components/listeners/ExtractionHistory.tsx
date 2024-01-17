@@ -11,7 +11,8 @@ import {
 	ListSubheader,
 } from "@mui/material";
 import { useDispatch, useSelector } from "react-redux";
-import { Listener, RootState } from "../../types/data";
+import { RootState } from "../../types/data";
+import { EventListenerOut as Listener } from "../../openapi/v2";
 import Layout from "../Layout";
 import { fetchListenerJobs, fetchListeners } from "../../actions/listeners";
 import { ArrowBack, ArrowForward } from "@material-ui/icons";
@@ -115,6 +116,7 @@ export const ExtractionHistory = (): JSX.Element => {
 
 	const listeners = useSelector((state: RootState) => state.listener.listeners);
 	const jobs = useSelector((state: RootState) => state.listener.jobs);
+	const adminMode = useSelector((state: RootState) => state.user.adminMode);
 
 	const [errorOpen, setErrorOpen] = useState(false);
 	const [currPageNum, setCurrPageNum] = useState<number>(0);
@@ -131,6 +133,11 @@ export const ExtractionHistory = (): JSX.Element => {
 		listListeners(skip, limit, 0, null, null);
 		listListenerJobs(null, null, null, null, null, null, 0, 100);
 	}, []);
+
+	useEffect(() => {
+		listListeners(skip, limit, 0, null, null);
+		listListenerJobs(null, null, null, null, null, null, 0, 100);
+	}, [adminMode]);
 
 	useEffect(() => {
 		if (selectedExtractor) {

@@ -1,6 +1,7 @@
 import {
 	DELETE_API_KEY,
 	GENERATE_API_KEY,
+	GET_ADMIN_MODE_STATUS,
 	LIST_API_KEYS,
 	LOGIN_ERROR,
 	RECEIVE_USER_PROFILE,
@@ -8,22 +9,33 @@ import {
 	REGISTER_USER,
 	RESET_API_KEY,
 	SET_USER,
+	TOGGLE_ADMIN_MODE,
 } from "../actions/user";
 import { UserState } from "../types/data";
 import { DataAction } from "../types/action";
+import { UserOut } from "../openapi/v2";
 
 const defaultState: UserState = {
 	Authorization: null,
 	loginError: false,
+	adminMode: false,
 	registerSucceeded: false,
 	errorMsg: "",
 	hashedKey: "",
 	apiKeys: [],
-	profile: null,
+	profile: <UserOut>{},
 };
 
 const user = (state = defaultState, action: DataAction) => {
 	switch (action.type) {
+		case TOGGLE_ADMIN_MODE:
+			return Object.assign({}, state, {
+				adminMode: action.adminMode,
+			});
+		case GET_ADMIN_MODE_STATUS:
+			return Object.assign({}, state, {
+				adminMode: action.adminMode,
+			});
 		case SET_USER:
 			return Object.assign({}, state, {
 				Authorization: action.Authorization,

@@ -78,3 +78,7 @@ backend/app/tests/*
 !clowder-theme.tgz
 *clowder2-software-dev.yaml
 secrets.yaml
+
+# faker
+official.csv
+fact.png

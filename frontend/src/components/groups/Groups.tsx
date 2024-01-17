@@ -42,6 +42,7 @@ export function Groups() {
 	) => dispatch(searchGroupsAction(searchTerm, skip, limit));
 
 	const groups = useSelector((state: RootState) => state.group.groups);
+	const adminMode = useSelector((state: RootState) => state.user.adminMode);
 
 	// TODO add option to determine limit number; default show 5 groups each time
 	const [currPageNum, setCurrPageNum] = useState<number>(0);
@@ -56,6 +57,10 @@ export function Groups() {
 	useEffect(() => {
 		listGroups(skip, limit);
 	}, []);
+
+	useEffect(() => {
+		listGroups(skip, limit);
+	}, [adminMode]);
 
 	useEffect(() => {
 		// disable flipping if reaches the last page
@@ -97,128 +102,129 @@ export function Groups() {
 		<Layout>
 			{/*Error Message dialogue*/}
 			<ErrorModal errorOpen={errorOpen} setErrorOpen={setErrorOpen} />
-
-			{/*create new group*/}
-			<Dialog
-				open={createGroupOpen}
-				onClose={() => {
-					setCreateGroupOpen(false);
-				}}
-				fullWidth={true}
-				maxWidth="md"
-				aria-labelledby="form-dialog"
-			>
-				<DialogTitle>Create New Group</DialogTitle>
-				<DialogContent>
-					<CreateGroup setCreateGroupOpen={setCreateGroupOpen} />
-				</DialogContent>
-			</Dialog>
-			<Grid container>
-				<Grid item xs={8}></Grid>
-				<Grid item xs={4}>
-					<Button
-						variant="contained"
-						onClick={() => {
-							setCreateGroupOpen(true);
-						}}
-						endIcon={<GroupAddIcon />}
-						sx={{ float: "right" }}
-					>
-						New Group
-					</Button>
+			<div className="outer-container">
+				{/*create new group*/}
+				<Dialog
+					open={createGroupOpen}
+					onClose={() => {
+						setCreateGroupOpen(false);
+					}}
+					fullWidth={true}
+					maxWidth="md"
+					aria-labelledby="form-dialog"
+				>
+					<DialogTitle>Create New Group</DialogTitle>
+					<DialogContent>
+						<CreateGroup setCreateGroupOpen={setCreateGroupOpen} />
+					</DialogContent>
+				</Dialog>
+				<Grid container>
+					<Grid item xs={8}></Grid>
+					<Grid item xs={4}>
+						<Button
+							variant="contained"
+							onClick={() => {
+								setCreateGroupOpen(true);
+							}}
+							endIcon={<GroupAddIcon />}
+							sx={{ float: "right" }}
+						>
+							New Group
+						</Button>
+					</Grid>
 				</Grid>
-			</Grid>
-			<Grid container spacing={2}>
-				<Grid item xs={12}>
-					<GenericSearchBox
-						title="Search for Groups"
-						searchPrompt="keyword for group"
-						setSearchTerm={setSearchTerm}
-						searchTerm={searchTerm}
-						searchFunction={searchGroups}
-						skip={skip}
-						limit={limit}
-					/>
-				</Grid>
-				<Grid item xs={12}>
-					<TableContainer component={Paper}>
-						<Table sx={{ minWidth: 650 }} aria-label="simple table">
-							<TableHead>
-								<TableRow>
-									<TableCell
-										sx={{
-											fontWeight: 600,
-										}}
-									>
-										Group Name
-									</TableCell>
-									<TableCell
-										sx={{
-											fontWeight: 600,
-										}}
-										align="left"
-									>
-										Description
-									</TableCell>
-									<TableCell
-										sx={{
-											fontWeight: 600,
-										}}
-										align="left"
-									>
-										<GroupsIcon />
-									</TableCell>
-								</TableRow>
-							</TableHead>
-							<TableBody>
-								{groups.map((group) => {
-									return (
-										<TableRow
-											key={group.id}
+				<Grid container spacing={2}>
+					<Grid item xs={12}>
+						<GenericSearchBox
+							title="Search for Groups"
+							searchPrompt="keyword for group"
+							setSearchTerm={setSearchTerm}
+							searchTerm={searchTerm}
+							searchFunction={searchGroups}
+							skip={skip}
+							limit={limit}
+						/>
+					</Grid>
+					<Grid item xs={12}>
+						<TableContainer component={Paper}>
+							<Table sx={{ minWidth: 650 }} aria-label="simple table">
+								<TableHead>
+									<TableRow>
+										<TableCell
 											sx={{
-												"&:last-child td, &:last-child th": { border: 0 },
+												fontWeight: 600,
 											}}
 										>
-											<TableCell scope="row" key={group.id}>
-												<Button component={Link} to={`/groups/${group.id}`}>
-													{group.name}
-												</Button>
-											</TableCell>
-											<TableCell scope="row" key={group.id} align="left">
-												{group.description}
-											</TableCell>
-											<TableCell scope="row" key={group.id} align="left">
-												{group.users !== undefined ? group.users.length : 0}
-											</TableCell>
-										</TableRow>
-									);
-								})}
-							</TableBody>
-						</Table>
-						<Box display="flex" justifyContent="center" sx={{ m: 1 }}>
-							<ButtonGroup
-								variant="contained"
-								aria-label="previous next buttons"
-							>
-								<Button
-									aria-label="previous"
-									onClick={previous}
-									disabled={prevDisabled}
+											Group Name
+										</TableCell>
+										<TableCell
+											sx={{
+												fontWeight: 600,
+											}}
+											align="left"
+										>
+											Description
+										</TableCell>
+										<TableCell
+											sx={{
+												fontWeight: 600,
+											}}
+											align="left"
+										>
+											<GroupsIcon />
+										</TableCell>
+									</TableRow>
+								</TableHead>
+								<TableBody>
+									{groups.map((group) => {
+										return (
+											<TableRow
+												key={group.id}
+												sx={{
+													"&:last-child td, &:last-child th": { border: 0 },
+												}}
+											>
+												<TableCell scope="row" key={group.id}>
+													<Button component={Link} to={`/groups/${group.id}`}>
+														{group.name}
+													</Button>
+												</TableCell>
+												<TableCell scope="row" key={group.id} align="left">
+													{group.description}
+												</TableCell>
+												<TableCell scope="row" key={group.id} align="left">
+													{group.users !== undefined ? group.users.length : 0}
+												</TableCell>
+											</TableRow>
+										);
+									})}
+								</TableBody>
+							</Table>
+							<Box display="flex" justifyContent="center" sx={{ m: 1 }}>
+								<ButtonGroup
+									variant="contained"
+									aria-label="previous next buttons"
 								>
-									<ArrowBack /> Prev
-								</Button>
-								<Button
-									aria-label="next"
-									onClick={next}
-									disabled={nextDisabled}
-								>
-									Next <ArrowForward />
-								</Button>
-							</ButtonGroup>
-						</Box>
-					</TableContainer>
+									<Button
+										aria-label="previous"
+										onClick={previous}
+										disabled={prevDisabled}
+									>
+										<ArrowBack /> Prev
+									</Button>
+									<Button
+										aria-label="next"
+										onClick={next}
+										disabled={nextDisabled}
+									>
+										Next <ArrowForward />
+									</Button>
+								</ButtonGroup>
+							</Box>
+						</TableContainer>
+					</Grid>
 				</Grid>
-			</Grid>
+			</div>
 		</Layout>
 	);
 }
