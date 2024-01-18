@@ -95,8 +95,12 @@ async def get_users(skip: int = 0, limit: int = 2):
             _get_page_query(skip, limit)
         ],
     ).to_list()
+    if len(users_and_count[0]['metadata']) > 0:
+        page_metadata = PageMetadata(**users_and_count[0]['metadata'][0], skip=skip, limit=limit)
+    else:
+        page_metadata = PageMetadata(skip=skip, limit=limit)
     page = Paged(
-        metadata=PageMetadata(**users_and_count[0]['metadata'][0], skip=skip, limit=limit),
+        metadata=page_metadata,
         data=[UserOut(id=item.pop("_id"), **item) for item in users_and_count[0]['data']]
     )
     return page.dict()
@@ -117,8 +121,12 @@ async def search_users(
             _get_page_query(skip, limit)
         ],
     ).to_list()
+    if len(users_and_count[0]['metadata']) > 0:
+        page_metadata = PageMetadata(**users_and_count[0]['metadata'][0], skip=skip, limit=limit)
+    else:
+        page_metadata = PageMetadata(skip=skip, limit=limit)
     page = Paged(
-        metadata=PageMetadata(**users_and_count[0]['metadata'][0], skip=skip, limit=limit),
+        metadata=page_metadata,
         data=[UserOut(id=item.pop("_id"), **item) for item in users_and_count[0]['data']]
     )
     return page.dict()
@@ -139,8 +147,12 @@ async def search_users(
             _get_page_query(skip, limit)
         ],
     ).to_list()
+    if len(users_and_count[0]['metadata']) > 0:
+        page_metadata = PageMetadata(**users_and_count[0]['metadata'][0], skip=skip, limit=limit)
+    else:
+        page_metadata = PageMetadata(skip=skip, limit=limit)
     page = Paged(
-        metadata=PageMetadata(**users_and_count[0]['metadata'][0], skip=skip, limit=limit),
+        metadata=page_metadata,
         data=[UserOut(id=item.pop("_id"), **item) for item in users_and_count[0]['data']]
     )
     return page.dict()

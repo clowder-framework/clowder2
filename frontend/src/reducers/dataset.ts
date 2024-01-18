@@ -34,7 +34,7 @@ import {
 } from "../openapi/v2";
 
 const defaultState: DatasetState = {
-	files: <File[]>[],
+	files: <Paged>{ metadata: <PageMetadata>{}, data: <File[]>[] },
 	about: <Dataset>{ creator: <UserOut>{} },
 	datasetRole: <AuthorizationBase>{},
 	datasets: <Paged>{ metadata: <PageMetadata>{}, data: <Dataset[]>[] },
@@ -81,7 +81,6 @@ const dataset = (state = defaultState, action: DataAction) => {
 		case RECEIVE_DATASET_ABOUT:
 			return Object.assign({}, state, { about: action.about });
 		case RECEIVE_DATASET_ROLE:
-			return Object.assign({}, state, { datasetRole: action.role });
 			return Object.assign({}, state, { datasetRole: action.role });
 		case RECEIVE_DATASET_ROLES:
 			return Object.assign({}, state, { roles: action.roles });

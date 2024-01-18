@@ -25,7 +25,7 @@ import {
 
 interface RECEIVE_FILES_IN_DATASET {
 	type: "RECEIVE_FILES_IN_DATASET";
-	files: FileSummary[];
+	files: Paged;
 }
 
 interface DELETE_FILE {

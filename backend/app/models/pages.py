@@ -12,9 +12,9 @@ from app.models.users import UserOut
 
 
 class PageMetadata(BaseModel):
-    total_count: int
-    skip: int
-    limit: int
+    total_count: int = 0
+    skip: int = 0
+    limit: int = 0
 
 
 class Paged(BaseModel):

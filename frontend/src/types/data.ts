@@ -133,7 +133,7 @@ export interface Thumbnail {
 }
 
 export interface DatasetState {
-	files: FileSummary[];
+	files: Paged;
 	datasets: Paged;
 	newDataset: Dataset;
 	newFile: FileSummary;

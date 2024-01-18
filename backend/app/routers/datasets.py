@@ -246,8 +246,12 @@ async def get_datasets(
 
     # TODO have to change _id this way otherwise it won't work
     # TODO need to research if there is other pydantic trick to make it work
+    if len(datasets_and_count[0]['metadata']) > 0:
+        page_metadata = PageMetadata(**datasets_and_count[0]['metadata'][0], skip=skip, limit=limit)
+    else:
+        page_metadata = PageMetadata(skip=skip, limit=limit)
     page = Paged(
-        metadata=PageMetadata(**datasets_and_count[0]['metadata'][0], skip=skip, limit=limit),
+        metadata=page_metadata,
         data=[DatasetOut(id=item.pop("_id"), **item) for item in datasets_and_count[0]['data']]
     )
 
@@ -265,7 +269,7 @@ async def get_dataset(
     raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
 
 
-@router.get("/{dataset_id}/files", response_model=List[FileOut])
+@router.get("/{dataset_id}/files", response_model=Paged)
 async def get_dataset_files(
         dataset_id: str,
         folder_id: Optional[str] = None,
@@ -289,8 +293,21 @@ async def get_dataset_files(
         ]
     if folder_id is not None:
         query.append(FileDBViewList.folder_id == ObjectId(folder_id))
-    files = await FileDBViewList.find(*query).skip(skip).limit(limit).to_list()
-    return [file.dict() for file in files]
+
+    files_and_count = await FileDBViewList.find(*query).aggregate(
+        [
+            _get_page_query(skip, limit)
+        ],
+    ).to_list()
+    if len(files_and_count[0]['metadata']) > 0:
+        page_metadata = PageMetadata(**files_and_count[0]['metadata'][0], skip=skip, limit=limit)
+    else:
+        page_metadata = PageMetadata(skip=skip, limit=limit)
+    page = Paged(
+        metadata=page_metadata,
+        data=[UserOut(id=item.pop("_id"), **item) for item in files_and_count[0]['data']]
+    )
+    return page.dict()
 
 
 @router.put("/{dataset_id}", response_model=DatasetOut)
