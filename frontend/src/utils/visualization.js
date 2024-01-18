@@ -10,7 +10,7 @@ export function generateVisDataDownloadUrl(visualizationId) {
 }
 
 export function generatePublicVisDataDownloadUrl(visualizationId) {
-	return `${config.hostname}/api/v2/public/visualizations/${visualizationId}/bytes`;
+	return `${config.hostname}/api/v2/public_visualizations/${visualizationId}/bytes`;
 }
 
 export function generateFileDownloadUrl(fileId, fileVersionNum = 0) {
@@ -21,7 +21,7 @@ export function generateFileDownloadUrl(fileId, fileVersionNum = 0) {
 }
 
 export function generatePublicFileDownloadUrl(fileId, fileVersionNum = 0) {
-	let url = `${config.hostname}/api/v2/public/files/${fileId}?increment=false`;
+	let url = `${config.hostname}/api/v2/public_files/${fileId}?increment=false`;
 	if (fileVersionNum > 0) url = `${url}&version=${fileVersionNum}`;
 
 	return url;
