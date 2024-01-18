@@ -296,6 +296,11 @@ interface RECEIVE_FILE_METADATA {
 	metadataList: Metadata[];
 }
 
+interface RECEIVE_PUBLIC_FILE_METADATA {
+	type: "RECEIVE_PUBLIC_FILE_METADATA";
+	publicFileMetadataList: Metadata[];
+}
+
 interface RECEIVE_FOLDERS_IN_DATASET {
 	type: "RECEIVE_FOLDERS_IN_DATASET";
 	folders: Folder[];

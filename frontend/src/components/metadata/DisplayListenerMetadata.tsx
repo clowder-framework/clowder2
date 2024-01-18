@@ -1,20 +1,18 @@
-import React, {useEffect, useState} from "react";
-import {Box, Grid, Typography} from "@mui/material";
-import {metadataConfig} from "../../metadata.config";
-import {useSelector, useDispatch} from "react-redux";
-import {RootState} from "../../types/data";
-import {fetchPublicFileMetadata} from "../../actions/public_file";
-import {fetchPublicDatasetMetadata} from "../../actions/public_dataset";
-import {Agent} from "./Agent";
-import {MetadataDeleteButton} from "./widgets/MetadataDeleteButton";
-import {ListenerMetadataEntry} from "../metadata/ListenerMetadataEntry";
+import React, { useEffect } from "react";
+import { Grid } from "@mui/material";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "../../types/data";
 import {
 	fetchDatasetMetadata,
 	fetchFileMetadata,
 	fetchMetadataDefinitions,
+	fetchPublicDatasetMetadata,
+	fetchPublicFileMetadata,
 } from "../../actions/metadata";
+import { ListenerMetadataEntry } from "../metadata/ListenerMetadataEntry";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
+
 
 type MetadataType = {
 	updateMetadata: any,
@@ -30,8 +28,8 @@ This is the interface displayed already created metadata and allow eidts
 Uses only the list of metadata
 */
 export const DisplayListenerMetadata = (props: MetadataType) => {
-
-	const {updateMetadata, deleteMetadata, resourceType, resourceId, version, publicView} = props;
+	const { updateMetadata, deleteMetadata, resourceType, resourceId, version, publicView } =
+		props;
 
 	const dispatch = useDispatch();
 
@@ -49,14 +47,20 @@ export const DisplayListenerMetadata = (props: MetadataType) => {
 		fileId: string | undefined,
 		version: number | undefined
 	) => dispatch(fetchFileMetadata(fileId, version));
+	const listPublicFileMetadata = (
+		fileId: string | undefined,
+		version: number | undefined
+	) => dispatch(fetchPublicFileMetadata(fileId, version));
+	const listPublicDatasetMetadata = (
+		datasetId: string | undefined
+	) => dispatch(fetchPublicDatasetMetadata(datasetId));
+
 	const datasetMetadataList = useSelector(
 		(state: RootState) => state.metadata.datasetMetadataList
 	);
 	const fileMetadataList = useSelector(
 		(state: RootState) => state.metadata.fileMetadataList
 	);
-	const listPublicDatasetMetadata = (datasetId: string | undefined) => dispatch(fetchPublicDatasetMetadata(datasetId));
-	const listPublicFileMetadata = (fileId: string | undefined, version: number | undefined) => dispatch(fetchPublicFileMetadata(fileId, version));
 	const publicDatasetMetadataList = useSelector((state: RootState) => state.metadata.publicDatasetMetadataList);
 	const publicFileMetadataList = useSelector((state: RootState) => state.metadata.publicFileMetadataList);
 
@@ -70,12 +74,14 @@ export const DisplayListenerMetadata = (props: MetadataType) => {
 	useEffect(() => {
 		if (resourceType === "dataset") {
 			if (publicView) {
+				console.log('we have a public dataset');
 				listPublicDatasetMetadata(resourceId);
 			} else {
 				listDatasetMetadata(resourceId);
 			}
 		} else if (resourceType === "file") {
 			if (publicView){
+				console.log('we ahve a public file');
 				listPublicFileMetadata(resourceId, version);
 			} else {
 				listFileMetadata(resourceId, version);
@@ -83,7 +89,7 @@ export const DisplayListenerMetadata = (props: MetadataType) => {
 			}
 		}
 	}, [resourceType, resourceId, version]);
-
+	console.log(publicDatasetMetadataList, publicFileMetadataList, 'the public metadata');
 	return (
 		<>
 			{
@@ -99,6 +105,7 @@ export const DisplayListenerMetadata = (props: MetadataType) => {
 				return (
 					<Grid container spacing={2}>
 						{metadataList.map((metadata, idx) => {
+							console.log('metadata', metadata,'idx', idx);
 							if (metadata.agent.listener !== null) {
 								return (
 									<Grid item xs={12}>

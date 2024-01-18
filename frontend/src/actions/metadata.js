@@ -153,7 +153,7 @@ export function fetchPublicDatasetMetadata(datasetId) {
 			.then((json) => {
 				dispatch({
 					type: RECEIVE_PUBLIC_DATASET_METADATA,
-					metadataList: json,
+					publicDatasetMetadataList: json,
 					receivedAt: Date.now(),
 				});
 			})
@@ -197,7 +197,7 @@ export function fetchPublicFileMetadata(fileId, version) {
 			.then((json) => {
 				dispatch({
 					type: RECEIVE_PUBLIC_FILE_METADATA,
-					metadataList: json,
+					publicFileMetadataList: json,
 					receivedAt: Date.now(),
 				});
 			})
