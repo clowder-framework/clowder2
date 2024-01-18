@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { ChangeEvent, useEffect, useState } from "react";
 import { RootState } from "../../types/data";
 import { useDispatch, useSelector } from "react-redux";
 import Layout from "../Layout";
@@ -62,7 +62,7 @@ export const ManageUsers = (): JSX.Element => {
 		else fetchAllUsers((currPageNum - 1) * limit, limit);
 	}, [searchTerm]);
 
-	const handlePageChange = (_: React.MouseEvent, value: number) => {
+	const handlePageChange = (_: ChangeEvent<unknown>, value: number) => {
 		const newSkip = (value - 1) * limit;
 		setCurrPageNum(value);
 		fetchAllUsers(newSkip, limit);

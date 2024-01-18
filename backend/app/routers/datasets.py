@@ -305,7 +305,7 @@ async def get_dataset_files(
         page_metadata = PageMetadata(skip=skip, limit=limit)
     page = Paged(
         metadata=page_metadata,
-        data=[UserOut(id=item.pop("_id"), **item) for item in files_and_count[0]['data']]
+        data=[FileOut(id=item.pop("_id"), **item) for item in files_and_count[0]['data']]
     )
     return page.dict()
 

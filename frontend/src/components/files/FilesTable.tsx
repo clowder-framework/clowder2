@@ -28,7 +28,9 @@ const iconStyle = {
 
 export default function FilesTable(props: FilesTableProps) {
 	// mapStateToProps
-	const filesInDataset = useSelector((state: RootState) => state.dataset.files);
+	const filesInDataset = useSelector(
+		(state: RootState) => state.dataset.files.data
+	);
 	const foldersInDataset = useSelector(
 		(state: RootState) => state.folder.folders
 	);

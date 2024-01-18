@@ -1,10 +1,10 @@
 // lazy loading
-import React, { useEffect, useState } from "react";
+import React, { ChangeEvent, useEffect, useState } from "react";
 import {
 	Box,
 	Button,
-	ButtonGroup,
 	Grid,
+	Pagination,
 	Stack,
 	Tab,
 	Tabs,
@@ -37,12 +37,7 @@ import {
 import Layout from "../Layout";
 import { ActionsMenu } from "./ActionsMenu";
 import { DatasetDetails } from "./DatasetDetails";
-import {
-	ArrowBack,
-	ArrowForward,
-	FormatListBulleted,
-	InsertDriveFile,
-} from "@material-ui/icons";
+import { FormatListBulleted, InsertDriveFile } from "@material-ui/icons";
 import { Listeners } from "../listeners/Listeners";
 import AssessmentIcon from "@mui/icons-material/Assessment";
 import HistoryIcon from "@mui/icons-material/History";
@@ -126,50 +121,33 @@ export const Dataset = (): JSX.Element => {
 	const [paths, setPaths] = useState([]);
 
 	// TODO add option to determine limit number; default show 20 files each time
-	const [currPageNum, setCurrPageNum] = useState<number>(0);
+	const [currPageNum, setCurrPageNum] = useState<number>(1);
 	const [limit] = useState<number>(10);
-	const [skip, setSkip] = useState<number | undefined>(0);
-	const [prevDisabled, setPrevDisabled] = useState<boolean>(true);
-	const [nextDisabled, setNextDisabled] = useState<boolean>(false);
-	const filesInDataset = useSelector((state: RootState) => state.dataset.files);
-	const foldersInDataset = useSelector(
-		(state: RootState) => state.folder.folders
+	const pageMetadata = useSelector(
+		(state: RootState) => state.dataset.files.metadata
 	);
 
-	// component did mount list all files in dataset
 	useEffect(() => {
+		listFilesInDataset(datasetId, folderId, (currPageNum - 1) * limit, limit);
+		listFoldersInDataset(datasetId, folderId, (currPageNum - 1) * limit, limit);
+		listDatasetAbout(datasetId);
+		getFolderPath(folderId);
 		getMetadatDefinitions(null, 0, 100);
 	}, []);
 
 	useEffect(() => {
-		listFilesInDataset(datasetId, folderId, skip, limit);
-		listFoldersInDataset(datasetId, folderId, skip, limit);
+		listFilesInDataset(datasetId, folderId, (currPageNum - 1) * limit, limit);
+		listFoldersInDataset(datasetId, folderId, (currPageNum - 1) * limit, limit);
 		listDatasetAbout(datasetId);
 		getFolderPath(folderId);
 	}, [searchParams]);
 
 	useEffect(() => {
-		listFilesInDataset(datasetId, folderId, skip, limit);
-		listFoldersInDataset(datasetId, folderId, skip, limit);
+		listFilesInDataset(datasetId, folderId, (currPageNum - 1) * limit, limit);
+		listFoldersInDataset(datasetId, folderId, (currPageNum - 1) * limit, limit);
 		listDatasetAbout(datasetId);
 		getFolderPath(folderId);
 	}, [adminMode]);
-
-	useEffect(() => {
-		// disable flipping if reaches the last page
-		if (filesInDataset.length < limit && foldersInDataset.length < limit)
-			setNextDisabled(true);
-		else setNextDisabled(false);
-	}, [filesInDataset]);
-
-	useEffect(() => {
-		if (skip !== null && skip !== undefined) {
-			listFilesInDataset(datasetId, folderId, skip, limit);
-			listFoldersInDataset(datasetId, folderId, skip, limit);
-			if (skip === 0) setPrevDisabled(true);
-			else setPrevDisabled(false);
-		}
-	}, [skip]);
 
 	// for breadcrumb
 	useEffect(() => {
@@ -195,25 +173,18 @@ export const Dataset = (): JSX.Element => {
 		setPaths(tmpPaths);
 	}, [about, folderPath]);
 
-	// for pagination keep flipping until the return dataset is less than the limit
-	const previous = () => {
-		if (currPageNum - 1 >= 0) {
-			setSkip((currPageNum - 1) * limit);
-			setCurrPageNum(currPageNum - 1);
-		}
-	};
-	const next = () => {
-		if (filesInDataset.length === limit || foldersInDataset.length === limit) {
-			setSkip((currPageNum + 1) * limit);
-			setCurrPageNum(currPageNum + 1);
-		}
-	};
-
 	const handleTabChange = (
 		_event: React.ChangeEvent<{}>,
 		newTabIndex: number
 	) => {
 		setSelectedTabIndex(newTabIndex);
+	};
+
+	const handlePageChange = (_: ChangeEvent<unknown>, value: number) => {
+		const newSkip = (value - 1) * limit;
+		setCurrPageNum(value);
+		listFilesInDataset(datasetId, folderId, newSkip, limit);
+		listFoldersInDataset(datasetId, folderId, newSkip, limit);
 	};
 
 	const setMetadata = (metadata: any) => {
@@ -461,18 +432,13 @@ export const Dataset = (): JSX.Element => {
 						<></>
 					)}
 					<Box display="flex" justifyContent="center" sx={{ m: 1 }}>
-						<ButtonGroup variant="contained" aria-label="previous next buttons">
-							<Button
-								aria-label="previous"
-								onClick={previous}
-								disabled={prevDisabled}
-							>
-								<ArrowBack /> Prev
-							</Button>
-							<Button aria-label="next" onClick={next} disabled={nextDisabled}>
-								Next <ArrowForward />
-							</Button>
-						</ButtonGroup>
+						<Pagination
+							count={Math.ceil(pageMetadata.total_count / limit)}
+							page={currPageNum}
+							onChange={handlePageChange}
+							shape="rounded"
+							variant="outlined"
+						/>
 					</Box>
 				</Grid>
 				<Grid item>

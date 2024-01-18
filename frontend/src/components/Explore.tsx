@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { ChangeEvent, useEffect, useState } from "react";
 import { Box, Button, Grid, Pagination, Tab, Tabs } from "@mui/material";
 
 import { RootState } from "../types/data";
@@ -62,7 +62,7 @@ export const Explore = (): JSX.Element => {
 	};
 
 	// pagination
-	const handlePageChange = (_: React.MouseEvent, value: number) => {
+	const handlePageChange = (_: ChangeEvent<unknown>, value: number) => {
 		const newSkip = (value - 1) * limit;
 		setCurrPageNum(value);
 		listDatasets(newSkip, limit, mine);
