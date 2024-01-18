@@ -1,4 +1,9 @@
+from typing import List, Union
+
 from pydantic import BaseModel
+
+from app.models.datasets import DatasetOut
+from app.models.files import FileOut
 
 
 class PageMetadata(BaseModel):
@@ -9,7 +14,7 @@ class PageMetadata(BaseModel):
 
 class Paged(BaseModel):
     metadata: PageMetadata
-    data: list
+    data: Union[List[DatasetOut], List[FileOut]]
 
 
 def _get_page_query(skip, limit):

@@ -62,7 +62,7 @@ export const Explore = (): JSX.Element => {
 	};
 
 	// pagination
-	const handlePageChange = (event, value) => {
+	const handlePageChange = (_: React.MouseEvent, value: number) => {
 		const newSkip = (value - 1) * limit;
 		setCurrPageNum(value);
 		listDatasets(newSkip, limit, mine);
