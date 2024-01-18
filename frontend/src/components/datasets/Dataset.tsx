@@ -373,7 +373,7 @@ export const Dataset = (): JSX.Element => {
 						</Box>
 					</TabPanel>
 					<TabPanel value={selectedTabIndex} index={1}>
-						{enableAddMetadata && datasetRole.role !== undefined && datasetRole.role !== "viewer" ? (
+						{enableAddMetadata ? (
 							<>
 								<EditMetadata
 									resourceType="dataset"
@@ -405,18 +405,15 @@ export const Dataset = (): JSX.Element => {
 									resourceId={datasetId}
 								/>
 								<Box textAlign="center">
-									{enableAddMetadata && datasetRole.role !== undefined && datasetRole.role !== "viewer" ?
-										<Button
-											variant="contained"
-											sx={{ m: 2 }}
-											onClick={() => {
-												setEnableAddMetadata(true);
-											}}
-										>
-										Add Metadata
-										</Button> :
-										<></>
-									}
+									<Button
+										variant="contained"
+										sx={{ m: 2 }}
+										onClick={() => {
+											setEnableAddMetadata(true);
+										}}
+									>
+									Add Metadata
+									</Button>
 								</Box>
 							</>
 						)}
