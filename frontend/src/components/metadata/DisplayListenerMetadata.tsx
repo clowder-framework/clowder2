@@ -3,22 +3,16 @@ import {Box, Grid, Typography} from "@mui/material";
 import {metadataConfig} from "../../metadata.config";
 import {useSelector, useDispatch} from "react-redux";
 import {RootState} from "../../types/data";
-import {fetchDatasetMetadata, fetchFileMetadata, fetchMetadataDefinitions} from "../../actions/metadata";
 import {fetchPublicFileMetadata} from "../../actions/public_file";
 import {fetchPublicDatasetMetadata} from "../../actions/public_dataset";
 import {Agent} from "./Agent";
 import {MetadataDeleteButton} from "./widgets/MetadataDeleteButton";
 import {ListenerMetadataEntry} from "../metadata/ListenerMetadataEntry";
-import React, { useEffect } from "react";
-import { Grid } from "@mui/material";
-import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "../../types/data";
 import {
 	fetchDatasetMetadata,
 	fetchFileMetadata,
 	fetchMetadataDefinitions,
 } from "../../actions/metadata";
-import { ListenerMetadataEntry } from "../metadata/ListenerMetadataEntry";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 
@@ -61,14 +55,8 @@ export const DisplayListenerMetadata = (props: MetadataType) => {
 	const fileMetadataList = useSelector(
 		(state: RootState) => state.metadata.fileMetadataList
 	);
-	const getMetadatDefinitions = (name: string | null, skip: number, limit: number) => dispatch(fetchMetadataDefinitions(name, skip, limit));
-	const metadataDefinitionList = useSelector((state: RootState) => state.metadata.metadataDefinitionList);
-	const listDatasetMetadata = (datasetId: string | undefined) => dispatch(fetchDatasetMetadata(datasetId));
-	const listFileMetadata = (fileId: string | undefined, version: number | undefined) => dispatch(fetchFileMetadata(fileId, version));
 	const listPublicDatasetMetadata = (datasetId: string | undefined) => dispatch(fetchPublicDatasetMetadata(datasetId));
 	const listPublicFileMetadata = (fileId: string | undefined, version: number | undefined) => dispatch(fetchPublicFileMetadata(fileId, version));
-	const datasetMetadataList = useSelector((state: RootState) => state.metadata.datasetMetadataList);
-	const fileMetadataList = useSelector((state: RootState) => state.metadata.fileMetadataList);
 	const publicDatasetMetadataList = useSelector((state: RootState) => state.metadata.publicDatasetMetadataList);
 	const publicFileMetadataList = useSelector((state: RootState) => state.metadata.publicFileMetadataList);
 

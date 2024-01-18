@@ -1,13 +1,3 @@
-import React, {useEffect} from "react";
-import {Box, Grid, Typography} from "@mui/material";
-import {metadataConfig} from "../../metadata.config";
-import {useSelector, useDispatch} from "react-redux";
-import {RootState} from "../../types/data";
-import {fetchDatasetMetadata, fetchFileMetadata, fetchMetadataDefinitions} from "../../actions/metadata";
-import {fetchPublicFileMetadata} from "../../actions/public_file";
-import {fetchPublicDatasetMetadata} from "../../actions/public_dataset";
-import {Agent} from "./Agent";
-import {MetadataDeleteButton} from "./widgets/MetadataDeleteButton";
 import React, { useEffect } from "react";
 import { Box, Grid, Typography } from "@mui/material";
 import { metadataConfig } from "../../metadata.config";
@@ -16,26 +6,26 @@ import { RootState } from "../../types/data";
 import {
 	fetchDatasetMetadata,
 	fetchFileMetadata,
-	fetchMetadataDefinitions,
+	fetchMetadataDefinitions, fetchPublicFileMetadata,
 } from "../../actions/metadata";
 import { Agent } from "./Agent";
 import { MetadataDeleteButton } from "./widgets/MetadataDeleteButton";
+import {fetchPublicDatasetMetadata} from "../../actions/public_dataset";
 
 type MetadataType = {
-	updateMetadata: any,
-	deleteMetadata: any,
-	resourceType:string|undefined,
-	resourceId:string|undefined,
-	publicView:boolean|false,
-}
+	updateMetadata: any;
+	deleteMetadata: any;
+	resourceType: string | undefined;
+	resourceId: string | undefined;
+	publicView: boolean | false;
+};
 
 /*
 This is the interface displayed already created metadata and allow eidts
 Uses only the list of metadata
 */
 export const DisplayMetadata = (props: MetadataType) => {
-
-	const {updateMetadata, deleteMetadata, resourceType, resourceId, publicView} = props;
+	const { updateMetadata, deleteMetadata, resourceType, resourceId,publicView } = props;
 
 	const dispatch = useDispatch();
 
@@ -57,21 +47,11 @@ export const DisplayMetadata = (props: MetadataType) => {
 	const fileMetadataList = useSelector(
 		(state: RootState) => state.metadata.fileMetadataList
 	);
-	const getMetadatDefinitions = (name:string|null, skip:number, limit:number) => dispatch(fetchMetadataDefinitions(name, skip,limit));
-	const metadataDefinitionList = useSelector((state: RootState) => state.metadata.metadataDefinitionList);
-	const listDatasetMetadata = (datasetId: string | undefined) => dispatch(fetchDatasetMetadata(datasetId));
-	const listFileMetadata = (fileId: string | undefined) => dispatch(fetchFileMetadata(fileId));
-	const listPublicDatasetMetadata = (datasetId: string | undefined) => dispatch(fetchPublicDatasetMetadata(datasetId));
-	const listPublicFileMetadata = (fileId: string | undefined) => dispatch(fetchPublicFileMetadata(fileId));
-	const datasetMetadataList = useSelector((state: RootState) => state.metadata.datasetMetadataList);
-	const fileMetadataList = useSelector((state: RootState) => state.metadata.fileMetadataList);
-	const publicDatasetMetadataList = useSelector((state: RootState) => state.metadata.publicDatasetMetadataList);
-	const publicFileMetadataList = useSelector((state: RootState) => state.metadata.publicFileMetadataList);
-
-
 	const datasetRole = useSelector(
 		(state: RootState) => state.dataset.datasetRole
 	);
+	const listPublicDatasetMetadata = (datasetId: string | undefined) => dispatch(fetchPublicDatasetMetadata(datasetId));
+	const listPublicFileMetadata = (fileId: string | undefined) => dispatch(fetchPublicFileMetadata(fileId));
 	console.log(updateMetadata, "updateMetadataDisplay");
 	useEffect(() => {
 		getMetadatDefinitions(null, 0, 100);
