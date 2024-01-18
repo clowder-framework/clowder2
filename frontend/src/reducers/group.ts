@@ -12,7 +12,13 @@ import {
 import { RECEIVE_GROUP_ROLE } from "../actions/authorization";
 import { DataAction } from "../types/action";
 import { GroupState } from "../types/data";
-import { GroupOut, RoleType } from "../openapi/v2";
+import {
+	GroupOut,
+	Paged,
+	PageMetadata,
+	RoleType,
+	UserOut,
+} from "../openapi/v2";
 import {
 	LIST_USERS,
 	PREFIX_SEARCH_USERS,
@@ -24,7 +30,7 @@ const defaultState: GroupState = {
 	groups: [],
 	about: <GroupOut>{},
 	role: <RoleType>{},
-	users: [],
+	users: <Paged>{ metadata: <PageMetadata>{}, data: <UserOut[]>[] },
 };
 
 const group = (state = defaultState, action: DataAction) => {

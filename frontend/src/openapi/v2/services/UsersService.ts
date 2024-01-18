@@ -1,6 +1,7 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { Paged } from '../models/Paged';
 import type { UserAPIKeyOut } from '../models/UserAPIKeyOut';
 import type { UserOut } from '../models/UserOut';
 import type { CancelablePromise } from '../core/CancelablePromise';
@@ -12,13 +13,13 @@ export class UsersService {
      * Get Users
      * @param skip
      * @param limit
-     * @returns UserOut Successful Response
+     * @returns Paged Successful Response
      * @throws ApiError
      */
     public static getUsersApiV2UsersGet(
         skip?: number,
         limit: number = 2,
-    ): CancelablePromise<Array<UserOut>> {
+    ): CancelablePromise<Paged> {
         return __request({
             method: 'GET',
             path: `/api/v2/users`,
@@ -117,14 +118,14 @@ export class UsersService {
      * @param text
      * @param skip
      * @param limit
-     * @returns UserOut Successful Response
+     * @returns Paged Successful Response
      * @throws ApiError
      */
     public static searchUsersApiV2UsersSearchGet(
         text: string,
         skip?: number,
         limit: number = 2,
-    ): CancelablePromise<Array<UserOut>> {
+    ): CancelablePromise<Paged> {
         return __request({
             method: 'GET',
             path: `/api/v2/users/search`,
@@ -144,14 +145,14 @@ export class UsersService {
      * @param prefix
      * @param skip
      * @param limit
-     * @returns UserOut Successful Response
+     * @returns Paged Successful Response
      * @throws ApiError
      */
     public static searchUsersApiV2UsersPrefixSearchGet(
         prefix: string,
         skip?: number,
         limit: number = 2,
-    ): CancelablePromise<Array<UserOut>> {
+    ): CancelablePromise<Paged> {
         return __request({
             method: 'GET',
             path: `/api/v2/users/prefixSearch`,

@@ -244,9 +244,11 @@ async def get_datasets(
             ],
         ).to_list()
 
+    # TODO have to change _id this way otherwise it won't work
+    # TODO need to research if there is other pydantic trick to make it work
     page = Paged(
         metadata=PageMetadata(**datasets_and_count[0]['metadata'][0], skip=skip, limit=limit),
-        data=[DatasetOut(**item) for item in datasets_and_count[0]['data']]
+        data=[DatasetOut(id=item.pop("_id"), **item) for item in datasets_and_count[0]['data']]
     )
 
     return page.dict()

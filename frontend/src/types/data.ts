@@ -156,7 +156,7 @@ export interface GroupState {
 	groups: GroupOut[];
 	about: GroupOut;
 	role: RoleType;
-	users: UserOut[];
+	users: Paged;
 }
 
 export interface MetadataState {

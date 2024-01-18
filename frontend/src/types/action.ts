@@ -19,7 +19,6 @@ import {
 	Paged,
 	RoleType,
 	UserAPIKeyOut,
-	UserOut,
 	VisualizationConfigOut,
 	VisualizationDataOut,
 } from "../openapi/v2";
@@ -420,12 +419,12 @@ interface ADD_GROUP_MEMBER {
 
 interface LIST_USERS {
 	type: "LIST_USERS";
-	users: UserOut[];
+	users: Paged;
 }
 
 interface PREFIX_SEARCH_USERS {
 	type: "PREFIX_SEARCH_USERS";
-	users: UserOut[];
+	users: Paged;
 }
 
 interface ASSIGN_GROUP_MEMBER_ROLE {

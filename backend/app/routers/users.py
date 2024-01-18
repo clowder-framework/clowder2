@@ -9,6 +9,7 @@ from itsdangerous.url_safe import URLSafeSerializer
 
 from app.config import settings
 from app.keycloak_auth import get_current_username
+from app.models.pages import Paged, _get_page_query, PageMetadata
 from app.models.users import (
     UserDB,
     UserOut,
@@ -22,9 +23,9 @@ router = APIRouter()
 
 @router.get("/keys", response_model=List[UserAPIKeyOut])
 async def get_user_api_keys(
-    current_user=Depends(get_current_username),
-    skip: int = 0,
-    limit: int = 10,
+        current_user=Depends(get_current_username),
+        skip: int = 0,
+        limit: int = 10,
 ):
     """List all api keys that user has created
 
@@ -44,9 +45,9 @@ async def get_user_api_keys(
 
 @router.post("/keys", response_model=str)
 async def generate_user_api_key(
-    name: str,
-    mins: int = settings.local_auth_expiration,
-    current_user=Depends(get_current_username),
+        name: str,
+        mins: int = settings.local_auth_expiration,
+        current_user=Depends(get_current_username),
 ):
     """Generate an API key that confers the user's privileges.
 
@@ -66,8 +67,8 @@ async def generate_user_api_key(
 
 @router.delete("/keys/{key_id}", response_model=UserAPIKeyOut)
 async def delete_user_api_key(
-    key_id: str,
-    current_user=Depends(get_current_username),
+        key_id: str,
+        current_user=Depends(get_current_username),
 ):
     """Delete API keys given ID
 
@@ -87,51 +88,67 @@ async def delete_user_api_key(
         raise HTTPException(status_code=404, detail=f"API key {key_id} not found.")
 
 
-@router.get("", response_model=List[UserOut])
+@router.get("", response_model=Paged)
 async def get_users(skip: int = 0, limit: int = 2):
-    users = await UserDB.find({}, skip=skip, limit=limit).to_list()
-    return [user.dict() for user in users]
-
-
-@router.get("/search", response_model=List[UserOut])
-async def search_users(
-    text: str,
-    skip: int = 0,
-    limit: int = 2,
-):
-    users = await UserDB.find(
-        Or(
-            RegEx(field=UserDB.email, pattern=text),
-            RegEx(field=UserDB.first_name, pattern=text),
-            RegEx(field=UserDB.last_name, pattern=text),
-        ),
-        skip=skip,
-        limit=limit,
+    users_and_count = await UserDB.find().aggregate(
+        [
+            _get_page_query(skip, limit)
+        ],
     ).to_list()
+    page = Paged(
+        metadata=PageMetadata(**users_and_count[0]['metadata'][0], skip=skip, limit=limit),
+        data=[UserOut(id=item.pop("_id"), **item) for item in users_and_count[0]['data']]
+    )
+    return page.dict()
 
-    return [user.dict() for user in users]
 
-
-@router.get("/prefixSearch", response_model=List[UserOut])
+@router.get("/search", response_model=Paged)
 async def search_users(
-    prefix: str,
-    skip: int = 0,
-    limit: int = 2,
+        text: str,
+        skip: int = 0,
+        limit: int = 2,
+):
+    users_and_count = await UserDB.find(Or(
+        RegEx(field=UserDB.email, pattern=text),
+        RegEx(field=UserDB.first_name, pattern=text),
+        RegEx(field=UserDB.last_name, pattern=text),
+    )).aggregate(
+        [
+            _get_page_query(skip, limit)
+        ],
+    ).to_list()
+    page = Paged(
+        metadata=PageMetadata(**users_and_count[0]['metadata'][0], skip=skip, limit=limit),
+        data=[UserOut(id=item.pop("_id"), **item) for item in users_and_count[0]['data']]
+    )
+    return page.dict()
+
+
+@router.get("/prefixSearch", response_model=Paged)
+async def search_users(
+        prefix: str,
+        skip: int = 0,
+        limit: int = 2,
 ):
     query_regx = f"^{prefix}.*"
-    users = await UserDB.find(
+    users_and_count = await UserDB.find(
         Or(RegEx(field=UserDB.email, pattern=query_regx)),
         sort=(+UserDB.email),
-        skip=skip,
-        limit=limit,
+    ).aggregate(
+        [
+            _get_page_query(skip, limit)
+        ],
     ).to_list()
-
-    return [user.dict() for user in users]
+    page = Paged(
+        metadata=PageMetadata(**users_and_count[0]['metadata'][0], skip=skip, limit=limit),
+        data=[UserOut(id=item.pop("_id"), **item) for item in users_and_count[0]['data']]
+    )
+    return page.dict()
 
 
 @router.get("/profile", response_model=UserOut)
 async def get_profile(
-    username=Depends(get_current_username),
+        username=Depends(get_current_username),
 ):
     if (user := await UserDB.find_one(UserDB.email == username)) is not None:
         return user.dict()
@@ -157,9 +174,9 @@ async def get_user_job_key(username: str):
     will be created, otherwise it will be re-used."""
     key = "__user_job_key"
     if (
-        job_key := await ListenerAPIKeyDB.find_one(
-            ListenerAPIKeyDB.user == username, ListenerAPIKeyDB.name == key
-        )
+            job_key := await ListenerAPIKeyDB.find_one(
+                ListenerAPIKeyDB.user == username, ListenerAPIKeyDB.name == key
+            )
     ) is not None:
         return job_key.hash
     else:
