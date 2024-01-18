@@ -343,17 +343,6 @@ export const File = (): JSX.Element => {
 							{...a11yProps(2)}
 							disabled={false}
 						/>
-						{fileRole.role !== undefined && fileRole.role !== "viewer" ?
-							<Tab
-								icon={<BuildIcon />}
-								iconPosition="start"
-								sx={TabStyle}
-								label="Extract"
-								{...a11yProps(4)}
-								disabled={false}
-							/> :
-							<></>
-						}
 						<Tab
 							icon={<BuildIcon />}
 							iconPosition="start"
