@@ -9,6 +9,11 @@
  *
  * - `id` - MongoDB document ObjectID "_id" field.
  * Mapped to the PydanticObjectId class
+ *
+ * Inherited from:
+ *
+ * - Pydantic BaseModel
+ * - [UpdateMethods](https://roman-right.github.io/beanie/api/interfaces/#aggregatemethods)
  */
 export type UserAPIKeyOut = {
     name: string;
@@ -16,8 +21,5 @@ export type UserAPIKeyOut = {
     user: string;
     created?: string;
     expires?: string;
-    /**
-     * MongoDB document ObjectID
-     */
     id?: string;
 }

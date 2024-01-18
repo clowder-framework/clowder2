@@ -12,6 +12,11 @@ import type { MongoDBRef } from './MongoDBRef';
  *
  * - `id` - MongoDB document ObjectID "_id" field.
  * Mapped to the PydanticObjectId class
+ *
+ * Inherited from:
+ *
+ * - Pydantic BaseModel
+ * - [UpdateMethods](https://roman-right.github.io/beanie/api/interfaces/#aggregatemethods)
  */
 export type MetadataOut = {
     '@context'?: Array<string>;
@@ -19,9 +24,6 @@ export type MetadataOut = {
     definition?: string;
     content: any;
     description?: string;
-    /**
-     * MongoDB document ObjectID
-     */
     id?: string;
     resource: MongoDBRef;
     agent: MetadataAgent;

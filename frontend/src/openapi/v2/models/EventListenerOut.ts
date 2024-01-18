@@ -12,9 +12,6 @@ export type EventListenerOut = {
     name: string;
     version?: string;
     description?: string;
-    /**
-     * MongoDB document ObjectID
-     */
     id?: string;
     creator?: UserOut;
     created?: string;

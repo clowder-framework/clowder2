@@ -11,13 +11,15 @@ import type { UserOut } from './UserOut';
  *
  * - `id` - MongoDB document ObjectID "_id" field.
  * Mapped to the PydanticObjectId class
+ *
+ * Inherited from:
+ *
+ * - Pydantic BaseModel
+ * - [UpdateMethods](https://roman-right.github.io/beanie/api/interfaces/#aggregatemethods)
  */
 export type DatasetOut = {
     name?: string;
     description?: string;
-    /**
-     * MongoDB document ObjectID
-     */
     id?: string;
     creator: UserOut;
     created?: string;
