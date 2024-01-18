@@ -28,6 +28,8 @@ import {
 	DatasetOut as Dataset,
 	DatasetRoles,
 	FileOut as File,
+	Paged,
+	PageMetadata,
 	UserOut,
 } from "../openapi/v2";
 
@@ -35,7 +37,7 @@ const defaultState: DatasetState = {
 	files: <File[]>[],
 	about: <Dataset>{ creator: <UserOut>{} },
 	datasetRole: <AuthorizationBase>{},
-	datasets: [],
+	datasets: <Paged>{ metadata: <PageMetadata>{}, data: <Dataset[]>[] },
 	newDataset: <Dataset>{},
 	newFile: <File>{},
 	newFiles: <File[]>[],
@@ -91,10 +93,11 @@ const dataset = (state = defaultState, action: DataAction) => {
 			return Object.assign({}, state, { newDataset: action.dataset });
 		case RESET_CREATE_DATASET:
 			return Object.assign({}, state, { newDataset: {} });
+		// TODO delete won't work rewrite filter
 		case DELETE_DATASET:
 			return Object.assign({}, state, {
 				datasets: state.datasets.filter(
-					(dataset) => dataset.id !== action.dataset.id
+					(dataset) => dataset.data.id !== action.dataset.id
 				),
 			});
 		default:

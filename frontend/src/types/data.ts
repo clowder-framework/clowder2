@@ -10,6 +10,7 @@ import {
 	GroupOut,
 	MetadataDefinitionOut,
 	MetadataOut as Metadata,
+	Paged,
 	RoleType,
 	UserAPIKeyOut,
 	UserOut,
@@ -133,7 +134,7 @@ export interface Thumbnail {
 
 export interface DatasetState {
 	files: FileSummary[];
-	datasets: Dataset[];
+	datasets: Paged;
 	newDataset: Dataset;
 	newFile: FileSummary;
 	about: Dataset;

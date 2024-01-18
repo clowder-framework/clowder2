@@ -16,6 +16,7 @@ import {
 	GroupOut as Group,
 	MetadataDefinitionOut as MetadataDefinition,
 	MetadataOut as Metadata,
+	Paged,
 	RoleType,
 	UserAPIKeyOut,
 	UserOut,
@@ -55,12 +56,12 @@ interface RECEIVE_FILE_ROLE {
 
 interface RECEIVE_DATASETS {
 	type: "RECEIVE_DATASETS";
-	datasets: Dataset[];
+	datasets: Paged;
 }
 
 interface DELETE_DATASET {
 	type: "DELETE_DATASET";
-	dataset: Dataset;
+	dataset: Paged;
 }
 
 interface RECEIVE_FILE_EXTRACTED_METADATA {
