@@ -1,5 +1,29 @@
 import { handleErrors } from "./common";
 import { V2 } from "../openapi";
+export const RECEIVE_PUBLIC_METADATA_DEFINITIONS = "RECEIVE_PUBLIC_METADATA_DEFINITIONS";
+
+export function fetchPublicMetadataDefinitions(name, skip, limit) {
+	return (dispatch) => {
+		return V2.PublicMetadataService.getMetadataDefinitionListApiV2PublicMetadataDefinitionGet(
+			name,
+			skip,
+			limit
+		)
+			.then((json) => {
+				dispatch({
+					type: RECEIVE_PUBLIC_METADATA_DEFINITIONS,
+					publicMetadataDefinitionList: json,
+					receivedAt: Date.now(),
+				});
+			})
+			.catch((reason) => {
+				dispatch(
+					handleErrors(reason, fetchPublicMetadataDefinitions(name, skip, limit))
+				);
+			});
+	};
+}
+
 
 export const RECEIVE_METADATA_DEFINITIONS = "RECEIVE_METADATA_DEFINITIONS";
 

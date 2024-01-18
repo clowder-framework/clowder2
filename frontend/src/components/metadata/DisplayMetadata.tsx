@@ -8,7 +8,7 @@ import {
 	fetchFileMetadata,
 	fetchMetadataDefinitions,
 	fetchPublicFileMetadata,
-	fetchPublicMetaDataDefinitions,
+	fetchPublicMetadataDefinitions,
 } from "../../actions/metadata";
 import { Agent } from "./Agent";
 import { MetadataDeleteButton } from "./widgets/MetadataDeleteButton";
@@ -36,8 +36,16 @@ export const DisplayMetadata = (props: MetadataType) => {
 		skip: number,
 		limit: number
 	) => dispatch(fetchMetadataDefinitions(name, skip, limit));
+	const getPublicMetadatDefinitions = (
+		name: string | null,
+		skip: number,
+		limit: number
+	) => dispatch(fetchPublicMetadataDefinitions(name, skip, limit));
 	const metadataDefinitionList = useSelector(
 		(state: RootState) => state.metadata.metadataDefinitionList
+	);
+	const publicMetadataDefinitionList = useSelector(
+		(state: RootState) => state.metadata.publicMetadataDefinitionList
 	);
 	const listDatasetMetadata = (datasetId: string | undefined) =>
 		dispatch(fetchDatasetMetadata(datasetId));
@@ -63,6 +71,7 @@ export const DisplayMetadata = (props: MetadataType) => {
 	console.log(updateMetadata, "updateMetadataDisplay");
 	useEffect(() => {
 		getMetadatDefinitions(null, 0, 100);
+		getPublicMetadatDefinitions(null, 0, 100);
 	}, []);
 
 	// complete metadata list with both definition and values
@@ -82,18 +91,22 @@ export const DisplayMetadata = (props: MetadataType) => {
 			}
 		}
 	}, [resourceType, resourceId]);
+
+
 	console.log(metadataConfig);
 	return (
 		<>
 			{(() => {
 				let metadataList = [];
+				let currentMetadataDefList = [];
 				if (resourceType === "dataset" && !publicView) metadataList = datasetMetadataList;
 				else if (resourceType === "file" && !publicView) metadataList = fileMetadataList;
 				else if (resourceType === "file" && publicView) metadataList = publicFileMetadataList;
 				else if (resourceType === "dataset" && publicView) metadataList = publicDatasetMetadataList;
-				console.log('public metadata', publicDatasetMetadataList, publicFileMetadataList);
-				console.log('the metadata list', metadataList, publicView);
-				return metadataDefinitionList.map((metadataDef) => {
+				if (publicView) currentMetadataDefList = publicMetadataDefinitionList;
+				else currentMetadataDefList = metadataDefinitionList;
+
+				return currentMetadataDefList.map((metadataDef) => {
 					return metadataList.map((metadata, idx) => {
 						console.log('metadata', metadata, idx, 'index');
 						if (metadataDef.name === metadata.definition) {

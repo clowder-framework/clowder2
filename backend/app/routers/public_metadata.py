@@ -29,7 +29,6 @@ router = APIRouter()
 @router.get("/definition", response_model=List[MetadataDefinitionOut])
 async def get_metadata_definition_list(
     name: Optional[str] = None,
-    user=Depends(get_current_user),
     skip: int = 0,
     limit: int = 2,
 ):
