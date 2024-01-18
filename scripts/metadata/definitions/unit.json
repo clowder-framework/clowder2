@@ -1,6 +1,10 @@
 {
     "name" : "Unit",
     "description" : "Unit",
+    "required_for_items": {
+        "datasets": false,
+        "files": false
+    },
     "context" : [
         {
             "doi" : "https://schema.org/QuantitativeValue"

@@ -64,6 +64,10 @@ class MetadataDefinitionBase(BaseModel):
     Example: {
         "name" : "LatLon",
         "description" : "A set of Latitude/Longitude coordinates",
+        "required_for_items": {
+            "datasets": false,
+            "files": false
+        },
         "context" : [
             {
             "longitude" : "https://schema.org/longitude",

@@ -178,7 +178,6 @@ export function MetadataDefinitions() {
 							onClick={() => {
 								setCreateMetadataDefinitionOpen(true);
 							}}
-							endIcon={<InfoIcon />}
 							sx={{ float: "right" }}
 						>
 							New Metadata Definition

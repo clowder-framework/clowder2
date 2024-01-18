@@ -4,6 +4,7 @@ import { metadataConfig } from "../../metadata.config";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../types/data";
 import { fetchMetadataDefinitions } from "../../actions/metadata";
+import {theme} from "../../theme";
 
 type MetadataType = {
 	setMetadata: any;
@@ -37,43 +38,48 @@ export const CreateMetadata = (props: MetadataType) => {
 		<>
 			{metadataDefinitionList.map((metadata, idx) => {
 				return (
-					<Box className="inputGroup" key={idx}>
-						{sourceItem === "datasets" && metadata.required_for_items.datasets ? (
-						  <Typography>
-							This metadata is required for creating new datasets.
-						  </Typography>
-						) : sourceItem === "files" && metadata.required_for_items.files ? (
-						  <Typography>
-							This metadata is required for creating new files.
-						  </Typography>
-						) : (
-						  <Typography>This metadata is optional for creating new {sourceItem}.</Typography>
-						)}
-						<Typography variant="h6">
-							{metadata.name}{" "}
-							{metadata.fields.some((field) => field.required && ((sourceItem == "datasets" && metadata.required_for_items.datasets) || (sourceItem == "files" && metadata.required_for_items.files)) && (<span>*</span>))}
-						</Typography>
-						<Typography variant="subtitle2">{metadata.description}</Typography>
-						{metadata.fields.map((field, idxx) => {
-							return React.cloneElement(
-								// if nothing match fall back to default widget
-								metadataConfig[field.widgetType ?? "NA"] ??
+					<Box className="inputGroup" key={idx} >
+						<div style={{display: 'flex', alignItems: 'center'}}>
+							<Typography variant="h6">
+								{metadata.name}{" "}
+								{metadata.fields.some((field) => field.required && ((sourceItem == "datasets" && metadata.required_for_items.datasets) || (sourceItem == "files" && metadata.required_for_items.files)) && (
+									<span>*</span>))}{" "}
+							</Typography>
+							{sourceItem === "datasets" && metadata.required_for_items.datasets ? (
+								<Typography variant="subtitle2" style={{color: theme.palette.primary.light}}>
+									 - required for datasets
+								</Typography>
+							) : sourceItem === "files" && metadata.required_for_items.files ? (
+								<Typography variant="subtitle2" style={{color: theme.palette.primary.light}}>
+									 - required for files
+								</Typography>
+							) : (
+								<Typography variant="subtitle2" style={{color: theme.palette.primary.light}}>
+									 - optional for {sourceItem}</Typography>
+							)}
+						</div>
+							<Typography variant="subtitle2">{metadata.description}</Typography>
+							{metadata.fields.map((field, idxx) => {
+								return React.cloneElement(
+									// if nothing match fall back to default widget
+									metadataConfig[field.widgetType ?? "NA"] ??
 									metadataConfig["NA"],
-								{
-									widgetName: metadata.name,
-									fieldName: field.name,
-									options: field.config.options ?? [],
-									setMetadata: setMetadata,
-									initialReadOnly: false,
-									isRequired: field.required,
-									datasetRole: datasetRole,
-									key: idxx
-								}
-							);
-						})}
+									{
+										widgetName: metadata.name,
+										fieldName: field.name,
+										options: field.config.options ?? [],
+										setMetadata: setMetadata,
+										initialReadOnly: false,
+										isRequired: field.required,
+										datasetRole: datasetRole,
+										key: idxx
+									}
+								);
+							})}
 					</Box>
-				);
+			);
 			})}
-		</>
-	);
-};
+			</>
+			)
+				;
+			};

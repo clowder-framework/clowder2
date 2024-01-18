@@ -12,40 +12,44 @@ import type { MetadataRequiredForItems } from './MetadataRequiredForItems';
  * Example: {
      * "name" : "LatLon",
      * "description" : "A set of Latitude/Longitude coordinates",
-     * "context" : [
-         * {
-             * "longitude" : "https://schema.org/longitude",
-             * "latitude" : "https://schema.org/latitude"
-             * },
-             * ],
-             * "fields" : [
-                 * {
-                     * "name" : "longitude",
-                     * "list" : false,
-                     * "widgetType": "TextField",
-                     * "config": {
-                         * "type" : "float"
-                         * },
-                         * "required" : true
-                         * },
-                         * {
-                             * "name" : "latitude",
-                             * "list" : false,
-                             * "widgetType": "TextField",
-                             * "config": {
-                                 * "type" : "float"
-                                 * },
-                                 * "required" : true
-                                 * }
-                                 * ]
-                                 * }
-                                 */
-                                export type MetadataDefinitionIn = {
-                                    name: string;
-                                    description?: string;
-                                    required_for_items: MetadataRequiredForItems;
-                                    created?: string;
-                                    '@context'?: Array<string>;
-                                    context_url?: string;
-                                    fields: Array<MetadataField>;
-                                }
+     * "required_for_items": {
+         * "datasets": false,
+         * "files": false
+         * },
+         * "context" : [
+             * {
+                 * "longitude" : "https://schema.org/longitude",
+                 * "latitude" : "https://schema.org/latitude"
+                 * },
+                 * ],
+                 * "fields" : [
+                     * {
+                         * "name" : "longitude",
+                         * "list" : false,
+                         * "widgetType": "TextField",
+                         * "config": {
+                             * "type" : "float"
+                             * },
+                             * "required" : true
+                             * },
+                             * {
+                                 * "name" : "latitude",
+                                 * "list" : false,
+                                 * "widgetType": "TextField",
+                                 * "config": {
+                                     * "type" : "float"
+                                     * },
+                                     * "required" : true
+                                     * }
+                                     * ]
+                                     * }
+                                     */
+                                    export type MetadataDefinitionIn = {
+                                        name: string;
+                                        description?: string;
+                                        required_for_items: MetadataRequiredForItems;
+                                        created?: string;
+                                        '@context'?: Array<string>;
+                                        context_url?: string;
+                                        fields: Array<MetadataField>;
+                                    }
