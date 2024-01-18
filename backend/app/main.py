@@ -130,7 +130,7 @@ api_router.include_router(
 )
 api_router.include_router(
     public_files.router,
-    prefix="/public/files",
+    prefix="/public_files",
     tags=["public_files"],
 )
 api_router.include_router(

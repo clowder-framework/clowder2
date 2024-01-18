@@ -2,9 +2,8 @@ import React, { useEffect, useState } from "react";
 import ShowMoreText from "react-show-more-text";
 import { readTextFromFile } from "../../../utils/common";
 
-import { downloadVisData, fileDownloaded } from "../../../utils/visualization";
+import { downloadVisData,  publicFileDownloaded } from "../../../utils/visualization";
 import {downloadPublicVisData} from "../../../actions/public_visualization";
-import {filePublicDownloaded} from "../../../actions/public_file";
 
 type TextProps = {
 	fileId?: string;
@@ -15,7 +14,7 @@ type TextProps = {
 export default function Text(props: TextProps) {
 	const { fileId, visualizationId, publicView } = props;
 	const [text, setText] = useState("");
-
+	console.log('text vis card');
 	useEffect(() => {
 		const processBlob = async () => {
 			try {
@@ -28,9 +27,13 @@ export default function Text(props: TextProps) {
 					}
 				} else {
 					if (publicView){
-						blob = await filePublicDownloaded(fileId);
+						console.log('public file download blob');
+						blob = await publicFileDownloaded(fileId);
+						console.log(blob);
 					} else {
-						blob = await fileDownloaded(fileId, 0);
+						console.log('downloading blob here');
+						blob = await publicFileDownloaded(fileId);
+						console.log(blob);
 					}
 				}
 				const file = new File([blob], "text.tmp");

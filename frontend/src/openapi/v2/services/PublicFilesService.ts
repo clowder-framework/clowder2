@@ -21,7 +21,7 @@ export class PublicFilesService {
     ): CancelablePromise<FileOut> {
         return __request({
             method: 'GET',
-            path: `/api/v2/public/files/${fileId}/summary`,
+            path: `/api/v2/public_files/${fileId}/summary`,
             errors: {
                 422: `Validation Error`,
             },
@@ -41,7 +41,7 @@ export class PublicFilesService {
     ): CancelablePromise<FileOut> {
         return __request({
             method: 'GET',
-            path: `/api/v2/public/files/${fileId}/version_details`,
+            path: `/api/v2/public_files/${fileId}/version_details`,
             query: {
                 'version_num': versionNum,
             },
@@ -66,7 +66,7 @@ export class PublicFilesService {
     ): CancelablePromise<Array<FileVersion>> {
         return __request({
             method: 'GET',
-            path: `/api/v2/public/files/${fileId}/versions`,
+            path: `/api/v2/public_files/${fileId}/versions`,
             query: {
                 'skip': skip,
                 'limit': limit,
@@ -92,7 +92,7 @@ export class PublicFilesService {
     ): CancelablePromise<any> {
         return __request({
             method: 'GET',
-            path: `/api/v2/public/files/${fileId}`,
+            path: `/api/v2/public_files/${fileId}`,
             query: {
                 'version': version,
                 'increment': increment,
@@ -114,7 +114,7 @@ export class PublicFilesService {
     ): CancelablePromise<any> {
         return __request({
             method: 'GET',
-            path: `/api/v2/public/files/${fileId}/thumbnail`,
+            path: `/api/v2/public_files/${fileId}/thumbnail`,
             errors: {
                 422: `Validation Error`,
             },
@@ -139,7 +139,7 @@ export class PublicFilesService {
     ): CancelablePromise<Array<MetadataOut>> {
         return __request({
             method: 'GET',
-            path: `/api/v2/public/files/${fileId}/metadata`,
+            path: `/api/v2/public_files/${fileId}/metadata`,
             query: {
                 'version': version,
                 'all_versions': allVersions,

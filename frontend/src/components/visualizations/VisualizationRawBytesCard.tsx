@@ -9,7 +9,7 @@ type previewProps = {
 
 export const VisualizationRawBytesCard = (props: previewProps) => {
 	const { visComponentDefinition, fileId } = props;
-
+	console.log('raw bytes card');
 	return (
 		<Grid item xs={12} sm={4} md={4} lg={4} xl={4}>
 			<Card>

@@ -57,3 +57,17 @@ export async function fileDownloaded(fileId, fileVersionNum = 0) {
 		return "";
 	}
 }
+
+export async function publicFileDownloaded(fileId) {
+	let endpoint = `${config.hostname}/api/v2/public_files/${fileId}`;
+	const response = await fetch(endpoint, {
+		method: "GET",
+		mode: "cors",
+	});
+
+	if (response.status === 200) {
+		return await response.blob();
+	} else {
+		return "";
+	}
+}
