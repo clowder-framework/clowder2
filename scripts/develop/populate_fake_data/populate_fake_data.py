@@ -74,10 +74,7 @@ def upload_metadata_definition(api):
     metadata_definition = {
         "name": "LatLon",
         "description": "A set of Latitude/Longitude coordinates",
-        "required_for_items": {
-            "datasets": True,
-            "files": True
-        },
+        "required_for_items": {"datasets": False, "files": False},
         "context": [
             {
                 "longitude": "https://schema.org/longitude",
@@ -112,10 +109,7 @@ def upload_metadata_dataset(fake, api, dataset_id):
     metadata_definition = {
         "name": "LatLon",
         "description": "A set of Latitude/Longitude coordinates",
-        "required_for_items": {
-            "datasets": True,
-            "files": True
-        },
+        "required_for_items": {"datasets": False, "files": False},
         "context": [
             {
                 "longitude": "https://schema.org/longitude",
@@ -166,10 +160,7 @@ def upload_metadata_file(fake, api, file_id):
     metadata_definition = {
         "name": "LatLon",
         "description": "A set of Latitude/Longitude coordinates",
-        "required_for_items": {
-            "datasets": False,
-            "files": False
-        },
+        "required_for_items": {"datasets": False, "files": False},
         "context": [
             {
                 "longitude": "https://schema.org/longitude",
