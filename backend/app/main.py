@@ -35,6 +35,7 @@ from app.routers import (
     users,
     authorization,
     metadata,
+    public_metadata,
     files,
     public_files,
     metadata_files,
@@ -115,6 +116,11 @@ api_router.include_router(
     prefix="/metadata",
     tags=["metadata"],
     dependencies=[Depends(get_current_username)],
+)
+api_router.include_router(
+    public_metadata.router,
+    prefix="/public_metadata",
+    tags=["public_metadata"],
 )
 api_router.include_router(
     files.router,

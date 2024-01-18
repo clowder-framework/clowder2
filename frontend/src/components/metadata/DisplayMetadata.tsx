@@ -6,7 +6,9 @@ import { RootState } from "../../types/data";
 import {
 	fetchDatasetMetadata,
 	fetchFileMetadata,
-	fetchMetadataDefinitions, fetchPublicFileMetadata,
+	fetchMetadataDefinitions,
+	fetchPublicFileMetadata,
+	fetchPublicMetaDataDefinitions,
 } from "../../actions/metadata";
 import { Agent } from "./Agent";
 import { MetadataDeleteButton } from "./widgets/MetadataDeleteButton";
@@ -41,6 +43,10 @@ export const DisplayMetadata = (props: MetadataType) => {
 		dispatch(fetchDatasetMetadata(datasetId));
 	const listFileMetadata = (fileId: string | undefined) =>
 		dispatch(fetchFileMetadata(fileId));
+	const listPublicDatasetMetadata = (datasetId: string | undefined) =>
+		dispatch(fetchPublicDatasetMetadata(datasetId));
+	const listPublicFileMetadata = (fileId: string | undefined) =>
+		dispatch(fetchPublicFileMetadata(fileId));
 	const datasetMetadataList = useSelector(
 		(state: RootState) => state.metadata.datasetMetadataList
 	);
@@ -50,8 +56,10 @@ export const DisplayMetadata = (props: MetadataType) => {
 	const datasetRole = useSelector(
 		(state: RootState) => state.dataset.datasetRole
 	);
-	const listPublicDatasetMetadata = (datasetId: string | undefined) => dispatch(fetchPublicDatasetMetadata(datasetId));
-	const listPublicFileMetadata = (fileId: string | undefined) => dispatch(fetchPublicFileMetadata(fileId));
+	const publicDatasetMetadataList = useSelector(
+		(state: RootState) => state.metadata.publicDatasetMetadataList);
+	const publicFileMetadataList = useSelector(
+		(state: RootState) => state.metadata.publicFileMetadataList);
 	console.log(updateMetadata, "updateMetadataDisplay");
 	useEffect(() => {
 		getMetadatDefinitions(null, 0, 100);
@@ -74,16 +82,20 @@ export const DisplayMetadata = (props: MetadataType) => {
 			}
 		}
 	}, [resourceType, resourceId]);
-
+	console.log(metadataConfig);
 	return (
 		<>
 			{(() => {
 				let metadataList = [];
-				if (resourceType === "dataset") metadataList = datasetMetadataList;
-				else if (resourceType === "file") metadataList = fileMetadataList;
-
+				if (resourceType === "dataset" && !publicView) metadataList = datasetMetadataList;
+				else if (resourceType === "file" && !publicView) metadataList = fileMetadataList;
+				else if (resourceType === "file" && publicView) metadataList = publicFileMetadataList;
+				else if (resourceType === "dataset" && publicView) metadataList = publicDatasetMetadataList;
+				console.log('public metadata', publicDatasetMetadataList, publicFileMetadataList);
+				console.log('the metadata list', metadataList, publicView);
 				return metadataDefinitionList.map((metadataDef) => {
 					return metadataList.map((metadata, idx) => {
+						console.log('metadata', metadata, idx, 'index');
 						if (metadataDef.name === metadata.definition) {
 							return (
 								<Box className="inputGroup" key={idx}>
@@ -94,6 +106,7 @@ export const DisplayMetadata = (props: MetadataType) => {
 									{
 										// construct metadata using its definition
 										metadataDef.fields.map((field, idxx) => {
+											console.log('field', field, idxx);
 											return React.cloneElement(
 												metadataConfig[field.widgetType ?? "NA"] ??
 													metadataConfig["NA"],

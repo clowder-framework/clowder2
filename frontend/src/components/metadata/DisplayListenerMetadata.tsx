@@ -61,8 +61,10 @@ export const DisplayListenerMetadata = (props: MetadataType) => {
 	const fileMetadataList = useSelector(
 		(state: RootState) => state.metadata.fileMetadataList
 	);
-	const publicDatasetMetadataList = useSelector((state: RootState) => state.metadata.publicDatasetMetadataList);
-	const publicFileMetadataList = useSelector((state: RootState) => state.metadata.publicFileMetadataList);
+	const publicDatasetMetadataList = useSelector(
+		(state: RootState) => state.metadata.publicDatasetMetadataList);
+	const publicFileMetadataList = useSelector(
+		(state: RootState) => state.metadata.publicFileMetadataList);
 
 
 
