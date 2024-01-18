@@ -267,6 +267,7 @@ async def get_dataset_files(
     dataset_id: str,
     folder_id: Optional[str] = None,
     authenticated: bool = Depends(CheckStatus("AUTHENTICATED")),
+    public: bool = Depends(CheckStatus("PUBLIC")),
     user_id=Depends(get_user),
     skip: int = 0,
     limit: int = 10,
@@ -490,7 +491,7 @@ async def save_file(
                 status_code=401, detail=f"User not found. Session might have expired."
             )
 
-        new_file = FileDB(name=file.filename, creator=user, dataset_id=dataset.id)
+        new_file = FileDB(name=file.filename, creator=user, dataset_id=dataset.id, status=dataset.status)
 
         if folder_id is not None:
             if (folder := await FolderDB.get(PydanticObjectId(folder_id))) is not None:
@@ -533,7 +534,7 @@ async def save_files(
                     detail=f"User not found. Session might have expired.",
                 )
 
-            new_file = FileDB(name=file.filename, creator=user, dataset_id=dataset.id)
+            new_file = FileDB(name=file.filename, creator=user, dataset_id=dataset.id, status=dataset.status)
 
             if folder_id is not None:
                 if (
