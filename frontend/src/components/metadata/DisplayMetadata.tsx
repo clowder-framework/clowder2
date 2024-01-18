@@ -68,7 +68,6 @@ export const DisplayMetadata = (props: MetadataType) => {
 		(state: RootState) => state.metadata.publicDatasetMetadataList);
 	const publicFileMetadataList = useSelector(
 		(state: RootState) => state.metadata.publicFileMetadataList);
-	console.log(updateMetadata, "updateMetadataDisplay");
 	useEffect(() => {
 		getMetadatDefinitions(null, 0, 100);
 		getPublicMetadatDefinitions(null, 0, 100);
@@ -92,8 +91,6 @@ export const DisplayMetadata = (props: MetadataType) => {
 		}
 	}, [resourceType, resourceId]);
 
-
-	console.log(metadataConfig);
 	return (
 		<>
 			{(() => {

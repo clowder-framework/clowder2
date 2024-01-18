@@ -26,7 +26,7 @@ const defaultState: MetadataState = {
 	fileMetadataList: [],
 	publicFileMetadataList: [],
 	metadataDefinitionList: [],
-	publicMetadataDefinitionsList: [],
+	publicMetadataDefinitionList: [],
 	metadataDefinition: <MetadataDefinitionOut>{},
 };
 
