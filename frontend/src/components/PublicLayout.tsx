@@ -158,7 +158,7 @@ export default function PersistentDrawerLeft(props) {
 					</Link>
 
 					{/*for searching*/}
-					<SearchDiv hidden={embeddedSearchHidden}>
+					<SearchDiv hidden={true}>
 						{/*	<InputSearchBox />*/}
 						<EmbeddedSearch />
 					</SearchDiv>
@@ -242,14 +242,15 @@ export default function PersistentDrawerLeft(props) {
 				</List>
 				<Divider />
 				<List>
-					<ListItem key={"search"} disablePadding>
-						<ListItemButton component={RouterLink} to="/search">
-							<ListItemIcon>
-								<SearchDatasetIcon />
-							</ListItemIcon>
-							<ListItemText primary={"Search"} />
-						</ListItemButton>
-					</ListItem>
+					{/*search commented out for now*/}
+					{/*<ListItem key={"search"} disablePadding>*/}
+					{/*	<ListItemButton component={RouterLink} to="/search">*/}
+					{/*		<ListItemIcon>*/}
+					{/*			<SearchDatasetIcon />*/}
+					{/*		</ListItemIcon>*/}
+					{/*		<ListItemText primary={"Search"} />*/}
+					{/*	</ListItemButton>*/}
+					{/*</ListItem>*/}
 				</List>
 				<Divider />
 			</Drawer>
