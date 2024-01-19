@@ -126,6 +126,12 @@ export const Dataset = (): JSX.Element => {
 	const pageMetadata = useSelector(
 		(state: RootState) => state.dataset.files.metadata
 	);
+	const filesInDataset = useSelector(
+		(state: RootState) => state.dataset.files.data
+	);
+	const foldersInDataset = useSelector(
+		(state: RootState) => state.folder.folders
+	);
 
 	useEffect(() => {
 		listFilesInDataset(datasetId, folderId, (currPageNum - 1) * limit, limit);
@@ -347,7 +353,12 @@ export const Dataset = (): JSX.Element => {
 						) : (
 							<></>
 						)}
-						<FilesTable datasetId={datasetId} folderId={folderId} />
+						<FilesTable
+							datasetId={datasetId}
+							folderId={folderId}
+							filesInDataset={filesInDataset}
+							foldersInDataset={foldersInDataset}
+						/>
 					</TabPanel>
 					<TabPanel value={selectedTabIndex} index={1}>
 						<Visualization datasetId={datasetId} />

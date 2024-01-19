@@ -6,8 +6,6 @@ import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
-import { useSelector } from "react-redux";
-import { RootState } from "../../types/data";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@mui/material";
 import FolderIcon from "@mui/icons-material/Folder";
@@ -15,10 +13,13 @@ import { theme } from "../../theme";
 import { parseDate } from "../../utils/common";
 import { FilesTableFileEntry } from "./FilesTableFileEntry";
 import FolderMenu from "./FolderMenu";
+import { FileOut, FolderOut } from "../../openapi/v2";
 
 type FilesTableProps = {
 	datasetId: string | undefined;
 	folderId: string | null;
+	filesInDataset: FileOut[];
+	foldersInDataset: FolderOut[];
 };
 
 const iconStyle = {
@@ -27,26 +28,20 @@ const iconStyle = {
 };
 
 export default function FilesTable(props: FilesTableProps) {
-	// mapStateToProps
-	const filesInDataset = useSelector(
-		(state: RootState) => state.dataset.files.data
-	);
-	const foldersInDataset = useSelector(
-		(state: RootState) => state.folder.folders
-	);
+	const { folderId, datasetId, filesInDataset, foldersInDataset } = props;
+
 	// use history hook to redirect/navigate between routes
 	const history = useNavigate();
 	// get existing folder
-	const parentFolderId = props.folderId;
 	const selectFile = (selectedFileId: string | undefined) => {
 		// Redirect to file route with file Id and dataset id and folderId
 		history(
-			`/files/${selectedFileId}?dataset=${props.datasetId}&folder=${parentFolderId}&verNum=${selectedFileId}`
+			`/files/${selectedFileId}?dataset=${datasetId}&folder=${folderId}&verNum=${selectedFileId}`
 		);
 	};
 	const selectFolder = (selectedFolderId: string | undefined) => {
 		// Redirect to file route with file Id and dataset id
-		history(`/datasets/${props.datasetId}?folder=${selectedFolderId}`);
+		history(`/datasets/${datasetId}?folder=${selectedFolderId}`);
 	};
 
 	return (
@@ -63,7 +58,7 @@ export default function FilesTable(props: FilesTableProps) {
 					</TableRow>
 				</TableHead>
 				<TableBody>
-					{foldersInDataset.map((folder) => (
+					{foldersInDataset.map((folder: FolderOut) => (
 						<TableRow
 							key={folder.id}
 							sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
@@ -83,13 +78,13 @@ export default function FilesTable(props: FilesTableProps) {
 							</TableCell>
 						</TableRow>
 					))}
-					{filesInDataset.map((file) => (
+					{filesInDataset.map((file: FileOut) => (
 						<FilesTableFileEntry
 							iconStyle={iconStyle}
 							selectFile={selectFile}
 							file={file}
 							key={file.id}
-							parentFolderId={parentFolderId}
+							parentFolderId={folderId}
 						/>
 					))}
 				</TableBody>
