@@ -273,7 +273,7 @@ async def get_dataset_files(
     limit: int = 10,
     allow: bool = Depends(Authorization("viewer")),
 ):
-    if authenticated:
+    if authenticated or public:
         query = [
             FileDBViewList.dataset_id == ObjectId(dataset_id),
         ]
