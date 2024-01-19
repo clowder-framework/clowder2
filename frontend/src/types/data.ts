@@ -1,10 +1,10 @@
 import {
 	AuthorizationBase,
-	DatasetOut as Dataset,
+	DatasetOut,
 	DatasetRoles,
 	EventListenerJobDB,
 	EventListenerOut as Listener,
-	FileOut as FileSummary,
+	FileOut,
 	FileVersion,
 	FolderOut,
 	GroupOut,
@@ -135,9 +135,10 @@ export interface Thumbnail {
 export interface DatasetState {
 	files: Paged;
 	datasets: Paged;
-	newDataset: Dataset;
-	newFile: FileSummary;
-	about: Dataset;
+	newDataset: DatasetOut;
+	newFile: FileOut;
+	newFiles: FileOut[];
+	about: DatasetOut;
 	datasetRole: AuthorizationBase;
 	roles: DatasetRoles;
 }

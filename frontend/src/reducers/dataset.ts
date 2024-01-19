@@ -25,8 +25,10 @@ import { DataAction } from "../types/action";
 import { DatasetState } from "../types/data";
 import {
 	AuthorizationBase,
+	DatasetOut,
 	DatasetOut as Dataset,
 	DatasetRoles,
+	FileOut,
 	FileOut as File,
 	Paged,
 	PageMetadata,
@@ -50,7 +52,12 @@ const dataset = (state = defaultState, action: DataAction) => {
 			return Object.assign({}, state, { files: action.files });
 		case DELETE_FILE:
 			return Object.assign({}, state, {
-				files: state.files.filter((file) => file.id !== action.file.id),
+				files: {
+					...state.files,
+					data: state.files.data.filter(
+						(file: FileOut) => file.id !== action.file.id
+					),
+				},
 			});
 		case CREATE_FILE:
 			return Object.assign({}, state, {
@@ -74,9 +81,12 @@ const dataset = (state = defaultState, action: DataAction) => {
 			return Object.assign({}, state, {});
 		case UPDATE_FILE:
 			return Object.assign({}, state, {
-				files: state.files.map((file) =>
-					file.id === action.file.id ? action.file : file
-				),
+				files: {
+					...state.files,
+					data: state.files.data.map((file: FileOut) =>
+						file.id === action.file.id ? action.file : file
+					),
+				},
 			});
 		case RECEIVE_DATASET_ABOUT:
 			return Object.assign({}, state, { about: action.about });
@@ -92,12 +102,14 @@ const dataset = (state = defaultState, action: DataAction) => {
 			return Object.assign({}, state, { newDataset: action.dataset });
 		case RESET_CREATE_DATASET:
 			return Object.assign({}, state, { newDataset: {} });
-		// TODO delete won't work rewrite filter
 		case DELETE_DATASET:
 			return Object.assign({}, state, {
-				datasets: state.datasets.filter(
-					(dataset) => dataset.data.id !== action.dataset.id
-				),
+				datasets: {
+					...state.datasets,
+					data: state.datasets.data.filter(
+						(dataset: DatasetOut) => dataset.id !== action.dataset.id
+					),
+				},
 			});
 		default:
 			return state;

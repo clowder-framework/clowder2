@@ -11,6 +11,7 @@ import {
 	DatasetRoles,
 	EventListenerJobOut,
 	EventListenerJobUpdateOut,
+	FileOut,
 	FileOut as FileSummary,
 	FileVersion,
 	GroupOut as Group,
@@ -26,6 +27,11 @@ import {
 interface RECEIVE_FILES_IN_DATASET {
 	type: "RECEIVE_FILES_IN_DATASET";
 	files: Paged;
+}
+
+interface UPDATE_FILE {
+	type: "UPDATE_FILE";
+	file: FileOut;
 }
 
 interface DELETE_FILE {
@@ -159,18 +165,24 @@ interface CREATE_DATASET {
 
 interface RESET_CREATE_DATASET {
 	type: "RESET_CREATE_DATASET";
-	newDataset: Dataset;
 }
 
 interface CREATE_FILE {
+	file: FileOut;
 	type: "CREATE_FILE";
-	newFile: File;
+}
+
+interface CREATE_FILES {
+	files: FileOut[];
+	type: "CREATE_FILES";
 }
 
 interface RESET_CREATE_FILE {
 	type: "RESET_CREATE_FILE";
-	newFile: File;
-	file: FileSummary;
+}
+
+interface RESET_CREATE_FILES {
+	type: "RESET_CREATE_FILES";
 }
 
 interface GENERATE_API_KEY {
@@ -486,6 +498,7 @@ export type DataAction =
 	| CREATE_DATASET
 	| RESET_CREATE_DATASET
 	| CREATE_FILE
+	| CREATE_FILES
 	| RESET_CREATE_FILE
 	| FAILED
 	| FAILED_INLINE
@@ -541,4 +554,6 @@ export type DataAction =
 	| GET_VIS_CONFIG
 	| DOWNLOAD_VIS_DATA
 	| GET_VIS_DATA_PRESIGNED_URL
-	| RESET_VIS_DATA_PRESIGNED_URL;
+	| RESET_VIS_DATA_PRESIGNED_URL
+	| RESET_CREATE_FILES
+	| UPDATE_FILE;
