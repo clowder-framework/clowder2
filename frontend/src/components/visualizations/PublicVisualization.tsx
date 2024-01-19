@@ -19,7 +19,6 @@ type previewProps = {
 };
 
 export const PublicVisualization = (props: previewProps) => {
-	console.log('public visualization');
 	const { fileId, datasetId } = props;
 	//const flag = false;
 	const [isEmptyVisData, setIsEmptyVisData] = useState(false);

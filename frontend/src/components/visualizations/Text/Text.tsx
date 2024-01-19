@@ -14,7 +14,6 @@ type TextProps = {
 export default function Text(props: TextProps) {
 	const { fileId, visualizationId, publicView } = props;
 	const [text, setText] = useState("");
-	console.log('text vis card');
 	useEffect(() => {
 		const processBlob = async () => {
 			try {

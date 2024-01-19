@@ -232,7 +232,7 @@ export const Dataset = (): JSX.Element => {
 	} else if (showNotFoundPage) {
 		return <PageNotFound />;
 	}
-	console.log('the dataset role is', datasetRole.role);
+
 	return (
 		<Layout>
 			{/*Error Message dialogue*/}

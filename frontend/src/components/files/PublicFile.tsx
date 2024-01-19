@@ -175,7 +175,6 @@ export const PublicFile = (): JSX.Element => {
 
 						const resourceURL = `/public/${config.hostname}${filePreview["pv_route"]}?superAdmin=true`;
 						Configuration.resource = await downloadPublicResource(resourceURL);
-						console.log('we downloaded public resource');
 						previewsTemp.push(Configuration);
 					})
 				);

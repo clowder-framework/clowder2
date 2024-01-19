@@ -46,7 +46,6 @@ export const Visualization = (props: previewProps) => {
 			getVisConfig(datasetId);
 		}
 	}, [fileId, datasetId]);
-	console.log('visiualization');
 	// Check for conditions and set state only once
 	useEffect(() => {
 		const supportedMimeType = visComponentDefinitions.reduce(

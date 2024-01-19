@@ -348,7 +348,6 @@ export function fetchFolderPath(folderId) {
 	};
 }
 
-
 export const RECEIVE_DATASET_ROLES = "RECEIVE_DATASET_ROLES";
 
 export function fetchDatasetRoles(datasetId) {

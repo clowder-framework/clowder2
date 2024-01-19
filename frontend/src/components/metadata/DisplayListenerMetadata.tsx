@@ -76,14 +76,12 @@ export const DisplayListenerMetadata = (props: MetadataType) => {
 	useEffect(() => {
 		if (resourceType === "dataset") {
 			if (publicView) {
-				console.log('we have a public dataset');
 				listPublicDatasetMetadata(resourceId);
 			} else {
 				listDatasetMetadata(resourceId);
 			}
 		} else if (resourceType === "file") {
 			if (publicView){
-				console.log('we ahve a public file');
 				listPublicFileMetadata(resourceId, version);
 			} else {
 				listFileMetadata(resourceId, version);
@@ -91,7 +89,6 @@ export const DisplayListenerMetadata = (props: MetadataType) => {
 			}
 		}
 	}, [resourceType, resourceId, version]);
-	console.log(publicDatasetMetadataList, publicFileMetadataList, 'the public metadata');
 	return (
 		<>
 			{
@@ -107,7 +104,6 @@ export const DisplayListenerMetadata = (props: MetadataType) => {
 				return (
 					<Grid container spacing={2}>
 						{metadataList.map((metadata, idx) => {
-							console.log('metadata', metadata,'idx', idx);
 							if (metadata.agent.listener !== null) {
 								return (
 									<Grid item xs={12}>

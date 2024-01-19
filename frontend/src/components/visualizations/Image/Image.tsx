@@ -16,7 +16,6 @@ export default function Image(props: ImageProps) {
 	const { fileId, visualizationId, publicView } = props;
 
 	const [url, setUrl] = useState("");
-	console.log('public image', publicView);
 	useEffect(() => {
 		let downloadUrl;
 		if (visualizationId) {

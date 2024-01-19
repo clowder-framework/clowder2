@@ -105,7 +105,6 @@ export const DisplayMetadata = (props: MetadataType) => {
 
 				return currentMetadataDefList.map((metadataDef) => {
 					return metadataList.map((metadata, idx) => {
-						console.log('metadata', metadata, idx, 'index');
 						if (metadataDef.name === metadata.definition) {
 							return (
 								<Box className="inputGroup" key={idx}>
@@ -116,7 +115,6 @@ export const DisplayMetadata = (props: MetadataType) => {
 									{
 										// construct metadata using its definition
 										metadataDef.fields.map((field, idxx) => {
-											console.log('field', field, idxx);
 											return React.cloneElement(
 												metadataConfig[field.widgetType ?? "NA"] ??
 													metadataConfig["NA"],
