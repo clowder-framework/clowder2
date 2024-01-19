@@ -36,17 +36,19 @@ export const CreateMetadata = (props: MetadataType) => {
 
 	return (
 		<>
-			{metadataDefinitionList.map((metadata, idx) => {
+			{metadataDefinitionList.filter((metadata) => {
+				// Add your condition here to filter the metadataDefinitionList
+				// For example, you may want to filter based on the sourceItem
+				return (
+					(sourceItem === "datasets" && metadata.required_for_items.datasets) ||
+      (sourceItem === "files" && metadata.required_for_items.files)
+				);
+			}).map((metadata, idx) => {
 				return (
 					<Box className="inputGroup" key={idx} >
 						<Typography variant="h6">
-							{`${metadata.name  } `}
+							{metadata.name}<span>*</span>
 						</Typography>
-						{((sourceItem === "datasets" && metadata.required_for_items.datasets) || (sourceItem === "files" && metadata.required_for_items.files)) ? (
-							<Typography variant="subtitle2" style={{color: theme.palette.primary.light}}>
-								<span>*</span> required
-							</Typography>
-						) : (<></>)}
 						<Typography variant="subtitle2">{metadata.description}</Typography>
 						{metadata.fields.map((field, idxx) => {
 							return React.cloneElement(
