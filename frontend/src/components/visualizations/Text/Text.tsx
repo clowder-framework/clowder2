@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import ShowMoreText from "react-show-more-text";
 import { readTextFromFile } from "../../../utils/common";
 
-import { downloadVisData,  publicFileDownloaded } from "../../../utils/visualization";
+import { downloadVisData,  publicFileDownloaded, fileDownloaded } from "../../../utils/visualization";
 import {downloadPublicVisData} from "../../../actions/public_visualization";
 
 type TextProps = {
@@ -32,7 +32,7 @@ export default function Text(props: TextProps) {
 						console.log(blob);
 					} else {
 						console.log('downloading blob here');
-						blob = await publicFileDownloaded(fileId);
+						blob = await fileDownloaded(fileId);
 						console.log(blob);
 					}
 				}
