@@ -9,7 +9,6 @@ from pydantic import Field, BaseModel, AnyUrl
 from app.config import settings
 from app.models.authorization import AuthorizationDB
 from app.models.mongomodel import MongoDBRef
-from app.models.pyobjectid import PyObjectId
 from app.models.users import UserOut
 
 
@@ -96,7 +95,7 @@ class FeedListener(BaseModel):
     """This is a shorthand POST class for associating an existing EventListener with a Feed. The automatic flag determines
     whether the Feed will automatically send new matches to the Event Listener."""
 
-    listener_id: PyObjectId
+    listener_id: PydanticObjectId
     automatic: bool  # Listeners can trigger automatically or not on a per-feed basis.
 
 

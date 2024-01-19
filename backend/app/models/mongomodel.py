@@ -1,8 +1,9 @@
 from typing import Optional
-from datetime import datetime
+
 from bson import ObjectId
 from bson.errors import InvalidId
-from pydantic import BaseModel, BaseConfig, Field
+from pydantic import BaseModel
+
 from app.models.pyobjectid import PyObjectId
 
 

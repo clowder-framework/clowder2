@@ -7,7 +7,6 @@ from pydantic import BaseModel, Field
 
 from app.models.files import ContentType
 from app.models.users import UserOut
-from app.models.pyobjectid import PyObjectId
 
 
 class VisualizationDataBase(BaseModel):
