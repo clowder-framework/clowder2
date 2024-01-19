@@ -255,11 +255,15 @@ async def get_datasets(
 async def get_dataset(
     dataset_id: str,
     authenticated: bool = Depends(CheckStatus("AUTHENTICATED")),
+    public: bool = Depends(CheckStatus("PUBLIC")),
     allow: bool = Depends(Authorization("viewer")),
 ):
-    if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
-        return dataset.dict()
-    raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
+    if authenticated or public or allow:
+        if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
+            return dataset.dict()
+        raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
+    else:
+        raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
 
 
 @router.get("/{dataset_id}/files", response_model=List[FileOut])
@@ -405,12 +409,13 @@ async def get_dataset_folders(
     parent_folder: Optional[str] = None,
     user_id=Depends(get_user),
     authenticated: bool = Depends(CheckStatus("authenticated")),
+    public: bool = Depends(CheckStatus("PUBLIC")),
     skip: int = 0,
     limit: int = 10,
     allow: bool = Depends(Authorization("viewer")),
 ):
     if (await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
-        if authenticated:
+        if authenticated or public:
             query = [
                 FolderDBViewList.dataset_id == ObjectId(dataset_id),
             ]
