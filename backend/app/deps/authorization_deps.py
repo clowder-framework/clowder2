@@ -87,7 +87,10 @@ async def get_role_by_file(
             if (
                 dataset := await DatasetDB.get(PydanticObjectId(file.dataset_id))
             ) is not None:
-                if dataset.status == DatasetStatus.AUTHENTICATED.name or dataset.status == DatasetStatus.PUBLIC.name:
+                if (
+                    dataset.status == DatasetStatus.AUTHENTICATED.name
+                    or dataset.status == DatasetStatus.PUBLIC.name
+                ):
                     return RoleType.VIEWER
                 else:
                     raise HTTPException(
@@ -275,10 +278,15 @@ class FileAuthorization:
                     detail=f"User `{current_user} does not have `{self.role}` permission on file {file_id}",
                 )
             else:
-                if (file.status == FileStatus.PUBLIC.name or file.status == FileStatus.AUTHENTICATED.name) and self.role == RoleType.VIEWER:
+                if (
+                    file.status == FileStatus.PUBLIC.name
+                    or file.status == FileStatus.AUTHENTICATED.name
+                ) and self.role == RoleType.VIEWER:
                     return True
                 else:
-                    raise HTTPException(status_code=404, detail=f"File {file_id} not found")
+                    raise HTTPException(
+                        status_code=404, detail=f"File {file_id} not found"
+                    )
 
 
 class MetadataAuthorization:

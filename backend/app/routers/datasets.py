@@ -491,7 +491,12 @@ async def save_file(
                 status_code=401, detail=f"User not found. Session might have expired."
             )
 
-        new_file = FileDB(name=file.filename, creator=user, dataset_id=dataset.id, status=dataset.status)
+        new_file = FileDB(
+            name=file.filename,
+            creator=user,
+            dataset_id=dataset.id,
+            status=dataset.status,
+        )
 
         if folder_id is not None:
             if (folder := await FolderDB.get(PydanticObjectId(folder_id))) is not None:
@@ -534,7 +539,12 @@ async def save_files(
                     detail=f"User not found. Session might have expired.",
                 )
 
-            new_file = FileDB(name=file.filename, creator=user, dataset_id=dataset.id, status=dataset.status)
+            new_file = FileDB(
+                name=file.filename,
+                creator=user,
+                dataset_id=dataset.id,
+                status=dataset.status,
+            )
 
             if folder_id is not None:
                 if (
