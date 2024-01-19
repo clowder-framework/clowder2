@@ -106,8 +106,6 @@ export const CreateMetadataDefinition = (
 			data.required_for_items.datasets = !data.required_for_items.datasets;
 		else if (key == "files")
 			data.required_for_items.files = !data.required_for_items.files;
-		console.log(data.required_for_items);
-
 		setFormInput(data);
 	};
 
