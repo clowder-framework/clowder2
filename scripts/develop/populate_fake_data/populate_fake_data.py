@@ -231,7 +231,7 @@ if __name__ == "__main__":
             dataset_data = {
                 "name": fake.sentence(nb_words=10).rstrip("."),
                 "description": fake.paragraph(),
-                "status": "PUBLIC",
+                "status": "AUTHENTICATED",
             }
         else:
             dataset_data = {
