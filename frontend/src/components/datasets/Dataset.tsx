@@ -359,6 +359,15 @@ export const Dataset = (): JSX.Element => {
 							filesInDataset={filesInDataset}
 							foldersInDataset={foldersInDataset}
 						/>
+						<Box display="flex" justifyContent="center" sx={{ m: 1 }}>
+							<Pagination
+								count={Math.ceil(pageMetadata.total_count / limit)}
+								page={currPageNum}
+								onChange={handlePageChange}
+								shape="rounded"
+								variant="outlined"
+							/>
+						</Box>
 					</TabPanel>
 					<TabPanel value={selectedTabIndex} index={1}>
 						<Visualization datasetId={datasetId} />
@@ -442,15 +451,6 @@ export const Dataset = (): JSX.Element => {
 					) : (
 						<></>
 					)}
-					<Box display="flex" justifyContent="center" sx={{ m: 1 }}>
-						<Pagination
-							count={Math.ceil(pageMetadata.total_count / limit)}
-							page={currPageNum}
-							onChange={handlePageChange}
-							shape="rounded"
-							variant="outlined"
-						/>
-					</Box>
 				</Grid>
 				<Grid item>
 					<DatasetDetails details={about} />
