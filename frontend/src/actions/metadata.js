@@ -49,7 +49,7 @@ export function fetchMetadataDefinition(metadataDefinitionId) {
 
 export const SAVE_METADATA_DEFINITIONS = "SAVE_METADATA_DEFINITIONS";
 
-export function postMetadataDefinitions(metadataDefinition) {
+export function postMetadataDefinition(metadataDefinition) {
 	return (dispatch) => {
 		return V2.MetadataService.saveMetadataDefinitionApiV2MetadataDefinitionPost(
 			metadataDefinition
@@ -57,15 +57,27 @@ export function postMetadataDefinitions(metadataDefinition) {
 			.then((json) => {
 				dispatch({
 					type: SAVE_METADATA_DEFINITIONS,
-					metadataDefinitionList: json,
+					metadataDefinition: json,
 					receivedAt: Date.now(),
 				});
 			})
 			.catch((reason) => {
 				dispatch(
-					handleErrors(reason, postMetadataDefinitions(metadataDefinition))
+					handleErrors(reason, postMetadataDefinition(metadataDefinition))
 				);
 			});
+	};
+}
+
+export const RESET_SAVE_METADATA_DEFINITIONS =
+	"RESET_SAVE_METADATA_DEFINITIONS";
+
+export function resetPostMetadataDefinitions() {
+	return (dispatch) => {
+		dispatch({
+			type: RESET_SAVE_METADATA_DEFINITIONS,
+			receivedAt: Date.now(),
+		});
 	};
 }
 

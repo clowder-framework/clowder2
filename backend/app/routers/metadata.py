@@ -1,4 +1,4 @@
-from typing import Optional, List
+from typing import Optional
 
 from beanie import PydanticObjectId
 from beanie.odm.operators.find.evaluation import RegEx
@@ -22,6 +22,7 @@ from app.models.metadata import (
     patch_metadata,
     MetadataDB,
 )
+from app.models.pages import Paged, _get_page_query, PageMetadata
 from app.models.pyobjectid import PyObjectId
 
 router = APIRouter()
@@ -29,8 +30,8 @@ router = APIRouter()
 
 @router.post("/definition", response_model=MetadataDefinitionOut)
 async def save_metadata_definition(
-    definition_in: MetadataDefinitionIn,
-    user=Depends(get_current_user),
+        definition_in: MetadataDefinitionIn,
+        user=Depends(get_current_user),
 ):
     existing = await MetadataDefinitionDB.find_one(
         MetadataDefinitionDB.name == definition_in.name
@@ -46,36 +47,43 @@ async def save_metadata_definition(
         return md_def.dict()
 
 
-@router.get("/definition", response_model=List[MetadataDefinitionOut])
+@router.get("/definition", response_model=Paged)
 async def get_metadata_definition_list(
-    name: Optional[str] = None,
-    user=Depends(get_current_user),
-    skip: int = 0,
-    limit: int = 2,
+        name: Optional[str] = None,
+        user=Depends(get_current_user),
+        skip: int = 0,
+        limit: int = 2,
 ):
-    if name is None:
-        defs = await MetadataDefinitionDB.find(
-            sort=(-MetadataDefinitionDB.created), skip=skip, limit=limit
-        ).to_list()
+    query = []
+    if name is not None:
+        query.append(MetadataDefinitionDB.name == name)
+
+    mdds_and_count = await MetadataDefinitionDB.find(*query).sort(
+        -MetadataDefinitionDB.created).aggregate(
+        [
+            _get_page_query(skip, limit)
+        ],
+    ).to_list()
+    if len(mdds_and_count[0]['metadata']) > 0:
+        page_metadata = PageMetadata(**mdds_and_count[0]['metadata'][0], skip=skip, limit=limit)
     else:
-        defs = await MetadataDefinitionDB.find(
-            MetadataDefinitionDB.name == name,
-            sort=(-MetadataDefinitionDB.created),
-            skip=skip,
-            limit=limit,
-        ).to_list()
-    return [mddef.dict() for mddef in defs]
+        page_metadata = PageMetadata(skip=skip, limit=limit)
+    page = Paged(
+        metadata=page_metadata,
+        data=[MetadataDefinitionOut(id=item.pop("_id"), **item) for item in mdds_and_count[0]['data']]
+    )
+    return page.dict()
 
 
 @router.get(
     "/definition/{metadata_definition_id}", response_model=MetadataDefinitionOut
 )
 async def get_metadata_definition(
-    metadata_definition_id: str,
-    user=Depends(get_current_user),
+        metadata_definition_id: str,
+        user=Depends(get_current_user),
 ):
     if (
-        mdd := await MetadataDefinitionDB.get(PydanticObjectId(metadata_definition_id))
+            mdd := await MetadataDefinitionDB.get(PydanticObjectId(metadata_definition_id))
     ) is not None:
         return mdd.dict()
     raise HTTPException(
@@ -88,8 +96,8 @@ async def get_metadata_definition(
     "/definition/{metadata_definition_id}", response_model=MetadataDefinitionOut
 )
 async def delete_metadata_definition(
-    metadata_definition_id: str,
-    user=Depends(get_current_user),
+        metadata_definition_id: str,
+        user=Depends(get_current_user),
 ):
     """Delete metadata definition by specific ID."""
     mdd = await MetadataDefinitionDB.find_one(
@@ -105,7 +113,7 @@ async def delete_metadata_definition(
             raise HTTPException(
                 status_code=400,
                 detail=f"Metadata definition: {mdd.name} ({metadata_definition_id}) in use. "
-                f"You cannot delete it until all metadata records using it are deleted.",
+                       f"You cannot delete it until all metadata records using it are deleted.",
             )
 
         # TODO: Refactor this with permissions checks etc.
@@ -119,13 +127,13 @@ async def delete_metadata_definition(
 
 
 @router.get(
-    "/definition/search/{search_term}", response_model=List[MetadataDefinitionOut]
+    "/definition/search/{search_term}", response_model=Paged
 )
 async def search_metadata_definition(
-    search_term: str,
-    skip: int = 0,
-    limit: int = 10,
-    user=Depends(get_current_user),
+        search_term: str,
+        skip: int = 0,
+        limit: int = 10,
+        user=Depends(get_current_user),
 ):
     """Search all metadata definition in the db based on text.
 
@@ -134,28 +142,34 @@ async def search_metadata_definition(
         skip -- number of initial records to skip (i.e. for pagination)
         limit -- restrict number of records to be returned (i.e. for pagination)
     """
-
-    mdds = await MetadataDefinitionDB.find(
-        Or(
-            RegEx(field=MetadataDefinitionDB.name, pattern=search_term),
-            RegEx(field=MetadataDefinitionDB.description, pattern=search_term),
-            RegEx(field=MetadataDefinitionDB.context, pattern=search_term),
-        ),
-        sort=(-MetadataDefinitionDB.created),
-        skip=skip,
-        limit=limit,
+    mdds_and_count = await MetadataDefinitionDB.find(Or(
+        RegEx(field=MetadataDefinitionDB.name, pattern=search_term),
+        RegEx(field=MetadataDefinitionDB.description, pattern=search_term),
+        RegEx(field=MetadataDefinitionDB.context, pattern=search_term),
+    ), ).sort(
+        -MetadataDefinitionDB.created).aggregate(
+        [
+            _get_page_query(skip, limit)
+        ],
     ).to_list()
-
-    return [mdd.dict() for mdd in mdds]
+    if len(mdds_and_count[0]['metadata']) > 0:
+        page_metadata = PageMetadata(**mdds_and_count[0]['metadata'][0], skip=skip, limit=limit)
+    else:
+        page_metadata = PageMetadata(skip=skip, limit=limit)
+    page = Paged(
+        metadata=page_metadata,
+        data=[MetadataDefinitionOut(id=item.pop("_id"), **item) for item in mdds_and_count[0]['data']]
+    )
+    return page.dict()
 
 
 @router.patch("/{metadata_id}", response_model=MetadataOut)
 async def update_metadata(
-    metadata_in: MetadataPatch,
-    metadata_id: str,
-    es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
-    user=Depends(get_current_user),
-    allow: bool = Depends(MetadataAuthorization("editor")),
+        metadata_in: MetadataPatch,
+        metadata_id: str,
+        es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
+        user=Depends(get_current_user),
+        allow: bool = Depends(MetadataAuthorization("editor")),
 ):
     """Update metadata. Any fields provided in the contents JSON will be added or updated in the metadata. If context or
     agent should be changed, use PUT.
@@ -173,9 +187,9 @@ async def update_metadata(
 
 @router.delete("/{metadata_id}")
 async def delete_metadata(
-    metadata_id: str,
-    user=Depends(get_current_user),
-    allow: bool = Depends(MetadataAuthorization("editor")),
+        metadata_id: str,
+        user=Depends(get_current_user),
+        allow: bool = Depends(MetadataAuthorization("editor")),
 ):
     """Delete metadata by specific ID."""
     md = await MetadataDB.find_one(MetadataDB.id == PyObjectId(metadata_id))

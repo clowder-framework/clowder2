@@ -1,4 +1,4 @@
-import React, {useState} from "react";
+import React, { useEffect } from "react";
 
 import {
 	Autocomplete,
@@ -14,15 +14,19 @@ import {
 	StepContent,
 	StepLabel,
 	Stepper,
-	Snackbar,
 } from "@mui/material";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import AddBoxIcon from "@mui/icons-material/AddBox";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import { ClowderInput } from "../styledComponents/ClowderInput";
-import { postMetadataDefinitions } from "../../actions/metadata";
+import {
+	postMetadataDefinition,
+	resetPostMetadataDefinitions,
+} from "../../actions/metadata";
 
 import { contextUrlMap, InputType, widgetTypes } from "../../metadata.config";
+import { useNavigate } from "react-router-dom";
+import { RootState } from "../../types/data";
 
 interface SupportedInputs {
 	[key: number]: Array<InputType>; // Define the type for SupportedInputs
@@ -37,13 +41,21 @@ type CreateMetadataDefinitionProps = {
 export const CreateMetadataDefinition = (
 	props: CreateMetadataDefinitionProps
 ) => {
-	const { setCreateMetadataDefinitionOpen, setSnackBarOpen, setSnackBarMessage } = props;
+	const {
+		setCreateMetadataDefinitionOpen,
+		setSnackBarOpen,
+		setSnackBarMessage,
+	} = props;
 
 	const dispatch = useDispatch();
+	const history = useNavigate();
+
 	// @ts-ignore
 	const saveMetadataDefinitions = (metadata: object) =>
-		dispatch(postMetadataDefinitions(metadata));
-
+		dispatch(postMetadataDefinition(metadata));
+	const newMetadataDefintion = useSelector(
+		(state: RootState) => state.metadata.newMetadataDefinition
+	);
 
 	const [activeStep, setActiveStep] = React.useState(0);
 	const [parsedInput, setParsedInput] = React.useState("");
@@ -68,6 +80,15 @@ export const CreateMetadataDefinition = (
 	const [supportedInputs, setSupportedInputs] = React.useState<SupportedInputs>(
 		{ 0: [] }
 	);
+
+	useEffect(() => {
+		if (newMetadataDefintion.id) {
+			//reset new metadata so next creation can be done
+			dispatch(resetPostMetadataDefinitions());
+			// zoom into that newly created dataset
+			history(`/metadata-definitions/${newMetadataDefintion.id}`);
+		}
+	}, [newMetadataDefintion]);
 
 	const handleInputChange = (idx: number, key: string, value: string) => {
 		let data = { ...formInput };

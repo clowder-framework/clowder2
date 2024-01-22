@@ -147,16 +147,17 @@ export interface GroupState {
 }
 
 export interface MetadataState {
-	metadataDefinitionList: MetadataDefinitionOut[];
+	metadataDefinitionList: Paged;
 	metadataDefinition: MetadataDefinitionOut;
 	datasetMetadataList: Metadata[];
 	fileMetadataList: Metadata[];
+	newMetadataDefinition: MetadataDefinitionOut;
 }
 
 export interface FileState {
 	url: string;
 	blob: Blob;
-	fileSummary: FileSummary;
+	fileSummary: FileOut;
 	extractedMetadata: ExtractedMetadata[];
 	metadataJsonld: MetadataJsonld[];
 	previews: FilePreview[];
