@@ -1,3 +1,4 @@
+from beanie.odm.enums import SortDirection
 from pydantic import BaseModel
 
 
@@ -15,10 +16,13 @@ class Paged(BaseModel):
     data: list = []
 
 
-def _get_page_query(skip, limit):
+def _get_page_query(skip, limit, sort_field="created", ascending=True):
     return {"$facet":
         {
             "metadata": [{"$count": "total_count"}],
-            "data": [{"$skip": skip}, {"$limit": limit}],
+            "data": [
+                {"$sort": {sort_field: SortDirection.ASCENDING if ascending else SortDirection.DESCENDING}},
+                {"$skip": skip},
+                {"$limit": limit}],
         },
     }

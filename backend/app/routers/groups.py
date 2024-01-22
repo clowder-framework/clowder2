@@ -57,9 +57,9 @@ async def get_groups(
 
     groups_and_count = await GroupDB.find(
         *criteria_list,
-    ).sort(-GroupDB.created).aggregate(
+    ).aggregate(
         [
-            _get_page_query(skip, limit)
+            _get_page_query(skip, limit, sort_field="created", ascending=False)
         ],
     ).to_list()
     if len(groups_and_count[0]['metadata']) > 0:
@@ -104,9 +104,9 @@ async def search_group(
     # user has to be the creator or member first; then apply search
     groups_and_count = await GroupDB.find(
         *criteria_list,
-    ).sort(-GroupDB.created).aggregate(
+    ).aggregate(
         [
-            _get_page_query(skip, limit)
+            _get_page_query(skip, limit, sort_field="created", ascending=False)
         ],
     ).to_list()
     if len(groups_and_count[0]['metadata']) > 0:

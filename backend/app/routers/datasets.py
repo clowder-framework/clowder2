@@ -216,20 +216,17 @@ async def get_datasets(
         admin_mode: bool = Depends(get_admin_mode),
 ):
     if admin and admin_mode:
-        datasets_and_count = await DatasetDBViewList.find(
-            sort=(-DatasetDBViewList.created),
-        ).aggregate(
+        datasets_and_count = await DatasetDBViewList.aggregate(
             [
-                _get_page_query(skip, limit)
+                _get_page_query(skip, limit, sort_field="created", ascending=False)
             ],
         ).to_list()
     elif mine:
         datasets_and_count = await DatasetDBViewList.find(
-            DatasetDBViewList.creator.email == user_id,
-            sort=(-DatasetDBViewList.created),
+            DatasetDBViewList.creator.email == user_id
         ).aggregate(
             [
-                _get_page_query(skip, limit)
+                _get_page_query(skip, limit, sort_field="created", ascending=False)
             ],
         ).to_list()
     else:
@@ -237,9 +234,9 @@ async def get_datasets(
             DatasetDBViewList.creator.email == user_id,
             DatasetDBViewList.auth.user_ids == user_id,
             DatasetDBViewList.status == DatasetStatus.AUTHENTICATED.name,
-        ), sort=(-DatasetDBViewList.created)).aggregate(
+        )).aggregate(
             [
-                _get_page_query(skip, limit)
+                _get_page_query(skip, limit, sort_field="created", ascending=False)
             ],
         ).to_list()
 
@@ -299,7 +296,7 @@ async def get_dataset_files(
 
     files_and_count = await FileDBViewList.find(*query).aggregate(
         [
-            _get_page_query(skip, limit)
+            _get_page_query(skip, limit, sort_field="created", ascending=False)
         ],
     ).to_list()
     if len(files_and_count[0]['metadata']) > 0:

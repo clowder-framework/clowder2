@@ -75,10 +75,9 @@ async def get_all_job_summary(
             EventListenerJobViewList.resource_ref.resource_id == ObjectId(dataset_id)
         )
 
-    jobs_and_count = await EventListenerJobViewList.find(*filters).sort(
-        -EventListenerJobViewList.created).aggregate(
+    jobs_and_count = await EventListenerJobViewList.find(*filters).aggregate(
         [
-            _get_page_query(skip, limit)
+            _get_page_query(skip, limit, sort_field="created", ascending=False)
         ],
     ).to_list()
     if len(jobs_and_count[0]['metadata']) > 0:

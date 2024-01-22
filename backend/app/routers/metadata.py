@@ -57,10 +57,9 @@ async def get_metadata_definition_list(
     if name is not None:
         query.append(MetadataDefinitionDB.name == name)
 
-    mdds_and_count = await MetadataDefinitionDB.find(*query).sort(
-        -MetadataDefinitionDB.created).aggregate(
+    mdds_and_count = await MetadataDefinitionDB.find(*query).aggregate(
         [
-            _get_page_query(skip, limit)
+            _get_page_query(skip, limit, sort_field="name", ascending=True)
         ],
     ).to_list()
     if len(mdds_and_count[0]['metadata']) > 0:
@@ -145,10 +144,9 @@ async def search_metadata_definition(
         RegEx(field=MetadataDefinitionDB.name, pattern=search_term),
         RegEx(field=MetadataDefinitionDB.description, pattern=search_term),
         RegEx(field=MetadataDefinitionDB.context, pattern=search_term),
-    ), ).sort(
-        -MetadataDefinitionDB.created).aggregate(
+    ), ).aggregate(
         [
-            _get_page_query(skip, limit)
+            _get_page_query(skip, limit, sort_field="name", ascending=True)
         ],
     ).to_list()
     if len(mdds_and_count[0]['metadata']) > 0:

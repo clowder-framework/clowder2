@@ -32,10 +32,9 @@ async def get_user_api_keys(
         skip: number of page to skip
         limit: number to limit per page
     """
-    apikeys_and_count = await UserAPIKeyDB.find(UserAPIKeyDB.user == current_user).sort(
-        -UserAPIKeyDB.created).aggregate(
+    apikeys_and_count = await UserAPIKeyDB.find(UserAPIKeyDB.user == current_user).aggregate(
         [
-            _get_page_query(skip, limit)
+            _get_page_query(skip, limit, sort_field="created", ascending=False)
         ],
     ).to_list()
     if len(apikeys_and_count[0]['metadata']) > 0:
@@ -96,9 +95,9 @@ async def delete_user_api_key(
 
 @router.get("", response_model=Paged)
 async def get_users(skip: int = 0, limit: int = 2):
-    users_and_count = await UserDB.find().sort(+UserDB.email).aggregate(
+    users_and_count = await UserDB.aggregate(
         [
-            _get_page_query(skip, limit)
+            _get_page_query(skip, limit, sort_field="email", ascending=True)
         ],
     ).to_list()
     if len(users_and_count[0]['metadata']) > 0:
@@ -122,9 +121,9 @@ async def search_users(
         RegEx(field=UserDB.email, pattern=text),
         RegEx(field=UserDB.first_name, pattern=text),
         RegEx(field=UserDB.last_name, pattern=text),
-    )).sort(+UserDB.email).aggregate(
+    )).aggregate(
         [
-            _get_page_query(skip, limit)
+            _get_page_query(skip, limit, sort_field="email", ascending=True)
         ],
     ).to_list()
     if len(users_and_count[0]['metadata']) > 0:
@@ -147,9 +146,9 @@ async def search_users(
     query_regx = f"^{prefix}.*"
     users_and_count = await UserDB.find(
         Or(RegEx(field=UserDB.email, pattern=query_regx)),
-    ).sort(+UserDB.email).aggregate(
+    ).aggregate(
         [
-            _get_page_query(skip, limit)
+            _get_page_query(skip, limit, sort_field="email", ascending=True)
         ],
     ).to_list()
     if len(users_and_count[0]['metadata']) > 0:
