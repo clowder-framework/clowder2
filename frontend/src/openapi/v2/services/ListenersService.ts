@@ -3,6 +3,7 @@
 /* eslint-disable */
 import type { EventListenerIn } from '../models/EventListenerIn';
 import type { EventListenerOut } from '../models/EventListenerOut';
+import type { Paged } from '../models/Paged';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { request as __request } from '../core/request';
 
@@ -37,7 +38,7 @@ export class ListenersService {
      * @param category
      * @param label
      * @param aliveOnly
-     * @returns EventListenerOut Successful Response
+     * @returns Paged Successful Response
      * @throws ApiError
      */
     public static getListenersApiV2ListenersGet(
@@ -47,7 +48,7 @@ export class ListenersService {
         category?: string,
         label?: string,
         aliveOnly: boolean = false,
-    ): CancelablePromise<Array<EventListenerOut>> {
+    ): CancelablePromise<Paged> {
         return __request({
             method: 'GET',
             path: `/api/v2/listeners`,
@@ -98,7 +99,7 @@ export class ListenersService {
      * @param skip
      * @param limit
      * @param heartbeatInterval
-     * @returns EventListenerOut Successful Response
+     * @returns Paged Successful Response
      * @throws ApiError
      */
     public static searchListenersApiV2ListenersSearchGet(
@@ -106,7 +107,7 @@ export class ListenersService {
         skip?: number,
         limit: number = 2,
         heartbeatInterval: number = 300,
-    ): CancelablePromise<Array<EventListenerOut>> {
+    ): CancelablePromise<Paged> {
         return __request({
             method: 'GET',
             path: `/api/v2/listeners/search`,

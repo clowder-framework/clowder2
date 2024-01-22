@@ -16,7 +16,7 @@ import { ListenerState } from "../types/data";
 import { EventListenerJobOut, Paged, PageMetadata } from "../openapi/v2";
 
 const defaultState: ListenerState = {
-	listeners: [],
+	listeners: <Paged>{ metadata: <PageMetadata>{}, data: <EventListener[]>[] },
 	categories: [],
 	labels: [],
 	jobs: <Paged>{ metadata: <PageMetadata>{}, data: <EventListenerJobOut[]>[] },

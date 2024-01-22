@@ -21,6 +21,7 @@ from app.models.listeners import (
     EventListenerDB,
     EventListenerOut,
 )
+from app.models.pages import Paged, _get_page_query, PageMetadata
 from app.models.search import SearchCriteria
 from app.models.users import UserOut
 from app.routers.feeds import disassociate_listener_db
@@ -32,10 +33,10 @@ clowder_bucket = os.getenv("MINIO_BUCKET_NAME", "clowder")
 
 
 async def _process_incoming_v1_extractor_info(
-    extractor_name: str,
-    extractor_id: str,
-    process: dict,
-    creator: Optional[UserOut] = None,
+        extractor_name: str,
+        extractor_id: str,
+        process: dict,
+        creator: Optional[UserOut] = None,
 ):
     """Return FeedDB object given v1 extractor info."""
     if "file" in process:
@@ -75,7 +76,7 @@ async def _process_incoming_v1_extractor_info(
 
 
 async def _check_livelihood(
-    listener: EventListenerDB, heartbeat_interval=settings.listener_heartbeat_interval
+        listener: EventListenerDB, heartbeat_interval=settings.listener_heartbeat_interval
 ):
     if heartbeat_interval == 0:
         heartbeat_interval = settings.listener_heartbeat_interval
@@ -118,7 +119,7 @@ def _check_livelihood_query(heartbeat_interval=settings.listener_heartbeat_inter
 
 @router.get("/instance")
 async def get_instance_id(
-    user=Depends(get_current_user),
+        user=Depends(get_current_user),
 ):
     instance_id = await ConfigEntryDB.find_one({ConfigEntryDB.key == "instance_id"})
     if instance_id:
@@ -138,8 +139,8 @@ async def get_instance_id(
 
 @router.post("", response_model=EventListenerOut)
 async def save_listener(
-    listener_in: EventListenerIn,
-    user=Depends(get_current_user),
+        listener_in: EventListenerIn,
+        user=Depends(get_current_user),
 ):
     """Register a new Event Listener with the system."""
     listener = EventListenerDB(**listener_in.dict(), creator=user)
@@ -150,8 +151,8 @@ async def save_listener(
 
 @legacy_router.post("", response_model=EventListenerOut)
 async def save_legacy_listener(
-    legacy_in: LegacyEventListenerIn,
-    user=Depends(get_current_user),
+        legacy_in: LegacyEventListenerIn,
+        user=Depends(get_current_user),
 ):
     """This will take a POST with Clowder v1 extractor_info included, and convert/update to a v2 Listener."""
     listener_properties = ExtractorInfo(**legacy_in.dict())
@@ -165,9 +166,9 @@ async def save_legacy_listener(
 
     # check to see if extractor already exists and update if so, otherwise return existing
     if (
-        existing := await EventListenerDB.find_one(
-            EventListenerDB.name == legacy_in.name
-        )
+            existing := await EventListenerDB.find_one(
+                EventListenerDB.name == legacy_in.name
+            )
     ) is not None:
         # if this is a new version, add it to the database, otherwise update existing
         if version.parse(listener.version) > version.parse(existing.version):
@@ -190,13 +191,13 @@ async def save_legacy_listener(
         return listener.dict()
 
 
-@router.get("/search", response_model=List[EventListenerOut])
+@router.get("/search", response_model=Paged)
 async def search_listeners(
-    text: str = "",
-    skip: int = 0,
-    limit: int = 2,
-    heartbeat_interval: Optional[int] = settings.listener_heartbeat_interval,
-    user=Depends(get_current_username),
+        text: str = "",
+        skip: int = 0,
+        limit: int = 2,
+        heartbeat_interval: Optional[int] = settings.listener_heartbeat_interval,
+        user=Depends(get_current_username),
 ):
     """Search all Event Listeners in the db based on text.
 
@@ -205,26 +206,26 @@ async def search_listeners(
         skip -- number of initial records to skip (i.e. for pagination)
         limit -- restrict number of records to be returned (i.e. for pagination)
     """
-    # TODO either use regex or index search
-    listeners = (
-        await EventListenerDB.find(
-            Or(
-                RegEx(field=EventListenerDB.name, pattern=text),
-                RegEx(field=EventListenerDB.description, pattern=text),
-            ),
-        )
-        .skip(skip)
-        .limit(limit)
-        .to_list()
+    # First compute alive flag for all listeners
+    aggregation_pipeline = [_check_livelihood_query(heartbeat_interval=heartbeat_interval),
+                            {"$sort": {"name": 1}},
+                            _get_page_query(skip, limit)]
+
+    listeners_and_count = await EventListenerDB.find(
+        Or(
+            RegEx(field=EventListenerDB.name, pattern=text),
+            RegEx(field=EventListenerDB.description, pattern=text),
+        ),
+    ).aggregate(aggregation_pipeline).to_list()
+    if len(listeners_and_count[0]['metadata']) > 0:
+        page_metadata = PageMetadata(**listeners_and_count[0]['metadata'][0], skip=skip, limit=limit)
+    else:
+        page_metadata = PageMetadata(skip=skip, limit=limit)
+    page = Paged(
+        metadata=page_metadata,
+        data=[EventListenerOut(id=item.pop("_id"), **item) for item in listeners_and_count[0]['data']]
     )
-
-    # batch return listener statuses for easy consumption
-    listenerResponse = []
-    for listener in listeners:
-        listener.alive = await _check_livelihood(listener, heartbeat_interval)
-        listenerResponse.append(listener.dict())
-
-    return listenerResponse
+    return page.dict()
 
 
 @router.get("/categories", response_model=List[str])
@@ -243,7 +244,7 @@ async def list_default_labels(user=Depends(get_current_username)):
 async def get_listener(listener_id: str, user=Depends(get_current_username)):
     """Return JSON information about an Event Listener if it exists."""
     if (
-        listener := await EventListenerDB.get(PydanticObjectId(listener_id))
+            listener := await EventListenerDB.get(PydanticObjectId(listener_id))
     ) is not None:
         return listener.dict()
     raise HTTPException(status_code=404, detail=f"listener {listener_id} not found")
@@ -251,27 +252,27 @@ async def get_listener(listener_id: str, user=Depends(get_current_username)):
 
 @router.get("/{listener_id}/status", response_model=bool)
 async def check_listener_livelihood(
-    listener_id: str,
-    heartbeat_interval: Optional[int] = settings.listener_heartbeat_interval,
-    user=Depends(get_current_username),
+        listener_id: str,
+        heartbeat_interval: Optional[int] = settings.listener_heartbeat_interval,
+        user=Depends(get_current_username),
 ):
     """Return JSON information about an Event Listener if it exists."""
     if (
-        listener := await EventListenerDB.get(PydanticObjectId(listener_id))
+            listener := await EventListenerDB.get(PydanticObjectId(listener_id))
     ) is not None:
         return await _check_livelihood(listener, heartbeat_interval)
     raise HTTPException(status_code=404, detail=f"listener {listener_id} not found")
 
 
-@router.get("", response_model=List[EventListenerOut])
+@router.get("", response_model=Paged)
 async def get_listeners(
-    user_id=Depends(get_current_username),
-    skip: int = 0,
-    limit: int = 2,
-    heartbeat_interval: Optional[int] = settings.listener_heartbeat_interval,
-    category: Optional[str] = None,
-    label: Optional[str] = None,
-    alive_only: Optional[bool] = False,
+        user_id=Depends(get_current_username),
+        skip: int = 0,
+        limit: int = 2,
+        heartbeat_interval: Optional[int] = settings.listener_heartbeat_interval,
+        category: Optional[str] = None,
+        label: Optional[str] = None,
+        alive_only: Optional[bool] = False,
 ):
     """Get a list of all Event Listeners in the db.
 
@@ -296,22 +297,30 @@ async def get_listeners(
     if alive_only:
         aggregation_pipeline.append({"$match": {"alive": True}}),
 
-    # Sort by name alphabetically and then pagination
+    # Sort by name alphabetically
     aggregation_pipeline.append({"$sort": {"name": 1}})
-    aggregation_pipeline.append({"$skip": skip})
-    aggregation_pipeline.append({"$limit": limit})
 
+    # add pagnation
+    aggregation_pipeline.append(_get_page_query(skip, limit))
     # Run aggregate query and return
-    listeners = await EventListenerDB.aggregate(aggregation_pipeline).to_list()
 
-    return listeners
+    listeners_and_count = await EventListenerDB.aggregate(aggregation_pipeline).to_list()
+    if len(listeners_and_count[0]['metadata']) > 0:
+        page_metadata = PageMetadata(**listeners_and_count[0]['metadata'][0], skip=skip, limit=limit)
+    else:
+        page_metadata = PageMetadata(skip=skip, limit=limit)
+    page = Paged(
+        metadata=page_metadata,
+        data=[EventListenerOut(id=item.pop("_id"), **item) for item in listeners_and_count[0]['data']]
+    )
+    return page.dict()
 
 
 @router.put("/{listener_id}", response_model=EventListenerOut)
 async def edit_listener(
-    listener_id: str,
-    listener_in: EventListenerIn,
-    user_id=Depends(get_user),
+        listener_id: str,
+        listener_in: EventListenerIn,
+        user_id=Depends(get_user),
 ):
     """Update the information about an existing Event Listener..
 
@@ -337,8 +346,8 @@ async def edit_listener(
 
 @router.delete("/{listener_id}")
 async def delete_listener(
-    listener_id: str,
-    user=Depends(get_current_username),
+        listener_id: str,
+        user=Depends(get_current_username),
 ):
     """Remove an Event Listener from the database. Will not clear event history for the listener."""
     listener = await EventListenerDB.find_one(
@@ -347,7 +356,7 @@ async def delete_listener(
     if listener:
         # unsubscribe the listener from any feeds
         async for feed in FeedDB.find(
-            FeedDB.listeners.listener_id == ObjectId(listener_id)
+                FeedDB.listeners.listener_id == ObjectId(listener_id)
         ):
             await disassociate_listener_db(feed.id, listener_id)
         await listener.delete()

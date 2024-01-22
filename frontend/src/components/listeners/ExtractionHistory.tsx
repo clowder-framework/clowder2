@@ -1,21 +1,19 @@
-import React, { useEffect, useState } from "react";
+import React, { ChangeEvent, useEffect, useState } from "react";
 
 import {
 	Box,
-	Button,
-	ButtonGroup,
 	Grid,
 	List,
 	ListItemButton,
 	ListItemText,
 	ListSubheader,
+	Pagination,
 } from "@mui/material";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../types/data";
 import { EventListenerOut as Listener } from "../../openapi/v2";
 import Layout from "../Layout";
 import { fetchListenerJobs, fetchListeners } from "../../actions/listeners";
-import { ArrowBack, ArrowForward } from "@material-ui/icons";
 import { ListenerInfo } from "./ListenerInfo";
 import { ExtractionJobs } from "./ExtractionJobs";
 import { ClowderTitle } from "../styledComponents/ClowderTitle";
@@ -116,7 +114,12 @@ export const ExtractionHistory = (): JSX.Element => {
 			)
 		);
 
-	const listeners = useSelector((state: RootState) => state.listener.listeners);
+	const listeners = useSelector(
+		(state: RootState) => state.listener.listeners.data
+	);
+	const listenerPageMetadata = useSelector(
+		(state: RootState) => state.listener.listeners.metadata
+	);
 	const jobs = useSelector((state: RootState) => state.listener.jobs.data);
 	const jobPageMetadata = useSelector(
 		(state: RootState) => state.listener.jobs.metadata
@@ -124,11 +127,8 @@ export const ExtractionHistory = (): JSX.Element => {
 	const adminMode = useSelector((state: RootState) => state.user.adminMode);
 
 	const [errorOpen, setErrorOpen] = useState(false);
-	const [currPageNum, setCurrPageNum] = useState<number>(0);
+	const [currPageNum, setCurrPageNum] = useState<number>(1);
 	const [limit] = useState<number>(20);
-	const [skip, setSkip] = useState<number | undefined>();
-	const [prevDisabled, setPrevDisabled] = useState<boolean>(true);
-	const [nextDisabled, setNextDisabled] = useState<boolean>(false);
 	const [selectedExtractor, setSelectedExtractor] = useState<Listener>();
 	const [executionJobsTableRow, setExecutionJobsTableRow] = useState([]);
 	const [selectedStatus, setSelectedStatus] = useState(null);
@@ -136,12 +136,12 @@ export const ExtractionHistory = (): JSX.Element => {
 	const [aliveOnly, setAliveOnly] = useState<boolean>(false);
 
 	useEffect(() => {
-		listListeners(skip, limit, 0, null, null, aliveOnly);
+		listListeners(0, limit, 0, null, null, aliveOnly);
 		listListenerJobs(null, null, null, null, null, null, 0, 100);
 	}, []);
 
 	useEffect(() => {
-		listListeners(skip, limit, 0, null, null);
+		listListeners((currPageNum - 1) * limit, limit, 0, null, null, aliveOnly);
 		listListenerJobs(null, null, null, null, null, null, 0, 100);
 	}, [adminMode]);
 
@@ -202,33 +202,10 @@ export const ExtractionHistory = (): JSX.Element => {
 		setExecutionJobsTableRow(rows);
 	}, [jobs]);
 
-	useEffect(() => {
-		if (skip !== null && skip !== undefined) {
-			listListeners(skip, limit, 0, null, null, aliveOnly);
-			if (skip === 0) setPrevDisabled(true);
-			else setPrevDisabled(false);
-		}
-	}, [skip]);
-
-	// fetch extractors from each individual dataset/id calls
-	useEffect(() => {
-		// disable flipping if reaches the last page
-		if (listeners.length < limit) setNextDisabled(true);
-		else setNextDisabled(false);
-	}, [listeners]);
-
-	// for pagination keep flipping until the return dataset is less than the limit
-	const previous = () => {
-		if (currPageNum - 1 >= 0) {
-			setSkip((currPageNum - 1) * limit);
-			setCurrPageNum(currPageNum - 1);
-		}
-	};
-	const next = () => {
-		if (listeners.length === limit) {
-			setSkip((currPageNum + 1) * limit);
-			setCurrPageNum(currPageNum + 1);
-		}
+	const handlePageChange = (_: ChangeEvent<unknown>, value: number) => {
+		const newSkip = (value - 1) * limit;
+		setCurrPageNum(value);
+		listListeners(newSkip, limit, 0, null, null, aliveOnly);
 	};
 
 	return (
@@ -275,27 +252,15 @@ export const ExtractionHistory = (): JSX.Element => {
 							) : (
 								<></>
 							)}
-							{/*pagination*/}
+							{/*listner pagination*/}
 							<Box display="flex" justifyContent="center" sx={{ m: 1 }}>
-								<ButtonGroup
-									variant="contained"
-									aria-label="previous next buttons"
-								>
-									<Button
-										aria-label="previous"
-										onClick={previous}
-										disabled={prevDisabled}
-									>
-										<ArrowBack /> Prev
-									</Button>
-									<Button
-										aria-label="next"
-										onClick={next}
-										disabled={nextDisabled}
-									>
-										Next <ArrowForward />
-									</Button>
-								</ButtonGroup>
+								<Pagination
+									count={Math.ceil(listenerPageMetadata.total_count / limit)}
+									page={currPageNum}
+									onChange={handlePageChange}
+									shape="rounded"
+									variant="outlined"
+								/>
 							</Box>
 						</List>
 					</Grid>

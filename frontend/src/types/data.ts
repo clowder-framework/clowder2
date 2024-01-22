@@ -128,7 +128,7 @@ export interface DatasetState {
 }
 
 export interface ListenerState {
-	listeners: EventListener[];
+	listeners: Paged;
 	categories: string[];
 	labels: string[];
 	jobs: Paged;
