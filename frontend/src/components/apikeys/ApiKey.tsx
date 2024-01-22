@@ -1,8 +1,7 @@
-import React, { useEffect, useState } from "react";
-import { Box, Button, ButtonGroup, Grid, IconButton } from "@mui/material";
+import React, { ChangeEvent, useEffect, useState } from "react";
+import { Box, Button, Grid, IconButton, Pagination } from "@mui/material";
 import { RootState } from "../../types/data";
 import { useDispatch, useSelector } from "react-redux";
-import { ArrowBack, ArrowForward } from "@material-ui/icons";
 import Paper from "@mui/material/Paper";
 import Table from "@mui/material/Table";
 import TableHead from "@mui/material/TableHead";
@@ -30,56 +29,27 @@ export function ApiKeys() {
 		dispatch(listApiKeysAction(skip, limit));
 	const deleteApiKey = (keyId: string) => dispatch(deleteApiKeyAction(keyId));
 
-	const apiKeys = useSelector((state: RootState) => state.user.apiKeys);
+	const apiKeys = useSelector((state: RootState) => state.user.apiKeys.data);
+	const pageMetadata = useSelector(
+		(state: RootState) => state.user.apiKeys.metadata
+	);
 
 	// TODO add option to determine limit number; default show 5 tokens each time
-	const [currPageNum, setCurrPageNum] = useState<number>(0);
+	const [currPageNum, setCurrPageNum] = useState<number>(1);
 	const [limit] = useState<number>(5);
-	const [skip, setSkip] = useState<number | undefined>(0);
-	const [prevDisabled, setPrevDisabled] = useState<boolean>(true);
-	const [nextDisabled, setNextDisabled] = useState<boolean>(false);
 	const [selectedApikey, setSelectApikey] = useState("");
 	const [deleteApikeyConfirmOpen, setDeleteApikeyConfirmOpen] = useState(false);
 	const [createApiKeyModalOpen, setCreateApiKeyModalOpen] = useState(false);
 
-	// for breadcrumb
-	const paths = [
-		{
-			name: "Explore",
-			url: "/",
-		},
-	];
-
 	// component did mount
 	useEffect(() => {
-		listApiKeys(skip, limit);
+		listApiKeys(0, limit);
 	}, []);
 
-	useEffect(() => {
-		// disable flipping if reaches the last page
-		if (apiKeys.length < limit) setNextDisabled(true);
-		else setNextDisabled(false);
-	}, [apiKeys]);
-
-	useEffect(() => {
-		if (skip !== null && skip !== undefined) {
-			listApiKeys(skip, limit);
-			if (skip === 0) setPrevDisabled(true);
-			else setPrevDisabled(false);
-		}
-	}, [skip]);
-
-	const previous = () => {
-		if (currPageNum - 1 >= 0) {
-			setSkip((currPageNum - 1) * limit);
-			setCurrPageNum(currPageNum - 1);
-		}
-	};
-	const next = () => {
-		if (apiKeys.length === limit) {
-			setSkip((currPageNum + 1) * limit);
-			setCurrPageNum(currPageNum + 1);
-		}
+	const handlePageChange = (_: ChangeEvent<unknown>, value: number) => {
+		const newSkip = (value - 1) * limit;
+		setCurrPageNum(value);
+		listApiKeys(newSkip, limit);
 	};
 
 	return (
@@ -118,7 +88,7 @@ export function ApiKeys() {
 				/>
 				{/*create api key modal*/}
 				<CreateApiKeyModal
-					skip={skip}
+					skip={(currPageNum - 1) * limit}
 					limit={limit}
 					apiKeyModalOpen={createApiKeyModalOpen}
 					setApiKeyModalOpen={setCreateApiKeyModalOpen}
@@ -191,18 +161,13 @@ export function ApiKeys() {
 						</TableBody>
 					</Table>
 					<Box display="flex" justifyContent="center" sx={{ m: 1 }}>
-						<ButtonGroup variant="contained" aria-label="previous next buttons">
-							<Button
-								aria-label="previous"
-								onClick={previous}
-								disabled={prevDisabled}
-							>
-								<ArrowBack /> Prev
-							</Button>
-							<Button aria-label="next" onClick={next} disabled={nextDisabled}>
-								Next <ArrowForward />
-							</Button>
-						</ButtonGroup>
+						<Pagination
+							count={Math.ceil(pageMetadata.total_count / limit)}
+							page={currPageNum}
+							onChange={handlePageChange}
+							shape="rounded"
+							variant="outlined"
+						/>
 					</Box>
 				</TableContainer>
 			</Grid>

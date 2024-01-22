@@ -12,7 +12,6 @@ import {
 	MetadataOut as Metadata,
 	Paged,
 	RoleType,
-	UserAPIKeyOut,
 	UserOut,
 	VisualizationConfigOut,
 	VisualizationDataOut,
@@ -173,7 +172,7 @@ export interface UserState {
 	registerSucceeded: boolean;
 	errorMsg: string;
 	hashedKey: string;
-	apiKeys: UserAPIKeyOut[];
+	apiKeys: Paged;
 	profile: UserOut;
 	adminMode: boolean;
 }

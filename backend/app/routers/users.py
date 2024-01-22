@@ -1,6 +1,5 @@
 from datetime import timedelta
 from secrets import token_urlsafe
-from typing import List
 
 from beanie import PydanticObjectId
 from beanie.operators import Or, RegEx
@@ -21,7 +20,7 @@ from app.models.users import (
 router = APIRouter()
 
 
-@router.get("/keys", response_model=List[UserAPIKeyOut])
+@router.get("/keys", response_model=Paged)
 async def get_user_api_keys(
         current_user=Depends(get_current_username),
         skip: int = 0,
@@ -33,14 +32,21 @@ async def get_user_api_keys(
         skip: number of page to skip
         limit: number to limit per page
     """
-    apikeys = (
-        await UserAPIKeyDB.find(UserAPIKeyDB.user == current_user)
-        .sort(-UserAPIKeyDB.created)
-        .skip(skip)
-        .limit(limit)
-        .to_list()
+    apikeys_and_count = await UserAPIKeyDB.find(UserAPIKeyDB.user == current_user).sort(
+        -UserAPIKeyDB.created).aggregate(
+        [
+            _get_page_query(skip, limit)
+        ],
+    ).to_list()
+    if len(apikeys_and_count[0]['metadata']) > 0:
+        page_metadata = PageMetadata(**apikeys_and_count[0]['metadata'][0], skip=skip, limit=limit)
+    else:
+        page_metadata = PageMetadata(skip=skip, limit=limit)
+    page = Paged(
+        metadata=page_metadata,
+        data=[UserAPIKeyOut(id=item.pop("_id"), **item) for item in apikeys_and_count[0]['data']]
     )
-    return [key.dict() for key in apikeys]
+    return page.dict()
 
 
 @router.post("/keys", response_model=str)

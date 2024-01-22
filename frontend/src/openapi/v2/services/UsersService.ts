@@ -42,13 +42,13 @@ export class UsersService {
      * limit: number to limit per page
      * @param skip
      * @param limit
-     * @returns UserAPIKeyOut Successful Response
+     * @returns Paged Successful Response
      * @throws ApiError
      */
     public static getUserApiKeysApiV2UsersKeysGet(
         skip?: number,
         limit: number = 10,
-    ): CancelablePromise<Array<UserAPIKeyOut>> {
+    ): CancelablePromise<Paged> {
         return __request({
             method: 'GET',
             path: `/api/v2/users/keys`,
