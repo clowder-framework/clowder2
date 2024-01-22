@@ -60,7 +60,6 @@ export const Dataset = (): JSX.Element => {
 	// search parameters
 	const [searchParams] = useSearchParams();
 	const folderId = searchParams.get("folder");
-
 	// Redux connect equivalent
 	const dispatch = useDispatch();
 	const updateDatasetMetadata = (
@@ -105,7 +104,6 @@ export const Dataset = (): JSX.Element => {
 		(state: RootState) => state.dataset.datasetRole
 	);
 	const folderPath = useSelector((state: RootState) => state.folder.folderPath);
-	const adminMode = useSelector((state: RootState) => state.user.adminMode);
 
 	// state
 	const [selectedTabIndex, setSelectedTabIndex] = useState<number>(0);
@@ -132,6 +130,7 @@ export const Dataset = (): JSX.Element => {
 	const foldersInDataset = useSelector(
 		(state: RootState) => state.folder.folders
 	);
+	const adminMode = useSelector((state: RootState) => state.user.adminMode);
 
 	useEffect(() => {
 		listFilesInDataset(datasetId, folderId, (currPageNum - 1) * limit, limit);
@@ -141,19 +140,13 @@ export const Dataset = (): JSX.Element => {
 		getMetadatDefinitions(null, 0, 100);
 	}, []);
 
+	// component did mount list all files in dataset
 	useEffect(() => {
 		listFilesInDataset(datasetId, folderId, (currPageNum - 1) * limit, limit);
 		listFoldersInDataset(datasetId, folderId, (currPageNum - 1) * limit, limit);
 		listDatasetAbout(datasetId);
 		getFolderPath(folderId);
-	}, [searchParams]);
-
-	useEffect(() => {
-		listFilesInDataset(datasetId, folderId, (currPageNum - 1) * limit, limit);
-		listFoldersInDataset(datasetId, folderId, (currPageNum - 1) * limit, limit);
-		listDatasetAbout(datasetId);
-		getFolderPath(folderId);
-	}, [adminMode]);
+	}, [searchParams, adminMode]);
 
 	// for breadcrumb
 	useEffect(() => {
@@ -280,6 +273,8 @@ export const Dataset = (): JSX.Element => {
 						value={selectedTabIndex}
 						onChange={handleTabChange}
 						aria-label="dataset tabs"
+						variant="scrollable"
+						scrollButtons="auto"
 					>
 						<Tab
 							icon={<InsertDriveFile />}
@@ -289,27 +284,19 @@ export const Dataset = (): JSX.Element => {
 							{...a11yProps(0)}
 						/>
 						<Tab
-							icon={<VisibilityIcon />}
-							iconPosition="start"
-							sx={TabStyle}
-							label="Visualizations"
-							{...a11yProps(1)}
-							disabled={false}
-						/>
-						<Tab
 							icon={<FormatListBulleted />}
 							iconPosition="start"
 							sx={TabStyle}
 							label="User Metadata"
-							{...a11yProps(2)}
+							{...a11yProps(1)}
 							disabled={false}
 						/>
 						<Tab
 							icon={<AssessmentIcon />}
 							iconPosition="start"
 							sx={TabStyle}
-							label="Extracted Metadata"
-							{...a11yProps(3)}
+							label="Machine Metadata"
+							{...a11yProps(2)}
 							disabled={false}
 						/>
 						{datasetRole.role !== undefined && datasetRole.role !== "viewer" ? (
@@ -317,8 +304,8 @@ export const Dataset = (): JSX.Element => {
 								icon={<BuildIcon />}
 								iconPosition="start"
 								sx={TabStyle}
-								label="Extract"
-								{...a11yProps(4)}
+								label="Analysis"
+								{...a11yProps(3)}
 								disabled={false}
 							/>
 						) : (
@@ -329,6 +316,14 @@ export const Dataset = (): JSX.Element => {
 							iconPosition="start"
 							sx={TabStyle}
 							label="Extraction History"
+							{...a11yProps(4)}
+							disabled={false}
+						/>
+						<Tab
+							icon={<VisibilityIcon />}
+							iconPosition="start"
+							sx={TabStyle}
+							label="Visualizations"
 							{...a11yProps(5)}
 							disabled={false}
 						/>
@@ -370,9 +365,6 @@ export const Dataset = (): JSX.Element => {
 						</Box>
 					</TabPanel>
 					<TabPanel value={selectedTabIndex} index={1}>
-						<Visualization datasetId={datasetId} />
-					</TabPanel>
-					<TabPanel value={selectedTabIndex} index={2}>
 						{enableAddMetadata &&
 						datasetRole.role !== undefined &&
 						datasetRole.role !== "viewer" ? (
@@ -426,7 +418,7 @@ export const Dataset = (): JSX.Element => {
 							</>
 						)}
 					</TabPanel>
-					<TabPanel value={selectedTabIndex} index={3}>
+					<TabPanel value={selectedTabIndex} index={2}>
 						<DisplayListenerMetadata
 							updateMetadata={updateDatasetMetadata}
 							deleteMetadata={deleteDatasetMetadata}
@@ -435,14 +427,17 @@ export const Dataset = (): JSX.Element => {
 						/>
 					</TabPanel>
 					{datasetRole.role !== undefined && datasetRole.role !== "viewer" ? (
-						<TabPanel value={selectedTabIndex} index={4}>
+						<TabPanel value={selectedTabIndex} index={3}>
 							<Listeners datasetId={datasetId} />
 						</TabPanel>
 					) : (
 						<></>
 					)}
-					<TabPanel value={selectedTabIndex} index={5}>
+					<TabPanel value={selectedTabIndex} index={4}>
 						<ExtractionHistoryTab datasetId={datasetId} />
+					</TabPanel>
+					<TabPanel value={selectedTabIndex} index={5}>
+						<Visualization datasetId={datasetId} />
 					</TabPanel>
 					{datasetRole.role !== undefined && datasetRole.role !== "viewer" ? (
 						<TabPanel value={selectedTabIndex} index={6}>

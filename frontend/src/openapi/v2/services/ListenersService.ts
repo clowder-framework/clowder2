@@ -27,13 +27,16 @@ export class ListenersService {
      * Arguments:
      * skip -- number of initial records to skip (i.e. for pagination)
      * limit -- restrict number of records to be returned (i.e. for pagination)
+     * heartbeat_interval -- number of seconds after which a listener is considered dead
      * category -- filter by category has to be exact match
      * label -- filter by label has to be exact match
+     * alive_only -- filter by alive status
      * @param skip
      * @param limit
      * @param heartbeatInterval
      * @param category
      * @param label
+     * @param aliveOnly
      * @returns EventListenerOut Successful Response
      * @throws ApiError
      */
@@ -43,6 +46,7 @@ export class ListenersService {
         heartbeatInterval: number = 300,
         category?: string,
         label?: string,
+        aliveOnly: boolean = false,
     ): CancelablePromise<Array<EventListenerOut>> {
         return __request({
             method: 'GET',
@@ -53,6 +57,7 @@ export class ListenersService {
                 'heartbeat_interval': heartbeatInterval,
                 'category': category,
                 'label': label,
+                'alive_only': aliveOnly,
             },
             errors: {
                 422: `Validation Error`,

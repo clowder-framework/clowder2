@@ -277,9 +277,13 @@ async def get_dataset_files(
         user_id=Depends(get_user),
         skip: int = 0,
         limit: int = 10,
+        admin=Depends(get_admin),
+        admin_mode: bool = Depends(get_admin_mode),
         allow: bool = Depends(Authorization("viewer")),
 ):
-    if authenticated:
+    if admin and admin_mode:
+        query = []
+    elif authenticated:
         query = [
             FileDBViewList.dataset_id == ObjectId(dataset_id),
         ]
