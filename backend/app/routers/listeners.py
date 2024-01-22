@@ -208,7 +208,6 @@ async def search_listeners(
     """
     # First compute alive flag for all listeners
     aggregation_pipeline = [_check_livelihood_query(heartbeat_interval=heartbeat_interval),
-                            {"$sort": {"name": 1}},
                             _get_page_query(skip, limit)]
 
     listeners_and_count = await EventListenerDB.find(
@@ -216,7 +215,7 @@ async def search_listeners(
             RegEx(field=EventListenerDB.name, pattern=text),
             RegEx(field=EventListenerDB.description, pattern=text),
         ),
-    ).aggregate(aggregation_pipeline).to_list()
+    ).sort(+EventListenerDB.name).aggregate(aggregation_pipeline).to_list()
     if len(listeners_and_count[0]['metadata']) > 0:
         page_metadata = PageMetadata(**listeners_and_count[0]['metadata'][0], skip=skip, limit=limit)
     else:
@@ -297,14 +296,13 @@ async def get_listeners(
     if alive_only:
         aggregation_pipeline.append({"$match": {"alive": True}}),
 
-    # Sort by name alphabetically
-    aggregation_pipeline.append({"$sort": {"name": 1}})
-
-    # add pagnation
+    # Add pagination
     aggregation_pipeline.append(_get_page_query(skip, limit))
+    
     # Run aggregate query and return
-
-    listeners_and_count = await EventListenerDB.aggregate(aggregation_pipeline).to_list()
+    # Sort by name alphabetically
+    listeners_and_count = await EventListenerDB.find().sort(+EventListenerDB.name).aggregate(
+        aggregation_pipeline).to_list()
     if len(listeners_and_count[0]['metadata']) > 0:
         page_metadata = PageMetadata(**listeners_and_count[0]['metadata'][0], skip=skip, limit=limit)
     else:
