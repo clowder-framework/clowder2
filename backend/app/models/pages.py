@@ -17,12 +17,19 @@ class Paged(BaseModel):
 
 
 def _get_page_query(skip, limit, sort_field="created", ascending=True):
-    return {"$facet":
-        {
+    return {
+        "$facet": {
             "metadata": [{"$count": "total_count"}],
             "data": [
-                {"$sort": {sort_field: SortDirection.ASCENDING if ascending else SortDirection.DESCENDING}},
+                {
+                    "$sort": {
+                        sort_field: SortDirection.ASCENDING
+                        if ascending
+                        else SortDirection.DESCENDING
+                    }
+                },
                 {"$skip": skip},
-                {"$limit": limit}],
+                {"$limit": limit},
+            ],
         },
     }
