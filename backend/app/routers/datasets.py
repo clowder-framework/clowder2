@@ -51,7 +51,6 @@ from app.models.files import FileOut, FileDB, FileDBViewList, LocalFileIn, Stora
 from app.models.folders import FolderOut, FolderIn, FolderDB, FolderDBViewList
 from app.models.metadata import MetadataDB
 from app.models.pages import Paged, PageMetadata, _get_page_query
-from app.models.pyobjectid import PyObjectId
 from app.models.thumbnails import ThumbnailDB
 from app.models.users import UserOut
 from app.rabbitmq.listeners import submit_dataset_job
@@ -402,7 +401,7 @@ async def add_folder(
                     status_code=400, detail=f"Parent folder {parent_folder} not found"
                 )
         new_folder = FolderDB(
-            **folder_in.dict(), creator=user, dataset_id=PyObjectId(dataset_id)
+            **folder_in.dict(), creator=user, dataset_id=PydanticObjectId(dataset_id)
         )
         await new_folder.insert()
         return new_folder.dict()

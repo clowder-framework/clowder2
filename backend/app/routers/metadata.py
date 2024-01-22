@@ -23,7 +23,6 @@ from app.models.metadata import (
     MetadataDB,
 )
 from app.models.pages import Paged, _get_page_query, PageMetadata
-from app.models.pyobjectid import PyObjectId
 
 router = APIRouter()
 
@@ -101,7 +100,7 @@ async def delete_metadata_definition(
 ):
     """Delete metadata definition by specific ID."""
     mdd = await MetadataDefinitionDB.find_one(
-        MetadataDefinitionDB.id == PyObjectId(metadata_definition_id)
+        MetadataDefinitionDB.id == PydanticObjectId(metadata_definition_id)
     )
     if mdd:
         # Check if metadata using this definition exists
@@ -177,7 +176,7 @@ async def update_metadata(
     Returns:
         Metadata document that was updated
     """
-    md = await MetadataDB.find_one(MetadataDB.id == PyObjectId(metadata_id))
+    md = await MetadataDB.find_one(MetadataDB.id == PydanticObjectId(metadata_id))
     if md:
         # TODO: Refactor this with permissions checks etc.
         return await patch_metadata(md, metadata_in.contents, es)
@@ -192,7 +191,7 @@ async def delete_metadata(
         allow: bool = Depends(MetadataAuthorization("editor")),
 ):
     """Delete metadata by specific ID."""
-    md = await MetadataDB.find_one(MetadataDB.id == PyObjectId(metadata_id))
+    md = await MetadataDB.find_one(MetadataDB.id == PydanticObjectId(metadata_id))
     if md:
         # TODO: Refactor this with permissions checks etc.
         await md.delete()
