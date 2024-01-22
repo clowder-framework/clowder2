@@ -57,15 +57,18 @@ export const ManageUsers = (): JSX.Element => {
 
 	// search while typing
 	useEffect(() => {
-		if (searchTerm !== "")
-			prefixSearchAllUsers(searchTerm, (currPageNum - 1) * limit, limit);
-		else fetchAllUsers((currPageNum - 1) * limit, limit);
+		if (searchTerm !== "") {
+			// reset page with each new search term
+			setCurrPageNum(1);
+			prefixSearchAllUsers(searchTerm, 0, limit);
+		} else fetchAllUsers((currPageNum - 1) * limit, limit);
 	}, [searchTerm]);
 
 	const handlePageChange = (_: ChangeEvent<unknown>, value: number) => {
 		const newSkip = (value - 1) * limit;
 		setCurrPageNum(value);
-		fetchAllUsers(newSkip, limit);
+		if (searchTerm !== "") prefixSearchAllUsers(searchTerm, newSkip, limit);
+		else fetchAllUsers(newSkip, limit);
 	};
 
 	return (
