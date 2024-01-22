@@ -1,10 +1,4 @@
-import {
-	ExtractedMetadata,
-	FilePreview,
-	Folder,
-	MetadataJsonld,
-	Profile,
-} from "./data";
+import { ExtractedMetadata, FilePreview, Folder, MetadataJsonld } from "./data";
 import {
 	AuthorizationBase,
 	DatasetOut as Dataset,
@@ -20,6 +14,7 @@ import {
 	Paged,
 	RoleType,
 	UserAPIKeyOut,
+	UserOut,
 	VisualizationConfigOut,
 	VisualizationDataOut,
 } from "../openapi/v2";
@@ -155,7 +150,7 @@ interface RESET_API_KEY {
 
 interface RECEIVE_USER_PROFILE {
 	type: "RECEIVE_USER_PROFILE";
-	profile: Profile;
+	profile: UserOut;
 }
 
 interface CREATE_DATASET {
@@ -469,6 +464,16 @@ interface RESET_VIS_DATA_PRESIGNED_URL {
 	preSignedUrl: string;
 }
 
+interface SET_ADMIN {
+	type: "SET_ADMIN";
+	profile: UserOut;
+}
+
+interface REVOKE_ADMIN {
+	type: "REVOKE_ADMIN";
+	profile: UserOut;
+}
+
 export type DataAction =
 	| GET_ADMIN_MODE_STATUS
 	| TOGGLE_ADMIN_MODE
@@ -556,4 +561,6 @@ export type DataAction =
 	| GET_VIS_DATA_PRESIGNED_URL
 	| RESET_VIS_DATA_PRESIGNED_URL
 	| RESET_CREATE_FILES
-	| UPDATE_FILE;
+	| UPDATE_FILE
+	| SET_ADMIN
+	| REVOKE_ADMIN;

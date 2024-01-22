@@ -57,15 +57,21 @@ const group = (state = defaultState, action: DataAction) => {
 			return Object.assign({}, state, { users: action.users });
 		case SET_ADMIN:
 			return Object.assign({}, state, {
-				users: state.users.map((user) =>
-					user.email === action.profile.email ? action.profile : user
-				),
+				users: {
+					...state.users,
+					data: state.users.data.map((user: UserOut) =>
+						user.email === action.profile.email ? action.profile : user
+					),
+				},
 			});
 		case REVOKE_ADMIN:
 			return Object.assign({}, state, {
-				users: state.users.map((user) =>
-					user.email === action.profile.email ? action.profile : user
-				),
+				users: {
+					...state.users,
+					data: state.users.data.map((user: UserOut) =>
+						user.email === action.profile.email ? action.profile : user
+					),
+				},
 			});
 		case PREFIX_SEARCH_USERS:
 			return Object.assign({}, state, { users: action.users });

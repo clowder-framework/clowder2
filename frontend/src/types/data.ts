@@ -18,20 +18,6 @@ import {
 	VisualizationDataOut,
 } from "../openapi/v2";
 
-export interface Profile {
-	id: string;
-	email: string;
-	first_name: string | null;
-	last_name: string | null;
-}
-
-export interface Profile {
-	id: string;
-	email: string;
-	first_name: string | null;
-	last_name: string | null;
-}
-
 export interface Folder {
 	id: string;
 	name: string;
