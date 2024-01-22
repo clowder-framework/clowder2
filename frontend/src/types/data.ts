@@ -140,7 +140,8 @@ export interface ListenerState {
 }
 
 export interface GroupState {
-	groups: GroupOut[];
+	groups: Paged;
+	newGroup: GroupOut;
 	about: GroupOut;
 	role: RoleType;
 	users: Paged;

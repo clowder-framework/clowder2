@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import List, Optional
+from typing import Optional
 
 from beanie import PydanticObjectId
 from beanie.operators import Or, Push, RegEx
@@ -10,6 +10,7 @@ from app.deps.authorization_deps import AuthorizationDB, GroupAuthorization
 from app.keycloak_auth import get_current_user, get_user
 from app.models.authorization import RoleType
 from app.models.groups import GroupOut, GroupIn, GroupDB, GroupBase, Member
+from app.models.pages import _get_page_query, PageMetadata, Paged
 from app.models.users import UserOut, UserDB
 from app.routers.authentication import get_admin_mode, get_admin
 
@@ -18,8 +19,8 @@ router = APIRouter()
 
 @router.post("", response_model=GroupOut)
 async def save_group(
-    group_in: GroupIn,
-    user=Depends(get_current_user),
+        group_in: GroupIn,
+        user=Depends(get_current_user),
 ):
     group_db = GroupDB(**group_in.dict(), creator=user.email)
     user_member = Member(user=user, editor=True)
@@ -29,13 +30,13 @@ async def save_group(
     return group_db.dict()
 
 
-@router.get("", response_model=List[GroupOut])
+@router.get("", response_model=Paged)
 async def get_groups(
-    user_id=Depends(get_user),
-    skip: int = 0,
-    limit: int = 10,
-    admin_mode: bool = Depends(get_admin_mode),
-    admin=Depends(get_admin),
+        user_id=Depends(get_user),
+        skip: int = 0,
+        limit: int = 10,
+        admin_mode: bool = Depends(get_admin_mode),
+        admin=Depends(get_admin),
 ):
     """Get a list of all Groups in the db the user is a member/owner of.
 
@@ -54,23 +55,32 @@ async def get_groups(
             )
         )
 
-    groups = await GroupDB.find(
+    groups_and_count = await GroupDB.find(
         *criteria_list,
-        sort=(-GroupDB.created),
-        skip=skip,
-        limit=limit,
+    ).sort(-GroupDB.created).aggregate(
+        [
+            _get_page_query(skip, limit)
+        ],
     ).to_list()
-    return [group.dict() for group in groups]
+    if len(groups_and_count[0]['metadata']) > 0:
+        page_metadata = PageMetadata(**groups_and_count[0]['metadata'][0], skip=skip, limit=limit)
+    else:
+        page_metadata = PageMetadata(skip=skip, limit=limit)
+    page = Paged(
+        metadata=page_metadata,
+        data=[GroupOut(id=item.pop("_id"), **item) for item in groups_and_count[0]['data']]
+    )
+    return page.dict()
 
 
-@router.get("/search/{search_term}", response_model=List[GroupOut])
+@router.get("/search/{search_term}", response_model=Paged)
 async def search_group(
-    search_term: str,
-    user_id=Depends(get_user),
-    skip: int = 0,
-    limit: int = 10,
-    admin_mode: bool = Depends(get_admin_mode),
-    admin=Depends(get_admin),
+        search_term: str,
+        user_id=Depends(get_user),
+        skip: int = 0,
+        limit: int = 10,
+        admin_mode: bool = Depends(get_admin_mode),
+        admin=Depends(get_admin),
 ):
     """Search all groups in the db based on text.
 
@@ -92,19 +102,28 @@ async def search_group(
         )
 
     # user has to be the creator or member first; then apply search
-    groups = await GroupDB.find(
+    groups_and_count = await GroupDB.find(
         *criteria_list,
-        skip=skip,
-        limit=limit,
+    ).sort(-GroupDB.created).aggregate(
+        [
+            _get_page_query(skip, limit)
+        ],
     ).to_list()
-
-    return [group.dict() for group in groups]
+    if len(groups_and_count[0]['metadata']) > 0:
+        page_metadata = PageMetadata(**groups_and_count[0]['metadata'][0], skip=skip, limit=limit)
+    else:
+        page_metadata = PageMetadata(skip=skip, limit=limit)
+    page = Paged(
+        metadata=page_metadata,
+        data=[GroupOut(id=item.pop("_id"), **item) for item in groups_and_count[0]['data']]
+    )
+    return page.dict()
 
 
 @router.get("/{group_id}", response_model=GroupOut)
 async def get_group(
-    group_id: str,
-    allow: bool = Depends(GroupAuthorization("viewer")),
+        group_id: str,
+        allow: bool = Depends(GroupAuthorization("viewer")),
 ):
     if (group := await GroupDB.get(PydanticObjectId(group_id))) is not None:
         return group.dict()
@@ -113,10 +132,10 @@ async def get_group(
 
 @router.put("/{group_id}", response_model=GroupOut)
 async def edit_group(
-    group_id: str,
-    group_info: GroupBase,
-    user_id=Depends(get_user),
-    allow: bool = Depends(GroupAuthorization("editor")),
+        group_id: str,
+        group_info: GroupBase,
+        user_id=Depends(get_user),
+        allow: bool = Depends(GroupAuthorization("editor")),
 ):
     if (group := await GroupDB.get(PydanticObjectId(group_id))) is not None:
         group_dict = dict(group_info) if group_info is not None else {}
@@ -139,7 +158,7 @@ async def edit_group(
             if original_user not in groups_users:
                 # remove them from auth
                 async for auth in AuthorizationDB.find(
-                    {"group_ids": ObjectId(group_id)}
+                        {"group_ids": ObjectId(group_id)}
                 ):
                     auth.user_ids.remove(original_user.user.email)
                     await auth.replace()
@@ -183,8 +202,8 @@ async def edit_group(
 
 @router.delete("/{group_id}", response_model=GroupOut)
 async def delete_group(
-    group_id: str,
-    allow: bool = Depends(GroupAuthorization("owner")),
+        group_id: str,
+        allow: bool = Depends(GroupAuthorization("owner")),
 ):
     if (group := await GroupDB.get(PydanticObjectId(group_id))) is not None:
         await group.delete()
@@ -195,10 +214,10 @@ async def delete_group(
 
 @router.post("/{group_id}/add/{username}", response_model=GroupOut)
 async def add_member(
-    group_id: str,
-    username: str,
-    role: Optional[str] = None,
-    allow: bool = Depends(GroupAuthorization("editor")),
+        group_id: str,
+        username: str,
+        role: Optional[str] = None,
+        allow: bool = Depends(GroupAuthorization("editor")),
 ):
     """Add a new user to a group."""
     if (user := await UserDB.find_one(UserDB.email == username)) is not None:
@@ -232,9 +251,9 @@ async def add_member(
 
 @router.post("/{group_id}/remove/{username}", response_model=GroupOut)
 async def remove_member(
-    group_id: str,
-    username: str,
-    allow: bool = Depends(GroupAuthorization("editor")),
+        group_id: str,
+        username: str,
+        allow: bool = Depends(GroupAuthorization("editor")),
 ):
     """Remove a user from a group."""
 
@@ -264,10 +283,10 @@ async def remove_member(
 
 @router.put("/{group_id}/update/{username}", response_model=GroupOut)
 async def update_member(
-    group_id: str,
-    username: str,
-    role: str,
-    allow: bool = Depends(GroupAuthorization("editor")),
+        group_id: str,
+        username: str,
+        role: str,
+        allow: bool = Depends(GroupAuthorization("editor")),
 ):
     """Update user role."""
     if (user := await UserDB.find_one({"email": username})) is not None:

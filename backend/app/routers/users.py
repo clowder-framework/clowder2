@@ -90,7 +90,7 @@ async def delete_user_api_key(
 
 @router.get("", response_model=Paged)
 async def get_users(skip: int = 0, limit: int = 2):
-    users_and_count = await UserDB.find().aggregate(
+    users_and_count = await UserDB.find().sort(+UserDB.email).aggregate(
         [
             _get_page_query(skip, limit)
         ],
@@ -116,7 +116,7 @@ async def search_users(
         RegEx(field=UserDB.email, pattern=text),
         RegEx(field=UserDB.first_name, pattern=text),
         RegEx(field=UserDB.last_name, pattern=text),
-    )).aggregate(
+    )).sort(+UserDB.email).aggregate(
         [
             _get_page_query(skip, limit)
         ],
@@ -141,8 +141,7 @@ async def search_users(
     query_regx = f"^{prefix}.*"
     users_and_count = await UserDB.find(
         Or(RegEx(field=UserDB.email, pattern=query_regx)),
-        sort=(+UserDB.email),
-    ).aggregate(
+    ).sort(+UserDB.email).aggregate(
         [
             _get_page_query(skip, limit)
         ],

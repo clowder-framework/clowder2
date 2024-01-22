@@ -158,6 +158,11 @@ interface CREATE_DATASET {
 	dataset: Dataset;
 }
 
+interface UPDATE_DATASET {
+	type: "UPDATE_DATASET";
+	about: Dataset;
+}
+
 interface RESET_CREATE_DATASET {
 	type: "RESET_CREATE_DATASET";
 }
@@ -389,6 +394,15 @@ interface CREATE_GROUP {
 	about: Group;
 }
 
+interface RESET_CREATE_GROUP {
+	type: "RESET_CREATE_GROUP";
+}
+
+interface UPDATE_GROUP {
+	type: "UPDATE_GROUP";
+	about: Group;
+}
+
 interface RECEIVE_GROUPS {
 	type: "RECEIVE_GROUPS";
 	groups: Group[];
@@ -484,6 +498,7 @@ export type DataAction =
 	| RECEIVE_DATASET_ROLE
 	| RECEIVE_DATASETS
 	| DELETE_DATASET
+	| UPDATE_DATASET
 	| RECEIVE_FILE_SUMMARY
 	| RECEIVE_FILE_ROLE
 	| RECEIVE_FILE_EXTRACTED_METADATA
@@ -543,6 +558,8 @@ export type DataAction =
 	| FETCH_JOB_UPDATES
 	| RESET_JOB_UPDATES
 	| CREATE_GROUP
+	| RESET_CREATE_GROUP
+	| UPDATE_GROUP
 	| RECEIVE_GROUPS
 	| SEARCH_GROUPS
 	| DELETE_GROUP

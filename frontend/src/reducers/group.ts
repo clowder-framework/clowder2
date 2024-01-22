@@ -6,6 +6,7 @@ import {
 	DELETE_GROUP_MEMBER,
 	RECEIVE_GROUP_ABOUT,
 	RECEIVE_GROUPS,
+	RESET_CREATE_GROUP,
 	SEARCH_GROUPS,
 	UPDATE_GROUP,
 } from "../actions/group";
@@ -27,7 +28,8 @@ import {
 } from "../actions/user";
 
 const defaultState: GroupState = {
-	groups: [],
+	groups: <Paged>{ metadata: <PageMetadata>{}, data: <GroupOut[]>[] },
+	newGroup: <GroupOut>{},
 	about: <GroupOut>{},
 	role: <RoleType>{},
 	users: <Paged>{ metadata: <PageMetadata>{}, data: <UserOut[]>[] },
@@ -36,9 +38,9 @@ const defaultState: GroupState = {
 const group = (state = defaultState, action: DataAction) => {
 	switch (action.type) {
 		case CREATE_GROUP:
-			return Object.assign({}, state, {
-				groups: [...[], action.about, ...state.groups],
-			});
+			return Object.assign({}, state, { newGroup: action.about });
+		case RESET_CREATE_GROUP:
+			return Object.assign({}, state, { newGroup: {} });
 		case RECEIVE_GROUPS:
 			return Object.assign({}, state, { groups: action.groups });
 		case SEARCH_GROUPS:
@@ -79,7 +81,12 @@ const group = (state = defaultState, action: DataAction) => {
 			return Object.assign({}, state, { about: action.about });
 		case DELETE_GROUP:
 			return Object.assign({}, state, {
-				groups: state.groups.filter((group) => group.id !== action.about.id),
+				groups: {
+					...state.groups,
+					data: state.groups.data.filter(
+						(group: GroupOut) => group.id !== action.about.id
+					),
+				},
 			});
 		default:
 			return state;
