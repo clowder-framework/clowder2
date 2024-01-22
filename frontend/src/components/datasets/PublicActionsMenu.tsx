@@ -22,7 +22,7 @@ export const PublicActionsMenu = (props: ActionsMenuProps): JSX.Element => {
 			<Button
 				sx={{ minWidth: "auto" }}
 				variant="contained"
-				href={`${config.hostname}/api/v2/public/datasets/${datasetId}/download`}
+				href={`${config.hostname}/api/v2/public_datasets/${datasetId}/download`}
 				endIcon={<Download />}
 			>
 				Download

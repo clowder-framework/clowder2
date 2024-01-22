@@ -57,7 +57,7 @@ export const PublicFileActionsMenu = (props: PublicFileActionsMenuProps): JSX.El
 				variant="contained"
 				onClick={() => {
 					listFileSummary(fileId);
-					window.location.href = `${config.hostname}/api/v2/public/files/${fileId}`;
+					window.location.href = `${config.hostname}/api/v2/public_files/${fileId}`;
 				}}
 				endIcon={<Download />}
 			>
