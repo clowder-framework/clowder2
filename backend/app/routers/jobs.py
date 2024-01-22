@@ -14,21 +14,22 @@ from app.models.listeners import (
     EventListenerJobOut,
     EventListenerJobUpdateOut,
 )
+from app.models.pages import Paged, _get_page_query, PageMetadata
 
 router = APIRouter()
 
 
-@router.get("", response_model=List[EventListenerJobOut])
+@router.get("", response_model=Paged)
 async def get_all_job_summary(
-    current_user_id=Depends(get_user),
-    listener_id: Optional[str] = None,
-    status: Optional[str] = None,
-    user_id: Optional[str] = None,
-    file_id: Optional[str] = None,
-    dataset_id: Optional[str] = None,
-    created: Optional[str] = None,
-    skip: int = 0,
-    limit: int = 2,
+        current_user_id=Depends(get_user),
+        listener_id: Optional[str] = None,
+        status: Optional[str] = None,
+        user_id: Optional[str] = None,
+        file_id: Optional[str] = None,
+        dataset_id: Optional[str] = None,
+        created: Optional[str] = None,
+        skip: int = 0,
+        limit: int = 2,
 ):
     """
     Get a list of all jobs from the db.
@@ -73,16 +74,28 @@ async def get_all_job_summary(
         filters.append(
             EventListenerJobViewList.resource_ref.resource_id == ObjectId(dataset_id)
         )
-    jobs = (
-        await EventListenerJobViewList.find(*filters).skip(skip).limit(limit).to_list()
+
+    jobs_and_count = await EventListenerJobViewList.find(*filters).sort(
+        -EventListenerJobViewList.created).aggregate(
+        [
+            _get_page_query(skip, limit)
+        ],
+    ).to_list()
+    if len(jobs_and_count[0]['metadata']) > 0:
+        page_metadata = PageMetadata(**jobs_and_count[0]['metadata'][0], skip=skip, limit=limit)
+    else:
+        page_metadata = PageMetadata(skip=skip, limit=limit)
+    page = Paged(
+        metadata=page_metadata,
+        data=[EventListenerJobOut(id=item.pop("_id"), **item) for item in jobs_and_count[0]['data']]
     )
-    return [job.dict() for job in jobs]
+    return page.dict()
 
 
 @router.get("/{job_id}/summary", response_model=EventListenerJobOut)
 async def get_job_summary(
-    job_id: str,
-    user=Depends(get_current_username),
+        job_id: str,
+        user=Depends(get_current_username),
 ):
     if (job := await EventListenerJobDB.get(PydanticObjectId(job_id))) is not None:
         return job.dict()
@@ -91,8 +104,8 @@ async def get_job_summary(
 
 @router.get("/{job_id}/updates", response_model=List[EventListenerJobUpdateOut])
 async def get_job_updates(
-    job_id: str,
-    user=Depends(get_current_username),
+        job_id: str,
+        user=Depends(get_current_username),
 ):
     if (job := await EventListenerJobDB.get(PydanticObjectId(job_id))) is not None:
         # TODO: Should this also return the job summary data since we just queried it here?

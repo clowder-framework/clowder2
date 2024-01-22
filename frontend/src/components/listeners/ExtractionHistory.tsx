@@ -117,7 +117,10 @@ export const ExtractionHistory = (): JSX.Element => {
 		);
 
 	const listeners = useSelector((state: RootState) => state.listener.listeners);
-	const jobs = useSelector((state: RootState) => state.listener.jobs);
+	const jobs = useSelector((state: RootState) => state.listener.jobs.data);
+	const jobPageMetadata = useSelector(
+		(state: RootState) => state.listener.jobs.metadata
+	);
 	const adminMode = useSelector((state: RootState) => state.user.adminMode);
 
 	const [errorOpen, setErrorOpen] = useState(false);
@@ -144,6 +147,7 @@ export const ExtractionHistory = (): JSX.Element => {
 
 	useEffect(() => {
 		if (selectedExtractor) {
+			// TODO add pagination here
 			listListenerJobs(
 				selectedExtractor["name"],
 				null,

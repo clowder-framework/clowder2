@@ -3,7 +3,6 @@ import {
 	DatasetOut,
 	DatasetRoles,
 	EventListenerJobDB,
-	EventListenerOut as Listener,
 	FileOut,
 	FileVersion,
 	FolderOut,
@@ -129,10 +128,10 @@ export interface DatasetState {
 }
 
 export interface ListenerState {
-	listeners: Listener[];
+	listeners: EventListener[];
 	categories: string[];
 	labels: string[];
-	jobs: EventListenerJobDB[];
+	jobs: Paged;
 	currJobUpdates: EventListenerJobDB[];
 	currJobSummary: JobSummary[];
 	currJobId: string;
