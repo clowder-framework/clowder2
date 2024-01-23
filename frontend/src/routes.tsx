@@ -32,7 +32,7 @@ import { ExtractionHistory } from "./components/listeners/ExtractionHistory";
 import { fetchDatasetRole, fetchFileRole } from "./actions/authorization";
 import { PageNotFound } from "./components/errors/PageNotFound";
 import { Forbidden } from "./components/errors/Forbidden";
-import { ApiKeys } from "./components/ApiKeys/ApiKey";
+import { ApiKeys } from "./components/apikeys/ApiKey";
 import { Profile } from "./components/users/Profile";
 import { ManageUsers } from "./components/users/ManageUsers";
 import config from "./app.config";
