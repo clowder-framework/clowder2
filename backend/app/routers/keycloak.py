@@ -34,12 +34,12 @@ async def register() -> RedirectResponse:
 async def login() -> RedirectResponse:
     """Redirect to keycloak login page."""
     return RedirectResponse(
-            keycloak_openid.auth_url(
-                redirect_uri=settings.auth_redirect_uri,
-                scope="openid email",
-                state=token_urlsafe(32) 
-            )
+        keycloak_openid.auth_url(
+            redirect_uri=settings.auth_redirect_uri,
+            scope="openid email",
+            state=token_urlsafe(32) 
         )
+    )
 
 
 @router.get("/logout")
@@ -108,7 +108,7 @@ async def auth(code: str) -> RedirectResponse:
     logger.info(f"In /api/v2/auth")
     # get token from Keycloak
     token_body = keycloak_openid.token(
-        grant_type='authorization_code',
+        grant_type="authorization_code",
         code=code,
         redirect_uri=settings.auth_redirect_uri,
     )
