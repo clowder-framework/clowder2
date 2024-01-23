@@ -28,7 +28,6 @@ RUN npm run build
 
 FROM nginx:alpine as clowder-runtime
 
-RUN apk add --no-cache jq
 RUN rm -rf /usr/share/nginx/html/ && \
   mkdir /usr/share/nginx/html && \
   mkdir /usr/share/nginx/html/public \
