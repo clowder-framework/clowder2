@@ -68,35 +68,11 @@ export function fetchPublicFileSummary(id) {
 	};
 }
 
-export const RECEIVE_PUBLIC_FILE_METADATA_JSONLD = "RECEIVE_PUBLIC_FILE_METADATA_JSONLD";
-
-export function fetchPublicFileMetadataJsonld(id) {
-	const url = `${config.hostname}/public/files/${id}/metadata.jsonld`;
-	return (dispatch) => {
-		return fetch(url, { mode: "cors"})
-			.then((response) => {
-				if (response.status === 200) {
-					response.json().then((json) => {
-						dispatch({
-							type: RECEIVE_PUBLIC_FILE_METADATA_JSONLD,
-							publicMetadataJsonld: json,
-							receivedAt: Date.now(),
-						});
-					});
-				} else {
-					dispatch(handleErrors(response, fetchPublicFileMetadataJsonld(id)));
-				}
-			})
-			.catch((reason) => {
-				dispatch(handleErrors(reason, fetchPublicFileMetadataJsonld(id)));
-			});
-	};
-}
 
 export const RECEIVE_PUBLIC_PREVIEWS = "RECEIVE_PUBLIC_PREVIEWS";
 
 export function fetchPublicFilePreviews(id) {
-	const url = `${config.hostname}/public/files/${id}/getPreviews`;
+	const url = `${config.hostname}/public_files/${id}/getPreviews`;
 	return (dispatch) => {
 		return fetch(url, { mode: "cors"})
 			.then((response) => {
