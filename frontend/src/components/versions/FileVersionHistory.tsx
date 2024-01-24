@@ -45,7 +45,7 @@ export function FileVersionHistory(props: FileVersionHistoryProps) {
 								{publicView?
 									(
 										<Button
-											href={`${config.hostname}/api/v2/public/files/${fileVersion.file_id}?version=${version_num}`}
+											href={`${config.hostname}/api/v2/public_files/${fileVersion.file_id}?version=${version_num}`}
 											variant="contained"
 										>
 										Download

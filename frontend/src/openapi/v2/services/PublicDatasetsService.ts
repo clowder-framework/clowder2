@@ -24,7 +24,7 @@ export class PublicDatasetsService {
     ): CancelablePromise<Array<DatasetOut>> {
         return __request({
             method: 'GET',
-            path: `/api/v2/public/datasets`,
+            path: `/api/v2/public_datasets`,
             query: {
                 'skip': skip,
                 'limit': limit,
@@ -46,7 +46,7 @@ export class PublicDatasetsService {
     ): CancelablePromise<DatasetOut> {
         return __request({
             method: 'GET',
-            path: `/api/v2/public/datasets/${datasetId}`,
+            path: `/api/v2/public_datasets/${datasetId}`,
             errors: {
                 422: `Validation Error`,
             },
@@ -70,7 +70,7 @@ export class PublicDatasetsService {
     ): CancelablePromise<Array<FileOut>> {
         return __request({
             method: 'GET',
-            path: `/api/v2/public/datasets/${datasetId}/files`,
+            path: `/api/v2/public_datasets/${datasetId}/files`,
             query: {
                 'folder_id': folderId,
                 'skip': skip,
@@ -99,7 +99,7 @@ export class PublicDatasetsService {
     ): CancelablePromise<Array<FolderOut>> {
         return __request({
             method: 'GET',
-            path: `/api/v2/public/datasets/${datasetId}/folders`,
+            path: `/api/v2/public_datasets/${datasetId}/folders`,
             query: {
                 'parent_folder': parentFolder,
                 'skip': skip,
@@ -124,7 +124,7 @@ export class PublicDatasetsService {
     ): CancelablePromise<Array<MetadataOut>> {
         return __request({
             method: 'GET',
-            path: `/api/v2/public/datasets/${datasetId}/metadata`,
+            path: `/api/v2/public_datasets/${datasetId}/metadata`,
             formData: formData,
             mediaType: 'application/x-www-form-urlencoded',
             errors: {
@@ -144,7 +144,7 @@ export class PublicDatasetsService {
     ): CancelablePromise<DatasetOut> {
         return __request({
             method: 'GET',
-            path: `/api/v2/public/datasets/${datasetId}/download`,
+            path: `/api/v2/public_datasets/${datasetId}/download`,
             errors: {
                 422: `Validation Error`,
             },

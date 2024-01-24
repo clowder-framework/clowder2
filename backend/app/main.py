@@ -45,6 +45,7 @@ from app.routers import (
     authentication,
     keycloak,
     elasticsearch,
+    public_elasticsearch,
     listeners,
     feeds,
     jobs,
@@ -147,7 +148,7 @@ api_router.include_router(
 )
 api_router.include_router(
     public_datasets.router,
-    prefix="/public/datasets",
+    prefix="/public_datasets",
     tags=["public_datasets"],
 )
 api_router.include_router(
@@ -192,8 +193,8 @@ api_router.include_router(
     dependencies=[Depends(get_current_username)],
 )
 api_router.include_router(
-    elasticsearch.router,
-    prefix="/public/elasticsearch",
+    public_elasticsearch.router,
+    prefix="/public_elasticsearch",
     tags=["public_elasticsearch"],
 )
 api_router.include_router(
