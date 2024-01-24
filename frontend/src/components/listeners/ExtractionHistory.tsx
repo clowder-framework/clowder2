@@ -80,7 +80,8 @@ export const ExtractionHistory = (): JSX.Element => {
 		limit: number | undefined,
 		heartbeatInterval: number | undefined,
 		selectedCategory: string | null,
-		selectedLabel: string | null
+		selectedLabel: string | null,
+		aliveOnly: boolean | undefined
 	) =>
 		dispatch(
 			fetchListeners(
@@ -88,7 +89,8 @@ export const ExtractionHistory = (): JSX.Element => {
 				limit,
 				heartbeatInterval,
 				selectedCategory,
-				selectedLabel
+				selectedLabel,
+				aliveOnly
 			)
 		);
 	const listListenerJobs = (
@@ -128,9 +130,10 @@ export const ExtractionHistory = (): JSX.Element => {
 	const [executionJobsTableRow, setExecutionJobsTableRow] = useState([]);
 	const [selectedStatus, setSelectedStatus] = useState(null);
 	const [selectedCreatedTime, setSelectedCreatedTime] = useState(null);
+	const [aliveOnly, setAliveOnly] = useState<boolean>(false);
 
 	useEffect(() => {
-		listListeners(skip, limit, 0, null, null);
+		listListeners(skip, limit, 0, null, null, aliveOnly);
 		listListenerJobs(null, null, null, null, null, null, 0, 100);
 	}, []);
 
@@ -197,7 +200,7 @@ export const ExtractionHistory = (): JSX.Element => {
 
 	useEffect(() => {
 		if (skip !== null && skip !== undefined) {
-			listListeners(skip, limit, 0, null, null);
+			listListeners(skip, limit, 0, null, null, aliveOnly);
 			if (skip === 0) setPrevDisabled(true);
 			else setPrevDisabled(false);
 		}
