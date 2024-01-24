@@ -240,7 +240,6 @@ export default function PersistentDrawerLeft(props) {
 						</ListItemButton>
 					</ListItem>
 				</List>
-				<Divider />
 				<List>
 					{/*search commented out for now*/}
 					{/*<ListItem key={"search"} disablePadding>*/}
