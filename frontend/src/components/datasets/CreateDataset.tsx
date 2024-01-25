@@ -61,7 +61,7 @@ export const CreateDataset = (): JSX.Element => {
 		let required = false;
 
 		metadataDefinitionList.forEach((val, idx) => {
-			if (val.fields[0].required) {
+			if (val.required_for_items.datasets && val.fields[0].required) {
 				required = true;
 			}
 		});
@@ -95,7 +95,7 @@ export const CreateDataset = (): JSX.Element => {
 		});
 
 		metadataDefinitionList.map((val, idx) => {
-			if (val.fields[0].required) {
+			if (val.required_for_items.datasets && val.fields[0].required) {
 				// Condition checks whether the current updated field is a required one
 				if (
 					val.name == metadata.definition ||
@@ -168,15 +168,8 @@ export const CreateDataset = (): JSX.Element => {
 							<Step key="fill-in-metadata">
 								<StepLabel>Required Metadata</StepLabel>
 								<StepContent>
-									{metadataDefinitionList.length > 0 ? (
-										<Typography>
-											This metadata is required when creating a new dataset.
-										</Typography>
-									) : (
-										<Typography>No metadata required.</Typography>
-									)}
 									<Box>
-										<CreateMetadata setMetadata={setMetadata} />
+										<CreateMetadata setMetadata={setMetadata} sourceItem={"datasets"}/>
 									</Box>
 									{/*buttons*/}
 									<Box sx={{ mb: 2 }}>

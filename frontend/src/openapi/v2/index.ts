@@ -53,6 +53,7 @@ export type { MetadataField } from './models/MetadataField';
 export type { MetadataIn } from './models/MetadataIn';
 export type { MetadataOut } from './models/MetadataOut';
 export type { MetadataPatch } from './models/MetadataPatch';
+export type { MetadataRequiredForItems } from './models/MetadataRequiredForItems';
 export type { MongoDBRef } from './models/MongoDBRef';
 export type { Repository } from './models/Repository';
 export { RoleType } from './models/RoleType';

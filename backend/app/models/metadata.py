@@ -34,6 +34,11 @@ FIELD_TYPES = {
 }  # JSON schema can handle this for us?
 
 
+class MetadataRequiredForItems(BaseModel):
+    datasets: bool = False
+    files: bool = False
+
+
 class MetadataConfig(BaseModel):
     type: str = "str"  # must be one of FIELD_TYPES
 
@@ -59,6 +64,10 @@ class MetadataDefinitionBase(BaseModel):
     Example: {
         "name" : "LatLon",
         "description" : "A set of Latitude/Longitude coordinates",
+        "required_for_items": {
+            "datasets": false,
+            "files": false
+        },
         "context" : [
             {
             "longitude" : "https://schema.org/longitude",
@@ -89,6 +98,7 @@ class MetadataDefinitionBase(BaseModel):
 
     name: str
     description: Optional[str]
+    required_for_items: MetadataRequiredForItems
     created: datetime = Field(default_factory=datetime.utcnow)
     context: Optional[
         List[Union[dict, AnyUrl]]
