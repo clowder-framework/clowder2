@@ -252,7 +252,7 @@ export default function PersistentDrawerLeft(props) {
 					{/*	</ListItemButton>*/}
 					{/*</ListItem>*/}
 				</List>
-				<Divider />
+				{/*<Divider />*/}
 			</Drawer>
 			<Main open={open}>
 				<DrawerHeader />
