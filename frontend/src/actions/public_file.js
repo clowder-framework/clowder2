@@ -24,32 +24,6 @@ export function fetchPublicFileMetadata(fileId, version) {
 	};
 }
 
-export const RECEIVE_PUBLIC_FILE_EXTRACTED_METADATA =
-	"RECEIVE_PUBLIC_FILE_EXTRACTED_METADATA";
-
-export function fetchPublicFileExtractedMetadata(id) {
-	const url = `${config.hostname}/api/v2/public/files/${id}/metadata`;
-	return (dispatch) => {
-		return fetch(url, { mode: "cors"})
-			.then((response) => {
-				if (response.status === 200) {
-					response.json().then((json) => {
-						dispatch({
-							type: RECEIVE_PUBLIC_FILE_EXTRACTED_METADATA,
-							publicExtractedMetadata: json,
-							receivedAt: Date.now(),
-						});
-					});
-				} else {
-					dispatch(handleErrors(response, fetchPublicFileExtractedMetadata(id)));
-				}
-			})
-			.catch((reason) => {
-				dispatch(handleErrors(reason, fetchPublicFileExtractedMetadata(id)));
-			});
-	};
-}
-
 export const RECEIVE_PUBLIC_FILE_SUMMARY = "RECEIVE_PUBLIC_FILE_SUMMARY";
 
 export function fetchPublicFileSummary(id) {
