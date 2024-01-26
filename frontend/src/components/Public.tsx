@@ -6,7 +6,7 @@ import { useDispatch, useSelector } from "react-redux";
 import {fetchPublicDatasets} from "../actions/public_dataset";
 
 import { a11yProps, TabPanel } from "./tabs/TabComponent";
-import DatasetCard from "./datasets/DatasetCard";
+import PublicDatasetCard from "./datasets/PublicDatasetCard";
 import { ArrowBack, ArrowForward } from "@material-ui/icons";
 import PublicLayout from "./PublicLayout";
 import Layout from "./Layout";
@@ -122,7 +122,7 @@ export const Public = (): JSX.Element => {
 								public_datasets.map((dataset) => {
 									return (
 										<Grid item key={dataset.id} xs={12} sm={6} md={4} lg={3}>
-											<DatasetCard
+											<PublicDatasetCard
 												id={dataset.id}
 												name={dataset.name}
 												author={`${dataset.creator.first_name} ${dataset.creator.last_name}`}
