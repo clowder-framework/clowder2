@@ -20,10 +20,11 @@ import config from "../../app.config";
 type FileMenuProps = {
 	file: File;
 	setSelectedVersion: any;
+	publicView: boolean | false;
 };
 
 export default function FileMenu(props: FileMenuProps) {
-	const { file, setSelectedVersion } = props;
+	const { file, setSelectedVersion , publicView} = props;
 	const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
 	const open = Boolean(anchorEl);
 	const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -115,23 +116,40 @@ export default function FileMenu(props: FileMenuProps) {
 					</MenuItem>
 				</AuthWrapper>
 
+
 				{/*owner, editor, uploader and viewer can download file*/}
-				<AuthWrapper
-					currRole={datasetRole.role}
-					allowedRoles={["owner", "editor", "uploader", "viewer"]}
-				>
-					<MenuItem
-						onClick={() => {
-							handleClose();
-							window.location.href = `${config.hostname}/api/v2/files/${file.id}`;
-						}}
+
+				{publicView?
+					(
+						<MenuItem
+							onClick={() => {
+								handleClose();
+								window.location.href = `${config.hostname}/api/v2/public_files/${file.id}`;
+							}}
+						>
+							<ListItemIcon>
+								<DownloadIcon fontSize="small" />
+							</ListItemIcon>
+							<ListItemText>Download</ListItemText>
+						</MenuItem>
+					):
+					<AuthWrapper
+						currRole={datasetRole.role}
+						allowedRoles={["owner", "editor", "uploader", "viewer"]}
 					>
-						<ListItemIcon>
-							<DownloadIcon fontSize="small" />
-						</ListItemIcon>
-						<ListItemText>Download</ListItemText>
-					</MenuItem>
-				</AuthWrapper>
+						<MenuItem
+							onClick={() => {
+								handleClose();
+								window.location.href = `${config.hostname}/api/v2/files/${file.id}`;
+							}}
+						>
+							<ListItemIcon>
+								<DownloadIcon fontSize="small" />
+							</ListItemIcon>
+							<ListItemText>Download</ListItemText>
+						</MenuItem>
+					</AuthWrapper>
+				}
 
 				{/*owner can delete file*/}
 				<AuthWrapper currRole={datasetRole.role} allowedRoles={["owner"]}>

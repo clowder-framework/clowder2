@@ -63,7 +63,7 @@ export function FilesTableFileEntry(props: FilesTableFileEntryProps) {
 						{file.content_type ? file.content_type.content_type : "NA"}
 					</TableCell>
 					<TableCell align="right">
-						<FileMenu file={file} setSelectedVersion={setSelectedVersion} />
+						<FileMenu file={file} setSelectedVersion={setSelectedVersion} publicView={publicView} />
 					</TableCell>
 				</TableRow>
 			) : (
