@@ -4,6 +4,7 @@ To run pass in API URL of running instance. The first user it creates will have 
 
 `python populate_fake_data.py http://localhost:8000/api/v2`
 """
+
 import os
 import random
 import sys
