@@ -474,9 +474,12 @@ async def get_file_versions(
     if (file := await FileDB.get(PydanticObjectId(file_id))) is not None:
         mongo_versions = []
         if file.storage_type == StorageType.MINIO:
-            async for ver in FileVersionDB.find(
-                FileVersionDB.file_id == ObjectId(file_id)
-            ).sort(-FileVersionDB.created).skip(skip).limit(limit):
+            async for ver in (
+                FileVersionDB.find(FileVersionDB.file_id == ObjectId(file_id))
+                .sort(-FileVersionDB.created)
+                .skip(skip)
+                .limit(limit)
+            ):
                 mongo_versions.append(FileVersion(**ver.dict()))
         return mongo_versions
 
