@@ -93,6 +93,8 @@ async def add_file_entry(
     rabbitmq_client: BlockingChannel,
     file: Optional[io.BytesIO] = None,
     content_type: Optional[str] = None,
+    public: bool = False,
+    authenticated: bool = False,
 ):
     """Insert FileDB object into MongoDB (makes Clowder ID), then Minio (makes version ID), then update MongoDB with
     the version ID from Minio.

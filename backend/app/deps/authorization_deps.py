@@ -5,12 +5,39 @@ from fastapi import Depends, HTTPException
 from app.keycloak_auth import get_current_username
 from app.models.authorization import RoleType, AuthorizationDB
 from app.models.datasets import DatasetDB, DatasetStatus
-from app.models.files import FileDB
-from app.models.groups import GroupDB
+from app.models.files import FileOut, FileDB, FileStatus
+from app.models.groups import GroupOut, GroupDB
 from app.models.metadata import MetadataDB
 from app.models.pyobjectid import PyObjectId
 from app.routers.authentication import get_admin
 from app.routers.authentication import get_admin_mode
+
+
+async def check_public_access(
+    resource_id: str,
+    resource_type: str,
+    role: RoleType,
+    current_user=Depends(get_current_username),
+) -> bool:
+    has_public_access = False
+    if role == RoleType.VIEWER:
+        if resource_type == "dataset":
+            if (
+                dataset := await DatasetDB.get(PydanticObjectId(resource_id))
+            ) is not None:
+                if (
+                    dataset.status == DatasetStatus.PUBLIC.name
+                    or dataset.status == DatasetStatus.AUTHENTICATED.name
+                ):
+                    has_public_access = True
+        elif resource_type == "file":
+            if (file := await FileDB.get(PydanticObjectId(resource_id))) is not None:
+                if (
+                    file.status == FileStatus.PUBLIC.name
+                    or file.status == FileStatus.AUTHENTICATED.name
+                ):
+                    has_public_access = True
+    return has_public_access
 
 
 async def get_role(
@@ -31,6 +58,11 @@ async def get_role(
             AuthorizationDB.user_ids == current_user,
         ),
     )
+    public_access = await check_public_access(
+        dataset_id, "dataset", RoleType.VIEWER, current_user
+    )
+    if authorization is None and public_access:
+        return RoleType.VIEWER
     return authorization.role
 
 
@@ -55,15 +87,11 @@ async def get_role_by_file(
             if (
                 dataset := await DatasetDB.get(PydanticObjectId(file.dataset_id))
             ) is not None:
-                if dataset.status == DatasetStatus.AUTHENTICATED.name:
-                    auth_dict = {
-                        "creator": dataset.author.email,
-                        "dataset_id": file.dataset_id,
-                        "user_ids": [current_user],
-                        "role": RoleType.VIEWER,
-                    }
-                    authenticated_auth = AuthorizationDB(**auth_dict)
-                    return authenticated_auth
+                if (
+                    dataset.status == DatasetStatus.AUTHENTICATED.name
+                    or dataset.status == DatasetStatus.PUBLIC.name
+                ):
+                    return RoleType.VIEWER
                 else:
                     raise HTTPException(
                         status_code=403,
@@ -199,6 +227,7 @@ class Authorization:
             ) is not None:
                 if (
                     current_dataset.status == DatasetStatus.AUTHENTICATED.name
+                    or current_dataset.status == DatasetStatus.PUBLIC.name
                     and self.role == "viewer"
                 ):
                     return True
@@ -249,7 +278,15 @@ class FileAuthorization:
                     detail=f"User `{current_user} does not have `{self.role}` permission on file {file_id}",
                 )
             else:
-                raise HTTPException(status_code=404, detail=f"File {file_id} not found")
+                if (
+                    file.status == FileStatus.PUBLIC.name
+                    or file.status == FileStatus.AUTHENTICATED.name
+                ) and self.role == RoleType.VIEWER:
+                    return True
+                else:
+                    raise HTTPException(
+                        status_code=404, detail=f"File {file_id} not found"
+                    )
 
 
 class MetadataAuthorization:

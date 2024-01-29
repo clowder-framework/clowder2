@@ -405,7 +405,7 @@ export const Dataset = (): JSX.Element => {
 									resourceId={datasetId}
 								/>
 								<Box textAlign="center">
-									{enableAddMetadata && datasetRole.role !== undefined && datasetRole.role !== "viewer" ?
+									{datasetRole.role !== undefined && datasetRole.role !== "viewer" ?
 										<Button
 											variant="contained"
 											sx={{ m: 2 }}

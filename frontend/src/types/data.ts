@@ -141,6 +141,16 @@ export interface DatasetState {
 	roles: DatasetRoles;
 }
 
+export interface PublicDatasetState {
+	public_files: FileSummary[];
+	public_datasets: Dataset[];
+	public_newDataset: Dataset;
+	public_newFile: FileSummary;
+	public_about: Dataset;
+	public_datasetRole: AuthorizationBase;
+	public_roles: DatasetRoles;
+}
+
 export interface ListenerState {
 	listeners: Listener[];
 	categories: string[];
@@ -160,9 +170,12 @@ export interface GroupState {
 
 export interface MetadataState {
 	metadataDefinitionList: MetadataDefinitionOut[];
+	publicMetadataDefinitionList: MetadataDefinitionOut[];
 	metadataDefinition: MetadataDefinitionOut;
 	datasetMetadataList: Metadata[];
+	publicDatasetMetadataList: Metadata[];
 	fileMetadataList: Metadata[];
+	publicFileMetadataList: Metadata[];
 }
 
 export interface FileState {
@@ -176,6 +189,17 @@ export interface FileState {
 	fileRole: AuthorizationBase;
 	presignedUrl: string;
 	selected_version_num: number;
+}
+
+export interface PublicFileState {
+	publicUrl: string;
+	publicBlob: Blob;
+	publicFileSummary: FileSummary;
+	publicExtractedMetadata: ExtractedMetadata[];
+	publicMetadataJsonld: MetadataJsonld[];
+	publicPreviews: FilePreview[];
+	publicFileVersions: FileVersion[];
+	publicSelected_version_num: number;
 }
 
 export interface UserState {
@@ -201,6 +225,8 @@ export interface ErrorState {
 export interface FolderState {
 	folders: FolderOut[];
 	folderPath: string[];
+	publicFolders: FolderOut[];
+	publicFolderPath: string[];
 }
 
 export interface JobSummary {
@@ -217,6 +243,13 @@ export interface VisualizationState {
 	blob: Blob;
 }
 
+export interface PublicVisualizationState {
+	publicVisData: VisualizationDataOut;
+	publicVisConfig: VisualizationConfigOut[];
+	publicPresignedUrl: string;
+	publicBlob: Blob;
+}
+
 export interface EventListenerJobStatus {
 	created: string;
 	started: string;
@@ -231,10 +264,13 @@ export interface RootState {
 	metadata: MetadataState;
 	error: ErrorState;
 	file: FileState;
+	publicFile: PublicFileState;
 	dataset: DatasetState;
+	publicDataset: PublicDatasetState;
 	listener: ListenerState;
 	group: GroupState;
 	user: UserState;
 	folder: FolderState;
 	visualization: VisualizationState;
+	publicVisualization: PublicVisualizationState;
 }

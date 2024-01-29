@@ -8,7 +8,9 @@ import {
 	useParams,
 } from "react-router-dom";
 import { Dataset as DatasetComponent } from "./components/datasets/Dataset";
+import {PublicDataset as PublicDatasetComponent} from "./components/datasets/PublicDataset";
 import { File as FileComponent } from "./components/files/File";
+import {PublicFile as PublicFileComponent} from "./components/files/PublicFile";
 import { CreateDataset } from "./components/datasets/CreateDataset";
 import { Groups as GroupListComponent } from "./components/groups/Groups";
 import { Group as GroupComponent } from "./components/groups/Group";
@@ -28,6 +30,7 @@ import {
 	resetLogout,
 } from "./actions/common";
 import { Explore } from "./components/Explore";
+import {Public} from "./components/Public";
 import { ExtractionHistory } from "./components/listeners/ExtractionHistory";
 import { fetchDatasetRole, fetchFileRole } from "./actions/authorization";
 import { PageNotFound } from "./components/errors/PageNotFound";
@@ -103,7 +106,7 @@ const PrivateRoute = (props): JSX.Element => {
 		if (fileId && reason === "") listFileRole(fileId);
 	}, [fileId, reason]);
 
-	return <>{isAuthorized() ? children : <Navigate to="/auth/login" />}</>;
+	return <>{isAuthorized() ? children : <Navigate to="/public" />}</>;
 };
 
 export const AppRoutes = (): JSX.Element => {
@@ -111,13 +114,29 @@ export const AppRoutes = (): JSX.Element => {
 		<BrowserRouter>
 			<Routes>
 				<Route
-					path="/"
+					path="/public"
 					element={
-						<PrivateRoute>
-							<Explore />
-						</PrivateRoute>
+						<Public />
 					}
 				/>
+				{isAuthorized()?
+					(
+						<Route
+							path="/"
+							element={
+								<PrivateRoute>
+									<Explore />
+								</PrivateRoute>
+							}
+						/>
+					) :
+					<Route
+						path="/public"
+						element={
+							<Public />
+						}
+					/>
+				}
 				<Route
 					path="/profile"
 					element={
@@ -175,11 +194,23 @@ export const AppRoutes = (): JSX.Element => {
 					}
 				/>
 				<Route
+					path="/public/datasets/:datasetId"
+					element={
+						<PublicDatasetComponent />
+					}
+				/>
+				<Route
 					path="/files/:fileId"
 					element={
 						<PrivateRoute>
 							<FileComponent />
 						</PrivateRoute>
+					}
+				/>
+				<Route
+					path="/public/files/:fileId"
+					element={
+						<PublicFileComponent />
 					}
 				/>
 				<Route path="/auth/register" element={<RedirectRegisterComponent />} />

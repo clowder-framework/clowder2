@@ -4,6 +4,7 @@ To run pass in API URL of running instance. The first user it creates will have 
 
 `python populate_fake_data.py http://localhost:8000/api/v2`
 """
+
 import os
 import random
 import sys
@@ -219,14 +220,28 @@ if __name__ == "__main__":
 
     for _ in range(0, 100):
         n = random.randint(0, 4)
+        s = random.randint(0, 3)
         user = users[n]
         response = requests.post(f"{api}/login", json=user)
         token = response.json().get("token")
         headers = {"Authorization": "Bearer " + token}
-        dataset_data = {
-            "name": fake.sentence(nb_words=10).rstrip("."),
-            "description": fake.paragraph(),
-        }
+        if s == 0:
+            dataset_data = {
+                "name": fake.sentence(nb_words=10).rstrip("."),
+                "description": fake.paragraph(),
+                "status": "PUBLIC",
+            }
+        elif s == 1:
+            dataset_data = {
+                "name": fake.sentence(nb_words=10).rstrip("."),
+                "description": fake.paragraph(),
+                "status": "AUTHENTICATED",
+            }
+        else:
+            dataset_data = {
+                "name": fake.sentence(nb_words=10).rstrip("."),
+                "description": fake.paragraph(),
+            }
         response = requests.post(f"{api}/datasets", json=dataset_data, headers=headers)
         if response.status_code != 200:
             raise ValueError(response.json())

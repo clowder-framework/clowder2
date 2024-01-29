@@ -5,4 +5,5 @@
 export type DatasetBase = {
     name?: string;
     description?: string;
+    status?: string;
 }
