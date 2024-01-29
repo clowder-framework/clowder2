@@ -128,7 +128,7 @@ export const Dataset = (): JSX.Element => {
 		(state: RootState) => state.dataset.files.data
 	);
 	const foldersInDataset = useSelector(
-		(state: RootState) => state.folder.folders
+		(state: RootState) => state.folder.folders.data
 	);
 	const adminMode = useSelector((state: RootState) => state.user.adminMode);
 

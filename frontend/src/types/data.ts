@@ -211,7 +211,8 @@ export interface ErrorState {
 }
 
 export interface FolderState {
-	folders: FolderOut[];
+	folders: Paged;
+	newFolder: FolderOut;
 	folderPath: string[];
 	publicFolders: FolderOut[];
 	publicFolderPath: string[];
