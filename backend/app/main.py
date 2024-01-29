@@ -30,22 +30,27 @@ from app.models.tokens import TokenDB
 from app.models.users import UserDB, UserAPIKeyDB, ListenerAPIKeyDB
 from app.models.visualization_config import VisualizationConfigDB
 from app.models.visualization_data import VisualizationDataDB
-from app.routers import folders, groups, status
+from app.routers import folders, groups, public_folders, status
 from app.routers import (
     users,
     authorization,
     metadata,
+    public_metadata,
     files,
+    public_files,
     metadata_files,
     datasets,
+    public_datasets,
     metadata_datasets,
     authentication,
     keycloak,
     elasticsearch,
+    public_elasticsearch,
     listeners,
     feeds,
     jobs,
     visualization,
+    public_visualization,
     thumbnails,
 )
 
@@ -114,10 +119,20 @@ api_router.include_router(
     dependencies=[Depends(get_current_username)],
 )
 api_router.include_router(
+    public_metadata.router,
+    prefix="/public_metadata",
+    tags=["public_metadata"],
+)
+api_router.include_router(
     files.router,
     prefix="/files",
     tags=["files"],
     dependencies=[Depends(get_current_username)],
+)
+api_router.include_router(
+    public_files.router,
+    prefix="/public_files",
+    tags=["public_files"],
 )
 api_router.include_router(
     metadata_files.router,
@@ -132,13 +147,26 @@ api_router.include_router(
     dependencies=[Depends(get_current_username)],
 )
 api_router.include_router(
-    metadata_datasets.router, prefix="/datasets", tags=["metadata"]
+    public_datasets.router,
+    prefix="/public_datasets",
+    tags=["public_datasets"],
+)
+api_router.include_router(
+    metadata_datasets.router,
+    prefix="/datasets",
+    tags=["metadata"],
+    dependencies=[Depends(get_current_username)],
 )
 api_router.include_router(
     folders.router,
     prefix="/folders",
     tags=["folders"],
     dependencies=[Depends(get_current_username)],
+)
+api_router.include_router(
+    public_folders.router,
+    prefix="/public_folders",
+    tags=["public_folders"],
 )
 api_router.include_router(
     listeners.router,
@@ -165,6 +193,11 @@ api_router.include_router(
     dependencies=[Depends(get_current_username)],
 )
 api_router.include_router(
+    public_elasticsearch.router,
+    prefix="/public_elasticsearch",
+    tags=["public_elasticsearch"],
+)
+api_router.include_router(
     feeds.router,
     prefix="/feeds",
     tags=["feeds"],
@@ -181,6 +214,11 @@ api_router.include_router(
     prefix="/visualizations",
     tags=["visualizations"],
     dependencies=[Depends(get_current_username)],
+)
+api_router.include_router(
+    public_visualization.router,
+    prefix="/public_visualizations",
+    tags=["public_visualizations"],
 )
 api_router.include_router(
     thumbnails.router,

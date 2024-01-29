@@ -16,13 +16,13 @@ type FilesTableFileEntryProps = {
 	selectFile: any;
 	file: FileOut;
 	parentFolderId: any;
+	publicView: boolean | false;
 };
 
 export function FilesTableFileEntry(props: FilesTableFileEntryProps) {
-	const { iconStyle, selectFile, file, parentFolderId } = props;
+	const { iconStyle, selectFile, file, parentFolderId, publicView } = props;
 	const [thumbnailUrl, setThumbnailUrl] = useState("");
 	const [selectedVersion, setSelectedVersion] = useState(file.version_num);
-
 	useEffect(() => {
 		let url = "";
 		if (file.thumbnail_id) {
@@ -63,7 +63,7 @@ export function FilesTableFileEntry(props: FilesTableFileEntryProps) {
 						{file.content_type ? file.content_type.content_type : "NA"}
 					</TableCell>
 					<TableCell align="right">
-						<FileMenu file={file} setSelectedVersion={setSelectedVersion} />
+						<FileMenu file={file} setSelectedVersion={setSelectedVersion} publicView={publicView} />
 					</TableCell>
 				</TableRow>
 			) : (

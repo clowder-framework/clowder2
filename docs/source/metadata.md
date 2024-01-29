@@ -13,6 +13,10 @@ The structure of metadata definition looks like below:
 {
     "name" : "Unit",
     "description" : "Unit",
+    "required_for_items": {
+        "datasets": false,
+        "files": false
+    },
     "context" : {
         "unit" : "https://schema.org/QuantitativeValue"
     },
@@ -44,6 +48,10 @@ A metadata entry could have multiple widgets (fields). For example:
 {
     "name" : "LatLon",
     "description" : "A set of Latitude/Longitude coordinates",
+    "required_for_items": {
+        "datasets": false,
+        "files": false
+    },
     "context" : {
         "longitude" : "https://schema.org/longitude",
         "latitude" : "https://schema.org/latitude"
@@ -89,6 +97,10 @@ collecting as many data points on a map. The field `{"list": true}` is designed 
 {
     "name" : "Coordinates",
     "description" : "Any number ofof Latitude/Longitude coordinates",
+    "required_for_items": {
+        "datasets": false,
+        "files": false
+    },
     "context" : {
         "point": "https://schema.org/point"
     },

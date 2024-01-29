@@ -47,7 +47,14 @@ from app.models.datasets import (
     DatasetDBViewList,
     DatasetStatus,
 )
-from app.models.files import FileOut, FileDB, FileDBViewList, LocalFileIn, StorageType
+from app.models.files import (
+    FileOut,
+    FileDB,
+    FileDBViewList,
+    LocalFileIn,
+    StorageType,
+    FileStatus,
+)
 from app.models.folders import FolderOut, FolderIn, FolderDB, FolderDBViewList
 from app.models.metadata import MetadataDB
 from app.models.pyobjectid import PyObjectId
@@ -60,7 +67,7 @@ from app.routers.files import add_file_entry, remove_file_entry, add_local_file_
 from app.search.connect import (
     delete_document_by_id,
 )
-from app.search.index import index_dataset
+from app.search.index import index_dataset, index_file
 
 router = APIRouter()
 security = HTTPBearer()
@@ -233,6 +240,7 @@ async def get_datasets(
             Or(
                 DatasetDBViewList.creator.email == user_id,
                 DatasetDBViewList.auth.user_ids == user_id,
+                DatasetDBViewList.status == DatasetStatus.PUBLIC.name,
                 DatasetDBViewList.status == DatasetStatus.AUTHENTICATED.name,
             ),
             sort=(-DatasetDBViewList.created),
@@ -247,11 +255,15 @@ async def get_datasets(
 async def get_dataset(
     dataset_id: str,
     authenticated: bool = Depends(CheckStatus("AUTHENTICATED")),
+    public: bool = Depends(CheckStatus("PUBLIC")),
     allow: bool = Depends(Authorization("viewer")),
 ):
-    if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
-        return dataset.dict()
-    raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
+    if authenticated or public or allow:
+        if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
+            return dataset.dict()
+        raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
+    else:
+        raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
 
 
 @router.get("/{dataset_id}/files", response_model=List[FileOut])
@@ -259,12 +271,13 @@ async def get_dataset_files(
     dataset_id: str,
     folder_id: Optional[str] = None,
     authenticated: bool = Depends(CheckStatus("AUTHENTICATED")),
+    public: bool = Depends(CheckStatus("PUBLIC")),
     user_id=Depends(get_user),
     skip: int = 0,
     limit: int = 10,
     allow: bool = Depends(Authorization("viewer")),
 ):
-    if authenticated:
+    if authenticated or public:
         query = [
             FileDBViewList.dataset_id == ObjectId(dataset_id),
         ]
@@ -320,6 +333,19 @@ async def patch_dataset(
             dataset.status = dataset_info.status
         dataset.modified = datetime.datetime.utcnow()
         await dataset.save()
+
+        if dataset_info.status is not None:
+            query = [
+                FileDBViewList.dataset_id == ObjectId(dataset_id),
+            ]
+            files_views = await FileDBViewList.find(*query).to_list()
+            for file_view in files_views:
+                if (
+                    file := await FileDB.get(PydanticObjectId(file_view.id))
+                ) is not None:
+                    file.status = dataset_info.status
+                    await file.save()
+                    await index_file(es, FileOut(**file.dict()), update=True)
 
         # Update entry to the dataset index
         await index_dataset(es, DatasetOut(**dataset.dict()), update=True)
@@ -383,12 +409,13 @@ async def get_dataset_folders(
     parent_folder: Optional[str] = None,
     user_id=Depends(get_user),
     authenticated: bool = Depends(CheckStatus("authenticated")),
+    public: bool = Depends(CheckStatus("PUBLIC")),
     skip: int = 0,
     limit: int = 10,
     allow: bool = Depends(Authorization("viewer")),
 ):
     if (await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
-        if authenticated:
+        if authenticated or public:
             query = [
                 FolderDBViewList.dataset_id == ObjectId(dataset_id),
             ]
@@ -469,7 +496,12 @@ async def save_file(
                 status_code=401, detail=f"User not found. Session might have expired."
             )
 
-        new_file = FileDB(name=file.filename, creator=user, dataset_id=dataset.id)
+        new_file = FileDB(
+            name=file.filename,
+            creator=user,
+            dataset_id=dataset.id,
+            status=dataset.status,
+        )
 
         if folder_id is not None:
             if (folder := await FolderDB.get(PydanticObjectId(folder_id))) is not None:
@@ -512,7 +544,12 @@ async def save_files(
                     detail=f"User not found. Session might have expired.",
                 )
 
-            new_file = FileDB(name=file.filename, creator=user, dataset_id=dataset.id)
+            new_file = FileDB(
+                name=file.filename,
+                creator=user,
+                dataset_id=dataset.id,
+                status=dataset.status,
+            )
 
             if folder_id is not None:
                 if (
@@ -524,6 +561,12 @@ async def save_files(
                         status_code=404, detail=f"Folder {folder_id} not found"
                     )
 
+            public = False
+            authenticated = False
+            if dataset.status == "PUBLIC":
+                public = True
+            if dataset.status == "AUTHENTICATED":
+                authenticated = True
             await add_file_entry(
                 new_file,
                 user,
@@ -532,6 +575,8 @@ async def save_files(
                 rabbitmq_client,
                 file.file,
                 content_type=file.content_type,
+                public=public,
+                authenticated=authenticated,
             )
             files_added.append(new_file.dict())
         return files_added

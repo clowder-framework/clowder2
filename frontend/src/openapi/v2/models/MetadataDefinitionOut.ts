@@ -3,6 +3,7 @@
 /* eslint-disable */
 
 import type { MetadataField } from './MetadataField';
+import type { MetadataRequiredForItems } from './MetadataRequiredForItems';
 import type { UserOut } from './UserOut';
 
 /**
@@ -21,6 +22,7 @@ import type { UserOut } from './UserOut';
 export type MetadataDefinitionOut = {
     name: string;
     description?: string;
+    required_for_items: MetadataRequiredForItems;
     created?: string;
     '@context'?: Array<string>;
     context_url?: string;

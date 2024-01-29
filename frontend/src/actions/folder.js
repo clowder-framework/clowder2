@@ -53,6 +53,31 @@ export function fetchFolderPath(folderId) {
 	};
 }
 
+export const GET_PUBLIC_FOLDER_PATH = "GET_PUBLIC_FOLDER_PATH";
+export function fetchPublicFolderPath(folderId){
+	return (dispatch) => {
+		if (folderId != null) {
+			return V2.PublicFoldersService.downloadFolderApiV2PublicFoldersFolderIdPathGet(folderId)
+				.then(json => {
+					dispatch({
+						type: GET_PUBLIC_FOLDER_PATH,
+						folderPath: json,
+						receivedAt: Date.now(),
+					});
+				})
+				.catch(reason => {
+					dispatch(handleErrors(reason, fetchPublicFolderPath(folderId)));
+				});
+		} else {
+			dispatch({
+				type: GET_FOLDER_PATH,
+				folderPath: [],
+				receivedAt: Date.now(),
+			});
+		}
+	};
+}
+
 export const FOLDER_DELETED = "FOLDER_DELETED";
 
 export function folderDeleted(datasetId, folderId) {
