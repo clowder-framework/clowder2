@@ -30,7 +30,7 @@ export const EditMetadata = (props: MetadataType) => {
 		limit: number
 	) => dispatch(fetchMetadataDefinitions(name, skip, limit));
 	const metadataDefinitionList = useSelector(
-		(state: RootState) => state.metadata.metadataDefinitionList
+		(state: RootState) => state.metadata.metadataDefinitionList.data
 	);
 	const listDatasetMetadata = (datasetId: string | undefined) =>
 		dispatch(fetchDatasetMetadata(datasetId));
