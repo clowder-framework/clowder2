@@ -6,7 +6,10 @@ import {
 } from "../actions/folder";
 import { DataAction } from "../types/action";
 import { FolderState } from "../types/data";
-import { RECEIVE_FOLDERS_IN_DATASET } from "../actions/dataset";
+import {
+	RECEIVE_FOLDERS_IN_DATASET,
+	RESET_FOLDERS_IN_DATASET,
+} from "../actions/dataset";
 import { RECEIVE_FOLDERS_IN_PUBLIC_DATASET } from "../actions/public_dataset";
 import { FolderOut, Paged, PageMetadata } from "../openapi/v2";
 
@@ -41,6 +44,10 @@ const folder = (state = defaultState, action: DataAction) => {
 			});
 		case RECEIVE_FOLDERS_IN_DATASET:
 			return Object.assign({}, state, { folders: action.folders });
+		case RESET_FOLDERS_IN_DATASET:
+			return Object.assign({}, state, {
+				folders: <Paged>{ metadata: <PageMetadata>{}, data: <FolderOut[]>[] },
+			});
 		case RECEIVE_FOLDERS_IN_PUBLIC_DATASET:
 			return Object.assign({}, state, { publicFolders: action.publicFolders });
 		default:

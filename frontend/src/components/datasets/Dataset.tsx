@@ -17,6 +17,8 @@ import {
 	fetchDatasetAbout,
 	fetchFilesInDataset,
 	fetchFoldersInDataset,
+	resetFilesInDataset as resetFilesInDatasetAction,
+	resetFolderInDataset as resetFolderInDatasetAction,
 } from "../../actions/dataset";
 import { fetchFolderPath } from "../../actions/folder";
 
@@ -82,12 +84,14 @@ export const Dataset = (): JSX.Element => {
 		skip: number | undefined,
 		limit: number | undefined
 	) => dispatch(fetchFilesInDataset(datasetId, folderId, skip, limit));
+	const resetFilesInDataset = () => dispatch(resetFilesInDatasetAction());
 	const listFoldersInDataset = (
 		datasetId: string | undefined,
 		parentFolder: string | null,
 		skip: number | undefined,
 		limit: number | undefined
 	) => dispatch(fetchFoldersInDataset(datasetId, parentFolder, skip, limit));
+	const resetFoldersInDataset = () => dispatch(resetFolderInDatasetAction());
 	const listDatasetAbout = (datasetId: string | undefined) =>
 		dispatch(fetchDatasetAbout(datasetId));
 	const listDatasetMetadata = (datasetId: string | undefined) =>
@@ -119,13 +123,17 @@ export const Dataset = (): JSX.Element => {
 	const [paths, setPaths] = useState([]);
 
 	// TODO add option to determine limit number; default show 20 files each time
-	const [currPageNum, setCurrPageNum] = useState<number>(1);
-	const [limit] = useState<number>(10);
-	const pageMetadata = useSelector(
+	const [folderCurrPageNum, setFolderCurrPageNum] = useState<number>(1);
+	const [fileCurrPageNum, setFileCurrPageNum] = useState<number>(1);
+	const [limit] = useState<number>(5);
+	const filePageMetadata = useSelector(
 		(state: RootState) => state.dataset.files.metadata
 	);
 	const filesInDataset = useSelector(
 		(state: RootState) => state.dataset.files.data
+	);
+	const folderPageMetadata = useSelector(
+		(state: RootState) => state.folder.folders.metadata
 	);
 	const foldersInDataset = useSelector(
 		(state: RootState) => state.folder.folders.data
@@ -133,8 +141,12 @@ export const Dataset = (): JSX.Element => {
 	const adminMode = useSelector((state: RootState) => state.user.adminMode);
 
 	useEffect(() => {
-		listFilesInDataset(datasetId, folderId, (currPageNum - 1) * limit, limit);
-		listFoldersInDataset(datasetId, folderId, (currPageNum - 1) * limit, limit);
+		listFoldersInDataset(
+			datasetId,
+			folderId,
+			(folderCurrPageNum - 1) * limit,
+			limit
+		);
 		listDatasetAbout(datasetId);
 		getFolderPath(folderId);
 		getMetadatDefinitions(null, 0, 100);
@@ -142,11 +154,26 @@ export const Dataset = (): JSX.Element => {
 
 	// component did mount list all files in dataset
 	useEffect(() => {
-		listFilesInDataset(datasetId, folderId, (currPageNum - 1) * limit, limit);
-		listFoldersInDataset(datasetId, folderId, (currPageNum - 1) * limit, limit);
+		listFoldersInDataset(
+			datasetId,
+			folderId,
+			(folderCurrPageNum - 1) * limit,
+			limit
+		);
 		listDatasetAbout(datasetId);
 		getFolderPath(folderId);
 	}, [searchParams, adminMode]);
+
+	useEffect(() => {
+		if (foldersInDataset && foldersInDataset.length < limit) {
+			listFilesInDataset(
+				datasetId,
+				folderId,
+				(fileCurrPageNum - 1) * limit,
+				limit
+			);
+		}
+	}, [foldersInDataset]);
 
 	// for breadcrumb
 	useEffect(() => {
@@ -179,11 +206,18 @@ export const Dataset = (): JSX.Element => {
 		setSelectedTabIndex(newTabIndex);
 	};
 
-	const handlePageChange = (_: ChangeEvent<unknown>, value: number) => {
+	const handleFilePageChange = (_: ChangeEvent<unknown>, value: number) => {
 		const newSkip = (value - 1) * limit;
-		setCurrPageNum(value);
+		setFileCurrPageNum(value);
 		listFilesInDataset(datasetId, folderId, newSkip, limit);
+		resetFoldersInDataset();
+	};
+
+	const handleFolderPageChange = (_: ChangeEvent<unknown>, value: number) => {
+		const newSkip = (value - 1) * limit;
+		setFolderCurrPageNum(value);
 		listFoldersInDataset(datasetId, folderId, newSkip, limit);
+		resetFilesInDataset();
 	};
 
 	const setMetadata = (metadata: any) => {
@@ -355,13 +389,24 @@ export const Dataset = (): JSX.Element => {
 							foldersInDataset={foldersInDataset}
 						/>
 						<Box display="flex" justifyContent="center" sx={{ m: 1 }}>
-							<Pagination
-								count={Math.ceil(pageMetadata.total_count / limit)}
-								page={currPageNum}
-								onChange={handlePageChange}
-								shape="rounded"
-								variant="outlined"
-							/>
+							{/*if folders flip to last page; switch to flipping files*/}
+							{foldersInDataset && foldersInDataset.length < limit ? (
+								<Pagination
+									count={Math.ceil(filePageMetadata.total_count / limit)}
+									page={fileCurrPageNum}
+									onChange={handleFilePageChange}
+									shape="rounded"
+									variant="outlined"
+								/>
+							) : (
+								<Pagination
+									count={Math.ceil(folderPageMetadata.total_count / limit)}
+									page={folderCurrPageNum}
+									onChange={handleFolderPageChange}
+									shape="rounded"
+									// variant="outlined"
+								/>
+							)}
 						</Box>
 					</TabPanel>
 					<TabPanel value={selectedTabIndex} index={1}>

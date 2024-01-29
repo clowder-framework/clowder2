@@ -8,6 +8,7 @@ import {
 	REMOVE_DATASET_GROUP_ROLE,
 	REMOVE_DATASET_USER_ROLE,
 	RESET_CREATE_DATASET,
+	RESET_FILES_IN_DATASET,
 	SET_DATASET_GROUP_ROLE,
 	SET_DATASET_USER_ROLE,
 	UPDATE_DATASET,
@@ -50,6 +51,10 @@ const dataset = (state = defaultState, action: DataAction) => {
 	switch (action.type) {
 		case RECEIVE_FILES_IN_DATASET:
 			return Object.assign({}, state, { files: action.files });
+		case RESET_FILES_IN_DATASET:
+			return Object.assign({}, state, {
+				files: <Paged>{ metadata: <PageMetadata>{}, data: <File[]>[] },
+			});
 		case DELETE_FILE:
 			return Object.assign({}, state, {
 				files: {

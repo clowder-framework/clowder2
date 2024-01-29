@@ -158,6 +158,28 @@ export function fetchFoldersInDataset(datasetId, parentFolder, skip, limit) {
 	};
 }
 
+export const RESET_FOLDERS_IN_DATASET = "RESET_FOLDERS_IN_DATASET";
+
+export function resetFolderInDataset() {
+	return (dispatch) => {
+		dispatch({
+			type: RESET_FOLDERS_IN_DATASET,
+			receivedAt: Date.now(),
+		});
+	};
+}
+
+export const RESET_FILES_IN_DATASET = "RESET_FILES_IN_DATASET";
+
+export function resetFilesInDataset() {
+	return (dispatch) => {
+		dispatch({
+			type: RESET_FILES_IN_DATASET,
+			receivedAt: Date.now(),
+		});
+	};
+}
+
 export const SUBMIT_DATASET_EXTRACTION = "SUBMIT_DATASET_EXTRACTION";
 
 export function submitDatasetExtractionAction(
