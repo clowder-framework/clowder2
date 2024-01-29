@@ -1,3 +1,5 @@
+import datetime
+
 from beanie import PydanticObjectId
 from beanie.operators import Or, In
 from bson import ObjectId
@@ -91,7 +93,10 @@ async def get_dataset_role(
         if (
             current_dataset := await DatasetDB.get(PydanticObjectId(dataset_id))
         ) is not None:
-            if current_dataset.status == DatasetStatus.AUTHENTICATED.name:
+            if (
+                current_dataset.status == DatasetStatus.AUTHENTICATED.name
+                or current_dataset.status == DatasetStatus.PUBLIC.name
+            ):
                 public_authorization_in = {
                     "dataset_id": PydanticObjectId(dataset_id),
                     "role": RoleType.VIEWER,

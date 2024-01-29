@@ -93,6 +93,8 @@ async def add_file_entry(
     rabbitmq_client: BlockingChannel,
     file: Optional[io.BytesIO] = None,
     content_type: Optional[str] = None,
+    public: bool = False,
+    authenticated: bool = False,
 ):
     """Insert FileDB object into MongoDB (makes Clowder ID), then Minio (makes version ID), then update MongoDB with
     the version ID from Minio.
@@ -472,9 +474,12 @@ async def get_file_versions(
     if (file := await FileDB.get(PydanticObjectId(file_id))) is not None:
         mongo_versions = []
         if file.storage_type == StorageType.MINIO:
-            async for ver in FileVersionDB.find(
-                FileVersionDB.file_id == ObjectId(file_id)
-            ).sort(-FileVersionDB.created).skip(skip).limit(limit):
+            async for ver in (
+                FileVersionDB.find(FileVersionDB.file_id == ObjectId(file_id))
+                .sort(-FileVersionDB.created)
+                .skip(skip)
+                .limit(limit)
+            ):
                 mongo_versions.append(FileVersion(**ver.dict()))
         return mongo_versions
 

@@ -1,12 +1,25 @@
 from datetime import datetime
 from enum import Enum
 from typing import Optional, List
-
+from enum import Enum, auto
 from beanie import Document, View, PydanticObjectId
 from pydantic import Field, BaseModel
 
 from app.models.authorization import AuthorizationDB
 from app.models.users import UserOut
+
+
+class AutoName(Enum):
+    def _generate_next_value_(name, start, count, last_values):
+        return name
+
+
+class FileStatus(AutoName):
+    PRIVATE = auto()
+    PUBLIC = auto()
+    AUTHENTICATED = auto()
+    DEFAULT = auto()
+    TRIAL = auto()
 
 
 class StorageType(str, Enum):
@@ -46,6 +59,7 @@ class FileVersionDB(Document, FileVersion):
 
 class FileBase(BaseModel):
     name: str = "N/A"
+    status: str = FileStatus.PRIVATE.name
 
 
 class FileIn(FileBase):

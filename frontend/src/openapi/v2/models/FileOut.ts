@@ -21,6 +21,7 @@ import type { UserOut } from './UserOut';
  */
 export type FileOut = {
     name?: string;
+    status?: string;
     id?: string;
     creator: UserOut;
     created?: string;

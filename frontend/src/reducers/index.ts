@@ -1,6 +1,8 @@
 import { combineReducers } from "redux";
 import file from "./file";
 import dataset from "./dataset";
+import publicDataset from "./public_dataset";
+import publicFile from "./public_file";
 import folder from "./folder";
 import user from "./user";
 import error from "./error";
@@ -8,10 +10,13 @@ import metadata from "./metadata";
 import listeners from "./listeners";
 import group from "./group";
 import visualization from "./visualization";
+import publicVisualization from "./public_visualization";
 
 const rootReducer = combineReducers({
 	file: file,
 	dataset: dataset,
+	publicDataset: publicDataset,
+	publicFile: publicFile,
 	folder: folder,
 	user: user,
 	error: error,
@@ -19,6 +24,7 @@ const rootReducer = combineReducers({
 	listener: listeners,
 	group: group,
 	visualization: visualization,
+	publicVisualization: publicVisualization,
 });
 
 export default rootReducer;

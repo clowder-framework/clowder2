@@ -27,6 +27,7 @@ class DatasetStatus(AutoName):
 class DatasetBase(BaseModel):
     name: str = "N/A"
     description: Optional[str] = None
+    status: str = DatasetStatus.PRIVATE.name
 
 
 class DatasetIn(DatasetBase):
@@ -65,7 +66,7 @@ class DatasetDBViewList(View, DatasetBase):
     modified: datetime = Field(default_factory=datetime.utcnow)
     auth: List[AuthorizationDB]
     thumbnail_id: Optional[PydanticObjectId] = None
-    status: Optional[str]
+    status: str = DatasetStatus.PRIVATE.name
 
     class Settings:
         source = DatasetDB

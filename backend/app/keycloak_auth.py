@@ -96,7 +96,7 @@ async def get_token(
                     ListenerAPIKeyDB.key == payload["key"],
                 )
             ) is not None:
-                return {"preferred_username": payload["user"]}
+                return {"email": payload["user"]}
             elif (
                 key := await UserAPIKeyDB.find_one(
                     UserAPIKeyDB.user == payload["user"],
@@ -113,7 +113,7 @@ async def get_token(
                         headers={"WWW-Authenticate": "Bearer"},
                     )
                 else:
-                    return {"preferred_username": payload["user"]}
+                    return {"email": payload["user"]}
             else:
                 raise HTTPException(
                     status_code=401,
@@ -136,7 +136,7 @@ async def get_token(
 
 async def get_user(identity: Json = Depends(get_token)):
     """Retrieve the user email from keycloak token."""
-    return identity["preferred_username"]
+    return identity["email"]
 
 
 async def get_current_user(
@@ -233,7 +233,7 @@ async def get_current_username(
     if token:
         try:
             userinfo = keycloak_openid.userinfo(token)
-            return userinfo["preferred_username"]
+            return userinfo["email"]
         # expired token
         except KeycloakAuthenticationError as e:
             raise HTTPException(
@@ -245,7 +245,7 @@ async def get_current_username(
     if token_cookie:
         try:
             userinfo = keycloak_openid.userinfo(token_cookie.removeprefix("Bearer%20"))
-            return userinfo["preferred_username"]
+            return userinfo["email"]
         # expired token
         except KeycloakAuthenticationError as e:
             raise HTTPException(

@@ -14,6 +14,7 @@ import {
 	StepContent,
 	StepLabel,
 	Stepper,
+	Tooltip,
 } from "@mui/material";
 import { useDispatch, useSelector } from "react-redux";
 import AddBoxIcon from "@mui/icons-material/AddBox";
@@ -27,6 +28,7 @@ import {
 import { contextUrlMap, InputType, widgetTypes } from "../../metadata.config";
 import { useNavigate } from "react-router-dom";
 import { RootState } from "../../types/data";
+import Typography from "@mui/material/Typography";
 
 interface SupportedInputs {
 	[key: number]: Array<InputType>; // Define the type for SupportedInputs
@@ -60,10 +62,15 @@ export const CreateMetadataDefinition = (
 	const [activeStep, setActiveStep] = React.useState(0);
 	const [parsedInput, setParsedInput] = React.useState("");
 	const [contextMap, setContextMap] = React.useState([{ term: "", iri: "" }]);
+
 	const [formInput, setFormInput] = React.useState({
 		name: "",
 		description: "",
 		context: "",
+		required_for_items: {
+			datasets: false,
+			files: false,
+		},
 		fields: [
 			{
 				name: "",
@@ -114,6 +121,16 @@ export const CreateMetadataDefinition = (
 		setFormInput(data);
 	};
 
+	const handleMetadataRequiredInputChange = (key: string) => {
+		let data = { ...formInput };
+
+		if (key == "datasets")
+			data.required_for_items.datasets = !data.required_for_items.datasets;
+		else if (key == "files")
+			data.required_for_items.files = !data.required_for_items.files;
+		setFormInput(data);
+	};
+
 	const addNewContext = (idx: number) => {
 		let newContextMap = [...contextMap];
 		newContextMap.splice(idx + 1, 0, { term: "", iri: "" });
@@ -154,6 +171,7 @@ export const CreateMetadataDefinition = (
 		setFormInput({
 			name: formInput.name,
 			description: formInput.description,
+			required_for_items: formInput.required_for_items,
 			context: [JSON.stringify(contextJson)],
 			fields: formInput.fields,
 		});
@@ -179,6 +197,7 @@ export const CreateMetadataDefinition = (
 		setFormInput({
 			name: formInput.name,
 			description: formInput.description,
+			required_for_items: formInput.required_for_items,
 			context: [formInput.context],
 			fields: newfield,
 		});
@@ -194,6 +213,7 @@ export const CreateMetadataDefinition = (
 		setFormInput({
 			name: formInput.name,
 			description: formInput.description,
+			required_for_items: formInput.required_for_items,
 			context: [formInput.context],
 			fields: data,
 		});
@@ -297,6 +317,7 @@ export const CreateMetadataDefinition = (
 		setFormInput({
 			name: "",
 			description: "",
+			required_for_items: formInput.required_for_items,
 			context: "",
 			fields: [
 				{
@@ -365,6 +386,46 @@ export const CreateMetadataDefinition = (
 										handleInputChange(-1, "description", event.target.value);
 									}}
 								/>
+								<FormGroup row>
+									<Tooltip
+										title="This will make the metadata as required when creating datasets or files"
+										arrow
+									>
+										<Grid container alignItems="center">
+											<Typography
+												variant="subtitle1"
+												style={{ marginRight: "10px" }}
+											>
+												Required:
+											</Typography>
+											<Grid item sm={6} md={4}>
+												<FormControlLabel
+													control={
+														<Checkbox
+															checked={formInput.required_for_items.datasets}
+															onChange={() =>
+																handleMetadataRequiredInputChange("datasets")
+															}
+														/>
+													}
+													label="Datasets"
+												/>
+												<FormControlLabel
+													control={
+														<Checkbox
+															checked={formInput.required_for_items.files}
+															onChange={() =>
+																handleMetadataRequiredInputChange("files")
+															}
+														/>
+													}
+													label="Files"
+												/>
+											</Grid>
+										</Grid>
+									</Tooltip>
+								</FormGroup>
+
 								{contextMap.map((item, idx) => {
 									return (
 										<Grid container>

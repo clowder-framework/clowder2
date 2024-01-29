@@ -18,6 +18,15 @@ import {
 	VisualizationConfigOut,
 	VisualizationDataOut,
 } from "../openapi/v2";
+import {
+	LIST_USERS,
+	PREFIX_SEARCH_USERS,
+	RECEIVE_USER_PROFILE,
+} from "../actions/user";
+import { CREATE_GROUP, DELETE_GROUP } from "../actions/group";
+import { RECEIVE_FILE_PRESIGNED_URL } from "../actions/file";
+import { GET_VIS_DATA_PRESIGNED_URL } from "../actions/visualization";
+import { GET_PUBLIC_VIS_DATA_PRESIGNED_URL } from "../actions/public_visualization";
 
 interface RECEIVE_FILES_IN_DATASET {
 	type: "RECEIVE_FILES_IN_DATASET";
@@ -59,6 +68,21 @@ interface RECEIVE_DATASETS {
 	datasets: Paged;
 }
 
+interface RECEIVE_PUBLIC_DATASETS {
+	type: "RECEIVE_PUBLIC_DATASETS";
+	public_datasets: Dataset[];
+}
+
+interface RECEIVE_PUBLIC_DATASET_ABOUT {
+	type: "RECEIVE_PUBLIC_DATASET_ABOUT";
+	public_about: Dataset;
+}
+
+interface RECEIVE_FILES_IN_PUBLIC_DATASET {
+	type: "RECEIVE_FILES_IN_PUBLIC_DATASET";
+	public_files: FileSummary[];
+}
+
 interface DELETE_DATASET {
 	type: "DELETE_DATASET";
 	dataset: Paged;
@@ -69,9 +93,19 @@ interface RECEIVE_FILE_EXTRACTED_METADATA {
 	extractedMetadata: ExtractedMetadata[];
 }
 
+interface RECEIVE_PUBLIC_FILE_EXTRACTED_METADATA {
+	type: "RECEIVE_PUBLIC_FILE_EXTRACTED_METADATA";
+	publicExtractedMetadata: ExtractedMetadata[];
+}
+
 interface RECEIVE_FILE_METADATA_JSONLD {
 	type: "RECEIVE_FILE_METADATA_JSONLD";
 	metadataJsonld: MetadataJsonld[];
+}
+
+interface RECEIVE_PUBLIC_FILE_METADATA_JSONLD {
+	type: "RECEIVE_PUBLIC_FILE_METADATA_JSONLD";
+	publicMetadataJsonld: MetadataJsonld[];
 }
 
 interface RECEIVE_PREVIEWS {
@@ -79,14 +113,29 @@ interface RECEIVE_PREVIEWS {
 	previews: FilePreview[];
 }
 
+interface RECEIVE_PUBLIC_PREVIEWS {
+	type: "RECEIVE_PUBLIC_PREVIEWS";
+	publicPreviews: FilePreview[];
+}
+
 interface RECEIVE_VERSIONS {
 	type: "RECEIVE_VERSIONS";
 	fileVersions: FileVersion[];
 }
 
+interface RECEIVE_PUBLIC_VERSIONS {
+	type: "RECEIVE_PUBLIC_VERSIONS";
+	publicFileVersions: FileVersion[];
+}
+
 interface CHANGE_SELECTED_VERSION {
 	type: "CHANGE_SELECTED_VERSION";
 	selected_version: number;
+}
+
+interface CHANGE_PUBLIC_SELECTED_VERSION {
+	type: "CHANGE_PUBLIC_SELECTED_VERSION";
+	publicSelected_version_num: number;
 }
 
 interface SET_USER {
@@ -239,9 +288,19 @@ interface RECEIVE_FILE_SUMMARY {
 	fileSummary: FileSummary;
 }
 
+interface RECEIVE_PUBLIC_FILE_SUMMARY {
+	type: "RECEIVE_PUBLIC_FILE_SUMMARY";
+	publicFileSummary: FileSummary;
+}
+
 interface RECEIVE_DATASET_METADATA {
 	type: "RECEIVE_DATASET_METADATA";
 	metadataList: Metadata[];
+}
+
+interface RECEIVE_PUBLIC_DATASET_METADATA {
+	type: "RECEIVE_PUBLIC_DATASET_METADATA";
+	publicDatasetMetadataList: Metadata[];
 }
 
 interface RECEIVE_FILE_METADATA {
@@ -249,9 +308,19 @@ interface RECEIVE_FILE_METADATA {
 	metadataList: Metadata[];
 }
 
+interface RECEIVE_PUBLIC_FILE_METADATA {
+	type: "RECEIVE_PUBLIC_FILE_METADATA";
+	publicFileMetadataList: Metadata[];
+}
+
 interface RECEIVE_FOLDERS_IN_DATASET {
 	type: "RECEIVE_FOLDERS_IN_DATASET";
 	folders: Folder[];
+}
+
+interface RECEIVE_FOLDERS_IN_PUBLIC_DATASET {
+	type: "RECEIVE_FOLDERS_IN_PUBLIC_DATASET";
+	publicFolders: Folder[];
 }
 
 interface UPDATE_DATASET_METADATA {
@@ -277,6 +346,11 @@ interface POST_FILE_METADATA {
 interface RECEIVE_METADATA_DEFINITIONS {
 	type: "RECEIVE_METADATA_DEFINITIONS";
 	metadataDefinitionList: MetadataDefinition[];
+}
+
+interface RECEIVE_PUBLIC_METADATA_DEFINITIONS {
+	type: "RECEIVE_PUBLIC_METADATA_DEFINITIONS";
+	publicMetadataDefinitionList: MetadataDefinition[];
 }
 
 interface RECEIVE_METADATA_DEFINITION {
@@ -336,6 +410,11 @@ interface FOLDER_DELETED {
 interface GET_FOLDER_PATH {
 	type: "GET_FOLDER_PATH";
 	folderPath: string[];
+}
+
+interface GET_PUBLIC_FOLDER_PATH {
+	type: "GET_PUBLIC_FOLDER_PATH";
+	publicFolderPath: string[];
 }
 
 interface RECEIVE_LISTENERS {
@@ -492,15 +571,44 @@ interface REVOKE_ADMIN {
 	profile: UserOut;
 }
 
+interface GET_PUBLIC_VIS_DATA {
+	type: "GET_PUBLIC_VIS_DATA";
+	publicVisData: VisualizationDataOut;
+}
+
+interface GET_PUBLIC_VIS_CONFIG {
+	type: "GET_PUBLIC_VIS_CONFIG";
+	publicVisConfig: VisualizationConfigOut;
+}
+
+interface DOWNLOAD_PUBLIC_VIS_DATA {
+	type: "DOWNLOAD_PUBLIC_VIS_DATA";
+	publicBlob: Blob;
+}
+
+interface GET_PUBLIC_VIS_DATA_PRESIGNED_URL {
+	type: "GET_PUBLIC_VIS_DATA_PRESIGNED_URL";
+	publicPresignedUrl: string;
+}
+
+interface RESET_PUBLIC_VIS_DATA_PRESIGNED_URL {
+	type: "RESET_PUBLIC_VIS_DATA_PRESIGNED_URL";
+	publicPreSignedUrl: string;
+}
+
 export type DataAction =
 	| GET_ADMIN_MODE_STATUS
 	| TOGGLE_ADMIN_MODE
 	| RECEIVE_FILES_IN_DATASET
 	| RECEIVE_FOLDERS_IN_DATASET
+	| RECEIVE_FOLDERS_IN_PUBLIC_DATASET
 	| DELETE_FILE
 	| RECEIVE_DATASET_ABOUT
 	| RECEIVE_DATASET_ROLE
 	| RECEIVE_DATASETS
+	| RECEIVE_PUBLIC_DATASETS
+	| RECEIVE_PUBLIC_DATASET_ABOUT
+	| RECEIVE_FILES_IN_PUBLIC_DATASET
 	| DELETE_DATASET
 	| UPDATE_DATASET
 	| RECEIVE_FILE_SUMMARY
@@ -510,6 +618,12 @@ export type DataAction =
 	| RECEIVE_PREVIEWS
 	| RECEIVE_VERSIONS
 	| CHANGE_SELECTED_VERSION
+	| RECEIVE_PUBLIC_FILE_SUMMARY
+	| RECEIVE_PUBLIC_FILE_EXTRACTED_METADATA
+	| RECEIVE_PUBLIC_FILE_METADATA_JSONLD
+	| RECEIVE_PUBLIC_PREVIEWS
+	| RECEIVE_PUBLIC_VERSIONS
+	| CHANGE_PUBLIC_SELECTED_VERSION
 	| SET_USER
 	| LOGIN_ERROR
 	| LOGOUT
@@ -537,13 +651,16 @@ export type DataAction =
 	| POST_DATASET_METADATA
 	| POST_FILE_METADATA
 	| RECEIVE_METADATA_DEFINITIONS
+	| RECEIVE_PUBLIC_METADATA_DEFINITIONS
 	| RECEIVE_METADATA_DEFINITION
 	| SEARCH_METADATA_DEFINITIONS
 	| DELETE_METADATA_DEFINITION
 	| SAVE_METADATA_DEFINITIONS
 	| RESET_SAVE_METADATA_DEFINITIONS
 	| RECEIVE_DATASET_METADATA
+	| RECEIVE_PUBLIC_DATASET_METADATA
 	| RECEIVE_FILE_METADATA
+	| RECEIVE_PUBLIC_FILE_METADATA
 	| DELETE_DATASET_METADATA
 	| DELETE_FILE_METADATA
 	| DOWNLOAD_FILE
@@ -551,6 +668,7 @@ export type DataAction =
 	| RESET_FILE_PRESIGNED_URL
 	| FOLDER_DELETED
 	| GET_FOLDER_PATH
+	| GET_PUBLIC_FOLDER_PATH
 	| RECEIVE_LISTENERS
 	| SEARCH_LISTENERS
 	| RECEIVE_LISTENER_CATEGORIES
@@ -585,4 +703,9 @@ export type DataAction =
 	| RESET_CREATE_FILES
 	| UPDATE_FILE
 	| SET_ADMIN
-	| REVOKE_ADMIN;
+	| REVOKE_ADMIN
+	| GET_PUBLIC_VIS_DATA
+	| GET_PUBLIC_VIS_CONFIG
+	| DOWNLOAD_PUBLIC_VIS_DATA
+	| GET_PUBLIC_VIS_DATA_PRESIGNED_URL
+	| RESET_PUBLIC_VIS_DATA_PRESIGNED_URL;

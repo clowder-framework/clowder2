@@ -20,6 +20,7 @@ type FilesTableProps = {
 	folderId: string | null;
 	filesInDataset: FileOut[];
 	foldersInDataset: FolderOut[];
+	publicView: boolean | false;
 };
 
 const iconStyle = {
@@ -28,7 +29,8 @@ const iconStyle = {
 };
 
 export default function FilesTable(props: FilesTableProps) {
-	const { folderId, datasetId, filesInDataset, foldersInDataset } = props;
+	const { folderId, datasetId, filesInDataset, foldersInDataset, publicView } =
+		props;
 
 	// use history hook to redirect/navigate between routes
 	const history = useNavigate();
@@ -39,9 +41,20 @@ export default function FilesTable(props: FilesTableProps) {
 			`/files/${selectedFileId}?dataset=${datasetId}&folder=${folderId}&verNum=${selectedFileId}`
 		);
 	};
+	const selectPublicFile = (selectedFileId: string | undefined) => {
+		// Redirect to file route with file Id and dataset id and folderId
+		history(
+			`/public/files/${selectedFileId}?dataset=${props.datasetId}&folder=${folderId}&verNum=${selectedFileId}`
+		);
+	};
 	const selectFolder = (selectedFolderId: string | undefined) => {
 		// Redirect to file route with file Id and dataset id
 		history(`/datasets/${datasetId}?folder=${selectedFolderId}`);
+	};
+
+	const selectPublicFolder = (selectedFolderId: string | undefined) => {
+		// Redirect to file route with file Id and dataset id
+		history(`/public/datasets/${datasetId}?folder=${selectedFolderId}`);
 	};
 
 	return (
@@ -58,14 +71,20 @@ export default function FilesTable(props: FilesTableProps) {
 					</TableRow>
 				</TableHead>
 				<TableBody>
-					{foldersInDataset.map((folder: FolderOut) => (
+					{foldersInDataset.map((folder) => (
 						<TableRow
 							key={folder.id}
 							sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
 						>
 							<TableCell component="th" scope="row">
 								<FolderIcon sx={iconStyle} />
-								<Button onClick={() => selectFolder(folder.id)}>
+								<Button
+									onClick={() =>
+										publicView
+											? selectPublicFolder(folder.id)
+											: selectFolder(folder.id)
+									}
+								>
 									{folder.name}
 								</Button>
 							</TableCell>
@@ -78,13 +97,14 @@ export default function FilesTable(props: FilesTableProps) {
 							</TableCell>
 						</TableRow>
 					))}
-					{filesInDataset.map((file: FileOut) => (
+					{filesInDataset.map((file) => (
 						<FilesTableFileEntry
 							iconStyle={iconStyle}
-							selectFile={selectFile}
+							selectFile={publicView ? selectPublicFile : selectFile}
 							file={file}
 							key={file.id}
 							parentFolderId={folderId}
+							publicView={publicView}
 						/>
 					))}
 				</TableBody>

@@ -39,6 +39,7 @@ async def index_dataset(
         MetadataDB.resource.resource_id == ObjectId(dataset.id)
     ):
         metadata.append(md.content)
+    dataset_status = dataset.status
     # Add en entry to the dataset index
     doc = ElasticsearchEntry(
         resource_type="dataset",
@@ -50,6 +51,7 @@ async def index_dataset(
         downloads=dataset.downloads,
         user_ids=authorized_user_ids,
         metadata=metadata,
+        status=dataset_status,
     ).dict()
 
     if update:
@@ -66,6 +68,8 @@ async def index_file(
     file: FileOut,
     user_ids: Optional[List[str]] = None,
     update: bool = False,
+    public: bool = False,
+    authenticated: bool = False,
 ):
     """Create or update an Elasticsearch entry for the file. user_ids is the list of users
     with permission to at least view the file's dataset, it will be queried if not provided.
@@ -86,6 +90,13 @@ async def index_file(
         MetadataDB.resource.resource_id == ObjectId(file.id)
     ):
         metadata.append(md.content)
+
+    status = None
+    if authenticated:
+        status = "AUTHENTICATED"
+    if public:
+        status = "PUBLIC"
+
     # Add en entry to the file index
     doc = ElasticsearchEntry(
         resource_type="file",
@@ -100,6 +111,7 @@ async def index_file(
         folder_id=str(file.folder_id),
         bytes=file.bytes,
         metadata=metadata,
+        status=status,
     ).dict()
     if update:
         try:

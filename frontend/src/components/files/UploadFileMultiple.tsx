@@ -101,7 +101,7 @@ export const UploadFileMultiple: React.FC<UploadFileMultipleProps> = (
 		let required = false;
 
 		metadataDefinitionList.forEach((val, _) => {
-			if (val.fields[0].required) {
+			if (val.required_for_items.files && val.fields[0].required) {
 				required = true;
 			}
 		});
@@ -112,7 +112,7 @@ export const UploadFileMultiple: React.FC<UploadFileMultipleProps> = (
 	const checkIfFieldsAreFilled = () => {
 		return metadataDefinitionList.every((val) => {
 			return val.fields.every((field) => {
-				return field.required
+				return val.required_for_items.files && field.required
 					? metadataRequestForms[val.name] !== undefined &&
 							metadataRequestForms[val.name].content[field.name] !==
 								undefined &&
@@ -200,7 +200,7 @@ export const UploadFileMultiple: React.FC<UploadFileMultipleProps> = (
 						<StepContent TransitionProps={{ unmountOnExit: false }}>
 							<Typography>Provide us the metadata about your file.</Typography>
 							<Box>
-								<CreateMetadata setMetadata={setMetadata} />
+								<CreateMetadata setMetadata={setMetadata} sourceItem={"files"}/>
 							</Box>
 							{/*buttons*/}
 							<Grid container>
