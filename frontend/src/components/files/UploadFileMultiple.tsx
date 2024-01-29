@@ -89,7 +89,7 @@ export const UploadFileMultiple: React.FC<UploadFileMultipleProps> = (
 
 	const newFiles = useSelector((state: RootState) => state.dataset.newFiles);
 	const metadataDefinitionList = useSelector(
-		(state: RootState) => state.metadata.metadataDefinitionList
+		(state: RootState) => state.metadata.metadataDefinitionList.data
 	);
 
 	useEffect(() => {
@@ -200,7 +200,10 @@ export const UploadFileMultiple: React.FC<UploadFileMultipleProps> = (
 						<StepContent TransitionProps={{ unmountOnExit: false }}>
 							<Typography>Provide us the metadata about your file.</Typography>
 							<Box>
-								<CreateMetadata setMetadata={setMetadata} sourceItem={"files"}/>
+								<CreateMetadata
+									setMetadata={setMetadata}
+									sourceItem={"files"}
+								/>
 							</Box>
 							{/*buttons*/}
 							<Grid container>
