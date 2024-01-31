@@ -122,11 +122,10 @@ export const Dataset = (): JSX.Element => {
 
 	const [paths, setPaths] = useState([]);
 
+	// TODO add option to determine limit number; default show 20 files each time
 	const [folderCurrPageNum, setFolderCurrPageNum] = useState<number>(1);
 	const [fileCurrPageNum, setFileCurrPageNum] = useState<number>(1);
 	const [limit] = useState<number>(5);
-	const [loadingFolders, setLoadingFolders] = useState(true);
-
 	const filePageMetadata = useSelector(
 		(state: RootState) => state.dataset.files.metadata
 	);
@@ -165,19 +164,8 @@ export const Dataset = (): JSX.Element => {
 		getFolderPath(folderId);
 	}, [searchParams, adminMode]);
 
-	// listing files
 	useEffect(() => {
 		if (foldersInDataset && foldersInDataset.length < limit) {
-			// if there are fewer folders than the limit, start loading files
-			setLoadingFolders(false);
-		} else {
-			setLoadingFolders(true);
-		}
-	}, [foldersInDataset]);
-
-	// listing files
-	useEffect(() => {
-		if (fileCurrPageNum === 1 && !loadingFolders) {
 			listFilesInDataset(
 				datasetId,
 				folderId,
@@ -185,7 +173,7 @@ export const Dataset = (): JSX.Element => {
 				limit
 			);
 		}
-	}, [fileCurrPageNum, limit, loadingFolders]);
+	}, [foldersInDataset]);
 
 	// for breadcrumb
 	useEffect(() => {
@@ -402,7 +390,7 @@ export const Dataset = (): JSX.Element => {
 						/>
 						<Box display="flex" justifyContent="center" sx={{ m: 1 }}>
 							{/*if folders flip to last page; switch to flipping files*/}
-							{!loadingFolders ? (
+							{foldersInDataset && foldersInDataset.length < limit ? (
 								<Pagination
 									count={Math.ceil(filePageMetadata.total_count / limit)}
 									page={fileCurrPageNum}
