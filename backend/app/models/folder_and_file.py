@@ -37,6 +37,14 @@ class FolderFileViewList(View, FileBase):
         name = "folders_files_view"
         pipeline = [
             {
+                "$lookup": {
+                    "from": "authorization",
+                    "localField": "dataset_id",
+                    "foreignField": "dataset_id",
+                    "as": "auth",
+                }
+            },
+            {
                 "$addFields": {
                     "object_type": "file"
                 }
@@ -51,14 +59,6 @@ class FolderFileViewList(View, FileBase):
                             }
                         }
                     ]
-                }
-            },
-            {
-                "$lookup": {
-                    "from": "authorization",
-                    "localField": "dataset_id",
-                    "foreignField": "dataset_id",
-                    "as": "auth",
                 }
             }
         ]

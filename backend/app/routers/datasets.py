@@ -297,43 +297,44 @@ async def get_dataset_files(
         admin_mode: bool = Depends(get_admin_mode),
         allow: bool = Depends(Authorization("viewer")),
 ):
-    if admin and admin_mode:
-        query = []
-    elif authenticated or public:
-        query = [
-            FileDBViewList.dataset_id == ObjectId(dataset_id),
-        ]
-    else:
-        query = [
-            FileDBViewList.dataset_id == ObjectId(dataset_id),
-            Or(
-                FileDBViewList.creator.email == user_id,
-                FileDBViewList.auth.user_ids == user_id,
-            ),
-        ]
-    if folder_id is not None:
-        query.append(FileDBViewList.folder_id == ObjectId(folder_id))
+    if (await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
+        if authenticated or public or (admin and admin_mode):
+            query = [
+                FileDBViewList.dataset_id == ObjectId(dataset_id),
+            ]
+        else:
+            query = [
+                FileDBViewList.dataset_id == ObjectId(dataset_id),
+                Or(
+                    FileDBViewList.creator.email == user_id,
+                    FileDBViewList.auth.user_ids == user_id,
+                ),
+            ]
+        if folder_id is not None:
+            query.append(FileDBViewList.folder_id == ObjectId(folder_id))
 
-    files_and_count = (
-        await FileDBViewList.find(*query)
-        .aggregate(
-            [_get_page_query(skip, limit, sort_field="created", ascending=False)],
+        files_and_count = (
+            await FileDBViewList.find(*query)
+            .aggregate(
+                [_get_page_query(skip, limit, sort_field="created", ascending=False)],
+            )
+            .to_list()
         )
-        .to_list()
-    )
-    if len(files_and_count[0]["metadata"]) > 0:
-        page_metadata = PageMetadata(
-            **files_and_count[0]["metadata"][0], skip=skip, limit=limit
+        if len(files_and_count[0]["metadata"]) > 0:
+            page_metadata = PageMetadata(
+                **files_and_count[0]["metadata"][0], skip=skip, limit=limit
+            )
+        else:
+            page_metadata = PageMetadata(skip=skip, limit=limit)
+        page = Paged(
+            metadata=page_metadata,
+            data=[
+                FileOut(id=item.pop("_id"), **item) for item in files_and_count[0]["data"]
+            ],
         )
-    else:
-        page_metadata = PageMetadata(skip=skip, limit=limit)
-    page = Paged(
-        metadata=page_metadata,
-        data=[
-            FileOut(id=item.pop("_id"), **item) for item in files_and_count[0]["data"]
-        ],
-    )
-    return page.dict()
+        return page.dict()
+
+    raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
 
 
 @router.put("/{dataset_id}", response_model=DatasetOut)
@@ -508,49 +509,49 @@ async def get_dataset_folders_and_files(
         admin_mode: bool = Depends(get_admin_mode),
         allow: bool = Depends(Authorization("viewer")),
 ):
-    if admin and admin_mode:
-        query = []
-    elif authenticated or public:
-        query = [
-            FolderFileViewList.dataset_id == ObjectId(dataset_id),
-        ]
-    else:
-        query = [
-            FileDBViewList.dataset_id == ObjectId(dataset_id),
-            Or(
-                FolderFileViewList.creator.email == user_id,
-                FolderFileViewList.auth.user_ids == user_id,
-            ),
-        ]
-    if folder_id is not None:
-        query.append(FileDBViewList.folder_id == ObjectId(folder_id))
-        query.append(FolderDBViewList.parent_folder == ObjectId(folder_id))
-    else:
-        query.append(FolderDBViewList.parent_folder == None)
+    if (await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
+        if authenticated or public or (admin and admin_mode):
+            query = [
+                FolderFileViewList.dataset_id == ObjectId(dataset_id),
+            ]
+        else:
+            query = [
+                FolderFileViewList.dataset_id == ObjectId(dataset_id),
+                Or(
+                    FolderFileViewList.creator.email == user_id,
+                    FolderFileViewList.auth.user_ids == user_id,
+                ),
+            ]
+        if folder_id is not None:
+            query.append(FolderFileViewList.folder_id == ObjectId(folder_id))
+            query.append(FolderFileViewList.parent_folder == ObjectId(folder_id))
+        else:
+            query.append(FolderFileViewList.parent_folder == None)
 
-    query = []
-    folders_files_and_count = (
-        await FolderFileViewList.find(*query)
-        .aggregate(
-            [_get_page_query(skip, limit, sort_field="object_type", ascending=False)],
+        folders_files_and_count = (
+            await FolderFileViewList.find(*query)
+            .aggregate(
+                [_get_page_query(skip, limit, sort_field="object_type", ascending=False)],
+            )
+            .to_list()
         )
-        .to_list()
-    )
-    if len(folders_files_and_count[0]["metadata"]) > 0:
-        page_metadata = PageMetadata(
-            **folders_files_and_count[0]["metadata"][0], skip=skip, limit=limit
+        if len(folders_files_and_count[0]["metadata"]) > 0:
+            page_metadata = PageMetadata(
+                **folders_files_and_count[0]["metadata"][0], skip=skip, limit=limit
+            )
+        else:
+            page_metadata = PageMetadata(skip=skip, limit=limit)
+        page = Paged(
+            metadata=page_metadata,
+            data=[
+                FileOut(id=item.pop("_id"), **item) if item.get("object_type") == "file" else FolderOut(
+                    id=item.pop("_id"),
+                    **item) for item
+                in folders_files_and_count[0]["data"]
+            ],
         )
-    else:
-        page_metadata = PageMetadata(skip=skip, limit=limit)
-    page = Paged(
-        metadata=page_metadata,
-        data=[
-            FileOut(id=item.pop("_id"), **item) if item.get("object_type") == "file" else FolderOut(id=item.pop("_id"),
-                                                                                                    **item) for item
-            in folders_files_and_count[0]["data"]
-        ],
-    )
-    return page.dict()
+        return page.dict()
+    raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
 
 
 @router.delete("/{dataset_id}/folders/{folder_id}")
