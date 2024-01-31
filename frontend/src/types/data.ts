@@ -117,6 +117,7 @@ export interface Thumbnail {
 }
 
 export interface DatasetState {
+	foldersAndFiles: Paged;
 	files: Paged;
 	datasets: Paged;
 	newDataset: DatasetOut;

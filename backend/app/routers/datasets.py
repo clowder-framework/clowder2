@@ -499,7 +499,6 @@ async def get_dataset_folders(
 async def get_dataset_folders_and_files(
         dataset_id: str,
         folder_id: Optional[str] = None,
-        parent_folder: Optional[str] = None,
         authenticated: bool = Depends(CheckStatus("AUTHENTICATED")),
         public: bool = Depends(CheckStatus("PUBLIC")),
         user_id=Depends(get_user),
@@ -525,9 +524,7 @@ async def get_dataset_folders_and_files(
         ]
     if folder_id is not None:
         query.append(FileDBViewList.folder_id == ObjectId(folder_id))
-
-    if parent_folder is not None:
-        query.append(FolderDBViewList.parent_folder == ObjectId(parent_folder))
+        query.append(FolderDBViewList.parent_folder == ObjectId(folder_id))
     else:
         query.append(FolderDBViewList.parent_folder == None)
 

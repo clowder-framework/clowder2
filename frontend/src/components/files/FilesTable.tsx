@@ -18,8 +18,7 @@ import { FileOut, FolderOut } from "../../openapi/v2";
 type FilesTableProps = {
 	datasetId: string | undefined;
 	folderId: string | null;
-	filesInDataset: FileOut[];
-	foldersInDataset: FolderOut[];
+	folderFilesInDataset: FileOut[] | FolderOut[];
 	publicView: boolean | false;
 };
 
@@ -29,8 +28,7 @@ const iconStyle = {
 };
 
 export default function FilesTable(props: FilesTableProps) {
-	const { folderId, datasetId, filesInDataset, foldersInDataset, publicView } =
-		props;
+	const { folderId, datasetId, folderFilesInDataset, publicView } = props;
 
 	// use history hook to redirect/navigate between routes
 	const history = useNavigate();

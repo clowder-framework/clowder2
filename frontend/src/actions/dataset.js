@@ -158,25 +158,32 @@ export function fetchFoldersInDataset(datasetId, parentFolder, skip, limit) {
 	};
 }
 
-export const RESET_FOLDERS_IN_DATASET = "RESET_FOLDERS_IN_DATASET";
+export const RECEIVE_FOLDERS_FILES_IN_DATASET =
+	"RECEIVE_FOLDERS_FILES_IN_DATASET";
 
-export function resetFolderInDataset() {
+export function fetchFoldersFilesInDataset(datasetId, folderId, skip, limit) {
 	return (dispatch) => {
-		dispatch({
-			type: RESET_FOLDERS_IN_DATASET,
-			receivedAt: Date.now(),
-		});
-	};
-}
-
-export const RESET_FILES_IN_DATASET = "RESET_FILES_IN_DATASET";
-
-export function resetFilesInDataset() {
-	return (dispatch) => {
-		dispatch({
-			type: RESET_FILES_IN_DATASET,
-			receivedAt: Date.now(),
-		});
+		return V2.DatasetsService.getDatasetFoldersAndFilesApiV2DatasetsDatasetIdFoldersAndFilesGet(
+			datasetId,
+			folderId,
+			skip,
+			limit
+		)
+			.then((json) => {
+				dispatch({
+					type: RECEIVE_FOLDERS_FILES_IN_DATASET,
+					foldersAndFiles: json,
+					receivedAt: Date.now(),
+				});
+			})
+			.catch((reason) => {
+				dispatch(
+					handleErrors(
+						reason,
+						fetchFoldersFilesInDataset(datasetId, folderId, skip, limit)
+					)
+				);
+			});
 	};
 }
 

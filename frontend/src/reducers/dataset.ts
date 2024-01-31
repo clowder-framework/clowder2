@@ -5,10 +5,10 @@ import {
 	RECEIVE_DATASET_ROLES,
 	RECEIVE_DATASETS,
 	RECEIVE_FILES_IN_DATASET,
+	RECEIVE_FOLDERS_FILES_IN_DATASET,
 	REMOVE_DATASET_GROUP_ROLE,
 	REMOVE_DATASET_USER_ROLE,
 	RESET_CREATE_DATASET,
-	RESET_FILES_IN_DATASET,
 	SET_DATASET_GROUP_ROLE,
 	SET_DATASET_USER_ROLE,
 	UPDATE_DATASET,
@@ -31,12 +31,17 @@ import {
 	DatasetRoles,
 	FileOut,
 	FileOut as File,
+	FolderOut as Folder,
 	Paged,
 	PageMetadata,
 	UserOut,
 } from "../openapi/v2";
 
 const defaultState: DatasetState = {
+	foldersAndFiles: <Paged>{
+		metadata: <PageMetadata>{},
+		data: <File | Folder[]>[],
+	},
 	files: <Paged>{ metadata: <PageMetadata>{}, data: <File[]>[] },
 	about: <Dataset>{ creator: <UserOut>{} },
 	datasetRole: <AuthorizationBase>{},
@@ -49,12 +54,12 @@ const defaultState: DatasetState = {
 
 const dataset = (state = defaultState, action: DataAction) => {
 	switch (action.type) {
+		case RECEIVE_FOLDERS_FILES_IN_DATASET:
+			return Object.assign({}, state, {
+				foldersAndFiles: action.foldersAndFiles,
+			});
 		case RECEIVE_FILES_IN_DATASET:
 			return Object.assign({}, state, { files: action.files });
-		case RESET_FILES_IN_DATASET:
-			return Object.assign({}, state, {
-				files: <Paged>{ metadata: <PageMetadata>{}, data: <File[]>[] },
-			});
 		case DELETE_FILE:
 			return Object.assign({}, state, {
 				files: {

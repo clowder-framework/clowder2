@@ -256,6 +256,35 @@ export class DatasetsService {
     }
 
     /**
+     * Get Dataset Folders And Files
+     * @param datasetId
+     * @param folderId
+     * @param skip
+     * @param limit
+     * @returns Paged Successful Response
+     * @throws ApiError
+     */
+    public static getDatasetFoldersAndFilesApiV2DatasetsDatasetIdFoldersAndFilesGet(
+        datasetId: string,
+        folderId?: string,
+        skip?: number,
+        limit: number = 10,
+    ): CancelablePromise<Paged> {
+        return __request({
+            method: 'GET',
+            path: `/api/v2/datasets/${datasetId}/folders_and_files`,
+            query: {
+                'folder_id': folderId,
+                'skip': skip,
+                'limit': limit,
+            },
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+
+    /**
      * Delete Folder
      * @param datasetId
      * @param folderId
