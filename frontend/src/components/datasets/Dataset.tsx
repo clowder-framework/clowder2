@@ -121,7 +121,7 @@ export const Dataset = (): JSX.Element => {
 	const pageMetadata = useSelector(
 		(state: RootState) => state.dataset.foldersAndFiles.metadata
 	);
-	const folderFilesInDataset = useSelector(
+	const foldersFilesInDataset = useSelector(
 		(state: RootState) => state.dataset.foldersAndFiles.data
 	);
 	const adminMode = useSelector((state: RootState) => state.user.adminMode);
@@ -340,7 +340,7 @@ export const Dataset = (): JSX.Element => {
 						<FilesTable
 							datasetId={datasetId}
 							folderId={folderId}
-							folderFilesInDataset={folderFilesInDataset}
+							foldersFilesInDataset={foldersFilesInDataset}
 						/>
 						<Box display="flex" justifyContent="center" sx={{ m: 1 }}>
 							<Pagination

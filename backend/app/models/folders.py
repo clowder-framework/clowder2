@@ -22,6 +22,7 @@ class FolderDB(Document, FolderBase):
     creator: UserOut
     created: datetime = Field(default_factory=datetime.utcnow)
     modified: datetime = Field(default_factory=datetime.utcnow)
+    object_type: str = "folder"
 
     class Settings:
         name = "folders"
