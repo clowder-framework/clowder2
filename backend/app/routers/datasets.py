@@ -54,6 +54,7 @@ from app.models.files import (
     LocalFileIn,
     StorageType,
 )
+from app.models.folder_and_file import FolderFileViewList
 from app.models.folders import FolderOut, FolderIn, FolderDB, FolderDBViewList
 from app.models.metadata import MetadataDB
 from app.models.pages import Paged, PageMetadata, _get_page_query
@@ -491,6 +492,67 @@ async def get_dataset_folders(
                 for item in folders_and_count[0]["data"]
             ],
         )
+    return page.dict()
+
+
+@router.get("/{dataset_id}/folders_and_files", response_model=Paged)
+async def get_dataset_folders_and_files(
+        dataset_id: str,
+        folder_id: Optional[str] = None,
+        parent_folder: Optional[str] = None,
+        authenticated: bool = Depends(CheckStatus("AUTHENTICATED")),
+        public: bool = Depends(CheckStatus("PUBLIC")),
+        user_id=Depends(get_user),
+        skip: int = 0,
+        limit: int = 10,
+        admin=Depends(get_admin),
+        admin_mode: bool = Depends(get_admin_mode),
+        allow: bool = Depends(Authorization("viewer")),
+):
+    if admin and admin_mode:
+        query = []
+    elif authenticated or public:
+        query = [
+            FolderFileViewList.dataset_id == ObjectId(dataset_id),
+        ]
+    else:
+        query = [
+            FileDBViewList.dataset_id == ObjectId(dataset_id),
+            Or(
+                FolderFileViewList.creator.email == user_id,
+                FolderFileViewList.auth.user_ids == user_id,
+            ),
+        ]
+    if folder_id is not None:
+        query.append(FileDBViewList.folder_id == ObjectId(folder_id))
+
+    if parent_folder is not None:
+        query.append(FolderDBViewList.parent_folder == ObjectId(parent_folder))
+    else:
+        query.append(FolderDBViewList.parent_folder == None)
+
+    query = []
+    folders_files_and_count = (
+        await FolderFileViewList.find(*query)
+        .aggregate(
+            [_get_page_query(skip, limit, sort_field="object_type", ascending=False)],
+        )
+        .to_list()
+    )
+    if len(folders_files_and_count[0]["metadata"]) > 0:
+        page_metadata = PageMetadata(
+            **folders_files_and_count[0]["metadata"][0], skip=skip, limit=limit
+        )
+    else:
+        page_metadata = PageMetadata(skip=skip, limit=limit)
+    page = Paged(
+        metadata=page_metadata,
+        data=[
+            FileOut(id=item.pop("_id"), **item) if item.get("object_type") == "file" else FolderOut(id=item.pop("_id"),
+                                                                                                    **item) for item
+            in folders_files_and_count[0]["data"]
+        ],
+    )
     return page.dict()
 
 

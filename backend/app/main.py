@@ -15,6 +15,7 @@ from app.models.datasets import DatasetDB, DatasetDBViewList
 from app.models.errors import ErrorDB
 from app.models.feeds import FeedDB
 from app.models.files import FileDB, FileVersionDB, FileDBViewList
+from app.models.folder_and_file import FolderFileViewList
 from app.models.folders import FolderDB, FolderDBViewList
 from app.models.groups import GroupDB
 from app.models.listeners import (
@@ -53,7 +54,6 @@ from app.routers import (
     public_visualization,
     thumbnails,
 )
-
 # setup loggers
 # logging.config.fileConfig('logging.conf', disable_existing_loggers=False)
 from app.search.config import indexSettings
@@ -65,8 +65,8 @@ app = FastAPI(
     title=settings.APP_NAME,
     openapi_url=f"{settings.API_V2_STR}/openapi.json",
     description="A cloud native data management framework to support any research domain. Clowder was "
-    "developed to help researchers and scientists in data intensive domains manage raw data, complex "
-    "metadata, and automatic data pipelines. ",
+                "developed to help researchers and scientists in data intensive domains manage raw data, complex "
+                "metadata, and automatic data pipelines. ",
     version="2.0.0-beta.1",
     contact={"name": "Clowder", "url": "https://clowderframework.org/"},
     license_info={
@@ -269,6 +269,7 @@ async def startup_beanie():
             VisualizationConfigDB,
             VisualizationDataDB,
             ThumbnailDB,
+            FolderFileViewList,
         ],
         recreate_views=True,
     )
