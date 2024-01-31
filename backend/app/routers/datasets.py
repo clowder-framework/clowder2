@@ -522,7 +522,7 @@ async def get_dataset_folders_and_files(
                     FolderFileViewList.auth.user_ids == user_id,
                 ),
             ]
-            
+
         if folder_id is not None:
             query.append(
                 Or(
@@ -535,7 +535,12 @@ async def get_dataset_folders_and_files(
         folders_files_and_count = (
             await FolderFileViewList.find(*query)
             .aggregate(
-                [_get_page_query(skip, limit, sort_field="object_type", ascending=False)],
+                [_get_page_query(skip, limit, sort_clause={
+                    "$sort": {
+                        "object_type": -1,  # folder first
+                        "created": -1  # then sort by created descendingly
+                    }
+                })],
             )
             .to_list()
         )
