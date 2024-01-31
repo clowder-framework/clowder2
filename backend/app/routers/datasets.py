@@ -522,9 +522,13 @@ async def get_dataset_folders_and_files(
                     FolderFileViewList.auth.user_ids == user_id,
                 ),
             ]
+            
         if folder_id is not None:
-            query.append(FolderFileViewList.folder_id == ObjectId(folder_id))
-            query.append(FolderFileViewList.parent_folder == ObjectId(folder_id))
+            query.append(
+                Or(
+                    FolderFileViewList.folder_id == ObjectId(folder_id),
+                    FolderFileViewList.parent_folder == ObjectId(folder_id)
+                ))
         else:
             query.append(FolderFileViewList.parent_folder == None)
 
