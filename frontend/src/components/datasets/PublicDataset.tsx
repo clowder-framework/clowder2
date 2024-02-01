@@ -137,9 +137,6 @@ export const PublicDataset = (): JSX.Element => {
 	const publicFoldersInDataset = useSelector(
 		(state: RootState) => state.folder.publicFolders
 	);
-	const metadataDefinitionList = useSelector(
-		(state: RootState) => state.metadata.metadataDefinitionList.data
-	);
 
 	// component did mount list all files in dataset
 	useEffect(() => {

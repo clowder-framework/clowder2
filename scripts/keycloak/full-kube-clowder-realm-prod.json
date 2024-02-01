@@ -316,7 +316,8 @@
         "web-origins",
         "roles",
         "profile",
-        "email"
+        "email",
+        "openid"
       ],
       "optionalClientScopes": [
         "address",
@@ -471,6 +472,18 @@
           }
         }
       ]
+    },
+    {
+      "id": "27b15f8c-ea65-4288-bfd5-bd88eb1d05cf",
+      "name": "openid",
+      "description": "",
+      "protocol": "openid-connect",
+      "attributes": {
+        "include.in.token.scope": "true",
+        "display.on.consent.screen": "true",
+        "gui.order": "",
+        "consent.screen.text": ""
+      }
     },
     {
       "id": "9489cfcc-4415-4d08-a792-988d995a3edb",
@@ -942,7 +955,8 @@
     "email",
     "roles",
     "web-origins",
-    "acr"
+    "acr",
+    "openid"
   ],
   "defaultOptionalClientScopes": [
     "offline_access",
