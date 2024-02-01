@@ -47,8 +47,8 @@ clowder_bucket = os.getenv("MINIO_BUCKET_NAME", "clowder")
 
 
 async def _get_folder_hierarchy(
-        folder_id: str,
-        hierarchy: str,
+    folder_id: str,
+    hierarchy: str,
 ):
     """Generate a string of nested path to folder for use in zip file creation."""
     folder = await FolderDB.get(PydanticObjectId(folder_id))
@@ -60,8 +60,8 @@ async def _get_folder_hierarchy(
 
 @router.get("", response_model=Paged)
 async def get_datasets(
-        skip: int = 0,
-        limit: int = 10,
+    skip: int = 0,
+    limit: int = 10,
 ):
     query = [DatasetDB.status == DatasetStatus.PUBLIC]
     datasets_and_count = (
@@ -89,7 +89,7 @@ async def get_datasets(
 
 @router.get("/{dataset_id}", response_model=DatasetOut)
 async def get_dataset(
-        dataset_id: str,
+    dataset_id: str,
 ):
     if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
         if dataset.status == DatasetStatus.PUBLIC.name:
@@ -99,10 +99,10 @@ async def get_dataset(
 
 @router.get("/{dataset_id}/files", response_model=List[FileOut])
 async def get_dataset_files(
-        dataset_id: str,
-        folder_id: Optional[str] = None,
-        skip: int = 0,
-        limit: int = 10,
+    dataset_id: str,
+    folder_id: Optional[str] = None,
+    skip: int = 0,
+    limit: int = 10,
 ):
     if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
         if dataset.status == DatasetStatus.PUBLIC.name:
@@ -118,10 +118,10 @@ async def get_dataset_files(
 
 @router.get("/{dataset_id}/folders", response_model=List[FolderOut])
 async def get_dataset_folders(
-        dataset_id: str,
-        parent_folder: Optional[str] = None,
-        skip: int = 0,
-        limit: int = 10,
+    dataset_id: str,
+    parent_folder: Optional[str] = None,
+    skip: int = 0,
+    limit: int = 10,
 ):
     if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
         if dataset.status == DatasetStatus.PUBLIC.name:
@@ -141,10 +141,10 @@ async def get_dataset_folders(
 
 @router.get("/{dataset_id}/folders_and_files", response_model=Paged)
 async def get_dataset_folders_and_files(
-        dataset_id: str,
-        folder_id: Optional[str] = None,
-        skip: int = 0,
-        limit: int = 10,
+    dataset_id: str,
+    folder_id: Optional[str] = None,
+    skip: int = 0,
+    limit: int = 10,
 ):
     if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
         if dataset.status == DatasetStatus.PUBLIC.name:
@@ -206,9 +206,9 @@ async def get_dataset_folders_and_files(
 
 @router.get("/{dataset_id}/metadata", response_model=List[MetadataOut])
 async def get_dataset_metadata(
-        dataset_id: str,
-        listener_name: Optional[str] = Form(None),
-        listener_version: Optional[float] = Form(None),
+    dataset_id: str,
+    listener_name: Optional[str] = Form(None),
+    listener_version: Optional[float] = Form(None),
 ):
     if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
         if dataset.status == DatasetStatus.PUBLIC.name:
@@ -223,9 +223,9 @@ async def get_dataset_metadata(
             async for md in MetadataDB.find(*query):
                 if md.definition is not None:
                     if (
-                            md_def := await MetadataDefinitionDB.find_one(
-                                MetadataDefinitionDB.name == md.definition
-                            )
+                        md_def := await MetadataDefinitionDB.find_one(
+                            MetadataDefinitionDB.name == md.definition
+                        )
                     ) is not None:
                         md.description = md_def.description
                 metadata.append(md)
@@ -240,8 +240,8 @@ async def get_dataset_metadata(
 
 @router.get("/{dataset_id}/download", response_model=DatasetOut)
 async def download_dataset(
-        dataset_id: str,
-        fs: Minio = Depends(dependencies.get_fs),
+    dataset_id: str,
+    fs: Minio = Depends(dependencies.get_fs),
 ):
     if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
         if dataset.status == DatasetStatus.PUBLIC.name:
@@ -390,7 +390,7 @@ async def download_dataset(
                 media_type="application/x-zip-compressed",
             )
             response.headers["Content-Disposition"] = (
-                    "attachment; filename=%s" % zip_name
+                "attachment; filename=%s" % zip_name
             )
             # Increment download count
             await dataset.update(Inc({DatasetDB.downloads: 1}))
