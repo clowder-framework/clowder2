@@ -275,7 +275,7 @@ export const File = (): JSX.Element => {
 	} else if (showNotFoundPage) {
 		return <PageNotFound />;
 	}
-	console.log("file role is", fileRole);
+	
 	return (
 		<Layout>
 			{/*Error Message dialogue*/}
