@@ -1,8 +1,6 @@
 import React, { useEffect, useState } from "react";
 import config from "../../app.config";
 import {
-	Box,
-	Button,
 	FormControl,
 	Grid,
 	MenuItem,
@@ -10,31 +8,29 @@ import {
 	Tab,
 	Tabs,
 } from "@mui/material";
-import {downloadPublicResource} from "../../utils/common";
+import { downloadPublicResource } from "../../utils/common";
 import { PreviewConfiguration, RootState } from "../../types/data";
 import { useParams, useSearchParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 
 import { a11yProps, TabPanel } from "../tabs/TabComponent";
-import {fetchPublicFileSummary, fetchPublicFileVersions, fetchPublicFileMetadata} from "../../actions/public_file.js";
+import {
+	fetchPublicFileMetadata,
+	fetchPublicFileSummary,
+	fetchPublicFileVersions,
+} from "../../actions/public_file.js";
 import { MainBreadcrumbs } from "../navigation/BreadCrumb";
 import { FileVersionHistory } from "../versions/FileVersionHistory";
 import { DisplayMetadata } from "../metadata/DisplayMetadata";
 import { DisplayListenerMetadata } from "../metadata/DisplayListenerMetadata";
-import {
-	fetchFileMetadata,
-} from "../../actions/metadata";
 import PublicLayout from "../PublicLayout";
-import { fetchPublicDatasetAbout} from "../../actions/public_dataset";
+import { fetchPublicDatasetAbout } from "../../actions/public_dataset";
 import { FileDetails } from "./FileDetails";
-import {fetchPublicFolderPath } from "../../actions/folder";
-import { ExtractionHistoryTab } from "../listeners/ExtractionHistoryTab";
+import { fetchPublicFolderPath } from "../../actions/folder";
 import { PublicFileActionsMenu } from "./PublicFileActionsMenu";
 import { FormatListBulleted, InsertDriveFile } from "@material-ui/icons";
 import { TabStyle } from "../../styles/Styles";
-import BuildIcon from "@mui/icons-material/Build";
 import AssessmentIcon from "@mui/icons-material/Assessment";
-import HistoryIcon from "@mui/icons-material/History";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import { PublicVisualization } from "../visualizations/PublicVisualization";
 import { ErrorModal } from "../errors/ErrorModal";
@@ -54,23 +50,30 @@ export const PublicFile = (): JSX.Element => {
 
 	const listDatasetAbout = (datasetId: string | undefined) =>
 		dispatch(fetchPublicDatasetAbout(datasetId));
-	const about = useSelector((state: RootState) => state.publicDataset.public_about);
+	const about = useSelector(
+		(state: RootState) => state.publicDataset.publicAbout
+	);
 
 	const dispatch = useDispatch();
 	const listPublicFileSummary = (fileId: string | undefined) =>
 		dispatch(fetchPublicFileSummary(fileId));
-	const listPublicFileVersions = (fileId: string | undefined,
+	const listPublicFileVersions = (
+		fileId: string | undefined,
 		skip: number | undefined,
-		limit: number | undefined) =>
-		dispatch(fetchPublicFileVersions(fileId, skip, limit));
+		limit: number | undefined
+	) => dispatch(fetchPublicFileVersions(fileId, skip, limit));
 	const listFileMetadata = (fileId: string | undefined) =>
 		dispatch(fetchPublicFileMetadata(fileId));
 	const getPublicFolderPath = (folderId: string | null) =>
 		dispatch(fetchPublicFolderPath(folderId));
 
 	const file = useSelector((state: RootState) => state.publicFile);
-	const fileSummary = useSelector((state: RootState) => state.publicFile.publicFileSummary);
-	const filePreviews = useSelector((state: RootState) => state.publicFile.publicPreviews);
+	const fileSummary = useSelector(
+		(state: RootState) => state.publicFile.publicFileSummary
+	);
+	const filePreviews = useSelector(
+		(state: RootState) => state.publicFile.publicPreviews
+	);
 	const fileVersions = useSelector(
 		(state: RootState) => state.publicFile.publicFileVersions
 	);
@@ -80,7 +83,9 @@ export const PublicFile = (): JSX.Element => {
 	const [selectedVersionNum, setSelectedVersionNum] = useState(
 		latestVersionNum ?? 1
 	);
-	const folderPath = useSelector((state: RootState) => state.folder.publicFolderPath);
+	const folderPath = useSelector(
+		(state: RootState) => state.folder.publicFolderPath
+	);
 	const [selectedTabIndex, setSelectedTabIndex] = useState(0);
 	const [previews, setPreviews] = useState([]);
 	const [enableAddMetadata, setEnableAddMetadata] =
@@ -281,7 +286,6 @@ export const PublicFile = (): JSX.Element => {
 							<FileVersionHistory
 								fileVersions={fileVersions}
 								publicView={true}
-
 							/>
 						) : (
 							<></>
@@ -324,7 +328,9 @@ export const PublicFile = (): JSX.Element => {
 							{Object.keys(fileSummary).length > 0 && (
 								<FileHistory
 									name={file.publicFileSummary.name}
-									contentType={file.publicFileSummary.content_type?.content_type}
+									contentType={
+										file.publicFileSummary.content_type?.content_type
+									}
 									selectedVersionNum={selectedVersionNum}
 								/>
 							)}
@@ -355,7 +361,7 @@ export const PublicFile = (): JSX.Element => {
 				</Grid>
 			</Grid>
 		</PublicLayout>
-	)
+	);
 
 	// return (
 	// 	<Layout>

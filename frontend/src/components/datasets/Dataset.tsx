@@ -332,6 +332,7 @@ export const Dataset = (): JSX.Element => {
 							folderId={folderId}
 							foldersFilesInDataset={foldersFilesInDataset}
 							setCurrPageNum={setCurrPageNum}
+							publicView={false}
 						/>
 						<Box display="flex" justifyContent="center" sx={{ m: 1 }}>
 							<Pagination

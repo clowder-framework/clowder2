@@ -1,12 +1,8 @@
 import { V2 } from "../openapi";
-import {
-	handleErrors,
-	handleErrorsAuthorization,
-	handleErrorsInline,
-	resetFailedReason,
-} from "./common";
+import { handleErrors } from "./common";
 
-export const RECEIVE_PUBLIC_DATASET_METADATA = "RECEIVE_PUBLIC_DATASET_METADATA";
+export const RECEIVE_PUBLIC_DATASET_METADATA =
+	"RECEIVE_PUBLIC_DATASET_METADATA";
 
 export function fetchPublicDatasetMetadata(datasetId, version) {
 	return (dispatch) => {
@@ -23,11 +19,15 @@ export function fetchPublicDatasetMetadata(datasetId, version) {
 				});
 			})
 			.catch((reason) => {
-				dispatch(handleErrors(reason, fetchPublicDatasetMetadata(datasetId, version)));
+				dispatch(
+					handleErrors(reason, fetchPublicDatasetMetadata(datasetId, version))
+				);
 			});
 	};
 }
-export const RECEIVE_FILES_IN_PUBLIC_DATASET = "RECEIVE_FILES_IN_PUBLIC_DATASET";
+
+export const RECEIVE_FILES_IN_PUBLIC_DATASET =
+	"RECEIVE_FILES_IN_PUBLIC_DATASET";
 
 export function fetchFilesInPublicDataset(datasetId, folderId, skip, limit) {
 	return (dispatch) => {
@@ -40,21 +40,30 @@ export function fetchFilesInPublicDataset(datasetId, folderId, skip, limit) {
 			.then((json) => {
 				dispatch({
 					type: RECEIVE_FILES_IN_PUBLIC_DATASET,
-					public_files: json,
+					publicFiles: json,
 					receivedAt: Date.now(),
 				});
 			})
 			.catch((reason) => {
 				dispatch(
-					handleErrors(reason, fetchFilesInPublicDataset(datasetId, folderId, skip, limit))
+					handleErrors(
+						reason,
+						fetchFilesInPublicDataset(datasetId, folderId, skip, limit)
+					)
 				);
 			});
 	};
 }
 
-export const RECEIVE_FOLDERS_IN_PUBLIC_DATASET = "RECEIVE_FOLDERS_IN_PUBLIC_DATASET";
+export const RECEIVE_FOLDERS_IN_PUBLIC_DATASET =
+	"RECEIVE_FOLDERS_IN_PUBLIC_DATASET";
 
-export function fetchFoldersInPublicDataset(datasetId, parentFolder, skip, limit) {
+export function fetchFoldersInPublicDataset(
+	datasetId,
+	parentFolder,
+	skip,
+	limit
+) {
 	return (dispatch) => {
 		return V2.PublicDatasetsService.getDatasetFoldersApiV2PublicDatasetsDatasetIdFoldersGet(
 			datasetId,
@@ -71,7 +80,10 @@ export function fetchFoldersInPublicDataset(datasetId, parentFolder, skip, limit
 			})
 			.catch((reason) => {
 				dispatch(
-					handleErrors(reason, fetchFoldersInPublicDataset(datasetId, parentFolder, skip, limit))
+					handleErrors(
+						reason,
+						fetchFoldersInPublicDataset(datasetId, parentFolder, skip, limit)
+					)
 				);
 			});
 	};
@@ -81,11 +93,13 @@ export const RECEIVE_PUBLIC_DATASET_ABOUT = "RECEIVE_PUBLIC_DATASET_ABOUT";
 
 export function fetchPublicDatasetAbout(id) {
 	return (dispatch) => {
-		return V2.PublicDatasetsService.getDatasetApiV2PublicDatasetsDatasetIdGet(id)
+		return V2.PublicDatasetsService.getDatasetApiV2PublicDatasetsDatasetIdGet(
+			id
+		)
 			.then((json) => {
 				dispatch({
 					type: RECEIVE_PUBLIC_DATASET_ABOUT,
-					public_about: json,
+					publicAbout: json,
 					receivedAt: Date.now(),
 				});
 			})
@@ -100,11 +114,14 @@ export const RECEIVE_PUBLIC_DATASETS = "RECEIVE_PUBLIC_DATASETS";
 export function fetchPublicDatasets(skip = 0, limit = 21) {
 	return (dispatch) => {
 		// TODO: Parameters for dates? paging?
-		return V2.PublicDatasetsService.getDatasetsApiV2PublicDatasetsGet(skip, limit)
+		return V2.PublicDatasetsService.getDatasetsApiV2PublicDatasetsGet(
+			skip,
+			limit
+		)
 			.then((json) => {
 				dispatch({
 					type: RECEIVE_PUBLIC_DATASETS,
-					public_datasets: json,
+					publicDatasets: json,
 					receivedAt: Date.now(),
 				});
 			})
@@ -139,5 +156,39 @@ export function fetchPublicFolderPath(folderId) {
 				receivedAt: Date.now(),
 			});
 		}
+	};
+}
+
+export const RECEIVE_PUBLIC_FOLDERS_FILES_IN_DATASET =
+	"RECEIVE_PUBLIC_FOLDERS_FILES_IN_DATASET";
+
+export function fetchPublicFoldersFilesInDataset(
+	datasetId,
+	folderId,
+	skip,
+	limit
+) {
+	return (dispatch) => {
+		return V2.PublicDatasetsService.getDatasetFoldersAndFilesApiV2PublicDatasetsDatasetIdFoldersAndFilesGet(
+			datasetId,
+			folderId,
+			skip,
+			limit
+		)
+			.then((json) => {
+				dispatch({
+					type: RECEIVE_PUBLIC_FOLDERS_FILES_IN_DATASET,
+					publicFoldersAndFiles: json,
+					receivedAt: Date.now(),
+				});
+			})
+			.catch((reason) => {
+				dispatch(
+					handleErrors(
+						reason,
+						fetchPublicFoldersFilesInDataset(datasetId, folderId, skip, limit)
+					)
+				);
+			});
 	};
 }

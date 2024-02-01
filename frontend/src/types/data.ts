@@ -131,13 +131,15 @@ export interface DatasetState {
 }
 
 export interface PublicDatasetState {
-	public_files: FileOut[];
-	public_datasets: DatasetOut[];
-	public_newDataset: DatasetOut;
-	public_newFile: FileOut;
-	public_about: DatasetOut;
-	public_datasetRole: AuthorizationBase;
-	public_roles: DatasetRoles;
+	publicFiles: FileOut[];
+	publicDatasets: Paged;
+	publicNewDataset: DatasetOut;
+	publicNewFile: FileOut;
+	publicNewFiles: FileOut[];
+	publicAbout: DatasetOut;
+	publicDatasetRole: AuthorizationBase;
+	publicRoles: DatasetRoles;
+	publicFoldersAndFiles: Paged;
 }
 
 export interface ListenerState {
