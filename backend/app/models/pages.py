@@ -16,7 +16,9 @@ class Paged(BaseModel):
     data: list = []
 
 
-def _get_page_query(skip, limit, sort_field="created", ascending=True, sort_clause=None):
+def _get_page_query(
+    skip, limit, sort_field="created", ascending=True, sort_clause=None
+):
     if sort_clause is not None:
         return {
             "$facet": {

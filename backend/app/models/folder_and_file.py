@@ -44,21 +44,11 @@ class FolderFileViewList(View, FileBase):
                     "as": "auth",
                 }
             },
-            {
-                "$addFields": {
-                    "object_type": "file"
-                }
-            },
+            {"$addFields": {"object_type": "file"}},
             {
                 "$unionWith": {
                     "coll": "folders",
-                    "pipeline": [
-                        {
-                            "$addFields": {
-                                "object_type": "folder"
-                            }
-                        }
-                    ]
+                    "pipeline": [{"$addFields": {"object_type": "folder"}}],
                 }
-            }
+            },
         ]
