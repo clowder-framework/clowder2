@@ -4,75 +4,41 @@ import io
 import os
 import shutil
 import tempfile
-import zipfile
-from collections.abc import Mapping, Iterable
 from typing import List, Optional
 
 from beanie import PydanticObjectId
-from beanie.operators import Or
 from beanie.odm.operators.update.general import Inc
+from beanie.operators import Or, And
 from bson import ObjectId
 from bson import json_util
-from elasticsearch import Elasticsearch
-from fastapi import Form
 from fastapi import (
     APIRouter,
     HTTPException,
     Depends,
-    Security,
-    File,
-    UploadFile,
-    Request,
 )
-from app.models.metadata import (
-    MongoDBRef,
-    MetadataAgent,
-    MetadataIn,
-    MetadataDB,
-    MetadataOut,
-    MetadataPatch,
-    validate_context,
-    patch_metadata,
-    MetadataDelete,
-    MetadataDefinitionDB,
-)
+from fastapi import Form
 from fastapi.responses import StreamingResponse
-from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from fastapi.security import HTTPBearer
 from minio import Minio
-from pika.adapters.blocking_connection import BlockingChannel
-from rocrate.model.person import Person
 from rocrate.rocrate import ROCrate
 
 from app import dependencies
 from app.config import settings
-from app.deps.authorization_deps import Authorization
-from app.keycloak_auth import (
-    get_token,
-    get_user,
-    get_current_user,
-)
-from app.models.authorization import AuthorizationDB, RoleType
 from app.models.datasets import (
-    DatasetBase,
-    DatasetIn,
     DatasetDB,
     DatasetOut,
-    DatasetPatch,
     DatasetDBViewList,
     DatasetStatus,
 )
 from app.models.files import FileOut, FileDB, FileDBViewList
-from app.models.folders import FolderOut, FolderIn, FolderDB, FolderDBViewList
+from app.models.folder_and_file import FolderFileViewList
+from app.models.folders import FolderOut, FolderDB, FolderDBViewList
 from app.models.metadata import MetadataDB
-from app.models.pyobjectid import PyObjectId
-from app.models.users import UserOut
-from app.models.thumbnails import ThumbnailDB
-from app.rabbitmq.listeners import submit_dataset_job
-from app.routers.files import add_file_entry, remove_file_entry
-from app.search.connect import (
-    delete_document_by_id,
+from app.models.metadata import (
+    MetadataOut,
+    MetadataDefinitionDB,
 )
-from app.search.index import index_dataset
+from app.models.pages import Paged, PageMetadata, _get_page_query
 
 router = APIRouter()
 security = HTTPBearer()
@@ -81,8 +47,8 @@ clowder_bucket = os.getenv("MINIO_BUCKET_NAME", "clowder")
 
 
 async def _get_folder_hierarchy(
-    folder_id: str,
-    hierarchy: str,
+        folder_id: str,
+        hierarchy: str,
 ):
     """Generate a string of nested path to folder for use in zip file creation."""
     folder = await FolderDB.get(PydanticObjectId(folder_id))
@@ -92,20 +58,38 @@ async def _get_folder_hierarchy(
     return hierarchy
 
 
-@router.get("", response_model=List[DatasetOut])
+@router.get("", response_model=Paged)
 async def get_datasets(
-    skip: int = 0,
-    limit: int = 10,
+        skip: int = 0,
+        limit: int = 10,
 ):
     query = [DatasetDB.status == DatasetStatus.PUBLIC]
-    datasets = await DatasetDB.find(*query).skip(skip).limit(limit).to_list()
-    print(str(datasets))
-    return [dataset.dict() for dataset in datasets]
+    datasets_and_count = (
+        await DatasetDBViewList.find(*query)
+        .aggregate(
+            [_get_page_query(skip, limit, sort_field="created", ascending=False)],
+        )
+        .to_list()
+    )
+    if len(datasets_and_count[0]["metadata"]) > 0:
+        page_metadata = PageMetadata(
+            **datasets_and_count[0]["metadata"][0], skip=skip, limit=limit
+        )
+    else:
+        page_metadata = PageMetadata(skip=skip, limit=limit)
+    page = Paged(
+        metadata=page_metadata,
+        data=[
+            DatasetOut(id=item.pop("_id"), **item)
+            for item in datasets_and_count[0]["data"]
+        ],
+    )
+    return page.dict()
 
 
 @router.get("/{dataset_id}", response_model=DatasetOut)
 async def get_dataset(
-    dataset_id: str,
+        dataset_id: str,
 ):
     if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
         if dataset.status == DatasetStatus.PUBLIC.name:
@@ -115,10 +99,10 @@ async def get_dataset(
 
 @router.get("/{dataset_id}/files", response_model=List[FileOut])
 async def get_dataset_files(
-    dataset_id: str,
-    folder_id: Optional[str] = None,
-    skip: int = 0,
-    limit: int = 10,
+        dataset_id: str,
+        folder_id: Optional[str] = None,
+        skip: int = 0,
+        limit: int = 10,
 ):
     if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
         if dataset.status == DatasetStatus.PUBLIC.name:
@@ -134,10 +118,10 @@ async def get_dataset_files(
 
 @router.get("/{dataset_id}/folders", response_model=List[FolderOut])
 async def get_dataset_folders(
-    dataset_id: str,
-    parent_folder: Optional[str] = None,
-    skip: int = 0,
-    limit: int = 10,
+        dataset_id: str,
+        parent_folder: Optional[str] = None,
+        skip: int = 0,
+        limit: int = 10,
 ):
     if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
         if dataset.status == DatasetStatus.PUBLIC.name:
@@ -155,11 +139,76 @@ async def get_dataset_folders(
     raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
 
 
+@router.get("/{dataset_id}/folders_and_files", response_model=Paged)
+async def get_dataset_folders_and_files(
+        dataset_id: str,
+        folder_id: Optional[str] = None,
+        skip: int = 0,
+        limit: int = 10,
+):
+    if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
+        if dataset.status == DatasetStatus.PUBLIC.name:
+            query = [
+                FolderFileViewList.dataset_id == ObjectId(dataset_id),
+            ]
+            if folder_id is None:
+                # only show folder and file at root level without parent folder
+                query.append(
+                    And(
+                        FolderFileViewList.parent_folder == None,
+                        FolderFileViewList.folder_id == None,
+                    )
+                )
+            else:
+                query.append(
+                    Or(
+                        FolderFileViewList.folder_id == ObjectId(folder_id),
+                        FolderFileViewList.parent_folder == ObjectId(folder_id),
+                    )
+                )
+
+            folders_files_and_count = (
+                await FolderFileViewList.find(*query)
+                .aggregate(
+                    [
+                        _get_page_query(
+                            skip,
+                            limit,
+                            sort_clause={
+                                "$sort": {
+                                    "object_type": -1,  # folder first
+                                    "created": -1,  # then sort by created descendingly
+                                }
+                            },
+                        )
+                    ],
+                )
+                .to_list()
+            )
+            if len(folders_files_and_count[0]["metadata"]) > 0:
+                page_metadata = PageMetadata(
+                    **folders_files_and_count[0]["metadata"][0], skip=skip, limit=limit
+                )
+            else:
+                page_metadata = PageMetadata(skip=skip, limit=limit)
+            page = Paged(
+                metadata=page_metadata,
+                data=[
+                    FileOut(id=item.pop("_id"), **item)
+                    if item.get("object_type") == "file"
+                    else FolderOut(id=item.pop("_id"), **item)
+                    for item in folders_files_and_count[0]["data"]
+                ],
+            )
+            return page.dict()
+    raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
+
+
 @router.get("/{dataset_id}/metadata", response_model=List[MetadataOut])
 async def get_dataset_metadata(
-    dataset_id: str,
-    listener_name: Optional[str] = Form(None),
-    listener_version: Optional[float] = Form(None),
+        dataset_id: str,
+        listener_name: Optional[str] = Form(None),
+        listener_version: Optional[float] = Form(None),
 ):
     if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
         if dataset.status == DatasetStatus.PUBLIC.name:
@@ -174,9 +223,9 @@ async def get_dataset_metadata(
             async for md in MetadataDB.find(*query):
                 if md.definition is not None:
                     if (
-                        md_def := await MetadataDefinitionDB.find_one(
-                            MetadataDefinitionDB.name == md.definition
-                        )
+                            md_def := await MetadataDefinitionDB.find_one(
+                                MetadataDefinitionDB.name == md.definition
+                            )
                     ) is not None:
                         md.description = md_def.description
                 metadata.append(md)
@@ -191,8 +240,8 @@ async def get_dataset_metadata(
 
 @router.get("/{dataset_id}/download", response_model=DatasetOut)
 async def download_dataset(
-    dataset_id: str,
-    fs: Minio = Depends(dependencies.get_fs),
+        dataset_id: str,
+        fs: Minio = Depends(dependencies.get_fs),
 ):
     if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
         if dataset.status == DatasetStatus.PUBLIC.name:
@@ -341,7 +390,7 @@ async def download_dataset(
                 media_type="application/x-zip-compressed",
             )
             response.headers["Content-Disposition"] = (
-                "attachment; filename=%s" % zip_name
+                    "attachment; filename=%s" % zip_name
             )
             # Increment download count
             await dataset.update(Inc({DatasetDB.downloads: 1}))
