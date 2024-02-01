@@ -341,6 +341,7 @@ export const Dataset = (): JSX.Element => {
 							datasetId={datasetId}
 							folderId={folderId}
 							foldersFilesInDataset={foldersFilesInDataset}
+							setCurrPageNum={setCurrPageNum}
 						/>
 						<Box display="flex" justifyContent="center" sx={{ m: 1 }}>
 							<Pagination

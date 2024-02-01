@@ -30,8 +30,7 @@ import {
 	DatasetOut as Dataset,
 	DatasetRoles,
 	FileOut,
-	FileOut as File,
-	FolderOut as Folder,
+	FolderOut,
 	Paged,
 	PageMetadata,
 	UserOut,
@@ -40,15 +39,15 @@ import {
 const defaultState: DatasetState = {
 	foldersAndFiles: <Paged>{
 		metadata: <PageMetadata>{},
-		data: <File | Folder[]>[],
+		data: <FileOut | FolderOut[]>[],
 	},
-	files: <Paged>{ metadata: <PageMetadata>{}, data: <File[]>[] },
+	files: <Paged>{ metadata: <PageMetadata>{}, data: <FileOut[]>[] },
 	about: <Dataset>{ creator: <UserOut>{} },
 	datasetRole: <AuthorizationBase>{},
 	datasets: <Paged>{ metadata: <PageMetadata>{}, data: <Dataset[]>[] },
 	newDataset: <Dataset>{},
-	newFile: <File>{},
-	newFiles: <File[]>[],
+	newFile: <FileOut>{},
+	newFiles: <FileOut[]>[],
 	roles: <DatasetRoles>{},
 };
 
@@ -66,6 +65,12 @@ const dataset = (state = defaultState, action: DataAction) => {
 					...state.files,
 					data: state.files.data.filter(
 						(file: FileOut) => file.id !== action.file.id
+					),
+				},
+				foldersAndFiles: {
+					...state.foldersAndFiles,
+					data: state.foldersAndFiles.data.filter(
+						(item: FileOut | FolderOut) => item.id !== action.file.id
 					),
 				},
 			});
@@ -95,6 +100,12 @@ const dataset = (state = defaultState, action: DataAction) => {
 					...state.files,
 					data: state.files.data.map((file: FileOut) =>
 						file.id === action.file.id ? action.file : file
+					),
+				},
+				foldersAndFiles: {
+					...state.foldersAndFiles,
+					data: state.foldersAndFiles.data.map((item: FileOut | FolderOut) =>
+						item.id === action.file.id ? action.file : item
 					),
 				},
 			});

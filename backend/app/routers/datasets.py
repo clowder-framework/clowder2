@@ -10,7 +10,7 @@ from typing import List, Optional
 
 from beanie import PydanticObjectId
 from beanie.odm.operators.update.general import Inc
-from beanie.operators import Or
+from beanie.operators import Or, And
 from bson import ObjectId
 from bson import json_util
 from elasticsearch import Elasticsearch
@@ -523,14 +523,13 @@ async def get_dataset_folders_and_files(
                 ),
             ]
 
-        if folder_id is not None:
-            query.append(
-                Or(
-                    FolderFileViewList.folder_id == ObjectId(folder_id),
-                    FolderFileViewList.parent_folder == ObjectId(folder_id)
-                ))
+        if folder_id is None:
+            # only show folder and file at root level without parent folder
+            query.append(And(FolderFileViewList.parent_folder == None,
+                             FolderFileViewList.folder_id == None))
         else:
-            query.append(FolderFileViewList.parent_folder == None)
+            query.append(Or(FolderFileViewList.folder_id == ObjectId(folder_id),
+                            FolderFileViewList.parent_folder == ObjectId(folder_id)))
 
         folders_files_and_count = (
             await FolderFileViewList.find(*query)

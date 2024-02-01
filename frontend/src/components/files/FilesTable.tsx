@@ -20,6 +20,7 @@ type FilesTableProps = {
 	folderId: string | null;
 	foldersFilesInDataset: FileOut[] | FolderOut[];
 	publicView: boolean | false;
+	setCurrPageNum: any;
 };
 
 const iconStyle = {
@@ -28,29 +29,43 @@ const iconStyle = {
 };
 
 export default function FilesTable(props: FilesTableProps) {
-	const { folderId, datasetId, foldersFilesInDataset, publicView } = props;
+	const {
+		folderId,
+		datasetId,
+		foldersFilesInDataset,
+		publicView,
+		setCurrPageNum,
+	} = props;
 
 	// use history hook to redirect/navigate between routes
 	const history = useNavigate();
 	// get existing folder
 	const selectFile = (selectedFileId: string | undefined) => {
+		// reset page number to 1
+		setCurrPageNum(1);
 		// Redirect to file route with file Id and dataset id and folderId
 		history(
 			`/files/${selectedFileId}?dataset=${datasetId}&folder=${folderId}&verNum=${selectedFileId}`
 		);
 	};
 	const selectPublicFile = (selectedFileId: string | undefined) => {
+		// reset page number to 1
+		setCurrPageNum(1);
 		// Redirect to file route with file Id and dataset id and folderId
 		history(
 			`/public/files/${selectedFileId}?dataset=${props.datasetId}&folder=${folderId}&verNum=${selectedFileId}`
 		);
 	};
 	const selectFolder = (selectedFolderId: string | undefined) => {
+		// reset page number to 1
+		setCurrPageNum(1);
 		// Redirect to file route with file Id and dataset id
 		history(`/datasets/${datasetId}?folder=${selectedFolderId}`);
 	};
 
 	const selectPublicFolder = (selectedFolderId: string | undefined) => {
+		// reset page number to 1
+		setCurrPageNum(1);
 		// Redirect to file route with file Id and dataset id
 		history(`/public/datasets/${datasetId}?folder=${selectedFolderId}`);
 	};
