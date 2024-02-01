@@ -36,7 +36,7 @@ export const CreateFolder: React.FC<CreateFolderProps> = (
 		folderName: string,
 		parentFolder: string | null
 	) => dispatch(folderAdded(datasetId, folderName, parentFolder));
-	const newFolder = useSelector((state: RootState) => state.folder.newFolder);
+	const newFolder = useSelector((state: RootState) => state.dataset.newFolder);
 
 	const [loading, setLoading] = useState(false);
 	const [name, setName] = useState("");

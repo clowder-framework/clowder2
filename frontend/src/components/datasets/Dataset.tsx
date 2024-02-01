@@ -46,8 +46,6 @@ import { ExtractionHistoryTab } from "../listeners/ExtractionHistoryTab";
 import { SharingTab } from "../sharing/SharingTab";
 import RoleChip from "../auth/RoleChip";
 import { TabStyle } from "../../styles/Styles";
-import { Forbidden } from "../errors/Forbidden";
-import { PageNotFound } from "../errors/PageNotFound";
 import { ErrorModal } from "../errors/ErrorModal";
 import { Visualization } from "../visualizations/Visualization";
 import VisibilityIcon from "@mui/icons-material/Visibility";
@@ -110,8 +108,6 @@ export const Dataset = (): JSX.Element => {
 
 	// Error msg dialog
 	const [errorOpen, setErrorOpen] = useState(false);
-	const [showForbiddenPage, setShowForbiddenPage] = useState(false);
-	const [showNotFoundPage, setShowNotFoundPage] = useState(false);
 
 	const [paths, setPaths] = useState([]);
 
@@ -212,12 +208,6 @@ export const Dataset = (): JSX.Element => {
 		// switch to display mode
 		setEnableAddMetadata(false);
 	};
-
-	if (showForbiddenPage) {
-		return <Forbidden />;
-	} else if (showNotFoundPage) {
-		return <PageNotFound />;
-	}
 
 	return (
 		<Layout>

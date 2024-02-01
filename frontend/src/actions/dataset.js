@@ -102,62 +102,6 @@ export function removeDatasetUserRole(datasetId, username) {
 	};
 }
 
-export const RECEIVE_FILES_IN_DATASET = "RECEIVE_FILES_IN_DATASET";
-
-export function fetchFilesInDataset(datasetId, folderId, skip, limit) {
-	return (dispatch) => {
-		return V2.DatasetsService.getDatasetFilesApiV2DatasetsDatasetIdFilesGet(
-			datasetId,
-			folderId,
-			skip,
-			limit
-		)
-			.then((json) => {
-				dispatch({
-					type: RECEIVE_FILES_IN_DATASET,
-					files: json,
-					receivedAt: Date.now(),
-				});
-			})
-			.catch((reason) => {
-				dispatch(
-					handleErrors(
-						reason,
-						fetchFilesInDataset(datasetId, folderId, skip, limit)
-					)
-				);
-			});
-	};
-}
-
-export const RECEIVE_FOLDERS_IN_DATASET = "RECEIVE_FOLDERS_IN_DATASET";
-
-export function fetchFoldersInDataset(datasetId, parentFolder, skip, limit) {
-	return (dispatch) => {
-		return V2.DatasetsService.getDatasetFoldersApiV2DatasetsDatasetIdFoldersGet(
-			datasetId,
-			parentFolder,
-			skip,
-			limit
-		)
-			.then((json) => {
-				dispatch({
-					type: RECEIVE_FOLDERS_IN_DATASET,
-					folders: json,
-					receivedAt: Date.now(),
-				});
-			})
-			.catch((reason) => {
-				dispatch(
-					handleErrors(
-						reason,
-						fetchFoldersInDataset(datasetId, parentFolder, skip, limit)
-					)
-				);
-			});
-	};
-}
-
 export const RECEIVE_FOLDERS_FILES_IN_DATASET =
 	"RECEIVE_FOLDERS_FILES_IN_DATASET";
 

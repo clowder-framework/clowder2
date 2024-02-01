@@ -26,23 +26,16 @@ import {
 
 import LoadingOverlay from "react-loading-overlay-ts";
 import { UploadFileInputMultiple } from "./UploadFileInputMultiple";
-import { fetchFolderPath } from "../../actions/folder";
-import {
-	fetchDatasetAbout,
-	fetchFilesInDataset,
-	fetchFoldersInDataset,
-} from "../../actions/dataset";
 
 type UploadFileMultipleProps = {
 	selectedDatasetId: string | undefined;
 	folderId: string | undefined;
-	setCreateMultipleFileOpen: any;
 };
 
 export const UploadFileMultiple: React.FC<UploadFileMultipleProps> = (
 	props: UploadFileMultipleProps
 ) => {
-	const { selectedDatasetId, folderId, setCreateMultipleFileOpen } = props;
+	const { selectedDatasetId, folderId } = props;
 	const [selectedFiles, setSelectedFiles] = useState<File[] | null>(null);
 	const [metadataRequestForms, setMetadataRequestForms] = useState({});
 	const [allFilled, setAllFilled] = React.useState<boolean>(false);
@@ -69,23 +62,6 @@ export const UploadFileMultiple: React.FC<UploadFileMultipleProps> = (
 		dispatch(
 			createFilesAction(selectedDatasetId, selectedFiles, selectedFolderId)
 		);
-
-	const getFolderPath = (folderId: string | null) =>
-		dispatch(fetchFolderPath(folderId));
-	const listFilesInDataset = (
-		datasetId: string | undefined,
-		folderId: string | null,
-		skip: number | undefined,
-		limit: number | undefined
-	) => dispatch(fetchFilesInDataset(datasetId, folderId, skip, limit));
-	const listFoldersInDataset = (
-		datasetId: string | undefined,
-		parentFolder: string | null,
-		skip: number | undefined,
-		limit: number | undefined
-	) => dispatch(fetchFoldersInDataset(datasetId, parentFolder, skip, limit));
-	const listDatasetAbout = (datasetId: string | undefined) =>
-		dispatch(fetchDatasetAbout(datasetId));
 
 	const newFiles = useSelector((state: RootState) => state.dataset.newFiles);
 	const metadataDefinitionList = useSelector(
@@ -150,15 +126,6 @@ export const UploadFileMultiple: React.FC<UploadFileMultipleProps> = (
 	};
 	const handleBack = () => {
 		setActiveStep((prevActiveStep) => prevActiveStep - 1);
-	};
-
-	// finish button post dataset; dataset ID triggers metadata posting
-	const handleFinish = () => {
-		// Triggers spinner
-		setLoading(true);
-
-		// create dataset
-		uploadFiles(selectedDatasetId, selectedFiles, folderId);
 	};
 
 	const handleFinishMultiple = () => {

@@ -4,7 +4,6 @@ import {
 	RECEIVE_DATASET_ABOUT,
 	RECEIVE_DATASET_ROLES,
 	RECEIVE_DATASETS,
-	RECEIVE_FILES_IN_DATASET,
 	RECEIVE_FOLDERS_FILES_IN_DATASET,
 	REMOVE_DATASET_GROUP_ROLE,
 	REMOVE_DATASET_USER_ROLE,
@@ -35,19 +34,20 @@ import {
 	PageMetadata,
 	UserOut,
 } from "../openapi/v2";
+import { FOLDER_ADDED, FOLDER_DELETED } from "../actions/folder";
 
 const defaultState: DatasetState = {
 	foldersAndFiles: <Paged>{
 		metadata: <PageMetadata>{},
 		data: <FileOut | FolderOut[]>[],
 	},
-	files: <Paged>{ metadata: <PageMetadata>{}, data: <FileOut[]>[] },
 	about: <Dataset>{ creator: <UserOut>{} },
 	datasetRole: <AuthorizationBase>{},
 	datasets: <Paged>{ metadata: <PageMetadata>{}, data: <Dataset[]>[] },
 	newDataset: <Dataset>{},
 	newFile: <FileOut>{},
 	newFiles: <FileOut[]>[],
+	newFolder: <FolderOut>{},
 	roles: <DatasetRoles>{},
 };
 
@@ -57,16 +57,8 @@ const dataset = (state = defaultState, action: DataAction) => {
 			return Object.assign({}, state, {
 				foldersAndFiles: action.foldersAndFiles,
 			});
-		case RECEIVE_FILES_IN_DATASET:
-			return Object.assign({}, state, { files: action.files });
 		case DELETE_FILE:
 			return Object.assign({}, state, {
-				files: {
-					...state.files,
-					data: state.files.data.filter(
-						(file: FileOut) => file.id !== action.file.id
-					),
-				},
 				foldersAndFiles: {
 					...state.foldersAndFiles,
 					data: state.foldersAndFiles.data.filter(
@@ -96,12 +88,6 @@ const dataset = (state = defaultState, action: DataAction) => {
 			return Object.assign({}, state, {});
 		case UPDATE_FILE:
 			return Object.assign({}, state, {
-				files: {
-					...state.files,
-					data: state.files.data.map((file: FileOut) =>
-						file.id === action.file.id ? action.file : file
-					),
-				},
 				foldersAndFiles: {
 					...state.foldersAndFiles,
 					data: state.foldersAndFiles.data.map((item: FileOut | FolderOut) =>
@@ -132,6 +118,18 @@ const dataset = (state = defaultState, action: DataAction) => {
 					),
 				},
 			});
+		case FOLDER_DELETED:
+			return Object.assign({}, state, {
+				foldersAndFiles: {
+					...state.foldersAndFiles,
+					data: state.foldersAndFiles.data.filter(
+						(item: FileOut | FolderOut) => item.id !== action.folder.id
+					),
+				},
+			});
+		case FOLDER_ADDED:
+			return Object.assign({}, state, { newFolder: action.folder });
+
 		default:
 			return state;
 	}

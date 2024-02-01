@@ -119,9 +119,11 @@ export interface Thumbnail {
 export interface DatasetState {
 	foldersAndFiles: Paged;
 	files: Paged;
+	folders: Paged;
 	datasets: Paged;
 	newDataset: DatasetOut;
 	newFile: FileOut;
+	newFolder: FolderOut;
 	newFiles: FileOut[];
 	about: DatasetOut;
 	datasetRole: AuthorizationBase;
