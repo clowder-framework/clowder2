@@ -37,11 +37,9 @@ def _get_page_query(
                 "data": [
                     {
                         "$sort": {
-                            sort_field: (
-                                SortDirection.ASCENDING
-                                if ascending
-                                else SortDirection.DESCENDING
-                            )
+                            sort_field: SortDirection.ASCENDING
+                            if ascending
+                            else SortDirection.DESCENDING
                         }
                     },
                     {"$skip": skip},
