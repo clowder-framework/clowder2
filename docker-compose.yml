@@ -53,6 +53,9 @@ services:
       API_HOST: ${API_HOST:-http://localhost}
       elasticsearch_url: http://elasticsearch:9200
       auth_base: http://localhost
+      auth_realm: clowder
+      auth_client_id: clowder2-backend
+      auth_redirect_uri: http://localhost:80/api/v2/auth
       auth_url: http://localhost/keycloak/realms/clowder/protocol/openid-connect/auth?client_id=clowder2-backend&response_type=code
       oauth2_scheme_auth_url: http://keycloak:8080/keycloak/realms/clowder/protocol/openid-connect/auth?client_id=clowder2-backend&response_type=code
       auth_register_url: http://localhost/keycloak/realms/clowder/protocol/openid-connect/registrations?client_id=clowder2-backend&response_type=code
