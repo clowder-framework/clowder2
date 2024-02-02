@@ -3,18 +3,16 @@ import { Box, Button, ButtonGroup, Grid, Tab, Tabs } from "@mui/material";
 
 import { RootState } from "../types/data";
 import { useDispatch, useSelector } from "react-redux";
-import {fetchPublicDatasets} from "../actions/public_dataset";
+import { fetchPublicDatasets } from "../actions/public_dataset";
 
 import { a11yProps, TabPanel } from "./tabs/TabComponent";
 import PublicDatasetCard from "./datasets/PublicDatasetCard";
 import { ArrowBack, ArrowForward } from "@material-ui/icons";
 import PublicLayout from "./PublicLayout";
-import Layout from "./Layout";
-
-import { Link as RouterLink } from "react-router-dom";
 import { Listeners } from "./listeners/Listeners";
 import { ErrorModal } from "./errors/ErrorModal";
-import {fetchDatasets} from "../actions/dataset";
+import { fetchDatasets } from "../actions/dataset";
+import config from "../app.config";
 
 const tab = {
 	fontStyle: "normal",
@@ -28,7 +26,7 @@ export const Public = (): JSX.Element => {
 	const dispatch = useDispatch();
 	const [skip, setSkip] = useState<number | undefined>();
 
-	const [limit] = useState<number>(21);
+	const [limit] = useState<number>(config.defaultDatasetPerPage);
 	// TODO add switch to turn on and off "mine" dataset
 	const [mine] = useState<boolean>(false);
 	const listPublicDatasets = (
@@ -44,21 +42,23 @@ export const Public = (): JSX.Element => {
 	const datasetState = useSelector((state: RootState) => state.dataset);
 	const datasets = useSelector((state: RootState) => state.dataset.datasets);
 
-
-	const currrentPublicDatasetState = useSelector((state: RootState) => state.publicDataset);
-	const public_datasets = useSelector((state: RootState) => state.publicDataset.public_datasets);
+	const currrentPublicDatasetState = useSelector(
+		(state: RootState) => state.publicDataset
+	);
+	const public_datasets = useSelector(
+		(state: RootState) => state.publicDataset.public_datasets
+	);
 	const [currPageNum, setCurrPageNum] = useState<number>(0);
 	const [prevDisabled, setPrevDisabled] = useState<boolean>(true);
 	const [nextDisabled, setNextDisabled] = useState<boolean>(false);
 	const [selectedTabIndex, setSelectedTabIndex] = useState(0);
 	const [errorOpen, setErrorOpen] = useState(false);
 
-
 	useEffect(() => {
 		listDatasets(0, limit, mine);
 	}, []);
 
-	useEffect( () => {
+	useEffect(() => {
 		listPublicDatasets(0, limit);
 	}, []);
 
@@ -77,7 +77,7 @@ export const Public = (): JSX.Element => {
 		setSelectedTabIndex(newTabIndex);
 	};
 
-		// for pagination keep flipping until the return dataset is less than the limit
+	// for pagination keep flipping until the return dataset is less than the limit
 	const previous = () => {
 		if (currPageNum - 1 >= 0) {
 			setSkip((currPageNum - 1) * limit);
@@ -98,7 +98,6 @@ export const Public = (): JSX.Element => {
 		}
 	}, [skip]);
 
-
 	return (
 		<PublicLayout>
 			{/*Error Message dialogue*/}
@@ -118,7 +117,7 @@ export const Public = (): JSX.Element => {
 					</Box>
 					<TabPanel value={selectedTabIndex} index={0}>
 						<Grid container spacing={2}>
-							{public_datasets !== undefined ?  (
+							{public_datasets !== undefined ? (
 								public_datasets.map((dataset) => {
 									return (
 										<Grid item key={dataset.id} xs={12} sm={6} md={4} lg={3}>
@@ -160,7 +159,7 @@ export const Public = (): JSX.Element => {
 									</Button>
 								</ButtonGroup>
 							</Box>
-						): (
+						) : (
 							<></>
 						)}
 					</TabPanel>

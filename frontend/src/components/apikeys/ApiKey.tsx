@@ -21,6 +21,7 @@ import { parseDate } from "../../utils/common";
 import { ActionModal } from "../dialog/ActionModal";
 import VpnKeyIcon from "@mui/icons-material/VpnKey";
 import { CreateApiKeyModal } from "./CreateApiKeyModal";
+import config from "../../app.config";
 
 export function ApiKeys() {
 	// Redux connect equivalent
@@ -36,7 +37,7 @@ export function ApiKeys() {
 
 	// TODO add option to determine limit number; default show 5 tokens each time
 	const [currPageNum, setCurrPageNum] = useState<number>(1);
-	const [limit] = useState<number>(5);
+	const [limit] = useState<number>(config.defaultApikeyPerPage);
 	const [selectedApikey, setSelectApikey] = useState("");
 	const [deleteApikeyConfirmOpen, setDeleteApikeyConfirmOpen] = useState(false);
 	const [createApiKeyModalOpen, setCreateApiKeyModalOpen] = useState(false);
