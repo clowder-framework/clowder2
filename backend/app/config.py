@@ -5,7 +5,7 @@ from pydantic import BaseSettings, AnyHttpUrl
 
 class Settings(BaseSettings):
     APP_NAME: str = "Clowder"
-    API_HOST: str = "http://127.0.0.1:8000"
+    API_HOST: str = "http://localhost:8000"
     API_V2_STR: str = "/api/v2"
     admin_email: str = "devnull@ncsa.illinois.edu"
     frontend_url: str = "http://localhost:3000"
