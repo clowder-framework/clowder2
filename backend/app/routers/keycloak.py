@@ -37,7 +37,7 @@ async def login() -> RedirectResponse:
         keycloak_openid.auth_url(
             redirect_uri=settings.auth_redirect_uri,
             scope="openid email",
-            state=token_urlsafe(32) 
+            state=token_urlsafe(32),
         )
     )
 
