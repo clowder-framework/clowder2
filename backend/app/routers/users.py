@@ -8,7 +8,7 @@ from itsdangerous.url_safe import URLSafeSerializer
 
 from app.config import settings
 from app.keycloak_auth import get_current_username
-from app.models.pages import Paged, _get_page_query, PageMetadata
+from app.models.pages import Paged, _get_page_query, _construct_page_metadata
 from app.models.users import (
     UserDB,
     UserOut,
@@ -39,12 +39,7 @@ async def get_user_api_keys(
         )
         .to_list()
     )
-    if len(apikeys_and_count[0]["metadata"]) > 0:
-        page_metadata = PageMetadata(
-            **apikeys_and_count[0]["metadata"][0], skip=skip, limit=limit
-        )
-    else:
-        page_metadata = PageMetadata(skip=skip, limit=limit)
+    page_metadata = _construct_page_metadata(apikeys_and_count, skip, limit)
     page = Paged(
         metadata=page_metadata,
         data=[
@@ -105,12 +100,7 @@ async def get_users(skip: int = 0, limit: int = 2):
     users_and_count = await UserDB.aggregate(
         [_get_page_query(skip, limit, sort_field="email", ascending=True)],
     ).to_list()
-    if len(users_and_count[0]["metadata"]) > 0:
-        page_metadata = PageMetadata(
-            **users_and_count[0]["metadata"][0], skip=skip, limit=limit
-        )
-    else:
-        page_metadata = PageMetadata(skip=skip, limit=limit)
+    page_metadata = _construct_page_metadata(users_and_count, skip, limit)
     page = Paged(
         metadata=page_metadata,
         data=[
@@ -139,12 +129,7 @@ async def search_users(
         )
         .to_list()
     )
-    if len(users_and_count[0]["metadata"]) > 0:
-        page_metadata = PageMetadata(
-            **users_and_count[0]["metadata"][0], skip=skip, limit=limit
-        )
-    else:
-        page_metadata = PageMetadata(skip=skip, limit=limit)
+    page_metadata = _construct_page_metadata(users_and_count, skip, limit)
     page = Paged(
         metadata=page_metadata,
         data=[
@@ -170,12 +155,7 @@ async def search_users(
         )
         .to_list()
     )
-    if len(users_and_count[0]["metadata"]) > 0:
-        page_metadata = PageMetadata(
-            **users_and_count[0]["metadata"][0], skip=skip, limit=limit
-        )
-    else:
-        page_metadata = PageMetadata(skip=skip, limit=limit)
+    page_metadata = _construct_page_metadata(users_and_count, skip, limit)
     page = Paged(
         metadata=page_metadata,
         data=[

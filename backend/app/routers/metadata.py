@@ -22,7 +22,7 @@ from app.models.metadata import (
     patch_metadata,
     MetadataDB,
 )
-from app.models.pages import Paged, _get_page_query, PageMetadata
+from app.models.pages import Paged, _get_page_query, _construct_page_metadata
 
 router = APIRouter()
 
@@ -64,12 +64,7 @@ async def get_metadata_definition_list(
         )
         .to_list()
     )
-    if len(mdds_and_count[0]["metadata"]) > 0:
-        page_metadata = PageMetadata(
-            **mdds_and_count[0]["metadata"][0], skip=skip, limit=limit
-        )
-    else:
-        page_metadata = PageMetadata(skip=skip, limit=limit)
+    page_metadata = _construct_page_metadata(mdds_and_count, skip, limit)
     page = Paged(
         metadata=page_metadata,
         data=[
@@ -158,12 +153,7 @@ async def search_metadata_definition(
         )
         .to_list()
     )
-    if len(mdds_and_count[0]["metadata"]) > 0:
-        page_metadata = PageMetadata(
-            **mdds_and_count[0]["metadata"][0], skip=skip, limit=limit
-        )
-    else:
-        page_metadata = PageMetadata(skip=skip, limit=limit)
+    page_metadata = _construct_page_metadata(mdds_and_count, skip, limit)
     page = Paged(
         metadata=page_metadata,
         data=[
