@@ -36,7 +36,7 @@ jobs:
           helm repo add ncsa https://opensource.ncsa.illinois.edu/charts
           helm dep build
 
-      - name: get release info
+      - name: Get release info
         id: release_info
         run: |
           version="$(awk '/^version:/ { print $2} ' Chart.yaml)"
@@ -44,8 +44,8 @@ jobs:
           changelog="${changelog//'%'/'%25'}"
           changelog="${changelog//$'\n'/'%0A'}"
           changelog="${changelog//$'\r'/'%0D'}"
-          echo "$version=${$version}" >> $GITHUB_ENV
-          echo "$changelog=${$changelog}" >> $GITHUB_ENV
+          echo "$version=${version}" >> $GITHUB_ENV
+          echo "$changelog=${changelog}" >> $GITHUB_ENV
 
       - name: Print Github Info
         run: |
@@ -70,7 +70,7 @@ jobs:
           chart-folder: "."
           force: true
 
-      - name: create release
+      - name: Create release
         if: github.event_name != 'pull_request' && github.repository == env.MAIN_REPO
         uses: actions/create-release@v1
         id: create_release
