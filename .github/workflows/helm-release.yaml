@@ -1,8 +1,12 @@
 name: Release Helm Charts
 
+env:
+  MAIN_REPO: clowder-framework/clowder2
+  CUSTOM_WORKING_DIRECTORY: deployments/kubernetes/charts/clowder2
+
 defaults:
   run:
-    working-directory: deployments/kubernetes/charts/clowder2
+    working-directory: ${{ env.CUSTOM_WORKING_DIRECTORY }}
 
 on:
   push:
@@ -17,9 +21,6 @@ on:
   release:
     types:
       - 'created'
-
-env:
-  MAIN_REPO: clowder-framework/clowder2
 
 jobs:
   release:
@@ -64,4 +65,5 @@ jobs:
           username: ${{ secrets.HELM_USERNAME }}
           password: ${{ secrets.HELM_PASSWORD }}
           registry-url: "https://opensource.ncsa.illinois.edu/charts"
+          chart-folder: ${{ env.CUSTOM_WORKING_DIRECTORY }}
           force: true
