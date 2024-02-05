@@ -7,7 +7,7 @@ import {
 	fetchFileMetadata,
 	fetchMetadataDefinitions,
 	fetchPublicDatasetMetadata,
-	fetchPublicFileMetadata,
+	fetchPublicFileMetadata, fetchPublicMetadataDefinitions,
 } from "../../actions/metadata";
 import { ListenerMetadataEntry } from "../metadata/ListenerMetadataEntry";
 import Card from "@mui/material/Card";
@@ -41,6 +41,14 @@ export const DisplayListenerMetadata = (props: MetadataType) => {
 	const metadataDefinitionList = useSelector(
 		(state: RootState) => state.metadata.metadataDefinitionList
 	);
+	const getPublicMetadatDefinitions = (
+		name: string | null,
+		skip: number,
+		limit: number
+	) => dispatch(fetchPublicMetadataDefinitions(name, skip, limit));
+	const publicMetadataDefinitionList = useSelector(
+		(state: RootState) => state.metadata.publicMetadataDefinitionList
+	);
 	const listDatasetMetadata = (datasetId: string | undefined) =>
 		dispatch(fetchDatasetMetadata(datasetId));
 	const listFileMetadata = (
@@ -69,7 +77,11 @@ export const DisplayListenerMetadata = (props: MetadataType) => {
 
 
 	useEffect(() => {
-		getMetadatDefinitions(null, 0, 100);
+		if (publicView) {
+			getPublicMetadatDefinitions(null, 0, 100);
+		} else {
+			getMetadatDefinitions(null, 0, 100);
+		}
 	}, []);
 
 	// complete metadata list with both definition and values

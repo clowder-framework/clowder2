@@ -28,7 +28,7 @@ import { EditMetadata } from "../metadata/EditMetadata";
 import { MainBreadcrumbs } from "../navigation/BreadCrumb";
 import {
 	deleteDatasetMetadata as deleteDatasetMetadataAction,
-	fetchDatasetMetadata, fetchMetadataDefinitions,
+	fetchDatasetMetadata, fetchMetadataDefinitions, fetchPublicMetadataDefinitions,
 	patchDatasetMetadata as patchDatasetMetadataAction,
 	postDatasetMetadata,
 } from "../../actions/metadata";
@@ -97,7 +97,7 @@ export const PublicDataset = (): JSX.Element => {
 		dispatch(fetchPublicDatasetAbout(datasetId));
 	const listDatasetMetadata = (datasetId: string | undefined) =>
 		dispatch(fetchDatasetMetadata(datasetId));
-	const getMetadatDefinitions = (name:string|null, skip:number, limit:number) => dispatch(fetchMetadataDefinitions(name, skip,limit));
+	const getMetadatDefinitions = (name:string|null, skip:number, limit:number) => dispatch(fetchPublicMetadataDefinitions(name, skip,limit));
 
 
 	// mapStateToProps
@@ -132,7 +132,7 @@ export const PublicDataset = (): JSX.Element => {
 
 	const foldersInDataset = useSelector((state: RootState) => state.folder.folders);
 	const publicFoldersInDataset = useSelector((state: RootState) => state.folder.publicFolders);
-	const metadataDefinitionList = useSelector((state: RootState) => state.metadata.metadataDefinitionList);
+	const metadataDefinitionList = useSelector((state: RootState) => state.metadata.publicMetadataDefinitionList);
 
 	// component did mount list all files in dataset
 	useEffect(() => {

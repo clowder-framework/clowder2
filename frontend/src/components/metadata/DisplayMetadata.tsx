@@ -69,8 +69,11 @@ export const DisplayMetadata = (props: MetadataType) => {
 	const publicFileMetadataList = useSelector(
 		(state: RootState) => state.metadata.publicFileMetadataList);
 	useEffect(() => {
-		getMetadatDefinitions(null, 0, 100);
-		getPublicMetadatDefinitions(null, 0, 100);
+		if (publicView){
+			getPublicMetadatDefinitions(null, 0, 100);
+		} else {
+			getMetadatDefinitions(null, 0, 100);
+		}
 	}, []);
 
 	// complete metadata list with both definition and values
