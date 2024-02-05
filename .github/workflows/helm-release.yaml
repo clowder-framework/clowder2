@@ -71,26 +71,3 @@ jobs:
           registry-url: "https://opensource.ncsa.illinois.edu/charts"
           chart-folder: "."
           force: true
-
-      - name: Create release
-        if: github.event_name != 'pull_request' && github.repository == env.MAIN_REPO
-        uses: actions/create-release@v1
-        id: create_release
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ env.version }}
-          release_name: Release ${{ env.version }}
-          body: ${{ env.changelog }}
-
-      - name: Upload Release Asset
-        if: github.event_name != 'pull_request' && github.repository == env.MAIN_REPO
-        id: upload-release-asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./incore-${{ env.version }}.tgz
-          asset_name: incore-${{ env.version }}.tgz
-          asset_content_type: application/zip
