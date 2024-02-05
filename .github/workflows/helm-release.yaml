@@ -44,17 +44,17 @@ jobs:
           changelog="${changelog//'%'/'%25'}"
           changelog="${changelog//$'\n'/'%0A'}"
           changelog="${changelog//$'\r'/'%0D'}"
-          echo "::set-output name=version::$version"
-          echo "::set-output name=changelog::$changelog"
-
-      - name: run helm template
-        run: helm template .
+          echo "$version=${$version}" >> $GITHUB_ENV
+          echo "$changelog=${$changelog}" >> $GITHUB_ENV
 
       - name: Print Github Info
         run: |
           echo "github.event_name: ${{ github.event_name }}"
           echo "github.repository: ${{ github.repository }}"
           echo "github.ref: ${{ github.ref }}"
+
+      - name: run helm template
+        run: helm template .
 
       - name: Publish to NCSA OpenSource
         if: |
@@ -77,9 +77,9 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ steps.release_info.outputs.version }}
-          release_name: Release ${{ steps.release_info.outputs.version }}
-          body: ${{ steps.release_info.outputs.changelog }}
+          tag_name: ${{ env.version }}
+          release_name: Release ${{ env.version }}
+          body: ${{ env.changelog }}
 
       - name: Upload Release Asset
         if: github.event_name != 'pull_request' && github.repository == env.MAIN_REPO
@@ -89,6 +89,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./incore-${{ steps.release_info.outputs.version }}.tgz
-          asset_name: incore-${{ steps.release_info.outputs.version }}.tgz
+          asset_path: ./incore-${{ env.version }}.tgz
+          asset_name: incore-${{ env.version }}.tgz
           asset_content_type: application/zip
