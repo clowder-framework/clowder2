@@ -64,5 +64,4 @@ jobs:
           username: ${{ secrets.HELM_USERNAME }}
           password: ${{ secrets.HELM_PASSWORD }}
           registry-url: "https://opensource.ncsa.illinois.edu/charts"
-          chart-folder: "."
           force: true
