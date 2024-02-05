@@ -53,7 +53,8 @@ jobs:
           echo "github.ref: ${{ github.ref }}"
 
       - name: Publish to NCSA OpenSource
-        if: github.event_name != 'pull_request' 
+        if: |
+          github.event_name != 'pull_request' 
           && github.repository == env.MAIN_REPO 
           && startsWith(github.ref, 'refs/tags/') 
           && contains(github.ref, 'v2.0.0')
