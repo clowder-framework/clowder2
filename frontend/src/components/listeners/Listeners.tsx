@@ -76,7 +76,7 @@ export function Listeners(props: ListenerProps) {
 	const labels = useSelector((state: RootState) => state.listener.labels);
 
 	const [currPageNum, setCurrPageNum] = useState<number>(1);
-	const [limit] = useState<number>(20);
+	const [limit] = useState<number>(config.defaultExtractors);
 	const [openSubmitExtraction, setOpenSubmitExtraction] =
 		useState<boolean>(false);
 	const [infoOnly, setInfoOnly] = useState<boolean>(false);

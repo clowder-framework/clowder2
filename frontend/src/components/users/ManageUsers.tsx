@@ -21,10 +21,11 @@ import { ErrorModal } from "../errors/ErrorModal";
 import { GenericSearchBox } from "../search/GenericSearchBox";
 import Gravatar from "react-gravatar";
 import PersonIcon from "@mui/icons-material/Person";
+import config from "../../app.config";
 
 export const ManageUsers = (): JSX.Element => {
 	const [currPageNum, setCurrPageNum] = useState<number>(1);
-	const [limit, setLimit] = useState<number>(5);
+	const [limit, setLimit] = useState<number>(config.defaultUserPerPage);
 	const [errorOpen, setErrorOpen] = useState(false);
 	const [searchTerm, setSearchTerm] = useState<string>("");
 

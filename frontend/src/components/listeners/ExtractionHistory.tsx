@@ -18,6 +18,7 @@ import { ListenerInfo } from "./ListenerInfo";
 import { ExtractionJobs } from "./ExtractionJobs";
 import { ClowderTitle } from "../styledComponents/ClowderTitle";
 import { ErrorModal } from "../errors/ErrorModal";
+import config from "../../app.config";
 
 export const ExtractionHistory = (): JSX.Element => {
 	const dispatch = useDispatch();
@@ -50,7 +51,7 @@ export const ExtractionHistory = (): JSX.Element => {
 
 	const [errorOpen, setErrorOpen] = useState(false);
 	const [currPageNum, setCurrPageNum] = useState<number>(1);
-	const [limit] = useState<number>(20);
+	const [limit] = useState<number>(config.defaultExtractionJobs);
 	const [selectedExtractor, setSelectedExtractor] = useState<Listener>();
 	const [selectedStatus, setSelectedStatus] = useState(null);
 	const [selectedCreatedTime, setSelectedCreatedTime] = useState(null);

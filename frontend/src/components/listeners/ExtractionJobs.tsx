@@ -180,7 +180,7 @@ export const ExtractionJobs = (props) => {
 	const [order, setOrder] = React.useState<Order>("desc");
 	const [orderBy, setOrderBy] = React.useState<keyof Data>("created");
 	const [currPageNum, setCurrPageNum] = React.useState(1);
-	const [limit, setLimit] = React.useState(5);
+	const [limit, setLimit] = React.useState(config.defaultExtractionJobs);
 	const [openExtractorPane, setOpenExtractorPane] = React.useState(false);
 	const [jobId, setJobId] = React.useState("");
 	const [rows, setRows] = useState([]);

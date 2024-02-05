@@ -5,7 +5,7 @@ from pydantic import BaseSettings, AnyHttpUrl
 
 class Settings(BaseSettings):
     APP_NAME: str = "Clowder"
-    API_HOST: str = "http://127.0.0.1:8000"
+    API_HOST: str = "http://localhost:8000"
     API_V2_STR: str = "/api/v2"
     admin_email: str = "devnull@ncsa.illinois.edu"
     frontend_url: str = "http://localhost:3000"
@@ -43,6 +43,7 @@ class Settings(BaseSettings):
     auth_base = "http://localhost:8080"
     auth_realm = "clowder"
     auth_client_id = "clowder2-backend"
+    auth_redirect_uri = f"{API_HOST}{API_V2_STR}/auth"
     auth_url = f"{auth_base}/keycloak/realms/{auth_realm}/protocol/openid-connect/auth?client_id={auth_client_id}&response_type=code"
     oauth2_scheme_auth_url = f"{auth_base}/auth/realms/{auth_realm}/protocol/openid-connect/auth?client_id={auth_client_id}&response_type=code"
     # scope=openid email&redirect_uri=http://<domain.com>/<redirect-path>&kc_locale=<two-digit-lang-code>

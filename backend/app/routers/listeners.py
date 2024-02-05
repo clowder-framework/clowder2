@@ -21,7 +21,7 @@ from app.models.listeners import (
     EventListenerDB,
     EventListenerOut,
 )
-from app.models.pages import Paged, _get_page_query, PageMetadata
+from app.models.pages import Paged, _get_page_query, _construct_page_metadata
 from app.models.search import SearchCriteria
 from app.models.users import UserOut
 from app.routers.feeds import disassociate_listener_db
@@ -222,12 +222,7 @@ async def search_listeners(
         .aggregate(aggregation_pipeline)
         .to_list()
     )
-    if len(listeners_and_count[0]["metadata"]) > 0:
-        page_metadata = PageMetadata(
-            **listeners_and_count[0]["metadata"][0], skip=skip, limit=limit
-        )
-    else:
-        page_metadata = PageMetadata(skip=skip, limit=limit)
+    page_metadata = _construct_page_metadata(listeners_and_count, skip, limit)
     page = Paged(
         metadata=page_metadata,
         data=[
@@ -317,12 +312,7 @@ async def get_listeners(
     listeners_and_count = (
         await EventListenerDB.find().aggregate(aggregation_pipeline).to_list()
     )
-    if len(listeners_and_count[0]["metadata"]) > 0:
-        page_metadata = PageMetadata(
-            **listeners_and_count[0]["metadata"][0], skip=skip, limit=limit
-        )
-    else:
-        page_metadata = PageMetadata(skip=skip, limit=limit)
+    page_metadata = _construct_page_metadata(listeners_and_count, skip, limit)
     page = Paged(
         metadata=page_metadata,
         data=[

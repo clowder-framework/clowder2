@@ -39,6 +39,7 @@ import { TabStyle } from "../../styles/Styles";
 import { ErrorModal } from "../errors/ErrorModal";
 import { Visualization } from "../visualizations/Visualization";
 import VisibilityIcon from "@mui/icons-material/Visibility";
+import config from "../../app.config";
 
 export const PublicDataset = (): JSX.Element => {
 	// path parameter
@@ -90,7 +91,7 @@ export const PublicDataset = (): JSX.Element => {
 	const [errorOpen, setErrorOpen] = useState(false);
 	const [paths, setPaths] = useState([]);
 	const [currPageNum, setCurrPageNum] = useState<number>(1);
-	const [limit] = useState<number>(5);
+	const [limit] = useState<number>(config.defaultFolderFilePerPage);
 
 	// we use the public files here
 	const pageMetadata = useSelector(

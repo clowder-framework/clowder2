@@ -8,8 +8,8 @@ import { fetchPublicDatasets } from "../actions/public_dataset";
 import { a11yProps, TabPanel } from "./tabs/TabComponent";
 import PublicDatasetCard from "./datasets/PublicDatasetCard";
 import PublicLayout from "./PublicLayout";
-import { Listeners } from "./listeners/Listeners";
 import { ErrorModal } from "./errors/ErrorModal";
+import config from "../app.config";
 
 const tab = {
 	fontStyle: "normal",
@@ -35,7 +35,7 @@ export const Public = (): JSX.Element => {
 	);
 
 	const [currPageNum, setCurrPageNum] = useState<number>(1);
-	const [limit] = useState<number>(20);
+	const [limit] = useState<number>(config.defaultDatasetPerPage);
 	const [selectedTabIndex, setSelectedTabIndex] = useState(0);
 	const [errorOpen, setErrorOpen] = useState(false);
 
@@ -71,7 +71,6 @@ export const Public = (): JSX.Element => {
 							aria-label="dashboard tabs"
 						>
 							<Tab sx={tab} label="Datasets" {...a11yProps(0)} />
-							<Tab sx={tab} label="Extractors" {...a11yProps(1)} />
 						</Tabs>
 					</Box>
 					<TabPanel value={selectedTabIndex} index={0}>
@@ -105,9 +104,6 @@ export const Public = (): JSX.Element => {
 								variant="outlined"
 							/>
 						</Box>
-					</TabPanel>
-					<TabPanel value={selectedTabIndex} index={1}>
-						<Listeners />
 					</TabPanel>
 					<TabPanel value={selectedTabIndex} index={4} />
 					<TabPanel value={selectedTabIndex} index={2} />
