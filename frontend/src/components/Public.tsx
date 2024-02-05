@@ -9,9 +9,7 @@ import { a11yProps, TabPanel } from "./tabs/TabComponent";
 import PublicDatasetCard from "./datasets/PublicDatasetCard";
 import { ArrowBack, ArrowForward } from "@material-ui/icons";
 import PublicLayout from "./PublicLayout";
-import { Listeners } from "./listeners/Listeners";
 import { ErrorModal } from "./errors/ErrorModal";
-import { fetchDatasets } from "../actions/dataset";
 import config from "../app.config";
 
 const tab = {
@@ -27,24 +25,11 @@ export const Public = (): JSX.Element => {
 	const [skip, setSkip] = useState<number | undefined>();
 
 	const [limit] = useState<number>(config.defaultDatasetPerPage);
-	// TODO add switch to turn on and off "mine" dataset
-	const [mine] = useState<boolean>(false);
 	const listPublicDatasets = (
 		skip: number | undefined,
 		limit: number | undefined
 	) => dispatch(fetchPublicDatasets(skip, limit));
 
-	const listDatasets = (
-		skip: number | undefined,
-		limit: number | undefined,
-		mine: boolean | undefined
-	) => dispatch(fetchDatasets(skip, limit, mine));
-	const datasetState = useSelector((state: RootState) => state.dataset);
-	const datasets = useSelector((state: RootState) => state.dataset.datasets);
-
-	const currrentPublicDatasetState = useSelector(
-		(state: RootState) => state.publicDataset
-	);
 	const public_datasets = useSelector(
 		(state: RootState) => state.publicDataset.public_datasets
 	);
@@ -53,10 +38,6 @@ export const Public = (): JSX.Element => {
 	const [nextDisabled, setNextDisabled] = useState<boolean>(false);
 	const [selectedTabIndex, setSelectedTabIndex] = useState(0);
 	const [errorOpen, setErrorOpen] = useState(false);
-
-	useEffect(() => {
-		listDatasets(0, limit, mine);
-	}, []);
 
 	useEffect(() => {
 		listPublicDatasets(0, limit);
@@ -112,7 +93,6 @@ export const Public = (): JSX.Element => {
 							aria-label="dashboard tabs"
 						>
 							<Tab sx={tab} label="Datasets" {...a11yProps(0)} />
-							<Tab sx={tab} label="Extractors" {...a11yProps(1)} />
 						</Tabs>
 					</Box>
 					<TabPanel value={selectedTabIndex} index={0}>
@@ -137,7 +117,7 @@ export const Public = (): JSX.Element => {
 								<></>
 							)}
 						</Grid>
-						{datasets.length !== 0 ? (
+						{public_datasets.length !== 0 ? (
 							<Box display="flex" justifyContent="center" sx={{ m: 1 }}>
 								<ButtonGroup
 									variant="contained"
@@ -162,9 +142,6 @@ export const Public = (): JSX.Element => {
 						) : (
 							<></>
 						)}
-					</TabPanel>
-					<TabPanel value={selectedTabIndex} index={1}>
-						<Listeners />
 					</TabPanel>
 					<TabPanel value={selectedTabIndex} index={4} />
 					<TabPanel value={selectedTabIndex} index={2} />
