@@ -7,12 +7,16 @@ defaults:
 on:
   push:
     branches:
-      - main
+      - 'main'
 
-  tags:
-    - '*'
+    tags:
+     - 'v*'
 
   pull_request:
+
+  release:
+    types:
+      - 'created'
 
 env:
   MAIN_REPO: clowder-framework/clowder2
