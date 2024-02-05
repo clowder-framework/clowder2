@@ -6,6 +6,7 @@ import type { DatasetOut } from '../models/DatasetOut';
 import type { FileOut } from '../models/FileOut';
 import type { FolderOut } from '../models/FolderOut';
 import type { MetadataOut } from '../models/MetadataOut';
+import type { Paged } from '../models/Paged';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { request as __request } from '../core/request';
 
@@ -15,13 +16,13 @@ export class PublicDatasetsService {
      * Get Datasets
      * @param skip
      * @param limit
-     * @returns DatasetOut Successful Response
+     * @returns Paged Successful Response
      * @throws ApiError
      */
     public static getDatasetsApiV2PublicDatasetsGet(
         skip?: number,
         limit: number = 10,
-    ): CancelablePromise<Array<DatasetOut>> {
+    ): CancelablePromise<Paged> {
         return __request({
             method: 'GET',
             path: `/api/v2/public_datasets`,
@@ -102,6 +103,35 @@ export class PublicDatasetsService {
             path: `/api/v2/public_datasets/${datasetId}/folders`,
             query: {
                 'parent_folder': parentFolder,
+                'skip': skip,
+                'limit': limit,
+            },
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+
+    /**
+     * Get Dataset Folders And Files
+     * @param datasetId
+     * @param folderId
+     * @param skip
+     * @param limit
+     * @returns Paged Successful Response
+     * @throws ApiError
+     */
+    public static getDatasetFoldersAndFilesApiV2PublicDatasetsDatasetIdFoldersAndFilesGet(
+        datasetId: string,
+        folderId?: string,
+        skip?: number,
+        limit: number = 10,
+    ): CancelablePromise<Paged> {
+        return __request({
+            method: 'GET',
+            path: `/api/v2/public_datasets/${datasetId}/folders_and_files`,
+            query: {
+                'folder_id': folderId,
                 'skip': skip,
                 'limit': limit,
             },

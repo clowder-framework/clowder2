@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import { Box, Button, ButtonGroup, Grid, Tab, Tabs } from "@mui/material";
+import React, { ChangeEvent, useEffect, useState } from "react";
+import { Box, Grid, Pagination, Tab, Tabs } from "@mui/material";
 
 import { RootState } from "../types/data";
 import { useDispatch, useSelector } from "react-redux";
@@ -7,7 +7,6 @@ import { fetchPublicDatasets } from "../actions/public_dataset";
 
 import { a11yProps, TabPanel } from "./tabs/TabComponent";
 import PublicDatasetCard from "./datasets/PublicDatasetCard";
-import { ArrowBack, ArrowForward } from "@material-ui/icons";
 import PublicLayout from "./PublicLayout";
 import { ErrorModal } from "./errors/ErrorModal";
 import config from "../app.config";
@@ -22,33 +21,27 @@ const tab = {
 export const Public = (): JSX.Element => {
 	// Redux connect equivalent
 	const dispatch = useDispatch();
-	const [skip, setSkip] = useState<number | undefined>();
 
-	const [limit] = useState<number>(config.defaultDatasetPerPage);
 	const listPublicDatasets = (
 		skip: number | undefined,
 		limit: number | undefined
 	) => dispatch(fetchPublicDatasets(skip, limit));
 
-	const public_datasets = useSelector(
-		(state: RootState) => state.publicDataset.public_datasets
+	const pageMetadata = useSelector(
+		(state: RootState) => state.publicDataset.publicDatasets.metadata
 	);
-	const [currPageNum, setCurrPageNum] = useState<number>(0);
-	const [prevDisabled, setPrevDisabled] = useState<boolean>(true);
-	const [nextDisabled, setNextDisabled] = useState<boolean>(false);
+	const publicDatasets = useSelector(
+		(state: RootState) => state.publicDataset.publicDatasets.data
+	);
+
+	const [currPageNum, setCurrPageNum] = useState<number>(1);
+	const [limit] = useState<number>(config.defaultDatasetPerPage);
 	const [selectedTabIndex, setSelectedTabIndex] = useState(0);
 	const [errorOpen, setErrorOpen] = useState(false);
 
 	useEffect(() => {
-		listPublicDatasets(0, limit);
+		listPublicDatasets((currPageNum - 1) * limit, limit);
 	}, []);
-
-	// fetch thumbnails from each individual dataset/id calls
-	useEffect(() => {
-		// disable flipping if reaches the last page
-		if (public_datasets.length < limit) setNextDisabled(true);
-		else setNextDisabled(false);
-	}, [public_datasets]);
 
 	// switch tabs
 	const handleTabChange = (
@@ -58,26 +51,11 @@ export const Public = (): JSX.Element => {
 		setSelectedTabIndex(newTabIndex);
 	};
 
-	// for pagination keep flipping until the return dataset is less than the limit
-	const previous = () => {
-		if (currPageNum - 1 >= 0) {
-			setSkip((currPageNum - 1) * limit);
-			setCurrPageNum(currPageNum - 1);
-		}
+	const handlePageChange = (_: ChangeEvent<unknown>, value: number) => {
+		const newSkip = (value - 1) * limit;
+		setCurrPageNum(value);
+		listPublicDatasets(newSkip, limit);
 	};
-	const next = () => {
-		if (public_datasets.length === limit) {
-			setSkip((currPageNum + 1) * limit);
-			setCurrPageNum(currPageNum + 1);
-		}
-	};
-	useEffect(() => {
-		if (skip !== null && skip !== undefined) {
-			listPublicDatasets(skip, limit);
-			if (skip === 0) setPrevDisabled(true);
-			else setPrevDisabled(false);
-		}
-	}, [skip]);
 
 	return (
 		<PublicLayout>
@@ -97,8 +75,8 @@ export const Public = (): JSX.Element => {
 					</Box>
 					<TabPanel value={selectedTabIndex} index={0}>
 						<Grid container spacing={2}>
-							{public_datasets !== undefined ? (
-								public_datasets.map((dataset) => {
+							{publicDatasets !== undefined ? (
+								publicDatasets.map((dataset) => {
 									return (
 										<Grid item key={dataset.id} xs={12} sm={6} md={4} lg={3}>
 											<PublicDatasetCard
@@ -117,31 +95,15 @@ export const Public = (): JSX.Element => {
 								<></>
 							)}
 						</Grid>
-						{public_datasets.length !== 0 ? (
-							<Box display="flex" justifyContent="center" sx={{ m: 1 }}>
-								<ButtonGroup
-									variant="contained"
-									aria-label="previous next buttons"
-								>
-									<Button
-										aria-label="previous"
-										onClick={previous}
-										disabled={prevDisabled}
-									>
-										<ArrowBack /> Prev
-									</Button>
-									<Button
-										aria-label="next"
-										onClick={next}
-										disabled={nextDisabled}
-									>
-										Next <ArrowForward />
-									</Button>
-								</ButtonGroup>
-							</Box>
-						) : (
-							<></>
-						)}
+						<Box display="flex" justifyContent="center" sx={{ m: 1 }}>
+							<Pagination
+								count={Math.ceil(pageMetadata.total_count / limit)}
+								page={currPageNum}
+								onChange={handlePageChange}
+								shape="rounded"
+								variant="outlined"
+							/>
+						</Box>
 					</TabPanel>
 					<TabPanel value={selectedTabIndex} index={4} />
 					<TabPanel value={selectedTabIndex} index={2} />

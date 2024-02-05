@@ -113,7 +113,9 @@ export const Dataset = (): JSX.Element => {
 	const [paths, setPaths] = useState([]);
 
 	const [currPageNum, setCurrPageNum] = useState<number>(1);
+
 	const [limit] = useState<number>(config.defaultFolderFilePerPage);
+
 	const pageMetadata = useSelector(
 		(state: RootState) => state.dataset.foldersAndFiles.metadata
 	);
@@ -332,6 +334,7 @@ export const Dataset = (): JSX.Element => {
 							folderId={folderId}
 							foldersFilesInDataset={foldersFilesInDataset}
 							setCurrPageNum={setCurrPageNum}
+							publicView={false}
 						/>
 						<Box display="flex" justifyContent="center" sx={{ m: 1 }}>
 							<Pagination

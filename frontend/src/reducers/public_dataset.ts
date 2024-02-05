@@ -1,8 +1,8 @@
 import {
+	RECEIVE_FILES_IN_PUBLIC_DATASET,
 	RECEIVE_PUBLIC_DATASET_ABOUT,
 	RECEIVE_PUBLIC_DATASETS,
-	RECEIVE_FILES_IN_PUBLIC_DATASET,
-	RECEIVE_FOLDERS_IN_PUBLIC_DATASET
+	RECEIVE_PUBLIC_FOLDERS_FILES_IN_DATASET,
 } from "../actions/public_dataset";
 import { DataAction } from "../types/action";
 import { PublicDatasetState } from "../types/data";
@@ -10,29 +10,43 @@ import {
 	AuthorizationBase,
 	DatasetOut as Dataset,
 	DatasetRoles,
+	FileOut,
 	FileOut as File,
+	FolderOut,
+	Paged,
+	PageMetadata,
 	UserOut,
 } from "../openapi/v2";
 
 const defaultState: PublicDatasetState = {
-	public_files: <File[]>[],
-	public_about: <Dataset>{ creator: <UserOut>{} },
-	public_datasetRole: <AuthorizationBase>{},
-	public_datasets: [],
-	public_newDataset: <Dataset>{},
-	public_newFile: <File>{},
-	public_newFiles: <File[]>[],
-	public_roles: <DatasetRoles>{},
+	publicFiles: <File[]>[],
+	publicAbout: <Dataset>{ creator: <UserOut>{} },
+	publicDatasetRole: <AuthorizationBase>{},
+	publicDatasets: <Paged>{ metadata: <PageMetadata>{}, data: <Dataset[]>[] },
+	publicNewDataset: <Dataset>{},
+	publicNewFile: <File>{},
+	publicNewFiles: <File[]>[],
+	publicRoles: <DatasetRoles>{},
+	publicFoldersAndFiles: <Paged>{
+		metadata: <PageMetadata>{},
+		data: <FileOut | FolderOut[]>[],
+	},
 };
 
 const publicDataset = (state = defaultState, action: DataAction) => {
 	switch (action.type) {
+		case RECEIVE_PUBLIC_FOLDERS_FILES_IN_DATASET:
+			return Object.assign({}, state, {
+				publicFoldersAndFiles: action.publicFoldersAndFiles,
+			});
 		case RECEIVE_FILES_IN_PUBLIC_DATASET:
-			return Object.assign({}, state, { public_files: action.public_files });
+			return Object.assign({}, state, { publicFiles: action.publicFiles });
 		case RECEIVE_PUBLIC_DATASET_ABOUT:
-			return Object.assign({}, state, { public_about: action.public_about });
+			return Object.assign({}, state, { publicAbout: action.publicAbout });
 		case RECEIVE_PUBLIC_DATASETS:
-			return Object.assign({}, state, { public_datasets: action.public_datasets });
+			return Object.assign({}, state, {
+				publicDatasets: action.publicDatasets,
+			});
 		default:
 			return state;
 	}

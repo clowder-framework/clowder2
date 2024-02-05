@@ -71,17 +71,17 @@ interface RECEIVE_DATASETS {
 
 interface RECEIVE_PUBLIC_DATASETS {
 	type: "RECEIVE_PUBLIC_DATASETS";
-	public_datasets: Dataset[];
+	publicDatasets: Dataset[];
 }
 
 interface RECEIVE_PUBLIC_DATASET_ABOUT {
 	type: "RECEIVE_PUBLIC_DATASET_ABOUT";
-	public_about: Dataset;
+	publicAbout: Dataset;
 }
 
 interface RECEIVE_FILES_IN_PUBLIC_DATASET {
 	type: "RECEIVE_FILES_IN_PUBLIC_DATASET";
-	public_files: FileSummary[];
+	publicFiles: FileSummary[];
 }
 
 interface DELETE_DATASET {
@@ -602,6 +602,11 @@ interface RECEIVE_FOLDERS_FILES_IN_DATASET {
 	foldersAndFiles: Paged;
 }
 
+interface RECEIVE_PUBLIC_FOLDERS_FILES_IN_DATASET {
+	type: "RECEIVE_PUBLIC_FOLDERS_FILES_IN_DATASET";
+	publicFoldersAndFiles: Paged;
+}
+
 export type DataAction =
 	| GET_ADMIN_MODE_STATUS
 	| TOGGLE_ADMIN_MODE
@@ -715,4 +720,5 @@ export type DataAction =
 	| DOWNLOAD_PUBLIC_VIS_DATA
 	| GET_PUBLIC_VIS_DATA_PRESIGNED_URL
 	| RESET_PUBLIC_VIS_DATA_PRESIGNED_URL
-	| RECEIVE_FOLDERS_FILES_IN_DATASET;
+	| RECEIVE_FOLDERS_FILES_IN_DATASET
+	| RECEIVE_PUBLIC_FOLDERS_FILES_IN_DATASET;
