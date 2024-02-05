@@ -1,0 +1,81 @@
+name: Release Helm Charts
+
+defaults:
+  run:
+    working-directory: deployments/kubernetes/charts/clowder2
+
+#on:
+#  push:
+#    branches:
+#      - main
+#
+#  pull_request:
+
+on:
+  workflow_dispatch:
+
+env:
+  MAIN_REPO: clowder-framework/clowder2
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Get dependencies
+        run: |
+          helm repo add bitnami https://raw.githubusercontent.com/bitnami/charts/archive-full-index/bitnami
+          helm repo add keycloak https://codecentric.github.io/helm-charts
+          helm repo add ncsa https://opensource.ncsa.illinois.edu/charts
+          helm dep build
+
+      - name: get release info
+        id: release_info
+        run: |
+          version="$(awk '/^version:/ { print $2} ' Chart.yaml)"
+          changelog="$(sed -e "1,/^### ${version}/d" -e "/^###/,\$d" -e '/^$/d' README.md)"
+          changelog="${changelog//'%'/'%25'}"
+          changelog="${changelog//$'\n'/'%0A'}"
+          changelog="${changelog//$'\r'/'%0D'}"
+          echo "::set-output name=version::$version"
+          echo "::set-output name=changelog::$changelog"
+
+      - name: run helm template
+        run: helm template .
+
+      - name: Publish to NCSA OpenSource
+        if: github.event_name != 'pull_request' && github.repository == env.MAIN_REPO
+        uses: bsord/helm-push@v4.1.0
+        with:
+          username: ${{ secrets.HELM_USERNAME }}
+          password: ${{ secrets.HELM_PASSWORD }}
+          registry-url: "https://opensource.ncsa.illinois.edu/charts"
+          chart-folder: "."
+          force: true
+
+      - name: create release
+        if: github.event_name != 'pull_request' && github.repository == env.MAIN_REPO
+        uses: actions/create-release@v1
+        id: create_release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ steps.release_info.outputs.version }}
+          release_name: Release ${{ steps.release_info.outputs.version }}
+          body: ${{ steps.release_info.outputs.changelog }}
+
+      - name: Upload Release Asset
+        if: github.event_name != 'pull_request' && github.repository == env.MAIN_REPO
+        id: upload-release-asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./incore-${{ steps.release_info.outputs.version }}.tgz
+          asset_name: incore-${{ steps.release_info.outputs.version }}.tgz
+          asset_content_type: application/zip
