@@ -46,8 +46,8 @@ jobs:
           changelog="${changelog//$'\r'/'%0D'}"
           echo "version=${version}" >> $GITHUB_ENV
           echo "changelog=${changelog}" >> $GITHUB_ENV
-          echo "version: ${{ env.version }}"
-          echo "changelog: ${{ env.changelog }}"
+          echo "version: ${version}"
+          echo "changelog: ${changelog}"
 
       - name: Print Github Info
         run: |
