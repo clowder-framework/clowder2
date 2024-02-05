@@ -122,7 +122,8 @@ minio:
     size: 20Gi
 
     # where to store data, can be network storage
-    #storageClass: nfs-taiga
+    storageClass: nfs-taiga
+
   service:
     type: ClusterIP
 
@@ -171,7 +172,7 @@ rabbitmq:
 
   persistence:
     # pick fast storage
-    #storageClass: csi-cinder-sc-retain
+    storageClass: csi-cinder-sc-retain
 
 # ----------------------------------------------------------------------
 # DEFAULT EXTRACTOR SERVICES
