@@ -59,11 +59,6 @@ jobs:
         run: helm template .
 
       - name: Publish to NCSA OpenSource
-        if: |
-          github.event_name != 'pull_request' 
-          && github.repository == env.MAIN_REPO 
-          && startsWith(github.ref, 'refs/tags/') 
-          && contains(github.ref, 'v2.0.0')
         uses: bsord/helm-push@v4.1.0
         with:
           username: ${{ secrets.HELM_USERNAME }}
