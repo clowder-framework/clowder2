@@ -44,8 +44,8 @@ jobs:
           changelog="${changelog//'%'/'%25'}"
           changelog="${changelog//$'\n'/'%0A'}"
           changelog="${changelog//$'\r'/'%0D'}"
-          echo "$version=${version}" >> $GITHUB_ENV
-          echo "$changelog=${changelog}" >> $GITHUB_ENV
+          echo "version=${version}" >> $GITHUB_ENV
+          echo "changelog=${changelog}" >> $GITHUB_ENV
 
       - name: Print Github Info
         run: |
