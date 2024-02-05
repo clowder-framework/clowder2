@@ -112,9 +112,8 @@ export const Dataset = (): JSX.Element => {
 
 	const [paths, setPaths] = useState([]);
 
-	// TODO add option to determine limit number; default show 20 files each time
 	const [currPageNum, setCurrPageNum] = useState<number>(1);
-	const [limit] = useState<number>(config.defaultDatasetPerPage);
+	const [limit] = useState<number>(config.defaultFolderFilePerPage);
 	const pageMetadata = useSelector(
 		(state: RootState) => state.dataset.foldersAndFiles.metadata
 	);
