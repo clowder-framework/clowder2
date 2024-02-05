@@ -12,7 +12,6 @@ import PublicLayout from "./PublicLayout";
 import Layout from "./Layout";
 
 import { Link as RouterLink } from "react-router-dom";
-import { Listeners } from "./listeners/Listeners";
 import { ErrorModal } from "./errors/ErrorModal";
 import {fetchDatasets} from "../actions/dataset";
 
@@ -35,12 +34,7 @@ export const Public = (): JSX.Element => {
 		skip: number | undefined,
 		limit: number | undefined
 	) => dispatch(fetchPublicDatasets(skip, limit));
-
-	const listDatasets = (
-		skip: number | undefined,
-		limit: number | undefined,
-		mine: boolean | undefined
-	) => dispatch(fetchDatasets(skip, limit, mine));
+	
 	const datasetState = useSelector((state: RootState) => state.dataset);
 	const datasets = useSelector((state: RootState) => state.dataset.datasets);
 
@@ -53,10 +47,6 @@ export const Public = (): JSX.Element => {
 	const [selectedTabIndex, setSelectedTabIndex] = useState(0);
 	const [errorOpen, setErrorOpen] = useState(false);
 
-
-	useEffect(() => {
-		listDatasets(0, limit, mine);
-	}, []);
 
 	useEffect( () => {
 		listPublicDatasets(0, limit);
@@ -113,7 +103,6 @@ export const Public = (): JSX.Element => {
 							aria-label="dashboard tabs"
 						>
 							<Tab sx={tab} label="Datasets" {...a11yProps(0)} />
-							<Tab sx={tab} label="Extractors" {...a11yProps(1)} />
 						</Tabs>
 					</Box>
 					<TabPanel value={selectedTabIndex} index={0}>
@@ -163,9 +152,6 @@ export const Public = (): JSX.Element => {
 						): (
 							<></>
 						)}
-					</TabPanel>
-					<TabPanel value={selectedTabIndex} index={1}>
-						<Listeners />
 					</TabPanel>
 					<TabPanel value={selectedTabIndex} index={4} />
 					<TabPanel value={selectedTabIndex} index={2} />
