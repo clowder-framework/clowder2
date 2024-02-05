@@ -16,7 +16,14 @@ import ListItem from "@mui/material/ListItem";
 import ListItemButton from "@mui/material/ListItemButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
-import { Link, Menu, MenuItem, MenuList, Typography } from "@mui/material";
+import {
+	Badge,
+	Link,
+	Menu,
+	MenuItem,
+	MenuList,
+	Typography,
+} from "@mui/material";
 import { Link as RouterLink, useLocation } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../types/data";
@@ -37,6 +44,7 @@ import {
 } from "../actions/user";
 import { AdminPanelSettings } from "@mui/icons-material";
 import ManageAccountsIcon from "@mui/icons-material/ManageAccounts";
+import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
 
 const drawerWidth = 240;
 
@@ -202,18 +210,46 @@ export default function PersistentDrawerLeft(props) {
 								color="inherit"
 							>
 								{getCurrEmail() !== undefined ? (
-									<Gravatar
-										email={getCurrEmail()}
-										rating="g"
-										style={{
-											width: "32px",
-											height: "32px",
-											borderRadius: "50%",
-											verticalAlign: "middle",
-										}}
-									/>
+									<Badge
+										overlap="circular"
+										anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+										badgeContent={
+											adminMode ? (
+												<AdminPanelSettingsIcon
+													sx={{ color: theme.palette.primary.main }}
+												/>
+											) : (
+												<></>
+											)
+										}
+									>
+										<Gravatar
+											email={getCurrEmail()}
+											rating="g"
+											style={{
+												width: "32px",
+												height: "32px",
+												borderRadius: "50%",
+												verticalAlign: "middle",
+											}}
+										/>
+									</Badge>
 								) : (
-									<PersonIcon sx={{ verticalAlign: "middle" }} />
+									<Badge
+										overlap="circular"
+										anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+										badgeContent={
+											adminMode ? (
+												<AdminPanelSettingsIcon
+													sx={{ color: theme.palette.primary.main }}
+												/>
+											) : (
+												<></>
+											)
+										}
+									>
+										<PersonIcon sx={{ verticalAlign: "middle" }} />
+									</Badge>
 								)}
 							</IconButton>
 						)}

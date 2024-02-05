@@ -4,6 +4,7 @@ import { metadataConfig } from "../../metadata.config";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../types/data";
 import { fetchMetadataDefinitions } from "../../actions/metadata";
+import {theme} from "../../theme";
 
 type MetadataType = {
 	setMetadata: any;
@@ -14,7 +15,7 @@ This is the interface when create new dataset and new files
 Uses only registered metadata definition to populate the form
  */
 export const CreateMetadata = (props: MetadataType) => {
-	const { setMetadata } = props;
+	const { setMetadata, sourceItem } = props;
 
 	const dispatch = useDispatch();
 	const getMetadatDefinitions = (
@@ -35,14 +36,18 @@ export const CreateMetadata = (props: MetadataType) => {
 
 	return (
 		<>
-			{metadataDefinitionList.map((metadata, idx) => {
+			{metadataDefinitionList.filter((metadata) => {
+				// Add your condition here to filter the metadataDefinitionList
+				// For example, you may want to filter based on the sourceItem
 				return (
-					<Box className="inputGroup" key={idx}>
+					(sourceItem === "datasets" && metadata.required_for_items.datasets) ||
+      (sourceItem === "files" && metadata.required_for_items.files)
+				);
+			}).map((metadata, idx) => {
+				return (
+					<Box className="inputGroup" key={idx} >
 						<Typography variant="h6">
-							{metadata.name}{" "}
-							{metadata.fields.some((field) => field.required) && (
-								<span>*</span>
-							)}
+							{metadata.name}<span>*</span>
 						</Typography>
 						<Typography variant="subtitle2">{metadata.description}</Typography>
 						{metadata.fields.map((field, idxx) => {
@@ -58,7 +63,7 @@ export const CreateMetadata = (props: MetadataType) => {
 									initialReadOnly: false,
 									isRequired: field.required,
 									datasetRole: datasetRole,
-									key: idxx,
+									key: idxx
 								}
 							);
 						})}
@@ -66,5 +71,6 @@ export const CreateMetadata = (props: MetadataType) => {
 				);
 			})}
 		</>
-	);
+	)
+	;
 };

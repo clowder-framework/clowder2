@@ -1,5 +1,29 @@
 import { handleErrors } from "./common";
 import { V2 } from "../openapi";
+export const RECEIVE_PUBLIC_METADATA_DEFINITIONS = "RECEIVE_PUBLIC_METADATA_DEFINITIONS";
+
+export function fetchPublicMetadataDefinitions(name, skip, limit) {
+	return (dispatch) => {
+		return V2.PublicMetadataService.getMetadataDefinitionListApiV2PublicMetadataDefinitionGet(
+			name,
+			skip,
+			limit
+		)
+			.then((json) => {
+				dispatch({
+					type: RECEIVE_PUBLIC_METADATA_DEFINITIONS,
+					publicMetadataDefinitionList: json,
+					receivedAt: Date.now(),
+				});
+			})
+			.catch((reason) => {
+				dispatch(
+					handleErrors(reason, fetchPublicMetadataDefinitions(name, skip, limit))
+				);
+			});
+	};
+}
+
 
 export const RECEIVE_METADATA_DEFINITIONS = "RECEIVE_METADATA_DEFINITIONS";
 
@@ -143,6 +167,26 @@ export function fetchDatasetMetadata(datasetId) {
 	};
 }
 
+export const RECEIVE_PUBLIC_DATASET_METADATA = "RECEIVE_PUBLIC_DATASET_METADATA";
+
+export function fetchPublicDatasetMetadata(datasetId) {
+	return (dispatch) => {
+		return V2.PublicDatasetsService.getDatasetMetadataApiV2PublicDatasetsDatasetIdMetadataGet(
+			datasetId
+		)
+			.then((json) => {
+				dispatch({
+					type: RECEIVE_PUBLIC_DATASET_METADATA,
+					publicDatasetMetadataList: json,
+					receivedAt: Date.now(),
+				});
+			})
+			.catch((reason) => {
+				dispatch(handleErrors(reason, fetchPublicDatasetMetadata(datasetId)));
+			});
+	};
+}
+
 export const RECEIVE_FILE_METADATA = "RECEIVE_FILE_METADATA";
 
 export function fetchFileMetadata(fileId, version) {
@@ -161,6 +205,28 @@ export function fetchFileMetadata(fileId, version) {
 			})
 			.catch((reason) => {
 				dispatch(handleErrors(reason, fetchFileMetadata(fileId, version)));
+			});
+	};
+}
+
+export const RECEIVE_PUBLIC_FILE_METADATA = "RECEIVE_PUBLIC_FILE_METADATA";
+
+export function fetchPublicFileMetadata(fileId, version) {
+	return (dispatch) => {
+		return V2.PublicFilesService.getFileMetadataApiV2PublicFilesFileIdMetadataGet(
+			fileId,
+			version,
+			false
+		)
+			.then((json) => {
+				dispatch({
+					type: RECEIVE_PUBLIC_FILE_METADATA,
+					publicFileMetadataList: json,
+					receivedAt: Date.now(),
+				});
+			})
+			.catch((reason) => {
+				dispatch(handleErrors(reason, fetchPublicFileMetadata(fileId, version)));
 			});
 	};
 }

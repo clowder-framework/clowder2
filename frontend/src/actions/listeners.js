@@ -8,7 +8,8 @@ export function fetchListeners(
 	limit = 21,
 	heartbeatInterval = 0,
 	category = null,
-	label = null
+	label = null,
+	aliveOnly = false
 ) {
 	return (dispatch) => {
 		// TODO: Parameters for dates? paging?
@@ -17,7 +18,8 @@ export function fetchListeners(
 			limit,
 			heartbeatInterval,
 			category,
-			label
+			label,
+			aliveOnly
 		)
 			.then((json) => {
 				dispatch({
@@ -30,7 +32,14 @@ export function fetchListeners(
 				dispatch(
 					handleErrors(
 						reason,
-						fetchListeners(skip, limit, heartbeatInterval, category, label)
+						fetchListeners(
+							skip,
+							limit,
+							heartbeatInterval,
+							category,
+							label,
+							aliveOnly
+						)
 					)
 				);
 			});

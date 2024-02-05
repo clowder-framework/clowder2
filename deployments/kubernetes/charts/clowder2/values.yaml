@@ -1,5 +1,11 @@
 hostname: clowder2.localhost
 
+auth:
+  server: clowder2.localhost/keycloak/
+  realm: clowder
+  clientID: clowder2-backend
+  redirectURI: clowder2.localhost/api/v2/auth
+
 imagePullSecrets: []
 nameOverride: ""
 fullnameOverride: ""

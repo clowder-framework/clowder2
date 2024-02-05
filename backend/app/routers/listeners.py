@@ -91,6 +91,31 @@ async def _check_livelihood(
         return True
 
 
+def _check_livelihood_query(heartbeat_interval=settings.listener_heartbeat_interval):
+    """
+    Return a MongoDB aggregation query to check the livelihood of a listener.
+    This is needed due to the alive field being a computed field.
+    When a user call the /listeners endpoint, the alive field will be computed with the current datetime
+    and compared with heartbeat_interval.
+    """
+    if heartbeat_interval == 0:
+        heartbeat_interval = settings.listener_heartbeat_interval
+
+    # Perform aggregation queries that adds alive flag using the PyMongo syntax
+    aggregated_query = {
+        "$addFields": {
+            "alive": {
+                "$lt": [
+                    {"$subtract": [datetime.datetime.utcnow(), "$lastAlive"]},
+                    heartbeat_interval * 1000,  # convert to milliseconds
+                ]
+            }
+        }
+    }
+
+    return aggregated_query
+
+
 @router.get("/instance")
 async def get_instance_id(
     user=Depends(get_current_user),
@@ -246,33 +271,40 @@ async def get_listeners(
     heartbeat_interval: Optional[int] = settings.listener_heartbeat_interval,
     category: Optional[str] = None,
     label: Optional[str] = None,
+    alive_only: Optional[bool] = False,
 ):
     """Get a list of all Event Listeners in the db.
 
     Arguments:
         skip -- number of initial records to skip (i.e. for pagination)
         limit -- restrict number of records to be returned (i.e. for pagination)
+        heartbeat_interval -- number of seconds after which a listener is considered dead
         category -- filter by category has to be exact match
         label -- filter by label has to be exact match
+        alive_only -- filter by alive status
     """
-    query = []
+    # First compute alive flag for all listeners
+    aggregation_pipeline = [
+        _check_livelihood_query(heartbeat_interval=heartbeat_interval)
+    ]
+
+    # Add filters if applicable
     if category:
-        query.append(EventListenerDB.properties.categories == category)
+        aggregation_pipeline.append({"$match": {"properties.categories": category}})
     if label:
-        query.append(EventListenerDB.properties.default_labels == label)
+        aggregation_pipeline.append({"$match": {"properties.default_labels": label}})
+    if alive_only:
+        aggregation_pipeline.append({"$match": {"alive": True}}),
 
-    # sort by name alphabetically
-    listeners = await EventListenerDB.find(
-        *query, skip=skip, limit=limit, sort=EventListenerDB.name
-    ).to_list()
+    # Sort by name alphabetically and then pagination
+    aggregation_pipeline.append({"$sort": {"name": 1}})
+    aggregation_pipeline.append({"$skip": skip})
+    aggregation_pipeline.append({"$limit": limit})
 
-    # batch return listener statuses for easy consumption
-    listener_response = []
-    for listener in listeners:
-        listener.alive = await _check_livelihood(listener, heartbeat_interval)
-        listener_response.append(listener.dict())
+    # Run aggregate query and return
+    listeners = await EventListenerDB.aggregate(aggregation_pipeline).to_list()
 
-    return listener_response
+    return listeners
 
 
 @router.put("/{listener_id}", response_model=EventListenerOut)
