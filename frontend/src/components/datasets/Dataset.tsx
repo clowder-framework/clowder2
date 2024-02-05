@@ -49,6 +49,7 @@ import { TabStyle } from "../../styles/Styles";
 import { ErrorModal } from "../errors/ErrorModal";
 import { Visualization } from "../visualizations/Visualization";
 import VisibilityIcon from "@mui/icons-material/Visibility";
+import config from "../../app.config";
 
 export const Dataset = (): JSX.Element => {
 	// path parameter
@@ -113,7 +114,7 @@ export const Dataset = (): JSX.Element => {
 
 	// TODO add option to determine limit number; default show 20 files each time
 	const [currPageNum, setCurrPageNum] = useState<number>(1);
-	const [limit] = useState<number>(5);
+	const [limit] = useState<number>(config.defaultDatasetPerPage);
 	const pageMetadata = useSelector(
 		(state: RootState) => state.dataset.foldersAndFiles.metadata
 	);

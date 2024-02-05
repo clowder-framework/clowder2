@@ -11,6 +11,7 @@ import Layout from "./Layout";
 import { Link as RouterLink } from "react-router-dom";
 import { ErrorModal } from "./errors/ErrorModal";
 import { DatasetOut } from "../openapi/v2";
+import config from "../app.config";
 
 const tab = {
 	fontStyle: "normal",
@@ -37,7 +38,7 @@ export const Explore = (): JSX.Element => {
 
 	// TODO add option to determine limit number; default show 12 datasets each time
 	const [currPageNum, setCurrPageNum] = useState<number>(1);
-	const [limit] = useState<number>(12);
+	const [limit] = useState<number>(config.defaultDatasetPerPage);
 	// TODO add switch to turn on and off "mine" dataset
 	const [mine] = useState<boolean>(false);
 	const [selectedTabIndex, setSelectedTabIndex] = useState(0);

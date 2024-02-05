@@ -51,6 +51,7 @@ import { PageNotFound } from "../errors/PageNotFound";
 import { ErrorModal } from "../errors/ErrorModal";
 import { Visualization } from "../visualizations/Visualization";
 import VisibilityIcon from "@mui/icons-material/Visibility";
+import config from "../../app.config";
 
 export const PublicDataset = (): JSX.Element => {
 	// path parameter
@@ -125,7 +126,7 @@ export const PublicDataset = (): JSX.Element => {
 
 	// TODO add option to determine limit number; default show 20 files each time
 	const [currPageNum, setCurrPageNum] = useState<number>(0);
-	const [limit] = useState<number>(10);
+	const [limit] = useState<number>(config.defaultFolderFilePerPage);
 	const [skip, setSkip] = useState<number | undefined>(0);
 	const [prevDisabled, setPrevDisabled] = useState<boolean>(true);
 	const [nextDisabled, setNextDisabled] = useState<boolean>(false);

@@ -28,6 +28,7 @@ import GroupAddIcon from "@mui/icons-material/GroupAdd";
 import { CreateGroup } from "./CreateGroup";
 import { ErrorModal } from "../errors/ErrorModal";
 import { GenericSearchBox } from "../search/GenericSearchBox";
+import config from "../../app.config";
 
 export function Groups() {
 	// Redux connect equivalent
@@ -48,7 +49,7 @@ export function Groups() {
 
 	// TODO add option to determine limit number; default show 5 groups each time
 	const [currPageNum, setCurrPageNum] = useState<number>(1);
-	const [limit] = useState<number>(5);
+	const [limit] = useState<number>(config.defaultGroupPerPage);
 	const [searchTerm, setSearchTerm] = useState<string>("");
 	const [createGroupOpen, setCreateGroupOpen] = useState<boolean>(false);
 	const [errorOpen, setErrorOpen] = useState(false);

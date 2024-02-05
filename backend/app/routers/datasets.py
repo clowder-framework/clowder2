@@ -57,7 +57,7 @@ from app.models.files import (
 from app.models.folder_and_file import FolderFileViewList
 from app.models.folders import FolderOut, FolderIn, FolderDB, FolderDBViewList
 from app.models.metadata import MetadataDB
-from app.models.pages import Paged, PageMetadata, _get_page_query
+from app.models.pages import Paged, _get_page_query, _construct_page_metadata
 from app.models.thumbnails import ThumbnailDB
 from app.models.users import UserOut
 from app.rabbitmq.listeners import submit_dataset_job
@@ -250,14 +250,9 @@ async def get_datasets(
             .to_list()
         )
 
+    page_metadata = _construct_page_metadata(datasets_and_count, skip, limit)
     # TODO have to change _id this way otherwise it won't work
     # TODO need to research if there is other pydantic trick to make it work
-    if len(datasets_and_count[0]["metadata"]) > 0:
-        page_metadata = PageMetadata(
-            **datasets_and_count[0]["metadata"][0], skip=skip, limit=limit
-        )
-    else:
-        page_metadata = PageMetadata(skip=skip, limit=limit)
     page = Paged(
         metadata=page_metadata,
         data=[
@@ -320,12 +315,7 @@ async def get_dataset_files(
             )
             .to_list()
         )
-        if len(files_and_count[0]["metadata"]) > 0:
-            page_metadata = PageMetadata(
-                **files_and_count[0]["metadata"][0], skip=skip, limit=limit
-            )
-        else:
-            page_metadata = PageMetadata(skip=skip, limit=limit)
+        page_metadata = _construct_page_metadata(files_and_count, skip, limit)
         page = Paged(
             metadata=page_metadata,
             data=[
@@ -483,14 +473,7 @@ async def get_dataset_folders(
             .to_list()
         )
 
-        # TODO have to change _id this way otherwise it won't work
-        # TODO need to research if there is other pydantic trick to make it work
-        if len(folders_and_count[0]["metadata"]) > 0:
-            page_metadata = PageMetadata(
-                **folders_and_count[0]["metadata"][0], skip=skip, limit=limit
-            )
-        else:
-            page_metadata = PageMetadata(skip=skip, limit=limit)
+        page_metadata = _construct_page_metadata(folders_and_count, skip, limit)
         page = Paged(
             metadata=page_metadata,
             data=[
@@ -498,7 +481,9 @@ async def get_dataset_folders(
                 for item in folders_and_count[0]["data"]
             ],
         )
-    return page.dict()
+        return page.dict()
+    else:
+        raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
 
 
 @router.get("/{dataset_id}/folders_and_files", response_model=Paged)
@@ -562,12 +547,7 @@ async def get_dataset_folders_and_files(
             )
             .to_list()
         )
-        if len(folders_files_and_count[0]["metadata"]) > 0:
-            page_metadata = PageMetadata(
-                **folders_files_and_count[0]["metadata"][0], skip=skip, limit=limit
-            )
-        else:
-            page_metadata = PageMetadata(skip=skip, limit=limit)
+        page_metadata = _construct_page_metadata(folders_files_and_count, skip, limit)
         page = Paged(
             metadata=page_metadata,
             data=[

@@ -23,7 +23,6 @@ import TableRow from "@mui/material/TableRow";
 import TableCell from "@mui/material/TableCell";
 import TableBody from "@mui/material/TableBody";
 import TableContainer from "@mui/material/TableContainer";
-import InfoIcon from "@mui/icons-material/Info";
 import Layout from "../Layout";
 import { ErrorModal } from "../errors/ErrorModal";
 import { CreateMetadataDefinition } from "./CreateMetadataDefinition";
@@ -32,6 +31,7 @@ import DeleteMetadataDefinitionModal from "./DeleteMetadataDefinitionModal";
 import { Link } from "react-router-dom";
 import { GenericSearchBox } from "../search/GenericSearchBox";
 import { MetadataDefinitionOut } from "../../openapi/v2";
+import config from "../../app.config";
 
 export function MetadataDefinitions() {
 	// Redux connect equivalent
@@ -56,7 +56,7 @@ export function MetadataDefinitions() {
 
 	// TODO add option to determine limit number; default show 5 metadata definitions each time
 	const [currPageNum, setCurrPageNum] = useState<number>(1);
-	const [limit] = useState<number>(5);
+	const [limit] = useState<number>(config.defaultMetadataDefintionPerPage);
 	const [searchTerm, setSearchTerm] = useState<string>("");
 	const [createMetadataDefinitionOpen, setCreateMetadataDefinitionOpen] =
 		useState<boolean>(false);

@@ -10,7 +10,7 @@ from app.deps.authorization_deps import AuthorizationDB, GroupAuthorization
 from app.keycloak_auth import get_current_user, get_user
 from app.models.authorization import RoleType
 from app.models.groups import GroupOut, GroupIn, GroupDB, GroupBase, Member
-from app.models.pages import _get_page_query, PageMetadata, Paged
+from app.models.pages import _get_page_query, Paged, _construct_page_metadata
 from app.models.users import UserOut, UserDB
 from app.routers.authentication import get_admin_mode, get_admin
 
@@ -64,12 +64,7 @@ async def get_groups(
         )
         .to_list()
     )
-    if len(groups_and_count[0]["metadata"]) > 0:
-        page_metadata = PageMetadata(
-            **groups_and_count[0]["metadata"][0], skip=skip, limit=limit
-        )
-    else:
-        page_metadata = PageMetadata(skip=skip, limit=limit)
+    page_metadata = _construct_page_metadata(groups_and_count, skip, limit)
     page = Paged(
         metadata=page_metadata,
         data=[
@@ -117,12 +112,7 @@ async def search_group(
         )
         .to_list()
     )
-    if len(groups_and_count[0]["metadata"]) > 0:
-        page_metadata = PageMetadata(
-            **groups_and_count[0]["metadata"][0], skip=skip, limit=limit
-        )
-    else:
-        page_metadata = PageMetadata(skip=skip, limit=limit)
+    page_metadata = _construct_page_metadata(groups_and_count, skip, limit)
     page = Paged(
         metadata=page_metadata,
         data=[

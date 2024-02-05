@@ -12,7 +12,7 @@ import {
 	RECEIVE_PUBLIC_FILE_METADATA,
 	RECEIVE_PUBLIC_METADATA_DEFINITIONS,
 	RESET_SAVE_METADATA_DEFINITIONS,
-	SAVE_METADATA_DEFINITIONS,
+	SAVE_METADATA_DEFINITION,
 	SEARCH_METADATA_DEFINITIONS,
 	UPDATE_DATASET_METADATA,
 	UPDATE_FILE_METADATA,
@@ -63,7 +63,7 @@ const metadata = (state = defaultState, action: DataAction) => {
 					),
 				},
 			});
-		case SAVE_METADATA_DEFINITIONS:
+		case SAVE_METADATA_DEFINITION:
 			return Object.assign({}, state, {
 				newMetadataDefinition: action.metadataDefinition,
 			});
