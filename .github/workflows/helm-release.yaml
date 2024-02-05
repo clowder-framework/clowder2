@@ -4,15 +4,14 @@ defaults:
   run:
     working-directory: deployments/kubernetes/charts/clowder2
 
-#on:
-#  push:
-#    branches:
-#      - main
-#
-#  pull_request:
-
 on:
-  workflow_dispatch:
+  push:
+    branches:
+      - main
+  tags:
+    - 'v2.0.0*'
+
+  pull_request:
 
 env:
   MAIN_REPO: clowder-framework/clowder2
@@ -47,8 +46,17 @@ jobs:
       - name: run helm template
         run: helm template .
 
+      - name: Print Github Info
+        run: |
+          echo "github.event_name: ${{ github.event_name }}"
+          echo "github.repository: ${{ github.repository }}"
+          echo "github.ref: ${{ github.ref }}"
+
       - name: Publish to NCSA OpenSource
-        if: github.event_name != 'pull_request' && github.repository == env.MAIN_REPO
+        if: github.event_name != 'pull_request' 
+          && github.repository == env.MAIN_REPO 
+          && startsWith(github.ref, 'refs/tags/') 
+          && contains(github.ref, 'v2.0.0')
         uses: bsord/helm-push@v4.1.0
         with:
           username: ${{ secrets.HELM_USERNAME }}
