@@ -27,6 +27,7 @@ import { CREATE_GROUP, DELETE_GROUP } from "../actions/group";
 import { RECEIVE_FILE_PRESIGNED_URL } from "../actions/file";
 import { GET_VIS_DATA_PRESIGNED_URL } from "../actions/visualization";
 import { GET_PUBLIC_VIS_DATA_PRESIGNED_URL } from "../actions/public_visualization";
+import { RECEIVE_FOLDERS_FILES_IN_DATASET } from "../actions/dataset";
 
 interface RECEIVE_FILES_IN_DATASET {
 	type: "RECEIVE_FILES_IN_DATASET";
@@ -596,6 +597,11 @@ interface RESET_PUBLIC_VIS_DATA_PRESIGNED_URL {
 	publicPreSignedUrl: string;
 }
 
+interface RECEIVE_FOLDERS_FILES_IN_DATASET {
+	type: "RECEIVE_FOLDERS_FILES_IN_DATASET";
+	foldersAndFiles: Paged;
+}
+
 export type DataAction =
 	| GET_ADMIN_MODE_STATUS
 	| TOGGLE_ADMIN_MODE
@@ -708,4 +714,5 @@ export type DataAction =
 	| GET_PUBLIC_VIS_CONFIG
 	| DOWNLOAD_PUBLIC_VIS_DATA
 	| GET_PUBLIC_VIS_DATA_PRESIGNED_URL
-	| RESET_PUBLIC_VIS_DATA_PRESIGNED_URL;
+	| RESET_PUBLIC_VIS_DATA_PRESIGNED_URL
+	| RECEIVE_FOLDERS_FILES_IN_DATASET;

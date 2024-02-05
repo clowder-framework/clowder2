@@ -13,10 +13,6 @@ import {
 import { useParams, useSearchParams } from "react-router-dom";
 import { RootState } from "../../types/data";
 import { useDispatch, useSelector } from "react-redux";
-import {
-	fetchDatasetAbout,
-	fetchFoldersInDataset,
-} from "../../actions/dataset";
 import { fetchFolderPath } from "../../actions/folder";
 
 import {
@@ -86,12 +82,6 @@ export const PublicDataset = (): JSX.Element => {
 		skip: number | undefined,
 		limit: number | undefined
 	) => dispatch(fetchFilesInPublicDataset(datasetId, folderId, skip, limit));
-	const listFoldersInDataset = (
-		datasetId: string | undefined,
-		parentFolder: string | null,
-		skip: number | undefined,
-		limit: number | undefined
-	) => dispatch(fetchFoldersInDataset(datasetId, parentFolder, skip, limit));
 	const listFoldersInPublicDataset = (
 		datasetId: string | undefined,
 		parentFolder: string | null,
@@ -99,8 +89,6 @@ export const PublicDataset = (): JSX.Element => {
 		limit: number | undefined
 	) =>
 		dispatch(fetchFoldersInPublicDataset(datasetId, parentFolder, skip, limit));
-	const listDatasetAbout = (datasetId: string | undefined) =>
-		dispatch(fetchDatasetAbout(datasetId));
 	const listPublicDatasetAbout = (datasetId: string | undefined) =>
 		dispatch(fetchPublicDatasetAbout(datasetId));
 	const listDatasetMetadata = (datasetId: string | undefined) =>
@@ -143,12 +131,12 @@ export const PublicDataset = (): JSX.Element => {
 	const [prevDisabled, setPrevDisabled] = useState<boolean>(true);
 	const [nextDisabled, setNextDisabled] = useState<boolean>(false);
 	// we use the public files here
-	const filesInDataset = useSelector(
+	const publicFilesInDataset = useSelector(
 		(state: RootState) => state.publicDataset.public_files
 	);
 
-	const foldersInDataset = useSelector(
-		(state: RootState) => state.folder.folders
+	const publicFoldersInDataset = useSelector(
+		(state: RootState) => state.folder.publicFolders
 	);
 
 	// component did mount list all files in dataset
@@ -167,10 +155,13 @@ export const PublicDataset = (): JSX.Element => {
 
 	useEffect(() => {
 		// disable flipping if reaches the last page
-		if (filesInDataset.length < limit && foldersInDataset.length < limit)
+		if (
+			publicFilesInDataset.length < limit &&
+			publicFoldersInDataset.length < limit
+		)
 			setNextDisabled(true);
 		else setNextDisabled(false);
-	}, [filesInDataset]);
+	}, [publicFilesInDataset]);
 
 	useEffect(() => {
 		if (skip !== null && skip !== undefined) {
@@ -214,7 +205,10 @@ export const PublicDataset = (): JSX.Element => {
 		}
 	};
 	const next = () => {
-		if (filesInDataset.length === limit || foldersInDataset.length === limit) {
+		if (
+			publicFilesInDataset.length === limit ||
+			publicFoldersInDataset.length === limit
+		) {
 			setSkip((currPageNum + 1) * limit);
 			setCurrPageNum(currPageNum + 1);
 		}
@@ -356,8 +350,8 @@ export const PublicDataset = (): JSX.Element => {
 						<FilesTable
 							datasetId={datasetId}
 							folderId={folderId}
-							filesInDataset={filesInDataset}
-							foldersInDataset={foldersInDataset}
+							filesInDataset={publicFilesInDataset}
+							foldersInDataset={publicFoldersInDataset}
 							publicView={true}
 						/>
 					</TabPanel>

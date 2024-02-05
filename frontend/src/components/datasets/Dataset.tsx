@@ -15,8 +15,7 @@ import { RootState } from "../../types/data";
 import { useDispatch, useSelector } from "react-redux";
 import {
 	fetchDatasetAbout,
-	fetchFilesInDataset,
-	fetchFoldersInDataset,
+	fetchFoldersFilesInDataset as fetchFoldersFilesInDatasetAction,
 } from "../../actions/dataset";
 import { fetchFolderPath } from "../../actions/folder";
 
@@ -47,8 +46,6 @@ import { ExtractionHistoryTab } from "../listeners/ExtractionHistoryTab";
 import { SharingTab } from "../sharing/SharingTab";
 import RoleChip from "../auth/RoleChip";
 import { TabStyle } from "../../styles/Styles";
-import { Forbidden } from "../errors/Forbidden";
-import { PageNotFound } from "../errors/PageNotFound";
 import { ErrorModal } from "../errors/ErrorModal";
 import { Visualization } from "../visualizations/Visualization";
 import VisibilityIcon from "@mui/icons-material/Visibility";
@@ -77,18 +74,16 @@ export const Dataset = (): JSX.Element => {
 	) => dispatch(deleteDatasetMetadataAction(datasetId, metadata));
 	const getFolderPath = (folderId: string | null) =>
 		dispatch(fetchFolderPath(folderId));
-	const listFilesInDataset = (
+
+	const fetchFoldersFilesInDataset = (
 		datasetId: string | undefined,
 		folderId: string | null,
 		skip: number | undefined,
 		limit: number | undefined
-	) => dispatch(fetchFilesInDataset(datasetId, folderId, skip, limit));
-	const listFoldersInDataset = (
-		datasetId: string | undefined,
-		parentFolder: string | null,
-		skip: number | undefined,
-		limit: number | undefined
-	) => dispatch(fetchFoldersInDataset(datasetId, parentFolder, skip, limit));
+	) =>
+		dispatch(
+			fetchFoldersFilesInDatasetAction(datasetId, folderId, skip, limit)
+		);
 	const listDatasetAbout = (datasetId: string | undefined) =>
 		dispatch(fetchDatasetAbout(datasetId));
 	const listDatasetMetadata = (datasetId: string | undefined) =>
@@ -114,39 +109,29 @@ export const Dataset = (): JSX.Element => {
 
 	// Error msg dialog
 	const [errorOpen, setErrorOpen] = useState(false);
-	const [showForbiddenPage, setShowForbiddenPage] = useState(false);
-	const [showNotFoundPage, setShowNotFoundPage] = useState(false);
 
 	const [paths, setPaths] = useState([]);
 
-	// TODO add option to determine limit number; default show 20 files each time
 	const [currPageNum, setCurrPageNum] = useState<number>(1);
-	const [limit] = useState<number>(config.defaultDatasetPerPage);
+	const [limit] = useState<number>(config.defaultFolderFilePerPage);
 	const pageMetadata = useSelector(
-		(state: RootState) => state.dataset.files.metadata
+		(state: RootState) => state.dataset.foldersAndFiles.metadata
 	);
-	const filesInDataset = useSelector(
-		(state: RootState) => state.dataset.files.data
-	);
-	const foldersInDataset = useSelector(
-		(state: RootState) => state.folder.folders
+	const foldersFilesInDataset = useSelector(
+		(state: RootState) => state.dataset.foldersAndFiles.data
 	);
 	const adminMode = useSelector((state: RootState) => state.user.adminMode);
 
 	useEffect(() => {
-		listFilesInDataset(datasetId, folderId, (currPageNum - 1) * limit, limit);
-		listFoldersInDataset(datasetId, folderId, (currPageNum - 1) * limit, limit);
+		fetchFoldersFilesInDataset(
+			datasetId,
+			folderId,
+			(currPageNum - 1) * limit,
+			limit
+		);
 		listDatasetAbout(datasetId);
 		getFolderPath(folderId);
 		getMetadatDefinitions(null, 0, 100);
-	}, []);
-
-	// component did mount list all files in dataset
-	useEffect(() => {
-		listFilesInDataset(datasetId, folderId, (currPageNum - 1) * limit, limit);
-		listFoldersInDataset(datasetId, folderId, (currPageNum - 1) * limit, limit);
-		listDatasetAbout(datasetId);
-		getFolderPath(folderId);
 	}, [searchParams, adminMode]);
 
 	// for breadcrumb
@@ -183,8 +168,7 @@ export const Dataset = (): JSX.Element => {
 	const handlePageChange = (_: ChangeEvent<unknown>, value: number) => {
 		const newSkip = (value - 1) * limit;
 		setCurrPageNum(value);
-		listFilesInDataset(datasetId, folderId, newSkip, limit);
-		listFoldersInDataset(datasetId, folderId, newSkip, limit);
+		fetchFoldersFilesInDataset(datasetId, folderId, newSkip, limit);
 	};
 
 	const setMetadata = (metadata: any) => {
@@ -224,12 +208,6 @@ export const Dataset = (): JSX.Element => {
 		// switch to display mode
 		setEnableAddMetadata(false);
 	};
-
-	if (showForbiddenPage) {
-		return <Forbidden />;
-	} else if (showNotFoundPage) {
-		return <PageNotFound />;
-	}
 
 	return (
 		<Layout>
@@ -352,8 +330,8 @@ export const Dataset = (): JSX.Element => {
 						<FilesTable
 							datasetId={datasetId}
 							folderId={folderId}
-							filesInDataset={filesInDataset}
-							foldersInDataset={foldersInDataset}
+							foldersFilesInDataset={foldersFilesInDataset}
+							setCurrPageNum={setCurrPageNum}
 						/>
 						<Box display="flex" justifyContent="center" sx={{ m: 1 }}>
 							<Pagination

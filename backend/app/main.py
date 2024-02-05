@@ -15,6 +15,7 @@ from app.models.datasets import DatasetDB, DatasetDBViewList
 from app.models.errors import ErrorDB
 from app.models.feeds import FeedDB
 from app.models.files import FileDB, FileVersionDB, FileDBViewList
+from app.models.folder_and_file import FolderFileViewList
 from app.models.folders import FolderDB, FolderDBViewList
 from app.models.groups import GroupDB
 from app.models.listeners import (
@@ -269,6 +270,7 @@ async def startup_beanie():
             VisualizationConfigDB,
             VisualizationDataDB,
             ThumbnailDB,
+            FolderFileViewList,
         ],
         recreate_views=True,
     )

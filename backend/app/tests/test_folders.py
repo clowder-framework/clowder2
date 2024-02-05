@@ -1,4 +1,5 @@
 from fastapi.testclient import TestClient
+
 from app.config import settings
 from app.tests.utils import create_dataset, create_folder
 
@@ -20,7 +21,7 @@ def test_create_nested(client: TestClient, headers: dict):
         headers=headers,
     )
     assert response.status_code == 200
-    assert len(response.json()) == 1
+    assert len(response.json()["data"]) == 1
 
     # list nested folders
     response = client.get(
@@ -28,4 +29,4 @@ def test_create_nested(client: TestClient, headers: dict):
         headers=headers,
     )
     assert response.status_code == 200
-    assert len(response.json()) == 1
+    assert len(response.json()["data"]) == 1

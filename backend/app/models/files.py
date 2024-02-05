@@ -1,7 +1,7 @@
 from datetime import datetime
-from enum import Enum
-from typing import Optional, List
 from enum import Enum, auto
+from typing import Optional, List
+
 from beanie import Document, View, PydanticObjectId
 from pydantic import Field, BaseModel
 
@@ -86,6 +86,7 @@ class FileDB(Document, FileBase):
     thumbnail_id: Optional[PydanticObjectId] = None
     storage_type: StorageType = StorageType.MINIO
     storage_path: Optional[str]  # store URL or file path depending on storage_type
+    object_type: str = "file"
 
     class Settings:
         name = "files"
