@@ -5,29 +5,34 @@ import {
 	POST_DATASET_METADATA,
 	POST_FILE_METADATA,
 	RECEIVE_DATASET_METADATA,
-	RECEIVE_PUBLIC_DATASET_METADATA,
 	RECEIVE_FILE_METADATA,
-	RECEIVE_PUBLIC_FILE_METADATA,
 	RECEIVE_METADATA_DEFINITION,
 	RECEIVE_METADATA_DEFINITIONS,
+	RECEIVE_PUBLIC_DATASET_METADATA,
+	RECEIVE_PUBLIC_FILE_METADATA,
 	RECEIVE_PUBLIC_METADATA_DEFINITIONS,
-	SAVE_METADATA_DEFINITIONS,
+	RESET_SAVE_METADATA_DEFINITIONS,
+	SAVE_METADATA_DEFINITION,
 	SEARCH_METADATA_DEFINITIONS,
 	UPDATE_DATASET_METADATA,
 	UPDATE_FILE_METADATA,
 } from "../actions/metadata";
 import { DataAction } from "../types/action";
 import { MetadataState } from "../types/data";
-import { MetadataDefinitionOut } from "../openapi/v2/";
+import { MetadataDefinitionOut, Paged, PageMetadata } from "../openapi/v2/";
 
 const defaultState: MetadataState = {
 	datasetMetadataList: [],
 	publicDatasetMetadataList: [],
 	fileMetadataList: [],
+	metadataDefinitionList: <Paged>{
+		metadata: <PageMetadata>{},
+		data: <MetadataDefinitionOut[]>[],
+	},
 	publicFileMetadataList: [],
-	metadataDefinitionList: [],
 	publicMetadataDefinitionList: [],
 	metadataDefinition: <MetadataDefinitionOut>{},
+	newMetadataDefinition: <MetadataDefinitionOut>{},
 };
 
 const metadata = (state = defaultState, action: DataAction) => {
@@ -50,17 +55,21 @@ const metadata = (state = defaultState, action: DataAction) => {
 			});
 		case DELETE_METADATA_DEFINITION:
 			return Object.assign({}, state, {
-				metadataDefinitionList: state.metadataDefinitionList.filter(
-					(metadataDefinition) =>
-						metadataDefinition.id !== action.metadataDefinition.id
-				),
-			});
-		case SAVE_METADATA_DEFINITIONS:
-			return Object.assign({}, state, {
-				metadataDefinitionList: [
-					action.metadataDefinitionList,
+				metadataDefinitionList: {
 					...state.metadataDefinitionList,
-				],
+					data: state.metadataDefinitionList.data.filter(
+						(metadataDefinition: MetadataDefinitionOut) =>
+							metadataDefinition.id !== action.metadataDefinition.id
+					),
+				},
+			});
+		case SAVE_METADATA_DEFINITION:
+			return Object.assign({}, state, {
+				newMetadataDefinition: action.metadataDefinition,
+			});
+		case RESET_SAVE_METADATA_DEFINITIONS:
+			return Object.assign({}, state, {
+				newMetadataDefinition: {},
 			});
 		case RECEIVE_DATASET_METADATA:
 			return Object.assign({}, state, {

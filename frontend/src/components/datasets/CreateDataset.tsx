@@ -47,7 +47,7 @@ export const CreateDataset = (): JSX.Element => {
 	}, []);
 
 	const metadataDefinitionList = useSelector(
-		(state: RootState) => state.metadata.metadataDefinitionList
+		(state: RootState) => state.metadata.metadataDefinitionList.data
 	);
 	const [errorOpen, setErrorOpen] = useState(false);
 
@@ -169,7 +169,10 @@ export const CreateDataset = (): JSX.Element => {
 								<StepLabel>Required Metadata</StepLabel>
 								<StepContent>
 									<Box>
-										<CreateMetadata setMetadata={setMetadata} sourceItem={"datasets"}/>
+										<CreateMetadata
+											setMetadata={setMetadata}
+											sourceItem={"datasets"}
+										/>
 									</Box>
 									{/*buttons*/}
 									<Box sx={{ mb: 2 }}>

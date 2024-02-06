@@ -1,7 +1,5 @@
 import {
 	DOWNLOAD_PUBLIC_FILE,
-	RECEIVE_PUBLIC_FILE_EXTRACTED_METADATA,
-	RECEIVE_PUBLIC_FILE_METADATA_JSONLD,
 	RECEIVE_PUBLIC_FILE_SUMMARY,
 	RECEIVE_PUBLIC_PREVIEWS,
 	RECEIVE_PUBLIC_VERSIONS,
@@ -25,14 +23,6 @@ const publicFile = (state = defaultState, action: DataAction) => {
 	switch (action.type) {
 		case RECEIVE_PUBLIC_FILE_SUMMARY:
 			return Object.assign({}, state, { publicFileSummary: action.publicFileSummary });
-		case RECEIVE_PUBLIC_FILE_EXTRACTED_METADATA:
-			return Object.assign({}, state, {
-				publicExtractedMetadata: action.publicExtractedMetadata,
-			});
-		case RECEIVE_PUBLIC_FILE_METADATA_JSONLD:
-			return Object.assign({}, state, {
-				publicMetadataJsonld: action.publicMetadataJsonld,
-			});
 		case RECEIVE_PUBLIC_PREVIEWS:
 			return Object.assign({}, state, { publicPreviews: action.publicPreviews });
 		case CHANGE_PUBLIC_SELECTED_VERSION:

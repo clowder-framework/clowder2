@@ -1,6 +1,8 @@
 import { handleErrors } from "./common";
 import { V2 } from "../openapi";
-export const RECEIVE_PUBLIC_METADATA_DEFINITIONS = "RECEIVE_PUBLIC_METADATA_DEFINITIONS";
+
+export const RECEIVE_PUBLIC_METADATA_DEFINITIONS =
+	"RECEIVE_PUBLIC_METADATA_DEFINITIONS";
 
 export function fetchPublicMetadataDefinitions(name, skip, limit) {
 	return (dispatch) => {
@@ -18,12 +20,14 @@ export function fetchPublicMetadataDefinitions(name, skip, limit) {
 			})
 			.catch((reason) => {
 				dispatch(
-					handleErrors(reason, fetchPublicMetadataDefinitions(name, skip, limit))
+					handleErrors(
+						reason,
+						fetchPublicMetadataDefinitions(name, skip, limit)
+					)
 				);
 			});
 	};
 }
-
 
 export const RECEIVE_METADATA_DEFINITIONS = "RECEIVE_METADATA_DEFINITIONS";
 
@@ -71,25 +75,37 @@ export function fetchMetadataDefinition(metadataDefinitionId) {
 	};
 }
 
-export const SAVE_METADATA_DEFINITIONS = "SAVE_METADATA_DEFINITIONS";
+export const SAVE_METADATA_DEFINITION = "SAVE_METADATA_DEFINITION";
 
-export function postMetadataDefinitions(metadataDefinition) {
+export function postMetadataDefinition(metadataDefinition) {
 	return (dispatch) => {
 		return V2.MetadataService.saveMetadataDefinitionApiV2MetadataDefinitionPost(
 			metadataDefinition
 		)
 			.then((json) => {
 				dispatch({
-					type: SAVE_METADATA_DEFINITIONS,
-					metadataDefinitionList: json,
+					type: SAVE_METADATA_DEFINITION,
+					metadataDefinition: json,
 					receivedAt: Date.now(),
 				});
 			})
 			.catch((reason) => {
 				dispatch(
-					handleErrors(reason, postMetadataDefinitions(metadataDefinition))
+					handleErrors(reason, postMetadataDefinition(metadataDefinition))
 				);
 			});
+	};
+}
+
+export const RESET_SAVE_METADATA_DEFINITIONS =
+	"RESET_SAVE_METADATA_DEFINITIONS";
+
+export function resetPostMetadataDefinitions() {
+	return (dispatch) => {
+		dispatch({
+			type: RESET_SAVE_METADATA_DEFINITIONS,
+			receivedAt: Date.now(),
+		});
 	};
 }
 
@@ -167,7 +183,8 @@ export function fetchDatasetMetadata(datasetId) {
 	};
 }
 
-export const RECEIVE_PUBLIC_DATASET_METADATA = "RECEIVE_PUBLIC_DATASET_METADATA";
+export const RECEIVE_PUBLIC_DATASET_METADATA =
+	"RECEIVE_PUBLIC_DATASET_METADATA";
 
 export function fetchPublicDatasetMetadata(datasetId) {
 	return (dispatch) => {
@@ -226,7 +243,9 @@ export function fetchPublicFileMetadata(fileId, version) {
 				});
 			})
 			.catch((reason) => {
-				dispatch(handleErrors(reason, fetchPublicFileMetadata(fileId, version)));
+				dispatch(
+					handleErrors(reason, fetchPublicFileMetadata(fileId, version))
+				);
 			});
 	};
 }

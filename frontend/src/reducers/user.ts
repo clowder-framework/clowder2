@@ -13,7 +13,7 @@ import {
 } from "../actions/user";
 import { UserState } from "../types/data";
 import { DataAction } from "../types/action";
-import { UserOut } from "../openapi/v2";
+import { Paged, PageMetadata, UserAPIKeyOut, UserOut } from "../openapi/v2";
 
 const defaultState: UserState = {
 	Authorization: null,
@@ -22,7 +22,7 @@ const defaultState: UserState = {
 	registerSucceeded: false,
 	errorMsg: "",
 	hashedKey: "",
-	apiKeys: [],
+	apiKeys: <Paged>{ metadata: <PageMetadata>{}, data: <UserAPIKeyOut[]>[] },
 	profile: <UserOut>{},
 };
 
@@ -63,9 +63,12 @@ const user = (state = defaultState, action: DataAction) => {
 			return Object.assign({}, state, { apiKeys: action.apiKeys });
 		case DELETE_API_KEY:
 			return Object.assign({}, state, {
-				apiKeys: state.apiKeys.filter(
-					(apikey) => apikey.id !== action.apiKey.id
-				),
+				apiKeys: {
+					...state.apiKeys,
+					data: state.apiKeys.data.filter(
+						(apiKey: UserAPIKeyOut) => apiKey.id !== action.apiKey.id
+					),
+				},
 			});
 		case GENERATE_API_KEY:
 			return Object.assign({}, state, { hashedKey: action.hashedKey });

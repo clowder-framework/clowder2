@@ -3,6 +3,7 @@
 /* eslint-disable */
 import type { EventListenerJobOut } from '../models/EventListenerJobOut';
 import type { EventListenerJobUpdateOut } from '../models/EventListenerJobUpdateOut';
+import type { Paged } from '../models/Paged';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { request as __request } from '../core/request';
 
@@ -28,7 +29,7 @@ export class JobsService {
      * @param created
      * @param skip
      * @param limit
-     * @returns EventListenerJobOut Successful Response
+     * @returns Paged Successful Response
      * @throws ApiError
      */
     public static getAllJobSummaryApiV2JobsGet(
@@ -40,7 +41,7 @@ export class JobsService {
         created?: string,
         skip?: number,
         limit: number = 2,
-    ): CancelablePromise<Array<EventListenerJobOut>> {
+    ): CancelablePromise<Paged> {
         return __request({
             method: 'GET',
             path: `/api/v2/jobs`,

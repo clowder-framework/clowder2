@@ -34,7 +34,7 @@ def test_get_one(client: TestClient, headers: dict):
         f"{settings.API_V2_STR}/datasets/{dataset_id}/files", headers=headers
     )
     assert response.status_code == 200
-    result = response.json()[0]
+    result = response.json().get("data")[0]
     assert result["name"] == temp_name
     assert result["version_num"] == 1
     assert result["dataset_id"] == dataset_id

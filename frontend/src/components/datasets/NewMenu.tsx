@@ -70,12 +70,7 @@ export const NewMenu = (props: ActionsMenuProps): JSX.Element => {
 				maxWidth="lg"
 				aria-labelledby="form-dialog"
 			>
-				<UploadFileMultiple
-					selectedDatasetId={datasetId}
-					selectedDatasetName={about.name}
-					setCreateMultipleFileOpen={setCreateMultipleFileOpen}
-					folderId={folderId}
-				/>
+				<UploadFileMultiple selectedDatasetId={datasetId} folderId={folderId} />
 			</Dialog>
 
 			<CreateFolder

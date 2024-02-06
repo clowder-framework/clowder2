@@ -1,12 +1,11 @@
 from datetime import datetime
-from enum import Enum
-from typing import Optional, List
 from enum import Enum, auto
+from typing import Optional, List
+
 from beanie import Document, View, PydanticObjectId
 from pydantic import Field, BaseModel
 
 from app.models.authorization import AuthorizationDB
-from app.models.pyobjectid import PyObjectId
 from app.models.users import UserOut
 
 
@@ -78,8 +77,8 @@ class FileDB(Document, FileBase):
     created: datetime = Field(default_factory=datetime.utcnow)
     version_id: str = "N/A"
     version_num: int = 0
-    dataset_id: PyObjectId
-    folder_id: Optional[PyObjectId]
+    dataset_id: PydanticObjectId
+    folder_id: Optional[PydanticObjectId]
     views: int = 0
     downloads: int = 0
     bytes: int = 0
@@ -87,6 +86,7 @@ class FileDB(Document, FileBase):
     thumbnail_id: Optional[PydanticObjectId] = None
     storage_type: StorageType = StorageType.MINIO
     storage_path: Optional[str]  # store URL or file path depending on storage_type
+    object_type: str = "file"
 
     class Settings:
         name = "files"
@@ -100,8 +100,8 @@ class FileDBViewList(View, FileBase):
     id: PydanticObjectId = Field(None, alias="_id")  # necessary for Views
     version_id: str = "N/A"
     version_num: int = 0
-    dataset_id: PyObjectId
-    folder_id: Optional[PyObjectId]
+    dataset_id: PydanticObjectId
+    folder_id: Optional[PydanticObjectId]
     creator: UserOut
     created: datetime = Field(default_factory=datetime.utcnow)
     modified: datetime = Field(default_factory=datetime.utcnow)

@@ -8,7 +8,6 @@ from app.models.datasets import DatasetDB, DatasetStatus
 from app.models.files import FileOut, FileDB, FileStatus
 from app.models.groups import GroupOut, GroupDB
 from app.models.metadata import MetadataDB
-from app.models.pyobjectid import PyObjectId
 from app.routers.authentication import get_admin
 from app.routers.authentication import get_admin_mode
 
@@ -52,7 +51,7 @@ async def get_role(
         return RoleType.OWNER
 
     authorization = await AuthorizationDB.find_one(
-        AuthorizationDB.dataset_id == PyObjectId(dataset_id),
+        AuthorizationDB.dataset_id == PydanticObjectId(dataset_id),
         Or(
             AuthorizationDB.creator == current_user,
             AuthorizationDB.user_ids == current_user,
@@ -207,7 +206,7 @@ class Authorization:
 
         # Else check role assigned to the user
         authorization = await AuthorizationDB.find_one(
-            AuthorizationDB.dataset_id == PyObjectId(dataset_id),
+            AuthorizationDB.dataset_id == PydanticObjectId(dataset_id),
             Or(
                 AuthorizationDB.creator == current_user,
                 AuthorizationDB.user_ids == current_user,
