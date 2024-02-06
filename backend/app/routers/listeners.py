@@ -21,6 +21,7 @@ from app.models.listeners import (
     EventListenerDB,
     EventListenerOut,
 )
+from app.models.pages import Paged, _get_page_query, _construct_page_metadata
 from app.models.search import SearchCriteria
 from app.models.users import UserOut
 from app.routers.feeds import disassociate_listener_db
@@ -190,7 +191,7 @@ async def save_legacy_listener(
         return listener.dict()
 
 
-@router.get("/search", response_model=List[EventListenerOut])
+@router.get("/search", response_model=Paged)
 async def search_listeners(
     text: str = "",
     skip: int = 0,
@@ -205,26 +206,31 @@ async def search_listeners(
         skip -- number of initial records to skip (i.e. for pagination)
         limit -- restrict number of records to be returned (i.e. for pagination)
     """
-    # TODO either use regex or index search
-    listeners = (
+    # First compute alive flag for all listeners
+    aggregation_pipeline = [
+        _check_livelihood_query(heartbeat_interval=heartbeat_interval),
+        _get_page_query(skip, limit, sort_field="name", ascending=True),
+    ]
+
+    listeners_and_count = (
         await EventListenerDB.find(
             Or(
                 RegEx(field=EventListenerDB.name, pattern=text),
                 RegEx(field=EventListenerDB.description, pattern=text),
             ),
         )
-        .skip(skip)
-        .limit(limit)
+        .aggregate(aggregation_pipeline)
         .to_list()
     )
-
-    # batch return listener statuses for easy consumption
-    listenerResponse = []
-    for listener in listeners:
-        listener.alive = await _check_livelihood(listener, heartbeat_interval)
-        listenerResponse.append(listener.dict())
-
-    return listenerResponse
+    page_metadata = _construct_page_metadata(listeners_and_count, skip, limit)
+    page = Paged(
+        metadata=page_metadata,
+        data=[
+            EventListenerOut(id=item.pop("_id"), **item)
+            for item in listeners_and_count[0]["data"]
+        ],
+    )
+    return page.dict()
 
 
 @router.get("/categories", response_model=List[str])
@@ -263,7 +269,7 @@ async def check_listener_livelihood(
     raise HTTPException(status_code=404, detail=f"listener {listener_id} not found")
 
 
-@router.get("", response_model=List[EventListenerOut])
+@router.get("", response_model=Paged)
 async def get_listeners(
     user_id=Depends(get_current_username),
     skip: int = 0,
@@ -296,15 +302,25 @@ async def get_listeners(
     if alive_only:
         aggregation_pipeline.append({"$match": {"alive": True}}),
 
-    # Sort by name alphabetically and then pagination
-    aggregation_pipeline.append({"$sort": {"name": 1}})
-    aggregation_pipeline.append({"$skip": skip})
-    aggregation_pipeline.append({"$limit": limit})
+    # Add pagination
+    aggregation_pipeline.append(
+        _get_page_query(skip, limit, sort_field="name", ascending=True)
+    )
 
     # Run aggregate query and return
-    listeners = await EventListenerDB.aggregate(aggregation_pipeline).to_list()
-
-    return listeners
+    # Sort by name alphabetically
+    listeners_and_count = (
+        await EventListenerDB.find().aggregate(aggregation_pipeline).to_list()
+    )
+    page_metadata = _construct_page_metadata(listeners_and_count, skip, limit)
+    page = Paged(
+        metadata=page_metadata,
+        data=[
+            EventListenerOut(id=item.pop("_id"), **item)
+            for item in listeners_and_count[0]["data"]
+        ],
+    )
+    return page.dict()
 
 
 @router.put("/{listener_id}", response_model=EventListenerOut)

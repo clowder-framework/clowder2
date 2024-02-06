@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import List, Optional
+from typing import Optional
 
 from beanie import PydanticObjectId
 from beanie.operators import Or, Push, RegEx
@@ -10,6 +10,7 @@ from app.deps.authorization_deps import AuthorizationDB, GroupAuthorization
 from app.keycloak_auth import get_current_user, get_user
 from app.models.authorization import RoleType
 from app.models.groups import GroupOut, GroupIn, GroupDB, GroupBase, Member
+from app.models.pages import _get_page_query, Paged, _construct_page_metadata
 from app.models.users import UserOut, UserDB
 from app.routers.authentication import get_admin_mode, get_admin
 
@@ -29,7 +30,7 @@ async def save_group(
     return group_db.dict()
 
 
-@router.get("", response_model=List[GroupOut])
+@router.get("", response_model=Paged)
 async def get_groups(
     user_id=Depends(get_user),
     skip: int = 0,
@@ -54,16 +55,26 @@ async def get_groups(
             )
         )
 
-    groups = await GroupDB.find(
-        *criteria_list,
-        sort=(-GroupDB.created),
-        skip=skip,
-        limit=limit,
-    ).to_list()
-    return [group.dict() for group in groups]
+    groups_and_count = (
+        await GroupDB.find(
+            *criteria_list,
+        )
+        .aggregate(
+            [_get_page_query(skip, limit, sort_field="created", ascending=False)],
+        )
+        .to_list()
+    )
+    page_metadata = _construct_page_metadata(groups_and_count, skip, limit)
+    page = Paged(
+        metadata=page_metadata,
+        data=[
+            GroupOut(id=item.pop("_id"), **item) for item in groups_and_count[0]["data"]
+        ],
+    )
+    return page.dict()
 
 
-@router.get("/search/{search_term}", response_model=List[GroupOut])
+@router.get("/search/{search_term}", response_model=Paged)
 async def search_group(
     search_term: str,
     user_id=Depends(get_user),
@@ -92,13 +103,23 @@ async def search_group(
         )
 
     # user has to be the creator or member first; then apply search
-    groups = await GroupDB.find(
-        *criteria_list,
-        skip=skip,
-        limit=limit,
-    ).to_list()
-
-    return [group.dict() for group in groups]
+    groups_and_count = (
+        await GroupDB.find(
+            *criteria_list,
+        )
+        .aggregate(
+            [_get_page_query(skip, limit, sort_field="created", ascending=False)],
+        )
+        .to_list()
+    )
+    page_metadata = _construct_page_metadata(groups_and_count, skip, limit)
+    page = Paged(
+        metadata=page_metadata,
+        data=[
+            GroupOut(id=item.pop("_id"), **item) for item in groups_and_count[0]["data"]
+        ],
+    )
+    return page.dict()
 
 
 @router.get("/{group_id}", response_model=GroupOut)

@@ -62,7 +62,7 @@ export const UploadFile: React.FC<UploadFileProps> = (
 		);
 	const newFile = useSelector((state: RootState) => state.dataset.newFile);
 	const metadataDefinitionList = useSelector(
-		(state: RootState) => state.metadata.metadataDefinitionList
+		(state: RootState) => state.metadata.metadataDefinitionList.data
 	);
 
 	useEffect(() => {
@@ -173,7 +173,10 @@ export const UploadFile: React.FC<UploadFileProps> = (
 						<StepContent TransitionProps={{ unmountOnExit: false }}>
 							<Typography>Provide us the metadata about your file.</Typography>
 							<Box>
-								<CreateMetadata setMetadata={setMetadata} sourceItem={"files"}/>
+								<CreateMetadata
+									setMetadata={setMetadata}
+									sourceItem={"files"}
+								/>
 							</Box>
 							{/*buttons*/}
 							<Grid container>

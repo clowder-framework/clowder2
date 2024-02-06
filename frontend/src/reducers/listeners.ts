@@ -13,12 +13,13 @@ import { SUBMIT_DATASET_EXTRACTION } from "../actions/dataset";
 import { SUBMIT_FILE_EXTRACTION } from "../actions/file";
 import { DataAction } from "../types/action";
 import { ListenerState } from "../types/data";
+import { EventListenerJobOut, Paged, PageMetadata } from "../openapi/v2";
 
 const defaultState: ListenerState = {
-	listeners: [],
+	listeners: <Paged>{ metadata: <PageMetadata>{}, data: <EventListener[]>[] },
 	categories: [],
 	labels: [],
-	jobs: [],
+	jobs: <Paged>{ metadata: <PageMetadata>{}, data: <EventListenerJobOut[]>[] },
 	currJobSummary: [],
 	currJobUpdates: [],
 	currJobId: "",

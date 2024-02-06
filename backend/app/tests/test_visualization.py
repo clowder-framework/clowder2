@@ -30,7 +30,7 @@ def test_visualization(client: TestClient, headers: dict):
         f"{settings.API_V2_STR}/datasets/{dataset_id}/files", headers=headers
     )
     assert response.status_code == 200
-    result = response.json()[0]
+    result = response.json().get("data")[0]
     file_id = result["id"]
 
     # create a visualization_config for the file

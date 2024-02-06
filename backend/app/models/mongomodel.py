@@ -1,9 +1,9 @@
 from typing import Optional
-from datetime import datetime
+
+from beanie import PydanticObjectId
 from bson import ObjectId
 from bson.errors import InvalidId
-from pydantic import BaseModel, BaseConfig, Field
-from app.models.pyobjectid import PyObjectId
+from pydantic import BaseModel
 
 
 class OID(str):
@@ -25,5 +25,5 @@ class OID(str):
 
 class MongoDBRef(BaseModel):
     collection: str
-    resource_id: PyObjectId
+    resource_id: PydanticObjectId
     version: Optional[int]

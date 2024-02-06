@@ -44,7 +44,7 @@ export default function ShareDatasetModal(props: ShareDatasetModalProps) {
 	const [role, setRole] = useState("viewer");
 	const [showSuccessAlert, setShowSuccessAlert] = useState(false);
 	const [options, setOptions] = useState([]);
-	const users = useSelector((state: RootState) => state.group.users);
+	const users = useSelector((state: RootState) => state.group.users.data);
 
 	const setUserRole = async (
 		datasetId: string,

@@ -1,58 +1,43 @@
 // lazy loading
-import React, { useEffect, useState } from "react";
-import {Box, Button, ButtonGroup, Grid, Stack, Tab, Tabs, Typography} from "@mui/material";
+import React, { ChangeEvent, useEffect, useState } from "react";
+import {
+	Box,
+	Grid,
+	Pagination,
+	Stack,
+	Tab,
+	Tabs,
+	Typography,
+} from "@mui/material";
 import { useParams, useSearchParams } from "react-router-dom";
 import { RootState } from "../../types/data";
 import { useDispatch, useSelector } from "react-redux";
-import {
-	fetchDatasetAbout,
-	fetchFilesInDataset,
-	fetchFoldersInDataset,
-} from "../../actions/dataset";
-import { fetchFolderPath } from "../../actions/folder";
-
+import { fetchPublicFolderPath } from "../../actions/folder";
 import {
 	fetchPublicDatasetAbout,
-	fetchFilesInPublicDataset,
-	fetchFoldersInPublicDataset,
+	fetchPublicFoldersFilesInDataset as fetchPublicFoldersFilesInDatasetAction,
 } from "../../actions/public_dataset";
-
-import { fetchPublicFolderPath } from "../../actions/folder";
-
 import { a11yProps, TabPanel } from "../tabs/TabComponent";
 import FilesTable from "../files/FilesTable";
-import { MetadataIn } from "../../openapi/v2";
 import { DisplayMetadata } from "../metadata/DisplayMetadata";
 import { DisplayListenerMetadata } from "../metadata/DisplayListenerMetadata";
-import { EditMetadata } from "../metadata/EditMetadata";
 import { MainBreadcrumbs } from "../navigation/BreadCrumb";
 import {
 	deleteDatasetMetadata as deleteDatasetMetadataAction,
 	fetchDatasetMetadata, fetchMetadataDefinitions, fetchPublicMetadataDefinitions,
 	patchDatasetMetadata as patchDatasetMetadataAction,
-	postDatasetMetadata,
 } from "../../actions/metadata";
-import Layout from "../Layout";
 import PublicLayout from "../PublicLayout";
 import { PublicActionsMenu } from "./PublicActionsMenu";
 import { DatasetDetails } from "./DatasetDetails";
-import {ArrowBack, ArrowForward, FormatListBulleted, InsertDriveFile} from "@material-ui/icons";
+import { FormatListBulleted, InsertDriveFile } from "@material-ui/icons";
 import { Listeners } from "../listeners/Listeners";
 import AssessmentIcon from "@mui/icons-material/Assessment";
-import HistoryIcon from "@mui/icons-material/History";
-import ShareIcon from "@mui/icons-material/Share";
-import BuildIcon from "@mui/icons-material/Build";
-import { ExtractionHistoryTab } from "../listeners/ExtractionHistoryTab";
-import { SharingTab } from "../sharing/SharingTab";
-import RoleChip from "../auth/RoleChip";
 import { TabStyle } from "../../styles/Styles";
-import { Forbidden } from "../errors/Forbidden";
-import { PageNotFound } from "../errors/PageNotFound";
 import { ErrorModal } from "../errors/ErrorModal";
 import { Visualization } from "../visualizations/Visualization";
 import VisibilityIcon from "@mui/icons-material/Visibility";
-import {UserMetadataTabPanel} from "../metadata/UserMetadataTabPanel";
-import {EditMetadataTabPanel} from "../metadata/EditMetadataTabPanel";
+import config from "../../app.config";
 
 export const PublicDataset = (): JSX.Element => {
 	// path parameter
@@ -67,104 +52,72 @@ export const PublicDataset = (): JSX.Element => {
 		datasetId: string | undefined,
 		content: object
 	) => dispatch(patchDatasetMetadataAction(datasetId, content));
-	const createDatasetMetadata = (
-		datasetId: string | undefined,
-		metadata: MetadataIn
-	) => dispatch(postDatasetMetadata(datasetId, metadata));
 	const deleteDatasetMetadata = (
 		datasetId: string | undefined,
 		metadata: object
 	) => dispatch(deleteDatasetMetadataAction(datasetId, metadata));
-	const getFolderPath = (folderId: string | null) =>
-		dispatch(fetchFolderPath(folderId));
-	const listFilesPublicInDataset = (
+	const getPublicFolderPath = (folderId: string | null) =>
+		dispatch(fetchPublicFolderPath(folderId));
+	const fetchPublicFoldersFilesInDataset = (
 		datasetId: string | undefined,
-		folderId: string | null
-		, skip: number | undefined, limit: number | undefined) => dispatch(fetchFilesInPublicDataset(datasetId, folderId, skip, limit));
-	const listFoldersInDataset = (
-		datasetId: string | undefined,
-		parentFolder: string | null,
-		skip: number | undefined, limit: number | undefined
-	) => dispatch(fetchFoldersInDataset(datasetId, parentFolder, skip, limit));
-	const listFoldersInPublicDataset = (
-		datasetId: string | undefined,
-		parentFolder: string | null,
-		skip: number | undefined, limit: number | undefined
-	) => dispatch(fetchFoldersInPublicDataset(datasetId, parentFolder, skip, limit));
-	const listDatasetAbout = (datasetId: string | undefined) =>
-		dispatch(fetchDatasetAbout(datasetId));
+		folderId: string | null,
+		skip: number | undefined,
+		limit: number | undefined
+	) =>
+		dispatch(
+			fetchPublicFoldersFilesInDatasetAction(datasetId, folderId, skip, limit)
+		);
 	const listPublicDatasetAbout = (datasetId: string | undefined) =>
 		dispatch(fetchPublicDatasetAbout(datasetId));
 	const listDatasetMetadata = (datasetId: string | undefined) =>
 		dispatch(fetchDatasetMetadata(datasetId));
-	const getMetadatDefinitions = (name:string|null, skip:number, limit:number) => dispatch(fetchPublicMetadataDefinitions(name, skip,limit));
-
+  const getMetadatDefinitions = (
+		name: string | null,
+		skip: number,
+		limit: number
+	) => dispatch(fetchMetadataDefinitions(name, skip, limit));
 
 	// mapStateToProps
-	const about = useSelector((state: RootState) => state.publicDataset.public_about);
-	// const datasetRole = useSelector(
-	// 	(state: RootState) => state.dataset.datasetRole
-	// );
-	const folderPath = useSelector((state: RootState) => state.folder.publicFolderPath);
+	const about = useSelector(
+		(state: RootState) => state.publicDataset.publicAbout
+	);
+
+	const publicFolderPath = useSelector(
+		(state: RootState) => state.folder.publicFolderPath
+	);
 
 	// state
 	const [selectedTabIndex, setSelectedTabIndex] = useState<number>(0);
-	const [enableAddMetadata, setEnableAddMetadata] =
-		React.useState<boolean>(false);
-	const [metadataRequestForms, setMetadataRequestForms] = useState({});
-
-	const [allowSubmit, setAllowSubmit] = React.useState<boolean>(false);
-	// Error msg dialog
 	const [errorOpen, setErrorOpen] = useState(false);
-	const [showForbiddenPage, setShowForbiddenPage] = useState(false);
-	const [showNotFoundPage, setShowNotFoundPage] = useState(false);
-
 	const [paths, setPaths] = useState([]);
+	const [currPageNum, setCurrPageNum] = useState<number>(1);
+	const [limit] = useState<number>(config.defaultFolderFilePerPage);
 
-	// TODO add option to determine limit number; default show 20 files each time
-	const [currPageNum, setCurrPageNum] = useState<number>(0);
-	const [limit] = useState<number>(10);
-	const [skip, setSkip] = useState<number | undefined>(0);
-	const [prevDisabled, setPrevDisabled] = useState<boolean>(true);
-	const [nextDisabled, setNextDisabled] = useState<boolean>(false);
 	// we use the public files here
 	const filesInDataset = useSelector((state: RootState) => state.publicDataset.public_files);
 
 	const foldersInDataset = useSelector((state: RootState) => state.folder.folders);
 	const publicFoldersInDataset = useSelector((state: RootState) => state.folder.publicFolders);
 	const metadataDefinitionList = useSelector((state: RootState) => state.metadata.publicMetadataDefinitionList);
+	const pageMetadata = useSelector(
+		(state: RootState) => state.publicDataset.publicFoldersAndFiles.metadata
+	);
+	const publicFoldersAndFiles = useSelector(
+		(state: RootState) => state.publicDataset.publicFoldersAndFiles.data
+	);
 
 	// component did mount list all files in dataset
 	useEffect(() => {
-		listFilesPublicInDataset(datasetId, folderId, skip, limit);
-		// listFoldersInDataset(datasetId, folderId, skip, limit);
-		listFoldersInPublicDataset(datasetId, folderId, skip, limit);
-		// listDatasetAbout(datasetId);
+		fetchPublicFoldersFilesInDataset(
+			datasetId,
+			folderId,
+			(currPageNum - 1) * limit,
+			limit
+		);
 		listPublicDatasetAbout(datasetId);
-		getFolderPath(folderId);
-	}, [searchParams]);
-
-	useEffect(() => {
+		getPublicFolderPath(folderId);
 		getMetadatDefinitions(null, 0, 100);
-	}, []);
-
-	useEffect(() => {
-		// disable flipping if reaches the last page
-		if (filesInDataset.length < limit && foldersInDataset.length < limit)
-			setNextDisabled(true);
-		else
-			setNextDisabled(false);
-	}, [filesInDataset]);
-
-	useEffect(() => {
-		if (skip !== null && skip !== undefined) {
-			listFilesPublicInDataset(datasetId, folderId, skip, limit);
-			// listFoldersInDataset(datasetId, folderId, skip, limit);
-			listFoldersInPublicDataset(datasetId, folderId, skip, limit);
-			if (skip === 0) setPrevDisabled(true);
-			else setPrevDisabled(false);
-		}
-	}, [skip]);
+	}, [searchParams]);
 
 	// for breadcrumb
 	useEffect(() => {
@@ -176,8 +129,8 @@ export const PublicDataset = (): JSX.Element => {
 			},
 		];
 
-		if (folderPath != null) {
-			for (const folderBread of folderPath) {
+		if (publicFolderPath != null) {
+			for (const folderBread of publicFolderPath) {
 				tmpPaths.push({
 					name: folderBread["folder_name"],
 					url: `/public_datasets/${datasetId}?folder=${folderBread["folder_id"]}`,
@@ -188,21 +141,7 @@ export const PublicDataset = (): JSX.Element => {
 		}
 
 		setPaths(tmpPaths);
-	}, [about, folderPath]);
-
-		// for pagination keep flipping until the return dataset is less than the limit
-	const previous = () => {
-		if (currPageNum - 1 >= 0) {
-			setSkip((currPageNum - 1) * limit);
-			setCurrPageNum(currPageNum - 1);
-		}
-	};
-	const next = () => {
-		if (filesInDataset.length === limit || foldersInDataset.length === limit) {
-			setSkip((currPageNum + 1) * limit);
-			setCurrPageNum(currPageNum + 1);
-		}
-	};
+	}, [about, publicFolderPath]);
 
 	const handleTabChange = (
 		_event: React.ChangeEvent<{}>,
@@ -211,49 +150,11 @@ export const PublicDataset = (): JSX.Element => {
 		setSelectedTabIndex(newTabIndex);
 	};
 
-	const setMetadata = (metadata: any) => {
-		// TODO wrap this in to a function
-		setMetadataRequestForms((prevState) => {
-			// merge the content field; e.g. lat lon
-			if (metadata.definition in prevState) {
-				const prevContent = prevState[metadata.definition].content;
-				metadata.content = { ...prevContent, ...metadata.content };
-			}
-			return { ...prevState, [metadata.definition]: metadata };
-		});
+	const handlePageChange = (_: ChangeEvent<unknown>, value: number) => {
+		const newSkip = (value - 1) * limit;
+		setCurrPageNum(value);
+		fetchPublicFoldersFilesInDataset(datasetId, folderId, newSkip, limit);
 	};
-
-	const handleMetadataUpdateFinish = () => {
-		Object.keys(metadataRequestForms).map((key) => {
-			if (
-				"id" in metadataRequestForms[key] &&
-				metadataRequestForms[key]["id"] !== undefined &&
-				metadataRequestForms[key]["id"] !== null &&
-				metadataRequestForms[key]["id"] !== ""
-			) {
-				// update existing metadata
-				updateDatasetMetadata(datasetId, metadataRequestForms[key]);
-			} else {
-				// post new metadata if metadata id doesn"t exist
-				createDatasetMetadata(datasetId, metadataRequestForms[key]);
-			}
-		});
-
-		// reset the form
-		setMetadataRequestForms({});
-
-		// pulling lastest from the API endpoint
-		listDatasetMetadata(datasetId);
-
-		// switch to display mode
-		setEnableAddMetadata(false);
-	};
-
-	if (showForbiddenPage) {
-		return <Forbidden />;
-	} else if (showNotFoundPage) {
-		return <PageNotFound />;
-	}
 
 	return (
 		<PublicLayout>
@@ -274,18 +175,12 @@ export const PublicDataset = (): JSX.Element => {
 								{about["name"]}
 							</Typography>
 						</Box>
-						<Box>
-							{/*<RoleChip role={datasetRole.role} />*/}
-						</Box>
+						<Box>{/*<RoleChip role={datasetRole.role} />*/}</Box>
 					</Stack>
 				</Grid>
 				{/*actions*/}
 				<Grid item xs={4} sx={{ display: "flex-top", alignItems: "center" }}>
-					<PublicActionsMenu
-						datasetId={datasetId}
-						folderId={folderId}
-						datasetName={about["name"]}
-					/>
+					<PublicActionsMenu datasetId={datasetId} />
 				</Grid>
 				{/*actions*/}
 			</Grid>
@@ -339,7 +234,22 @@ export const PublicDataset = (): JSX.Element => {
 						) : (
 							<></>
 						)}
-						<FilesTable datasetId={datasetId} folderId={folderId} publicView={true} />
+						<FilesTable
+							datasetId={datasetId}
+							folderId={folderId}
+							foldersFilesInDataset={publicFoldersAndFiles}
+							setCurrPageNum={setCurrPageNum}
+							publicView={true}
+						/>
+						<Box display="flex" justifyContent="center" sx={{ m: 1 }}>
+							<Pagination
+								count={Math.ceil(pageMetadata.total_count / limit)}
+								page={currPageNum}
+								onChange={handlePageChange}
+								shape="rounded"
+								variant="outlined"
+							/>
+						</Box>
 					</TabPanel>
 					<TabPanel value={selectedTabIndex} index={1}>
 						<Visualization datasetId={datasetId} />
@@ -365,30 +275,6 @@ export const PublicDataset = (): JSX.Element => {
 					<TabPanel value={selectedTabIndex} index={4}>
 						<Listeners datasetId={datasetId} />
 					</TabPanel>
-					{/*<TabPanel value={selectedTabIndex} index={6}>*/}
-					{/*	<SharingTab datasetId={datasetId} />*/}
-					{/*</TabPanel>*/}
-					<Box display="flex" justifyContent="center" sx={{ m: 1 }}>
-						<ButtonGroup
-								variant="contained"
-								aria-label="previous next buttons"
-							>
-								<Button
-									aria-label="previous"
-									onClick={previous}
-									disabled={prevDisabled}
-								>
-									<ArrowBack /> Prev
-								</Button>
-								<Button
-									aria-label="next"
-									onClick={next}
-									disabled={nextDisabled}
-								>
-									Next <ArrowForward />
-								</Button>
-						</ButtonGroup>
-					</Box>
 				</Grid>
 				<Grid item>
 					<DatasetDetails details={about} />

@@ -1,7 +1,5 @@
 import { Button, Stack } from "@mui/material";
 import React from "react";
-import { useSelector } from "react-redux";
-import { RootState } from "../../types/data";
 import { Download } from "@mui/icons-material";
 import config from "../../app.config";
 
@@ -10,7 +8,7 @@ type ActionsMenuProps = {
 };
 
 export const PublicActionsMenu = (props: ActionsMenuProps): JSX.Element => {
-	const { datasetId} = props;
+	const { datasetId } = props;
 
 	return (
 		<Stack
@@ -27,7 +25,6 @@ export const PublicActionsMenu = (props: ActionsMenuProps): JSX.Element => {
 			>
 				Download
 			</Button>
-			{/*owner, editor, uploader cannot create new*/}
 		</Stack>
 	);
 };
