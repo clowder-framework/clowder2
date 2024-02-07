@@ -50,6 +50,7 @@ const defaultState: DatasetState = {
 	newFile: <FileOut>{},
 	newFiles: <FileOut[]>[],
 	newFolder: <FolderOut>{},
+	currFolder: <FolderOut>{},
 	roles: <DatasetRoles>{},
 };
 
@@ -140,6 +141,7 @@ const dataset = (state = defaultState, action: DataAction) => {
 						return item;
 					}),
 				},
+				currFolder: action,
 			});
 
 		default:
