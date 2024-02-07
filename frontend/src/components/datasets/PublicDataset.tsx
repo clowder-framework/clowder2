@@ -24,7 +24,7 @@ import { DisplayListenerMetadata } from "../metadata/DisplayListenerMetadata";
 import { MainBreadcrumbs } from "../navigation/BreadCrumb";
 import {
 	deleteDatasetMetadata as deleteDatasetMetadataAction,
-	fetchDatasetMetadata, fetchMetadataDefinitions, fetchPublicMetadataDefinitions,
+	fetchPublicMetadataDefinitions,
 	patchDatasetMetadata as patchDatasetMetadataAction,
 } from "../../actions/metadata";
 import PublicLayout from "../PublicLayout";
@@ -69,9 +69,7 @@ export const PublicDataset = (): JSX.Element => {
 		);
 	const listPublicDatasetAbout = (datasetId: string | undefined) =>
 		dispatch(fetchPublicDatasetAbout(datasetId));
-	const listDatasetMetadata = (datasetId: string | undefined) =>
-		dispatch(fetchDatasetMetadata(datasetId));
-  const getMetadatDefinitions = (
+	const getMetadatDefinitions = (
 		name: string | null,
 		skip: number,
 		limit: number
@@ -93,12 +91,6 @@ export const PublicDataset = (): JSX.Element => {
 	const [currPageNum, setCurrPageNum] = useState<number>(1);
 	const [limit] = useState<number>(config.defaultFolderFilePerPage);
 
-	// we use the public files here
-	const filesInDataset = useSelector((state: RootState) => state.publicDataset.public_files);
-
-	const foldersInDataset = useSelector((state: RootState) => state.folder.folders);
-	const publicFoldersInDataset = useSelector((state: RootState) => state.folder.publicFolders);
-	const metadataDefinitionList = useSelector((state: RootState) => state.metadata.publicMetadataDefinitionList);
 	const pageMetadata = useSelector(
 		(state: RootState) => state.publicDataset.publicFoldersAndFiles.metadata
 	);
