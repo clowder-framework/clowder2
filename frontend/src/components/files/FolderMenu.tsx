@@ -10,7 +10,8 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import { ListItemIcon, ListItemText } from "@mui/material";
 import { MoreHoriz } from "@material-ui/icons";
 import { FolderOut } from "../../openapi/v2";
-import EditIcon from "@mui/icons-material/Edit";
+import { DriveFileRenameOutline } from "@mui/icons-material";
+import EditFolderNameModal from "./EditFolderNameModal";
 
 type FolderMenuProps = {
 	folder: FolderOut;
@@ -31,7 +32,10 @@ export default function FolderMenu(props: FolderMenuProps) {
 	const dispatch = useDispatch();
 	const deleteFolder = (datasetId: string, folderId: string | undefined) =>
 		dispatch(folderDeleted(datasetId, folderId));
+
 	const [confirmationOpen, setConfirmationOpen] = useState(false);
+	const [renameModalOpen, setRenameModalOpen] = useState(false);
+
 	const deleteSelectedFolder = () => {
 		if (folder) {
 			deleteFolder(folder.dataset_id, folder.id);
@@ -39,6 +43,9 @@ export default function FolderMenu(props: FolderMenuProps) {
 		setConfirmationOpen(false);
 	};
 
+	const handleRenameModalClose = () => {
+		setRenameModalOpen(false);
+	};
 	return (
 		<div>
 			<ActionModal
@@ -50,6 +57,12 @@ export default function FolderMenu(props: FolderMenuProps) {
 				handleActionCancel={() => {
 					setConfirmationOpen(false);
 				}}
+			/>
+			<EditFolderNameModal
+				datasetId={folder.dataset_id}
+				folderId={folder.id}
+				handleClose={handleRenameModalClose}
+				open={renameModalOpen}
 			/>
 			<Button
 				id="basic-button"
@@ -84,11 +97,11 @@ export default function FolderMenu(props: FolderMenuProps) {
 				<MenuItem
 					onClick={() => {
 						handleClose();
-						setConfirmationOpen(true);
+						setRenameModalOpen(true);
 					}}
 				>
 					<ListItemIcon>
-						<EditIcon fontSize="small" />
+						<DriveFileRenameOutline fontSize="small" />
 					</ListItemIcon>
 					<ListItemText>Rename</ListItemText>
 				</MenuItem>

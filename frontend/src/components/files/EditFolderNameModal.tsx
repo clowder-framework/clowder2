@@ -13,19 +13,27 @@ import {
 import LoadingOverlay from "react-loading-overlay-ts";
 
 import { useDispatch } from "react-redux";
+import { updateFolder as updateFolderAction } from "../../actions/dataset";
+import { FolderPatch } from "../../openapi/v2";
 
 type EditNameModalProps = {
 	datasetId: string;
-	handleClose: (open: boolean) => void;
+	folderId: string;
+	handleClose: () => void;
 	open: boolean;
 };
 
 export default function EditFolderNameModal(props: EditNameModalProps) {
-	const { datasetId, open, handleClose } = props;
+	const { datasetId, folderId, open, handleClose } = props;
 	const dispatch = useDispatch();
+	const updateFolder = (
+		datasetId: string | undefined,
+		folderId: string | undefined,
+		formData: FolderPatch
+	) => dispatch(updateFolderAction(datasetId, folderId, formData));
 
 	const [loading, setLoading] = useState(false);
-	const [name, setName] = useState(about["name"]);
+	const [name, setName] = useState("");
 
 	const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
 		setName(event.target.value);
@@ -33,23 +41,23 @@ export default function EditFolderNameModal(props: EditNameModalProps) {
 
 	const onSave = async () => {
 		setLoading(true);
-		editDataset(datasetId, { name: name });
+		updateFolder(datasetId, folderId, { name: name });
 		setName("");
 		setLoading(false);
-		handleClose(true);
+		handleClose();
 	};
 
 	return (
 		<Container>
 			<LoadingOverlay active={loading} spinner text="Saving...">
 				<Dialog open={open} onClose={handleClose} fullWidth={true}>
-					<DialogTitle>Rename Dataset</DialogTitle>
+					<DialogTitle>Rename Folder</DialogTitle>
 					<DialogContent>
 						<TextField
 							id="outlined-name"
 							variant="standard"
 							fullWidth
-							defaultValue={about["name"]}
+							defaultValue={""}
 							onChange={handleChange}
 						/>
 					</DialogContent>

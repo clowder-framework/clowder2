@@ -304,7 +304,7 @@ export function updateFolder(datasetId, folderId, formData) {
 		)
 			.then((json) => {
 				dispatch({
-					type: UPDATE_FOLDER,
+					type: FOLDER_UPDATED,
 					folder: json,
 					receivedAt: Date.now(),
 				});
