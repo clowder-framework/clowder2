@@ -61,6 +61,7 @@ export default function FolderMenu(props: FolderMenuProps) {
 			<EditFolderNameModal
 				datasetId={folder.dataset_id}
 				folderId={folder.id}
+				initialFolderName={folder.name}
 				handleClose={handleRenameModalClose}
 				open={renameModalOpen}
 			/>

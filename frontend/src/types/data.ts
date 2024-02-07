@@ -124,6 +124,7 @@ export interface DatasetState {
 	newDataset: DatasetOut;
 	newFile: FileOut;
 	newFolder: FolderOut;
+	currFolder: FolderOut;
 	newFiles: FileOut[];
 	about: DatasetOut;
 	datasetRole: AuthorizationBase;

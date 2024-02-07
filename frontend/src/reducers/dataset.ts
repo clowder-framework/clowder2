@@ -141,7 +141,7 @@ const dataset = (state = defaultState, action: DataAction) => {
 						return item;
 					}),
 				},
-				currFolder: action,
+				currFolder: action.folder,
 			});
 
 		default:
