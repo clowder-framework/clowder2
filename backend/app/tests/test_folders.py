@@ -30,3 +30,20 @@ def test_create_nested(client: TestClient, headers: dict):
     )
     assert response.status_code == 200
     assert len(response.json()["data"]) == 1
+
+
+def test_rename_folder(client: TestClient, headers: dict):
+    dataset_id = create_dataset(client, headers).get("id")
+
+    # create folder
+    folder_id = create_folder(client, headers, dataset_id, "original name").get("id")
+
+    # rename
+    response = client.patch(
+        f"{settings.API_V2_STR}/datasets/{dataset_id}/folders/{folder_id}",
+        json={"name": "edited name"},
+        headers=headers,
+    )
+    assert response.status_code == 200
+    assert response.json().get("id") is not None
+    assert response.json().get("name") == "edited name"

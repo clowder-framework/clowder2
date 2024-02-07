@@ -12,6 +12,11 @@ class FolderBase(BaseModel):
     name: str = "N/A"
 
 
+class FolderPatch(BaseModel):
+    name: Optional[str]
+    parent_folder: Optional[PydanticObjectId]
+
+
 class FolderIn(FolderBase):
     parent_folder: Optional[PydanticObjectId]
 
