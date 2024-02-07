@@ -7,9 +7,10 @@ import {
 	fetchFileMetadata,
 	fetchMetadataDefinitions,
 	fetchPublicDatasetMetadata,
-	fetchPublicFileMetadata, fetchPublicMetadataDefinitions,
+	fetchPublicFileMetadata,
+	fetchPublicMetadataDefinitions,
 } from "../../actions/metadata";
-import { ListenerMetadataEntry } from "../metadata/ListenerMetadataEntry";
+import { ListenerMetadataEntry } from "./ListenerMetadataEntry";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 
@@ -27,14 +28,7 @@ This is the interface displayed already created metadata and allow eidts
 Uses only the list of metadata
 */
 export const DisplayListenerMetadata = (props: MetadataType) => {
-	const {
-		updateMetadata,
-		deleteMetadata,
-		resourceType,
-		resourceId,
-		version,
-		publicView,
-	} = props;
+	const { resourceType, resourceId, version, publicView } = props;
 
 	const dispatch = useDispatch();
 
@@ -43,17 +37,13 @@ export const DisplayListenerMetadata = (props: MetadataType) => {
 		skip: number,
 		limit: number
 	) => dispatch(fetchMetadataDefinitions(name, skip, limit));
-	const metadataDefinitionList = useSelector(
-		(state: RootState) => state.metadata.metadataDefinitionList
-	);
+
 	const getPublicMetadatDefinitions = (
 		name: string | null,
 		skip: number,
 		limit: number
 	) => dispatch(fetchPublicMetadataDefinitions(name, skip, limit));
-	const publicMetadataDefinitionList = useSelector(
-		(state: RootState) => state.metadata.publicMetadataDefinitionList
-	);
+
 	const listDatasetMetadata = (datasetId: string | undefined) =>
 		dispatch(fetchDatasetMetadata(datasetId));
 	const listFileMetadata = (
@@ -116,9 +106,6 @@ export const DisplayListenerMetadata = (props: MetadataType) => {
 					metadataList = publicFileMetadataList;
 				else if (resourceType === "dataset" && publicView)
 					metadataList = publicDatasetMetadataList;
-				let listenerMetadataList = [];
-				let listenerMetadataContent = [];
-
 				return (
 					<Grid container spacing={2}>
 						{metadataList.map((metadata, idx) => {
