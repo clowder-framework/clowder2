@@ -37,6 +37,7 @@ export type { FileOut } from './models/FileOut';
 export type { FileVersion } from './models/FileVersion';
 export type { FolderIn } from './models/FolderIn';
 export type { FolderOut } from './models/FolderOut';
+export type { FolderPatch } from './models/FolderPatch';
 export type { GroupAndRole } from './models/GroupAndRole';
 export type { GroupBase } from './models/GroupBase';
 export type { GroupIn } from './models/GroupIn';

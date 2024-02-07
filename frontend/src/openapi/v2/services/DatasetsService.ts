@@ -11,6 +11,7 @@ import type { DatasetPatch } from '../models/DatasetPatch';
 import type { FileOut } from '../models/FileOut';
 import type { FolderIn } from '../models/FolderIn';
 import type { FolderOut } from '../models/FolderOut';
+import type { FolderPatch } from '../models/FolderPatch';
 import type { LocalFileIn } from '../models/LocalFileIn';
 import type { Paged } from '../models/Paged';
 import type { CancelablePromise } from '../core/CancelablePromise';
@@ -298,6 +299,30 @@ export class DatasetsService {
         return __request({
             method: 'DELETE',
             path: `/api/v2/datasets/${datasetId}/folders/${folderId}`,
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+
+    /**
+     * Patch Folder
+     * @param datasetId
+     * @param folderId
+     * @param requestBody
+     * @returns FolderOut Successful Response
+     * @throws ApiError
+     */
+    public static patchFolderApiV2DatasetsDatasetIdFoldersFolderIdPatch(
+        datasetId: string,
+        folderId: string,
+        requestBody: FolderPatch,
+    ): CancelablePromise<FolderOut> {
+        return __request({
+            method: 'PATCH',
+            path: `/api/v2/datasets/${datasetId}/folders/${folderId}`,
+            body: requestBody,
+            mediaType: 'application/json',
             errors: {
                 422: `Validation Error`,
             },
