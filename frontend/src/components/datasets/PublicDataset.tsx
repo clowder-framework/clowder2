@@ -75,7 +75,7 @@ export const PublicDataset = (): JSX.Element => {
 		name: string | null,
 		skip: number,
 		limit: number
-	) => dispatch(fetchMetadataDefinitions(name, skip, limit));
+	) => dispatch(fetchPublicMetadataDefinitions(name, skip, limit));
 
 	// mapStateToProps
 	const about = useSelector(
