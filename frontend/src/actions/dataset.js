@@ -293,6 +293,30 @@ export function folderAdded(datasetId, folderName, parentFolder = null) {
 	};
 }
 
+export const FOLDER_UPDATED = "FOLDER_UPDATED";
+
+export function updateFolder(datasetId, folderId, formData) {
+	return (dispatch) => {
+		return V2.DatasetsService.patchFolderApiV2DatasetsDatasetIdFoldersFolderIdPatch(
+			datasetId,
+			folderId,
+			formData
+		)
+			.then((json) => {
+				dispatch({
+					type: UPDATE_FOLDER,
+					folder: json,
+					receivedAt: Date.now(),
+				});
+			})
+			.catch((reason) => {
+				dispatch(
+					handleErrors(reason, updateFolder(datasetId, folderId, formData))
+				);
+			});
+	};
+}
+
 export const GET_FOLDER_PATH = "GET_FOLDER_PATH";
 
 export function fetchFolderPath(folderId) {

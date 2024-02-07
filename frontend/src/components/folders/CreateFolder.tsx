@@ -13,7 +13,7 @@ import {
 import LoadingOverlay from "react-loading-overlay-ts";
 
 import { useDispatch, useSelector } from "react-redux";
-import { folderAdded } from "../../actions/folder";
+import { folderAdded } from "../../actions/dataset";
 import { useNavigate } from "react-router-dom";
 import { RootState } from "../../types/data";
 

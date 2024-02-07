@@ -1,6 +1,8 @@
 import {
 	CREATE_DATASET,
 	DELETE_DATASET,
+	FOLDER_ADDED,
+	FOLDER_UPDATED,
 	RECEIVE_DATASET_ABOUT,
 	RECEIVE_DATASET_ROLES,
 	RECEIVE_DATASETS,
@@ -34,7 +36,7 @@ import {
 	PageMetadata,
 	UserOut,
 } from "../openapi/v2";
-import { FOLDER_ADDED, FOLDER_DELETED } from "../actions/folder";
+import { FOLDER_DELETED } from "../actions/folder";
 
 const defaultState: DatasetState = {
 	foldersAndFiles: <Paged>{
@@ -129,6 +131,16 @@ const dataset = (state = defaultState, action: DataAction) => {
 			});
 		case FOLDER_ADDED:
 			return Object.assign({}, state, { newFolder: action.folder });
+		case FOLDER_UPDATED:
+			return Object.assign({}, state, {
+				foldersAndFiles: {
+					...state.foldersAndFiles,
+					data: state.foldersAndFiles.data.map((item: FileOut | FolderOut) => {
+						if (item.id === action.folder.id) return action.folder;
+						return item;
+					}),
+				},
+			});
 
 		default:
 			return state;
