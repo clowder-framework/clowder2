@@ -12,27 +12,30 @@ import {
 
 import LoadingOverlay from "react-loading-overlay-ts";
 
-import { useDispatch, useSelector } from "react-redux";
-import { DatasetIn } from "../../openapi/v2";
-import { updateDataset } from "../../actions/dataset";
-import { RootState } from "../../types/data";
+import { useDispatch } from "react-redux";
+import { updateFolder as updateFolderAction } from "../../actions/dataset";
+import { FolderPatch } from "../../openapi/v2";
 
 type EditNameModalProps = {
 	datasetId: string;
-	handleClose: (open: boolean) => void;
+	folderId: string;
+	initialFolderName: string;
+	handleClose: () => void;
 	open: boolean;
 };
 
-export default function EditNameModal(props: EditNameModalProps) {
-	const { datasetId, open, handleClose } = props;
+export default function EditFolderNameModal(props: EditNameModalProps) {
+	const { datasetId, folderId, initialFolderName, open, handleClose } = props;
 	const dispatch = useDispatch();
-	const editDataset = (datasetId: string | undefined, formData: DatasetIn) =>
-		dispatch(updateDataset(datasetId, formData));
-
-	const about = useSelector((state: RootState) => state.dataset.about);
+	const updateFolder = (
+		datasetId: string | undefined,
+		folderId: string | undefined,
+		formData: FolderPatch
+	) => dispatch(updateFolderAction(datasetId, folderId, formData));
 
 	const [loading, setLoading] = useState(false);
-	const [name, setName] = useState(about["name"]);
+	const [name, setName] = useState();
+	const [defaultName, setDefaultName] = useState(initialFolderName);
 
 	const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
 		setName(event.target.value);
@@ -40,23 +43,24 @@ export default function EditNameModal(props: EditNameModalProps) {
 
 	const onSave = async () => {
 		setLoading(true);
-		editDataset(datasetId, { name: name });
+		updateFolder(datasetId, folderId, { name: name });
 		setName("");
+		setDefaultName(name);
 		setLoading(false);
-		handleClose(true);
+		handleClose();
 	};
 
 	return (
 		<Container>
 			<LoadingOverlay active={loading} spinner text="Saving...">
 				<Dialog open={open} onClose={handleClose} fullWidth={true}>
-					<DialogTitle>Rename Dataset</DialogTitle>
+					<DialogTitle>Rename Folder</DialogTitle>
 					<DialogContent>
 						<TextField
 							id="outlined-name"
 							variant="standard"
 							fullWidth
-							defaultValue={about["name"]}
+							defaultValue={defaultName}
 							onChange={handleChange}
 						/>
 					</DialogContent>

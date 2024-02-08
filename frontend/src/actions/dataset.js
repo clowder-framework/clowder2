@@ -293,6 +293,51 @@ export function folderAdded(datasetId, folderName, parentFolder = null) {
 	};
 }
 
+export const FOLDER_UPDATED = "FOLDER_UPDATED";
+
+export function updateFolder(datasetId, folderId, formData) {
+	return (dispatch) => {
+		return V2.DatasetsService.patchFolderApiV2DatasetsDatasetIdFoldersFolderIdPatch(
+			datasetId,
+			folderId,
+			formData
+		)
+			.then((json) => {
+				dispatch({
+					type: FOLDER_UPDATED,
+					folder: json,
+					receivedAt: Date.now(),
+				});
+			})
+			.catch((reason) => {
+				dispatch(
+					handleErrors(reason, updateFolder(datasetId, folderId, formData))
+				);
+			});
+	};
+}
+
+export const GET_FOLDER = "GET_FOLDER";
+
+export function getFolder(datasetId, folderId) {
+	return (dispatch) => {
+		return V2.DatasetsService.getFolderApiV2DatasetsDatasetIdFoldersFolderIdGet(
+			datasetId,
+			folderId
+		)
+			.then((json) => {
+				dispatch({
+					type: GET_FOLDER,
+					folder: json,
+					receivedAt: Date.now(),
+				});
+			})
+			.catch((reason) => {
+				dispatch(handleErrors(reason, getFolder(datasetId, folderId)));
+			});
+	};
+}
+
 export const GET_FOLDER_PATH = "GET_FOLDER_PATH";
 
 export function fetchFolderPath(folderId) {

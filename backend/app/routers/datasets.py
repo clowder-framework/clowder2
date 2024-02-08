@@ -55,7 +55,13 @@ from app.models.files import (
     StorageType,
 )
 from app.models.folder_and_file import FolderFileViewList
-from app.models.folders import FolderOut, FolderIn, FolderDB, FolderDBViewList
+from app.models.folders import (
+    FolderOut,
+    FolderIn,
+    FolderDB,
+    FolderDBViewList,
+    FolderPatch,
+)
 from app.models.metadata import MetadataDB
 from app.models.pages import Paged, _get_page_query, _construct_page_metadata
 from app.models.thumbnails import ThumbnailDB
@@ -595,6 +601,48 @@ async def delete_folder(
             await _delete_nested_folders(folder_id)
             await folder.delete()
             return {"deleted": folder_id}
+        else:
+            raise HTTPException(status_code=404, detail=f"Folder {folder_id} not found")
+    raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
+
+
+@router.get("/{dataset_id}/folders/{folder_id}")
+async def get_folder(
+    dataset_id: str,
+    folder_id: str,
+    allow: bool = Depends(Authorization("viewer")),
+):
+    if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
+        if (folder := await FolderDB.get(PydanticObjectId(folder_id))) is not None:
+            return folder.dict()
+        else:
+            raise HTTPException(status_code=404, detail=f"Folder {folder_id} not found")
+    raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
+
+
+@router.patch("/{dataset_id}/folders/{folder_id}", response_model=FolderOut)
+async def patch_folder(
+    dataset_id: str,
+    folder_id: str,
+    folder_info: FolderPatch,
+    user=Depends(get_current_user),
+    allow: bool = Depends(Authorization("editor")),
+):
+    if await DatasetDB.get(PydanticObjectId(dataset_id)) is not None:
+        if (folder := await FolderDB.get(PydanticObjectId(folder_id))) is not None:
+            # update folder
+            if folder_info.name is not None:
+                folder.name = folder_info.name
+            # allow moving folder around within the hierarchy
+            if folder_info.parent_folder is not None:
+                if (
+                    await FolderDB.get(PydanticObjectId(folder_info.parent_folder))
+                    is not None
+                ):
+                    folder.parent_folder = folder_info.parent_folder
+            folder.modified = datetime.datetime.utcnow()
+            await folder.save()
+            return folder.dict()
         else:
             raise HTTPException(status_code=404, detail=f"Folder {folder_id} not found")
     raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")

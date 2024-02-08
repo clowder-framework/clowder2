@@ -8,6 +8,7 @@ import {
 	FileOut,
 	FileOut as FileSummary,
 	FileVersion,
+	FolderOut,
 	GroupOut as Group,
 	MetadataDefinitionOut as MetadataDefinition,
 	MetadataOut as Metadata,
@@ -607,6 +608,11 @@ interface RECEIVE_PUBLIC_FOLDERS_FILES_IN_DATASET {
 	publicFoldersAndFiles: Paged;
 }
 
+interface FOLDER_UPDATED {
+	type: "FOLDER_UPDATED";
+	folder: FolderOut;
+}
+
 export type DataAction =
 	| GET_ADMIN_MODE_STATUS
 	| TOGGLE_ADMIN_MODE
@@ -721,4 +727,5 @@ export type DataAction =
 	| GET_PUBLIC_VIS_DATA_PRESIGNED_URL
 	| RESET_PUBLIC_VIS_DATA_PRESIGNED_URL
 	| RECEIVE_FOLDERS_FILES_IN_DATASET
-	| RECEIVE_PUBLIC_FOLDERS_FILES_IN_DATASET;
+	| RECEIVE_PUBLIC_FOLDERS_FILES_IN_DATASET
+	| FOLDER_UPDATED;

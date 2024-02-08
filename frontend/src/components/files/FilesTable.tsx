@@ -12,8 +12,11 @@ import FolderIcon from "@mui/icons-material/Folder";
 import { theme } from "../../theme";
 import { parseDate } from "../../utils/common";
 import { FilesTableFileEntry } from "./FilesTableFileEntry";
-import FolderMenu from "./FolderMenu";
 import { FileOut, FolderOut } from "../../openapi/v2";
+import { useSelector } from "react-redux";
+import { RootState } from "../../types/data";
+import FolderMenu from "./FolderMenu";
+import { AuthWrapper } from "../auth/AuthWrapper";
 
 type FilesTableProps = {
 	datasetId: string | undefined;
@@ -70,6 +73,10 @@ export default function FilesTable(props: FilesTableProps) {
 		history(`/public/datasets/${datasetId}?folder=${selectedFolderId}`);
 	};
 
+	const datasetRole = useSelector(
+		(state: RootState) => state.dataset.datasetRole
+	);
+
 	return (
 		<TableContainer component={Paper}>
 			<Table sx={{ minWidth: 650 }} aria-label="simple table">
@@ -107,7 +114,13 @@ export default function FilesTable(props: FilesTableProps) {
 								<TableCell align="right">&nbsp;</TableCell>
 								<TableCell align="right">&nbsp;</TableCell>
 								<TableCell align="right">
-									<FolderMenu folder={item} />
+									{/*owner, editor can delete and edit folder*/}
+									<AuthWrapper
+										currRole={datasetRole.role}
+										allowedRoles={["owner", "editor"]}
+									>
+										<FolderMenu folder={item} />
+									</AuthWrapper>
 								</TableCell>
 							</TableRow>
 						) : (
