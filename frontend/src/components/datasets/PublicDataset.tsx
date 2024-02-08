@@ -13,12 +13,10 @@ import { useParams, useSearchParams } from "react-router-dom";
 import { RootState } from "../../types/data";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchPublicFolderPath } from "../../actions/folder";
-
 import {
 	fetchPublicDatasetAbout,
 	fetchPublicFoldersFilesInDataset as fetchPublicFoldersFilesInDatasetAction,
 } from "../../actions/public_dataset";
-
 import { a11yProps, TabPanel } from "../tabs/TabComponent";
 import FilesTable from "../files/FilesTable";
 import { DisplayMetadata } from "../metadata/DisplayMetadata";
@@ -26,7 +24,7 @@ import { DisplayListenerMetadata } from "../metadata/DisplayListenerMetadata";
 import { MainBreadcrumbs } from "../navigation/BreadCrumb";
 import {
 	deleteDatasetMetadata as deleteDatasetMetadataAction,
-	fetchMetadataDefinitions,
+	fetchPublicMetadataDefinitions,
 	patchDatasetMetadata as patchDatasetMetadataAction,
 } from "../../actions/metadata";
 import PublicLayout from "../PublicLayout";
@@ -75,7 +73,7 @@ export const PublicDataset = (): JSX.Element => {
 		name: string | null,
 		skip: number,
 		limit: number
-	) => dispatch(fetchMetadataDefinitions(name, skip, limit));
+	) => dispatch(fetchPublicMetadataDefinitions(name, skip, limit));
 
 	// mapStateToProps
 	const about = useSelector(
@@ -93,7 +91,6 @@ export const PublicDataset = (): JSX.Element => {
 	const [currPageNum, setCurrPageNum] = useState<number>(1);
 	const [limit] = useState<number>(config.defaultFolderFilePerPage);
 
-	// we use the public files here
 	const pageMetadata = useSelector(
 		(state: RootState) => state.publicDataset.publicFoldersAndFiles.metadata
 	);
