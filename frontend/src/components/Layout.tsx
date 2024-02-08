@@ -432,7 +432,7 @@ export default function PersistentDrawerLeft(props) {
 					}}
 				>
 					<Typography variant="body2" color="primary.light">
-						v2.0.0-beta.1
+						v2.0.0-beta.2
 					</Typography>
 				</Box>
 			</Main>
