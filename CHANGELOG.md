@@ -22,6 +22,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Improvements to overall UI and UX. Standardized components and widgets used.
 - Helm charts for Kubernetes deployment.
 
-[unreleased]: https://github.com/clowder-framework/clowder2/compare/v2.0.0-alpha.2...HEAD
+[v2.0.0-beta.2]: https://github.com/clowder-framework/clowder2/releases/tag/v2.0.0-beta.2
+
+[v2.0.0-beta.1]: https://github.com/clowder-framework/clowder2/releases/tag/v2.0.0-beta.1
 
 [alpha-2]: https://github.com/clowder-framework/clowder2/releases/tag/v2.0.0-alpha.2
