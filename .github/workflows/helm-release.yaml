@@ -15,8 +15,7 @@ on:
   pull_request:
 
   release:
-    types:
-      - 'created'
+    types: [published]
 
 env:
   MAIN_REPO: clowder-framework/clowder2
