@@ -5,11 +5,32 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [Unreleased]
+## [v2.0.0-beta.2] - 2024-02-16
+
+### Added
+
+- Super Admin functionality implemented.
+- Helm chart published to Artifact Hub.
+- GUI now supports viewing and modifying metadata definitions.
+- Examples of custom visualizations added, including netCDF, Vega, and iframe.
 
 ### Changed
 
-- Update README and make related changes. [#537](https://github.com/clowder-framework/clowder2/issues/537)
+- Pagination refactored for increased flexibility in page navigation.
+
+## [v2.0.0-beta.1] - 2023-11-27
+
+### Added
+
+- Initial implementation of Extractors.
+- Initial implementation of Visualization.
+- Group, roles, and dependencies functionalities added.
+- Group implementation initiated.
+
+### Changed
+
+- README updated with relevant changes.
+- Improved accessibility to Swagger API documentation.
 
 ## [alpha-2] - 2022-11-28
 
