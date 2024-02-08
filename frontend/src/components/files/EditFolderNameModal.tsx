@@ -12,10 +12,9 @@ import {
 
 import LoadingOverlay from "react-loading-overlay-ts";
 
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { updateFolder as updateFolderAction } from "../../actions/dataset";
 import { FolderPatch } from "../../openapi/v2";
-import { RootState } from "../../types/data";
 
 type EditNameModalProps = {
 	datasetId: string;
@@ -34,12 +33,9 @@ export default function EditFolderNameModal(props: EditNameModalProps) {
 		formData: FolderPatch
 	) => dispatch(updateFolderAction(datasetId, folderId, formData));
 
-	const currFolder = useSelector(
-		(state: RootState) => state.dataset.currFolder
-	);
-
 	const [loading, setLoading] = useState(false);
-	const [name, setName] = useState(initialFolderName);
+	const [name, setName] = useState();
+	const [defaultName, setDefaultName] = useState(initialFolderName);
 
 	const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
 		setName(event.target.value);
@@ -49,6 +45,7 @@ export default function EditFolderNameModal(props: EditNameModalProps) {
 		setLoading(true);
 		updateFolder(datasetId, folderId, { name: name });
 		setName("");
+		setDefaultName(name);
 		setLoading(false);
 		handleClose();
 	};
@@ -63,9 +60,7 @@ export default function EditFolderNameModal(props: EditNameModalProps) {
 							id="outlined-name"
 							variant="standard"
 							fullWidth
-							defaultValue={
-								currFolder["name"] ? currFolder["name"] : initialFolderName
-							}
+							defaultValue={defaultName}
 							onChange={handleChange}
 						/>
 					</DialogContent>
