@@ -12,7 +12,6 @@ import IconButton from "@mui/material/IconButton";
 import MenuIcon from "@mui/icons-material/Menu";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
-import SearchDatasetIcon from "@mui/icons-material/Search";
 import ListItem from "@mui/material/ListItem";
 import ListItemButton from "@mui/material/ListItemButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
@@ -21,13 +20,8 @@ import { Link, Menu, MenuItem, MenuList } from "@mui/material";
 import { Link as RouterLink, useLocation } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { RootState } from "../types/data";
-import { AddBox, Explore } from "@material-ui/icons";
-import HistoryIcon from "@mui/icons-material/History";
-import GroupIcon from "@mui/icons-material/Group";
-import Gravatar from "react-gravatar";
+import { Explore } from "@material-ui/icons";
 import PersonIcon from "@mui/icons-material/Person";
-import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
-import { getCurrEmail } from "../utils/common";
 import VpnKeyIcon from "@mui/icons-material/VpnKey";
 import LogoutIcon from "@mui/icons-material/Logout";
 import { EmbeddedSearch } from "./search/EmbeddedSearch";
@@ -148,7 +142,7 @@ export default function PersistentDrawerLeft(props) {
 					>
 						<MenuIcon />
 					</IconButton>
-					<Link href="/">
+					<Link component={RouterLink} to="/">
 						<Box
 							component="img"
 							src="../../public/blue-clowder-logo-sm.svg"
@@ -164,10 +158,10 @@ export default function PersistentDrawerLeft(props) {
 					</SearchDiv>
 					<Box sx={{ flexGrow: 1 }} />
 					<Box sx={{ marginLeft: "auto" }}>
-						<Link href="/auth/register" sx={link}>
+						<Link component={RouterLink} to="/auth/register" sx={link}>
 							Register
 						</Link>
-						<Link href="/auth/login" sx={link}>
+						<Link component={RouterLink} to="/auth/login" sx={link}>
 							Login
 						</Link>
 					</Box>
@@ -240,7 +234,7 @@ export default function PersistentDrawerLeft(props) {
 						</ListItemButton>
 					</ListItem>
 				</List>
-				<Divider/>
+				<Divider />
 				<List>
 					{/*search commented out for now*/}
 					{/*<ListItem key={"search"} disablePadding>*/}
