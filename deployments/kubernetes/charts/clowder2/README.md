@@ -138,4 +138,3 @@ and apply it using:
 ```bash
 kubectl -n traefik apply -f dashboard.yaml
 ```
-

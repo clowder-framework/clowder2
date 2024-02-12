@@ -1,12 +1,6 @@
 import logging
 
 import uvicorn
-from beanie import init_beanie
-from fastapi import FastAPI, APIRouter, Depends
-from fastapi.middleware.cors import CORSMiddleware
-from motor.motor_asyncio import AsyncIOMotorClient
-from pydantic import BaseConfig
-
 from app.config import settings
 from app.keycloak_auth import get_current_username
 from app.models.authorization import AuthorizationDB
@@ -14,7 +8,7 @@ from app.models.config import ConfigEntryDB
 from app.models.datasets import DatasetDB, DatasetDBViewList
 from app.models.errors import ErrorDB
 from app.models.feeds import FeedDB
-from app.models.files import FileDB, FileVersionDB, FileDBViewList
+from app.models.files import FileDB, FileDBViewList, FileVersionDB
 from app.models.folder_and_file import FolderFileViewList
 from app.models.folders import FolderDB, FolderDBViewList
 from app.models.groups import GroupDB
@@ -22,43 +16,51 @@ from app.models.listeners import (
     EventListenerDB,
     EventListenerJobDB,
     EventListenerJobUpdateDB,
-    EventListenerJobViewList,
     EventListenerJobUpdateViewList,
+    EventListenerJobViewList,
 )
 from app.models.metadata import MetadataDB, MetadataDefinitionDB
 from app.models.thumbnails import ThumbnailDB
 from app.models.tokens import TokenDB
-from app.models.users import UserDB, UserAPIKeyDB, ListenerAPIKeyDB
+from app.models.users import ListenerAPIKeyDB, UserAPIKeyDB, UserDB
 from app.models.visualization_config import VisualizationConfigDB
 from app.models.visualization_data import VisualizationDataDB
-from app.routers import folders, groups, public_folders, status
 from app.routers import (
-    users,
-    authorization,
-    metadata,
-    public_metadata,
-    files,
-    public_files,
-    metadata_files,
-    datasets,
-    public_datasets,
-    metadata_datasets,
     authentication,
-    keycloak,
+    authorization,
+    datasets,
     elasticsearch,
-    public_elasticsearch,
-    listeners,
     feeds,
+    files,
+    folders,
+    groups,
     jobs,
-    visualization,
+    keycloak,
+    listeners,
+    metadata,
+    metadata_datasets,
+    metadata_files,
+    public_datasets,
+    public_elasticsearch,
+    public_files,
+    public_folders,
+    public_metadata,
     public_visualization,
+    status,
     thumbnails,
+    users,
+    visualization,
 )
 
 # setup loggers
 # logging.config.fileConfig('logging.conf', disable_existing_loggers=False)
 from app.search.config import indexSettings
 from app.search.connect import connect_elasticsearch, create_index
+from beanie import init_beanie
+from fastapi import APIRouter, Depends, FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from motor.motor_asyncio import AsyncIOMotorClient
+from pydantic import BaseConfig
 
 logger = logging.getLogger(__name__)
 

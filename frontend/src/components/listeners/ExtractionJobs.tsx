@@ -227,7 +227,7 @@ export const ExtractionJobs = (props) => {
 	}, [selectedStatus, selectedCreatedTime]);
 
 	useEffect(() => {
-		let rows = [];
+		const rows = [];
 		if (jobs && jobs.length > 0) {
 			jobs.map((job: EventListenerJobOut) => {
 				rows.push(

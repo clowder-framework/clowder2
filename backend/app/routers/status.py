@@ -1,7 +1,6 @@
+from app.models.status import Status
 from fastapi import APIRouter
 from fastapi.security import HTTPBearer
-
-from app.models.status import Status
 
 router = APIRouter()
 security = HTTPBearer()

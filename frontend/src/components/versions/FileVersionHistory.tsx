@@ -28,7 +28,6 @@ export function FileVersionHistory(props: FileVersionHistoryProps) {
 					fileVersions.map((fileVersion) => {
 						const { version_num, creator, created } = fileVersion;
 						return (
-
 							<ListItem key={version_num}>
 								<ListItemAvatar>
 									<VersionChip selectedVersion={version_num} />
@@ -42,23 +41,21 @@ export function FileVersionHistory(props: FileVersionHistoryProps) {
 									secondary={`Uploaded on ${parseDate(created)}`}
 									sx={{ maxWidth: "38rem" }}
 								/>
-								{publicView?
-									(
-										<Button
-											href={`${config.hostname}/api/v2/public_files/${fileVersion.file_id}?version=${version_num}`}
-											variant="contained"
-										>
+								{publicView ? (
+									<Button
+										href={`${config.hostname}/api/v2/public_files/${fileVersion.file_id}?version=${version_num}`}
+										variant="contained"
+									>
 										Download
-										</Button>
-									):
-
+									</Button>
+								) : (
 									<Button
 										href={`${config.hostname}/api/v2/files/${fileVersion.file_id}?version=${version_num}`}
 										variant="contained"
 									>
-									Download
+										Download
 									</Button>
-								}
+								)}
 
 								{/*TODO implement those actions*/}
 								{/*<Button disabled>Delete</Button>*/}

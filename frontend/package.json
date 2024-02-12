@@ -28,6 +28,7 @@
 		"codegen:v2": "./node_modules/.bin/openapi -i ${CLOWDER_REMOTE_HOSTNAME}/api/v2/openapi.json -o src/openapi/v2",
 		"codegen:v2:dev": "export CLOWDER_REMOTE_HOSTNAME=http://localhost:8000 && ./node_modules/.bin/openapi -i ${CLOWDER_REMOTE_HOSTNAME}/api/v2/openapi.json -o src/openapi/v2",
 		"codegen:v2:test": "export CLOWDER_REMOTE_HOSTNAME=http://localhost && ./node_modules/.bin/openapi -i ${CLOWDER_REMOTE_HOSTNAME}/api/v2/openapi.json -o src/openapi/v2",
+		"codegen:v2:file": "./node_modules/.bin/openapi -i ../openapi.json -o src/openapi/v2",
 		"codegen": "npm run codegen:v1 && npm run codegen:v2",
 		"docs": "typedoc"
 	},
