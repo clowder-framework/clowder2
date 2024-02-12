@@ -139,7 +139,7 @@ async def search_users(
 
 
 @router.get("/prefixSearch", response_model=Paged)
-async def prefix_search_users(
+async def search_users_prefix(
     prefix: str,
     skip: int = 0,
     limit: int = 2,

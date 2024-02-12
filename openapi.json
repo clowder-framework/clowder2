@@ -690,8 +690,8 @@
         "tags": [
           "users"
         ],
-        "summary": "Prefix Search Users",
-        "operationId": "prefix_search_users_api_v2_users_prefixSearch_get",
+        "summary": "Search Users Prefix",
+        "operationId": "search_users_prefix_api_v2_users_prefixSearch_get",
         "parameters": [
           {
             "required": true,
