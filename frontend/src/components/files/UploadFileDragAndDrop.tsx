@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import { FileDrop } from "react-file-drop";
+import React, {useEffect, useRef, useState} from "react";
+
 import {
 	Box,
 	Button,
@@ -10,10 +10,9 @@ import {
 	Stepper,
 	Typography,
 } from "@mui/material";
+import { FileDrop } from "react-file-drop";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../types/data";
-
-import { UploadFileInput } from "./UploadFileInput";
 import { CreateMetadata } from "../metadata/CreateMetadata";
 import {
 	fetchMetadataDefinitions,
@@ -22,25 +21,105 @@ import {
 import { MetadataIn } from "../../openapi/v2";
 import { useNavigate } from "react-router-dom";
 import {
-	createFile as createFileAction,
-	resetFileCreated,
+	createFiles as createFilesAction,
+	resetFilesCreated,
 } from "../../actions/file";
 
 import LoadingOverlay from "react-loading-overlay-ts";
+import { UploadFileInputMultiple } from "./UploadFileInputMultiple";
 
 type UploadFileDragAndDropProps = {
 	selectedDatasetId: string | undefined;
 	folderId: string | undefined;
-	selectedDatasetName: string | undefined;
 };
+
+import { makeStyles } from "@material-ui/core/styles";
+
+const useStyles = makeStyles({
+	fileDrop: {
+		boxSizing: "border-box",
+		height: "176px",
+		width: "100%",
+		border: "1px dashed #00619D",
+		backgroundColor: "#FFFFFF",
+		margin: "27px auto 0 auto",
+		display: "block"
+	},
+	fileDropInput: {
+		width: "95px"
+	},
+	fileDropText: {
+		height: "54px",
+		width: "92px",
+		color: "#8798AD",
+		fontSize: "15px",
+		fontWeight: 500,
+		letterSpacing: 0,
+		lineHeight: "18px",
+		textAlign: "center"
+	},
+	fileDropGroup: {
+		width: "92px",
+		margin: "50px auto 0 auto",
+		display: "block"
+	},
+	displayFile: {
+		boxSizing: "border-box",
+		width: "100%",
+		border: "1px solid #00619D",
+		backgroundColor: "#FFFFFF",
+		margin: "5px auto 0 auto",
+		display: "block"
+	},
+	displayFileItem: {
+		width: "100%",
+		height: "37px"
+	},
+	displayFilename: {
+		height: "18px",
+		color: "#00619D",
+		fontSize: "15px",
+		fontWeight: 500,
+		letterSpacing: 0,
+		lineHeight: "18px",
+		padding: "9px 17px",
+		float: "left"
+	},
+	deleteFileIcon: {
+		"height": "24px",
+		"width": "24px",
+		"float": "right",
+		"margin": "6px",
+		"&:hover": {
+			color: "#D63649"
+		}
+	}
+});
 
 export const UploadFileDragAndDrop: React.FC<UploadFileDragAndDropProps> = (
 	props: UploadFileDragAndDropProps
 ) => {
 	const { selectedDatasetId, folderId } = props;
+	const [selectedFiles, setSelectedFiles] = useState<File[] | null>(null);
+	const [metadataRequestForms, setMetadataRequestForms] = useState({});
+	const [allFilled, setAllFilled] = React.useState<boolean>(false);
 
 	const [loading, setLoading] = useState(false);
 
+	// TODO some of this will need to change
+	const [files, setFile] = useState([]);
+	const fileInputRef = useRef(null);
+
+	const onFileInputChange = (event) => {
+		const fileList = Array.from(event.target.files);
+		setFile(fileList);
+	};
+	const onDeleteClick = (filename) => {
+		setFile(files.filter((file) => file.name !== filename));
+	};
+
+
+	// TODO end what is added from incore
 	const dispatch = useDispatch();
 	// @ts-ignore
 	const getMetadatDefinitions = (
@@ -52,15 +131,17 @@ export const UploadFileDragAndDrop: React.FC<UploadFileDragAndDropProps> = (
 		fileId: string | undefined,
 		metadata: MetadataIn
 	) => dispatch(postFileMetadata(fileId, metadata));
-	const uploadFile = (
+
+	const uploadFiles = (
 		selectedDatasetId: string | undefined,
-		selectedFolderId: string | undefined,
-		selectedFile: File
+		selectedFiles: File[] | undefined,
+		selectedFolderId: string | undefined
 	) =>
 		dispatch(
-			createFileAction(selectedDatasetId, selectedFolderId, selectedFile)
+			createFilesAction(selectedDatasetId, selectedFiles, selectedFolderId)
 		);
-	const newFile = useSelector((state: RootState) => state.dataset.newFile);
+
+	const newFiles = useSelector((state: RootState) => state.dataset.newFiles);
 	const metadataDefinitionList = useSelector(
 		(state: RootState) => state.metadata.metadataDefinitionList.data
 	);
@@ -69,12 +150,7 @@ export const UploadFileDragAndDrop: React.FC<UploadFileDragAndDropProps> = (
 		getMetadatDefinitions(null, 0, 100);
 	}, []);
 
-	const [selectedFile, setSelectedFile] = useState<File | null>(null);
-	const [metadataRequestForms, setMetadataRequestForms] = useState({});
-	const [allFilled, setAllFilled] = React.useState<boolean>(false);
-
 	const history = useNavigate();
-
 	const checkIfFieldsAreRequired = () => {
 		let required = false;
 
@@ -130,37 +206,33 @@ export const UploadFileDragAndDrop: React.FC<UploadFileDragAndDropProps> = (
 		setActiveStep((prevActiveStep) => prevActiveStep - 1);
 	};
 
-	// finish button post dataset; dataset ID triggers metadata posting
-	const handleFinish = () => {
-		// Triggers spinner
+	const handleFinishMultiple = () => {
 		setLoading(true);
-
-		// create dataset
-		uploadFile(selectedDatasetId, folderId, selectedFile);
+		uploadFiles(selectedDatasetId, selectedFiles, folderId);
 	};
 
 	useEffect(() => {
-		if (newFile.id) {
-			// Stop spinner
-			setLoading(false);
-
-			// post new metadata
-			const file = newFile;
-			Object.keys(metadataRequestForms).map((key) => {
-				createFileMetadata(file.id, metadataRequestForms[key]);
+		if (newFiles.length > 0) {
+			newFiles.map((file) => {
+				// post new metadata
+				Object.keys(metadataRequestForms).map((key) => {
+					createFileMetadata(file.id, metadataRequestForms[key]);
+				});
 			});
 
 			// reset newFile so next upload can be done
-			dispatch(resetFileCreated());
+			dispatch(resetFilesCreated());
 			setMetadataRequestForms({});
-			setSelectedFile(null);
 
-			// Redirect to file route with file Id and dataset id
+			// Stop spinner
+			setLoading(false);
+
+			// Redirect to the first file route with file Id and dataset id
 			history(
-				`/files/${file.id}?dataset=${selectedDatasetId}&folder=${folderId}`
+				`/files/${newFiles[0].id}?dataset=${selectedDatasetId}&folder=${folderId}`
 			);
 		}
-	}, [newFile]);
+	}, [newFiles]);
 
 	return (
 		<LoadingOverlay active={loading} spinner text="Uploading file...">
@@ -200,15 +272,15 @@ export const UploadFileDragAndDrop: React.FC<UploadFileDragAndDropProps> = (
 						<StepContent TransitionProps={{ unmountOnExit: false }}>
 							<Typography>Upload files to the dataset.</Typography>
 							<Box>
-								<UploadFileInput setSelectedFile={setSelectedFile} />
+								<UploadFileInputMultiple setSelectedFiles={setSelectedFiles} />
 								<Box className="inputGroup">
 									<Button onClick={handleBack} sx={{ float: "right" }}>
 										Back
 									</Button>
 									<Button
 										variant="contained"
-										onClick={handleFinish}
-										disabled={!selectedFile}
+										onClick={handleFinishMultiple}
+										disabled={!selectedFiles}
 										sx={{ float: "right" }}
 									>
 										Finish
