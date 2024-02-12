@@ -110,7 +110,7 @@ async def get_dataset_folders(
             if parent_folder is not None:
                 query.append(FolderDBViewList.parent_folder == ObjectId(parent_folder))
             else:
-                query.append(FolderDBViewList.parent_folder is None)
+                query.append(FolderDBViewList.parent_folder == None)  # noqa: E711
             folders = (
                 await FolderDBViewList.find(*query).skip(skip).limit(limit).to_list()
             )
@@ -134,8 +134,8 @@ async def get_dataset_folders_and_files(
                 # only show folder and file at root level without parent folder
                 query.append(
                     And(
-                        FolderFileViewList.parent_folder is None,
-                        FolderFileViewList.folder_id is None,
+                        FolderFileViewList.parent_folder == None,  # noqa: E711
+                        FolderFileViewList.folder_id == None,  # noqa: E711
                     )
                 )
             else:

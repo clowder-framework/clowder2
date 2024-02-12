@@ -501,8 +501,8 @@ async def get_dataset_folders_and_files(
             # only show folder and file at root level without parent folder
             query.append(
                 And(
-                    FolderFileViewList.parent_folder is None,
-                    FolderFileViewList.folder_id is None,
+                    FolderFileViewList.parent_folder == None,  # noqa: E711
+                    FolderFileViewList.folder_id == None,  # noqa: E711
                 )
             )
         else:
