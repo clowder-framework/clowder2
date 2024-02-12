@@ -52,6 +52,6 @@ dependencies:
     repository: https://charts.bitnami.com/bitnami
     condition: elasticsearch.enabled
   - name: keycloak
-    version: ~10
+    version: ~13
     repository: https://charts.bitnami.com/bitnami
     condition: keycloak.enabled
