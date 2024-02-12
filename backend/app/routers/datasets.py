@@ -447,7 +447,7 @@ async def get_dataset_folders(
         if parent_folder is not None:
             query.append(FolderDBViewList.parent_folder == ObjectId(parent_folder))
         else:
-            query.append(FolderDBViewList.parent_folder is None)
+            query.append(FolderDBViewList.parent_folder == None)  # noqa: E711
 
         folders_and_count = (
             await FolderDBViewList.find(*query)
