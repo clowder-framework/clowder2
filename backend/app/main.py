@@ -9,6 +9,7 @@ from app.models.datasets import DatasetDB, DatasetDBViewList
 from app.models.errors import ErrorDB
 from app.models.feeds import FeedDB
 from app.models.files import FileDB, FileDBViewList, FileVersionDB
+from app.models.folder_and_file import FolderFileViewList
 from app.models.folders import FolderDB, FolderDBViewList
 from app.models.groups import GroupDB
 from app.models.listeners import (
@@ -39,6 +40,12 @@ from app.routers import (
     metadata,
     metadata_datasets,
     metadata_files,
+    public_datasets,
+    public_elasticsearch,
+    public_files,
+    public_folders,
+    public_metadata,
+    public_visualization,
     status,
     thumbnails,
     users,
@@ -115,10 +122,20 @@ api_router.include_router(
     dependencies=[Depends(get_current_username)],
 )
 api_router.include_router(
+    public_metadata.router,
+    prefix="/public_metadata",
+    tags=["public_metadata"],
+)
+api_router.include_router(
     files.router,
     prefix="/files",
     tags=["files"],
     dependencies=[Depends(get_current_username)],
+)
+api_router.include_router(
+    public_files.router,
+    prefix="/public_files",
+    tags=["public_files"],
 )
 api_router.include_router(
     metadata_files.router,
@@ -133,13 +150,26 @@ api_router.include_router(
     dependencies=[Depends(get_current_username)],
 )
 api_router.include_router(
-    metadata_datasets.router, prefix="/datasets", tags=["metadata"]
+    public_datasets.router,
+    prefix="/public_datasets",
+    tags=["public_datasets"],
+)
+api_router.include_router(
+    metadata_datasets.router,
+    prefix="/datasets",
+    tags=["metadata"],
+    dependencies=[Depends(get_current_username)],
 )
 api_router.include_router(
     folders.router,
     prefix="/folders",
     tags=["folders"],
     dependencies=[Depends(get_current_username)],
+)
+api_router.include_router(
+    public_folders.router,
+    prefix="/public_folders",
+    tags=["public_folders"],
 )
 api_router.include_router(
     listeners.router,
@@ -166,6 +196,11 @@ api_router.include_router(
     dependencies=[Depends(get_current_username)],
 )
 api_router.include_router(
+    public_elasticsearch.router,
+    prefix="/public_elasticsearch",
+    tags=["public_elasticsearch"],
+)
+api_router.include_router(
     feeds.router,
     prefix="/feeds",
     tags=["feeds"],
@@ -182,6 +217,11 @@ api_router.include_router(
     prefix="/visualizations",
     tags=["visualizations"],
     dependencies=[Depends(get_current_username)],
+)
+api_router.include_router(
+    public_visualization.router,
+    prefix="/public_visualizations",
+    tags=["public_visualizations"],
 )
 api_router.include_router(
     thumbnails.router,
@@ -232,6 +272,7 @@ async def startup_beanie():
             VisualizationConfigDB,
             VisualizationDataDB,
             ThumbnailDB,
+            FolderFileViewList,
         ],
         recreate_views=True,
     )

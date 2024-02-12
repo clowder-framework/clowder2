@@ -1,11 +1,13 @@
 from datetime import datetime
-from typing import List, Optional
+from typing import Optional
 
 from app.deps.authorization_deps import AuthorizationDB, GroupAuthorization
 from app.keycloak_auth import get_current_user, get_user
 from app.models.authorization import RoleType
 from app.models.groups import GroupBase, GroupDB, GroupIn, GroupOut, Member
+from app.models.pages import Paged, _construct_page_metadata, _get_page_query
 from app.models.users import UserDB, UserOut
+from app.routers.authentication import get_admin, get_admin_mode
 from beanie import PydanticObjectId
 from beanie.operators import Or, Push, RegEx
 from bson.objectid import ObjectId
@@ -27,11 +29,13 @@ async def save_group(
     return group_db.dict()
 
 
-@router.get("", response_model=List[GroupOut])
+@router.get("", response_model=Paged)
 async def get_groups(
     user_id=Depends(get_user),
     skip: int = 0,
     limit: int = 10,
+    admin_mode: bool = Depends(get_admin_mode),
+    admin=Depends(get_admin),
 ):
     """Get a list of all Groups in the db the user is a member/owner of.
 
@@ -41,24 +45,42 @@ async def get_groups(
 
 
     """
-    groups = await GroupDB.find(
-        Or(
-            GroupDB.creator == user_id,
-            GroupDB.users.user.email == user_id,
-        ),
-        sort=(-GroupDB.created),
-        skip=skip,
-        limit=limit,
-    ).to_list()
-    return [group.dict() for group in groups]
+    criteria_list = []
+    if not admin or not admin_mode:
+        criteria_list.append(
+            Or(
+                GroupDB.creator == user_id,
+                GroupDB.users.user.email == user_id,
+            )
+        )
+
+    groups_and_count = (
+        await GroupDB.find(
+            *criteria_list,
+        )
+        .aggregate(
+            [_get_page_query(skip, limit, sort_field="created", ascending=False)],
+        )
+        .to_list()
+    )
+    page_metadata = _construct_page_metadata(groups_and_count, skip, limit)
+    page = Paged(
+        metadata=page_metadata,
+        data=[
+            GroupOut(id=item.pop("_id"), **item) for item in groups_and_count[0]["data"]
+        ],
+    )
+    return page.dict()
 
 
-@router.get("/search/{search_term}", response_model=List[GroupOut])
+@router.get("/search/{search_term}", response_model=Paged)
 async def search_group(
     search_term: str,
     user_id=Depends(get_user),
     skip: int = 0,
     limit: int = 10,
+    admin_mode: bool = Depends(get_admin_mode),
+    admin=Depends(get_admin),
 ):
     """Search all groups in the db based on text.
 
@@ -68,18 +90,35 @@ async def search_group(
         limit -- restrict number of records to be returned (i.e. for pagination)
     """
 
-    # user has to be the creator or member first; then apply search
-    groups = await GroupDB.find(
-        Or(GroupDB.creator == user_id, GroupDB.users.user.email == user_id),
+    criteria_list = [
         Or(
             RegEx(field=GroupDB.name, pattern=search_term),
             RegEx(field=GroupDB.description, pattern=search_term),
         ),
-        skip=skip,
-        limit=limit,
-    ).to_list()
+    ]
+    if not admin or not admin_mode:
+        criteria_list.append(
+            Or(GroupDB.creator == user_id, GroupDB.users.user.email == user_id)
+        )
 
-    return [group.dict() for group in groups]
+    # user has to be the creator or member first; then apply search
+    groups_and_count = (
+        await GroupDB.find(
+            *criteria_list,
+        )
+        .aggregate(
+            [_get_page_query(skip, limit, sort_field="created", ascending=False)],
+        )
+        .to_list()
+    )
+    page_metadata = _construct_page_metadata(groups_and_count, skip, limit)
+    page = Paged(
+        metadata=page_metadata,
+        data=[
+            GroupOut(id=item.pop("_id"), **item) for item in groups_and_count[0]["data"]
+        ],
+    )
+    return page.dict()
 
 
 @router.get("/{group_id}", response_model=GroupOut)

@@ -47,7 +47,9 @@ listener_v2_example = {
 feed_example = {
     "name": "test.feed_example",
     "search": {
-        "index_name": "clowder-tests",  # If settings.elasticsearch_index is used, conftest values won't be ready yet!!!
+        "index_name": (
+            "clowder-tests"
+        ),  # If settings.elasticsearch_index is used, conftest values won't be ready yet!!!
         "criteria": [{"field": "content_type_main", "operator": "==", "value": "text"}],
     },
 }
@@ -62,13 +64,17 @@ extractor_info_v1_example = {
         {
             "lines": "http://clowder.ncsa.illinois.edu/metadata/ncsa.wordcount#lines",
             "words": "http://clowder.ncsa.illinois.edu/metadata/ncsa.wordcount#words",
-            "characters": "http://clowder.ncsa.illinois.edu/metadata/ncsa.wordcount#characters",
+            "characters": (
+                "http://clowder.ncsa.illinois.edu/metadata/ncsa.wordcount#characters"
+            ),
         }
     ],
     "repository": [
         {
             "repType": "git",
-            "repUrl": "https://opensource.ncsa.illinois.edu/stash/scm/cats/pyclowder.git",
+            "repUrl": (
+                "https://opensource.ncsa.illinois.edu/stash/scm/cats/pyclowder.git"
+            ),
         }
     ],
     "process": {"file": ["text/*", "application/json"]},

@@ -46,3 +46,4 @@ class ElasticsearchEntry(BaseModel):
     bytes: Optional[int]
     # metadata fields
     metadata: Optional[List[dict]] = []
+    status: Optional[str]

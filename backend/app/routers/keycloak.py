@@ -1,5 +1,6 @@
 import json
 import logging
+from secrets import token_urlsafe
 
 import requests
 from app.config import settings
@@ -29,9 +30,15 @@ async def register() -> RedirectResponse:
 
 
 @router.get("/login")
-async def login() -> RedirectResponse:
+async def loginGet() -> RedirectResponse:
     """Redirect to keycloak login page."""
-    return RedirectResponse(settings.auth_url)
+    return RedirectResponse(
+        keycloak_openid.auth_url(
+            redirect_uri=settings.auth_redirect_uri,
+            scope="openid email",
+            state=token_urlsafe(32),
+        )
+    )
 
 
 @router.get("/logout")
@@ -53,13 +60,13 @@ async def logout(
                 # delete entry in the token database
                 await token_exist.delete()
                 return {"status": f"Successfully logged user: {user_info} out!"}
-            except HTTPException:
+            except:  # noqa: E722
                 raise HTTPException(
                     status_code=403,
                     detail="Refresh token invalid/expired! Cannot log user out.",
                     headers={"WWW-Authenticate": "Bearer"},
                 )
-    except HTTPException:
+    except:  # noqa: E722
         raise HTTPException(
             status_code=403,
             detail="Access token invalid! Cannot get user info.",
@@ -73,7 +80,7 @@ async def logout(
 
 
 @router.post("/login")
-async def login_post(userIn: UserIn):
+async def loginPost(userIn: UserIn):
     """Client can use this to login when redirect is not available."""
     try:
         token = keycloak_openid.token(userIn.email, userIn.password)
@@ -99,15 +106,12 @@ async def auth(code: str) -> RedirectResponse:
     """Redirect endpoint Keycloak redirects to after login."""
     logger.info("In /api/v2/auth")
     # get token from Keycloak
-    payload = (
-        f"grant_type=authorization_code&code={code}"
-        f"&redirect_uri={settings.auth_url}&client_id={settings.auth_client_id}"
+    token_body = keycloak_openid.token(
+        grant_type="authorization_code",
+        code=code,
+        redirect_uri=settings.auth_redirect_uri,
     )
-    headers = {"Content-Type": "application/x-www-form-urlencoded"}
-    token_response = requests.request(
-        "POST", settings.auth_token_url, data=payload, headers=headers
-    )
-    token_body = json.loads(token_response.content)
+
     access_token = token_body["access_token"]
 
     # create user in db if it doesn't already exist; get the user_id
@@ -153,9 +157,12 @@ async def auth(code: str) -> RedirectResponse:
 
     # redirect to frontend
     auth_url = f"{settings.frontend_url}/auth"
+
     response = RedirectResponse(url=auth_url)
+
     response.set_cookie("Authorization", value=f"Bearer {access_token}")
     logger.info(f"Authenticated by keycloak. Redirecting to {auth_url}")
+
     return response
 
 

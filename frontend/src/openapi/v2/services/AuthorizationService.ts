@@ -66,7 +66,7 @@ export class AuthorizationService {
     ): CancelablePromise<any> {
         return __request({
             method: 'GET',
-            path: `/api/v2/authorizations/datasets/${datasetId}/role/viewer`,
+            path: `/api/v2/authorizations/datasets/${datasetId}/role/viewer}`,
             errors: {
                 422: `Validation Error`,
             },
@@ -86,7 +86,7 @@ export class AuthorizationService {
     ): CancelablePromise<any> {
         return __request({
             method: 'GET',
-            path: `/api/v2/authorizations/datasets/${datasetId}/role/owner`,
+            path: `/api/v2/authorizations/datasets/${datasetId}/role/owner}`,
             errors: {
                 422: `Validation Error`,
             },
@@ -95,6 +95,7 @@ export class AuthorizationService {
 
     /**
      * Get File Role
+     * Retrieve role of user for an individual file. Role cannot change between file versions.
      * @param fileId
      * @param datasetId
      * @returns RoleType Successful Response
@@ -118,6 +119,7 @@ export class AuthorizationService {
 
     /**
      * Get Metadata Role
+     * Retrieve role of user for group. Group roles can be OWNER, EDITOR, or VIEWER (for regular Members).
      * @param metadataId
      * @param datasetId
      * @returns AuthorizationMetadata Successful Response
@@ -129,7 +131,7 @@ export class AuthorizationService {
     ): CancelablePromise<AuthorizationMetadata> {
         return __request({
             method: 'GET',
-            path: `/api/v2/authorizations/metadata/${metadataId}/role`,
+            path: `/api/v2/authorizations/metadata/${metadataId}/role}`,
             query: {
                 'dataset_id': datasetId,
             },
@@ -141,6 +143,7 @@ export class AuthorizationService {
 
     /**
      * Get Group Role
+     * Retrieve role of user on a particular group (i.e. whether they can change group memberships).
      * @param groupId
      * @param datasetId
      * @returns RoleType Successful Response
@@ -262,7 +265,7 @@ export class AuthorizationService {
     ): CancelablePromise<DatasetRoles> {
         return __request({
             method: 'GET',
-            path: `/api/v2/authorizations/datasets/${datasetId}/roles`,
+            path: `/api/v2/authorizations/datasets/${datasetId}/roles}`,
             errors: {
                 422: `Validation Error`,
             },

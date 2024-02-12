@@ -14,10 +14,11 @@ import config from "../../app.config";
 
 type FileVersionHistoryProps = {
 	fileVersions: FileVersion[];
+	publicView: boolean | false;
 };
 
 export function FileVersionHistory(props: FileVersionHistoryProps) {
-	const { fileVersions } = props;
+	const { fileVersions, publicView } = props;
 
 	return (
 		<Box className="infoCard">
@@ -40,12 +41,22 @@ export function FileVersionHistory(props: FileVersionHistoryProps) {
 									secondary={`Uploaded on ${parseDate(created)}`}
 									sx={{ maxWidth: "38rem" }}
 								/>
-								<Button
-									href={`${config.hostname}/api/v2/files/${fileVersion.file_id}?version=${version_num}`}
-									variant="contained"
-								>
-									Download
-								</Button>
+								{publicView ? (
+									<Button
+										href={`${config.hostname}/api/v2/public_files/${fileVersion.file_id}?version=${version_num}`}
+										variant="contained"
+									>
+										Download
+									</Button>
+								) : (
+									<Button
+										href={`${config.hostname}/api/v2/files/${fileVersion.file_id}?version=${version_num}`}
+										variant="contained"
+									>
+										Download
+									</Button>
+								)}
+
 								{/*TODO implement those actions*/}
 								{/*<Button disabled>Delete</Button>*/}
 								{/*<Button disabled>Make Current</Button>*/}

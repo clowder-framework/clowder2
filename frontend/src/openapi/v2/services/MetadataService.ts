@@ -9,6 +9,7 @@ import type { MetadataDelete } from '../models/MetadataDelete';
 import type { MetadataIn } from '../models/MetadataIn';
 import type { MetadataOut } from '../models/MetadataOut';
 import type { MetadataPatch } from '../models/MetadataPatch';
+import type { Paged } from '../models/Paged';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { request as __request } from '../core/request';
 
@@ -19,14 +20,14 @@ export class MetadataService {
      * @param name
      * @param skip
      * @param limit
-     * @returns MetadataDefinitionOut Successful Response
+     * @returns Paged Successful Response
      * @throws ApiError
      */
     public static getMetadataDefinitionListApiV2MetadataDefinitionGet(
         name?: string,
         skip?: number,
         limit: number = 2,
-    ): CancelablePromise<Array<MetadataDefinitionOut>> {
+    ): CancelablePromise<Paged> {
         return __request({
             method: 'GET',
             path: `/api/v2/metadata/definition`,
@@ -109,14 +110,14 @@ export class MetadataService {
      * @param searchTerm
      * @param skip
      * @param limit
-     * @returns MetadataDefinitionOut Successful Response
+     * @returns Paged Successful Response
      * @throws ApiError
      */
     public static searchMetadataDefinitionApiV2MetadataDefinitionSearchSearchTermGet(
         searchTerm: string,
         skip?: number,
         limit: number = 10,
-    ): CancelablePromise<Array<MetadataDefinitionOut>> {
+    ): CancelablePromise<Paged> {
         return __request({
             method: 'GET',
             path: `/api/v2/metadata/definition/search/${searchTerm}`,

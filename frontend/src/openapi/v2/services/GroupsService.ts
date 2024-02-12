@@ -4,6 +4,7 @@
 import type { GroupBase } from '../models/GroupBase';
 import type { GroupIn } from '../models/GroupIn';
 import type { GroupOut } from '../models/GroupOut';
+import type { Paged } from '../models/Paged';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { request as __request } from '../core/request';
 
@@ -18,19 +19,22 @@ export class GroupsService {
      * limit -- restrict number of records to be returned (i.e. for pagination)
      * @param skip
      * @param limit
-     * @returns GroupOut Successful Response
+     * @param datasetId
+     * @returns Paged Successful Response
      * @throws ApiError
      */
     public static getGroupsApiV2GroupsGet(
         skip?: number,
         limit: number = 10,
-    ): CancelablePromise<Array<GroupOut>> {
+        datasetId?: string,
+    ): CancelablePromise<Paged> {
         return __request({
             method: 'GET',
             path: `/api/v2/groups`,
             query: {
                 'skip': skip,
                 'limit': limit,
+                'dataset_id': datasetId,
             },
             errors: {
                 422: `Validation Error`,
@@ -69,20 +73,23 @@ export class GroupsService {
      * @param searchTerm
      * @param skip
      * @param limit
-     * @returns GroupOut Successful Response
+     * @param datasetId
+     * @returns Paged Successful Response
      * @throws ApiError
      */
     public static searchGroupApiV2GroupsSearchSearchTermGet(
         searchTerm: string,
         skip?: number,
         limit: number = 10,
-    ): CancelablePromise<Array<GroupOut>> {
+        datasetId?: string,
+    ): CancelablePromise<Paged> {
         return __request({
             method: 'GET',
             path: `/api/v2/groups/search/${searchTerm}`,
             query: {
                 'skip': skip,
                 'limit': limit,
+                'dataset_id': datasetId,
             },
             errors: {
                 422: `Validation Error`,

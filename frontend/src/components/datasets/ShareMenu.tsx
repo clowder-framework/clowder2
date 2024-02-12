@@ -9,13 +9,10 @@ import {
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import React, { useEffect, useState } from "react";
 import { ActionModal } from "../dialog/ActionModal";
-import { datasetDeleted, fetchFilesInDataset } from "../../actions/dataset";
+import { datasetDeleted } from "../../actions/dataset";
 import { fetchGroups } from "../../actions/group";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
-import { MoreHoriz } from "@material-ui/icons";
-import DeleteIcon from "@mui/icons-material/Delete";
-import ShareIcon from "@mui/icons-material/Share";
 import GroupsIcon from "@mui/icons-material/Groups";
 import PersonIcon from "@mui/icons-material/Person";
 import ShareDatasetModal from "./ShareDatasetModal";

@@ -25,4 +25,5 @@ export type FolderOut = {
     creator: UserOut;
     created?: string;
     modified?: string;
+    object_type?: string;
 }

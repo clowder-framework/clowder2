@@ -2,25 +2,42 @@ import React, { useEffect, useState } from "react";
 import ShowMoreText from "react-show-more-text";
 import { readTextFromFile } from "../../../utils/common";
 
-import { downloadVisData, fileDownloaded } from "../../../utils/visualization";
+import {
+	downloadVisData,
+	publicFileDownloaded,
+	fileDownloaded,
+} from "../../../utils/visualization";
+import { downloadPublicVisData } from "../../../actions/public_visualization";
 
 type TextProps = {
 	fileId?: string;
 	visualizationId?: string;
+	publicView?: boolean;
 };
 
 export default function Text(props: TextProps) {
-	const { fileId, visualizationId } = props;
+	const { fileId, visualizationId, publicView } = props;
 	const [text, setText] = useState("");
-
 	useEffect(() => {
 		const processBlob = async () => {
 			try {
 				let blob;
 				if (visualizationId) {
-					blob = await downloadVisData(visualizationId);
+					if (publicView) {
+						blob = await downloadPublicVisData(visualizationId);
+					} else {
+						blob = await downloadVisData(visualizationId);
+					}
 				} else {
-					blob = await fileDownloaded(fileId, 0);
+					if (publicView) {
+						console.log("public file download blob");
+						blob = await publicFileDownloaded(fileId);
+						console.log(blob);
+					} else {
+						console.log("downloading blob here");
+						blob = await fileDownloaded(fileId);
+						console.log(blob);
+					}
 				}
 				const file = new File([blob], "text.tmp");
 				const text = await readTextFromFile(file);

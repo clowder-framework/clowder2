@@ -1,16 +1,16 @@
-import React, { useEffect, useState } from "react";
-import { Box, Grid, Typography } from "@mui/material";
-import { metadataConfig } from "../../metadata.config";
-import { useSelector, useDispatch } from "react-redux";
+import React, { useEffect } from "react";
+import { Grid } from "@mui/material";
+import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../types/data";
 import {
 	fetchDatasetMetadata,
 	fetchFileMetadata,
 	fetchMetadataDefinitions,
+	fetchPublicDatasetMetadata,
+	fetchPublicFileMetadata,
+	fetchPublicMetadataDefinitions,
 } from "../../actions/metadata";
-import { Agent } from "./Agent";
-import { MetadataDeleteButton } from "./widgets/MetadataDeleteButton";
-import { ListenerMetadataEntry } from "../metadata/ListenerMetadataEntry";
+import { ListenerMetadataEntry } from "./ListenerMetadataEntry";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 
@@ -20,6 +20,7 @@ type MetadataType = {
 	resourceType: string | undefined;
 	resourceId: string | undefined;
 	version: number | undefined;
+	publicView: boolean | false;
 };
 
 /*
@@ -27,8 +28,7 @@ This is the interface displayed already created metadata and allow eidts
 Uses only the list of metadata
 */
 export const DisplayListenerMetadata = (props: MetadataType) => {
-	const { updateMetadata, deleteMetadata, resourceType, resourceId, version } =
-		props;
+	const { resourceType, resourceId, version, publicView } = props;
 
 	const dispatch = useDispatch();
 
@@ -37,44 +37,75 @@ export const DisplayListenerMetadata = (props: MetadataType) => {
 		skip: number,
 		limit: number
 	) => dispatch(fetchMetadataDefinitions(name, skip, limit));
-	const metadataDefinitionList = useSelector(
-		(state: RootState) => state.metadata.metadataDefinitionList
-	);
+
+	const getPublicMetadatDefinitions = (
+		name: string | null,
+		skip: number,
+		limit: number
+	) => dispatch(fetchPublicMetadataDefinitions(name, skip, limit));
+
 	const listDatasetMetadata = (datasetId: string | undefined) =>
 		dispatch(fetchDatasetMetadata(datasetId));
 	const listFileMetadata = (
 		fileId: string | undefined,
 		version: number | undefined
 	) => dispatch(fetchFileMetadata(fileId, version));
+	const listPublicFileMetadata = (
+		fileId: string | undefined,
+		version: number | undefined
+	) => dispatch(fetchPublicFileMetadata(fileId, version));
+	const listPublicDatasetMetadata = (datasetId: string | undefined) =>
+		dispatch(fetchPublicDatasetMetadata(datasetId));
+
 	const datasetMetadataList = useSelector(
 		(state: RootState) => state.metadata.datasetMetadataList
 	);
 	const fileMetadataList = useSelector(
 		(state: RootState) => state.metadata.fileMetadataList
 	);
+	const publicDatasetMetadataList = useSelector(
+		(state: RootState) => state.metadata.publicDatasetMetadataList
+	);
+	const publicFileMetadataList = useSelector(
+		(state: RootState) => state.metadata.publicFileMetadataList
+	);
 
 	useEffect(() => {
-		getMetadatDefinitions(null, 0, 100);
+		if (publicView) {
+			getPublicMetadatDefinitions(null, 0, 100);
+		} else {
+			getMetadatDefinitions(null, 0, 100);
+		}
 	}, []);
 
 	// complete metadata list with both definition and values
 	useEffect(() => {
 		if (resourceType === "dataset") {
-			listDatasetMetadata(resourceId);
+			if (publicView) {
+				listPublicDatasetMetadata(resourceId);
+			} else {
+				listDatasetMetadata(resourceId);
+			}
 		} else if (resourceType === "file") {
-			listFileMetadata(resourceId, version);
+			if (publicView) {
+				listPublicFileMetadata(resourceId, version);
+			} else {
+				listFileMetadata(resourceId, version);
+			}
 		}
 	}, [resourceType, resourceId, version]);
-
 	return (
 		<>
 			{(() => {
 				let metadataList = [];
-				if (resourceType === "dataset") metadataList = datasetMetadataList;
-				else if (resourceType === "file") metadataList = fileMetadataList;
-				const listenerMetadataList = [];
-				const listenerMetadataContent = [];
-
+				if (resourceType === "dataset" && !publicView)
+					metadataList = datasetMetadataList;
+				else if (resourceType === "file" && !publicView)
+					metadataList = fileMetadataList;
+				else if (resourceType === "file" && publicView)
+					metadataList = publicFileMetadataList;
+				else if (resourceType === "dataset" && publicView)
+					metadataList = publicDatasetMetadataList;
 				return (
 					<Grid container spacing={2}>
 						{metadataList.map((metadata, idx) => {

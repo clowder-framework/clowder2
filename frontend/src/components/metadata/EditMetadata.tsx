@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { Box, Typography } from "@mui/material";
 import { metadataConfig } from "../../metadata.config";
-import { useSelector, useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../types/data";
 import {
 	fetchDatasetMetadata,
@@ -30,7 +30,7 @@ export const EditMetadata = (props: MetadataType) => {
 		limit: number
 	) => dispatch(fetchMetadataDefinitions(name, skip, limit));
 	const metadataDefinitionList = useSelector(
-		(state: RootState) => state.metadata.metadataDefinitionList
+		(state: RootState) => state.metadata.metadataDefinitionList.data
 	);
 	const listDatasetMetadata = (datasetId: string | undefined) =>
 		dispatch(fetchDatasetMetadata(datasetId));

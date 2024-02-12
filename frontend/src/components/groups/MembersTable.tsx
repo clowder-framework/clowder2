@@ -1,4 +1,5 @@
 import * as React from "react";
+import { useState } from "react";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
@@ -10,7 +11,6 @@ import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../types/data";
 import { MembersTableUserEntry } from "./MembersTableUserEntry";
 import { ActionModal } from "../dialog/ActionModal";
-import { useState } from "react";
 import { deleteGroupMember } from "../../actions/group";
 
 type MembersTableProps = {
@@ -27,6 +27,7 @@ export default function MembersTable(props: MembersTableProps) {
 	);
 	// dispatch
 	const dispatch = useDispatch();
+
 	const groupMemberDeleted = (
 		groupId: string | undefined,
 		username: string | undefined

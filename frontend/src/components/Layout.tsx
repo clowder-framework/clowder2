@@ -16,7 +16,14 @@ import ListItem from "@mui/material/ListItem";
 import ListItemButton from "@mui/material/ListItemButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
-import { Link, Menu, MenuItem, MenuList, Typography } from "@mui/material";
+import {
+	Badge,
+	Link,
+	Menu,
+	MenuItem,
+	MenuList,
+	Typography,
+} from "@mui/material";
 import { Link as RouterLink, useLocation } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../types/data";
@@ -30,8 +37,14 @@ import { getCurrEmail } from "../utils/common";
 import VpnKeyIcon from "@mui/icons-material/VpnKey";
 import LogoutIcon from "@mui/icons-material/Logout";
 import { EmbeddedSearch } from "./search/EmbeddedSearch";
-import { fetchUserProfile } from "../actions/user";
+import {
+	fetchUserProfile,
+	getAdminModeStatus as getAdminModeStatusAction,
+	toggleAdminMode as toggleAdminModeAction,
+} from "../actions/user";
+import { AdminPanelSettings } from "@mui/icons-material";
 import ManageAccountsIcon from "@mui/icons-material/ManageAccounts";
+import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
 
 const drawerWidth = 240;
 
@@ -99,15 +112,25 @@ const link = {
 };
 
 export default function PersistentDrawerLeft(props) {
+	const dispatch = useDispatch();
 	const { children } = props;
 	const theme = useTheme();
 	const [open, setOpen] = React.useState(false);
 	const [embeddedSearchHidden, setEmbeddedSearchHidden] = React.useState(false);
 	const [anchorEl, setAnchorEl] = React.useState(null);
 	const isMenuOpen = Boolean(anchorEl);
-	const profile = useSelector((state: RootState) => state.user.profile);
-	const dispatch = useDispatch();
-	const fetchProfile = () => dispatch(fetchUserProfile());
+	const currUserProfile = useSelector((state: RootState) => state.user.profile);
+	const adminMode = useSelector((state: RootState) => state.user.adminMode);
+
+	const fetchCurrUserProfile = () => dispatch(fetchUserProfile());
+	const toggleAdminMode = (adminModeOn: boolean) =>
+		dispatch(toggleAdminModeAction(adminModeOn));
+	const getAdminModeStatus = () => dispatch(getAdminModeStatusAction());
+
+	useEffect(() => {
+		fetchCurrUserProfile();
+		getAdminModeStatus();
+	}, []);
 
 	const handleDrawerOpen = () => {
 		setOpen(true);
@@ -133,7 +156,7 @@ export default function PersistentDrawerLeft(props) {
 		} else {
 			setEmbeddedSearchHidden(false);
 		}
-		fetchProfile();
+		fetchCurrUserProfile();
 	}, [location]);
 
 	const loggedOut = useSelector((state: RootState) => state.error.loggedOut);
@@ -187,18 +210,46 @@ export default function PersistentDrawerLeft(props) {
 								color="inherit"
 							>
 								{getCurrEmail() !== undefined ? (
-									<Gravatar
-										email={getCurrEmail()}
-										rating="g"
-										style={{
-											width: "32px",
-											height: "32px",
-											borderRadius: "50%",
-											verticalAlign: "middle",
-										}}
-									/>
+									<Badge
+										overlap="circular"
+										anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+										badgeContent={
+											adminMode ? (
+												<AdminPanelSettingsIcon
+													sx={{ color: theme.palette.primary.main }}
+												/>
+											) : (
+												<></>
+											)
+										}
+									>
+										<Gravatar
+											email={getCurrEmail()}
+											rating="g"
+											style={{
+												width: "32px",
+												height: "32px",
+												borderRadius: "50%",
+												verticalAlign: "middle",
+											}}
+										/>
+									</Badge>
 								) : (
-									<PersonIcon sx={{ verticalAlign: "middle" }} />
+									<Badge
+										overlap="circular"
+										anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+										badgeContent={
+											adminMode ? (
+												<AdminPanelSettingsIcon
+													sx={{ color: theme.palette.primary.main }}
+												/>
+											) : (
+												<></>
+											)
+										}
+									>
+										<PersonIcon sx={{ verticalAlign: "middle" }} />
+									</Badge>
 								)}
 							</IconButton>
 						)}
@@ -223,6 +274,32 @@ export default function PersistentDrawerLeft(props) {
 						<ListItemText>User Profile</ListItemText>
 					</MenuItem>
 					<Divider orientation="horizontal" />
+					{currUserProfile.admin ? (
+						<>
+							<MenuItem onClick={() => toggleAdminMode(!adminMode)}>
+								{adminMode ? (
+									<>
+										<ListItemIcon>
+											<AdminPanelSettings fontSize="small" />
+										</ListItemIcon>
+										<ListItemText>Drop Admin Mode</ListItemText>
+									</>
+								) : (
+									<>
+										<ListItemIcon>
+											<AdminPanelSettings fontSize="small" />
+										</ListItemIcon>
+										<ListItemText>Enable Admin Mode</ListItemText>
+									</>
+								)}
+							</MenuItem>
+
+							<Divider orientation="horizontal" />
+						</>
+					) : (
+						<></>
+					)}
+
 					<MenuItem component={RouterLink} to="/apikeys">
 						<ListItemIcon>
 							<VpnKeyIcon fontSize="small" />
@@ -284,7 +361,7 @@ export default function PersistentDrawerLeft(props) {
 					</ListItem>
 				</List>
 				<Divider />
-				{profile.admin ? (
+				{currUserProfile.admin ? (
 					<>
 						<List>
 							<ListItem key={"manage-user"} disablePadding>
@@ -355,7 +432,7 @@ export default function PersistentDrawerLeft(props) {
 					}}
 				>
 					<Typography variant="body2" color="primary.light">
-						v2.0.0-beta.1
+						v2.0.0-beta.2
 					</Typography>
 				</Box>
 			</Main>

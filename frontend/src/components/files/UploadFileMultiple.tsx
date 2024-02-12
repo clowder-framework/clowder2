@@ -26,23 +26,16 @@ import {
 
 import LoadingOverlay from "react-loading-overlay-ts";
 import { UploadFileInputMultiple } from "./UploadFileInputMultiple";
-import { fetchFolderPath } from "../../actions/folder";
-import {
-	fetchDatasetAbout,
-	fetchFilesInDataset,
-	fetchFoldersInDataset,
-} from "../../actions/dataset";
 
 type UploadFileMultipleProps = {
 	selectedDatasetId: string | undefined;
 	folderId: string | undefined;
-	setCreateMultipleFileOpen: any;
 };
 
 export const UploadFileMultiple: React.FC<UploadFileMultipleProps> = (
 	props: UploadFileMultipleProps
 ) => {
-	const { selectedDatasetId, folderId, setCreateMultipleFileOpen } = props;
+	const { selectedDatasetId, folderId } = props;
 	const [selectedFiles, setSelectedFiles] = useState<File[] | null>(null);
 	const [metadataRequestForms, setMetadataRequestForms] = useState({});
 	const [allFilled, setAllFilled] = React.useState<boolean>(false);
@@ -70,26 +63,9 @@ export const UploadFileMultiple: React.FC<UploadFileMultipleProps> = (
 			createFilesAction(selectedDatasetId, selectedFiles, selectedFolderId)
 		);
 
-	const getFolderPath = (folderId: string | null) =>
-		dispatch(fetchFolderPath(folderId));
-	const listFilesInDataset = (
-		datasetId: string | undefined,
-		folderId: string | null,
-		skip: number | undefined,
-		limit: number | undefined
-	) => dispatch(fetchFilesInDataset(datasetId, folderId, skip, limit));
-	const listFoldersInDataset = (
-		datasetId: string | undefined,
-		parentFolder: string | null,
-		skip: number | undefined,
-		limit: number | undefined
-	) => dispatch(fetchFoldersInDataset(datasetId, parentFolder, skip, limit));
-	const listDatasetAbout = (datasetId: string | undefined) =>
-		dispatch(fetchDatasetAbout(datasetId));
-
 	const newFiles = useSelector((state: RootState) => state.dataset.newFiles);
 	const metadataDefinitionList = useSelector(
-		(state: RootState) => state.metadata.metadataDefinitionList
+		(state: RootState) => state.metadata.metadataDefinitionList.data
 	);
 
 	useEffect(() => {
@@ -101,7 +77,7 @@ export const UploadFileMultiple: React.FC<UploadFileMultipleProps> = (
 		let required = false;
 
 		metadataDefinitionList.forEach((val, _) => {
-			if (val.fields[0].required) {
+			if (val.required_for_items.files && val.fields[0].required) {
 				required = true;
 			}
 		});
@@ -112,7 +88,7 @@ export const UploadFileMultiple: React.FC<UploadFileMultipleProps> = (
 	const checkIfFieldsAreFilled = () => {
 		return metadataDefinitionList.every((val) => {
 			return val.fields.every((field) => {
-				return field.required
+				return val.required_for_items.files && field.required
 					? metadataRequestForms[val.name] !== undefined &&
 							metadataRequestForms[val.name].content[field.name] !==
 								undefined &&
@@ -150,15 +126,6 @@ export const UploadFileMultiple: React.FC<UploadFileMultipleProps> = (
 	};
 	const handleBack = () => {
 		setActiveStep((prevActiveStep) => prevActiveStep - 1);
-	};
-
-	// finish button post dataset; dataset ID triggers metadata posting
-	const handleFinish = () => {
-		// Triggers spinner
-		setLoading(true);
-
-		// create dataset
-		uploadFiles(selectedDatasetId, selectedFiles, folderId);
 	};
 
 	const handleFinishMultiple = () => {
@@ -200,7 +167,10 @@ export const UploadFileMultiple: React.FC<UploadFileMultipleProps> = (
 						<StepContent TransitionProps={{ unmountOnExit: false }}>
 							<Typography>Provide us the metadata about your file.</Typography>
 							<Box>
-								<CreateMetadata setMetadata={setMetadata} />
+								<CreateMetadata
+									setMetadata={setMetadata}
+									sourceItem={"files"}
+								/>
 							</Box>
 							{/*buttons*/}
 							<Grid container>

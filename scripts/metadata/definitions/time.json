@@ -1,6 +1,10 @@
 {
     "name" : "Time",
     "description" : "time",
+    "required_for_items": {
+        "datasets": false,
+        "files": false
+    },
     "context" : [
         {
             "doi" : "https://schema.org/Time"

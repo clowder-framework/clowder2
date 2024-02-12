@@ -23,19 +23,26 @@ from app.models.datasets import (
     DatasetStatus,
 )
 from app.models.files import FileDB, FileDBViewList, FileOut, LocalFileIn, StorageType
-from app.models.folders import FolderDB, FolderDBViewList, FolderIn, FolderOut
+from app.models.folder_and_file import FolderFileViewList
+from app.models.folders import (
+    FolderDB,
+    FolderDBViewList,
+    FolderIn,
+    FolderOut,
+    FolderPatch,
+)
 from app.models.metadata import MetadataDB
-from app.models.pyobjectid import PyObjectId
+from app.models.pages import Paged, _construct_page_metadata, _get_page_query
 from app.models.thumbnails import ThumbnailDB
 from app.models.users import UserOut
 from app.rabbitmq.listeners import submit_dataset_job
-from app.routers.authentication import get_admin
+from app.routers.authentication import get_admin, get_admin_mode
 from app.routers.files import add_file_entry, add_local_file_entry, remove_file_entry
 from app.search.connect import delete_document_by_id
-from app.search.index import index_dataset
+from app.search.index import index_dataset, index_file
 from beanie import PydanticObjectId
 from beanie.odm.operators.update.general import Inc
-from beanie.operators import Or
+from beanie.operators import And, Or
 from bson import ObjectId, json_util
 from elasticsearch import Elasticsearch
 from fastapi import APIRouter, Depends, File, HTTPException, Request, UploadFile
@@ -190,79 +197,119 @@ async def save_dataset(
     return dataset.dict()
 
 
-@router.get("", response_model=List[DatasetOut])
+@router.get("", response_model=Paged)
 async def get_datasets(
     user_id=Depends(get_user),
     skip: int = 0,
     limit: int = 10,
     mine: bool = False,
     admin=Depends(get_admin),
+    admin_mode: bool = Depends(get_admin_mode),
 ):
-    if admin:
-        datasets = await DatasetDBViewList.find(
-            sort=(-DatasetDBViewList.created),
-            skip=skip,
-            limit=limit,
+    if admin and admin_mode:
+        datasets_and_count = await DatasetDBViewList.aggregate(
+            [_get_page_query(skip, limit, sort_field="created", ascending=False)],
         ).to_list()
     elif mine:
-        datasets = await DatasetDBViewList.find(
-            DatasetDBViewList.creator.email == user_id,
-            sort=(-DatasetDBViewList.created),
-            skip=skip,
-            limit=limit,
-        ).to_list()
+        datasets_and_count = (
+            await DatasetDBViewList.find(DatasetDBViewList.creator.email == user_id)
+            .aggregate(
+                [_get_page_query(skip, limit, sort_field="created", ascending=False)],
+            )
+            .to_list()
+        )
     else:
-        datasets = await DatasetDBViewList.find(
-            Or(
-                DatasetDBViewList.creator.email == user_id,
-                DatasetDBViewList.auth.user_ids == user_id,
-                DatasetDBViewList.status == DatasetStatus.AUTHENTICATED.name,
-            ),
-            sort=(-DatasetDBViewList.created),
-            skip=skip,
-            limit=limit,
-        ).to_list()
+        datasets_and_count = (
+            await DatasetDBViewList.find(
+                Or(
+                    DatasetDBViewList.creator.email == user_id,
+                    DatasetDBViewList.auth.user_ids == user_id,
+                    DatasetDBViewList.status == DatasetStatus.PUBLIC.name,
+                    DatasetDBViewList.status == DatasetStatus.AUTHENTICATED.name,
+                )
+            )
+            .aggregate(
+                [_get_page_query(skip, limit, sort_field="created", ascending=False)],
+            )
+            .to_list()
+        )
 
-    return [dataset.dict() for dataset in datasets]
+    page_metadata = _construct_page_metadata(datasets_and_count, skip, limit)
+    # TODO have to change _id this way otherwise it won't work
+    # TODO need to research if there is other pydantic trick to make it work
+    page = Paged(
+        metadata=page_metadata,
+        data=[
+            DatasetOut(id=item.pop("_id"), **item)
+            for item in datasets_and_count[0]["data"]
+        ],
+    )
+
+    return page.dict()
 
 
 @router.get("/{dataset_id}", response_model=DatasetOut)
 async def get_dataset(
     dataset_id: str,
     authenticated: bool = Depends(CheckStatus("AUTHENTICATED")),
+    public: bool = Depends(CheckStatus("PUBLIC")),
     allow: bool = Depends(Authorization("viewer")),
 ):
-    if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
-        return dataset.dict()
-    raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
+    if authenticated or public or allow:
+        if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
+            return dataset.dict()
+        raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
+    else:
+        raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
 
 
-@router.get("/{dataset_id}/files", response_model=List[FileOut])
+@router.get("/{dataset_id}/files", response_model=Paged)
 async def get_dataset_files(
     dataset_id: str,
     folder_id: Optional[str] = None,
     authenticated: bool = Depends(CheckStatus("AUTHENTICATED")),
-    allow: bool = Depends(Authorization("viewer")),
+    public: bool = Depends(CheckStatus("PUBLIC")),
     user_id=Depends(get_user),
     skip: int = 0,
     limit: int = 10,
+    admin=Depends(get_admin),
+    admin_mode: bool = Depends(get_admin_mode),
+    allow: bool = Depends(Authorization("viewer")),
 ):
-    if authenticated:
-        query = [
-            FileDBViewList.dataset_id == ObjectId(dataset_id),
-        ]
-    else:
-        query = [
-            FileDBViewList.dataset_id == ObjectId(dataset_id),
-            Or(
-                FileDBViewList.creator.email == user_id,
-                FileDBViewList.auth.user_ids == user_id,
-            ),
-        ]
-    if folder_id is not None:
-        query.append(FileDBViewList.folder_id == ObjectId(folder_id))
-    files = await FileDBViewList.find(*query).skip(skip).limit(limit).to_list()
-    return [file.dict() for file in files]
+    if (await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
+        if authenticated or public or (admin and admin_mode):
+            query = [
+                FileDBViewList.dataset_id == ObjectId(dataset_id),
+            ]
+        else:
+            query = [
+                FileDBViewList.dataset_id == ObjectId(dataset_id),
+                Or(
+                    FileDBViewList.creator.email == user_id,
+                    FileDBViewList.auth.user_ids == user_id,
+                ),
+            ]
+        if folder_id is not None:
+            query.append(FileDBViewList.folder_id == ObjectId(folder_id))
+
+        files_and_count = (
+            await FileDBViewList.find(*query)
+            .aggregate(
+                [_get_page_query(skip, limit, sort_field="created", ascending=False)],
+            )
+            .to_list()
+        )
+        page_metadata = _construct_page_metadata(files_and_count, skip, limit)
+        page = Paged(
+            metadata=page_metadata,
+            data=[
+                FileOut(id=item.pop("_id"), **item)
+                for item in files_and_count[0]["data"]
+            ],
+        )
+        return page.dict()
+
+    raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
 
 
 @router.put("/{dataset_id}", response_model=DatasetOut)
@@ -303,6 +350,19 @@ async def patch_dataset(
             dataset.status = dataset_info.status
         dataset.modified = datetime.datetime.utcnow()
         await dataset.save()
+
+        if dataset_info.status is not None:
+            query = [
+                FileDBViewList.dataset_id == ObjectId(dataset_id),
+            ]
+            files_views = await FileDBViewList.find(*query).to_list()
+            for file_view in files_views:
+                if (
+                    file := await FileDB.get(PydanticObjectId(file_view.id))
+                ) is not None:
+                    file.status = dataset_info.status
+                    await file.save()
+                    await index_file(es, FileOut(**file.dict()), update=True)
 
         # Update entry to the dataset index
         await index_dataset(es, DatasetOut(**dataset.dict()), update=True)
@@ -353,25 +413,26 @@ async def add_folder(
                     status_code=400, detail=f"Parent folder {parent_folder} not found"
                 )
         new_folder = FolderDB(
-            **folder_in.dict(), creator=user, dataset_id=PyObjectId(dataset_id)
+            **folder_in.dict(), creator=user, dataset_id=PydanticObjectId(dataset_id)
         )
         await new_folder.insert()
         return new_folder.dict()
     raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
 
 
-@router.get("/{dataset_id}/folders", response_model=List[FolderOut])
+@router.get("/{dataset_id}/folders", response_model=Paged)
 async def get_dataset_folders(
     dataset_id: str,
     parent_folder: Optional[str] = None,
     user_id=Depends(get_user),
-    allow: bool = Depends(Authorization("viewer")),
     authenticated: bool = Depends(CheckStatus("authenticated")),
+    public: bool = Depends(CheckStatus("PUBLIC")),
     skip: int = 0,
     limit: int = 10,
+    allow: bool = Depends(Authorization("viewer")),
 ):
     if (await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
-        if authenticated:
+        if authenticated or public:
             query = [
                 FolderDBViewList.dataset_id == ObjectId(dataset_id),
             ]
@@ -386,9 +447,101 @@ async def get_dataset_folders(
         if parent_folder is not None:
             query.append(FolderDBViewList.parent_folder == ObjectId(parent_folder))
         else:
-            query.append(FolderDBViewList.parent_folder == None)  # noqa: E711
-        folders = await FolderDBViewList.find(*query).skip(skip).limit(limit).to_list()
-        return [folder.dict() for folder in folders]
+            query.append(FolderDBViewList.parent_folder is None)
+
+        folders_and_count = (
+            await FolderDBViewList.find(*query)
+            .aggregate(
+                [_get_page_query(skip, limit, sort_field="created", ascending=False)],
+            )
+            .to_list()
+        )
+
+        page_metadata = _construct_page_metadata(folders_and_count, skip, limit)
+        page = Paged(
+            metadata=page_metadata,
+            data=[
+                DatasetOut(id=item.pop("_id"), **item)
+                for item in folders_and_count[0]["data"]
+            ],
+        )
+        return page.dict()
+    else:
+        raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
+
+
+@router.get("/{dataset_id}/folders_and_files", response_model=Paged)
+async def get_dataset_folders_and_files(
+    dataset_id: str,
+    folder_id: Optional[str] = None,
+    authenticated: bool = Depends(CheckStatus("AUTHENTICATED")),
+    public: bool = Depends(CheckStatus("PUBLIC")),
+    user_id=Depends(get_user),
+    skip: int = 0,
+    limit: int = 10,
+    admin=Depends(get_admin),
+    admin_mode: bool = Depends(get_admin_mode),
+    allow: bool = Depends(Authorization("viewer")),
+):
+    if (await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
+        if authenticated or public or (admin and admin_mode):
+            query = [
+                FolderFileViewList.dataset_id == ObjectId(dataset_id),
+            ]
+        else:
+            query = [
+                FolderFileViewList.dataset_id == ObjectId(dataset_id),
+                Or(
+                    FolderFileViewList.creator.email == user_id,
+                    FolderFileViewList.auth.user_ids == user_id,
+                ),
+            ]
+
+        if folder_id is None:
+            # only show folder and file at root level without parent folder
+            query.append(
+                And(
+                    FolderFileViewList.parent_folder is None,
+                    FolderFileViewList.folder_id is None,
+                )
+            )
+        else:
+            query.append(
+                Or(
+                    FolderFileViewList.folder_id == ObjectId(folder_id),
+                    FolderFileViewList.parent_folder == ObjectId(folder_id),
+                )
+            )
+
+        folders_files_and_count = (
+            await FolderFileViewList.find(*query)
+            .aggregate(
+                [
+                    _get_page_query(
+                        skip,
+                        limit,
+                        sort_clause={
+                            "$sort": {
+                                "object_type": -1,  # folder first
+                                "created": -1,  # then sort by created descendingly
+                            }
+                        },
+                    )
+                ],
+            )
+            .to_list()
+        )
+        page_metadata = _construct_page_metadata(folders_files_and_count, skip, limit)
+        page = Paged(
+            metadata=page_metadata,
+            data=[
+                FileOut(id=item.pop("_id"), **item)
+                if item.get("object_type") == "file"
+                else FolderOut(id=item.pop("_id"), **item)
+                for item in folders_files_and_count[0]["data"]
+            ],
+        )
+        return page.dict()
     raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
 
 
@@ -431,6 +584,48 @@ async def delete_folder(
     raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
 
 
+@router.get("/{dataset_id}/folders/{folder_id}")
+async def get_folder(
+    dataset_id: str,
+    folder_id: str,
+    allow: bool = Depends(Authorization("viewer")),
+):
+    if (await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
+        if (folder := await FolderDB.get(PydanticObjectId(folder_id))) is not None:
+            return folder.dict()
+        else:
+            raise HTTPException(status_code=404, detail=f"Folder {folder_id} not found")
+    raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
+
+
+@router.patch("/{dataset_id}/folders/{folder_id}", response_model=FolderOut)
+async def patch_folder(
+    dataset_id: str,
+    folder_id: str,
+    folder_info: FolderPatch,
+    user=Depends(get_current_user),
+    allow: bool = Depends(Authorization("editor")),
+):
+    if await DatasetDB.get(PydanticObjectId(dataset_id)) is not None:
+        if (folder := await FolderDB.get(PydanticObjectId(folder_id))) is not None:
+            # update folder
+            if folder_info.name is not None:
+                folder.name = folder_info.name
+            # allow moving folder around within the hierarchy
+            if folder_info.parent_folder is not None:
+                if (
+                    await FolderDB.get(PydanticObjectId(folder_info.parent_folder))
+                    is not None
+                ):
+                    folder.parent_folder = folder_info.parent_folder
+            folder.modified = datetime.datetime.utcnow()
+            await folder.save()
+            return folder.dict()
+        else:
+            raise HTTPException(status_code=404, detail=f"Folder {folder_id} not found")
+    raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
+
+
 # new endpoint for /{dataset_id}/local_files
 # new endpoint for /{dataset_id}/remote_files
 
@@ -452,7 +647,12 @@ async def save_file(
                 status_code=401, detail="User not found. Session might have expired."
             )
 
-        new_file = FileDB(name=file.filename, creator=user, dataset_id=dataset.id)
+        new_file = FileDB(
+            name=file.filename,
+            creator=user,
+            dataset_id=dataset.id,
+            status=dataset.status,
+        )
 
         if folder_id is not None:
             if (folder := await FolderDB.get(PydanticObjectId(folder_id))) is not None:
@@ -495,7 +695,12 @@ async def save_files(
                     detail="User not found. Session might have expired.",
                 )
 
-            new_file = FileDB(name=file.filename, creator=user, dataset_id=dataset.id)
+            new_file = FileDB(
+                name=file.filename,
+                creator=user,
+                dataset_id=dataset.id,
+                status=dataset.status,
+            )
 
             if folder_id is not None:
                 if (
@@ -507,6 +712,12 @@ async def save_files(
                         status_code=404, detail=f"Folder {folder_id} not found"
                     )
 
+            public = False
+            authenticated = False
+            if dataset.status == "PUBLIC":
+                public = True
+            if dataset.status == "AUTHENTICATED":
+                authenticated = True
             await add_file_entry(
                 new_file,
                 user,
@@ -515,6 +726,8 @@ async def save_files(
                 rabbitmq_client,
                 file.file,
                 content_type=file.content_type,
+                public=public,
+                authenticated=authenticated,
             )
             files_added.append(new_file.dict())
         return files_added

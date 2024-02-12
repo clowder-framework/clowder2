@@ -6,13 +6,20 @@ import {
 	DELETE_GROUP_MEMBER,
 	RECEIVE_GROUP_ABOUT,
 	RECEIVE_GROUPS,
+	RESET_CREATE_GROUP,
 	SEARCH_GROUPS,
 	UPDATE_GROUP,
 } from "../actions/group";
 import { RECEIVE_GROUP_ROLE } from "../actions/authorization";
 import { DataAction } from "../types/action";
 import { GroupState } from "../types/data";
-import { GroupOut, RoleType } from "../openapi/v2";
+import {
+	GroupOut,
+	Paged,
+	PageMetadata,
+	RoleType,
+	UserOut,
+} from "../openapi/v2";
 import {
 	LIST_USERS,
 	PREFIX_SEARCH_USERS,
@@ -21,18 +28,19 @@ import {
 } from "../actions/user";
 
 const defaultState: GroupState = {
-	groups: [],
+	groups: <Paged>{ metadata: <PageMetadata>{}, data: <GroupOut[]>[] },
+	newGroup: <GroupOut>{},
 	about: <GroupOut>{},
 	role: <RoleType>{},
-	users: [],
+	users: <Paged>{ metadata: <PageMetadata>{}, data: <UserOut[]>[] },
 };
 
 const group = (state = defaultState, action: DataAction) => {
 	switch (action.type) {
 		case CREATE_GROUP:
-			return Object.assign({}, state, {
-				groups: [...[], action.about, ...state.groups],
-			});
+			return Object.assign({}, state, { newGroup: action.about });
+		case RESET_CREATE_GROUP:
+			return Object.assign({}, state, { newGroup: {} });
 		case RECEIVE_GROUPS:
 			return Object.assign({}, state, { groups: action.groups });
 		case SEARCH_GROUPS:
@@ -51,15 +59,21 @@ const group = (state = defaultState, action: DataAction) => {
 			return Object.assign({}, state, { users: action.users });
 		case SET_ADMIN:
 			return Object.assign({}, state, {
-				users: state.users.map((user) =>
-					user.email === action.profile.email ? action.profile : user
-				),
+				users: {
+					...state.users,
+					data: state.users.data.map((user: UserOut) =>
+						user.email === action.profile.email ? action.profile : user
+					),
+				},
 			});
 		case REVOKE_ADMIN:
 			return Object.assign({}, state, {
-				users: state.users.map((user) =>
-					user.email === action.profile.email ? action.profile : user
-				),
+				users: {
+					...state.users,
+					data: state.users.data.map((user: UserOut) =>
+						user.email === action.profile.email ? action.profile : user
+					),
+				},
 			});
 		case PREFIX_SEARCH_USERS:
 			return Object.assign({}, state, { users: action.users });
@@ -67,7 +81,12 @@ const group = (state = defaultState, action: DataAction) => {
 			return Object.assign({}, state, { about: action.about });
 		case DELETE_GROUP:
 			return Object.assign({}, state, {
-				groups: state.groups.filter((group) => group.id !== action.about.id),
+				groups: {
+					...state.groups,
+					data: state.groups.data.filter(
+						(group: GroupOut) => group.id !== action.about.id
+					),
+				},
 			});
 		default:
 			return state;

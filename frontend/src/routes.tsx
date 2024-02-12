@@ -8,7 +8,9 @@ import {
 	useParams,
 } from "react-router-dom";
 import { Dataset as DatasetComponent } from "./components/datasets/Dataset";
+import { PublicDataset as PublicDatasetComponent } from "./components/datasets/PublicDataset";
 import { File as FileComponent } from "./components/files/File";
+import { PublicFile as PublicFileComponent } from "./components/files/PublicFile";
 import { CreateDataset } from "./components/datasets/CreateDataset";
 import { Groups as GroupListComponent } from "./components/groups/Groups";
 import { Group as GroupComponent } from "./components/groups/Group";
@@ -21,13 +23,19 @@ import { Search } from "./components/search/Search";
 import { isAuthorized } from "./utils/common";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "./types/data";
-import { refreshToken, resetLogout } from "./actions/common";
+import {
+	refreshToken,
+	resetFailedReason,
+	resetFailedReasonInline,
+	resetLogout,
+} from "./actions/common";
 import { Explore } from "./components/Explore";
+import { Public } from "./components/Public";
 import { ExtractionHistory } from "./components/listeners/ExtractionHistory";
 import { fetchDatasetRole, fetchFileRole } from "./actions/authorization";
 import { PageNotFound } from "./components/errors/PageNotFound";
 import { Forbidden } from "./components/errors/Forbidden";
-import { ApiKeys } from "./components/ApiKeys/ApiKey";
+import { ApiKeys } from "./components/apikeys/ApiKey";
 import { Profile } from "./components/users/Profile";
 import { ManageUsers } from "./components/users/ManageUsers";
 import config from "./app.config";
@@ -74,11 +82,17 @@ const PrivateRoute = (props): JSX.Element => {
 		}
 	}, [loggedOut]);
 
-	// not found or unauthorized
+	// not found or unauthorized redirect
 	useEffect(() => {
 		if (reason == "Forbidden") {
+			// if redirect to new page, reset error so the error modal/message doesn't stuck in "Forbidden" state
+			dispatch(resetFailedReason());
+			dispatch(resetFailedReasonInline());
 			history("/forbidden");
 		} else if (reason == "Not Found") {
+			// if redirect to new page, reset error so the error modal/message doesn't stuck in "Forbidden" state
+			dispatch(resetFailedReason());
+			dispatch(resetFailedReasonInline());
 			history("/not-found");
 		}
 	}, [reason]);
@@ -92,21 +106,26 @@ const PrivateRoute = (props): JSX.Element => {
 		if (fileId && reason === "") listFileRole(fileId);
 	}, [fileId, reason]);
 
-	return <>{isAuthorized() ? children : <Navigate to="/auth/login" />}</>;
+	return <>{isAuthorized() ? children : <Navigate to="/public" />}</>;
 };
 
 export const AppRoutes = (): JSX.Element => {
 	return (
 		<BrowserRouter>
 			<Routes>
-				<Route
-					path="/"
-					element={
-						<PrivateRoute>
-							<Explore />
-						</PrivateRoute>
-					}
-				/>
+				<Route path="/public" element={<Public />} />
+				{isAuthorized() ? (
+					<Route
+						path="/"
+						element={
+							<PrivateRoute>
+								<Explore />
+							</PrivateRoute>
+						}
+					/>
+				) : (
+					<Route path="/public" element={<Public />} />
+				)}
 				<Route
 					path="/profile"
 					element={
@@ -164,6 +183,10 @@ export const AppRoutes = (): JSX.Element => {
 					}
 				/>
 				<Route
+					path="/public/datasets/:datasetId"
+					element={<PublicDatasetComponent />}
+				/>
+				<Route
 					path="/files/:fileId"
 					element={
 						<PrivateRoute>
@@ -171,6 +194,7 @@ export const AppRoutes = (): JSX.Element => {
 						</PrivateRoute>
 					}
 				/>
+				<Route path="/public/files/:fileId" element={<PublicFileComponent />} />
 				<Route path="/auth/register" element={<RedirectRegisterComponent />} />
 				<Route path="/auth/login" element={<RedirectLoginComponent />} />
 				<Route path="/auth/logout" element={<RedirectLogoutComponent />} />

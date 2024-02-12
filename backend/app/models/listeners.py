@@ -6,7 +6,6 @@ import pymongo
 from app.config import settings
 from app.models.authorization import AuthorizationDB
 from app.models.mongomodel import MongoDBRef
-from app.models.pyobjectid import PyObjectId
 from app.models.users import UserOut
 from beanie import Document, PydanticObjectId, View
 from pydantic import AnyUrl, BaseModel, Field
@@ -95,7 +94,7 @@ class FeedListener(BaseModel):
     """This is a shorthand POST class for associating an existing EventListener with a Feed. The automatic flag determines
     whether the Feed will automatically send new matches to the Event Listener."""
 
-    listener_id: PyObjectId
+    listener_id: PydanticObjectId
     automatic: bool  # Listeners can trigger automatically or not on a per-feed basis.
 
 
@@ -302,7 +301,9 @@ class EventListenerJobUpdateViewList(View, EventListenerJobUpdateBase):
                         {
                             "$lookup": {
                                 "from": "authorization",
-                                "localField": "listener_job_details.resource_ref.resource_id",
+                                "localField": (
+                                    "listener_job_details.resource_ref.resource_id"
+                                ),
                                 "foreignField": "dataset_id",
                                 "as": "auth",
                             }
@@ -319,7 +320,9 @@ class EventListenerJobUpdateViewList(View, EventListenerJobUpdateBase):
                         {
                             "$lookup": {
                                 "from": "files",
-                                "localField": "listener_job_details.resource_ref.resource_id",
+                                "localField": (
+                                    "listener_job_details.resource_ref.resource_id"
+                                ),
                                 "foreignField": "_id",
                                 "as": "file_details",
                             }

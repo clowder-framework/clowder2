@@ -1,21 +1,18 @@
-import {
-	ExtractedMetadata,
-	FilePreview,
-	Folder,
-	MetadataJsonld,
-	Profile,
-} from "./data";
+import { ExtractedMetadata, FilePreview, Folder, MetadataJsonld } from "./data";
 import {
 	AuthorizationBase,
 	DatasetOut as Dataset,
 	DatasetRoles,
 	EventListenerJobOut,
 	EventListenerJobUpdateOut,
+	FileOut,
 	FileOut as FileSummary,
 	FileVersion,
+	FolderOut,
 	GroupOut as Group,
 	MetadataDefinitionOut as MetadataDefinition,
 	MetadataOut as Metadata,
+	Paged,
 	RoleType,
 	UserAPIKeyOut,
 	UserOut,
@@ -30,10 +27,17 @@ import {
 import { CREATE_GROUP, DELETE_GROUP } from "../actions/group";
 import { RECEIVE_FILE_PRESIGNED_URL } from "../actions/file";
 import { GET_VIS_DATA_PRESIGNED_URL } from "../actions/visualization";
+import { GET_PUBLIC_VIS_DATA_PRESIGNED_URL } from "../actions/public_visualization";
+import { RECEIVE_FOLDERS_FILES_IN_DATASET } from "../actions/dataset";
 
 interface RECEIVE_FILES_IN_DATASET {
 	type: "RECEIVE_FILES_IN_DATASET";
-	files: FileSummary[];
+	files: Paged;
+}
+
+interface UPDATE_FILE {
+	type: "UPDATE_FILE";
+	file: FileOut;
 }
 
 interface DELETE_FILE {
@@ -63,12 +67,27 @@ interface RECEIVE_FILE_ROLE {
 
 interface RECEIVE_DATASETS {
 	type: "RECEIVE_DATASETS";
-	datasets: Dataset[];
+	datasets: Paged;
+}
+
+interface RECEIVE_PUBLIC_DATASETS {
+	type: "RECEIVE_PUBLIC_DATASETS";
+	publicDatasets: Dataset[];
+}
+
+interface RECEIVE_PUBLIC_DATASET_ABOUT {
+	type: "RECEIVE_PUBLIC_DATASET_ABOUT";
+	publicAbout: Dataset;
+}
+
+interface RECEIVE_FILES_IN_PUBLIC_DATASET {
+	type: "RECEIVE_FILES_IN_PUBLIC_DATASET";
+	publicFiles: FileSummary[];
 }
 
 interface DELETE_DATASET {
 	type: "DELETE_DATASET";
-	dataset: Dataset;
+	dataset: Paged;
 }
 
 interface RECEIVE_FILE_EXTRACTED_METADATA {
@@ -76,9 +95,19 @@ interface RECEIVE_FILE_EXTRACTED_METADATA {
 	extractedMetadata: ExtractedMetadata[];
 }
 
+interface RECEIVE_PUBLIC_FILE_EXTRACTED_METADATA {
+	type: "RECEIVE_PUBLIC_FILE_EXTRACTED_METADATA";
+	publicExtractedMetadata: ExtractedMetadata[];
+}
+
 interface RECEIVE_FILE_METADATA_JSONLD {
 	type: "RECEIVE_FILE_METADATA_JSONLD";
 	metadataJsonld: MetadataJsonld[];
+}
+
+interface RECEIVE_PUBLIC_FILE_METADATA_JSONLD {
+	type: "RECEIVE_PUBLIC_FILE_METADATA_JSONLD";
+	publicMetadataJsonld: MetadataJsonld[];
 }
 
 interface RECEIVE_PREVIEWS {
@@ -86,9 +115,19 @@ interface RECEIVE_PREVIEWS {
 	previews: FilePreview[];
 }
 
+interface RECEIVE_PUBLIC_PREVIEWS {
+	type: "RECEIVE_PUBLIC_PREVIEWS";
+	publicPreviews: FilePreview[];
+}
+
 interface RECEIVE_VERSIONS {
 	type: "RECEIVE_VERSIONS";
 	fileVersions: FileVersion[];
+}
+
+interface RECEIVE_PUBLIC_VERSIONS {
+	type: "RECEIVE_PUBLIC_VERSIONS";
+	publicFileVersions: FileVersion[];
 }
 
 interface CHANGE_SELECTED_VERSION {
@@ -96,9 +135,24 @@ interface CHANGE_SELECTED_VERSION {
 	selected_version: number;
 }
 
+interface CHANGE_PUBLIC_SELECTED_VERSION {
+	type: "CHANGE_PUBLIC_SELECTED_VERSION";
+	publicSelected_version_num: number;
+}
+
 interface SET_USER {
 	type: "SET_USER";
 	Authorization: string;
+}
+
+interface TOGGLE_ADMIN_MODE {
+	adminMode: boolean;
+	type: "TOGGLE_ADMIN_MODE";
+}
+
+interface GET_ADMIN_MODE_STATUS {
+	adminMode: boolean;
+	type: "GET_ADMIN_MODE_STATUS";
 }
 
 interface LOGIN_ERROR {
@@ -147,7 +201,7 @@ interface RESET_API_KEY {
 
 interface RECEIVE_USER_PROFILE {
 	type: "RECEIVE_USER_PROFILE";
-	profile: Profile;
+	profile: UserOut;
 }
 
 interface CREATE_DATASET {
@@ -155,20 +209,31 @@ interface CREATE_DATASET {
 	dataset: Dataset;
 }
 
+interface UPDATE_DATASET {
+	type: "UPDATE_DATASET";
+	about: Dataset;
+}
+
 interface RESET_CREATE_DATASET {
 	type: "RESET_CREATE_DATASET";
-	newDataset: Dataset;
 }
 
 interface CREATE_FILE {
+	file: FileOut;
 	type: "CREATE_FILE";
-	newFile: File;
+}
+
+interface CREATE_FILES {
+	files: FileOut[];
+	type: "CREATE_FILES";
 }
 
 interface RESET_CREATE_FILE {
 	type: "RESET_CREATE_FILE";
-	newFile: File;
-	file: FileSummary;
+}
+
+interface RESET_CREATE_FILES {
+	type: "RESET_CREATE_FILES";
 }
 
 interface GENERATE_API_KEY {
@@ -225,9 +290,19 @@ interface RECEIVE_FILE_SUMMARY {
 	fileSummary: FileSummary;
 }
 
+interface RECEIVE_PUBLIC_FILE_SUMMARY {
+	type: "RECEIVE_PUBLIC_FILE_SUMMARY";
+	publicFileSummary: FileSummary;
+}
+
 interface RECEIVE_DATASET_METADATA {
 	type: "RECEIVE_DATASET_METADATA";
 	metadataList: Metadata[];
+}
+
+interface RECEIVE_PUBLIC_DATASET_METADATA {
+	type: "RECEIVE_PUBLIC_DATASET_METADATA";
+	publicDatasetMetadataList: Metadata[];
 }
 
 interface RECEIVE_FILE_METADATA {
@@ -235,9 +310,19 @@ interface RECEIVE_FILE_METADATA {
 	metadataList: Metadata[];
 }
 
+interface RECEIVE_PUBLIC_FILE_METADATA {
+	type: "RECEIVE_PUBLIC_FILE_METADATA";
+	publicFileMetadataList: Metadata[];
+}
+
 interface RECEIVE_FOLDERS_IN_DATASET {
 	type: "RECEIVE_FOLDERS_IN_DATASET";
 	folders: Folder[];
+}
+
+interface RECEIVE_FOLDERS_IN_PUBLIC_DATASET {
+	type: "RECEIVE_FOLDERS_IN_PUBLIC_DATASET";
+	publicFolders: Folder[];
 }
 
 interface UPDATE_DATASET_METADATA {
@@ -265,6 +350,11 @@ interface RECEIVE_METADATA_DEFINITIONS {
 	metadataDefinitionList: MetadataDefinition[];
 }
 
+interface RECEIVE_PUBLIC_METADATA_DEFINITIONS {
+	type: "RECEIVE_PUBLIC_METADATA_DEFINITIONS";
+	publicMetadataDefinitionList: MetadataDefinition[];
+}
+
 interface RECEIVE_METADATA_DEFINITION {
 	type: "RECEIVE_METADATA_DEFINITION";
 	metadataDefinition: MetadataDefinition;
@@ -280,9 +370,13 @@ interface DELETE_METADATA_DEFINITION {
 	metadataDefinition: MetadataDefinition;
 }
 
-interface SAVE_METADATA_DEFINITIONS {
-	type: "SAVE_METADATA_DEFINITIONS";
-	metadataDefinitionList: MetadataDefinition[];
+interface SAVE_METADATA_DEFINITION {
+	type: "SAVE_METADATA_DEFINITION";
+	metadataDefinition: MetadataDefinition;
+}
+
+interface RESET_SAVE_METADATA_DEFINITIONS {
+	type: "RESET_SAVE_METADATA_DEFINITIONS";
 }
 
 interface DOWNLOAD_FILE {
@@ -318,6 +412,11 @@ interface FOLDER_DELETED {
 interface GET_FOLDER_PATH {
 	type: "GET_FOLDER_PATH";
 	folderPath: string[];
+}
+
+interface GET_PUBLIC_FOLDER_PATH {
+	type: "GET_PUBLIC_FOLDER_PATH";
+	publicFolderPath: string[];
 }
 
 interface RECEIVE_LISTENERS {
@@ -380,6 +479,15 @@ interface CREATE_GROUP {
 	about: Group;
 }
 
+interface RESET_CREATE_GROUP {
+	type: "RESET_CREATE_GROUP";
+}
+
+interface UPDATE_GROUP {
+	type: "UPDATE_GROUP";
+	about: Group;
+}
+
 interface RECEIVE_GROUPS {
 	type: "RECEIVE_GROUPS";
 	groups: Group[];
@@ -417,12 +525,12 @@ interface ADD_GROUP_MEMBER {
 
 interface LIST_USERS {
 	type: "LIST_USERS";
-	users: UserOut[];
+	users: Paged;
 }
 
 interface PREFIX_SEARCH_USERS {
 	type: "PREFIX_SEARCH_USERS";
-	users: UserOut[];
+	users: Paged;
 }
 
 interface ASSIGN_GROUP_MEMBER_ROLE {
@@ -455,14 +563,71 @@ interface RESET_VIS_DATA_PRESIGNED_URL {
 	preSignedUrl: string;
 }
 
+interface SET_ADMIN {
+	type: "SET_ADMIN";
+	profile: UserOut;
+}
+
+interface REVOKE_ADMIN {
+	type: "REVOKE_ADMIN";
+	profile: UserOut;
+}
+
+interface GET_PUBLIC_VIS_DATA {
+	type: "GET_PUBLIC_VIS_DATA";
+	publicVisData: VisualizationDataOut;
+}
+
+interface GET_PUBLIC_VIS_CONFIG {
+	type: "GET_PUBLIC_VIS_CONFIG";
+	publicVisConfig: VisualizationConfigOut;
+}
+
+interface DOWNLOAD_PUBLIC_VIS_DATA {
+	type: "DOWNLOAD_PUBLIC_VIS_DATA";
+	publicBlob: Blob;
+}
+
+interface GET_PUBLIC_VIS_DATA_PRESIGNED_URL {
+	type: "GET_PUBLIC_VIS_DATA_PRESIGNED_URL";
+	publicPresignedUrl: string;
+}
+
+interface RESET_PUBLIC_VIS_DATA_PRESIGNED_URL {
+	type: "RESET_PUBLIC_VIS_DATA_PRESIGNED_URL";
+	publicPreSignedUrl: string;
+}
+
+interface RECEIVE_FOLDERS_FILES_IN_DATASET {
+	type: "RECEIVE_FOLDERS_FILES_IN_DATASET";
+	foldersAndFiles: Paged;
+}
+
+interface RECEIVE_PUBLIC_FOLDERS_FILES_IN_DATASET {
+	type: "RECEIVE_PUBLIC_FOLDERS_FILES_IN_DATASET";
+	publicFoldersAndFiles: Paged;
+}
+
+interface FOLDER_UPDATED {
+	type: "FOLDER_UPDATED";
+	folder: FolderOut;
+}
+
 export type DataAction =
+	| GET_ADMIN_MODE_STATUS
+	| TOGGLE_ADMIN_MODE
 	| RECEIVE_FILES_IN_DATASET
 	| RECEIVE_FOLDERS_IN_DATASET
+	| RECEIVE_FOLDERS_IN_PUBLIC_DATASET
 	| DELETE_FILE
 	| RECEIVE_DATASET_ABOUT
 	| RECEIVE_DATASET_ROLE
 	| RECEIVE_DATASETS
+	| RECEIVE_PUBLIC_DATASETS
+	| RECEIVE_PUBLIC_DATASET_ABOUT
+	| RECEIVE_FILES_IN_PUBLIC_DATASET
 	| DELETE_DATASET
+	| UPDATE_DATASET
 	| RECEIVE_FILE_SUMMARY
 	| RECEIVE_FILE_ROLE
 	| RECEIVE_FILE_EXTRACTED_METADATA
@@ -470,6 +635,12 @@ export type DataAction =
 	| RECEIVE_PREVIEWS
 	| RECEIVE_VERSIONS
 	| CHANGE_SELECTED_VERSION
+	| RECEIVE_PUBLIC_FILE_SUMMARY
+	| RECEIVE_PUBLIC_FILE_EXTRACTED_METADATA
+	| RECEIVE_PUBLIC_FILE_METADATA_JSONLD
+	| RECEIVE_PUBLIC_PREVIEWS
+	| RECEIVE_PUBLIC_VERSIONS
+	| CHANGE_PUBLIC_SELECTED_VERSION
 	| SET_USER
 	| LOGIN_ERROR
 	| LOGOUT
@@ -482,6 +653,7 @@ export type DataAction =
 	| CREATE_DATASET
 	| RESET_CREATE_DATASET
 	| CREATE_FILE
+	| CREATE_FILES
 	| RESET_CREATE_FILE
 	| FAILED
 	| FAILED_INLINE
@@ -496,12 +668,16 @@ export type DataAction =
 	| POST_DATASET_METADATA
 	| POST_FILE_METADATA
 	| RECEIVE_METADATA_DEFINITIONS
+	| RECEIVE_PUBLIC_METADATA_DEFINITIONS
 	| RECEIVE_METADATA_DEFINITION
 	| SEARCH_METADATA_DEFINITIONS
 	| DELETE_METADATA_DEFINITION
-	| SAVE_METADATA_DEFINITIONS
+	| SAVE_METADATA_DEFINITION
+	| RESET_SAVE_METADATA_DEFINITIONS
 	| RECEIVE_DATASET_METADATA
+	| RECEIVE_PUBLIC_DATASET_METADATA
 	| RECEIVE_FILE_METADATA
+	| RECEIVE_PUBLIC_FILE_METADATA
 	| DELETE_DATASET_METADATA
 	| DELETE_FILE_METADATA
 	| DOWNLOAD_FILE
@@ -509,6 +685,7 @@ export type DataAction =
 	| RESET_FILE_PRESIGNED_URL
 	| FOLDER_DELETED
 	| GET_FOLDER_PATH
+	| GET_PUBLIC_FOLDER_PATH
 	| RECEIVE_LISTENERS
 	| SEARCH_LISTENERS
 	| RECEIVE_LISTENER_CATEGORIES
@@ -521,6 +698,8 @@ export type DataAction =
 	| FETCH_JOB_UPDATES
 	| RESET_JOB_UPDATES
 	| CREATE_GROUP
+	| RESET_CREATE_GROUP
+	| UPDATE_GROUP
 	| RECEIVE_GROUPS
 	| SEARCH_GROUPS
 	| DELETE_GROUP
@@ -537,4 +716,16 @@ export type DataAction =
 	| GET_VIS_CONFIG
 	| DOWNLOAD_VIS_DATA
 	| GET_VIS_DATA_PRESIGNED_URL
-	| RESET_VIS_DATA_PRESIGNED_URL;
+	| RESET_VIS_DATA_PRESIGNED_URL
+	| RESET_CREATE_FILES
+	| UPDATE_FILE
+	| SET_ADMIN
+	| REVOKE_ADMIN
+	| GET_PUBLIC_VIS_DATA
+	| GET_PUBLIC_VIS_CONFIG
+	| DOWNLOAD_PUBLIC_VIS_DATA
+	| GET_PUBLIC_VIS_DATA_PRESIGNED_URL
+	| RESET_PUBLIC_VIS_DATA_PRESIGNED_URL
+	| RECEIVE_FOLDERS_FILES_IN_DATASET
+	| RECEIVE_PUBLIC_FOLDERS_FILES_IN_DATASET
+	| FOLDER_UPDATED;

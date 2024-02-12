@@ -21,6 +21,7 @@ import type { UserOut } from './UserOut';
  */
 export type FileOut = {
     name?: string;
+    status?: string;
     id?: string;
     creator: UserOut;
     created?: string;
@@ -35,4 +36,5 @@ export type FileOut = {
     thumbnail_id?: string;
     storage_type?: StorageType;
     storage_path?: string;
+    object_type?: string;
 }

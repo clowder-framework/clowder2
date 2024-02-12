@@ -1,6 +1,7 @@
 import {
 	DELETE_API_KEY,
 	GENERATE_API_KEY,
+	GET_ADMIN_MODE_STATUS,
 	LIST_API_KEYS,
 	LOGIN_ERROR,
 	RECEIVE_USER_PROFILE,
@@ -8,23 +9,33 @@ import {
 	REGISTER_USER,
 	RESET_API_KEY,
 	SET_USER,
+	TOGGLE_ADMIN_MODE,
 } from "../actions/user";
 import { UserState } from "../types/data";
 import { DataAction } from "../types/action";
-import { UserOut } from "../openapi/v2";
+import { Paged, PageMetadata, UserAPIKeyOut, UserOut } from "../openapi/v2";
 
 const defaultState: UserState = {
 	Authorization: null,
 	loginError: false,
+	adminMode: false,
 	registerSucceeded: false,
 	errorMsg: "",
 	hashedKey: "",
-	apiKeys: [],
+	apiKeys: <Paged>{ metadata: <PageMetadata>{}, data: <UserAPIKeyOut[]>[] },
 	profile: <UserOut>{},
 };
 
 const user = (state = defaultState, action: DataAction) => {
 	switch (action.type) {
+		case TOGGLE_ADMIN_MODE:
+			return Object.assign({}, state, {
+				adminMode: action.adminMode,
+			});
+		case GET_ADMIN_MODE_STATUS:
+			return Object.assign({}, state, {
+				adminMode: action.adminMode,
+			});
 		case SET_USER:
 			return Object.assign({}, state, {
 				Authorization: action.Authorization,
@@ -52,9 +63,12 @@ const user = (state = defaultState, action: DataAction) => {
 			return Object.assign({}, state, { apiKeys: action.apiKeys });
 		case DELETE_API_KEY:
 			return Object.assign({}, state, {
-				apiKeys: state.apiKeys.filter(
-					(apikey) => apikey.id !== action.apiKey.id
-				),
+				apiKeys: {
+					...state.apiKeys,
+					data: state.apiKeys.data.filter(
+						(apiKey: UserAPIKeyOut) => apiKey.id !== action.apiKey.id
+					),
+				},
 			});
 		case GENERATE_API_KEY:
 			return Object.assign({}, state, { hashedKey: action.hashedKey });

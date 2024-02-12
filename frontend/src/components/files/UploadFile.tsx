@@ -62,7 +62,7 @@ export const UploadFile: React.FC<UploadFileProps> = (
 		);
 	const newFile = useSelector((state: RootState) => state.dataset.newFile);
 	const metadataDefinitionList = useSelector(
-		(state: RootState) => state.metadata.metadataDefinitionList
+		(state: RootState) => state.metadata.metadataDefinitionList.data
 	);
 
 	useEffect(() => {
@@ -79,7 +79,7 @@ export const UploadFile: React.FC<UploadFileProps> = (
 		let required = false;
 
 		metadataDefinitionList.forEach((val, _) => {
-			if (val.fields[0].required) {
+			if (val.required_for_items.files && val.fields[0].required) {
 				required = true;
 			}
 		});
@@ -90,7 +90,7 @@ export const UploadFile: React.FC<UploadFileProps> = (
 	const checkIfFieldsAreFilled = () => {
 		return metadataDefinitionList.every((val) => {
 			return val.fields.every((field) => {
-				return field.required
+				return val.required_for_items.files && field.required
 					? metadataRequestForms[val.name] !== undefined &&
 							metadataRequestForms[val.name].content[field.name] !==
 								undefined &&
@@ -173,7 +173,10 @@ export const UploadFile: React.FC<UploadFileProps> = (
 						<StepContent TransitionProps={{ unmountOnExit: false }}>
 							<Typography>Provide us the metadata about your file.</Typography>
 							<Box>
-								<CreateMetadata setMetadata={setMetadata} />
+								<CreateMetadata
+									setMetadata={setMetadata}
+									sourceItem={"files"}
+								/>
 							</Box>
 							{/*buttons*/}
 							<Grid container>

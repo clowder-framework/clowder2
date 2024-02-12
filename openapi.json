@@ -49,11 +49,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "title": "Response Get Users Api V2 Users Get",
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/UserOut"
-                  }
+                  "$ref": "#/components/schemas/Paged"
                 }
               }
             }
@@ -158,6 +154,156 @@
             }
           }
         }
+      }
+    },
+    "/api/v2/users/me/is_admin": {
+      "get": {
+        "tags": [
+          "login"
+        ],
+        "summary": "Get Admin",
+        "operationId": "get_admin_api_v2_users_me_is_admin_get",
+        "parameters": [
+          {
+            "required": false,
+            "schema": {
+              "title": "Dataset Id",
+              "type": "string"
+            },
+            "name": "dataset_id",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response Get Admin Api V2 Users Me Is Admin Get",
+                  "type": "boolean"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2AuthorizationCodeBearer": []
+          },
+          {
+            "APIKeyHeader": []
+          },
+          {
+            "APIKeyCookie": []
+          }
+        ]
+      }
+    },
+    "/api/v2/users/me/admin_mode": {
+      "get": {
+        "tags": [
+          "login"
+        ],
+        "summary": "Get Admin Mode",
+        "description": "Get Admin mode from User Object.",
+        "operationId": "get_admin_mode_api_v2_users_me_admin_mode_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response Get Admin Mode Api V2 Users Me Admin Mode Get",
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2AuthorizationCodeBearer": []
+          },
+          {
+            "APIKeyHeader": []
+          },
+          {
+            "APIKeyCookie": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "login"
+        ],
+        "summary": "Set Admin Mode",
+        "description": "Set Admin mode from User Object.",
+        "operationId": "set_admin_mode_api_v2_users_me_admin_mode_post",
+        "parameters": [
+          {
+            "required": true,
+            "schema": {
+              "title": "Admin Mode On",
+              "type": "boolean"
+            },
+            "name": "admin_mode_on",
+            "in": "query"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Dataset Id",
+              "type": "string"
+            },
+            "name": "dataset_id",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response Set Admin Mode Api V2 Users Me Admin Mode Post",
+                  "type": "boolean"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2AuthorizationCodeBearer": []
+          },
+          {
+            "APIKeyHeader": []
+          },
+          {
+            "APIKeyCookie": []
+          }
+        ]
       }
     },
     "/api/v2/users/set_admin/{useremail}": {
@@ -320,11 +466,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "title": "Response Get User Api Keys Api V2 Users Keys Get",
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/UserAPIKeyOut"
-                  }
+                  "$ref": "#/components/schemas/Paged"
                 }
               }
             }
@@ -514,11 +656,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "title": "Response Search Users Api V2 Users Search Get",
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/UserOut"
-                  }
+                  "$ref": "#/components/schemas/Paged"
                 }
               }
             }
@@ -552,8 +690,8 @@
         "tags": [
           "users"
         ],
-        "summary": "Search Users Prefix",
-        "operationId": "search_users_prefix_api_v2_users_prefixSearch_get",
+        "summary": "Prefix Search Users",
+        "operationId": "prefix_search_users_api_v2_users_prefixSearch_get",
         "parameters": [
           {
             "required": true,
@@ -591,11 +729,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "title": "Response Search Users Prefix Api V2 Users Prefixsearch Get",
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/UserOut"
-                  }
+                  "$ref": "#/components/schemas/Paged"
                 }
               }
             }
@@ -880,14 +1014,14 @@
         ]
       }
     },
-    "/api/v2/authorizations/datasets/{dataset_id}/role/viewer": {
+    "/api/v2/authorizations/datasets/{dataset_id}/role/viewer}": {
       "get": {
         "tags": [
           "authorization"
         ],
         "summary": "Get Dataset Role Viewer",
         "description": "Used for testing only. Returns true if user has viewer permission on dataset, otherwise throws a 403 Forbidden HTTP exception.\nSee `routers/authorization.py` for more info.",
-        "operationId": "get_dataset_role_viewer_api_v2_authorizations_datasets__dataset_id__role_viewer_get",
+        "operationId": "get_dataset_role_viewer_api_v2_authorizations_datasets__dataset_id__role_viewer__get",
         "parameters": [
           {
             "required": true,
@@ -932,14 +1066,14 @@
         ]
       }
     },
-    "/api/v2/authorizations/datasets/{dataset_id}/role/owner": {
+    "/api/v2/authorizations/datasets/{dataset_id}/role/owner}": {
       "get": {
         "tags": [
           "authorization"
         ],
         "summary": "Get Dataset Role Owner",
         "description": "Used for testing only. Returns true if user has owner permission on dataset, otherwise throws a 403 Forbidden HTTP exception.\nSee `routers/authorization.py` for more info.",
-        "operationId": "get_dataset_role_owner_api_v2_authorizations_datasets__dataset_id__role_owner_get",
+        "operationId": "get_dataset_role_owner_api_v2_authorizations_datasets__dataset_id__role_owner__get",
         "parameters": [
           {
             "required": true,
@@ -990,6 +1124,7 @@
           "authorization"
         ],
         "summary": "Get File Role",
+        "description": "Retrieve role of user for an individual file. Role cannot change between file versions.",
         "operationId": "get_file_role_api_v2_authorizations_files__file_id__role_get",
         "parameters": [
           {
@@ -1046,13 +1181,14 @@
         ]
       }
     },
-    "/api/v2/authorizations/metadata/{metadata_id}/role": {
+    "/api/v2/authorizations/metadata/{metadata_id}/role}": {
       "get": {
         "tags": [
           "authorization"
         ],
         "summary": "Get Metadata Role",
-        "operationId": "get_metadata_role_api_v2_authorizations_metadata__metadata_id__role_get",
+        "description": "Retrieve role of user for group. Group roles can be OWNER, EDITOR, or VIEWER (for regular Members).",
+        "operationId": "get_metadata_role_api_v2_authorizations_metadata__metadata_id__role__get",
         "parameters": [
           {
             "required": true,
@@ -1114,6 +1250,7 @@
           "authorization"
         ],
         "summary": "Get Group Role",
+        "description": "Retrieve role of user on a particular group (i.e. whether they can change group memberships).",
         "operationId": "get_group_role_api_v2_authorizations_groups__group_id__role_get",
         "parameters": [
           {
@@ -1446,14 +1583,14 @@
         ]
       }
     },
-    "/api/v2/authorizations/datasets/{dataset_id}/roles": {
+    "/api/v2/authorizations/datasets/{dataset_id}/roles}": {
       "get": {
         "tags": [
           "authorization"
         ],
         "summary": "Get Dataset Roles",
         "description": "Get a list of all users and groups that have assigned roles on this dataset.",
-        "operationId": "get_dataset_roles_api_v2_authorizations_datasets__dataset_id__roles_get",
+        "operationId": "get_dataset_roles_api_v2_authorizations_datasets__dataset_id__roles__get",
         "parameters": [
           {
             "required": true,
@@ -1544,11 +1681,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "title": "Response Get Metadata Definition List Api V2 Metadata Definition Get",
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/MetadataDefinitionOut"
-                  }
+                  "$ref": "#/components/schemas/Paged"
                 }
               }
             }
@@ -1777,11 +1910,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "title": "Response Search Metadata Definition Api V2 Metadata Definition Search  Search Term  Get",
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/MetadataDefinitionOut"
-                  }
+                  "$ref": "#/components/schemas/Paged"
                 }
               }
             }
@@ -1914,6 +2043,203 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/MetadataOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2AuthorizationCodeBearer": []
+          },
+          {
+            "APIKeyHeader": []
+          },
+          {
+            "APIKeyCookie": []
+          }
+        ]
+      }
+    },
+    "/api/v2/public_metadata/definition": {
+      "get": {
+        "tags": [
+          "public_metadata"
+        ],
+        "summary": "Get Metadata Definition List",
+        "operationId": "get_metadata_definition_list_api_v2_public_metadata_definition_get",
+        "parameters": [
+          {
+            "required": false,
+            "schema": {
+              "title": "Name",
+              "type": "string"
+            },
+            "name": "name",
+            "in": "query"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Skip",
+              "type": "integer",
+              "default": 0
+            },
+            "name": "skip",
+            "in": "query"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Limit",
+              "type": "integer",
+              "default": 2
+            },
+            "name": "limit",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response Get Metadata Definition List Api V2 Public Metadata Definition Get",
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MetadataDefinitionOut"
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/public_metadata/definition/{metadata_definition_id}": {
+      "get": {
+        "tags": [
+          "public_metadata"
+        ],
+        "summary": "Get Metadata Definition",
+        "operationId": "get_metadata_definition_api_v2_public_metadata_definition__metadata_definition_id__get",
+        "parameters": [
+          {
+            "required": true,
+            "schema": {
+              "title": "Metadata Definition Id",
+              "type": "string"
+            },
+            "name": "metadata_definition_id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MetadataDefinitionOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2AuthorizationCodeBearer": []
+          },
+          {
+            "APIKeyHeader": []
+          },
+          {
+            "APIKeyCookie": []
+          }
+        ]
+      }
+    },
+    "/api/v2/public_metadata/definition/search/{search_term}": {
+      "get": {
+        "tags": [
+          "public_metadata"
+        ],
+        "summary": "Search Metadata Definition",
+        "description": "Search all metadata definition in the db based on text.\n\nArguments:\n    text -- any text matching name or description\n    skip -- number of initial records to skip (i.e. for pagination)\n    limit -- restrict number of records to be returned (i.e. for pagination)",
+        "operationId": "search_metadata_definition_api_v2_public_metadata_definition_search__search_term__get",
+        "parameters": [
+          {
+            "required": true,
+            "schema": {
+              "title": "Search Term",
+              "type": "string"
+            },
+            "name": "search_term",
+            "in": "path"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Skip",
+              "type": "integer",
+              "default": 0
+            },
+            "name": "skip",
+            "in": "query"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Limit",
+              "type": "integer",
+              "default": 10
+            },
+            "name": "limit",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response Search Metadata Definition Api V2 Public Metadata Definition Search  Search Term  Get",
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MetadataDefinitionOut"
+                  }
                 }
               }
             }
@@ -2728,6 +3054,340 @@
         ]
       }
     },
+    "/api/v2/public_files/{file_id}/summary": {
+      "get": {
+        "tags": [
+          "public_files"
+        ],
+        "summary": "Get File Summary",
+        "operationId": "get_file_summary_api_v2_public_files__file_id__summary_get",
+        "parameters": [
+          {
+            "required": true,
+            "schema": {
+              "title": "File Id",
+              "type": "string"
+            },
+            "name": "file_id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FileOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/public_files/{file_id}/version_details": {
+      "get": {
+        "tags": [
+          "public_files"
+        ],
+        "summary": "Get File Version Details",
+        "operationId": "get_file_version_details_api_v2_public_files__file_id__version_details_get",
+        "parameters": [
+          {
+            "required": true,
+            "schema": {
+              "title": "File Id",
+              "type": "string"
+            },
+            "name": "file_id",
+            "in": "path"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Version Num",
+              "type": "integer",
+              "default": 0
+            },
+            "name": "version_num",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FileOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/public_files/{file_id}/versions": {
+      "get": {
+        "tags": [
+          "public_files"
+        ],
+        "summary": "Get File Versions",
+        "operationId": "get_file_versions_api_v2_public_files__file_id__versions_get",
+        "parameters": [
+          {
+            "required": true,
+            "schema": {
+              "title": "File Id",
+              "type": "string"
+            },
+            "name": "file_id",
+            "in": "path"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Skip",
+              "type": "integer",
+              "default": 0
+            },
+            "name": "skip",
+            "in": "query"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Limit",
+              "type": "integer",
+              "default": 20
+            },
+            "name": "limit",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response Get File Versions Api V2 Public Files  File Id  Versions Get",
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/FileVersion"
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/public_files/{file_id}": {
+      "get": {
+        "tags": [
+          "public_files"
+        ],
+        "summary": "Download File",
+        "operationId": "download_file_api_v2_public_files__file_id__get",
+        "parameters": [
+          {
+            "required": true,
+            "schema": {
+              "title": "File Id",
+              "type": "string"
+            },
+            "name": "file_id",
+            "in": "path"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Version",
+              "type": "integer"
+            },
+            "name": "version",
+            "in": "query"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Increment",
+              "type": "boolean",
+              "default": true
+            },
+            "name": "increment",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/public_files/{file_id}/thumbnail": {
+      "get": {
+        "tags": [
+          "public_files"
+        ],
+        "summary": "Download File Thumbnail",
+        "operationId": "download_file_thumbnail_api_v2_public_files__file_id__thumbnail_get",
+        "parameters": [
+          {
+            "required": true,
+            "schema": {
+              "title": "File Id",
+              "type": "string"
+            },
+            "name": "file_id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/public_files/{file_id}/metadata": {
+      "get": {
+        "tags": [
+          "public_files"
+        ],
+        "summary": "Get File Metadata",
+        "description": "Get file metadata.",
+        "operationId": "get_file_metadata_api_v2_public_files__file_id__metadata_get",
+        "parameters": [
+          {
+            "required": true,
+            "schema": {
+              "title": "File Id",
+              "type": "string"
+            },
+            "name": "file_id",
+            "in": "path"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Version",
+              "type": "integer"
+            },
+            "name": "version",
+            "in": "query"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "All Versions",
+              "type": "boolean",
+              "default": false
+            },
+            "name": "all_versions",
+            "in": "query"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_get_file_metadata_api_v2_public_files__file_id__metadata_get"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response Get File Metadata Api V2 Public Files  File Id  Metadata Get",
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MetadataOut"
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v2/files/{file_id}/metadata": {
       "get": {
         "tags": [
@@ -3160,11 +3820,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "title": "Response Get Datasets Api V2 Datasets Get",
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/DatasetOut"
-                  }
+                  "$ref": "#/components/schemas/Paged"
                 }
               }
             }
@@ -3520,11 +4176,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "title": "Response Get Dataset Files Api V2 Datasets  Dataset Id  Files Get",
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/FileOut"
-                  }
+                  "$ref": "#/components/schemas/Paged"
                 }
               }
             }
@@ -3676,11 +4328,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "title": "Response Get Dataset Folders Api V2 Datasets  Dataset Id  Folders Get",
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/FolderOut"
-                  }
+                  "$ref": "#/components/schemas/Paged"
                 }
               }
             }
@@ -3770,7 +4418,147 @@
         ]
       }
     },
+    "/api/v2/datasets/{dataset_id}/folders_and_files": {
+      "get": {
+        "tags": [
+          "datasets"
+        ],
+        "summary": "Get Dataset Folders And Files",
+        "operationId": "get_dataset_folders_and_files_api_v2_datasets__dataset_id__folders_and_files_get",
+        "parameters": [
+          {
+            "required": true,
+            "schema": {
+              "title": "Dataset Id",
+              "type": "string"
+            },
+            "name": "dataset_id",
+            "in": "path"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Folder Id",
+              "type": "string"
+            },
+            "name": "folder_id",
+            "in": "query"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Skip",
+              "type": "integer",
+              "default": 0
+            },
+            "name": "skip",
+            "in": "query"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Limit",
+              "type": "integer",
+              "default": 10
+            },
+            "name": "limit",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Paged"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2AuthorizationCodeBearer": []
+          },
+          {
+            "APIKeyHeader": []
+          },
+          {
+            "APIKeyCookie": []
+          }
+        ]
+      }
+    },
     "/api/v2/datasets/{dataset_id}/folders/{folder_id}": {
+      "get": {
+        "tags": [
+          "datasets"
+        ],
+        "summary": "Get Folder",
+        "operationId": "get_folder_api_v2_datasets__dataset_id__folders__folder_id__get",
+        "parameters": [
+          {
+            "required": true,
+            "schema": {
+              "title": "Dataset Id",
+              "type": "string"
+            },
+            "name": "dataset_id",
+            "in": "path"
+          },
+          {
+            "required": true,
+            "schema": {
+              "title": "Folder Id",
+              "type": "string"
+            },
+            "name": "folder_id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2AuthorizationCodeBearer": []
+          },
+          {
+            "APIKeyHeader": []
+          },
+          {
+            "APIKeyCookie": []
+          }
+        ]
+      },
       "delete": {
         "tags": [
           "datasets"
@@ -3803,6 +4591,76 @@
             "content": {
               "application/json": {
                 "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2AuthorizationCodeBearer": []
+          },
+          {
+            "APIKeyHeader": []
+          },
+          {
+            "APIKeyCookie": []
+          }
+        ]
+      },
+      "patch": {
+        "tags": [
+          "datasets"
+        ],
+        "summary": "Patch Folder",
+        "operationId": "patch_folder_api_v2_datasets__dataset_id__folders__folder_id__patch",
+        "parameters": [
+          {
+            "required": true,
+            "schema": {
+              "title": "Dataset Id",
+              "type": "string"
+            },
+            "name": "dataset_id",
+            "in": "path"
+          },
+          {
+            "required": true,
+            "schema": {
+              "title": "Folder Id",
+              "type": "string"
+            },
+            "name": "folder_id",
+            "in": "path"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FolderPatch"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FolderOut"
+                }
               }
             }
           },
@@ -4266,6 +5124,419 @@
         ]
       }
     },
+    "/api/v2/public_datasets": {
+      "get": {
+        "tags": [
+          "public_datasets"
+        ],
+        "summary": "Get Datasets",
+        "operationId": "get_datasets_api_v2_public_datasets_get",
+        "parameters": [
+          {
+            "required": false,
+            "schema": {
+              "title": "Skip",
+              "type": "integer",
+              "default": 0
+            },
+            "name": "skip",
+            "in": "query"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Limit",
+              "type": "integer",
+              "default": 10
+            },
+            "name": "limit",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Paged"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/public_datasets/{dataset_id}": {
+      "get": {
+        "tags": [
+          "public_datasets"
+        ],
+        "summary": "Get Dataset",
+        "operationId": "get_dataset_api_v2_public_datasets__dataset_id__get",
+        "parameters": [
+          {
+            "required": true,
+            "schema": {
+              "title": "Dataset Id",
+              "type": "string"
+            },
+            "name": "dataset_id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DatasetOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/public_datasets/{dataset_id}/files": {
+      "get": {
+        "tags": [
+          "public_datasets"
+        ],
+        "summary": "Get Dataset Files",
+        "operationId": "get_dataset_files_api_v2_public_datasets__dataset_id__files_get",
+        "parameters": [
+          {
+            "required": true,
+            "schema": {
+              "title": "Dataset Id",
+              "type": "string"
+            },
+            "name": "dataset_id",
+            "in": "path"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Folder Id",
+              "type": "string"
+            },
+            "name": "folder_id",
+            "in": "query"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Skip",
+              "type": "integer",
+              "default": 0
+            },
+            "name": "skip",
+            "in": "query"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Limit",
+              "type": "integer",
+              "default": 10
+            },
+            "name": "limit",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response Get Dataset Files Api V2 Public Datasets  Dataset Id  Files Get",
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/FileOut"
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/public_datasets/{dataset_id}/folders": {
+      "get": {
+        "tags": [
+          "public_datasets"
+        ],
+        "summary": "Get Dataset Folders",
+        "operationId": "get_dataset_folders_api_v2_public_datasets__dataset_id__folders_get",
+        "parameters": [
+          {
+            "required": true,
+            "schema": {
+              "title": "Dataset Id",
+              "type": "string"
+            },
+            "name": "dataset_id",
+            "in": "path"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Parent Folder",
+              "type": "string"
+            },
+            "name": "parent_folder",
+            "in": "query"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Skip",
+              "type": "integer",
+              "default": 0
+            },
+            "name": "skip",
+            "in": "query"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Limit",
+              "type": "integer",
+              "default": 10
+            },
+            "name": "limit",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response Get Dataset Folders Api V2 Public Datasets  Dataset Id  Folders Get",
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/FolderOut"
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/public_datasets/{dataset_id}/folders_and_files": {
+      "get": {
+        "tags": [
+          "public_datasets"
+        ],
+        "summary": "Get Dataset Folders And Files",
+        "operationId": "get_dataset_folders_and_files_api_v2_public_datasets__dataset_id__folders_and_files_get",
+        "parameters": [
+          {
+            "required": true,
+            "schema": {
+              "title": "Dataset Id",
+              "type": "string"
+            },
+            "name": "dataset_id",
+            "in": "path"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Folder Id",
+              "type": "string"
+            },
+            "name": "folder_id",
+            "in": "query"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Skip",
+              "type": "integer",
+              "default": 0
+            },
+            "name": "skip",
+            "in": "query"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Limit",
+              "type": "integer",
+              "default": 10
+            },
+            "name": "limit",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Paged"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/public_datasets/{dataset_id}/metadata": {
+      "get": {
+        "tags": [
+          "public_datasets"
+        ],
+        "summary": "Get Dataset Metadata",
+        "operationId": "get_dataset_metadata_api_v2_public_datasets__dataset_id__metadata_get",
+        "parameters": [
+          {
+            "required": true,
+            "schema": {
+              "title": "Dataset Id",
+              "type": "string"
+            },
+            "name": "dataset_id",
+            "in": "path"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_get_dataset_metadata_api_v2_public_datasets__dataset_id__metadata_get"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response Get Dataset Metadata Api V2 Public Datasets  Dataset Id  Metadata Get",
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MetadataOut"
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/public_datasets/{dataset_id}/download": {
+      "get": {
+        "tags": [
+          "public_datasets"
+        ],
+        "summary": "Download Dataset",
+        "operationId": "download_dataset_api_v2_public_datasets__dataset_id__download_get",
+        "parameters": [
+          {
+            "required": true,
+            "schema": {
+              "title": "Dataset Id",
+              "type": "string"
+            },
+            "name": "dataset_id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DatasetOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v2/datasets/{dataset_id}/metadata": {
       "get": {
         "tags": [
@@ -4630,6 +5901,46 @@
         ]
       }
     },
+    "/api/v2/public_folders/{folder_id}/path": {
+      "get": {
+        "tags": [
+          "public_folders"
+        ],
+        "summary": "Download Folder",
+        "operationId": "download_folder_api_v2_public_folders__folder_id__path_get",
+        "parameters": [
+          {
+            "required": true,
+            "schema": {
+              "title": "Folder Id",
+              "type": "string"
+            },
+            "name": "folder_id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v2/listeners/instance": {
       "get": {
         "tags": [
@@ -4666,7 +5977,7 @@
           "listeners"
         ],
         "summary": "Get Listeners",
-        "description": "Get a list of all Event Listeners in the db.\n\nArguments:\n    skip -- number of initial records to skip (i.e. for pagination)\n    limit -- restrict number of records to be returned (i.e. for pagination)\n    category -- filter by category has to be exact match\n    label -- filter by label has to be exact match",
+        "description": "Get a list of all Event Listeners in the db.\n\nArguments:\n    skip -- number of initial records to skip (i.e. for pagination)\n    limit -- restrict number of records to be returned (i.e. for pagination)\n    heartbeat_interval -- number of seconds after which a listener is considered dead\n    category -- filter by category has to be exact match\n    label -- filter by label has to be exact match\n    alive_only -- filter by alive status",
         "operationId": "get_listeners_api_v2_listeners_get",
         "parameters": [
           {
@@ -4716,6 +6027,16 @@
             },
             "name": "label",
             "in": "query"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Alive Only",
+              "type": "boolean",
+              "default": false
+            },
+            "name": "alive_only",
+            "in": "query"
           }
         ],
         "responses": {
@@ -4724,11 +6045,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "title": "Response Get Listeners Api V2 Listeners Get",
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/EventListenerOut"
-                  }
+                  "$ref": "#/components/schemas/Paged"
                 }
               }
             }
@@ -4864,11 +6181,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "title": "Response Search Listeners Api V2 Listeners Search Get",
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/EventListenerOut"
-                  }
+                  "$ref": "#/components/schemas/Paged"
                 }
               }
             }
@@ -5345,11 +6658,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "title": "Response Get All Job Summary Api V2 Jobs Get",
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/EventListenerJobOut"
-                  }
+                  "$ref": "#/components/schemas/Paged"
                 }
               }
             }
@@ -5513,6 +6822,15 @@
             },
             "name": "query",
             "in": "query"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Dataset Id",
+              "type": "string"
+            },
+            "name": "dataset_id",
+            "in": "query"
           }
         ],
         "responses": {
@@ -5558,12 +6876,33 @@
         ],
         "summary": "Msearch",
         "operationId": "msearch_api_v2_elasticsearch_all__msearch_post",
+        "parameters": [
+          {
+            "required": false,
+            "schema": {
+              "title": "Dataset Id",
+              "type": "string"
+            },
+            "name": "dataset_id",
+            "in": "query"
+          }
+        ],
         "responses": {
           "200": {
             "description": "Successful Response",
             "content": {
               "application/json": {
                 "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
               }
             }
           }
@@ -5579,6 +6918,77 @@
             "APIKeyCookie": []
           }
         ]
+      }
+    },
+    "/api/v2/public_elasticsearch/search": {
+      "put": {
+        "tags": [
+          "public_elasticsearch"
+        ],
+        "summary": "Search",
+        "operationId": "search_api_v2_public_elasticsearch_search_put",
+        "parameters": [
+          {
+            "required": true,
+            "schema": {
+              "title": "Index Name",
+              "type": "string"
+            },
+            "name": "index_name",
+            "in": "query"
+          },
+          {
+            "required": true,
+            "schema": {
+              "title": "Query",
+              "type": "string"
+            },
+            "name": "query",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response Search Api V2 Public Elasticsearch Search Put",
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/public_elasticsearch/all/_msearch": {
+      "post": {
+        "tags": [
+          "public_elasticsearch"
+        ],
+        "summary": "Msearch",
+        "operationId": "msearch_api_v2_public_elasticsearch_all__msearch_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
       }
     },
     "/api/v2/feeds": {
@@ -5969,6 +7379,15 @@
             },
             "name": "limit",
             "in": "query"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Dataset Id",
+              "type": "string"
+            },
+            "name": "dataset_id",
+            "in": "query"
           }
         ],
         "responses": {
@@ -5977,11 +7396,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "title": "Response Get Groups Api V2 Groups Get",
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/GroupOut"
-                  }
+                  "$ref": "#/components/schemas/Paged"
                 }
               }
             }
@@ -6097,6 +7512,15 @@
             },
             "name": "limit",
             "in": "query"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Dataset Id",
+              "type": "string"
+            },
+            "name": "dataset_id",
+            "in": "query"
           }
         ],
         "responses": {
@@ -6105,11 +7529,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "title": "Response Search Group Api V2 Groups Search  Search Term  Get",
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/GroupOut"
-                  }
+                  "$ref": "#/components/schemas/Paged"
                 }
               }
             }
@@ -7146,6 +8566,284 @@
         ]
       }
     },
+    "/api/v2/public_visualizations/{visualization_id}": {
+      "get": {
+        "tags": [
+          "public_visualizations"
+        ],
+        "summary": "Get Visualization",
+        "operationId": "get_visualization_api_v2_public_visualizations__visualization_id__get",
+        "parameters": [
+          {
+            "required": true,
+            "schema": {
+              "title": "Visualization Id",
+              "type": "string"
+            },
+            "name": "visualization_id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VisualizationDataOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/public_visualizations/{visualization_id}/bytes": {
+      "get": {
+        "tags": [
+          "public_visualizations"
+        ],
+        "summary": "Download Visualization",
+        "operationId": "download_visualization_api_v2_public_visualizations__visualization_id__bytes_get",
+        "parameters": [
+          {
+            "required": true,
+            "schema": {
+              "title": "Visualization Id",
+              "type": "string"
+            },
+            "name": "visualization_id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/public_visualizations/{visualization_id}/url/": {
+      "get": {
+        "tags": [
+          "public_visualizations"
+        ],
+        "summary": "Download Visualization Url",
+        "operationId": "download_visualization_url_api_v2_public_visualizations__visualization_id__url__get",
+        "parameters": [
+          {
+            "required": true,
+            "schema": {
+              "title": "Visualization Id",
+              "type": "string"
+            },
+            "name": "visualization_id",
+            "in": "path"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Expires In Seconds",
+              "type": "integer",
+              "default": 3600
+            },
+            "name": "expires_in_seconds",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/public_visualizations/{resource_id}/config": {
+      "get": {
+        "tags": [
+          "public_visualizations"
+        ],
+        "summary": "Get Resource Visconfig",
+        "operationId": "get_resource_visconfig_api_v2_public_visualizations__resource_id__config_get",
+        "parameters": [
+          {
+            "required": true,
+            "schema": {
+              "title": "Resource Id",
+              "type": "string",
+              "examples": [
+                "5eb7cf5a86d9755df3a6c593",
+                "5eb7cfb05e32e07750a1756a"
+              ]
+            },
+            "name": "resource_id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response Get Resource Visconfig Api V2 Public Visualizations  Resource Id  Config Get",
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/VisualizationConfigOut"
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/public_visualizations/config/{config_id}": {
+      "get": {
+        "tags": [
+          "public_visualizations"
+        ],
+        "summary": "Get Visconfig",
+        "operationId": "get_visconfig_api_v2_public_visualizations_config__config_id__get",
+        "parameters": [
+          {
+            "required": true,
+            "schema": {
+              "title": "Config Id",
+              "type": "string",
+              "examples": [
+                "5eb7cf5a86d9755df3a6c593",
+                "5eb7cfb05e32e07750a1756a"
+              ]
+            },
+            "name": "config_id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VisualizationConfigOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/public_visualizations/config/{config_id}/visdata": {
+      "get": {
+        "tags": [
+          "public_visualizations"
+        ],
+        "summary": "Get Visdata From Visconfig",
+        "operationId": "get_visdata_from_visconfig_api_v2_public_visualizations_config__config_id__visdata_get",
+        "parameters": [
+          {
+            "required": true,
+            "schema": {
+              "title": "Config Id",
+              "type": "string",
+              "examples": [
+                "5eb7cf5a86d9755df3a6c593",
+                "5eb7cfb05e32e07750a1756a"
+              ]
+            },
+            "name": "config_id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response Get Visdata From Visconfig Api V2 Public Visualizations Config  Config Id  Visdata Get",
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/VisualizationDataOut"
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v2/thumbnails": {
       "post": {
         "tags": [
@@ -7354,9 +9052,9 @@
         "tags": [
           "auth"
         ],
-        "summary": "Login",
+        "summary": "Loginget",
         "description": "Redirect to keycloak login page.",
-        "operationId": "login_api_v2_auth_login_get",
+        "operationId": "loginGet_api_v2_auth_login_get",
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -7372,9 +9070,9 @@
         "tags": [
           "auth"
         ],
-        "summary": "Login Post",
+        "summary": "Loginpost",
         "description": "Client can use this to login when redirect is not available.",
-        "operationId": "login_post_api_v2_auth_login_post",
+        "operationId": "loginPost_api_v2_auth_login_post",
         "requestBody": {
           "content": {
             "application/json": {
@@ -7572,7 +9270,11 @@
         "properties": {
           "dataset_id": {
             "title": "Dataset Id",
-            "type": "string"
+            "type": "string",
+            "examples": [
+              "5eb7cf5a86d9755df3a6c593",
+              "5eb7cfb05e32e07750a1756a"
+            ]
           },
           "user_ids": {
             "title": "User Ids",
@@ -7590,7 +9292,11 @@
             "title": "Group Ids",
             "type": "array",
             "items": {
-              "type": "string"
+              "type": "string",
+              "examples": [
+                "5eb7cf5a86d9755df3a6c593",
+                "5eb7cfb05e32e07750a1756a"
+              ]
             },
             "default": []
           }
@@ -7608,7 +9314,11 @@
         "properties": {
           "metadata_id": {
             "title": "Metadata Id",
-            "type": "string"
+            "type": "string",
+            "examples": [
+              "5eb7cf5a86d9755df3a6c593",
+              "5eb7cfb05e32e07750a1756a"
+            ]
           },
           "user_id": {
             "title": "User Id",
@@ -7646,7 +9356,11 @@
           },
           "dataset_id": {
             "title": "Dataset Id",
-            "type": "string"
+            "type": "string",
+            "examples": [
+              "5eb7cf5a86d9755df3a6c593",
+              "5eb7cfb05e32e07750a1756a"
+            ]
           },
           "user_ids": {
             "title": "User Ids",
@@ -7664,7 +9378,11 @@
             "title": "Group Ids",
             "type": "array",
             "items": {
-              "type": "string"
+              "type": "string",
+              "examples": [
+                "5eb7cf5a86d9755df3a6c593",
+                "5eb7cfb05e32e07750a1756a"
+              ]
             },
             "default": []
           },
@@ -7735,8 +9453,40 @@
           }
         }
       },
+      "Body_get_dataset_metadata_api_v2_public_datasets__dataset_id__metadata_get": {
+        "title": "Body_get_dataset_metadata_api_v2_public_datasets__dataset_id__metadata_get",
+        "type": "object",
+        "properties": {
+          "listener_name": {
+            "title": "Listener Name",
+            "type": "string"
+          },
+          "listener_version": {
+            "title": "Listener Version",
+            "type": "number"
+          }
+        }
+      },
       "Body_get_file_metadata_api_v2_files__file_id__metadata_get": {
         "title": "Body_get_file_metadata_api_v2_files__file_id__metadata_get",
+        "type": "object",
+        "properties": {
+          "definition": {
+            "title": "Definition",
+            "type": "string"
+          },
+          "listener_name": {
+            "title": "Listener Name",
+            "type": "string"
+          },
+          "listener_version": {
+            "title": "Listener Version",
+            "type": "number"
+          }
+        }
+      },
+      "Body_get_file_metadata_api_v2_public_files__file_id__metadata_get": {
+        "title": "Body_get_file_metadata_api_v2_public_files__file_id__metadata_get",
         "type": "object",
         "properties": {
           "definition": {
@@ -7827,6 +9577,11 @@
           "description": {
             "title": "Description",
             "type": "string"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string",
+            "default": "PRIVATE"
           }
         }
       },
@@ -7842,6 +9597,11 @@
           "description": {
             "title": "Description",
             "type": "string"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string",
+            "default": "PRIVATE"
           }
         }
       },
@@ -7860,6 +9620,11 @@
           "description": {
             "title": "Description",
             "type": "string"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string",
+            "default": "PRIVATE"
           },
           "id": {
             "title": "Id",
@@ -7881,11 +9646,6 @@
             "title": "Modified",
             "type": "string",
             "format": "date-time"
-          },
-          "status": {
-            "title": "Status",
-            "type": "string",
-            "default": "PRIVATE"
           },
           "user_views": {
             "title": "User Views",
@@ -8346,7 +10106,11 @@
         "properties": {
           "listener_id": {
             "title": "Listener Id",
-            "type": "string"
+            "type": "string",
+            "examples": [
+              "5eb7cf5a86d9755df3a6c593",
+              "5eb7cfb05e32e07750a1756a"
+            ]
           },
           "automatic": {
             "title": "Automatic",
@@ -8417,6 +10181,11 @@
             "type": "string",
             "default": "N/A"
           },
+          "status": {
+            "title": "Status",
+            "type": "string",
+            "default": "PRIVATE"
+          },
           "id": {
             "title": "Id",
             "type": "string",
@@ -8445,11 +10214,19 @@
           },
           "dataset_id": {
             "title": "Dataset Id",
-            "type": "string"
+            "type": "string",
+            "examples": [
+              "5eb7cf5a86d9755df3a6c593",
+              "5eb7cfb05e32e07750a1756a"
+            ]
           },
           "folder_id": {
             "title": "Folder Id",
-            "type": "string"
+            "type": "string",
+            "examples": [
+              "5eb7cf5a86d9755df3a6c593",
+              "5eb7cfb05e32e07750a1756a"
+            ]
           },
           "views": {
             "title": "Views",
@@ -8497,6 +10274,11 @@
           "storage_path": {
             "title": "Storage Path",
             "type": "string"
+          },
+          "object_type": {
+            "title": "Object Type",
+            "type": "string",
+            "default": "file"
           }
         },
         "description": "Document Mapping class.\n\nFields:\n\n- `id` - MongoDB document ObjectID \"_id\" field.\nMapped to the PydanticObjectId class\n\nInherited from:\n\n- Pydantic BaseModel\n- [UpdateMethods](https://roman-right.github.io/beanie/api/interfaces/#aggregatemethods)"
@@ -8553,7 +10335,11 @@
           },
           "parent_folder": {
             "title": "Parent Folder",
-            "type": "string"
+            "type": "string",
+            "examples": [
+              "5eb7cf5a86d9755df3a6c593",
+              "5eb7cfb05e32e07750a1756a"
+            ]
           }
         }
       },
@@ -8580,11 +10366,19 @@
           },
           "dataset_id": {
             "title": "Dataset Id",
-            "type": "string"
+            "type": "string",
+            "examples": [
+              "5eb7cf5a86d9755df3a6c593",
+              "5eb7cfb05e32e07750a1756a"
+            ]
           },
           "parent_folder": {
             "title": "Parent Folder",
-            "type": "string"
+            "type": "string",
+            "examples": [
+              "5eb7cf5a86d9755df3a6c593",
+              "5eb7cfb05e32e07750a1756a"
+            ]
           },
           "creator": {
             "$ref": "#/components/schemas/UserOut"
@@ -8598,9 +10392,32 @@
             "title": "Modified",
             "type": "string",
             "format": "date-time"
+          },
+          "object_type": {
+            "title": "Object Type",
+            "type": "string",
+            "default": "folder"
           }
         },
         "description": "Document Mapping class.\n\nFields:\n\n- `id` - MongoDB document ObjectID \"_id\" field.\nMapped to the PydanticObjectId class\n\nInherited from:\n\n- Pydantic BaseModel\n- [UpdateMethods](https://roman-right.github.io/beanie/api/interfaces/#aggregatemethods)"
+      },
+      "FolderPatch": {
+        "title": "FolderPatch",
+        "type": "object",
+        "properties": {
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "parent_folder": {
+            "title": "Parent Folder",
+            "type": "string",
+            "examples": [
+              "5eb7cf5a86d9755df3a6c593",
+              "5eb7cfb05e32e07750a1756a"
+            ]
+          }
+        }
       },
       "GroupAndRole": {
         "title": "GroupAndRole",
@@ -8913,6 +10730,7 @@
         "title": "MetadataDefinitionIn",
         "required": [
           "name",
+          "required_for_items",
           "fields"
         ],
         "type": "object",
@@ -8924,6 +10742,9 @@
           "description": {
             "title": "Description",
             "type": "string"
+          },
+          "required_for_items": {
+            "$ref": "#/components/schemas/MetadataRequiredForItems"
           },
           "created": {
             "title": "Created",
@@ -8959,12 +10780,13 @@
             }
           }
         },
-        "description": "This describes a metadata object with a short name and description, predefined set of fields, and context.\nThese provide a shorthand for use by listeners as well as a source for building GUI widgets to add new entries.\n\nExample: {\n    \"name\" : \"LatLon\",\n    \"description\" : \"A set of Latitude/Longitude coordinates\",\n    \"context\" : [\n        {\n        \"longitude\" : \"https://schema.org/longitude\",\n        \"latitude\" : \"https://schema.org/latitude\"\n        },\n    ],\n    \"fields\" : [\n        {\n            \"name\" : \"longitude\",\n            \"list\" : false,\n            \"widgetType\": \"TextField\",\n            \"config\": {\n                \"type\" : \"float\"\n            },\n            \"required\" : true\n        },\n        {\n            \"name\" : \"latitude\",\n            \"list\" : false,\n            \"widgetType\": \"TextField\",\n            \"config\": {\n                \"type\" : \"float\"\n            },\n            \"required\" : true\n        }\n    ]\n}"
+        "description": "This describes a metadata object with a short name and description, predefined set of fields, and context.\nThese provide a shorthand for use by listeners as well as a source for building GUI widgets to add new entries.\n\nExample: {\n    \"name\" : \"LatLon\",\n    \"description\" : \"A set of Latitude/Longitude coordinates\",\n    \"required_for_items\": {\n        \"datasets\": false,\n        \"files\": false\n    },\n    \"context\" : [\n        {\n        \"longitude\" : \"https://schema.org/longitude\",\n        \"latitude\" : \"https://schema.org/latitude\"\n        },\n    ],\n    \"fields\" : [\n        {\n            \"name\" : \"longitude\",\n            \"list\" : false,\n            \"widgetType\": \"TextField\",\n            \"config\": {\n                \"type\" : \"float\"\n            },\n            \"required\" : true\n        },\n        {\n            \"name\" : \"latitude\",\n            \"list\" : false,\n            \"widgetType\": \"TextField\",\n            \"config\": {\n                \"type\" : \"float\"\n            },\n            \"required\" : true\n        }\n    ]\n}"
       },
       "MetadataDefinitionOut": {
         "title": "MetadataDefinitionOut",
         "required": [
           "name",
+          "required_for_items",
           "fields",
           "creator"
         ],
@@ -8977,6 +10799,9 @@
           "description": {
             "title": "Description",
             "type": "string"
+          },
+          "required_for_items": {
+            "$ref": "#/components/schemas/MetadataRequiredForItems"
           },
           "created": {
             "title": "Created",
@@ -9278,6 +11103,22 @@
           }
         }
       },
+      "MetadataRequiredForItems": {
+        "title": "MetadataRequiredForItems",
+        "type": "object",
+        "properties": {
+          "datasets": {
+            "title": "Datasets",
+            "type": "boolean",
+            "default": false
+          },
+          "files": {
+            "title": "Files",
+            "type": "boolean",
+            "default": false
+          }
+        }
+      },
       "MongoDBRef": {
         "title": "MongoDBRef",
         "required": [
@@ -9292,11 +11133,54 @@
           },
           "resource_id": {
             "title": "Resource Id",
-            "type": "string"
+            "type": "string",
+            "examples": [
+              "5eb7cf5a86d9755df3a6c593",
+              "5eb7cfb05e32e07750a1756a"
+            ]
           },
           "version": {
             "title": "Version",
             "type": "integer"
+          }
+        }
+      },
+      "PageMetadata": {
+        "title": "PageMetadata",
+        "type": "object",
+        "properties": {
+          "total_count": {
+            "title": "Total Count",
+            "type": "integer",
+            "default": 0
+          },
+          "skip": {
+            "title": "Skip",
+            "type": "integer",
+            "default": 0
+          },
+          "limit": {
+            "title": "Limit",
+            "type": "integer",
+            "default": 0
+          }
+        }
+      },
+      "Paged": {
+        "title": "Paged",
+        "required": [
+          "metadata"
+        ],
+        "type": "object",
+        "properties": {
+          "metadata": {
+            "$ref": "#/components/schemas/PageMetadata"
+          },
+          "data": {
+            "title": "Data",
+            "type": "array",
+            "items": {},
+            "default": []
           }
         }
       },
@@ -9598,6 +11482,11 @@
           "admin": {
             "title": "Admin",
             "type": "boolean"
+          },
+          "admin_mode": {
+            "title": "Admin Mode",
+            "type": "boolean",
+            "default": false
           }
         },
         "description": "Document Mapping class.\n\nFields:\n\n- `id` - MongoDB document ObjectID \"_id\" field.\nMapped to the PydanticObjectId class\n\nInherited from:\n\n- Pydantic BaseModel\n- [UpdateMethods](https://roman-right.github.io/beanie/api/interfaces/#aggregatemethods)"

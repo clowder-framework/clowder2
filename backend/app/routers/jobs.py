@@ -9,6 +9,7 @@ from app.models.listeners import (
     EventListenerJobUpdateOut,
     EventListenerJobViewList,
 )
+from app.models.pages import Paged, _construct_page_metadata, _get_page_query
 from beanie import PydanticObjectId
 from beanie.operators import GTE, LT, Or, RegEx
 from bson import ObjectId
@@ -17,7 +18,7 @@ from fastapi import APIRouter, Depends, HTTPException
 router = APIRouter()
 
 
-@router.get("", response_model=List[EventListenerJobOut])
+@router.get("", response_model=Paged)
 async def get_all_job_summary(
     current_user_id=Depends(get_user),
     listener_id: Optional[str] = None,
@@ -72,10 +73,23 @@ async def get_all_job_summary(
         filters.append(
             EventListenerJobViewList.resource_ref.resource_id == ObjectId(dataset_id)
         )
-    jobs = (
-        await EventListenerJobViewList.find(*filters).skip(skip).limit(limit).to_list()
+
+    jobs_and_count = (
+        await EventListenerJobViewList.find(*filters)
+        .aggregate(
+            [_get_page_query(skip, limit, sort_field="created", ascending=False)],
+        )
+        .to_list()
     )
-    return [job.dict() for job in jobs]
+    page_metadata = _construct_page_metadata(jobs_and_count, skip, limit)
+    page = Paged(
+        metadata=page_metadata,
+        data=[
+            EventListenerJobOut(id=item.pop("_id"), **item)
+            for item in jobs_and_count[0]["data"]
+        ],
+    )
+    return page.dict()
 
 
 @router.get("/{job_id}/summary", response_model=EventListenerJobOut)

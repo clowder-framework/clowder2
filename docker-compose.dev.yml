@@ -75,7 +75,7 @@ services:
         POSTGRES_PASSWORD: password
 
   keycloak:
-      image: quay.io/keycloak/keycloak:19.0
+      image: quay.io/keycloak/keycloak:20.0
       volumes:
         - ./scripts/keycloak/clowder-realm-dev.json:/opt/keycloak/data/import/realm.json:ro
         - ./scripts/keycloak/clowder-theme/:/opt/keycloak/themes/clowder-theme/:ro
@@ -139,7 +139,7 @@ services:
       - elasticsearch:/usr/share/elasticsearch/data
 
   extractors-heartbeat:
-    image: "clowder/clowder2-heartbeat"
+    image: "clowder/clowder2-heartbeat:latest"
     build:
       context: backend
       dockerfile: heartbeat.Dockerfile
@@ -155,7 +155,7 @@ services:
       - rabbitmq
 
   extractors-messages:
-    image: "clowder/clowder2-messages"
+    image: "clowder/clowder2-messages:latest"
     build:
       context: backend
       dockerfile: messages.Dockerfile

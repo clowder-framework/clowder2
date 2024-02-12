@@ -9,6 +9,10 @@ from fastapi.testclient import TestClient
 metadata_definition = {
     "name": "LatLon",
     "description": "A set of Latitude/Longitude coordinates",
+    "required_for_items": {
+        "datasets": True,
+        "files": True,
+    },
     "@context": [
         {
             "longitude": "https://schema.org/longitude",
@@ -36,6 +40,10 @@ metadata_definition = {
 metadata_definition2 = {
     "name": "AlternativeTitle",
     "description": "Alternative title",
+    "required_for_items": {
+        "datasets": True,
+        "files": False,
+    },
     "@context": [{"title": "https://schema.org/alternateName"}],
     "fields": [
         {

@@ -1,4 +1,5 @@
 import * as React from "react";
+import { ChangeEvent, useEffect, useState } from "react";
 import Box from "@mui/material/Box";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
@@ -27,6 +28,12 @@ import { ExtractionJobsToolbar } from "./ExtractionJobsToolbar";
 import { EnhancedTableHead as ExtractionJobsTableHeader } from "./ExtractionJobsTableHeader";
 import ExtractorStatus from "./ExtractorStatus";
 import config from "../../app.config";
+import { fetchListenerJobs } from "../../actions/listeners";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "../../types/data";
+import { format } from "date-fns";
+import { parseDate } from "../../utils/common";
+import { EventListenerJobOut } from "../../openapi/v2";
 
 export interface Data {
 	status: string;
@@ -37,6 +44,57 @@ export interface Data {
 	resourceId: string;
 	resourceType: string;
 }
+
+const headCells = [
+	{
+		id: "status",
+		label: "",
+	},
+	{
+		id: "jobId",
+		label: "Job ID",
+	},
+	{
+		id: "created",
+		label: "Submitted At",
+	},
+	{
+		id: "creator",
+		label: "Submitted By",
+	},
+	{
+		id: "duration",
+		label: "Duration",
+	},
+	{
+		id: "resourceType",
+		label: "Resource Type",
+	},
+	{
+		id: "resourceId",
+		label: "Resource Id",
+	},
+];
+
+const createData = (
+	status: string,
+	jobId: string,
+	created: string,
+	creator: string,
+	duration: number,
+	resourceType: string,
+	resourceId: string
+) => {
+	return {
+		status,
+		jobId,
+		created,
+		creator,
+		duration,
+		resourceType,
+		resourceId,
+	};
+};
 
 function descendingComparator<T>(a: T, b: T, orderBy: keyof T) {
 	if (b[orderBy] < a[orderBy]) {
@@ -81,24 +139,128 @@ function stableSort<T>(
 
 export const ExtractionJobs = (props) => {
 	const {
-		rows,
-		headCells,
 		selectedStatus,
 		selectedCreatedTime,
 		setSelectedStatus,
 		setSelectedCreatedTime,
-		handleRefresh,
+		selectedExtractor,
 	} = props;
+
+	const dispatch = useDispatch();
+
+	const listListenerJobs = (
+		listenerId: string | null,
+		status: string | null,
+		userId: string | null,
+		fileId: string | null,
+		datasetId: string | null,
+		created: string | null,
+		skip: number,
+		limit: number
+	) =>
+		dispatch(
+			fetchListenerJobs(
+				listenerId,
+				status,
+				userId,
+				fileId,
+				datasetId,
+				created,
+				skip,
+				limit
+			)
+		);
+
+	const jobs = useSelector((state: RootState) => state.listener.jobs.data);
+	const jobPageMetadata = useSelector(
+		(state: RootState) => state.listener.jobs.metadata
+	);
+	const adminMode = useSelector((state: RootState) => state.user.adminMode);
 
 	const [order, setOrder] = React.useState<Order>("desc");
 	const [orderBy, setOrderBy] = React.useState<keyof Data>("created");
-	const [page, setPage] = React.useState(0);
-	const [rowsPerPage, setRowsPerPage] = React.useState(10);
+	const [currPageNum, setCurrPageNum] = React.useState(1);
+	const [limit, setLimit] = React.useState(config.defaultExtractionJobs);
 	const [openExtractorPane, setOpenExtractorPane] = React.useState(false);
 	const [jobId, setJobId] = React.useState("");
+	const [rows, setRows] = useState([]);
+
+	useEffect(() => {
+		// reset to first currPageNum
+		setCurrPageNum(1);
+		listListenerJobs(null, null, null, null, null, null, 0, limit);
+	}, [adminMode]);
+
+	useEffect(() => {
+		// reset to first currPageNum
+		setCurrPageNum(1);
+		if (selectedExtractor) {
+			listListenerJobs(
+				selectedExtractor["name"],
+				null,
+				null,
+				null,
+				null,
+				null,
+				0,
+				limit
+			);
+			// clear filters
+			setSelectedStatus(null);
+			setSelectedCreatedTime(null);
+		}
+	}, [selectedExtractor]);
+
+	useEffect(() => {
+		// reset to first currPageNum
+		setCurrPageNum(1);
+		listListenerJobs(
+			selectedExtractor ? selectedExtractor["name"] : null,
+			selectedStatus,
+			null,
+			null,
+			null,
+			selectedCreatedTime ? format(selectedCreatedTime, "yyyy-MM-dd") : null,
+			0,
+			limit
+		);
+	}, [selectedStatus, selectedCreatedTime]);
+
+	useEffect(() => {
+		const rows = [];
+		if (jobs && jobs.length > 0) {
+			jobs.map((job: EventListenerJobOut) => {
+				rows.push(
+					createData(
+						job["status"],
+						job["id"],
+						parseDate(job["created"]),
+						job["creator"]["email"],
+						`${job["duration"]} sec`,
+						job["resource_ref"]["collection"],
+						job["resource_ref"]["resource_id"]
+					)
+				);
+			});
+		}
+		setRows(rows);
+	}, [jobs]);
+
+	const handleRefresh = () => {
+		listListenerJobs(
+			selectedExtractor ? selectedExtractor["name"] : null,
+			selectedStatus,
+			null,
+			null,
+			null,
+			selectedCreatedTime ? format(selectedCreatedTime, "yyyy-MM-dd") : null,
+			(currPageNum - 1) * limit,
+			limit
+		);
+	};
 
 	const handleRequestSort = (
-		event: React.MouseEvent<unknown>,
+		_: React.MouseEvent<unknown>,
 		property: keyof Data
 	) => {
 		const isAsc = orderBy === property && order === "asc";
@@ -106,15 +268,39 @@ export const ExtractionJobs = (props) => {
 		setOrderBy(property);
 	};
 
-	const handleChangePage = (event: unknown, newPage: number) => {
-		setPage(newPage);
+	const handleChangePage = (_: ChangeEvent<unknown>, newPage: number) => {
+		const newSkip = newPage * limit;
+		setCurrPageNum(newPage + 1);
+		listListenerJobs(
+			selectedExtractor ? selectedExtractor["name"] : null,
+			selectedStatus ? selectedStatus : null,
+			null,
+			null,
+			null,
+			selectedCreatedTime ? format(selectedCreatedTime, "yyyy-MM-dd") : null,
+			newSkip,
+			limit
+		);
 	};
 
 	const handleChangeRowsPerPage = (
 		event: React.ChangeEvent<HTMLInputElement>
 	) => {
-		setRowsPerPage(parseInt(event.target.value, 10));
-		setPage(0);
+		const newRowsPerPage = parseInt(event.target.value, 10);
+		setLimit(parseInt(event.target.value, 10));
+
+		// reset to first page
+		setCurrPageNum(1);
+		listListenerJobs(
+			selectedExtractor ? selectedExtractor["name"] : null,
+			selectedStatus ? selectedStatus : null,
+			null,
+			null,
+			null,
+			selectedCreatedTime ? format(selectedCreatedTime, "yyyy-MM-dd") : null,
+			0,
+			newRowsPerPage
+		);
 	};
 
 	const handleExtractionSummary = () => {
@@ -124,10 +310,6 @@ export const ExtractionJobs = (props) => {
 	const handleSubmitExtractionClose = () => {
 		setOpenExtractorPane(false);
 	};
-
-	// Avoid a layout jump when reaching the last page with empty rows.
-	const emptyRows =
-		page > 0 ? Math.max(0, (1 + page) * rowsPerPage - rows.length) : 0;
 
 	return (
 		<Box sx={{ width: "100%" }}>
@@ -167,84 +349,70 @@ export const ExtractionJobs = (props) => {
 							headCells={headCells}
 						/>
 						<TableBody>
-							{stableSort(rows, getComparator(order, orderBy))
-								.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-								.map((row) => {
-									return (
-										<TableRow key={row.jobId}>
-											<TableCell
-												align="right"
-												sx={{ color: theme.palette.primary.main }}
-											>
-												{row.status ===
-												config.eventListenerJobStatus.created ? (
-													<AddCircleOutlineIcon />
-												) : null}
-												{row.status ===
-												config.eventListenerJobStatus.resubmitted ? (
-													<RestartAltIcon />
-												) : null}
-												{row.status ===
-												config.eventListenerJobStatus.started ? (
-													<PlayCircleOutlineIcon />
-												) : null}
-												{row.status ===
-												config.eventListenerJobStatus.processing ? (
-													<AccessTimeIcon />
-												) : null}
-												{row.status ===
-												config.eventListenerJobStatus.succeeded ? (
-													<CheckCircleIcon />
-												) : null}
-												{row.status === config.eventListenerJobStatus.error ? (
-													<CancelIcon />
-												) : null}
-												{row.status ===
-												config.eventListenerJobStatus.skipped ? (
-													<SkipNextIcon />
-												) : null}
-											</TableCell>
-											{Object.keys(row).map((key) => {
-												if (key == "jobId") {
-													return (
-														<TableCell align="left">
-															<Link
-																component="button"
-																variant="body2"
-																onClick={() => {
-																	setJobId(row[key]);
-																	handleExtractionSummary();
-																}}
-															>
-																{row[key]}
-															</Link>
-														</TableCell>
-													);
-												}
-												if (key !== "status")
-													return <TableCell align="left">{row[key]}</TableCell>;
-											})}
-										</TableRow>
-									);
-								})}
-							{emptyRows > 0 && (
-								<TableRow
-									style={{
-										height: 53 * emptyRows,
-									}}
-								>
-									<TableCell colSpan={6} />
-								</TableRow>
-							)}
+							{stableSort(rows, getComparator(order, orderBy)).map((row) => {
+								return (
+									<TableRow key={row.jobId}>
+										<TableCell
+											align="right"
+											sx={{ color: theme.palette.primary.main }}
+										>
+											{row.status === config.eventListenerJobStatus.created ? (
+												<AddCircleOutlineIcon />
+											) : null}
+											{row.status ===
+											config.eventListenerJobStatus.resubmitted ? (
+												<RestartAltIcon />
+											) : null}
+											{row.status === config.eventListenerJobStatus.started ? (
+												<PlayCircleOutlineIcon />
+											) : null}
+											{row.status ===
+											config.eventListenerJobStatus.processing ? (
+												<AccessTimeIcon />
+											) : null}
+											{row.status ===
+											config.eventListenerJobStatus.succeeded ? (
+												<CheckCircleIcon />
+											) : null}
+											{row.status === config.eventListenerJobStatus.error ? (
+												<CancelIcon />
+											) : null}
+											{row.status === config.eventListenerJobStatus.skipped ? (
+												<SkipNextIcon />
+											) : null}
+										</TableCell>
+										{Object.keys(row).map((key) => {
+											if (key == "jobId") {
+												return (
+													<TableCell align="left">
+														<Link
+															component="button"
+															variant="body2"
+															onClick={() => {
+																setJobId(row[key]);
+																handleExtractionSummary();
+															}}
+														>
+															{row[key]}
+														</Link>
+													</TableCell>
+												);
+											}
+											if (key !== "status")
+												return <TableCell align="left">{row[key]}</TableCell>;
+										})}
+									</TableRow>
+								);
+							})}
 						</TableBody>
 					</Table>
 				</TableContainer>
 				<TablePagination
-					rowsPerPageOptions={[5, 10, 25]}
+					rowsPerPageOptions={[5, 10, 20]}
 					component="div"
-					count={rows.length}
-					rowsPerPage={rowsPerPage}
-					page={page}
+					count={jobPageMetadata.total_count ? jobPageMetadata.total_count : 0}
+					rowsPerPage={limit}
+					page={currPageNum - 1}
 					onPageChange={handleChangePage}
 					onRowsPerPageChange={handleChangeRowsPerPage}
 				/>

@@ -15,6 +15,7 @@ from app.models.listeners import (
     ExtractorInfo,
     LegacyEventListenerIn,
 )
+from app.models.pages import Paged, _construct_page_metadata, _get_page_query
 from app.models.search import SearchCriteria
 from app.models.users import UserOut
 from app.routers.feeds import disassociate_listener_db
@@ -88,6 +89,31 @@ async def _check_livelihood(
         return False
     else:
         return True
+
+
+def _check_livelihood_query(heartbeat_interval=settings.listener_heartbeat_interval):
+    """
+    Return a MongoDB aggregation query to check the livelihood of a listener.
+    This is needed due to the alive field being a computed field.
+    When a user call the /listeners endpoint, the alive field will be computed with the current datetime
+    and compared with heartbeat_interval.
+    """
+    if heartbeat_interval == 0:
+        heartbeat_interval = settings.listener_heartbeat_interval
+
+    # Perform aggregation queries that adds alive flag using the PyMongo syntax
+    aggregated_query = {
+        "$addFields": {
+            "alive": {
+                "$lt": [
+                    {"$subtract": [datetime.datetime.utcnow(), "$lastAlive"]},
+                    heartbeat_interval * 1000,  # convert to milliseconds
+                ]
+            }
+        }
+    }
+
+    return aggregated_query
 
 
 @router.get("/instance")
@@ -164,7 +190,7 @@ async def save_legacy_listener(
         return listener.dict()
 
 
-@router.get("/search", response_model=List[EventListenerOut])
+@router.get("/search", response_model=Paged)
 async def search_listeners(
     text: str = "",
     skip: int = 0,
@@ -179,26 +205,31 @@ async def search_listeners(
         skip -- number of initial records to skip (i.e. for pagination)
         limit -- restrict number of records to be returned (i.e. for pagination)
     """
-    # TODO either use regex or index search
-    listeners = (
+    # First compute alive flag for all listeners
+    aggregation_pipeline = [
+        _check_livelihood_query(heartbeat_interval=heartbeat_interval),
+        _get_page_query(skip, limit, sort_field="name", ascending=True),
+    ]
+
+    listeners_and_count = (
         await EventListenerDB.find(
             Or(
                 RegEx(field=EventListenerDB.name, pattern=text),
                 RegEx(field=EventListenerDB.description, pattern=text),
             ),
         )
-        .skip(skip)
-        .limit(limit)
+        .aggregate(aggregation_pipeline)
         .to_list()
     )
-
-    # batch return listener statuses for easy consumption
-    listenerResponse = []
-    for listener in listeners:
-        listener.alive = await _check_livelihood(listener, heartbeat_interval)
-        listenerResponse.append(listener.dict())
-
-    return listenerResponse
+    page_metadata = _construct_page_metadata(listeners_and_count, skip, limit)
+    page = Paged(
+        metadata=page_metadata,
+        data=[
+            EventListenerOut(id=item.pop("_id"), **item)
+            for item in listeners_and_count[0]["data"]
+        ],
+    )
+    return page.dict()
 
 
 @router.get("/categories", response_model=List[str])
@@ -237,7 +268,7 @@ async def check_listener_livelihood(
     raise HTTPException(status_code=404, detail=f"listener {listener_id} not found")
 
 
-@router.get("", response_model=List[EventListenerOut])
+@router.get("", response_model=Paged)
 async def get_listeners(
     user_id=Depends(get_current_username),
     skip: int = 0,
@@ -245,33 +276,50 @@ async def get_listeners(
     heartbeat_interval: Optional[int] = settings.listener_heartbeat_interval,
     category: Optional[str] = None,
     label: Optional[str] = None,
+    alive_only: Optional[bool] = False,
 ):
     """Get a list of all Event Listeners in the db.
 
     Arguments:
         skip -- number of initial records to skip (i.e. for pagination)
         limit -- restrict number of records to be returned (i.e. for pagination)
+        heartbeat_interval -- number of seconds after which a listener is considered dead
         category -- filter by category has to be exact match
         label -- filter by label has to be exact match
+        alive_only -- filter by alive status
     """
-    query = []
+    # First compute alive flag for all listeners
+    aggregation_pipeline = [
+        _check_livelihood_query(heartbeat_interval=heartbeat_interval)
+    ]
+
+    # Add filters if applicable
     if category:
-        query.append(EventListenerDB.properties.categories == category)
+        aggregation_pipeline.append({"$match": {"properties.categories": category}})
     if label:
-        query.append(EventListenerDB.properties.default_labels == label)
+        aggregation_pipeline.append({"$match": {"properties.default_labels": label}})
+    if alive_only:
+        aggregation_pipeline.append({"$match": {"alive": True}}),
 
-    # sort by name alphabetically
-    listeners = await EventListenerDB.find(
-        *query, skip=skip, limit=limit, sort=EventListenerDB.name
-    ).to_list()
+    # Add pagination
+    aggregation_pipeline.append(
+        _get_page_query(skip, limit, sort_field="name", ascending=True)
+    )
 
-    # batch return listener statuses for easy consumption
-    listener_response = []
-    for listener in listeners:
-        listener.alive = await _check_livelihood(listener, heartbeat_interval)
-        listener_response.append(listener.dict())
-
-    return listener_response
+    # Run aggregate query and return
+    # Sort by name alphabetically
+    listeners_and_count = (
+        await EventListenerDB.find().aggregate(aggregation_pipeline).to_list()
+    )
+    page_metadata = _construct_page_metadata(listeners_and_count, skip, limit)
+    page = Paged(
+        metadata=page_metadata,
+        data=[
+            EventListenerOut(id=item.pop("_id"), **item)
+            for item in listeners_and_count[0]["data"]
+        ],
+    )
+    return page.dict()
 
 
 @router.put("/{listener_id}", response_model=EventListenerOut)
