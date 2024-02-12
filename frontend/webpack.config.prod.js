@@ -11,6 +11,9 @@ import TerserPlugin from "terser-webpack-plugin";
 console.log(
 	`the current CLOWDER_REMOTE_HOSTNAME environment variable is ${process.env.CLOWDER_REMOTE_HOSTNAME}`
 );
+console.log(
+	`the current BASE_URL_ROUTE  environment variable is ${process.env.BASE_URL_ROUTE}`
+);
 
 export default {
 	mode: "production",
@@ -47,6 +50,7 @@ export default {
 				CLOWDER_REMOTE_HOSTNAME: JSON.stringify(
 					process.env.CLOWDER_REMOTE_HOSTNAME
 				),
+				BASE_URL_ROUTE: JSON.stringify(process.env.BASE_URL_ROUTE),
 				APIKEY: JSON.stringify(process.env.APIKEY),
 				KeycloakBaseURL: JSON.stringify(process.env.KeycloakBaseURL),
 			},

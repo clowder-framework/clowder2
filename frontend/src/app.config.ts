@@ -3,6 +3,7 @@ import { EventListenerJobStatus } from "./types/data";
 
 interface Config {
 	hostname: string;
+	baseUrlRoute: string;
 	apikey: string;
 	GHIssueBaseURL: string;
 	KeycloakBaseURL: string;
@@ -32,10 +33,13 @@ const hostname =
 	process.env.CLOWDER_REMOTE_HOSTNAME ||
 	`${window.location.protocol}//${window.location.host}`;
 
+const baseUrlRoute = process.env.BASE_URL_ROUTE || "";
+
 // TODO when add auth piece remove this env
 const apikey = process.env.APIKEY || "";
 
 config["hostname"] = hostname;
+config["baseUrlRoute"] = baseUrlRoute;
 config["apikey"] = apikey;
 
 V2.OpenAPI.BASE = config.hostname;
