@@ -99,7 +99,7 @@ def upload_metadata_definition(api):
             },
         ],
     }
-    response = requests.post(
+    requests.post(
         f"{api}/metadata/definition",
         json=metadata_definition,
         headers=headers,

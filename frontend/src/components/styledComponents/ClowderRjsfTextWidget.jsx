@@ -1,7 +1,7 @@
 import { Box } from "@material-ui/core";
 import React from "react";
-import {ClowderInput} from "./ClowderInput";
-import {ClowderInputLabel} from "./ClowderInputLabel";
+import { ClowderInput } from "./ClowderInput";
+import { ClowderInputLabel } from "./ClowderInputLabel";
 
 export const ClowderRjsfTextWidget = (item) => {
 	return (

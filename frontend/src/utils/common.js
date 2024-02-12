@@ -71,7 +71,6 @@ export async function downloadResource(url) {
 	}
 }
 
-
 export function dataURItoFile(dataURI) {
 	const metadata = dataURI.split(",")[0];
 	const mime = metadata.match(/:(.*?);/)[1];

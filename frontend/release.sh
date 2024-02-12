@@ -4,7 +4,7 @@
 set -e
 
 # use DEBUG=echo ./release-all.sh to print all commands
-export DEBUG=${DEBUG:-""}
+export "DEBUG=${DEBUG:-""}"
 
 $DEBUG docker login hub.ncsa.illinois.edu
 

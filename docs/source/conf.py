@@ -13,7 +13,7 @@
 # import os
 # import sys
 # sys.path.insert(0, os.path.abspath('.'))
-
+import os
 
 # -- Project information -----------------------------------------------------
 
@@ -75,8 +75,6 @@ html_theme_options = {
     # If True, show hidden TOC entries
     "globaltoc_includehidden": False,
 }
-
-import os
 
 FORCE_CLASSIC = os.environ.get("SPHINX_MATERIAL_FORCE_CLASSIC", False)
 FORCE_CLASSIC = FORCE_CLASSIC in ("1", "true")

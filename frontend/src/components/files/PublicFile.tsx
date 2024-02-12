@@ -344,7 +344,7 @@ export const PublicFile = (): JSX.Element => {
 								defaultValue={"viewer"}
 								onChange={(event) => {
 									setSelectedVersionNum(event.target.value);
-									setSnackBarMessage("Viewing version " + event.target.value);
+									setSnackBarMessage(`Viewing version ${event.target.value}`);
 									setSnackBarOpen(true);
 								}}
 							>

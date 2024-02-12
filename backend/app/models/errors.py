@@ -1,10 +1,9 @@
 from datetime import datetime
 from typing import Optional
 
-from beanie import Document
-from pydantic import Field, BaseModel
-
 from app.models.mongomodel import MongoDBRef
+from beanie import Document
+from pydantic import BaseModel, Field
 
 
 class ServiceUnreachable(Exception):

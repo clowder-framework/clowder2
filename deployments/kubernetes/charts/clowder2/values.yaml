@@ -89,7 +89,7 @@ minio:
   auth:
     rootUser: minioadmin
     rootPassword: minioadmin
-    
+
   # enable webui
   disableWebUI: false
 
@@ -145,7 +145,7 @@ mongodb:
   persistence:
     # storage size for database
     size: 8Gi
-    
+
     # pick fast non network storage
     storageClass: csi-cinder-sc-retain
 
