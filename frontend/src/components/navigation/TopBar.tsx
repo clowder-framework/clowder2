@@ -1,5 +1,6 @@
 import React from "react";
 import { AppBar, Link, Toolbar } from "@mui/material";
+import { Link as RouterLink } from "react-router-dom";
 import Box from "@mui/material/Box";
 import { useSelector } from "react-redux";
 import { RootState } from "../../types/data";
@@ -40,15 +41,15 @@ export default function TopBar() {
 					</Box>
 					{loggedOut ? (
 						<>
-							<Link href="/auth/register" sx={link}>
+							<Link component={RouterLink} to="/auth/register" sx={link}>
 								Register
 							</Link>
-							<Link href="/auth/login" sx={link}>
+							<Link component={RouterLink} to="/auth/login" sx={link}>
 								Login
 							</Link>
 						</>
 					) : (
-						<Link href="/auth/logout" sx={link}>
+						<Link component={RouterLink} to="/auth/logout" sx={link}>
 							Logout
 						</Link>
 					)}
