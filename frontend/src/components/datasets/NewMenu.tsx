@@ -133,6 +133,17 @@ export const NewMenu = (props: ActionsMenuProps): JSX.Element => {
 				</MenuItem>
 				<MenuItem
 					onClick={() => {
+						setDragDropFiles(true);
+						handleOptionClose();
+					}}
+				>
+					<ListItemIcon>
+						<UploadIcon fontSize="small" />
+					</ListItemIcon>
+					<ListItemText>Drag and Drop</ListItemText>
+				</MenuItem>
+				<MenuItem
+					onClick={() => {
 						setNewFolder(true);
 						handleOptionClose();
 					}}

@@ -98,12 +98,12 @@ const useStyles = makeStyles({
 		}
 	}
 });
-const classes = useStyles();
 
 
 export const UploadFileDragAndDrop: React.FC<UploadFileDragAndDropProps> = (
 	props: UploadFileDragAndDropProps
 ) => {
+	const classes = useStyles();
 	const { selectedDatasetId, folderId } = props;
 	const [selectedFiles, setSelectedFiles] = useState<File[] | null>(null);
 	const [metadataRequestForms, setMetadataRequestForms] = useState({});
@@ -117,10 +117,10 @@ export const UploadFileDragAndDrop: React.FC<UploadFileDragAndDropProps> = (
 
 	const onFileInputChange = (event) => {
 		const fileList = Array.from(event.target.files);
-		setFile(fileList);
+		setSelectedFiles(fileList);
 	};
 	const onDeleteClick = (filename) => {
-		setFile(files.filter((file) => file.name !== filename));
+		setSelectedFiles(files.filter((file) => file.name !== filename));
 	};
 	const onDrop = (fileList) => {
 		setSelectedFiles(Array.from(fileList));
