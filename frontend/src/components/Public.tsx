@@ -1,9 +1,10 @@
 import React, { ChangeEvent, useEffect, useState } from "react";
-import { Box, Grid, Pagination, Tab, Tabs } from "@mui/material";
+import {Box, Button, Grid, Link, Pagination, Tab, Tabs} from "@mui/material";
 
 import { RootState } from "../types/data";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchPublicDatasets } from "../actions/public_dataset";
+import { Link as RouterLink, useLocation } from "react-router-dom";
 
 import { a11yProps, TabPanel } from "./tabs/TabComponent";
 import PublicDatasetCard from "./datasets/PublicDatasetCard";
@@ -16,6 +17,12 @@ const tab = {
 	fontWeight: "normal",
 	fontSize: "16px",
 	textTransform: "capitalize",
+};
+
+const link = {
+	fontSize: "12px",
+	color: "#495057",
+	m: 4,
 };
 
 export const Public = (): JSX.Element => {
@@ -92,7 +99,29 @@ export const Public = (): JSX.Element => {
 									);
 								})
 							) : (
-								<>No public datasets</>
+								<Box>
+									<p>No public datasets on this instance. Login or register to create datasets. </p>
+									<div>
+										<Button
+											component={RouterLink}
+											to="/auth/login"
+											variant="contained"
+											sx={{ m: 2 }}
+										>
+											Login
+										</Button>
+									</div>
+									<div>
+										<Button
+											component={RouterLink}
+											to="/auth/register"
+											variant="contained"
+											sx={{ m: 2 }}
+										>
+											Register
+										</Button>
+									</div>
+								</Box>
 							)}
 						</Grid>
 						<Box display="flex" justifyContent="center" sx={{ m: 1 }}>
