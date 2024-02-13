@@ -16,106 +16,185 @@ on:
       - 'main'
       - 'release/*'
 
+# Certain actions will only run when this is the main repo.
+env:
+  MAIN_REPO: clowder-framework/clowder2
+  DOCKERHUB_ORG: clowder
+
 jobs:
   docker:
     runs-on: ubuntu-latest
+    permissions:
+      packages: write
+    strategy:
+      fail-fast: true
+      matrix:
+        name:
+          - backend
+          - heartbeat
+          - message
+        include:
+          - name: clowder2-backend
+            dockerfile: ./backend/Dockerfile
+          - name: clowder2-heartbeat
+            dockerfile: ./backend/heartbeat.Dockerfile
+          - name: clowder2-message
+            dockerfile: ./backend/messages.Dockerfile
     steps:
-      -
-        name: Set up QEMU
+      - uses: actions/checkout@v2
+
+      # set environment variables
+      - name: Extractor Version
+        run: |
+          # find out what the BRANCH is, in case of a PR we will use the PR-<number>
+          if [ "${{ github.event.release.target_commitish }}" != "" ]; then
+            BRANCH="${{ github.event.release.target_commitish }}"
+          elif [[ $GITHUB_REF =~ pull ]]; then
+            BRANCH="$(echo $GITHUB_REF | sed 's#refs/pull/\([0-9]*\)/merge#PR-\1#')"
+          else
+            BRANCH=${GITHUB_REF##*/}
+          fi
+
+          # Set up the owner and lowercase owner
+          OWNER=${{ github.repository_owner }}
+          OWNER_LC=${OWNER,,}
+
+          # should we push to dockerhub, and is there a README
+          DOCKERHUB_PUSH="false"
+          DOCKERHUB_README="false"
+          if [ "$BRANCH" == "main" -a "${{ github.repository }}" == "${{ env.MAIN_REPO }}" ]; then
+            if [ "${{ secrets.DOCKERHUB_USERNAME }}" != "" -a "${{ secrets.DOCKERHUB_PASSWORD }}" != "" ]; then
+              DOCKERHUB_PUSH="true"
+              if [ -e "backend/README.md" ]; then
+                DOCKERHUB_README="true"
+              fi
+            fi
+          fi
+
+          # calculate the version and all tags; main to main; release to release
+          if [[ "$BRANCH" == release/* ]]; then
+            CHANGELOG_FILE="${{ matrix.workdir }}/CHANGELOG.md"
+            if [ -e "$CHANGELOG_FILE" ]; then
+              VERSION=$(cat "$CHANGELOG_FILE" | grep -Eo '\[[0-9]+\.[0-9]+\.[0-9]+\]'| head -1 | tr -d '[]')
+              tags="latest"
+              oldversion=""
+              tmpversion="${VERSION}"
+              while [ "${oldversion}" != "${tmpversion}" ]; do
+                oldversion="${tmpversion}"
+                tags="${tags} ${tmpversion}"
+                tmpversion=${tmpversion%.*}
+              done
+            else
+              VERSION="latest"
+              tags="latest"
+            fi
+          else
+            VERSION="$BRANCH"
+            tags="$BRANCH"
+          fi
+
+          # should we push to dockerhub, and is there a README
+          DOCKERHUB_PUSH="false"
+          DOCKERHUB_README="false"
+          if [ "${{ github.repository }}" == "${{ env.MAIN_REPO }}" ]; then
+            if [ ${BRANCH} == "main" ]; then
+              if [ "${{ secrets.DOCKERHUB_USERNAME }}" != "" -a "${{ secrets.DOCKERHUB_PASSWORD }}" != "" ]; then
+                DOCKERHUB_PUSH="true"
+                if [ -e "README.md" ]; then
+                  DOCKERHUB_README="true"
+                fi
+              fi
+            fi
+          fi
+
+          # should we push to Github
+          GITHUB_PUSH="false"
+          if [ "${{ github.repository }}" == "${{ env.MAIN_REPO }}" ]; then
+              GITHUB_PUSH="true"
+          fi
+
+          # create a list of all images to be pushed
+          IMAGE=${{matrix.name}}
+          IMAGES=""
+          for tag in ${tags}; do
+            if [ "$DOCKERHUB_PUSH" == "true" ]; then
+              IMAGES="${IMAGES}${{ env.DOCKERHUB_ORG }}/${IMAGE}:${tag},"
+            fi
+            if [ "$GITHUB_PUSH" == "true" ]; then
+              IMAGES="${IMAGES}ghcr.io/${OWNER_LC}/${IMAGE}:${tag},"
+            fi
+          done
+          IMAGES="${IMAGES%,*}"
+
+          # save the results in env
+          echo "BRANCH=${BRANCH}"
+          echo "VERSION=${VERSION}"
+          echo "DOCKERHUB_README=${DOCKERHUB_README}"
+          echo "DOCKERHUB_PUSH=${DOCKERHUB_PUSH}"
+          echo "IMAGES=${IMAGES}"
+
+          echo "BRANCH=${BRANCH}" >> $GITHUB_ENV
+          echo "VERSION=${VERSION}" >> $GITHUB_ENV
+          echo "DOCKERHUB_README=${DOCKERHUB_README}" >> $GITHUB_ENV
+          echo "DOCKERHUB_PUSH=${DOCKERHUB_PUSH}" >> $GITHUB_ENV
+          echo "GITHUB_PUSH=${GITHUB_PUSH}" >> $GITHUB_ENV
+          echo "IMAGES=${IMAGES}" >> $GITHUB_ENV
+
+      # setup docker build
+      - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
-      -
-        name: Set up Docker Buildx
+
+      - name: Set up Docker Buildx
+        id: buildx
         uses: docker/setup-buildx-action@v2
-      -
-        name: Checkout
-        uses: actions/checkout@v2
-      -
-        name: Login to DockerHub
-        if: github.event_name != 'pull_request'
+
+      - name: Inspect Builder
+        run: |
+          echo "Name:      ${{ steps.buildx.outputs.name }}"
+          echo "Endpoint:  ${{ steps.buildx.outputs.endpoint }}"
+          echo "Status:    ${{ steps.buildx.outputs.status }}"
+          echo "Flags:     ${{ steps.buildx.outputs.flags }}"
+          echo "Platforms: ${{ steps.buildx.outputs.platforms }}"
+
+      # login to registries
+      - name: Login to DockerHub
+        if: env.DOCKERHUB_PUSH == 'true' && github.event_name != 'pull_request'
         uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
-      -
-        name: Login to GitHub Container Registry
+
+      - name: Login to GitHub Container Registry
         uses: docker/login-action@v2
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      -
-        name: Docker meta backend
-        id: backendMeta
-        uses: docker/metadata-action@v4
-        with:
-          images: |
-            clowder/clowder2-backend
-          tags: |
-            type=ref,event=branch
-            type=ref,event=pr
-            type=semver,pattern={{version}}
-            type=semver,pattern={{major}}.{{minor}}
-          labels: |
-            component=backend
 
-      -
-        name: Docker meta heartbeat
-        id: heartbeatMeta
-        uses: docker/metadata-action@v4
-        with:
-          images: |
-            clowder/clowder2-heartbeat
-          tags: |
-            type=ref,event=branch
-            type=ref,event=pr
-            type=semver,pattern={{version}}
-            type=semver,pattern={{major}}.{{minor}}
-          labels: |
-            component=heartbeat
-
-      -
-        name: Docker meta messages
-        id: messagesMeta
-        uses: docker/metadata-action@v4
-        with:
-          images: |
-            clowder/clowder2-messages
-          tags: |
-            type=ref,event=branch
-            type=ref,event=pr
-            type=semver,pattern={{version}}
-            type=semver,pattern={{major}}.{{minor}}
-          labels: |
-            component=messages
-
-      -
-        name: Build and push
+      # build the docker images
+      - name: Build and push docker (Backend)
+        if: env.DOCKERHUB_PUSH == 'true' || env.GITHUB_PUSH == 'true'
         uses: docker/build-push-action@v3
         with:
           context: ./backend
-          platforms: linux/amd64,linux/arm64
           push: true
-          tags: ${{ steps.backendMeta.outputs.tags }}
-          labels: ${{ steps.backendMeta.outputs.labels }}
+          platforms: linux/amd64
+          cache-from: type=gha
+          cache-to: type=gha
+          tags: ${{ env.IMAGES }}
+          file: ${{ matrix.dockerfile }}
+          build-args: |
+            BRANCH: ${{ env.BRANCH }}
+            VERSION=${{ env.VERSION }}
+            BUILDNUMBER=${{ github.run_number }}
+            GITSHA1=${{ github.sha  }}
 
-      -
-        name: Build and push
-        uses: docker/build-push-action@v3
+      # this will update the README of the dockerhub repo
+      - name: Docker Hub Description
+        if: env.DOCKERHUB_README == 'true'
+        uses: peter-evans/dockerhub-description@v3
         with:
-          context: ./backend
-          platforms: linux/amd64,linux/arm64
-          push: true
-          tags: ${{ steps.heartbeatMeta.outputs.tags }}
-          file: ./backend/heartbeat.Dockerfile
-          labels: ${{ steps.heartbeatMeta.outputs.labels }}
-
-      -
-        name: Build and push
-        uses: docker/build-push-action@v3
-        with:
-          context: ./backend
-          platforms: linux/amd64,linux/arm64
-          push: true
-          tags: ${{ steps.messagesMeta.outputs.tags }}
-          file: ./backend/messages.Dockerfile
-          labels: ${{ steps.messagesMeta.outputs.labels }}
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_PASSWORD }}
+          repository: ${{ env.DOCKERHUB_ORG }}/${{ github.event.repository.name }}
+          readme-filepath: README.md

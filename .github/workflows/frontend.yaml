@@ -59,8 +59,8 @@ jobs:
           fi
 
           # calculate the version and all tags
-          if [ "$BRANCH" == "main" ]; then
-            version=$(grep '"version"' www/package.json | sed 's/.*"\([0-9\.]*\)", *$/\1/')
+          if [[ "$BRANCH" == release/* ]]; then
+            VERSION=$(grep '"version"' www/package.json | sed 's/.*"\([0-9\.]*\)", *$/\1/')
             tags="latest"
             oldversion=""
             tmpversion="${VERSION}"
@@ -139,7 +139,7 @@ jobs:
 
       # login to registries
       - name: Login to DockerHub
-        if: env.DOCKERHUB_PUSH == 'true'
+        if: env.DOCKERHUB_PUSH == 'true' && github.event_name != 'pull_request'
         uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
@@ -159,7 +159,7 @@ jobs:
         with:
           context: ./frontend
           push: true
-          platforms: ${{ env.PLATFORM }}
+          platforms: linux/amd64
           cache-from: type=gha
           cache-to: type=gha
           tags: ${{ env.IMAGES }}
