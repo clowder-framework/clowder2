@@ -1,8 +1,9 @@
-import { FileDrop } from "react-file-drop";
 import React from "react";
+import { FileDrop } from "react-file-drop";
 import { Box, IconButton, Typography } from "@material-ui/core";
 import DeleteIcon from "@material-ui/icons/Delete";
 import { makeStyles } from "@material-ui/core/styles";
+
 
 const useStyles = makeStyles({
 	fileDrop: {
@@ -96,7 +97,7 @@ export default function FileUploadDrop(props: FileUploadDropProps) {
 					</Typography>
 				</div>
 			</FileDrop>
-			{files.length > 0 ? (
+			{files !== undefined && files.length > 0 ? (
 				<Box className={classes.displayFile}>
 					{files.map((file) => {
 						return (
@@ -115,7 +116,7 @@ export default function FileUploadDrop(props: FileUploadDropProps) {
 						);
 					})}
 				</Box>
-			) : null}
+			) : <></>}
 		</div>
 	);
 }

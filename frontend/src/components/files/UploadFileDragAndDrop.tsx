@@ -1,4 +1,4 @@
-import React, {useEffect, useRef, useState} from "react";
+import React, { useEffect, useState } from "react";
 
 import {
 	Box,
@@ -10,7 +10,6 @@ import {
 	Stepper,
 	Typography,
 } from "@mui/material";
-import { FileDrop } from "react-file-drop";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../types/data";
 import { CreateMetadata } from "../metadata/CreateMetadata";
@@ -27,83 +26,16 @@ import {
 
 import LoadingOverlay from "react-loading-overlay-ts";
 import { UploadFileInputMultiple } from "./UploadFileInputMultiple";
+import FileUploadDrop from "./FileUploadDrop";
 
 type UploadFileDragAndDropProps = {
 	selectedDatasetId: string | undefined;
 	folderId: string | undefined;
 };
 
-import { makeStyles } from "@material-ui/core/styles";
-import IconButton from "@mui/material/IconButton";
-import DeleteIcon from "@mui/icons-material/Delete";
-
-
-const useStyles = makeStyles({
-	fileDrop: {
-		boxSizing: "border-box",
-		height: "176px",
-		width: "100%",
-		border: "1px dashed #00619D",
-		backgroundColor: "#FFFFFF",
-		margin: "27px auto 0 auto",
-		display: "block"
-	},
-	fileDropInput: {
-		width: "95px"
-	},
-	fileDropText: {
-		height: "54px",
-		width: "92px",
-		color: "#8798AD",
-		fontSize: "15px",
-		fontWeight: 500,
-		letterSpacing: 0,
-		lineHeight: "18px",
-		textAlign: "center"
-	},
-	fileDropGroup: {
-		width: "92px",
-		margin: "50px auto 0 auto",
-		display: "block"
-	},
-	displayFile: {
-		boxSizing: "border-box",
-		width: "100%",
-		border: "1px solid #00619D",
-		backgroundColor: "#FFFFFF",
-		margin: "5px auto 0 auto",
-		display: "block"
-	},
-	displayFileItem: {
-		width: "100%",
-		height: "37px"
-	},
-	displayFilename: {
-		height: "18px",
-		color: "#00619D",
-		fontSize: "15px",
-		fontWeight: 500,
-		letterSpacing: 0,
-		lineHeight: "18px",
-		padding: "9px 17px",
-		float: "left"
-	},
-	deleteFileIcon: {
-		"height": "24px",
-		"width": "24px",
-		"float": "right",
-		"margin": "6px",
-		"&:hover": {
-			color: "#D63649"
-		}
-	}
-});
-
-
 export const UploadFileDragAndDrop: React.FC<UploadFileDragAndDropProps> = (
 	props: UploadFileDragAndDropProps
 ) => {
-	const classes = useStyles();
 	const { selectedDatasetId, folderId } = props;
 	const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
 	const [metadataRequestForms, setMetadataRequestForms] = useState({});
@@ -111,27 +43,6 @@ export const UploadFileDragAndDrop: React.FC<UploadFileDragAndDropProps> = (
 
 	const [loading, setLoading] = useState(false);
 
-	// TODO some of this will need to change
-	const fileInputRef = useRef(null);
-
-	const onFileInputChange = (event) => {
-		console.log('on file input change', event.target.files);
-		const fileList = Array.from(event.target.files);
-		setSelectedFiles(fileList);
-	};
-	const onDeleteClick = (filename) => {
-		setSelectedFiles(selectedFiles.filter((file) => file.name !== filename));
-	};
-	const onDrop = (event) => {
-		console.log('on drop', event);
-		selectedFiles.push(event);
-		console.log('on file input change', event.target.files);
-		setSelectedFiles(Array.from(event.target.files));
-	};
-
-
-
-	// TODO end what is added from incore
 	const dispatch = useDispatch();
 	// @ts-ignore
 	const getMetadatDefinitions = (
@@ -274,7 +185,7 @@ export const UploadFileDragAndDrop: React.FC<UploadFileDragAndDropProps> = (
 										Next
 									</Button>
 								</Grid>
-								<Grid xs={1} />
+								<Grid xs={1}></Grid>
 							</Grid>
 						</StepContent>
 					</Step>
@@ -284,42 +195,13 @@ export const UploadFileDragAndDrop: React.FC<UploadFileDragAndDropProps> = (
 						<StepContent TransitionProps={{ unmountOnExit: false }}>
 							<Typography>Upload files to the dataset.</Typography>
 							<Box>
-								<FileDrop onDrop={onDrop} className={classes.fileDrop}>
-									<div className={classes.fileDropGroup}>
-										<input
-											onChange={onFileInputChange}
-											ref={fileInputRef}
-											type="file"
-											className={classes.fileDropInput}
-											multiple
-										/>
-										<Typography className={classes.fileDropText}>
-												Upload a File <br />
-														or
-											<br /> Drag & Drop
-										</Typography>
-									</div>
-									{selectedFiles !== null && selectedFiles.length > 0 ? (
-										<Box className={classes.displayFile}>
-											{selectedFiles.map((file) => {
-												return (
-													<div className={classes.displayFileItem} key={file.name}>
-														<Typography className={classes.displayFilename}>{file.name}</Typography>
-														<IconButton
-															aria-label="delete"
-															className={classes.deleteFileIcon}
-															onClick={() => {
-																onDeleteClick(file.name);
-															}}
-														>
-															<DeleteIcon />
-														</IconButton>
-													</div>
-												);
-											})}
-										</Box>
-									) : null}
-								</FileDrop>
+								<FileUploadDrop
+									onDrop={null}
+									onFileInputChange={null}
+									fileInputRef={null}
+									onDeleteClick={null}
+									files={selectedFiles}
+								/>
 							</Box>
 						</StepContent>
 					</Step>
