@@ -22,8 +22,7 @@ copyright = "2022, Clowder Devs"
 author = "Clowder Devs"
 
 # The full version, including alpha/beta/rc tags
-release = "2.0.0-beta.1"
-
+release = "2.0.0-beta.2"
 
 # -- General configuration ---------------------------------------------------
 
@@ -88,6 +87,5 @@ if FORCE_CLASSIC:
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ["_static"]
-
 
 # -- Markdown support --------------------------------------------------------
