@@ -29,10 +29,6 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        name:
-          - backend
-          - heartbeat
-          - message
         include:
           - name: clowder2-backend
             dockerfile: ./backend/Dockerfile
@@ -73,9 +69,9 @@ jobs:
 
           # calculate the version and all tags; main to main; release to release
           if [[ "$BRANCH" == release/* ]]; then
-            CHANGELOG_FILE="${{ matrix.workdir }}/CHANGELOG.md"
+            CHANGELOG_FILE="CHANGELOG.md"
             if [ -e "$CHANGELOG_FILE" ]; then
-              VERSION=$(cat "$CHANGELOG_FILE" | grep -Eo '\[[0-9]+\.[0-9]+\.[0-9]+\]'| head -1 | tr -d '[]')
+              VERSION=$(cat "$CHANGELOG_FILE" | grep -Eo '\[[^\]]+\]' | head -1 | sed 's/\[v*//; s/\]//')
               tags="latest"
               oldversion=""
               tmpversion="${VERSION}"
