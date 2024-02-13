@@ -105,25 +105,28 @@ export const UploadFileDragAndDrop: React.FC<UploadFileDragAndDropProps> = (
 ) => {
 	const classes = useStyles();
 	const { selectedDatasetId, folderId } = props;
-	const [selectedFiles, setSelectedFiles] = useState<File[] | null>(null);
+	const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
 	const [metadataRequestForms, setMetadataRequestForms] = useState({});
 	const [allFilled, setAllFilled] = React.useState<boolean>(false);
 
 	const [loading, setLoading] = useState(false);
 
 	// TODO some of this will need to change
-	const [files, setFile] = useState([]);
 	const fileInputRef = useRef(null);
 
 	const onFileInputChange = (event) => {
+		console.log('on file input change', event.target.files);
 		const fileList = Array.from(event.target.files);
 		setSelectedFiles(fileList);
 	};
 	const onDeleteClick = (filename) => {
-		setSelectedFiles(files.filter((file) => file.name !== filename));
+		setSelectedFiles(selectedFiles.filter((file) => file.name !== filename));
 	};
-	const onDrop = (fileList) => {
-		setSelectedFiles(Array.from(fileList));
+	const onDrop = (event) => {
+		console.log('on drop', event);
+		selectedFiles.push(event);
+		console.log('on file input change', event.target.files);
+		setSelectedFiles(Array.from(event.target.files));
 	};
 
 
@@ -296,9 +299,9 @@ export const UploadFileDragAndDrop: React.FC<UploadFileDragAndDropProps> = (
 											<br /> Drag & Drop
 										</Typography>
 									</div>
-									{files.length > 0 ? (
+									{selectedFiles !== null && selectedFiles.length > 0 ? (
 										<Box className={classes.displayFile}>
-											{files.map((file) => {
+											{selectedFiles.map((file) => {
 												return (
 													<div className={classes.displayFileItem} key={file.name}>
 														<Typography className={classes.displayFilename}>{file.name}</Typography>
