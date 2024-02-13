@@ -75,7 +75,7 @@ export const Public = (): JSX.Element => {
 					</Box>
 					<TabPanel value={selectedTabIndex} index={0}>
 						<Grid container spacing={2}>
-							{publicDatasets !== undefined ? (
+							{publicDatasets !== undefined && publicDatasets.length > 0 ? (
 								publicDatasets.map((dataset) => {
 									return (
 										<Grid item key={dataset.id} xs={12} sm={6} md={4} lg={3}>
@@ -92,7 +92,7 @@ export const Public = (): JSX.Element => {
 									);
 								})
 							) : (
-								<></>
+								<>No public datasets</>
 							)}
 						</Grid>
 						<Box display="flex" justifyContent="center" sx={{ m: 1 }}>
