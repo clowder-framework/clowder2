@@ -36,13 +36,6 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
-
-      - name: Login to GitHub Container Registry
-        uses: docker/login-action@v2
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
       -
         name: Docker meta backend
         id: backendMeta
@@ -94,7 +87,7 @@ jobs:
         with:
           context: ./backend
           platforms: linux/amd64,linux/arm64
-          push: ${{ github.event_name != 'pull_request' }}
+          push: true
           tags: ${{ steps.backendMeta.outputs.tags }}
           labels: ${{ steps.backendMeta.outputs.labels }}
 
@@ -104,7 +97,7 @@ jobs:
         with:
           context: ./backend
           platforms: linux/amd64,linux/arm64
-          push: ${{ github.event_name != 'pull_request' }}
+          push: true
           tags: ${{ steps.heartbeatMeta.outputs.tags }}
           file: ./backend/heartbeat.Dockerfile
           labels: ${{ steps.heartbeatMeta.outputs.labels }}
@@ -115,7 +108,7 @@ jobs:
         with:
           context: ./backend
           platforms: linux/amd64,linux/arm64
-          push: ${{ github.event_name != 'pull_request' }}
+          push: true
           tags: ${{ steps.messagesMeta.outputs.tags }}
           file: ./backend/messages.Dockerfile
           labels: ${{ steps.messagesMeta.outputs.labels }}
