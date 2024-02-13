@@ -108,7 +108,7 @@ jobs:
         with:
           context: ./backend
           platforms: linux/amd64,linux/arm64
-          push: true
+          push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.messagesMeta.outputs.tags }}
           file: ./backend/messages.Dockerfile
           labels: ${{ steps.messagesMeta.outputs.labels }}
