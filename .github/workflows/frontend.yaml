@@ -42,6 +42,10 @@ jobs:
             BRANCH=${GITHUB_REF##*/}
           fi
 
+          # Set up the owner and lowercase owner
+          OWNER=${{ github.repository_owner }}
+          OWNER_LC=${OWNER,,}
+
           # should we push to dockerhub, and is there a README
           DOCKERHUB_PUSH="false"
           DOCKERHUB_README="false"
@@ -114,6 +118,7 @@ jobs:
           echo "VERSION=${VERSION}" >> $GITHUB_ENV
           echo "DOCKERHUB_README=${DOCKERHUB_README}" >> $GITHUB_ENV
           echo "DOCKERHUB_PUSH=${DOCKERHUB_PUSH}" >> $GITHUB_ENV
+          echo "GITHUB_PUSH=${GITHUB_PUSH}" >> $GITHUB_ENV
           echo "IMAGES=${IMAGES}" >> $GITHUB_ENV
 
       # setup docker build
