@@ -101,26 +101,6 @@ export const Public = (): JSX.Element => {
 							) : (
 								<Box>
 									<p>No public datasets on this instance. Login or register to create datasets. </p>
-									<div>
-										<Button
-											component={RouterLink}
-											to="/auth/login"
-											variant="contained"
-											sx={{ m: 2 }}
-										>
-											Login
-										</Button>
-									</div>
-									<div>
-										<Button
-											component={RouterLink}
-											to="/auth/register"
-											variant="contained"
-											sx={{ m: 2 }}
-										>
-											Register
-										</Button>
-									</div>
 								</Box>
 							)}
 						</Grid>
