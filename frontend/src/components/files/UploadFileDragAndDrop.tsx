@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, {useEffect, useRef, useState} from "react";
 
 import {
 	Box,
@@ -40,6 +40,7 @@ export const UploadFileDragAndDrop: React.FC<UploadFileDragAndDropProps> = (
 	const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
 	const [metadataRequestForms, setMetadataRequestForms] = useState({});
 	const [allFilled, setAllFilled] = React.useState<boolean>(false);
+	const fileInputRef = useRef(null);
 
 	const [loading, setLoading] = useState(false);
 
@@ -84,6 +85,23 @@ export const UploadFileDragAndDrop: React.FC<UploadFileDragAndDropProps> = (
 		});
 
 		return required;
+	};
+
+	const onFileInputChange = (event) => {
+		console.log(event, 'called onFileInputChange');
+		const fileList = Array.from(event.target.files);
+		console.log("here are the files");
+		setSelectedFiles(fileList);
+		console.log(selectedFiles, 'selected files');
+	};
+
+	const onDrop = (event) => {
+		console.log('called on drop', event);
+		console.log(event);
+		const fileList = Array.from(event.target.files);
+		console.log('the file list', fileList);
+		setSelectedFiles(fileList);
+		console.log(selectedFiles, 'selected files');
 	};
 
 	const checkIfFieldsAreFilled = () => {
@@ -196,9 +214,9 @@ export const UploadFileDragAndDrop: React.FC<UploadFileDragAndDropProps> = (
 							<Typography>Upload files to the dataset.</Typography>
 							<Box>
 								<FileUploadDrop
-									onDrop={null}
-									onFileInputChange={null}
-									fileInputRef={null}
+									onDrop={onDrop}
+									onFileInputChange={onFileInputChange}
+									fileInputRef={fileInputRef}
 									onDeleteClick={null}
 									files={selectedFiles}
 								/>
