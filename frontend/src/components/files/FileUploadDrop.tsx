@@ -71,11 +71,11 @@ type FileUploadDropProps = {
 	onFileInputChange: any;
 	fileInputRef: any;
 	onDeleteClick: any;
-	files: File[] | [];
+	selectedFiles: File[] | [];
 };
 
 export default function FileUploadDrop(props: FileUploadDropProps) {
-	const { onDrop, onFileInputChange, fileInputRef, onDeleteClick, files } = props;
+	const { onDrop, onFileInputChange, fileInputRef, onDeleteClick, selectedFiles } = props;
 
 	const classes = useStyles();
 
@@ -97,9 +97,9 @@ export default function FileUploadDrop(props: FileUploadDropProps) {
 					</Typography>
 				</div>
 			</FileDrop>
-			{files !== undefined && files.length > 0 ? (
+			{selectedFiles !== undefined && selectedFiles.length > 0 ? (
 				<Box className={classes.displayFile}>
-					{files.map((file) => {
+					{selectedFiles.map((file) => {
 						return (
 							<div className={classes.displayFileItem} key={file.name}>
 								<Typography className={classes.displayFilename}>{file.name}</Typography>

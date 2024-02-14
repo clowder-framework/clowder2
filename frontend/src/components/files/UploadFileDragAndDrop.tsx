@@ -91,16 +91,13 @@ export const UploadFileDragAndDrop: React.FC<UploadFileDragAndDropProps> = (
 		console.log(event, 'called onFileInputChange');
 		const fileList = Array.from(event.target.files);
 		console.log("here are the files");
+		// TODO find out how to append useState update previous state
 		setSelectedFiles(fileList);
 		console.log(selectedFiles, 'selected files');
 	};
 
-	const onDrop = (event) => {
-		console.log('called on drop', event);
-		console.log(event);
-		const fileList = Array.from(event.target.files);
-		console.log('the file list', fileList);
-		setSelectedFiles(fileList);
+	const onDrop = (fileList) => {
+		setSelectedFiles(Array.from(fileList));
 		console.log(selectedFiles, 'selected files');
 	};
 
@@ -218,7 +215,7 @@ export const UploadFileDragAndDrop: React.FC<UploadFileDragAndDropProps> = (
 									onFileInputChange={onFileInputChange}
 									fileInputRef={fileInputRef}
 									onDeleteClick={null}
-									files={selectedFiles}
+									selectedFiles={selectedFiles}
 								/>
 							</Box>
 						</StepContent>
