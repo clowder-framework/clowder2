@@ -100,7 +100,11 @@ export const UploadFileDragAndDrop: React.FC<UploadFileDragAndDropProps> = (
 	};
 
 	const onDrop = (fileList) => {
-		setSelectedFiles(Array.from(fileList));
+		let newFileList : File[] = fileList;
+		let newArray = selectedFiles.slice();
+		newFileList.forEach(f => newArray.push(f));
+
+		setSelectedFiles(newArray);
 		console.log(selectedFiles, 'selected files');
 	};
 
