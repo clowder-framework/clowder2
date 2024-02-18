@@ -217,6 +217,19 @@ export const UploadFileDragAndDrop: React.FC<UploadFileDragAndDropProps> = (
 									onDeleteClick={null}
 									selectedFiles={selectedFiles}
 								/>
+								<Box className="inputGroup">
+									<Button onClick={handleBack} sx={{ float: "right" }}>
+										Back
+									</Button>
+									<Button
+										variant="contained"
+										onClick={handleFinishMultiple}
+										disabled={!selectedFiles}
+										sx={{ float: "right" }}
+									>
+										Finish
+									</Button>
+								</Box>
 							</Box>
 						</StepContent>
 					</Step>
