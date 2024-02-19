@@ -88,24 +88,24 @@ export const UploadFileDragAndDrop: React.FC<UploadFileDragAndDropProps> = (
 	};
 
 	const onFileInputChange = (event) => {
-		console.log(event, 'called onFileInputChange');
 		const fileList : File[] = Array.from(event.target.files);
-		console.log("here are the files");
-		// TODO find out how to append useState update previous state
 		let newArray = selectedFiles.slice();
 		fileList.forEach(f => newArray.push(f));
-
 		setSelectedFiles(newArray);
-		console.log(selectedFiles, 'selected files');
 	};
 
 	const onDrop = (fileList) => {
 		let newFileList : File[] = Array.from(fileList);
 		let newArray = selectedFiles.slice();
 		newFileList.forEach(f => newArray.push(f));
-
 		setSelectedFiles(newArray);
-		console.log(selectedFiles, 'selected files');
+	};
+
+	const onDeleteClick = (element) => {
+		let newFileList : File[] = selectedFiles;
+		let newArray = newFileList.slice();
+		newArray.pop(element);
+		setSelectedFiles(newArray);
 	};
 
 	const checkIfFieldsAreFilled = () => {
@@ -221,7 +221,7 @@ export const UploadFileDragAndDrop: React.FC<UploadFileDragAndDropProps> = (
 									onDrop={onDrop}
 									onFileInputChange={onFileInputChange}
 									fileInputRef={fileInputRef}
-									onDeleteClick={null}
+									onDeleteClick={onDeleteClick}
 									selectedFiles={selectedFiles}
 								/>
 								<Box className="inputGroup">

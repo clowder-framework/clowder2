@@ -107,7 +107,7 @@ export default function FileUploadDrop(props: FileUploadDropProps) {
 									aria-label="delete"
 									className={classes.deleteFileIcon}
 									onClick={() => {
-										onDeleteClick(file.name);
+										onDeleteClick(file);
 									}}
 								>
 									<DeleteIcon />
