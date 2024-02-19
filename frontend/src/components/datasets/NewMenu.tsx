@@ -30,9 +30,6 @@ export const NewMenu = (props: ActionsMenuProps): JSX.Element => {
 	const about = useSelector((state: RootState) => state.dataset.about);
 
 	const [anchorEl, setAnchorEl] = React.useState<Element | null>(null);
-	const [createFileOpen, setCreateFileOpen] = React.useState<boolean>(false);
-	const [createMultipleFileOpen, setCreateMultipleFileOpen] =
-		React.useState<boolean>(false);
 	const [dragDropFiles, setDragDropFiles] =
 		React.useState<boolean>(false);
 	const [newFolder, setNewFolder] = React.useState<boolean>(false);
@@ -49,32 +46,6 @@ export const NewMenu = (props: ActionsMenuProps): JSX.Element => {
 	};
 	return (
 		<Box>
-			<Dialog
-				open={createFileOpen}
-				onClose={() => {
-					setCreateFileOpen(false);
-				}}
-				fullWidth={true}
-				maxWidth="lg"
-				aria-labelledby="form-dialog"
-			>
-				<UploadFile
-					selectedDatasetId={datasetId}
-					selectedDatasetName={about.name}
-					folderId={folderId}
-				/>
-			</Dialog>
-			<Dialog
-				open={createMultipleFileOpen}
-				onClose={() => {
-					setCreateMultipleFileOpen(false);
-				}}
-				fullWidth={true}
-				maxWidth="lg"
-				aria-labelledby="form-dialog"
-			>
-				<UploadFileMultiple selectedDatasetId={datasetId} folderId={folderId} />
-			</Dialog>
 			<Dialog
 				open={dragDropFiles}
 				onClose={() => {
@@ -111,28 +82,6 @@ export const NewMenu = (props: ActionsMenuProps): JSX.Element => {
 			>
 				<MenuItem
 					onClick={() => {
-						setCreateFileOpen(true);
-						handleOptionClose();
-					}}
-				>
-					<ListItemIcon>
-						<UploadIcon fontSize="small" />
-					</ListItemIcon>
-					<ListItemText>Upload File</ListItemText>
-				</MenuItem>
-				<MenuItem
-					onClick={() => {
-						setCreateMultipleFileOpen(true);
-						handleOptionClose();
-					}}
-				>
-					<ListItemIcon>
-						<UploadIcon fontSize="small" />
-					</ListItemIcon>
-					<ListItemText>Upload Multiple Files</ListItemText>
-				</MenuItem>
-				<MenuItem
-					onClick={() => {
 						setDragDropFiles(true);
 						handleOptionClose();
 					}}
@@ -140,7 +89,7 @@ export const NewMenu = (props: ActionsMenuProps): JSX.Element => {
 					<ListItemIcon>
 						<UploadIcon fontSize="small" />
 					</ListItemIcon>
-					<ListItemText>Drag and Drop</ListItemText>
+					<ListItemText>Upload Files</ListItemText>
 				</MenuItem>
 				<MenuItem
 					onClick={() => {
