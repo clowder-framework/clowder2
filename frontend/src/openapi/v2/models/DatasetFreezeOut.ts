@@ -17,7 +17,7 @@ import type { UserOut } from './UserOut';
  * - Pydantic BaseModel
  * - [UpdateMethods](https://roman-right.github.io/beanie/api/interfaces/#aggregatemethods)
  */
-export type DatasetOut = {
+export type DatasetFreezeOut = {
     name?: string;
     description?: string;
     status?: string;
@@ -28,4 +28,6 @@ export type DatasetOut = {
     downloads?: number;
     thumbnail_id?: string;
     id?: string;
+    frozen?: boolean;
+    frozen_version_num?: number;
 }

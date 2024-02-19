@@ -20,6 +20,7 @@ export type { Body_save_files_api_v2_datasets__dataset_id__filesMultiple_post } 
 export type { Body_update_file_api_v2_files__file_id__put } from './models/Body_update_file_api_v2_files__file_id__put';
 export type { ContentType } from './models/ContentType';
 export type { DatasetBase } from './models/DatasetBase';
+export type { DatasetFreezeOut } from './models/DatasetFreezeOut';
 export type { DatasetIn } from './models/DatasetIn';
 export type { DatasetOut } from './models/DatasetOut';
 export type { DatasetPatch } from './models/DatasetPatch';

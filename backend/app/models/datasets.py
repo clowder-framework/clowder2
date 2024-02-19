@@ -34,13 +34,7 @@ class DatasetIn(DatasetBase):
     pass
 
 
-class DatasetPatch(BaseModel):
-    name: Optional[str]
-    description: Optional[str]
-    status: Optional[str]
-
-
-class DatasetDB(Document, DatasetBase):
+class DatasetBaseCommon(DatasetBase):
     creator: UserOut
     created: datetime = Field(default_factory=datetime.utcnow)
     modified: datetime = Field(default_factory=datetime.utcnow)
@@ -49,8 +43,30 @@ class DatasetDB(Document, DatasetBase):
     downloads: int = 0
     thumbnail_id: Optional[PydanticObjectId] = None
 
+
+class DatasetPatch(BaseModel):
+    name: Optional[str]
+    description: Optional[str]
+    status: Optional[str]
+
+
+class DatasetDB(Document, DatasetBaseCommon):
     class Settings:
         name = "datasets"
+        indexes = [
+            [
+                ("name", pymongo.TEXT),
+                ("description", pymongo.TEXT),
+            ],
+        ]
+
+
+class DatasetFreezeDB(Document, DatasetBaseCommon):
+    frozen: bool = True
+    frozen_version_num: int = 1
+
+    class Settings:
+        name = "datasets_freeze"
         indexes = [
             [
                 ("name", pymongo.TEXT),
@@ -69,7 +85,7 @@ class DatasetDBViewList(View, DatasetBase):
     status: str = DatasetStatus.PRIVATE.name
 
     class Settings:
-        source = DatasetDB
+        source = DatasetFreezeDB
         name = "datasets_view"
         pipeline = [
             {
@@ -80,6 +96,14 @@ class DatasetDBViewList(View, DatasetBase):
                     "as": "auth",
                 }
             },
+            {
+                "$unionWith": {
+                    "coll": "datasets",
+                    "pipeline": [
+                        {"$addFields": {"frozen": False, "frozen_version_num": "NA"}}
+                    ],
+                }
+            },
         ]
         # Needs fix to work https://github.com/roman-right/beanie/pull/521
         # use_cache = True
@@ -88,6 +112,11 @@ class DatasetDBViewList(View, DatasetBase):
 
 
 class DatasetOut(DatasetDB):
+    class Config:
+        fields = {"id": "id"}
+
+
+class DatasetFreezeOut(DatasetFreezeDB):
     class Config:
         fields = {"id": "id"}
 

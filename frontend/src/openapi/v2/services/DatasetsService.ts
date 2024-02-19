@@ -5,6 +5,7 @@ import type { Body_create_dataset_from_zip_api_v2_datasets_createFromZip_post } 
 import type { Body_save_file_api_v2_datasets__dataset_id__files_post } from '../models/Body_save_file_api_v2_datasets__dataset_id__files_post';
 import type { Body_save_files_api_v2_datasets__dataset_id__filesMultiple_post } from '../models/Body_save_files_api_v2_datasets__dataset_id__filesMultiple_post';
 import type { DatasetBase } from '../models/DatasetBase';
+import type { DatasetFreezeOut } from '../models/DatasetFreezeOut';
 import type { DatasetIn } from '../models/DatasetIn';
 import type { DatasetOut } from '../models/DatasetOut';
 import type { DatasetPatch } from '../models/DatasetPatch';
@@ -23,6 +24,7 @@ export class DatasetsService {
      * Get Datasets
      * @param skip
      * @param limit
+     * @param frozenOnly
      * @param mine
      * @param datasetId
      * @returns Paged Successful Response
@@ -31,6 +33,7 @@ export class DatasetsService {
     public static getDatasetsApiV2DatasetsGet(
         skip?: number,
         limit: number = 10,
+        frozenOnly: boolean = false,
         mine: boolean = false,
         datasetId?: string,
     ): CancelablePromise<Paged> {
@@ -40,6 +43,7 @@ export class DatasetsService {
             query: {
                 'skip': skip,
                 'limit': limit,
+                'frozen_only': frozenOnly,
                 'mine': mine,
                 'dataset_id': datasetId,
             },
@@ -199,6 +203,24 @@ export class DatasetsService {
             },
             formData: formData,
             mediaType: 'multipart/form-data',
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+
+    /**
+     * Freeze Dataset
+     * @param datasetId
+     * @returns DatasetFreezeOut Successful Response
+     * @throws ApiError
+     */
+    public static freezeDatasetApiV2DatasetsDatasetIdFreezePost(
+        datasetId: string,
+    ): CancelablePromise<DatasetFreezeOut> {
+        return __request({
+            method: 'POST',
+            path: `/api/v2/datasets/${datasetId}/freeze`,
             errors: {
                 422: `Validation Error`,
             },

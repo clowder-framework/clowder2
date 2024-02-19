@@ -5,9 +5,7 @@ from fastapi.testclient import TestClient
 from app.config import settings
 from app.tests.utils import (
     create_dataset,
-    create_user,
     generate_png,
-    user_example,
     user_alt,
 )
 
@@ -31,6 +29,16 @@ def test_delete(client: TestClient, headers: dict):
         f"{settings.API_V2_STR}/datasets/{dataset_id}", headers=headers
     )
     assert response.status_code == 200
+
+
+def test_freeze(client: TestClient, headers: dict):
+    dataset_id = create_dataset(client, headers).get("id")
+    response = client.post(
+        f"{settings.API_V2_STR}/datasets/{dataset_id}/freeze", headers=headers
+    )
+    assert response.status_code == 200
+    assert response.json().get("frozen") is True
+    assert response.json().get("id") == dataset_id  # datasetId should stay the same
 
 
 def test_delete_with_metadata(client: TestClient, headers: dict):

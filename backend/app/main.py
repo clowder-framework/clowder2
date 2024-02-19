@@ -11,7 +11,7 @@ from app.config import settings
 from app.keycloak_auth import get_current_username
 from app.models.authorization import AuthorizationDB
 from app.models.config import ConfigEntryDB
-from app.models.datasets import DatasetDB, DatasetDBViewList
+from app.models.datasets import DatasetDB, DatasetDBViewList, DatasetFreezeDB
 from app.models.errors import ErrorDB
 from app.models.feeds import FeedDB
 from app.models.files import FileDB, FileVersionDB, FileDBViewList
@@ -246,6 +246,7 @@ async def startup_beanie():
         document_models=[
             ConfigEntryDB,
             DatasetDB,
+            DatasetFreezeDB,
             DatasetDBViewList,
             AuthorizationDB,
             MetadataDB,

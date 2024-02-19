@@ -46,6 +46,8 @@ from app.models.datasets import (
     DatasetPatch,
     DatasetDBViewList,
     DatasetStatus,
+    DatasetFreezeDB,
+    DatasetFreezeOut,
 )
 from app.models.files import (
     FileOut,
@@ -224,32 +226,43 @@ async def get_datasets(
     user_id=Depends(get_user),
     skip: int = 0,
     limit: int = 10,
+    frozen_only: bool = False,
     mine: bool = False,
     admin=Depends(get_admin),
     admin_mode: bool = Depends(get_admin_mode),
 ):
+    query = []
+    if frozen_only:
+        query.append(DatasetDB.frozen == True)
+
     if admin and admin_mode:
-        datasets_and_count = await DatasetDBViewList.aggregate(
-            [_get_page_query(skip, limit, sort_field="created", ascending=False)],
-        ).to_list()
-    elif mine:
         datasets_and_count = (
-            await DatasetDBViewList.find(DatasetDBViewList.creator.email == user_id)
+            await DatasetDBViewList.find(*query)
+            .aggregate(
+                [_get_page_query(skip, limit, sort_field="created", ascending=False)],
+            )
+            .to_list()
+        )
+    elif mine:
+        query.append(DatasetDBViewList.creator.email == user_id)
+        datasets_and_count = (
+            await DatasetDBViewList.find(*query)
             .aggregate(
                 [_get_page_query(skip, limit, sort_field="created", ascending=False)],
             )
             .to_list()
         )
     else:
-        datasets_and_count = (
-            await DatasetDBViewList.find(
-                Or(
-                    DatasetDBViewList.creator.email == user_id,
-                    DatasetDBViewList.auth.user_ids == user_id,
-                    DatasetDBViewList.status == DatasetStatus.PUBLIC.name,
-                    DatasetDBViewList.status == DatasetStatus.AUTHENTICATED.name,
-                )
+        query.append(
+            Or(
+                DatasetDBViewList.creator.email == user_id,
+                DatasetDBViewList.auth.user_ids == user_id,
+                DatasetDBViewList.status == DatasetStatus.PUBLIC.name,
+                DatasetDBViewList.status == DatasetStatus.AUTHENTICATED.name,
             )
+        )
+        datasets_and_count = (
+            await DatasetDBViewList.find(*query)
             .aggregate(
                 [_get_page_query(skip, limit, sort_field="created", ascending=False)],
             )
@@ -417,6 +430,27 @@ async def delete_dataset(
             AuthorizationDB.dataset_id == ObjectId(dataset_id)
         ).delete()
         return {"deleted": dataset_id}
+    raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
+
+
+@router.post("/{dataset_id}/freeze", response_model=DatasetFreezeOut)
+async def freeze_dataset(
+    dataset_id: str,
+    fs: Minio = Depends(dependencies.get_fs),
+    es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
+    allow: bool = Depends(Authorization("owner")),
+):
+    # Retrieve the dataset by ID
+    if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
+        # Move dataset to Public Freeze Dataset collection
+        frozen_dataset_data = dataset.dict()
+        frozen_dataset_data["_id"] = frozen_dataset_data.pop("id")
+        frozen_dataset = DatasetFreezeDB(**frozen_dataset_data)
+        await frozen_dataset.insert()
+        await dataset.delete()
+        # TODO: move metadata, files, folders, and authorizations to the frozen set
+        return frozen_dataset.dict()
+
     raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
 
 
