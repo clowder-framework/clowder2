@@ -53,7 +53,7 @@ from app.routers import (
     visualization,
     public_visualization,
     thumbnails,
-    licenses
+    licenses,
 )
 
 # setup loggers
@@ -280,7 +280,7 @@ async def startup_beanie():
             VisualizationDataDB,
             ThumbnailDB,
             FolderFileViewList,
-            LicenseDB
+            LicenseDB,
         ],
         recreate_views=True,
     )

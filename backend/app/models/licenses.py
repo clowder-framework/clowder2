@@ -17,8 +17,10 @@ class LicenseBase(BaseModel):
     expiration_date: datetime = Field(default_factory=datetime.utcnow)
     allow_download: bool = False
 
+
 class LicenseIn(LicenseBase):
     pass
+
 
 class LicenseDB(Document, LicenseBase):
     creator: UserOut
@@ -28,7 +30,7 @@ class LicenseDB(Document, LicenseBase):
     class Settings:
         name = "licenses"
 
+
 class LicenseOut(LicenseDB):
     class Config:
         fields = {"id": "id"}
-

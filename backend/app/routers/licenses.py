@@ -38,6 +38,7 @@ async def get_license(
         return license.dict()
     raise HTTPException(status_code=404, detail=f"Group {license_id} not found")
 
+
 @router.put("/{license_id}", response_model=GroupOut)
 async def edit_license(
     license_id: str,
@@ -58,11 +59,11 @@ async def edit_license(
         user = await UserDB.find_one(UserDB.email == user_id)
         license.creator = user.dict()
         license.modified = datetime.utcnow()
-        license.holders = license_dict['holders']
-        license.type = license_dict['text']
-        license.url = license_dict['url']
-        license.version = license_dict['version']
-        license.allow_download = license_dict['allow_download']
+        license.holders = license_dict["holders"]
+        license.type = license_dict["text"]
+        license.url = license_dict["url"]
+        license.version = license_dict["version"]
+        license.allow_download = license_dict["allow_download"]
         license.replace()
 
         return license.dict()
@@ -79,6 +80,3 @@ async def delete_license(
         return license.dict()  # TODO: Do we need to return what we just deleted?
     else:
         raise HTTPException(status_code=404, detail=f"Dataset {license_id} not found")
-
-
-

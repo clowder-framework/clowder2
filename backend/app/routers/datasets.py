@@ -207,7 +207,16 @@ async def save_dataset(
     user=Depends(get_current_user),
     es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
 ):
-    license_in = {"name": "All Rights Reserved", "text": "", "type": "", "url": "", "version": "", "holders": [user], "expiration_date":"", "allow_downloads": True}
+    license_in = {
+        "name": "All Rights Reserved",
+        "text": "",
+        "type": "",
+        "url": "",
+        "version": "",
+        "holders": [user],
+        "expiration_date": "",
+        "allow_downloads": True,
+    }
     license = await save_license(license_in)
     print(license["id"])
     dataset = DatasetDB(**dataset_in.dict(), creator=user, license_id=license["id"])
