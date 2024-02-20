@@ -91,9 +91,7 @@ export default function FileUploadDrop(props: FileUploadDropProps) {
 						multiple
 					/>
 					<Typography className={classes.fileDropText}>
-						Upload a File <br />
-						or
-						<br /> Drag & Drop
+						<br></br>
 					</Typography>
 				</div>
 			</FileDrop>
