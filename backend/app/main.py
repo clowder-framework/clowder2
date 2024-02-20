@@ -53,12 +53,15 @@ from app.routers import (
     visualization,
     public_visualization,
     thumbnails,
+    licenses
 )
 
 # setup loggers
 # logging.config.fileConfig('logging.conf', disable_existing_loggers=False)
 from app.search.config import indexSettings
 from app.search.connect import connect_elasticsearch, create_index
+
+from backend.app.models.licenses import LicenseDB
 
 logger = logging.getLogger(__name__)
 
@@ -227,6 +230,12 @@ api_router.include_router(
     tags=["thumbnails"],
     dependencies=[Depends(get_current_username)],
 )
+api_router.include_router(
+    licenses.router,
+    prefix="/licenses",
+    tags=["licenses"],
+    dependencies=[Depends(get_current_username)],
+)
 api_router.include_router(status.router, prefix="/status", tags=["status"])
 api_router.include_router(keycloak.router, prefix="/auth", tags=["auth"])
 app.include_router(api_router, prefix=settings.API_V2_STR)
@@ -271,6 +280,7 @@ async def startup_beanie():
             VisualizationDataDB,
             ThumbnailDB,
             FolderFileViewList,
+            LicenseDB
         ],
         recreate_views=True,
     )

@@ -13,6 +13,9 @@ from beanie.odm.operators.update.general import Inc
 from beanie.operators import Or, And
 from bson import ObjectId
 from bson import json_util
+
+from backend.app.models.licenses import LicenseIn
+from backend.app.routers.licenses import save_license
 from elasticsearch import Elasticsearch
 from fastapi import (
     APIRouter,
@@ -204,7 +207,10 @@ async def save_dataset(
     user=Depends(get_current_user),
     es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
 ):
-    dataset = DatasetDB(**dataset_in.dict(), creator=user)
+    license_in = {"name": "All Rights Reserved", "text": "", "type": "", "url": "", "version": "", "holders": [user], "expiration_date":"", "allow_downloads": True}
+    license = await save_license(license_in)
+    print(license["id"])
+    dataset = DatasetDB(**dataset_in.dict(), creator=user, license_id=license["id"])
     await dataset.insert()
 
     # Create authorization entry
