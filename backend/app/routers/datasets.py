@@ -465,7 +465,7 @@ async def get_dataset_folders(
     limit: int = 10,
     allow: bool = Depends(Authorization("viewer")),
 ):
-    if (await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
+    if (dataset_db := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
         if authenticated or public:
             query = [
                 FolderDBViewList.dataset_id == ObjectId(dataset_id),
@@ -495,7 +495,7 @@ async def get_dataset_folders(
         page = Paged(
             metadata=page_metadata,
             data=[
-                DatasetOut(id=item.pop("_id"), **item)
+                DatasetOut(id=item.pop("_id"), **item, license_id=dataset_db.license_id)
                 for item in folders_and_count[0]["data"]
             ],
         )
