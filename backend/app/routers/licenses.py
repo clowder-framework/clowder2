@@ -1,19 +1,12 @@
 from datetime import datetime
-from typing import Optional
 
 from beanie import PydanticObjectId
-from beanie.operators import Or, Push, RegEx
-from bson.objectid import ObjectId
 from fastapi import HTTPException, Depends, APIRouter
 
-from app.deps.authorization_deps import AuthorizationDB, GroupAuthorization
+from app.deps.authorization_deps import GroupAuthorization
 from app.keycloak_auth import get_current_user, get_user
-from app.models.authorization import RoleType
-from app.models.groups import GroupOut, GroupIn, GroupDB, GroupBase, Member
-from app.models.pages import _get_page_query, Paged, _construct_page_metadata
-from app.models.users import UserOut, UserDB
-from app.routers.authentication import get_admin_mode, get_admin
-
+from app.models.groups import GroupOut, GroupDB
+from app.models.users import UserDB
 from backend.app.models.licenses import LicenseOut, LicenseIn, LicenseDB, LicenseBase
 
 router = APIRouter()
@@ -24,7 +17,7 @@ async def save_license(
     license_in: LicenseIn,
     user=Depends(get_current_user),
 ):
-    license_db = LicenseDB(**license_in, creator=user)
+    license_db = LicenseDB(**license_in.dict(), creator=user.email)
     await license_db.insert()
     return license_db.dict()
 

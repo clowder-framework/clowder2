@@ -1,10 +1,11 @@
 from datetime import datetime
 from typing import List
 
+from beanie import Document
 from pydantic import BaseModel, Field
-from beanie import Document, View, PydanticObjectId
 
-from backend.app.models.users import UserOut
+from app.models.authorization import Provenance
+from app.models.users import UserOut
 
 
 class LicenseBase(BaseModel):
@@ -13,8 +14,10 @@ class LicenseBase(BaseModel):
     text: str
     url: str
     version: str
-    holders: List[UserOut]
-    expiration_date: datetime = Field(default_factory=datetime.utcnow)
+    holders: List[UserOut] = []
+    expiration_date: datetime = Field(
+        default_factory=datetime.utcnow
+    )  # TODO: shoudn't the default be never?
     allow_download: bool = False
 
 
@@ -22,11 +25,7 @@ class LicenseIn(LicenseBase):
     pass
 
 
-class LicenseDB(Document, LicenseBase):
-    creator: UserOut
-    created: datetime = Field(default_factory=datetime.utcnow)
-    modified: datetime = Field(default_factory=datetime.utcnow)
-
+class LicenseDB(Document, LicenseBase, Provenance):
     class Settings:
         name = "licenses"
 
