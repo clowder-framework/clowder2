@@ -78,7 +78,7 @@ class DatasetFreezeDB(Document, DatasetBaseCommon):
         ]
 
 
-class DatasetDBViewList(View, DatasetBase):
+class DatasetDBViewList(View, DatasetBaseCommon):
     id: PydanticObjectId = Field(None, alias="_id")  # necessary for Views
     creator: UserOut
     created: datetime = Field(default_factory=datetime.utcnow)
@@ -86,25 +86,27 @@ class DatasetDBViewList(View, DatasetBase):
     auth: List[AuthorizationDB]
     thumbnail_id: Optional[PydanticObjectId] = None
     status: str = DatasetStatus.PRIVATE.name
+    frozen: bool = False
+    frozen_version_num: int = -999
 
     class Settings:
         source = DatasetFreezeDB
         name = "datasets_view"
         pipeline = [
             {
-                "$lookup": {
-                    "from": "authorization",
-                    "localField": "_id",
-                    "foreignField": "dataset_id",
-                    "as": "auth",
-                }
-            },
-            {
                 "$unionWith": {
                     "coll": "datasets",
                     "pipeline": [
                         {"$addFields": {"frozen": False, "frozen_version_num": -999}}
                     ],
+                }
+            },
+            {
+                "$lookup": {
+                    "from": "authorization",
+                    "localField": "_id",
+                    "foreignField": "dataset_id",
+                    "as": "auth",
                 }
             },
         ]
@@ -122,6 +124,10 @@ class DatasetOut(DatasetDB):
 class DatasetFreezeOut(DatasetFreezeDB):
     class Config:
         fields = {"id": "id"}
+
+
+class CombinedDataset(DatasetOut, DatasetFreezeOut):
+    pass
 
 
 class UserAndRole(BaseModel):
