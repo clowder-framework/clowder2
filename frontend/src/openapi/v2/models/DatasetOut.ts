@@ -28,4 +28,6 @@ export type DatasetOut = {
     downloads?: number;
     thumbnail_id?: string;
     id?: string;
+    frozen?: boolean;
+    frozen_version_num?: number;
 }

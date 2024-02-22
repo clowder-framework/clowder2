@@ -51,6 +51,9 @@ class DatasetPatch(BaseModel):
 
 
 class DatasetDB(Document, DatasetBaseCommon):
+    frozen: bool = False
+    frozen_version_num: int = -999
+
     class Settings:
         name = "datasets"
         indexes = [
@@ -100,7 +103,7 @@ class DatasetDBViewList(View, DatasetBase):
                 "$unionWith": {
                     "coll": "datasets",
                     "pipeline": [
-                        {"$addFields": {"frozen": False, "frozen_version_num": "NA"}}
+                        {"$addFields": {"frozen": False, "frozen_version_num": -999}}
                     ],
                 }
             },
