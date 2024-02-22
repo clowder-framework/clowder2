@@ -5,8 +5,8 @@ from fastapi import HTTPException, Depends, APIRouter
 
 from app.keycloak_auth import get_current_user, get_user
 
-from backend.app.models.licenses import LicenseOut, LicenseIn, LicenseDB, LicenseBase
-from backend.app.routers.authentication import get_admin, get_admin_mode
+from app.models.licenses import LicenseOut, LicenseIn, LicenseDB, LicenseBase
+from app.routers.authentication import get_admin, get_admin_mode
 
 router = APIRouter()
 
