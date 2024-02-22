@@ -1,5 +1,6 @@
-import { Button, Stack } from "@mui/material";
 import React from "react";
+
+import { Button, Stack } from "@mui/material";
 import { useSelector } from "react-redux";
 import { RootState } from "../../types/data";
 import { Download } from "@mui/icons-material";
@@ -8,15 +9,16 @@ import { OtherMenu } from "./OtherMenu";
 import { ShareMenu } from "./ShareMenu";
 import { AuthWrapper } from "../auth/AuthWrapper";
 import config from "../../app.config";
+import { PublishedWrapper } from "../auth/PublishedWrapper";
+import { CombinedDataset } from "../../openapi/v2";
 
 type ActionsMenuProps = {
-	datasetId: string;
-	folderId: string;
-	datasetName: string;
+	folderId: string | null;
+	dataset: CombinedDataset;
 };
 
 export const ActionsMenu = (props: ActionsMenuProps): JSX.Element => {
-	const { datasetId, folderId, datasetName } = props;
+	const { dataset, folderId } = props;
 
 	const datasetRole = useSelector(
 		(state: RootState) => state.dataset.datasetRole
@@ -32,42 +34,34 @@ export const ActionsMenu = (props: ActionsMenuProps): JSX.Element => {
 			<Button
 				sx={{ minWidth: "auto" }}
 				variant="contained"
-				href={`${config.hostname}/api/v2/datasets/${datasetId}/download`}
+				href={`${config.hostname}/api/v2/datasets/${dataset.id}/download`}
 				endIcon={<Download />}
 			>
 				Download
 			</Button>
-			{/*owner, editor, uploader cannot create new*/}
-			{
+			<PublishedWrapper
+				frozen={dataset.frozen}
+				frozen_version_num={dataset.frozen_version_num}
+			>
+				{/*owner, editor, uploader cannot create new*/}
 				<AuthWrapper
 					currRole={datasetRole.role}
 					allowedRoles={["owner", "editor", "uploader"]}
 				>
-					<NewMenu datasetId={datasetId} folderId={folderId} />
+					<NewMenu datasetId={dataset.id} folderId={folderId} />
 				</AuthWrapper>
-			}
-			{/*owner can delete and perform other tasks*/}
-			{
+				{/*owner can delete and perform sharing tasks*/}
 				<AuthWrapper currRole={datasetRole.role} allowedRoles={["owner"]}>
-					<ShareMenu
-						datasetId={datasetId}
-						folderId={folderId}
-						datasetName={datasetName}
-					/>
+					<ShareMenu datasetId={dataset.id} datasetName={dataset.name} />
 				</AuthWrapper>
-			}
-			{
+				{/*owner and editor can perform editing tasks*/}
 				<AuthWrapper
 					currRole={datasetRole.role}
 					allowedRoles={["owner", "editor"]}
 				>
-					<OtherMenu
-						datasetId={datasetId}
-						folderId={folderId}
-						datasetName={datasetName}
-					/>
+					<OtherMenu datasetId={dataset.id} datasetName={dataset.name} />
 				</AuthWrapper>
-			}
+			</PublishedWrapper>
 		</Stack>
 	);
 };

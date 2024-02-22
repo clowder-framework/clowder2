@@ -8,6 +8,7 @@ import {
 	Stack,
 	Tab,
 	Tabs,
+	Tooltip,
 	Typography,
 } from "@mui/material";
 import { useParams, useSearchParams } from "react-router-dom";
@@ -50,6 +51,7 @@ import { ErrorModal } from "../errors/ErrorModal";
 import { Visualization } from "../visualizations/Visualization";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import config from "../../app.config";
+import LockIcon from "@mui/icons-material/Lock";
 
 export const Dataset = (): JSX.Element => {
 	// path parameter
@@ -229,6 +231,15 @@ export const Dataset = (): JSX.Element => {
 							<Typography variant="h3" paragraph>
 								{about["name"]}
 							</Typography>
+							{about.frozen &&
+							about.frozen_version_num &&
+							about.frozen_version_num > 0 ? (
+								<Tooltip title="Published">
+									<LockIcon />
+								</Tooltip>
+							) : (
+								<></>
+							)}
 						</Box>
 						<Box>
 							<RoleChip role={datasetRole.role} />
@@ -237,11 +248,7 @@ export const Dataset = (): JSX.Element => {
 				</Grid>
 				{/*actions*/}
 				<Grid item xs={4} sx={{ display: "flex-top", alignItems: "center" }}>
-					<ActionsMenu
-						datasetId={datasetId}
-						folderId={folderId}
-						datasetName={about["name"]}
-					/>
+					<ActionsMenu dataset={about} folderId={folderId} />
 				</Grid>
 				{/*actions*/}
 			</Grid>
