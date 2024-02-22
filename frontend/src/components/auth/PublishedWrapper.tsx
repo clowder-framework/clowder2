@@ -3,7 +3,7 @@ import React from "react";
 type PublishedWrapperProps = {
 	frozen: boolean | undefined;
 	frozen_version_num: number | undefined;
-	children: JSX.Element[];
+	children: JSX.Element | JSX.Element[];
 };
 
 export const PublishedWrapper = (props: PublishedWrapperProps): JSX.Element => {

@@ -3,7 +3,7 @@ import React from "react";
 type AuthWrapperProps = {
 	currRole: string;
 	allowedRoles: string[];
-	children: JSX.Element;
+	children: JSX.Element | JSX.Element[];
 };
 
 export const AuthWrapper = (props: AuthWrapperProps): JSX.Element => {
