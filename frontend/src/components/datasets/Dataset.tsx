@@ -348,7 +348,6 @@ export const Dataset = (): JSX.Element => {
 							<></>
 						)}
 						<FilesTable
-							datasetId={datasetId}
 							folderId={folderId}
 							foldersFilesInDataset={foldersFilesInDataset}
 							setCurrPageNum={setCurrPageNum}

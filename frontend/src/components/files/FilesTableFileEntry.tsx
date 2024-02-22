@@ -10,6 +10,8 @@ import FileMenu from "./FileMenu";
 import prettyBytes from "pretty-bytes";
 import { FileOut } from "../../openapi/v2";
 import { generateThumbnailUrl } from "../../utils/visualization";
+import { useSelector } from "react-redux";
+import { RootState } from "../../types/data";
 
 type FilesTableFileEntryProps = {
 	iconStyle: {};
@@ -23,6 +25,9 @@ export function FilesTableFileEntry(props: FilesTableFileEntryProps) {
 	const { iconStyle, selectFile, file, parentFolderId, publicView } = props;
 	const [thumbnailUrl, setThumbnailUrl] = useState("");
 	const [selectedVersion, setSelectedVersion] = useState(file.version_num);
+
+	const fileRole = useSelector((state: RootState) => state.file.fileRole);
+
 	useEffect(() => {
 		let url = "";
 		if (file.thumbnail_id) {
@@ -63,7 +68,11 @@ export function FilesTableFileEntry(props: FilesTableFileEntryProps) {
 						{file.content_type ? file.content_type.content_type : "NA"}
 					</TableCell>
 					<TableCell align="right">
-						<FileMenu file={file} setSelectedVersion={setSelectedVersion} publicView={publicView} />
+						<FileMenu
+							file={file}
+							setSelectedVersion={setSelectedVersion}
+							publicView={publicView}
+						/>
 					</TableCell>
 				</TableRow>
 			) : (

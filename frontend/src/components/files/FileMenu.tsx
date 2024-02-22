@@ -16,6 +16,7 @@ import { MoreHoriz } from "@material-ui/icons";
 import { RootState } from "../../types/data";
 import { AuthWrapper } from "../auth/AuthWrapper";
 import config from "../../app.config";
+import { PublishedWrapper } from "../auth/PublishedWrapper";
 
 type FileMenuProps = {
 	file: File;
@@ -24,7 +25,7 @@ type FileMenuProps = {
 };
 
 export default function FileMenu(props: FileMenuProps) {
-	const { file, setSelectedVersion , publicView} = props;
+	const { file, setSelectedVersion, publicView } = props;
 	const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
 	const open = Boolean(anchorEl);
 	const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -38,9 +39,11 @@ export default function FileMenu(props: FileMenuProps) {
 	const dispatch = useDispatch();
 	const deleteFile = (fileId: string | undefined) =>
 		dispatch(fileDeleted(fileId));
+	// need to update file role
 	const datasetRole = useSelector(
 		(state: RootState) => state.dataset.datasetRole
 	);
+	const dataset = useSelector((state: RootState) => state.dataset.about);
 
 	const [confirmationOpen, setConfirmationOpen] = useState(false);
 	const [updateFileOpen, setUpdateFileOpen] = useState(false);
@@ -98,41 +101,20 @@ export default function FileMenu(props: FileMenuProps) {
 					"aria-labelledby": "basic-button",
 				}}
 			>
-				{/*owner, editor can update file*/}
-				<AuthWrapper
-					currRole={datasetRole.role}
-					allowedRoles={["owner", "editor"]}
-				>
+				{/*owner, editor, uploader and viewer can download file*/}
+				{publicView ? (
 					<MenuItem
 						onClick={() => {
 							handleClose();
-							setUpdateFileOpen(true);
+							window.location.href = `${config.hostname}/api/v2/public_files/${file.id}`;
 						}}
 					>
 						<ListItemIcon>
-							<UploadIcon fontSize="small" />
+							<DownloadIcon fontSize="small" />
 						</ListItemIcon>
-						<ListItemText>Update File</ListItemText>
+						<ListItemText>Download</ListItemText>
 					</MenuItem>
-				</AuthWrapper>
-
-
-				{/*owner, editor, uploader and viewer can download file*/}
-
-				{publicView?
-					(
-						<MenuItem
-							onClick={() => {
-								handleClose();
-								window.location.href = `${config.hostname}/api/v2/public_files/${file.id}`;
-							}}
-						>
-							<ListItemIcon>
-								<DownloadIcon fontSize="small" />
-							</ListItemIcon>
-							<ListItemText>Download</ListItemText>
-						</MenuItem>
-					):
+				) : (
 					<AuthWrapper
 						currRole={datasetRole.role}
 						allowedRoles={["owner", "editor", "uploader", "viewer"]}
@@ -149,22 +131,43 @@ export default function FileMenu(props: FileMenuProps) {
 							<ListItemText>Download</ListItemText>
 						</MenuItem>
 					</AuthWrapper>
-				}
-
-				{/*owner can delete file*/}
-				<AuthWrapper currRole={datasetRole.role} allowedRoles={["owner"]}>
-					<MenuItem
-						onClick={() => {
-							handleClose();
-							setConfirmationOpen(true);
-						}}
+				)}
+				<PublishedWrapper
+					frozen={dataset.frozen}
+					frozenVersionNum={dataset.frozen_version_num}
+				>
+					{/*owner, editor can update file*/}
+					<AuthWrapper
+						currRole={datasetRole.role}
+						allowedRoles={["owner", "editor"]}
 					>
-						<ListItemIcon>
-							<DeleteIcon fontSize="small" />
-						</ListItemIcon>
-						<ListItemText>Delete</ListItemText>
-					</MenuItem>
-				</AuthWrapper>
+						<MenuItem
+							onClick={() => {
+								handleClose();
+								setUpdateFileOpen(true);
+							}}
+						>
+							<ListItemIcon>
+								<UploadIcon fontSize="small" />
+							</ListItemIcon>
+							<ListItemText>Update File</ListItemText>
+						</MenuItem>
+					</AuthWrapper>
+					{/*owner can delete file*/}
+					<AuthWrapper currRole={datasetRole.role} allowedRoles={["owner"]}>
+						<MenuItem
+							onClick={() => {
+								handleClose();
+								setConfirmationOpen(true);
+							}}
+						>
+							<ListItemIcon>
+								<DeleteIcon fontSize="small" />
+							</ListItemIcon>
+							<ListItemText>Delete</ListItemText>
+						</MenuItem>
+					</AuthWrapper>
+				</PublishedWrapper>
 			</Menu>
 		</div>
 	);
