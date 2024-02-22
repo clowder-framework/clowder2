@@ -17,10 +17,10 @@ from app.search.connect import insert_record, update_record
 
 
 async def index_dataset(
-        es: Elasticsearch,
-        dataset: CombinedDataset,
-        user_ids: Optional[List[str]] = None,
-        update: bool = False,
+    es: Elasticsearch,
+    dataset: CombinedDataset,
+    user_ids: Optional[List[str]] = None,
+    update: bool = False,
 ):
     """Create or update an Elasticsearch entry for the dataset. user_ids is the list of users
     with permission to at least view the dataset, it will be queried if not provided."""
@@ -28,7 +28,7 @@ async def index_dataset(
         # Get authorized users from db
         authorized_user_ids = []
         async for auth in AuthorizationDB.find(
-                AuthorizationDB.dataset_id == ObjectId(dataset.id)
+            AuthorizationDB.dataset_id == ObjectId(dataset.id)
         ):
             authorized_user_ids += auth.user_ids
     else:
@@ -37,7 +37,7 @@ async def index_dataset(
     # Get full metadata from db (granular updates possible but complicated)
     metadata = []
     async for md in MetadataDB.find(
-            MetadataDB.resource.resource_id == ObjectId(dataset.id)
+        MetadataDB.resource.resource_id == ObjectId(dataset.id)
     ):
         metadata.append(md.content)
     dataset_status = dataset.status
@@ -65,12 +65,12 @@ async def index_dataset(
 
 
 async def index_file(
-        es: Elasticsearch,
-        file: FileOut,
-        user_ids: Optional[List[str]] = None,
-        update: bool = False,
-        public: bool = False,
-        authenticated: bool = False,
+    es: Elasticsearch,
+    file: FileOut,
+    user_ids: Optional[List[str]] = None,
+    update: bool = False,
+    public: bool = False,
+    authenticated: bool = False,
 ):
     """Create or update an Elasticsearch entry for the file. user_ids is the list of users
     with permission to at least view the file's dataset, it will be queried if not provided.
@@ -79,7 +79,7 @@ async def index_file(
         # Get authorized users from db
         authorized_user_ids = []
         async for auth in AuthorizationDB.find(
-                AuthorizationDB.dataset_id == ObjectId(file.dataset_id)
+            AuthorizationDB.dataset_id == ObjectId(file.dataset_id)
         ):
             authorized_user_ids += auth.user_ids
     else:
@@ -88,7 +88,7 @@ async def index_file(
     # Get full metadata from db (granular updates possible but complicated)
     metadata = []
     async for md in MetadataDB.find(
-            MetadataDB.resource.resource_id == ObjectId(file.id)
+        MetadataDB.resource.resource_id == ObjectId(file.id)
     ):
         metadata.append(md.content)
 
@@ -124,29 +124,29 @@ async def index_file(
 
 
 async def index_thumbnail(
-        es: Elasticsearch,
-        thumbnail_id: str,
-        file_id: str,
-        dataset_id: str,
-        update: bool = False,
+    es: Elasticsearch,
+    thumbnail_id: str,
+    file_id: str,
+    dataset_id: str,
+    update: bool = False,
 ):
     """Create or update an Elasticsearch entry for the file. user_ids is the list of users
     with permission to at least view the file's dataset, it will be queried if not provided.
     """
     if (file := await FileDB.get(PydanticObjectId(file_id))) is not None:
         if (
-                thumbnail := await ThumbnailDB.get(PydanticObjectId(thumbnail_id))
+            thumbnail := await ThumbnailDB.get(PydanticObjectId(thumbnail_id))
         ) is not None:
             # Get authorized users from db
             authorized_user_ids = []
             async for auth in AuthorizationDB.find(
-                    AuthorizationDB.dataset_id == ObjectId(dataset_id)
+                AuthorizationDB.dataset_id == ObjectId(dataset_id)
             ):
                 authorized_user_ids += auth.user_ids
             # Get full metadata from db (granular updates possible but complicated)
             metadata = []
             async for md in MetadataDB.find(
-                    MetadataDB.resource.resource_id == ObjectId(file.id)
+                MetadataDB.resource.resource_id == ObjectId(file.id)
             ):
                 metadata.append(md.content)
             # Add en entry to the file index

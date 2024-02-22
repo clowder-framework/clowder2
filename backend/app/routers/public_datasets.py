@@ -26,7 +26,8 @@ from app.config import settings
 from app.models.datasets import (
     DatasetOut,
     DatasetDBViewList,
-    DatasetStatus, CombinedDataset,
+    DatasetStatus,
+    CombinedDataset,
 )
 from app.models.files import FileOut, FileDB, FileDBViewList
 from app.models.folder_and_file import FolderFileViewList
@@ -45,8 +46,8 @@ clowder_bucket = os.getenv("MINIO_BUCKET_NAME", "clowder")
 
 
 async def _get_folder_hierarchy(
-        folder_id: str,
-        hierarchy: str,
+    folder_id: str,
+    hierarchy: str,
 ):
     """Generate a string of nested path to folder for use in zip file creation."""
     folder = await FolderDB.get(PydanticObjectId(folder_id))
@@ -58,9 +59,9 @@ async def _get_folder_hierarchy(
 
 @router.get("", response_model=Paged)
 async def get_datasets(
-        skip: int = 0,
-        limit: int = 10,
-        frozen_only: bool = False,
+    skip: int = 0,
+    limit: int = 10,
+    frozen_only: bool = False,
 ):
     query = [DatasetDBViewList.status == DatasetStatus.PUBLIC]
     if frozen_only:
@@ -86,9 +87,13 @@ async def get_datasets(
 
 @router.get("/{dataset_id}", response_model=CombinedDataset)
 async def get_dataset(
-        dataset_id: str,
+    dataset_id: str,
 ):
-    if (dataset := await DatasetDBViewList.find_one(DatasetDBViewList.id == PydanticObjectId(dataset_id))) is not None:
+    if (
+        dataset := await DatasetDBViewList.find_one(
+            DatasetDBViewList.id == PydanticObjectId(dataset_id)
+        )
+    ) is not None:
         if dataset.status == DatasetStatus.PUBLIC.name:
             return dataset.dict()
     raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
@@ -96,12 +101,16 @@ async def get_dataset(
 
 @router.get("/{dataset_id}/files", response_model=List[FileOut])
 async def get_dataset_files(
-        dataset_id: str,
-        folder_id: Optional[str] = None,
-        skip: int = 0,
-        limit: int = 10,
+    dataset_id: str,
+    folder_id: Optional[str] = None,
+    skip: int = 0,
+    limit: int = 10,
 ):
-    if (dataset := await DatasetDBViewList.find_one(DatasetDBViewList.id == PydanticObjectId(dataset_id))) is not None:
+    if (
+        dataset := await DatasetDBViewList.find_one(
+            DatasetDBViewList.id == PydanticObjectId(dataset_id)
+        )
+    ) is not None:
         if dataset.status == DatasetStatus.PUBLIC.name:
             query = [
                 FileDBViewList.dataset_id == ObjectId(dataset_id),
@@ -115,12 +124,16 @@ async def get_dataset_files(
 
 @router.get("/{dataset_id}/folders", response_model=List[FolderOut])
 async def get_dataset_folders(
-        dataset_id: str,
-        parent_folder: Optional[str] = None,
-        skip: int = 0,
-        limit: int = 10,
+    dataset_id: str,
+    parent_folder: Optional[str] = None,
+    skip: int = 0,
+    limit: int = 10,
 ):
-    if (dataset := await DatasetDBViewList.find_one(DatasetDBViewList.id == PydanticObjectId(dataset_id))) is not None:
+    if (
+        dataset := await DatasetDBViewList.find_one(
+            DatasetDBViewList.id == PydanticObjectId(dataset_id)
+        )
+    ) is not None:
         if dataset.status == DatasetStatus.PUBLIC.name:
             query = [
                 FolderDBViewList.dataset_id == ObjectId(dataset_id),
@@ -138,12 +151,16 @@ async def get_dataset_folders(
 
 @router.get("/{dataset_id}/folders_and_files", response_model=Paged)
 async def get_dataset_folders_and_files(
-        dataset_id: str,
-        folder_id: Optional[str] = None,
-        skip: int = 0,
-        limit: int = 10,
+    dataset_id: str,
+    folder_id: Optional[str] = None,
+    skip: int = 0,
+    limit: int = 10,
 ):
-    if (dataset := await DatasetDBViewList.find_one(DatasetDBViewList.id == PydanticObjectId(dataset_id))) is not None:
+    if (
+        dataset := await DatasetDBViewList.find_one(
+            DatasetDBViewList.id == PydanticObjectId(dataset_id)
+        )
+    ) is not None:
         if dataset.status == DatasetStatus.PUBLIC.name:
             query = [
                 FolderFileViewList.dataset_id == ObjectId(dataset_id),
@@ -200,11 +217,15 @@ async def get_dataset_folders_and_files(
 
 @router.get("/{dataset_id}/metadata", response_model=List[MetadataOut])
 async def get_dataset_metadata(
-        dataset_id: str,
-        listener_name: Optional[str] = Form(None),
-        listener_version: Optional[float] = Form(None),
+    dataset_id: str,
+    listener_name: Optional[str] = Form(None),
+    listener_version: Optional[float] = Form(None),
 ):
-    if (dataset := await DatasetDBViewList.find_one(DatasetDBViewList.id == PydanticObjectId(dataset_id))) is not None:
+    if (
+        dataset := await DatasetDBViewList.find_one(
+            DatasetDBViewList.id == PydanticObjectId(dataset_id)
+        )
+    ) is not None:
         if dataset.status == DatasetStatus.PUBLIC.name:
             query = [MetadataDB.resource.resource_id == ObjectId(dataset_id)]
 
@@ -217,9 +238,9 @@ async def get_dataset_metadata(
             async for md in MetadataDB.find(*query):
                 if md.definition is not None:
                     if (
-                            md_def := await MetadataDefinitionDB.find_one(
-                                MetadataDefinitionDB.name == md.definition
-                            )
+                        md_def := await MetadataDefinitionDB.find_one(
+                            MetadataDefinitionDB.name == md.definition
+                        )
                     ) is not None:
                         md.description = md_def.description
                 metadata.append(md)
@@ -234,10 +255,14 @@ async def get_dataset_metadata(
 
 @router.get("/{dataset_id}/download", response_model=DatasetOut)
 async def download_dataset(
-        dataset_id: str,
-        fs: Minio = Depends(dependencies.get_fs),
+    dataset_id: str,
+    fs: Minio = Depends(dependencies.get_fs),
 ):
-    if (dataset := await DatasetDBViewList.find_one(DatasetDBViewList.id == PydanticObjectId(dataset_id))) is not None:
+    if (
+        dataset := await DatasetDBViewList.find_one(
+            DatasetDBViewList.id == PydanticObjectId(dataset_id)
+        )
+    ) is not None:
         if dataset.status == DatasetStatus.PUBLIC.name:
             current_temp_dir = tempfile.mkdtemp(prefix="rocratedownload")
             crate = ROCrate()
@@ -384,7 +409,7 @@ async def download_dataset(
                 media_type="application/x-zip-compressed",
             )
             response.headers["Content-Disposition"] = (
-                    "attachment; filename=%s" % zip_name
+                "attachment; filename=%s" % zip_name
             )
             # # TODO Increment download count
             # await dataset.update(Inc({DatasetDB.downloads: 1}))

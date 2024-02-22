@@ -11,7 +11,7 @@ from passlib.hash import bcrypt
 
 from app.keycloak_auth import create_user, get_current_user
 from app.keycloak_auth import keycloak_openid
-from app.models.datasets import DatasetDB
+from app.models.datasets import DatasetDBViewList
 from app.models.users import UserDB, UserIn, UserOut, UserLogin
 
 router = APIRouter()
@@ -103,7 +103,11 @@ async def get_admin(
             return current_user.admin
     elif (
         dataset_id
-        and (dataset_db := await DatasetDB.get(PydanticObjectId(dataset_id)))
+        and (
+            dataset_db := await DatasetDBViewList.find_one(
+                DatasetDBViewList.id == PydanticObjectId(dataset_id)
+            )
+        )
         is not None
     ):
         # TODO: question regarding resource creator is considered as admin of the resource?
