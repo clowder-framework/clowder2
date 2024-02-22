@@ -15,14 +15,14 @@ def test_license(client: TestClient, headers: dict):
         f"{settings.API_V2_STR}/datasets/{dataset_id}", headers=headers
     )
     assert response.status_code == 200
-    license_id = response.json().get("license_id")
-    assert license_id is not None
 
     # get
     response = client.get(
-        f"{settings.API_V2_STR}/licenses/{license_id}", headers=headers
+        f"{settings.API_V2_STR}/licenses/{dataset_id}", headers=headers
     )
     assert response.status_code == 200
+    license_id = response.json().get("id")
+    assert license_id is not None
 
     # edit
     license_info = response.json()

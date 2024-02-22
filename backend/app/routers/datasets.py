@@ -206,6 +206,8 @@ async def save_dataset(
     user=Depends(get_current_user),
     es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
 ):
+    dataset = DatasetDB(**dataset_in.dict(), creator=user)
+    await dataset.insert()
     license_in_model = LicenseIn(
         name="All Rights Reserved",
         text="",
@@ -214,10 +216,9 @@ async def save_dataset(
         version="",
         holders=[user],
         allow_downloads=True,
+        dataset_id=dataset.id,
     )
-    license = await save_license(license_in_model, user)
-    dataset = DatasetDB(**dataset_in.dict(), creator=user, license_id=license["id"])
-    await dataset.insert()
+    await save_license(license_in_model, user)
 
     # Create authorization entry
     await AuthorizationDB(

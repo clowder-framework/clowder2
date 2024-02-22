@@ -48,7 +48,6 @@ class DatasetDB(Document, DatasetBase):
     user_views: int = 0
     downloads: int = 0
     thumbnail_id: Optional[PydanticObjectId] = None
-    license_id: PydanticObjectId
 
     class Settings:
         name = "datasets"

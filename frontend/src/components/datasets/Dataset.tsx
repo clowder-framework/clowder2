@@ -14,7 +14,7 @@ import { useParams, useSearchParams } from "react-router-dom";
 import { RootState } from "../../types/data";
 import { useDispatch, useSelector } from "react-redux";
 import {
-	fetchDatasetAbout,
+	fetchDatasetAbout, fetchDatasetLicense,
 	fetchFoldersFilesInDataset as fetchFoldersFilesInDatasetAction,
 } from "../../actions/dataset";
 import { fetchFolderPath } from "../../actions/folder";
@@ -86,6 +86,8 @@ export const Dataset = (): JSX.Element => {
 		);
 	const listDatasetAbout = (datasetId: string | undefined) =>
 		dispatch(fetchDatasetAbout(datasetId));
+	const listDatasetLicense = (datasetId: string | undefined) =>
+		dispatch(fetchDatasetLicense(datasetId));
 	const listDatasetMetadata = (datasetId: string | undefined) =>
 		dispatch(fetchDatasetMetadata(datasetId));
 	const getMetadatDefinitions = (
@@ -123,6 +125,7 @@ export const Dataset = (): JSX.Element => {
 		(state: RootState) => state.dataset.foldersAndFiles.data
 	);
 	const adminMode = useSelector((state: RootState) => state.user.adminMode);
+	const license = useSelector((state: RootState) => state.dataset.license);
 
 	useEffect(() => {
 		fetchFoldersFilesInDataset(
@@ -132,6 +135,7 @@ export const Dataset = (): JSX.Element => {
 			limit
 		);
 		listDatasetAbout(datasetId);
+		listDatasetLicense(datasetId);
 		getFolderPath(folderId);
 		getMetadatDefinitions(null, 0, 100);
 	}, [searchParams, adminMode]);
@@ -211,6 +215,7 @@ export const Dataset = (): JSX.Element => {
 		setEnableAddMetadata(false);
 	};
 
+	// @ts-ignore
 	return (
 		<Layout>
 			{/*Error Message dialogue*/}
@@ -431,6 +436,7 @@ export const Dataset = (): JSX.Element => {
 				</Grid>
 				<Grid item>
 					<DatasetDetails details={about} />
+					{license.name !== undefined? <Typography>License: {license.name}</Typography> : <></>}
 				</Grid>
 			</Grid>
 		</Layout>

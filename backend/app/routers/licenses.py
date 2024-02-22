@@ -3,11 +3,8 @@ from datetime import datetime
 from beanie import PydanticObjectId
 from fastapi import HTTPException, Depends, APIRouter
 
-from app.deps.authorization_deps import GroupAuthorization
 from app.keycloak_auth import get_current_user, get_user
 
-from backend.app.deps.authorization_deps import Authorization
-from backend.app.models.users import UserDB
 from backend.app.models.licenses import LicenseOut, LicenseIn, LicenseDB, LicenseBase
 from backend.app.routers.authentication import get_admin, get_admin_mode
 
@@ -24,11 +21,17 @@ async def save_license(
     return license_db.dict()
 
 
-@router.get("/{license_id}", response_model=LicenseOut)
-async def get_license(license_id: str):
-    if (license := await LicenseDB.get(PydanticObjectId(license_id))) is not None:
+@router.get("/{dataset_id}", response_model=LicenseOut)
+async def get_license(dataset_id: str):
+    if (
+        license := await LicenseDB.find_one(
+            LicenseDB.dataset_id == PydanticObjectId(dataset_id)
+        )
+    ) is not None:
         return license.dict()
-    raise HTTPException(status_code=404, detail=f"License {license_id} not found")
+    raise HTTPException(
+        status_code=404, detail=f"License not found for dataset {dataset_id}"
+    )
 
 
 @router.put("/{license_id}", response_model=LicenseOut)

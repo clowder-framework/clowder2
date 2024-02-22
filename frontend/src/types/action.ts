@@ -9,7 +9,7 @@ import {
 	FileOut as FileSummary,
 	FileVersion,
 	FolderOut,
-	GroupOut as Group,
+	GroupOut as Group, LicenseOut,
 	MetadataDefinitionOut as MetadataDefinition,
 	MetadataOut as Metadata,
 	Paged,
@@ -48,6 +48,11 @@ interface DELETE_FILE {
 interface RECEIVE_DATASET_ABOUT {
 	type: "RECEIVE_DATASET_ABOUT";
 	about: Dataset;
+}
+
+interface RECEIVE_DATASET_LICENSE {
+	type: "RECEIVE_DATASET_LICENSE";
+	license: LicenseOut;
 }
 
 interface RECEIVE_DATASET_ROLE {
@@ -728,4 +733,5 @@ export type DataAction =
 	| RESET_PUBLIC_VIS_DATA_PRESIGNED_URL
 	| RECEIVE_FOLDERS_FILES_IN_DATASET
 	| RECEIVE_PUBLIC_FOLDERS_FILES_IN_DATASET
-	| FOLDER_UPDATED;
+	| FOLDER_UPDATED
+	| RECEIVE_DATASET_LICENSE;

@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import List
 
-from beanie import Document
+from beanie import Document, PydanticObjectId
 from pydantic import BaseModel, Field
 
 from app.models.authorization import Provenance
@@ -19,6 +19,7 @@ class LicenseBase(BaseModel):
         default_factory=datetime.utcnow
     )  # TODO: shoudn't the default be never?
     allow_download: bool = False
+    dataset_id: PydanticObjectId
 
 
 class LicenseIn(LicenseBase):
