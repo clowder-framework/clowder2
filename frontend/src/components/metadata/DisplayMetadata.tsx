@@ -13,6 +13,8 @@ import {
 import { Agent } from "./Agent";
 import { MetadataDeleteButton } from "./widgets/MetadataDeleteButton";
 import { fetchPublicDatasetMetadata } from "../../actions/public_dataset";
+import { AuthWrapper } from "../auth/AuthWrapper";
+import { PublishedWrapper } from "../auth/PublishedWrapper";
 
 type MetadataType = {
 	updateMetadata: any;
@@ -76,8 +78,10 @@ export const DisplayMetadata = (props: MetadataType) => {
 	const publicFileMetadataList = useSelector(
 		(state: RootState) => state.metadata.publicFileMetadataList
 	);
+	const about = useSelector((state: RootState) => state.dataset.about);
+
 	useEffect(() => {
-		if (publicView){
+		if (publicView) {
 			getPublicMetadatDefinitions(null, 0, 100);
 		} else {
 			getMetadatDefinitions(null, 0, 100);
@@ -144,6 +148,8 @@ export const DisplayMetadata = (props: MetadataType) => {
 													isRequired: field.required,
 													key: idxx,
 													datasetRole: datasetRole,
+													frozen: about.frozen,
+													frozenVersionNum: about.frozen_version_num,
 												}
 											);
 										})
@@ -154,17 +160,22 @@ export const DisplayMetadata = (props: MetadataType) => {
 												created={metadata.created}
 												agent={metadata.agent}
 											/>
-											{datasetRole.role !== undefined &&
-											datasetRole.role !== "viewer" ? (
-												<MetadataDeleteButton
-													metadataId={metadata.id ?? null}
-													deleteMetadata={deleteMetadata}
-													resourceId={resourceId}
-													widgetName={metadataDef.name}
-												/>
-											) : (
-												<></>
-											)}
+											<PublishedWrapper
+												frozen={about.frozen}
+												frozenVersionNum={about.frozen_version_num}
+											>
+												<AuthWrapper
+													currRole={datasetRole.role}
+													allowedRoles={["owner", "editor", "uploader"]}
+												>
+													<MetadataDeleteButton
+														metadataId={metadata.id ?? null}
+														deleteMetadata={deleteMetadata}
+														resourceId={resourceId}
+														widgetName={metadataDef.name}
+													/>
+												</AuthWrapper>
+											</PublishedWrapper>
 										</Grid>
 									</Grid>
 								</Box>
