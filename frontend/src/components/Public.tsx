@@ -87,6 +87,8 @@ export const Public = (): JSX.Element => {
 												description={dataset.description}
 												thumbnailId={dataset.thumbnail_id}
 												publicView={true}
+												frozen={dataset.frozen}
+												frozenVersionNum={dataset.frozen_version_num}
 											/>
 										</Grid>
 									);

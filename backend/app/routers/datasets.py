@@ -9,7 +9,6 @@ from collections.abc import Mapping, Iterable
 from typing import List, Optional
 
 from beanie import PydanticObjectId
-from beanie.odm.operators.update.general import Inc
 from beanie.operators import Or, And
 from bson import ObjectId
 from bson import json_util
@@ -922,7 +921,7 @@ async def create_dataset_from_zip(
     return dataset.dict()
 
 
-@router.get("/{dataset_id}/download", response_model=DatasetOut)
+@router.get("/{dataset_id}/download", response_model=CombinedDataset)
 async def download_dataset(
         dataset_id: str,
         user=Depends(get_current_user),
@@ -1073,7 +1072,7 @@ async def download_dataset(
         )
         response.headers["Content-Disposition"] = "attachment; filename=%s" % zip_name
         # TODO for frozen dataset how are we going to increment download count
-        await dataset.update(Inc({DatasetDBViewList.downloads: 1}))
+        # await dataset.update(Inc({DatasetDBViewList.downloads: 1}))
         return response
     raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
 

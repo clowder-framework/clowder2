@@ -27,8 +27,8 @@ import { DataAction } from "../types/action";
 import { DatasetState } from "../types/data";
 import {
 	AuthorizationBase,
+	CombinedDataset,
 	DatasetOut,
-	DatasetOut as Dataset,
 	DatasetRoles,
 	FileOut,
 	FolderOut,
@@ -43,10 +43,10 @@ const defaultState: DatasetState = {
 		metadata: <PageMetadata>{},
 		data: <FileOut | FolderOut[]>[],
 	},
-	about: <Dataset>{ creator: <UserOut>{} },
+	about: <CombinedDataset>{ creator: <UserOut>{} },
 	datasetRole: <AuthorizationBase>{},
-	datasets: <Paged>{ metadata: <PageMetadata>{}, data: <Dataset[]>[] },
-	newDataset: <Dataset>{},
+	datasets: <Paged>{ metadata: <PageMetadata>{}, data: <CombinedDataset[]>[] },
+	newDataset: <DatasetOut>{},
 	newFile: <FileOut>{},
 	newFiles: <FileOut[]>[],
 	newFolder: <FolderOut>{},

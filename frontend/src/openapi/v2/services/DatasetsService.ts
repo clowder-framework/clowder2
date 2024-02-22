@@ -4,6 +4,7 @@
 import type { Body_create_dataset_from_zip_api_v2_datasets_createFromZip_post } from '../models/Body_create_dataset_from_zip_api_v2_datasets_createFromZip_post';
 import type { Body_save_file_api_v2_datasets__dataset_id__files_post } from '../models/Body_save_file_api_v2_datasets__dataset_id__files_post';
 import type { Body_save_files_api_v2_datasets__dataset_id__filesMultiple_post } from '../models/Body_save_files_api_v2_datasets__dataset_id__filesMultiple_post';
+import type { CombinedDataset } from '../models/CombinedDataset';
 import type { DatasetBase } from '../models/DatasetBase';
 import type { DatasetFreezeOut } from '../models/DatasetFreezeOut';
 import type { DatasetIn } from '../models/DatasetIn';
@@ -76,12 +77,12 @@ export class DatasetsService {
     /**
      * Get Dataset
      * @param datasetId
-     * @returns DatasetOut Successful Response
+     * @returns CombinedDataset Successful Response
      * @throws ApiError
      */
     public static getDatasetApiV2DatasetsDatasetIdGet(
         datasetId: string,
-    ): CancelablePromise<DatasetOut> {
+    ): CancelablePromise<CombinedDataset> {
         return __request({
             method: 'GET',
             path: `/api/v2/datasets/${datasetId}`,
@@ -448,12 +449,12 @@ export class DatasetsService {
     /**
      * Download Dataset
      * @param datasetId
-     * @returns DatasetOut Successful Response
+     * @returns CombinedDataset Successful Response
      * @throws ApiError
      */
     public static downloadDatasetApiV2DatasetsDatasetIdDownloadGet(
         datasetId: string,
-    ): CancelablePromise<DatasetOut> {
+    ): CancelablePromise<CombinedDataset> {
         return __request({
             method: 'GET',
             path: `/api/v2/datasets/${datasetId}/download`,

@@ -318,7 +318,7 @@ async def remove_dataset_user_role(
 ):
     """Remove any role the user has with a specific dataset."""
 
-    if (dataset := await DatasetDBViewList.find(DatasetDBViewList.id == PydanticObjectId(dataset_id))) is not None:
+    if (dataset := await DatasetDBViewList.find_one(DatasetDBViewList.id == PydanticObjectId(dataset_id))) is not None:
         if (await UserDB.find_one(UserDB.email == username)) is not None:
             if (
                     auth_db := await AuthorizationDB.find_one(
@@ -343,7 +343,7 @@ async def get_dataset_roles(
         allow: bool = Depends(Authorization("editor")),
 ):
     """Get a list of all users and groups that have assigned roles on this dataset."""
-    if (dataset := await DatasetDBViewList.find(DatasetDBViewList.id == PydanticObjectId(dataset_id))) is not None:
+    if (dataset := await DatasetDBViewList.find_one(DatasetDBViewList.id == PydanticObjectId(dataset_id))) is not None:
         roles = DatasetRoles(dataset_id=str(dataset.id))
 
         async for auth in AuthorizationDB.find(

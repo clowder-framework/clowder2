@@ -1,5 +1,6 @@
 import {
 	AuthorizationBase,
+	CombinedDataset,
 	DatasetOut,
 	DatasetRoles,
 	EventListenerJobDB,
@@ -125,7 +126,7 @@ export interface DatasetState {
 	newFile: FileOut;
 	newFolder: FolderOut;
 	newFiles: FileOut[];
-	about: DatasetOut;
+	about: CombinedDataset;
 	datasetRole: AuthorizationBase;
 	roles: DatasetRoles;
 }
@@ -136,7 +137,7 @@ export interface PublicDatasetState {
 	publicNewDataset: DatasetOut;
 	publicNewFile: FileOut;
 	publicNewFiles: FileOut[];
-	publicAbout: DatasetOut;
+	publicAbout: CombinedDataset;
 	publicDatasetRole: AuthorizationBase;
 	publicRoles: DatasetRoles;
 	publicFoldersAndFiles: Paged;
