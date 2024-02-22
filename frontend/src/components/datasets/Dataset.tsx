@@ -426,6 +426,7 @@ export const Dataset = (): JSX.Element => {
 						frozen={about.frozen}
 						frozenVersionNum={about.frozen_version_num}
 					>
+						{/* Viewer is not allowed to submit to extractor*/}
 						<AuthWrapper
 							currRole={datasetRole.role}
 							allowedRoles={["owner", "editor", "uploader"]}

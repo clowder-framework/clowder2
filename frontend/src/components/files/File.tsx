@@ -53,6 +53,7 @@ import Typography from "@mui/material/Typography";
 import { ClowderSelect } from "../styledComponents/ClowderSelect";
 import { AuthWrapper } from "../auth/AuthWrapper";
 import LockIcon from "@mui/icons-material/Lock";
+import { PublishedWrapper } from "../auth/PublishedWrapper";
 
 export const File = (): JSX.Element => {
 	// path parameter
@@ -419,22 +420,27 @@ export const File = (): JSX.Element => {
 									resourceType="file"
 									resourceId={fileId}
 								/>
-								<AuthWrapper
-									currRole={fileRole.role}
-									allowedRoles={["owner", "editor", "uploader"]}
+								<PublishedWrapper
+									frozen={about.frozen}
+									frozenVersionNum={about.frozen_version_num}
 								>
-									<Box textAlign="center">
-										<Button
-											variant="contained"
-											sx={{ m: 2 }}
-											onClick={() => {
-												setEnableAddMetadata(true);
-											}}
-										>
-											Add Metadata
-										</Button>
-									</Box>
-								</AuthWrapper>
+									<AuthWrapper
+										currRole={fileRole.role}
+										allowedRoles={["owner", "editor", "uploader"]}
+									>
+										<Box textAlign="center">
+											<Button
+												variant="contained"
+												sx={{ m: 2 }}
+												onClick={() => {
+													setEnableAddMetadata(true);
+												}}
+											>
+												Add Metadata
+											</Button>
+										</Box>
+									</AuthWrapper>
+								</PublishedWrapper>
 							</>
 						)}
 					</TabPanel>
