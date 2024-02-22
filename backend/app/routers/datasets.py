@@ -313,7 +313,7 @@ async def get_dataset_files(
         admin_mode: bool = Depends(get_admin_mode),
         allow: bool = Depends(Authorization("viewer")),
 ):
-    if (await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
+    if (await DatasetDBViewList.find_one(DatasetDBViewList.id == PydanticObjectId(dataset_id))) is not None:
         if authenticated or public or (admin and admin_mode):
             query = [
                 FileDBViewList.dataset_id == ObjectId(dataset_id),
@@ -489,7 +489,7 @@ async def get_dataset_folders(
         limit: int = 10,
         allow: bool = Depends(Authorization("viewer")),
 ):
-    if (await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
+    if (await DatasetDBViewList.find_one(DatasetDBViewList.id == PydanticObjectId(dataset_id))) is not None:
         if authenticated or public:
             query = [
                 FolderDBViewList.dataset_id == ObjectId(dataset_id),
@@ -541,7 +541,7 @@ async def get_dataset_folders_and_files(
         admin_mode: bool = Depends(get_admin_mode),
         allow: bool = Depends(Authorization("viewer")),
 ):
-    if (await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
+    if (await DatasetDBViewList.find_one(DatasetDBViewList.id == PydanticObjectId(dataset_id))) is not None:
         if authenticated or public or (admin and admin_mode):
             query = [
                 FolderFileViewList.dataset_id == ObjectId(dataset_id),
@@ -648,7 +648,7 @@ async def get_folder(
         folder_id: str,
         allow: bool = Depends(Authorization("viewer")),
 ):
-    if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
+    if (dataset := await DatasetDBViewList.find_one(DatasetDBViewList.id == PydanticObjectId(dataset_id))) is not None:
         if (folder := await FolderDB.get(PydanticObjectId(folder_id))) is not None:
             return folder.dict()
         else:
@@ -929,7 +929,7 @@ async def download_dataset(
         fs: Minio = Depends(dependencies.get_fs),
         allow: bool = Depends(Authorization("viewer")),
 ):
-    if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
+    if (dataset := await DatasetDBViewList.find_one(DatasetDBViewList.id == PydanticObjectId(dataset_id))) is not None:
         current_temp_dir = tempfile.mkdtemp(prefix="rocratedownload")
         crate = ROCrate()
         user_full_name = user.first_name + " " + user.last_name
@@ -1072,8 +1072,8 @@ async def download_dataset(
             media_type="application/x-zip-compressed",
         )
         response.headers["Content-Disposition"] = "attachment; filename=%s" % zip_name
-        # Increment download count
-        await dataset.update(Inc({DatasetDB.downloads: 1}))
+        # TODO for frozen dataset how are we going to increment download count
+        await dataset.update(Inc({DatasetDBViewList.downloads: 1}))
         return response
     raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
 
@@ -1114,7 +1114,7 @@ async def download_dataset_thumbnail(
         allow: bool = Depends(Authorization("viewer")),
 ):
     # If dataset exists in MongoDB, download from Minio
-    if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
+    if (dataset := await DatasetDBViewList.find_one(DatasetDBViewList.id == PydanticObjectId(dataset_id))) is not None:
         if dataset.thumbnail_id is not None:
             content = fs.get_object(
                 settings.MINIO_BUCKET_NAME, str(dataset.thumbnail_id)
