@@ -289,25 +289,23 @@ export const Dataset = (): JSX.Element => {
 							{...a11yProps(2)}
 							disabled={false}
 						/>
-						<PublishedWrapper
-							frozen={about.frozen}
-							frozenVersionNum={about.frozen_version_num}
-						>
-							{/* Viewer is not allowed to submit to extractor*/}
-							<AuthWrapper
-								currRole={datasetRole.role}
-								allowedRoles={["owner", "editor", "uploader"]}
-							>
-								<Tab
-									icon={<BuildIcon />}
-									iconPosition="start"
-									sx={TabStyle}
-									label="Analysis"
-									{...a11yProps(3)}
-									disabled={false}
-								/>
-							</AuthWrapper>
-						</PublishedWrapper>
+						{/* Viewer is not allowed to submit to extractor*/}
+						<Tab
+							icon={<BuildIcon />}
+							iconPosition="start"
+							sx={
+								about.frozen &&
+								about.frozen_version_num &&
+								about.frozen_version_num > 0
+									? { display: "none" }
+									: !["owner", "editor", "uploader"].includes(datasetRole.role)
+									? { display: "none" }
+									: TabStyle
+							}
+							label="Analysis"
+							{...a11yProps(3)}
+							disabled={false}
+						/>
 						<Tab
 							icon={<HistoryIcon />}
 							iconPosition="start"
@@ -325,19 +323,18 @@ export const Dataset = (): JSX.Element => {
 							disabled={false}
 						/>
 						{/*Viewer is not allowed to share*/}
-						<AuthWrapper
-							currRole={datasetRole.role}
-							allowedRoles={["owner", "editor", "uploader"]}
-						>
-							<Tab
-								icon={<ShareIcon />}
-								iconPosition="start"
-								sx={TabStyle}
-								label="Sharing"
-								{...a11yProps(6)}
-								disabled={false}
-							/>
-						</AuthWrapper>
+						<Tab
+							icon={<ShareIcon />}
+							iconPosition="start"
+							sx={
+								!["owner", "editor", "uploader"].includes(datasetRole.role)
+									? { display: "none" }
+									: TabStyle
+							}
+							label="Sharing"
+							{...a11yProps(6)}
+							disabled={false}
+						/>
 					</Tabs>
 					<TabPanel value={selectedTabIndex} index={0}>
 						{folderId !== null ? (
@@ -422,34 +419,39 @@ export const Dataset = (): JSX.Element => {
 							resourceId={datasetId}
 						/>
 					</TabPanel>
-					<PublishedWrapper
-						frozen={about.frozen}
-						frozenVersionNum={about.frozen_version_num}
+					{/* Viewer is not allowed to submit to extractor*/}
+					<TabPanel
+						value={selectedTabIndex}
+						index={3}
+						sx={
+							about.frozen &&
+							about.frozen_version_num &&
+							about.frozen_version_num > 0
+								? { display: "none" }
+								: !["owner", "editor", "uploader"].includes(datasetRole.role)
+								? { display: "none" }
+								: TabStyle
+						}
 					>
-						{/* Viewer is not allowed to submit to extractor*/}
-						<AuthWrapper
-							currRole={datasetRole.role}
-							allowedRoles={["owner", "editor", "uploader"]}
-						>
-							<TabPanel value={selectedTabIndex} index={3}>
-								<Listeners datasetId={datasetId} />
-							</TabPanel>
-						</AuthWrapper>
-					</PublishedWrapper>
+						<Listeners datasetId={datasetId} />
+					</TabPanel>
 					<TabPanel value={selectedTabIndex} index={4}>
 						<ExtractionHistoryTab datasetId={datasetId} />
 					</TabPanel>
 					<TabPanel value={selectedTabIndex} index={5}>
 						<Visualization datasetId={datasetId} />
 					</TabPanel>
-					<AuthWrapper
-						currRole={datasetRole.role}
-						allowedRoles={["owner", "editor", "uploader"]}
+					<TabPanel
+						value={selectedTabIndex}
+						index={6}
+						sx={
+							!["owner", "editor", "uploader"].includes(datasetRole.role)
+								? { display: "none" }
+								: null
+						}
 					>
-						<TabPanel value={selectedTabIndex} index={6}>
-							<SharingTab datasetId={datasetId} />
-						</TabPanel>
-					</AuthWrapper>
+						<SharingTab datasetId={datasetId} />
+					</TabPanel>
 				</Grid>
 				<Grid item>
 					<DatasetDetails details={about} />
