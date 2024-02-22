@@ -74,8 +74,8 @@ from app.search.connect import (
     delete_document_by_id,
 )
 from app.search.index import index_dataset, index_file
-from backend.app.models.licenses import LicenseIn
-from backend.app.routers.licenses import save_license
+from app.models.licenses import LicenseIn
+from app.routers.licenses import save_license
 
 router = APIRouter()
 security = HTTPBearer()
@@ -496,7 +496,7 @@ async def get_dataset_folders(
         page = Paged(
             metadata=page_metadata,
             data=[
-                DatasetOut(id=item.pop("_id"), **item, license_id=dataset_db.license_id)
+                DatasetOut(id=item.pop("_id"), **item)
                 for item in folders_and_count[0]["data"]
             ],
         )

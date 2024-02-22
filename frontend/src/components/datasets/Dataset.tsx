@@ -9,7 +9,10 @@ import {
 	Tab,
 	Tabs,
 	Typography,
+	Link,
+	IconButton
 } from "@mui/material";
+import EditIcon from '@mui/icons-material/Edit';
 import { useParams, useSearchParams } from "react-router-dom";
 import { RootState } from "../../types/data";
 import { useDispatch, useSelector } from "react-redux";
@@ -169,6 +172,9 @@ export const Dataset = (): JSX.Element => {
 		newTabIndex: number
 	) => {
 		setSelectedTabIndex(newTabIndex);
+	};
+
+	const editLicense = () =>{
 	};
 
 	const handlePageChange = (_: ChangeEvent<unknown>, value: number) => {
@@ -355,55 +361,55 @@ export const Dataset = (): JSX.Element => {
 						{enableAddMetadata &&
 						datasetRole.role !== undefined &&
 						datasetRole.role !== "viewer" ? (
-							<>
-								<EditMetadata
-									resourceType="dataset"
-									resourceId={datasetId}
-									setMetadata={setMetadata}
-								/>
-								<Button
-									variant="contained"
-									onClick={handleMetadataUpdateFinish}
-									sx={{ mt: 1, mr: 1 }}
-								>
+								<>
+									<EditMetadata
+										resourceType="dataset"
+										resourceId={datasetId}
+										setMetadata={setMetadata}
+									/>
+									<Button
+										variant="contained"
+										onClick={handleMetadataUpdateFinish}
+										sx={{ mt: 1, mr: 1 }}
+									>
 									Update
-								</Button>
-								<Button
-									onClick={() => {
-										setEnableAddMetadata(false);
-									}}
-									sx={{ mt: 1, mr: 1 }}
-								>
+									</Button>
+									<Button
+										onClick={() => {
+											setEnableAddMetadata(false);
+										}}
+										sx={{ mt: 1, mr: 1 }}
+									>
 									Cancel
-								</Button>
-							</>
-						) : (
-							<>
-								<DisplayMetadata
-									updateMetadata={updateDatasetMetadata}
-									deleteMetadata={deleteDatasetMetadata}
-									resourceType="dataset"
-									resourceId={datasetId}
-								/>
-								<Box textAlign="center">
-									{enableAddMetadata &&
+									</Button>
+								</>
+							) : (
+								<>
+									<DisplayMetadata
+										updateMetadata={updateDatasetMetadata}
+										deleteMetadata={deleteDatasetMetadata}
+										resourceType="dataset"
+										resourceId={datasetId}
+									/>
+									<Box textAlign="center">
+										{enableAddMetadata &&
 									datasetRole.role !== undefined &&
 									datasetRole.role !== "viewer" ? (
-										<Button
-											variant="contained"
-											sx={{ m: 2 }}
-											onClick={() => {
-												setEnableAddMetadata(true);
-											}}
-										>
+												<Button
+													variant="contained"
+													sx={{ m: 2 }}
+													onClick={() => {
+														setEnableAddMetadata(true);
+													}}
+												>
 											Add Metadata
-										</Button>
-									) : (
-										<></>
-									)}
-								</Box>
-							</>
-						)}
+												</Button>
+											) : (
+												<></>
+											)}
+									</Box>
+								</>
+							)}
 					</TabPanel>
 					<TabPanel value={selectedTabIndex} index={2}>
 						<DisplayListenerMetadata
@@ -436,7 +442,18 @@ export const Dataset = (): JSX.Element => {
 				</Grid>
 				<Grid item>
 					<DatasetDetails details={about} />
-					{license.name !== undefined? <Typography>License: {license.name}</Typography> : <></>}
+					{license.name !== undefined ? (
+						<>
+							<Typography>
+								<Link href={license.url}>{license.name}</Link>
+								<IconButton onClick={editLicense} sx={{ fontSize: 'small' }}>
+									<EditIcon />
+								</IconButton>
+							</Typography>
+						</>
+					) : (
+						<></>
+					)}
 				</Grid>
 			</Grid>
 		</Layout>

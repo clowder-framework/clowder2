@@ -61,7 +61,7 @@ from app.routers import (
 from app.search.config import indexSettings
 from app.search.connect import connect_elasticsearch, create_index
 
-from backend.app.models.licenses import LicenseDB
+from app.models.licenses import LicenseDB
 
 logger = logging.getLogger(__name__)
 
