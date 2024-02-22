@@ -53,6 +53,7 @@ import VisibilityIcon from "@mui/icons-material/Visibility";
 import config from "../../app.config";
 import LockIcon from "@mui/icons-material/Lock";
 import { AuthWrapper } from "../auth/AuthWrapper";
+import { PublishedWrapper } from "../auth/PublishedWrapper";
 
 export const Dataset = (): JSX.Element => {
 	// path parameter
@@ -288,20 +289,25 @@ export const Dataset = (): JSX.Element => {
 							{...a11yProps(2)}
 							disabled={false}
 						/>
-						{/* Viewer is not allowed to submit to extractor*/}
-						<AuthWrapper
-							currRole={datasetRole.role}
-							allowedRoles={["owner", "editor", "uploader"]}
+						<PublishedWrapper
+							frozen={about.frozen}
+							frozenVersionNum={about.frozen_version_num}
 						>
-							<Tab
-								icon={<BuildIcon />}
-								iconPosition="start"
-								sx={TabStyle}
-								label="Analysis"
-								{...a11yProps(3)}
-								disabled={false}
-							/>
-						</AuthWrapper>
+							{/* Viewer is not allowed to submit to extractor*/}
+							<AuthWrapper
+								currRole={datasetRole.role}
+								allowedRoles={["owner", "editor", "uploader"]}
+							>
+								<Tab
+									icon={<BuildIcon />}
+									iconPosition="start"
+									sx={TabStyle}
+									label="Analysis"
+									{...a11yProps(3)}
+									disabled={false}
+								/>
+							</AuthWrapper>
+						</PublishedWrapper>
 						<Tab
 							icon={<HistoryIcon />}
 							iconPosition="start"
@@ -360,31 +366,36 @@ export const Dataset = (): JSX.Element => {
 					</TabPanel>
 					<TabPanel value={selectedTabIndex} index={1}>
 						{enableAddMetadata ? (
-							<AuthWrapper
-								currRole={datasetRole.role}
-								allowedRoles={["owner", "editor", "uploader"]}
+							<PublishedWrapper
+								frozen={about.frozen}
+								frozenVersionNum={about.frozen_version_num}
 							>
-								<EditMetadata
-									resourceType="dataset"
-									resourceId={datasetId}
-									setMetadata={setMetadata}
-								/>
-								<Button
-									variant="contained"
-									onClick={handleMetadataUpdateFinish}
-									sx={{ mt: 1, mr: 1 }}
+								<AuthWrapper
+									currRole={datasetRole.role}
+									allowedRoles={["owner", "editor", "uploader"]}
 								>
-									Update
-								</Button>
-								<Button
-									onClick={() => {
-										setEnableAddMetadata(false);
-									}}
-									sx={{ mt: 1, mr: 1 }}
-								>
-									Cancel
-								</Button>
-							</AuthWrapper>
+									<EditMetadata
+										resourceType="dataset"
+										resourceId={datasetId}
+										setMetadata={setMetadata}
+									/>
+									<Button
+										variant="contained"
+										onClick={handleMetadataUpdateFinish}
+										sx={{ mt: 1, mr: 1 }}
+									>
+										Update
+									</Button>
+									<Button
+										onClick={() => {
+											setEnableAddMetadata(false);
+										}}
+										sx={{ mt: 1, mr: 1 }}
+									>
+										Cancel
+									</Button>
+								</AuthWrapper>
+							</PublishedWrapper>
 						) : (
 							<>
 								<DisplayMetadata
@@ -395,20 +406,25 @@ export const Dataset = (): JSX.Element => {
 								/>
 								<Box textAlign="center">
 									{enableAddMetadata ? (
-										<AuthWrapper
-											currRole={datasetRole.role}
-											allowedRoles={["owner", "editor", "uploader"]}
+										<PublishedWrapper
+											frozen={about.frozen}
+											frozenVersionNum={about.frozen_version_num}
 										>
-											<Button
-												variant="contained"
-												sx={{ m: 2 }}
-												onClick={() => {
-													setEnableAddMetadata(true);
-												}}
+											<AuthWrapper
+												currRole={datasetRole.role}
+												allowedRoles={["owner", "editor", "uploader"]}
 											>
-												Add Metadata
-											</Button>
-										</AuthWrapper>
+												<Button
+													variant="contained"
+													sx={{ m: 2 }}
+													onClick={() => {
+														setEnableAddMetadata(true);
+													}}
+												>
+													Add Metadata
+												</Button>
+											</AuthWrapper>
+										</PublishedWrapper>
 									) : (
 										<></>
 									)}
@@ -424,14 +440,19 @@ export const Dataset = (): JSX.Element => {
 							resourceId={datasetId}
 						/>
 					</TabPanel>
-					<AuthWrapper
-						currRole={datasetRole.role}
-						allowedRoles={["owner", "editor", "uploader"]}
+					<PublishedWrapper
+						frozen={about.frozen}
+						frozenVersionNum={about.frozen_version_num}
 					>
-						<TabPanel value={selectedTabIndex} index={3}>
-							<Listeners datasetId={datasetId} />
-						</TabPanel>
-					</AuthWrapper>
+						<AuthWrapper
+							currRole={datasetRole.role}
+							allowedRoles={["owner", "editor", "uploader"]}
+						>
+							<TabPanel value={selectedTabIndex} index={3}>
+								<Listeners datasetId={datasetId} />
+							</TabPanel>
+						</AuthWrapper>
+					</PublishedWrapper>
 					<TabPanel value={selectedTabIndex} index={4}>
 						<ExtractionHistoryTab datasetId={datasetId} />
 					</TabPanel>

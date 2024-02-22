@@ -41,7 +41,7 @@ export const ActionsMenu = (props: ActionsMenuProps): JSX.Element => {
 			</Button>
 			<PublishedWrapper
 				frozen={dataset.frozen}
-				frozen_version_num={dataset.frozen_version_num}
+				frozenVersionNum={dataset.frozen_version_num}
 			>
 				{/*owner, editor, uploader cannot create new*/}
 				<AuthWrapper
