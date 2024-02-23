@@ -1,7 +1,7 @@
 import React from "react";
 
-import { Button, Stack } from "@mui/material";
-import { useSelector } from "react-redux";
+import { Button, Stack, Tooltip } from "@mui/material";
+import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../types/data";
 import { Download } from "@mui/icons-material";
 import { NewMenu } from "./NewMenu";
@@ -11,18 +11,23 @@ import { AuthWrapper } from "../auth/AuthWrapper";
 import config from "../../app.config";
 import { PublishedWrapper } from "../auth/PublishedWrapper";
 import { CombinedDataset } from "../../openapi/v2";
+import LockIcon from "@mui/icons-material/Lock";
+import { freezeDataset as freezeDatasetAction } from "../../actions/dataset";
 
 type ActionsMenuProps = {
 	folderId: string | null;
 	dataset: CombinedDataset;
 };
 
-export const ActionsMenu = (props: ActionsMenuProps): JSX.Element => {
+export const ActionsMenuGroup = (props: ActionsMenuProps): JSX.Element => {
 	const { dataset, folderId } = props;
 
 	const datasetRole = useSelector(
 		(state: RootState) => state.dataset.datasetRole
 	);
+	const dispatch = useDispatch();
+	const freezeDataset = (datasetId: string | undefined) =>
+		dispatch(freezeDatasetAction(datasetId));
 
 	return (
 		<Stack
@@ -43,6 +48,21 @@ export const ActionsMenu = (props: ActionsMenuProps): JSX.Element => {
 				frozen={dataset.frozen}
 				frozenVersionNum={dataset.frozen_version_num}
 			>
+				{/*onwer can publish*/}
+				<AuthWrapper currRole={datasetRole.role} allowedRoles={["owner"]}>
+					<Tooltip title="Published datasets are frozen and cannot be altered; updates require creating a new version.">
+						<Button
+							sx={{ minWidth: "auto" }}
+							variant="outlined"
+							endIcon={<LockIcon />}
+							onClick={() => {
+								freezeDataset(dataset.id);
+							}}
+						>
+							Publish
+						</Button>
+					</Tooltip>
+				</AuthWrapper>
 				{/*owner, editor, uploader cannot create new*/}
 				<AuthWrapper
 					currRole={datasetRole.role}

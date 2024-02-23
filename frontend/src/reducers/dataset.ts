@@ -3,6 +3,7 @@ import {
 	DELETE_DATASET,
 	FOLDER_ADDED,
 	FOLDER_UPDATED,
+	FREEZE_DATASET,
 	RECEIVE_DATASET_ABOUT,
 	RECEIVE_DATASET_ROLES,
 	RECEIVE_DATASETS,
@@ -104,6 +105,8 @@ const dataset = (state = defaultState, action: DataAction) => {
 		case RECEIVE_DATASET_ROLES:
 			return Object.assign({}, state, { roles: action.roles });
 		case UPDATE_DATASET:
+			return Object.assign({}, state, { about: action.about });
+		case FREEZE_DATASET:
 			return Object.assign({}, state, { about: action.about });
 		case RECEIVE_DATASETS:
 			return Object.assign({}, state, { datasets: action.datasets });

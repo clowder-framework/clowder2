@@ -35,7 +35,7 @@ import {
 	postDatasetMetadata,
 } from "../../actions/metadata";
 import Layout from "../Layout";
-import { ActionsMenu } from "./ActionsMenu";
+import { ActionsMenuGroup } from "./ActionsMenuGroup";
 import { DatasetDetails } from "./DatasetDetails";
 import { FormatListBulleted, InsertDriveFile } from "@material-ui/icons";
 import { Listeners } from "../listeners/Listeners";
@@ -250,7 +250,7 @@ export const Dataset = (): JSX.Element => {
 				</Grid>
 				{/*actions*/}
 				<Grid item xs={4} sx={{ display: "flex-top", alignItems: "center" }}>
-					<ActionsMenu dataset={about} folderId={folderId} />
+					<ActionsMenuGroup dataset={about} folderId={folderId} />
 				</Grid>
 				{/*actions*/}
 			</Grid>

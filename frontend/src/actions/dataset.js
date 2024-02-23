@@ -183,6 +183,29 @@ export function updateDataset(datasetId, formData) {
 	};
 }
 
+export const FREEZE_DATASET = "FREEZE_DATASET";
+
+export function freezeDataset(datasetId) {
+	return (dispatch) => {
+		return V2.DatasetsService.freezeDatasetApiV2DatasetsDatasetIdFreezePost(
+			datasetId
+		)
+			.then((json) => {
+				dispatch({
+					type: FREEZE_DATASET,
+					about: json,
+					receivedAt: Date.now(),
+				});
+			})
+			.then(() => {
+				dispatch(resetFailedReason());
+			})
+			.catch((reason) => {
+				dispatch(handleErrorsAuthorization(reason, freezeDataset(datasetId)));
+			});
+	};
+}
+
 export const RECEIVE_DATASET_ABOUT = "RECEIVE_DATASET_ABOUT";
 
 export function fetchDatasetAbout(id) {
