@@ -11,7 +11,6 @@ import {
 	FileDropText,
 	DisplayFilename,
 	DeleteFileIcon,
-	FileDropStyle
 } from "../../styles/Styles";
 import { makeStyles } from "@material-ui/core/styles";
 
@@ -93,19 +92,19 @@ export default function FileUploadDrop(props: FileUploadDropProps) {
 	return (
 		<div>
 			<FileDrop onDrop={onDrop} className={classes.fileDrop}>
-				<div className={classes.fileDropGroup}>
+				<div style={FileDropGroup}>
 					<input
 						onChange={onFileInputChange}
 						ref={fileInputRef}
 						type="file"
-						className={classes.fileDropInput}
+						style={FileDropInput}
 						multiple
 					/>
 					<Typography className={classes.fileDropText}>
 						<br></br>
 					</Typography>
 				</div>
-			</Box>
+			</FileDrop>
 			{selectedFiles !== undefined && selectedFiles.length > 0 ? (
 				<Box className={classes.displayFile}>
 					{selectedFiles.map((file) => {
