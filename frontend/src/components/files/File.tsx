@@ -361,10 +361,18 @@ export const File = (): JSX.Element => {
 						<Tab
 							icon={<BuildIcon />}
 							iconPosition="start"
-							sx={TabStyle}
 							label="Analysis"
 							{...a11yProps(3)}
 							disabled={false}
+							sx={
+								about.frozen &&
+								about.frozen_version_num &&
+								about.frozen_version_num > 0
+									? { display: "none" }
+									: !["owner", "editor", "uploader"].includes(fileRoleType)
+									? { display: "none" }
+									: TabStyle
+							}
 						/>
 						<Tab
 							icon={<HistoryIcon />}
@@ -455,7 +463,19 @@ export const File = (): JSX.Element => {
 							version={fileSummary.version_num}
 						/>
 					</TabPanel>
-					<TabPanel value={selectedTabIndex} index={3}>
+					<TabPanel
+						value={selectedTabIndex}
+						index={3}
+						sx={
+							about.frozen &&
+							about.frozen_version_num &&
+							about.frozen_version_num > 0
+								? { display: "none" }
+								: !["owner", "editor", "uploader"].includes(fileRoleType)
+								? { display: "none" }
+								: TabStyle
+						}
+					>
 						<Listeners fileId={fileId} datasetId={datasetId} />
 					</TabPanel>
 					<TabPanel value={selectedTabIndex} index={4}>
