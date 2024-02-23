@@ -180,7 +180,7 @@ export interface FileState {
 	metadataJsonld: MetadataJsonld[];
 	previews: FilePreview[];
 	fileVersions: FileVersion[];
-	fileRole: AuthorizationBase;
+	fileRoleType: RoleType;
 	presignedUrl: string;
 	selected_version_num: number;
 }

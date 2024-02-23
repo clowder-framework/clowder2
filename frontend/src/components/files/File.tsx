@@ -98,7 +98,9 @@ export const File = (): JSX.Element => {
 		(state: RootState) => state.file.fileVersions
 	);
 	const folderPath = useSelector((state: RootState) => state.folder.folderPath);
-	const fileRole = useSelector((state: RootState) => state.file.fileRole);
+	const fileRoleType = useSelector(
+		(state: RootState) => state.file.fileRoleType
+	);
 	const storageType = useSelector(
 		(state: RootState) => state.file.fileSummary.storage_type
 	);
@@ -312,7 +314,7 @@ export const File = (): JSX.Element => {
 						) : (
 							<></>
 						)}
-						<RoleChip role={fileRole.role} />
+						<RoleChip role={fileRoleType} />
 					</Grid>
 				</Grid>
 				<Grid item xs={2} sx={{ display: "flex-top", alignItems: "center" }}>
@@ -425,7 +427,7 @@ export const File = (): JSX.Element => {
 									frozenVersionNum={about.frozen_version_num}
 								>
 									<AuthWrapper
-										currRole={fileRole.role}
+										currRole={fileRoleType}
 										allowedRoles={["owner", "editor", "uploader"]}
 									>
 										<Box textAlign="center">

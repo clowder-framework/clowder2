@@ -101,13 +101,13 @@ export class AuthorizationService {
      * @returns RoleType Successful Response
      * @throws ApiError
      */
-    public static getFileRoleApiV2AuthorizationsFilesFileIdRoleGet(
+    public static getFileRoleApiV2AuthorizationsFilesFileIdRoleTypeGet(
         fileId: string,
         datasetId?: string,
     ): CancelablePromise<RoleType> {
         return __request({
             method: 'GET',
-            path: `/api/v2/authorizations/files/${fileId}/role`,
+            path: `/api/v2/authorizations/files/${fileId}/roleType`,
             query: {
                 'dataset_id': datasetId,
             },

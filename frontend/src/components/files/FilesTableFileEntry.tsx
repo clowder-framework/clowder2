@@ -26,7 +26,9 @@ export function FilesTableFileEntry(props: FilesTableFileEntryProps) {
 	const [thumbnailUrl, setThumbnailUrl] = useState("");
 	const [selectedVersion, setSelectedVersion] = useState(file.version_num);
 
-	const fileRole = useSelector((state: RootState) => state.file.fileRole);
+	const fileRoleType = useSelector(
+		(state: RootState) => state.file.fileRoleType
+	);
 
 	useEffect(() => {
 		let url = "";
