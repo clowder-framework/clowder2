@@ -10,9 +10,9 @@ import {
 	Tabs,
 	Typography,
 	Link,
-	IconButton
+	IconButton, DialogTitle, DialogContent, Dialog
 } from "@mui/material";
-import EditIcon from '@mui/icons-material/Edit';
+import EditIcon from "@mui/icons-material/Edit";
 import { useParams, useSearchParams } from "react-router-dom";
 import { RootState } from "../../types/data";
 import { useDispatch, useSelector } from "react-redux";
@@ -53,6 +53,7 @@ import { ErrorModal } from "../errors/ErrorModal";
 import { Visualization } from "../visualizations/Visualization";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import config from "../../app.config";
+import {EditLicenseModal} from "./EditLicenseModal";
 
 export const Dataset = (): JSX.Element => {
 	// path parameter
@@ -119,6 +120,8 @@ export const Dataset = (): JSX.Element => {
 
 	const [currPageNum, setCurrPageNum] = useState<number>(1);
 
+	const [editLicenseOpen, setEditLicenseOpen] = useState<boolean>(false);
+
 	const [limit] = useState<number>(config.defaultFolderFilePerPage);
 
 	const pageMetadata = useSelector(
@@ -174,7 +177,14 @@ export const Dataset = (): JSX.Element => {
 		setSelectedTabIndex(newTabIndex);
 	};
 
-	const editLicense = () =>{
+	const [openEditLicenseModal, setOpenEditLicenseModal] = useState(false);
+
+	const handleOpenEditLicenseModal = () => {
+		setOpenEditLicenseModal(true); // Open the modal
+	};
+
+	const handleCloseEditLicenseModal = (save: boolean) => {
+		setOpenEditLicenseModal(false); // Close the modal
 	};
 
 	const handlePageChange = (_: ChangeEvent<unknown>, value: number) => {
@@ -221,6 +231,7 @@ export const Dataset = (): JSX.Element => {
 		setEnableAddMetadata(false);
 	};
 
+	// @ts-ignore
 	// @ts-ignore
 	return (
 		<Layout>
@@ -446,10 +457,32 @@ export const Dataset = (): JSX.Element => {
 						<>
 							<Typography>
 								<Link href={license.url}>{license.name}</Link>
-								<IconButton onClick={editLicense} sx={{ fontSize: 'small' }}>
+								<IconButton
+									onClick={() => {
+										setEditLicenseOpen(true);
+									}}
+								>
 									<EditIcon />
 								</IconButton>
 							</Typography>
+							{/*<IconButton onClick={handleOpenEditLicenseModal} sx={{ fontSize: "small" }}>*/}
+							{/*	<EditIcon />*/}
+							{/*</IconButton>*/}
+							<Dialog
+								open={editLicenseOpen}
+								onClose={() => {
+									setOpenEditLicenseModal(false);
+								}}
+								fullWidth={true}
+								maxWidth="md"
+								aria-labelledby="form-dialog"
+							>
+								<DialogTitle>Edit license</DialogTitle>
+								<DialogContent>
+									<EditLicenseModal setEditLicenseOpen={setEditLicenseOpen} />
+								</DialogContent>
+							</Dialog>
+							{/*<EditLicenseModal license={license} open={openEditLicenseModal} handleClose={handleCloseEditLicenseModal} />*/}
 						</>
 					) : (
 						<></>

@@ -218,6 +218,23 @@ export function fetchDatasetLicense(dataset_id) {
 	};
 }
 
+export const UPDATE_DATASET_LICENSE = "UPDATE_DATASET_LICENSE";
+
+export function updateDatasetLicense(licenseId, formData) {
+	return (dispatch) => {
+		return V2.LicensesService.editLicenseApiV2LicensesLicenseIdPut(licenseId, formData).then((json) => {
+				dispatch({
+					type: UPDATE_DATASET_LICENSE,
+					license: json,
+					receivedAt: Date.now(),
+				});
+			})
+			.catch((reason) => {
+				dispatch(handleErrors(reason, updateDatasetLicense(licenseId, formData)));
+			});
+	};
+}
+
 export const RECEIVE_DATASETS = "RECEIVE_DATASETS";
 
 export function fetchDatasets(skip = 0, limit = 21, mine = false) {

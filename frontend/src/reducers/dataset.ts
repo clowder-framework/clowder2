@@ -5,6 +5,7 @@ import {
 	FOLDER_UPDATED,
 	RECEIVE_DATASET_ABOUT,
 	RECEIVE_DATASET_LICENSE,
+	UPDATE_DATASET_LICENSE,
 	RECEIVE_DATASET_ROLES,
 	RECEIVE_DATASETS,
 	RECEIVE_FOLDERS_FILES_IN_DATASET,
@@ -102,6 +103,8 @@ const dataset = (state = defaultState, action: DataAction) => {
 		case RECEIVE_DATASET_ABOUT:
 			return Object.assign({}, state, { about: action.about });
 		case RECEIVE_DATASET_LICENSE:
+			return Object.assign({}, state, { license: action.license });
+		case UPDATE_DATASET_LICENSE:
 			return Object.assign({}, state, { license: action.license });
 		case RECEIVE_DATASET_ROLE:
 			return Object.assign({}, state, { datasetRole: action.role });

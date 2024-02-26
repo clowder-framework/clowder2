@@ -65,7 +65,7 @@ async def edit_license(
         license.version = license_dict["version"]
         license.allow_download = license_dict["allow_download"]
         license.name = license_dict["name"]
-        license.replace()
+        await license.replace()
 
         return license.dict()
     raise HTTPException(status_code=404, detail=f"License {license_id} not found")

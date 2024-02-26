@@ -1,0 +1,38 @@
+{
+	"schema": {
+		"type": "object",
+		"required": [
+			"name"
+		],
+		"properties": {
+			"name": {
+				"type": "string",
+				"title": "Name"
+			},
+			"type": {
+				"type": "string",
+				"title": "Type"
+			},
+			"text": {
+				"type": "string",
+				"title": "Text"
+			},
+			"url": {
+				"type": "string",
+				"title": "Url"
+			},
+			"version": {
+				"type": "string",
+				"title": "Version"
+			}
+		}
+	},
+	"uiSchema": {
+		"name": {
+			"ui:autofocus": true,
+			"ui:emptyValue": "",
+			"ui:placeholder": "ui:emptyValue causes this field to always be valid despite being required",
+			"ui:description": "License name"
+		}
+	}
+}
