@@ -5,7 +5,6 @@ from beanie import Document, View, PydanticObjectId
 from pydantic import Field, BaseModel
 
 from app.models.authorization import AuthorizationDB
-from app.models.pyobjectid import PyObjectId
 from app.models.users import UserOut
 
 
@@ -13,16 +12,22 @@ class FolderBase(BaseModel):
     name: str = "N/A"
 
 
+class FolderPatch(BaseModel):
+    name: Optional[str]
+    parent_folder: Optional[PydanticObjectId]
+
+
 class FolderIn(FolderBase):
-    parent_folder: Optional[PyObjectId]
+    parent_folder: Optional[PydanticObjectId]
 
 
 class FolderDB(Document, FolderBase):
-    dataset_id: PyObjectId
-    parent_folder: Optional[PyObjectId]
+    dataset_id: PydanticObjectId
+    parent_folder: Optional[PydanticObjectId]
     creator: UserOut
     created: datetime = Field(default_factory=datetime.utcnow)
     modified: datetime = Field(default_factory=datetime.utcnow)
+    object_type: str = "folder"
 
     class Settings:
         name = "folders"
@@ -30,8 +35,8 @@ class FolderDB(Document, FolderBase):
 
 class FolderDBViewList(View, FolderBase):
     id: PydanticObjectId = Field(None, alias="_id")  # necessary for Views
-    dataset_id: PyObjectId
-    parent_folder: Optional[PyObjectId]
+    dataset_id: PydanticObjectId
+    parent_folder: Optional[PydanticObjectId]
     creator: UserOut
     created: datetime = Field(default_factory=datetime.utcnow)
     modified: datetime = Field(default_factory=datetime.utcnow)

@@ -4,6 +4,7 @@
 import type { GroupBase } from '../models/GroupBase';
 import type { GroupIn } from '../models/GroupIn';
 import type { GroupOut } from '../models/GroupOut';
+import type { Paged } from '../models/Paged';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { request as __request } from '../core/request';
 
@@ -19,14 +20,14 @@ export class GroupsService {
      * @param skip
      * @param limit
      * @param datasetId
-     * @returns GroupOut Successful Response
+     * @returns Paged Successful Response
      * @throws ApiError
      */
     public static getGroupsApiV2GroupsGet(
         skip?: number,
         limit: number = 10,
         datasetId?: string,
-    ): CancelablePromise<Array<GroupOut>> {
+    ): CancelablePromise<Paged> {
         return __request({
             method: 'GET',
             path: `/api/v2/groups`,
@@ -73,7 +74,7 @@ export class GroupsService {
      * @param skip
      * @param limit
      * @param datasetId
-     * @returns GroupOut Successful Response
+     * @returns Paged Successful Response
      * @throws ApiError
      */
     public static searchGroupApiV2GroupsSearchSearchTermGet(
@@ -81,7 +82,7 @@ export class GroupsService {
         skip?: number,
         limit: number = 10,
         datasetId?: string,
-    ): CancelablePromise<Array<GroupOut>> {
+    ): CancelablePromise<Paged> {
         return __request({
             method: 'GET',
             path: `/api/v2/groups/search/${searchTerm}`,

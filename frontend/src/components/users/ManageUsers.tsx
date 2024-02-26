@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { ChangeEvent, useEffect, useState } from "react";
 import { RootState } from "../../types/data";
 import { useDispatch, useSelector } from "react-redux";
 import Layout from "../Layout";
@@ -16,24 +16,24 @@ import {
 	revokeAdmin as revokeAdminAction,
 	setAdmin as setAdminAction,
 } from "../../actions/user";
-import { Box, Button, ButtonGroup, Grid, Switch } from "@mui/material";
-import { ArrowBack, ArrowForward } from "@material-ui/icons";
+import { Box, Grid, Pagination, Switch } from "@mui/material";
 import { ErrorModal } from "../errors/ErrorModal";
 import { GenericSearchBox } from "../search/GenericSearchBox";
 import Gravatar from "react-gravatar";
 import PersonIcon from "@mui/icons-material/Person";
+import config from "../../app.config";
 
 export const ManageUsers = (): JSX.Element => {
-	const [currPageNum, setCurrPageNum] = useState<number>(0);
-	const [limit, setLimit] = useState<number>(5);
-	const [skip, setSkip] = useState<number>(0);
-	const [prevDisabled, setPrevDisabled] = useState<boolean>(true);
-	const [nextDisabled, setNextDisabled] = useState<boolean>(false);
+	const [currPageNum, setCurrPageNum] = useState<number>(1);
+	const [limit, setLimit] = useState<number>(config.defaultUserPerPage);
 	const [errorOpen, setErrorOpen] = useState(false);
 	const [searchTerm, setSearchTerm] = useState<string>("");
 
 	const dispatch = useDispatch();
-	const users = useSelector((state: RootState) => state.group.users);
+	const users = useSelector((state: RootState) => state.group.users.data);
+	const pageMetadata = useSelector(
+		(state: RootState) => state.group.users.metadata
+	);
 	const currentUser = useSelector((state: RootState) => state.user.profile);
 
 	const fetchAllUsers = (skip: number, limit: number) =>
@@ -47,47 +47,29 @@ export const ManageUsers = (): JSX.Element => {
 
 	// component did mount
 	useEffect(() => {
-		fetchAllUsers(skip, limit);
+		fetchAllUsers(0, limit);
 		fetchCurrentUser();
 	}, []);
 
-	useEffect(() => {
-		// disable flipping if reaches the last page
-		if (users.length < limit) setNextDisabled(true);
-		else setNextDisabled(false);
-	}, [users]);
-
-	useEffect(() => {
-		if (skip !== null && skip !== undefined) {
-			fetchAllUsers(skip, limit);
-			if (skip === 0) setPrevDisabled(true);
-			else setPrevDisabled(false);
-		}
-	}, [skip]);
-
-	const previous = () => {
-		if (currPageNum - 1 >= 0) {
-			setSkip((currPageNum - 1) * limit);
-			setCurrPageNum(currPageNum - 1);
-		}
-	};
-	const next = () => {
-		if (users.length === limit) {
-			setSkip((currPageNum + 1) * limit);
-			setCurrPageNum(currPageNum + 1);
-		}
-	};
-
 	const searchUsers = (searchTerm: string) => {
-		prefixSearchAllUsers(searchTerm, skip, limit);
+		prefixSearchAllUsers(searchTerm, (currPageNum - 1) * limit, limit);
 		setSearchTerm(searchTerm);
 	};
 
 	// search while typing
 	useEffect(() => {
-		if (searchTerm !== "") prefixSearchAllUsers(searchTerm, skip, limit);
-		else fetchAllUsers(skip, limit);
+		// reset page with each new search term
+		setCurrPageNum(1);
+		if (searchTerm !== "") prefixSearchAllUsers(searchTerm, 0, limit);
+		else fetchAllUsers(0, limit);
 	}, [searchTerm]);
+
+	const handlePageChange = (_: ChangeEvent<unknown>, value: number) => {
+		const newSkip = (value - 1) * limit;
+		setCurrPageNum(value);
+		if (searchTerm !== "") prefixSearchAllUsers(searchTerm, newSkip, limit);
+		else fetchAllUsers(newSkip, limit);
+	};
 
 	return (
 		<Layout>
@@ -102,7 +84,7 @@ export const ManageUsers = (): JSX.Element => {
 							setSearchTerm={setSearchTerm}
 							searchTerm={searchTerm}
 							searchFunction={searchUsers}
-							skip={skip}
+							skip={(currPageNum - 1) * limit}
 							limit={limit}
 						/>
 					</Grid>
@@ -168,25 +150,13 @@ export const ManageUsers = (): JSX.Element => {
 								</TableBody>
 							</Table>
 							<Box display="flex" justifyContent="center" sx={{ m: 1 }}>
-								<ButtonGroup
-									variant="contained"
-									aria-label="previous next buttons"
-								>
-									<Button
-										aria-label="previous"
-										onClick={previous}
-										disabled={prevDisabled}
-									>
-										<ArrowBack /> Prev
-									</Button>
-									<Button
-										aria-label="next"
-										onClick={next}
-										disabled={nextDisabled}
-									>
-										Next <ArrowForward />
-									</Button>
-								</ButtonGroup>
+								<Pagination
+									count={Math.ceil(pageMetadata.total_count / limit)}
+									page={currPageNum}
+									onChange={handlePageChange}
+									shape="rounded"
+									variant="outlined"
+								/>
 							</Box>
 						</TableContainer>
 					</Grid>

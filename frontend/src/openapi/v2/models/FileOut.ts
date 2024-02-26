@@ -36,4 +36,5 @@ export type FileOut = {
     thumbnail_id?: string;
     storage_type?: StorageType;
     storage_path?: string;
+    object_type?: string;
 }

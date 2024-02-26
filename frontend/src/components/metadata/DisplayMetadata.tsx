@@ -12,7 +12,7 @@ import {
 } from "../../actions/metadata";
 import { Agent } from "./Agent";
 import { MetadataDeleteButton } from "./widgets/MetadataDeleteButton";
-import {fetchPublicDatasetMetadata} from "../../actions/public_dataset";
+import { fetchPublicDatasetMetadata } from "../../actions/public_dataset";
 
 type MetadataType = {
 	updateMetadata: any;
@@ -27,7 +27,13 @@ This is the interface displayed already created metadata and allow eidts
 Uses only the list of metadata
 */
 export const DisplayMetadata = (props: MetadataType) => {
-	const { updateMetadata, deleteMetadata, resourceType, resourceId,publicView } = props;
+	const {
+		updateMetadata,
+		deleteMetadata,
+		resourceType,
+		resourceId,
+		publicView,
+	} = props;
 
 	const dispatch = useDispatch();
 
@@ -42,7 +48,7 @@ export const DisplayMetadata = (props: MetadataType) => {
 		limit: number
 	) => dispatch(fetchPublicMetadataDefinitions(name, skip, limit));
 	const metadataDefinitionList = useSelector(
-		(state: RootState) => state.metadata.metadataDefinitionList
+		(state: RootState) => state.metadata.metadataDefinitionList.data
 	);
 	const publicMetadataDefinitionList = useSelector(
 		(state: RootState) => state.metadata.publicMetadataDefinitionList
@@ -65,25 +71,29 @@ export const DisplayMetadata = (props: MetadataType) => {
 		(state: RootState) => state.dataset.datasetRole
 	);
 	const publicDatasetMetadataList = useSelector(
-		(state: RootState) => state.metadata.publicDatasetMetadataList);
+		(state: RootState) => state.metadata.publicDatasetMetadataList
+	);
 	const publicFileMetadataList = useSelector(
-		(state: RootState) => state.metadata.publicFileMetadataList);
+		(state: RootState) => state.metadata.publicFileMetadataList
+	);
 	useEffect(() => {
-		getMetadatDefinitions(null, 0, 100);
-		getPublicMetadatDefinitions(null, 0, 100);
+		if (publicView){
+			getPublicMetadatDefinitions(null, 0, 100);
+		} else {
+			getMetadatDefinitions(null, 0, 100);
+		}
 	}, []);
 
 	// complete metadata list with both definition and values
 	useEffect(() => {
-		if (resourceType === "dataset"){
-			if (publicView){
+		if (resourceType === "dataset") {
+			if (publicView) {
 				listPublicDatasetMetadata(resourceId);
 			} else {
 				listDatasetMetadata(resourceId);
 			}
-		}
-		else if (resourceType === "file"){
-			if (publicView){
+		} else if (resourceType === "file") {
+			if (publicView) {
 				listPublicFileMetadata(resourceId);
 			} else {
 				listFileMetadata(resourceId);
@@ -96,10 +106,14 @@ export const DisplayMetadata = (props: MetadataType) => {
 			{(() => {
 				let metadataList = [];
 				let currentMetadataDefList = [];
-				if (resourceType === "dataset" && !publicView) metadataList = datasetMetadataList;
-				else if (resourceType === "file" && !publicView) metadataList = fileMetadataList;
-				else if (resourceType === "file" && publicView) metadataList = publicFileMetadataList;
-				else if (resourceType === "dataset" && publicView) metadataList = publicDatasetMetadataList;
+				if (resourceType === "dataset" && !publicView)
+					metadataList = datasetMetadataList;
+				else if (resourceType === "file" && !publicView)
+					metadataList = fileMetadataList;
+				else if (resourceType === "file" && publicView)
+					metadataList = publicFileMetadataList;
+				else if (resourceType === "dataset" && publicView)
+					metadataList = publicDatasetMetadataList;
 				if (publicView) currentMetadataDefList = publicMetadataDefinitionList;
 				else currentMetadataDefList = metadataDefinitionList;
 

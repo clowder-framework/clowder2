@@ -1,10 +1,12 @@
 import {
 	CREATE_DATASET,
 	DELETE_DATASET,
+	FOLDER_ADDED,
+	FOLDER_UPDATED,
 	RECEIVE_DATASET_ABOUT,
 	RECEIVE_DATASET_ROLES,
 	RECEIVE_DATASETS,
-	RECEIVE_FILES_IN_DATASET,
+	RECEIVE_FOLDERS_FILES_IN_DATASET,
 	REMOVE_DATASET_GROUP_ROLE,
 	REMOVE_DATASET_USER_ROLE,
 	RESET_CREATE_DATASET,
@@ -25,30 +27,46 @@ import { DataAction } from "../types/action";
 import { DatasetState } from "../types/data";
 import {
 	AuthorizationBase,
+	DatasetOut,
 	DatasetOut as Dataset,
 	DatasetRoles,
-	FileOut as File,
+	FileOut,
+	FolderOut,
+	Paged,
+	PageMetadata,
 	UserOut,
 } from "../openapi/v2";
+import { FOLDER_DELETED } from "../actions/folder";
 
 const defaultState: DatasetState = {
-	files: <File[]>[],
+	foldersAndFiles: <Paged>{
+		metadata: <PageMetadata>{},
+		data: <FileOut | FolderOut[]>[],
+	},
 	about: <Dataset>{ creator: <UserOut>{} },
 	datasetRole: <AuthorizationBase>{},
-	datasets: [],
+	datasets: <Paged>{ metadata: <PageMetadata>{}, data: <Dataset[]>[] },
 	newDataset: <Dataset>{},
-	newFile: <File>{},
-	newFiles: <File[]>[],
+	newFile: <FileOut>{},
+	newFiles: <FileOut[]>[],
+	newFolder: <FolderOut>{},
 	roles: <DatasetRoles>{},
 };
 
 const dataset = (state = defaultState, action: DataAction) => {
 	switch (action.type) {
-		case RECEIVE_FILES_IN_DATASET:
-			return Object.assign({}, state, { files: action.files });
+		case RECEIVE_FOLDERS_FILES_IN_DATASET:
+			return Object.assign({}, state, {
+				foldersAndFiles: action.foldersAndFiles,
+			});
 		case DELETE_FILE:
 			return Object.assign({}, state, {
-				files: state.files.filter((file) => file.id !== action.file.id),
+				foldersAndFiles: {
+					...state.foldersAndFiles,
+					data: state.foldersAndFiles.data.filter(
+						(item: FileOut | FolderOut) => item.id !== action.file.id
+					),
+				},
 			});
 		case CREATE_FILE:
 			return Object.assign({}, state, {
@@ -72,9 +90,12 @@ const dataset = (state = defaultState, action: DataAction) => {
 			return Object.assign({}, state, {});
 		case UPDATE_FILE:
 			return Object.assign({}, state, {
-				files: state.files.map((file) =>
-					file.id === action.file.id ? action.file : file
-				),
+				foldersAndFiles: {
+					...state.foldersAndFiles,
+					data: state.foldersAndFiles.data.map((item: FileOut | FolderOut) =>
+						item.id === action.file.id ? action.file : item
+					),
+				},
 			});
 		case RECEIVE_DATASET_ABOUT:
 			return Object.assign({}, state, { about: action.about });
@@ -92,10 +113,35 @@ const dataset = (state = defaultState, action: DataAction) => {
 			return Object.assign({}, state, { newDataset: {} });
 		case DELETE_DATASET:
 			return Object.assign({}, state, {
-				datasets: state.datasets.filter(
-					(dataset) => dataset.id !== action.dataset.id
-				),
+				datasets: {
+					...state.datasets,
+					data: state.datasets.data.filter(
+						(dataset: DatasetOut) => dataset.id !== action.dataset.id
+					),
+				},
 			});
+		case FOLDER_DELETED:
+			return Object.assign({}, state, {
+				foldersAndFiles: {
+					...state.foldersAndFiles,
+					data: state.foldersAndFiles.data.filter(
+						(item: FileOut | FolderOut) => item.id !== action.folder.id
+					),
+				},
+			});
+		case FOLDER_ADDED:
+			return Object.assign({}, state, { newFolder: action.folder });
+		case FOLDER_UPDATED:
+			return Object.assign({}, state, {
+				foldersAndFiles: {
+					...state.foldersAndFiles,
+					data: state.foldersAndFiles.data.map((item: FileOut | FolderOut) => {
+						if (item.id === action.folder.id) return action.folder;
+						return item;
+					}),
+				},
+			});
+
 		default:
 			return state;
 	}

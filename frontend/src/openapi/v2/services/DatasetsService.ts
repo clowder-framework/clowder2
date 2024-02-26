@@ -11,7 +11,9 @@ import type { DatasetPatch } from '../models/DatasetPatch';
 import type { FileOut } from '../models/FileOut';
 import type { FolderIn } from '../models/FolderIn';
 import type { FolderOut } from '../models/FolderOut';
+import type { FolderPatch } from '../models/FolderPatch';
 import type { LocalFileIn } from '../models/LocalFileIn';
+import type { Paged } from '../models/Paged';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { request as __request } from '../core/request';
 
@@ -23,7 +25,7 @@ export class DatasetsService {
      * @param limit
      * @param mine
      * @param datasetId
-     * @returns DatasetOut Successful Response
+     * @returns Paged Successful Response
      * @throws ApiError
      */
     public static getDatasetsApiV2DatasetsGet(
@@ -31,7 +33,7 @@ export class DatasetsService {
         limit: number = 10,
         mine: boolean = false,
         datasetId?: string,
-    ): CancelablePromise<Array<DatasetOut>> {
+    ): CancelablePromise<Paged> {
         return __request({
             method: 'GET',
             path: `/api/v2/datasets`,
@@ -153,7 +155,7 @@ export class DatasetsService {
      * @param folderId
      * @param skip
      * @param limit
-     * @returns FileOut Successful Response
+     * @returns Paged Successful Response
      * @throws ApiError
      */
     public static getDatasetFilesApiV2DatasetsDatasetIdFilesGet(
@@ -161,7 +163,7 @@ export class DatasetsService {
         folderId?: string,
         skip?: number,
         limit: number = 10,
-    ): CancelablePromise<Array<FileOut>> {
+    ): CancelablePromise<Paged> {
         return __request({
             method: 'GET',
             path: `/api/v2/datasets/${datasetId}/files`,
@@ -209,7 +211,7 @@ export class DatasetsService {
      * @param parentFolder
      * @param skip
      * @param limit
-     * @returns FolderOut Successful Response
+     * @returns Paged Successful Response
      * @throws ApiError
      */
     public static getDatasetFoldersApiV2DatasetsDatasetIdFoldersGet(
@@ -217,7 +219,7 @@ export class DatasetsService {
         parentFolder?: string,
         skip?: number,
         limit: number = 10,
-    ): CancelablePromise<Array<FolderOut>> {
+    ): CancelablePromise<Paged> {
         return __request({
             method: 'GET',
             path: `/api/v2/datasets/${datasetId}/folders`,
@@ -255,6 +257,55 @@ export class DatasetsService {
     }
 
     /**
+     * Get Dataset Folders And Files
+     * @param datasetId
+     * @param folderId
+     * @param skip
+     * @param limit
+     * @returns Paged Successful Response
+     * @throws ApiError
+     */
+    public static getDatasetFoldersAndFilesApiV2DatasetsDatasetIdFoldersAndFilesGet(
+        datasetId: string,
+        folderId?: string,
+        skip?: number,
+        limit: number = 10,
+    ): CancelablePromise<Paged> {
+        return __request({
+            method: 'GET',
+            path: `/api/v2/datasets/${datasetId}/folders_and_files`,
+            query: {
+                'folder_id': folderId,
+                'skip': skip,
+                'limit': limit,
+            },
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+
+    /**
+     * Get Folder
+     * @param datasetId
+     * @param folderId
+     * @returns any Successful Response
+     * @throws ApiError
+     */
+    public static getFolderApiV2DatasetsDatasetIdFoldersFolderIdGet(
+        datasetId: string,
+        folderId: string,
+    ): CancelablePromise<any> {
+        return __request({
+            method: 'GET',
+            path: `/api/v2/datasets/${datasetId}/folders/${folderId}`,
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+
+    /**
      * Delete Folder
      * @param datasetId
      * @param folderId
@@ -268,6 +319,30 @@ export class DatasetsService {
         return __request({
             method: 'DELETE',
             path: `/api/v2/datasets/${datasetId}/folders/${folderId}`,
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+
+    /**
+     * Patch Folder
+     * @param datasetId
+     * @param folderId
+     * @param requestBody
+     * @returns FolderOut Successful Response
+     * @throws ApiError
+     */
+    public static patchFolderApiV2DatasetsDatasetIdFoldersFolderIdPatch(
+        datasetId: string,
+        folderId: string,
+        requestBody: FolderPatch,
+    ): CancelablePromise<FolderOut> {
+        return __request({
+            method: 'PATCH',
+            path: `/api/v2/datasets/${datasetId}/folders/${folderId}`,
+            body: requestBody,
+            mediaType: 'application/json',
             errors: {
                 422: `Validation Error`,
             },

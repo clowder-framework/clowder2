@@ -122,7 +122,8 @@ minio:
     size: 20Gi
 
     # where to store data, can be network storage
-    #storageClass: nfs-taiga
+    storageClass: nfs-taiga
+
   service:
     type: ClusterIP
 
@@ -143,10 +144,10 @@ mongodb:
   # storage
   persistence:
     # storage size for database
-    #size: 8Gi
+    size: 8Gi
     
     # pick fast non network storage
-    #storageClass: csi-cinder-sc-retain
+    storageClass: csi-cinder-sc-retain
 
 # ----------------------------------------------------------------------
 # RABBITMQ
@@ -171,7 +172,7 @@ rabbitmq:
 
   persistence:
     # pick fast storage
-    #storageClass: csi-cinder-sc-retain
+    storageClass: csi-cinder-sc-retain
 
 # ----------------------------------------------------------------------
 # DEFAULT EXTRACTOR SERVICES
@@ -220,12 +221,12 @@ elasticsearch:
 
   master:
     persistence:
-      # storageClass: csi-cinder-sc-retain
-      # size: 8Gi
+       storageClass: csi-cinder-sc-retain
+       size: 8Gi
   data:
     persistence:
-      # storageClass: csi-cinder-sc-retain
-      # size: 8Gi
+       storageClass: csi-cinder-sc-retain
+       size: 8Gi
 
 # ----------------------------------------------------------------------
 # KEYCLOAK
@@ -254,8 +255,8 @@ keycloak:
 
     primary:
       persistence:
-        # storageClass: csi-cinder-sc-retain
-        # size: 8Gi
+         storageClass: csi-cinder-sc-retain
+         size: 8Gi
 
   # Mount configmap with theme and untar
   initContainers:

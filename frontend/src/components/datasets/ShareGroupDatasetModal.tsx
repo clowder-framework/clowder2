@@ -43,7 +43,10 @@ export default function ShareGroupDatasetModal(
 	const [showSuccessAlert, setShowSuccessAlert] = useState(false);
 	const dispatch = useDispatch();
 	const listGroups = () => dispatch(fetchGroups(0, 21));
-	const groups = useSelector((state: RootState) => state.group.groups);
+	const groups = useSelector((state: RootState) => state.group.groups.data);
+	const groupPageMetadata = useSelector(
+		(state: RootState) => state.group.groups.metadata
+	);
 	const setGroupRole = async (
 		datasetId: string,
 		groupId: string,

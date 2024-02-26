@@ -36,7 +36,7 @@ export default function AddMemberModal(props: AddMemberModalProps) {
 		groupId: string | undefined,
 		username: string | undefined
 	) => dispatch(addGroupMember(groupId, username));
-	const users = useSelector((state: RootState) => state.group.users);
+	const users = useSelector((state: RootState) => state.group.users.data);
 
 	const [email, setEmail] = useState("");
 	const [options, setOptions] = useState([]);

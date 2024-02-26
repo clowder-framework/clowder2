@@ -17,6 +17,14 @@ interface Config {
 	eventListenerJobStatus: EventListenerJobStatus;
 	streamingBytes: number;
 	rawDataVisualizationThreshold: number;
+	defaultFolderFilePerPage: number;
+	defaultDatasetPerPage: number;
+	defaultGroupPerPage: number;
+	defaultUserPerPage: number;
+	defaultApikeyPerPage: number;
+	defaultExtractors: number;
+	defaultExtractionJobs: number;
+	defaultMetadataDefintionPerPage: number;
 }
 
 const config: Config = <Config>{};
@@ -64,5 +72,14 @@ config["eventListenerJobStatus"]["resubmitted"] = "RESUBMITTED";
 
 config["streamingBytes"] = 1024 * 10; // 10 MB?
 config["rawDataVisualizationThreshold"] = 1024 * 1024 * 10; // 10 MB
+
+config["defaultDatasetPerPage"] = 12;
+config["defaultFolderFilePerPage"] = 5;
+config["defaultGroupPerPage"] = 5;
+config["defaultUserPerPage"] = 5;
+config["defaultApikeyPerPage"] = 5;
+config["defaultExtractors"] = 5;
+config["defaultExtractionJobs"] = 5;
+config["defaultMetadataDefintionPerPage"] = 5;
 
 export default config;

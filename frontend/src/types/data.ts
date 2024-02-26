@@ -1,35 +1,20 @@
 import {
 	AuthorizationBase,
-	DatasetOut as Dataset,
+	DatasetOut,
 	DatasetRoles,
 	EventListenerJobDB,
-	EventListenerOut as Listener,
-	FileOut as FileSummary,
+	FileOut,
 	FileVersion,
 	FolderOut,
 	GroupOut,
 	MetadataDefinitionOut,
 	MetadataOut as Metadata,
+	Paged,
 	RoleType,
-	UserAPIKeyOut,
 	UserOut,
 	VisualizationConfigOut,
 	VisualizationDataOut,
 } from "../openapi/v2";
-
-export interface Profile {
-	id: string;
-	email: string;
-	first_name: string | null;
-	last_name: string | null;
-}
-
-export interface Profile {
-	id: string;
-	email: string;
-	first_name: string | null;
-	last_name: string | null;
-}
 
 export interface Folder {
 	id: string;
@@ -132,56 +117,64 @@ export interface Thumbnail {
 }
 
 export interface DatasetState {
-	files: FileSummary[];
-	datasets: Dataset[];
-	newDataset: Dataset;
-	newFile: FileSummary;
-	about: Dataset;
+	foldersAndFiles: Paged;
+	files: Paged;
+	folders: Paged;
+	datasets: Paged;
+	newDataset: DatasetOut;
+	newFile: FileOut;
+	newFolder: FolderOut;
+	newFiles: FileOut[];
+	about: DatasetOut;
 	datasetRole: AuthorizationBase;
 	roles: DatasetRoles;
 }
 
 export interface PublicDatasetState {
-	public_files: FileSummary[];
-	public_datasets: Dataset[];
-	public_newDataset: Dataset;
-	public_newFile: FileSummary;
-	public_about: Dataset;
-	public_datasetRole: AuthorizationBase;
-	public_roles: DatasetRoles;
+	publicFiles: FileOut[];
+	publicDatasets: Paged;
+	publicNewDataset: DatasetOut;
+	publicNewFile: FileOut;
+	publicNewFiles: FileOut[];
+	publicAbout: DatasetOut;
+	publicDatasetRole: AuthorizationBase;
+	publicRoles: DatasetRoles;
+	publicFoldersAndFiles: Paged;
 }
 
 export interface ListenerState {
-	listeners: Listener[];
+	listeners: Paged;
 	categories: string[];
 	labels: string[];
-	jobs: EventListenerJobDB[];
+	jobs: Paged;
 	currJobUpdates: EventListenerJobDB[];
 	currJobSummary: JobSummary[];
 	currJobId: string;
 }
 
 export interface GroupState {
-	groups: GroupOut[];
+	groups: Paged;
+	newGroup: GroupOut;
 	about: GroupOut;
 	role: RoleType;
-	users: UserOut[];
+	users: Paged;
 }
 
 export interface MetadataState {
-	metadataDefinitionList: MetadataDefinitionOut[];
+	metadataDefinitionList: Paged;
 	publicMetadataDefinitionList: MetadataDefinitionOut[];
 	metadataDefinition: MetadataDefinitionOut;
 	datasetMetadataList: Metadata[];
 	publicDatasetMetadataList: Metadata[];
 	fileMetadataList: Metadata[];
+	newMetadataDefinition: MetadataDefinitionOut;
 	publicFileMetadataList: Metadata[];
 }
 
 export interface FileState {
 	url: string;
 	blob: Blob;
-	fileSummary: FileSummary;
+	fileSummary: FileOut;
 	extractedMetadata: ExtractedMetadata[];
 	metadataJsonld: MetadataJsonld[];
 	previews: FilePreview[];
@@ -194,7 +187,7 @@ export interface FileState {
 export interface PublicFileState {
 	publicUrl: string;
 	publicBlob: Blob;
-	publicFileSummary: FileSummary;
+	publicFileSummary: FileOut;
 	publicExtractedMetadata: ExtractedMetadata[];
 	publicMetadataJsonld: MetadataJsonld[];
 	publicPreviews: FilePreview[];
@@ -208,7 +201,7 @@ export interface UserState {
 	registerSucceeded: boolean;
 	errorMsg: string;
 	hashedKey: string;
-	apiKeys: UserAPIKeyOut[];
+	apiKeys: Paged;
 	profile: UserOut;
 	adminMode: boolean;
 }
@@ -223,7 +216,8 @@ export interface ErrorState {
 }
 
 export interface FolderState {
-	folders: FolderOut[];
+	folders: Paged;
+	newFolder: FolderOut;
 	folderPath: string[];
 	publicFolders: FolderOut[];
 	publicFolderPath: string[];
