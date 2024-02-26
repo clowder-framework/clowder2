@@ -30,7 +30,6 @@ import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import { getCurrEmail } from "../utils/common";
 import VpnKeyIcon from "@mui/icons-material/VpnKey";
 import LogoutIcon from "@mui/icons-material/Logout";
-import { EmbeddedSearch } from "./search/EmbeddedSearch";
 import { EmbeddedPublicSearch } from "./search/EmbeddedPublicSearch";
 const drawerWidth = 240;
 
@@ -53,7 +52,7 @@ const Main = styled("main", { shouldForwardProp: (prop) => prop !== "open" })<{
 	}),
 }));
 
-const SearchDiv = styled("div")(({ theme }) => ({
+const PublicSearchDiv = styled("div")(({ theme }) => ({
 	position: "relative",
 	marginLeft: theme.spacing(3),
 	marginBottom: "-5px", // to compoensate the tags div
@@ -158,10 +157,10 @@ export default function PersistentDrawerLeft(props) {
 					</Link>
 
 					{/*for searching*/}
-					<SearchDiv hidden={true}>
+					<PublicSearchDiv hidden={embeddedPublicSearchHidden}>
 						{/*	<InputSearchBox />*/}
 						<EmbeddedPublicSearch />
-					</SearchDiv>
+					</PublicSearchDiv>
 					<Box sx={{ flexGrow: 1 }} />
 					<Box sx={{ marginLeft: "auto" }}>
 						<Link href="/auth/register" sx={link}>
