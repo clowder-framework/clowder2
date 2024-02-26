@@ -31,7 +31,7 @@ import { getCurrEmail } from "../utils/common";
 import VpnKeyIcon from "@mui/icons-material/VpnKey";
 import LogoutIcon from "@mui/icons-material/Logout";
 import { EmbeddedSearch } from "./search/EmbeddedSearch";
-
+import { EmbeddedPublicSearch } from "./search/EmbeddedPublicSearch";
 const drawerWidth = 240;
 
 const Main = styled("main", { shouldForwardProp: (prop) => prop !== "open" })<{
@@ -101,7 +101,7 @@ export default function PersistentDrawerLeft(props) {
 	const { children } = props;
 	const theme = useTheme();
 	const [open, setOpen] = React.useState(false);
-	const [embeddedSearchHidden, setEmbeddedSearchHidden] = React.useState(false);
+	const [embeddedPublicSearchHidden, setEmbeddedPublicSearchHidden] = React.useState(false);
 	const [anchorEl, setAnchorEl] = React.useState(null);
 	const isMenuOpen = Boolean(anchorEl);
 
@@ -125,9 +125,9 @@ export default function PersistentDrawerLeft(props) {
 
 	useEffect(() => {
 		if (location.pathname.includes("search")) {
-			setEmbeddedSearchHidden(true);
+			setEmbeddedPublicSearchHidden(true);
 		} else {
-			setEmbeddedSearchHidden(false);
+			setEmbeddedPublicSearchHidden(false);
 		}
 	}, [location]);
 
@@ -160,7 +160,7 @@ export default function PersistentDrawerLeft(props) {
 					{/*for searching*/}
 					<SearchDiv hidden={true}>
 						{/*	<InputSearchBox />*/}
-						<EmbeddedSearch />
+						<EmbeddedPublicSearch />
 					</SearchDiv>
 					<Box sx={{ flexGrow: 1 }} />
 					<Box sx={{ marginLeft: "auto" }}>
@@ -242,15 +242,15 @@ export default function PersistentDrawerLeft(props) {
 				</List>
 				<Divider/>
 				<List>
-					{/*search commented out for now*/}
-					{/*<ListItem key={"search"} disablePadding>*/}
-					{/*	<ListItemButton component={RouterLink} to="/search">*/}
-					{/*		<ListItemIcon>*/}
-					{/*			<SearchDatasetIcon />*/}
-					{/*		</ListItemIcon>*/}
-					{/*		<ListItemText primary={"Search"} />*/}
-					{/*	</ListItemButton>*/}
-					{/*</ListItem>*/}
+					search commented out for now
+					<ListItem key={"public_search"} disablePadding>
+						<ListItemButton component={RouterLink} to="/public_search">
+							<ListItemIcon>
+								<SearchDatasetIcon />
+							</ListItemIcon>
+							<ListItemText primary={"Public Search"} />
+						</ListItemButton>
+					</ListItem>
 				</List>
 				{/*<Divider />*/}
 			</Drawer>
