@@ -70,7 +70,7 @@ export function PublicSearch() {
 							}
 						/>
 						<ReactiveBase
-							url={config.searchEndpoint}
+							url={config.publicSearchEndpoint}
 							app="all"
 							headers={authorizationHeader}
 							theme={searchTheme}

@@ -29,7 +29,7 @@ export function EmbeddedPublicSearch() {
 	// @ts-ignore
 	return (
 		<ReactiveBase
-			url={config.searchEndpoint}
+			url={config.publicSearchEndpoint}
 			app="all"
 			headers={authorizationHeader}
 			theme={searchTheme}
