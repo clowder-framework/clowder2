@@ -100,7 +100,11 @@ export const Public = (): JSX.Element => {
 								})
 							) : (
 								<Box>
-									<p>No public datasets on this instance. Login or register to create datasets. </p>
+									<p>No public datasets on this instance. <Link href="/auth/login">
+									Login
+									</Link> or <Link href="/auth/register">
+										register
+									</Link> to create datasets. </p>
 								</Box>
 							)}
 						</Grid>
