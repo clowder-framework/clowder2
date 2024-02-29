@@ -100,7 +100,7 @@ export const Public = (): JSX.Element => {
 								})
 							) : (
 								<Box>
-									<p>No public datasets on this instance. <Link href="/auth/login">
+									<p>No public datasets available. <Link href="/auth/login">
 									Login
 									</Link> or <Link href="/auth/register">
 										register
