@@ -16,7 +16,7 @@ import ListItem from "@mui/material/ListItem";
 import ListItemButton from "@mui/material/ListItemButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
-import { Link, Menu, MenuItem, MenuList, Typography } from "@mui/material";
+import { Link, Menu, MenuItem, MenuList } from "@mui/material";
 import { Link as RouterLink, useLocation } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { RootState } from "../types/data";
@@ -25,6 +25,7 @@ import PersonIcon from "@mui/icons-material/Person";
 import VpnKeyIcon from "@mui/icons-material/VpnKey";
 import LogoutIcon from "@mui/icons-material/Logout";
 import { EmbeddedSearch } from "./search/EmbeddedSearch";
+import { AppVersion } from "./versions/AppVersion";
 
 const drawerWidth = 240;
 
@@ -239,18 +240,7 @@ export default function PersistentDrawerLeft(props) {
 			<Main open={open}>
 				<DrawerHeader />
 				{children}
-				<Box
-					sx={{
-						position: "fixed",
-						bottom: "0px",
-						minHeight: "30px",
-						width: "100%",
-					}}
-				>
-					<Typography variant="body2" color="primary.light">
-						v2.0.0-beta.2
-					</Typography>
-				</Box>
+				<AppVersion />
 			</Main>
 		</Box>
 	);
