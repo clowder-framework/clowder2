@@ -27,7 +27,7 @@ def test_license(client: TestClient, headers: dict):
     # edit
     license_info = response.json()
     license_info["version"] = "1.1"
-    license_info["text"] = "abc"
+    license_info["description"] = "abc"
     response = client.put(
         f"{settings.API_V2_STR}/licenses/{license_id}",
         headers=headers,
@@ -35,7 +35,7 @@ def test_license(client: TestClient, headers: dict):
     )
     assert response.status_code == 200
     assert response.json()["version"] == "1.1"
-    assert response.json()["text"] == "abc"
+    assert response.json()["description"] == "abc"
 
     # delete
     response = client.delete(

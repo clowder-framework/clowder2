@@ -2,16 +2,12 @@
 /* tslint:disable */
 /* eslint-disable */
 
-import type { UserOut } from './UserOut';
-
 export type LicenseBase = {
     name: string;
-    type: string;
-    text: string;
+    description: string;
     url: string;
     version: string;
-    holders?: Array<UserOut>;
+    holders: string;
     expiration_date?: string;
-    allow_download?: boolean;
     dataset_id: string;
 }

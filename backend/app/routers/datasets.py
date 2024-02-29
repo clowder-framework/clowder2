@@ -210,12 +210,10 @@ async def save_dataset(
     await dataset.insert()
     license_in_model = LicenseIn(
         name="All Rights Reserved",
-        text="",
-        type="",
+        description="",
         url="",
         version="",
-        holders=[user],
-        allow_downloads=True,
+        holders=user.email,
         dataset_id=dataset.id,
     )
     await save_license(license_in_model, user)

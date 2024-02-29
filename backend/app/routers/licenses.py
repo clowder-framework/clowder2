@@ -59,11 +59,10 @@ async def edit_license(
 
         license.modified = datetime.utcnow()
         license.holders = license_dict["holders"]
-        license.type = license_dict["type"]
-        license.text = license_dict["text"]
+        license.description = license_dict["description"]
         license.url = license_dict["url"]
         license.version = license_dict["version"]
-        license.allow_download = license_dict["allow_download"]
+        license.expiration_date = license_dict["expiration_date"]
         license.name = license_dict["name"]
         await license.replace()
 

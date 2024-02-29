@@ -10,15 +10,11 @@ from app.models.users import UserOut
 
 class LicenseBase(BaseModel):
     name: str
-    type: str
-    text: str
+    description: str
     url: str
     version: str
-    holders: List[UserOut] = []
-    expiration_date: datetime = Field(
-        default_factory=datetime.utcnow
-    )  # TODO: shoudn't the default be never?
-    allow_download: bool = False
+    holders: str
+    expiration_date: datetime = Field(None)
     dataset_id: PydanticObjectId
 
 

@@ -2,8 +2,6 @@
 /* tslint:disable */
 /* eslint-disable */
 
-import type { UserOut } from './UserOut';
-
 /**
  * Document Mapping class.
  *
@@ -22,13 +20,11 @@ export type LicenseOut = {
     created?: string;
     modified?: string;
     name: string;
-    type: string;
-    text: string;
+    description: string;
     url: string;
     version: string;
-    holders?: Array<UserOut>;
+    holders: string;
     expiration_date?: string;
-    allow_download?: boolean;
     dataset_id: string;
     id?: string;
 }

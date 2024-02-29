@@ -9,30 +9,27 @@
 				"type": "string",
 				"title": "Name"
 			},
-			"type": {
+			"description": {
 				"type": "string",
-				"title": "Type"
-			},
-			"text": {
-				"type": "string",
-				"title": "Text"
+				"title": "Description"
 			},
 			"url": {
 				"type": "string",
 				"title": "Url"
 			},
+			"holders": {
+				"type": "string",
+				"title": "Holders"
+			},
 			"version": {
 				"type": "string",
 				"title": "Version"
+			},
+			"expiration_date": {
+				"type": "string",
+  				"format": "date-time",
+      			"title": "Expiration Date"
 			}
-		}
-	},
-	"uiSchema": {
-		"name": {
-			"ui:autofocus": true,
-			"ui:emptyValue": "",
-			"ui:placeholder": "ui:emptyValue causes this field to always be valid despite being required",
-			"ui:description": "License name"
 		}
 	}
 }

@@ -453,7 +453,7 @@ export const Dataset = (): JSX.Element => {
 				</Grid>
 				<Grid item>
 					<DatasetDetails details={about} />
-					{license.name !== undefined ? (
+					{license!== undefined && license.name !== undefined ? (
 						<>
 							<Typography>
 								<Link href={license.url}>{license.name}</Link>
