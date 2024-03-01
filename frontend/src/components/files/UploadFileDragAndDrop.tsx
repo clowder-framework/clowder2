@@ -18,25 +18,26 @@ import {
 	postFileMetadata,
 } from "../../actions/metadata";
 import { MetadataIn } from "../../openapi/v2";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, redirect } from "react-router-dom";
 import {
 	createFiles as createFilesAction,
 	resetFilesCreated,
 } from "../../actions/file";
 
 import LoadingOverlay from "react-loading-overlay-ts";
-import { UploadFileInputMultiple } from "./UploadFileInputMultiple";
 import FileUploadDrop from "./FileUploadDrop";
 
 type UploadFileDragAndDropProps = {
 	selectedDatasetId: string | undefined;
 	folderId: string | undefined;
+	handleClose: (open: boolean) => void;
+	open: boolean;
 };
 
 export const UploadFileDragAndDrop: React.FC<UploadFileDragAndDropProps> = (
 	props: UploadFileDragAndDropProps
 ) => {
-	const { selectedDatasetId, folderId } = props;
+	const { selectedDatasetId, folderId, handleClose, open } = props;
 	const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
 	const [metadataRequestForms, setMetadataRequestForms] = useState({});
 	const [allFilled, setAllFilled] = React.useState<boolean>(false);
@@ -172,10 +173,8 @@ export const UploadFileDragAndDrop: React.FC<UploadFileDragAndDropProps> = (
 			// Stop spinner
 			setLoading(false);
 
-			// Redirect to the first file route with file Id and dataset id
-			history(
-				`/files/${newFiles[0].id}?dataset=${selectedDatasetId}&folder=${folderId}`
-			);
+			// go back to the dataset
+			location.reload();
 		}
 	}, [newFiles]);
 

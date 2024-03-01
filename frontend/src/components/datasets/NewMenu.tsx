@@ -55,7 +55,7 @@ export const NewMenu = (props: ActionsMenuProps): JSX.Element => {
 				maxWidth="lg"
 				aria-labelledby="form-dialog"
 			>
-				<UploadFileDragAndDrop selectedDatasetId={datasetId} folderId={folderId} />
+				<UploadFileDragAndDrop selectedDatasetId={datasetId} folderId={folderId} handleClose={setDragDropFiles} open={dragDropFiles} />
 			</Dialog>
 
 			<CreateFolder
