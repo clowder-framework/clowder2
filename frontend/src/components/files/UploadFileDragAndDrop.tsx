@@ -18,7 +18,7 @@ import {
 	postFileMetadata,
 } from "../../actions/metadata";
 import { MetadataIn } from "../../openapi/v2";
-import { useNavigate, redirect } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import {
 	createFiles as createFilesAction,
 	resetFilesCreated,
@@ -30,14 +30,12 @@ import FileUploadDrop from "./FileUploadDrop";
 type UploadFileDragAndDropProps = {
 	selectedDatasetId: string | undefined;
 	folderId: string | undefined;
-	handleClose: (open: boolean) => void;
-	open: boolean;
 };
 
 export const UploadFileDragAndDrop: React.FC<UploadFileDragAndDropProps> = (
 	props: UploadFileDragAndDropProps
 ) => {
-	const { selectedDatasetId, folderId, handleClose, open } = props;
+	const { selectedDatasetId, folderId} = props;
 	const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
 	const [metadataRequestForms, setMetadataRequestForms] = useState({});
 	const [allFilled, setAllFilled] = React.useState<boolean>(false);
