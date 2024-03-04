@@ -111,6 +111,7 @@ async def submit_dataset_job(
         datasetId=str(dataset_out.id),
         secretKey=current_secretKey,
         job_id=str(job.id),
+        parameters=parameters,
     )
     reply_to = await create_reply_queue()
     rabbitmq_client.basic_publish(
