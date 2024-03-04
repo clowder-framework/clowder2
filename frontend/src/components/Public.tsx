@@ -1,9 +1,10 @@
 import React, { ChangeEvent, useEffect, useState } from "react";
-import { Box, Grid, Pagination, Tab, Tabs } from "@mui/material";
+import {Box, Button, Grid, Link, Pagination, Tab, Tabs} from "@mui/material";
 
 import { RootState } from "../types/data";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchPublicDatasets } from "../actions/public_dataset";
+import { Link as RouterLink, useLocation } from "react-router-dom";
 
 import { a11yProps, TabPanel } from "./tabs/TabComponent";
 import PublicDatasetCard from "./datasets/PublicDatasetCard";
@@ -16,6 +17,12 @@ const tab = {
 	fontWeight: "normal",
 	fontSize: "16px",
 	textTransform: "capitalize",
+};
+
+const link = {
+	fontSize: "12px",
+	color: "#495057",
+	m: 4,
 };
 
 export const Public = (): JSX.Element => {
@@ -75,7 +82,7 @@ export const Public = (): JSX.Element => {
 					</Box>
 					<TabPanel value={selectedTabIndex} index={0}>
 						<Grid container spacing={2}>
-							{publicDatasets !== undefined ? (
+							{publicDatasets !== undefined && publicDatasets.length > 0 ? (
 								publicDatasets.map((dataset) => {
 									return (
 										<Grid item key={dataset.id} xs={12} sm={6} md={4} lg={3}>
@@ -92,7 +99,13 @@ export const Public = (): JSX.Element => {
 									);
 								})
 							) : (
-								<></>
+								<Box>
+									<p>No public datasets available. <Link href="/auth/login">
+									Login
+									</Link> or <Link href="/auth/register">
+										register
+									</Link> to create datasets. </p>
+								</Box>
 							)}
 						</Grid>
 						<Box display="flex" justifyContent="center" sx={{ m: 1 }}>

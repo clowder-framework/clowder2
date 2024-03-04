@@ -23,7 +23,7 @@ const defaultState: FileState = {
 	fileRole: <AuthorizationBase>{},
 	blob: new Blob([]),
 	presignedUrl: "",
-	selected_version_num:1,
+	selected_version_num: 1,
 };
 
 const file = (state = defaultState, action: DataAction) => {
@@ -43,7 +43,9 @@ const file = (state = defaultState, action: DataAction) => {
 		case RECEIVE_PREVIEWS:
 			return Object.assign({}, state, { previews: action.previews });
 		case CHANGE_SELECTED_VERSION:
-			return Object.assign({}, state,{selected_version_num:action.selected_version});
+			return Object.assign({}, state, {
+				selected_version_num: action.selected_version,
+			});
 		case RECEIVE_VERSIONS:
 			return Object.assign({}, state, { fileVersions: action.fileVersions });
 		case DOWNLOAD_FILE:

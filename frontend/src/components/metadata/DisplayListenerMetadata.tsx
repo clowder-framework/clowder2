@@ -111,8 +111,8 @@ export const DisplayListenerMetadata = (props: MetadataType) => {
 						{metadataList.map((metadata, idx) => {
 							if (metadata.agent.listener !== null) {
 								return (
-									<Grid item xs={12}>
-										<Card key={idx}>
+									<Grid item xs={12} key={idx}>
+										<Card>
 											<CardContent>
 												<ListenerMetadataEntry
 													agent={metadata.agent}

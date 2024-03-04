@@ -275,7 +275,7 @@ export const File = (): JSX.Element => {
 	} else if (showNotFoundPage) {
 		return <PageNotFound />;
 	}
-	
+
 	return (
 		<Layout>
 			{/*Error Message dialogue*/}
@@ -407,22 +407,21 @@ export const File = (): JSX.Element => {
 									resourceType="file"
 									resourceId={fileId}
 								/>
-								{fileRole !== undefined && fileRole!== "viewer"?
-									(
-										<Box textAlign="center">
-											<Button
-												variant="contained"
-												sx={{ m: 2 }}
-												onClick={() => {
-													setEnableAddMetadata(true);
-												}}
-											>
+								{fileRole !== undefined && fileRole !== "viewer" ? (
+									<Box textAlign="center">
+										<Button
+											variant="contained"
+											sx={{ m: 2 }}
+											onClick={() => {
+												setEnableAddMetadata(true);
+											}}
+										>
 											Add Metadata
-											</Button>
-										</Box>
-									) :
+										</Button>
+									</Box>
+								) : (
 									<></>
-								}
+								)}
 							</>
 						)}
 					</TabPanel>

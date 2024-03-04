@@ -1,12 +1,11 @@
 from datetime import datetime
-from typing import Optional, List
-
-from beanie import View, PydanticObjectId
-from pydantic import Field
+from typing import List, Optional
 
 from app.models.authorization import AuthorizationDB
-from app.models.files import FileDB, FileBase, ContentType
+from app.models.files import ContentType, FileBase, FileDB
 from app.models.users import UserOut
+from beanie import PydanticObjectId, View
+from pydantic import Field
 
 
 class FolderFileViewList(View, FileBase):
