@@ -404,6 +404,7 @@ export const File = (): JSX.Element => {
 									deleteMetadata={deleteFileMetadata}
 									resourceType="file"
 									resourceId={fileId}
+									publicView={false}
 								/>
 								{fileRole !== undefined && fileRole !== "viewer" ? (
 									<Box textAlign="center">
