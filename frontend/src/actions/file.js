@@ -349,6 +349,7 @@ export function submitFileExtractionAction(fileId, extractorName, requestBody) {
 		return V2.FilesService.postFileExtractApiV2FilesFileIdExtractPost(
 			fileId,
 			extractorName,
+			null,
 			requestBody
 		)
 			.then((json) => {

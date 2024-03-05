@@ -1,5 +1,5 @@
 import React, { ChangeEvent, useEffect, useState } from "react";
-import {Box, Button, Grid, Link, Pagination, Tab, Tabs} from "@mui/material";
+import { Box, Button, Grid, Link, Pagination, Tab, Tabs } from "@mui/material";
 
 import { RootState } from "../types/data";
 import { useDispatch, useSelector } from "react-redux";
@@ -100,11 +100,12 @@ export const Public = (): JSX.Element => {
 								})
 							) : (
 								<Box>
-									<p>No public datasets available. <Link href="/auth/login">
-									Login
-									</Link> or <Link href="/auth/register">
-										register
-									</Link> to create datasets. </p>
+									<p>
+										No public datasets available.{" "}
+										<Link href="/auth/login">Login</Link> or{" "}
+										<Link href="/auth/register">register</Link> to create
+										datasets.{" "}
+									</p>
 								</Box>
 							)}
 						</Grid>
