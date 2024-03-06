@@ -25,6 +25,7 @@ from fastapi.responses import StreamingResponse
 from fastapi.security import HTTPBearer
 from minio import Minio
 from pika.adapters.blocking_connection import BlockingChannel
+from pymongo import DESCENDING
 from rocrate.model.person import Person
 from rocrate.rocrate import ROCrate
 
@@ -444,6 +445,7 @@ async def delete_dataset(
 @router.post("/{dataset_id}/freeze_draft", response_model=DatasetFreezeOut)
 async def draft_freeze_dataset(
         dataset_id: str,
+        user=Depends(get_current_user),
         fs: Minio = Depends(dependencies.get_fs),
         es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
         allow: bool = Depends(Authorization("owner")),
@@ -453,10 +455,17 @@ async def draft_freeze_dataset(
     if (frozen_dataset := await DatasetFreezeDB.get(PydanticObjectId(dataset_id))) is not None:
         # copy over
         draft_frozen_dataset_data = frozen_dataset.dict()
-        draft_frozen_dataset_data["_id"] = draft_frozen_dataset_data.pop("id")
+        draft_frozen_dataset_data.pop("id")
         draft_frozen_dataset_data["frozen"] = FrozenState.FROZEN_DRAFT
         draft_frozen_dataset = DatasetDB(**draft_frozen_dataset_data)
         await draft_frozen_dataset.insert()
+
+        # Create authorization entry
+        await AuthorizationDB(
+            dataset_id=draft_frozen_dataset.id,
+            role=RoleType.OWNER,
+            creator=user.email,
+        ).save()
 
         # TODO: move metadata, files, folders, and authorizations to the frozen set
         return draft_frozen_dataset.dict()
@@ -467,6 +476,7 @@ async def draft_freeze_dataset(
 @router.post("/{dataset_id}/freeze", response_model=DatasetFreezeOut)
 async def freeze_dataset(
         dataset_id: str,
+        user=Depends(get_current_user),
         fs: Minio = Depends(dependencies.get_fs),
         es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
         allow: bool = Depends(Authorization("owner")),
@@ -478,14 +488,16 @@ async def freeze_dataset(
 
         # Move dataset to Public Freeze Dataset collection
         # if no origin id associated with that dataset, freeze it as the very fist version
-        if dataset.origin_id is None:
+        if dataset.origin_id is None and dataset.frozen == FrozenState.ACTIVE:
             # first version always keep the origin id; hmm does it matter?
             frozen_dataset_data["_id"] = frozen_dataset_data.pop("id")
             frozen_dataset_data["frozen"] = FrozenState.FROZEN
             frozen_dataset_data["frozen_version_num"] = 1
         # else search in freeze dataset collection to get the latest version of the dataset
         else:
-            latest_frozen_dataset = await DatasetFreezeDB.find({"origin_id": dataset.origin_id}).first_or_none()
+            latest_frozen_dataset = await DatasetFreezeDB.find({"origin_id": dataset.origin_id}).sort(
+                "frozen_version_num", DESCENDING
+            ).first_or_none()
             frozen_dataset_data.pop("id")
             frozen_dataset_data["frozen"] = FrozenState.FROZEN
             frozen_dataset_data["frozen_version_num"] = latest_frozen_dataset.frozen_version_num + 1
@@ -495,6 +507,16 @@ async def freeze_dataset(
         frozen_dataset = DatasetFreezeDB(**frozen_dataset_data)
         await frozen_dataset.insert()
         await dataset.delete()
+
+        # Update Authorization
+        if (authorization := await AuthorizationDB.find_one(AuthorizationDB.dataset_id == PydanticObjectId(
+                dataset_id))) is not None:
+            await authorization.delete()
+        await AuthorizationDB(
+            dataset_id=frozen_dataset.id,
+            role=RoleType.OWNER,
+            creator=user.email,
+        ).save()
 
         # TODO: move metadata, files, folders, and authorizations to the frozen set
         return frozen_dataset.dict()
