@@ -115,7 +115,7 @@ class DatasetDBViewList(View, DatasetBaseCommon):
                             "$addFields": {
                                 "frozen": {"$ifNull": ["$frozen", FrozenState.ACTIVE]},
                                 "frozen_version_num": {"$ifNull": ["$frozen_version_num", -999]},
-                                "origin_id": "$_id"
+                                "origin_id": {"$ifNull": ["$origin_id", "$_id"]}
                             }
                         }
                     ]
