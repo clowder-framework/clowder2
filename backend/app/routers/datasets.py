@@ -496,7 +496,7 @@ async def freeze_dataset(
         # else search in freeze dataset collection to get the latest version of the dataset
         else:
             latest_frozen_dataset = await DatasetFreezeDB.find({"origin_id": dataset.origin_id}).sort(
-                "frozen_version_num", DESCENDING
+                ("frozen_version_num", DESCENDING)
             ).first_or_none()
             frozen_dataset_data.pop("id")
             frozen_dataset_data["frozen"] = FrozenState.FROZEN
