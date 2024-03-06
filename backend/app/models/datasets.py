@@ -94,25 +94,7 @@ class DatasetDBViewList(View, DatasetBaseCommon):
     class Settings:
         source = DatasetFreezeDB
         name = "datasets_view"
-        # pipeline = [
-        #     {
-        #         "$unionWith": {
-        #             "coll": "datasets",
-        #             "pipeline": [
-        #                 {"$addFields": {"frozen": False, "frozen_version_num": -999, "origin_id": "$_id"}},
-        #             ],
-        #         }
-        #     },
-        #     {
-        #         "$lookup": {
-        #             "from": "authorization",
-        #             "localField": "_id",
-        #             "foreignField": "dataset_id",
-        #             "as": "auth",
-        #         }
-        #     },
-        # ]
-
+    
         pipeline = [
             {
                 "$unionWith": {

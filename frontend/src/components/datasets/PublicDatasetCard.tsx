@@ -6,7 +6,6 @@ import Typography from "@mui/material/Typography";
 import { Link } from "react-router-dom";
 import { parseDate } from "../../utils/common";
 import {
-	Box,
 	CardActionArea,
 	CardHeader,
 	CardMedia,
@@ -16,9 +15,6 @@ import {
 import { Download } from "@mui/icons-material";
 import { generateThumbnailUrl } from "../../utils/visualization";
 import config from "../../app.config";
-import LockIcon from "@mui/icons-material/Lock";
-import { theme } from "../../theme";
-import { ClowderFootnote } from "../styledComponents/ClowderFootnote";
 // import {Favorite, Share} from "@material-ui/icons";
 
 type PublicDatasetCardProps = {
@@ -135,12 +131,7 @@ export default function PublicDatasetCard(props: PublicDatasetCardProps) {
 					</IconButton>
 				</Tooltip>
 				{frozen && frozenVersionNum && frozenVersionNum > 0 ? (
-					<Box sx={{ display: "flex", alignItems: "end" }}>
-						<Tooltip title="Published">
-							<LockIcon sx={{ color: theme.palette.primary.main }} />
-						</Tooltip>
-						<ClowderFootnote>v{frozenVersionNum}</ClowderFootnote>
-					</Box>
+					<FreezeVersionChip frozenVersionNum={frozenVersionNum} />
 				) : (
 					<></>
 				)}

@@ -8,7 +8,6 @@ import {
 	Stack,
 	Tab,
 	Tabs,
-	Tooltip,
 	Typography,
 } from "@mui/material";
 import { useParams, useSearchParams } from "react-router-dom";
@@ -51,11 +50,9 @@ import { ErrorModal } from "../errors/ErrorModal";
 import { Visualization } from "../visualizations/Visualization";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import config from "../../app.config";
-import LockIcon from "@mui/icons-material/Lock";
 import { AuthWrapper } from "../auth/AuthWrapper";
 import { PublishedWrapper } from "../auth/PublishedWrapper";
-import { theme } from "../../theme";
-import { ClowderFootnote } from "../styledComponents/ClowderFootnote";
+import { FreezeVersionChip } from "../versions/FeezeVersionChip";
 
 export const Dataset = (): JSX.Element => {
 	// path parameter
@@ -238,12 +235,9 @@ export const Dataset = (): JSX.Element => {
 							{about.frozen &&
 							about.frozen_version_num &&
 							about.frozen_version_num > 0 ? (
-								<Box sx={{ display: "flex", alignItems: "end" }}>
-									<Tooltip title="Published">
-										<LockIcon sx={{ color: theme.palette.primary.main }} />
-									</Tooltip>
-									<ClowderFootnote>v{about.frozen_version_num}</ClowderFootnote>
-								</Box>
+								<FreezeVersionChip
+									frozenVersionNum={about.frozen_version_num}
+								/>
 							) : (
 								<></>
 							)}

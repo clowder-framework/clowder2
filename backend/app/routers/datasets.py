@@ -25,6 +25,7 @@ from fastapi.responses import StreamingResponse
 from fastapi.security import HTTPBearer
 from minio import Minio
 from pika.adapters.blocking_connection import BlockingChannel
+from pymongo import DESCENDING
 from rocrate.model.person import Person
 from rocrate.rocrate import ROCrate
 
@@ -450,15 +451,30 @@ async def freeze_dataset(
 ):
     # Retrieve the dataset by ID
     if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
-        # Move dataset to Public Freeze Dataset collection
+
         frozen_dataset_data = dataset.dict()
-        frozen_dataset_data["_id"] = frozen_dataset_data.pop("id")
-        frozen_dataset_data["frozen"] = True
-        frozen_dataset_data["frozen_version_num"] = 1
+
+        # Move dataset to Public Freeze Dataset collection
+        # if no origin id associated with that dataset, freeze it as the very fist version
+        if dataset.origin_id is None:
+            # first version always keep the origin id
+            frozen_dataset_data["_id"] = frozen_dataset_data.pop("id")
+            frozen_dataset_data["frozen"] = True
+            frozen_dataset_data["frozen_version_num"] = 1
+        # else search in freeze dataset collection to get the latest version of the dataset
+        else:
+            latest_frozen_dataset = await DatasetFreezeDB.find(PydanticObjectId(dataset.origin_id) ==
+                                                               DatasetFreezeDB.origin_id
+                                                               ).sort("frozen_version_num", DESCENDING).first_or_none()
+            frozen_dataset_data["frozen"] = True
+            frozen_dataset_data["frozen_version_num"] = latest_frozen_dataset.frozen_version_num
+            frozen_dataset_data["origin_id"] = PydanticObjectId(dataset_id)
+
         frozen_dataset_data["origin_id"] = PydanticObjectId(dataset_id)
         frozen_dataset = DatasetFreezeDB(**frozen_dataset_data)
         await frozen_dataset.insert()
         await dataset.delete()
+
         # TODO: move metadata, files, folders, and authorizations to the frozen set
         return frozen_dataset.dict()
 
