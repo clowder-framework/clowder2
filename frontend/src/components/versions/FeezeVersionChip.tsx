@@ -30,7 +30,7 @@ export function FreezeVersionChip(props: FreezeVersionChipProps) {
 					<Tooltip title="Draft">
 						<EditNoteIcon sx={{ color: theme.palette.primary.main }} />
 					</Tooltip>
-					{/*<ClowderFootnote>v{frozenVersionNum}</ClowderFootnote>*/}
+					<ClowderFootnote>v{frozenVersionNum}</ClowderFootnote>
 				</Box>
 			) : (
 				<></>

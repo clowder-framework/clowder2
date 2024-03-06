@@ -491,7 +491,7 @@ async def freeze_dataset(
         if dataset.origin_id is None and dataset.frozen == FrozenState.ACTIVE:
             # first version always keep the origin id; hmm does it matter?
             frozen_dataset_data["_id"] = frozen_dataset_data.pop("id")
-            frozen_dataset_data["frozen"] = FrozenState.FROZEN
+            frozen_dataset_data["origin_id"] = PydanticObjectId(dataset_id)
             frozen_dataset_data["frozen_version_num"] = 1
         # else search in freeze dataset collection to get the latest version of the dataset
         else:
@@ -499,11 +499,9 @@ async def freeze_dataset(
                 ("frozen_version_num", DESCENDING)
             ).first_or_none()
             frozen_dataset_data.pop("id")
-            frozen_dataset_data["frozen"] = FrozenState.FROZEN
             frozen_dataset_data["frozen_version_num"] = latest_frozen_dataset.frozen_version_num + 1
-            frozen_dataset_data["origin_id"] = PydanticObjectId(dataset_id)
 
-        frozen_dataset_data["origin_id"] = PydanticObjectId(dataset_id)
+        frozen_dataset_data["frozen"] = FrozenState.FROZEN
         frozen_dataset = DatasetFreezeDB(**frozen_dataset_data)
         await frozen_dataset.insert()
         await dataset.delete()
