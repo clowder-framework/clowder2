@@ -232,15 +232,10 @@ export const Dataset = (): JSX.Element => {
 							<Typography variant="h3" paragraph>
 								{about["name"]}
 							</Typography>
-							{about.frozen &&
-							about.frozen_version_num &&
-							about.frozen_version_num > 0 ? (
-								<FreezeVersionChip
-									frozenVersionNum={about.frozen_version_num}
-								/>
-							) : (
-								<></>
-							)}
+							<FreezeVersionChip
+								frozen={about.frozen}
+								frozenVersionNum={about.frozen_version_num}
+							/>
 						</Box>
 						<Box>
 							<RoleChip role={datasetRole.role} />

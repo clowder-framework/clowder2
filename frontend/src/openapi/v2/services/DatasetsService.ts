@@ -211,6 +211,29 @@ export class DatasetsService {
     }
 
     /**
+     * Draft Freeze Dataset
+     * @param datasetId
+     * @param frozenDatasetId
+     * @returns DatasetFreezeOut Successful Response
+     * @throws ApiError
+     */
+    public static draftFreezeDatasetApiV2DatasetsDatasetIdFreezeDraftPost(
+        datasetId: string,
+        frozenDatasetId: string,
+    ): CancelablePromise<DatasetFreezeOut> {
+        return __request({
+            method: 'POST',
+            path: `/api/v2/datasets/${datasetId}/freeze_draft`,
+            query: {
+                'frozen_dataset_id': frozenDatasetId,
+            },
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+
+    /**
      * Freeze Dataset
      * @param datasetId
      * @returns DatasetFreezeOut Successful Response

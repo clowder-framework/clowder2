@@ -11,6 +11,16 @@ from app.models.groups import GroupOut
 from app.models.users import UserOut
 
 
+class FrozenState(str, Enum):
+    """A user can have one of the following roles for a specific dataset. Since we don't currently implement permissions
+    there is an implied hierarchy between these roles OWNER > EDITOR > UPLOADER > VIEWER. For example, if a route
+    requires VIEWER any of the roles can access that resource."""
+
+    FROZEN = "frozen"
+    FROZEN_DRAFT = "frozen_draft"
+    ACTIVE = "active"
+
+
 class AutoName(Enum):
     def _generate_next_value_(name, start, count, last_values):
         return name
@@ -51,7 +61,7 @@ class DatasetPatch(BaseModel):
 
 
 class DatasetDB(Document, DatasetBaseCommon):
-    frozen: bool = False
+    frozen: FrozenState = FrozenState.ACTIVE
     frozen_version_num: int = -999
     origin_id: PydanticObjectId = None
 
@@ -66,7 +76,7 @@ class DatasetDB(Document, DatasetBaseCommon):
 
 
 class DatasetFreezeDB(Document, DatasetBaseCommon):
-    frozen: bool = True
+    frozen: FrozenState = FrozenState.FROZEN
     frozen_version_num: int = 1
     origin_id: PydanticObjectId
 
@@ -88,19 +98,26 @@ class DatasetDBViewList(View, DatasetBaseCommon):
     auth: List[AuthorizationDB]
     thumbnail_id: Optional[PydanticObjectId] = None
     status: str = DatasetStatus.PRIVATE.name
-    frozen: bool = False
+    frozen: FrozenState = FrozenState.ACTIVE
     frozen_version_num: int = -999
+    origin_id: PydanticObjectId = None
 
     class Settings:
         source = DatasetFreezeDB
         name = "datasets_view"
-    
+
         pipeline = [
             {
                 "$unionWith": {
                     "coll": "datasets",
                     "pipeline": [
-                        {"$addFields": {"frozen": False, "frozen_version_num": -999, "origin_id": "$_id"}},
+                        {
+                            "$addFields": {
+                                "frozen": {"$ifNull": ["$frozen", FrozenState.ACTIVE]},
+                                "frozen_version_num": {"$ifNull": ["$frozen_version_num", -999]},
+                                "origin_id": "$_id"
+                            }
+                        }
                     ],
                 }
             },

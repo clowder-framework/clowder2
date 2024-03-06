@@ -26,7 +26,7 @@ type DatasetCardProps = {
 	description?: string;
 	thumbnailId?: string;
 	publicView?: boolean | false;
-	frozen?: boolean | false;
+	frozen?: string;
 	frozenVersionNum?: number;
 };
 
@@ -131,11 +131,10 @@ export default function DatasetCard(props: DatasetCardProps) {
 						<Download />
 					</IconButton>
 				</Tooltip>
-				{frozen && frozenVersionNum && frozenVersionNum > 0 ? (
-					<FreezeVersionChip frozenVersionNum={frozenVersionNum} />
-				) : (
-					<></>
-				)}
+				<FreezeVersionChip
+					frozen={frozen}
+					frozenVersionNum={frozenVersionNum}
+				/>
 				{/*<Tooltip title="Favorite">*/}
 				{/*	<IconButton color="primary" aria-label="favorite"  sx={{mr: 3}} disabled>*/}
 				{/*		<Favorite/>*/}

@@ -48,7 +48,7 @@ from app.models.datasets import (
     DatasetStatus,
     DatasetFreezeDB,
     DatasetFreezeOut,
-    CombinedDataset,
+    CombinedDataset, FrozenState,
 )
 from app.models.files import (
     FileOut,
@@ -442,6 +442,29 @@ async def delete_dataset(
     raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
 
 
+@router.post("/{dataset_id}/freeze_draft", response_model=DatasetFreezeOut)
+async def draft_freeze_dataset(
+        frozen_dataset_id: str,
+        fs: Minio = Depends(dependencies.get_fs),
+        es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
+        allow: bool = Depends(Authorization("owner")),
+):
+    # Find that dataset in freeze database and copy over to dataset database (workspace)
+    # Allow them to base off any version of that dataset
+    if (frozen_dataset := await DatasetFreezeDB.get(PydanticObjectId(frozen_dataset_id))) is not None:
+        # copy over
+        draft_frozen_dataset_data = frozen_dataset.dict()
+        draft_frozen_dataset_data["_id"] = draft_frozen_dataset_data.pop("id")
+        draft_frozen_dataset_data["frozen"] = FrozenState.FROZEN_DRAFT
+        draft_frozen_dataset = DatasetDB(**draft_frozen_dataset_data)
+        await draft_frozen_dataset.insert()
+
+        # TODO: move metadata, files, folders, and authorizations to the frozen set
+        return draft_frozen_dataset.dict()
+
+    raise HTTPException(status_code=404, detail=f"Freezed Dataset {frozen_dataset_id} not found")
+
+
 @router.post("/{dataset_id}/freeze", response_model=DatasetFreezeOut)
 async def freeze_dataset(
         dataset_id: str,
@@ -459,14 +482,14 @@ async def freeze_dataset(
         if dataset.origin_id is None:
             # first version always keep the origin id
             frozen_dataset_data["_id"] = frozen_dataset_data.pop("id")
-            frozen_dataset_data["frozen"] = True
+            frozen_dataset_data["frozen"] = FrozenState.FROZEN
             frozen_dataset_data["frozen_version_num"] = 1
         # else search in freeze dataset collection to get the latest version of the dataset
         else:
             latest_frozen_dataset = await DatasetFreezeDB.find(PydanticObjectId(dataset.origin_id) ==
                                                                DatasetFreezeDB.origin_id
                                                                ).sort("frozen_version_num", DESCENDING).first_or_none()
-            frozen_dataset_data["frozen"] = True
+            frozen_dataset_data["frozen"] = FrozenState.FROZEN
             frozen_dataset_data["frozen_version_num"] = latest_frozen_dataset.frozen_version_num
             frozen_dataset_data["origin_id"] = PydanticObjectId(dataset_id)
 
