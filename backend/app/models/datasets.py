@@ -121,28 +121,44 @@ class DatasetDBViewList(View, DatasetBaseCommon):
                     ]
                 }
             },
-            # if there is draft show draft
             {
-                "$addFields": {
-                    "priority": {
-                        "$cond": {
-                            "if": {"$eq": ["$frozen", FrozenState.FROZEN_DRAFT]},
-                            "then": 0,
-                            "else": 1
-                        }
-                    }
-                }
-            },
-            # else show the latest version
-            {"$sort": {"origin_id": 1, "priority": 1, "frozen_version_num": -1}},
-            {
-                "$group": {
-                    "_id": "$origin_id",
-                    "doc": {"$first": "$$ROOT"}
+                "$sort": {
+                    "origin_id": 1,
+                    "frozen": 1,
+                    "frozen_version_num": -1
                 }
             },
             {
-                "$replaceRoot": {"newRoot": "$doc"}
+                "$facet": {
+                    "active": [
+                        {"$match": {"frozen": FrozenState.ACTIVE}},
+                    ],
+                    "drafts": [
+                        {"$match": {"frozen": FrozenState.FROZEN_DRAFT}},
+                        {"$group": {
+                            "_id": "$origin_id",
+                            "doc": {"$first": "$$ROOT"}
+                        }}
+                    ],
+                    "published": [
+                        {"$match": {"frozen": FrozenState.FROZEN}},
+                        {"$group": {
+                            "_id": "$origin_id",
+                            "doc": {"$first": "$$ROOT"}
+                        }}
+                    ]
+                }
+            },
+            {
+                "$project": {
+                    "allVersions": {"$setUnion": ["$drafts.doc", "$published.doc", "$active"]},
+                }
+            },
+            {
+                "$unwind": "$allVersions"
+            },
+            {
+                "$replaceRoot": {"newRoot": "$allVersions"}
             },
             {
                 "$lookup": {
