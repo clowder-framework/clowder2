@@ -53,6 +53,7 @@ class DatasetPatch(BaseModel):
 class DatasetDB(Document, DatasetBaseCommon):
     frozen: bool = False
     frozen_version_num: int = -999
+    origin_id: PydanticObjectId = None
 
     class Settings:
         name = "datasets"
@@ -67,6 +68,7 @@ class DatasetDB(Document, DatasetBaseCommon):
 class DatasetFreezeDB(Document, DatasetBaseCommon):
     frozen: bool = True
     frozen_version_num: int = 1
+    origin_id: PydanticObjectId
 
     class Settings:
         name = "datasets_freeze"
@@ -92,14 +94,43 @@ class DatasetDBViewList(View, DatasetBaseCommon):
     class Settings:
         source = DatasetFreezeDB
         name = "datasets_view"
+        # pipeline = [
+        #     {
+        #         "$unionWith": {
+        #             "coll": "datasets",
+        #             "pipeline": [
+        #                 {"$addFields": {"frozen": False, "frozen_version_num": -999, "origin_id": "$_id"}},
+        #             ],
+        #         }
+        #     },
+        #     {
+        #         "$lookup": {
+        #             "from": "authorization",
+        #             "localField": "_id",
+        #             "foreignField": "dataset_id",
+        #             "as": "auth",
+        #         }
+        #     },
+        # ]
+
         pipeline = [
             {
                 "$unionWith": {
                     "coll": "datasets",
                     "pipeline": [
-                        {"$addFields": {"frozen": False, "frozen_version_num": -999}}
+                        {"$addFields": {"frozen": False, "frozen_version_num": -999, "origin_id": "$_id"}},
                     ],
                 }
+            },
+            {"$sort": {"origin_id": 1, "frozen_version_num": -1}},
+            {
+                "$group": {
+                    "_id": "$origin_id",
+                    "doc": {"$first": "$$ROOT"}
+                }
+            },
+            {
+                "$replaceRoot": {"newRoot": "$doc"}
             },
             {
                 "$lookup": {

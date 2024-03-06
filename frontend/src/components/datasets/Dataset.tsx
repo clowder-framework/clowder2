@@ -54,6 +54,8 @@ import config from "../../app.config";
 import LockIcon from "@mui/icons-material/Lock";
 import { AuthWrapper } from "../auth/AuthWrapper";
 import { PublishedWrapper } from "../auth/PublishedWrapper";
+import { theme } from "../../theme";
+import { ClowderFootnote } from "../styledComponents/ClowderFootnote";
 
 export const Dataset = (): JSX.Element => {
 	// path parameter
@@ -236,9 +238,12 @@ export const Dataset = (): JSX.Element => {
 							{about.frozen &&
 							about.frozen_version_num &&
 							about.frozen_version_num > 0 ? (
-								<Tooltip title="Published">
-									<LockIcon />
-								</Tooltip>
+								<Box sx={{ display: "flex", alignItems: "end" }}>
+									<Tooltip title="Published">
+										<LockIcon sx={{ color: theme.palette.primary.main }} />
+									</Tooltip>
+									<ClowderFootnote>v{about.frozen_version_num}</ClowderFootnote>
+								</Box>
 							) : (
 								<></>
 							)}
