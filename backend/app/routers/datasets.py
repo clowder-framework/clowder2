@@ -455,7 +455,8 @@ async def draft_freeze_dataset(
     if (frozen_dataset := await DatasetFreezeDB.get(PydanticObjectId(dataset_id))) is not None:
         # copy over
         draft_frozen_dataset_data = frozen_dataset.dict()
-        draft_frozen_dataset_data.pop("id")
+        # keep the original id
+        draft_frozen_dataset_data["_id"] = draft_frozen_dataset_data.pop("id")
         draft_frozen_dataset_data["frozen"] = FrozenState.FROZEN_DRAFT
         draft_frozen_dataset = DatasetDB(**draft_frozen_dataset_data)
         await draft_frozen_dataset.insert()
@@ -490,8 +491,7 @@ async def freeze_dataset(
         # if no origin id associated with that dataset, freeze it as the very fist version
         if dataset.origin_id is None and dataset.frozen == FrozenState.ACTIVE:
             # first version always keep the origin id; hmm does it matter?
-            frozen_dataset_data["_id"] = frozen_dataset_data.pop("id")
-            frozen_dataset_data["origin_id"] = PydanticObjectId(dataset_id)
+            frozen_dataset_data["origin_id"] = frozen_dataset_data["_id"] = frozen_dataset_data.pop("id")
             frozen_dataset_data["frozen_version_num"] = 1
         # else search in freeze dataset collection to get the latest version of the dataset
         else:
