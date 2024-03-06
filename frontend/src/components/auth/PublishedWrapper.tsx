@@ -1,7 +1,8 @@
 import React from "react";
+import { FrozenState } from "../../openapi/v2";
 
 type PublishedWrapperProps = {
-	frozen: boolean | undefined;
+	frozen: string | undefined;
 	frozenVersionNum: number | undefined;
 	children: JSX.Element | JSX.Element[];
 };
@@ -9,6 +10,15 @@ type PublishedWrapperProps = {
 export const PublishedWrapper = (props: PublishedWrapperProps): JSX.Element => {
 	const { frozen, frozenVersionNum, children } = props;
 	return (
-		<>{frozen && frozenVersionNum && frozenVersionNum > 0 ? <></> : children}</>
+		<>
+			{frozen &&
+			frozen === FrozenState.FROZEN &&
+			frozenVersionNum &&
+			frozenVersionNum > 0 ? (
+				<></>
+			) : (
+				children
+			)}
+		</>
 	);
 };

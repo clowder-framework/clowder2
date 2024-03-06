@@ -118,10 +118,23 @@ class DatasetDBViewList(View, DatasetBaseCommon):
                                 "origin_id": "$_id"
                             }
                         }
-                    ],
+                    ]
                 }
             },
-            {"$sort": {"origin_id": 1, "frozen_version_num": -1}},
+            # if there is draft show draft
+            {
+                "$addFields": {
+                    "priority": {
+                        "$cond": {
+                            "if": {"$eq": ["$frozen", FrozenState.FROZEN_DRAFT]},
+                            "then": 0,
+                            "else": 1
+                        }
+                    }
+                }
+            },
+            # else show the latest version
+            {"$sort": {"origin_id": 1, "priority": 1, "frozen_version_num": -1}},
             {
                 "$group": {
                     "_id": "$origin_id",
@@ -136,10 +149,11 @@ class DatasetDBViewList(View, DatasetBaseCommon):
                     "from": "authorization",
                     "localField": "_id",
                     "foreignField": "dataset_id",
-                    "as": "auth",
+                    "as": "auth"
                 }
-            },
+            }
         ]
+
         # Needs fix to work https://github.com/roman-right/beanie/pull/521
         # use_cache = True
         # cache_expiration_time = timedelta(seconds=10)

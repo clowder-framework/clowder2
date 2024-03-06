@@ -206,6 +206,31 @@ export function freezeDataset(datasetId) {
 	};
 }
 
+export const DFRAFT_FREEZE_DATASET = "DFRAFT_FREEZE_DATASET";
+
+export function draftFreezeDataset(frozenDatasetId) {
+	return (dispatch) => {
+		return V2.DatasetsService.draftFreezeDatasetApiV2DatasetsDatasetIdFreezeDraftPost(
+			frozenDatasetId
+		)
+			.then((json) => {
+				dispatch({
+					type: DFRAFT_FREEZE_DATASET,
+					about: json,
+					receivedAt: Date.now(),
+				});
+			})
+			.then(() => {
+				dispatch(resetFailedReason());
+			})
+			.catch((reason) => {
+				dispatch(
+					handleErrorsAuthorization(reason, draftFreezeDataset(frozenDatasetId))
+				);
+			});
+	};
+}
+
 export const RECEIVE_DATASET_ABOUT = "RECEIVE_DATASET_ABOUT";
 
 export function fetchDatasetAbout(id) {

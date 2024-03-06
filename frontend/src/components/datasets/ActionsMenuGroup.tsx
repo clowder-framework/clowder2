@@ -12,7 +12,12 @@ import config from "../../app.config";
 import { PublishedWrapper } from "../auth/PublishedWrapper";
 import { CombinedDataset } from "../../openapi/v2";
 import LockIcon from "@mui/icons-material/Lock";
-import { freezeDataset as freezeDatasetAction } from "../../actions/dataset";
+import EditNoteIcon from "@mui/icons-material/EditNote";
+
+import {
+	draftFreezeDataset as draftFreezeDatasetAction,
+	freezeDataset as freezeDatasetAction,
+} from "../../actions/dataset";
 
 type ActionsMenuProps = {
 	folderId: string | null;
@@ -28,6 +33,8 @@ export const ActionsMenuGroup = (props: ActionsMenuProps): JSX.Element => {
 	const dispatch = useDispatch();
 	const freezeDataset = (datasetId: string | undefined) =>
 		dispatch(freezeDatasetAction(datasetId));
+	const draftFreezeDataset = (frozenDatasetId: string | undefined) =>
+		dispatch(draftFreezeDatasetAction(frozenDatasetId));
 
 	return (
 		<Stack
@@ -50,6 +57,7 @@ export const ActionsMenuGroup = (props: ActionsMenuProps): JSX.Element => {
 			>
 				{/*onwer can publish*/}
 				<AuthWrapper currRole={datasetRole.role} allowedRoles={["owner"]}>
+					{/*TODO some logic to determine showing one or another*/}
 					<Tooltip title="Published datasets are frozen and cannot be altered; updates require creating a new version.">
 						<Button
 							sx={{ minWidth: "auto" }}
@@ -59,7 +67,7 @@ export const ActionsMenuGroup = (props: ActionsMenuProps): JSX.Element => {
 								freezeDataset(dataset.id);
 							}}
 						>
-							Publish
+							Freeze
 						</Button>
 					</Tooltip>
 				</AuthWrapper>
@@ -82,6 +90,21 @@ export const ActionsMenuGroup = (props: ActionsMenuProps): JSX.Element => {
 					<OtherMenu datasetId={dataset.id} datasetName={dataset.name} />
 				</AuthWrapper>
 			</PublishedWrapper>
+			{/*onwer can draft*/}
+			<AuthWrapper currRole={datasetRole.role} allowedRoles={["owner"]}>
+				<Tooltip title="Draft the next version of this dataset.">
+					<Button
+						sx={{ minWidth: "auto" }}
+						variant="outlined"
+						endIcon={<EditNoteIcon />}
+						onClick={() => {
+							draftFreezeDataset(dataset.id);
+						}}
+					>
+						Draft
+					</Button>
+				</Tooltip>
+			</AuthWrapper>
 		</Stack>
 	);
 };
