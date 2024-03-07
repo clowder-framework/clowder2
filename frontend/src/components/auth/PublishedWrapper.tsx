@@ -11,10 +11,27 @@ export const PublishedWrapper = (props: PublishedWrapperProps): JSX.Element => {
 	const { frozen, frozenVersionNum, children } = props;
 	return (
 		<>
-			{frozen &&
-			frozen === FrozenState.FROZEN &&
+			{frozen === FrozenState.FROZEN &&
 			frozenVersionNum &&
 			frozenVersionNum > 0 ? (
+				<></>
+			) : (
+				children
+			)}
+		</>
+	);
+};
+
+export const PublishedDraftWrapper = (
+	props: PublishedWrapperProps
+): JSX.Element => {
+	const { frozen, frozenVersionNum, children } = props;
+	return (
+		<>
+			{frozen == FrozenState.ACTIVE ||
+			(frozen === FrozenState.FROZEN_DRAFT &&
+				frozenVersionNum &&
+				frozenVersionNum > 0) ? (
 				<></>
 			) : (
 				children

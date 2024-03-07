@@ -9,7 +9,10 @@ import { OtherMenu } from "./OtherMenu";
 import { ShareMenu } from "./ShareMenu";
 import { AuthWrapper } from "../auth/AuthWrapper";
 import config from "../../app.config";
-import { PublishedWrapper } from "../auth/PublishedWrapper";
+import {
+	PublishedDraftWrapper,
+	PublishedWrapper,
+} from "../auth/PublishedWrapper";
 import { CombinedDataset } from "../../openapi/v2";
 import LockIcon from "@mui/icons-material/Lock";
 import EditNoteIcon from "@mui/icons-material/EditNote";
@@ -92,7 +95,7 @@ export const ActionsMenuGroup = (props: ActionsMenuProps): JSX.Element => {
 			</PublishedWrapper>
 
 			{/*Frozen items can have draft button*/}
-			<PublishedWrapper
+			<PublishedDraftWrapper
 				frozen={dataset.frozen}
 				frozenVersionNum={dataset.frozen_version_num}
 			>
@@ -111,7 +114,7 @@ export const ActionsMenuGroup = (props: ActionsMenuProps): JSX.Element => {
 						</Button>
 					</Tooltip>
 				</AuthWrapper>
-			</PublishedWrapper>
+			</PublishedDraftWrapper>
 		</Stack>
 	);
 };
