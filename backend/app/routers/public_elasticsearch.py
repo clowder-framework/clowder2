@@ -10,7 +10,7 @@ router = APIRouter()
 def _add_public_clause(query):
     """Append filter to Elasticsearch object that restricts permissions based on the requesting user."""
     # TODO: Add public filter once added
-    public_clause = {"bool": {"should": [{"term": {"public": True}}]}}
+    public_clause = {"bool": {"should": [{"term": {"status": "public"}}]}}
 
     updated_query = ""
     for content in query.decode().split("\n"):
