@@ -329,7 +329,7 @@ async def create_user(email: str, password: str, firstName: str, lastName: str):
         {
             "email": email,
             "username": email,
-            "enabled": True,
+            "enabled": True,  # TODO: Get this from config
             "firstName": firstName,
             "lastName": lastName,
             "credentials": [
