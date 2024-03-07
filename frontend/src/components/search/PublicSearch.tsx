@@ -19,26 +19,9 @@ import { RootState } from "../../types/data";
 export function PublicSearch() {
 	const [luceneOn, setLuceneOn] = useState(false);
 
-	const cookies = new Cookies();
-	const [authorizationHeader, setAuthorizationHeader] = useState({
-		Authorization: cookies.get("Authorization"),
-	});
-	const getUpdatedCookie = () => {
-		const cookies = new Cookies();
-		setAuthorizationHeader({ Authorization: cookies.get("Authorization") });
-	};
-
-	// Pulling latest cookie
-	useEffect(() => {
-		const intervalId = setInterval(
-			getUpdatedCookie,
-			config.refreshTokenInterval
-		);
-		return () => clearInterval(intervalId);
-	}, []);
 
 	// toggle super admin
-	const adminMode = useSelector((state: RootState) => state.user.adminMode);
+	// const adminMode = useSelector((state: RootState) => state.user.adminMode);
 
 	// @ts-ignore
 	return (
@@ -72,7 +55,6 @@ export function PublicSearch() {
 						<ReactiveBase
 							url={config.publicSearchEndpoint}
 							app="all"
-							headers={authorizationHeader}
 							theme={searchTheme}
 						>
 							{luceneOn ? (
@@ -111,7 +93,6 @@ export function PublicSearch() {
 										debounce={100}
 										react={{
 											and: [
-												"creatorfilter",
 												"downloadfilter",
 												"fromfilter",
 												"tofilter",
@@ -122,7 +103,7 @@ export function PublicSearch() {
 										showFilter={true}
 										showClear={true}
 										renderNoSuggestion="No suggestions found."
-										dataField={["name", "description", "creator.keyword"]}
+										dataField={["name", "description"]}
 										fieldWeights={[3, 2, 1]}
 										innerClass={{
 											title: "search-title",
@@ -132,19 +113,6 @@ export function PublicSearch() {
 
 									{/*filters*/}
 									<Grid container spacing={2} sx={{ marginBottom: "20px" }}>
-										<Grid item xs={12} sm={4} md={4} lg={4}>
-											<MultiDropdownList
-												componentId="creatorfilter"
-												dataField="creator"
-												size={5}
-												sortBy="count"
-												showCount={true}
-												placeholder="Creator: All"
-												innerClass={{
-													select: "filter-select",
-												}}
-											/>
-										</Grid>
 										<Grid item xs={12} sm={4} md={4} lg={4}>
 											<SingleDropdownRange
 												componentId="downloadfilter"
