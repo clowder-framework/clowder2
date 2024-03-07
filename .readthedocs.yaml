@@ -20,5 +20,5 @@ python:
 
   install:
 
-  - requirements: mkdocs/requirements.txt
+  - requirements: docs/requirements.txt
 
