@@ -8,7 +8,7 @@ import {
 	SingleDropdownRange,
 } from "@appbaseio/reactivesearch";
 import { FormControlLabel, Grid, Switch, Typography } from "@mui/material";
-import Layout from "../Layout";
+import PublicLayout from "../PublicLayout";
 import { SearchResult } from "./SearchResult";
 import { searchTheme, theme } from "../../theme";
 import config from "../../app.config";
@@ -25,7 +25,7 @@ export function PublicSearch() {
 
 	// @ts-ignore
 	return (
-		<Layout>
+		<PublicLayout>
 			<div className="outer-container">
 				<Grid container spacing={4}>
 					<Grid item xs>
@@ -204,6 +204,6 @@ export function PublicSearch() {
 					</Grid>
 				</Grid>
 			</div>
-		</Layout>
+		</PublicLayout>
 	);
 }
