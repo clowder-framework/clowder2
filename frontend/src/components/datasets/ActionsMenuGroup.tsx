@@ -90,21 +90,28 @@ export const ActionsMenuGroup = (props: ActionsMenuProps): JSX.Element => {
 					<OtherMenu datasetId={dataset.id} datasetName={dataset.name} />
 				</AuthWrapper>
 			</PublishedWrapper>
-			{/*onwer can draft*/}
-			<AuthWrapper currRole={datasetRole.role} allowedRoles={["owner"]}>
-				<Tooltip title="Draft the next version of this dataset.">
-					<Button
-						sx={{ minWidth: "auto" }}
-						variant="outlined"
-						endIcon={<EditNoteIcon />}
-						onClick={() => {
-							draftFreezeDataset(dataset.id);
-						}}
-					>
-						Draft
-					</Button>
-				</Tooltip>
-			</AuthWrapper>
+
+			{/*Frozen items can have draft button*/}
+			<PublishedWrapper
+				frozen={dataset.frozen}
+				frozenVersionNum={dataset.frozen_version_num}
+			>
+				{/*onwer can draft*/}
+				<AuthWrapper currRole={datasetRole.role} allowedRoles={["owner"]}>
+					<Tooltip title="Draft the next version of this dataset.">
+						<Button
+							sx={{ minWidth: "auto" }}
+							variant="outlined"
+							endIcon={<EditNoteIcon />}
+							onClick={() => {
+								draftFreezeDataset(dataset.id);
+							}}
+						>
+							Draft
+						</Button>
+					</Tooltip>
+				</AuthWrapper>
+			</PublishedWrapper>
 		</Stack>
 	);
 };
