@@ -1,14 +1,12 @@
 import json
 import logging
 
-from elasticsearch import BadRequestError
-from elasticsearch import Elasticsearch
-
 from app.config import settings
 from app.database.errors import log_error
 from app.models.errors import ServiceUnreachable
 from app.models.feeds import SearchObject
 from app.models.files import FileOut
+from elasticsearch import BadRequestError, Elasticsearch
 
 logger = logging.getLogger(__name__)
 no_of_shards = settings.elasticsearch_no_of_shards
@@ -177,5 +175,5 @@ def check_search_result(es_client, file_out: FileOut, search_obj: SearchObject):
     try:
         responses = results.body["responses"][0]
         return responses["hits"]["total"]["value"] > 0
-    except Exception as e:
+    except Exception:
         return False

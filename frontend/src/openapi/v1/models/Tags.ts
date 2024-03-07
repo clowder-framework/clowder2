@@ -3,6 +3,6 @@
 /* eslint-disable */
 
 export type Tags = {
-    tags?: Array<string>;
-    extractor_id?: string;
-}
+	tags?: Array<string>;
+	extractor_id?: string;
+};
