@@ -276,7 +276,7 @@ async def get_datasets(
     page = Paged(
         metadata=page_metadata,
         data=[
-            CombinedDataset(id=item.pop("_id"), **item)
+            CombinedDataset(id=item.get("origin_id"), **item)
             for item in datasets_and_count[0]["data"]
         ],
     )
@@ -455,8 +455,9 @@ async def draft_freeze_dataset(
     if (frozen_dataset := await DatasetFreezeDB.get(PydanticObjectId(dataset_id))) is not None:
         # copy over
         draft_frozen_dataset_data = frozen_dataset.dict()
-        # keep the original id
-        draft_frozen_dataset_data["_id"] = draft_frozen_dataset_data.pop("id")
+        # keep the origin id
+        draft_frozen_dataset_data.pop("id")
+        draft_frozen_dataset_data["_id"] = draft_frozen_dataset_data.pop("origin_id")
         draft_frozen_dataset_data["frozen"] = FrozenState.FROZEN_DRAFT
         draft_frozen_dataset = DatasetDB(**draft_frozen_dataset_data)
         await draft_frozen_dataset.insert()

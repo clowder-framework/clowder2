@@ -45,6 +45,7 @@ class DatasetIn(DatasetBase):
 
 
 class DatasetBaseCommon(DatasetBase):
+    id: PydanticObjectId = Field(None, alias="origin_id")  # necessary for Views
     creator: UserOut
     created: datetime = Field(default_factory=datetime.utcnow)
     modified: datetime = Field(default_factory=datetime.utcnow)
@@ -52,6 +53,7 @@ class DatasetBaseCommon(DatasetBase):
     user_views: int = 0
     downloads: int = 0
     thumbnail_id: Optional[PydanticObjectId] = None
+    origin_id: PydanticObjectId = None
 
 
 class DatasetPatch(BaseModel):
@@ -63,7 +65,6 @@ class DatasetPatch(BaseModel):
 class DatasetDB(Document, DatasetBaseCommon):
     frozen: FrozenState = FrozenState.ACTIVE
     frozen_version_num: int = -999
-    origin_id: PydanticObjectId = None
 
     class Settings:
         name = "datasets"
@@ -78,7 +79,6 @@ class DatasetDB(Document, DatasetBaseCommon):
 class DatasetFreezeDB(Document, DatasetBaseCommon):
     frozen: FrozenState = FrozenState.FROZEN
     frozen_version_num: int = 1
-    origin_id: PydanticObjectId
 
     class Settings:
         name = "datasets_freeze"
@@ -166,6 +166,8 @@ class DatasetOut(DatasetDB):
 
 
 class DatasetFreezeOut(DatasetFreezeDB):
+    id: PydanticObjectId = Field(None, alias="origin_id")  # necessary for Views
+
     class Config:
         fields = {"id": "id"}
 
