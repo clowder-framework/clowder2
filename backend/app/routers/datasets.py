@@ -294,7 +294,10 @@ async def get_dataset(
     if authenticated or public or allow:
         if (
                 dataset := await DatasetDBViewList.find_one(
-                    DatasetDBViewList.id == PydanticObjectId(dataset_id)
+                    Or(
+                        DatasetDBViewList.id == PydanticObjectId(dataset_id),
+                        DatasetDBViewList.origin_id == PydanticObjectId(dataset_id)
+                    )
                 )
         ) is not None:
             return dataset.dict()
@@ -318,7 +321,10 @@ async def get_dataset_files(
 ):
     if (
             await DatasetDBViewList.find_one(
-                DatasetDBViewList.id == PydanticObjectId(dataset_id)
+                Or(
+                    DatasetDBViewList.id == PydanticObjectId(dataset_id),
+                    DatasetDBViewList.origin_id == PydanticObjectId(dataset_id)
+                )
             )
     ) is not None:
         if authenticated or public or (admin and admin_mode):
@@ -558,7 +564,10 @@ async def get_dataset_folders(
 ):
     if (
             await DatasetDBViewList.find_one(
-                DatasetDBViewList.id == PydanticObjectId(dataset_id)
+                Or(
+                    DatasetDBViewList.id == PydanticObjectId(dataset_id),
+                    DatasetDBViewList.origin_id == PydanticObjectId(dataset_id)
+                )
             )
     ) is not None:
         if authenticated or public:
@@ -614,7 +623,10 @@ async def get_dataset_folders_and_files(
 ):
     if (
             await DatasetDBViewList.find_one(
-                DatasetDBViewList.id == PydanticObjectId(dataset_id)
+                Or(
+                    DatasetDBViewList.id == PydanticObjectId(dataset_id),
+                    DatasetDBViewList.origin_id == PydanticObjectId(dataset_id)
+                )
             )
     ) is not None:
         if authenticated or public or (admin and admin_mode):
@@ -725,7 +737,10 @@ async def get_folder(
 ):
     if (
             dataset := await DatasetDBViewList.find_one(
-                DatasetDBViewList.id == PydanticObjectId(dataset_id)
+                Or(
+                    DatasetDBViewList.id == PydanticObjectId(dataset_id),
+                    DatasetDBViewList.origin_id == PydanticObjectId(dataset_id)
+                )
             )
     ) is not None:
         if (folder := await FolderDB.get(PydanticObjectId(folder_id))) is not None:
@@ -1010,7 +1025,10 @@ async def download_dataset(
 ):
     if (
             dataset := await DatasetDBViewList.find_one(
-                DatasetDBViewList.id == PydanticObjectId(dataset_id)
+                Or(
+                    DatasetDBViewList.id == PydanticObjectId(dataset_id),
+                    DatasetDBViewList.origin_id == PydanticObjectId(dataset_id)
+                )
             )
     ) is not None:
         current_temp_dir = tempfile.mkdtemp(prefix="rocratedownload")
@@ -1199,7 +1217,10 @@ async def download_dataset_thumbnail(
     # If dataset exists in MongoDB, download from Minio
     if (
             dataset := await DatasetDBViewList.find_one(
-                DatasetDBViewList.id == PydanticObjectId(dataset_id)
+                Or(
+                    DatasetDBViewList.id == PydanticObjectId(dataset_id),
+                    DatasetDBViewList.origin_id == PydanticObjectId(dataset_id)
+                )
             )
     ) is not None:
         if dataset.thumbnail_id is not None:
