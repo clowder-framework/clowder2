@@ -194,19 +194,12 @@ async def test_public_files():
         time.sleep(1)
         dummy_file_query = []
 
-        query_body = {
-            "query": {
-                "match": {
-                    "name": "public test file"
-                }
-            }
-        }
+        query_body = {"query": {"match": {"creator": "xyz"}}}
 
         user_public_clause = {
             "bool": {
                 "should": [
-                    {"term": {"name": "public"}},
-                    {"term": {"status": "PUBLIC"}},
+                    {"term": {"status": "public"}},
                 ]
             }
         }
@@ -261,7 +254,7 @@ async def test_public_datasets():
             "bool": {
                 "should": [
                     {"term": {"creator": "abcd"}},
-                    {"term": {"status": "PUBLIC"}},
+                    {"term": {"status": "public"}},
                 ]
             }
         }
