@@ -28,7 +28,7 @@ theme:
   font:
     text: Roboto
     code: Roboto Mono
-  favicon: assets/images/cat.png
+  favicon: assets/images/favicon.png
   logo: assets/images/cat.png
   palette:
     scheme: clowder
