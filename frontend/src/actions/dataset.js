@@ -203,9 +203,9 @@ export function fetchDatasetAbout(id) {
 
 export const RECEIVE_DATASET_LICENSE = "RECEIVE_DATASET_LICENSE";
 
-export function fetchDatasetLicense(dataset_id) {
+export function fetchDatasetLicense(license_id) {
 	return (dispatch) => {
-		return V2.LicensesService.getLicenseApiV2LicensesDatasetIdGet(dataset_id).then((json) => {
+		return V2.LicensesService.getLicenseApiV2LicensesLicenseIdGet(license_id).then((json) => {
 				dispatch({
 					type: RECEIVE_DATASET_LICENSE,
 					license: json,
@@ -213,7 +213,7 @@ export function fetchDatasetLicense(dataset_id) {
 				});
 			})
 			.catch((reason) => {
-				dispatch(handleErrors(reason, fetchDatasetLicense(dataset_id)));
+				dispatch(handleErrors(reason, fetchDatasetLicense(license_id)));
 			});
 	};
 }
@@ -256,9 +256,9 @@ export function fetchDatasets(skip = 0, limit = 21, mine = false) {
 
 export const CREATE_DATASET = "CREATE_DATASET";
 
-export function datasetCreated(formData) {
+export function datasetCreated(formData, licenseId) {
 	return (dispatch) => {
-		return V2.DatasetsService.saveDatasetApiV2DatasetsPost(formData)
+		return V2.DatasetsService.saveDatasetApiV2DatasetsPost(formData, licenseId)
 			.then((dataset) => {
 				dispatch({
 					type: CREATE_DATASET,
@@ -267,7 +267,7 @@ export function datasetCreated(formData) {
 				});
 			})
 			.catch((reason) => {
-				dispatch(handleErrors(reason, datasetCreated(formData)));
+				dispatch(handleErrors(reason, datasetCreated(formData, licenseId)));
 			});
 	};
 }

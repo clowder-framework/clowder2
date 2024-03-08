@@ -23,6 +23,8 @@ import { datasetCreated, resetDatsetCreated } from "../../actions/dataset";
 import { useNavigate } from "react-router-dom";
 import Layout from "../Layout";
 import { ErrorModal } from "../errors/ErrorModal";
+import {V2} from "../../openapi";
+import {ChooseLicenseModal} from "./ChooseLicenseModal";
 
 export const CreateDataset = (): JSX.Element => {
 	const dispatch = useDispatch();
@@ -36,8 +38,8 @@ export const CreateDataset = (): JSX.Element => {
 		datasetId: string | undefined,
 		metadata: MetadataIn
 	) => dispatch(postDatasetMetadata(datasetId, metadata));
-	const createDataset = (formData: FormData) =>
-		dispatch(datasetCreated(formData));
+	const createDataset = (formData: FormData, licenseId: string| undefined) =>
+		dispatch(datasetCreated(formData, licenseId));
 	const newDataset = useSelector(
 		(state: RootState) => state.dataset.newDataset
 	);
@@ -54,6 +56,7 @@ export const CreateDataset = (): JSX.Element => {
 	const [datasetRequestForm, setdatasetRequestForm] = useState({});
 	const [metadataRequestForms, setMetadataRequestForms] = useState({});
 	const [allowSubmit, setAllowSubmit] = React.useState<boolean>(false);
+	const [selectedLicense, setSelectedLicense] = useState("");
 
 	const history = useNavigate();
 
@@ -122,8 +125,9 @@ export const CreateDataset = (): JSX.Element => {
 
 	// finish button post dataset; dataset ID triggers metadata posting
 	const handleFinish = () => {
+		console.log("selectedLicense:" , selectedLicense);
 		// create dataset
-		createDataset(datasetRequestForm);
+		createDataset(datasetRequestForm, selectedLicense);
 	};
 
 	useEffect(() => {
@@ -160,6 +164,18 @@ export const CreateDataset = (): JSX.Element => {
 									</Typography>
 									<Box>
 										<CreateDatasetModal onSave={onDatasetSave} />
+									</Box>
+								</StepContent>
+							</Step>
+
+							<Step key="create-license">
+								<StepLabel>Standard License Options</StepLabel>
+								<StepContent>
+									<Typography>
+										You can choose a license from the standard options or create your own
+									</Typography>
+									<Box>
+										<ChooseLicenseModal setSelectedLicense={setSelectedLicense} handleBack={handleBack} handleNext={handleNext}/>
 									</Box>
 								</StepContent>
 							</Step>

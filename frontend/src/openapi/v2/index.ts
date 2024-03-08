@@ -46,6 +46,7 @@ export type { HTTPValidationError } from './models/HTTPValidationError';
 export type { LegacyEventListenerIn } from './models/LegacyEventListenerIn';
 export type { LicenseBase } from './models/LicenseBase';
 export type { LicenseIn } from './models/LicenseIn';
+export type { LicenseOption } from './models/LicenseOption';
 export type { LicenseOut } from './models/LicenseOut';
 export type { LocalFileIn } from './models/LocalFileIn';
 export type { Member } from './models/Member';

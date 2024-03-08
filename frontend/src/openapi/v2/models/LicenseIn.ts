@@ -9,5 +9,4 @@ export type LicenseIn = {
     version: string;
     holders: string;
     expiration_date?: string;
-    dataset_id: string;
 }

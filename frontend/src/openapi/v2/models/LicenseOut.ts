@@ -25,6 +25,5 @@ export type LicenseOut = {
     version: string;
     holders: string;
     expiration_date?: string;
-    dataset_id: string;
     id?: string;
 }

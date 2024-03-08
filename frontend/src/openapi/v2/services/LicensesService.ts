@@ -3,11 +3,24 @@
 /* eslint-disable */
 import type { LicenseBase } from '../models/LicenseBase';
 import type { LicenseIn } from '../models/LicenseIn';
+import type { LicenseOption } from '../models/LicenseOption';
 import type { LicenseOut } from '../models/LicenseOut';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { request as __request } from '../core/request';
 
 export class LicensesService {
+
+    /**
+     * Get Licenses
+     * @returns LicenseOption Successful Response
+     * @throws ApiError
+     */
+    public static getLicensesApiV2LicensesGet(): CancelablePromise<Array<LicenseOption>> {
+        return __request({
+            method: 'GET',
+            path: `/api/v2/licenses`,
+        });
+    }
 
     /**
      * Save License
@@ -31,16 +44,16 @@ export class LicensesService {
 
     /**
      * Get License
-     * @param datasetId
+     * @param licenseId
      * @returns LicenseOut Successful Response
      * @throws ApiError
      */
-    public static getLicenseApiV2LicensesDatasetIdGet(
-        datasetId: string,
+    public static getLicenseApiV2LicensesLicenseIdGet(
+        licenseId: string,
     ): CancelablePromise<LicenseOut> {
         return __request({
             method: 'GET',
-            path: `/api/v2/licenses/${datasetId}`,
+            path: `/api/v2/licenses/${licenseId}`,
             errors: {
                 422: `Validation Error`,
             },
@@ -91,6 +104,24 @@ export class LicensesService {
             query: {
                 'dataset_id': datasetId,
             },
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+
+    /**
+     * Get Standard License Url
+     * @param licenseId
+     * @returns string Successful Response
+     * @throws ApiError
+     */
+    public static getStandardLicenseUrlApiV2LicensesStandardLicensesLicenseIdGet(
+        licenseId: string,
+    ): CancelablePromise<string> {
+        return __request({
+            method: 'GET',
+            path: `/api/v2/licenses/standard_licenses/${licenseId}`,
             errors: {
                 422: `Validation Error`,
             },

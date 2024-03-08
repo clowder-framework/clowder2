@@ -137,3 +137,25 @@ mark {
 .show-more-less-clickable {
 	color: #F7941E;
 }
+
+.license-item {
+	max-width: 800px;
+	cursor: pointer;
+	margin-top: 0;
+	margin-bottom: 15px;
+	display: flex;
+}
+.radio-checkbox {
+	margin-right: .5em;
+	min-width: 17px;
+}
+.header {
+	font-weight: 700;
+	font-size: 1.28571429em;
+}
+.description {
+	color: rgba(0,0,0,.6);
+	font-size: smaller;
+	line-height: 1.4285em;
+}
+

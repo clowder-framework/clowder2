@@ -203,20 +203,30 @@ async def _get_folder_hierarchy(
 @router.post("", response_model=DatasetOut)
 async def save_dataset(
     dataset_in: DatasetIn,
+    license_id: Optional[str] = None,
     user=Depends(get_current_user),
     es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
 ):
-    dataset = DatasetDB(**dataset_in.dict(), creator=user)
-    await dataset.insert()
-    license_in_model = LicenseIn(
-        name="All Rights Reserved",
-        description="",
-        url="",
-        version="",
-        holders=user.email,
-        dataset_id=dataset.id,
+    standard_license = True
+    if license_id is None or license_id == "Custom":
+        license_in_model = LicenseIn(
+            name="All Rights Reserved",
+            description="",
+            url="",
+            version="",
+            holders=user.email,
+        )
+        license = await save_license(license_in_model, user)
+        license_id = license["id"]
+        standard_license = False
+
+    dataset = DatasetDB(
+        **dataset_in.dict(),
+        creator=user,
+        license_id=str(license_id),
+        standard_license=standard_license,
     )
-    await save_license(license_in_model, user)
+    await dataset.insert()
 
     # Create authorization entry
     await AuthorizationDB(
@@ -425,9 +435,10 @@ async def delete_dataset(
             FolderDB.dataset_id == PydanticObjectId(dataset_id)
         ).delete()
         await AuthorizationDB.find(
-            AuthorizationDB.dataset_id == ObjectId(dataset_id)
+            AuthorizationDB.dataset_id == PydanticObjectId(dataset_id)
         ).delete()
         return {"deleted": dataset_id}
+        await delete_license(dataset.license_id)
     raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
 
 

@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import List
 
 from beanie import PydanticObjectId
 from fastapi import HTTPException, Depends, APIRouter
@@ -7,6 +8,10 @@ from app.keycloak_auth import get_current_user, get_user
 
 from app.models.licenses import LicenseOut, LicenseIn, LicenseDB, LicenseBase
 from app.routers.authentication import get_admin, get_admin_mode
+
+from app.models.licenses import LicenseOption
+
+from app.models.licenses import standard_licenses
 
 router = APIRouter()
 
@@ -21,17 +26,30 @@ async def save_license(
     return license_db.dict()
 
 
-@router.get("/{dataset_id}", response_model=LicenseOut)
-async def get_license(dataset_id: str):
-    if (
-        license := await LicenseDB.find_one(
-            LicenseDB.dataset_id == PydanticObjectId(dataset_id)
-        )
-    ) is not None:
+@router.get("/{license_id}", response_model=LicenseOut)
+async def get_license(license_id: str):
+    if (license := await LicenseDB.get(PydanticObjectId(license_id))) is not None:
         return license.dict()
     raise HTTPException(
-        status_code=404, detail=f"License not found for dataset {dataset_id}"
+        status_code=404, detail=f"License not found for id {license_id}"
     )
+
+
+# Endpoint to retrieve standard license options
+@router.get("", response_model=List[LicenseOption])
+def get_licenses():
+    return standard_licenses
+
+
+@router.get("/standard_licenses/{license_id}", response_model=str)
+def get_standard_license_url(license_id: str):
+    for license in standard_licenses:
+        if license.id == license_id:
+            # Return the URL if the license ID is found
+            return license.url
+
+        # If license ID is not found, raise HTTP 404 error
+    raise HTTPException(status_code=404, detail="Standard License ID not found")
 
 
 @router.put("/{license_id}", response_model=LicenseOut)

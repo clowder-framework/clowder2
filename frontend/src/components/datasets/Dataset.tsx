@@ -24,7 +24,7 @@ import { fetchFolderPath } from "../../actions/folder";
 
 import { a11yProps, TabPanel } from "../tabs/TabComponent";
 import FilesTable from "../files/FilesTable";
-import { MetadataIn } from "../../openapi/v2";
+import {LicenseOption, MetadataIn} from "../../openapi/v2";
 import { DisplayMetadata } from "../metadata/DisplayMetadata";
 import { DisplayListenerMetadata } from "../metadata/DisplayListenerMetadata";
 import { EditMetadata } from "../metadata/EditMetadata";
@@ -54,6 +54,8 @@ import { Visualization } from "../visualizations/Visualization";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import config from "../../app.config";
 import {EditLicenseModal} from "./EditLicenseModal";
+import {TRUE} from "ol/functions";
+import {V2} from "../../openapi";
 
 export const Dataset = (): JSX.Element => {
 	// path parameter
@@ -90,8 +92,9 @@ export const Dataset = (): JSX.Element => {
 		);
 	const listDatasetAbout = (datasetId: string | undefined) =>
 		dispatch(fetchDatasetAbout(datasetId));
-	const listDatasetLicense = (datasetId: string | undefined) =>
-		dispatch(fetchDatasetLicense(datasetId));
+	const listDatasetLicense = (licenseId: string | undefined) =>
+		dispatch(fetchDatasetLicense(licenseId));
+
 	const listDatasetMetadata = (datasetId: string | undefined) =>
 		dispatch(fetchDatasetMetadata(datasetId));
 	const getMetadatDefinitions = (
@@ -132,6 +135,8 @@ export const Dataset = (): JSX.Element => {
 	);
 	const adminMode = useSelector((state: RootState) => state.user.adminMode);
 	const license = useSelector((state: RootState) => state.dataset.license);
+	const [standardLicenseUrl, setStandardLicenseUrl] = useState<string>("");
+
 
 	useEffect(() => {
 		fetchFoldersFilesInDataset(
@@ -141,10 +146,16 @@ export const Dataset = (): JSX.Element => {
 			limit
 		);
 		listDatasetAbout(datasetId);
-		listDatasetLicense(datasetId);
+		if (about.standard_license && about.license_id) {
+			V2.LicensesService.getStandardLicenseUrlApiV2LicensesStandardLicensesLicenseIdGet(about.license_id)
+				.then((response) => setStandardLicenseUrl(response))
+				.catch((error) => console.error("Error fetching standard license url:", error));
+		}
+		if (!about.standard_license && about.license_id)
+			listDatasetLicense(about.license_id);
 		getFolderPath(folderId);
 		getMetadatDefinitions(null, 0, 100);
-	}, [searchParams, adminMode]);
+	}, [searchParams, adminMode, about.license_id]);
 
 	// for breadcrumb
 	useEffect(() => {
@@ -453,8 +464,15 @@ export const Dataset = (): JSX.Element => {
 				</Grid>
 				<Grid item>
 					<DatasetDetails details={about} />
-					{license!== undefined && license.name !== undefined ? (
-						<>
+					{about.standard_license && about.license_id !== undefined ? (
+						<Typography>
+							<Link href={standardLicenseUrl}>{about.license_id}</Link>
+						</Typography>
+					) : (
+						<></>
+					)}
+					{!about.standard_license && license!== undefined && license.name !== undefined ? (
+						<div>
 							<Typography>
 								<Link href={license.url}>{license.name}</Link>
 								<IconButton
@@ -465,9 +483,6 @@ export const Dataset = (): JSX.Element => {
 									<EditIcon />
 								</IconButton>
 							</Typography>
-							{/*<IconButton onClick={handleOpenEditLicenseModal} sx={{ fontSize: "small" }}>*/}
-							{/*	<EditIcon />*/}
-							{/*</IconButton>*/}
 							<Dialog
 								open={editLicenseOpen}
 								onClose={() => {
@@ -483,7 +498,7 @@ export const Dataset = (): JSX.Element => {
 								</DialogContent>
 							</Dialog>
 							{/*<EditLicenseModal license={license} open={openEditLicenseModal} handleClose={handleCloseEditLicenseModal} />*/}
-						</>
+						</div>
 					) : (
 						<></>
 					)}
