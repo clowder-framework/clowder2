@@ -241,7 +241,6 @@ export default function PersistentDrawerLeft(props) {
 				</List>
 				<Divider/>
 				<List>
-					search commented out for now
 					<ListItem key={"public_search"} disablePadding>
 						<ListItemButton component={RouterLink} to="/public_search">
 							<ListItemIcon>
