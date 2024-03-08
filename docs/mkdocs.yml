@@ -1,11 +1,10 @@
-site_name: Clowder v2
+site_name: Clowder
 repo_url: https://github.com/clowder-framework/clowder2
 edit_uri: mkdocs/docs
 nav:
-  - Home:
-      - index.md
-      - About: about.md
+  - Home: index.md
   - User Guide:
+      - users/index.md
       - Visualizations: users/visualizations.md
   - Developer Guide:
       - Getting started: devs/getstarted.md
@@ -18,9 +17,12 @@ nav:
       - Listeners: devs/listeners.md
       - Proposals:
         - Storage: devs/storage.md
+  - About: about.md
 
 theme:
   name: material
+  site_description: "Clowder v2 Documentation"
+  custom_dir: docs/overrides
   features:
     - navigation.tabs
   font:
