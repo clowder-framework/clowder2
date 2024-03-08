@@ -1,6 +1,8 @@
 import { ExtractedMetadata, FilePreview, Folder, MetadataJsonld } from "./data";
 import {
 	AuthorizationBase,
+	CombinedDataset,
+	DatasetFreezeOut,
 	DatasetOut as Dataset,
 	DatasetRoles,
 	EventListenerJobOut,
@@ -28,7 +30,10 @@ import { CREATE_GROUP, DELETE_GROUP } from "../actions/group";
 import { RECEIVE_FILE_PRESIGNED_URL } from "../actions/file";
 import { GET_VIS_DATA_PRESIGNED_URL } from "../actions/visualization";
 import { GET_PUBLIC_VIS_DATA_PRESIGNED_URL } from "../actions/public_visualization";
-import { RECEIVE_FOLDERS_FILES_IN_DATASET } from "../actions/dataset";
+import {
+	DFRAFT_FREEZE_DATASET,
+	RECEIVE_FOLDERS_FILES_IN_DATASET,
+} from "../actions/dataset";
 
 interface RECEIVE_FILES_IN_DATASET {
 	type: "RECEIVE_FILES_IN_DATASET";
@@ -47,7 +52,7 @@ interface DELETE_FILE {
 
 interface RECEIVE_DATASET_ABOUT {
 	type: "RECEIVE_DATASET_ABOUT";
-	about: Dataset;
+	about: CombinedDataset;
 }
 
 interface RECEIVE_DATASET_ROLE {
@@ -615,7 +620,12 @@ interface FOLDER_UPDATED {
 
 interface FREEZE_DATASET {
 	type: "FREEZE_DATASET";
-	about: Dataset;
+	about: DatasetFreezeOut;
+}
+
+interface DFRAFT_FREEZE_DATASET {
+	type: "DFRAFT_FREEZE_DATASET";
+	about: DatasetFreezeOut;
 }
 
 export type DataAction =
@@ -734,4 +744,5 @@ export type DataAction =
 	| RECEIVE_FOLDERS_FILES_IN_DATASET
 	| RECEIVE_PUBLIC_FOLDERS_FILES_IN_DATASET
 	| FOLDER_UPDATED
-	| FREEZE_DATASET;
+	| FREEZE_DATASET
+	| DFRAFT_FREEZE_DATASET;
