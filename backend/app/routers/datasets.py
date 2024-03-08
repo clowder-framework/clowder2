@@ -463,7 +463,7 @@ async def draft_freeze_dataset(
         draft_frozen_dataset_data = frozen_dataset.dict()
         # keep the origin id
         draft_frozen_dataset_data.pop("id")
-        draft_frozen_dataset_data["_id"] = draft_frozen_dataset_data.pop("origin_id")
+        draft_frozen_dataset_data["_id"] = draft_frozen_dataset_data.get("origin_id")
         draft_frozen_dataset_data["frozen"] = FrozenState.FROZEN_DRAFT
         draft_frozen_dataset = DatasetDB(**draft_frozen_dataset_data)
         await draft_frozen_dataset.insert()
