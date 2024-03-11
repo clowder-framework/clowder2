@@ -28,6 +28,11 @@ export const Explore = (): JSX.Element => {
 		limit: number | undefined,
 		mine: boolean | undefined
 	) => dispatch(fetchDatasets(skip, limit, mine));
+	const listMyDatasets = (
+		skip: number | undefined,
+		limit: number | undefined,
+		mine: boolean | true
+	) => dispatch(fetchDatasets(skip, limit, mine));
 	const datasets = useSelector(
 		(state: RootState) => state.dataset.datasets.data
 	);
@@ -47,6 +52,11 @@ export const Explore = (): JSX.Element => {
 	// component did mount
 	useEffect(() => {
 		listDatasets(0, limit, mine);
+	}, []);
+
+	// component did mount
+	useEffect(() => {
+		listMyDatasets(0, limit, true);
 	}, []);
 
 	// Admin mode will fetch all datasets
@@ -82,9 +92,66 @@ export const Explore = (): JSX.Element => {
 							aria-label="dashboard tabs"
 						>
 							<Tab sx={tab} label="Datasets" {...a11yProps(0)} />
+							<Tab sx={tab} label="My Datasets" {...a11yProps(1)} />
+
 						</Tabs>
 					</Box>
 					<TabPanel value={selectedTabIndex} index={0}>
+						<Grid container spacing={2}>
+							{datasets !== undefined ? (
+								datasets.map((dataset: DatasetOut) => {
+									return (
+										<Grid item key={dataset.id} xs={12} sm={6} md={4} lg={3}>
+											<DatasetCard
+												id={dataset.id}
+												name={dataset.name}
+												author={`${dataset.creator.first_name} ${dataset.creator.last_name}`}
+												created={dataset.created}
+												description={dataset.description}
+												thumbnailId={dataset.thumbnail_id}
+											/>
+										</Grid>
+									);
+								})
+							) : (
+								<></>
+							)}
+							{datasets.length === 0 ? (
+								<Grid container justifyContent="center">
+									<Box textAlign="center">
+										<p>
+											Nobody has created any datasets on this instance. Click
+											below to create a dataset!
+										</p>
+										<Button
+											component={RouterLink}
+											to="/create-dataset"
+											variant="contained"
+											sx={{ m: 2 }}
+										>
+											Create Dataset
+										</Button>
+									</Box>
+								</Grid>
+							) : (
+								<></>
+							)}
+						</Grid>
+						{datasets.length !== 0 ? (
+							<Box display="flex" justifyContent="center" sx={{ m: 1 }}>
+								<Pagination
+									count={Math.ceil(pageMetadata.total_count / limit)}
+									page={currPageNum}
+									onChange={handlePageChange}
+									shape="rounded"
+									variant="outlined"
+								/>
+							</Box>
+						) : (
+							<></>
+						)}
+					</TabPanel>
+					<TabPanel value={selectedTabIndex} index={1}>
 						<Grid container spacing={2}>
 							{datasets !== undefined ? (
 								datasets.map((dataset: DatasetOut) => {
