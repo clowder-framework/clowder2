@@ -3,7 +3,7 @@ import { Box, Button, Grid, Pagination, Tab, Tabs } from "@mui/material";
 
 import { RootState } from "../types/data";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchDatasets } from "../actions/dataset";
+import {fetchDatasets, fetchMyDatasets} from "../actions/dataset";
 
 import { a11yProps, TabPanel } from "./tabs/TabComponent";
 import DatasetCard from "./datasets/DatasetCard";
@@ -30,11 +30,13 @@ export const Explore = (): JSX.Element => {
 	) => dispatch(fetchDatasets(skip, limit, mine));
 	const listMyDatasets = (
 		skip: number | undefined,
-		limit: number | undefined,
-		mine: boolean | true
-	) => dispatch(fetchDatasets(skip, limit, mine));
+		limit: number | undefined
+	) => dispatch(fetchMyDatasets(skip, limit, true));
 	const datasets = useSelector(
 		(state: RootState) => state.dataset.datasets.data
+	);
+	const myDatasets = useSelector(
+		(state: RootState) => state.dataset.myDatasets.data
 	);
 	const pageMetadata = useSelector(
 		(state: RootState) => state.dataset.datasets.metadata
@@ -56,7 +58,7 @@ export const Explore = (): JSX.Element => {
 
 	// component did mount
 	useEffect(() => {
-		listMyDatasets(0, limit, true);
+		listMyDatasets(0, limit);
 	}, []);
 
 	// Admin mode will fetch all datasets
@@ -153,8 +155,8 @@ export const Explore = (): JSX.Element => {
 					</TabPanel>
 					<TabPanel value={selectedTabIndex} index={1}>
 						<Grid container spacing={2}>
-							{datasets !== undefined ? (
-								datasets.map((dataset: DatasetOut) => {
+							{myDatasets !== undefined ? (
+								myDatasets.map((dataset: DatasetOut) => {
 									return (
 										<Grid item key={dataset.id} xs={12} sm={6} md={4} lg={3}>
 											<DatasetCard
@@ -171,7 +173,7 @@ export const Explore = (): JSX.Element => {
 							) : (
 								<></>
 							)}
-							{datasets.length === 0 ? (
+							{myDatasets.length === 0 ? (
 								<Grid container justifyContent="center">
 									<Box textAlign="center">
 										<p>
@@ -192,7 +194,7 @@ export const Explore = (): JSX.Element => {
 								<></>
 							)}
 						</Grid>
-						{datasets.length !== 0 ? (
+						{myDatasets.length !== 0 ? (
 							<Box display="flex" justifyContent="center" sx={{ m: 1 }}>
 								<Pagination
 									count={Math.ceil(pageMetadata.total_count / limit)}

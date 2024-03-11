@@ -220,6 +220,25 @@ export function fetchDatasets(skip = 0, limit = 21, mine = false) {
 	};
 }
 
+export const RECEIVE_MY_DATASETS = "RECEIVE_MY_DATASETS";
+
+export function fetchMyDatasets(skip = 0, limit = 21, mine = true) {
+	return (dispatch) => {
+		// TODO: Parameters for dates? paging?
+		return V2.DatasetsService.getDatasetsApiV2DatasetsGet(skip, limit, mine)
+			.then((json) => {
+				dispatch({
+					type: RECEIVE_MY_DATASETS,
+					myDatasets: json,
+					receivedAt: Date.now(),
+				});
+			})
+			.catch((reason) => {
+				dispatch(handleErrors(reason, fetchMyDatasets(skip, limit, mine)));
+			});
+	};
+}
+
 export const CREATE_DATASET = "CREATE_DATASET";
 
 export function datasetCreated(formData) {
