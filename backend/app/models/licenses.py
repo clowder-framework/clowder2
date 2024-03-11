@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import List
+from typing import List, Optional
 
 from beanie import Document, PydanticObjectId
 from pydantic import BaseModel, Field
@@ -10,11 +10,11 @@ from app.models.users import UserOut
 
 class LicenseBase(BaseModel):
     name: str
-    description: str
-    url: str
-    version: str
-    holders: str
-    expiration_date: datetime = Field(None)
+    description: str = None
+    url: str = None
+    version: Optional[str] = None
+    holders: Optional[str] = None
+    expiration_date: Optional[datetime] = Field(None)
 
 
 class LicenseIn(LicenseBase):
@@ -47,12 +47,12 @@ standard_licenses = [
     ),
     LicenseOption(
         id="CC BY-SA",
-        description="This license enables reusers to distribute, remix, adapt, and build upon the material in any medium or format, so long as attribution is given to the creator. The license allows for commercial use. If you remix, adapt, or build upon the material, you must license the modified material under identical terms. CC BY-SA includes the following elements:\n BY: credit must be given to the creator. SA: Adaptations must be shared under the same terms.",
+        description="This license enables reusers to distribute, remix, adapt, and build upon the material in any medium or format, so long as attribution is given to the creator. The license allows for commercial use. If you remix, adapt, or build upon the material, you must license the modified material under identical terms. CC BY-SA includes the following elements:\n BY: credit must be given to the creator. \nSA: Adaptations must be shared under the same terms.",
         url="https://creativecommons.org/licenses/by-sa/4.0/",
     ),
     LicenseOption(
         id="CC BY-NC",
-        description="This license enables reusers to distribute, remix, adapt, and build upon the material in any medium or format for noncommercial purposes only, and only so long as attribution is given to the creator. CC BY-NC includes the following elements:\nBY: credit must be given to the creator.NC: Only noncommercial uses of the work are permitted.",
+        description="This license enables reusers to distribute, remix, adapt, and build upon the material in any medium or format for noncommercial purposes only, and only so long as attribution is given to the creator. CC BY-NC includes the following elements:\nBY: credit must be given to the creator.\nNC: Only noncommercial uses of the work are permitted.",
         url="https://creativecommons.org/licenses/by-nc/4.0/",
     ),
     LicenseOption(

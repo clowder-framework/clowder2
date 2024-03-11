@@ -2,7 +2,7 @@
 	"schema": {
 		"type": "object",
 		"required": [
-			"name"
+			"name", "description", "url", "holders"
 		],
 		"properties": {
 			"name": {
@@ -10,19 +10,19 @@
 				"title": "Name"
 			},
 			"description": {
-				"type": "string",
+				"type": ["string", "null"],
 				"title": "Description"
 			},
 			"url": {
-				"type": "string",
+				"type": ["string", "null"],
 				"title": "Url"
 			},
 			"holders": {
-				"type": "string",
+				"type": ["string", "null"],
 				"title": "Holders"
 			},
 			"version": {
-				"type": "string",
+				"type": ["string", "null"],
 				"title": "Version"
 			},
 			"expiration_date": {

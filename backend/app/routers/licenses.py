@@ -21,6 +21,8 @@ async def save_license(
     license_in: LicenseIn,
     user=Depends(get_current_user),
 ):
+    if license_in.holders == None:
+        license_in = user
     license_db = LicenseDB(**license_in.dict(), creator=user.email)
     await license_db.insert()
     return license_db.dict()
@@ -68,10 +70,15 @@ async def edit_license(
             )
         license_dict = dict(license_info) if license_info is not None else {}
 
-        if len(license_dict["name"]) == 0 or len(license_dict["holders"]) == 0:
+        if (
+            len(license_dict["name"]) == 0
+            or len(license_dict["description"]) == 0
+            or len(license_dict["url"]) == 0
+            or len(license_dict["holders"]) == 0
+        ):
             raise HTTPException(
                 status_code=400,
-                detail="License name can't be null or user list can't be empty",
+                detail="License name/description/url/holders can't be null or empty",
             )
             return
 

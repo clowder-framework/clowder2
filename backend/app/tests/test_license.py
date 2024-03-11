@@ -8,14 +8,23 @@ from app.tests.utils import (
 )
 
 
+license_example = {
+    "name": "test license",
+    "description": "test description",
+    "url": "test url",
+    "holders": " test holders",
+}
+
+
 def test_license(client: TestClient, headers: dict):
     # create
-    dataset_id = create_dataset(client, headers).get("id")
-    response = client.get(
-        f"{settings.API_V2_STR}/datasets/{dataset_id}", headers=headers
+    response = client.post(
+        f"{settings.API_V2_STR}/licenses/?user=test@test.org",
+        headers=headers,
+        json=license_example,
     )
     assert response.status_code == 200
-    license_id = response.json().get("license_id")
+    license_id = response.json().get("id")
 
     # get
     response = client.get(

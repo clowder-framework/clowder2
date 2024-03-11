@@ -74,8 +74,7 @@ from app.search.connect import (
     delete_document_by_id,
 )
 from app.search.index import index_dataset, index_file
-from app.models.licenses import LicenseIn
-from app.routers.licenses import save_license
+from app.models.licenses import standard_licenses
 
 router = APIRouter()
 security = HTTPBearer()
@@ -203,22 +202,14 @@ async def _get_folder_hierarchy(
 @router.post("", response_model=DatasetOut)
 async def save_dataset(
     dataset_in: DatasetIn,
-    license_id: Optional[str] = None,
+    license_id: str,
     user=Depends(get_current_user),
     es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
 ):
-    standard_license = True
-    if license_id is None or license_id == "Custom":
-        license_in_model = LicenseIn(
-            name="All Rights Reserved",
-            description="",
-            url="",
-            version="",
-            holders=user.email,
-        )
-        license = await save_license(license_in_model, user)
-        license_id = license["id"]
-        standard_license = False
+    standard_license = False
+    standard_license_ids = [license.id for license in standard_licenses]
+    if license_id in standard_license_ids:
+        standard_license = True
 
     dataset = DatasetDB(
         **dataset_in.dict(),

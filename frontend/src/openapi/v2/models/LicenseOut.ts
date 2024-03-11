@@ -20,10 +20,10 @@ export type LicenseOut = {
     created?: string;
     modified?: string;
     name: string;
-    description: string;
-    url: string;
-    version: string;
-    holders: string;
+    description?: string;
+    url?: string;
+    version?: string;
+    holders?: string;
     expiration_date?: string;
     id?: string;
 }

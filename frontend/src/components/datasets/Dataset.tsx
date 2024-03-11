@@ -463,7 +463,9 @@ export const Dataset = (): JSX.Element => {
 					)}
 				</Grid>
 				<Grid item>
-					<DatasetDetails details={about} />
+					<Typography variant="h5" gutterBottom>
+				License
+					</Typography>
 					{about.standard_license && about.license_id !== undefined ? (
 						<Typography>
 							<Link href={standardLicenseUrl}>{about.license_id}</Link>
@@ -497,11 +499,11 @@ export const Dataset = (): JSX.Element => {
 									<EditLicenseModal setEditLicenseOpen={setEditLicenseOpen} />
 								</DialogContent>
 							</Dialog>
-							{/*<EditLicenseModal license={license} open={openEditLicenseModal} handleClose={handleCloseEditLicenseModal} />*/}
 						</div>
 					) : (
 						<></>
 					)}
+					<DatasetDetails details={about} />
 				</Grid>
 			</Grid>
 		</Layout>
