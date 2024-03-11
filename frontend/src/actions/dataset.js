@@ -260,7 +260,7 @@ export function datasetCreated(formData, licenseId, licenseFormData) {
 	return (dispatch) => {
 		if (licenseFormData) {
 			// If licenseFormData is present, save the license first
-			return V2.LicensesService.saveLicenseApiV2LicensesPost(formData)
+			return V2.LicensesService.saveLicenseApiV2LicensesPost(licenseFormData)
 				.then((license) => {
 					licenseId = license.id;
 					console.log("license: ", licenseId);
