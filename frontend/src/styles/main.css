@@ -148,6 +148,7 @@ mark {
 .radio-checkbox {
 	margin-right: .5em;
 	min-width: 17px;
+	align-content: center;
 }
 .header {
 	font-weight: 700;
@@ -157,5 +158,9 @@ mark {
 	color: rgba(0,0,0,.6);
 	font-size: smaller;
 	line-height: 1.4285em;
+}
+.logo {
+	width: 100px;
+	height: 30px;
 }
 

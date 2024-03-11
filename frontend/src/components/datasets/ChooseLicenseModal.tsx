@@ -66,9 +66,12 @@ export const ChooseLicenseModal: React.FC<ChooseLicenseModalProps> = (
 						/>
 					</div>
 					<div>
-						<Link href={license.url} target="_blank" rel="noopener noreferrer" sx={{textDecoration: "none"}}>
-							<div className="header">{license.id}</div>
-						</Link>
+						<div>
+							<Link href={license.url} target="_blank" rel="noopener noreferrer"
+								  sx={{textDecoration: "none"}}>
+								<img className="logo" src={`styles/images/${license.id}.png`} alt={`${license.id}`}/>
+							</Link>
+						</div>
 						<div className="description">
 							{license.description.split("\n").map((line, index) => (
 								<React.Fragment key={index}>
@@ -89,12 +92,13 @@ export const ChooseLicenseModal: React.FC<ChooseLicenseModalProps> = (
 			>
 				<DialogTitle>Create custom license</DialogTitle>
 				<DialogContent>
-					<CreateLicenseModal setLicenseModalOpen={setLicenseModalOpen} setLicenseRequestForm={setLicenseRequestForm} handleNext={handleNext}/>
+					<CreateLicenseModal setLicenseModalOpen={setLicenseModalOpen}
+										setLicenseRequestForm={setLicenseRequestForm} handleNext={handleNext}/>
 				</DialogContent>
 			</Dialog>
 			<Box>
 				<Button variant="contained" onClick={handleNext}>
-				Next
+					Next
 				</Button>
 				<Button onClick={handleBack} sx={{mt: 1, ml: 1}}>
 				Back

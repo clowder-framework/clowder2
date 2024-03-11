@@ -468,7 +468,9 @@ export const Dataset = (): JSX.Element => {
 					</Typography>
 					{about.standard_license && about.license_id !== undefined ? (
 						<Typography>
-							<Link href={standardLicenseUrl}>{about.license_id}</Link>
+							<Link href={standardLicenseUrl}>
+								<img className="logo" src={`styles/images/${about.license_id}.png`} alt={about.license_id}/>
+							</Link>
 						</Typography>
 					) : (
 						<></>
