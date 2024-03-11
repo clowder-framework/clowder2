@@ -46,7 +46,7 @@ export function EmbeddedPublicSearch() {
 				showFilter={true}
 				showClear
 				renderNoSuggestion="No suggestions found."
-				dataField={["name", "description", "creator.keyword"]}
+				dataField={["name", "description"]}
 				// placeholder="Search for Dataset"
 				innerClass={{
 					title: "search-title",
@@ -58,7 +58,7 @@ export function EmbeddedPublicSearch() {
 						cause === "ENTER_PRESS" ||
 						cause === "SEARCH_ICON_CLICK"
 					) {
-						history(`/search?searchbox="${value}"`);
+						history(`/public_search?searchbox="${value}"`);
 					}
 				}}
 			/>

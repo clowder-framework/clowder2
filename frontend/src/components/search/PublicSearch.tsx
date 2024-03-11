@@ -15,6 +15,7 @@ import config from "../../app.config";
 import Cookies from "universal-cookie";
 import { useSelector } from "react-redux";
 import { RootState } from "../../types/data";
+import { PublicSearchResult } from "./PublicSearchResult";
 
 export function PublicSearch() {
 	const [luceneOn, setLuceneOn] = useState(false);
@@ -178,7 +179,7 @@ export function PublicSearch() {
 									react={{
 										and: ["string-searchbox"],
 									}}
-									render={({ data }) => <SearchResult data={data} />}
+									render={({ data }) => <PublicSearchResult data={data} />}
 								/>
 							) : (
 								<ReactiveList
@@ -196,7 +197,7 @@ export function PublicSearch() {
 										],
 									}}
 									render={({ data }) => {
-										return <SearchResult data={data} />;
+										return <PublicSearchResult data={data} />;
 									}}
 								/>
 							)}
