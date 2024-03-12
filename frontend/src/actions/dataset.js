@@ -225,7 +225,7 @@ export const RECEIVE_MY_DATASETS = "RECEIVE_MY_DATASETS";
 export function fetchMyDatasets(skip = 0, limit = 21, mine = true) {
 	return (dispatch) => {
 		// TODO: Parameters for dates? paging?
-		return V2.DatasetsService.getDatasetsApiV2DatasetsGet(skip, limit, mine)
+		return V2.DatasetsService.getDatasetsApiV2DatasetsGet(skip, limit, true)
 			.then((json) => {
 				dispatch({
 					type: RECEIVE_MY_DATASETS,

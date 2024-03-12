@@ -41,10 +41,15 @@ export const Explore = (): JSX.Element => {
 	const pageMetadata = useSelector(
 		(state: RootState) => state.dataset.datasets.metadata
 	);
+	const pageMyDatasetsMetadata = useSelector(
+		(state: RootState) => state.dataset.myDatasets.metadata
+	);
 	const adminMode = useSelector((state: RootState) => state.user.adminMode);
 
 	// TODO add option to determine limit number; default show 12 datasets each time
 	const [currPageNum, setCurrPageNum] = useState<number>(1);
+	const [currPageNumMyDatasets, setCurrPageNumMyDatasets] = useState<number>(1);
+
 	const [limit] = useState<number>(config.defaultDatasetPerPage);
 	// TODO add switch to turn on and off "mine" dataset
 	const [mine] = useState<boolean>(false);
@@ -66,6 +71,12 @@ export const Explore = (): JSX.Element => {
 		listDatasets(0, limit, mine);
 	}, [adminMode]);
 
+	// Admin mode will fetch my datasets
+	useEffect(() => {
+		listMyDatasets(0, limit);
+	}, [adminMode]);
+
+
 	// switch tabs
 	const handleTabChange = (
 		_event: React.ChangeEvent<{}>,
@@ -79,6 +90,13 @@ export const Explore = (): JSX.Element => {
 		const newSkip = (value - 1) * limit;
 		setCurrPageNum(value);
 		listDatasets(newSkip, limit, mine);
+	};
+
+	// pagination
+	const handlePageChangeMyDatasets = (_: ChangeEvent<unknown>, value: number) => {
+		const newSkip = (value - 1) * limit;
+		setCurrPageNumMyDatasets(value);
+		listMyDatasets(newSkip, limit);
 	};
 
 	return (
@@ -197,9 +215,9 @@ export const Explore = (): JSX.Element => {
 						{myDatasets.length !== 0 ? (
 							<Box display="flex" justifyContent="center" sx={{ m: 1 }}>
 								<Pagination
-									count={Math.ceil(pageMetadata.total_count / limit)}
-									page={currPageNum}
-									onChange={handlePageChange}
+									count={Math.ceil(pageMyDatasetsMetadata.total_count / limit)}
+									page={currPageNumMyDatasets}
+									onChange={handlePageChangeMyDatasets}
 									shape="rounded"
 									variant="outlined"
 								/>
