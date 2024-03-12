@@ -1,8 +1,10 @@
 import {
 	CREATE_DATASET,
 	DELETE_DATASET,
+	DFRAFT_FREEZE_DATASET,
 	FOLDER_ADDED,
 	FOLDER_UPDATED,
+	FREEZE_DATASET,
 	RECEIVE_DATASET_ABOUT,
 	RECEIVE_DATASET_ROLES,
 	RECEIVE_DATASETS,
@@ -27,8 +29,8 @@ import { DataAction } from "../types/action";
 import { DatasetState } from "../types/data";
 import {
 	AuthorizationBase,
+	CombinedDataset,
 	DatasetOut,
-	DatasetOut as Dataset,
 	DatasetRoles,
 	FileOut,
 	FolderOut,
@@ -43,10 +45,10 @@ const defaultState: DatasetState = {
 		metadata: <PageMetadata>{},
 		data: <FileOut | FolderOut[]>[],
 	},
-	about: <Dataset>{ creator: <UserOut>{} },
+	about: <CombinedDataset>{ creator: <UserOut>{} },
 	datasetRole: <AuthorizationBase>{},
-	datasets: <Paged>{ metadata: <PageMetadata>{}, data: <Dataset[]>[] },
-	newDataset: <Dataset>{},
+	datasets: <Paged>{ metadata: <PageMetadata>{}, data: <CombinedDataset[]>[] },
+	newDataset: <DatasetOut>{},
 	newFile: <FileOut>{},
 	newFiles: <FileOut[]>[],
 	newFolder: <FolderOut>{},
@@ -104,6 +106,10 @@ const dataset = (state = defaultState, action: DataAction) => {
 		case RECEIVE_DATASET_ROLES:
 			return Object.assign({}, state, { roles: action.roles });
 		case UPDATE_DATASET:
+			return Object.assign({}, state, { about: action.about });
+		case DFRAFT_FREEZE_DATASET:
+			return Object.assign({}, state, { about: action.about });
+		case FREEZE_DATASET:
 			return Object.assign({}, state, { about: action.about });
 		case RECEIVE_DATASETS:
 			return Object.assign({}, state, { datasets: action.datasets });

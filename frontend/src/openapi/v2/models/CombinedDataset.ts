@@ -18,7 +18,7 @@ import type { UserOut } from './UserOut';
  * - Pydantic BaseModel
  * - [UpdateMethods](https://roman-right.github.io/beanie/api/interfaces/#aggregatemethods)
  */
-export type DatasetOut = {
+export type CombinedDataset = {
     name?: string;
     description?: string;
     status?: string;

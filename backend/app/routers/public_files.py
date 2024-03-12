@@ -1,65 +1,36 @@
-import io
-import time
-from datetime import datetime, timedelta
 from typing import Optional, List
-from typing import Union
-from fastapi import Form
-from app.models.metadata import (
-    MongoDBRef,
-    MetadataAgent,
-    MetadataIn,
-    MetadataDB,
-    MetadataOut,
-    MetadataPatch,
-    validate_context,
-    patch_metadata,
-    MetadataDelete,
-    MetadataDefinitionDB,
-    MetadataDefinitionOut,
-)
+
 from beanie import PydanticObjectId
 from beanie.odm.operators.update.general import Inc
 from bson import ObjectId
-from elasticsearch import Elasticsearch, NotFoundError
 from fastapi import (
     APIRouter,
     HTTPException,
     Depends,
-    Security,
-    File,
-    UploadFile,
 )
+from fastapi import Form
 from fastapi.responses import StreamingResponse
-from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from fastapi.security import HTTPBearer
 from minio import Minio
-from pika.adapters.blocking_connection import BlockingChannel
 
 from app import dependencies
 from app.config import settings
-from app.deps.authorization_deps import FileAuthorization
-from app.keycloak_auth import get_current_user, get_token
+from app.models.datasets import (
+    DatasetStatus,
+    DatasetDBViewList,
+)
 from app.models.files import (
     FileOut,
     FileVersion,
     FileDB,
     FileVersionDB,
 )
-from app.models.datasets import (
-    DatasetDB,
-    DatasetStatus,
-)
 from app.models.metadata import MetadataDB
-from app.models.users import UserOut
-from app.models.thumbnails import ThumbnailDB
-from app.rabbitmq.listeners import submit_file_job, EventListenerJobDB
-from app.routers.feeds import check_feed_listeners
-from app.routers.utils import get_content_type
-from app.search.connect import (
-    delete_document_by_id,
-    insert_record,
-    update_record,
+from app.models.metadata import (
+    MetadataOut,
+    MetadataDefinitionDB,
+    MetadataDefinitionOut,
 )
-from app.search.index import index_file, index_thumbnail
 
 router = APIRouter()
 security = HTTPBearer()
@@ -74,7 +45,9 @@ async def get_file_summary(
         # file.views += 1
         # await file.replace()
         if (
-            dataset := await DatasetDB.get(PydanticObjectId(file.dataset_id))
+            dataset := await DatasetDBViewList.find_one(
+                DatasetDBViewList.id == PydanticObjectId(file.dataset_id)
+            )
         ) is not None:
             if dataset.status == DatasetStatus.PUBLIC.name:
                 return file.dict()
@@ -90,7 +63,9 @@ async def get_file_version_details(
     if (file := await FileDB.get(PydanticObjectId(file_id))) is not None:
         # TODO: Incrementing too often (3x per page view)
         if (
-            dataset := await DatasetDB.get(PydanticObjectId(file.dataset_id))
+            dataset := await DatasetDBViewList.find_one(
+                DatasetDBViewList.id == PydanticObjectId(file.dataset_id)
+            )
         ) is not None:
             if dataset.status == DatasetStatus.PUBLIC.name:
                 file_vers = await FileVersionDB.find_one(
@@ -116,7 +91,9 @@ async def get_file_versions(
     file = await FileDB.get(PydanticObjectId(file_id))
     if file is not None:
         if (
-            dataset := await DatasetDB.get(PydanticObjectId(file.dataset_id))
+            dataset := await DatasetDBViewList.find_one(
+                DatasetDBViewList.id == PydanticObjectId(file.dataset_id)
+            )
         ) is not None:
             if dataset.status == DatasetStatus.PUBLIC.name:
                 mongo_versions = []
@@ -141,7 +118,9 @@ async def download_file(
     # If file exists in MongoDB, download from Minio
     if (file := await FileDB.get(PydanticObjectId(file_id))) is not None:
         if (
-            dataset := await DatasetDB.get(PydanticObjectId(file.dataset_id))
+            dataset := await DatasetDBViewList.find_one(
+                DatasetDBViewList.id == PydanticObjectId(file.dataset_id)
+            )
         ) is not None:
             if dataset.status == DatasetStatus.PUBLIC.name:
                 if version is not None:
@@ -189,7 +168,9 @@ async def download_file_thumbnail(
     # If file exists in MongoDB, download from Minio
     if (file := await FileDB.get(PydanticObjectId(file_id))) is not None:
         if (
-            dataset := await DatasetDB.get(PydanticObjectId(file.dataset_id))
+            dataset := await DatasetDBViewList.find_one(
+                DatasetDBViewList.id == PydanticObjectId(file.dataset_id)
+            )
         ) is not None:
             if dataset.status == DatasetStatus.PUBLIC.name:
                 if file.thumbnail_id is not None:
@@ -227,7 +208,9 @@ async def get_file_metadata(
     """Get file metadata."""
     if (file := await FileDB.get(PydanticObjectId(file_id))) is not None:
         if (
-            dataset := await DatasetDB.get(PydanticObjectId(file.dataset_id))
+            dataset := await DatasetDBViewList.find_one(
+                DatasetDBViewList.id == PydanticObjectId(file.dataset_id)
+            )
         ) is not None:
             if dataset.status == DatasetStatus.PUBLIC.name:
                 query = [MetadataDB.resource.resource_id == ObjectId(file_id)]

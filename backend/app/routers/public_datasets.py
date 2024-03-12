@@ -7,7 +7,6 @@ import tempfile
 from typing import List, Optional
 
 from beanie import PydanticObjectId
-from beanie.odm.operators.update.general import Inc
 from beanie.operators import Or, And
 from bson import ObjectId
 from bson import json_util
@@ -25,10 +24,10 @@ from rocrate.rocrate import ROCrate
 from app import dependencies
 from app.config import settings
 from app.models.datasets import (
-    DatasetDB,
     DatasetOut,
     DatasetDBViewList,
     DatasetStatus,
+    CombinedDataset,
 )
 from app.models.files import FileOut, FileDB, FileDBViewList
 from app.models.folder_and_file import FolderFileViewList
@@ -62,8 +61,12 @@ async def _get_folder_hierarchy(
 async def get_datasets(
     skip: int = 0,
     limit: int = 10,
+    frozen_only: bool = False,
 ):
-    query = [DatasetDB.status == DatasetStatus.PUBLIC]
+    query = [DatasetDBViewList.status == DatasetStatus.PUBLIC]
+    if frozen_only:
+        query.append(DatasetDBViewList.frozen == True)
+
     datasets_and_count = (
         await DatasetDBViewList.find(*query)
         .aggregate(
@@ -75,18 +78,22 @@ async def get_datasets(
     page = Paged(
         metadata=page_metadata,
         data=[
-            DatasetOut(id=item.pop("_id"), **item)
+            CombinedDataset(id=item.pop("_id"), **item)
             for item in datasets_and_count[0]["data"]
         ],
     )
     return page.dict()
 
 
-@router.get("/{dataset_id}", response_model=DatasetOut)
+@router.get("/{dataset_id}", response_model=CombinedDataset)
 async def get_dataset(
     dataset_id: str,
 ):
-    if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
+    if (
+        dataset := await DatasetDBViewList.find_one(
+            DatasetDBViewList.id == PydanticObjectId(dataset_id)
+        )
+    ) is not None:
         if dataset.status == DatasetStatus.PUBLIC.name:
             return dataset.dict()
     raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
@@ -99,7 +106,11 @@ async def get_dataset_files(
     skip: int = 0,
     limit: int = 10,
 ):
-    if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
+    if (
+        dataset := await DatasetDBViewList.find_one(
+            DatasetDBViewList.id == PydanticObjectId(dataset_id)
+        )
+    ) is not None:
         if dataset.status == DatasetStatus.PUBLIC.name:
             query = [
                 FileDBViewList.dataset_id == ObjectId(dataset_id),
@@ -118,7 +129,11 @@ async def get_dataset_folders(
     skip: int = 0,
     limit: int = 10,
 ):
-    if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
+    if (
+        dataset := await DatasetDBViewList.find_one(
+            DatasetDBViewList.id == PydanticObjectId(dataset_id)
+        )
+    ) is not None:
         if dataset.status == DatasetStatus.PUBLIC.name:
             query = [
                 FolderDBViewList.dataset_id == ObjectId(dataset_id),
@@ -141,7 +156,11 @@ async def get_dataset_folders_and_files(
     skip: int = 0,
     limit: int = 10,
 ):
-    if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
+    if (
+        dataset := await DatasetDBViewList.find_one(
+            DatasetDBViewList.id == PydanticObjectId(dataset_id)
+        )
+    ) is not None:
         if dataset.status == DatasetStatus.PUBLIC.name:
             query = [
                 FolderFileViewList.dataset_id == ObjectId(dataset_id),
@@ -202,7 +221,11 @@ async def get_dataset_metadata(
     listener_name: Optional[str] = Form(None),
     listener_version: Optional[float] = Form(None),
 ):
-    if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
+    if (
+        dataset := await DatasetDBViewList.find_one(
+            DatasetDBViewList.id == PydanticObjectId(dataset_id)
+        )
+    ) is not None:
         if dataset.status == DatasetStatus.PUBLIC.name:
             query = [MetadataDB.resource.resource_id == ObjectId(dataset_id)]
 
@@ -235,7 +258,11 @@ async def download_dataset(
     dataset_id: str,
     fs: Minio = Depends(dependencies.get_fs),
 ):
-    if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
+    if (
+        dataset := await DatasetDBViewList.find_one(
+            DatasetDBViewList.id == PydanticObjectId(dataset_id)
+        )
+    ) is not None:
         if dataset.status == DatasetStatus.PUBLIC.name:
             current_temp_dir = tempfile.mkdtemp(prefix="rocratedownload")
             crate = ROCrate()
@@ -384,8 +411,8 @@ async def download_dataset(
             response.headers["Content-Disposition"] = (
                 "attachment; filename=%s" % zip_name
             )
-            # Increment download count
-            await dataset.update(Inc({DatasetDB.downloads: 1}))
+            # # TODO Increment download count
+            # await dataset.update(Inc({DatasetDB.downloads: 1}))
             return response
         else:
             raise HTTPException(

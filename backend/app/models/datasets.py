@@ -11,6 +11,16 @@ from app.models.groups import GroupOut
 from app.models.users import UserOut
 
 
+class FrozenState(str, Enum):
+    """A user can have one of the following roles for a specific dataset. Since we don't currently implement permissions
+    there is an implied hierarchy between these roles OWNER > EDITOR > UPLOADER > VIEWER. For example, if a route
+    requires VIEWER any of the roles can access that resource."""
+
+    FROZEN = "frozen"
+    FROZEN_DRAFT = "frozen_draft"
+    ACTIVE = "active"
+
+
 class AutoName(Enum):
     def _generate_next_value_(name, start, count, last_values):
         return name
@@ -34,13 +44,7 @@ class DatasetIn(DatasetBase):
     pass
 
 
-class DatasetPatch(BaseModel):
-    name: Optional[str]
-    description: Optional[str]
-    status: Optional[str]
-
-
-class DatasetDB(Document, DatasetBase):
+class DatasetBaseCommon(DatasetBase):
     creator: UserOut
     created: datetime = Field(default_factory=datetime.utcnow)
     modified: datetime = Field(default_factory=datetime.utcnow)
@@ -48,6 +52,18 @@ class DatasetDB(Document, DatasetBase):
     user_views: int = 0
     downloads: int = 0
     thumbnail_id: Optional[PydanticObjectId] = None
+    origin_id: PydanticObjectId = None
+
+
+class DatasetPatch(BaseModel):
+    name: Optional[str]
+    description: Optional[str]
+    status: Optional[str]
+
+
+class DatasetDB(Document, DatasetBaseCommon):
+    frozen: FrozenState = FrozenState.ACTIVE
+    frozen_version_num: int = -999
 
     class Settings:
         name = "datasets"
@@ -59,7 +75,21 @@ class DatasetDB(Document, DatasetBase):
         ]
 
 
-class DatasetDBViewList(View, DatasetBase):
+class DatasetFreezeDB(Document, DatasetBaseCommon):
+    frozen: FrozenState = FrozenState.FROZEN
+    frozen_version_num: int = 1
+
+    class Settings:
+        name = "datasets_freeze"
+        indexes = [
+            [
+                ("name", pymongo.TEXT),
+                ("description", pymongo.TEXT),
+            ],
+        ]
+
+
+class DatasetDBViewList(View, DatasetBaseCommon):
     id: PydanticObjectId = Field(None, alias="_id")  # necessary for Views
     creator: UserOut
     created: datetime = Field(default_factory=datetime.utcnow)
@@ -67,20 +97,62 @@ class DatasetDBViewList(View, DatasetBase):
     auth: List[AuthorizationDB]
     thumbnail_id: Optional[PydanticObjectId] = None
     status: str = DatasetStatus.PRIVATE.name
+    frozen: FrozenState = FrozenState.ACTIVE
+    frozen_version_num: int = -999
+    origin_id: PydanticObjectId = None
 
     class Settings:
-        source = DatasetDB
+        source = DatasetFreezeDB
         name = "datasets_view"
+
         pipeline = [
+            {
+                "$unionWith": {
+                    "coll": "datasets",
+                    "pipeline": [
+                        {
+                            "$addFields": {
+                                "frozen": {"$ifNull": ["$frozen", FrozenState.ACTIVE]},
+                                "frozen_version_num": {"$ifNull": ["$frozen_version_num", -999]},
+                                "origin_id": {"$ifNull": ["$origin_id", "$_id"]}
+                            }
+                        }
+                    ]
+                }
+            },
+            # if there is draft show draft
+            {
+                "$addFields": {
+                    "priority": {
+                        "$cond": {
+                            "if": {"$eq": ["$frozen", FrozenState.FROZEN_DRAFT]},
+                            "then": 0,
+                            "else": 1
+                        }
+                    }
+                }
+            },
+            # else show the latest version
+            {"$sort": {"origin_id": 1, "priority": 1, "frozen_version_num": -1}},
+            {
+                "$group": {
+                    "_id": "$origin_id",
+                    "doc": {"$first": "$$ROOT"}
+                }
+            },
+            {
+                "$replaceRoot": {"newRoot": "$doc"}
+            },
             {
                 "$lookup": {
                     "from": "authorization",
                     "localField": "_id",
                     "foreignField": "dataset_id",
-                    "as": "auth",
+                    "as": "auth"
                 }
-            },
+            }
         ]
+
         # Needs fix to work https://github.com/roman-right/beanie/pull/521
         # use_cache = True
         # cache_expiration_time = timedelta(seconds=10)
@@ -90,6 +162,15 @@ class DatasetDBViewList(View, DatasetBase):
 class DatasetOut(DatasetDB):
     class Config:
         fields = {"id": "id"}
+
+
+class DatasetFreezeOut(DatasetFreezeDB):
+    class Config:
+        fields = {"id": "id"}
+
+
+class CombinedDataset(DatasetOut, DatasetFreezeOut):
+    pass
 
 
 class UserAndRole(BaseModel):

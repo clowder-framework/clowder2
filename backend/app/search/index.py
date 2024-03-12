@@ -1,23 +1,24 @@
 from typing import Optional, List
 
+from beanie import PydanticObjectId
 from bson import ObjectId
 from elasticsearch import Elasticsearch, NotFoundError
-from beanie import PydanticObjectId
+
 from app.config import settings
 from app.models.authorization import AuthorizationDB
-from app.models.datasets import DatasetOut, DatasetDB
+from app.models.datasets import CombinedDataset
 from app.models.files import FileOut, FileDB
-from app.models.thumbnails import ThumbnailOut, ThumbnailDB
 from app.models.metadata import MetadataDB
 from app.models.search import (
     ElasticsearchEntry,
 )
+from app.models.thumbnails import ThumbnailDB
 from app.search.connect import insert_record, update_record
 
 
 async def index_dataset(
     es: Elasticsearch,
-    dataset: DatasetOut,
+    dataset: CombinedDataset,
     user_ids: Optional[List[str]] = None,
     update: bool = False,
 ):

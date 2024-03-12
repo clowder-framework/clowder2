@@ -2,6 +2,7 @@
 /* tslint:disable */
 /* eslint-disable */
 import type { Body_get_dataset_metadata_api_v2_public_datasets__dataset_id__metadata_get } from '../models/Body_get_dataset_metadata_api_v2_public_datasets__dataset_id__metadata_get';
+import type { CombinedDataset } from '../models/CombinedDataset';
 import type { DatasetOut } from '../models/DatasetOut';
 import type { FileOut } from '../models/FileOut';
 import type { FolderOut } from '../models/FolderOut';
@@ -16,12 +17,14 @@ export class PublicDatasetsService {
      * Get Datasets
      * @param skip
      * @param limit
+     * @param frozenOnly
      * @returns Paged Successful Response
      * @throws ApiError
      */
     public static getDatasetsApiV2PublicDatasetsGet(
         skip?: number,
         limit: number = 10,
+        frozenOnly: boolean = false,
     ): CancelablePromise<Paged> {
         return __request({
             method: 'GET',
@@ -29,6 +32,7 @@ export class PublicDatasetsService {
             query: {
                 'skip': skip,
                 'limit': limit,
+                'frozen_only': frozenOnly,
             },
             errors: {
                 422: `Validation Error`,
@@ -39,12 +43,12 @@ export class PublicDatasetsService {
     /**
      * Get Dataset
      * @param datasetId
-     * @returns DatasetOut Successful Response
+     * @returns CombinedDataset Successful Response
      * @throws ApiError
      */
     public static getDatasetApiV2PublicDatasetsDatasetIdGet(
         datasetId: string,
-    ): CancelablePromise<DatasetOut> {
+    ): CancelablePromise<CombinedDataset> {
         return __request({
             method: 'GET',
             path: `/api/v2/public_datasets/${datasetId}`,

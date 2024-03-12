@@ -19,7 +19,7 @@ import { Folder } from "@material-ui/icons";
 
 type ActionsMenuProps = {
 	datasetId: string;
-	folderId: string;
+	folderId: string | null;
 };
 
 export const NewMenu = (props: ActionsMenuProps): JSX.Element => {

@@ -1,5 +1,3 @@
-import datetime
-
 from beanie import PydanticObjectId
 from beanie.operators import Or, In
 from bson import ObjectId
@@ -25,9 +23,9 @@ from app.models.datasets import (
     UserAndRole,
     GroupAndRole,
     DatasetRoles,
-    DatasetDB,
     DatasetOut,
     DatasetStatus,
+    DatasetDBViewList,
 )
 from app.models.groups import GroupDB
 from app.models.users import UserDB
@@ -91,7 +89,9 @@ async def get_dataset_role(
     )
     if auth_db is None:
         if (
-            current_dataset := await DatasetDB.get(PydanticObjectId(dataset_id))
+            current_dataset := await DatasetDBViewList.find_one(
+                DatasetDBViewList.id == PydanticObjectId(dataset_id)
+            )
         ) is not None:
             if (
                 current_dataset.status == DatasetStatus.AUTHENTICATED.name
@@ -134,13 +134,14 @@ async def get_dataset_role_owner(
     return {"dataset_id": dataset_id, "allow": allow}
 
 
-@router.get("/files/{file_id}/role", response_model=RoleType)
+@router.get("/files/{file_id}/roleType", response_model=RoleType)
 async def get_file_role(
     file_id: str,
     current_user=Depends(get_current_username),
     role: RoleType = Depends(get_role_by_file),
 ):
     """Retrieve role of user for an individual file. Role cannot change between file versions."""
+    # Role is derived by dataset owner type
     return role
 
 
@@ -177,7 +178,9 @@ async def set_dataset_group_role(
     allow: bool = Depends(Authorization("editor")),
 ):
     """Assign an entire group a specific role for a dataset."""
-    if (dataset := await DatasetDB.get(dataset_id)) is not None:
+    if (
+        dataset := await DatasetDBViewList.find_one(DatasetDBViewList.id == dataset_id)
+    ) is not None:
         if (group := await GroupDB.get(group_id)) is not None:
             # First, remove any existing role the group has on the dataset
             await remove_dataset_group_role(dataset_id, group_id, es, user_id, allow)
@@ -229,7 +232,11 @@ async def set_dataset_user_role(
 ):
     """Assign a single user a specific role for a dataset."""
 
-    if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
+    if (
+        dataset := await DatasetDBViewList.find_one(
+            DatasetDBViewList.id == PydanticObjectId(dataset_id)
+        )
+    ) is not None:
         if (await UserDB.find_one(UserDB.email == username)) is not None:
             # First, remove any existing role the user has on the dataset
             await remove_dataset_user_role(dataset_id, username, es, user_id, allow)
@@ -285,7 +292,9 @@ async def remove_dataset_group_role(
 ):
     """Remove any role the group has with a specific dataset."""
 
-    if (dataset := await DatasetDB.get(dataset_id)) is not None:
+    if (
+        dataset := await DatasetDBViewList.find_one(DatasetDBViewList.id == dataset_id)
+    ) is not None:
         if (group := await GroupDB.get(group_id)) is not None:
             if (
                 auth_db := await AuthorizationDB.find_one(
@@ -320,7 +329,11 @@ async def remove_dataset_user_role(
 ):
     """Remove any role the user has with a specific dataset."""
 
-    if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
+    if (
+        dataset := await DatasetDBViewList.find_one(
+            DatasetDBViewList.id == PydanticObjectId(dataset_id)
+        )
+    ) is not None:
         if (await UserDB.find_one(UserDB.email == username)) is not None:
             if (
                 auth_db := await AuthorizationDB.find_one(
@@ -345,7 +358,11 @@ async def get_dataset_roles(
     allow: bool = Depends(Authorization("editor")),
 ):
     """Get a list of all users and groups that have assigned roles on this dataset."""
-    if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
+    if (
+        dataset := await DatasetDBViewList.find_one(
+            DatasetDBViewList.id == PydanticObjectId(dataset_id)
+        )
+    ) is not None:
         roles = DatasetRoles(dataset_id=str(dataset.id))
 
         async for auth in AuthorizationDB.find(

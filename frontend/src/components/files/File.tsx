@@ -9,6 +9,7 @@ import {
 	Snackbar,
 	Tab,
 	Tabs,
+	Tooltip,
 } from "@mui/material";
 import { downloadResource } from "../../utils/common";
 import { PreviewConfiguration, RootState } from "../../types/data";
@@ -50,6 +51,9 @@ import { VersionChip } from "../versions/VersionChip";
 import RoleChip from "../auth/RoleChip";
 import Typography from "@mui/material/Typography";
 import { ClowderSelect } from "../styledComponents/ClowderSelect";
+import { AuthWrapper } from "../auth/AuthWrapper";
+import LockIcon from "@mui/icons-material/Lock";
+import { PublishedWrapper } from "../auth/PublishedWrapper";
 
 export const File = (): JSX.Element => {
 	// path parameter
@@ -94,7 +98,9 @@ export const File = (): JSX.Element => {
 		(state: RootState) => state.file.fileVersions
 	);
 	const folderPath = useSelector((state: RootState) => state.folder.folderPath);
-	const fileRole = useSelector((state: RootState) => state.file.fileRole);
+	const fileRoleType = useSelector(
+		(state: RootState) => state.file.fileRoleType
+	);
 	const storageType = useSelector(
 		(state: RootState) => state.file.fileSummary.storage_type
 	);
@@ -275,7 +281,7 @@ export const File = (): JSX.Element => {
 	} else if (showNotFoundPage) {
 		return <PageNotFound />;
 	}
-	
+
 	return (
 		<Layout>
 			{/*Error Message dialogue*/}
@@ -293,13 +299,22 @@ export const File = (): JSX.Element => {
 			<Grid container>
 				<Grid item xs={10} sx={{ display: "flex", alignItems: "center" }}>
 					<MainBreadcrumbs paths={paths} />
+					{about.frozen &&
+					about.frozen_version_num &&
+					about.frozen_version_num > 0 ? (
+						<Tooltip title="Published">
+							<LockIcon />
+						</Tooltip>
+					) : (
+						<></>
+					)}
 					<Grid item>
 						{versionEnabled ? (
 							<VersionChip selectedVersion={selectedVersionNum} />
 						) : (
 							<></>
 						)}
-						<RoleChip role={fileRole} />
+						<RoleChip role={fileRoleType} />
 					</Grid>
 				</Grid>
 				<Grid item xs={2} sx={{ display: "flex-top", alignItems: "center" }}>
@@ -346,10 +361,18 @@ export const File = (): JSX.Element => {
 						<Tab
 							icon={<BuildIcon />}
 							iconPosition="start"
-							sx={TabStyle}
 							label="Analysis"
 							{...a11yProps(3)}
 							disabled={false}
+							sx={
+								about.frozen &&
+								about.frozen_version_num &&
+								about.frozen_version_num > 0
+									? { display: "none" }
+									: !["owner", "editor", "uploader"].includes(fileRoleType)
+									? { display: "none" }
+									: TabStyle
+							}
 						/>
 						<Tab
 							icon={<HistoryIcon />}
@@ -407,8 +430,14 @@ export const File = (): JSX.Element => {
 									resourceType="file"
 									resourceId={fileId}
 								/>
-								{fileRole !== undefined && fileRole!== "viewer"?
-									(
+								<PublishedWrapper
+									frozen={about.frozen}
+									frozenVersionNum={about.frozen_version_num}
+								>
+									<AuthWrapper
+										currRole={fileRoleType}
+										allowedRoles={["owner", "editor", "uploader"]}
+									>
 										<Box textAlign="center">
 											<Button
 												variant="contained"
@@ -417,12 +446,11 @@ export const File = (): JSX.Element => {
 													setEnableAddMetadata(true);
 												}}
 											>
-											Add Metadata
+												Add Metadata
 											</Button>
 										</Box>
-									) :
-									<></>
-								}
+									</AuthWrapper>
+								</PublishedWrapper>
 							</>
 						)}
 					</TabPanel>
@@ -435,7 +463,19 @@ export const File = (): JSX.Element => {
 							version={fileSummary.version_num}
 						/>
 					</TabPanel>
-					<TabPanel value={selectedTabIndex} index={3}>
+					<TabPanel
+						value={selectedTabIndex}
+						index={3}
+						sx={
+							about.frozen &&
+							about.frozen_version_num &&
+							about.frozen_version_num > 0
+								? { display: "none" }
+								: !["owner", "editor", "uploader"].includes(fileRoleType)
+								? { display: "none" }
+								: TabStyle
+						}
+					>
 						<Listeners fileId={fileId} datasetId={datasetId} />
 					</TabPanel>
 					<TabPanel value={selectedTabIndex} index={4}>

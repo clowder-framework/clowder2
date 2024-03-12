@@ -11,7 +11,7 @@ from app import dependencies
 from app.config import settings
 from app.deps.authorization_deps import Authorization
 from app.keycloak_auth import get_current_user, UserOut
-from app.models.datasets import DatasetOut, DatasetDB
+from app.models.datasets import DatasetOut, DatasetDB, DatasetDBViewList
 from app.models.listeners import EventListenerDB
 from app.models.metadata import (
     MongoDBRef,
@@ -247,7 +247,11 @@ async def get_dataset_metadata(
     user=Depends(get_current_user),
     allow: bool = Depends(Authorization("viewer")),
 ):
-    if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
+    if (
+        dataset := await DatasetDBViewList.find_one(
+            DatasetDBViewList.id == PydanticObjectId(dataset_id)
+        )
+    ) is not None:
         query = [MetadataDB.resource.resource_id == ObjectId(dataset_id)]
 
         if listener_name is not None:
