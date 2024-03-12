@@ -231,7 +231,7 @@ export const PublicFile = (): JSX.Element => {
 				</Grid>
 			</Grid>
 			<Grid container spacing={2}>
-				<Grid item xs={10}>
+				<Grid item xs={12} sm={12} md={10} lg={10} xl={10}>
 					<Tabs
 						value={selectedTabIndex}
 						onChange={handleTabChange}
@@ -314,7 +314,7 @@ export const PublicFile = (): JSX.Element => {
 					{/*	<Listeners fileId={fileId} datasetId={datasetId} />*/}
 					{/*</TabPanel>*/}
 				</Grid>
-				<Grid item xs={2}>
+				<Grid item xs={12} sm={12} md={2} lg={2} xl={2}>
 					{latestVersionNum == selectedVersionNum ? (
 						// latest version
 						<>

@@ -47,7 +47,6 @@ import { Visualization } from "../visualizations/Visualization";
 import { ErrorModal } from "../errors/ErrorModal";
 import { FileHistory } from "./FileHistory";
 import { VersionChip } from "../versions/VersionChip";
-import RoleChip from "../auth/RoleChip";
 import Typography from "@mui/material/Typography";
 import { ClowderSelect } from "../styledComponents/ClowderSelect";
 
@@ -275,7 +274,7 @@ export const File = (): JSX.Element => {
 	} else if (showNotFoundPage) {
 		return <PageNotFound />;
 	}
-	
+
 	return (
 		<Layout>
 			{/*Error Message dialogue*/}
@@ -299,7 +298,6 @@ export const File = (): JSX.Element => {
 						) : (
 							<></>
 						)}
-						<RoleChip role={fileRole} />
 					</Grid>
 				</Grid>
 				<Grid item xs={2} sx={{ display: "flex-top", alignItems: "center" }}>
@@ -311,7 +309,7 @@ export const File = (): JSX.Element => {
 				</Grid>
 			</Grid>
 			<Grid container spacing={2}>
-				<Grid item xs={10}>
+				<Grid item xs={12} sm={12} md={10} lg={10} xl={10}>
 					<Tabs
 						value={selectedTabIndex}
 						onChange={handleTabChange}
@@ -407,22 +405,21 @@ export const File = (): JSX.Element => {
 									resourceType="file"
 									resourceId={fileId}
 								/>
-								{fileRole !== undefined && fileRole!== "viewer"?
-									(
-										<Box textAlign="center">
-											<Button
-												variant="contained"
-												sx={{ m: 2 }}
-												onClick={() => {
-													setEnableAddMetadata(true);
-												}}
-											>
+								{fileRole !== undefined && fileRole !== "viewer" ? (
+									<Box textAlign="center">
+										<Button
+											variant="contained"
+											sx={{ m: 2 }}
+											onClick={() => {
+												setEnableAddMetadata(true);
+											}}
+										>
 											Add Metadata
-											</Button>
-										</Box>
-									) :
+										</Button>
+									</Box>
+								) : (
 									<></>
-								}
+								)}
 							</>
 						)}
 					</TabPanel>
@@ -449,12 +446,12 @@ export const File = (): JSX.Element => {
 						)}
 					</TabPanel>
 				</Grid>
-				<Grid item xs={2}>
+				<Grid item xs={12} sm={12} md={2} lg={2} xl={2}>
 					{latestVersionNum == selectedVersionNum ? (
 						// latest version
 						<>
 							{Object.keys(fileSummary).length > 0 && (
-								<FileDetails fileSummary={fileSummary} />
+								<FileDetails fileSummary={fileSummary} myRole={fileRole} />
 							)}
 						</>
 					) : (
