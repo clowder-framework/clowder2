@@ -45,7 +45,6 @@ class DatasetIn(DatasetBase):
 
 
 class DatasetBaseCommon(DatasetBase):
-    id: PydanticObjectId = Field(None, alias="origin_id")  # necessary for Views
     creator: UserOut
     created: datetime = Field(default_factory=datetime.utcnow)
     modified: datetime = Field(default_factory=datetime.utcnow)
@@ -166,8 +165,6 @@ class DatasetOut(DatasetDB):
 
 
 class DatasetFreezeOut(DatasetFreezeDB):
-    id: PydanticObjectId = Field(None, alias="origin_id")  # necessary for Views
-
     class Config:
         fields = {"id": "id"}
 

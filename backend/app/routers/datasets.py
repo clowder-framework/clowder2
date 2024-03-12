@@ -524,7 +524,11 @@ async def freeze_dataset(
         ).save()
 
         # TODO: move metadata, files, folders, and authorizations to the frozen set
-        return frozen_dataset.dict()
+        # Need to return the latest frozen dataset id but with the same origin id
+        frozen_dataset_out_dict = frozen_dataset.dict()
+        frozen_dataset_out_dict.pop("id")
+        frozen_dataset_out = DatasetFreezeOut(id=frozen_dataset_out_dict.get("origin_id"), **frozen_dataset_out_dict)
+        return frozen_dataset_out.dict()
 
     raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
 
