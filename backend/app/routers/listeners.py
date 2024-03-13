@@ -278,6 +278,7 @@ async def get_listeners(
     category: Optional[str] = None,
     label: Optional[str] = None,
     alive_only: Optional[bool] = False,
+    process: Optional[str] = None,
 ):
     """Get a list of all Event Listeners in the db.
 
@@ -301,7 +302,11 @@ async def get_listeners(
         aggregation_pipeline.append({"$match": {"properties.default_labels": label}})
     if alive_only:
         aggregation_pipeline.append({"$match": {"alive": True}}),
-
+    if process:
+        if process == 'file':
+            aggregation_pipeline.append({"$match": {"properties.process.file" : {"$exists": True}}})
+        if process == 'dataset':
+            aggregation_pipeline.append({"$match": {"properties.process.dataset" : {"$exists": True}}})
     # Add pagination
     aggregation_pipeline.append(
         _get_page_query(skip, limit, sort_field="name", ascending=True)
