@@ -95,6 +95,9 @@ export const File = (): JSX.Element => {
 	);
 	const folderPath = useSelector((state: RootState) => state.folder.folderPath);
 	const fileRole = useSelector((state: RootState) => state.file.fileRole);
+	const datasetRole = useSelector(
+		(state: RootState) => state.dataset.datasetRole
+	);
 	const storageType = useSelector(
 		(state: RootState) => state.file.fileSummary.storage_type
 	);
@@ -115,7 +118,7 @@ export const File = (): JSX.Element => {
 	// snack bar
 	const [snackBarOpen, setSnackBarOpen] = useState(false);
 	const [snackBarMessage, setSnackBarMessage] = useState("");
-
+	console.log('file role', fileRole);
 	// component did mount
 	useEffect(() => {
 		// load file information
@@ -275,7 +278,7 @@ export const File = (): JSX.Element => {
 	} else if (showNotFoundPage) {
 		return <PageNotFound />;
 	}
-	
+
 	return (
 		<Layout>
 			{/*Error Message dialogue*/}
@@ -343,14 +346,18 @@ export const File = (): JSX.Element => {
 							{...a11yProps(2)}
 							disabled={false}
 						/>
-						<Tab
-							icon={<BuildIcon />}
-							iconPosition="start"
-							sx={TabStyle}
-							label="Analysis"
-							{...a11yProps(3)}
-							disabled={false}
-						/>
+						{datasetRole.role !== undefined && datasetRole.role !== "viewer" ? (
+							<Tab
+								icon={<BuildIcon />}
+								iconPosition="start"
+								sx={TabStyle}
+								label="Analysis"
+								{...a11yProps(3)}
+								disabled={false}
+							/>
+						) : (
+							<></>
+						)}
 						<Tab
 							icon={<HistoryIcon />}
 							iconPosition="start"
@@ -435,9 +442,13 @@ export const File = (): JSX.Element => {
 							version={fileSummary.version_num}
 						/>
 					</TabPanel>
-					<TabPanel value={selectedTabIndex} index={3}>
-						<Listeners fileId={fileId} datasetId={datasetId} />
-					</TabPanel>
+					{datasetRole.role !== undefined && datasetRole.role !== "viewer" ? (
+						<TabPanel value={selectedTabIndex} index={3}>
+							<Listeners fileId={fileId} datasetId={datasetId}/>
+						</TabPanel>
+					) : (
+						<></>
+					)}
 					<TabPanel value={selectedTabIndex} index={4}>
 						<ExtractionHistoryTab fileId={fileId} />
 					</TabPanel>
