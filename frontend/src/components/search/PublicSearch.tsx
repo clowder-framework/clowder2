@@ -9,12 +9,8 @@ import {
 } from "@appbaseio/reactivesearch";
 import { FormControlLabel, Grid, Switch, Typography } from "@mui/material";
 import PublicLayout from "../PublicLayout";
-import { SearchResult } from "./SearchResult";
 import { searchTheme, theme } from "../../theme";
 import config from "../../app.config";
-import Cookies from "universal-cookie";
-import { useSelector } from "react-redux";
-import { RootState } from "../../types/data";
 import { PublicSearchResult } from "./PublicSearchResult";
 
 export function PublicSearch() {
@@ -190,7 +186,6 @@ export function PublicSearch() {
 									react={{
 										and: [
 											"searchbox",
-											"creatorfilter",
 											"downloadfilter",
 											"fromfilter",
 											"tofilter",
