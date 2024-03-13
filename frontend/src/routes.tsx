@@ -20,6 +20,7 @@ import { Auth as AuthComponent } from "./components/auth/Auth";
 import { RedirectLogin as RedirectLoginComponent } from "./components/auth/RedirectLogin";
 import { RedirectLogout as RedirectLogoutComponent } from "./components/auth/RedirectLogout";
 import { Search } from "./components/search/Search";
+import { PublicSearch } from "./components/search/PublicSearch";
 import { isAuthorized } from "./utils/common";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "./types/data";
@@ -239,6 +240,12 @@ export const AppRoutes = (): JSX.Element => {
 						<PrivateRoute>
 							<Search />
 						</PrivateRoute>
+					}
+				/>
+				<Route
+					path="/public_search"
+					element={
+						<PublicSearch />
 					}
 				/>
 				<Route
