@@ -38,6 +38,7 @@ export class ListenersService {
      * @param category
      * @param label
      * @param aliveOnly
+     * @param process
      * @returns Paged Successful Response
      * @throws ApiError
      */
@@ -48,7 +49,7 @@ export class ListenersService {
         category?: string,
         label?: string,
         aliveOnly: boolean = false,
-		process: string,
+        process?: string,
     ): CancelablePromise<Paged> {
         return __request({
             method: 'GET',
@@ -60,7 +61,7 @@ export class ListenersService {
                 'category': category,
                 'label': label,
                 'alive_only': aliveOnly,
-				'process': process,
+                'process': process,
             },
             errors: {
                 422: `Validation Error`,
