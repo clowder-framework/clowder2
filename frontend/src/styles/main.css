@@ -161,6 +161,6 @@ mark {
 }
 .logo {
 	width: 100px;
-	height: 30px;
+	height: auto;
 }
 
