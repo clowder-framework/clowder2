@@ -50,6 +50,7 @@ import { VersionChip } from "../versions/VersionChip";
 import RoleChip from "../auth/RoleChip";
 import Typography from "@mui/material/Typography";
 import { ClowderSelect } from "../styledComponents/ClowderSelect";
+import {AuthWrapper} from "../auth/AuthWrapper";
 
 export const File = (): JSX.Element => {
 	// path parameter
@@ -118,7 +119,7 @@ export const File = (): JSX.Element => {
 	// snack bar
 	const [snackBarOpen, setSnackBarOpen] = useState(false);
 	const [snackBarMessage, setSnackBarMessage] = useState("");
-	console.log('file role', fileRole);
+
 	// component did mount
 	useEffect(() => {
 		// load file information
@@ -346,7 +347,7 @@ export const File = (): JSX.Element => {
 							{...a11yProps(2)}
 							disabled={false}
 						/>
-						{datasetRole.role !== undefined && datasetRole.role !== "viewer" ? (
+						<AuthWrapper currRole={datasetRole.role} allowedRoles={["owner", "editor"]}>
 							<Tab
 								icon={<BuildIcon />}
 								iconPosition="start"
@@ -355,9 +356,7 @@ export const File = (): JSX.Element => {
 								{...a11yProps(3)}
 								disabled={false}
 							/>
-						) : (
-							<></>
-						)}
+						</AuthWrapper>
 						<Tab
 							icon={<HistoryIcon />}
 							iconPosition="start"
@@ -442,13 +441,11 @@ export const File = (): JSX.Element => {
 							version={fileSummary.version_num}
 						/>
 					</TabPanel>
-					{datasetRole.role !== undefined && datasetRole.role !== "viewer" ? (
+					<AuthWrapper currRole={datasetRole.role} allowedRoles={["owner", "editor"]}>
 						<TabPanel value={selectedTabIndex} index={3}>
 							<Listeners fileId={fileId} datasetId={datasetId}/>
 						</TabPanel>
-					) : (
-						<></>
-					)}
+					</AuthWrapper>
 					<TabPanel value={selectedTabIndex} index={4}>
 						<ExtractionHistoryTab fileId={fileId} />
 					</TabPanel>
