@@ -209,10 +209,10 @@ async def search_listeners(
     """
     # First compute alive flag for all listeners
     aggregation_pipeline = [
-        _check_livelihood_query(heartbeat_interval=heartbeat_interval),
-        _get_page_query(skip, limit, sort_field="name", ascending=True),
+        _check_livelihood_query(heartbeat_interval=heartbeat_interval)
     ]
 
+    # Add filters if applicable
     if process:
         if process == "file":
             aggregation_pipeline.append(
@@ -222,6 +222,10 @@ async def search_listeners(
             aggregation_pipeline.append(
                 {"$match": {"properties.process.dataset": {"$exists": True}}}
             )
+    # Add pagination
+    aggregation_pipeline.append(
+        _get_page_query(skip, limit, sort_field="name", ascending=True)
+    )
 
     listeners_and_count = (
         await EventListenerDB.find(
