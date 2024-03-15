@@ -410,7 +410,7 @@ export const Dataset = (): JSX.Element => {
 					</TabPanel>
 					{datasetRole.role !== undefined && datasetRole.role !== "viewer" ? (
 						<TabPanel value={selectedTabIndex} index={3}>
-							<Listeners datasetId={datasetId} />
+							<Listeners datasetId={datasetId} process={"dataset"}/>
 						</TabPanel>
 					) : (
 						<></>

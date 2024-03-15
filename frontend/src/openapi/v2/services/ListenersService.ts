@@ -38,6 +38,7 @@ export class ListenersService {
      * @param category
      * @param label
      * @param aliveOnly
+     * @param process
      * @returns Paged Successful Response
      * @throws ApiError
      */
@@ -48,6 +49,7 @@ export class ListenersService {
         category?: string,
         label?: string,
         aliveOnly: boolean = false,
+        process?: string,
     ): CancelablePromise<Paged> {
         return __request({
             method: 'GET',
@@ -59,6 +61,7 @@ export class ListenersService {
                 'category': category,
                 'label': label,
                 'alive_only': aliveOnly,
+                'process': process,
             },
             errors: {
                 422: `Validation Error`,
@@ -99,6 +102,7 @@ export class ListenersService {
      * @param skip
      * @param limit
      * @param heartbeatInterval
+     * @param process
      * @returns Paged Successful Response
      * @throws ApiError
      */
@@ -107,6 +111,7 @@ export class ListenersService {
         skip?: number,
         limit: number = 2,
         heartbeatInterval: number = 300,
+        process?: string,
     ): CancelablePromise<Paged> {
         return __request({
             method: 'GET',
@@ -116,6 +121,7 @@ export class ListenersService {
                 'skip': skip,
                 'limit': limit,
                 'heartbeat_interval': heartbeatInterval,
+                'process': process,
             },
             errors: {
                 422: `Validation Error`,
