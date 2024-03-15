@@ -14,7 +14,7 @@ class LicenseBase(BaseModel):
     url: str = None
     version: Optional[str] = None
     holders: Optional[str] = None
-    expiration_date: Optional[datetime] = Field(None)
+    expiration_date: Optional[datetime] = None
 
 
 class LicenseIn(LicenseBase):

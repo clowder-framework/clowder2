@@ -10,15 +10,15 @@
 				"title": "Name"
 			},
 			"description": {
-				"type": ["string", "null"],
+				"type": ["string"],
 				"title": "Description"
 			},
 			"url": {
-				"type": ["string", "null"],
+				"type": ["string"],
 				"title": "Url"
 			},
 			"holders": {
-				"type": ["string", "null"],
+				"type": ["string"],
 				"title": "Holders"
 			},
 			"version": {

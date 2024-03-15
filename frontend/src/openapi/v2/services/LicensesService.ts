@@ -11,18 +11,6 @@ import { request as __request } from '../core/request';
 export class LicensesService {
 
     /**
-     * Get Licenses
-     * @returns LicenseOption Successful Response
-     * @throws ApiError
-     */
-    public static getLicensesApiV2LicensesGet(): CancelablePromise<Array<LicenseOption>> {
-        return __request({
-            method: 'GET',
-            path: `/api/v2/licenses`,
-        });
-    }
-
-    /**
      * Save License
      * @param requestBody
      * @returns LicenseOut Successful Response
@@ -107,6 +95,18 @@ export class LicensesService {
             errors: {
                 422: `Validation Error`,
             },
+        });
+    }
+
+    /**
+     * Get Standard Licenses
+     * @returns LicenseOption Successful Response
+     * @throws ApiError
+     */
+    public static getStandardLicensesApiV2LicensesStandardLicensesAllGet(): CancelablePromise<Array<LicenseOption>> {
+        return __request({
+            method: 'GET',
+            path: `/api/v2/licenses/standard_licenses/all`,
         });
     }
 

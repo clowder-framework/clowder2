@@ -7,10 +7,11 @@ import {
 	FormControl,
 	Link
 } from "@mui/material";
-import CircleIcon from '@mui/icons-material/Circle';
 import { V2 } from "../../openapi";
 import { LicenseOption } from "../../openapi/v2";
 import {CreateLicenseModal} from "./CreateLicenseModal";
+import {fetchStandardLicenses} from "../../utils/licenses";
+import Typography from "@mui/material/Typography";
 
 type ChooseLicenseModalProps = {
 	selectedLicense: any;
@@ -26,11 +27,17 @@ export const ChooseLicenseModal: React.FC<ChooseLicenseModalProps> = (
 	const { selectedLicense, setSelectedLicense, setLicenseRequestForm, handleBack, handleNext } = props;
 	const [standardLicenses, setStandardLicenses] = useState<LicenseOption[]>([]);
 	const [licenseModalOpen, setLicenseModalOpen] = useState<boolean>(false);
+	const fetchStandardLicensesData = async () => {
+            try {
+                const data = await fetchStandardLicenses(); // Call your function to fetch licenses
+                setStandardLicenses(data); // Update state with the fetched data
+            } catch (error) {
+                console.error('Error fetching licenses', error);
+            }
+        };
 
 	useEffect(() => {
-		V2.LicensesService.getLicensesApiV2LicensesGet()
-			.then((response) => setStandardLicenses(response))
-			.catch((error) => console.error("Error fetching licenses:", error));
+		fetchStandardLicensesData();
 	}, []);
 
 	useEffect(() => {
@@ -67,10 +74,11 @@ export const ChooseLicenseModal: React.FC<ChooseLicenseModalProps> = (
 					</div>
 					<div>
 						<div>
-							<Link href={license.url} target="_blank" rel="noopener noreferrer"
+							{license.url && <Link href={license.url} target="_blank" rel="noopener noreferrer"
 								  sx={{textDecoration: "none"}}>
-								<img className="logo" src={`styles/images/${license.id}.png`} alt={`${license.id}`}/>
-							</Link>
+								<img className="logo" src={`public/${license.id}.png`} alt={`${license.id}`}/>
+							</Link>}
+							{!license.url && <Typography>{license.id}</Typography>}
 						</div>
 						<div className="description">
 							{license.description.split("\n").map((line, index) => (

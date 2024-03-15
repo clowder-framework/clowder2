@@ -38,8 +38,8 @@ async def get_license(license_id: str):
 
 
 # Endpoint to retrieve standard license options
-@router.get("", response_model=List[LicenseOption])
-def get_licenses():
+@router.get("/standard_licenses/all", response_model=List[LicenseOption])
+def get_standard_licenses():
     return standard_licenses
 
 

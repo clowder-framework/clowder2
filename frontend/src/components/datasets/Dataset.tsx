@@ -54,8 +54,8 @@ import { Visualization } from "../visualizations/Visualization";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import config from "../../app.config";
 import {EditLicenseModal} from "./EditLicenseModal";
-import {TRUE} from "ol/functions";
 import {V2} from "../../openapi";
+import {fetchStandardLicenses, fetchStandardLicenseUrl} from "../../utils/licenses";
 
 export const Dataset = (): JSX.Element => {
 	// path parameter
@@ -136,6 +136,14 @@ export const Dataset = (): JSX.Element => {
 	const adminMode = useSelector((state: RootState) => state.user.adminMode);
 	const license = useSelector((state: RootState) => state.dataset.license);
 	const [standardLicenseUrl, setStandardLicenseUrl] = useState<string>("");
+	const fetchStandardLicenseUrlData = async (license_id: string) => {
+            try {
+                const data = await fetchStandardLicenseUrl(license_id); // Call your function to fetch licenses
+                setStandardLicenseUrl(data); // Update state with the fetched data
+            } catch (error) {
+                console.error('Error fetching license url', error);
+            }
+        };
 
 
 	useEffect(() => {
@@ -147,9 +155,7 @@ export const Dataset = (): JSX.Element => {
 		);
 		listDatasetAbout(datasetId);
 		if (about.standard_license && about.license_id) {
-			V2.LicensesService.getStandardLicenseUrlApiV2LicensesStandardLicensesLicenseIdGet(about.license_id)
-				.then((response) => setStandardLicenseUrl(response))
-				.catch((error) => console.error("Error fetching standard license url:", error));
+			fetchStandardLicenseUrlData(about.license_id);
 		}
 		if (!about.standard_license && about.license_id)
 			listDatasetLicense(about.license_id);
@@ -469,7 +475,7 @@ export const Dataset = (): JSX.Element => {
 					{about.standard_license && about.license_id !== undefined ? (
 						<Typography>
 							<Link href={standardLicenseUrl} target="_blank">
-								<img className="logo" src={`styles/images/${about.license_id}.png`} alt={about.license_id}/>
+								<img className="logo" src={`public/${about.license_id}.png`} alt={about.license_id}/>
 							</Link>
 						</Typography>
 					) : (
@@ -478,7 +484,7 @@ export const Dataset = (): JSX.Element => {
 					{!about.standard_license && license!== undefined && license.name !== undefined ? (
 						<div>
 							<Typography>
-								<Link href={license.url}>{license.name}</Link>
+								<Link href={license.url} target="_blank">{license.name}</Link>
 								<IconButton
 									onClick={() => {
 										setEditLicenseOpen(true);
