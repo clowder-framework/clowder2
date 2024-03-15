@@ -102,6 +102,7 @@ export class ListenersService {
      * @param skip
      * @param limit
      * @param heartbeatInterval
+     * @param process
      * @returns Paged Successful Response
      * @throws ApiError
      */
@@ -110,6 +111,7 @@ export class ListenersService {
         skip?: number,
         limit: number = 2,
         heartbeatInterval: number = 300,
+        process?: string,
     ): CancelablePromise<Paged> {
         return __request({
             method: 'GET',
@@ -119,6 +121,7 @@ export class ListenersService {
                 'skip': skip,
                 'limit': limit,
                 'heartbeat_interval': heartbeatInterval,
+                'process': process,
             },
             errors: {
                 422: `Validation Error`,

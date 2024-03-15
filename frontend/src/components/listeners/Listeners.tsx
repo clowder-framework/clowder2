@@ -62,8 +62,9 @@ export function Listeners(props: ListenerProps) {
 		text: string,
 		skip: number | undefined,
 		limit: number | undefined,
-		heartbeatInterval: number | undefined
-	) => dispatch(queryListeners(text, skip, limit, heartbeatInterval));
+		heartbeatInterval: number | undefined,
+		process: string | undefined,
+	) => dispatch(queryListeners(text, skip, limit, heartbeatInterval, process));
 	const listAvailableCategories = () => dispatch(fetchListenerCategories());
 	const listAvailableLabels = () => dispatch(fetchListenerLabels());
 
@@ -102,7 +103,7 @@ export function Listeners(props: ListenerProps) {
 		setCurrPageNum(1);
 		setSelectedCategory("");
 
-		if (searchText !== "") searchListeners(searchText, 0, limit, 0);
+		if (searchText !== "") searchListeners(searchText, 0, limit, 0, process);
 		else listListeners(0, limit, 0, selectedCategory, selectedLabel, aliveOnly, process);
 	}, [searchText]);
 
@@ -146,7 +147,7 @@ export function Listeners(props: ListenerProps) {
 
 	const handleListenerSearch = () => {
 		setSelectedCategory("");
-		searchListeners(searchText, (currPageNum - 1) * limit, limit, 0);
+		searchListeners(searchText, (currPageNum - 1) * limit, limit, 0, process);
 	};
 
 	const handleCategoryChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -166,7 +167,7 @@ export function Listeners(props: ListenerProps) {
 	const handlePageChange = (_: ChangeEvent<unknown>, value: number) => {
 		const newSkip = (value - 1) * limit;
 		setCurrPageNum(value);
-		if (searchText !== "") searchListeners(searchText, newSkip, limit, 0);
+		if (searchText !== "") searchListeners(searchText, newSkip, limit, 0, process);
 		else listListeners(newSkip, limit, 0, null, null, aliveOnly, process);
 	};
 

@@ -55,7 +55,8 @@ export function queryListeners(
 	text,
 	skip = 0,
 	limit = 21,
-	heartbeatInterval = 0
+	heartbeatInterval = 0,
+	process = null,
 ) {
 	return (dispatch) => {
 		// TODO: Parameters for dates? paging?
@@ -63,7 +64,8 @@ export function queryListeners(
 			text,
 			skip,
 			limit,
-			heartbeatInterval
+			heartbeatInterval,
+			process
 		)
 			.then((json) => {
 				dispatch({
@@ -76,7 +78,7 @@ export function queryListeners(
 				dispatch(
 					handleErrors(
 						reason,
-						queryListeners(text, skip, limit, heartbeatInterval)
+						queryListeners(text, skip, limit, heartbeatInterval, process)
 					)
 				);
 			});
