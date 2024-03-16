@@ -121,7 +121,6 @@ export interface DatasetState {
 	files: Paged;
 	folders: Paged;
 	datasets: Paged;
-	myDatasets: Paged;
 	newDataset: DatasetOut;
 	newFile: FileOut;
 	newFolder: FolderOut;
