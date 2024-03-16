@@ -3,7 +3,7 @@ import { Box, Button, Grid, Pagination, Tab, Tabs } from "@mui/material";
 
 import { RootState } from "../types/data";
 import { useDispatch, useSelector } from "react-redux";
-import {fetchDatasets, fetchMyDatasets} from "../actions/dataset";
+import {fetchDatasets} from "../actions/dataset";
 
 import { a11yProps, TabPanel } from "./tabs/TabComponent";
 import DatasetCard from "./datasets/DatasetCard";
@@ -28,15 +28,8 @@ export const Explore = (): JSX.Element => {
 		limit: number | undefined,
 		mine: boolean | undefined
 	) => dispatch(fetchDatasets(skip, limit, mine));
-	const listMyDatasets = (
-		skip: number | undefined,
-		limit: number | undefined
-	) => dispatch(fetchMyDatasets(skip, limit, true));
 	const datasets = useSelector(
 		(state: RootState) => state.dataset.datasets.data
-	);
-	const myDatasets = useSelector(
-		(state: RootState) => state.dataset.myDatasets.data
 	);
 	const pageMetadata = useSelector(
 		(state: RootState) => state.dataset.datasets.metadata
@@ -48,8 +41,6 @@ export const Explore = (): JSX.Element => {
 
 	// TODO add option to determine limit number; default show 12 datasets each time
 	const [currPageNum, setCurrPageNum] = useState<number>(1);
-	const [currPageNumMyDatasets, setCurrPageNumMyDatasets] = useState<number>(1);
-
 	const [limit] = useState<number>(config.defaultDatasetPerPage);
 	// TODO add switch to turn on and off "mine" dataset
 	const [mine, setMine] = useState<boolean>(false);
@@ -64,10 +55,6 @@ export const Explore = (): JSX.Element => {
 	useEffect(() => {
 		listDatasets(0, limit, mine);
 	}, [mine]);
-	// component did mount
-	// useEffect(() => {
-	// 	listMyDatasets(0, limit);
-	// }, []);
 
 	// Admin mode will fetch all datasets
 	useEffect(() => {
@@ -77,7 +64,7 @@ export const Explore = (): JSX.Element => {
 	// Admin mode will fetch my datasets
 	useEffect(() => {
 		listDatasets(0, limit, true);
-	}, [adminMode]);
+	}, [adminMode, mine]);
 
 
 	// switch tabs
@@ -90,7 +77,6 @@ export const Explore = (): JSX.Element => {
 			listDatasets(0, limit, true);
 		}
 		setSelectedTabIndex(newTabIndex);
-		console.log("length of datasets", datasets);
 	};
 
 	// pagination
@@ -98,13 +84,6 @@ export const Explore = (): JSX.Element => {
 		const newSkip = (value - 1) * limit;
 		setCurrPageNum(value);
 		listDatasets(newSkip, limit, mine);
-	};
-
-	// pagination
-	const handlePageChangeMyDatasets = (_: ChangeEvent<unknown>, value: number) => {
-		const newSkip = (value - 1) * limit;
-		setCurrPageNumMyDatasets(value);
-		listMyDatasets(newSkip, limit);
 	};
 
 	return (
