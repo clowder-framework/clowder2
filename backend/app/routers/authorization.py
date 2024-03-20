@@ -238,7 +238,7 @@ async def set_dataset_user_role(
                 AuthorizationDB.role == role,
             )
             if user.read_only_user and role.name is not RoleType.VIEWER:
-                print("this is not allowed")
+                raise HTTPException(status_code=405, detail=f"User {username} is read only")
             if auth_db is not None and username not in auth_db.user_ids:
                 auth_db.user_ids.append(username)
                 await auth_db.save()
