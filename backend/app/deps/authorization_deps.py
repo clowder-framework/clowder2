@@ -443,8 +443,11 @@ def access(
     role_required: RoleType,
     admin_mode: bool = Depends(get_admin_mode),
     admin: bool = Depends(get_admin),
-    read_only_user: bool = Depends(get_read_only_user()),
+    read_only_user: bool = Depends(get_read_only_user),
 ) -> bool:
+    # check for read only user first
+    if read_only_user and role_required == RoleType.VIEWER:
+        return True
     """Enforce implied role hierarchy ADMIN = OWNER > EDITOR > UPLOADER > VIEWER"""
     if user_role == RoleType.OWNER or (admin and admin_mode):
         return True
@@ -452,12 +455,12 @@ def access(
         RoleType.EDITOR,
         RoleType.UPLOADER,
         RoleType.VIEWER,
-    ]:
+    ] and not read_only_user:
         return True
     elif user_role == RoleType.UPLOADER and role_required in [
         RoleType.UPLOADER,
         RoleType.VIEWER,
-    ]:
+    ] and not read_only_user:
         return True
     elif user_role == RoleType.VIEWER and role_required == RoleType.VIEWER:
         return True
