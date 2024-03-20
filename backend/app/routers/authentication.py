@@ -202,6 +202,7 @@ async def revoke_admin(
             detail=f"User {current_username.email} is not an admin. Only admin can revoke admin access.",
         )
 
+
 @router.post("/users/enable/{useremail}", response_model=UserOut)
 async def user_enable(
     useremail: str, current_username=Depends(get_current_user), admin=Depends(get_admin)
@@ -232,6 +233,7 @@ async def user_enable(
             status_code=403,
             detail=f"User {current_username.email} is not an admin. Only admin can enable user access.",
         )
+
 
 @router.post("/users/disable/{useremail}", response_model=UserOut)
 async def user_enable(
