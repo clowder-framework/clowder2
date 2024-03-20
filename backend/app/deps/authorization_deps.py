@@ -2,7 +2,7 @@ from beanie import PydanticObjectId
 from beanie.operators import Or
 from fastapi import Depends, HTTPException
 
-from app.keycloak_auth import get_current_username
+from app.keycloak_auth import get_current_username, get_read_only_user
 from app.models.authorization import RoleType, AuthorizationDB
 from app.models.datasets import DatasetDB, DatasetStatus
 from app.models.files import FileOut, FileDB, FileStatus
@@ -197,6 +197,7 @@ class Authorization:
         current_user: str = Depends(get_current_username),
         admin_mode: bool = Depends(get_admin_mode),
         admin: bool = Depends(get_admin),
+        readonly: bool = Depends(get_read_only_user)
     ):
         # TODO: Make sure we enforce only one role per user per dataset, or find_one could yield wrong answer here.
 
@@ -442,6 +443,7 @@ def access(
     role_required: RoleType,
     admin_mode: bool = Depends(get_admin_mode),
     admin: bool = Depends(get_admin),
+    read_only_user: bool = Depends(get_read_only_user()),
 ) -> bool:
     """Enforce implied role hierarchy ADMIN = OWNER > EDITOR > UPLOADER > VIEWER"""
     if user_role == RoleType.OWNER or (admin and admin_mode):
