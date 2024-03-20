@@ -389,6 +389,7 @@ async def retreive_refresh_token(email: str):
             headers={"WWW-Authenticate": "Bearer"},
         )
 
+
 async def enable_disable_user(email: str, set_enable: bool):
     keycloak_admin = KeycloakAdmin(
         server_url=settings.auth_server_url,
