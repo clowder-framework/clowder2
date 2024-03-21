@@ -305,6 +305,7 @@ async def get_current_username(
         headers={"WWW-Authenticate": "Bearer"},
     )
 
+
 async def get_read_only_user(
     token: str = Security(oauth2_scheme),
     api_key: str = Security(api_key_header),
@@ -388,6 +389,7 @@ async def get_read_only_user(
         detail="Not authenticated.",  # "token expired",
         headers={"WWW-Authenticate": "Bearer"},
     )
+
 
 async def get_current_user_id(identity: Json = Depends(get_token)) -> str:
     """Retrieve internal Keycloak id. Does not query MongoDB."""

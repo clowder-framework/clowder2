@@ -197,7 +197,7 @@ class Authorization:
         current_user: str = Depends(get_current_username),
         admin_mode: bool = Depends(get_admin_mode),
         admin: bool = Depends(get_admin),
-        readonly: bool = Depends(get_read_only_user)
+        readonly: bool = Depends(get_read_only_user),
     ):
         # TODO: Make sure we enforce only one role per user per dataset, or find_one could yield wrong answer here.
 
@@ -451,16 +451,26 @@ def access(
     """Enforce implied role hierarchy ADMIN = OWNER > EDITOR > UPLOADER > VIEWER"""
     if user_role == RoleType.OWNER or (admin and admin_mode):
         return True
-    elif user_role == RoleType.EDITOR and role_required in [
-        RoleType.EDITOR,
-        RoleType.UPLOADER,
-        RoleType.VIEWER,
-    ] and not read_only_user:
+    elif (
+        user_role == RoleType.EDITOR
+        and role_required
+        in [
+            RoleType.EDITOR,
+            RoleType.UPLOADER,
+            RoleType.VIEWER,
+        ]
+        and not read_only_user
+    ):
         return True
-    elif user_role == RoleType.UPLOADER and role_required in [
-        RoleType.UPLOADER,
-        RoleType.VIEWER,
-    ] and not read_only_user:
+    elif (
+        user_role == RoleType.UPLOADER
+        and role_required
+        in [
+            RoleType.UPLOADER,
+            RoleType.VIEWER,
+        ]
+        and not read_only_user
+    ):
         return True
     elif user_role == RoleType.VIEWER and role_required == RoleType.VIEWER:
         return True

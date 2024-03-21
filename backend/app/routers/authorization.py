@@ -230,7 +230,7 @@ async def set_dataset_user_role(
     """Assign a single user a specific role for a dataset."""
 
     if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
-        if (user:= await UserDB.find_one(UserDB.email == username)) is not None:
+        if (user := await UserDB.find_one(UserDB.email == username)) is not None:
             # First, remove any existing role the user has on the dataset
             await remove_dataset_user_role(dataset_id, username, es, user_id, allow)
             auth_db = await AuthorizationDB.find_one(
@@ -239,7 +239,9 @@ async def set_dataset_user_role(
             )
             rolename = role.name
             if user.read_only_user and role.name is not RoleType.VIEWER.name:
-                raise HTTPException(status_code=405, detail=f"User {username} is read only")
+                raise HTTPException(
+                    status_code=405, detail=f"User {username} is read only"
+                )
             if auth_db is not None and username not in auth_db.user_ids:
                 auth_db.user_ids.append(username)
                 await auth_db.save()
