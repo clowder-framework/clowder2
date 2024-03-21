@@ -74,6 +74,7 @@ async def get_dataset_role(
     admin_mode: bool = Depends(get_admin_mode),
     admin=Depends(get_admin),
 ):
+
     """Retrieve role of user for a specific dataset."""
     # Get group id and the associated users from authorization
     criteria = []
@@ -189,16 +190,25 @@ async def set_dataset_group_role(
             ) is not None:
                 if group_id not in auth_db.group_ids:
                     auth_db.group_ids.append(group_id)
+                    readonly_users = []
                     for u in group.users:
-                        auth_db.user_ids.append(u.user.email)
+                        if u.user.read_only_user:
+                            readonly_users.append(u)
+                        else:
+                            auth_db.user_ids.append(u.user.email)
                     await auth_db.replace()
                 await index_dataset(es, DatasetOut(**dataset.dict()), auth_db.user_ids)
                 return auth_db.dict()
             else:
                 # Create new role entry for this dataset
                 user_ids = []
+                readonly_user_ids = []
                 for u in group.users:
-                    user_ids.append(u.user.email)
+                    if u.user.read_only_user:
+                        readonly_user_ids.append(u.user.email)
+                    else:
+                        user_ids.append(u.user.email)
+                # add the users who get the role
                 auth_db = AuthorizationDB(
                     creator=user_id,
                     dataset_id=PydanticObjectId(dataset_id),
@@ -206,6 +216,7 @@ async def set_dataset_group_role(
                     group_ids=[PydanticObjectId(group_id)],
                     user_ids=user_ids,
                 )
+                # if there are read only users add them with the role of viewer
                 await auth_db.insert()
                 await index_dataset(es, DatasetOut(**dataset.dict()), auth_db.user_ids)
                 return auth_db.dict()
