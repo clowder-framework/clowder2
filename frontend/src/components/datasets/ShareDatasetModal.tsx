@@ -75,13 +75,11 @@ export default function ShareDatasetModal(props: ShareDatasetModalProps) {
 	}, [users]);
 
 	const onShare = async () => {
-		console.log('clicked on share');
 		setShowFailAlert(false);
 		setShowSuccessAlert(false);
 		await setUserRole(datasetId, email, role);
 		getRoles(datasetId);
 		let currentRoles = datasetRoles;
-		console.log('current roles', currentRoles);
 		// TODO check for roles
 		let found_user = false;
 		if (currentRoles !== undefined && currentRoles.user_roles !== undefined) {
