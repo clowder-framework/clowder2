@@ -44,4 +44,3 @@ keycloak:
       persistence:
         storageClass: csi-cinder-sc-retain
         size: 8Gi
-

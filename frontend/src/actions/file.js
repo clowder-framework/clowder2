@@ -150,8 +150,8 @@ export const CREATE_FILES = "CREATE_FILES";
 
 export function createFiles(selectedDatasetId, selectedFiles, folderId) {
 	return (dispatch) => {
-		let formData = new FormData();
-		let tmp = [];
+		const formData = new FormData();
+		const tmp = [];
 		if (selectedFiles.length > 0) {
 			for (let i = 0; i < selectedFiles.length; i++) {
 				tmp.push(selectedFiles[i]);
@@ -349,6 +349,7 @@ export function submitFileExtractionAction(fileId, extractorName, requestBody) {
 		return V2.FilesService.postFileExtractApiV2FilesFileIdExtractPost(
 			fileId,
 			extractorName,
+			null,
 			requestBody
 		)
 			.then((json) => {

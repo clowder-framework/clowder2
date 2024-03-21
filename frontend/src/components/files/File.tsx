@@ -412,23 +412,23 @@ export const File = (): JSX.Element => {
 									deleteMetadata={deleteFileMetadata}
 									resourceType="file"
 									resourceId={fileId}
+									publicView={false}
 								/>
-								{fileRole !== undefined && fileRole!== "viewer"?
-									(
-										<Box textAlign="center">
-											<Button
-												variant="contained"
-												sx={{ m: 2 }}
-												onClick={() => {
-													setEnableAddMetadata(true);
-												}}
-											>
+								{fileRole !== undefined && fileRole !== "viewer" ? (
+									<Box textAlign="center">
+										<Button
+											variant="contained"
+											sx={{ m: 2 }}
+											onClick={() => {
+												setEnableAddMetadata(true);
+											}}
+										>
 											Add Metadata
-											</Button>
-										</Box>
-									) :
+										</Button>
+									</Box>
+								) : (
 									<></>
-								}
+								)}
 							</>
 						)}
 					</TabPanel>

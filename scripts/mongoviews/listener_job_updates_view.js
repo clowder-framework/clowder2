@@ -11,7 +11,7 @@ db.getCollection("listener_job_updates").aggregate(
                 foreignField: "_id",
                 as: "listener_job_details"
             }
-            
+
             // Uncorrelated Subqueries
             // (supported as of MongoDB 3.6)
             // {
@@ -20,7 +20,7 @@ db.getCollection("listener_job_updates").aggregate(
             //    pipeline: [ <pipeline to execute on the collection to join> ],
             //    as: "<output array field>"
             // }
-            
+
             // Correlated Subqueries
             // (supported as of MongoDB 5.0)
             // {

@@ -55,7 +55,7 @@ export function downloadPublicVisData(
 			// TODO guess extension
 			filename = `${visualizationId}.tmp`;
 		}
-		let endpoint = `${config.hostname}/api/v2/public/visualizations/${visualizationId}/bytes`;
+		const endpoint = `${config.hostname}/api/v2/public/visualizations/${visualizationId}/bytes`;
 		const response = await fetch(endpoint, {
 			method: "GET",
 			mode: "cors",
@@ -92,8 +92,10 @@ export function downloadPublicVisData(
 	};
 }
 
-export const GET_PUBLIC_VIS_DATA_PRESIGNED_URL = "GET_PUBLIC_VIS_DATA_PRESIGNED_URL";
-export const RESET_PUBLIC_VIS_DATA_PRESIGNED_URL = "RESET_PUBLIC_VIS_DATA_PRESIGNED_URL";
+export const GET_PUBLIC_VIS_DATA_PRESIGNED_URL =
+	"GET_PUBLIC_VIS_DATA_PRESIGNED_URL";
+export const RESET_PUBLIC_VIS_DATA_PRESIGNED_URL =
+	"RESET_PUBLIC_VIS_DATA_PRESIGNED_URL";
 
 export function generatePublicVisPresignedUrl(
 	visualizationId,

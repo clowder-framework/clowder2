@@ -379,10 +379,10 @@ export const Dataset = (): JSX.Element => {
 									deleteMetadata={deleteDatasetMetadata}
 									resourceType="dataset"
 									resourceId={datasetId}
+									publicView={false}
 								/>
 								<Box textAlign="center">
-									{enableAddMetadata &&
-									datasetRole.role !== undefined &&
+									{datasetRole.role !== undefined &&
 									datasetRole.role !== "viewer" ? (
 										<Button
 											variant="contained"
