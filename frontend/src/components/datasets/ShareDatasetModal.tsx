@@ -45,7 +45,7 @@ export default function ShareDatasetModal(props: ShareDatasetModalProps) {
 	const [showSuccessAlert, setShowSuccessAlert] = useState(false);
 	const [options, setOptions] = useState([]);
 	const users = useSelector((state: RootState) => state.group.users.data);
-
+	const datasetRoles = useSelector((state: RootState) => state.dataset.roles);
 	const setUserRole = async (
 		datasetId: string,
 		username: string,
@@ -74,6 +74,10 @@ export default function ShareDatasetModal(props: ShareDatasetModalProps) {
 
 	const onShare = async () => {
 		await setUserRole(datasetId, email, role);
+		getRoles(datasetId);
+		let currentRoles = datasetRoles;
+		// TODO check for roles
+
 		setEmail("");
 		setRole("viewer");
 		setShowSuccessAlert(true);
