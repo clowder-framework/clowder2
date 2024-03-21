@@ -162,7 +162,12 @@ async def get_group_role(
     role: RoleType = Depends(get_role_by_group),
 ):
     """Retrieve role of user on a particular group (i.e. whether they can change group memberships)."""
-    return role
+    if (user := await UserDB.find_one(UserDB.email == current_user)) is not None:
+        # return viewer if read only user
+        if user.read_only_user:
+            return RoleType.VIEWER
+        else:
+            return role
 
 
 @router.post(
