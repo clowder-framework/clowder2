@@ -154,4 +154,50 @@ export class LoginService {
         });
     }
 
+    /**
+     * Enable Readonly User
+     * @param useremail
+     * @param datasetId
+     * @returns UserOut Successful Response
+     * @throws ApiError
+     */
+    public static enableReadonlyUserApiV2UsersEnableReadonlyUseremailPost(
+        useremail: string,
+        datasetId?: string,
+    ): CancelablePromise<UserOut> {
+        return __request({
+            method: 'POST',
+            path: `/api/v2/users/enable_readonly/${useremail}`,
+            query: {
+                'dataset_id': datasetId,
+            },
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+
+    /**
+     * Disable Readonly User
+     * @param useremail
+     * @param datasetId
+     * @returns UserOut Successful Response
+     * @throws ApiError
+     */
+    public static disableReadonlyUserApiV2UsersSetReadonlyUseremailPost(
+        useremail: string,
+        datasetId?: string,
+    ): CancelablePromise<UserOut> {
+        return __request({
+            method: 'POST',
+            path: `/api/v2/users/set_readonly/${useremail}`,
+            query: {
+                'dataset_id': datasetId,
+            },
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+
 }
