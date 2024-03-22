@@ -1,4 +1,5 @@
 import {
+	CHANGE_SELECTED_VERSION,
 	DOWNLOAD_FILE,
 	RECEIVE_FILE_EXTRACTED_METADATA,
 	RECEIVE_FILE_METADATA_JSONLD,
@@ -7,11 +8,10 @@ import {
 	RECEIVE_PREVIEWS,
 	RECEIVE_VERSIONS,
 	RESET_FILE_PRESIGNED_URL,
-	CHANGE_SELECTED_VERSION,
 } from "../actions/file";
 import { DataAction } from "../types/action";
 import { FileState } from "../types/data";
-import { AuthorizationBase, FileOut as FileSummary } from "../openapi/v2";
+import { FileOut as FileSummary } from "../openapi/v2";
 import { RECEIVE_FILE_ROLE } from "../actions/authorization";
 
 const defaultState: FileState = {
@@ -20,7 +20,7 @@ const defaultState: FileState = {
 	metadataJsonld: [],
 	previews: [],
 	fileVersions: [],
-	fileRole: <AuthorizationBase>{},
+	fileRole: "",
 	blob: new Blob([]),
 	presignedUrl: "",
 	selected_version_num: 1,
