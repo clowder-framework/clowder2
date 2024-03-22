@@ -16,7 +16,7 @@ export const FileDropStyle = {
 };
 
 export const FileDropInput = {
-	width: "95px"
+	width: "95px",
 };
 
 export const FileDropText = {
@@ -27,7 +27,7 @@ export const FileDropText = {
 	fontWeight: 500,
 	letterSpacing: 0,
 	lineHeight: "18px",
-	textAlign: "center"
+	textAlign: "center",
 };
 export const FileDropGroup = {
 	width: "92px",
@@ -41,11 +41,11 @@ export const DisplayFile = {
 	border: "1px solid #00619D",
 	backgroundColor: "#FFFFFF",
 	margin: "5px auto 0 auto",
-	display: "block"
+	display: "block",
 };
 export const DisplayFileItem = {
 	width: "100%",
-	height: "37px"
+	height: "37px",
 };
 
 export const DisplayFilename = {
@@ -56,14 +56,14 @@ export const DisplayFilename = {
 	letterSpacing: 0,
 	lineHeight: "18px",
 	padding: "9px 17px",
-	float: "left"
+	float: "left",
 };
 export const DeleteFileIcon = {
-	"height": "24px",
-	"width": "24px",
-	"float": "right",
-	"margin": "6px",
+	height: "24px",
+	width: "24px",
+	float: "right",
+	margin: "6px",
 	"&:hover": {
-		color: "#D63649"
-	}
+		color: "#D63649",
+	},
 };

@@ -1,4 +1,4 @@
-import React, {useEffect, useRef, useState} from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 import {
 	Box,
@@ -35,7 +35,7 @@ type UploadFileDragAndDropProps = {
 export const UploadFileDragAndDrop: React.FC<UploadFileDragAndDropProps> = (
 	props: UploadFileDragAndDropProps
 ) => {
-	const { selectedDatasetId, folderId} = props;
+	const { selectedDatasetId, folderId } = props;
 	const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
 	const [metadataRequestForms, setMetadataRequestForms] = useState({});
 	const [allFilled, setAllFilled] = React.useState<boolean>(false);
@@ -87,22 +87,22 @@ export const UploadFileDragAndDrop: React.FC<UploadFileDragAndDropProps> = (
 	};
 
 	const onFileInputChange = (event) => {
-		const fileList : File[] = Array.from(event.target.files);
-		let newArray = selectedFiles.slice();
-		fileList.forEach(f => newArray.push(f));
+		const fileList: File[] = Array.from(event.target.files);
+		const newArray = selectedFiles.slice();
+		fileList.forEach((f) => newArray.push(f));
 		setSelectedFiles(newArray);
 	};
 
 	const onDrop = (fileList) => {
-		let newFileList : File[] = Array.from(fileList);
-		let newArray = selectedFiles.slice();
-		newFileList.forEach(f => newArray.push(f));
+		const newFileList: File[] = Array.from(fileList);
+		const newArray = selectedFiles.slice();
+		newFileList.forEach((f) => newArray.push(f));
 		setSelectedFiles(newArray);
 	};
 
 	const onDeleteClick = (element) => {
-		let newFileList : File[] = selectedFiles;
-		let newArray = newFileList.slice();
+		const newFileList: File[] = selectedFiles;
+		const newArray = newFileList.slice();
 		newArray.pop(element);
 		setSelectedFiles(newArray);
 	};
@@ -204,7 +204,7 @@ export const UploadFileDragAndDrop: React.FC<UploadFileDragAndDropProps> = (
 										Next
 									</Button>
 								</Grid>
-								<Grid xs={1}></Grid>
+								<Grid xs={1} />
 							</Grid>
 						</StepContent>
 					</Step>

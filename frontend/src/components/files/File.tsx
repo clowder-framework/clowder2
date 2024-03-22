@@ -50,7 +50,7 @@ import { VersionChip } from "../versions/VersionChip";
 import RoleChip from "../auth/RoleChip";
 import Typography from "@mui/material/Typography";
 import { ClowderSelect } from "../styledComponents/ClowderSelect";
-import {AuthWrapper} from "../auth/AuthWrapper";
+import { AuthWrapper } from "../auth/AuthWrapper";
 
 export const File = (): JSX.Element => {
 	// path parameter
@@ -347,7 +347,10 @@ export const File = (): JSX.Element => {
 							{...a11yProps(2)}
 							disabled={false}
 						/>
-						<AuthWrapper currRole={datasetRole.role} allowedRoles={["owner", "editor"]}>
+						<AuthWrapper
+							currRole={datasetRole.role}
+							allowedRoles={["owner", "editor"]}
+						>
 							<Tab
 								icon={<BuildIcon />}
 								iconPosition="start"
@@ -441,9 +444,12 @@ export const File = (): JSX.Element => {
 							version={fileSummary.version_num}
 						/>
 					</TabPanel>
-					<AuthWrapper currRole={datasetRole.role} allowedRoles={["owner", "editor"]}>
+					<AuthWrapper
+						currRole={datasetRole.role}
+						allowedRoles={["owner", "editor"]}
+					>
 						<TabPanel value={selectedTabIndex} index={3}>
-							<Listeners fileId={fileId} datasetId={datasetId}/>
+							<Listeners fileId={fileId} datasetId={datasetId} />
 						</TabPanel>
 					</AuthWrapper>
 					<TabPanel value={selectedTabIndex} index={4}>
