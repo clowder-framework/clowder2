@@ -263,7 +263,6 @@ export function datasetCreated(formData, licenseId, licenseFormData) {
 			return V2.LicensesService.saveLicenseApiV2LicensesPost(licenseFormData)
 				.then((license) => {
 					licenseId = license.id;
-					console.log("license: ", licenseId);
 					// After saving the license, save the dataset
 					return V2.DatasetsService.saveDatasetApiV2DatasetsPost(licenseId, formData);
 				})
