@@ -154,6 +154,9 @@ async def get_current_user(
             user = await UserDB.find_one(UserDB.email == userinfo["email"])
             return UserOut(**user.dict())
         except KeycloakAuthenticationError as e:
+            if not e.error_message:
+                if e.response_code == 401:
+                    e.error_message = '{"error": "Unauthenticated"}'
             raise HTTPException(
                 status_code=e.response_code,
                 detail=json.loads(e.error_message),
@@ -236,6 +239,9 @@ async def get_current_username(
             return userinfo["email"]
         # expired token
         except KeycloakAuthenticationError as e:
+            if not e.error_message:
+                if e.response_code == 401:
+                    e.error_message = '{"error": "Unauthenticated"}'
             raise HTTPException(
                 status_code=e.response_code,
                 detail=json.loads(e.error_message),
