@@ -5,7 +5,7 @@
     "bool": "Boolean",
     "date": "Date",
     "time": "Time",
-    "dict": "Dictionary", 
+    "dict": "Dictionary",
     "enum": "List",
     "tuple": "Tuple"
 }

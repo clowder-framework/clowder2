@@ -184,7 +184,7 @@ export const UploadFileMultiple: React.FC<UploadFileMultipleProps> = (
 										Next
 									</Button>
 								</Grid>
-								<Grid xs={1}></Grid>
+								<Grid xs={1} />
 							</Grid>
 						</StepContent>
 					</Step>
