@@ -201,6 +201,40 @@ export function fetchDatasetAbout(id) {
 	};
 }
 
+export const RECEIVE_DATASET_LICENSE = "RECEIVE_DATASET_LICENSE";
+
+export function fetchDatasetLicense(license_id) {
+	return (dispatch) => {
+		return V2.LicensesService.getLicenseApiV2LicensesLicenseIdGet(license_id).then((json) => {
+			dispatch({
+				type: RECEIVE_DATASET_LICENSE,
+				license: json,
+				receivedAt: Date.now(),
+			});
+		})
+			.catch((reason) => {
+				dispatch(handleErrors(reason, fetchDatasetLicense(license_id)));
+			});
+	};
+}
+
+export const UPDATE_DATASET_LICENSE = "UPDATE_DATASET_LICENSE";
+
+export function updateDatasetLicense(licenseId, formData) {
+	return (dispatch) => {
+		return V2.LicensesService.editLicenseApiV2LicensesLicenseIdPut(licenseId, formData).then((json) => {
+			dispatch({
+				type: UPDATE_DATASET_LICENSE,
+				license: json,
+				receivedAt: Date.now(),
+			});
+		})
+			.catch((reason) => {
+				dispatch(handleErrors(reason, updateDatasetLicense(licenseId, formData)));
+			});
+	};
+}
+
 export const RECEIVE_DATASETS = "RECEIVE_DATASETS";
 
 export function fetchDatasets(skip = 0, limit = 21, mine = false) {
@@ -222,20 +256,49 @@ export function fetchDatasets(skip = 0, limit = 21, mine = false) {
 
 export const CREATE_DATASET = "CREATE_DATASET";
 
-export function datasetCreated(formData) {
+export function datasetCreated(formData, licenseId, licenseFormData) {
 	return (dispatch) => {
-		return V2.DatasetsService.saveDatasetApiV2DatasetsPost(formData)
-			.then((dataset) => {
-				dispatch({
-					type: CREATE_DATASET,
-					dataset: dataset,
-					receivedAt: Date.now(),
+		if (licenseFormData) {
+			// If licenseFormData is present, save the license first
+			return V2.LicensesService.saveLicenseApiV2LicensesPost(licenseFormData)
+				.then((license) => {
+					licenseId = license.id;
+					// After saving the license, save the dataset
+					return V2.DatasetsService.saveDatasetApiV2DatasetsPost(licenseId, formData);
+				})
+				.then((dataset) => {
+					dispatch({
+						type: CREATE_DATASET,
+						dataset: dataset,
+						receivedAt: Date.now(),
+					});
+				})
+				.catch((reason) => {
+					dispatch(handleErrors(reason, datasetCreated(formData, licenseId, licenseFormData)));
 				});
-			})
-			.catch((reason) => {
-				dispatch(handleErrors(reason, datasetCreated(formData)));
-			});
+		} else {
+			// If licenseFormData is not present, directly save the dataset
+			return V2.DatasetsService.saveDatasetApiV2DatasetsPost(licenseId, formData)
+				.then((dataset) => {
+					dispatch({
+						type: CREATE_DATASET,
+						dataset: dataset,
+						receivedAt: Date.now(),
+					});
+				})
+				.catch((reason) => {
+					dispatch(handleErrors(reason, datasetCreated(formData, licenseId, licenseFormData)));
+				});
+		}
 	};
+}
+
+export function licenseCreated(formData) {
+	try {
+		return V2.LicensesService.saveLicenseApiV2LicensesPost(formData);
+	} catch (reason) {
+		(handleErrors(reason, licenseCreated(formData)));
+	}
 }
 
 export const RESET_CREATE_DATASET = "RESET_CREATE_DATASET";

@@ -140,8 +140,11 @@ def create_group(client: TestClient, headers: dict):
 
 def create_dataset(client: TestClient, headers: dict):
     """Creates a test dataset and returns the JSON."""
+    license_id = "CC BY"
     response = client.post(
-        f"{settings.API_V2_STR}/datasets", headers=headers, json=dataset_example
+        f"{settings.API_V2_STR}/datasets/?license_id={license_id}",
+        headers=headers,
+        json=dataset_example,
     )
     assert response.status_code == 200
     assert response.json().get("id") is not None

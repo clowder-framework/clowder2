@@ -74,6 +74,7 @@ from app.search.connect import (
     delete_document_by_id,
 )
 from app.search.index import index_dataset, index_file
+from app.models.licenses import standard_licenses
 
 router = APIRouter()
 security = HTTPBearer()
@@ -201,10 +202,21 @@ async def _get_folder_hierarchy(
 @router.post("", response_model=DatasetOut)
 async def save_dataset(
     dataset_in: DatasetIn,
+    license_id: str,
     user=Depends(get_current_user),
     es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
 ):
-    dataset = DatasetDB(**dataset_in.dict(), creator=user)
+    standard_license = False
+    standard_license_ids = [license.id for license in standard_licenses]
+    if license_id in standard_license_ids:
+        standard_license = True
+
+    dataset = DatasetDB(
+        **dataset_in.dict(),
+        creator=user,
+        license_id=str(license_id),
+        standard_license=standard_license,
+    )
     await dataset.insert()
 
     # Create authorization entry
@@ -414,9 +426,10 @@ async def delete_dataset(
             FolderDB.dataset_id == PydanticObjectId(dataset_id)
         ).delete()
         await AuthorizationDB.find(
-            AuthorizationDB.dataset_id == ObjectId(dataset_id)
+            AuthorizationDB.dataset_id == PydanticObjectId(dataset_id)
         ).delete()
         return {"deleted": dataset_id}
+        await delete_license(dataset.license_id)
     raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
 
 
@@ -453,7 +466,7 @@ async def get_dataset_folders(
     limit: int = 10,
     allow: bool = Depends(Authorization("viewer")),
 ):
-    if (await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
+    if (dataset_db := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
         if authenticated or public:
             query = [
                 FolderDBViewList.dataset_id == ObjectId(dataset_id),

@@ -2,8 +2,6 @@
 /* tslint:disable */
 /* eslint-disable */
 
-import type { UserOut } from './UserOut';
-
 /**
  * Document Mapping class.
  *
@@ -17,17 +15,15 @@ import type { UserOut } from './UserOut';
  * - Pydantic BaseModel
  * - [UpdateMethods](https://roman-right.github.io/beanie/api/interfaces/#aggregatemethods)
  */
-export type DatasetOut = {
-    name?: string;
-    description?: string;
-    status?: string;
-    id?: string;
-    creator: UserOut;
+export type LicenseOut = {
+    creator: string;
     created?: string;
     modified?: string;
-    user_views?: number;
-    downloads?: number;
-    thumbnail_id?: string;
-    standard_license?: boolean;
-    license_id?: string;
+    name: string;
+    description?: string;
+    url?: string;
+    version?: string;
+    holders?: string;
+    expiration_date?: string;
+    id?: string;
 }

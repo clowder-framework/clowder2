@@ -9,19 +9,22 @@ import {
 	Tab,
 	Tabs,
 	Typography,
+	Link,
+	IconButton, DialogTitle, DialogContent, Dialog
 } from "@mui/material";
+import EditIcon from "@mui/icons-material/Edit";
 import { useParams, useSearchParams } from "react-router-dom";
 import { RootState } from "../../types/data";
 import { useDispatch, useSelector } from "react-redux";
 import {
-	fetchDatasetAbout,
+	fetchDatasetAbout, fetchDatasetLicense,
 	fetchFoldersFilesInDataset as fetchFoldersFilesInDatasetAction,
 } from "../../actions/dataset";
 import { fetchFolderPath } from "../../actions/folder";
 
 import { a11yProps, TabPanel } from "../tabs/TabComponent";
 import FilesTable from "../files/FilesTable";
-import { MetadataIn } from "../../openapi/v2";
+import {LicenseOption, MetadataIn} from "../../openapi/v2";
 import { DisplayMetadata } from "../metadata/DisplayMetadata";
 import { DisplayListenerMetadata } from "../metadata/DisplayListenerMetadata";
 import { EditMetadata } from "../metadata/EditMetadata";
@@ -50,6 +53,9 @@ import { ErrorModal } from "../errors/ErrorModal";
 import { Visualization } from "../visualizations/Visualization";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import config from "../../app.config";
+import {EditLicenseModal} from "./EditLicenseModal";
+import {V2} from "../../openapi";
+import {fetchStandardLicenses, fetchStandardLicenseUrl} from "../../utils/licenses";
 
 export const Dataset = (): JSX.Element => {
 	// path parameter
@@ -86,6 +92,9 @@ export const Dataset = (): JSX.Element => {
 		);
 	const listDatasetAbout = (datasetId: string | undefined) =>
 		dispatch(fetchDatasetAbout(datasetId));
+	const listDatasetLicense = (licenseId: string | undefined) =>
+		dispatch(fetchDatasetLicense(licenseId));
+
 	const listDatasetMetadata = (datasetId: string | undefined) =>
 		dispatch(fetchDatasetMetadata(datasetId));
 	const getMetadatDefinitions = (
@@ -114,6 +123,8 @@ export const Dataset = (): JSX.Element => {
 
 	const [currPageNum, setCurrPageNum] = useState<number>(1);
 
+	const [editLicenseOpen, setEditLicenseOpen] = useState<boolean>(false);
+
 	const [limit] = useState<number>(config.defaultFolderFilePerPage);
 
 	const pageMetadata = useSelector(
@@ -123,6 +134,17 @@ export const Dataset = (): JSX.Element => {
 		(state: RootState) => state.dataset.foldersAndFiles.data
 	);
 	const adminMode = useSelector((state: RootState) => state.user.adminMode);
+	const license = useSelector((state: RootState) => state.dataset.license);
+	const [standardLicenseUrl, setStandardLicenseUrl] = useState<string>("");
+	const fetchStandardLicenseUrlData = async (license_id: string) => {
+            try {
+                const data = await fetchStandardLicenseUrl(license_id); // Call your function to fetch licenses
+                setStandardLicenseUrl(data); // Update state with the fetched data
+            } catch (error) {
+                console.error('Error fetching license url', error);
+            }
+        };
+
 
 	useEffect(() => {
 		fetchFoldersFilesInDataset(
@@ -132,9 +154,14 @@ export const Dataset = (): JSX.Element => {
 			limit
 		);
 		listDatasetAbout(datasetId);
+		if (about.standard_license && about.license_id) {
+			fetchStandardLicenseUrlData(about.license_id);
+		}
+		if (!about.standard_license && about.license_id)
+			listDatasetLicense(about.license_id);
 		getFolderPath(folderId);
 		getMetadatDefinitions(null, 0, 100);
-	}, [searchParams, adminMode]);
+	}, [searchParams, adminMode, about.license_id]);
 
 	// for breadcrumb
 	useEffect(() => {
@@ -165,6 +192,16 @@ export const Dataset = (): JSX.Element => {
 		newTabIndex: number
 	) => {
 		setSelectedTabIndex(newTabIndex);
+	};
+
+	const [openEditLicenseModal, setOpenEditLicenseModal] = useState(false);
+
+	const handleOpenEditLicenseModal = () => {
+		setOpenEditLicenseModal(true); // Open the modal
+	};
+
+	const handleCloseEditLicenseModal = (save: boolean) => {
+		setOpenEditLicenseModal(false); // Close the modal
 	};
 
 	const handlePageChange = (_: ChangeEvent<unknown>, value: number) => {
@@ -211,6 +248,8 @@ export const Dataset = (): JSX.Element => {
 		setEnableAddMetadata(false);
 	};
 
+	// @ts-ignore
+	// @ts-ignore
 	return (
 		<Layout>
 			{/*Error Message dialogue*/}
@@ -350,55 +389,55 @@ export const Dataset = (): JSX.Element => {
 						{enableAddMetadata &&
 						datasetRole.role !== undefined &&
 						datasetRole.role !== "viewer" ? (
-							<>
-								<EditMetadata
-									resourceType="dataset"
-									resourceId={datasetId}
-									setMetadata={setMetadata}
-								/>
-								<Button
-									variant="contained"
-									onClick={handleMetadataUpdateFinish}
-									sx={{ mt: 1, mr: 1 }}
-								>
+								<>
+									<EditMetadata
+										resourceType="dataset"
+										resourceId={datasetId}
+										setMetadata={setMetadata}
+									/>
+									<Button
+										variant="contained"
+										onClick={handleMetadataUpdateFinish}
+										sx={{ mt: 1, mr: 1 }}
+									>
 									Update
-								</Button>
-								<Button
-									onClick={() => {
-										setEnableAddMetadata(false);
-									}}
-									sx={{ mt: 1, mr: 1 }}
-								>
+									</Button>
+									<Button
+										onClick={() => {
+											setEnableAddMetadata(false);
+										}}
+										sx={{ mt: 1, mr: 1 }}
+									>
 									Cancel
-								</Button>
-							</>
-						) : (
-							<>
-								<DisplayMetadata
-									updateMetadata={updateDatasetMetadata}
-									deleteMetadata={deleteDatasetMetadata}
-									resourceType="dataset"
-									resourceId={datasetId}
-								/>
-								<Box textAlign="center">
-									{enableAddMetadata &&
+									</Button>
+								</>
+							) : (
+								<>
+									<DisplayMetadata
+										updateMetadata={updateDatasetMetadata}
+										deleteMetadata={deleteDatasetMetadata}
+										resourceType="dataset"
+										resourceId={datasetId}
+									/>
+									<Box textAlign="center">
+										{enableAddMetadata &&
 									datasetRole.role !== undefined &&
 									datasetRole.role !== "viewer" ? (
-										<Button
-											variant="contained"
-											sx={{ m: 2 }}
-											onClick={() => {
-												setEnableAddMetadata(true);
-											}}
-										>
+												<Button
+													variant="contained"
+													sx={{ m: 2 }}
+													onClick={() => {
+														setEnableAddMetadata(true);
+													}}
+												>
 											Add Metadata
-										</Button>
-									) : (
-										<></>
-									)}
-								</Box>
-							</>
-						)}
+												</Button>
+											) : (
+												<></>
+											)}
+									</Box>
+								</>
+							)}
 					</TabPanel>
 					<TabPanel value={selectedTabIndex} index={2}>
 						<DisplayListenerMetadata
@@ -430,6 +469,48 @@ export const Dataset = (): JSX.Element => {
 					)}
 				</Grid>
 				<Grid item>
+					<Typography variant="h5" gutterBottom>
+				License
+					</Typography>
+					{about.standard_license && about.license_id !== undefined ? (
+						<Typography>
+							<Link href={standardLicenseUrl} target="_blank">
+								<img className="logo" src={`public/${about.license_id}.png`} alt={about.license_id}/>
+							</Link>
+						</Typography>
+					) : (
+						<></>
+					)}
+					{!about.standard_license && license!== undefined && license.name !== undefined ? (
+						<div>
+							<Typography>
+								<Link href={license.url} target="_blank">{license.name}</Link>
+								<IconButton
+									onClick={() => {
+										setEditLicenseOpen(true);
+									}}
+								>
+									<EditIcon />
+								</IconButton>
+							</Typography>
+							<Dialog
+								open={editLicenseOpen}
+								onClose={() => {
+									setOpenEditLicenseModal(false);
+								}}
+								fullWidth={true}
+								maxWidth="md"
+								aria-labelledby="form-dialog"
+							>
+								<DialogTitle>Edit license</DialogTitle>
+								<DialogContent>
+									<EditLicenseModal setEditLicenseOpen={setEditLicenseOpen} />
+								</DialogContent>
+							</Dialog>
+						</div>
+					) : (
+						<></>
+					)}
 					<DatasetDetails details={about} />
 				</Grid>
 			</Grid>

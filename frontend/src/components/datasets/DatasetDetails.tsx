@@ -9,7 +9,7 @@ type DatasetAboutProps = {
 };
 
 export function DatasetDetails(props: DatasetAboutProps) {
-	const { id, created, modified, creator, status, views, downloads } =
+	const { id, created, modified, creator, status, views, downloads} =
 		props.details;
 
 	const details = new Map<string, string>();
