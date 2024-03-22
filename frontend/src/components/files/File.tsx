@@ -49,6 +49,7 @@ import { FileHistory } from "./FileHistory";
 import { VersionChip } from "../versions/VersionChip";
 import Typography from "@mui/material/Typography";
 import { ClowderSelect } from "../styledComponents/ClowderSelect";
+import { AuthWrapper } from "../auth/AuthWrapper";
 
 export const File = (): JSX.Element => {
 	// path parameter
@@ -94,6 +95,9 @@ export const File = (): JSX.Element => {
 	);
 	const folderPath = useSelector((state: RootState) => state.folder.folderPath);
 	const fileRole = useSelector((state: RootState) => state.file.fileRole);
+	const datasetRole = useSelector(
+		(state: RootState) => state.dataset.datasetRole
+	);
 	const storageType = useSelector(
 		(state: RootState) => state.file.fileSummary.storage_type
 	);
@@ -341,14 +345,19 @@ export const File = (): JSX.Element => {
 							{...a11yProps(2)}
 							disabled={false}
 						/>
-						<Tab
-							icon={<BuildIcon />}
-							iconPosition="start"
-							sx={TabStyle}
-							label="Analysis"
-							{...a11yProps(3)}
-							disabled={false}
-						/>
+						<AuthWrapper
+							currRole={datasetRole.role}
+							allowedRoles={["owner", "editor"]}
+						>
+							<Tab
+								icon={<BuildIcon />}
+								iconPosition="start"
+								sx={TabStyle}
+								label="Analysis"
+								{...a11yProps(3)}
+								disabled={false}
+							/>
+						</AuthWrapper>
 						<Tab
 							icon={<HistoryIcon />}
 							iconPosition="start"
@@ -433,9 +442,14 @@ export const File = (): JSX.Element => {
 							version={fileSummary.version_num}
 						/>
 					</TabPanel>
-					<TabPanel value={selectedTabIndex} index={3}>
-						<Listeners fileId={fileId} datasetId={datasetId} />
-					</TabPanel>
+					<AuthWrapper
+						currRole={datasetRole.role}
+						allowedRoles={["owner", "editor"]}
+					>
+						<TabPanel value={selectedTabIndex} index={3}>
+							<Listeners fileId={fileId} datasetId={datasetId} />
+						</TabPanel>
+					</AuthWrapper>
 					<TabPanel value={selectedTabIndex} index={4}>
 						<ExtractionHistoryTab fileId={fileId} />
 					</TabPanel>
