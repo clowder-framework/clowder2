@@ -14,7 +14,7 @@ import { useSelector } from "react-redux";
 import { RootState } from "../../types/data";
 import { UploadFile } from "../files/UploadFile";
 import { UploadFileMultiple } from "../files/UploadFileMultiple";
-import {UploadFileDragAndDrop} from "../files/UploadFileDragAndDrop";
+import { UploadFileDragAndDrop } from "../files/UploadFileDragAndDrop";
 import UploadIcon from "@mui/icons-material/Upload";
 import { Folder } from "@material-ui/icons";
 
@@ -30,8 +30,7 @@ export const NewMenu = (props: ActionsMenuProps): JSX.Element => {
 	const about = useSelector((state: RootState) => state.dataset.about);
 
 	const [anchorEl, setAnchorEl] = React.useState<Element | null>(null);
-	const [dragDropFiles, setDragDropFiles] =
-		React.useState<boolean>(false);
+	const [dragDropFiles, setDragDropFiles] = React.useState<boolean>(false);
 	const [newFolder, setNewFolder] = React.useState<boolean>(false);
 
 	const handleCloseNewFolder = () => {
@@ -55,7 +54,10 @@ export const NewMenu = (props: ActionsMenuProps): JSX.Element => {
 				maxWidth="lg"
 				aria-labelledby="form-dialog"
 			>
-				<UploadFileDragAndDrop selectedDatasetId={datasetId} folderId={folderId}/>
+				<UploadFileDragAndDrop
+					selectedDatasetId={datasetId}
+					folderId={folderId}
+				/>
 			</Dialog>
 
 			<CreateFolder
