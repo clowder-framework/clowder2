@@ -303,3 +303,39 @@ export function revokeAdmin(email) {
 			});
 	};
 }
+
+export const ENABLE_READONLY = "ENABLE_READONLY";
+
+export function enableReadOnly(email) {
+	return (dispatch) => {
+		return V2.LoginService.enableReadonlyUserApiV2UsersEnableReadonlyUseremailPost(email)
+			.then((json) => {
+				dispatch({
+					type: ENABLE_READONLY,
+					profile: json,
+					receivedAt: Date.now(),
+				});
+			})
+			.catch((reason) => {
+				dispatch(handleErrors(reason, enableReadOnly(email)));
+			});
+	};
+}
+
+export const DISABLE_READONLY = "DISABLE_READONLY";
+
+export function disableReadOnly(email) {
+	return (dispatch) => {
+		return V2.LoginService.disableReadonlyUserApiV2UsersSetReadonlyUseremailPost(email)
+			.then((json) => {
+				dispatch({
+					type: DISABLE_READONLY,
+					profile: json,
+					receivedAt: Date.now(),
+				});
+			})
+			.catch((reason) => {
+				dispatch(handleErrors(reason, disableReadOnly(email)));
+			});
+	};
+}
