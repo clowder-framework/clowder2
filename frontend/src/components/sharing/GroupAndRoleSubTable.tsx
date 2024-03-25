@@ -1,12 +1,12 @@
 import React from "react";
 import TableContainer from "@mui/material/TableContainer";
 import Table from "@mui/material/Table";
-import TableHead from "@mui/material/TableHead";
-import TableRow from "@mui/material/TableRow";
-import TableCell from "@mui/material/TableCell";
 import TableBody from "@mui/material/TableBody";
 import { GroupAndRoleSubTableEntry } from "./GroupAndRoleSubTableEntry";
 import { GroupOut } from "../../openapi/v2";
+import { TableRow } from "@mui/material";
+import TableCell from "@mui/material/TableCell";
+import TableHead from "@mui/material/TableHead";
 
 type GroupAndRoleSubTableProps = {
 	group: GroupOut;
@@ -20,15 +20,17 @@ export function GroupAndRoleSubTable(props: GroupAndRoleSubTableProps) {
 			<Table
 				sx={{
 					minWidth: 650,
-					backgroundColor: "#EEEEEE",
+					fontSize: "0.8rem",
 				}}
-				aria-label="simple table"
+				size="small"
+				aria-label="group and roles table"
 			>
 				<TableHead>
 					<TableRow>
 						<TableCell />
-						<TableCell align="right">Name</TableCell>
-						<TableCell align="right">Email</TableCell>
+						<TableCell>Member Name</TableCell>
+						<TableCell align="right">Member Email</TableCell>
+						<TableCell align="right" />
 						<TableCell align="right" />
 					</TableRow>
 				</TableHead>

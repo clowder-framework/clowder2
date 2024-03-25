@@ -1,14 +1,14 @@
 # Event Listeners in Clowder
 
-In Clowder v1, extractors were initially intended to extract metadata automatically from 
-incoming files based on MIME type, and the extracted metadata could then be indexed for search 
-and other purposes. As Clowder grew, different projects began to expand the extractor framework 
-to do much more than extract metadata. 
+In Clowder v1, extractors were initially intended to extract metadata automatically from
+incoming files based on MIME type, and the extracted metadata could then be indexed for search
+and other purposes. As Clowder grew, different projects began to expand the extractor framework
+to do much more than extract metadata.
 
-In Clowder v2, we are improving support for these types of activities. While existing extractors 
+In Clowder v2, we are improving support for these types of activities. While existing extractors
 will largely function the same way in Clowder - connect to a RabbitMQ message bus and process
-event messages sent by Clowder to the corresponding queue - the way in which extractors can be 
-assigned and triggered has been expanded. Additionally, extractors are now just one type of 
+event messages sent by Clowder to the corresponding queue - the way in which extractors can be
+assigned and triggered has been expanded. Additionally, extractors are now just one type of
 behavior in a larger framework called **Event Listeners** that can benefit from this feature.
 
 ## Types of Event Listeners
@@ -21,9 +21,9 @@ will also receive a temporary API key from the user granting them equivalent per
 What the event listener does with the resources and any results will depend:
 - examine files or datasets and generate metadata JSON that is attached to the resource;
 - create new files or datasets;
-- populate databases and web services; 
-- trigger downstream workflows dependent on the status of other extractors in orchestration; 
-- submit jobs to external HPC resources. 
+- populate databases and web services;
+- trigger downstream workflows dependent on the status of other extractors in orchestration;
+- submit jobs to external HPC resources.
 
 The Event Listeners dashboard provides a list of listeners that Clowder has received a heartbeat from:
 - Name
@@ -37,12 +37,12 @@ The Event Listeners dashboard provides a list of listeners that Clowder has rece
 - unique identifiers seen
 
 When a heartbeat is received from a new listener, Clowder will attempt to match it to any existing feeds
-according to the extractor_info JSON. Legacy extractors 
+according to the extractor_info JSON. Legacy extractors
 
 ## Defining Listener Feeds
 
-A feed is a named set of criteria that can be assigned listeners. When new files arrive that meet the criteria, 
-any assigned listeners are triggered. 
+A feed is a named set of criteria that can be assigned listeners. When new files arrive that meet the criteria,
+any assigned listeners are triggered.
 
 The Feeds dashboard helps users manage this:
 - Any search query can be saved as a feed from the Search page
@@ -54,7 +54,7 @@ The Feeds dashboard helps users manage this:
    - User or user group
    - Metadata fields
    - Feeds without criteria will be notified of everything.
-   
+
 - Feeds can be specified for Files or Datasets
    - Dataset feeds allow multiple file criteria to be listed
    - When a dataset contains files that match every criteria, notify listeners
@@ -63,7 +63,7 @@ The Feeds dashboard helps users manage this:
    - what parameters to include with jobs from this feed
    - cron job for the criteria checks on newly created resources?
    - order criteria so we can evaluate rapidly
-   
+
 - On request, users can calculate feed statistics:
    - Number of files meeting criteria
    - Per feed, number of files that have been successfully processed
@@ -97,38 +97,38 @@ All submissions for a specific resource can be viewed on its page, regardless of
 
 ## Event Listeners and Feeds in API
 
-The API can also be used to programatically manage these features. Note that there is no endpoint for registering 
+The API can also be used to programatically manage these features. Note that there is no endpoint for registering
 listeners (that is done via RabbitMQ heartbeats).
 
-- `GET /api/listeners` 
+- `GET /api/listeners`
     - List known listeners.
     - Parameters: `id`, `name`, `~status~`, `skip`, `limit`
-    
-- `DELETE /api/listeners/:listener_id` 
-    - Unsubscribe from all feeds, mark as inactive (not shown except to admins). 
+
+- `DELETE /api/listeners/:listener_id`
+    - Unsubscribe from all feeds, mark as inactive (not shown except to admins).
 The entry and event history are kept for record-keeping purposes.
 
 - `POST /api/feeds`
     - JSON body: `{"query": "title:*.xlsx", "name":"Excel spreadsheets"}`
     - Return `feed_id`
 
-- `GET /api/feeds` 
+- `GET /api/feeds`
     - List feeds.
     - Parameters: `id`, `name`, `listener`, `skip`, `limit`
 
 - `DELETE /api/feeds/:feed_id`
 
-- `POST /api/feeds/:feed_id/subscribe/:listener_id` 
+- `POST /api/feeds/:feed_id/subscribe/:listener_id`
     - Associate a listener with a feed.
     - Parameters: `type` (file or dataset), `auto` (default True), `backfill` (default False)
 
-- `POST /api/feeds/:feed_id/execute/:listener_id` 
+- `POST /api/feeds/:feed_id/execute/:listener_id`
     - Sends feed contents to listener. Default is to send only contents
 that have not already been processed, but flag can force all feed contents (search results) to be submitted.
     - Parameters: `force_all`, `skip`, `limit`
     - Return count of resources sent to listener.
-    
-- `GET /api/feeds/:feed_id/counts/:listener_id` 
+
+- `GET /api/feeds/:feed_id/counts/:listener_id`
     - Calculate counts for feed contents that have been successfully
 and unsuccessfully processed by a given listener.
     - JSON: `{"total": 123, "success": 119, "failure": 2, "submitted": 1, "not_submitted": 1, "pending_approval": 0}`

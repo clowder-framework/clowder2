@@ -47,9 +47,9 @@ import { Visualization } from "../visualizations/Visualization";
 import { ErrorModal } from "../errors/ErrorModal";
 import { FileHistory } from "./FileHistory";
 import { VersionChip } from "../versions/VersionChip";
-import RoleChip from "../auth/RoleChip";
 import Typography from "@mui/material/Typography";
 import { ClowderSelect } from "../styledComponents/ClowderSelect";
+import { AuthWrapper } from "../auth/AuthWrapper";
 
 export const File = (): JSX.Element => {
 	// path parameter
@@ -95,6 +95,9 @@ export const File = (): JSX.Element => {
 	);
 	const folderPath = useSelector((state: RootState) => state.folder.folderPath);
 	const fileRole = useSelector((state: RootState) => state.file.fileRole);
+	const datasetRole = useSelector(
+		(state: RootState) => state.dataset.datasetRole
+	);
 	const storageType = useSelector(
 		(state: RootState) => state.file.fileSummary.storage_type
 	);
@@ -275,7 +278,7 @@ export const File = (): JSX.Element => {
 	} else if (showNotFoundPage) {
 		return <PageNotFound />;
 	}
-	
+
 	return (
 		<Layout>
 			{/*Error Message dialogue*/}
@@ -299,7 +302,6 @@ export const File = (): JSX.Element => {
 						) : (
 							<></>
 						)}
-						<RoleChip role={fileRole} />
 					</Grid>
 				</Grid>
 				<Grid item xs={2} sx={{ display: "flex-top", alignItems: "center" }}>
@@ -311,7 +313,7 @@ export const File = (): JSX.Element => {
 				</Grid>
 			</Grid>
 			<Grid container spacing={2}>
-				<Grid item xs={10}>
+				<Grid item xs={12} sm={12} md={10} lg={10} xl={10}>
 					<Tabs
 						value={selectedTabIndex}
 						onChange={handleTabChange}
@@ -343,14 +345,19 @@ export const File = (): JSX.Element => {
 							{...a11yProps(2)}
 							disabled={false}
 						/>
-						<Tab
-							icon={<BuildIcon />}
-							iconPosition="start"
-							sx={TabStyle}
-							label="Analysis"
-							{...a11yProps(3)}
-							disabled={false}
-						/>
+						<AuthWrapper
+							currRole={datasetRole.role}
+							allowedRoles={["owner", "editor"]}
+						>
+							<Tab
+								icon={<BuildIcon />}
+								iconPosition="start"
+								sx={TabStyle}
+								label="Analysis"
+								{...a11yProps(3)}
+								disabled={false}
+							/>
+						</AuthWrapper>
 						<Tab
 							icon={<HistoryIcon />}
 							iconPosition="start"
@@ -406,23 +413,23 @@ export const File = (): JSX.Element => {
 									deleteMetadata={deleteFileMetadata}
 									resourceType="file"
 									resourceId={fileId}
+									publicView={false}
 								/>
-								{fileRole !== undefined && fileRole!== "viewer"?
-									(
-										<Box textAlign="center">
-											<Button
-												variant="contained"
-												sx={{ m: 2 }}
-												onClick={() => {
-													setEnableAddMetadata(true);
-												}}
-											>
+								{fileRole !== undefined && fileRole !== "viewer" ? (
+									<Box textAlign="center">
+										<Button
+											variant="contained"
+											sx={{ m: 2 }}
+											onClick={() => {
+												setEnableAddMetadata(true);
+											}}
+										>
 											Add Metadata
-											</Button>
-										</Box>
-									) :
+										</Button>
+									</Box>
+								) : (
 									<></>
-								}
+								)}
 							</>
 						)}
 					</TabPanel>
@@ -435,9 +442,14 @@ export const File = (): JSX.Element => {
 							version={fileSummary.version_num}
 						/>
 					</TabPanel>
-					<TabPanel value={selectedTabIndex} index={3}>
-						<Listeners fileId={fileId} datasetId={datasetId} />
-					</TabPanel>
+					<AuthWrapper
+						currRole={datasetRole.role}
+						allowedRoles={["owner", "editor"]}
+					>
+						<TabPanel value={selectedTabIndex} index={3}>
+							<Listeners fileId={fileId} datasetId={datasetId} />
+						</TabPanel>
+					</AuthWrapper>
 					<TabPanel value={selectedTabIndex} index={4}>
 						<ExtractionHistoryTab fileId={fileId} />
 					</TabPanel>
@@ -449,12 +461,12 @@ export const File = (): JSX.Element => {
 						)}
 					</TabPanel>
 				</Grid>
-				<Grid item xs={2}>
+				<Grid item xs={12} sm={12} md={2} lg={2} xl={2}>
 					{latestVersionNum == selectedVersionNum ? (
 						// latest version
 						<>
 							{Object.keys(fileSummary).length > 0 && (
-								<FileDetails fileSummary={fileSummary} />
+								<FileDetails fileSummary={fileSummary} myRole={fileRole} />
 							)}
 						</>
 					) : (
