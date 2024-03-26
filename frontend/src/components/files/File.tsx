@@ -10,7 +10,7 @@ import {
 	Tab,
 	Tabs,
 } from "@mui/material";
-import { downloadResource } from "../../utils/common";
+import { authCheck, downloadResource } from "../../utils/common";
 import { PreviewConfiguration, RootState } from "../../types/data";
 import { useParams, useSearchParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
@@ -95,9 +95,6 @@ export const File = (): JSX.Element => {
 	);
 	const folderPath = useSelector((state: RootState) => state.folder.folderPath);
 	const fileRole = useSelector((state: RootState) => state.file.fileRole);
-	const datasetRole = useSelector(
-		(state: RootState) => state.dataset.datasetRole
-	);
 	const storageType = useSelector(
 		(state: RootState) => state.file.fileSummary.storage_type
 	);
@@ -345,19 +342,18 @@ export const File = (): JSX.Element => {
 							{...a11yProps(2)}
 							disabled={false}
 						/>
-						<AuthWrapper
-							currRole={datasetRole.role}
-							allowedRoles={["owner", "editor"]}
-						>
-							<Tab
-								icon={<BuildIcon />}
-								iconPosition="start"
-								sx={TabStyle}
-								label="Analysis"
-								{...a11yProps(3)}
-								disabled={false}
-							/>
-						</AuthWrapper>
+						<Tab
+							icon={<BuildIcon />}
+							iconPosition="start"
+							sx={
+								authCheck(adminMode, fileRole, ["owner", "editor", "uploader"])
+									? TabStyle
+									: { display: "none" }
+							}
+							label="Analysis"
+							{...a11yProps(3)}
+							disabled={false}
+						/>
 						<Tab
 							icon={<HistoryIcon />}
 							iconPosition="start"
@@ -415,7 +411,10 @@ export const File = (): JSX.Element => {
 									resourceId={fileId}
 									publicView={false}
 								/>
-								{fileRole !== undefined && fileRole !== "viewer" ? (
+								<AuthWrapper
+									currRole={fileRole}
+									allowedRoles={["owner", "editor", "uploader"]}
+								>
 									<Box textAlign="center">
 										<Button
 											variant="contained"
@@ -427,9 +426,7 @@ export const File = (): JSX.Element => {
 											Add Metadata
 										</Button>
 									</Box>
-								) : (
-									<></>
-								)}
+								</AuthWrapper>
 							</>
 						)}
 					</TabPanel>
@@ -442,14 +439,9 @@ export const File = (): JSX.Element => {
 							version={fileSummary.version_num}
 						/>
 					</TabPanel>
-					<AuthWrapper
-						currRole={datasetRole.role}
-						allowedRoles={["owner", "editor"]}
-					>
-						<TabPanel value={selectedTabIndex} index={3}>
-							<Listeners fileId={fileId} datasetId={datasetId} />
-						</TabPanel>
-					</AuthWrapper>
+					<TabPanel value={selectedTabIndex} index={3}>
+						<Listeners fileId={fileId} datasetId={datasetId} />
+					</TabPanel>
 					<TabPanel value={selectedTabIndex} index={4}>
 						<ExtractionHistoryTab fileId={fileId} />
 					</TabPanel>

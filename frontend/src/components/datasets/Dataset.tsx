@@ -49,6 +49,7 @@ import { ErrorModal } from "../errors/ErrorModal";
 import { Visualization } from "../visualizations/Visualization";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import config from "../../app.config";
+import { authCheck } from "../../utils/common";
 
 export const Dataset = (): JSX.Element => {
 	// path parameter
@@ -278,18 +279,22 @@ export const Dataset = (): JSX.Element => {
 							{...a11yProps(2)}
 							disabled={false}
 						/>
-						{datasetRole.role !== undefined && datasetRole.role !== "viewer" ? (
-							<Tab
-								icon={<BuildIcon />}
-								iconPosition="start"
-								sx={TabStyle}
-								label="Analysis"
-								{...a11yProps(3)}
-								disabled={false}
-							/>
-						) : (
-							<></>
-						)}
+						<Tab
+							icon={<BuildIcon />}
+							iconPosition="start"
+							sx={
+								authCheck(adminMode, datasetRole.role, [
+									"owner",
+									"editor",
+									"uploader",
+								])
+									? TabStyle
+									: { display: "none" }
+							}
+							label="Analysis"
+							{...a11yProps(3)}
+							disabled={false}
+						/>
 						<Tab
 							icon={<HistoryIcon />}
 							iconPosition="start"
@@ -306,18 +311,22 @@ export const Dataset = (): JSX.Element => {
 							{...a11yProps(5)}
 							disabled={false}
 						/>
-						{datasetRole.role !== undefined && datasetRole.role !== "viewer" ? (
-							<Tab
-								icon={<ShareIcon />}
-								iconPosition="start"
-								sx={TabStyle}
-								label="Sharing"
-								{...a11yProps(6)}
-								disabled={false}
-							/>
-						) : (
-							<></>
-						)}
+						<Tab
+							icon={<ShareIcon />}
+							iconPosition="start"
+							sx={
+								authCheck(adminMode, datasetRole.role, [
+									"owner",
+									"editor",
+									"uploader",
+								])
+									? TabStyle
+									: { display: "none" }
+							}
+							label="Sharing"
+							{...a11yProps(6)}
+							disabled={false}
+						/>
 					</Tabs>
 					<TabPanel value={selectedTabIndex} index={0}>
 						{folderId !== null ? (
@@ -406,26 +415,18 @@ export const Dataset = (): JSX.Element => {
 							resourceId={datasetId}
 						/>
 					</TabPanel>
-					{datasetRole.role !== undefined && datasetRole.role !== "viewer" ? (
-						<TabPanel value={selectedTabIndex} index={3}>
-							<Listeners datasetId={datasetId} />
-						</TabPanel>
-					) : (
-						<></>
-					)}
+					<TabPanel value={selectedTabIndex} index={3}>
+						<Listeners datasetId={datasetId} />
+					</TabPanel>
 					<TabPanel value={selectedTabIndex} index={4}>
 						<ExtractionHistoryTab datasetId={datasetId} />
 					</TabPanel>
 					<TabPanel value={selectedTabIndex} index={5}>
 						<Visualization datasetId={datasetId} />
 					</TabPanel>
-					{datasetRole.role !== undefined && datasetRole.role !== "viewer" ? (
-						<TabPanel value={selectedTabIndex} index={6}>
-							<SharingTab datasetId={datasetId} />
-						</TabPanel>
-					) : (
-						<></>
-					)}
+					<TabPanel value={selectedTabIndex} index={6}>
+						<SharingTab datasetId={datasetId} />
+					</TabPanel>
 				</Grid>
 				<Grid item xs={12} sm={12} md={2} lg={2} xl={2}>
 					<DatasetDetails details={about} myRole={datasetRole.role} />
