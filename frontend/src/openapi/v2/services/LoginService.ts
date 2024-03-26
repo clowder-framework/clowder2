@@ -178,13 +178,13 @@ export class LoginService {
     }
 
     /**
-     * User Enable
+     * User Disable
      * @param useremail
      * @param datasetId
      * @returns UserOut Successful Response
      * @throws ApiError
      */
-    public static userEnableApiV2UsersDisableUseremailPost(
+    public static userDisableApiV2UsersDisableUseremailPost(
         useremail: string,
         datasetId?: string,
     ): CancelablePromise<UserOut> {
