@@ -165,11 +165,16 @@ async def set_admin(
 ):
     if admin and current_username.admin:
         if (user := await UserDB.find_one(UserDB.email == useremail)) is not None:
+            if user.read_only_user:
+                raise
             user.admin = True
             await user.replace()
             return user.dict()
         else:
-            raise HTTPException(status_code=404, detail=f"User {useremail} not found")
+            raise HTTPException(
+                status_code=403,
+                detail=f"User {useremail} is read only user. Read only user cannot be admin"
+            )
     else:
         raise HTTPException(
             status_code=403,
