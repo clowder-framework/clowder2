@@ -168,7 +168,7 @@ async def set_admin(
             if user.read_only_user:
                 raise HTTPException(
                     status_code=403,
-                    detail=f"User {useremail} is read only user. Read only user cannot be admin"
+                    detail=f"User {useremail} is read only user. Read only user cannot be admin",
                 )
             user.admin = True
             await user.replace()
@@ -205,6 +205,7 @@ async def revoke_admin(
             detail=f"User {current_username.email} is not an admin. Only admin can revoke admin access.",
         )
 
+
 @router.post("/users/enable_readonly/{useremail}", response_model=UserOut)
 async def enable_readonly_user(
     useremail: str, current_username=Depends(get_current_user), admin=Depends(get_admin)
@@ -221,6 +222,7 @@ async def enable_readonly_user(
             status_code=403,
             detail=f"User {current_username.email} is not an admin. Only admin can make others admin.",
         )
+
 
 @router.post("/users/set_readonly/{useremail}", response_model=UserOut)
 async def disable_readonly_user(

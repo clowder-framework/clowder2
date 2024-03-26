@@ -74,7 +74,6 @@ async def get_dataset_role(
     admin_mode: bool = Depends(get_admin_mode),
     admin=Depends(get_admin),
 ):
-
     """Retrieve role of user for a specific dataset."""
     # Get group id and the associated users from authorization
     criteria = []
@@ -202,17 +201,21 @@ async def set_dataset_group_role(
                         else:
                             auth_db.user_ids.append(u.user.email)
                     await auth_db.replace()
-                    await index_dataset(es, DatasetOut(**dataset.dict()), auth_db.user_ids)
+                    await index_dataset(
+                        es, DatasetOut(**dataset.dict()), auth_db.user_ids
+                    )
                     if len(readonly_user_ids) > 0:
                         readonly_auth_db = AuthorizationDB(
-                        creator=user_id,
-                        dataset_id=PydanticObjectId(dataset_id),
-                        role=RoleType.VIEWER,
-                        group_ids=[PydanticObjectId(group_id)],
-                        user_ids=readonly_user_ids,
+                            creator=user_id,
+                            dataset_id=PydanticObjectId(dataset_id),
+                            role=RoleType.VIEWER,
+                            group_ids=[PydanticObjectId(group_id)],
+                            user_ids=readonly_user_ids,
                         )
                         await readonly_auth_db.insert()
-                        await index_dataset(es, DatasetOut(**dataset.dict()), readonly_auth_db.user_ids)
+                        await index_dataset(
+                            es, DatasetOut(**dataset.dict()), readonly_auth_db.user_ids
+                        )
                 return auth_db.dict()
             else:
                 # Create new role entry for this dataset
@@ -242,7 +245,9 @@ async def set_dataset_group_role(
                 await auth_db.insert()
                 await index_dataset(es, DatasetOut(**dataset.dict()), auth_db.user_ids)
                 await readonly_auth_db.insert()
-                await index_dataset(es, DatasetOut(**dataset.dict()), readonly_auth_db.user_ids)
+                await index_dataset(
+                    es, DatasetOut(**dataset.dict()), readonly_auth_db.user_ids
+                )
                 return auth_db.dict()
         else:
             raise HTTPException(status_code=404, detail=f"Group {group_id} not found")
