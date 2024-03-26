@@ -236,7 +236,7 @@ async def user_enable(
 
 
 @router.post("/users/disable/{useremail}", response_model=UserOut)
-async def user_enable(
+async def user_disable(
     useremail: str, current_username=Depends(get_current_user), admin=Depends(get_admin)
 ):
     if admin:
