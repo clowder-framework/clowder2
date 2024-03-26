@@ -50,6 +50,7 @@ export async function downloadPublicResource(url) {
 		return null;
 	}
 }
+
 export async function downloadResource(url) {
 	const authHeader = getHeader();
 	const response = await fetch(url, {
@@ -272,4 +273,8 @@ export const handleErrorReport = (reason, stack) => {
 			reason
 		)}&body=${encodeURIComponent(stack)}`
 	);
+};
+
+export const authCheck = (adminMode, currRole, allowedRoles = []) => {
+	return adminMode || (currRole && allowedRoles.includes(currRole));
 };
