@@ -1,20 +1,19 @@
 import collections.abc
 from datetime import datetime
-from typing import Optional, List, Union
-
-from beanie import Document
-from elasticsearch import Elasticsearch, NotFoundError
-from fastapi import HTTPException
-from pydantic import Field, validator, AnyUrl, BaseModel
+from typing import List, Optional, Union
 
 from app.models.listeners import (
     EventListenerIn,
-    LegacyEventListenerIn,
     EventListenerOut,
+    LegacyEventListenerIn,
 )
 from app.models.mongomodel import MongoDBRef
 from app.models.users import UserOut
 from app.search.connect import insert_record, update_record
+from beanie import Document
+from elasticsearch import Elasticsearch, NotFoundError
+from fastapi import HTTPException
+from pydantic import AnyUrl, BaseModel, Field, validator
 
 # List of valid types that can be specified for metadata fields
 FIELD_TYPES = {
@@ -166,7 +165,7 @@ def validate_definition(content: dict, metadata_def: MetadataDefinitionOut):
                         for v in value:
                             typecast_list.append(t(v))
                         content[field.name] = typecast_list
-                    except:
+                    except HTTPException:
                         raise HTTPException(
                             status_code=400,
                             detail=f"{metadata_def.name} field {field.name} requires {field.config.type} for all values in list",
@@ -288,7 +287,7 @@ async def validate_context(
     if context is None and context_url is None and definition is None:
         raise HTTPException(
             status_code=400,
-            detail=f"Context is required",
+            detail="Context is required",
         )
     if context is not None:
         pass

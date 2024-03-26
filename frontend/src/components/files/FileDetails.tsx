@@ -7,21 +7,20 @@ import { StackedList } from "../util/StackedList";
 
 type FileAboutProps = {
 	fileSummary: FileOut;
+	myRole?: string;
 };
 
 export function FileDetails(props: FileAboutProps) {
+	const { myRole } = props;
 	const {
 		id,
 		created,
 		name,
 		creator,
-		version_id,
 		bytes,
 		content_type,
-		views,
 		downloads,
 		storage_type,
-		storage_path,
 	} = props.fileSummary;
 
 	const details = new Map<string, string>();
@@ -30,6 +29,7 @@ export function FileDetails(props: FileAboutProps) {
 	details.set("Updated on", parseDate(created));
 	details.set("Uploaded as", name);
 	details.set("Uploaded by", `${creator.first_name} ${creator.last_name}`);
+
 	switch (storage_type) {
 		case "minio": {
 			details.set("Storage location", "Database");
@@ -50,6 +50,8 @@ export function FileDetails(props: FileAboutProps) {
 	}
 	details.set("File id", id);
 	details.set("Downloads", downloads);
+
+	if (myRole) details.set("My Role", myRole ? myRole.toUpperCase() : "");
 
 	return (
 		<Box sx={{ mt: 5, mb: 2 }}>

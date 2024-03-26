@@ -3,20 +3,19 @@ import time
 from datetime import datetime
 
 import pytest
-from bson import ObjectId
-
 from app.config import settings
 from app.search.config import indexSettings
 from app.search.connect import (
     connect_elasticsearch,
     create_index,
+    delete_document_by_id,
+    delete_document_by_query,
+    delete_index,
     insert_record,
     search_index,
-    delete_index,
-    delete_document_by_id,
     update_record,
-    delete_document_by_query,
 )
+from bson import ObjectId
 
 dummy_file_record = {
     "name": "test file",

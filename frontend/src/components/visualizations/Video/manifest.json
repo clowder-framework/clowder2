@@ -11,10 +11,7 @@
 	"visConfig": {
 		"name": "Video",
 		"mainType": "video",
-		"mimeTypes": [
-			"video/mp4",
-			"video/ogg"
-		],
+		"mimeTypes": ["video/mp4", "video/ogg"],
 		"props": {
 			"fileId": "string"
 		}

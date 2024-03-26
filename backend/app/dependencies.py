@@ -1,13 +1,12 @@
 from typing import Generator
 
 import pika
+from app.config import settings
+from app.search.connect import connect_elasticsearch
 from minio import Minio
 from minio.commonconfig import ENABLED
 from minio.versioningconfig import VersioningConfig
 from pika.adapters.blocking_connection import BlockingChannel
-
-from app.config import settings
-from app.search.connect import connect_elasticsearch
 
 
 async def get_fs() -> Generator:

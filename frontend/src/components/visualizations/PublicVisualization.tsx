@@ -4,14 +4,14 @@ import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../types/data";
 import { fetchFileSummary } from "../../actions/file";
 import { getVisConfig as getVisConfigAction } from "../../actions/visualization";
-import {getPublicVisConfig as getPublicVisConfigAction} from "../../actions/public_visualization";
+import { getPublicVisConfig as getPublicVisConfigAction } from "../../actions/public_visualization";
 import { visComponentDefinitions } from "../../visualization.config";
 import { Grid } from "@mui/material";
 import { PublicVisualizationRawBytesCard } from "./PublicVisualizationRawBytesCard";
 import { PublicVisualizationSpecCard } from "./PublicVisualizationSpecCard";
 import config from "../../app.config";
-import {fetchPublicFileSummary} from "../../actions/public_file";
-import {PublicVisualizationCard} from "./PublicVisualizationCard";
+import { fetchPublicFileSummary } from "../../actions/public_file";
+import { PublicVisualizationCard } from "./PublicVisualizationCard";
 
 type previewProps = {
 	fileId?: string;
@@ -26,7 +26,9 @@ export const PublicVisualization = (props: previewProps) => {
 		useState(false);
 	const [isRawDataSupported, setIsRawDataSupported] = useState(false);
 
-	const fileSummary = useSelector((state: RootState) => state.publicFile.publicFileSummary);
+	const fileSummary = useSelector(
+		(state: RootState) => state.publicFile.publicFileSummary
+	);
 	const visConfig = useSelector(
 		(state: RootState) => state.publicVisualization.publicVisConfig
 	);
@@ -63,12 +65,14 @@ export const PublicVisualization = (props: previewProps) => {
 		);
 		// if raw type supported
 		if (
-			fileSummary&&
-			((fileSummary.content_type && fileSummary.content_type.content_type !== undefined &&
-						// @ts-ignore
+			fileSummary &&
+			((fileSummary.content_type &&
+				fileSummary.content_type.content_type !== undefined &&
+				// @ts-ignore
 				supportedMimeType.includes(fileSummary.content_type.content_type)) ||
-				(fileSummary.content_type && fileSummary.content_type.main_type !== undefined &&
-							// @ts-ignore
+				(fileSummary.content_type &&
+					fileSummary.content_type.main_type !== undefined &&
+					// @ts-ignore
 					supportedMimeType.includes(fileSummary.content_type.main_type)))
 		) {
 			setIsRawDataSupported(true);
@@ -76,9 +80,12 @@ export const PublicVisualization = (props: previewProps) => {
 			setIsRawDataSupported(false);
 		}
 
-		if (fileSummary &&
-			fileSummary.bytes && fileSummary.bytes >= config["rawDataVisualizationThreshold"]) {
-				setIsVisDataGreaterThanMaxSize(true);
+		if (
+			fileSummary &&
+			fileSummary.bytes &&
+			fileSummary.bytes >= config["rawDataVisualizationThreshold"]
+		) {
+			setIsVisDataGreaterThanMaxSize(true);
 		} else {
 			setIsVisDataGreaterThanMaxSize(false);
 		}
@@ -88,7 +95,7 @@ export const PublicVisualization = (props: previewProps) => {
 
 	return (
 		<Grid container rowSpacing={1} columnSpacing={{ xs: 1, sm: 3, md: 3 }}>
-			{isEmptyVisData && !isRawDataSupported? (
+			{isEmptyVisData && !isRawDataSupported ? (
 				<div>
 					No visualization data or parameters available. Incomplete
 					visualization configuration.
@@ -124,8 +131,12 @@ export const PublicVisualization = (props: previewProps) => {
 													(visualizationDataItem) => {
 														return (
 															<PublicVisualizationCard
-																publicVisualizationDataItem={visualizationDataItem}
-																publicVisComponentDefinition={visComponentDefinition}
+																publicVisualizationDataItem={
+																	visualizationDataItem
+																}
+																publicVisComponentDefinition={
+																	visComponentDefinition
+																}
 															/>
 														);
 													}

@@ -12,9 +12,7 @@
 	"visConfig": {
 		"name": "Demo",
 		"mainType": "text",
-		"mimeTypes": [
-			"text/csv"
-		],
+		"mimeTypes": ["text/csv"],
 		"props": {
 			"fileId": "string"
 		}

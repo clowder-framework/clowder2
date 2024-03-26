@@ -1,11 +1,10 @@
 import time
 
 import pytest as pytest
-from fastapi.testclient import TestClient
-
 from app.config import settings
 from app.search.connect import connect_elasticsearch, search_index
 from app.tests.utils import create_dataset, upload_file
+from fastapi.testclient import TestClient
 
 metadata_definition = {
     "name": "LatLon",

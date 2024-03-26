@@ -5,7 +5,7 @@ Uses [Sphinx](https://www.sphinx-doc.org). Requires [enchant](https://pyenchant.
 
 Currently deployed at https://clowder2.readthedocs.io.
 
-If you have installed `sphinx-autobuild docs/source docs/build/html` you can use it to automatically rebuild the docs 
+If you have installed `sphinx-autobuild docs/source docs/build/html` you can use it to automatically rebuild the docs
 when you make changes.
 
 ```shell

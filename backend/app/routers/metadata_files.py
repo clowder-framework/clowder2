@@ -1,36 +1,30 @@
-from typing import Optional, List
-
-from beanie import PydanticObjectId
-from bson import ObjectId
-from elasticsearch import Elasticsearch
-from fastapi import (
-    APIRouter,
-    HTTPException,
-    Depends,
-    Form,
-)
+from typing import List, Optional
 
 from app import dependencies
 from app.config import settings
 from app.deps.authorization_deps import FileAuthorization
-from app.keycloak_auth import get_current_user, UserOut
-from app.models.files import FileOut, FileDB, FileVersionDB
+from app.keycloak_auth import UserOut, get_current_user
+from app.models.files import FileDB, FileOut, FileVersionDB
 from app.models.listeners import EventListenerDB
 from app.models.metadata import (
-    MongoDBRef,
     MetadataAgent,
-    MetadataDefinitionOut,
-    MetadataIn,
     MetadataDB,
+    MetadataDefinitionDB,
+    MetadataDefinitionOut,
+    MetadataDelete,
+    MetadataIn,
     MetadataOut,
     MetadataPatch,
-    validate_context,
+    MongoDBRef,
     patch_metadata,
-    MetadataDelete,
-    MetadataDefinitionDB,
+    validate_context,
 )
 from app.search.connect import delete_document_by_id
 from app.search.index import index_file
+from beanie import PydanticObjectId
+from bson import ObjectId
+from elasticsearch import Elasticsearch
+from fastapi import APIRouter, Depends, Form, HTTPException
 
 router = APIRouter()
 
@@ -83,7 +77,7 @@ async def _build_metadata_db_obj(
             if listener:
                 agent = MetadataAgent(creator=user, listener=listener)
             else:
-                raise HTTPException(status_code=404, detail=f"Extractor not found")
+                raise HTTPException(status_code=404, detail="Extractor not found")
         else:
             agent = MetadataAgent(creator=user)
 
@@ -200,7 +194,7 @@ async def replace_file_metadata(
                     MetadataDB.agent.listener.version == agent.listener.version
                 )
             else:
-                raise HTTPException(status_code=404, detail=f"Extractor not found")
+                raise HTTPException(status_code=404, detail="Extractor not found")
         else:
             agent = MetadataAgent(creator=user)
             query.append(MetadataDB.agent.creator.id == agent.creator.id)
@@ -221,7 +215,7 @@ async def replace_file_metadata(
             await index_file(es, FileOut(**file.dict()), update=True)
             return md.dict()
         else:
-            raise HTTPException(status_code=404, detail=f"No metadata found to update")
+            raise HTTPException(status_code=404, detail="No metadata found to update")
     else:
         raise HTTPException(status_code=404, detail=f"File {file_id} not found")
 
@@ -306,7 +300,7 @@ async def update_file_metadata(
                     MetadataDB.agent.listener.version == agent.listener.version
                 )
             else:
-                raise HTTPException(status_code=404, detail=f"Extractor not found")
+                raise HTTPException(status_code=404, detail="Extractor not found")
         else:
             # Don't apply user filter on a PATCH
             # agent = MetadataAgent(creator=user)
@@ -318,7 +312,7 @@ async def update_file_metadata(
             await index_file(es, FileOut(**file.dict()), update=True)
             return await patch_metadata(md, content, es)
         else:
-            raise HTTPException(status_code=404, detail=f"No metadata found to update")
+            raise HTTPException(status_code=404, detail="No metadata found to update")
     else:
         raise HTTPException(status_code=404, detail=f"File {file_id} not found")
 
@@ -390,7 +384,7 @@ async def delete_file_metadata(
     es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
     allow: bool = Depends(FileAuthorization("editor")),
 ):
-    if (file := await FileDB.get(PydanticObjectId(file_id))) is not None:
+    if (await FileDB.get(PydanticObjectId(file_id))) is not None:
         query = [MetadataDB.resource.resource_id == ObjectId(file_id)]
 
         # # Validate specified version, or use latest by default
@@ -441,7 +435,7 @@ async def delete_file_metadata(
                     MetadataDB.agent.listener.version == agent.listener.version
                 )
             else:
-                raise HTTPException(status_code=404, detail=f"Extractor not found")
+                raise HTTPException(status_code=404, detail="Extractor not found")
         else:
             agent = MetadataAgent(creator=user)
             query.append(MetadataDB.agent.creator.id == agent.creator.id)
@@ -456,6 +450,6 @@ async def delete_file_metadata(
             return md.dict()  # TODO: Do we need to return the object we just deleted?
         else:
             raise HTTPException(
-                status_code=404, detail=f"No metadata found with that criteria"
+                status_code=404, detail="No metadata found with that criteria"
             )
     raise HTTPException(status_code=404, detail=f"File {file_id} not found")

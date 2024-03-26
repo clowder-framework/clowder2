@@ -1,28 +1,11 @@
-from typing import Optional, List
+from typing import List, Optional
 
+from app.keycloak_auth import get_current_user
+from app.models.metadata import MetadataDefinitionDB, MetadataDefinitionOut
 from beanie import PydanticObjectId
 from beanie.odm.operators.find.evaluation import RegEx
 from beanie.odm.operators.find.logical import Or
-from elasticsearch import Elasticsearch
-from fastapi import (
-    APIRouter,
-    HTTPException,
-    Depends,
-)
-
-from app import dependencies
-from app.deps.authorization_deps import MetadataAuthorization
-from app.keycloak_auth import get_current_user
-from app.models.metadata import (
-    MetadataDefinitionIn,
-    MetadataDefinitionDB,
-    MetadataDefinitionOut,
-    MetadataOut,
-    MetadataPatch,
-    patch_metadata,
-    MetadataDB,
-)
-from app.models.pyobjectid import PyObjectId
+from fastapi import APIRouter, Depends, HTTPException
 
 router = APIRouter()
 

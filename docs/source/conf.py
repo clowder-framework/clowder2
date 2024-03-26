@@ -13,7 +13,7 @@
 # import os
 # import sys
 # sys.path.insert(0, os.path.abspath('.'))
-
+import os
 
 # -- Project information -----------------------------------------------------
 
@@ -22,8 +22,7 @@ copyright = "2022, Clowder Devs"
 author = "Clowder Devs"
 
 # The full version, including alpha/beta/rc tags
-release = "2.0.0-beta.1"
-
+release = "2.0.0-beta.2"
 
 # -- General configuration ---------------------------------------------------
 
@@ -76,8 +75,6 @@ html_theme_options = {
     "globaltoc_includehidden": False,
 }
 
-import os
-
 FORCE_CLASSIC = os.environ.get("SPHINX_MATERIAL_FORCE_CLASSIC", False)
 FORCE_CLASSIC = FORCE_CLASSIC in ("1", "true")
 if FORCE_CLASSIC:
@@ -90,6 +87,5 @@ if FORCE_CLASSIC:
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ["_static"]
-
 
 # -- Markdown support --------------------------------------------------------

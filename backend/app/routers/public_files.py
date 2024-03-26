@@ -1,65 +1,22 @@
-import io
-import time
-from datetime import datetime, timedelta
-from typing import Optional, List
-from typing import Union
-from fastapi import Form
+from typing import List, Optional
+
+from app import dependencies
+from app.config import settings
+from app.models.datasets import DatasetDB, DatasetStatus
+from app.models.files import FileDB, FileOut, FileVersion, FileVersionDB
 from app.models.metadata import (
-    MongoDBRef,
-    MetadataAgent,
-    MetadataIn,
     MetadataDB,
-    MetadataOut,
-    MetadataPatch,
-    validate_context,
-    patch_metadata,
-    MetadataDelete,
     MetadataDefinitionDB,
     MetadataDefinitionOut,
+    MetadataOut,
 )
 from beanie import PydanticObjectId
 from beanie.odm.operators.update.general import Inc
 from bson import ObjectId
-from elasticsearch import Elasticsearch, NotFoundError
-from fastapi import (
-    APIRouter,
-    HTTPException,
-    Depends,
-    Security,
-    File,
-    UploadFile,
-)
+from fastapi import APIRouter, Depends, Form, HTTPException
 from fastapi.responses import StreamingResponse
-from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from fastapi.security import HTTPBearer
 from minio import Minio
-from pika.adapters.blocking_connection import BlockingChannel
-
-from app import dependencies
-from app.config import settings
-from app.deps.authorization_deps import FileAuthorization
-from app.keycloak_auth import get_current_user, get_token
-from app.models.files import (
-    FileOut,
-    FileVersion,
-    FileDB,
-    FileVersionDB,
-)
-from app.models.datasets import (
-    DatasetDB,
-    DatasetStatus,
-)
-from app.models.metadata import MetadataDB
-from app.models.users import UserOut
-from app.models.thumbnails import ThumbnailDB
-from app.rabbitmq.listeners import submit_file_job, EventListenerJobDB
-from app.routers.feeds import check_feed_listeners
-from app.routers.utils import get_content_type
-from app.search.connect import (
-    delete_document_by_id,
-    insert_record,
-    update_record,
-)
-from app.search.index import index_file, index_thumbnail
 
 router = APIRouter()
 security = HTTPBearer()

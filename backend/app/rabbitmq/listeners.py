@@ -3,21 +3,20 @@ import random
 import string
 
 import pika
-from fastapi import Depends
-from pika.adapters.blocking_connection import BlockingChannel
-
 from app import dependencies
 from app.models.config import ConfigEntryDB
 from app.models.datasets import DatasetOut
 from app.models.files import FileOut
 from app.models.listeners import (
+    EventListenerDatasetJobMessage,
     EventListenerJobDB,
     EventListenerJobMessage,
-    EventListenerDatasetJobMessage,
 )
 from app.models.mongomodel import MongoDBRef
 from app.models.users import UserOut
 from app.routers.users import get_user_job_key
+from fastapi import Depends
+from pika.adapters.blocking_connection import BlockingChannel
 
 
 async def create_reply_queue():
@@ -112,6 +111,7 @@ async def submit_dataset_job(
         datasetId=str(dataset_out.id),
         secretKey=current_secretKey,
         job_id=str(job.id),
+        parameters=parameters,
     )
     reply_to = await create_reply_queue()
     rabbitmq_client.basic_publish(

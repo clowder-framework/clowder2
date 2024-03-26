@@ -3,7 +3,7 @@ from typing import Optional
 
 from beanie import Document
 from passlib.context import CryptContext
-from pydantic import Field, EmailStr, BaseModel
+from pydantic import BaseModel, EmailStr, Field
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 

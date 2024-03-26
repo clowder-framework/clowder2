@@ -1,7 +1,6 @@
-from fastapi.testclient import TestClient
-
 from app.config import settings
 from app.tests.utils import create_dataset, create_folder
+from fastapi.testclient import TestClient
 
 
 def test_create_nested(client: TestClient, headers: dict):
@@ -11,9 +10,7 @@ def test_create_nested(client: TestClient, headers: dict):
     folder1_id = create_folder(client, headers, dataset_id, "top folder").get("id")
 
     # create nested folder
-    folder2_id = create_folder(
-        client, headers, dataset_id, "nested folder", folder1_id
-    ).get("id")
+    create_folder(client, headers, dataset_id, "nested folder", folder1_id).get("id")
 
     # list top level folders
     response = client.get(

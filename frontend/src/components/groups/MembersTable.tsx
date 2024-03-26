@@ -58,7 +58,7 @@ export default function MembersTable(props: MembersTableProps) {
 							<TableCell>Name</TableCell>
 							<TableCell align="right">Email</TableCell>
 							<TableCell align="right">Role</TableCell>
-							<TableCell align="right"></TableCell>
+							<TableCell align="right" />
 						</TableRow>
 					</TableHead>
 					<TableBody>

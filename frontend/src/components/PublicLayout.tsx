@@ -12,7 +12,6 @@ import IconButton from "@mui/material/IconButton";
 import MenuIcon from "@mui/icons-material/Menu";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
-import SearchDatasetIcon from "@mui/icons-material/Search";
 import ListItem from "@mui/material/ListItem";
 import ListItemButton from "@mui/material/ListItemButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
@@ -21,16 +20,12 @@ import { Link, Menu, MenuItem, MenuList } from "@mui/material";
 import { Link as RouterLink, useLocation } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { RootState } from "../types/data";
-import { AddBox, Explore } from "@material-ui/icons";
-import HistoryIcon from "@mui/icons-material/History";
-import GroupIcon from "@mui/icons-material/Group";
-import Gravatar from "react-gravatar";
+import { Explore } from "@material-ui/icons";
 import PersonIcon from "@mui/icons-material/Person";
-import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
-import { getCurrEmail } from "../utils/common";
 import VpnKeyIcon from "@mui/icons-material/VpnKey";
 import LogoutIcon from "@mui/icons-material/Logout";
 import { EmbeddedSearch } from "./search/EmbeddedSearch";
+import { AppVersion } from "./versions/AppVersion";
 
 const drawerWidth = 240;
 
@@ -240,23 +235,12 @@ export default function PersistentDrawerLeft(props) {
 						</ListItemButton>
 					</ListItem>
 				</List>
-				<Divider/>
-				<List>
-					{/*search commented out for now*/}
-					{/*<ListItem key={"search"} disablePadding>*/}
-					{/*	<ListItemButton component={RouterLink} to="/search">*/}
-					{/*		<ListItemIcon>*/}
-					{/*			<SearchDatasetIcon />*/}
-					{/*		</ListItemIcon>*/}
-					{/*		<ListItemText primary={"Search"} />*/}
-					{/*	</ListItemButton>*/}
-					{/*</ListItem>*/}
-				</List>
-				{/*<Divider />*/}
+				<Divider />
 			</Drawer>
 			<Main open={open}>
 				<DrawerHeader />
 				{children}
+				<AppVersion />
 			</Main>
 		</Box>
 	);

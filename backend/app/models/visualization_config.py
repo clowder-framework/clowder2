@@ -1,11 +1,10 @@
-from typing import Optional, List
+from typing import List, Optional
 
-from beanie import Document
-from pydantic import BaseModel
-
-from app.models.listeners import ExtractorInfo, EventListenerJobDB
+from app.models.listeners import EventListenerJobDB, ExtractorInfo
 from app.models.metadata import MongoDBRef
 from app.models.visualization_data import VisualizationDataOut
+from beanie import Document
+from pydantic import BaseModel
 
 
 class VisualizationConfigBase(BaseModel):

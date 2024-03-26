@@ -1,16 +1,23 @@
-import {Box, Button, ListItemIcon, ListItemText, Menu, MenuItem} from "@mui/material";
+import {
+	Box,
+	Button,
+	ListItemIcon,
+	ListItemText,
+	Menu,
+	MenuItem,
+} from "@mui/material";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import React from "react";
 import EditNameModal from "./EditNameModal";
 import EditDescriptionModal from "./EditDescriptionModal";
-import {DriveFileRenameOutline} from "@mui/icons-material";
+import { DriveFileRenameOutline } from "@mui/icons-material";
 
 type ActionsMenuProps = {
-	datasetId: string
-}
+	datasetId: string;
+};
 
 export const EditMenu = (props: ActionsMenuProps): JSX.Element => {
-	const {datasetId} = props;
+	const { datasetId } = props;
 
 	// state
 	const [rename, setRename] = React.useState<boolean>(false);
@@ -27,16 +34,27 @@ export const EditMenu = (props: ActionsMenuProps): JSX.Element => {
 	};
 	const handleSetRename = () => {
 		setRename(false);
-	}
+	};
 	const handleSetDescription = () => {
 		setDescription(false);
-	}
+	};
 	return (
 		<Box>
-			<EditNameModal datasetId={datasetId} handleClose={handleSetRename} open={rename}/>
-			<EditDescriptionModal datasetId={datasetId} handleClose={handleSetDescription} open={description}/>
-			<Button variant="outlined" onClick={handleOptionClick}
-					endIcon={<ArrowDropDownIcon/>}>
+			<EditNameModal
+				datasetId={datasetId}
+				handleClose={handleSetRename}
+				open={rename}
+			/>
+			<EditDescriptionModal
+				datasetId={datasetId}
+				handleClose={handleSetDescription}
+				open={description}
+			/>
+			<Button
+				variant="outlined"
+				onClick={handleOptionClick}
+				endIcon={<ArrowDropDownIcon />}
+			>
 				Edit
 			</Button>
 			<Menu
@@ -50,20 +68,27 @@ export const EditMenu = (props: ActionsMenuProps): JSX.Element => {
 					onClick={() => {
 						handleOptionClose();
 						setRename(true);
-					}
-					}> <ListItemIcon>
-					<DriveFileRenameOutline fontSize="small"/>
-				</ListItemIcon>
-					<ListItemText>Rename</ListItemText></MenuItem>
+					}}
+				>
+					{" "}
+					<ListItemIcon>
+						<DriveFileRenameOutline fontSize="small" />
+					</ListItemIcon>
+					<ListItemText>Rename</ListItemText>
+				</MenuItem>
 				<MenuItem
 					onClick={() => {
 						handleOptionClose();
 						setDescription(true);
-					}
-					}> <ListItemIcon>
-					<DriveFileRenameOutline fontSize="small"/>
-				</ListItemIcon>
-					<ListItemText>Update Description</ListItemText></MenuItem>
+					}}
+				>
+					{" "}
+					<ListItemIcon>
+						<DriveFileRenameOutline fontSize="small" />
+					</ListItemIcon>
+					<ListItemText>Update Description</ListItemText>
+				</MenuItem>
 			</Menu>
-		</Box>)
-}
+		</Box>
+	);
+};

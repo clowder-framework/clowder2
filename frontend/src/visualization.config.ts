@@ -1,4 +1,4 @@
-import React, {lazy} from "react";
+import React, { lazy } from "react";
 
 export interface VisComponentDefinitions {
 	name: string;
@@ -9,14 +9,14 @@ export interface VisComponentDefinitions {
 
 const visComponentDefinitions: VisComponentDefinitions[] = <
 	VisComponentDefinitions[]
-	>[];
+>[];
 
 function registerComponent(config) {
 	return lazy(
 		() =>
 			import(
 				/* webpackChunkName: "[request]" */ `./components/visualizations/${config.visConfig.name}/${config.main}`
-				)
+			)
 	);
 }
 

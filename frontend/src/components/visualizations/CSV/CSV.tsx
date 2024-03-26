@@ -9,8 +9,8 @@ import {
 import { Box, Container, Grid, MenuItem, Select } from "@mui/material";
 import { ClowderInputLabel } from "../../styledComponents/ClowderInputLabel";
 import { theme } from "../../../theme";
-import {downloadPublicVisData} from "../../../actions/public_visualization";
-import {filePublicDownloaded} from "../../../actions/public_file";
+import { downloadPublicVisData } from "../../../actions/public_visualization";
+import { filePublicDownloaded } from "../../../actions/public_file";
 
 type TextProps = {
 	fileId?: string;
@@ -27,7 +27,7 @@ const allowedType = [
 ];
 
 export default function CSV(props: TextProps) {
-	const { fileId, visualizationId,publicView } = props;
+	const { fileId, visualizationId, publicView } = props;
 	const [mark, setMark] = useState("bar");
 	// TODO default to the first two columns
 	const [availableColumns, setAvailableColumns] = useState<string[]>([]);
@@ -45,13 +45,13 @@ export default function CSV(props: TextProps) {
 			try {
 				let blob;
 				if (visualizationId) {
-					if (publicView){
+					if (publicView) {
 						blob = await downloadPublicVisData(visualizationId);
 					} else {
 						blob = await downloadVisData(visualizationId);
 					}
 				} else {
-					if (publicView){
+					if (publicView) {
 						blob = await filePublicDownloaded(fileId);
 					} else {
 						blob = await fileDownloaded(fileId, 0);

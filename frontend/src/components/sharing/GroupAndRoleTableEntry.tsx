@@ -32,7 +32,7 @@ import {
 	removeDatasetGroupRole,
 	setDatasetGroupRole,
 } from "../../actions/dataset";
-import { useParams } from "react-router-dom";
+import { Link as RouterLink, useParams } from "react-router-dom";
 import { GroupAndRoleSubTable } from "./GroupAndRoleSubTable";
 
 type GroupAndRoleTableEntryProps = {
@@ -133,7 +133,9 @@ export function GroupAndRoleTableEntry(props: GroupAndRoleTableEntryProps) {
 				</TableCell>
 				<TableCell>
 					<GroupIcon sx={iconStyle} />
-					<Button>{group_role.group.name}</Button>
+					<Button component={RouterLink} to={`/groups/${group_role.group.id}`}>
+						{group_role.group.name}
+					</Button>
 				</TableCell>
 				<TableCell align="right">
 					{group_role.group.users ? group_role.group.users.length : 0} members

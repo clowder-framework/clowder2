@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import {
-	generateFileDownloadUrl, generatePublicFileDownloadUrl, generatePublicVisDataDownloadUrl,
+	generateFileDownloadUrl,
+	generatePublicFileDownloadUrl,
+	generatePublicVisDataDownloadUrl,
 	generateVisDataDownloadUrl,
 } from "../../../utils/visualization";
 
@@ -18,13 +20,13 @@ export default function Audio(props: AudioProps) {
 	useEffect(() => {
 		let downloadUrl;
 		if (visualizationId) {
-			if (publicView){
+			if (publicView) {
 				downloadUrl = generatePublicVisDataDownloadUrl(visualizationId);
 			} else {
 				downloadUrl = generateVisDataDownloadUrl(visualizationId);
 			}
 		} else {
-			if (publicView){
+			if (publicView) {
 				downloadUrl = generatePublicFileDownloadUrl(fileId, 0);
 			} else {
 				downloadUrl = generateFileDownloadUrl(fileId, 0);

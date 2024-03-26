@@ -167,7 +167,11 @@ export const PublicDataset = (): JSX.Element => {
 								{about["name"]}
 							</Typography>
 						</Box>
-						<Box>{/*<RoleChip role={datasetRole.role} />*/}</Box>
+						<Box>
+							<Typography variant="body1" paragraph>
+								{about["description"]}
+							</Typography>
+						</Box>
 					</Stack>
 				</Grid>
 				{/*actions*/}
@@ -177,10 +181,7 @@ export const PublicDataset = (): JSX.Element => {
 				{/*actions*/}
 			</Grid>
 			<Grid container spacing={2} sx={{ mt: 2 }}>
-				<Grid item xs={10}>
-					<Typography variant="body1" paragraph>
-						{about["description"]}
-					</Typography>
+				<Grid item xs={12} sm={12} md={10} lg={10} xl={10}>
 					<Tabs
 						value={selectedTabIndex}
 						onChange={handleTabChange}
@@ -268,7 +269,7 @@ export const PublicDataset = (): JSX.Element => {
 						<Listeners datasetId={datasetId} />
 					</TabPanel>
 				</Grid>
-				<Grid item>
+				<Grid item xs={12} sm={12} md={2} lg={2} xl={2}>
 					<DatasetDetails details={about} />
 				</Grid>
 			</Grid>

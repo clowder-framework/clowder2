@@ -1,7 +1,7 @@
 import React from "react";
-import {styled} from "@mui/styles";
-import {Typography} from "@mui/material";
-import {theme} from "../../theme";
+import { styled } from "@mui/styles";
+import { Typography } from "@mui/material";
+import { theme } from "../../theme";
 
 export const ClowderInputLabel = styled(Typography)({
 	color: theme.palette.primary.main,

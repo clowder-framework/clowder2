@@ -1,7 +1,6 @@
 import pymongo
-from beanie import Document
-
 from app.models.mongomodel import BaseModel
+from beanie import Document
 
 
 class TokenBase(BaseModel):

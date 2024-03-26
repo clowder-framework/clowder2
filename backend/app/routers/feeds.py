@@ -1,24 +1,15 @@
 from typing import List, Optional
 
-from beanie import PydanticObjectId
-from beanie.operators import NE
-from fastapi import APIRouter, HTTPException, Depends
-from pika.adapters.blocking_connection import BlockingChannel
-
 from app.keycloak_auth import get_current_user, get_current_username
-from app.models.feeds import (
-    FeedIn,
-    FeedDB,
-    FeedOut,
-)
+from app.models.feeds import FeedDB, FeedIn, FeedOut
 from app.models.files import FileOut
-from app.models.listeners import (
-    FeedListener,
-    EventListenerDB,
-)
+from app.models.listeners import EventListenerDB, FeedListener
 from app.models.users import UserOut
 from app.rabbitmq.listeners import submit_file_job
 from app.search.connect import check_search_result
+from beanie import PydanticObjectId
+from fastapi import APIRouter, Depends, HTTPException
+from pika.adapters.blocking_connection import BlockingChannel
 
 router = APIRouter()
 
@@ -46,7 +37,7 @@ async def check_feed_listeners(
 ):
     """Automatically submit new file to listeners on feeds that fit the search criteria."""
     listener_ids_found = []
-    async for feed in FeedDB.find(FeedDB.listeners.automatic == True):
+    async for feed in FeedDB.find(FeedDB.listeners.automatic == True):  # noqa: E712
         # Verify whether resource_id is found when searching the specified criteria
         feed_match = check_search_result(es_client, file_out, feed.search)
         if feed_match:
@@ -163,7 +154,7 @@ async def disassociate_listener(
         feed_id: UUID of search Feed that is being changed
         listener_id: UUID of Event Listener that should be disassociated
     """
-    if (feed := await FeedDB.get(PydanticObjectId(feed_id))) is not None:
+    if (await FeedDB.get(PydanticObjectId(feed_id))) is not None:
         await disassociate_listener_db(feed_id, listener_id)
         return {"disassociated": listener_id}
     raise HTTPException(status_code=404, detail=f"feed {feed_id} not found")

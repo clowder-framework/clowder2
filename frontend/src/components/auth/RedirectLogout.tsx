@@ -1,10 +1,9 @@
-import React, {useEffect} from "react";
-import {logout} from "../../actions/user";
+import React, { useEffect } from "react";
+import { logout } from "../../actions/user";
 import TopBar from "../navigation/TopBar";
-import {useDispatch} from "react-redux";
+import { useDispatch } from "react-redux";
 
 export const RedirectLogout = (): JSX.Element => {
-
 	const dispatch = useDispatch();
 	const logUserOut = () => dispatch(logout());
 
@@ -14,12 +13,12 @@ export const RedirectLogout = (): JSX.Element => {
 
 	return (
 		<div>
-			<TopBar/>
+			<TopBar />
 			<div className="outer-container">
-				<p>You have logged out. <a href="/auth/login">Log in again.</a></p>
+				<p>
+					You have logged out. <a href="/auth/login">Log in again.</a>
+				</p>
 			</div>
-
 		</div>
-
-	)
-}
+	);
+};

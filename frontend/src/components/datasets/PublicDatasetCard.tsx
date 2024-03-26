@@ -28,7 +28,8 @@ type PublicDatasetCardProps = {
 };
 
 export default function PublicDatasetCard(props: PublicDatasetCardProps) {
-	const { id, name, author, created, description, thumbnailId, publicView } = props;
+	const { id, name, author, created, description, thumbnailId, publicView } =
+		props;
 	const [thumbnailUrl, setThumbnailUrl] = useState("");
 
 	useEffect(() => {
@@ -48,38 +49,37 @@ export default function PublicDatasetCard(props: PublicDatasetCardProps) {
 			sx={{ display: "flex", flexDirection: "column", height: "100%" }}
 			variant="outlined"
 		>
-			{publicView?
-				(
-					<CardActionArea
-						component={Link}
-						to={`/public/datasets/${id}`}
-						sx={{ height: "100%" }}
-					>
-						<CardHeader title={name} subheader={subheader} />
-						{thumbnailId ? (
-							<CardMedia
-								component="img"
-								image={thumbnailUrl}
-								alt={`${name}_thumbnail`}
-							/>
-						) :
-							null}
-						<CardContent sx={{ py: 0 }}>
-							<Typography
-								variant="body2"
-								sx={{
-									overflow: "hidden",
-									textOverflow: "ellipsis",
-									display: "-webkit-box",
-									WebkitLineClamp: "5",
-									WebkitBoxOrient: "vertical",
-								}}
-							>
-								{description}
-							</Typography>
-						</CardContent>
-					</CardActionArea>):
-				(<CardActionArea
+			{publicView ? (
+				<CardActionArea
+					component={Link}
+					to={`/public/datasets/${id}`}
+					sx={{ height: "100%" }}
+				>
+					<CardHeader title={name} subheader={subheader} />
+					{thumbnailId ? (
+						<CardMedia
+							component="img"
+							image={thumbnailUrl}
+							alt={`${name}_thumbnail`}
+						/>
+					) : null}
+					<CardContent sx={{ py: 0 }}>
+						<Typography
+							variant="body2"
+							sx={{
+								overflow: "hidden",
+								textOverflow: "ellipsis",
+								display: "-webkit-box",
+								WebkitLineClamp: "5",
+								WebkitBoxOrient: "vertical",
+							}}
+						>
+							{description}
+						</Typography>
+					</CardContent>
+				</CardActionArea>
+			) : (
+				<CardActionArea
 					component={Link}
 					to={`/datasets/${id}`}
 					sx={{ height: "100%" }}
@@ -106,8 +106,8 @@ export default function PublicDatasetCard(props: PublicDatasetCardProps) {
 							{description}
 						</Typography>
 					</CardContent>
-				</CardActionArea>)
-			}
+				</CardActionArea>
+			)}
 			<CardActions sx={{ pb: 0 }}>
 				<Tooltip title="Download">
 					<IconButton
