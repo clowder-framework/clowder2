@@ -15,6 +15,8 @@ import {
 	prefixSearchAllUsers as prefixSearchAllUsersAction,
 	revokeAdmin as revokeAdminAction,
 	setAdmin as setAdminAction,
+	enableReadOnly as setEnableReadOnlyAction,
+	disableReadOnly as setDisableReadOnlyAction,
 } from "../../actions/user";
 import { Box, Grid, Pagination, Switch } from "@mui/material";
 import { ErrorModal } from "../errors/ErrorModal";
@@ -44,6 +46,9 @@ export const ManageUsers = (): JSX.Element => {
 
 	const setAdmin = (email: string) => dispatch(setAdminAction(email));
 	const revokeAdmin = (email: string) => dispatch(revokeAdminAction(email));
+
+	const setEnableReadOnly = (email: string) => dispatch(setEnableReadOnlyAction(email));
+	const setDisableReadOnly = (email: string) => dispatch(setDisableReadOnlyAction(email));
 
 	// component did mount
 	useEffect(() => {
@@ -95,7 +100,8 @@ export const ManageUsers = (): JSX.Element => {
 									<TableRow>
 										<TableCell>Name</TableCell>
 										<TableCell align="right">Email</TableCell>
-										<TableCell align="left">Admin</TableCell>
+										<TableCell align="center">Admin</TableCell>
+										<TableCell align="left">Read Only</TableCell>
 									</TableRow>
 								</TableHead>
 								<TableBody>
@@ -130,7 +136,7 @@ export const ManageUsers = (): JSX.Element => {
 													{profile.first_name} {profile.last_name}
 												</TableCell>
 												<TableCell align="right">{profile.email}</TableCell>
-												<TableCell align="left">
+												<TableCell align="center">
 													<Switch
 														color="primary"
 														checked={profile.admin}
@@ -139,6 +145,20 @@ export const ManageUsers = (): JSX.Element => {
 																revokeAdmin(profile.email);
 															} else {
 																setAdmin(profile.email);
+															}
+														}}
+														disabled={profile.email === currentUser.email}
+													/>
+												</TableCell>
+												<TableCell align="left">
+													<Switch
+														color="primary"
+														checked={profile.read_only_user}
+														onChange={() => {
+															if (profile.read_only_user) {
+																setDisableReadOnly(profile.email);
+															} else {
+																setEnableReadOnly(profile.email);
 															}
 														}}
 														disabled={profile.email === currentUser.email}

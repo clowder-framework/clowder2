@@ -204,6 +204,7 @@ export interface UserState {
 	apiKeys: Paged;
 	profile: UserOut;
 	adminMode: boolean;
+	read_only_user: boolean;
 }
 
 export interface ErrorState {

@@ -21,6 +21,8 @@ import {
 	UserOut,
 } from "../openapi/v2";
 import {
+	ENABLE_READONLY,
+	DISABLE_READONLY,
 	LIST_USERS,
 	PREFIX_SEARCH_USERS,
 	REVOKE_ADMIN,
@@ -67,6 +69,24 @@ const group = (state = defaultState, action: DataAction) => {
 				},
 			});
 		case REVOKE_ADMIN:
+			return Object.assign({}, state, {
+				users: {
+					...state.users,
+					data: state.users.data.map((user: UserOut) =>
+						user.email === action.profile.email ? action.profile : user
+					),
+				},
+			});
+		case ENABLE_READONLY:
+			return Object.assign({}, state, {
+				users: {
+					...state.users,
+					data: state.users.data.map((user: UserOut) =>
+						user.email === action.profile.email ? action.profile : user
+					),
+				},
+			});
+		case DISABLE_READONLY:
 			return Object.assign({}, state, {
 				users: {
 					...state.users,

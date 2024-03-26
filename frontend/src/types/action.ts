@@ -573,6 +573,16 @@ interface REVOKE_ADMIN {
 	profile: UserOut;
 }
 
+interface ENABLE_READONLY {
+	type: "ENABLE_READONLY";
+	profile: UserOut;
+}
+
+interface DISABLE_READONLY {
+	type: "DISABLE_READONLY";
+	profile: UserOut;
+}
+
 interface GET_PUBLIC_VIS_DATA {
 	type: "GET_PUBLIC_VIS_DATA";
 	publicVisData: VisualizationDataOut;
@@ -721,6 +731,8 @@ export type DataAction =
 	| UPDATE_FILE
 	| SET_ADMIN
 	| REVOKE_ADMIN
+	| ENABLE_READONLY
+	| DISABLE_READONLY
 	| GET_PUBLIC_VIS_DATA
 	| GET_PUBLIC_VIS_CONFIG
 	| DOWNLOAD_PUBLIC_VIS_DATA
