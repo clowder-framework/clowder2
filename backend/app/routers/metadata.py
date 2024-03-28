@@ -1,3 +1,4 @@
+import datetime
 from typing import Optional
 
 from beanie import PydanticObjectId
@@ -73,6 +74,44 @@ async def get_metadata_definition_list(
         ],
     )
     return page.dict()
+
+
+@router.put(
+    "/definition/{metadata_definition_id}", response_model=MetadataDefinitionOut
+)
+async def update_metadata_definition(
+    metadata_definition: MetadataDefinitionIn,
+    metadata_definition_id: str,
+    user=Depends(get_current_user),
+):
+    existing = await MetadataDefinitionDB.find_one(
+        MetadataDefinitionDB.name == metadata_definition.name
+    )
+    if existing:
+        raise HTTPException(
+            status_code=409,
+            detail=f"Metadata definition named {metadata_definition.name} already exists.",
+        )
+    else:
+        if (
+            mdd := await MetadataDefinitionDB.get(
+                PydanticObjectId(metadata_definition_id)
+            )
+        ) is not None:
+            mdd.name = metadata_definition.name
+            mdd.description = metadata_definition.description
+            mdd.required_for_items = metadata_definition.required_for_items
+            mdd.context = metadata_definition.context
+            mdd.context_url = metadata_definition.context_url
+            mdd.fields = metadata_definition.fields
+            mdd.modified = datetime.datetime.utcnow()
+            await mdd.save()
+            return mdd.dict()
+        else:
+            raise HTTPException(
+                status_code=404,
+                detail=f"Metadata definition id {metadata_definition_id} not found",
+            )
 
 
 @router.get(

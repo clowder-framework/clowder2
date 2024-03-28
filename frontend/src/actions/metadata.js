@@ -97,6 +97,23 @@ export function postMetadataDefinition(metadataDefinition) {
 	};
 }
 
+export function updateMetadataDefinition(id, metadataDefinition) {
+	console.log(metadataDefinition)
+	return (dispatch) => {
+		return V2.MetadataService.updateMetadataDefinitionApiV2MetadataDefinitionMetadataDefinitionIdPut(id,
+			metadataDefinition
+		)
+			.then((json) => {
+				dispatch(fetchMetadataDefinitions(null, 0, 100));
+			})
+			.catch((reason) => {
+				dispatch(
+					handleErrors(reason, updateMetadataDefinition(id, metadataDefinition))
+				);
+			});
+	};
+}
+
 export const RESET_SAVE_METADATA_DEFINITIONS =
 	"RESET_SAVE_METADATA_DEFINITIONS";
 
