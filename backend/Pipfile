@@ -33,7 +33,6 @@ pytest = "7.3.1"
 pytest-asyncio = "0.21.0"
 black = "23.3.0"
 faker = "18.4.0"
-python-dotenv = "1.0.1"
 
 [requires]
 python_version = "3.9"
