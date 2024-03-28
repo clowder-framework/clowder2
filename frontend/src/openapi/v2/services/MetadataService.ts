@@ -81,6 +81,28 @@ export class MetadataService {
     }
 
     /**
+     * Update Metadata Definition
+     * @param metadataDefinitionId
+     * @param requestBody
+     * @returns MetadataDefinitionOut Successful Response
+     * @throws ApiError
+     */
+    public static updateMetadataDefinitionApiV2MetadataDefinitionMetadataDefinitionIdPut(
+        metadataDefinitionId: string,
+        requestBody: MetadataDefinitionIn,
+    ): CancelablePromise<MetadataDefinitionOut> {
+        return __request({
+            method: 'PUT',
+            path: `/api/v2/metadata/definition/${metadataDefinitionId}`,
+            body: requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+
+    /**
      * Delete Metadata Definition
      * Delete metadata definition by specific ID.
      * @param metadataDefinitionId

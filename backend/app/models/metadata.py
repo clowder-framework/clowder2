@@ -105,6 +105,7 @@ class MetadataDefinitionBase(BaseModel):
     ]  # https://json-ld.org/spec/latest/json-ld/#the-context
     context_url: Optional[str]  # single URL applying to contents
     fields: List[MetadataField]
+    modified: datetime = Field(default_factory=datetime.utcnow)
 
     # TODO: Space-level requirements?
 
