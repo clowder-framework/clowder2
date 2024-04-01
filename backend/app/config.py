@@ -50,6 +50,7 @@ class Settings(BaseSettings):
     auth_register_url = (
         f"{auth_base}/keycloak/realms/{auth_realm}/protocol/openid-connect/registrations?client_id"
         f"={auth_client_id}&response_type=code"
+        f"=&redirect_uri={auth_redirect_uri}"
     )
     auth_token_url = (
         f"{auth_base}/keycloak/realms/{auth_realm}/protocol/openid-connect/token"
