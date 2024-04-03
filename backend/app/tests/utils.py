@@ -221,11 +221,15 @@ def create_folder(
     return response.json()
 
 
-def register_v1_extractor(client: TestClient, headers: dict, name: str = None):
+def register_v1_extractor(
+    client: TestClient, headers: dict, name: str = None, user: str = None
+):
     """Registers a new v1 listener (extractor) and returns the JSON."""
     new_extractor = extractor_info_v1_example
     if name:
         new_extractor["name"] = name
+    if user:
+        new_extractor["owners"] = {"users": [user]}
     response = client.post(
         f"{settings.API_V2_STR}/extractors", json=new_extractor, headers=headers
     )

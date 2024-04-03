@@ -38,6 +38,15 @@ class ExtractorInfo(BaseModel):
     categories: Optional[List[str]] = []
     parameters: Optional[dict] = None
     version: Optional[str] = "1.0"
+    unique_key: Optional[str] = None
+
+
+class OwnerList(BaseModel):
+    """Container object for lists of user emails/group IDs/dataset IDs that can submit to listener."""
+
+    users: List[str] = []
+    group: List[PydanticObjectId] = []
+    datasets: List[PydanticObjectId] = []
 
 
 class EventListenerBase(BaseModel):
@@ -46,6 +55,7 @@ class EventListenerBase(BaseModel):
     name: str
     version: str = "1.0"
     description: str = ""
+    owners: Optional[OwnerList] = None
 
 
 class EventListenerIn(EventListenerBase):
@@ -69,7 +79,7 @@ class EventListenerDB(Document, EventListenerBase):
     created: datetime = Field(default_factory=datetime.now)
     modified: datetime = Field(default_factory=datetime.now)
     lastAlive: datetime = None
-    alive: Optional[bool] = None  # made up field to indicate if extractor is alive
+    alive: Optional[bool] = None
     properties: Optional[ExtractorInfo] = None
 
     class Settings:
