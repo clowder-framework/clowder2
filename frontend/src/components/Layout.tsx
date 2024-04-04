@@ -187,9 +187,9 @@ export default function PersistentDrawerLeft(props) {
 					<Box sx={{ marginLeft: "auto" }}>
 						{loggedOut ? (
 							<>
-								<Link href="/auth/register" sx={link}>
-									Register
-								</Link>
+								{/*<Link href="/auth/register" sx={link}>*/}
+								{/*	Register*/}
+								{/*</Link>*/}
 								<Link href="/auth/login" sx={link}>
 									Login
 								</Link>
