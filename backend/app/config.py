@@ -49,7 +49,7 @@ class Settings(BaseSettings):
     # scope=openid email&redirect_uri=http://<domain.com>/<redirect-path>&kc_locale=<two-digit-lang-code>
     auth_register_url = (
         f"{auth_base}/keycloak/realms/{auth_realm}/protocol/openid-connect/registrations?client_id"
-        f"={auth_client_id}&response_type=code"
+        f"={auth_client_id}&response_type=code&redirect_uri={auth_redirect_uri}"
     )
     auth_token_url = (
         f"{auth_base}/keycloak/realms/{auth_realm}/protocol/openid-connect/token"
