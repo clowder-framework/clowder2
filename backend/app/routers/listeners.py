@@ -369,6 +369,8 @@ async def edit_listener(
     listener_id: str,
     listener_in: EventListenerIn,
     user_id=Depends(get_user),
+    admin_mode: bool = Depends(get_admin_mode),
+    admin=Depends(get_admin),
 ):
     """Update the information about an existing Event Listener..
 
@@ -376,11 +378,16 @@ async def edit_listener(
         listener_id -- UUID of the listener to be udpated
         listener_in -- JSON object including updated information
     """
-    listener = await EventListenerDB.find_one(
-        EventListenerDB.id == ObjectId(listener_id)
-    )
+    criteria_list = [EventListenerDB.id == ObjectId(listener_id)]
+    if not admin and not admin_mode:
+        criteria_list.append(
+            Or(
+                Exists(EventListenerDB.owners, False),
+                EventListenerDB.owners.owner == user_id,
+            ),
+        )
+    listener = await EventListenerDB.find_one(*criteria_list)
     if listener:
-        # TODO: Refactor this with permissions checks etc.
         listener_update = dict(listener_in) if listener_in is not None else {}
         listener_update["modified"] = datetime.datetime.utcnow()
         try:
@@ -395,12 +402,20 @@ async def edit_listener(
 @router.delete("/{listener_id}")
 async def delete_listener(
     listener_id: str,
-    user=Depends(get_current_username),
+    user_id=Depends(get_current_username),
+    admin_mode: bool = Depends(get_admin_mode),
+    admin=Depends(get_admin),
 ):
     """Remove an Event Listener from the database. Will not clear event history for the listener."""
-    listener = await EventListenerDB.find_one(
-        EventListenerDB.id == ObjectId(listener_id)
-    )
+    criteria_list = [EventListenerDB.id == ObjectId(listener_id)]
+    if not admin and not admin_mode:
+        criteria_list.append(
+            Or(
+                Exists(EventListenerDB.owners, False),
+                EventListenerDB.owners.owner == user_id,
+            ),
+        )
+    listener = await EventListenerDB.find_one(*criteria_list)
     if listener:
         # unsubscribe the listener from any feeds
         async for feed in FeedDB.find(
