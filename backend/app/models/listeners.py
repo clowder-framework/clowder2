@@ -42,8 +42,10 @@ class ExtractorInfo(BaseModel):
 
 
 class OwnerList(BaseModel):
-    """Container object for lists of user emails/group IDs/dataset IDs that can submit to listener."""
+    """Container object for lists of user emails/group IDs/dataset IDs that can submit to listener.
+    The singular owner is the primary who can modify other lists."""
 
+    owner: str
     users: List[str] = []
     group: List[PydanticObjectId] = []
     datasets: List[PydanticObjectId] = []

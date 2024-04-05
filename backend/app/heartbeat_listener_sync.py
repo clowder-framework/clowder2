@@ -28,18 +28,21 @@ def callback(ch, method, properties, body):
     )
     owner = msg["owner"]
     if owner is not None:
-        extractor_db.owners = {"users": [owner]}
+        extractor_db.owners = {"owner": owner}
 
     mongo_client = MongoClient(settings.MONGODB_URL)
     db = mongo_client[settings.MONGO_DATABASE]
 
-    # check to see if extractor alredy exists
-    existing_extractor = db["listeners"].find_one({"name": msg["queue"]})
+    # check to see if extractor already exists
+    if owner is not None:
+        existing_extractor = EventListenerDB.find_one(
+            EventListenerDB.name == msg["queue"]
+        )
+    else:
+        existing_extractor = EventListenerDB.find_one(
+            EventListenerDB.name == msg["queue"], EventListenerDB.owners.owner == owner
+        )
     if existing_extractor is not None:
-        if owner is not None:
-            # TODO: make sure owner is included in owners list
-            pass
-
         # Update existing listener
         existing_version = existing_extractor["version"]
         new_version = extractor_db.version
