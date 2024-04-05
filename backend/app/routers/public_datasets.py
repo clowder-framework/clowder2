@@ -6,39 +6,23 @@ import shutil
 import tempfile
 from typing import List, Optional
 
+from app import dependencies
+from app.config import settings
+from app.models.datasets import DatasetDB, DatasetDBViewList, DatasetOut, DatasetStatus
+from app.models.files import FileDB, FileDBViewList, FileOut
+from app.models.folder_and_file import FolderFileViewList
+from app.models.folders import FolderDB, FolderDBViewList, FolderOut
+from app.models.metadata import MetadataDB, MetadataDefinitionDB, MetadataOut
+from app.models.pages import Paged, _construct_page_metadata, _get_page_query
 from beanie import PydanticObjectId
 from beanie.odm.operators.update.general import Inc
-from beanie.operators import Or, And
-from bson import ObjectId
-from bson import json_util
-from fastapi import (
-    APIRouter,
-    HTTPException,
-    Depends,
-)
-from fastapi import Form
+from beanie.operators import And, Or
+from bson import ObjectId, json_util
+from fastapi import APIRouter, Depends, Form, HTTPException
 from fastapi.responses import StreamingResponse
 from fastapi.security import HTTPBearer
 from minio import Minio
 from rocrate.rocrate import ROCrate
-
-from app import dependencies
-from app.config import settings
-from app.models.datasets import (
-    DatasetDB,
-    DatasetOut,
-    DatasetDBViewList,
-    DatasetStatus,
-)
-from app.models.files import FileOut, FileDB, FileDBViewList
-from app.models.folder_and_file import FolderFileViewList
-from app.models.folders import FolderOut, FolderDB, FolderDBViewList
-from app.models.metadata import MetadataDB
-from app.models.metadata import (
-    MetadataOut,
-    MetadataDefinitionDB,
-)
-from app.models.pages import Paged, _get_page_query, _construct_page_metadata
 
 router = APIRouter()
 security = HTTPBearer()
@@ -126,7 +110,7 @@ async def get_dataset_folders(
             if parent_folder is not None:
                 query.append(FolderDBViewList.parent_folder == ObjectId(parent_folder))
             else:
-                query.append(FolderDBViewList.parent_folder == None)
+                query.append(FolderDBViewList.parent_folder == None)  # noqa: E711
             folders = (
                 await FolderDBViewList.find(*query).skip(skip).limit(limit).to_list()
             )
@@ -150,8 +134,8 @@ async def get_dataset_folders_and_files(
                 # only show folder and file at root level without parent folder
                 query.append(
                     And(
-                        FolderFileViewList.parent_folder == None,
-                        FolderFileViewList.folder_id == None,
+                        FolderFileViewList.parent_folder == None,  # noqa: E711
+                        FolderFileViewList.folder_id == None,  # noqa: E711
                     )
                 )
             else:

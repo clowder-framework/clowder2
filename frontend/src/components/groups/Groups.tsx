@@ -95,7 +95,7 @@ export function Groups() {
 					</DialogContent>
 				</Dialog>
 				<Grid container>
-					<Grid item xs={8}></Grid>
+					<Grid item xs={8} />
 					<Grid item xs={4}>
 						<Button
 							variant="contained"

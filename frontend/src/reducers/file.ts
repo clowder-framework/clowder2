@@ -1,4 +1,5 @@
 import {
+	CHANGE_SELECTED_VERSION,
 	DOWNLOAD_FILE,
 	RECEIVE_FILE_EXTRACTED_METADATA,
 	RECEIVE_FILE_METADATA_JSONLD,
@@ -7,11 +8,10 @@ import {
 	RECEIVE_PREVIEWS,
 	RECEIVE_VERSIONS,
 	RESET_FILE_PRESIGNED_URL,
-	CHANGE_SELECTED_VERSION,
 } from "../actions/file";
 import { DataAction } from "../types/action";
 import { FileState } from "../types/data";
-import { AuthorizationBase, FileOut as FileSummary } from "../openapi/v2";
+import { FileOut as FileSummary } from "../openapi/v2";
 import { RECEIVE_FILE_ROLE } from "../actions/authorization";
 
 const defaultState: FileState = {
@@ -20,10 +20,10 @@ const defaultState: FileState = {
 	metadataJsonld: [],
 	previews: [],
 	fileVersions: [],
-	fileRole: <AuthorizationBase>{},
+	fileRole: "",
 	blob: new Blob([]),
 	presignedUrl: "",
-	selected_version_num:1,
+	selected_version_num: 1,
 };
 
 const file = (state = defaultState, action: DataAction) => {
@@ -43,7 +43,9 @@ const file = (state = defaultState, action: DataAction) => {
 		case RECEIVE_PREVIEWS:
 			return Object.assign({}, state, { previews: action.previews });
 		case CHANGE_SELECTED_VERSION:
-			return Object.assign({}, state,{selected_version_num:action.selected_version});
+			return Object.assign({}, state, {
+				selected_version_num: action.selected_version,
+			});
 		case RECEIVE_VERSIONS:
 			return Object.assign({}, state, { fileVersions: action.fileVersions });
 		case DOWNLOAD_FILE:
