@@ -41,7 +41,7 @@ class ExtractorInfo(BaseModel):
     unique_key: Optional[str] = None
 
 
-class OwnerList(BaseModel):
+class AccessList(BaseModel):
     """Container object for lists of user emails/group IDs/dataset IDs that can submit to listener.
     The singular owner is the primary who can modify other lists."""
 
@@ -57,7 +57,7 @@ class EventListenerBase(BaseModel):
     name: str
     version: str = "1.0"
     description: str = ""
-    owners: Optional[OwnerList] = None
+    access: Optional[AccessList] = None
 
 
 class EventListenerIn(EventListenerBase):

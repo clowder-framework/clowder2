@@ -230,10 +230,10 @@ async def search_listeners(
 
         criteria_list.append(
             Or(
-                Exists(EventListenerDB.owners, False),
-                EventListenerDB.owners.owner == user_id,
-                EventListenerDB.owners.users == user_id,
-                In(EventListenerDB.owners.groups, user_groups),
+                Exists(EventListenerDB.access, False),
+                EventListenerDB.access.owner == user_id,
+                EventListenerDB.access.users == user_id,
+                In(EventListenerDB.access.groups, user_groups),
             )
         )
 
@@ -339,10 +339,10 @@ async def get_listeners(
 
         criteria_list.append(
             Or(
-                Exists(EventListenerDB.owners, False),
-                EventListenerDB.owners.owner == user_id,
-                EventListenerDB.owners.users == user_id,
-                In(EventListenerDB.owners.groups, user_groups),
+                Exists(EventListenerDB.access, False),
+                EventListenerDB.access.owner == user_id,
+                EventListenerDB.access.users == user_id,
+                In(EventListenerDB.access.groups, user_groups),
             )
         )
 
@@ -382,8 +382,8 @@ async def edit_listener(
     if not admin and not admin_mode:
         criteria_list.append(
             Or(
-                Exists(EventListenerDB.owners, False),
-                EventListenerDB.owners.owner == user_id,
+                Exists(EventListenerDB.access, False),
+                EventListenerDB.access.owner == user_id,
             ),
         )
     listener = await EventListenerDB.find_one(*criteria_list)
@@ -411,8 +411,8 @@ async def delete_listener(
     if not admin and not admin_mode:
         criteria_list.append(
             Or(
-                Exists(EventListenerDB.owners, False),
-                EventListenerDB.owners.owner == user_id,
+                Exists(EventListenerDB.access, False),
+                EventListenerDB.access.owner == user_id,
             ),
         )
     listener = await EventListenerDB.find_one(*criteria_list)
@@ -425,3 +425,51 @@ async def delete_listener(
         await listener.delete()
         return {"deleted": listener_id}
     raise HTTPException(status_code=404, detail=f"Listener {listener_id} not found")
+
+
+@router.post("/{listener_id}/users/{target_user}")
+async def add_user_permission(
+    listener_id: str,
+    target_user: str,
+    user_id=Depends(get_current_username),
+    admin_mode: bool = Depends(get_admin_mode),
+    admin=Depends(get_admin),
+):
+    criteria_list = [EventListenerDB.id == ObjectId(listener_id)]
+    if not admin and not admin_mode:
+        criteria_list.append(
+            Or(
+                Exists(EventListenerDB.access, False),
+                EventListenerDB.access.owner == user_id,
+            ),
+        )
+    listener = await EventListenerDB.find_one(*criteria_list)
+    if listener:
+        if target_user not in listener.access.users:
+            listener.access.users.append(target_user)
+            await listener.save()
+        return listener.dict()
+    raise HTTPException(status_code=404, detail=f"listener {listener_id} not found")
+
+
+@router.delete("/{listener_id}/users/{target_user}")
+async def remove_user_permission(
+    listener_id: str,
+    target_user: str,
+    user_id=Depends(get_current_username),
+    admin_mode: bool = Depends(get_admin_mode),
+    admin=Depends(get_admin),
+):
+    criteria_list = [EventListenerDB.id == ObjectId(listener_id)]
+    if not admin and not admin_mode:
+        criteria_list.append(
+            Or(
+                Exists(EventListenerDB.access, False),
+                EventListenerDB.access.owner == user_id,
+            ),
+        )
+    listener = await EventListenerDB.find_one(*criteria_list)
+    if listener:
+        listener.access.users.remove(target_user)
+        await listener.save()
+    raise HTTPException(status_code=404, detail=f"listener {listener_id} not found")
