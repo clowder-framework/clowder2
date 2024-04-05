@@ -46,7 +46,7 @@ async def get_groups(
 
     """
     criteria_list = []
-    if not admin or not admin_mode:
+    if not admin and not admin_mode:
         criteria_list.append(
             Or(
                 GroupDB.creator == user_id,
@@ -96,7 +96,7 @@ async def search_group(
             RegEx(field=GroupDB.description, pattern=search_term),
         ),
     ]
-    if not admin or not admin_mode:
+    if not admin and not admin_mode:
         criteria_list.append(
             Or(GroupDB.creator == user_id, GroupDB.users.user.email == user_id)
         )

@@ -4,10 +4,17 @@ import random
 import string
 from typing import List, Optional
 
+from beanie import PydanticObjectId
+from beanie.operators import Or, RegEx, In, Exists
+from bson import ObjectId
+from fastapi import APIRouter, Depends, HTTPException
+from packaging import version
+
 from app.config import settings
 from app.keycloak_auth import get_current_user, get_current_username, get_user
 from app.models.config import ConfigEntryDB
 from app.models.feeds import FeedDB, FeedListener
+from app.models.groups import GroupDB
 from app.models.listeners import (
     EventListenerDB,
     EventListenerIn,
@@ -18,12 +25,8 @@ from app.models.listeners import (
 from app.models.pages import Paged, _construct_page_metadata, _get_page_query
 from app.models.search import SearchCriteria
 from app.models.users import UserOut
+from app.routers.authentication import get_admin, get_admin_mode
 from app.routers.feeds import disassociate_listener_db
-from beanie import PydanticObjectId
-from beanie.operators import Or, RegEx
-from bson import ObjectId
-from fastapi import APIRouter, Depends, HTTPException
-from packaging import version
 
 router = APIRouter()
 legacy_router = APIRouter()  # for back-compatibilty with v1 extractors
@@ -196,7 +199,9 @@ async def search_listeners(
     skip: int = 0,
     limit: int = 2,
     heartbeat_interval: Optional[int] = settings.listener_heartbeat_interval,
-    user=Depends(get_current_username),
+    user_id=Depends(get_current_username),
+    admin_mode: bool = Depends(get_admin_mode),
+    admin=Depends(get_admin),
 ):
     """Search all Event Listeners in the db based on text.
 
@@ -211,13 +216,29 @@ async def search_listeners(
         _get_page_query(skip, limit, sort_field="name", ascending=True),
     ]
 
-    listeners_and_count = (
-        await EventListenerDB.find(
-            Or(
-                RegEx(field=EventListenerDB.name, pattern=text),
-                RegEx(field=EventListenerDB.description, pattern=text),
-            ),
+    criteria_list = [
+        Or(
+            RegEx(field=EventListenerDB.name, pattern=text),
+            RegEx(field=EventListenerDB.description, pattern=text),
         )
+    ]
+    if not admin and not admin_mode:
+        user_q = await GroupDB.find(
+            Or(GroupDB.creator == user_id, GroupDB.users.user.email == user),
+        ).to_list()
+        user_groups = [u["_id"] for u in user_q]
+
+        criteria_list.append(
+            Or(
+                Exists(EventListenerDB.owners, False),
+                EventListenerDB.owners.owner == user_id,
+                EventListenerDB.owners.users == user_id,
+                In(EventListenerDB.owners.groups, user_groups),
+            )
+        )
+
+    listeners_and_count = (
+        await EventListenerDB.find(*criteria_list)
         .aggregate(aggregation_pipeline)
         .to_list()
     )
@@ -277,6 +298,8 @@ async def get_listeners(
     category: Optional[str] = None,
     label: Optional[str] = None,
     alive_only: Optional[bool] = False,
+    admin_mode: bool = Depends(get_admin_mode),
+    admin=Depends(get_admin),
 ):
     """Get a list of all Event Listeners in the db.
 
@@ -306,10 +329,29 @@ async def get_listeners(
         _get_page_query(skip, limit, sort_field="name", ascending=True)
     )
 
+    # Filter by ownership
+    criteria_list = []
+    if not admin and not admin_mode:
+        user_q = await GroupDB.find(
+            Or(GroupDB.creator == user_id, GroupDB.users.user.email == user),
+        ).to_list()
+        user_groups = [u["_id"] for u in user_q]
+
+        criteria_list.append(
+            Or(
+                Exists(EventListenerDB.owners, False),
+                EventListenerDB.owners.owner == user_id,
+                EventListenerDB.owners.users == user_id,
+                In(EventListenerDB.owners.groups, user_groups),
+            )
+        )
+
     # Run aggregate query and return
     # Sort by name alphabetically
     listeners_and_count = (
-        await EventListenerDB.find().aggregate(aggregation_pipeline).to_list()
+        await EventListenerDB.find(*criteria_list)
+        .aggregate(aggregation_pipeline)
+        .to_list()
     )
     page_metadata = _construct_page_metadata(listeners_and_count, skip, limit)
     page = Paged(

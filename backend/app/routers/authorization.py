@@ -74,7 +74,7 @@ async def get_dataset_role(
     """Retrieve role of user for a specific dataset."""
     # Get group id and the associated users from authorization
     criteria = []
-    if not admin or not admin_mode:
+    if not admin and not admin_mode:
         criteria.append(
             Or(
                 AuthorizationDB.creator == current_user,

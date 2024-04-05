@@ -1,7 +1,8 @@
 import json
 import logging
-
 import pika
+from beanie import PydanticObjectId
+
 from app.config import settings
 from app.models.listeners import EventListenerDB, EventListenerOut, ExtractorInfo
 from app.models.search import SearchCriteria
@@ -48,10 +49,10 @@ def callback(ch, method, properties, body):
         new_version = extractor_db.version
         if version.parse(new_version) > version.parse(existing_version):
             # if this is a new version, add it to the database
-            new_extractor = db["listeners"].insert_one(extractor_db.to_mongo())
-            found = db["listeners"].find_one({"_id": new_extractor.inserted_id})
+            new_extractor = EventListenerDB.insert_one(extractor_db.to_mongo())
+            found = EventListenerDB.get(PydanticObjectId(new_extractor.inserted_id))
             # TODO - for now we are not deleting an older version of the extractor, just adding a new one
-            # removed = db["listeners"].delete_one({"_id": existing_extractor["_id"]})
+            # removed = EventListenerDB.delete_one(EventListenerDB.id == PydanticObjectId(existing_extractor["_id"]))
             extractor_out = EventListenerOut.from_mongo(found)
             logger.info(
                 "%s updated from %s to %s"
@@ -60,8 +61,8 @@ def callback(ch, method, properties, body):
             return extractor_out
     else:
         # Register new listener
-        new_extractor = db["listeners"].insert_one(extractor_db.to_mongo())
-        found = db["listeners"].find_one({"_id": new_extractor.inserted_id})
+        new_extractor = EventListenerDB.insert_one(extractor_db.to_mongo())
+        found = EventListenerDB.get(PydanticObjectId(new_extractor.inserted_id))
         extractor_out = EventListenerOut.from_mongo(found)
         logger.info("New extractor registered: " + extractor_name)
 
@@ -104,7 +105,7 @@ def callback(ch, method, properties, body):
                         FeedListener(listener_id=extractor_out.id, automatic=True)
                     ],
                 )
-                db["feeds"].insert_one(new_feed.to_mongo())
+                FeedDB.insert_one(new_feed.to_mongo())
 
         return extractor_out
 
