@@ -38,7 +38,7 @@ import {
 import { AdminPanelSettings } from "@mui/icons-material";
 import ManageAccountsIcon from "@mui/icons-material/ManageAccounts";
 import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
-import { AppVersion } from "./versions/AppVersion";
+import { Footer } from "./navigation/Footer";
 
 const drawerWidth = 240;
 
@@ -417,8 +417,17 @@ export default function PersistentDrawerLeft(props) {
 			<Main open={open}>
 				<DrawerHeader />
 				{children}
-				<AppVersion />
 			</Main>
+			<Box
+				sx={{
+					position: "fixed",
+					bottom: 0,
+					minHeight: "30px",
+					width: "100%",
+				}}
+			>
+				<Footer />
+			</Box>
 		</Box>
 	);
 }
