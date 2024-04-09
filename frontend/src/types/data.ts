@@ -172,14 +172,13 @@ export interface MetadataState {
 }
 
 export interface FileState {
-	url: string;
 	blob: Blob;
 	fileSummary: FileOut;
 	extractedMetadata: ExtractedMetadata[];
 	metadataJsonld: MetadataJsonld[];
 	previews: FilePreview[];
 	fileVersions: FileVersion[];
-	fileRole: AuthorizationBase;
+	fileRole: string;
 	presignedUrl: string;
 	selected_version_num: number;
 }

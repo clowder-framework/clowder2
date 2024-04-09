@@ -1,7 +1,6 @@
 import React from "react";
 import { RootState } from "../../types/data";
-import { useDispatch, useSelector } from "react-redux";
-import { useParams } from "react-router-dom";
+import { useSelector } from "react-redux";
 import TableContainer from "@mui/material/TableContainer";
 import Table from "@mui/material/Table";
 import TableHead from "@mui/material/TableHead";
@@ -11,10 +10,6 @@ import TableBody from "@mui/material/TableBody";
 import { GroupAndRoleTableEntry } from "./GroupAndRoleTableEntry";
 
 export const GroupAndRoleTable = (): JSX.Element => {
-	const { datasetId } = useParams<{ datasetId?: string }>();
-
-	const dispatch = useDispatch();
-
 	const datasetRolesList = useSelector(
 		(state: RootState) => state.dataset.roles
 	);

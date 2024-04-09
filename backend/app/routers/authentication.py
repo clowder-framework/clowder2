@@ -1,18 +1,16 @@
 import json
 
+from app.keycloak_auth import create_user, get_current_user, keycloak_openid
+from app.models.datasets import DatasetDB
+from app.models.users import UserDB, UserIn, UserLogin, UserOut
 from beanie import PydanticObjectId
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from keycloak.exceptions import (
     KeycloakAuthenticationError,
     KeycloakGetError,
     KeycloakPostError,
 )
 from passlib.hash import bcrypt
-
-from app.keycloak_auth import create_user, get_current_user
-from app.keycloak_auth import keycloak_openid
-from app.models.datasets import DatasetDB
-from app.models.users import UserDB, UserIn, UserOut, UserLogin
 
 router = APIRouter()
 
@@ -188,7 +186,7 @@ async def revoke_admin(
         if current_username.email == useremail:
             raise HTTPException(
                 status_code=403,
-                detail=f"You are currently an admin. Admin cannot revoke their own admin access.",
+                detail="You are currently an admin. Admin cannot revoke their own admin access.",
             )
         else:
             if (user := await UserDB.find_one(UserDB.email == useremail)) is not None:

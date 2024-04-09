@@ -3,8 +3,8 @@ import json
 import logging
 from datetime import datetime
 
-from fastapi import Security, HTTPException, Depends
-from fastapi.security import OAuth2AuthorizationCodeBearer, APIKeyHeader, APIKeyCookie
+from fastapi import Depends, HTTPException, Security
+from fastapi.security import APIKeyCookie, APIKeyHeader, OAuth2AuthorizationCodeBearer
 from itsdangerous.exc import BadSignature
 from itsdangerous.url_safe import URLSafeSerializer
 from jose import ExpiredSignatureError
@@ -15,7 +15,7 @@ from pydantic import Json
 
 from .config import settings
 from .models.tokens import TokenDB
-from .models.users import UserOut, UserAPIKeyDB, UserDB, ListenerAPIKeyDB
+from .models.users import ListenerAPIKeyDB, UserAPIKeyDB, UserDB, UserOut
 
 logger = logging.getLogger(__name__)
 
@@ -120,7 +120,7 @@ async def get_token(
                     detail={"error": "Key is invalid."},
                     headers={"WWW-Authenticate": "Bearer"},
                 )
-        except BadSignature as e:
+        except BadSignature:
             raise HTTPException(
                 status_code=401,
                 detail={"error": "Key is invalid."},
@@ -210,7 +210,7 @@ async def get_current_user(
                     detail={"error": "Key is invalid."},
                     headers={"WWW-Authenticate": "Bearer"},
                 )
-        except BadSignature as e:
+        except BadSignature:
             raise HTTPException(
                 status_code=401,
                 detail={"error": "Key is invalid."},
@@ -292,7 +292,7 @@ async def get_current_username(
                     detail={"error": "Key is invalid."},
                     headers={"WWW-Authenticate": "Bearer"},
                 )
-        except BadSignature as e:
+        except BadSignature:
             raise HTTPException(
                 status_code=401,
                 detail={"error": "Key is invalid."},

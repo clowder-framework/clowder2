@@ -1,8 +1,8 @@
 import json
-from fastapi.routing import APIRouter, Request
 
 from app.config import settings
 from app.search.connect import connect_elasticsearch, search_index
+from fastapi.routing import APIRouter, Request
 
 router = APIRouter()
 

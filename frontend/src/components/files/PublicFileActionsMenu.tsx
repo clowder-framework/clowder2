@@ -9,9 +9,7 @@ import {
 	Stack,
 } from "@mui/material";
 import React, { useState } from "react";
-import {
-	fetchPublicFileSummary,
-} from "../../actions/public_file";
+import { fetchPublicFileSummary } from "../../actions/public_file";
 import { useDispatch, useSelector } from "react-redux";
 import { Download, MoreHoriz, Upload } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
@@ -23,7 +21,9 @@ type PublicFileActionsMenuProps = {
 	setSelectedVersion: any;
 };
 
-export const PublicFileActionsMenu = (props: PublicFileActionsMenuProps): JSX.Element => {
+export const PublicFileActionsMenu = (
+	props: PublicFileActionsMenuProps
+): JSX.Element => {
 	const { fileId, datasetId, setSelectedVersion } = props;
 
 	const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
