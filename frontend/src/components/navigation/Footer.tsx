@@ -19,15 +19,16 @@ export const Footer = () => {
 				<Toolbar sx={{ justifyContent: "space-between", alignItems: "center" }}>
 					<Box sx={{ display: "flex", alignItems: "center" }}>
 						<img
-							src="../../public/blue-clowder-logo-icon.svg"
+							src="../../public/grey-clowder-logo-icon.svg"
 							alt="Clowder Logo"
-							style={{ marginRight: 8, height: "20px" }}
+							style={{
+								marginRight: 8,
+								height: "20px",
+								color: theme.palette.info.main,
+							}}
 						/>
-						<Typography
-							variant="body1"
-							sx={{ color: theme.palette.primary.main }}
-						>
-							Powered by Clowder Framework | Version {appVersion}
+						<Typography variant="body1" sx={{ color: theme.palette.info.main }}>
+							Powered by Clowder Framework | {appVersion}
 						</Typography>
 					</Box>
 					<Box sx={{ display: "flex" }}>
