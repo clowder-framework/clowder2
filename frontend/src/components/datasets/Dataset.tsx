@@ -56,6 +56,7 @@ import config from "../../app.config";
 import {EditLicenseModal} from "./EditLicenseModal";
 import {V2} from "../../openapi";
 import {fetchStandardLicenses, fetchStandardLicenseUrl} from "../../utils/licenses";
+import { authCheck } from "../../utils/common";
 
 export const Dataset = (): JSX.Element => {
 	// path parameter
@@ -270,7 +271,9 @@ export const Dataset = (): JSX.Element => {
 							</Typography>
 						</Box>
 						<Box>
-							<RoleChip role={datasetRole.role} />
+							<Typography variant="body1" paragraph>
+								{about["description"]}
+							</Typography>
 						</Box>
 					</Stack>
 				</Grid>
@@ -285,10 +288,7 @@ export const Dataset = (): JSX.Element => {
 				{/*actions*/}
 			</Grid>
 			<Grid container spacing={2} sx={{ mt: 2 }}>
-				<Grid item xs={10}>
-					<Typography variant="body1" paragraph>
-						{about["description"]}
-					</Typography>
+				<Grid item xs={12} sm={12} md={10} lg={10} xl={10}>
 					<Tabs
 						value={selectedTabIndex}
 						onChange={handleTabChange}
@@ -319,18 +319,22 @@ export const Dataset = (): JSX.Element => {
 							{...a11yProps(2)}
 							disabled={false}
 						/>
-						{datasetRole.role !== undefined && datasetRole.role !== "viewer" ? (
-							<Tab
-								icon={<BuildIcon />}
-								iconPosition="start"
-								sx={TabStyle}
-								label="Analysis"
-								{...a11yProps(3)}
-								disabled={false}
-							/>
-						) : (
-							<></>
-						)}
+						<Tab
+							icon={<BuildIcon />}
+							iconPosition="start"
+							sx={
+								authCheck(adminMode, datasetRole.role, [
+									"owner",
+									"editor",
+									"uploader",
+								])
+									? TabStyle
+									: { display: "none" }
+							}
+							label="Analysis"
+							{...a11yProps(3)}
+							disabled={false}
+						/>
 						<Tab
 							icon={<HistoryIcon />}
 							iconPosition="start"
@@ -347,18 +351,22 @@ export const Dataset = (): JSX.Element => {
 							{...a11yProps(5)}
 							disabled={false}
 						/>
-						{datasetRole.role !== undefined && datasetRole.role !== "viewer" ? (
-							<Tab
-								icon={<ShareIcon />}
-								iconPosition="start"
-								sx={TabStyle}
-								label="Sharing"
-								{...a11yProps(6)}
-								disabled={false}
-							/>
-						) : (
-							<></>
-						)}
+						<Tab
+							icon={<ShareIcon />}
+							iconPosition="start"
+							sx={
+								authCheck(adminMode, datasetRole.role, [
+									"owner",
+									"editor",
+									"uploader",
+								])
+									? TabStyle
+									: { display: "none" }
+							}
+							label="Sharing"
+							{...a11yProps(6)}
+							disabled={false}
+						/>
 					</Tabs>
 					<TabPanel value={selectedTabIndex} index={0}>
 						{folderId !== null ? (
@@ -412,31 +420,30 @@ export const Dataset = (): JSX.Element => {
 									</Button>
 								</>
 							) : (
-								<>
-									<DisplayMetadata
-										updateMetadata={updateDatasetMetadata}
-										deleteMetadata={deleteDatasetMetadata}
-										resourceType="dataset"
-										resourceId={datasetId}
-									/>
-									<Box textAlign="center">
-										{enableAddMetadata &&
-									datasetRole.role !== undefined &&
-									datasetRole.role !== "viewer" ? (
-												<Button
-													variant="contained"
-													sx={{ m: 2 }}
-													onClick={() => {
-														setEnableAddMetadata(true);
-													}}
-												>
-											Add Metadata
-												</Button>
-											) : (
-												<></>
-											)}
-									</Box>
-								</>
+							<>
+								<DisplayMetadata
+								updateMetadata={updateDatasetMetadata}
+								deleteMetadata={deleteDatasetMetadata}
+								resourceType="dataset"
+								resourceId={datasetId}
+								publicView={false}/>
+								<Box textAlign="center">
+								{datasetRole.role !== undefined &&
+								datasetRole.role !== "viewer" ? (
+									<Button
+										variant="contained"
+										sx={{m: 2}}
+										onClick={() => {
+											setEnableAddMetadata(true);
+										}}
+									>
+										Add Metadata
+									</Button>
+								) : (
+									<></>
+								)}
+								</Box>
+							</>
 							)}
 					</TabPanel>
 					<TabPanel value={selectedTabIndex} index={2}>
@@ -447,26 +454,18 @@ export const Dataset = (): JSX.Element => {
 							resourceId={datasetId}
 						/>
 					</TabPanel>
-					{datasetRole.role !== undefined && datasetRole.role !== "viewer" ? (
-						<TabPanel value={selectedTabIndex} index={3}>
-							<Listeners datasetId={datasetId} />
-						</TabPanel>
-					) : (
-						<></>
-					)}
+					<TabPanel value={selectedTabIndex} index={3}>
+						<Listeners datasetId={datasetId} />
+					</TabPanel>
 					<TabPanel value={selectedTabIndex} index={4}>
 						<ExtractionHistoryTab datasetId={datasetId} />
 					</TabPanel>
 					<TabPanel value={selectedTabIndex} index={5}>
 						<Visualization datasetId={datasetId} />
 					</TabPanel>
-					{datasetRole.role !== undefined && datasetRole.role !== "viewer" ? (
-						<TabPanel value={selectedTabIndex} index={6}>
-							<SharingTab datasetId={datasetId} />
-						</TabPanel>
-					) : (
-						<></>
-					)}
+					<TabPanel value={selectedTabIndex} index={6}>
+						<SharingTab datasetId={datasetId} />
+					</TabPanel>
 				</Grid>
 				<Grid item>
 					<Typography variant="h5" gutterBottom>
@@ -511,7 +510,7 @@ export const Dataset = (): JSX.Element => {
 					) : (
 						<></>
 					)}
-					<DatasetDetails details={about} />
+					<DatasetDetails details={about} myRole={datasetRole.role} />
 				</Grid>
 			</Grid>
 		</Layout>

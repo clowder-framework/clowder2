@@ -40,3 +40,6 @@ sphinx-material = "*"
 
 [requires]
 python_version = "3.9"
+
+[scripts]
+extract-openapi = "python backend/extract-openapi.py app.main:app"

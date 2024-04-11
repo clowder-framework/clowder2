@@ -19,13 +19,13 @@ export default function Image(props: ImageProps) {
 	useEffect(() => {
 		let downloadUrl;
 		if (visualizationId) {
-			if (publicView){
+			if (publicView) {
 				downloadUrl = generatePublicVisDataDownloadUrl(visualizationId);
 			} else {
 				downloadUrl = generateVisDataDownloadUrl(visualizationId);
 			}
 		} else {
-			if (publicView){
+			if (publicView) {
 				downloadUrl = generatePublicFileDownloadUrl(fileId, 0);
 			} else {
 				downloadUrl = generateFileDownloadUrl(fileId, 0);

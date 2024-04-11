@@ -1,14 +1,13 @@
 from datetime import datetime
 from enum import Enum, auto
-from typing import Optional, List
+from typing import List, Optional
 
 import pymongo
-from beanie import Document, View, PydanticObjectId
-from pydantic import BaseModel, Field
-
-from app.models.authorization import RoleType, AuthorizationDB
+from app.models.authorization import AuthorizationDB, RoleType
 from app.models.groups import GroupOut
 from app.models.users import UserOut
+from beanie import Document, PydanticObjectId, View
+from pydantic import BaseModel, Field
 
 
 class AutoName(Enum):
