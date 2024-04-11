@@ -1,15 +1,13 @@
+from app.keycloak_auth import get_current_username
+from app.models.authorization import AuthorizationDB, RoleType
+from app.models.datasets import DatasetDB, DatasetStatus
+from app.models.files import FileDB, FileStatus
+from app.models.groups import GroupDB
+from app.models.metadata import MetadataDB
+from app.routers.authentication import get_admin, get_admin_mode
 from beanie import PydanticObjectId
 from beanie.operators import Or
 from fastapi import Depends, HTTPException
-
-from app.keycloak_auth import get_current_username
-from app.models.authorization import RoleType, AuthorizationDB
-from app.models.datasets import DatasetDB, DatasetStatus
-from app.models.files import FileOut, FileDB, FileStatus
-from app.models.groups import GroupOut, GroupDB
-from app.models.metadata import MetadataDB
-from app.routers.authentication import get_admin
-from app.routers.authentication import get_admin_mode
 
 
 async def check_public_access(

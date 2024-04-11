@@ -2,6 +2,7 @@ import { V2 } from "./openapi";
 import { EventListenerJobStatus } from "./types/data";
 
 interface Config {
+	appVersion: string;
 	hostname: string;
 	apikey: string;
 	GHIssueBaseURL: string;
@@ -34,7 +35,7 @@ const hostname =
 
 // TODO when add auth piece remove this env
 const apikey = process.env.APIKEY || "";
-
+config["appVersion"] = "v2.0.0-beta.2";
 config["hostname"] = hostname;
 config["apikey"] = apikey;
 
