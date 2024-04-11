@@ -13,15 +13,28 @@ export function DatasetDetails(props: DatasetAboutProps) {
 	const { myRole } = props;
 	const { id, created, modified, creator, status, downloads } = props.details;
 
-	const details = new Map<string, string>();
-	details.set("Owner", `${creator.first_name} ${creator.last_name}`);
-	details.set("Created on", parseDate(created));
-	details.set("Updated on", parseDate(modified));
-	details.set("Status", status);
-	details.set("Dataset id", id);
-	details.set("Downloads", downloads);
+	const details = new Map<
+		string,
+		{ value: string | undefined; info?: string }
+	>();
+	details.set("Owner", { value: `${creator.first_name} ${creator.last_name}` });
+	details.set("Created on", {
+		value: parseDate(created),
+		info: "Date and time of dataset creation",
+	});
+	details.set("Updated on", {
+		value: parseDate(modified),
+		info: "Date and time of dataset modification",
+	});
+	details.set("Status", { value: status });
+	details.set("Dataset id", { value: id });
+	details.set("Downloads", { value: downloads, info: "Number of downloads" });
 
-	if (myRole) details.set("My Role", myRole ? myRole.toUpperCase() : "");
+	if (myRole)
+		details.set("My Role", {
+			value: myRole ? myRole.toUpperCase() : "",
+			info: "Your role in the dataset",
+		});
 
 	return (
 		<Box sx={{ mt: 5 }}>
