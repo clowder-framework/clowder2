@@ -304,6 +304,24 @@ export function revokeAdmin(email) {
 	};
 }
 
+export const SET_READONLY = "SETREADONLY";
+
+export function setReadOnly(email) {
+	return (dispatch) => {
+		return V2.LoginService.setReadonlyUserApiV2UsersEnableReadonlyUseremailPost(email, read_only)
+			.then((json) => {
+				dispatch({
+					type: SET_READONLY,
+					profile: json,
+					receivedAt: Date.now(),
+				});
+			})
+			.catch((reason) => {
+				dispatch(handleErrors(reason, enableReadOnly(email)));
+			});
+	};
+}
+
 export const ENABLE_READONLY = "ENABLE_READONLY";
 
 export function enableReadOnly(email) {

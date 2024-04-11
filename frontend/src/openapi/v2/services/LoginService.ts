@@ -154,6 +154,29 @@ export class LoginService {
         });
     }
 
+	/**
+     * Set Readonly User
+     * @param useremail
+     * @param read_only
+     * @returns UserOut Successful Response
+     * @throws ApiError
+     */
+    public static setReadonlyUserApiV2UsersEnableReadonlyUseremailPost(
+        useremail: string,
+		read_only: boolean
+    ): CancelablePromise<UserOut> {
+        return __request({
+            method: 'POST',
+            path: `/api/v2/users/set_readonly/${useremail}`,
+            query: {
+                'read_only': read_only,
+            },
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+
     /**
      * Enable Readonly User
      * @param useremail
