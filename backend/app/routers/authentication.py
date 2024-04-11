@@ -206,7 +206,10 @@ async def revoke_admin(
 
 @router.post("/users/enable_readonly/{useremail}", response_model=UserOut)
 async def set_readonly_user(
-    useremail: str, read_only: bool, current_username=Depends(get_current_user), admin=Depends(get_admin)
+    useremail: str,
+    read_only: bool,
+    current_username=Depends(get_current_user),
+    admin=Depends(get_admin),
 ):
     if admin and current_username.admin:
         if (user := await UserDB.find_one(UserDB.email == useremail)) is not None:
@@ -220,6 +223,7 @@ async def set_readonly_user(
             status_code=403,
             detail=f"User {current_username.email} is not an admin. Only admin can make others admin.",
         )
+
 
 @router.post("/users/enable_readonly/{useremail}", response_model=UserOut)
 async def enable_readonly_user(
