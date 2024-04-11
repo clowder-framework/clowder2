@@ -1,12 +1,11 @@
 import os
 import struct
 
+from app.config import settings
+from app.keycloak_auth import delete_user
 from elasticsearch import Elasticsearch
 from fastapi.testclient import TestClient
 from pymongo import MongoClient
-
-from app.config import settings
-from app.keycloak_auth import delete_user
 
 """These are standard JSON entries to be used for creating test resources."""
 user_example = {

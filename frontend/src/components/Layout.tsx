@@ -16,14 +16,7 @@ import ListItem from "@mui/material/ListItem";
 import ListItemButton from "@mui/material/ListItemButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
-import {
-	Badge,
-	Link,
-	Menu,
-	MenuItem,
-	MenuList,
-	Typography,
-} from "@mui/material";
+import { Badge, Link, Menu, MenuItem, MenuList } from "@mui/material";
 import { Link as RouterLink, useLocation } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../types/data";
@@ -45,6 +38,7 @@ import {
 import { AdminPanelSettings } from "@mui/icons-material";
 import ManageAccountsIcon from "@mui/icons-material/ManageAccounts";
 import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
+import { AppVersion } from "./versions/AppVersion";
 
 const drawerWidth = 240;
 
@@ -193,9 +187,9 @@ export default function PersistentDrawerLeft(props) {
 					<Box sx={{ marginLeft: "auto" }}>
 						{loggedOut ? (
 							<>
-								<Link href="/auth/register" sx={link}>
-									Register
-								</Link>
+								{/*<Link href="/auth/register" sx={link}>*/}
+								{/*	Register*/}
+								{/*</Link>*/}
 								<Link href="/auth/login" sx={link}>
 									Login
 								</Link>
@@ -423,18 +417,7 @@ export default function PersistentDrawerLeft(props) {
 			<Main open={open}>
 				<DrawerHeader />
 				{children}
-				<Box
-					sx={{
-						position: "fixed",
-						bottom: "0px",
-						minHeight: "30px",
-						width: "100%",
-					}}
-				>
-					<Typography variant="body2" color="primary.light">
-						v2.0.0-beta.1
-					</Typography>
-				</Box>
+				<AppVersion />
 			</Main>
 		</Box>
 	);

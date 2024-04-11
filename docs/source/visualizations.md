@@ -26,4 +26,4 @@ thumbnails automatically.
 ## Visualizations
 
 Visualizations can be more complex than Thumbnails, and as such they include a JSON config document along with any
-actual bytes necessary to render. 
+actual bytes necessary to render.
