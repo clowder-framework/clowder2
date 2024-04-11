@@ -304,9 +304,9 @@ export function revokeAdmin(email) {
 	};
 }
 
-export const SET_READONLY = "SETREADONLY";
+export const SET_READONLY = "SET_READONLY";
 
-export function setReadOnly(email) {
+export function setReadOnly(email, read_only) {
 	return (dispatch) => {
 		return V2.LoginService.setReadonlyUserApiV2UsersEnableReadonlyUseremailPost(email, read_only)
 			.then((json) => {
@@ -317,7 +317,7 @@ export function setReadOnly(email) {
 				});
 			})
 			.catch((reason) => {
-				dispatch(handleErrors(reason, enableReadOnly(email)));
+				dispatch(handleErrors(reason, setReadOnly(email, read_only)));
 			});
 	};
 }

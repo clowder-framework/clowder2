@@ -16,7 +16,8 @@ import {
 	revokeAdmin as revokeAdminAction,
 	setAdmin as setAdminAction,
 	enableReadOnly as setEnableReadOnlyAction,
-	disableReadOnly as setDisableReadOnlyAction
+	disableReadOnly as setDisableReadOnlyAction,
+	setReadOnly as setReadOnlyAction, enableReadOnly, disableReadOnly,
 } from "../../actions/user";
 import { Box, Grid, Pagination, Switch } from "@mui/material";
 import { ErrorModal } from "../errors/ErrorModal";
@@ -50,7 +51,7 @@ export const ManageUsers = (): JSX.Element => {
 	const setEnableReadOnly = (email: string) => dispatch(setEnableReadOnlyAction(email));
 	const setDisableReadOnly = (email: string) => dispatch(setDisableReadOnlyAction(email));
 
-	const setReadOnly = (email: string, read_only: boolean) => dispatch(set)
+	const setReadOnly = (email: string, read_only: boolean) => dispatch(setReadOnlyAction(email, read_only))
 	// component did mount
 	useEffect(() => {
 		fetchAllUsers(0, limit);
@@ -157,12 +158,12 @@ export const ManageUsers = (): JSX.Element => {
 														checked={profile.read_only_user}
 														onChange={() => {
 															if (profile.read_only_user) {
-																setDisableReadOnly(profile.email);
-															} else {
-																setEnableReadOnly(profile.email);
+																disableReadOnly(profile.email);
+															} else if (!profile.admin) {
+																enableReadOnly(profile.email);
 															}
 														}}
-														disabled={(profile.email === currentUser.email) || (profile.admin)}
+														disabled={(profile.email === currentUser.email)}
 													/>
 												</TableCell>
 											</TableRow>

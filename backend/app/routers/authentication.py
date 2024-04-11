@@ -204,7 +204,7 @@ async def revoke_admin(
         )
 
 
-@router.post("/users/enable_readonly/{useremail}", response_model=UserOut)
+@router.post("/users/set_readonly/{useremail}", response_model=UserOut)
 async def set_readonly_user(
     useremail: str,
     read_only: bool,
