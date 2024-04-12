@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Box, Button, Grid, Link } from "@mui/material";
+import {Box, Button, Dialog, DialogContent, DialogTitle, Grid, Link} from "@mui/material";
 import Layout from "../Layout";
 import { useDispatch, useSelector } from "react-redux";
 import Typography from "@mui/material/Typography";
@@ -11,6 +11,8 @@ import { fetchMetadataDefinition as fetchMetadataDefinitionAction } from "../../
 import { RootState } from "../../types/data";
 import DeleteMetadataDefinitionModal from "./DeleteMetadataDefinitionModal";
 import DeleteIcon from "@mui/icons-material/Delete";
+import EditIcon from "@mui/icons-material/Edit";
+import EditMetadataDefinitionModal from "./EditMetadataDefinitionModal";
 
 export function MetadataDefinitionEntry() {
 	// path parameter
@@ -25,6 +27,10 @@ export function MetadataDefinitionEntry() {
 	const metadataDefinition = useSelector(
 		(state: RootState) => state.metadata.metadataDefinition
 	);
+	const [
+		editMetadataDefinitionOpen,
+		setEditMetadataDefinitionOpen,
+	] = useState<boolean>(false);
 
 	const [
 		deleteMetadataDefinitionConfirmOpen,
@@ -70,6 +76,26 @@ export function MetadataDefinitionEntry() {
 				}
 				metdataDefinitionId={metadataDefinition.id}
 			/>
+			{/*Edit metadata definition modal*/}
+			<Dialog
+				open={editMetadataDefinitionOpen}
+				onClose={() => {
+					setEditMetadataDefinitionOpen(false);
+				}}
+				fullWidth={true}
+				maxWidth="md"
+				aria-labelledby="form-dialog"
+			>
+				<DialogTitle>Edit Metadata Definition</DialogTitle>
+				<DialogContent>
+					<EditMetadataDefinitionModal
+						setEditMetadataDefinitionOpen ={
+							setEditMetadataDefinitionOpen
+						}
+						metadataDefinitionId={metadataDefinitionId}
+					/>
+				</DialogContent>
+			</Dialog>
 			{/*Header & menus*/}
 			<Grid container>
 				<Grid
@@ -131,6 +157,17 @@ export function MetadataDefinitionEntry() {
 						flexDirection: "row",
 					}}
 				>
+					<Button
+						variant="contained"
+						aria-label="edit"
+						onClick={() => {
+							setEditMetadataDefinitionOpen(true);
+						}}
+						endIcon={<EditIcon />}
+						sx={{ float: "right" }}
+					>
+						Edit
+					</Button>
 					<Button
 						variant="contained"
 						aria-label="delete"

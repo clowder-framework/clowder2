@@ -32,8 +32,6 @@ import { Link } from "react-router-dom";
 import { GenericSearchBox } from "../search/GenericSearchBox";
 import { MetadataDefinitionOut } from "../../openapi/v2";
 import config from "../../app.config";
-import EditIcon from "@mui/icons-material/Edit";
-import EditMetadataDefinitionModal from "./EditMetadataDefinitionModal";
 
 export function MetadataDefinitions() {
 	// Redux connect equivalent
@@ -65,10 +63,6 @@ export function MetadataDefinitions() {
 	const [
 		deleteMetadataDefinitionConfirmOpen,
 		setDeleteMetadataDefinitionConfirmOpen,
-	] = useState<boolean>(false);
-	const [
-		editMetadataDefinitionOpen,
-		setEditMetadataDefinitionOpen,
 	] = useState<boolean>(false);
 	const [selectedMetadataDefinition, setSelectedMetadataDefinition] =
 		useState();
@@ -145,31 +139,6 @@ export function MetadataDefinitions() {
 				<DialogContent>
 					<CreateMetadataDefinition
 						setCreateMetadataDefinitionOpen={setCreateMetadataDefinitionOpen}
-						setSnackBarOpen={setSnackBarOpen}
-						setSnackBarMessage={setSnackBarMessage}
-					/>
-				</DialogContent>
-			</Dialog>
-			{/*Edit metadata definition modal*/}
-			<Dialog
-				open={editMetadataDefinitionOpen}
-				onClose={() => {
-					setEditMetadataDefinitionOpen(false);
-				}}
-				fullWidth={true}
-				maxWidth="md"
-				aria-labelledby="form-dialog"
-			>
-				<DialogTitle>Edit Metadata Definition</DialogTitle>
-				<DialogContent>
-					<EditMetadataDefinitionModal
-						editMetadataDefinitionOpen={
-							editMetadataDefinitionOpen
-						}
-						setEditMetadataDefinitionOpen ={
-							setEditMetadataDefinitionOpen
-						}
-						metdataDefinitionId={selectedMetadataDefinition}
 						setSnackBarOpen={setSnackBarOpen}
 						setSnackBarMessage={setSnackBarMessage}
 					/>
@@ -255,16 +224,6 @@ export function MetadataDefinitions() {
 													key={`${mdd.id}-delete`}
 													align="left"
 												>
-													<IconButton
-														aria-label="edit"
-														size="small"
-														onClick={() => {
-															setSelectedMetadataDefinition(mdd.id);
-															setEditMetadataDefinitionOpen(true);
-														}}
-													>
-														<EditIcon fontSize="small" />
-													</IconButton>
 													<IconButton
 														aria-label="delete"
 														size="small"

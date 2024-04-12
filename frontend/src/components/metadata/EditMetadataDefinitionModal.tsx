@@ -19,17 +19,14 @@ import Typography from "@mui/material/Typography";
 import {contextUrlMap, InputType, widgetTypes} from "../../metadata.config";
 import AddBoxIcon from "@mui/icons-material/AddBox";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
-import {postMetadataDefinition, updateMetadataDefinition} from "../../actions/metadata";
+import {updateMetadataDefinition} from "../../actions/metadata";
 
 interface SupportedInputs {
 	[key: number]: Array<InputType>; // Define the type for SupportedInputs
 }
 type EditMetadataDefinitionModalProps = {
-	editMetadataDefinitionOpen: any;
 	setEditMetadataDefinitionOpen: any;
-	metdataDefinitionId: string | undefined;
-	setSnackBarOpen: any;
-	setSnackBarMessage: any;
+	metadataDefinitionId: string | undefined;
 };
 
 
@@ -37,21 +34,18 @@ export default function EditMetadataDefinitionModal(
 	props: EditMetadataDefinitionModalProps
 ) {
 	const {
-		editMetadataDefinitionOpen,
 		setEditMetadataDefinitionOpen,
-		metdataDefinitionId,
-		setSnackBarOpen,
-		setSnackBarMessage,
+		metadataDefinitionId,
 	} = props;
 
 	const dispatch = useDispatch();
 	const editMetadataDefinition = (id: string|undefined, metadata: object) =>
 		dispatch(updateMetadataDefinition(id, metadata));
-	const metadataDefinitions = useSelector(
-		(state: RootState) => state.metadata.metadataDefinitionList.data
+	const metadataDefinition = useSelector(
+		(state: RootState) => state.metadata.metadataDefinition
 	);
 
-	const [formInput, setFormInput] = React.useState(metadataDefinitions?.find(item => item.id === metdataDefinitionId));
+	const [formInput, setFormInput] = React.useState(metadataDefinition);
 	const [activeStep, setActiveStep] = React.useState(0);
 	const [parsedInput, setParsedInput] = React.useState("");
 	const [contextMap, setContextMap] = React.useState([{ term: "", iri: "" }]);
@@ -61,46 +55,49 @@ export default function EditMetadataDefinitionModal(
 
 	// Update formData when metadataDefinitions or metdataDefinitionId changes
 	useEffect(() => {
-		if (metadataDefinitions) {
-			const initialData = metadataDefinitions.find(item => item.id === metdataDefinitionId);
-			//initialData.fields[0].config.options=""
-			//initialData.fields[0].config.type="Integer"
-			setFormInput(initialData);
-			if (initialData.context) {
-				const mappedContext = initialData.context.map(item => ({
-					term: Object.keys(item)[0], // Access the key of the object
-					iri: Object.values(item)[0] // Access the value of the object
+		if (metadataDefinition) {
+			setFormInput(metadataDefinition);
+			formInput.fields.map((field, idx) => {
+				setSupportedInputs((prevState) => ({
+					...prevState,
+					[idx]: widgetTypes[field.widgetType]["input_types"],
 				}));
+			});
+			if (metadataDefinition["@context"]) {
+				console.log(metadataDefinition["@context"]);
+				// const mappedContext = metadataDefinition["@context"].map(item => ({
+				// 	term: Object.keys(item)[0], // Access the key of the object
+				// 	iri: Object.values(item)[0] // Access the value of the object
+				// }));
+				const mappedContext = metadataDefinition["@context"].flatMap(obj =>
+					Object.entries(obj).map(([term, iri]) => ({ term, iri }))
+				);
 				setContextMap(mappedContext);
+				console.log(mappedContext);
 			}
-
-			console.log("context:", formInput.context);
-			console.log("mapped context:", initialData.context.map(item => ({
-				term: Object.keys(item)[0], // Access the key of the object
-				iri: Object.values(item)[0] // Access the value of the object
-			}))); // Add this line
-			console.log("fields:", formInput.fields);
 		}
-	}, [metadataDefinitions]);
+	}, [metadataDefinition]);
 
 	const handleEditMetadataDefinition = () => {
-		// let context = [JSON.parse(formInput.context)];
-		// formInput.context = context;
+		// console
+		//@ts-ignore
+		const data = JSON.parse(JSON.stringify(formInput));
+		// let context = [JSON.parse(data.context)];
+		// data.context = context;
 
 		// Remove the options field if widgetType != enum
-		for (let i = 0; i < formInput.fields.length; i++) {
-			if (formInput.fields[i].config.type != "enum") {
-				delete formInput.fields[i].config.options;
+		for (let i = 0; i < data.fields.length; i++) {
+			if (data.fields[i].config.type != "enum") {
+				delete data.fields[i].config.options;
 			}
 		}
 		// Handle form submission
-		console.log("Form submitted:", formInput);
-		editMetadataDefinition(metdataDefinitionId, formInput)
+		console.log("Form submitted:", data);
+		editMetadataDefinition(metadataDefinitionId, data);
 		setEditMetadataDefinitionOpen(false);
 	};
 	const handleInputChange = (idx: number, key: string, value: string) => {
-		const data = { ...formInput };
-
+		const data = JSON.parse(JSON.stringify(formInput));
 		// Handle input change of name, description, context high level fields
 		if (idx == -1) {
 			data[key] = value;
@@ -123,7 +120,7 @@ export default function EditMetadataDefinitionModal(
 	};
 
 	const handleMetadataRequiredInputChange = (key: string) => {
-		const data = { ...formInput };
+		const data = JSON.parse(JSON.stringify(formInput));
 
 		if (key == "datasets")
 			data.required_for_items.datasets = !data.required_for_items.datasets;
@@ -163,23 +160,18 @@ export default function EditMetadataDefinitionModal(
 	};
 
 	const constructContextJson = (newContextMap: any) => {
+		const data = JSON.parse(JSON.stringify(formInput));
 		const contextJson = {};
 
 		newContextMap.forEach((item, idx) => {
 			contextJson[item["term"]] = item["iri"];
 		});
-
-		setFormInput({
-			name: formInput.name,
-			description: formInput.description,
-			required_for_items: formInput.required_for_items,
-			context: [JSON.stringify(contextJson)],
-			fields: formInput.fields,
-		});
+		data["@context"] = [JSON.parse(JSON.stringify(contextJson))];
+		setFormInput(data);
 	};
 
 	const addNewField = (idx: number) => {
-		const newitem = {
+		const newField = {
 			name: "",
 			list: false,
 			widgetType: "",
@@ -190,44 +182,37 @@ export default function EditMetadataDefinitionModal(
 			required: false,
 		};
 
-		const newfield = formInput["fields"];
+		const data = JSON.parse(JSON.stringify(formInput));
+		const fields = data["fields"];
 
 		// Add newfield to ith idx of list
-		newfield.splice(idx + 1, 0, newitem);
+		fields.splice(idx + 1, 0, newField);
+		data.fields = fields;
 
-		setFormInput({
-			name: formInput.name,
-			description: formInput.description,
-			required_for_items: formInput.required_for_items,
-			context: [formInput.context],
-			fields: newfield,
-		});
+		setFormInput(data);
 
 		// Update the preview text
 		parseInput();
 	};
 
 	const removeField = (idx: number) => {
-		const data = formInput["fields"];
-		data.splice(idx, 1);
+		const data = JSON.parse(JSON.stringify(formInput));
+		const fields = data["fields"];
+		fields.splice(idx, 1);
+		data.fields = fields;
 
-		setFormInput({
-			name: formInput.name,
-			description: formInput.description,
-			required_for_items: formInput.required_for_items,
-			context: [formInput.context],
-			fields: data,
-		});
+		setFormInput(data);
 
 		// Update the preview text
 		parseInput();
 
 		// Render the stepper correctly after deleting a field
+		console.log("activestep:", activeStep);
 		handleBack();
 	};
 
 	const parseInput = () => {
-		const data = { ...formInput };
+		const data = JSON.parse(JSON.stringify(formInput));
 
 		// Parse the context JSON
 		//data.context = [JSON.parse(data.context)];
@@ -293,14 +278,16 @@ export default function EditMetadataDefinitionModal(
 	};
 
 	const handleBack = () => {
+		console.log("back");
 		setActiveStep((prevActiveStep) => prevActiveStep - 1);
+		console.log("activestep:", activeStep);
 	};
 
 	return (
 		<div className="outer-container">
 			<div className="inner-container">
 				<Stepper activeStep={activeStep} orientation="vertical">
-					<Step key="create-metadata">
+					<Step key="edit-metadata">
 						<StepButton
 							color="inherit"
 							onClick={() => {
@@ -598,7 +585,6 @@ export default function EditMetadataDefinitionModal(
 											);
 										})}
 									</ClowderInput>
-									<div>{input.config.type}</div>
 									<ClowderInput
 										margin="normal"
 										required
