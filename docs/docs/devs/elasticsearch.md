@@ -7,7 +7,7 @@ For some examples in Python, please refer to https://www.elastic.co/guide/en/ela
 We are running Elasticsearch inside Docker at port 9200. Once the elasticsearch docker container is up and running,
 you should be able to connect to http://localhost:9200 and see something like below:
 
-![Connect to elasticsearch](img/elasticsearch1.png)
+![Connect to elasticsearch](../assets/images/elasticsearch1.png)
 
 If you see error in Elasticsearch docker container and that is related to heap memory, try upgrading memory to
 8Gb in docker setting.

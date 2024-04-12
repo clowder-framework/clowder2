@@ -11577,8 +11577,7 @@
         "required": [
           "email",
           "first_name",
-          "last_name",
-          "admin"
+          "last_name"
         ],
         "type": "object",
         "properties": {
@@ -11605,7 +11604,8 @@
           },
           "admin": {
             "title": "Admin",
-            "type": "boolean"
+            "type": "boolean",
+            "default": false
           },
           "admin_mode": {
             "title": "Admin Mode",
