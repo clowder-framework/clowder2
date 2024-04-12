@@ -84,12 +84,14 @@ async def update_metadata_definition(
     metadata_definition_id: str,
     user=Depends(get_current_user),
 ):
-    existing_count = await MetadataDefinitionDB.find({
-        "$and": [
-            {"_id": {"$ne": PydanticObjectId(metadata_definition_id)}},
-            {"name": {"$eq": metadata_definition.name}}
-        ]
-    }).count()
+    existing_count = await MetadataDefinitionDB.find(
+        {
+            "$and": [
+                {"_id": {"$ne": PydanticObjectId(metadata_definition_id)}},
+                {"name": {"$eq": metadata_definition.name}},
+            ]
+        }
+    ).count()
     if existing_count > 0:
         raise HTTPException(
             status_code=409,
