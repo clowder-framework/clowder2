@@ -34,7 +34,9 @@ export function FileDetails(props: FileAboutProps) {
 		info: "Latest date and time of the file being updated",
 	});
 	details.set("Uploaded as", { value: name, info: "Name of the file" });
-	details.set("Uploaded by", `${creator.first_name} ${creator.last_name}`);
+	details.set("Uploaded by", {
+		value: `${creator.first_name} ${creator.last_name}`,
+	});
 
 	switch (storage_type) {
 		case "minio": {
@@ -68,7 +70,7 @@ export function FileDetails(props: FileAboutProps) {
 	}
 	details.set("File id", { value: id });
 	details.set("Downloads", {
-		value: downloads.toString(),
+		value: downloads,
 		info: "Number of downloads",
 	});
 

@@ -2,7 +2,7 @@ import React from "react";
 import { Box, Typography } from "@mui/material";
 import { parseDate } from "../../utils/common";
 import { StackedList } from "../util/StackedList";
-import { Dataset } from "../../types/data";
+import { DatasetOut as Dataset } from "../../openapi/v2";
 
 type DatasetAboutProps = {
 	myRole?: string;
@@ -26,9 +26,12 @@ export function DatasetDetails(props: DatasetAboutProps) {
 		value: parseDate(modified),
 		info: "Date and time of dataset modification",
 	});
-	details.set("Status", { value: status });
+	details.set("Status", { value: status, info: "Public or private dataset" });
 	details.set("Dataset id", { value: id });
-	details.set("Downloads", { value: downloads, info: "Number of downloads" });
+	details.set("Downloads", {
+		value: downloads,
+		info: "Number of downloads",
+	});
 
 	if (myRole)
 		details.set("My Role", {
