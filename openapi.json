@@ -1707,14 +1707,14 @@
         ]
       }
     },
-    "/api/v2/authorizations/datasets/{dataset_id}/roles}": {
+    "/api/v2/authorizations/datasets/{dataset_id}/roles": {
       "get": {
         "tags": [
           "authorization"
         ],
         "summary": "Get Dataset Roles",
         "description": "Get a list of all users and groups that have assigned roles on this dataset.",
-        "operationId": "get_dataset_roles_api_v2_authorizations_datasets__dataset_id__roles__get",
+        "operationId": "get_dataset_roles_api_v2_authorizations_datasets__dataset_id__roles_get",
         "parameters": [
           {
             "required": true,

@@ -265,7 +265,7 @@ export class AuthorizationService {
     ): CancelablePromise<DatasetRoles> {
         return __request({
             method: 'GET',
-            path: `/api/v2/authorizations/datasets/${datasetId}/roles}`,
+            path: `/api/v2/authorizations/datasets/${datasetId}/roles`,
             errors: {
                 422: `Validation Error`,
             },
