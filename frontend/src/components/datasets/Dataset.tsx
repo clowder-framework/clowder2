@@ -454,9 +454,13 @@ export const Dataset = (): JSX.Element => {
 							resourceId={datasetId}
 						/>
 					</TabPanel>
-					<TabPanel value={selectedTabIndex} index={3}>
-						<Listeners datasetId={datasetId} />
-					</TabPanel>
+					{datasetRole.role !== undefined && datasetRole.role !== "viewer" ? (
+						<TabPanel value={selectedTabIndex} index={3}>
+							<Listeners datasetId={datasetId} process={"dataset"}/>
+						</TabPanel>
+					) : (
+						<></>
+					)}
 					<TabPanel value={selectedTabIndex} index={4}>
 						<ExtractionHistoryTab datasetId={datasetId} />
 					</TabPanel>
