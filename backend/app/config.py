@@ -1,6 +1,6 @@
 from typing import List
 
-from pydantic import BaseSettings, AnyHttpUrl
+from pydantic import AnyHttpUrl, BaseSettings
 
 
 class Settings(BaseSettings):
@@ -9,7 +9,7 @@ class Settings(BaseSettings):
     API_V2_STR: str = "/api/v2"
     admin_email: str = "devnull@ncsa.illinois.edu"
     frontend_url: str = "http://localhost:3000"
-    version: str = "2.0.0-beta.1"
+    version: str = "2.0.0-beta.2"
 
     # Unique secret for hashing API keys. Generate with `openssl rand -hex 32`
     local_auth_secret = "clowder_secret_key"
@@ -49,7 +49,7 @@ class Settings(BaseSettings):
     # scope=openid email&redirect_uri=http://<domain.com>/<redirect-path>&kc_locale=<two-digit-lang-code>
     auth_register_url = (
         f"{auth_base}/keycloak/realms/{auth_realm}/protocol/openid-connect/registrations?client_id"
-        f"={auth_client_id}&response_type=code"
+        f"={auth_client_id}&response_type=code&redirect_uri={auth_redirect_uri}"
     )
     auth_token_url = (
         f"{auth_base}/keycloak/realms/{auth_realm}/protocol/openid-connect/token"

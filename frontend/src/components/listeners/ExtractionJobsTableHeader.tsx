@@ -4,18 +4,21 @@ import TableRow from "@mui/material/TableRow";
 import TableCell from "@mui/material/TableCell";
 import TableSortLabel from "@mui/material/TableSortLabel";
 import Box from "@mui/material/Box";
-import {visuallyHidden} from "@mui/utils";
-import {Data, Order} from "./ExtractionJobs";
+import { visuallyHidden } from "@mui/utils";
+import { Data, Order } from "./ExtractionJobs";
 
 interface EnhancedTableProps {
-	onRequestSort: (event: React.MouseEvent<unknown>, property: keyof Data) => void;
+	onRequestSort: (
+		event: React.MouseEvent<unknown>,
+		property: keyof Data
+	) => void;
 	order: Order;
 	orderBy: string;
 	headCells: any;
 }
 
 export const EnhancedTableHead = (props: EnhancedTableProps) => {
-	const {order, orderBy, onRequestSort, headCells} = props;
+	const { order, orderBy, onRequestSort, headCells } = props;
 	const createSortHandler =
 		(property: keyof Data) => (event: React.MouseEvent<unknown>) => {
 			onRequestSort(event, property);
@@ -48,4 +51,4 @@ export const EnhancedTableHead = (props: EnhancedTableProps) => {
 			</TableRow>
 		</TableHead>
 	);
-}
+};

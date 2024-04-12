@@ -14,7 +14,8 @@ export const PublicVisualizationRawBytesCard = (props: publicPreviewProps) => {
 			<Card>
 				<CardContent>
 					{React.cloneElement(visComponentDefinition.component, {
-						fileId: fileId, publicView: true,
+						fileId: fileId,
+						publicView: true,
 					})}
 				</CardContent>
 			</Card>

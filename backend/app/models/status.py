@@ -1,6 +1,5 @@
-from pydantic import BaseModel
-
 from app.config import settings
+from pydantic import BaseModel
 
 
 class Status(BaseModel):
