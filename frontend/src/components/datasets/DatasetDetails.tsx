@@ -18,23 +18,23 @@ export function DatasetDetails(props: DatasetAboutProps) {
 		{ value: string | undefined; info?: string }
 	>();
 	details.set("Owner", { value: `${creator.first_name} ${creator.last_name}` });
-	details.set("Created on", {
+	details.set("Created", {
 		value: parseDate(created),
 		info: "Date and time of dataset creation",
 	});
-	details.set("Updated on", {
+	details.set("Updated", {
 		value: parseDate(modified),
 		info: "Date and time of dataset modification",
 	});
 	details.set("Status", { value: status, info: "Public or private dataset" });
-	details.set("Dataset id", { value: id });
+	details.set("Dataset identifier", { value: id });
 	details.set("Downloads", {
 		value: downloads,
 		info: "Number of downloads",
 	});
 
 	if (myRole)
-		details.set("My Role", {
+		details.set("My role", {
 			value: myRole ? myRole.toUpperCase() : "",
 			info: "Your role on the dataset. E.g. Owner, Editor, Uploader, Viewer.",
 		});

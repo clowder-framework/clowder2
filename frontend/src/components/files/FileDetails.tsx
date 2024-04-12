@@ -29,20 +29,20 @@ export function FileDetails(props: FileAboutProps) {
 	>();
 	details.set("Size", { value: prettyBytes(bytes) });
 	details.set("Content type", { value: content_type.content_type });
-	details.set("Updated on", {
+	details.set("Updated", {
 		value: parseDate(created),
 		info: "Latest date and time of the file being updated",
 	});
-	details.set("Uploaded as", { value: name, info: "Name of the file" });
-	details.set("Uploaded by", {
+	details.set("Uploaded", { value: name, info: "Name of the file" });
+	details.set("Uploader", {
 		value: `${creator.first_name} ${creator.last_name}`,
 	});
 
 	switch (storage_type) {
 		case "minio": {
 			details.set("Storage location", {
-				value: "Database",
-				info: "Data stored in the Minio instance",
+				value: "Local object store",
+				info: "Data stored in the MinIO instance",
 			});
 			break;
 		}
@@ -68,14 +68,14 @@ export function FileDetails(props: FileAboutProps) {
 			break;
 		}
 	}
-	details.set("File id", { value: id });
+	details.set("File identifier", { value: id });
 	details.set("Downloads", {
 		value: downloads,
 		info: "Number of downloads",
 	});
 
 	if (myRole)
-		details.set("My Role", {
+		details.set("My role", {
 			value: myRole ? myRole.toUpperCase() : "",
 			info: "Your role on the file. E.g. Owner, Editor, Uploader, Viewer.",
 		});
