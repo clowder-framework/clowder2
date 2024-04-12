@@ -28,25 +28,17 @@ export const Footer = () => {
 							}}
 						/>
 						<Typography variant="body1" sx={{ color: theme.palette.info.main }}>
-							Powered by Clowder Framework | {appVersion}
+							Powered by Clowder | {appVersion}
 						</Typography>
 					</Box>
 					<Box sx={{ display: "flex" }}>
-						<Link
-							href={`mailto:${config.mailingList}`}
-							color="primary"
-							sx={{ ml: 2, textDecoration: "none" }}
-							target="_blank"
-						>
-							Contact Us
-						</Link>
 						<Link
 							href={config.slackChannel}
 							color="primary"
 							sx={{ ml: 2, textDecoration: "none" }}
 							target="_blank"
 						>
-							Slack Channel
+							Slack
 						</Link>
 						<Link
 							href={config.documentation}
@@ -55,6 +47,14 @@ export const Footer = () => {
 							target="_blank"
 						>
 							Documentation
+						</Link>
+						<Link
+							href={`mailto:${config.mailingList}`}
+							color="primary"
+							sx={{ ml: 2, textDecoration: "none" }}
+							target="_blank"
+						>
+							Contact Us
 						</Link>
 					</Box>
 				</Toolbar>
