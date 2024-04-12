@@ -154,6 +154,9 @@ async def get_current_user(
             user = await UserDB.find_one(UserDB.email == userinfo["email"])
             return UserOut(**user.dict())
         except KeycloakAuthenticationError as e:
+            if not e.error_message:
+                if e.response_code == 401:
+                    e.error_message = '{"error": "Unauthenticated"}'
             raise HTTPException(
                 status_code=e.response_code,
                 detail=json.loads(e.error_message),
@@ -236,6 +239,9 @@ async def get_current_username(
             return userinfo["email"]
         # expired token
         except KeycloakAuthenticationError as e:
+            if not e.error_message:
+                if e.response_code == 401:
+                    e.error_message = '{"error": "Unauthenticated"}'
             raise HTTPException(
                 status_code=e.response_code,
                 detail=json.loads(e.error_message),
@@ -329,7 +335,7 @@ async def create_user(email: str, password: str, firstName: str, lastName: str):
         {
             "email": email,
             "username": email,
-            "enabled": True,
+            "enabled": settings.keycloak_default_enabled,
             "firstName": firstName,
             "lastName": lastName,
             "credentials": [
@@ -388,3 +394,24 @@ async def retreive_refresh_token(email: str):
             },  # "Invalid authentication credentials",
             headers={"WWW-Authenticate": "Bearer"},
         )
+
+
+async def enable_disable_user(email: str, set_enable: bool):
+    keycloak_admin = KeycloakAdmin(
+        server_url=settings.auth_server_url,
+        username=settings.keycloak_username,
+        password=settings.keycloak_password,
+        realm_name=settings.keycloak_realm_name,
+        user_realm_name=settings.keycloak_user_realm_name,
+        # client_secret_key=settings.auth_client_secret,
+        # client_id=settings.keycloak_client_id,
+        verify=True,
+    )
+    user_id = keycloak_admin.get_user_id(username=email)
+    if user_id:
+        if set_enable:
+            keycloak_admin.enable_user(user_id)
+        else:
+            keycloak_admin.disable_user(user_id)
+    else:
+        raise Exception("keycloak doesnot have user: " + str)
