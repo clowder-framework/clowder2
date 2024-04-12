@@ -7,11 +7,12 @@ from datetime import datetime
 
 from aio_pika import connect_robust
 from aio_pika.abc import AbstractIncomingMessage
+from packaging import version
+
 from app.config import settings
 from app.main import startup_beanie
 from app.models.listeners import EventListenerDB, EventListenerOut, ExtractorInfo
 from app.routers.listeners import _process_incoming_v1_extractor_info
-from packaging import version
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -34,11 +35,20 @@ async def callback(message: AbstractIncomingMessage):
         extractor_db = EventListenerDB(
             **extractor_info, properties=ExtractorInfo(**extractor_info)
         )
+        owner = msg["owner"]
+        if owner is not None:
+            extractor_db.access = {"owner": owner}
 
         # check to see if extractor already exists and update if so
-        existing_extractor = await EventListenerDB.find_one(
-            EventListenerDB.name == msg["queue"]
-        )
+        if owner is not None:
+            existing_extractor = await EventListenerDB.find_one(
+                EventListenerDB.name == msg["queue"]
+            )
+        else:
+            existing_extractor = await EventListenerDB.find_one(
+                EventListenerDB.name == msg["queue"],
+                EventListenerDB.access.owner == owner,
+            )
         if existing_extractor is not None:
             extractor_db.id = existing_extractor.id
             extractor_db.created = existing_extractor.created
