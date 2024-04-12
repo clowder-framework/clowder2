@@ -29,7 +29,7 @@ export function VisualizationDataDetail(props: FileAboutProps) {
 	});
 	details.set("Uploaded as", {
 		value: visualizationDataItem.name,
-		info: "Name of the file",
+		info: "Name of the visualization extractor",
 	});
 	details.set("Uploaded by", {
 		value: `${visualizationDataItem.creator.first_name} ${visualizationDataItem.creator.last_name}`,

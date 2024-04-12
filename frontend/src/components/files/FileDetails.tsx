@@ -77,7 +77,7 @@ export function FileDetails(props: FileAboutProps) {
 	if (myRole)
 		details.set("My Role", {
 			value: myRole ? myRole.toUpperCase() : "",
-			info: "Your role in the file",
+			info: "Your role on the file. E.g. Owner, Editor, Uploader, Viewer.",
 		});
 
 	return (

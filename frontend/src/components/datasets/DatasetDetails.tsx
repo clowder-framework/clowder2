@@ -36,7 +36,7 @@ export function DatasetDetails(props: DatasetAboutProps) {
 	if (myRole)
 		details.set("My Role", {
 			value: myRole ? myRole.toUpperCase() : "",
-			info: "Your role in the dataset",
+			info: "Your role on the dataset. E.g. Owner, Editor, Uploader, Viewer.",
 		});
 
 	return (
