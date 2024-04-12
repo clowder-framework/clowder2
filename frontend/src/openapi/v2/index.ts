@@ -21,6 +21,7 @@ export type { Body_update_file_api_v2_files__file_id__put } from './models/Body_
 export type { ContentType } from './models/ContentType';
 export type { DatasetBase } from './models/DatasetBase';
 export type { DatasetIn } from './models/DatasetIn';
+export type { DatasetInS3 } from './models/DatasetInS3';
 export type { DatasetOut } from './models/DatasetOut';
 export type { DatasetPatch } from './models/DatasetPatch';
 export type { DatasetRoles } from './models/DatasetRoles';

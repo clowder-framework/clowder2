@@ -23,13 +23,29 @@ class DatasetStatus(AutoName):
     TRIAL = auto()
 
 
+class DatasetType(AutoName):
+    DEFAULT = auto()
+    S3 = auto()
+
+
 class DatasetBase(BaseModel):
     name: str = "N/A"
     description: Optional[str] = None
     status: str = DatasetStatus.PRIVATE.name
+    type: str = DatasetType.DEFAULT.name
 
 
 class DatasetIn(DatasetBase):
+    pass
+
+
+class DatasetS3Fields(BaseModel):
+    bucket: str
+    prefix: str
+    credentials: dict
+
+
+class DatasetInS3(DatasetIn, DatasetS3Fields):
     pass
 
 
@@ -56,6 +72,10 @@ class DatasetDB(Document, DatasetBase):
                 ("description", pymongo.TEXT),
             ],
         ]
+
+
+class DatasetDBS3(DatasetDB, DatasetS3Fields):
+    pass
 
 
 class DatasetDBViewList(View, DatasetBase):

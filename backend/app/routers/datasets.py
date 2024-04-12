@@ -16,8 +16,10 @@ from app.models.authorization import AuthorizationDB, RoleType
 from app.models.datasets import (
     DatasetBase,
     DatasetDB,
+    DatasetDBS3,
     DatasetDBViewList,
     DatasetIn,
+    DatasetInS3,
     DatasetOut,
     DatasetPatch,
     DatasetStatus,
@@ -183,6 +185,27 @@ async def save_dataset(
     es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
 ):
     dataset = DatasetDB(**dataset_in.dict(), creator=user)
+    await dataset.insert()
+
+    # Create authorization entry
+    await AuthorizationDB(
+        dataset_id=dataset.id,
+        role=RoleType.OWNER,
+        creator=user.email,
+    ).save()
+
+    # Add new entry to elasticsearch
+    await index_dataset(es, DatasetOut(**dataset.dict()), [user.email])
+    return dataset.dict()
+
+
+@router.post("", response_model=DatasetOut)
+async def save_dataset_s3(
+    dataset_in: DatasetInS3,
+    user=Depends(get_current_user),
+    es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
+):
+    dataset = DatasetDBS3(**dataset_in.dict(), creator=user)
     await dataset.insert()
 
     # Create authorization entry

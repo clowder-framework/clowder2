@@ -3852,13 +3852,13 @@
         "tags": [
           "datasets"
         ],
-        "summary": "Save Dataset",
-        "operationId": "save_dataset_api_v2_datasets_post",
+        "summary": "Save Dataset S3",
+        "operationId": "save_dataset_s3_api_v2_datasets_post",
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/DatasetIn"
+                "$ref": "#/components/schemas/DatasetInS3"
               }
             }
           },
@@ -9582,6 +9582,11 @@
             "title": "Status",
             "type": "string",
             "default": "PRIVATE"
+          },
+          "type": {
+            "title": "Type",
+            "type": "string",
+            "default": "DEFAULT"
           }
         }
       },
@@ -9602,6 +9607,53 @@
             "title": "Status",
             "type": "string",
             "default": "PRIVATE"
+          },
+          "type": {
+            "title": "Type",
+            "type": "string",
+            "default": "DEFAULT"
+          }
+        }
+      },
+      "DatasetInS3": {
+        "title": "DatasetInS3",
+        "required": [
+          "bucket",
+          "prefix",
+          "credentials"
+        ],
+        "type": "object",
+        "properties": {
+          "bucket": {
+            "title": "Bucket",
+            "type": "string"
+          },
+          "prefix": {
+            "title": "Prefix",
+            "type": "string"
+          },
+          "credentials": {
+            "title": "Credentials",
+            "type": "object"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string",
+            "default": "N/A"
+          },
+          "description": {
+            "title": "Description",
+            "type": "string"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string",
+            "default": "PRIVATE"
+          },
+          "type": {
+            "title": "Type",
+            "type": "string",
+            "default": "DEFAULT"
           }
         }
       },
@@ -9625,6 +9677,11 @@
             "title": "Status",
             "type": "string",
             "default": "PRIVATE"
+          },
+          "type": {
+            "title": "Type",
+            "type": "string",
+            "default": "DEFAULT"
           },
           "id": {
             "title": "Id",

@@ -21,6 +21,7 @@ export type DatasetOut = {
     name?: string;
     description?: string;
     status?: string;
+    type?: string;
     id?: string;
     creator: UserOut;
     created?: string;

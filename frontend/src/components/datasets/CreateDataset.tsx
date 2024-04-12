@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import {
 	Box,
 	Button,
+	Container,
 	Step,
 	StepContent,
 	StepLabel,
@@ -145,57 +146,53 @@ export const CreateDataset = (): JSX.Element => {
 
 	return (
 		<Layout>
-			<Box className="outer-container">
-				{/*Error Message dialogue*/}
-				<ErrorModal errorOpen={errorOpen} setErrorOpen={setErrorOpen} />
-				<Box className="inner-container">
-					<Box>
-						<Stepper activeStep={activeStep} orientation="vertical">
-							{/*step 1 Dataset*/}
-							<Step key="create-dataset">
-								<StepLabel>Basic Information</StepLabel>
-								<StepContent>
-									<Typography>
-										A dataset is a container for files, folders and metadata.
-									</Typography>
-									<Box>
-										<CreateDatasetModal onSave={onDatasetSave} />
-									</Box>
-								</StepContent>
-							</Step>
+			{/*Error Message dialogue*/}
+			<ErrorModal errorOpen={errorOpen} setErrorOpen={setErrorOpen} />
+			<Container maxWidth="md">
+				<Stepper activeStep={activeStep} orientation="vertical">
+					{/*step 1 Dataset*/}
+					<Step key="create-dataset">
+						<StepLabel>Basic Information</StepLabel>
+						<StepContent>
+							<Typography>
+								A dataset is a container for files, folders and metadata.
+							</Typography>
+							<Box>
+								<CreateDatasetModal onSave={onDatasetSave} />
+							</Box>
+						</StepContent>
+					</Step>
 
-							{/*step 2 Metadata*/}
-							<Step key="fill-in-metadata">
-								<StepLabel>Required Metadata</StepLabel>
-								<StepContent>
-									<Box>
-										<CreateMetadata
-											setMetadata={setMetadata}
-											sourceItem={"datasets"}
-										/>
-									</Box>
-									{/*buttons*/}
-									<Box sx={{ mb: 2 }}>
-										<>
-											<Button
-												variant="contained"
-												onClick={handleFinish}
-												disabled={!allowSubmit}
-												sx={{ mt: 1, mr: 1 }}
-											>
-												Finish
-											</Button>
-											<Button onClick={handleBack} sx={{ mt: 1, mr: 1 }}>
-												Back
-											</Button>
-										</>
-									</Box>
-								</StepContent>
-							</Step>
-						</Stepper>
-					</Box>
-				</Box>
-			</Box>
+					{/*step 2 Metadata*/}
+					<Step key="fill-in-metadata">
+						<StepLabel>Required Metadata</StepLabel>
+						<StepContent>
+							<Box>
+								<CreateMetadata
+									setMetadata={setMetadata}
+									sourceItem={"datasets"}
+								/>
+							</Box>
+							{/*buttons*/}
+							<Box sx={{ mb: 2 }}>
+								<>
+									<Button
+										variant="contained"
+										onClick={handleFinish}
+										disabled={!allowSubmit}
+										sx={{ mt: 1, mr: 1 }}
+									>
+										Finish
+									</Button>
+									<Button onClick={handleBack} sx={{ mt: 1, mr: 1 }}>
+										Back
+									</Button>
+								</>
+							</Box>
+						</StepContent>
+					</Step>
+				</Stepper>
+			</Container>
 		</Layout>
 	);
 };

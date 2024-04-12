@@ -5,7 +5,7 @@ import type { Body_create_dataset_from_zip_api_v2_datasets_createFromZip_post } 
 import type { Body_save_file_api_v2_datasets__dataset_id__files_post } from '../models/Body_save_file_api_v2_datasets__dataset_id__files_post';
 import type { Body_save_files_api_v2_datasets__dataset_id__filesMultiple_post } from '../models/Body_save_files_api_v2_datasets__dataset_id__filesMultiple_post';
 import type { DatasetBase } from '../models/DatasetBase';
-import type { DatasetIn } from '../models/DatasetIn';
+import type { DatasetInS3 } from '../models/DatasetInS3';
 import type { DatasetOut } from '../models/DatasetOut';
 import type { DatasetPatch } from '../models/DatasetPatch';
 import type { FileOut } from '../models/FileOut';
@@ -50,13 +50,13 @@ export class DatasetsService {
     }
 
     /**
-     * Save Dataset
+     * Save Dataset S3
      * @param requestBody
      * @returns DatasetOut Successful Response
      * @throws ApiError
      */
-    public static saveDatasetApiV2DatasetsPost(
-        requestBody: DatasetIn,
+    public static saveDatasetS3ApiV2DatasetsPost(
+        requestBody: DatasetInS3,
     ): CancelablePromise<DatasetOut> {
         return __request({
             method: 'POST',
