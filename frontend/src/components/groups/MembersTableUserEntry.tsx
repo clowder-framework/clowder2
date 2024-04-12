@@ -162,9 +162,7 @@ export function MembersTableUserEntry(props: MembersTableUserEntryProps) {
 					</AuthWrapper>
 				</TableCell>
 			)}
-			{member.user.email == creatorEmail && (
-				<TableCell align="right"></TableCell>
-			)}
+			{member.user.email == creatorEmail && <TableCell align="right" />}
 			{member.user.email != creatorEmail && (
 				<TableCell align="right">
 					{/*only owner or editor are allowed to delete*/}
