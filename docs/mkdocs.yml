@@ -15,6 +15,7 @@ nav:
       - PyCharm: devs/pycharm.md
       - Elasticsearch: devs/elasticsearch.md
       - Listeners: devs/listeners.md
+      - VM Setup: devs/vm-setup.md
       - Proposals:
         - Storage: devs/storage.md
   - About: about.md
