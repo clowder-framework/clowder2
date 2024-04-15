@@ -293,9 +293,7 @@
       "clientAuthenticatorType": "client-secret",
       "redirectUris": [
         "https://clowder2.software-dev.ncsa.illinois.edu/api/v2/auth",
-        "http://clowder2.software-dev.ncsa.illinois.edu/api/v2/auth",
-        "https://clowder2.software-dev.ncsa.illinois.edu/",
-        "http://clowder2.software-dev.ncsa.illinois.edu/"
+        "http://clowder2.software-dev.ncsa.illinois.edu/api/v2/auth"
       ],
       "webOrigins": [
         "https://clowder2.software-dev.ncsa.illinois.edu"
