@@ -16,8 +16,7 @@ import {
 	revokeAdmin as revokeAdminAction,
 	setAdmin as setAdminAction,
 	enableReadOnly as setEnableReadOnlyAction,
-	disableReadOnly as setDisableReadOnlyAction,
-	setReadOnly as setReadOnlyAction, enableReadOnly, disableReadOnly,
+	disableReadOnly as setDisableReadOnlyAction
 } from "../../actions/user";
 import { Box, Grid, Pagination, Switch } from "@mui/material";
 import { ErrorModal } from "../errors/ErrorModal";
@@ -51,7 +50,6 @@ export const ManageUsers = (): JSX.Element => {
 	const setEnableReadOnly = (email: string) => dispatch(setEnableReadOnlyAction(email));
 	const setDisableReadOnly = (email: string) => dispatch(setDisableReadOnlyAction(email));
 
-	const setReadOnly = (email: string, read_only: boolean) => dispatch(setReadOnlyAction(email, read_only))
 	// component did mount
 	useEffect(() => {
 		fetchAllUsers(0, limit);
