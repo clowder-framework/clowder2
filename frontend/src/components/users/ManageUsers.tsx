@@ -50,6 +50,7 @@ export const ManageUsers = (): JSX.Element => {
 	const setEnableReadOnly = (email: string) => dispatch(setEnableReadOnlyAction(email));
 	const setDisableReadOnly = (email: string) => dispatch(setDisableReadOnlyAction(email));
 
+
 	// component did mount
 	useEffect(() => {
 		fetchAllUsers(0, limit);
@@ -75,6 +76,15 @@ export const ManageUsers = (): JSX.Element => {
 		if (searchTerm !== "") prefixSearchAllUsers(searchTerm, newSkip, limit);
 		else fetchAllUsers(newSkip, limit);
 	};
+
+	const changeReadOnly = (email: string, readOnly: boolean) => {
+		if (readOnly) {
+			setEnableReadOnly(email);
+		} else {
+			setDisableReadOnly(email);
+		}
+	}
+
 
 	return (
 		<Layout>
@@ -156,9 +166,9 @@ export const ManageUsers = (): JSX.Element => {
 														checked={profile.read_only_user}
 														onChange={() => {
 															if (profile.read_only_user) {
-																setDisableReadOnly(profile.email);
+																changeReadOnly(profile.email, false);
 															} else {
-																setEnableReadOnly(profile.email);
+																changeReadOnly(profile.email, true);
 															}
 														}}
 														disabled={(profile.email === currentUser.email)}
