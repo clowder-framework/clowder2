@@ -67,6 +67,7 @@ class Settings(BaseSettings):
     keycloak_client_id = auth_client_id
     # identity providers registered in keycloak, for example cilogon, globus, twitter
     keycloak_ipds = ["cilogon", "globus"]
+    keycloak_default_enabled = True
 
     # Elasticsearch local config
     elasticsearch_url = "http://localhost:9200"

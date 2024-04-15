@@ -50,7 +50,7 @@ def _get_page_query(
 
 
 def _construct_page_metadata(items_and_counts, skip, limit):
-    if len(items_and_counts[0]["metadata"]) > 0:
+    if len(items_and_counts) > 0 and len(items_and_counts[0]["metadata"]) > 0:
         page_metadata = PageMetadata(
             **items_and_counts[0]["metadata"][0], skip=skip, limit=limit
         )
