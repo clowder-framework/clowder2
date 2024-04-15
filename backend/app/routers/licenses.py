@@ -1,17 +1,18 @@
 from datetime import datetime
 from typing import List
 
-from beanie import PydanticObjectId
-from fastapi import HTTPException, Depends, APIRouter
-
 from app.keycloak_auth import get_current_user, get_user
-
-from app.models.licenses import LicenseOut, LicenseIn, LicenseDB, LicenseBase
+from app.models.licenses import (
+    LicenseBase,
+    LicenseDB,
+    LicenseIn,
+    LicenseOption,
+    LicenseOut,
+    standard_licenses,
+)
 from app.routers.authentication import get_admin, get_admin_mode
-
-from app.models.licenses import LicenseOption
-
-from app.models.licenses import standard_licenses
+from beanie import PydanticObjectId
+from fastapi import APIRouter, Depends, HTTPException
 
 router = APIRouter()
 

@@ -560,8 +560,7 @@
       "alwaysDisplayInConsole": false,
       "clientAuthenticatorType": "client-secret",
       "redirectUris": [
-        "http://localhost/api/v2/auth",
-        "http://localhost/"
+        "http://localhost/api/v2/auth"
       ],
       "webOrigins": [
         "http://localhost"

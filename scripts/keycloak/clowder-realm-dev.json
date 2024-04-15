@@ -284,8 +284,7 @@
       "alwaysDisplayInConsole": false,
       "clientAuthenticatorType": "client-secret",
       "redirectUris": [
-        "http://localhost:8000/api/v2/auth",
-        "http://localhost:8000/"
+        "http://localhost:8000/api/v2/auth"
       ],
       "webOrigins": [
         "http://localhost:8000"

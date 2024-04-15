@@ -1,11 +1,9 @@
 from datetime import datetime
-from typing import List, Optional
-
-from beanie import Document, PydanticObjectId
-from pydantic import BaseModel, Field
+from typing import Optional
 
 from app.models.authorization import Provenance
-from app.models.users import UserOut
+from beanie import Document
+from pydantic import BaseModel
 
 
 class LicenseBase(BaseModel):
