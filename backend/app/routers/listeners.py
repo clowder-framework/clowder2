@@ -223,9 +223,9 @@ async def search_listeners(
     ]
     if not admin and not admin_mode:
         user_q = await GroupDB.find(
-            Or(GroupDB.creator == user_id, GroupDB.users.user.email == user_id),
+            Or(GroupDB.creator == user_id, GroupDB.users.email == user_id),
         ).to_list()
-        user_groups = [u["_id"] for u in user_q]
+        user_groups = [u.id for u in user_q]
 
         criteria_list.append(
             Or(
@@ -334,7 +334,7 @@ async def get_listeners(
         user_q = await GroupDB.find(
             Or(GroupDB.creator == user_id, GroupDB.users.user.email == user_id),
         ).to_list()
-        user_groups = [u["_id"] for u in user_q]
+        user_groups = [u.id for u in user_q]
 
         criteria_list.append(
             Or(
@@ -473,8 +473,10 @@ async def remove_user_permission(
                 status_code=403,
                 detail=f"please contact {listener.access.owner} to modify access",
             )
-        listener.access.users.remove(target_user)
-        await listener.save()
+        if target_user in listener.access.users:
+            listener.access.users.remove(target_user)
+            await listener.save()
+        return listener.dict()
     raise HTTPException(status_code=404, detail=f"listener {listener_id} not found")
 
 
@@ -525,8 +527,10 @@ async def remove_group_permission(
                 status_code=403,
                 detail=f"please contact {listener.access.owner} to modify access",
             )
-        listener.access.users.remove(PydanticObjectId(target_group))
-        await listener.save()
+        if PydanticObjectId(target_group) in listener.access.groups:
+            listener.access.groups.remove(PydanticObjectId(target_group))
+            await listener.save()
+        return listener.dict()
     raise HTTPException(status_code=404, detail=f"listener {listener_id} not found")
 
 
@@ -557,7 +561,7 @@ async def add_dataset_permission(
     raise HTTPException(status_code=404, detail=f"listener {listener_id} not found")
 
 
-@router.delete("/{listener_id}/users/{target_dataset}")
+@router.delete("/{listener_id}/datasets/{target_dataset}")
 async def remove_dataset_permission(
     listener_id: str,
     target_dataset: str,
@@ -577,6 +581,8 @@ async def remove_dataset_permission(
                 status_code=403,
                 detail=f"please contact {listener.access.owner} to modify access",
             )
-        listener.access.users.remove(PydanticObjectId(target_dataset))
-        await listener.save()
+        if PydanticObjectId(target_dataset) in listener.access.datasets:
+            listener.access.datasets.remove(PydanticObjectId(target_dataset))
+            await listener.save()
+        return listener.dict()
     raise HTTPException(status_code=404, detail=f"listener {listener_id} not found")
