@@ -1,6 +1,6 @@
-# Virtual Machine Setup
+# Standalone Docker Deployment
 
-A brief guide on how to setup Clowder2 on a virtual machine.
+A brief guide on how to setup Clowder2 on a host.
 
 ## Prerequisites
 - Docker
@@ -12,7 +12,7 @@ A brief guide on how to setup Clowder2 on a virtual machine.
 git clone https://github.com/clowder-framework/clowder2.git
 ```
 
-2. Create a docker-compose.override.yml file with the following content. Replace `{{IP_ADDRESS}}` with the IP address of the virtual machine.
+2. Create a docker-compose.override.yml file with the following content. Replace `{{IP_ADDRESS}}` with the IP address of the host.
 
 ```yaml
 version: '3.9'
