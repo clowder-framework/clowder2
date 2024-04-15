@@ -26,6 +26,7 @@ import VpnKeyIcon from "@mui/icons-material/VpnKey";
 import LogoutIcon from "@mui/icons-material/Logout";
 import { EmbeddedPublicSearch } from "./search/EmbeddedPublicSearch";
 import { AppVersion } from "./versions/AppVersion";
+import SearchDatasetIcon from "@mui/icons-material/Search";
 
 const drawerWidth = 240;
 
