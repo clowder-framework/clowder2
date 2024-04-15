@@ -31,24 +31,32 @@ async def callback(message: AbstractIncomingMessage):
         msg = json.loads(message.body.decode("utf-8"))
 
         extractor_info = msg["extractor_info"]
-        extractor_name = extractor_info["name"]
-        extractor_db = EventListenerDB(
-            **extractor_info, properties=ExtractorInfo(**extractor_info)
-        )
         owner = msg["owner"]
         if owner is not None:
-            extractor_db.access = {"owner": owner}
-
-        # check to see if extractor already exists and update if so
-        if owner is not None:
-            existing_extractor = await EventListenerDB.find_one(
-                EventListenerDB.name == msg["queue"]
+            # Extractor name should match queue, which includes secret key with common extractor_info["name"]
+            extractor_name = msg["queue"]
+            extractor_db = EventListenerDB(
+                **extractor_info,
+                extractor_name=extractor_name,
+                access={"owner": owner},
+                properties=ExtractorInfo(**extractor_info),
             )
-        else:
+            logger.info(f"Received heartbeat from ${extractor_name} owned by ${owner}")
             existing_extractor = await EventListenerDB.find_one(
-                EventListenerDB.name == msg["queue"],
+                EventListenerDB.name == extractor_name,
                 EventListenerDB.access.owner == owner,
             )
+        else:
+            extractor_name = extractor_info["name"]
+            extractor_db = EventListenerDB(
+                **extractor_info, properties=ExtractorInfo(**extractor_info)
+            )
+            logger.info(f"Received heartbeat from ${extractor_name}")
+            existing_extractor = await EventListenerDB.find_one(
+                EventListenerDB.name == extractor_name
+            )
+
+        # check to see if extractor already exists and update if so
         if existing_extractor is not None:
             extractor_db.id = existing_extractor.id
             extractor_db.created = existing_extractor.created
