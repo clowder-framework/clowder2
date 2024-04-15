@@ -158,9 +158,9 @@ export const ManageUsers = (): JSX.Element => {
 														checked={profile.read_only_user}
 														onChange={() => {
 															if (profile.read_only_user) {
-																disableReadOnly(profile.email);
-															} else if (!profile.admin) {
-																enableReadOnly(profile.email);
+																setDisableReadOnly(profile.email);
+															} else {
+																setEnableReadOnly(profile.email);
 															}
 														}}
 														disabled={(profile.email === currentUser.email)}
