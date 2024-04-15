@@ -224,7 +224,7 @@ async def search_listeners(
     ]
     if not admin and not admin_mode:
         user_q = await GroupDB.find(
-            Or(GroupDB.creator == user_id, GroupDB.users.user.email == user),
+            Or(GroupDB.creator == user_id, GroupDB.users.user.email == user_id),
         ).to_list()
         user_groups = [u["_id"] for u in user_q]
 
