@@ -6,7 +6,6 @@ from typing import List, Optional
 
 from beanie import PydanticObjectId
 from beanie.operators import Or, RegEx, In, Exists
-from bson import ObjectId
 from fastapi import APIRouter, Depends, HTTPException
 from packaging import version
 
@@ -378,7 +377,7 @@ async def edit_listener(
         listener_id -- UUID of the listener to be udpated
         listener_in -- JSON object including updated information
     """
-    criteria_list = [EventListenerDB.id == ObjectId(listener_id)]
+    criteria_list = [EventListenerDB.id == PydanticObjectId(listener_id)]
     if not admin and not admin_mode:
         criteria_list.append(
             Or(
@@ -407,7 +406,7 @@ async def delete_listener(
     admin=Depends(get_admin),
 ):
     """Remove an Event Listener from the database. Will not clear event history for the listener."""
-    criteria_list = [EventListenerDB.id == ObjectId(listener_id)]
+    criteria_list = [EventListenerDB.id == PydanticObjectId(listener_id)]
     if not admin and not admin_mode:
         criteria_list.append(
             Or(
@@ -419,7 +418,7 @@ async def delete_listener(
     if listener:
         # unsubscribe the listener from any feeds
         async for feed in FeedDB.find(
-            FeedDB.listeners.listener_id == ObjectId(listener_id)
+            FeedDB.listeners.listener_id == PydanticObjectId(listener_id)
         ):
             await disassociate_listener_db(feed.id, listener_id)
         await listener.delete()
@@ -435,16 +434,18 @@ async def add_user_permission(
     admin_mode: bool = Depends(get_admin_mode),
     admin=Depends(get_admin),
 ):
-    criteria_list = [EventListenerDB.id == ObjectId(listener_id)]
-    if not admin and not admin_mode:
-        criteria_list.append(
-            Or(
-                Exists(EventListenerDB.access, False),
-                EventListenerDB.access.owner == user_id,
-            ),
-        )
-    listener = await EventListenerDB.find_one(*criteria_list)
-    if listener:
+    listener = await EventListenerDB.get(PydanticObjectId(listener_id))
+    if listener is not None:
+        if listener.access is None:
+            raise HTTPException(
+                status_code=403,
+                detail=f"listener {listener_id} does not require private access",
+            )
+        elif listener.access.owner != user_id and not (admin or admin_mode):
+            raise HTTPException(
+                status_code=403,
+                detail=f"please contact {listener.access.owner} to modify access",
+            )
         if target_user not in listener.access.users:
             listener.access.users.append(target_user)
             await listener.save()
@@ -460,16 +461,122 @@ async def remove_user_permission(
     admin_mode: bool = Depends(get_admin_mode),
     admin=Depends(get_admin),
 ):
-    criteria_list = [EventListenerDB.id == ObjectId(listener_id)]
-    if not admin and not admin_mode:
-        criteria_list.append(
-            Or(
-                Exists(EventListenerDB.access, False),
-                EventListenerDB.access.owner == user_id,
-            ),
-        )
-    listener = await EventListenerDB.find_one(*criteria_list)
-    if listener:
+    listener = await EventListenerDB.get(PydanticObjectId(listener_id))
+    if listener is not None:
+        if listener.access is None:
+            raise HTTPException(
+                status_code=403,
+                detail=f"listener {listener_id} does not require private access",
+            )
+        elif listener.access.owner != user_id and not (admin or admin_mode):
+            raise HTTPException(
+                status_code=403,
+                detail=f"please contact {listener.access.owner} to modify access",
+            )
         listener.access.users.remove(target_user)
+        await listener.save()
+    raise HTTPException(status_code=404, detail=f"listener {listener_id} not found")
+
+
+@router.post("/{listener_id}/groups/{target_group}")
+async def add_group_permission(
+    listener_id: str,
+    target_group: str,
+    user_id=Depends(get_current_username),
+    admin_mode: bool = Depends(get_admin_mode),
+    admin=Depends(get_admin),
+):
+    listener = await EventListenerDB.get(PydanticObjectId(listener_id))
+    if listener is not None:
+        if listener.access is None:
+            raise HTTPException(
+                status_code=403,
+                detail=f"listener {listener_id} does not require private access",
+            )
+        elif listener.access.owner != user_id and not (admin or admin_mode):
+            raise HTTPException(
+                status_code=403,
+                detail=f"please contact {listener.access.owner} to modify access",
+            )
+        if PydanticObjectId(target_group) not in listener.access.groups:
+            listener.access.groups.append(PydanticObjectId(target_group))
+            await listener.save()
+        return listener.dict()
+    raise HTTPException(status_code=404, detail=f"listener {listener_id} not found")
+
+
+@router.delete("/{listener_id}/groups/{target_group}")
+async def remove_group_permission(
+    listener_id: str,
+    target_group: str,
+    user_id=Depends(get_current_username),
+    admin_mode: bool = Depends(get_admin_mode),
+    admin=Depends(get_admin),
+):
+    listener = await EventListenerDB.get(PydanticObjectId(listener_id))
+    if listener is not None:
+        if listener.access is None:
+            raise HTTPException(
+                status_code=403,
+                detail=f"listener {listener_id} does not require private access",
+            )
+        elif listener.access.owner != user_id and not (admin or admin_mode):
+            raise HTTPException(
+                status_code=403,
+                detail=f"please contact {listener.access.owner} to modify access",
+            )
+        listener.access.users.remove(PydanticObjectId(target_group))
+        await listener.save()
+    raise HTTPException(status_code=404, detail=f"listener {listener_id} not found")
+
+
+@router.post("/{listener_id}/datasets/{target_dataset}")
+async def add_dataset_permission(
+    listener_id: str,
+    target_dataset: str,
+    user_id=Depends(get_current_username),
+    admin_mode: bool = Depends(get_admin_mode),
+    admin=Depends(get_admin),
+):
+    listener = await EventListenerDB.get(PydanticObjectId(listener_id))
+    if listener is not None:
+        if listener.access is None:
+            raise HTTPException(
+                status_code=403,
+                detail=f"listener {listener_id} does not require private access",
+            )
+        elif listener.access.owner != user_id and not (admin or admin_mode):
+            raise HTTPException(
+                status_code=403,
+                detail=f"please contact {listener.access.owner} to modify access",
+            )
+        if PydanticObjectId(target_dataset) not in listener.access.datasets:
+            listener.access.datasets.append(PydanticObjectId(target_dataset))
+            await listener.save()
+        return listener.dict()
+    raise HTTPException(status_code=404, detail=f"listener {listener_id} not found")
+
+
+@router.delete("/{listener_id}/users/{target_dataset}")
+async def remove_dataset_permission(
+    listener_id: str,
+    target_dataset: str,
+    user_id=Depends(get_current_username),
+    admin_mode: bool = Depends(get_admin_mode),
+    admin=Depends(get_admin),
+):
+    listener = await EventListenerDB.get(PydanticObjectId(listener_id))
+    if listener is not None:
+        if listener.access is None:
+            raise HTTPException(
+                status_code=403,
+                detail=f"listener {listener_id} does not require private access",
+            )
+        elif listener.access.owner != user_id and not (admin or admin_mode):
+            raise HTTPException(
+                status_code=403,
+                detail=f"please contact {listener.access.owner} to modify access",
+            )
+        listener.access.users.remove(PydanticObjectId(target_dataset))
         await listener.save()
     raise HTTPException(status_code=404, detail=f"listener {listener_id} not found")

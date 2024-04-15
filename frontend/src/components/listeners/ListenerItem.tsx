@@ -58,7 +58,7 @@ export default function ListenerItem(props: ListenerCardProps) {
 						setInfoOnly(true);
 					}}
 				>
-					{extractorName}
+					{extractorName.replace("private.", "")}
 				</Button>
 				{!(fileId !== undefined || datasetId !== undefined) ||
 				!extractor["alive"] ? (
