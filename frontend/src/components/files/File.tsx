@@ -440,7 +440,7 @@ export const File = (): JSX.Element => {
 						/>
 					</TabPanel>
 					<TabPanel value={selectedTabIndex} index={3}>
-						<Listeners fileId={fileId} datasetId={datasetId} />
+						<Listeners fileId={fileId} datasetId={datasetId} process={"file"} />
 					</TabPanel>
 					<TabPanel value={selectedTabIndex} index={4}>
 						<ExtractionHistoryTab fileId={fileId} />

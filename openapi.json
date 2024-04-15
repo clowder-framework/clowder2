@@ -430,6 +430,130 @@
         ]
       }
     },
+    "/api/v2/users/enable/{useremail}": {
+      "post": {
+        "tags": [
+          "login"
+        ],
+        "summary": "User Enable",
+        "operationId": "user_enable_api_v2_users_enable__useremail__post",
+        "parameters": [
+          {
+            "required": true,
+            "schema": {
+              "title": "Useremail",
+              "type": "string"
+            },
+            "name": "useremail",
+            "in": "path"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Dataset Id",
+              "type": "string"
+            },
+            "name": "dataset_id",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2AuthorizationCodeBearer": []
+          },
+          {
+            "APIKeyHeader": []
+          },
+          {
+            "APIKeyCookie": []
+          }
+        ]
+      }
+    },
+    "/api/v2/users/disable/{useremail}": {
+      "post": {
+        "tags": [
+          "login"
+        ],
+        "summary": "User Disable",
+        "operationId": "user_disable_api_v2_users_disable__useremail__post",
+        "parameters": [
+          {
+            "required": true,
+            "schema": {
+              "title": "Useremail",
+              "type": "string"
+            },
+            "name": "useremail",
+            "in": "path"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Dataset Id",
+              "type": "string"
+            },
+            "name": "dataset_id",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2AuthorizationCodeBearer": []
+          },
+          {
+            "APIKeyHeader": []
+          },
+          {
+            "APIKeyCookie": []
+          }
+        ]
+      }
+    },
     "/api/v2/users/keys": {
       "get": {
         "tags": [
@@ -1583,14 +1707,14 @@
         ]
       }
     },
-    "/api/v2/authorizations/datasets/{dataset_id}/roles}": {
+    "/api/v2/authorizations/datasets/{dataset_id}/roles": {
       "get": {
         "tags": [
           "authorization"
         ],
         "summary": "Get Dataset Roles",
         "description": "Get a list of all users and groups that have assigned roles on this dataset.",
-        "operationId": "get_dataset_roles_api_v2_authorizations_datasets__dataset_id__roles__get",
+        "operationId": "get_dataset_roles_api_v2_authorizations_datasets__dataset_id__roles_get",
         "parameters": [
           {
             "required": true,
@@ -11453,8 +11577,7 @@
         "required": [
           "email",
           "first_name",
-          "last_name",
-          "admin"
+          "last_name"
         ],
         "type": "object",
         "properties": {
@@ -11481,7 +11604,8 @@
           },
           "admin": {
             "title": "Admin",
-            "type": "boolean"
+            "type": "boolean",
+            "default": false
           },
           "admin_mode": {
             "title": "Admin Mode",
