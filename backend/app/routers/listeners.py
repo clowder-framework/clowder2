@@ -431,6 +431,7 @@ async def edit_listener(
     """
     criteria_list = [EventListenerDB.id == PydanticObjectId(listener_id)]
     if not admin and not admin_mode:
+        # Must either be owner, or a listener with no restrictions
         criteria_list.append(
             Or(
                 Exists(EventListenerDB.access, False),
@@ -460,6 +461,7 @@ async def delete_listener(
     """Remove an Event Listener from the database. Will not clear event history for the listener."""
     criteria_list = [EventListenerDB.id == PydanticObjectId(listener_id)]
     if not admin and not admin_mode:
+        # Must either be owner, or a listener with no restrictions
         criteria_list.append(
             Or(
                 Exists(EventListenerDB.access, False),
