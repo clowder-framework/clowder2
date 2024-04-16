@@ -144,7 +144,7 @@ async def delete_feed(
 async def associate_listener(
     feed_id: str,
     listener: FeedListener,
-    user_id=Depends(get_current_username()),
+    user_id=Depends(get_current_username),
 ):
     """Associate an existing Event Listener with a Feed, e.g. so it will be triggered on new Feed results.
 
