@@ -407,10 +407,8 @@ async def delete_dataset(
         await AuthorizationDB.find(
             AuthorizationDB.dataset_id == PydanticObjectId(dataset_id)
         ).delete()
-        await delete_license(dataset.license_id)
-
         return {"deleted": dataset_id}
-
+        await delete_license(dataset.license_id)
     raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
 
 
