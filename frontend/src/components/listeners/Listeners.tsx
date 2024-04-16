@@ -45,7 +45,7 @@ export function Listeners(props: ListenerProps) {
 		selectedCategory: string | null,
 		selectedLabel: string | null,
 		aliveOnly: boolean | undefined,
-		process: string | undefined,
+		process: string | undefined
 	) =>
 		dispatch(
 			fetchListeners(
@@ -55,7 +55,8 @@ export function Listeners(props: ListenerProps) {
 				selectedCategory,
 				selectedLabel,
 				aliveOnly,
-				process
+				process,
+				datasetId
 			)
 		);
 	const searchListeners = (
@@ -63,8 +64,11 @@ export function Listeners(props: ListenerProps) {
 		skip: number | undefined,
 		limit: number | undefined,
 		heartbeatInterval: number | undefined,
-		process: string | undefined,
-	) => dispatch(queryListeners(text, skip, limit, heartbeatInterval, process));
+		process: string | undefined
+	) =>
+		dispatch(
+			queryListeners(text, skip, limit, heartbeatInterval, process, datasetId)
+		);
 	const listAvailableCategories = () => dispatch(fetchListenerCategories());
 	const listAvailableLabels = () => dispatch(fetchListenerLabels());
 
@@ -104,14 +108,31 @@ export function Listeners(props: ListenerProps) {
 		setSelectedCategory("");
 
 		if (searchText !== "") searchListeners(searchText, 0, limit, 0, process);
-		else listListeners(0, limit, 0, selectedCategory, selectedLabel, aliveOnly, process);
+		else
+			listListeners(
+				0,
+				limit,
+				0,
+				selectedCategory,
+				selectedLabel,
+				aliveOnly,
+				process
+			);
 	}, [searchText]);
 
 	useEffect(() => {
 		// reset page and reset search text with each new search term
 		setCurrPageNum(1);
 		setSearchText("");
-		listListeners(0, limit, 0, selectedCategory, selectedLabel, aliveOnly, process);
+		listListeners(
+			0,
+			limit,
+			0,
+			selectedCategory,
+			selectedLabel,
+			aliveOnly,
+			process
+		);
 	}, [aliveOnly]);
 
 	// any of the change triggers timer to fetch the extractor status
@@ -154,20 +175,37 @@ export function Listeners(props: ListenerProps) {
 		const selectedCategoryValue = (event.target as HTMLInputElement).value;
 		setSelectedCategory(selectedCategoryValue);
 		setSearchText("");
-		listListeners(0, limit, 0, selectedCategoryValue, selectedLabel, aliveOnly, process);
+		listListeners(
+			0,
+			limit,
+			0,
+			selectedCategoryValue,
+			selectedLabel,
+			aliveOnly,
+			process
+		);
 	};
 
 	const handleLabelChange = (event: React.ChangeEvent<HTMLInputElement>) => {
 		const selectedLabelValue = (event.target as HTMLInputElement).value;
 		setSelectedLabel(selectedLabelValue);
 		setSearchText("");
-		listListeners(0, limit, 0, selectedCategory, selectedLabelValue, aliveOnly, process);
+		listListeners(
+			0,
+			limit,
+			0,
+			selectedCategory,
+			selectedLabelValue,
+			aliveOnly,
+			process
+		);
 	};
 
 	const handlePageChange = (_: ChangeEvent<unknown>, value: number) => {
 		const newSkip = (value - 1) * limit;
 		setCurrPageNum(value);
-		if (searchText !== "") searchListeners(searchText, newSkip, limit, 0, process);
+		if (searchText !== "")
+			searchListeners(searchText, newSkip, limit, 0, process);
 		else listListeners(newSkip, limit, 0, null, null, aliveOnly, process);
 	};
 

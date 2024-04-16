@@ -32,6 +32,8 @@ export class ListenersService {
      * category -- filter by category has to be exact match
      * label -- filter by label has to be exact match
      * alive_only -- filter by alive status
+     * process -- filter by file or dataset type (if specified)
+     * dataset_id -- restrict to listeners that run on the given dataset or a file within (if not otherwise permitted)
      * @param skip
      * @param limit
      * @param heartbeatInterval

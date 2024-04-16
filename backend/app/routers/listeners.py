@@ -200,6 +200,7 @@ async def search_listeners(
     heartbeat_interval: Optional[int] = settings.listener_heartbeat_interval,
     user_id=Depends(get_current_username),
     process: Optional[str] = None,
+    dataset_id: Optional[str] = None,
     admin_mode: bool = Depends(get_admin_mode),
     admin=Depends(get_admin),
 ):
@@ -256,14 +257,25 @@ async def search_listeners(
         ).to_list()
         user_groups = [u.id for u in user_q]
 
-        criteria_list.append(
-            Or(
-                Exists(EventListenerDB.access, False),
-                EventListenerDB.access.owner == user_id,
-                EventListenerDB.access.users == user_id,
-                In(EventListenerDB.access.groups, user_groups),
+        if dataset_id is None:
+            criteria_list.append(
+                Or(
+                    Exists(EventListenerDB.access, False),
+                    EventListenerDB.access.owner == user_id,
+                    EventListenerDB.access.users == user_id,
+                    In(EventListenerDB.access.groups, user_groups),
+                )
             )
-        )
+        else:
+            criteria_list.append(
+                Or(
+                    Exists(EventListenerDB.access, False),
+                    EventListenerDB.access.owner == user_id,
+                    EventListenerDB.access.users == user_id,
+                    In(EventListenerDB.access.groups, user_groups),
+                    EventListenerDB.access.datasets == PydanticObjectId(dataset_id),
+                )
+            )
 
     listeners_and_count = (
         await EventListenerDB.find(*criteria_list)
@@ -327,6 +339,7 @@ async def get_listeners(
     label: Optional[str] = None,
     alive_only: Optional[bool] = False,
     process: Optional[str] = None,
+    dataset_id: Optional[str] = None,
     admin_mode: bool = Depends(get_admin_mode),
     admin=Depends(get_admin),
 ):
@@ -339,6 +352,8 @@ async def get_listeners(
         category -- filter by category has to be exact match
         label -- filter by label has to be exact match
         alive_only -- filter by alive status
+        process -- filter by file or dataset type (if specified)
+        dataset_id -- restrict to listeners that run on the given dataset or a file within (if not otherwise permitted)
     """
     # First compute alive flag for all listeners
     aggregation_pipeline = [
@@ -388,14 +403,25 @@ async def get_listeners(
         ).to_list()
         user_groups = [u.id for u in user_q]
 
-        criteria_list.append(
-            Or(
-                Exists(EventListenerDB.access, False),
-                EventListenerDB.access.owner == user_id,
-                EventListenerDB.access.users == user_id,
-                In(EventListenerDB.access.groups, user_groups),
+        if dataset_id is None:
+            criteria_list.append(
+                Or(
+                    Exists(EventListenerDB.access, False),
+                    EventListenerDB.access.owner == user_id,
+                    EventListenerDB.access.users == user_id,
+                    In(EventListenerDB.access.groups, user_groups),
+                )
             )
-        )
+        else:
+            criteria_list.append(
+                Or(
+                    Exists(EventListenerDB.access, False),
+                    EventListenerDB.access.owner == user_id,
+                    EventListenerDB.access.users == user_id,
+                    In(EventListenerDB.access.groups, user_groups),
+                    EventListenerDB.access.datasets == PydanticObjectId(dataset_id),
+                )
+            )
 
     # Run aggregate query and return
     # Sort by name alphabetically
