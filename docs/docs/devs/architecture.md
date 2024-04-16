@@ -6,4 +6,7 @@ Each box below is a docker service as defined in `docker-compose.yml`.
 Boxes are grouped logically into backend, keycloak, extractors, database boxes.
 Lines show interactions between containers over the docker network.
 
-![Clowder v2 architecture](img/architecture.jpg)
+<figure markdown="span">
+  ![Clowder v2 architecture](../assets/images/architecture.jpg)
+  <figcaption>Architecture</figcaption>
+</figure>

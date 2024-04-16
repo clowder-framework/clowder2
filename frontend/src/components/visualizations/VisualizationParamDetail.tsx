@@ -10,10 +10,13 @@ type FileAboutProps = {
 export function VisualizationParamDetail(props: FileAboutProps) {
 	const { visConfigEntry } = props;
 
-	const details = new Map();
+	const details = new Map<
+		string,
+		{ value: string | undefined; info?: string }
+	>();
 
 	for (const key in visConfigEntry.parameters) {
-		details.set(key, visConfigEntry.parameters[key]);
+		details.set(key, { value: visConfigEntry.parameters[key] });
 	}
 
 	return (

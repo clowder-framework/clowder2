@@ -3,6 +3,9 @@ import { EventListenerJobStatus } from "./types/data";
 
 interface Config {
 	appVersion: string;
+	mailingList: string;
+	slackChannel: string;
+	documentation: string;
 	hostname: string;
 	apikey: string;
 	GHIssueBaseURL: string;
@@ -37,6 +40,10 @@ const hostname =
 // TODO when add auth piece remove this env
 const apikey = process.env.APIKEY || "";
 config["appVersion"] = "v2.0.0-beta.2";
+config["mailingList"] = "clowder@lists.illinois.edu";
+config["slackChannel"] =
+	"https://join.slack.com/t/clowder-software/shared_invite/enQtMzQzOTg0Nzk3OTUzLTYwZDlkZDI0NGI4YmI0ZjE5MTZiYmZhZTIyNWE1YzM0NWMwMzIxODNhZTA1Y2E3MTQzOTg1YThiNzkwOWQwYWE";
+config["documentation"] = "https://clowder2.readthedocs.io/en/latest/";
 config["hostname"] = hostname;
 config["apikey"] = apikey;
 

@@ -39,25 +39,33 @@ export function FileHistory(props: FileHistoryAboutProps) {
 		}
 	}, [selectedVersionNum]);
 
-	const details = new Map<string, string>();
+	const details = new Map<
+		string,
+		{ value: string | undefined; info?: string }
+	>();
+
 	if (
 		selectedFileVersionDetail !== null &&
 		selectedFileVersionDetail !== undefined
 	) {
-		details.set(
-			"Size",
-			selectedFileVersionDetail.bytes
+		details.set("Size", {
+			value: selectedFileVersionDetail.bytes
 				? prettyBytes(selectedFileVersionDetail.bytes)
-				: "NA"
-		);
-		details.set("Content type", contentType ?? "NA");
-		details.set("Updated on", parseDate(selectedFileVersionDetail.created));
-		details.set("Uploaded as", name ?? "NA");
-		details.set(
-			"Uploaded by",
-			`${selectedFileVersionDetail.creator.first_name} ${selectedFileVersionDetail.creator.last_name}`
-		);
-		details.set("File id", selectedFileVersionDetail.file_id);
+				: "NA",
+		});
+		details.set("Content type", { value: contentType ?? "NA" });
+		details.set("Updated on", {
+			value: parseDate(selectedFileVersionDetail.created),
+			info: "Latest date and time of the file being updated",
+		});
+		details.set("Uploaded as", {
+			value: name ?? "NA",
+			info: "Name of the file",
+		});
+		details.set("Uploaded by", {
+			value: `${selectedFileVersionDetail.creator.first_name} ${selectedFileVersionDetail.creator.last_name}`,
+		});
+		details.set("File id", { value: selectedFileVersionDetail.file_id });
 	}
 
 	return (

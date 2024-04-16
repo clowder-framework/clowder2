@@ -40,7 +40,8 @@ Each field corresponding to an individual widget on the frontend. `widgetType` i
 user interface. Currently, we follow the name convention of [Material UI components](https://mui.com/components/)
 and we support dropdown(`Select`), input box (`TextField`), calendar (`DateTimePicker`). Here is an example of a Select
 widget:
-![img](img/metadata_dropdown.png)
+
+![Widget Type](../assets/images/metadata_dropdown.png)
 
 ### Multiple Widgets
 A metadata entry could have multiple widgets (fields). For example:
@@ -78,7 +79,9 @@ A metadata entry could have multiple widgets (fields). For example:
     ]
 }
 ```
-This corresponds to the Lat/Lon at the user interface: ![img](img/multiple_widgets.png)
+This corresponds to the Lat/Lon at the user interface:
+
+![LatLon](../assets/images/multiple_widgets.png)
 
 ### Configure widget
 The content of config field can be flexible. It will be used to hold information that populates the frontend
