@@ -219,11 +219,25 @@ async def search_listeners(
     if process:
         if process == "file":
             aggregation_pipeline.append(
-                {"$match": {"properties.process.file": {"$exists": True}}}
+                {
+                    "$match": {
+                        "$or": [
+                            {"properties.process.file": {"$exists": True}},
+                            {"properties.process.file": {}},
+                        ]
+                    }
+                }
             )
         if process == "dataset":
             aggregation_pipeline.append(
-                {"$match": {"properties.process.dataset": {"$exists": True}}}
+                {
+                    "$match": {
+                        "$or": [
+                            {"properties.process.dataset": {"$exists": True}},
+                            {"properties.process.dataset": {}},
+                        ]
+                    }
+                }
             )
     # Add pagination
     aggregation_pipeline.append(
@@ -341,11 +355,25 @@ async def get_listeners(
     if process:
         if process == "file":
             aggregation_pipeline.append(
-                {"$match": {"properties.process.file": {"$exists": True}}}
+                {
+                    "$match": {
+                        "$or": [
+                            {"properties.process.file": {"$exists": True}},
+                            {"properties.process": {}},
+                        ]
+                    }
+                }
             )
         if process == "dataset":
             aggregation_pipeline.append(
-                {"$match": {"properties.process.dataset": {"$exists": True}}}
+                {
+                    "$match": {
+                        "$or": [
+                            {"properties.process.dataset": {"$exists": True}},
+                            {"properties.process": {}},
+                        ]
+                    }
+                }
             )
     # Add pagination
     aggregation_pipeline.append(
