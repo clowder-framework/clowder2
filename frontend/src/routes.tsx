@@ -184,7 +184,7 @@ export const AppRoutes = (): JSX.Element => {
 					}
 				/>
 				<Route
-					path="/public/datasets/:datasetId"
+					path="/public_datasets/:datasetId"
 					element={<PublicDatasetComponent />}
 				/>
 				<Route
@@ -195,7 +195,7 @@ export const AppRoutes = (): JSX.Element => {
 						</PrivateRoute>
 					}
 				/>
-				<Route path="/public/files/:fileId" element={<PublicFileComponent />} />
+				<Route path="/public_files/:fileId" element={<PublicFileComponent />} />
 				<Route path="/auth/register" element={<RedirectRegisterComponent />} />
 				<Route path="/auth/login" element={<RedirectLoginComponent />} />
 				<Route path="/auth/logout" element={<RedirectLogoutComponent />} />
