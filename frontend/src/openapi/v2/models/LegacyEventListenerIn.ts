@@ -22,5 +22,6 @@ export type LegacyEventListenerIn = {
     categories?: Array<string>;
     parameters?: any;
     version?: string;
+    unique_key?: string;
     description?: string;
 }

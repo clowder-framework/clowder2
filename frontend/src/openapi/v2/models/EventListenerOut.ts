@@ -2,6 +2,7 @@
 /* tslint:disable */
 /* eslint-disable */
 
+import type { AccessList } from './AccessList';
 import type { ExtractorInfo } from './ExtractorInfo';
 import type { UserOut } from './UserOut';
 
@@ -12,6 +13,7 @@ export type EventListenerOut = {
     name: string;
     version?: string;
     description?: string;
+    access?: AccessList;
     id?: string;
     creator?: UserOut;
     created?: string;

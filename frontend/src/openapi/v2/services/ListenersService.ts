@@ -39,6 +39,7 @@ export class ListenersService {
      * @param label
      * @param aliveOnly
      * @param process
+     * @param datasetId
      * @returns Paged Successful Response
      * @throws ApiError
      */
@@ -50,6 +51,7 @@ export class ListenersService {
         label?: string,
         aliveOnly: boolean = false,
         process?: string,
+        datasetId?: string,
     ): CancelablePromise<Paged> {
         return __request({
             method: 'GET',
@@ -62,6 +64,7 @@ export class ListenersService {
                 'label': label,
                 'alive_only': aliveOnly,
                 'process': process,
+                'dataset_id': datasetId,
             },
             errors: {
                 422: `Validation Error`,
@@ -103,6 +106,7 @@ export class ListenersService {
      * @param limit
      * @param heartbeatInterval
      * @param process
+     * @param datasetId
      * @returns Paged Successful Response
      * @throws ApiError
      */
@@ -112,6 +116,7 @@ export class ListenersService {
         limit: number = 2,
         heartbeatInterval: number = 300,
         process?: string,
+        datasetId?: string,
     ): CancelablePromise<Paged> {
         return __request({
             method: 'GET',
@@ -122,6 +127,7 @@ export class ListenersService {
                 'limit': limit,
                 'heartbeat_interval': heartbeatInterval,
                 'process': process,
+                'dataset_id': datasetId,
             },
             errors: {
                 422: `Validation Error`,
@@ -183,16 +189,21 @@ export class ListenersService {
      * listener_in -- JSON object including updated information
      * @param listenerId
      * @param requestBody
+     * @param datasetId
      * @returns EventListenerOut Successful Response
      * @throws ApiError
      */
     public static editListenerApiV2ListenersListenerIdPut(
         listenerId: string,
         requestBody: EventListenerIn,
+        datasetId?: string,
     ): CancelablePromise<EventListenerOut> {
         return __request({
             method: 'PUT',
             path: `/api/v2/listeners/${listenerId}`,
+            query: {
+                'dataset_id': datasetId,
+            },
             body: requestBody,
             mediaType: 'application/json',
             errors: {
@@ -205,15 +216,20 @@ export class ListenersService {
      * Delete Listener
      * Remove an Event Listener from the database. Will not clear event history for the listener.
      * @param listenerId
+     * @param datasetId
      * @returns any Successful Response
      * @throws ApiError
      */
     public static deleteListenerApiV2ListenersListenerIdDelete(
         listenerId: string,
+        datasetId?: string,
     ): CancelablePromise<any> {
         return __request({
             method: 'DELETE',
             path: `/api/v2/listeners/${listenerId}`,
+            query: {
+                'dataset_id': datasetId,
+            },
             errors: {
                 422: `Validation Error`,
             },
@@ -237,6 +253,156 @@ export class ListenersService {
             path: `/api/v2/listeners/${listenerId}/status`,
             query: {
                 'heartbeat_interval': heartbeatInterval,
+            },
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+
+    /**
+     * Add User Permission
+     * @param listenerId
+     * @param targetUser
+     * @param datasetId
+     * @returns any Successful Response
+     * @throws ApiError
+     */
+    public static addUserPermissionApiV2ListenersListenerIdUsersTargetUserPost(
+        listenerId: string,
+        targetUser: string,
+        datasetId?: string,
+    ): CancelablePromise<any> {
+        return __request({
+            method: 'POST',
+            path: `/api/v2/listeners/${listenerId}/users/${targetUser}`,
+            query: {
+                'dataset_id': datasetId,
+            },
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+
+    /**
+     * Remove User Permission
+     * @param listenerId
+     * @param targetUser
+     * @param datasetId
+     * @returns any Successful Response
+     * @throws ApiError
+     */
+    public static removeUserPermissionApiV2ListenersListenerIdUsersTargetUserDelete(
+        listenerId: string,
+        targetUser: string,
+        datasetId?: string,
+    ): CancelablePromise<any> {
+        return __request({
+            method: 'DELETE',
+            path: `/api/v2/listeners/${listenerId}/users/${targetUser}`,
+            query: {
+                'dataset_id': datasetId,
+            },
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+
+    /**
+     * Add Group Permission
+     * @param listenerId
+     * @param targetGroup
+     * @param datasetId
+     * @returns any Successful Response
+     * @throws ApiError
+     */
+    public static addGroupPermissionApiV2ListenersListenerIdGroupsTargetGroupPost(
+        listenerId: string,
+        targetGroup: string,
+        datasetId?: string,
+    ): CancelablePromise<any> {
+        return __request({
+            method: 'POST',
+            path: `/api/v2/listeners/${listenerId}/groups/${targetGroup}`,
+            query: {
+                'dataset_id': datasetId,
+            },
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+
+    /**
+     * Remove Group Permission
+     * @param listenerId
+     * @param targetGroup
+     * @param datasetId
+     * @returns any Successful Response
+     * @throws ApiError
+     */
+    public static removeGroupPermissionApiV2ListenersListenerIdGroupsTargetGroupDelete(
+        listenerId: string,
+        targetGroup: string,
+        datasetId?: string,
+    ): CancelablePromise<any> {
+        return __request({
+            method: 'DELETE',
+            path: `/api/v2/listeners/${listenerId}/groups/${targetGroup}`,
+            query: {
+                'dataset_id': datasetId,
+            },
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+
+    /**
+     * Add Dataset Permission
+     * @param listenerId
+     * @param targetDataset
+     * @param datasetId
+     * @returns any Successful Response
+     * @throws ApiError
+     */
+    public static addDatasetPermissionApiV2ListenersListenerIdDatasetsTargetDatasetPost(
+        listenerId: string,
+        targetDataset: string,
+        datasetId?: string,
+    ): CancelablePromise<any> {
+        return __request({
+            method: 'POST',
+            path: `/api/v2/listeners/${listenerId}/datasets/${targetDataset}`,
+            query: {
+                'dataset_id': datasetId,
+            },
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+
+    /**
+     * Remove Dataset Permission
+     * @param listenerId
+     * @param targetDataset
+     * @param datasetId
+     * @returns any Successful Response
+     * @throws ApiError
+     */
+    public static removeDatasetPermissionApiV2ListenersListenerIdDatasetsTargetDatasetDelete(
+        listenerId: string,
+        targetDataset: string,
+        datasetId?: string,
+    ): CancelablePromise<any> {
+        return __request({
+            method: 'DELETE',
+            path: `/api/v2/listeners/${listenerId}/datasets/${targetDataset}`,
+            query: {
+                'dataset_id': datasetId,
             },
             errors: {
                 422: `Validation Error`,

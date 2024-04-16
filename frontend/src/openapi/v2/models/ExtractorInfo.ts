@@ -22,4 +22,5 @@ export type ExtractorInfo = {
     categories?: Array<string>;
     parameters?: any;
     version?: string;
+    unique_key?: string;
 }
