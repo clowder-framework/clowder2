@@ -24,7 +24,7 @@ class UserLogin(BaseModel):
 
 
 class UserDoc(Document, UserBase):
-    admin: bool
+    admin: bool = False
     admin_mode: bool = False
     read_only_user: bool = False
 

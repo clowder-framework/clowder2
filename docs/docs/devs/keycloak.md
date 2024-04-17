@@ -3,7 +3,7 @@
 ###  Access keycloak admin console
 Once keycloak container is up running, you can access the admin console at `https://{hostname}/keycloak`.  Click
 "Administration Console " to login in. If not specified, the default admin username and password are `admin`/ `admin`.
-![admin console](img/keycloak-admin-console.png)
+![admin console](../assets/images/keycloak-admin-console.png)
 
 ### Import Realm
 The default Realm of keycloak is Master. To use the realm for this project, the easiest way is to **import
@@ -14,7 +14,7 @@ import the file `clowder-realm-dev.json`.
 To import, please navigate to the dropdown on top left corner and click **Create Realm**. Once you see the create
 realm interface, you can either copy-paste the json definition into the dialog; or click **Browse** and select the
 realm json file you want to use.
-![create realm](img/keycloak-create-realm.png)
+![create realm](../assets/images/keycloak-create-realm.png)
 
 You can check if the Clowder realm is successfully created by whether you can see the **Clowder** in the dropdown
 of top left corner. Once select Clowder there, you should also see the "Welcome to Clowder" Page. Last thing to
@@ -27,14 +27,14 @@ setting to reflect the domain host name. For example, if we deploy Clowder at ht
 cloud, there will be three places you need to adjust:
 1. Under **Realm Settings**, you would need to change the **Frontend URL** to https://clowder2.software-dev.ncsa.
    cloud/keycloak. The pattern is `http(s)://{hostname}/keycloak`
-   ![realm setting](img/keycloak-realm-setting.png)
+   ![realm setting](../assets/images/keycloak-realm-setting.png)
 2. Navigate to **Clients** and find the client you will be using (in our case, it's clowder2-backend). Change the
    **root URL** to `http(s)://{hostname}`, i.e. https://clowder2.software-dev.ncsa.cloud
 3. Similarly, change the **Valid redirect URIs** to be `http(s)://{hostname}/api/v2/auth` which is the API endpoint
    for validation and authenticate users, i.e.
    https://clowder2.software-dev.ncsa.cloud/api/v2/auth. Valid URI pattern a browser can redirect to after a successful
    login.
-   ![client setting](img/keycloak-client-setting.png)
+   ![client setting](../assets/images/keycloak-client-setting.png)
 
 
 ### Alternative
@@ -66,7 +66,7 @@ Under attributes add/modify the **frontendUrl**
 
 A few other settings:
 
-To enable password resest add below:
+To enable password reset add below:
 ```angular2html
   "resetPasswordAllowed": true,
 ```

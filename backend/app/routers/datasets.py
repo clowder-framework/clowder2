@@ -53,6 +53,53 @@ from pika.adapters.blocking_connection import BlockingChannel
 from rocrate.model.person import Person
 from rocrate.rocrate import ROCrate
 
+from app import dependencies
+from app.config import settings
+from app.deps.authorization_deps import Authorization, CheckStatus
+from app.keycloak_auth import (
+    get_token,
+    get_user,
+    get_current_user,
+)
+from app.models.authorization import AuthorizationDB, RoleType
+from app.models.datasets import (
+    DatasetBase,
+    DatasetIn,
+    DatasetDB,
+    DatasetOut,
+    DatasetPatch,
+    DatasetDBViewList,
+    DatasetStatus,
+)
+from app.models.files import (
+    FileOut,
+    FileDB,
+    FileDBViewList,
+    LocalFileIn,
+    StorageType,
+)
+from app.models.folder_and_file import FolderFileViewList
+from app.models.folders import (
+    FolderOut,
+    FolderIn,
+    FolderDB,
+    FolderDBViewList,
+    FolderPatch,
+)
+from app.models.metadata import MetadataDB
+from app.models.pages import Paged, _get_page_query, _construct_page_metadata
+from app.models.thumbnails import ThumbnailDB
+from app.models.users import UserOut
+from app.rabbitmq.listeners import submit_dataset_job
+from app.routers.authentication import get_admin
+from app.routers.authentication import get_admin_mode
+from app.routers.files import add_file_entry, remove_file_entry, add_local_file_entry
+from app.search.connect import (
+    delete_document_by_id,
+)
+from app.search.index import index_dataset, index_file
+from app.models.licenses import standard_licenses
+
 router = APIRouter()
 security = HTTPBearer()
 
@@ -179,10 +226,21 @@ async def _get_folder_hierarchy(
 @router.post("", response_model=DatasetOut)
 async def save_dataset(
     dataset_in: DatasetIn,
+    license_id: str,
     user=Depends(get_current_user),
     es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
 ):
-    dataset = DatasetDB(**dataset_in.dict(), creator=user)
+    standard_license = False
+    standard_license_ids = [license.id for license in standard_licenses]
+    if license_id in standard_license_ids:
+        standard_license = True
+
+    dataset = DatasetDB(
+        **dataset_in.dict(),
+        creator=user,
+        license_id=str(license_id),
+        standard_license=standard_license,
+    )
     await dataset.insert()
 
     # Create authorization entry
@@ -392,9 +450,10 @@ async def delete_dataset(
             FolderDB.dataset_id == PydanticObjectId(dataset_id)
         ).delete()
         await AuthorizationDB.find(
-            AuthorizationDB.dataset_id == ObjectId(dataset_id)
+            AuthorizationDB.dataset_id == PydanticObjectId(dataset_id)
         ).delete()
         return {"deleted": dataset_id}
+        await delete_license(dataset.license_id)
     raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
 
 
@@ -431,7 +490,7 @@ async def get_dataset_folders(
     limit: int = 10,
     allow: bool = Depends(Authorization("viewer")),
 ):
-    if (await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
+    if (dataset_db := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
         if authenticated or public:
             query = [
                 FolderDBViewList.dataset_id == ObjectId(dataset_id),

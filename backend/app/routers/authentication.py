@@ -1,6 +1,11 @@
 import json
 
-from app.keycloak_auth import create_user, get_current_user, keycloak_openid
+from app.keycloak_auth import (
+    create_user,
+    enable_disable_user,
+    get_current_user,
+    keycloak_openid,
+)
 from app.models.datasets import DatasetDB
 from app.models.users import UserDB, UserIn, UserLogin, UserOut
 from beanie import PydanticObjectId
@@ -163,14 +168,11 @@ async def set_admin(
 ):
     if admin and current_username.admin:
         if (user := await UserDB.find_one(UserDB.email == useremail)) is not None:
-            if user.read_only_user:
-                raise HTTPException(
-                    status_code=403,
-                    detail=f"User {useremail} is read only user. Read only user cannot be admin",
-                )
             user.admin = True
             await user.replace()
             return user.dict()
+        else:
+            raise HTTPException(status_code=404, detail=f"User {useremail} not found")
     else:
         raise HTTPException(
             status_code=403,
@@ -237,4 +239,68 @@ async def disable_readonly_user(
         raise HTTPException(
             status_code=403,
             detail=f"User {current_username.email} is not an admin. Only admin can make others admin.",
+        )
+
+
+@router.post("/users/enable/{useremail}", response_model=UserOut)
+async def user_enable(
+    useremail: str, current_username=Depends(get_current_user), admin=Depends(get_admin)
+):
+    if admin:
+        if current_username.email == useremail:
+            raise HTTPException(
+                status_code=403,
+                detail="You are currently an admin. Admin cannot enable their own self.",
+            )
+        else:
+            if (user := await UserDB.find_one(UserDB.email == useremail)) is not None:
+                try:
+                    await enable_disable_user(useremail, True)
+                except KeycloakGetError as e:
+                    raise HTTPException(
+                        status_code=e.response_code,
+                        detail=json.loads(e.error_message),
+                        headers={"WWW-Authenticate": "Bearer"},
+                    )
+                return user.dict()
+            else:
+                raise HTTPException(
+                    status_code=404, detail=f"User {useremail} not found"
+                )
+    else:
+        raise HTTPException(
+            status_code=403,
+            detail=f"User {current_username.email} is not an admin. Only admin can enable user access.",
+        )
+
+
+@router.post("/users/disable/{useremail}", response_model=UserOut)
+async def user_disable(
+    useremail: str, current_username=Depends(get_current_user), admin=Depends(get_admin)
+):
+    if admin:
+        if current_username.email == useremail:
+            raise HTTPException(
+                status_code=403,
+                detail="You are currently an admin. Admin cannot disable their own self.",
+            )
+        else:
+            if (user := await UserDB.find_one(UserDB.email == useremail)) is not None:
+                try:
+                    await enable_disable_user(useremail, False)
+                except KeycloakGetError as e:
+                    raise HTTPException(
+                        status_code=e.response_code,
+                        detail=json.loads(e.error_message),
+                        headers={"WWW-Authenticate": "Bearer"},
+                    )
+                return user.dict()
+            else:
+                raise HTTPException(
+                    status_code=404, detail=f"User {useremail} not found"
+                )
+    else:
+        raise HTTPException(
+            status_code=403,
+            detail=f"User {current_username.email} is not an admin. Only admin can disable user access.",
         )

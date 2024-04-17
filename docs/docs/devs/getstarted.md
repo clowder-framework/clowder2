@@ -2,7 +2,7 @@
 
 The core app is divided into two modules: backend and frontend. The frontend module is a standalone [React](https://react.dev/)
 application and the backend, a  standalone [FastAPI](https://fastapi.tiangolo.com/lo/) web API. We leverage [MongoDB](https://www.mongodb.com/), [RabbitMQ](https://www.rabbitmq.com/),
-and [Elasticsearch](https://www.elastic.co/). We also use [MinIO](https://min.io/) out of the box as the default object  store and [Traefik](https://traefik.io/traefik/) as
+and [Elasticsearch](https://www.elastic.co/). We also use [MinIO](https://min.io/) out of the box as the default object store and [Traefik](https://traefik.io/traefik/) as
 the web proxy.
 
 There are two simple ways to run Clowder v2:
@@ -83,7 +83,7 @@ Additional steps/details:
     * You can also run the frontend module below and use the Login link available there.
 3. Manually run tests before pushing with `pipenv run pytest -v` or right-clicking on `test` folder and clicking `Run`
    in PyCharm.
-4. Linting is done using [Black]((https://black.readthedocs.io/en/stable/)). You can set up PyCharm to automatically
+4. Linting is done using [Black](https://black.readthedocs.io/en/stable/). You can set up PyCharm to automatically
    run it when you save a file using
    these [instructions](https://black.readthedocs.io/en/stable/integrations/editors.html).
    The git repository includes an action to run Black on push and pull_request.
@@ -126,7 +126,7 @@ You can run the frontend module using either of the below options:
 - If you are deploying on the kubernetes cluster (https://clowder2.software-dev.ncsa.cloud/), please import the
   Keycloak realm setting file `/scripts/keycloak/mini-kube-clowder-realm-prod.json`
 
-For more details on how to set up Keycloak, please refer to this [Documentation](docs/source/configure-keycloak-realm.md)
+For more details on how to set up Keycloak, please refer to [keycloak setup](keycloak.md).
 
 ### Pre-commit Hooks and Linting
 

@@ -6,7 +6,7 @@ import {
 	FileOut,
 	FileVersion,
 	FolderOut,
-	GroupOut,
+	GroupOut, LicenseOut,
 	MetadataDefinitionOut,
 	MetadataOut as Metadata,
 	Paged,
@@ -128,6 +128,7 @@ export interface DatasetState {
 	about: DatasetOut;
 	datasetRole: AuthorizationBase;
 	roles: DatasetRoles;
+	license: LicenseOut;
 }
 
 export interface PublicDatasetState {
@@ -140,6 +141,7 @@ export interface PublicDatasetState {
 	publicDatasetRole: AuthorizationBase;
 	publicRoles: DatasetRoles;
 	publicFoldersAndFiles: Paged;
+	license: LicenseOut;
 }
 
 export interface ListenerState {
