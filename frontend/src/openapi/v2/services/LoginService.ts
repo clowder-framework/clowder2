@@ -184,7 +184,7 @@ export class LoginService {
      * @returns UserOut Successful Response
      * @throws ApiError
      */
-    public static disableReadonlyUserApiV2UsersSetReadonlyUseremailPost(
+    public static disableReadonlyUserApiV2UsersDisableReadonlyUseremailPost(
         useremail: string,
         datasetId?: string,
     ): CancelablePromise<UserOut> {
