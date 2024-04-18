@@ -2,7 +2,6 @@
 /* tslint:disable */
 /* eslint-disable */
 import type { Body_get_dataset_metadata_api_v2_public_datasets__dataset_id__metadata_get } from '../models/Body_get_dataset_metadata_api_v2_public_datasets__dataset_id__metadata_get';
-import type { CombinedDataset } from '../models/CombinedDataset';
 import type { DatasetOut } from '../models/DatasetOut';
 import type { FileOut } from '../models/FileOut';
 import type { FolderOut } from '../models/FolderOut';
@@ -43,12 +42,12 @@ export class PublicDatasetsService {
     /**
      * Get Dataset
      * @param datasetId
-     * @returns CombinedDataset Successful Response
+     * @returns DatasetOut Successful Response
      * @throws ApiError
      */
     public static getDatasetApiV2PublicDatasetsDatasetIdGet(
         datasetId: string,
-    ): CancelablePromise<CombinedDataset> {
+    ): CancelablePromise<DatasetOut> {
         return __request({
             method: 'GET',
             path: `/api/v2/public_datasets/${datasetId}`,

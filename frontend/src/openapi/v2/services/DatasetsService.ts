@@ -4,7 +4,6 @@
 import type { Body_create_dataset_from_zip_api_v2_datasets_createFromZip_post } from '../models/Body_create_dataset_from_zip_api_v2_datasets_createFromZip_post';
 import type { Body_save_file_api_v2_datasets__dataset_id__files_post } from '../models/Body_save_file_api_v2_datasets__dataset_id__files_post';
 import type { Body_save_files_api_v2_datasets__dataset_id__filesMultiple_post } from '../models/Body_save_files_api_v2_datasets__dataset_id__filesMultiple_post';
-import type { CombinedDataset } from '../models/CombinedDataset';
 import type { DatasetBase } from '../models/DatasetBase';
 import type { DatasetFreezeOut } from '../models/DatasetFreezeOut';
 import type { DatasetIn } from '../models/DatasetIn';
@@ -82,12 +81,12 @@ export class DatasetsService {
     /**
      * Get Dataset
      * @param datasetId
-     * @returns CombinedDataset Successful Response
+     * @returns DatasetOut Successful Response
      * @throws ApiError
      */
     public static getDatasetApiV2DatasetsDatasetIdGet(
         datasetId: string,
-    ): CancelablePromise<CombinedDataset> {
+    ): CancelablePromise<DatasetOut> {
         return __request({
             method: 'GET',
             path: `/api/v2/datasets/${datasetId}`,
@@ -209,24 +208,6 @@ export class DatasetsService {
             },
             formData: formData,
             mediaType: 'multipart/form-data',
-            errors: {
-                422: `Validation Error`,
-            },
-        });
-    }
-
-    /**
-     * Draft Freeze Dataset
-     * @param datasetId
-     * @returns DatasetFreezeOut Successful Response
-     * @throws ApiError
-     */
-    public static draftFreezeDatasetApiV2DatasetsDatasetIdFreezeDraftPost(
-        datasetId: string,
-    ): CancelablePromise<DatasetFreezeOut> {
-        return __request({
-            method: 'POST',
-            path: `/api/v2/datasets/${datasetId}/freeze_draft`,
             errors: {
                 422: `Validation Error`,
             },
@@ -472,12 +453,12 @@ export class DatasetsService {
     /**
      * Download Dataset
      * @param datasetId
-     * @returns CombinedDataset Successful Response
+     * @returns any Successful Response
      * @throws ApiError
      */
     public static downloadDatasetApiV2DatasetsDatasetIdDownloadGet(
         datasetId: string,
-    ): CancelablePromise<CombinedDataset> {
+    ): CancelablePromise<any> {
         return __request({
             method: 'GET',
             path: `/api/v2/datasets/${datasetId}/download`,

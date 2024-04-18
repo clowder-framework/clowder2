@@ -14,7 +14,6 @@ from app.deps.authorization_deps import Authorization, CheckStatus
 from app.keycloak_auth import get_current_user, get_token, get_user
 from app.models.authorization import AuthorizationDB, RoleType
 from app.models.datasets import (
-    CombinedDataset,
     DatasetBase,
     DatasetDB,
     DatasetDBViewList,
@@ -24,7 +23,6 @@ from app.models.datasets import (
     DatasetOut,
     DatasetPatch,
     DatasetStatus,
-    FrozenState,
 )
 from app.models.files import FileDB, FileDBViewList, FileOut, LocalFileIn, StorageType
 from app.models.folder_and_file import FolderFileViewList
@@ -265,10 +263,11 @@ async def get_datasets(
     page_metadata = _construct_page_metadata(datasets_and_count, skip, limit)
     # TODO have to change _id this way otherwise it won't work
     # TODO need to research if there is other pydantic trick to make it work
+
     page = Paged(
         metadata=page_metadata,
         data=[
-            CombinedDataset(id=item.get("origin_id"), **item)
+            DatasetOut(id=item.pop("_id"), **item)
             for item in datasets_and_count[0]["data"]
         ],
     )
@@ -276,7 +275,7 @@ async def get_datasets(
     return page.dict()
 
 
-@router.get("/{dataset_id}", response_model=CombinedDataset)
+@router.get("/{dataset_id}", response_model=DatasetOut)
 async def get_dataset(
     dataset_id: str,
     authenticated: bool = Depends(CheckStatus("AUTHENTICATED")),
@@ -447,43 +446,6 @@ async def delete_dataset(
     raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
 
 
-@router.post("/{dataset_id}/freeze_draft", response_model=DatasetFreezeOut)
-async def draft_freeze_dataset(
-    dataset_id: str,
-    user=Depends(get_current_user),
-    fs: Minio = Depends(dependencies.get_fs),
-    es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
-    allow: bool = Depends(Authorization("owner")),
-):
-    # Find that dataset in freeze database and copy over to dataset database (workspace)
-    # Allow them to base off any version of that dataset
-    if (
-        frozen_dataset := await DatasetFreezeDB.get(PydanticObjectId(dataset_id))
-    ) is not None:
-        # copy over
-        draft_frozen_dataset_data = frozen_dataset.dict()
-        # keep the origin id
-        draft_frozen_dataset_data.pop("id")
-        draft_frozen_dataset_data["_id"] = draft_frozen_dataset_data.get("origin_id")
-        draft_frozen_dataset_data["frozen"] = FrozenState.FROZEN_DRAFT
-        draft_frozen_dataset = DatasetDB(**draft_frozen_dataset_data)
-        await draft_frozen_dataset.insert()
-
-        # Create authorization entry
-        await AuthorizationDB(
-            dataset_id=draft_frozen_dataset.id,
-            role=RoleType.OWNER,
-            creator=user.email,
-        ).save()
-
-        # TODO: move metadata, files, folders, and authorizations to the frozen set
-        return draft_frozen_dataset.dict()
-
-    raise HTTPException(
-        status_code=404, detail=f"Freezed Dataset {dataset_id} not found"
-    )
-
-
 @router.post("/{dataset_id}/freeze", response_model=DatasetFreezeOut)
 async def freeze_dataset(
     dataset_id: str,
@@ -496,30 +458,27 @@ async def freeze_dataset(
     if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
         frozen_dataset_data = dataset.dict()
 
-        # Move dataset to Public Freeze Dataset collection
-        # if no origin id associated with that dataset, freeze it as the very fist version
-        if dataset.origin_id is None and dataset.frozen == FrozenState.ACTIVE:
-            # first version always keep the origin id; hmm does it matter?
-            frozen_dataset_data["origin_id"] = frozen_dataset_data[
-                "_id"
-            ] = frozen_dataset_data.pop("id")
-            frozen_dataset_data["frozen_version_num"] = 1
+        # Copy the dataset to Public Freeze Dataset collection
         # else search in freeze dataset collection to get the latest version of the dataset
+        latest_frozen_dataset = (
+            await DatasetFreezeDB.find({"origin_id": dataset.origin_id})
+            .sort(("frozen_version_num", DESCENDING))
+            .first_or_none()
+        )
+
+        frozen_dataset_data["origin_id"] = frozen_dataset_data.pop("id")
+
+        if latest_frozen_dataset is None:
+            # if no origin id associated with that dataset, freeze it as the very fist version
+            frozen_dataset_data["frozen_version_num"] = 1
         else:
-            latest_frozen_dataset = (
-                await DatasetFreezeDB.find({"origin_id": dataset.origin_id})
-                .sort(("frozen_version_num", DESCENDING))
-                .first_or_none()
-            )
-            frozen_dataset_data.pop("id")
             frozen_dataset_data["frozen_version_num"] = (
                 latest_frozen_dataset.frozen_version_num + 1
             )
 
-        frozen_dataset_data["frozen"] = FrozenState.FROZEN
+        frozen_dataset_data["frozen"] = True
         frozen_dataset = DatasetFreezeDB(**frozen_dataset_data)
         await frozen_dataset.insert()
-        await dataset.delete()
 
         # Update Authorization
         if (
@@ -1033,7 +992,7 @@ async def create_dataset_from_zip(
     return dataset.dict()
 
 
-@router.get("/{dataset_id}/download", response_model=CombinedDataset)
+@router.get("/{dataset_id}/download")
 async def download_dataset(
     dataset_id: str,
     user=Depends(get_current_user),

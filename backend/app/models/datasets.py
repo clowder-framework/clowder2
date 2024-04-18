@@ -10,16 +10,6 @@ from beanie import Document, PydanticObjectId, View
 from pydantic import BaseModel, Field
 
 
-class FrozenState(str, Enum):
-    """A user can have one of the following roles for a specific dataset. Since we don't currently implement permissions
-    there is an implied hierarchy between these roles OWNER > EDITOR > UPLOADER > VIEWER. For example, if a route
-    requires VIEWER any of the roles can access that resource."""
-
-    FROZEN = "frozen"
-    FROZEN_DRAFT = "frozen_draft"
-    ACTIVE = "active"
-
-
 class AutoName(Enum):
     def _generate_next_value_(name, start, count, last_values):
         return name
@@ -61,7 +51,7 @@ class DatasetPatch(BaseModel):
 
 
 class DatasetDB(Document, DatasetBaseCommon):
-    frozen: FrozenState = FrozenState.ACTIVE
+    frozen: bool = False
     frozen_version_num: int = -999
     standard_license: bool = True
     license_id: Optional[str] = None
@@ -77,7 +67,7 @@ class DatasetDB(Document, DatasetBaseCommon):
 
 
 class DatasetFreezeDB(Document, DatasetBaseCommon):
-    frozen: FrozenState = FrozenState.FROZEN
+    frozen: bool = True
     frozen_version_num: int = 1
 
     class Settings:
@@ -98,47 +88,15 @@ class DatasetDBViewList(View, DatasetBaseCommon):
     auth: List[AuthorizationDB]
     thumbnail_id: Optional[PydanticObjectId] = None
     status: str = DatasetStatus.PRIVATE.name
-    frozen: FrozenState = FrozenState.ACTIVE
+    frozen: bool = False
     frozen_version_num: int = -999
     origin_id: PydanticObjectId = None
 
     class Settings:
-        source = DatasetFreezeDB
+        source = DatasetDB
         name = "datasets_view"
 
         pipeline = [
-            {
-                "$unionWith": {
-                    "coll": "datasets",
-                    "pipeline": [
-                        {
-                            "$addFields": {
-                                "frozen": {"$ifNull": ["$frozen", FrozenState.ACTIVE]},
-                                "frozen_version_num": {
-                                    "$ifNull": ["$frozen_version_num", -999]
-                                },
-                                "origin_id": {"$ifNull": ["$origin_id", "$_id"]},
-                            }
-                        }
-                    ],
-                }
-            },
-            # if there is draft show draft
-            {
-                "$addFields": {
-                    "priority": {
-                        "$cond": {
-                            "if": {"$eq": ["$frozen", FrozenState.FROZEN_DRAFT]},
-                            "then": 0,
-                            "else": 1,
-                        }
-                    }
-                }
-            },
-            # else show the latest version
-            {"$sort": {"origin_id": 1, "priority": 1, "frozen_version_num": -1}},
-            {"$group": {"_id": "$origin_id", "doc": {"$first": "$$ROOT"}}},
-            {"$replaceRoot": {"newRoot": "$doc"}},
             {
                 "$lookup": {
                     "from": "authorization",
@@ -163,10 +121,6 @@ class DatasetOut(DatasetDB):
 class DatasetFreezeOut(DatasetFreezeDB):
     class Config:
         fields = {"id": "id"}
-
-
-class CombinedDataset(DatasetOut, DatasetFreezeOut):
-    pass
 
 
 class UserAndRole(BaseModel):

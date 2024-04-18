@@ -4068,7 +4068,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/CombinedDataset"
+                  "$ref": "#/components/schemas/DatasetOut"
                 }
               }
             }
@@ -4392,59 +4392,6 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/FileOut"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "OAuth2AuthorizationCodeBearer": []
-          },
-          {
-            "APIKeyHeader": []
-          },
-          {
-            "APIKeyCookie": []
-          }
-        ]
-      }
-    },
-    "/api/v2/datasets/{dataset_id}/freeze_draft": {
-      "post": {
-        "tags": [
-          "datasets"
-        ],
-        "summary": "Draft Freeze Dataset",
-        "operationId": "draft_freeze_dataset_api_v2_datasets__dataset_id__freeze_draft_post",
-        "parameters": [
-          {
-            "required": true,
-            "schema": {
-              "title": "Dataset Id",
-              "type": "string"
-            },
-            "name": "dataset_id",
-            "in": "path"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/DatasetFreezeOut"
                 }
               }
             }
@@ -5162,9 +5109,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CombinedDataset"
-                }
+                "schema": {}
               }
             }
           },
@@ -5462,7 +5407,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/CombinedDataset"
+                  "$ref": "#/components/schemas/DatasetOut"
                 }
               }
             }
@@ -10152,99 +10097,6 @@
           }
         }
       },
-      "CombinedDataset": {
-        "title": "CombinedDataset",
-        "required": [
-          "creator"
-        ],
-        "type": "object",
-        "properties": {
-          "name": {
-            "title": "Name",
-            "type": "string",
-            "default": "N/A"
-          },
-          "description": {
-            "title": "Description",
-            "type": "string"
-          },
-          "status": {
-            "title": "Status",
-            "type": "string",
-            "default": "PRIVATE"
-          },
-          "creator": {
-            "$ref": "#/components/schemas/UserOut"
-          },
-          "created": {
-            "title": "Created",
-            "type": "string",
-            "format": "date-time"
-          },
-          "modified": {
-            "title": "Modified",
-            "type": "string",
-            "format": "date-time"
-          },
-          "user_views": {
-            "title": "User Views",
-            "type": "integer",
-            "default": 0
-          },
-          "downloads": {
-            "title": "Downloads",
-            "type": "integer",
-            "default": 0
-          },
-          "thumbnail_id": {
-            "title": "Thumbnail Id",
-            "type": "string",
-            "examples": [
-              "5eb7cf5a86d9755df3a6c593",
-              "5eb7cfb05e32e07750a1756a"
-            ]
-          },
-          "origin_id": {
-            "title": "Origin Id",
-            "type": "string",
-            "examples": [
-              "5eb7cf5a86d9755df3a6c593",
-              "5eb7cfb05e32e07750a1756a"
-            ]
-          },
-          "id": {
-            "title": "Id",
-            "type": "string",
-            "examples": [
-              "5eb7cf5a86d9755df3a6c593",
-              "5eb7cfb05e32e07750a1756a"
-            ]
-          },
-          "frozen": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/FrozenState"
-              }
-            ],
-            "default": "active"
-          },
-          "frozen_version_num": {
-            "title": "Frozen Version Num",
-            "type": "integer",
-            "default": -999
-          },
-          "standard_license": {
-            "title": "Standard License",
-            "type": "boolean",
-            "default": true
-          },
-          "license_id": {
-            "title": "License Id",
-            "type": "string"
-          }
-        },
-        "description": "Document Mapping class.\n\nFields:\n\n- `id` - MongoDB document ObjectID \"_id\" field.\nMapped to the PydanticObjectId class\n\nInherited from:\n\n- Pydantic BaseModel\n- [UpdateMethods](https://roman-right.github.io/beanie/api/interfaces/#aggregatemethods)"
-      },
       "ContentType": {
         "title": "ContentType",
         "type": "object",
@@ -10351,12 +10203,9 @@
             ]
           },
           "frozen": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/FrozenState"
-              }
-            ],
-            "default": "frozen"
+            "title": "Frozen",
+            "type": "boolean",
+            "default": true
           },
           "frozen_version_num": {
             "title": "Frozen Version Num",
@@ -10455,12 +10304,9 @@
             ]
           },
           "frozen": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/FrozenState"
-              }
-            ],
-            "default": "active"
+            "title": "Frozen",
+            "type": "boolean",
+            "default": false
           },
           "frozen_version_num": {
             "title": "Frozen Version Num",
@@ -11229,16 +11075,6 @@
             ]
           }
         }
-      },
-      "FrozenState": {
-        "title": "FrozenState",
-        "enum": [
-          "frozen",
-          "frozen_draft",
-          "active"
-        ],
-        "type": "string",
-        "description": "A user can have one of the following roles for a specific dataset. Since we don't currently implement permissions\nthere is an implied hierarchy between these roles OWNER > EDITOR > UPLOADER > VIEWER. For example, if a route\nrequires VIEWER any of the roles can access that resource."
       },
       "GroupAndRole": {
         "title": "GroupAndRole",

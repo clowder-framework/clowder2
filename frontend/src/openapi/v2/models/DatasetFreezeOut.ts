@@ -2,7 +2,6 @@
 /* tslint:disable */
 /* eslint-disable */
 
-import type { FrozenState } from './FrozenState';
 import type { UserOut } from './UserOut';
 
 /**
@@ -30,6 +29,6 @@ export type DatasetFreezeOut = {
     thumbnail_id?: string;
     origin_id?: string;
     id?: string;
-    frozen?: FrozenState;
+    frozen?: boolean;
     frozen_version_num?: number;
 }

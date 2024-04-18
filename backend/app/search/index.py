@@ -2,7 +2,7 @@ from typing import List, Optional
 
 from app.config import settings
 from app.models.authorization import AuthorizationDB
-from app.models.datasets import CombinedDataset
+from app.models.datasets import DatasetOut
 from app.models.files import FileDB, FileOut
 from app.models.metadata import MetadataDB
 from app.models.search import ElasticsearchEntry
@@ -15,7 +15,7 @@ from elasticsearch import Elasticsearch, NotFoundError
 
 async def index_dataset(
     es: Elasticsearch,
-    dataset: CombinedDataset,
+    dataset: DatasetOut,
     user_ids: Optional[List[str]] = None,
     update: bool = False,
 ):

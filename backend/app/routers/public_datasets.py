@@ -8,12 +8,7 @@ from typing import List, Optional
 
 from app import dependencies
 from app.config import settings
-from app.models.datasets import (
-    CombinedDataset,
-    DatasetDBViewList,
-    DatasetOut,
-    DatasetStatus,
-)
+from app.models.datasets import DatasetDBViewList, DatasetOut, DatasetStatus
 from app.models.files import FileDB, FileDBViewList, FileOut
 from app.models.folder_and_file import FolderFileViewList
 from app.models.folders import FolderDB, FolderDBViewList, FolderOut
@@ -67,14 +62,14 @@ async def get_datasets(
     page = Paged(
         metadata=page_metadata,
         data=[
-            CombinedDataset(id=item.pop("_id"), **item)
+            DatasetOut(id=item.pop("_id"), **item)
             for item in datasets_and_count[0]["data"]
         ],
     )
     return page.dict()
 
 
-@router.get("/{dataset_id}", response_model=CombinedDataset)
+@router.get("/{dataset_id}", response_model=DatasetOut)
 async def get_dataset(
     dataset_id: str,
 ):
