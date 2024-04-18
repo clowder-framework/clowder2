@@ -30,7 +30,7 @@ export const RECEIVE_FILE_ROLE = "RECEIVE_FILE_ROLE";
 
 export function fetchFileRole(fileId) {
 	return (dispatch) => {
-		return V2.AuthorizationService.getFileRoleApiV2AuthorizationsFilesFileIdRoleTypeGet(
+		return V2.AuthorizationService.getFileRoleApiV2AuthorizationsFilesFileIdRoleGet(
 			fileId
 		)
 			.then((json) => {
