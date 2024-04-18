@@ -1,36 +1,22 @@
-from typing import Optional, List
-
-from beanie import PydanticObjectId
-from beanie.odm.operators.update.general import Inc
-from bson import ObjectId
-from fastapi import (
-    APIRouter,
-    HTTPException,
-    Depends,
-)
-from fastapi import Form
-from fastapi.responses import StreamingResponse
-from fastapi.security import HTTPBearer
-from minio import Minio
+from typing import List, Optional
 
 from app import dependencies
 from app.config import settings
-from app.models.datasets import (
-    DatasetStatus,
-    DatasetDBViewList,
-)
-from app.models.files import (
-    FileOut,
-    FileVersion,
-    FileDB,
-    FileVersionDB,
-)
-from app.models.metadata import MetadataDB
+from app.models.datasets import DatasetDBViewList, DatasetStatus
+from app.models.files import FileDB, FileOut, FileVersion, FileVersionDB
 from app.models.metadata import (
-    MetadataOut,
+    MetadataDB,
     MetadataDefinitionDB,
     MetadataDefinitionOut,
+    MetadataOut,
 )
+from beanie import PydanticObjectId
+from beanie.odm.operators.update.general import Inc
+from bson import ObjectId
+from fastapi import APIRouter, Depends, Form, HTTPException
+from fastapi.responses import StreamingResponse
+from fastapi.security import HTTPBearer
+from minio import Minio
 
 router = APIRouter()
 security = HTTPBearer()

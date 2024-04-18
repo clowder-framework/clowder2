@@ -11,7 +11,7 @@ import {
 } from "../actions/file";
 import { DataAction } from "../types/action";
 import { FileState } from "../types/data";
-import { AuthorizationBase, FileOut as FileSummary } from "../openapi/v2";
+import { FileOut as FileSummary } from "../openapi/v2";
 import { RECEIVE_FILE_ROLE } from "../actions/authorization";
 
 const defaultState: FileState = {
@@ -20,7 +20,7 @@ const defaultState: FileState = {
 	metadataJsonld: [],
 	previews: [],
 	fileVersions: [],
-	fileRoleType: <AuthorizationBase>{},
+	fileRole: "",
 	blob: new Blob([]),
 	presignedUrl: "",
 	selected_version_num: 1,

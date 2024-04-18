@@ -28,8 +28,8 @@ export type DatasetFreezeOut = {
     user_views?: number;
     downloads?: number;
     thumbnail_id?: string;
+    origin_id?: string;
     id?: string;
     frozen?: FrozenState;
     frozen_version_num?: number;
-    origin_id: string;
 }

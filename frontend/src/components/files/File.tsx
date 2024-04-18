@@ -11,7 +11,7 @@ import {
 	Tabs,
 	Tooltip,
 } from "@mui/material";
-import { downloadResource } from "../../utils/common";
+import { authCheck, downloadResource } from "../../utils/common";
 import { PreviewConfiguration, RootState } from "../../types/data";
 import { useParams, useSearchParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
@@ -48,7 +48,6 @@ import { Visualization } from "../visualizations/Visualization";
 import { ErrorModal } from "../errors/ErrorModal";
 import { FileHistory } from "./FileHistory";
 import { VersionChip } from "../versions/VersionChip";
-import RoleChip from "../auth/RoleChip";
 import Typography from "@mui/material/Typography";
 import { ClowderSelect } from "../styledComponents/ClowderSelect";
 import { AuthWrapper } from "../auth/AuthWrapper";
@@ -314,7 +313,6 @@ export const File = (): JSX.Element => {
 						) : (
 							<></>
 						)}
-						<RoleChip role={fileRoleType} />
 					</Grid>
 				</Grid>
 				<Grid item xs={2} sx={{ display: "flex-top", alignItems: "center" }}>
@@ -326,7 +324,7 @@ export const File = (): JSX.Element => {
 				</Grid>
 			</Grid>
 			<Grid container spacing={2}>
-				<Grid item xs={10}>
+				<Grid item xs={12} sm={12} md={10} lg={10} xl={10}>
 					<Tabs
 						value={selectedTabIndex}
 						onChange={handleTabChange}
@@ -361,6 +359,11 @@ export const File = (): JSX.Element => {
 						<Tab
 							icon={<BuildIcon />}
 							iconPosition="start"
+							sx={
+								authCheck(adminMode, fileRole, ["owner", "editor", "uploader"])
+									? TabStyle
+									: { display: "none" }
+							}
 							label="Analysis"
 							{...a11yProps(3)}
 							disabled={false}
@@ -429,6 +432,7 @@ export const File = (): JSX.Element => {
 									deleteMetadata={deleteFileMetadata}
 									resourceType="file"
 									resourceId={fileId}
+									publicView={false}
 								/>
 								<PublishedWrapper
 									frozen={about.frozen}
@@ -476,7 +480,7 @@ export const File = (): JSX.Element => {
 								: TabStyle
 						}
 					>
-						<Listeners fileId={fileId} datasetId={datasetId} />
+						<Listeners fileId={fileId} datasetId={datasetId} process={"file"} />
 					</TabPanel>
 					<TabPanel value={selectedTabIndex} index={4}>
 						<ExtractionHistoryTab fileId={fileId} />
@@ -489,12 +493,12 @@ export const File = (): JSX.Element => {
 						)}
 					</TabPanel>
 				</Grid>
-				<Grid item xs={2}>
+				<Grid item xs={12} sm={12} md={2} lg={2} xl={2}>
 					{latestVersionNum == selectedVersionNum ? (
 						// latest version
 						<>
 							{Object.keys(fileSummary).length > 0 && (
-								<FileDetails fileSummary={fileSummary} />
+								<FileDetails fileSummary={fileSummary} myRole={fileRole} />
 							)}
 						</>
 					) : (

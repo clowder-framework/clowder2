@@ -1,14 +1,13 @@
 from datetime import datetime
 from enum import Enum, auto
-from typing import Optional, List
+from typing import List, Optional
 
 import pymongo
-from beanie import Document, View, PydanticObjectId
-from pydantic import BaseModel, Field
-
-from app.models.authorization import RoleType, AuthorizationDB
+from app.models.authorization import AuthorizationDB, RoleType
 from app.models.groups import GroupOut
 from app.models.users import UserOut
+from beanie import Document, PydanticObjectId, View
+from pydantic import BaseModel, Field
 
 
 class FrozenState(str, Enum):
@@ -64,6 +63,8 @@ class DatasetPatch(BaseModel):
 class DatasetDB(Document, DatasetBaseCommon):
     frozen: FrozenState = FrozenState.ACTIVE
     frozen_version_num: int = -999
+    standard_license: bool = True
+    license_id: Optional[str] = None
 
     class Settings:
         name = "datasets"
@@ -113,11 +114,13 @@ class DatasetDBViewList(View, DatasetBaseCommon):
                         {
                             "$addFields": {
                                 "frozen": {"$ifNull": ["$frozen", FrozenState.ACTIVE]},
-                                "frozen_version_num": {"$ifNull": ["$frozen_version_num", -999]},
-                                "origin_id": {"$ifNull": ["$origin_id", "$_id"]}
+                                "frozen_version_num": {
+                                    "$ifNull": ["$frozen_version_num", -999]
+                                },
+                                "origin_id": {"$ifNull": ["$origin_id", "$_id"]},
                             }
                         }
-                    ]
+                    ],
                 }
             },
             # if there is draft show draft
@@ -127,30 +130,23 @@ class DatasetDBViewList(View, DatasetBaseCommon):
                         "$cond": {
                             "if": {"$eq": ["$frozen", FrozenState.FROZEN_DRAFT]},
                             "then": 0,
-                            "else": 1
+                            "else": 1,
                         }
                     }
                 }
             },
             # else show the latest version
             {"$sort": {"origin_id": 1, "priority": 1, "frozen_version_num": -1}},
-            {
-                "$group": {
-                    "_id": "$origin_id",
-                    "doc": {"$first": "$$ROOT"}
-                }
-            },
-            {
-                "$replaceRoot": {"newRoot": "$doc"}
-            },
+            {"$group": {"_id": "$origin_id", "doc": {"$first": "$$ROOT"}}},
+            {"$replaceRoot": {"newRoot": "$doc"}},
             {
                 "$lookup": {
                     "from": "authorization",
                     "localField": "_id",
                     "foreignField": "dataset_id",
-                    "as": "auth"
+                    "as": "auth",
                 }
-            }
+            },
         ]
 
         # Needs fix to work https://github.com/roman-right/beanie/pull/521

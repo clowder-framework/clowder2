@@ -5,6 +5,7 @@ import { ClowderSelect } from "../../styledComponents/ClowderSelect";
 import { ClowderMetadataFormHelperText } from "../../styledComponents/ClowderMetadataFormHelperText";
 import { MetadataEditButton } from "./MetadataEditButton";
 import { AuthWrapper } from "../../auth/AuthWrapper";
+import { PublishedWrapper } from "../../auth/PublishedWrapper";
 
 export const MetadataSelect = (props) => {
 	const {

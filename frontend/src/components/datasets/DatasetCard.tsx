@@ -16,7 +16,6 @@ import { Download } from "@mui/icons-material";
 import { generateThumbnailUrl } from "../../utils/visualization";
 import config from "../../app.config";
 import { FreezeVersionChip } from "../versions/FeezeVersionChip";
-// import {Favorite, Share} from "@material-ui/icons";
 
 type DatasetCardProps = {
 	id?: string;
@@ -42,6 +41,7 @@ export default function DatasetCard(props: DatasetCardProps) {
 		frozen,
 		frozenVersionNum,
 	} = props;
+
 	const [thumbnailUrl, setThumbnailUrl] = useState("");
 
 	useEffect(() => {

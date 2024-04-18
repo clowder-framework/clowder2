@@ -56,16 +56,21 @@ export class DatasetsService {
 
     /**
      * Save Dataset
+     * @param licenseId
      * @param requestBody
      * @returns DatasetOut Successful Response
      * @throws ApiError
      */
     public static saveDatasetApiV2DatasetsPost(
+        licenseId: string,
         requestBody: DatasetIn,
     ): CancelablePromise<DatasetOut> {
         return __request({
             method: 'POST',
             path: `/api/v2/datasets`,
+            query: {
+                'license_id': licenseId,
+            },
             body: requestBody,
             mediaType: 'application/json',
             errors: {

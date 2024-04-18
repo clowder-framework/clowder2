@@ -8,6 +8,7 @@ import {
 	FileVersion,
 	FolderOut,
 	GroupOut,
+	LicenseOut,
 	MetadataDefinitionOut,
 	MetadataOut as Metadata,
 	Paged,
@@ -129,6 +130,7 @@ export interface DatasetState {
 	about: CombinedDataset;
 	datasetRole: AuthorizationBase;
 	roles: DatasetRoles;
+	license: LicenseOut;
 }
 
 export interface PublicDatasetState {
@@ -141,6 +143,7 @@ export interface PublicDatasetState {
 	publicDatasetRole: AuthorizationBase;
 	publicRoles: DatasetRoles;
 	publicFoldersAndFiles: Paged;
+	license: LicenseOut;
 }
 
 export interface ListenerState {
@@ -173,7 +176,6 @@ export interface MetadataState {
 }
 
 export interface FileState {
-	url: string;
 	blob: Blob;
 	fileSummary: FileOut;
 	extractedMetadata: ExtractedMetadata[];

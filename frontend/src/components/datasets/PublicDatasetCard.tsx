@@ -42,6 +42,7 @@ export default function PublicDatasetCard(props: PublicDatasetCardProps) {
 		frozen,
 		frozenVersionNum,
 	} = props;
+
 	const [thumbnailUrl, setThumbnailUrl] = useState("");
 
 	useEffect(() => {

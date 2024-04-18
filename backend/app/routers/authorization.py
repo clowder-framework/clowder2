@@ -1,36 +1,35 @@
-from beanie import PydanticObjectId
-from beanie.operators import Or, In
-from bson import ObjectId
-from fastapi import APIRouter, Depends
-from fastapi.exceptions import HTTPException
-
 from app.dependencies import get_elasticsearchclient
 from app.deps.authorization_deps import (
     Authorization,
     get_role_by_file,
-    get_role_by_metadata,
     get_role_by_group,
+    get_role_by_metadata,
 )
 from app.keycloak_auth import get_current_username, get_user
 from app.models.authorization import (
     AuthorizationBase,
-    AuthorizationMetadata,
     AuthorizationDB,
+    AuthorizationMetadata,
     AuthorizationOut,
     RoleType,
 )
 from app.models.datasets import (
-    UserAndRole,
-    GroupAndRole,
-    DatasetRoles,
-    DatasetOut,
-    DatasetStatus,
     DatasetDBViewList,
+    DatasetOut,
+    DatasetRoles,
+    DatasetStatus,
+    GroupAndRole,
+    UserAndRole,
 )
 from app.models.groups import GroupDB
 from app.models.users import UserDB
 from app.routers.authentication import get_admin, get_admin_mode
 from app.search.index import index_dataset
+from beanie import PydanticObjectId
+from beanie.operators import In, Or
+from bson import ObjectId
+from fastapi import APIRouter, Depends
+from fastapi.exceptions import HTTPException
 
 router = APIRouter()
 
@@ -352,7 +351,7 @@ async def remove_dataset_user_role(
         raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
 
 
-@router.get("/datasets/{dataset_id}/roles}", response_model=DatasetRoles)
+@router.get("/datasets/{dataset_id}/roles", response_model=DatasetRoles)
 async def get_dataset_roles(
     dataset_id: str,
     allow: bool = Depends(Authorization("editor")),

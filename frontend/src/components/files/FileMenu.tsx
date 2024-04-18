@@ -8,7 +8,6 @@ import { fileDeleted } from "../../actions/file";
 import { useDispatch, useSelector } from "react-redux";
 import { ActionModal } from "../dialog/ActionModal";
 import DownloadIcon from "@mui/icons-material/Download";
-import DeleteIcon from "@mui/icons-material/Delete";
 import UploadIcon from "@mui/icons-material/Upload";
 import { Dialog, DialogTitle, ListItemIcon, ListItemText } from "@mui/material";
 import { UpdateFile } from "./UpdateFile";
@@ -101,7 +100,6 @@ export default function FileMenu(props: FileMenuProps) {
 					"aria-labelledby": "basic-button",
 				}}
 			>
-				{/*owner, editor, uploader and viewer can download file*/}
 				{publicView ? (
 					<MenuItem
 						onClick={() => {
@@ -115,44 +113,22 @@ export default function FileMenu(props: FileMenuProps) {
 						<ListItemText>Download</ListItemText>
 					</MenuItem>
 				) : (
-					<AuthWrapper
-						currRole={datasetRole.role}
-						allowedRoles={["owner", "editor", "uploader", "viewer"]}
+					<MenuItem
+						onClick={() => {
+							handleClose();
+							window.location.href = `${config.hostname}/api/v2/files/${file.id}`;
+						}}
 					>
-						<MenuItem
-							onClick={() => {
-								handleClose();
-								window.location.href = `${config.hostname}/api/v2/files/${file.id}`;
-							}}
-						>
-							<ListItemIcon>
-								<DownloadIcon fontSize="small" />
-							</ListItemIcon>
-							<ListItemText>Download</ListItemText>
-						</MenuItem>
-					</AuthWrapper>
+						<ListItemIcon>
+							<DownloadIcon fontSize="small" />
+						</ListItemIcon>
+						<ListItemText>Download</ListItemText>
+					</MenuItem>
 				)}
 				<PublishedWrapper
 					frozen={dataset.frozen}
 					frozenVersionNum={dataset.frozen_version_num}
 				>
-					{/*owner, editor can update file*/}
-					<AuthWrapper
-						currRole={datasetRole.role}
-						allowedRoles={["owner", "editor"]}
-					>
-						<MenuItem
-							onClick={() => {
-								handleClose();
-								setUpdateFileOpen(true);
-							}}
-						>
-							<ListItemIcon>
-								<UploadIcon fontSize="small" />
-							</ListItemIcon>
-							<ListItemText>Update File</ListItemText>
-						</MenuItem>
-					</AuthWrapper>
 					{/*owner can delete file*/}
 					<AuthWrapper currRole={datasetRole.role} allowedRoles={["owner"]}>
 						<MenuItem
@@ -162,9 +138,9 @@ export default function FileMenu(props: FileMenuProps) {
 							}}
 						>
 							<ListItemIcon>
-								<DeleteIcon fontSize="small" />
+								<UploadIcon fontSize="small" />
 							</ListItemIcon>
-							<ListItemText>Delete</ListItemText>
+							<ListItemText>Update File</ListItemText>
 						</MenuItem>
 					</AuthWrapper>
 				</PublishedWrapper>

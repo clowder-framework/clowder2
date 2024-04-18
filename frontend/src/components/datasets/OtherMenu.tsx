@@ -102,7 +102,8 @@ export const OtherMenu = (props: ActionsMenuProps): JSX.Element => {
 			<EditStatusModal
 				open={editStatusPaneOpen}
 				handleClose={handleEditStatusClose}
-				datasetName={datasetName}/>
+				datasetName={datasetName}
+			/>
 			<ActionModal
 				actionOpen={deleteDatasetConfirmOpen}
 				actionTitle="Are you sure?"
@@ -155,8 +156,8 @@ export const OtherMenu = (props: ActionsMenuProps): JSX.Element => {
 					onClick={() => {
 						handleOptionClose();
 						setEditStatusPaneOpen(true);
-					}
-					}>
+					}}
+				>
 					<ListItemIcon>
 						<ShareIcon fontSize="small" />
 					</ListItemIcon>
