@@ -407,8 +407,14 @@ async def delete_dataset(
         await AuthorizationDB.find(
             AuthorizationDB.dataset_id == PydanticObjectId(dataset_id)
         ).delete()
+
+        # don't delete standard license
+        standard_license_ids = [license.id for license in standard_licenses]
+        if dataset.license_id not in standard_license_ids:
+            await delete_license(dataset.license_id)
+
         return {"deleted": dataset_id}
-        await delete_license(dataset.license_id)
+
     raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
 
 
@@ -445,7 +451,7 @@ async def get_dataset_folders(
     limit: int = 10,
     allow: bool = Depends(Authorization("viewer")),
 ):
-    if await DatasetDB.get(PydanticObjectId(dataset_id)) is not None:
+    if (await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
         if authenticated or public:
             query = [
                 FolderDBViewList.dataset_id == ObjectId(dataset_id),
