@@ -1,12 +1,5 @@
-from fastapi.testclient import TestClient
-
 from app.config import settings
-from app.tests.utils import (
-    create_dataset,
-    create_user,
-    user_example,
-)
-
+from fastapi.testclient import TestClient
 
 license_example = {
     "name": "test license",

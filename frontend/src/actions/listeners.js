@@ -10,7 +10,7 @@ export function fetchListeners(
 	category = null,
 	label = null,
 	aliveOnly = false,
-	process = null,
+	process = null
 ) {
 	return (dispatch) => {
 		// TODO: Parameters for dates? paging?
@@ -56,7 +56,7 @@ export function queryListeners(
 	skip = 0,
 	limit = 21,
 	heartbeatInterval = 0,
-	process = null,
+	process = null
 ) {
 	return (dispatch) => {
 		// TODO: Parameters for dates? paging?

@@ -147,7 +147,7 @@ mark {
 	display: flex;
 }
 .radio-checkbox {
-	margin-right: .5em;
+	margin-right: 0.5em;
 	min-width: 17px;
 	align-content: center;
 }
@@ -156,7 +156,7 @@ mark {
 	font-size: 1.28571429em;
 }
 .description {
-	color: rgba(0,0,0,.6);
+	color: rgba(0, 0, 0, 0.6);
 	font-size: smaller;
 	line-height: 1.4285em;
 }
@@ -164,4 +164,3 @@ mark {
 	width: 100px;
 	height: auto;
 }
-
