@@ -97,9 +97,7 @@ export const File = (): JSX.Element => {
 		(state: RootState) => state.file.fileVersions
 	);
 	const folderPath = useSelector((state: RootState) => state.folder.folderPath);
-	const fileRoleType = useSelector(
-		(state: RootState) => state.file.fileRoleType
-	);
+	const fileRole = useSelector((state: RootState) => state.file.fileRole);
 	const storageType = useSelector(
 		(state: RootState) => state.file.fileSummary.storage_type
 	);
@@ -372,7 +370,7 @@ export const File = (): JSX.Element => {
 								about.frozen_version_num &&
 								about.frozen_version_num > 0
 									? { display: "none" }
-									: !["owner", "editor", "uploader"].includes(fileRoleType)
+									: !["owner", "editor", "uploader"].includes(fileRole)
 									? { display: "none" }
 									: TabStyle
 							}
@@ -439,7 +437,7 @@ export const File = (): JSX.Element => {
 									frozenVersionNum={about.frozen_version_num}
 								>
 									<AuthWrapper
-										currRole={fileRoleType}
+										currRole={fileRole}
 										allowedRoles={["owner", "editor", "uploader"]}
 									>
 										<Box textAlign="center">
@@ -475,7 +473,7 @@ export const File = (): JSX.Element => {
 							about.frozen_version_num &&
 							about.frozen_version_num > 0
 								? { display: "none" }
-								: !["owner", "editor", "uploader"].includes(fileRoleType)
+								: !["owner", "editor", "uploader"].includes(fileRole)
 								? { display: "none" }
 								: TabStyle
 						}

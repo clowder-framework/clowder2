@@ -133,14 +133,13 @@ async def get_dataset_role_owner(
     return {"dataset_id": dataset_id, "allow": allow}
 
 
-@router.get("/files/{file_id}/roleType", response_model=RoleType)
+@router.get("/files/{file_id}/role", response_model=RoleType)
 async def get_file_role(
     file_id: str,
     current_user=Depends(get_current_username),
     role: RoleType = Depends(get_role_by_file),
 ):
     """Retrieve role of user for an individual file. Role cannot change between file versions."""
-    # Role is derived by dataset owner type
     return role
 
 

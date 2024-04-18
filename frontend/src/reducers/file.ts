@@ -31,7 +31,7 @@ const file = (state = defaultState, action: DataAction) => {
 		case RECEIVE_FILE_SUMMARY:
 			return Object.assign({}, state, { fileSummary: action.fileSummary });
 		case RECEIVE_FILE_ROLE:
-			return Object.assign({}, state, { fileRoleType: action.role });
+			return Object.assign({}, state, { fileRole: action.role });
 		case RECEIVE_FILE_EXTRACTED_METADATA:
 			return Object.assign({}, state, {
 				extractedMetadata: action.extractedMetadata,

@@ -41,9 +41,7 @@ export const FileActionsMenu = (props: FileActionsMenuProps): JSX.Element => {
 	const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
 	const [fileShareModalOpen, setFileShareModalOpen] = useState(false);
 
-	const fileRoleType = useSelector(
-		(state: RootState) => state.file.fileRoleType
-	);
+	const fileRole = useSelector((state: RootState) => state.file.fileRole);
 	const dataset = useSelector((state: RootState) => state.dataset.about);
 	const storageType = useSelector(
 		(state: RootState) => state.file.fileSummary.storage_type
@@ -178,7 +176,7 @@ export const FileActionsMenu = (props: FileActionsMenuProps): JSX.Element => {
 				frozenVersionNum={dataset.frozen_version_num}
 			>
 				{/*owner, editor can update file*/}
-				<AuthWrapper currRole={fileRoleType} allowedRoles={["owner", "editor"]}>
+				<AuthWrapper currRole={fileRole} allowedRoles={["owner", "editor"]}>
 					<Button
 						variant="outlined"
 						id="basic-button"

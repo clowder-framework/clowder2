@@ -1242,14 +1242,14 @@
         ]
       }
     },
-    "/api/v2/authorizations/files/{file_id}/roleType": {
+    "/api/v2/authorizations/files/{file_id}/role": {
       "get": {
         "tags": [
           "authorization"
         ],
         "summary": "Get File Role",
         "description": "Retrieve role of user for an individual file. Role cannot change between file versions.",
-        "operationId": "get_file_role_api_v2_authorizations_files__file_id__roleType_get",
+        "operationId": "get_file_role_api_v2_authorizations_files__file_id__role_get",
         "parameters": [
           {
             "required": true,

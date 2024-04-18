@@ -182,7 +182,7 @@ export interface FileState {
 	metadataJsonld: MetadataJsonld[];
 	previews: FilePreview[];
 	fileVersions: FileVersion[];
-	fileRoleType: RoleType;
+	fileRole: RoleType;
 	presignedUrl: string;
 	selected_version_num: number;
 }
