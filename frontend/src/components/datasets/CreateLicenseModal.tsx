@@ -19,10 +19,16 @@ type CreateLicenseModalProps = {
 	setLicenseModalOpen: any;
 	setLicenseRequestForm: any;
 	handleNext: any;
+	handleCloseModal: any;
 };
 
 export const CreateLicenseModal = (props: CreateLicenseModalProps) => {
-	const { setLicenseModalOpen, setLicenseRequestForm, handleNext } = props;
+	const {
+		setLicenseModalOpen,
+		setLicenseRequestForm,
+		handleNext,
+		handleCloseModal,
+	} = props;
 
 	const addLicense = (formData: FormData) => {
 		setLicenseRequestForm(formData);
@@ -46,7 +52,7 @@ export const CreateLicenseModal = (props: CreateLicenseModalProps) => {
 					</Button>
 					<Button
 						onClick={() => {
-							setLicenseModalOpen(false);
+							handleCloseModal();
 						}}
 						sx={{ marginLeft: "0.5em" }}
 					>

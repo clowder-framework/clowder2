@@ -119,11 +119,16 @@ export const ChooseLicenseModal: React.FC<ChooseLicenseModalProps> = (
 						setLicenseModalOpen={setLicenseModalOpen}
 						setLicenseRequestForm={setLicenseRequestForm}
 						handleNext={handleNext}
+						handleCloseModal={handleCloseModal}
 					/>
 				</DialogContent>
 			</Dialog>
 			<Box>
-				<Button variant="contained" onClick={handleNext}>
+				<Button
+					disabled={!selectedLicense}
+					variant="contained"
+					onClick={handleNext}
+				>
 					Next
 				</Button>
 				<Button onClick={handleBack} sx={{ mt: 1, ml: 1 }}>
