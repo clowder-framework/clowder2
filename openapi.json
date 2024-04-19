@@ -3921,16 +3921,6 @@
           {
             "required": false,
             "schema": {
-              "title": "Frozen Only",
-              "type": "boolean",
-              "default": false
-            },
-            "name": "frozen_only",
-            "in": "query"
-          },
-          {
-            "required": false,
-            "schema": {
               "title": "Mine",
               "type": "boolean",
               "default": false
@@ -4435,6 +4425,121 @@
               "type": "string"
             },
             "name": "dataset_id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DatasetFreezeOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2AuthorizationCodeBearer": []
+          },
+          {
+            "APIKeyHeader": []
+          },
+          {
+            "APIKeyCookie": []
+          }
+        ]
+      }
+    },
+    "/api/v2/datasets/{dataset_id}/freeze/latest": {
+      "get": {
+        "tags": [
+          "datasets"
+        ],
+        "summary": "Get Freeze Dataset Lastest",
+        "operationId": "get_freeze_dataset_lastest_api_v2_datasets__dataset_id__freeze_latest_get",
+        "parameters": [
+          {
+            "required": true,
+            "schema": {
+              "title": "Dataset Id",
+              "type": "string"
+            },
+            "name": "dataset_id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DatasetFreezeOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2AuthorizationCodeBearer": []
+          },
+          {
+            "APIKeyHeader": []
+          },
+          {
+            "APIKeyCookie": []
+          }
+        ]
+      }
+    },
+    "/api/v2/datasets/{dataset_id}/freeze/{frozen_version_num}": {
+      "get": {
+        "tags": [
+          "datasets"
+        ],
+        "summary": "Get Freeze Dataset Version",
+        "operationId": "get_freeze_dataset_version_api_v2_datasets__dataset_id__freeze__frozen_version_num__get",
+        "parameters": [
+          {
+            "required": true,
+            "schema": {
+              "title": "Dataset Id",
+              "type": "string"
+            },
+            "name": "dataset_id",
+            "in": "path"
+          },
+          {
+            "required": true,
+            "schema": {
+              "title": "Frozen Version Num",
+              "type": "integer"
+            },
+            "name": "frozen_version_num",
             "in": "path"
           }
         ],
@@ -10137,7 +10242,8 @@
       "DatasetFreezeOut": {
         "title": "DatasetFreezeOut",
         "required": [
-          "creator"
+          "creator",
+          "frozen_version_num"
         ],
         "type": "object",
         "properties": {
@@ -10209,8 +10315,7 @@
           },
           "frozen_version_num": {
             "title": "Frozen Version Num",
-            "type": "integer",
-            "default": 1
+            "type": "integer"
           }
         },
         "description": "Document Mapping class.\n\nFields:\n\n- `id` - MongoDB document ObjectID \"_id\" field.\nMapped to the PydanticObjectId class\n\nInherited from:\n\n- Pydantic BaseModel\n- [UpdateMethods](https://roman-right.github.io/beanie/api/interfaces/#aggregatemethods)"

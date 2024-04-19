@@ -30,5 +30,5 @@ export type DatasetFreezeOut = {
     origin_id?: string;
     id?: string;
     frozen?: boolean;
-    frozen_version_num?: number;
+    frozen_version_num: number;
 }

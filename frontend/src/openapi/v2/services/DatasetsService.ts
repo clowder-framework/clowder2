@@ -24,7 +24,6 @@ export class DatasetsService {
      * Get Datasets
      * @param skip
      * @param limit
-     * @param frozenOnly
      * @param mine
      * @param datasetId
      * @returns Paged Successful Response
@@ -33,7 +32,6 @@ export class DatasetsService {
     public static getDatasetsApiV2DatasetsGet(
         skip?: number,
         limit: number = 10,
-        frozenOnly: boolean = false,
         mine: boolean = false,
         datasetId?: string,
     ): CancelablePromise<Paged> {
@@ -43,7 +41,6 @@ export class DatasetsService {
             query: {
                 'skip': skip,
                 'limit': limit,
-                'frozen_only': frozenOnly,
                 'mine': mine,
                 'dataset_id': datasetId,
             },
@@ -226,6 +223,44 @@ export class DatasetsService {
         return __request({
             method: 'POST',
             path: `/api/v2/datasets/${datasetId}/freeze`,
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+
+    /**
+     * Get Freeze Dataset Lastest
+     * @param datasetId
+     * @returns DatasetFreezeOut Successful Response
+     * @throws ApiError
+     */
+    public static getFreezeDatasetLastestApiV2DatasetsDatasetIdFreezeLatestGet(
+        datasetId: string,
+    ): CancelablePromise<DatasetFreezeOut> {
+        return __request({
+            method: 'GET',
+            path: `/api/v2/datasets/${datasetId}/freeze/latest`,
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+
+    /**
+     * Get Freeze Dataset Version
+     * @param datasetId
+     * @param frozenVersionNum
+     * @returns DatasetFreezeOut Successful Response
+     * @throws ApiError
+     */
+    public static getFreezeDatasetVersionApiV2DatasetsDatasetIdFreezeFrozenVersionNumGet(
+        datasetId: string,
+        frozenVersionNum: number,
+    ): CancelablePromise<DatasetFreezeOut> {
+        return __request({
+            method: 'GET',
+            path: `/api/v2/datasets/${datasetId}/freeze/${frozenVersionNum}`,
             errors: {
                 422: `Validation Error`,
             },

@@ -217,14 +217,11 @@ async def get_datasets(
     user_id=Depends(get_user),
     skip: int = 0,
     limit: int = 10,
-    frozen_only: bool = False,
     mine: bool = False,
     admin=Depends(get_admin),
     admin_mode: bool = Depends(get_admin_mode),
 ):
     query = []
-    if frozen_only:
-        query.append(DatasetDBViewList.frozen is True)
 
     if admin and admin_mode:
         datasets_and_count = (
@@ -287,7 +284,6 @@ async def get_dataset(
             dataset := await DatasetDBViewList.find_one(
                 Or(
                     DatasetDBViewList.id == PydanticObjectId(dataset_id),
-                    DatasetDBViewList.origin_id == PydanticObjectId(dataset_id),
                 )
             )
         ) is not None:
@@ -314,7 +310,6 @@ async def get_dataset_files(
         await DatasetDBViewList.find_one(
             Or(
                 DatasetDBViewList.id == PydanticObjectId(dataset_id),
-                DatasetDBViewList.origin_id == PydanticObjectId(dataset_id),
             )
         )
     ) is not None:
@@ -461,7 +456,9 @@ async def freeze_dataset(
         # Copy the dataset to Public Freeze Dataset collection
         # else search in freeze dataset collection to get the latest version of the dataset
         latest_frozen_dataset = (
-            await DatasetFreezeDB.find({"origin_id": dataset.origin_id})
+            await DatasetFreezeDB.find(
+                DatasetFreezeDB.origin_id == PydanticObjectId(dataset_id)
+            )
             .sort(("frozen_version_num", DESCENDING))
             .first_or_none()
         )
@@ -480,29 +477,58 @@ async def freeze_dataset(
         frozen_dataset = DatasetFreezeDB(**frozen_dataset_data)
         await frozen_dataset.insert()
 
-        # Update Authorization
-        if (
-            authorization := await AuthorizationDB.find_one(
-                AuthorizationDB.dataset_id == PydanticObjectId(dataset_id)
-            )
-        ) is not None:
-            await authorization.delete()
-        await AuthorizationDB(
-            dataset_id=frozen_dataset.id,
-            role=RoleType.OWNER,
-            creator=user.email,
-        ).save()
-
-        # TODO: move metadata, files, folders, and authorizations to the frozen set
-        # Need to return the latest frozen dataset id but with the same origin id
-        frozen_dataset_out_dict = frozen_dataset.dict()
-        frozen_dataset_out_dict.pop("id")
-        frozen_dataset_out = DatasetFreezeOut(
-            id=frozen_dataset_out_dict.get("origin_id"), **frozen_dataset_out_dict
-        )
-        return frozen_dataset_out.dict()
+        # TODO: copy metadata, files, folders, and authorizations to the frozen set
+        return frozen_dataset.dict()
 
     raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
+
+
+@router.get("/{dataset_id}/freeze/latest", response_model=DatasetFreezeOut)
+async def get_freeze_dataset_lastest(
+    dataset_id: str,
+    user=Depends(get_current_user),
+    fs: Minio = Depends(dependencies.get_fs),
+    es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
+    allow: bool = Depends(Authorization("owner")),
+):
+    latest_frozen_dataset = (
+        await DatasetFreezeDB.find(
+            DatasetFreezeDB.origin_id == PydanticObjectId(dataset_id)
+        )
+        .sort(("frozen_version_num", DESCENDING))
+        .first_or_none()
+    )
+    if latest_frozen_dataset is not None:
+        return latest_frozen_dataset.dict()
+
+    raise HTTPException(
+        status_code=404, detail=f"Dataset {dataset_id} has no frozen version yet."
+    )
+
+
+@router.get(
+    "/{dataset_id}/freeze/{frozen_version_num}", response_model=DatasetFreezeOut
+)
+async def get_freeze_dataset_version(
+    dataset_id: str,
+    frozen_version_num: int,
+    user=Depends(get_current_user),
+    fs: Minio = Depends(dependencies.get_fs),
+    es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
+    allow: bool = Depends(Authorization("owner")),
+):
+    # Retrieve the dataset by ID
+    if (
+        frozen_dataset := await DatasetFreezeDB.find_one(
+            DatasetFreezeDB.origin_id == PydanticObjectId(dataset_id)
+        )
+    ) is not None:
+        return frozen_dataset.dict()
+
+    raise HTTPException(
+        status_code=404,
+        detail=f"Dataset {dataset_id} version {frozen_version_num} not found",
+    )
 
 
 @router.post("/{dataset_id}/folders", response_model=FolderOut)
@@ -542,7 +568,6 @@ async def get_dataset_folders(
         await DatasetDBViewList.find_one(
             Or(
                 DatasetDBViewList.id == PydanticObjectId(dataset_id),
-                DatasetDBViewList.origin_id == PydanticObjectId(dataset_id),
             )
         )
     ) is not None:
@@ -601,7 +626,6 @@ async def get_dataset_folders_and_files(
         await DatasetDBViewList.find_one(
             Or(
                 DatasetDBViewList.id == PydanticObjectId(dataset_id),
-                DatasetDBViewList.origin_id == PydanticObjectId(dataset_id),
             )
         )
     ) is not None:
@@ -715,7 +739,6 @@ async def get_folder(
         await DatasetDBViewList.find_one(
             Or(
                 DatasetDBViewList.id == PydanticObjectId(dataset_id),
-                DatasetDBViewList.origin_id == PydanticObjectId(dataset_id),
             )
         )
     ) is not None:
@@ -1003,7 +1026,6 @@ async def download_dataset(
         dataset := await DatasetDBViewList.find_one(
             Or(
                 DatasetDBViewList.id == PydanticObjectId(dataset_id),
-                DatasetDBViewList.origin_id == PydanticObjectId(dataset_id),
             )
         )
     ) is not None:
@@ -1195,7 +1217,6 @@ async def download_dataset_thumbnail(
         dataset := await DatasetDBViewList.find_one(
             Or(
                 DatasetDBViewList.id == PydanticObjectId(dataset_id),
-                DatasetDBViewList.origin_id == PydanticObjectId(dataset_id),
             )
         )
     ) is not None:

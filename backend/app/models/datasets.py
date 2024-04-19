@@ -68,7 +68,7 @@ class DatasetDB(Document, DatasetBaseCommon):
 
 class DatasetFreezeDB(Document, DatasetBaseCommon):
     frozen: bool = True
-    frozen_version_num: int = 1
+    frozen_version_num: int
 
     class Settings:
         name = "datasets_freeze"

@@ -38,7 +38,41 @@ def test_freeze(client: TestClient, headers: dict):
     )
     assert response.status_code == 200
     assert response.json().get("frozen") is True
-    assert response.json().get("id") == dataset_id  # datasetId should stay the same
+    assert response.json().get("frozen_version_num") == 1
+    assert (
+        response.json().get("origin_id") == dataset_id
+    )  # datasetId should stay the same
+
+    # Freeze again check version
+    response = client.post(
+        f"{settings.API_V2_STR}/datasets/{dataset_id}/freeze", headers=headers
+    )
+    assert response.status_code == 200
+    assert response.json().get("frozen") is True
+    assert response.json().get("frozen_version_num") == 2
+    assert (
+        response.json().get("origin_id") == dataset_id
+    )  # datasetId should stay the same
+
+    # get latest versions
+    response = client.get(
+        f"{settings.API_V2_STR}/datasets/{dataset_id}/freeze/latest", headers=headers
+    )
+    assert response.status_code == 200
+    assert response.json().get("frozen_version_num") == 2
+    assert (
+        response.json().get("origin_id") == dataset_id
+    )  # datasetId should stay the same
+
+    # get specific versions
+    response = client.get(
+        f"{settings.API_V2_STR}/datasets/{dataset_id}/freeze/1", headers=headers
+    )
+    assert response.status_code == 200
+    assert response.json().get("frozen_version_num") == 1
+    assert (
+        response.json().get("origin_id") == dataset_id
+    )  # datasetId should stay the same
 
 
 def test_delete_with_custom_license(client: TestClient, headers: dict):
