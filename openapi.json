@@ -4463,13 +4463,13 @@
         ]
       }
     },
-    "/api/v2/datasets/{dataset_id}/freeze/latest": {
+    "/api/v2/datasets/{dataset_id}/freeze/latest_version_num": {
       "get": {
         "tags": [
           "datasets"
         ],
-        "summary": "Get Freeze Dataset Lastest",
-        "operationId": "get_freeze_dataset_lastest_api_v2_datasets__dataset_id__freeze_latest_get",
+        "summary": "Get Freeze Dataset Lastest Version Num",
+        "operationId": "get_freeze_dataset_lastest_version_num_api_v2_datasets__dataset_id__freeze_latest_version_num_get",
         "parameters": [
           {
             "required": true,
@@ -4487,7 +4487,8 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/DatasetFreezeOut"
+                  "title": "Response Get Freeze Dataset Lastest Version Num Api V2 Datasets  Dataset Id  Freeze Latest Version Num Get",
+                  "type": "integer"
                 }
               }
             }

@@ -60,7 +60,7 @@ import config from "../../app.config";
 import { AuthWrapper } from "../auth/AuthWrapper";
 import { EditLicenseModal } from "./EditLicenseModal";
 import { fetchStandardLicenseUrl } from "../../utils/licenses";
-import { authCheck, frozenCheck } from "../../utils/common";
+import { authCheck } from "../../utils/common";
 
 export const Dataset = (): JSX.Element => {
 	// path parameter
@@ -110,8 +110,8 @@ export const Dataset = (): JSX.Element => {
 
 	// mapStateToProps
 	const about = useSelector((state: RootState) => state.dataset.about);
-	const frozenAbout = useSelector(
-		(state: RootState) => state.dataset.frozenAbout
+	const frozenVersionNum = useSelector(
+		(state: RootState) => state.dataset.frozenVersionNum
 	);
 
 	const datasetRole = useSelector(
@@ -176,13 +176,11 @@ export const Dataset = (): JSX.Element => {
 	}, [searchParams, adminMode, about.license_id]);
 
 	useEffect(() => {
-		if (frozenCheck(frozenAbout.frozen, frozenAbout.frozen_version_num)) {
+		if (frozenVersionNum && frozenVersionNum > 0) {
 			setSnackBarOpen(true);
-			setSnackBarMessage(
-				`Version ${frozenAbout.frozen_version_num} is created.`
-			);
+			setSnackBarMessage(`Version ${frozenVersionNum} is created.`);
 		}
-	}, [frozenAbout]);
+	}, [frozenVersionNum]);
 
 	// for breadcrumb
 	useEffect(() => {

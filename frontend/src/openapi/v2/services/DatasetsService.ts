@@ -230,17 +230,17 @@ export class DatasetsService {
     }
 
     /**
-     * Get Freeze Dataset Lastest
+     * Get Freeze Dataset Lastest Version Num
      * @param datasetId
-     * @returns DatasetFreezeOut Successful Response
+     * @returns number Successful Response
      * @throws ApiError
      */
-    public static getFreezeDatasetLastestApiV2DatasetsDatasetIdFreezeLatestGet(
+    public static getFreezeDatasetLastestVersionNumApiV2DatasetsDatasetIdFreezeLatestVersionNumGet(
         datasetId: string,
-    ): CancelablePromise<DatasetFreezeOut> {
+    ): CancelablePromise<number> {
         return __request({
             method: 'GET',
-            path: `/api/v2/datasets/${datasetId}/freeze/latest`,
+            path: `/api/v2/datasets/${datasetId}/freeze/latest_version_num`,
             errors: {
                 422: `Validation Error`,
             },

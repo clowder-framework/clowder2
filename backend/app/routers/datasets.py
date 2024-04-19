@@ -483,14 +483,15 @@ async def freeze_dataset(
     raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
 
 
-@router.get("/{dataset_id}/freeze/latest", response_model=DatasetFreezeOut)
-async def get_freeze_dataset_lastest(
+@router.get("/{dataset_id}/freeze/latest_version_num", response_model=int)
+async def get_freeze_dataset_lastest_version_num(
     dataset_id: str,
     user=Depends(get_current_user),
     fs: Minio = Depends(dependencies.get_fs),
     es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
     allow: bool = Depends(Authorization("owner")),
 ):
+    freeze_dataset_latest_version_num = -999
     latest_frozen_dataset = (
         await DatasetFreezeDB.find(
             DatasetFreezeDB.origin_id == PydanticObjectId(dataset_id)
@@ -499,11 +500,9 @@ async def get_freeze_dataset_lastest(
         .first_or_none()
     )
     if latest_frozen_dataset is not None:
-        return latest_frozen_dataset.dict()
+        freeze_dataset_latest_version_num = latest_frozen_dataset.frozen_version_num
 
-    raise HTTPException(
-        status_code=404, detail=f"Dataset {dataset_id} has no frozen version yet."
-    )
+    return freeze_dataset_latest_version_num
 
 
 @router.get(

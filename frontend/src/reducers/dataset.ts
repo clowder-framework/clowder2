@@ -4,6 +4,8 @@ import {
 	FOLDER_ADDED,
 	FOLDER_UPDATED,
 	FREEZE_DATASET,
+	GET_FREEZE_DATASET_LATEST_VERSION_NUM,
+	GET_FREEZE_DATASET_VERSION,
 	RECEIVE_DATASET_ABOUT,
 	RECEIVE_DATASET_LICENSE,
 	RECEIVE_DATASET_ROLES,
@@ -30,7 +32,6 @@ import { DataAction } from "../types/action";
 import { DatasetState } from "../types/data";
 import {
 	AuthorizationBase,
-	DatasetFreezeOut,
 	DatasetOut,
 	DatasetRoles,
 	FileOut,
@@ -48,7 +49,7 @@ const defaultState: DatasetState = {
 		data: <FileOut | FolderOut[]>[],
 	},
 	about: <DatasetOut>{ creator: <UserOut>{} },
-	frozenAbout: <DatasetFreezeOut>{ creator: <UserOut>{} },
+	frozenVersionNum: -999,
 	datasetRole: <AuthorizationBase>{},
 	datasets: <Paged>{ metadata: <PageMetadata>{}, data: <DatasetOut[]>[] },
 	newDataset: <DatasetOut>{},
@@ -116,7 +117,15 @@ const dataset = (state = defaultState, action: DataAction) => {
 		case UPDATE_DATASET:
 			return Object.assign({}, state, { about: action.about });
 		case FREEZE_DATASET:
-			return Object.assign({}, state, { frozenAbout: action.frozenAbout });
+			return Object.assign({}, state, {
+				frozenVersionNum: action.frozenVersionNum,
+			});
+		case GET_FREEZE_DATASET_LATEST_VERSION_NUM:
+			return Object.assign({}, state, {
+				frozenVersionNum: action.frozenVersionNum,
+			});
+		case GET_FREEZE_DATASET_VERSION:
+			return Object.assign({}, state, { about: action.about });
 		case RECEIVE_DATASETS:
 			return Object.assign({}, state, { datasets: action.datasets });
 		case CREATE_DATASET:

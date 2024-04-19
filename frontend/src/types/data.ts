@@ -1,6 +1,5 @@
 import {
 	AuthorizationBase,
-	DatasetFreezeOut,
 	DatasetOut,
 	DatasetRoles,
 	EventListenerJobDB,
@@ -128,7 +127,7 @@ export interface DatasetState {
 	newFolder: FolderOut;
 	newFiles: FileOut[];
 	about: DatasetOut;
-	frozenAbout: DatasetFreezeOut;
+	frozenVersionNum: number;
 	datasetRole: AuthorizationBase;
 	roles: DatasetRoles;
 	license: LicenseOut;

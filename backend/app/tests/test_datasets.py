@@ -56,13 +56,11 @@ def test_freeze(client: TestClient, headers: dict):
 
     # get latest versions
     response = client.get(
-        f"{settings.API_V2_STR}/datasets/{dataset_id}/freeze/latest", headers=headers
+        f"{settings.API_V2_STR}/datasets/{dataset_id}/freeze/latest_version_num",
+        headers=headers,
     )
     assert response.status_code == 200
-    assert response.json().get("frozen_version_num") == 2
-    assert (
-        response.json().get("origin_id") == dataset_id
-    )  # datasetId should stay the same
+    assert response.json() == 2
 
     # get specific versions
     response = client.get(

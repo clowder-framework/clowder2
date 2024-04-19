@@ -631,7 +631,17 @@ interface FOLDER_UPDATED {
 
 interface FREEZE_DATASET {
 	type: "FREEZE_DATASET";
-	frozenAbout: DatasetFreezeOut;
+	frozenVersionNum: number;
+}
+
+interface GET_FREEZE_DATASET_LATEST_VERSION_NUM {
+	type: "GET_FREEZE_DATASET_LATEST";
+	frozenVersionNum: frozenVersionNum;
+}
+
+interface GET_FREEZE_DATASET_VERSION {
+	type: "GET_FREEZE_DATASET_VERSION";
+	about: DatasetFreezeOut;
 }
 
 export type DataAction =
@@ -751,6 +761,8 @@ export type DataAction =
 	| RECEIVE_PUBLIC_FOLDERS_FILES_IN_DATASET
 	| FOLDER_UPDATED
 	| FREEZE_DATASET
+	| GET_FREEZE_DATASET_LATEST
+	| GET_FREEZE_DATASET_VERSION
 	| DFRAFT_FREEZE_DATASET
 	| RECEIVE_DATASET_LICENSE
 	| UPDATE_DATASET_LICENSE;
