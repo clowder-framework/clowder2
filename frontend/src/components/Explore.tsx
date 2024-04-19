@@ -10,7 +10,7 @@ import DatasetCard from "./datasets/DatasetCard";
 import Layout from "./Layout";
 import { Link as RouterLink } from "react-router-dom";
 import { ErrorModal } from "./errors/ErrorModal";
-import { CombinedDataset } from "../openapi/v2";
+import { DatasetOut } from "../openapi/v2";
 import config from "../app.config";
 
 const tab = {
@@ -87,7 +87,7 @@ export const Explore = (): JSX.Element => {
 					<TabPanel value={selectedTabIndex} index={0}>
 						<Grid container spacing={2}>
 							{datasets !== undefined ? (
-								datasets.map((dataset: CombinedDataset) => {
+								datasets.map((dataset: DatasetOut) => {
 									return (
 										<Grid item key={dataset.id} xs={12} sm={6} md={4} lg={3}>
 											<DatasetCard

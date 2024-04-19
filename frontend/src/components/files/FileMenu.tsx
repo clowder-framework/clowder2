@@ -15,7 +15,7 @@ import { MoreHoriz } from "@material-ui/icons";
 import { RootState } from "../../types/data";
 import { AuthWrapper } from "../auth/AuthWrapper";
 import config from "../../app.config";
-import { PublishedWrapper } from "../auth/PublishedWrapper";
+import { FrozenWrapper } from "../auth/FrozenWrapper";
 
 type FileMenuProps = {
 	file: File;
@@ -125,7 +125,7 @@ export default function FileMenu(props: FileMenuProps) {
 						<ListItemText>Download</ListItemText>
 					</MenuItem>
 				)}
-				<PublishedWrapper
+				<FrozenWrapper
 					frozen={dataset.frozen}
 					frozenVersionNum={dataset.frozen_version_num}
 				>
@@ -143,7 +143,7 @@ export default function FileMenu(props: FileMenuProps) {
 							<ListItemText>Update File</ListItemText>
 						</MenuItem>
 					</AuthWrapper>
-				</PublishedWrapper>
+				</FrozenWrapper>
 			</Menu>
 		</div>
 	);

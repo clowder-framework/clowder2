@@ -1,3 +1,5 @@
+import React, { useEffect, useState } from "react";
+
 import {
 	Box,
 	Button,
@@ -7,7 +9,6 @@ import {
 	MenuItem,
 } from "@mui/material";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
-import React, { useEffect, useState } from "react";
 import { ActionModal } from "../dialog/ActionModal";
 import { datasetDeleted } from "../../actions/dataset";
 import { fetchGroups } from "../../actions/group";
@@ -19,8 +20,8 @@ import ShareDatasetModal from "./ShareDatasetModal";
 import ShareGroupDatasetModal from "./ShareGroupDatasetModal";
 
 type ActionsMenuProps = {
-	datasetId: string;
-	datasetName: string;
+	datasetId?: string;
+	datasetName?: string;
 };
 
 export const ShareMenu = (props: ActionsMenuProps): JSX.Element => {

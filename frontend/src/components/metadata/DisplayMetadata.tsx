@@ -14,7 +14,7 @@ import { Agent } from "./Agent";
 import { MetadataDeleteButton } from "./widgets/MetadataDeleteButton";
 import { fetchPublicDatasetMetadata } from "../../actions/public_dataset";
 import { AuthWrapper } from "../auth/AuthWrapper";
-import { PublishedWrapper } from "../auth/PublishedWrapper";
+import { FrozenWrapper } from "../auth/FrozenWrapper";
 
 type MetadataType = {
 	updateMetadata: any;
@@ -160,7 +160,7 @@ export const DisplayMetadata = (props: MetadataType) => {
 												created={metadata.created}
 												agent={metadata.agent}
 											/>
-											<PublishedWrapper
+											<FrozenWrapper
 												frozen={about.frozen}
 												frozenVersionNum={about.frozen_version_num}
 											>
@@ -175,7 +175,7 @@ export const DisplayMetadata = (props: MetadataType) => {
 														widgetName={metadataDef.name}
 													/>
 												</AuthWrapper>
-											</PublishedWrapper>
+											</FrozenWrapper>
 										</Grid>
 									</Grid>
 								</Box>

@@ -52,7 +52,7 @@ import Typography from "@mui/material/Typography";
 import { ClowderSelect } from "../styledComponents/ClowderSelect";
 import { AuthWrapper } from "../auth/AuthWrapper";
 import LockIcon from "@mui/icons-material/Lock";
-import { PublishedWrapper } from "../auth/PublishedWrapper";
+import { FrozenWrapper } from "../auth/FrozenWrapper";
 
 export const File = (): JSX.Element => {
 	// path parameter
@@ -432,7 +432,7 @@ export const File = (): JSX.Element => {
 									resourceId={fileId}
 									publicView={false}
 								/>
-								<PublishedWrapper
+								<FrozenWrapper
 									frozen={about.frozen}
 									frozenVersionNum={about.frozen_version_num}
 								>
@@ -452,7 +452,7 @@ export const File = (): JSX.Element => {
 											</Button>
 										</Box>
 									</AuthWrapper>
-								</PublishedWrapper>
+								</FrozenWrapper>
 							</>
 						)}
 					</TabPanel>

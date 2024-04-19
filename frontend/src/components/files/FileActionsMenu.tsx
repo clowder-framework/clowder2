@@ -27,7 +27,7 @@ import { AuthWrapper } from "../auth/AuthWrapper";
 import { RootState } from "../../types/data";
 import { PresignedUrlShareModal } from "../sharing/PresignedUrlShareModal";
 import config from "../../app.config";
-import { PublishedWrapper } from "../auth/PublishedWrapper";
+import { FrozenWrapper } from "../auth/FrozenWrapper";
 
 type FileActionsMenuProps = {
 	fileId?: string;
@@ -171,7 +171,7 @@ export const FileActionsMenu = (props: FileActionsMenuProps): JSX.Element => {
 			) : (
 				<></>
 			)}
-			<PublishedWrapper
+			<FrozenWrapper
 				frozen={dataset.frozen}
 				frozenVersionNum={dataset.frozen_version_num}
 			>
@@ -222,7 +222,7 @@ export const FileActionsMenu = (props: FileActionsMenuProps): JSX.Element => {
 						</MenuItem>
 					</Menu>
 				</AuthWrapper>
-			</PublishedWrapper>
+			</FrozenWrapper>
 		</Stack>
 	);
 };

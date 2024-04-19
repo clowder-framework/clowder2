@@ -57,7 +57,7 @@ import { Visualization } from "../visualizations/Visualization";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import config from "../../app.config";
 import { AuthWrapper } from "../auth/AuthWrapper";
-import { PublishedWrapper } from "../auth/PublishedWrapper";
+import { FrozenWrapper } from "../auth/FrozenWrapper";
 import { EditLicenseModal } from "./EditLicenseModal";
 import { fetchStandardLicenseUrl } from "../../utils/licenses";
 import { authCheck } from "../../utils/common";
@@ -423,7 +423,7 @@ export const Dataset = (): JSX.Element => {
 									resourceId={datasetId}
 									publicView={false}
 								/>
-								<PublishedWrapper
+								<FrozenWrapper
 									frozen={about.frozen}
 									frozenVersionNum={about.frozen_version_num}
 								>
@@ -443,7 +443,7 @@ export const Dataset = (): JSX.Element => {
 											</Button>
 										</Box>
 									</AuthWrapper>
-								</PublishedWrapper>
+								</FrozenWrapper>
 							</>
 						)}
 					</TabPanel>

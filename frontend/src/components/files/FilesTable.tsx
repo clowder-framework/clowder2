@@ -17,7 +17,7 @@ import { useSelector } from "react-redux";
 import { RootState } from "../../types/data";
 import FolderMenu from "./FolderMenu";
 import { AuthWrapper } from "../auth/AuthWrapper";
-import { PublishedWrapper } from "../auth/PublishedWrapper";
+import { FrozenWrapper } from "../auth/FrozenWrapper";
 
 type FilesTableProps = {
 	folderId: string | null;
@@ -108,7 +108,7 @@ export default function FilesTable(props: FilesTableProps) {
 								<TableCell align="right">&nbsp;</TableCell>
 								<TableCell align="right">&nbsp;</TableCell>
 								<TableCell align="right">
-									<PublishedWrapper
+									<FrozenWrapper
 										frozen={dataset.frozen}
 										frozenVersionNum={dataset.frozen_version_num}
 									>
@@ -119,7 +119,7 @@ export default function FilesTable(props: FilesTableProps) {
 										>
 											<FolderMenu folder={item} />
 										</AuthWrapper>
-									</PublishedWrapper>
+									</FrozenWrapper>
 								</TableCell>
 							</TableRow>
 						) : (

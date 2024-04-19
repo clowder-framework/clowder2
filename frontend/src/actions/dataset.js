@@ -193,7 +193,7 @@ export function freezeDataset(datasetId) {
 			.then((json) => {
 				dispatch({
 					type: FREEZE_DATASET,
-					about: json,
+					frozenAbout: json,
 					receivedAt: Date.now(),
 				});
 			})
@@ -202,31 +202,6 @@ export function freezeDataset(datasetId) {
 			})
 			.catch((reason) => {
 				dispatch(handleErrorsAuthorization(reason, freezeDataset(datasetId)));
-			});
-	};
-}
-
-export const DFRAFT_FREEZE_DATASET = "DFRAFT_FREEZE_DATASET";
-
-export function draftFreezeDataset(frozenDatasetId) {
-	return (dispatch) => {
-		return V2.DatasetsService.draftFreezeDatasetApiV2DatasetsDatasetIdFreezeDraftPost(
-			frozenDatasetId
-		)
-			.then((json) => {
-				dispatch({
-					type: DFRAFT_FREEZE_DATASET,
-					about: json,
-					receivedAt: Date.now(),
-				});
-			})
-			.then(() => {
-				dispatch(resetFailedReason());
-			})
-			.catch((reason) => {
-				dispatch(
-					handleErrorsAuthorization(reason, draftFreezeDataset(frozenDatasetId))
-				);
 			});
 	};
 }

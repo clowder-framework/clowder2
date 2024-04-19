@@ -6,7 +6,7 @@ import { ClowderMetadataTextField } from "../../styledComponents/ClowderMetadata
 import { MetadataEditButton } from "./MetadataEditButton";
 import { Grid } from "@mui/material";
 import { AuthWrapper } from "../../auth/AuthWrapper";
-import { PublishedWrapper } from "../../auth/PublishedWrapper";
+import { FrozenWrapper } from "../../auth/FrozenWrapper";
 
 export const MetadataDateTimePicker = (props) => {
 	const {
@@ -80,7 +80,7 @@ export const MetadataDateTimePicker = (props) => {
 					</LocalizationProvider>
 				</Grid>
 				<Grid item xs={1} sm={1} md={1} lg={1} xl={1}>
-					<PublishedWrapper frozen={frozen} frozenVersionNum={frozenVersionNum}>
+					<FrozenWrapper frozen={frozen} frozenVersionNum={frozenVersionNum}>
 						<AuthWrapper
 							currRole={datasetRole.role}
 							allowedRoles={["owner", "editor", "uploader"]}
@@ -97,7 +97,7 @@ export const MetadataDateTimePicker = (props) => {
 								setMetadata={setMetadata}
 							/>
 						</AuthWrapper>
-					</PublishedWrapper>
+					</FrozenWrapper>
 				</Grid>
 			</Grid>
 		</div>

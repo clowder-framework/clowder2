@@ -1,3 +1,5 @@
+import React, { useEffect, useState } from "react";
+
 import {
 	Box,
 	Button,
@@ -5,11 +7,14 @@ import {
 	ListItemText,
 	Menu,
 	MenuItem,
+	Tooltip,
 } from "@mui/material";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
-import React, { useEffect, useState } from "react";
 import { ActionModal } from "../dialog/ActionModal";
-import { datasetDeleted } from "../../actions/dataset";
+import {
+	datasetDeleted,
+	freezeDataset as freezeDatasetAction,
+} from "../../actions/dataset";
 import { fetchGroups } from "../../actions/group";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
@@ -22,10 +27,11 @@ import { DriveFileRenameOutline } from "@mui/icons-material";
 import { AuthWrapper } from "../auth/AuthWrapper";
 import { RootState } from "../../types/data";
 import ShareIcon from "@mui/icons-material/Share";
+import LockIcon from "@mui/icons-material/Lock";
 
 type ActionsMenuProps = {
-	datasetId: string;
-	datasetName: string;
+	datasetId?: string;
+	datasetName?: string;
 };
 
 export const OtherMenu = (props: ActionsMenuProps): JSX.Element => {
@@ -41,6 +47,8 @@ export const OtherMenu = (props: ActionsMenuProps): JSX.Element => {
 	const datasetRole = useSelector(
 		(state: RootState) => state.dataset.datasetRole
 	);
+	const freezeDataset = (datasetId: string | undefined) =>
+		dispatch(freezeDatasetAction(datasetId));
 
 	const listGroups = () => dispatch(fetchGroups(0, 21));
 
@@ -163,6 +171,21 @@ export const OtherMenu = (props: ActionsMenuProps): JSX.Element => {
 					</ListItemIcon>
 					<ListItemText>Change Status</ListItemText>
 				</MenuItem>
+				<AuthWrapper currRole={datasetRole.role} allowedRoles={["owner"]}>
+					<Tooltip title="Published datasets are frozen and cannot be altered; updates require creating a new version.">
+						<MenuItem
+							onClick={() => {
+								handleOptionClose();
+								freezeDataset(datasetId);
+							}}
+						>
+							<ListItemIcon>
+								<LockIcon fontSize="small" />
+							</ListItemIcon>
+							Lock Version
+						</MenuItem>
+					</Tooltip>
+				</AuthWrapper>
 				<AuthWrapper
 					currRole={datasetRole.role}
 					allowedRoles={["owner", "editor"]}

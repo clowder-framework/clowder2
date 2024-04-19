@@ -1,8 +1,8 @@
 import { ExtractedMetadata, FilePreview, Folder, MetadataJsonld } from "./data";
 import {
 	AuthorizationBase,
-	CombinedDataset,
 	DatasetFreezeOut,
+	DatasetOut,
 	DatasetOut as Dataset,
 	DatasetRoles,
 	EventListenerJobOut,
@@ -53,7 +53,7 @@ interface DELETE_FILE {
 
 interface RECEIVE_DATASET_ABOUT {
 	type: "RECEIVE_DATASET_ABOUT";
-	about: CombinedDataset;
+	about: DatasetOut;
 }
 
 interface RECEIVE_DATASET_LICENSE {
@@ -631,12 +631,7 @@ interface FOLDER_UPDATED {
 
 interface FREEZE_DATASET {
 	type: "FREEZE_DATASET";
-	about: DatasetFreezeOut;
-}
-
-interface DFRAFT_FREEZE_DATASET {
-	type: "DFRAFT_FREEZE_DATASET";
-	about: DatasetFreezeOut;
+	frozenAbout: DatasetFreezeOut;
 }
 
 export type DataAction =
