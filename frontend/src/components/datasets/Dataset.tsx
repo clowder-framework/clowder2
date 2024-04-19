@@ -58,7 +58,6 @@ import VisibilityIcon from "@mui/icons-material/Visibility";
 import config from "../../app.config";
 import { AuthWrapper } from "../auth/AuthWrapper";
 import { PublishedWrapper } from "../auth/PublishedWrapper";
-import { FreezeVersionChip } from "../versions/FeezeVersionChip";
 import { EditLicenseModal } from "./EditLicenseModal";
 import { fetchStandardLicenseUrl } from "../../utils/licenses";
 import { authCheck } from "../../utils/common";
@@ -273,10 +272,6 @@ export const Dataset = (): JSX.Element => {
 							<Typography variant="h3" paragraph>
 								{about["name"]}
 							</Typography>
-							<FreezeVersionChip
-								frozen={about.frozen}
-								frozenVersionNum={about.frozen_version_num}
-							/>
 						</Box>
 						<Box>
 							<Typography variant="body1" paragraph>
@@ -503,7 +498,6 @@ export const Dataset = (): JSX.Element => {
 					</TabPanel>
 				</Grid>
 				<Grid item>
-					<DatasetDetails details={about} />
 					<Typography variant="h5" gutterBottom>
 						License
 					</Typography>

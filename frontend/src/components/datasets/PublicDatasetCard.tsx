@@ -15,7 +15,6 @@ import {
 import { Download } from "@mui/icons-material";
 import { generateThumbnailUrl } from "../../utils/visualization";
 import config from "../../app.config";
-import { FreezeVersionChip } from "../versions/FeezeVersionChip";
 // import {Favorite, Share} from "@material-ui/icons";
 
 type PublicDatasetCardProps = {
@@ -132,10 +131,6 @@ export default function PublicDatasetCard(props: PublicDatasetCardProps) {
 						<Download />
 					</IconButton>
 				</Tooltip>
-				<FreezeVersionChip
-					frozen={frozen}
-					frozenVersionNum={frozenVersionNum}
-				/>
 				{/*<Tooltip title="Favorite">*/}
 				{/*	<IconButton color="primary" aria-label="favorite"  sx={{mr: 3}} disabled>*/}
 				{/*		<Favorite/>*/}
