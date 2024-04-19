@@ -1,4 +1,5 @@
 import React from "react";
+import { frozenCheck } from "../../utils/common";
 
 type FrozenWrapperProps = {
 	frozen: boolean | undefined;
@@ -8,7 +9,5 @@ type FrozenWrapperProps = {
 
 export const FrozenWrapper = (props: FrozenWrapperProps): JSX.Element => {
 	const { frozen, frozenVersionNum, children } = props;
-	return (
-		<>{frozen && frozenVersionNum && frozenVersionNum > 0 ? <></> : children}</>
-	);
+	return <>{frozenCheck(frozen, frozenVersionNum) ? <></> : children}</>;
 };

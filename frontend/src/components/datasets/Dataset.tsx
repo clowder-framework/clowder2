@@ -10,6 +10,7 @@ import {
 	IconButton,
 	Link,
 	Pagination,
+	Snackbar,
 	Stack,
 	Tab,
 	Tabs,
@@ -57,10 +58,9 @@ import { Visualization } from "../visualizations/Visualization";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import config from "../../app.config";
 import { AuthWrapper } from "../auth/AuthWrapper";
-import { FrozenWrapper } from "../auth/FrozenWrapper";
 import { EditLicenseModal } from "./EditLicenseModal";
 import { fetchStandardLicenseUrl } from "../../utils/licenses";
-import { authCheck } from "../../utils/common";
+import { authCheck, frozenCheck } from "../../utils/common";
 
 export const Dataset = (): JSX.Element => {
 	// path parameter
@@ -110,6 +110,10 @@ export const Dataset = (): JSX.Element => {
 
 	// mapStateToProps
 	const about = useSelector((state: RootState) => state.dataset.about);
+	const frozenAbout = useSelector(
+		(state: RootState) => state.dataset.frozenAbout
+	);
+
 	const datasetRole = useSelector(
 		(state: RootState) => state.dataset.datasetRole
 	);
@@ -123,6 +127,10 @@ export const Dataset = (): JSX.Element => {
 
 	// Error msg dialog
 	const [errorOpen, setErrorOpen] = useState(false);
+
+	// Snackbar
+	const [snackBarOpen, setSnackBarOpen] = useState(false);
+	const [snackBarMessage, setSnackBarMessage] = useState("");
 
 	const [paths, setPaths] = useState([]);
 
@@ -166,6 +174,15 @@ export const Dataset = (): JSX.Element => {
 		getFolderPath(folderId);
 		getMetadatDefinitions(null, 0, 100);
 	}, [searchParams, adminMode, about.license_id]);
+
+	useEffect(() => {
+		if (frozenCheck(frozenAbout.frozen, frozenAbout.frozen_version_num)) {
+			setSnackBarOpen(true);
+			setSnackBarMessage(
+				`Version ${frozenAbout.frozen_version_num} is created.`
+			);
+		}
+	}, [frozenAbout]);
 
 	// for breadcrumb
 	useEffect(() => {
@@ -258,6 +275,15 @@ export const Dataset = (): JSX.Element => {
 		<Layout>
 			{/*Error Message dialogue*/}
 			<ErrorModal errorOpen={errorOpen} setErrorOpen={setErrorOpen} />
+			<Snackbar
+				open={snackBarOpen}
+				autoHideDuration={6000}
+				onClose={() => {
+					setSnackBarOpen(false);
+					setSnackBarMessage("");
+				}}
+				message={snackBarMessage}
+			/>
 			<Grid container>
 				{/*title*/}
 				<Grid item xs={8} sx={{ display: "flex", alignItems: "center" }}>
@@ -322,15 +348,11 @@ export const Dataset = (): JSX.Element => {
 							icon={<BuildIcon />}
 							iconPosition="start"
 							sx={
-								about.frozen &&
-								about.frozen_version_num &&
-								about.frozen_version_num > 0
-									? { display: "none" }
-									: !authCheck(adminMode, datasetRole.role, [
-											"owner",
-											"editor",
-											"uploader",
-									  ])
+								!authCheck(adminMode, datasetRole.role, [
+									"owner",
+									"editor",
+									"uploader",
+								])
 									? { display: "none" }
 									: TabStyle
 							}
@@ -423,27 +445,22 @@ export const Dataset = (): JSX.Element => {
 									resourceId={datasetId}
 									publicView={false}
 								/>
-								<FrozenWrapper
-									frozen={about.frozen}
-									frozenVersionNum={about.frozen_version_num}
+								<AuthWrapper
+									currRole={datasetRole.role}
+									allowedRoles={["owner", "editor", "uploader"]}
 								>
-									<AuthWrapper
-										currRole={datasetRole.role}
-										allowedRoles={["owner", "editor", "uploader"]}
-									>
-										<Box textAlign="center">
-											<Button
-												variant="contained"
-												sx={{ m: 2 }}
-												onClick={() => {
-													setEnableAddMetadata(true);
-												}}
-											>
-												Add Metadata
-											</Button>
-										</Box>
-									</AuthWrapper>
-								</FrozenWrapper>
+									<Box textAlign="center">
+										<Button
+											variant="contained"
+											sx={{ m: 2 }}
+											onClick={() => {
+												setEnableAddMetadata(true);
+											}}
+										>
+											Add Metadata
+										</Button>
+									</Box>
+								</AuthWrapper>
 							</>
 						)}
 					</TabPanel>
@@ -460,15 +477,11 @@ export const Dataset = (): JSX.Element => {
 						value={selectedTabIndex}
 						index={3}
 						sx={
-							about.frozen &&
-							about.frozen_version_num &&
-							about.frozen_version_num > 0
-								? { display: "none" }
-								: !authCheck(adminMode, datasetRole.role, [
-										"owner",
-										"editor",
-										"uploader",
-								  ])
+							!authCheck(adminMode, datasetRole.role, [
+								"owner",
+								"editor",
+								"uploader",
+							])
 								? { display: "none" }
 								: TabStyle
 						}

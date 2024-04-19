@@ -11,7 +11,7 @@ import {
 	Tabs,
 	Tooltip,
 } from "@mui/material";
-import { authCheck, downloadResource } from "../../utils/common";
+import { authCheck, downloadResource, frozenCheck } from "../../utils/common";
 import { PreviewConfiguration, RootState } from "../../types/data";
 import { useParams, useSearchParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
@@ -296,9 +296,7 @@ export const File = (): JSX.Element => {
 			<Grid container>
 				<Grid item xs={10} sx={{ display: "flex", alignItems: "center" }}>
 					<MainBreadcrumbs paths={paths} />
-					{about.frozen &&
-					about.frozen_version_num &&
-					about.frozen_version_num > 0 ? (
+					{frozenCheck(about.frozen, about.frozen_version_num) ? (
 						<Tooltip title="Published">
 							<LockIcon />
 						</Tooltip>
@@ -366,11 +364,13 @@ export const File = (): JSX.Element => {
 							{...a11yProps(3)}
 							disabled={false}
 							sx={
-								about.frozen &&
-								about.frozen_version_num &&
-								about.frozen_version_num > 0
+								frozenCheck(about.frozen, about.frozen_version_num)
 									? { display: "none" }
-									: !["owner", "editor", "uploader"].includes(fileRole)
+									: !authCheck(adminMode, fileRole, [
+											"owner",
+											"editor",
+											"uploader",
+									  ])
 									? { display: "none" }
 									: TabStyle
 							}
@@ -469,11 +469,13 @@ export const File = (): JSX.Element => {
 						value={selectedTabIndex}
 						index={3}
 						sx={
-							about.frozen &&
-							about.frozen_version_num &&
-							about.frozen_version_num > 0
+							frozenCheck(about.frozen, about.frozen_version_num)
 								? { display: "none" }
-								: !["owner", "editor", "uploader"].includes(fileRole)
+								: !authCheck(adminMode, fileRole, [
+										"owner",
+										"editor",
+										"uploader",
+								  ])
 								? { display: "none" }
 								: TabStyle
 						}
