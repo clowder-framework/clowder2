@@ -147,9 +147,8 @@ export const Dataset = (): JSX.Element => {
 
 	const [limit] = useState<number>(config.defaultFolderFilePerPage);
 
-	const [selectedDatasetVersionNum, setSelectedDatasetVersionNum] = useState<
-		string | number
-	>("current");
+	const [selectedDatasetVersionNum, setSelectedDatasetVersionNum] =
+		useState<string>("current");
 
 	const pageMetadata = useSelector(
 		(state: RootState) => state.dataset.foldersAndFiles.metadata
@@ -190,6 +189,7 @@ export const Dataset = (): JSX.Element => {
 		getMetadatDefinitions(null, 0, 100);
 	}, [searchParams, adminMode, about.license_id]);
 
+	// TODO change this to a modal
 	useEffect(() => {
 		if (latestFrozenVersionNum && latestFrozenVersionNum > 0) {
 			setSnackBarOpen(true);
@@ -582,8 +582,7 @@ export const Dataset = (): JSX.Element => {
 					</Typography>
 					<FormControl>
 						<ClowderSelect
-							value={selectedDatasetVersionNum}
-							defaultValue={selectedDatasetVersionNum}
+							value={selectedDatasetVersionNum.toString()}
 							onChange={(event) => {
 								setSelectedDatasetVersionNum(event.target.value);
 								setSnackBarMessage(
@@ -592,7 +591,9 @@ export const Dataset = (): JSX.Element => {
 								setSnackBarOpen(true);
 							}}
 						>
-							<MenuItem value={"current"}>Current</MenuItem>
+							<MenuItem value="current" key="current">
+								Current
+							</MenuItem>
 							{VersionOptions(latestFrozenVersionNum)}
 						</ClowderSelect>
 					</FormControl>
@@ -607,11 +608,9 @@ function VersionOptions(latestFrozenVersionNum: number) {
 		return null;
 	}
 
-	const menuItems = Array.from({ length: latestFrozenVersionNum }, (_, i) => (
-		<MenuItem key={i + 1} value={i + 1}>
+	return Array.from({ length: latestFrozenVersionNum }, (_, i) => (
+		<MenuItem key={(i + 1).toString()} value={(i + 1).toString()}>
 			{i + 1}
 		</MenuItem>
 	));
-
-	return <>{menuItems}</>;
 }
