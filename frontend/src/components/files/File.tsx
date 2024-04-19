@@ -516,7 +516,9 @@ export const File = (): JSX.Element => {
 
 					{versionEnabled ? (
 						<>
-							<Typography sx={{ wordBreak: "break-all" }}>Version</Typography>
+							<Typography sx={{ wordBreak: "break-all" }}>
+								File Version
+							</Typography>
 							<FormControl>
 								<ClowderSelect
 									value={String(selectedVersionNum)}

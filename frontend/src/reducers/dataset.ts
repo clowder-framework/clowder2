@@ -49,7 +49,7 @@ const defaultState: DatasetState = {
 		data: <FileOut | FolderOut[]>[],
 	},
 	about: <DatasetOut>{ creator: <UserOut>{} },
-	frozenVersionNum: -999,
+	latestFrozenVersionNum: -999,
 	datasetRole: <AuthorizationBase>{},
 	datasets: <Paged>{ metadata: <PageMetadata>{}, data: <DatasetOut[]>[] },
 	newDataset: <DatasetOut>{},
@@ -118,11 +118,11 @@ const dataset = (state = defaultState, action: DataAction) => {
 			return Object.assign({}, state, { about: action.about });
 		case FREEZE_DATASET:
 			return Object.assign({}, state, {
-				frozenVersionNum: action.frozenVersionNum,
+				latestFrozenVersionNum: action.latestFrozenVersionNum,
 			});
 		case GET_FREEZE_DATASET_LATEST_VERSION_NUM:
 			return Object.assign({}, state, {
-				frozenVersionNum: action.frozenVersionNum,
+				latestFrozenVersionNum: action.latestFrozenVersionNum,
 			});
 		case GET_FREEZE_DATASET_VERSION:
 			return Object.assign({}, state, { about: action.about });

@@ -127,7 +127,7 @@ export interface DatasetState {
 	newFolder: FolderOut;
 	newFiles: FileOut[];
 	about: DatasetOut;
-	frozenVersionNum: number;
+	latestFrozenVersionNum: number;
 	datasetRole: AuthorizationBase;
 	roles: DatasetRoles;
 	license: LicenseOut;

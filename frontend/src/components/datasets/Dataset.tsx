@@ -6,9 +6,11 @@ import {
 	Dialog,
 	DialogContent,
 	DialogTitle,
+	FormControl,
 	Grid,
 	IconButton,
 	Link,
+	MenuItem,
 	Pagination,
 	Snackbar,
 	Stack,
@@ -24,6 +26,7 @@ import {
 	fetchDatasetAbout,
 	fetchDatasetLicense,
 	fetchFoldersFilesInDataset as fetchFoldersFilesInDatasetAction,
+	getFreezeDatasetLatest as getFreezeDatasetLatestAction,
 } from "../../actions/dataset";
 import { fetchFolderPath } from "../../actions/folder";
 
@@ -61,6 +64,7 @@ import { AuthWrapper } from "../auth/AuthWrapper";
 import { EditLicenseModal } from "./EditLicenseModal";
 import { fetchStandardLicenseUrl } from "../../utils/licenses";
 import { authCheck } from "../../utils/common";
+import { ClowderSelect } from "../styledComponents/ClowderSelect";
 
 export const Dataset = (): JSX.Element => {
 	// path parameter
@@ -108,10 +112,13 @@ export const Dataset = (): JSX.Element => {
 		limit: number
 	) => dispatch(fetchMetadataDefinitions(name, skip, limit));
 
+	const getFreezeDatasetLatestVersionNum = (datasetId: string | undefined) =>
+		dispatch(getFreezeDatasetLatestAction(datasetId));
+
 	// mapStateToProps
 	const about = useSelector((state: RootState) => state.dataset.about);
-	const frozenVersionNum = useSelector(
-		(state: RootState) => state.dataset.frozenVersionNum
+	const latestFrozenVersionNum = useSelector(
+		(state: RootState) => state.dataset.latestFrozenVersionNum
 	);
 
 	const datasetRole = useSelector(
@@ -140,6 +147,10 @@ export const Dataset = (): JSX.Element => {
 
 	const [limit] = useState<number>(config.defaultFolderFilePerPage);
 
+	const [selectedDatasetVersionNum, setSelectedDatasetVersionNum] = useState<
+		string | number
+	>("current");
+
 	const pageMetadata = useSelector(
 		(state: RootState) => state.dataset.foldersAndFiles.metadata
 	);
@@ -159,6 +170,10 @@ export const Dataset = (): JSX.Element => {
 	};
 
 	useEffect(() => {
+		getFreezeDatasetLatestVersionNum(datasetId);
+	}, []);
+
+	useEffect(() => {
 		fetchFoldersFilesInDataset(
 			datasetId,
 			folderId,
@@ -176,11 +191,13 @@ export const Dataset = (): JSX.Element => {
 	}, [searchParams, adminMode, about.license_id]);
 
 	useEffect(() => {
-		if (frozenVersionNum && frozenVersionNum > 0) {
+		if (latestFrozenVersionNum && latestFrozenVersionNum > 0) {
 			setSnackBarOpen(true);
-			setSnackBarMessage(`Version ${frozenVersionNum} is created.`);
+			setSnackBarMessage(
+				`The most recent locked version of the dataset is numbered ${latestFrozenVersionNum}.`
+			);
 		}
-	}, [frozenVersionNum]);
+	}, [latestFrozenVersionNum]);
 
 	// for breadcrumb
 	useEffect(() => {
@@ -560,8 +577,41 @@ export const Dataset = (): JSX.Element => {
 						<></>
 					)}
 					<DatasetDetails details={about} myRole={datasetRole.role} />
+					<Typography sx={{ wordBreak: "break-all" }}>
+						Dataset Version
+					</Typography>
+					<FormControl>
+						<ClowderSelect
+							value={selectedDatasetVersionNum}
+							defaultValue={selectedDatasetVersionNum}
+							onChange={(event) => {
+								setSelectedDatasetVersionNum(event.target.value);
+								setSnackBarMessage(
+									`Viewing dataset version ${event.target.value}.`
+								);
+								setSnackBarOpen(true);
+							}}
+						>
+							<MenuItem value={"current"}>Current</MenuItem>
+							{VersionOptions(latestFrozenVersionNum)}
+						</ClowderSelect>
+					</FormControl>
 				</Grid>
 			</Grid>
 		</Layout>
 	);
 };
+
+function VersionOptions(latestFrozenVersionNum: number) {
+	if (latestFrozenVersionNum <= 0) {
+		return null;
+	}
+
+	const menuItems = Array.from({ length: latestFrozenVersionNum }, (_, i) => (
+		<MenuItem key={i + 1} value={i + 1}>
+			{i + 1}
+		</MenuItem>
+	));
+
+	return <>{menuItems}</>;
+}
