@@ -243,7 +243,7 @@ export function getFreezeDatasetVersion(datasetId, frozenVersionNum) {
 			.then((json) => {
 				dispatch({
 					type: GET_FREEZE_DATASET_VERSION,
-					about: json,
+					frozenDataset: json,
 					receivedAt: Date.now(),
 				});
 			})

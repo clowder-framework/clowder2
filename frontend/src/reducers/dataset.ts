@@ -32,6 +32,7 @@ import { DataAction } from "../types/action";
 import { DatasetState } from "../types/data";
 import {
 	AuthorizationBase,
+	DatasetFreezeOut,
 	DatasetOut,
 	DatasetRoles,
 	FileOut,
@@ -49,6 +50,7 @@ const defaultState: DatasetState = {
 		data: <FileOut | FolderOut[]>[],
 	},
 	about: <DatasetOut>{ creator: <UserOut>{} },
+	frozenDataset: <DatasetFreezeOut>{ creator: <UserOut>{} },
 	latestFrozenVersionNum: -999,
 	datasetRole: <AuthorizationBase>{},
 	datasets: <Paged>{ metadata: <PageMetadata>{}, data: <DatasetOut[]>[] },
@@ -125,7 +127,7 @@ const dataset = (state = defaultState, action: DataAction) => {
 				latestFrozenVersionNum: action.latestFrozenVersionNum,
 			});
 		case GET_FREEZE_DATASET_VERSION:
-			return Object.assign({}, state, { about: action.about });
+			return Object.assign({}, state, { frozenDataset: action.frozenDataset });
 		case RECEIVE_DATASETS:
 			return Object.assign({}, state, { datasets: action.datasets });
 		case CREATE_DATASET:

@@ -641,7 +641,7 @@ interface GET_FREEZE_DATASET_LATEST_VERSION_NUM {
 
 interface GET_FREEZE_DATASET_VERSION {
 	type: "GET_FREEZE_DATASET_VERSION";
-	about: DatasetFreezeOut;
+	frozenDataset: DatasetFreezeOut;
 }
 
 export type DataAction =

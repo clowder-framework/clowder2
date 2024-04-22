@@ -117,13 +117,16 @@ export const Dataset = (): JSX.Element => {
 		dispatch(getFreezeDatasetLatestAction(datasetId));
 	const getFreezeDatasetVersion = (
 		datasetId: string | undefined,
-		frozenVersionNum
+		frozenVersionNum: string
 	) => dispatch(getFreezeDatasetVersionAction(datasetId, frozenVersionNum));
 
 	// mapStateToProps
 	const about = useSelector((state: RootState) => state.dataset.about);
 	const latestFrozenVersionNum = useSelector(
 		(state: RootState) => state.dataset.latestFrozenVersionNum
+	);
+	const frozenDataset = useSelector(
+		(state: RootState) => state.dataset.frozenDataset
 	);
 
 	const datasetRole = useSelector(
