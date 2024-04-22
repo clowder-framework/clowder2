@@ -17,8 +17,8 @@ import { AuthWrapper } from "../auth/AuthWrapper";
 import { FrozenWrapper } from "../auth/FrozenWrapper";
 
 type MetadataType = {
-	updateMetadata: any;
-	deleteMetadata: any;
+	updateMetadata?: any;
+	deleteMetadata?: any;
 	resourceType: string | undefined;
 	resourceId: string | undefined;
 	publicView: boolean | false;

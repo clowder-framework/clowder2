@@ -41,6 +41,7 @@ import { ManageUsers } from "./components/users/ManageUsers";
 import config from "./app.config";
 import { MetadataDefinitions } from "./components/metadata/MetadataDefinitions";
 import { MetadataDefinitionEntry } from "./components/metadata/MetadataDefinitionEntry";
+import { DatasetFreeze } from "./components/datasets/DatasetFreeze";
 
 // https://dev.to/iamandrewluca/private-route-in-react-router-v6-lg5
 const PrivateRoute = (props): JSX.Element => {
@@ -179,6 +180,14 @@ export const AppRoutes = (): JSX.Element => {
 					element={
 						<PrivateRoute>
 							<DatasetComponent />
+						</PrivateRoute>
+					}
+				/>
+				<Route
+					path="/datasets/:datasetId/freeze/:frozenVersionNum"
+					element={
+						<PrivateRoute>
+							<DatasetFreeze />
 						</PrivateRoute>
 					}
 				/>
