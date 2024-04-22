@@ -28,9 +28,9 @@ export type DatasetOut = {
     downloads?: number;
     thumbnail_id?: string;
     origin_id?: string;
+    standard_license?: boolean;
+    license_id?: string;
     id?: string;
     frozen?: boolean;
     frozen_version_num?: number;
-    standard_license?: boolean;
-    license_id?: string;
 }

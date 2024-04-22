@@ -20,7 +20,7 @@ class FolderIn(FolderBase):
     parent_folder: Optional[PydanticObjectId]
 
 
-class FolderDB(Document, FolderBase):
+class FolderBaseCommon(FolderBase):
     dataset_id: PydanticObjectId
     parent_folder: Optional[PydanticObjectId]
     creator: UserOut
@@ -28,8 +28,17 @@ class FolderDB(Document, FolderBase):
     modified: datetime = Field(default_factory=datetime.utcnow)
     object_type: str = "folder"
 
+
+class FolderDB(Document, FolderBaseCommon):
     class Settings:
         name = "folders"
+
+
+class FolderFreezeDB(Document, FolderBaseCommon):
+    frozen: bool = True
+
+    class Settings:
+        name = "folders_freeze"
 
 
 class FolderDBViewList(View, FolderBase):

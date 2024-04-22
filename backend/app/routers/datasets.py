@@ -24,17 +24,25 @@ from app.models.datasets import (
     DatasetPatch,
     DatasetStatus,
 )
-from app.models.files import FileDB, FileDBViewList, FileOut, LocalFileIn, StorageType
+from app.models.files import (
+    FileDB,
+    FileDBViewList,
+    FileFreezeDB,
+    FileOut,
+    LocalFileIn,
+    StorageType,
+)
 from app.models.folder_and_file import FolderFileViewList
 from app.models.folders import (
     FolderDB,
     FolderDBViewList,
+    FolderFreezeDB,
     FolderIn,
     FolderOut,
     FolderPatch,
 )
 from app.models.licenses import standard_licenses
-from app.models.metadata import MetadataDB
+from app.models.metadata import MetadataDB, MetadataFreezeDB
 from app.models.pages import Paged, _construct_page_metadata, _get_page_query
 from app.models.thumbnails import ThumbnailDB
 from app.models.users import UserOut
@@ -441,6 +449,52 @@ async def delete_dataset(
     raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
 
 
+async def _freeze_files(dataset_id, new_frozen_dataset_id):
+    files = await FileDB.find(FileDB.dataset_id == ObjectId(dataset_id)).to_list()
+    for file in files:
+        file_data = file.dict()
+        file_data.pop("id")
+        file_data["dataset_id"] = new_frozen_dataset_id
+        frozen_file = FileFreezeDB(**file_data)
+        await frozen_file.insert()
+
+
+async def _freeze_folders(dataset_id, new_frozen_dataset_id):
+    folders = await FolderDB.find(FolderDB.dataset_id == ObjectId(dataset_id)).to_list()
+    for folder in folders:
+        folder_data = folder.dict()
+        folder_data.pop("id")
+        folder_data["dataset_id"] = new_frozen_dataset_id
+        frozen_folder = FolderFreezeDB(**folder_data)
+        await frozen_folder.insert()
+
+
+async def _freeze_metadata(dataset_id, new_frozen_dataset_id):
+    dataset_metadata = await MetadataDB.find(
+        MetadataDB.resource.resource_id == ObjectId(dataset_id)
+    ).to_list()
+    for dm in dataset_metadata:
+        dm_data = dm.dict()
+        dm_data.pop("id")
+        dm_data["resource"]["resource_id"] = new_frozen_dataset_id
+        frozen_metadata = MetadataFreezeDB(**dm_data)
+        await frozen_metadata.insert()
+
+    files = await FileDBViewList.find(
+        FileDBViewList.dataset_id == ObjectId(dataset_id)
+    ).to_list()
+    for file in files:
+        file_metadata = await MetadataDB.find(
+            MetadataDB.resource.resource_id == ObjectId(file.id)
+        ).to_list()
+        for fm in file_metadata:
+            fm_data = fm.dict()
+            fm_data.pop("id")
+            fm_data["resource"]["resource_id"] = file.id
+            frozen_metadata = MetadataFreezeDB(**fm_data)
+            await frozen_metadata.insert()
+
+
 @router.post("/{dataset_id}/freeze", response_model=DatasetFreezeOut)
 async def freeze_dataset(
     dataset_id: str,
@@ -477,7 +531,18 @@ async def freeze_dataset(
         frozen_dataset = DatasetFreezeDB(**frozen_dataset_data)
         await frozen_dataset.insert()
 
-        # TODO: copy metadata, files, folders, and authorizations to the frozen set
+        # metadata
+        await _freeze_metadata(dataset_id, frozen_dataset.id)
+
+        # files
+        await _freeze_files(dataset_id, frozen_dataset.id)
+        # TODO file versions
+
+        # folders
+        await _freeze_folders(dataset_id, frozen_dataset.id)
+
+        # TODO thumbnails, visualizations, listeners, authorizations, etc
+
         return frozen_dataset.dict()
 
     raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")

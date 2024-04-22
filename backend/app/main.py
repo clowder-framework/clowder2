@@ -8,9 +8,9 @@ from app.models.config import ConfigEntryDB
 from app.models.datasets import DatasetDB, DatasetDBViewList, DatasetFreezeDB
 from app.models.errors import ErrorDB
 from app.models.feeds import FeedDB
-from app.models.files import FileDB, FileDBViewList, FileVersionDB
+from app.models.files import FileDB, FileDBViewList, FileFreezeDB, FileVersionDB
 from app.models.folder_and_file import FolderFileViewList
-from app.models.folders import FolderDB, FolderDBViewList
+from app.models.folders import FolderDB, FolderDBViewList, FolderFreezeDB
 from app.models.groups import GroupDB
 from app.models.licenses import LicenseDB
 from app.models.listeners import (
@@ -20,7 +20,7 @@ from app.models.listeners import (
     EventListenerJobUpdateViewList,
     EventListenerJobViewList,
 )
-from app.models.metadata import MetadataDB, MetadataDefinitionDB
+from app.models.metadata import MetadataDB, MetadataDefinitionDB, MetadataFreezeDB
 from app.models.thumbnails import ThumbnailDB
 from app.models.tokens import TokenDB
 from app.models.users import ListenerAPIKeyDB, UserAPIKeyDB, UserDB
@@ -260,10 +260,13 @@ async def startup_beanie():
             DatasetDBViewList,
             AuthorizationDB,
             MetadataDB,
+            MetadataFreezeDB,
             MetadataDefinitionDB,
             FolderDB,
+            FolderFreezeDB,
             FolderDBViewList,
             FileDB,
+            FileFreezeDB,
             FileVersionDB,
             FileDBViewList,
             FeedDB,

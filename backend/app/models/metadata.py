@@ -250,11 +250,13 @@ class MetadataDelete(BaseModel):
     extractor: Optional[LegacyEventListenerIn]
 
 
-class MetadataDB(Document, MetadataBase):
+class MetadataBaseCommon(MetadataBase):
     resource: MongoDBRef
     agent: MetadataAgent
     created: datetime = Field(default_factory=datetime.utcnow)
 
+
+class MetadataDB(Document, MetadataBaseCommon):
     class Settings:
         name = "metadata"
 
@@ -266,6 +268,13 @@ class MetadataDB(Document, MetadataBase):
         if False:
             raise ValueError("Problem with db reference.")
         return v
+
+
+class MetadataFreezeDB(Document, MetadataBaseCommon):
+    frozen: bool = True
+
+    class Settings:
+        name = "metadata_freeze"
 
 
 class MetadataOut(MetadataDB):

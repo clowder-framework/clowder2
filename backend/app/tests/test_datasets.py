@@ -5,6 +5,7 @@ from app.tests.utils import (
     create_dataset,
     create_dataset_with_custom_license,
     generate_png,
+    upload_file,
     user_alt,
 )
 from fastapi.testclient import TestClient
@@ -33,6 +34,7 @@ def test_delete(client: TestClient, headers: dict):
 
 def test_freeze(client: TestClient, headers: dict):
     dataset_id = create_dataset(client, headers).get("id")
+    upload_file(client, headers, dataset_id).get("id")
     response = client.post(
         f"{settings.API_V2_STR}/datasets/{dataset_id}/freeze", headers=headers
     )

@@ -245,7 +245,11 @@ async def get_dataset_metadata(
     user=Depends(get_current_user),
     allow: bool = Depends(Authorization("viewer")),
 ):
-    if (await DatasetDBViewList.get(PydanticObjectId(dataset_id))) is not None:
+    if (
+        await DatasetDBViewList.find_one(
+            DatasetDBViewList.id == PydanticObjectId(dataset_id)
+        )
+    ) is not None:
         query = [MetadataDB.resource.resource_id == ObjectId(dataset_id)]
 
         if listener_name is not None:

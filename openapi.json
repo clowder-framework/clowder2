@@ -10301,6 +10301,15 @@
               "5eb7cfb05e32e07750a1756a"
             ]
           },
+          "standard_license": {
+            "title": "Standard License",
+            "type": "boolean",
+            "default": true
+          },
+          "license_id": {
+            "title": "License Id",
+            "type": "string"
+          },
           "id": {
             "title": "Id",
             "type": "string",
@@ -10401,6 +10410,15 @@
               "5eb7cfb05e32e07750a1756a"
             ]
           },
+          "standard_license": {
+            "title": "Standard License",
+            "type": "boolean",
+            "default": true
+          },
+          "license_id": {
+            "title": "License Id",
+            "type": "string"
+          },
           "id": {
             "title": "Id",
             "type": "string",
@@ -10418,15 +10436,6 @@
             "title": "Frozen Version Num",
             "type": "integer",
             "default": -999
-          },
-          "standard_license": {
-            "title": "Standard License",
-            "type": "boolean",
-            "default": true
-          },
-          "license_id": {
-            "title": "License Id",
-            "type": "string"
           }
         },
         "description": "Document Mapping class.\n\nFields:\n\n- `id` - MongoDB document ObjectID \"_id\" field.\nMapped to the PydanticObjectId class\n\nInherited from:\n\n- Pydantic BaseModel\n- [UpdateMethods](https://roman-right.github.io/beanie/api/interfaces/#aggregatemethods)"
@@ -10949,14 +10958,6 @@
             "type": "string",
             "default": "PRIVATE"
           },
-          "id": {
-            "title": "Id",
-            "type": "string",
-            "examples": [
-              "5eb7cf5a86d9755df3a6c593",
-              "5eb7cfb05e32e07750a1756a"
-            ]
-          },
           "creator": {
             "$ref": "#/components/schemas/UserOut"
           },
@@ -11042,6 +11043,14 @@
             "title": "Object Type",
             "type": "string",
             "default": "file"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string",
+            "examples": [
+              "5eb7cf5a86d9755df3a6c593",
+              "5eb7cfb05e32e07750a1756a"
+            ]
           }
         },
         "description": "Document Mapping class.\n\nFields:\n\n- `id` - MongoDB document ObjectID \"_id\" field.\nMapped to the PydanticObjectId class\n\nInherited from:\n\n- Pydantic BaseModel\n- [UpdateMethods](https://roman-right.github.io/beanie/api/interfaces/#aggregatemethods)"
@@ -11119,14 +11128,6 @@
             "type": "string",
             "default": "N/A"
           },
-          "id": {
-            "title": "Id",
-            "type": "string",
-            "examples": [
-              "5eb7cf5a86d9755df3a6c593",
-              "5eb7cfb05e32e07750a1756a"
-            ]
-          },
           "dataset_id": {
             "title": "Dataset Id",
             "type": "string",
@@ -11160,6 +11161,14 @@
             "title": "Object Type",
             "type": "string",
             "default": "folder"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string",
+            "examples": [
+              "5eb7cf5a86d9755df3a6c593",
+              "5eb7cfb05e32e07750a1756a"
+            ]
           }
         },
         "description": "Document Mapping class.\n\nFields:\n\n- `id` - MongoDB document ObjectID \"_id\" field.\nMapped to the PydanticObjectId class\n\nInherited from:\n\n- Pydantic BaseModel\n- [UpdateMethods](https://roman-right.github.io/beanie/api/interfaces/#aggregatemethods)"
@@ -11936,14 +11945,6 @@
             "title": "Description",
             "type": "string"
           },
-          "id": {
-            "title": "Id",
-            "type": "string",
-            "examples": [
-              "5eb7cf5a86d9755df3a6c593",
-              "5eb7cfb05e32e07750a1756a"
-            ]
-          },
           "resource": {
             "$ref": "#/components/schemas/MongoDBRef"
           },
@@ -11954,6 +11955,14 @@
             "title": "Created",
             "type": "string",
             "format": "date-time"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string",
+            "examples": [
+              "5eb7cf5a86d9755df3a6c593",
+              "5eb7cfb05e32e07750a1756a"
+            ]
           }
         },
         "description": "Document Mapping class.\n\nFields:\n\n- `id` - MongoDB document ObjectID \"_id\" field.\nMapped to the PydanticObjectId class\n\nInherited from:\n\n- Pydantic BaseModel\n- [UpdateMethods](https://roman-right.github.io/beanie/api/interfaces/#aggregatemethods)"

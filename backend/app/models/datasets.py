@@ -42,6 +42,8 @@ class DatasetBaseCommon(DatasetBase):
     downloads: int = 0
     thumbnail_id: Optional[PydanticObjectId] = None
     origin_id: PydanticObjectId = None
+    standard_license: bool = True
+    license_id: Optional[str] = None
 
 
 class DatasetPatch(BaseModel):
@@ -53,8 +55,6 @@ class DatasetPatch(BaseModel):
 class DatasetDB(Document, DatasetBaseCommon):
     frozen: bool = False
     frozen_version_num: int = -999
-    standard_license: bool = True
-    license_id: Optional[str] = None
 
     class Settings:
         name = "datasets"

@@ -71,7 +71,7 @@ class LocalFileIn(BaseModel):
     path: str
 
 
-class FileDB(Document, FileBase):
+class FileBaseCommon(FileBase):
     creator: UserOut
     created: datetime = Field(default_factory=datetime.utcnow)
     version_id: str = "N/A"
@@ -87,12 +87,21 @@ class FileDB(Document, FileBase):
     storage_path: Optional[str]  # store URL or file path depending on storage_type
     object_type: str = "file"
 
+
+class FileDB(Document, FileBaseCommon):
     class Settings:
         name = "files"
 
     class Config:
         # required for Enum to properly work
         use_enum_values = True
+
+
+class FileFreezeDB(Document, FileBaseCommon):
+    frozen: bool = True
+
+    class Settings:
+        name = "files_freeze"
 
 
 class FileDBViewList(View, FileBase):
