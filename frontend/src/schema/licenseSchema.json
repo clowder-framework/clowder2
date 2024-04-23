@@ -1,9 +1,7 @@
 {
 	"schema": {
 		"type": "object",
-		"required": [
-			"name", "description", "url", "holders"
-		],
+		"required": ["name", "description", "url", "holders"],
 		"properties": {
 			"name": {
 				"type": "string",
@@ -27,8 +25,8 @@
 			},
 			"expiration_date": {
 				"type": ["string", "null"],
-  				"format": "date-time",
-      			"title": "Expiration Date"
+				"format": "date-time",
+				"title": "Expiration Date"
 			}
 		}
 	}

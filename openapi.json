@@ -3978,6 +3978,17 @@
         ],
         "summary": "Save Dataset",
         "operationId": "save_dataset_api_v2_datasets_post",
+        "parameters": [
+          {
+            "required": true,
+            "schema": {
+              "title": "License Id",
+              "type": "string"
+            },
+            "name": "license_id",
+            "in": "query"
+          }
+        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -6161,6 +6172,15 @@
             },
             "name": "alive_only",
             "in": "query"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Process",
+              "type": "string"
+            },
+            "name": "process",
+            "in": "query"
           }
         ],
         "responses": {
@@ -6296,6 +6316,15 @@
               "default": 300
             },
             "name": "heartbeat_interval",
+            "in": "query"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Process",
+              "type": "string"
+            },
+            "name": "process",
             "in": "query"
           }
         ],
@@ -9131,6 +9160,331 @@
         ]
       }
     },
+    "/api/v2/licenses": {
+      "post": {
+        "tags": [
+          "licenses"
+        ],
+        "summary": "Save License",
+        "operationId": "save_license_api_v2_licenses_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LicenseIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LicenseOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2AuthorizationCodeBearer": []
+          },
+          {
+            "APIKeyHeader": []
+          },
+          {
+            "APIKeyCookie": []
+          }
+        ]
+      }
+    },
+    "/api/v2/licenses/{license_id}": {
+      "get": {
+        "tags": [
+          "licenses"
+        ],
+        "summary": "Get License",
+        "operationId": "get_license_api_v2_licenses__license_id__get",
+        "parameters": [
+          {
+            "required": true,
+            "schema": {
+              "title": "License Id",
+              "type": "string"
+            },
+            "name": "license_id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LicenseOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2AuthorizationCodeBearer": []
+          },
+          {
+            "APIKeyHeader": []
+          },
+          {
+            "APIKeyCookie": []
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "licenses"
+        ],
+        "summary": "Edit License",
+        "operationId": "edit_license_api_v2_licenses__license_id__put",
+        "parameters": [
+          {
+            "required": true,
+            "schema": {
+              "title": "License Id",
+              "type": "string"
+            },
+            "name": "license_id",
+            "in": "path"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Dataset Id",
+              "type": "string"
+            },
+            "name": "dataset_id",
+            "in": "query"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LicenseBase"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LicenseOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2AuthorizationCodeBearer": []
+          },
+          {
+            "APIKeyHeader": []
+          },
+          {
+            "APIKeyCookie": []
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "licenses"
+        ],
+        "summary": "Delete License",
+        "operationId": "delete_license_api_v2_licenses__license_id__delete",
+        "parameters": [
+          {
+            "required": true,
+            "schema": {
+              "title": "License Id",
+              "type": "string"
+            },
+            "name": "license_id",
+            "in": "path"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Dataset Id",
+              "type": "string"
+            },
+            "name": "dataset_id",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LicenseOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2AuthorizationCodeBearer": []
+          },
+          {
+            "APIKeyHeader": []
+          },
+          {
+            "APIKeyCookie": []
+          }
+        ]
+      }
+    },
+    "/api/v2/licenses/standard_licenses/all": {
+      "get": {
+        "tags": [
+          "licenses"
+        ],
+        "summary": "Get Standard Licenses",
+        "operationId": "get_standard_licenses_api_v2_licenses_standard_licenses_all_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response Get Standard Licenses Api V2 Licenses Standard Licenses All Get",
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/LicenseOption"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2AuthorizationCodeBearer": []
+          },
+          {
+            "APIKeyHeader": []
+          },
+          {
+            "APIKeyCookie": []
+          }
+        ]
+      }
+    },
+    "/api/v2/licenses/standard_licenses/{license_id}": {
+      "get": {
+        "tags": [
+          "licenses"
+        ],
+        "summary": "Get Standard License Url",
+        "operationId": "get_standard_license_url_api_v2_licenses_standard_licenses__license_id__get",
+        "parameters": [
+          {
+            "required": true,
+            "schema": {
+              "title": "License Id",
+              "type": "string"
+            },
+            "name": "license_id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response Get Standard License Url Api V2 Licenses Standard Licenses  License Id  Get",
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2AuthorizationCodeBearer": []
+          },
+          {
+            "APIKeyHeader": []
+          },
+          {
+            "APIKeyCookie": []
+          }
+        ]
+      }
+    },
     "/api/v2/status": {
       "get": {
         "tags": [
@@ -9788,6 +10142,15 @@
               "5eb7cf5a86d9755df3a6c593",
               "5eb7cfb05e32e07750a1756a"
             ]
+          },
+          "standard_license": {
+            "title": "Standard License",
+            "type": "boolean",
+            "default": true
+          },
+          "license_id": {
+            "title": "License Id",
+            "type": "string"
           }
         },
         "description": "Document Mapping class.\n\nFields:\n\n- `id` - MongoDB document ObjectID \"_id\" field.\nMapped to the PydanticObjectId class\n\nInherited from:\n\n- Pydantic BaseModel\n- [UpdateMethods](https://roman-right.github.io/beanie/api/interfaces/#aggregatemethods)"
@@ -10791,6 +11154,154 @@
           }
         },
         "description": "v1 Extractors can submit data formatted as a LegacyEventListener (i.e. v1 format) and it will be converted to a v2 EventListener."
+      },
+      "LicenseBase": {
+        "title": "LicenseBase",
+        "required": [
+          "name"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "description": {
+            "title": "Description",
+            "type": "string"
+          },
+          "url": {
+            "title": "Url",
+            "type": "string"
+          },
+          "version": {
+            "title": "Version",
+            "type": "string"
+          },
+          "holders": {
+            "title": "Holders",
+            "type": "string"
+          },
+          "expiration_date": {
+            "title": "Expiration Date",
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "LicenseIn": {
+        "title": "LicenseIn",
+        "required": [
+          "name"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "description": {
+            "title": "Description",
+            "type": "string"
+          },
+          "url": {
+            "title": "Url",
+            "type": "string"
+          },
+          "version": {
+            "title": "Version",
+            "type": "string"
+          },
+          "holders": {
+            "title": "Holders",
+            "type": "string"
+          },
+          "expiration_date": {
+            "title": "Expiration Date",
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "LicenseOption": {
+        "title": "LicenseOption",
+        "required": [
+          "id"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "description": {
+            "title": "Description",
+            "type": "string"
+          },
+          "url": {
+            "title": "Url",
+            "type": "string"
+          }
+        }
+      },
+      "LicenseOut": {
+        "title": "LicenseOut",
+        "required": [
+          "creator",
+          "name"
+        ],
+        "type": "object",
+        "properties": {
+          "creator": {
+            "title": "Creator",
+            "type": "string",
+            "format": "email"
+          },
+          "created": {
+            "title": "Created",
+            "type": "string",
+            "format": "date-time"
+          },
+          "modified": {
+            "title": "Modified",
+            "type": "string",
+            "format": "date-time"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "description": {
+            "title": "Description",
+            "type": "string"
+          },
+          "url": {
+            "title": "Url",
+            "type": "string"
+          },
+          "version": {
+            "title": "Version",
+            "type": "string"
+          },
+          "holders": {
+            "title": "Holders",
+            "type": "string"
+          },
+          "expiration_date": {
+            "title": "Expiration Date",
+            "type": "string",
+            "format": "date-time"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string",
+            "examples": [
+              "5eb7cf5a86d9755df3a6c593",
+              "5eb7cfb05e32e07750a1756a"
+            ]
+          }
+        },
+        "description": "Document Mapping class.\n\nFields:\n\n- `id` - MongoDB document ObjectID \"_id\" field.\nMapped to the PydanticObjectId class\n\nInherited from:\n\n- Pydantic BaseModel\n- [UpdateMethods](https://roman-right.github.io/beanie/api/interfaces/#aggregatemethods)"
       },
       "LocalFileIn": {
         "title": "LocalFileIn",
