@@ -62,6 +62,7 @@ import { EditLicenseModal } from "./EditLicenseModal";
 import { fetchStandardLicenseUrl } from "../../utils/licenses";
 import { authCheck, frozenCheck } from "../../utils/common";
 import { DatasetVersions } from "./DatasetVersions";
+import { FreezeVersionChip } from "../versions/FeezeVersionChip";
 
 export const Dataset = (): JSX.Element => {
 	// path parameter
@@ -296,6 +297,14 @@ export const Dataset = (): JSX.Element => {
 							<Typography variant="h3" paragraph>
 								{dataset["name"]}
 							</Typography>
+							{frozenCheck(dataset.frozen, dataset.frozen_version_num) ? (
+								<FreezeVersionChip
+									frozenVersionNum={dataset.frozen_version_num}
+									frozen={dataset.frozen}
+								/>
+							) : (
+								<></>
+							)}
 						</Box>
 						<Box>
 							<Typography variant="body1" paragraph>
