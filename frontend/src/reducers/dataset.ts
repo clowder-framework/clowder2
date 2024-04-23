@@ -54,7 +54,7 @@ const defaultState: DatasetState = {
 	frozenDataset: <DatasetFreezeOut>{ creator: <UserOut>{} },
 	frozenDatasets: <Paged>{
 		metadata: <PageMetadata>{},
-		data: <DatasetFreezeOut>[],
+		data: <DatasetFreezeOut[]>[],
 	},
 	latestFrozenVersionNum: -999,
 	datasetRole: <AuthorizationBase>{},

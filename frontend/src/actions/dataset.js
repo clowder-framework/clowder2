@@ -270,7 +270,7 @@ export function getFreezeDatasets(datasetId, skip = 0, limit = 21) {
 		)
 			.then((json) => {
 				dispatch({
-					type: GET_FREEZE_DATASET,
+					type: GET_FREEZE_DATASETS,
 					frozenDatasets: json,
 					receivedAt: Date.now(),
 				});

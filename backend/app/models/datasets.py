@@ -97,7 +97,13 @@ class DatasetDBViewList(View, DatasetBaseCommon):
         name = "datasets_view"
 
         pipeline = [
-            {"$addFields": {"frozen": False, "frozen_version_num": -999}},
+            {
+                "$addFields": {
+                    "frozen": False,
+                    "frozen_version_num": -999,
+                    "origin_id": "$_id",
+                }
+            },
             {
                 "$unionWith": {
                     "coll": "datasets_freeze",

@@ -6,11 +6,9 @@ import {
 	Dialog,
 	DialogContent,
 	DialogTitle,
-	FormControl,
 	Grid,
 	IconButton,
 	Link,
-	MenuItem,
 	Pagination,
 	Snackbar,
 	Stack,
@@ -26,8 +24,6 @@ import {
 	fetchDatasetAbout,
 	fetchDatasetLicense,
 	fetchFoldersFilesInDataset as fetchFoldersFilesInDatasetAction,
-	getFreezeDatasetLatest as getFreezeDatasetLatestAction,
-	getFreezeDatasetVersion as getFreezeDatasetVersion,
 } from "../../actions/dataset";
 import { fetchFolderPath } from "../../actions/folder";
 
@@ -65,7 +61,7 @@ import { AuthWrapper } from "../auth/AuthWrapper";
 import { EditLicenseModal } from "./EditLicenseModal";
 import { fetchStandardLicenseUrl } from "../../utils/licenses";
 import { authCheck } from "../../utils/common";
-import { ClowderSelect } from "../styledComponents/ClowderSelect";
+import { DatasetVersions } from "./DatasetVersions";
 
 export const Dataset = (): JSX.Element => {
 	// path parameter
@@ -113,22 +109,8 @@ export const Dataset = (): JSX.Element => {
 		limit: number
 	) => dispatch(fetchMetadataDefinitions(name, skip, limit));
 
-	const getFreezeDatasetLatestVersionNum = (datasetId: string | undefined) =>
-		dispatch(getFreezeDatasetLatestAction(datasetId));
-	const getFreezeDataset = (
-		datasetId: string | undefined,
-		frozenVersionNum: string
-	) => dispatch(getFreezeDatasetVersion(datasetId, frozenVersionNum));
-
 	// mapStateToProps
 	const dataset = useSelector((state: RootState) => state.dataset.about);
-	const latestFrozenVersionNum = useSelector(
-		(state: RootState) => state.dataset.latestFrozenVersionNum
-	);
-	const frozenDataset = useSelector(
-		(state: RootState) => state.dataset.frozenDataset
-	);
-
 	const datasetRole = useSelector(
 		(state: RootState) => state.dataset.datasetRole
 	);
@@ -155,9 +137,6 @@ export const Dataset = (): JSX.Element => {
 
 	const [limit] = useState<number>(config.defaultFolderFilePerPage);
 
-	const [selectedDatasetVersionNum, setSelectedDatasetVersionNum] =
-		useState<string>("current");
-
 	const pageMetadata = useSelector(
 		(state: RootState) => state.dataset.foldersAndFiles.metadata
 	);
@@ -177,10 +156,6 @@ export const Dataset = (): JSX.Element => {
 	};
 
 	useEffect(() => {
-		getFreezeDatasetLatestVersionNum(datasetId);
-	}, []);
-
-	useEffect(() => {
 		fetchFoldersFilesInDataset(
 			datasetId,
 			folderId,
@@ -195,17 +170,17 @@ export const Dataset = (): JSX.Element => {
 			listDatasetLicense(dataset.license_id);
 		getFolderPath(folderId);
 		getMetadatDefinitions(null, 0, 100);
-	}, [searchParams, adminMode, dataset.license_id]);
+	}, [datasetId, searchParams, adminMode, dataset.license_id]);
 
-	// TODO change this to a modal
-	useEffect(() => {
-		if (latestFrozenVersionNum && latestFrozenVersionNum > 0) {
-			setSnackBarOpen(true);
-			setSnackBarMessage(
-				`The most recent locked version of the dataset is numbered ${latestFrozenVersionNum}.`
-			);
-		}
-	}, [latestFrozenVersionNum]);
+	// // TODO change this to a modal
+	// useEffect(() => {
+	// 	if (latestFrozenVersionNum && latestFrozenVersionNum > 0) {
+	// 		setSnackBarOpen(true);
+	// 		setSnackBarMessage(
+	// 			`The most recent locked version of the dataset ${latestFrozenVersionNum}.`
+	// 		);
+	// 	}
+	// }, [latestFrozenVersionNum]);
 
 	// for breadcrumb
 	useEffect(() => {
@@ -585,41 +560,13 @@ export const Dataset = (): JSX.Element => {
 						<></>
 					)}
 					<DatasetDetails details={dataset} myRole={datasetRole.role} />
-					<Typography sx={{ wordBreak: "break-all" }}>
-						Dataset Version
-					</Typography>
-					<FormControl>
-						<ClowderSelect
-							value={selectedDatasetVersionNum.toString()}
-							onChange={(event) => {
-								setSelectedDatasetVersionNum(event.target.value);
-								getFreezeDataset(datasetId, event.target.value);
-								setSnackBarMessage(
-									`Viewing dataset version ${event.target.value}.`
-								);
-								setSnackBarOpen(true);
-							}}
-						>
-							<MenuItem value="current" key="current">
-								Current
-							</MenuItem>
-							{VersionOptions(latestFrozenVersionNum)}
-						</ClowderSelect>
-					</FormControl>
+					<DatasetVersions
+						datasetId={datasetId}
+						setSnackBarMessage={setSnackBarMessage}
+						setSnackBarOpen={setSnackBarOpen}
+					/>
 				</Grid>
 			</Grid>
 		</Layout>
 	);
 };
-
-function VersionOptions(latestFrozenVersionNum: number) {
-	if (latestFrozenVersionNum <= 0) {
-		return null;
-	}
-
-	return Array.from({ length: latestFrozenVersionNum }, (_, i) => (
-		<MenuItem key={(i + 1).toString()} value={(i + 1).toString()}>
-			{i + 1}
-		</MenuItem>
-	));
-}
