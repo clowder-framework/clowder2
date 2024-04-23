@@ -74,6 +74,14 @@ def test_freeze(client: TestClient, headers: dict):
         response.json().get("origin_id") == dataset_id
     )  # datasetId should stay the same
 
+    # get all versions
+    response = client.get(
+        f"{settings.API_V2_STR}/datasets/{dataset_id}/freeze", headers=headers
+    )
+    assert response.status_code == 200
+    assert len(response.json().get("data")) == 2
+    assert response.json().get("metadata") == {"total_count": 2, "skip": 0, "limit": 10}
+
 
 def test_delete_with_custom_license(client: TestClient, headers: dict):
     dataset_id = create_dataset_with_custom_license(client, headers).get("id")

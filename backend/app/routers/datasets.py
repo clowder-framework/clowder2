@@ -555,6 +555,41 @@ async def freeze_dataset(
     raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
 
 
+@router.get("/{dataset_id}/freeze", response_model=Paged)
+async def get_freeze_datasets(
+    dataset_id: str,
+    skip: int = 0,
+    limit: int = 10,
+    user=Depends(get_current_user),
+    fs: Minio = Depends(dependencies.get_fs),
+    es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
+    allow: bool = Depends(Authorization("owner")),
+):
+    frozen_datasets_and_count = (
+        await DatasetFreezeDB.find(
+            DatasetFreezeDB.origin_id == PydanticObjectId(dataset_id)
+        )
+        .aggregate(
+            [
+                _get_page_query(
+                    skip, limit, sort_field="frozen_version_num", ascending=False
+                )
+            ],
+        )
+        .to_list()
+    )
+
+    page_metadata = _construct_page_metadata(frozen_datasets_and_count, skip, limit)
+    page = Paged(
+        metadata=page_metadata,
+        data=[
+            DatasetFreezeOut(id=item.pop("_id"), **item)
+            for item in frozen_datasets_and_count[0]["data"]
+        ],
+    )
+    return page.dict()
+
+
 @router.get("/{dataset_id}/freeze/latest_version_num", response_model=int)
 async def get_freeze_dataset_lastest_version_num(
     dataset_id: str,

@@ -212,6 +212,32 @@ export class DatasetsService {
     }
 
     /**
+     * Get Freeze Datasets
+     * @param datasetId
+     * @param skip
+     * @param limit
+     * @returns Paged Successful Response
+     * @throws ApiError
+     */
+    public static getFreezeDatasetsApiV2DatasetsDatasetIdFreezeGet(
+        datasetId: string,
+        skip?: number,
+        limit: number = 10,
+    ): CancelablePromise<Paged> {
+        return __request({
+            method: 'GET',
+            path: `/api/v2/datasets/${datasetId}/freeze`,
+            query: {
+                'skip': skip,
+                'limit': limit,
+            },
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+
+    /**
      * Freeze Dataset
      * @param datasetId
      * @returns DatasetFreezeOut Successful Response
