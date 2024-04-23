@@ -29,10 +29,7 @@ import FilesTable from "../files/FilesTable";
 import { DisplayMetadata } from "../metadata/DisplayMetadata";
 import { DisplayListenerMetadata } from "../metadata/DisplayListenerMetadata";
 import { MainBreadcrumbs } from "../navigation/BreadCrumb";
-import {
-	fetchDatasetMetadata,
-	fetchMetadataDefinitions,
-} from "../../actions/metadata";
+import { fetchMetadataDefinitions } from "../../actions/metadata";
 import Layout from "../Layout";
 import { ActionsMenuGroup } from "./ActionsMenuGroup";
 import { DatasetDetails } from "./DatasetDetails";
@@ -69,8 +66,6 @@ export const DatasetFreeze = (): JSX.Element => {
 	const listDatasetLicense = (licenseId: string | undefined) =>
 		dispatch(fetchDatasetLicense(licenseId));
 
-	const listDatasetMetadata = (datasetId: string | undefined) =>
-		dispatch(fetchDatasetMetadata(datasetId));
 	const getMetadatDefinitions = (
 		name: string | null,
 		skip: number,
@@ -136,25 +131,26 @@ export const DatasetFreeze = (): JSX.Element => {
 
 	useEffect(() => {
 		getFreezeDatasetLatestVersionNum(datasetId);
+		getFreezeDatasetVersion(datasetId, frozenVersionNum);
 	}, []);
 
 	useEffect(() => {
-		getFreezeDatasetVersion(datasetId, frozenVersionNum);
-		// fetchFoldersFilesInDataset(
-		// 	datasetId,
-		// 	folderId,
-		// 	(currPageNum - 1) * limit,
-		// 	limit
-		// );
-		// listDatasetAbout(datasetId);
-		// if (frozenDataset.standard_license && frozenDataset.license_id) {
-		// 	fetchStandardLicenseUrlData(frozenDataset.license_id);
-		// }
-		// if (!frozenDataset.standard_license && frozenDataset.license_id)
-		// 	listDatasetLicense(frozenDataset.license_id);
-		// getFolderPath(folderId);
-		// getMetadatDefinitions(null, 0, 100);
-	}, [searchParams, adminMode, datasetId, frozenVersionNum]);
+		if (frozenDataset && frozenDataset.id) {
+			fetchFoldersFilesInDataset(
+				frozenDataset.id,
+				folderId,
+				(currPageNum - 1) * limit,
+				limit
+			);
+			if (frozenDataset.standard_license && frozenDataset.license_id) {
+				fetchStandardLicenseUrlData(frozenDataset.license_id);
+			}
+			if (!frozenDataset.standard_license && frozenDataset.license_id)
+				listDatasetLicense(frozenDataset.license_id);
+			getFolderPath(folderId);
+			getMetadatDefinitions(null, 0, 100);
+		}
+	}, [searchParams, adminMode, datasetId, frozenVersionNum, frozenDataset]);
 
 	// TODO change this to a modal
 	useEffect(() => {

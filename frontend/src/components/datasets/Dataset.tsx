@@ -121,7 +121,7 @@ export const Dataset = (): JSX.Element => {
 	) => dispatch(getFreezeDatasetVersionAction(datasetId, frozenVersionNum));
 
 	// mapStateToProps
-	const about = useSelector((state: RootState) => state.dataset.about);
+	const dataset = useSelector((state: RootState) => state.dataset.about);
 	const latestFrozenVersionNum = useSelector(
 		(state: RootState) => state.dataset.latestFrozenVersionNum
 	);
@@ -188,14 +188,14 @@ export const Dataset = (): JSX.Element => {
 			limit
 		);
 		listDatasetAbout(datasetId);
-		if (about.standard_license && about.license_id) {
-			fetchStandardLicenseUrlData(about.license_id);
+		if (dataset.standard_license && dataset.license_id) {
+			fetchStandardLicenseUrlData(dataset.license_id);
 		}
-		if (!about.standard_license && about.license_id)
-			listDatasetLicense(about.license_id);
+		if (!dataset.standard_license && dataset.license_id)
+			listDatasetLicense(dataset.license_id);
 		getFolderPath(folderId);
 		getMetadatDefinitions(null, 0, 100);
-	}, [searchParams, adminMode, about.license_id]);
+	}, [searchParams, adminMode, dataset.license_id]);
 
 	// TODO change this to a modal
 	useEffect(() => {
@@ -212,7 +212,7 @@ export const Dataset = (): JSX.Element => {
 		// for breadcrumb
 		const tmpPaths = [
 			{
-				name: about["name"],
+				name: dataset["name"],
 				url: `/datasets/${datasetId}`,
 			},
 		];
@@ -229,7 +229,7 @@ export const Dataset = (): JSX.Element => {
 		}
 
 		setPaths(tmpPaths);
-	}, [about, folderPath]);
+	}, [dataset, folderPath]);
 
 	const handleTabChange = (
 		_event: React.ChangeEvent<{}>,
@@ -319,19 +319,19 @@ export const Dataset = (): JSX.Element => {
 							}}
 						>
 							<Typography variant="h3" paragraph>
-								{about["name"]}
+								{dataset["name"]}
 							</Typography>
 						</Box>
 						<Box>
 							<Typography variant="body1" paragraph>
-								{about["description"]}
+								{dataset["description"]}
 							</Typography>
 						</Box>
 					</Stack>
 				</Grid>
 				{/*actions*/}
 				<Grid item xs={4} sx={{ display: "flex-top", alignItems: "center" }}>
-					<ActionsMenuGroup dataset={about} folderId={folderId} />
+					<ActionsMenuGroup dataset={dataset} folderId={folderId} />
 				</Grid>
 				{/*actions*/}
 			</Grid>
@@ -537,20 +537,20 @@ export const Dataset = (): JSX.Element => {
 					<Typography variant="h5" gutterBottom>
 						License
 					</Typography>
-					{about.standard_license && about.license_id !== undefined ? (
+					{dataset.standard_license && dataset.license_id !== undefined ? (
 						<Typography>
 							<Link href={standardLicenseUrl} target="_blank">
 								<img
 									className="logo"
-									src={`public/${about.license_id}.png`}
-									alt={about.license_id}
+									src={`public/${dataset.license_id}.png`}
+									alt={dataset.license_id}
 								/>
 							</Link>
 						</Typography>
 					) : (
 						<></>
 					)}
-					{!about.standard_license &&
+					{!dataset.standard_license &&
 					license !== undefined &&
 					license.name !== undefined ? (
 						<div>
@@ -584,7 +584,7 @@ export const Dataset = (): JSX.Element => {
 					) : (
 						<></>
 					)}
-					<DatasetDetails details={about} myRole={datasetRole.role} />
+					<DatasetDetails details={dataset} myRole={datasetRole.role} />
 					<Typography sx={{ wordBreak: "break-all" }}>
 						Dataset Version
 					</Typography>

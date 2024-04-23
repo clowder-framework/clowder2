@@ -55,6 +55,11 @@ class FolderDBViewList(View, FolderBase):
         name = "folders_view"
         pipeline = [
             {
+                "$unionWith": {
+                    "coll": "folders_freeze",
+                }
+            },
+            {
                 "$lookup": {
                     "from": "authorization",
                     "localField": "dataset_id",

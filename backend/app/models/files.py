@@ -123,6 +123,11 @@ class FileDBViewList(View, FileBase):
         name = "files_view"
         pipeline = [
             {
+                "$unionWith": {
+                    "coll": "files_freeze",
+                }
+            },
+            {
                 "$lookup": {
                     "from": "authorization",
                     "localField": "dataset_id",

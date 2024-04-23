@@ -229,7 +229,7 @@ async def get_datasets(
     admin=Depends(get_admin),
     admin_mode: bool = Depends(get_admin_mode),
 ):
-    query = []
+    query = [DatasetDBViewList.frozen == False]  # noqa: E712
 
     if admin and admin_mode:
         datasets_and_count = (
@@ -501,7 +501,7 @@ async def freeze_dataset(
     user=Depends(get_current_user),
     fs: Minio = Depends(dependencies.get_fs),
     es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
-    allow: bool = Depends(Authorization("owner")),
+    allow: bool = Depends(Authorization(RoleType.OWNER)),
 ):
     # Retrieve the dataset by ID
     if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
@@ -540,6 +540,13 @@ async def freeze_dataset(
 
         # folders
         await _freeze_folders(dataset_id, frozen_dataset.id)
+
+        # Create authorization entry
+        await AuthorizationDB(
+            dataset_id=frozen_dataset.id,
+            role=RoleType.OWNER,
+            creator=user.email,
+        ).save()
 
         # TODO thumbnails, visualizations, listeners, authorizations, etc
 

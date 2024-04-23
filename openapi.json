@@ -5453,16 +5453,6 @@
             },
             "name": "limit",
             "in": "query"
-          },
-          {
-            "required": false,
-            "schema": {
-              "title": "Frozen Only",
-              "type": "boolean",
-              "default": false
-            },
-            "name": "frozen_only",
-            "in": "query"
           }
         ],
         "responses": {

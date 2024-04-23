@@ -16,14 +16,12 @@ export class PublicDatasetsService {
      * Get Datasets
      * @param skip
      * @param limit
-     * @param frozenOnly
      * @returns Paged Successful Response
      * @throws ApiError
      */
     public static getDatasetsApiV2PublicDatasetsGet(
         skip?: number,
         limit: number = 10,
-        frozenOnly: boolean = false,
     ): CancelablePromise<Paged> {
         return __request({
             method: 'GET',
@@ -31,7 +29,6 @@ export class PublicDatasetsService {
             query: {
                 'skip': skip,
                 'limit': limit,
-                'frozen_only': frozenOnly,
             },
             errors: {
                 422: `Validation Error`,

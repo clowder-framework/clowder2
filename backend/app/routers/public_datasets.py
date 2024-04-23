@@ -45,11 +45,11 @@ async def _get_folder_hierarchy(
 async def get_datasets(
     skip: int = 0,
     limit: int = 10,
-    frozen_only: bool = False,
 ):
-    query = [DatasetDBViewList.status == DatasetStatus.PUBLIC]
-    if frozen_only:
-        query.append(DatasetDBViewList.frozen is True)
+    query = [
+        DatasetDBViewList.status == DatasetStatus.PUBLIC,
+        DatasetDBViewList.frozen == False,  # noqa: E712
+    ]
 
     datasets_and_count = (
         await DatasetDBViewList.find(*query)

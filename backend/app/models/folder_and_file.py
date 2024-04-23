@@ -35,19 +35,24 @@ class FolderFileViewList(View, FileBase):
         source = FileDB
         name = "folders_files_view"
         pipeline = [
+            {"$addFields": {"object_type": "file"}},
+            {
+                "$unionWith": {
+                    "coll": "folders",
+                    "pipeline": [{"$addFields": {"object_type": "folder"}}],
+                }
+            },
+            {
+                "$unionWith": {
+                    "coll": "files_freeze",
+                }
+            },
             {
                 "$lookup": {
                     "from": "authorization",
                     "localField": "dataset_id",
                     "foreignField": "dataset_id",
                     "as": "auth",
-                }
-            },
-            {"$addFields": {"object_type": "file"}},
-            {
-                "$unionWith": {
-                    "coll": "folders",
-                    "pipeline": [{"$addFields": {"object_type": "folder"}}],
                 }
             },
         ]
