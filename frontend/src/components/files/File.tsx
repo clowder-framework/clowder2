@@ -9,7 +9,6 @@ import {
 	Snackbar,
 	Tab,
 	Tabs,
-	Tooltip,
 } from "@mui/material";
 import { authCheck, downloadResource, frozenCheck } from "../../utils/common";
 import { PreviewConfiguration, RootState } from "../../types/data";
@@ -51,7 +50,6 @@ import { VersionChip } from "../versions/VersionChip";
 import Typography from "@mui/material/Typography";
 import { ClowderSelect } from "../styledComponents/ClowderSelect";
 import { AuthWrapper } from "../auth/AuthWrapper";
-import LockIcon from "@mui/icons-material/Lock";
 import { FrozenWrapper } from "../auth/FrozenWrapper";
 
 export const File = (): JSX.Element => {
@@ -296,13 +294,6 @@ export const File = (): JSX.Element => {
 			<Grid container>
 				<Grid item xs={10} sx={{ display: "flex", alignItems: "center" }}>
 					<MainBreadcrumbs paths={paths} />
-					{frozenCheck(about.frozen, about.frozen_version_num) ? (
-						<Tooltip title="Published">
-							<LockIcon />
-						</Tooltip>
-					) : (
-						<></>
-					)}
 					<Grid item>
 						{versionEnabled ? (
 							<VersionChip selectedVersion={selectedVersionNum} />
@@ -355,11 +346,6 @@ export const File = (): JSX.Element => {
 						<Tab
 							icon={<BuildIcon />}
 							iconPosition="start"
-							sx={
-								authCheck(adminMode, fileRole, ["owner", "editor", "uploader"])
-									? TabStyle
-									: { display: "none" }
-							}
 							label="Analysis"
 							{...a11yProps(3)}
 							disabled={false}
@@ -378,7 +364,11 @@ export const File = (): JSX.Element => {
 						<Tab
 							icon={<HistoryIcon />}
 							iconPosition="start"
-							sx={TabStyle}
+							sx={
+								frozenCheck(about.frozen, about.frozen_version_num)
+									? { display: "none" }
+									: TabStyle
+							}
 							label="Analysis History"
 							{...a11yProps(4)}
 							disabled={false}
@@ -387,7 +377,11 @@ export const File = (): JSX.Element => {
 							<Tab
 								icon={<InsertDriveFile />}
 								iconPosition="start"
-								sx={TabStyle}
+								sx={
+									frozenCheck(about.frozen, about.frozen_version_num)
+										? { display: "none" }
+										: TabStyle
+								}
 								label="Version History"
 								{...a11yProps(5)}
 							/>
