@@ -1,8 +1,7 @@
 from datetime import datetime
 from enum import Enum, auto
-from typing import List, Optional
+from typing import Optional
 
-from app.models.authorization import AuthorizationDB
 from app.models.users import UserOut
 from beanie import Document, PydanticObjectId, View
 from pydantic import BaseModel, Field
@@ -104,19 +103,8 @@ class FileFreezeDB(Document, FileBaseCommon):
         name = "files_freeze"
 
 
-class FileDBViewList(View, FileBase):
+class FileDBViewList(View, FileBaseCommon):
     id: PydanticObjectId = Field(None, alias="_id")  # necessary for Views
-    version_id: str = "N/A"
-    version_num: int = 0
-    dataset_id: PydanticObjectId
-    folder_id: Optional[PydanticObjectId]
-    creator: UserOut
-    created: datetime = Field(default_factory=datetime.utcnow)
-    modified: datetime = Field(default_factory=datetime.utcnow)
-    auth: List[AuthorizationDB]
-    bytes: int = 0
-    content_type: ContentType = ContentType()
-    thumbnail_id: Optional[PydanticObjectId] = None
 
     class Settings:
         source = FileDB

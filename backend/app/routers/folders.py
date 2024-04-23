@@ -1,4 +1,4 @@
-from app.models.folders import FolderDB
+from app.models.folders import FolderDB, FolderDBViewList
 from beanie import PydanticObjectId
 from bson import ObjectId
 from fastapi import APIRouter, HTTPException
@@ -10,7 +10,9 @@ router = APIRouter()
 async def download_folder(
     folder_id: str,
 ):
-    folder = await FolderDB.get(PydanticObjectId(folder_id))
+    folder = await FolderDBViewList.find_one(
+        FolderDBViewList.id == PydanticObjectId(folder_id)
+    )
     if folder is not None:
         path = []
         current_folder_id = folder_id

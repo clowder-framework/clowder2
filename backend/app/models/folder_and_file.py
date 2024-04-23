@@ -2,13 +2,13 @@ from datetime import datetime
 from typing import List, Optional
 
 from app.models.authorization import AuthorizationDB
-from app.models.files import ContentType, FileBase, FileDB
+from app.models.files import ContentType, FileBaseCommon, FileDB
 from app.models.users import UserOut
 from beanie import PydanticObjectId, View
 from pydantic import Field
 
 
-class FolderFileViewList(View, FileBase):
+class FolderFileViewList(View, FileBaseCommon):
     # common field
     object_type: str = Field(None, alias="object_type")  # necessary for Views
     id: PydanticObjectId = Field(None, alias="_id")  # necessary for Views

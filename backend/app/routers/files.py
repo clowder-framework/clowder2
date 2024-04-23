@@ -7,7 +7,14 @@ from app import dependencies
 from app.config import settings
 from app.deps.authorization_deps import FileAuthorization
 from app.keycloak_auth import get_current_user, get_token
-from app.models.files import FileDB, FileOut, FileVersion, FileVersionDB, StorageType
+from app.models.files import (
+    FileDB,
+    FileDBViewList,
+    FileOut,
+    FileVersion,
+    FileVersionDB,
+    StorageType,
+)
 from app.models.metadata import MetadataDB
 from app.models.thumbnails import ThumbnailDB
 from app.models.users import UserOut
@@ -294,7 +301,11 @@ async def download_file(
     allow: bool = Depends(FileAuthorization("viewer")),
 ):
     # If file exists in MongoDB, download from Minio
-    if (file := await FileDB.get(PydanticObjectId(file_id))) is not None:
+    if (
+        file := await FileDBViewList.find_one(
+            FileDBViewList.id == PydanticObjectId(file_id)
+        )
+    ) is not None:
         if file.storage_type == StorageType.MINIO:
             if version is not None:
                 # Version is specified, so get the minio ID from versions table if possible
@@ -355,7 +366,11 @@ async def download_file_url(
     allow: bool = Depends(FileAuthorization("viewer")),
 ):
     # If file exists in MongoDB, download from Minio
-    if (file := await FileDB.get(PydanticObjectId(file_id))) is not None:
+    if (
+        file := await FileDBViewList.find_one(
+            FileDBViewList.id == PydanticObjectId(file_id)
+        )
+    ) is not None:
         if expires_in_seconds is None:
             expires = timedelta(seconds=settings.MINIO_EXPIRES)
         else:
@@ -420,7 +435,11 @@ async def get_file_summary(
     file_id: str,
     allow: bool = Depends(FileAuthorization("viewer")),
 ):
-    if (file := await FileDB.get(PydanticObjectId(file_id))) is not None:
+    if (
+        file := await FileDBViewList.find_one(
+            FileDBViewList.id == PydanticObjectId(file_id)
+        )
+    ) is not None:
         # TODO: Incrementing too often (3x per page view)
         # file.views += 1
         # await file.replace()
@@ -435,7 +454,11 @@ async def get_file_version_details(
     version_num: Optional[int] = 0,
     allow: bool = Depends(FileAuthorization("viewer")),
 ):
-    if (file := await FileDB.get(PydanticObjectId(file_id))) is not None:
+    if (
+        file := await FileDBViewList.find_one(
+            FileDBViewList.id == PydanticObjectId(file_id)
+        )
+    ) is not None:
         # TODO: Incrementing too often (3x per page view)
         file_vers = await FileVersionDB.find_one(
             FileVersionDB.file_id == ObjectId(file_id),
@@ -458,7 +481,11 @@ async def get_file_versions(
     limit: int = 20,
     allow: bool = Depends(FileAuthorization("viewer")),
 ):
-    if (file := await FileDB.get(PydanticObjectId(file_id))) is not None:
+    if (
+        file := await FileDBViewList.find_one(
+            FileDBViewList.id == PydanticObjectId(file_id)
+        )
+    ) is not None:
         mongo_versions = []
         if file.storage_type == StorageType.MINIO:
             async for ver in (
@@ -537,7 +564,11 @@ async def download_file_thumbnail(
     allow: bool = Depends(FileAuthorization("viewer")),
 ):
     # If file exists in MongoDB, download from Minio
-    if (file := await FileDB.get(PydanticObjectId(file_id))) is not None:
+    if (
+        file := await FileDBViewList.find_one(
+            FileDBViewList.id == PydanticObjectId(file_id)
+        )
+    ) is not None:
         if file.thumbnail_id is not None:
             content = fs.get_object(settings.MINIO_BUCKET_NAME, str(file.thumbnail_id))
         else:

@@ -60,7 +60,7 @@ import config from "../../app.config";
 import { AuthWrapper } from "../auth/AuthWrapper";
 import { EditLicenseModal } from "./EditLicenseModal";
 import { fetchStandardLicenseUrl } from "../../utils/licenses";
-import { authCheck } from "../../utils/common";
+import { authCheck, frozenCheck } from "../../utils/common";
 import { DatasetVersions } from "./DatasetVersions";
 
 export const Dataset = (): JSX.Element => {
@@ -346,11 +346,13 @@ export const Dataset = (): JSX.Element => {
 							icon={<BuildIcon />}
 							iconPosition="start"
 							sx={
-								!authCheck(adminMode, datasetRole.role, [
-									"owner",
-									"editor",
-									"uploader",
-								])
+								frozenCheck(dataset.frozen, dataset.frozen_version_num)
+									? { display: "none" }
+									: !authCheck(adminMode, datasetRole.role, [
+											"owner",
+											"editor",
+											"uploader",
+									  ])
 									? { display: "none" }
 									: TabStyle
 							}
@@ -361,7 +363,11 @@ export const Dataset = (): JSX.Element => {
 						<Tab
 							icon={<HistoryIcon />}
 							iconPosition="start"
-							sx={TabStyle}
+							sx={
+								frozenCheck(dataset.frozen, dataset.frozen_version_num)
+									? { display: "none" }
+									: TabStyle
+							}
 							label="Extraction History"
 							{...a11yProps(4)}
 							disabled={false}
@@ -369,7 +375,11 @@ export const Dataset = (): JSX.Element => {
 						<Tab
 							icon={<VisibilityIcon />}
 							iconPosition="start"
-							sx={TabStyle}
+							sx={
+								frozenCheck(dataset.frozen, dataset.frozen_version_num)
+									? { display: "none" }
+									: TabStyle
+							}
 							label="Visualizations"
 							{...a11yProps(5)}
 							disabled={false}
@@ -378,13 +388,15 @@ export const Dataset = (): JSX.Element => {
 							icon={<ShareIcon />}
 							iconPosition="start"
 							sx={
-								authCheck(adminMode, datasetRole.role, [
-									"owner",
-									"editor",
-									"uploader",
-								])
-									? TabStyle
-									: { display: "none" }
+								frozenCheck(dataset.frozen, dataset.frozen_version_num)
+									? { display: "none" }
+									: !authCheck(adminMode, datasetRole.role, [
+											"owner",
+											"editor",
+											"uploader",
+									  ])
+									? { display: "none" }
+									: TabStyle
 							}
 							label="Sharing"
 							{...a11yProps(6)}
