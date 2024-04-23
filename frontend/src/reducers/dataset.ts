@@ -4,8 +4,9 @@ import {
 	FOLDER_ADDED,
 	FOLDER_UPDATED,
 	FREEZE_DATASET,
+	GET_FREEZE_DATASET,
 	GET_FREEZE_DATASET_LATEST_VERSION_NUM,
-	GET_FREEZE_DATASET_VERSION,
+	GET_FREEZE_DATASETS,
 	RECEIVE_DATASET_ABOUT,
 	RECEIVE_DATASET_LICENSE,
 	RECEIVE_DATASET_ROLES,
@@ -51,6 +52,10 @@ const defaultState: DatasetState = {
 	},
 	about: <DatasetOut>{ creator: <UserOut>{} },
 	frozenDataset: <DatasetFreezeOut>{ creator: <UserOut>{} },
+	frozenDatasets: <Paged>{
+		metadata: <PageMetadata>{},
+		data: <DatasetFreezeOut>[],
+	},
 	latestFrozenVersionNum: -999,
 	datasetRole: <AuthorizationBase>{},
 	datasets: <Paged>{ metadata: <PageMetadata>{}, data: <DatasetOut[]>[] },
@@ -126,8 +131,12 @@ const dataset = (state = defaultState, action: DataAction) => {
 			return Object.assign({}, state, {
 				latestFrozenVersionNum: action.latestFrozenVersionNum,
 			});
-		case GET_FREEZE_DATASET_VERSION:
+		case GET_FREEZE_DATASET:
 			return Object.assign({}, state, { frozenDataset: action.frozenDataset });
+		case GET_FREEZE_DATASETS:
+			return Object.assign({}, state, {
+				frozenDatasets: action.frozenDatasets,
+			});
 		case RECEIVE_DATASETS:
 			return Object.assign({}, state, { datasets: action.datasets });
 		case CREATE_DATASET:

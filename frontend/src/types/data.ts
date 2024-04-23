@@ -129,6 +129,7 @@ export interface DatasetState {
 	newFiles: FileOut[];
 	about: DatasetOut;
 	frozenDataset: DatasetFreezeOut;
+	frozenDatasets: Paged;
 	latestFrozenVersionNum: number;
 	datasetRole: AuthorizationBase;
 	roles: DatasetRoles;

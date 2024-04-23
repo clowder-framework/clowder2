@@ -232,9 +232,9 @@ export function getFreezeDatasetLatest(datasetId) {
 	};
 }
 
-export const GET_FREEZE_DATASET_VERSION = "GET_FREEZE_DATASET_VERSION";
+export const GET_FREEZE_DATASET = "GET_FREEZE_DATASET";
 
-export function getFreezeDatasetVersion(datasetId, frozenVersionNum) {
+export function getFreezeDataset(datasetId, frozenVersionNum) {
 	return (dispatch) => {
 		return V2.DatasetsService.getFreezeDatasetVersionApiV2DatasetsDatasetIdFreezeFrozenVersionNumGet(
 			datasetId,
@@ -242,7 +242,7 @@ export function getFreezeDatasetVersion(datasetId, frozenVersionNum) {
 		)
 			.then((json) => {
 				dispatch({
-					type: GET_FREEZE_DATASET_VERSION,
+					type: GET_FREEZE_DATASET,
 					frozenDataset: json,
 					receivedAt: Date.now(),
 				});
@@ -254,7 +254,35 @@ export function getFreezeDatasetVersion(datasetId, frozenVersionNum) {
 				dispatch(
 					handleErrorsAuthorization(
 						reason,
-						getFreezeDatasetVersion(datasetId, frozenVersionNum)
+						getFreezeDataset(datasetId, frozenVersionNum)
+					)
+				);
+			});
+	};
+}
+
+export const GET_FREEZE_DATASETS = "GET_FREEZE_DATASETS";
+
+export function getFreezeDatasets(datasetId, skip = 0, limit = 21) {
+	return (dispatch) => {
+		return V2.DatasetsService.getFreezeDatasetsApiV2DatasetsDatasetIdFreezeGet(
+			datasetId
+		)
+			.then((json) => {
+				dispatch({
+					type: GET_FREEZE_DATASET,
+					frozenDatasets: json,
+					receivedAt: Date.now(),
+				});
+			})
+			.then(() => {
+				dispatch(resetFailedReason());
+			})
+			.catch((reason) => {
+				dispatch(
+					handleErrorsAuthorization(
+						reason,
+						getFreezeDatasets(datasetId, skip, limit)
 					)
 				);
 			});

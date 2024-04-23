@@ -27,7 +27,7 @@ import {
 	fetchDatasetLicense,
 	fetchFoldersFilesInDataset as fetchFoldersFilesInDatasetAction,
 	getFreezeDatasetLatest as getFreezeDatasetLatestAction,
-	getFreezeDatasetVersion as getFreezeDatasetVersionAction,
+	getFreezeDatasetVersion as getFreezeDatasetVersion,
 } from "../../actions/dataset";
 import { fetchFolderPath } from "../../actions/folder";
 
@@ -115,10 +115,10 @@ export const Dataset = (): JSX.Element => {
 
 	const getFreezeDatasetLatestVersionNum = (datasetId: string | undefined) =>
 		dispatch(getFreezeDatasetLatestAction(datasetId));
-	const getFreezeDatasetVersion = (
+	const getFreezeDataset = (
 		datasetId: string | undefined,
 		frozenVersionNum: string
-	) => dispatch(getFreezeDatasetVersionAction(datasetId, frozenVersionNum));
+	) => dispatch(getFreezeDatasetVersion(datasetId, frozenVersionNum));
 
 	// mapStateToProps
 	const dataset = useSelector((state: RootState) => state.dataset.about);
@@ -593,7 +593,7 @@ export const Dataset = (): JSX.Element => {
 							value={selectedDatasetVersionNum.toString()}
 							onChange={(event) => {
 								setSelectedDatasetVersionNum(event.target.value);
-								getFreezeDatasetVersion(datasetId, event.target.value);
+								getFreezeDataset(datasetId, event.target.value);
 								setSnackBarMessage(
 									`Viewing dataset version ${event.target.value}.`
 								);

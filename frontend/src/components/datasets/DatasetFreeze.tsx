@@ -20,7 +20,7 @@ import {
 	fetchDatasetLicense,
 	fetchFoldersFilesInDataset as fetchFoldersFilesInDatasetAction,
 	getFreezeDatasetLatest as getFreezeDatasetLatestAction,
-	getFreezeDatasetVersion as getFreezeDatasetVersionAction,
+	getFreezeDatasetVersion as getFreezeDatasetVersion,
 } from "../../actions/dataset";
 import { fetchFolderPath } from "../../actions/folder";
 
@@ -74,10 +74,10 @@ export const DatasetFreeze = (): JSX.Element => {
 
 	const getFreezeDatasetLatestVersionNum = (datasetId: string | undefined) =>
 		dispatch(getFreezeDatasetLatestAction(datasetId));
-	const getFreezeDatasetVersion = (
+	const getFreezeDataset = (
 		datasetId: string | undefined,
 		frozenVersionNum: string
-	) => dispatch(getFreezeDatasetVersionAction(datasetId, frozenVersionNum));
+	) => dispatch(getFreezeDatasetVersion(datasetId, frozenVersionNum));
 
 	// mapStateToProps
 	const latestFrozenVersionNum = useSelector(
@@ -131,7 +131,7 @@ export const DatasetFreeze = (): JSX.Element => {
 
 	useEffect(() => {
 		getFreezeDatasetLatestVersionNum(datasetId);
-		getFreezeDatasetVersion(datasetId, frozenVersionNum);
+		getFreezeDataset(datasetId, frozenVersionNum);
 	}, []);
 
 	useEffect(() => {
