@@ -38,7 +38,8 @@ def create_local_user(local_user_v1):
     first_name = user_v1['firstName']
     last_name = user_v1['lastName']
     email = user_v1['email']
-    password = fake.password(20)
+    # password = fake.password(20)
+    password = 'Password123&'
     user_json = {
         "email": email,
         "password": password,
@@ -56,9 +57,13 @@ users_v1 = get_clowder_v1_users()
 
 for user_v1 in users_v1:
     print(user_v1)
+    email = user_v1['email']
+    firstName = user_v1['firstName']
+    lastName = user_v1['lastName']
+
     id_provider = user_v1['identityProvider']
     if '[Local Account]' in user_v1['identityProvider']:
-        new_user_api_key = generate_user_api_key(user_v1)
+        user_v2 = create_local_user(user_v1)
     else:
         print("not a local account")
 
