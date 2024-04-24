@@ -11,7 +11,6 @@ import {
 	Link,
 	Pagination,
 	Snackbar,
-	Stack,
 	Tab,
 	Tabs,
 	Typography,
@@ -294,32 +293,24 @@ export const Dataset = (): JSX.Element => {
 			<Grid container>
 				{/*title*/}
 				<Grid item xs={8} sx={{ display: "flex", alignItems: "center" }}>
-					<Stack>
-						<Box
-							sx={{
-								display: "inline-flex",
-								justifyContent: "space-between",
-								alignItems: "baseline",
-							}}
-						>
-							<Typography variant="h3" paragraph>
-								{dataset["name"]}
-							</Typography>
-							{frozenCheck(dataset.frozen, dataset.frozen_version_num) ? (
-								<FreezeVersionChip
-									frozenVersionNum={dataset.frozen_version_num}
-									frozen={dataset.frozen}
-								/>
-							) : (
-								<></>
-							)}
-						</Box>
-						<Box>
-							<Typography variant="body1" paragraph>
-								{dataset["description"]}
-							</Typography>
-						</Box>
-					</Stack>
+					<Grid container spacing={2} alignItems="flex-start">
+						<Grid item>
+							<FreezeVersionChip
+								frozenVersionNum={dataset.frozen_version_num}
+								frozen={dataset.frozen}
+							/>
+						</Grid>
+						<Grid item xs>
+							<Box>
+								<Typography variant="h5" paragraph sx={{ marginBottom: 0 }}>
+									{dataset["name"]}
+								</Typography>
+								<Typography variant="body1" paragraph>
+									{dataset["description"]}
+								</Typography>
+							</Box>
+						</Grid>
+					</Grid>
 				</Grid>
 				{/*actions*/}
 				<Grid item xs={4} sx={{ display: "flex-top", alignItems: "center" }}>

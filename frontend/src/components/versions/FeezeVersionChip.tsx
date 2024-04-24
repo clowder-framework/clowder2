@@ -1,6 +1,6 @@
 import React from "react";
 import { Box, Tooltip } from "@mui/material";
-import { ClowderVersionTextLight } from "../styledComponents/ClowderVersionText";
+import { ClowderVersionPill } from "../styledComponents/ClowderVersionText";
 
 type FreezeVersionChipProps = {
 	frozen: boolean | undefined;
@@ -15,15 +15,13 @@ export function FreezeVersionChip(props: FreezeVersionChipProps) {
 			{frozen && frozenVersionNum && frozenVersionNum > 0 ? (
 				<Box sx={{ display: "flex", alignItems: "end" }}>
 					<Tooltip title="This is a historical version.">
-						<ClowderVersionTextLight>
-							v{frozenVersionNum}
-						</ClowderVersionTextLight>
+						<ClowderVersionPill>v{frozenVersionNum}</ClowderVersionPill>
 					</Tooltip>
 				</Box>
 			) : (
 				<Box sx={{ display: "flex", alignItems: "end" }}>
 					<Tooltip title="This is a current draft.">
-						<ClowderVersionTextLight>current</ClowderVersionTextLight>
+						<ClowderVersionPill>Now</ClowderVersionPill>
 					</Tooltip>
 				</Box>
 			)}

@@ -18,3 +18,12 @@ export const ClowderVersionTextDark = styled(Typography)({
 	borderRadius: "5px",
 	padding: "0 5px",
 });
+
+export const ClowderVersionPill = styled(Typography)({
+	backgroundColor: "#eeeeee",
+	color: theme.palette.info.main,
+	fontSize: "1.5rem",
+	borderRadius: "5px",
+	padding: "0.5em",
+	textTransform: "uppercase",
+});
