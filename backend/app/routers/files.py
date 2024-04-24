@@ -10,6 +10,7 @@ from app.keycloak_auth import get_current_user, get_token
 from app.models.files import (
     FileDB,
     FileDBViewList,
+    FileFreezeDB,
     FileOut,
     FileVersion,
     FileVersionDB,
@@ -306,17 +307,24 @@ async def download_file(
             FileDBViewList.id == PydanticObjectId(file_id)
         )
     ) is not None:
+        # find the bytes id
+        # if it's working draft file_id == origin_id
+        # if it's published origin_id points to the raw bytes
+        bytes_file_id = str(file.origin_id) if file.origin_id else str(file.id)
+
         if file.storage_type == StorageType.MINIO:
             if version is not None:
                 # Version is specified, so get the minio ID from versions table if possible
                 file_vers = await FileVersionDB.find_one(
-                    FileVersionDB.file_id == ObjectId(file_id),
+                    FileVersionDB.file_id == ObjectId(bytes_file_id),
                     FileVersionDB.version_num == version,
                 )
                 if file_vers is not None:
                     vers = FileVersion(**file_vers.dict())
                     content = fs.get_object(
-                        settings.MINIO_BUCKET_NAME, file_id, version_id=vers.version_id
+                        settings.MINIO_BUCKET_NAME,
+                        bytes_file_id,
+                        version_id=vers.version_id,
                     )
                 else:
                     raise HTTPException(
@@ -325,7 +333,7 @@ async def download_file(
                     )
             else:
                 # If no version specified, get latest version directly
-                content = fs.get_object(settings.MINIO_BUCKET_NAME, file_id)
+                content = fs.get_object(settings.MINIO_BUCKET_NAME, bytes_file_id)
 
             # Get content type & open file stream
             response = StreamingResponse(
@@ -350,7 +358,20 @@ async def download_file(
         if response:
             if increment:
                 # Increment download count
-                await file.update(Inc({FileDB.downloads: 1}))
+                if (
+                    file := await FileDB.find_one(
+                        FileDB.id == PydanticObjectId(file_id)
+                    )
+                ) is not None:
+                    await file.update(Inc({FileDB.downloads: 1}))
+
+                if (
+                    file := await FileFreezeDB.find_one(
+                        FileFreezeDB.id == PydanticObjectId(file_id)
+                    )
+                ) is not None:
+                    await file.update(Inc({FileFreezeDB.downloads: 1}))
+
             return response
 
     else:

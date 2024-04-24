@@ -14,7 +14,7 @@ export function FreezeVersionChip(props: FreezeVersionChipProps) {
 		<>
 			{frozen && frozenVersionNum && frozenVersionNum > 0 ? (
 				<Box sx={{ display: "flex", alignItems: "end" }}>
-					<Tooltip title="This is frozen version.">
+					<Tooltip title="This is a historical version.">
 						<ClowderVersionTextLight>
 							v{frozenVersionNum}
 						</ClowderVersionTextLight>
@@ -22,7 +22,7 @@ export function FreezeVersionChip(props: FreezeVersionChipProps) {
 				</Box>
 			) : (
 				<Box sx={{ display: "flex", alignItems: "end" }}>
-					<Tooltip title="This is working draft.">
+					<Tooltip title="This is a current draft.">
 						<ClowderVersionTextLight>current</ClowderVersionTextLight>
 					</Tooltip>
 				</Box>

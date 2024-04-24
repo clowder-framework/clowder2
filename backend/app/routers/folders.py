@@ -1,4 +1,4 @@
-from app.models.folders import FolderDB, FolderDBViewList
+from app.models.folders import FolderDBViewList
 from beanie import PydanticObjectId
 from bson import ObjectId
 from fastapi import APIRouter, HTTPException
@@ -18,8 +18,8 @@ async def download_folder(
         current_folder_id = folder_id
         # TODO switch to $graphLookup
         while (
-            current_folder := await FolderDB.find_one(
-                FolderDB.id == ObjectId(current_folder_id)
+            current_folder := await FolderDBViewList.find_one(
+                FolderDBViewList.id == ObjectId(current_folder_id)
             )
         ) is not None:
             folder_info = {
@@ -30,4 +30,4 @@ async def download_folder(
             current_folder_id = current_folder.parent_folder
         return path
     else:
-        raise HTTPException(status_code=404, detail=f"File {folder_id} not found")
+        raise HTTPException(status_code=404, detail=f"Folder {folder_id} not found")
