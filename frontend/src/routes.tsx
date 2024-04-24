@@ -41,6 +41,8 @@ import { ManageUsers } from "./components/users/ManageUsers";
 import config from "./app.config";
 import { MetadataDefinitions } from "./components/metadata/MetadataDefinitions";
 import { MetadataDefinitionEntry } from "./components/metadata/MetadataDefinitionEntry";
+import {Listeners} from "./components/listeners/Listeners";
+import {AllListeners} from "./components/listeners/AllListeners";
 
 // https://dev.to/iamandrewluca/private-route-in-react-router-v6-lg5
 const PrivateRoute = (props): JSX.Element => {
@@ -228,6 +230,14 @@ export const AppRoutes = (): JSX.Element => {
 					element={
 						<PrivateRoute>
 							<ExtractionHistory />
+						</PrivateRoute>
+					}
+				/>
+				<Route
+					path="/listeners"
+					element={
+						<PrivateRoute>
+							<AllListeners />
 						</PrivateRoute>
 					}
 				/>

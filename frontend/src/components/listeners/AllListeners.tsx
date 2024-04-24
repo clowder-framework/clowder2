@@ -1,10 +1,10 @@
 import React, { ChangeEvent, useEffect, useState } from "react";
 import {
-	Box,
+	Box, Checkbox,
 	Divider,
 	FormControl,
 	FormControlLabel,
-	Grid,
+	Grid, Input,
 	InputLabel,
 	List,
 	MenuItem,
@@ -20,22 +20,21 @@ import {
 	fetchListenerCategories,
 	fetchListenerLabels,
 	fetchListeners,
-	queryListeners,
+	queryListeners, toggleActiveFlagListener,
 } from "../../actions/listeners";
 import ListenerItem from "./ListenerItem";
 import SubmitExtraction from "./SubmitExtraction";
 import { capitalize } from "../../utils/common";
 import config from "../../app.config";
 import { GenericSearchBox } from "../search/GenericSearchBox";
+import Layout from "../Layout";
 
 type ListenerProps = {
-	fileId?: string;
-	datasetId?: string;
 	process?: string;
 };
 
-export function Listeners(props: ListenerProps) {
-	const { fileId, datasetId, process } = props;
+export function AllListeners(props: ListenerProps) {
+	const {process } = props;
 	// Redux connect equivalent
 	const dispatch = useDispatch();
 	const listListeners = (
@@ -67,6 +66,8 @@ export function Listeners(props: ListenerProps) {
 	) => dispatch(queryListeners(text, skip, limit, heartbeatInterval, process));
 	const listAvailableCategories = () => dispatch(fetchListenerCategories());
 	const listAvailableLabels = () => dispatch(fetchListenerLabels());
+	const toggleActiveFlag = (id: string, active: boolean) =>
+		dispatch(toggleActiveFlagListener(id, active));
 
 	const listeners = useSelector(
 		(state: RootState) => state.listener.listeners.data
@@ -83,7 +84,7 @@ export function Listeners(props: ListenerProps) {
 	const [limit] = useState<number>(config.defaultExtractors);
 	const [openSubmitExtraction, setOpenSubmitExtraction] =
 		useState<boolean>(false);
-	const [infoOnly, setInfoOnly] = useState<boolean>(false);
+	const [infoOnly, setInfoOnly] = useState<boolean>(true);
 	const [selectedExtractor, setSelectedExtractor] = useState();
 	const [searchText, setSearchText] = useState<string>("");
 	const [selectedCategory, setSelectedCategory] = useState("");
@@ -210,131 +211,143 @@ export function Listeners(props: ListenerProps) {
 		setOpenSubmitExtraction(false);
 	};
 
+	const setActiveListeners = (event: React.ChangeEvent<HTMLInputElement>) => {
+		console.log("setting the active flag for", event.target.id, " : ", event.target.value)
+		toggleActiveFlag(event.target.id, event.target.value)
+	};
+
 	return (
-		<>
-			<Grid container>
-				<Grid item xs={12}>
-					{/*searchbox*/}
-					<GenericSearchBox
-						title="Search for Extractors"
-						searchPrompt="Keyword for extractor"
-						setSearchTerm={setSearchText}
-						searchTerm={searchText}
-						searchFunction={handleListenerSearch}
-						skip={(currPageNum - 1) * limit}
-						limit={limit}
-					/>
+		<Layout>
+			<div className="outer-container">
+				<Grid container>
+					<Grid item xs={12}>
+						{/*searchbox*/}
+						<GenericSearchBox
+							title="Search for Extractors"
+							searchPrompt="Keyword for extractor"
+							setSearchTerm={setSearchText}
+							searchTerm={searchText}
+							searchFunction={handleListenerSearch}
+							skip={(currPageNum - 1) * limit}
+							limit={limit}
+						/>
+					</Grid>
 				</Grid>
-			</Grid>
-			<Grid
-				container
-				sx={{ padding: "0 0 1em 0", justifyContent: "space-between" }}
-				spacing={3}
-			>
-				{/*categories*/}
-				<Grid item xs={5}>
-					<FormControl variant="standard" sx={{ width: "100%" }}>
-						<InputLabel id="label-categories">Filter by category</InputLabel>
-						<Select
-							defaultValue=""
-							labelId="label-categories"
-							id="label-categories"
-							value={selectedCategory}
-							onChange={handleCategoryChange}
-							label="Categories"
-						>
-							<MenuItem value="">All</MenuItem>
-							{categories.map((category: string) => {
-								return (
-									<MenuItem value={category}>{capitalize(category)}</MenuItem>
-								);
-							})}
-						</Select>
-					</FormControl>
-				</Grid>
-				<Grid item xs={5}>
-					<FormControl variant="standard" sx={{ width: "100%" }}>
-						<InputLabel id="label-categories">Filter by labels</InputLabel>
-						<Select
-							defaultValue=""
-							labelId="label-labels"
-							id="label-labels"
-							value={selectedLabel}
-							onChange={handleLabelChange}
-							label="Labels"
-						>
-							<MenuItem value="">All</MenuItem>
-							{labels.map((label: string) => {
-								return <MenuItem value={label}>{capitalize(label)}</MenuItem>;
-							})}
-						</Select>
-					</FormControl>
-				</Grid>
-				<Grid item xs={2}>
-					<FormControlLabel
-						sx={{ margin: "auto auto -2.5em auto" }}
-						control={
-							<Switch
-								color="primary"
-								checked={aliveOnly}
-								onChange={() => {
-									setAliveOnly(!aliveOnly);
-								}}
-							/>
-						}
-						label="Alive Extractors"
-					/>
-				</Grid>
-			</Grid>
-			<Grid container>
-				<Grid item xs={12}>
-					<Paper sx={{ width: "100%", mb: 2, padding: "3em" }}>
-						<List>
-							{listeners !== undefined ? (
-								listeners.map((listener) => {
+				<Grid
+					container
+					sx={{padding: "0 0 1em 0", justifyContent: "space-between"}}
+					spacing={3}
+				>
+					{/*categories*/}
+					<Grid item xs={5}>
+						<FormControl variant="standard" sx={{width: "100%"}}>
+							<InputLabel id="label-categories">Filter by category</InputLabel>
+							<Select
+								defaultValue=""
+								labelId="label-categories"
+								id="label-categories"
+								value={selectedCategory}
+								onChange={handleCategoryChange}
+								label="Categories"
+							>
+								<MenuItem value="">All</MenuItem>
+								{categories.map((category: string) => {
 									return (
-										<>
-											<ListenerItem
-												key={listener.id}
-												id={listener.id}
-												fileId={fileId}
-												datasetId={datasetId}
-												extractor={listener}
-												extractorName={listener.name}
-												extractorDescription={listener.description}
-												setInfoOnly={setInfoOnly}
-												setOpenSubmitExtraction={setOpenSubmitExtraction}
-												setSelectedExtractor={setSelectedExtractor}
-												showSubmit={true}
-											/>
-											<Divider />
-										</>
+										<MenuItem value={category}>{capitalize(category)}</MenuItem>
 									);
-								})
-							) : (
-								<></>
-							)}
-						</List>
-						<Box display="flex" justifyContent="center" sx={{ m: 1 }}>
-							<Pagination
-								count={Math.ceil(pageMetadata.total_count / limit)}
-								page={currPageNum}
-								onChange={handlePageChange}
-								shape="rounded"
-								variant="outlined"
-							/>
-						</Box>
-					</Paper>
+								})}
+							</Select>
+						</FormControl>
+					</Grid>
+					<Grid item xs={5}>
+						<FormControl variant="standard" sx={{width: "100%"}}>
+							<InputLabel id="label-categories">Filter by labels</InputLabel>
+							<Select
+								defaultValue=""
+								labelId="label-labels"
+								id="label-labels"
+								value={selectedLabel}
+								onChange={handleLabelChange}
+								label="Labels"
+							>
+								<MenuItem value="">All</MenuItem>
+								{labels.map((label: string) => {
+									return <MenuItem value={label}>{capitalize(label)}</MenuItem>;
+								})}
+							</Select>
+						</FormControl>
+					</Grid>
+					<Grid item xs={2}>
+						<FormControlLabel
+							sx={{margin: "auto auto -2.5em auto"}}
+							control={
+								<Switch
+									color="primary"
+									checked={aliveOnly}
+									onChange={() => {
+										setAliveOnly(!aliveOnly);
+									}}
+								/>
+							}
+							label="Alive Extractors"
+						/>
+					</Grid>
 				</Grid>
-			</Grid>
-			<SubmitExtraction
-				fileId={fileId}
-				datasetId={datasetId}
-				open={openSubmitExtraction}
-				infoOnly={infoOnly}
-				handleClose={handleSubmitExtractionClose}
-				selectedExtractor={selectedExtractor}
-			/>
-		</>
-	);
+				<Grid container>
+					<Grid item xs={12}>
+						<Paper sx={{width: "100%", mb: 2, padding: "3em"}}>
+							<List>
+								{listeners !== undefined ? (
+									listeners.map((listener) => {
+										return (
+											<div style={{ display: 'flex', alignItems: 'baseline' }}>
+												<Checkbox id={listener.id} style={{ marginRight: '50px' }}
+													   checked={listener.active}
+													   onChange={setActiveListeners}
+														  value = {!listener.active}
+												/>
+												<ListenerItem
+													key={listener.id}
+													id={listener.id}
+													fileId={null}
+													datasetId={null}
+													setInfoOnly={setInfoOnly}
+													extractor={listener}
+													extractorName={listener.name}
+													extractorDescription={listener.description}
+													setOpenSubmitExtraction={setOpenSubmitExtraction}
+													setSelectedExtractor={setSelectedExtractor}
+													showSubmit={false}
+												/>
+												<Divider/>
+											</div>
+										);
+									})
+								) : (
+									<></>
+								)}
+							</List>
+							<Box display="flex" justifyContent="center" sx={{m: 1}}>
+								<Pagination
+									count={Math.ceil(pageMetadata.total_count / limit)}
+									page={currPageNum}
+									onChange={handlePageChange}
+									shape="rounded"
+									variant="outlined"
+								/>
+							</Box>
+						</Paper>
+					</Grid>
+				</Grid>
+				<SubmitExtraction
+					fileId={null}
+					datasetId={null}
+					open={openSubmitExtraction}
+					infoOnly={infoOnly}
+					handleClose={handleSubmitExtractionClose}
+					selectedExtractor={selectedExtractor}
+				/>
+			</div>
+		</Layout>
+);
 }

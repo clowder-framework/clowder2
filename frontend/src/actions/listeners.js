@@ -49,6 +49,26 @@ export function fetchListeners(
 	};
 }
 
+export const TOGGLE_ACTIVE_FLAG_LISTENER = "TOGGLE_ACTIVE_FLAG_LISTENER";
+export function toggleActiveFlagListener(id, value) {
+	return (dispatch) => {
+		return V2.ListenersService.setActiveFlagApiV2ListenersListenerIdTogglePut(id, value).then((json) => {
+			// dispatch({
+			// 		type: TOGGLE_ACTIVE_FLAG_LISTENER,
+			// 		listener: json,
+			// 	});
+			dispatch(fetchListeners());
+		}).catch((reason) => {
+				dispatch(
+					handleErrors(
+						reason,
+						toggleActiveFlagListener(id, value)
+					)
+				);
+			});
+	}
+}
+
 export const SEARCH_LISTENERS = "SEARCH_LISTENERS";
 
 export function queryListeners(
