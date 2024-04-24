@@ -31,20 +31,49 @@ class FolderFileViewList(View, FileBaseCommon):
     parent_folder: Optional[PydanticObjectId]
     auth: List[AuthorizationDB]
 
+    # for dataset versioning
+    origin_id: Optional[PydanticObjectId] = None
+    frozen: bool = False
+
     class Settings:
         source = FileDB
         name = "folders_files_view"
         pipeline = [
-            {"$addFields": {"object_type": "file"}},
+            {
+                "$addFields": {
+                    "object_type": "file",
+                    "frozen": False,
+                    "origin_id": "$_id",
+                }
+            },
             {
                 "$unionWith": {
                     "coll": "folders",
-                    "pipeline": [{"$addFields": {"object_type": "folder"}}],
+                    "pipeline": [
+                        {
+                            "$addFields": {
+                                "object_type": "folder",
+                                "frozen": False,
+                                "origin_id": "$_id",
+                            }
+                        }
+                    ],
                 }
             },
             {
                 "$unionWith": {
                     "coll": "files_freeze",
+                    "pipeline": [
+                        {"$addFields": {"object_type": "file", "frozen": True}}
+                    ],
+                }
+            },
+            {
+                "$unionWith": {
+                    "coll": "folders_freeze",
+                    "pipeline": [
+                        {"$addFields": {"object_type": "folder", "frozen": True}}
+                    ],
                 }
             },
             {

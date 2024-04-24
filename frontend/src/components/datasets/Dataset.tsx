@@ -63,6 +63,7 @@ import { fetchStandardLicenseUrl } from "../../utils/licenses";
 import { authCheck, frozenCheck } from "../../utils/common";
 import { DatasetVersions } from "./DatasetVersions";
 import { FreezeVersionChip } from "../versions/FeezeVersionChip";
+import { FrozenWrapper } from "../auth/FrozenWrapper";
 
 export const Dataset = (): JSX.Element => {
 	// path parameter
@@ -464,22 +465,27 @@ export const Dataset = (): JSX.Element => {
 									resourceId={datasetId}
 									publicView={false}
 								/>
-								<AuthWrapper
-									currRole={datasetRole.role}
-									allowedRoles={["owner", "editor", "uploader"]}
+								<FrozenWrapper
+									frozen={dataset.frozen}
+									frozenVersionNum={dataset.frozen_version_num}
 								>
-									<Box textAlign="center">
-										<Button
-											variant="contained"
-											sx={{ m: 2 }}
-											onClick={() => {
-												setEnableAddMetadata(true);
-											}}
-										>
-											Add Metadata
-										</Button>
-									</Box>
-								</AuthWrapper>
+									<AuthWrapper
+										currRole={datasetRole.role}
+										allowedRoles={["owner", "editor", "uploader"]}
+									>
+										<Box textAlign="center">
+											<Button
+												variant="contained"
+												sx={{ m: 2 }}
+												onClick={() => {
+													setEnableAddMetadata(true);
+												}}
+											>
+												Add Metadata
+											</Button>
+										</Box>
+									</AuthWrapper>
+								</FrozenWrapper>
 							</>
 						)}
 					</TabPanel>

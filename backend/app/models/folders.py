@@ -27,6 +27,7 @@ class FolderBaseCommon(FolderBase):
     created: datetime = Field(default_factory=datetime.utcnow)
     modified: datetime = Field(default_factory=datetime.utcnow)
     object_type: str = "folder"
+    origin_id: Optional[PydanticObjectId] = None
 
 
 class FolderDB(Document, FolderBaseCommon):
@@ -43,20 +44,26 @@ class FolderFreezeDB(Document, FolderBaseCommon):
 
 class FolderDBViewList(View, FolderBase):
     id: PydanticObjectId = Field(None, alias="_id")  # necessary for Views
-    dataset_id: PydanticObjectId
-    parent_folder: Optional[PydanticObjectId]
-    creator: UserOut
-    created: datetime = Field(default_factory=datetime.utcnow)
-    modified: datetime = Field(default_factory=datetime.utcnow)
     auth: List[AuthorizationDB]
+
+    # for dataset versioning
+    origin_id: PydanticObjectId
+    frozen: bool = False
 
     class Settings:
         source = FolderDB
         name = "folders_view"
         pipeline = [
             {
+                "$addFields": {
+                    "frozen": False,
+                    "origin_id": "$_id",
+                }
+            },
+            {
                 "$unionWith": {
                     "coll": "folders_freeze",
+                    "pipeline": [{"$addFields": {"frozen": True}}],
                 }
             },
             {

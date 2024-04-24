@@ -36,5 +36,6 @@ export type FileOut = {
     storage_type?: StorageType;
     storage_path?: string;
     object_type?: string;
+    origin_id?: string;
     id?: string;
 }

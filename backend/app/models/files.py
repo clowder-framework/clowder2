@@ -1,7 +1,8 @@
 from datetime import datetime
 from enum import Enum, auto
-from typing import Optional
+from typing import List, Optional
 
+from app.models.authorization import AuthorizationDB
 from app.models.users import UserOut
 from beanie import Document, PydanticObjectId, View
 from pydantic import BaseModel, Field
@@ -85,6 +86,7 @@ class FileBaseCommon(FileBase):
     storage_type: StorageType = StorageType.MINIO
     storage_path: Optional[str]  # store URL or file path depending on storage_type
     object_type: str = "file"
+    origin_id: Optional[PydanticObjectId] = None
 
 
 class FileDB(Document, FileBaseCommon):
@@ -105,14 +107,26 @@ class FileFreezeDB(Document, FileBaseCommon):
 
 class FileDBViewList(View, FileBaseCommon):
     id: PydanticObjectId = Field(None, alias="_id")  # necessary for Views
+    auth: List[AuthorizationDB]
+
+    # for dataset versioning
+    origin_id: PydanticObjectId
+    frozen: bool = False
 
     class Settings:
         source = FileDB
         name = "files_view"
         pipeline = [
             {
+                "$addFields": {
+                    "frozen": False,
+                    "origin_id": "$_id",
+                }
+            },
+            {
                 "$unionWith": {
                     "coll": "files_freeze",
+                    "pipeline": [{"$addFields": {"frozen": True}}],
                 }
             },
             {

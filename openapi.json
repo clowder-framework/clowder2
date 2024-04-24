@@ -11105,6 +11105,14 @@
             "type": "string",
             "default": "file"
           },
+          "origin_id": {
+            "title": "Origin Id",
+            "type": "string",
+            "examples": [
+              "5eb7cf5a86d9755df3a6c593",
+              "5eb7cfb05e32e07750a1756a"
+            ]
+          },
           "id": {
             "title": "Id",
             "type": "string",
@@ -11222,6 +11230,14 @@
             "title": "Object Type",
             "type": "string",
             "default": "folder"
+          },
+          "origin_id": {
+            "title": "Origin Id",
+            "type": "string",
+            "examples": [
+              "5eb7cf5a86d9755df3a6c593",
+              "5eb7cfb05e32e07750a1756a"
+            ]
           },
           "id": {
             "title": "Id",

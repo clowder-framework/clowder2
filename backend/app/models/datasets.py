@@ -41,7 +41,7 @@ class DatasetBaseCommon(DatasetBase):
     user_views: int = 0
     downloads: int = 0
     thumbnail_id: Optional[PydanticObjectId] = None
-    origin_id: PydanticObjectId = None
+    origin_id: Optional[PydanticObjectId] = None
     standard_license: bool = True
     license_id: Optional[str] = None
 
@@ -82,15 +82,12 @@ class DatasetFreezeDB(Document, DatasetBaseCommon):
 
 class DatasetDBViewList(View, DatasetBaseCommon):
     id: PydanticObjectId = Field(None, alias="_id")  # necessary for Views
-    creator: UserOut
-    created: datetime = Field(default_factory=datetime.utcnow)
-    modified: datetime = Field(default_factory=datetime.utcnow)
     auth: List[AuthorizationDB]
-    thumbnail_id: Optional[PydanticObjectId] = None
-    status: str = DatasetStatus.PRIVATE.name
+
+    # for dataset versioning
+    origin_id: Optional[PydanticObjectId] = None
     frozen: bool = False
     frozen_version_num: int = -999
-    origin_id: PydanticObjectId = None
 
     class Settings:
         source = DatasetDB
