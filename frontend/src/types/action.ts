@@ -440,7 +440,6 @@ interface TOGGLE_ACTIVE_FLAG_LISTENER {
 	listener: LicenseOut;
 }
 
-
 interface SEARCH_LISTENERS {
 	type: "SEARCH_LISTENERS";
 	listeners: [];

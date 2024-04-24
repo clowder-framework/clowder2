@@ -1,10 +1,12 @@
 import React, { ChangeEvent, useEffect, useState } from "react";
 import {
-	Box, Checkbox,
+	Box,
+	Checkbox,
 	Divider,
 	FormControl,
 	FormControlLabel,
-	Grid, Input,
+	Grid,
+	Input,
 	InputLabel,
 	List,
 	MenuItem,
@@ -20,7 +22,8 @@ import {
 	fetchListenerCategories,
 	fetchListenerLabels,
 	fetchListeners,
-	queryListeners, toggleActiveFlagListener,
+	queryListeners,
+	toggleActiveFlagListener,
 } from "../../actions/listeners";
 import ListenerItem from "./ListenerItem";
 import SubmitExtraction from "./SubmitExtraction";
@@ -34,7 +37,7 @@ type ListenerProps = {
 };
 
 export function AllListeners(props: ListenerProps) {
-	const {process } = props;
+	const { process } = props;
 	// Redux connect equivalent
 	const dispatch = useDispatch();
 	const listListeners = (
@@ -212,8 +215,13 @@ export function AllListeners(props: ListenerProps) {
 	};
 
 	const setActiveListeners = (event: React.ChangeEvent<HTMLInputElement>) => {
-		console.log("setting the active flag for", event.target.id, " : ", event.target.value)
-		toggleActiveFlag(event.target.id, event.target.value)
+		console.log(
+			"setting the active flag for",
+			event.target.id,
+			" : ",
+			event.target.value
+		);
+		toggleActiveFlag(event.target.id, event.target.value);
 	};
 
 	return (
@@ -235,12 +243,12 @@ export function AllListeners(props: ListenerProps) {
 				</Grid>
 				<Grid
 					container
-					sx={{padding: "0 0 1em 0", justifyContent: "space-between"}}
+					sx={{ padding: "0 0 1em 0", justifyContent: "space-between" }}
 					spacing={3}
 				>
 					{/*categories*/}
 					<Grid item xs={5}>
-						<FormControl variant="standard" sx={{width: "100%"}}>
+						<FormControl variant="standard" sx={{ width: "100%" }}>
 							<InputLabel id="label-categories">Filter by category</InputLabel>
 							<Select
 								defaultValue=""
@@ -260,7 +268,7 @@ export function AllListeners(props: ListenerProps) {
 						</FormControl>
 					</Grid>
 					<Grid item xs={5}>
-						<FormControl variant="standard" sx={{width: "100%"}}>
+						<FormControl variant="standard" sx={{ width: "100%" }}>
 							<InputLabel id="label-categories">Filter by labels</InputLabel>
 							<Select
 								defaultValue=""
@@ -279,7 +287,7 @@ export function AllListeners(props: ListenerProps) {
 					</Grid>
 					<Grid item xs={2}>
 						<FormControlLabel
-							sx={{margin: "auto auto -2.5em auto"}}
+							sx={{ margin: "auto auto -2.5em auto" }}
 							control={
 								<Switch
 									color="primary"
@@ -295,16 +303,18 @@ export function AllListeners(props: ListenerProps) {
 				</Grid>
 				<Grid container>
 					<Grid item xs={12}>
-						<Paper sx={{width: "100%", mb: 2, padding: "3em"}}>
+						<Paper sx={{ width: "100%", mb: 2, padding: "3em" }}>
 							<List>
 								{listeners !== undefined ? (
 									listeners.map((listener) => {
 										return (
-											<div style={{ display: 'flex', alignItems: 'baseline' }}>
-												<Checkbox id={listener.id} style={{ marginRight: '50px' }}
-													   checked={listener.active}
-													   onChange={setActiveListeners}
-														  value = {!listener.active}
+											<div style={{ display: "flex", alignItems: "baseline" }}>
+												<Checkbox
+													id={listener.id}
+													style={{ marginRight: "50px" }}
+													checked={listener.active}
+													onChange={setActiveListeners}
+													value={!listener.active}
 												/>
 												<ListenerItem
 													key={listener.id}
@@ -319,7 +329,7 @@ export function AllListeners(props: ListenerProps) {
 													setSelectedExtractor={setSelectedExtractor}
 													showSubmit={false}
 												/>
-												<Divider/>
+												<Divider />
 											</div>
 										);
 									})
@@ -327,7 +337,7 @@ export function AllListeners(props: ListenerProps) {
 									<></>
 								)}
 							</List>
-							<Box display="flex" justifyContent="center" sx={{m: 1}}>
+							<Box display="flex" justifyContent="center" sx={{ m: 1 }}>
 								<Pagination
 									count={Math.ceil(pageMetadata.total_count / limit)}
 									page={currPageNum}
@@ -349,5 +359,5 @@ export function AllListeners(props: ListenerProps) {
 				/>
 			</div>
 		</Layout>
-);
+	);
 }

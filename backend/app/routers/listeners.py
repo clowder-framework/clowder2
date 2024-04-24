@@ -25,7 +25,7 @@ from bson import ObjectId
 from fastapi import APIRouter, Depends, HTTPException
 from packaging import version
 
-from backend.app.routers.authentication import get_admin_mode, get_admin
+from backend.app.routers.authentication import get_admin, get_admin_mode
 
 router = APIRouter()
 legacy_router = APIRouter()  # for back-compatibilty with v1 extractors
@@ -375,6 +375,7 @@ async def edit_listener(
             raise HTTPException(status_code=500, detail=e.args[0])
     raise HTTPException(status_code=404, detail=f"listener {listener_id} not found")
 
+
 @router.put("/{listener_id}/enable", response_model=EventListenerOut)
 async def enable_listener(
     listener_id: str,
@@ -389,7 +390,7 @@ async def enable_listener(
 
 
 @router.put("/{listener_id}/disable", response_model=EventListenerOut)
-async def enable_listener(
+async def disable_listener(
     listener_id: str,
     user_id=Depends(get_user),
 ):
@@ -400,20 +401,23 @@ async def enable_listener(
     """
     return set_active_flag(listener_id, False)
 
+
 @router.put("/{listener_id}/toggle", response_model=EventListenerOut)
 async def set_active_flag(
     listener_id: str,
     active: bool,
     admin=Depends(get_admin),
-    admin_mode: bool = Depends(get_admin_mode)
+    admin_mode: bool = Depends(get_admin_mode),
 ):
     """Enable an Event Listener. Only admins can enable listeners.
 
     Arguments:
         listener_id -- UUID of the listener to be enabled
     """
-    if not(admin and admin_mode):
-        raise HTTPException(status_code=403, detail=f"Only admins can enable/disable listeners")
+    if not (admin and admin_mode):
+        raise HTTPException(
+            status_code=403, detail="Only admins can enable/disable listeners"
+        )
     listener = await EventListenerDB.find_one(
         EventListenerDB.id == ObjectId(listener_id)
     )
