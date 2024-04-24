@@ -20,7 +20,12 @@ from app.models.listeners import (
     EventListenerJobUpdateViewList,
     EventListenerJobViewList,
 )
-from app.models.metadata import MetadataDB, MetadataDefinitionDB, MetadataFreezeDB
+from app.models.metadata import (
+    MetadataDB,
+    MetadataDBViewList,
+    MetadataDefinitionDB,
+    MetadataFreezeDB,
+)
 from app.models.thumbnails import ThumbnailDB
 from app.models.tokens import TokenDB
 from app.models.users import ListenerAPIKeyDB, UserAPIKeyDB, UserDB
@@ -261,6 +266,7 @@ async def startup_beanie():
             AuthorizationDB,
             MetadataDB,
             MetadataFreezeDB,
+            MetadataDBViewList,
             MetadataDefinitionDB,
             FolderDB,
             FolderFreezeDB,
@@ -269,6 +275,7 @@ async def startup_beanie():
             FileFreezeDB,
             FileVersionDB,
             FileDBViewList,
+            FolderFileViewList,
             FeedDB,
             EventListenerDB,
             EventListenerJobDB,
@@ -284,7 +291,6 @@ async def startup_beanie():
             VisualizationConfigDB,
             VisualizationDataDB,
             ThumbnailDB,
-            FolderFileViewList,
             LicenseDB,
         ],
         recreate_views=True,

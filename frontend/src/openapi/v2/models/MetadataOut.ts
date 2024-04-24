@@ -27,5 +27,6 @@ export type MetadataOut = {
     resource: MongoDBRef;
     agent: MetadataAgent;
     created?: string;
+    origin_id?: string;
     id?: string;
 }

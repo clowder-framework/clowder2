@@ -488,7 +488,20 @@ async def _freeze_folder(folder, new_frozen_dataset_id, parent_id_map=None):
     return frozen_folder
 
 
-async def _freeze_files_folders(dataset_id, new_frozen_dataset_id):
+async def _freeze_file_metadata(file, new_frozen_file_id):
+    file_metadata = await MetadataDB.find(
+        MetadataDB.resource.resource_id == ObjectId(file.id)
+    ).to_list()
+    for fm in file_metadata:
+        fm_data = fm.dict()
+        fm_data["origin_id"] = fm_data.pop("id")
+        fm_data["resource"]["resource_id"] = new_frozen_file_id
+        fm_data["frozen"] = True
+        frozen_metadata = MetadataFreezeDB(**fm_data)
+        await frozen_metadata.insert()
+
+
+async def _freeze_files_folders_metadata(dataset_id, new_frozen_dataset_id):
     files = await FileDB.find(FileDB.dataset_id == ObjectId(dataset_id)).to_list()
     for file in files:
         file_data = file.dict()
@@ -507,8 +520,11 @@ async def _freeze_files_folders(dataset_id, new_frozen_dataset_id):
         frozen_file = FileFreezeDB(**file_data)
         await frozen_file.insert()
 
+        # if there are associate metadata on the file
+        await _freeze_file_metadata(file, frozen_file.id)
 
-async def _freeze_metadata(dataset_id, new_frozen_dataset_id):
+
+async def _freeze_dataset_metadata(dataset_id, new_frozen_dataset_id):
     dataset_metadata = await MetadataDB.find(
         MetadataDB.resource.resource_id == ObjectId(dataset_id)
     ).to_list()
@@ -519,21 +535,6 @@ async def _freeze_metadata(dataset_id, new_frozen_dataset_id):
         dm_data["frozen"] = True
         frozen_metadata = MetadataFreezeDB(**dm_data)
         await frozen_metadata.insert()
-
-    files = await FileDBViewList.find(
-        FileDBViewList.dataset_id == ObjectId(dataset_id)
-    ).to_list()
-    for file in files:
-        file_metadata = await MetadataDB.find(
-            MetadataDB.resource.resource_id == ObjectId(file.id)
-        ).to_list()
-        for fm in file_metadata:
-            fm_data = fm.dict()
-            fm_data["origin_id"] = fm_data.pop("id")
-            fm_data["resource"]["resource_id"] = file.id
-            fm_data["frozen"] = True
-            frozen_metadata = MetadataFreezeDB(**fm_data)
-            await frozen_metadata.insert()
 
 
 @router.post("/{dataset_id}/freeze", response_model=DatasetFreezeOut)
@@ -572,11 +573,12 @@ async def freeze_dataset(
         frozen_dataset = DatasetFreezeDB(**frozen_dataset_data)
         await frozen_dataset.insert()
 
-        # metadata
-        await _freeze_metadata(dataset_id, frozen_dataset.id)
+        # dataset metadata
+        await _freeze_dataset_metadata(dataset_id, frozen_dataset.id)
 
-        # recursively freeze both files and folders
-        await _freeze_files_folders(dataset_id, frozen_dataset.id)
+        # recursively freeze both files, folders, and associate metadata (if any)
+        # TODO in the future need to add visualziation, thumbnails, and other associate data
+        await _freeze_files_folders_metadata(dataset_id, frozen_dataset.id)
 
         # Create authorization entry
         await AuthorizationDB(

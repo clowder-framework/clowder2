@@ -372,8 +372,9 @@ async def download_file(
                 status_code=400, detail=f"Unable to download {file_id}."
             )
 
-        if response and increment:
-            await _increment_file_downloads(file_id)
+        if response:
+            if increment:
+                await _increment_file_downloads(file_id)
 
             return response
 

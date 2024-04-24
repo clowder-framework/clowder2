@@ -7,7 +7,6 @@ import {
 	ListItemText,
 	Menu,
 	MenuItem,
-	Tooltip,
 } from "@mui/material";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import { ActionModal } from "../dialog/ActionModal";
@@ -172,19 +171,17 @@ export const OtherMenu = (props: ActionsMenuProps): JSX.Element => {
 					<ListItemText>Change Status</ListItemText>
 				</MenuItem>
 				<AuthWrapper currRole={datasetRole.role} allowedRoles={["owner"]}>
-					<Tooltip title="Published datasets are frozen and cannot be altered; updates require creating a new version.">
-						<MenuItem
-							onClick={() => {
-								handleOptionClose();
-								freezeDataset(datasetId);
-							}}
-						>
-							<ListItemIcon>
-								<LockIcon fontSize="small" />
-							</ListItemIcon>
-							Lock Version
-						</MenuItem>
-					</Tooltip>
+					<MenuItem
+						onClick={() => {
+							handleOptionClose();
+							freezeDataset(datasetId);
+						}}
+					>
+						<ListItemIcon>
+							<LockIcon fontSize="small" />
+						</ListItemIcon>
+						Lock Version
+					</MenuItem>
 				</AuthWrapper>
 				<AuthWrapper
 					currRole={datasetRole.role}

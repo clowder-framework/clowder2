@@ -10,6 +10,7 @@ from app.models.listeners import EventListenerDB
 from app.models.metadata import (
     MetadataAgent,
     MetadataDB,
+    MetadataDBViewList,
     MetadataDefinitionDB,
     MetadataDelete,
     MetadataIn,
@@ -250,15 +251,15 @@ async def get_dataset_metadata(
             DatasetDBViewList.id == PydanticObjectId(dataset_id)
         )
     ) is not None:
-        query = [MetadataDB.resource.resource_id == ObjectId(dataset_id)]
+        query = [MetadataDBViewList.resource.resource_id == ObjectId(dataset_id)]
 
         if listener_name is not None:
-            query.append(MetadataDB.agent.listener.name == listener_name)
+            query.append(MetadataDBViewList.agent.listener.name == listener_name)
         if listener_version is not None:
-            query.append(MetadataDB.agent.listener.version == listener_version)
+            query.append(MetadataDBViewList.agent.listener.version == listener_version)
 
         metadata = []
-        async for md in MetadataDB.find(*query):
+        async for md in MetadataDBViewList.find(*query):
             if md.definition is not None:
                 if (
                     md_def := await MetadataDefinitionDB.find_one(

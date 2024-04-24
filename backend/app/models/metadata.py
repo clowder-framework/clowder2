@@ -10,7 +10,7 @@ from app.models.listeners import (
 from app.models.mongomodel import MongoDBRef
 from app.models.users import UserOut
 from app.search.connect import insert_record, update_record
-from beanie import Document
+from beanie import Document, PydanticObjectId, View
 from elasticsearch import Elasticsearch, NotFoundError
 from fastapi import HTTPException
 from pydantic import AnyUrl, BaseModel, Field, validator
@@ -254,6 +254,7 @@ class MetadataBaseCommon(MetadataBase):
     resource: MongoDBRef
     agent: MetadataAgent
     created: datetime = Field(default_factory=datetime.utcnow)
+    origin_id: Optional[PydanticObjectId] = None
 
 
 class MetadataDB(Document, MetadataBaseCommon):
@@ -275,6 +276,12 @@ class MetadataFreezeDB(Document, MetadataBaseCommon):
 
     class Settings:
         name = "metadata_freeze"
+
+    @validator("resource")
+    def resource_dbref_is_valid(cls, v):
+        if False:
+            raise ValueError("Problem with db reference.")
+        return v
 
 
 class MetadataOut(MetadataDB):
@@ -349,3 +356,33 @@ async def patch_metadata(metadata: MetadataDB, new_entries: dict, es: Elasticsea
     except Exception as e:
         raise e
     return MetadataOut(**metadata.dict())
+
+
+class MetadataDBViewList(View, MetadataBaseCommon):
+    id: PydanticObjectId = Field(None, alias="_id")  # necessary for Views
+
+    # for dataset versioning
+    origin_id: PydanticObjectId
+    frozen: bool = False
+
+    class Settings:
+        source = MetadataDB
+        name = "metadata_view"
+        pipeline = [
+            {
+                "$addFields": {
+                    "frozen": False,
+                    "origin_id": "$_id",
+                }
+            },
+            {
+                "$unionWith": {
+                    "coll": "metadata_freeze",
+                    "pipeline": [{"$addFields": {"frozen": True}}],
+                }
+            },
+        ]
+        # Needs fix to work https://github.com/roman-right/beanie/pull/521
+        # use_cache = True
+        # cache_expiration_time = timedelta(seconds=10)
+        # cache_capacity = 5
