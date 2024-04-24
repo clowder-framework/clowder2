@@ -197,8 +197,15 @@ export const Dataset = (): JSX.Element => {
 		if (folderPath != null) {
 			for (const folderBread of folderPath) {
 				tmpPaths.push({
-					name: folderBread["folder_name"],
-					url: `/datasets/${datasetId}?folder=${folderBread["folder_id"]}`,
+					name:
+						folderBread && "folder_name" in folderBread
+							? folderBread["folder_name"]
+							: "",
+					url: `/datasets/${datasetId}?folder=${
+						folderBread && folderBread["folder_id"]
+							? folderBread["folder_id"]
+							: ""
+					}`,
 				});
 			}
 		} else {

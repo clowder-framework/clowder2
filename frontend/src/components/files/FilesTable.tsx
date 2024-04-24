@@ -46,7 +46,9 @@ export default function FilesTable(props: FilesTableProps) {
 		setCurrPageNum(1);
 		// Redirect to file route with file Id and dataset id and folderId
 		history(
-			`/files/${selectedFileId}?dataset=${dataset.id}&folder=${folderId}&verNum=${selectedFileId}`
+			`/files/${selectedFileId}?dataset=${dataset.id}&folder=${
+				folderId ?? ""
+			}&verNum=${selectedFileId}`
 		);
 	};
 	const selectPublicFile = (selectedFileId: string | undefined) => {
@@ -54,7 +56,9 @@ export default function FilesTable(props: FilesTableProps) {
 		setCurrPageNum(1);
 		// Redirect to file route with file Id and dataset id and folderId
 		history(
-			`/public/files/${selectedFileId}?dataset=${dataset.id}&folder=${folderId}&verNum=${selectedFileId}`
+			`/public/files/${selectedFileId}?dataset=${dataset.id}&folder=${
+				folderId ?? ""
+			}&verNum=${selectedFileId}`
 		);
 	};
 	const selectFolder = (selectedFolderId: string | undefined) => {

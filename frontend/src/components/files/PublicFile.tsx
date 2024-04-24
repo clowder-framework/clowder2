@@ -129,7 +129,11 @@ export const PublicFile = (): JSX.Element => {
 			for (const folderBread of folderPath) {
 				tmpPaths.push({
 					name: folderBread["folder_name"],
-					url: `/public_datasets/${datasetId}?folder=${folderBread["folder_id"]}`,
+					url: `/public_datasets/${datasetId}?folder=${
+						folderBread && folderBread["folder_id"]
+							? folderBread["folder_id"]
+							: ""
+					}`,
 				});
 			}
 		} else {

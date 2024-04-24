@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import config from "../../app.config";
 import {
 	Box,
 	Button,
@@ -10,8 +9,8 @@ import {
 	Tab,
 	Tabs,
 } from "@mui/material";
-import { authCheck, downloadResource, frozenCheck } from "../../utils/common";
-import { PreviewConfiguration, RootState } from "../../types/data";
+import { authCheck, frozenCheck } from "../../utils/common";
+import { RootState } from "../../types/data";
 import { useParams, useSearchParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 
@@ -40,8 +39,6 @@ import { TabStyle } from "../../styles/Styles";
 import BuildIcon from "@mui/icons-material/Build";
 import AssessmentIcon from "@mui/icons-material/Assessment";
 import HistoryIcon from "@mui/icons-material/History";
-import { Forbidden } from "../errors/Forbidden";
-import { PageNotFound } from "../errors/PageNotFound";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import { Visualization } from "../visualizations/Visualization";
 import { ErrorModal } from "../errors/ErrorModal";
@@ -63,7 +60,7 @@ export const File = (): JSX.Element => {
 
 	const listDatasetAbout = (datasetId: string | undefined) =>
 		dispatch(fetchDatasetAbout(datasetId));
-	const about = useSelector((state: RootState) => state.dataset.about);
+	const dataset = useSelector((state: RootState) => state.dataset.about);
 
 	const dispatch = useDispatch();
 	const listFileSummary = (fileId: string | undefined) =>
@@ -102,7 +99,6 @@ export const File = (): JSX.Element => {
 	const adminMode = useSelector((state: RootState) => state.user.adminMode);
 
 	const [selectedTabIndex, setSelectedTabIndex] = useState(0);
-	const [previews, setPreviews] = useState([]);
 	const [enableAddMetadata, setEnableAddMetadata] =
 		React.useState<boolean>(false);
 	const [metadataRequestForms, setMetadataRequestForms] = useState({});
@@ -110,8 +106,6 @@ export const File = (): JSX.Element => {
 
 	// Error msg dialog
 	const [errorOpen, setErrorOpen] = useState(false);
-	const [showForbiddenPage, setShowForbiddenPage] = useState(false);
-	const [showNotFoundPage, setShowNotFoundPage] = useState(false);
 
 	// snack bar
 	const [snackBarOpen, setSnackBarOpen] = useState(false);
@@ -122,34 +116,20 @@ export const File = (): JSX.Element => {
 		// load file information
 		listFileSummary(fileId);
 		listFileVersions(fileId);
-		// FIXME replace checks for null with logic to load this info from redux instead of the page parameters
-		if (datasetId != "null" && datasetId != "undefined") {
-			listDatasetAbout(datasetId); // get dataset name
-		}
-		if (folderId != "null" && folderId != "undefined") {
-			getFolderPath(folderId); // get folder path
-		}
-	}, []);
 
-	// component did mount
-	useEffect(() => {
-		// load file information
-		listFileSummary(fileId);
-		listFileVersions(fileId);
-		// FIXME replace checks for null with logic to load this info from redux instead of the page parameters
-		if (datasetId != "null" && datasetId != "undefined") {
-			listDatasetAbout(datasetId); // get dataset name
+		if (datasetId) {
+			listDatasetAbout(datasetId);
 		}
-		if (folderId != "null" && folderId != "undefined") {
+		if (folderId) {
 			getFolderPath(folderId); // get folder path
 		}
-	}, [adminMode]);
+	}, [adminMode, fileId, datasetId, folderId]);
 
 	// for breadcrumb
 	useEffect(() => {
 		const tmpPaths = [
 			{
-				name: about["name"],
+				name: dataset["name"],
 				url: `/datasets/${datasetId}`,
 			},
 		];
@@ -158,7 +138,9 @@ export const File = (): JSX.Element => {
 			for (const folderBread of folderPath) {
 				tmpPaths.push({
 					name: folderBread["folder_name"],
-					url: `/datasets/${datasetId}?folder=${folderBread["folder_id"]}`,
+					url: `/datasets/${datasetId}?folder=${
+						(folderBread && folderBread["folder_id"]) ?? ""
+					}`,
 				});
 			}
 		} else {
@@ -172,7 +154,7 @@ export const File = (): JSX.Element => {
 		});
 
 		setPaths(tmpPaths);
-	}, [about, fileSummary, folderPath]);
+	}, [dataset, fileSummary, folderPath]);
 
 	useEffect(() => {
 		if (latestVersionNum !== undefined && latestVersionNum !== null) {
@@ -181,50 +163,15 @@ export const File = (): JSX.Element => {
 	}, [latestVersionNum]);
 
 	useEffect(() => {
-		if (storageType === "minio") {
+		if (
+			storageType === "minio" &&
+			!frozenCheck(dataset.frozen, dataset.frozen_version_num)
+		) {
 			setVersionEnabled(true);
 		} else {
 			setVersionEnabled(false);
 		}
 	}, [storageType]);
-
-	useEffect(() => {
-		(async () => {
-			if (
-				filePreviews !== undefined &&
-				filePreviews.length > 0 &&
-				filePreviews[0].previews !== undefined
-			) {
-				const previewsTemp: any = [];
-				await Promise.all(
-					filePreviews[0].previews.map(async (filePreview) => {
-						// download resources
-						const Configuration: PreviewConfiguration = {
-							previewType: "",
-							url: "",
-							fileid: "",
-							previewer: "",
-							fileType: "",
-							resource: "",
-						};
-						Configuration.previewType = filePreview["p_id"]
-							.replace(" ", "-")
-							.toLowerCase();
-						Configuration.url = `${config.hostname}${filePreview["pv_route"]}?superAdmin=true`;
-						Configuration.fileid = filePreview["pv_id"];
-						Configuration.previewer = `/public${filePreview["p_path"]}/`;
-						Configuration.fileType = filePreview["pv_contenttype"];
-
-						const resourceURL = `${config.hostname}${filePreview["pv_route"]}?superAdmin=true`;
-						Configuration.resource = await downloadResource(resourceURL);
-
-						previewsTemp.push(Configuration);
-					})
-				);
-				setPreviews(previewsTemp);
-			}
-		})();
-	}, [filePreviews]);
 
 	const handleTabChange = (
 		_event: React.ChangeEvent<{}>,
@@ -270,12 +217,6 @@ export const File = (): JSX.Element => {
 		// switch to display mode
 		setEnableAddMetadata(false);
 	};
-
-	if (showForbiddenPage) {
-		return <Forbidden />;
-	} else if (showNotFoundPage) {
-		return <PageNotFound />;
-	}
 
 	return (
 		<Layout>
@@ -350,7 +291,7 @@ export const File = (): JSX.Element => {
 							{...a11yProps(3)}
 							disabled={false}
 							sx={
-								frozenCheck(about.frozen, about.frozen_version_num)
+								frozenCheck(dataset.frozen, dataset.frozen_version_num)
 									? { display: "none" }
 									: !authCheck(adminMode, fileRole, [
 											"owner",
@@ -365,7 +306,7 @@ export const File = (): JSX.Element => {
 							icon={<HistoryIcon />}
 							iconPosition="start"
 							sx={
-								frozenCheck(about.frozen, about.frozen_version_num)
+								frozenCheck(dataset.frozen, dataset.frozen_version_num)
 									? { display: "none" }
 									: TabStyle
 							}
@@ -378,7 +319,7 @@ export const File = (): JSX.Element => {
 								icon={<InsertDriveFile />}
 								iconPosition="start"
 								sx={
-									frozenCheck(about.frozen, about.frozen_version_num)
+									frozenCheck(dataset.frozen, dataset.frozen_version_num)
 										? { display: "none" }
 										: TabStyle
 								}
@@ -427,8 +368,8 @@ export const File = (): JSX.Element => {
 									publicView={false}
 								/>
 								<FrozenWrapper
-									frozen={about.frozen}
-									frozenVersionNum={about.frozen_version_num}
+									frozen={dataset.frozen}
+									frozenVersionNum={dataset.frozen_version_num}
 								>
 									<AuthWrapper
 										currRole={fileRole}
@@ -463,7 +404,7 @@ export const File = (): JSX.Element => {
 						value={selectedTabIndex}
 						index={3}
 						sx={
-							frozenCheck(about.frozen, about.frozen_version_num)
+							frozenCheck(dataset.frozen, dataset.frozen_version_num)
 								? { display: "none" }
 								: !authCheck(adminMode, fileRole, [
 										"owner",
