@@ -293,6 +293,23 @@ async def update_file(
         raise HTTPException(status_code=404, detail=f"File {file_id} not found")
 
 
+async def _increment_file_downloads(file_id: str):
+    # Increment download count
+    # if working draft
+    if (
+        file := await FileDB.find_one(FileDB.id == PydanticObjectId(file_id))
+    ) is not None:
+        await file.update(Inc({FileDB.downloads: 1}))
+
+    # if published version
+    if (
+        file := await FileFreezeDB.find_one(
+            FileFreezeDB.id == PydanticObjectId(file_id)
+        )
+    ) is not None:
+        await file.update(Inc({FileFreezeDB.downloads: 1}))
+
+
 @router.get("/{file_id}")
 async def download_file(
     file_id: str,
@@ -355,22 +372,8 @@ async def download_file(
                 status_code=400, detail=f"Unable to download {file_id}."
             )
 
-        if response:
-            if increment:
-                # Increment download count
-                if (
-                    file := await FileDB.find_one(
-                        FileDB.id == PydanticObjectId(file_id)
-                    )
-                ) is not None:
-                    await file.update(Inc({FileDB.downloads: 1}))
-
-                if (
-                    file := await FileFreezeDB.find_one(
-                        FileFreezeDB.id == PydanticObjectId(file_id)
-                    )
-                ) is not None:
-                    await file.update(Inc({FileFreezeDB.downloads: 1}))
+        if response and increment:
+            await _increment_file_downloads(file_id)
 
             return response
 
@@ -392,6 +395,10 @@ async def download_file_url(
             FileDBViewList.id == PydanticObjectId(file_id)
         )
     ) is not None:
+        # find the bytes id
+        # if it's working draft file_id == origin_id
+        # if it's published origin_id points to the raw bytes
+        bytes_file_id = str(file.origin_id) if file.origin_id else str(file.id)
         if expires_in_seconds is None:
             expires = timedelta(seconds=settings.MINIO_EXPIRES)
         else:
@@ -408,7 +415,7 @@ async def download_file_url(
                 # If no version specified, get latest version directly
                 presigned_url = external_fs.presigned_get_object(
                     bucket_name=settings.MINIO_BUCKET_NAME,
-                    object_name=file_id,
+                    object_name=bytes_file_id,
                     version_id=vers.version_id,
                     expires=expires,
                 )
@@ -421,15 +428,14 @@ async def download_file_url(
             # If no version specified, get latest version directly
             presigned_url = external_fs.presigned_get_object(
                 bucket_name=settings.MINIO_BUCKET_NAME,
-                object_name=file_id,
+                object_name=bytes_file_id,
                 expires=expires,
             )
 
-        # Increment download count
-        await file.update(Inc({FileDB.downloads: 1}))
+        if presigned_url is not None:
+            await _increment_file_downloads(file_id)
 
-        # return presigned url
-        return {"presigned_url": presigned_url}
+            return {"presigned_url": presigned_url}
     else:
         raise HTTPException(status_code=404, detail=f"File {file_id} not found")
 
@@ -590,6 +596,7 @@ async def download_file_thumbnail(
             FileDBViewList.id == PydanticObjectId(file_id)
         )
     ) is not None:
+        # TODO investigate what happens with dataset versoning and thumbnail
         if file.thumbnail_id is not None:
             content = fs.get_object(settings.MINIO_BUCKET_NAME, str(file.thumbnail_id))
         else:

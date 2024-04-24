@@ -53,6 +53,7 @@ from app.routers.licenses import delete_license
 from app.search.connect import delete_document_by_id
 from app.search.index import index_dataset, index_file
 from beanie import PydanticObjectId
+from beanie.odm.operators.update.general import Inc
 from beanie.operators import And, Or
 from bson import ObjectId, json_util
 from elasticsearch import Elasticsearch
@@ -1157,6 +1158,25 @@ async def create_dataset_from_zip(
     return dataset.dict()
 
 
+async def _increment_data_downloads(dataset_id: str):
+    # Increment download count
+    # if working draft
+    if (
+        dataset := await DatasetDB.find_one(
+            DatasetDB.id == PydanticObjectId(dataset_id)
+        )
+    ) is not None:
+        await dataset.update(Inc({DatasetDB.downloads: 1}))
+
+    # if published version
+    if (
+        dataset := await DatasetFreezeDB.find_one(
+            DatasetFreezeDB.id == PydanticObjectId(dataset_id)
+        )
+    ) is not None:
+        await dataset.update(Inc({DatasetFreezeDB.downloads: 1}))
+
+
 @router.get("/{dataset_id}/download")
 async def download_dataset(
     dataset_id: str,
@@ -1214,6 +1234,10 @@ async def download_dataset(
         async for file in FileDBViewList.find(
             FileDBViewList.dataset_id == ObjectId(dataset_id)
         ):
+            # find the bytes id
+            # if it's working draft file_id == origin_id
+            # if it's published origin_id points to the raw bytes
+            bytes_file_id = str(file.origin_id) if file.origin_id else str(file.id)
             file_count += 1
             file_name = file.name
             if file.folder_id is not None:
@@ -1224,7 +1248,7 @@ async def download_dataset(
                 file_name = hierarchy + file_name
             current_file_path = os.path.join(current_temp_dir, file_name.lstrip("/"))
 
-            content = fs.get_object(settings.MINIO_BUCKET_NAME, str(file.id))
+            content = fs.get_object(settings.MINIO_BUCKET_NAME, bytes_file_id)
             file_md5_hash = hashlib.md5(content.data).hexdigest()
             with open(current_file_path, "wb") as f1:
                 f1.write(content.data)
@@ -1294,7 +1318,12 @@ async def download_dataset(
             properties={"name": "tagmanifest-md5.txt"},
         )
 
-        zip_name = dataset.name + ".zip"
+        version_name = (
+            f"-v{dataset.frozen_version_num}"
+            if dataset.frozen and dataset.frozen_version_num > 0
+            else ""
+        )
+        zip_name = dataset.name + version_name + ".zip"
         path_to_zip = os.path.join(current_temp_dir, zip_name)
         crate.write_zip(path_to_zip)
         f = open(path_to_zip, "rb", buffering=0)
@@ -1313,8 +1342,7 @@ async def download_dataset(
             media_type="application/x-zip-compressed",
         )
         response.headers["Content-Disposition"] = "attachment; filename=%s" % zip_name
-        # TODO for frozen dataset how are we going to increment download count
-        # await dataset.update(Inc({DatasetDBViewList.downloads: 1}))
+        await _increment_data_downloads(dataset_id)
         return response
     raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
 
