@@ -193,7 +193,7 @@ export function freezeDataset(datasetId) {
 			.then((json) => {
 				dispatch({
 					type: FREEZE_DATASET,
-					latestFrozenVersionNum: json.frozen_version_num,
+					newFrozenDataset: json,
 					receivedAt: Date.now(),
 				});
 			})

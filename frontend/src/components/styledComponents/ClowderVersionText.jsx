@@ -26,4 +26,6 @@ export const ClowderVersionPill = styled(Typography)({
 	borderRadius: "5px",
 	padding: "0.5em",
 	textTransform: "uppercase",
+	textAlign: "center",
+	minWidth: "2em",
 });

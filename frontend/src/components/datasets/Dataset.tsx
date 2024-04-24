@@ -112,6 +112,9 @@ export const Dataset = (): JSX.Element => {
 
 	// mapStateToProps
 	const dataset = useSelector((state: RootState) => state.dataset.about);
+	const newFrozenDataset = useSelector(
+		(state: RootState) => state.dataset.newFrozenDataset
+	);
 	const datasetRole = useSelector(
 		(state: RootState) => state.dataset.datasetRole
 	);
@@ -173,15 +176,18 @@ export const Dataset = (): JSX.Element => {
 		getMetadatDefinitions(null, 0, 100);
 	}, [datasetId, searchParams, adminMode, dataset.license_id]);
 
-	// // TODO change this to a modal
-	// useEffect(() => {
-	// 	if (latestFrozenVersionNum && latestFrozenVersionNum > 0) {
-	// 		setSnackBarOpen(true);
-	// 		setSnackBarMessage(
-	// 			`The most recent locked version of the dataset ${latestFrozenVersionNum}.`
-	// 		);
-	// 	}
-	// }, [latestFrozenVersionNum]);
+	useEffect(() => {
+		if (
+			newFrozenDataset &&
+			newFrozenDataset.frozen &&
+			newFrozenDataset.frozen_version_num > 0
+		) {
+			setSnackBarOpen(true);
+			setSnackBarMessage(
+				`Dataset version ${newFrozenDataset.frozen_version_num} has been created.`
+			);
+		}
+	}, [newFrozenDataset]);
 
 	// for breadcrumb
 	useEffect(() => {

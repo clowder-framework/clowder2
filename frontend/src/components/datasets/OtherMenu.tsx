@@ -62,6 +62,8 @@ export const OtherMenu = (props: ActionsMenuProps): JSX.Element => {
 	const [deleteDatasetConfirmOpen, setDeleteDatasetConfirmOpen] =
 		useState(false);
 	const [editStatusPaneOpen, setEditStatusPaneOpen] = useState(false);
+	const [freezeDatasetConfirmOpen, setFreezeDatasetConfirmOpen] =
+		useState(false);
 
 	const handleSetRename = () => {
 		setRename(false);
@@ -113,12 +115,25 @@ export const OtherMenu = (props: ActionsMenuProps): JSX.Element => {
 			/>
 			<ActionModal
 				actionOpen={deleteDatasetConfirmOpen}
-				actionTitle="Are you sure?"
+				actionTitle="Delete Dataset"
 				actionText="Do you really want to delete this dataset? This process cannot be undone."
 				actionBtnName="Delete"
 				handleActionBtnClick={deleteSelectedDataset}
 				handleActionCancel={() => {
 					setDeleteDatasetConfirmOpen(false);
+				}}
+			/>
+			<ActionModal
+				actionOpen={freezeDatasetConfirmOpen}
+				actionTitle="Lock Version"
+				actionText="Do you really want to lock this version of the dataset? Once locked, the dataset and its associated files, metadata, and visulaizations will be frozen and cannot be modified."
+				actionBtnName="Lock"
+				handleActionBtnClick={() => {
+					freezeDataset(datasetId);
+					setFreezeDatasetConfirmOpen(false);
+				}}
+				handleActionCancel={() => {
+					setFreezeDatasetConfirmOpen(false);
 				}}
 			/>
 			<Button
@@ -174,7 +189,7 @@ export const OtherMenu = (props: ActionsMenuProps): JSX.Element => {
 					<MenuItem
 						onClick={() => {
 							handleOptionClose();
-							freezeDataset(datasetId);
+							setFreezeDatasetConfirmOpen(true);
 						}}
 					>
 						<ListItemIcon>
