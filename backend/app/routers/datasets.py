@@ -181,8 +181,10 @@ async def _get_folder_hierarchy(
     hierarchy: str,
 ):
     """Generate a string of nested path to folder for use in zip file creation."""
-    folder = await FolderDB.get(PydanticObjectId(folder_id))
-    hierarchy = folder.name + "/" + hierarchy
+    folder = await FolderDBViewList.find_one(
+        FolderDBViewList.id == PydanticObjectId(folder_id)
+    )
+    hierarchy = os.path.join(folder.name, hierarchy)
     if folder.parent_folder is not None:
         hierarchy = await _get_folder_hierarchy(folder.parent_folder, hierarchy)
     return hierarchy
@@ -1149,9 +1151,7 @@ async def download_dataset(
 ):
     if (
         dataset := await DatasetDBViewList.find_one(
-            Or(
-                DatasetDBViewList.id == PydanticObjectId(dataset_id),
-            )
+            DatasetDBViewList.id == PydanticObjectId(dataset_id)
         )
     ) is not None:
         current_temp_dir = tempfile.mkdtemp(prefix="rocratedownload")
@@ -1196,14 +1196,16 @@ async def download_dataset(
         bag_size = 0  # bytes
         file_count = 0
 
-        async for file in FileDB.find(FileDB.dataset_id == ObjectId(dataset_id)):
+        async for file in FileDBViewList.find(
+            FileDBViewList.dataset_id == ObjectId(dataset_id)
+        ):
             file_count += 1
             file_name = file.name
             if file.folder_id is not None:
                 hierarchy = await _get_folder_hierarchy(file.folder_id, "")
                 dest_folder = os.path.join(current_temp_dir, hierarchy.lstrip("/"))
                 if not os.path.isdir(dest_folder):
-                    os.mkdir(dest_folder)
+                    os.makedirs(dest_folder, exist_ok=True)
                 file_name = hierarchy + file_name
             current_file_path = os.path.join(current_temp_dir, file_name.lstrip("/"))
 
