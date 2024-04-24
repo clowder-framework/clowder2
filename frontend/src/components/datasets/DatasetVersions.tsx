@@ -65,7 +65,16 @@ export const DatasetVersions = (props) => {
 		<>
 			<Typography sx={{ wordBreak: "break-all" }}>Dataset Version</Typography>
 			<FormControl>
-				<ClowderSelect value={selectedDatasetId} onChange={handleVersionChange}>
+				<ClowderSelect
+					value={
+						currDataset &&
+						currDataset.frozen &&
+						currDataset.frozen_version_num > 0
+							? currDataset.id
+							: "current"
+					}
+					onChange={handleVersionChange}
+				>
 					<MenuItem value="current" key="current">
 						Current
 					</MenuItem>
