@@ -251,7 +251,7 @@ async def search_listeners(
             RegEx(field=EventListenerDB.description, pattern=text),
         )
     ]
-    if not admin and not admin_mode:
+    if not admin or not admin_mode:
         user_q = await GroupDB.find(
             Or(GroupDB.creator == user_id, GroupDB.users.email == user_id),
         ).to_list()
@@ -397,7 +397,7 @@ async def get_listeners(
 
     # Filter by ownership
     criteria_list = []
-    if not admin and not admin_mode:
+    if not admin or not admin_mode:
         user_q = await GroupDB.find(
             Or(GroupDB.creator == user_id, GroupDB.users.user.email == user_id),
         ).to_list()
@@ -456,7 +456,7 @@ async def edit_listener(
         listener_in -- JSON object including updated information
     """
     criteria_list = [EventListenerDB.id == PydanticObjectId(listener_id)]
-    if not admin and not admin_mode:
+    if not admin or not admin_mode:
         # Must either be owner, or a listener with no restrictions
         criteria_list.append(
             Or(
@@ -486,7 +486,7 @@ async def delete_listener(
 ):
     """Remove an Event Listener from the database. Will not clear event history for the listener."""
     criteria_list = [EventListenerDB.id == PydanticObjectId(listener_id)]
-    if not admin and not admin_mode:
+    if not admin or not admin_mode:
         # Must either be owner, or a listener with no restrictions
         criteria_list.append(
             Or(
