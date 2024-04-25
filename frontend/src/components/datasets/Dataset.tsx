@@ -227,16 +227,6 @@ export const Dataset = (): JSX.Element => {
 		setSelectedTabIndex(newTabIndex);
 	};
 
-	const [openEditLicenseModal, setOpenEditLicenseModal] = useState(false);
-
-	const handleOpenEditLicenseModal = () => {
-		setOpenEditLicenseModal(true); // Open the modal
-	};
-
-	const handleCloseEditLicenseModal = (save: boolean) => {
-		setOpenEditLicenseModal(false); // Close the modal
-	};
-
 	const handlePageChange = (_: ChangeEvent<unknown>, value: number) => {
 		const newSkip = (value - 1) * limit;
 		setCurrPageNum(value);
@@ -540,62 +530,64 @@ export const Dataset = (): JSX.Element => {
 					</TabPanel>
 				</Grid>
 				<Grid item>
-					<Typography variant="h5" gutterBottom>
-						License
-					</Typography>
-					{dataset.standard_license && dataset.license_id !== undefined ? (
-						<Typography>
-							<Link href={standardLicenseUrl} target="_blank">
-								<img
-									className="logo"
-									src={`public/${dataset.license_id}.png`}
-									alt={dataset.license_id}
-								/>
-							</Link>
-						</Typography>
-					) : (
-						<></>
-					)}
-					{!dataset.standard_license &&
-					license !== undefined &&
-					license.name !== undefined ? (
-						<div>
-							<Typography>
-								<Link href={license.url} target="_blank">
-									{license.name}
-								</Link>
-								<IconButton
-									onClick={() => {
-										setEditLicenseOpen(true);
-									}}
-								>
-									<EditIcon />
-								</IconButton>
-							</Typography>
-							<Dialog
-								open={editLicenseOpen}
-								onClose={() => {
-									setOpenEditLicenseModal(false);
-								}}
-								fullWidth={true}
-								maxWidth="md"
-								aria-labelledby="form-dialog"
-							>
-								<DialogTitle>Edit license</DialogTitle>
-								<DialogContent>
-									<EditLicenseModal setEditLicenseOpen={setEditLicenseOpen} />
-								</DialogContent>
-							</Dialog>
-						</div>
-					) : (
-						<></>
-					)}
-					<DatasetDetails details={dataset} myRole={datasetRole.role} />
 					<DatasetVersions
 						datasetId={datasetId}
 						setSnackBarMessage={setSnackBarMessage}
 						setSnackBarOpen={setSnackBarOpen}
 					/>
+					<>
+						<Typography variant="h5" gutterBottom>
+							License
+						</Typography>
+						{dataset.standard_license && dataset.license_id !== undefined ? (
+							<Typography>
+								<Link href={standardLicenseUrl} target="_blank">
+									<img
+										className="logo"
+										src={`public/${dataset.license_id}.png`}
+										alt={dataset.license_id}
+									/>
+								</Link>
+							</Typography>
+						) : (
+							<></>
+						)}
+						{!dataset.standard_license &&
+						license !== undefined &&
+						license.name !== undefined ? (
+							<div>
+								<Typography>
+									<Link href={license.url} target="_blank">
+										{license.name}
+									</Link>
+									<IconButton
+										onClick={() => {
+											setEditLicenseOpen(true);
+										}}
+									>
+										<EditIcon />
+									</IconButton>
+								</Typography>
+								<Dialog
+									open={editLicenseOpen}
+									onClose={() => {
+										setEditLicenseOpen(false);
+									}}
+									fullWidth={true}
+									maxWidth="md"
+									aria-labelledby="form-dialog"
+								>
+									<DialogTitle>Edit license</DialogTitle>
+									<DialogContent>
+										<EditLicenseModal setEditLicenseOpen={setEditLicenseOpen} />
+									</DialogContent>
+								</Dialog>
+							</div>
+						) : (
+							<></>
+						)}
+					</>
+					<DatasetDetails details={dataset} myRole={datasetRole.role} />
 				</Grid>
 			</Grid>
 		</Layout>

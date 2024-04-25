@@ -1,4 +1,4 @@
-import { FormControl, MenuItem, Typography } from "@mui/material";
+import { Box, FormControl, MenuItem, Typography } from "@mui/material";
 import { ClowderSelect } from "../styledComponents/ClowderSelect";
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -62,8 +62,11 @@ export const DatasetVersions = (props) => {
 	}
 
 	return (
-		<>
-			<Typography sx={{ wordBreak: "break-all" }}>Dataset Version</Typography>
+		<Box sx={{ mt: 2, mb: 5 }}>
+			<Typography variant="h5" gutterBottom>
+				Dataset Version
+			</Typography>
+			<Typography>Select Version</Typography>
 			<FormControl>
 				<ClowderSelect
 					value={
@@ -89,6 +92,6 @@ export const DatasetVersions = (props) => {
 						: null}
 				</ClowderSelect>
 			</FormControl>
-		</>
+		</Box>
 	);
 };

@@ -125,8 +125,8 @@ export const OtherMenu = (props: ActionsMenuProps): JSX.Element => {
 			/>
 			<ActionModal
 				actionOpen={freezeDatasetConfirmOpen}
-				actionTitle="Lock Version"
-				actionText="Do you really want to lock this version of the dataset? Once locked, the dataset and its associated files, metadata, and visulaizations will be frozen and cannot be modified."
+				actionTitle="Release Version"
+				actionText="Do you really want to release this version of the dataset? Once released, the dataset and its associated files, metadata, and visulaizations will be frozen and cannot be modified."
 				actionBtnName="Lock"
 				handleActionBtnClick={() => {
 					freezeDataset(datasetId);
@@ -195,7 +195,7 @@ export const OtherMenu = (props: ActionsMenuProps): JSX.Element => {
 						<ListItemIcon>
 							<LockIcon fontSize="small" />
 						</ListItemIcon>
-						Lock Version
+						Release Version
 					</MenuItem>
 				</AuthWrapper>
 				<AuthWrapper
