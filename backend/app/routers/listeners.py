@@ -5,7 +5,7 @@ import string
 from typing import List, Optional
 
 from beanie import PydanticObjectId
-from beanie.operators import Or, RegEx, In, Exists
+from beanie.operators import Or, RegEx, In, NE
 from fastapi import APIRouter, Depends, HTTPException
 from packaging import version
 
@@ -260,7 +260,7 @@ async def search_listeners(
         if dataset_id is None:
             criteria_list.append(
                 Or(
-                    Exists(EventListenerDB.access, False),
+                    EventListenerDB.access == None,
                     EventListenerDB.access.owner == user_id,
                     EventListenerDB.access.users == user_id,
                     In(EventListenerDB.access.groups, user_groups),
@@ -269,7 +269,7 @@ async def search_listeners(
         else:
             criteria_list.append(
                 Or(
-                    Exists(EventListenerDB.access, False),
+                    EventListenerDB.access == None,
                     EventListenerDB.access.owner == user_id,
                     EventListenerDB.access.users == user_id,
                     In(EventListenerDB.access.groups, user_groups),
@@ -406,7 +406,7 @@ async def get_listeners(
         if dataset_id is None:
             criteria_list.append(
                 Or(
-                    Exists(EventListenerDB.access, False),
+                    EventListenerDB.access == None,
                     EventListenerDB.access.owner == user_id,
                     EventListenerDB.access.users == user_id,
                     In(EventListenerDB.access.groups, user_groups),
@@ -415,7 +415,7 @@ async def get_listeners(
         else:
             criteria_list.append(
                 Or(
-                    Exists(EventListenerDB.access, False),
+                    EventListenerDB.access == None,
                     EventListenerDB.access.owner == user_id,
                     EventListenerDB.access.users == user_id,
                     In(EventListenerDB.access.groups, user_groups),
@@ -460,7 +460,7 @@ async def edit_listener(
         # Must either be owner, or a listener with no restrictions
         criteria_list.append(
             Or(
-                Exists(EventListenerDB.access, False),
+                EventListenerDB.access == None,
                 EventListenerDB.access.owner == user_id,
             ),
         )
@@ -490,7 +490,7 @@ async def delete_listener(
         # Must either be owner, or a listener with no restrictions
         criteria_list.append(
             Or(
-                Exists(EventListenerDB.access, False),
+                EventListenerDB.access == None,
                 EventListenerDB.access.owner == user_id,
             ),
         )
