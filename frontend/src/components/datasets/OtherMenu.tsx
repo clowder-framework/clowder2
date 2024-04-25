@@ -26,7 +26,7 @@ import { DriveFileRenameOutline } from "@mui/icons-material";
 import { AuthWrapper } from "../auth/AuthWrapper";
 import { RootState } from "../../types/data";
 import ShareIcon from "@mui/icons-material/Share";
-import LockIcon from "@mui/icons-material/Lock";
+import LocalOfferIcon from "@mui/icons-material/LocalOffer";
 
 type ActionsMenuProps = {
 	datasetId?: string;
@@ -127,7 +127,7 @@ export const OtherMenu = (props: ActionsMenuProps): JSX.Element => {
 				actionOpen={freezeDatasetConfirmOpen}
 				actionTitle="Release Version"
 				actionText="Do you really want to release this version of the dataset? Once released, the dataset and its associated files, metadata, and visulaizations will be frozen and cannot be modified."
-				actionBtnName="Lock"
+				actionBtnName="Release"
 				handleActionBtnClick={() => {
 					freezeDataset(datasetId);
 					setFreezeDatasetConfirmOpen(false);
@@ -193,7 +193,7 @@ export const OtherMenu = (props: ActionsMenuProps): JSX.Element => {
 						}}
 					>
 						<ListItemIcon>
-							<LockIcon fontSize="small" />
+							<LocalOfferIcon fontSize="small" />
 						</ListItemIcon>
 						Release Version
 					</MenuItem>

@@ -23,6 +23,7 @@ from app.models.metadata import (
 from app.search.connect import delete_document_by_id
 from app.search.index import index_file
 from beanie import PydanticObjectId
+from beanie.operators import Or
 from bson import ObjectId
 from elasticsearch import Elasticsearch
 from fastapi import APIRouter, Depends, Form, HTTPException
@@ -342,7 +343,10 @@ async def get_file_metadata(
             if version is not None and version > 0:
                 if (
                     await FileVersionDB.find_one(
-                        FileVersionDB.file_id == ObjectId(file_id),
+                        Or(
+                            FileVersionDB.file_id == ObjectId(file_id),
+                            FileVersionDB.file_id == file.origin_id,
+                        ),
                         FileVersionDB.version_num == version,
                     )
                 ) is None:

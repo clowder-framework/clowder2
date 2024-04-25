@@ -41,7 +41,7 @@ export const DatasetVersions = (props) => {
 		if (event.target.value === "current") {
 			history(`/datasets/${currDataset.origin_id}`);
 			setSelectedDatasetId("current");
-			setSnackBarMessage(`Viewing current unlocked dataset.`);
+			setSnackBarMessage(`Viewing current unreleased dataset.`);
 			setSnackBarOpen(true);
 		} else {
 			const selectedDataset = frozenDatasets.find(
