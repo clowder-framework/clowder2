@@ -37,6 +37,9 @@ export default function FilesTable(props: FilesTableProps) {
 		(state: RootState) => state.dataset.datasetRole
 	);
 	const dataset = useSelector((state: RootState) => state.dataset.about);
+	const publicDataset = useSelector(
+		(state: RootState) => state.publicDataset.publicAbout
+	);
 
 	// use history hook to redirect/navigate between routes
 	const history = useNavigate();
@@ -56,7 +59,7 @@ export default function FilesTable(props: FilesTableProps) {
 		setCurrPageNum(1);
 		// Redirect to file route with file Id and dataset id and folderId
 		history(
-			`/public/files/${selectedFileId}?dataset=${dataset.id}&folder=${
+			`/public/files/${selectedFileId}?dataset=${publicDataset.id}&folder=${
 				folderId ?? ""
 			}&verNum=${selectedFileId}`
 		);
@@ -72,7 +75,7 @@ export default function FilesTable(props: FilesTableProps) {
 		// reset page number to 1
 		setCurrPageNum(1);
 		// Redirect to file route with file Id and dataset id
-		history(`/public/datasets/${dataset.id}?folder=${selectedFolderId}`);
+		history(`/public/datasets/${publicDataset.id}?folder=${selectedFolderId}`);
 	};
 
 	return (

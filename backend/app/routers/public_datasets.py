@@ -10,7 +10,13 @@ from app import dependencies
 from app.config import settings
 from app.db.dataset.download import _increment_data_downloads
 from app.db.folder.hierarchy import _get_folder_hierarchy
-from app.models.datasets import DatasetDBViewList, DatasetOut, DatasetStatus
+from app.models.datasets import (
+    DatasetDBViewList,
+    DatasetFreezeDB,
+    DatasetFreezeOut,
+    DatasetOut,
+    DatasetStatus,
+)
 from app.models.files import FileDBViewList, FileOut
 from app.models.folder_and_file import FolderFileViewList
 from app.models.folders import FolderDBViewList, FolderOut
@@ -405,3 +411,35 @@ async def download_dataset(
                 status_code=404, detail=f"Dataset {dataset_id} not found"
             )
     raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
+
+
+@router.get("/{dataset_id}/freeze", response_model=Paged)
+async def get_freeze_datasets(
+    dataset_id: str,
+    skip: int = 0,
+    limit: int = 10,
+):
+    frozen_datasets_and_count = (
+        await DatasetFreezeDB.find(
+            DatasetFreezeDB.status == DatasetStatus.PUBLIC,
+            DatasetFreezeDB.origin_id == PydanticObjectId(dataset_id),
+        )
+        .aggregate(
+            [
+                _get_page_query(
+                    skip, limit, sort_field="frozen_version_num", ascending=False
+                )
+            ],
+        )
+        .to_list()
+    )
+
+    page_metadata = _construct_page_metadata(frozen_datasets_and_count, skip, limit)
+    page = Paged(
+        metadata=page_metadata,
+        data=[
+            DatasetFreezeOut(id=item.pop("_id"), **item)
+            for item in frozen_datasets_and_count[0]["data"]
+        ],
+    )
+    return page.dict()

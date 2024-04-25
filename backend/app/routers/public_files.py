@@ -86,7 +86,7 @@ async def get_file_versions(
     skip: int = 0,
     limit: int = 20,
 ):
-    file = await FileDBViewList.find(FileDBViewList.id == PydanticObjectId(file_id))
+    file = await FileDBViewList.find_one(FileDBViewList.id == PydanticObjectId(file_id))
     if file is not None:
         if (
             dataset := await DatasetDBViewList.find_one(

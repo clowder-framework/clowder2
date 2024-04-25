@@ -87,7 +87,6 @@ export const File = (): JSX.Element => {
 	);
 	const [versionEnabled, setVersionEnabled] = useState(false);
 	const fileSummary = useSelector((state: RootState) => state.file.fileSummary);
-	const filePreviews = useSelector((state: RootState) => state.file.previews);
 	const fileVersions = useSelector(
 		(state: RootState) => state.file.fileVersions
 	);
@@ -314,21 +313,18 @@ export const File = (): JSX.Element => {
 							{...a11yProps(4)}
 							disabled={false}
 						/>
-						{versionEnabled ? (
-							<Tab
-								icon={<InsertDriveFile />}
-								iconPosition="start"
-								sx={
-									frozenCheck(dataset.frozen, dataset.frozen_version_num)
-										? { display: "none" }
-										: TabStyle
-								}
-								label="Version History"
-								{...a11yProps(5)}
-							/>
-						) : (
-							<></>
-						)}
+						<Tab
+							icon={<InsertDriveFile />}
+							iconPosition="start"
+							sx={
+								frozenCheck(dataset.frozen, dataset.frozen_version_num) ||
+								!versionEnabled
+									? { display: "none" }
+									: TabStyle
+							}
+							label="Version History"
+							{...a11yProps(5)}
+						/>
 					</Tabs>
 					<TabPanel value={selectedTabIndex} index={0}>
 						<Visualization fileId={fileId} />
