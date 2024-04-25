@@ -298,7 +298,7 @@ async def download_dataset(
                     hierarchy = await _get_folder_hierarchy(file.folder_id, "")
                     dest_folder = os.path.join(current_temp_dir, hierarchy.lstrip("/"))
                     if not os.path.isdir(dest_folder):
-                        os.mkdir(dest_folder)
+                        os.makedirs(dest_folder, exist_ok=True)
                     file_name = hierarchy + file_name
                 current_file_path = os.path.join(
                     current_temp_dir, file_name.lstrip("/")

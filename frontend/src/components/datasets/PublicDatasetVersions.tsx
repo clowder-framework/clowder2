@@ -35,7 +35,7 @@ export const PublicDatasetVersions = (props) => {
 
 	function handleVersionChange(event) {
 		if (event.target.value === "current") {
-			history(`/datasets/${currDataset.origin_id}`);
+			history(`/public/datasets/${currDataset.origin_id}`);
 			setSnackBarMessage(`Viewing current unreleased dataset.`);
 			setSnackBarOpen(true);
 		} else {
@@ -44,7 +44,7 @@ export const PublicDatasetVersions = (props) => {
 			);
 
 			if (selectedDataset) {
-				history(`/datasets/${selectedDataset.id}`);
+				history(`/public/datasets/${selectedDataset.id}`);
 				setSnackBarMessage(
 					`Viewing dataset version ${selectedDataset.frozen_version_num}.`
 				);
