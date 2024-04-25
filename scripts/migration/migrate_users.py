@@ -15,10 +15,21 @@ from app.models.files import (
     LocalFileIn,
     StorageType,
 )
+import nest_asyncio
+nest_asyncio.apply()
 from app.models.users import UserDB, UserOut, UserAPIKeyDB
 from beanie import init_beanie
 from fastapi import FastAPI, APIRouter, Depends
 from motor.motor_asyncio import AsyncIOMotorClient
+
+mongo_client = MongoClient("mongodb://localhost:27018", connect=False)
+mongo_client_v2 = MongoClient("mongodb://localhost:27017", connect=False)
+db = mongo_client["clowder"]
+db_v2 = mongo_client_v2["clowder2"]
+print('got the db')
+v1_users = db["social.users"].find({})
+for u in v1_users:
+    print(u)
 
 app = FastAPI()
 @app.on_event("startup")
@@ -64,12 +75,7 @@ clowder_headers_v2 = {**base_headers_v2, 'Content-type': 'application/json',
 TEST_DATASET_NAME = 'Migration Test Dataset'
 # TODO this is just for testing
 DEFAULT_PASSWORD = 'Password123&'
-mongo_client = MongoClient("mongodb://localhost:27018", connect=False)
-db = mongo_client["clowder"]
-print('got the db')
-v1_users = db["social.users"].find({})
-for u in v1_users:
-    print(u)
+
 def email_user_new_login(user):
     print("login to the new clowder instance")
 
@@ -78,6 +84,9 @@ def generate_user_api_key(user):
     unique_key = token_urlsafe(16)
     hashed_key = serializer.dumps({"user": user, "key": unique_key})
     user_key = UserAPIKeyDB(user=user, key=unique_key, name='migrationKey')
+    # user_key = {'user': user, 'key': unique_key, 'name': 'migrationKey'}
+    user_key_collection = mongo_client["user_keys"]
+    result = mongo_client["user_keys"].insert_one({user_key})
     return user_key.key
 
 def get_clowder_v1_users():
@@ -107,16 +116,7 @@ async def create_v2_dataset(headers, dataset, user_email):
     response = requests.post(
         dataset_in_v2_endpoint, headers=headers, json=dataset_example
     )
-    files_result = r_files.json()
-    if (user := await UserDB.find_one(UserDB.email == user_email)) is not None:
-        print('we got a user!')
-    for file in files_result:
-        new_file = FileDB(
-            name=file['filename'],
-            creator=user,
-            dataset_id=dataset.id,
-        )
-    print('here')
+    return response.json()
 
 
 def get_clowder_v1_user_datasets(user_id):
@@ -143,7 +143,8 @@ def create_local_user(user_v1):
     }
     # response = requests.post(f"{CLOWDER_V2}api/v2/users", json=user_json)
     email_user_new_login(email)
-    api_key = generate_user_api_key(email)
+    # api_key = generate_user_api_key(email)
+    api_key = 'aZM2QXJ_lvw_5FKNUB89Vg'
     print("Local user created and api key generated")
     if os.path.exists(output_file):
         print('it exists.')
@@ -179,8 +180,31 @@ async def process_users():
                     print('creating a dataset in v2')
                     dataset_id = await create_v2_dataset(user_headers_v2, dataset, email)
                     dataset_files_endpoint = CLOWDER_V1 + 'api/datasets/' + dataset['id'] + '/files'
+                    # move file stuff here
+                    print('we got a dataset id')
+
                     r_files = requests.get(dataset_files_endpoint, headers=base_headers_v1, verify=False)
                     r_files_json = r_files.json()
+                    files_result = r_files.json()
+                    user_collection = db_v2["users"]
+                    user = user_collection.find_one({"email": email})
+                    print('got a user')
+                    userDB = await UserDB.find_one({"email": email})
+                    for file in files_result:
+                        new_file = FileDB(
+                            name=file['filename'],
+                            creator=user,
+                            dataset_id=dataset.id,
+                        )
+                    print('here')
+                    for file in r_files_json:
+                        file_json = requests.get(CLOWDER_V1 + 'api/files/' + file['id'], headers=base_headers_v1).json()
+                        filename = file['filename']
+                        file_id = file['id']
+                        loader_id = file['loader']
+                        add_file_entry(
+
+                        )
                     print('here')
 
         else:
