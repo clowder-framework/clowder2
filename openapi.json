@@ -11120,6 +11120,11 @@
               "5eb7cf5a86d9755df3a6c593",
               "5eb7cfb05e32e07750a1756a"
             ]
+          },
+          "frozen": {
+            "title": "Frozen",
+            "type": "boolean",
+            "default": true
           }
         },
         "description": "Document Mapping class.\n\nFields:\n\n- `id` - MongoDB document ObjectID \"_id\" field.\nMapped to the PydanticObjectId class\n\nInherited from:\n\n- Pydantic BaseModel\n- [UpdateMethods](https://roman-right.github.io/beanie/api/interfaces/#aggregatemethods)"
@@ -11246,6 +11251,11 @@
               "5eb7cf5a86d9755df3a6c593",
               "5eb7cfb05e32e07750a1756a"
             ]
+          },
+          "frozen": {
+            "title": "Frozen",
+            "type": "boolean",
+            "default": true
           }
         },
         "description": "Document Mapping class.\n\nFields:\n\n- `id` - MongoDB document ObjectID \"_id\" field.\nMapped to the PydanticObjectId class\n\nInherited from:\n\n- Pydantic BaseModel\n- [UpdateMethods](https://roman-right.github.io/beanie/api/interfaces/#aggregatemethods)"
@@ -12048,6 +12058,11 @@
               "5eb7cf5a86d9755df3a6c593",
               "5eb7cfb05e32e07750a1756a"
             ]
+          },
+          "frozen": {
+            "title": "Frozen",
+            "type": "boolean",
+            "default": true
           }
         },
         "description": "Document Mapping class.\n\nFields:\n\n- `id` - MongoDB document ObjectID \"_id\" field.\nMapped to the PydanticObjectId class\n\nInherited from:\n\n- Pydantic BaseModel\n- [UpdateMethods](https://roman-right.github.io/beanie/api/interfaces/#aggregatemethods)"

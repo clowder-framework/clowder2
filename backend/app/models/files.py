@@ -144,6 +144,6 @@ class FileDBViewList(View, FileBaseCommon):
         # cache_capacity = 5
 
 
-class FileOut(FileDB):
+class FileOut(FileDB, FileFreezeDB):
     class Config:
         fields = {"id": "id"}

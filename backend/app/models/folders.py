@@ -81,6 +81,6 @@ class FolderDBViewList(View, FolderBaseCommon):
         # cache_capacity = 5
 
 
-class FolderOut(FolderDB):
+class FolderOut(FolderDB, FolderFreezeDB):
     class Config:
         fields = {"id": "id"}

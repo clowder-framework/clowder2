@@ -8,11 +8,13 @@ from typing import List, Optional
 
 from app import dependencies
 from app.config import settings
+from app.db.dataset.download import _increment_data_downloads
+from app.db.folder.hierarchy import _get_folder_hierarchy
 from app.models.datasets import DatasetDBViewList, DatasetOut, DatasetStatus
-from app.models.files import FileDB, FileDBViewList, FileOut
+from app.models.files import FileDBViewList, FileOut
 from app.models.folder_and_file import FolderFileViewList
-from app.models.folders import FolderDB, FolderDBViewList, FolderOut
-from app.models.metadata import MetadataDB, MetadataDefinitionDB, MetadataOut
+from app.models.folders import FolderDBViewList, FolderOut
+from app.models.metadata import MetadataDBViewList, MetadataDefinitionDB, MetadataOut
 from app.models.pages import Paged, _construct_page_metadata, _get_page_query
 from beanie import PydanticObjectId
 from beanie.operators import And, Or
@@ -27,18 +29,6 @@ router = APIRouter()
 security = HTTPBearer()
 
 clowder_bucket = os.getenv("MINIO_BUCKET_NAME", "clowder")
-
-
-async def _get_folder_hierarchy(
-    folder_id: str,
-    hierarchy: str,
-):
-    """Generate a string of nested path to folder for use in zip file creation."""
-    folder = await FolderDB.get(PydanticObjectId(folder_id))
-    hierarchy = folder.name + "/" + hierarchy
-    if folder.parent_folder is not None:
-        hierarchy = await _get_folder_hierarchy(folder.parent_folder, hierarchy)
-    return hierarchy
 
 
 @router.get("", response_model=Paged)
@@ -211,15 +201,17 @@ async def get_dataset_metadata(
         )
     ) is not None:
         if dataset.status == DatasetStatus.PUBLIC.name:
-            query = [MetadataDB.resource.resource_id == ObjectId(dataset_id)]
+            query = [MetadataDBViewList.resource.resource_id == ObjectId(dataset_id)]
 
             if listener_name is not None:
-                query.append(MetadataDB.agent.listener.name == listener_name)
+                query.append(MetadataDBViewList.agent.listener.name == listener_name)
             if listener_version is not None:
-                query.append(MetadataDB.agent.listener.version == listener_version)
+                query.append(
+                    MetadataDBViewList.agent.listener.version == listener_version
+                )
 
             metadata = []
-            async for md in MetadataDB.find(*query):
+            async for md in MetadataDBViewList.find(*query):
                 if md.definition is not None:
                     if (
                         md_def := await MetadataDefinitionDB.find_one(
@@ -268,8 +260,8 @@ async def download_dataset(
                 f.write("Tag-File-Character-Encoding: UTF-8" + "\n")
 
             # Write dataset metadata if found
-            metadata = await MetadataDB.find(
-                MetadataDB.resource.resource_id == ObjectId(dataset_id)
+            metadata = await MetadataDBViewList.find(
+                MetadataDBViewList.resource.resource_id == ObjectId(dataset_id)
             ).to_list()
             if len(metadata) > 0:
                 datasetmetadata_path = os.path.join(
@@ -287,7 +279,13 @@ async def download_dataset(
             bag_size = 0  # bytes
             file_count = 0
 
-            async for file in FileDB.find(FileDB.dataset_id == ObjectId(dataset_id)):
+            async for file in FileDBViewList.find(
+                FileDBViewList.dataset_id == ObjectId(dataset_id)
+            ):
+                # find the bytes id
+                # if it's working draft file_id == origin_id
+                # if it's published origin_id points to the raw bytes
+                bytes_file_id = str(file.origin_id) if file.origin_id else str(file.id)
                 file_count += 1
                 file_name = file.name
                 if file.folder_id is not None:
@@ -300,7 +298,7 @@ async def download_dataset(
                     current_temp_dir, file_name.lstrip("/")
                 )
 
-                content = fs.get_object(settings.MINIO_BUCKET_NAME, str(file.id))
+                content = fs.get_object(settings.MINIO_BUCKET_NAME, bytes_file_id)
                 file_md5_hash = hashlib.md5(content.data).hexdigest()
                 with open(current_file_path, "wb") as f1:
                     f1.write(content.data)
@@ -317,8 +315,8 @@ async def download_dataset(
                 current_file_size = os.path.getsize(current_file_path)
                 bag_size += current_file_size
 
-                metadata = await MetadataDB.find(
-                    MetadataDB.resource.resource_id == ObjectId(dataset_id)
+                metadata = await MetadataDBViewList.find(
+                    MetadataDBViewList.resource.resource_id == ObjectId(dataset_id)
                 ).to_list()
                 if len(metadata) > 0:
                     metadata_filename = file_name + "_metadata.json"
@@ -374,7 +372,12 @@ async def download_dataset(
                 properties={"name": "tagmanifest-md5.txt"},
             )
 
-            zip_name = dataset.name + ".zip"
+            version_name = (
+                f"-v{dataset.frozen_version_num}"
+                if dataset.frozen and dataset.frozen_version_num > 0
+                else ""
+            )
+            zip_name = dataset.name + version_name + ".zip"
             path_to_zip = os.path.join(current_temp_dir, zip_name)
             crate.write_zip(path_to_zip)
             f = open(path_to_zip, "rb", buffering=0)
@@ -395,8 +398,7 @@ async def download_dataset(
             response.headers["Content-Disposition"] = (
                 "attachment; filename=%s" % zip_name
             )
-            # # TODO Increment download count
-            # await dataset.update(Inc({DatasetDB.downloads: 1}))
+            await _increment_data_downloads(dataset_id)
             return response
         else:
             raise HTTPException(

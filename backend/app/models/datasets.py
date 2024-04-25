@@ -123,7 +123,7 @@ class DatasetDBViewList(View, DatasetBaseCommon):
         # cache_capacity = 5
 
 
-class DatasetOut(DatasetDB):
+class DatasetOut(DatasetDB, DatasetFreezeDB):
     class Config:
         fields = {"id": "id"}
 

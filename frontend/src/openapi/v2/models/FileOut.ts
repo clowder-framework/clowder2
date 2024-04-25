@@ -38,4 +38,5 @@ export type FileOut = {
     object_type?: string;
     origin_id?: string;
     id?: string;
+    frozen?: boolean;
 }

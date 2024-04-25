@@ -5,12 +5,12 @@ from typing import List, Optional, Union
 
 from app import dependencies
 from app.config import settings
+from app.db.file.download import _increment_file_downloads
 from app.deps.authorization_deps import FileAuthorization
 from app.keycloak_auth import get_current_user, get_token
 from app.models.files import (
     FileDB,
     FileDBViewList,
-    FileFreezeDB,
     FileOut,
     FileVersion,
     FileVersionDB,
@@ -25,7 +25,7 @@ from app.routers.utils import get_content_type
 from app.search.connect import delete_document_by_id, insert_record, update_record
 from app.search.index import index_file, index_thumbnail
 from beanie import PydanticObjectId
-from beanie.odm.operators.update.general import Inc
+from beanie.odm.operators.find.logical import Or
 from bson import ObjectId
 from elasticsearch import Elasticsearch, NotFoundError
 from fastapi import APIRouter, Depends, File, HTTPException, Security, UploadFile
@@ -293,23 +293,6 @@ async def update_file(
         raise HTTPException(status_code=404, detail=f"File {file_id} not found")
 
 
-async def _increment_file_downloads(file_id: str):
-    # Increment download count
-    # if working draft
-    if (
-        file := await FileDB.find_one(FileDB.id == PydanticObjectId(file_id))
-    ) is not None:
-        await file.update(Inc({FileDB.downloads: 1}))
-
-    # if published version
-    if (
-        file := await FileFreezeDB.find_one(
-            FileFreezeDB.id == PydanticObjectId(file_id)
-        )
-    ) is not None:
-        await file.update(Inc({FileFreezeDB.downloads: 1}))
-
-
 @router.get("/{file_id}")
 async def download_file(
     file_id: str,
@@ -333,7 +316,10 @@ async def download_file(
             if version is not None:
                 # Version is specified, so get the minio ID from versions table if possible
                 file_vers = await FileVersionDB.find_one(
-                    FileVersionDB.file_id == ObjectId(bytes_file_id),
+                    Or(
+                        FileVersionDB.file_id == ObjectId(file_id),
+                        FileVersionDB.file_id == file.origin_id,
+                    ),
                     FileVersionDB.version_num == version,
                 )
                 if file_vers is not None:
@@ -408,7 +394,10 @@ async def download_file_url(
         if version is not None:
             # Version is specified, so get the minio ID from versions table if possible
             file_vers = await FileVersionDB.find_one(
-                FileVersionDB.file_id == ObjectId(file_id),
+                Or(
+                    FileVersionDB.file_id == ObjectId(file_id),
+                    FileVersionDB.file_id == file.origin_id,
+                ),
                 FileVersionDB.version_num == version,
             )
             if file_vers is not None:
@@ -489,7 +478,10 @@ async def get_file_version_details(
     ) is not None:
         # TODO: Incrementing too often (3x per page view)
         file_vers = await FileVersionDB.find_one(
-            FileVersionDB.file_id == ObjectId(file_id),
+            Or(
+                FileVersionDB.file_id == ObjectId(file_id),
+                FileVersionDB.file_id == file.origin_id,
+            ),
             FileVersionDB.version_num == version_num,
         )
         file_vers_dict = file_vers.dict()
@@ -517,7 +509,12 @@ async def get_file_versions(
         mongo_versions = []
         if file.storage_type == StorageType.MINIO:
             async for ver in (
-                FileVersionDB.find(FileVersionDB.file_id == ObjectId(file_id))
+                FileVersionDB.find(
+                    Or(
+                        FileVersionDB.file_id == ObjectId(file_id),
+                        FileVersionDB.file_id == file.origin_id,
+                    )
+                )
                 .sort(-FileVersionDB.created)
                 .skip(skip)
                 .limit(limit)

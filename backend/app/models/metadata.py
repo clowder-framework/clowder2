@@ -284,7 +284,7 @@ class MetadataFreezeDB(Document, MetadataBaseCommon):
         return v
 
 
-class MetadataOut(MetadataDB):
+class MetadataOut(MetadataDB, MetadataFreezeDB):
     class Config:
         fields = {"id": "id"}
 

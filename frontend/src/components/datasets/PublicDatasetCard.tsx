@@ -30,17 +30,8 @@ type PublicDatasetCardProps = {
 };
 
 export default function PublicDatasetCard(props: PublicDatasetCardProps) {
-	const {
-		id,
-		name,
-		author,
-		created,
-		description,
-		thumbnailId,
-		publicView,
-		frozen,
-		frozenVersionNum,
-	} = props;
+	const { id, name, author, created, description, thumbnailId, publicView } =
+		props;
 
 	const [thumbnailUrl, setThumbnailUrl] = useState("");
 

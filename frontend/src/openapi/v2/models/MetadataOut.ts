@@ -29,4 +29,5 @@ export type MetadataOut = {
     created?: string;
     origin_id?: string;
     id?: string;
+    frozen?: boolean;
 }

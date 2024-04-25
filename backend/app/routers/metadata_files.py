@@ -53,7 +53,10 @@ async def _build_metadata_db_obj(
         if file_version is not None and file_version > 0:
             if (
                 await FileVersionDB.find_one(
-                    FileVersionDB.file_id == file.id,
+                    Or(
+                        FileVersionDB.file_id == ObjectId(file.id),
+                        FileVersionDB.file_id == file.origin_id,
+                    ),
                     FileVersionDB.version_num == file_version,
                 )
             ) is None:
@@ -170,7 +173,10 @@ async def replace_file_metadata(
         if version is not None:
             if (
                 await FileVersionDB.find_one(
-                    FileVersionDB.file_id == ObjectId(file_id),
+                    Or(
+                        FileVersionDB.file_id == ObjectId(file_id),
+                        FileVersionDB.file_id == file.origin_id,
+                    ),
                     FileVersionDB.version_num == version,
                 )
             ) is None:
@@ -275,7 +281,10 @@ async def update_file_metadata(
         if metadata_in.file_version is not None:
             if (
                 await FileVersionDB.find_one(
-                    FileVersionDB.file_id == ObjectId(file_id),
+                    Or(
+                        FileVersionDB.file_id == ObjectId(file_id),
+                        FileVersionDB.file_id == file.origin_id,
+                    ),
                     FileVersionDB.version_num == metadata_in.file_version,
                 )
             ) is None:
