@@ -140,6 +140,7 @@ export interface DatasetState {
 export interface PublicDatasetState {
 	publicFiles: FileOut[];
 	publicDatasets: Paged;
+	publicFrozenDatasets: Paged;
 	publicNewDataset: DatasetOut;
 	publicNewFile: FileOut;
 	publicNewFiles: FileOut[];

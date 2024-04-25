@@ -27,14 +27,6 @@ import {
 	PREFIX_SEARCH_USERS,
 	RECEIVE_USER_PROFILE,
 } from "../actions/user";
-import { CREATE_GROUP, DELETE_GROUP } from "../actions/group";
-import { RECEIVE_FILE_PRESIGNED_URL } from "../actions/file";
-import { GET_VIS_DATA_PRESIGNED_URL } from "../actions/visualization";
-import { GET_PUBLIC_VIS_DATA_PRESIGNED_URL } from "../actions/public_visualization";
-import {
-	DFRAFT_FREEZE_DATASET,
-	RECEIVE_FOLDERS_FILES_IN_DATASET,
-} from "../actions/dataset";
 
 interface RECEIVE_FILES_IN_DATASET {
 	type: "RECEIVE_FILES_IN_DATASET";
@@ -649,6 +641,11 @@ interface GET_FREEZE_DATASETS {
 	frozenDatasets: Paged;
 }
 
+interface GET_PUBLIC_FREEZE_DATASETS {
+	type: "GET_PUBLIC_FREEZE_DATASETS";
+	publicFrozenDatasets: Paged;
+}
+
 export type DataAction =
 	| GET_ADMIN_MODE_STATUS
 	| TOGGLE_ADMIN_MODE
@@ -769,6 +766,6 @@ export type DataAction =
 	| GET_FREEZE_DATASET_LATEST_VERSION_NUM
 	| GET_FREEZE_DATASET
 	| GET_FREEZE_DATASETS
-	| DFRAFT_FREEZE_DATASET
+	| GET_PUBLIC_FREEZE_DATASETS
 	| RECEIVE_DATASET_LICENSE
 	| UPDATE_DATASET_LICENSE;

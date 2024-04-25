@@ -39,7 +39,7 @@ import { Visualization } from "../visualizations/Visualization";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import config from "../../app.config";
 import { FreezeVersionChip } from "../versions/FeezeVersionChip";
-import { DatasetVersions } from "./DatasetVersions";
+import { PublicDatasetVersions } from "./PublicDatasetVersions";
 
 export const PublicDataset = (): JSX.Element => {
 	// path parameter
@@ -292,7 +292,7 @@ export const PublicDataset = (): JSX.Element => {
 					</TabPanel>
 				</Grid>
 				<Grid item xs={12} sm={12} md={2} lg={2} xl={2}>
-					<DatasetVersions
+					<PublicDatasetVersions
 						currDataset={dataset}
 						setSnackBarMessage={setSnackBarMessage}
 						setSnackBarOpen={setSnackBarOpen}
