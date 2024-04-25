@@ -379,11 +379,7 @@ export const Dataset = (): JSX.Element => {
 						<Tab
 							icon={<VisibilityIcon />}
 							iconPosition="start"
-							sx={
-								frozenCheck(dataset.frozen, dataset.frozen_version_num)
-									? { display: "none" }
-									: TabStyle
-							}
+							sx={TabStyle}
 							label="Visualizations"
 							{...a11yProps(5)}
 							disabled={false}
