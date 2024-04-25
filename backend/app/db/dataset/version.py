@@ -41,6 +41,13 @@ async def _freeze_folder(folder, new_frozen_dataset_id, parent_id_map=None):
     return frozen_folder
 
 
+async def _freeze_folders(folders, new_frozen_dataset_id):
+    parent_id_map = {}
+    for folder in folders:
+        await _freeze_folder(folder, new_frozen_dataset_id, parent_id_map)
+        return parent_id_map
+
+
 async def _freeze_file_metadata(file, new_frozen_file_id):
     file_metadata = await MetadataDB.find(
         MetadataDB.resource.resource_id == ObjectId(file.id)
@@ -55,8 +62,14 @@ async def _freeze_file_metadata(file, new_frozen_file_id):
 
 
 async def _freeze_files_folders_metadata(dataset_id, new_frozen_dataset_id):
-    files = await FileDB.find(FileDB.dataset_id == ObjectId(dataset_id)).to_list()
+    # freeze folders first and save frozen folder id to a hashmap
     folders = await FolderDB.find(FolderDB.dataset_id == ObjectId(dataset_id)).to_list()
+    parent_id_map = {}
+    for folder in folders:
+        await _freeze_folder(folder, new_frozen_dataset_id, parent_id_map)
+
+    # then freeze file
+    files = await FileDB.find(FileDB.dataset_id == ObjectId(dataset_id)).to_list()
     for file in files:
         file_data = file.dict()
         file_data["origin_id"] = file_data.pop("id")
@@ -64,22 +77,14 @@ async def _freeze_files_folders_metadata(dataset_id, new_frozen_dataset_id):
         file_data["frozen"] = True
 
         # if file belongs to a folder
-        # freeze the folder first
-        # then update the folder_id to the new frozen folder id
-        if file_data["folder_id"]:
-            folder = await FolderDB.get(PydanticObjectId(file_data["folder_id"]))
-            frozen_folder = await _freeze_folder(folder, new_frozen_dataset_id)
-            file_data["folder_id"] = frozen_folder.id
+        if file_data["folder_id"] and file_data["folder_id"] in parent_id_map:
+            file_data["folder_id"] = parent_id_map[file_data["folder_id"]]
 
         frozen_file = FileFreezeDB(**file_data)
         await frozen_file.insert()
 
         # if there are associate metadata on the file
         await _freeze_file_metadata(file, frozen_file.id)
-
-    # recursively freeze folders without files
-    for folder in folders:
-        await _freeze_folder(folder, new_frozen_dataset_id)
 
 
 async def _freeze_dataset_metadata(dataset_id, new_frozen_dataset_id):
