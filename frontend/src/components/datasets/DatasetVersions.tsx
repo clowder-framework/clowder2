@@ -1,6 +1,6 @@
 import { Box, FormControl, MenuItem, Typography } from "@mui/material";
 import { ClowderSelect } from "../styledComponents/ClowderSelect";
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { getFreezeDatasets as getFreezeDatasetsAction } from "../../actions/dataset";
@@ -29,18 +29,17 @@ export const DatasetVersions = (props) => {
 
 	const history = useNavigate();
 
-	const [selectedDatasetId, setSelectedDatasetId] = useState<string>("current");
-
 	useEffect(() => {
 		// TODO implement proper pagination
-		if (currDataset.origin_id)
-			getFreezeDatasets(currDataset.origin_id, 0, 1000);
+		let datasetId;
+		if (currDataset.origin_id) datasetId = currDataset.origin_id;
+		else datasetId = currDataset.id;
+		if (datasetId) getFreezeDatasets(datasetId, 0, 1000);
 	}, [currDataset, latestFrozenVersionNum]);
 
 	function handleVersionChange(event) {
 		if (event.target.value === "current") {
 			history(`/datasets/${currDataset.origin_id}`);
-			setSelectedDatasetId("current");
 			setSnackBarMessage(`Viewing current unreleased dataset.`);
 			setSnackBarOpen(true);
 		} else {
@@ -50,7 +49,6 @@ export const DatasetVersions = (props) => {
 
 			if (selectedDataset) {
 				history(`/datasets/${selectedDataset.id}`);
-				setSelectedDatasetId(selectedDataset.id);
 				setSnackBarMessage(
 					`Viewing dataset version ${selectedDataset.frozen_version_num}.`
 				);
