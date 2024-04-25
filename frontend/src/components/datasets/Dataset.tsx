@@ -531,7 +531,7 @@ export const Dataset = (): JSX.Element => {
 				</Grid>
 				<Grid item>
 					<DatasetVersions
-						datasetId={datasetId}
+						currDataset={dataset}
 						setSnackBarMessage={setSnackBarMessage}
 						setSnackBarOpen={setSnackBarOpen}
 					/>

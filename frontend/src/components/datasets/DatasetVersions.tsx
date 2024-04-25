@@ -7,7 +7,7 @@ import { getFreezeDatasets as getFreezeDatasetsAction } from "../../actions/data
 import { RootState } from "../../types/data";
 
 export const DatasetVersions = (props) => {
-	const { setSnackBarMessage, setSnackBarOpen } = props;
+	const { currDataset, setSnackBarMessage, setSnackBarOpen } = props;
 
 	const dispatch = useDispatch();
 	const getFreezeDatasets = (
@@ -25,7 +25,6 @@ export const DatasetVersions = (props) => {
 	const frozenDatasets = useSelector(
 		(state: RootState) => state.dataset.frozenDatasets.data
 	);
-	const currDataset = useSelector((state: RootState) => state.dataset.about);
 
 	const history = useNavigate();
 
