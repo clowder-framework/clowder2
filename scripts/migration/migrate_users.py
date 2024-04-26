@@ -1,4 +1,6 @@
 import os
+
+from bson import ObjectId
 from faker import Faker
 from dotenv import dotenv_values, load_dotenv
 import requests
@@ -179,11 +181,11 @@ async def process_users():
                 for dataset in user_v1_datasets:
                     print('creating a dataset in v2')
                     dataset_id = await create_v2_dataset(user_headers_v2, dataset, email)
-                    dataset_files_endpoint = CLOWDER_V1 + 'api/datasets/' + dataset['id'] + '/files'
+                    dataset_files_endpoint = CLOWDER_V1 + 'api/datasets/' + dataset['id'] + '/files?=superAdmin=true'
                     # move file stuff here
                     print('we got a dataset id')
 
-                    r_files = requests.get(dataset_files_endpoint, headers=base_headers_v1, verify=False)
+                    r_files = requests.get(dataset_files_endpoint, headers=clowder_headers_v1, verify=False)
                     r_files_json = r_files.json()
                     files_result = r_files.json()
                     user_collection = db_v2["users"]
@@ -193,15 +195,20 @@ async def process_users():
                     for file in files_result:
                         new_file = FileDB(
                             name=file['filename'],
-                            creator=user,
-                            dataset_id=dataset.id,
+                            creator=userDB,
+                            dataset_id=dataset["id"],
                         )
-                    print('here')
-                    for file in r_files_json:
-                        file_json = requests.get(CLOWDER_V1 + 'api/files/' + file['id'], headers=base_headers_v1).json()
-                        filename = file['filename']
+                        print('here')
                         file_id = file['id']
-                        loader_id = file['loader']
+                        file = db["uploads"].find_one({"_id": ObjectId(file_id)})
+                        filename = file['filename']
+                        loader_id = file["loader_id"]
+                        content_type = file["contentType"]
+                        upload_chunks_entry = db["uploads.chunks"].find_one({"files_id": ObjectId(loader_id)})
+                        data_bytes = upload_chunks_entry['data']
+                        print('got the entry')
+
+
                         add_file_entry(
 
                         )
