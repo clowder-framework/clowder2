@@ -31,6 +31,7 @@ import { capitalize } from "../../utils/common";
 import config from "../../app.config";
 import { GenericSearchBox } from "../search/GenericSearchBox";
 import Layout from "../Layout";
+import { toBoolean } from "vega";
 
 type ListenerProps = {
 	process?: string;
@@ -69,8 +70,8 @@ export function AllListeners(props: ListenerProps) {
 	) => dispatch(queryListeners(text, skip, limit, heartbeatInterval, process));
 	const listAvailableCategories = () => dispatch(fetchListenerCategories());
 	const listAvailableLabels = () => dispatch(fetchListenerLabels());
-	const toggleActiveFlag = (id: string, active: boolean) =>
-		dispatch(toggleActiveFlagListener(id, active));
+	const toggleActiveFlag = (id: string) =>
+		dispatch(toggleActiveFlagListener(id));
 
 	const listeners = useSelector(
 		(state: RootState) => state.listener.listeners.data
@@ -214,14 +215,9 @@ export function AllListeners(props: ListenerProps) {
 		setOpenSubmitExtraction(false);
 	};
 
-	const setActiveListeners = (event: React.ChangeEvent<HTMLInputElement>) => {
-		console.log(
-			"setting the active flag for",
-			event.target.id,
-			" : ",
-			event.target.value
-		);
-		toggleActiveFlag(event.target.id, event.target.value);
+	const setActiveListeners = (id: string) => {
+		console.log("setting the active flag for", id);
+		toggleActiveFlag(id);
 	};
 
 	return (
@@ -308,13 +304,16 @@ export function AllListeners(props: ListenerProps) {
 								{listeners !== undefined ? (
 									listeners.map((listener) => {
 										return (
-											<div style={{ display: "flex", alignItems: "baseline" }}>
+											<div
+												style={{ display: "flex", alignItems: "self-start" }}
+											>
 												<Checkbox
 													id={listener.id}
 													style={{ marginRight: "50px" }}
 													checked={listener.active}
-													onChange={setActiveListeners}
-													value={!listener.active}
+													onChange={() => {
+														setActiveListeners(listener.id);
+													}}
 												/>
 												<ListenerItem
 													key={listener.id}

@@ -50,22 +50,22 @@ export function fetchListeners(
 }
 
 export const TOGGLE_ACTIVE_FLAG_LISTENER = "TOGGLE_ACTIVE_FLAG_LISTENER";
-export function toggleActiveFlagListener(id, value) {
+export function toggleActiveFlagListener(id) {
 	return (dispatch) => {
 		return V2.ListenersService.setActiveFlagApiV2ListenersListenerIdTogglePut(
-			id,
-			value
+			id
 		)
 			.then((json) => {
-				// We could have called fetchListeners but it would be an overhead since we are just toggling the active flag.
+				// We could have called fetchListeners but it would be an overhead since we are just toggling the active flag for one listener.
 				// Hence we create a separate action to update the particular listener in state
 				dispatch({
 					type: TOGGLE_ACTIVE_FLAG_LISTENER,
 					listener: json,
 				});
+				//dispatch(fetchListeners());
 			})
 			.catch((reason) => {
-				dispatch(handleErrors(reason, toggleActiveFlagListener(id, value)));
+				dispatch(handleErrors(reason, toggleActiveFlagListener(id)));
 			});
 	};
 }

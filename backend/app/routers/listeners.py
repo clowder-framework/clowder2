@@ -405,7 +405,7 @@ async def disable_listener(
 @router.put("/{listener_id}/toggle", response_model=EventListenerOut)
 async def set_active_flag(
     listener_id: str,
-    active: bool,
+    active: Optional[bool] = None,
     admin=Depends(get_admin),
     admin_mode: bool = Depends(get_admin_mode),
 ):
@@ -423,7 +423,10 @@ async def set_active_flag(
     )
     if listener:
         try:
-            listener.active = active
+            if active is not None:
+                listener.active = active
+            else:
+                listener.active = not listener.active
             await listener.save()
             return listener.dict()
         except Exception as e:

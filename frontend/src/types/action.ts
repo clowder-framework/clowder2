@@ -1,10 +1,17 @@
-import { ExtractedMetadata, FilePreview, Folder, MetadataJsonld } from "./data";
+import {
+	ExtractedMetadata,
+	FilePreview,
+	Folder,
+	ListenerState,
+	MetadataJsonld,
+} from "./data";
 import {
 	AuthorizationBase,
 	DatasetOut as Dataset,
 	DatasetRoles,
 	EventListenerJobOut,
 	EventListenerJobUpdateOut,
+	EventListenerOut,
 	FileOut,
 	FileOut as FileSummary,
 	FileVersion,
@@ -437,7 +444,7 @@ interface RECEIVE_LISTENERS {
 
 interface TOGGLE_ACTIVE_FLAG_LISTENER {
 	type: "TOGGLE_ACTIVE_FLAG_LISTENER";
-	listener: LicenseOut;
+	listener: EventListenerOut;
 }
 
 interface SEARCH_LISTENERS {

@@ -37,6 +37,7 @@ const listeners = (state = defaultState, action: DataAction) => {
 				// Check if the current listener matches the one being toggled
 				if (listener.id === action.listener.id) {
 					// Toggle the active flag of the matched item
+					action.listener.alive = listener.alive;
 					return action.listener;
 				} else return listener;
 			});
