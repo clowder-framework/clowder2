@@ -72,11 +72,11 @@ def test_enable_disable_extractor(client: TestClient, headers: dict):
         f"{settings.API_V2_STR}/listeners/{extractor_id}/enable", headers=headers
     )
     assert response.status_code == 200
-    assert response.json()["active"] == True
+    assert response.json()["active"] is True
 
     # disable the extractor
     response = client.put(
         f"{settings.API_V2_STR}/listeners/{extractor_id}/disable", headers=headers
     )
     assert response.status_code == 200
-    assert response.json()["active"] == False
+    assert response.json()["active"] is False

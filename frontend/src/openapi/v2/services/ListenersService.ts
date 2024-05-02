@@ -39,6 +39,7 @@ export class ListenersService {
      * @param label
      * @param aliveOnly
      * @param process
+     * @param datasetId
      * @returns Paged Successful Response
      * @throws ApiError
      */
@@ -50,6 +51,7 @@ export class ListenersService {
         label?: string,
         aliveOnly: boolean = false,
         process?: string,
+        datasetId?: string,
     ): CancelablePromise<Paged> {
         return __request({
             method: 'GET',
@@ -62,6 +64,7 @@ export class ListenersService {
                 'label': label,
                 'alive_only': aliveOnly,
                 'process': process,
+                'dataset_id': datasetId,
             },
             errors: {
                 422: `Validation Error`,
@@ -103,6 +106,7 @@ export class ListenersService {
      * @param limit
      * @param heartbeatInterval
      * @param process
+     * @param datasetId
      * @returns Paged Successful Response
      * @throws ApiError
      */
@@ -112,6 +116,7 @@ export class ListenersService {
         limit: number = 2,
         heartbeatInterval: number = 300,
         process?: string,
+        datasetId?: string,
     ): CancelablePromise<Paged> {
         return __request({
             method: 'GET',
@@ -122,6 +127,7 @@ export class ListenersService {
                 'limit': limit,
                 'heartbeat_interval': heartbeatInterval,
                 'process': process,
+                'dataset_id': datasetId,
             },
             errors: {
                 422: `Validation Error`,
@@ -237,6 +243,80 @@ export class ListenersService {
             path: `/api/v2/listeners/${listenerId}/status`,
             query: {
                 'heartbeat_interval': heartbeatInterval,
+            },
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+
+    /**
+     * Enable Listener
+     * Enable an Event Listener. Only admins can enable listeners.
+     *
+     * Arguments:
+     * listener_id -- UUID of the listener to be enabled
+     * @param listenerId
+     * @returns EventListenerOut Successful Response
+     * @throws ApiError
+     */
+    public static enableListenerApiV2ListenersListenerIdEnablePut(
+        listenerId: string,
+    ): CancelablePromise<EventListenerOut> {
+        return __request({
+            method: 'PUT',
+            path: `/api/v2/listeners/${listenerId}/enable`,
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+
+    /**
+     * Disable Listener
+     * Enable an Event Listener. Only admins can enable listeners.
+     *
+     * Arguments:
+     * listener_id -- UUID of the listener to be enabled
+     * @param listenerId
+     * @returns EventListenerOut Successful Response
+     * @throws ApiError
+     */
+    public static disableListenerApiV2ListenersListenerIdDisablePut(
+        listenerId: string,
+    ): CancelablePromise<EventListenerOut> {
+        return __request({
+            method: 'PUT',
+            path: `/api/v2/listeners/${listenerId}/disable`,
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+
+    /**
+     * Set Active Flag
+     * Enable an Event Listener. Only admins can enable listeners.
+     *
+     * Arguments:
+     * listener_id -- UUID of the listener to be enabled
+     * @param listenerId
+     * @param active
+     * @param datasetId
+     * @returns EventListenerOut Successful Response
+     * @throws ApiError
+     */
+    public static setActiveFlagApiV2ListenersListenerIdTogglePut(
+        listenerId: string,
+        active?: boolean,
+        datasetId?: string,
+    ): CancelablePromise<EventListenerOut> {
+        return __request({
+            method: 'PUT',
+            path: `/api/v2/listeners/${listenerId}/toggle`,
+            query: {
+                'active': active,
+                'dataset_id': datasetId,
             },
             errors: {
                 422: `Validation Error`,
