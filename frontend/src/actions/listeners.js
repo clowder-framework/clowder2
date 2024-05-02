@@ -62,7 +62,6 @@ export function toggleActiveFlagListener(id) {
 					type: TOGGLE_ACTIVE_FLAG_LISTENER,
 					listener: json,
 				});
-				//dispatch(fetchListeners());
 			})
 			.catch((reason) => {
 				dispatch(handleErrors(reason, toggleActiveFlagListener(id)));

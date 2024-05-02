@@ -60,3 +60,23 @@ def test_v1_mime_trigger(client: TestClient, headers: dict):
     )
     assert response.status_code == 200
     assert len(response.json()) > 0
+
+
+def test_enable_disable_extractor(client: TestClient, headers: dict):
+    # create a new extractor
+    ext_name = "test.v1_extractor"
+    extractor_id = register_v1_extractor(client, headers, ext_name).get("id")
+
+    # enable the extractor
+    response = client.put(
+        f"{settings.API_V2_STR}/listeners/{extractor_id}/enable", headers=headers
+    )
+    assert response.status_code == 200
+    assert response.json()["active"] == True
+
+    # disable the extractor
+    response = client.put(
+        f"{settings.API_V2_STR}/listeners/{extractor_id}/disable", headers=headers
+    )
+    assert response.status_code == 200
+    assert response.json()["active"] == False

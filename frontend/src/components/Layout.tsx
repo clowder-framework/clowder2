@@ -427,7 +427,7 @@ export default function PersistentDrawerLeft(props) {
 							<ListItemIcon>
 								<BuildIcon />
 							</ListItemIcon>
-							<ListItemText primary={"Listeners"} />
+							<ListItemText primary={"Extractors"} />
 						</ListItemButton>
 					</ListItem>
 				</List>

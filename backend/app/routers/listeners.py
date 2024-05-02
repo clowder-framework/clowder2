@@ -18,14 +18,13 @@ from app.models.listeners import (
 from app.models.pages import Paged, _construct_page_metadata, _get_page_query
 from app.models.search import SearchCriteria
 from app.models.users import UserOut
+from app.routers.authentication import get_admin, get_admin_mode
 from app.routers.feeds import disassociate_listener_db
 from beanie import PydanticObjectId
 from beanie.operators import Or, RegEx
 from bson import ObjectId
 from fastapi import APIRouter, Depends, HTTPException
 from packaging import version
-
-from backend.app.routers.authentication import get_admin, get_admin_mode
 
 router = APIRouter()
 legacy_router = APIRouter()  # for back-compatibilty with v1 extractors
@@ -200,6 +199,8 @@ async def search_listeners(
     heartbeat_interval: Optional[int] = settings.listener_heartbeat_interval,
     user=Depends(get_current_username),
     process: Optional[str] = None,
+    admin=Depends(get_admin),
+    admin_mode=Depends(get_admin_mode),
 ):
     """Search all Event Listeners in the db based on text.
 
@@ -223,6 +224,8 @@ async def search_listeners(
             aggregation_pipeline.append(
                 {"$match": {"properties.process.dataset": {"$exists": True}}}
             )
+    if not admin or not admin_mode:
+        aggregation_pipeline.append({"$match": {"active": True}})
     # Add pagination
     aggregation_pipeline.append(
         _get_page_query(skip, limit, sort_field="name", ascending=True)
@@ -295,6 +298,8 @@ async def get_listeners(
     label: Optional[str] = None,
     alive_only: Optional[bool] = False,
     process: Optional[str] = None,
+    admin=Depends(get_admin),
+    admin_mode=Depends(get_admin_mode),
 ):
     """Get a list of all Event Listeners in the db.
 
@@ -327,6 +332,8 @@ async def get_listeners(
             aggregation_pipeline.append(
                 {"$match": {"properties.process.dataset": {"$exists": True}}}
             )
+    if not admin or not admin_mode:
+        aggregation_pipeline.append({"$match": {"active": True}})
     # Add pagination
     aggregation_pipeline.append(
         _get_page_query(skip, limit, sort_field="name", ascending=True)
@@ -386,7 +393,7 @@ async def enable_listener(
     Arguments:
         listener_id -- UUID of the listener to be enabled
     """
-    return set_active_flag(listener_id, True)
+    return await set_active_flag(listener_id, True)
 
 
 @router.put("/{listener_id}/disable", response_model=EventListenerOut)
@@ -399,7 +406,7 @@ async def disable_listener(
     Arguments:
         listener_id -- UUID of the listener to be enabled
     """
-    return set_active_flag(listener_id, False)
+    return await set_active_flag(listener_id, False)
 
 
 @router.put("/{listener_id}/toggle", response_model=EventListenerOut)

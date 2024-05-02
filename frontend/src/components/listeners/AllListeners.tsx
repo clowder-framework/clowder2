@@ -82,6 +82,8 @@ export function AllListeners(props: ListenerProps) {
 	const categories = useSelector(
 		(state: RootState) => state.listener.categories
 	);
+	const admin = useSelector((state: RootState) => state.user.profile.admin);
+	const adminMode = useSelector((state: RootState) => state.user.adminMode);
 	const labels = useSelector((state: RootState) => state.listener.labels);
 
 	const [currPageNum, setCurrPageNum] = useState<number>(1);
@@ -100,7 +102,7 @@ export function AllListeners(props: ListenerProps) {
 		listListeners(0, limit, 0, null, null, aliveOnly, process);
 		listAvailableCategories();
 		listAvailableLabels();
-	}, []);
+	}, [adminMode]);
 
 	// search
 	useEffect(() => {
@@ -119,7 +121,7 @@ export function AllListeners(props: ListenerProps) {
 				aliveOnly,
 				process
 			);
-	}, [searchText]);
+	}, [searchText, adminMode]);
 
 	useEffect(() => {
 		// reset page and reset search text with each new search term
@@ -134,7 +136,7 @@ export function AllListeners(props: ListenerProps) {
 			aliveOnly,
 			process
 		);
-	}, [aliveOnly]);
+	}, [aliveOnly, adminMode]);
 
 	// any of the change triggers timer to fetch the extractor status
 	useEffect(() => {
@@ -165,6 +167,7 @@ export function AllListeners(props: ListenerProps) {
 		selectedCategory,
 		selectedLabel,
 		aliveOnly,
+		adminMode,
 	]);
 
 	const handleListenerSearch = () => {
@@ -216,7 +219,6 @@ export function AllListeners(props: ListenerProps) {
 	};
 
 	const setActiveListeners = (id: string) => {
-		console.log("setting the active flag for", id);
 		toggleActiveFlag(id);
 	};
 
@@ -307,14 +309,19 @@ export function AllListeners(props: ListenerProps) {
 											<div
 												style={{ display: "flex", alignItems: "self-start" }}
 											>
-												<Checkbox
-													id={listener.id}
-													style={{ marginRight: "50px" }}
-													checked={listener.active}
-													onChange={() => {
-														setActiveListeners(listener.id);
-													}}
-												/>
+												{admin && adminMode ? (
+													<Checkbox
+														id={listener.id}
+														style={{ marginRight: "50px" }}
+														checked={listener.active}
+														disabled={!admin || !adminMode}
+														onChange={() => {
+															setActiveListeners(listener.id);
+														}}
+													/>
+												) : (
+													<></>
+												)}
 												<ListenerItem
 													key={listener.id}
 													id={listener.id}
