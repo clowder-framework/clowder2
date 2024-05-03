@@ -1,29 +1,24 @@
 import datetime
 from typing import Optional
 
-from beanie import PydanticObjectId
-from beanie.odm.operators.find.evaluation import RegEx
-from beanie.odm.operators.find.logical import Or
-from elasticsearch import Elasticsearch
-from fastapi import (
-    APIRouter,
-    HTTPException,
-    Depends,
-)
-
 from app import dependencies
 from app.deps.authorization_deps import MetadataAuthorization
 from app.keycloak_auth import get_current_user
 from app.models.metadata import (
-    MetadataDefinitionIn,
+    MetadataDB,
     MetadataDefinitionDB,
+    MetadataDefinitionIn,
     MetadataDefinitionOut,
     MetadataOut,
     MetadataPatch,
     patch_metadata,
-    MetadataDB,
 )
-from app.models.pages import Paged, _get_page_query, _construct_page_metadata
+from app.models.pages import Paged, _construct_page_metadata, _get_page_query
+from beanie import PydanticObjectId
+from beanie.odm.operators.find.evaluation import RegEx
+from beanie.odm.operators.find.logical import Or
+from elasticsearch import Elasticsearch
+from fastapi import APIRouter, Depends, HTTPException
 
 router = APIRouter()
 

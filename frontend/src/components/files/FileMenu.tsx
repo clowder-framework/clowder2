@@ -24,7 +24,7 @@ type FileMenuProps = {
 };
 
 export default function FileMenu(props: FileMenuProps) {
-	const { file, setSelectedVersion , publicView} = props;
+	const { file, setSelectedVersion, publicView } = props;
 	const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
 	const open = Boolean(anchorEl);
 	const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -116,23 +116,21 @@ export default function FileMenu(props: FileMenuProps) {
 					</MenuItem>
 				</AuthWrapper>
 
-
 				{/*owner, editor, uploader and viewer can download file*/}
 
-				{publicView?
-					(
-						<MenuItem
-							onClick={() => {
-								handleClose();
-								window.location.href = `${config.hostname}/api/v2/public_files/${file.id}`;
-							}}
-						>
-							<ListItemIcon>
-								<DownloadIcon fontSize="small" />
-							</ListItemIcon>
-							<ListItemText>Download</ListItemText>
-						</MenuItem>
-					):
+				{publicView ? (
+					<MenuItem
+						onClick={() => {
+							handleClose();
+							window.location.href = `${config.hostname}/api/v2/public_files/${file.id}`;
+						}}
+					>
+						<ListItemIcon>
+							<DownloadIcon fontSize="small" />
+						</ListItemIcon>
+						<ListItemText>Download</ListItemText>
+					</MenuItem>
+				) : (
 					<AuthWrapper
 						currRole={datasetRole.role}
 						allowedRoles={["owner", "editor", "uploader", "viewer"]}
@@ -149,7 +147,7 @@ export default function FileMenu(props: FileMenuProps) {
 							<ListItemText>Download</ListItemText>
 						</MenuItem>
 					</AuthWrapper>
-				}
+				)}
 
 				{/*owner can delete file*/}
 				<AuthWrapper currRole={datasetRole.role} allowedRoles={["owner"]}>

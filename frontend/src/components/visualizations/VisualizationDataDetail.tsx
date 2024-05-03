@@ -12,22 +12,33 @@ type FileAboutProps = {
 export function VisualizationDataDetail(props: FileAboutProps) {
 	const { visualizationDataItem } = props;
 
-	const details = new Map();
-	details.set("Size", prettyBytes(visualizationDataItem.bytes ?? 0));
-	details.set(
-		"Content type",
-		visualizationDataItem.content_type
+	const details = new Map<
+		string,
+		{ value: string | undefined; info?: string }
+	>();
+
+	details.set("Size", { value: prettyBytes(visualizationDataItem.bytes ?? 0) });
+	details.set("Content type", {
+		value: visualizationDataItem.content_type
 			? visualizationDataItem.content_type.content_type
-			: "NA"
-	);
-	details.set("Updated on", parseDate(visualizationDataItem.created));
-	details.set("Uploaded as", visualizationDataItem.name);
-	details.set(
-		"Uploaded by",
-		`${visualizationDataItem.creator.first_name} ${visualizationDataItem.creator.last_name}`
-	);
-	details.set("Visualization id", visualizationDataItem.id);
-	details.set("Descriptions", visualizationDataItem.description);
+			: "NA",
+	});
+	details.set("Updated on", {
+		value: parseDate(visualizationDataItem.created),
+		info: "Latest date and time of the file being updated",
+	});
+	details.set("Uploaded as", {
+		value: visualizationDataItem.name,
+		info: "Name of the visualization extractor",
+	});
+	details.set("Uploaded by", {
+		value: `${visualizationDataItem.creator.first_name} ${visualizationDataItem.creator.last_name}`,
+	});
+	details.set("Visualization id", { value: visualizationDataItem.id });
+	details.set("Descriptions", {
+		value: visualizationDataItem.description,
+		info: "Description of the visualization",
+	});
 
 	return (
 		<>

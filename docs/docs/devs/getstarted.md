@@ -1,13 +1,13 @@
 # Getting Started
 
-The core app is divided into two modules: backend and frontend. The frontend module is a standalone [React](https://react.dev/) 
+The core app is divided into two modules: backend and frontend. The frontend module is a standalone [React](https://react.dev/)
 application and the backend, a  standalone [FastAPI](https://fastapi.tiangolo.com/lo/) web API. We leverage [MongoDB](https://www.mongodb.com/), [RabbitMQ](https://www.rabbitmq.com/),
-and [Elasticsearch](https://www.elastic.co/). We also use [MinIO](https://min.io/) out of the box as the default object  store and [Traefik](https://traefik.io/traefik/) as 
+and [Elasticsearch](https://www.elastic.co/). We also use [MinIO](https://min.io/) out of the box as the default object store and [Traefik](https://traefik.io/traefik/) as
 the web proxy.
 
-There are two simple ways to run Clowder v2: 
+There are two simple ways to run Clowder v2:
 1. using Docker to run the full stack in Docker using the `docker-compose.yml`
-2. running required services in docker using `docker-compose.dev.yml` and running backend and frontend modules from the 
+2. running required services in docker using `docker-compose.dev.yml` and running backend and frontend modules from the
 command line or in your favorite IDE (to make debugging easier).
 
 ## Running Full Stack in Docker
@@ -83,7 +83,7 @@ Additional steps/details:
     * You can also run the frontend module below and use the Login link available there.
 3. Manually run tests before pushing with `pipenv run pytest -v` or right-clicking on `test` folder and clicking `Run`
    in PyCharm.
-4. Linting is done using [Black]((https://black.readthedocs.io/en/stable/)). You can set up PyCharm to automatically
+4. Linting is done using [Black](https://black.readthedocs.io/en/stable/). You can set up PyCharm to automatically
    run it when you save a file using
    these [instructions](https://black.readthedocs.io/en/stable/integrations/editors.html).
    The git repository includes an action to run Black on push and pull_request.
@@ -126,4 +126,29 @@ You can run the frontend module using either of the below options:
 - If you are deploying on the kubernetes cluster (https://clowder2.software-dev.ncsa.cloud/), please import the
   Keycloak realm setting file `/scripts/keycloak/mini-kube-clowder-realm-prod.json`
 
-For more details on how to set up Keycloak, please refer to this [Documentation](docs/source/configure-keycloak-realm.md)
+For more details on how to set up Keycloak, please refer to [keycloak setup](keycloak.md).
+
+### Pre-commit Hooks and Linting
+
+We use [pre-commit](https://pre-commit.com/) to run linting and formatting checks before committing code. To install
+pre-commit, run `pip install pre-commit` and then `pre-commit install` in the root directory of the repository. This
+will install the pre-commit hooks and run them on every commit. If any of the hooks fail, the commit will be aborted.
+Once ran, the hooks will be in place for all future commits and branches since they are stored in the `.git/hooks`.
+To run the hooks manually, run `pre-commit run --all-files`. To skip the hooks, run `git commit --no-verify` (or click
+on cog in PyCharm and uncheck `Run Git hooks`).
+
+See .pre-commit-config.yaml for the list of hooks that are run. The hooks are run in the order they are listed in the
+file. The hooks are run on all files that are staged for commit. To run the hooks on all files, run `pre-commit run
+--all-files`.
+
+Hooks include:
+
+- Python style checks and formatting using black, isort and flake8.
+- Custom script to create openapi.json file from the backend FastAPI app.
+- Eslint and prettier for frontend code.
+
+
+#### Eslint and Prettier
+
+Use `npx eslint-config-prettier src/index.tsx` to check for conflicts between eslint and prettier. To run eslint use
+`npx eslint src`.

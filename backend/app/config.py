@@ -1,6 +1,6 @@
 from typing import List
 
-from pydantic import BaseSettings, AnyHttpUrl
+from pydantic import AnyHttpUrl, BaseSettings
 
 
 class Settings(BaseSettings):
@@ -9,7 +9,7 @@ class Settings(BaseSettings):
     API_V2_STR: str = "/api/v2"
     admin_email: str = "devnull@ncsa.illinois.edu"
     frontend_url: str = "http://localhost:3000"
-    version: str = "2.0.0-beta.1"
+    version: str = "2.0.0-beta.2"
 
     # Unique secret for hashing API keys. Generate with `openssl rand -hex 32`
     local_auth_secret = "clowder_secret_key"
@@ -67,6 +67,7 @@ class Settings(BaseSettings):
     keycloak_client_id = auth_client_id
     # identity providers registered in keycloak, for example cilogon, globus, twitter
     keycloak_ipds = ["cilogon", "globus"]
+    keycloak_default_enabled = True
 
     # Elasticsearch local config
     elasticsearch_url = "http://localhost:9200"

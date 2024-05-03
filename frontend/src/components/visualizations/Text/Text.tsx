@@ -2,8 +2,12 @@ import React, { useEffect, useState } from "react";
 import ShowMoreText from "react-show-more-text";
 import { readTextFromFile } from "../../../utils/common";
 
-import { downloadVisData,  publicFileDownloaded, fileDownloaded } from "../../../utils/visualization";
-import {downloadPublicVisData} from "../../../actions/public_visualization";
+import {
+	downloadVisData,
+	publicFileDownloaded,
+	fileDownloaded,
+} from "../../../utils/visualization";
+import { downloadPublicVisData } from "../../../actions/public_visualization";
 
 type TextProps = {
 	fileId?: string;
@@ -19,18 +23,18 @@ export default function Text(props: TextProps) {
 			try {
 				let blob;
 				if (visualizationId) {
-					if (publicView){
+					if (publicView) {
 						blob = await downloadPublicVisData(visualizationId);
 					} else {
 						blob = await downloadVisData(visualizationId);
 					}
 				} else {
-					if (publicView){
-						console.log('public file download blob');
+					if (publicView) {
+						console.log("public file download blob");
 						blob = await publicFileDownloaded(fileId);
 						console.log(blob);
 					} else {
-						console.log('downloading blob here');
+						console.log("downloading blob here");
 						blob = await fileDownloaded(fileId);
 						console.log(blob);
 					}

@@ -35,8 +35,12 @@ urllib3 = "==1.26.8"
 zipp = "==3.7.0"
 sphinx-autobuild = "*"
 sphinx-material = "*"
+mkdocs-material = "*"
 
 [dev-packages]
 
 [requires]
 python_version = "3.9"
+
+[scripts]
+extract-openapi = "python backend/extract-openapi.py app.main:app"

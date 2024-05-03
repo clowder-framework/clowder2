@@ -1,0 +1,33 @@
+{
+	"schema": {
+		"type": "object",
+		"required": ["name", "description", "url", "holders"],
+		"properties": {
+			"name": {
+				"type": "string",
+				"title": "Name"
+			},
+			"description": {
+				"type": ["string"],
+				"title": "Description"
+			},
+			"url": {
+				"type": ["string"],
+				"title": "Url"
+			},
+			"holders": {
+				"type": ["string"],
+				"title": "Holders"
+			},
+			"version": {
+				"type": ["string", "null"],
+				"title": "Version"
+			},
+			"expiration_date": {
+				"type": ["string", "null"],
+				"format": "date-time",
+				"title": "Expiration Date"
+			}
+		}
+	}
+}
