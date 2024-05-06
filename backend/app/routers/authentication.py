@@ -1,13 +1,5 @@
 import json
 
-from app.keycloak_auth import (
-    create_user,
-    enable_disable_user,
-    get_current_user,
-    keycloak_openid,
-)
-from app.models.datasets import DatasetDB
-from app.models.users import UserDB, UserIn, UserLogin, UserOut
 from beanie import PydanticObjectId
 from fastapi import APIRouter, Depends, HTTPException
 from keycloak.exceptions import (
@@ -16,6 +8,15 @@ from keycloak.exceptions import (
     KeycloakPostError,
 )
 from passlib.hash import bcrypt
+
+from app.keycloak_auth import (
+    create_user,
+    enable_disable_user,
+    get_current_user,
+    keycloak_openid,
+)
+from app.models.datasets import DatasetDB
+from app.models.users import UserDB, UserIn, UserLogin, UserOut
 
 router = APIRouter()
 
@@ -116,13 +117,18 @@ async def get_admin(
 
 
 @router.get("/users/me/admin_mode")
-async def get_admin_mode(current_username=Depends(get_current_user)) -> bool:
+async def get_admin_mode(
+    superadmin: bool = False, current_username=Depends(get_current_user)
+) -> bool:
     """Get Admin mode from User Object."""
     if (
         current_user := await UserDB.find_one(UserDB.email == current_username.email)
     ) is not None:
-        if current_user.admin_mode is not None:
-            return current_user.admin_mode
+        if current_user.admin:
+            if superadmin:
+                return True
+            elif current_user.admin_mode is not None:
+                return current_user.admin_mode
         else:
             return False
     else:
