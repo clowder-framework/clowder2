@@ -129,6 +129,8 @@ async def get_admin_mode(
                 return True
             elif current_user.admin_mode is not None:
                 return current_user.admin_mode
+            else:
+                return False
         else:
             return False
     else:
