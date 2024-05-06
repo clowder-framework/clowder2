@@ -5,7 +5,12 @@ from app.config import settings
 from app.keycloak_auth import get_current_user
 from app.models.datasets import DatasetDB
 from app.models.files import FileDB
-from app.models.thumbnails import ThumbnailDB, ThumbnailIn, ThumbnailOut
+from app.models.thumbnails import (
+    ThumbnailDB,
+    ThumbnailDBViewList,
+    ThumbnailIn,
+    ThumbnailOut,
+)
 from app.routers.utils import get_content_type
 from beanie import PydanticObjectId
 from beanie.odm.operators.update.general import Inc
@@ -76,8 +81,15 @@ async def download_thumbnail(
     increment: Optional[bool] = False,
 ):
     # If thumbnail exists in MongoDB, download from Minio
-    if (thumbnail := await ThumbnailDB.get(PydanticObjectId(thumbnail_id))) is not None:
-        content = fs.get_object(settings.MINIO_BUCKET_NAME, thumbnail_id)
+    if (
+        thumbnail := await ThumbnailDBViewList.find_one(
+            ThumbnailDBViewList.id == PydanticObjectId(thumbnail_id)
+        )
+    ) is not None:
+        bytes_thumbnail_id = (
+            str(thumbnail.origin_id) if thumbnail.origin_id else str(thumbnail.id)
+        )
+        content = fs.get_object(settings.MINIO_BUCKET_NAME, bytes_thumbnail_id)
 
         # Get content type & open file stream
         response = StreamingResponse(content.stream(settings.MINIO_UPLOAD_CHUNK_SIZE))

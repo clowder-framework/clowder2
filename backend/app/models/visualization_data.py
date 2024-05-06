@@ -1,8 +1,7 @@
 import json
 from datetime import datetime
-from typing import List, Optional
+from typing import Optional
 
-from app.models.authorization import AuthorizationDB
 from app.models.files import ContentType
 from app.models.users import UserOut
 from beanie import Document, PydanticObjectId, View
@@ -43,21 +42,20 @@ class VisualizationDataDB(Document, VisualizationDataBaseCommon):
         name = "visualization_data"
 
 
-class VisualizationFreezeDataDB(Document, VisualizationDataBaseCommon):
+class VisualizationDataFreezeDB(Document, VisualizationDataBaseCommon):
     frozen: bool = True
 
     class Settings:
         name = "visualization_data_freeze"
 
 
-class VisualizationDataOut(VisualizationDataDB, VisualizationDataBaseCommon):
+class VisualizationDataOut(VisualizationDataDB, VisualizationDataFreezeDB):
     class Config:
         fields = {"id": "id"}
 
 
 class VisualizationDataDBViewList(View, VisualizationDataBaseCommon):
     id: PydanticObjectId = Field(None, alias="_id")  # necessary for Views
-    auth: List[AuthorizationDB]
 
     # for dataset versioning
     origin_id: PydanticObjectId
@@ -77,14 +75,6 @@ class VisualizationDataDBViewList(View, VisualizationDataBaseCommon):
                 "$unionWith": {
                     "coll": "visualization_data_freeze",
                     "pipeline": [{"$addFields": {"frozen": True}}],
-                }
-            },
-            {
-                "$lookup": {
-                    "from": "authorization",
-                    "localField": "dataset_id",
-                    "foreignField": "dataset_id",
-                    "as": "auth",
                 }
             },
         ]

@@ -1,6 +1,5 @@
 from typing import List, Optional
 
-from app.models.authorization import AuthorizationDB
 from app.models.listeners import EventListenerJobDB, ExtractorInfo
 from app.models.metadata import MongoDBRef
 from app.models.visualization_data import VisualizationDataOut
@@ -47,7 +46,6 @@ class VisualizationConfigOut(VisualizationConfigDB, VisualizationConfigFreezeDB)
 
 class VisualizationConfigDBViewList(View, VisualizationConfigDB):
     id: PydanticObjectId = Field(None, alias="_id")  # necessary for Views
-    auth: List[AuthorizationDB]
 
     # for dataset versioning
     origin_id: PydanticObjectId
@@ -67,14 +65,6 @@ class VisualizationConfigDBViewList(View, VisualizationConfigDB):
                 "$unionWith": {
                     "coll": "visualization_config_freeze",
                     "pipeline": [{"$addFields": {"frozen": True}}],
-                }
-            },
-            {
-                "$lookup": {
-                    "from": "authorization",
-                    "localField": "dataset_id",
-                    "foreignField": "dataset_id",
-                    "as": "auth",
                 }
             },
         ]

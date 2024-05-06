@@ -29,4 +29,5 @@ export type VisualizationDataOut = {
     visualization_config_id: string;
     origin_id?: string;
     id?: string;
+    frozen?: boolean;
 }
