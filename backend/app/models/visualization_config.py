@@ -1,10 +1,11 @@
 from typing import List, Optional
 
+from app.models.authorization import AuthorizationDB
 from app.models.listeners import EventListenerJobDB, ExtractorInfo
 from app.models.metadata import MongoDBRef
 from app.models.visualization_data import VisualizationDataOut
-from beanie import Document
-from pydantic import BaseModel
+from beanie import Document, PydanticObjectId, View
+from pydantic import BaseModel, Field
 
 
 class VisualizationConfigBase(BaseModel):
@@ -23,12 +24,61 @@ class VisualizationConfigIn(VisualizationConfigBase):
 
 
 class VisualizationConfigDB(Document, VisualizationConfigBase):
+    origin_id: Optional[PydanticObjectId] = None
+
     class Settings:
         name = "visualization_config"
 
 
-class VisualizationConfigOut(VisualizationConfigDB):
+class VisualizationConfigFreezeDB(Document, VisualizationConfigBase):
+    origin_id: Optional[PydanticObjectId] = None
+    frozen: bool = True
+
+    class Settings:
+        name = "visualization_config_freeze"
+
+
+class VisualizationConfigOut(VisualizationConfigDB, VisualizationConfigFreezeDB):
     visualization_data: List[VisualizationDataOut] = []
 
     class Config:
         fields = {"id": "id"}
+
+
+class VisualizationConfigDBViewList(View, VisualizationConfigDB):
+    id: PydanticObjectId = Field(None, alias="_id")  # necessary for Views
+    auth: List[AuthorizationDB]
+
+    # for dataset versioning
+    origin_id: PydanticObjectId
+    frozen: bool = False
+
+    class Settings:
+        source = VisualizationConfigDB
+        name = "visualization_config_view"
+        pipeline = [
+            {
+                "$addFields": {
+                    "frozen": False,
+                    "origin_id": "$_id",
+                }
+            },
+            {
+                "$unionWith": {
+                    "coll": "visualization_config_freeze",
+                    "pipeline": [{"$addFields": {"frozen": True}}],
+                }
+            },
+            {
+                "$lookup": {
+                    "from": "authorization",
+                    "localField": "dataset_id",
+                    "foreignField": "dataset_id",
+                    "as": "auth",
+                }
+            },
+        ]
+        # Needs fix to work https://github.com/roman-right/beanie/pull/521
+        # use_cache = True
+        # cache_expiration_time = timedelta(seconds=10)
+        # cache_capacity = 5

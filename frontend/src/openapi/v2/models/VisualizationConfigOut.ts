@@ -29,5 +29,7 @@ export type VisualizationConfigOut = {
     visualization_component_id: string;
     visualization_mimetype: string;
     id?: string;
+    origin_id?: string;
+    frozen?: boolean;
     visualization_data?: Array<VisualizationDataOut>;
 }

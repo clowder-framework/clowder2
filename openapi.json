@@ -12686,6 +12686,19 @@
               "5eb7cfb05e32e07750a1756a"
             ]
           },
+          "origin_id": {
+            "title": "Origin Id",
+            "type": "string",
+            "examples": [
+              "5eb7cf5a86d9755df3a6c593",
+              "5eb7cfb05e32e07750a1756a"
+            ]
+          },
+          "frozen": {
+            "title": "Frozen",
+            "type": "boolean",
+            "default": true
+          },
           "visualization_data": {
             "title": "Visualization Data",
             "type": "array",
@@ -12713,14 +12726,6 @@
           "description": {
             "title": "Description",
             "type": "string"
-          },
-          "id": {
-            "title": "Id",
-            "type": "string",
-            "examples": [
-              "5eb7cf5a86d9755df3a6c593",
-              "5eb7cfb05e32e07750a1756a"
-            ]
           },
           "creator": {
             "$ref": "#/components/schemas/UserOut"
@@ -12754,6 +12759,22 @@
           },
           "visualization_config_id": {
             "title": "Visualization Config Id",
+            "type": "string",
+            "examples": [
+              "5eb7cf5a86d9755df3a6c593",
+              "5eb7cfb05e32e07750a1756a"
+            ]
+          },
+          "origin_id": {
+            "title": "Origin Id",
+            "type": "string",
+            "examples": [
+              "5eb7cf5a86d9755df3a6c593",
+              "5eb7cfb05e32e07750a1756a"
+            ]
+          },
+          "id": {
+            "title": "Id",
             "type": "string",
             "examples": [
               "5eb7cf5a86d9755df3a6c593",
