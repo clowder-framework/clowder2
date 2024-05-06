@@ -13,7 +13,7 @@ from beanie.odm.operators.find.logical import And
 from bson import ObjectId
 
 
-async def _freeze_file_metadata(file, new_frozen_file_id):
+async def _freeze_file_metadata(file, new_frozen_file_id: PydanticObjectId):
     file_metadata = await MetadataDB.find(
         And(
             MetadataDB.resource.resource_id == ObjectId(file.id),
@@ -29,8 +29,8 @@ async def _freeze_file_metadata(file, new_frozen_file_id):
         await frozen_metadata.insert()
 
 
-async def _freeze_file_thumbnail(file):
-    file_thumbnail = await ThumbnailDB.get(PydanticObjectId(file.thumbnail_id))
+async def _freeze_file_thumbnail(thumbnail_id):
+    file_thumbnail = await ThumbnailDB.get(PydanticObjectId(thumbnail_id))
     file_thumbnail_data = file_thumbnail.dict()
     file_thumbnail_data["origin_id"] = file_thumbnail_data.pop("id")
     file_thumbnail_data["frozen"] = True
@@ -40,7 +40,7 @@ async def _freeze_file_thumbnail(file):
     return frozen_file_thumbnail.id
 
 
-async def _freeze_file_visualization(file, new_frozen_file_id):
+async def _freeze_file_visualization(file, new_frozen_file_id: PydanticObjectId):
     file_vis_config = await VisualizationConfigDB.find(
         And(
             VisualizationConfigDB.resource.resource_id == ObjectId(file.id),
@@ -69,7 +69,9 @@ async def _freeze_file_visualization(file, new_frozen_file_id):
             await frozen_vis_data.insert()
 
 
-async def _freeze_files_folders_w_metadata_vis(dataset_id, new_frozen_dataset_id):
+async def _freeze_files_folders_w_metadata_vis(
+    dataset_id: str, new_frozen_dataset_id: PydanticObjectId
+):
     # freeze folders first and save frozen folder id to a hashmap
     folders = await FolderDB.find(FolderDB.dataset_id == ObjectId(dataset_id)).to_list()
     parent_id_map = {}
@@ -90,7 +92,9 @@ async def _freeze_files_folders_w_metadata_vis(dataset_id, new_frozen_dataset_id
 
         # if file has thumbnail
         if file_data["thumbnail_id"]:
-            frozen_file_thumbnail_id = await _freeze_file_thumbnail(file)
+            frozen_file_thumbnail_id = await _freeze_file_thumbnail(
+                file_data["thumbnail_id"]
+            )
             file_data["thumbnail_id"] = frozen_file_thumbnail_id
 
         frozen_file = FileFreezeDB(**file_data)
@@ -103,7 +107,9 @@ async def _freeze_files_folders_w_metadata_vis(dataset_id, new_frozen_dataset_id
         await _freeze_file_visualization(file, frozen_file.id)
 
 
-async def _freeze_dataset_metadata(dataset_id, new_frozen_dataset_id):
+async def _freeze_dataset_metadata(
+    dataset_id: str, new_frozen_dataset_id: PydanticObjectId
+):
     dataset_metadata = await MetadataDB.find(
         And(
             MetadataDB.resource.resource_id == ObjectId(dataset_id),
@@ -119,8 +125,8 @@ async def _freeze_dataset_metadata(dataset_id, new_frozen_dataset_id):
         await frozen_metadata.insert()
 
 
-async def _freeze_dataset_thumbnail(dataset):
-    dataset_thumbnail = await ThumbnailDB.get(PydanticObjectId(dataset.thumbnail_id))
+async def _freeze_dataset_thumbnail(thumbnail_id: PydanticObjectId):
+    dataset_thumbnail = await ThumbnailDB.get(thumbnail_id)
     dataset_thumbnail_data = dataset_thumbnail.dict()
     dataset_thumbnail_data["origin_id"] = dataset_thumbnail_data.pop("id")
     dataset_thumbnail_data["frozen"] = True
@@ -130,10 +136,12 @@ async def _freeze_dataset_thumbnail(dataset):
     return frozen_dataset_thumbnail.id
 
 
-async def _freeze_dataset_visualization(dataset, new_frozen_dataset_id):
+async def _freeze_dataset_visualization(
+    dataset_id: str, new_frozen_dataset_id: PydanticObjectId
+):
     dataset_vis_config = await VisualizationConfigDB.find(
         And(
-            VisualizationConfigDB.resource.resource_id == ObjectId(dataset.id),
+            VisualizationConfigDB.resource.resource_id == ObjectId(dataset_id),
             VisualizationConfigDB.resource.collection == "datasets",
         )
     ).to_list()

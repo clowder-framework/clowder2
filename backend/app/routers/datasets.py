@@ -474,7 +474,9 @@ async def freeze_dataset(
 
         # if dataset has thumbnail
         if dataset.thumbnail_id is not None:
-            frozen_dataset_thumbnail_id = await _freeze_dataset_thumbnail(dataset)
+            frozen_dataset_thumbnail_id = await _freeze_dataset_thumbnail(
+                dataset.thumbnail_id
+            )
             frozen_dataset_data["thumbnail_id"] = frozen_dataset_thumbnail_id
 
         frozen_dataset = DatasetFreezeDB(**frozen_dataset_data)
