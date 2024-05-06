@@ -101,6 +101,7 @@ export { PublicElasticsearchService } from './services/PublicElasticsearchServic
 export { PublicFilesService } from './services/PublicFilesService';
 export { PublicFoldersService } from './services/PublicFoldersService';
 export { PublicMetadataService } from './services/PublicMetadataService';
+export { PublicThumbnailsService } from './services/PublicThumbnailsService';
 export { PublicVisualizationsService } from './services/PublicVisualizationsService';
 export { ServiceService } from './services/ServiceService';
 export { StatusService } from './services/StatusService';

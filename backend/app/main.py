@@ -60,6 +60,7 @@ from app.routers import (
     public_files,
     public_folders,
     public_metadata,
+    public_thumbnails,
     public_visualization,
     status,
     thumbnails,
@@ -243,6 +244,11 @@ api_router.include_router(
     prefix="/thumbnails",
     tags=["thumbnails"],
     dependencies=[Depends(get_current_username)],
+)
+api_router.include_router(
+    public_thumbnails.router,
+    prefix="/public_thumbnails",
+    tags=["public_thumbnails"],
 )
 api_router.include_router(
     licenses.router,

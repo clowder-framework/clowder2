@@ -9,9 +9,10 @@ import { parseDate } from "../../utils/common";
 import FileMenu from "./FileMenu";
 import prettyBytes from "pretty-bytes";
 import { FileOut } from "../../openapi/v2";
-import { generateThumbnailUrl } from "../../utils/visualization";
-import { useSelector } from "react-redux";
-import { RootState } from "../../types/data";
+import {
+	generatePublicThumbnailUrl,
+	generateThumbnailUrl,
+} from "../../utils/visualization";
 
 type FilesTableFileEntryProps = {
 	iconStyle: {};
@@ -26,12 +27,14 @@ export function FilesTableFileEntry(props: FilesTableFileEntryProps) {
 	const [thumbnailUrl, setThumbnailUrl] = useState("");
 	const [selectedVersion, setSelectedVersion] = useState(file.version_num);
 
-	const fileRole = useSelector((state: RootState) => state.file.fileRole);
-
 	useEffect(() => {
 		let url = "";
 		if (file.thumbnail_id) {
-			url = generateThumbnailUrl(file.thumbnail_id);
+			if (publicView) {
+				url = generatePublicThumbnailUrl(file.thumbnail_id);
+			} else {
+				url = generateThumbnailUrl(file.thumbnail_id);
+			}
 		}
 		setThumbnailUrl(url);
 	}, [file]);

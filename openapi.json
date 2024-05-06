@@ -9460,6 +9460,56 @@
         ]
       }
     },
+    "/api/v2/public_thumbnails/{thumbnail_id}": {
+      "get": {
+        "tags": [
+          "public_thumbnails"
+        ],
+        "summary": "Download Thumbnail",
+        "operationId": "download_thumbnail_api_v2_public_thumbnails__thumbnail_id__get",
+        "parameters": [
+          {
+            "required": true,
+            "schema": {
+              "title": "Thumbnail Id",
+              "type": "string"
+            },
+            "name": "thumbnail_id",
+            "in": "path"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Increment",
+              "type": "boolean",
+              "default": false
+            },
+            "name": "increment",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v2/licenses": {
       "post": {
         "tags": [
