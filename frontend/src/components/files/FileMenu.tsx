@@ -9,6 +9,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { ActionModal } from "../dialog/ActionModal";
 import DownloadIcon from "@mui/icons-material/Download";
 import UploadIcon from "@mui/icons-material/Upload";
+import DeleteIcon from "@mui/icons-material/Delete";
 import { Dialog, DialogTitle, ListItemIcon, ListItemText } from "@mui/material";
 import { UpdateFile } from "./UpdateFile";
 import { MoreHoriz } from "@material-ui/icons";
@@ -129,6 +130,24 @@ export default function FileMenu(props: FileMenuProps) {
 					frozen={dataset.frozen}
 					frozenVersionNum={dataset.frozen_version_num}
 				>
+					{/*owner, editor can update file*/}
+					<AuthWrapper
+						currRole={datasetRole.role}
+						allowedRoles={["owner", "editor"]}
+					>
+						<MenuItem
+							onClick={() => {
+								handleClose();
+								setUpdateFileOpen(true);
+							}}
+						>
+							<ListItemIcon>
+								<UploadIcon fontSize="small" />
+							</ListItemIcon>
+							<ListItemText>Update File</ListItemText>
+						</MenuItem>
+					</AuthWrapper>
+
 					{/*owner can delete file*/}
 					<AuthWrapper currRole={datasetRole.role} allowedRoles={["owner"]}>
 						<MenuItem
@@ -138,9 +157,9 @@ export default function FileMenu(props: FileMenuProps) {
 							}}
 						>
 							<ListItemIcon>
-								<UploadIcon fontSize="small" />
+								<DeleteIcon fontSize="small" />
 							</ListItemIcon>
-							<ListItemText>Update File</ListItemText>
+							<ListItemText>Delete</ListItemText>
 						</MenuItem>
 					</AuthWrapper>
 				</FrozenWrapper>
