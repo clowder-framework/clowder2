@@ -12691,16 +12691,16 @@
             "title": "Visualization Mimetype",
             "type": "string"
           },
-          "id": {
-            "title": "Id",
+          "origin_id": {
+            "title": "Origin Id",
             "type": "string",
             "examples": [
               "5eb7cf5a86d9755df3a6c593",
               "5eb7cfb05e32e07750a1756a"
             ]
           },
-          "origin_id": {
-            "title": "Origin Id",
+          "id": {
+            "title": "Id",
             "type": "string",
             "examples": [
               "5eb7cf5a86d9755df3a6c593",

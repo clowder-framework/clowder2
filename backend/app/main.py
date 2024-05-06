@@ -26,11 +26,19 @@ from app.models.metadata import (
     MetadataDefinitionDB,
     MetadataFreezeDB,
 )
-from app.models.thumbnails import ThumbnailDB
+from app.models.thumbnails import ThumbnailDB, ThumbnailDBViewList, ThumbnailFreezeDB
 from app.models.tokens import TokenDB
 from app.models.users import ListenerAPIKeyDB, UserAPIKeyDB, UserDB
-from app.models.visualization_config import VisualizationConfigDB
-from app.models.visualization_data import VisualizationDataDB
+from app.models.visualization_config import (
+    VisualizationConfigDB,
+    VisualizationConfigDBViewList,
+    VisualizationConfigFreezeDB,
+)
+from app.models.visualization_data import (
+    VisualizationDataDB,
+    VisualizationDataDBViewList,
+    VisualizationDataFreezeDB,
+)
 from app.routers import (
     authentication,
     authorization,
@@ -289,8 +297,14 @@ async def startup_beanie():
             TokenDB,
             ErrorDB,
             VisualizationConfigDB,
+            VisualizationConfigFreezeDB,
+            VisualizationConfigDBViewList,
             VisualizationDataDB,
+            VisualizationDataFreezeDB,
+            VisualizationDataDBViewList,
             ThumbnailDB,
+            ThumbnailFreezeDB,
+            ThumbnailDBViewList,
             LicenseDB,
         ],
         recreate_views=True,

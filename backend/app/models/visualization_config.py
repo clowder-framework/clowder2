@@ -22,15 +22,16 @@ class VisualizationConfigIn(VisualizationConfigBase):
     pass
 
 
-class VisualizationConfigDB(Document, VisualizationConfigBase):
+class VisualizationConfigBaseCommon(VisualizationConfigBase):
     origin_id: Optional[PydanticObjectId] = None
 
+
+class VisualizationConfigDB(Document, VisualizationConfigBaseCommon):
     class Settings:
         name = "visualization_config"
 
 
-class VisualizationConfigFreezeDB(Document, VisualizationConfigBase):
-    origin_id: Optional[PydanticObjectId] = None
+class VisualizationConfigFreezeDB(Document, VisualizationConfigBaseCommon):
     frozen: bool = True
 
     class Settings:
@@ -44,7 +45,7 @@ class VisualizationConfigOut(VisualizationConfigDB, VisualizationConfigFreezeDB)
         fields = {"id": "id"}
 
 
-class VisualizationConfigDBViewList(View, VisualizationConfigDB):
+class VisualizationConfigDBViewList(View, VisualizationConfigBaseCommon):
     id: PydanticObjectId = Field(None, alias="_id")  # necessary for Views
 
     # for dataset versioning
