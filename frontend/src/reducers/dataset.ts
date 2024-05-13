@@ -33,7 +33,8 @@ import {
 	DatasetOut as Dataset,
 	DatasetRoles,
 	FileOut,
-	FolderOut, LicenseOut,
+	FolderOut,
+	LicenseOut,
 	Paged,
 	PageMetadata,
 	UserOut,
@@ -53,7 +54,7 @@ const defaultState: DatasetState = {
 	newFiles: <FileOut[]>[],
 	newFolder: <FolderOut>{},
 	roles: <DatasetRoles>{},
-	license: <LicenseOut>{}
+	license: <LicenseOut>{},
 };
 
 const dataset = (state = defaultState, action: DataAction) => {

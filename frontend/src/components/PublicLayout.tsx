@@ -157,9 +157,9 @@ export default function PersistentDrawerLeft(props) {
 					</SearchDiv>
 					<Box sx={{ flexGrow: 1 }} />
 					<Box sx={{ marginLeft: "auto" }}>
-						{/*<Link href="/auth/register" sx={link}>*/}
-						{/*	Register*/}
-						{/*</Link>*/}
+						<Link href="/auth/register" sx={link}>
+							Register
+						</Link>
 						<Link href="/auth/login" sx={link}>
 							Login
 						</Link>

@@ -1,22 +1,30 @@
-import React, { useState } from 'react';
-import {Container, Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField, Box} from '@mui/material';
+import React, { useState } from "react";
+import {
+	Container,
+	Dialog,
+	DialogTitle,
+	DialogContent,
+	DialogActions,
+	Button,
+	TextField,
+	Box,
+} from "@mui/material";
 import licenseSchema from "../../schema/licenseSchema.json";
-import {FormProps} from "@rjsf/core";
-import {ClowderRjsfErrorList} from "../styledComponents/ClowderRjsfErrorList";
+import { FormProps } from "@rjsf/core";
+import { ClowderRjsfErrorList } from "../styledComponents/ClowderRjsfErrorList";
 import Form from "@rjsf/material-ui";
-import {useDispatch, useSelector} from "react-redux";
-import {ClowderRjsfTextWidget} from "../styledComponents/ClowderRjsfTextWidget";
-import {ClowderRjsfTextAreaWidget} from "../styledComponents/ClowderRjsfTextAreaWidget";
-import {ClowderRjsfSelectWidget} from "../styledComponents/ClowderRjsfSelectWidget";
-import {RootState} from "../../types/data";
-import {updateDatasetLicense} from "../../actions/dataset"; // Import LicenseOut type
-
+import { useDispatch, useSelector } from "react-redux";
+import { ClowderRjsfTextWidget } from "../styledComponents/ClowderRjsfTextWidget";
+import { ClowderRjsfTextAreaWidget } from "../styledComponents/ClowderRjsfTextAreaWidget";
+import { ClowderRjsfSelectWidget } from "../styledComponents/ClowderRjsfSelectWidget";
+import { RootState } from "../../types/data";
+import { updateDatasetLicense } from "../../actions/dataset"; // Import LicenseOut type
 
 type EditLicenseModalProps = {
 	setEditLicenseOpen: any;
-}
+};
 
-export const EditLicenseModal = (props: EditLicenseModalProps)=> {
+export const EditLicenseModal = (props: EditLicenseModalProps) => {
 	const { setEditLicenseOpen } = props;
 
 	const dispatch = useDispatch();
@@ -26,14 +34,13 @@ export const EditLicenseModal = (props: EditLicenseModalProps)=> {
 
 	const license = useSelector((state: RootState) => state.dataset.license);
 
-    const onSave = async () => {
-        // Handle save operation here
-    };
+	const onSave = async () => {
+		// Handle save operation here
+	};
 
-
-    return (
-        <Container>
-            <Form
+	return (
+		<Container>
+			<Form
 				schema={licenseSchema["schema"] as FormProps<any>["schema"]}
 				//uiSchema={licenseSchema["uiSchema"] as FormProps<any>["uiSchema"]}
 				formData={license}
@@ -58,6 +65,6 @@ export const EditLicenseModal = (props: EditLicenseModalProps)=> {
 					</Button>
 				</Box>
 			</Form>
-        </Container>
-    );
-}
+		</Container>
+	);
+};
