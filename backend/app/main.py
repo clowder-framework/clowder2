@@ -46,7 +46,6 @@ from app.routers import (
     public_elasticsearch,
     public_files,
     public_folders,
-    public_licenses,
     public_metadata,
     public_visualization,
     status,
@@ -239,7 +238,7 @@ api_router.include_router(
     dependencies=[Depends(get_current_username)],
 )
 api_router.include_router(
-    public_licenses.router, prefix="/public_licenses", tags=["public_licenses"]
+    licenses.public_router, prefix="/public_licenses", tags=["public_licenses"]
 )
 api_router.include_router(status.router, prefix="/status", tags=["status"])
 api_router.include_router(keycloak.router, prefix="/auth", tags=["auth"])
