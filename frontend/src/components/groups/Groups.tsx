@@ -6,6 +6,7 @@ import {
 	DialogContent,
 	DialogTitle,
 	Grid,
+	Link as MuiLink,
 	Pagination,
 } from "@mui/material";
 import { RootState } from "../../types/data";
@@ -161,9 +162,13 @@ export function Groups() {
 												}}
 											>
 												<TableCell scope="row" key={group.id}>
-													<Button component={Link} to={`/groups/${group.id}`}>
+													<MuiLink
+														component={Link}
+														to={`/groups/${group.id}`}
+														sx={{ textDecoration: "none" }}
+													>
 														{group.name}
-													</Button>
+													</MuiLink>
 												</TableCell>
 												<TableCell scope="row" key={group.id} align="left">
 													{group.description}
