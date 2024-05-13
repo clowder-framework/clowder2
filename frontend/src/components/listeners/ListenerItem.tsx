@@ -64,7 +64,7 @@ export default function ListenerItem(props: ListenerCardProps) {
 				!extractor["alive"] ? (
 					<Typography
 						sx={{
-							padding: "0.5em",
+							padding: "2em",
 							color: "rgba(0, 0, 0, 0.26)",
 							fontSize: "14px",
 						}}
@@ -74,7 +74,7 @@ export default function ListenerItem(props: ListenerCardProps) {
 				) : (
 					<Typography
 						sx={{
-							padding: "0.5em",
+							padding: "2em",
 							color: theme.palette.primary.light,
 							fontSize: "14px",
 						}}
