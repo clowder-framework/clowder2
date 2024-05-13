@@ -75,6 +75,9 @@ export const Explore = (): JSX.Element => {
 		if (newTabIndex === 1) {
 			setMine(true);
 			listDatasets(0, limit, true);
+		} else if (newTabIndex === 0) {
+			setMine(false);
+			listDatasets(0, limit, false);
 		}
 		setSelectedTabIndex(newTabIndex);
 	};
