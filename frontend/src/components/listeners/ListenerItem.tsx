@@ -75,7 +75,7 @@ export default function ListenerItem(props: ListenerCardProps) {
 					<Typography
 						sx={{
 							padding: "2em",
-							color: theme.palette.primary.light,
+							color: theme.palette.info.main,
 							fontSize: "14px",
 						}}
 					>
