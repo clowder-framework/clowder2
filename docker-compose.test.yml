@@ -54,7 +54,7 @@ services:
       auth_redirect_uri: http://localhost:80/api/v2/auth
       auth_url: http://localhost/keycloak/realms/clowder/protocol/openid-connect/auth?client_id=clowder2-backend&response_type=code
       oauth2_scheme_auth_url: http://keycloak:8080/keycloak/realms/clowder/protocol/openid-connect/auth?client_id=clowder2-backend&response_type=code
-      auth_register_url: http://localhost/keycloak/realms/clowder/protocol/openid-connect/registrations?client_id=clowder2-backend&response_type=code
+      auth_register_url: http://localhost/keycloak/realms/clowder/protocol/openid-connect/registrations?client_id=clowder2-backend&response_type=code&redirect_uri=http://localhost:80/api/v2/auth&scope=openid%20email
       auth_token_url: http://keycloak:8080/keycloak/realms/clowder/protocol/openid-connect/token
       auth_server_url: http://keycloak:8080/keycloak/
       keycloak_base: http://localhost/api

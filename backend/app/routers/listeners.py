@@ -4,27 +4,26 @@ import random
 import string
 from typing import List, Optional
 
-from beanie import PydanticObjectId
-from beanie.operators import Or, RegEx
-from bson import ObjectId
-from fastapi import APIRouter, HTTPException, Depends
-from packaging import version
-
 from app.config import settings
-from app.keycloak_auth import get_user, get_current_user, get_current_username
+from app.keycloak_auth import get_current_user, get_current_username, get_user
 from app.models.config import ConfigEntryDB
 from app.models.feeds import FeedDB, FeedListener
 from app.models.listeners import (
-    ExtractorInfo,
-    EventListenerIn,
-    LegacyEventListenerIn,
     EventListenerDB,
+    EventListenerIn,
     EventListenerOut,
+    ExtractorInfo,
+    LegacyEventListenerIn,
 )
-from app.models.pages import Paged, _get_page_query, _construct_page_metadata
+from app.models.pages import Paged, _construct_page_metadata, _get_page_query
 from app.models.search import SearchCriteria
 from app.models.users import UserOut
 from app.routers.feeds import disassociate_listener_db
+from beanie import PydanticObjectId
+from beanie.operators import Or, RegEx
+from bson import ObjectId
+from fastapi import APIRouter, Depends, HTTPException
+from packaging import version
 
 router = APIRouter()
 legacy_router = APIRouter()  # for back-compatibilty with v1 extractors
@@ -198,6 +197,7 @@ async def search_listeners(
     limit: int = 2,
     heartbeat_interval: Optional[int] = settings.listener_heartbeat_interval,
     user=Depends(get_current_username),
+    process: Optional[str] = None,
 ):
     """Search all Event Listeners in the db based on text.
 
@@ -208,9 +208,23 @@ async def search_listeners(
     """
     # First compute alive flag for all listeners
     aggregation_pipeline = [
-        _check_livelihood_query(heartbeat_interval=heartbeat_interval),
-        _get_page_query(skip, limit, sort_field="name", ascending=True),
+        _check_livelihood_query(heartbeat_interval=heartbeat_interval)
     ]
+
+    # Add filters if applicable
+    if process:
+        if process == "file":
+            aggregation_pipeline.append(
+                {"$match": {"properties.process.file": {"$exists": True}}}
+            )
+        if process == "dataset":
+            aggregation_pipeline.append(
+                {"$match": {"properties.process.dataset": {"$exists": True}}}
+            )
+    # Add pagination
+    aggregation_pipeline.append(
+        _get_page_query(skip, limit, sort_field="name", ascending=True)
+    )
 
     listeners_and_count = (
         await EventListenerDB.find(
@@ -278,6 +292,7 @@ async def get_listeners(
     category: Optional[str] = None,
     label: Optional[str] = None,
     alive_only: Optional[bool] = False,
+    process: Optional[str] = None,
 ):
     """Get a list of all Event Listeners in the db.
 
@@ -301,7 +316,15 @@ async def get_listeners(
         aggregation_pipeline.append({"$match": {"properties.default_labels": label}})
     if alive_only:
         aggregation_pipeline.append({"$match": {"alive": True}}),
-
+    if process:
+        if process == "file":
+            aggregation_pipeline.append(
+                {"$match": {"properties.process.file": {"$exists": True}}}
+            )
+        if process == "dataset":
+            aggregation_pipeline.append(
+                {"$match": {"properties.process.dataset": {"$exists": True}}}
+            )
     # Add pagination
     aggregation_pipeline.append(
         _get_page_query(skip, limit, sort_field="name", ascending=True)

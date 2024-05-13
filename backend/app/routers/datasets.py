@@ -5,75 +5,55 @@ import os
 import shutil
 import tempfile
 import zipfile
-from collections.abc import Mapping, Iterable
+from collections.abc import Iterable, Mapping
 from typing import List, Optional
 
+from app import dependencies
+from app.config import settings
+from app.deps.authorization_deps import Authorization, CheckStatus
+from app.keycloak_auth import get_current_user, get_token, get_user
+from app.models.authorization import AuthorizationDB, RoleType
+from app.models.datasets import (
+    DatasetBase,
+    DatasetDB,
+    DatasetDBViewList,
+    DatasetIn,
+    DatasetOut,
+    DatasetPatch,
+    DatasetStatus,
+)
+from app.models.files import FileDB, FileDBViewList, FileOut, LocalFileIn, StorageType
+from app.models.folder_and_file import FolderFileViewList
+from app.models.folders import (
+    FolderDB,
+    FolderDBViewList,
+    FolderIn,
+    FolderOut,
+    FolderPatch,
+)
+from app.models.licenses import standard_licenses
+from app.models.metadata import MetadataDB
+from app.models.pages import Paged, _construct_page_metadata, _get_page_query
+from app.models.thumbnails import ThumbnailDB
+from app.models.users import UserOut
+from app.rabbitmq.listeners import submit_dataset_job
+from app.routers.authentication import get_admin, get_admin_mode
+from app.routers.files import add_file_entry, add_local_file_entry, remove_file_entry
+from app.routers.licenses import delete_license
+from app.search.connect import delete_document_by_id
+from app.search.index import index_dataset, index_file
 from beanie import PydanticObjectId
 from beanie.odm.operators.update.general import Inc
-from beanie.operators import Or, And
-from bson import ObjectId
-from bson import json_util
+from beanie.operators import And, Or
+from bson import ObjectId, json_util
 from elasticsearch import Elasticsearch
-from fastapi import (
-    APIRouter,
-    HTTPException,
-    Depends,
-    File,
-    UploadFile,
-    Request,
-)
+from fastapi import APIRouter, Depends, File, HTTPException, Request, UploadFile
 from fastapi.responses import StreamingResponse
 from fastapi.security import HTTPBearer
 from minio import Minio
 from pika.adapters.blocking_connection import BlockingChannel
 from rocrate.model.person import Person
 from rocrate.rocrate import ROCrate
-
-from app import dependencies
-from app.config import settings
-from app.deps.authorization_deps import Authorization, CheckStatus
-from app.keycloak_auth import (
-    get_token,
-    get_user,
-    get_current_user,
-)
-from app.models.authorization import AuthorizationDB, RoleType
-from app.models.datasets import (
-    DatasetBase,
-    DatasetIn,
-    DatasetDB,
-    DatasetOut,
-    DatasetPatch,
-    DatasetDBViewList,
-    DatasetStatus,
-)
-from app.models.files import (
-    FileOut,
-    FileDB,
-    FileDBViewList,
-    LocalFileIn,
-    StorageType,
-)
-from app.models.folder_and_file import FolderFileViewList
-from app.models.folders import (
-    FolderOut,
-    FolderIn,
-    FolderDB,
-    FolderDBViewList,
-    FolderPatch,
-)
-from app.models.metadata import MetadataDB
-from app.models.pages import Paged, _get_page_query, _construct_page_metadata
-from app.models.thumbnails import ThumbnailDB
-from app.models.users import UserOut
-from app.rabbitmq.listeners import submit_dataset_job
-from app.routers.authentication import get_admin
-from app.routers.authentication import get_admin_mode
-from app.routers.files import add_file_entry, remove_file_entry, add_local_file_entry
-from app.search.connect import (
-    delete_document_by_id,
-)
-from app.search.index import index_dataset, index_file
 
 router = APIRouter()
 security = HTTPBearer()
@@ -192,7 +172,7 @@ async def _get_folder_hierarchy(
 ):
     """Generate a string of nested path to folder for use in zip file creation."""
     folder = await FolderDB.get(PydanticObjectId(folder_id))
-    hierarchy = folder.name + "/" + hierarchy
+    hierarchy = os.path.join(folder.name, hierarchy)
     if folder.parent_folder is not None:
         hierarchy = await _get_folder_hierarchy(folder.parent_folder, hierarchy)
     return hierarchy
@@ -201,10 +181,21 @@ async def _get_folder_hierarchy(
 @router.post("", response_model=DatasetOut)
 async def save_dataset(
     dataset_in: DatasetIn,
+    license_id: str,
     user=Depends(get_current_user),
     es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
 ):
-    dataset = DatasetDB(**dataset_in.dict(), creator=user)
+    standard_license = False
+    standard_license_ids = [license.id for license in standard_licenses]
+    if license_id in standard_license_ids:
+        standard_license = True
+
+    dataset = DatasetDB(
+        **dataset_in.dict(),
+        creator=user,
+        license_id=str(license_id),
+        standard_license=standard_license,
+    )
     await dataset.insert()
 
     # Create authorization entry
@@ -414,9 +405,16 @@ async def delete_dataset(
             FolderDB.dataset_id == PydanticObjectId(dataset_id)
         ).delete()
         await AuthorizationDB.find(
-            AuthorizationDB.dataset_id == ObjectId(dataset_id)
+            AuthorizationDB.dataset_id == PydanticObjectId(dataset_id)
         ).delete()
+
+        # don't delete standard license
+        standard_license_ids = [license.id for license in standard_licenses]
+        if dataset.license_id not in standard_license_ids:
+            await delete_license(dataset.license_id)
+
         return {"deleted": dataset_id}
+
     raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
 
 
@@ -427,7 +425,7 @@ async def add_folder(
     user=Depends(get_current_user),
     allow: bool = Depends(Authorization("uploader")),
 ):
-    if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
+    if (await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
         parent_folder = folder_in.parent_folder
         if parent_folder is not None:
             if (await FolderDB.get(PydanticObjectId(parent_folder))) is None:
@@ -469,7 +467,7 @@ async def get_dataset_folders(
         if parent_folder is not None:
             query.append(FolderDBViewList.parent_folder == ObjectId(parent_folder))
         else:
-            query.append(FolderDBViewList.parent_folder == None)
+            query.append(FolderDBViewList.parent_folder == None)  # noqa: E711
 
         folders_and_count = (
             await FolderDBViewList.find(*query)
@@ -523,8 +521,8 @@ async def get_dataset_folders_and_files(
             # only show folder and file at root level without parent folder
             query.append(
                 And(
-                    FolderFileViewList.parent_folder == None,
-                    FolderFileViewList.folder_id == None,
+                    FolderFileViewList.parent_folder == None,  # noqa: E711
+                    FolderFileViewList.folder_id == None,  # noqa: E711
                 )
             )
         else:
@@ -575,7 +573,7 @@ async def delete_folder(
     es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
     allow: bool = Depends(Authorization("editor")),
 ):
-    if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
+    if (await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
         if (folder := await FolderDB.get(PydanticObjectId(folder_id))) is not None:
             # delete current folder and files
             async for file in FileDB.find(FileDB.folder_id == ObjectId(folder_id)):
@@ -612,7 +610,7 @@ async def get_folder(
     folder_id: str,
     allow: bool = Depends(Authorization("viewer")),
 ):
-    if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
+    if (await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
         if (folder := await FolderDB.get(PydanticObjectId(folder_id))) is not None:
             return folder.dict()
         else:
@@ -666,7 +664,7 @@ async def save_file(
     if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
         if user is None:
             raise HTTPException(
-                status_code=401, detail=f"User not found. Session might have expired."
+                status_code=401, detail="User not found. Session might have expired."
             )
 
         new_file = FileDB(
@@ -714,7 +712,7 @@ async def save_files(
             if user is None:
                 raise HTTPException(
                     status_code=401,
-                    detail=f"User not found. Session might have expired.",
+                    detail="User not found. Session might have expired.",
                 )
 
             new_file = FileDB(
@@ -771,7 +769,7 @@ async def save_local_file(
     if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
         if user is None:
             raise HTTPException(
-                status_code=401, detail=f"User not found. Session might have expired."
+                status_code=401, detail="User not found. Session might have expired."
             )
 
         # Check to make sure file is cleared to proceed
@@ -782,7 +780,7 @@ async def save_local_file(
         if not cleared:
             raise HTTPException(
                 status_code=500,
-                detail=f"File is not located in a whitelisted directory.",
+                detail="File is not located in a whitelisted directory.",
             )
 
         (dirname, filename) = os.path.split(localfile_in.path)
@@ -822,8 +820,8 @@ async def create_dataset_from_zip(
     rabbitmq_client: BlockingChannel = Depends(dependencies.get_rabbitmq),
     token: str = Depends(get_token),
 ):
-    if file.filename.endswith(".zip") == False:
-        raise HTTPException(status_code=404, detail=f"File is not a zip file")
+    if file.filename.endswith(".zip") is False:
+        raise HTTPException(status_code=404, detail="File is not a zip file")
 
     # Read contents of zip file into temporary location
     with tempfile.TemporaryFile() as tmp_zip:
@@ -943,7 +941,7 @@ async def download_dataset(
                 hierarchy = await _get_folder_hierarchy(file.folder_id, "")
                 dest_folder = os.path.join(current_temp_dir, hierarchy.lstrip("/"))
                 if not os.path.isdir(dest_folder):
-                    os.mkdir(dest_folder)
+                    os.makedirs(dest_folder, exist_ok=True)
                 file_name = hierarchy + file_name
             current_file_path = os.path.join(current_temp_dir, file_name.lstrip("/"))
 
@@ -1056,7 +1054,7 @@ async def get_dataset_extract(
     allow: bool = Depends(Authorization("uploader")),
 ):
     if extractorName is None:
-        raise HTTPException(status_code=400, detail=f"No extractorName specified")
+        raise HTTPException(status_code=400, detail="No extractorName specified")
     if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
         queue = extractorName
         routing_key = queue
@@ -1105,9 +1103,7 @@ async def add_dataset_thumbnail(
     allow: bool = Depends(Authorization("editor")),
 ):
     if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
-        if (
-            thumbnail := await ThumbnailDB.get(PydanticObjectId(thumbnail_id))
-        ) is not None:
+        if (await ThumbnailDB.get(PydanticObjectId(thumbnail_id))) is not None:
             # TODO: Should we garbage collect existing thumbnail if nothing else points to it?
             dataset.thumbnail_id = thumbnail_id
             await dataset.save()

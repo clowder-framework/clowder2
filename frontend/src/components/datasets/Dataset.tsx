@@ -9,19 +9,26 @@ import {
 	Tab,
 	Tabs,
 	Typography,
+	Link,
+	IconButton,
+	DialogTitle,
+	DialogContent,
+	Dialog,
 } from "@mui/material";
+import EditIcon from "@mui/icons-material/Edit";
 import { useParams, useSearchParams } from "react-router-dom";
 import { RootState } from "../../types/data";
 import { useDispatch, useSelector } from "react-redux";
 import {
 	fetchDatasetAbout,
+	fetchDatasetLicense,
 	fetchFoldersFilesInDataset as fetchFoldersFilesInDatasetAction,
 } from "../../actions/dataset";
 import { fetchFolderPath } from "../../actions/folder";
 
 import { a11yProps, TabPanel } from "../tabs/TabComponent";
 import FilesTable from "../files/FilesTable";
-import { MetadataIn } from "../../openapi/v2";
+import { LicenseOption, MetadataIn } from "../../openapi/v2";
 import { DisplayMetadata } from "../metadata/DisplayMetadata";
 import { DisplayListenerMetadata } from "../metadata/DisplayListenerMetadata";
 import { EditMetadata } from "../metadata/EditMetadata";
@@ -50,6 +57,13 @@ import { ErrorModal } from "../errors/ErrorModal";
 import { Visualization } from "../visualizations/Visualization";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import config from "../../app.config";
+import { EditLicenseModal } from "./EditLicenseModal";
+import { V2 } from "../../openapi";
+import {
+	fetchStandardLicenses,
+	fetchStandardLicenseUrl,
+} from "../../utils/licenses";
+import { authCheck } from "../../utils/common";
 
 export const Dataset = (): JSX.Element => {
 	// path parameter
@@ -86,6 +100,9 @@ export const Dataset = (): JSX.Element => {
 		);
 	const listDatasetAbout = (datasetId: string | undefined) =>
 		dispatch(fetchDatasetAbout(datasetId));
+	const listDatasetLicense = (licenseId: string | undefined) =>
+		dispatch(fetchDatasetLicense(licenseId));
+
 	const listDatasetMetadata = (datasetId: string | undefined) =>
 		dispatch(fetchDatasetMetadata(datasetId));
 	const getMetadatDefinitions = (
@@ -114,6 +131,8 @@ export const Dataset = (): JSX.Element => {
 
 	const [currPageNum, setCurrPageNum] = useState<number>(1);
 
+	const [editLicenseOpen, setEditLicenseOpen] = useState<boolean>(false);
+
 	const [limit] = useState<number>(config.defaultFolderFilePerPage);
 
 	const pageMetadata = useSelector(
@@ -123,6 +142,16 @@ export const Dataset = (): JSX.Element => {
 		(state: RootState) => state.dataset.foldersAndFiles.data
 	);
 	const adminMode = useSelector((state: RootState) => state.user.adminMode);
+	const license = useSelector((state: RootState) => state.dataset.license);
+	const [standardLicenseUrl, setStandardLicenseUrl] = useState<string>("");
+	const fetchStandardLicenseUrlData = async (license_id: string) => {
+		try {
+			const data = await fetchStandardLicenseUrl(license_id); // Call your function to fetch licenses
+			setStandardLicenseUrl(data); // Update state with the fetched data
+		} catch (error) {
+			console.error("Error fetching license url", error);
+		}
+	};
 
 	useEffect(() => {
 		fetchFoldersFilesInDataset(
@@ -132,9 +161,14 @@ export const Dataset = (): JSX.Element => {
 			limit
 		);
 		listDatasetAbout(datasetId);
+		if (about.standard_license && about.license_id) {
+			fetchStandardLicenseUrlData(about.license_id);
+		}
+		if (!about.standard_license && about.license_id)
+			listDatasetLicense(about.license_id);
 		getFolderPath(folderId);
 		getMetadatDefinitions(null, 0, 100);
-	}, [searchParams, adminMode]);
+	}, [searchParams, adminMode, about.license_id]);
 
 	// for breadcrumb
 	useEffect(() => {
@@ -165,6 +199,16 @@ export const Dataset = (): JSX.Element => {
 		newTabIndex: number
 	) => {
 		setSelectedTabIndex(newTabIndex);
+	};
+
+	const [openEditLicenseModal, setOpenEditLicenseModal] = useState(false);
+
+	const handleOpenEditLicenseModal = () => {
+		setOpenEditLicenseModal(true); // Open the modal
+	};
+
+	const handleCloseEditLicenseModal = (save: boolean) => {
+		setOpenEditLicenseModal(false); // Close the modal
 	};
 
 	const handlePageChange = (_: ChangeEvent<unknown>, value: number) => {
@@ -211,6 +255,8 @@ export const Dataset = (): JSX.Element => {
 		setEnableAddMetadata(false);
 	};
 
+	// @ts-ignore
+	// @ts-ignore
 	return (
 		<Layout>
 			{/*Error Message dialogue*/}
@@ -231,7 +277,9 @@ export const Dataset = (): JSX.Element => {
 							</Typography>
 						</Box>
 						<Box>
-							<RoleChip role={datasetRole.role} />
+							<Typography variant="body1" paragraph>
+								{about["description"]}
+							</Typography>
 						</Box>
 					</Stack>
 				</Grid>
@@ -246,10 +294,7 @@ export const Dataset = (): JSX.Element => {
 				{/*actions*/}
 			</Grid>
 			<Grid container spacing={2} sx={{ mt: 2 }}>
-				<Grid item xs={10}>
-					<Typography variant="body1" paragraph>
-						{about["description"]}
-					</Typography>
+				<Grid item xs={12} sm={12} md={10} lg={10} xl={10}>
 					<Tabs
 						value={selectedTabIndex}
 						onChange={handleTabChange}
@@ -280,18 +325,22 @@ export const Dataset = (): JSX.Element => {
 							{...a11yProps(2)}
 							disabled={false}
 						/>
-						{datasetRole.role !== undefined && datasetRole.role !== "viewer" ? (
-							<Tab
-								icon={<BuildIcon />}
-								iconPosition="start"
-								sx={TabStyle}
-								label="Analysis"
-								{...a11yProps(3)}
-								disabled={false}
-							/>
-						) : (
-							<></>
-						)}
+						<Tab
+							icon={<BuildIcon />}
+							iconPosition="start"
+							sx={
+								authCheck(adminMode, datasetRole.role, [
+									"owner",
+									"editor",
+									"uploader",
+								])
+									? TabStyle
+									: { display: "none" }
+							}
+							label="Analysis"
+							{...a11yProps(3)}
+							disabled={false}
+						/>
 						<Tab
 							icon={<HistoryIcon />}
 							iconPosition="start"
@@ -308,18 +357,22 @@ export const Dataset = (): JSX.Element => {
 							{...a11yProps(5)}
 							disabled={false}
 						/>
-						{datasetRole.role !== undefined && datasetRole.role !== "viewer" ? (
-							<Tab
-								icon={<ShareIcon />}
-								iconPosition="start"
-								sx={TabStyle}
-								label="Sharing"
-								{...a11yProps(6)}
-								disabled={false}
-							/>
-						) : (
-							<></>
-						)}
+						<Tab
+							icon={<ShareIcon />}
+							iconPosition="start"
+							sx={
+								authCheck(adminMode, datasetRole.role, [
+									"owner",
+									"editor",
+									"uploader",
+								])
+									? TabStyle
+									: { display: "none" }
+							}
+							label="Sharing"
+							{...a11yProps(6)}
+							disabled={false}
+						/>
 					</Tabs>
 					<TabPanel value={selectedTabIndex} index={0}>
 						{folderId !== null ? (
@@ -379,10 +432,10 @@ export const Dataset = (): JSX.Element => {
 									deleteMetadata={deleteDatasetMetadata}
 									resourceType="dataset"
 									resourceId={datasetId}
+									publicView={false}
 								/>
 								<Box textAlign="center">
-									{enableAddMetadata &&
-									datasetRole.role !== undefined &&
+									{datasetRole.role !== undefined &&
 									datasetRole.role !== "viewer" ? (
 										<Button
 											variant="contained"
@@ -410,7 +463,7 @@ export const Dataset = (): JSX.Element => {
 					</TabPanel>
 					{datasetRole.role !== undefined && datasetRole.role !== "viewer" ? (
 						<TabPanel value={selectedTabIndex} index={3}>
-							<Listeners datasetId={datasetId} />
+							<Listeners datasetId={datasetId} process={"dataset"} />
 						</TabPanel>
 					) : (
 						<></>
@@ -421,16 +474,62 @@ export const Dataset = (): JSX.Element => {
 					<TabPanel value={selectedTabIndex} index={5}>
 						<Visualization datasetId={datasetId} />
 					</TabPanel>
-					{datasetRole.role !== undefined && datasetRole.role !== "viewer" ? (
-						<TabPanel value={selectedTabIndex} index={6}>
-							<SharingTab datasetId={datasetId} />
-						</TabPanel>
+					<TabPanel value={selectedTabIndex} index={6}>
+						<SharingTab datasetId={datasetId} />
+					</TabPanel>
+				</Grid>
+				<Grid item>
+					<Typography variant="h5" gutterBottom>
+						License
+					</Typography>
+					{about.standard_license && about.license_id !== undefined ? (
+						<Typography>
+							<Link href={standardLicenseUrl} target="_blank">
+								<img
+									className="logo"
+									src={`public/${about.license_id}.png`}
+									alt={about.license_id}
+								/>
+							</Link>
+						</Typography>
 					) : (
 						<></>
 					)}
-				</Grid>
-				<Grid item>
-					<DatasetDetails details={about} />
+					{!about.standard_license &&
+					license !== undefined &&
+					license.name !== undefined ? (
+						<div>
+							<Typography>
+								<Link href={license.url} target="_blank">
+									{license.name}
+								</Link>
+								<IconButton
+									onClick={() => {
+										setEditLicenseOpen(true);
+									}}
+								>
+									<EditIcon />
+								</IconButton>
+							</Typography>
+							<Dialog
+								open={editLicenseOpen}
+								onClose={() => {
+									setOpenEditLicenseModal(false);
+								}}
+								fullWidth={true}
+								maxWidth="md"
+								aria-labelledby="form-dialog"
+							>
+								<DialogTitle>Edit license</DialogTitle>
+								<DialogContent>
+									<EditLicenseModal setEditLicenseOpen={setEditLicenseOpen} />
+								</DialogContent>
+							</Dialog>
+						</div>
+					) : (
+						<></>
+					)}
+					<DatasetDetails details={about} myRole={datasetRole.role} />
 				</Grid>
 			</Grid>
 		</Layout>
