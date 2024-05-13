@@ -1,5 +1,6 @@
 from typing import List, Optional
 
+from app.deps.authorization_deps import ListenerAuthorization
 from app.keycloak_auth import get_current_user, get_current_username
 from app.models.feeds import FeedDB, FeedIn, FeedOut
 from app.models.files import FileOut
@@ -11,8 +12,6 @@ from app.search.connect import check_search_result
 from beanie import PydanticObjectId
 from fastapi import APIRouter, Depends, HTTPException
 from pika.adapters.blocking_connection import BlockingChannel
-
-from app.deps.authorization_deps import ListenerAuthorization
 
 router = APIRouter()
 

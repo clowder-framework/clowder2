@@ -393,7 +393,7 @@ class GroupAuthorization:
 class ListenerAuthorization:
     """We use class dependency so that we can provide the `permission` parameter to the dependency.
     For more info see https://fastapi.tiangolo.com/advanced/advanced-dependencies/.
-    We want not admins users not to access listeners which are not active"""
+    Regular users are not allowed to run non-active listeners"""
 
     # def __init__(self, optional_arg: str = None):
     #         self.optional_arg = optional_arg
@@ -422,9 +422,7 @@ class ListenerAuthorization:
                     status_code=403,
                     detail=f"User `{current_user} does not have permission on listener `{listener_id}`",
                 )
-        raise HTTPException(
-            status_code=404, detail=f":Listener {listener_id} not found"
-        )
+        raise HTTPException(status_code=404, detail=f"Listener {listener_id} not found")
 
 
 class CheckStatus:

@@ -421,16 +421,20 @@ export default function PersistentDrawerLeft(props) {
 					</ListItem>
 				</List>
 				<Divider />
-				<List>
-					<ListItem key={"listeners"} disablePadding>
-						<ListItemButton component={RouterLink} to="/listeners">
-							<ListItemIcon>
-								<BuildIcon />
-							</ListItemIcon>
-							<ListItemText primary={"Extractors"} />
-						</ListItemButton>
-					</ListItem>
-				</List>
+				{currUserProfile.admin && adminMode ? (
+					<List>
+						<ListItem key={"listeners"} disablePadding>
+							<ListItemButton component={RouterLink} to="/listeners">
+								<ListItemIcon>
+									<BuildIcon />
+								</ListItemIcon>
+								<ListItemText primary={"Extractors"} />
+							</ListItemButton>
+						</ListItem>
+					</List>
+				) : (
+					<></>
+				)}
 			</Drawer>
 			<Main open={open}>
 				<DrawerHeader />

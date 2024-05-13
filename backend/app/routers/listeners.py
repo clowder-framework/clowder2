@@ -411,7 +411,7 @@ async def disable_listener(
     user_id=Depends(get_user),
     allow: bool = Depends(ListenerAuthorization()),
 ):
-    """Enable an Event Listener. Only admins can enable listeners.
+    """Disable an Event Listener. Only admins can enable listeners.
 
     Arguments:
         listener_id -- UUID of the listener to be enabled
@@ -425,7 +425,7 @@ async def set_active_flag(
     active: Optional[bool] = None,
     allow: bool = Depends(ListenerAuthorization()),
 ):
-    """Enable an Event Listener. Only admins can enable listeners.
+    """Toggle the active flag of an Event Listener. Only admins can enable/disbale listeners.
 
     Arguments:
         listener_id -- UUID of the listener to be enabled
