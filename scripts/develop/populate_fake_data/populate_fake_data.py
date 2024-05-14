@@ -225,6 +225,7 @@ if __name__ == "__main__":
         response = requests.post(f"{api}/login", json=user)
         token = response.json().get("token")
         headers = {"Authorization": "Bearer " + token}
+        license_id = "CC BY"
         if s == 0:
             dataset_data = {
                 "name": fake.sentence(nb_words=10).rstrip("."),
@@ -242,7 +243,11 @@ if __name__ == "__main__":
                 "name": fake.sentence(nb_words=10).rstrip("."),
                 "description": fake.paragraph(),
             }
-        response = requests.post(f"{api}/datasets", json=dataset_data, headers=headers)
+        response = requests.post(
+            f"{api}/datasets?license_id={license_id}",
+            json=dataset_data,
+            headers=headers,
+        )
         if response.status_code != 200:
             raise ValueError(response.json())
         dataset_id = response.json().get("id")
