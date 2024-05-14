@@ -56,7 +56,6 @@ export function MetadataDefinitions() {
 		(state: RootState) => state.metadata.metadataDefinitionList.metadata
 	);
 	const adminMode = useSelector((state: RootState) => state.user.adminMode);
-	const read_only_user = useSelector((state: RootState) => state.user.read_only_user);
 
 	// TODO add option to determine limit number; default show 5 metadata definitions each time
 	const [currPageNum, setCurrPageNum] = useState<number>(1);
