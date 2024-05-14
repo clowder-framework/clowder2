@@ -9485,6 +9485,116 @@
         ]
       }
     },
+    "/api/v2/public_licenses/{license_id}": {
+      "get": {
+        "tags": [
+          "public_licenses"
+        ],
+        "summary": "Get License",
+        "operationId": "get_license_api_v2_public_licenses__license_id__get",
+        "parameters": [
+          {
+            "required": true,
+            "schema": {
+              "title": "License Id",
+              "type": "string"
+            },
+            "name": "license_id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LicenseOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/public_licenses/standard_licenses/all": {
+      "get": {
+        "tags": [
+          "public_licenses"
+        ],
+        "summary": "Get Standard Licenses",
+        "operationId": "get_standard_licenses_api_v2_public_licenses_standard_licenses_all_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response Get Standard Licenses Api V2 Public Licenses Standard Licenses All Get",
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/LicenseOption"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/public_licenses/standard_licenses/{license_id}": {
+      "get": {
+        "tags": [
+          "public_licenses"
+        ],
+        "summary": "Get Standard License Url",
+        "operationId": "get_standard_license_url_api_v2_public_licenses_standard_licenses__license_id__get",
+        "parameters": [
+          {
+            "required": true,
+            "schema": {
+              "title": "License Id",
+              "type": "string"
+            },
+            "name": "license_id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response Get Standard License Url Api V2 Public Licenses Standard Licenses  License Id  Get",
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v2/status": {
       "get": {
         "tags": [
