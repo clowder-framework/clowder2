@@ -70,7 +70,7 @@ export default function FilesTable(props: FilesTableProps) {
 		// reset page number to 1
 		setCurrPageNum(1);
 		// Redirect to file route with file Id and dataset id
-		history(`/public/datasets/${datasetId}?folder=${selectedFolderId}`);
+		history(`/public_datasets/${datasetId}?folder=${selectedFolderId}`);
 	};
 
 	const datasetRole = useSelector(
