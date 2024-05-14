@@ -15,6 +15,7 @@ nav:
       - PyCharm: devs/pycharm.md
       - Elasticsearch: devs/elasticsearch.md
       - Listeners: devs/listeners.md
+      - Standalone Docker Deployment: devs/standalone-docker-deployment.md
       - Proposals:
         - Storage: devs/storage.md
   - About: about.md

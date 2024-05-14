@@ -1,19 +1,21 @@
 from datetime import datetime
 from typing import List
 
-from beanie import PydanticObjectId
-from fastapi import HTTPException, Depends, APIRouter
-
 from app.keycloak_auth import get_current_user, get_user
-
-from app.models.licenses import LicenseOut, LicenseIn, LicenseDB, LicenseBase
+from app.models.licenses import (
+    LicenseBase,
+    LicenseDB,
+    LicenseIn,
+    LicenseOption,
+    LicenseOut,
+    standard_licenses,
+)
 from app.routers.authentication import get_admin, get_admin_mode
-
-from app.models.licenses import LicenseOption
-
-from app.models.licenses import standard_licenses
+from beanie import PydanticObjectId
+from fastapi import APIRouter, Depends, HTTPException
 
 router = APIRouter()
+public_router = APIRouter()
 
 
 @router.post("", response_model=LicenseOut)
@@ -28,6 +30,7 @@ async def save_license(
     return license_db.dict()
 
 
+@public_router.get("/{license_id}", response_model=LicenseOut)
 @router.get("/{license_id}", response_model=LicenseOut)
 async def get_license(license_id: str):
     if (license := await LicenseDB.get(PydanticObjectId(license_id))) is not None:
@@ -38,11 +41,13 @@ async def get_license(license_id: str):
 
 
 # Endpoint to retrieve standard license options
+@public_router.get("/standard_licenses/all", response_model=List[LicenseOption])
 @router.get("/standard_licenses/all", response_model=List[LicenseOption])
 def get_standard_licenses():
     return standard_licenses
 
 
+@public_router.get("/standard_licenses/{license_id}", response_model=str)
 @router.get("/standard_licenses/{license_id}", response_model=str)
 def get_standard_license_url(license_id: str):
     for license in standard_licenses:

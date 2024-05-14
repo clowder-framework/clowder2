@@ -19,12 +19,16 @@ import {
 	postDatasetMetadata,
 } from "../../actions/metadata";
 import { MetadataIn } from "../../openapi/v2";
-import {datasetCreated, licenseCreated, resetDatsetCreated} from "../../actions/dataset";
+import {
+	datasetCreated,
+	licenseCreated,
+	resetDatsetCreated,
+} from "../../actions/dataset";
 import { useNavigate } from "react-router-dom";
 import Layout from "../Layout";
 import { ErrorModal } from "../errors/ErrorModal";
-import {V2} from "../../openapi";
-import {ChooseLicenseModal} from "./ChooseLicenseModal";
+import { V2 } from "../../openapi";
+import { ChooseLicenseModal } from "./ChooseLicenseModal";
 
 export const CreateDataset = (): JSX.Element => {
 	const dispatch = useDispatch();
@@ -38,8 +42,11 @@ export const CreateDataset = (): JSX.Element => {
 		datasetId: string | undefined,
 		metadata: MetadataIn
 	) => dispatch(postDatasetMetadata(datasetId, metadata));
-	const createDataset = (formData: FormData, licenseId: string| undefined, licenseFormData: FormData) =>
-		dispatch(datasetCreated(formData, licenseId, licenseFormData));
+	const createDataset = (
+		formData: FormData,
+		licenseId: string | undefined,
+		licenseFormData: FormData
+	) => dispatch(datasetCreated(formData, licenseId, licenseFormData));
 
 	const newDataset = useSelector(
 		(state: RootState) => state.dataset.newDataset
@@ -173,10 +180,17 @@ export const CreateDataset = (): JSX.Element => {
 								<StepLabel>Standard License Options</StepLabel>
 								<StepContent>
 									<Typography>
-										You can choose a license from the standard options or create your own
+										You can choose a license from the standard options or create
+										your own
 									</Typography>
 									<Box>
-										<ChooseLicenseModal selectedLicense={selectedLicense} setSelectedLicense={setSelectedLicense} setLicenseRequestForm={setLicenseRequestForm} handleBack={handleBack} handleNext={handleNext}/>
+										<ChooseLicenseModal
+											selectedLicense={selectedLicense}
+											setSelectedLicense={setSelectedLicense}
+											setLicenseRequestForm={setLicenseRequestForm}
+											handleBack={handleBack}
+											handleNext={handleNext}
+										/>
 									</Box>
 								</StepContent>
 							</Step>

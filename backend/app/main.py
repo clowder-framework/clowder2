@@ -12,6 +12,7 @@ from app.models.files import FileDB, FileDBViewList, FileVersionDB
 from app.models.folder_and_file import FolderFileViewList
 from app.models.folders import FolderDB, FolderDBViewList
 from app.models.groups import GroupDB
+from app.models.licenses import LicenseDB
 from app.models.listeners import (
     EventListenerDB,
     EventListenerJobDB,
@@ -36,6 +37,7 @@ from app.routers import (
     groups,
     jobs,
     keycloak,
+    licenses,
     listeners,
     metadata,
     metadata_datasets,
@@ -48,7 +50,6 @@ from app.routers import (
     public_visualization,
     status,
     thumbnails,
-    licenses,
     users,
     visualization,
 )
@@ -62,8 +63,6 @@ from fastapi import APIRouter, Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
 from pydantic import BaseConfig
-
-from app.models.licenses import LicenseDB
 
 logger = logging.getLogger(__name__)
 
@@ -237,6 +236,9 @@ api_router.include_router(
     prefix="/licenses",
     tags=["licenses"],
     dependencies=[Depends(get_current_username)],
+)
+api_router.include_router(
+    licenses.public_router, prefix="/public_licenses", tags=["public_licenses"]
 )
 api_router.include_router(status.router, prefix="/status", tags=["status"])
 api_router.include_router(keycloak.router, prefix="/auth", tags=["auth"])

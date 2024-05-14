@@ -1,4 +1,4 @@
-import {V2} from "../openapi";
+import { V2 } from "../openapi";
 
 export async function fetchStandardLicenses() {
 	try {
@@ -11,7 +11,20 @@ export async function fetchStandardLicenses() {
 
 export async function fetchStandardLicenseUrl(licenseId) {
 	try {
-		return await V2.LicensesService.getStandardLicenseUrlApiV2LicensesStandardLicensesLicenseIdGet(licenseId);
+		return await V2.LicensesService.getStandardLicenseUrlApiV2LicensesStandardLicensesLicenseIdGet(
+			licenseId
+		);
+	} catch (reason) {
+		console.error("Failed to fetch standard license url: ", reason);
+		return {};
+	}
+}
+
+export async function fetchPublicStandardLicenseUrl(licenseId) {
+	try {
+		return await V2.PublicLicensesService.getStandardLicenseUrlApiV2PublicLicensesStandardLicensesLicenseIdGet(
+			licenseId
+		);
 	} catch (reason) {
 		console.error("Failed to fetch standard license url: ", reason);
 		return {};
