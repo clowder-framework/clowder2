@@ -681,7 +681,15 @@ async def save_file(
                 raise HTTPException(
                     status_code=404, detail=f"Folder {folder_id} not found"
                 )
-
+        file_public = False
+        file_authenticated = False
+        file_private = False
+        if dataset.status == DatasetStatus.PUBLIC:
+            file_public = True
+        elif dataset.status == DatasetStatus.AUTHENTICATED:
+            file_authenticated = True
+        else:
+            file_private = True
         await add_file_entry(
             new_file,
             user,
@@ -690,6 +698,8 @@ async def save_file(
             rabbitmq_client,
             file.file,
             content_type=file.content_type,
+            authenticated=file_authenticated,
+            public=file_public
         )
         return new_file.dict()
     raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
