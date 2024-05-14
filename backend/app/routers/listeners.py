@@ -229,8 +229,8 @@ async def search_listeners(
     listeners_and_count = (
         await EventListenerDB.find(
             Or(
-                RegEx(field=EventListenerDB.name, pattern=text),
-                RegEx(field=EventListenerDB.description, pattern=text),
+                RegEx(field=EventListenerDB.name, pattern=text, options="i"),
+                RegEx(field=EventListenerDB.description, pattern=text, options="i"),
             ),
         )
         .aggregate(aggregation_pipeline)

@@ -1,5 +1,5 @@
 import React from "react";
-import { Box, Button, IconButton, Tooltip, Typography } from "@mui/material";
+import { Box, IconButton, Link, Tooltip, Typography } from "@mui/material";
 import { EventListenerOut } from "../../openapi/v2";
 import { theme } from "../../theme";
 import PlayCircleIcon from "@mui/icons-material/PlayCircle";
@@ -51,20 +51,21 @@ export default function ListenerItem(props: ListenerCardProps) {
 						/>
 					</Tooltip>
 				)}
-				<Button
+				<Link
 					onClick={() => {
 						setOpenSubmitExtraction(true);
 						setSelectedExtractor(extractor);
 						setInfoOnly(true);
 					}}
+					sx={{ textDecoration: "none", cursor: "pointer" }}
 				>
 					{extractorName}
-				</Button>
+				</Link>
 				{!(fileId !== undefined || datasetId !== undefined) ||
 				!extractor["alive"] ? (
 					<Typography
 						sx={{
-							padding: "0.5em",
+							padding: "2em",
 							color: "rgba(0, 0, 0, 0.26)",
 							fontSize: "14px",
 						}}
@@ -74,8 +75,8 @@ export default function ListenerItem(props: ListenerCardProps) {
 				) : (
 					<Typography
 						sx={{
-							padding: "0.5em",
-							color: theme.palette.primary.light,
+							padding: "2em",
+							color: theme.palette.info.main,
 							fontSize: "14px",
 						}}
 					>

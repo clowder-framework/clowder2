@@ -92,8 +92,8 @@ async def search_group(
 
     criteria_list = [
         Or(
-            RegEx(field=GroupDB.name, pattern=search_term),
-            RegEx(field=GroupDB.description, pattern=search_term),
+            RegEx(field=GroupDB.name, pattern=search_term, options="i"),
+            RegEx(field=GroupDB.description, pattern=search_term, options="i"),
         ),
     ]
     if not admin or not admin_mode:
