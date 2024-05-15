@@ -30,12 +30,13 @@ import FileUploadDrop from "./FileUploadDrop";
 type UploadFileDragAndDropProps = {
 	selectedDatasetId: string | undefined;
 	folderId: string | undefined;
+	setDragDropFiles: any;
 };
 
 export const UploadFileDragAndDrop: React.FC<UploadFileDragAndDropProps> = (
 	props: UploadFileDragAndDropProps
 ) => {
-	const { selectedDatasetId, folderId } = props;
+	const { selectedDatasetId, folderId, setDragDropFiles } = props;
 	const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
 	const [metadataRequestForms, setMetadataRequestForms] = useState({});
 	const [allFilled, setAllFilled] = React.useState<boolean>(false);
@@ -52,8 +53,11 @@ export const UploadFileDragAndDrop: React.FC<UploadFileDragAndDropProps> = (
 	) => dispatch(fetchMetadataDefinitions(name, skip, limit));
 	const createFileMetadata = (
 		fileId: string | undefined,
-		metadata: MetadataIn
-	) => dispatch(postFileMetadata(fileId, metadata));
+		metadata: MetadataIn,
+		reload: boolean
+	) => {
+		dispatch(postFileMetadata(fileId, metadata, reload));
+	};
 
 	const uploadFiles = (
 		selectedDatasetId: string | undefined,
@@ -157,10 +161,15 @@ export const UploadFileDragAndDrop: React.FC<UploadFileDragAndDropProps> = (
 
 	useEffect(() => {
 		if (newFiles.length > 0) {
-			newFiles.map((file) => {
+			newFiles.forEach((file, i) => {
 				// post new metadata
-				Object.keys(metadataRequestForms).map((key) => {
-					createFileMetadata(file.id, metadataRequestForms[key]);
+				Object.keys(metadataRequestForms).forEach((key, j) => {
+					if (
+						j == Object.keys(metadataRequestForms).length - 1 &&
+						i == newFiles.length - 1
+					)
+						createFileMetadata(file.id, metadataRequestForms[key], true);
+					else createFileMetadata(file.id, metadataRequestForms[key]);
 				});
 			});
 
@@ -171,8 +180,7 @@ export const UploadFileDragAndDrop: React.FC<UploadFileDragAndDropProps> = (
 			// Stop spinner
 			setLoading(false);
 
-			// go back to the dataset
-			location.reload();
+			setDragDropFiles(false);
 		}
 	}, [newFiles]);
 

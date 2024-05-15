@@ -275,7 +275,7 @@ export function postDatasetMetadata(datasetId, metadata) {
 
 export const POST_FILE_METADATA = "POST_FILE_METADATA";
 
-export function postFileMetadata(fileId, metadata) {
+export function postFileMetadata(fileId, metadata, reload = false) {
 	return (dispatch) => {
 		return V2.MetadataService.addFileMetadataApiV2FilesFileIdMetadataPost(
 			fileId,
@@ -287,6 +287,7 @@ export function postFileMetadata(fileId, metadata) {
 					metadata: json,
 					receivedAt: Date.now(),
 				});
+				if (reload) window.location.reload();
 			})
 			.catch((reason) => {
 				dispatch(handleErrors(reason, postFileMetadata(fileId, metadata)));
