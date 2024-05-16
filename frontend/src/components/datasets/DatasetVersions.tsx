@@ -39,12 +39,7 @@ export const DatasetVersions = (props) => {
 		if (datasetId) getFreezeDatasets(datasetId, 0, limit);
 	}, [currDataset, latestFrozenVersionNum]);
 
-	const handleVersionChange = (
-		selectedDatasetId: string,
-		selectedVersionNum: string
-	) => {
-		setSnackBarMessage(`Viewing dataset version ${selectedVersionNum}.`);
-		setSnackBarOpen(true);
+	const handleVersionChange = (selectedDatasetId: string) => {
 		history(`/datasets/${selectedDatasetId}`);
 	};
 
@@ -65,7 +60,7 @@ export const DatasetVersions = (props) => {
 					<Link
 						component="button"
 						onClick={() => {
-							handleVersionChange(currDataset.origin_id, "current unreleased");
+							handleVersionChange(currDataset.origin_id);
 						}}
 						sx={{
 							color:
@@ -90,7 +85,7 @@ export const DatasetVersions = (props) => {
 						<Link
 							component="button"
 							onClick={() => {
-								handleVersionChange(dataset.id, dataset.frozen_version_num);
+								handleVersionChange(dataset.id);
 							}}
 							sx={{
 								color:
