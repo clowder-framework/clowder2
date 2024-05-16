@@ -11,7 +11,6 @@ import { theme } from "../../theme";
 export const DatasetVersions = (props) => {
 	const { currDataset, setSnackBarMessage, setSnackBarOpen } = props;
 	const dispatch = useDispatch();
-	const [selectedId, setSelectedId] = useState(currDataset.id);
 	const [currPageNum, setCurrPageNum] = useState<number>(1);
 	const [limit] = useState<number>(config.defaultVersionPerPage);
 
@@ -34,7 +33,6 @@ export const DatasetVersions = (props) => {
 	const history = useNavigate();
 
 	useEffect(() => {
-		// TODO implement proper pagination
 		let datasetId;
 		if (currDataset.origin_id) datasetId = currDataset.origin_id;
 		else datasetId = currDataset.id;
@@ -45,10 +43,9 @@ export const DatasetVersions = (props) => {
 		selectedDatasetId: string,
 		selectedVersionNum: string
 	) => {
-		setSelectedId(selectedDatasetId);
-		history(`/datasets/${selectedDatasetId}`);
 		setSnackBarMessage(`Viewing dataset version ${selectedVersionNum}.`);
 		setSnackBarOpen(true);
+		history(`/datasets/${selectedDatasetId}`);
 	};
 
 	const handlePageChange = (_: ChangeEvent<unknown>, value: number) => {
@@ -72,14 +69,14 @@ export const DatasetVersions = (props) => {
 						}}
 						sx={{
 							color:
-								selectedId === currDataset.origin_id
+								currDataset.id === currDataset.origin_id
 									? theme.palette.info.main
 									: theme.palette.primary.main,
 							pointerEvents:
-								selectedId === currDataset.origin_id ? "none" : "auto",
+								currDataset.id === currDataset.origin_id ? "none" : "auto",
 							textDecoration: "none",
 							fontWeight:
-								selectedId === currDataset.origin_id ? "bold" : "normal",
+								currDataset.id === currDataset.origin_id ? "bold" : "normal",
 							"&:hover": {
 								textDecoration: "underline",
 							},
@@ -97,12 +94,12 @@ export const DatasetVersions = (props) => {
 							}}
 							sx={{
 								color:
-									selectedId === dataset.id
+									currDataset.id === dataset.id
 										? theme.palette.info.main
 										: theme.palette.primary.main,
-								pointerEvents: selectedId === dataset.id ? "none" : "auto",
+								pointerEvents: currDataset.id === dataset.id ? "none" : "auto",
 								textDecoration: "none",
-								fontWeight: selectedId === dataset.id ? "bold" : "normal",
+								fontWeight: currDataset.id === dataset.id ? "bold" : "normal",
 								"&:hover": {
 									textDecoration: "underline",
 								},
