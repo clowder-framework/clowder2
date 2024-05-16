@@ -27,6 +27,7 @@ interface Config {
 	defaultUserPerPage: number;
 	defaultApikeyPerPage: number;
 	defaultExtractors: number;
+	defaultFeeds: number;
 	defaultExtractionJobs: number;
 	defaultMetadataDefintionPerPage: number;
 }
@@ -87,6 +88,7 @@ config["defaultGroupPerPage"] = 5;
 config["defaultUserPerPage"] = 5;
 config["defaultApikeyPerPage"] = 5;
 config["defaultExtractors"] = 5;
+config["defaultFeeds"] = 5;
 config["defaultExtractionJobs"] = 5;
 config["defaultMetadataDefintionPerPage"] = 5;
 
