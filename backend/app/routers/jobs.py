@@ -51,7 +51,9 @@ async def get_all_job_summary(
     if listener_id is not None:
         filters.append(EventListenerJobViewList.listener_id == listener_id)
     if status is not None:
-        filters.append(RegEx(field=EventListenerJobViewList.status, pattern=status))
+        filters.append(
+            RegEx(field=EventListenerJobViewList.status, pattern=status, options="i")
+        )
     if created is not None:
         created_datetime_object = datetime.strptime(created, "%Y-%m-%d")
         filters.append(GTE(EventListenerJobViewList.created, created_datetime_object))

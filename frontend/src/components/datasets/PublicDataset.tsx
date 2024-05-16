@@ -3,6 +3,7 @@ import React, { ChangeEvent, useEffect, useState } from "react";
 import {
 	Box,
 	Grid,
+	Link,
 	Pagination,
 	Snackbar,
 	Tab,
@@ -40,6 +41,7 @@ import VisibilityIcon from "@mui/icons-material/Visibility";
 import config from "../../app.config";
 import { FreezeVersionChip } from "../versions/FeezeVersionChip";
 import { PublicDatasetVersions } from "./PublicDatasetVersions";
+import { fetchPublicStandardLicenseUrl } from "../../utils/licenses";
 
 export const PublicDataset = (): JSX.Element => {
 	// path parameter
@@ -81,10 +83,19 @@ export const PublicDataset = (): JSX.Element => {
 	const dataset = useSelector(
 		(state: RootState) => state.publicDataset.publicAbout
 	);
-
 	const publicFolderPath = useSelector(
 		(state: RootState) => state.folder.publicFolderPath
 	);
+	const license = useSelector((state: RootState) => state.dataset.license);
+	const [standardLicenseUrl, setStandardLicenseUrl] = useState<string>("");
+	const fetchStandardLicenseUrlData = async (license_id: string) => {
+		try {
+			const data = await fetchPublicStandardLicenseUrl(license_id); // Call your function to fetch licenses
+			setStandardLicenseUrl(data); // Update state with the fetched data
+		} catch (error) {
+			console.error("Error fetching license url", error);
+		}
+	};
 
 	// state
 	const [selectedTabIndex, setSelectedTabIndex] = useState<number>(0);
@@ -116,6 +127,11 @@ export const PublicDataset = (): JSX.Element => {
 		getPublicFolderPath(folderId);
 		getMetadatDefinitions(null, 0, 100);
 	}, [datasetId, searchParams]);
+
+	useEffect(() => {
+		if (dataset && dataset.license_id !== undefined)
+			fetchStandardLicenseUrlData(dataset.license_id);
+	}, [dataset]);
 
 	// for breadcrumb
 	useEffect(() => {
@@ -297,6 +313,36 @@ export const PublicDataset = (): JSX.Element => {
 						setSnackBarMessage={setSnackBarMessage}
 						setSnackBarOpen={setSnackBarOpen}
 					/>
+					<DatasetDetails details={dataset} />
+					<Typography variant="h5" gutterBottom>
+						License
+					</Typography>
+					{dataset.standard_license && dataset.license_id !== undefined ? (
+						<Typography>
+							<Link href={standardLicenseUrl} target="_blank">
+								<img
+									className="logo"
+									src={`public/${dataset.license_id}.png`}
+									alt={dataset.license_id}
+								/>
+							</Link>
+						</Typography>
+					) : (
+						<></>
+					)}
+					{!dataset.standard_license &&
+					license !== undefined &&
+					license.name !== undefined ? (
+						<div>
+							<Typography>
+								<Link href={license.url} target="_blank">
+									{license.name}
+								</Link>
+							</Typography>
+						</div>
+					) : (
+						<></>
+					)}
 					<DatasetDetails details={dataset} />
 				</Grid>
 			</Grid>

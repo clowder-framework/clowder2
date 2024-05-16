@@ -256,6 +256,9 @@ api_router.include_router(
     tags=["licenses"],
     dependencies=[Depends(get_current_username)],
 )
+api_router.include_router(
+    licenses.public_router, prefix="/public_licenses", tags=["public_licenses"]
+)
 api_router.include_router(status.router, prefix="/status", tags=["status"])
 api_router.include_router(keycloak.router, prefix="/auth", tags=["auth"])
 app.include_router(api_router, prefix=settings.API_V2_STR)

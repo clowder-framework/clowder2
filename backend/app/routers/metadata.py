@@ -138,9 +138,17 @@ async def search_metadata_definition(
     mdds_and_count = (
         await MetadataDefinitionDB.find(
             Or(
-                RegEx(field=MetadataDefinitionDB.name, pattern=search_term),
-                RegEx(field=MetadataDefinitionDB.description, pattern=search_term),
-                RegEx(field=MetadataDefinitionDB.context, pattern=search_term),
+                RegEx(
+                    field=MetadataDefinitionDB.name, pattern=search_term, options="i"
+                ),
+                RegEx(
+                    field=MetadataDefinitionDB.description,
+                    pattern=search_term,
+                    options="i",
+                ),
+                RegEx(
+                    field=MetadataDefinitionDB.context, pattern=search_term, options="i"
+                ),
             ),
         )
         .aggregate(
