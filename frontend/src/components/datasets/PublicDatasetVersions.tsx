@@ -16,9 +16,6 @@ export const PublicDatasetVersions = (props) => {
 		limit: number
 	) => dispatch(getPublicFreezeDatasetsAction(datasetId, skip, limit));
 
-	const pageMetadata = useSelector(
-		(state: RootState) => state.publicDataset.publicFrozenDatasets.metadata
-	);
 	const frozenDatasets = useSelector(
 		(state: RootState) => state.publicDataset.publicFrozenDatasets.data
 	);
