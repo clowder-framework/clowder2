@@ -13,6 +13,7 @@ export const DatasetVersions = (props) => {
 	const dispatch = useDispatch();
 	const [currPageNum, setCurrPageNum] = useState<number>(1);
 	const [limit] = useState<number>(config.defaultVersionPerPage);
+	const [skip, setSkip] = useState<number>(0);
 
 	const getFreezeDatasets = (
 		datasetId: string | undefined,
@@ -36,7 +37,7 @@ export const DatasetVersions = (props) => {
 		let datasetId;
 		if (currDataset.origin_id) datasetId = currDataset.origin_id;
 		else datasetId = currDataset.id;
-		if (datasetId) getFreezeDatasets(datasetId, 0, limit);
+		if (datasetId) getFreezeDatasets(datasetId, skip, limit);
 	}, [currDataset, latestFrozenVersionNum]);
 
 	const handleVersionChange = (selectedDatasetId: string) => {
@@ -47,6 +48,7 @@ export const DatasetVersions = (props) => {
 		const originDatasetId = currDataset.origin_id;
 		const newSkip = (value - 1) * limit;
 		setCurrPageNum(value);
+		setSkip(newSkip);
 		getFreezeDatasets(originDatasetId, newSkip, limit);
 	};
 
