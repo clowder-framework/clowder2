@@ -11,7 +11,6 @@ import listeners from "./listeners";
 import group from "./group";
 import visualization from "./visualization";
 import publicVisualization from "./public_visualization";
-import feeds from "./feeds";
 
 const rootReducer = combineReducers({
 	file: file,
@@ -26,7 +25,6 @@ const rootReducer = combineReducers({
 	group: group,
 	visualization: visualization,
 	publicVisualization: publicVisualization,
-	feed: feeds
 });
 
 export default rootReducer;

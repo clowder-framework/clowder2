@@ -11,7 +11,6 @@ import type { SearchObject } from './SearchObject';
  */
 export type FeedIn = {
     name: string;
-    description?: string;
     search: SearchObject;
     listeners?: Array<FeedListener>;
 }

@@ -2,7 +2,7 @@ import {
 	AuthorizationBase,
 	DatasetOut,
 	DatasetRoles,
-	EventListenerJobDB, FeedOut,
+	EventListenerJobDB,
 	FileOut,
 	FileVersion,
 	FolderOut,
@@ -256,10 +256,6 @@ export interface EventListenerJobStatus {
 	resubmitted: string;
 }
 
-export interface FeedState {
-	feeds: Paged;
-}
-
 export interface RootState {
 	metadata: MetadataState;
 	error: ErrorState;
@@ -273,5 +269,4 @@ export interface RootState {
 	folder: FolderState;
 	visualization: VisualizationState;
 	publicVisualization: PublicVisualizationState;
-	feed: FeedState;
 }

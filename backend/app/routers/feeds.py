@@ -10,17 +10,8 @@ from app.rabbitmq.listeners import submit_file_job
 from app.routers.authentication import get_admin, get_admin_mode
 from app.search.connect import check_search_result
 from beanie import PydanticObjectId
-from beanie.operators import Or, RegEx
 from fastapi import APIRouter, Depends, HTTPException
 from pika.adapters.blocking_connection import BlockingChannel
-
-from app.deps.authorization_deps import ListenerAuthorization
-
-from app.models.pages import Paged
-
-from app.models.pages import _construct_page_metadata
-
-from app.models.pages import _get_page_query
 
 router = APIRouter()
 
@@ -80,44 +71,28 @@ async def save_feed(
     return feed.dict()
 
 
-@router.get("", response_model=Paged)
+@router.get("", response_model=List[FeedOut])
 async def get_feeds(
-    searchTerm: Optional[str] = None,
+    name: Optional[str] = None,
     user=Depends(get_current_user),
     skip: int = 0,
     limit: int = 10,
-    admin=Depends(get_admin),
-    admin_mode=Depends(get_admin_mode)
 ):
     """Fetch all existing Feeds."""
-    criteria_list = []
-    # if not admin or not admin_mode:
-    #     criteria_list.append(FeedDB.creator == user)
-    if searchTerm is not None:
-        criteria_list.append(
-        Or(
-            RegEx(field=FeedDB.name, pattern=searchTerm),
-            RegEx(field=FeedDB.description, pattern=searchTerm),
-        ))
-
-    feeds_and_count = (
-            await FeedDB.find(
-                *criteria_list,
-            )
-            .aggregate(
-                [_get_page_query(skip, limit, sort_field="created", ascending=False)],
-            )
+    if name is not None:
+        feeds = (
+            await FeedDB.find(FeedDB.name == name)
+            .sort(-FeedDB.created)
+            .skip(skip)
+            .limit(limit)
             .to_list()
         )
-    print(feeds_and_count)
-    page_metadata = _construct_page_metadata(feeds_and_count, skip, limit)
-    page = Paged(
-            metadata=page_metadata,
-            data=[
-                FeedOut(id=item.pop("_id"), **item) for item in feeds_and_count[0]["data"]
-            ],
+    else:
+        feeds = (
+            await FeedDB.find().sort(-FeedDB.created).skip(skip).limit(limit).to_list()
         )
-    return page.dict()
+
+    return [feed.dict() for feed in feeds]
 
 
 @router.get("/{feed_id}", response_model=FeedOut)

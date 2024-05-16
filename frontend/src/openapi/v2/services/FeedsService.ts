@@ -4,7 +4,6 @@
 import type { FeedIn } from '../models/FeedIn';
 import type { FeedListener } from '../models/FeedListener';
 import type { FeedOut } from '../models/FeedOut';
-import type { Paged } from '../models/Paged';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { request as __request } from '../core/request';
 
@@ -13,27 +12,24 @@ export class FeedsService {
     /**
      * Get Feeds
      * Fetch all existing Feeds.
-     * @param searchTerm
+     * @param name
      * @param skip
      * @param limit
-     * @param datasetId
-     * @returns Paged Successful Response
+     * @returns FeedOut Successful Response
      * @throws ApiError
      */
     public static getFeedsApiV2FeedsGet(
-        searchTerm?: string,
+        name?: string,
         skip?: number,
         limit: number = 10,
-        datasetId?: string,
-    ): CancelablePromise<Paged> {
+    ): CancelablePromise<Array<FeedOut>> {
         return __request({
             method: 'GET',
             path: `/api/v2/feeds`,
             query: {
-                'searchTerm': searchTerm,
+                'name': name,
                 'skip': skip,
                 'limit': limit,
-                'dataset_id': datasetId,
             },
             errors: {
                 422: `Validation Error`,
