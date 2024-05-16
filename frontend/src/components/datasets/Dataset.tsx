@@ -184,7 +184,7 @@ export const Dataset = (): JSX.Element => {
 		) {
 			setSnackBarOpen(true);
 			setSnackBarMessage(
-				`Dataset version ${newFrozenDataset.frozen_version_num} has been created.`
+				`Dataset version ${newFrozenDataset.frozen_version_num} has been released.`
 			);
 		}
 	}, [newFrozenDataset]);
