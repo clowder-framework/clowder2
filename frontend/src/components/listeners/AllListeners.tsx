@@ -1,7 +1,6 @@
 import React, { ChangeEvent, useEffect, useState } from "react";
 import {
 	Box,
-	Checkbox,
 	Divider,
 	FormControl,
 	FormControlLabel,
@@ -14,7 +13,10 @@ import {
 	Paper,
 	Select,
 	Switch,
+	Tooltip,
 } from "@mui/material";
+
+import Table from "@mui/material/Table";
 
 import { RootState } from "../../types/data";
 import { useDispatch, useSelector } from "react-redux";
@@ -23,7 +25,8 @@ import {
 	fetchListenerLabels,
 	fetchListeners,
 	queryListeners,
-	toggleActiveFlagListener,
+	enableListener as enableListenerAction,
+	disableListener as disableListenerAction,
 } from "../../actions/listeners";
 import ListenerItem from "./ListenerItem";
 import SubmitExtraction from "./SubmitExtraction";
@@ -31,7 +34,10 @@ import { capitalize } from "../../utils/common";
 import config from "../../app.config";
 import { GenericSearchBox } from "../search/GenericSearchBox";
 import Layout from "../Layout";
-import { toBoolean } from "vega";
+import TableCell from "@mui/material/TableCell";
+import TableRow from "@mui/material/TableRow";
+import TableBody from "@mui/material/TableBody";
+import FiberManualRecordIcon from "@mui/icons-material/FiberManualRecord";
 
 type ListenerProps = {
 	process?: string;
@@ -58,7 +64,8 @@ export function AllListeners(props: ListenerProps) {
 				selectedCategory,
 				selectedLabel,
 				aliveOnly,
-				process
+				process,
+				true
 			)
 		);
 	const searchListeners = (
@@ -70,8 +77,9 @@ export function AllListeners(props: ListenerProps) {
 	) => dispatch(queryListeners(text, skip, limit, heartbeatInterval, process));
 	const listAvailableCategories = () => dispatch(fetchListenerCategories());
 	const listAvailableLabels = () => dispatch(fetchListenerLabels());
-	const toggleActiveFlag = (id: string) =>
-		dispatch(toggleActiveFlagListener(id));
+
+	const enableListener = (id: string) => dispatch(enableListenerAction(id));
+	const disableListener = (id: string) => dispatch(disableListenerAction(id));
 
 	const listeners = useSelector(
 		(state: RootState) => state.listener.listeners.data
@@ -218,10 +226,6 @@ export function AllListeners(props: ListenerProps) {
 		setOpenSubmitExtraction(false);
 	};
 
-	const setActiveListeners = (id: string) => {
-		toggleActiveFlag(id);
-	};
-
 	return (
 		<Layout>
 			<div className="outer-container">
@@ -302,56 +306,85 @@ export function AllListeners(props: ListenerProps) {
 				<Grid container>
 					<Grid item xs={12}>
 						<Paper sx={{ width: "100%", mb: 2, padding: "3em" }}>
-							<List>
-								{listeners !== undefined ? (
-									listeners.map((listener) => {
-										return (
-											<div
-												style={{ display: "flex", alignItems: "self-start" }}
-											>
-												{admin && adminMode ? (
-													<Checkbox
-														id={listener.id}
-														style={{ marginRight: "50px" }}
-														checked={listener.active}
-														disabled={!admin || !adminMode}
-														onChange={() => {
-															setActiveListeners(listener.id);
-														}}
-													/>
-												) : (
-													<></>
-												)}
-												<ListenerItem
-													key={listener.id}
-													id={listener.id}
-													fileId={null}
-													datasetId={null}
-													setInfoOnly={setInfoOnly}
-													extractor={listener}
-													extractorName={listener.name}
-													extractorDescription={listener.description}
-													setOpenSubmitExtraction={setOpenSubmitExtraction}
-													setSelectedExtractor={setSelectedExtractor}
-													showSubmit={false}
-												/>
-												<Divider />
-											</div>
-										);
-									})
-								) : (
-									<></>
-								)}
-							</List>
-							<Box display="flex" justifyContent="center" sx={{ m: 1 }}>
-								<Pagination
-									count={Math.ceil(pageMetadata.total_count / limit)}
-									page={currPageNum}
-									onChange={handlePageChange}
-									shape="rounded"
-									variant="outlined"
-								/>
-							</Box>
+							<Table sx={{ minWidth: 650 }} aria-label="simple table">
+								<TableBody>
+									{listeners !== undefined ? (
+										listeners.map((listener) => {
+											return (
+												<TableRow>
+													<TableCell align="left">
+														<ListenerItem
+															key={listener.id}
+															id={listener.id}
+															fileId={null}
+															datasetId={null}
+															setInfoOnly={setInfoOnly}
+															extractor={listener}
+															extractorName={listener.name}
+															extractorDescription={listener.description}
+															setOpenSubmitExtraction={setOpenSubmitExtraction}
+															setSelectedExtractor={setSelectedExtractor}
+															showSubmit={false}
+														/>
+													</TableCell>
+													<TableCell align="right">
+														{/*									extractor["alive"] ? (*/}
+														{/*	<Tooltip title="Extractor Offline">*/}
+														{/*		<FiberManualRecordIcon*/}
+														{/*			color="error"*/}
+														{/*			fontSize="small"*/}
+														{/*			sx={{ verticalAlign: "middle" }}*/}
+														{/*		/>*/}
+														{/*	</Tooltip>*/}
+														{/*) : (*/}
+														{/*	<Tooltip title="Extractor Alive">*/}
+														{/*		<FiberManualRecordIcon*/}
+														{/*			color="success"*/}
+														{/*			fontSize="small"*/}
+														{/*			sx={{ verticalAlign: "middle" }}*/}
+														{/*		/>*/}
+														{/*	</Tooltip>*/}
+														{admin && adminMode ? (
+															<Switch
+																id={listener.id}
+																color="primary"
+																checked={listener.active}
+																onChange={() => {
+																	if (listener.active) {
+																		disableListener(listener.id);
+																	} else {
+																		enableListener(listener.id);
+																	}
+																}}
+															/>
+														) : (
+															<Tooltip title="Only admins can enable/disable listener">
+																<Switch
+																	id={listener.id}
+																	color="default"
+																	checked={listener.active}
+																/>
+															</Tooltip>
+														)}
+													</TableCell>
+													<Divider />
+												</TableRow>
+											);
+										})
+									) : (
+										<></>
+									)}
+								</TableBody>
+								<Box display="flex" justifyContent="center" sx={{ m: 1 }}>
+									<Pagination
+										count={Math.ceil(pageMetadata.total_count / limit)}
+										page={currPageNum}
+										onChange={handlePageChange}
+										shape="rounded"
+										variant="outlined"
+									/>
+								</Box>
+							</Table>
 						</Paper>
 					</Grid>
 				</Grid>

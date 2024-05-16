@@ -304,6 +304,7 @@ async def get_listeners(
     label: Optional[str] = None,
     alive_only: Optional[bool] = False,
     process: Optional[str] = None,
+    all: Optional[bool] = False,
     admin=Depends(get_admin),
     admin_mode=Depends(get_admin_mode),
 ):
@@ -316,6 +317,7 @@ async def get_listeners(
         category -- filter by category has to be exact match
         label -- filter by label has to be exact match
         alive_only -- filter by alive status
+        all -- boolean stating if we want to show all listeners irrespective of admin and admin_mode
     """
     # First compute alive flag for all listeners
     aggregation_pipeline = [
@@ -338,8 +340,8 @@ async def get_listeners(
             aggregation_pipeline.append(
                 {"$match": {"properties.process.dataset": {"$exists": True}}}
             )
-    # Non admin users can access only active listeners
-    if not admin or not admin_mode:
+    # Non admin users can access only active listeners unless all is turned on for Extractor page
+    if not all and (not admin or not admin_mode):
         aggregation_pipeline.append({"$match": {"active": True}})
     # Add pagination
     aggregation_pipeline.append(
@@ -402,7 +404,7 @@ async def enable_listener(
     Arguments:
         listener_id -- UUID of the listener to be enabled
     """
-    return await set_active_flag(listener_id, True)
+    return await _set_active_flag(listener_id, True)
 
 
 @router.put("/{listener_id}/disable", response_model=EventListenerOut)
@@ -416,29 +418,25 @@ async def disable_listener(
     Arguments:
         listener_id -- UUID of the listener to be enabled
     """
-    return await set_active_flag(listener_id, False)
+    return await _set_active_flag(listener_id, False)
 
 
-@router.put("/{listener_id}/toggle", response_model=EventListenerOut)
-async def set_active_flag(
+async def _set_active_flag(
     listener_id: str,
-    active: Optional[bool] = None,
+    active: bool,
     allow: bool = Depends(ListenerAuthorization()),
 ):
-    """Toggle the active flag of an Event Listener. Only admins can enable/disbale listeners.
+    """Set the active flag of an Event Listener. Only admins can enable/disable listeners.
 
     Arguments:
-        listener_id -- UUID of the listener to be enabled
+        listener_id -- UUID of the listener to be enabled/disabled
     """
     listener = await EventListenerDB.find_one(
         EventListenerDB.id == ObjectId(listener_id)
     )
     if listener:
         try:
-            if active is not None:
-                listener.active = active
-            else:
-                listener.active = not listener.active
+            listener.active = active
             await listener.save()
             return listener.dict()
         except Exception as e:

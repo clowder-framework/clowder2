@@ -32,6 +32,7 @@ export class ListenersService {
      * category -- filter by category has to be exact match
      * label -- filter by label has to be exact match
      * alive_only -- filter by alive status
+     * all -- boolean stating if we want to show all listeners irrespective of admin and admin_mode
      * @param skip
      * @param limit
      * @param heartbeatInterval
@@ -39,6 +40,7 @@ export class ListenersService {
      * @param label
      * @param aliveOnly
      * @param process
+     * @param all
      * @param datasetId
      * @returns Paged Successful Response
      * @throws ApiError
@@ -51,6 +53,7 @@ export class ListenersService {
         label?: string,
         aliveOnly: boolean = false,
         process?: string,
+        all: boolean = false,
         datasetId?: string,
     ): CancelablePromise<Paged> {
         return __request({
@@ -64,6 +67,7 @@ export class ListenersService {
                 'label': label,
                 'alive_only': aliveOnly,
                 'process': process,
+                'all': all,
                 'dataset_id': datasetId,
             },
             errors: {
@@ -314,36 +318,6 @@ export class ListenersService {
             method: 'PUT',
             path: `/api/v2/listeners/${listenerId}/disable`,
             query: {
-                'dataset_id': datasetId,
-            },
-            errors: {
-                422: `Validation Error`,
-            },
-        });
-    }
-
-    /**
-     * Set Active Flag
-     * Toggle the active flag of an Event Listener. Only admins can enable/disbale listeners.
-     *
-     * Arguments:
-     * listener_id -- UUID of the listener to be enabled
-     * @param listenerId
-     * @param active
-     * @param datasetId
-     * @returns EventListenerOut Successful Response
-     * @throws ApiError
-     */
-    public static setActiveFlagApiV2ListenersListenerIdTogglePut(
-        listenerId: string,
-        active?: boolean,
-        datasetId?: string,
-    ): CancelablePromise<EventListenerOut> {
-        return __request({
-            method: 'PUT',
-            path: `/api/v2/listeners/${listenerId}/toggle`,
-            query: {
-                'active': active,
                 'dataset_id': datasetId,
             },
             errors: {
