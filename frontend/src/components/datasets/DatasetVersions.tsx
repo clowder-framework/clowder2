@@ -6,12 +6,12 @@ import { getFreezeDatasets as getFreezeDatasetsAction } from "../../actions/data
 import { RootState } from "../../types/data";
 import config from "../../app.config";
 import { parseDate } from "../../utils/common";
-import { ClowderFootnote } from "../styledComponents/ClowderFootnote";
+import { theme } from "../../theme";
 
 export const DatasetVersions = (props) => {
 	const { currDataset, setSnackBarMessage, setSnackBarOpen } = props;
 	const dispatch = useDispatch();
-	const [selectedId, setSelectedId] = useState("");
+	const [selectedId, setSelectedId] = useState(currDataset.id);
 	const [currPageNum, setCurrPageNum] = useState<number>(1);
 	const [limit] = useState<number>(config.defaultVersionPerPage);
 
@@ -45,6 +45,7 @@ export const DatasetVersions = (props) => {
 		selectedDatasetId: string,
 		selectedVersionNum: string
 	) => {
+		setSelectedId(selectedDatasetId);
 		history(`/datasets/${selectedDatasetId}`);
 		setSnackBarMessage(`Viewing dataset version ${selectedVersionNum}.`);
 		setSnackBarOpen(true);
@@ -70,9 +71,15 @@ export const DatasetVersions = (props) => {
 							handleVersionChange(currDataset.origin_id, "current unreleased");
 						}}
 						sx={{
-							color: selectedId === currDataset.origin_id ? "red" : "blue",
-							pointerEvents: selectedId === currDataset.id ? "none" : "auto",
+							color:
+								selectedId === currDataset.origin_id
+									? theme.palette.info.main
+									: theme.palette.primary.main,
+							pointerEvents:
+								selectedId === currDataset.origin_id ? "none" : "auto",
 							textDecoration: "none",
+							fontWeight:
+								selectedId === currDataset.origin_id ? "bold" : "normal",
 							"&:hover": {
 								textDecoration: "underline",
 							},
@@ -89,9 +96,13 @@ export const DatasetVersions = (props) => {
 								handleVersionChange(dataset.id, dataset.frozen_version_num);
 							}}
 							sx={{
-								color: selectedId === dataset.id ? "red" : "blue",
+								color:
+									selectedId === dataset.id
+										? theme.palette.info.main
+										: theme.palette.primary.main,
 								pointerEvents: selectedId === dataset.id ? "none" : "auto",
 								textDecoration: "none",
+								fontWeight: selectedId === dataset.id ? "bold" : "normal",
 								"&:hover": {
 									textDecoration: "underline",
 								},
@@ -99,9 +110,14 @@ export const DatasetVersions = (props) => {
 						>
 							Version {dataset.frozen_version_num}
 						</Link>
-						<ClowderFootnote>
-							Last Modified: {parseDate(dataset.modified)}
-						</ClowderFootnote>
+						<Box>
+							<Typography
+								variant="caption"
+								sx={{ color: "text.primary.light" }}
+							>
+								{parseDate(dataset.modified)}
+							</Typography>
+						</Box>
 					</Box>
 				))}
 			</Box>
