@@ -313,7 +313,6 @@ export const PublicDataset = (): JSX.Element => {
 						setSnackBarMessage={setSnackBarMessage}
 						setSnackBarOpen={setSnackBarOpen}
 					/>
-					<DatasetDetails details={dataset} />
 					<Typography variant="h5" gutterBottom>
 						License
 					</Typography>
