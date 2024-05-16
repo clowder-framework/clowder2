@@ -1,4 +1,9 @@
-import { ExtractedMetadata, FilePreview, Folder, MetadataJsonld } from "./data";
+import {
+	ExtractedMetadata,
+	FilePreview,
+	Folder,
+	MetadataJsonld,
+} from "./data";
 import {
 	AuthorizationBase,
 	DatasetOut as Dataset,
@@ -624,6 +629,11 @@ interface FOLDER_UPDATED {
 	folder: FolderOut;
 }
 
+interface RECEIVE_FEEDS {
+	type: "RECEIVE_FEEDS";
+	feeds: Paged;
+}
+
 export type DataAction =
 	| GET_ADMIN_MODE_STATUS
 	| TOGGLE_ADMIN_MODE
@@ -741,4 +751,5 @@ export type DataAction =
 	| RECEIVE_PUBLIC_FOLDERS_FILES_IN_DATASET
 	| FOLDER_UPDATED
 	| RECEIVE_DATASET_LICENSE
-	| UPDATE_DATASET_LICENSE;
+	| UPDATE_DATASET_LICENSE
+	| RECEIVE_FEEDS;

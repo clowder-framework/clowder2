@@ -230,3 +230,20 @@ export function resetJobUpdates() {
 		});
 	};
 }
+
+export const RECEIVE_FEEDS = "RECEIVE_FEEDS"
+export function fetchFeeds(name, skip=0, limit= 20) {
+	return (dispatch) => {
+		return V2.FeedsService.getFeedsApiV2FeedsGet(name, skip, limit)
+			.then((json) => {
+				dispatch({
+					type: RECEIVE_FEEDS,
+					feeds: json,
+					receivedAt: Date.now(),
+				});
+			})
+			.catch((reason) => {
+				dispatch(handleErrors(reason, fetchFeeds(skip, limit)));
+			});
+	};
+}
