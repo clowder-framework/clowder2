@@ -17,12 +17,16 @@ from app.models.files import (
     LocalFileIn,
     StorageType,
 )
+from minio import Minio
 import nest_asyncio
 nest_asyncio.apply()
 from app.models.users import UserDB, UserOut, UserAPIKeyDB
 from beanie import init_beanie
 from fastapi import FastAPI, APIRouter, Depends
+from elasticsearch import Elasticsearch
+from app import dependencies
 from motor.motor_asyncio import AsyncIOMotorClient
+from pika.adapters.blocking_connection import BlockingChannel
 
 mongo_client = MongoClient("mongodb://localhost:27018", connect=False)
 mongo_client_v2 = MongoClient("mongodb://localhost:27017", connect=False)
@@ -157,7 +161,11 @@ def create_local_user(user_v1):
         f.write(entry)
     return api_key
 
-async def process_users():
+async def process_users(
+        fs: Minio = Depends(dependencies.get_fs),
+        es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
+        rabbitmq_client: BlockingChannel = Depends(dependencies.get_rabbitmq),
+    ):
     users_v1 = get_clowder_v1_users()
 
     for user_v1 in users_v1:
@@ -206,13 +214,15 @@ async def process_users():
                         content_type = file["contentType"]
                         upload_chunks_entry = db["uploads.chunks"].find_one({"files_id": ObjectId(loader_id)})
                         data_bytes = upload_chunks_entry['data']
-                        print('got the entry')
-
-
-                        add_file_entry(
-
+                        await add_file_entry(
+                            new_file,
+                            user,
+                            fs,
+                            es,
+                            rabbitmq_client,
+                            file.file,
+                            content_type=file.content_type,
                         )
-                    print('here')
 
         else:
             print("not a local account")
