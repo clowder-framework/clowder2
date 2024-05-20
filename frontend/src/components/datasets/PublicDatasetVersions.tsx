@@ -1,13 +1,23 @@
-import { Box, FormControl, MenuItem, Typography } from "@mui/material";
-import { ClowderSelect } from "../styledComponents/ClowderSelect";
-import React, { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { Box, Link, Pagination, Typography } from "@mui/material";
+import React, { ChangeEvent, useEffect, useState } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { getPublicFreezeDatasets as getPublicFreezeDatasetsAction } from "../../actions/public_dataset";
 import { RootState } from "../../types/data";
+import config from "../../app.config";
+import { theme } from "../../theme";
+import { parseDate } from "../../utils/common";
 
 export const PublicDatasetVersions = (props) => {
-	const { currDataset, setSnackBarMessage, setSnackBarOpen } = props;
+	// search parameters
+	const [searchParams] = useSearchParams();
+	const currVersionPageNumParam = searchParams.get("currVersionPageNum");
+
+	const { currDataset } = props;
+
+	const [currVersionPageNum, setCurrVersionPageNum] = useState<number>(1);
+	const [limit] = useState<number>(config.defaultVersionPerPage);
+	const [skip, setSkip] = useState<number>(0);
 
 	const dispatch = useDispatch();
 	const getPublicFreezeDatasets = (
@@ -19,70 +29,122 @@ export const PublicDatasetVersions = (props) => {
 	const frozenDatasets = useSelector(
 		(state: RootState) => state.publicDataset.publicFrozenDatasets.data
 	);
+	const pageMetadata = useSelector(
+		(state: RootState) => state.publicDataset.publicFrozenDatasets.metadata
+	);
 
 	const history = useNavigate();
 
 	useEffect(() => {
-		// TODO implement proper pagination
+		if (currVersionPageNumParam) {
+			const pageNum = parseInt(currVersionPageNumParam, 10);
+			setCurrVersionPageNum(pageNum);
+			setSkip((pageNum - 1) * limit);
+		}
+	}, [currVersionPageNumParam]);
+
+	useEffect(() => {
 		let datasetId;
 		if (currDataset.origin_id) datasetId = currDataset.origin_id;
 		else datasetId = currDataset.id;
-		if (datasetId) getPublicFreezeDatasets(datasetId, 0, 1000);
-	}, [currDataset]);
+		if (datasetId) getPublicFreezeDatasets(datasetId, skip, limit);
+	}, [currDataset, skip, limit]);
 
-	function handleVersionChange(event) {
-		if (event.target.value === "current") {
-			history(`/public/datasets/${currDataset.origin_id}`);
-			setSnackBarMessage(`Viewing current unreleased dataset.`);
-			setSnackBarOpen(true);
+	const handleVersionChange = (selectedDatasetId: string) => {
+		// current version flip to page 1
+		if (selectedDatasetId === currDataset.origin_id) {
+			history(`/public/datasets/${selectedDatasetId}?currVersionPageNum=1`);
+			// other version flip to the current page
 		} else {
-			const selectedDataset = frozenDatasets.find(
-				(dataset) => dataset.id === event.target.value
+			history(
+				`/public/datasets/${selectedDatasetId}?currVersionPageNum=${currVersionPageNum}`
 			);
-
-			if (selectedDataset) {
-				history(`/public/datasets/${selectedDataset.id}`);
-				setSnackBarMessage(
-					`Viewing dataset version ${selectedDataset.frozen_version_num}.`
-				);
-				setSnackBarOpen(true);
-			} else {
-				console.error("Selected dataset not found in the list");
-			}
 		}
-	}
+	};
+
+	const handlePageChange = (_: ChangeEvent<unknown>, value: number) => {
+		const originDatasetId = currDataset.origin_id;
+		const newSkip = (value - 1) * limit;
+		setCurrVersionPageNum(value);
+		setSkip(newSkip);
+		getPublicFreezeDatasets(originDatasetId, newSkip, limit);
+	};
 
 	return (
 		<Box sx={{ mt: 2, mb: 5 }}>
 			<Typography variant="h5" gutterBottom>
 				Dataset Version
 			</Typography>
-			<Typography>Select Version</Typography>
-			<FormControl>
-				<ClowderSelect
-					value={
-						currDataset &&
-						currDataset.frozen &&
-						currDataset.frozen_version_num > 0
-							? currDataset.id
-							: "current"
-					}
-					onChange={handleVersionChange}
-				>
-					<MenuItem value="current" key="current">
-						Current
-					</MenuItem>
-					{frozenDatasets && frozenDatasets.length > 0
-						? frozenDatasets.map((dataset) => {
-								return (
-									<MenuItem value={dataset.id} key={dataset.id}>
-										{`Version ${dataset.frozen_version_num}`}
-									</MenuItem>
-								);
-						  })
-						: null}
-				</ClowderSelect>
-			</FormControl>
+			<Box>
+				<Box key={currDataset.origin_id} mb={2}>
+					<Link
+						component="button"
+						onClick={() => {
+							handleVersionChange(currDataset.origin_id);
+						}}
+						sx={{
+							color:
+								currDataset.id === currDataset.origin_id
+									? theme.palette.info.main
+									: theme.palette.primary.main,
+							pointerEvents:
+								currDataset.id === currDataset.origin_id ? "none" : "auto",
+							textDecoration: "none",
+							fontWeight:
+								currDataset.id === currDataset.origin_id ? "bold" : "normal",
+							"&:hover": {
+								textDecoration: "underline",
+							},
+						}}
+					>
+						Current Unreleased
+					</Link>
+				</Box>
+				{frozenDatasets.map((dataset) => (
+					<Box key={dataset.id} mb={2}>
+						<Link
+							component="button"
+							onClick={() => {
+								handleVersionChange(dataset.id);
+							}}
+							sx={{
+								color:
+									currDataset.id === dataset.id
+										? theme.palette.info.main
+										: theme.palette.primary.main,
+								pointerEvents: currDataset.id === dataset.id ? "none" : "auto",
+								textDecoration: "none",
+								fontWeight: currDataset.id === dataset.id ? "bold" : "normal",
+								"&:hover": {
+									textDecoration: "underline",
+								},
+							}}
+						>
+							Version {dataset.frozen_version_num}
+						</Link>
+						<Box>
+							<Typography
+								variant="caption"
+								sx={{ color: "text.primary.light" }}
+							>
+								{parseDate(dataset.modified)}
+							</Typography>
+						</Box>
+					</Box>
+				))}
+			</Box>
+			{frozenDatasets && frozenDatasets.length !== 0 ? (
+				<Box display="flex" justifyContent="center" sx={{ m: 1 }}>
+					<Pagination
+						count={Math.ceil(pageMetadata.total_count / limit)}
+						page={currVersionPageNum}
+						onChange={handlePageChange}
+						shape="circular"
+					/>
+				</Box>
+			) : (
+				<></>
+			)}
 		</Box>
 	);
 };
