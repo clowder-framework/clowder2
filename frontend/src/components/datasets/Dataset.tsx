@@ -537,11 +537,7 @@ export const Dataset = (): JSX.Element => {
 					</TabPanel>
 				</Grid>
 				<Grid item>
-					<DatasetVersions
-						currDataset={dataset}
-						setSnackBarMessage={setSnackBarMessage}
-						setSnackBarOpen={setSnackBarOpen}
-					/>
+					<DatasetVersions currDataset={dataset} />
 					<>
 						<Typography variant="h5" gutterBottom>
 							License

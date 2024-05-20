@@ -9,9 +9,9 @@ import { parseDate } from "../../utils/common";
 import { theme } from "../../theme";
 
 export const DatasetVersions = (props) => {
-	const { currDataset, setSnackBarMessage, setSnackBarOpen } = props;
+	const { currDataset } = props;
 	const dispatch = useDispatch();
-	const [currPageNum, setCurrPageNum] = useState<number>(1);
+	const [currVersionPageNum, setCurrVersionPageNum] = useState<number>(1);
 	const [limit] = useState<number>(config.defaultVersionPerPage);
 	const [skip, setSkip] = useState<number>(0);
 
@@ -34,20 +34,30 @@ export const DatasetVersions = (props) => {
 	const history = useNavigate();
 
 	useEffect(() => {
+		const storedPageNum = localStorage.getItem("currVersionPageNum");
+		if (storedPageNum) {
+			const pageNum = parseInt(storedPageNum, 10);
+			setCurrVersionPageNum(pageNum);
+			setSkip((pageNum - 1) * limit);
+		}
+	}, []);
+
+	useEffect(() => {
 		let datasetId;
 		if (currDataset.origin_id) datasetId = currDataset.origin_id;
 		else datasetId = currDataset.id;
 		if (datasetId) getFreezeDatasets(datasetId, skip, limit);
-	}, [currDataset, latestFrozenVersionNum]);
+	}, [currDataset, latestFrozenVersionNum, skip, limit]);
 
 	const handleVersionChange = (selectedDatasetId: string) => {
+		localStorage.setItem("currVersionPageNum", currVersionPageNum.toString());
 		history(`/datasets/${selectedDatasetId}`);
 	};
 
 	const handlePageChange = (_: ChangeEvent<unknown>, value: number) => {
 		const originDatasetId = currDataset.origin_id;
 		const newSkip = (value - 1) * limit;
-		setCurrPageNum(value);
+		setCurrVersionPageNum(value);
 		setSkip(newSkip);
 		getFreezeDatasets(originDatasetId, newSkip, limit);
 	};
@@ -119,10 +129,9 @@ export const DatasetVersions = (props) => {
 				<Box display="flex" justifyContent="center" sx={{ m: 1 }}>
 					<Pagination
 						count={Math.ceil(pageMetadata.total_count / limit)}
-						page={currPageNum}
+						page={currVersionPageNum}
 						onChange={handlePageChange}
-						shape="rounded"
-						variant="outlined"
+						shape="circular"
 					/>
 				</Box>
 			) : (
