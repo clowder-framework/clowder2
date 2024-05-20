@@ -97,12 +97,18 @@ def generate_user_api_key(user):
 
 def get_clowder_v1_users():
     endpoint = CLOWDER_V1 + 'api/users'
-    r = requests.get(endpoint,  headers=base_headers_v1, verify=False)
+    print(base_headers_v1)
+    r = requests.get(endpoint,  headers=clowder_headers_v1, verify=False)
     return r.json()
 
 def get_clowder_v2_users():
     endpoint = CLOWDER_V2 + 'api/v2/users'
-    r = requests.get(endpoint, headers=base_headers_v1, verify=False)
+    r = requests.get(endpoint, headers=base_headers_v2, verify=False)
+    return r.json()
+
+def get_clowder_v2_user_by_name(username):
+    endpoint = CLOWDER_V2 + 'api/v2/users/username/' + username
+    r = requests.get(endpoint, headers=base_headers_v2, verify=False)
     return r.json()
 
 async def create_v2_dataset(headers, dataset, user_email):
@@ -147,10 +153,10 @@ def create_local_user(user_v1):
         "first_name": first_name,
         "last_name": last_name
     }
-    # response = requests.post(f"{CLOWDER_V2}api/v2/users", json=user_json)
+    response = requests.post(f"{CLOWDER_V2}api/v2/users", json=user_json)
     email_user_new_login(email)
-    # api_key = generate_user_api_key(email)
-    api_key = 'aZM2QXJ_lvw_5FKNUB89Vg'
+    api_key = generate_user_api_key(email)
+    # api_key = 'aZM2QXJ_lvw_5FKNUB89Vg'
     print("Local user created and api key generated")
     if os.path.exists(output_file):
         print('it exists.')
@@ -178,10 +184,12 @@ async def process_users(
         id_provider = user_v1['identityProvider']
         if '[Local Account]' in user_v1['identityProvider']:
             # get the v2 users
+            # i create a user account in v2 with this username
             if email != "a@a.com":
                 user_v1_datasets = get_clowder_v1_user_datasets(user_id=id)
                 # TODO check if there is already a local user
-                # user_v2_api_key = create_local_user(user_v1)
+                user_v2 = get_clowder_v2_user_by_name(email)
+                user_v2_api_key = create_local_user(user_v1)
                 user_v2_api_key = 'aZM2QXJ_lvw_5FKNUB89Vg'
                 user_base_headers_v2 = {'X-API-key': user_v2_api_key}
                 user_headers_v2 = {**user_base_headers_v2, 'Content-type': 'application/json',
