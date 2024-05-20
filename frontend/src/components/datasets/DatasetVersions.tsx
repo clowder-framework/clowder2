@@ -1,6 +1,6 @@
 import React, { ChangeEvent, useEffect, useState } from "react";
 import { Box, Link, Pagination, Typography } from "@mui/material";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { getFreezeDatasets as getFreezeDatasetsAction } from "../../actions/dataset";
 import { RootState } from "../../types/data";
@@ -9,6 +9,10 @@ import { parseDate } from "../../utils/common";
 import { theme } from "../../theme";
 
 export const DatasetVersions = (props) => {
+	// search parameters
+	const [searchParams] = useSearchParams();
+	const currVersionPageNumParam = searchParams.get("currVersionPageNum");
+
 	const { currDataset } = props;
 	const dispatch = useDispatch();
 	const [currVersionPageNum, setCurrVersionPageNum] = useState<number>(1);
@@ -34,13 +38,12 @@ export const DatasetVersions = (props) => {
 	const history = useNavigate();
 
 	useEffect(() => {
-		const storedPageNum = localStorage.getItem("currVersionPageNum");
-		if (storedPageNum) {
-			const pageNum = parseInt(storedPageNum, 10);
+		if (currVersionPageNumParam) {
+			const pageNum = parseInt(currVersionPageNumParam, 10);
 			setCurrVersionPageNum(pageNum);
 			setSkip((pageNum - 1) * limit);
 		}
-	}, []);
+	}, [currVersionPageNumParam]);
 
 	useEffect(() => {
 		let datasetId;
@@ -50,8 +53,15 @@ export const DatasetVersions = (props) => {
 	}, [currDataset, latestFrozenVersionNum, skip, limit]);
 
 	const handleVersionChange = (selectedDatasetId: string) => {
-		localStorage.setItem("currVersionPageNum", currVersionPageNum.toString());
-		history(`/datasets/${selectedDatasetId}`);
+		// current version flip to page 1
+		if (selectedDatasetId === currDataset.origin_id) {
+			history(`/datasets/${selectedDatasetId}?currVersionPageNum=1`);
+			// other version flip to the current page
+		} else {
+			history(
+				`/datasets/${selectedDatasetId}?currVersionPageNum=${currVersionPageNum}`
+			);
+		}
 	};
 
 	const handlePageChange = (_: ChangeEvent<unknown>, value: number) => {
