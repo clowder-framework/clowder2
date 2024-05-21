@@ -105,16 +105,21 @@ export class FeedsService {
      * listener: JSON object with "listener_id" field and "automatic" bool field (whether to auto-trigger on new data)
      * @param feedId
      * @param requestBody
+     * @param datasetId
      * @returns FeedOut Successful Response
      * @throws ApiError
      */
     public static associateListenerApiV2FeedsFeedIdListenersPost(
         feedId: string,
         requestBody: FeedListener,
+        datasetId?: string,
     ): CancelablePromise<FeedOut> {
         return __request({
             method: 'POST',
             path: `/api/v2/feeds/${feedId}/listeners`,
+            query: {
+                'dataset_id': datasetId,
+            },
             body: requestBody,
             mediaType: 'application/json',
             errors: {
@@ -132,16 +137,21 @@ export class FeedsService {
      * listener_id: UUID of Event Listener that should be disassociated
      * @param feedId
      * @param listenerId
-     * @returns FeedOut Successful Response
+     * @param datasetId
+     * @returns any Successful Response
      * @throws ApiError
      */
     public static disassociateListenerApiV2FeedsFeedIdListenersListenerIdDelete(
         feedId: string,
         listenerId: string,
-    ): CancelablePromise<FeedOut> {
+        datasetId?: string,
+    ): CancelablePromise<any> {
         return __request({
             method: 'DELETE',
             path: `/api/v2/feeds/${feedId}/listeners/${listenerId}`,
+            query: {
+                'dataset_id': datasetId,
+            },
             errors: {
                 422: `Validation Error`,
             },
