@@ -88,7 +88,7 @@ def email_user_new_login(user):
 def generate_user_api_key(user, password):
     user_example = {
         "email": user["email"],
-        "password": DEFAULT_PASSWORD,
+        "password": password,
         "first_name": user["first_name"],
         "last_name": user["last_name"],
     }
@@ -160,9 +160,9 @@ def create_local_user(user_v1):
         "first_name": first_name,
         "last_name": last_name
     }
-    # response = requests.post(f"{CLOWDER_V2}api/v2/users", json=user_json)
+    response = requests.post(f"{CLOWDER_V2}api/v2/users", json=user_json)
     email_user_new_login(email)
-    api_key = generate_user_api_key(email, DEFAULT_PASSWORD)
+    api_key = generate_user_api_key(user_json, DEFAULT_PASSWORD)
     # api_key = 'aZM2QXJ_lvw_5FKNUB89Vg'
     print("Local user created and api key generated")
     if os.path.exists(output_file):
@@ -174,11 +174,25 @@ def create_local_user(user_v1):
         f.write(entry)
     return api_key
 
+def create_admin_user():
+    user_json = {
+        "email": "a@a.com",
+        "password": "admin",
+        "first_name": "aa",
+        "last_name": "aa"
+    }
+    response = requests.post(f"{CLOWDER_V2}api/v2/users", json=user_json)
+    api_key = generate_user_api_key(user_json, "admin")
+    return api_key
+
 async def process_users(
         fs: Minio = Depends(dependencies.get_fs),
         es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
         rabbitmq_client: BlockingChannel = Depends(dependencies.get_rabbitmq),
     ):
+    print("We create a v2 admin user")
+    NEW_ADMIN_KEY_V2 = create_admin_user()
+    print('here')
     users_v1 = get_clowder_v1_users()
     for user_v1 in users_v1:
         print(user_v1)
@@ -194,8 +208,8 @@ async def process_users(
             if email != "a@a.com":
                 user_v1_datasets = get_clowder_v1_user_datasets(user_id=id)
                 # TODO check if there is already a local user
-                user_v2 = get_clowder_v2_user_by_name(email)
-                # user_v2_api_key = create_local_user(user_v1)
+                # user_v2 = get_clowder_v2_user_by_name(email)
+                user_v2 = create_local_user(user_v1)
                 user_v2_api_key = generate_user_api_key(user_v2, DEFAULT_PASSWORD)
                 # user_v2_api_key = 'aZM2QXJ_lvw_5FKNUB89Vg'
                 user_base_headers_v2 = {'X-API-key': user_v2_api_key}
@@ -227,6 +241,9 @@ async def process_users(
                         filename = file['filename']
                         loader_id = file["loader_id"]
                         content_type = file["contentType"]
+                        # TODO download the file from v1 using api routes
+                        v1_download_url = CLOWDER_V1 + 'api/files' + file_id
+                        download = requests.get(v1_download_url, headers=clowder_headers_v1)
                         upload_chunks_entry = db["uploads.chunks"].find_one({"files_id": ObjectId(loader_id)})
                         data_bytes = upload_chunks_entry['data']
                         current_path = os.path.join(os.getcwd(),'scripts','migration')
