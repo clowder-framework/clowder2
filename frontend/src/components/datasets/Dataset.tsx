@@ -143,6 +143,7 @@ export const Dataset = (): JSX.Element => {
 	);
 	const adminMode = useSelector((state: RootState) => state.user.adminMode);
 	const license = useSelector((state: RootState) => state.dataset.license);
+	const newFiles = useSelector((state: RootState) => state.dataset.newFiles);
 	const [standardLicenseUrl, setStandardLicenseUrl] = useState<string>("");
 	const fetchStandardLicenseUrlData = async (license_id: string) => {
 		try {
@@ -168,7 +169,7 @@ export const Dataset = (): JSX.Element => {
 			listDatasetLicense(about.license_id);
 		getFolderPath(folderId);
 		getMetadatDefinitions(null, 0, 100);
-	}, [searchParams, adminMode, about.license_id]);
+	}, [searchParams, adminMode, about.license_id, newFiles]);
 
 	// for breadcrumb
 	useEffect(() => {

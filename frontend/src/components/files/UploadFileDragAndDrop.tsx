@@ -53,10 +53,9 @@ export const UploadFileDragAndDrop: React.FC<UploadFileDragAndDropProps> = (
 	) => dispatch(fetchMetadataDefinitions(name, skip, limit));
 	const createFileMetadata = (
 		fileId: string | undefined,
-		metadata: MetadataIn,
-		reload: boolean
+		metadata: MetadataIn
 	) => {
-		dispatch(postFileMetadata(fileId, metadata, reload));
+		dispatch(postFileMetadata(fileId, metadata));
 	};
 
 	const uploadFiles = (
@@ -161,15 +160,10 @@ export const UploadFileDragAndDrop: React.FC<UploadFileDragAndDropProps> = (
 
 	useEffect(() => {
 		if (newFiles.length > 0) {
-			newFiles.forEach((file, i) => {
+			newFiles.forEach((file) => {
 				// post new metadata
-				Object.keys(metadataRequestForms).forEach((key, j) => {
-					if (
-						j == Object.keys(metadataRequestForms).length - 1 &&
-						i == newFiles.length - 1
-					)
-						createFileMetadata(file.id, metadataRequestForms[key], true);
-					else createFileMetadata(file.id, metadataRequestForms[key]);
+				Object.keys(metadataRequestForms).forEach((key) => {
+					createFileMetadata(file.id, metadataRequestForms[key]);
 				});
 			});
 
