@@ -85,15 +85,22 @@ DEFAULT_PASSWORD = 'Password123&'
 def email_user_new_login(user):
     print("login to the new clowder instance")
 
-def generate_user_api_key(user):
-    serializer = URLSafeSerializer(settings.local_auth_secret, salt="api_key")
-    unique_key = token_urlsafe(16)
-    hashed_key = serializer.dumps({"user": user, "key": unique_key})
-    user_key = UserAPIKeyDB(user=user, key=unique_key, name='migrationKey')
-    # user_key = {'user': user, 'key': unique_key, 'name': 'migrationKey'}
-    user_key_collection = mongo_client["user_keys"]
-    result = mongo_client["user_keys"].insert_one({user_key})
-    return user_key.key
+def generate_user_api_key(user, password):
+    user_example = {
+        "email": user["email"],
+        "password": DEFAULT_PASSWORD,
+        "first_name": user["first_name"],
+        "last_name": user["last_name"],
+    }
+    login_endpoint = CLOWDER_V2 + 'api/v2/login'
+    response = requests.post(login_endpoint, json=user_example)
+    token = response.json().get("token")
+    current_headers = {"Authorization": "Bearer " + token}
+    auth = {'username': user["email"], 'password': password}
+    api_key_endpoint = CLOWDER_V2 + 'api/v2/users/keys?name=migration&mins=0'
+    result = requests.post(api_key_endpoint, headers=current_headers)
+    api_key = result.json()
+    return api_key
 
 def get_clowder_v1_users():
     endpoint = CLOWDER_V1 + 'api/users'
@@ -153,9 +160,9 @@ def create_local_user(user_v1):
         "first_name": first_name,
         "last_name": last_name
     }
-    response = requests.post(f"{CLOWDER_V2}api/v2/users", json=user_json)
+    # response = requests.post(f"{CLOWDER_V2}api/v2/users", json=user_json)
     email_user_new_login(email)
-    api_key = generate_user_api_key(email)
+    api_key = generate_user_api_key(email, DEFAULT_PASSWORD)
     # api_key = 'aZM2QXJ_lvw_5FKNUB89Vg'
     print("Local user created and api key generated")
     if os.path.exists(output_file):
@@ -173,7 +180,6 @@ async def process_users(
         rabbitmq_client: BlockingChannel = Depends(dependencies.get_rabbitmq),
     ):
     users_v1 = get_clowder_v1_users()
-
     for user_v1 in users_v1:
         print(user_v1)
         id = user_v1['id']
@@ -189,8 +195,9 @@ async def process_users(
                 user_v1_datasets = get_clowder_v1_user_datasets(user_id=id)
                 # TODO check if there is already a local user
                 user_v2 = get_clowder_v2_user_by_name(email)
-                user_v2_api_key = create_local_user(user_v1)
-                user_v2_api_key = 'aZM2QXJ_lvw_5FKNUB89Vg'
+                # user_v2_api_key = create_local_user(user_v1)
+                user_v2_api_key = generate_user_api_key(user_v2, DEFAULT_PASSWORD)
+                # user_v2_api_key = 'aZM2QXJ_lvw_5FKNUB89Vg'
                 user_base_headers_v2 = {'X-API-key': user_v2_api_key}
                 user_headers_v2 = {**user_base_headers_v2, 'Content-type': 'application/json',
                                       'accept': 'application/json'}
@@ -228,9 +235,10 @@ async def process_users(
                             fs,
                             es,
                             rabbitmq_client,
-                            file.file,
-                            content_type=file.content_type,
+                            data_bytes,
+                            content_type=content_type,
                         )
+                        print('done')
 
         else:
             print("not a local account")
