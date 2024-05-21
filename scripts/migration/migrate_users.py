@@ -229,15 +229,14 @@ async def process_users(
                         content_type = file["contentType"]
                         upload_chunks_entry = db["uploads.chunks"].find_one({"files_id": ObjectId(loader_id)})
                         data_bytes = upload_chunks_entry['data']
-                        await add_file_entry(
-                            new_file,
-                            user,
-                            fs,
-                            es,
-                            rabbitmq_client,
-                            data_bytes,
-                            content_type=content_type,
-                        )
+                        current_path = os.path.join(os.getcwd(),'scripts','migration')
+                        path_to_temp_file = os.path.join(current_path, filename)
+                        with open(path_to_temp_file, "wb") as f:
+                            f.write(data_bytes)
+                        file_data = {"file": open(path_to_temp_file, "rb")}
+                        dataset_file_upload_endoint = CLOWDER_V2 + 'api/v2/datasets/' + dataset_id['id'] + '/files'
+                        response = requests.post(dataset_file_upload_endoint, files=file_data, headers=user_base_headers_v2)
+                        result = response.json()
                         print('done')
 
         else:
