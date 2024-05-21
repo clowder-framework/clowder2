@@ -161,6 +161,7 @@ export interface ListenerState {
 export interface GroupState {
 	groups: Paged;
 	newGroup: GroupOut;
+	deletedGroup: GroupOut;
 	about: GroupOut;
 	role: RoleType;
 	users: Paged;

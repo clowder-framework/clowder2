@@ -46,6 +46,9 @@ export function Groups() {
 	const pageMetadata = useSelector(
 		(state: RootState) => state.group.groups.metadata
 	);
+	const deletedGroup = useSelector(
+		(state: RootState) => state.group.deletedGroup
+	);
 	const adminMode = useSelector((state: RootState) => state.user.adminMode);
 
 	// TODO add option to determine limit number; default show 5 groups each time
@@ -58,7 +61,7 @@ export function Groups() {
 	// component did mount
 	useEffect(() => {
 		listGroups((currPageNum - 1) * limit, limit);
-	}, [adminMode]);
+	}, [adminMode, deletedGroup]);
 
 	// search while typing
 	useEffect(() => {
