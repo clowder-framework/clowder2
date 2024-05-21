@@ -172,6 +172,7 @@ services:
 
 networks:
   clowder2:
+    name: clowder2
 
 ## By default this config uses default local driver,
 ## For custom volumes replace with volume driver configuration.
