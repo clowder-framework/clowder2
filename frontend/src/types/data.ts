@@ -175,6 +175,7 @@ export interface MetadataState {
 	publicDatasetMetadataList: Metadata[];
 	fileMetadataList: Metadata[];
 	newMetadataDefinition: MetadataDefinitionOut;
+	deletedMetadataDefinition: MetadataDefinitionOut;
 	publicFileMetadataList: Metadata[];
 }
 
