@@ -105,13 +105,20 @@ export function removeDatasetUserRole(datasetId, username) {
 export const RECEIVE_FOLDERS_FILES_IN_DATASET =
 	"RECEIVE_FOLDERS_FILES_IN_DATASET";
 
-export function fetchFoldersFilesInDataset(datasetId, folderId, skip, limit) {
+export function fetchFoldersFilesInDataset(
+	datasetId,
+	folderId,
+	skip,
+	limit,
+	recursive
+) {
 	return (dispatch) => {
 		return V2.DatasetsService.getDatasetFoldersAndFilesApiV2DatasetsDatasetIdFoldersAndFilesGet(
 			datasetId,
 			folderId,
 			skip,
-			limit
+			limit,
+			recursive
 		)
 			.then((json) => {
 				dispatch({

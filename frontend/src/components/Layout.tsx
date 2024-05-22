@@ -41,6 +41,10 @@ import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
 import { Footer } from "./navigation/Footer";
 import BuildIcon from "@mui/icons-material/Build";
 
+import Dialog from "@mui/material/Dialog";
+import FileSystemViewer from "./navigation/FileSystemViewer";
+import Container from "@mui/material/Container";
+
 const drawerWidth = 240;
 
 const Main = styled("main", { shouldForwardProp: (prop) => prop !== "open" })<{
@@ -116,6 +120,8 @@ export default function PersistentDrawerLeft(props) {
 	const isMenuOpen = Boolean(anchorEl);
 	const currUserProfile = useSelector((state: RootState) => state.user.profile);
 	const adminMode = useSelector((state: RootState) => state.user.adminMode);
+
+	const [openDialog, setOpenDialog] = React.useState(false);
 
 	const fetchCurrUserProfile = () => dispatch(fetchUserProfile());
 	const toggleAdminMode = (adminModeOn: boolean) =>
@@ -454,6 +460,11 @@ export default function PersistentDrawerLeft(props) {
 			>
 				<Footer />
 			</Box>
+			<Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
+				<Container>
+					<FileSystemViewer />
+				</Container>
+			</Dialog>
 		</Box>
 	);
 }

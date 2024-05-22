@@ -88,10 +88,17 @@ export const Dataset = (): JSX.Element => {
 		datasetId: string | undefined,
 		folderId: string | null,
 		skip: number | undefined,
-		limit: number | undefined
+		limit: number | undefined,
+		recursive: boolean = false
 	) =>
 		dispatch(
-			fetchFoldersFilesInDatasetAction(datasetId, folderId, skip, limit)
+			fetchFoldersFilesInDatasetAction(
+				datasetId,
+				folderId,
+				skip,
+				limit,
+				recursive
+			)
 		);
 	const listDatasetAbout = (datasetId: string | undefined) =>
 		dispatch(fetchDatasetAbout(datasetId));
