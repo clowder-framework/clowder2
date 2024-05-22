@@ -23,7 +23,7 @@ import { RootState } from "../types/data";
 import { AddBox, Explore } from "@material-ui/icons";
 import HistoryIcon from "@mui/icons-material/History";
 import GroupIcon from "@mui/icons-material/Group";
-import MenuBookIcon from '@mui/icons-material/MenuBook';
+import MenuBookIcon from "@mui/icons-material/MenuBook";
 import Gravatar from "react-gravatar";
 import PersonIcon from "@mui/icons-material/Person";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
@@ -424,8 +424,12 @@ export default function PersistentDrawerLeft(props) {
 				{/*TODO: Need to make link dynamic */}
 				<List>
 					<ListItem key={"jupyter"} disablePadding>
-						<ListItemButton component={RouterLink} to="http://localhost:8765/" target="_blank"
-										rel="noopener noreferrer">
+						<ListItemButton
+							component={RouterLink}
+							to="http://localhost:8765/"
+							target="_blank"
+							rel="noopener noreferrer"
+						>
 							<ListItemIcon>
 								<MenuBookIcon />
 							</ListItemIcon>

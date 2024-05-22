@@ -60,4 +60,4 @@ docker-compose -f docker-compose.yml -f docker-compose.override.yml up -d
 
 4. Access the keycloak admin console at `http://{{IP_ADDRESS}}/keycloak/` and login with the credentials from the `docker-compose.yml` file and finish the steps in [Keycloak](keycloak.md), using the same IP address as the `{hostname}` placeholder.
 
-You shall be able to log in now at `http://{{IP_ADDRESS}}/`. 
+You shall be able to log in now at `http://{{IP_ADDRESS}}/`.
