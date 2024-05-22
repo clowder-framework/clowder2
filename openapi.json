@@ -4722,6 +4722,16 @@
             },
             "name": "limit",
             "in": "query"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Recursive",
+              "type": "boolean",
+              "default": false
+            },
+            "name": "recursive",
+            "in": "query"
           }
         ],
         "responses": {

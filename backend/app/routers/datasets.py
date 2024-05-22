@@ -501,6 +501,7 @@ async def get_dataset_folders_and_files(
     limit: int = 10,
     admin=Depends(get_admin),
     admin_mode: bool = Depends(get_admin_mode),
+    recursive: bool = False,
     allow: bool = Depends(Authorization("viewer")),
 ):
     if (await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
@@ -517,21 +518,22 @@ async def get_dataset_folders_and_files(
                 ),
             ]
 
-        if folder_id is None:
-            # only show folder and file at root level without parent folder
-            query.append(
-                And(
-                    FolderFileViewList.parent_folder == None,  # noqa: E711
-                    FolderFileViewList.folder_id == None,  # noqa: E711
+        if not recursive:
+            if folder_id is None:
+                # only show folder and file at root level without parent folder
+                query.append(
+                    And(
+                        FolderFileViewList.parent_folder == None,  # noqa: E711
+                        FolderFileViewList.folder_id == None,  # noqa: E711
+                    )
                 )
-            )
-        else:
-            query.append(
-                Or(
-                    FolderFileViewList.folder_id == ObjectId(folder_id),
-                    FolderFileViewList.parent_folder == ObjectId(folder_id),
+            else:
+                query.append(
+                    Or(
+                        FolderFileViewList.folder_id == ObjectId(folder_id),
+                        FolderFileViewList.parent_folder == ObjectId(folder_id),
+                    )
                 )
-            )
 
         folders_files_and_count = (
             await FolderFileViewList.find(*query)
