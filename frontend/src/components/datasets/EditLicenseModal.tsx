@@ -14,9 +14,6 @@ import { FormProps } from "@rjsf/core";
 import { ClowderRjsfErrorList } from "../styledComponents/ClowderRjsfErrorList";
 import Form from "@rjsf/material-ui";
 import { useDispatch, useSelector } from "react-redux";
-import { ClowderRjsfTextWidget } from "../styledComponents/ClowderRjsfTextWidget";
-import { ClowderRjsfTextAreaWidget } from "../styledComponents/ClowderRjsfTextAreaWidget";
-import { ClowderRjsfSelectWidget } from "../styledComponents/ClowderRjsfSelectWidget";
 import { RootState } from "../../types/data";
 import { updateDatasetLicense } from "../../actions/dataset"; // Import LicenseOut type
 
@@ -33,10 +30,6 @@ export const EditLicenseModal = (props: EditLicenseModalProps) => {
 		dispatch(updateDatasetLicense(license.id, formData));
 
 	const license = useSelector((state: RootState) => state.dataset.license);
-
-	const onSave = async () => {
-		// Handle save operation here
-	};
 
 	return (
 		<Container>

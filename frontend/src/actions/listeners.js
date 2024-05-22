@@ -231,8 +231,8 @@ export function resetJobUpdates() {
 	};
 }
 
-export const RECEIVE_FEEDS = "RECEIVE_FEEDS"
-export function fetchFeeds(name, skip=0, limit= 20) {
+export const RECEIVE_FEEDS = "RECEIVE_FEEDS";
+export function fetchFeeds(name, skip = 0, limit = 20) {
 	return (dispatch) => {
 		return V2.FeedsService.getFeedsApiV2FeedsGet(name, skip, limit)
 			.then((json) => {
@@ -244,6 +244,57 @@ export function fetchFeeds(name, skip=0, limit= 20) {
 			})
 			.catch((reason) => {
 				dispatch(handleErrors(reason, fetchFeeds(skip, limit)));
+			});
+	};
+}
+
+export const CREATE_FEED = "CREATE_FEED";
+export function createFeed(formData) {
+	return (dispatch) => {
+		return V2.FeedsService.saveFeedApiV2FeedsPost(formData)
+			.then((json) => {
+				dispatch({
+					type: CREATE_FEED,
+					feed: json,
+					receivedAt: Date.now(),
+				});
+			})
+			.catch((reason) => {
+				dispatch(handleErrors(reason, createFeed(formData)));
+			});
+	};
+}
+
+export const EDIT_FEED = "EDIT_FEED";
+export function updateFeed(id, formData) {
+	return (dispatch) => {
+		return V2.FeedsService.editFeedApiV2FeedsFeedIdPost(id, formData)
+			.then((json) => {
+				dispatch({
+					type: EDIT_FEED,
+					feed: json,
+					receivedAt: Date.now(),
+				});
+			})
+			.catch((reason) => {
+				dispatch(handleErrors(reason, updateFeed(id, formData)));
+			});
+	};
+}
+
+export const DELETE_FEED = "DELETE_FEED";
+export function deleteFeed(id) {
+	return (dispatch) => {
+		return V2.FeedsService.deleteFeedApiV2FeedsFeedIdDelete(id)
+			.then((json) => {
+				dispatch({
+					type: DELETE_FEED,
+					feed: json,
+					receivedAt: Date.now(),
+				});
+			})
+			.catch((reason) => {
+				dispatch(handleErrors(reason, deleteFeed(id)));
 			});
 	};
 }

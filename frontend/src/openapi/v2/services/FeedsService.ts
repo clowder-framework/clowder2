@@ -79,15 +79,42 @@ export class FeedsService {
     }
 
     /**
+     * Edit Feed
+     * Update the information about an existing Feed..
+     *
+     * Arguments:
+     * feed_id -- UUID of the feed to be udpated
+     * feed_in -- JSON object including updated information
+     * @param feedId
+     * @param requestBody
+     * @returns FeedOut Successful Response
+     * @throws ApiError
+     */
+    public static editFeedApiV2FeedsFeedIdPost(
+        feedId: string,
+        requestBody: FeedIn,
+    ): CancelablePromise<FeedOut> {
+        return __request({
+            method: 'POST',
+            path: `/api/v2/feeds/${feedId}`,
+            body: requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+
+    /**
      * Delete Feed
      * Delete an existing saved search Feed.
      * @param feedId
-     * @returns any Successful Response
+     * @returns FeedOut Successful Response
      * @throws ApiError
      */
     public static deleteFeedApiV2FeedsFeedIdDelete(
         feedId: string,
-    ): CancelablePromise<any> {
+    ): CancelablePromise<FeedOut> {
         return __request({
             method: 'DELETE',
             path: `/api/v2/feeds/${feedId}`,

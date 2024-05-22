@@ -18,7 +18,6 @@ class JobFeed(BaseModel):
     listeners: List[FeedListener] = []
 
 
-
 class FeedIn(JobFeed):
     pass
 

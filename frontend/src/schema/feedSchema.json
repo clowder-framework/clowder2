@@ -1,0 +1,83 @@
+{
+	"schema": {
+		"type": "object",
+		"required": ["name", "description", "search"],
+		"properties": {
+			"name": {
+				"type": "string",
+				"title": "Name"
+			},
+			"description": {
+				"type": "string",
+				"title": "Description"
+			},
+			"search": {
+				"type": "object",
+				"title": "Search criteria",
+				"properties": {
+					"index_name": {
+						"type": "string",
+						"title": "Index name you want to search on"
+					},
+					"criteria": {
+						"type": "array",
+						"items": {
+							"type": "object",
+							"properties": {
+								"field": {
+									"type": "string",
+									"title": "Field",
+									"enum": [
+										"content_type",
+										"content_type_main",
+										"size",
+										"creator"
+									]
+								},
+								"operator": {
+									"type": "string",
+									"title": "Operator",
+									"enum": ["==", "<", ">", "!="]
+								},
+								"value": {
+									"type": "string",
+									"title": "Value"
+								}
+							}
+						}
+					},
+					"mode": {
+						"type": "string",
+						"title": "Mode of search criterion - Or/And"
+					}
+				}
+			},
+			"listeners": {
+				"type": "array",
+				"title": "Extractors",
+				"items": {
+					"type": "object",
+					"properties": {
+						"listener_id": {
+							"type": "string",
+							"title": "Extractor Id"
+						},
+						"automatic": {
+							"type": "boolean",
+							"title": "Turn on for automatic extraction"
+						}
+					}
+				}
+			}
+		}
+	},
+	"uiSchema": {
+		"search": {
+			"criteria": {
+				"operator": {
+					"ui:widget": "select"
+				}
+			}
+		}
+	}
+}

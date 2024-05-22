@@ -1,15 +1,11 @@
-import {
-	ExtractedMetadata,
-	FilePreview,
-	Folder,
-	MetadataJsonld,
-} from "./data";
+import { ExtractedMetadata, FilePreview, Folder, MetadataJsonld } from "./data";
 import {
 	AuthorizationBase,
 	DatasetOut as Dataset,
 	DatasetRoles,
 	EventListenerJobOut,
 	EventListenerJobUpdateOut,
+	FeedOut,
 	FileOut,
 	FileOut as FileSummary,
 	FileVersion,
@@ -629,9 +625,24 @@ interface FOLDER_UPDATED {
 	folder: FolderOut;
 }
 
+interface CREATE_FEED {
+	type: "CREATE_FEED";
+	feed: FeedOut;
+}
+
+interface EDIT_FEED {
+	type: "EDIT_FEED";
+	feed: FeedOut;
+}
+
 interface RECEIVE_FEEDS {
 	type: "RECEIVE_FEEDS";
 	feeds: Paged;
+}
+
+interface DELETE_FEED {
+	type: "DELETE_FEED";
+	feed: FeedOut;
 }
 
 export type DataAction =
@@ -752,4 +763,7 @@ export type DataAction =
 	| FOLDER_UPDATED
 	| RECEIVE_DATASET_LICENSE
 	| UPDATE_DATASET_LICENSE
-	| RECEIVE_FEEDS;
+	| CREATE_FEED
+	| EDIT_FEED
+	| RECEIVE_FEEDS
+	| DELETE_FEED;

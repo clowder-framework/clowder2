@@ -26,7 +26,7 @@ const rootReducer = combineReducers({
 	group: group,
 	visualization: visualization,
 	publicVisualization: publicVisualization,
-	feed: feeds
+	feed: feeds,
 });
 
 export default rootReducer;

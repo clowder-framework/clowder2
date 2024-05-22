@@ -4,6 +4,7 @@ from app.keycloak_auth import get_current_user, get_current_username
 from app.models.feeds import FeedDB, FeedIn, FeedOut
 from app.models.files import FileOut
 from app.models.listeners import EventListenerDB, FeedListener
+from app.models.pages import Paged, _construct_page_metadata, _get_page_query
 from app.models.users import UserOut
 from app.rabbitmq.listeners import submit_file_job
 from app.search.connect import check_search_result
@@ -11,12 +12,6 @@ from beanie import PydanticObjectId
 from beanie.operators import Or, RegEx
 from fastapi import APIRouter, Depends, HTTPException
 from pika.adapters.blocking_connection import BlockingChannel
-
-from app.models.pages import Paged
-
-from app.models.pages import _construct_page_metadata
-
-from app.models.pages import _get_page_query
 
 router = APIRouter()
 
@@ -76,12 +71,50 @@ async def save_feed(
     return feed.dict()
 
 
+@router.post("/{feed_id}", response_model=FeedOut)
+async def edit_feed(
+    feed_id: str,
+    feed_in: FeedIn,
+    user=Depends(get_current_username),
+):
+    """Update the information about an existing Feed..
+
+    Arguments:
+        feed_id -- UUID of the feed to be udpated
+        feed_in -- JSON object including updated information
+    """
+    feed = await FeedDB.get(PydanticObjectId(feed_id))
+    if feed:
+        # TODO: Refactor this with permissions checks etc.
+        feed_update = feed_in.dict()
+        if (
+            len(feed_update["name"]) == 0
+            or len(feed_update["search"]) == 0
+            or len(feed_update["listeners"]) == 0
+        ):
+            raise HTTPException(
+                status_code=400,
+                detail="Feed name/search/listeners can't be null or empty",
+            )
+            return
+        feed.description = feed_update["description"]
+        feed.name = feed_update["name"]
+        feed.search = feed_update["search"]
+        feed.listeners = feed_update["listeners"]
+        try:
+            await feed.save()
+            return feed.dict()
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=e.args[0])
+    raise HTTPException(status_code=404, detail=f"listener {feed_id} not found")
+
+
 @router.get("", response_model=Paged)
 async def get_feeds(
     searchTerm: Optional[str] = None,
     user=Depends(get_current_user),
     skip: int = 0,
-    limit: int = 10
+    limit: int = 10,
 ):
     """Fetch all existing Feeds."""
     criteria_list = []
@@ -89,28 +122,28 @@ async def get_feeds(
     #     criteria_list.append(FeedDB.creator == user)
     if searchTerm is not None:
         criteria_list.append(
-        Or(
-            RegEx(field=FeedDB.name, pattern=searchTerm),
-            RegEx(field=FeedDB.description, pattern=searchTerm),
-        ))
+            Or(
+                RegEx(field=FeedDB.name, pattern=searchTerm),
+                RegEx(field=FeedDB.description, pattern=searchTerm),
+            )
+        )
 
     feeds_and_count = (
-            await FeedDB.find(
-                *criteria_list,
-            )
-            .aggregate(
-                [_get_page_query(skip, limit, sort_field="created", ascending=False)],
-            )
-            .to_list()
+        await FeedDB.find(
+            *criteria_list,
         )
-    print(feeds_and_count)
+        .aggregate(
+            [_get_page_query(skip, limit, sort_field="created", ascending=False)],
+        )
+        .to_list()
+    )
     page_metadata = _construct_page_metadata(feeds_and_count, skip, limit)
     page = Paged(
-            metadata=page_metadata,
-            data=[
-                FeedOut(id=item.pop("_id"), **item) for item in feeds_and_count[0]["data"]
-            ],
-        )
+        metadata=page_metadata,
+        data=[
+            FeedOut(id=item.pop("_id"), **item) for item in feeds_and_count[0]["data"]
+        ],
+    )
     return page.dict()
 
 
@@ -126,7 +159,7 @@ async def get_feed(
         raise HTTPException(status_code=404, detail=f"Feed {feed_id} not found")
 
 
-@router.delete("/{feed_id}")
+@router.delete("/{feed_id}", response_model=FeedOut)
 async def delete_feed(
     feed_id: str,
     user=Depends(get_current_user),
@@ -134,7 +167,7 @@ async def delete_feed(
     """Delete an existing saved search Feed."""
     if (feed := await FeedDB.get(PydanticObjectId(feed_id))) is not None:
         await feed.delete()
-        return {"deleted": feed_id}
+        return feed.dict()
     raise HTTPException(status_code=404, detail=f"Feed {feed_id} not found")
 
 
