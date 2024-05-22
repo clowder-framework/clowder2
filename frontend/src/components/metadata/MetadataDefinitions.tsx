@@ -7,6 +7,7 @@ import {
 	DialogTitle,
 	Grid,
 	IconButton,
+	Link as MuiLink,
 	Pagination,
 	Snackbar,
 } from "@mui/material";
@@ -205,12 +206,13 @@ export function MetadataDefinitions() {
 												}}
 											>
 												<TableCell scope="row" key={`${mdd.id}-name`}>
-													<Button
+													<MuiLink
 														component={Link}
 														to={`/metadata-definitions/${mdd.id}`}
+														sx={{ textDecoration: "none" }}
 													>
 														{mdd.name}
-													</Button>
+													</MuiLink>
 												</TableCell>
 												<TableCell
 													scope="row"

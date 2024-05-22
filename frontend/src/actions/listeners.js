@@ -11,7 +11,8 @@ export function fetchListeners(
 	label = null,
 	aliveOnly = false,
 	process = null,
-	dataset_id = null
+	dataset_id = null,
+	all = false
 ) {
 	return (dispatch) => {
 		// TODO: Parameters for dates? paging?
@@ -24,6 +25,7 @@ export function fetchListeners(
 			aliveOnly,
 			process,
 			dataset_id
+			all
 		)
 			.then((json) => {
 				dispatch({
@@ -48,6 +50,45 @@ export function fetchListeners(
 						)
 					)
 				);
+			});
+	};
+}
+
+export const TOGGLE_ACTIVE_FLAG_LISTENER = "TOGGLE_ACTIVE_FLAG_LISTENER";
+export function enableListener(id) {
+	return (dispatch) => {
+		return V2.ListenersService.enableListenerApiV2ListenersListenerIdEnablePut(
+			id
+		)
+			.then((json) => {
+				// We could have called fetchListeners but it would be an overhead since we are just toggling the active flag for one listener.
+				// Hence we create a separate action to update the particular listener in state
+				dispatch({
+					type: TOGGLE_ACTIVE_FLAG_LISTENER,
+					listener: json,
+				});
+			})
+			.catch((reason) => {
+				dispatch(handleErrors(reason, enableListener(id)));
+			});
+	};
+}
+
+export function disableListener(id) {
+	return (dispatch) => {
+		return V2.ListenersService.disableListenerApiV2ListenersListenerIdDisablePut(
+			id
+		)
+			.then((json) => {
+				// We could have called fetchListeners but it would be an overhead since we are just toggling the active flag for one listener.
+				// Hence we create a separate action to update the particular listener in state
+				dispatch({
+					type: TOGGLE_ACTIVE_FLAG_LISTENER,
+					listener: json,
+				});
+			})
+			.catch((reason) => {
+				dispatch(handleErrors(reason, disableListener(id)));
 			});
 	};
 }

@@ -118,9 +118,9 @@ async def search_users(
     users_and_count = (
         await UserDB.find(
             Or(
-                RegEx(field=UserDB.email, pattern=text),
-                RegEx(field=UserDB.first_name, pattern=text),
-                RegEx(field=UserDB.last_name, pattern=text),
+                RegEx(field=UserDB.email, pattern=text, options="i"),
+                RegEx(field=UserDB.first_name, pattern=text, options="i"),
+                RegEx(field=UserDB.last_name, pattern=text, options="i"),
             )
         )
         .aggregate(
@@ -147,7 +147,7 @@ async def search_users_prefix(
     query_regx = f"^{prefix}.*"
     users_and_count = (
         await UserDB.find(
-            Or(RegEx(field=UserDB.email, pattern=query_regx)),
+            Or(RegEx(field=UserDB.email, pattern=query_regx, options="i")),
         )
         .aggregate(
             [_get_page_query(skip, limit, sort_field="email", ascending=True)],

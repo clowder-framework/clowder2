@@ -1,10 +1,9 @@
 from typing import List, Optional
-
 from beanie import PydanticObjectId
 from beanie.operators import Or
 from fastapi import APIRouter, Depends, HTTPException
 from pika.adapters.blocking_connection import BlockingChannel
-
+from app.deps.authorization_deps import ListenerAuthorization
 from app.keycloak_auth import get_current_user, get_current_username
 from app.models.feeds import FeedDB, FeedIn, FeedOut
 from app.models.files import FileOut
@@ -26,7 +25,7 @@ async def disassociate_listener_db(feed_id: str, listener_id: str):
     if (feed := await FeedDB.get(PydanticObjectId(feed_id))) is not None:
         new_listeners = []
         for feed_listener in feed.listeners:
-            if feed_listener.listener_id != listener_id:
+            if feed_listener.listener_id != PydanticObjectId(listener_id):
                 new_listeners.append(feed_listener)
         feed.listeners = new_listeners
         await feed.save()
@@ -142,9 +141,7 @@ async def delete_feed(
 
 @router.post("/{feed_id}/listeners", response_model=FeedOut)
 async def associate_listener(
-    feed_id: str,
-    listener: FeedListener,
-    user_id=Depends(get_current_username),
+    feed_id: str, listener: FeedListener, allow: bool = Depends(ListenerAuthorization())
 ):
     """Associate an existing Event Listener with a Feed, e.g. so it will be triggered on new Feed results.
 
@@ -154,40 +151,20 @@ async def associate_listener(
     """
     if (feed := await FeedDB.get(PydanticObjectId(feed_id))) is not None:
         if (
-            listener_obj := await EventListenerDB.get(
-                PydanticObjectId(listener.listener_id)
-            )
+            await EventListenerDB.get(PydanticObjectId(listener.listener_id))
         ) is not None:
-            if listener_obj.access is not None:
-                group_q = await GroupDB.find(
-                    Or(GroupDB.creator == user_id, GroupDB.users.email == user_id),
-                ).to_list()
-                user_groups = [g.id for g in group_q]
-
-                valid_modificaiton = (
-                    (listener_obj.access.owner == user_id)
-                    or (user_id in listener_obj.access.users)
-                    or (not set(user_groups).isdisjoint(listener_obj.access.groups))
-                )
-                if not valid_modificaiton:
-                    raise HTTPException(
-                        status_code=403,
-                        detail=f"Insufficient permissions for this listener",
-                    )
             feed.listeners.append(listener)
             await feed.save()
             return feed.dict()
         raise HTTPException(
-            status_code=404, detail=f"listener {listener.listener_id} not found"
+            status_code=404, detail=f"Listener {listener.listener_id} not found"
         )
     raise HTTPException(status_code=404, detail=f"feed {feed_id} not found")
 
 
-@router.delete("/{feed_id}/listeners/{listener_id}", response_model=FeedOut)
+@router.delete("/{feed_id}/listeners/{listener_id}")
 async def disassociate_listener(
-    feed_id: str,
-    listener_id: str,
-    user_id=Depends(get_current_username),
+    feed_id: str, listener_id: str, allow: bool = Depends(ListenerAuthorization())
 ):
     """Disassociate an Event Listener from a Feed.
 
@@ -196,25 +173,8 @@ async def disassociate_listener(
         listener_id: UUID of Event Listener that should be disassociated
     """
     if (await FeedDB.get(PydanticObjectId(feed_id))) is not None:
-        if (
-            listener_obj := await EventListenerDB.get(PydanticObjectId(listener_id))
-        ) is not None:
-            if listener_obj.access is not None:
-                group_q = await GroupDB.find(
-                    Or(GroupDB.creator == user_id, GroupDB.users.email == user_id),
-                ).to_list()
-                user_groups = [g.id for g in group_q]
-
-                valid_modificaiton = (
-                    (listener_obj.access.owner == user_id)
-                    or (user_id in listener_obj.access.users)
-                    or (not set(user_groups).isdisjoint(listener_obj.access.groups))
-                )
-                if not valid_modificaiton:
-                    raise HTTPException(
-                        status_code=403,
-                        detail=f"Insufficient permissions for this listener",
-                    )
-        await disassociate_listener_db(feed_id, listener_id)
-        return {"disassociated": listener_id}
-    raise HTTPException(status_code=404, detail=f"feed {feed_id} not found")
+        if (await EventListenerDB.get(PydanticObjectId(listener_id))) is not None:
+            await disassociate_listener_db(feed_id, listener_id)
+            return {"disassociated": listener_id}
+        raise HTTPException(status_code=404, detail=f"Listener {listener_id} not found")
+    raise HTTPException(status_code=404, detail=f"Feed {feed_id} not found")

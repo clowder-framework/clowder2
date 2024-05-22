@@ -10,6 +10,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from packaging import version
 
 from app.config import settings
+from app.deps.authorization_deps import ListenerAuthorization
 from app.keycloak_auth import get_current_user, get_current_username, get_user
 from app.models.config import ConfigEntryDB
 from app.models.feeds import FeedDB, FeedListener
@@ -201,8 +202,8 @@ async def search_listeners(
     user_id=Depends(get_current_username),
     process: Optional[str] = None,
     dataset_id: Optional[str] = None,
-    admin_mode: bool = Depends(get_admin_mode),
     admin=Depends(get_admin),
+    admin_mode=Depends(get_admin_mode),
 ):
     """Search all Event Listeners in the db based on text.
 
@@ -240,6 +241,8 @@ async def search_listeners(
                     }
                 }
             )
+    if not admin or not admin_mode:
+        aggregation_pipeline.append({"$match": {"active": True}})
     # Add pagination
     aggregation_pipeline.append(
         _get_page_query(skip, limit, sort_field="name", ascending=True)
@@ -247,8 +250,8 @@ async def search_listeners(
 
     criteria_list = [
         Or(
-            RegEx(field=EventListenerDB.name, pattern=text),
-            RegEx(field=EventListenerDB.description, pattern=text),
+            RegEx(field=EventListenerDB.name, pattern=text, options="i"),
+            RegEx(field=EventListenerDB.description, pattern=text, options="i"),
         )
     ]
     if not admin or not admin_mode:
@@ -306,7 +309,11 @@ async def list_default_labels(user=Depends(get_current_username)):
 
 
 @router.get("/{listener_id}", response_model=EventListenerOut)
-async def get_listener(listener_id: str, user=Depends(get_current_username)):
+async def get_listener(
+    listener_id: str,
+    user=Depends(get_current_username),
+    allow: bool = Depends(ListenerAuthorization()),
+):
     """Return JSON information about an Event Listener if it exists."""
     if (
         listener := await EventListenerDB.get(PydanticObjectId(listener_id))
@@ -320,6 +327,7 @@ async def check_listener_livelihood(
     listener_id: str,
     heartbeat_interval: Optional[int] = settings.listener_heartbeat_interval,
     user=Depends(get_current_username),
+    allow: bool = Depends(ListenerAuthorization()),
 ):
     """Return JSON information about an Event Listener if it exists."""
     if (
@@ -340,8 +348,9 @@ async def get_listeners(
     alive_only: Optional[bool] = False,
     process: Optional[str] = None,
     dataset_id: Optional[str] = None,
-    admin_mode: bool = Depends(get_admin_mode),
+    all: Optional[bool] = False,
     admin=Depends(get_admin),
+    admin_mode=Depends(get_admin_mode),
 ):
     """Get a list of all Event Listeners in the db.
 
@@ -354,6 +363,7 @@ async def get_listeners(
         alive_only -- filter by alive status
         process -- filter by file or dataset type (if specified)
         dataset_id -- restrict to listeners that run on the given dataset or a file within (if not otherwise permitted)
+        all -- boolean stating if we want to show all listeners irrespective of admin and admin_mode
     """
     # First compute alive flag for all listeners
     aggregation_pipeline = [
@@ -390,6 +400,9 @@ async def get_listeners(
                     }
                 }
             )
+    # Non admin users can access only active listeners unless all is turned on for Extractor page
+    if not all and (not admin or not admin_mode):
+        aggregation_pipeline.append({"$match": {"active": True}})
     # Add pagination
     aggregation_pipeline.append(
         _get_page_query(skip, limit, sort_field="name", ascending=True)
@@ -445,9 +458,7 @@ async def get_listeners(
 async def edit_listener(
     listener_id: str,
     listener_in: EventListenerIn,
-    user_id=Depends(get_user),
-    admin_mode: bool = Depends(get_admin_mode),
-    admin=Depends(get_admin),
+    allow: bool = Depends(ListenerAuthorization()),
 ):
     """Update the information about an existing Event Listener..
 
@@ -455,17 +466,9 @@ async def edit_listener(
         listener_id -- UUID of the listener to be udpated
         listener_in -- JSON object including updated information
     """
-    criteria_list = [EventListenerDB.id == PydanticObjectId(listener_id)]
-    if not admin or not admin_mode:
-        # Must either be owner, or a listener with no restrictions
-        criteria_list.append(
-            Or(
-                EventListenerDB.access == None,
-                EventListenerDB.access.owner == user_id,
-            ),
-        )
-    listener = await EventListenerDB.find_one(*criteria_list)
-    if listener:
+    if (
+        listener := await EventListenerDB.get(PydanticObjectId(listener_id))
+    ) is not None:
         listener_update = dict(listener_in) if listener_in is not None else {}
         listener_update["modified"] = datetime.datetime.utcnow()
         try:
@@ -477,25 +480,65 @@ async def edit_listener(
     raise HTTPException(status_code=404, detail=f"listener {listener_id} not found")
 
 
+@router.put("/{listener_id}/enable", response_model=EventListenerOut)
+async def enable_listener(
+    listener_id: str,
+    allow: bool = Depends(ListenerAuthorization()),
+):
+    """Enable an Event Listener. Only admins can enable listeners.
+
+    Arguments:
+        listener_id -- UUID of the listener to be enabled
+    """
+    return await _set_active_flag(listener_id, True)
+
+
+@router.put("/{listener_id}/disable", response_model=EventListenerOut)
+async def disable_listener(
+    listener_id: str,
+    user_id=Depends(get_user),
+    allow: bool = Depends(ListenerAuthorization()),
+):
+    """Disable an Event Listener. Only admins can enable listeners.
+
+    Arguments:
+        listener_id -- UUID of the listener to be enabled
+    """
+    return await _set_active_flag(listener_id, False)
+
+
+async def _set_active_flag(
+    listener_id: str,
+    active: bool,
+    allow: bool = Depends(ListenerAuthorization()),
+):
+    """Set the active flag of an Event Listener. Only admins can enable/disable listeners.
+
+    Arguments:
+        listener_id -- UUID of the listener to be enabled/disabled
+    """
+    listener = await EventListenerDB.find_one(
+        EventListenerDB.id == ObjectId(listener_id)
+    )
+    if listener:
+        try:
+            listener.active = active
+            await listener.save()
+            return listener.dict()
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=e.args[0])
+    raise HTTPException(status_code=404, detail=f"listener {listener_id} not found")
+
+
 @router.delete("/{listener_id}")
 async def delete_listener(
     listener_id: str,
-    user_id=Depends(get_current_username),
-    admin_mode: bool = Depends(get_admin_mode),
-    admin=Depends(get_admin),
+    allow: bool = Depends(ListenerAuthorization()),
 ):
     """Remove an Event Listener from the database. Will not clear event history for the listener."""
-    criteria_list = [EventListenerDB.id == PydanticObjectId(listener_id)]
-    if not admin or not admin_mode:
-        # Must either be owner, or a listener with no restrictions
-        criteria_list.append(
-            Or(
-                EventListenerDB.access == None,
-                EventListenerDB.access.owner == user_id,
-            ),
-        )
-    listener = await EventListenerDB.find_one(*criteria_list)
-    if listener:
+    if (
+        listener := await EventListenerDB.get(PydanticObjectId(listener_id))
+    ) is not None:
         # unsubscribe the listener from any feeds
         async for feed in FeedDB.find(
             FeedDB.listeners.listener_id == PydanticObjectId(listener_id)

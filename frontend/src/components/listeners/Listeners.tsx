@@ -82,6 +82,7 @@ export function Listeners(props: ListenerProps) {
 		(state: RootState) => state.listener.categories
 	);
 	const labels = useSelector((state: RootState) => state.listener.labels);
+	const adminMode = useSelector((state: RootState) => state.user.adminMode);
 
 	const [currPageNum, setCurrPageNum] = useState<number>(1);
 	const [limit] = useState<number>(config.defaultExtractors);
@@ -99,7 +100,7 @@ export function Listeners(props: ListenerProps) {
 		listListeners(0, limit, 0, null, null, aliveOnly, process);
 		listAvailableCategories();
 		listAvailableLabels();
-	}, []);
+	}, [adminMode]);
 
 	// search
 	useEffect(() => {
@@ -118,7 +119,7 @@ export function Listeners(props: ListenerProps) {
 				aliveOnly,
 				process
 			);
-	}, [searchText]);
+	}, [searchText, adminMode]);
 
 	useEffect(() => {
 		// reset page and reset search text with each new search term
@@ -133,7 +134,7 @@ export function Listeners(props: ListenerProps) {
 			aliveOnly,
 			process
 		);
-	}, [aliveOnly]);
+	}, [aliveOnly, adminMode]);
 
 	// any of the change triggers timer to fetch the extractor status
 	useEffect(() => {
@@ -164,6 +165,7 @@ export function Listeners(props: ListenerProps) {
 		selectedCategory,
 		selectedLabel,
 		aliveOnly,
+		adminMode,
 	]);
 
 	const handleListenerSearch = () => {
@@ -309,6 +311,7 @@ export function Listeners(props: ListenerProps) {
 												setInfoOnly={setInfoOnly}
 												setOpenSubmitExtraction={setOpenSubmitExtraction}
 												setSelectedExtractor={setSelectedExtractor}
+												showSubmit={true}
 											/>
 											<Divider />
 										</>

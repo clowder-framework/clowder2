@@ -20,5 +20,6 @@ export type EventListenerOut = {
     modified?: string;
     lastAlive?: string;
     alive?: boolean;
+    active?: boolean;
     properties?: ExtractorInfo;
 }

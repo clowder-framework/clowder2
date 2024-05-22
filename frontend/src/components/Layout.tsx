@@ -39,6 +39,7 @@ import { AdminPanelSettings } from "@mui/icons-material";
 import ManageAccountsIcon from "@mui/icons-material/ManageAccounts";
 import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
 import { Footer } from "./navigation/Footer";
+import BuildIcon from "@mui/icons-material/Build";
 
 const drawerWidth = 240;
 
@@ -193,9 +194,9 @@ export default function PersistentDrawerLeft(props) {
 					<Box sx={{ marginLeft: "auto" }}>
 						{loggedOut ? (
 							<>
-								{/*<Link href="/auth/register" sx={link}>*/}
-								{/*	Register*/}
-								{/*</Link>*/}
+								<Link href="/auth/register" sx={link}>
+									Register
+								</Link>
 								<Link href="/auth/login" sx={link}>
 									Login
 								</Link>
@@ -416,6 +417,17 @@ export default function PersistentDrawerLeft(props) {
 								<HistoryIcon />
 							</ListItemIcon>
 							<ListItemText primary={"Extraction History"} />
+						</ListItemButton>
+					</ListItem>
+				</List>
+				<Divider />
+				<List>
+					<ListItem key={"listeners"} disablePadding>
+						<ListItemButton component={RouterLink} to="/listeners">
+							<ListItemIcon>
+								<BuildIcon />
+							</ListItemIcon>
+							<ListItemText primary={"Extractors"} />
 						</ListItemButton>
 					</ListItem>
 				</List>
