@@ -4,6 +4,8 @@
 # Configuration file for JupyterHub
 import os
 
+from customauthenticator.custom import CustomTokenAuthenticator
+
 c = get_config()  # noqa: F821
 
 # We rely on environment variables to configure JupyterHub so that we
@@ -53,20 +55,24 @@ c.JupyterHub.db_url = "sqlite:////data/jupyterhub.sqlite"
 # c.NativeAuthenticator.open_signup = True
 
 # Authenticate with Custom Token Authenticator
-from customauthenticator.custom import CustomTokenAuthenticator
-c.Spawner.cmd = ['start.sh', 'jupyterhub-singleuser', '--allow-root']
-c.KubeSpawner.args = ['--allow-root']
+c.Spawner.cmd = ["start.sh", "jupyterhub-singleuser", "--allow-root"]
+c.KubeSpawner.args = ["--allow-root"]
 c.JupyterHub.authenticator_class = CustomTokenAuthenticator
 # TODO:Change this keycloak_url as required
-c.CustomTokenAuthenticator.keycloak_url = "http://%s/realms/%s/" % (os.getenv('KEYCLOAK_HOSTNAME'), os.getenv('KEYCLOAK_REALM'))
-c.CustomTokenAuthenticator.auth_cookie_header= "Authorization"
-c.CustomTokenAuthenticator.auth_username_key= "preferred_username"
+c.CustomTokenAuthenticator.keycloak_url = "http://%s/realms/%s/" % (
+    os.getenv("KEYCLOAK_HOSTNAME"),
+    os.getenv("KEYCLOAK_REALM"),
+)
+c.CustomTokenAuthenticator.auth_cookie_header = "Authorization"
+c.CustomTokenAuthenticator.auth_username_key = "preferred_username"
 c.CustomTokenAuthenticator.auth_uid_number_key = "uid_number"
 c.CustomTokenAuthenticator.enable_auth_state = True
 c.CustomTokenAuthenticator.auto_login = True
-c.CustomTokenAuthenticator.landing_page_login_url = "https://" + os.getenv('KEYCLOAK_HOSTNAME')
+c.CustomTokenAuthenticator.landing_page_login_url = "https://" + os.getenv(
+    "KEYCLOAK_HOSTNAME"
+)
 
-c.JupyterHub.cookie_secret = os.getenv('JUPYTERHUB_CRYPT_KEY')
+c.JupyterHub.cookie_secret = os.getenv("JUPYTERHUB_CRYPT_KEY")
 
 # Allowed admins
 admin = os.environ.get("JUPYTERHUB_ADMIN")
