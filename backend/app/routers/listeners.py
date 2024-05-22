@@ -518,7 +518,7 @@ async def _set_active_flag(
         listener_id -- UUID of the listener to be enabled/disabled
     """
     listener = await EventListenerDB.find_one(
-        EventListenerDB.id == ObjectId(listener_id)
+        EventListenerDB.id == PydanticObjectId(listener_id)
     )
     if listener:
         try:

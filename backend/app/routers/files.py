@@ -48,7 +48,7 @@ async def _resubmit_file_extractors(
     """
     resubmitted_jobs = []
     async for job in EventListenerJobDB.find(
-        EventListenerJobDB.resource_ref.resource_id == ObjectId(file.id),
+        EventListenerJobDB.resource_ref.resource_id == PydanticObjectId(file.id),
         EventListenerJobDB.resource_ref.version == file.version_num - 1,
     ):
         resubmitted_job = {"listener_id": job.listener_id, "parameters": job.parameters}
@@ -179,8 +179,12 @@ async def remove_file_entry(
     delete_document_by_id(es, settings.elasticsearch_index, str(file_id))
     if (file := await FileDB.get(PydanticObjectId(file_id))) is not None:
         await file.delete()
-    await MetadataDB.find(MetadataDB.resource.resource_id == ObjectId(file_id)).delete()
-    await FileVersionDB.find(FileVersionDB.file_id == ObjectId(file_id)).delete()
+    await MetadataDB.find(
+        MetadataDB.resource.resource_id == PydanticObjectId(file_id)
+    ).delete()
+    await FileVersionDB.find(
+        FileVersionDB.file_id == PydanticObjectId(file_id)
+    ).delete()
 
 
 async def remove_local_file_entry(file_id: Union[str, ObjectId], es: Elasticsearch):
@@ -192,7 +196,9 @@ async def remove_local_file_entry(file_id: Union[str, ObjectId], es: Elasticsear
         # TODO: delete from disk - should this be allowed if Clowder didn't originally write the file?
         # os.path.remove(file.storage_path)
         await file.delete()
-    await MetadataDB.find(MetadataDB.resource.resource_id == ObjectId(file_id)).delete()
+    await MetadataDB.find(
+        MetadataDB.resource.resource_id == PydanticObjectId(file_id)
+    ).delete()
 
 
 @router.put("/{file_id}", response_model=FileOut)
@@ -264,7 +270,7 @@ async def update_file(
 
         # updating metadata in elasticsearch
         metadata = await MetadataDB.find_one(
-            MetadataDB.resource.resource_id == ObjectId(updated_file.id)
+            MetadataDB.resource.resource_id == PydanticObjectId(updated_file.id)
         )
         if metadata:
             doc = {
@@ -299,7 +305,7 @@ async def download_file(
             if version is not None:
                 # Version is specified, so get the minio ID from versions table if possible
                 file_vers = await FileVersionDB.find_one(
-                    FileVersionDB.file_id == ObjectId(file_id),
+                    FileVersionDB.file_id == PydanticObjectId(file_id),
                     FileVersionDB.version_num == version,
                 )
                 if file_vers is not None:
@@ -462,7 +468,7 @@ async def get_file_versions(
         mongo_versions = []
         if file.storage_type == StorageType.MINIO:
             async for ver in (
-                FileVersionDB.find(FileVersionDB.file_id == ObjectId(file_id))
+                FileVersionDB.find(FileVersionDB.file_id == PydanticObjectId(file_id))
                 .sort(-FileVersionDB.created)
                 .skip(skip)
                 .limit(limit)

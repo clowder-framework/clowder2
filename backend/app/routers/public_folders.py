@@ -17,7 +17,7 @@ async def download_folder(
         # TODO switch to $graphLookup
         while (
             current_folder := await FolderDB.find_one(
-                FolderDB.id == ObjectId(current_folder_id)
+                FolderDB.id == PydanticObjectId(current_folder_id)
             )
         ) is not None:
             folder_info = {

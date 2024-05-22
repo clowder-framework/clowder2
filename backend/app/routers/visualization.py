@@ -201,7 +201,9 @@ async def get_resource_visconfig(
     resource_id: PydanticObjectId,
     user=Depends(get_current_user),
 ):
-    query = [VisualizationConfigDB.resource.resource_id == ObjectId(resource_id)]
+    query = [
+        VisualizationConfigDB.resource.resource_id == PydanticObjectId(resource_id)
+    ]
     visconfigs = []
     async for vzconfig in VisualizationConfigDB.find(*query):
         config_visdata = []
