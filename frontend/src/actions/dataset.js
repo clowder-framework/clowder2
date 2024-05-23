@@ -266,7 +266,9 @@ export const GET_FREEZE_DATASETS = "GET_FREEZE_DATASETS";
 export function getFreezeDatasets(datasetId, skip = 0, limit = 21) {
 	return (dispatch) => {
 		return V2.DatasetsService.getFreezeDatasetsApiV2DatasetsDatasetIdFreezeGet(
-			datasetId
+			datasetId,
+			skip,
+			limit
 		)
 			.then((json) => {
 				dispatch({

@@ -131,6 +131,14 @@ export const PublicDataset = (): JSX.Element => {
 	useEffect(() => {
 		if (dataset && dataset.license_id !== undefined)
 			fetchStandardLicenseUrlData(dataset.license_id);
+		setSnackBarOpen(true);
+		setSnackBarMessage(
+			`Viewing dataset version ${
+				dataset.id === dataset.origin_id
+					? "current unreleased"
+					: dataset.frozen_version_num
+			}.`
+		);
 	}, [dataset]);
 
 	// for breadcrumb
@@ -308,11 +316,7 @@ export const PublicDataset = (): JSX.Element => {
 					</TabPanel>
 				</Grid>
 				<Grid item xs={12} sm={12} md={2} lg={2} xl={2}>
-					<PublicDatasetVersions
-						currDataset={dataset}
-						setSnackBarMessage={setSnackBarMessage}
-						setSnackBarOpen={setSnackBarOpen}
-					/>
+					<PublicDatasetVersions currDataset={dataset} />
 					<Typography variant="h5" gutterBottom>
 						License
 					</Typography>

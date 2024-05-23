@@ -177,6 +177,17 @@ export const Dataset = (): JSX.Element => {
 	}, [datasetId, searchParams, adminMode, dataset.license_id]);
 
 	useEffect(() => {
+		setSnackBarOpen(true);
+		setSnackBarMessage(
+			`Viewing dataset version ${
+				dataset.id === dataset.origin_id
+					? "current unreleased"
+					: dataset.frozen_version_num
+			}.`
+		);
+	}, [dataset]);
+
+	useEffect(() => {
 		if (
 			newFrozenDataset &&
 			newFrozenDataset.frozen &&
@@ -526,11 +537,7 @@ export const Dataset = (): JSX.Element => {
 					</TabPanel>
 				</Grid>
 				<Grid item>
-					<DatasetVersions
-						currDataset={dataset}
-						setSnackBarMessage={setSnackBarMessage}
-						setSnackBarOpen={setSnackBarOpen}
-					/>
+					<DatasetVersions currDataset={dataset} />
 					<>
 						<Typography variant="h5" gutterBottom>
 							License
