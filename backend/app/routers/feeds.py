@@ -1,5 +1,6 @@
 from typing import Optional
 
+from app.deps.authorization_deps import ListenerAuthorization
 from app.keycloak_auth import get_current_user, get_current_username
 from app.models.feeds import FeedDB, FeedIn, FeedOut
 from app.models.files import FileOut
@@ -7,6 +8,7 @@ from app.models.listeners import EventListenerDB, FeedListener
 from app.models.pages import Paged, _construct_page_metadata, _get_page_query
 from app.models.users import UserOut
 from app.rabbitmq.listeners import submit_file_job
+from app.routers.authentication import get_admin, get_admin_mode
 from app.search.connect import check_search_result
 from beanie import PydanticObjectId
 from beanie.operators import Or, RegEx
@@ -25,7 +27,7 @@ async def disassociate_listener_db(feed_id: str, listener_id: str):
     if (feed := await FeedDB.get(PydanticObjectId(feed_id))) is not None:
         new_listeners = []
         for feed_listener in feed.listeners:
-            if feed_listener.listener_id != listener_id:
+            if feed_listener.listener_id != PydanticObjectId(listener_id):
                 new_listeners.append(feed_listener)
         feed.listeners = new_listeners
         await feed.save()
@@ -176,6 +178,8 @@ async def associate_listener(
     feed_id: str,
     listener: FeedListener,
     user=Depends(get_current_user),
+    admin=Depends(get_admin),
+    admin_mode=Depends(get_admin_mode),
 ):
     """Associate an existing Event Listener with a Feed, e.g. so it will be triggered on new Feed results.
 
@@ -185,22 +189,35 @@ async def associate_listener(
     """
     if (feed := await FeedDB.get(PydanticObjectId(feed_id))) is not None:
         if (
-            await EventListenerDB.get(PydanticObjectId(listener.listener_id))
+            listener_db := await EventListenerDB.get(
+                PydanticObjectId(listener.listener_id)
+            )
         ) is not None:
-            feed.listeners.append(listener)
-            await feed.save()
-            return feed.dict()
+            if (
+                (admin and admin_mode)
+                or (listener_db.creator and listener_db.creator.email == user.email)
+                or listener_db.active
+            ):
+                feed.listeners.append(listener)
+                await feed.save()
+                return feed.dict()
+            else:
+                raise HTTPException(
+                    status_code=403,
+                    detail=f"User {user} doesn't have permission to submit job to listener {listener.listener_id}",
+                )
         raise HTTPException(
             status_code=404, detail=f"listener {listener.listener_id} not found"
         )
     raise HTTPException(status_code=404, detail=f"feed {feed_id} not found")
 
 
-@router.delete("/{feed_id}/listeners/{listener_id}", response_model=FeedOut)
+@router.delete("/{feed_id}/listeners/{listener_id}")
 async def disassociate_listener(
     feed_id: str,
     listener_id: str,
     user=Depends(get_current_user),
+    allow: bool = Depends(ListenerAuthorization()),
 ):
     """Disassociate an Event Listener from a Feed.
 

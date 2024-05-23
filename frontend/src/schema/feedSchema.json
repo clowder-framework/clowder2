@@ -60,7 +60,9 @@
 					"properties": {
 						"listener_id": {
 							"type": "string",
-							"title": "Extractor Id"
+							"title": "Extractor Id",
+							"enum": [],
+							"enumNames": []
 						},
 						"automatic": {
 							"type": "boolean",
@@ -76,6 +78,13 @@
 			"criteria": {
 				"operator": {
 					"ui:widget": "select"
+				}
+			}
+		},
+		"listeners": {
+			"items": {
+				"listener_id": {
+					"ui:widget": "Select"
 				}
 			}
 		}

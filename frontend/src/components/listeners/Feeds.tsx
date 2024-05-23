@@ -2,7 +2,6 @@ import React, { ChangeEvent, useEffect, useState } from "react";
 import {
 	Box,
 	Button,
-	Checkbox,
 	Dialog,
 	DialogContent,
 	DialogTitle,
@@ -11,16 +10,9 @@ import {
 	FormControlLabel,
 	Grid,
 	IconButton,
-	Input,
-	InputLabel,
-	Link as MuiLink,
-	List,
-	MenuItem,
 	Pagination,
 	Paper,
-	Select,
 	Snackbar,
-	Switch,
 } from "@mui/material";
 
 import { RootState } from "../../types/data";
@@ -91,7 +83,7 @@ export function Feeds() {
 
 	useEffect(() => {
 		listFeeds("", 0, limit);
-	}, []);
+	}, [editFeedModalOpen, createFeedModalOpen]);
 
 	useEffect(() => {
 		// reset page and reset category with each new search term

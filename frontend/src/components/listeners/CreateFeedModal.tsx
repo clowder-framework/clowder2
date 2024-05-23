@@ -21,29 +21,32 @@ export const CreateFeedModal = (props: CreateFeedProps) => {
 	const listeners = useSelector(
 		(state: RootState) => state.listener.listeners.data
 	);
+	const schema = feedSchema["schema"];
 
 	const saveFeed = (formData: FormData) => {
-		// console.log(formData);
-		// console.log(formData.search);
-		// // @ts-ignore
-		// if (formData && formData.search != null && formData.search.criteria.length > 0)
-		// 	{ // @ts-ignore
-		// 		for (const criteria of formData.search.criteria){ // @ts-ignore
-		// 							console.log("here")
-		// 							criteria.operator = criteria.operator[0]
-		// 						}
-		// 	}
+		console.log(formData);
 		dispatch(createFeed(formData));
 	};
 	useEffect(() => {
 		listListeners();
 	}, []);
 
+	useEffect(() => {
+		const listenerNames: string[] = [];
+		listeners?.map((listener) => (listenerNames[listener.id] = listener.name));
+		// @ts-ignore
+		schema.properties.listeners.items.properties.listener_id.enum =
+			listeners?.map((listener) => listener.id);
+		schema.properties.listeners.items.properties.listener_id.enumNames =
+			schema.properties.listeners.items.properties.listener_id.enum.map(
+				(id) => listenerNames[id]
+			);
+	}, [listeners]);
+
 	return (
 		<Container>
 			<Form
-				schema={feedSchema["schema"] as FormProps<any>["schema"]}
-				//uiSchema={licenseSchema["uiSchema"] as FormProps<any>["uiSchema"]}
+				schema={schema as FormProps<any>["schema"]}
 				onSubmit={({ formData }) => {
 					saveFeed(formData);
 					// close modal
