@@ -19,11 +19,7 @@ export function FreezeVersionChip(props: FreezeVersionChipProps) {
 					</Tooltip>
 				</Box>
 			) : (
-				<Box sx={{ display: "flex", alignItems: "end" }}>
-					<Tooltip title="This is a current draft.">
-						<ClowderVersionPill>Now</ClowderVersionPill>
-					</Tooltip>
-				</Box>
+				<></>
 			)}
 		</>
 	);
