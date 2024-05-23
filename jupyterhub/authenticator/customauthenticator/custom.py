@@ -34,6 +34,12 @@ class CustomTokenAuthenticator(Authenticator):
         help="the landing page login entry",
     )
 
+    landing_page_logout_url = Unicode(
+        os.environ.get("LANDING_PAGE_LOGOUT", ""),
+        config=True,
+        help="the landing page logout entry",
+    )
+
     keycloak_url = Unicode(
         os.environ.get("KEYCLOAK_URL", ""),
         config=True,
@@ -229,9 +235,9 @@ class CustomTokenLogoutHandler(LogoutHandler):
     async def handle_logout(self):
         # remove clowder token on logout
         self.log.info("Remove clowder token on logout")
-        error_msg = (
+        self.log.info(
             "You have logged out of Clowder system from Clowder . Please login again if you want to use "
             "Clowder components."
         )
         self.set_cookie(self.authenticator.auth_cookie_header, "")
-        self.redirect(f"{self.authenticator.landing_page_login_url}?error={error_msg}")
+        self.redirect(f"{self.authenticator.landing_page_logout_url}")

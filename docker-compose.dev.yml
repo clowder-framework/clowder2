@@ -67,6 +67,8 @@ services:
 
   postgres:
       image: postgres
+      networks:
+        - clowder2
       volumes:
         - postgres_data:/var/lib/postgresql/data
       environment:
@@ -79,6 +81,8 @@ services:
       volumes:
         - ./scripts/keycloak/clowder-realm-dev.json:/opt/keycloak/data/import/realm.json:ro
         - ./scripts/keycloak/clowder-theme/:/opt/keycloak/themes/clowder-theme/:ro
+      networks:
+        - clowder2
       command:
         - start-dev
         - --http-relative-path /keycloak
