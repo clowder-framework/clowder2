@@ -3,6 +3,8 @@
 
 # Configuration file for JupyterHub
 import os
+import shutil
+import logging
 
 from customauthenticator.custom import CustomTokenAuthenticator
 
@@ -61,7 +63,7 @@ c.JupyterHub.authenticator_class = CustomTokenAuthenticator
 # TODO:Change this keycloak_url as required
 
 c.CustomTokenAuthenticator.auth_cookie_header = "Authorization"
-c.CustomTokenAuthenticator.auth_username_key = "preferred_username"
+c.CustomTokenAuthenticator.auth_username_key = "email"
 c.CustomTokenAuthenticator.auth_uid_number_key = "uid_number"
 c.CustomTokenAuthenticator.enable_auth_state = True
 c.CustomTokenAuthenticator.auto_login = True
@@ -92,7 +94,20 @@ else:
 
 c.JupyterHub.cookie_secret = os.getenv("JUPYTERHUB_CRYPT_KEY")
 
+# Allow all users to access
+c.Authenticator.allow_all = True
+
 # Allowed admins
 admin = os.environ.get("JUPYTERHUB_ADMIN")
 if admin:
     c.Authenticator.admin_users = [admin]
+
+
+# Pre spawn hook
+# def pre_spawn_hook(spawner):
+#     # Git clone
+#
+#
+
+
+# c.Spawner.post_stop_hook = pre_spawn_hook
