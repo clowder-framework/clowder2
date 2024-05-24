@@ -1,4 +1,5 @@
 import {
+	GET_PUBLIC_FREEZE_DATASETS,
 	RECEIVE_FILES_IN_PUBLIC_DATASET,
 	RECEIVE_PUBLIC_DATASET_ABOUT,
 	RECEIVE_PUBLIC_DATASETS,
@@ -8,11 +9,13 @@ import { DataAction } from "../types/action";
 import { PublicDatasetState } from "../types/data";
 import {
 	AuthorizationBase,
+	DatasetFreezeOut,
 	DatasetOut as Dataset,
 	DatasetRoles,
 	FileOut,
 	FileOut as File,
 	FolderOut,
+	LicenseOut,
 	Paged,
 	PageMetadata,
 	UserOut,
@@ -23,6 +26,10 @@ const defaultState: PublicDatasetState = {
 	publicAbout: <Dataset>{ creator: <UserOut>{} },
 	publicDatasetRole: <AuthorizationBase>{},
 	publicDatasets: <Paged>{ metadata: <PageMetadata>{}, data: <Dataset[]>[] },
+	publicFrozenDatasets: <Paged>{
+		metadata: <PageMetadata>{},
+		data: <DatasetFreezeOut[]>[],
+	},
 	publicNewDataset: <Dataset>{},
 	publicNewFile: <File>{},
 	publicNewFiles: <File[]>[],
@@ -31,6 +38,7 @@ const defaultState: PublicDatasetState = {
 		metadata: <PageMetadata>{},
 		data: <FileOut | FolderOut[]>[],
 	},
+	license: <LicenseOut>{},
 };
 
 const publicDataset = (state = defaultState, action: DataAction) => {
@@ -46,6 +54,10 @@ const publicDataset = (state = defaultState, action: DataAction) => {
 		case RECEIVE_PUBLIC_DATASETS:
 			return Object.assign({}, state, {
 				publicDatasets: action.publicDatasets,
+			});
+		case GET_PUBLIC_FREEZE_DATASETS:
+			return Object.assign({}, state, {
+				publicFrozenDatasets: action.publicFrozenDatasets,
 			});
 		default:
 			return state;

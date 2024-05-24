@@ -33,13 +33,7 @@ class DatasetIn(DatasetBase):
     pass
 
 
-class DatasetPatch(BaseModel):
-    name: Optional[str]
-    description: Optional[str]
-    status: Optional[str]
-
-
-class DatasetDB(Document, DatasetBase):
+class DatasetBaseCommon(DatasetBase):
     creator: UserOut
     created: datetime = Field(default_factory=datetime.utcnow)
     modified: datetime = Field(default_factory=datetime.utcnow)
@@ -47,8 +41,20 @@ class DatasetDB(Document, DatasetBase):
     user_views: int = 0
     downloads: int = 0
     thumbnail_id: Optional[PydanticObjectId] = None
+    origin_id: Optional[PydanticObjectId] = None
     standard_license: bool = True
     license_id: Optional[str] = None
+
+
+class DatasetPatch(BaseModel):
+    name: Optional[str]
+    description: Optional[str]
+    status: Optional[str]
+
+
+class DatasetDB(Document, DatasetBaseCommon):
+    frozen: bool = False
+    frozen_version_num: int = -999
 
     class Settings:
         name = "datasets"
@@ -60,19 +66,47 @@ class DatasetDB(Document, DatasetBase):
         ]
 
 
-class DatasetDBViewList(View, DatasetBase):
+class DatasetFreezeDB(Document, DatasetBaseCommon):
+    frozen: bool = True
+    frozen_version_num: int
+
+    class Settings:
+        name = "datasets_freeze"
+        indexes = [
+            [
+                ("name", pymongo.TEXT),
+                ("description", pymongo.TEXT),
+            ],
+        ]
+
+
+class DatasetDBViewList(View, DatasetBaseCommon):
     id: PydanticObjectId = Field(None, alias="_id")  # necessary for Views
-    creator: UserOut
-    created: datetime = Field(default_factory=datetime.utcnow)
-    modified: datetime = Field(default_factory=datetime.utcnow)
     auth: List[AuthorizationDB]
-    thumbnail_id: Optional[PydanticObjectId] = None
-    status: str = DatasetStatus.PRIVATE.name
+
+    # for dataset versioning
+    origin_id: Optional[PydanticObjectId] = None
+    frozen: bool = False
+    frozen_version_num: int = -999
 
     class Settings:
         source = DatasetDB
         name = "datasets_view"
+
         pipeline = [
+            {
+                "$addFields": {
+                    "frozen": False,
+                    "frozen_version_num": -999,
+                    "origin_id": "$_id",
+                }
+            },
+            {
+                "$unionWith": {
+                    "coll": "datasets_freeze",
+                    "pipeline": [{"$addFields": {"frozen": True}}],
+                }
+            },
             {
                 "$lookup": {
                     "from": "authorization",
@@ -82,13 +116,19 @@ class DatasetDBViewList(View, DatasetBase):
                 }
             },
         ]
+
         # Needs fix to work https://github.com/roman-right/beanie/pull/521
         # use_cache = True
         # cache_expiration_time = timedelta(seconds=10)
         # cache_capacity = 5
 
 
-class DatasetOut(DatasetDB):
+class DatasetOut(DatasetDB, DatasetFreezeDB):
+    class Config:
+        fields = {"id": "id"}
+
+
+class DatasetFreezeOut(DatasetFreezeDB):
     class Config:
         fields = {"id": "id"}
 

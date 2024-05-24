@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import config from "../../app.config";
 import {
 	FormControl,
 	Grid,
@@ -8,14 +7,12 @@ import {
 	Tab,
 	Tabs,
 } from "@mui/material";
-import { downloadPublicResource } from "../../utils/common";
-import { PreviewConfiguration, RootState } from "../../types/data";
+import { RootState } from "../../types/data";
 import { useParams, useSearchParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 
 import { a11yProps, TabPanel } from "../tabs/TabComponent";
 import {
-	fetchPublicFileMetadata,
 	fetchPublicFileSummary,
 	fetchPublicFileVersions,
 } from "../../actions/public_file.js";
@@ -38,6 +35,7 @@ import { FileHistory } from "./FileHistory";
 import { VersionChip } from "../versions/VersionChip";
 import Typography from "@mui/material/Typography";
 import { ClowderSelect } from "../styledComponents/ClowderSelect";
+import { frozenCheck } from "../../utils/common";
 
 export const PublicFile = (): JSX.Element => {
 	// path parameter
@@ -50,7 +48,7 @@ export const PublicFile = (): JSX.Element => {
 
 	const listDatasetAbout = (datasetId: string | undefined) =>
 		dispatch(fetchPublicDatasetAbout(datasetId));
-	const about = useSelector(
+	const dataset = useSelector(
 		(state: RootState) => state.publicDataset.publicAbout
 	);
 
@@ -62,8 +60,6 @@ export const PublicFile = (): JSX.Element => {
 		skip: number | undefined,
 		limit: number | undefined
 	) => dispatch(fetchPublicFileVersions(fileId, skip, limit));
-	const listFileMetadata = (fileId: string | undefined) =>
-		dispatch(fetchPublicFileMetadata(fileId));
 	const getPublicFolderPath = (folderId: string | null) =>
 		dispatch(fetchPublicFolderPath(folderId));
 
@@ -71,8 +67,8 @@ export const PublicFile = (): JSX.Element => {
 	const fileSummary = useSelector(
 		(state: RootState) => state.publicFile.publicFileSummary
 	);
-	const filePreviews = useSelector(
-		(state: RootState) => state.publicFile.publicPreviews
+	const storageType = useSelector(
+		(state: RootState) => state.publicFile.publicFileSummary.storage_type
 	);
 	const fileVersions = useSelector(
 		(state: RootState) => state.publicFile.publicFileVersions
@@ -87,40 +83,36 @@ export const PublicFile = (): JSX.Element => {
 		(state: RootState) => state.folder.publicFolderPath
 	);
 	const [selectedTabIndex, setSelectedTabIndex] = useState(0);
-	const [previews, setPreviews] = useState([]);
-	const [enableAddMetadata, setEnableAddMetadata] =
-		React.useState<boolean>(false);
-	const [metadataRequestForms, setMetadataRequestForms] = useState({});
+	React.useState<boolean>(false);
 	const [paths, setPaths] = useState([]);
 
 	// Error msg dialog
 	const [errorOpen, setErrorOpen] = useState(false);
-	const [showForbiddenPage, setShowForbiddenPage] = useState(false);
-	const [showNotFoundPage, setShowNotFoundPage] = useState(false);
 
 	// snack bar
 	const [snackBarOpen, setSnackBarOpen] = useState(false);
 	const [snackBarMessage, setSnackBarMessage] = useState("");
+
+	const [versionEnabled, setVersionEnabled] = useState(false);
 
 	// component did mount
 	useEffect(() => {
 		// load file information
 		listPublicFileSummary(fileId);
 		listPublicFileVersions(fileId, 0, 20);
-		// FIXME replace checks for null with logic to load this info from redux instead of the page parameters
-		if (datasetId != "null" && datasetId != "undefined") {
+		if (datasetId) {
 			listDatasetAbout(datasetId); // get dataset name
 		}
-		if (folderId != "null" && folderId != "undefined") {
+		if (folderId) {
 			getPublicFolderPath(folderId); // get folder path
 		}
-	}, []);
+	}, [fileId, datasetId, folderId]);
 
 	// for breadcrumb
 	useEffect(() => {
 		const tmpPaths = [
 			{
-				name: about["name"],
+				name: dataset["name"],
 				url: `/public/datasets/${datasetId}`,
 			},
 		];
@@ -129,7 +121,11 @@ export const PublicFile = (): JSX.Element => {
 			for (const folderBread of folderPath) {
 				tmpPaths.push({
 					name: folderBread["folder_name"],
-					url: `/public/datasets/${datasetId}?folder=${folderBread["folder_id"]}`,
+					url: `/public/datasets/${datasetId}?folder=${
+						folderBread && folderBread["folder_id"]
+							? folderBread["folder_id"]
+							: ""
+					}`,
 				});
 			}
 		} else {
@@ -143,7 +139,7 @@ export const PublicFile = (): JSX.Element => {
 		});
 
 		setPaths(tmpPaths);
-	}, [about, fileSummary, folderPath]);
+	}, [dataset, fileSummary, folderPath]);
 
 	useEffect(() => {
 		if (latestVersionNum !== undefined && latestVersionNum !== null) {
@@ -152,41 +148,15 @@ export const PublicFile = (): JSX.Element => {
 	}, [latestVersionNum]);
 
 	useEffect(() => {
-		(async () => {
-			if (
-				filePreviews !== undefined &&
-				filePreviews.length > 0 &&
-				filePreviews[0].previews !== undefined
-			) {
-				const previewsTemp: any = [];
-				await Promise.all(
-					filePreviews[0].previews.map(async (filePreview) => {
-						// download resources
-						const Configuration: PreviewConfiguration = {
-							previewType: "",
-							url: "",
-							fileid: "",
-							previewer: "",
-							fileType: "",
-							resource: "",
-						};
-						Configuration.previewType = filePreview["p_id"]
-							.replace(" ", "-")
-							.toLowerCase();
-						Configuration.url = `/public/${config.hostname}${filePreview["pv_route"]}?superAdmin=true`;
-						Configuration.fileid = filePreview["pv_id"];
-						Configuration.previewer = `/public/${filePreview["p_path"]}/`;
-						Configuration.fileType = filePreview["pv_contenttype"];
-
-						const resourceURL = `/public/${config.hostname}${filePreview["pv_route"]}?superAdmin=true`;
-						Configuration.resource = await downloadPublicResource(resourceURL);
-						previewsTemp.push(Configuration);
-					})
-				);
-				setPreviews(previewsTemp);
-			}
-		})();
-	}, [filePreviews]);
+		if (
+			storageType === "minio" &&
+			!frozenCheck(dataset.frozen, dataset.frozen_version_num)
+		) {
+			setVersionEnabled(true);
+		} else {
+			setVersionEnabled(false);
+		}
+	}, [storageType]);
 
 	const handleTabChange = (
 		_event: React.ChangeEvent<{}>,
@@ -194,12 +164,6 @@ export const PublicFile = (): JSX.Element => {
 	) => {
 		setSelectedTabIndex(newTabIndex);
 	};
-
-	// if (showForbiddenPage) {
-	// 	return <Forbidden />;
-	// } else if (showNotFoundPage) {
-	// 	return <PageNotFound />;
-	// }
 
 	return (
 		<PublicLayout>
@@ -219,7 +183,11 @@ export const PublicFile = (): JSX.Element => {
 				<Grid item xs={10} sx={{ display: "flex", alignItems: "center" }}>
 					<MainBreadcrumbs paths={paths} />
 					<Grid item>
-						<VersionChip selectedVersion={selectedVersionNum} />
+						{versionEnabled ? (
+							<VersionChip selectedVersion={selectedVersionNum} />
+						) : (
+							<></>
+						)}
 					</Grid>
 				</Grid>
 				<Grid item xs={2} sx={{ display: "flex-top", alignItems: "center" }}>
@@ -248,7 +216,12 @@ export const PublicFile = (): JSX.Element => {
 						<Tab
 							icon={<InsertDriveFile />}
 							iconPosition="start"
-							sx={TabStyle}
+							sx={
+								frozenCheck(dataset.frozen, dataset.frozen_version_num) ||
+								!versionEnabled
+									? { display: "none" }
+									: TabStyle
+							}
 							label="Version History"
 							{...a11yProps(1)}
 						/>
@@ -268,14 +241,6 @@ export const PublicFile = (): JSX.Element => {
 							{...a11yProps(3)}
 							disabled={false}
 						/>
-						{/*<Tab*/}
-						{/*	icon={<BuildIcon />}*/}
-						{/*	iconPosition="start"*/}
-						{/*	sx={TabStyle}*/}
-						{/*	label="Extract"*/}
-						{/*	{...a11yProps(4)}*/}
-						{/*	disabled={false}*/}
-						{/*/>*/}
 					</Tabs>
 					<TabPanel value={selectedTabIndex} index={0}>
 						<PublicVisualization fileId={fileId} />
@@ -310,9 +275,6 @@ export const PublicFile = (): JSX.Element => {
 							publicView={true}
 						/>
 					</TabPanel>
-					{/*<TabPanel value={selectedTabIndex} index={4}>*/}
-					{/*	<Listeners fileId={fileId} datasetId={datasetId} />*/}
-					{/*</TabPanel>*/}
 				</Grid>
 				<Grid item xs={12} sm={12} md={2} lg={2} xl={2}>
 					{latestVersionNum == selectedVersionNum ? (
@@ -336,196 +298,34 @@ export const PublicFile = (): JSX.Element => {
 							)}
 						</>
 					)}
-					<>
-						<Typography sx={{ wordBreak: "break-all" }}>Version</Typography>
-						<FormControl>
-							<ClowderSelect
-								value={String(selectedVersionNum)}
-								defaultValue={"viewer"}
-								onChange={(event) => {
-									setSelectedVersionNum(event.target.value);
-									setSnackBarMessage(`Viewing version ${event.target.value}`);
-									setSnackBarOpen(true);
-								}}
-							>
-								{fileVersions.map((fileVersion) => {
-									return (
-										<MenuItem value={fileVersion.version_num}>
-											{fileVersion.version_num}
-										</MenuItem>
-									);
-								})}
-							</ClowderSelect>
-						</FormControl>
-					</>
+					{versionEnabled ? (
+						<>
+							<Typography sx={{ wordBreak: "break-all" }}>Version</Typography>
+							<FormControl>
+								<ClowderSelect
+									value={String(selectedVersionNum)}
+									defaultValue={"viewer"}
+									onChange={(event) => {
+										setSelectedVersionNum(event.target.value);
+										setSnackBarMessage(`Viewing version ${event.target.value}`);
+										setSnackBarOpen(true);
+									}}
+								>
+									{fileVersions.map((fileVersion) => {
+										return (
+											<MenuItem value={fileVersion.version_num}>
+												{fileVersion.version_num}
+											</MenuItem>
+										);
+									})}
+								</ClowderSelect>
+							</FormControl>
+						</>
+					) : (
+						<></>
+					)}
 				</Grid>
 			</Grid>
 		</PublicLayout>
 	);
-
-	// return (
-	// 	<Layout>
-	// 		{/*Error Message dialogue*/}
-	// 		<ErrorModal errorOpen={errorOpen} setErrorOpen={setErrorOpen} />
-	// 		{/*snackbar*/}
-	// 		<Snackbar
-	// 			open={snackBarOpen}
-	// 			autoHideDuration={6000}
-	// 			onClose={() => {
-	// 				setSnackBarOpen(false);
-	// 				setSnackBarMessage("");
-	// 			}}
-	// 			message={snackBarMessage}
-	// 		/>
-	// 		<Grid container>
-	// 			<Grid item xs={10} sx={{ display: "flex", alignItems: "center" }}>
-	// 				<MainBreadcrumbs paths={paths} />
-	// 				<Grid item>
-	// 					<VersionChip selectedVersion={selectedVersionNum} />
-	// 				</Grid>
-	// 			</Grid>
-	// 			<Grid item xs={2} sx={{ display: "flex-top", alignItems: "center" }}>
-	// 				<PublicFileActionsMenu
-	// 					fileId={fileId}
-	// 					datasetId={datasetId}
-	// 					setSelectedVersion={setSelectedVersionNum}
-	// 				/>
-	// 			</Grid>
-	// 		</Grid>
-	// 		<Grid container spacing={2}>
-	// 			<Grid item xs={10}>
-	// 				<Tabs
-	// 					value={selectedTabIndex}
-	// 					onChange={handleTabChange}
-	// 					aria-label="file tabs"
-	// 				>
-	// 					<Tab
-	// 						icon={<VisibilityIcon />}
-	// 						iconPosition="start"
-	// 						sx={TabStyle}
-	// 						label="Visualizations"
-	// 						{...a11yProps(0)}
-	// 						disabled={false}
-	// 					/>
-	// 					<Tab
-	// 						icon={<InsertDriveFile />}
-	// 						iconPosition="start"
-	// 						sx={TabStyle}
-	// 						label="Version History"
-	// 						{...a11yProps(1)}
-	// 					/>
-	// 					<Tab
-	// 						icon={<FormatListBulleted />}
-	// 						iconPosition="start"
-	// 						sx={TabStyle}
-	// 						label="User Metadata"
-	// 						{...a11yProps(2)}
-	// 						disabled={false}
-	// 					/>
-	// 					<Tab
-	// 						icon={<AssessmentIcon />}
-	// 						iconPosition="start"
-	// 						sx={TabStyle}
-	// 						label="Extracted Metadata"
-	// 						{...a11yProps(3)}
-	// 						disabled={false}
-	// 					/>
-	// 					{/*<Tab*/}
-	// 					{/*	icon={<BuildIcon />}*/}
-	// 					{/*	iconPosition="start"*/}
-	// 					{/*	sx={TabStyle}*/}
-	// 					{/*	label="Extract"*/}
-	// 					{/*	{...a11yProps(4)}*/}
-	// 					{/*	disabled={false}*/}
-	// 					{/*/>*/}
-	// 					<Tab
-	// 						icon={<HistoryIcon />}
-	// 						iconPosition="start"
-	// 						sx={TabStyle}
-	// 						label="Extraction History"
-	// 						{...a11yProps(5)}
-	// 						disabled={false}
-	// 					/>
-	// 				</Tabs>
-	// 				<TabPanel value={selectedTabIndex} index={0}>
-	// 					<PublicVisualization fileId={fileId} />
-	// 				</TabPanel>
-	// 				{/*Version History*/}
-	// 				<TabPanel value={selectedTabIndex} index={1}>
-	// 					{fileVersions !== undefined ? (
-	// 						<FileVersionHistory fileVersions={fileVersions} />
-	// 					) : (
-	// 						<></>
-	// 					)}
-	// 				</TabPanel>
-	// 				<TabPanel value={selectedTabIndex} index={2}>
-	// 					<DisplayMetadata
-	// 						updateMetadata={""}
-	// 						deleteMetadata={""}
-	// 						resourceType="file"
-	// 						resourceId={fileId}
-	// 					/>
-	// 				</TabPanel>
-	// 				<TabPanel value={selectedTabIndex} index={3}>
-	// 					<DisplayListenerMetadata
-	// 						updateMetadata={""}
-	// 						deleteMetadata={""}
-	// 						resourceType="file"
-	// 						resourceId={fileId}
-	// 						version={fileSummary.version_num}
-	// 					/>
-	// 				</TabPanel>
-	// 				{/*<TabPanel value={selectedTabIndex} index={4}>*/}
-	// 				{/*	<Listeners fileId={fileId} datasetId={datasetId} />*/}
-	// 				{/*</TabPanel>*/}
-	// 				<TabPanel value={selectedTabIndex} index={5}>
-	// 					<ExtractionHistoryTab fileId={fileId} />
-	// 				</TabPanel>
-	// 			</Grid>
-	// 			<Grid item xs={2}>
-	// 				{latestVersionNum == selectedVersionNum ? (
-	// 					// latest version
-	// 					<>
-	// 						{/*{Object.keys(fileSummary).length > 0 && (*/}
-	// 						{/*	<FileDetails fileSummary={fileSummary} />*/}
-	// 						{/*)}*/}
-	// 					</>
-	// 				) : (
-	// 					// history version
-	// 					<>
-	// 						{/*{Object.keys(fileSummary).length > 0 && (*/}
-	// 						{/*	<FileHistory*/}
-	// 						{/*		name={file.publicFileSummary.name}*/}
-	// 						{/*		contentType={file.publicFileSummary.content_type?.content_type}*/}
-	// 						{/*		selectedVersionNum={selectedVersionNum}*/}
-	// 						{/*	/>*/}
-	// 						{/*)}*/}
-	// 					</>
-	// 				)}
-	// 				<>
-	// 					<Typography sx={{ wordBreak: "break-all" }}>Version</Typography>
-	// 					<FormControl>
-	// 						<ClowderSelect
-	// 							value={String(selectedVersionNum)}
-	// 							defaultValue={"viewer"}
-	// 							onChange={(event) => {
-	// 								setSelectedVersionNum(event.target.value);
-	// 								setSnackBarMessage("Viewing version " + event.target.value);
-	// 								setSnackBarOpen(true);
-	// 							}}
-	// 						>
-	// 							{fileVersions.map((fileVersion) => {
-	// 								return (
-	// 									<MenuItem value={fileVersion.version_num}>
-	// 										{fileVersion.version_num}
-	// 									</MenuItem>
-	// 								);
-	// 							})}
-	// 						</ClowderSelect>
-	// 					</FormControl>
-	// 				</>
-	// 			</Grid>
-	// 		</Grid>
-	// 	</Layout>
-	// );
 };

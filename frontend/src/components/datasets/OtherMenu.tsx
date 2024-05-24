@@ -1,3 +1,5 @@
+import React, { useEffect, useState } from "react";
+
 import {
 	Box,
 	Button,
@@ -7,9 +9,11 @@ import {
 	MenuItem,
 } from "@mui/material";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
-import React, { useEffect, useState } from "react";
 import { ActionModal } from "../dialog/ActionModal";
-import { datasetDeleted } from "../../actions/dataset";
+import {
+	datasetDeleted,
+	freezeDataset as freezeDatasetAction,
+} from "../../actions/dataset";
 import { fetchGroups } from "../../actions/group";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
@@ -22,10 +26,11 @@ import { DriveFileRenameOutline } from "@mui/icons-material";
 import { AuthWrapper } from "../auth/AuthWrapper";
 import { RootState } from "../../types/data";
 import ShareIcon from "@mui/icons-material/Share";
+import LocalOfferIcon from "@mui/icons-material/LocalOffer";
 
 type ActionsMenuProps = {
-	datasetId: string;
-	datasetName: string;
+	datasetId?: string;
+	datasetName?: string;
 };
 
 export const OtherMenu = (props: ActionsMenuProps): JSX.Element => {
@@ -41,6 +46,8 @@ export const OtherMenu = (props: ActionsMenuProps): JSX.Element => {
 	const datasetRole = useSelector(
 		(state: RootState) => state.dataset.datasetRole
 	);
+	const freezeDataset = (datasetId: string | undefined) =>
+		dispatch(freezeDatasetAction(datasetId));
 
 	const listGroups = () => dispatch(fetchGroups(0, 21));
 
@@ -55,6 +62,8 @@ export const OtherMenu = (props: ActionsMenuProps): JSX.Element => {
 	const [deleteDatasetConfirmOpen, setDeleteDatasetConfirmOpen] =
 		useState(false);
 	const [editStatusPaneOpen, setEditStatusPaneOpen] = useState(false);
+	const [freezeDatasetConfirmOpen, setFreezeDatasetConfirmOpen] =
+		useState(false);
 
 	const handleSetRename = () => {
 		setRename(false);
@@ -106,12 +115,25 @@ export const OtherMenu = (props: ActionsMenuProps): JSX.Element => {
 			/>
 			<ActionModal
 				actionOpen={deleteDatasetConfirmOpen}
-				actionTitle="Are you sure?"
+				actionTitle="Delete Dataset"
 				actionText="Do you really want to delete this dataset? This process cannot be undone."
 				actionBtnName="Delete"
 				handleActionBtnClick={deleteSelectedDataset}
 				handleActionCancel={() => {
 					setDeleteDatasetConfirmOpen(false);
+				}}
+			/>
+			<ActionModal
+				actionOpen={freezeDatasetConfirmOpen}
+				actionTitle="Are you ready to release this version of the dataset?"
+				actionText="By proceeding with the release, you will lock in the current content of the dataset, including all associated files, metadata, and visualizations. Once released, these elements will be set as final and cannot be altered. However, you can continue to make edits and improvements on the ongoing version of the dataset."
+				actionBtnName="Release"
+				handleActionBtnClick={() => {
+					freezeDataset(datasetId);
+					setFreezeDatasetConfirmOpen(false);
+				}}
+				handleActionCancel={() => {
+					setFreezeDatasetConfirmOpen(false);
 				}}
 			/>
 			<Button
@@ -163,6 +185,19 @@ export const OtherMenu = (props: ActionsMenuProps): JSX.Element => {
 					</ListItemIcon>
 					<ListItemText>Change Status</ListItemText>
 				</MenuItem>
+				<AuthWrapper currRole={datasetRole.role} allowedRoles={["owner"]}>
+					<MenuItem
+						onClick={() => {
+							handleOptionClose();
+							setFreezeDatasetConfirmOpen(true);
+						}}
+					>
+						<ListItemIcon>
+							<LocalOfferIcon fontSize="small" />
+						</ListItemIcon>
+						Release Version
+					</MenuItem>
+				</AuthWrapper>
 				<AuthWrapper
 					currRole={datasetRole.role}
 					allowedRoles={["owner", "editor"]}

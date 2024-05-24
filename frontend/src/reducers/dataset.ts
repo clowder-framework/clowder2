@@ -3,9 +3,12 @@ import {
 	DELETE_DATASET,
 	FOLDER_ADDED,
 	FOLDER_UPDATED,
+	FREEZE_DATASET,
+	GET_FREEZE_DATASET,
+	GET_FREEZE_DATASET_LATEST_VERSION_NUM,
+	GET_FREEZE_DATASETS,
 	RECEIVE_DATASET_ABOUT,
 	RECEIVE_DATASET_LICENSE,
-	UPDATE_DATASET_LICENSE,
 	RECEIVE_DATASET_ROLES,
 	RECEIVE_DATASETS,
 	RECEIVE_FOLDERS_FILES_IN_DATASET,
@@ -15,6 +18,7 @@ import {
 	SET_DATASET_GROUP_ROLE,
 	SET_DATASET_USER_ROLE,
 	UPDATE_DATASET,
+	UPDATE_DATASET_LICENSE,
 } from "../actions/dataset";
 import {
 	CREATE_FILE,
@@ -29,8 +33,8 @@ import { DataAction } from "../types/action";
 import { DatasetState } from "../types/data";
 import {
 	AuthorizationBase,
+	DatasetFreezeOut,
 	DatasetOut,
-	DatasetOut as Dataset,
 	DatasetRoles,
 	FileOut,
 	FolderOut,
@@ -46,10 +50,17 @@ const defaultState: DatasetState = {
 		metadata: <PageMetadata>{},
 		data: <FileOut | FolderOut[]>[],
 	},
-	about: <Dataset>{ creator: <UserOut>{} },
+	about: <DatasetOut>{ creator: <UserOut>{} },
+	frozenDataset: <DatasetFreezeOut>{ creator: <UserOut>{} },
+	newFrozenDataset: <DatasetFreezeOut>{ creator: <UserOut>{} },
+	frozenDatasets: <Paged>{
+		metadata: <PageMetadata>{},
+		data: <DatasetFreezeOut[]>[],
+	},
+	latestFrozenVersionNum: -999,
 	datasetRole: <AuthorizationBase>{},
-	datasets: <Paged>{ metadata: <PageMetadata>{}, data: <Dataset[]>[] },
-	newDataset: <Dataset>{},
+	datasets: <Paged>{ metadata: <PageMetadata>{}, data: <DatasetOut[]>[] },
+	newDataset: <DatasetOut>{},
 	newFile: <FileOut>{},
 	newFiles: <FileOut[]>[],
 	newFolder: <FolderOut>{},
@@ -113,6 +124,21 @@ const dataset = (state = defaultState, action: DataAction) => {
 			return Object.assign({}, state, { roles: action.roles });
 		case UPDATE_DATASET:
 			return Object.assign({}, state, { about: action.about });
+		case FREEZE_DATASET:
+			return Object.assign({}, state, {
+				latestFrozenVersionNum: action.newFrozenDataset.frozen_version_num,
+				newFrozenDataset: action.newFrozenDataset,
+			});
+		case GET_FREEZE_DATASET_LATEST_VERSION_NUM:
+			return Object.assign({}, state, {
+				latestFrozenVersionNum: action.latestFrozenVersionNum,
+			});
+		case GET_FREEZE_DATASET:
+			return Object.assign({}, state, { frozenDataset: action.frozenDataset });
+		case GET_FREEZE_DATASETS:
+			return Object.assign({}, state, {
+				frozenDatasets: action.frozenDatasets,
+			});
 		case RECEIVE_DATASETS:
 			return Object.assign({}, state, { datasets: action.datasets });
 		case CREATE_DATASET:

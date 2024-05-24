@@ -7,6 +7,8 @@ import {
 } from "./data";
 import {
 	AuthorizationBase,
+	DatasetFreezeOut,
+	DatasetOut,
 	DatasetOut as Dataset,
 	DatasetRoles,
 	EventListenerJobOut,
@@ -32,11 +34,6 @@ import {
 	PREFIX_SEARCH_USERS,
 	RECEIVE_USER_PROFILE,
 } from "../actions/user";
-import { CREATE_GROUP, DELETE_GROUP } from "../actions/group";
-import { RECEIVE_FILE_PRESIGNED_URL } from "../actions/file";
-import { GET_VIS_DATA_PRESIGNED_URL } from "../actions/visualization";
-import { GET_PUBLIC_VIS_DATA_PRESIGNED_URL } from "../actions/public_visualization";
-import { RECEIVE_FOLDERS_FILES_IN_DATASET } from "../actions/dataset";
 
 interface RECEIVE_FILES_IN_DATASET {
 	type: "RECEIVE_FILES_IN_DATASET";
@@ -55,7 +52,7 @@ interface DELETE_FILE {
 
 interface RECEIVE_DATASET_ABOUT {
 	type: "RECEIVE_DATASET_ABOUT";
-	about: Dataset;
+	about: DatasetOut;
 }
 
 interface RECEIVE_DATASET_LICENSE {
@@ -636,6 +633,31 @@ interface FOLDER_UPDATED {
 	folder: FolderOut;
 }
 
+interface FREEZE_DATASET {
+	type: "FREEZE_DATASET";
+	latestFrozenVersionNum: number;
+}
+
+interface GET_FREEZE_DATASET_LATEST_VERSION_NUM {
+	type: "GET_FREEZE_DATASET_LATEST";
+	latestFrozenVersionNum: number;
+}
+
+interface GET_FREEZE_DATASET {
+	type: "GET_FREEZE_DATASET";
+	frozenDataset: DatasetFreezeOut;
+}
+
+interface GET_FREEZE_DATASETS {
+	type: "GET_FREEZE_DATASETS";
+	frozenDatasets: Paged;
+}
+
+interface GET_PUBLIC_FREEZE_DATASETS {
+	type: "GET_PUBLIC_FREEZE_DATASETS";
+	publicFrozenDatasets: Paged;
+}
+
 export type DataAction =
 	| GET_ADMIN_MODE_STATUS
 	| TOGGLE_ADMIN_MODE
@@ -753,5 +775,10 @@ export type DataAction =
 	| RECEIVE_FOLDERS_FILES_IN_DATASET
 	| RECEIVE_PUBLIC_FOLDERS_FILES_IN_DATASET
 	| FOLDER_UPDATED
+	| FREEZE_DATASET
+	| GET_FREEZE_DATASET_LATEST_VERSION_NUM
+	| GET_FREEZE_DATASET
+	| GET_FREEZE_DATASETS
+	| GET_PUBLIC_FREEZE_DATASETS
 	| RECEIVE_DATASET_LICENSE
 	| UPDATE_DATASET_LICENSE;

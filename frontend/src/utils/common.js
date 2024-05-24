@@ -278,3 +278,7 @@ export const handleErrorReport = (reason, stack) => {
 export const authCheck = (adminMode, currRole, allowedRoles = []) => {
 	return adminMode || (currRole && allowedRoles.includes(currRole));
 };
+
+export const frozenCheck = (frozen, frozen_version_num) => {
+	return frozen && frozen_version_num && frozen_version_num > 0;
+};

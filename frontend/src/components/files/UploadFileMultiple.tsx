@@ -151,7 +151,9 @@ export const UploadFileMultiple: React.FC<UploadFileMultipleProps> = (
 
 			// Redirect to the first file route with file Id and dataset id
 			history(
-				`/files/${newFiles[0].id}?dataset=${selectedDatasetId}&folder=${folderId}`
+				`/files/${newFiles[0].id}?dataset=${selectedDatasetId}&folder=${
+					folderId ?? ""
+				}`
 			);
 		}
 	}, [newFiles]);

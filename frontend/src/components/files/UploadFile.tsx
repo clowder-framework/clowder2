@@ -157,7 +157,9 @@ export const UploadFile: React.FC<UploadFileProps> = (
 
 			// Redirect to file route with file Id and dataset id
 			history(
-				`/files/${file.id}?dataset=${selectedDatasetId}&folder=${folderId}`
+				`/files/${file.id}?dataset=${selectedDatasetId}&folder=${
+					folderId ?? ""
+				}`
 			);
 		}
 	}, [newFile]);

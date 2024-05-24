@@ -2,10 +2,10 @@ import React from "react";
 import {
 	Button,
 	Dialog,
-	DialogContent,
-	DialogTitle,
-	DialogContentText,
 	DialogActions,
+	DialogContent,
+	DialogContentText,
+	DialogTitle,
 } from "@mui/material";
 
 type ActionModalProps = {
@@ -37,8 +37,12 @@ export const ActionModal: React.FC<ActionModalProps> = (
 			</DialogContent>
 			<DialogActions>
 				{/*handleActionBtnClick This could be used to report error/ confirm deletion and so on*/}
-				<Button onClick={handleActionBtnClick}>{actionBtnName}</Button>
-				<Button onClick={handleActionCancel}>Cancel</Button>
+				<Button variant="contained" onClick={handleActionBtnClick}>
+					{actionBtnName}
+				</Button>
+				<Button variant="outlined" onClick={handleActionCancel}>
+					Cancel
+				</Button>
 			</DialogActions>
 		</Dialog>
 	);

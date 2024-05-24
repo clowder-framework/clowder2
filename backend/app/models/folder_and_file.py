@@ -2,13 +2,13 @@ from datetime import datetime
 from typing import List, Optional
 
 from app.models.authorization import AuthorizationDB
-from app.models.files import ContentType, FileBase, FileDB
+from app.models.files import ContentType, FileBaseCommon, FileDB
 from app.models.users import UserOut
 from beanie import PydanticObjectId, View
 from pydantic import Field
 
 
-class FolderFileViewList(View, FileBase):
+class FolderFileViewList(View, FileBaseCommon):
     # common field
     object_type: str = Field(None, alias="object_type")  # necessary for Views
     id: PydanticObjectId = Field(None, alias="_id")  # necessary for Views
@@ -31,23 +31,57 @@ class FolderFileViewList(View, FileBase):
     parent_folder: Optional[PydanticObjectId]
     auth: List[AuthorizationDB]
 
+    # for dataset versioning
+    origin_id: Optional[PydanticObjectId] = None
+    frozen: bool = False
+
     class Settings:
         source = FileDB
         name = "folders_files_view"
         pipeline = [
+            {
+                "$addFields": {
+                    "object_type": "file",
+                    "frozen": False,
+                    "origin_id": "$_id",
+                }
+            },
+            {
+                "$unionWith": {
+                    "coll": "folders",
+                    "pipeline": [
+                        {
+                            "$addFields": {
+                                "object_type": "folder",
+                                "frozen": False,
+                                "origin_id": "$_id",
+                            }
+                        }
+                    ],
+                }
+            },
+            {
+                "$unionWith": {
+                    "coll": "files_freeze",
+                    "pipeline": [
+                        {"$addFields": {"object_type": "file", "frozen": True}}
+                    ],
+                }
+            },
+            {
+                "$unionWith": {
+                    "coll": "folders_freeze",
+                    "pipeline": [
+                        {"$addFields": {"object_type": "folder", "frozen": True}}
+                    ],
+                }
+            },
             {
                 "$lookup": {
                     "from": "authorization",
                     "localField": "dataset_id",
                     "foreignField": "dataset_id",
                     "as": "auth",
-                }
-            },
-            {"$addFields": {"object_type": "file"}},
-            {
-                "$unionWith": {
-                    "coll": "folders",
-                    "pipeline": [{"$addFields": {"object_type": "folder"}}],
                 }
             },
         ]
