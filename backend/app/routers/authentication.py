@@ -210,11 +210,14 @@ async def revoke_admin(
 async def enable_readonly_user(
     useremail: str, current_username=Depends(get_current_user), admin=Depends(get_admin)
 ):
-    if admin and current_username.admin:
+    if admin:
         if (user := await UserDB.find_one(UserDB.email == useremail)) is not None:
-            user.read_only_user = True
-            await user.replace()
-            return user.dict()
+            if not user.admim:
+                user.read_only_user = True
+                await user.replace()
+                return user.dict()
+            else:
+                raise HTTPException(status_code=403, detail=f"User {useremail} is admin cannot be read only")
         else:
             raise HTTPException(status_code=404, detail=f"User {useremail} not found")
     else:
@@ -228,11 +231,14 @@ async def enable_readonly_user(
 async def disable_readonly_user(
     useremail: str, current_username=Depends(get_current_user), admin=Depends(get_admin)
 ):
-    if admin and current_username.admin:
+    if admin:
         if (user := await UserDB.find_one(UserDB.email == useremail)) is not None:
-            user.read_only_user = False
-            await user.replace()
-            return user.dict()
+            if not user.admin:
+                user.read_only_user = False
+                await user.replace()
+                return user.dict()
+            else:
+                raise HTTPException(status_code=403, detail=f"User {useremail} is admin cannot be read only")
         else:
             raise HTTPException(status_code=404, detail=f"User {useremail} not found")
     else:
