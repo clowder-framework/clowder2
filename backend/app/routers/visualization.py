@@ -16,6 +16,7 @@ from app.models.visualization_config import (
 from app.models.visualization_data import (
     VisualizationDataDB,
     VisualizationDataDBViewList,
+    VisualizationDataFreezeDB,
     VisualizationDataIn,
     VisualizationDataOut,
 )
@@ -108,7 +109,16 @@ async def remove_visualization(
             vis_config := await VisualizationConfigDB.get(visualization_config_id)
         ) is not None:
             await vis_config.delete()
-        fs.remove_object(settings.MINIO_BUCKET_NAME, visualization_id)
+
+        # if not being used in any version, remove the raw bytes
+        if (
+            await VisualizationDataFreezeDB.find_one(
+                VisualizationDataFreezeDB.origin_id
+                == PydanticObjectId(visualization_id)
+            )
+        ) is None:
+            fs.remove_object(settings.MINIO_BUCKET_NAME, visualization_id)
+
         await visualization.delete()
         return
     raise HTTPException(
