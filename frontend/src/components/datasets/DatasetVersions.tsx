@@ -2,11 +2,17 @@ import React, { ChangeEvent, useEffect, useState } from "react";
 import { Box, Link, Pagination, Typography } from "@mui/material";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { getFreezeDatasets as getFreezeDatasetsAction } from "../../actions/dataset";
+import {
+	deleteFreezeDataset as deleteFreezeDatasetAction,
+	getFreezeDatasets as getFreezeDatasetsAction,
+} from "../../actions/dataset";
 import { RootState } from "../../types/data";
 import config from "../../app.config";
 import { parseDate } from "../../utils/common";
 import { theme } from "../../theme";
+import IconButton from "@mui/material/IconButton";
+import DeleteIcon from "@material-ui/icons/Delete";
+import Divider from "@mui/material/Divider";
 
 export const DatasetVersions = (props) => {
 	// search parameters
@@ -25,8 +31,18 @@ export const DatasetVersions = (props) => {
 		limit: number
 	) => dispatch(getFreezeDatasetsAction(datasetId, skip, limit));
 
+	const deleteFreezeDataset = (
+		datasetId: string | undefined,
+		frozenVersionNum: number
+	) => {
+		dispatch(deleteFreezeDatasetAction(datasetId, frozenVersionNum));
+	};
+
 	const latestFrozenVersionNum = useSelector(
 		(state: RootState) => state.dataset.latestFrozenVersionNum
+	);
+	const deletedFrozenDataset = useSelector(
+		(state: RootState) => state.dataset.deletedFrozenDataset
 	);
 	const frozenDatasets = useSelector(
 		(state: RootState) => state.dataset.frozenDatasets.data
@@ -50,7 +66,7 @@ export const DatasetVersions = (props) => {
 		if (currDataset.origin_id) datasetId = currDataset.origin_id;
 		else datasetId = currDataset.id;
 		if (datasetId) getFreezeDatasets(datasetId, skip, limit);
-	}, [currDataset, latestFrozenVersionNum, skip, limit]);
+	}, [currDataset, deletedFrozenDataset, latestFrozenVersionNum, skip, limit]);
 
 	const handleVersionChange = (selectedDatasetId: string) => {
 		// current version flip to page 1
@@ -102,38 +118,84 @@ export const DatasetVersions = (props) => {
 						Current Unreleased
 					</Link>
 				</Box>
-				{frozenDatasets.map((dataset) => (
-					<Box key={dataset.id} mb={2}>
-						<Link
-							component="button"
-							onClick={() => {
-								handleVersionChange(dataset.id);
-							}}
-							sx={{
-								color:
-									currDataset.id === dataset.id
-										? theme.palette.info.main
-										: theme.palette.primary.main,
-								pointerEvents: currDataset.id === dataset.id ? "none" : "auto",
-								textDecoration: "none",
-								fontWeight: currDataset.id === dataset.id ? "bold" : "normal",
-								"&:hover": {
-									textDecoration: "underline",
-								},
-							}}
-						>
-							Version {dataset.frozen_version_num}
-						</Link>
-						<Box>
+				{frozenDatasets.map((dataset) =>
+					dataset.deleted ? (
+						<Box key={dataset.id} mb={2}>
 							<Typography
-								variant="caption"
-								sx={{ color: "text.primary.light" }}
+								variant="body1"
+								style={{
+									color: theme.palette.error.main,
+									fontWeight: "bold",
+								}}
 							>
-								{parseDate(dataset.modified)}
+								Version {dataset.frozen_version_num} (Deleted)
 							</Typography>
+							<Box>
+								<Typography
+									variant="caption"
+									sx={{ color: "text.primary.light" }}
+								>
+									{parseDate(dataset.modified)}
+								</Typography>
+							</Box>
+							<Divider orientation="horizontal" />
 						</Box>
-					</Box>
-				))}
+					) : (
+						<Box key={dataset.id} mb={2}>
+							<Box
+								display="flex"
+								justifyContent="space-between"
+								alignItems="center"
+							>
+								<Link
+									component="button"
+									onClick={() => {
+										handleVersionChange(dataset.id);
+									}}
+									sx={{
+										color:
+											currDataset.id === dataset.id
+												? theme.palette.info.main
+												: theme.palette.primary.main,
+										pointerEvents:
+											currDataset.id === dataset.id ? "none" : "auto",
+										textDecoration: "none",
+										fontWeight:
+											currDataset.id === dataset.id ? "bold" : "normal",
+										"&:hover": {
+											textDecoration: "underline",
+										},
+									}}
+								>
+									Version {dataset.frozen_version_num}
+								</Link>
+								<IconButton
+									aria-label="delete"
+									onClick={() =>
+										deleteFreezeDataset(
+											dataset.origin_id,
+											dataset.frozen_version_num
+										)
+									}
+									sx={{
+										marginLeft: 1,
+									}}
+								>
+									<DeleteIcon />
+								</IconButton>
+							</Box>
+							<Box>
+								<Typography
+									variant="caption"
+									sx={{ color: "text.primary.light" }}
+								>
+									{parseDate(dataset.modified)}
+								</Typography>
+							</Box>
+							<Divider orientation="horizontal" />
+						</Box>
+					)
+				)}
 			</Box>
 			{frozenDatasets && frozenDatasets.length !== 0 ? (
 				<Box display="flex" justifyContent="center" sx={{ m: 1 }}>

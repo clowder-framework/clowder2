@@ -294,6 +294,26 @@ export class DatasetsService {
     }
 
     /**
+     * Delete Freeze Dataset Version
+     * @param datasetId
+     * @param frozenVersionNum
+     * @returns DatasetFreezeOut Successful Response
+     * @throws ApiError
+     */
+    public static deleteFreezeDatasetVersionApiV2DatasetsDatasetIdFreezeFrozenVersionNumDelete(
+        datasetId: string,
+        frozenVersionNum: number,
+    ): CancelablePromise<DatasetFreezeOut> {
+        return __request({
+            method: 'DELETE',
+            path: `/api/v2/datasets/${datasetId}/freeze/${frozenVersionNum}`,
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+
+    /**
      * Get Dataset Folders
      * @param datasetId
      * @param parentFolder

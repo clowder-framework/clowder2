@@ -576,9 +576,45 @@ async def get_freeze_dataset_version(
     # Retrieve the dataset by ID
     if (
         frozen_dataset := await DatasetFreezeDB.find_one(
-            DatasetFreezeDB.origin_id == PydanticObjectId(dataset_id)
+            DatasetFreezeDB.origin_id == PydanticObjectId(dataset_id),
+            DatasetFreezeDB.frozen_version_num == frozen_version_num,
         )
     ) is not None:
+        if frozen_dataset.deleted is True:
+            raise HTTPException(
+                status_code=404,
+                detail=f"Dataset {dataset_id} version {frozen_version_num} has been deleted",
+            )
+
+        return frozen_dataset.dict()
+
+    raise HTTPException(
+        status_code=404,
+        detail=f"Dataset {dataset_id} version {frozen_version_num} not found",
+    )
+
+
+@router.delete(
+    "/{dataset_id}/freeze/{frozen_version_num}", response_model=DatasetFreezeOut
+)
+async def delete_freeze_dataset_version(
+    dataset_id: str,
+    frozen_version_num: int,
+    user=Depends(get_current_user),
+    fs: Minio = Depends(dependencies.get_fs),
+    es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
+    allow: bool = Depends(Authorization("owner")),
+):
+    # Retrieve the dataset by ID
+    if (
+        frozen_dataset := await DatasetFreezeDB.find_one(
+            DatasetFreezeDB.origin_id == PydanticObjectId(dataset_id),
+            DatasetFreezeDB.frozen_version_num == frozen_version_num,
+        )
+    ) is not None:
+        # mark the deleted field without actually deleting
+        frozen_dataset.deleted = True
+        await frozen_dataset.save()
         return frozen_dataset.dict()
 
     raise HTTPException(

@@ -33,4 +33,5 @@ export type DatasetFreezeOut = {
     id?: string;
     frozen?: boolean;
     frozen_version_num: number;
+    deleted?: boolean;
 }

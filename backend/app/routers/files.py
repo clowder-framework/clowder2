@@ -11,6 +11,7 @@ from app.keycloak_auth import get_current_user, get_token
 from app.models.files import (
     FileDB,
     FileDBViewList,
+    FileFreezeDB,
     FileOut,
     FileVersion,
     FileVersionDB,
@@ -178,11 +179,15 @@ async def add_local_file_entry(
 
 # TODO: Move this to MongoDB middle layer
 async def remove_file_entry(
-    file_id: Union[str, ObjectId], fs: Minio, es: Elasticsearch
+    file_id: Union[str, ObjectId],
+    fs: Minio,
+    es: Elasticsearch,
+    remove_bytes: bool = True,
 ):
     """Remove FileDB object into MongoDB, Minio, and associated metadata and version information."""
     # TODO: Deleting individual versions will require updating version_id in mongo, or deleting entire document
-    fs.remove_object(settings.MINIO_BUCKET_NAME, str(file_id))
+    if remove_bytes:
+        fs.remove_object(settings.MINIO_BUCKET_NAME, str(file_id))
     # delete from elasticsearch
     delete_document_by_id(es, settings.elasticsearch_index, str(file_id))
     if (file := await FileDB.get(PydanticObjectId(file_id))) is not None:
@@ -438,11 +443,17 @@ async def delete_file(
     allow: bool = Depends(FileAuthorization("editor")),
 ):
     if (file := await FileDB.get(PydanticObjectId(file_id))) is not None:
-        if file.storage_type == StorageType.LOCAL:
-            await remove_local_file_entry(file_id, es)
+        if await FileFreezeDB.find_one(
+            FileFreezeDB.origin_id == PydanticObjectId(file_id)
+        ):
+            # Only delete the mongo entry then
+            await remove_file_entry(file_id, fs, es, remove_bytes=False)
         else:
-            await remove_file_entry(file_id, fs, es)
-        return {"deleted": file_id}
+            if file.storage_type == StorageType.LOCAL:
+                await remove_local_file_entry(file_id, es)
+            else:
+                await remove_file_entry(file_id, fs, es)
+            return {"deleted": file_id}
     else:
         raise HTTPException(status_code=404, detail=f"File {file_id} not found")
 

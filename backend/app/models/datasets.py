@@ -69,6 +69,7 @@ class DatasetDB(Document, DatasetBaseCommon):
 class DatasetFreezeDB(Document, DatasetBaseCommon):
     frozen: bool = True
     frozen_version_num: int
+    deleted: bool = False
 
     class Settings:
         name = "datasets_freeze"
@@ -88,6 +89,7 @@ class DatasetDBViewList(View, DatasetBaseCommon):
     origin_id: Optional[PydanticObjectId] = None
     frozen: bool = False
     frozen_version_num: int = -999
+    deleted: bool = False
 
     class Settings:
         source = DatasetDB
