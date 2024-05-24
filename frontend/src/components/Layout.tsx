@@ -154,7 +154,6 @@ export default function PersistentDrawerLeft(props) {
 	}, [location]);
 
 	const loggedOut = useSelector((state: RootState) => state.error.loggedOut);
-	console.log("user profile", currUserProfile);
 	// @ts-ignore
 	return (
 		<Box

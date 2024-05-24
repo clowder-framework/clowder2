@@ -157,7 +157,7 @@ export const ManageUsers = (): JSX.Element => {
 																setAdmin(profile.email);
 															}
 														}}
-														disabled={profile.email === currentUser.email}
+														disabled={profile.email === currentUser.email || currentUser.read_only_user}
 													/>
 												</TableCell>
 												<TableCell align="left">

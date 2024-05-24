@@ -79,12 +79,9 @@ export function MetadataDefinitions() {
 	const [errorOpen, setErrorOpen] = useState(false);
 
 	// component did mount
+	// user profile
 	useEffect(() => {
 		listMetadataDefinitions(null, 0, limit);
-	}, []);
-
-	// get profile
-	useEffect(() => {
 		fetchCurrUserProfile();
 	}, []);
 
