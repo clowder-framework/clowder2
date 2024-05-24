@@ -31,6 +31,9 @@ export const Explore = (): JSX.Element => {
 	const datasets = useSelector(
 		(state: RootState) => state.dataset.datasets.data
 	);
+	const deletedDataset = useSelector(
+		(state: RootState) => state.dataset.deletedDataset
+	);
 	const pageMetadata = useSelector(
 		(state: RootState) => state.dataset.datasets.metadata
 	);
@@ -56,10 +59,11 @@ export const Explore = (): JSX.Element => {
 		listDatasets(0, limit, mine);
 	}, [mine]);
 
+
 	// Admin mode will fetch all datasets
 	useEffect(() => {
-		listDatasets(0, limit, mine);
-	}, [adminMode]);
+		listDatasets((currPageNum - 1) * limit, limit, mine);
+	}, [adminMode, deletedDataset]);
 
 	// Admin mode will fetch my datasets
 	useEffect(() => {
