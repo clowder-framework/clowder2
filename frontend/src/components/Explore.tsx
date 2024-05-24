@@ -75,7 +75,7 @@ export const Explore = (): JSX.Element => {
 		if (newTabIndex === 1) {
 			setMine(true);
 			listDatasets(0, limit, true);
-		} else if (newTabIndex === 0) {
+		} else {
 			setMine(false);
 			listDatasets(0, limit, false);
 		}
