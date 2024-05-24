@@ -91,7 +91,7 @@ export const DatasetVersions = (props) => {
 	return (
 		<Box sx={{ mt: 2, mb: 5 }}>
 			<Typography variant="h5" gutterBottom>
-				Dataset Version
+				Version
 			</Typography>
 			<Box>
 				<Box key={currDataset.origin_id} mb={2}>
@@ -101,10 +101,7 @@ export const DatasetVersions = (props) => {
 							handleVersionChange(currDataset.origin_id);
 						}}
 						sx={{
-							color:
-								currDataset.id === currDataset.origin_id
-									? theme.palette.info.main
-									: theme.palette.primary.main,
+							color: theme.palette.primary.main,
 							pointerEvents:
 								currDataset.id === currDataset.origin_id ? "none" : "auto",
 							textDecoration: "none",
@@ -115,8 +112,21 @@ export const DatasetVersions = (props) => {
 							},
 						}}
 					>
-						Current Unreleased
+						Current
 					</Link>
+					<Box>
+						<Typography
+							variant="caption"
+							sx={{
+								color: "text.primary.light",
+								fontWeight:
+									currDataset.id === currDataset.origin_id ? "bold" : "normal",
+							}}
+						>
+							{parseDate(currDataset.modified)}
+						</Typography>
+					</Box>
+					<Divider orientation="horizontal" />
 				</Box>
 				{frozenDatasets.map((dataset) =>
 					dataset.deleted ? (
@@ -124,8 +134,7 @@ export const DatasetVersions = (props) => {
 							<Typography
 								variant="body1"
 								style={{
-									color: theme.palette.error.main,
-									fontWeight: "bold",
+									color: theme.palette.info.main,
 								}}
 							>
 								Version {dataset.frozen_version_num} (Deleted)
@@ -153,10 +162,7 @@ export const DatasetVersions = (props) => {
 										handleVersionChange(dataset.id);
 									}}
 									sx={{
-										color:
-											currDataset.id === dataset.id
-												? theme.palette.info.main
-												: theme.palette.primary.main,
+										color: theme.palette.primary.main,
 										pointerEvents:
 											currDataset.id === dataset.id ? "none" : "auto",
 										textDecoration: "none",
@@ -171,15 +177,13 @@ export const DatasetVersions = (props) => {
 								</Link>
 								<IconButton
 									aria-label="delete"
+									size="small"
 									onClick={() =>
 										deleteFreezeDataset(
 											dataset.origin_id,
 											dataset.frozen_version_num
 										)
 									}
-									sx={{
-										marginLeft: 1,
-									}}
 								>
 									<DeleteIcon />
 								</IconButton>
@@ -187,7 +191,11 @@ export const DatasetVersions = (props) => {
 							<Box>
 								<Typography
 									variant="caption"
-									sx={{ color: "text.primary.light" }}
+									sx={{
+										color: "text.primary.light",
+										fontWeight:
+											currDataset.id === dataset.id ? "bold" : "normal",
+									}}
 								>
 									{parseDate(dataset.modified)}
 								</Typography>
