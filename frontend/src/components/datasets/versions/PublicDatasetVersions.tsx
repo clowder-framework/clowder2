@@ -2,11 +2,12 @@ import { Box, Link, Pagination, Typography } from "@mui/material";
 import React, { ChangeEvent, useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { getPublicFreezeDatasets as getPublicFreezeDatasetsAction } from "../../actions/public_dataset";
-import { RootState } from "../../types/data";
-import config from "../../app.config";
-import { theme } from "../../theme";
-import { parseDate } from "../../utils/common";
+import { getPublicFreezeDatasets as getPublicFreezeDatasetsAction } from "../../../actions/public_dataset";
+import { RootState } from "../../../types/data";
+import config from "../../../app.config";
+import { theme } from "../../../theme";
+import { parseDate } from "../../../utils/common";
+import Divider from "@mui/material/Divider";
 
 export const PublicDatasetVersions = (props) => {
 	// search parameters
@@ -73,7 +74,7 @@ export const PublicDatasetVersions = (props) => {
 	return (
 		<Box sx={{ mt: 2, mb: 5 }}>
 			<Typography variant="h5" gutterBottom>
-				Dataset Version
+				Version
 			</Typography>
 			<Box>
 				<Box key={currDataset.origin_id} mb={2}>
@@ -83,10 +84,7 @@ export const PublicDatasetVersions = (props) => {
 							handleVersionChange(currDataset.origin_id);
 						}}
 						sx={{
-							color:
-								currDataset.id === currDataset.origin_id
-									? theme.palette.info.main
-									: theme.palette.primary.main,
+							color: theme.palette.primary.main,
 							pointerEvents:
 								currDataset.id === currDataset.origin_id ? "none" : "auto",
 							textDecoration: "none",
@@ -97,41 +95,86 @@ export const PublicDatasetVersions = (props) => {
 							},
 						}}
 					>
-						Current Unreleased
+						Current
 					</Link>
-				</Box>
-				{frozenDatasets.map((dataset) => (
-					<Box key={dataset.id} mb={2}>
-						<Link
-							component="button"
-							onClick={() => {
-								handleVersionChange(dataset.id);
-							}}
+					<Box>
+						<Typography
+							variant="caption"
 							sx={{
-								color:
-									currDataset.id === dataset.id
-										? theme.palette.info.main
-										: theme.palette.primary.main,
-								pointerEvents: currDataset.id === dataset.id ? "none" : "auto",
-								textDecoration: "none",
-								fontWeight: currDataset.id === dataset.id ? "bold" : "normal",
-								"&:hover": {
-									textDecoration: "underline",
-								},
+								color: "text.primary.light",
+								fontWeight:
+									currDataset.id === currDataset.origin_id ? "bold" : "normal",
 							}}
 						>
-							Version {dataset.frozen_version_num}
-						</Link>
-						<Box>
-							<Typography
-								variant="caption"
-								sx={{ color: "text.primary.light" }}
-							>
-								{parseDate(dataset.modified)}
-							</Typography>
-						</Box>
+							{parseDate(currDataset.modified)}
+						</Typography>
 					</Box>
-				))}
+					<Divider orientation="horizontal" />
+				</Box>
+				{frozenDatasets.map((dataset) =>
+					dataset.deleted ? (
+						<Box key={dataset.id} mb={2}>
+							<Typography
+								variant="body1"
+								style={{
+									color: theme.palette.info.main,
+								}}
+							>
+								Version {dataset.frozen_version_num} (Deleted)
+							</Typography>
+							<Box>
+								<Typography
+									variant="caption"
+									sx={{ color: "text.primary.light" }}
+								>
+									{parseDate(dataset.modified)}
+								</Typography>
+							</Box>
+							<Divider orientation="horizontal" />
+						</Box>
+					) : (
+						<Box key={dataset.id} mb={2}>
+							<Box
+								display="flex"
+								justifyContent="space-between"
+								alignItems="center"
+							>
+								<Link
+									component="button"
+									onClick={() => {
+										handleVersionChange(dataset.id);
+									}}
+									sx={{
+										color: theme.palette.primary.main,
+										pointerEvents:
+											currDataset.id === dataset.id ? "none" : "auto",
+										textDecoration: "none",
+										fontWeight:
+											currDataset.id === dataset.id ? "bold" : "normal",
+										"&:hover": {
+											textDecoration: "underline",
+										},
+									}}
+								>
+									Version {dataset.frozen_version_num}
+								</Link>
+							</Box>
+							<Box>
+								<Typography
+									variant="caption"
+									sx={{
+										color: "text.primary.light",
+										fontWeight:
+											currDataset.id === dataset.id ? "bold" : "normal",
+									}}
+								>
+									{parseDate(dataset.modified)}
+								</Typography>
+							</Box>
+							<Divider orientation="horizontal" />
+						</Box>
+					)
+				)}
 			</Box>
 			{frozenDatasets && frozenDatasets.length !== 0 ? (
 				<Box display="flex" justifyContent="center" sx={{ m: 1 }}>

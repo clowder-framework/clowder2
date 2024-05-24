@@ -5,11 +5,11 @@ import { useDispatch, useSelector } from "react-redux";
 import {
 	deleteFreezeDataset as deleteFreezeDatasetAction,
 	getFreezeDatasets as getFreezeDatasetsAction,
-} from "../../actions/dataset";
-import { RootState } from "../../types/data";
-import config from "../../app.config";
-import { parseDate } from "../../utils/common";
-import { theme } from "../../theme";
+} from "../../../actions/dataset";
+import { RootState } from "../../../types/data";
+import config from "../../../app.config";
+import { parseDate } from "../../../utils/common";
+import { theme } from "../../../theme";
 import IconButton from "@mui/material/IconButton";
 import DeleteIcon from "@material-ui/icons/Delete";
 import Divider from "@mui/material/Divider";
