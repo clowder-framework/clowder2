@@ -212,7 +212,7 @@ async def enable_readonly_user(
 ):
     if admin:
         if (user := await UserDB.find_one(UserDB.email == useremail)) is not None:
-            if not user.admim:
+            if not user.admin:
                 user.read_only_user = True
                 await user.replace()
                 return user.dict()
