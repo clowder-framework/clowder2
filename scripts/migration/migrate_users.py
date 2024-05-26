@@ -258,6 +258,11 @@ async def process_users(
                         dataset_file_upload_endoint = CLOWDER_V2 + 'api/v2/datasets/' + dataset_id['id'] + '/files'
                         response = requests.post(dataset_file_upload_endoint, files=file_data, headers=user_base_headers_v2)
                         result = response.json()
+                        try:
+                            os.remove(filename)
+                        except Exception as e:
+                            print("could not delete locally downloaded file")
+                            print(e)
                         print('done')
 
         else:
