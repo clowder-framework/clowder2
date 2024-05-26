@@ -60,7 +60,7 @@ output_file = 'new_users.txt'
 
 fake = Faker()
 
-path_to_env = os.path.join(os.getcwd(), 'scripts', 'migration', '.env')
+path_to_env = os.path.join(os.getcwd(), '.env')
 print(os.path.isfile(path_to_env))
 config = dotenv_values(dotenv_path=path_to_env)
 
@@ -208,10 +208,10 @@ async def process_users(
             if email != "a@a.com":
                 user_v1_datasets = get_clowder_v1_user_datasets(user_id=id)
                 # TODO check if there is already a local user
-                # user_v2 = get_clowder_v2_user_by_name(email)
+                user_v2 = get_clowder_v2_user_by_name(email)
                 user_v2 = create_local_user(user_v1)
-                user_v2_api_key = generate_user_api_key(user_v2, DEFAULT_PASSWORD)
-                # user_v2_api_key = 'aZM2QXJ_lvw_5FKNUB89Vg'
+                # user_v2_api_key = 'eyJ1c2VyIjoiYkBiLmNvbSIsImtleSI6Ik5yNUd1clFmNGhTZFd5ZEVlQ2FmSEEifQ.FTvhQrDgvmSgnwBGwafRNAXkxH8'
+                user_v2_api_key = user_v2
                 user_base_headers_v2 = {'X-API-key': user_v2_api_key}
                 user_headers_v2 = {**user_base_headers_v2, 'Content-type': 'application/json',
                                       'accept': 'application/json'}
@@ -230,27 +230,31 @@ async def process_users(
                     print('got a user')
                     userDB = await UserDB.find_one({"email": email})
                     for file in files_result:
-                        new_file = FileDB(
-                            name=file['filename'],
-                            creator=userDB,
-                            dataset_id=dataset["id"],
-                        )
-                        print('here')
+                        # new_file = FileDB(
+                        #     name=file['filename'],
+                        #     creator=userDB,
+                        #     dataset_id=dataset["id"],
+                        # )
+                        # print('here')
                         file_id = file['id']
                         file = db["uploads"].find_one({"_id": ObjectId(file_id)})
                         filename = file['filename']
                         loader_id = file["loader_id"]
                         content_type = file["contentType"]
                         # TODO download the file from v1 using api routes
-                        v1_download_url = CLOWDER_V1 + 'api/files' + file_id
+                        v1_download_url = CLOWDER_V1 + 'api/files/' + file_id + '?superAdmin=true'
+                        print('downloading file', filename)
                         download = requests.get(v1_download_url, headers=clowder_headers_v1)
-                        upload_chunks_entry = db["uploads.chunks"].find_one({"files_id": ObjectId(loader_id)})
-                        data_bytes = upload_chunks_entry['data']
-                        current_path = os.path.join(os.getcwd(),'scripts','migration')
-                        path_to_temp_file = os.path.join(current_path, filename)
-                        with open(path_to_temp_file, "wb") as f:
-                            f.write(data_bytes)
-                        file_data = {"file": open(path_to_temp_file, "rb")}
+                        with open(filename, 'wb') as f:
+                            f.write(download.content)
+                        # print('after the file download')
+                        # upload_chunks_entry = db["uploads.chunks"].find_one({"files_id": ObjectId(loader_id)})
+                        # data_bytes = upload_chunks_entry['data']
+                        # current_path = os.path.join(os.getcwd(),'scripts','migration')
+                        # path_to_temp_file = os.path.join(current_path, filename)
+                        # with open(path_to_temp_file, "wb") as f:
+                        #     f.write(data_bytes)
+                        file_data = {"file": open(filename, "rb")}
                         dataset_file_upload_endoint = CLOWDER_V2 + 'api/v2/datasets/' + dataset_id['id'] + '/files'
                         response = requests.post(dataset_file_upload_endoint, files=file_data, headers=user_base_headers_v2)
                         result = response.json()
