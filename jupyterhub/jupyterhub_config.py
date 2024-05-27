@@ -1,10 +1,10 @@
 # Copyright (c) Jupyter Development Team.
 # Distributed under the terms of the Modified BSD License.
 
+
 # Configuration file for JupyterHub
 import os
 import shutil
-import logging
 
 from customauthenticator.custom import CustomTokenAuthenticator
 
@@ -31,10 +31,12 @@ c.DockerSpawner.network_name = network_name
 # We follow the same convention.
 notebook_dir = os.environ.get("DOCKER_NOTEBOOK_DIR", "/home/jovyan/work")
 c.DockerSpawner.notebook_dir = notebook_dir
+c.Spawner.args = ["--NotebookApp.default_url=/notebooks/Welcome.ipynb"]
 
 # Mount the real user's Docker volume on the host to the notebook user's
 # notebook directory in the container
 c.DockerSpawner.volumes = {"jupyterhub-user-{username}": notebook_dir}
+
 
 # Remove containers once they are stopped
 c.DockerSpawner.remove = True
@@ -104,10 +106,14 @@ if admin:
 
 
 # Pre spawn hook
-# def pre_spawn_hook(spawner):
-#     # Git clone
-#
-#
+def post_spawn_hook(spawner, auth_state):
+    username = spawner.user.name
+    spawner.environment["GREETING"] = f"Hello Master {username}"
+
+    target_file_path = f"/home/jovyan/work/Clowder_APIs.ipynb"
+
+    if not os.path.exists(target_file_path):
+        shutil.copy2("/etc/jupyter/Clowder_APIs.ipynb", target_file_path)
 
 
-# c.Spawner.post_stop_hook = pre_spawn_hook
+# c.Spawner.auth_state_hook = post_spawn_hook

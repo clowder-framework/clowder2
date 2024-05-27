@@ -19,3 +19,6 @@ RUN pip install --no-cache-dir \
     requests \
     pyclowder \
     pandas
+
+# Copy Clowder API notebook
+COPY Clowder_APIs.ipynb /etc/jupyter/Clowder_APIs.ipynb
