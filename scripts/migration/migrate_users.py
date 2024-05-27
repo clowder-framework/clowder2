@@ -124,8 +124,11 @@ async def create_v2_dataset(headers, dataset, user_email):
     dataset_description = dataset['description']
     dataset_endpoint = CLOWDER_V1 + 'api/datasets/' + dataset['id']
     r = requests.get(dataset_endpoint, headers=base_headers_v1, verify=False)
-    dataset_files_endpoint = CLOWDER_V1 + 'api/datasets/' + dataset['id'] + '/files'
+    dataset_files_endpoint = CLOWDER_V1 + 'api/datasets/' + dataset['id'] + '/files?superAdmin=true'
     r_files = requests.get(dataset_files_endpoint, headers=base_headers_v1, verify=False)
+    dataset_folders_endpoint = CLOWDER_V1 + 'api/datasets/' + dataset['id'] + '/folders?superAdmin=true'
+    dataset_folders = requests.get(dataset_folders_endpoint, base_headers_v1)
+    dataset_folders_json = dataset_folders.json()
     dataset_in_v2_endpoint = CLOWDER_V2 + 'api/v2/datasets'
     # create dataset
     dataset_example = {
@@ -218,6 +221,9 @@ async def process_users(
                 for dataset in user_v1_datasets:
                     print('creating a dataset in v2')
                     dataset_id = await create_v2_dataset(user_headers_v2, dataset, email)
+                    dataset_folders_endpoint = CLOWDER_V1 + 'api/datasets/' + dataset['id'] + '/folders?superAdmin=true'
+                    dataset_folders = requests.get(dataset_folders_endpoint, base_headers_v1)
+                    dataset_folders_json = dataset_folders.json()
                     dataset_files_endpoint = CLOWDER_V1 + 'api/datasets/' + dataset['id'] + '/files?=superAdmin=true'
                     # move file stuff here
                     print('we got a dataset id')
