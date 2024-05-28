@@ -41,11 +41,11 @@ type SubmitExtractionProps = {
 const widgets = {
 	TextWidget: ClowderRjsfTextWidget,
 	SelectWidget: ClowderRjsfSelectWidget,
-	file: ClowderFileSelector,
+	clowderFile: ClowderFileSelector,
 };
 
 const uiSchema = {
-	file: { "ui:widget": "FileSelector" },
+	clowderFile: { "ui:widget": "FileSelector" },
 };
 
 export default function SubmitExtraction(props: SubmitExtractionProps) {
