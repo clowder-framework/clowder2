@@ -206,10 +206,11 @@ const FileSystemViewer: React.FC<{
 	return FSItems.length > 0 ? (
 		<Box
 			sx={{
-				width: "100%", // Takes the full width of its parent
-				height: 360, // Set a fixed height in pixels
-				maxWidth: 360, // Maximum width is 360px
-				overflowY: "auto", // Enable vertical scrolling
+				width: "100%",
+				height: 360,
+				maxWidth: 360,
+				overflowY: "auto",
+				overflowX: "auto",
 				bgcolor: "background.paper",
 			}}
 		>
@@ -227,7 +228,9 @@ const FileSystemViewer: React.FC<{
 	) : null;
 };
 
-const FileSelector: React.FC = () => {
+const FileSelector: React.FC<{ onChange: (fileId: string) => void }> = ({
+	onChange,
+}) => {
 	const [open, setOpen] = useState(false);
 	const [selectedFile, setSelectedFile] = useState<FileDetails>({
 		fileId: "",
@@ -239,6 +242,7 @@ const FileSelector: React.FC = () => {
 
 	const handleFileSelect = (fileId: string, fileName: string) => {
 		setSelectedFile({ fileId: fileId, fileName: fileName });
+		onChange(fileId);
 		handleClose();
 	};
 
