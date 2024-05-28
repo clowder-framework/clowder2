@@ -13,6 +13,8 @@ import { theme } from "../../../theme";
 import IconButton from "@mui/material/IconButton";
 import DeleteIcon from "@material-ui/icons/Delete";
 import Divider from "@mui/material/Divider";
+import { ActionModal } from "../../dialog/ActionModal";
+import { DatasetFreezeOut } from "../../../openapi/v2";
 
 export const DatasetVersions = (props) => {
 	// search parameters
@@ -24,6 +26,10 @@ export const DatasetVersions = (props) => {
 	const [currVersionPageNum, setCurrVersionPageNum] = useState<number>(1);
 	const [limit] = useState<number>(config.defaultVersionPerPage);
 	const [skip, setSkip] = useState<number>(0);
+	const [selectedDatasetVersion, setSelectedDatasetVersion] =
+		useState<DatasetFreezeOut>();
+	const [deleteDatasetVersionConfirmOpen, setDeleteDatasetVersionConfirmOpen] =
+		useState(false);
 
 	const getFreezeDatasets = (
 		datasetId: string | undefined,
@@ -88,135 +94,163 @@ export const DatasetVersions = (props) => {
 		getFreezeDatasets(originDatasetId, newSkip, limit);
 	};
 
+	// delete dataset version
+	const deleteSelectedDatasetVersion = () => {
+		if (
+			selectedDatasetVersion &&
+			selectedDatasetVersion.origin_id &&
+			selectedDatasetVersion.frozen_version_num
+		)
+			deleteFreezeDataset(
+				selectedDatasetVersion.origin_id,
+				selectedDatasetVersion.frozen_version_num
+			);
+		// after delete go to the current version
+		history(`/datasets/${currDataset.origin_id}?currVersionPageNum=1`);
+		setDeleteDatasetVersionConfirmOpen(false);
+	};
+
 	return (
-		<Box sx={{ mt: 2, mb: 5 }}>
-			<Typography variant="h5" gutterBottom>
-				Version
-			</Typography>
-			<Box>
-				<Box key={currDataset.origin_id} mb={2}>
-					<Link
-						component="button"
-						onClick={() => {
-							handleVersionChange(currDataset.origin_id);
-						}}
-						sx={{
-							color: theme.palette.primary.main,
-							pointerEvents:
-								currDataset.id === currDataset.origin_id ? "none" : "auto",
-							textDecoration: "none",
-							fontWeight:
-								currDataset.id === currDataset.origin_id ? "bold" : "normal",
-							"&:hover": {
-								textDecoration: "underline",
-							},
-						}}
-					>
-						Current
-					</Link>
-					<Box>
-						<Typography
-							variant="caption"
+		<>
+			<ActionModal
+				actionOpen={deleteDatasetVersionConfirmOpen}
+				actionTitle="Delete Dataset"
+				actionText="Do you really want to delete this version? This process cannot be undone."
+				actionBtnName="Delete"
+				handleActionBtnClick={deleteSelectedDatasetVersion}
+				handleActionCancel={() => {
+					setDeleteDatasetVersionConfirmOpen(false);
+				}}
+			/>
+			<Box sx={{ mt: 2, mb: 5 }}>
+				<Typography variant="h5" gutterBottom>
+					Version
+				</Typography>
+				<Box>
+					<Box key={currDataset.origin_id} mb={2}>
+						<Link
+							component="button"
+							onClick={() => {
+								handleVersionChange(currDataset.origin_id);
+							}}
 							sx={{
-								color: "text.primary.light",
+								color: theme.palette.primary.main,
+								pointerEvents:
+									currDataset.id === currDataset.origin_id ? "none" : "auto",
+								textDecoration: "none",
 								fontWeight:
 									currDataset.id === currDataset.origin_id ? "bold" : "normal",
+								"&:hover": {
+									textDecoration: "underline",
+								},
 							}}
 						>
-							{parseDate(currDataset.modified)}
-						</Typography>
-					</Box>
-					<Divider orientation="horizontal" />
-				</Box>
-				{frozenDatasets.map((dataset) =>
-					dataset.deleted ? (
-						<Box key={dataset.id} mb={2}>
+							Current
+						</Link>
+						<Box>
 							<Typography
-								variant="body1"
-								style={{
-									color: theme.palette.info.main,
+								variant="caption"
+								sx={{
+									color: "text.primary.light",
+									fontWeight:
+										currDataset.id === currDataset.origin_id
+											? "bold"
+											: "normal",
 								}}
 							>
-								Version {dataset.frozen_version_num} (Deleted)
+								{parseDate(currDataset.modified)}
 							</Typography>
-							<Box>
-								<Typography
-									variant="caption"
-									sx={{ color: "text.primary.light" }}
-								>
-									{parseDate(dataset.modified)}
-								</Typography>
-							</Box>
-							<Divider orientation="horizontal" />
 						</Box>
-					) : (
-						<Box key={dataset.id} mb={2}>
-							<Box
-								display="flex"
-								justifyContent="space-between"
-								alignItems="center"
-							>
-								<Link
-									component="button"
-									onClick={() => {
-										handleVersionChange(dataset.id);
-									}}
-									sx={{
-										color: theme.palette.primary.main,
-										pointerEvents:
-											currDataset.id === dataset.id ? "none" : "auto",
-										textDecoration: "none",
-										fontWeight:
-											currDataset.id === dataset.id ? "bold" : "normal",
-										"&:hover": {
-											textDecoration: "underline",
-										},
-									}}
-								>
-									Version {dataset.frozen_version_num}
-								</Link>
-								<IconButton
-									aria-label="delete"
-									size="small"
-									onClick={() =>
-										deleteFreezeDataset(
-											dataset.origin_id,
-											dataset.frozen_version_num
-										)
-									}
-								>
-									<DeleteIcon />
-								</IconButton>
-							</Box>
-							<Box>
+						<Divider orientation="horizontal" />
+					</Box>
+					{frozenDatasets.map((dataset) =>
+						dataset.deleted ? (
+							<Box key={dataset.id} mb={2}>
 								<Typography
-									variant="caption"
-									sx={{
-										color: "text.primary.light",
-										fontWeight:
-											currDataset.id === dataset.id ? "bold" : "normal",
+									variant="body1"
+									style={{
+										color: theme.palette.info.main,
 									}}
 								>
-									{parseDate(dataset.modified)}
+									Version {dataset.frozen_version_num} (Deleted)
 								</Typography>
+								<Box>
+									<Typography
+										variant="caption"
+										sx={{ color: "text.primary.light" }}
+									>
+										{parseDate(dataset.modified)}
+									</Typography>
+								</Box>
+								<Divider orientation="horizontal" />
 							</Box>
-							<Divider orientation="horizontal" />
-						</Box>
-					)
+						) : (
+							<Box key={dataset.id} mb={2}>
+								<Box
+									display="flex"
+									justifyContent="space-between"
+									alignItems="center"
+								>
+									<Link
+										component="button"
+										onClick={() => {
+											handleVersionChange(dataset.id);
+										}}
+										sx={{
+											color: theme.palette.primary.main,
+											pointerEvents:
+												currDataset.id === dataset.id ? "none" : "auto",
+											textDecoration: "none",
+											fontWeight:
+												currDataset.id === dataset.id ? "bold" : "normal",
+											"&:hover": {
+												textDecoration: "underline",
+											},
+										}}
+									>
+										Version {dataset.frozen_version_num}
+									</Link>
+									<IconButton
+										aria-label="delete"
+										size="small"
+										onClick={() => {
+											setSelectedDatasetVersion(dataset);
+											setDeleteDatasetVersionConfirmOpen(true);
+										}}
+									>
+										<DeleteIcon />
+									</IconButton>
+								</Box>
+								<Box>
+									<Typography
+										variant="caption"
+										sx={{
+											color: "text.primary.light",
+											fontWeight:
+												currDataset.id === dataset.id ? "bold" : "normal",
+										}}
+									>
+										{parseDate(dataset.modified)}
+									</Typography>
+								</Box>
+								<Divider orientation="horizontal" />
+							</Box>
+						)
+					)}
+				</Box>
+				{frozenDatasets && frozenDatasets.length !== 0 ? (
+					<Box display="flex" justifyContent="center" sx={{ m: 1 }}>
+						<Pagination
+							count={Math.ceil(pageMetadata.total_count / limit)}
+							page={currVersionPageNum}
+							onChange={handlePageChange}
+							shape="circular"
+						/>
+					</Box>
+				) : (
+					<></>
 				)}
 			</Box>
-			{frozenDatasets && frozenDatasets.length !== 0 ? (
-				<Box display="flex" justifyContent="center" sx={{ m: 1 }}>
-					<Pagination
-						count={Math.ceil(pageMetadata.total_count / limit)}
-						page={currVersionPageNum}
-						onChange={handlePageChange}
-						shape="circular"
-					/>
-				</Box>
-			) : (
-				<></>
-			)}
-		</Box>
+		</>
 	);
 };
