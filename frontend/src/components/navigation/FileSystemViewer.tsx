@@ -13,28 +13,22 @@ import {
 import FolderIcon from "@mui/icons-material/Folder";
 import InsertDriveFileIcon from "@mui/icons-material/InsertDriveFile";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import {
-	fetchDatasets,
-	fetchFoldersFilesInDataset,
-} from "../../actions/dataset";
-
-// Define a type for items in the directory structure
-interface DirectoryItem {
-	id: string;
-	label: string;
-	children?: DirectoryItem[];
-}
+import { fetchDatasets } from "../../actions/dataset";
+import { V2 } from "../../openapi";
 
 // Define the RecursiveComponent component with props type
 interface RecursiveComponentProps {
-	item: DirectoryItem;
+	item: FSItem;
 	depth?: number;
 }
 
-interface FSDataset {
-	id: string;
+// Define a type for items in the directory structure
+interface FSItem {
+	datasetId: string;
+	id?: string;
 	label: string;
-	children?: DirectoryItem[];
+	children?: FSItem[] | null;
+	type: string; // A FSItem can be a folder or a file
 }
 
 const RecursiveComponent: React.FC<RecursiveComponentProps> = ({
@@ -42,24 +36,51 @@ const RecursiveComponent: React.FC<RecursiveComponentProps> = ({
 	depth = 0,
 }) => {
 	const [expanded, setExpanded] = useState(false);
-	const [children, setChildren] = useState<DirectoryItem[] | undefined>(
-		item.children
-	);
-	const hasChildren = children && children.length > 0;
+	const [children, setChildren] = useState<FSItem[] | undefined>(item.children);
+	const isFolder = item.type === "folder";
 
 	// Function to generate Icon based on item type
 	const getIcon = () => {
-		if (hasChildren || !children) {
+		if (isFolder) {
 			return <FolderIcon />;
 		}
 		// TODO: Switch case to generate file icon based on file type
 		return <InsertDriveFileIcon />;
 	};
 
+	// Function to fetch children of a folder
+	async function fetchFolderFiles(
+		datasetid: string,
+		folderId: string | undefined
+	) {
+		try {
+			const response =
+				await V2.DatasetsService.getDatasetFoldersAndFilesApiV2DatasetsDatasetIdFoldersAndFilesGet(
+					datasetid,
+					folderId,
+					// TODO: Remove hardcoded values
+					0,
+					30
+				);
+			const data = response.data;
+			const FSItems = data.map((FSItem: any) => ({
+				datasetId: datasetid,
+				id: FSItem.id,
+				label: FSItem.name,
+				children: FSItem.object_type === "folder" ? [] : null,
+				type: FSItem.object_type,
+			}));
+			return FSItems;
+		} catch (error) {
+			console.error("Error fetching folders and files", error);
+		}
+	}
+
+	// Function to toggle expand/collapse of folder
 	const toggleExpand = () => {
-		if (!expanded && !children) {
+		if (!expanded && isFolder) {
 			// Simulate an API call to fetch children
-			fetchChildren(item.id).then((data) => {
+			fetchFolderFiles(item.datasetId, item.id).then((data) => {
 				setChildren(data);
 			});
 		}
@@ -68,12 +89,13 @@ const RecursiveComponent: React.FC<RecursiveComponentProps> = ({
 
 	return (
 		<List disablePadding>
+			{/*Indentation of item proportional to depth*/}
 			<ListItem sx={{ pl: depth * 2, borderBottom: "none", py: 0.5 }}>
 				<ListItemIcon sx={{ minWidth: "auto", mr: 1 }}>
 					<IconButton
 						size="small"
 						onClick={toggleExpand}
-						sx={{ visibility: hasChildren || !children ? "visible" : "hidden" }}
+						sx={{ visibility: isFolder ? "visible" : "hidden" }}
 					>
 						<ExpandMoreIcon
 							style={{
@@ -86,7 +108,7 @@ const RecursiveComponent: React.FC<RecursiveComponentProps> = ({
 				<ListItemText primary={item.label} />
 			</ListItem>
 			<Collapse in={expanded} timeout="auto" unmountOnExit>
-				{hasChildren && (
+				{isFolder && (
 					<Box sx={{ ml: 2 }}>
 						{children?.map((child) => (
 							<RecursiveComponent
@@ -102,55 +124,44 @@ const RecursiveComponent: React.FC<RecursiveComponentProps> = ({
 	);
 };
 
-// Simulated API call to fetch children based on parent ID
-async function fetchChildren(parentId: string): Promise<DirectoryItem[]> {
-	// Simulate delayed API response
-	return new Promise((resolve) => {
-		setTimeout(() => {
-			resolve([
-				{ id: `${parentId}-child-1`, label: "Child 1" },
-				{ id: `${parentId}-child-2`, label: "Child 2" },
-			]);
-		}, 300);
-	});
-}
-
 const FileSystemViewer: React.FC = () => {
 	const dispatch = useDispatch();
 	const datasets = useSelector((state: any) => state.dataset.datasets);
-	const [FSDatasets, setFSDatasets] = useState<FSDataset[]>([]);
+	const [FSItems, setFSItems] = useState<FSItem[]>([]);
 
 	// API function call to get Datasets
 	const listDatasets = (skip?: number, limit?: number, mine?: boolean) => {
 		dispatch(fetchDatasets(skip, limit, mine));
 	};
 
-	// Fetch root directories and datasets on component mount
+	// Fetch datasets on component mount
 	useEffect(() => {
 		listDatasets(0, 10, true);
-	}, []); // Include dispatch to satisfy exhaustive-deps rule
+	}, []); //
 
 	useEffect(() => {
 		if (datasets.data) {
-			setFSDatasets(
+			setFSItems(
 				datasets.data.map((dataset: any) => ({
-					id: dataset.id,
+					datasetId: dataset.id,
 					label: dataset.name,
+					children: [],
+					type: "folder",
 				}))
 			);
 		}
-	}, [datasets]); // Depend on datasets to update FSDatasets
+	}, [datasets]);
 
-	return FSDatasets.length > 0 ? (
+	return FSItems.length > 0 ? (
 		<Box sx={{ width: "100%", maxWidth: 360, bgcolor: "background.paper" }}>
 			<Typography variant="h6" sx={{ ml: 2, my: 2 }}>
-				File System Viewer
+				File Selector
 			</Typography>
-			{FSDatasets.map((FSDataset) => (
-				<RecursiveComponent key={FSDataset.id} item={FSDataset} />
+			{FSItems.map((FSItem) => (
+				<RecursiveComponent key={FSItem.id} item={FSItem} />
 			))}
 		</Box>
-	) : null; // Optionally handle the case where roots are empty
+	) : null;
 };
 
 export default FileSystemViewer;
