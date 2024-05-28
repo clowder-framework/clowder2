@@ -3,6 +3,7 @@ import React, { ChangeEvent, useEffect, useState } from "react";
 import {
 	Box,
 	Grid,
+	Link,
 	Pagination,
 	Stack,
 	Tab,
@@ -38,6 +39,7 @@ import { ErrorModal } from "../errors/ErrorModal";
 import { Visualization } from "../visualizations/Visualization";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import config from "../../app.config";
+import { fetchPublicStandardLicenseUrl } from "../../utils/licenses";
 
 export const PublicDataset = (): JSX.Element => {
 	// path parameter
@@ -79,10 +81,19 @@ export const PublicDataset = (): JSX.Element => {
 	const about = useSelector(
 		(state: RootState) => state.publicDataset.publicAbout
 	);
-
 	const publicFolderPath = useSelector(
 		(state: RootState) => state.folder.publicFolderPath
 	);
+	const license = useSelector((state: RootState) => state.dataset.license);
+	const [standardLicenseUrl, setStandardLicenseUrl] = useState<string>("");
+	const fetchStandardLicenseUrlData = async (license_id: string) => {
+		try {
+			const data = await fetchPublicStandardLicenseUrl(license_id); // Call your function to fetch licenses
+			setStandardLicenseUrl(data); // Update state with the fetched data
+		} catch (error) {
+			console.error("Error fetching license url", error);
+		}
+	};
 
 	// state
 	const [selectedTabIndex, setSelectedTabIndex] = useState<number>(0);
@@ -111,13 +122,18 @@ export const PublicDataset = (): JSX.Element => {
 		getMetadatDefinitions(null, 0, 100);
 	}, [searchParams]);
 
+	useEffect(() => {
+		if (about && about.license_id !== undefined)
+			fetchStandardLicenseUrlData(about.license_id);
+	}, [about]);
+
 	// for breadcrumb
 	useEffect(() => {
 		// for breadcrumb
 		const tmpPaths = [
 			{
 				name: about["name"],
-				url: `/public_datasets/${datasetId}`,
+				url: `/public/datasets/${datasetId}`,
 			},
 		];
 
@@ -125,7 +141,7 @@ export const PublicDataset = (): JSX.Element => {
 			for (const folderBread of publicFolderPath) {
 				tmpPaths.push({
 					name: folderBread["folder_name"],
-					url: `/public_datasets/${datasetId}?folder=${folderBread["folder_id"]}`,
+					url: `/public/datasets/${datasetId}?folder=${folderBread["folder_id"]}`,
 				});
 			}
 		} else {
@@ -270,6 +286,35 @@ export const PublicDataset = (): JSX.Element => {
 					</TabPanel>
 				</Grid>
 				<Grid item xs={12} sm={12} md={2} lg={2} xl={2}>
+					<Typography variant="h5" gutterBottom>
+						License
+					</Typography>
+					{about.standard_license && about.license_id !== undefined ? (
+						<Typography>
+							<Link href={standardLicenseUrl} target="_blank">
+								<img
+									className="logo"
+									src={`public/${about.license_id}.png`}
+									alt={about.license_id}
+								/>
+							</Link>
+						</Typography>
+					) : (
+						<></>
+					)}
+					{!about.standard_license &&
+					license !== undefined &&
+					license.name !== undefined ? (
+						<div>
+							<Typography>
+								<Link href={license.url} target="_blank">
+									{license.name}
+								</Link>
+							</Typography>
+						</div>
+					) : (
+						<></>
+					)}
 					<DatasetDetails details={about} />
 				</Grid>
 			</Grid>

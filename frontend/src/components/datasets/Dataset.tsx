@@ -3,17 +3,17 @@ import React, { ChangeEvent, useEffect, useState } from "react";
 import {
 	Box,
 	Button,
+	Dialog,
+	DialogContent,
+	DialogTitle,
 	Grid,
+	IconButton,
+	Link,
 	Pagination,
 	Stack,
 	Tab,
 	Tabs,
 	Typography,
-	Link,
-	IconButton,
-	DialogTitle,
-	DialogContent,
-	Dialog,
 } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import { useParams, useSearchParams } from "react-router-dom";
@@ -28,7 +28,7 @@ import { fetchFolderPath } from "../../actions/folder";
 
 import { a11yProps, TabPanel } from "../tabs/TabComponent";
 import FilesTable from "../files/FilesTable";
-import { LicenseOption, MetadataIn } from "../../openapi/v2";
+import { MetadataIn } from "../../openapi/v2";
 import { DisplayMetadata } from "../metadata/DisplayMetadata";
 import { DisplayListenerMetadata } from "../metadata/DisplayListenerMetadata";
 import { EditMetadata } from "../metadata/EditMetadata";
@@ -51,18 +51,13 @@ import ShareIcon from "@mui/icons-material/Share";
 import BuildIcon from "@mui/icons-material/Build";
 import { ExtractionHistoryTab } from "../listeners/ExtractionHistoryTab";
 import { SharingTab } from "../sharing/SharingTab";
-import RoleChip from "../auth/RoleChip";
 import { TabStyle } from "../../styles/Styles";
 import { ErrorModal } from "../errors/ErrorModal";
 import { Visualization } from "../visualizations/Visualization";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import config from "../../app.config";
 import { EditLicenseModal } from "./EditLicenseModal";
-import { V2 } from "../../openapi";
-import {
-	fetchStandardLicenses,
-	fetchStandardLicenseUrl,
-} from "../../utils/licenses";
+import { fetchStandardLicenseUrl } from "../../utils/licenses";
 import { authCheck } from "../../utils/common";
 
 export const Dataset = (): JSX.Element => {
@@ -143,6 +138,13 @@ export const Dataset = (): JSX.Element => {
 	);
 	const adminMode = useSelector((state: RootState) => state.user.adminMode);
 	const license = useSelector((state: RootState) => state.dataset.license);
+	const deletedFile = useSelector(
+		(state: RootState) => state.dataset.deletedFile
+	);
+	const deletedFolder = useSelector(
+		(state: RootState) => state.dataset.deletedFolder
+	);
+
 	const [standardLicenseUrl, setStandardLicenseUrl] = useState<string>("");
 	const fetchStandardLicenseUrlData = async (license_id: string) => {
 		try {
@@ -169,6 +171,16 @@ export const Dataset = (): JSX.Element => {
 		getFolderPath(folderId);
 		getMetadatDefinitions(null, 0, 100);
 	}, [searchParams, adminMode, about.license_id]);
+
+	useEffect(() => {
+		fetchFoldersFilesInDataset(
+			datasetId,
+			folderId,
+			(currPageNum - 1) * limit,
+			limit
+		);
+		listDatasetAbout(datasetId);
+	}, [deletedFile, deletedFolder]);
 
 	// for breadcrumb
 	useEffect(() => {

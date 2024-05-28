@@ -99,6 +99,7 @@ export { PublicDatasetsService } from './services/PublicDatasetsService';
 export { PublicElasticsearchService } from './services/PublicElasticsearchService';
 export { PublicFilesService } from './services/PublicFilesService';
 export { PublicFoldersService } from './services/PublicFoldersService';
+export { PublicLicensesService } from './services/PublicLicensesService';
 export { PublicMetadataService } from './services/PublicMetadataService';
 export { PublicVisualizationsService } from './services/PublicVisualizationsService';
 export { ServiceService } from './services/ServiceService';

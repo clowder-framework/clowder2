@@ -19,9 +19,19 @@ def test_license(client: TestClient, headers: dict):
     assert response.status_code == 200
     license_id = response.json().get("id")
 
-    # get
+    # private get without token should fail
+    response = client.get(f"{settings.API_V2_STR}/licenses/{license_id}")
+    assert response.status_code == 401
+
+    # private get with token should pass
     response = client.get(
         f"{settings.API_V2_STR}/licenses/{license_id}", headers=headers
+    )
+    assert response.status_code == 200
+
+    # public get route without token should pass
+    response = client.get(
+        f"{settings.API_V2_STR}/public_licenses/{license_id}"  # , headers=headers
     )
     assert response.status_code == 200
 
