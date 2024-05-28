@@ -42,7 +42,7 @@ import { Footer } from "./navigation/Footer";
 import BuildIcon from "@mui/icons-material/Build";
 
 import Dialog from "@mui/material/Dialog";
-import FileSystemViewer from "./navigation/FileSystemViewer";
+import FileSelector from "./navigation/FileSelector";
 import Container from "@mui/material/Container";
 
 const drawerWidth = 240;
@@ -469,7 +469,7 @@ export default function PersistentDrawerLeft(props) {
 			</Box>
 			<Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
 				<Container>
-					<FileSystemViewer />
+					<FileSelector />
 				</Container>
 			</Dialog>
 		</Box>
