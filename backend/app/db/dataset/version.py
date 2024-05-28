@@ -1,4 +1,3 @@
-from http.client import HTTPException
 from typing import Union
 
 from app.config import settings
@@ -18,6 +17,7 @@ from beanie import PydanticObjectId
 from beanie.odm.operators.find.logical import And
 from bson import ObjectId
 from elasticsearch import Elasticsearch
+from fastapi import HTTPException
 from minio import Minio
 
 
@@ -394,7 +394,8 @@ async def remove_file_entry(
 
         # delete file raw bytes if not used anywhere else
         await _delete_file(file, fs)
-        # else:
+
+    else:
         raise HTTPException(status_code=404, detail=f"File {file_id} not found")
 
 
