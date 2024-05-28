@@ -194,8 +194,6 @@ async def remove_file_entry(
         # delete from elasticsearch
         delete_document_by_id(es, settings.elasticsearch_index, str(file_id))
 
-        # delete from mongo
-        await file.delete()
         # delete file raw bytes if not used anywhere else
         if (
             await FileFreezeDB.find_one(
@@ -252,6 +250,9 @@ async def remove_file_entry(
                     is None
                 ):
                     fs.remove_object(settings.MINIO_BUCKET_NAME, visData.id)
+
+        # if all above succeeded, delete from mongo
+        await file.delete()
     else:
         raise HTTPException(status_code=404, detail=f"File {file_id} not found")
 
@@ -261,8 +262,6 @@ async def remove_frozen_file_entry(frozne_file_id: Union[str, ObjectId], fs: Min
     if (
         frozenFile := await FileFreezeDB.get(PydanticObjectId(frozne_file_id))
     ) is not None:
-        # delete from mongo
-        await frozenFile.delete()
         # delete file raw bytes if not used anywhere else, check both frozen and well as current
         if (
             await FileFreezeDB.find_one(
@@ -331,7 +330,8 @@ async def remove_frozen_file_entry(frozne_file_id: Union[str, ObjectId], fs: Min
                     fs.remove_object(
                         settings.MINIO_BUCKET_NAME, frozenVisData.origin_id
                     )
-
+        # if all above succeeded, delete from mongo
+        await frozenFile.delete()
     else:
         raise HTTPException(
             status_code=404, detail=f"Released File {frozne_file_id} not found"
@@ -343,9 +343,6 @@ async def remove_local_file_entry(file_id: Union[str, ObjectId], es: Elasticsear
     if (file := await FileDB.get(PydanticObjectId(file_id))) is not None:
         # delete from elasticsearch
         delete_document_by_id(es, settings.elasticsearch_index, str(file_id))
-
-        # delete from mongo
-        await file.delete()
 
         # delete metadata
         await MetadataDB.find(
@@ -369,6 +366,9 @@ async def remove_local_file_entry(file_id: Union[str, ObjectId], es: Elasticsear
                 == PydanticObjectId(visConfig.id)
             ).delete()
 
+        # if all above succeeded, delete from mongo
+        await file.delete()
+
     else:
         raise HTTPException(status_code=404, detail=f"File {file_id} not found")
 
@@ -378,9 +378,6 @@ async def remove_frozen_local_file_entry(frozen_file_id: Union[str, ObjectId]):
     if (
         frozenFile := await FileFreezeDB.get(PydanticObjectId(frozen_file_id))
     ) is not None:
-        # delete from mongo
-        await frozenFile.delete()
-
         # delete metadata
         await MetadataFreezeDB.find(
             MetadataFreezeDB.resource.resource_id == PydanticObjectId(frozen_file_id)
@@ -406,6 +403,8 @@ async def remove_frozen_local_file_entry(frozen_file_id: Union[str, ObjectId]):
                 == PydanticObjectId(frozenVisConfig.id)
             ).delete()
 
+        # if all above succeeded, delete from mongo
+        await frozenFile.delete()
     else:
         raise HTTPException(status_code=404, detail=f"File {frozen_file_id} not found")
 

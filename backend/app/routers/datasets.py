@@ -630,10 +630,6 @@ async def delete_freeze_dataset_version(
     ) is not None:
         frozen_dataset_id = frozen_dataset.id
 
-        # mark the deleted field without actually deleting
-        frozen_dataset.deleted = True
-        await frozen_dataset.save()
-
         # delete metadata
         await MetadataFreezeDB.find(
             MetadataFreezeDB.resource.resource_id
@@ -713,6 +709,10 @@ async def delete_freeze_dataset_version(
         await AuthorizationDB.find(
             AuthorizationDB.dataset_id == PydanticObjectId(frozen_dataset_id)
         ).delete()
+
+        # If all above succeeded, mark the deleted field without actually deleting
+        frozen_dataset.deleted = True
+        await frozen_dataset.save()
 
         return frozen_dataset.dict()
 
