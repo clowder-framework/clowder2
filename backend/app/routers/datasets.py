@@ -12,10 +12,14 @@ from app import dependencies
 from app.config import settings
 from app.db.dataset.download import _increment_data_downloads
 from app.db.dataset.version import (
+    _delete_frozen_dataset,
+    _delete_thumbnail,
+    _delete_visualizations,
     _freeze_dataset_metadata,
     _freeze_dataset_thumbnail,
     _freeze_dataset_visualization,
     _freeze_files_folders_w_metadata_vis,
+    remove_file_entry,
 )
 from app.db.folder.hierarchy import _get_folder_hierarchy
 from app.deps.authorization_deps import Authorization, CheckStatus
@@ -32,39 +36,23 @@ from app.models.datasets import (
     DatasetPatch,
     DatasetStatus,
 )
-from app.models.files import (
-    FileDB,
-    FileDBViewList,
-    FileFreezeDB,
-    FileOut,
-    LocalFileIn,
-    StorageType,
-)
+from app.models.files import FileDB, FileDBViewList, FileOut, LocalFileIn, StorageType
 from app.models.folder_and_file import FolderFileViewList
 from app.models.folders import (
     FolderDB,
     FolderDBViewList,
-    FolderFreezeDB,
     FolderIn,
     FolderOut,
     FolderPatch,
 )
 from app.models.licenses import standard_licenses
-from app.models.metadata import MetadataDB, MetadataFreezeDB
+from app.models.metadata import MetadataDB
 from app.models.pages import Paged, _construct_page_metadata, _get_page_query
-from app.models.thumbnails import ThumbnailDB, ThumbnailFreezeDB
+from app.models.thumbnails import ThumbnailDB
 from app.models.users import UserOut
-from app.models.visualization_config import VisualizationConfigFreezeDB
-from app.models.visualization_data import VisualizationDataDB, VisualizationDataFreezeDB
 from app.rabbitmq.listeners import submit_dataset_job
 from app.routers.authentication import get_admin, get_admin_mode
-from app.routers.files import (
-    add_file_entry,
-    add_local_file_entry,
-    remove_file_entry,
-    remove_frozen_file_entry,
-    remove_frozen_local_file_entry,
-)
+from app.routers.files import add_file_entry, add_local_file_entry
 from app.routers.licenses import delete_license
 from app.search.connect import delete_document_by_id
 from app.search.index import index_dataset, index_file
@@ -427,18 +415,36 @@ async def delete_dataset(
     if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
         # delete from elasticsearch
         delete_document_by_id(es, settings.elasticsearch_index, dataset_id)
-        # delete dataset first to minimize files/folder being uploaded to a delete dataset
-        await dataset.delete()
+
+        # find associate frozen datasets and delete them iteratively
+        async for frozen_dataset in DatasetFreezeDB.find(
+            DatasetFreezeDB.origin_id == PydanticObjectId(dataset_id)
+        ):
+            await _delete_frozen_dataset(frozen_dataset, fs, hard_delete=True)
+
+        # delete associate metadata
         await MetadataDB.find(
-            MetadataDB.resource.resource_id == PydanticObjectId(dataset_id)
+            MetadataDB.resource.resource_id == PydanticObjectId(dataset_id),
+            MetadataDB.resource.collection == "datasets",
         ).delete()
+
+        # delete associate folders
+        await FolderDB.find(
+            FolderDB.dataset_id == PydanticObjectId(dataset_id)
+        ).delete()
+
+        # delete associate thumbnails
+        await _delete_thumbnail(dataset, fs)
+
+        # delete associate visualizations
+        await _delete_visualizations(dataset, fs)
+
+        # delete files and its associate resources
         async for file in FileDB.find(
             FileDB.dataset_id == PydanticObjectId(dataset_id)
         ):
             await remove_file_entry(file.id, fs, es)
-        await FolderDB.find(
-            FolderDB.dataset_id == PydanticObjectId(dataset_id)
-        ).delete()
+
         await AuthorizationDB.find(
             AuthorizationDB.dataset_id == PydanticObjectId(dataset_id)
         ).delete()
@@ -448,6 +454,8 @@ async def delete_dataset(
         if dataset.license_id not in standard_license_ids:
             await delete_license(dataset.license_id)
 
+        # if above succeeded, delete the dataset
+        await dataset.delete()
         return {"deleted": dataset_id}
 
     raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
@@ -628,93 +636,7 @@ async def delete_freeze_dataset_version(
             DatasetFreezeDB.frozen_version_num == frozen_version_num,
         )
     ) is not None:
-        frozen_dataset_id = frozen_dataset.id
-
-        # delete metadata
-        await MetadataFreezeDB.find(
-            MetadataFreezeDB.resource.resource_id
-            == PydanticObjectId(frozen_dataset_id),
-            MetadataFreezeDB.resource.collection == "datasets",
-        ).delete()
-
-        # delete folders
-        await FolderFreezeDB.find(
-            FolderFreezeDB.dataset_id == PydanticObjectId(frozen_dataset_id)
-        ).delete()
-
-        # delete dataset thumbnails
-        async for frozenThumbnail in ThumbnailFreezeDB.find(
-            ThumbnailFreezeDB.id == frozen_dataset.thumbnail_id,
-        ):
-            # delete mongo document
-            await frozenThumbnail.delete()
-
-            # if thumbnail is not used by other frozen dataset, delete the raw bytes
-            if (
-                await ThumbnailFreezeDB.find_one(
-                    ThumbnailFreezeDB.origin_id
-                    == PydanticObjectId(frozenThumbnail.origin_id)
-                )
-                is None
-            ) and (
-                await ThumbnailDB.find_one(ThumbnailDB.id != frozenThumbnail.origin_id)
-                is None
-            ):
-                fs.remove_object(settings.MINIO_BUCKET_NAME, frozenThumbnail.origin_id)
-
-        # delete dataset visualization
-        async for frozenVisConfig in VisualizationConfigFreezeDB.find(
-            VisualizationConfigFreezeDB.resource.resource_id
-            == PydanticObjectId(frozen_dataset_id),
-            VisualizationConfigFreezeDB.resource.collection == "datasets",
-        ):
-            # delete mongo document
-            await frozenVisConfig.delete()
-
-            # delete associate visualization data
-            async for frozenVisData in VisualizationDataFreezeDB.find(
-                VisualizationDataFreezeDB.visualization_config_id
-                == PydanticObjectId(frozenVisConfig.id),
-            ):
-                # delete mongo document
-                await frozenVisData.delete()
-
-                # if vis data is not used by other frozen dataset, delete the raw bytes too
-                if (
-                    await VisualizationDataFreezeDB.find_one(
-                        VisualizationDataFreezeDB.origin_id
-                        == PydanticObjectId(frozenVisData.origin_id)
-                    )
-                    is None
-                ) and (
-                    await VisualizationDataDB.find_one(
-                        VisualizationDataDB.id != frozenVisData.origin_id
-                    )
-                    is None
-                ):
-                    fs.remove_object(
-                        settings.MINIO_BUCKET_NAME, frozenVisData.origin_id
-                    )
-
-        # delete files and file associate resources
-        async for frozenFile in FileFreezeDB.find(
-            FileFreezeDB.dataset_id == PydanticObjectId(frozen_dataset_id)
-        ):
-            if frozenFile.storage_type == StorageType.LOCAL:
-                await remove_frozen_local_file_entry(frozenFile.id)
-            else:
-                await remove_frozen_file_entry(frozenFile.id, fs)
-
-        # delete authorizations
-        await AuthorizationDB.find(
-            AuthorizationDB.dataset_id == PydanticObjectId(frozen_dataset_id)
-        ).delete()
-
-        # If all above succeeded, mark the deleted field without actually deleting
-        frozen_dataset.deleted = True
-        await frozen_dataset.save()
-
-        return frozen_dataset.dict()
+        return await _delete_frozen_dataset(frozen_dataset, fs, hard_delete=False)
 
     raise HTTPException(
         status_code=404,

@@ -1,6 +1,11 @@
+from http.client import HTTPException
+from typing import Union
+
+from app.config import settings
 from app.db.folder.version import _freeze_folder
-from app.models.files import FileDB, FileFreezeDB
-from app.models.folders import FolderDB
+from app.models.authorization import AuthorizationDB
+from app.models.files import FileDB, FileFreezeDB, FileVersionDB, StorageType
+from app.models.folders import FolderDB, FolderFreezeDB
 from app.models.metadata import MetadataDB, MetadataFreezeDB
 from app.models.thumbnails import ThumbnailDB, ThumbnailFreezeDB
 from app.models.visualization_config import (
@@ -8,9 +13,12 @@ from app.models.visualization_config import (
     VisualizationConfigFreezeDB,
 )
 from app.models.visualization_data import VisualizationDataDB, VisualizationDataFreezeDB
+from app.search.connect import delete_document_by_id
 from beanie import PydanticObjectId
 from beanie.odm.operators.find.logical import And
 from bson import ObjectId
+from elasticsearch import Elasticsearch
+from minio import Minio
 
 
 async def _freeze_file_metadata(file, new_frozen_file_id: PydanticObjectId):
@@ -165,3 +173,297 @@ async def _freeze_dataset_visualization(
             dvd_data["frozen"] = True
             frozen_vis_data = VisualizationDataFreezeDB(**dvd_data)
             await frozen_vis_data.insert()
+
+
+async def _delete_frozen_visualizations(resource, fs):
+    async for frozen_vis_config in VisualizationConfigFreezeDB.find(
+        VisualizationConfigFreezeDB.resource.resource_id
+        == PydanticObjectId(resource.id),
+    ):
+        # delete mongo document
+        await frozen_vis_config.delete()
+
+        # delete associate visualization data
+        async for frozen_vis_data in VisualizationDataFreezeDB.find(
+            VisualizationDataFreezeDB.visualization_config_id
+            == PydanticObjectId(frozen_vis_config.id),
+        ):
+            # delete mongo document
+            await frozen_vis_data.delete()
+
+            if fs is not None:
+                # if vis data is not used by other frozen dataset, delete the raw bytes too
+                if (
+                    await VisualizationDataFreezeDB.find_one(
+                        VisualizationDataFreezeDB.origin_id
+                        == PydanticObjectId(frozen_vis_data.origin_id)
+                    )
+                    is None
+                ) and (
+                    await VisualizationDataDB.find_one(
+                        VisualizationDataDB.id != frozen_vis_data.origin_id
+                    )
+                    is None
+                ):
+                    fs.remove_object(
+                        settings.MINIO_BUCKET_NAME, str(frozen_vis_data.origin_id)
+                    )
+
+        return frozen_vis_config.dict()
+
+
+async def _delete_visualizations(resource, fs):
+    async for vis_config in VisualizationConfigDB.find(
+        VisualizationConfigDB.resource.resource_id == PydanticObjectId(resource.id),
+    ):
+        # delete mongo document
+        await vis_config.delete()
+
+        # delete associate visualization data
+        async for vis_data in VisualizationDataDB.find(
+            VisualizationDataDB.visualization_config_id
+            == PydanticObjectId(vis_config.id),
+        ):
+            # delete mongo document
+            await vis_data.delete()
+
+            if fs is not None:
+                # if vis data is not used by other frozen dataset, delete the raw bytes too
+                if (
+                    await VisualizationDataFreezeDB.find_one(
+                        VisualizationDataFreezeDB.origin_id
+                        == PydanticObjectId(vis_data.id)
+                    )
+                    is None
+                ):
+                    fs.remove_object(settings.MINIO_BUCKET_NAME, str(vis_data.id))
+
+        return vis_config.dict()
+
+
+async def _delete_frozen_thumbnail(resource, fs):
+    async for frozen_thumbnail in ThumbnailFreezeDB.find(
+        ThumbnailFreezeDB.id == resource.thumbnail_id,
+    ):
+        # delete mongo document
+        await frozen_thumbnail.delete()
+
+        if fs is not None:
+            # if thumbnail is not used by other frozen dataset, delete the raw bytes
+            if (
+                await ThumbnailFreezeDB.find_one(
+                    ThumbnailFreezeDB.origin_id
+                    == PydanticObjectId(frozen_thumbnail.origin_id)
+                )
+                is None
+            ) and (
+                await ThumbnailDB.find_one(ThumbnailDB.id != frozen_thumbnail.origin_id)
+                is None
+            ):
+                fs.remove_object(
+                    settings.MINIO_BUCKET_NAME, str(frozen_thumbnail.origin_id)
+                )
+
+        return frozen_thumbnail.dict()
+
+
+async def _delete_thumbnail(resource, fs):
+    async for thumbnail in ThumbnailDB.find(
+        ThumbnailDB.id == resource.thumbnail_id,
+    ):
+        # delete mongo document
+        await thumbnail.delete()
+
+        if fs is not None:
+            # if thumbnail is not used by other frozen dataset, delete the raw bytes
+            if (
+                await ThumbnailFreezeDB.find_one(
+                    ThumbnailFreezeDB.origin_id == PydanticObjectId(thumbnail.id)
+                )
+                is None
+            ):
+                fs.remove_object(settings.MINIO_BUCKET_NAME, str(thumbnail.id))
+
+        return thumbnail.dict()
+
+
+async def _delete_file(file, fs):
+    # delete mongo
+    await file.delete()
+
+    if fs is not None:
+        # delete file raw bytes if not used anywhere else
+        if (
+            await FileFreezeDB.find_one(
+                FileFreezeDB.origin_id == PydanticObjectId(file.id)
+            )
+            is None
+        ):
+            fs.remove_object(settings.MINIO_BUCKET_NAME, str(file.id))
+
+    return file.dict()
+
+
+async def _delete_frozen_file(frozen_file, fs):
+    # delete mongo
+    await frozen_file.delete()
+
+    if fs is not None:
+        # delete file raw bytes if not used anywhere else, check both frozen and well as current
+        if (
+            await FileFreezeDB.find_one(
+                FileFreezeDB.origin_id == PydanticObjectId(frozen_file.origin_id)
+            )
+            is None
+        ) and (
+            await FileDB.find_one(FileDB.id == PydanticObjectId(frozen_file.origin_id))
+        ) is None:
+            fs.remove_object(settings.MINIO_BUCKET_NAME, str(frozen_file.origin_id))
+
+    return frozen_file.dict()
+
+
+async def _delete_frozen_dataset(frozen_dataset, fs, hard_delete=False):
+    # delete metadata
+    await MetadataFreezeDB.find(
+        MetadataFreezeDB.resource.resource_id == PydanticObjectId(frozen_dataset.id),
+        MetadataFreezeDB.resource.collection == "datasets",
+    ).delete()
+
+    # delete folders
+    await FolderFreezeDB.find(
+        FolderFreezeDB.dataset_id == PydanticObjectId(frozen_dataset.id)
+    ).delete()
+
+    # delete dataset thumbnails
+    await _delete_frozen_thumbnail(frozen_dataset, fs)
+
+    # delete dataset visualization
+    await _delete_frozen_visualizations(frozen_dataset, fs)
+
+    # delete files and file associate resources
+    async for frozen_file in FileFreezeDB.find(
+        FileFreezeDB.dataset_id == PydanticObjectId(frozen_dataset.id)
+    ):
+        if frozen_file.storage_type == StorageType.LOCAL:
+            await remove_frozen_local_file_entry(frozen_file.id)
+        else:
+            await remove_frozen_file_entry(frozen_file.id, fs)
+
+    # delete authorizations
+    await AuthorizationDB.find(
+        AuthorizationDB.dataset_id == PydanticObjectId(frozen_dataset.id)
+    ).delete()
+
+    # If all above succeeded
+    if hard_delete:
+        await frozen_dataset.delete()
+    else:
+        frozen_dataset.deleted = True
+        await frozen_dataset.save()
+
+    return frozen_dataset.dict()
+
+
+# TODO: Move this to MongoDB middle layer
+async def remove_file_entry(
+    file_id: Union[str, ObjectId],
+    fs: Minio,
+    es: Elasticsearch,
+):
+    """Remove FileDB object into MongoDB, Minio, and associated metadata and version information."""
+
+    if (file := await FileDB.get(PydanticObjectId(file_id))) is not None:
+        # delete from elasticsearch
+        delete_document_by_id(es, settings.elasticsearch_index, str(file_id))
+
+        # TODO: Deleting individual versions will require updating version_id in mongo, or deleting entire document
+        await FileVersionDB.find(FileVersionDB.file_id == ObjectId(file_id)).delete()
+
+        # delete metadata
+        await MetadataDB.find(
+            MetadataDB.resource.resource_id == ObjectId(file_id),
+            MetadataDB.resource.collection == "files",
+        ).delete()
+
+        # delete thumbnail
+        await _delete_thumbnail(file, fs)
+
+        # delete visualization
+        await _delete_visualizations(file, fs)
+
+        # delete file raw bytes if not used anywhere else
+        await _delete_file(file, fs)
+        # else:
+        raise HTTPException(status_code=404, detail=f"File {file_id} not found")
+
+
+async def remove_frozen_file_entry(frozne_file_id: Union[str, ObjectId], fs: Minio):
+    """Remove Frozen FileDB object into MongoDB, Minio, and associated metadata and version information."""
+    if (
+        frozen_file := await FileFreezeDB.get(PydanticObjectId(frozne_file_id))
+    ) is not None:
+        # delete metadata
+        await MetadataFreezeDB.find(
+            MetadataFreezeDB.resource.resource_id == ObjectId(frozne_file_id),
+            MetadataFreezeDB.resource.collection == "files",
+        ).delete()
+
+        # delete thumbnail
+        await _delete_frozen_thumbnail(frozen_file, fs)
+
+        # delete visualization
+        await _delete_frozen_visualizations(frozen_file, fs)
+
+        # if all above succeeded, delete from mongo
+        await _delete_frozen_file(frozen_file, fs)
+    else:
+        raise HTTPException(
+            status_code=404, detail=f"Released File {frozne_file_id} not found"
+        )
+
+
+async def remove_local_file_entry(file_id: Union[str, ObjectId], es: Elasticsearch):
+    """Remove FileDB object into MongoDB, Minio, and associated metadata and version information."""
+    if (file := await FileDB.get(PydanticObjectId(file_id))) is not None:
+        # delete from elasticsearch
+        delete_document_by_id(es, settings.elasticsearch_index, str(file_id))
+
+        # delete metadata
+        await MetadataDB.find(
+            MetadataDB.resource.resource_id == PydanticObjectId(file_id)
+        ).delete()
+
+        # delete thumbnail
+        await _delete_thumbnail(file, None)
+
+        # delete visualization
+        await _delete_visualizations(file, None)
+
+        # if all above succeeded
+        await _delete_file(file, None)
+
+    else:
+        raise HTTPException(status_code=404, detail=f"File {file_id} not found")
+
+
+async def remove_frozen_local_file_entry(frozen_file_id: Union[str, ObjectId]):
+    """Remove FileDB object into MongoDB, Minio, and associated metadata and version information."""
+    if (
+        frozen_file := await FileFreezeDB.get(PydanticObjectId(frozen_file_id))
+    ) is not None:
+        # delete metadata
+        await MetadataFreezeDB.find(
+            MetadataFreezeDB.resource.resource_id == PydanticObjectId(frozen_file_id)
+        ).delete()
+
+        # delete thumbnail
+        await _delete_frozen_thumbnail(frozen_file, None)
+
+        # delete visualization
+        await _delete_frozen_visualizations(frozen_file, None)
+
+        # if all above succeeded, delete from mongo
+        await _delete_frozen_file(frozen_file, None)
+    else:
+        raise HTTPException(status_code=404, detail=f"File {frozen_file_id} not found")
