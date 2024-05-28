@@ -206,10 +206,10 @@ const FileSystemViewer: React.FC<{
 	return FSItems.length > 0 ? (
 		<Box
 			sx={{
-				width: "100%",
-				height: "400",
-				maxWidth: 360,
-				overflowY: "auto",
+				width: "100%", // Takes the full width of its parent
+				height: 360, // Set a fixed height in pixels
+				maxWidth: 360, // Maximum width is 360px
+				overflowY: "auto", // Enable vertical scrolling
 				bgcolor: "background.paper",
 			}}
 		>
@@ -243,9 +243,19 @@ const FileSelector: React.FC = () => {
 	};
 
 	return (
-		<Box>
-			<Button onClick={handleOpen}>Choose File</Button>
-			<Typography variant="h6">{selectedFile.fileName}</Typography>
+		<Box sx={{ display: "flex", alignItems: "center", gap: 2, p: 2 }}>
+			{selectedFile.fileName && (
+				<Typography variant="subtitle1" sx={{ ml: 2 }}>
+					{selectedFile.fileName}
+				</Typography>
+			)}
+			<Button
+				variant="outlined"
+				onClick={handleOpen}
+				startIcon={<InsertDriveFileIcon />}
+			>
+				Choose File
+			</Button>
 			<Modal
 				open={open}
 				onClose={handleClose}

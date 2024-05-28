@@ -267,7 +267,6 @@ export class DatasetsService {
      * @param folderId
      * @param skip
      * @param limit
-     * @param recursive
      * @returns Paged Successful Response
      * @throws ApiError
      */
@@ -276,7 +275,6 @@ export class DatasetsService {
         folderId?: string,
         skip?: number,
         limit: number = 10,
-        recursive: boolean = false,
     ): CancelablePromise<Paged> {
         return __request({
             method: 'GET',
@@ -285,7 +283,6 @@ export class DatasetsService {
                 'folder_id': folderId,
                 'skip': skip,
                 'limit': limit,
-                'recursive': recursive,
             },
             errors: {
                 422: `Validation Error`,
