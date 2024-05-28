@@ -1,153 +1,156 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { RichTreeView } from "@mui/x-tree-view/RichTreeView";
-import { TreeViewBaseItem } from "@mui/x-tree-view/models";
-import Box from "@mui/material/Box";
-import Stack from "@mui/material/Stack";
-import Typography from "@mui/material/Typography";
+import {
+	Box,
+	List,
+	ListItem,
+	ListItemIcon,
+	ListItemText,
+	Typography,
+	IconButton,
+	Collapse,
+} from "@mui/material";
+import FolderIcon from "@mui/icons-material/Folder";
+import InsertDriveFileIcon from "@mui/icons-material/InsertDriveFile";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import {
 	fetchDatasets,
 	fetchFoldersFilesInDataset,
 } from "../../actions/dataset";
-import { RootState } from "../../types/data";
 
-const MUI_X_PRODUCTS: TreeViewBaseItem[] = [
-	{
-		id: "grid",
-		label: "Data Grid",
-		children: [
-			{ id: "grid-community", label: "@mui/x-data-grid" },
-			{ id: "grid-pro", label: "@mui/x-data-grid-pro" },
-			{ id: "grid-premium", label: "@mui/x-data-grid-premium" },
-		],
-	},
-	{
-		id: "pickers",
-		label: "Date and Time Pickers",
-		children: [
-			{ id: "pickers-community", label: "@mui/x-date-pickers" },
-			{ id: "pickers-pro", label: "@mui/x-date-pickers-pro" },
-		],
-	},
-	{
-		id: "charts",
-		label: "Charts",
-		children: [{ id: "charts-community", label: "@mui/x-charts" }],
-	},
-	{
-		id: "tree-view",
-		label: "Tree View",
-		children: [{ id: "tree-view-community", label: "@mui/x-tree-view" }],
-	},
-];
+// Define a type for items in the directory structure
+interface DirectoryItem {
+	id: string;
+	label: string;
+	children?: DirectoryItem[];
+}
 
-export const FileSystemViewer: React.FC = () => {
-	const dispatch = useDispatch();
-	const [lastSelectedItem, setLastSelectedItem] = React.useState<string | null>(
-		null
+// Define the RecursiveComponent component with props type
+interface RecursiveComponentProps {
+	item: DirectoryItem;
+	depth?: number;
+}
+
+interface FSDataset {
+	id: string;
+	label: string;
+	children?: DirectoryItem[];
+}
+
+const RecursiveComponent: React.FC<RecursiveComponentProps> = ({
+	item,
+	depth = 0,
+}) => {
+	const [expanded, setExpanded] = useState(false);
+	const [children, setChildren] = useState<DirectoryItem[] | undefined>(
+		item.children
 	);
-	// File System JSON to be used for rendering the TreeView
-	const [fsJson, setFsJson] = useState({
-		datasets: [],
-		files: {},
-		folders: {},
+	const hasChildren = children && children.length > 0;
+
+	// Function to generate Icon based on item type
+	const getIcon = () => {
+		if (hasChildren || !children) {
+			return <FolderIcon />;
+		}
+		// TODO: Switch case to generate file icon based on file type
+		return <InsertDriveFileIcon />;
+	};
+
+	const toggleExpand = () => {
+		if (!expanded && !children) {
+			// Simulate an API call to fetch children
+			fetchChildren(item.id).then((data) => {
+				setChildren(data);
+			});
+		}
+		setExpanded(!expanded);
+	};
+
+	return (
+		<List disablePadding>
+			<ListItem sx={{ pl: depth * 2, borderBottom: "none", py: 0.5 }}>
+				<ListItemIcon sx={{ minWidth: "auto", mr: 1 }}>
+					<IconButton
+						size="small"
+						onClick={toggleExpand}
+						sx={{ visibility: hasChildren || !children ? "visible" : "hidden" }}
+					>
+						<ExpandMoreIcon
+							style={{
+								transform: expanded ? "rotate(0deg)" : "rotate(-90deg)",
+							}}
+						/>
+					</IconButton>
+				</ListItemIcon>
+				<ListItemIcon sx={{ minWidth: "auto" }}>{getIcon()}</ListItemIcon>
+				<ListItemText primary={item.label} />
+			</ListItem>
+			<Collapse in={expanded} timeout="auto" unmountOnExit>
+				{hasChildren && (
+					<Box sx={{ ml: 2 }}>
+						{children?.map((child) => (
+							<RecursiveComponent
+								key={child.id}
+								item={child}
+								depth={depth + 1}
+							/>
+						))}
+					</Box>
+				)}
+			</Collapse>
+		</List>
+	);
+};
+
+// Simulated API call to fetch children based on parent ID
+async function fetchChildren(parentId: string): Promise<DirectoryItem[]> {
+	// Simulate delayed API response
+	return new Promise((resolve) => {
+		setTimeout(() => {
+			resolve([
+				{ id: `${parentId}-child-1`, label: "Child 1" },
+				{ id: `${parentId}-child-2`, label: "Child 2" },
+			]);
+		}, 300);
 	});
+}
+
+const FileSystemViewer: React.FC = () => {
+	const dispatch = useDispatch();
+	const datasets = useSelector((state: any) => state.dataset.datasets);
+	const [FSDatasets, setFSDatasets] = useState<FSDataset[]>([]);
 
 	// API function call to get Datasets
-	const listDatasets = (
-		skip: number | undefined,
-		limit: number | undefined,
-		mine: boolean | undefined
-	) => dispatch(fetchDatasets(skip, limit, mine));
+	const listDatasets = (skip?: number, limit?: number, mine?: boolean) => {
+		dispatch(fetchDatasets(skip, limit, mine));
+	};
 
-	const listFilesFolders = (
-		datasetId: string,
-		folderId: string | undefined,
-		skip: number | undefined,
-		limit: number | undefined,
-		recursive: boolean | undefined
-	) =>
-		dispatch(
-			fetchFoldersFilesInDataset(datasetId, folderId, skip, limit, recursive)
-		);
-
-	const datasets = useSelector(
-		(state: RootState) => state.dataset.datasets.data
-	);
-
-	const filesFolders = useSelector(
-		(state: RootState) => state.dataset.foldersAndFiles.data
-	);
-
-	// Mounting datasets
+	// Fetch root directories and datasets on component mount
 	useEffect(() => {
-		listDatasets(0, 30, false);
-	}, []);
+		listDatasets(0, 10, true);
+	}, []); // Include dispatch to satisfy exhaustive-deps rule
 
 	useEffect(() => {
-		if (datasets !== undefined && datasets.length > 0) {
-			const updatedFsJson = { ...fsJson };
-			datasets.forEach((dataset) => {
-				const datasetEntry = {
+		if (datasets.data) {
+			setFSDatasets(
+				datasets.data.map((dataset: any) => ({
 					id: dataset.id,
 					label: dataset.name,
-					children: [],
-				};
-				updatedFsJson.datasets.push(datasetEntry);
-				listFilesFolders(dataset.id, undefined, 0, 30, true);
-			});
-			setFsJson(updatedFsJson);
+				}))
+			);
 		}
-	}, [datasets]);
+	}, [datasets]); // Depend on datasets to update FSDatasets
 
-	useEffect(() => {
-		if (filesFolders !== undefined && filesFolders.length > 0) {
-			const updatedFsJson = { ...fsJson };
-			filesFolders.forEach((fileFolder) => {
-				if (fileFolder.object_type === "folder") {
-					if (!updatedFsJson.folders[fileFolder.folderId]) {
-						updatedFsJson.folders[fileFolder.folderId] = [];
-					}
-					const folderEntry = {
-						id: fileFolder.id,
-						label: fileFolder.name,
-						children: [],
-					};
-					updatedFsJson.folders[fileFolder.folderId].push(folderEntry);
-				}
-			});
-			setFsJson(updatedFsJson);
-		}
-	}, [filesFolders]);
-
-	useEffect(() => {
-		console.log("fsJson:", fsJson);
-	}, [fsJson]);
-
-	// React.useEffect(() => {
-	// 	console.log("lastSelectedItem:", lastSelectedItem);
-	// }, [lastSelectedItem]);
-
-	const handleItemSelectionToggle = (
-		event: React.SyntheticEvent,
-		itemId: string,
-		isSelected: boolean
-	) => {
-		if (isSelected) {
-			setLastSelectedItem(itemId);
-		}
-	};
-	return (
-		<Stack spacing={2}>
-			<Typography variant="h6">Select File</Typography>
-			<Box sx={{ minHeight: 200, minWidth: 300, flexGrow: 1 }}>
-				<RichTreeView
-					items={MUI_X_PRODUCTS}
-					onItemSelectionToggle={handleItemSelectionToggle}
-				/>
-			</Box>
-		</Stack>
-	);
+	return FSDatasets.length > 0 ? (
+		<Box sx={{ width: "100%", maxWidth: 360, bgcolor: "background.paper" }}>
+			<Typography variant="h6" sx={{ ml: 2, my: 2 }}>
+				File System Viewer
+			</Typography>
+			{FSDatasets.map((FSDataset) => (
+				<RecursiveComponent key={FSDataset.id} item={FSDataset} />
+			))}
+		</Box>
+	) : null; // Optionally handle the case where roots are empty
 };
 
 export default FileSystemViewer;
