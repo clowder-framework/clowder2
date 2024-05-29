@@ -125,6 +125,7 @@ async def associate_listener(
     listener: FeedListener,
     user=Depends(get_current_user),
     admin=Depends(get_admin),
+    force_admin: bool = False,
     admin_mode=Depends(get_admin_mode),
 ):
     """Associate an existing Event Listener with a Feed, e.g. so it will be triggered on new Feed results.

@@ -118,14 +118,14 @@ async def get_admin(
 
 @router.get("/users/me/admin_mode")
 async def get_admin_mode(
-    superadmin: bool = False, current_username=Depends(get_current_user)
+    force_admin: bool = False, current_username=Depends(get_current_user)
 ) -> bool:
     """Get Admin mode from User Object."""
     if (
         current_user := await UserDB.find_one(UserDB.email == current_username.email)
     ) is not None:
         if current_user.admin:
-            if superadmin:
+            if force_admin:
                 return True
             elif current_user.admin_mode is not None:
                 return current_user.admin_mode

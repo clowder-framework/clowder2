@@ -217,6 +217,7 @@ async def get_datasets(
     limit: int = 10,
     mine: bool = False,
     admin=Depends(get_admin),
+    force_admin: bool = False,
     admin_mode: bool = Depends(get_admin_mode),
 ):
     if admin and admin_mode:
@@ -286,6 +287,7 @@ async def get_dataset_files(
     skip: int = 0,
     limit: int = 10,
     admin=Depends(get_admin),
+    force_admin: bool = False,
     admin_mode: bool = Depends(get_admin_mode),
     allow: bool = Depends(Authorization("viewer")),
 ):
@@ -500,6 +502,7 @@ async def get_dataset_folders_and_files(
     skip: int = 0,
     limit: int = 10,
     admin=Depends(get_admin),
+    force_admin: bool = False,
     admin_mode: bool = Depends(get_admin_mode),
     allow: bool = Depends(Authorization("viewer")),
 ):

@@ -65,6 +65,7 @@ async def edit_license(
     license_info: LicenseBase,
     user_id=Depends(get_user),
     admin=Depends(get_admin),
+    force_admin: bool = False,
     admin_mode: bool = Depends(get_admin_mode),
 ):
     if (license := await LicenseDB.get(PydanticObjectId(license_id))) is not None:
@@ -105,6 +106,7 @@ async def delete_license(
     license_id: str,
     user_id=Depends(get_user),
     admin=Depends(get_admin),
+    force_admin: bool = False,
     admin_mode: bool = Depends(get_admin_mode),
 ):
     if (license := await LicenseDB.get(PydanticObjectId(license_id))) is not None:

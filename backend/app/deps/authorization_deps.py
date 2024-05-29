@@ -41,6 +41,7 @@ async def check_public_access(
 async def get_role(
     dataset_id: str,
     current_user=Depends(get_current_username),
+    force_admin: bool = False,
     admin_mode: bool = Depends(get_admin_mode),
     admin=Depends(get_admin),
 ) -> RoleType:
@@ -67,6 +68,7 @@ async def get_role(
 async def get_role_by_file(
     file_id: str,
     current_user=Depends(get_current_username),
+    force_admin: bool = False,
     admin_mode: bool = Depends(get_admin_mode),
     admin=Depends(get_admin),
 ) -> RoleType:
@@ -102,6 +104,7 @@ async def get_role_by_file(
 async def get_role_by_metadata(
     metadata_id: str,
     current_user=Depends(get_current_username),
+    force_admin: bool = False,
     admin_mode: bool = Depends(get_admin_mode),
     admin=Depends(get_admin),
 ) -> RoleType:
@@ -138,6 +141,7 @@ async def get_role_by_metadata(
 async def get_role_by_group(
     group_id: str,
     current_user=Depends(get_current_username),
+    force_admin: bool = False,
     admin_mode: bool = Depends(get_admin_mode),
     admin=Depends(get_admin),
 ) -> RoleType:
@@ -194,6 +198,7 @@ class Authorization:
         self,
         dataset_id: str,
         current_user: str = Depends(get_current_username),
+        force_admin: bool = False,
         admin_mode: bool = Depends(get_admin_mode),
         admin: bool = Depends(get_admin),
     ):
@@ -252,6 +257,7 @@ class FileAuthorization:
         self,
         file_id: str,
         current_user: str = Depends(get_current_username),
+        force_admin: bool = False,
         admin_mode: bool = Depends(get_admin_mode),
         admin: bool = Depends(get_admin),
     ):
@@ -298,6 +304,7 @@ class MetadataAuthorization:
         self,
         metadata_id: str,
         current_user: str = Depends(get_current_username),
+        force_admin: bool = False,
         admin_mode: bool = Depends(get_admin_mode),
         admin: bool = Depends(get_admin),
     ):
@@ -365,6 +372,7 @@ class GroupAuthorization:
         self,
         group_id: str,
         current_user: str = Depends(get_current_username),
+        force_admin: bool = False,
         admin_mode: bool = Depends(get_admin_mode),
         admin: bool = Depends(get_admin),
     ):
@@ -402,6 +410,7 @@ class ListenerAuthorization:
         self,
         listener_id: str,
         current_user: str = Depends(get_current_username),
+        force_admin: bool = False,
         admin_mode: bool = Depends(get_admin_mode),
         admin: bool = Depends(get_admin),
     ):
@@ -474,6 +483,7 @@ class CheckFileStatus:
 def access(
     user_role: RoleType,
     role_required: RoleType,
+    force_admin: bool = False,
     admin_mode: bool = Depends(get_admin_mode),
     admin: bool = Depends(get_admin),
 ) -> bool:
