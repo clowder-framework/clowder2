@@ -14,6 +14,7 @@ export class FilesService {
      * @param fileId
      * @param version
      * @param increment
+     * @param forceAdmin
      * @param datasetId
      * @returns any Successful Response
      * @throws ApiError
@@ -22,6 +23,7 @@ export class FilesService {
         fileId: string,
         version?: number,
         increment: boolean = true,
+        forceAdmin: boolean = false,
         datasetId?: string,
     ): CancelablePromise<any> {
         return __request({
@@ -30,6 +32,7 @@ export class FilesService {
             query: {
                 'version': version,
                 'increment': increment,
+                'force_admin': forceAdmin,
                 'dataset_id': datasetId,
             },
             errors: {
@@ -42,6 +45,7 @@ export class FilesService {
      * Update File
      * @param fileId
      * @param formData
+     * @param forceAdmin
      * @param datasetId
      * @returns FileOut Successful Response
      * @throws ApiError
@@ -49,12 +53,14 @@ export class FilesService {
     public static updateFileApiV2FilesFileIdPut(
         fileId: string,
         formData: Body_update_file_api_v2_files__file_id__put,
+        forceAdmin: boolean = false,
         datasetId?: string,
     ): CancelablePromise<FileOut> {
         return __request({
             method: 'PUT',
             path: `/api/v2/files/${fileId}`,
             query: {
+                'force_admin': forceAdmin,
                 'dataset_id': datasetId,
             },
             formData: formData,
@@ -68,18 +74,21 @@ export class FilesService {
     /**
      * Delete File
      * @param fileId
+     * @param forceAdmin
      * @param datasetId
      * @returns any Successful Response
      * @throws ApiError
      */
     public static deleteFileApiV2FilesFileIdDelete(
         fileId: string,
+        forceAdmin: boolean = false,
         datasetId?: string,
     ): CancelablePromise<any> {
         return __request({
             method: 'DELETE',
             path: `/api/v2/files/${fileId}`,
             query: {
+                'force_admin': forceAdmin,
                 'dataset_id': datasetId,
             },
             errors: {
@@ -93,6 +102,7 @@ export class FilesService {
      * @param fileId
      * @param version
      * @param expiresInSeconds
+     * @param forceAdmin
      * @param datasetId
      * @returns any Successful Response
      * @throws ApiError
@@ -101,6 +111,7 @@ export class FilesService {
         fileId: string,
         version?: number,
         expiresInSeconds: number = 3600,
+        forceAdmin: boolean = false,
         datasetId?: string,
     ): CancelablePromise<any> {
         return __request({
@@ -109,6 +120,7 @@ export class FilesService {
             query: {
                 'version': version,
                 'expires_in_seconds': expiresInSeconds,
+                'force_admin': forceAdmin,
                 'dataset_id': datasetId,
             },
             errors: {
@@ -120,18 +132,21 @@ export class FilesService {
     /**
      * Get File Summary
      * @param fileId
+     * @param forceAdmin
      * @param datasetId
      * @returns FileOut Successful Response
      * @throws ApiError
      */
     public static getFileSummaryApiV2FilesFileIdSummaryGet(
         fileId: string,
+        forceAdmin: boolean = false,
         datasetId?: string,
     ): CancelablePromise<FileOut> {
         return __request({
             method: 'GET',
             path: `/api/v2/files/${fileId}/summary`,
             query: {
+                'force_admin': forceAdmin,
                 'dataset_id': datasetId,
             },
             errors: {
@@ -144,6 +159,7 @@ export class FilesService {
      * Get File Version Details
      * @param fileId
      * @param versionNum
+     * @param forceAdmin
      * @param datasetId
      * @returns FileOut Successful Response
      * @throws ApiError
@@ -151,6 +167,7 @@ export class FilesService {
     public static getFileVersionDetailsApiV2FilesFileIdVersionDetailsGet(
         fileId: string,
         versionNum?: number,
+        forceAdmin: boolean = false,
         datasetId?: string,
     ): CancelablePromise<FileOut> {
         return __request({
@@ -158,6 +175,7 @@ export class FilesService {
             path: `/api/v2/files/${fileId}/version_details`,
             query: {
                 'version_num': versionNum,
+                'force_admin': forceAdmin,
                 'dataset_id': datasetId,
             },
             errors: {
@@ -171,6 +189,7 @@ export class FilesService {
      * @param fileId
      * @param skip
      * @param limit
+     * @param forceAdmin
      * @param datasetId
      * @returns FileVersion Successful Response
      * @throws ApiError
@@ -179,6 +198,7 @@ export class FilesService {
         fileId: string,
         skip?: number,
         limit: number = 20,
+        forceAdmin: boolean = false,
         datasetId?: string,
     ): CancelablePromise<Array<FileVersion>> {
         return __request({
@@ -187,6 +207,7 @@ export class FilesService {
             query: {
                 'skip': skip,
                 'limit': limit,
+                'force_admin': forceAdmin,
                 'dataset_id': datasetId,
             },
             errors: {
@@ -199,6 +220,7 @@ export class FilesService {
      * Post File Extract
      * @param fileId
      * @param extractorName
+     * @param forceAdmin
      * @param datasetId
      * @param requestBody
      * @returns any Successful Response
@@ -207,6 +229,7 @@ export class FilesService {
     public static postFileExtractApiV2FilesFileIdExtractPost(
         fileId: string,
         extractorName: string,
+        forceAdmin: boolean = false,
         datasetId?: string,
         requestBody?: any,
     ): CancelablePromise<any> {
@@ -215,6 +238,7 @@ export class FilesService {
             path: `/api/v2/files/${fileId}/extract`,
             query: {
                 'extractorName': extractorName,
+                'force_admin': forceAdmin,
                 'dataset_id': datasetId,
             },
             body: requestBody,
@@ -236,18 +260,21 @@ export class FilesService {
      * credentials: credentials of logged in user
      * rabbitmq_client: Rabbitmq Client
      * @param fileId
+     * @param forceAdmin
      * @param datasetId
      * @returns any Successful Response
      * @throws ApiError
      */
     public static resubmitFileExtractionsApiV2FilesFileIdResubmitExtractPost(
         fileId: string,
+        forceAdmin: boolean = false,
         datasetId?: string,
     ): CancelablePromise<any> {
         return __request({
             method: 'POST',
             path: `/api/v2/files/${fileId}/resubmit_extract`,
             query: {
+                'force_admin': forceAdmin,
                 'dataset_id': datasetId,
             },
             errors: {
@@ -259,18 +286,21 @@ export class FilesService {
     /**
      * Download File Thumbnail
      * @param fileId
+     * @param forceAdmin
      * @param datasetId
      * @returns any Successful Response
      * @throws ApiError
      */
     public static downloadFileThumbnailApiV2FilesFileIdThumbnailGet(
         fileId: string,
+        forceAdmin: boolean = false,
         datasetId?: string,
     ): CancelablePromise<any> {
         return __request({
             method: 'GET',
             path: `/api/v2/files/${fileId}/thumbnail`,
             query: {
+                'force_admin': forceAdmin,
                 'dataset_id': datasetId,
             },
             errors: {
@@ -283,6 +313,7 @@ export class FilesService {
      * Add File Thumbnail
      * @param fileId
      * @param thumbnailId
+     * @param forceAdmin
      * @param datasetId
      * @returns FileOut Successful Response
      * @throws ApiError
@@ -290,12 +321,14 @@ export class FilesService {
     public static addFileThumbnailApiV2FilesFileIdThumbnailThumbnailIdPatch(
         fileId: string,
         thumbnailId: string,
+        forceAdmin: boolean = false,
         datasetId?: string,
     ): CancelablePromise<FileOut> {
         return __request({
             method: 'PATCH',
             path: `/api/v2/files/${fileId}/thumbnail/${thumbnailId}`,
             query: {
+                'force_admin': forceAdmin,
                 'dataset_id': datasetId,
             },
             errors: {

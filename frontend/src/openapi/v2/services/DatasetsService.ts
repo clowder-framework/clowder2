@@ -24,6 +24,7 @@ export class DatasetsService {
      * @param skip
      * @param limit
      * @param mine
+     * @param forceAdmin
      * @param datasetId
      * @returns Paged Successful Response
      * @throws ApiError
@@ -32,6 +33,7 @@ export class DatasetsService {
         skip?: number,
         limit: number = 10,
         mine: boolean = false,
+        forceAdmin: boolean = false,
         datasetId?: string,
     ): CancelablePromise<Paged> {
         return __request({
@@ -41,6 +43,7 @@ export class DatasetsService {
                 'skip': skip,
                 'limit': limit,
                 'mine': mine,
+                'force_admin': forceAdmin,
                 'dataset_id': datasetId,
             },
             errors: {
@@ -77,15 +80,20 @@ export class DatasetsService {
     /**
      * Get Dataset
      * @param datasetId
+     * @param forceAdmin
      * @returns DatasetOut Successful Response
      * @throws ApiError
      */
     public static getDatasetApiV2DatasetsDatasetIdGet(
         datasetId: string,
+        forceAdmin: boolean = false,
     ): CancelablePromise<DatasetOut> {
         return __request({
             method: 'GET',
             path: `/api/v2/datasets/${datasetId}`,
+            query: {
+                'force_admin': forceAdmin,
+            },
             errors: {
                 422: `Validation Error`,
             },
@@ -96,16 +104,21 @@ export class DatasetsService {
      * Edit Dataset
      * @param datasetId
      * @param requestBody
+     * @param forceAdmin
      * @returns DatasetOut Successful Response
      * @throws ApiError
      */
     public static editDatasetApiV2DatasetsDatasetIdPut(
         datasetId: string,
         requestBody: DatasetBase,
+        forceAdmin: boolean = false,
     ): CancelablePromise<DatasetOut> {
         return __request({
             method: 'PUT',
             path: `/api/v2/datasets/${datasetId}`,
+            query: {
+                'force_admin': forceAdmin,
+            },
             body: requestBody,
             mediaType: 'application/json',
             errors: {
@@ -117,15 +130,20 @@ export class DatasetsService {
     /**
      * Delete Dataset
      * @param datasetId
+     * @param forceAdmin
      * @returns any Successful Response
      * @throws ApiError
      */
     public static deleteDatasetApiV2DatasetsDatasetIdDelete(
         datasetId: string,
+        forceAdmin: boolean = false,
     ): CancelablePromise<any> {
         return __request({
             method: 'DELETE',
             path: `/api/v2/datasets/${datasetId}`,
+            query: {
+                'force_admin': forceAdmin,
+            },
             errors: {
                 422: `Validation Error`,
             },
@@ -136,16 +154,21 @@ export class DatasetsService {
      * Patch Dataset
      * @param datasetId
      * @param requestBody
+     * @param forceAdmin
      * @returns DatasetOut Successful Response
      * @throws ApiError
      */
     public static patchDatasetApiV2DatasetsDatasetIdPatch(
         datasetId: string,
         requestBody: DatasetPatch,
+        forceAdmin: boolean = false,
     ): CancelablePromise<DatasetOut> {
         return __request({
             method: 'PATCH',
             path: `/api/v2/datasets/${datasetId}`,
+            query: {
+                'force_admin': forceAdmin,
+            },
             body: requestBody,
             mediaType: 'application/json',
             errors: {
@@ -160,6 +183,7 @@ export class DatasetsService {
      * @param folderId
      * @param skip
      * @param limit
+     * @param forceAdmin
      * @returns Paged Successful Response
      * @throws ApiError
      */
@@ -168,6 +192,7 @@ export class DatasetsService {
         folderId?: string,
         skip?: number,
         limit: number = 10,
+        forceAdmin: boolean = false,
     ): CancelablePromise<Paged> {
         return __request({
             method: 'GET',
@@ -176,6 +201,7 @@ export class DatasetsService {
                 'folder_id': folderId,
                 'skip': skip,
                 'limit': limit,
+                'force_admin': forceAdmin,
             },
             errors: {
                 422: `Validation Error`,
@@ -188,6 +214,7 @@ export class DatasetsService {
      * @param datasetId
      * @param formData
      * @param folderId
+     * @param forceAdmin
      * @returns FileOut Successful Response
      * @throws ApiError
      */
@@ -195,12 +222,14 @@ export class DatasetsService {
         datasetId: string,
         formData: Body_save_file_api_v2_datasets__dataset_id__files_post,
         folderId?: string,
+        forceAdmin: boolean = false,
     ): CancelablePromise<FileOut> {
         return __request({
             method: 'POST',
             path: `/api/v2/datasets/${datasetId}/files`,
             query: {
                 'folder_id': folderId,
+                'force_admin': forceAdmin,
             },
             formData: formData,
             mediaType: 'multipart/form-data',
@@ -216,6 +245,7 @@ export class DatasetsService {
      * @param parentFolder
      * @param skip
      * @param limit
+     * @param forceAdmin
      * @returns Paged Successful Response
      * @throws ApiError
      */
@@ -224,6 +254,7 @@ export class DatasetsService {
         parentFolder?: string,
         skip?: number,
         limit: number = 10,
+        forceAdmin: boolean = false,
     ): CancelablePromise<Paged> {
         return __request({
             method: 'GET',
@@ -232,6 +263,7 @@ export class DatasetsService {
                 'parent_folder': parentFolder,
                 'skip': skip,
                 'limit': limit,
+                'force_admin': forceAdmin,
             },
             errors: {
                 422: `Validation Error`,
@@ -243,16 +275,21 @@ export class DatasetsService {
      * Add Folder
      * @param datasetId
      * @param requestBody
+     * @param forceAdmin
      * @returns FolderOut Successful Response
      * @throws ApiError
      */
     public static addFolderApiV2DatasetsDatasetIdFoldersPost(
         datasetId: string,
         requestBody: FolderIn,
+        forceAdmin: boolean = false,
     ): CancelablePromise<FolderOut> {
         return __request({
             method: 'POST',
             path: `/api/v2/datasets/${datasetId}/folders`,
+            query: {
+                'force_admin': forceAdmin,
+            },
             body: requestBody,
             mediaType: 'application/json',
             errors: {
@@ -267,6 +304,7 @@ export class DatasetsService {
      * @param folderId
      * @param skip
      * @param limit
+     * @param forceAdmin
      * @returns Paged Successful Response
      * @throws ApiError
      */
@@ -275,6 +313,7 @@ export class DatasetsService {
         folderId?: string,
         skip?: number,
         limit: number = 10,
+        forceAdmin: boolean = false,
     ): CancelablePromise<Paged> {
         return __request({
             method: 'GET',
@@ -283,6 +322,7 @@ export class DatasetsService {
                 'folder_id': folderId,
                 'skip': skip,
                 'limit': limit,
+                'force_admin': forceAdmin,
             },
             errors: {
                 422: `Validation Error`,
@@ -294,16 +334,21 @@ export class DatasetsService {
      * Get Folder
      * @param datasetId
      * @param folderId
+     * @param forceAdmin
      * @returns any Successful Response
      * @throws ApiError
      */
     public static getFolderApiV2DatasetsDatasetIdFoldersFolderIdGet(
         datasetId: string,
         folderId: string,
+        forceAdmin: boolean = false,
     ): CancelablePromise<any> {
         return __request({
             method: 'GET',
             path: `/api/v2/datasets/${datasetId}/folders/${folderId}`,
+            query: {
+                'force_admin': forceAdmin,
+            },
             errors: {
                 422: `Validation Error`,
             },
@@ -314,16 +359,21 @@ export class DatasetsService {
      * Delete Folder
      * @param datasetId
      * @param folderId
+     * @param forceAdmin
      * @returns any Successful Response
      * @throws ApiError
      */
     public static deleteFolderApiV2DatasetsDatasetIdFoldersFolderIdDelete(
         datasetId: string,
         folderId: string,
+        forceAdmin: boolean = false,
     ): CancelablePromise<any> {
         return __request({
             method: 'DELETE',
             path: `/api/v2/datasets/${datasetId}/folders/${folderId}`,
+            query: {
+                'force_admin': forceAdmin,
+            },
             errors: {
                 422: `Validation Error`,
             },
@@ -335,6 +385,7 @@ export class DatasetsService {
      * @param datasetId
      * @param folderId
      * @param requestBody
+     * @param forceAdmin
      * @returns FolderOut Successful Response
      * @throws ApiError
      */
@@ -342,10 +393,14 @@ export class DatasetsService {
         datasetId: string,
         folderId: string,
         requestBody: FolderPatch,
+        forceAdmin: boolean = false,
     ): CancelablePromise<FolderOut> {
         return __request({
             method: 'PATCH',
             path: `/api/v2/datasets/${datasetId}/folders/${folderId}`,
+            query: {
+                'force_admin': forceAdmin,
+            },
             body: requestBody,
             mediaType: 'application/json',
             errors: {
@@ -359,6 +414,7 @@ export class DatasetsService {
      * @param datasetId
      * @param formData
      * @param folderId
+     * @param forceAdmin
      * @returns FileOut Successful Response
      * @throws ApiError
      */
@@ -366,12 +422,14 @@ export class DatasetsService {
         datasetId: string,
         formData: Body_save_files_api_v2_datasets__dataset_id__filesMultiple_post,
         folderId?: string,
+        forceAdmin: boolean = false,
     ): CancelablePromise<Array<FileOut>> {
         return __request({
             method: 'POST',
             path: `/api/v2/datasets/${datasetId}/filesMultiple`,
             query: {
                 'folder_id': folderId,
+                'force_admin': forceAdmin,
             },
             formData: formData,
             mediaType: 'multipart/form-data',
@@ -386,6 +444,7 @@ export class DatasetsService {
      * @param datasetId
      * @param requestBody
      * @param folderId
+     * @param forceAdmin
      * @returns FileOut Successful Response
      * @throws ApiError
      */
@@ -393,12 +452,14 @@ export class DatasetsService {
         datasetId: string,
         requestBody: LocalFileIn,
         folderId?: string,
+        forceAdmin: boolean = false,
     ): CancelablePromise<FileOut> {
         return __request({
             method: 'POST',
             path: `/api/v2/datasets/${datasetId}/local_files`,
             query: {
                 'folder_id': folderId,
+                'force_admin': forceAdmin,
             },
             body: requestBody,
             mediaType: 'application/json',
@@ -431,15 +492,20 @@ export class DatasetsService {
     /**
      * Download Dataset
      * @param datasetId
+     * @param forceAdmin
      * @returns DatasetOut Successful Response
      * @throws ApiError
      */
     public static downloadDatasetApiV2DatasetsDatasetIdDownloadGet(
         datasetId: string,
+        forceAdmin: boolean = false,
     ): CancelablePromise<DatasetOut> {
         return __request({
             method: 'GET',
             path: `/api/v2/datasets/${datasetId}/download`,
+            query: {
+                'force_admin': forceAdmin,
+            },
             errors: {
                 422: `Validation Error`,
             },
@@ -450,6 +516,7 @@ export class DatasetsService {
      * Get Dataset Extract
      * @param datasetId
      * @param extractorName
+     * @param forceAdmin
      * @param requestBody
      * @returns any Successful Response
      * @throws ApiError
@@ -457,6 +524,7 @@ export class DatasetsService {
     public static getDatasetExtractApiV2DatasetsDatasetIdExtractPost(
         datasetId: string,
         extractorName: string,
+        forceAdmin: boolean = false,
         requestBody?: any,
     ): CancelablePromise<any> {
         return __request({
@@ -464,6 +532,7 @@ export class DatasetsService {
             path: `/api/v2/datasets/${datasetId}/extract`,
             query: {
                 'extractorName': extractorName,
+                'force_admin': forceAdmin,
             },
             body: requestBody,
             mediaType: 'application/json',
@@ -476,15 +545,20 @@ export class DatasetsService {
     /**
      * Download Dataset Thumbnail
      * @param datasetId
+     * @param forceAdmin
      * @returns any Successful Response
      * @throws ApiError
      */
     public static downloadDatasetThumbnailApiV2DatasetsDatasetIdThumbnailGet(
         datasetId: string,
+        forceAdmin: boolean = false,
     ): CancelablePromise<any> {
         return __request({
             method: 'GET',
             path: `/api/v2/datasets/${datasetId}/thumbnail`,
+            query: {
+                'force_admin': forceAdmin,
+            },
             errors: {
                 422: `Validation Error`,
             },
@@ -495,16 +569,21 @@ export class DatasetsService {
      * Add Dataset Thumbnail
      * @param datasetId
      * @param thumbnailId
+     * @param forceAdmin
      * @returns DatasetOut Successful Response
      * @throws ApiError
      */
     public static addDatasetThumbnailApiV2DatasetsDatasetIdThumbnailThumbnailIdPatch(
         datasetId: string,
         thumbnailId: string,
+        forceAdmin: boolean = false,
     ): CancelablePromise<DatasetOut> {
         return __request({
             method: 'PATCH',
             path: `/api/v2/datasets/${datasetId}/thumbnail/${thumbnailId}`,
+            query: {
+                'force_admin': forceAdmin,
+            },
             errors: {
                 422: `Validation Error`,
             },

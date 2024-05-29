@@ -52,6 +52,7 @@ export class LicensesService {
      * Edit License
      * @param licenseId
      * @param requestBody
+     * @param forceAdmin
      * @param datasetId
      * @returns LicenseOut Successful Response
      * @throws ApiError
@@ -59,12 +60,14 @@ export class LicensesService {
     public static editLicenseApiV2LicensesLicenseIdPut(
         licenseId: string,
         requestBody: LicenseBase,
+        forceAdmin: boolean = false,
         datasetId?: string,
     ): CancelablePromise<LicenseOut> {
         return __request({
             method: 'PUT',
             path: `/api/v2/licenses/${licenseId}`,
             query: {
+                'force_admin': forceAdmin,
                 'dataset_id': datasetId,
             },
             body: requestBody,
@@ -78,18 +81,21 @@ export class LicensesService {
     /**
      * Delete License
      * @param licenseId
+     * @param forceAdmin
      * @param datasetId
      * @returns LicenseOut Successful Response
      * @throws ApiError
      */
     public static deleteLicenseApiV2LicensesLicenseIdDelete(
         licenseId: string,
+        forceAdmin: boolean = false,
         datasetId?: string,
     ): CancelablePromise<LicenseOut> {
         return __request({
             method: 'DELETE',
             path: `/api/v2/licenses/${licenseId}`,
             query: {
+                'force_admin': forceAdmin,
                 'dataset_id': datasetId,
             },
             errors: {

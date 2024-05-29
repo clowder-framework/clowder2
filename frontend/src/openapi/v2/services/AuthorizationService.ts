@@ -16,16 +16,21 @@ export class AuthorizationService {
      * Save authorization info in Mongo. This is a triple of dataset_id/user_id/role/group_id.
      * @param datasetId
      * @param requestBody
+     * @param forceAdmin
      * @returns AuthorizationOut Successful Response
      * @throws ApiError
      */
     public static saveAuthorizationApiV2AuthorizationsDatasetsDatasetIdPost(
         datasetId: string,
         requestBody: AuthorizationBase,
+        forceAdmin: boolean = false,
     ): CancelablePromise<AuthorizationOut> {
         return __request({
             method: 'POST',
             path: `/api/v2/authorizations/datasets/${datasetId}`,
+            query: {
+                'force_admin': forceAdmin,
+            },
             body: requestBody,
             mediaType: 'application/json',
             errors: {
@@ -38,15 +43,20 @@ export class AuthorizationService {
      * Get Dataset Role
      * Retrieve role of user for a specific dataset.
      * @param datasetId
+     * @param forceAdmin
      * @returns AuthorizationOut Successful Response
      * @throws ApiError
      */
     public static getDatasetRoleApiV2AuthorizationsDatasetsDatasetIdRoleGet(
         datasetId: string,
+        forceAdmin: boolean = false,
     ): CancelablePromise<AuthorizationOut> {
         return __request({
             method: 'GET',
             path: `/api/v2/authorizations/datasets/${datasetId}/role`,
+            query: {
+                'force_admin': forceAdmin,
+            },
             errors: {
                 422: `Validation Error`,
             },
@@ -58,15 +68,20 @@ export class AuthorizationService {
      * Used for testing only. Returns true if user has viewer permission on dataset, otherwise throws a 403 Forbidden HTTP exception.
      * See `routers/authorization.py` for more info.
      * @param datasetId
+     * @param forceAdmin
      * @returns any Successful Response
      * @throws ApiError
      */
     public static getDatasetRoleViewerApiV2AuthorizationsDatasetsDatasetIdRoleViewerGet(
         datasetId: string,
+        forceAdmin: boolean = false,
     ): CancelablePromise<any> {
         return __request({
             method: 'GET',
             path: `/api/v2/authorizations/datasets/${datasetId}/role/viewer}`,
+            query: {
+                'force_admin': forceAdmin,
+            },
             errors: {
                 422: `Validation Error`,
             },
@@ -78,15 +93,20 @@ export class AuthorizationService {
      * Used for testing only. Returns true if user has owner permission on dataset, otherwise throws a 403 Forbidden HTTP exception.
      * See `routers/authorization.py` for more info.
      * @param datasetId
+     * @param forceAdmin
      * @returns any Successful Response
      * @throws ApiError
      */
     public static getDatasetRoleOwnerApiV2AuthorizationsDatasetsDatasetIdRoleOwnerGet(
         datasetId: string,
+        forceAdmin: boolean = false,
     ): CancelablePromise<any> {
         return __request({
             method: 'GET',
             path: `/api/v2/authorizations/datasets/${datasetId}/role/owner}`,
+            query: {
+                'force_admin': forceAdmin,
+            },
             errors: {
                 422: `Validation Error`,
             },
@@ -97,18 +117,21 @@ export class AuthorizationService {
      * Get File Role
      * Retrieve role of user for an individual file. Role cannot change between file versions.
      * @param fileId
+     * @param forceAdmin
      * @param datasetId
      * @returns RoleType Successful Response
      * @throws ApiError
      */
     public static getFileRoleApiV2AuthorizationsFilesFileIdRoleGet(
         fileId: string,
+        forceAdmin: boolean = false,
         datasetId?: string,
     ): CancelablePromise<RoleType> {
         return __request({
             method: 'GET',
             path: `/api/v2/authorizations/files/${fileId}/role`,
             query: {
+                'force_admin': forceAdmin,
                 'dataset_id': datasetId,
             },
             errors: {
@@ -121,18 +144,21 @@ export class AuthorizationService {
      * Get Metadata Role
      * Retrieve role of user for group. Group roles can be OWNER, EDITOR, or VIEWER (for regular Members).
      * @param metadataId
+     * @param forceAdmin
      * @param datasetId
      * @returns AuthorizationMetadata Successful Response
      * @throws ApiError
      */
     public static getMetadataRoleApiV2AuthorizationsMetadataMetadataIdRoleGet(
         metadataId: string,
+        forceAdmin: boolean = false,
         datasetId?: string,
     ): CancelablePromise<AuthorizationMetadata> {
         return __request({
             method: 'GET',
             path: `/api/v2/authorizations/metadata/${metadataId}/role}`,
             query: {
+                'force_admin': forceAdmin,
                 'dataset_id': datasetId,
             },
             errors: {
@@ -145,18 +171,21 @@ export class AuthorizationService {
      * Get Group Role
      * Retrieve role of user on a particular group (i.e. whether they can change group memberships).
      * @param groupId
+     * @param forceAdmin
      * @param datasetId
      * @returns RoleType Successful Response
      * @throws ApiError
      */
     public static getGroupRoleApiV2AuthorizationsGroupsGroupIdRoleGet(
         groupId: string,
+        forceAdmin: boolean = false,
         datasetId?: string,
     ): CancelablePromise<RoleType> {
         return __request({
             method: 'GET',
             path: `/api/v2/authorizations/groups/${groupId}/role`,
             query: {
+                'force_admin': forceAdmin,
                 'dataset_id': datasetId,
             },
             errors: {
@@ -171,6 +200,7 @@ export class AuthorizationService {
      * @param datasetId
      * @param groupId
      * @param role
+     * @param forceAdmin
      * @returns AuthorizationOut Successful Response
      * @throws ApiError
      */
@@ -178,10 +208,14 @@ export class AuthorizationService {
         datasetId: string,
         groupId: string,
         role: RoleType,
+        forceAdmin: boolean = false,
     ): CancelablePromise<AuthorizationOut> {
         return __request({
             method: 'POST',
             path: `/api/v2/authorizations/datasets/${datasetId}/group_role/${groupId}/${role}`,
+            query: {
+                'force_admin': forceAdmin,
+            },
             errors: {
                 422: `Validation Error`,
             },
@@ -194,6 +228,7 @@ export class AuthorizationService {
      * @param datasetId
      * @param username
      * @param role
+     * @param forceAdmin
      * @returns AuthorizationOut Successful Response
      * @throws ApiError
      */
@@ -201,10 +236,14 @@ export class AuthorizationService {
         datasetId: string,
         username: string,
         role: RoleType,
+        forceAdmin: boolean = false,
     ): CancelablePromise<AuthorizationOut> {
         return __request({
             method: 'POST',
             path: `/api/v2/authorizations/datasets/${datasetId}/user_role/${username}/${role}`,
+            query: {
+                'force_admin': forceAdmin,
+            },
             errors: {
                 422: `Validation Error`,
             },
@@ -216,16 +255,21 @@ export class AuthorizationService {
      * Remove any role the group has with a specific dataset.
      * @param datasetId
      * @param groupId
+     * @param forceAdmin
      * @returns AuthorizationOut Successful Response
      * @throws ApiError
      */
     public static removeDatasetGroupRoleApiV2AuthorizationsDatasetsDatasetIdGroupRoleGroupIdDelete(
         datasetId: string,
         groupId: string,
+        forceAdmin: boolean = false,
     ): CancelablePromise<AuthorizationOut> {
         return __request({
             method: 'DELETE',
             path: `/api/v2/authorizations/datasets/${datasetId}/group_role/${groupId}`,
+            query: {
+                'force_admin': forceAdmin,
+            },
             errors: {
                 422: `Validation Error`,
             },
@@ -237,16 +281,21 @@ export class AuthorizationService {
      * Remove any role the user has with a specific dataset.
      * @param datasetId
      * @param username
+     * @param forceAdmin
      * @returns AuthorizationOut Successful Response
      * @throws ApiError
      */
     public static removeDatasetUserRoleApiV2AuthorizationsDatasetsDatasetIdUserRoleUsernameDelete(
         datasetId: string,
         username: string,
+        forceAdmin: boolean = false,
     ): CancelablePromise<AuthorizationOut> {
         return __request({
             method: 'DELETE',
             path: `/api/v2/authorizations/datasets/${datasetId}/user_role/${username}`,
+            query: {
+                'force_admin': forceAdmin,
+            },
             errors: {
                 422: `Validation Error`,
             },
@@ -257,15 +306,20 @@ export class AuthorizationService {
      * Get Dataset Roles
      * Get a list of all users and groups that have assigned roles on this dataset.
      * @param datasetId
+     * @param forceAdmin
      * @returns DatasetRoles Successful Response
      * @throws ApiError
      */
     public static getDatasetRolesApiV2AuthorizationsDatasetsDatasetIdRolesGet(
         datasetId: string,
+        forceAdmin: boolean = false,
     ): CancelablePromise<DatasetRoles> {
         return __request({
             method: 'GET',
             path: `/api/v2/authorizations/datasets/${datasetId}/roles`,
+            query: {
+                'force_admin': forceAdmin,
+            },
             errors: {
                 422: `Validation Error`,
             },

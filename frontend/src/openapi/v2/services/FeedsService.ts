@@ -105,6 +105,7 @@ export class FeedsService {
      * listener: JSON object with "listener_id" field and "automatic" bool field (whether to auto-trigger on new data)
      * @param feedId
      * @param requestBody
+     * @param forceAdmin
      * @param datasetId
      * @returns FeedOut Successful Response
      * @throws ApiError
@@ -112,12 +113,14 @@ export class FeedsService {
     public static associateListenerApiV2FeedsFeedIdListenersPost(
         feedId: string,
         requestBody: FeedListener,
+        forceAdmin: boolean = false,
         datasetId?: string,
     ): CancelablePromise<FeedOut> {
         return __request({
             method: 'POST',
             path: `/api/v2/feeds/${feedId}/listeners`,
             query: {
+                'force_admin': forceAdmin,
                 'dataset_id': datasetId,
             },
             body: requestBody,
@@ -137,6 +140,7 @@ export class FeedsService {
      * listener_id: UUID of Event Listener that should be disassociated
      * @param feedId
      * @param listenerId
+     * @param forceAdmin
      * @param datasetId
      * @returns any Successful Response
      * @throws ApiError
@@ -144,12 +148,14 @@ export class FeedsService {
     public static disassociateListenerApiV2FeedsFeedIdListenersListenerIdDelete(
         feedId: string,
         listenerId: string,
+        forceAdmin: boolean = false,
         datasetId?: string,
     ): CancelablePromise<any> {
         return __request({
             method: 'DELETE',
             path: `/api/v2/feeds/${feedId}/listeners/${listenerId}`,
             query: {
+                'force_admin': forceAdmin,
                 'dataset_id': datasetId,
             },
             errors: {
