@@ -10,7 +10,7 @@ import {
 	ListItemText,
 	Typography,
 	IconButton,
-	Collapse,
+	Collapse
 } from "@mui/material";
 import FolderIcon from "@mui/icons-material/Folder";
 import DatasetIcon from "@mui/icons-material/Dataset";
@@ -48,10 +48,10 @@ interface FSItem {
 }
 
 const RecursiveComponent: React.FC<RecursiveComponentProps> = ({
-	item,
-	depth = 0,
-	onSelectFile,
-}) => {
+																																 item,
+																																 depth = 0,
+																																 onSelectFile
+																															 }) => {
 	const [expanded, setExpanded] = useState(false);
 	const [children, setChildren] = useState<FSItem[] | undefined>(item.children);
 	const isFolderOrDataset = item.type === "folder" || item.type === "dataset";
@@ -95,16 +95,16 @@ const RecursiveComponent: React.FC<RecursiveComponentProps> = ({
 			const FSItems: FSItem[] =
 				data !== undefined
 					? data.map((FSItem: any) => ({
-							datasetId: datasetid,
-							id: FSItem.id,
-							label: FSItem.name,
-							children: FSItem.object_type === "folder" ? [] : undefined,
-							type: FSItem.object_type,
-							content_type:
-								FSItem.object_type !== "folder"
-									? FSItem.content_type.main_type
-									: undefined,
-					  }))
+						datasetId: datasetid,
+						id: FSItem.id,
+						label: FSItem.name,
+						children: FSItem.object_type === "folder" ? [] : undefined,
+						type: FSItem.object_type,
+						content_type:
+							FSItem.object_type !== "folder"
+								? FSItem.content_type.main_type
+								: undefined
+					}))
 					: [];
 			return FSItems;
 		} catch (error) {
@@ -138,8 +138,8 @@ const RecursiveComponent: React.FC<RecursiveComponentProps> = ({
 					py: 0.5,
 					"&:hover": {
 						backgroundColor: "rgba(0, 0, 0, 0.1)", // or any other color
-						cursor: "pointer",
-					},
+						cursor: "pointer"
+					}
 				}}
 				onClick={onSelect}
 			>
@@ -150,7 +150,7 @@ const RecursiveComponent: React.FC<RecursiveComponentProps> = ({
 					>
 						<ExpandMoreIcon
 							style={{
-								transform: expanded ? "rotate(0deg)" : "rotate(-90deg)",
+								transform: expanded ? "rotate(0deg)" : "rotate(-90deg)"
 							}}
 						/>
 					</IconButton>
@@ -215,7 +215,7 @@ const FileSystemViewer: React.FC<{
 				maxWidth: 360,
 				overflowY: "auto",
 				overflowX: "auto",
-				bgcolor: "background.paper",
+				bgcolor: "background.paper"
 			}}
 		>
 			<Typography variant="h6" sx={{ ml: 2, my: 2 }}>
@@ -233,12 +233,12 @@ const FileSystemViewer: React.FC<{
 };
 
 const FileSelector: React.FC<{ onChange: (fileId: string) => void }> = ({
-	onChange,
-}) => {
+																																					onChange
+																																				}) => {
 	const [open, setOpen] = useState(false);
 	const [selectedFile, setSelectedFile] = useState<FileDetails>({
 		fileId: "",
-		fileName: "",
+		fileName: ""
 	});
 
 	const handleOpen = () => setOpen(true);
@@ -279,7 +279,7 @@ const FileSelector: React.FC<{ onChange: (fileId: string) => void }> = ({
 						width: 400,
 						bgcolor: "background.paper",
 						boxShadow: 24,
-						p: 4,
+						p: 4
 					}}
 				>
 					<FileSystemViewer onSelectFile={handleFileSelect} />
