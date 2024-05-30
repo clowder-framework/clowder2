@@ -122,13 +122,6 @@ async def create_v2_dataset(headers, dataset, user_email):
     print(dataset)
     dataset_name = dataset['name']
     dataset_description = dataset['description']
-    dataset_endpoint = CLOWDER_V1 + 'api/datasets/' + dataset['id']
-    r = requests.get(dataset_endpoint, headers=base_headers_v1, verify=False)
-    dataset_files_endpoint = CLOWDER_V1 + 'api/datasets/' + dataset['id'] + '/files?superAdmin=true'
-    r_files = requests.get(dataset_files_endpoint, headers=base_headers_v1, verify=False)
-    dataset_folders_endpoint = CLOWDER_V1 + 'api/datasets/' + dataset['id'] + '/folders?superAdmin=true'
-    dataset_folders = requests.get(dataset_folders_endpoint, base_headers_v1)
-    dataset_folders_json = dataset_folders.json()
     dataset_in_v2_endpoint = CLOWDER_V2 + 'api/v2/datasets'
     # create dataset
     dataset_example = {
@@ -138,7 +131,7 @@ async def create_v2_dataset(headers, dataset, user_email):
     response = requests.post(
         dataset_in_v2_endpoint, headers=headers, json=dataset_example
     )
-    return response.json()
+    return response.json()['id']
 
 
 def get_clowder_v1_user_datasets(user_id):
@@ -188,13 +181,115 @@ def create_admin_user():
     api_key = generate_user_api_key(user_json, "admin")
     return api_key
 
+async def create_or_get_folder(dataset, folder_name, current_headers):
+    dataset_folder_url = CLOWDER_V2 + 'api/v2/datasets/' + dataset['id'] + '/folders'
+
+
+async def add_folder_entry_to_dataset(dataset_id, folder_name, current_headers):
+    current_dataset_folders = []
+    dataset_folder_url = CLOWDER_V2 + 'api/v2/datasets/' + dataset_id + '/folders'
+    response = requests.get(dataset_folder_url, headers=current_headers)
+    response_json = response.json()
+    existing_folder_names = dict()
+    if 'data' in response_json:
+        existing_folders = response_json['data']
+        for existing_folder in existing_folders:
+            existing_folder_names[existing_folder['name']] = existing_folder['id']
+    if folder_name.startswith('/'):
+        folder_name = folder_name.lstrip('/')
+    folder_parts = folder_name.split('/')
+    parent = None
+    for folder_part in folder_parts:
+        folder_data = {"name": folder_part}
+        # TODO create or get folder
+        if folder_part not in existing_folder_names:
+            create_folder_endpoint = CLOWDER_V2 + 'api/v2/datasets/' + dataset_id + '/folders'
+            folder_api_call = requests.post(create_folder_endpoint, json=folder_data, headers=current_headers)
+            print("created folder")
+        else:
+            parent = folder_part
+            print("this one already exists")
+    print('got folder parts')
+
+
+async def create_folder_if_not_exists_or_get(folder, parent, dataset_v2, current_headers):
+    clowder_v2_folder_endpoint = CLOWDER_V2 + 'api/v2/datasets/' + dataset_v2 + '/folders'
+    current_dataset_folders = requests.get(clowder_v2_folder_endpoint, headers=current_headers)
+    folder_json = current_dataset_folders.json()
+    folder_json_data = folder_json['data']
+    current_folder_data = {"name": folder}
+    if parent:
+        print('we have a parent to check for')
+    else:
+        for each in folder_json_data:
+            if each['name'] == folder:
+                print('we found this folder')
+                return each
+    response = requests.post(
+        f"{CLOWDER_V2}api/v2/datasets/{dataset_v2}/folders",
+        json=current_folder_data,
+        headers=current_headers,
+    )
+    return response
+
+async def add_folder_hierarchy(folder_hierarchy, dataset_v2, current_headers):
+    clowder_v2_folder_endpoint = CLOWDER_V2 + 'api/v2/datasets/' + dataset_v2 + '/folders'
+    current_dataset_folders = requests.get(clowder_v2_folder_endpoint, headers=current_headers)
+    folder_json = current_dataset_folders.json()
+    folder_json_data = folder_json['data']
+    hierarchy_parts = folder_hierarchy.split('/')
+    hierarchy_parts.remove('')
+    current_parent = None
+    for part in hierarchy_parts:
+        result = await create_folder_if_not_exists_or_get(part, current_parent, dataset_v2, current_headers=current_headers)
+        current_parent = result
+        print('got result')
+
+async def add_dataset_folders(dataset_v1, dataset_v2, current_headers):
+    dataset_folders_endpoint = CLOWDER_V1 + 'api/datasets/' + dataset_v1['id'] + '/folders?superAdmin=true'
+    dataset_folders = requests.get(dataset_folders_endpoint, headers=base_headers_v1)
+    dataset_folders_json = dataset_folders.json()
+    folder_names = []
+    for folder in dataset_folders_json:
+        folder_names.append(folder["name"])
+    for folder in folder_names:
+        new = await add_folder_entry_to_dataset(dataset_v2, folder, current_headers)
+
+
+
 async def process_users(
         fs: Minio = Depends(dependencies.get_fs),
         es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
         rabbitmq_client: BlockingChannel = Depends(dependencies.get_rabbitmq),
     ):
+
+    test_admin_key = 'eyJ1c2VyIjoiYUBhLmNvbSIsImtleSI6IkI3RDVJdl85WURQRHVnVXJXS3RlLWcifQ.bKYm8OuOovYKl-YvvBgzi54A_wA'
+    user_base_headers_v2 = {'X-API-key': test_admin_key}
+    user_headers_v2 = {**user_base_headers_v2, 'Content-type': 'application/json',
+                       'accept': 'application/json'}
+
+    # create a dataset
+    dataset_name = "test"
+    dataset_description = "just a test"
+    dataset_in_v2_endpoint = CLOWDER_V2 + 'api/v2/datasets'
+    # create dataset
+    dataset_example = {
+        "name": dataset_name,
+        "description": dataset_description,
+    }
+    # response = requests.post(
+    #     dataset_in_v2_endpoint, headers=user_headers_v2, json=dataset_example
+    # )
+    # test_dataset =  response.json()['id']
+
+    test_datast_id = '6659047bd8ec0c3da1f19b73'
+    # add folder hierarchy
+    print('created a dataset')
+    result = await add_folder_hierarchy('/root/child/subchild', test_datast_id, current_headers=user_headers_v2)
+
     print("We create a v2 admin user")
-    NEW_ADMIN_KEY_V2 = create_admin_user()
+    # NEW_ADMIN_KEY_V2 = create_admin_user()
+    NEW_ADMIN_KEY_V2 = 'eyJ1c2VyIjoiYUBhLmNvbSIsImtleSI6IjlZdWxlcmxhbDlyODF5WDYwTVE5dVEifQ.0ygTBVGeStf7zUl7CBq7jDyc4ZI'
     print('here')
     users_v1 = get_clowder_v1_users()
     for user_v1 in users_v1:
@@ -211,19 +306,20 @@ async def process_users(
             if email != "a@a.com":
                 user_v1_datasets = get_clowder_v1_user_datasets(user_id=id)
                 # TODO check if there is already a local user
-                user_v2 = get_clowder_v2_user_by_name(email)
-                user_v2 = create_local_user(user_v1)
-                # user_v2_api_key = 'eyJ1c2VyIjoiYkBiLmNvbSIsImtleSI6Ik5yNUd1clFmNGhTZFd5ZEVlQ2FmSEEifQ.FTvhQrDgvmSgnwBGwafRNAXkxH8'
-                user_v2_api_key = user_v2
+                # user_v2 = get_clowder_v2_user_by_name(email)
+                # user_v2 = create_local_user(user_v1)
+                # # user_v2_api_key = 'eyJ1c2VyIjoiYkBiLmNvbSIsImtleSI6Ik5yNUd1clFmNGhTZFd5ZEVlQ2FmSEEifQ.FTvhQrDgvmSgnwBGwafRNAXkxH8'
+                # user_v2_api_key = user_v2
+                user_v2_api_key = 'eyJ1c2VyIjoiYkBiLmNvbSIsImtleSI6ImRvLUQtcG5kVWg1a3ZQVWVtWWNFTFEifQ.i_0jvyHKX0UmHrcps_pH4N2nru0'
                 user_base_headers_v2 = {'X-API-key': user_v2_api_key}
                 user_headers_v2 = {**user_base_headers_v2, 'Content-type': 'application/json',
                                       'accept': 'application/json'}
                 for dataset in user_v1_datasets:
                     print('creating a dataset in v2')
-                    dataset_id = await create_v2_dataset(user_headers_v2, dataset, email)
-                    dataset_folders_endpoint = CLOWDER_V1 + 'api/datasets/' + dataset['id'] + '/folders?superAdmin=true'
-                    dataset_folders = requests.get(dataset_folders_endpoint, base_headers_v1)
-                    dataset_folders_json = dataset_folders.json()
+                    dataset_v2_id = await create_v2_dataset(user_headers_v2, dataset, email)
+                    dataset_v2_id = '66563fd645c9e9039f41faf7'
+                    folders = await add_dataset_folders(dataset, dataset_v2_id, user_headers_v2)
+
                     dataset_files_endpoint = CLOWDER_V1 + 'api/datasets/' + dataset['id'] + '/files?=superAdmin=true'
                     # move file stuff here
                     print('we got a dataset id')
@@ -261,7 +357,7 @@ async def process_users(
                         # with open(path_to_temp_file, "wb") as f:
                         #     f.write(data_bytes)
                         file_data = {"file": open(filename, "rb")}
-                        dataset_file_upload_endoint = CLOWDER_V2 + 'api/v2/datasets/' + dataset_id['id'] + '/files'
+                        dataset_file_upload_endoint = CLOWDER_V2 + 'api/v2/datasets/' + dataset_v2['id'] + '/files'
                         response = requests.post(dataset_file_upload_endoint, files=file_data, headers=user_base_headers_v2)
                         result = response.json()
                         try:
