@@ -13,7 +13,7 @@ import {
 	Stack,
 	Tab,
 	Tabs,
-	Typography,
+	Typography
 } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import { useParams, useSearchParams } from "react-router-dom";
@@ -22,7 +22,7 @@ import { useDispatch, useSelector } from "react-redux";
 import {
 	fetchDatasetAbout,
 	fetchDatasetLicense,
-	fetchFoldersFilesInDataset as fetchFoldersFilesInDatasetAction,
+	fetchFoldersFilesInDataset as fetchFoldersFilesInDatasetAction
 } from "../../actions/dataset";
 import { fetchFolderPath } from "../../actions/folder";
 
@@ -38,7 +38,7 @@ import {
 	fetchDatasetMetadata,
 	fetchMetadataDefinitions,
 	patchDatasetMetadata as patchDatasetMetadataAction,
-	postDatasetMetadata,
+	postDatasetMetadata
 } from "../../actions/metadata";
 import Layout from "../Layout";
 import { ActionsMenu } from "./ActionsMenu";
@@ -188,15 +188,15 @@ export const Dataset = (): JSX.Element => {
 		const tmpPaths = [
 			{
 				name: about["name"],
-				url: `/datasets/${datasetId}`,
-			},
+				url: `/datasets/${datasetId}`
+			}
 		];
 
 		if (folderPath != null) {
 			for (const folderBread of folderPath) {
 				tmpPaths.push({
 					name: folderBread["folder_name"],
-					url: `/datasets/${datasetId}?folder=${folderBread["folder_id"]}`,
+					url: `/datasets/${datasetId}?folder=${folderBread["folder_id"]}`
 				});
 			}
 		} else {
@@ -281,7 +281,7 @@ export const Dataset = (): JSX.Element => {
 							sx={{
 								display: "inline-flex",
 								justifyContent: "space-between",
-								alignItems: "baseline",
+								alignItems: "baseline"
 							}}
 						>
 							<Typography variant="h3" paragraph>
@@ -344,7 +344,7 @@ export const Dataset = (): JSX.Element => {
 								authCheck(adminMode, datasetRole.role, [
 									"owner",
 									"editor",
-									"uploader",
+									"uploader"
 								])
 									? TabStyle
 									: { display: "none" }
@@ -376,7 +376,7 @@ export const Dataset = (): JSX.Element => {
 								authCheck(adminMode, datasetRole.role, [
 									"owner",
 									"editor",
-									"uploader",
+									"uploader"
 								])
 									? TabStyle
 									: { display: "none" }

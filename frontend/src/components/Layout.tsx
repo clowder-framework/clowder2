@@ -33,7 +33,7 @@ import { EmbeddedSearch } from "./search/EmbeddedSearch";
 import {
 	fetchUserProfile,
 	getAdminModeStatus as getAdminModeStatusAction,
-	toggleAdminMode as toggleAdminModeAction,
+	toggleAdminMode as toggleAdminModeAction
 } from "../actions/user";
 import { AdminPanelSettings } from "@mui/icons-material";
 import ManageAccountsIcon from "@mui/icons-material/ManageAccounts";
@@ -50,23 +50,23 @@ const Main = styled("main", { shouldForwardProp: (prop) => prop !== "open" })<{
 	padding: theme.spacing(3),
 	transition: theme.transitions.create("margin", {
 		easing: theme.transitions.easing.sharp,
-		duration: theme.transitions.duration.leavingScreen,
+		duration: theme.transitions.duration.leavingScreen
 	}),
 	marginLeft: 0,
 	...(open && {
 		transition: theme.transitions.create("margin", {
 			easing: theme.transitions.easing.easeOut,
-			duration: theme.transitions.duration.enteringScreen,
+			duration: theme.transitions.duration.enteringScreen
 		}),
-		marginLeft: `${drawerWidth}px`,
-	}),
+		marginLeft: `${drawerWidth}px`
+	})
 }));
 
 const SearchDiv = styled("div")(({ theme }) => ({
 	position: "relative",
 	marginLeft: theme.spacing(3),
 	marginBottom: "-5px", // to compoensate the tags div
-	width: "50%",
+	width: "50%"
 }));
 
 interface AppBarProps extends MuiAppBarProps {
@@ -74,20 +74,20 @@ interface AppBarProps extends MuiAppBarProps {
 }
 
 const AppBar = styled(MuiAppBar, {
-	shouldForwardProp: (prop) => prop !== "open",
+	shouldForwardProp: (prop) => prop !== "open"
 })<AppBarProps>(({ theme, open }) => ({
 	transition: theme.transitions.create(["margin", "width"], {
 		easing: theme.transitions.easing.sharp,
-		duration: theme.transitions.duration.leavingScreen,
+		duration: theme.transitions.duration.leavingScreen
 	}),
 	...(open && {
 		width: `calc(100% - ${drawerWidth}px)`,
 		marginLeft: `${drawerWidth}px`,
 		transition: theme.transitions.create(["margin", "width"], {
 			easing: theme.transitions.easing.easeOut,
-			duration: theme.transitions.duration.enteringScreen,
-		}),
-	}),
+			duration: theme.transitions.duration.enteringScreen
+		})
+	})
 }));
 
 const DrawerHeader = styled("div")(({ theme }) => ({
@@ -96,14 +96,14 @@ const DrawerHeader = styled("div")(({ theme }) => ({
 	padding: theme.spacing(0, 1),
 	// necessary for content to be below app bar
 	...theme.mixins.toolbar,
-	justifyContent: "flex-end",
+	justifyContent: "flex-end"
 }));
 
 const link = {
 	textDecoration: "none",
 	fontSize: "16px",
 	color: "#495057",
-	m: 2,
+	m: 2
 };
 
 export default function PersistentDrawerLeft(props) {
@@ -162,7 +162,7 @@ export default function PersistentDrawerLeft(props) {
 			sx={{
 				display: "flex",
 				flexDirection: "column", // Stack children vertically
-				minHeight: "100vh", // Fill the viewport height
+				minHeight: "100vh" // Fill the viewport height
 			}}
 		>
 			<AppBar position="fixed" open={open}>
@@ -231,7 +231,7 @@ export default function PersistentDrawerLeft(props) {
 												width: "32px",
 												height: "32px",
 												borderRadius: "50%",
-												verticalAlign: "middle",
+												verticalAlign: "middle"
 											}}
 										/>
 									</Badge>
@@ -323,8 +323,8 @@ export default function PersistentDrawerLeft(props) {
 					flexShrink: 0,
 					"& .MuiDrawer-paper": {
 						width: drawerWidth,
-						boxSizing: "border-box",
-					},
+						boxSizing: "border-box"
+					}
 				}}
 				variant="persistent"
 				anchor="left"
@@ -446,10 +446,10 @@ export default function PersistentDrawerLeft(props) {
 						width: `calc(100% - ${drawerWidth}px)`,
 						transition: theme.transitions.create("margin", {
 							easing: theme.transitions.easing.easeOut,
-							duration: theme.transitions.duration.enteringScreen,
+							duration: theme.transitions.duration.enteringScreen
 						}),
-						marginLeft: `${drawerWidth}px`,
-					}),
+						marginLeft: `${drawerWidth}px`
+					})
 				}}
 			>
 				<Footer />
