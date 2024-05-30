@@ -13,7 +13,6 @@ type DeleteFeedModal = {
 
 export default function DeleteFeedModal(props: DeleteFeedModal) {
 	const { deleteFeedConfirmOpen, setDeleteFeedConfirmOpen, feedId } = props;
-	const history = useNavigate();
 	const dispatch = useDispatch();
 	const deleteFeed = (FeedId: string | undefined) =>
 		dispatch(deleteFeedAction(FeedId));
@@ -26,7 +25,6 @@ export default function DeleteFeedModal(props: DeleteFeedModal) {
 			handleActionBtnClick={() => {
 				deleteFeed(feedId);
 				setDeleteFeedConfirmOpen(false);
-				//history("/feeds");
 			}}
 			handleActionCancel={() => {
 				setDeleteFeedConfirmOpen(false);

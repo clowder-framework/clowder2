@@ -6,10 +6,12 @@ import {
 	EDIT_FEED,
 	RECEIVE_FEEDS,
 	DELETE_FEED,
+	RECEIVE_FEED,
 } from "../actions/listeners";
 
 const defaultState: FeedState = {
 	feeds: <Paged>{ metadata: <PageMetadata>{}, data: <Array<FeedOut>>[] },
+	feed: <FeedOut>{},
 };
 
 const feeds = (state = defaultState, action: DataAction) => {
@@ -18,14 +20,15 @@ const feeds = (state = defaultState, action: DataAction) => {
 			return Object.assign({}, state, {
 				feeds: {
 					...state.feeds,
-					data: state.feeds.data?.push(action.feed),
+					data: [...(state.feeds.data || []), action.feed],
 				},
 			});
 		case EDIT_FEED:
 			return Object.assign({}, state, {
+				feed: action.feed,
 				feeds: {
 					...state.feeds,
-					data: state.feeds.data.map((feed: FeedOut) => {
+					data: state.feeds.data?.map((feed: FeedOut) => {
 						if (feed.id === action.feed.id) {
 							return action.feed;
 						}
@@ -33,6 +36,8 @@ const feeds = (state = defaultState, action: DataAction) => {
 					}),
 				},
 			});
+		case RECEIVE_FEED:
+			return Object.assign({}, state, { feed: action.feed });
 		case RECEIVE_FEEDS:
 			return Object.assign({}, state, { feeds: action.feeds });
 		case DELETE_FEED:

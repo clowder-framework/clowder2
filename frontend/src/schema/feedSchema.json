@@ -1,7 +1,7 @@
 {
 	"schema": {
 		"type": "object",
-		"required": ["name", "description", "search"],
+		"required": ["name", "description", "search", "listeners"],
 		"properties": {
 			"name": {
 				"type": "string",
@@ -13,14 +13,22 @@
 			},
 			"search": {
 				"type": "object",
-				"title": "Search criteria",
+				"title": "Match criteria",
+				"required": ["mode", "criteria"],
+				"description": "Fill out the match criteria to enable the selected extractor(s) on those specific files/datasets that match the criteria",
 				"properties": {
 					"index_name": {
 						"type": "string",
 						"title": "Index name you want to search on"
 					},
+					"mode": {
+						"type": "string",
+						"title": "Mode of match criterion",
+						"enum": ["Or", "And"]
+					},
 					"criteria": {
 						"type": "array",
+						"title": "",
 						"items": {
 							"type": "object",
 							"properties": {
@@ -28,8 +36,8 @@
 									"type": "string",
 									"title": "Field",
 									"enum": [
-										"content_type",
 										"content_type_main",
+										"content_type",
 										"size",
 										"creator"
 									]
@@ -45,10 +53,6 @@
 								}
 							}
 						}
-					},
-					"mode": {
-						"type": "string",
-						"title": "Mode of search criterion - Or/And"
 					}
 				}
 			},
@@ -66,7 +70,8 @@
 						},
 						"automatic": {
 							"type": "boolean",
-							"title": "Turn on for automatic extraction"
+							"title": "Turn on for automatic extraction",
+							"default": false
 						}
 					}
 				}
@@ -75,16 +80,12 @@
 	},
 	"uiSchema": {
 		"search": {
+			"mode": {
+				"ui:widget": "radio"
+			},
 			"criteria": {
-				"operator": {
-					"ui:widget": "select"
-				}
-			}
-		},
-		"listeners": {
-			"items": {
-				"listener_id": {
-					"ui:widget": "Select"
+				"field": {
+					"ui:options": ["example1", "example2", "example3"]
 				}
 			}
 		}

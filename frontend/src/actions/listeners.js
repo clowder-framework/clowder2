@@ -289,6 +289,23 @@ export function fetchFeeds(name, skip = 0, limit = 20) {
 	};
 }
 
+export const RECEIVE_FEED = "RECEIVE_FEED";
+export function fetchFeed(id) {
+	return (dispatch) => {
+		return V2.FeedsService.getFeedApiV2FeedsFeedIdGet(id)
+			.then((json) => {
+				dispatch({
+					type: RECEIVE_FEED,
+					feed: json,
+					receivedAt: Date.now(),
+				});
+			})
+			.catch((reason) => {
+				dispatch(handleErrors(reason, fetchFeed(id)));
+			});
+	};
+}
+
 export const CREATE_FEED = "CREATE_FEED";
 export function createFeed(formData) {
 	return (dispatch) => {

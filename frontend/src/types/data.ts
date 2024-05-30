@@ -259,6 +259,7 @@ export interface EventListenerJobStatus {
 
 export interface FeedState {
 	feeds: Paged;
+	feed: FeedOut;
 }
 
 export interface RootState {

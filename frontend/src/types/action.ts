@@ -646,6 +646,11 @@ interface RECEIVE_FEEDS {
 	feeds: Paged;
 }
 
+interface RECEIVE_FEED {
+	type: "RECEIVE_FEED";
+	feed: FeedOut;
+}
+
 interface DELETE_FEED {
 	type: "DELETE_FEED";
 	feed: FeedOut;
@@ -773,4 +778,5 @@ export type DataAction =
 	| CREATE_FEED
 	| EDIT_FEED
 	| RECEIVE_FEEDS
+	| RECEIVE_FEED
 	| DELETE_FEED;

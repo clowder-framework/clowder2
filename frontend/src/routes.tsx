@@ -43,6 +43,7 @@ import { MetadataDefinitions } from "./components/metadata/MetadataDefinitions";
 import { MetadataDefinitionEntry } from "./components/metadata/MetadataDefinitionEntry";
 import { Feeds } from "./components/listeners/Feeds";
 import { AllListeners } from "./components/listeners/AllListeners";
+import { FeedEntry } from "./components/listeners/FeedEntry";
 
 // https://dev.to/iamandrewluca/private-route-in-react-router-v6-lg5
 const PrivateRoute = (props): JSX.Element => {
@@ -238,6 +239,14 @@ export const AppRoutes = (): JSX.Element => {
 					element={
 						<PrivateRoute>
 							<Feeds />
+						</PrivateRoute>
+					}
+				/>
+				<Route
+					path="/feeds/:feedId"
+					element={
+						<PrivateRoute>
+							<FeedEntry />
 						</PrivateRoute>
 					}
 				/>
