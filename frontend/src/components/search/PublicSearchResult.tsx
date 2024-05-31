@@ -61,7 +61,7 @@ function buildFileResult(item) {
 			<Box sx={{ marginTop: "5px" }}>
 				<MuiLink
 					component={Link}
-					to={`/public_files/${item._id}?public_dataset=${item.dataset_id}`}
+					to={`/public_files/${item._id}?dataset=${item.dataset_id}`}
 					sx={{ fontWeight: "bold", fontSize: "18px" }}
 				>
 					{parseString(item.name)}
