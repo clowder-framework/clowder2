@@ -4,7 +4,6 @@
 
 # Configuration file for JupyterHub
 import os
-import shutil
 
 from customauthenticator.custom import CustomTokenAuthenticator
 
@@ -13,6 +12,38 @@ c = get_config()  # noqa: F821
 # We rely on environment variables to configure JupyterHub so that we
 # avoid having to rebuild the JupyterHub container every time we change a
 # configuration parameter.
+
+
+def create_dir_hook(spawner):
+    username = spawner.user.name  # get the username
+
+    volume_path = os.path.join("/volumes/jupyterhub/", username)
+    print(f"Checking if {volume_path} exists…")
+
+    if not os.path.exists(volume_path):
+        print(f"{volume_path} does not exist. Creating directory...")
+        # create a directory with umask 0755
+        # hub and container user must have the same UID to be writeable
+        # still readable by other users on the system
+        try:
+            # Attempt to create the directory
+            os.mkdir(volume_path)
+            print(f"Directory {volume_path} created.")
+            # Now, do whatever you think your user needs
+            # ...
+        except OSError as e:
+            print(f"Error creating directory {volume_path}: {e}")
+
+        try:
+            os.chown(volume_path, 1003, 1003)
+            print("Ownership of changed successfully.")
+        except OSError as e:
+            print(f"Error changing ownership of: {e}")
+        # now do whatever you think your user needs
+
+
+# attach the hook function to the spawner
+c.Spawner.pre_spawn_hook = create_dir_hook
 
 # Spawn single-user servers as Docker containers
 c.JupyterHub.spawner_class = "dockerspawner.DockerSpawner"
@@ -36,7 +67,6 @@ c.Spawner.args = ["--NotebookApp.default_url=/notebooks/Welcome.ipynb"]
 # Mount the real user's Docker volume on the host to the notebook user's
 # notebook directory in the container
 c.DockerSpawner.volumes = {"jupyterhub-user-{username}": notebook_dir}
-
 
 # Remove containers once they are stopped
 c.DockerSpawner.remove = True
@@ -103,17 +133,3 @@ c.Authenticator.allow_all = True
 admin = os.environ.get("JUPYTERHUB_ADMIN")
 if admin:
     c.Authenticator.admin_users = [admin]
-
-
-# Pre spawn hook
-def post_spawn_hook(spawner, auth_state):
-    username = spawner.user.name
-    spawner.environment["GREETING"] = f"Hello Master {username}"
-
-    target_file_path = f"/home/jovyan/work/Clowder_APIs.ipynb"
-
-    if not os.path.exists(target_file_path):
-        shutil.copy2("/etc/jupyter/Clowder_APIs.ipynb", target_file_path)
-
-
-# c.Spawner.auth_state_hook = post_spawn_hook

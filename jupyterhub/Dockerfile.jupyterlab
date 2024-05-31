@@ -14,11 +14,12 @@ RUN apt-get -qq update && apt-get install -y --no-install-recommends \
 
 USER $NB_USER
 
+COPY Clowder_APIs.ipynb /home/jovyan/work/
+
+COPY Clowder_APIs.ipynb /home/jovyan/
+
 # Install Python packages
 RUN pip install --no-cache-dir \
     requests \
     pyclowder \
     pandas
-
-# Copy Clowder API notebook
-COPY Clowder_APIs.ipynb /etc/jupyter/Clowder_APIs.ipynb
