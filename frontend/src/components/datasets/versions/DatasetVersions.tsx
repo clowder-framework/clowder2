@@ -115,12 +115,15 @@ export const DatasetVersions = (props) => {
 			<ActionModal
 				actionOpen={deleteDatasetVersionConfirmOpen}
 				actionTitle="Delete Dataset"
-				actionText="Do you really want to delete this version? This process cannot be undone."
+				actionText="Are you sure you want to delete this version? This process cannot be undone.
+				All files, folders, metadata, visualizations, and thumbnails associated with this version will be
+				permanently deleted."
 				actionBtnName="Delete"
 				handleActionBtnClick={deleteSelectedDatasetVersion}
 				handleActionCancel={() => {
 					setDeleteDatasetVersionConfirmOpen(false);
 				}}
+				actionLevel={"error"}
 			/>
 			<Box sx={{ mt: 2, mb: 5 }}>
 				<Typography variant="h5" gutterBottom>

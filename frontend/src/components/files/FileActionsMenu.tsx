@@ -120,12 +120,13 @@ export const FileActionsMenu = (props: FileActionsMenuProps): JSX.Element => {
 			<ActionModal
 				actionOpen={confirmationOpen}
 				actionTitle="Are you sure?"
-				actionText="Do you really want to delete? This process cannot be undone."
+				actionText="Do you really want to delete this file? This process cannot be undone."
 				actionBtnName="Delete"
 				handleActionBtnClick={deleteSelectedFile}
 				handleActionCancel={() => {
 					setConfirmationOpen(false);
 				}}
+				actionLevel={"error"}
 			/>
 			<Dialog
 				open={updateFileOpen}

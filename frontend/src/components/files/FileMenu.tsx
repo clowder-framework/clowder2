@@ -65,6 +65,7 @@ export default function FileMenu(props: FileMenuProps) {
 				handleActionCancel={() => {
 					setConfirmationOpen(false);
 				}}
+				actionLevel={"error"}
 			/>
 			<Dialog
 				open={updateFileOpen}

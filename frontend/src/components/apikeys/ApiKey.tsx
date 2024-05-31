@@ -86,6 +86,7 @@ export function ApiKeys() {
 					handleActionCancel={() => {
 						setDeleteApikeyConfirmOpen(false);
 					}}
+					actionLevel={"error"}
 				/>
 				{/*create api key modal*/}
 				<CreateApiKeyModal
