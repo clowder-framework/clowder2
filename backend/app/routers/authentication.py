@@ -217,7 +217,10 @@ async def enable_readonly_user(
                 await user.replace()
                 return user.dict()
             else:
-                raise HTTPException(status_code=403, detail=f"User {useremail} is admin cannot be read only")
+                raise HTTPException(
+                    status_code=403,
+                    detail=f"User {useremail} is admin cannot be read only",
+                )
         else:
             raise HTTPException(status_code=404, detail=f"User {useremail} not found")
     else:
@@ -238,7 +241,10 @@ async def disable_readonly_user(
                 await user.replace()
                 return user.dict()
             else:
-                raise HTTPException(status_code=403, detail=f"User {useremail} is admin cannot be read only")
+                raise HTTPException(
+                    status_code=403,
+                    detail=f"User {useremail} is admin cannot be read only",
+                )
         else:
             raise HTTPException(status_code=404, detail=f"User {useremail} not found")
     else:
