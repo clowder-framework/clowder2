@@ -6,6 +6,7 @@ from app.models.authorization import AuthorizationDB, RoleType
 from app.models.datasets import DatasetDB, DatasetStatus
 from app.models.files import FileDB, FileStatus
 from app.models.groups import GroupDB
+from app.models.listeners import EventListenerDB
 from app.models.metadata import MetadataDB
 from app.routers.authentication import get_admin, get_admin_mode
 from beanie import PydanticObjectId
@@ -391,6 +392,41 @@ class GroupAuthorization:
                 detail=f"User `{current_user} does not have `{self.role}` permission on group {group_id}",
             )
         raise HTTPException(status_code=404, detail=f"Group {group_id} not found")
+
+
+class ListenerAuthorization:
+    """We use class dependency so that we can provide the `permission` parameter to the dependency.
+    For more info see https://fastapi.tiangolo.com/advanced/advanced-dependencies/.
+    Regular users are not allowed to run non-active listeners"""
+
+    # def __init__(self, optional_arg: str = None):
+    #         self.optional_arg = optional_arg
+
+    async def __call__(
+        self,
+        listener_id: str,
+        current_user: str = Depends(get_current_username),
+        admin_mode: bool = Depends(get_admin_mode),
+        admin: bool = Depends(get_admin),
+    ):
+        # If the current user is admin and has turned on admin_mode, user has access irrespective of any role assigned
+        if admin and admin_mode:
+            return True
+
+        # Else check if listener is active or current user is the creator of the extractor
+        if (
+            listener := await EventListenerDB.get(PydanticObjectId(listener_id))
+        ) is not None:
+            if listener.active is True or (
+                listener.creator and listener.creator.email == current_user
+            ):
+                return True
+            else:
+                raise HTTPException(
+                    status_code=403,
+                    detail=f"User `{current_user} does not have permission on listener `{listener_id}`",
+                )
+        raise HTTPException(status_code=404, detail=f"Listener {listener_id} not found")
 
 
 class CheckStatus:

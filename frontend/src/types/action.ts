@@ -1,10 +1,17 @@
-import { ExtractedMetadata, FilePreview, Folder, MetadataJsonld } from "./data";
+import {
+	ExtractedMetadata,
+	FilePreview,
+	Folder,
+	ListenerState,
+	MetadataJsonld,
+} from "./data";
 import {
 	AuthorizationBase,
 	DatasetOut as Dataset,
 	DatasetRoles,
 	EventListenerJobOut,
 	EventListenerJobUpdateOut,
+	EventListenerOut,
 	FileOut,
 	FileOut as FileSummary,
 	FileVersion,
@@ -435,6 +442,11 @@ interface RECEIVE_LISTENERS {
 	listeners: [];
 }
 
+interface TOGGLE_ACTIVE_FLAG_LISTENER {
+	type: "TOGGLE_ACTIVE_FLAG_LISTENER";
+	listener: EventListenerOut;
+}
+
 interface SEARCH_LISTENERS {
 	type: "SEARCH_LISTENERS";
 	listeners: [];
@@ -713,6 +725,7 @@ export type DataAction =
 	| GET_FOLDER_PATH
 	| GET_PUBLIC_FOLDER_PATH
 	| RECEIVE_LISTENERS
+	| TOGGLE_ACTIVE_FLAG_LISTENER
 	| SEARCH_LISTENERS
 	| RECEIVE_LISTENER_CATEGORIES
 	| RECEIVE_LISTENER_LABELS

@@ -56,6 +56,9 @@ export function MetadataDefinitions() {
 	const pageMetadata = useSelector(
 		(state: RootState) => state.metadata.metadataDefinitionList.metadata
 	);
+	const deletedMetadataDefinition = useSelector(
+		(state: RootState) => state.metadata.deletedMetadataDefinition
+	);
 	const adminMode = useSelector((state: RootState) => state.user.adminMode);
 
 	// TODO add option to determine limit number; default show 5 metadata definitions each time
@@ -88,7 +91,7 @@ export function MetadataDefinitions() {
 	// Admin mode will fetch all datasets
 	useEffect(() => {
 		listMetadataDefinitions(null, (currPageNum - 1) * limit, limit);
-	}, [adminMode]);
+	}, [adminMode, deletedMetadataDefinition]);
 
 	// search
 	useEffect(() => {
