@@ -263,34 +263,34 @@ async def process_users(
         rabbitmq_client: BlockingChannel = Depends(dependencies.get_rabbitmq),
     ):
 
-    test_admin_key = 'eyJ1c2VyIjoiYUBhLmNvbSIsImtleSI6IkI3RDVJdl85WURQRHVnVXJXS3RlLWcifQ.bKYm8OuOovYKl-YvvBgzi54A_wA'
-    user_base_headers_v2 = {'X-API-key': test_admin_key}
-    user_headers_v2 = {**user_base_headers_v2, 'Content-type': 'application/json',
-                       'accept': 'application/json'}
+    # test_admin_key = 'eyJ1c2VyIjoiYUBhLmNvbSIsImtleSI6IkI3RDVJdl85WURQRHVnVXJXS3RlLWcifQ.bKYm8OuOovYKl-YvvBgzi54A_wA'
+    # user_base_headers_v2 = {'X-API-key': test_admin_key}
+    # user_headers_v2 = {**user_base_headers_v2, 'Content-type': 'application/json',
+    #                    'accept': 'application/json'}
 
     # create a dataset
-    dataset_name = "test"
-    dataset_description = "just a test"
-    dataset_in_v2_endpoint = CLOWDER_V2 + 'api/v2/datasets'
-    # create dataset
-    dataset_example = {
-        "name": dataset_name,
-        "description": dataset_description,
-    }
+    # dataset_name = "test"
+    # dataset_description = "just a test"
+    # dataset_in_v2_endpoint = CLOWDER_V2 + 'api/v2/datasets'
+    # # create dataset
+    # dataset_example = {
+    #     "name": dataset_name,
+    #     "description": dataset_description,
+    # }
     # response = requests.post(
     #     dataset_in_v2_endpoint, headers=user_headers_v2, json=dataset_example
     # )
     # test_dataset =  response.json()['id']
 
-    test_datast_id = '6659047bd8ec0c3da1f19b73'
-    # add folder hierarchy
-    print('created a dataset')
-    result = await add_folder_hierarchy('/root/child/subchild', test_datast_id, current_headers=user_headers_v2)
-
+    # test_datast_id = '6659047bd8ec0c3da1f19b73'
+    # # add folder hierarchy
+    # print('created a dataset')
+    # result = await add_folder_hierarchy('/root/child/subchild', test_datast_id, current_headers=user_headers_v2)
+    #
     print("We create a v2 admin user")
-    # NEW_ADMIN_KEY_V2 = create_admin_user()
-    NEW_ADMIN_KEY_V2 = 'eyJ1c2VyIjoiYUBhLmNvbSIsImtleSI6IjlZdWxlcmxhbDlyODF5WDYwTVE5dVEifQ.0ygTBVGeStf7zUl7CBq7jDyc4ZI'
-    print('here')
+    NEW_ADMIN_KEY_V2 = create_admin_user()
+    # NEW_ADMIN_KEY_V2 = 'eyJ1c2VyIjoiYUBhLmNvbSIsImtleSI6IjlZdWxlcmxhbDlyODF5WDYwTVE5dVEifQ.0ygTBVGeStf7zUl7CBq7jDyc4ZI'
+    # print('here')
     users_v1 = get_clowder_v1_users()
     for user_v1 in users_v1:
         print(user_v1)
@@ -307,18 +307,18 @@ async def process_users(
                 user_v1_datasets = get_clowder_v1_user_datasets(user_id=id)
                 # TODO check if there is already a local user
                 # user_v2 = get_clowder_v2_user_by_name(email)
-                # user_v2 = create_local_user(user_v1)
+                user_v2 = create_local_user(user_v1)
                 # # user_v2_api_key = 'eyJ1c2VyIjoiYkBiLmNvbSIsImtleSI6Ik5yNUd1clFmNGhTZFd5ZEVlQ2FmSEEifQ.FTvhQrDgvmSgnwBGwafRNAXkxH8'
-                # user_v2_api_key = user_v2
-                user_v2_api_key = 'eyJ1c2VyIjoiYkBiLmNvbSIsImtleSI6ImRvLUQtcG5kVWg1a3ZQVWVtWWNFTFEifQ.i_0jvyHKX0UmHrcps_pH4N2nru0'
+                user_v2_api_key = user_v2
+                # user_v2_api_key = 'eyJ1c2VyIjoiYkBiLmNvbSIsImtleSI6ImRvLUQtcG5kVWg1a3ZQVWVtWWNFTFEifQ.i_0jvyHKX0UmHrcps_pH4N2nru0'
                 user_base_headers_v2 = {'X-API-key': user_v2_api_key}
                 user_headers_v2 = {**user_base_headers_v2, 'Content-type': 'application/json',
                                       'accept': 'application/json'}
                 for dataset in user_v1_datasets:
                     print('creating a dataset in v2')
                     dataset_v2_id = await create_v2_dataset(user_headers_v2, dataset, email)
-                    dataset_v2_id = '66563fd645c9e9039f41faf7'
-                    folders = await add_dataset_folders(dataset, dataset_v2_id, user_headers_v2)
+                    # dataset_v2_id = '66563fd645c9e9039f41faf7'
+                    # folders = await add_dataset_folders(dataset, dataset_v2_id, user_headers_v2)
 
                     dataset_files_endpoint = CLOWDER_V1 + 'api/datasets/' + dataset['id'] + '/files?=superAdmin=true'
                     # move file stuff here
@@ -357,7 +357,7 @@ async def process_users(
                         # with open(path_to_temp_file, "wb") as f:
                         #     f.write(data_bytes)
                         file_data = {"file": open(filename, "rb")}
-                        dataset_file_upload_endoint = CLOWDER_V2 + 'api/v2/datasets/' + dataset_v2['id'] + '/files'
+                        dataset_file_upload_endoint = CLOWDER_V2 + 'api/v2/datasets/' + dataset_v2_id + '/files'
                         response = requests.post(dataset_file_upload_endoint, files=file_data, headers=user_base_headers_v2)
                         result = response.json()
                         try:
@@ -365,7 +365,7 @@ async def process_users(
                         except Exception as e:
                             print("could not delete locally downloaded file")
                             print(e)
-                        print('done')
+                        print('done with file upload')
 
         else:
             print("not a local account")
