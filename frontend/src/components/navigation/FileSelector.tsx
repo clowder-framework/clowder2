@@ -187,7 +187,8 @@ const FileSystemViewer: React.FC<{
 
 	// Fetch datasets on component mount
 	useEffect(() => {
-		listDatasets(0, 10, true);
+		// TODO: Remove hardcoded values for skip and limit
+		listDatasets(0, 100, true);
 	}, []); //
 
 	useEffect(() => {
