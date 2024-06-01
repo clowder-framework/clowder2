@@ -52,11 +52,11 @@ export const Explore = (): JSX.Element => {
 
 	// component did mount
 	useEffect(() => {
-		listDatasets(0, limit, mine);
+		listDatasets((currPageNum - 1) * limit, limit, mine);
 	}, []);
 
 	useEffect(() => {
-		listDatasets(0, limit, mine);
+		listDatasets((currPageNum - 1) * limit, limit, mine);
 	}, [mine]);
 
 
@@ -78,6 +78,7 @@ export const Explore = (): JSX.Element => {
 	) => {
 		if (newTabIndex === 1) {
 			setMine(true);
+			setCurrPageNum(1);
 			listDatasets(0, limit, true);
 		} else {
 			setMine(false);
