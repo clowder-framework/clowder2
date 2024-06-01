@@ -121,7 +121,7 @@ export const PublicFile = (): JSX.Element => {
 		const tmpPaths = [
 			{
 				name: about["name"],
-				url: `/public_datasets/${datasetId}`,
+				url: `/public/datasets/${datasetId}`,
 			},
 		];
 
@@ -129,7 +129,7 @@ export const PublicFile = (): JSX.Element => {
 			for (const folderBread of folderPath) {
 				tmpPaths.push({
 					name: folderBread["folder_name"],
-					url: `/public_datasets/${datasetId}?folder=${folderBread["folder_id"]}`,
+					url: `/public/datasets/${datasetId}?folder=${folderBread["folder_id"]}`,
 				});
 			}
 		} else {
@@ -231,7 +231,7 @@ export const PublicFile = (): JSX.Element => {
 				</Grid>
 			</Grid>
 			<Grid container spacing={2}>
-				<Grid item xs={10}>
+				<Grid item xs={12} sm={12} md={10} lg={10} xl={10}>
 					<Tabs
 						value={selectedTabIndex}
 						onChange={handleTabChange}
@@ -314,7 +314,7 @@ export const PublicFile = (): JSX.Element => {
 					{/*	<Listeners fileId={fileId} datasetId={datasetId} />*/}
 					{/*</TabPanel>*/}
 				</Grid>
-				<Grid item xs={2}>
+				<Grid item xs={12} sm={12} md={2} lg={2} xl={2}>
 					{latestVersionNum == selectedVersionNum ? (
 						// latest version
 						<>
@@ -344,7 +344,7 @@ export const PublicFile = (): JSX.Element => {
 								defaultValue={"viewer"}
 								onChange={(event) => {
 									setSelectedVersionNum(event.target.value);
-									setSnackBarMessage("Viewing version " + event.target.value);
+									setSnackBarMessage(`Viewing version ${event.target.value}`);
 									setSnackBarOpen(true);
 								}}
 							>

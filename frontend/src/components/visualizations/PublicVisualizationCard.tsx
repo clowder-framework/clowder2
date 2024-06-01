@@ -11,7 +11,7 @@ import {
 	RESET_VIS_DATA_PRESIGNED_URL,
 } from "../../actions/visualization";
 import { RootState } from "../../types/data";
-import {RESET_PUBLIC_VIS_DATA_PRESIGNED_URL} from "../../actions/public_visualization";
+import { RESET_PUBLIC_VIS_DATA_PRESIGNED_URL } from "../../actions/public_visualization";
 
 type publicPreviewProps = {
 	publicVisComponentDefinition: VisComponentDefinitions;

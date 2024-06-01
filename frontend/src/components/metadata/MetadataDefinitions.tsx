@@ -7,6 +7,7 @@ import {
 	DialogTitle,
 	Grid,
 	IconButton,
+	Link as MuiLink,
 	Pagination,
 	Snackbar,
 } from "@mui/material";
@@ -52,6 +53,9 @@ export function MetadataDefinitions() {
 	const pageMetadata = useSelector(
 		(state: RootState) => state.metadata.metadataDefinitionList.metadata
 	);
+	const deletedMetadataDefinition = useSelector(
+		(state: RootState) => state.metadata.deletedMetadataDefinition
+	);
 	const adminMode = useSelector((state: RootState) => state.user.adminMode);
 
 	// TODO add option to determine limit number; default show 5 metadata definitions each time
@@ -74,15 +78,10 @@ export function MetadataDefinitions() {
 	// Error msg dialog
 	const [errorOpen, setErrorOpen] = useState(false);
 
-	// component did mount
-	useEffect(() => {
-		listMetadataDefinitions(null, 0, limit);
-	}, []);
-
 	// Admin mode will fetch all datasets
 	useEffect(() => {
 		listMetadataDefinitions(null, (currPageNum - 1) * limit, limit);
-	}, [adminMode]);
+	}, [adminMode, deletedMetadataDefinition]);
 
 	// search
 	useEffect(() => {
@@ -146,7 +145,7 @@ export function MetadataDefinitions() {
 			</Dialog>
 			<div className="outer-container">
 				<Grid container>
-					<Grid item xs={8}></Grid>
+					<Grid item xs={8} />
 					<Grid item xs={4}>
 						<Button
 							variant="contained"
@@ -192,7 +191,7 @@ export function MetadataDefinitions() {
 										>
 											Description
 										</TableCell>
-										<TableCell align="left"></TableCell>
+										<TableCell align="left" />
 									</TableRow>
 								</TableHead>
 								<TableBody>
@@ -205,12 +204,13 @@ export function MetadataDefinitions() {
 												}}
 											>
 												<TableCell scope="row" key={`${mdd.id}-name`}>
-													<Button
+													<MuiLink
 														component={Link}
 														to={`/metadata-definitions/${mdd.id}`}
+														sx={{ textDecoration: "none" }}
 													>
 														{mdd.name}
-													</Button>
+													</MuiLink>
 												</TableCell>
 												<TableCell
 													scope="row"

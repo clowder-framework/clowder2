@@ -1,5 +1,5 @@
 body {
-	font-family: 'Open Sans', sans-serif;
+	font-family: "Open Sans", sans-serif;
 	font-weight: 300;
 }
 
@@ -12,7 +12,7 @@ body {
 }
 
 .fileCard {
-	border: 1px solid #DFDFDF;
+	border: 1px solid #dfdfdf;
 	box-sizing: border-box;
 	border-radius: 4px;
 	height: 140px;
@@ -37,7 +37,7 @@ body {
 .actionCard {
 	padding: 20px;
 	margin: 20px 20px;
-	border: 1px solid #DFDFDF;
+	border: 1px solid #dfdfdf;
 	box-sizing: border-box;
 	border-radius: 4px;
 }
@@ -59,7 +59,7 @@ body {
 }
 
 .appBar {
-	background: #FFFFFF;
+	background: #ffffff;
 	box-shadow: none;
 }
 
@@ -80,15 +80,15 @@ body {
 }
 
 .search-input {
-	background-color: #FFFFFF !important;
-	border: 1px solid #CED4DA !important;
+	background-color: #ffffff !important;
+	border: 1px solid #ced4da !important;
 	border-radius: 4px;
 }
 
 .embedded-search-input {
 	border: none !important;
 	background: transparent !important;
-	border-bottom: 0.5px solid #868E96 !important;
+	border-bottom: 0.5px solid #868e96 !important;
 }
 
 /*turn off the shadow box on search*/
@@ -100,13 +100,13 @@ body {
 .filter-select {
 	border: none !important;
 	background: transparent !important;
-	border-bottom: 1px solid #868E96 !important;
+	border-bottom: 1px solid #868e96 !important;
 	font-weight: bold;
 }
 
 .DayPickerInput {
 	border-radius: 0;
-	border-bottom: 1px solid #868E96 !important;
+	border-bottom: 1px solid #868e96 !important;
 }
 
 .DayPickerInput > input {
@@ -114,7 +114,8 @@ body {
 	background: transparent !important;
 }
 
-.DayPickerInput > input::placeholder { /* Chrome, Firefox, Opera, Safari 10.1+ */
+.DayPickerInput > input::placeholder {
+	/* Chrome, Firefox, Opera, Safari 10.1+ */
 	color: #424242;
 	opacity: 1; /* Firefox */
 }
@@ -135,5 +136,30 @@ mark {
 }
 
 .show-more-less-clickable {
-	color: #F7941E;
+	color: #f7941e;
+}
+
+.license-item {
+	max-width: 800px;
+	cursor: pointer;
+	margin-top: 0;
+	margin-bottom: 15px;
+	display: flex;
+}
+.radio-checkbox {
+	margin-right: 0.5em;
+	min-width: 17px;
+}
+.header {
+	font-weight: 700;
+	font-size: 1.28571429em;
+}
+.description {
+	color: rgba(0, 0, 0, 0.6);
+	font-size: smaller;
+	line-height: 1.4285em;
+}
+.logo {
+	width: 100px;
+	height: auto;
 }

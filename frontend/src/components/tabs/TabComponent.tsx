@@ -1,8 +1,8 @@
-import {Box, Typography} from "@mui/material";
+import { Box, Typography } from "@mui/material";
 import React from "react";
 
-export function TabPanel(props:any) {
-	const {children, value, index, ...other} = props;
+export function TabPanel(props: any) {
+	const { children, value, index, ...other } = props;
 
 	return (
 		<div
@@ -21,7 +21,7 @@ export function TabPanel(props:any) {
 	);
 }
 
-export function a11yProps(index:number) {
+export function a11yProps(index: number) {
 	return {
 		id: `tab-${index}`,
 		"aria-controls": `tabpanel-${index}`,

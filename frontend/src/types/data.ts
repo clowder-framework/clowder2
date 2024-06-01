@@ -7,10 +7,12 @@ import {
 	FileVersion,
 	FolderOut,
 	GroupOut,
+	LicenseOut,
 	MetadataDefinitionOut,
 	MetadataOut as Metadata,
 	Paged,
 	RoleType,
+	UserAPIKeyOut,
 	UserOut,
 	VisualizationConfigOut,
 	VisualizationDataOut,
@@ -121,6 +123,9 @@ export interface DatasetState {
 	files: Paged;
 	folders: Paged;
 	datasets: Paged;
+	deletedDataset: DatasetOut;
+	deletedFolder: FolderOut;
+	deletedFile: FileOut;
 	newDataset: DatasetOut;
 	newFile: FileOut;
 	newFolder: FolderOut;
@@ -128,6 +133,7 @@ export interface DatasetState {
 	about: DatasetOut;
 	datasetRole: AuthorizationBase;
 	roles: DatasetRoles;
+	license: LicenseOut;
 }
 
 export interface PublicDatasetState {
@@ -140,6 +146,7 @@ export interface PublicDatasetState {
 	publicDatasetRole: AuthorizationBase;
 	publicRoles: DatasetRoles;
 	publicFoldersAndFiles: Paged;
+	license: LicenseOut;
 }
 
 export interface ListenerState {
@@ -155,6 +162,7 @@ export interface ListenerState {
 export interface GroupState {
 	groups: Paged;
 	newGroup: GroupOut;
+	deletedGroup: GroupOut;
 	about: GroupOut;
 	role: RoleType;
 	users: Paged;
@@ -168,18 +176,18 @@ export interface MetadataState {
 	publicDatasetMetadataList: Metadata[];
 	fileMetadataList: Metadata[];
 	newMetadataDefinition: MetadataDefinitionOut;
+	deletedMetadataDefinition: MetadataDefinitionOut;
 	publicFileMetadataList: Metadata[];
 }
 
 export interface FileState {
-	url: string;
 	blob: Blob;
 	fileSummary: FileOut;
 	extractedMetadata: ExtractedMetadata[];
 	metadataJsonld: MetadataJsonld[];
 	previews: FilePreview[];
 	fileVersions: FileVersion[];
-	fileRole: AuthorizationBase;
+	fileRole: string;
 	presignedUrl: string;
 	selected_version_num: number;
 }
@@ -202,6 +210,7 @@ export interface UserState {
 	errorMsg: string;
 	hashedKey: string;
 	apiKeys: Paged;
+	deletedApiKey: UserAPIKeyOut;
 	profile: UserOut;
 	adminMode: boolean;
 }

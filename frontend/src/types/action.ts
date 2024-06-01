@@ -1,15 +1,23 @@
-import { ExtractedMetadata, FilePreview, Folder, MetadataJsonld } from "./data";
+import {
+	ExtractedMetadata,
+	FilePreview,
+	Folder,
+	ListenerState,
+	MetadataJsonld,
+} from "./data";
 import {
 	AuthorizationBase,
 	DatasetOut as Dataset,
 	DatasetRoles,
 	EventListenerJobOut,
 	EventListenerJobUpdateOut,
+	EventListenerOut,
 	FileOut,
 	FileOut as FileSummary,
 	FileVersion,
 	FolderOut,
 	GroupOut as Group,
+	LicenseOut,
 	MetadataDefinitionOut as MetadataDefinition,
 	MetadataOut as Metadata,
 	Paged,
@@ -48,6 +56,16 @@ interface DELETE_FILE {
 interface RECEIVE_DATASET_ABOUT {
 	type: "RECEIVE_DATASET_ABOUT";
 	about: Dataset;
+}
+
+interface RECEIVE_DATASET_LICENSE {
+	type: "RECEIVE_DATASET_LICENSE";
+	license: LicenseOut;
+}
+
+interface UPDATE_DATASET_LICENSE {
+	type: "UPDATE_DATASET_LICENSE";
+	license: LicenseOut;
 }
 
 interface RECEIVE_DATASET_ROLE {
@@ -424,6 +442,11 @@ interface RECEIVE_LISTENERS {
 	listeners: [];
 }
 
+interface TOGGLE_ACTIVE_FLAG_LISTENER {
+	type: "TOGGLE_ACTIVE_FLAG_LISTENER";
+	listener: EventListenerOut;
+}
+
 interface SEARCH_LISTENERS {
 	type: "SEARCH_LISTENERS";
 	listeners: [];
@@ -687,6 +710,7 @@ export type DataAction =
 	| GET_FOLDER_PATH
 	| GET_PUBLIC_FOLDER_PATH
 	| RECEIVE_LISTENERS
+	| TOGGLE_ACTIVE_FLAG_LISTENER
 	| SEARCH_LISTENERS
 	| RECEIVE_LISTENER_CATEGORIES
 	| RECEIVE_LISTENER_LABELS
@@ -728,4 +752,6 @@ export type DataAction =
 	| RESET_PUBLIC_VIS_DATA_PRESIGNED_URL
 	| RECEIVE_FOLDERS_FILES_IN_DATASET
 	| RECEIVE_PUBLIC_FOLDERS_FILES_IN_DATASET
-	| FOLDER_UPDATED;
+	| FOLDER_UPDATED
+	| RECEIVE_DATASET_LICENSE
+	| UPDATE_DATASET_LICENSE;

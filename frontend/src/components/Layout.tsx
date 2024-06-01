@@ -16,14 +16,7 @@ import ListItem from "@mui/material/ListItem";
 import ListItemButton from "@mui/material/ListItemButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
-import {
-	Badge,
-	Link,
-	Menu,
-	MenuItem,
-	MenuList,
-	Typography,
-} from "@mui/material";
+import { Badge, Link, Menu, MenuItem, MenuList } from "@mui/material";
 import { Link as RouterLink, useLocation } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../types/data";
@@ -45,6 +38,8 @@ import {
 import { AdminPanelSettings } from "@mui/icons-material";
 import ManageAccountsIcon from "@mui/icons-material/ManageAccounts";
 import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
+import { Footer } from "./navigation/Footer";
+import BuildIcon from "@mui/icons-material/Build";
 
 const drawerWidth = 240;
 
@@ -57,13 +52,13 @@ const Main = styled("main", { shouldForwardProp: (prop) => prop !== "open" })<{
 		easing: theme.transitions.easing.sharp,
 		duration: theme.transitions.duration.leavingScreen,
 	}),
-	marginLeft: `-${drawerWidth}px`,
+	marginLeft: 0,
 	...(open && {
 		transition: theme.transitions.create("margin", {
 			easing: theme.transitions.easing.easeOut,
 			duration: theme.transitions.duration.enteringScreen,
 		}),
-		marginLeft: 0,
+		marginLeft: `${drawerWidth}px`,
 	}),
 }));
 
@@ -163,7 +158,13 @@ export default function PersistentDrawerLeft(props) {
 
 	// @ts-ignore
 	return (
-		<Box sx={{ display: "flex" }}>
+		<Box
+			sx={{
+				display: "flex",
+				flexDirection: "column", // Stack children vertically
+				minHeight: "100vh", // Fill the viewport height
+			}}
+		>
 			<AppBar position="fixed" open={open}>
 				<Toolbar>
 					<IconButton
@@ -419,23 +420,40 @@ export default function PersistentDrawerLeft(props) {
 						</ListItemButton>
 					</ListItem>
 				</List>
+				<Divider />
+				<List>
+					<ListItem key={"listeners"} disablePadding>
+						<ListItemButton component={RouterLink} to="/listeners">
+							<ListItemIcon>
+								<BuildIcon />
+							</ListItemIcon>
+							<ListItemText primary={"Extractors"} />
+						</ListItemButton>
+					</ListItem>
+				</List>
 			</Drawer>
 			<Main open={open}>
 				<DrawerHeader />
 				{children}
-				<Box
-					sx={{
-						position: "fixed",
-						bottom: "0px",
-						minHeight: "30px",
-						width: "100%",
-					}}
-				>
-					<Typography variant="body2" color="primary.light">
-						v2.0.0-beta.1
-					</Typography>
-				</Box>
 			</Main>
+			<Box
+				sx={{
+					mt: "auto", // Pushes the footer to the bottom
+					minHeight: "30px",
+					width: "100%",
+					marginLeft: 0,
+					...(open && {
+						width: `calc(100% - ${drawerWidth}px)`,
+						transition: theme.transitions.create("margin", {
+							easing: theme.transitions.easing.easeOut,
+							duration: theme.transitions.duration.enteringScreen,
+						}),
+						marginLeft: `${drawerWidth}px`,
+					}),
+				}}
+			>
+				<Footer />
+			</Box>
 		</Box>
 	);
 }

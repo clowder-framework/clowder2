@@ -9,7 +9,9 @@ export function fetchListeners(
 	heartbeatInterval = 0,
 	category = null,
 	label = null,
-	aliveOnly = false
+	aliveOnly = false,
+	process = null,
+	all = false
 ) {
 	return (dispatch) => {
 		// TODO: Parameters for dates? paging?
@@ -19,7 +21,9 @@ export function fetchListeners(
 			heartbeatInterval,
 			category,
 			label,
-			aliveOnly
+			aliveOnly,
+			process,
+			all
 		)
 			.then((json) => {
 				dispatch({
@@ -38,10 +42,50 @@ export function fetchListeners(
 							heartbeatInterval,
 							category,
 							label,
-							aliveOnly
+							aliveOnly,
+							process
 						)
 					)
 				);
+			});
+	};
+}
+
+export const TOGGLE_ACTIVE_FLAG_LISTENER = "TOGGLE_ACTIVE_FLAG_LISTENER";
+export function enableListener(id) {
+	return (dispatch) => {
+		return V2.ListenersService.enableListenerApiV2ListenersListenerIdEnablePut(
+			id
+		)
+			.then((json) => {
+				// We could have called fetchListeners but it would be an overhead since we are just toggling the active flag for one listener.
+				// Hence we create a separate action to update the particular listener in state
+				dispatch({
+					type: TOGGLE_ACTIVE_FLAG_LISTENER,
+					listener: json,
+				});
+			})
+			.catch((reason) => {
+				dispatch(handleErrors(reason, enableListener(id)));
+			});
+	};
+}
+
+export function disableListener(id) {
+	return (dispatch) => {
+		return V2.ListenersService.disableListenerApiV2ListenersListenerIdDisablePut(
+			id
+		)
+			.then((json) => {
+				// We could have called fetchListeners but it would be an overhead since we are just toggling the active flag for one listener.
+				// Hence we create a separate action to update the particular listener in state
+				dispatch({
+					type: TOGGLE_ACTIVE_FLAG_LISTENER,
+					listener: json,
+				});
+			})
+			.catch((reason) => {
+				dispatch(handleErrors(reason, disableListener(id)));
 			});
 	};
 }
@@ -52,7 +96,8 @@ export function queryListeners(
 	text,
 	skip = 0,
 	limit = 21,
-	heartbeatInterval = 0
+	heartbeatInterval = 0,
+	process = null
 ) {
 	return (dispatch) => {
 		// TODO: Parameters for dates? paging?
@@ -60,7 +105,8 @@ export function queryListeners(
 			text,
 			skip,
 			limit,
-			heartbeatInterval
+			heartbeatInterval,
+			process
 		)
 			.then((json) => {
 				dispatch({
@@ -73,7 +119,7 @@ export function queryListeners(
 				dispatch(
 					handleErrors(
 						reason,
-						queryListeners(text, skip, limit, heartbeatInterval)
+						queryListeners(text, skip, limit, heartbeatInterval, process)
 					)
 				);
 			});

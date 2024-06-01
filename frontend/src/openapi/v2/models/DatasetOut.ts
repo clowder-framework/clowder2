@@ -28,4 +28,6 @@ export type DatasetOut = {
     user_views?: number;
     downloads?: number;
     thumbnail_id?: string;
+    standard_license?: boolean;
+    license_id?: string;
 }

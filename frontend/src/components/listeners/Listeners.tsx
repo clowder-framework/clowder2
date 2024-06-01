@@ -31,10 +31,11 @@ import { GenericSearchBox } from "../search/GenericSearchBox";
 type ListenerProps = {
 	fileId?: string;
 	datasetId?: string;
+	process?: string;
 };
 
 export function Listeners(props: ListenerProps) {
-	const { fileId, datasetId } = props;
+	const { fileId, datasetId, process } = props;
 	// Redux connect equivalent
 	const dispatch = useDispatch();
 	const listListeners = (
@@ -43,7 +44,8 @@ export function Listeners(props: ListenerProps) {
 		heartbeatInterval: number | undefined,
 		selectedCategory: string | null,
 		selectedLabel: string | null,
-		aliveOnly: boolean | undefined
+		aliveOnly: boolean | undefined,
+		process: string | undefined
 	) =>
 		dispatch(
 			fetchListeners(
@@ -52,15 +54,17 @@ export function Listeners(props: ListenerProps) {
 				heartbeatInterval,
 				selectedCategory,
 				selectedLabel,
-				aliveOnly
+				aliveOnly,
+				process
 			)
 		);
 	const searchListeners = (
 		text: string,
 		skip: number | undefined,
 		limit: number | undefined,
-		heartbeatInterval: number | undefined
-	) => dispatch(queryListeners(text, skip, limit, heartbeatInterval));
+		heartbeatInterval: number | undefined,
+		process: string | undefined
+	) => dispatch(queryListeners(text, skip, limit, heartbeatInterval, process));
 	const listAvailableCategories = () => dispatch(fetchListenerCategories());
 	const listAvailableLabels = () => dispatch(fetchListenerLabels());
 
@@ -74,6 +78,7 @@ export function Listeners(props: ListenerProps) {
 		(state: RootState) => state.listener.categories
 	);
 	const labels = useSelector((state: RootState) => state.listener.labels);
+	const adminMode = useSelector((state: RootState) => state.user.adminMode);
 
 	const [currPageNum, setCurrPageNum] = useState<number>(1);
 	const [limit] = useState<number>(config.defaultExtractors);
@@ -88,10 +93,10 @@ export function Listeners(props: ListenerProps) {
 
 	// component did mount
 	useEffect(() => {
-		listListeners(0, limit, 0, null, null, aliveOnly);
+		listListeners(0, limit, 0, null, null, aliveOnly, process);
 		listAvailableCategories();
 		listAvailableLabels();
-	}, []);
+	}, [adminMode]);
 
 	// search
 	useEffect(() => {
@@ -99,16 +104,33 @@ export function Listeners(props: ListenerProps) {
 		setCurrPageNum(1);
 		setSelectedCategory("");
 
-		if (searchText !== "") searchListeners(searchText, 0, limit, 0);
-		else listListeners(0, limit, 0, selectedCategory, selectedLabel, aliveOnly);
-	}, [searchText]);
+		if (searchText !== "") searchListeners(searchText, 0, limit, 0, process);
+		else
+			listListeners(
+				0,
+				limit,
+				0,
+				selectedCategory,
+				selectedLabel,
+				aliveOnly,
+				process
+			);
+	}, [searchText, adminMode]);
 
 	useEffect(() => {
 		// reset page and reset search text with each new search term
 		setCurrPageNum(1);
 		setSearchText("");
-		listListeners(0, limit, 0, selectedCategory, selectedLabel, aliveOnly);
-	}, [aliveOnly]);
+		listListeners(
+			0,
+			limit,
+			0,
+			selectedCategory,
+			selectedLabel,
+			aliveOnly,
+			process
+		);
+	}, [aliveOnly, adminMode]);
 
 	// any of the change triggers timer to fetch the extractor status
 	useEffect(() => {
@@ -126,7 +148,8 @@ export function Listeners(props: ListenerProps) {
 					0,
 					selectedCategory,
 					selectedLabel,
-					aliveOnly
+					aliveOnly,
+					process
 				);
 			}, config.extractorLivelihoodInterval);
 			return () => clearInterval(interval);
@@ -138,32 +161,50 @@ export function Listeners(props: ListenerProps) {
 		selectedCategory,
 		selectedLabel,
 		aliveOnly,
+		adminMode,
 	]);
 
 	const handleListenerSearch = () => {
 		setSelectedCategory("");
-		searchListeners(searchText, (currPageNum - 1) * limit, limit, 0);
+		searchListeners(searchText, (currPageNum - 1) * limit, limit, 0, process);
 	};
 
 	const handleCategoryChange = (event: React.ChangeEvent<HTMLInputElement>) => {
 		const selectedCategoryValue = (event.target as HTMLInputElement).value;
 		setSelectedCategory(selectedCategoryValue);
 		setSearchText("");
-		listListeners(0, limit, 0, selectedCategoryValue, selectedLabel, aliveOnly);
+		listListeners(
+			0,
+			limit,
+			0,
+			selectedCategoryValue,
+			selectedLabel,
+			aliveOnly,
+			process
+		);
 	};
 
 	const handleLabelChange = (event: React.ChangeEvent<HTMLInputElement>) => {
 		const selectedLabelValue = (event.target as HTMLInputElement).value;
 		setSelectedLabel(selectedLabelValue);
 		setSearchText("");
-		listListeners(0, limit, 0, selectedCategory, selectedLabelValue, aliveOnly);
+		listListeners(
+			0,
+			limit,
+			0,
+			selectedCategory,
+			selectedLabelValue,
+			aliveOnly,
+			process
+		);
 	};
 
 	const handlePageChange = (_: ChangeEvent<unknown>, value: number) => {
 		const newSkip = (value - 1) * limit;
 		setCurrPageNum(value);
-		if (searchText !== "") searchListeners(searchText, newSkip, limit, 0);
-		else listListeners(newSkip, limit, 0, null, null, aliveOnly);
+		if (searchText !== "")
+			searchListeners(searchText, newSkip, limit, 0, process);
+		else listListeners(newSkip, limit, 0, null, null, aliveOnly, process);
 	};
 
 	const handleSubmitExtractionClose = () => {
@@ -266,6 +307,7 @@ export function Listeners(props: ListenerProps) {
 												setInfoOnly={setInfoOnly}
 												setOpenSubmitExtraction={setOpenSubmitExtraction}
 												setSelectedExtractor={setSelectedExtractor}
+												showSubmit={true}
 											/>
 											<Divider />
 										</>

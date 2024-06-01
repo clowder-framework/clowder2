@@ -55,6 +55,8 @@ export default function ShareDatasetModal(props: ShareDatasetModalProps) {
 	const getRoles = (datasetId: string | undefined) =>
 		dispatch(fetchDatasetRoles(datasetId));
 
+	const myProfile = useSelector((state: RootState) => state.user.profile);
+
 	useEffect(() => {
 		prefixSearchAllUsers("", 0, 10);
 	}, []);
@@ -67,10 +69,14 @@ export default function ShareDatasetModal(props: ShareDatasetModalProps) {
 	useEffect(() => {
 		setOptions(
 			users.reduce((list: string[], user: UserOut) => {
-				return [...list, user.email];
+				// don't include the current user
+				if (user.email !== myProfile.email) {
+					return [...list, user.email];
+				}
+				return list;
 			}, [])
 		);
-	}, [users]);
+	}, [users, myProfile.email]);
 
 	const onShare = async () => {
 		await setUserRole(datasetId, email, role);
