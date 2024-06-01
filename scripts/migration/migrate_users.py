@@ -219,12 +219,12 @@ async def create_folder_if_not_exists_or_get(folder, parent, dataset_v2, current
     folder_json_data = folder_json['data']
     current_folder_data = {"name": folder}
     if parent:
-        current_folder_data["parent"] = parent
+        current_folder_data["parent_folder"] = parent
     else:
         for each in folder_json_data:
             if each['name'] == folder:
                 print('we found this folder')
-                return each
+                return each['id']
     response = requests.post(
         f"{CLOWDER_V2}api/v2/datasets/{dataset_v2}/folders",
         json=current_folder_data,
@@ -242,7 +242,8 @@ async def add_folder_hierarchy(folder_hierarchy, dataset_v2, current_headers):
     current_parent = None
     for part in hierarchy_parts:
         result = await create_folder_if_not_exists_or_get(part, current_parent, dataset_v2, current_headers=current_headers)
-        current_parent = result
+        if result.status_code == 200:
+            current_parent = result.json()['id']
         print('got result')
 
 async def add_dataset_folders(dataset_v1, dataset_v2, current_headers):
