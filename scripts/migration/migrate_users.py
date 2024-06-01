@@ -68,8 +68,8 @@ CLOWDER_V1 = config["CLOWDER_V1"]
 ADMIN_KEY_V1 = config["ADMIN_KEY_V1"]
 
 CLOWDER_V2 = config["CLOWDER_V2"]
-ADMIN_KEY_V2 = config["ADMIN_KEY_V2"]
-
+# ADMIN_KEY_V2 = config["ADMIN_KEY_V2"]
+ADMIN_KEY_V2 = 'eyJ1c2VyIjoiYUBhLmNvbSIsImtleSI6IlU1dllaWnB4elNDREl1Q0xObDZ3TWcifQ.LRiLqSH0fJlFSObKrNz-qexkoHw'
 base_headers_v1 = {'X-API-key': ADMIN_KEY_V1}
 clowder_headers_v1 = {**base_headers_v1, 'Content-type': 'application/json',
         'accept': 'application/json'}
@@ -219,7 +219,7 @@ async def create_folder_if_not_exists_or_get(folder, parent, dataset_v2, current
     folder_json_data = folder_json['data']
     current_folder_data = {"name": folder}
     if parent:
-        print('we have a parent to check for')
+        current_folder_data["parent"] = parent
     else:
         for each in folder_json_data:
             if each['name'] == folder:
@@ -282,10 +282,10 @@ async def process_users(
     # )
     # test_dataset =  response.json()['id']
 
-    # test_datast_id = '6659047bd8ec0c3da1f19b73'
+    test_datast_id = '665b888d2038e8d9bd4b3a9b'
     # # add folder hierarchy
     # print('created a dataset')
-    # result = await add_folder_hierarchy('/root/child/subchild', test_datast_id, current_headers=user_headers_v2)
+    result = await add_folder_hierarchy('/root/child/subchild', test_datast_id, current_headers=clowder_headers_v2)
     #
     print("We create a v2 admin user")
     NEW_ADMIN_KEY_V2 = create_admin_user()
