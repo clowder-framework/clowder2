@@ -209,6 +209,28 @@ async def add_folder_entry_to_dataset(dataset_id, folder_name, current_headers):
             print("this one already exists")
     print('got folder parts')
 
+async def get_folder_and_subfolders(dataset_id, folder, current_headers):
+    total_folders = []
+    if folder:
+        path_url = CLOWDER_V2 + 'api/v2/datasets/' + dataset_id + '/folders_and_files?folder_id=' + folder['id']
+        folder_result = requests.get(path_url, headers=current_headers)
+        folder_json_data = folder_result.json()['data']
+        for data in folder_json_data:
+            if data['object_type'] == 'folder':
+                total_folders.append(data)
+    else:
+        path_url = CLOWDER_V2 + 'api/v2/datasets/' + dataset_id + '/folders'
+        folder_result = requests.get(path_url, headers=current_headers)
+        folder_json_data = folder_result.json()['data']
+        for data in folder_json_data:
+            total_folders.append(data)
+        print('we got the base level now')
+    current_subfolders = []
+    for current_folder in total_folders:
+        subfolders = await get_folder_and_subfolders(dataset_id, current_folder, current_headers)
+        current_subfolders += subfolders
+    total_folders += current_subfolders
+    return total_folders
 
 async def create_folder_if_not_exists_or_get(folder, parent, dataset_v2, current_headers):
     clowder_v2_folder_endpoint = CLOWDER_V2 + 'api/v2/datasets/' + dataset_v2 + '/folders'
@@ -216,19 +238,21 @@ async def create_folder_if_not_exists_or_get(folder, parent, dataset_v2, current
     folder_json = current_dataset_folders.json()
     folder_json_data = folder_json['data']
     current_folder_data = {"name": folder}
+    found_folder = None
     if parent:
         current_folder_data["parent_folder"] = parent
-    else:
-        for each in folder_json_data:
-            if each['name'] == folder:
-                print('we found this folder')
-                return each['id']
-    response = requests.post(
-        f"{CLOWDER_V2}api/v2/datasets/{dataset_v2}/folders",
-        json=current_folder_data,
-        headers=current_headers,
-    )
-    return response
+    for each in folder_json_data:
+        if each['name'] == folder:
+            found_folder = each
+    if not found_folder:
+        response = requests.post(
+            f"{CLOWDER_V2}api/v2/datasets/{dataset_v2}/folders",
+            json=current_folder_data,
+            headers=current_headers,
+        )
+        found_folder = response.json()
+        print("We just created", found_folder)
+    return found_folder
 
 async def add_folder_hierarchy(folder_hierarchy, dataset_v2, current_headers):
     clowder_v2_folder_endpoint = CLOWDER_V2 + 'api/v2/datasets/' + dataset_v2 + '/folders'
@@ -240,8 +264,8 @@ async def add_folder_hierarchy(folder_hierarchy, dataset_v2, current_headers):
     current_parent = None
     for part in hierarchy_parts:
         result = await create_folder_if_not_exists_or_get(part, current_parent, dataset_v2, current_headers=current_headers)
-        if result.status_code == 200:
-            current_parent = result.json()['id']
+        if result:
+            current_parent = result['id']
         print('got result')
 
 async def add_dataset_folders(dataset_v1, dataset_v2, current_headers):
@@ -253,7 +277,7 @@ async def add_dataset_folders(dataset_v1, dataset_v2, current_headers):
         folder_names.append(folder["name"])
     for folder in folder_names:
         new = await add_folder_hierarchy(folder_hierarchy=folder, dataset_v2=dataset_v2, current_headers=current_headers)
-        print("added a folder")
+        print('added', folder)
 
 
 
@@ -296,6 +320,7 @@ async def process_users(
                 user_base_headers_v2 = {'X-API-key': user_v2_api_key}
                 user_headers_v2 = {**user_base_headers_v2, 'Content-type': 'application/json',
                                       'accept': 'application/json'}
+                folders_from_test = await get_folder_and_subfolders(dataset_id='665cdb1b7af29eb74e40bc86',folder=None, current_headers=user_headers_v2)
                 for dataset in user_v1_datasets:
                     print('creating a dataset in v2')
                     dataset_v2_id = await create_v2_dataset(user_base_headers_v2, dataset, email)
@@ -316,6 +341,7 @@ async def process_users(
                     user = user_collection.find_one({"email": email})
                     print('got a user')
                     userDB = await UserDB.find_one({"email": email})
+                    print('BEFORE FILES')
                     for file in files_result:
 
                         file_id = file['id']
