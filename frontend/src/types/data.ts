@@ -213,6 +213,7 @@ export interface UserState {
 	deletedApiKey: UserAPIKeyOut;
 	profile: UserOut;
 	adminMode: boolean;
+	read_only_user: boolean;
 }
 
 export interface ErrorState {

@@ -155,7 +155,6 @@ export default function PersistentDrawerLeft(props) {
 	}, [location]);
 
 	const loggedOut = useSelector((state: RootState) => state.error.loggedOut);
-
 	// @ts-ignore
 	return (
 		<Box
@@ -378,36 +377,44 @@ export default function PersistentDrawerLeft(props) {
 					</>
 				) : null}
 				<List>
-					<ListItem key={"groups"} disablePadding>
-						<ListItemButton component={RouterLink} to="/groups">
-							<ListItemIcon>
-								<GroupIcon />
-							</ListItemIcon>
-							<ListItemText primary={"Groups"} />
-						</ListItemButton>
-					</ListItem>
+					{currUserProfile.read_only_user? (
+						<></>
+					) :
+						<ListItem key={"groups"} disablePadding>
+							<ListItemButton component={RouterLink} to="/groups">
+								<ListItemIcon>
+									<GroupIcon />
+								</ListItemIcon>
+								<ListItemText primary={"Groups"} />
+							</ListItemButton>
+						</ListItem>
+					}
 				</List>
 				<Divider />
 				<List>
-					<ListItem key={"newdataset"} disablePadding>
-						<ListItemButton component={RouterLink} to="/create-dataset">
-							<ListItemIcon>
-								<AddBox />
-							</ListItemIcon>
+					{currUserProfile.read_only_user? (
+						<></>
+					) :
+						<ListItem key={"newdataset"} disablePadding>
+							<ListItemButton component={RouterLink} to="/create-dataset">
+								<ListItemIcon>
+									<AddBox />
+								</ListItemIcon>
 							<ListItemText primary={"New Dataset"} />
 						</ListItemButton>
 					</ListItem>
+					}
 				</List>
 				<Divider />
 				<List>
-					<ListItem key={"metadataDefinition"} disablePadding>
-						<ListItemButton component={RouterLink} to="/metadata-definitions">
-							<ListItemIcon>
-								<InfoOutlinedIcon />
-							</ListItemIcon>
-							<ListItemText primary={"Metadata Definitions"} />
-						</ListItemButton>
-					</ListItem>
+						<ListItem key={"metadataDefinition"} disablePadding>
+							<ListItemButton component={RouterLink} to="/metadata-definitions">
+								<ListItemIcon>
+									<InfoOutlinedIcon />
+								</ListItemIcon>
+								<ListItemText primary={"Metadata Definitions"} />
+							</ListItemButton>
+						</ListItem>
 				</List>
 				<Divider />
 				<List>

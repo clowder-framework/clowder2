@@ -1,4 +1,7 @@
-from app.keycloak_auth import get_current_username
+from beanie import PydanticObjectId
+from beanie.operators import Or
+from fastapi import Depends, HTTPException
+from app.keycloak_auth import get_current_username, get_read_only_user
 from app.models.authorization import AuthorizationDB, RoleType
 from app.models.datasets import DatasetDB, DatasetStatus
 from app.models.files import FileDB, FileStatus
@@ -196,6 +199,7 @@ class Authorization:
         current_user: str = Depends(get_current_username),
         admin_mode: bool = Depends(get_admin_mode),
         admin: bool = Depends(get_admin),
+        readonly: bool = Depends(get_read_only_user),
     ):
         # TODO: Make sure we enforce only one role per user per dataset, or find_one could yield wrong answer here.
 
@@ -476,20 +480,34 @@ def access(
     role_required: RoleType,
     admin_mode: bool = Depends(get_admin_mode),
     admin: bool = Depends(get_admin),
+    read_only_user: bool = Depends(get_read_only_user),
 ) -> bool:
+    # check for read only user first
+    if read_only_user and role_required == RoleType.VIEWER:
+        return True
     """Enforce implied role hierarchy ADMIN = OWNER > EDITOR > UPLOADER > VIEWER"""
     if user_role == RoleType.OWNER or (admin and admin_mode):
         return True
-    elif user_role == RoleType.EDITOR and role_required in [
-        RoleType.EDITOR,
-        RoleType.UPLOADER,
-        RoleType.VIEWER,
-    ]:
+    elif (
+        user_role == RoleType.EDITOR
+        and role_required
+        in [
+            RoleType.EDITOR,
+            RoleType.UPLOADER,
+            RoleType.VIEWER,
+        ]
+        and not read_only_user
+    ):
         return True
-    elif user_role == RoleType.UPLOADER and role_required in [
-        RoleType.UPLOADER,
-        RoleType.VIEWER,
-    ]:
+    elif (
+        user_role == RoleType.UPLOADER
+        and role_required
+        in [
+            RoleType.UPLOADER,
+            RoleType.VIEWER,
+        ]
+        and not read_only_user
+    ):
         return True
     elif user_role == RoleType.VIEWER and role_required == RoleType.VIEWER:
         return True
