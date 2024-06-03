@@ -3,10 +3,10 @@ repo_url: https://github.com/clowder-framework/clowder2
 edit_uri: mkdocs/docs
 nav:
   - Home: index.md
-  - User Guide:
+  - Users:
       - users/index.md
       - Visualizations: users/visualizations.md
-  - Developer Guide:
+  - Developers:
       - Getting started: devs/getstarted.md
       - Architecture: devs/architecture.md
       - Keycloak: devs/keycloak.md
@@ -18,6 +18,8 @@ nav:
       - Standalone Docker Deployment: devs/standalone-docker-deployment.md
       - Proposals:
         - Storage: devs/storage.md
+  - Admins:
+      - admins/index.md
   - About: about.md
 
 theme:
