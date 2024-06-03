@@ -318,7 +318,9 @@ async def get_current_user_id(identity: Json = Depends(get_token)) -> str:
     return keycloak_id
 
 
-async def create_user(email: str, password: str, firstName: str, lastName: str, temporary: bool = False):
+async def create_user(
+    email: str, password: str, firstName: str, lastName: str, temporary: bool = False
+):
     """Create a user in Keycloak."""
     keycloak_admin = KeycloakAdmin(
         server_url=settings.auth_server_url,
