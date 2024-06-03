@@ -209,6 +209,7 @@ async def add_folder_entry_to_dataset(dataset_id, folder_name, current_headers):
             print("this one already exists")
     print('got folder parts')
 
+# gets all folders and subfolders in a dataset
 async def get_folder_and_subfolders(dataset_id, folder, current_headers):
     total_folders = []
     if folder:
@@ -234,14 +235,12 @@ async def get_folder_and_subfolders(dataset_id, folder, current_headers):
 
 async def create_folder_if_not_exists_or_get(folder, parent, dataset_v2, current_headers):
     clowder_v2_folder_endpoint = CLOWDER_V2 + 'api/v2/datasets/' + dataset_v2 + '/folders'
-    current_dataset_folders = requests.get(clowder_v2_folder_endpoint, headers=current_headers)
-    folder_json = current_dataset_folders.json()
-    folder_json_data = folder_json['data']
+    current_dataset_folders = await get_folder_and_subfolders(dataset_id=dataset_v2,folder=None, current_headers=current_headers)
     current_folder_data = {"name": folder}
     found_folder = None
     if parent:
         current_folder_data["parent_folder"] = parent
-    for each in folder_json_data:
+    for each in current_dataset_folders:
         if each['name'] == folder:
             found_folder = each
     if not found_folder:
@@ -255,10 +254,8 @@ async def create_folder_if_not_exists_or_get(folder, parent, dataset_v2, current
     return found_folder
 
 async def add_folder_hierarchy(folder_hierarchy, dataset_v2, current_headers):
-    clowder_v2_folder_endpoint = CLOWDER_V2 + 'api/v2/datasets/' + dataset_v2 + '/folders'
-    current_dataset_folders = requests.get(clowder_v2_folder_endpoint, headers=current_headers)
-    folder_json = current_dataset_folders.json()
-    folder_json_data = folder_json['data']
+    current_dataset_folders = await get_folder_and_subfolders(dataset_id=dataset_v2, folder=None, current_headers=current_headers)
+    folder_json_data = current_dataset_folders
     hierarchy_parts = folder_hierarchy.split('/')
     hierarchy_parts.remove('')
     current_parent = None
@@ -266,7 +263,6 @@ async def add_folder_hierarchy(folder_hierarchy, dataset_v2, current_headers):
         result = await create_folder_if_not_exists_or_get(part, current_parent, dataset_v2, current_headers=current_headers)
         if result:
             current_parent = result['id']
-        print('got result')
 
 async def add_dataset_folders(dataset_v1, dataset_v2, current_headers):
     dataset_folders_endpoint = CLOWDER_V1 + 'api/datasets/' + dataset_v1['id'] + '/folders?superAdmin=true'
@@ -286,8 +282,6 @@ async def process_users(
         es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
         rabbitmq_client: BlockingChannel = Depends(dependencies.get_rabbitmq),
     ):
-
-    test_datast_id = '665b888d2038e8d9bd4b3a9b'
     # # add folder hierarchy
     # print('created a dataset')
     # result = await add_folder_hierarchy('/root/child/subchild', test_datast_id, current_headers=clowder_headers_v2)
@@ -320,35 +314,33 @@ async def process_users(
                 user_base_headers_v2 = {'X-API-key': user_v2_api_key}
                 user_headers_v2 = {**user_base_headers_v2, 'Content-type': 'application/json',
                                       'accept': 'application/json'}
-                folders_from_test = await get_folder_and_subfolders(dataset_id='665cdb1b7af29eb74e40bc86',folder=None, current_headers=user_headers_v2)
                 for dataset in user_v1_datasets:
                     print('creating a dataset in v2')
                     dataset_v2_id = await create_v2_dataset(user_base_headers_v2, dataset, email)
-                    # dataset_v2_id = '66563fd645c9e9039f41faf7'
+                    # dataset_v2_id = '665dfe7649c5719830e2c0e0'
                     folders = await add_dataset_folders(dataset, dataset_v2_id, user_headers_v2)
                     print('we got folders')
-                    folder_v2_endpoint = CLOWDER_V2 + 'api/v2/datasets/' + dataset_v2_id + '/folders'
-                    folders_v2_dataset = requests.get(folder_v2_endpoint, user_headers_v2)
-                    folders_v2_dataset_json = folders_v2_dataset.json()
+                    all_dataset_folders = await get_folder_and_subfolders(dataset_id=dataset_v2_id, folder=None, current_headers=user_headers_v2)
                     dataset_files_endpoint = CLOWDER_V1 + 'api/datasets/' + dataset['id'] + '/files?=superAdmin=true'
                     # move file stuff here
                     print('we got a dataset id')
 
                     r_files = requests.get(dataset_files_endpoint, headers=clowder_headers_v1, verify=False)
-                    r_files_json = r_files.json()
                     files_result = r_files.json()
-                    user_collection = db_v2["users"]
-                    user = user_collection.find_one({"email": email})
                     print('got a user')
-                    userDB = await UserDB.find_one({"email": email})
                     print('BEFORE FILES')
+                    files_with_folders = []
                     for file in files_result:
-
+                        if 'folders' in file:
+                            print('a folder')
+                            files_with_folders.append(file)
+                    for file in files_result:
+                        file_folder = None
                         file_id = file['id']
-                        file = db["uploads"].find_one({"_id": ObjectId(file_id)})
                         filename = file['filename']
-                        loader_id = file["loader_id"]
-                        content_type = file["contentType"]
+                        if 'folders' in file:
+                            file_folder = file['folders']
+                            file_folder_name = file['folders']['name']
                         # TODO download the file from v1 using api routes
                         v1_download_url = CLOWDER_V1 + 'api/files/' + file_id + '?superAdmin=true'
                         print('downloading file', filename)
@@ -356,8 +348,22 @@ async def process_users(
                         with open(filename, 'wb') as f:
                             f.write(download.content)
                         file_data = {"file": open(filename, "rb")}
-                        dataset_file_upload_endoint = CLOWDER_V2 + 'api/v2/datasets/' + dataset_v2_id + '/files'
-                        response = requests.post(dataset_file_upload_endoint, files=file_data, headers=user_base_headers_v2)
+                        matching_folder = None
+                        if file_folder:
+                            for folder in all_dataset_folders:
+                                if folder['name'] == file_folder['name']:
+                                    matching_folder = folder
+                        if matching_folder:
+                            upload_files = {"files":open(filename,'rb')}
+                            dataset_file_upload_endoint = CLOWDER_V2 + 'api/v2/datasets/' + dataset_v2_id + '/filesMultiple?folder_id=' + matching_folder['id']
+                            response = requests.post(dataset_file_upload_endoint, files=upload_files,
+                                                     headers=user_base_headers_v2)
+
+                        else:
+                            dataset_file_upload_endoint = CLOWDER_V2 + 'api/v2/datasets/' + dataset_v2_id + '/files'
+                            response = requests.post(dataset_file_upload_endoint, files=file_data,
+                                                     headers=user_base_headers_v2)
+
                         result = response.json()
                         try:
                             os.remove(filename)
