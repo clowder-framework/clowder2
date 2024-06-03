@@ -31,6 +31,9 @@ export const Explore = (): JSX.Element => {
 	const datasets = useSelector(
 		(state: RootState) => state.dataset.datasets.data
 	);
+	const deletedDataset = useSelector(
+		(state: RootState) => state.dataset.deletedDataset
+	);
 	const pageMetadata = useSelector(
 		(state: RootState) => state.dataset.datasets.metadata
 	);
@@ -44,15 +47,10 @@ export const Explore = (): JSX.Element => {
 	const [selectedTabIndex, setSelectedTabIndex] = useState(0);
 	const [errorOpen, setErrorOpen] = useState(false);
 
-	// component did mount
-	useEffect(() => {
-		listDatasets(0, limit, mine);
-	}, []);
-
 	// Admin mode will fetch all datasets
 	useEffect(() => {
-		listDatasets(0, limit, mine);
-	}, [adminMode]);
+		listDatasets((currPageNum - 1) * limit, limit, mine);
+	}, [adminMode, deletedDataset]);
 
 	// switch tabs
 	const handleTabChange = (

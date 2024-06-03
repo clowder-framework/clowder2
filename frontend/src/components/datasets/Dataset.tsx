@@ -149,6 +149,14 @@ export const Dataset = (): JSX.Element => {
 	);
 	const adminMode = useSelector((state: RootState) => state.user.adminMode);
 	const license = useSelector((state: RootState) => state.dataset.license);
+	const newFiles = useSelector((state: RootState) => state.dataset.newFiles);
+	const deletedFile = useSelector(
+		(state: RootState) => state.dataset.deletedFile
+	);
+	const deletedFolder = useSelector(
+		(state: RootState) => state.dataset.deletedFolder
+	);
+
 	const [standardLicenseUrl, setStandardLicenseUrl] = useState<string>("");
 	const fetchStandardLicenseUrlData = async (license_id: string) => {
 		try {
@@ -174,7 +182,15 @@ export const Dataset = (): JSX.Element => {
 			listDatasetLicense(dataset.license_id);
 		getFolderPath(folderId);
 		getMetadatDefinitions(null, 0, 100);
-	}, [datasetId, searchParams, adminMode, dataset.license_id]);
+	}, [
+		datasetId,
+		searchParams,
+		adminMode,
+		dataset.license_id,
+		newFiles,
+		deletedFile,
+		deletedFolder,
+	]);
 
 	useEffect(() => {
 		setSnackBarOpen(true);

@@ -59,7 +59,7 @@ export default function FilesTable(props: FilesTableProps) {
 		setCurrPageNum(1);
 		// Redirect to file route with file Id and dataset id and folderId
 		history(
-			`/public/files/${selectedFileId}?dataset=${publicDataset.id}&folder=${
+			`/public_files/${selectedFileId}?dataset=${publicDataset.id}&folder=${
 				folderId ?? ""
 			}&verNum=${selectedFileId}`
 		);
@@ -75,7 +75,7 @@ export default function FilesTable(props: FilesTableProps) {
 		// reset page number to 1
 		setCurrPageNum(1);
 		// Redirect to file route with file Id and dataset id
-		history(`/public/datasets/${publicDataset.id}?folder=${selectedFolderId}`);
+		history(`/public_datasets/${publicDataset.id}?folder=${selectedFolderId}`);
 	};
 
 	return (
