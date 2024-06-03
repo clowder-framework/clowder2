@@ -12,8 +12,6 @@ import { CreateFolder } from "../folders/CreateFolder";
 import React from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "../../types/data";
-import { UploadFile } from "../files/UploadFile";
-import { UploadFileMultiple } from "../files/UploadFileMultiple";
 import { UploadFileDragAndDrop } from "../files/UploadFileDragAndDrop";
 import UploadIcon from "@mui/icons-material/Upload";
 import { Folder } from "@material-ui/icons";
@@ -57,6 +55,7 @@ export const NewMenu = (props: ActionsMenuProps): JSX.Element => {
 				<UploadFileDragAndDrop
 					selectedDatasetId={datasetId}
 					folderId={folderId}
+					setDragDropFiles={setDragDropFiles}
 				/>
 			</Dialog>
 
