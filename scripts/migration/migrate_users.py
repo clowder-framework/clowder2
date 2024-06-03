@@ -282,17 +282,11 @@ async def process_users(
         es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
         rabbitmq_client: BlockingChannel = Depends(dependencies.get_rabbitmq),
     ):
-    # # add folder hierarchy
-    # print('created a dataset')
-    # result = await add_folder_hierarchy('/root/child/subchild', test_datast_id, current_headers=clowder_headers_v2)
-    #
     print("We create a v2 admin user")
-    # NEW_ADMIN_KEY_V2 = create_admin_user()
-    # NEW_ADMIN_KEY_V2 = 'eyJ1c2VyIjoiYUBhLmNvbSIsImtleSI6IjlZdWxlcmxhbDlyODF5WDYwTVE5dVEifQ.0ygTBVGeStf7zUl7CBq7jDyc4ZI'
-    # print('here')
+    NEW_ADMIN_KEY_V2 = create_admin_user()
     users_v1 = get_clowder_v1_users()
     for user_v1 in users_v1:
-        print(user_v1)
+        print("migrating v1 user", user_v1)
         id = user_v1['id']
         email = user_v1['email']
         firstName = user_v1['firstName']
@@ -301,46 +295,31 @@ async def process_users(
         id_provider = user_v1['identityProvider']
         if '[Local Account]' in user_v1['identityProvider']:
             # get the v2 users
-            # i create a user account in v2 with this username
+            # create a user account in v2 with this username
             if email != "a@a.com":
                 user_v1_datasets = get_clowder_v1_user_datasets(user_id=id)
                 # TODO check if there is already a local user
-                # user_v2 = get_clowder_v2_user_by_name(email)
-                # user_v2 = create_local_user(user_v1)
-                user_v2 = 'eyJ1c2VyIjoiYkBiLmNvbSIsImtleSI6ImkyNmJ6MXdPNVpiejJYQTA5ZlRMbXcifQ.JuLZJ6zOBj6fBXoEmX97cs_bx5c'
-                # # user_v2_api_key = 'eyJ1c2VyIjoiYkBiLmNvbSIsImtleSI6Ik5yNUd1clFmNGhTZFd5ZEVlQ2FmSEEifQ.FTvhQrDgvmSgnwBGwafRNAXkxH8'
+                user_v2 = create_local_user(user_v1)
                 user_v2_api_key = user_v2
-                # user_v2_api_key = 'eyJ1c2VyIjoiYkBiLmNvbSIsImtleSI6ImRvLUQtcG5kVWg1a3ZQVWVtWWNFTFEifQ.i_0jvyHKX0UmHrcps_pH4N2nru0'
                 user_base_headers_v2 = {'X-API-key': user_v2_api_key}
                 user_headers_v2 = {**user_base_headers_v2, 'Content-type': 'application/json',
                                       'accept': 'application/json'}
                 for dataset in user_v1_datasets:
-                    print('creating a dataset in v2')
+                    print('creating a dataset in v2', dataset['id'], dataset['name'])
                     dataset_v2_id = await create_v2_dataset(user_base_headers_v2, dataset, email)
-                    # dataset_v2_id = '665dfe7649c5719830e2c0e0'
                     folders = await add_dataset_folders(dataset, dataset_v2_id, user_headers_v2)
-                    print('we got folders')
+                    print("Created folders in new dataset")
+
                     all_dataset_folders = await get_folder_and_subfolders(dataset_id=dataset_v2_id, folder=None, current_headers=user_headers_v2)
                     dataset_files_endpoint = CLOWDER_V1 + 'api/datasets/' + dataset['id'] + '/files?=superAdmin=true'
-                    # move file stuff here
-                    print('we got a dataset id')
-
                     r_files = requests.get(dataset_files_endpoint, headers=clowder_headers_v1, verify=False)
                     files_result = r_files.json()
-                    print('got a user')
-                    print('BEFORE FILES')
-                    files_with_folders = []
-                    for file in files_result:
-                        if 'folders' in file:
-                            print('a folder')
-                            files_with_folders.append(file)
                     for file in files_result:
                         file_folder = None
                         file_id = file['id']
                         filename = file['filename']
                         if 'folders' in file:
                             file_folder = file['folders']
-                            file_folder_name = file['folders']['name']
                         # TODO download the file from v1 using api routes
                         v1_download_url = CLOWDER_V1 + 'api/files/' + file_id + '?superAdmin=true'
                         print('downloading file', filename)
@@ -363,8 +342,9 @@ async def process_users(
                             dataset_file_upload_endoint = CLOWDER_V2 + 'api/v2/datasets/' + dataset_v2_id + '/files'
                             response = requests.post(dataset_file_upload_endoint, files=file_data,
                                                      headers=user_base_headers_v2)
-
-                        result = response.json()
+                        if response.status_code == 200:
+                            result = response.json()
+                            print("added file", result)
                         try:
                             os.remove(filename)
                         except Exception as e:
@@ -373,7 +353,7 @@ async def process_users(
                         print('done with file upload')
 
         else:
-            print("not a local account")
+            print("not a local account, not migrated at this time")
 
 asyncio.run(process_users())
 
