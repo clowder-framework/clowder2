@@ -334,13 +334,13 @@ async def process_users(
                                     matching_folder = folder
                         if matching_folder:
                             upload_files = {"files":open(filename,'rb')}
-                            dataset_file_upload_endoint = CLOWDER_V2 + 'api/v2/datasets/' + dataset_v2_id + '/filesMultiple?folder_id=' + matching_folder['id']
-                            response = requests.post(dataset_file_upload_endoint, files=upload_files,
+                            dataset_file_upload_endpoint = CLOWDER_V2 + 'api/v2/datasets/' + dataset_v2_id + '/filesMultiple?folder_id=' + matching_folder['id']
+                            response = requests.post(dataset_file_upload_endpoint, files=upload_files,
                                                      headers=user_base_headers_v2)
 
                         else:
-                            dataset_file_upload_endoint = CLOWDER_V2 + 'api/v2/datasets/' + dataset_v2_id + '/files'
-                            response = requests.post(dataset_file_upload_endoint, files=file_data,
+                            dataset_file_upload_endpoint = CLOWDER_V2 + 'api/v2/datasets/' + dataset_v2_id + '/files'
+                            response = requests.post(dataset_file_upload_endpoint, files=file_data,
                                                      headers=user_base_headers_v2)
                         if response.status_code == 200:
                             result = response.json()
