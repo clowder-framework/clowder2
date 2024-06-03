@@ -6,7 +6,7 @@ import { getPublicFreezeDatasets as getPublicFreezeDatasetsAction } from "../../
 import { RootState } from "../../types/data";
 import config from "../../app.config";
 import { theme } from "../../theme";
-import { parseDate } from "../../utils/common";
+import { parseDate, selectedHighlightStyles } from "../../utils/common";
 
 export const PublicDatasetVersions = (props) => {
 	// search parameters
@@ -53,11 +53,11 @@ export const PublicDatasetVersions = (props) => {
 	const handleVersionChange = (selectedDatasetId: string) => {
 		// current version flip to page 1
 		if (selectedDatasetId === currDataset.origin_id) {
-			history(`/public/datasets/${selectedDatasetId}?currVersionPageNum=1`);
+			history(`/public_datasets/${selectedDatasetId}?currVersionPageNum=1`);
 			// other version flip to the current page
 		} else {
 			history(
-				`/public/datasets/${selectedDatasetId}?currVersionPageNum=${currVersionPageNum}`
+				`/public_datasets/${selectedDatasetId}?currVersionPageNum=${currVersionPageNum}`
 			);
 		}
 	};
@@ -82,20 +82,11 @@ export const PublicDatasetVersions = (props) => {
 						onClick={() => {
 							handleVersionChange(currDataset.origin_id);
 						}}
-						sx={{
-							color:
-								currDataset.id === currDataset.origin_id
-									? theme.palette.info.main
-									: theme.palette.primary.main,
-							pointerEvents:
-								currDataset.id === currDataset.origin_id ? "none" : "auto",
-							textDecoration: "none",
-							fontWeight:
-								currDataset.id === currDataset.origin_id ? "bold" : "normal",
-							"&:hover": {
-								textDecoration: "underline",
-							},
-						}}
+						sx={selectedHighlightStyles(
+							currDataset.id,
+							currDataset.origin_id,
+							theme
+						)}
 					>
 						Current Unreleased
 					</Link>
@@ -107,18 +98,7 @@ export const PublicDatasetVersions = (props) => {
 							onClick={() => {
 								handleVersionChange(dataset.id);
 							}}
-							sx={{
-								color:
-									currDataset.id === dataset.id
-										? theme.palette.info.main
-										: theme.palette.primary.main,
-								pointerEvents: currDataset.id === dataset.id ? "none" : "auto",
-								textDecoration: "none",
-								fontWeight: currDataset.id === dataset.id ? "bold" : "normal",
-								"&:hover": {
-									textDecoration: "underline",
-								},
-							}}
+							sx={selectedHighlightStyles(currDataset.id, dataset.id, theme)}
 						>
 							Version {dataset.frozen_version_num}
 						</Link>

@@ -282,3 +282,18 @@ export const authCheck = (adminMode, currRole, allowedRoles = []) => {
 export const frozenCheck = (frozen, frozen_version_num) => {
 	return frozen && frozen_version_num && frozen_version_num > 0;
 };
+
+export const selectedHighlightStyles = (currentId, selectedId, theme) => {
+	return {
+		color:
+			currentId === selectedId
+				? theme.palette.info.main
+				: theme.palette.primary.main,
+		pointerEvents: currentId === selectedId ? "none" : "auto",
+		textDecoration: "none",
+		fontWeight: currentId === selectedId ? "bold" : "normal",
+		"&:hover": {
+			textDecoration: "underline",
+		},
+	};
+};
