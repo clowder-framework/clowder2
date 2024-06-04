@@ -21,10 +21,11 @@ from app.models.datasets import (
     GroupAndRole,
     UserAndRole,
 )
+from app.models.files import FileDB, FileOut
 from app.models.groups import GroupDB
 from app.models.users import UserDB
 from app.routers.authentication import get_admin, get_admin_mode
-from app.search.index import index_dataset
+from app.search.index import index_dataset, index_file
 from beanie import PydanticObjectId
 from beanie.operators import In, Or
 from bson import ObjectId
@@ -39,6 +40,7 @@ async def save_authorization(
     dataset_id: str,
     authorization_in: AuthorizationBase,
     user=Depends(get_current_username),
+    es=Depends(get_elasticsearchclient),
     allow: bool = Depends(Authorization("editor")),
 ):
     """Save authorization info in Mongo. This is a triple of dataset_id/user_id/role/group_id."""
@@ -61,6 +63,13 @@ async def save_authorization(
         **authorization_in.dict(), creator=user, user_ids=user_ids
     )
     await authorization.insert()
+    # TODO index all files in dataset
+    query = [
+        FileDB.dataset_id == ObjectId(dataset_id),
+    ]
+    files = await FileDB.find(*query).to_list()
+    for file in files:
+        await index_file(es, FileOut(**file.dict()), update=True)
     return authorization.dict()
 
 
@@ -296,6 +305,12 @@ async def set_dataset_user_role(
                     auth_db.user_ids.append(username)
                     await auth_db.save()
                 await index_dataset(es, DatasetOut(**dataset.dict()), auth_db.user_ids)
+                query = [
+                    FileDB.dataset_id == ObjectId(dataset_id),
+                ]
+                files = await FileDB.find(*query).to_list()
+                for file in files:
+                    await index_file(es, FileOut(**file.dict()), update=True)
                 return auth_db.dict()
             else:
                 # Create a new entry
@@ -307,6 +322,12 @@ async def set_dataset_user_role(
                 )
                 await auth_db.insert()
                 await index_dataset(es, DatasetOut(**dataset.dict()), [username])
+                query = [
+                    FileDB.dataset_id == ObjectId(dataset_id),
+                ]
+                files = await FileDB.find(*query).to_list()
+                for file in files:
+                    await index_file(es, FileOut(**file.dict()), update=True)
                 return auth_db.dict()
         else:
             raise HTTPException(status_code=404, detail=f"User {username} not found")
