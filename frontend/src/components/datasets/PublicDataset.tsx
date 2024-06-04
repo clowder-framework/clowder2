@@ -131,12 +131,13 @@ export const PublicDataset = (): JSX.Element => {
 	useEffect(() => {
 		if (dataset && dataset.license_id !== undefined)
 			fetchStandardLicenseUrlData(dataset.license_id);
-		setSnackBarOpen(true);
-		setSnackBarMessage(
-			`Viewing dataset version ${
-				dataset.id === dataset.origin_id ? "latest" : dataset.frozen_version_num
-			}.`
-		);
+
+		if (dataset.frozen && dataset.id !== dataset.origin_id) {
+			setSnackBarOpen(true);
+			setSnackBarMessage(
+				`Viewing dataset version ${dataset.frozen_version_num}.`
+			);
+		}
 	}, [dataset]);
 
 	// for breadcrumb

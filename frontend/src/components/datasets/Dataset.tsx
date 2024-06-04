@@ -193,7 +193,7 @@ export const Dataset = (): JSX.Element => {
 	]);
 
 	useEffect(() => {
-		if (dataset.id !== dataset.origin_id) {
+		if (dataset.frozen && dataset.id !== dataset.origin_id) {
 			setSnackBarOpen(true);
 			setSnackBarMessage(
 				`Viewing dataset version ${dataset.frozen_version_num}.`
