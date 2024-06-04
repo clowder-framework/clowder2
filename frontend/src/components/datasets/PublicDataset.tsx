@@ -134,9 +134,7 @@ export const PublicDataset = (): JSX.Element => {
 		setSnackBarOpen(true);
 		setSnackBarMessage(
 			`Viewing dataset version ${
-				dataset.id === dataset.origin_id
-					? "current unreleased"
-					: dataset.frozen_version_num
+				dataset.id === dataset.origin_id ? "latest" : dataset.frozen_version_num
 			}.`
 		);
 	}, [dataset]);

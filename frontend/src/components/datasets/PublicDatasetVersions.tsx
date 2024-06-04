@@ -88,7 +88,7 @@ export const PublicDatasetVersions = (props) => {
 							theme
 						)}
 					>
-						Current Unreleased
+						Latest
 					</Link>
 				</Box>
 				{frozenDatasets.map((dataset) => (

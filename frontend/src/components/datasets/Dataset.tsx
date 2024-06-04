@@ -193,14 +193,12 @@ export const Dataset = (): JSX.Element => {
 	]);
 
 	useEffect(() => {
-		setSnackBarOpen(true);
-		setSnackBarMessage(
-			`Viewing dataset version ${
-				dataset.id === dataset.origin_id
-					? "current unreleased"
-					: dataset.frozen_version_num
-			}.`
-		);
+		if (dataset.id !== dataset.origin_id) {
+			setSnackBarOpen(true);
+			setSnackBarMessage(
+				`Viewing dataset version ${dataset.frozen_version_num}.`
+			);
+		}
 	}, [dataset]);
 
 	useEffect(() => {
