@@ -395,6 +395,12 @@ async def remove_dataset_user_role(
                 await auth_db.save()
                 # Update elasticsearch index with updated users
                 await index_dataset(es, DatasetOut(**dataset.dict()), auth_db.user_ids)
+                query = [
+                    FileDB.dataset_id == ObjectId(dataset_id),
+                ]
+                files = await FileDB.find(*query).to_list()
+                for file in files:
+                    await index_file(es, FileOut(**file.dict()), update=True)
                 return auth_db.dict()
         else:
             raise HTTPException(status_code=404, detail=f"User {username} not found")
