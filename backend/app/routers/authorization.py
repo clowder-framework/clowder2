@@ -216,6 +216,7 @@ async def set_dataset_group_role(
                         await index_dataset(
                             es, DatasetOut(**dataset.dict()), readonly_auth_db.user_ids
                         )
+                        await index_dataset_files(es, str(dataset_id))
                 return auth_db.dict()
             else:
                 # Create new role entry for this dataset
@@ -248,6 +249,7 @@ async def set_dataset_group_role(
                 await index_dataset(
                     es, DatasetOut(**dataset.dict()), readonly_auth_db.user_ids
                 )
+                await index_dataset_files(es, str(dataset_id))
                 return auth_db.dict()
         else:
             raise HTTPException(status_code=404, detail=f"Group {group_id} not found")
