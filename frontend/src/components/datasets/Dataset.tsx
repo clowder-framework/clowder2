@@ -348,7 +348,7 @@ export const Dataset = (): JSX.Element => {
 						onChange={handleTabChange}
 						aria-label="dataset tabs"
 						variant="scrollable"
-						scrollButtons="auto"
+						scrollButtons={false}
 					>
 						<Tab
 							icon={<InsertDriveFile />}
@@ -552,6 +552,7 @@ export const Dataset = (): JSX.Element => {
 						<SharingTab datasetId={datasetId} />
 					</TabPanel>
 				</Grid>
+
 				<Grid item>
 					<DatasetVersions currDataset={dataset} />
 					<>
