@@ -228,28 +228,30 @@ async def set_dataset_group_role(
                     else:
                         user_ids.append(u.user.email)
                 # add the users who get the role
-                auth_db = AuthorizationDB(
-                    creator=user_id,
-                    dataset_id=PydanticObjectId(dataset_id),
-                    role=role,
-                    group_ids=[PydanticObjectId(group_id)],
-                    user_ids=user_ids,
-                )
-                readonly_auth_db = AuthorizationDB(
-                    creator=user_id,
-                    dataset_id=PydanticObjectId(dataset_id),
-                    role=RoleType.VIEWER,
-                    group_ids=[PydanticObjectId(group_id)],
-                    user_ids=readonly_user_ids,
-                )
-                # if there are read only users add them with the role of viewer
-                await auth_db.insert()
-                await index_dataset(es, DatasetOut(**dataset.dict()), auth_db.user_ids)
-                await readonly_auth_db.insert()
-                await index_dataset(
-                    es, DatasetOut(**dataset.dict()), readonly_auth_db.user_ids
-                )
-                await index_dataset_files(es, str(dataset_id))
+                if len(readonly_user_ids) > 0:
+                    readonly_auth_db = AuthorizationDB(
+                        creator=user_id,
+                        dataset_id=PydanticObjectId(dataset_id),
+                        role=RoleType.VIEWER,
+                        group_ids=[PydanticObjectId(group_id)],
+                        user_ids=readonly_user_ids,
+                    )
+                    await readonly_auth_db.insert()
+                    await index_dataset(
+                        es, DatasetOut(**dataset.dict()), readonly_auth_db.user_ids
+                    )
+                if len(user_ids) > 0:
+                    auth_db = AuthorizationDB(
+                        creator=user_id,
+                        dataset_id=PydanticObjectId(dataset_id),
+                        role=role,
+                        group_ids=[PydanticObjectId(group_id)],
+                        user_ids=user_ids,
+                    )
+                    # if there are read only users add them with the role of viewer
+                    await auth_db.insert()
+                    await index_dataset(es, DatasetOut(**dataset.dict()), auth_db.user_ids)
+                    await index_dataset_files(es, str(dataset_id))
                 return auth_db.dict()
         else:
             raise HTTPException(status_code=404, detail=f"Group {group_id} not found")
