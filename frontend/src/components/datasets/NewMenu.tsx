@@ -52,6 +52,7 @@ export const NewMenu = (props: ActionsMenuProps): JSX.Element => {
 				<UploadFileDragAndDrop
 					selectedDatasetId={datasetId}
 					folderId={folderId}
+					setDragDropFiles={setDragDropFiles}
 				/>
 			</Dialog>
 

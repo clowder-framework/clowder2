@@ -55,7 +55,7 @@ export default function PublicDatasetCard(props: PublicDatasetCardProps) {
 			{publicView ? (
 				<CardActionArea
 					component={Link}
-					to={`/public/datasets/${id}`}
+					to={`/public_datasets/${id}`}
 					sx={{ height: "100%" }}
 				>
 					<CardHeader title={name} subheader={subheader} />

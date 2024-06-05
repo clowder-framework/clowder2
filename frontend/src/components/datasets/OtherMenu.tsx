@@ -127,7 +127,7 @@ export const OtherMenu = (props: ActionsMenuProps): JSX.Element => {
 			<ActionModal
 				actionOpen={freezeDatasetConfirmOpen}
 				actionTitle="Are you ready to release this version of the dataset?"
-				actionText="By proceeding with the release, you will lock in the current content of the dataset, including all associated files, metadata, and visualizations. Once released, these elements will be set as final and cannot be altered. However, you can continue to make edits and improvements on the ongoing version of the dataset."
+				actionText="By proceeding with the release, you will lock in the current content of the dataset, including all associated files, folders, metadata, and visualizations. Once released, these elements will be set as final and cannot be altered. However, you can continue to make edits and improvements on the ongoing version of the dataset."
 				actionBtnName="Release"
 				handleActionBtnClick={() => {
 					freezeDataset(datasetId);

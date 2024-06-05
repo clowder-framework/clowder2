@@ -59,6 +59,9 @@ const defaultState: DatasetState = {
 		data: <DatasetFreezeOut[]>[],
 	},
 	latestFrozenVersionNum: -999,
+	deletedDataset: <DatasetOut>{},
+	deletedFolder: <FolderOut>{},
+	deletedFile: <FileOut>{},
 	datasetRole: <AuthorizationBase>{},
 	datasets: <Paged>{ metadata: <PageMetadata>{}, data: <DatasetOut[]>[] },
 	newDataset: <DatasetOut>{},
@@ -77,12 +80,7 @@ const dataset = (state = defaultState, action: DataAction) => {
 			});
 		case DELETE_FILE:
 			return Object.assign({}, state, {
-				foldersAndFiles: {
-					...state.foldersAndFiles,
-					data: state.foldersAndFiles.data.filter(
-						(item: FileOut | FolderOut) => item.id !== action.file.id
-					),
-				},
+				deletedFile: action.file,
 			});
 		case CREATE_FILE:
 			return Object.assign({}, state, {
@@ -148,21 +146,11 @@ const dataset = (state = defaultState, action: DataAction) => {
 			return Object.assign({}, state, { newDataset: {} });
 		case DELETE_DATASET:
 			return Object.assign({}, state, {
-				datasets: {
-					...state.datasets,
-					data: state.datasets.data.filter(
-						(dataset: DatasetOut) => dataset.id !== action.dataset.id
-					),
-				},
+				deletedDataset: action.dataset,
 			});
 		case FOLDER_DELETED:
 			return Object.assign({}, state, {
-				foldersAndFiles: {
-					...state.foldersAndFiles,
-					data: state.foldersAndFiles.data.filter(
-						(item: FileOut | FolderOut) => item.id !== action.folder.id
-					),
-				},
+				deletedFolder: action.folder,
 			});
 		case FOLDER_ADDED:
 			return Object.assign({}, state, { newFolder: action.folder });

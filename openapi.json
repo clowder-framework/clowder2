@@ -430,6 +430,130 @@
         ]
       }
     },
+    "/api/v2/users/enable_readonly/{useremail}": {
+      "post": {
+        "tags": [
+          "login"
+        ],
+        "summary": "Enable Readonly User",
+        "operationId": "enable_readonly_user_api_v2_users_enable_readonly__useremail__post",
+        "parameters": [
+          {
+            "required": true,
+            "schema": {
+              "title": "Useremail",
+              "type": "string"
+            },
+            "name": "useremail",
+            "in": "path"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Dataset Id",
+              "type": "string"
+            },
+            "name": "dataset_id",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2AuthorizationCodeBearer": []
+          },
+          {
+            "APIKeyHeader": []
+          },
+          {
+            "APIKeyCookie": []
+          }
+        ]
+      }
+    },
+    "/api/v2/users/disable_readonly/{useremail}": {
+      "post": {
+        "tags": [
+          "login"
+        ],
+        "summary": "Disable Readonly User",
+        "operationId": "disable_readonly_user_api_v2_users_disable_readonly__useremail__post",
+        "parameters": [
+          {
+            "required": true,
+            "schema": {
+              "title": "Useremail",
+              "type": "string"
+            },
+            "name": "useremail",
+            "in": "path"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Dataset Id",
+              "type": "string"
+            },
+            "name": "dataset_id",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2AuthorizationCodeBearer": []
+          },
+          {
+            "APIKeyHeader": []
+          },
+          {
+            "APIKeyCookie": []
+          }
+        ]
+      }
+    },
     "/api/v2/users/enable/{useremail}": {
       "post": {
         "tags": [
@@ -13021,6 +13145,11 @@
           },
           "admin_mode": {
             "title": "Admin Mode",
+            "type": "boolean",
+            "default": false
+          },
+          "read_only_user": {
+            "title": "Read Only User",
             "type": "boolean",
             "default": false
           }

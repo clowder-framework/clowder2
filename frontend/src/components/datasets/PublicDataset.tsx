@@ -131,14 +131,13 @@ export const PublicDataset = (): JSX.Element => {
 	useEffect(() => {
 		if (dataset && dataset.license_id !== undefined)
 			fetchStandardLicenseUrlData(dataset.license_id);
-		setSnackBarOpen(true);
-		setSnackBarMessage(
-			`Viewing dataset version ${
-				dataset.id === dataset.origin_id
-					? "current unreleased"
-					: dataset.frozen_version_num
-			}.`
-		);
+
+		if (dataset.frozen && dataset.id !== dataset.origin_id) {
+			setSnackBarOpen(true);
+			setSnackBarMessage(
+				`Viewing dataset version ${dataset.frozen_version_num}.`
+			);
+		}
 	}, [dataset]);
 
 	// for breadcrumb
@@ -147,7 +146,7 @@ export const PublicDataset = (): JSX.Element => {
 		const tmpPaths = [
 			{
 				name: dataset["name"],
-				url: `/public/datasets/${datasetId}`,
+				url: `/public_datasets/${datasetId}`,
 			},
 		];
 
@@ -158,7 +157,7 @@ export const PublicDataset = (): JSX.Element => {
 						folderBread && folderBread["folder_name"]
 							? folderBread["folder_name"]
 							: "",
-					url: `/public/datasets/${datasetId}?folder=${
+					url: `/public_datasets/${datasetId}?folder=${
 						folderBread && folderBread["folder_id"]
 							? folderBread["folder_id"]
 							: ""

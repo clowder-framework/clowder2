@@ -257,7 +257,7 @@ export const File = (): JSX.Element => {
 						onChange={handleTabChange}
 						aria-label="file tabs"
 						variant="scrollable"
-						scrollButtons="auto"
+						scrollButtons={false}
 					>
 						<Tab
 							icon={<VisibilityIcon />}

@@ -8,11 +8,10 @@ import {
 } from "../../../actions/dataset";
 import { RootState } from "../../../types/data";
 import config from "../../../app.config";
-import { parseDate } from "../../../utils/common";
+import { parseDate, selectedHighlightStyles } from "../../../utils/common";
 import { theme } from "../../../theme";
 import IconButton from "@mui/material/IconButton";
 import DeleteIcon from "@material-ui/icons/Delete";
-import Divider from "@mui/material/Divider";
 import { ActionModal } from "../../dialog/ActionModal";
 import { DatasetFreezeOut } from "../../../openapi/v2";
 
@@ -136,19 +135,13 @@ export const DatasetVersions = (props) => {
 							onClick={() => {
 								handleVersionChange(currDataset.origin_id);
 							}}
-							sx={{
-								color: theme.palette.primary.main,
-								pointerEvents:
-									currDataset.id === currDataset.origin_id ? "none" : "auto",
-								textDecoration: "none",
-								fontWeight:
-									currDataset.id === currDataset.origin_id ? "bold" : "normal",
-								"&:hover": {
-									textDecoration: "underline",
-								},
-							}}
+							sx={selectedHighlightStyles(
+								currDataset.id,
+								currDataset.origin_id,
+								theme
+							)}
 						>
-							Current
+							Latest
 						</Link>
 						<Box>
 							<Typography
@@ -164,7 +157,6 @@ export const DatasetVersions = (props) => {
 								{parseDate(currDataset.modified)}
 							</Typography>
 						</Box>
-						<Divider orientation="horizontal" />
 					</Box>
 					{frozenDatasets.map((dataset) =>
 						dataset.deleted ? (
@@ -185,7 +177,6 @@ export const DatasetVersions = (props) => {
 										{parseDate(dataset.modified)}
 									</Typography>
 								</Box>
-								<Divider orientation="horizontal" />
 							</Box>
 						) : (
 							<Box key={dataset.id} mb={2}>
@@ -199,17 +190,11 @@ export const DatasetVersions = (props) => {
 										onClick={() => {
 											handleVersionChange(dataset.id);
 										}}
-										sx={{
-											color: theme.palette.primary.main,
-											pointerEvents:
-												currDataset.id === dataset.id ? "none" : "auto",
-											textDecoration: "none",
-											fontWeight:
-												currDataset.id === dataset.id ? "bold" : "normal",
-											"&:hover": {
-												textDecoration: "underline",
-											},
-										}}
+										sx={selectedHighlightStyles(
+											currDataset.id,
+											dataset.id,
+											theme
+										)}
 									>
 										Version {dataset.frozen_version_num}
 									</Link>
@@ -236,7 +221,6 @@ export const DatasetVersions = (props) => {
 										{parseDate(dataset.modified)}
 									</Typography>
 								</Box>
-								<Divider orientation="horizontal" />
 							</Box>
 						)
 					)}
