@@ -383,7 +383,7 @@ async def get_read_only_user(
                     detail={"error": "Key is invalid."},
                     headers={"WWW-Authenticate": "Bearer"},
                 )
-        except BadSignature as e:
+        except BadSignature:
             raise HTTPException(
                 status_code=401,
                 detail={"error": "Key is invalid."},

@@ -274,7 +274,6 @@ async def set_dataset_user_role(
                 AuthorizationDB.dataset_id == PydanticObjectId(dataset_id),
                 AuthorizationDB.role == role,
             )
-            rolename = role.name
             if user.read_only_user and role.name is not RoleType.VIEWER.name:
                 raise HTTPException(
                     status_code=405, detail=f"User {username} is read only"
