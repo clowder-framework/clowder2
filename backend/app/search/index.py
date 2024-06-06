@@ -2,7 +2,7 @@ from typing import List, Optional, Union
 
 from app.config import settings
 from app.models.authorization import AuthorizationDB
-from app.models.datasets import DatasetOut
+from app.models.datasets import DatasetDB, DatasetOut
 from app.models.files import FileDB, FileOut
 from app.models.folders import FolderOut
 from app.models.metadata import MetadataDB
@@ -12,6 +12,7 @@ from app.search.connect import delete_document_by_id, insert_record, update_reco
 from beanie import PydanticObjectId
 from bson import ObjectId
 from elasticsearch import Elasticsearch, NotFoundError
+from fastapi import HTTPException
 
 
 async def index_dataset(
@@ -119,20 +120,26 @@ async def index_folder(
     update: bool = False,
 ):
     """Create or update an Elasticsearch entry for the folder."""
+    # find dataset this folder belongs to
+    if (
+        dataset := await DatasetDB.find_one(
+            DatasetDB.id == PydanticObjectId(folder.dataset_id)
+        )
+    ) is not None:
+        downloads = dataset.downloads
+    else:
+        raise HTTPException(
+            status_code=404, detail="Orpan folder doesn't belong to any dataset"
+        )
+
     doc = ElasticsearchEntry(
         resource_type="folder",
         name=folder.name,
         creator=folder.creator.email,
         created=folder.created,
         dataset_id=str(folder.dataset_id),
-        folder_id=str(folder.folder_id),
-        # downloads=folder.downloads,
-        # user_ids=authorized_user_ids,
-        # content_type=file.content_type.content_type,
-        # content_type_main=file.content_type.main_type,
-        # bytes=file.bytes,
-        # metadata=metadata,
-        # status=file.status,
+        folder_id=str(folder.id),
+        downloads=downloads,
     ).dict()
 
     if update:
