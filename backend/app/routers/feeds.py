@@ -20,7 +20,7 @@ router = APIRouter()
 
 # TODO: Move this to MongoDB middle layer
 async def disassociate_listener_db(
-        feed_id: str, listener_id: str, allows: bool = Depends(FeedAuthorization())
+    feed_id: str, listener_id: str, allows: bool = Depends(FeedAuthorization())
 ):
     """Remove a specific Event Listener from a feed. Does not delete either resource, just removes relationship.
 
@@ -36,10 +36,10 @@ async def disassociate_listener_db(
 
 
 async def check_feed_listeners(
-        es_client,
-        file_out: FileOut,
-        user: UserOut,
-        rabbitmq_client: BlockingChannel,
+    es_client,
+    file_out: FileOut,
+    user: UserOut,
+    rabbitmq_client: BlockingChannel,
 ):
     """Automatically submit new file to listeners on feeds that fit the search criteria."""
     listener_ids_found = []
@@ -52,7 +52,7 @@ async def check_feed_listeners(
                     listener_ids_found.append(listener.listener_id)
     for targ_listener in listener_ids_found:
         if (
-                listener_info := await EventListenerDB.get(PydanticObjectId(targ_listener))
+            listener_info := await EventListenerDB.get(PydanticObjectId(targ_listener))
         ) is not None:
             await submit_file_job(
                 file_out,
@@ -66,8 +66,8 @@ async def check_feed_listeners(
 
 @router.post("", response_model=FeedOut)
 async def save_feed(
-        feed_in: FeedIn,
-        user=Depends(get_current_username),
+    feed_in: FeedIn,
+    user=Depends(get_current_username),
 ):
     """Create a new Feed (i.e. saved search) in the database."""
     feed = FeedDB(**feed_in.dict(), creator=user)
@@ -77,10 +77,10 @@ async def save_feed(
 
 @router.put("/{feed_id}", response_model=FeedOut)
 async def edit_feed(
-        feed_id: str,
-        feed_in: FeedIn,
-        user=Depends(get_current_username),
-        allow: bool = Depends(FeedAuthorization()),
+    feed_id: str,
+    feed_in: FeedIn,
+    user=Depends(get_current_username),
+    allow: bool = Depends(FeedAuthorization()),
 ):
     """Update the information about an existing Feed..
 
@@ -93,9 +93,9 @@ async def edit_feed(
         # TODO: Refactor this with permissions checks etc.
         feed_update = feed_in.dict()
         if (
-                not feed_update["name"]
-                or not feed_update["search"]
-                or len(feed_update["listeners"]) == 0
+            not feed_update["name"]
+            or not feed_update["search"]
+            or len(feed_update["listeners"]) == 0
         ):
             raise HTTPException(
                 status_code=400,
@@ -116,12 +116,12 @@ async def edit_feed(
 
 @router.get("", response_model=Paged)
 async def get_feeds(
-        searchTerm: Optional[str] = None,
-        user=Depends(get_current_user),
-        skip: int = 0,
-        limit: int = 10,
-        admin=Depends(get_admin),
-        admin_mode=Depends(get_admin_mode),
+    searchTerm: Optional[str] = None,
+    user=Depends(get_current_user),
+    skip: int = 0,
+    limit: int = 10,
+    admin=Depends(get_admin),
+    admin_mode=Depends(get_admin_mode),
 ):
     """Fetch all existing Feeds."""
     criteria_list = []
@@ -156,9 +156,9 @@ async def get_feeds(
 
 @router.get("/{feed_id}", response_model=FeedOut)
 async def get_feed(
-        feed_id: str,
-        user=Depends(get_current_user),
-        allow: bool = Depends(FeedAuthorization()),
+    feed_id: str,
+    user=Depends(get_current_user),
+    allow: bool = Depends(FeedAuthorization()),
 ):
     """Fetch an existing saved search Feed."""
     if (feed := await FeedDB.get(PydanticObjectId(feed_id))) is not None:
@@ -169,9 +169,9 @@ async def get_feed(
 
 @router.delete("/{feed_id}", response_model=FeedOut)
 async def delete_feed(
-        feed_id: str,
-        user=Depends(get_current_user),
-        allow: bool = Depends(FeedAuthorization()),
+    feed_id: str,
+    user=Depends(get_current_user),
+    allow: bool = Depends(FeedAuthorization()),
 ):
     """Delete an existing saved search Feed."""
     if (feed := await FeedDB.get(PydanticObjectId(feed_id))) is not None:
@@ -182,12 +182,12 @@ async def delete_feed(
 
 @router.post("/{feed_id}/listeners", response_model=FeedOut)
 async def associate_listener(
-        feed_id: str,
-        listener: FeedListener,
-        user=Depends(get_current_user),
-        admin=Depends(get_admin),
-        admin_mode=Depends(get_admin_mode),
-        allow: bool = Depends(FeedAuthorization()),
+    feed_id: str,
+    listener: FeedListener,
+    user=Depends(get_current_user),
+    admin=Depends(get_admin),
+    admin_mode=Depends(get_admin_mode),
+    allow: bool = Depends(FeedAuthorization()),
 ):
     """Associate an existing Event Listener with a Feed, e.g. so it will be triggered on new Feed results.
 
@@ -197,14 +197,14 @@ async def associate_listener(
     """
     if (feed := await FeedDB.get(PydanticObjectId(feed_id))) is not None:
         if (
-                listener_db := await EventListenerDB.get(
-                    PydanticObjectId(listener.listener_id)
-                )
+            listener_db := await EventListenerDB.get(
+                PydanticObjectId(listener.listener_id)
+            )
         ) is not None:
             if (
-                    (admin and admin_mode)
-                    or (listener_db.creator and listener_db.creator.email == user.email)
-                    or listener_db.active
+                (admin and admin_mode)
+                or (listener_db.creator and listener_db.creator.email == user.email)
+                or listener_db.active
             ):
                 feed.listeners.append(listener)
                 await feed.save()
@@ -222,10 +222,10 @@ async def associate_listener(
 
 @router.delete("/{feed_id}/listeners/{listener_id}")
 async def disassociate_listener(
-        feed_id: str,
-        listener_id: str,
-        user=Depends(get_current_user),
-        allow: bool = Depends(ListenerAuthorization()),
+    feed_id: str,
+    listener_id: str,
+    user=Depends(get_current_user),
+    allow: bool = Depends(ListenerAuthorization()),
 ):
     """Disassociate an Event Listener from a Feed.
 
