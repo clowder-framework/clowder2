@@ -346,6 +346,13 @@ async def edit_dataset(
 
         # Update entry to the dataset index
         await index_dataset(es, DatasetOut(**dataset.dict()), update=True)
+
+        # Update folders index since its using dataset downloads and status to index
+        async for folder in FolderDB.find(
+            FolderDB.dataset_id == PydanticObjectId(dataset_id)
+        ):
+            await index_folder(es, FolderOut(**folder.dict()), update=True)
+
         return dataset.dict()
     raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
 
@@ -384,6 +391,13 @@ async def patch_dataset(
 
         # Update entry to the dataset index
         await index_dataset(es, DatasetOut(**dataset.dict()), update=True)
+
+        # Update folders index since its using dataset downloads and status to index
+        async for folder in FolderDB.find(
+            FolderDB.dataset_id == PydanticObjectId(dataset_id)
+        ):
+            await index_folder(es, FolderOut(**folder.dict()), update=True)
+
         return dataset.dict()
 
 
@@ -906,6 +920,7 @@ async def create_dataset_from_zip(
 @router.get("/{dataset_id}/download", response_model=DatasetOut)
 async def download_dataset(
     dataset_id: str,
+    es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
     user=Depends(get_current_user),
     fs: Minio = Depends(dependencies.get_fs),
     allow: bool = Depends(Authorization("viewer")),
@@ -1055,6 +1070,15 @@ async def download_dataset(
         response.headers["Content-Disposition"] = "attachment; filename=%s" % zip_name
         # Increment download count
         await dataset.update(Inc({DatasetDB.downloads: 1}))
+
+        # reindex
+        await index_dataset(es, DatasetOut(**dataset.dict()), update=True)
+        # Update folders index since its using dataset downloads and status to index
+        async for folder in FolderDB.find(
+            FolderDB.dataset_id == PydanticObjectId(dataset_id)
+        ):
+            await index_folder(es, FolderOut(**folder.dict()), update=True)
+
         return response
     raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
 

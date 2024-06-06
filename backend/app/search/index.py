@@ -117,6 +117,7 @@ async def index_file(
 async def index_folder(
     es: Elasticsearch,
     folder: FolderOut,
+    user_ids: Optional[List[str]] = None,
     update: bool = False,
 ):
     """Create or update an Elasticsearch entry for the folder."""
@@ -127,9 +128,10 @@ async def index_folder(
         )
     ) is not None:
         downloads = dataset.downloads
+        status = dataset.status
     else:
         raise HTTPException(
-            status_code=404, detail="Orpan folder doesn't belong to any dataset"
+            status_code=404, detail="Orphan folder doesn't belong to any dataset."
         )
 
     doc = ElasticsearchEntry(
@@ -140,6 +142,7 @@ async def index_folder(
         dataset_id=str(folder.dataset_id),
         folder_id=str(folder.id),
         downloads=downloads,
+        status=status,
     ).dict()
 
     if update:
