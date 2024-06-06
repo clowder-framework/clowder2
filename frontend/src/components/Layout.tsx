@@ -377,9 +377,9 @@ export default function PersistentDrawerLeft(props) {
 					</>
 				) : null}
 				<List>
-					{currUserProfile.read_only_user? (
+					{currUserProfile.read_only_user ? (
 						<></>
-					) :
+					) : (
 						<ListItem key={"groups"} disablePadding>
 							<ListItemButton component={RouterLink} to="/groups">
 								<ListItemIcon>
@@ -388,33 +388,33 @@ export default function PersistentDrawerLeft(props) {
 								<ListItemText primary={"Groups"} />
 							</ListItemButton>
 						</ListItem>
-					}
+					)}
 				</List>
 				<Divider />
 				<List>
-					{currUserProfile.read_only_user? (
+					{currUserProfile.read_only_user ? (
 						<></>
-					) :
+					) : (
 						<ListItem key={"newdataset"} disablePadding>
 							<ListItemButton component={RouterLink} to="/create-dataset">
 								<ListItemIcon>
 									<AddBox />
 								</ListItemIcon>
-							<ListItemText primary={"New Dataset"} />
-						</ListItemButton>
-					</ListItem>
-					}
+								<ListItemText primary={"New Dataset"} />
+							</ListItemButton>
+						</ListItem>
+					)}
 				</List>
 				<Divider />
 				<List>
-						<ListItem key={"metadataDefinition"} disablePadding>
-							<ListItemButton component={RouterLink} to="/metadata-definitions">
-								<ListItemIcon>
-									<InfoOutlinedIcon />
-								</ListItemIcon>
-								<ListItemText primary={"Metadata Definitions"} />
-							</ListItemButton>
-						</ListItem>
+					<ListItem key={"metadataDefinition"} disablePadding>
+						<ListItemButton component={RouterLink} to="/metadata-definitions">
+							<ListItemIcon>
+								<InfoOutlinedIcon />
+							</ListItemIcon>
+							<ListItemText primary={"Metadata Definitions"} />
+						</ListItemButton>
+					</ListItem>
 				</List>
 				<Divider />
 				<List>

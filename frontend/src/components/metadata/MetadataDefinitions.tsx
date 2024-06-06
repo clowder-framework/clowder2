@@ -33,7 +33,7 @@ import { Link } from "react-router-dom";
 import { GenericSearchBox } from "../search/GenericSearchBox";
 import { MetadataDefinitionOut } from "../../openapi/v2";
 import config from "../../app.config";
-import {fetchUserProfile} from "../../actions/user";
+import { fetchUserProfile } from "../../actions/user";
 
 export function MetadataDefinitions() {
 	// Redux connect equivalent
@@ -109,7 +109,6 @@ export function MetadataDefinitions() {
 		else listMetadataDefinitions(null, newSkip, limit);
 	};
 
-
 	return (
 		<Layout>
 			{/*Error Message dialogue*/}
@@ -155,9 +154,9 @@ export function MetadataDefinitions() {
 				</DialogContent>
 			</Dialog>
 			<div className="outer-container">
-				{currUserProfile.read_only_user? (
+				{currUserProfile.read_only_user ? (
 					<></>
-					):
+				) : (
 					<Grid container>
 						<Grid item xs={8} />
 						<Grid item xs={4}>
@@ -172,7 +171,7 @@ export function MetadataDefinitions() {
 							</Button>
 						</Grid>
 					</Grid>
-				}
+				)}
 				<br />
 				<Grid container spacing={2}>
 					<Grid item xs={12}>
@@ -239,10 +238,9 @@ export function MetadataDefinitions() {
 													key={`${mdd.id}-delete`}
 													align="left"
 												>
-													{currUserProfile.read_only_user?
-														(
-															<></>
-														):
+													{currUserProfile.read_only_user ? (
+														<></>
+													) : (
 														<IconButton
 															aria-label="delete"
 															size="small"
@@ -250,10 +248,10 @@ export function MetadataDefinitions() {
 																setSelectedMetadataDefinition(mdd.id);
 																setDeleteMetadataDefinitionConfirmOpen(true);
 															}}
-															>
-																<DeleteIcon fontSize="small" />
+														>
+															<DeleteIcon fontSize="small" />
 														</IconButton>
-													}
+													)}
 												</TableCell>
 											</TableRow>
 										);
