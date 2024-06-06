@@ -41,7 +41,12 @@ from app.routers.authentication import get_admin, get_admin_mode
 from app.routers.files import add_file_entry, add_local_file_entry, remove_file_entry
 from app.routers.licenses import delete_license
 from app.search.connect import delete_document_by_id
-from app.search.index import index_dataset, index_file
+from app.search.index import (
+    index_dataset,
+    index_file,
+    index_folder,
+    remove_folder_index,
+)
 from beanie import PydanticObjectId
 from beanie.odm.operators.update.general import Inc
 from beanie.operators import And, Or
@@ -423,6 +428,7 @@ async def add_folder(
     dataset_id: str,
     folder_in: FolderIn,
     user=Depends(get_current_user),
+    es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
     allow: bool = Depends(Authorization("uploader")),
 ):
     if (await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
@@ -436,6 +442,7 @@ async def add_folder(
             **folder_in.dict(), creator=user, dataset_id=PydanticObjectId(dataset_id)
         )
         await new_folder.insert()
+        await index_folder(es, FolderOut(**new_folder.dict()))
         return new_folder.dict()
     raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
 
@@ -595,9 +602,11 @@ async def delete_folder(
                             await remove_file_entry(file.id, fs, es)
                         await _delete_nested_folders(subfolder.id)
                         await subfolder.delete()
+                        await remove_folder_index(subfolder.id, es)
 
             await _delete_nested_folders(folder_id)
             await folder.delete()
+            await remove_folder_index(folder.id, es)
             return {"deleted": folder_id}
         else:
             raise HTTPException(status_code=404, detail=f"Folder {folder_id} not found")
@@ -623,6 +632,7 @@ async def patch_folder(
     dataset_id: str,
     folder_id: str,
     folder_info: FolderPatch,
+    es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
     user=Depends(get_current_user),
     allow: bool = Depends(Authorization("editor")),
 ):
@@ -640,6 +650,8 @@ async def patch_folder(
                     folder.parent_folder = folder_info.parent_folder
             folder.modified = datetime.datetime.utcnow()
             await folder.save()
+            await index_folder(es, FolderOut(**folder.dict()), update=True)
+
             return folder.dict()
         else:
             raise HTTPException(status_code=404, detail=f"Folder {folder_id} not found")
@@ -683,13 +695,10 @@ async def save_file(
                 )
         file_public = False
         file_authenticated = False
-        file_private = False
         if dataset.status == DatasetStatus.PUBLIC:
             file_public = True
         elif dataset.status == DatasetStatus.AUTHENTICATED:
             file_authenticated = True
-        else:
-            file_private = True
         await add_file_entry(
             new_file,
             user,

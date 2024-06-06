@@ -16,7 +16,6 @@ import { PublicSearchResult } from "./PublicSearchResult";
 export function PublicSearch() {
 	const [luceneOn, setLuceneOn] = useState(false);
 
-
 	// toggle super admin
 	// const adminMode = useSelector((state: RootState) => state.user.adminMode);
 
@@ -89,11 +88,7 @@ export function PublicSearch() {
 										fuzziness={0}
 										debounce={100}
 										react={{
-											and: [
-												"downloadfilter",
-												"fromfilter",
-												"tofilter",
-											],
+											and: ["downloadfilter", "fromfilter", "tofilter"],
 										}}
 										// apply react to the filter
 										URLParams={true}

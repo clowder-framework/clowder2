@@ -1,13 +1,14 @@
-from typing import List, Optional
+from typing import List, Optional, Union
 
 from app.config import settings
 from app.models.authorization import AuthorizationDB
 from app.models.datasets import DatasetOut
 from app.models.files import FileDB, FileOut
+from app.models.folders import FolderOut
 from app.models.metadata import MetadataDB
 from app.models.search import ElasticsearchEntry
 from app.models.thumbnails import ThumbnailDB
-from app.search.connect import insert_record, update_record
+from app.search.connect import delete_document_by_id, insert_record, update_record
 from beanie import PydanticObjectId
 from bson import ObjectId
 from elasticsearch import Elasticsearch, NotFoundError
@@ -87,8 +88,6 @@ async def index_file(
     ):
         metadata.append(md.content)
 
-    status = file.status
-
     # Add en entry to the file index
     doc = ElasticsearchEntry(
         resource_type="file",
@@ -112,6 +111,41 @@ async def index_file(
             insert_record(es, settings.elasticsearch_index, doc, file.id)
     else:
         insert_record(es, settings.elasticsearch_index, doc, file.id)
+
+
+async def index_folder(
+    es: Elasticsearch,
+    folder: FolderOut,
+    update: bool = False,
+):
+    """Create or update an Elasticsearch entry for the folder."""
+    doc = ElasticsearchEntry(
+        resource_type="folder",
+        name=folder.name,
+        creator=folder.creator.email,
+        created=folder.created,
+        dataset_id=str(folder.dataset_id),
+        folder_id=str(folder.folder_id),
+        # downloads=folder.downloads,
+        # user_ids=authorized_user_ids,
+        # content_type=file.content_type.content_type,
+        # content_type_main=file.content_type.main_type,
+        # bytes=file.bytes,
+        # metadata=metadata,
+        # status=file.status,
+    ).dict()
+
+    if update:
+        try:
+            update_record(es, settings.elasticsearch_index, {"doc": doc}, folder.id)
+        except NotFoundError:
+            insert_record(es, settings.elasticsearch_index, doc, folder.id)
+    else:
+        insert_record(es, settings.elasticsearch_index, doc, folder.id)
+
+
+async def remove_folder_index(folderId: Union[str, ObjectId], es: Elasticsearch):
+    delete_document_by_id(es, settings.elasticsearch_index, str(folderId))
 
 
 async def index_thumbnail(
