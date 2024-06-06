@@ -240,6 +240,7 @@ async def set_dataset_group_role(
                     await index_dataset(
                         es, DatasetOut(**dataset.dict()), readonly_auth_db.user_ids
                     )
+                    await index_dataset_files(es, str(dataset_id))
                 if len(user_ids) > 0:
                     auth_db = AuthorizationDB(
                         creator=user_id,
