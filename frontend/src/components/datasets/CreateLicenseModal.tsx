@@ -12,8 +12,9 @@ import {
 import licenseSchema from "../../schema/licenseSchema.json";
 import { FormProps } from "@rjsf/core";
 import { ClowderRjsfErrorList } from "../styledComponents/ClowderRjsfErrorList";
-import Form from "@rjsf/material-ui";
-import { V2 } from "../../openapi"; // Import LicenseOut type
+import Form from "@rjsf/mui";
+import { V2 } from "../../openapi";
+import validator from "@rjsf/validator-ajv8"; // Import LicenseOut type
 
 type CreateLicenseModalProps = {
 	setLicenseModalOpen: any;
@@ -39,6 +40,7 @@ export const CreateLicenseModal = (props: CreateLicenseModalProps) => {
 		<Container>
 			<Form
 				schema={licenseSchema["schema"] as FormProps<any>["schema"]}
+				validator={validator}
 				onSubmit={({ formData }) => {
 					addLicense(formData);
 					// close modal

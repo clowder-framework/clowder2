@@ -17,7 +17,7 @@ import {
 } from "@mui/material";
 
 import { ListenerInfo } from "./ListenerInfo";
-import Form from "@rjsf/material-ui";
+import Form from "@rjsf/mui";
 import { FormProps } from "@rjsf/core";
 import { submitFileExtractionAction } from "../../actions/file";
 import { submitDatasetExtractionAction } from "../../actions/dataset";
@@ -27,6 +27,7 @@ import { ClowderRjsfSelectWidget } from "../styledComponents/ClowderRjsfSelectWi
 import { ClowderRjsfTextWidget } from "../styledComponents/ClowderRjsfTextWidget";
 import ExtractorStatus from "./ExtractorStatus";
 import CloseIcon from "@mui/icons-material/Close";
+import validator from "@rjsf/validator-ajv8";
 
 type SubmitExtractionProps = {
 	fileId: string;
@@ -132,6 +133,7 @@ export default function SubmitExtraction(props: SubmitExtractionProps) {
 											<Container>
 												<Form
 													widgets={widgets}
+													validator={validator}
 													schema={{
 														properties: selectedExtractor["properties"][
 															"parameters"

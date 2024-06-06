@@ -64,7 +64,10 @@ export function Feeds() {
 	const [currPageNum, setCurrPageNum] = useState<number>(1);
 	const [limit] = useState<number>(config.defaultFeeds);
 
+	const adminMode = useSelector((state: RootState) => state.user.adminMode);
+
 	const feeds = useSelector((state: RootState) => state.feed.feeds.data);
+	const deletedFeed = useSelector((state: RootState) => state.feed.deletedFeed);
 	const pageMetadata = useSelector(
 		(state: RootState) => state.feed.feeds.metadata
 	);
@@ -76,21 +79,20 @@ export function Feeds() {
 	};
 	const handleFeedsSearch = () => {
 		listFeeds(searchTerm, (currPageNum - 1) * limit, limit);
-		//setSearchTerm("")
 	};
 
 	// component did mount
 
 	useEffect(() => {
-		listFeeds("", 0, limit);
-	}, [editFeedModalOpen, createFeedModalOpen]);
+		listFeeds(searchTerm, (currPageNum - 1) * limit, limit);
+	}, [editFeedModalOpen, createFeedModalOpen, deletedFeed, adminMode]);
 
 	useEffect(() => {
 		// reset page and reset category with each new search term
 		setCurrPageNum(1);
 
 		listFeeds(searchTerm, 0, limit);
-	}, [searchTerm]);
+	}, [searchTerm, adminMode]);
 
 	// @ts-ignore
 	return (
@@ -212,15 +214,6 @@ export function Feeds() {
 													{feed.name}
 												</Button>
 											</TableCell>
-											{/*<TableCell scope="row" key={`${feed.id}-name`}>*/}
-											{/*	<MuiLink*/}
-											{/*		component={Link}*/}
-											{/*		to={`/metadata-definitions/${feed.id}`}*/}
-											{/*		sx={{ textDecoration: "none" }}*/}
-											{/*	>*/}
-											{/*		{feed.name}*/}
-											{/*	</MuiLink>*/}
-											{/*</TableCell>*/}
 											<TableCell
 												scope="row"
 												key={`${feed.id}-description`}
@@ -230,7 +223,7 @@ export function Feeds() {
 											</TableCell>
 											<TableCell
 												scope="row"
-												key={`${feed.id}-edit`}
+												key={`${feed.id}-edit-delete`}
 												align="left"
 											>
 												<IconButton
@@ -243,12 +236,6 @@ export function Feeds() {
 												>
 													<EditIcon fontSize="small" />
 												</IconButton>
-											</TableCell>
-											<TableCell
-												scope="row"
-												key={`${feed.id}-delete`}
-												align="left"
-											>
 												<IconButton
 													aria-label="delete"
 													size="small"

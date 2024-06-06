@@ -16,6 +16,7 @@ export class FeedsService {
      * @param searchTerm
      * @param skip
      * @param limit
+     * @param datasetId
      * @returns Paged Successful Response
      * @throws ApiError
      */
@@ -23,6 +24,7 @@ export class FeedsService {
         searchTerm?: string,
         skip?: number,
         limit: number = 10,
+        datasetId?: string,
     ): CancelablePromise<Paged> {
         return __request({
             method: 'GET',
@@ -31,6 +33,7 @@ export class FeedsService {
                 'searchTerm': searchTerm,
                 'skip': skip,
                 'limit': limit,
+                'dataset_id': datasetId,
             },
             errors: {
                 422: `Validation Error`,
@@ -63,15 +66,20 @@ export class FeedsService {
      * Get Feed
      * Fetch an existing saved search Feed.
      * @param feedId
+     * @param datasetId
      * @returns FeedOut Successful Response
      * @throws ApiError
      */
     public static getFeedApiV2FeedsFeedIdGet(
         feedId: string,
+        datasetId?: string,
     ): CancelablePromise<FeedOut> {
         return __request({
             method: 'GET',
             path: `/api/v2/feeds/${feedId}`,
+            query: {
+                'dataset_id': datasetId,
+            },
             errors: {
                 422: `Validation Error`,
             },
@@ -87,16 +95,21 @@ export class FeedsService {
      * feed_in -- JSON object including updated information
      * @param feedId
      * @param requestBody
+     * @param datasetId
      * @returns FeedOut Successful Response
      * @throws ApiError
      */
-    public static editFeedApiV2FeedsFeedIdPost(
+    public static editFeedApiV2FeedsFeedIdPut(
         feedId: string,
         requestBody: FeedIn,
+        datasetId?: string,
     ): CancelablePromise<FeedOut> {
         return __request({
-            method: 'POST',
+            method: 'PUT',
             path: `/api/v2/feeds/${feedId}`,
+            query: {
+                'dataset_id': datasetId,
+            },
             body: requestBody,
             mediaType: 'application/json',
             errors: {
@@ -109,15 +122,20 @@ export class FeedsService {
      * Delete Feed
      * Delete an existing saved search Feed.
      * @param feedId
+     * @param datasetId
      * @returns FeedOut Successful Response
      * @throws ApiError
      */
     public static deleteFeedApiV2FeedsFeedIdDelete(
         feedId: string,
+        datasetId?: string,
     ): CancelablePromise<FeedOut> {
         return __request({
             method: 'DELETE',
             path: `/api/v2/feeds/${feedId}`,
+            query: {
+                'dataset_id': datasetId,
+            },
             errors: {
                 422: `Validation Error`,
             },

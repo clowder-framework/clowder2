@@ -12,7 +12,8 @@ import {
 import licenseSchema from "../../schema/licenseSchema.json";
 import { FormProps } from "@rjsf/core";
 import { ClowderRjsfErrorList } from "../styledComponents/ClowderRjsfErrorList";
-import Form from "@rjsf/material-ui";
+import Form from "@rjsf/mui";
+import validator from "@rjsf/validator-ajv8";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../types/data";
 import { updateDatasetLicense } from "../../actions/dataset"; // Import LicenseOut type
@@ -37,6 +38,7 @@ export const EditLicenseModal = (props: EditLicenseModalProps) => {
 				schema={licenseSchema["schema"] as FormProps<any>["schema"]}
 				//uiSchema={licenseSchema["uiSchema"] as FormProps<any>["uiSchema"]}
 				formData={license}
+				validator={validator}
 				onSubmit={({ formData }) => {
 					editLicense(formData);
 					// close modal

@@ -31,11 +31,12 @@
 						"title": "",
 						"items": {
 							"type": "object",
+							"required": ["field", "operator", "value"],
 							"properties": {
 								"field": {
 									"type": "string",
 									"title": "Field",
-									"enum": [
+									"examples": [
 										"content_type_main",
 										"content_type",
 										"size",
@@ -61,6 +62,7 @@
 				"title": "Extractors",
 				"items": {
 					"type": "object",
+					"required": ["listener_id", "automatic"],
 					"properties": {
 						"listener_id": {
 							"type": "string",

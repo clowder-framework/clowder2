@@ -260,6 +260,7 @@ export interface EventListenerJobStatus {
 export interface FeedState {
 	feeds: Paged;
 	feed: FeedOut;
+	deletedFeed: FeedOut;
 }
 
 export interface RootState {

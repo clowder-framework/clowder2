@@ -12,6 +12,7 @@ import {
 const defaultState: FeedState = {
 	feeds: <Paged>{ metadata: <PageMetadata>{}, data: <Array<FeedOut>>[] },
 	feed: <FeedOut>{},
+	deletedFeed: <FeedOut>{},
 };
 
 const feeds = (state = defaultState, action: DataAction) => {
@@ -42,12 +43,7 @@ const feeds = (state = defaultState, action: DataAction) => {
 			return Object.assign({}, state, { feeds: action.feeds });
 		case DELETE_FEED:
 			return Object.assign({}, state, {
-				feeds: {
-					...state.feeds,
-					data: state.feeds.data.filter(
-						(feed: FeedOut) => feed.id !== action.feed.id
-					),
-				},
+				deletedFeed: action.feed,
 			});
 
 		default:
