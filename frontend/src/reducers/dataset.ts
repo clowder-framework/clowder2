@@ -8,6 +8,7 @@ import {
 	RECEIVE_DATASET_ROLES,
 	RECEIVE_DATASETS,
 	RECEIVE_FOLDERS_FILES_IN_DATASET,
+	RECEIVE_MY_DATASETS,
 	REMOVE_DATASET_GROUP_ROLE,
 	REMOVE_DATASET_USER_ROLE,
 	RESET_CREATE_DATASET,
@@ -51,6 +52,7 @@ const defaultState: DatasetState = {
 	about: <Dataset>{ creator: <UserOut>{} },
 	datasetRole: <AuthorizationBase>{},
 	datasets: <Paged>{ metadata: <PageMetadata>{}, data: <Dataset[]>[] },
+	myDatasets: <Paged>{ metadata: <PageMetadata>{}, data: <Dataset[]>[] },
 	newDataset: <Dataset>{},
 	newFile: <FileOut>{},
 	newFiles: <FileOut[]>[],
@@ -112,6 +114,8 @@ const dataset = (state = defaultState, action: DataAction) => {
 			return Object.assign({}, state, { about: action.about });
 		case RECEIVE_DATASETS:
 			return Object.assign({}, state, { datasets: action.datasets });
+		case RECEIVE_MY_DATASETS:
+			return Object.assign({}, state, { myDatasets: action.myDatasets });
 		case CREATE_DATASET:
 			return Object.assign({}, state, { newDataset: action.dataset });
 		case RESET_CREATE_DATASET:
