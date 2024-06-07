@@ -24,7 +24,7 @@ export function fetchListeners(
 			label,
 			aliveOnly,
 			process,
-			dataset_id
+			dataset_id,
 			all
 		)
 			.then((json) => {
