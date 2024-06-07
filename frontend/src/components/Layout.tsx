@@ -438,10 +438,10 @@ export default function PersistentDrawerLeft(props) {
 								<BuildIcon />
 							</ListItemIcon>
 							<ListItemText primary={"Extractors"} />
-						<ListItemButton/>
-					<ListItem/>
-				<List/>
-				<Divider/>
+						</ListItemButton>
+					</ListItem>
+				</List>
+				<Divider />
 				{/*TODO: Need to make link dynamic */}
 				<List>
 					<ListItem key={"jupyter"} disablePadding>
