@@ -133,7 +133,7 @@ export const PublicDataset = (): JSX.Element => {
 		const tmpPaths = [
 			{
 				name: about["name"],
-				url: `/public/datasets/${datasetId}`,
+				url: `/public_datasets/${datasetId}`,
 			},
 		];
 
@@ -141,7 +141,7 @@ export const PublicDataset = (): JSX.Element => {
 			for (const folderBread of publicFolderPath) {
 				tmpPaths.push({
 					name: folderBread["folder_name"],
-					url: `/public/datasets/${datasetId}?folder=${folderBread["folder_id"]}`,
+					url: `/public_datasets/${datasetId}?folder=${folderBread["folder_id"]}`,
 				});
 			}
 		} else {

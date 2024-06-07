@@ -88,6 +88,11 @@ interface RECEIVE_DATASETS {
 	datasets: Paged;
 }
 
+interface RECEIVE_MY_DATASETS {
+	type: "RECEIVE_MY_DATASETS";
+	myDatasets: Paged;
+}
+
 interface RECEIVE_PUBLIC_DATASETS {
 	type: "RECEIVE_PUBLIC_DATASETS";
 	publicDatasets: Dataset[];
@@ -596,6 +601,21 @@ interface REVOKE_ADMIN {
 	profile: UserOut;
 }
 
+interface SET_READONLY {
+	type: "SET_READONLY";
+	profile: UserOut;
+}
+
+interface ENABLE_READONLY {
+	type: "ENABLE_READONLY";
+	profile: UserOut;
+}
+
+interface DISABLE_READONLY {
+	type: "DISABLE_READONLY";
+	profile: UserOut;
+}
+
 interface GET_PUBLIC_VIS_DATA {
 	type: "GET_PUBLIC_VIS_DATA";
 	publicVisData: VisualizationDataOut;
@@ -646,6 +666,7 @@ export type DataAction =
 	| RECEIVE_DATASET_ABOUT
 	| RECEIVE_DATASET_ROLE
 	| RECEIVE_DATASETS
+	| RECEIVE_MY_DATASETS
 	| RECEIVE_PUBLIC_DATASETS
 	| RECEIVE_PUBLIC_DATASET_ABOUT
 	| RECEIVE_FILES_IN_PUBLIC_DATASET
@@ -745,6 +766,9 @@ export type DataAction =
 	| UPDATE_FILE
 	| SET_ADMIN
 	| REVOKE_ADMIN
+	| SET_READONLY
+	| ENABLE_READONLY
+	| DISABLE_READONLY
 	| GET_PUBLIC_VIS_DATA
 	| GET_PUBLIC_VIS_CONFIG
 	| DOWNLOAD_PUBLIC_VIS_DATA

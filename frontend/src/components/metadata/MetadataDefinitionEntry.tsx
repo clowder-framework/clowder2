@@ -11,6 +11,7 @@ import { fetchMetadataDefinition as fetchMetadataDefinitionAction } from "../../
 import { RootState } from "../../types/data";
 import DeleteMetadataDefinitionModal from "./DeleteMetadataDefinitionModal";
 import DeleteIcon from "@mui/icons-material/Delete";
+import { fetchUserProfile } from "../../actions/user";
 
 export function MetadataDefinitionEntry() {
 	// path parameter
@@ -20,6 +21,8 @@ export function MetadataDefinitionEntry() {
 
 	// Redux connect equivalent
 	const dispatch = useDispatch();
+	const currUserProfile = useSelector((state: RootState) => state.user.profile);
+	const fetchCurrUserProfile = () => dispatch(fetchUserProfile());
 	const fetchMetadataDefinition = (metadataDefinitionId: string | undefined) =>
 		dispatch(fetchMetadataDefinitionAction(metadataDefinitionId));
 	const metadataDefinition = useSelector(
@@ -38,6 +41,11 @@ export function MetadataDefinitionEntry() {
 
 	// Error msg dialog
 	const [errorOpen, setErrorOpen] = useState(false);
+
+	// get profile
+	useEffect(() => {
+		fetchCurrUserProfile();
+	}, []);
 
 	// for breadcrumb
 	const paths = [
@@ -118,31 +126,35 @@ export function MetadataDefinitionEntry() {
 				</Grid>
 
 				{/*Buttons*/}
-				<Grid
-					item
-					xs={12}
-					sm={12}
-					md={4}
-					lg={3}
-					sx={{
-						display: "flex",
-						justifyContent: "flex-end",
-						alignItems: "baseline",
-						flexDirection: "row",
-					}}
-				>
-					<Button
-						variant="contained"
-						aria-label="delete"
-						onClick={() => {
-							setDeleteMetadataDefinitionConfirmOpen(true);
+				{currUserProfile.read_only_user ? (
+					<></>
+				) : (
+					<Grid
+						item
+						xs={12}
+						sm={12}
+						md={4}
+						lg={3}
+						sx={{
+							display: "flex",
+							justifyContent: "flex-end",
+							alignItems: "baseline",
+							flexDirection: "row",
 						}}
-						endIcon={<DeleteIcon />}
-						sx={{ float: "right" }}
 					>
-						Delete
-					</Button>
-				</Grid>
+						<Button
+							variant="contained"
+							aria-label="delete"
+							onClick={() => {
+								setDeleteMetadataDefinitionConfirmOpen(true);
+							}}
+							endIcon={<DeleteIcon />}
+							sx={{ float: "right" }}
+						>
+							Delete
+						</Button>
+					</Grid>
+				)}
 			</Grid>
 			<ReactJson
 				src={metadataDefinition}

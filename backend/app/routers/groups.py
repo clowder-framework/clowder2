@@ -272,8 +272,9 @@ async def remove_member(
         async for auth in AuthorizationDB.find(
             AuthorizationDB.group_ids == PydanticObjectId(group_id),
         ):
-            auth.user_ids.remove(username)
-            await auth.replace()
+            if username in auth.user_ids:
+                auth.user_ids.remove(username)
+                await auth.replace()
 
         # Update group itself
         group.users.remove(found_user)
