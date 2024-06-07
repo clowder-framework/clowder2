@@ -98,15 +98,28 @@ async def update_metadata_definition(
                 PydanticObjectId(metadata_definition_id)
             )
         ) is not None:
-            mdd.name = metadata_definition.name
-            mdd.description = metadata_definition.description
-            mdd.required_for_items = metadata_definition.required_for_items
-            mdd.context = metadata_definition.context
-            mdd.context_url = metadata_definition.context_url
-            mdd.fields = metadata_definition.fields
-            mdd.modified = datetime.datetime.utcnow()
-            await mdd.save()
-            return mdd.dict()
+            # Check if metadata using this definition exists
+            metadata_using_definition = await MetadataDB.find(
+                MetadataDB.definition == mdd.name
+            ).to_list()
+
+            if len(metadata_using_definition) > 0:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Metadata definition: {mdd.name} ({metadata_definition_id}) in use. "
+                    f"You cannot edit it if there are existing metadata using this definition.",
+                )
+            try:
+                metadata_update = metadata_definition.dict()
+                metadata_update["modified"] = datetime.datetime.utcnow()
+
+                # Update mdd's attributes using the updated dictionary
+                for key, value in metadata_update.items():
+                    setattr(mdd, key, value)
+                await mdd.save()
+                return mdd.dict()
+            except Exception as e:
+                raise HTTPException(status_code=500, detail=e.args[0])
         else:
             raise HTTPException(
                 status_code=404,

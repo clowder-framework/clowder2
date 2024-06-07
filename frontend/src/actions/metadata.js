@@ -96,25 +96,28 @@ export function postMetadataDefinition(metadataDefinition) {
 			});
 	};
 }
+
 export const EDIT_METADATA_DEFINITION = "EDIT_METADATA_DEFINITION";
 
 export function updateMetadataDefinition(id, metadataDefinition) {
-	console.log(metadataDefinition)
 	return (dispatch) => {
-		return V2.MetadataService.updateMetadataDefinitionApiV2MetadataDefinitionMetadataDefinitionIdPut(id,
-			metadataDefinition).then((json) => {
-                dispatch({
-                    type: EDIT_METADATA_DEFINITION,
-                    metadataDefinition: json,
-                    receivedAt: Date.now(),
-                });
-            })
+		return V2.MetadataService.updateMetadataDefinitionApiV2MetadataDefinitionMetadataDefinitionIdPut(
+			id,
+			metadataDefinition
+		)
+			.then((json) => {
+				dispatch({
+					type: EDIT_METADATA_DEFINITION,
+					metadataDefinition: json,
+					receivedAt: Date.now(),
+				});
+			})
 			.catch((reason) => {
 				dispatch(
 					handleErrors(reason, updateMetadataDefinition(id, metadataDefinition))
 				);
 			});
-	}
+	};
 }
 
 export const RESET_SAVE_METADATA_DEFINITIONS =

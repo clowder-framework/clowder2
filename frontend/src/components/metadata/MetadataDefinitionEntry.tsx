@@ -1,5 +1,13 @@
 import React, { useEffect, useState } from "react";
-import {Box, Button, Dialog, DialogContent, DialogTitle, Grid, Link} from "@mui/material";
+import {
+	Box,
+	Button,
+	Dialog,
+	DialogContent,
+	DialogTitle,
+	Grid,
+	Link,
+} from "@mui/material";
 import Layout from "../Layout";
 import { useDispatch, useSelector } from "react-redux";
 import Typography from "@mui/material/Typography";
@@ -27,10 +35,8 @@ export function MetadataDefinitionEntry() {
 	const metadataDefinition = useSelector(
 		(state: RootState) => state.metadata.metadataDefinition
 	);
-	const [
-		editMetadataDefinitionOpen,
-		setEditMetadataDefinitionOpen,
-	] = useState<boolean>(false);
+	const [editMetadataDefinitionOpen, setEditMetadataDefinitionOpen] =
+		useState<boolean>(false);
 
 	const [
 		deleteMetadataDefinitionConfirmOpen,
@@ -89,9 +95,7 @@ export function MetadataDefinitionEntry() {
 				<DialogTitle>Edit Metadata Definition</DialogTitle>
 				<DialogContent>
 					<EditMetadataDefinitionModal
-						setEditMetadataDefinitionOpen ={
-							setEditMetadataDefinitionOpen
-						}
+						setEditMetadataDefinitionOpen={setEditMetadataDefinitionOpen}
 						metadataDefinitionId={metadataDefinitionId}
 					/>
 				</DialogContent>
@@ -164,7 +168,7 @@ export function MetadataDefinitionEntry() {
 							setEditMetadataDefinitionOpen(true);
 						}}
 						endIcon={<EditIcon />}
-						sx={{ float: "right" }}
+						sx={{ float: "right", marginRight: "0.5em" }}
 					>
 						Edit
 					</Button>

@@ -1,45 +1,46 @@
-import React, {useEffect, useState} from "react";
+import React, { useEffect, useState } from "react";
 import Form from "@rjsf/material-ui";
-import {useDispatch, useSelector} from "react-redux";
-import {RootState} from "../../types/data";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "../../types/data";
 import {
-	Autocomplete, Button,
+	Autocomplete,
+	Button,
 	Checkbox,
 	FormControlLabel,
 	FormGroup,
-	Grid, IconButton, MenuItem,
+	Grid,
+	IconButton,
+	MenuItem,
 	Step,
 	StepButton,
-	StepContent, StepLabel,
+	StepContent,
+	StepLabel,
 	Stepper,
-	Tooltip
+	Tooltip,
 } from "@mui/material";
-import {ClowderInput} from "../styledComponents/ClowderInput";
+import { ClowderInput } from "../styledComponents/ClowderInput";
 import Typography from "@mui/material/Typography";
-import {contextUrlMap, InputType, widgetTypes} from "../../metadata.config";
+import { contextUrlMap, InputType, widgetTypes } from "../../metadata.config";
 import AddBoxIcon from "@mui/icons-material/AddBox";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
-import {updateMetadataDefinition} from "../../actions/metadata";
+import { updateMetadataDefinition } from "../../actions/metadata";
 
 interface SupportedInputs {
 	[key: number]: Array<InputType>; // Define the type for SupportedInputs
 }
+
 type EditMetadataDefinitionModalProps = {
 	setEditMetadataDefinitionOpen: any;
 	metadataDefinitionId: string | undefined;
 };
 
-
 export default function EditMetadataDefinitionModal(
 	props: EditMetadataDefinitionModalProps
 ) {
-	const {
-		setEditMetadataDefinitionOpen,
-		metadataDefinitionId,
-	} = props;
+	const { setEditMetadataDefinitionOpen, metadataDefinitionId } = props;
 
 	const dispatch = useDispatch();
-	const editMetadataDefinition = (id: string|undefined, metadata: object) =>
+	const editMetadataDefinition = (id: string | undefined, metadata: object) =>
 		dispatch(updateMetadataDefinition(id, metadata));
 	const metadataDefinition = useSelector(
 		(state: RootState) => state.metadata.metadataDefinition
@@ -64,22 +65,15 @@ export default function EditMetadataDefinitionModal(
 				}));
 			});
 			if (metadataDefinition["@context"]) {
-				console.log(metadataDefinition["@context"]);
-				// const mappedContext = metadataDefinition["@context"].map(item => ({
-				// 	term: Object.keys(item)[0], // Access the key of the object
-				// 	iri: Object.values(item)[0] // Access the value of the object
-				// }));
-				const mappedContext = metadataDefinition["@context"].flatMap(obj =>
+				const mappedContext = metadataDefinition["@context"].flatMap((obj) =>
 					Object.entries(obj).map(([term, iri]) => ({ term, iri }))
 				);
 				setContextMap(mappedContext);
-				console.log(mappedContext);
 			}
 		}
 	}, [metadataDefinition]);
 
 	const handleEditMetadataDefinition = () => {
-		// console
 		//@ts-ignore
 		const data = JSON.parse(JSON.stringify(formInput));
 		// let context = [JSON.parse(data.context)];
@@ -92,7 +86,6 @@ export default function EditMetadataDefinitionModal(
 			}
 		}
 		// Handle form submission
-		console.log("Form submitted:", data);
 		editMetadataDefinition(metadataDefinitionId, data);
 		setEditMetadataDefinitionOpen(false);
 	};
@@ -138,6 +131,11 @@ export default function EditMetadataDefinitionModal(
 	};
 
 	const removeContext = (idx: number) => {
+		if (contextMap.length == 1) {
+			// Reset the context map if this is the last entry
+			setContextMap([{ term: "", iri: "" }]);
+			return;
+		}
 		const newContextMap = [...contextMap];
 		newContextMap.splice(idx, 1);
 
@@ -198,8 +196,25 @@ export default function EditMetadataDefinitionModal(
 	const removeField = (idx: number) => {
 		const data = JSON.parse(JSON.stringify(formInput));
 		const fields = data["fields"];
-		fields.splice(idx, 1);
-		data.fields = fields;
+
+		// if this is the last metadata entry, just reset it else delete the entry
+		if (fields.length == 1)
+			data.fields = [
+				{
+					name: "",
+					list: false,
+					widgetType: "",
+					config: {
+						type: "",
+						options: "",
+					},
+					required: false,
+				},
+			];
+		else {
+			fields.splice(idx, 1);
+			data.fields = fields;
+		}
 
 		setFormInput(data);
 
@@ -207,17 +222,11 @@ export default function EditMetadataDefinitionModal(
 		parseInput();
 
 		// Render the stepper correctly after deleting a field
-		console.log("activestep:", activeStep);
 		handleBack();
 	};
 
 	const parseInput = () => {
 		const data = JSON.parse(JSON.stringify(formInput));
-
-		// Parse the context JSON
-		//data.context = [JSON.parse(data.context)];
-
-		// Remove the options field if widgetType != enum
 		for (let i = 0; i < data.fields.length; i++) {
 			if (data.fields[i].config.type != "enum") {
 				delete data.fields[i].config.options;
@@ -278,9 +287,7 @@ export default function EditMetadataDefinitionModal(
 	};
 
 	const handleBack = () => {
-		console.log("back");
 		setActiveStep((prevActiveStep) => prevActiveStep - 1);
-		console.log("activestep:", activeStep);
 	};
 
 	return (
@@ -420,17 +427,13 @@ export default function EditMetadataDefinitionModal(
 											>
 												<AddBoxIcon />
 											</IconButton>
-											{idx == 0 ? (
-												<></>
-											) : (
-												<IconButton
-													color="primary"
-													size="small"
-													onClick={() => removeContext(idx)}
-												>
-													<DeleteOutlineIcon />
-												</IconButton>
-											)}
+											<IconButton
+												color="primary"
+												size="small"
+												onClick={() => removeContext(idx)}
+											>
+												<DeleteOutlineIcon />
+											</IconButton>
 										</Grid>
 									);
 								})}
@@ -448,16 +451,16 @@ export default function EditMetadataDefinitionModal(
 					{formInput.fields.map((input, idx) => {
 						return (
 							<Step key={idx}>
-								{idx == 0 ? (
-									<StepButton
-										color="inherit"
-										onClick={() => {
-											setActiveStep(idx + 1);
-										}}
-									>
-										<StepLabel>
-											Edit metadata entry*
-											{idx == activeStep - 1 ? (
+								<StepButton
+									color="inherit"
+									onClick={() => {
+										setActiveStep(idx + 1);
+									}}
+								>
+									<StepLabel>
+										Edit metadata entry*
+										{idx == activeStep - 1 ? (
+											<>
 												<IconButton
 													color="primary"
 													size="small"
@@ -465,48 +468,18 @@ export default function EditMetadataDefinitionModal(
 												>
 													<AddBoxIcon />
 												</IconButton>
-											) : (
-												<></>
-											)}
-										</StepLabel>
-									</StepButton>
-								) : (
-									<StepButton
-										color="inherit"
-										onClick={() => {
-											setActiveStep(idx + 1);
-										}}
-									>
-										<StepLabel>
-											Add additional entry
-											{idx == activeStep - 1 ? (
-												<>
-													<IconButton
-														color="primary"
-														size="small"
-														onClick={() => addNewField(idx)}
-													>
-														<AddBoxIcon />
-													</IconButton>
-													<IconButton
-														color="primary"
-														size="small"
-														onClick={() => removeField(idx)}
-													>
-														<DeleteOutlineIcon />
-													</IconButton>
-												</>
-											) : (
 												<IconButton
 													size="small"
 													onClick={() => removeField(idx)}
 												>
 													<DeleteOutlineIcon />
 												</IconButton>
-											)}
-										</StepLabel>
-									</StepButton>
-								)}
+											</>
+										) : (
+											<></>
+										)}
+									</StepLabel>
+								</StepButton>
 								<StepContent>
 									<Grid container>
 										<Grid xs={4} md={4}>
@@ -601,14 +574,14 @@ export default function EditMetadataDefinitionModal(
 										{/*read the current selected widget idx and its supported types*/}
 										{idx in supportedInputs
 											? supportedInputs[idx].map((supportedInput) => {
-												return (
-													<MenuItem
-														value={supportedInput["name"]}
-														key={supportedInput["name"]}
-													>
-														{supportedInput["description"]}
-													</MenuItem>
-												);
+													return (
+														<MenuItem
+															value={supportedInput["name"]}
+															key={supportedInput["name"]}
+														>
+															{supportedInput["description"]}
+														</MenuItem>
+													);
 											  })
 											: null}
 									</ClowderInput>

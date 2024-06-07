@@ -16,7 +16,7 @@ import {
 	SEARCH_METADATA_DEFINITIONS,
 	UPDATE_DATASET_METADATA,
 	UPDATE_FILE_METADATA,
-	EDIT_METADATA_DEFINITION
+	EDIT_METADATA_DEFINITION,
 } from "../actions/metadata";
 import { DataAction } from "../types/action";
 import { MetadataState } from "../types/data";
@@ -69,7 +69,6 @@ const metadata = (state = defaultState, action: DataAction) => {
 				newMetadataDefinition: action.metadataDefinition,
 			});
 		case EDIT_METADATA_DEFINITION:
-			console.log("here");
 			return Object.assign({}, state, {
 				metadataDefinition: action.metadataDefinition,
 			});
