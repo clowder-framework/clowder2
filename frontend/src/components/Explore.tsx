@@ -37,9 +37,6 @@ export const Explore = (): JSX.Element => {
 	const pageMetadata = useSelector(
 		(state: RootState) => state.dataset.datasets.metadata
 	);
-	const pageMyDatasetsMetadata = useSelector(
-		(state: RootState) => state.dataset.myDatasets.metadata
-	);
 	const adminMode = useSelector((state: RootState) => state.user.adminMode);
 
 	// TODO add option to determine limit number; default show 12 datasets each time
@@ -50,24 +47,11 @@ export const Explore = (): JSX.Element => {
 	const [selectedTabIndex, setSelectedTabIndex] = useState(0);
 	const [errorOpen, setErrorOpen] = useState(false);
 
-	// component did mount
-	useEffect(() => {
-		listDatasets((currPageNum - 1) * limit, limit, mine);
-	}, []);
-
-	useEffect(() => {
-		listDatasets((currPageNum - 1) * limit, limit, mine);
-	}, [mine]);
-
 	// Admin mode will fetch all datasets
 	useEffect(() => {
-		listDatasets((currPageNum - 1) * limit, limit, mine);
-	}, [adminMode, deletedDataset]);
-
-	// Admin mode will fetch my datasets
-	useEffect(() => {
-		listDatasets(0, limit, true);
-	}, [adminMode, mine]);
+		if (adminMode) listDatasets(0, limit, true);
+		else listDatasets((currPageNum - 1) * limit, limit, mine);
+	}, [adminMode, deletedDataset, mine, currPageNum, limit]);
 
 	// switch tabs
 	const handleTabChange = (
