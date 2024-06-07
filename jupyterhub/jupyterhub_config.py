@@ -13,38 +13,6 @@ c = get_config()  # noqa: F821
 # avoid having to rebuild the JupyterHub container every time we change a
 # configuration parameter.
 
-
-def create_dir_hook(spawner):
-    username = spawner.user.name  # get the username
-
-    volume_path = os.path.join("/volumes/jupyterhub/", username)
-    print(f"Checking if {volume_path} exists…")
-
-    if not os.path.exists(volume_path):
-        print(f"{volume_path} does not exist. Creating directory...")
-        # create a directory with umask 0755
-        # hub and container user must have the same UID to be writeable
-        # still readable by other users on the system
-        try:
-            # Attempt to create the directory
-            os.mkdir(volume_path)
-            print(f"Directory {volume_path} created.")
-            # Now, do whatever you think your user needs
-            # ...
-        except OSError as e:
-            print(f"Error creating directory {volume_path}: {e}")
-
-        try:
-            os.chown(volume_path, 1003, 1003)
-            print("Ownership of changed successfully.")
-        except OSError as e:
-            print(f"Error changing ownership of: {e}")
-        # now do whatever you think your user needs
-
-
-# attach the hook function to the spawner
-c.Spawner.pre_spawn_hook = create_dir_hook
-
 # Spawn single-user servers as Docker containers
 c.JupyterHub.spawner_class = "dockerspawner.DockerSpawner"
 
