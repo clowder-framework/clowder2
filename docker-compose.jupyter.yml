@@ -5,7 +5,7 @@ services:
         context: jupyterhub
         dockerfile: Dockerfile.jupyterhub
         args:
-              JUPYTERHUB_VERSION: latest
+              JUPYTERHUB_VERSION: 4
     restart: always
     networks:
       - clowder2
