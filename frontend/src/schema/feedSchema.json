@@ -17,10 +17,6 @@
 				"required": ["mode", "criteria"],
 				"description": "Fill out the match criteria to enable the selected extractor(s) on those specific files/datasets that match the criteria",
 				"properties": {
-					"index_name": {
-						"type": "string",
-						"title": "Index name you want to search on"
-					},
 					"mode": {
 						"type": "string",
 						"title": "Mode of match criterion",

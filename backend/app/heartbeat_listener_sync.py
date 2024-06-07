@@ -86,7 +86,6 @@ def callback(ch, method, properties, body):
                 new_feed = FeedDB(
                     name=extractor_name,
                     search={
-                        "index_name": "file",
                         "criteria": criteria_list,
                         "mode": "or",
                     },
