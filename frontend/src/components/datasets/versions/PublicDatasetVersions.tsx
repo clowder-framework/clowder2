@@ -100,7 +100,7 @@ export const PublicDatasetVersions = (props) => {
 									currDataset.id === currDataset.origin_id ? "bold" : "normal",
 							}}
 						>
-							{parseDate(currDataset.modified)}
+							Last Modified: {parseDate(currDataset.modified)}
 						</Typography>
 					</Box>
 				</Box>
@@ -120,7 +120,7 @@ export const PublicDatasetVersions = (props) => {
 									variant="caption"
 									sx={{ color: "text.primary.light" }}
 								>
-									{parseDate(dataset.modified)}
+									Last Modified: {parseDate(dataset.modified)}
 								</Typography>
 							</Box>
 						</Box>
@@ -154,7 +154,7 @@ export const PublicDatasetVersions = (props) => {
 											currDataset.id === dataset.id ? "bold" : "normal",
 									}}
 								>
-									{parseDate(dataset.modified)}
+									Last Modified: {parseDate(dataset.modified)}
 								</Typography>
 							</Box>
 						</Box>
