@@ -13,6 +13,7 @@ import {
 	Collapse,
 } from "@mui/material";
 import FolderIcon from "@mui/icons-material/Folder";
+import DatasetIcon from "@mui/icons-material/Dataset";
 import InsertDriveFileIcon from "@mui/icons-material/InsertDriveFile";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ImageIcon from "@mui/icons-material/Image";
@@ -53,12 +54,14 @@ const RecursiveComponent: React.FC<RecursiveComponentProps> = ({
 }) => {
 	const [expanded, setExpanded] = useState(false);
 	const [children, setChildren] = useState<FSItem[] | undefined>(item.children);
-	const isFolder = item.type === "folder";
+	const isFolderOrDataset = item.type === "folder" || item.type === "dataset";
 
 	// Function to generate Icon based on item type
 	const getIcon = () => {
-		if (isFolder) {
+		if (item.type === "folder") {
 			return <FolderIcon />;
+		} else if (item.type === "dataset") {
+			return <DatasetIcon />;
 		}
 		switch (item.content_type) {
 			case "image":
@@ -111,7 +114,7 @@ const RecursiveComponent: React.FC<RecursiveComponentProps> = ({
 
 	// Function to handle selection of folder or file
 	const onSelect = () => {
-		if (isFolder) {
+		if (isFolderOrDataset) {
 			if (!expanded) {
 				fetchFolderFiles(item.datasetId, item.id).then((data) => {
 					setChildren(data);
@@ -143,7 +146,7 @@ const RecursiveComponent: React.FC<RecursiveComponentProps> = ({
 				<ListItemIcon sx={{ minWidth: "auto", mr: 1 }}>
 					<IconButton
 						size="small"
-						sx={{ visibility: isFolder ? "visible" : "hidden" }}
+						sx={{ visibility: isFolderOrDataset ? "visible" : "hidden" }}
 					>
 						<ExpandMoreIcon
 							style={{
@@ -156,7 +159,7 @@ const RecursiveComponent: React.FC<RecursiveComponentProps> = ({
 				<ListItemText primary={item.label} />
 			</ListItem>
 			<Collapse in={expanded} timeout="auto" unmountOnExit>
-				{isFolder && (
+				{isFolderOrDataset && (
 					<Box sx={{ ml: 2 }}>
 						{children?.map((child) => (
 							<RecursiveComponent
@@ -188,7 +191,7 @@ const FileSystemViewer: React.FC<{
 	// Fetch datasets on component mount
 	useEffect(() => {
 		// TODO: Remove hardcoded values for skip and limit
-		listDatasets(0, 100, true);
+		listDatasets(0, 3000, true);
 	}, []); //
 
 	useEffect(() => {
@@ -198,7 +201,7 @@ const FileSystemViewer: React.FC<{
 					datasetId: dataset.id,
 					label: dataset.name,
 					children: [],
-					type: "folder",
+					type: "dataset",
 				}))
 			);
 		}
