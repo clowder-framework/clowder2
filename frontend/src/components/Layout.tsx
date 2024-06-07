@@ -41,6 +41,8 @@ import ManageAccountsIcon from "@mui/icons-material/ManageAccounts";
 import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
 import { Footer } from "./navigation/Footer";
 
+import config from "../app.config";
+
 const drawerWidth = 240;
 
 const Main = styled("main", { shouldForwardProp: (prop) => prop !== "open" })<{
@@ -426,7 +428,7 @@ export default function PersistentDrawerLeft(props) {
 					<ListItem key={"jupyter"} disablePadding>
 						<ListItemButton
 							component={RouterLink}
-							to="http://localhost:8765/"
+							to={config.jupyterHubURL}
 							target="_blank"
 							rel="noopener noreferrer"
 						>

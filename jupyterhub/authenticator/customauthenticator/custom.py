@@ -145,26 +145,8 @@ class CustomTokenAuthenticator(Authenticator):
             )
         username = resp_json[self.auth_username_key]
 
-        # # make sure there is a user id
-        # if self.auth_uid_number_key not in resp_json.keys():
-        #     raise web.HTTPError(500, log_message=f"Required field {self.auth_uid_number_key} does not exist in jwt token")
-        # uid = resp_json[self.auth_uid_number_key]
-        #
-        # get the groups/roles for the user
-        if "roles" in resp_json:
-            user_roles = resp_json.get("roles", [])
-        elif "realm_access" in resp_json:
-            user_roles = resp_json["realm_access"].get("roles", [])
-        else:
-            user_roles = []
-
         self.log.info(f"username={username}")
-        return {
-            "name": username,
-            "auth_state": {
-                "roles": user_roles,
-            },
-        }
+        return {"name": username}
 
     async def authenticate(self, handler, data):
         self.log.info("Authenticate")
