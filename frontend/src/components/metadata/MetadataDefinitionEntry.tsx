@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, {useEffect, useState} from "react";
 import {
 	Box,
 	Button,
@@ -9,27 +9,30 @@ import {
 	Link,
 } from "@mui/material";
 import Layout from "../Layout";
-import { useDispatch, useSelector } from "react-redux";
+import {useDispatch, useSelector} from "react-redux";
 import Typography from "@mui/material/Typography";
-import { useParams } from "react-router-dom";
-import { MainBreadcrumbs } from "../navigation/BreadCrumb";
-import { ErrorModal } from "../errors/ErrorModal";
+import {useParams} from "react-router-dom";
+import {MainBreadcrumbs} from "../navigation/BreadCrumb";
+import {ErrorModal} from "../errors/ErrorModal";
 import ReactJson from "react-json-view";
-import { fetchMetadataDefinition as fetchMetadataDefinitionAction } from "../../actions/metadata";
-import { RootState } from "../../types/data";
+import {fetchMetadataDefinition as fetchMetadataDefinitionAction} from "../../actions/metadata";
+import {RootState} from "../../types/data";
 import DeleteMetadataDefinitionModal from "./DeleteMetadataDefinitionModal";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import EditMetadataDefinitionModal from "./EditMetadataDefinitionModal";
+import {fetchUserProfile} from "../../actions/user";
 
 export function MetadataDefinitionEntry() {
 	// path parameter
-	const { metadataDefinitionId } = useParams<{
+	const {metadataDefinitionId} = useParams<{
 		metadataDefinitionId?: string;
 	}>();
 
 	// Redux connect equivalent
 	const dispatch = useDispatch();
+	const currUserProfile = useSelector((state: RootState) => state.user.profile);
+	const fetchCurrUserProfile = () => dispatch(fetchUserProfile());
 	const fetchMetadataDefinition = (metadataDefinitionId: string | undefined) =>
 		dispatch(fetchMetadataDefinitionAction(metadataDefinitionId));
 	const metadataDefinition = useSelector(
@@ -51,6 +54,11 @@ export function MetadataDefinitionEntry() {
 	// Error msg dialog
 	const [errorOpen, setErrorOpen] = useState(false);
 
+	// get profile
+	useEffect(() => {
+		fetchCurrUserProfile();
+	}, []);
+
 	// for breadcrumb
 	const paths = [
 		{
@@ -66,11 +74,11 @@ export function MetadataDefinitionEntry() {
 	return (
 		<Layout>
 			{/*Error Message dialogue*/}
-			<ErrorModal errorOpen={errorOpen} setErrorOpen={setErrorOpen} />
+			<ErrorModal errorOpen={errorOpen} setErrorOpen={setErrorOpen}/>
 			{/*breadcrumb*/}
 			<Grid container>
-				<Grid item xs={10} sx={{ display: "flex", alignItems: "center" }}>
-					<MainBreadcrumbs paths={paths} />
+				<Grid item xs={10} sx={{display: "flex", alignItems: "center"}}>
+					<MainBreadcrumbs paths={paths}/>
 				</Grid>
 			</Grid>
 			<DeleteMetadataDefinitionModal
@@ -114,7 +122,7 @@ export function MetadataDefinitionEntry() {
 						alignItems: "baseline",
 					}}
 				>
-					<Box sx={{ display: "flex", flexDirection: "column" }}>
+					<Box sx={{display: "flex", flexDirection: "column"}}>
 						<Box
 							sx={{
 								display: "flex",
@@ -148,42 +156,46 @@ export function MetadataDefinitionEntry() {
 				</Grid>
 
 				{/*Buttons*/}
-				<Grid
-					item
-					xs={12}
-					sm={12}
-					md={4}
-					lg={3}
-					sx={{
-						display: "flex",
-						justifyContent: "flex-end",
-						alignItems: "baseline",
-						flexDirection: "row",
-					}}
-				>
-					<Button
-						variant="contained"
-						aria-label="edit"
-						onClick={() => {
-							setEditMetadataDefinitionOpen(true);
+				{currUserProfile.read_only_user ? (
+						<></>
+					) :
+					<Grid
+						item
+						xs={12}
+						sm={12}
+						md={4}
+						lg={3}
+						sx={{
+							display: "flex",
+							justifyContent: "flex-end",
+							alignItems: "baseline",
+							flexDirection: "row",
 						}}
-						endIcon={<EditIcon />}
-						sx={{ float: "right", marginRight: "0.5em" }}
 					>
-						Edit
-					</Button>
-					<Button
-						variant="contained"
-						aria-label="delete"
-						onClick={() => {
-							setDeleteMetadataDefinitionConfirmOpen(true);
-						}}
-						endIcon={<DeleteIcon />}
-						sx={{ float: "right" }}
-					>
-						Delete
-					</Button>
-				</Grid>
+						<Button
+							variant="contained"
+							aria-label="edit"
+							onClick={() => {
+								setEditMetadataDefinitionOpen(true);
+							}}
+							endIcon={<EditIcon/>}
+							sx={{float: "right", marginRight: "0.5em"}}
+						>
+							Edit
+						</Button>
+						<Button
+							variant="contained"
+							aria-label="delete"
+							onClick={() => {
+								setDeleteMetadataDefinitionConfirmOpen(true);
+							}}
+							endIcon={<DeleteIcon/>}
+							sx={{float: "right"}}
+						>
+							Delete
+						</Button>
+					</Grid>
+				}
 			</Grid>
 			<ReactJson
 				src={metadataDefinition}

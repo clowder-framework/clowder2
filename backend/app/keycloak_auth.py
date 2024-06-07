@@ -312,6 +312,91 @@ async def get_current_username(
     )
 
 
+async def get_read_only_user(
+    token: str = Security(oauth2_scheme),
+    api_key: str = Security(api_key_header),
+    token_cookie: str = Security(jwt_header),
+) -> bool:
+    """Retrieve the user object from Mongo by first getting user id from JWT and then querying Mongo.
+    Potentially expensive. Use `get_current_username` if all you need is user name.
+    """
+
+    if token:
+        try:
+            userinfo = keycloak_openid.userinfo(token)
+            user = await UserDB.find_one(UserDB.email == userinfo["email"])
+            return user.read_only_user
+        except KeycloakAuthenticationError as e:
+            raise HTTPException(
+                status_code=e.response_code,
+                detail=json.loads(e.error_message),
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+    if token_cookie:
+        try:
+            userinfo = keycloak_openid.userinfo(token_cookie.removeprefix("Bearer%20"))
+            user = await UserDB.find_one(UserDB.email == userinfo["email"])
+            return user.read_only_user
+        # expired token
+        except KeycloakAuthenticationError as e:
+            raise HTTPException(
+                status_code=e.response_code,
+                detail=json.loads(e.error_message),
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+
+    if api_key:
+        serializer = URLSafeSerializer(settings.local_auth_secret, salt="api_key")
+        try:
+            payload = serializer.loads(api_key)
+            # Key is valid, check expiration date in database
+            if (
+                key := await ListenerAPIKeyDB.find_one(
+                    ListenerAPIKeyDB.user == payload["user"],
+                    ListenerAPIKeyDB.key == payload["key"],
+                )
+            ) is not None:
+                user = await UserDB.find_one(UserDB.email == key.user)
+                return user.read_only_user
+            elif (
+                key := await UserAPIKeyDB.find_one(
+                    UserAPIKeyDB.user == payload["user"],
+                    UserAPIKeyDB.key == payload["key"],
+                )
+            ) is not None:
+                current_time = datetime.utcnow()
+
+                if key.expires is not None and current_time >= key.expires:
+                    # Expired key, delete it first
+                    await key.delete()
+                    raise HTTPException(
+                        status_code=401,
+                        detail={"error": "Key is expired."},
+                        headers={"WWW-Authenticate": "Bearer"},
+                    )
+                else:
+                    user = await UserDB.find_one(UserDB.email == key.user)
+                    return user.read_only_user
+            else:
+                raise HTTPException(
+                    status_code=401,
+                    detail={"error": "Key is invalid."},
+                    headers={"WWW-Authenticate": "Bearer"},
+                )
+        except BadSignature as e:
+            raise HTTPException(
+                status_code=401,
+                detail={"error": "Key is invalid."},
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+
+    raise HTTPException(
+        status_code=401,
+        detail="Not authenticated.",  # "token expired",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+
+
 async def get_current_user_id(identity: Json = Depends(get_token)) -> str:
     """Retrieve internal Keycloak id. Does not query MongoDB."""
     keycloak_id = identity["sub"]

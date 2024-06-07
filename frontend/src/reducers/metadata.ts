@@ -34,6 +34,7 @@ const defaultState: MetadataState = {
 	publicMetadataDefinitionList: [],
 	metadataDefinition: <MetadataDefinitionOut>{},
 	newMetadataDefinition: <MetadataDefinitionOut>{},
+	deletedMetadataDefinition: <MetadataDefinitionOut>{},
 };
 
 const metadata = (state = defaultState, action: DataAction) => {
@@ -56,13 +57,7 @@ const metadata = (state = defaultState, action: DataAction) => {
 			});
 		case DELETE_METADATA_DEFINITION:
 			return Object.assign({}, state, {
-				metadataDefinitionList: {
-					...state.metadataDefinitionList,
-					data: state.metadataDefinitionList.data.filter(
-						(metadataDefinition: MetadataDefinitionOut) =>
-							metadataDefinition.id !== action.metadataDefinition.id
-					),
-				},
+				deletedMetadataDefinition: action.metadataDefinition,
 			});
 		case SAVE_METADATA_DEFINITION:
 			return Object.assign({}, state, {

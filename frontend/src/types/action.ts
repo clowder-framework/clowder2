@@ -1,10 +1,17 @@
-import { ExtractedMetadata, FilePreview, Folder, MetadataJsonld } from "./data";
+import {
+	ExtractedMetadata,
+	FilePreview,
+	Folder,
+	ListenerState,
+	MetadataJsonld,
+} from "./data";
 import {
 	AuthorizationBase,
 	DatasetOut as Dataset,
 	DatasetRoles,
 	EventListenerJobOut,
 	EventListenerJobUpdateOut,
+	EventListenerOut,
 	FileOut,
 	FileOut as FileSummary,
 	FileVersion,
@@ -440,6 +447,11 @@ interface RECEIVE_LISTENERS {
 	listeners: [];
 }
 
+interface TOGGLE_ACTIVE_FLAG_LISTENER {
+	type: "TOGGLE_ACTIVE_FLAG_LISTENER";
+	listener: EventListenerOut;
+}
+
 interface SEARCH_LISTENERS {
 	type: "SEARCH_LISTENERS";
 	listeners: [];
@@ -589,6 +601,21 @@ interface REVOKE_ADMIN {
 	profile: UserOut;
 }
 
+interface SET_READONLY {
+	type: "SET_READONLY";
+	profile: UserOut;
+}
+
+interface ENABLE_READONLY {
+	type: "ENABLE_READONLY";
+	profile: UserOut;
+}
+
+interface DISABLE_READONLY {
+	type: "DISABLE_READONLY";
+	profile: UserOut;
+}
+
 interface GET_PUBLIC_VIS_DATA {
 	type: "GET_PUBLIC_VIS_DATA";
 	publicVisData: VisualizationDataOut;
@@ -704,6 +731,7 @@ export type DataAction =
 	| GET_FOLDER_PATH
 	| GET_PUBLIC_FOLDER_PATH
 	| RECEIVE_LISTENERS
+	| TOGGLE_ACTIVE_FLAG_LISTENER
 	| SEARCH_LISTENERS
 	| RECEIVE_LISTENER_CATEGORIES
 	| RECEIVE_LISTENER_LABELS
@@ -738,6 +766,9 @@ export type DataAction =
 	| UPDATE_FILE
 	| SET_ADMIN
 	| REVOKE_ADMIN
+	| SET_READONLY
+	| ENABLE_READONLY
+	| DISABLE_READONLY
 	| GET_PUBLIC_VIS_DATA
 	| GET_PUBLIC_VIS_CONFIG
 	| DOWNLOAD_PUBLIC_VIS_DATA

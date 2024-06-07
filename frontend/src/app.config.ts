@@ -15,6 +15,7 @@ interface Config {
 	KeycloakRefresh: string;
 	KeycloakRegister: string;
 	searchEndpoint: string;
+	publicSearchEndpoint: string;
 	refreshTokenInterval: number;
 	extractorStatusInterval: number;
 	extractorLivelihoodInterval: number;
@@ -61,6 +62,7 @@ config["KeycloakRegister"] = `${config.KeycloakBaseURL}/register`;
 
 // elasticsearch
 config["searchEndpoint"] = `${hostname}/api/v2/elasticsearch`;
+config["publicSearchEndpoint"] = `${hostname}/api/v2/public_elasticsearch`;
 
 // refresh token time interval
 config["refreshTokenInterval"] = 1000 * 60; // 1 minute

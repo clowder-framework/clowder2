@@ -21,6 +21,8 @@ import {
 	UserOut,
 } from "../openapi/v2";
 import {
+	ENABLE_READONLY,
+	DISABLE_READONLY,
 	LIST_USERS,
 	PREFIX_SEARCH_USERS,
 	REVOKE_ADMIN,
@@ -30,6 +32,7 @@ import {
 const defaultState: GroupState = {
 	groups: <Paged>{ metadata: <PageMetadata>{}, data: <GroupOut[]>[] },
 	newGroup: <GroupOut>{},
+	deletedGroup: <GroupOut>{},
 	about: <GroupOut>{},
 	role: <RoleType>{},
 	users: <Paged>{ metadata: <PageMetadata>{}, data: <UserOut[]>[] },
@@ -50,7 +53,7 @@ const group = (state = defaultState, action: DataAction) => {
 		case RECEIVE_GROUP_ROLE:
 			return Object.assign({}, state, { role: action.role });
 		case DELETE_GROUP_MEMBER:
-			return Object.assign({}, state, { about: action.about });
+			return Object.assign({}, state, { deletedGroup: action.about });
 		case UPDATE_GROUP:
 			return Object.assign({}, state, { about: action.about });
 		case ADD_GROUP_MEMBER:
@@ -75,18 +78,31 @@ const group = (state = defaultState, action: DataAction) => {
 					),
 				},
 			});
+		case ENABLE_READONLY:
+			return Object.assign({}, state, {
+				users: {
+					...state.users,
+					data: state.users.data.map((user: UserOut) =>
+						user.email === action.profile.email ? action.profile : user
+					),
+				},
+			});
+		case DISABLE_READONLY:
+			return Object.assign({}, state, {
+				users: {
+					...state.users,
+					data: state.users.data.map((user: UserOut) =>
+						user.email === action.profile.email ? action.profile : user
+					),
+				},
+			});
 		case PREFIX_SEARCH_USERS:
 			return Object.assign({}, state, { users: action.users });
 		case ASSIGN_GROUP_MEMBER_ROLE:
 			return Object.assign({}, state, { about: action.about });
 		case DELETE_GROUP:
 			return Object.assign({}, state, {
-				groups: {
-					...state.groups,
-					data: state.groups.data.filter(
-						(group: GroupOut) => group.id !== action.about.id
-					),
-				},
+				deletedGroup: action.about,
 			});
 		default:
 			return state;
