@@ -3,7 +3,7 @@ import { Box, Button, Grid, Pagination, Tab, Tabs } from "@mui/material";
 
 import { RootState } from "../types/data";
 import { useDispatch, useSelector } from "react-redux";
-import {fetchDatasets} from "../actions/dataset";
+import { fetchDatasets } from "../actions/dataset";
 
 import { a11yProps, TabPanel } from "./tabs/TabComponent";
 import DatasetCard from "./datasets/DatasetCard";
@@ -59,7 +59,6 @@ export const Explore = (): JSX.Element => {
 		listDatasets((currPageNum - 1) * limit, limit, mine);
 	}, [mine]);
 
-
 	// Admin mode will fetch all datasets
 	useEffect(() => {
 		listDatasets((currPageNum - 1) * limit, limit, mine);
@@ -69,7 +68,6 @@ export const Explore = (): JSX.Element => {
 	useEffect(() => {
 		listDatasets(0, limit, true);
 	}, [adminMode, mine]);
-
 
 	// switch tabs
 	const handleTabChange = (
@@ -109,7 +107,6 @@ export const Explore = (): JSX.Element => {
 						>
 							<Tab sx={tab} label="Datasets" {...a11yProps(0)} />
 							<Tab sx={tab} label="My Datasets" {...a11yProps(1)} />
-
 						</Tabs>
 					</Box>
 					<TabPanel value={selectedTabIndex} index={0}>

@@ -93,7 +93,6 @@ interface RECEIVE_MY_DATASETS {
 	myDatasets: Paged;
 }
 
-
 interface RECEIVE_PUBLIC_DATASETS {
 	type: "RECEIVE_PUBLIC_DATASETS";
 	publicDatasets: Dataset[];
