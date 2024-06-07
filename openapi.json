@@ -430,6 +430,130 @@
         ]
       }
     },
+    "/api/v2/users/enable_readonly/{useremail}": {
+      "post": {
+        "tags": [
+          "login"
+        ],
+        "summary": "Enable Readonly User",
+        "operationId": "enable_readonly_user_api_v2_users_enable_readonly__useremail__post",
+        "parameters": [
+          {
+            "required": true,
+            "schema": {
+              "title": "Useremail",
+              "type": "string"
+            },
+            "name": "useremail",
+            "in": "path"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Dataset Id",
+              "type": "string"
+            },
+            "name": "dataset_id",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2AuthorizationCodeBearer": []
+          },
+          {
+            "APIKeyHeader": []
+          },
+          {
+            "APIKeyCookie": []
+          }
+        ]
+      }
+    },
+    "/api/v2/users/disable_readonly/{useremail}": {
+      "post": {
+        "tags": [
+          "login"
+        ],
+        "summary": "Disable Readonly User",
+        "operationId": "disable_readonly_user_api_v2_users_disable_readonly__useremail__post",
+        "parameters": [
+          {
+            "required": true,
+            "schema": {
+              "title": "Useremail",
+              "type": "string"
+            },
+            "name": "useremail",
+            "in": "path"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Dataset Id",
+              "type": "string"
+            },
+            "name": "dataset_id",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2AuthorizationCodeBearer": []
+          },
+          {
+            "APIKeyHeader": []
+          },
+          {
+            "APIKeyCookie": []
+          }
+        ]
+      }
+    },
     "/api/v2/users/enable/{useremail}": {
       "post": {
         "tags": [
@@ -6112,7 +6236,7 @@
           "listeners"
         ],
         "summary": "Get Listeners",
-        "description": "Get a list of all Event Listeners in the db.\n\nArguments:\n    skip -- number of initial records to skip (i.e. for pagination)\n    limit -- restrict number of records to be returned (i.e. for pagination)\n    heartbeat_interval -- number of seconds after which a listener is considered dead\n    category -- filter by category has to be exact match\n    label -- filter by label has to be exact match\n    alive_only -- filter by alive status",
+        "description": "Get a list of all Event Listeners in the db.\n\nArguments:\n    skip -- number of initial records to skip (i.e. for pagination)\n    limit -- restrict number of records to be returned (i.e. for pagination)\n    heartbeat_interval -- number of seconds after which a listener is considered dead\n    category -- filter by category has to be exact match\n    label -- filter by label has to be exact match\n    alive_only -- filter by alive status\n    all -- boolean stating if we want to show all listeners irrespective of admin and admin_mode",
         "operationId": "get_listeners_api_v2_listeners_get",
         "parameters": [
           {
@@ -6180,6 +6304,25 @@
               "type": "string"
             },
             "name": "process",
+            "in": "query"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "All",
+              "type": "boolean",
+              "default": false
+            },
+            "name": "all",
+            "in": "query"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Dataset Id",
+              "type": "string"
+            },
+            "name": "dataset_id",
             "in": "query"
           }
         ],
@@ -6326,6 +6469,15 @@
             },
             "name": "process",
             "in": "query"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Dataset Id",
+              "type": "string"
+            },
+            "name": "dataset_id",
+            "in": "query"
           }
         ],
         "responses": {
@@ -6454,6 +6606,15 @@
             },
             "name": "listener_id",
             "in": "path"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Dataset Id",
+              "type": "string"
+            },
+            "name": "dataset_id",
+            "in": "query"
           }
         ],
         "responses": {
@@ -6506,6 +6667,15 @@
             },
             "name": "listener_id",
             "in": "path"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Dataset Id",
+              "type": "string"
+            },
+            "name": "dataset_id",
+            "in": "query"
           }
         ],
         "requestBody": {
@@ -6568,6 +6738,15 @@
             },
             "name": "listener_id",
             "in": "path"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Dataset Id",
+              "type": "string"
+            },
+            "name": "dataset_id",
+            "in": "query"
           }
         ],
         "responses": {
@@ -6630,6 +6809,15 @@
             },
             "name": "heartbeat_interval",
             "in": "query"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Dataset Id",
+              "type": "string"
+            },
+            "name": "dataset_id",
+            "in": "query"
           }
         ],
         "responses": {
@@ -6640,6 +6828,132 @@
                 "schema": {
                   "title": "Response Check Listener Livelihood Api V2 Listeners  Listener Id  Status Get",
                   "type": "boolean"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2AuthorizationCodeBearer": []
+          },
+          {
+            "APIKeyHeader": []
+          },
+          {
+            "APIKeyCookie": []
+          }
+        ]
+      }
+    },
+    "/api/v2/listeners/{listener_id}/enable": {
+      "put": {
+        "tags": [
+          "listeners"
+        ],
+        "summary": "Enable Listener",
+        "description": "Enable an Event Listener. Only admins can enable listeners.\n\nArguments:\n    listener_id -- UUID of the listener to be enabled",
+        "operationId": "enable_listener_api_v2_listeners__listener_id__enable_put",
+        "parameters": [
+          {
+            "required": true,
+            "schema": {
+              "title": "Listener Id",
+              "type": "string"
+            },
+            "name": "listener_id",
+            "in": "path"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Dataset Id",
+              "type": "string"
+            },
+            "name": "dataset_id",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventListenerOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2AuthorizationCodeBearer": []
+          },
+          {
+            "APIKeyHeader": []
+          },
+          {
+            "APIKeyCookie": []
+          }
+        ]
+      }
+    },
+    "/api/v2/listeners/{listener_id}/disable": {
+      "put": {
+        "tags": [
+          "listeners"
+        ],
+        "summary": "Disable Listener",
+        "description": "Disable an Event Listener. Only admins can enable listeners.\n\nArguments:\n    listener_id -- UUID of the listener to be enabled",
+        "operationId": "disable_listener_api_v2_listeners__listener_id__disable_put",
+        "parameters": [
+          {
+            "required": true,
+            "schema": {
+              "title": "Listener Id",
+              "type": "string"
+            },
+            "name": "listener_id",
+            "in": "path"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Dataset Id",
+              "type": "string"
+            },
+            "name": "dataset_id",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventListenerOut"
                 }
               }
             }
@@ -7394,6 +7708,15 @@
             },
             "name": "feed_id",
             "in": "path"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Dataset Id",
+              "type": "string"
+            },
+            "name": "dataset_id",
+            "in": "query"
           }
         ],
         "requestBody": {
@@ -7467,6 +7790,15 @@
             },
             "name": "listener_id",
             "in": "path"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Dataset Id",
+              "type": "string"
+            },
+            "name": "dataset_id",
+            "in": "query"
           }
         ],
         "responses": {
@@ -7474,9 +7806,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/FeedOut"
-                }
+                "schema": {}
               }
             }
           },
@@ -10553,6 +10883,11 @@
             "title": "Alive",
             "type": "boolean"
           },
+          "active": {
+            "title": "Active",
+            "type": "boolean",
+            "default": false
+          },
           "properties": {
             "$ref": "#/components/schemas/ExtractorInfo"
           }
@@ -12230,6 +12565,11 @@
           },
           "admin_mode": {
             "title": "Admin Mode",
+            "type": "boolean",
+            "default": false
+          },
+          "read_only_user": {
+            "title": "Read Only User",
             "type": "boolean",
             "default": false
           }

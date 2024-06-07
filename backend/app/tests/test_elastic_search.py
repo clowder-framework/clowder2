@@ -193,8 +193,6 @@ async def test_public_files():
         time.sleep(1)
         dummy_file_query = []
 
-        query_body = {"query": {"match": {"creator": "xyz"}}}
-
         user_public_clause = {
             "bool": {
                 "should": [

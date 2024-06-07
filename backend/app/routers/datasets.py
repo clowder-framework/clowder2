@@ -683,13 +683,10 @@ async def save_file(
                 )
         file_public = False
         file_authenticated = False
-        file_private = False
         if dataset.status == DatasetStatus.PUBLIC:
             file_public = True
         elif dataset.status == DatasetStatus.AUTHENTICATED:
             file_authenticated = True
-        else:
-            file_private = True
         await add_file_entry(
             new_file,
             user,
