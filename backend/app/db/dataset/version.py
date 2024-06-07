@@ -1,8 +1,9 @@
-from typing import Union
+from typing import Optional, Union
 
 from app.config import settings
 from app.db.folder.version import _freeze_folder
 from app.models.authorization import AuthorizationDB
+from app.models.datasets import DatasetDB, DatasetFreezeDB
 from app.models.files import FileDB, FileFreezeDB, FileVersionDB, StorageType
 from app.models.folders import FolderDB, FolderFreezeDB
 from app.models.metadata import MetadataDB, MetadataFreezeDB
@@ -22,6 +23,12 @@ from minio import Minio
 
 
 async def _freeze_file_metadata(file, new_frozen_file_id: PydanticObjectId):
+    """
+    Release metadata associated with a file.
+    Args:
+        file (FileDB): The file whose metadata needs to be released.
+        new_frozen_file_id (PydanticObjectId): The ID of the new released file.
+    """
     file_metadata = await MetadataDB.find(
         And(
             MetadataDB.resource.resource_id == ObjectId(file.id),
@@ -38,6 +45,13 @@ async def _freeze_file_metadata(file, new_frozen_file_id: PydanticObjectId):
 
 
 async def _freeze_file_thumbnail(thumbnail_id):
+    """
+    Release a file's thumbnail.
+    Args:
+        thumbnail_id (str): The ID of the thumbnail to be released.
+    Returns:
+        str: The ID of the newly created released thumbnail.
+    """
     file_thumbnail = await ThumbnailDB.get(PydanticObjectId(thumbnail_id))
     file_thumbnail_data = file_thumbnail.dict()
     file_thumbnail_data["origin_id"] = file_thumbnail_data.pop("id")
@@ -49,6 +63,12 @@ async def _freeze_file_thumbnail(thumbnail_id):
 
 
 async def _freeze_file_visualization(file, new_frozen_file_id: PydanticObjectId):
+    """
+    Release visualizations associated with a file.
+    Args:
+        file (FileDB): The file whose visualizations need to be released.
+        new_frozen_file_id (PydanticObjectId): The ID of the new released file.
+    """
     file_vis_config = await VisualizationConfigDB.find(
         And(
             VisualizationConfigDB.resource.resource_id == ObjectId(file.id),
@@ -80,6 +100,12 @@ async def _freeze_file_visualization(file, new_frozen_file_id: PydanticObjectId)
 async def _freeze_files_folders_w_metadata_vis(
     dataset_id: str, new_frozen_dataset_id: PydanticObjectId
 ):
+    """
+    Release files and folders along with their metadata and visualizations for a dataset.
+    Args:
+        dataset_id (str): The ID of the dataset to be released.
+        new_frozen_dataset_id (PydanticObjectId): The ID of the new released dataset.
+    """
     # freeze folders first and save frozen folder id to a hashmap
     folders = await FolderDB.find(FolderDB.dataset_id == ObjectId(dataset_id)).to_list()
     parent_id_map = {}
@@ -118,6 +144,12 @@ async def _freeze_files_folders_w_metadata_vis(
 async def _freeze_dataset_metadata(
     dataset_id: str, new_frozen_dataset_id: PydanticObjectId
 ):
+    """
+    Release metadata associated with a dataset.
+    Args:
+        dataset_id (str): The ID of the dataset whose metadata needs to be released.
+        new_frozen_dataset_id (PydanticObjectId): The ID of the new released dataset.
+    """
     dataset_metadata = await MetadataDB.find(
         And(
             MetadataDB.resource.resource_id == ObjectId(dataset_id),
@@ -134,6 +166,13 @@ async def _freeze_dataset_metadata(
 
 
 async def _freeze_dataset_thumbnail(thumbnail_id: PydanticObjectId):
+    """
+    Release a dataset's thumbnail.
+    Args:
+        thumbnail_id (PydanticObjectId): The ID of the thumbnail to be released.
+    Returns:
+        str: The ID of the newly created released thumbnail.
+    """
     dataset_thumbnail = await ThumbnailDB.get(thumbnail_id)
     dataset_thumbnail_data = dataset_thumbnail.dict()
     dataset_thumbnail_data["origin_id"] = dataset_thumbnail_data.pop("id")
@@ -147,6 +186,12 @@ async def _freeze_dataset_thumbnail(thumbnail_id: PydanticObjectId):
 async def _freeze_dataset_visualization(
     dataset_id: str, new_frozen_dataset_id: PydanticObjectId
 ):
+    """
+    Release visualizations associated with a dataset.
+    Args:
+        dataset_id (str): The ID of the dataset whose visualizations need to be released.
+        new_frozen_dataset_id (PydanticObjectId): The ID of the new released dataset.
+    """
     dataset_vis_config = await VisualizationConfigDB.find(
         And(
             VisualizationConfigDB.resource.resource_id == ObjectId(dataset_id),
@@ -175,7 +220,16 @@ async def _freeze_dataset_visualization(
             await frozen_vis_data.insert()
 
 
-async def _delete_frozen_visualizations(resource, fs):
+async def _delete_frozen_visualizations(
+    resource: Union[DatasetFreezeDB, FileFreezeDB], fs: Optional[Minio]
+):
+    """
+    Delete the visualizations associated with a released resource.
+
+    Args:
+        resource(Union[DatasetFreezeDB, FileFreezeDB]): file or dataset.
+        fs (Optional[Minio]): The Minio file system client.
+    """
     async for frozen_vis_config in VisualizationConfigFreezeDB.find(
         VisualizationConfigFreezeDB.resource.resource_id
         == PydanticObjectId(resource.id),
@@ -212,7 +266,16 @@ async def _delete_frozen_visualizations(resource, fs):
         return frozen_vis_config.dict()
 
 
-async def _delete_visualizations(resource, fs):
+async def _delete_visualizations(
+    resource: Union[DatasetDB, FileDB], fs: Optional[Minio]
+):
+    """
+    Delete the visualizations associated with a current/latest resource.
+
+    Args:
+        resource (Union[DatasetDB, FileDB]): file or dataset.
+        fs (Optional[Minio]): The Minio file system client.
+    """
     async for vis_config in VisualizationConfigDB.find(
         VisualizationConfigDB.resource.resource_id == PydanticObjectId(resource.id),
     ):
@@ -241,7 +304,16 @@ async def _delete_visualizations(resource, fs):
         return vis_config.dict()
 
 
-async def _delete_frozen_thumbnail(resource, fs):
+async def _delete_frozen_thumbnail(
+    resource: Union[DatasetFreezeDB, FileFreezeDB], fs: Optional[Minio]
+):
+    """
+    Delete the thumbnail associated with a released resource.
+
+    Args:
+        resource (Union[DatasetFreezeDB, FileFreezeDB]): file or dataset.
+        fs (Optional[Minio]): The Minio file system client.
+    """
     async for frozen_thumbnail in ThumbnailFreezeDB.find(
         ThumbnailFreezeDB.id == resource.thumbnail_id,
     ):
@@ -267,7 +339,14 @@ async def _delete_frozen_thumbnail(resource, fs):
         return frozen_thumbnail.dict()
 
 
-async def _delete_thumbnail(resource, fs):
+async def _delete_thumbnail(resource: Union[DatasetDB, FileDB], fs: Optional[Minio]):
+    """
+    Delete the thumbnail associated with a current/latest resource.
+
+    Args:
+        resource (Union[DatasetDB, FileDB]): file or dataset.
+        fs (Optional[Minio]): The Minio file system client.
+    """
     async for thumbnail in ThumbnailDB.find(
         ThumbnailDB.id == resource.thumbnail_id,
     ):
@@ -287,7 +366,14 @@ async def _delete_thumbnail(resource, fs):
         return thumbnail.dict()
 
 
-async def _delete_file(file, fs):
+async def _delete_file(file: FileDB, fs: Optional[Minio]):
+    """
+    Delete the file mongo document and raw bytes if applicable
+
+    Args:
+        file (FileDB): file .
+        fs (Optional[Minio]): The Minio file system client.
+    """
     # delete mongo
     await file.delete()
 
@@ -304,7 +390,15 @@ async def _delete_file(file, fs):
     return file.dict()
 
 
-async def _delete_frozen_file(frozen_file, fs):
+async def _delete_frozen_file(frozen_file: FileFreezeDB, fs: Optional[Minio]):
+    """
+    Delete the file associated with a released dataset including mongo document and raw bytes if applicable
+
+    Args:
+        frozen_file (FileFreezeDB): file associated with a released dataset.
+        fs (Optional[Minio]): The Minio file system client.
+    """
+
     # delete mongo
     await frozen_file.delete()
 
@@ -323,7 +417,17 @@ async def _delete_frozen_file(frozen_file, fs):
     return frozen_file.dict()
 
 
-async def _delete_frozen_dataset(frozen_dataset, fs, hard_delete=False):
+async def _delete_frozen_dataset(
+    frozen_dataset: DatasetFreezeDB, fs: Optional[Minio], hard_delete: bool = False
+):
+    """
+    Delete a released dataset, including metadata, folders, thumbnails, visualizations, and authorizations.
+
+    Args:
+        frozen_dataset (DatasetFreezeDB): Released dataset.
+        fs (Optional[Minio]): The Minio file system client.
+        hard_delete: Flag indicating delete bytes in minio or not.
+    """
     # delete metadata
     await MetadataFreezeDB.find(
         MetadataFreezeDB.resource.resource_id == PydanticObjectId(frozen_dataset.id),
@@ -371,7 +475,15 @@ async def remove_file_entry(
     fs: Minio,
     es: Elasticsearch,
 ):
-    """Remove FileDB object into MongoDB, Minio, and associated metadata and version information."""
+    """
+    Remove a file belongs to a current/latest dataset; remove it from MongoDB, Elasticsearch, Minio, and associated
+    metadata and version information.
+
+    Args:
+        file_id (Union[str, ObjectId]): The ID of the file to be removed.
+        fs (Minio): The Minio file system client.
+        es (Elasticsearch): The Elasticsearch client.
+    """
 
     if (file := await FileDB.get(PydanticObjectId(file_id))) is not None:
         # delete from elasticsearch
@@ -399,14 +511,23 @@ async def remove_file_entry(
         raise HTTPException(status_code=404, detail=f"File {file_id} not found")
 
 
-async def remove_frozen_file_entry(frozne_file_id: Union[str, ObjectId], fs: Minio):
-    """Remove Frozen FileDB object into MongoDB, Minio, and associated metadata and version information."""
+async def remove_frozen_file_entry(
+    frozen_file_id: Union[str, ObjectId], fs: Optional[Minio]
+):
+    """
+    Remove a file belongs to a released dataset; remove it from MongoDB, Minio, and associated metadata
+    and version information.
+
+    Args:
+        frozen_file_id (Union[str, ObjectId]): The ID of the file to be removed.
+        fs (Minio): The Minio file system client.
+    """
     if (
-        frozen_file := await FileFreezeDB.get(PydanticObjectId(frozne_file_id))
+        frozen_file := await FileFreezeDB.get(PydanticObjectId(frozen_file_id))
     ) is not None:
         # delete metadata
         await MetadataFreezeDB.find(
-            MetadataFreezeDB.resource.resource_id == ObjectId(frozne_file_id),
+            MetadataFreezeDB.resource.resource_id == ObjectId(frozen_file_id),
             MetadataFreezeDB.resource.collection == "files",
         ).delete()
 
@@ -420,12 +541,19 @@ async def remove_frozen_file_entry(frozne_file_id: Union[str, ObjectId], fs: Min
         await _delete_frozen_file(frozen_file, fs)
     else:
         raise HTTPException(
-            status_code=404, detail=f"Released File {frozne_file_id} not found"
+            status_code=404, detail=f"Released File {frozen_file_id} not found"
         )
 
 
 async def remove_local_file_entry(file_id: Union[str, ObjectId], es: Elasticsearch):
-    """Remove FileDB object into MongoDB, Minio, and associated metadata and version information."""
+    """
+    Remove a local file belongs to a current/latest dataset; remove it from MongoDB, elasticsearch, and associated
+    metadata and version information.
+
+    Args:
+        file_id (Union[str, ObjectId]): The ID of the file to be removed.
+        es (Elasticsearch): The Elasticsearch client.
+    """
     if (file := await FileDB.get(PydanticObjectId(file_id))) is not None:
         # delete from elasticsearch
         delete_document_by_id(es, settings.elasticsearch_index, str(file_id))
@@ -449,7 +577,13 @@ async def remove_local_file_entry(file_id: Union[str, ObjectId], es: Elasticsear
 
 
 async def remove_frozen_local_file_entry(frozen_file_id: Union[str, ObjectId]):
-    """Remove FileDB object into MongoDB, Minio, and associated metadata and version information."""
+    """
+    Remove a local file belongs to a released dataset; remove it from MongoDB, and associated
+    metadata and version information.
+
+    Args:
+        frozen_file_id (Union[str, ObjectId]): The ID of the file to be removed.
+    """
     if (
         frozen_file := await FileFreezeDB.get(PydanticObjectId(frozen_file_id))
     ) is not None:
