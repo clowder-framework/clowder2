@@ -11,7 +11,7 @@ import { fetchMetadataDefinition as fetchMetadataDefinitionAction } from "../../
 import { RootState } from "../../types/data";
 import DeleteMetadataDefinitionModal from "./DeleteMetadataDefinitionModal";
 import DeleteIcon from "@mui/icons-material/Delete";
-import {fetchUserProfile} from "../../actions/user";
+import { fetchUserProfile } from "../../actions/user";
 
 export function MetadataDefinitionEntry() {
 	// path parameter
@@ -126,22 +126,22 @@ export function MetadataDefinitionEntry() {
 				</Grid>
 
 				{/*Buttons*/}
-				{currUserProfile.read_only_user? (
+				{currUserProfile.read_only_user ? (
 					<></>
-					):
-						<Grid
-							item
-							xs={12}
-							sm={12}
-							md={4}
-							lg={3}
-							sx={{
-								display: "flex",
-								justifyContent: "flex-end",
-								alignItems: "baseline",
-								flexDirection: "row",
-							}}
-						>
+				) : (
+					<Grid
+						item
+						xs={12}
+						sm={12}
+						md={4}
+						lg={3}
+						sx={{
+							display: "flex",
+							justifyContent: "flex-end",
+							alignItems: "baseline",
+							flexDirection: "row",
+						}}
+					>
 						<Button
 							variant="contained"
 							aria-label="delete"
@@ -154,7 +154,7 @@ export function MetadataDefinitionEntry() {
 							Delete
 						</Button>
 					</Grid>
-				}
+				)}
 			</Grid>
 			<ReactJson
 				src={metadataDefinition}

@@ -25,7 +25,7 @@ from app.models.files import FileDB, FileOut
 from app.models.groups import GroupDB
 from app.models.users import UserDB
 from app.routers.authentication import get_admin, get_admin_mode
-from app.search.index import index_dataset, index_dataset_files, index_file
+from app.search.index import index_dataset, index_dataset_files
 from beanie import PydanticObjectId
 from beanie.operators import In, Or
 from bson import ObjectId

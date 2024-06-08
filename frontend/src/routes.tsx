@@ -225,12 +225,7 @@ export const AppRoutes = (): JSX.Element => {
 						</PrivateRoute>
 					}
 				/>
-				<Route
-					path="/public_search"
-					element={
-						<PublicSearch />
-					}
-				/>
+				<Route path="/public_search" element={<PublicSearch />} />
 				<Route
 					path="/extractions"
 					element={

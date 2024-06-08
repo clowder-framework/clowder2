@@ -97,7 +97,8 @@ export default function PersistentDrawerLeft(props) {
 	const { children } = props;
 	const theme = useTheme();
 	const [open, setOpen] = React.useState(false);
-	const [embeddedPublicSearchHidden, setEmbeddedPublicSearchHidden] = React.useState(false);
+	const [embeddedPublicSearchHidden, setEmbeddedPublicSearchHidden] =
+		React.useState(false);
 	const [anchorEl, setAnchorEl] = React.useState(null);
 	const isMenuOpen = Boolean(anchorEl);
 
@@ -236,7 +237,7 @@ export default function PersistentDrawerLeft(props) {
 						</ListItemButton>
 					</ListItem>
 				</List>
-				<Divider/>
+				<Divider />
 				<List>
 					<ListItem key={"public_search"} disablePadding>
 						<ListItemButton component={RouterLink} to="/public_search">
