@@ -25,7 +25,7 @@ from app.models.files import FileDB, FileOut
 from app.models.groups import GroupDB
 from app.models.users import UserDB
 from app.routers.authentication import get_admin, get_admin_mode
-from app.search.index import index_dataset, index_file, index_dataset_files
+from app.search.index import index_dataset, index_dataset_files, index_file
 from beanie import PydanticObjectId
 from beanie.operators import In, Or
 from bson import ObjectId
@@ -252,7 +252,9 @@ async def set_dataset_group_role(
                     )
                     # if there are read only users add them with the role of viewer
                     await auth_db.insert()
-                    await index_dataset(es, DatasetOut(**dataset.dict()), auth_db.user_ids)
+                    await index_dataset(
+                        es, DatasetOut(**dataset.dict()), auth_db.user_ids
+                    )
                     await index_dataset_files(es, str(dataset_id))
                 return auth_db.dict()
         else:

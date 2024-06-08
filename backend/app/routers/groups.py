@@ -10,12 +10,11 @@ from app.models.groups import GroupBase, GroupDB, GroupIn, GroupOut, Member
 from app.models.pages import Paged, _construct_page_metadata, _get_page_query
 from app.models.users import UserDB, UserOut
 from app.routers.authentication import get_admin, get_admin_mode
+from app.search.index import index_dataset, index_dataset_files
 from beanie import PydanticObjectId
 from beanie.operators import Or, Push, RegEx
 from bson.objectid import ObjectId
 from fastapi import APIRouter, Depends, HTTPException
-
-from app.search.index import index_dataset, index_dataset_files
 
 router = APIRouter()
 
@@ -197,7 +196,7 @@ async def edit_group(
                 AuthorizationDB.group_ids == ObjectId(group_id)
             ).to_list()
             for auth in group_authorizations:
-                print('add auth')
+                print("add auth")
         try:
             group.name = group_dict["name"]
             await group.replace()
@@ -260,8 +259,14 @@ async def add_member(
                     AuthorizationDB.group_ids == ObjectId(group_id)
                 ).to_list()
                 for auth in group_authorizations:
-                    if (dataset := await DatasetDB.get(PydanticObjectId(auth.dataset_id))) is not None:
-                        await index_dataset(es, DatasetOut(**dataset.dict()), auth.user_ids)
+                    if (
+                        dataset := await DatasetDB.get(
+                            PydanticObjectId(auth.dataset_id)
+                        )
+                    ) is not None:
+                        await index_dataset(
+                            es, DatasetOut(**dataset.dict()), auth.user_ids
+                        )
                         await index_dataset_files(es, str(auth.dataset_id))
             return group.dict()
         raise HTTPException(status_code=404, detail=f"Group {group_id} not found")
@@ -302,7 +307,9 @@ async def remove_member(
             AuthorizationDB.group_ids == ObjectId(group_id)
         ).to_list()
         for auth in group_authorizations:
-            if (dataset := await DatasetDB.get(PydanticObjectId(auth.dataset_id))) is not None:
+            if (
+                dataset := await DatasetDB.get(PydanticObjectId(auth.dataset_id))
+            ) is not None:
                 await index_dataset(es, DatasetOut(**dataset.dict()), auth.user_ids)
                 await index_dataset_files(es, str(auth.dataset_id))
 
