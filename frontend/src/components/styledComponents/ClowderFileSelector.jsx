@@ -6,10 +6,17 @@ export const ClowderFileSelector = (item) => {
 	const handleChange = (value) => {
 		item.onChange(value);
 	};
+	const datasetId = item.options.datasetId;
+	const showOnlyDatasetFiles = item.schema.showOnlyDatasetFiles ? true : false;
+	console.log(showOnlyDatasetFiles);
 	return (
 		<>
 			<ClowderInputLabel>{item.schema.title}</ClowderInputLabel>
-			<FileSelectorButton onChange={handleChange} />
+			<FileSelectorButton
+				showOnlyDatasetFiles={showOnlyDatasetFiles}
+				datasetId={datasetId}
+				onChange={handleChange}
+			/>
 		</>
 	);
 };
