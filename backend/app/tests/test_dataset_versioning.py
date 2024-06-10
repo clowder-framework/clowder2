@@ -22,11 +22,44 @@ def test_freeze_and_delete(client: TestClient, headers: dict):
     )
     thumbnail_id = response.json()["id"]
     os.remove("test.png")
-    resp = client.patch(
+    response = client.patch(
         f"{settings.API_V2_STR}/datasets/{dataset_id}/thumbnail/{thumbnail_id}",
         headers=headers,
     )
-    assert resp.status_code == 200
+    assert response.status_code == 200
+
+    # Add visualization
+    test_visualization_config = {
+        "client": "testClient",
+        "parameters": {"url": "testurl.com"},
+        "visualization_mimetype": "testMimeType",
+        "visualization_component_id": "basic-image-component",
+    }
+    visualization_example = "vis_upload.csv"
+    visualization_content_example = "year,location,count\n2024,preview,4"
+    resource = {"resource_id": dataset_id, "collection": "datasets"}
+    vis_name = "test vis data"
+    vis_description = "test visualization data"
+    test_visualization_config["resource"] = resource
+    response = client.post(
+        f"{settings.API_V2_STR}/visualizations/config",
+        json=test_visualization_config,
+        headers=headers,
+    )
+    assert response.status_code == 200
+    assert response.json().get("id") is not None
+    # add vis data
+    visualization_config_id = response.json().get("id")
+    with open(visualization_example, "w") as tempf:
+        tempf.write(visualization_content_example)
+    vis_file = {"file": open(visualization_example, "rb")}
+    response = client.post(
+        f"{settings.API_V2_STR}/visualizations/?name={vis_name}&description={vis_description}&config={visualization_config_id}",
+        headers=headers,
+        files=vis_file,
+    )
+    assert response.status_code == 200
+    assert response.json().get("id") is not None
 
     response = client.post(
         f"{settings.API_V2_STR}/datasets/{dataset_id}/freeze", headers=headers
@@ -66,8 +99,21 @@ def test_freeze_and_delete(client: TestClient, headers: dict):
     assert (
         response.json().get("origin_id") == dataset_id
     )  # datasetId should stay the same
-    # document version 1 dataset id
+    # document version 1 dataset
     dataset_version_1 = response.json()
+    dataset_version_1_id = dataset_version_1.get("id")
+
+    # document version 1 vis id
+    response = client.get(
+        f"{settings.API_V2_STR}/visualizations/{dataset_version_1_id}/config",
+        headers=headers,
+    )
+    version_1_vis_config_id = response.json()[0].get("id")
+    response = client.get(
+        f"{settings.API_V2_STR}/visualizations/config/{version_1_vis_config_id}/visdata",
+        headers=headers,
+    )
+    version_1_vis_id = response.json()[0].get("id")
 
     # get all versions
     response = client.get(
@@ -77,11 +123,11 @@ def test_freeze_and_delete(client: TestClient, headers: dict):
     assert len(response.json().get("data")) == 2
     assert response.json().get("metadata") == {"total_count": 2, "skip": 0, "limit": 10}
 
+    ######################## delete ########################
     # delete a specific version (version 1)
     response = client.delete(
         f"{settings.API_V2_STR}/datasets/{dataset_id}/freeze/1", headers=headers
     )
-    dataset_version_1_id = dataset_version_1.get("id")
     assert response.status_code == 200
     assert response.json().get("deleted") == True
     assert response.json().get("id") == dataset_version_1_id
@@ -126,6 +172,31 @@ def test_freeze_and_delete(client: TestClient, headers: dict):
         f"{settings.API_V2_STR}/thumbnails/{thumbnail_id}", headers=headers
     )
     assert response.status_code == 200
+
+    # check if visualization is gone
+    response = client.get(
+        f"{settings.API_V2_STR}/visualizations/{dataset_version_1_id}/config",
+        headers=headers,
+    )
+    assert response.json() == []
+    response = client.get(
+        f"{settings.API_V2_STR}/visualizations/{dataset_id}/config",
+        headers=headers,
+    )
+    assert isinstance(response.json(), list)
+    assert len(response.json()) > 0
+
+    # check if visualization bytes is gone
+    response = client.get(
+        f"{settings.API_V2_STR}/visualizations/{version_1_vis_config_id}/config/visdata",
+        headers=headers,
+    )
+    assert response.status_code == 404
+    response = client.get(
+        f"{settings.API_V2_STR}/visualizations/{version_1_vis_id}/",
+        headers=headers,
+    )
+    assert response.status_code == 404
 
     # delete the whole dataset
     response = client.delete(
