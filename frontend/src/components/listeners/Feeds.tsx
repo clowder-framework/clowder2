@@ -30,11 +30,8 @@ import TableBody from "@mui/material/TableBody";
 import { Link } from "react-router-dom";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { ErrorModal } from "../errors/ErrorModal";
-import DeleteMetadataDefinitionModal from "../metadata/DeleteMetadataDefinitionModal";
 import DeleteFeedModal from "./DeleteFeedModal";
 import { EditFeedModal } from "./EditFeedModal";
-import EditIcon from "@mui/icons-material/Edit";
-import { EditLicenseModal } from "../datasets/EditLicenseModal";
 import { CreateFeedModal } from "./CreateFeedModal";
 
 export function Feeds() {
@@ -56,10 +53,8 @@ export function Feeds() {
 		useState<boolean>(false);
 	const [deleteFeedConfirmOpen, setDeleteFeedConfirmOpen] =
 		useState<boolean>(false);
-	const [editFeedModalOpen, setEditFeedModalOpen] = useState<boolean>(false);
 
 	const [selectedFeedId, setSelectedFeedId] = useState();
-	const [selectedFeed, setSelectedFeed] = useState();
 
 	const [currPageNum, setCurrPageNum] = useState<number>(1);
 	const [limit] = useState<number>(config.defaultFeeds);
@@ -85,7 +80,7 @@ export function Feeds() {
 
 	useEffect(() => {
 		listFeeds(searchTerm, (currPageNum - 1) * limit, limit);
-	}, [editFeedModalOpen, createFeedModalOpen, deletedFeed, adminMode]);
+	}, [createFeedModalOpen, deletedFeed, adminMode]);
 
 	useEffect(() => {
 		// reset page and reset category with each new search term
@@ -122,24 +117,6 @@ export function Feeds() {
 				<DialogTitle>Create feed</DialogTitle>
 				<DialogContent>
 					<CreateFeedModal setCreateFeedOpen={setCreateFeedModalOpen} />
-				</DialogContent>
-			</Dialog>
-			{/*Edit feed modal*/}
-			<Dialog
-				open={editFeedModalOpen}
-				onClose={() => {
-					setEditFeedModalOpen(false);
-				}}
-				fullWidth={true}
-				maxWidth="lg"
-				aria-labelledby="form-dialog"
-			>
-				<DialogTitle>Edit feed</DialogTitle>
-				<DialogContent>
-					<EditFeedModal
-						setEditFeedOpen={setEditFeedModalOpen}
-						feed={selectedFeed}
-					/>
 				</DialogContent>
 			</Dialog>
 			{/*Delete feed modal*/}
@@ -226,16 +203,6 @@ export function Feeds() {
 												key={`${feed.id}-edit-delete`}
 												align="left"
 											>
-												<IconButton
-													aria-label="edit"
-													size="small"
-													onClick={() => {
-														setSelectedFeed(feed);
-														setEditFeedModalOpen(true);
-													}}
-												>
-													<EditIcon fontSize="small" />
-												</IconButton>
 												<IconButton
 													aria-label="delete"
 													size="small"

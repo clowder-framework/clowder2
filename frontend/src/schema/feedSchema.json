@@ -20,7 +20,7 @@
 					"mode": {
 						"type": "string",
 						"title": "Mode of match criterion",
-						"enum": ["Or", "And"]
+						"enum": ["or", "and"]
 					},
 					"criteria": {
 						"type": "array",

@@ -19,10 +19,12 @@ export const EditFeedModal = (props: EditFeedProps) => {
 
 	const dispatch = useDispatch();
 	const listListeners = () => dispatch(fetchListeners());
-	const schema = feedSchema["schema"];
 	const listeners = useSelector(
 		(state: RootState) => state.listener.listeners.data
 	);
+	const [schema, setSchema] = useState(feedSchema["schema"]);
+	const [loading, setLoading] = useState(true);
+
 	const editFeed = (formData: FormData) =>
 		dispatch(updateFeed(feed.id, formData));
 
@@ -34,20 +36,27 @@ export const EditFeedModal = (props: EditFeedProps) => {
 		const listenerNames: string[] = [];
 		listeners?.map((listener) => (listenerNames[listener.id] = listener.name));
 		// @ts-ignore
-		schema.properties.listeners.items.properties.listener_id.enum =
+		const updatedSchema = { ...schema };
+		updatedSchema.properties.listeners.items.properties.listener_id.enum =
 			listeners?.map((listener) => listener.id);
-		schema.properties.listeners.items.properties.listener_id.enumNames =
+		updatedSchema.properties.listeners.items.properties.listener_id.enumNames =
 			schema.properties.listeners.items.properties.listener_id.enum.map(
 				(id) => listenerNames[id]
 			);
-	}, [listeners]);
+		setSchema(updatedSchema);
+		setLoading(false);
+	}, [listeners, schema.properties.listeners]);
+
+	if (loading) {
+		return <div>Loading...</div>;
+	}
 
 	return (
 		<Container>
 			<Form
 				schema={feedSchema["schema"] as FormProps<any>["schema"]}
-				formData={feed}
 				validator={validator}
+				formData={feed}
 				onSubmit={({ formData }) => {
 					editFeed(formData);
 					// close modal

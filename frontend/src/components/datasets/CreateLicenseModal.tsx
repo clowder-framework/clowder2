@@ -14,7 +14,7 @@ import { FormProps } from "@rjsf/core";
 import { ClowderRjsfErrorList } from "../styledComponents/ClowderRjsfErrorList";
 import Form from "@rjsf/mui";
 import { V2 } from "../../openapi";
-import validator from "@rjsf/validator-ajv8"; // Import LicenseOut type
+import validator from "@rjsf/validator-ajv8";
 
 type CreateLicenseModalProps = {
 	setLicenseModalOpen: any;

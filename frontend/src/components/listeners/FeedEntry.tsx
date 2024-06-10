@@ -53,8 +53,6 @@ export function FeedEntry() {
 		listListeners();
 	}, []);
 
-	useEffect(() => {}, [feed]);
-
 	// Error msg dialog
 	const [errorOpen, setErrorOpen] = useState(false);
 
