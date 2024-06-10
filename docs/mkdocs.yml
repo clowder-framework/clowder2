@@ -4,11 +4,13 @@ edit_uri: mkdocs/docs
 nav:
   - Home: index.md
   - Users:
-      - users/index.md
+      - Overview: users/index.md
       - Visualizations: users/visualizations.md
   - Developers:
       - Getting started: devs/getstarted.md
       - Architecture: devs/architecture.md
+      - Frontend:
+        - devs/frontend/lazyloading.md
       - Keycloak: devs/keycloak.md
       - Metadata: devs/metadata.md
       - Mongo: devs/mongo-fastapi.md
@@ -19,7 +21,12 @@ nav:
       - Proposals:
         - Storage: devs/storage.md
   - Admins:
-      - admins/index.md
+      - Overview: admins/index.md
+      - Deployment:
+        - 'Docker compose': admins/dockercompose.md
+        - admins/kubernetes.md
+      - admins/config.md
+      - admins/backups.md
   - About: about.md
 
 theme:
