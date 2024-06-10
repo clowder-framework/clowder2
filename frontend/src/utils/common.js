@@ -270,8 +270,8 @@ export function renameIdArray(arr) {
 export const handleErrorReport = (reason, stack) => {
 	window.open(
 		`${config.GHIssueBaseURL}+${encodeURIComponent(
-			reason
-		)}&body=${encodeURIComponent(stack)}`
+			reason,
+		)}&body=${encodeURIComponent(stack)}`,
 	);
 };
 

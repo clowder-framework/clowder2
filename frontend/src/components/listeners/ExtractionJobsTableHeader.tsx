@@ -10,7 +10,7 @@ import { Data, Order } from "./ExtractionJobs";
 interface EnhancedTableProps {
 	onRequestSort: (
 		event: React.MouseEvent<unknown>,
-		property: keyof Data
+		property: keyof Data,
 	) => void;
 	order: Order;
 	orderBy: string;

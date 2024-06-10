@@ -36,20 +36,20 @@ export const CreateDataset = (): JSX.Element => {
 	const getMetadatDefinitions = (
 		name: string | null,
 		skip: number,
-		limit: number
+		limit: number,
 	) => dispatch(fetchMetadataDefinitions(name, skip, limit));
 	const createDatasetMetadata = (
 		datasetId: string | undefined,
-		metadata: MetadataIn
+		metadata: MetadataIn,
 	) => dispatch(postDatasetMetadata(datasetId, metadata));
 	const createDataset = (
 		formData: FormData,
 		licenseId: string | undefined,
-		licenseFormData: FormData
+		licenseFormData: FormData,
 	) => dispatch(datasetCreated(formData, licenseId, licenseFormData));
 
 	const newDataset = useSelector(
-		(state: RootState) => state.dataset.newDataset
+		(state: RootState) => state.dataset.newDataset,
 	);
 
 	useEffect(() => {
@@ -57,7 +57,7 @@ export const CreateDataset = (): JSX.Element => {
 	}, []);
 
 	const metadataDefinitionList = useSelector(
-		(state: RootState) => state.metadata.metadataDefinitionList.data
+		(state: RootState) => state.metadata.metadataDefinitionList.data,
 	);
 	const [errorOpen, setErrorOpen] = useState(false);
 

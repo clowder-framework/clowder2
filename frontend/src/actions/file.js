@@ -126,7 +126,7 @@ export function createFile(selectedDatasetId, folderId, selectedFile) {
 		return V2.DatasetsService.saveFileApiV2DatasetsDatasetIdFilesPost(
 			selectedDatasetId,
 			formData,
-			folderId
+			folderId,
 		)
 			.then((file) => {
 				dispatch({
@@ -139,8 +139,8 @@ export function createFile(selectedDatasetId, folderId, selectedFile) {
 				dispatch(
 					handleErrors(
 						reason,
-						createFile(selectedDatasetId, folderId, selectedFile)
-					)
+						createFile(selectedDatasetId, folderId, selectedFile),
+					),
 				);
 			});
 	};
@@ -162,7 +162,7 @@ export function createFiles(selectedDatasetId, selectedFiles, folderId) {
 		return V2.DatasetsService.saveFilesApiV2DatasetsDatasetIdFilesMultiplePost(
 			selectedDatasetId,
 			formData,
-			folderId
+			folderId,
 		)
 			.then((files) => {
 				dispatch({
@@ -175,8 +175,8 @@ export function createFiles(selectedDatasetId, selectedFiles, folderId) {
 				dispatch(
 					handleErrors(
 						reason,
-						createFiles(selectedDatasetId, selectedFiles, folderId)
-					)
+						createFiles(selectedDatasetId, selectedFiles, folderId),
+					),
 				);
 			});
 	};
@@ -245,7 +245,7 @@ export function fetchFileVersions(fileId) {
 			.then((json) => {
 				// sort by decending order
 				const version = json.sort(
-					(a, b) => new Date(b["created"]) - new Date(a["created"])
+					(a, b) => new Date(b["created"]) - new Date(a["created"]),
 				);
 				dispatch({
 					type: RECEIVE_VERSIONS,
@@ -265,7 +265,7 @@ export function fileDownloaded(
 	fileId,
 	filename = "",
 	fileVersionNum = 0,
-	autoSave = true
+	autoSave = true,
 ) {
 	return async (dispatch) => {
 		if (filename === "") {
@@ -303,8 +303,8 @@ export function fileDownloaded(
 			dispatch(
 				handleErrors(
 					response,
-					fileDownloaded(fileId, filename, fileVersionNum, autoSave)
-				)
+					fileDownloaded(fileId, filename, fileVersionNum, autoSave),
+				),
 			);
 		}
 	};
@@ -316,13 +316,13 @@ export const RESET_FILE_PRESIGNED_URL = "RESET_FILE_PRESIGNED_URL";
 export function generateFilePresignedUrl(
 	fileId,
 	fileVersionNum = null,
-	expiresInSeconds = 7 * 24 * 3600
+	expiresInSeconds = 7 * 24 * 3600,
 ) {
 	return async (dispatch) => {
 		return V2.FilesService.downloadFileUrlApiV2FilesFileIdUrlGet(
 			fileId,
 			fileVersionNum,
-			expiresInSeconds
+			expiresInSeconds,
 		)
 			.then((json) => {
 				dispatch({
@@ -335,8 +335,8 @@ export function generateFilePresignedUrl(
 				dispatch(
 					handleErrors(
 						reason,
-						generateFilePresignedUrl(fileId, fileVersionNum, expiresInSeconds)
-					)
+						generateFilePresignedUrl(fileId, fileVersionNum, expiresInSeconds),
+					),
 				);
 			});
 	};
@@ -350,7 +350,7 @@ export function submitFileExtractionAction(fileId, extractorName, requestBody) {
 			fileId,
 			extractorName,
 			null,
-			requestBody
+			requestBody,
 		)
 			.then((json) => {
 				dispatch({
@@ -363,8 +363,8 @@ export function submitFileExtractionAction(fileId, extractorName, requestBody) {
 				dispatch(
 					handleErrors(
 						reason,
-						submitFileExtractionAction(fileId, extractorName, requestBody)
-					)
+						submitFileExtractionAction(fileId, extractorName, requestBody),
+					),
 				);
 			});
 	};

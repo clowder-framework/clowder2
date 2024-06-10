@@ -49,7 +49,7 @@ export class CurationsService {
 	 */
 	public static deleteCurations1(
 		id: string,
-		curationFolderId: string
+		curationFolderId: string,
 	): CancelablePromise<any> {
 		return __request({
 			method: "DELETE",
@@ -85,7 +85,7 @@ export class CurationsService {
 	 */
 	public static deleteCurations2(
 		id: string,
-		curationFileId: string
+		curationFileId: string,
 	): CancelablePromise<any> {
 		return __request({
 			method: "DELETE",

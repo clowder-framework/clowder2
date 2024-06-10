@@ -30,7 +30,7 @@ export default function EditFolderNameModal(props: EditNameModalProps) {
 	const updateFolder = (
 		datasetId: string | undefined,
 		folderId: string | undefined,
-		formData: FolderPatch
+		formData: FolderPatch,
 	) => dispatch(updateFolderAction(datasetId, folderId, formData));
 
 	const [loading, setLoading] = useState(false);

@@ -19,7 +19,7 @@ const iconStyle = {
 };
 
 export function GroupAndRoleSubTableEntry(
-	props: GroupAndRoleSubTableEntryProps
+	props: GroupAndRoleSubTableEntryProps,
 ) {
 	const { user } = props;
 

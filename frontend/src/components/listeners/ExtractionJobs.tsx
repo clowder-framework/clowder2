@@ -83,7 +83,7 @@ const createData = (
 	creator: string,
 	duration: number,
 	resourceType: string,
-	resourceId: string
+	resourceId: string,
 ) => {
 	return {
 		status,
@@ -110,10 +110,10 @@ export type Order = "asc" | "desc";
 
 function getComparator<Key extends keyof any>(
 	order: Order,
-	orderBy: Key
+	orderBy: Key,
 ): (
 	a: { [key in Key]: number | string },
-	b: { [key in Key]: number | string }
+	b: { [key in Key]: number | string },
 ) => number {
 	return order === "desc"
 		? (a, b) => descendingComparator(a, b, orderBy)
@@ -124,7 +124,7 @@ function getComparator<Key extends keyof any>(
 // need to support IE11, you can use Array.prototype.sort() directly
 function stableSort<T>(
 	array: readonly T[],
-	comparator: (a: T, b: T) => number
+	comparator: (a: T, b: T) => number,
 ) {
 	const stabilizedThis = array.map((el, index) => [el, index] as [T, number]);
 	stabilizedThis.sort((a, b) => {
@@ -156,7 +156,7 @@ export const ExtractionJobs = (props) => {
 		datasetId: string | null,
 		created: string | null,
 		skip: number,
-		limit: number
+		limit: number,
 	) =>
 		dispatch(
 			fetchListenerJobs(
@@ -167,13 +167,13 @@ export const ExtractionJobs = (props) => {
 				datasetId,
 				created,
 				skip,
-				limit
-			)
+				limit,
+			),
 		);
 
 	const jobs = useSelector((state: RootState) => state.listener.jobs.data);
 	const jobPageMetadata = useSelector(
-		(state: RootState) => state.listener.jobs.metadata
+		(state: RootState) => state.listener.jobs.metadata,
 	);
 	const adminMode = useSelector((state: RootState) => state.user.adminMode);
 
@@ -203,7 +203,7 @@ export const ExtractionJobs = (props) => {
 				null,
 				null,
 				0,
-				limit
+				limit,
 			);
 			// clear filters
 			setSelectedStatus(null);
@@ -222,7 +222,7 @@ export const ExtractionJobs = (props) => {
 			null,
 			selectedCreatedTime ? format(selectedCreatedTime, "yyyy-MM-dd") : null,
 			0,
-			limit
+			limit,
 		);
 	}, [selectedStatus, selectedCreatedTime]);
 
@@ -238,8 +238,8 @@ export const ExtractionJobs = (props) => {
 						job["creator"]["email"],
 						`${job["duration"]} sec`,
 						job["resource_ref"]["collection"],
-						job["resource_ref"]["resource_id"]
-					)
+						job["resource_ref"]["resource_id"],
+					),
 				);
 			});
 		}
@@ -255,13 +255,13 @@ export const ExtractionJobs = (props) => {
 			null,
 			selectedCreatedTime ? format(selectedCreatedTime, "yyyy-MM-dd") : null,
 			(currPageNum - 1) * limit,
-			limit
+			limit,
 		);
 	};
 
 	const handleRequestSort = (
 		_: React.MouseEvent<unknown>,
-		property: keyof Data
+		property: keyof Data,
 	) => {
 		const isAsc = orderBy === property && order === "asc";
 		setOrder(isAsc ? "desc" : "asc");
@@ -279,12 +279,12 @@ export const ExtractionJobs = (props) => {
 			null,
 			selectedCreatedTime ? format(selectedCreatedTime, "yyyy-MM-dd") : null,
 			newSkip,
-			limit
+			limit,
 		);
 	};
 
 	const handleChangeRowsPerPage = (
-		event: React.ChangeEvent<HTMLInputElement>
+		event: React.ChangeEvent<HTMLInputElement>,
 	) => {
 		const newRowsPerPage = parseInt(event.target.value, 10);
 		setLimit(parseInt(event.target.value, 10));
@@ -299,7 +299,7 @@ export const ExtractionJobs = (props) => {
 			null,
 			selectedCreatedTime ? format(selectedCreatedTime, "yyyy-MM-dd") : null,
 			0,
-			newRowsPerPage
+			newRowsPerPage,
 		);
 	};
 

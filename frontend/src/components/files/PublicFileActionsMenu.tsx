@@ -22,7 +22,7 @@ type PublicFileActionsMenuProps = {
 };
 
 export const PublicFileActionsMenu = (
-	props: PublicFileActionsMenuProps
+	props: PublicFileActionsMenuProps,
 ): JSX.Element => {
 	const { fileId, datasetId, setSelectedVersion } = props;
 

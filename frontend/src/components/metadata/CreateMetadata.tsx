@@ -20,13 +20,13 @@ export const CreateMetadata = (props: MetadataType) => {
 	const getMetadatDefinitions = (
 		name: string | null,
 		skip: number,
-		limit: number
+		limit: number,
 	) => dispatch(fetchMetadataDefinitions(name, skip, limit));
 	const metadataDefinitionList = useSelector(
-		(state: RootState) => state.metadata.metadataDefinitionList.data
+		(state: RootState) => state.metadata.metadataDefinitionList.data,
 	);
 	const datasetRole = useSelector(
-		(state: RootState) => state.dataset.datasetRole
+		(state: RootState) => state.dataset.datasetRole,
 	);
 
 	useEffect(() => {
@@ -69,7 +69,7 @@ export const CreateMetadata = (props: MetadataType) => {
 										isRequired: field.required,
 										datasetRole: datasetRole,
 										key: idxx,
-									}
+									},
 								);
 							})}
 						</Box>

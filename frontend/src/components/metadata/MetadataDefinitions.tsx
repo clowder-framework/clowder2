@@ -43,21 +43,21 @@ export function MetadataDefinitions() {
 	const listMetadataDefinitions = (
 		name: string | undefined | null,
 		skip: number | undefined,
-		limit: number | undefined
+		limit: number | undefined,
 	) => dispatch(fetchMetadataDefinitionsAction(name, skip, limit));
 	const searchMetadataDefinitions = (
 		searchTerm: string,
 		skip: number | undefined,
-		limit: number | undefined
+		limit: number | undefined,
 	) => dispatch(searchMetadataDefinitionsAction(searchTerm, skip, limit));
 	const metadataDefinitions = useSelector(
-		(state: RootState) => state.metadata.metadataDefinitionList.data
+		(state: RootState) => state.metadata.metadataDefinitionList.data,
 	);
 	const pageMetadata = useSelector(
-		(state: RootState) => state.metadata.metadataDefinitionList.metadata
+		(state: RootState) => state.metadata.metadataDefinitionList.metadata,
 	);
 	const deletedMetadataDefinition = useSelector(
-		(state: RootState) => state.metadata.deletedMetadataDefinition
+		(state: RootState) => state.metadata.deletedMetadataDefinition,
 	);
 	const adminMode = useSelector((state: RootState) => state.user.adminMode);
 

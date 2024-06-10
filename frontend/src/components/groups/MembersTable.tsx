@@ -23,14 +23,14 @@ export default function MembersTable(props: MembersTableProps) {
 	// mapStateToProps
 	const groupAbout = useSelector((state: RootState) => state.group.about);
 	const groupCreatorEmail = useSelector(
-		(state: RootState) => state.group.about.creator
+		(state: RootState) => state.group.about.creator,
 	);
 	// dispatch
 	const dispatch = useDispatch();
 
 	const groupMemberDeleted = (
 		groupId: string | undefined,
-		username: string | undefined
+		username: string | undefined,
 	) => dispatch(deleteGroupMember(groupId, username));
 
 	const [deleteMemberConfirmOpen, setDeleteMemberConfirmOpen] = useState(false);

@@ -27,10 +27,10 @@ export const PublicVisualization = (props: previewProps) => {
 	const [isRawDataSupported, setIsRawDataSupported] = useState(false);
 
 	const fileSummary = useSelector(
-		(state: RootState) => state.publicFile.publicFileSummary
+		(state: RootState) => state.publicFile.publicFileSummary,
 	);
 	const visConfig = useSelector(
-		(state: RootState) => state.publicVisualization.publicVisConfig
+		(state: RootState) => state.publicVisualization.publicVisConfig,
 	);
 
 	const dispatch = useDispatch();
@@ -61,7 +61,7 @@ export const PublicVisualization = (props: previewProps) => {
 				}
 				return acc;
 			},
-			[]
+			[],
 		);
 		// if raw type supported
 		if (
@@ -139,7 +139,7 @@ export const PublicVisualization = (props: previewProps) => {
 																}
 															/>
 														);
-													}
+													},
 												);
 											} else {
 												// use visualization parameters if available
@@ -167,7 +167,7 @@ export const PublicVisualization = (props: previewProps) => {
 										fileSummary.content_type !== undefined &&
 										((fileSummary.content_type.content_type !== undefined &&
 											visComponentDefinition.mimeTypes.includes(
-												fileSummary.content_type.content_type
+												fileSummary.content_type.content_type,
 											)) ||
 											(fileSummary.content_type.content_type === undefined &&
 												fileSummary.content_type.main_type !== undefined &&

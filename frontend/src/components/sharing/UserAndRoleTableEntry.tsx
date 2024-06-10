@@ -47,18 +47,18 @@ export function UserAndRoleTableEntry(props: UserAndRoleTableEntryProps) {
 
 	const dispatch = useDispatch();
 	const datasetRole = useSelector(
-		(state: RootState) => state.dataset.datasetRole
+		(state: RootState) => state.dataset.datasetRole,
 	);
 
 	const userRoleAssigned = (
 		dataset_id: string | undefined,
 		username: string | undefined,
-		role: string | undefined
+		role: string | undefined,
 	) => dispatch(setDatasetUserRole(dataset_id, username, role));
 
 	const removeUserRole = async (
 		dataset_id: string | undefined,
-		username: string | undefined
+		username: string | undefined,
 	) => dispatch(removeDatasetUserRole(dataset_id, username));
 
 	const getRoles = (datasetId: string | undefined) =>

@@ -33,7 +33,7 @@ type ShareGroupDatasetModalProps = {
 };
 
 export default function ShareGroupDatasetModal(
-	props: ShareGroupDatasetModalProps
+	props: ShareGroupDatasetModalProps,
 ) {
 	const { open, handleClose, datasetName } = props;
 	const { datasetId } = useParams<{ datasetId?: string }>();
@@ -45,12 +45,12 @@ export default function ShareGroupDatasetModal(
 	const listGroups = () => dispatch(fetchGroups(0, 21));
 	const groups = useSelector((state: RootState) => state.group.groups.data);
 	const groupPageMetadata = useSelector(
-		(state: RootState) => state.group.groups.metadata
+		(state: RootState) => state.group.groups.metadata,
 	);
 	const setGroupRole = async (
 		datasetId: string,
 		groupId: string,
-		role: string
+		role: string,
 	) => dispatch(setDatasetGroupRole(datasetId, groupId, role));
 
 	const getRoles = (datasetId: string | undefined) =>
@@ -65,7 +65,7 @@ export default function ShareGroupDatasetModal(
 		setOptions(
 			groups.map((g) => {
 				return { label: g.name, id: g.id };
-			})
+			}),
 		);
 	}, [groups]);
 

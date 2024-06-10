@@ -73,7 +73,7 @@ export function searchGroups(searchTerm, skip = 0, limit = 21) {
 		return V2.GroupsService.searchGroupApiV2GroupsSearchSearchTermGet(
 			searchTerm,
 			skip,
-			limit
+			limit,
 		)
 			.then((json) => {
 				dispatch({
@@ -112,7 +112,7 @@ export function deleteGroupMember(groupId, username) {
 	return (dispatch) => {
 		return V2.GroupsService.removeMemberApiV2GroupsGroupIdRemoveUsernamePost(
 			groupId,
-			username
+			username,
 		)
 			.then((json) => {
 				dispatch({
@@ -134,7 +134,7 @@ export function addGroupMember(groupId, username, role = "viewer") {
 		return V2.GroupsService.addMemberApiV2GroupsGroupIdAddUsernamePost(
 			groupId,
 			username,
-			role
+			role,
 		)
 			.then((json) => {
 				dispatch({
@@ -145,7 +145,7 @@ export function addGroupMember(groupId, username, role = "viewer") {
 			})
 			.catch((reason) => {
 				dispatch(
-					handleErrorsInline(reason, addGroupMember(groupId, username, role))
+					handleErrorsInline(reason, addGroupMember(groupId, username, role)),
 				);
 			});
 	};
@@ -158,7 +158,7 @@ export function assignGroupMemberRole(groupId, username, role = "viewer") {
 		return V2.GroupsService.updateMemberApiV2GroupsGroupIdUpdateUsernamePut(
 			groupId,
 			username,
-			role
+			role,
 		)
 			.then((json) => {
 				dispatch({
@@ -169,7 +169,7 @@ export function assignGroupMemberRole(groupId, username, role = "viewer") {
 			})
 			.catch((reason) => {
 				dispatch(
-					handleErrors(reason, assignGroupMemberRole(groupId, username, role))
+					handleErrors(reason, assignGroupMemberRole(groupId, username, role)),
 				);
 			});
 	};

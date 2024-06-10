@@ -9,7 +9,7 @@ export function fetchPublicDatasetMetadata(datasetId, version) {
 		return V2.PublicDatasetsService.getDatasetMetadataApiV2PublicDatasetsDatasetIdMetadataGet(
 			datasetId,
 			version,
-			false
+			false,
 		)
 			.then((json) => {
 				dispatch({
@@ -20,7 +20,7 @@ export function fetchPublicDatasetMetadata(datasetId, version) {
 			})
 			.catch((reason) => {
 				dispatch(
-					handleErrors(reason, fetchPublicDatasetMetadata(datasetId, version))
+					handleErrors(reason, fetchPublicDatasetMetadata(datasetId, version)),
 				);
 			});
 	};
@@ -35,7 +35,7 @@ export function fetchFilesInPublicDataset(datasetId, folderId, skip, limit) {
 			datasetId,
 			folderId,
 			skip,
-			limit
+			limit,
 		)
 			.then((json) => {
 				dispatch({
@@ -48,8 +48,8 @@ export function fetchFilesInPublicDataset(datasetId, folderId, skip, limit) {
 				dispatch(
 					handleErrors(
 						reason,
-						fetchFilesInPublicDataset(datasetId, folderId, skip, limit)
-					)
+						fetchFilesInPublicDataset(datasetId, folderId, skip, limit),
+					),
 				);
 			});
 	};
@@ -62,14 +62,14 @@ export function fetchFoldersInPublicDataset(
 	datasetId,
 	parentFolder,
 	skip,
-	limit
+	limit,
 ) {
 	return (dispatch) => {
 		return V2.PublicDatasetsService.getDatasetFoldersApiV2PublicDatasetsDatasetIdFoldersGet(
 			datasetId,
 			parentFolder,
 			skip,
-			limit
+			limit,
 		)
 			.then((json) => {
 				dispatch({
@@ -82,8 +82,8 @@ export function fetchFoldersInPublicDataset(
 				dispatch(
 					handleErrors(
 						reason,
-						fetchFoldersInPublicDataset(datasetId, parentFolder, skip, limit)
-					)
+						fetchFoldersInPublicDataset(datasetId, parentFolder, skip, limit),
+					),
 				);
 			});
 	};
@@ -94,7 +94,7 @@ export const RECEIVE_PUBLIC_DATASET_ABOUT = "RECEIVE_PUBLIC_DATASET_ABOUT";
 export function fetchPublicDatasetAbout(id) {
 	return (dispatch) => {
 		return V2.PublicDatasetsService.getDatasetApiV2PublicDatasetsDatasetIdGet(
-			id
+			id,
 		)
 			.then((json) => {
 				dispatch({
@@ -116,7 +116,7 @@ export function fetchPublicDatasets(skip = 0, limit = 21) {
 		// TODO: Parameters for dates? paging?
 		return V2.PublicDatasetsService.getDatasetsApiV2PublicDatasetsGet(
 			skip,
-			limit
+			limit,
 		)
 			.then((json) => {
 				dispatch({
@@ -137,7 +137,7 @@ export function fetchPublicFolderPath(folderId) {
 	return (dispatch) => {
 		if (folderId != null) {
 			return V2.PublicFoldersService.downloadFolderApiV2PublicFoldersFolderIdPathGet(
-				folderId
+				folderId,
 			)
 				.then((json) => {
 					dispatch({
@@ -166,14 +166,14 @@ export function fetchPublicFoldersFilesInDataset(
 	datasetId,
 	folderId,
 	skip,
-	limit
+	limit,
 ) {
 	return (dispatch) => {
 		return V2.PublicDatasetsService.getDatasetFoldersAndFilesApiV2PublicDatasetsDatasetIdFoldersAndFilesGet(
 			datasetId,
 			folderId,
 			skip,
-			limit
+			limit,
 		)
 			.then((json) => {
 				dispatch({
@@ -186,8 +186,8 @@ export function fetchPublicFoldersFilesInDataset(
 				dispatch(
 					handleErrors(
 						reason,
-						fetchPublicFoldersFilesInDataset(datasetId, folderId, skip, limit)
-					)
+						fetchPublicFoldersFilesInDataset(datasetId, folderId, skip, limit),
+					),
 				);
 			});
 	};

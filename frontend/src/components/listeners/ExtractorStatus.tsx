@@ -106,10 +106,10 @@ export default function ExtractorStatus(props: { job_id: any }) {
 	const jobUpdatesReset = () => dispatch(resetJobUpdates());
 
 	const summary = useSelector(
-		(state: RootState) => state.listener.currJobSummary
+		(state: RootState) => state.listener.currJobSummary,
 	);
 	const updates = useSelector(
-		(state: RootState) => state.listener.currJobUpdates
+		(state: RootState) => state.listener.currJobUpdates,
 	);
 
 	useEffect(() => {

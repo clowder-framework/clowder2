@@ -13,7 +13,7 @@ const createData = (
 	listener_id: string,
 	created: string,
 	creator: string,
-	duration: number
+	duration: number,
 ) => {
 	return {
 		status,
@@ -63,7 +63,7 @@ export const ExtractionHistoryTab = (props): JSX.Element => {
 		datasetId: string | null,
 		created: string | null,
 		skip: number,
-		limit: number
+		limit: number,
 	) =>
 		dispatch(
 			fetchListenerJobs(
@@ -74,8 +74,8 @@ export const ExtractionHistoryTab = (props): JSX.Element => {
 				datasetId,
 				created,
 				skip,
-				limit
-			)
+				limit,
+			),
 		);
 
 	const jobs = useSelector((state: RootState) => state.listener.jobs);
@@ -93,7 +93,7 @@ export const ExtractionHistoryTab = (props): JSX.Element => {
 			datasetId ? datasetId : null,
 			null,
 			0,
-			100
+			100,
 		);
 	}, []);
 
@@ -106,7 +106,7 @@ export const ExtractionHistoryTab = (props): JSX.Element => {
 			datasetId ? datasetId : null,
 			selectedCreatedTime ? format(selectedCreatedTime, "yyyy-MM-dd") : null,
 			0,
-			100
+			100,
 		);
 	};
 
@@ -126,8 +126,8 @@ export const ExtractionHistoryTab = (props): JSX.Element => {
 						job["listener_id"],
 						parseDate(job["created"]),
 						job["creator"]["email"],
-						`${job["duration"]} sec`
-					)
+						`${job["duration"]} sec`,
+					),
 				);
 			});
 		}

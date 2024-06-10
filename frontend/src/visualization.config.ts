@@ -16,7 +16,7 @@ function registerComponent(config) {
 		() =>
 			import(
 				/* webpackChunkName: "[request]" */ `./components/visualizations/${config.visConfig.name}/${config.main}`
-			)
+			),
 	);
 }
 

@@ -21,7 +21,7 @@ export class FoldersService {
 			name?: string;
 			parentId?: string;
 			parentType?: "dataset" | "folder";
-		}
+		},
 	): CancelablePromise<any> {
 		return __request({
 			method: "POST",
@@ -45,7 +45,7 @@ export class FoldersService {
 		folderId: string,
 		requestBody: {
 			name?: string;
-		}
+		},
 	): CancelablePromise<any> {
 		return __request({
 			method: "PUT",
@@ -65,7 +65,7 @@ export class FoldersService {
 	 */
 	public static deleteFolders(
 		parentDatasetId: string,
-		folderId: string
+		folderId: string,
 	): CancelablePromise<any> {
 		return __request({
 			method: "DELETE",

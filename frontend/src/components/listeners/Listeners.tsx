@@ -45,7 +45,7 @@ export function Listeners(props: ListenerProps) {
 		selectedCategory: string | null,
 		selectedLabel: string | null,
 		aliveOnly: boolean | undefined,
-		process: string | undefined
+		process: string | undefined,
 	) =>
 		dispatch(
 			fetchListeners(
@@ -55,27 +55,27 @@ export function Listeners(props: ListenerProps) {
 				selectedCategory,
 				selectedLabel,
 				aliveOnly,
-				process
-			)
+				process,
+			),
 		);
 	const searchListeners = (
 		text: string,
 		skip: number | undefined,
 		limit: number | undefined,
 		heartbeatInterval: number | undefined,
-		process: string | undefined
+		process: string | undefined,
 	) => dispatch(queryListeners(text, skip, limit, heartbeatInterval, process));
 	const listAvailableCategories = () => dispatch(fetchListenerCategories());
 	const listAvailableLabels = () => dispatch(fetchListenerLabels());
 
 	const listeners = useSelector(
-		(state: RootState) => state.listener.listeners.data
+		(state: RootState) => state.listener.listeners.data,
 	);
 	const pageMetadata = useSelector(
-		(state: RootState) => state.listener.listeners.metadata
+		(state: RootState) => state.listener.listeners.metadata,
 	);
 	const categories = useSelector(
-		(state: RootState) => state.listener.categories
+		(state: RootState) => state.listener.categories,
 	);
 	const labels = useSelector((state: RootState) => state.listener.labels);
 	const adminMode = useSelector((state: RootState) => state.user.adminMode);
@@ -113,7 +113,7 @@ export function Listeners(props: ListenerProps) {
 				selectedCategory,
 				selectedLabel,
 				aliveOnly,
-				process
+				process,
 			);
 	}, [searchText, adminMode]);
 
@@ -128,7 +128,7 @@ export function Listeners(props: ListenerProps) {
 			selectedCategory,
 			selectedLabel,
 			aliveOnly,
-			process
+			process,
 		);
 	}, [aliveOnly, adminMode]);
 
@@ -149,7 +149,7 @@ export function Listeners(props: ListenerProps) {
 					selectedCategory,
 					selectedLabel,
 					aliveOnly,
-					process
+					process,
 				);
 			}, config.extractorLivelihoodInterval);
 			return () => clearInterval(interval);
@@ -180,7 +180,7 @@ export function Listeners(props: ListenerProps) {
 			selectedCategoryValue,
 			selectedLabel,
 			aliveOnly,
-			process
+			process,
 		);
 	};
 
@@ -195,7 +195,7 @@ export function Listeners(props: ListenerProps) {
 			selectedCategory,
 			selectedLabelValue,
 			aliveOnly,
-			process
+			process,
 		);
 	};
 

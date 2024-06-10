@@ -21,7 +21,7 @@ export class ExtractionsService {
 			 * the extractor Id
 			 */
 			extractor?: string;
-		}
+		},
 	): CancelablePromise<any> {
 		return __request({
 			method: "POST",
@@ -41,7 +41,7 @@ export class ExtractionsService {
 	 */
 	public static deleteExtractions(
 		id: string,
-		msgId: string
+		msgId: string,
 	): CancelablePromise<any> {
 		return __request({
 			method: "DELETE",
@@ -65,7 +65,7 @@ export class ExtractionsService {
 			 * the extractor Id
 			 */
 			extractor?: string;
-		}
+		},
 	): CancelablePromise<any> {
 		return __request({
 			method: "POST",
@@ -85,7 +85,7 @@ export class ExtractionsService {
 	 */
 	public static deleteExtractions1(
 		dsId: string,
-		msgId: string
+		msgId: string,
 	): CancelablePromise<any> {
 		return __request({
 			method: "DELETE",
@@ -132,7 +132,7 @@ export class ExtractionsService {
 	 */
 	public static postExtractions2(
 		extract?: boolean,
-		requestBody?: Array<any>
+		requestBody?: Array<any>,
 	): CancelablePromise<any> {
 		return __request({
 			method: "POST",
@@ -161,7 +161,7 @@ export class ExtractionsService {
 	public static postExtractions3(
 		formData: any,
 		extract?: boolean,
-		showPreviews?: string
+		showPreviews?: string,
 	): CancelablePromise<any> {
 		return __request({
 			method: "POST",
@@ -292,7 +292,7 @@ export class ExtractionsService {
 			 * the extractor Id
 			 */
 			extractor?: string;
-		}
+		},
 	): CancelablePromise<any> {
 		return __request({
 			method: "POST",

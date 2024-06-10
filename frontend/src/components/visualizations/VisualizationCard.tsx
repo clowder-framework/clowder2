@@ -26,11 +26,11 @@ export const VisualizationCard = (props: previewProps) => {
 	const dispatch = useDispatch();
 	const generateVisPresignedUrl = (
 		visualizationId: string | undefined,
-		expiresInSeconds: number | undefined
+		expiresInSeconds: number | undefined,
 	) =>
 		dispatch(generateVisPresignedUrlAction(visualizationId, expiresInSeconds));
 	const presignedUrl = useSelector(
-		(state: RootState) => state.visualization.presignedUrl
+		(state: RootState) => state.visualization.presignedUrl,
 	);
 
 	const handleExpandClick = () => {

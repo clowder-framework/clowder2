@@ -8,7 +8,7 @@ export const GET_PUBLIC_VIS_CONFIG = "GET_PUBLIC_VIS_CONFIG";
 export function getPublicVisConfig(resourceId) {
 	return (dispatch) => {
 		return V2.PublicVisualizationsService.getResourceVisconfigApiV2PublicVisualizationsResourceIdConfigGet(
-			resourceId
+			resourceId,
 		)
 			.then((json) => {
 				dispatch({
@@ -28,7 +28,7 @@ export const GET_PUBLIC_VIS_DATA = "GET_PUBLIC_VIS_DATA";
 export function getPublicVisData(visualizationId) {
 	return (dispatch) => {
 		return V2.PublicVisualizationsService.getVisualizationApiV2VisualizationsVisualizationIdGet(
-			visualizationId
+			visualizationId,
 		)
 			.then((json) => {
 				dispatch({
@@ -48,7 +48,7 @@ export const DOWNLOAD_PUBLIC_VIS_DATA = "DOWNLOAD_PUBLIC_VIS_DATA";
 export function downloadPublicVisData(
 	visualizationId,
 	filename = "",
-	autoSave = true
+	autoSave = true,
 ) {
 	return async (dispatch) => {
 		if (filename === "") {
@@ -85,8 +85,8 @@ export function downloadPublicVisData(
 			dispatch(
 				handleErrors(
 					response,
-					downloadPublicVisData(visualizationId, filename, autoSave)
-				)
+					downloadPublicVisData(visualizationId, filename, autoSave),
+				),
 			);
 		}
 	};
@@ -99,12 +99,12 @@ export const RESET_PUBLIC_VIS_DATA_PRESIGNED_URL =
 
 export function generatePublicVisPresignedUrl(
 	visualizationId,
-	expiresInSeconds = 7 * 24 * 3600
+	expiresInSeconds = 7 * 24 * 3600,
 ) {
 	return async (dispatch) => {
 		return V2.PublicVisualizationsService.downloadVisualizationUrlApiV2PublicVisualizationsVisualizationIdUrlGet(
 			visualizationId,
-			expiresInSeconds
+			expiresInSeconds,
 		)
 			.then((json) => {
 				dispatch({
@@ -117,8 +117,8 @@ export function generatePublicVisPresignedUrl(
 				dispatch(
 					handleErrors(
 						reason,
-						generatePublicVisPresignedUrl(visualizationId, expiresInSeconds)
-					)
+						generatePublicVisPresignedUrl(visualizationId, expiresInSeconds),
+					),
 				);
 			});
 	};

@@ -21,7 +21,7 @@ const widgets = {
 };
 
 export const CreateDatasetModal: React.FC<CreateDatasetModalProps> = (
-	props: CreateDatasetModalProps
+	props: CreateDatasetModalProps,
 ) => {
 	const { onSave } = props;
 

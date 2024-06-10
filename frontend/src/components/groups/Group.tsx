@@ -32,7 +32,7 @@ export function Group() {
 	const groupAbout = useSelector((state: RootState) => state.group.about);
 	const role = useSelector((state: RootState) => state.group.role);
 	const groupCreatorEmail = useSelector(
-		(state: RootState) => state.group.about.creator
+		(state: RootState) => state.group.about.creator,
 	);
 	const adminMode = useSelector((state: RootState) => state.user.adminMode);
 

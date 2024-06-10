@@ -25,7 +25,7 @@ type CreateFolderProps = {
 };
 
 export const CreateFolder: React.FC<CreateFolderProps> = (
-	props: CreateFolderProps
+	props: CreateFolderProps,
 ) => {
 	const { datasetId, parentFolder, open, handleClose } = props;
 
@@ -34,7 +34,7 @@ export const CreateFolder: React.FC<CreateFolderProps> = (
 	const addFolder = (
 		datasetId: string | undefined,
 		folderName: string,
-		parentFolder: string | null
+		parentFolder: string | null,
 	) => dispatch(folderAdded(datasetId, folderName, parentFolder));
 	const newFolder = useSelector((state: RootState) => state.dataset.newFolder);
 

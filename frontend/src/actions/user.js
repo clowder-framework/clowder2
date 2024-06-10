@@ -10,7 +10,7 @@ export async function loginHelper(
 	password,
 	first_name = null,
 	last_name = null,
-	register = false
+	register = false,
 ) {
 	const data = { email: email, password: password };
 	if (register) {
@@ -170,7 +170,7 @@ export function prefixSearchAllUsers(text = "", skip = 0, limit = 101) {
 		return V2.UsersService.searchUsersPrefixApiV2UsersPrefixSearchGet(
 			text,
 			skip,
-			limit
+			limit,
 		)
 			.then((json) => {
 				dispatch({
@@ -309,7 +309,7 @@ export const ENABLE_READONLY = "ENABLE_READONLY";
 export function enableReadOnly(email) {
 	return (dispatch) => {
 		return V2.LoginService.enableReadonlyUserApiV2UsersEnableReadonlyUseremailPost(
-			email
+			email,
 		)
 			.then((json) => {
 				dispatch({
@@ -329,7 +329,7 @@ export const DISABLE_READONLY = "DISABLE_READONLY";
 export function disableReadOnly(email) {
 	return (dispatch) => {
 		return V2.LoginService.disableReadonlyUserApiV2UsersDisableReadonlyUseremailPost(
-			email
+			email,
 		)
 			.then((json) => {
 				dispatch({

@@ -9,7 +9,7 @@ export function fetchPublicFileMetadata(fileId, version) {
 		return V2.PublicFilesService.getFileMetadataApiV2PublicFilesFileIdMetadataGet(
 			fileId,
 			version,
-			false
+			false,
 		)
 			.then((json) => {
 				dispatch({
@@ -20,7 +20,7 @@ export function fetchPublicFileMetadata(fileId, version) {
 			})
 			.catch((reason) => {
 				dispatch(
-					handleErrors(reason, fetchPublicFileMetadata(fileId, version))
+					handleErrors(reason, fetchPublicFileMetadata(fileId, version)),
 				);
 			});
 	};
@@ -31,7 +31,7 @@ export const RECEIVE_PUBLIC_FILE_SUMMARY = "RECEIVE_PUBLIC_FILE_SUMMARY";
 export function fetchPublicFileSummary(id) {
 	return (dispatch) => {
 		return V2.PublicFilesService.getFileSummaryApiV2PublicFilesFileIdSummaryGet(
-			id
+			id,
 		)
 			.then((json) => {
 				dispatch({
@@ -91,12 +91,12 @@ export function fetchPublicFileVersions(fileId, skip, limit) {
 		return V2.PublicFilesService.getFileVersionsApiV2PublicFilesFileIdVersionsGet(
 			fileId,
 			skip,
-			limit
+			limit,
 		)
 			.then((json) => {
 				// sort by decending order
 				const version = json.sort(
-					(a, b) => new Date(b["created"]) - new Date(a["created"])
+					(a, b) => new Date(b["created"]) - new Date(a["created"]),
 				);
 				dispatch({
 					type: RECEIVE_PUBLIC_VERSIONS,
@@ -116,7 +116,7 @@ export function filePublicDownloaded(
 	fileId,
 	filename = "",
 	fileVersionNum = 0,
-	autoSave = true
+	autoSave = true,
 ) {
 	return async (dispatch) => {
 		if (filename === "") {
@@ -153,8 +153,8 @@ export function filePublicDownloaded(
 			dispatch(
 				handleErrors(
 					response,
-					filePublicDownloaded(fileId, filename, fileVersionNum, autoSave)
-				)
+					filePublicDownloaded(fileId, filename, fileVersionNum, autoSave),
+				),
 			);
 		}
 	};

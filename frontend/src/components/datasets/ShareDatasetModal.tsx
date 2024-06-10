@@ -51,7 +51,7 @@ export default function ShareDatasetModal(props: ShareDatasetModalProps) {
 	const setUserRole = async (
 		datasetId: string,
 		username: string,
-		role: string
+		role: string,
 	) => dispatch(setDatasetUserRole(datasetId, username, role));
 
 	const getRoles = async (datasetId: string | undefined) =>
@@ -80,7 +80,7 @@ export default function ShareDatasetModal(props: ShareDatasetModalProps) {
 					return [...list, user.email];
 				}
 				return list;
-			}, [])
+			}, []),
 		);
 	}, [users, myProfile.email]);
 

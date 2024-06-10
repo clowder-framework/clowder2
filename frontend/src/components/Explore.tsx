@@ -26,16 +26,16 @@ export const Explore = (): JSX.Element => {
 	const listDatasets = (
 		skip: number | undefined,
 		limit: number | undefined,
-		mine: boolean | undefined
+		mine: boolean | undefined,
 	) => dispatch(fetchDatasets(skip, limit, mine));
 	const datasets = useSelector(
-		(state: RootState) => state.dataset.datasets.data
+		(state: RootState) => state.dataset.datasets.data,
 	);
 	const deletedDataset = useSelector(
-		(state: RootState) => state.dataset.deletedDataset
+		(state: RootState) => state.dataset.deletedDataset,
 	);
 	const pageMetadata = useSelector(
-		(state: RootState) => state.dataset.datasets.metadata
+		(state: RootState) => state.dataset.datasets.metadata,
 	);
 	const adminMode = useSelector((state: RootState) => state.user.adminMode);
 
@@ -55,7 +55,7 @@ export const Explore = (): JSX.Element => {
 	// switch tabs
 	const handleTabChange = (
 		_event: React.ChangeEvent<{}>,
-		newTabIndex: number
+		newTabIndex: number,
 	) => {
 		setSelectedTabIndex(newTabIndex);
 	};

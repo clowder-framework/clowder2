@@ -42,7 +42,7 @@ export const FileActionsMenu = (props: FileActionsMenuProps): JSX.Element => {
 
 	const fileRole = useSelector((state: RootState) => state.file.fileRole);
 	const storageType = useSelector(
-		(state: RootState) => state.file.fileSummary.storage_type
+		(state: RootState) => state.file.fileSummary.storage_type,
 	);
 
 	const open = Boolean(anchorEl);
@@ -61,13 +61,13 @@ export const FileActionsMenu = (props: FileActionsMenuProps): JSX.Element => {
 	const generateFilePresignedUrl = (
 		fileId: string | undefined,
 		fileVersionNum: number | undefined | null,
-		expiresInSeconds: number | undefined | null
+		expiresInSeconds: number | undefined | null,
 	) =>
 		dispatch(
-			generateFilePresignedUrlAction(fileId, fileVersionNum, expiresInSeconds)
+			generateFilePresignedUrlAction(fileId, fileVersionNum, expiresInSeconds),
 		);
 	const presignedUrl = useSelector(
-		(state: RootState) => state.file.presignedUrl
+		(state: RootState) => state.file.presignedUrl,
 	);
 
 	const deleteFile = (fileId: string | undefined) =>

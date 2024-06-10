@@ -19,7 +19,7 @@ type ActionModalProps = {
 };
 
 export const ActionModal: React.FC<ActionModalProps> = (
-	props: ActionModalProps
+	props: ActionModalProps,
 ) => {
 	const {
 		actionOpen,

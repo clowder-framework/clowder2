@@ -32,10 +32,10 @@ export function ApiKeys() {
 
 	const apiKeys = useSelector((state: RootState) => state.user.apiKeys.data);
 	const pageMetadata = useSelector(
-		(state: RootState) => state.user.apiKeys.metadata
+		(state: RootState) => state.user.apiKeys.metadata,
 	);
 	const deletedApiKey = useSelector(
-		(state: RootState) => state.user.deletedApiKey
+		(state: RootState) => state.user.deletedApiKey,
 	);
 	const hashedKey = useSelector((state: RootState) => state.user.hashedKey);
 

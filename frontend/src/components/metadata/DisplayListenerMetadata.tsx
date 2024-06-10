@@ -35,39 +35,39 @@ export const DisplayListenerMetadata = (props: MetadataType) => {
 	const getMetadatDefinitions = (
 		name: string | null,
 		skip: number,
-		limit: number
+		limit: number,
 	) => dispatch(fetchMetadataDefinitions(name, skip, limit));
 
 	const getPublicMetadatDefinitions = (
 		name: string | null,
 		skip: number,
-		limit: number
+		limit: number,
 	) => dispatch(fetchPublicMetadataDefinitions(name, skip, limit));
 
 	const listDatasetMetadata = (datasetId: string | undefined) =>
 		dispatch(fetchDatasetMetadata(datasetId));
 	const listFileMetadata = (
 		fileId: string | undefined,
-		version: number | undefined
+		version: number | undefined,
 	) => dispatch(fetchFileMetadata(fileId, version));
 	const listPublicFileMetadata = (
 		fileId: string | undefined,
-		version: number | undefined
+		version: number | undefined,
 	) => dispatch(fetchPublicFileMetadata(fileId, version));
 	const listPublicDatasetMetadata = (datasetId: string | undefined) =>
 		dispatch(fetchPublicDatasetMetadata(datasetId));
 
 	const datasetMetadataList = useSelector(
-		(state: RootState) => state.metadata.datasetMetadataList
+		(state: RootState) => state.metadata.datasetMetadataList,
 	);
 	const fileMetadataList = useSelector(
-		(state: RootState) => state.metadata.fileMetadataList
+		(state: RootState) => state.metadata.fileMetadataList,
 	);
 	const publicDatasetMetadataList = useSelector(
-		(state: RootState) => state.metadata.publicDatasetMetadataList
+		(state: RootState) => state.metadata.publicDatasetMetadataList,
 	);
 	const publicFileMetadataList = useSelector(
-		(state: RootState) => state.metadata.publicFileMetadataList
+		(state: RootState) => state.metadata.publicFileMetadataList,
 	);
 
 	useEffect(() => {

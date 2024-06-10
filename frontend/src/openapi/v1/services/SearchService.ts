@@ -40,7 +40,7 @@ export class SearchService {
 		size?: number,
 		page?: number,
 		sort?: string,
-		order: "asc" | "desc" = "asc"
+		order: "asc" | "desc" = "asc",
 	): CancelablePromise<any> {
 		return __request({
 			method: "GET",

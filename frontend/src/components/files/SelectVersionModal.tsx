@@ -28,12 +28,12 @@ type SelectVersionModalProps = {
 };
 
 export const SelectVersionModal: React.FC<SelectVersionModalProps> = (
-	props: SelectVersionModalProps
+	props: SelectVersionModalProps,
 ) => {
 	const { open, handleClose, selectedVersion, setSelectedVersion } = props;
 
 	const all_versions = useSelector(
-		(state: RootState) => state.file.fileVersions
+		(state: RootState) => state.file.fileVersions,
 	);
 
 	const [showSuccessAlert, setShowSuccessAlert] = useState(false);

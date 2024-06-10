@@ -34,7 +34,7 @@ export const ManageUsers = (): JSX.Element => {
 	const dispatch = useDispatch();
 	const users = useSelector((state: RootState) => state.group.users.data);
 	const pageMetadata = useSelector(
-		(state: RootState) => state.group.users.metadata
+		(state: RootState) => state.group.users.metadata,
 	);
 	const currentUser = useSelector((state: RootState) => state.user.profile);
 

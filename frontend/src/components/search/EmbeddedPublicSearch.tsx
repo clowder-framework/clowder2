@@ -21,7 +21,7 @@ export function EmbeddedPublicSearch() {
 	useEffect(() => {
 		const intervalId = setInterval(
 			getUpdatedCookie,
-			config.refreshTokenInterval
+			config.refreshTokenInterval,
 		);
 		return () => clearInterval(intervalId);
 	}, []);

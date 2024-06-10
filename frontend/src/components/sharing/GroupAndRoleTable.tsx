@@ -11,7 +11,7 @@ import { GroupAndRoleTableEntry } from "./GroupAndRoleTableEntry";
 
 export const GroupAndRoleTable = (): JSX.Element => {
 	const datasetRolesList = useSelector(
-		(state: RootState) => state.dataset.roles
+		(state: RootState) => state.dataset.roles,
 	);
 
 	return (

@@ -9,7 +9,7 @@ import type { OnCancel } from "./CancelablePromise";
 import { OpenAPI } from "./OpenAPI";
 
 function isDefined<T>(
-	value: T | null | undefined
+	value: T | null | undefined,
 ): value is Exclude<T, null | undefined> {
 	return value !== undefined && value !== null;
 }
@@ -101,7 +101,7 @@ type Resolver<T> = (options: ApiRequestOptions) => Promise<T>;
 
 async function resolve<T>(
 	options: ApiRequestOptions,
-	resolver?: T | Resolver<T>
+	resolver?: T | Resolver<T>,
 ): Promise<T | undefined> {
 	if (typeof resolver === "function") {
 		return (resolver as Resolver<T>)(options);
@@ -126,7 +126,7 @@ async function getHeaders(options: ApiRequestOptions): Promise<Headers> {
 				...headers,
 				[key]: String(value),
 			}),
-			{} as Record<string, string>
+			{} as Record<string, string>,
 		);
 
 	const headers = new Headers(defaultHeaders);
@@ -146,7 +146,7 @@ async function getHeaders(options: ApiRequestOptions): Promise<Headers> {
 		} else if (isBlob(options.body)) {
 			headers.append(
 				"Content-Type",
-				options.body.type || "application/octet-stream"
+				options.body.type || "application/octet-stream",
 			);
 		} else if (isString(options.body)) {
 			headers.append("Content-Type", "text/plain");
@@ -177,7 +177,7 @@ async function sendRequest(
 	formData: FormData | undefined,
 	body: BodyInit | undefined,
 	headers: Headers,
-	onCancel: OnCancel
+	onCancel: OnCancel,
 ): Promise<Response> {
 	const controller = new AbortController();
 
@@ -199,7 +199,7 @@ async function sendRequest(
 
 function getResponseHeader(
 	response: Response,
-	responseHeader?: string
+	responseHeader?: string,
 ): string | undefined {
 	if (responseHeader) {
 		const content = response.headers.get(responseHeader);
@@ -272,12 +272,12 @@ export function request<T>(options: ApiRequestOptions): CancelablePromise<T> {
 					formData,
 					body,
 					headers,
-					onCancel
+					onCancel,
 				);
 				const responseBody = await getResponseBody(response);
 				const responseHeader = getResponseHeader(
 					response,
-					options.responseHeader
+					options.responseHeader,
 				);
 
 				const result: ApiResult = {

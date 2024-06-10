@@ -94,13 +94,13 @@ const metadata = (state = defaultState, action: DataAction) => {
 		case DELETE_DATASET_METADATA:
 			return Object.assign({}, state, {
 				datasetMetadataList: state.datasetMetadataList.filter(
-					(metadata) => metadata.id !== action.metadata.id
+					(metadata) => metadata.id !== action.metadata.id,
 				),
 			});
 		case DELETE_FILE_METADATA:
 			return Object.assign({}, state, {
 				fileMetadataList: state.fileMetadataList.filter(
-					(metadata) => metadata.id !== action.metadata.id
+					(metadata) => metadata.id !== action.metadata.id,
 				),
 			});
 		case UPDATE_FILE_METADATA:

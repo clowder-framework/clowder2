@@ -71,15 +71,15 @@ export const Dataset = (): JSX.Element => {
 	const dispatch = useDispatch();
 	const updateDatasetMetadata = (
 		datasetId: string | undefined,
-		content: object
+		content: object,
 	) => dispatch(patchDatasetMetadataAction(datasetId, content));
 	const createDatasetMetadata = (
 		datasetId: string | undefined,
-		metadata: MetadataIn
+		metadata: MetadataIn,
 	) => dispatch(postDatasetMetadata(datasetId, metadata));
 	const deleteDatasetMetadata = (
 		datasetId: string | undefined,
-		metadata: object
+		metadata: object,
 	) => dispatch(deleteDatasetMetadataAction(datasetId, metadata));
 	const getFolderPath = (folderId: string | null) =>
 		dispatch(fetchFolderPath(folderId));
@@ -88,10 +88,10 @@ export const Dataset = (): JSX.Element => {
 		datasetId: string | undefined,
 		folderId: string | null,
 		skip: number | undefined,
-		limit: number | undefined
+		limit: number | undefined,
 	) =>
 		dispatch(
-			fetchFoldersFilesInDatasetAction(datasetId, folderId, skip, limit)
+			fetchFoldersFilesInDatasetAction(datasetId, folderId, skip, limit),
 		);
 	const listDatasetAbout = (datasetId: string | undefined) =>
 		dispatch(fetchDatasetAbout(datasetId));
@@ -103,13 +103,13 @@ export const Dataset = (): JSX.Element => {
 	const getMetadatDefinitions = (
 		name: string | null,
 		skip: number,
-		limit: number
+		limit: number,
 	) => dispatch(fetchMetadataDefinitions(name, skip, limit));
 
 	// mapStateToProps
 	const about = useSelector((state: RootState) => state.dataset.about);
 	const datasetRole = useSelector(
-		(state: RootState) => state.dataset.datasetRole
+		(state: RootState) => state.dataset.datasetRole,
 	);
 	const folderPath = useSelector((state: RootState) => state.folder.folderPath);
 
@@ -131,19 +131,19 @@ export const Dataset = (): JSX.Element => {
 	const [limit] = useState<number>(config.defaultFolderFilePerPage);
 
 	const pageMetadata = useSelector(
-		(state: RootState) => state.dataset.foldersAndFiles.metadata
+		(state: RootState) => state.dataset.foldersAndFiles.metadata,
 	);
 	const foldersFilesInDataset = useSelector(
-		(state: RootState) => state.dataset.foldersAndFiles.data
+		(state: RootState) => state.dataset.foldersAndFiles.data,
 	);
 	const adminMode = useSelector((state: RootState) => state.user.adminMode);
 	const license = useSelector((state: RootState) => state.dataset.license);
 	const newFiles = useSelector((state: RootState) => state.dataset.newFiles);
 	const deletedFile = useSelector(
-		(state: RootState) => state.dataset.deletedFile
+		(state: RootState) => state.dataset.deletedFile,
 	);
 	const deletedFolder = useSelector(
-		(state: RootState) => state.dataset.deletedFolder
+		(state: RootState) => state.dataset.deletedFolder,
 	);
 
 	const [standardLicenseUrl, setStandardLicenseUrl] = useState<string>("");
@@ -161,7 +161,7 @@ export const Dataset = (): JSX.Element => {
 			datasetId,
 			folderId,
 			(currPageNum - 1) * limit,
-			limit
+			limit,
 		);
 		listDatasetAbout(datasetId);
 		if (about.standard_license && about.license_id) {
@@ -178,7 +178,7 @@ export const Dataset = (): JSX.Element => {
 			datasetId,
 			folderId,
 			(currPageNum - 1) * limit,
-			limit
+			limit,
 		);
 		listDatasetAbout(datasetId);
 	}, [deletedFile, deletedFolder]);
@@ -209,7 +209,7 @@ export const Dataset = (): JSX.Element => {
 
 	const handleTabChange = (
 		_event: React.ChangeEvent<{}>,
-		newTabIndex: number
+		newTabIndex: number,
 	) => {
 		setSelectedTabIndex(newTabIndex);
 	};

@@ -82,21 +82,21 @@ export const File = (): JSX.Element => {
 
 	const file = useSelector((state: RootState) => state.file);
 	const latestVersionNum = useSelector(
-		(state: RootState) => state.file.fileSummary.version_num
+		(state: RootState) => state.file.fileSummary.version_num,
 	);
 	const [selectedVersionNum, setSelectedVersionNum] = useState(
-		latestVersionNum ?? 1
+		latestVersionNum ?? 1,
 	);
 	const [versionEnabled, setVersionEnabled] = useState(false);
 	const fileSummary = useSelector((state: RootState) => state.file.fileSummary);
 	const filePreviews = useSelector((state: RootState) => state.file.previews);
 	const fileVersions = useSelector(
-		(state: RootState) => state.file.fileVersions
+		(state: RootState) => state.file.fileVersions,
 	);
 	const folderPath = useSelector((state: RootState) => state.folder.folderPath);
 	const fileRole = useSelector((state: RootState) => state.file.fileRole);
 	const storageType = useSelector(
-		(state: RootState) => state.file.fileSummary.storage_type
+		(state: RootState) => state.file.fileSummary.storage_type,
 	);
 	const adminMode = useSelector((state: RootState) => state.user.adminMode);
 
@@ -218,7 +218,7 @@ export const File = (): JSX.Element => {
 						Configuration.resource = await downloadResource(resourceURL);
 
 						previewsTemp.push(Configuration);
-					})
+					}),
 				);
 				setPreviews(previewsTemp);
 			}
@@ -227,7 +227,7 @@ export const File = (): JSX.Element => {
 
 	const handleTabChange = (
 		_event: React.ChangeEvent<{}>,
-		newTabIndex: number
+		newTabIndex: number,
 	) => {
 		setSelectedTabIndex(newTabIndex);
 	};

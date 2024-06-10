@@ -51,7 +51,7 @@ export const PublicFile = (): JSX.Element => {
 	const listDatasetAbout = (datasetId: string | undefined) =>
 		dispatch(fetchPublicDatasetAbout(datasetId));
 	const about = useSelector(
-		(state: RootState) => state.publicDataset.publicAbout
+		(state: RootState) => state.publicDataset.publicAbout,
 	);
 
 	const dispatch = useDispatch();
@@ -60,7 +60,7 @@ export const PublicFile = (): JSX.Element => {
 	const listPublicFileVersions = (
 		fileId: string | undefined,
 		skip: number | undefined,
-		limit: number | undefined
+		limit: number | undefined,
 	) => dispatch(fetchPublicFileVersions(fileId, skip, limit));
 	const listFileMetadata = (fileId: string | undefined) =>
 		dispatch(fetchPublicFileMetadata(fileId));
@@ -69,22 +69,22 @@ export const PublicFile = (): JSX.Element => {
 
 	const file = useSelector((state: RootState) => state.publicFile);
 	const fileSummary = useSelector(
-		(state: RootState) => state.publicFile.publicFileSummary
+		(state: RootState) => state.publicFile.publicFileSummary,
 	);
 	const filePreviews = useSelector(
-		(state: RootState) => state.publicFile.publicPreviews
+		(state: RootState) => state.publicFile.publicPreviews,
 	);
 	const fileVersions = useSelector(
-		(state: RootState) => state.publicFile.publicFileVersions
+		(state: RootState) => state.publicFile.publicFileVersions,
 	);
 	const latestVersionNum = useSelector(
-		(state: RootState) => state.publicFile.publicFileSummary.version_num
+		(state: RootState) => state.publicFile.publicFileSummary.version_num,
 	);
 	const [selectedVersionNum, setSelectedVersionNum] = useState(
-		latestVersionNum ?? 1
+		latestVersionNum ?? 1,
 	);
 	const folderPath = useSelector(
-		(state: RootState) => state.folder.publicFolderPath
+		(state: RootState) => state.folder.publicFolderPath,
 	);
 	const [selectedTabIndex, setSelectedTabIndex] = useState(0);
 	const [previews, setPreviews] = useState([]);
@@ -181,7 +181,7 @@ export const PublicFile = (): JSX.Element => {
 						const resourceURL = `/public/${config.hostname}${filePreview["pv_route"]}?superAdmin=true`;
 						Configuration.resource = await downloadPublicResource(resourceURL);
 						previewsTemp.push(Configuration);
-					})
+					}),
 				);
 				setPreviews(previewsTemp);
 			}
@@ -190,7 +190,7 @@ export const PublicFile = (): JSX.Element => {
 
 	const handleTabChange = (
 		_event: React.ChangeEvent<{}>,
-		newTabIndex: number
+		newTabIndex: number,
 	) => {
 		setSelectedTabIndex(newTabIndex);
 	};

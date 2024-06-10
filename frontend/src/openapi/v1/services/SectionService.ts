@@ -62,7 +62,7 @@ export class SectionService {
 		id: string,
 		requestBody: {
 			text: string;
-		}
+		},
 	): CancelablePromise<any> {
 		return __request({
 			method: "POST",
@@ -83,7 +83,7 @@ export class SectionService {
 		id: string,
 		requestBody: {
 			description: string;
-		}
+		},
 	): CancelablePromise<any> {
 		return __request({
 			method: "POST",
@@ -105,7 +105,7 @@ export class SectionService {
 	 */
 	public static postSection3(
 		id: string,
-		thumbnailId: string
+		thumbnailId: string,
 	): CancelablePromise<any> {
 		return __request({
 			method: "POST",
@@ -140,7 +140,7 @@ export class SectionService {
 		id: string,
 		requestBody: {
 			tags: Array<string>;
-		}
+		},
 	): CancelablePromise<any> {
 		return __request({
 			method: "POST",
