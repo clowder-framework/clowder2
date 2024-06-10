@@ -2060,6 +2060,67 @@
           }
         ]
       },
+      "put": {
+        "tags": [
+          "metadata"
+        ],
+        "summary": "Update Metadata Definition",
+        "operationId": "update_metadata_definition_api_v2_metadata_definition__metadata_definition_id__put",
+        "parameters": [
+          {
+            "required": true,
+            "schema": {
+              "title": "Metadata Definition Id",
+              "type": "string"
+            },
+            "name": "metadata_definition_id",
+            "in": "path"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MetadataDefinitionIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MetadataDefinitionOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2AuthorizationCodeBearer": []
+          },
+          {
+            "APIKeyHeader": []
+          },
+          {
+            "APIKeyCookie": []
+          }
+        ]
+      },
       "delete": {
         "tags": [
           "metadata"
@@ -11858,6 +11919,11 @@
             "items": {
               "$ref": "#/components/schemas/MetadataField"
             }
+          },
+          "modified": {
+            "title": "Modified",
+            "type": "string",
+            "format": "date-time"
           }
         },
         "description": "This describes a metadata object with a short name and description, predefined set of fields, and context.\nThese provide a shorthand for use by listeners as well as a source for building GUI widgets to add new entries.\n\nExample: {\n    \"name\" : \"LatLon\",\n    \"description\" : \"A set of Latitude/Longitude coordinates\",\n    \"required_for_items\": {\n        \"datasets\": false,\n        \"files\": false\n    },\n    \"context\" : [\n        {\n        \"longitude\" : \"https://schema.org/longitude\",\n        \"latitude\" : \"https://schema.org/latitude\"\n        },\n    ],\n    \"fields\" : [\n        {\n            \"name\" : \"longitude\",\n            \"list\" : false,\n            \"widgetType\": \"TextField\",\n            \"config\": {\n                \"type\" : \"float\"\n            },\n            \"required\" : true\n        },\n        {\n            \"name\" : \"latitude\",\n            \"list\" : false,\n            \"widgetType\": \"TextField\",\n            \"config\": {\n                \"type\" : \"float\"\n            },\n            \"required\" : true\n        }\n    ]\n}"
@@ -11915,6 +11981,11 @@
             "items": {
               "$ref": "#/components/schemas/MetadataField"
             }
+          },
+          "modified": {
+            "title": "Modified",
+            "type": "string",
+            "format": "date-time"
           },
           "id": {
             "title": "Id",
