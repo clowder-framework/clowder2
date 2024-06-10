@@ -49,7 +49,7 @@ export const Explore = (): JSX.Element => {
 
 	// Admin mode will fetch all datasets
 	useEffect(() => {
-		if (adminMode) listDatasets(0, limit, true);
+		if (adminMode) listDatasets(0, limit, false);
 		else listDatasets((currPageNum - 1) * limit, limit, mine);
 	}, [adminMode, deletedDataset, mine, currPageNum, limit]);
 
