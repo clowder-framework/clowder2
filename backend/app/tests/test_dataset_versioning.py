@@ -103,7 +103,20 @@ def test_freeze_and_delete(client: TestClient, headers: dict):
     dataset_version_1 = response.json()
     dataset_version_1_id = dataset_version_1.get("id")
 
-    # document version 1 vis id
+    # get specific versions
+    response = client.get(
+        f"{settings.API_V2_STR}/datasets/{dataset_id}/freeze/2", headers=headers
+    )
+    assert response.status_code == 200
+    assert response.json().get("frozen_version_num") == 2
+    assert (
+        response.json().get("origin_id") == dataset_id
+    )  # datasetId should stay the same
+    # document version 2 dataset
+    dataset_version_2 = response.json()
+    dataset_version_2_id = dataset_version_2.get("id")
+
+    # document version 1 & 2 vis id
     response = client.get(
         f"{settings.API_V2_STR}/visualizations/{dataset_version_1_id}/config",
         headers=headers,
@@ -114,6 +127,17 @@ def test_freeze_and_delete(client: TestClient, headers: dict):
         headers=headers,
     )
     version_1_vis_id = response.json()[0].get("id")
+
+    response = client.get(
+        f"{settings.API_V2_STR}/visualizations/{dataset_version_2_id}/config",
+        headers=headers,
+    )
+    version_2_vis_config_id = response.json()[0].get("id")
+    response = client.get(
+        f"{settings.API_V2_STR}/visualizations/config/{version_2_vis_config_id}/visdata",
+        headers=headers,
+    )
+    version_2_vis_id = response.json()[0].get("id")
 
     # get all versions
     response = client.get(
@@ -198,8 +222,51 @@ def test_freeze_and_delete(client: TestClient, headers: dict):
     )
     assert response.status_code == 404
 
+    ############################################
     # delete the whole dataset
     response = client.delete(
         f"{settings.API_V2_STR}/datasets/{dataset_id}", headers=headers
     )
     assert response.status_code == 200
+
+    # check metadata, thumbnail and visualization is gone
+    response = client.get(
+        f"{settings.API_V2_STR}/datasets/{dataset_version_2_id}/metadata",
+        headers=headers,
+    )
+    assert response.status_code == 404
+    response = client.get(
+        f"{settings.API_V2_STR}/datasets/{dataset_id}/metadata",
+        headers=headers,
+    )
+    assert response.status_code == 404
+    dataset_version_2_thumbnail_id = dataset_version_2.get("thumbnail_id")
+    response = client.get(
+        f"{settings.API_V2_STR}/thumbnail/{dataset_version_2_thumbnail_id}",
+        headers=headers,
+    )
+    assert response.status_code == 404
+    response = client.get(
+        f"{settings.API_V2_STR}/thumbnails/{thumbnail_id}", headers=headers
+    )
+    assert response.status_code == 404
+    response = client.get(
+        f"{settings.API_V2_STR}/visualizations/{dataset_version_2_id}/config",
+        headers=headers,
+    )
+    assert response.json() == []
+    response = client.get(
+        f"{settings.API_V2_STR}/visualizations/{dataset_id}/config",
+        headers=headers,
+    )
+    assert response.json() == []
+    response = client.get(
+        f"{settings.API_V2_STR}/visualizations/{version_2_vis_config_id}/config/visdata",
+        headers=headers,
+    )
+    assert response.status_code == 404
+    response = client.get(
+        f"{settings.API_V2_STR}/visualizations/{version_2_vis_id}/",
+        headers=headers,
+    )
+    assert response.status_code == 404
