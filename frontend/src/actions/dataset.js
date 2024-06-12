@@ -309,6 +309,35 @@ export function fetchDatasetAbout(id) {
 	};
 }
 
+export const DELETE_FREEZE_DATASET = "DELETE_FREEZE_DATASET";
+
+export function deleteFreezeDataset(datasetId, frozenVersionNum) {
+	return (dispatch) => {
+		return V2.DatasetsService.deleteFreezeDatasetVersionApiV2DatasetsDatasetIdFreezeFrozenVersionNumDelete(
+			datasetId,
+			frozenVersionNum
+		)
+			.then((json) => {
+				dispatch({
+					type: DELETE_FREEZE_DATASET,
+					frozenDataset: json,
+					receivedAt: Date.now(),
+				});
+			})
+			.then(() => {
+				dispatch(resetFailedReason());
+			})
+			.catch((reason) => {
+				dispatch(
+					handleErrorsAuthorization(
+						reason,
+						deleteFreezeDataset(datasetId, frozenVersionNum)
+					)
+				);
+			});
+	};
+}
+
 export const RECEIVE_DATASET_LICENSE = "RECEIVE_DATASET_LICENSE";
 
 export function fetchDatasetLicense(license_id) {

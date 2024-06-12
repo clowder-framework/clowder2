@@ -285,10 +285,7 @@ export const frozenCheck = (frozen, frozen_version_num) => {
 
 export const selectedHighlightStyles = (currentId, selectedId, theme) => {
 	return {
-		color:
-			currentId === selectedId
-				? theme.palette.info.main
-				: theme.palette.primary.main,
+		color: theme.palette.primary.main,
 		pointerEvents: currentId === selectedId ? "none" : "auto",
 		textDecoration: "none",
 		fontWeight: currentId === selectedId ? "bold" : "normal",

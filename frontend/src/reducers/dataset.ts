@@ -1,11 +1,11 @@
 import {
 	CREATE_DATASET,
 	DELETE_DATASET,
+	DELETE_FREEZE_DATASET,
 	FOLDER_ADDED,
 	FOLDER_UPDATED,
 	FREEZE_DATASET,
 	GET_FREEZE_DATASET,
-	GET_FREEZE_DATASET_LATEST_VERSION_NUM,
 	GET_FREEZE_DATASETS,
 	RECEIVE_DATASET_ABOUT,
 	RECEIVE_DATASET_LICENSE,
@@ -52,6 +52,7 @@ const defaultState: DatasetState = {
 	},
 	about: <DatasetOut>{ creator: <UserOut>{} },
 	frozenDataset: <DatasetFreezeOut>{ creator: <UserOut>{} },
+	deletedFrozenDataset: <DatasetFreezeOut>{ creator: <UserOut>{} },
 	newFrozenDataset: <DatasetFreezeOut>{ creator: <UserOut>{} },
 	frozenDatasets: <Paged>{
 		metadata: <PageMetadata>{},
@@ -127,12 +128,12 @@ const dataset = (state = defaultState, action: DataAction) => {
 				latestFrozenVersionNum: action.newFrozenDataset.frozen_version_num,
 				newFrozenDataset: action.newFrozenDataset,
 			});
-		case GET_FREEZE_DATASET_LATEST_VERSION_NUM:
-			return Object.assign({}, state, {
-				latestFrozenVersionNum: action.latestFrozenVersionNum,
-			});
 		case GET_FREEZE_DATASET:
 			return Object.assign({}, state, { frozenDataset: action.frozenDataset });
+		case DELETE_FREEZE_DATASET:
+			return Object.assign({}, state, {
+				deletedFrozenDataset: action.frozenDataset,
+			});
 		case GET_FREEZE_DATASETS:
 			return Object.assign({}, state, {
 				frozenDatasets: action.frozenDatasets,

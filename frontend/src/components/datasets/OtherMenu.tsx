@@ -116,12 +116,13 @@ export const OtherMenu = (props: ActionsMenuProps): JSX.Element => {
 			<ActionModal
 				actionOpen={deleteDatasetConfirmOpen}
 				actionTitle="Delete Dataset"
-				actionText="Do you really want to delete this dataset? This process cannot be undone."
+				actionText="Are you sure you want to delete this dataset? This action is irreversible. All released versions, including their associated files, folders, metadata, visualizations, and thumbnails, will be permanently deleted."
 				actionBtnName="Delete"
 				handleActionBtnClick={deleteSelectedDataset}
 				handleActionCancel={() => {
 					setDeleteDatasetConfirmOpen(false);
 				}}
+				actionLevel={"error"}
 			/>
 			<ActionModal
 				actionOpen={freezeDatasetConfirmOpen}

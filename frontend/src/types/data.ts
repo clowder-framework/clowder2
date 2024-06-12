@@ -133,6 +133,7 @@ export interface DatasetState {
 	newFiles: FileOut[];
 	about: DatasetOut;
 	frozenDataset: DatasetFreezeOut;
+	deletedFrozenDataset: DatasetFreezeOut;
 	newFrozenDataset: DatasetFreezeOut;
 	frozenDatasets: Paged;
 	latestFrozenVersionNum: number;

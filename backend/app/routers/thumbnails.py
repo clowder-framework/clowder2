@@ -8,6 +8,7 @@ from app.models.files import FileDB
 from app.models.thumbnails import (
     ThumbnailDB,
     ThumbnailDBViewList,
+    ThumbnailFreezeDB,
     ThumbnailIn,
     ThumbnailOut,
 )
@@ -68,8 +69,16 @@ async def remove_thumbnail(thumb_id: str, fs: Minio = Depends(dependencies.get_f
         ):
             dataset.thumbnail_id = None
             dataset.save()
-        fs.remove_object(settings.MINIO_BUCKET_NAME, thumb_id)
-        thumbnail.delete()
+
+        # if not being used in any version, remove the raw bytes
+        if (
+            await ThumbnailFreezeDB.find_one(
+                ThumbnailFreezeDB.origin_id == PydanticObjectId(thumb_id)
+            )
+        ) is None:
+            fs.remove_object(settings.MINIO_BUCKET_NAME, thumb_id)
+
+        await thumbnail.delete()
         return {"deleted": thumb_id}
     raise HTTPException(status_code=404, detail=f"Thumbnail {thumb_id} not found")
 

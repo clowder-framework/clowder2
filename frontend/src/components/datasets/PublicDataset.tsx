@@ -40,7 +40,7 @@ import { Visualization } from "../visualizations/Visualization";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import config from "../../app.config";
 import { FreezeVersionChip } from "../versions/FeezeVersionChip";
-import { PublicDatasetVersions } from "./PublicDatasetVersions";
+import { PublicDatasetVersions } from "./versions/PublicDatasetVersions";
 import { fetchPublicStandardLicenseUrl } from "../../utils/licenses";
 
 export const PublicDataset = (): JSX.Element => {

@@ -1,12 +1,13 @@
-import { Box, Link, Pagination, Typography } from "@mui/material";
 import React, { ChangeEvent, useEffect, useState } from "react";
+
+import { Box, Link, Pagination, Typography } from "@mui/material";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { getPublicFreezeDatasets as getPublicFreezeDatasetsAction } from "../../actions/public_dataset";
-import { RootState } from "../../types/data";
-import config from "../../app.config";
-import { theme } from "../../theme";
-import { parseDate, selectedHighlightStyles } from "../../utils/common";
+import { getPublicFreezeDatasets as getPublicFreezeDatasetsAction } from "../../../actions/public_dataset";
+import { RootState } from "../../../types/data";
+import config from "../../../app.config";
+import { theme } from "../../../theme";
+import { parseDate, selectedHighlightStyles } from "../../../utils/common";
 
 export const PublicDatasetVersions = (props) => {
 	// search parameters
@@ -73,7 +74,7 @@ export const PublicDatasetVersions = (props) => {
 	return (
 		<Box sx={{ mt: 2, mb: 5 }}>
 			<Typography variant="h5" gutterBottom>
-				Dataset Version
+				Version
 			</Typography>
 			<Box>
 				<Box key={currDataset.origin_id} mb={2}>
@@ -90,28 +91,75 @@ export const PublicDatasetVersions = (props) => {
 					>
 						Latest
 					</Link>
-				</Box>
-				{frozenDatasets.map((dataset) => (
-					<Box key={dataset.id} mb={2}>
-						<Link
-							component="button"
-							onClick={() => {
-								handleVersionChange(dataset.id);
+					<Box>
+						<Typography
+							variant="caption"
+							sx={{
+								color: "text.primary.light",
+								fontWeight:
+									currDataset.id === currDataset.origin_id ? "bold" : "normal",
 							}}
-							sx={selectedHighlightStyles(currDataset.id, dataset.id, theme)}
 						>
-							Version {dataset.frozen_version_num}
-						</Link>
-						<Box>
-							<Typography
-								variant="caption"
-								sx={{ color: "text.primary.light" }}
-							>
-								{parseDate(dataset.modified)}
-							</Typography>
-						</Box>
+							Last Modified: {parseDate(currDataset.modified)}
+						</Typography>
 					</Box>
-				))}
+				</Box>
+				{frozenDatasets.map((dataset) =>
+					dataset.deleted ? (
+						<Box key={dataset.id} mb={2}>
+							<Typography
+								variant="body1"
+								style={{
+									color: theme.palette.info.main,
+								}}
+							>
+								Version {dataset.frozen_version_num} (Deleted)
+							</Typography>
+							<Box>
+								<Typography
+									variant="caption"
+									sx={{ color: "text.primary.light" }}
+								>
+									Last Modified: {parseDate(dataset.modified)}
+								</Typography>
+							</Box>
+						</Box>
+					) : (
+						<Box key={dataset.id} mb={2}>
+							<Box
+								display="flex"
+								justifyContent="space-between"
+								alignItems="center"
+							>
+								<Link
+									component="button"
+									onClick={() => {
+										handleVersionChange(dataset.id);
+									}}
+									sx={selectedHighlightStyles(
+										currDataset.id,
+										dataset.id,
+										theme
+									)}
+								>
+									Version {dataset.frozen_version_num}
+								</Link>
+							</Box>
+							<Box>
+								<Typography
+									variant="caption"
+									sx={{
+										color: "text.primary.light",
+										fontWeight:
+											currDataset.id === dataset.id ? "bold" : "normal",
+									}}
+								>
+									Last Modified: {parseDate(dataset.modified)}
+								</Typography>
+							</Box>
+						</Box>
+					)
+				)}
 			</Box>
 			{frozenDatasets && frozenDatasets.length !== 0 ? (
 				<Box display="flex" justifyContent="center" sx={{ m: 1 }}>

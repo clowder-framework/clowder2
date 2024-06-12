@@ -8,14 +8,16 @@ import {
 	DialogTitle,
 } from "@mui/material";
 
+type ActionLevel = "error" | "warning" | "info";
+
 type ActionModalProps = {
 	actionOpen: boolean;
 	actionTitle: string;
 	actionText: string;
 	actionBtnName: string;
-	// TODO properly define below functions
-	handleActionBtnClick: any;
-	handleActionCancel: any;
+	handleActionBtnClick: () => void;
+	handleActionCancel: () => void;
+	actionLevel?: ActionLevel;
 };
 
 export const ActionModal: React.FC<ActionModalProps> = (
@@ -28,7 +30,9 @@ export const ActionModal: React.FC<ActionModalProps> = (
 		actionBtnName,
 		handleActionBtnClick,
 		handleActionCancel,
+		actionLevel,
 	} = props;
+
 	return (
 		<Dialog open={actionOpen} onClose={handleActionCancel} maxWidth={"sm"}>
 			<DialogTitle id="confirmation-dialog-title">{actionTitle}</DialogTitle>
@@ -36,11 +40,18 @@ export const ActionModal: React.FC<ActionModalProps> = (
 				<DialogContentText>{actionText}</DialogContentText>
 			</DialogContent>
 			<DialogActions>
-				{/*handleActionBtnClick This could be used to report error/ confirm deletion and so on*/}
-				<Button variant="contained" onClick={handleActionBtnClick}>
+				<Button
+					variant="contained"
+					onClick={handleActionBtnClick}
+					color={actionLevel ?? "primary"}
+				>
 					{actionBtnName}
 				</Button>
-				<Button variant="outlined" onClick={handleActionCancel}>
+				<Button
+					variant="outlined"
+					onClick={handleActionCancel}
+					color={actionLevel ?? "primary"}
+				>
 					Cancel
 				</Button>
 			</DialogActions>

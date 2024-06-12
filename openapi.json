@@ -4772,6 +4772,66 @@
             "APIKeyCookie": []
           }
         ]
+      },
+      "delete": {
+        "tags": [
+          "datasets"
+        ],
+        "summary": "Delete Freeze Dataset Version",
+        "operationId": "delete_freeze_dataset_version_api_v2_datasets__dataset_id__freeze__frozen_version_num__delete",
+        "parameters": [
+          {
+            "required": true,
+            "schema": {
+              "title": "Dataset Id",
+              "type": "string"
+            },
+            "name": "dataset_id",
+            "in": "path"
+          },
+          {
+            "required": true,
+            "schema": {
+              "title": "Frozen Version Num",
+              "type": "integer"
+            },
+            "name": "frozen_version_num",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DatasetFreezeOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2AuthorizationCodeBearer": []
+          },
+          {
+            "APIKeyHeader": []
+          },
+          {
+            "APIKeyCookie": []
+          }
+        ]
       }
     },
     "/api/v2/datasets/{dataset_id}/folders": {
@@ -10939,6 +10999,11 @@
           "frozen_version_num": {
             "title": "Frozen Version Num",
             "type": "integer"
+          },
+          "deleted": {
+            "title": "Deleted",
+            "type": "boolean",
+            "default": false
           }
         },
         "description": "Document Mapping class.\n\nFields:\n\n- `id` - MongoDB document ObjectID \"_id\" field.\nMapped to the PydanticObjectId class\n\nInherited from:\n\n- Pydantic BaseModel\n- [UpdateMethods](https://roman-right.github.io/beanie/api/interfaces/#aggregatemethods)"
@@ -11049,6 +11114,11 @@
             "title": "Frozen Version Num",
             "type": "integer",
             "default": -999
+          },
+          "deleted": {
+            "title": "Deleted",
+            "type": "boolean",
+            "default": false
           }
         },
         "description": "Document Mapping class.\n\nFields:\n\n- `id` - MongoDB document ObjectID \"_id\" field.\nMapped to the PydanticObjectId class\n\nInherited from:\n\n- Pydantic BaseModel\n- [UpdateMethods](https://roman-right.github.io/beanie/api/interfaces/#aggregatemethods)"

@@ -1,10 +1,4 @@
-import {
-	ExtractedMetadata,
-	FilePreview,
-	Folder,
-	ListenerState,
-	MetadataJsonld,
-} from "./data";
+import { ExtractedMetadata, FilePreview, Folder, MetadataJsonld } from "./data";
 import {
 	AuthorizationBase,
 	DatasetFreezeOut,
@@ -650,7 +644,7 @@ interface FOLDER_UPDATED {
 
 interface FREEZE_DATASET {
 	type: "FREEZE_DATASET";
-	latestFrozenVersionNum: number;
+	newFrozenDataset: any;
 }
 
 interface GET_FREEZE_DATASET_LATEST_VERSION_NUM {
@@ -660,6 +654,11 @@ interface GET_FREEZE_DATASET_LATEST_VERSION_NUM {
 
 interface GET_FREEZE_DATASET {
 	type: "GET_FREEZE_DATASET";
+	frozenDataset: DatasetFreezeOut;
+}
+
+interface DELETE_FREEZE_DATASET {
+	type: "DELETE_FREEZE_DATASET";
 	frozenDataset: DatasetFreezeOut;
 }
 
@@ -796,6 +795,7 @@ export type DataAction =
 	| FREEZE_DATASET
 	| GET_FREEZE_DATASET_LATEST_VERSION_NUM
 	| GET_FREEZE_DATASET
+	| DELETE_FREEZE_DATASET
 	| GET_FREEZE_DATASETS
 	| GET_PUBLIC_FREEZE_DATASETS
 	| RECEIVE_DATASET_LICENSE

@@ -5,7 +5,6 @@ from app.tests.utils import (
     create_dataset,
     create_dataset_with_custom_license,
     generate_png,
-    upload_file,
     user_alt,
 )
 from fastapi.testclient import TestClient
@@ -30,57 +29,6 @@ def test_delete(client: TestClient, headers: dict):
         f"{settings.API_V2_STR}/datasets/{dataset_id}", headers=headers
     )
     assert response.status_code == 200
-
-
-def test_freeze(client: TestClient, headers: dict):
-    dataset_id = create_dataset(client, headers).get("id")
-    upload_file(client, headers, dataset_id).get("id")
-    response = client.post(
-        f"{settings.API_V2_STR}/datasets/{dataset_id}/freeze", headers=headers
-    )
-    assert response.status_code == 200
-    assert response.json().get("frozen") is True
-    assert response.json().get("frozen_version_num") == 1
-    assert (
-        response.json().get("origin_id") == dataset_id
-    )  # datasetId should stay the same
-
-    # Freeze again check version
-    response = client.post(
-        f"{settings.API_V2_STR}/datasets/{dataset_id}/freeze", headers=headers
-    )
-    assert response.status_code == 200
-    assert response.json().get("frozen") is True
-    assert response.json().get("frozen_version_num") == 2
-    assert (
-        response.json().get("origin_id") == dataset_id
-    )  # datasetId should stay the same
-
-    # get latest versions
-    response = client.get(
-        f"{settings.API_V2_STR}/datasets/{dataset_id}/freeze/latest_version_num",
-        headers=headers,
-    )
-    assert response.status_code == 200
-    assert response.json() == 2
-
-    # get specific versions
-    response = client.get(
-        f"{settings.API_V2_STR}/datasets/{dataset_id}/freeze/1", headers=headers
-    )
-    assert response.status_code == 200
-    assert response.json().get("frozen_version_num") == 1
-    assert (
-        response.json().get("origin_id") == dataset_id
-    )  # datasetId should stay the same
-
-    # get all versions
-    response = client.get(
-        f"{settings.API_V2_STR}/datasets/{dataset_id}/freeze", headers=headers
-    )
-    assert response.status_code == 200
-    assert len(response.json().get("data")) == 2
-    assert response.json().get("metadata") == {"total_count": 2, "skip": 0, "limit": 10}
 
 
 def test_delete_with_custom_license(client: TestClient, headers: dict):

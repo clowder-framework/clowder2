@@ -60,7 +60,7 @@ import { AuthWrapper } from "../auth/AuthWrapper";
 import { EditLicenseModal } from "./EditLicenseModal";
 import { fetchStandardLicenseUrl } from "../../utils/licenses";
 import { authCheck, frozenCheck } from "../../utils/common";
-import { DatasetVersions } from "./DatasetVersions";
+import { DatasetVersions } from "./versions/DatasetVersions";
 import { FreezeVersionChip } from "../versions/FeezeVersionChip";
 import { FrozenWrapper } from "../auth/FrozenWrapper";
 

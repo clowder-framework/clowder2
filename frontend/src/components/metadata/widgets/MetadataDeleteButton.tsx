@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Box, Button } from "@mui/material";
+import { Button } from "@mui/material";
 import { ActionModal } from "../../dialog/ActionModal";
 
 type MetadataDeleteButtonType = {
@@ -19,7 +19,7 @@ export const MetadataDeleteButton = (props: MetadataDeleteButtonType) => {
 			<ActionModal
 				actionOpen={confirmationOpen}
 				actionTitle="Are you sure?"
-				actionText="Do you really want to delete? This process cannot be undone."
+				actionText="Do you really want to delete this metadata? This process cannot be undone."
 				actionBtnName="Delete"
 				handleActionBtnClick={() => {
 					deleteMetadata(resourceId, {
@@ -30,6 +30,7 @@ export const MetadataDeleteButton = (props: MetadataDeleteButtonType) => {
 				handleActionCancel={() => {
 					setConfirmationOpen(false);
 				}}
+				actionLevel={"error"}
 			/>
 			<Button
 				variant="outlined"

@@ -12,10 +12,14 @@ from app import dependencies
 from app.config import settings
 from app.db.dataset.download import _increment_data_downloads
 from app.db.dataset.version import (
+    _delete_frozen_dataset,
+    _delete_thumbnail,
+    _delete_visualizations,
     _freeze_dataset_metadata,
     _freeze_dataset_thumbnail,
     _freeze_dataset_visualization,
     _freeze_files_folders_w_metadata_vis,
+    remove_file_entry,
 )
 from app.db.folder.hierarchy import _get_folder_hierarchy
 from app.deps.authorization_deps import Authorization, CheckStatus
@@ -48,7 +52,7 @@ from app.models.thumbnails import ThumbnailDB
 from app.models.users import UserOut
 from app.rabbitmq.listeners import submit_dataset_job
 from app.routers.authentication import get_admin, get_admin_mode
-from app.routers.files import add_file_entry, add_local_file_entry, remove_file_entry
+from app.routers.files import add_file_entry, add_local_file_entry
 from app.routers.licenses import delete_license
 from app.search.connect import delete_document_by_id
 from app.search.index import index_dataset, index_file
@@ -411,18 +415,36 @@ async def delete_dataset(
     if (dataset := await DatasetDB.get(PydanticObjectId(dataset_id))) is not None:
         # delete from elasticsearch
         delete_document_by_id(es, settings.elasticsearch_index, dataset_id)
-        # delete dataset first to minimize files/folder being uploaded to a delete dataset
-        await dataset.delete()
+
+        # find associate frozen datasets and delete them iteratively
+        async for frozen_dataset in DatasetFreezeDB.find(
+            DatasetFreezeDB.origin_id == PydanticObjectId(dataset_id)
+        ):
+            await _delete_frozen_dataset(frozen_dataset, fs, hard_delete=True)
+
+        # delete associate metadata
         await MetadataDB.find(
-            MetadataDB.resource.resource_id == PydanticObjectId(dataset_id)
+            MetadataDB.resource.resource_id == PydanticObjectId(dataset_id),
+            MetadataDB.resource.collection == "datasets",
         ).delete()
+
+        # delete associate folders
+        await FolderDB.find(
+            FolderDB.dataset_id == PydanticObjectId(dataset_id)
+        ).delete()
+
+        # delete associate thumbnails
+        await _delete_thumbnail(dataset, fs)
+
+        # delete associate visualizations
+        await _delete_visualizations(dataset, fs)
+
+        # delete files and its associate resources
         async for file in FileDB.find(
             FileDB.dataset_id == PydanticObjectId(dataset_id)
         ):
             await remove_file_entry(file.id, fs, es)
-        await FolderDB.find(
-            FolderDB.dataset_id == PydanticObjectId(dataset_id)
-        ).delete()
+
         await AuthorizationDB.find(
             AuthorizationDB.dataset_id == PydanticObjectId(dataset_id)
         ).delete()
@@ -432,6 +454,8 @@ async def delete_dataset(
         if dataset.license_id not in standard_license_ids:
             await delete_license(dataset.license_id)
 
+        # if above succeeded, delete the dataset
+        await dataset.delete()
         return {"deleted": dataset_id}
 
     raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
@@ -576,10 +600,43 @@ async def get_freeze_dataset_version(
     # Retrieve the dataset by ID
     if (
         frozen_dataset := await DatasetFreezeDB.find_one(
-            DatasetFreezeDB.origin_id == PydanticObjectId(dataset_id)
+            DatasetFreezeDB.origin_id == PydanticObjectId(dataset_id),
+            DatasetFreezeDB.frozen_version_num == frozen_version_num,
         )
     ) is not None:
+        if frozen_dataset.deleted is True:
+            raise HTTPException(
+                status_code=404,
+                detail=f"Dataset {dataset_id} version {frozen_version_num} has been deleted",
+            )
+
         return frozen_dataset.dict()
+
+    raise HTTPException(
+        status_code=404,
+        detail=f"Dataset {dataset_id} version {frozen_version_num} not found",
+    )
+
+
+@router.delete(
+    "/{dataset_id}/freeze/{frozen_version_num}", response_model=DatasetFreezeOut
+)
+async def delete_freeze_dataset_version(
+    dataset_id: str,
+    frozen_version_num: int,
+    user=Depends(get_current_user),
+    fs: Minio = Depends(dependencies.get_fs),
+    es: Elasticsearch = Depends(dependencies.get_elasticsearchclient),
+    allow: bool = Depends(Authorization("owner")),
+):
+    # Retrieve the frozen dataset by ID
+    if (
+        frozen_dataset := await DatasetFreezeDB.find_one(
+            DatasetFreezeDB.origin_id == PydanticObjectId(dataset_id),
+            DatasetFreezeDB.frozen_version_num == frozen_version_num,
+        )
+    ) is not None:
+        return await _delete_frozen_dataset(frozen_dataset, fs, hard_delete=False)
 
     raise HTTPException(
         status_code=404,

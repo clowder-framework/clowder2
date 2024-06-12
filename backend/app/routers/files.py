@@ -1,10 +1,11 @@
 import io
 import time
 from datetime import datetime, timedelta
-from typing import List, Optional, Union
+from typing import List, Optional
 
 from app import dependencies
 from app.config import settings
+from app.db.dataset.version import remove_file_entry, remove_local_file_entry
 from app.db.file.download import _increment_file_downloads
 from app.deps.authorization_deps import FileAuthorization
 from app.keycloak_auth import get_current_user, get_token
@@ -22,7 +23,7 @@ from app.models.users import UserOut
 from app.rabbitmq.listeners import EventListenerJobDB, submit_file_job
 from app.routers.feeds import check_feed_listeners
 from app.routers.utils import get_content_type
-from app.search.connect import delete_document_by_id, insert_record, update_record
+from app.search.connect import insert_record, update_record
 from app.search.index import index_file, index_thumbnail
 from beanie import PydanticObjectId
 from beanie.odm.operators.find.logical import Or
@@ -174,33 +175,6 @@ async def add_local_file_entry(
         user,
         rabbitmq_client,
     )
-
-
-# TODO: Move this to MongoDB middle layer
-async def remove_file_entry(
-    file_id: Union[str, ObjectId], fs: Minio, es: Elasticsearch
-):
-    """Remove FileDB object into MongoDB, Minio, and associated metadata and version information."""
-    # TODO: Deleting individual versions will require updating version_id in mongo, or deleting entire document
-    fs.remove_object(settings.MINIO_BUCKET_NAME, str(file_id))
-    # delete from elasticsearch
-    delete_document_by_id(es, settings.elasticsearch_index, str(file_id))
-    if (file := await FileDB.get(PydanticObjectId(file_id))) is not None:
-        await file.delete()
-    await MetadataDB.find(MetadataDB.resource.resource_id == ObjectId(file_id)).delete()
-    await FileVersionDB.find(FileVersionDB.file_id == ObjectId(file_id)).delete()
-
-
-async def remove_local_file_entry(file_id: Union[str, ObjectId], es: Elasticsearch):
-    """Remove FileDB object into MongoDB, Minio, and associated metadata and version information."""
-    # TODO: Deleting individual versions will require updating version_id in mongo, or deleting entire document
-    # delete from elasticsearch
-    delete_document_by_id(es, settings.elasticsearch_index, str(file_id))
-    if (file := await FileDB.get(PydanticObjectId(file_id))) is not None:
-        # TODO: delete from disk - should this be allowed if Clowder didn't originally write the file?
-        # os.path.remove(file.storage_path)
-        await file.delete()
-    await MetadataDB.find(MetadataDB.resource.resource_id == ObjectId(file_id)).delete()
 
 
 @router.put("/{file_id}", response_model=FileOut)
