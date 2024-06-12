@@ -16,6 +16,7 @@ import {
 	SEARCH_METADATA_DEFINITIONS,
 	UPDATE_DATASET_METADATA,
 	UPDATE_FILE_METADATA,
+	EDIT_METADATA_DEFINITION,
 } from "../actions/metadata";
 import { DataAction } from "../types/action";
 import { MetadataState } from "../types/data";
@@ -61,6 +62,10 @@ const metadata = (state = defaultState, action: DataAction) => {
 		case SAVE_METADATA_DEFINITION:
 			return Object.assign({}, state, {
 				newMetadataDefinition: action.metadataDefinition,
+			});
+		case EDIT_METADATA_DEFINITION:
+			return Object.assign({}, state, {
+				metadataDefinition: action.metadataDefinition,
 			});
 		case RESET_SAVE_METADATA_DEFINITIONS:
 			return Object.assign({}, state, {

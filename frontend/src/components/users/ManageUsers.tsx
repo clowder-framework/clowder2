@@ -159,7 +159,7 @@ export const ManageUsers = (): JSX.Element => {
 														}}
 														disabled={
 															profile.email === currentUser.email ||
-															currentUser.read_only_user
+															profile.read_only_user
 														}
 													/>
 												</TableCell>

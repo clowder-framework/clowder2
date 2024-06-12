@@ -87,8 +87,6 @@ async def index_file(
     ):
         metadata.append(md.content)
 
-    status = file.status
-
     # Add en entry to the file index
     doc = ElasticsearchEntry(
         resource_type="file",

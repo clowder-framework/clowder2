@@ -309,7 +309,7 @@ export const ENABLE_READONLY = "ENABLE_READONLY";
 export function enableReadOnly(email) {
 	return (dispatch) => {
 		return V2.LoginService.enableReadonlyUserApiV2UsersEnableReadonlyUseremailPost(
-			email,
+			email
 		)
 			.then((json) => {
 				dispatch({
@@ -329,7 +329,7 @@ export const DISABLE_READONLY = "DISABLE_READONLY";
 export function disableReadOnly(email) {
 	return (dispatch) => {
 		return V2.LoginService.disableReadonlyUserApiV2UsersDisableReadonlyUseremailPost(
-			email,
+			email
 		)
 			.then((json) => {
 				dispatch({

@@ -25,6 +25,7 @@ import { RootState } from "../../types/data";
 import { EventListenerOut as Extractor } from "../../openapi/v2";
 import { ClowderRjsfSelectWidget } from "../styledComponents/ClowderRjsfSelectWidget";
 import { ClowderRjsfTextWidget } from "../styledComponents/ClowderRjsfTextWidget";
+import { ClowderFileSelector } from "../styledComponents/ClowderFileSelector";
 import ExtractorStatus from "./ExtractorStatus";
 import CloseIcon from "@mui/icons-material/Close";
 
@@ -40,6 +41,11 @@ type SubmitExtractionProps = {
 const widgets = {
 	TextWidget: ClowderRjsfTextWidget,
 	SelectWidget: ClowderRjsfSelectWidget,
+	clowderFile: ClowderFileSelector,
+};
+
+const uiSchema = {
+	clowderFile: { "ui:widget": "FileSelector" },
 };
 
 export default function SubmitExtraction(props: SubmitExtractionProps) {
@@ -156,6 +162,7 @@ export default function SubmitExtraction(props: SubmitExtractionProps) {
 											<Container>
 												<Form
 													schema={{ properties: {} }}
+													uiSchema={uiSchema}
 													onSubmit={({ formData }) => {
 														onSubmit(formData);
 													}}

@@ -219,7 +219,7 @@ async def get_datasets(
     admin=Depends(get_admin),
     admin_mode: bool = Depends(get_admin_mode),
 ):
-    if admin and admin_mode:
+    if admin and admin_mode and not mine:
         datasets_and_count = await DatasetDBViewList.aggregate(
             [_get_page_query(skip, limit, sort_field="created", ascending=False)],
         ).to_list()
@@ -683,13 +683,10 @@ async def save_file(
                 )
         file_public = False
         file_authenticated = False
-        file_private = False
         if dataset.status == DatasetStatus.PUBLIC:
             file_public = True
         elif dataset.status == DatasetStatus.AUTHENTICATED:
             file_authenticated = True
-        else:
-            file_private = True
         await add_file_entry(
             new_file,
             user,
