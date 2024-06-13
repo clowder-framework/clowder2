@@ -10,7 +10,8 @@ export function fetchListeners(
 	category = null,
 	label = null,
 	aliveOnly = false,
-	process = null
+	process = null,
+	all = false
 ) {
 	return (dispatch) => {
 		// TODO: Parameters for dates? paging?
@@ -21,7 +22,8 @@ export function fetchListeners(
 			category,
 			label,
 			aliveOnly,
-			process
+			process,
+			all
 		)
 			.then((json) => {
 				dispatch({
@@ -45,6 +47,46 @@ export function fetchListeners(
 						)
 					)
 				);
+			});
+	};
+}
+
+export const TOGGLE_ACTIVE_FLAG_LISTENER = "TOGGLE_ACTIVE_FLAG_LISTENER";
+
+export function enableListener(id) {
+	return (dispatch) => {
+		return V2.ListenersService.enableListenerApiV2ListenersListenerIdEnablePut(
+			id
+		)
+			.then((json) => {
+				// We could have called fetchListeners but it would be an overhead since we are just toggling the active flag for one listener.
+				// Hence we create a separate action to update the particular listener in state
+				dispatch({
+					type: TOGGLE_ACTIVE_FLAG_LISTENER,
+					listener: json,
+				});
+			})
+			.catch((reason) => {
+				dispatch(handleErrors(reason, enableListener(id)));
+			});
+	};
+}
+
+export function disableListener(id) {
+	return (dispatch) => {
+		return V2.ListenersService.disableListenerApiV2ListenersListenerIdDisablePut(
+			id
+		)
+			.then((json) => {
+				// We could have called fetchListeners but it would be an overhead since we are just toggling the active flag for one listener.
+				// Hence we create a separate action to update the particular listener in state
+				dispatch({
+					type: TOGGLE_ACTIVE_FLAG_LISTENER,
+					listener: json,
+				});
+			})
+			.catch((reason) => {
+				dispatch(handleErrors(reason, disableListener(id)));
 			});
 	};
 }
@@ -228,5 +270,95 @@ export function resetJobUpdates() {
 			currJobUpdates: [],
 			receivedAt: Date.now(),
 		});
+	};
+}
+
+export const RECEIVE_FEEDS = "RECEIVE_FEEDS";
+
+export function fetchFeeds(name, skip = 0, limit = 20) {
+	return (dispatch) => {
+		return V2.FeedsService.getFeedsApiV2FeedsGet(name, skip, limit)
+			.then((json) => {
+				dispatch({
+					type: RECEIVE_FEEDS,
+					feeds: json,
+					receivedAt: Date.now(),
+				});
+			})
+			.catch((reason) => {
+				dispatch(handleErrors(reason, fetchFeeds(skip, limit)));
+			});
+	};
+}
+
+export const RECEIVE_FEED = "RECEIVE_FEED";
+
+export function fetchFeed(id) {
+	return (dispatch) => {
+		return V2.FeedsService.getFeedApiV2FeedsFeedIdGet(id)
+			.then((json) => {
+				dispatch({
+					type: RECEIVE_FEED,
+					feed: json,
+					receivedAt: Date.now(),
+				});
+			})
+			.catch((reason) => {
+				dispatch(handleErrors(reason, fetchFeed(id)));
+			});
+	};
+}
+
+export const CREATE_FEED = "CREATE_FEED";
+
+export function createFeed(formData) {
+	return (dispatch) => {
+		return V2.FeedsService.saveFeedApiV2FeedsPost(formData)
+			.then((json) => {
+				dispatch({
+					type: CREATE_FEED,
+					feed: json,
+					receivedAt: Date.now(),
+				});
+			})
+			.catch((reason) => {
+				dispatch(handleErrors(reason, createFeed(formData)));
+			});
+	};
+}
+
+export const EDIT_FEED = "EDIT_FEED";
+
+export function updateFeed(id, formData) {
+	return (dispatch) => {
+		return V2.FeedsService.editFeedApiV2FeedsFeedIdPut(id, formData)
+			.then((json) => {
+				dispatch({
+					type: EDIT_FEED,
+					feed: json,
+					receivedAt: Date.now(),
+				});
+			})
+			.catch((reason) => {
+				dispatch(handleErrors(reason, updateFeed(id, formData)));
+			});
+	};
+}
+
+export const DELETE_FEED = "DELETE_FEED";
+
+export function deleteFeed(id) {
+	return (dispatch) => {
+		return V2.FeedsService.deleteFeedApiV2FeedsFeedIdDelete(id)
+			.then((json) => {
+				dispatch({
+					type: DELETE_FEED,
+					feed: json,
+					receivedAt: Date.now(),
+				});
+			})
+			.catch((reason) => {
+				dispatch(handleErrors(reason, deleteFeed(id)));
+			});
 	};
 }

@@ -25,11 +25,14 @@ type PublicDatasetCardProps = {
 	description?: string;
 	thumbnailId?: string;
 	publicView?: boolean | false;
+	frozen?: boolean | false;
+	frozenVersionNum?: number;
 };
 
 export default function PublicDatasetCard(props: PublicDatasetCardProps) {
 	const { id, name, author, created, description, thumbnailId, publicView } =
 		props;
+
 	const [thumbnailUrl, setThumbnailUrl] = useState("");
 
 	useEffect(() => {
@@ -52,7 +55,7 @@ export default function PublicDatasetCard(props: PublicDatasetCardProps) {
 			{publicView ? (
 				<CardActionArea
 					component={Link}
-					to={`/public/datasets/${id}`}
+					to={`/public_datasets/${id}`}
 					sx={{ height: "100%" }}
 				>
 					<CardHeader title={name} subheader={subheader} />
@@ -108,7 +111,7 @@ export default function PublicDatasetCard(props: PublicDatasetCardProps) {
 					</CardContent>
 				</CardActionArea>
 			)}
-			<CardActions sx={{ pb: 0 }}>
+			<CardActions sx={{ pb: 0, justifyContent: "space-between" }}>
 				<Tooltip title="Download">
 					<IconButton
 						href={`${config.hostname}/api/v2/public_datasets/${id}/download`}

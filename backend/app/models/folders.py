@@ -20,31 +20,52 @@ class FolderIn(FolderBase):
     parent_folder: Optional[PydanticObjectId]
 
 
-class FolderDB(Document, FolderBase):
+class FolderBaseCommon(FolderBase):
     dataset_id: PydanticObjectId
-    parent_folder: Optional[PydanticObjectId]
+    parent_folder: Optional[PydanticObjectId] = None
     creator: UserOut
     created: datetime = Field(default_factory=datetime.utcnow)
     modified: datetime = Field(default_factory=datetime.utcnow)
     object_type: str = "folder"
+    origin_id: Optional[PydanticObjectId] = None
 
+
+class FolderDB(Document, FolderBaseCommon):
     class Settings:
         name = "folders"
 
 
-class FolderDBViewList(View, FolderBase):
+class FolderFreezeDB(Document, FolderBaseCommon):
+    frozen: bool = True
+
+    class Settings:
+        name = "folders_freeze"
+
+
+class FolderDBViewList(View, FolderBaseCommon):
     id: PydanticObjectId = Field(None, alias="_id")  # necessary for Views
-    dataset_id: PydanticObjectId
-    parent_folder: Optional[PydanticObjectId]
-    creator: UserOut
-    created: datetime = Field(default_factory=datetime.utcnow)
-    modified: datetime = Field(default_factory=datetime.utcnow)
     auth: List[AuthorizationDB]
+
+    # for dataset versioning
+    origin_id: PydanticObjectId
+    frozen: bool = False
 
     class Settings:
         source = FolderDB
         name = "folders_view"
         pipeline = [
+            {
+                "$addFields": {
+                    "frozen": False,
+                    "origin_id": "$_id",
+                }
+            },
+            {
+                "$unionWith": {
+                    "coll": "folders_freeze",
+                    "pipeline": [{"$addFields": {"frozen": True}}],
+                }
+            },
             {
                 "$lookup": {
                     "from": "authorization",
@@ -60,6 +81,6 @@ class FolderDBViewList(View, FolderBase):
         # cache_capacity = 5
 
 
-class FolderOut(FolderDB):
+class FolderOut(FolderDB, FolderFreezeDB):
     class Config:
         fields = {"id": "id"}

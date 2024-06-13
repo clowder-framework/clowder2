@@ -15,8 +15,6 @@ import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 
 type MetadataType = {
-	updateMetadata: any;
-	deleteMetadata: any;
 	resourceType: string | undefined;
 	resourceId: string | undefined;
 	version: number | undefined;

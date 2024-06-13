@@ -40,7 +40,7 @@ export function DatasetDetails(props: DatasetAboutProps) {
 		});
 
 	return (
-		<Box sx={{ mt: 5 }}>
+		<Box sx={{ mt: 5, mb: 2 }}>
 			<Typography variant="h5" gutterBottom>
 				Details
 			</Typography>

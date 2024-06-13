@@ -6,6 +6,8 @@ import {
 	DialogContent,
 	DialogTitle,
 	Grid,
+	IconButton,
+	Link as MuiLink,
 	Pagination,
 } from "@mui/material";
 import { RootState } from "../../types/data";
@@ -29,6 +31,8 @@ import { CreateGroup } from "./CreateGroup";
 import { ErrorModal } from "../errors/ErrorModal";
 import { GenericSearchBox } from "../search/GenericSearchBox";
 import config from "../../app.config";
+import DeleteIcon from "@mui/icons-material/Delete";
+import DeleteGroupModal from "./DeleteGroupModal";
 
 export function Groups() {
 	// Redux connect equivalent
@@ -45,6 +49,9 @@ export function Groups() {
 	const pageMetadata = useSelector(
 		(state: RootState) => state.group.groups.metadata
 	);
+	const deletedGroup = useSelector(
+		(state: RootState) => state.group.deletedGroup
+	);
 	const adminMode = useSelector((state: RootState) => state.user.adminMode);
 
 	// TODO add option to determine limit number; default show 5 groups each time
@@ -53,11 +60,13 @@ export function Groups() {
 	const [searchTerm, setSearchTerm] = useState<string>("");
 	const [createGroupOpen, setCreateGroupOpen] = useState<boolean>(false);
 	const [errorOpen, setErrorOpen] = useState(false);
+	const [deleteGroupConfirmOpen, setDeleteGroupConfirmOpen] = useState(false);
+	const [selectedGroupId, setSelectedGroupId] = useState("");
 
 	// component did mount
 	useEffect(() => {
 		listGroups((currPageNum - 1) * limit, limit);
-	}, [adminMode]);
+	}, [adminMode, deletedGroup]);
 
 	// search while typing
 	useEffect(() => {
@@ -78,6 +87,11 @@ export function Groups() {
 		<Layout>
 			{/*Error Message dialogue*/}
 			<ErrorModal errorOpen={errorOpen} setErrorOpen={setErrorOpen} />
+			<DeleteGroupModal
+				deleteGroupConfirmOpen={deleteGroupConfirmOpen}
+				setDeleteGroupConfirmOpen={setDeleteGroupConfirmOpen}
+				groupId={selectedGroupId}
+			/>
 			<div className="outer-container">
 				{/*create new group*/}
 				<Dialog
@@ -149,6 +163,7 @@ export function Groups() {
 										>
 											<GroupsIcon />
 										</TableCell>
+										<TableCell align="left" />
 									</TableRow>
 								</TableHead>
 								<TableBody>
@@ -161,15 +176,35 @@ export function Groups() {
 												}}
 											>
 												<TableCell scope="row" key={group.id}>
-													<Button component={Link} to={`/groups/${group.id}`}>
+													<MuiLink
+														component={Link}
+														to={`/groups/${group.id}`}
+														sx={{ textDecoration: "none" }}
+													>
 														{group.name}
-													</Button>
+													</MuiLink>
 												</TableCell>
 												<TableCell scope="row" key={group.id} align="left">
 													{group.description}
 												</TableCell>
 												<TableCell scope="row" key={group.id} align="left">
 													{group.users !== undefined ? group.users.length : 0}
+												</TableCell>
+												<TableCell
+													scope="row"
+													key={`${group.id}-delete`}
+													align="left"
+												>
+													<IconButton
+														aria-label="delete"
+														size="small"
+														onClick={() => {
+															setSelectedGroupId(group.id);
+															setDeleteGroupConfirmOpen(true);
+														}}
+													>
+														<DeleteIcon fontSize="small" />
+													</IconButton>
 												</TableCell>
 											</TableRow>
 										);

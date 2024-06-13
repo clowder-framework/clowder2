@@ -52,4 +52,5 @@ import type { MetadataRequiredForItems } from './MetadataRequiredForItems';
                                         '@context'?: Array<string>;
                                         context_url?: string;
                                         fields: Array<MetadataField>;
+                                        modified?: string;
                                     }

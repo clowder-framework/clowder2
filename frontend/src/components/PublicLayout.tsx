@@ -22,6 +22,9 @@ import { Explore } from "@material-ui/icons";
 import PersonIcon from "@mui/icons-material/Person";
 import VpnKeyIcon from "@mui/icons-material/VpnKey";
 import LogoutIcon from "@mui/icons-material/Logout";
+import { EmbeddedPublicSearch } from "./search/EmbeddedPublicSearch";
+import { AppVersion } from "./versions/AppVersion";
+import SearchDatasetIcon from "@mui/icons-material/Search";
 import { EmbeddedSearch } from "./search/EmbeddedSearch";
 import { Footer } from "./navigation/Footer";
 
@@ -46,7 +49,7 @@ const Main = styled("main", { shouldForwardProp: (prop) => prop !== "open" })<{
 	}),
 }));
 
-const SearchDiv = styled("div")(({ theme }) => ({
+const PublicSearchDiv = styled("div")(({ theme }) => ({
 	position: "relative",
 	marginLeft: theme.spacing(3),
 	marginBottom: "-5px", // to compoensate the tags div
@@ -94,7 +97,8 @@ export default function PersistentDrawerLeft(props) {
 	const { children } = props;
 	const theme = useTheme();
 	const [open, setOpen] = React.useState(false);
-	const [embeddedSearchHidden, setEmbeddedSearchHidden] = React.useState(false);
+	const [embeddedPublicSearchHidden, setEmbeddedPublicSearchHidden] =
+		React.useState(false);
 	const [anchorEl, setAnchorEl] = React.useState(null);
 	const isMenuOpen = Boolean(anchorEl);
 
@@ -114,9 +118,9 @@ export default function PersistentDrawerLeft(props) {
 
 	useEffect(() => {
 		if (location.pathname.includes("search")) {
-			setEmbeddedSearchHidden(true);
+			setEmbeddedPublicSearchHidden(true);
 		} else {
-			setEmbeddedSearchHidden(false);
+			setEmbeddedPublicSearchHidden(false);
 		}
 	}, [location]);
 
@@ -151,10 +155,10 @@ export default function PersistentDrawerLeft(props) {
 					</Link>
 
 					{/*for searching*/}
-					<SearchDiv hidden={true}>
+					<PublicSearchDiv hidden={embeddedPublicSearchHidden}>
 						{/*	<InputSearchBox />*/}
-						<EmbeddedSearch />
-					</SearchDiv>
+						<EmbeddedPublicSearch />
+					</PublicSearchDiv>
 					<Box sx={{ flexGrow: 1 }} />
 					<Box sx={{ marginLeft: "auto" }}>
 						<Link href="/auth/register" sx={link}>
@@ -233,6 +237,18 @@ export default function PersistentDrawerLeft(props) {
 						</ListItemButton>
 					</ListItem>
 				</List>
+				<Divider />
+				<List>
+					<ListItem key={"public_search"} disablePadding>
+						<ListItemButton component={RouterLink} to="/public_search">
+							<ListItemIcon>
+								<SearchDatasetIcon />
+							</ListItemIcon>
+							<ListItemText primary={"Public Search"} />
+						</ListItemButton>
+					</ListItem>
+				</List>
+				{/*<Divider />*/}
 				<Divider />
 			</Drawer>
 			<Main open={open}>

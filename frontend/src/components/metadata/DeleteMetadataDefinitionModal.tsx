@@ -37,6 +37,7 @@ export default function DeleteMetadataDefinitionModal(
 			handleActionCancel={() => {
 				setDeleteMetadataDefinitionConfirmOpen(false);
 			}}
+			actionLevel={"error"}
 		/>
 	);
 }

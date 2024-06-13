@@ -23,6 +23,7 @@ const defaultState: UserState = {
 	errorMsg: "",
 	hashedKey: "",
 	apiKeys: <Paged>{ metadata: <PageMetadata>{}, data: <UserAPIKeyOut[]>[] },
+	deletedApiKey: <UserAPIKeyOut>{},
 	profile: <UserOut>{},
 };
 
@@ -63,12 +64,7 @@ const user = (state = defaultState, action: DataAction) => {
 			return Object.assign({}, state, { apiKeys: action.apiKeys });
 		case DELETE_API_KEY:
 			return Object.assign({}, state, {
-				apiKeys: {
-					...state.apiKeys,
-					data: state.apiKeys.data.filter(
-						(apiKey: UserAPIKeyOut) => apiKey.id !== action.apiKey.id
-					),
-				},
+				deletedApiKey: action.apiKey,
 			});
 		case GENERATE_API_KEY:
 			return Object.assign({}, state, { hashedKey: action.hashedKey });
