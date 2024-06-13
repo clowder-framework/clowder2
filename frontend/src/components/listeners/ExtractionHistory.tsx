@@ -28,7 +28,7 @@ export const ExtractionHistory = (): JSX.Element => {
 		heartbeatInterval: number | undefined,
 		selectedCategory: string | null,
 		selectedLabel: string | null,
-		aliveOnly: boolean | undefined,
+		aliveOnly: boolean | undefined
 	) =>
 		dispatch(
 			fetchListeners(
@@ -37,15 +37,15 @@ export const ExtractionHistory = (): JSX.Element => {
 				heartbeatInterval,
 				selectedCategory,
 				selectedLabel,
-				aliveOnly,
-			),
+				aliveOnly
+			)
 		);
 
 	const listeners = useSelector(
-		(state: RootState) => state.listener.listeners.data,
+		(state: RootState) => state.listener.listeners.data
 	);
 	const listenerPageMetadata = useSelector(
-		(state: RootState) => state.listener.listeners.metadata,
+		(state: RootState) => state.listener.listeners.metadata
 	);
 	const adminMode = useSelector((state: RootState) => state.user.adminMode);
 

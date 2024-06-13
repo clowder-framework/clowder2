@@ -12,7 +12,7 @@ type DeleteMetadataDefinitionModalProps = {
 };
 
 export default function DeleteMetadataDefinitionModal(
-	props: DeleteMetadataDefinitionModalProps,
+	props: DeleteMetadataDefinitionModalProps
 ) {
 	const {
 		deleteMetadataDefinitionConfirmOpen,

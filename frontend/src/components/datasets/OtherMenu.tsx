@@ -39,7 +39,7 @@ export const OtherMenu = (props: ActionsMenuProps): JSX.Element => {
 	const deleteDataset = (datasetId: string | undefined) =>
 		dispatch(datasetDeleted(datasetId));
 	const datasetRole = useSelector(
-		(state: RootState) => state.dataset.datasetRole,
+		(state: RootState) => state.dataset.datasetRole
 	);
 
 	const listGroups = () => dispatch(fetchGroups(0, 21));

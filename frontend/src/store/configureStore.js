@@ -32,7 +32,7 @@ function configureStoreDev() {
 		window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
 	const store = createStore(
 		rootReducer,
-		composeEnhancers(applyMiddleware(...middlewares)),
+		composeEnhancers(applyMiddleware(...middlewares))
 		// window.devToolsExtension ? window.devToolsExtension() : f => f
 	);
 

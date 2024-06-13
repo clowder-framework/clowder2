@@ -52,11 +52,11 @@ export const PublicDataset = (): JSX.Element => {
 	const dispatch = useDispatch();
 	const updateDatasetMetadata = (
 		datasetId: string | undefined,
-		content: object,
+		content: object
 	) => dispatch(patchDatasetMetadataAction(datasetId, content));
 	const deleteDatasetMetadata = (
 		datasetId: string | undefined,
-		metadata: object,
+		metadata: object
 	) => dispatch(deleteDatasetMetadataAction(datasetId, metadata));
 	const getPublicFolderPath = (folderId: string | null) =>
 		dispatch(fetchPublicFolderPath(folderId));
@@ -64,25 +64,25 @@ export const PublicDataset = (): JSX.Element => {
 		datasetId: string | undefined,
 		folderId: string | null,
 		skip: number | undefined,
-		limit: number | undefined,
+		limit: number | undefined
 	) =>
 		dispatch(
-			fetchPublicFoldersFilesInDatasetAction(datasetId, folderId, skip, limit),
+			fetchPublicFoldersFilesInDatasetAction(datasetId, folderId, skip, limit)
 		);
 	const listPublicDatasetAbout = (datasetId: string | undefined) =>
 		dispatch(fetchPublicDatasetAbout(datasetId));
 	const getMetadatDefinitions = (
 		name: string | null,
 		skip: number,
-		limit: number,
+		limit: number
 	) => dispatch(fetchPublicMetadataDefinitions(name, skip, limit));
 
 	// mapStateToProps
 	const about = useSelector(
-		(state: RootState) => state.publicDataset.publicAbout,
+		(state: RootState) => state.publicDataset.publicAbout
 	);
 	const publicFolderPath = useSelector(
-		(state: RootState) => state.folder.publicFolderPath,
+		(state: RootState) => state.folder.publicFolderPath
 	);
 	const license = useSelector((state: RootState) => state.dataset.license);
 	const [standardLicenseUrl, setStandardLicenseUrl] = useState<string>("");
@@ -103,10 +103,10 @@ export const PublicDataset = (): JSX.Element => {
 	const [limit] = useState<number>(config.defaultFolderFilePerPage);
 
 	const pageMetadata = useSelector(
-		(state: RootState) => state.publicDataset.publicFoldersAndFiles.metadata,
+		(state: RootState) => state.publicDataset.publicFoldersAndFiles.metadata
 	);
 	const publicFoldersAndFiles = useSelector(
-		(state: RootState) => state.publicDataset.publicFoldersAndFiles.data,
+		(state: RootState) => state.publicDataset.publicFoldersAndFiles.data
 	);
 
 	// component did mount list all files in dataset
@@ -115,7 +115,7 @@ export const PublicDataset = (): JSX.Element => {
 			datasetId,
 			folderId,
 			(currPageNum - 1) * limit,
-			limit,
+			limit
 		);
 		listPublicDatasetAbout(datasetId);
 		getPublicFolderPath(folderId);
@@ -153,7 +153,7 @@ export const PublicDataset = (): JSX.Element => {
 
 	const handleTabChange = (
 		_event: React.ChangeEvent<{}>,
-		newTabIndex: number,
+		newTabIndex: number
 	) => {
 		setSelectedTabIndex(newTabIndex);
 	};

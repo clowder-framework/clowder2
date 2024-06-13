@@ -22,10 +22,10 @@ export const Register = (): JSX.Element => {
 		email: string,
 		password: string,
 		firstname: string,
-		lastname: string,
+		lastname: string
 	) => dispatch(registerAction(email, password, firstname, lastname));
 	const registerSucceeded = useSelector(
-		(state: RootState) => state.user.registerSucceeded,
+		(state: RootState) => state.user.registerSucceeded
 	);
 	const errorMsg = useSelector((state: RootState) => state.user.errorMsg);
 
@@ -69,7 +69,7 @@ export const Register = (): JSX.Element => {
 	};
 
 	const changePasswordConfirm = (
-		event: React.ChangeEvent<HTMLInputElement>,
+		event: React.ChangeEvent<HTMLInputElement>
 	) => {
 		const pw = event.target.value;
 

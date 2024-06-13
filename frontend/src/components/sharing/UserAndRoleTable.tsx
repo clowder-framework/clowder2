@@ -23,7 +23,7 @@ export const UserAndRoleTable = (): JSX.Element => {
 	const dispatch = useDispatch();
 
 	const datasetRolesList = useSelector(
-		(state: RootState) => state.dataset.roles,
+		(state: RootState) => state.dataset.roles
 	);
 
 	return (

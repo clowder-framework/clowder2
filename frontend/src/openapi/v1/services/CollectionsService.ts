@@ -22,7 +22,7 @@ export class CollectionsService {
 		title?: string,
 		date?: string,
 		limit?: number,
-		exact?: boolean,
+		exact?: boolean
 	): CancelablePromise<void> {
 		return __request({
 			method: "GET",
@@ -48,7 +48,7 @@ export class CollectionsService {
 	 * @throws ApiError
 	 */
 	public static postCollections(
-		requestBody?: Collection,
+		requestBody?: Collection
 	): CancelablePromise<any> {
 		return __request({
 			method: "POST",
@@ -110,7 +110,7 @@ export class CollectionsService {
 	 */
 	public static getCollections3(
 		limit?: number,
-		showAll?: boolean,
+		showAll?: boolean
 	): CancelablePromise<any> {
 		return __request({
 			method: "GET",
@@ -136,7 +136,7 @@ export class CollectionsService {
 		collId: string,
 		requestBody: {
 			name: string;
-		},
+		}
 	): CancelablePromise<any> {
 		return __request({
 			method: "PUT",
@@ -168,7 +168,7 @@ export class CollectionsService {
 		title?: string,
 		date?: string,
 		limit?: number,
-		exact?: boolean,
+		exact?: boolean
 	): CancelablePromise<any> {
 		return __request({
 			method: "GET",
@@ -236,7 +236,7 @@ export class CollectionsService {
 	 */
 	public static postCollections2(
 		collId: string,
-		subCollId: string,
+		subCollId: string
 	): CancelablePromise<any> {
 		return __request({
 			method: "POST",
@@ -262,7 +262,7 @@ export class CollectionsService {
 		title?: string,
 		date?: string,
 		limit?: number,
-		exact?: boolean,
+		exact?: boolean
 	): CancelablePromise<any> {
 		return __request({
 			method: "GET",
@@ -347,7 +347,7 @@ export class CollectionsService {
 	 */
 	public static postCollections3(
 		collId: string,
-		subCollId: string,
+		subCollId: string
 	): CancelablePromise<any> {
 		return __request({
 			method: "POST",
@@ -405,7 +405,7 @@ export class CollectionsService {
 		title?: string,
 		date?: string,
 		limit?: number,
-		exact?: boolean,
+		exact?: boolean
 	): CancelablePromise<any> {
 		return __request({
 			method: "GET",
@@ -430,7 +430,7 @@ export class CollectionsService {
 	 */
 	public static postCollections4(
 		collId: string,
-		dsId: string,
+		dsId: string
 	): CancelablePromise<any> {
 		return __request({
 			method: "POST",
@@ -450,7 +450,7 @@ export class CollectionsService {
 	public static deleteCollections3(
 		collId: string,
 		dsId: string,
-		ignoreNotFound?: boolean,
+		ignoreNotFound?: boolean
 	): CancelablePromise<any> {
 		return __request({
 			method: "DELETE",
@@ -476,7 +476,7 @@ export class CollectionsService {
 		requestBody?: {
 			extractor_id?: string;
 			preview_type?: string;
-		},
+		}
 	): CancelablePromise<any> {
 		return __request({
 			method: "POST",
@@ -542,7 +542,7 @@ export class CollectionsService {
 	 */
 	public static postCollections8(
 		collId: string,
-		spaceId: string,
+		spaceId: string
 	): CancelablePromise<any> {
 		return __request({
 			method: "POST",
@@ -562,7 +562,7 @@ export class CollectionsService {
 	 */
 	public static getCollections13(
 		collId: string,
-		spaceId: string,
+		spaceId: string
 	): CancelablePromise<any> {
 		return __request({
 			method: "GET",
@@ -620,7 +620,7 @@ export class CollectionsService {
 		collId: string,
 		requestBody: {
 			description: string;
-		},
+		}
 	): CancelablePromise<any> {
 		return __request({
 			method: "PUT",
@@ -643,7 +643,7 @@ export class CollectionsService {
 	 */
 	public static postCollections10(
 		collId: string,
-		spaceId: string,
+		spaceId: string
 	): CancelablePromise<any> {
 		return __request({
 			method: "POST",
@@ -661,7 +661,7 @@ export class CollectionsService {
 	 */
 	public static getCollections15(
 		id: string,
-		compression?: number,
+		compression?: number
 	): CancelablePromise<any> {
 		return __request({
 			method: "GET",
@@ -689,7 +689,7 @@ export class CollectionsService {
 		title?: string,
 		date?: string,
 		limit?: number,
-		exact?: boolean,
+		exact?: boolean
 	): CancelablePromise<any> {
 		return __request({
 			method: "GET",
@@ -716,7 +716,7 @@ export class CollectionsService {
 	public static postCollections11(
 		collId: string,
 		dsId: string,
-		ignoreNotFound: string,
+		ignoreNotFound: string
 	): CancelablePromise<any> {
 		return __request({
 			method: "POST",

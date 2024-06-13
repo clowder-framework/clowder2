@@ -19,7 +19,7 @@ export const MetadataDateTimePicker = (props) => {
 		datasetRole,
 	} = props;
 	const [localContent, setLocalContent] = useState(
-		content && content[fieldName] ? content : {},
+		content && content[fieldName] ? content : {}
 	);
 
 	const [readOnly, setReadOnly] = useState(initialReadOnly);
@@ -36,11 +36,11 @@ export const MetadataDateTimePicker = (props) => {
 						id: metadataId,
 						definition: widgetName,
 						content: tempContents,
-					})
+				  })
 				: setMetadata({
 						definition: widgetName,
 						content: tempContents,
-					})
+				  })
 			: null;
 		setLocalContent(tempContents);
 	};
@@ -65,7 +65,7 @@ export const MetadataDateTimePicker = (props) => {
 									helperText={
 										inputChanged
 											? "* You have changed this field. " +
-												"Remember to save/ update."
+											  "Remember to save/ update."
 											: ""
 									}
 								/>

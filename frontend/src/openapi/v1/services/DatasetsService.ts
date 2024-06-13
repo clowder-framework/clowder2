@@ -36,7 +36,7 @@ export class DatasetsService {
 		originalZipFile?: string,
 		flags?: string,
 		extract?: boolean,
-		folderId?: string,
+		folderId?: string
 	): CancelablePromise<any> {
 		return __request({
 			method: "POST",
@@ -72,7 +72,7 @@ export class DatasetsService {
 		date?: string,
 		title?: string,
 		limit?: number,
-		exact?: boolean,
+		exact?: boolean
 	): CancelablePromise<any> {
 		return __request({
 			method: "GET",
@@ -161,7 +161,7 @@ export class DatasetsService {
 	 */
 	public static postDatasets2(
 		dsId: string,
-		spaceId: string,
+		spaceId: string
 	): CancelablePromise<any> {
 		return __request({
 			method: "POST",
@@ -184,7 +184,7 @@ export class DatasetsService {
 	 */
 	public static postDatasets3(
 		dsId: string,
-		fileId: string,
+		fileId: string
 	): CancelablePromise<any> {
 		return __request({
 			method: "POST",
@@ -213,7 +213,7 @@ export class DatasetsService {
 			 * old folder id
 			 */
 			folderId?: string;
-		},
+		}
 	): CancelablePromise<any> {
 		return __request({
 			method: "POST",
@@ -234,7 +234,7 @@ export class DatasetsService {
 	public static postDatasets5(
 		dsId: string,
 		folderId: string,
-		fileId: string,
+		fileId: string
 	): CancelablePromise<any> {
 		return __request({
 			method: "POST",
@@ -254,7 +254,7 @@ export class DatasetsService {
 	public static postDatasets6(
 		dsId: string,
 		fileId: string,
-		ignoreNotFound: string,
+		ignoreNotFound: string
 	): CancelablePromise<any> {
 		return __request({
 			method: "POST",
@@ -317,7 +317,7 @@ export class DatasetsService {
 	 */
 	public static postDatasets8(
 		id: string,
-		requestBody: Tags,
+		requestBody: Tags
 	): CancelablePromise<any> {
 		return __request({
 			method: "POST",
@@ -355,7 +355,7 @@ export class DatasetsService {
 	public static postDatasets9(
 		id: string,
 		inFolder: boolean,
-		fileCount: number,
+		fileCount: number
 	): CancelablePromise<any> {
 		return __request({
 			method: "POST",
@@ -420,7 +420,7 @@ export class DatasetsService {
 		id: string,
 		requestBody: {
 			description: string;
-		},
+		}
 	): CancelablePromise<any> {
 		return __request({
 			method: "PUT",
@@ -440,7 +440,7 @@ export class DatasetsService {
 	 */
 	public static postDatasets11(
 		id: string,
-		requestBody?: any,
+		requestBody?: any
 	): CancelablePromise<any> {
 		return __request({
 			method: "POST",
@@ -515,7 +515,7 @@ export class DatasetsService {
 	 */
 	public static deleteDatasets2(
 		dsId: string,
-		fileId: string,
+		fileId: string
 	): CancelablePromise<any> {
 		return __request({
 			method: "DELETE",
@@ -533,7 +533,7 @@ export class DatasetsService {
 	 */
 	public static postDatasets12(
 		id: string,
-		requestBody: Comment,
+		requestBody: Comment
 	): CancelablePromise<any> {
 		return __request({
 			method: "POST",
@@ -592,7 +592,7 @@ export class DatasetsService {
 	 */
 	public static postDatasets13(
 		id: string,
-		requestBody: any,
+		requestBody: any
 	): CancelablePromise<any> {
 		return __request({
 			method: "POST",
@@ -672,7 +672,7 @@ export class DatasetsService {
 		id: string,
 		requestBody: {
 			creator?: string;
-		},
+		}
 	): CancelablePromise<any> {
 		return __request({
 			method: "POST",
@@ -692,7 +692,7 @@ export class DatasetsService {
 	 */
 	public static deleteDatasets3(
 		id: string,
-		creator: string,
+		creator: string
 	): CancelablePromise<any> {
 		return __request({
 			method: "DELETE",
@@ -717,7 +717,7 @@ export class DatasetsService {
 	public static putDatasets1(
 		id: string,
 		creator: string,
-		newPos: number,
+		newPos: number
 	): CancelablePromise<any> {
 		return __request({
 			method: "PUT",
@@ -755,7 +755,7 @@ export class DatasetsService {
 	 */
 	public static putDatasets2(
 		id: string,
-		access?: string,
+		access?: string
 	): CancelablePromise<any> {
 		return __request({
 			method: "PUT",
@@ -784,7 +784,7 @@ export class DatasetsService {
 		date?: string,
 		title?: string,
 		limit?: number,
-		exact?: boolean,
+		exact?: boolean
 	): CancelablePromise<any> {
 		return __request({
 			method: "GET",
@@ -813,7 +813,7 @@ export class DatasetsService {
 		id: string,
 		requestBody: {
 			name: string;
-		},
+		}
 	): CancelablePromise<any> {
 		return __request({
 			method: "PUT",
@@ -903,7 +903,7 @@ export class DatasetsService {
 		requestBody: {
 			name: string;
 			description: string;
-		},
+		}
 	): CancelablePromise<any> {
 		return __request({
 			method: "POST",
@@ -972,7 +972,7 @@ export class DatasetsService {
 	 */
 	public static getDatasets16(
 		id: string,
-		extractor?: string,
+		extractor?: string
 	): CancelablePromise<any> {
 		return __request({
 			method: "GET",
@@ -998,7 +998,7 @@ export class DatasetsService {
 	 */
 	public static postDatasets22(
 		id: string,
-		requestBody: JSONLD,
+		requestBody: JSONLD
 	): CancelablePromise<any> {
 		return __request({
 			method: "POST",
@@ -1021,7 +1021,7 @@ export class DatasetsService {
 	 */
 	public static deleteDatasets4(
 		id: string,
-		extractor?: string,
+		extractor?: string
 	): CancelablePromise<any> {
 		return __request({
 			method: "DELETE",
@@ -1047,7 +1047,7 @@ export class DatasetsService {
 	 */
 	public static postDatasets23(
 		id: string,
-		requestBody: License,
+		requestBody: License
 	): CancelablePromise<any> {
 		return __request({
 			method: "POST",
@@ -1127,7 +1127,7 @@ export class DatasetsService {
 	 */
 	public static getDatasets17(
 		id: string,
-		max?: number,
+		max?: number
 	): CancelablePromise<any> {
 		return __request({
 			method: "GET",
@@ -1153,7 +1153,7 @@ export class DatasetsService {
 	 */
 	public static postDatasets27(
 		id: string,
-		formData: any,
+		formData: any
 	): CancelablePromise<any> {
 		return __request({
 			method: "POST",
@@ -1180,7 +1180,7 @@ export class DatasetsService {
 	 */
 	public static postDatasets28(
 		id: string,
-		requestBody?: any,
+		requestBody?: any
 	): CancelablePromise<any> {
 		return __request({
 			method: "POST",
@@ -1255,7 +1255,7 @@ export class DatasetsService {
 		id: string,
 		requestBody: {
 			tagId: string;
-		},
+		}
 	): CancelablePromise<any> {
 		return __request({
 			method: "POST",
@@ -1279,7 +1279,7 @@ export class DatasetsService {
 	public static postDatasets30(
 		datasetId: string,
 		toDataset: string,
-		fileId: string,
+		fileId: string
 	): CancelablePromise<any> {
 		return __request({
 			method: "POST",
@@ -1302,7 +1302,7 @@ export class DatasetsService {
 	public static getDatasets21(
 		id: string,
 		compression?: number,
-		tracking?: boolean,
+		tracking?: boolean
 	): CancelablePromise<any> {
 		return __request({
 			method: "GET",
@@ -1324,7 +1324,7 @@ export class DatasetsService {
 	 */
 	public static getDatasets22(
 		id: string,
-		fileList: string,
+		fileList: string
 	): CancelablePromise<any> {
 		return __request({
 			method: "GET",
@@ -1345,7 +1345,7 @@ export class DatasetsService {
 	 */
 	public static getDatasets23(
 		id: string,
-		folderId: string,
+		folderId: string
 	): CancelablePromise<any> {
 		return __request({
 			method: "GET",

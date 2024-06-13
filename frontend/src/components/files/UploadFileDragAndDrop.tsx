@@ -34,7 +34,7 @@ type UploadFileDragAndDropProps = {
 };
 
 export const UploadFileDragAndDrop: React.FC<UploadFileDragAndDropProps> = (
-	props: UploadFileDragAndDropProps,
+	props: UploadFileDragAndDropProps
 ) => {
 	const { selectedDatasetId, folderId, setDragDropFiles } = props;
 	const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
@@ -49,11 +49,11 @@ export const UploadFileDragAndDrop: React.FC<UploadFileDragAndDropProps> = (
 	const getMetadatDefinitions = (
 		name: string | null,
 		skip: number,
-		limit: number,
+		limit: number
 	) => dispatch(fetchMetadataDefinitions(name, skip, limit));
 	const createFileMetadata = (
 		fileId: string | undefined,
-		metadata: MetadataIn,
+		metadata: MetadataIn
 	) => {
 		dispatch(postFileMetadata(fileId, metadata));
 	};
@@ -61,15 +61,15 @@ export const UploadFileDragAndDrop: React.FC<UploadFileDragAndDropProps> = (
 	const uploadFiles = (
 		selectedDatasetId: string | undefined,
 		selectedFiles: File[] | undefined,
-		selectedFolderId: string | undefined,
+		selectedFolderId: string | undefined
 	) =>
 		dispatch(
-			createFilesAction(selectedDatasetId, selectedFiles, selectedFolderId),
+			createFilesAction(selectedDatasetId, selectedFiles, selectedFolderId)
 		);
 
 	const newFiles = useSelector((state: RootState) => state.dataset.newFiles);
 	const metadataDefinitionList = useSelector(
-		(state: RootState) => state.metadata.metadataDefinitionList.data,
+		(state: RootState) => state.metadata.metadataDefinitionList.data
 	);
 
 	useEffect(() => {

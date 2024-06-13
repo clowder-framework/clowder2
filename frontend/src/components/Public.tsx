@@ -31,14 +31,14 @@ export const Public = (): JSX.Element => {
 
 	const listPublicDatasets = (
 		skip: number | undefined,
-		limit: number | undefined,
+		limit: number | undefined
 	) => dispatch(fetchPublicDatasets(skip, limit));
 
 	const pageMetadata = useSelector(
-		(state: RootState) => state.publicDataset.publicDatasets.metadata,
+		(state: RootState) => state.publicDataset.publicDatasets.metadata
 	);
 	const publicDatasets = useSelector(
-		(state: RootState) => state.publicDataset.publicDatasets.data,
+		(state: RootState) => state.publicDataset.publicDatasets.data
 	);
 
 	const [currPageNum, setCurrPageNum] = useState<number>(1);
@@ -53,7 +53,7 @@ export const Public = (): JSX.Element => {
 	// switch tabs
 	const handleTabChange = (
 		_event: React.ChangeEvent<{}>,
-		newTabIndex: number,
+		newTabIndex: number
 	) => {
 		setSelectedTabIndex(newTabIndex);
 	};

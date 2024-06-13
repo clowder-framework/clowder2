@@ -20,7 +20,7 @@ export class SpacesService {
 		when?: string,
 		title?: string,
 		date?: string,
-		limit?: number,
+		limit?: number
 	): CancelablePromise<any> {
 		return __request({
 			method: "GET",
@@ -97,7 +97,7 @@ export class SpacesService {
 	 */
 	public static postSpaces1(
 		spaceId: string,
-		datasetId: string,
+		datasetId: string
 	): CancelablePromise<any> {
 		return __request({
 			method: "POST",
@@ -171,7 +171,7 @@ export class SpacesService {
 	 */
 	public static postSpaces2(
 		spaceId: string,
-		collectionId: string,
+		collectionId: string
 	): CancelablePromise<any> {
 		return __request({
 			method: "POST",
@@ -227,7 +227,7 @@ export class SpacesService {
 	 */
 	public static postSpaces5(
 		spaceId: string,
-		collectionId: string,
+		collectionId: string
 	): CancelablePromise<any> {
 		return __request({
 			method: "POST",
@@ -253,7 +253,7 @@ export class SpacesService {
 			 * A map that contains a role level as a key and a comma separated String of user IDs as the value
 			 */
 			rolesandusers?: any;
-		},
+		}
 	): CancelablePromise<any> {
 		return __request({
 			method: "POST",
@@ -281,7 +281,7 @@ export class SpacesService {
 		when?: string,
 		title?: string,
 		date?: string,
-		limit?: number,
+		limit?: number
 	): CancelablePromise<any> {
 		return __request({
 			method: "GET",
@@ -305,7 +305,7 @@ export class SpacesService {
 	 */
 	public static postSpaces7(
 		id: string,
-		removeUser: string,
+		removeUser: string
 	): CancelablePromise<any> {
 		return __request({
 			method: "POST",
@@ -332,7 +332,7 @@ export class SpacesService {
 			timetolive: string;
 			enabled: boolean;
 			access: string;
-		},
+		}
 	): CancelablePromise<any> {
 		return __request({
 			method: "POST",
@@ -382,7 +382,7 @@ export class SpacesService {
 	 */
 	public static postSpaces11(
 		spaceId: string,
-		datasetId: string,
+		datasetId: string
 	): CancelablePromise<any> {
 		return __request({
 			method: "POST",
@@ -407,7 +407,7 @@ export class SpacesService {
 			type: string;
 			description: string;
 			uri?: string;
-		},
+		}
 	): CancelablePromise<any> {
 		return __request({
 			method: "POST",

@@ -34,7 +34,7 @@ export default function AddMemberModal(props: AddMemberModalProps) {
 
 	const groupMemberAdded = (
 		groupId: string | undefined,
-		username: string | undefined,
+		username: string | undefined
 	) => dispatch(addGroupMember(groupId, username));
 	const users = useSelector((state: RootState) => state.group.users.data);
 
@@ -67,7 +67,7 @@ export default function AddMemberModal(props: AddMemberModalProps) {
 				.reduce((list: string[], user: UserOut) => {
 					return [...list, user.email];
 				}, [])
-				.filter((email) => email !== groupOwner),
+				.filter((email) => email !== groupOwner)
 		);
 	}, [users, groupOwner]);
 

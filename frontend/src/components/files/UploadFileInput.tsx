@@ -7,7 +7,7 @@ type UploadFileModalProps = {
 };
 
 export const UploadFileInput: React.FC<UploadFileModalProps> = (
-	props: UploadFileModalProps,
+	props: UploadFileModalProps
 ) => {
 	const { setSelectedFile } = props;
 

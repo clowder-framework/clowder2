@@ -6,7 +6,7 @@ export const RECEIVE_DATASET_ROLE = "RECEIVE_DATASET_ROLE";
 export function fetchDatasetRole(datasetId) {
 	return (dispatch) => {
 		return V2.AuthorizationService.getDatasetRoleApiV2AuthorizationsDatasetsDatasetIdRoleGet(
-			datasetId,
+			datasetId
 		)
 			.then((json) => {
 				dispatch({
@@ -20,7 +20,7 @@ export function fetchDatasetRole(datasetId) {
 			})
 			.catch((reason) => {
 				dispatch(
-					handleErrorsAuthorization(reason, fetchDatasetRole(datasetId)),
+					handleErrorsAuthorization(reason, fetchDatasetRole(datasetId))
 				);
 			});
 	};
@@ -31,7 +31,7 @@ export const RECEIVE_FILE_ROLE = "RECEIVE_FILE_ROLE";
 export function fetchFileRole(fileId) {
 	return (dispatch) => {
 		return V2.AuthorizationService.getFileRoleApiV2AuthorizationsFilesFileIdRoleGet(
-			fileId,
+			fileId
 		)
 			.then((json) => {
 				dispatch({
@@ -54,7 +54,7 @@ export const RECEIVE_GROUP_ROLE = "RECEIVE_GROUP_ROLE";
 export function fetchGroupRole(groupId) {
 	return (dispatch) => {
 		return V2.AuthorizationService.getGroupRoleApiV2AuthorizationsGroupsGroupIdRoleGet(
-			groupId,
+			groupId
 		)
 			.then((json) => {
 				dispatch({

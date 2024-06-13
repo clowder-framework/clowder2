@@ -17,7 +17,7 @@ export const MetadataTextField = (props) => {
 		datasetRole,
 	} = props;
 	const [localContent, setLocalContent] = useState(
-		content && content[fieldName] ? content : {},
+		content && content[fieldName] ? content : {}
 	);
 	const [readOnly, setReadOnly] = useState(initialReadOnly);
 	const [inputChanged, setInputChanged] = useState(false);
@@ -46,11 +46,11 @@ export const MetadataTextField = (props) => {
 										id: metadataId,
 										definition: widgetName,
 										content: tempContents,
-									})
+								  })
 								: setMetadata({
 										definition: widgetName,
 										content: tempContents,
-									})
+								  })
 							: null;
 					}}
 					disabled={readOnly}

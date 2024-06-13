@@ -65,7 +65,7 @@ const group = (state = defaultState, action: DataAction) => {
 				users: {
 					...state.users,
 					data: state.users.data.map((user: UserOut) =>
-						user.email === action.profile.email ? action.profile : user,
+						user.email === action.profile.email ? action.profile : user
 					),
 				},
 			});
@@ -74,7 +74,7 @@ const group = (state = defaultState, action: DataAction) => {
 				users: {
 					...state.users,
 					data: state.users.data.map((user: UserOut) =>
-						user.email === action.profile.email ? action.profile : user,
+						user.email === action.profile.email ? action.profile : user
 					),
 				},
 			});
@@ -83,7 +83,7 @@ const group = (state = defaultState, action: DataAction) => {
 				users: {
 					...state.users,
 					data: state.users.data.map((user: UserOut) =>
-						user.email === action.profile.email ? action.profile : user,
+						user.email === action.profile.email ? action.profile : user
 					),
 				},
 			});
@@ -92,7 +92,7 @@ const group = (state = defaultState, action: DataAction) => {
 				users: {
 					...state.users,
 					data: state.users.data.map((user: UserOut) =>
-						user.email === action.profile.email ? action.profile : user,
+						user.email === action.profile.email ? action.profile : user
 					),
 				},
 			});

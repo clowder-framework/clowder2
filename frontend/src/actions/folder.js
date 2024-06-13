@@ -7,7 +7,7 @@ export function fetchFolderPath(folderId) {
 	return (dispatch) => {
 		if (folderId != null) {
 			return V2.FoldersService.downloadFolderApiV2FoldersFolderIdPathGet(
-				folderId,
+				folderId
 			)
 				.then((json) => {
 					dispatch({
@@ -29,7 +29,7 @@ export function fetchPublicFolderPath(folderId) {
 	return (dispatch) => {
 		if (folderId != null) {
 			return V2.PublicFoldersService.downloadFolderApiV2PublicFoldersFolderIdPathGet(
-				folderId,
+				folderId
 			)
 				.then((json) => {
 					dispatch({
@@ -51,7 +51,7 @@ export function folderDeleted(datasetId, folderId) {
 	return (dispatch) => {
 		return V2.DatasetsService.deleteFolderApiV2DatasetsDatasetIdFoldersFolderIdDelete(
 			datasetId,
-			folderId,
+			folderId
 		)
 			.then((json) => {
 				dispatch({

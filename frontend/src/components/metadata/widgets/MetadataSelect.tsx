@@ -20,7 +20,7 @@ export const MetadataSelect = (props) => {
 		datasetRole,
 	} = props;
 	const [localContent, setLocalContent] = useState(
-		content && content[fieldName] ? content : {},
+		content && content[fieldName] ? content : {}
 	);
 
 	const [readOnly, setReadOnly] = useState(initialReadOnly);
@@ -37,11 +37,11 @@ export const MetadataSelect = (props) => {
 						id: metadataId,
 						definition: widgetName,
 						content: tempContents,
-					})
+				  })
 				: setMetadata({
 						definition: widgetName,
 						content: tempContents,
-					})
+				  })
 			: null;
 		setLocalContent(tempContents);
 	};

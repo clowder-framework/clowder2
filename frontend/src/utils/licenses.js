@@ -12,7 +12,7 @@ export async function fetchStandardLicenses() {
 export async function fetchStandardLicenseUrl(licenseId) {
 	try {
 		return await V2.LicensesService.getStandardLicenseUrlApiV2LicensesStandardLicensesLicenseIdGet(
-			licenseId,
+			licenseId
 		);
 	} catch (reason) {
 		console.error("Failed to fetch standard license url: ", reason);
@@ -23,7 +23,7 @@ export async function fetchStandardLicenseUrl(licenseId) {
 export async function fetchPublicStandardLicenseUrl(licenseId) {
 	try {
 		return await V2.PublicLicensesService.getStandardLicenseUrlApiV2PublicLicensesStandardLicensesLicenseIdGet(
-			licenseId,
+			licenseId
 		);
 	} catch (reason) {
 		console.error("Failed to fetch standard license url: ", reason);

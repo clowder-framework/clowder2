@@ -129,7 +129,7 @@ export class LogosService {
 	 */
 	public static deleteLogos1(
 		path: string,
-		name: string,
+		name: string
 	): CancelablePromise<any> {
 		return __request({
 			method: "DELETE",

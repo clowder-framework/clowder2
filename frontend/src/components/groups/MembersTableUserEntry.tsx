@@ -49,12 +49,12 @@ export function MembersTableUserEntry(props: MembersTableUserEntryProps) {
 	const groupMemberRoleAssigned = (
 		groupId: string | undefined,
 		username: string | undefined,
-		role: string | undefined,
+		role: string | undefined
 	) => dispatch(assignGroupMemberRole(groupId, username, role));
 	const role = useSelector((state: RootState) => state.group.role);
 
 	const [selectedRole, setSelectedRole] = useState(
-		member.editor ? "editor" : "member",
+		member.editor ? "editor" : "member"
 	);
 	const [editRoleOn, setEditRoleOn] = useState(false);
 

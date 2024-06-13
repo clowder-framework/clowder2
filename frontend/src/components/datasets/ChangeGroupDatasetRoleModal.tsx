@@ -32,7 +32,7 @@ type ChangeGroupDatasetRoleModalProps = {
 };
 
 export default function ChangeGroupDatasetRoleModal(
-	props: ChangeGroupDatasetRoleModalProps,
+	props: ChangeGroupDatasetRoleModalProps
 ) {
 	const {
 		open,

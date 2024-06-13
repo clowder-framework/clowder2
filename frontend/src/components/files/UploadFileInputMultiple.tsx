@@ -8,7 +8,7 @@ type UploadFileMultipleModalProps = {
 
 // https://stackoverflow.com/questions/68213700/react-js-upload-multiple-files
 export const UploadFileInputMultiple: React.FC<UploadFileMultipleModalProps> = (
-	props: UploadFileMultipleModalProps,
+	props: UploadFileMultipleModalProps
 ) => {
 	const { setSelectedFiles } = props;
 

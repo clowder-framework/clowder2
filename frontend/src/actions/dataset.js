@@ -13,7 +13,7 @@ export function setDatasetGroupRole(datasetId, groupId, roleType) {
 		return V2.AuthorizationService.setDatasetGroupRoleApiV2AuthorizationsDatasetsDatasetIdGroupRoleGroupIdRolePost(
 			datasetId,
 			groupId,
-			roleType,
+			roleType
 		)
 			.then((json) => {
 				dispatch({
@@ -25,8 +25,8 @@ export function setDatasetGroupRole(datasetId, groupId, roleType) {
 				dispatch(
 					handleErrors(
 						reason,
-						setDatasetGroupRole(datasetId, groupId, roleType),
-					),
+						setDatasetGroupRole(datasetId, groupId, roleType)
+					)
 				);
 			});
 	};
@@ -39,7 +39,7 @@ export function setDatasetUserRole(datasetId, username, roleType) {
 		return V2.AuthorizationService.setDatasetUserRoleApiV2AuthorizationsDatasetsDatasetIdUserRoleUsernameRolePost(
 			datasetId,
 			username,
-			roleType,
+			roleType
 		)
 			.then((json) => {
 				dispatch({
@@ -51,8 +51,8 @@ export function setDatasetUserRole(datasetId, username, roleType) {
 				dispatch(
 					handleErrorsInline(
 						reason,
-						setDatasetUserRole(datasetId, username, roleType),
-					),
+						setDatasetUserRole(datasetId, username, roleType)
+					)
 				);
 			});
 	};
@@ -64,7 +64,7 @@ export function removeDatasetGroupRole(datasetId, groupId) {
 	return (dispatch) => {
 		return V2.AuthorizationService.removeDatasetGroupRoleApiV2AuthorizationsDatasetsDatasetIdGroupRoleGroupIdDelete(
 			datasetId,
-			groupId,
+			groupId
 		)
 			.then((json) => {
 				dispatch({
@@ -74,7 +74,7 @@ export function removeDatasetGroupRole(datasetId, groupId) {
 			})
 			.catch((reason) => {
 				dispatch(
-					handleErrors(reason, removeDatasetGroupRole(datasetId, groupId)),
+					handleErrors(reason, removeDatasetGroupRole(datasetId, groupId))
 				);
 			});
 	};
@@ -86,7 +86,7 @@ export function removeDatasetUserRole(datasetId, username) {
 	return (dispatch) => {
 		return V2.AuthorizationService.removeDatasetUserRoleApiV2AuthorizationsDatasetsDatasetIdUserRoleUsernameDelete(
 			datasetId,
-			username,
+			username
 		)
 			.then((json) => {
 				dispatch({
@@ -96,7 +96,7 @@ export function removeDatasetUserRole(datasetId, username) {
 			})
 			.catch((reason) => {
 				dispatch(
-					handleErrors(reason, removeDatasetUserRole(datasetId, username)),
+					handleErrors(reason, removeDatasetUserRole(datasetId, username))
 				);
 			});
 	};
@@ -111,7 +111,7 @@ export function fetchFoldersFilesInDataset(datasetId, folderId, skip, limit) {
 			datasetId,
 			folderId,
 			skip,
-			limit,
+			limit
 		)
 			.then((json) => {
 				dispatch({
@@ -124,8 +124,8 @@ export function fetchFoldersFilesInDataset(datasetId, folderId, skip, limit) {
 				dispatch(
 					handleErrors(
 						reason,
-						fetchFoldersFilesInDataset(datasetId, folderId, skip, limit),
-					),
+						fetchFoldersFilesInDataset(datasetId, folderId, skip, limit)
+					)
 				);
 			});
 	};
@@ -136,13 +136,13 @@ export const SUBMIT_DATASET_EXTRACTION = "SUBMIT_DATASET_EXTRACTION";
 export function submitDatasetExtractionAction(
 	datasetId,
 	extractorName,
-	requestBody,
+	requestBody
 ) {
 	return (dispatch) => {
 		return V2.DatasetsService.getDatasetExtractApiV2DatasetsDatasetIdExtractPost(
 			datasetId,
 			extractorName,
-			requestBody,
+			requestBody
 		)
 			.then((json) => {
 				dispatch({
@@ -155,12 +155,8 @@ export function submitDatasetExtractionAction(
 				dispatch(
 					handleErrors(
 						reason,
-						submitDatasetExtractionAction(
-							datasetId,
-							extractorName,
-							requestBody,
-						),
-					),
+						submitDatasetExtractionAction(datasetId, extractorName, requestBody)
+					)
 				);
 			});
 	};
@@ -172,7 +168,7 @@ export function updateDataset(datasetId, formData) {
 	return (dispatch) => {
 		return V2.DatasetsService.patchDatasetApiV2DatasetsDatasetIdPatch(
 			datasetId,
-			formData,
+			formData
 		)
 			.then((json) => {
 				dispatch({
@@ -229,7 +225,7 @@ export function updateDatasetLicense(licenseId, formData) {
 	return (dispatch) => {
 		return V2.LicensesService.editLicenseApiV2LicensesLicenseIdPut(
 			licenseId,
-			formData,
+			formData
 		)
 			.then((json) => {
 				dispatch({
@@ -240,7 +236,7 @@ export function updateDatasetLicense(licenseId, formData) {
 			})
 			.catch((reason) => {
 				dispatch(
-					handleErrors(reason, updateDatasetLicense(licenseId, formData)),
+					handleErrors(reason, updateDatasetLicense(licenseId, formData))
 				);
 			});
 	};
@@ -296,7 +292,7 @@ export function datasetCreated(formData, licenseId, licenseFormData) {
 					// After saving the license, save the dataset
 					return V2.DatasetsService.saveDatasetApiV2DatasetsPost(
 						licenseId,
-						formData,
+						formData
 					);
 				})
 				.then((dataset) => {
@@ -310,15 +306,15 @@ export function datasetCreated(formData, licenseId, licenseFormData) {
 					dispatch(
 						handleErrors(
 							reason,
-							datasetCreated(formData, licenseId, licenseFormData),
-						),
+							datasetCreated(formData, licenseId, licenseFormData)
+						)
 					);
 				});
 		} else {
 			// If licenseFormData is not present, directly save the dataset
 			return V2.DatasetsService.saveDatasetApiV2DatasetsPost(
 				licenseId,
-				formData,
+				formData
 			)
 				.then((dataset) => {
 					dispatch({
@@ -331,8 +327,8 @@ export function datasetCreated(formData, licenseId, licenseFormData) {
 					dispatch(
 						handleErrors(
 							reason,
-							datasetCreated(formData, licenseId, licenseFormData),
-						),
+							datasetCreated(formData, licenseId, licenseFormData)
+						)
 					);
 				});
 		}
@@ -363,7 +359,7 @@ export const DELETE_DATASET = "DELETE_DATASET";
 export function datasetDeleted(datasetId) {
 	return (dispatch) => {
 		return V2.DatasetsService.deleteDatasetApiV2DatasetsDatasetIdDelete(
-			datasetId,
+			datasetId
 		)
 			.then((json) => {
 				dispatch({
@@ -385,7 +381,7 @@ export function folderAdded(datasetId, folderName, parentFolder = null) {
 		const folder = { name: folderName, parent_folder: parentFolder };
 		return V2.DatasetsService.addFolderApiV2DatasetsDatasetIdFoldersPost(
 			datasetId,
-			folder,
+			folder
 		)
 			.then((json) => {
 				dispatch({
@@ -396,10 +392,7 @@ export function folderAdded(datasetId, folderName, parentFolder = null) {
 			})
 			.catch((reason) => {
 				dispatch(
-					handleErrors(
-						reason,
-						folderAdded(datasetId, folderName, parentFolder),
-					),
+					handleErrors(reason, folderAdded(datasetId, folderName, parentFolder))
 				);
 			});
 	};
@@ -412,7 +405,7 @@ export function updateFolder(datasetId, folderId, formData) {
 		return V2.DatasetsService.patchFolderApiV2DatasetsDatasetIdFoldersFolderIdPatch(
 			datasetId,
 			folderId,
-			formData,
+			formData
 		)
 			.then((json) => {
 				dispatch({
@@ -423,7 +416,7 @@ export function updateFolder(datasetId, folderId, formData) {
 			})
 			.catch((reason) => {
 				dispatch(
-					handleErrors(reason, updateFolder(datasetId, folderId, formData)),
+					handleErrors(reason, updateFolder(datasetId, folderId, formData))
 				);
 			});
 	};
@@ -435,7 +428,7 @@ export function getFolder(datasetId, folderId) {
 	return (dispatch) => {
 		return V2.DatasetsService.getFolderApiV2DatasetsDatasetIdFoldersFolderIdGet(
 			datasetId,
-			folderId,
+			folderId
 		)
 			.then((json) => {
 				dispatch({
@@ -456,7 +449,7 @@ export function fetchFolderPath(folderId) {
 	return (dispatch) => {
 		if (folderId != null) {
 			return V2.FoldersService.downloadFolderApiV2FoldersFolderIdPathGet(
-				folderId,
+				folderId
 			)
 				.then((json) => {
 					dispatch({
@@ -483,7 +476,7 @@ export const RECEIVE_DATASET_ROLES = "RECEIVE_DATASET_ROLES";
 export function fetchDatasetRoles(datasetId) {
 	return (dispatch) => {
 		return V2.AuthorizationService.getDatasetRolesApiV2AuthorizationsDatasetsDatasetIdRolesGet(
-			datasetId,
+			datasetId
 		)
 			.then((json) => {
 				dispatch({
@@ -497,7 +490,7 @@ export function fetchDatasetRoles(datasetId) {
 			})
 			.catch((reason) => {
 				dispatch(
-					handleErrorsAuthorization(reason, fetchDatasetRoles(datasetId)),
+					handleErrorsAuthorization(reason, fetchDatasetRoles(datasetId))
 				);
 			});
 	};

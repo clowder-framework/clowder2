@@ -124,8 +124,8 @@ async def index_dataset_files(
     files = await FileDB.find(*query).to_list()
     for file in files:
         await index_file(es, FileOut(**file.dict()), update=True)
-        
-        
+
+
 async def index_folder(
     es: Elasticsearch,
     folder: FolderOut,

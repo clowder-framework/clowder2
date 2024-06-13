@@ -13,7 +13,7 @@ export async function fetchFileMetadata(id) {
 			if (reason.status === 401) {
 				console.error(
 					"Failed to get file summary: Not authenticated: ",
-					reason,
+					reason
 				);
 				// logout();
 				return {};

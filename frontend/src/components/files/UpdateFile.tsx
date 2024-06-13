@@ -19,7 +19,7 @@ type UpdateFileProps = {
 };
 
 export const UpdateFile: React.FC<UpdateFileProps> = (
-	props: UpdateFileProps,
+	props: UpdateFileProps
 ) => {
 	const dispatch = useDispatch();
 	const updateFile = async (file: File, fileId: string | undefined) =>
@@ -30,13 +30,13 @@ export const UpdateFile: React.FC<UpdateFileProps> = (
 		dispatch(fetchFileMetadata(fileId));
 	const createFileMetadata = (
 		fileId: string | undefined,
-		metadata: MetadataIn,
+		metadata: MetadataIn
 	) => dispatch(postFileMetadata(fileId, metadata));
 	const fileMetadataList = useSelector(
-		(state: RootState) => state.metadata.fileMetadataList,
+		(state: RootState) => state.metadata.fileMetadataList
 	);
 	const fileVersions = useSelector(
-		(state: RootState) => state.file.fileVersions,
+		(state: RootState) => state.file.fileVersions
 	);
 
 	const { fileId, setOpen, setSelectedVersion } = props;

@@ -50,7 +50,7 @@ export function GroupAndRoleTableEntry(props: GroupAndRoleTableEntryProps) {
 
 	const dispatch = useDispatch();
 	const datasetRole = useSelector(
-		(state: RootState) => state.dataset.datasetRole,
+		(state: RootState) => state.dataset.datasetRole
 	);
 
 	const [expand, setExpand] = React.useState(false);
@@ -58,12 +58,12 @@ export function GroupAndRoleTableEntry(props: GroupAndRoleTableEntryProps) {
 	const groupRoleAssigned = (
 		dataset_id: string | undefined,
 		group_id: string | undefined,
-		role: string | undefined,
+		role: string | undefined
 	) => dispatch(setDatasetGroupRole(dataset_id, group_id, role));
 
 	const removeGroupRole = async (
 		dataset_id: string | undefined,
-		group_id: string | undefined,
+		group_id: string | undefined
 	) => dispatch(removeDatasetGroupRole(dataset_id, group_id));
 
 	const [selectedRole, setSelectedRole] = useState(group_role.role);

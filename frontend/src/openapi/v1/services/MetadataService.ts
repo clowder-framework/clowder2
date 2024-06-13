@@ -102,7 +102,7 @@ export class MetadataService {
 	 * @throws ApiError
 	 */
 	public static postMetadata(
-		requestBody: Array<string>,
+		requestBody: Array<string>
 	): CancelablePromise<any> {
 		return __request({
 			method: "POST",
@@ -148,7 +148,7 @@ export class MetadataService {
 	 */
 	public static putMetadata(
 		id: string,
-		requestBody: Array<string>,
+		requestBody: Array<string>
 	): CancelablePromise<any> {
 		return __request({
 			method: "PUT",

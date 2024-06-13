@@ -33,7 +33,7 @@ export class ProxyService {
 	 */
 	public static putProxy(
 		endpointKey: string,
-		requestBody?: any,
+		requestBody?: any
 	): CancelablePromise<void> {
 		return __request({
 			method: "PUT",
@@ -57,7 +57,7 @@ export class ProxyService {
 	 */
 	public static postProxy(
 		endpointKey: string,
-		requestBody?: any,
+		requestBody?: any
 	): CancelablePromise<void> {
 		return __request({
 			method: "POST",
@@ -99,7 +99,7 @@ export class ProxyService {
 	 */
 	public static getProxy1(
 		endpointKey: string,
-		pathSuffix: string,
+		pathSuffix: string
 	): CancelablePromise<void> {
 		return __request({
 			method: "GET",
@@ -123,7 +123,7 @@ export class ProxyService {
 	public static putProxy1(
 		endpointKey: string,
 		pathSuffix: string,
-		requestBody?: any,
+		requestBody?: any
 	): CancelablePromise<void> {
 		return __request({
 			method: "PUT",
@@ -149,7 +149,7 @@ export class ProxyService {
 	public static postProxy1(
 		endpointKey: string,
 		pathSuffix: string,
-		requestBody?: any,
+		requestBody?: any
 	): CancelablePromise<void> {
 		return __request({
 			method: "POST",
@@ -173,7 +173,7 @@ export class ProxyService {
 	 */
 	public static deleteProxy1(
 		endpointKey: string,
-		pathSuffix: string,
+		pathSuffix: string
 	): CancelablePromise<void> {
 		return __request({
 			method: "DELETE",

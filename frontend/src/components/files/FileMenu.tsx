@@ -39,7 +39,7 @@ export default function FileMenu(props: FileMenuProps) {
 	const deleteFile = (fileId: string | undefined) =>
 		dispatch(fileDeleted(fileId));
 	const datasetRole = useSelector(
-		(state: RootState) => state.dataset.datasetRole,
+		(state: RootState) => state.dataset.datasetRole
 	);
 
 	const [confirmationOpen, setConfirmationOpen] = useState(false);

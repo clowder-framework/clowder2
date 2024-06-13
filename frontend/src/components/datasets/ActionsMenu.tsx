@@ -19,7 +19,7 @@ export const ActionsMenu = (props: ActionsMenuProps): JSX.Element => {
 	const { datasetId, folderId, datasetName } = props;
 
 	const datasetRole = useSelector(
-		(state: RootState) => state.dataset.datasetRole,
+		(state: RootState) => state.dataset.datasetRole
 	);
 
 	return (

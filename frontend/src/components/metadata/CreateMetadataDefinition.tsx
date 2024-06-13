@@ -41,7 +41,7 @@ type CreateMetadataDefinitionProps = {
 };
 
 export const CreateMetadataDefinition = (
-	props: CreateMetadataDefinitionProps,
+	props: CreateMetadataDefinitionProps
 ) => {
 	const {
 		setCreateMetadataDefinitionOpen,
@@ -56,7 +56,7 @@ export const CreateMetadataDefinition = (
 	const saveMetadataDefinitions = (metadata: object) =>
 		dispatch(postMetadataDefinition(metadata));
 	const newMetadataDefintion = useSelector(
-		(state: RootState) => state.metadata.newMetadataDefinition,
+		(state: RootState) => state.metadata.newMetadataDefinition
 	);
 
 	const [activeStep, setActiveStep] = React.useState(0);
@@ -85,7 +85,7 @@ export const CreateMetadataDefinition = (
 		],
 	});
 	const [supportedInputs, setSupportedInputs] = React.useState<SupportedInputs>(
-		{ 0: [] },
+		{ 0: [] }
 	);
 
 	useEffect(() => {
@@ -261,7 +261,7 @@ export const CreateMetadataDefinition = (
 				const listOfOptions = data.fields[i].config.options.split(",");
 				// Remove any trailing whitespace from each list entry
 				listOfOptions.forEach(
-					(value, index, arr) => (arr[index] = value.trim()),
+					(value, index, arr) => (arr[index] = value.trim())
 				);
 
 				data.fields[i].config.options = listOfOptions;
@@ -456,7 +456,7 @@ export const CreateMetadataDefinition = (
 													autoHighlight
 													inputValue={item["iri"]}
 													options={contextUrlMap["frequently_used"].map(
-														(option) => option.url,
+														(option) => option.url
 													)}
 													onInputChange={(event, value) => {
 														updateContext(idx, "iri", value);
@@ -583,7 +583,7 @@ export const CreateMetadataDefinition = (
 																handleInputChange(
 																	idx,
 																	"list",
-																	event.target.value,
+																	event.target.value
 																);
 															}}
 														/>
@@ -598,7 +598,7 @@ export const CreateMetadataDefinition = (
 																handleInputChange(
 																	idx,
 																	"required",
-																	event.target.value,
+																	event.target.value
 																);
 															}}
 														/>
@@ -673,7 +673,7 @@ export const CreateMetadataDefinition = (
 															{supportedInput["description"]}
 														</MenuItem>
 													);
-												})
+											  })
 											: null}
 									</ClowderInput>
 									{/*

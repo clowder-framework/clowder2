@@ -191,7 +191,7 @@ export class FilesService {
 	 */
 	public static postFiles2(
 		id: string,
-		requestBody?: any,
+		requestBody?: any
 	): CancelablePromise<any> {
 		return __request({
 			method: "POST",
@@ -314,7 +314,7 @@ export class FilesService {
 			 * the extractor Id
 			 */
 			extractor?: string;
-		},
+		}
 	): CancelablePromise<any> {
 		return __request({
 			method: "POST",
@@ -334,7 +334,7 @@ export class FilesService {
 	 */
 	public static deleteFiles1(
 		id: string,
-		msgId: string,
+		msgId: string
 	): CancelablePromise<any> {
 		return __request({
 			method: "DELETE",
@@ -368,7 +368,7 @@ export class FilesService {
 		originalZipFile?: string,
 		flags?: string,
 		extract?: boolean,
-		folderId?: string,
+		folderId?: string
 	): CancelablePromise<any> {
 		return __request({
 			method: "POST",
@@ -453,7 +453,7 @@ export class FilesService {
 	 */
 	public static postFiles11(
 		id: string,
-		requestBody: any,
+		requestBody: any
 	): CancelablePromise<any> {
 		return __request({
 			method: "POST",
@@ -516,7 +516,7 @@ export class FilesService {
 		pId: string,
 		requestBody?: {
 			extractor_id?: string;
-		},
+		}
 	): CancelablePromise<any> {
 		return __request({
 			method: "POST",
@@ -577,7 +577,7 @@ export class FilesService {
 		id: string,
 		requestBody: {
 			name?: string;
-		},
+		}
 	): CancelablePromise<any> {
 		return __request({
 			method: "PUT",
@@ -604,7 +604,7 @@ export class FilesService {
 	public static postFiles15(
 		id: string,
 		requestBody: any,
-		extractorId?: string,
+		extractorId?: string
 	): CancelablePromise<any> {
 		return __request({
 			method: "POST",
@@ -644,7 +644,7 @@ export class FilesService {
 	 */
 	public static getFiles9(
 		id: string,
-		extractor?: string,
+		extractor?: string
 	): CancelablePromise<any> {
 		return __request({
 			method: "GET",
@@ -670,7 +670,7 @@ export class FilesService {
 	 */
 	public static postFiles17(
 		id: string,
-		requestBody: JSONLD,
+		requestBody: JSONLD
 	): CancelablePromise<any> {
 		return __request({
 			method: "POST",
@@ -693,7 +693,7 @@ export class FilesService {
 	 */
 	public static deleteFiles2(
 		id: string,
-		extractor?: string,
+		extractor?: string
 	): CancelablePromise<any> {
 		return __request({
 			method: "DELETE",
@@ -776,7 +776,7 @@ export class FilesService {
 	 */
 	public static postFiles19(
 		id: string,
-		requestBody: Tags,
+		requestBody: Tags
 	): CancelablePromise<any> {
 		return __request({
 			method: "POST",
@@ -816,7 +816,7 @@ export class FilesService {
 	 */
 	public static postFiles20(
 		id: string,
-		requestBody: License,
+		requestBody: License
 	): CancelablePromise<any> {
 		return __request({
 			method: "POST",
@@ -857,7 +857,7 @@ export class FilesService {
 		id: string,
 		requestBody: {
 			description: string;
-		},
+		}
 	): CancelablePromise<any> {
 		return __request({
 			method: "PUT",
@@ -901,7 +901,7 @@ export class FilesService {
 	 */
 	public static postFiles21(
 		fileId: string,
-		fileType: string,
+		fileType: string
 	): CancelablePromise<any> {
 		return __request({
 			method: "POST",
@@ -955,7 +955,7 @@ export class FilesService {
 	 */
 	public static postFiles22(
 		id: string,
-		requestBody: Comment,
+		requestBody: Comment
 	): CancelablePromise<any> {
 		return __request({
 			method: "POST",
@@ -1045,7 +1045,7 @@ export class FilesService {
 	 */
 	public static postFiles27(
 		id: string,
-		thumbnailId: string,
+		thumbnailId: string
 	): CancelablePromise<any> {
 		return __request({
 			method: "POST",
@@ -1133,7 +1133,7 @@ export class FilesService {
 	 */
 	public static postFiles28(
 		fileId: string,
-		thumbnailId: string,
+		thumbnailId: string
 	): CancelablePromise<any> {
 		return __request({
 			method: "POST",
@@ -1282,7 +1282,7 @@ export class FilesService {
 			 * the extractor Id
 			 */
 			extractor?: string;
-		},
+		}
 	): CancelablePromise<any> {
 		return __request({
 			method: "POST",

@@ -96,7 +96,7 @@ const dataset = (state = defaultState, action: DataAction) => {
 				foldersAndFiles: {
 					...state.foldersAndFiles,
 					data: state.foldersAndFiles.data.map((item: FileOut | FolderOut) =>
-						item.id === action.file.id ? action.file : item,
+						item.id === action.file.id ? action.file : item
 					),
 				},
 			});

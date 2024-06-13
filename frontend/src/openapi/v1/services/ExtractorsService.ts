@@ -61,7 +61,7 @@ export class ExtractorsService {
 	 * @throws ApiError
 	 */
 	public static postExtractors1(
-		requestBody?: ExtractorsLabel,
+		requestBody?: ExtractorsLabel
 	): CancelablePromise<ExtractorsLabel> {
 		return __request({
 			method: "POST",
@@ -80,7 +80,7 @@ export class ExtractorsService {
 	 */
 	public static putExtractors(
 		id: string,
-		requestBody?: ExtractorsLabel,
+		requestBody?: ExtractorsLabel
 	): CancelablePromise<ExtractorsLabel> {
 		return __request({
 			method: "PUT",
@@ -97,7 +97,7 @@ export class ExtractorsService {
 	 * @throws ApiError
 	 */
 	public static deleteExtractors(
-		id: string,
+		id: string
 	): CancelablePromise<ExtractorsLabel> {
 		return __request({
 			method: "DELETE",

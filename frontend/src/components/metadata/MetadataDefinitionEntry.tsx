@@ -36,7 +36,7 @@ export function MetadataDefinitionEntry() {
 	const fetchMetadataDefinition = (metadataDefinitionId: string | undefined) =>
 		dispatch(fetchMetadataDefinitionAction(metadataDefinitionId));
 	const metadataDefinition = useSelector(
-		(state: RootState) => state.metadata.metadataDefinition,
+		(state: RootState) => state.metadata.metadataDefinition
 	);
 	const [editMetadataDefinitionOpen, setEditMetadataDefinitionOpen] =
 		useState<boolean>(false);

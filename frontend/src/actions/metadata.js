@@ -9,7 +9,7 @@ export function fetchPublicMetadataDefinitions(name, skip, limit) {
 		return V2.PublicMetadataService.getMetadataDefinitionListApiV2PublicMetadataDefinitionGet(
 			name,
 			skip,
-			limit,
+			limit
 		)
 			.then((json) => {
 				dispatch({
@@ -22,8 +22,8 @@ export function fetchPublicMetadataDefinitions(name, skip, limit) {
 				dispatch(
 					handleErrors(
 						reason,
-						fetchPublicMetadataDefinitions(name, skip, limit),
-					),
+						fetchPublicMetadataDefinitions(name, skip, limit)
+					)
 				);
 			});
 	};
@@ -36,7 +36,7 @@ export function fetchMetadataDefinitions(name, skip, limit) {
 		return V2.MetadataService.getMetadataDefinitionListApiV2MetadataDefinitionGet(
 			name,
 			skip,
-			limit,
+			limit
 		)
 			.then((json) => {
 				dispatch({
@@ -47,7 +47,7 @@ export function fetchMetadataDefinitions(name, skip, limit) {
 			})
 			.catch((reason) => {
 				dispatch(
-					handleErrors(reason, fetchMetadataDefinitions(name, skip, limit)),
+					handleErrors(reason, fetchMetadataDefinitions(name, skip, limit))
 				);
 			});
 	};
@@ -58,7 +58,7 @@ export const RECEIVE_METADATA_DEFINITION = "RECEIVE_METADATA_DEFINITION";
 export function fetchMetadataDefinition(metadataDefinitionId) {
 	return (dispatch) => {
 		return V2.MetadataService.getMetadataDefinitionApiV2MetadataDefinitionMetadataDefinitionIdGet(
-			metadataDefinitionId,
+			metadataDefinitionId
 		)
 			.then((json) => {
 				dispatch({
@@ -69,7 +69,7 @@ export function fetchMetadataDefinition(metadataDefinitionId) {
 			})
 			.catch((reason) => {
 				dispatch(
-					handleErrors(reason, fetchMetadataDefinition(metadataDefinitionId)),
+					handleErrors(reason, fetchMetadataDefinition(metadataDefinitionId))
 				);
 			});
 	};
@@ -80,7 +80,7 @@ export const SAVE_METADATA_DEFINITION = "SAVE_METADATA_DEFINITION";
 export function postMetadataDefinition(metadataDefinition) {
 	return (dispatch) => {
 		return V2.MetadataService.saveMetadataDefinitionApiV2MetadataDefinitionPost(
-			metadataDefinition,
+			metadataDefinition
 		)
 			.then((json) => {
 				dispatch({
@@ -91,7 +91,7 @@ export function postMetadataDefinition(metadataDefinition) {
 			})
 			.catch((reason) => {
 				dispatch(
-					handleErrors(reason, postMetadataDefinition(metadataDefinition)),
+					handleErrors(reason, postMetadataDefinition(metadataDefinition))
 				);
 			});
 	};
@@ -137,7 +137,7 @@ export const DELETE_METADATA_DEFINITION = "DELETE_METADATA_DEFINITION";
 export function deleteMetadataDefinition(metadataDefinitionId) {
 	return (dispatch) => {
 		return V2.MetadataService.deleteMetadataDefinitionApiV2MetadataDefinitionMetadataDefinitionIdDelete(
-			metadataDefinitionId,
+			metadataDefinitionId
 		)
 			.then((json) => {
 				dispatch({
@@ -148,7 +148,7 @@ export function deleteMetadataDefinition(metadataDefinitionId) {
 			})
 			.catch((reason) => {
 				dispatch(
-					handleErrors(reason, deleteMetadataDefinition(metadataDefinitionId)),
+					handleErrors(reason, deleteMetadataDefinition(metadataDefinitionId))
 				);
 			});
 	};
@@ -166,7 +166,7 @@ export function searchMetadataDefinitions(searchTerm, skip, limit) {
 		return V2.MetadataService.searchMetadataDefinitionApiV2MetadataDefinitionSearchSearchTermGet(
 			searchTerm,
 			skip,
-			limit,
+			limit
 		)
 			.then((json) => {
 				dispatch({
@@ -179,8 +179,8 @@ export function searchMetadataDefinitions(searchTerm, skip, limit) {
 				dispatch(
 					handleErrors(
 						reason,
-						searchMetadataDefinitions(searchTerm, skip, limit),
-					),
+						searchMetadataDefinitions(searchTerm, skip, limit)
+					)
 				);
 			});
 	};
@@ -191,7 +191,7 @@ export const RECEIVE_DATASET_METADATA = "RECEIVE_DATASET_METADATA";
 export function fetchDatasetMetadata(datasetId) {
 	return (dispatch) => {
 		return V2.MetadataService.getDatasetMetadataApiV2DatasetsDatasetIdMetadataGet(
-			datasetId,
+			datasetId
 		)
 			.then((json) => {
 				dispatch({
@@ -212,7 +212,7 @@ export const RECEIVE_PUBLIC_DATASET_METADATA =
 export function fetchPublicDatasetMetadata(datasetId) {
 	return (dispatch) => {
 		return V2.PublicDatasetsService.getDatasetMetadataApiV2PublicDatasetsDatasetIdMetadataGet(
-			datasetId,
+			datasetId
 		)
 			.then((json) => {
 				dispatch({
@@ -234,7 +234,7 @@ export function fetchFileMetadata(fileId, version) {
 		return V2.MetadataService.getFileMetadataApiV2FilesFileIdMetadataGet(
 			fileId,
 			version,
-			false,
+			false
 		)
 			.then((json) => {
 				dispatch({
@@ -256,7 +256,7 @@ export function fetchPublicFileMetadata(fileId, version) {
 		return V2.PublicFilesService.getFileMetadataApiV2PublicFilesFileIdMetadataGet(
 			fileId,
 			version,
-			false,
+			false
 		)
 			.then((json) => {
 				dispatch({
@@ -267,7 +267,7 @@ export function fetchPublicFileMetadata(fileId, version) {
 			})
 			.catch((reason) => {
 				dispatch(
-					handleErrors(reason, fetchPublicFileMetadata(fileId, version)),
+					handleErrors(reason, fetchPublicFileMetadata(fileId, version))
 				);
 			});
 	};
@@ -279,7 +279,7 @@ export function postDatasetMetadata(datasetId, metadata) {
 	return (dispatch) => {
 		return V2.MetadataService.addDatasetMetadataApiV2DatasetsDatasetIdMetadataPost(
 			datasetId,
-			metadata,
+			metadata
 		)
 			.then((json) => {
 				dispatch({
@@ -290,7 +290,7 @@ export function postDatasetMetadata(datasetId, metadata) {
 			})
 			.catch((reason) => {
 				dispatch(
-					handleErrors(reason, postDatasetMetadata(datasetId, metadata)),
+					handleErrors(reason, postDatasetMetadata(datasetId, metadata))
 				);
 			});
 	};
@@ -302,7 +302,7 @@ export function postFileMetadata(fileId, metadata) {
 	return (dispatch) => {
 		return V2.MetadataService.addFileMetadataApiV2FilesFileIdMetadataPost(
 			fileId,
-			metadata,
+			metadata
 		)
 			.then((json) => {
 				dispatch({
@@ -323,7 +323,7 @@ export function deleteDatasetMetadata(datasetId, metadata) {
 	return (dispatch) => {
 		return V2.MetadataService.deleteDatasetMetadataApiV2DatasetsDatasetIdMetadataDelete(
 			datasetId,
-			metadata,
+			metadata
 		)
 			.then((json) => {
 				dispatch({
@@ -334,7 +334,7 @@ export function deleteDatasetMetadata(datasetId, metadata) {
 			})
 			.catch((reason) => {
 				dispatch(
-					handleErrors(reason, deleteDatasetMetadata(datasetId, metadata)),
+					handleErrors(reason, deleteDatasetMetadata(datasetId, metadata))
 				);
 			});
 	};
@@ -346,7 +346,7 @@ export function deleteFileMetadata(fileId, metadata) {
 	return (dispatch) => {
 		return V2.MetadataService.deleteFileMetadataApiV2FilesFileIdMetadataDelete(
 			fileId,
-			metadata,
+			metadata
 		)
 			.then((json) => {
 				dispatch({
@@ -367,7 +367,7 @@ export function patchDatasetMetadata(datasetId, metadata) {
 	return (dispatch) => {
 		return V2.MetadataService.updateDatasetMetadataApiV2DatasetsDatasetIdMetadataPatch(
 			datasetId,
-			metadata,
+			metadata
 		)
 			.then((json) => {
 				dispatch({
@@ -378,7 +378,7 @@ export function patchDatasetMetadata(datasetId, metadata) {
 			})
 			.catch((reason) => {
 				dispatch(
-					handleErrors(reason, patchDatasetMetadata(datasetId, metadata)),
+					handleErrors(reason, patchDatasetMetadata(datasetId, metadata))
 				);
 			});
 	};
@@ -390,7 +390,7 @@ export function patchFileMetadata(fileId, metadata) {
 	return (dispatch) => {
 		return V2.MetadataService.updateFileMetadataApiV2FilesFileIdMetadataPatch(
 			fileId,
-			metadata,
+			metadata
 		)
 			.then((json) => {
 				dispatch({

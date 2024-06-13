@@ -18,5 +18,5 @@ render(
 			<AppRoutes />
 		</Provider>
 	</ThemeProvider>,
-	document.getElementById("app"),
+	document.getElementById("app")
 );

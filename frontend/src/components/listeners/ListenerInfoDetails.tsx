@@ -14,7 +14,7 @@ type ListenerAboutProps = {
 export function ListenerInfoDetails(props: ListenerAboutProps) {
 	const { listener, defaultExpanded } = props;
 	const [expanded, setExpanded] = useState(
-		defaultExpanded ? defaultExpanded : false,
+		defaultExpanded ? defaultExpanded : false
 	);
 
 	const details = new Map<

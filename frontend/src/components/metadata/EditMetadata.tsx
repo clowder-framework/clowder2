@@ -27,23 +27,23 @@ export const EditMetadata = (props: MetadataType) => {
 	const getMetadatDefinitions = (
 		name: string | null,
 		skip: number,
-		limit: number,
+		limit: number
 	) => dispatch(fetchMetadataDefinitions(name, skip, limit));
 	const metadataDefinitionList = useSelector(
-		(state: RootState) => state.metadata.metadataDefinitionList.data,
+		(state: RootState) => state.metadata.metadataDefinitionList.data
 	);
 	const listDatasetMetadata = (datasetId: string | undefined) =>
 		dispatch(fetchDatasetMetadata(datasetId));
 	const listFileMetadata = (fileId: string | undefined) =>
 		dispatch(fetchFileMetadata(fileId));
 	const datasetMetadataList = useSelector(
-		(state: RootState) => state.metadata.datasetMetadataList,
+		(state: RootState) => state.metadata.datasetMetadataList
 	);
 	const fileMetadataList = useSelector(
-		(state: RootState) => state.metadata.fileMetadataList,
+		(state: RootState) => state.metadata.fileMetadataList
 	);
 	const datasetRole = useSelector(
-		(state: RootState) => state.dataset.datasetRole,
+		(state: RootState) => state.dataset.datasetRole
 	);
 
 	useEffect(() => {
@@ -70,7 +70,7 @@ export const EditMetadata = (props: MetadataType) => {
 						(list: string[], item) => {
 							return [...list, item.definition];
 						},
-						[],
+						[]
 					);
 				} else if (resourceType === "file") {
 					metadataList = fileMetadataList;
@@ -103,7 +103,7 @@ export const EditMetadata = (props: MetadataType) => {
 												initialReadOnly: false,
 												isRequired: field.required,
 												datasetRole: datasetRole,
-											},
+											}
 										);
 									})
 								}
@@ -136,7 +136,7 @@ export const EditMetadata = (props: MetadataType) => {
 														metadataId: metadata.id ?? null,
 														isRequired: field.required,
 														key: idxx,
-													},
+													}
 												);
 											})
 										}

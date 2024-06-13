@@ -42,15 +42,15 @@ export function Groups() {
 	const searchGroups = (
 		searchTerm: string,
 		skip: number | undefined,
-		limit: number | undefined,
+		limit: number | undefined
 	) => dispatch(searchGroupsAction(searchTerm, skip, limit));
 
 	const groups = useSelector((state: RootState) => state.group.groups.data);
 	const pageMetadata = useSelector(
-		(state: RootState) => state.group.groups.metadata,
+		(state: RootState) => state.group.groups.metadata
 	);
 	const deletedGroup = useSelector(
-		(state: RootState) => state.group.deletedGroup,
+		(state: RootState) => state.group.deletedGroup
 	);
 	const adminMode = useSelector((state: RootState) => state.user.adminMode);
 

@@ -23,7 +23,7 @@ type ChooseLicenseModalProps = {
 };
 
 export const ChooseLicenseModal: React.FC<ChooseLicenseModalProps> = (
-	props: ChooseLicenseModalProps,
+	props: ChooseLicenseModalProps
 ) => {
 	const {
 		selectedLicense,

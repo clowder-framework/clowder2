@@ -10,7 +10,7 @@ export async function loginHelper(
 	password,
 	first_name = null,
 	last_name = null,
-	register = false,
+	register = false
 ) {
 	const data = { email: email, password: password };
 	if (register) {
@@ -170,7 +170,7 @@ export function prefixSearchAllUsers(text = "", skip = 0, limit = 101) {
 		return V2.UsersService.searchUsersPrefixApiV2UsersPrefixSearchGet(
 			text,
 			skip,
-			limit,
+			limit
 		)
 			.then((json) => {
 				dispatch({

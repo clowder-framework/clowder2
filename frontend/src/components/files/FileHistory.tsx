@@ -17,10 +17,10 @@ export function FileHistory(props: FileHistoryAboutProps) {
 	const { name, selectedVersionNum, contentType } = props;
 
 	const fileVersions = useSelector(
-		(state: RootState) => state.file.fileVersions,
+		(state: RootState) => state.file.fileVersions
 	);
 	const [selectedFileVersionDetail, setSelectedFileVersionDetail] = useState(
-		fileVersions[0],
+		fileVersions[0]
 	);
 
 	useEffect(() => {

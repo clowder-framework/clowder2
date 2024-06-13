@@ -8,7 +8,7 @@ type BreadCrumbProps = {
 	paths: any;
 };
 export const MainBreadcrumbs: React.FC<BreadCrumbProps> = (
-	props: BreadCrumbProps,
+	props: BreadCrumbProps
 ) => {
 	const { paths } = props;
 	const history = useNavigate();

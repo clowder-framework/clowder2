@@ -32,7 +32,7 @@ export function Search() {
 	useEffect(() => {
 		const intervalId = setInterval(
 			getUpdatedCookie,
-			config.refreshTokenInterval,
+			config.refreshTokenInterval
 		);
 		return () => clearInterval(intervalId);
 	}, []);

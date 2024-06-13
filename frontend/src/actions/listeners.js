@@ -11,7 +11,7 @@ export function fetchListeners(
 	label = null,
 	aliveOnly = false,
 	process = null,
-	all = false,
+	all = false
 ) {
 	return (dispatch) => {
 		// TODO: Parameters for dates? paging?
@@ -23,7 +23,7 @@ export function fetchListeners(
 			label,
 			aliveOnly,
 			process,
-			all,
+			all
 		)
 			.then((json) => {
 				dispatch({
@@ -43,9 +43,9 @@ export function fetchListeners(
 							category,
 							label,
 							aliveOnly,
-							process,
-						),
-					),
+							process
+						)
+					)
 				);
 			});
 	};
@@ -55,7 +55,7 @@ export const TOGGLE_ACTIVE_FLAG_LISTENER = "TOGGLE_ACTIVE_FLAG_LISTENER";
 export function enableListener(id) {
 	return (dispatch) => {
 		return V2.ListenersService.enableListenerApiV2ListenersListenerIdEnablePut(
-			id,
+			id
 		)
 			.then((json) => {
 				// We could have called fetchListeners but it would be an overhead since we are just toggling the active flag for one listener.
@@ -74,7 +74,7 @@ export function enableListener(id) {
 export function disableListener(id) {
 	return (dispatch) => {
 		return V2.ListenersService.disableListenerApiV2ListenersListenerIdDisablePut(
-			id,
+			id
 		)
 			.then((json) => {
 				// We could have called fetchListeners but it would be an overhead since we are just toggling the active flag for one listener.
@@ -97,7 +97,7 @@ export function queryListeners(
 	skip = 0,
 	limit = 21,
 	heartbeatInterval = 0,
-	process = null,
+	process = null
 ) {
 	return (dispatch) => {
 		// TODO: Parameters for dates? paging?
@@ -106,7 +106,7 @@ export function queryListeners(
 			skip,
 			limit,
 			heartbeatInterval,
-			process,
+			process
 		)
 			.then((json) => {
 				dispatch({
@@ -119,8 +119,8 @@ export function queryListeners(
 				dispatch(
 					handleErrors(
 						reason,
-						queryListeners(text, skip, limit, heartbeatInterval, process),
-					),
+						queryListeners(text, skip, limit, heartbeatInterval, process)
+					)
 				);
 			});
 	};
@@ -172,7 +172,7 @@ export function fetchListenerJobs(
 	datasetId = null,
 	created,
 	skip = 0,
-	limit = 100,
+	limit = 100
 ) {
 	return (dispatch) => {
 		return V2.JobsService.getAllJobSummaryApiV2JobsGet(
@@ -183,7 +183,7 @@ export function fetchListenerJobs(
 			datasetId,
 			created,
 			skip,
-			limit,
+			limit
 		)
 			.then((json) => {
 				dispatch({
@@ -204,9 +204,9 @@ export function fetchListenerJobs(
 							(datasetId = null),
 							created,
 							(skip = 0),
-							(limit = 100),
-						),
-					),
+							(limit = 100)
+						)
+					)
 				);
 			});
 	};

@@ -40,18 +40,18 @@ export const DisplayMetadata = (props: MetadataType) => {
 	const getMetadatDefinitions = (
 		name: string | null,
 		skip: number,
-		limit: number,
+		limit: number
 	) => dispatch(fetchMetadataDefinitions(name, skip, limit));
 	const getPublicMetadatDefinitions = (
 		name: string | null,
 		skip: number,
-		limit: number,
+		limit: number
 	) => dispatch(fetchPublicMetadataDefinitions(name, skip, limit));
 	const metadataDefinitionList = useSelector(
-		(state: RootState) => state.metadata.metadataDefinitionList.data,
+		(state: RootState) => state.metadata.metadataDefinitionList.data
 	);
 	const publicMetadataDefinitionList = useSelector(
-		(state: RootState) => state.metadata.publicMetadataDefinitionList,
+		(state: RootState) => state.metadata.publicMetadataDefinitionList
 	);
 	const listDatasetMetadata = (datasetId: string | undefined) =>
 		dispatch(fetchDatasetMetadata(datasetId));
@@ -62,19 +62,19 @@ export const DisplayMetadata = (props: MetadataType) => {
 	const listPublicFileMetadata = (fileId: string | undefined) =>
 		dispatch(fetchPublicFileMetadata(fileId));
 	const datasetMetadataList = useSelector(
-		(state: RootState) => state.metadata.datasetMetadataList,
+		(state: RootState) => state.metadata.datasetMetadataList
 	);
 	const fileMetadataList = useSelector(
-		(state: RootState) => state.metadata.fileMetadataList,
+		(state: RootState) => state.metadata.fileMetadataList
 	);
 	const datasetRole = useSelector(
-		(state: RootState) => state.dataset.datasetRole,
+		(state: RootState) => state.dataset.datasetRole
 	);
 	const publicDatasetMetadataList = useSelector(
-		(state: RootState) => state.metadata.publicDatasetMetadataList,
+		(state: RootState) => state.metadata.publicDatasetMetadataList
 	);
 	const publicFileMetadataList = useSelector(
-		(state: RootState) => state.metadata.publicFileMetadataList,
+		(state: RootState) => state.metadata.publicFileMetadataList
 	);
 	useEffect(() => {
 		if (publicView) {
@@ -144,7 +144,7 @@ export const DisplayMetadata = (props: MetadataType) => {
 													isRequired: field.required,
 													key: idxx,
 													datasetRole: datasetRole,
-												},
+												}
 											);
 										})
 									}

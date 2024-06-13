@@ -35,7 +35,7 @@ export class ReportingService {
 	 */
 	public static getReporting1(
 		since?: string,
-		until?: string,
+		until?: string
 	): CancelablePromise<Blob> {
 		return __request({
 			method: "GET",
@@ -62,7 +62,7 @@ export class ReportingService {
 	 */
 	public static getReporting2(
 		since?: string,
-		until?: string,
+		until?: string
 	): CancelablePromise<Blob> {
 		return __request({
 			method: "GET",
@@ -109,7 +109,7 @@ export class ReportingService {
 	public static getReporting4(
 		space?: string,
 		since?: string,
-		until?: string,
+		until?: string
 	): CancelablePromise<Blob> {
 		return __request({
 			method: "GET",

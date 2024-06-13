@@ -20,7 +20,7 @@ export const InlineAlert = (props: InlineAlertProps) => {
 	const dispatch = useDispatch();
 
 	const reasonInline = useSelector(
-		(state: RootState) => state.error.reasonInline,
+		(state: RootState) => state.error.reasonInline
 	);
 
 	useEffect(() => {
