@@ -294,3 +294,27 @@ export const selectedHighlightStyles = (currentId, selectedId, theme) => {
 		},
 	};
 };
+
+export const highlightLatestStyles = (
+	frozen,
+	frozenVersionNum,
+	currentId,
+	originId,
+	theme
+) => {
+	return {
+		color: theme.palette.primary.main,
+		pointerEvents:
+			(frozen === false && frozenVersionNum === -999) || currentId === originId
+				? "none"
+				: "auto",
+		textDecoration: "none",
+		fontWeight:
+			(frozen === false && frozenVersionNum === -999) || currentId === originId
+				? "bold"
+				: "normal",
+		"&:hover": {
+			textDecoration: "underline",
+		},
+	};
+};

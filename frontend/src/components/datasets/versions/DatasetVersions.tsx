@@ -8,7 +8,11 @@ import {
 } from "../../../actions/dataset";
 import { RootState } from "../../../types/data";
 import config from "../../../app.config";
-import { parseDate, selectedHighlightStyles } from "../../../utils/common";
+import {
+	highlightLatestStyles,
+	parseDate,
+	selectedHighlightStyles,
+} from "../../../utils/common";
 import { theme } from "../../../theme";
 import IconButton from "@mui/material/IconButton";
 import DeleteIcon from "@material-ui/icons/Delete";
@@ -75,7 +79,10 @@ export const DatasetVersions = (props) => {
 
 	const handleVersionChange = (selectedDatasetId: string) => {
 		// current version flip to page 1
-		if (selectedDatasetId === currDataset.origin_id) {
+		if (
+			(currDataset.frozen == false && currDataset.frozen_version_num == -999) ||
+			currDataset.id === currDataset.origin_id
+		) {
 			history(`/datasets/${selectedDatasetId}?currVersionPageNum=1`);
 			// other version flip to the current page
 		} else {
@@ -135,7 +142,9 @@ export const DatasetVersions = (props) => {
 							onClick={() => {
 								handleVersionChange(currDataset.origin_id);
 							}}
-							sx={selectedHighlightStyles(
+							sx={highlightLatestStyles(
+								currDataset.frozen,
+								currDataset.frozen_version_num,
 								currDataset.id,
 								currDataset.origin_id,
 								theme
@@ -149,6 +158,8 @@ export const DatasetVersions = (props) => {
 								sx={{
 									color: "text.primary.light",
 									fontWeight:
+										(currDataset.frozen == false &&
+											currDataset.frozen_version_num == -999) ||
 										currDataset.id === currDataset.origin_id
 											? "bold"
 											: "normal",
