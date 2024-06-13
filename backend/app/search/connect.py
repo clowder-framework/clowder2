@@ -6,7 +6,7 @@ from app.database.errors import log_error
 from app.models.errors import ServiceUnreachable
 from app.models.feeds import SearchObject
 from app.models.files import FileOut
-from elasticsearch import BadRequestError, Elasticsearch
+from elasticsearch import BadRequestError, ConflictError, Elasticsearch, NotFoundError
 
 logger = logging.getLogger(__name__)
 no_of_shards = settings.elasticsearch_no_of_shards
@@ -114,8 +114,11 @@ def delete_document_by_id(es_client, index_name, id):
         id -- unique identifier of the document
     """
     try:
-        query = {"match": {"_id": id}}
-        es_client.delete_by_query(index=index_name, query=query)
+        es_client.delete(index=index_name, id=id)
+    except NotFoundError:
+        print(f"Document with ID {id} not found.")
+    except ConflictError as ex:
+        print(f"Version conflict error: {str(ex)}")
     except BadRequestError as ex:
         logger.error(str(ex))
 
