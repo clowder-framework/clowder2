@@ -44,14 +44,12 @@ const widgets = {
 	clowderFile: ClowderFileSelector,
 };
 
-const uiSchema = {
-	clowderFile: { "ui:widget": "FileSelector" },
-};
-
 export default function SubmitExtraction(props: SubmitExtractionProps) {
 	const { fileId, datasetId, open, infoOnly, handleClose, selectedExtractor } =
 		props;
 	const dispatch = useDispatch();
+
+	const uiSchema: any = {};
 
 	const submitFileExtraction = (
 		fileId: string | undefined,
@@ -79,6 +77,27 @@ export default function SubmitExtraction(props: SubmitExtractionProps) {
 			handleNext();
 		}
 	};
+
+	// The for loop is used to pass the datasetId to a widget if it is a clowderFile Widget
+	if (
+		selectedExtractor &&
+		selectedExtractor["properties"] &&
+		selectedExtractor["properties"]["parameters"] &&
+		selectedExtractor["properties"]["parameters"]["schema"]
+	) {
+		const parameters = selectedExtractor["properties"]["parameters"]["schema"];
+		for (const key in parameters) {
+			// Check if field "format" present and equals "clowderFile"
+			if (parameters[key].format && parameters[key].format === "clowderFile") {
+				uiSchema[key] = {
+					"ui:widget": "clowderFile",
+					"ui:options": {
+						datasetId: datasetId,
+					},
+				};
+			}
+		}
+	}
 
 	const [activeStep, setActiveStep] = useState(0);
 	const handleNext = () => {
@@ -138,6 +157,7 @@ export default function SubmitExtraction(props: SubmitExtractionProps) {
 											<Container>
 												<Form
 													widgets={widgets}
+													uiSchema={uiSchema}
 													schema={{
 														properties: selectedExtractor["properties"][
 															"parameters"
